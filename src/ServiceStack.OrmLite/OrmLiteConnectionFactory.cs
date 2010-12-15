@@ -41,7 +41,7 @@ namespace ServiceStack.OrmLite
 		}
 
 		public string ConnectionString { get; set; }
-		
+
 		public bool AutoDisposeConnection { get; set; }
 
 		/// <summary>
@@ -85,6 +85,27 @@ namespace ServiceStack.OrmLite
 				: OrmLiteConnection;
 
 			return connection;
+		}
+	}
+
+	public static class OrmLiteConnectionFactoryExtensions
+	{
+		public static void Exec(this IDbConnectionFactory connectionFactory, Action<IDbCommand> runDbCommandsFn)
+		{
+			using (var dbConn = connectionFactory.OpenDbConnection())
+			using (var dbCmd = dbConn.CreateCommand())
+			{
+				runDbCommandsFn(dbCmd);
+			}
+		}
+
+		public static T Exec<T>(this IDbConnectionFactory connectionFactory, Func<IDbCommand, T> runDbCommandsFn)
+		{
+			using (var dbConn = connectionFactory.OpenDbConnection())
+			using (var dbCmd = dbConn.CreateCommand())
+			{
+				return runDbCommandsFn(dbCmd);
+			}
 		}
 	}
 }
