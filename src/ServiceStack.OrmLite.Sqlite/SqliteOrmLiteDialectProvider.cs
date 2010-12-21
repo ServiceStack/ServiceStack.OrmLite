@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Reflection;
 using System.Text;
 using Mono.Data.Sqlite;
@@ -46,6 +47,14 @@ namespace ServiceStack.OrmLite.Sqlite
 
 			if (!isFullConnectionString)
 			{
+				if (connectionString != ":memory:")
+				{
+					var existingDir = Path.GetDirectoryName(connectionString);
+					if (!Directory.Exists(existingDir))
+					{
+						Directory.CreateDirectory(existingDir);
+					}
+				}
 				connectionString =
 					@"Data Source=" + connectionString + ";Version=3;New=True;Compress=True;";
 			}
