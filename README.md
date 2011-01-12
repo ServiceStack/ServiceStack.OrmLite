@@ -1,5 +1,5 @@
 [Join the new google group](http://groups.google.com/group/servicestack) or
-follow [@demisbellot](http://twitter.com/demisbellot) and [@boxerab](http://twitter.com/boxerab)
+follow [@demisbellot](http://twitter.com/demisbellot) and [@ServiceStack](http://twitter.com/servicestack)
 for twitter updates.
 
 ServiceStack.OrmLite is a convention-based, configuration-free lightweight ORM that uses standard POCO classes and Data Annotation attributes to infer its table schema.
