@@ -1,6 +1,8 @@
-ServiceStack.OrmLite is a convention-based, configuration-free lightweight ORM that uses standard POCO classes and Data Annotation attributes to infer its table schema.
-For twitter updates follow <a href="http://twitter.com/demisbellot">@demisbellot</a> or <a href="http://twitter.com/servicestack">@ServiceStack</a>
+[Join the new google group](http://groups.google.com/group/servicestack) or
+follow [@demisbellot](http://twitter.com/demisbellot) and [@boxerab](http://twitter.com/boxerab)
+for twitter updates.
 
+ServiceStack.OrmLite is a convention-based, configuration-free lightweight ORM that uses standard POCO classes and Data Annotation attributes to infer its table schema.
 # Introduction
 
 OrmLite is a set of light-weight C# extension methods around System.Data.`*` interfaces which is designed to persist POCO classes with a minimal amount of intrusion and configuration.
