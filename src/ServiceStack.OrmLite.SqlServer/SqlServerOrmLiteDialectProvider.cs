@@ -71,7 +71,7 @@ namespace ServiceStack.OrmLite.SqlServer
 			{
 				if (value == null || value is DBNull) return null;
 
-				if (type == typeof(bool))
+				if (type == typeof(bool) && !(value is bool))
 				{
 					var intVal = Convert.ToInt32(value.ToString());
 					return intVal != 0;
