@@ -18,7 +18,7 @@ OrmLite was designed with a focus on these core objectives:
 OrmLite is included with [ServiceStack.zip](https://github.com/downloads/mythz/ServiceStack/ServiceStack.zip) or available to download separately in a standalone 
 [ ServiceStack.OrmLite.zip](https://github.com/downloads/mythz/ServiceStack.OrmLite/ServiceStack.OrmLite.zip).
 
-The full source code for OrmLite is also [available online](https://github.com/mythz/ServiceStack.OrmLite).
+The full source code for OrmLite is also [available online](https://github.com/ServiceStack/ServiceStack.OrmLite).
 
 # Limitations 
 
@@ -50,7 +50,7 @@ In its simplest useage, OrmLite can persist any POCO type without any attributes
 	}
 
 To get a better idea of the features of OrmLite lets walk through a complete example using sample tables from the Northwind database. 
-_ (Full source code for this example is [available here](https://github.com/mythz/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLite.Tests/ShippersExample.cs).) _
+_ (Full source code for this example is [available here](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLite.Tests/ShippersExample.cs).) _
 
 So with no other configuration using only the classes below:
 
