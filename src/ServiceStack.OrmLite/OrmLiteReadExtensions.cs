@@ -100,7 +100,11 @@ namespace ServiceStack.OrmLite
 			if (!string.IsNullOrEmpty(sqlFilter))
 			{
 				sqlFilter = sqlFilter.SqlFormat(filterParams);
-				sql.Append(" WHERE ");
+				if (!sqlFilter.StartsWith("ORDER ", StringComparison.InvariantCultureIgnoreCase)
+					&& !sqlFilter.StartsWith("LIMIT ", StringComparison.InvariantCultureIgnoreCase))
+				{
+					sql.Append(" WHERE ");
+				}
 				sql.Append(sqlFilter);
 			}
 
