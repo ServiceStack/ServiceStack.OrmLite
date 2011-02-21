@@ -9,6 +9,7 @@ OrmLite is a set of light-weight C# extension methods around System.Data.`*` int
 Another Orm with similar goals is [sqlite-net](http://code.google.com/p/sqlite-net/).
 
 OrmLite was designed with a focus on these core objectives:
+
   * Simplicity - with minimal, convention-based attribute configuration
   * High performance - with support for indexes, text blobs, etc.
   * Expressive power and flexibility - with access to IDbCommand and raw SQL
