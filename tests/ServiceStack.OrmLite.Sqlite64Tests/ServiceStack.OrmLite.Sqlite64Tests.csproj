@@ -8,7 +8,7 @@
     <ProjectGuid>{1B97B329-8B70-4034-A2C9-35BF5DF428DC}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ServiceStack.OrmLite.Sqlite64Tests</RootNamespace>
+    <RootNamespace>ServiceStack.OrmLite.Tests</RootNamespace>
     <AssemblyName>ServiceStack.OrmLite.Sqlite64Tests</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
