@@ -16,6 +16,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceStack.OrmLite.Tests"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceStack.OrmLite.TestsPerf", "..\tests\ServiceStack.OrmLite.TestsPerf\ServiceStack.OrmLite.TestsPerf.csproj", "{24E0D2DB-1F1E-43BE-83DB-B999ACE5A700}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceStack.OrmLite.Sqlite64", "ServiceStack.OrmLite.Sqlite64\ServiceStack.OrmLite.Sqlite64.csproj", "{59E6B217-24AD-4F55-B032-FCD0090CD300}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceStack.OrmLite.Sqlite64Tests", "..\tests\ServiceStack.OrmLite.Sqlite64Tests\ServiceStack.OrmLite.Sqlite64Tests.csproj", "{1B97B329-8B70-4034-A2C9-35BF5DF428DC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -64,6 +68,22 @@ Global
 		{24E0D2DB-1F1E-43BE-83DB-B999ACE5A700}.Release|Any CPU.Build.0 = Release|Any CPU
 		{24E0D2DB-1F1E-43BE-83DB-B999ACE5A700}.STATIC_ONLY NO_EXPRESSIONS|Any CPU.ActiveCfg = Release|Any CPU
 		{24E0D2DB-1F1E-43BE-83DB-B999ACE5A700}.STATIC_ONLY NO_EXPRESSIONS|Any CPU.Build.0 = Release|Any CPU
+		{59E6B217-24AD-4F55-B032-FCD0090CD300}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{59E6B217-24AD-4F55-B032-FCD0090CD300}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{59E6B217-24AD-4F55-B032-FCD0090CD300}.MonoTouch|Any CPU.ActiveCfg = Release|Any CPU
+		{59E6B217-24AD-4F55-B032-FCD0090CD300}.MonoTouch|Any CPU.Build.0 = Release|Any CPU
+		{59E6B217-24AD-4F55-B032-FCD0090CD300}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{59E6B217-24AD-4F55-B032-FCD0090CD300}.Release|Any CPU.Build.0 = Release|Any CPU
+		{59E6B217-24AD-4F55-B032-FCD0090CD300}.STATIC_ONLY NO_EXPRESSIONS|Any CPU.ActiveCfg = Release|Any CPU
+		{59E6B217-24AD-4F55-B032-FCD0090CD300}.STATIC_ONLY NO_EXPRESSIONS|Any CPU.Build.0 = Release|Any CPU
+		{1B97B329-8B70-4034-A2C9-35BF5DF428DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B97B329-8B70-4034-A2C9-35BF5DF428DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B97B329-8B70-4034-A2C9-35BF5DF428DC}.MonoTouch|Any CPU.ActiveCfg = Release|Any CPU
+		{1B97B329-8B70-4034-A2C9-35BF5DF428DC}.MonoTouch|Any CPU.Build.0 = Release|Any CPU
+		{1B97B329-8B70-4034-A2C9-35BF5DF428DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B97B329-8B70-4034-A2C9-35BF5DF428DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B97B329-8B70-4034-A2C9-35BF5DF428DC}.STATIC_ONLY NO_EXPRESSIONS|Any CPU.ActiveCfg = Release|Any CPU
+		{1B97B329-8B70-4034-A2C9-35BF5DF428DC}.STATIC_ONLY NO_EXPRESSIONS|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
