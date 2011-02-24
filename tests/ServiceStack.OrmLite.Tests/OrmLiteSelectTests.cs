@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using ServiceStack.Common.Extensions;
 using ServiceStack.Common.Tests.Models;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -236,6 +237,26 @@ namespace ServiceStack.OrmLite.Tests
 				Assert.That(lookup, Has.Count.EqualTo(2));
 				Assert.That(lookup["OddGroup"], Has.Count.EqualTo(3));
 				Assert.That(lookup["EvenGroup"], Has.Count.EqualTo(2));
+			}
+		}
+
+		[Test]
+		public void Can_GetDictionary()
+		{
+			const int n = 5;
+
+			using (var db = ConnectionString.OpenDbConnection())
+			using (var dbCmd = db.CreateCommand())
+			{
+				dbCmd.CreateTable<ModelWithIdAndName>(true);
+
+				n.Times(x => dbCmd.Insert(ModelWithIdAndName.Create(x)));
+
+				var dictionary = dbCmd.GetDictionary<int, string>("SELECT Id, Name FROM ModelWithIdAndName");
+
+				Assert.That(dictionary, Has.Count.EqualTo(5));
+
+				//Console.Write(dictionary.Dump());
 			}
 		}
 

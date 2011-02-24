@@ -320,5 +320,30 @@ namespace ServiceStack.OrmLite
 
 			return lookup;
 		}
+
+		public static Dictionary<K, V> GetDictionary<K, V>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
+		{
+			using (var dbReader = dbCmd.ExecReader(sql.SqlFormat(sqlParams)))
+			{
+				return GetDictionary<K, V>(dbReader);
+			}
+		}
+
+		public static Dictionary<K, V> GetDictionary<K, V>(this IDataReader reader)
+		{
+			var map = new Dictionary<K, V>();
+
+			var getKeyFn = GetValueFn<K>(reader);
+			var getValueFn = GetValueFn<V>(reader);
+			while (reader.Read())
+			{
+				var key = (K)getKeyFn(0);
+				var value = (V)getValueFn(1);
+
+				map.Add(key, value);
+			}
+
+			return map;
+		}
 	}
 }
