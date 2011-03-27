@@ -5,7 +5,7 @@ using NUnit.Framework;
 
 namespace ServiceStack.OrmLite.Tests
 {
-	[TestFixture]
+	[TestFixture][Ignore("Long running tests")]
 	public class OrmLiteNorthwindTests
 		: OrmLiteTestBase
 	{
