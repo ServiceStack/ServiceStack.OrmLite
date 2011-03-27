@@ -12,6 +12,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Text;
 using ServiceStack.Logging;
 using ServiceStack.Text;
@@ -72,7 +73,7 @@ namespace ServiceStack.OrmLite
 		 */
 		#endregion
 
-		private static ILog log = LogManager.GetLogger(typeof (OrmLiteDialectProviderBase));
+		private static ILog log = LogManager.GetLogger(typeof(OrmLiteDialectProviderBase));
 
 		public string StringLengthNonUnicodeColumnDefinitionFormat = "VARCHAR({0})";
 		public string StringLengthUnicodeColumnDefinitionFormat = "NVARCHAR({0})";
@@ -133,7 +134,7 @@ namespace ServiceStack.OrmLite
 		{
 			this.StringLengthColumnDefinitionFormat = useUnicode
 				? StringLengthUnicodeColumnDefinitionFormat
-      			: StringLengthNonUnicodeColumnDefinitionFormat;
+				: StringLengthNonUnicodeColumnDefinitionFormat;
 
 			this.StringColumnDefinition = string.Format(
 				this.StringLengthColumnDefinitionFormat, DefaultStringLength);
@@ -197,10 +198,20 @@ namespace ServiceStack.OrmLite
 				return value;
 			}
 
-			if (type == typeof(string))
+			if (type.IsValueType)
 			{
-				return value;
+				if (type == typeof(float))
+					return value is double ? (float)((double)value) : (float)value;
+
+				if (type == typeof(double))
+					return value is float ? (double)((float)value) : (double)value;
+
+				if (type == typeof(decimal))
+					return (decimal)value;
 			}
+
+			if (type == typeof(string))
+				return value;
 
 			try
 			{
@@ -229,6 +240,15 @@ namespace ServiceStack.OrmLite
 				throw new NotSupportedException(
 					string.Format("Property of type: {0} is not supported", fieldType.FullName));
 			}
+
+			if (fieldType == typeof(float))
+				return ((float)value).ToString(CultureInfo.InvariantCulture);
+
+			if (fieldType == typeof(double))
+				return ((double)value).ToString(CultureInfo.InvariantCulture);
+
+			if (fieldType == typeof(decimal))
+				return ((decimal)value).ToString(CultureInfo.InvariantCulture);
 
 			return ShouldQuoteValue(fieldType)
 					? "'" + EscapeParam(value) + "'"
