@@ -191,22 +191,20 @@ namespace ServiceStack.OrmLite
 
 		public static T PopulateWithSqlReader<T>(this T objWithProperties, IDataReader dataReader)
 		{
+			var modelDef = typeof(T).GetModelDefinition();
+			var fieldDefs = modelDef.FieldDefinitions.ToArray();
+
+			return PopulateWithSqlReader(objWithProperties, dataReader, fieldDefs);
+		}
+
+		public static T PopulateWithSqlReader<T>(this T objWithProperties, IDataReader dataReader, FieldDefinition[] fieldDefs)
+		{
 			var i = 0;
-			var tableType = objWithProperties.GetType();
-
-			var modelDef = tableType.GetModelDefinition();
-			foreach (var fieldDef in modelDef.FieldDefinitions)
+			for (var rowIndex = 0; rowIndex < fieldDefs.Length; rowIndex++)
 			{
+				var fieldDef = fieldDefs[rowIndex];
 				var value = dataReader.GetValue(i++);
-
-				try
-				{
-					fieldDef.SetValue(objWithProperties, value);
-				}
-				catch (Exception ex)
-				{
-					throw;
-				}
+				fieldDef.SetValue(objWithProperties, value);
 			}
 			return objWithProperties;
 		}

@@ -22,12 +22,14 @@ namespace ServiceStack.OrmLite
 		public static T ConvertTo<T>(this IDataReader dataReader)
 			where T : new()
 		{
+			var fieldDefs = typeof(T).GetModelDefinition().FieldDefinitionsArray;
+
 			using (dataReader)
 			{
 				if (dataReader.Read())
 				{
 					var row = new T();
-					row.PopulateWithSqlReader(dataReader);
+					row.PopulateWithSqlReader(dataReader, fieldDefs);
 					return row;
 				}
 				return default(T);
@@ -37,13 +39,15 @@ namespace ServiceStack.OrmLite
 		public static List<T> ConvertToList<T>(this IDataReader dataReader)
 			where T : new()
 		{
+			var fieldDefs = typeof(T).GetModelDefinition().FieldDefinitionsArray;
+
 			var to = new List<T>();
 			using (dataReader)
 			{
 				while (dataReader.Read())
 				{
 					var row = new T();
-					row.PopulateWithSqlReader(dataReader);
+					row.PopulateWithSqlReader(dataReader, fieldDefs);
 					to.Add(row);
 				}
 			}

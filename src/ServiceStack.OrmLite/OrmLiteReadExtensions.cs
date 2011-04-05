@@ -160,12 +160,14 @@ namespace ServiceStack.OrmLite
 		public static IEnumerable<T> Each<T>(this IDbCommand dbCommand, string filter, params object[] filterParams)
 			where T : new()
 		{
+			var fieldDefs = typeof(T).GetModelDefinition().FieldDefinitionsArray;
+
 			using (var reader = dbCommand.ExecReader(ToSelectStatement(typeof(T), filter, filterParams)))
 			{
 				while (reader.Read())
 				{
 					var row = new T();
-					row.PopulateWithSqlReader(reader);
+					row.PopulateWithSqlReader(reader, fieldDefs);
 					yield return row;
 				}
 			}

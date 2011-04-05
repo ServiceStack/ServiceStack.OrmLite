@@ -45,6 +45,19 @@ namespace ServiceStack.OrmLite
 
 		public List<FieldDefinition> FieldDefinitions { get; set; }
 
+		private FieldDefinition[] fieldDefinitionsArray;
+		public FieldDefinition[] FieldDefinitionsArray
+		{
+			get
+			{
+				if (fieldDefinitionsArray == null)
+				{
+					fieldDefinitionsArray = FieldDefinitions.ToArray();
+				}
+				return fieldDefinitionsArray;
+			}
+		}
+
 		public List<CompositeIndexAttribute> CompositeIndexes { get; set; }
 	}
 }
