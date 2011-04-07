@@ -104,9 +104,9 @@ namespace SqlMapper
         	
 
 			//ServiceStack.OrmLite Provider:
-			OrmLiteConfig.DialectProvider = SqlServerOrmLiteDialectProvider.Instance;
-			var ormLiteCmd = Program.GetOpenConnection().CreateCommand();
-			tests.Add(id => ormLiteCmd.Select<Post>("Id = {0}", id), "OrmLite Query");
+			OrmLiteConfig.DialectProvider = SqlServerOrmLiteDialectProvider.Instance; //Using SQL Server
+			IDbCommand ormLiteCmd = Program.GetOpenConnection().CreateCommand();
+			tests.Add(id => ormLiteCmd.Select<Post>("select * from Posts where Id = {0}", id), "OrmLite Query");
 
 
 

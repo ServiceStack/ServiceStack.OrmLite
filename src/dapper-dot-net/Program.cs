@@ -12,7 +12,6 @@ using ServiceStack.DataAnnotations;
 
 namespace SqlMapper
 {
-	[Alias("Posts")]
     class Post
     {
         public int Id { get; set; }
