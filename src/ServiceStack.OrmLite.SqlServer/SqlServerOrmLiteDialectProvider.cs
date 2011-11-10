@@ -119,7 +119,8 @@ namespace ServiceStack.OrmLite.SqlServer
 		{
 			dbCmd.CommandText = "SELECT SCOPE_IDENTITY()";
 			var result = dbCmd.ExecuteScalar();
-			//if (result is DBNull) return 0;
+			if (result is DBNull) return default(long);
+            if (result is decimal) return Convert.ToInt64((decimal)result);
 			return (long)result;
 		}
 	}
