@@ -76,8 +76,7 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Mono.Data.Sqlite, Version=2.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Mono.Data.Sqlite">
       <HintPath>..\..\lib\Mono.Data.Sqlite.dll</HintPath>
     </Reference>
     <Reference Include="ServiceStack.Text, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">

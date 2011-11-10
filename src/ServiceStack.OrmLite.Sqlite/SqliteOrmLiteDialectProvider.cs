@@ -21,6 +21,7 @@ namespace ServiceStack.OrmLite.Sqlite
 			base.BoolColumnDefinition = base.IntColumnDefinition;
 			base.GuidColumnDefinition = "CHAR(32)";
 
+
 			base.InitColumnTypeMap();
 		}
 
