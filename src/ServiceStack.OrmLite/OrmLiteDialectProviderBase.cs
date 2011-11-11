@@ -19,11 +19,12 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
-	public abstract class OrmLiteDialectProviderBase
-		: IOrmLiteDialectProvider
-	{
-		#region ADO.NET supported types
-		/* ADO.NET UNDERSTOOD DATA TYPES:
+ 
+    public abstract class OrmLiteDialectProviderBase
+        : IOrmLiteDialectProvider
+    {
+        #region ADO.NET supported types
+        /* ADO.NET UNDERSTOOD DATA TYPES:
 			COUNTER	DbType.Int64
 			AUTOINCREMENT	DbType.Int64
 			IDENTITY	DbType.Int64
@@ -71,255 +72,250 @@ namespace ServiceStack.OrmLite
 			SMALLDATE	DbType.DateTime
 			SMALLDATETIME	DbType.DateTime
 		 */
-		#endregion
+        #endregion
 
-		private static ILog log = LogManager.GetLogger(typeof(OrmLiteDialectProviderBase));
+        private static ILog log = LogManager.GetLogger(typeof(OrmLiteDialectProviderBase));
 
-		public string StringLengthNonUnicodeColumnDefinitionFormat = "VARCHAR({0})";
-		public string StringLengthUnicodeColumnDefinitionFormat = "NVARCHAR({0})";
+        public string StringLengthNonUnicodeColumnDefinitionFormat = "VARCHAR({0})";
+        public string StringLengthUnicodeColumnDefinitionFormat = "NVARCHAR({0})";
 
-		//Set by Constructor and UpdateStringColumnDefinitions()
-		public string StringColumnDefinition;
-		public string StringLengthColumnDefinitionFormat;
+        //Set by Constructor and UpdateStringColumnDefinitions()
+        public string StringColumnDefinition;
+        public string StringLengthColumnDefinitionFormat;
 
-		public string AutoIncrementDefinition = "AUTOINCREMENT"; //SqlServer express limit
-		public string IntColumnDefinition = "INTEGER";
-		public string LongColumnDefinition = "BIGINT";
-		public string GuidColumnDefinition = "GUID";
-		public string BoolColumnDefinition = "BOOL";
-		public string RealColumnDefinition = "DOUBLE";
-		public string DecimalColumnDefinition = "DECIMAL";
-		public string BlobColumnDefinition = "BLOB";
-		public string DateTimeColumnDefinition = "DATETIME";
-		public string TimeColumnDefinition = "DATETIME";
-		//public string TimeColumnDefinition = "TIME"; //SQLSERVER 2008+
+        public string AutoIncrementDefinition = "AUTOINCREMENT"; //SqlServer express limit
+        public string IntColumnDefinition = "INTEGER";
+        public string LongColumnDefinition = "BIGINT";
+        public string GuidColumnDefinition = "GUID";
+        public string BoolColumnDefinition = "BOOL";
+        public string RealColumnDefinition = "DOUBLE";
+        public string DecimalColumnDefinition = "DECIMAL";
+        public string BlobColumnDefinition = "BLOB";
+        public string DateTimeColumnDefinition = "DATETIME";
+        public string TimeColumnDefinition = "DATETIME";
+        //public string TimeColumnDefinition = "TIME"; //SQLSERVER 2008+
 
-		protected Dictionary<Type, string> ColumnTypeMap;
+        protected OrmLiteDialectProviderBase()
+        {
+            InitColumnTypeMap();
+            UpdateStringColumnDefinitions();
+        }
 
-		protected OrmLiteDialectProviderBase()
-		{
-			InitColumnTypeMap();
-			UpdateStringColumnDefinitions();
-		}
+        private int defaultStringLength = 8000; //SqlServer express limit
+        public int DefaultStringLength
+        {
+            get
+            {
+                return defaultStringLength;
+            }
+            set
+            {
+                defaultStringLength = value;
+                UpdateStringColumnDefinitions();
+            }
+        }
 
-		private int defaultStringLength = 8000; //SqlServer express limit
-		public int DefaultStringLength
-		{
-			get
-			{
-				return defaultStringLength;
-			}
-			set
-			{
-				defaultStringLength = value;
-				UpdateStringColumnDefinitions();
-			}
-		}
+        private bool useUnicode;
+        public virtual bool UseUnicode
+        {
+            get
+            {
+                return useUnicode;
+            }
+            set
+            {
+                useUnicode = value;
+                UpdateStringColumnDefinitions();
+            }
+        }
 
-		private bool useUnicode;
-		public virtual bool UseUnicode
-		{
-			get
-			{
-				return useUnicode;
-			}
-			set
-			{
-				useUnicode = value;
-				UpdateStringColumnDefinitions();
-			}
-		}
+        private void UpdateStringColumnDefinitions()
+        {
+            this.StringLengthColumnDefinitionFormat = useUnicode
+                ? StringLengthUnicodeColumnDefinitionFormat
+                : StringLengthNonUnicodeColumnDefinitionFormat;
 
-		private void UpdateStringColumnDefinitions()
-		{
-			this.StringLengthColumnDefinitionFormat = useUnicode
-				? StringLengthUnicodeColumnDefinitionFormat
-				: StringLengthNonUnicodeColumnDefinitionFormat;
+            this.StringColumnDefinition = string.Format(
+                this.StringLengthColumnDefinitionFormat, DefaultStringLength);
+        }
 
-			this.StringColumnDefinition = string.Format(
-				this.StringLengthColumnDefinitionFormat, DefaultStringLength);
-		}
+        protected void InitColumnTypeMap()
+        {
+            DbTypes<string>.Set(DbType.String, StringColumnDefinition);
+            DbTypes<char>.Set(DbType.StringFixedLength, StringColumnDefinition);
+            DbTypes<char[]>.Set(DbType.String, StringColumnDefinition);
+            DbTypes<bool>.Set(DbType.Boolean, BoolColumnDefinition);
+            DbTypes<Guid>.Set(DbType.Guid, GuidColumnDefinition);
+            DbTypes<DateTime>.Set(DbType.DateTime, DateTimeColumnDefinition);
+            DbTypes<TimeSpan>.Set(DbType.Time, TimeColumnDefinition);
+            DbTypes<DateTimeOffset>.Set(DbType.Time, TimeColumnDefinition);
 
-		protected void InitColumnTypeMap()
-		{
-			ColumnTypeMap = new Dictionary<Type, string>
-        	{
-        		{ typeof(string), StringColumnDefinition },
-        		{ typeof(char), StringColumnDefinition },
-        		{ typeof(char[]), StringColumnDefinition },
+            DbTypes<byte>.Set(DbType.Byte, IntColumnDefinition);
+            DbTypes<sbyte>.Set(DbType.SByte, IntColumnDefinition);
+            DbTypes<short>.Set(DbType.Int16, IntColumnDefinition);
+            DbTypes<ushort>.Set(DbType.UInt16, IntColumnDefinition);
+            DbTypes<int>.Set(DbType.Int32, IntColumnDefinition);
+            DbTypes<uint>.Set(DbType.UInt32, IntColumnDefinition);
 
-        		{ typeof(bool), BoolColumnDefinition },
+            DbTypes<long>.Set(DbType.Int64, LongColumnDefinition);
+            DbTypes<ulong>.Set(DbType.UInt64, LongColumnDefinition);
 
-        		{ typeof(Guid), GuidColumnDefinition },
+            DbTypes<float>.Set(DbType.Single, RealColumnDefinition);
+            DbTypes<double>.Set(DbType.Double, RealColumnDefinition);
 
-        		{ typeof(DateTime), DateTimeColumnDefinition },
-        		{ typeof(TimeSpan), TimeColumnDefinition },
+            DbTypes<decimal>.Set(DbType.Decimal, DecimalColumnDefinition);
 
-        		{ typeof(byte), IntColumnDefinition },
-        		{ typeof(sbyte), IntColumnDefinition },
-        		{ typeof(short), IntColumnDefinition },
-        		{ typeof(ushort), IntColumnDefinition },
-        		{ typeof(int), IntColumnDefinition },
-        		{ typeof(uint), IntColumnDefinition },
-        		{ typeof(long), LongColumnDefinition },
-        		{ typeof(ulong), LongColumnDefinition },
+            DbTypes<byte[]>.Set(DbType.Binary, BlobColumnDefinition);
+        }
 
-        		{ typeof(float), RealColumnDefinition },
-        		{ typeof(double), RealColumnDefinition },
-        		{ typeof(decimal), DecimalColumnDefinition },
+        public string DefaultValueFormat = " DEFAULT ({0})";
 
-        		{ typeof(byte[]), BlobColumnDefinition },
-        	};
-		}
+        public virtual bool ShouldQuoteValue(Type fieldType)
+        {
+            string fieldDefinition;
+            if (!DbTypes.ColumnTypeMap.TryGetValue(fieldType, out fieldDefinition))
+            {
+                fieldDefinition = this.GetUndefinedColumnDefintion(fieldType);
+            }
 
-		public string DefaultValueFormat = " DEFAULT ({0})";
+            return fieldDefinition != IntColumnDefinition
+                   && fieldDefinition != LongColumnDefinition
+                   && fieldDefinition != RealColumnDefinition
+                   && fieldDefinition != DecimalColumnDefinition
+                   && fieldDefinition != BoolColumnDefinition;
+        }
 
-		public virtual bool ShouldQuoteValue(Type fieldType)
-		{
-			string fieldDefinition;
-			if (!ColumnTypeMap.TryGetValue(fieldType, out fieldDefinition))
-			{
-				fieldDefinition = this.GetUndefinedColumnDefintion(fieldType);
-			}
+        public virtual object ConvertDbValue(object value, Type type)
+        {
+            if (value == null || value.GetType() == typeof(DBNull)) return null;
 
-			return fieldDefinition != IntColumnDefinition
-				   && fieldDefinition != LongColumnDefinition
-				   && fieldDefinition != RealColumnDefinition
-				   && fieldDefinition != DecimalColumnDefinition
-				   && fieldDefinition != BoolColumnDefinition;
-		}
+            if (value.GetType() == type)
+            {
+                return value;
+            }
 
-		public virtual object ConvertDbValue(object value, Type type)
-		{
-			if (value == null || value.GetType() == typeof(DBNull)) return null;
+            if (type.IsValueType)
+            {
+                if (type == typeof(float))
+                    return value is double ? (float)((double)value) : (float)value;
 
-			if (value.GetType() == type)
-			{
-				return value;
-			}
+                if (type == typeof(double))
+                    return value is float ? (double)((float)value) : (double)value;
 
-			if (type.IsValueType)
-			{
-				if (type == typeof(float))
-					return value is double ? (float)((double)value) : (float)value;
+                if (type == typeof(decimal))
+                    return (decimal)value;
+            }
 
-				if (type == typeof(double))
-					return value is float ? (double)((float)value) : (double)value;
+            if (type == typeof(string))
+                return value;
 
-				if (type == typeof(decimal))
-					return (decimal)value;
-			}
+            try
+            {
+                var convertedValue = TypeSerializer.DeserializeFromString(value.ToString(), type);
+                return convertedValue;
+            }
+            catch (Exception ex)
+            {
+                log.ErrorFormat("Error ConvertDbValue trying to convert {0} into {1}",
+                    value, type.Name);
+                throw;
+            }
+        }
 
-			if (type == typeof(string))
-				return value;
+        public virtual string GetQuotedValue(object value, Type fieldType)
+        {
+            if (value == null) return "NULL";
 
-			try
-			{
-				var convertedValue = TypeSerializer.DeserializeFromString(value.ToString(), type);
-				return convertedValue;
-			}
-			catch (Exception ex)
-			{
-				log.ErrorFormat("Error ConvertDbValue trying to convert {0} into {1}",
-					value, type.Name);
-				throw;
-			}
-		}
+            if (!fieldType.UnderlyingSystemType.IsValueType && fieldType != typeof(string))
+            {
+                if (TypeSerializer.CanCreateFromString(fieldType))
+                {
+                    return "'" + EscapeParam(TypeSerializer.SerializeToString(value)) + "'";
+                }
 
-		public virtual string GetQuotedValue(object value, Type fieldType)
-		{
-			if (value == null) return "NULL";
+                throw new NotSupportedException(
+                    string.Format("Property of type: {0} is not supported", fieldType.FullName));
+            }
 
-			if (!fieldType.UnderlyingSystemType.IsValueType && fieldType != typeof(string))
-			{
-				if (TypeSerializer.CanCreateFromString(fieldType))
-				{
-					return "'" + EscapeParam(TypeSerializer.SerializeToString(value)) + "'";
-				}
+            if (fieldType == typeof(float))
+                return ((float)value).ToString(CultureInfo.InvariantCulture);
 
-				throw new NotSupportedException(
-					string.Format("Property of type: {0} is not supported", fieldType.FullName));
-			}
+            if (fieldType == typeof(double))
+                return ((double)value).ToString(CultureInfo.InvariantCulture);
 
-			if (fieldType == typeof(float))
-				return ((float)value).ToString(CultureInfo.InvariantCulture);
+            if (fieldType == typeof(decimal))
+                return ((decimal)value).ToString(CultureInfo.InvariantCulture);
 
-			if (fieldType == typeof(double))
-				return ((double)value).ToString(CultureInfo.InvariantCulture);
+            return ShouldQuoteValue(fieldType)
+                    ? "'" + EscapeParam(value) + "'"
+                    : value.ToString();
+        }
 
-			if (fieldType == typeof(decimal))
-				return ((decimal)value).ToString(CultureInfo.InvariantCulture);
+        public abstract IDbConnection CreateConnection(string filePath, Dictionary<string, string> options);
 
-			return ShouldQuoteValue(fieldType)
-					? "'" + EscapeParam(value) + "'"
-					: value.ToString();
-		}
+        public virtual string EscapeParam(object paramValue)
+        {
+            return paramValue.ToString().Replace("'", "''");
+        }
 
-		public abstract IDbConnection CreateConnection(string filePath, Dictionary<string, string> options);
+        protected virtual string GetUndefinedColumnDefintion(Type fieldType)
+        {
+            if (TypeSerializer.CanCreateFromString(fieldType))
+            {
+                return this.StringColumnDefinition;
+            }
 
-		public virtual string EscapeParam(object paramValue)
-		{
-			return paramValue.ToString().Replace("'", "''");
-		}
+            throw new NotSupportedException(
+                string.Format("Property of type: {0} is not supported", fieldType.FullName));
+        }
 
-		protected virtual string GetUndefinedColumnDefintion(Type fieldType)
-		{
-			if (TypeSerializer.CanCreateFromString(fieldType))
-			{
-				return this.StringColumnDefinition;
-			}
+        public virtual string GetColumnDefinition(string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement, bool isNullable, int? fieldLength, string defaultValue)
+        {
+            string fieldDefinition;
 
-			throw new NotSupportedException(
-				string.Format("Property of type: {0} is not supported", fieldType.FullName));
-		}
+            if (fieldType == typeof(string))
+            {
+                fieldDefinition = string.Format(StringLengthColumnDefinitionFormat, fieldLength.GetValueOrDefault(DefaultStringLength));
+            }
+            else
+            {
+                if (!DbTypes.ColumnTypeMap.TryGetValue(fieldType, out fieldDefinition))
+                {
+                    fieldDefinition = this.GetUndefinedColumnDefintion(fieldType);
+                }
+            }
 
-		public virtual string GetColumnDefinition(string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement, bool isNullable, int? fieldLength, string defaultValue)
-		{
-			string fieldDefinition;
+            var sql = new StringBuilder();
+            sql.AppendFormat("\"{0}\" {1}", fieldName, fieldDefinition);
 
-			if (fieldType == typeof(string))
-			{
-				fieldDefinition = string.Format(StringLengthColumnDefinitionFormat, fieldLength.GetValueOrDefault(DefaultStringLength));
-			}
-			else
-			{
-				if (!ColumnTypeMap.TryGetValue(fieldType, out fieldDefinition))
-				{
-					fieldDefinition = this.GetUndefinedColumnDefintion(fieldType);
-				}
-			}
+            if (isPrimaryKey)
+            {
+                sql.Append(" PRIMARY KEY");
+                if (autoIncrement)
+                {
+                    sql.Append(" ").Append(AutoIncrementDefinition);
+                }
+            }
+            else
+            {
+                if (isNullable)
+                {
+                    sql.Append(" NULL");
+                }
+                else
+                {
+                    sql.Append(" NOT NULL");
+                }
+            }
 
-			var sql = new StringBuilder();
-			sql.AppendFormat("\"{0}\" {1}", fieldName, fieldDefinition);
+            if (!string.IsNullOrEmpty(defaultValue))
+            {
+                sql.AppendFormat(DefaultValueFormat, defaultValue);
+            }
 
-			if (isPrimaryKey)
-			{
-				sql.Append(" PRIMARY KEY");
-				if (autoIncrement)
-				{
-					sql.Append(" ").Append(AutoIncrementDefinition);
-				}
-			}
-			else
-			{
-				if (isNullable)
-				{
-					sql.Append(" NULL");
-				}
-				else
-				{
-					sql.Append(" NOT NULL");
-				}
-			}
+            return sql.ToString();
+        }
 
-			if (!string.IsNullOrEmpty(defaultValue))
-			{
-				sql.AppendFormat(DefaultValueFormat, defaultValue);
-			}
-
-			return sql.ToString();
-		}
-
-		public abstract long GetLastInsertId(IDbCommand command);
-	}
+        public abstract long GetLastInsertId(IDbCommand command);
+    }
 }

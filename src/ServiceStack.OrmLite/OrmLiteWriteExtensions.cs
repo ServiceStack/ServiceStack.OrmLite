@@ -191,8 +191,7 @@ namespace ServiceStack.OrmLite
 
 		public static T PopulateWithSqlReader<T>(this T objWithProperties, IDataReader dataReader)
 		{
-			var modelDef = typeof(T).GetModelDefinition();
-			var fieldDefs = modelDef.FieldDefinitions.ToArray();
+            var fieldDefs = ModelDefinition<T>.Definition.FieldDefinitions.ToArray();
 
 			return PopulateWithSqlReader(objWithProperties, dataReader, fieldDefs);
 		}
@@ -326,7 +325,7 @@ namespace ServiceStack.OrmLite
 		public static void DeleteById<T>(this IDbCommand dbCommand, object id)
 			where T : new()
 		{
-			var modelDef = typeof(T).GetModelDefinition();
+            var modelDef = ModelDefinition<T>.Definition;
 
 			var sql = string.Format("DELETE FROM \"{0}\" WHERE \"{1}\" = {2}",
 				modelDef.ModelName, modelDef.PrimaryKey.FieldName, 
@@ -341,7 +340,7 @@ namespace ServiceStack.OrmLite
 			var sqlIn = idValues.GetIdsInSql();
 			if (sqlIn == null) return;
 
-			var modelDef = typeof(T).GetModelDefinition();
+            var modelDef = ModelDefinition<T>.Definition;
 
 			var sql = string.Format("DELETE FROM \"{0}\" WHERE \"{1}\" IN ({2})",
 				modelDef.ModelName, modelDef.PrimaryKey.FieldName, sqlIn);

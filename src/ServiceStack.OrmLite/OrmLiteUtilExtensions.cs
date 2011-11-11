@@ -20,9 +20,9 @@ namespace ServiceStack.OrmLite
 	public static class OrmLiteUtilExtensions
 	{
 		public static T ConvertTo<T>(this IDataReader dataReader)
-			where T : new()
-		{
-			var fieldDefs = typeof(T).GetModelDefinition().FieldDefinitionsArray;
+            where T : new()
+        {
+			var fieldDefs = ModelDefinition<T>.Definition.FieldDefinitionsArray;
 
 			using (dataReader)
 			{
@@ -39,7 +39,7 @@ namespace ServiceStack.OrmLite
 		public static List<T> ConvertToList<T>(this IDataReader dataReader)
 			where T : new()
 		{
-			var fieldDefs = typeof(T).GetModelDefinition().FieldDefinitionsArray;
+            var fieldDefs = ModelDefinition<T>.Definition.FieldDefinitionsArray;
 
 			var to = new List<T>();
 			using (dataReader)

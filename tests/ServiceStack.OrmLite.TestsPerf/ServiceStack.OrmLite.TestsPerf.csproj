@@ -110,6 +110,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DapperTests.cs" />
     <Compile Include="Model\ModelWithFieldsOfDifferentTypes.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -133,6 +134,10 @@
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Sqlite\ServiceStack.OrmLite.Sqlite.csproj">
       <Project>{CF68A37D-D071-469D-AE04-68594CB95382}</Project>
       <Name>ServiceStack.OrmLite.Sqlite</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.SqlServer\ServiceStack.OrmLite.SqlServer.csproj">
+      <Project>{1887DC99-9139-43E3-A7AA-6D74714B3A5D}</Project>
+      <Name>ServiceStack.OrmLite.SqlServer</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj">
       <Project>{96179AC6-F6F1-40C3-9FDD-4F6582F54C5C}</Project>

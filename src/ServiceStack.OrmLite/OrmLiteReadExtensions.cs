@@ -20,332 +20,400 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
-	public static class OrmLiteReadExtensions
-	{
-		private static readonly ILog Log = LogManager.GetLogger(typeof(OrmLiteReadExtensions));
+    public static class OrmLiteReadExtensions
+    {
+        private static readonly ILog Log = LogManager.GetLogger(typeof(OrmLiteReadExtensions));
 
-		[Conditional("DEBUG")]
-		private static void LogDebug(string fmt, params object[] args)
-		{
-			if (args.Length > 0)
-				Log.DebugFormat(fmt, args);
-			else
-				Log.Debug(fmt);
-		}
+        [Conditional("DEBUG")]
+        private static void LogDebug(string fmt, params object[] args)
+        {
+            if (args.Length > 0)
+                Log.DebugFormat(fmt, args);
+            else
+                Log.Debug(fmt);
+        }
 
-		private static IDataReader ExecReader(this IDbCommand dbCmd, string sql)
-		{
-			LogDebug(sql);
-			dbCmd.CommandText = sql;
-			return dbCmd.ExecuteReader();
-		}
+        private static IDataReader ExecReader(this IDbCommand dbCmd, string sql)
+        {
+            LogDebug(sql);
+            dbCmd.CommandText = sql;
+            return dbCmd.ExecuteReader();
+        }
 
-		public static Func<int, object> GetValueFn<T>(IDataRecord reader)
-		{
-			var type = typeof(T);
+        public static Func<int, object> GetValueFn<T>(IDataRecord reader)
+        {
+            var type = typeof(T);
 
-			if (type == typeof(string))
-				return reader.GetString;
+            if (type == typeof(string))
+                return reader.GetString;
 
-			if (type == typeof(short))
-				return i => reader.GetInt16(i);
+            if (type == typeof(short))
+                return i => reader.GetInt16(i);
 
-			if (type == typeof(int))
-				return i => reader.GetInt32(i);
+            if (type == typeof(int))
+                return i => reader.GetInt32(i);
 
-			if (type == typeof(long))
-				return i => reader.GetInt64(i);
+            if (type == typeof(long))
+                return i => reader.GetInt64(i);
 
-			if (type == typeof(bool))
-				return i => reader.GetBoolean(i);
+            if (type == typeof(bool))
+                return i => reader.GetBoolean(i);
 
-			if (type == typeof(DateTime))
-				return i => reader.GetDateTime(i);
+            if (type == typeof(DateTime))
+                return i => reader.GetDateTime(i);
 
-			if (type == typeof(Guid))
-				return i => reader.GetGuid(i);
+            if (type == typeof(Guid))
+                return i => reader.GetGuid(i);
 
-			if (type == typeof(float))
-				return i => reader.GetFloat(i);
+            if (type == typeof(float))
+                return i => reader.GetFloat(i);
 
-			if (type == typeof(double))
-				return i => reader.GetDouble(i);
+            if (type == typeof(double))
+                return i => reader.GetDouble(i);
 
-			if (type == typeof(decimal))
-				return i => reader.GetDecimal(i);
+            if (type == typeof(decimal))
+                return i => reader.GetDecimal(i);
 
-			return reader.GetValue;
-		}
+            return reader.GetValue;
+        }
 
 
-		public static string ToSelectStatement(this Type tableType)
-		{
-			return ToSelectStatement(tableType, null);
-		}
+        public static string ToSelectStatement(this Type tableType)
+        {
+            return ToSelectStatement(tableType, null);
+        }
 
-		public static string ToSelectStatement(this Type tableType, string sqlFilter, params object[] filterParams)
-		{
-			var sql = new StringBuilder();
-			const string SelectStatement = "SELECT ";
+        public static string ToSelectStatement(this Type tableType, string sqlFilter, params object[] filterParams)
+        {
+            var sql = new StringBuilder();
+            const string SelectStatement = "SELECT ";
 
-			var isFullSelectStatement = 
-				!string.IsNullOrEmpty(sqlFilter)
-				&& sqlFilter.Length > SelectStatement.Length
-				&& sqlFilter.Substring(0, SelectStatement.Length).ToUpper().Equals(SelectStatement);
+            var isFullSelectStatement =
+                !string.IsNullOrEmpty(sqlFilter)
+                && sqlFilter.Length > SelectStatement.Length
+                && sqlFilter.Substring(0, SelectStatement.Length).ToUpper().Equals(SelectStatement);
 
-			if (isFullSelectStatement) return sqlFilter.SqlFormat(filterParams);
+            if (isFullSelectStatement) return sqlFilter.SqlFormat(filterParams);
 
-			var modelDef = tableType.GetModelDefinition();
-			sql.AppendFormat("SELECT {0} FROM \"{1}\"", tableType.GetColumnNames(), modelDef.ModelName);
-			if (!string.IsNullOrEmpty(sqlFilter))
-			{
-				sqlFilter = sqlFilter.SqlFormat(filterParams);
-				if (!sqlFilter.StartsWith("ORDER ", StringComparison.InvariantCultureIgnoreCase)
-					&& !sqlFilter.StartsWith("LIMIT ", StringComparison.InvariantCultureIgnoreCase))
-				{
-					sql.Append(" WHERE ");
-				}
-				sql.Append(sqlFilter);
-			}
+            var modelDef = tableType.GetModelDefinition();
+            sql.AppendFormat("SELECT {0} FROM \"{1}\"", tableType.GetColumnNames(), modelDef.ModelName);
+            if (!string.IsNullOrEmpty(sqlFilter))
+            {
+                sqlFilter = sqlFilter.SqlFormat(filterParams);
+                if (!sqlFilter.StartsWith("ORDER ", StringComparison.InvariantCultureIgnoreCase)
+                    && !sqlFilter.StartsWith("LIMIT ", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    sql.Append(" WHERE ");
+                }
+                sql.Append(sqlFilter);
+            }
 
-			return sql.ToString();
-		}
+            return sql.ToString();
+        }
 
-		public static List<T> Select<T>(this IDbCommand dbCommand)
-			where T : new()
-		{
-			return Select<T>(dbCommand, (string)null);
-		}
+        public static List<T> Select<T>(this IDbCommand dbCommand)
+            where T : new()
+        {
+            return Select<T>(dbCommand, (string)null);
+        }
 
-		public static List<T> Select<T>(this IDbCommand dbCommand, string sqlFilter, params object[] filterParams)
-			where T : new()
-		{
-			using (var reader = dbCommand.ExecReader(ToSelectStatement(typeof(T), sqlFilter, filterParams)))
-			{
-				return reader.ConvertToList<T>();
-			}
-		}
+        public static List<T> Select<T>(this IDbCommand dbCommand, string sqlFilter, params object[] filterParams)
+            where T : new()
+        {
+            using (var reader = dbCommand.ExecReader(ToSelectStatement(typeof(T), sqlFilter, filterParams)))
+            {
+                return reader.ConvertToList<T>();
+            }
+        }
 
-		public static List<TModel> Select<TModel>(this IDbCommand dbCommand, Type fromTableType)
-			where TModel : new()
-		{
-			return Select<TModel>(dbCommand, fromTableType, null);
-		}
+        public static List<TModel> Select<TModel>(this IDbCommand dbCommand, Type fromTableType)
+            where TModel : new()
+        {
+            return Select<TModel>(dbCommand, fromTableType, null);
+        }
 
-		public static List<TModel> Select<TModel>(this IDbCommand dbCommand, Type fromTableType, string sqlFilter, params object[] filterParams)
-			where TModel : new()
-		{
-			var sql = new StringBuilder();
-			var modelType = typeof(TModel);
-			sql.AppendFormat("SELECT {0} FROM \"{1}\"", modelType.GetColumnNames(), fromTableType.GetModelDefinition().ModelName);
-			if (!string.IsNullOrEmpty(sqlFilter))
-			{
-				sqlFilter = sqlFilter.SqlFormat(filterParams);
-				sql.Append(" WHERE ");
-				sql.Append(sqlFilter);
-			}
+        public static List<TModel> Select<TModel>(this IDbCommand dbCommand, Type fromTableType, string sqlFilter, params object[] filterParams)
+            where TModel : new()
+        {
+            var sql = new StringBuilder();
+            var modelType = typeof(TModel);
+            sql.AppendFormat("SELECT {0} FROM \"{1}\"", modelType.GetColumnNames(), fromTableType.GetModelDefinition().ModelName);
+            if (!string.IsNullOrEmpty(sqlFilter))
+            {
+                sqlFilter = sqlFilter.SqlFormat(filterParams);
+                sql.Append(" WHERE ");
+                sql.Append(sqlFilter);
+            }
 
-			using (var reader = dbCommand.ExecReader(sql.ToString()))
-			{
-				return reader.ConvertToList<TModel>();
-			}
-		}
+            using (var reader = dbCommand.ExecReader(sql.ToString()))
+            {
+                return reader.ConvertToList<TModel>();
+            }
+        }
 
-		public static IEnumerable<T> Each<T>(this IDbCommand dbCommand)
-			where T : new()
-		{
-			return Each<T>(dbCommand, null);
-		}
+        public static IEnumerable<T> Each<T>(this IDbCommand dbCommand)
+            where T : new()
+        {
+            return Each<T>(dbCommand, null);
+        }
 
-		public static IEnumerable<T> Each<T>(this IDbCommand dbCommand, string filter, params object[] filterParams)
-			where T : new()
-		{
-			var fieldDefs = typeof(T).GetModelDefinition().FieldDefinitionsArray;
+        public static IEnumerable<T> Each<T>(this IDbCommand dbCommand, string filter, params object[] filterParams)
+            where T : new()
+        {
+            var fieldDefs = ModelDefinition<T>.Definition.FieldDefinitionsArray;
+            using (var reader = dbCommand.ExecReader(ToSelectStatement(typeof(T), filter, filterParams)))
+            {
+                while (reader.Read())
+                {
+                    var row = new T();
+                    row.PopulateWithSqlReader(reader, fieldDefs);
+                    yield return row;
+                }
+            }
+        }
 
-			using (var reader = dbCommand.ExecReader(ToSelectStatement(typeof(T), filter, filterParams)))
-			{
-				while (reader.Read())
-				{
-					var row = new T();
-					row.PopulateWithSqlReader(reader, fieldDefs);
-					yield return row;
-				}
-			}
-		}
+        public static T First<T>(this IDbCommand dbCommand, string filter, params object[] filterParams)
+            where T : new()
+        {
+            return First<T>(dbCommand, filter.SqlFormat(filterParams));
+        }
 
-		public static T First<T>(this IDbCommand dbCommand, string filter, params object[] filterParams)
-			where T : new()
-		{
-			return First<T>(dbCommand, filter.SqlFormat(filterParams));
-		}
+        public static T First<T>(this IDbCommand dbCommand, string filter)
+            where T : new()
+        {
+            var result = FirstOrDefault<T>(dbCommand, filter);
+            if (Equals(result, default(T)))
+            {
+                throw new ArgumentNullException(string.Format(
+                    "{0}: '{1}' does not exist", typeof(T).Name, filter));
+            }
+            return result;
+        }
 
-		public static T First<T>(this IDbCommand dbCommand, string filter)
-			where T : new()
-		{
-			var result = FirstOrDefault<T>(dbCommand, filter);
-			if (Equals(result, default(T)))
-			{
-				throw new ArgumentNullException(string.Format(
-					"{0}: '{1}' does not exist", typeof(T).Name, filter));
-			}
-			return result;
-		}
+        public static T FirstOrDefault<T>(this IDbCommand dbCommand, string filter, params object[] filterParams)
+            where T : new()
+        {
+            return FirstOrDefault<T>(dbCommand, filter.SqlFormat(filterParams));
+        }
 
-		public static T FirstOrDefault<T>(this IDbCommand dbCommand, string filter, params object[] filterParams)
-			where T : new()
-		{
-			return FirstOrDefault<T>(dbCommand, filter.SqlFormat(filterParams));
-		}
+        public static T FirstOrDefault<T>(this IDbCommand dbCommand, string filter)
+            where T : new()
+        {
+            using (var dbReader = dbCommand.ExecReader(ToSelectStatement(typeof(T), filter)))
+            {
+                return dbReader.ConvertTo<T>();
+            }
+        }
 
-		public static T FirstOrDefault<T>(this IDbCommand dbCommand, string filter)
-			where T : new()
-		{
-			using (var dbReader = dbCommand.ExecReader(ToSelectStatement(typeof(T), filter)))
-			{
-				return dbReader.ConvertTo<T>();
-			}
-		}
+        public static T GetById<T>(this IDbCommand dbCommand, object idValue)
+            where T : new()
+        {
+            return First<T>(dbCommand, ModelDefinition<T>.Definition.PrimaryKey.FieldName + " = {0}".SqlFormat(idValue));
+        }
 
-		public static T GetById<T>(this IDbCommand dbCommand, object idValue)
-			where T : new()
-		{
-			var modelDef = typeof (T).GetModelDefinition();
-			return First<T>(dbCommand, modelDef.PrimaryKey.FieldName + " = {0}".SqlFormat(idValue));
-		}
+        public static void AddFilter<T>(this IDbCommand dbCommand, string name, T value)
+        {
+            var p1 = dbCommand.CreateParameter();
+            p1.ParameterName = name;
+            p1.DbType = DbTypes<T>.DbType;
+            p1.Direction = ParameterDirection.Input;
+            p1.Value = value;
+            dbCommand.Parameters.Add(p1);
+        }
+        
+        public static void AddIdFilter<T>(this IDbCommand dbCommand, T value)
+        {
+            var modelDef = ModelDefinition<T>.Definition;
+            AddFilter(dbCommand, modelDef.PrimaryKey.Name, value);
+        }
 
-		public static T GetByIdOrDefault<T>(this IDbCommand dbCommand, object idValue)
-			where T : new()
-		{
-			var modelDef = typeof(T).GetModelDefinition();
-			return FirstOrDefault<T>(dbCommand, modelDef.PrimaryKey.FieldName + " = {0}".SqlFormat(idValue));
-		}
+        private static StringBuilder GetFilterSql(IDbCommand dbCommand, ModelDefinition modelDef) 
+        {
+            var sb = new StringBuilder("SELECT * FROM " + modelDef.ModelName + " WHERE ");
+            for (var i = 0; i < dbCommand.Parameters.Count; i++)
+            {
+                if (i > 0) sb.Append(" AND ");
+                var p = (IDbDataParameter) dbCommand.Parameters[i];
+                sb.AppendLine(p.ParameterName + " = @" + p.ParameterName);
+            }
+            return sb;
+        }
 
-		public static List<T> GetByIds<T>(this IDbCommand dbCommand, IEnumerable idValues)
-			where T : new()
-		{
-			var sql = idValues.GetIdsInSql();
-			if (sql == null) return new List<T>();
+        public static T FilterById<T>(this IDbCommand dbCommand, object value)
+            where T : new()
+        {
+            if (dbCommand.Parameters.Count == 0)
+            {
+                var modelDef = ModelDefinition<T>.Definition;
+                var p1 = dbCommand.CreateParameter();
+                p1.ParameterName = modelDef.PrimaryKey.Name;
+                p1.DbType = DbTypes.ColumnDbTypeMap[value.GetType()];
+                p1.Direction = ParameterDirection.Input;
+                p1.Value = value;
+                dbCommand.Parameters.Add(p1);                
+            }
 
-			var modelDef = typeof(T).GetModelDefinition();
-			return Select<T>(dbCommand, string.Format(modelDef.PrimaryKey.FieldName + " IN ({0})", sql));
-		}
+            return FilterSingle<T>(dbCommand);
+        }
 
-		public static T GetScalar<T>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
-		{
-			using (var reader = dbCmd.ExecReader(sql.SqlFormat(sqlParams)))
-			{
-				return GetScalar<T>(reader);
-			}
-		}
+        public static T FilterSingle<T>(this IDbCommand dbCommand)
+            where T : new()
+        {
+            if (dbCommand.Parameters.Count == 0)
+                throw new Exception("No parameters were added");
 
-		public static T GetScalar<T>(this IDataReader reader)
-		{
-			while (reader.Read())
-			{
-				return TypeSerializer.DeserializeFromString<T>(reader.GetValue(0).ToString());
-			}
-			return default(T);
-		}
+            var modelDef = ModelDefinition<T>.Definition;
+            var sb = GetFilterSql(dbCommand, modelDef);
 
-		public static long GetLastInsertId(this IDbCommand dbCmd)
-		{
-			return OrmLiteConfig.DialectProvider.GetLastInsertId(dbCmd);
-		}
+            using (var dbReader = dbCommand.ExecReader(sb.ToString()))
+            {
+                return dbReader.ConvertTo<T>();
+            }
+        }
 
-		public static List<T> GetFirstColumn<T>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
-		{
-			using (var dbReader = dbCmd.ExecReader(sql.SqlFormat(sqlParams)))
-			{
-				return GetFirstColumn<T>(dbReader);
-			}
-		}
+        public static List<T> Filter<T>(this IDbCommand dbCommand, string name)
+            where T : new()
+        {
+            var modelDef = ModelDefinition<T>.Definition;
+            var sb = GetFilterSql(dbCommand, modelDef);
 
-		public static List<T> GetFirstColumn<T>(this IDataReader reader)
-		{
-			var columValues = new List<T>();
-			var getValueFn = GetValueFn<T>(reader);
-			while (reader.Read())
-			{
-				var value = getValueFn(0);
-				columValues.Add((T)value);
-			}
-			return columValues;
-		}
+            using (var dbReader = dbCommand.ExecReader(sb.ToString()))
+            {
+                return dbReader.ConvertToList<T>();
+            }
+        }
 
-		public static HashSet<T> GetFirstColumnDistinct<T>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
-		{
-			using (var dbReader = dbCmd.ExecReader(sql.SqlFormat(sqlParams)))
-			{
-				return GetFirstColumnDistinct<T>(dbReader);
-			}
-		}
+        public static T GetByIdOrDefault<T>(this IDbCommand dbCommand, object idValue)
+            where T : new()
+        {
+            return FirstOrDefault<T>(dbCommand, ModelDefinition<T>.Definition.PrimaryKey.FieldName + " = {0}".SqlFormat(idValue));
+        }
 
-		public static HashSet<T> GetFirstColumnDistinct<T>(this IDataReader reader)
-		{
-			var columValues = new HashSet<T>();
-			var getValueFn = GetValueFn<T>(reader);
-			while (reader.Read())
-			{
-				var value = getValueFn(0);
-				columValues.Add((T)value);
-			}
-			return columValues;
-		}
+        public static List<T> GetByIds<T>(this IDbCommand dbCommand, IEnumerable idValues)
+            where T : new()
+        {
+            var sql = idValues.GetIdsInSql();
+            if (sql == null) return new List<T>();
 
-		public static Dictionary<K, List<V>> GetLookup<K, V>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
-		{
-			using (var dbReader = dbCmd.ExecReader(sql.SqlFormat(sqlParams)))
-			{
-				return GetLookup<K, V>(dbReader);
-			}
-		}
+            return Select<T>(dbCommand, string.Format(ModelDefinition<T>.Definition.PrimaryKey.FieldName + " IN ({0})", sql));
+        }
 
-		public static Dictionary<K, List<V>> GetLookup<K, V>(this IDataReader reader)
-		{
-			var lookup = new Dictionary<K, List<V>>();
+        public static T GetScalar<T>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
+        {
+            using (var reader = dbCmd.ExecReader(sql.SqlFormat(sqlParams)))
+            {
+                return GetScalar<T>(reader);
+            }
+        }
 
-			List<V> values;
-			var getKeyFn = GetValueFn<K>(reader);
-			var getValueFn = GetValueFn<V>(reader);
-			while (reader.Read())
-			{
-				var key = (K)getKeyFn(0);
-				var value = (V)getValueFn(1);
+        public static T GetScalar<T>(this IDataReader reader)
+        {
+            while (reader.Read())
+            {
+                return TypeSerializer.DeserializeFromString<T>(reader.GetValue(0).ToString());
+            }
+            return default(T);
+        }
 
-				if (!lookup.TryGetValue(key, out values))
-				{
-					values = new List<V>();
-					lookup[key] = values;
-				}
-				values.Add(value);
-			}
+        public static long GetLastInsertId(this IDbCommand dbCmd)
+        {
+            return OrmLiteConfig.DialectProvider.GetLastInsertId(dbCmd);
+        }
 
-			return lookup;
-		}
+        public static List<T> GetFirstColumn<T>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
+        {
+            using (var dbReader = dbCmd.ExecReader(sql.SqlFormat(sqlParams)))
+            {
+                return GetFirstColumn<T>(dbReader);
+            }
+        }
 
-		public static Dictionary<K, V> GetDictionary<K, V>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
-		{
-			using (var dbReader = dbCmd.ExecReader(sql.SqlFormat(sqlParams)))
-			{
-				return GetDictionary<K, V>(dbReader);
-			}
-		}
+        public static List<T> GetFirstColumn<T>(this IDataReader reader)
+        {
+            var columValues = new List<T>();
+            var getValueFn = GetValueFn<T>(reader);
+            while (reader.Read())
+            {
+                var value = getValueFn(0);
+                columValues.Add((T)value);
+            }
+            return columValues;
+        }
 
-		public static Dictionary<K, V> GetDictionary<K, V>(this IDataReader reader)
-		{
-			var map = new Dictionary<K, V>();
+        public static HashSet<T> GetFirstColumnDistinct<T>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
+        {
+            using (var dbReader = dbCmd.ExecReader(sql.SqlFormat(sqlParams)))
+            {
+                return GetFirstColumnDistinct<T>(dbReader);
+            }
+        }
 
-			var getKeyFn = GetValueFn<K>(reader);
-			var getValueFn = GetValueFn<V>(reader);
-			while (reader.Read())
-			{
-				var key = (K)getKeyFn(0);
-				var value = (V)getValueFn(1);
+        public static HashSet<T> GetFirstColumnDistinct<T>(this IDataReader reader)
+        {
+            var columValues = new HashSet<T>();
+            var getValueFn = GetValueFn<T>(reader);
+            while (reader.Read())
+            {
+                var value = getValueFn(0);
+                columValues.Add((T)value);
+            }
+            return columValues;
+        }
 
-				map.Add(key, value);
-			}
+        public static Dictionary<K, List<V>> GetLookup<K, V>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
+        {
+            using (var dbReader = dbCmd.ExecReader(sql.SqlFormat(sqlParams)))
+            {
+                return GetLookup<K, V>(dbReader);
+            }
+        }
 
-			return map;
-		}
-	}
+        public static Dictionary<K, List<V>> GetLookup<K, V>(this IDataReader reader)
+        {
+            var lookup = new Dictionary<K, List<V>>();
+
+            List<V> values;
+            var getKeyFn = GetValueFn<K>(reader);
+            var getValueFn = GetValueFn<V>(reader);
+            while (reader.Read())
+            {
+                var key = (K)getKeyFn(0);
+                var value = (V)getValueFn(1);
+
+                if (!lookup.TryGetValue(key, out values))
+                {
+                    values = new List<V>();
+                    lookup[key] = values;
+                }
+                values.Add(value);
+            }
+
+            return lookup;
+        }
+
+        public static Dictionary<K, V> GetDictionary<K, V>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
+        {
+            using (var dbReader = dbCmd.ExecReader(sql.SqlFormat(sqlParams)))
+            {
+                return GetDictionary<K, V>(dbReader);
+            }
+        }
+
+        public static Dictionary<K, V> GetDictionary<K, V>(this IDataReader reader)
+        {
+            var map = new Dictionary<K, V>();
+
+            var getKeyFn = GetValueFn<K>(reader);
+            var getValueFn = GetValueFn<V>(reader);
+            while (reader.Read())
+            {
+                var key = (K)getKeyFn(0);
+                var value = (V)getValueFn(1);
+
+                map.Add(key, value);
+            }
+
+            return map;
+        }
+    }
 }

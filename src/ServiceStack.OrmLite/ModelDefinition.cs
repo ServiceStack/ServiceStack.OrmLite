@@ -60,4 +60,15 @@ namespace ServiceStack.OrmLite
 
 		public List<CompositeIndexAttribute> CompositeIndexes { get; set; }
 	}
+
+
+    public static class ModelDefinition<T>
+    {
+        private static ModelDefinition definition;
+
+        public static ModelDefinition Definition
+        {
+            get { return definition ?? (definition = typeof(T).GetModelDefinition()); }
+        }
+    }
 }
