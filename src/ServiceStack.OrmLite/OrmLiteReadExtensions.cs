@@ -15,11 +15,14 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Text;
+using ServiceStack.Common;
 using ServiceStack.Logging;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
+	public delegate object GetValueDelegate(int i);
+
     public static class OrmLiteReadExtensions
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(OrmLiteReadExtensions));
@@ -40,7 +43,7 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecuteReader();
         }
 
-        public static Func<int, object> GetValueFn<T>(IDataRecord reader)
+		public static GetValueDelegate GetValueFn<T>(IDataRecord reader)
         {
             var type = typeof(T);
 
@@ -211,21 +214,50 @@ namespace ServiceStack.OrmLite
             return First<T>(dbCommand, ModelDefinition<T>.Definition.PrimaryKey.FieldName + " = {0}".SqlFormat(idValue));
         }
 
-        public static void AddFilter<T>(this IDbCommand dbCommand, string name, T value)
-        {
-            var p1 = dbCommand.CreateParameter();
-            p1.ParameterName = name;
-            p1.DbType = DbTypes<T>.DbType;
-            p1.Direction = ParameterDirection.Input;
-            p1.Value = value;
-            dbCommand.Parameters.Add(p1);
-        }
+		public static void AddFilter<T>(this IDbCommand dbCommand, string name, T value)
+		{
+			var p1 = dbCommand.CreateParameter();
+			p1.ParameterName = name;
+			p1.DbType = DbTypes<T>.DbType;
+			p1.Direction = ParameterDirection.Input;
+			p1.Value = value;
+			dbCommand.Parameters.Add(p1);
+		}
+
+		public static void AddFilters(this IDbCommand dbCommand, object anonType, bool excludeNulls)
+		{
+			var pis = anonType.GetType().GetSerializableProperties();
+			foreach (var pi in pis)
+			{
+				var mi = pi.GetGetMethod();
+				if (mi == null) continue;
+
+				var value = mi.Invoke(anonType, new object[0]);
+				if (excludeNulls && value == null) continue;
+
+				var p = dbCommand.CreateParameter();
+				p.ParameterName = pi.Name;
+				p.DbType = DbTypes.ColumnDbTypeMap[pi.PropertyType];
+				p.Direction = ParameterDirection.Input;
+				p.Value = value;
+				dbCommand.Parameters.Add(p);
+			}
+		}
+
+    	public static void AddFilters(this IDbCommand dbCommand, object anonType)
+		{
+			dbCommand.AddFilters(anonType, false);
+		}
         
         public static void AddIdFilter<T>(this IDbCommand dbCommand, T value)
         {
-            var modelDef = ModelDefinition<T>.Definition;
-            AddFilter(dbCommand, modelDef.PrimaryKey.Name, value);
+			AddFilter(dbCommand, ModelDefinition<T>.Definition.PrimaryKey.Name, value);
         }
+
+		public static void ClearFilters(this IDbCommand dbCommand)
+		{
+			dbCommand.Parameters.Clear();			
+		}
 
         private static StringBuilder GetFilterSql(IDbCommand dbCommand, ModelDefinition modelDef) 
         {
@@ -239,31 +271,19 @@ namespace ServiceStack.OrmLite
             return sb;
         }
 
-        public static T FilterById<T>(this IDbCommand dbCommand, object value)
+        public static T QueryById<T>(this IDbCommand dbCommand, object value)
             where T : new()
         {
-            if (dbCommand.Parameters.Count == 0)
-            {
-                var modelDef = ModelDefinition<T>.Definition;
-                var p1 = dbCommand.CreateParameter();
-                p1.ParameterName = modelDef.PrimaryKey.Name;
-                p1.DbType = DbTypes.ColumnDbTypeMap[value.GetType()];
-                p1.Direction = ParameterDirection.Input;
-                p1.Value = value;
-                dbCommand.Parameters.Add(p1);                
-            }
-
-            return FilterSingle<T>(dbCommand);
+			return QuerySingle<T>(dbCommand, ModelDefinition<T>.Definition.PrimaryKey.Name, value);
         }
 
-        public static T FilterSingle<T>(this IDbCommand dbCommand)
+        public static T QuerySingle<T>(this IDbCommand dbCommand, string name, object value)
             where T : new()
         {
-            if (dbCommand.Parameters.Count == 0)
-                throw new Exception("No parameters were added");
+			AddFilterIfNotExists(dbCommand, name, value);
+			((IDbDataParameter)dbCommand.Parameters[0]).Value = value;
 
-            var modelDef = ModelDefinition<T>.Definition;
-            var sb = GetFilterSql(dbCommand, modelDef);
+			var sb = GetFilterSql(dbCommand, ModelDefinition<T>.Definition);
 
             using (var dbReader = dbCommand.ExecReader(sb.ToString()))
             {
@@ -271,19 +291,81 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        public static List<T> Filter<T>(this IDbCommand dbCommand, string name)
-            where T : new()
-        {
-            var modelDef = ModelDefinition<T>.Definition;
-            var sb = GetFilterSql(dbCommand, modelDef);
+		public static List<T> Query<T>(this IDbCommand dbCmd, string name, object value)
+			where T : new()
+		{
+			AddFilterIfNotExists(dbCmd, name, value);
+			((IDbDataParameter)dbCmd.Parameters[0]).Value = value;
 
-            using (var dbReader = dbCommand.ExecReader(sb.ToString()))
-            {
-                return dbReader.ConvertToList<T>();
-            }
-        }
+			var sb = GetFilterSql(dbCmd, ModelDefinition<T>.Definition);
 
-        public static T GetByIdOrDefault<T>(this IDbCommand dbCommand, object idValue)
+			using (var dbReader = dbCmd.ExecReader(sb.ToString()))
+			{
+				return dbReader.ConvertToList<T>();
+			}
+		}
+
+		public static List<T> Query<T>(this IDbCommand dbCmd, object anonType)
+			where T : new()
+		{
+			dbCmd.Parameters.Clear();
+			dbCmd.AddFilters(anonType);
+
+			var sb = GetFilterSql(dbCmd, ModelDefinition<T>.Definition);
+
+			using (var dbReader = dbCmd.ExecReader(sb.ToString()))
+			{
+				return dbReader.ConvertToList<T>();
+			}
+		}
+
+		public static List<T> QueryByExample<T>(this IDbCommand dbCmd, object anonType)
+			where T : new()
+		{
+			dbCmd.Parameters.Clear();
+			dbCmd.AddFilters(anonType, true);
+
+			var sb = GetFilterSql(dbCmd, ModelDefinition<T>.Definition);
+
+			using (var dbReader = dbCmd.ExecReader(sb.ToString()))
+			{
+				return dbReader.ConvertToList<T>();
+			}
+		}
+
+		public static IEnumerable<T> QueryEach<T>(this IDbCommand dbCmd, object anonType)
+			where T : new()
+		{
+			dbCmd.Parameters.Clear();
+			dbCmd.AddFilters(anonType);
+
+			var modelDef = ModelDefinition<T>.Definition;
+			var fieldDefs = modelDef.FieldDefinitionsArray;
+			var sb = GetFilterSql(dbCmd, modelDef);
+			using (var reader = dbCmd.ExecReader(sb.ToString()))
+			{
+				while (reader.Read())
+				{
+					var row = new T();
+					row.PopulateWithSqlReader(reader, fieldDefs);
+					yield return row;
+				}
+			}
+		}
+
+    	private static void AddFilterIfNotExists(IDbCommand dbCommand, string name, object value)
+    	{
+    		if (dbCommand.Parameters.Count == 0)
+    		{
+    			var p = dbCommand.CreateParameter();
+    			p.ParameterName = name;
+    			p.DbType = DbTypes.ColumnDbTypeMap[value.GetType()];
+    			p.Direction = ParameterDirection.Input;
+    			dbCommand.Parameters.Add(p);
+    		}
+    	}
+
+    	public static T GetByIdOrDefault<T>(this IDbCommand dbCommand, object idValue)
             where T : new()
         {
             return FirstOrDefault<T>(dbCommand, ModelDefinition<T>.Definition.PrimaryKey.FieldName + " = {0}".SqlFormat(idValue));

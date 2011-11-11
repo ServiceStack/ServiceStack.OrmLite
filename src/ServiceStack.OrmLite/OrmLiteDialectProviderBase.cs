@@ -93,7 +93,6 @@ namespace ServiceStack.OrmLite
         public string BlobColumnDefinition = "BLOB";
         public string DateTimeColumnDefinition = "DATETIME";
         public string TimeColumnDefinition = "DATETIME";
-        //public string TimeColumnDefinition = "TIME"; //SQLSERVER 2008+
 
         protected OrmLiteDialectProviderBase()
         {
@@ -142,28 +141,45 @@ namespace ServiceStack.OrmLite
         protected void InitColumnTypeMap()
         {
             DbTypes<string>.Set(DbType.String, StringColumnDefinition);
-            DbTypes<char>.Set(DbType.StringFixedLength, StringColumnDefinition);
+			DbTypes<char>.Set(DbType.StringFixedLength, StringColumnDefinition);
+			DbTypes<char?>.Set(DbType.StringFixedLength, StringColumnDefinition);
             DbTypes<char[]>.Set(DbType.String, StringColumnDefinition);
-            DbTypes<bool>.Set(DbType.Boolean, BoolColumnDefinition);
-            DbTypes<Guid>.Set(DbType.Guid, GuidColumnDefinition);
-            DbTypes<DateTime>.Set(DbType.DateTime, DateTimeColumnDefinition);
-            DbTypes<TimeSpan>.Set(DbType.Time, TimeColumnDefinition);
-            DbTypes<DateTimeOffset>.Set(DbType.Time, TimeColumnDefinition);
+			DbTypes<bool>.Set(DbType.Boolean, BoolColumnDefinition);
+			DbTypes<bool?>.Set(DbType.Boolean, BoolColumnDefinition);
+			DbTypes<Guid>.Set(DbType.Guid, GuidColumnDefinition);
+			DbTypes<Guid?>.Set(DbType.Guid, GuidColumnDefinition);
+			DbTypes<DateTime>.Set(DbType.DateTime, DateTimeColumnDefinition);
+			DbTypes<DateTime?>.Set(DbType.DateTime, DateTimeColumnDefinition);
+			DbTypes<TimeSpan>.Set(DbType.Time, TimeColumnDefinition);
+			DbTypes<TimeSpan?>.Set(DbType.Time, TimeColumnDefinition);
+			DbTypes<DateTimeOffset>.Set(DbType.Time, TimeColumnDefinition);
+			DbTypes<DateTimeOffset?>.Set(DbType.Time, TimeColumnDefinition);
 
-            DbTypes<byte>.Set(DbType.Byte, IntColumnDefinition);
-            DbTypes<sbyte>.Set(DbType.SByte, IntColumnDefinition);
-            DbTypes<short>.Set(DbType.Int16, IntColumnDefinition);
-            DbTypes<ushort>.Set(DbType.UInt16, IntColumnDefinition);
-            DbTypes<int>.Set(DbType.Int32, IntColumnDefinition);
-            DbTypes<uint>.Set(DbType.UInt32, IntColumnDefinition);
+			DbTypes<byte>.Set(DbType.Byte, IntColumnDefinition);
+			DbTypes<byte?>.Set(DbType.Byte, IntColumnDefinition);
+			DbTypes<sbyte>.Set(DbType.SByte, IntColumnDefinition);
+			DbTypes<sbyte?>.Set(DbType.SByte, IntColumnDefinition);
+			DbTypes<short>.Set(DbType.Int16, IntColumnDefinition);
+			DbTypes<short?>.Set(DbType.Int16, IntColumnDefinition);
+			DbTypes<ushort>.Set(DbType.UInt16, IntColumnDefinition);
+			DbTypes<ushort?>.Set(DbType.UInt16, IntColumnDefinition);
+			DbTypes<int>.Set(DbType.Int32, IntColumnDefinition);
+			DbTypes<int?>.Set(DbType.Int32, IntColumnDefinition);
+			DbTypes<uint>.Set(DbType.UInt32, IntColumnDefinition);
+			DbTypes<uint?>.Set(DbType.UInt32, IntColumnDefinition);
 
-            DbTypes<long>.Set(DbType.Int64, LongColumnDefinition);
-            DbTypes<ulong>.Set(DbType.UInt64, LongColumnDefinition);
+			DbTypes<long>.Set(DbType.Int64, LongColumnDefinition);
+			DbTypes<long?>.Set(DbType.Int64, LongColumnDefinition);
+			DbTypes<ulong>.Set(DbType.UInt64, LongColumnDefinition);
+			DbTypes<ulong?>.Set(DbType.UInt64, LongColumnDefinition);
 
-            DbTypes<float>.Set(DbType.Single, RealColumnDefinition);
-            DbTypes<double>.Set(DbType.Double, RealColumnDefinition);
+			DbTypes<float>.Set(DbType.Single, RealColumnDefinition);
+			DbTypes<float?>.Set(DbType.Single, RealColumnDefinition);
+			DbTypes<double>.Set(DbType.Double, RealColumnDefinition);
+			DbTypes<double?>.Set(DbType.Double, RealColumnDefinition);
 
-            DbTypes<decimal>.Set(DbType.Decimal, DecimalColumnDefinition);
+			DbTypes<decimal>.Set(DbType.Decimal, DecimalColumnDefinition);
+			DbTypes<decimal?>.Set(DbType.Decimal, DecimalColumnDefinition);
 
             DbTypes<byte[]>.Set(DbType.Binary, BlobColumnDefinition);
         }

@@ -22,6 +22,7 @@ namespace ServiceStack.OrmLite.SqlServer
 			base.GuidColumnDefinition = "UniqueIdentifier";
 			base.RealColumnDefinition = "FLOAT";
 			base.DecimalColumnDefinition = "DECIMAL(38,6)";
+			base.TimeColumnDefinition = "TIME"; //SQLSERVER 2008+
 
 			base.InitColumnTypeMap();
 		}

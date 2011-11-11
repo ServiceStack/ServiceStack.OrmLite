@@ -81,6 +81,17 @@ namespace ServiceStack.OrmLite.Sqlite
 				var intVal = int.Parse(value.ToString());
 				return intVal != 0;
 			}
+			if (type == typeof(TimeSpan))
+			{
+				var dateValue = value as DateTime?;
+				if (dateValue != null)
+				{
+					var now = DateTime.Now;
+					var todayWithoutTime = new DateTime(now.Year, now.Month, now.Day);
+					var ts = dateValue.Value - todayWithoutTime;
+					return ts;
+				}
+			}
 
 			try
 			{

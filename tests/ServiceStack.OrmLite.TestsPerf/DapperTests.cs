@@ -70,7 +70,8 @@ namespace ServiceStack.OrmLite.TestsPerf
                 var tests = new Tests();
                 tests.Add(id => ormLiteCmd.GetById<Post>(id), "OrmLite Query GetById");
                 tests.Add(id => ormLiteCmd.First<Post>("SELECT * FROM Posts WHERE Id = {0}", id), "OrmLite Query First<SQL>");
-                tests.Add(id => ormLiteCmd.FilterById<Post>(id), "OrmLite Query FilterSingle");
+				tests.Add(id => ormLiteCmd.QueryById<Post>(id), "OrmLite Query FilterSingle");
+				tests.Add(id => ormLiteCmd.QuerySingle<Post>("Id", id), "OrmLite Query FilterSingle");
 
                 tests.Run(iterations);
             }
