@@ -56,15 +56,20 @@ namespace ServiceStack.OrmLite
 
 		internal static string GetColumnNames(this Type tableType)
 		{
-			var sqlColumns = new StringBuilder();
-			tableType.GetModelDefinition().FieldDefinitions
-				.ForEach(x => sqlColumns.AppendFormat(
-					"{0}\"{1}\" ", sqlColumns.Length > 0 ? "," : "", x.FieldName));
-
-			return sqlColumns.ToString();
+		    var modelDefinition = tableType.GetModelDefinition();
+		    return GetColumnNames(modelDefinition);
 		}
 
-		internal static string GetIdsInSql(this IEnumerable idValues)
+	    public static string GetColumnNames(this ModelDefinition modelDef)
+	    {
+            var sqlColumns = new StringBuilder();
+            modelDef.FieldDefinitions.ForEach(x => 
+                sqlColumns.AppendFormat("{0}\"{1}\" ", sqlColumns.Length > 0 ? "," : "", x.FieldName));
+
+	        return sqlColumns.ToString();
+	    }
+
+	    internal static string GetIdsInSql(this IEnumerable idValues)
 		{
 			var sql = new StringBuilder();
 			foreach (var idValue in idValues)

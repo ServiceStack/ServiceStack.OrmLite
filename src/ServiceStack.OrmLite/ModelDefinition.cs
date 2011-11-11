@@ -35,6 +35,8 @@ namespace ServiceStack.OrmLite
 
 		public Type ModelType { get; set; }
 
+        public string ColumnNames { get; set; }
+
 		public FieldDefinition PrimaryKey
 		{
 			get

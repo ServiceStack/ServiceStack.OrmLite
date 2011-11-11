@@ -17,15 +17,6 @@ namespace ServiceStack.OrmLite
 {
 	public static class OrmLiteConfig
 	{
-		static OrmLiteConfig()
-		{
-#if NO_EXPRESSIONS
-			PropertyInvoker = ReflectionPropertyInvoker.Instance;
-#else
-			PropertyInvoker = ExpressionPropertyInvoker.Instance;
-#endif
-		}
-
 		private static IOrmLiteDialectProvider dialectProvider;
 		public static IOrmLiteDialectProvider DialectProvider
 		{
@@ -41,11 +32,8 @@ namespace ServiceStack.OrmLite
 			set
 			{
 				dialectProvider = value;
-				PropertyInvoker.ConvertValueFn = dialectProvider.ConvertDbValue;
 			}
 		}
-
-		public static IPropertyInvoker PropertyInvoker { get; set; }
 
 		public static IDbConnection ToDbConnection(this string dbConnectionStringOrFilePath)
 		{

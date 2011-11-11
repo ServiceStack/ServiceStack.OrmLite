@@ -10,44 +10,62 @@
 //
 
 using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace ServiceStack.OrmLite
 {
-	public class PropertyInvoker : IPropertyInvoker
-	{
-#if !NO_EXPRESSIONS
-		public Func<object, Type, object> ConvertValueFn
-		{
-			get { return ExpressionPropertyInvoker.Instance.ConvertValueFn; }
-			set { ExpressionPropertyInvoker.Instance.ConvertValueFn = value; }
-		}
+    public static class PropertyInvoker
+    {
+        public static PropertySetterDelegate GetPropertySetterFn(this PropertyInfo propertyInfo)
+        {
+            var propertySetMethod = propertyInfo.GetSetMethod();
+            if (propertySetMethod == null) return null;
 
-		public void SetPropertyValue(PropertyInfo propertyInfo, Type fieldType, object onInstance, object withValue)
-		{
-			ExpressionPropertyInvoker.Instance.SetPropertyValue(propertyInfo, fieldType, onInstance, withValue);
-		}
+#if NO_EXPRESSIONS
+            return (o, convertedValue) =>
+            {
+                propertySetMethod.Invoke(o, new[] { convertedValue });
+                return;
+            };
+#else 
+            var instance = Expression.Parameter(typeof(object), "i");
+            var argument = Expression.Parameter(typeof(object), "a");
 
-		public object GetPropertyValue(PropertyInfo propertyInfo, object fromInstance)
-		{
-			return ExpressionPropertyInvoker.Instance.GetPropertyValue(propertyInfo, fromInstance);
-		}
-#else
-		public Func<object, Type, object> ConvertValueFn
-		{
-			get { return ReflectionPropertyInvoker.Instance.ConvertValueFn; }
-			set { ReflectionPropertyInvoker.Instance.ConvertValueFn = value; }
-		}
+            var instanceParam = Expression.Convert(instance, propertyInfo.DeclaringType);
+            var valueParam = Expression.Convert(argument, propertyInfo.PropertyType);
 
-		public void SetPropertyValue(PropertyInfo propertyInfo, Type fieldType, object onInstance, object withValue)
-		{
-			ReflectionPropertyInvoker.Instance.SetPropertyValue(propertyInfo, fieldType, onInstance, withValue);
-		}
+            var setterCall = Expression.Call(instanceParam, propertyInfo.GetSetMethod(), valueParam);
 
-		public object GetPropertyValue(PropertyInfo propertyInfo, object fromInstance)
-		{
-			return ReflectionPropertyInvoker.Instance.GetPropertyValue(propertyInfo, fromInstance);
-		}
+            return Expression.Lambda<PropertySetterDelegate>(setterCall, instance, argument).Compile();
 #endif
-	}
+        }
+
+        public static PropertyGetterDelegate GetPropertyGetterFn(this PropertyInfo propertyInfo)
+        {
+            if (propertyInfo.GetGetMethod() == null) return null;
+
+#if NO_EXPRESSIONS
+			return o => propertyInfo.GetGetMethod().Invoke(o, new object[] { });
+#else
+            var getMethodInfo = propertyInfo.GetGetMethod();
+            var oInstanceParam = Expression.Parameter(typeof(object), "oInstanceParam");
+            var instanceParam = Expression.Convert(oInstanceParam, propertyInfo.DeclaringType);
+
+            var exprCallPropertyGetFn = Expression.Call(instanceParam, getMethodInfo);
+            var oExprCallPropertyGetFn = Expression.Convert(exprCallPropertyGetFn, typeof(object));
+
+            var propertyGetFn = Expression.Lambda<PropertyGetterDelegate>
+                (
+                    oExprCallPropertyGetFn,
+                    oInstanceParam
+                ).Compile();
+
+            return propertyGetFn;
+#endif
+        }
+    }
+
+
 }

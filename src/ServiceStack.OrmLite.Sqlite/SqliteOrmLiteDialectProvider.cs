@@ -52,7 +52,7 @@ namespace ServiceStack.OrmLite.Sqlite
 				if (connectionString != ":memory:")
 				{
 					var existingDir = Path.GetDirectoryName(connectionString);
-					if (!Directory.Exists(existingDir))
+					if (!string.IsNullOrEmpty(existingDir) && !Directory.Exists(existingDir))
 					{
 						Directory.CreateDirectory(existingDir);
 					}

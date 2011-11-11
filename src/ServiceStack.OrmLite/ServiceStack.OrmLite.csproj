@@ -97,7 +97,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DbTypes.cs" />
-    <Compile Include="ExpressionPropertyInvoker.cs" />
+    <Compile Include="PropertyInvoker.cs" />
     <Compile Include="FieldDefinition.cs" />
     <Compile Include="IDbConnectionFactory.cs" />
     <Compile Include="IPropertyInvoker.cs" />
@@ -114,7 +114,6 @@
     <Compile Include="OrmLiteReadExtensions.cs" />
     <Compile Include="OrmLiteUtilExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PropertyInvoker.cs" />
     <Compile Include="ReflectionPropertyInvoker.cs" />
     <Compile Include="SqlInValues.cs" />
   </ItemGroup>

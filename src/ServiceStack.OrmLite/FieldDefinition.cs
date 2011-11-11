@@ -45,22 +45,30 @@ namespace ServiceStack.OrmLite
 
 		public Type ReferencesType { get; set; }
 
-		public Func<object, Type, object> ConvertValueFn { get; set; }
+        public ConvertDbValueDelegate ConvertValueFn { get; set; }
 
-		public Func<object, Type, string> QuoteValueFn { get; set; }
+        public GetQuotedValueDelegate QuoteValueFn { get; set; }
 
-		public IPropertyInvoker PropertyInvoker { get; set; }
+        public PropertyGetterDelegate GetValueFn { get; set; }
+        
+        public PropertySetterDelegate SetValueFn { get; set; }
 
-		public Func<object, object> GetValueFn { get; set; }
+        public object GetValue(object onInstance)
+        {
+            return this.GetValueFn == null ? null : this.GetValueFn(onInstance);
+        }
 
-		public void SetValue(object onInstance, object withValue)
-		{
-			PropertyInvoker.SetPropertyValue(this.PropertyInfo, FieldType, onInstance, withValue);
-		}
+	    public void SetValue(object onInstance, object withValue)
+        {
+            if (this.SetValueFn == null) return;
+
+            var convertedValue = ConvertValueFn(withValue, this.FieldType);
+            SetValueFn(onInstance, convertedValue);
+        }
 
 		public string GetQuotedValue(object fromInstance)
 		{
-			var value = PropertyInvoker.GetPropertyValue(this.PropertyInfo, fromInstance);
+            var value = GetValue(fromInstance);
 			return QuoteValueFn(value, FieldType);
 		}
 	}

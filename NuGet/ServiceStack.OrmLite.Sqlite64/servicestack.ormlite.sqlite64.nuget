@@ -2,7 +2,7 @@
 <package> 
   <metadata> 
     <id>ServiceStack.OrmLite.Sqlite64</id> 
-    <version>2.09</version> 
+    <version>3.03</version> 
     <authors>Demis Bellot</authors> 
     <owners>Demis Bellot</owners>
     <description>ServiceStack.NET OrmLite - Light, simple and fast convention-based POCO ORM</description> 

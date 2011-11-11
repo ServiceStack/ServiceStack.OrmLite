@@ -116,13 +116,15 @@ namespace ServiceStack.OrmLite
 							ReferencesType = referencesAttr != null ? referencesAttr.Type : null,
 							ConvertValueFn = OrmLiteConfig.DialectProvider.ConvertDbValue,
 							QuoteValueFn = OrmLiteConfig.DialectProvider.GetQuotedValue,
-							PropertyInvoker = OrmLiteConfig.PropertyInvoker,
+							GetValueFn = propertyInfo.GetPropertyGetterFn(),
+                            SetValueFn = propertyInfo.GetPropertySetterFn(),
 						};
 
 						modelDef.FieldDefinitions.Add(fieldDefinition);
 					}
 
 					typeModelDefinitionMap[modelType] = modelDef;
+				    modelDef.ColumnNames = modelDef.GetColumnNames();
 				}
 
 				return modelDef;
