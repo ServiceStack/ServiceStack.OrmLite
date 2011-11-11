@@ -278,17 +278,27 @@ namespace ServiceStack.OrmLite
             return sb.ToString();
         }
 
-        public static T QueryById<T>(this IDbCommand dbCommand, object value)
+        public static T QueryById<T>(this IDbCommand dbCmd, object value)
             where T : new()
         {
-			return QuerySingle<T>(dbCommand, ModelDefinition<T>.Definition.PrimaryKey.Name, value);
+            if (dbCmd.Parameters.Count == 0)
+                AddFilter<T>(dbCmd, ModelDefinition<T>.Definition.PrimaryKey.Name, value);
+
+            ((IDbDataParameter)dbCmd.Parameters[0]).Value = value;
+
+            using (var dbReader = dbCmd.ExecuteReader())
+            {
+                return dbReader.ConvertTo<T>();
+            }
         }
 
         public static T QuerySingle<T>(this IDbCommand dbCmd, string name, object value)
             where T : new()
         {
-			AddFilterIfNotExists<T>(dbCmd, name, value);
-			((IDbDataParameter)dbCmd.Parameters[0]).Value = value;
+            if (dbCmd.Parameters.Count == 0)
+                AddFilter<T>(dbCmd, ModelDefinition<T>.Definition.PrimaryKey.Name, value);
+
+            ((IDbDataParameter)dbCmd.Parameters[0]).Value = value;
 
             using (var dbReader = dbCmd.ExecuteReader())
             {
@@ -299,8 +309,10 @@ namespace ServiceStack.OrmLite
 		public static List<T> Query<T>(this IDbCommand dbCmd, string name, object value)
 			where T : new()
 		{
-			AddFilterIfNotExists<T>(dbCmd, name, value);
-			((IDbDataParameter)dbCmd.Parameters[0]).Value = value;
+            if (dbCmd.Parameters.Count == 0)
+                AddFilter<T>(dbCmd, ModelDefinition<T>.Definition.PrimaryKey.Name, value);
+
+            ((IDbDataParameter)dbCmd.Parameters[0]).Value = value;
 
 			using (var dbReader = dbCmd.ExecuteReader())
 			{
@@ -350,21 +362,18 @@ namespace ServiceStack.OrmLite
 				}
 			}
 		}
+        
+        private static void AddFilter<T>(IDbCommand dbCmd, string name, object value)
+        {
+            var p = dbCmd.CreateParameter();
+            p.ParameterName = name;
+            p.DbType = DbTypes.ColumnDbTypeMap[value.GetType()];
+            p.Direction = ParameterDirection.Input;
+            dbCmd.Parameters.Add(p);
+            dbCmd.CommandText = GetFilterSql(dbCmd, ModelDefinition<T>.Definition);
+        }
 
-    	private static void AddFilterIfNotExists<T>(IDbCommand dbCmd, string name, object value)
-    	{
-    		if (dbCmd.Parameters.Count == 0)
-    		{
-    			var p = dbCmd.CreateParameter();
-    			p.ParameterName = name;
-    			p.DbType = DbTypes.ColumnDbTypeMap[value.GetType()];
-    			p.Direction = ParameterDirection.Input;
-    			dbCmd.Parameters.Add(p);
-                dbCmd.CommandText = GetFilterSql(dbCmd, ModelDefinition<T>.Definition);
-    		}
-    	}
-
-    	public static T GetByIdOrDefault<T>(this IDbCommand dbCommand, object idValue)
+        public static T GetByIdOrDefault<T>(this IDbCommand dbCommand, object idValue)
             where T : new()
         {
             return FirstOrDefault<T>(dbCommand, ModelDefinition<T>.Definition.PrimaryKey.FieldName + " = {0}".SqlFormat(idValue));
