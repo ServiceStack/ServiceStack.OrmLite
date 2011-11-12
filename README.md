@@ -124,8 +124,16 @@ For simplicity, and to be able to have the same POCO class persisted in db4o, me
         trans.Commit();
     }
 
+Running this against a SQL Server database will yield the results below:
 
-# Examples 
+![SQL Server Management Studio results](http://www.servicestack.net/files/ormlite-example.png)
+
+Notice the POCO types are stored in the [very fast](http://www.servicestack.net/mythz_blog/?p=176) 
+and [Versatile](http://www.servicestack.net/mythz_blog/?p=314) 
+[JSV Format](https://github.com/ServiceStack/ServiceStack.Text/wiki/JSV-Format) which although hard to do 
+happens to be more compact, human-friendly and parser-friendly than JSON.
+
+# More Examples 
 
 In its simplest useage, OrmLite can persist any POCO type without any attributes required:
 
