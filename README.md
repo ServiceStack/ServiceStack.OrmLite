@@ -59,23 +59,31 @@ Below is a complete stand-alone example. No other config or classes is required 
 
         [AutoIncrement] // Creates Auto primary key
         public int Id { get; set; }
+        
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        
         [Index(Unique = true)] // Creates Unique Index
         public string Email { get; set; }
+        
         public Dictionary<PhoneType, string> PhoneNumbers { get; private set; }  //Blobbed
         public Dictionary<AddressType, Address> Addresses { get; private set; }  //Blobbed
         public DateTime CreatedAt { get; set; }
     }
 
     public class Order {
+        
         [AutoIncrement]
         public int Id { get; set; }
+        
         [References(typeof(Customer))]      //Creates Foreign Key
         public int CustomerId { get; set; }
+        
         [References(typeof(Employee))]      //Creates Foreign Key
         public int EmployeeId { get; set; }
+        
         public Address ShippingAddress { get; set; } //Blobbed (no Address table)
+        
         public DateTime? OrderDate { get; set; }
         public DateTime? RequiredDate { get; set; }
         public DateTime? ShippedDate { get; set; }
@@ -85,10 +93,13 @@ Below is a complete stand-alone example. No other config or classes is required 
     }
 
     public class OrderDetail {
+        
         [AutoIncrement]
         public int Id { get; set; }
+        
         [References(typeof(Order))] //Creates Foreign Key
         public int OrderId { get; set; }
+        
         public int ProductId { get; set; }
         public decimal UnitPrice { get; set; }
         public short Quantity { get; set; }
