@@ -25,7 +25,7 @@ The full source code for OrmLite is also [available online](https://github.com/S
 
 For simplicity, and to be able to have the same POCO class persisted in db4o, memcached, redis or on the filesystem (i.e. providers included in ServiceStack), each model must have an '`Id`' property which is its primary key.  
 
-# Code-first Customer and Order example with complex types POCO blobs
+# Code-first Customer and Order example with complex types on POCO as text blobs
 
 Below is a complete stand-alone example. No other config or classes is required for it to run. It's also available as a 
 [stand-alone unit test](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLite.Tests/UseCase/CustomerOrdersUseCase.cs).
