@@ -109,46 +109,46 @@ namespace ServiceStack.OrmLite
                     isUnique ? "UNIQUE" : "", indexName, modelName, fieldName);
         }
 
-        public static void CreateTables(this IDbCommand dbCommand, bool overwrite, params Type[] tableTypes)
+        public static void CreateTables(this IDbCommand dbCmd, bool overwrite, params Type[] tableTypes)
         {
             foreach (var tableType in tableTypes)
             {
-                CreateTable(dbCommand, overwrite, tableType);
+                CreateTable(dbCmd, overwrite, tableType);
             }
         }
 
-        public static void CreateTable<T>(this IDbCommand dbCommand)
+        public static void CreateTable<T>(this IDbCommand dbCmd)
             where T : new()
         {
             var tableType = typeof(T);
-            CreateTable(dbCommand, false, tableType);
+            CreateTable(dbCmd, false, tableType);
         }
 
-        public static void CreateTable<T>(this IDbCommand dbCommand, bool overwrite)
+        public static void CreateTable<T>(this IDbCommand dbCmd, bool overwrite)
             where T : new()
         {
             var tableType = typeof(T);
-            CreateTable(dbCommand, overwrite, tableType);
+            CreateTable(dbCmd, overwrite, tableType);
         }
 
-        public static void CreateTable(this IDbCommand dbCommand, bool overwrite, Type modelType)
+        public static void CreateTable(this IDbCommand dbCmd, bool overwrite, Type modelType)
         {
             var modelDef = modelType.GetModelDefinition();
             if (overwrite)
             {
-                DropTable(dbCommand, modelDef);
+                DropTable(dbCmd, modelDef);
             }
 
             try
             {
-                ExecuteSql(dbCommand, ToCreateTableStatement(modelType));
+                ExecuteSql(dbCmd, ToCreateTableStatement(modelType));
 
                 var sqlIndexes = ToCreateIndexStatements(modelType);
                 foreach (var sqlIndex in sqlIndexes)
                 {
                     try
                     {
-                        dbCommand.ExecuteSql(sqlIndex);
+                        dbCmd.ExecuteSql(sqlIndex);
                     }
                     catch (Exception exIndex)
                     {
@@ -172,17 +172,17 @@ namespace ServiceStack.OrmLite
             }
         }
         
-        public static void DropTable<T>(this IDbCommand dbCommand)
+        public static void DropTable<T>(this IDbCommand dbCmd)
             where T : new()
         {
-            DropTable(dbCommand, ModelDefinition<T>.Definition);
+            DropTable(dbCmd, ModelDefinition<T>.Definition);
         }
 
-        private static void DropTable(IDbCommand dbCommand, ModelDefinition modelDef)
+        private static void DropTable(IDbCommand dbCmd, ModelDefinition modelDef)
         {
             try
             {
-                dbCommand.ExecuteSql(string.Format("DROP TABLE \"{0}\";", modelDef.ModelName));
+                dbCmd.ExecuteSql(string.Format("DROP TABLE \"{0}\";", modelDef.ModelName));
             }
             catch (Exception ex)
             {
@@ -190,12 +190,12 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        private static void ExecuteSql(this IDbCommand dbCommand, string sql)
+        private static void ExecuteSql(this IDbCommand dbCmd, string sql)
         {
             LogDebug(sql);
 
-            dbCommand.CommandText = sql;
-            dbCommand.ExecuteNonQuery();
+            dbCmd.CommandText = sql;
+            dbCmd.ExecuteNonQuery();
         }
 
         private static bool IgnoreAlreadyExistsError(Exception ex)
@@ -257,13 +257,7 @@ namespace ServiceStack.OrmLite
 
             return sql;
         }
-
-        public static void Insert<T>(this IDbCommand dbCommand, T obj)
-            where T : new()
-        {
-            dbCommand.ExecuteSql(ToInsertRowStatement(obj));
-        }
-
+		
         public static string ToUpdateRowStatement(this object objWithProperties)
         {
             var sqlFilter = new StringBuilder();
@@ -299,11 +293,23 @@ namespace ServiceStack.OrmLite
             return updateSql;
         }
 
-        public static void Update<T>(this IDbCommand dbCommand, T obj)
-            where T : new()
-        {
-            dbCommand.ExecuteSql(ToUpdateRowStatement(obj));
-        }
+		public static void Update<T>(this IDbCommand dbCmd, params T[] objs)
+			where T : new()
+		{
+			foreach (var obj in objs)
+			{
+				dbCmd.ExecuteSql(ToUpdateRowStatement(obj));
+			}
+		}
+
+		public static void UpdateAll<T>(this IDbCommand dbCmd, IEnumerable<T> objs)
+			where T : new()
+		{
+			foreach (var obj in objs)
+			{
+				dbCmd.ExecuteSql(ToUpdateRowStatement(obj));
+			}
+		}
 
         public static string ToDeleteRowStatement(this object objWithProperties)
         {
@@ -334,13 +340,25 @@ namespace ServiceStack.OrmLite
             return deleteSql;
         }
 
-        public static void Delete<T>(this IDbCommand dbCommand, T obj)
-            where T : new()
-        {
-            dbCommand.ExecuteSql(ToDeleteRowStatement(obj));
-        }
+		public static void Delete<T>(this IDbCommand dbCmd, params T[] objs)
+			where T : new()
+		{
+			foreach (var obj in objs)
+			{
+				dbCmd.ExecuteSql(ToDeleteRowStatement(obj));
+			}
+		}
 
-        public static void DeleteById<T>(this IDbCommand dbCommand, object id)
+		public static void DeleteAll<T>(this IDbCommand dbCmd, IEnumerable<T> objs)
+			where T : new()
+		{
+			foreach (var obj in objs)
+			{
+				dbCmd.ExecuteSql(ToDeleteRowStatement(obj));
+			}
+		}
+
+        public static void DeleteById<T>(this IDbCommand dbCmd, object id)
             where T : new()
         {
             var modelDef = ModelDefinition<T>.Definition;
@@ -349,10 +367,10 @@ namespace ServiceStack.OrmLite
                 modelDef.ModelName, modelDef.PrimaryKey.FieldName,
                 OrmLiteConfig.DialectProvider.GetQuotedValue(id, id.GetType()));
 
-            dbCommand.ExecuteSql(sql);
+            dbCmd.ExecuteSql(sql);
         }
 
-        public static void DeleteByIds<T>(this IDbCommand dbCommand, IEnumerable idValues)
+        public static void DeleteByIds<T>(this IDbCommand dbCmd, IEnumerable idValues)
             where T : new()
         {
             var sqlIn = idValues.GetIdsInSql();
@@ -363,28 +381,28 @@ namespace ServiceStack.OrmLite
             var sql = string.Format("DELETE FROM \"{0}\" WHERE \"{1}\" IN ({2})",
                 modelDef.ModelName, modelDef.PrimaryKey.FieldName, sqlIn);
 
-            dbCommand.ExecuteSql(sql);
+            dbCmd.ExecuteSql(sql);
         }
 
-        public static void DeleteAll<T>(this IDbCommand dbCommand)
+        public static void DeleteAll<T>(this IDbCommand dbCmd)
         {
-            DeleteAll(dbCommand, typeof(T));
+            DeleteAll(dbCmd, typeof(T));
         }
 
-        public static void DeleteAll(this IDbCommand dbCommand, Type tableType)
+        public static void DeleteAll(this IDbCommand dbCmd, Type tableType)
         {
-            Delete(dbCommand, tableType, null);
-        }
+			dbCmd.ExecuteSql(ToDeleteStatement(tableType, null));
+		}
 
-        public static void Delete<T>(this IDbCommand dbCommand, string sqlFilter, params object[] filterParams)
+        public static void Delete<T>(this IDbCommand dbCmd, string sqlFilter, params object[] filterParams)
             where T : new()
         {
-            Delete(dbCommand, typeof(T), sqlFilter, filterParams);
+            Delete(dbCmd, typeof(T), sqlFilter, filterParams);
         }
 
-        public static void Delete(this IDbCommand dbCommand, Type tableType, string sqlFilter, params object[] filterParams)
+        public static void Delete(this IDbCommand dbCmd, Type tableType, string sqlFilter, params object[] filterParams)
         {
-            dbCommand.ExecuteSql(ToDeleteStatement(tableType, sqlFilter, filterParams));
+            dbCmd.ExecuteSql(ToDeleteStatement(tableType, sqlFilter, filterParams));
         }
 
         public static string ToDeleteStatement(this Type tableType, string sqlFilter, params object[] filterParams)
@@ -411,37 +429,46 @@ namespace ServiceStack.OrmLite
             return sql.ToString();
         }
 
-        public static void Save<T>(this IDbCommand dbCommand, T obj)
+        public static void Save<T>(this IDbCommand dbCmd, T obj)
             where T : new()
         {
             var id = obj.GetId();
-            var existingRow = dbCommand.GetByIdOrDefault<T>(id);
+            var existingRow = dbCmd.GetByIdOrDefault<T>(id);
             if (Equals(existingRow, default(T)))
             {
-                dbCommand.Insert(obj);
+                dbCmd.Insert(obj);
             }
             else
             {
-                dbCommand.Update(obj);
+                dbCmd.Update(obj);
             }
         }
 
-        public static void InsertAll<T>(this IDbCommand dbCommand, params T[] objs)
+		public static void Insert<T>(this IDbCommand dbCmd, params T[] objs)
+			where T : new()
+		{
+			foreach (var obj in objs)
+			{
+				dbCmd.ExecuteSql(ToInsertRowStatement(obj));
+			}
+		}
+
+		public static void InsertAll<T>(this IDbCommand dbCmd, IEnumerable<T> objs)
+			where T : new()
+		{
+			foreach (var obj in objs)
+			{
+				dbCmd.ExecuteSql(ToInsertRowStatement(obj));
+			}
+		}
+
+        public static void Save<T>(this IDbCommand dbCmd, params T[] objs)
             where T : new()
         {
-            foreach (var obj in objs)
-            {
-                dbCommand.Insert(obj);
-            }
+            SaveAll(dbCmd, objs);
         }
 
-        public static void SaveAll<T>(this IDbCommand dbCommand, params T[] objs)
-            where T : new()
-        {
-            SaveAll(dbCommand, (IEnumerable<T>)objs);
-        }
-
-        public static void SaveAll<T>(this IDbCommand dbCommand, IEnumerable<T> objs)
+        public static void SaveAll<T>(this IDbCommand dbCmd, IEnumerable<T> objs)
             where T : new()
         {
             var saveRows = objs.ToList();
@@ -455,22 +482,22 @@ namespace ServiceStack.OrmLite
                 ? saveRows.Where(x => !defaultIdValue.Equals(x.GetId())).ToDictionary(x => x.GetId())
                 : saveRows.Where(x => x.GetId() != null).ToDictionary(x => x.GetId());
 
-            var existingRowsMap = dbCommand.GetByIds<T>(idMap.Keys).ToDictionary(x => x.GetId());
+            var existingRowsMap = dbCmd.GetByIds<T>(idMap.Keys).ToDictionary(x => x.GetId());
 
-            using (var dbTrans = dbCommand.Connection.BeginTransaction())
+            using (var dbTrans = dbCmd.Connection.BeginTransaction())
             {
-                dbCommand.Transaction = dbTrans;
+                dbCmd.Transaction = dbTrans;
 
                 foreach (var saveRow in saveRows)
                 {
                     var id = IdUtils.GetId(saveRow);
                     if (id != defaultIdValue && existingRowsMap.ContainsKey(id))
                     {
-                        dbCommand.Update(saveRow);
+                        dbCmd.Update(saveRow);
                     }
                     else
                     {
-                        dbCommand.Insert(saveRow);
+                        dbCmd.Insert(saveRow);
                     }
                 }
 

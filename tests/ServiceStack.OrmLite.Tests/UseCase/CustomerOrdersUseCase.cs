@@ -125,15 +125,15 @@ namespace ServiceStack.OrmLite.Tests.UseCase
         public void Run()
         {
             //Setup SQL Server Connection Factory
-            var dbFactory = new OrmLiteConnectionFactory(
-                "Data Source=.;Initial Catalog=tempdb;Integrated Security=True",
-                SqlServerOrmLiteDialectProvider.Instance);
+			var dbFactory = new OrmLiteConnectionFactory(
+				@"Data Source=.\SQLEXPRESS;AttachDbFilename=|DataDirectory|\App_Data\Database1.mdf;Integrated Security=True;User Instance=True",
+				SqlServerOrmLiteDialectProvider.Instance);
 
-            //Use Sqlite in-memory instead
-            //var dbFactory = new OrmLiteConnectionFactory(
-            //    ":memory:", SqliteOrmLiteDialectProvider.Instance);
+			//Use in-memory Sqlite DB instead
+			//var dbFactory = new OrmLiteConnectionFactory(
+			//    ":memory:", false, SqliteOrmLiteDialectProvider.Instance);
 
-            //Non-intrusive: All extension methods off System.Data.* interfaces
+            //Non-intrusive: All extension methods hang off System.Data.* interfaces
             IDbConnection dbConn = dbFactory.OpenDbConnection();
             IDbCommand dbCmd = dbConn.CreateCommand();
 
@@ -154,7 +154,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
             dbCmd.Insert(new Employee { Id = 2, Name = "Employee 2" });
             var product1 = new Product { Id = 1, Name = "Product 1", UnitPrice = 10 };
             var product2 = new Product { Id = 2, Name = "Product 2", UnitPrice = 20 };
-            dbCmd.SaveAll(product1, product2);
+            dbCmd.Save(product1, product2);
 
             var customer = new Customer
             {
@@ -212,7 +212,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
                     }
                 };
 
-                dbCmd.InsertAll(orderDetails);
+                dbCmd.Insert(orderDetails);
 
                 order.Total = orderDetails.Sum(x => x.UnitPrice * x.Quantity * x.Discount) + order.Freight;
 

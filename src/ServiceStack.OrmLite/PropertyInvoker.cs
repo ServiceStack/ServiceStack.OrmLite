@@ -50,7 +50,9 @@ namespace ServiceStack.OrmLite
 #if NO_EXPRESSIONS
 			return o => propertyInfo.GetGetMethod().Invoke(o, new object[] { });
 #else
-            var oInstanceParam = Expression.Parameter(typeof(object), "oInstanceParam");
+try 
+	{	        
+		    var oInstanceParam = Expression.Parameter(typeof(object), "oInstanceParam");
             var instanceParam = Expression.Convert(oInstanceParam, propertyInfo.DeclaringType);
 
             var exprCallPropertyGetFn = Expression.Call(instanceParam, getMethodInfo);
@@ -63,6 +65,13 @@ namespace ServiceStack.OrmLite
                 ).Compile();
 
             return propertyGetFn;
+
+	}
+	catch (Exception ex)
+	{
+		Console.Write(ex.Message);
+		throw;
+	}
 #endif
         }
     }

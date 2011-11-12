@@ -17,6 +17,7 @@ using System.Reflection;
 using System.Threading;
 using ServiceStack.Common.Extensions;
 using ServiceStack.DataAnnotations;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
@@ -124,7 +125,8 @@ namespace ServiceStack.OrmLite
                 modelDef.FieldDefinitions.Add(fieldDefinition);
             }
 
-            modelDef.ColumnNames = modelDef.GetColumnNames();
+			modelDef.SqlSelectAllFromTable = "SELECT {0} FROM \"{1}\" ".Fmt(modelDef.GetColumnNames(), modelDef.ModelName);
+
             Dictionary<Type, ModelDefinition> snapshot, newCache;
             do
             {

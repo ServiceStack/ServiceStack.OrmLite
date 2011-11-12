@@ -35,7 +35,7 @@ namespace ServiceStack.OrmLite
 
 		public Type ModelType { get; set; }
 
-        public string ColumnNames { get; set; }
+        public string SqlSelectAllFromTable { get; set; }
 
 		public FieldDefinition PrimaryKey
 		{
@@ -67,10 +67,16 @@ namespace ServiceStack.OrmLite
     public static class ModelDefinition<T>
     {
         private static ModelDefinition definition;
+		public static ModelDefinition Definition
+		{
+			get { return definition ?? (definition = typeof(T).GetModelDefinition()); }
+		}
 
-        public static ModelDefinition Definition
-        {
-            get { return definition ?? (definition = typeof(T).GetModelDefinition()); }
-        }
-    }
+		private static string primaryKeyName;
+		public static string PrimaryKeyName
+		{
+			get { return primaryKeyName ?? (primaryKeyName = Definition.PrimaryKey.FieldName); }
+		}
+
+	}
 }

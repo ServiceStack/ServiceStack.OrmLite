@@ -5,8 +5,10 @@ using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
 using NUnit.Framework;
+using ServiceStack.Common.Utils;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.SqlServer;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.TestsPerf
 {
@@ -99,8 +101,10 @@ namespace ServiceStack.OrmLite.TestsPerf
 
         }
 
+		//
+		//public static readonly string connectionString = "Data Source=.;Initial Catalog=tempdb;Integrated Security=True";
+		public static readonly string connectionString = @"Data Source=.\SQLEXPRESS;AttachDbFilename=|DataDirectory|\App_Data\Dapper.mdf;Integrated Security=True;Connect Timeout=30;User Instance=True";
 
-        public static readonly string connectionString = "Data Source=.;Initial Catalog=tempdb;Integrated Security=True";
         private IDbCommand dbCmd;
         public static SqlConnection GetOpenConnection()
         {
@@ -174,10 +178,6 @@ end
             test.Run(iterations);
         }
 
-        [Test] 
-        public void Run_OrmLite()
-        {
-            
-        }
+
     }
 }
