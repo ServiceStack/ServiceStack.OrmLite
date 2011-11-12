@@ -63,17 +63,17 @@ Below is a complete stand-alone example. No other config or classes is required 
         public string LastName { get; set; }
         [Index(Unique = true)] // Creates Unique Index
         public string Email { get; set; }
-        public Dictionary<PhoneType, string> PhoneNumbers { get; private set; }
-        public Dictionary<AddressType, Address> Addresses { get; private set; }
+        public Dictionary<PhoneType, string> PhoneNumbers { get; private set; }  //Blobbed
+        public Dictionary<AddressType, Address> Addresses { get; private set; }  //Blobbed
         public DateTime CreatedAt { get; set; }
     }
 
     public class Order {
         [AutoIncrement]
         public int Id { get; set; }
-        [References(typeof(Customer))] //Creates Foreign Key
+        [References(typeof(Customer))]      //Creates Foreign Key
         public int CustomerId { get; set; }
-        [References(typeof(Employee))] //Creates Foreign Key
+        [References(typeof(Employee))]      //Creates Foreign Key
         public int EmployeeId { get; set; }
         public Address ShippingAddress { get; set; } //Blobbed (no Address table)
         public DateTime? OrderDate { get; set; }
