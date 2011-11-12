@@ -25,8 +25,115 @@ The full source code for OrmLite is also [available online](https://github.com/S
 
 For simplicity, and to be able to have the same POCO class persisted in db4o, memcached, redis or on the filesystem (i.e. providers included in ServiceStack), each model must have an '`Id`' property which is its primary key.  
 
+# Code-first Customer and Order example with complex types POCO blobs
 
-# Examples 
+    //Setup SQL Server Connection Factory
+	var dbFactory = new OrmLiteConnectionFactory(
+		@"Data Source=.\SQLEXPRESS;AttachDbFilename=|DataDirectory|\App_Data\Database1.mdf;Integrated Security=True;User Instance=True",
+		SqlServerOrmLiteDialectProvider.Instance);
+
+	//Use in-memory Sqlite DB instead
+	//var dbFactory = new OrmLiteConnectionFactory(
+	//    ":memory:", false, SqliteOrmLiteDialectProvider.Instance);
+
+    //Non-intrusive: All extension methods hang off System.Data.* interfaces
+    IDbConnection dbConn = dbFactory.OpenDbConnection();
+    IDbCommand dbCmd = dbConn.CreateCommand();
+
+    //Re-Create all table schemas:
+    dbCmd.DropTable<OrderDetail>();
+    dbCmd.DropTable<Order>();
+    dbCmd.DropTable<Customer>();
+    dbCmd.DropTable<Product>();
+    dbCmd.DropTable<Employee>();
+
+    dbCmd.CreateTable<Employee>();
+    dbCmd.CreateTable<Product>();
+    dbCmd.CreateTable<Customer>();
+    dbCmd.CreateTable<Order>();
+    dbCmd.CreateTable<OrderDetail>();
+
+    dbCmd.Insert(new Employee { Id = 1, Name = "Employee 1" });
+    dbCmd.Insert(new Employee { Id = 2, Name = "Employee 2" });
+    var product1 = new Product { Id = 1, Name = "Product 1", UnitPrice = 10 };
+    var product2 = new Product { Id = 2, Name = "Product 2", UnitPrice = 20 };
+    dbCmd.Save(product1, product2);
+
+    var customer = new Customer
+    {
+        FirstName = "Orm",
+        LastName = "Lite",
+        Email = "ormlite@servicestack.net",
+        PhoneNumbers =
+            {
+                { PhoneType.Home, "555-1234" },
+                { PhoneType.Work, "1-800-1234" },
+                { PhoneType.Mobile, "818-123-4567" },
+            },
+        Addresses =
+            {
+                { AddressType.Work, new Address { Line1 = "1 Street", Country = "US", State = "NY", City = "New York", ZipCode = "10101" } },
+            },
+        CreatedAt = DateTime.UtcNow,
+    };
+    dbCmd.Insert(customer);
+
+    var customerId = dbCmd.GetLastInsertId(); //Get Auto Inserted Id
+    customer = dbCmd.QuerySingle<Customer>(new { customer.Email }); //Query
+    Assert.That(customer.Id, Is.EqualTo(customerId));
+
+    //Direct access to System.Data.Transactions:
+    using (var trans = dbCmd.BeginTransaction(IsolationLevel.ReadCommitted))
+    {
+        var order = new Order
+        {
+            CustomerId = customer.Id,
+            EmployeeId = 1,
+            OrderDate = DateTime.UtcNow,
+            Freight = 10.50m,
+            ShippingAddress = new Address { Line1 = "3 Street", Country = "US", State = "NY", City = "New York", ZipCode = "12121" },
+        };
+        dbCmd.Save(order); //Inserts 1st time
+
+        order.Id = (int)dbCmd.GetLastInsertId(); //Get Auto Inserted Id
+
+        var orderDetails = new[] {
+            new OrderDetail
+            {
+                OrderId = order.Id,
+                ProductId = product1.Id,
+                Quantity = 2,
+                UnitPrice = product1.UnitPrice,
+            },
+            new OrderDetail
+            {
+                OrderId = order.Id,
+                ProductId = product2.Id,
+                Quantity = 2,
+                UnitPrice = product2.UnitPrice,
+                Discount = .15m,
+            }
+        };
+
+        dbCmd.Insert(orderDetails);
+
+        order.Total = orderDetails.Sum(x => x.UnitPrice * x.Quantity * x.Discount) + order.Freight;
+
+        dbCmd.Save(order); //Updates 2nd Time
+
+        trans.Commit();
+    }
+
+Running this against a SQL Server database will yield the results below:
+
+![SQL Server Management Studio results](http://www.servicestack.net/files/ormlite-example.png)
+
+Notice the POCO types are stored in the [very fast](http://www.servicestack.net/mythz_blog/?p=176) 
+and [Versatile](http://www.servicestack.net/mythz_blog/?p=314) 
+[JSV Format](https://github.com/ServiceStack/ServiceStack.Text/wiki/JSV-Format) which although hard to do 
+happens to be more compact, human-friendly and parser-friendly than JSON.
+
+# More Examples 
 
 In its simplest useage, OrmLite can persist any POCO type without any attributes required:
 
