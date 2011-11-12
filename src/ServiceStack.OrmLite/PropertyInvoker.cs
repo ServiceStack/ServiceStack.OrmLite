@@ -44,12 +44,12 @@ namespace ServiceStack.OrmLite
 
         public static PropertyGetterDelegate GetPropertyGetterFn(this PropertyInfo propertyInfo)
         {
-            if (propertyInfo.GetGetMethod() == null) return null;
+            var getMethodInfo = propertyInfo.GetGetMethod();
+            if (getMethodInfo == null) return null;
 
 #if NO_EXPRESSIONS
 			return o => propertyInfo.GetGetMethod().Invoke(o, new object[] { });
 #else
-            var getMethodInfo = propertyInfo.GetGetMethod();
             var oInstanceParam = Expression.Parameter(typeof(object), "oInstanceParam");
             var instanceParam = Expression.Convert(oInstanceParam, propertyInfo.DeclaringType);
 

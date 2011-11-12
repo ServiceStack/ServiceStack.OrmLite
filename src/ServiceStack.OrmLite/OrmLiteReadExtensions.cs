@@ -306,6 +306,18 @@ namespace ServiceStack.OrmLite
             }
         }
 
+        public static T QuerySingle<T>(this IDbCommand dbCmd, object anonType)
+            where T : new()
+        {
+            dbCmd.Parameters.Clear();
+            dbCmd.AddFilters<T>(anonType);
+
+            using (var dbReader = dbCmd.ExecuteReader())
+            {
+                return dbReader.ConvertTo<T>();
+            }
+        }
+
 		public static List<T> Query<T>(this IDbCommand dbCmd, string name, object value)
 			where T : new()
 		{

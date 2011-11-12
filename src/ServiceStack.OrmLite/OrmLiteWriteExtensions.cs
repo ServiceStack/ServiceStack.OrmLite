@@ -22,442 +22,477 @@ using ServiceStack.Logging;
 
 namespace ServiceStack.OrmLite
 {
-	public static class OrmLiteWriteExtensions
-	{
-		private static readonly ILog Log = LogManager.GetLogger(typeof(OrmLiteWriteExtensions));
+    public static class OrmLiteWriteExtensions
+    {
+        private static readonly ILog Log = LogManager.GetLogger(typeof(OrmLiteWriteExtensions));
 
-		[Conditional("DEBUG")]
-		private static void LogDebug(string fmt, params object[] args)
-		{
-			if (args.Length > 0)
-				Log.DebugFormat(fmt, args);
-			else
-				Log.Debug(fmt);
-		}
+        [Conditional("DEBUG")]
+        private static void LogDebug(string fmt, params object[] args)
+        {
+            if (args.Length > 0)
+                Log.DebugFormat(fmt, args);
+            else
+                Log.Debug(fmt);
+        }
 
-		public static string ToCreateTableStatement(this Type tableType)
-		{
-			var sbColumns = new StringBuilder();
-			var sbConstraints = new StringBuilder();
+        public static string ToCreateTableStatement(this Type tableType)
+        {
+            var sbColumns = new StringBuilder();
+            var sbConstraints = new StringBuilder();
 
-			var modelDef = tableType.GetModelDefinition();
-			foreach (var fieldDef in modelDef.FieldDefinitions)
-			{
-				if (sbColumns.Length != 0) sbColumns.Append(", \n  ");
+            var modelDef = tableType.GetModelDefinition();
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+                if (sbColumns.Length != 0) sbColumns.Append(", \n  ");
 
-				var columnDefinition = OrmLiteConfig.DialectProvider.GetColumnDefinition(
-					fieldDef.FieldName,
-					fieldDef.FieldType,
-					fieldDef.IsPrimaryKey,
-					fieldDef.AutoIncrement,
-					fieldDef.IsNullable,
-					fieldDef.FieldLength,
-					fieldDef.DefaultValue);
+                var columnDefinition = OrmLiteConfig.DialectProvider.GetColumnDefinition(
+                    fieldDef.FieldName,
+                    fieldDef.FieldType,
+                    fieldDef.IsPrimaryKey,
+                    fieldDef.AutoIncrement,
+                    fieldDef.IsNullable,
+                    fieldDef.FieldLength,
+                    fieldDef.DefaultValue);
 
-				sbColumns.Append(columnDefinition);
+                sbColumns.Append(columnDefinition);
 
-				if (fieldDef.ReferencesType == null) continue;
+                if (fieldDef.ReferencesType == null) continue;
 
-				var refModelDef = fieldDef.ReferencesType.GetModelDefinition();
-				sbConstraints.AppendFormat(", \n\n  CONSTRAINT \"FK_{0}_{1}\" FOREIGN KEY (\"{2}\") REFERENCES \"{3}\" (\"{4}\")",
-					modelDef.ModelName, refModelDef.ModelName, fieldDef.FieldName, refModelDef.ModelName, modelDef.PrimaryKey.FieldName);
-			}
+                var refModelDef = fieldDef.ReferencesType.GetModelDefinition();
+                sbConstraints.AppendFormat(", \n\n  CONSTRAINT \"FK_{0}_{1}\" FOREIGN KEY (\"{2}\") REFERENCES \"{3}\" (\"{4}\")",
+                    modelDef.ModelName, refModelDef.ModelName, fieldDef.FieldName, refModelDef.ModelName, modelDef.PrimaryKey.FieldName);
+            }
 
-			var sql = new StringBuilder(string.Format(
-				"CREATE TABLE \"{0}\" \n(\n  {1}{2} \n); \n", modelDef.ModelName, sbColumns, sbConstraints));
+            var sql = new StringBuilder(string.Format(
+                "CREATE TABLE \"{0}\" \n(\n  {1}{2} \n); \n", modelDef.ModelName, sbColumns, sbConstraints));
 
-			return sql.ToString();
-		}
+            return sql.ToString();
+        }
 
-		public static List<string> ToCreateIndexStatements(this Type tableType)
-		{
-			var sqlIndexes = new List<string>();
+        public static List<string> ToCreateIndexStatements(this Type tableType)
+        {
+            var sqlIndexes = new List<string>();
 
-			var modelDef = tableType.GetModelDefinition();
-			foreach (var fieldDef in modelDef.FieldDefinitions)
-			{
-				if (!fieldDef.IsIndexed) continue;
+            var modelDef = tableType.GetModelDefinition();
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+                if (!fieldDef.IsIndexed) continue;
 
-				var indexName = GetIndexName(fieldDef.IsUnique, modelDef.ModelName.SafeVarName(), fieldDef.FieldName);
+                var indexName = GetIndexName(fieldDef.IsUnique, modelDef.ModelName.SafeVarName(), fieldDef.FieldName);
 
-				sqlIndexes.Add(
-					ToCreateIndexStatement(fieldDef.IsUnique, indexName, modelDef.ModelName, fieldDef.FieldName));
-			}
+                sqlIndexes.Add(
+                    ToCreateIndexStatement(fieldDef.IsUnique, indexName, modelDef.ModelName, fieldDef.FieldName));
+            }
 
-			foreach (var compositeIndex in modelDef.CompositeIndexes)
-			{
-				var indexName = GetIndexName(compositeIndex.Unique, modelDef.ModelName.SafeVarName(),
-					string.Join("_", compositeIndex.FieldNames.ToArray()));
+            foreach (var compositeIndex in modelDef.CompositeIndexes)
+            {
+                var indexName = GetIndexName(compositeIndex.Unique, modelDef.ModelName.SafeVarName(),
+                    string.Join("_", compositeIndex.FieldNames.ToArray()));
 
-				var indexNames = string.Join("\" ASC, \"", compositeIndex.FieldNames.ToArray());
+                var indexNames = string.Join("\" ASC, \"", compositeIndex.FieldNames.ToArray());
 
-				sqlIndexes.Add(
-					ToCreateIndexStatement(compositeIndex.Unique, indexName, modelDef.ModelName, indexNames));
-			}
+                sqlIndexes.Add(
+                    ToCreateIndexStatement(compositeIndex.Unique, indexName, modelDef.ModelName, indexNames));
+            }
 
-			return sqlIndexes;
-		}
+            return sqlIndexes;
+        }
 
-		private static string GetIndexName(bool isUnique, string modelName, string fieldName)
-		{
-			return string.Format("{0}idx_{1}_{2}", isUnique ? "u" : "", modelName, fieldName).ToLower();
-		}
+        private static string GetIndexName(bool isUnique, string modelName, string fieldName)
+        {
+            return string.Format("{0}idx_{1}_{2}", isUnique ? "u" : "", modelName, fieldName).ToLower();
+        }
 
-		private static string ToCreateIndexStatement(bool isUnique, string indexName, string modelName, string fieldName)
-		{
-			return string.Format("CREATE {0} INDEX {1} ON \"{2}\" (\"{3}\" ASC); \n",
-					isUnique ? "UNIQUE" : "", indexName, modelName, fieldName);
-		}
+        private static string ToCreateIndexStatement(bool isUnique, string indexName, string modelName, string fieldName)
+        {
+            return string.Format("CREATE {0} INDEX {1} ON \"{2}\" (\"{3}\" ASC); \n",
+                    isUnique ? "UNIQUE" : "", indexName, modelName, fieldName);
+        }
 
-		public static void CreateTables(this IDbCommand dbCommand, bool overwrite, params Type[] tableTypes)
-		{
-			foreach (var tableType in tableTypes)
-			{
-				CreateTable(dbCommand, overwrite, tableType);
-			}
-		}
+        public static void CreateTables(this IDbCommand dbCommand, bool overwrite, params Type[] tableTypes)
+        {
+            foreach (var tableType in tableTypes)
+            {
+                CreateTable(dbCommand, overwrite, tableType);
+            }
+        }
 
-		public static void CreateTable<T>(this IDbCommand dbCommand, bool overwrite)
-			where T : new()
-		{
-			var tableType = typeof(T);
-			CreateTable(dbCommand, overwrite, tableType);
-		}
+        public static void CreateTable<T>(this IDbCommand dbCommand)
+            where T : new()
+        {
+            var tableType = typeof(T);
+            CreateTable(dbCommand, false, tableType);
+        }
 
-		public static void CreateTable(this IDbCommand dbCommand, bool overwrite, Type modelType)
-		{
-			var modelDef = modelType.GetModelDefinition();
-			if (overwrite)
-			{
-				try
-				{
-					dbCommand.ExecuteSql(string.Format("DROP TABLE \"{0}\";", modelDef.ModelName));
-				}
-				catch (Exception ex)
-				{
-					//Log.DebugFormat("Cannot drop non-existing table '{0}': {1}", modelDef.ModelName, ex.Message);
-				}
-			}
+        public static void CreateTable<T>(this IDbCommand dbCommand, bool overwrite)
+            where T : new()
+        {
+            var tableType = typeof(T);
+            CreateTable(dbCommand, overwrite, tableType);
+        }
 
-			try
-			{
-				ExecuteSql(dbCommand, ToCreateTableStatement(modelType));
+        public static void CreateTable(this IDbCommand dbCommand, bool overwrite, Type modelType)
+        {
+            var modelDef = modelType.GetModelDefinition();
+            if (overwrite)
+            {
+                DropTable(dbCommand, modelDef);
+            }
 
-				var sqlIndexes = ToCreateIndexStatements(modelType);
-				foreach (var sqlIndex in sqlIndexes)
-				{
-					try
-					{
-						dbCommand.ExecuteSql(sqlIndex);
-					}
-					catch (Exception exIndex)
-					{
-						if (IgnoreAlreadyExistsError(exIndex))
-						{
-							Log.DebugFormat("Ignoring existing index '{0}': {1}", sqlIndex, exIndex.Message);
-							continue;
-						}
-						throw;
-					}
-				}
-			}
-			catch (Exception ex)
-			{
-				if (IgnoreAlreadyExistsError(ex))
-				{
-					Log.DebugFormat("Ignoring existing table '{0}': {1}", modelDef.ModelName, ex.Message);
-					return;
-				}
-				throw;
-			}
-		}
+            try
+            {
+                ExecuteSql(dbCommand, ToCreateTableStatement(modelType));
 
-		private static void ExecuteSql(this IDbCommand dbCommand, string sql)
-		{
-			LogDebug(sql);
+                var sqlIndexes = ToCreateIndexStatements(modelType);
+                foreach (var sqlIndex in sqlIndexes)
+                {
+                    try
+                    {
+                        dbCommand.ExecuteSql(sqlIndex);
+                    }
+                    catch (Exception exIndex)
+                    {
+                        if (IgnoreAlreadyExistsError(exIndex))
+                        {
+                            Log.DebugFormat("Ignoring existing index '{0}': {1}", sqlIndex, exIndex.Message);
+                            continue;
+                        }
+                        throw;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (IgnoreAlreadyExistsError(ex))
+                {
+                    Log.DebugFormat("Ignoring existing table '{0}': {1}", modelDef.ModelName, ex.Message);
+                    return;
+                }
+                throw;
+            }
+        }
+        
+        public static void DropTable<T>(this IDbCommand dbCommand)
+            where T : new()
+        {
+            DropTable(dbCommand, ModelDefinition<T>.Definition);
+        }
 
-			dbCommand.CommandText = sql;
-			dbCommand.ExecuteNonQuery();
-		}
+        private static void DropTable(IDbCommand dbCommand, ModelDefinition modelDef)
+        {
+            try
+            {
+                dbCommand.ExecuteSql(string.Format("DROP TABLE \"{0}\";", modelDef.ModelName));
+            }
+            catch (Exception ex)
+            {
+                //Log.DebugFormat("Cannot drop non-existing table '{0}': {1}", modelDef.ModelName, ex.Message);
+            }
+        }
 
-		private static bool IgnoreAlreadyExistsError(Exception ex)
-		{
-			//ignore Sqlite table already exists error
-			const string sqliteAlreadyExistsError = "already exists";
-			const string sqlServerAlreadyExistsError = "There is already an object named";
-			return ex.Message.Contains(sqliteAlreadyExistsError)
-			       || ex.Message.Contains(sqlServerAlreadyExistsError);
-		}
+        private static void ExecuteSql(this IDbCommand dbCommand, string sql)
+        {
+            LogDebug(sql);
 
-		public static T PopulateWithSqlReader<T>(this T objWithProperties, IDataReader dataReader)
-		{
+            dbCommand.CommandText = sql;
+            dbCommand.ExecuteNonQuery();
+        }
+
+        private static bool IgnoreAlreadyExistsError(Exception ex)
+        {
+            //ignore Sqlite table already exists error
+            const string sqliteAlreadyExistsError = "already exists";
+            const string sqlServerAlreadyExistsError = "There is already an object named";
+            return ex.Message.Contains(sqliteAlreadyExistsError)
+                   || ex.Message.Contains(sqlServerAlreadyExistsError);
+        }
+
+        public static T PopulateWithSqlReader<T>(this T objWithProperties, IDataReader dataReader)
+        {
             var fieldDefs = ModelDefinition<T>.Definition.FieldDefinitions.ToArray();
 
-			return PopulateWithSqlReader(objWithProperties, dataReader, fieldDefs);
-		}
+            return PopulateWithSqlReader(objWithProperties, dataReader, fieldDefs);
+        }
 
-		public static T PopulateWithSqlReader<T>(this T objWithProperties, IDataReader dataReader, FieldDefinition[] fieldDefs)
-		{
-			for (var i = 0; i < fieldDefs.Length; i++)
-			{
-				var fieldDef = fieldDefs[i];
-				var value = dataReader.GetValue(i);
-				fieldDef.SetValue(objWithProperties, value);
-			}
-			return objWithProperties;
-		}
+        public static T PopulateWithSqlReader<T>(this T objWithProperties, IDataReader dataReader, FieldDefinition[] fieldDefs)
+        {
+            for (var i = 0; i < fieldDefs.Length; i++)
+            {
+                var fieldDef = fieldDefs[i];
+                var value = dataReader.GetValue(i);
+                fieldDef.SetValue(objWithProperties, value);
+            }
+            return objWithProperties;
+        }
 
 
-		public static string ToInsertRowStatement(this object objWithProperties)
-		{
-			var sbColumnNames = new StringBuilder();
-			var sbColumnValues = new StringBuilder();
+        public static string ToInsertRowStatement(this object objWithProperties)
+        {
+            var sbColumnNames = new StringBuilder();
+            var sbColumnValues = new StringBuilder();
 
-			var tableType = objWithProperties.GetType();
-			var modelDef = tableType.GetModelDefinition();
-			foreach (var fieldDef in modelDef.FieldDefinitions)
-			{
-				if (fieldDef.AutoIncrement) continue;
+            var tableType = objWithProperties.GetType();
+            var modelDef = tableType.GetModelDefinition();
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+                if (fieldDef.AutoIncrement) continue;
 
-				if (sbColumnNames.Length > 0) sbColumnNames.Append(",");
-				if (sbColumnValues.Length > 0) sbColumnValues.Append(",");
+                if (sbColumnNames.Length > 0) sbColumnNames.Append(",");
+                if (sbColumnValues.Length > 0) sbColumnValues.Append(",");
 
-				try
-				{
-					sbColumnNames.Append(string.Format("\"{0}\"", fieldDef.FieldName));
-					sbColumnValues.Append(fieldDef.GetQuotedValue(objWithProperties));
-				}
-				catch (Exception ex)
-				{
-					Log.Error("ERROR in ToInsertRowStatement(): " + ex.Message, ex);
-					throw;
-				}
-			}
+                try
+                {
+                    sbColumnNames.Append(string.Format("\"{0}\"", fieldDef.FieldName));
+                    sbColumnValues.Append(fieldDef.GetQuotedValue(objWithProperties));
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("ERROR in ToInsertRowStatement(): " + ex.Message, ex);
+                    throw;
+                }
+            }
 
-			var sql = string.Format("INSERT INTO \"{0}\" ({1}) VALUES ({2});",
-									modelDef.ModelName, sbColumnNames, sbColumnValues);
+            var sql = string.Format("INSERT INTO \"{0}\" ({1}) VALUES ({2});",
+                                    modelDef.ModelName, sbColumnNames, sbColumnValues);
 
-			return sql;
-		}
+            return sql;
+        }
 
-		public static void Insert<T>(this IDbCommand dbCommand, T obj)
-			where T : new()
-		{
-			dbCommand.ExecuteSql(ToInsertRowStatement(obj));
-		}
+        public static void Insert<T>(this IDbCommand dbCommand, T obj)
+            where T : new()
+        {
+            dbCommand.ExecuteSql(ToInsertRowStatement(obj));
+        }
 
-		public static string ToUpdateRowStatement(this object objWithProperties)
-		{
-			var sqlFilter = new StringBuilder();
-			var sql = new StringBuilder();
+        public static string ToUpdateRowStatement(this object objWithProperties)
+        {
+            var sqlFilter = new StringBuilder();
+            var sql = new StringBuilder();
 
-			var tableType = objWithProperties.GetType();
-			var modelDef = tableType.GetModelDefinition();
-			foreach (var fieldDef in modelDef.FieldDefinitions)
-			{
-				try
-				{
-					if (fieldDef.IsPrimaryKey)
-					{
-						if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
+            var tableType = objWithProperties.GetType();
+            var modelDef = tableType.GetModelDefinition();
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+                try
+                {
+                    if (fieldDef.IsPrimaryKey)
+                    {
+                        if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
 
-						sqlFilter.AppendFormat("\"{0}\" = {1}", fieldDef.FieldName, fieldDef.GetQuotedValue(objWithProperties));
-							
-						continue;
-					}
+                        sqlFilter.AppendFormat("\"{0}\" = {1}", fieldDef.FieldName, fieldDef.GetQuotedValue(objWithProperties));
 
-					if (sql.Length > 0) sql.Append(",");
-					sql.AppendFormat("\"{0}\" = {1}", fieldDef.FieldName, fieldDef.GetQuotedValue(objWithProperties));
-				}
-				catch (Exception ex)
-				{
-					Log.Error("ERROR in ToUpdateRowStatement(): " + ex.Message, ex);
-				}
-			}
+                        continue;
+                    }
 
-			var updateSql = string.Format("UPDATE \"{0}\" SET {1} WHERE {2}",
-				modelDef.ModelName, sql, sqlFilter);
+                    if (sql.Length > 0) sql.Append(",");
+                    sql.AppendFormat("\"{0}\" = {1}", fieldDef.FieldName, fieldDef.GetQuotedValue(objWithProperties));
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("ERROR in ToUpdateRowStatement(): " + ex.Message, ex);
+                }
+            }
 
-			return updateSql;
-		}
+            var updateSql = string.Format("UPDATE \"{0}\" SET {1} WHERE {2}",
+                modelDef.ModelName, sql, sqlFilter);
 
-		public static void Update<T>(this IDbCommand dbCommand, T obj)
-			where T : new()
-		{
-			dbCommand.ExecuteSql(ToUpdateRowStatement(obj));
-		}
+            return updateSql;
+        }
 
-		public static string ToDeleteRowStatement(this object objWithProperties)
-		{
-			var sqlFilter = new StringBuilder();
+        public static void Update<T>(this IDbCommand dbCommand, T obj)
+            where T : new()
+        {
+            dbCommand.ExecuteSql(ToUpdateRowStatement(obj));
+        }
 
-			var tableType = objWithProperties.GetType();
-			var modelDef = tableType.GetModelDefinition();
-			foreach (var fieldDef in modelDef.FieldDefinitions)
-			{
-				try
-				{
-					if (fieldDef.IsPrimaryKey)
-					{
-						if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
+        public static string ToDeleteRowStatement(this object objWithProperties)
+        {
+            var sqlFilter = new StringBuilder();
 
-						sqlFilter.AppendFormat("\"{0}\" = {1}", fieldDef.FieldName, fieldDef.GetQuotedValue(objWithProperties));
-					}
-				}
-				catch (Exception ex)
-				{
-					Log.Error("ERROR in ToDeleteRowStatement(): " + ex.Message, ex);
-				}
-			}
+            var tableType = objWithProperties.GetType();
+            var modelDef = tableType.GetModelDefinition();
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+                try
+                {
+                    if (fieldDef.IsPrimaryKey)
+                    {
+                        if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
 
-			var deleteSql = string.Format("DELETE FROM \"{0}\" WHERE {1}",
-				modelDef.ModelName, sqlFilter);
+                        sqlFilter.AppendFormat("\"{0}\" = {1}", fieldDef.FieldName, fieldDef.GetQuotedValue(objWithProperties));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("ERROR in ToDeleteRowStatement(): " + ex.Message, ex);
+                }
+            }
 
-			return deleteSql;
-		}
+            var deleteSql = string.Format("DELETE FROM \"{0}\" WHERE {1}",
+                modelDef.ModelName, sqlFilter);
 
-		public static void Delete<T>(this IDbCommand dbCommand, T obj)
-			where T : new()
-		{
-			dbCommand.ExecuteSql(ToDeleteRowStatement(obj));
-		}
+            return deleteSql;
+        }
 
-		public static void DeleteById<T>(this IDbCommand dbCommand, object id)
-			where T : new()
-		{
+        public static void Delete<T>(this IDbCommand dbCommand, T obj)
+            where T : new()
+        {
+            dbCommand.ExecuteSql(ToDeleteRowStatement(obj));
+        }
+
+        public static void DeleteById<T>(this IDbCommand dbCommand, object id)
+            where T : new()
+        {
             var modelDef = ModelDefinition<T>.Definition;
 
-			var sql = string.Format("DELETE FROM \"{0}\" WHERE \"{1}\" = {2}",
-				modelDef.ModelName, modelDef.PrimaryKey.FieldName, 
-				OrmLiteConfig.DialectProvider.GetQuotedValue(id, id.GetType()));
+            var sql = string.Format("DELETE FROM \"{0}\" WHERE \"{1}\" = {2}",
+                modelDef.ModelName, modelDef.PrimaryKey.FieldName,
+                OrmLiteConfig.DialectProvider.GetQuotedValue(id, id.GetType()));
 
-			dbCommand.ExecuteSql(sql);
-		}
+            dbCommand.ExecuteSql(sql);
+        }
 
-		public static void DeleteByIds<T>(this IDbCommand dbCommand, IEnumerable idValues)
-			where T : new()
-		{
-			var sqlIn = idValues.GetIdsInSql();
-			if (sqlIn == null) return;
+        public static void DeleteByIds<T>(this IDbCommand dbCommand, IEnumerable idValues)
+            where T : new()
+        {
+            var sqlIn = idValues.GetIdsInSql();
+            if (sqlIn == null) return;
 
             var modelDef = ModelDefinition<T>.Definition;
 
-			var sql = string.Format("DELETE FROM \"{0}\" WHERE \"{1}\" IN ({2})",
-				modelDef.ModelName, modelDef.PrimaryKey.FieldName, sqlIn);
+            var sql = string.Format("DELETE FROM \"{0}\" WHERE \"{1}\" IN ({2})",
+                modelDef.ModelName, modelDef.PrimaryKey.FieldName, sqlIn);
 
-			dbCommand.ExecuteSql(sql);
-		}
+            dbCommand.ExecuteSql(sql);
+        }
 
-		public static void DeleteAll<T>(this IDbCommand dbCommand)
-		{
-			DeleteAll(dbCommand, typeof(T));
-		}
+        public static void DeleteAll<T>(this IDbCommand dbCommand)
+        {
+            DeleteAll(dbCommand, typeof(T));
+        }
 
-		public static void DeleteAll(this IDbCommand dbCommand, Type tableType)
-		{
-			Delete(dbCommand, tableType, null);
-		}
+        public static void DeleteAll(this IDbCommand dbCommand, Type tableType)
+        {
+            Delete(dbCommand, tableType, null);
+        }
 
-		public static void Delete<T>(this IDbCommand dbCommand, string sqlFilter, params object[] filterParams)
-			where T : new()
-		{
-			Delete(dbCommand, typeof(T), sqlFilter, filterParams);
-		}
+        public static void Delete<T>(this IDbCommand dbCommand, string sqlFilter, params object[] filterParams)
+            where T : new()
+        {
+            Delete(dbCommand, typeof(T), sqlFilter, filterParams);
+        }
 
-		public static void Delete(this IDbCommand dbCommand, Type tableType, string sqlFilter, params object[] filterParams)
-		{
-			dbCommand.ExecuteSql(ToDeleteStatement(tableType, sqlFilter, filterParams));
-		}
+        public static void Delete(this IDbCommand dbCommand, Type tableType, string sqlFilter, params object[] filterParams)
+        {
+            dbCommand.ExecuteSql(ToDeleteStatement(tableType, sqlFilter, filterParams));
+        }
 
-		public static string ToDeleteStatement(this Type tableType, string sqlFilter, params object[] filterParams)
-		{
-			var sql = new StringBuilder();
-			const string deleteStatement = "DELETE ";
+        public static string ToDeleteStatement(this Type tableType, string sqlFilter, params object[] filterParams)
+        {
+            var sql = new StringBuilder();
+            const string deleteStatement = "DELETE ";
 
-			var isFullDeleteStatement = 
-				!string.IsNullOrEmpty(sqlFilter)
-				&& sqlFilter.Length > deleteStatement.Length
-				&& sqlFilter.Substring(0, deleteStatement.Length).ToUpper().Equals(deleteStatement);
+            var isFullDeleteStatement =
+                !string.IsNullOrEmpty(sqlFilter)
+                && sqlFilter.Length > deleteStatement.Length
+                && sqlFilter.Substring(0, deleteStatement.Length).ToUpper().Equals(deleteStatement);
 
-			if (isFullDeleteStatement) return sqlFilter.SqlFormat(filterParams);
+            if (isFullDeleteStatement) return sqlFilter.SqlFormat(filterParams);
 
-			var modelDef = tableType.GetModelDefinition();
-			sql.AppendFormat("DELETE FROM \"{0}\"", modelDef.ModelName);
-			if (!string.IsNullOrEmpty(sqlFilter))
-			{
-				sqlFilter = sqlFilter.SqlFormat(filterParams);
-				sql.Append(" WHERE ");
-				sql.Append(sqlFilter);
-			}
+            var modelDef = tableType.GetModelDefinition();
+            sql.AppendFormat("DELETE FROM \"{0}\"", modelDef.ModelName);
+            if (!string.IsNullOrEmpty(sqlFilter))
+            {
+                sqlFilter = sqlFilter.SqlFormat(filterParams);
+                sql.Append(" WHERE ");
+                sql.Append(sqlFilter);
+            }
 
-			return sql.ToString();
-		}
+            return sql.ToString();
+        }
 
-		public static void Save<T>(this IDbCommand dbCommand, T obj)
-			where T : new()
-		{
-			var id = IdUtils.GetId(obj);
-			var existingRow = dbCommand.GetByIdOrDefault<T>(id);
-			if (Equals(existingRow, default(T)))
-			{
-				dbCommand.Insert(obj);
-			}
-			else
-			{
-				dbCommand.Update(obj);
-			}
-		}
+        public static void Save<T>(this IDbCommand dbCommand, T obj)
+            where T : new()
+        {
+            var id = obj.GetId();
+            var existingRow = dbCommand.GetByIdOrDefault<T>(id);
+            if (Equals(existingRow, default(T)))
+            {
+                dbCommand.Insert(obj);
+            }
+            else
+            {
+                dbCommand.Update(obj);
+            }
+        }
 
-		public static void SaveAll<T>(this IDbCommand dbCommand, IEnumerable<T> objs)
-			where T : new()
-		{
-			var saveRows = objs.ToList();
+        public static void InsertAll<T>(this IDbCommand dbCommand, params T[] objs)
+            where T : new()
+        {
+            foreach (var obj in objs)
+            {
+                dbCommand.Insert(obj);
+            }
+        }
 
-			var firstRow = saveRows.FirstOrDefault();
-			if (Equals(firstRow, default(T))) return;
+        public static void SaveAll<T>(this IDbCommand dbCommand, params T[] objs)
+            where T : new()
+        {
+            SaveAll(dbCommand, (IEnumerable<T>)objs);
+        }
 
-			var defaultIdValue = ReflectionUtils.GetDefaultValue(IdUtils.GetId(firstRow).GetType());
+        public static void SaveAll<T>(this IDbCommand dbCommand, IEnumerable<T> objs)
+            where T : new()
+        {
+            var saveRows = objs.ToList();
 
-			var idMap = defaultIdValue != null 
-				? saveRows.Where(x => !defaultIdValue.Equals(IdUtils.GetId(x))).ToDictionary(x => IdUtils.GetId(x))
-				: saveRows.Where(x => IdUtils.GetId(x) != null).ToDictionary(x => IdUtils.GetId(x));
+            var firstRow = saveRows.FirstOrDefault();
+            if (Equals(firstRow, default(T))) return;
 
-			var existingRowsMap = dbCommand.GetByIds<T>(idMap.Keys).ToDictionary(x => IdUtils.GetId(x));
+            var defaultIdValue = ReflectionUtils.GetDefaultValue(firstRow.GetId().GetType());
 
-			using (var dbTrans = dbCommand.Connection.BeginTransaction())
-			{
-				dbCommand.Transaction = dbTrans;
+            var idMap = defaultIdValue != null
+                ? saveRows.Where(x => !defaultIdValue.Equals(x.GetId())).ToDictionary(x => x.GetId())
+                : saveRows.Where(x => x.GetId() != null).ToDictionary(x => x.GetId());
 
-				foreach (var saveRow in saveRows)
-				{
-					var id = IdUtils.GetId(saveRow);
-					if (id != defaultIdValue && existingRowsMap.ContainsKey(id))
-					{
-						dbCommand.Update(saveRow);
-					}
-					else
-					{
-						dbCommand.Insert(saveRow);
-					}
-				}
+            var existingRowsMap = dbCommand.GetByIds<T>(idMap.Keys).ToDictionary(x => x.GetId());
 
-				dbTrans.Commit();
-			}
-		}
+            using (var dbTrans = dbCommand.Connection.BeginTransaction())
+            {
+                dbCommand.Transaction = dbTrans;
 
-		public static IDbTransaction BeginTransaction(this IDbCommand dbCmd)
-		{
-			var dbTrans = dbCmd.Connection.BeginTransaction();
-			dbCmd.Transaction = dbTrans;
-			return dbTrans;
-		}
+                foreach (var saveRow in saveRows)
+                {
+                    var id = IdUtils.GetId(saveRow);
+                    if (id != defaultIdValue && existingRowsMap.ContainsKey(id))
+                    {
+                        dbCommand.Update(saveRow);
+                    }
+                    else
+                    {
+                        dbCommand.Insert(saveRow);
+                    }
+                }
 
-		public static IDbTransaction BeginTransaction(this IDbCommand dbCmd, IsolationLevel isolationLevel)
-		{
-			var dbTrans = dbCmd.Connection.BeginTransaction(isolationLevel);
-			dbCmd.Transaction = dbTrans;
-			return dbTrans;
-		}
+                dbTrans.Commit();
+            }
+        }
 
-	}
+        public static IDbTransaction BeginTransaction(this IDbCommand dbCmd)
+        {
+            var dbTrans = dbCmd.Connection.BeginTransaction();
+            dbCmd.ClearFilters();
+            dbCmd.Transaction = dbTrans;
+            return dbTrans;
+        }
+
+        public static IDbTransaction BeginTransaction(this IDbCommand dbCmd, IsolationLevel isolationLevel)
+        {
+            var dbTrans = dbCmd.Connection.BeginTransaction(isolationLevel);
+            dbCmd.ClearFilters();
+            dbCmd.Transaction = dbTrans;
+            return dbTrans;
+        }
+
+    }
 }
