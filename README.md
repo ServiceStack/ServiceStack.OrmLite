@@ -27,14 +27,17 @@ For simplicity, and to be able to have the same POCO class persisted in db4o, me
 
 # Code-first Customer and Order example with complex types POCO blobs
 
-    //Setup SQL Server Connection Factory
-	var dbFactory = new OrmLiteConnectionFactory(
-		@"Data Source=.\SQLEXPRESS;AttachDbFilename=|DataDirectory|\App_Data\Database1.mdf;Integrated Security=True;User Instance=True",
-		SqlServerOrmLiteDialectProvider.Instance);
+Below is a complete stand-alone example. No other config or classes is required for it to run. It's also available as a 
+[stand-alone unit test](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLite.Tests/UseCase/CustomerOrdersUseCase.cs).
 
-	//Use in-memory Sqlite DB instead
-	//var dbFactory = new OrmLiteConnectionFactory(
-	//    ":memory:", false, SqliteOrmLiteDialectProvider.Instance);
+    //Setup SQL Server Connection Factory
+    var dbFactory = new OrmLiteConnectionFactory(
+	@"Data Source=.\SQLEXPRESS;AttachDbFilename=|DataDirectory|\App_Data\Database1.mdf;Integrated Security=True;User Instance=True",
+	SqlServerOrmLiteDialectProvider.Instance);
+
+    //Use in-memory Sqlite DB instead
+    //var dbFactory = new OrmLiteConnectionFactory(
+    //    ":memory:", false, SqliteOrmLiteDialectProvider.Instance);
 
     //Non-intrusive: All extension methods hang off System.Data.* interfaces
     IDbConnection dbConn = dbFactory.OpenDbConnection();
@@ -126,12 +129,12 @@ For simplicity, and to be able to have the same POCO class persisted in db4o, me
 
 Running this against a SQL Server database will yield the results below:
 
-![SQL Server Management Studio results](http://www.servicestack.net/files/ormlite-example.png)
+[![SQL Server Management Studio results](http://www.servicestack.net/files/ormlite-example.png)](http://www.servicestack.net/files/ormlite-example.png)
 
 Notice the POCO types are stored in the [very fast](http://www.servicestack.net/mythz_blog/?p=176) 
 and [Versatile](http://www.servicestack.net/mythz_blog/?p=314) 
-[JSV Format](https://github.com/ServiceStack/ServiceStack.Text/wiki/JSV-Format) which although hard to do 
-happens to be more compact, human-friendly and parser-friendly than JSON.
+[JSV Format](https://github.com/ServiceStack/ServiceStack.Text/wiki/JSV-Format) which although hard to do - 
+is actually more compact, human and parser-friendly than JSON :)
 
 # More Examples 
 
