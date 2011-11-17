@@ -2,7 +2,7 @@
 <package> 
   <metadata> 
     <id>ServiceStack.OrmLite.SqlServer</id> 
-    <version>3.0.3</version> 
+    <version>3.0.5</version> 
     <authors>Demis Bellot</authors> 
     <owners>Demis Bellot</owners>
     <description>ServiceStack.NET OrmLite - Light, simple and fast convention-based POCO ORM</description> 

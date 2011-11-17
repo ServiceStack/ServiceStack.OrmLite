@@ -15,7 +15,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Text;
-using ServiceStack.Common;
 using ServiceStack.Logging;
 using ServiceStack.Text;
 
@@ -219,17 +218,8 @@ namespace ServiceStack.OrmLite
 			return First<T>(dbCmd, ModelDefinition<T>.PrimaryKeyName + " = {0}".SqlFormat(idValue));
         }
 
-		public static void SetFilter<T>(this IDbCommand dbCmd, string name, T value)
-		{
-			dbCmd.Parameters.Clear();
-			var p1 = dbCmd.CreateParameter();
-			p1.ParameterName = name;
-			p1.DbType = DbTypes<T>.DbType;
-			p1.Direction = ParameterDirection.Input;
-			p1.Value = value;
-			dbCmd.Parameters.Add(p1);
-		}
-
+        [ThreadStatic]
+        private static Type lastQueryType;
 		private static void SetFilter<T>(IDbCommand dbCmd, string name, object value)
 		{
 			dbCmd.Parameters.Clear();
@@ -239,40 +229,42 @@ namespace ServiceStack.OrmLite
 			p.Direction = ParameterDirection.Input;
 			dbCmd.Parameters.Add(p);
 			dbCmd.CommandText = GetFilterSql(dbCmd, ModelDefinition<T>.Definition);
+            lastQueryType = typeof(T);		    
 		}
 
 		public static void SetFilters<T>(this IDbCommand dbCmd, object anonType, bool excludeNulls)
 		{
-			dbCmd.Parameters.Clear();
-			var pis = anonType.GetType().GetSerializableProperties();
-			foreach (var pi in pis)
-			{
-				var mi = pi.GetGetMethod();
-				if (mi == null) continue;
+		    SetParameters(dbCmd, anonType, excludeNulls);
 
-				var value = mi.Invoke(anonType, new object[0]);
-				if (excludeNulls && value == null) continue;
-
-				var p = dbCmd.CreateParameter();
-				p.ParameterName = pi.Name;
-				p.DbType = DbTypes.ColumnDbTypeMap[pi.PropertyType];
-				p.Direction = ParameterDirection.Input;
-				p.Value = value;
-				dbCmd.Parameters.Add(p);
-			}
-
-            dbCmd.CommandText = GetFilterSql(dbCmd, ModelDefinition<T>.Definition);
+		    dbCmd.CommandText = GetFilterSql(dbCmd, ModelDefinition<T>.Definition);
 		}
 
-    	public static void SetFilters<T>(this IDbCommand dbCmd, object anonType)
+        private static void SetParameters(this IDbCommand dbCmd, object anonType, bool excludeNulls)
+        {
+            dbCmd.Parameters.Clear();
+            var pis = anonType.GetType().GetSerializableProperties();
+            foreach (var pi in pis)
+            {
+                var mi = pi.GetGetMethod();
+                if (mi == null) continue;
+
+                var value = mi.Invoke(anonType, new object[0]);
+                if (excludeNulls && value == null) continue;
+
+                var p = dbCmd.CreateParameter();
+                p.ParameterName = pi.Name;
+                p.DbType = DbTypes.ColumnDbTypeMap[pi.PropertyType];
+                p.Direction = ParameterDirection.Input;
+                p.Value = value;
+                dbCmd.Parameters.Add(p);
+            }
+            lastQueryType = null;
+        }
+
+        public static void SetFilters<T>(this IDbCommand dbCmd, object anonType)
 		{
             dbCmd.SetFilters<T>(anonType, false);
 		}
-        
-        public static void AddIdFilter<T>(this IDbCommand dbCmd, T value)
-        {
-			SetFilter(dbCmd, ModelDefinition<T>.Definition.PrimaryKey.Name, value);
-        }
 
 		public static void ClearFilters(this IDbCommand dbCmd)
 		{
@@ -294,95 +286,158 @@ namespace ServiceStack.OrmLite
         public static T QueryById<T>(this IDbCommand dbCmd, object value)
             where T : new()
         {
-			if (dbCmd.Parameters.Count != 1 || 
-				((IDbDataParameter)dbCmd.Parameters[0]).ParameterName != ModelDefinition<T>.PrimaryKeyName)
+			if (dbCmd.Parameters.Count != 1 
+                || ((IDbDataParameter)dbCmd.Parameters[0]).ParameterName != ModelDefinition<T>.PrimaryKeyName
+                || lastQueryType != typeof(T))
 				SetFilter<T>(dbCmd, ModelDefinition<T>.PrimaryKeyName, value);
 
             ((IDbDataParameter)dbCmd.Parameters[0]).Value = value;
 
             using (var dbReader = dbCmd.ExecuteReader())
-            {
                 return dbReader.ConvertTo<T>();
-            }
         }
 
-        public static T QuerySingle<T>(this IDbCommand dbCmd, string name, object value)
+        public static T SingleWhere<T>(this IDbCommand dbCmd, string name, object value)
             where T : new()
         {
-			if (dbCmd.Parameters.Count != 1 || ((IDbDataParameter)dbCmd.Parameters[0]).ParameterName != name)
-				SetFilter<T>(dbCmd, name, value);
+			if (dbCmd.Parameters.Count != 1 || ((IDbDataParameter)dbCmd.Parameters[0]).ParameterName != name
+                || lastQueryType != typeof(T))
+                SetFilter<T>(dbCmd, name, value);
 
             ((IDbDataParameter)dbCmd.Parameters[0]).Value = value;
 
             using (var dbReader = dbCmd.ExecuteReader())
-            {
                 return dbReader.ConvertTo<T>();
-            }
         }
 
         public static T QuerySingle<T>(this IDbCommand dbCmd, object anonType)
             where T : new()
         {
+            if (typeof(T).IsValueType) return QueryScalar<T>(dbCmd, anonType);
+
             dbCmd.SetFilters<T>(anonType);
 
             using (var dbReader = dbCmd.ExecuteReader())
-            {
                 return dbReader.ConvertTo<T>();
-            }
         }
 
-		public static List<T> Query<T>(this IDbCommand dbCmd, string name, object value)
+        public static T QuerySingle<T>(this IDbCommand dbCmd, string sql, object anonType)
+            where T : new()
+        {
+            if (typeof(T).IsValueType) return QueryScalar<T>(dbCmd, sql, anonType);
+
+            dbCmd.SetParameters(anonType, true);
+            dbCmd.CommandText = sql;
+
+            using (var dbReader = dbCmd.ExecuteReader())
+                return dbReader.ConvertTo<T>();
+        }
+
+		public static List<T> Where<T>(this IDbCommand dbCmd, string name, object value)
 			where T : new()
 		{
-			if (dbCmd.Parameters.Count != 1 || ((IDbDataParameter)dbCmd.Parameters[0]).ParameterName != name)
-				SetFilter<T>(dbCmd, name, value);
+			if (dbCmd.Parameters.Count != 1 || ((IDbDataParameter)dbCmd.Parameters[0]).ParameterName != name
+                || lastQueryType != typeof(T))
+                SetFilter<T>(dbCmd, name, value);
 
             ((IDbDataParameter)dbCmd.Parameters[0]).Value = value;
 
 			using (var dbReader = dbCmd.ExecuteReader())
-			{
-				return dbReader.ConvertToList<T>();
-			}
-		}
+                return dbReader.ConvertToList<T>();
+        }
 
-		public static List<T> Query<T>(this IDbCommand dbCmd, object anonType)
-			where T : new()
-		{
+        public static List<T> Where<T>(this IDbCommand dbCmd, object anonType)
+            where T : new()
+        {
             dbCmd.SetFilters<T>(anonType);
 
-			using (var dbReader = dbCmd.ExecuteReader())
-			{
-				return dbReader.ConvertToList<T>();
-			}
-		}
+            using (var dbReader = dbCmd.ExecuteReader())
+                return typeof(T).IsValueType
+                    ? dbReader.GetFirstColumn<T>()
+                    : dbReader.ConvertToList<T>();
+        }
 
-		public static List<T> QueryByExample<T>(this IDbCommand dbCmd, object anonType)
-			where T : new()
-		{
+        public static List<T> Query<T>(this IDbCommand dbCmd, string sql, object anonType)
+            where T : new()
+        {
+            dbCmd.SetParameters(anonType, true);
+            dbCmd.CommandText = sql;
+
+            using (var dbReader = dbCmd.ExecuteReader())
+                return typeof(T).IsValueType
+                    ? dbReader.GetFirstColumn<T>()
+                    : dbReader.ConvertToList<T>();
+        }
+
+        public static T QueryScalar<T>(this IDbCommand dbCmd, object anonType)
+        {
             dbCmd.SetFilters<T>(anonType, true);
 
-			using (var dbReader = dbCmd.ExecuteReader())
-			{
-				return dbReader.ConvertToList<T>();
-			}
-		}
+            using (var dbReader = dbCmd.ExecuteReader())
+                return GetScalar<T>(dbReader);
+        }
 
-		public static IEnumerable<T> QueryEach<T>(this IDbCommand dbCmd, object anonType)
-			where T : new()
-		{
-			dbCmd.SetFilters<T>(anonType);
+        public static T QueryScalar<T>(this IDbCommand dbCmd, string sql, object anonType)
+        {
+            dbCmd.SetParameters(anonType, true);
+            dbCmd.CommandText = sql;
 
-			var fieldDefs = ModelDefinition<T>.Definition.FieldDefinitionsArray;
-			using (var reader = dbCmd.ExecuteReader())
-			{
-				while (reader.Read())
-				{
-					var row = new T();
-					row.PopulateWithSqlReader(reader, fieldDefs);
-					yield return row;
-				}
-			}
-		}
+            using (var dbReader = dbCmd.ExecuteReader())
+                return GetScalar<T>(dbReader);
+        }
+
+        public static List<T> ByExampleWhere<T>(this IDbCommand dbCmd, object anonType)
+            where T : new()
+        {
+            dbCmd.SetFilters<T>(anonType, true);
+
+            using (var dbReader = dbCmd.ExecuteReader())
+                return dbReader.ConvertToList<T>();
+        }
+
+        public static List<T> QueryByExample<T>(this IDbCommand dbCmd, string sql, object anonType)
+            where T : new()
+        {
+            dbCmd.SetParameters(anonType, true);
+            dbCmd.CommandText = sql;
+
+            using (var dbReader = dbCmd.ExecuteReader())
+                return dbReader.ConvertToList<T>();
+        }
+
+        public static IEnumerable<T> QueryEach<T>(this IDbCommand dbCmd, string sql, object anonType)
+            where T : new()
+        {
+            dbCmd.SetFilters<T>(anonType);
+
+            var fieldDefs = ModelDefinition<T>.Definition.FieldDefinitionsArray;
+            using (var reader = dbCmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    var row = new T();
+                    row.PopulateWithSqlReader(reader, fieldDefs);
+                    yield return row;
+                }
+            }
+        }
+
+        public static IEnumerable<T> EachWhere<T>(this IDbCommand dbCmd, object anonType)
+            where T : new()
+        {
+            dbCmd.SetFilters<T>(anonType);
+
+            var fieldDefs = ModelDefinition<T>.Definition.FieldDefinitionsArray;
+            using (var reader = dbCmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    var row = new T();
+                    row.PopulateWithSqlReader(reader, fieldDefs);
+                    yield return row;
+                }
+            }
+        }
 
         public static T GetByIdOrDefault<T>(this IDbCommand dbCmd, object idValue)
             where T : new()
@@ -394,25 +449,22 @@ namespace ServiceStack.OrmLite
             where T : new()
         {
             var sql = idValues.GetIdsInSql();
-            if (sql == null) return new List<T>();
-
-			return Select<T>(dbCmd, ModelDefinition<T>.PrimaryKeyName + " IN (" + sql + ")");
+            return sql == null 
+                ? new List<T>() 
+                : Select<T>(dbCmd, ModelDefinition<T>.PrimaryKeyName + " IN (" + sql + ")");
         }
 
         public static T GetScalar<T>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
         {
             using (var reader = dbCmd.ExecReader(sql.SqlFormat(sqlParams)))
-            {
                 return GetScalar<T>(reader);
-            }
         }
 
         public static T GetScalar<T>(this IDataReader reader)
         {
             while (reader.Read())
-            {
                 return TypeSerializer.DeserializeFromString<T>(reader.GetValue(0).ToString());
-            }
+
             return default(T);
         }
 
@@ -424,9 +476,7 @@ namespace ServiceStack.OrmLite
         public static List<T> GetFirstColumn<T>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
         {
             using (var dbReader = dbCmd.ExecReader(sql.SqlFormat(sqlParams)))
-            {
                 return GetFirstColumn<T>(dbReader);
-            }
         }
 
         public static List<T> GetFirstColumn<T>(this IDataReader reader)
@@ -444,9 +494,7 @@ namespace ServiceStack.OrmLite
         public static HashSet<T> GetFirstColumnDistinct<T>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
         {
             using (var dbReader = dbCmd.ExecReader(sql.SqlFormat(sqlParams)))
-            {
                 return GetFirstColumnDistinct<T>(dbReader);
-            }
         }
 
         public static HashSet<T> GetFirstColumnDistinct<T>(this IDataReader reader)
@@ -464,9 +512,7 @@ namespace ServiceStack.OrmLite
         public static Dictionary<K, List<V>> GetLookup<K, V>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
         {
             using (var dbReader = dbCmd.ExecReader(sql.SqlFormat(sqlParams)))
-            {
                 return GetLookup<K, V>(dbReader);
-            }
         }
 
         public static Dictionary<K, List<V>> GetLookup<K, V>(this IDataReader reader)
@@ -495,9 +541,7 @@ namespace ServiceStack.OrmLite
         public static Dictionary<K, V> GetDictionary<K, V>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
         {
             using (var dbReader = dbCmd.ExecReader(sql.SqlFormat(sqlParams)))
-            {
                 return GetDictionary<K, V>(dbReader);
-            }
         }
 
         public static Dictionary<K, V> GetDictionary<K, V>(this IDataReader reader)

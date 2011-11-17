@@ -127,6 +127,7 @@
     <Compile Include="OrmLiteInsertTests.cs" />
     <Compile Include="OrmLiteTestBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SqlMapperTests.cs" />
     <Compile Include="SqlServerProviderTests.cs" />
     <Compile Include="UseCase\CustomerOrdersUseCase.cs" />
     <Compile Include="UseCase\SimpleUseCase.cs" />

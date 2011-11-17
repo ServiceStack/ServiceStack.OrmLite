@@ -62,18 +62,18 @@ namespace ServiceStack.OrmLite.Tests
 
 				dbCmd.Insert(filterRow);
 
-				var rows = dbCmd.Query<ModelWithOnlyStringFields>(new { filterRow.AlbumName });
+				var rows = dbCmd.Where<ModelWithOnlyStringFields>(new { filterRow.AlbumName });
 				var dbRowIds = rows.ConvertAll(x => x.Id);
 				Assert.That(dbRowIds, Has.Count.EqualTo(1));
 				Assert.That(dbRowIds[0], Is.EqualTo(filterRow.Id));
 
-				rows = dbCmd.Query<ModelWithOnlyStringFields>(new { AlbumName = filterRow.AlbumName });
+				rows = dbCmd.Where<ModelWithOnlyStringFields>(new { AlbumName = filterRow.AlbumName });
 				dbRowIds = rows.ConvertAll(x => x.Id);
 				Assert.That(dbRowIds, Has.Count.EqualTo(1));
 				Assert.That(dbRowIds[0], Is.EqualTo(filterRow.Id));
 
 				var queryByExample = new ModelWithOnlyStringFields { AlbumName = filterRow.AlbumName };
-				rows = dbCmd.QueryByExample<ModelWithOnlyStringFields>(queryByExample);
+				rows = dbCmd.ByExampleWhere<ModelWithOnlyStringFields>(queryByExample);
 				dbRowIds = rows.ConvertAll(x => x.Id);
 				Assert.That(dbRowIds, Has.Count.EqualTo(1));
 				Assert.That(dbRowIds[0], Is.EqualTo(filterRow.Id));
@@ -98,7 +98,7 @@ namespace ServiceStack.OrmLite.Tests
 				dbCmd.Insert(filterRow);
 
 				var dbRowIds = new List<string>();
-				var rows = dbCmd.QueryEach<ModelWithOnlyStringFields>(new { filterRow.AlbumName });
+				var rows = dbCmd.EachWhere<ModelWithOnlyStringFields>(new { filterRow.AlbumName });
 				foreach (var row in rows)
 				{
 					dbRowIds.Add(row.Id);
