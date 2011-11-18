@@ -103,7 +103,6 @@ namespace ServiceStack.OrmLite
 			if (isFullSelectStatement) return sqlFilter.SqlFormat(filterParams);
 
 			var modelDef = tableType.GetModelDefinition();
-			//sql.AppendFormat("SELECT {0} FROM \"{1}\"", tableType.GetColumnNames(), modelDef.ModelName);
 		    sql.AppendFormat("SELECT {0} FROM {1}", tableType.GetColumnNames(),
 		                     OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef));
 			if (!string.IsNullOrEmpty(sqlFilter))
@@ -146,7 +145,6 @@ namespace ServiceStack.OrmLite
 		{
 			var sql = new StringBuilder();
 			var modelDef = ModelDefinition<TModel>.Definition;
-			//sql.AppendFormat("SELECT {0} FROM \"{1}\"", modelDef.GetColumnNames(), fromTableType.GetModelDefinition().ModelName);
 		    sql.AppendFormat("SELECT {0} FROM {1}", modelDef.GetColumnNames(),
 		                     OrmLiteConfig.DialectProvider.GetTableNameDelimited(fromTableType.GetModelDefinition()));
             if (!string.IsNullOrEmpty(sqlFilter))
