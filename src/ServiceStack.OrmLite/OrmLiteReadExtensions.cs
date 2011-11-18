@@ -103,7 +103,8 @@ namespace ServiceStack.OrmLite
 			if (isFullSelectStatement) return sqlFilter.SqlFormat(filterParams);
 
 			var modelDef = tableType.GetModelDefinition();
-			sql.AppendFormat("SELECT {0} FROM \"{1}\"", tableType.GetColumnNames(), modelDef.ModelName);
+		    sql.AppendFormat("SELECT {0} FROM {1}", tableType.GetColumnNames(),
+		                     OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef));
 			if (!string.IsNullOrEmpty(sqlFilter))
 			{
 				sqlFilter = sqlFilter.SqlFormat(filterParams);
@@ -144,8 +145,9 @@ namespace ServiceStack.OrmLite
 		{
 			var sql = new StringBuilder();
 			var modelDef = ModelDefinition<TModel>.Definition;
-			sql.AppendFormat("SELECT {0} FROM \"{1}\"", modelDef.GetColumnNames(), fromTableType.GetModelDefinition().ModelName);
-			if (!string.IsNullOrEmpty(sqlFilter))
+		    sql.AppendFormat("SELECT {0} FROM {1}", modelDef.GetColumnNames(),
+		                     OrmLiteConfig.DialectProvider.GetTableNameDelimited(fromTableType.GetModelDefinition()));
+            if (!string.IsNullOrEmpty(sqlFilter))
 			{
 				sqlFilter = sqlFilter.SqlFormat(filterParams);
 				sql.Append(" WHERE ");
@@ -360,7 +362,7 @@ namespace ServiceStack.OrmLite
 		public static List<T> Query<T>(this IDbCommand dbCmd, string sql, object anonType=null)
 			where T : new()
 		{
-			if (anonType != null) dbCmd.SetParameters(anonType, true);
+            if (anonType != null) dbCmd.SetParameters(anonType, true);
 			dbCmd.CommandText = sql;
 
 			using (var dbReader = dbCmd.ExecuteReader())
@@ -379,7 +381,7 @@ namespace ServiceStack.OrmLite
 
 		public static T QueryScalar<T>(this IDbCommand dbCmd, string sql, object anonType=null)
 		{
-			if (anonType != null) dbCmd.SetParameters(anonType, true);
+            if (anonType != null) dbCmd.SetParameters(anonType, true);
 			dbCmd.CommandText = sql;
 
 			using (var dbReader = dbCmd.ExecuteReader())
@@ -398,7 +400,7 @@ namespace ServiceStack.OrmLite
 		public static List<T> QueryByExample<T>(this IDbCommand dbCmd, string sql, object anonType=null)
 			where T : new()
 		{
-			if (anonType != null) dbCmd.SetParameters(anonType, true);
+            if (anonType != null) dbCmd.SetParameters(anonType, true);
 			dbCmd.CommandText = sql;
 
 			using (var dbReader = dbCmd.ExecuteReader())
@@ -408,7 +410,7 @@ namespace ServiceStack.OrmLite
 		public static IEnumerable<T> QueryEach<T>(this IDbCommand dbCmd, string sql, object anonType=null)
 			where T : new()
 		{
-			if (anonType != null) dbCmd.SetParameters(anonType, true);
+            if (anonType != null) dbCmd.SetFilters<T>(anonType);
 
 			var fieldDefs = ModelDefinition<T>.Definition.FieldDefinitionsArray;
 			using (var reader = dbCmd.ExecuteReader())

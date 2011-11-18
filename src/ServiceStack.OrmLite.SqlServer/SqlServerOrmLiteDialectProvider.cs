@@ -23,6 +23,7 @@ namespace ServiceStack.OrmLite.SqlServer
 			base.RealColumnDefinition = "FLOAT";
 			base.DecimalColumnDefinition = "DECIMAL(38,6)";
 			base.TimeColumnDefinition = "TIME"; //SQLSERVER 2008+
+		    base.BlobColumnDefinition = "VARBINARY(MAX)";
 
 			base.InitColumnTypeMap();
 		}
@@ -65,6 +66,14 @@ namespace ServiceStack.OrmLite.SqlServer
 
 			return new SqlConnection(connectionString);
 		}
+
+        public override string GetTableNameDelimited(ModelDefinition modelDef)
+        {
+            if (!modelDef.IsInSchema)
+                return base.GetTableNameDelimited(modelDef);
+
+            return string.Format("\"{0}\".\"{1}\"", modelDef.Schema, modelDef.ModelName);
+        }
 
 		public override object ConvertDbValue(object value, Type type)
 		{

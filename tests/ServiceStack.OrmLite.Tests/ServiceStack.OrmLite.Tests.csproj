@@ -130,6 +130,7 @@
     <Compile Include="SqlMapperTests.cs" />
     <Compile Include="SqlServerProviderTests.cs" />
     <Compile Include="UseCase\CustomerOrdersUseCase.cs" />
+    <Compile Include="UseCase\SchemaUseCase.cs" />
     <Compile Include="UseCase\SimpleUseCase.cs" />
   </ItemGroup>
   <ItemGroup>
