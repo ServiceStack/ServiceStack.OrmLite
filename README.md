@@ -243,7 +243,7 @@ is actually more compact, human and parser-friendly than JSON :)
 
 The API is minimal, providing basic shortcuts for the primitive SQL statements:
 
-[![OrmLite API](http://www.servicestack.net/files/ormlite-api)](http://www.servicestack.net/files/ormlite-api)
+[![OrmLite API](http://www.servicestack.net/files/ormlite-api.png)](http://www.servicestack.net/files/ormlite-api.png)
 
 Nearly all extension methods hang off the implementation agnostic `IDbCommand`.
 
