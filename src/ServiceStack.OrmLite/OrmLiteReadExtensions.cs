@@ -359,10 +359,10 @@ namespace ServiceStack.OrmLite
 					: dbReader.ConvertToList<T>();
 		}
 
-		public static List<T> Query<T>(this IDbCommand dbCmd, string sql, object anonType)
+		public static List<T> Query<T>(this IDbCommand dbCmd, string sql, object anonType=null)
 			where T : new()
 		{
-			dbCmd.SetParameters(anonType, true);
+            if (anonType != null) dbCmd.SetParameters(anonType, true);
 			dbCmd.CommandText = sql;
 
 			using (var dbReader = dbCmd.ExecuteReader())
@@ -379,9 +379,9 @@ namespace ServiceStack.OrmLite
 				return GetScalar<T>(dbReader);
 		}
 
-		public static T QueryScalar<T>(this IDbCommand dbCmd, string sql, object anonType)
+		public static T QueryScalar<T>(this IDbCommand dbCmd, string sql, object anonType=null)
 		{
-			dbCmd.SetParameters(anonType, true);
+            if (anonType != null) dbCmd.SetParameters(anonType, true);
 			dbCmd.CommandText = sql;
 
 			using (var dbReader = dbCmd.ExecuteReader())
@@ -397,20 +397,20 @@ namespace ServiceStack.OrmLite
 				return dbReader.ConvertToList<T>();
 		}
 
-		public static List<T> QueryByExample<T>(this IDbCommand dbCmd, string sql, object anonType)
+		public static List<T> QueryByExample<T>(this IDbCommand dbCmd, string sql, object anonType=null)
 			where T : new()
 		{
-			dbCmd.SetParameters(anonType, true);
+            if (anonType != null) dbCmd.SetParameters(anonType, true);
 			dbCmd.CommandText = sql;
 
 			using (var dbReader = dbCmd.ExecuteReader())
 				return dbReader.ConvertToList<T>();
 		}
 
-		public static IEnumerable<T> QueryEach<T>(this IDbCommand dbCmd, string sql, object anonType)
+		public static IEnumerable<T> QueryEach<T>(this IDbCommand dbCmd, string sql, object anonType=null)
 			where T : new()
 		{
-			dbCmd.SetFilters<T>(anonType);
+            if (anonType != null) dbCmd.SetFilters<T>(anonType);
 
 			var fieldDefs = ModelDefinition<T>.Definition.FieldDefinitionsArray;
 			using (var reader = dbCmd.ExecuteReader())
