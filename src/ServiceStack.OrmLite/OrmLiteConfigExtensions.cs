@@ -57,11 +57,13 @@ namespace ServiceStack.OrmLite
                 return modelDef;
 
             var modelAliasAttr = modelType.FirstAttribute<AliasAttribute>();
+		    var schemaAttr = modelType.FirstAttribute<SchemaAttribute>();
             modelDef = new ModelDefinition
             {
                 ModelType = modelType,
                 Name = modelType.Name,
                 Alias = modelAliasAttr != null ? modelAliasAttr.Name : null,
+                Schema = schemaAttr != null ? schemaAttr.Name : null
             };
 
             modelDef.CompositeIndexes.AddRange(
@@ -125,8 +127,10 @@ namespace ServiceStack.OrmLite
                 modelDef.FieldDefinitions.Add(fieldDefinition);
             }
 
-			modelDef.SqlSelectAllFromTable = "SELECT {0} FROM \"{1}\" ".Fmt(modelDef.GetColumnNames(), modelDef.ModelName);
-
+			//modelDef.SqlSelectAllFromTable = "SELECT {0} FROM \"{1}\" ".Fmt(modelDef.GetColumnNames(), modelDef.ModelName);
+		    modelDef.SqlSelectAllFromTable = "SELECT {0} FROM {1} ".Fmt(modelDef.GetColumnNames(),
+		                                                                OrmLiteConfig.DialectProvider.GetTableNameDelimited(
+		                                                                    modelDef));
             Dictionary<Type, ModelDefinition> snapshot, newCache;
             do
             {

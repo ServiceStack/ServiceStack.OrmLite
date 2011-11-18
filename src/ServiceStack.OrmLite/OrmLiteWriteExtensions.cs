@@ -62,9 +62,8 @@ namespace ServiceStack.OrmLite
                 sbConstraints.AppendFormat(", \n\n  CONSTRAINT \"FK_{0}_{1}\" FOREIGN KEY (\"{2}\") REFERENCES \"{3}\" (\"{4}\")",
                     modelDef.ModelName, refModelDef.ModelName, fieldDef.FieldName, refModelDef.ModelName, modelDef.PrimaryKey.FieldName);
             }
-
             var sql = new StringBuilder(string.Format(
-                "CREATE TABLE \"{0}\" \n(\n  {1}{2} \n); \n", modelDef.ModelName, sbColumns, sbConstraints));
+                "CREATE TABLE {0} \n(\n  {1}{2} \n); \n", OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef), sbColumns, sbConstraints));
 
             return sql.ToString();
         }
@@ -81,7 +80,7 @@ namespace ServiceStack.OrmLite
                 var indexName = GetIndexName(fieldDef.IsUnique, modelDef.ModelName.SafeVarName(), fieldDef.FieldName);
 
                 sqlIndexes.Add(
-                    ToCreateIndexStatement(fieldDef.IsUnique, indexName, modelDef.ModelName, fieldDef.FieldName));
+                    ToCreateIndexStatement(fieldDef.IsUnique, indexName, modelDef, fieldDef.FieldName));
             }
 
             foreach (var compositeIndex in modelDef.CompositeIndexes)
@@ -92,7 +91,7 @@ namespace ServiceStack.OrmLite
                 var indexNames = string.Join("\" ASC, \"", compositeIndex.FieldNames.ToArray());
 
                 sqlIndexes.Add(
-                    ToCreateIndexStatement(compositeIndex.Unique, indexName, modelDef.ModelName, indexNames));
+                    ToCreateIndexStatement(compositeIndex.Unique, indexName, modelDef, indexNames));
             }
 
             return sqlIndexes;
@@ -103,10 +102,10 @@ namespace ServiceStack.OrmLite
             return string.Format("{0}idx_{1}_{2}", isUnique ? "u" : "", modelName, fieldName).ToLower();
         }
 
-        private static string ToCreateIndexStatement(bool isUnique, string indexName, string modelName, string fieldName)
+        private static string ToCreateIndexStatement(bool isUnique, string indexName, ModelDefinition modelDef, string fieldName)
         {
-            return string.Format("CREATE {0} INDEX {1} ON \"{2}\" (\"{3}\" ASC); \n",
-                    isUnique ? "UNIQUE" : "", indexName, modelName, fieldName);
+            return string.Format("CREATE {0} INDEX {1} ON {2} (\"{3}\" ASC); \n",
+                    isUnique ? "UNIQUE" : "", indexName, OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef), fieldName);
         }
 
         public static void CreateTables(this IDbCommand dbCmd, bool overwrite, params Type[] tableTypes)
@@ -182,7 +181,7 @@ namespace ServiceStack.OrmLite
         {
             try
             {
-                dbCmd.ExecuteSql(string.Format("DROP TABLE \"{0}\";", modelDef.ModelName));
+                dbCmd.ExecuteSql(string.Format("DROP TABLE {0};", OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef)));
             }
             catch (Exception ex)
             {
@@ -252,8 +251,8 @@ namespace ServiceStack.OrmLite
                 }
             }
 
-            var sql = string.Format("INSERT INTO \"{0}\" ({1}) VALUES ({2});",
-                                    modelDef.ModelName, sbColumnNames, sbColumnValues);
+            var sql = string.Format("INSERT INTO {0} ({1}) VALUES ({2});",
+                                    OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef), sbColumnNames, sbColumnValues);
 
             return sql;
         }
@@ -287,8 +286,8 @@ namespace ServiceStack.OrmLite
                 }
             }
 
-            var updateSql = string.Format("UPDATE \"{0}\" SET {1} WHERE {2}",
-                modelDef.ModelName, sql, sqlFilter);
+            var updateSql = string.Format("UPDATE {0} SET {1} WHERE {2}",
+                OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef), sql, sqlFilter);
 
             return updateSql;
         }
@@ -334,8 +333,8 @@ namespace ServiceStack.OrmLite
                 }
             }
 
-            var deleteSql = string.Format("DELETE FROM \"{0}\" WHERE {1}",
-                modelDef.ModelName, sqlFilter);
+            var deleteSql = string.Format("DELETE FROM {0} WHERE {1}",
+                OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef), sqlFilter);
 
             return deleteSql;
         }
@@ -363,8 +362,8 @@ namespace ServiceStack.OrmLite
         {
             var modelDef = ModelDefinition<T>.Definition;
 
-            var sql = string.Format("DELETE FROM \"{0}\" WHERE \"{1}\" = {2}",
-                modelDef.ModelName, modelDef.PrimaryKey.FieldName,
+            var sql = string.Format("DELETE FROM {0} WHERE \"{1}\" = {2}",
+                OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef), modelDef.PrimaryKey.FieldName,
                 OrmLiteConfig.DialectProvider.GetQuotedValue(id, id.GetType()));
 
             dbCmd.ExecuteSql(sql);
@@ -378,8 +377,8 @@ namespace ServiceStack.OrmLite
 
             var modelDef = ModelDefinition<T>.Definition;
 
-            var sql = string.Format("DELETE FROM \"{0}\" WHERE \"{1}\" IN ({2})",
-                modelDef.ModelName, modelDef.PrimaryKey.FieldName, sqlIn);
+            var sql = string.Format("DELETE FROM {0} WHERE \"{1}\" IN ({2})",
+                OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef), modelDef.PrimaryKey.FieldName, sqlIn);
 
             dbCmd.ExecuteSql(sql);
         }
@@ -418,7 +417,7 @@ namespace ServiceStack.OrmLite
             if (isFullDeleteStatement) return sqlFilter.SqlFormat(filterParams);
 
             var modelDef = tableType.GetModelDefinition();
-            sql.AppendFormat("DELETE FROM \"{0}\"", modelDef.ModelName);
+            sql.AppendFormat("DELETE FROM {0}", OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef));
             if (!string.IsNullOrEmpty(sqlFilter))
             {
                 sqlFilter = sqlFilter.SqlFormat(filterParams);
@@ -490,7 +489,7 @@ namespace ServiceStack.OrmLite
 
                 foreach (var saveRow in saveRows)
                 {
-                    var id = saveRow.GetId();
+                    var id = IdUtils.GetId(saveRow);
                     if (id != defaultIdValue && existingRowsMap.ContainsKey(id))
                     {
                         dbCmd.Update(saveRow);

@@ -29,6 +29,8 @@ namespace ServiceStack.OrmLite
 
 		IDbConnection CreateConnection(string filePath, Dictionary<string, string> options);
 
+	    string GetTableNameDelimited(ModelDefinition modelDef);
+
 		string GetColumnDefinition(
 			string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement, 
 			bool isNullable, int? fieldLength, string defaultValue);
