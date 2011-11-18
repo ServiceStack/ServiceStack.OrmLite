@@ -70,6 +70,14 @@ namespace ServiceStack.OrmLite.Sqlite
 			return new SQLiteConnection(connectionString);
 		}
 
+        public override string GetTableNameDelimited(ModelDefinition modelDef)
+        {
+            if (!modelDef.IsInSchema)
+                return base.GetTableNameDelimited(modelDef);
+
+            return string.Format("\"{0}_{1}\"", modelDef.Schema, modelDef.ModelName);
+        }
+
 		public override object ConvertDbValue(object value, Type type)
 		{
 			if (value == null || value is DBNull) return null;

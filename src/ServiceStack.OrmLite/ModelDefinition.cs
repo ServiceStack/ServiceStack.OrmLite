@@ -28,6 +28,10 @@ namespace ServiceStack.OrmLite
 
 		public string Alias { get; set; }
 
+        public string Schema { get; set; }
+
+        public bool IsInSchema { get { return this.Schema != null; } }
+
 		public string ModelName
 		{
 			get { return this.Alias ?? this.Name; }
