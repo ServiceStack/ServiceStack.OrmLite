@@ -9,6 +9,7 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
+#if !NO_EXPRESSIONS
 	/// <summary>
 	/// Nice SqlBuilder class by @samsaffron from Dapper.Contrib:
 	/// http://samsaffron.com/archive/2011/09/05/Digging+ourselves+out+of+the+mess+Linq-2-SQL+created
@@ -269,5 +270,6 @@ namespace ServiceStack.OrmLite
 			return this;
 		}
 	}
+#endif
 
 }

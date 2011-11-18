@@ -490,7 +490,7 @@ namespace ServiceStack.OrmLite
 
                 foreach (var saveRow in saveRows)
                 {
-                    var id = IdUtils.GetId(saveRow);
+                    var id = saveRow.GetId();
                     if (id != defaultIdValue && existingRowsMap.ContainsKey(id))
                     {
                         dbCmd.Update(saveRow);

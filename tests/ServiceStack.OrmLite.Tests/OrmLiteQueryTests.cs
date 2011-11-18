@@ -67,13 +67,19 @@ namespace ServiceStack.OrmLite.Tests
 				Assert.That(dbRowIds, Has.Count.EqualTo(1));
 				Assert.That(dbRowIds[0], Is.EqualTo(filterRow.Id));
 
-				rows = dbCmd.Where<ModelWithOnlyStringFields>(new { AlbumName = filterRow.AlbumName });
+				rows = dbCmd.Where<ModelWithOnlyStringFields>(new { filterRow.AlbumName });
 				dbRowIds = rows.ConvertAll(x => x.Id);
 				Assert.That(dbRowIds, Has.Count.EqualTo(1));
 				Assert.That(dbRowIds[0], Is.EqualTo(filterRow.Id));
 
 				var queryByExample = new ModelWithOnlyStringFields { AlbumName = filterRow.AlbumName };
 				rows = dbCmd.ByExampleWhere<ModelWithOnlyStringFields>(queryByExample);
+				dbRowIds = rows.ConvertAll(x => x.Id);
+				Assert.That(dbRowIds, Has.Count.EqualTo(1));
+				Assert.That(dbRowIds[0], Is.EqualTo(filterRow.Id));
+
+				rows = dbCmd.Query<ModelWithOnlyStringFields>(
+					"SELECT * FROM ModelWithOnlyStringFields WHERE AlbumName = @AlbumName", new { filterRow.AlbumName });
 				dbRowIds = rows.ConvertAll(x => x.Id);
 				Assert.That(dbRowIds, Has.Count.EqualTo(1));
 				Assert.That(dbRowIds[0], Is.EqualTo(filterRow.Id));

@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="ServiceStack.OrmLite.OrmLiteWriteExtensions">
+    <Position X="3.75" Y="0.5" Width="3" />
+    <Members>
+      <Method Name="ExecuteSql" Hidden="true" />
+      <Method Name="GetIndexName" Hidden="true" />
+      <Method Name="IgnoreAlreadyExistsError" Hidden="true" />
+      <Field Name="Log" Hidden="true" />
+      <Method Name="LogDebug" Hidden="true" />
+      <Method Name="ToCreateIndexStatement" Hidden="true" />
+      <Method Name="ToCreateIndexStatements" Hidden="true" />
+      <Method Name="ToCreateTableStatement" Hidden="true" />
+      <Method Name="ToDeleteRowStatement" Hidden="true" />
+      <Method Name="ToDeleteStatement" Hidden="true" />
+      <Method Name="ToInsertRowStatement" Hidden="true" />
+      <Method Name="ToUpdateRowStatement" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>AAQCAMAFEAAAgAAlBAAAAAQAACkBgEAAAAAACgAIEAI=</HashCode>
+      <FileName>OrmLiteWriteExtensions.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ServiceStack.OrmLite.OrmLiteReadExtensions">
+    <Position X="0.5" Y="0.5" Width="3" />
+    <Members>
+      <Method Name="ExecReader" Hidden="true" />
+      <Method Name="GetFilterSql" Hidden="true" />
+      <Method Name="GetValueFn" Hidden="true" />
+      <Field Name="lastQueryType" Hidden="true" />
+      <Field Name="Log" Hidden="true" />
+      <Method Name="LogDebug" Hidden="true" />
+      <Method Name="SetFilter" Hidden="true" />
+      <Method Name="SetParameters" Hidden="true" />
+    </Members>
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AABAEgCMAIAAAQAAAQAYIAIIAAmBYAkCQAAgVMAACIA=</HashCode>
+      <FileName>OrmLiteReadExtensions.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

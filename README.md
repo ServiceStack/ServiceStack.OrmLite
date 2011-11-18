@@ -8,22 +8,38 @@ ServiceStack.OrmLite is a convention-based, configuration-free lightweight ORM t
 OrmLite is a set of light-weight C# extension methods around System.Data.`*` interfaces which is designed to persist POCO classes with a minimal amount of intrusion and configuration.
 Another Orm with similar goals is [sqlite-net](http://code.google.com/p/sqlite-net/).
 
-OrmLite was designed with a focus on these core objectives:
+OrmLite was designed with a focus on the core objectives:
 
-  * Simplicity - with minimal, convention-based attribute configuration
+  * Map a POCO class 1:1 to an RDBMS table, cleanly by conventions, without any attributes required.
+  * Create/Drop DB Table schemas using nothing but POCO class definitions (IOTW a true code-first ORM)
+  * Simplicity - typed, wrist friendly API for common data access patterns.
   * High performance - with support for indexes, text blobs, etc.
+    * Amongst the [fastest Micro ORMs](http://servicestack.net/benchmarks/) for .NET (just behind [Dapper](http://code.google.com/p/dapper-dot-net/)).
   * Expressive power and flexibility - with access to IDbCommand and raw SQL
   * Cross platform - supports multiple dbs (currently: Sqlite and Sql Server) running on both .NET and Mono platforms.
+
+In OrmLite: **1 Class = 1 Table**. There's no hidden behaviour behind the scenes auto-magically managing hidden references to other tables.
+Any non-scalar properties (i.e. complex types) are text blobbed in a schema-less text field using [.NET's fastest Text Serializer](http://www.servicestack.net/mythz_blog/?p=176).
+Effectively this allows you to create a table from any POCO type and it should persist as expected in a DB Table with columns for each of the classes 1st level public properties.
+
+### Other notable Micro ORMs for .NET
+Many performance problems can be mitigated and a lot of use-cases can be simplified without the use of a heavyweight ORM, and their config, mappings and infrastructure. 
+As [performance is the most important feature](https://github.com/mythz/ScalingDotNET) we can recommend the following list, each with their own unique special blend of features. 
+
+  * [Dapper](http://code.google.com/p/dapper-dot-net/) - by [@samsaffron](http://twitter.com/samsaffron) and [@marcgravell](http://twitter.com/marcgravell) 
+    - The current performance king, supports both POCO and dynamic access, fits in a single class. Put in production to solve [StackOverflow's DB Perf issues](http://samsaffron.com/archive/2011/03/30/How+I+learned+to+stop+worrying+and+write+my+own+ORM). Requires .NET 4.
+  * [PetaPoco](http://www.toptensoftware.com/petapoco/) - by [@toptensoftware](http://twitter.com/toptensoftware)
+    - Fast, supports dynamics, expandos and typed POCOs, fits in a single class, runs on .NET 3.5 and Mono. Includes optional T4 templates for POCO table generation.
+  * [Massive](https://github.com/robconery/massive) - by [@robconery](http://twitter.com/robconery)
+    - Fast, supports dynamics and expandos, smart use of optional params to provide a wrist-friendly api, fits in a single class. Multiple RDBMS support. Requires .NET 4.
+  * [Simple.Data](https://github.com/markrendle/Simple.Data) - by [@markrendle](http://twitter.com/markrendle)
+    - A little slower than above ORMS, most wrist-friendly courtesy of a dynamic API, multiple RDBMS support inc. Mongo DB. Requires .NET 4.
 
 # Download 
 OrmLite is included with [ServiceStack.zip](https://github.com/downloads/mythz/ServiceStack/ServiceStack.zip) or available to download separately in a standalone 
 [ ServiceStack.OrmLite.zip](https://github.com/downloads/mythz/ServiceStack.OrmLite/ServiceStack.OrmLite.zip).
 
 The full source code for OrmLite is also [available online](https://github.com/ServiceStack/ServiceStack.OrmLite).
-
-# Limitations 
-
-For simplicity, and to be able to have the same POCO class persisted in db4o, memcached, redis or on the filesystem (i.e. providers included in ServiceStack), each model must have an '`Id`' property which is its primary key.  
 
 # Code-first Customer & Order example with complex types on POCO as text blobs
 
@@ -119,8 +135,8 @@ Below is a complete stand-alone example. No other config or classes is required 
 
     //Setup SQL Server Connection Factory
     var dbFactory = new OrmLiteConnectionFactory(
-	@"Data Source=.\SQLEXPRESS;AttachDbFilename=|DataDirectory|\App_Data\Database1.mdf;Integrated Security=True;User Instance=True",
-	SqlServerOrmLiteDialectProvider.Instance);
+    	@"Data Source=.\SQLEXPRESS;AttachDbFilename=|DataDirectory|\App_Data\Database1.mdf;Integrated Security=True;User Instance=True",
+    	SqlServerOrmLiteDialectProvider.Instance);
 
     //Use in-memory Sqlite DB instead
     //var dbFactory = new OrmLiteConnectionFactory(
@@ -222,6 +238,80 @@ Notice the POCO types are stored in the [very fast](http://www.servicestack.net/
 and [Versatile](http://www.servicestack.net/mythz_blog/?p=314) 
 [JSV Format](https://github.com/ServiceStack/ServiceStack.Text/wiki/JSV-Format) which although hard to do - 
 is actually more compact, human and parser-friendly than JSON :)
+
+# API Overview
+
+The API is minimal, providing basic shortcuts for the primitive SQL statements:
+
+[![OrmLite API](http://www.servicestack.net/files/ormlite-api)](http://www.servicestack.net/files/ormlite-api)
+
+Nearly all extension methods hang off the implementation agnostic `IDbCommand`.
+
+`CreateTable<T>` and `DropTable<T>` create and drop tables based on a classes type definition (only public properties used).
+
+For a one-time use of a connection, you can query straight of the `IDbFactory` with:
+
+    var customers = dbFactory.Exec(dbCmd => dbCmd.Where<Customer>(new { Age = 30 }));
+
+The **Select** methods allow you to construct Sql using C# `string.Format()` syntax.
+If you're SQL doesn't start with a **SELECT** statement, it is assumed a WHERE clause is being provided, e.g:
+
+    var tracks = dbCmd.Select<Track>("Artist = {0} AND Album = {1}", "Nirvana", "Heart Shaped Box");
+
+The same results could also be fetched with:
+    
+    var tracks = dbCmd.Select<Track>("select * from track WHERE Artist = {0} AND Album = {1}", "Nirvana", "Heart Shaped Box");
+
+**Select** returns multiple records 
+
+    List<Track> tracks = dbCmd.Select<Track>()
+
+**Single** returns a single record  
+
+    Track track = dbCmd.Single<Track>("RefId = {0}", refId)
+
+**GetDictionary** returns a Dictionary made from the first to columns
+
+    Dictionary<int,string> trackIdNamesMap = dbCmd.GetDictionary<int, string>("select Id, Name from Track")
+
+**GetLookup** returns an `Dictionary<K, List<V>>` made from the first to columns
+
+        var albumTrackNames = dbCmd.GetLookup<int, string>("select AlbumId, Name from Track")
+
+**GetFirstColumn** returns a List of first column values
+    
+    List<string> trackNames = dbCmd.GetFirstColumn<string>("select Name from Track")
+
+**GetScalar** returns a single scalar value
+
+    var trackCount = dbCmd.GetScalar<int>("select count(*) from Track")
+
+All Insert, Update, and Delete methods take multiple params, while InsertAll, UpdateAll and DeleteAll take IEnumerables.
+**GetLastInsertId** returns the last inserted records auto incremented primary key.
+
+Save and SaveAll will Insert if no record with **Id** exists, otherwise it Updates. 
+Both take multiple items, optimized to perform a single read to check for existing records and are executed within a sinlge transaction.
+
+Methods containing the word **Each** return an IEnumerable<T> and are lazily loaded (i.e. non-buffered).
+
+Selection methods containing the word **Query** or **Where** use parameterized SQL (other selection methods do not).
+Anonymous types passed into **Where** are treated like an **AND** filter.
+
+    var track3 = dbCmd.Where<Track>(new { AlbumName = "Throwing Copper", TrackNo = 3 })
+
+**Query** statements take in parameterized SQL using properties from the supplied anonymous type (if any)
+
+    var track3 = dbCmd.Query<Track>("select * from Track Where AlbumName = @album and TrackNo = @trackNo", new { album = "Throwing Copper", trackNo = 3 })
+
+GetById(s), QueryById(s), etc provide strong-typed convenience methods to fetch by a Table's **Id** primary key field.
+
+    var track = dbCmd.QueryById<Track>(1);
+    
+
+# Limitations 
+
+For simplicity, and to be able to have the same POCO class persisted in db4o, memcached, redis or on the filesystem (i.e. providers included in ServiceStack), each model must have an '`Id`' property which is its primary key.  
+
 
 # More Examples 
 
