@@ -5,7 +5,7 @@ for twitter updates.
 ServiceStack.OrmLite is a convention-based, configuration-free lightweight ORM that uses standard POCO classes and Data Annotation attributes to infer its table schema.
 # Introduction
 
-OrmLite is a set of light-weight C# extension methods around System.Data.`*` interfaces which is designed to persist POCO classes with a minimal amount of intrusion and configuration.
+OrmLite is a set of light-weight C# extension methods around `System.Data.*` interfaces which is designed to persist POCO classes with a minimal amount of intrusion and configuration.
 Another Orm with similar goals is [sqlite-net](http://code.google.com/p/sqlite-net/).
 
 OrmLite was designed with a focus on the core objectives:
@@ -26,18 +26,18 @@ Effectively this allows you to create a table from any POCO type and it should p
 Many performance problems can be mitigated and a lot of use-cases can be simplified without the use of a heavyweight ORM, and their config, mappings and infrastructure. 
 As [performance is the most important feature](https://github.com/mythz/ScalingDotNET) we can recommend the following list, each with their own unique special blend of features. 
 
-  * [Dapper](http://code.google.com/p/dapper-dot-net/) - by [@samsaffron](http://twitter.com/samsaffron) and [@marcgravell](http://twitter.com/marcgravell) 
+  * **[Dapper](http://code.google.com/p/dapper-dot-net/)** - by [@samsaffron](http://twitter.com/samsaffron) and [@marcgravell](http://twitter.com/marcgravell) 
     - The current performance king, supports both POCO and dynamic access, fits in a single class. Put in production to solve [StackOverflow's DB Perf issues](http://samsaffron.com/archive/2011/03/30/How+I+learned+to+stop+worrying+and+write+my+own+ORM). Requires .NET 4.
-  * [PetaPoco](http://www.toptensoftware.com/petapoco/) - by [@toptensoftware](http://twitter.com/toptensoftware)
+  * **[PetaPoco](http://www.toptensoftware.com/petapoco/)** - by [@toptensoftware](http://twitter.com/toptensoftware)
     - Fast, supports dynamics, expandos and typed POCOs, fits in a single class, runs on .NET 3.5 and Mono. Includes optional T4 templates for POCO table generation.
-  * [Massive](https://github.com/robconery/massive) - by [@robconery](http://twitter.com/robconery)
+  * **[Massive](https://github.com/robconery/massive)** - by [@robconery](http://twitter.com/robconery)
     - Fast, supports dynamics and expandos, smart use of optional params to provide a wrist-friendly api, fits in a single class. Multiple RDBMS support. Requires .NET 4.
-  * [Simple.Data](https://github.com/markrendle/Simple.Data) - by [@markrendle](http://twitter.com/markrendle)
+  * **[Simple.Data](https://github.com/markrendle/Simple.Data)** - by [@markrendle](http://twitter.com/markrendle)
     - A little slower than above ORMS, most wrist-friendly courtesy of a dynamic API, multiple RDBMS support inc. Mongo DB. Requires .NET 4.
 
 # Download 
-OrmLite is included with [ServiceStack.zip](https://github.com/downloads/mythz/ServiceStack/ServiceStack.zip) or available to download separately in a standalone 
-[ ServiceStack.OrmLite.zip](https://github.com/downloads/mythz/ServiceStack.OrmLite/ServiceStack.OrmLite.zip).
+OrmLite is included with [ServiceStack.zip](https://github.com/ServiceStack/ServiceStack/downloads) or available to download separately in a standalone 
+[ServiceStack.OrmLite.zip](https://github.com/ServiceStack/ServiceStack.OrmLite/downloads).
 
 The full source code for OrmLite is also [available online](https://github.com/ServiceStack/ServiceStack.OrmLite).
 
