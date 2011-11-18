@@ -286,10 +286,10 @@ The same results could also be fetched with:
 
     var trackCount = dbCmd.GetScalar<int>("select count(*) from Track")
 
-All Insert, Update, and Delete methods take multiple params, while InsertAll, UpdateAll and DeleteAll take IEnumerables.
+All **Insert**, **Update**, and **Delete** methods take multiple params, while `InsertAll`, `UpdateAll` and `DeleteAll` take IEnumerables.
 **GetLastInsertId** returns the last inserted records auto incremented primary key.
 
-Save and SaveAll will Insert if no record with **Id** exists, otherwise it Updates. 
+`Save` and `SaveAll` will Insert if no record with **Id** exists, otherwise it Updates. 
 Both take multiple items, optimized to perform a single read to check for existing records and are executed within a sinlge transaction.
 
 Methods containing the word **Each** return an IEnumerable<T> and are lazily loaded (i.e. non-buffered).
@@ -301,7 +301,8 @@ Anonymous types passed into **Where** are treated like an **AND** filter.
 
 **Query** statements take in parameterized SQL using properties from the supplied anonymous type (if any)
 
-    var track3 = dbCmd.Query<Track>("select * from Track Where AlbumName = @album and TrackNo = @trackNo", new { album = "Throwing Copper", trackNo = 3 })
+    var track3 = dbCmd.Query<Track>("select * from Track Where AlbumName = @album and TrackNo = @trackNo", 
+        new { album = "Throwing Copper", trackNo = 3 })
 
 GetById(s), QueryById(s), etc provide strong-typed convenience methods to fetch by a Table's **Id** primary key field.
 
