@@ -274,6 +274,11 @@ namespace ServiceStack.OrmLite
             return paramValue.ToString().Replace("'", "''");
         }
 
+        public virtual string GetTableNameDelimited(ModelDefinition modelDef)
+        {
+            return string.Format("\"{0}\"", modelDef.ModelName);
+        }
+
         protected virtual string GetUndefinedColumnDefintion(Type fieldType)
         {
             if (TypeSerializer.CanCreateFromString(fieldType))

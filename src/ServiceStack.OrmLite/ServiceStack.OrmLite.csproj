@@ -115,6 +115,7 @@
     <Compile Include="OrmLiteUtilExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReflectionPropertyInvoker.cs" />
+    <Compile Include="SchemaAttribute.cs" />
     <Compile Include="SqlBuilder.cs" />
     <Compile Include="SqlInValues.cs" />
   </ItemGroup>
