@@ -36,10 +36,18 @@ As [performance is the most important feature](https://github.com/mythz/ScalingD
     - A little slower than above ORMS, most wrist-friendly courtesy of a dynamic API, multiple RDBMS support inc. Mongo DB. Requires .NET 4.
 
 # Download 
-OrmLite is included with [ServiceStack.zip](https://github.com/ServiceStack/ServiceStack/downloads) or available to download separately in a standalone 
-[ServiceStack.OrmLite.zip](https://github.com/ServiceStack/ServiceStack.OrmLite/downloads).
 
-The full source code for OrmLite is also [available online](https://github.com/ServiceStack/ServiceStack.OrmLite).
+[![http://www.servicestack.net/img/nuget-servicestack.ormlite.sqlserver.png](Download on NuGet)](http://nuget.org/List/Packages/ServiceStack.OrmLite.SqlServer)
+
+You can download OrmLite on NuGet in 3 flavours: 
+[Sql Server](http://nuget.org/List/Packages/ServiceStack.OrmLite.SqlServer), 
+[Sqlite32](http://nuget.org/List/Packages/ServiceStack.OrmLite.Sqlite32) and 
+[Sqlite64](http://nuget.org/List/Packages/ServiceStack.OrmLite.Sqlite64).
+
+OrmLite is also included in [ServiceStack](https://github.com/ServiceStack/ServiceStack/downloads) or available to download separately in 
+[/downloads](https://github.com/ServiceStack/ServiceStack.OrmLite/downloads).
+
+
 
 # Code-first Customer & Order example with complex types on POCO as text blobs
 
