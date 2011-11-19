@@ -37,7 +37,7 @@ As [performance is the most important feature](https://github.com/mythz/ScalingD
 
 # Download 
 
-[![http://www.servicestack.net/img/nuget-servicestack.ormlite.sqlserver.png](Download on NuGet)](http://nuget.org/List/Packages/ServiceStack.OrmLite.SqlServer)
+[!(Download on NuGet)[http://www.servicestack.net/img/nuget-servicestack.ormlite.sqlserver.png]](http://nuget.org/List/Packages/ServiceStack.OrmLite.SqlServer)
 
 You can download OrmLite on NuGet in 3 flavours: 
 [Sql Server](http://nuget.org/List/Packages/ServiceStack.OrmLite.SqlServer), 
