@@ -38,11 +38,14 @@ namespace ServiceStack.OrmLite
 			{
 				OrmLiteConfig.DialectProvider = dialectProvider;
 			}
+			this.ConnectionFilter = x => x;
 		}
 
 		public string ConnectionString { get; set; }
 
 		public bool AutoDisposeConnection { get; set; }
+
+		public Func<IDbConnection, IDbConnection> ConnectionFilter { get; set; }
 
 		/// <summary>
 		/// Force the IDbConnection to always return this IDbCommand
@@ -84,7 +87,7 @@ namespace ServiceStack.OrmLite
 				? new OrmLiteConnection(this)
 				: OrmLiteConnection;
 
-			return connection;
+			return ConnectionFilter(connection);
 		}
 	}
 

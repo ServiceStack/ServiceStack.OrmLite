@@ -1,5 +1,7 @@
 using System.Data;
+using System.Data.Common;
 using System.Data.SqlClient;
+using ServiceStack.DataAccess;
 
 namespace ServiceStack.OrmLite
 {
@@ -7,7 +9,7 @@ namespace ServiceStack.OrmLite
 	/// Wrapper IDbConnection class to allow for connection sharing, mocking, etc.
 	/// </summary>
 	public class OrmLiteConnection
-		: IDbConnection
+		: IDbConnection, IHasDbConnection 
 	{
 		private readonly OrmLiteConnectionFactory factory;
 		private IDbConnection dbConnection;
@@ -105,6 +107,11 @@ namespace ServiceStack.OrmLite
 		public static explicit operator SqlConnection(OrmLiteConnection dbConn)
 		{
 			return (SqlConnection)dbConn.DbConnection;
+		}
+
+		public static explicit operator DbConnection(OrmLiteConnection dbConn)
+		{
+			return (DbConnection)dbConn.DbConnection;
 		}
 	}
 }
