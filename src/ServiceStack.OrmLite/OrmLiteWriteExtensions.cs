@@ -215,10 +215,9 @@ namespace ServiceStack.OrmLite
 
         public static T PopulateWithSqlReader<T>(this T objWithProperties, IDataReader dataReader, FieldDefinition[] fieldDefs)
         {
-            for (var i = 0; i < fieldDefs.Length; i++)
+            foreach (var fieldDef in fieldDefs)
             {
-                var fieldDef = fieldDefs[i];
-                var value = dataReader.GetValue(i);
+                var value = dataReader.GetValue(dataReader.GetOrdinal(fieldDef.FieldName));
                 fieldDef.SetValue(objWithProperties, value);
             }
             return objWithProperties;
