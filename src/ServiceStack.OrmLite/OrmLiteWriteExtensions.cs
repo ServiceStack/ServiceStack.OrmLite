@@ -222,8 +222,7 @@ namespace ServiceStack.OrmLite
             }
             return objWithProperties;
         }
-
-
+		
         public static string ToInsertRowStatement(this object objWithProperties)
         {
             var sbColumnNames = new StringBuilder();
