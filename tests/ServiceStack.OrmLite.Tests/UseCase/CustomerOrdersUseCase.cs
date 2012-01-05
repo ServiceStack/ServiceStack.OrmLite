@@ -51,9 +51,9 @@ namespace ServiceStack.OrmLite.Tests.UseCase
         [Index(Unique = true)] // Creates Unique Index
         public string Email { get; set; }
 
-        public Dictionary<PhoneType, string> PhoneNumbers { get; private set; }
+        public Dictionary<PhoneType, string> PhoneNumbers { get; set; }
 
-        public Dictionary<AddressType, Address> Addresses { get; private set; }
+        public Dictionary<AddressType, Address> Addresses { get; set; }
 
         public DateTime CreatedAt { get; set; }
     }
