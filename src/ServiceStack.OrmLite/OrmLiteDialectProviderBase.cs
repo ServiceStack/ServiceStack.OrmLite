@@ -16,6 +16,7 @@ using System.Globalization;
 using System.Text;
 using ServiceStack.Logging;
 using ServiceStack.Text;
+using System.Diagnostics;
 
 namespace ServiceStack.OrmLite
 {
@@ -23,6 +24,18 @@ namespace ServiceStack.OrmLite
     public abstract class OrmLiteDialectProviderBase
         : IOrmLiteDialectProvider
     {
+		private static readonly ILog Log = LogManager.GetLogger(typeof(IOrmLiteDialectProvider));
+
+        [Conditional("DEBUG")]
+        private static void LogDebug(string fmt, params object[] args)
+        {
+            if (args.Length > 0)
+                Log.DebugFormat(fmt, args);
+            else
+                Log.Debug(fmt);
+        }
+		
+		
         #region ADO.NET supported types
         /* ADO.NET UNDERSTOOD DATA TYPES:
 			COUNTER	DbType.Int64
@@ -230,7 +243,7 @@ namespace ServiceStack.OrmLite
                 var convertedValue = TypeSerializer.DeserializeFromString(value.ToString(), type);
                 return convertedValue;
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 log.ErrorFormat("Error ConvertDbValue trying to convert {0} into {1}",
                     value, type.Name);
@@ -338,5 +351,159 @@ namespace ServiceStack.OrmLite
         }
 
         public abstract long GetLastInsertId(IDbCommand command);
+		
+			
+		public virtual string ToSelectStatement( Type tableType,  string sqlFilter, params object[] filterParams){
+			
+			var sql = new StringBuilder();
+			const string SelectStatement = "SELECT ";
+			var modelDef= tableType.GetModelDefinition();
+			var isFullSelectStatement =
+                !string.IsNullOrEmpty(sqlFilter)
+				&& sqlFilter.Length > SelectStatement.Length
+				&& sqlFilter.Substring(0, SelectStatement.Length).ToUpper().Equals(SelectStatement);
+
+			if (isFullSelectStatement) return sqlFilter.SqlFormat(filterParams);
+
+		    sql.AppendFormat("SELECT {0} FROM {1}", tableType.GetColumnNames(),
+		                     OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef));
+			if (!string.IsNullOrEmpty(sqlFilter))
+			{
+				sqlFilter = sqlFilter.SqlFormat(filterParams);
+				if (!sqlFilter.StartsWith("ORDER ", StringComparison.InvariantCultureIgnoreCase)
+					&& !sqlFilter.StartsWith("LIMIT ", StringComparison.InvariantCultureIgnoreCase))
+				{
+					sql.Append(" WHERE ");
+				}
+				sql.Append(sqlFilter);
+			}
+
+			return sql.ToString();
+			
+		}
+		
+		public virtual string ToInsertRowStatement( object objWithProperties,  IDbCommand command)
+        {
+            var sbColumnNames = new StringBuilder();
+            var sbColumnValues = new StringBuilder();
+			var modelDef= objWithProperties.GetType().GetModelDefinition();
+                    
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+                if (fieldDef.AutoIncrement) continue;
+
+                if (sbColumnNames.Length > 0) sbColumnNames.Append(",");
+                if (sbColumnValues.Length > 0) sbColumnValues.Append(",");
+
+                try
+                {
+                    sbColumnNames.Append(string.Format("\"{0}\"", fieldDef.FieldName));
+                    sbColumnValues.Append(fieldDef.GetQuotedValue(objWithProperties));
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("ERROR in ToInsertRowStatement(): " + ex.Message, ex);
+                    throw;
+                }
+            }
+
+            var sql = string.Format("INSERT INTO {0} ({1}) VALUES ({2});",
+                                    OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef), sbColumnNames, sbColumnValues);
+
+            return sql;
+        }
+		
+		public virtual string ToUpdateRowStatement(object objWithProperties){
+			var sqlFilter = new StringBuilder();
+            var sql = new StringBuilder();
+			var modelDef= objWithProperties.GetType().GetModelDefinition();
+            
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+                try
+                {
+                    if (fieldDef.IsPrimaryKey)
+                    {
+                        if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
+
+                        sqlFilter.AppendFormat("\"{0}\" = {1}", fieldDef.FieldName, fieldDef.GetQuotedValue(objWithProperties));
+
+                        continue;
+                    }
+
+                    if (sql.Length > 0) sql.Append(",");
+                    sql.AppendFormat("\"{0}\" = {1}", fieldDef.FieldName, fieldDef.GetQuotedValue(objWithProperties));
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("ERROR in ToUpdateRowStatement(): " + ex.Message, ex);
+                }
+            }
+
+            var updateSql = string.Format("UPDATE {0} SET {1} WHERE {2}",
+                OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef), sql, sqlFilter);
+
+            return updateSql;
+		}
+		
+		
+		public virtual string ToDeleteRowStatement(object objWithProperties)
+        {
+            var sqlFilter = new StringBuilder();
+			var modelDef= objWithProperties.GetType().GetModelDefinition();
+            
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+                try
+                {
+                    if (fieldDef.IsPrimaryKey)
+                    {
+                        if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
+
+                        sqlFilter.AppendFormat("\"{0}\" = {1}", fieldDef.FieldName, fieldDef.GetQuotedValue(objWithProperties));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("ERROR in ToDeleteRowStatement(): " + ex.Message, ex);
+                }
+            }
+
+            var deleteSql = string.Format("DELETE FROM {0} WHERE {1}",
+                OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef), sqlFilter);
+
+            return deleteSql;
+        }
+		
+		// TODO : make abstract  ??
+		public virtual string ToExistStatement( Type fromTableType,
+			object objWithProperties,
+			string sqlFilter,
+			params object[] filterParams){
+			throw new NotImplementedException();
+		}
+		
+		// TODO : make abstract  ??
+		public virtual string ToSelectFromProcedureStatement(object fromObjWithProperties,
+		                                          Type outputModelType,       
+		                                          string sqlFilter, 
+		                                          params object[] filterParams){
+			throw new NotImplementedException();
+		}
+		
+		// TODO : make abstract  ??
+		public virtual string ToExecuteProcedureStatement(object objWithProperties){
+			throw new NotImplementedException();
+		}
+		
+		protected static ModelDefinition GetModel( Type modelType){
+			return modelType.GetModelDefinition();
+		}	
+		
+		
+		public static string IdField{
+			get {return  OrmLiteConfigExtensions.IdField ;}
+		}
+		
     }
 }
