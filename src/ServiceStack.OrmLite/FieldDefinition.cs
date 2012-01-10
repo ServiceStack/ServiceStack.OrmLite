@@ -71,5 +71,18 @@ namespace ServiceStack.OrmLite
             var value = GetValue(fromInstance);
 			return QuoteValueFn(value, FieldType);
 		}
+		
+		public string Sequence{
+			get; set;
+		}
+
+		public bool IsComputed{
+			get;set;
+		}
+		
+		public string ComputeExpression{
+			get;set;
+		}
+		
 	}
 }

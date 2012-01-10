@@ -36,5 +36,30 @@ namespace ServiceStack.OrmLite
 			bool isNullable, int? fieldLength, string defaultValue);
 
 		long GetLastInsertId(IDbCommand command);
+				
+		// 
+		
+				
+		string ToSelectStatement( Type tableType, string sqlFilter, params object[] filterParams);
+		
+		string ToInsertRowStatement( object objWithProperties, IDbCommand command);
+		
+		string ToUpdateRowStatement(object objWithProperties);
+		
+		string ToDeleteRowStatement(object objWithProperties);
+		
+		string ToExistStatement( Type fromTableType,
+			object objWithProperties,
+			string sqlFilter,
+			params object[] filterParams);
+		
+		string ToSelectFromProcedureStatement(object fromObjWithProperties,
+		                                          Type outputModelType,       
+		                                          string sqlFilter, 
+		                                          params object[] filterParams);
+		
+		string ToExecuteProcedureStatement(object objWithProperties);
+		
 	}
+	
 }

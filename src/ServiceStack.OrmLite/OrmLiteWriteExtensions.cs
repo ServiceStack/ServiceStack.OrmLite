@@ -183,7 +183,7 @@ namespace ServiceStack.OrmLite
             {
                 dbCmd.ExecuteSql(string.Format("DROP TABLE {0};", OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef)));
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 //Log.DebugFormat("Cannot drop non-existing table '{0}': {1}", modelDef.ModelName, ex.Message);
             }
@@ -217,85 +217,22 @@ namespace ServiceStack.OrmLite
         {
             foreach (var fieldDef in fieldDefs)
             {
-                var value = dataReader.GetValue(dataReader.GetOrdinal(fieldDef.FieldName));
+				var value = dataReader.GetValue(dataReader.GetOrdinal(fieldDef.FieldName));
                 fieldDef.SetValue(objWithProperties, value);
             }
             return objWithProperties;
         }
 		
-        public static string ToInsertRowStatement(this object objWithProperties)
-        {
-            var sbColumnNames = new StringBuilder();
-            var sbColumnValues = new StringBuilder();
-
-            var tableType = objWithProperties.GetType();
-            var modelDef = tableType.GetModelDefinition();
-            foreach (var fieldDef in modelDef.FieldDefinitions)
-            {
-                if (fieldDef.AutoIncrement) continue;
-
-                if (sbColumnNames.Length > 0) sbColumnNames.Append(",");
-                if (sbColumnValues.Length > 0) sbColumnValues.Append(",");
-
-                try
-                {
-                    sbColumnNames.Append(string.Format("\"{0}\"", fieldDef.FieldName));
-                    sbColumnValues.Append(fieldDef.GetQuotedValue(objWithProperties));
-                }
-                catch (Exception ex)
-                {
-                    Log.Error("ERROR in ToInsertRowStatement(): " + ex.Message, ex);
-                    throw;
-                }
-            }
-
-            var sql = string.Format("INSERT INTO {0} ({1}) VALUES ({2});",
-                                    OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef), sbColumnNames, sbColumnValues);
-
-            return sql;
-        }
+        
 		
-        public static string ToUpdateRowStatement(this object objWithProperties)
-        {
-            var sqlFilter = new StringBuilder();
-            var sql = new StringBuilder();
-
-            var tableType = objWithProperties.GetType();
-            var modelDef = tableType.GetModelDefinition();
-            foreach (var fieldDef in modelDef.FieldDefinitions)
-            {
-                try
-                {
-                    if (fieldDef.IsPrimaryKey)
-                    {
-                        if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
-
-                        sqlFilter.AppendFormat("\"{0}\" = {1}", fieldDef.FieldName, fieldDef.GetQuotedValue(objWithProperties));
-
-                        continue;
-                    }
-
-                    if (sql.Length > 0) sql.Append(",");
-                    sql.AppendFormat("\"{0}\" = {1}", fieldDef.FieldName, fieldDef.GetQuotedValue(objWithProperties));
-                }
-                catch (Exception ex)
-                {
-                    Log.Error("ERROR in ToUpdateRowStatement(): " + ex.Message, ex);
-                }
-            }
-
-            var updateSql = string.Format("UPDATE {0} SET {1} WHERE {2}",
-                OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef), sql, sqlFilter);
-
-            return updateSql;
-        }
+        
 
 		public static void Update<T>(this IDbCommand dbCmd, params T[] objs)
 			where T : new()
 		{
 			foreach (var obj in objs)
 			{
-				dbCmd.ExecuteSql(ToUpdateRowStatement(obj));
+				dbCmd.ExecuteSql( OrmLiteConfig.DialectProvider.ToUpdateRowStatement( obj)); 
 			}
 		}
 
@@ -304,45 +241,17 @@ namespace ServiceStack.OrmLite
 		{
 			foreach (var obj in objs)
 			{
-				dbCmd.ExecuteSql(ToUpdateRowStatement(obj));
+				dbCmd.ExecuteSql(OrmLiteConfig.DialectProvider.ToUpdateRowStatement(obj));
 			}
 		}
 
-        public static string ToDeleteRowStatement(this object objWithProperties)
-        {
-            var sqlFilter = new StringBuilder();
-
-            var tableType = objWithProperties.GetType();
-            var modelDef = tableType.GetModelDefinition();
-            foreach (var fieldDef in modelDef.FieldDefinitions)
-            {
-                try
-                {
-                    if (fieldDef.IsPrimaryKey)
-                    {
-                        if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
-
-                        sqlFilter.AppendFormat("\"{0}\" = {1}", fieldDef.FieldName, fieldDef.GetQuotedValue(objWithProperties));
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Log.Error("ERROR in ToDeleteRowStatement(): " + ex.Message, ex);
-                }
-            }
-
-            var deleteSql = string.Format("DELETE FROM {0} WHERE {1}",
-                OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef), sqlFilter);
-
-            return deleteSql;
-        }
-
+        
 		public static void Delete<T>(this IDbCommand dbCmd, params T[] objs)
 			where T : new()
 		{
 			foreach (var obj in objs)
 			{
-				dbCmd.ExecuteSql(ToDeleteRowStatement(obj));
+				dbCmd.ExecuteSql(OrmLiteConfig.DialectProvider.ToDeleteRowStatement(obj));
 			}
 		}
 
@@ -351,7 +260,7 @@ namespace ServiceStack.OrmLite
 		{
 			foreach (var obj in objs)
 			{
-				dbCmd.ExecuteSql(ToDeleteRowStatement(obj));
+				dbCmd.ExecuteSql(OrmLiteConfig.DialectProvider.ToDeleteRowStatement(obj));
 			}
 		}
 
@@ -446,7 +355,7 @@ namespace ServiceStack.OrmLite
 		{
 			foreach (var obj in objs)
 			{
-				dbCmd.ExecuteSql(ToInsertRowStatement(obj));
+				dbCmd.ExecuteSql(OrmLiteConfig.DialectProvider.ToInsertRowStatement(obj, dbCmd));
 			}
 		}
 
@@ -455,7 +364,7 @@ namespace ServiceStack.OrmLite
 		{
 			foreach (var obj in objs)
 			{
-				dbCmd.ExecuteSql(ToInsertRowStatement(obj));
+				dbCmd.ExecuteSql(OrmLiteConfig.DialectProvider.ToInsertRowStatement(obj, dbCmd));
 			}
 		}
 
@@ -517,6 +426,16 @@ namespace ServiceStack.OrmLite
             dbCmd.Transaction = dbTrans;
             return dbTrans;
         }
-
+		
+		
+		// Procedures
+		
+		public static void ExecuteProcedure<T>(this IDbCommand dbCommand, T obj){	
+			
+			string sql= OrmLiteConfig.DialectProvider.ToExecuteProcedureStatement(obj);
+			dbCommand.CommandType= CommandType.StoredProcedure;
+			dbCommand.ExecuteSql(sql);
+		}
+		
     }
 }
