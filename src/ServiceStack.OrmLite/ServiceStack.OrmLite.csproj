@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -74,18 +74,6 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ServiceStack.Common, Version=1.0.4067.4533, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\ServiceStack.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="ServiceStack.Interfaces, Version=1.0.4067.4533, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\ServiceStack.Interfaces.dll</HintPath>
-    </Reference>
-    <Reference Include="ServiceStack.Text, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\ServiceStack.Text.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -94,6 +82,15 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Data" />
+    <Reference Include="ServiceStack.Common">
+      <HintPath>..\..\lib\ServiceStack.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="ServiceStack.Interfaces">
+      <HintPath>..\..\lib\ServiceStack.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="ServiceStack.Text">
+      <HintPath>..\..\lib\ServiceStack.Text.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DbTypes.cs" />
@@ -118,6 +115,19 @@
     <Compile Include="SchemaAttribute.cs" />
     <Compile Include="SqlBuilder.cs" />
     <Compile Include="SqlInValues.cs" />
+    <Compile Include="ComputeAttribute.cs" />
+    <Compile Include="IgnoreAttribute.cs" />
+    <Compile Include="PrimaryKeyAttribute.cs" />
+    <Compile Include="SequenceAttribute.cs" />
+    <Compile Include="OrmLiteProcedureExtensions.cs" />
+    <Compile Include="DbSchema\IColumn.cs" />
+    <Compile Include="DbSchema\IParameter.cs" />
+    <Compile Include="DbSchema\IProcedure.cs" />
+    <Compile Include="DbSchema\ISchema.cs" />
+    <Compile Include="DbSchema\ITable.cs" />
+    <Compile Include="DbSchema\ParameterDirection.cs" />
+    <Compile Include="DbSchema\PocoCreator.cs" />
+    <Compile Include="DbSchema\ProcedureType.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

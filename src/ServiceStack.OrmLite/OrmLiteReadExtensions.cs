@@ -85,40 +85,7 @@ namespace ServiceStack.OrmLite
 		}
 
 
-		public static string ToSelectStatement(this Type tableType)
-		{
-			return ToSelectStatement(tableType, null);
-		}
-
-		public static string ToSelectStatement(this Type tableType, string sqlFilter, params object[] filterParams)
-		{
-			var sql = new StringBuilder();
-			const string SelectStatement = "SELECT ";
-
-			var isFullSelectStatement =
-                !string.IsNullOrEmpty(sqlFilter)
-				&& sqlFilter.Length > SelectStatement.Length
-				&& sqlFilter.Substring(0, SelectStatement.Length).ToUpper().Equals(SelectStatement);
-
-			if (isFullSelectStatement) return sqlFilter.SqlFormat(filterParams);
-
-			var modelDef = tableType.GetModelDefinition();
-		    sql.AppendFormat("SELECT {0} FROM {1}", tableType.GetColumnNames(),
-		                     OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef));
-			if (!string.IsNullOrEmpty(sqlFilter))
-			{
-				sqlFilter = sqlFilter.SqlFormat(filterParams);
-				if (!sqlFilter.StartsWith("ORDER ", StringComparison.InvariantCultureIgnoreCase)
-					&& !sqlFilter.StartsWith("LIMIT ", StringComparison.InvariantCultureIgnoreCase))
-				{
-					sql.Append(" WHERE ");
-				}
-				sql.Append(sqlFilter);
-			}
-
-			return sql.ToString();
-		}
-
+		
 		public static List<T> Select<T>(this IDbCommand dbCmd)
 			where T : new()
 		{
@@ -128,7 +95,8 @@ namespace ServiceStack.OrmLite
 		public static List<T> Select<T>(this IDbCommand dbCmd, string sqlFilter, params object[] filterParams)
 			where T : new()
 		{
-			using (var reader = dbCmd.ExecReader(ToSelectStatement(typeof(T), sqlFilter, filterParams)))
+			using (var reader = dbCmd.ExecReader(
+				OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sqlFilter, filterParams)))
 			{
 				return reader.ConvertToList<T>();
 			}
@@ -170,7 +138,8 @@ namespace ServiceStack.OrmLite
 			where T : new()
 		{
 			var fieldDefs = ModelDefinition<T>.Definition.FieldDefinitionsArray;
-			using (var reader = dbCmd.ExecReader(ToSelectStatement(typeof(T), filter, filterParams)))
+			using (var reader = dbCmd.ExecReader(
+				OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T),  filter, filterParams)))
 			{
 				while (reader.Read())
 				{
@@ -208,7 +177,8 @@ namespace ServiceStack.OrmLite
 		public static T FirstOrDefault<T>(this IDbCommand dbCmd, string filter)
 			where T : new()
 		{
-			using (var dbReader = dbCmd.ExecReader(ToSelectStatement(typeof(T), filter)))
+			using (var dbReader = dbCmd.ExecReader(
+				OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T),  filter)))
 			{
 				return dbReader.ConvertTo<T>();
 			}
@@ -562,5 +532,68 @@ namespace ServiceStack.OrmLite
 
 			return map;
 		}
+		
+		// somo aditional methods
+		
+		public static bool HasChildren<T>(this IDbCommand dbCmd, object record){
+			return HasChildren<T>(dbCmd, record, string.Empty);
+		}
+		
+		private static bool HasChildren<T>(this IDbCommand dbCmd, object record, string sqlFilter,
+		                                  params object[] filterParams){
+			
+			Type fromTableType = typeof(T);
+			
+			string sql = OrmLiteConfig.DialectProvider.ToExistStatement(fromTableType, record,sqlFilter, filterParams);
+			dbCmd.CommandText = sql;
+			object result =  dbCmd.ExecuteScalar();
+			return result==null? false: true ;
+		}
+		
+		
+		public static bool Exists<T>(this IDbCommand dbCmd,  string sqlFilter,
+		                                  params object[] filterParams){
+			
+			return HasChildren<T>(dbCmd, null, sqlFilter, filterParams);
+		}
+		
+		public  static bool Exists<T>(this IDbCommand dbCmd, object record){
+			
+			return HasChildren<T>(dbCmd, record, string.Empty);
+		}
+		
+		
+		
+		// procedures ...
+		
+		public static List<TOutputModel> SelectFromProcedure<TOutputModel>(this IDbCommand dbCommand,
+		                                          object fromObjWithProperties
+		                                          )
+			where TOutputModel : new()
+		{
+			return SelectFromProcedure<TOutputModel>(dbCommand, fromObjWithProperties,string.Empty);
+		}
+		
+		
+		public static List<TOutputModel> SelectFromProcedure<TOutputModel>(this IDbCommand dbCommand,
+		                                          object fromObjWithProperties,
+		                                          string sqlFilter, 
+		                                          params object[] filterParams)
+			where TOutputModel : new()
+		{
+			var modelType = typeof(TOutputModel);	
+			
+			string sql = OrmLiteConfig.DialectProvider.ToSelectFromProcedureStatement(
+				fromObjWithProperties,modelType, sqlFilter, filterParams);
+			
+			
+			using (var reader = dbCommand.ExecReader(sql ) )
+			{
+				return reader.ConvertToList<TOutputModel>();
+			}
+
+		}
+		
+			
 	}
 }

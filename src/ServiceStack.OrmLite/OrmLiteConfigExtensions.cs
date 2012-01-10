@@ -78,9 +78,15 @@ namespace ServiceStack.OrmLite
             var i = 0;
             foreach (var propertyInfo in objProperties)
             {
+				if (propertyInfo.FirstAttribute<IgnoreAttribute>()!=null) continue;
+				var sequenceAttr = propertyInfo.FirstAttribute<SequenceAttribute>();
+				var computeAttr= propertyInfo.FirstAttribute<ComputeAttribute>();
+				var pkAttribute = propertyInfo.FirstAttribute<PrimaryKeyAttribute>();
+				
                 var isFirst = i++ == 0;
 
-                var isPrimaryKey = propertyInfo.Name == IdField || (!hasIdField && isFirst);
+                var isPrimaryKey = propertyInfo.Name == IdField || (!hasIdField && isFirst)
+					|| pkAttribute != null;
 
                 var isNullableType = IsNullableType(propertyInfo.PropertyType);
 
@@ -103,7 +109,7 @@ namespace ServiceStack.OrmLite
                 var defaultValueAttr = propertyInfo.FirstAttribute<DefaultAttribute>();
 
                 var referencesAttr = propertyInfo.FirstAttribute<ReferencesAttribute>();
-
+				
                 var fieldDefinition = new FieldDefinition
                 {
                     Name = propertyInfo.Name,
@@ -122,6 +128,9 @@ namespace ServiceStack.OrmLite
                     QuoteValueFn = OrmLiteConfig.DialectProvider.GetQuotedValue,
                     GetValueFn = propertyInfo.GetPropertyGetterFn(),
                     SetValueFn = propertyInfo.GetPropertySetterFn(),
+					Sequence= sequenceAttr!=null?sequenceAttr.Name:string.Empty,
+					IsComputed= computeAttr!=null,
+					ComputeExpression=  computeAttr!=null? computeAttr.Expression: string.Empty,
                 };
 
                 modelDef.FieldDefinitions.Add(fieldDefinition);
