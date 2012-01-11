@@ -1,10 +1,11 @@
 using System;
-using ServiceStack.OrmLite.DbSchema;
+using ServiceStack.OrmLite.Firebird.DbSchema;
+
 namespace ServiceStack.OrmLite.Firebird
 {
-	public  class ClassWriter:PocoCreator<Table,Column,Procedure,Parameter>
+	public class ClassWriter : PocoCreator<Table, Column, Procedure, Parameter>
 	{
-		
+
 	}
 }
 

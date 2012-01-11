@@ -48,7 +48,7 @@ namespace ServiceStack.OrmLite
 				sqlConn.Open();
 				return sqlConn;
 			}
-			catch (Exception )
+			catch (Exception ex)
 			{
 				throw;
 			}

@@ -7,7 +7,6 @@ using ServiceStack.DataAnnotations;
 using System.Reflection;
 
 using ServiceStack.OrmLite;
-using ServiceStack.OrmLite.DbSchema;
 using ServiceStack.OrmLite.Firebird;
 
 

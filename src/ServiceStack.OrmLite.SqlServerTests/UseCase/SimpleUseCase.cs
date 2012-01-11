@@ -8,7 +8,7 @@ using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.SqlServerTests.UseCase
 {
-    [TestFixture, Ignore]
+    [TestFixture, NUnit.Framework.Ignore]
     public class SimpleUseCase
     {
         [TestFixtureSetUp]

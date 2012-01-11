@@ -1,152 +1,154 @@
-using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using System.Data;
 using ServiceStack.DataAnnotations;
-using ServiceStack.OrmLite.DbSchema;
-
-using FirebirdSql.Data.FirebirdClient;
+using ServiceStack.OrmLite.Firebird.DbSchema;
 
 namespace ServiceStack.OrmLite.Firebird
 {
-	
-	
-	public class Schema:ISchema<Table,Column,Procedure,Parameter>
+	public class Schema : ISchema<Table, Column, Procedure, Parameter>
 	{
-
 		private string sqlTables;
-		
-		private StringBuilder  sqlColumns = new StringBuilder();
-		private StringBuilder sqlFieldGenerator= new StringBuilder();
+
+		private StringBuilder sqlColumns = new StringBuilder();
+		private StringBuilder sqlFieldGenerator = new StringBuilder();
 		private StringBuilder sqlProcedures = new StringBuilder();
-		 
+
 		private StringBuilder  sqlParameters = new StringBuilder();
-		
+
 		public IDbConnection Connection { private get; set; }
-				
-		public Schema ()
+
+		public Schema()
 		{
 			Init();
 		}
-		
-			
-		public System.Collections.Generic.List<Table> Tables{
-			get{
-				using (IDbCommand dbCmd = Connection.CreateCommand() )
+
+		public List<Table> Tables
+		{
+			get
+			{
+				using (IDbCommand dbCmd = Connection.CreateCommand())
 				{
 					return dbCmd.Select<Table>(sqlTables);
 				}
 			}
 		}
-		
-		public Table GetTable(string name){
-		
-			string sql = sqlTables+
+
+		public Table GetTable(string name)
+		{
+
+			string sql = sqlTables +
 						string.Format("    AND a.rdb$relation_name ='{0}' ", name);
-			
-			using (IDbCommand dbCmd = Connection.CreateCommand() )
+
+			using (IDbCommand dbCmd = Connection.CreateCommand())
 			{
 				var query = dbCmd.Select<Table>(sql);
 				return query.FirstOrDefault();
 			}
-		
+
 		}
 		
-		
-		public System.Collections.Generic.List<Column> GetColumns(string tableName){
-			
-			string sql = string.Format(sqlColumns.ToString(),                           
-			                           string.IsNullOrEmpty(tableName)?"idx.rdb$relation_name":
-			                           string.Format("'{0}'",tableName),
-			                           string.IsNullOrEmpty(tableName)?"r.rdb$relation_name":
-			                           string.Format("'{0}'",tableName)); 
-			
-			using (IDbCommand dbCmd = Connection.CreateCommand() )
+		public List<Column> GetColumns(string tableName)
+		{
+
+			string sql = string.Format(sqlColumns.ToString(),
+									   string.IsNullOrEmpty(tableName) ? "idx.rdb$relation_name" :
+									   string.Format("'{0}'", tableName),
+									   string.IsNullOrEmpty(tableName) ? "r.rdb$relation_name" :
+									   string.Format("'{0}'", tableName));
+
+			using (IDbCommand dbCmd = Connection.CreateCommand())
 			{
-				List<Column> columns =dbCmd.Select<Column>(sql);	
-				
-				sql = string.Format( sqlFieldGenerator.ToString(),
-				                    string.IsNullOrEmpty(tableName)?"TRIGGERS.RDB$RELATION_NAME":
-			                           string.Format("'{0}'",tableName)); 
-				                    
+				List<Column> columns =dbCmd.Select<Column>(sql);
+
+				sql = string.Format(sqlFieldGenerator.ToString(),
+									string.IsNullOrEmpty(tableName) ? "TRIGGERS.RDB$RELATION_NAME" :
+									   string.Format("'{0}'", tableName));
+
 				List<FieldGenerator> fg = dbCmd.Select<FieldGenerator>(sql);
-				
-				foreach(var record in columns){
+
+				foreach (var record in columns)
+				{
 					IEnumerable<string> query=  from q in fg
-								where q.TableName==record.TableName 
-								&& q.FieldName == record.Name
-								select q.SequenceName;
-					if( query.Count()==1)
-						record.Sequence= query.First();
+												where q.TableName == record.TableName
+												&& q.FieldName == record.Name
+												select q.SequenceName;
+					if (query.Count() == 1)
+						record.Sequence = query.First();
 				}
-				
+
 				return columns;
 			}
 		}
-		
-		public System.Collections.Generic.List<Column> GetColumns(Table table){
+
+		public List<Column> GetColumns(Table table)
+		{
 			return GetColumns(table.Name);
 		}
-		
-		
-		public Procedure GetProcedure(string name){
-			string sql= sqlProcedures.ToString()+
+
+
+		public Procedure GetProcedure(string name)
+		{
+			string sql= sqlProcedures.ToString() +
 						string.Format("WHERE  b.rdb$procedure_name ='{0}'", name);
-			
-			using (IDbCommand dbCmd = Connection.CreateCommand() )
+
+			using (IDbCommand dbCmd = Connection.CreateCommand())
 			{
 				var query = dbCmd.Select<Procedure>(sql);
 				return query.FirstOrDefault();
 			}
 		}
 
-		public List<Procedure> Procedures{
-			get {
-				using (IDbCommand dbCmd = Connection.CreateCommand() )
+		public List<Procedure> Procedures
+		{
+			get
+			{
+				using (IDbCommand dbCmd = Connection.CreateCommand())
 				{
 					return dbCmd.Select<Procedure>(sqlProcedures.ToString());
 				}
 			}
 		}
-		
-		public List<Parameter> GetParameters( Procedure procedure){
+
+		public List<Parameter> GetParameters(Procedure procedure)
+		{
 			return GetParameters(procedure.Name);
 		}
-		
-		public List<Parameter> GetParameters( string procedureName){
-			
-			string sql = string.Format( sqlParameters.ToString(),
-			                           string.IsNullOrEmpty(procedureName)?"a.rdb$procedure_name":
-			                           string.Format("'{0}'",procedureName)); 
-			
-			using (IDbCommand dbCmd = Connection.CreateCommand() )
+
+		public List<Parameter> GetParameters(string procedureName)
+		{
+
+			string sql = string.Format(sqlParameters.ToString(),
+									   string.IsNullOrEmpty(procedureName) ? "a.rdb$procedure_name" :
+									   string.Format("'{0}'", procedureName));
+
+			using (IDbCommand dbCmd = Connection.CreateCommand())
 			{
 				return dbCmd.Select<Parameter>(sql);
 			}
-			
+
 		}
 		
-		
-		
-		private void Init(){
-			
-			sqlTables=
+		private void Init()
+		{
+
+			sqlTables =
 			"SELECT \n" +
-			"    trim(a.rdb$relation_name) AS name, \n"+
-            "    trim(a.rdb$owner_name)    AS owner \n"+
-            "FROM \n" +
-            "    rdb$relations a \n"+
-            "WHERE\n" +
-            "    rdb$system_flag = 0 \n"+
-            "    AND rdb$view_blr IS NULL \n";
-			
-			
+			"    trim(a.rdb$relation_name) AS name, \n" +
+			"    trim(a.rdb$owner_name)    AS owner \n" +
+			"FROM \n" +
+			"    rdb$relations a \n" +
+			"WHERE\n" +
+			"    rdb$system_flag = 0 \n" +
+			"    AND rdb$view_blr IS NULL \n";
+
+
 			sqlColumns.Append("SELECT TRIM(r.rdb$field_name)                          AS field_name, \n");
 			sqlColumns.Append("       r.rdb$field_position                            AS field_position, \n");
 			sqlColumns.Append("       CASE f.rdb$field_type \n");
 			sqlColumns.Append("         WHEN 261 THEN " +
-				              "         trim(iif(f.rdb$field_sub_type = 0,'BLOB', 'TEXT')) \n");
+							  "         trim(iif(f.rdb$field_sub_type = 0,'BLOB', 'TEXT')) \n");
 			sqlColumns.Append("         WHEN 14 THEN trim(iif( cset.rdb$character_set_name='OCTETS'and f.rdb$field_length=16,'GUID', 'CHAR' )) \n"); //CHAR
 			sqlColumns.Append("         WHEN 40 THEN trim('VARCHAR') \n"); //CSTRING
 			sqlColumns.Append("         WHEN 11 THEN trim('FLOAT') \n"); //D_FLOAT
@@ -196,10 +198,10 @@ namespace ServiceStack.OrmLite.Firebird
 			sqlColumns.Append("WHERE  r.rdb$system_flag = '0' \n");
 			sqlColumns.Append("       AND r.rdb$relation_name = {1} \n");
 			sqlColumns.Append(" ORDER  BY r.rdb$relation_name,r.rdb$field_position \n");
-			
-			
+
+
 			sqlFieldGenerator.Append("SELECT  trim(TRIGGERS.RDB$RELATION_NAME) as TableName,");
-			sqlFieldGenerator.Append(	"trim(deps.rdb$field_name)        AS field_name, \n");
+			sqlFieldGenerator.Append("trim(deps.rdb$field_name)        AS field_name, \n");
 			sqlFieldGenerator.Append("       trim(deps2.rdb$depended_on_name) AS sequence_name \n");
 			sqlFieldGenerator.Append("FROM   rdb$triggers triggers \n");
 			sqlFieldGenerator.Append("       JOIN rdb$dependencies deps \n");
@@ -216,15 +218,15 @@ namespace ServiceStack.OrmLite.Firebird
 			sqlFieldGenerator.Append("       AND triggers.rdb$trigger_type = 1 \n");
 			sqlFieldGenerator.Append("       AND triggers.rdb$trigger_inactive = 0 \n");
 			sqlFieldGenerator.Append("       AND triggers.rdb$relation_name = {0} ");
-			
-			
+
+
 			sqlProcedures.Append("SELECT TRIM(b.rdb$procedure_name)           AS name, \n");
 			sqlProcedures.Append("       TRIM(b.rdb$owner_name)               AS owner, \n");
 			sqlProcedures.Append("       cast(Coalesce(b.rdb$procedure_inputs, 0) as smallint) AS inputs, \n");
 			sqlProcedures.Append("       cast(Coalesce(b.rdb$procedure_outputs, 0) as smallint) AS outputs \n");
 			sqlProcedures.Append("FROM   rdb$procedures b \n");
-			
-			
+
+
 			sqlParameters.Append("SELECT TRIM(a.rdb$procedure_name)                            AS procedure_name, \n");
 			sqlParameters.Append("       TRIM(a.rdb$parameter_name)                            AS parameter_name, \n");
 			sqlParameters.Append("       CAST(a.rdb$parameter_number AS SMALLINT)              AS parameter_number \n");
@@ -237,7 +239,7 @@ namespace ServiceStack.OrmLite.Firebird
 			sqlParameters.Append("       CAST(b.rdb$field_scale AS SMALLINT)                   AS field_scale \n");
 			//sqlParameters.Append("       --b.rdb$field_type       AS field_type,  \n");
 			//sqlParameters.Append("       --b.rdb$field_sub_type   AS field_sub_type,  \n");
-			
+
 			sqlParameters.Append("FROM   rdb$procedure_parameters a \n");
 			sqlParameters.Append("       JOIN rdb$fields b \n");
 			sqlParameters.Append("         ON b.rdb$field_name = a.rdb$field_source \n");
@@ -248,34 +250,34 @@ namespace ServiceStack.OrmLite.Firebird
 			sqlParameters.Append("ORDER  BY a.rdb$procedure_name, \n");
 			sqlParameters.Append("          a.rdb$parameter_type, \n");
 			sqlParameters.Append("          a.rdb$parameter_number ");
-					
-					
 		}
 		
-		
-		private class FieldGenerator{
-			
+		private class FieldGenerator
+		{
+
 			[Alias("TABLENAME")]
-			public string TableName{
-				get; set;
+			public string TableName
+			{
+				get;
+				set;
 			}
-			
+
 			[Alias("FIELD_NAME")]
-			public string FieldName{
-				get; set;
+			public string FieldName
+			{
+				get;
+				set;
 			}
-			
+
 			[Alias("SEQUENCE_NAME")]
-			public string SequenceName{
-				get; set;
+			public string SequenceName
+			{
+				get;
+				set;
 			}
-			
+
 		}
-		
 	}
-	
-	
-	
 }
 
 /*ID--0--False--2 -- SMALLINT-- System.Int16-- 

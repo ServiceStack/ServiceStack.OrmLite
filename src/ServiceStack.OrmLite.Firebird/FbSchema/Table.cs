@@ -1,20 +1,20 @@
 using System;
 using ServiceStack.DataAnnotations;
-using ServiceStack.OrmLite.DbSchema;
+using ServiceStack.OrmLite.Firebird.DbSchema;
 
 namespace ServiceStack.OrmLite.Firebird
 {
-	public class Table:ITable
+	public class Table : ITable
 	{
-		public Table ()
+		public Table()
 		{
 		}
-		
+
 		[Alias("NAME")]
-		public  string  Name { get; set; }
+		public string Name { get; set; }
+
 		[Alias("OWNER")]
-    	public  string Owner { get; set; }
-		
+		public string Owner { get; set; }
 	}
 }
 

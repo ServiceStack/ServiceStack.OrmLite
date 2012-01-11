@@ -20,7 +20,7 @@ namespace ServiceStack.OrmLite.Tests
 			public DateTime CreatedDate { get; set; }
 		}
 
-		[Ignore]
+		[NUnit.Framework.Ignore]
 		[Test]
 		public void Can_execute_simple_query()
 		{

@@ -8,7 +8,6 @@ using ServiceStack.DataAnnotations;
 using ServiceStack.Common.Extensions;
 
 using ServiceStack.OrmLite;
-using ServiceStack.OrmLite.DbSchema;
 using ServiceStack.OrmLite.Firebird;
 
 namespace TestLiteFirebir03
