@@ -17,6 +17,7 @@ using System.Text;
 using ServiceStack.Logging;
 using ServiceStack.Text;
 using System.Diagnostics;
+using ServiceStack.Common.Extensions;
 
 namespace ServiceStack.OrmLite
 {
@@ -112,7 +113,22 @@ namespace ServiceStack.OrmLite
             InitColumnTypeMap();
             UpdateStringColumnDefinitions();
         }
-
+				
+		
+		private int defaultDecimalPrecision=18;
+		private int defaultDecimalScale=0;
+				
+		public int DefaultDecimalPrecision{
+			get { return defaultDecimalPrecision;}
+			set { defaultDecimalPrecision=value;}
+		}
+				
+		public int DefaultDecimalScale{
+			get { return defaultDecimalScale;}
+			set { defaultDecimalScale=value;}
+		}
+		
+		
         private int defaultStringLength = 8000; //SqlServer express limit
         public int DefaultStringLength
         {
@@ -303,7 +319,9 @@ namespace ServiceStack.OrmLite
                 string.Format("Property of type: {0} is not supported", fieldType.FullName));
         }
 
-        public virtual string GetColumnDefinition(string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement, bool isNullable, int? fieldLength, string defaultValue)
+        public virtual string GetColumnDefinition(string fieldName, Type fieldType, 
+			bool isPrimaryKey, bool autoIncrement, bool isNullable, 
+			int? fieldLength, int? scale, string defaultValue)
         {
             string fieldDefinition;
 
@@ -474,6 +492,85 @@ namespace ServiceStack.OrmLite
 
             return deleteSql;
         }
+		
+		public virtual string ToCreateTableStatement( Type tableType)
+        {
+            var sbColumns = new StringBuilder();
+            var sbConstraints = new StringBuilder();
+
+            var modelDef = tableType.GetModelDefinition();
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+                if (sbColumns.Length != 0) sbColumns.Append(", \n  ");
+
+                var columnDefinition = OrmLiteConfig.DialectProvider.GetColumnDefinition(
+                    fieldDef.FieldName,
+                    fieldDef.FieldType,
+                    fieldDef.IsPrimaryKey,
+                    fieldDef.AutoIncrement,
+                    fieldDef.IsNullable,
+                    fieldDef.FieldLength,
+					null,
+                    fieldDef.DefaultValue);
+
+                sbColumns.Append(columnDefinition);
+
+                if (fieldDef.ReferencesType == null) continue;
+
+                var refModelDef = fieldDef.ReferencesType.GetModelDefinition();
+                sbConstraints.AppendFormat(", \n\n  CONSTRAINT \"FK_{0}_{1}\" FOREIGN KEY (\"{2}\") REFERENCES \"{3}\" (\"{4}\")",
+                    modelDef.ModelName, refModelDef.ModelName, fieldDef.FieldName, refModelDef.ModelName, modelDef.PrimaryKey.FieldName);
+            }
+            var sql = new StringBuilder(string.Format(
+                "CREATE TABLE {0} \n(\n  {1}{2} \n); \n", OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef), sbColumns, sbConstraints));
+
+            return sql.ToString();
+        }
+		
+		public virtual List<string> ToCreateIndexStatements(Type tableType)
+        {
+            var sqlIndexes = new List<string>();
+
+            var modelDef = tableType.GetModelDefinition();
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+                if (!fieldDef.IsIndexed) continue;
+
+                var indexName = GetIndexName(fieldDef.IsUnique, modelDef.ModelName.SafeVarName(), fieldDef.FieldName);
+
+                sqlIndexes.Add(
+                    ToCreateIndexStatement(fieldDef.IsUnique, indexName, modelDef, fieldDef.FieldName));
+            }
+
+            foreach (var compositeIndex in modelDef.CompositeIndexes)
+            {
+                var indexName = GetIndexName(compositeIndex.Unique, modelDef.ModelName.SafeVarName(),
+                    string.Join("_", compositeIndex.FieldNames.ToArray()));
+
+                var indexNames = string.Join("\" ASC, \"", compositeIndex.FieldNames.ToArray());
+
+                sqlIndexes.Add(
+                    ToCreateIndexStatement(compositeIndex.Unique, indexName, modelDef, indexNames));
+            }
+
+            return sqlIndexes;
+        }
+
+        protected virtual string GetIndexName(bool isUnique, string modelName, string fieldName)
+        {
+            return string.Format("{0}idx_{1}_{2}", isUnique ? "u" : "", modelName, fieldName).ToLower();
+        }
+
+        protected virtual string ToCreateIndexStatement(bool isUnique, string indexName, ModelDefinition modelDef, string fieldName)
+        {
+            return string.Format("CREATE {0} INDEX {1} ON {2} (\"{3}\" ASC); \n",
+                    isUnique ? "UNIQUE" : "", indexName, OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef), fieldName);
+        }
+		
+		
+		public virtual List<string> ToCreateSequenceStatements(Type tableType){
+			return new List<string>();
+		}
 		
 		// TODO : make abstract  ??
 		public virtual string ToExistStatement( Type fromTableType,

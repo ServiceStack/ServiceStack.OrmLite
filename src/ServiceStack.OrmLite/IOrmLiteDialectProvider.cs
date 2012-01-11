@@ -33,13 +33,13 @@ namespace ServiceStack.OrmLite
 
 		string GetColumnDefinition(
 			string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement, 
-			bool isNullable, int? fieldLength, string defaultValue);
+			bool isNullable, int? fieldLength, 
+			int? scale, string defaultValue);
 
 		long GetLastInsertId(IDbCommand command);
 				
 		// 
-		
-				
+						
 		string ToSelectStatement( Type tableType, string sqlFilter, params object[] filterParams);
 		
 		string ToInsertRowStatement( object objWithProperties, IDbCommand command);
@@ -59,6 +59,11 @@ namespace ServiceStack.OrmLite
 		                                          params object[] filterParams);
 		
 		string ToExecuteProcedureStatement(object objWithProperties);
+		
+		string ToCreateTableStatement(Type tableType);
+		
+		List<string> ToCreateIndexStatements(Type tableType);
+		List<string> ToCreateSequenceStatements(Type tableType);
 		
 	}
 	

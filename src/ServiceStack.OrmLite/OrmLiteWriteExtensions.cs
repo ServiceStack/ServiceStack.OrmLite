@@ -34,79 +34,7 @@ namespace ServiceStack.OrmLite
             else
                 Log.Debug(fmt);
         }
-
-        public static string ToCreateTableStatement(this Type tableType)
-        {
-            var sbColumns = new StringBuilder();
-            var sbConstraints = new StringBuilder();
-
-            var modelDef = tableType.GetModelDefinition();
-            foreach (var fieldDef in modelDef.FieldDefinitions)
-            {
-                if (sbColumns.Length != 0) sbColumns.Append(", \n  ");
-
-                var columnDefinition = OrmLiteConfig.DialectProvider.GetColumnDefinition(
-                    fieldDef.FieldName,
-                    fieldDef.FieldType,
-                    fieldDef.IsPrimaryKey,
-                    fieldDef.AutoIncrement,
-                    fieldDef.IsNullable,
-                    fieldDef.FieldLength,
-                    fieldDef.DefaultValue);
-
-                sbColumns.Append(columnDefinition);
-
-                if (fieldDef.ReferencesType == null) continue;
-
-                var refModelDef = fieldDef.ReferencesType.GetModelDefinition();
-                sbConstraints.AppendFormat(", \n\n  CONSTRAINT \"FK_{0}_{1}\" FOREIGN KEY (\"{2}\") REFERENCES \"{3}\" (\"{4}\")",
-                    modelDef.ModelName, refModelDef.ModelName, fieldDef.FieldName, refModelDef.ModelName, modelDef.PrimaryKey.FieldName);
-            }
-            var sql = new StringBuilder(string.Format(
-                "CREATE TABLE {0} \n(\n  {1}{2} \n); \n", OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef), sbColumns, sbConstraints));
-
-            return sql.ToString();
-        }
-
-        public static List<string> ToCreateIndexStatements(this Type tableType)
-        {
-            var sqlIndexes = new List<string>();
-
-            var modelDef = tableType.GetModelDefinition();
-            foreach (var fieldDef in modelDef.FieldDefinitions)
-            {
-                if (!fieldDef.IsIndexed) continue;
-
-                var indexName = GetIndexName(fieldDef.IsUnique, modelDef.ModelName.SafeVarName(), fieldDef.FieldName);
-
-                sqlIndexes.Add(
-                    ToCreateIndexStatement(fieldDef.IsUnique, indexName, modelDef, fieldDef.FieldName));
-            }
-
-            foreach (var compositeIndex in modelDef.CompositeIndexes)
-            {
-                var indexName = GetIndexName(compositeIndex.Unique, modelDef.ModelName.SafeVarName(),
-                    string.Join("_", compositeIndex.FieldNames.ToArray()));
-
-                var indexNames = string.Join("\" ASC, \"", compositeIndex.FieldNames.ToArray());
-
-                sqlIndexes.Add(
-                    ToCreateIndexStatement(compositeIndex.Unique, indexName, modelDef, indexNames));
-            }
-
-            return sqlIndexes;
-        }
-
-        private static string GetIndexName(bool isUnique, string modelName, string fieldName)
-        {
-            return string.Format("{0}idx_{1}_{2}", isUnique ? "u" : "", modelName, fieldName).ToLower();
-        }
-
-        private static string ToCreateIndexStatement(bool isUnique, string indexName, ModelDefinition modelDef, string fieldName)
-        {
-            return string.Format("CREATE {0} INDEX {1} ON {2} (\"{3}\" ASC); \n",
-                    isUnique ? "UNIQUE" : "", indexName, OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef), fieldName);
-        }
+  
 
         public static void CreateTables(this IDbCommand dbCmd, bool overwrite, params Type[] tableTypes)
         {
@@ -140,9 +68,9 @@ namespace ServiceStack.OrmLite
 
             try
             {
-                ExecuteSql(dbCmd, ToCreateTableStatement(modelType));
+                ExecuteSql(dbCmd, OrmLiteConfig.DialectProvider.ToCreateTableStatement(modelType));
 
-                var sqlIndexes = ToCreateIndexStatements(modelType);
+                var sqlIndexes = OrmLiteConfig.DialectProvider.ToCreateIndexStatements(modelType);
                 foreach (var sqlIndex in sqlIndexes)
                 {
                     try
@@ -159,6 +87,22 @@ namespace ServiceStack.OrmLite
                         throw;
                     }
                 }
+				
+				var sequences = OrmLiteConfig.DialectProvider.ToCreateSequenceStatements(modelType);
+				foreach( var seq in sequences) {
+					
+					try{
+						dbCmd.ExecuteSql(seq);
+					}
+					catch (Exception ex){
+						if (IgnoreAlreadyExistsError(ex))
+                        {
+                            Log.DebugFormat("Ignoring existing generator '{0}': {1}", seq, ex.Message);
+                            continue;
+                        }
+                        throw;
+					}
+				}
             }
             catch (Exception ex)
             {
@@ -202,8 +146,10 @@ namespace ServiceStack.OrmLite
             //ignore Sqlite table already exists error
             const string sqliteAlreadyExistsError = "already exists";
             const string sqlServerAlreadyExistsError = "There is already an object named";
+			const string firbirdAlreadyExistsError = "unsuccessful metadata update";
             return ex.Message.Contains(sqliteAlreadyExistsError)
-                   || ex.Message.Contains(sqlServerAlreadyExistsError);
+                   || ex.Message.Contains(sqlServerAlreadyExistsError)
+				   || ex.Message.Contains(firbirdAlreadyExistsError)	;
         }
 
         public static T PopulateWithSqlReader<T>(this T objWithProperties, IDataReader dataReader)

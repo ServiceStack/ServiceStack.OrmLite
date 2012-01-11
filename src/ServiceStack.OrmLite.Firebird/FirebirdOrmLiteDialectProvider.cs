@@ -7,6 +7,7 @@ using ServiceStack.Common.Utils;
 using System.Text;
 using FirebirdSql.Data.FirebirdClient;
 using ServiceStack.OrmLite;
+using ServiceStack.Common.Extensions;
 
 namespace ServiceStack.OrmLite.Firebird
 {
@@ -22,6 +23,9 @@ namespace ServiceStack.OrmLite.Firebird
 		{
 			base.BoolColumnDefinition = base.IntColumnDefinition;
 			base.GuidColumnDefinition = "CHAR(16) character set octets";
+			base.AutoIncrementDefinition= string.Empty;
+			base.DateTimeColumnDefinition="DATE";
+			base.TimeColumnDefinition = "TIMESTAMP";
 			base.InitColumnTypeMap();
 		}
 
@@ -244,6 +248,150 @@ namespace ServiceStack.OrmLite.Firebird
 			return deleteSql;
 		}
 		
+		
+		public override string ToCreateTableStatement( Type tableType){
+			var sbColumns = new StringBuilder();
+            var sbConstraints = new StringBuilder();
+			var sbPk= new StringBuilder();			
+						
+            var modelDef = OrmLiteDialectProviderBase.GetModel( tableType);
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+				if(fieldDef.IsPrimaryKey) {
+					if( sbPk.Length !=0) sbPk.AppendFormat(",\"{0}\"", fieldDef.FieldName);
+					else sbPk.AppendFormat("\"{0}\"", fieldDef.FieldName);
+				}
+								
+                if (sbColumns.Length != 0) sbColumns.Append(", \n  ");
+
+                var columnDefinition = OrmLiteConfig.DialectProvider.GetColumnDefinition(
+                    fieldDef.FieldName,
+                    fieldDef.FieldType,
+                    fieldDef.IsPrimaryKey,
+                    fieldDef.AutoIncrement,
+                    fieldDef.IsNullable,
+                    fieldDef.FieldLength,
+					fieldDef.Scale,
+                    fieldDef.DefaultValue);
+
+                sbColumns.Append(columnDefinition);
+
+                if (fieldDef.ReferencesType == null) continue;
+
+                var refModelDef = OrmLiteDialectProviderBase.GetModel( fieldDef.ReferencesType);
+                sbConstraints.AppendFormat(", \n\n  CONSTRAINT \"FK_{0}_{1}\" FOREIGN KEY (\"{2}\") REFERENCES \"{3}\" (\"{4}\")",
+                    modelDef.ModelName, refModelDef.ModelName, fieldDef.FieldName, refModelDef.ModelName, modelDef.PrimaryKey.FieldName);
+            }
+			
+			if( sbPk.Length !=0) sbColumns.AppendFormat(", \n  PRIMARY KEY({0})", sbPk.ToString());
+			
+            var sql = new StringBuilder(string.Format(
+                "CREATE TABLE {0} \n(\n  {1}{2} \n); \n",
+				OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef),
+				sbColumns,
+				sbConstraints));
+			
+			Console.WriteLine(sql.ToString());
+			return sql.ToString();
+			
+		}
+		
+		public override List<string> ToCreateSequenceStatements(Type tableType){
+			List<string> gens = new  List<string>();
+			
+			var modelDef = OrmLiteDialectProviderBase.GetModel( tableType);
+			
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+				if(fieldDef.AutoIncrement || ! fieldDef.Sequence.IsNullOrEmpty()){
+			
+					var sequence = fieldDef.Sequence.IsNullOrEmpty() ?
+						"CREATE GENERATOR \""+modelDef.ModelName+"_"+ fieldDef.FieldName+"_GEN\";":
+						"CREATE GENERATOR \""+fieldDef.Sequence+"\";";	
+					gens.Add(sequence);
+				}
+			}
+			return gens;
+		}
+		
+		public override string GetColumnDefinition (string fieldName, Type fieldType, 
+			bool isPrimaryKey, bool autoIncrement, bool isNullable, 
+			int? fieldLength, int? scale, string defaultValue)
+		{
+			string fieldDefinition;
+
+            if (fieldType == typeof(string))
+            {
+                fieldDefinition = string.Format(StringLengthColumnDefinitionFormat, fieldLength.GetValueOrDefault(DefaultStringLength));
+            }
+            else if( fieldType==typeof(Decimal) ){
+				fieldDefinition= string.Format("{0} ({1},{2})", DecimalColumnDefinition, 
+					fieldLength.GetValueOrDefault(DefaultDecimalPrecision),
+					scale.GetValueOrDefault(DefaultDecimalScale) );
+			}
+            else {
+                if (!DbTypes.ColumnTypeMap.TryGetValue(fieldType, out fieldDefinition))
+                {
+                    fieldDefinition = this.GetUndefinedColumnDefintion(fieldType);
+                }
+            }
+
+            var sql = new StringBuilder();
+            sql.AppendFormat("\"{0}\" {1}", fieldName, fieldDefinition);
+
+            
+            if ( ! isNullable)
+            {
+                sql.Append(" NOT NULL");
+            }
+            
+
+            if (!string.IsNullOrEmpty(defaultValue))
+            {
+                sql.AppendFormat(DefaultValueFormat, defaultValue);
+            }
+
+            return sql.ToString();
+		}
+		
+		
+		public override List<string> ToCreateIndexStatements(Type tableType)
+        {
+            var sqlIndexes = new List<string>();
+
+            var modelDef = OrmLiteDialectProviderBase.GetModel(tableType);
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+                if (!fieldDef.IsIndexed) continue;
+
+                var indexName = GetIndexName(fieldDef.IsUnique, modelDef.ModelName.SafeVarName(), fieldDef.FieldName);
+
+                sqlIndexes.Add(
+                    ToCreateIndexStatement(fieldDef.IsUnique, indexName, modelDef, fieldDef.FieldName));
+            }
+
+            foreach (var compositeIndex in modelDef.CompositeIndexes)
+            {
+                var indexName = GetIndexName(compositeIndex.Unique, modelDef.ModelName.SafeVarName(),
+                    string.Join("_", compositeIndex.FieldNames.ToArray()));
+
+                var indexNames = string.Join(",", compositeIndex.FieldNames.ToArray());
+
+                sqlIndexes.Add(
+                    ToCreateIndexStatement(compositeIndex.Unique, indexName, modelDef, indexNames));
+            }
+
+            return sqlIndexes;
+        }
+		
+		protected override string ToCreateIndexStatement(bool isUnique, string indexName, ModelDefinition modelDef, string fieldName)
+        {
+            return string.Format("CREATE {0} INDEX {1} ON {2} (\"{3}\" ); \n",
+				isUnique ? "UNIQUE" : "", 
+				indexName, 
+				OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef),
+				fieldName);
+        }
 		
 		
 		public override string ToExistStatement( Type fromTableType,
