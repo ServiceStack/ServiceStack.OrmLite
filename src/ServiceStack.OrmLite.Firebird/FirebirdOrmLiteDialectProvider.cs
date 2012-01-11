@@ -291,7 +291,6 @@ namespace ServiceStack.OrmLite.Firebird
 				sbColumns,
 				sbConstraints));
 			
-			Console.WriteLine(sql.ToString());
 			return sql.ToString();
 			
 		}
