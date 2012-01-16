@@ -22,7 +22,7 @@ namespace TestLiteFirebird00
 		}
 		
 		[AutoIncrement]
-		[Sequence("Author_Id_GEN")]
+		//[Sequence("Author_Id_GEN")]
 		public Int32 Id { get; set;}
 		
 		[Required]
@@ -35,8 +35,9 @@ namespace TestLiteFirebird00
 		
 		public DateTime ? LastActivity  { get; set;}
 		
-		public Decimal? Earnings { get; set;}  // Precision=18, scale=0 default values
+		public Decimal? Earnings { get; set;}  // Precision=18, scale=12 default values
 		
+		//[Alias("Active")] // Active Firebird Reserved  ?
 		public bool Active { get; set; } 
 		
 		[StringLength(80)]
@@ -51,7 +52,7 @@ namespace TestLiteFirebird00
 		}
 		
 		[AutoIncrement]
-		[Sequence("Book_Id_GEN")]
+		//[Sequence("Book_Id_GEN")]
 		public Int32 Id { get; set;}
 		
 		[References(typeof(Author))]
@@ -75,7 +76,7 @@ namespace TestLiteFirebird00
 			       "User=SYSDBA;Password=masterkey;Database=employee.fdb;DataSource=localhost;Dialect=3;charset=ISO8859_1;".OpenDbConnection())
 			using ( IDbCommand dbCmd = db.CreateCommand())
 			{
-				try{
+				//try{
 					dbCmd.CreateTable<Author>(true);
 					dbCmd.CreateTable<Book>(true);
 					
@@ -154,12 +155,12 @@ namespace TestLiteFirebird00
 					
 					dbCmd.DropTable<Book>();
 					dbCmd.DropTable<Author>();
-				}
+				//}
 				
-				catch(Exception e){
-					Console.WriteLine("Error : " + e.Message);
-					return;
-				}
+				//catch(Exception e){
+				//	Console.WriteLine("Error : " + e.Message);
+				//	return;
+				//}
 				Console.WriteLine("This is The End my friend !");
 				
 			}

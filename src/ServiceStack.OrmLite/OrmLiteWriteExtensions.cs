@@ -95,7 +95,7 @@ namespace ServiceStack.OrmLite
 						dbCmd.ExecuteSql(seq);
 					}
 					catch (Exception ex){
-						if (IgnoreAlreadyExistsError(ex))
+						if (IgnoreAlreadyExistsGeneratorError(ex))
                         {
                             Log.DebugFormat("Ignoring existing generator '{0}': {1}", seq, ex.Message);
                             continue;
@@ -146,12 +146,21 @@ namespace ServiceStack.OrmLite
             //ignore Sqlite table already exists error
             const string sqliteAlreadyExistsError = "already exists";
             const string sqlServerAlreadyExistsError = "There is already an object named";
-			const string firbirdAlreadyExistsError = "unsuccessful metadata update";
-            return ex.Message.Contains(sqliteAlreadyExistsError)
-                   || ex.Message.Contains(sqlServerAlreadyExistsError)
-				   || ex.Message.Contains(firbirdAlreadyExistsError)	;
+			 return ex.Message.Contains(sqliteAlreadyExistsError)
+                   || ex.Message.Contains(sqlServerAlreadyExistsError)	;
         }
-
+		
+		//DEFINE GENERATOR failed
+		//
+		
+		private static bool IgnoreAlreadyExistsGeneratorError(Exception ex)
+        {
+            const string fbError = "attempt to store duplicate value";
+            return ex.Message.Contains(fbError);
+                   
+        }
+		
+		
         public static T PopulateWithSqlReader<T>(this T objWithProperties, IDataReader dataReader)
         {
             var fieldDefs = ModelDefinition<T>.Definition.FieldDefinitions.ToArray();
@@ -163,7 +172,7 @@ namespace ServiceStack.OrmLite
         {
             foreach (var fieldDef in fieldDefs)
             {
-				var value = dataReader.GetValue(dataReader.GetOrdinal(fieldDef.FieldName));
+				var value = dataReader.GetValue(dataReader.GetOrdinal( fieldDef.FieldName ));
                 fieldDef.SetValue(objWithProperties, value);
             }
             return objWithProperties;
@@ -215,8 +224,9 @@ namespace ServiceStack.OrmLite
         {
             var modelDef = ModelDefinition<T>.Definition;
 
-            var sql = string.Format("DELETE FROM {0} WHERE \"{1}\" = {2}",
-                OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef), modelDef.PrimaryKey.FieldName,
+            var sql = string.Format("DELETE FROM {0} WHERE {1} = {2}",
+                OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef),
+				OrmLiteConfig.DialectProvider.GetFieldNameDelimited( modelDef.PrimaryKey.FieldName),
                 OrmLiteConfig.DialectProvider.GetQuotedValue(id, id.GetType()));
 
             dbCmd.ExecuteSql(sql);
@@ -230,8 +240,10 @@ namespace ServiceStack.OrmLite
 
             var modelDef = ModelDefinition<T>.Definition;
 
-            var sql = string.Format("DELETE FROM {0} WHERE \"{1}\" IN ({2})",
-                OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef), modelDef.PrimaryKey.FieldName, sqlIn);
+            var sql = string.Format("DELETE FROM {0} WHERE {1} IN ({2})",
+                OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef), 
+				OrmLiteConfig.DialectProvider.GetFieldNameDelimited(modelDef.PrimaryKey.FieldName),
+				sqlIn);
 
             dbCmd.ExecuteSql(sql);
         }

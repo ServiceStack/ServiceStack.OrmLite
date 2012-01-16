@@ -113,7 +113,7 @@ namespace ServiceStack.OrmLite
 		{
 			var sql = new StringBuilder();
 			var modelDef = ModelDefinition<TModel>.Definition;
-		    sql.AppendFormat("SELECT {0} FROM {1}", modelDef.GetColumnNames(),
+		    sql.AppendFormat("SELECT {0} FROM {1}", OrmLiteConfig.DialectProvider.GetColumnNames( modelDef),
 		                     OrmLiteConfig.DialectProvider.GetTableNameDelimited(fromTableType.GetModelDefinition()));
             if (!string.IsNullOrEmpty(sqlFilter))
 			{

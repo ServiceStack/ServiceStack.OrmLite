@@ -65,6 +65,10 @@ namespace ServiceStack.OrmLite
 		List<string> ToCreateIndexStatements(Type tableType);
 		List<string> ToCreateSequenceStatements(Type tableType);
 		
+		string GetColumnNames(ModelDefinition modelDef);
+		
+		string GetFieldNameDelimited(string fieldName);
+		
 	}
 	
 }

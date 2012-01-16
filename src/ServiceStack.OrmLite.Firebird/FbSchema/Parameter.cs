@@ -70,7 +70,7 @@ namespace ServiceStack.OrmLite.Firebird
 						t = Nullable ? typeof(Byte?[]) : typeof(Byte[]);
 						break;
 
-					case "DOUBLE":
+					case "DOUBLE PRECISION":
 						t = Nullable ? typeof(Double?) : typeof(Double);
 						break;
 

@@ -116,7 +116,7 @@ namespace ServiceStack.OrmLite
 				
 		
 		private int defaultDecimalPrecision=18;
-		private int defaultDecimalScale=0;
+		private int defaultDecimalScale=12;
 				
 		public int DefaultDecimalPrecision{
 			get { return defaultDecimalPrecision;}
@@ -567,6 +567,10 @@ namespace ServiceStack.OrmLite
                     isUnique ? "UNIQUE" : "", indexName, OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef), fieldName);
         }
 		
+		public virtual string GetColumnNames(ModelDefinition modelDef){
+			return modelDef.GetColumnNames();
+		}
+		
 		
 		public virtual List<string> ToCreateSequenceStatements(Type tableType){
 			return new List<string>();
@@ -601,6 +605,11 @@ namespace ServiceStack.OrmLite
 		public static string IdField{
 			get {return  OrmLiteConfigExtensions.IdField ;}
 		}
+	
+		public virtual string GetFieldNameDelimited(string fieldName){
+			return string.Format("\"{0}\"", fieldName);
+		}
+		
 		
     }
 }

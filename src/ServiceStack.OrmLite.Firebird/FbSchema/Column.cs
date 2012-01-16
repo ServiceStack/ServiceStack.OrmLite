@@ -90,7 +90,7 @@ namespace ServiceStack.OrmLite.Firebird
 						t = Nullable ? typeof(Decimal?) : typeof(Decimal);
 						break;
 
-					case "DOUBLE":
+					case "DOUBLE PRECISION":
 						t = Nullable ? typeof(Double?) : typeof(Double);
 						break;
 
