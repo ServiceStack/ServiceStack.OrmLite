@@ -21,7 +21,7 @@ namespace ServiceStack.OrmLite.Firebird.DbSchema
 					"using System.ComponentModel.DataAnnotations;\n" +
 					"using ServiceStack.Common;\n" +
 					"using ServiceStack.DataAnnotations;\n" +
-					"using ServiceStack.OrmSimple;\n";
+					"using ServiceStack.OrmLite;\n";
 
 			SpaceName = "Database.Records";
 		}
