@@ -22,6 +22,7 @@ namespace TestClassWriter
 
 				ClassWriter cw = new ClassWriter(){
 					Schema=fbd,
+					GenerateMetadata=true,
 					//SpaceName= "your.app.namespace",
 					//OutputDirectory="outputpath"
 					//Usings="Using System;\nUsing System.Data\n"

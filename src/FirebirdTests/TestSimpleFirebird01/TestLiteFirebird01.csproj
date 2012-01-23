@@ -34,13 +34,13 @@
     <Reference Include="System.Core" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Data" />
-    <Reference Include="ServiceStack.Interfaces">
+    <Reference Include="ServiceStack.Interfaces, Version=1.0.4339.7067, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\..\..\lib\ServiceStack.Interfaces.dll</HintPath>
     </Reference>
-    <Reference Include="ServiceStack.Text">
+    <Reference Include="ServiceStack.Text, Version=3.0.6.5609, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\..\..\lib\ServiceStack.Text.dll</HintPath>
     </Reference>
-    <Reference Include="ServiceStack.Common">
+    <Reference Include="ServiceStack.Common, Version=1.0.4339.7068, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\..\..\lib\ServiceStack.Common.dll</HintPath>
     </Reference>
   </ItemGroup>
