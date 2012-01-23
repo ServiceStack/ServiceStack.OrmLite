@@ -27,17 +27,7 @@ namespace Database.Records{
 
 namespace TestLiteFirebird2
 {
-	public static class Extensions{
-		public static void Get<T>(this IDbCommand dbConn, IHasId<T> record){
-		}
-		public static void Put<T>(this IDbCommand dbConn, IHasId<T> record){
-		}
-		public static void Post<T>(this IDbCommand dbConn, IHasId<T> record){
-		}
-		public static void Delete<T>(this IDbCommand dbConn, IHasId<T> record){
-		}
-	}
-		
+			
 	class MainClass
 	{
 		public static void Main (string[] args)
