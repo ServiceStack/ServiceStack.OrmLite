@@ -9,7 +9,7 @@ namespace ServiceStack.OrmLite
 	/// Wrapper IDbConnection class to allow for connection sharing, mocking, etc.
 	/// </summary>
 	public class OrmLiteConnection
-		: IDbConnection//, IHasDbConnection 
+		: IDbConnection, IHasDbConnection 
 	{
 		private readonly OrmLiteConnectionFactory factory;
 		private IDbConnection dbConnection;
