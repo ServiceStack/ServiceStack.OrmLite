@@ -86,11 +86,6 @@
     <Compile Include="UseCase\SimpleUseCase.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config">
-      <SubType>Designer</SubType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\ServiceStack.OrmLite.MySql\ServiceStack.OrmLite.MySql.csproj">
       <Project>{FD20F088-ACC0-4979-AC0C-8C541C2E7DE5}</Project>
       <Name>ServiceStack.OrmLite.MySql</Name>
@@ -99,6 +94,11 @@
       <Project>{96179AC6-F6F1-40C3-9FDD-4F6582F54C5C}</Project>
       <Name>ServiceStack.OrmLite</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
