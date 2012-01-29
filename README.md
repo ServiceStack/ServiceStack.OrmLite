@@ -54,6 +54,7 @@ OrmLite is also included in [ServiceStack](https://github.com/ServiceStack/Servi
 Below is a complete stand-alone example. No other config or classes is required for it to run. It's also available as a 
 [stand-alone unit test](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLite.Tests/UseCase/CustomerOrdersUseCase.cs).
 
+```csharp
     public enum PhoneType {
         Home,
         Work,
@@ -237,6 +238,7 @@ Below is a complete stand-alone example. No other config or classes is required 
 
         trans.Commit();
     }
+```
 
 Running this against a SQL Server database will yield the results below:
 
