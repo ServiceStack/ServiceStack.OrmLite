@@ -59,8 +59,13 @@ namespace ServiceStack.OrmLite
                 if (fieldDef.ReferencesType == null) continue;
 
                 var refModelDef = fieldDef.ReferencesType.GetModelDefinition();
-                sbConstraints.AppendFormat(", \n\n  CONSTRAINT \"FK_{0}_{1}\" FOREIGN KEY (\"{2}\") REFERENCES \"{3}\" (\"{4}\")",
-                    modelDef.ModelName, refModelDef.ModelName, fieldDef.FieldName, refModelDef.ModelName, modelDef.PrimaryKey.FieldName);
+                sbConstraints.AppendFormat(
+                    ", \n\n  CONSTRAINT {0} FOREIGN KEY ({1}) REFERENCES {2} ({3})",
+                    OrmLiteConfig.DialectProvider.GetNameDelimited(string.Format("FK_{0}_{1}", modelDef.ModelName,
+                                                                                       refModelDef.ModelName)),
+                    OrmLiteConfig.DialectProvider.GetNameDelimited(fieldDef.FieldName),
+                    OrmLiteConfig.DialectProvider.GetTableNameDelimited(refModelDef),
+                    OrmLiteConfig.DialectProvider.GetNameDelimited(refModelDef.PrimaryKey.FieldName));
             }
             var sql = new StringBuilder(string.Format(
                 "CREATE TABLE {0} \n(\n  {1}{2} \n); \n", OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef), sbColumns, sbConstraints));
@@ -88,10 +93,12 @@ namespace ServiceStack.OrmLite
                 var indexName = GetIndexName(compositeIndex.Unique, modelDef.ModelName.SafeVarName(),
                     string.Join("_", compositeIndex.FieldNames.ToArray()));
 
-                var indexNames = string.Join("\" ASC, \"", compositeIndex.FieldNames.ToArray());
+                var indexNames = string.Join(" ASC, ",
+                                             compositeIndex.FieldNames.ConvertAll(
+                                                 n => OrmLiteConfig.DialectProvider.GetNameDelimited(n)).ToArray());
 
                 sqlIndexes.Add(
-                    ToCreateIndexStatement(compositeIndex.Unique, indexName, modelDef, indexNames));
+                    ToCreateIndexStatement(compositeIndex.Unique, indexName, modelDef, indexNames, true));
             }
 
             return sqlIndexes;
@@ -102,10 +109,12 @@ namespace ServiceStack.OrmLite
             return string.Format("{0}idx_{1}_{2}", isUnique ? "u" : "", modelName, fieldName).ToLower();
         }
 
-        private static string ToCreateIndexStatement(bool isUnique, string indexName, ModelDefinition modelDef, string fieldName)
+        private static string ToCreateIndexStatement(bool isUnique, string indexName, ModelDefinition modelDef, string fieldName, bool isCombined = false)
         {
-            return string.Format("CREATE {0} INDEX {1} ON {2} (\"{3}\" ASC); \n",
-                    isUnique ? "UNIQUE" : "", indexName, OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef), fieldName);
+            return string.Format("CREATE {0} INDEX {1} ON {2} ({3} ASC); \n",
+                                 isUnique ? "UNIQUE" : "", indexName,
+                                 OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef),
+                                 (isCombined) ? fieldName : OrmLiteConfig.DialectProvider.GetNameDelimited(fieldName));
         }
 
         public static void CreateTables(this IDbCommand dbCmd, bool overwrite, params Type[] tableTypes)
@@ -269,9 +278,10 @@ namespace ServiceStack.OrmLite
         {
             var modelDef = ModelDefinition<T>.Definition;
 
-            var sql = string.Format("DELETE FROM {0} WHERE \"{1}\" = {2}",
-                OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef), modelDef.PrimaryKey.FieldName,
-                OrmLiteConfig.DialectProvider.GetQuotedValue(id, id.GetType()));
+            var sql = string.Format("DELETE FROM {0} WHERE {1} = {2}",
+                                    OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef),
+                                    OrmLiteConfig.DialectProvider.GetNameDelimited(modelDef.PrimaryKey.FieldName),
+                                    OrmLiteConfig.DialectProvider.GetQuotedValue(id, id.GetType()));
 
             dbCmd.ExecuteSql(sql);
         }
@@ -284,8 +294,10 @@ namespace ServiceStack.OrmLite
 
             var modelDef = ModelDefinition<T>.Definition;
 
-            var sql = string.Format("DELETE FROM {0} WHERE \"{1}\" IN ({2})",
-                OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef), modelDef.PrimaryKey.FieldName, sqlIn);
+            var sql = string.Format("DELETE FROM {0} WHERE {1} IN ({2})",
+                                    OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef),
+                                    OrmLiteConfig.DialectProvider.GetNameDelimited(modelDef.PrimaryKey.FieldName),
+                                    sqlIn);
 
             dbCmd.ExecuteSql(sql);
         }

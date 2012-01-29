@@ -292,6 +292,11 @@ namespace ServiceStack.OrmLite
             return string.Format("\"{0}\"", modelDef.ModelName);
         }
 
+        public virtual string GetNameDelimited(string columnName)
+        {
+            return string.Format("\"{0}\"", columnName);
+        }
+
         protected virtual string GetUndefinedColumnDefintion(Type fieldType)
         {
             if (TypeSerializer.CanCreateFromString(fieldType))
@@ -320,7 +325,7 @@ namespace ServiceStack.OrmLite
             }
 
             var sql = new StringBuilder();
-            sql.AppendFormat("\"{0}\" {1}", fieldName, fieldDefinition);
+            sql.AppendFormat("{0} {1}", GetNameDelimited(fieldName), fieldDefinition);
 
             if (isPrimaryKey)
             {
@@ -397,7 +402,7 @@ namespace ServiceStack.OrmLite
 
                 try
                 {
-                    sbColumnNames.Append(string.Format("\"{0}\"", fieldDef.FieldName));
+                    sbColumnNames.Append(GetNameDelimited(fieldDef.Name));
                     sbColumnValues.Append(fieldDef.GetQuotedValue(objWithProperties));
                 }
                 catch (Exception ex)
@@ -426,13 +431,13 @@ namespace ServiceStack.OrmLite
                     {
                         if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
 
-                        sqlFilter.AppendFormat("\"{0}\" = {1}", fieldDef.FieldName, fieldDef.GetQuotedValue(objWithProperties));
+                        sqlFilter.AppendFormat("{0} = {1}", GetNameDelimited(fieldDef.FieldName), fieldDef.GetQuotedValue(objWithProperties));
 
                         continue;
                     }
 
                     if (sql.Length > 0) sql.Append(",");
-                    sql.AppendFormat("\"{0}\" = {1}", fieldDef.FieldName, fieldDef.GetQuotedValue(objWithProperties));
+                    sql.AppendFormat("{0} = {1}", GetNameDelimited(fieldDef.FieldName), fieldDef.GetQuotedValue(objWithProperties));
                 }
                 catch (Exception ex)
                 {
@@ -460,7 +465,7 @@ namespace ServiceStack.OrmLite
                     {
                         if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
 
-                        sqlFilter.AppendFormat("\"{0}\" = {1}", fieldDef.FieldName, fieldDef.GetQuotedValue(objWithProperties));
+                        sqlFilter.AppendFormat("{0} = {1}", GetNameDelimited(fieldDef.FieldName), fieldDef.GetQuotedValue(objWithProperties));
                     }
                 }
                 catch (Exception ex)

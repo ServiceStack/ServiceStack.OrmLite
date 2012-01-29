@@ -31,6 +31,8 @@ namespace ServiceStack.OrmLite
 
 	    string GetTableNameDelimited(ModelDefinition modelDef);
 
+        string GetNameDelimited(string columnName);
+
 		string GetColumnDefinition(
 			string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement, 
 			bool isNullable, int? fieldLength, string defaultValue);
