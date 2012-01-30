@@ -402,7 +402,13 @@ namespace ServiceStack.OrmLite
 		
 		public virtual string ToInsertRowStatement( object objWithProperties,  IDbCommand command)
         {
-            var sbColumnNames = new StringBuilder();
+			return ToInsertRowStatement(objWithProperties, new List<string>(), command);
+        }
+		
+		public virtual string ToInsertRowStatement( object objWithProperties, IList<string>insertFields, IDbCommand command){
+			
+			if( insertFields==null ) insertFields = new List<string>(); 
+			var sbColumnNames = new StringBuilder();
             var sbColumnValues = new StringBuilder();
 			var modelDef= objWithProperties.GetType().GetModelDefinition();
                     
@@ -410,6 +416,8 @@ namespace ServiceStack.OrmLite
             {
                 if (fieldDef.AutoIncrement) continue;
 
+				if( insertFields.Count>0 && !insertFields.Contains( fieldDef.Name )) continue;
+				
                 if (sbColumnNames.Length > 0) sbColumnNames.Append(",");
                 if (sbColumnValues.Length > 0) sbColumnValues.Append(",");
 
@@ -429,9 +437,17 @@ namespace ServiceStack.OrmLite
                                     OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef), sbColumnNames, sbColumnValues);
 
             return sql;
-        }
+		}
 		
+				
 		public virtual string ToUpdateRowStatement(object objWithProperties){
+			return ToUpdateRowStatement(objWithProperties, new List<string>());
+		}
+		
+		
+		public virtual string ToUpdateRowStatement(object objWithProperties, IList<string>updateFields){
+			
+			if (updateFields==null) updateFields= new List<string>();
 			var sqlFilter = new StringBuilder();
             var sql = new StringBuilder();
 			var modelDef= objWithProperties.GetType().GetModelDefinition();
@@ -440,7 +456,7 @@ namespace ServiceStack.OrmLite
             {
                 try
                 {
-                    if (fieldDef.IsPrimaryKey)
+                    if (fieldDef.IsPrimaryKey && updateFields.Count==0)
                     {
                         if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
 
@@ -448,7 +464,8 @@ namespace ServiceStack.OrmLite
 
                         continue;
                     }
-
+					
+					if( updateFields.Count>0 && !updateFields.Contains( fieldDef.Name )) continue;
                     if (sql.Length > 0) sql.Append(",");
                     sql.AppendFormat("\"{0}\" = {1}", fieldDef.FieldName, fieldDef.GetQuotedValue(objWithProperties));
                 }
@@ -458,12 +475,12 @@ namespace ServiceStack.OrmLite
                 }
             }
 
-            var updateSql = string.Format("UPDATE {0} SET {1} WHERE {2}",
-                OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef), sql, sqlFilter);
+            var updateSql = string.Format("UPDATE {0} SET {1} {2}",
+                GetTableNameDelimited(modelDef), sql, (sqlFilter.Length>0? "WHERE "+ sqlFilter:""));
+				
 
             return updateSql;
 		}
-		
 		
 		public virtual string ToDeleteRowStatement(object objWithProperties)
         {
@@ -610,6 +627,9 @@ namespace ServiceStack.OrmLite
 			return string.Format("\"{0}\"", fieldName);
 		}
 		
+		public virtual SqlExpressionVisitor<T> ExpressionVisitor<T>(){
+			throw new NotImplementedException();
+		}
 		
     }
 }

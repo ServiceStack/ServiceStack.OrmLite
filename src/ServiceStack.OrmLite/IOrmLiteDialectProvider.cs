@@ -43,8 +43,10 @@ namespace ServiceStack.OrmLite
 		string ToSelectStatement( Type tableType, string sqlFilter, params object[] filterParams);
 		
 		string ToInsertRowStatement( object objWithProperties, IDbCommand command);
+		string ToInsertRowStatement( object objWithProperties, IList<string>InsertFields, IDbCommand command);
 		
 		string ToUpdateRowStatement(object objWithProperties);
+		string ToUpdateRowStatement(object objWithProperties, IList<string>UpdateFields);
 		
 		string ToDeleteRowStatement(object objWithProperties);
 		
@@ -68,6 +70,8 @@ namespace ServiceStack.OrmLite
 		string GetColumnNames(ModelDefinition modelDef);
 		
 		string GetFieldNameDelimited(string fieldName);
+		
+		SqlExpressionVisitor<T> ExpressionVisitor<T>();
 		
 	}
 	

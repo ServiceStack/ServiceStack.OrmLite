@@ -5,10 +5,10 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>10.0.0</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{85DF0278-488D-460B-8B40-737E07089465}</ProjectGuid>
+    <ProjectGuid>{B0EBA56F-626B-4F38-A189-5E1B6BD60D9A}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>TestClassWriter</RootNamespace>
-    <AssemblyName>TestClassWriter</AssemblyName>
+    <RootNamespace>TestLiteFirebird04</RootNamespace>
+    <AssemblyName>TestLiteFirebird04</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -16,7 +16,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug</OutputPath>
-    <DefineConstants>DEBUG;</DefineConstants>
+    <DefineConstants>DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Externalconsole>true</Externalconsole>
@@ -33,21 +33,23 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
-    <Reference Include="ServiceStack.Common, Version=1.0.4408.9285, Culture=neutral, PublicKeyToken=null">
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="ServiceStack.Common">
       <HintPath>..\..\..\lib\ServiceStack.Common.dll</HintPath>
     </Reference>
-    <Reference Include="ServiceStack.Interfaces, Version=1.0.4408.9285, Culture=neutral, PublicKeyToken=null">
+    <Reference Include="ServiceStack.Interfaces">
       <HintPath>..\..\..\lib\ServiceStack.Interfaces.dll</HintPath>
     </Reference>
-    <Reference Include="ServiceStack.Text, Version=3.3.3.8701, Culture=neutral, PublicKeyToken=null">
+    <Reference Include="ServiceStack.Text">
       <HintPath>..\..\..\lib\ServiceStack.Text.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Main.cs" />
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="Company.cs" />
+    <Compile Include="DbMethodsIn.cs" />
   </ItemGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <ProjectReference Include="..\..\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj">
       <Project>{96179AC6-F6F1-40C3-9FDD-4F6582F54C5C}</Project>
@@ -58,4 +60,5 @@
       <Name>ServiceStack.OrmLite.Firebird</Name>
     </ProjectReference>
   </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

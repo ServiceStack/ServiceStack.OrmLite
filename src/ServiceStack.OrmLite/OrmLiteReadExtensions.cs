@@ -40,7 +40,7 @@ namespace ServiceStack.OrmLite
 				Log.Debug(fmt);
 		}
 
-		private static IDataReader ExecReader(this IDbCommand dbCmd, string sql)
+		internal static IDataReader ExecReader(this IDbCommand dbCmd, string sql)
 		{
 			LogDebug(sql);
 			dbCmd.CommandText = sql;

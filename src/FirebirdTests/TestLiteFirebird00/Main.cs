@@ -41,7 +41,12 @@ namespace TestLiteFirebird00
 		public bool Active { get; set; } 
 		
 		[StringLength(80)]
+		public string City { get; set;}
+		
+		[StringLength(80)]
 		public string Comments { get; set;}
+		
+		public Int16 Rate{ get; set;}
 		
 		
 	}
@@ -76,85 +81,143 @@ namespace TestLiteFirebird00
 			       "User=SYSDBA;Password=masterkey;Database=employee.fdb;DataSource=localhost;Dialect=3;charset=ISO8859_1;".OpenDbConnection())
 			using ( IDbCommand dbCmd = db.CreateCommand())
 			{
-				//try{
-					dbCmd.CreateTable<Author>(true);
-					dbCmd.CreateTable<Book>(true);
+			//try{
+				// due to firebirdslq features, we have to drop book first  and then author
+				dbCmd.DropTable<Book>();
+				dbCmd.DropTable<Author>();
+				
+				dbCmd.CreateTable<Author>();
+				dbCmd.CreateTable<Book>();
+				
+				dbCmd.Insert( new Author(){
+					Name="Demis Bellot",
+					Birthday= DateTime.Today.AddYears(20),
+					Active=true,
+					Earnings= 99.9m,
+					Comments="ServiceStack.Net ...",
+					City="London"
+				});
+				
+				dbCmd.Insert( new Author(){
+					Name="Angel Colmenares",
+					Birthday= DateTime.Today.AddYears(30),
+					Active=true,
+					Earnings= 50.25m,
+					Comments="OrmLite.Firebird",
+					City="Bogota"
+				});
+				
+				dbCmd.Insert( new Author(){
+					Name="Adam Witco",
+					Birthday= DateTime.Today.AddYears(25),
+					Active=true,
+					Comments="other books...",
+					City="London"
+				});
+			
+				
+				dbCmd.Insert( new Author(){
+					Name="Claudia Espinel",
+					Birthday= DateTime.Today.AddYears(28),
+					Active=false,
+					Comments="other books...",
+					City="Bogota"
+				});
+				
+				//-------------------------------------------------------------------
+				SqlExpressionVisitor<Author> ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<Author>();
+				
+				ev.Insert(r=> new {r.Id, r.Name, r.Birthday, r.Active}); // fields to insert
+				
+				var author = new Author(){
+					Name="William",
+					Birthday= DateTime.Today.AddYears(250),
+					Active=false,
+					City="London",
+					Comments="this will not be inserted" // null in db
+				};
+			
+				dbCmd.Insert(author, ev);
+				
+				author.Comments="this will be updated";
+				
+				ev.Update(rn=> rn.Comments).Where(r=>r.Id==author.Id);
+				dbCmd.Update(author, ev);
+				
+				
+				// update comment for all authors from london...
+				
+				author.Comments="update from london";
+				ev.Where(rn=> rn.City=="London");
+				dbCmd.Update(author, ev);
+				
+				// select author from Bogota
+				ev.Where(rn=> rn.City=="Bogota");
+				var authors = dbCmd.Select(ev);
+				Console.WriteLine(authors.Count);
+				
+				// select author from Bogota and Active=true;
+				
+				ev.Where(rn=> rn.City=="Bogota" && rn.Active==true); // sorry for firebird must write ==true !
+				authors = dbCmd.Select(ev);
+				Console.WriteLine(authors.Count);
+				
+				//-------------------------------------------------------------------
+				authors = dbCmd.Select<Author>();
+				
+				Console.WriteLine("Rows in  Author : '{0}'",authors.Count);
+				
+				foreach(Author a in authors){
+					Console.WriteLine("Id :{0} - Name : {1} -- Earnings {2}", a.Id,
+						a.Name,
+						a.Earnings.HasValue? a.Earnings.Value: 0.0m);
+				}
+				
+				author= authors.FirstOrDefault<Author>(r=>r.Name=="Angel Colmenares");
+				if( author != default(Author) ){
 					
-					dbCmd.Insert( new Author(){
-						Name="Demis Bellot",
-						Birthday= DateTime.Today.AddYears(20),
-						Active=true,
-						Earnings= 99.9m,
-						Comments="ServicStack.Net ..."
+					dbCmd.Insert( new Book(){
+						IdAuthor= author.Id,
+						Title= "The big book",
+						Price= 18.55m,
 					});
-					
-					dbCmd.Insert( new Author(){
-						Name="Angel Colmenares",
-						Birthday= DateTime.Today.AddYears(30),
-						Active=true,
-						Earnings= 50.25m,
-						Comments="OrmLite.Firebird"
-					});
-					
-					dbCmd.Insert( new Author(){
-						Name="Adam Witco",
-						Birthday= DateTime.Today.AddYears(25),
-						Active=true,
-						Comments="other books..."
-					});
+					Console.WriteLine("{0} == {1}", dbCmd.HasChildren<Book>( author), true ) ;
+				}
+				else{
+					Console.WriteLine("Something wrong ");
+				}
+				
+				
+				author= authors.FirstOrDefault<Author>(r=>r.Name=="Adam Witco");
+				if( author != default(Author) ){
 					
 					
-					var authors = dbCmd.Select<Author>();
-					
-					Console.WriteLine("Rows in  Author : '{0}'",authors.Count);
-					
-					foreach(Author a in authors){
-						Console.WriteLine("Id :{0} - Name : {1} -- Earnings {2}", a.Id,
-							a.Name,
-							a.Earnings.HasValue? a.Earnings.Value: 0.0m);
-					}
-					
-					var author= authors.FirstOrDefault<Author>(r=>r.Name=="Angel Colmenares");
-					if( author != default(Author) ){
-						
-						dbCmd.Insert( new Book(){
-							IdAuthor= author.Id,
-							Title= "The big book",
-							Price= 18.55m,
-						});
-						Console.WriteLine("{0} == {1}", dbCmd.HasChildren<Book>( author), true ) ;
-					}
-					else{
-						Console.WriteLine("Something wrong ");
-					}
-					
-					
-					author= authors.FirstOrDefault<Author>(r=>r.Name=="Adam Witco");
-					if( author != default(Author) ){
-						
-						
-						Console.WriteLine("{0} == {1}", dbCmd.HasChildren<Book>( author), false ) ;
-					}
-					else{
-						Console.WriteLine("Something wrong ");
-					}
-					
-					var books = dbCmd.Select<Book>();
-					
-					foreach(var b in books){
-						Console.WriteLine("Title {0}  Price {1}",b.Title, b.Price);
-					}
-					
-					
-					// due to firebirdslq features, we have to drop book first  and then author
-					Console.WriteLine("Enter to drop tables");
-					Console.ReadLine();
-					
-					dbCmd.DeleteAll<Book>();
-					dbCmd.DeleteAll<Author>();
-					
-					dbCmd.DropTable<Book>();
-					dbCmd.DropTable<Author>();
+					Console.WriteLine("{0} == {1}", dbCmd.HasChildren<Book>( author), false ) ;
+				}
+				else{
+					Console.WriteLine("Something wrong ");
+				}
+				
+				var books = dbCmd.Select<Book>();
+				
+				foreach(var b in books){
+					Console.WriteLine("Title {0}  Price {1}",b.Title, b.Price);
+				}
+				
+				ev.Select(r=>new { r.Name, r.Active}).Where(); // only Name and Active fields will be retrived
+								
+				authors = dbCmd.Select(ev);
+				Console.WriteLine(ev.SelectExpression);
+				
+				foreach(Author r in authors){
+					Console.WriteLine("'{0}' '{1}' '{2}'", r.Name, r.Active, r.Id);
+				}
+				
+				
+				dbCmd.DeleteAll<Book>();
+				dbCmd.DeleteAll<Author>();
+				
+				
 				//}
 				
 				//catch(Exception e){

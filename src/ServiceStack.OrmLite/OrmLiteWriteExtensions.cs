@@ -133,12 +133,12 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        private static void ExecuteSql(this IDbCommand dbCmd, string sql)
+        internal static int ExecuteSql(this IDbCommand dbCmd, string sql)
         {
             LogDebug(sql);
 
             dbCmd.CommandText = sql;
-            dbCmd.ExecuteNonQuery();
+            return dbCmd.ExecuteNonQuery();
         }
 
         private static bool IgnoreAlreadyExistsError(Exception ex)

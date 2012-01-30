@@ -121,6 +121,10 @@
     <Compile Include="SequenceAttribute.cs" />
     <Compile Include="OrmLiteProcedureExtensions.cs" />
     <Compile Include="DecimalLengthAttribute.cs" />
+    <Compile Include="Expressions\ReadExtensions.cs" />
+    <Compile Include="Expressions\SqlExpressionVisitor.cs" />
+    <Compile Include="Expressions\WriteExtensions.cs" />
+    <Compile Include="Expressions\Sql.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

@@ -121,16 +121,16 @@ namespace ServiceStack.OrmLite.Firebird
 
 			if (isFullSelectStatement) 	return sqlFilter.SqlFormat(filterParams);
 			
-			sql.AppendFormat("SELECT {0} FROM {1}", 
+			sql.AppendFormat("SELECT {0} \nFROM {1}", 
 			                 GetColumnNames(modelDef), 
 			                 GetTableNameDelimited(modelDef));
 			if (!string.IsNullOrEmpty(sqlFilter))
 			{
 				sqlFilter = sqlFilter.SqlFormat(filterParams);
-				if (!sqlFilter.StartsWith("ORDER ", StringComparison.InvariantCultureIgnoreCase)
-					&& !sqlFilter.StartsWith("ROWS ", StringComparison.InvariantCultureIgnoreCase)) // ROWS <m> [TO <n>])
+				if (!sqlFilter.StartsWith("\nORDER ", StringComparison.InvariantCultureIgnoreCase)
+					&& !sqlFilter.StartsWith("\nROWS ", StringComparison.InvariantCultureIgnoreCase)) // ROWS <m> [TO <n>])
 				{
-					sql.Append(" WHERE ");
+					sql.Append("\nWHERE ");
 				}
 				sql.Append(sqlFilter);
 			}
@@ -138,7 +138,7 @@ namespace ServiceStack.OrmLite.Firebird
 		}
 		
 		
-		public override string ToInsertRowStatement(object objWithProperties,IDbCommand dbCommand)
+		public override string ToInsertRowStatement(object objWithProperties, IList<string> insertFields, IDbCommand dbCommand)
 		{
 			var sbColumnNames = new StringBuilder();
 			var sbColumnValues = new StringBuilder();
@@ -150,6 +150,7 @@ namespace ServiceStack.OrmLite.Firebird
 			{
 				
 				if( fieldDef.IsComputed ) continue;
+				if( insertFields.Count>0 && ! insertFields.Contains( fieldDef.Name )) continue;
 				
 				if( (fieldDef.AutoIncrement || ! string.IsNullOrEmpty(fieldDef.Sequence) 
 					|| fieldDef.Name== OrmLiteDialectProviderBase.IdField ) 
@@ -173,7 +174,7 @@ namespace ServiceStack.OrmLite.Firebird
 						ReflectionUtils.SetProperty(objWithProperties, pi, Convert.ToInt64( result));			
 				}
 				
-
+				
 				if (sbColumnNames.Length > 0) sbColumnNames.Append(",");
 				if (sbColumnValues.Length > 0) sbColumnValues.Append(",");
 
@@ -198,7 +199,7 @@ namespace ServiceStack.OrmLite.Firebird
 		}
 
 		
-		public override string ToUpdateRowStatement(object objWithProperties)
+		public override string ToUpdateRowStatement(object objWithProperties, IList<string> updateFields)
 		{
 			var sqlFilter = new StringBuilder();
 			var sql = new StringBuilder();
@@ -211,7 +212,8 @@ namespace ServiceStack.OrmLite.Firebird
 				
 				try
 				{
-					if (fieldDef.IsPrimaryKey || fieldDef.Name== OrmLiteDialectProviderBase.IdField )
+					if ( (fieldDef.IsPrimaryKey || fieldDef.Name== OrmLiteDialectProviderBase.IdField) &&
+					     updateFields.Count==0)
 					{
 						if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
 
@@ -219,7 +221,7 @@ namespace ServiceStack.OrmLite.Firebird
 							
 						continue;
 					}
-
+					if( updateFields.Count>0 && !updateFields.Contains( fieldDef.Name )) continue;
 					if (sql.Length > 0) sql.Append(",");
 					sql.AppendFormat("{0} = {1}", Quote(fieldDef.FieldName), fieldDef.GetQuotedValue(objWithProperties));
 				}
@@ -229,8 +231,8 @@ namespace ServiceStack.OrmLite.Firebird
 				}
 			}
 
-			var updateSql = string.Format("UPDATE {0} SET {1} WHERE {2}",
-				GetTableNameDelimited(modelDef), sql, sqlFilter);
+			var updateSql = string.Format("UPDATE {0} \nSET {1} {2}",
+				GetTableNameDelimited(modelDef), sql, (sqlFilter.Length>0? "\nWHERE "+ sqlFilter:""));
 
 			return updateSql;
 		}
@@ -424,7 +426,7 @@ namespace ServiceStack.OrmLite.Firebird
 			
 			var fromModelDef= OrmLiteDialectProviderBase.GetModel(fromTableType);
 			var sql = new StringBuilder();
-			sql.AppendFormat("SELECT 1 FROM {0}", 
+			sql.AppendFormat("SELECT 1 \nFROM {0}", 
 			                 GetTableNameDelimited(fromModelDef));
 			
 			var filter = new StringBuilder();
@@ -483,16 +485,16 @@ namespace ServiceStack.OrmLite.Firebird
 				}
 				
 								
-				if( filter.Length>0) sql.AppendFormat(" WHERE {0} ", filter.ToString());
+				if( filter.Length>0) sql.AppendFormat("\nWHERE {0} ", filter.ToString());
 			}	
 			
 			if (!string.IsNullOrEmpty(sqlFilter))
 			{
 				sqlFilter = sqlFilter.SqlFormat(filterParams);
-				if (!sqlFilter.StartsWith("ORDER ", StringComparison.InvariantCultureIgnoreCase)
-					&& !sqlFilter.StartsWith("ROWS ", StringComparison.InvariantCultureIgnoreCase)) // ROWS <m> [TO <n>])
+				if (!sqlFilter.StartsWith("\nORDER ", StringComparison.InvariantCultureIgnoreCase)
+					&& !sqlFilter.StartsWith("\nROWS ", StringComparison.InvariantCultureIgnoreCase)) // ROWS <m> [TO <n>])
 				{
-					sql.Append( filter.Length>0? " AND  ": " WHERE ");
+					sql.Append( filter.Length>0? " AND  ": "\nWHERE ");
 				}
 				sql.Append(sqlFilter);
 			}
@@ -533,7 +535,7 @@ namespace ServiceStack.OrmLite.Firebird
 				
 			
 			StringBuilder sql = new StringBuilder();
-			sql.AppendFormat("SELECT {0} FROM  {1} {2}{3}{4}  \n", 
+			sql.AppendFormat("SELECT {0} \nFROM  {1} {2}{3}{4}  \n", 
 							GetColumnNames( OrmLiteDialectProviderBase.GetModel(outputModelType) ),
 			                GetTableNameDelimited(modelDef),
 			                sbColumnValues.Length>0?"(":"",
@@ -543,10 +545,10 @@ namespace ServiceStack.OrmLite.Firebird
 			
 			if(!string.IsNullOrEmpty(sqlFilter)){
 				sqlFilter = sqlFilter.SqlFormat(filterParams);
-				if (!sqlFilter.StartsWith("ORDER ", StringComparison.InvariantCultureIgnoreCase)
-						&& !sqlFilter.StartsWith("ROWS ", StringComparison.InvariantCultureIgnoreCase)) // ROWS <m> [TO <n>]
+				if (!sqlFilter.StartsWith("\nORDER ", StringComparison.InvariantCultureIgnoreCase)
+						&& !sqlFilter.StartsWith("\nROWS ", StringComparison.InvariantCultureIgnoreCase)) // ROWS <m> [TO <n>]
 				{
-					sql.Append(" WHERE ");
+					sql.Append("\nWHERE ");
 				}
 				sql.Append(sqlFilter);
 			}
@@ -631,7 +633,7 @@ namespace ServiceStack.OrmLite.Firebird
 			else{
 				var sqlColumns = new StringBuilder();
             	modelDef.FieldDefinitions.ForEach(x => 
-                	sqlColumns.AppendFormat("{0}{1} ", sqlColumns.Length > 0 ? "," : "",Quote( x.FieldName )));
+                	sqlColumns.AppendFormat("{0} {1}", sqlColumns.Length > 0 ? "," : "",Quote( x.FieldName )));
 
 	        	return sqlColumns.ToString();
 			}
@@ -659,6 +661,10 @@ namespace ServiceStack.OrmLite.Firebird
 				Quote(sequence);	
 		}
 		
+		public override SqlExpressionVisitor<T> ExpressionVisitor<T> ()
+		{
+			return new FirebirdSqlExpressionVisitor<T>();
+		}
 	}
 }
 
