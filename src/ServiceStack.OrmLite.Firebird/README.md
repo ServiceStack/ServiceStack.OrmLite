@@ -7,7 +7,7 @@ Additionally, Firebird  DialectProvider implements class "SqlExpressionVisitor <
 
 Below is a complete example of how to use "SqlExpressionVisitor <T>" in OrmLite:
 
-public class Author{
+	public class Author{
 		public Author(){}
 		[AutoIncrement]
 		public Int32 Id { get; set;}
