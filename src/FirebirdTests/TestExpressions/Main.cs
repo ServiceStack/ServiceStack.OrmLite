@@ -142,8 +142,7 @@ namespace TestExpressions
 				Console.WriteLine(ev.WhereExpression);
 				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, result.Count, expected==result.Count);
 			
-				//  enough selecting, lets upate;
-				
+				//  enough selecting, lets update;
 				// set Active=false where rate =0
 				expected=2;
 				ev.Where(rn=>  rn.Rate==0 ).Update(rn=> rn.Active);
