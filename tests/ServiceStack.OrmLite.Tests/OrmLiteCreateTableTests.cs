@@ -134,7 +134,7 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_create_ModelWithIdAndName_table_with_specified_DefaultStringLength()
 		{
 			OrmLiteConfig.DialectProvider.DefaultStringLength = 255;
-			var createTableSql = typeof(ModelWithIdAndName).ToCreateTableStatement();
+			var createTableSql =  OrmLiteConfig.DialectProvider.ToCreateTableStatement(typeof(ModelWithIdAndName));
 
 			Console.WriteLine("createTableSql: " + createTableSql);
 			Assert.That(createTableSql.Contains("VARCHAR(255)"), Is.True);
