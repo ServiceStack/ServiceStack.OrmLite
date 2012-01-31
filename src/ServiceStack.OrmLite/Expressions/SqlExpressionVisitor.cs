@@ -23,8 +23,8 @@ namespace ServiceStack.OrmLite
 		private string whereExpression;
 		private string havingExpression;
 		
-		private int? rows;
-		private int? to;
+		protected  int? Rows{ get ; private set;}
+		protected  int? FromRow { get ; private set;}
 		
 				
 		public SqlExpressionVisitor ()
@@ -85,36 +85,40 @@ namespace ServiceStack.OrmLite
 			}
 		}
 		
-		public virtual SqlExpressionVisitor<T> Limit(int? rows, int? to ){
-			this.rows=rows;
-			this.to=to;
+		public virtual SqlExpressionVisitor<T> Limit(int fromrow, int rows ){
+			Rows=rows;
+			FromRow= fromrow;
 			return this;
 		}
 		
-		public virtual SqlExpressionVisitor<T> Limit(int? rows){
-			return Limit(rows, null);
+		public virtual SqlExpressionVisitor<T> Limit(int rows){
+			FromRow= rows;
+			Rows=null;
+			return this;
 		}
 		
 		public virtual SqlExpressionVisitor<T> Limit(){
-			return Limit(null, null);
+			FromRow= null;
+			Rows=null;
+			return this;
 		}
 		
 		public virtual string LimitExpression{
 			get{
-				if(!rows.HasValue) return "";
-				if(rows.Value<=0)
-					throw new ArgumentException("rows value must be>0");
-				string toString;
-				if(to.HasValue){
-					if( to.Value<=0) {
-						throw new ArgumentException("to value must be>0");
+				if(!FromRow.HasValue) return "";
+				if(FromRow.Value<=0)
+					throw new ArgumentException("FromRow value must be>0");
+				string rows;
+				if(Rows.HasValue){
+					if( Rows.Value<0) {
+						throw new ArgumentException("Rows  value must be>=0");
 					}
-					toString= string.Format("TO {0}", to.Value);
+					rows= string.Format("TO {0}", FromRow.Value+Rows.Value-1 );
 				}
 				else{
-					toString=string.Empty;
+					rows=string.Empty;
 				}
-				return string.Format("ROWS {0} {1}", rows.Value, toString);                   
+				return string.Format("ROWS {0} {1}", FromRow.Value, rows);                   
 			}
 		}
 		
@@ -643,7 +647,7 @@ namespace ServiceStack.OrmLite
 		}
 		
 		
-		private string RemoveQuote(string exp){
+		protected string RemoveQuote(string exp){
 			
 			if (exp.StartsWith("'") )
 				exp=exp.Remove(0,1);
