@@ -82,7 +82,7 @@ namespace ServiceStack.OrmLite
 				var sequenceAttr = propertyInfo.FirstAttribute<SequenceAttribute>();
 				var computeAttr= propertyInfo.FirstAttribute<ComputeAttribute>();
 				var pkAttribute = propertyInfo.FirstAttribute<PrimaryKeyAttribute>();
-				
+				var decimalAttribute = propertyInfo.FirstAttribute<DecimalLengthAttribute>();
                 var isFirst = i++ == 0;
 
                 var isPrimaryKey = propertyInfo.Name == IdField || (!hasIdField && isFirst)
@@ -110,6 +110,9 @@ namespace ServiceStack.OrmLite
 
                 var referencesAttr = propertyInfo.FirstAttribute<ReferencesAttribute>();
 				
+				if(decimalAttribute != null  && stringLengthAttr==null)
+					stringLengthAttr= new StringLengthAttribute(decimalAttribute.Precision);
+				
                 var fieldDefinition = new FieldDefinition
                 {
                     Name = propertyInfo.Name,
@@ -131,12 +134,13 @@ namespace ServiceStack.OrmLite
 					Sequence= sequenceAttr!=null?sequenceAttr.Name:string.Empty,
 					IsComputed= computeAttr!=null,
 					ComputeExpression=  computeAttr!=null? computeAttr.Expression: string.Empty,
+					Scale = decimalAttribute != null ? decimalAttribute.Scale : (int?)null,
                 };
 
                 modelDef.FieldDefinitions.Add(fieldDefinition);
             }
 
-		    modelDef.SqlSelectAllFromTable = "SELECT {0} FROM {1} ".Fmt(modelDef.GetColumnNames(),
+		    modelDef.SqlSelectAllFromTable = "SELECT {0} FROM {1} ".Fmt(OrmLiteConfig.DialectProvider.GetColumnNames(modelDef),
 		                                                                OrmLiteConfig.DialectProvider.GetTableNameDelimited(
 		                                                                    modelDef));
             Dictionary<Type, ModelDefinition> snapshot, newCache;

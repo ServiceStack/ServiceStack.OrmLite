@@ -23,7 +23,7 @@ namespace TestLiteFirebird01
 		public int Id { get; set; }
 		[Alias("NAME")]
     	public string Name { get; set; }
-		[Alias("PASSWORD")]
+		[Alias("PASSWORD")]  
     	public string Password { get; set; }
 		[Alias("COL1")]
     	public string Col1 { get; set; }
@@ -81,7 +81,7 @@ namespace TestLiteFirebird01
 			       "User=SYSDBA;Password=masterkey;Database=employee.fdb;DataSource=localhost;Dialect=3;charset=ISO8859_1;".OpenDbConnection())
 			using ( IDbCommand dbConn = db.CreateCommand())
 			{
-				try{
+				//try{
 					
 					
     				dbConn.Insert(new User 
@@ -123,11 +123,11 @@ namespace TestLiteFirebird01
 					
 					Console.WriteLine("-------------records in users after delete {0}", rows.Count);
 					
-				}	
+				//}	
 				
-				catch(Exception e){
-					Console.WriteLine(e);
-				}
+				//catch(Exception e){
+				//	Console.WriteLine(e);
+				//}
 			}
 
 		}

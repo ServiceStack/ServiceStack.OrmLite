@@ -37,3 +37,7 @@ App_Data/
 
 NuGet/*.dll
 *.nupkg
+*.pidb
+*.userprefs
+add.sh
+.gitignore
