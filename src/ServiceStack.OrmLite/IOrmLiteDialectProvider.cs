@@ -35,20 +35,23 @@ namespace ServiceStack.OrmLite
 
 		string GetColumnDefinition(
 			string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement, 
-			bool isNullable, int? fieldLength, string defaultValue);
+			bool isNullable, int? fieldLength, 
+			int? scale, string defaultValue);
 
 		long GetLastInsertId(IDbCommand command);
 				
 		// 
-		
-				
+						
 		string ToSelectStatement( Type tableType, string sqlFilter, params object[] filterParams);
 		
 		string ToInsertRowStatement( object objWithProperties, IDbCommand command);
+		string ToInsertRowStatement( object objWithProperties, IList<string>InsertFields, IDbCommand command);
 		
 		string ToUpdateRowStatement(object objWithProperties);
+		string ToUpdateRowStatement(object objWithProperties, IList<string>UpdateFields);
 		
 		string ToDeleteRowStatement(object objWithProperties);
+		string ToDeleteStatement(Type tableType, string sqlFilter, params object[] filterParams);
 		
 		string ToExistStatement( Type fromTableType,
 			object objWithProperties,
@@ -61,6 +64,15 @@ namespace ServiceStack.OrmLite
 		                                          params object[] filterParams);
 		
 		string ToExecuteProcedureStatement(object objWithProperties);
+		
+		string ToCreateTableStatement(Type tableType);
+		
+		List<string> ToCreateIndexStatements(Type tableType);
+		List<string> ToCreateSequenceStatements(Type tableType);
+		
+		string GetColumnNames(ModelDefinition modelDef);
+				
+		SqlExpressionVisitor<T> ExpressionVisitor<T>();
 		
 	}
 	

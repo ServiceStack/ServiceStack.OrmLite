@@ -17,6 +17,7 @@ using System.Text;
 using ServiceStack.Logging;
 using ServiceStack.Text;
 using System.Diagnostics;
+using ServiceStack.Common.Extensions;
 
 namespace ServiceStack.OrmLite
 {
@@ -112,7 +113,22 @@ namespace ServiceStack.OrmLite
             InitColumnTypeMap();
             UpdateStringColumnDefinitions();
         }
-
+				
+		
+		private int defaultDecimalPrecision=18;
+		private int defaultDecimalScale=12;
+				
+		public int DefaultDecimalPrecision{
+			get { return defaultDecimalPrecision;}
+			set { defaultDecimalPrecision=value;}
+		}
+				
+		public int DefaultDecimalScale{
+			get { return defaultDecimalScale;}
+			set { defaultDecimalScale=value;}
+		}
+		
+		
         private int defaultStringLength = 8000; //SqlServer express limit
         public int DefaultStringLength
         {
@@ -308,7 +324,9 @@ namespace ServiceStack.OrmLite
                 string.Format("Property of type: {0} is not supported", fieldType.FullName));
         }
 
-        public virtual string GetColumnDefinition(string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement, bool isNullable, int? fieldLength, string defaultValue)
+        public virtual string GetColumnDefinition(string fieldName, Type fieldType, 
+			bool isPrimaryKey, bool autoIncrement, bool isNullable, 
+			int? fieldLength, int? scale, string defaultValue)
         {
             string fieldDefinition;
 
@@ -371,7 +389,7 @@ namespace ServiceStack.OrmLite
 			if (isFullSelectStatement) return sqlFilter.SqlFormat(filterParams);
 
 		    sql.AppendFormat("SELECT {0} FROM {1}", tableType.GetColumnNames(),
-		                     OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef));
+		                     GetTableNameDelimited(modelDef));
 			if (!string.IsNullOrEmpty(sqlFilter))
 			{
 				sqlFilter = sqlFilter.SqlFormat(filterParams);
@@ -389,7 +407,13 @@ namespace ServiceStack.OrmLite
 		
 		public virtual string ToInsertRowStatement( object objWithProperties,  IDbCommand command)
         {
-            var sbColumnNames = new StringBuilder();
+			return ToInsertRowStatement(objWithProperties, new List<string>(), command);
+        }
+		
+		public virtual string ToInsertRowStatement( object objWithProperties, IList<string>insertFields, IDbCommand command){
+			
+			if( insertFields==null ) insertFields = new List<string>(); 
+			var sbColumnNames = new StringBuilder();
             var sbColumnValues = new StringBuilder();
 			var modelDef= objWithProperties.GetType().GetModelDefinition();
                     
@@ -397,6 +421,8 @@ namespace ServiceStack.OrmLite
             {
                 if (fieldDef.AutoIncrement) continue;
 
+				if( insertFields.Count>0 && !insertFields.Contains( fieldDef.Name )) continue;
+				
                 if (sbColumnNames.Length > 0) sbColumnNames.Append(",");
                 if (sbColumnValues.Length > 0) sbColumnValues.Append(",");
 
@@ -413,12 +439,20 @@ namespace ServiceStack.OrmLite
             }
 
             var sql = string.Format("INSERT INTO {0} ({1}) VALUES ({2});",
-                                    OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef), sbColumnNames, sbColumnValues);
+                                    GetTableNameDelimited(modelDef), sbColumnNames, sbColumnValues);
 
             return sql;
-        }
+		}
 		
+				
 		public virtual string ToUpdateRowStatement(object objWithProperties){
+			return ToUpdateRowStatement(objWithProperties, new List<string>());
+		}
+		
+		
+		public virtual string ToUpdateRowStatement(object objWithProperties, IList<string>updateFields){
+			
+			if (updateFields==null) updateFields= new List<string>();
 			var sqlFilter = new StringBuilder();
             var sql = new StringBuilder();
 			var modelDef= objWithProperties.GetType().GetModelDefinition();
@@ -427,7 +461,7 @@ namespace ServiceStack.OrmLite
             {
                 try
                 {
-                    if (fieldDef.IsPrimaryKey)
+                    if (fieldDef.IsPrimaryKey && updateFields.Count==0)
                     {
                         if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
 
@@ -435,7 +469,8 @@ namespace ServiceStack.OrmLite
 
                         continue;
                     }
-
+					
+					if( updateFields.Count>0 && !updateFields.Contains( fieldDef.Name )) continue;
                     if (sql.Length > 0) sql.Append(",");
                     sql.AppendFormat("{0} = {1}", GetNameDelimited(fieldDef.FieldName), fieldDef.GetQuotedValue(objWithProperties));
                 }
@@ -445,12 +480,12 @@ namespace ServiceStack.OrmLite
                 }
             }
 
-            var updateSql = string.Format("UPDATE {0} SET {1} WHERE {2}",
-                OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef), sql, sqlFilter);
+            var updateSql = string.Format("UPDATE {0} SET {1} {2}",
+                GetTableNameDelimited(modelDef), sql, (sqlFilter.Length>0? "WHERE "+ sqlFilter:""));
+				
 
             return updateSql;
 		}
-		
 		
 		public virtual string ToDeleteRowStatement(object objWithProperties)
         {
@@ -475,10 +510,130 @@ namespace ServiceStack.OrmLite
             }
 
             var deleteSql = string.Format("DELETE FROM {0} WHERE {1}",
-                OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef), sqlFilter);
+                GetTableNameDelimited(modelDef), sqlFilter);
 
             return deleteSql;
         }
+		
+		
+		public virtual string ToDeleteStatement(Type tableType, string sqlFilter, params object[] filterParams)
+        {
+            var sql = new StringBuilder();
+            const string deleteStatement = "DELETE ";
+
+            var isFullDeleteStatement =
+                !string.IsNullOrEmpty(sqlFilter)
+                && sqlFilter.Length > deleteStatement.Length
+                && sqlFilter.Substring(0, deleteStatement.Length).ToUpper().Equals(deleteStatement);
+
+            if (isFullDeleteStatement) return sqlFilter.SqlFormat(filterParams);
+
+            var modelDef = tableType.GetModelDefinition();
+            sql.AppendFormat("DELETE FROM {0}", GetTableNameDelimited(modelDef));
+            if (!string.IsNullOrEmpty(sqlFilter))
+            {
+                sqlFilter = sqlFilter.SqlFormat(filterParams);
+                sql.Append(" WHERE ");
+                sql.Append(sqlFilter);
+            }
+
+            return sql.ToString();
+        }
+		
+		
+		
+		
+		public virtual string ToCreateTableStatement( Type tableType)
+        {
+             var sbColumns = new StringBuilder();
+            var sbConstraints = new StringBuilder();
+
+            var modelDef = tableType.GetModelDefinition();
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+                if (sbColumns.Length != 0) sbColumns.Append(", \n  ");
+
+                var columnDefinition = GetColumnDefinition(
+                    fieldDef.FieldName,
+                    fieldDef.FieldType,
+                    fieldDef.IsPrimaryKey,
+                    fieldDef.AutoIncrement,
+                    fieldDef.IsNullable,
+                    fieldDef.FieldLength,
+					null,
+                    fieldDef.DefaultValue);
+
+                sbColumns.Append(columnDefinition);
+
+                if (fieldDef.ReferencesType == null) continue;
+
+                var refModelDef = fieldDef.ReferencesType.GetModelDefinition();
+                sbConstraints.AppendFormat(
+                    ", \n\n  CONSTRAINT {0} FOREIGN KEY ({1}) REFERENCES {2} ({3})",
+                    GetNameDelimited(string.Format("FK_{0}_{1}", modelDef.ModelName,
+					                                             refModelDef.ModelName)),
+                    GetNameDelimited(fieldDef.FieldName),
+                    GetTableNameDelimited(refModelDef),
+                    GetNameDelimited(refModelDef.PrimaryKey.FieldName));
+            }
+            var sql = new StringBuilder(string.Format(
+                "CREATE TABLE {0} \n(\n  {1}{2} \n); \n", GetTableNameDelimited(modelDef), sbColumns, sbConstraints));
+
+            return sql.ToString();
+        }
+		
+		public virtual List<string> ToCreateIndexStatements(Type tableType)
+        {
+            var sqlIndexes = new List<string>();
+
+            var modelDef = tableType.GetModelDefinition();
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+                if (!fieldDef.IsIndexed) continue;
+
+                var indexName = GetIndexName(fieldDef.IsUnique, modelDef.ModelName.SafeVarName(), fieldDef.FieldName);
+
+                sqlIndexes.Add(
+                    ToCreateIndexStatement(fieldDef.IsUnique, indexName, modelDef, fieldDef.FieldName));
+            }
+
+            foreach (var compositeIndex in modelDef.CompositeIndexes)
+            {
+                var indexName = GetIndexName(compositeIndex.Unique, modelDef.ModelName.SafeVarName(),
+                    string.Join("_", compositeIndex.FieldNames.ToArray()));
+
+                var indexNames = string.Join(" ASC, ",
+                                             compositeIndex.FieldNames.ConvertAll(
+                                                 n => GetNameDelimited(n)).ToArray());
+
+                sqlIndexes.Add(
+                    ToCreateIndexStatement(compositeIndex.Unique, indexName, modelDef, indexNames, true));
+            }
+
+            return sqlIndexes;
+        }
+
+        protected virtual string GetIndexName(bool isUnique, string modelName, string fieldName)
+        {
+            return string.Format("{0}idx_{1}_{2}", isUnique ? "u" : "", modelName, fieldName).ToLower();
+        }
+
+        protected virtual string ToCreateIndexStatement(bool isUnique, string indexName, ModelDefinition modelDef, string fieldName, bool isCombined = false)
+        {
+            return string.Format("CREATE {0} INDEX {1} ON {2} ({3} ASC); \n",
+                                 isUnique ? "UNIQUE" : "", indexName,
+                                 GetTableNameDelimited(modelDef),
+                                 (isCombined) ? fieldName : GetNameDelimited(fieldName));
+        }
+		
+		public virtual string GetColumnNames(ModelDefinition modelDef){
+			return modelDef.GetColumnNames();
+		}
+		
+		
+		public virtual List<string> ToCreateSequenceStatements(Type tableType){
+			return new List<string>();
+		}
 		
 		// TODO : make abstract  ??
 		public virtual string ToExistStatement( Type fromTableType,
@@ -508,6 +663,11 @@ namespace ServiceStack.OrmLite
 		
 		public static string IdField{
 			get {return  OrmLiteConfigExtensions.IdField ;}
+		}
+	
+		
+		public virtual SqlExpressionVisitor<T> ExpressionVisitor<T>(){
+			throw new NotImplementedException();
 		}
 		
     }

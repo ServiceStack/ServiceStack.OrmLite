@@ -17,7 +17,7 @@ namespace ServiceStack.OrmLite.Tests
 			{
 				dbConn.CreateTable<ModelWithIndexFields>(true);
 
-				var sql = typeof (ModelWithIndexFields).ToCreateIndexStatements().Join();
+				var sql =OrmLiteConfig.DialectProvider.ToCreateIndexStatements( typeof (ModelWithIndexFields) ).Join();
 
 				Assert.IsTrue(sql.Contains("idx_modelwithindexfields_name"));
 				Assert.IsTrue(sql.Contains("uidx_modelwithindexfields_uniquename"));
@@ -32,7 +32,7 @@ namespace ServiceStack.OrmLite.Tests
 			{
 				dbConn.CreateTable<ModelWithCompositeIndexFields>(true);
 
-				var sql = typeof(ModelWithCompositeIndexFields).ToCreateIndexStatements().Join();
+				var sql = OrmLiteConfig.DialectProvider.ToCreateIndexStatements(typeof(ModelWithCompositeIndexFields)).Join();
 
 				Assert.IsTrue(sql.Contains("idx_modelwithcompositeindexfields_name"));
 				Assert.IsTrue(sql.Contains("idx_modelwithcompositeindexfields_composite1_composite2"));

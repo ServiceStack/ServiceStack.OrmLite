@@ -1,48 +1,33 @@
 using System;
+using System.Linq;
+using System.Data;
 using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
 
 using ServiceStack.Common.Utils;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Common.Extensions;
-
-using System.Data;
+using ServiceStack.DesignPatterns.Model;
 
 using ServiceStack.OrmLite;
 using ServiceStack.OrmLite.Firebird;
+using Database.Records;
 
-namespace TestLiteFirebird2
-{
-	[Alias("COMPANY")]
-	public class Company
-	{
-		
-		[Alias("ID")]
-		[Sequence("COMPANY_ID_GEN")]   
-		[PrimaryKey]
-		public long Id { get; set; }
-		
-		[Alias("NAME")]
-    	public string Name { get; set; }
-		
-		[Alias("TURNOVER")]
-    	public Nullable<float>  TurnOver { get; set; }
-		
-		[Alias("STARTED")]
-    	public Nullable<DateTime> Started { get; set; }
-		
-		[Alias("EMPLOYEES")]
-    	public Nullable<int> Employees { get; set; }
-			
-		[Alias("CREATED_DATE")]
-    	public Nullable<DateTime> CreatedDate { get; set; }
+namespace Database.Records{
+	
+	public partial class Company{
 		
 		[Ignore]
 		public string UpperName{
 			get { return Name.ToUpper();}
 		}
 	}
-	
+}
+
+
+namespace TestLiteFirebird2
+{
+			
 	class MainClass
 	{
 		public static void Main (string[] args)
@@ -58,13 +43,13 @@ namespace TestLiteFirebird2
 			{
 				try{
 					
-					Console.WriteLine( dbConn.HasChildren<Company>( new Company(){Id=100} ) );
+					Console.WriteLine( dbConn.HasChildren<Company>( new Company(){Id=1000} ) );
 					
 					Console.WriteLine(dbConn.HasChildren<Company>( new Company(){Id=5} )) ;
 					
-					Console.WriteLine( dbConn.Exists<Company>( "Id='{0}'",5 ) );
+					Console.WriteLine( dbConn.Exists<Company>( Company.Me.Id+"={0}",5 ) );
 					
-					Console.WriteLine(dbConn.Exists<Company>( "Id='{0}'",100 )) ;
+					Console.WriteLine(dbConn.Exists<Company>( Company.Me.Id+"={0}",1000 )) ;
 					
 					
 					var rows = dbConn.Select<Company>();
@@ -72,7 +57,7 @@ namespace TestLiteFirebird2
 					
 					Company cp = new Company{ 
 						Name="One More Company", Employees=10,
-						Started= DateTime.Today, TurnOver= 12525,
+						Started= DateTime.Today, Turnover= 12525,
 						CreatedDate= DateTime.Now
 					};
 			
@@ -86,13 +71,14 @@ namespace TestLiteFirebird2
 					}
 					Console.WriteLine("----------------------");
 					
-					rows = dbConn.Select<Company>("ID>={0} order by ID descending  rows 5", 10); 
+					rows = dbConn.Select<Company>(Company.Me.Id+">={0} order by " +Company.Me.Id+" descending rows 5",
+					                              10); 
 					Console.WriteLine(rows.Count);
 					foreach(Company u in rows){
 						Console.WriteLine("{0} -- {1} -- {2} -- {3} -- {4} -- {5} --{6}", u.Id, u.Name,
 						                  (u.Employees.HasValue)?u.Employees.Value.ToString():"",
 						                   u.Started.HasValue?u.Started.Value.ToString():"",
-						                  u.TurnOver.HasValue?u.TurnOver.Value.ToString():"",
+						                  u.Turnover.HasValue?u.Turnover.Value.ToString():"",
 						                  u.CreatedDate.HasValue?u.CreatedDate.Value.ToString():"",
 						                  u.UpperName
 						                  );
@@ -106,8 +92,8 @@ namespace TestLiteFirebird2
 					Console.WriteLine(e);
 				}
 
-    //Assert.That(rows, Has.Count(1));
-    //Assert.That(rows[0].Id, Is.EqualTo(1));
+				
+   
 			}	
 		}
 		

@@ -35,88 +35,6 @@ namespace ServiceStack.OrmLite
                 Log.Debug(fmt);
         }
 
-        public static string ToCreateTableStatement(this Type tableType)
-        {
-            var sbColumns = new StringBuilder();
-            var sbConstraints = new StringBuilder();
-
-            var modelDef = tableType.GetModelDefinition();
-            foreach (var fieldDef in modelDef.FieldDefinitions)
-            {
-                if (sbColumns.Length != 0) sbColumns.Append(", \n  ");
-
-                var columnDefinition = OrmLiteConfig.DialectProvider.GetColumnDefinition(
-                    fieldDef.FieldName,
-                    fieldDef.FieldType,
-                    fieldDef.IsPrimaryKey,
-                    fieldDef.AutoIncrement,
-                    fieldDef.IsNullable,
-                    fieldDef.FieldLength,
-                    fieldDef.DefaultValue);
-
-                sbColumns.Append(columnDefinition);
-
-                if (fieldDef.ReferencesType == null) continue;
-
-                var refModelDef = fieldDef.ReferencesType.GetModelDefinition();
-                sbConstraints.AppendFormat(
-                    ", \n\n  CONSTRAINT {0} FOREIGN KEY ({1}) REFERENCES {2} ({3})",
-                    OrmLiteConfig.DialectProvider.GetNameDelimited(string.Format("FK_{0}_{1}", modelDef.ModelName,
-                                                                                       refModelDef.ModelName)),
-                    OrmLiteConfig.DialectProvider.GetNameDelimited(fieldDef.FieldName),
-                    OrmLiteConfig.DialectProvider.GetTableNameDelimited(refModelDef),
-                    OrmLiteConfig.DialectProvider.GetNameDelimited(refModelDef.PrimaryKey.FieldName));
-            }
-            var sql = new StringBuilder(string.Format(
-                "CREATE TABLE {0} \n(\n  {1}{2} \n); \n", OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef), sbColumns, sbConstraints));
-
-            return sql.ToString();
-        }
-
-        public static List<string> ToCreateIndexStatements(this Type tableType)
-        {
-            var sqlIndexes = new List<string>();
-
-            var modelDef = tableType.GetModelDefinition();
-            foreach (var fieldDef in modelDef.FieldDefinitions)
-            {
-                if (!fieldDef.IsIndexed) continue;
-
-                var indexName = GetIndexName(fieldDef.IsUnique, modelDef.ModelName.SafeVarName(), fieldDef.FieldName);
-
-                sqlIndexes.Add(
-                    ToCreateIndexStatement(fieldDef.IsUnique, indexName, modelDef, fieldDef.FieldName));
-            }
-
-            foreach (var compositeIndex in modelDef.CompositeIndexes)
-            {
-                var indexName = GetIndexName(compositeIndex.Unique, modelDef.ModelName.SafeVarName(),
-                    string.Join("_", compositeIndex.FieldNames.ToArray()));
-
-                var indexNames = string.Join(" ASC, ",
-                                             compositeIndex.FieldNames.ConvertAll(
-                                                 n => OrmLiteConfig.DialectProvider.GetNameDelimited(n)).ToArray());
-
-                sqlIndexes.Add(
-                    ToCreateIndexStatement(compositeIndex.Unique, indexName, modelDef, indexNames, true));
-            }
-
-            return sqlIndexes;
-        }
-
-        private static string GetIndexName(bool isUnique, string modelName, string fieldName)
-        {
-            return string.Format("{0}idx_{1}_{2}", isUnique ? "u" : "", modelName, fieldName).ToLower();
-        }
-
-        private static string ToCreateIndexStatement(bool isUnique, string indexName, ModelDefinition modelDef, string fieldName, bool isCombined = false)
-        {
-            return string.Format("CREATE {0} INDEX {1} ON {2} ({3} ASC); \n",
-                                 isUnique ? "UNIQUE" : "", indexName,
-                                 OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef),
-                                 (isCombined) ? fieldName : OrmLiteConfig.DialectProvider.GetNameDelimited(fieldName));
-        }
-
         public static void CreateTables(this IDbCommand dbCmd, bool overwrite, params Type[] tableTypes)
         {
             foreach (var tableType in tableTypes)
@@ -149,9 +67,9 @@ namespace ServiceStack.OrmLite
 
             try
             {
-                ExecuteSql(dbCmd, ToCreateTableStatement(modelType));
+                ExecuteSql(dbCmd, OrmLiteConfig.DialectProvider.ToCreateTableStatement(modelType));
 
-                var sqlIndexes = ToCreateIndexStatements(modelType);
+                var sqlIndexes = OrmLiteConfig.DialectProvider.ToCreateIndexStatements(modelType);
                 foreach (var sqlIndex in sqlIndexes)
                 {
                     try
@@ -168,6 +86,22 @@ namespace ServiceStack.OrmLite
                         throw;
                     }
                 }
+				
+				var sequences = OrmLiteConfig.DialectProvider.ToCreateSequenceStatements(modelType);
+				foreach( var seq in sequences) {
+					
+					try{
+						dbCmd.ExecuteSql(seq);
+					}
+					catch (Exception ex){
+						if (IgnoreAlreadyExistsGeneratorError(ex))
+                        {
+                            Log.DebugFormat("Ignoring existing generator '{0}': {1}", seq, ex.Message);
+                            continue;
+                        }
+                        throw;
+					}
+				}
             }
             catch (Exception ex)
             {
@@ -193,17 +127,18 @@ namespace ServiceStack.OrmLite
                 dbCmd.ExecuteSql(string.Format("DROP TABLE {0};", OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef)));
             }
             catch (Exception )
+
             {
                 //Log.DebugFormat("Cannot drop non-existing table '{0}': {1}", modelDef.ModelName, ex.Message);
             }
         }
 
-        private static void ExecuteSql(this IDbCommand dbCmd, string sql)
+        internal static int ExecuteSql(this IDbCommand dbCmd, string sql)
         {
             LogDebug(sql);
 
             dbCmd.CommandText = sql;
-            dbCmd.ExecuteNonQuery();
+            return dbCmd.ExecuteNonQuery();
         }
 
         private static bool IgnoreAlreadyExistsError(Exception ex)
@@ -211,10 +146,21 @@ namespace ServiceStack.OrmLite
             //ignore Sqlite table already exists error
             const string sqliteAlreadyExistsError = "already exists";
             const string sqlServerAlreadyExistsError = "There is already an object named";
-            return ex.Message.Contains(sqliteAlreadyExistsError)
-                   || ex.Message.Contains(sqlServerAlreadyExistsError);
+			 return ex.Message.Contains(sqliteAlreadyExistsError)
+                   || ex.Message.Contains(sqlServerAlreadyExistsError)	;
         }
-
+		
+		//DEFINE GENERATOR failed
+		//
+		
+		private static bool IgnoreAlreadyExistsGeneratorError(Exception ex)
+        {
+            const string fbError = "attempt to store duplicate value";
+            return ex.Message.Contains(fbError);
+                   
+        }
+		
+		
         public static T PopulateWithSqlReader<T>(this T objWithProperties, IDataReader dataReader)
         {
             var fieldDefs = ModelDefinition<T>.Definition.FieldDefinitions.ToArray();
@@ -291,6 +237,7 @@ namespace ServiceStack.OrmLite
                                     OrmLiteConfig.DialectProvider.GetNameDelimited(modelDef.PrimaryKey.FieldName),
                                     OrmLiteConfig.DialectProvider.GetQuotedValue(id, id.GetType()));
 
+
             dbCmd.ExecuteSql(sql);
         }
 
@@ -317,7 +264,7 @@ namespace ServiceStack.OrmLite
 
         public static void DeleteAll(this IDbCommand dbCmd, Type tableType)
         {
-			dbCmd.ExecuteSql(ToDeleteStatement(tableType, null));
+			dbCmd.ExecuteSql(OrmLiteConfig.DialectProvider.ToDeleteStatement(tableType, null));
 		}
 
         public static void Delete<T>(this IDbCommand dbCmd, string sqlFilter, params object[] filterParams)
@@ -328,33 +275,10 @@ namespace ServiceStack.OrmLite
 
         public static void Delete(this IDbCommand dbCmd, Type tableType, string sqlFilter, params object[] filterParams)
         {
-            dbCmd.ExecuteSql(ToDeleteStatement(tableType, sqlFilter, filterParams));
+            dbCmd.ExecuteSql(OrmLiteConfig.DialectProvider.ToDeleteStatement(tableType, sqlFilter, filterParams));
         }
 
-        public static string ToDeleteStatement(this Type tableType, string sqlFilter, params object[] filterParams)
-        {
-            var sql = new StringBuilder();
-            const string deleteStatement = "DELETE ";
-
-            var isFullDeleteStatement =
-                !string.IsNullOrEmpty(sqlFilter)
-                && sqlFilter.Length > deleteStatement.Length
-                && sqlFilter.Substring(0, deleteStatement.Length).ToUpper().Equals(deleteStatement);
-
-            if (isFullDeleteStatement) return sqlFilter.SqlFormat(filterParams);
-
-            var modelDef = tableType.GetModelDefinition();
-            sql.AppendFormat("DELETE FROM {0}", OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef));
-            if (!string.IsNullOrEmpty(sqlFilter))
-            {
-                sqlFilter = sqlFilter.SqlFormat(filterParams);
-                sql.Append(" WHERE ");
-                sql.Append(sqlFilter);
-            }
-
-            return sql.ToString();
-        }
-
+        
         public static void Save<T>(this IDbCommand dbCmd, T obj)
             where T : new()
         {

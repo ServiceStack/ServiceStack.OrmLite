@@ -39,7 +39,9 @@ namespace ServiceStack.OrmLite
 
 		public bool IsUnique { get; set; }
 
-		public int? FieldLength { get; set; }
+		public int? FieldLength { get; set; }  // Precision for Decimal Type
+		
+		public int? Scale { get; set; }  //  for decimal type
 
 		public string DefaultValue { get; set; }
 

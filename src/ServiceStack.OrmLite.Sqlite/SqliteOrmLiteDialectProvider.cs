@@ -142,5 +142,10 @@ namespace ServiceStack.OrmLite.Sqlite
 			var result = dbCmd.ExecuteScalar();
 			return (long)result;
 		}
+		
+		public override SqlExpressionVisitor<T> ExpressionVisitor<T>()
+		{
+			return new SqliteExpressionVisitor<T>();
+		}
 	}
 }

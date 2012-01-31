@@ -81,5 +81,11 @@ namespace ServiceStack.OrmLite.MySql
             if (result is DBNull) return default(long);
             return Convert.ToInt64(result);
         }
+        
+        
+        public override SqlExpressionVisitor<T> ExpressionVisitor<T> ()
+		{
+			return new MySqlExpressionVisitor<T>();
+		}
     }
 }
