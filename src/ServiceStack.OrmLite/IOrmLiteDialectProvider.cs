@@ -31,6 +31,8 @@ namespace ServiceStack.OrmLite
 
 	    string GetTableNameDelimited(ModelDefinition modelDef);
 
+        string GetNameDelimited(string columnName);
+
 		string GetColumnDefinition(
 			string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement, 
 			bool isNullable, int? fieldLength, 
@@ -49,6 +51,7 @@ namespace ServiceStack.OrmLite
 		string ToUpdateRowStatement(object objWithProperties, IList<string>UpdateFields);
 		
 		string ToDeleteRowStatement(object objWithProperties);
+		string ToDeleteStatement(Type tableType, string sqlFilter, params object[] filterParams);
 		
 		string ToExistStatement( Type fromTableType,
 			object objWithProperties,
@@ -68,9 +71,7 @@ namespace ServiceStack.OrmLite
 		List<string> ToCreateSequenceStatements(Type tableType);
 		
 		string GetColumnNames(ModelDefinition modelDef);
-		
-		string GetFieldNameDelimited(string fieldName);
-		
+				
 		SqlExpressionVisitor<T> ExpressionVisitor<T>();
 		
 	}

@@ -34,7 +34,6 @@ namespace ServiceStack.OrmLite
             else
                 Log.Debug(fmt);
         }
-  
 
         public static void CreateTables(this IDbCommand dbCmd, bool overwrite, params Type[] tableTypes)
         {
@@ -128,6 +127,7 @@ namespace ServiceStack.OrmLite
                 dbCmd.ExecuteSql(string.Format("DROP TABLE {0};", OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef)));
             }
             catch (Exception )
+
             {
                 //Log.DebugFormat("Cannot drop non-existing table '{0}': {1}", modelDef.ModelName, ex.Message);
             }
@@ -233,9 +233,10 @@ namespace ServiceStack.OrmLite
             var modelDef = ModelDefinition<T>.Definition;
 
             var sql = string.Format("DELETE FROM {0} WHERE {1} = {2}",
-                OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef),
-				OrmLiteConfig.DialectProvider.GetFieldNameDelimited( modelDef.PrimaryKey.FieldName),
-                OrmLiteConfig.DialectProvider.GetQuotedValue(id, id.GetType()));
+                                    OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef),
+                                    OrmLiteConfig.DialectProvider.GetNameDelimited(modelDef.PrimaryKey.FieldName),
+                                    OrmLiteConfig.DialectProvider.GetQuotedValue(id, id.GetType()));
+
 
             dbCmd.ExecuteSql(sql);
         }
@@ -249,9 +250,9 @@ namespace ServiceStack.OrmLite
             var modelDef = ModelDefinition<T>.Definition;
 
             var sql = string.Format("DELETE FROM {0} WHERE {1} IN ({2})",
-                OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef), 
-				OrmLiteConfig.DialectProvider.GetFieldNameDelimited(modelDef.PrimaryKey.FieldName),
-				sqlIn);
+                                    OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef),
+                                    OrmLiteConfig.DialectProvider.GetNameDelimited(modelDef.PrimaryKey.FieldName),
+                                    sqlIn);
 
             dbCmd.ExecuteSql(sql);
         }
@@ -263,7 +264,7 @@ namespace ServiceStack.OrmLite
 
         public static void DeleteAll(this IDbCommand dbCmd, Type tableType)
         {
-			dbCmd.ExecuteSql(ToDeleteStatement(tableType, null));
+			dbCmd.ExecuteSql(OrmLiteConfig.DialectProvider.ToDeleteStatement(tableType, null));
 		}
 
         public static void Delete<T>(this IDbCommand dbCmd, string sqlFilter, params object[] filterParams)
@@ -274,33 +275,10 @@ namespace ServiceStack.OrmLite
 
         public static void Delete(this IDbCommand dbCmd, Type tableType, string sqlFilter, params object[] filterParams)
         {
-            dbCmd.ExecuteSql(ToDeleteStatement(tableType, sqlFilter, filterParams));
+            dbCmd.ExecuteSql(OrmLiteConfig.DialectProvider.ToDeleteStatement(tableType, sqlFilter, filterParams));
         }
 
-        public static string ToDeleteStatement(this Type tableType, string sqlFilter, params object[] filterParams)
-        {
-            var sql = new StringBuilder();
-            const string deleteStatement = "DELETE ";
-
-            var isFullDeleteStatement =
-                !string.IsNullOrEmpty(sqlFilter)
-                && sqlFilter.Length > deleteStatement.Length
-                && sqlFilter.Substring(0, deleteStatement.Length).ToUpper().Equals(deleteStatement);
-
-            if (isFullDeleteStatement) return sqlFilter.SqlFormat(filterParams);
-
-            var modelDef = tableType.GetModelDefinition();
-            sql.AppendFormat("DELETE FROM {0}", OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef));
-            if (!string.IsNullOrEmpty(sqlFilter))
-            {
-                sqlFilter = sqlFilter.SqlFormat(filterParams);
-                sql.Append(" WHERE ");
-                sql.Append(sqlFilter);
-            }
-
-            return sql.ToString();
-        }
-
+        
         public static void Save<T>(this IDbCommand dbCmd, T obj)
             where T : new()
         {

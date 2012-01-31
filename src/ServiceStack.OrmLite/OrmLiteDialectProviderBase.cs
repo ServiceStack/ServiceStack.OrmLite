@@ -308,6 +308,11 @@ namespace ServiceStack.OrmLite
             return string.Format("\"{0}\"", modelDef.ModelName);
         }
 
+        public virtual string GetNameDelimited(string columnName)
+        {
+            return string.Format("\"{0}\"", columnName);
+        }
+
         protected virtual string GetUndefinedColumnDefintion(Type fieldType)
         {
             if (TypeSerializer.CanCreateFromString(fieldType))
@@ -338,7 +343,7 @@ namespace ServiceStack.OrmLite
             }
 
             var sql = new StringBuilder();
-            sql.AppendFormat("\"{0}\" {1}", fieldName, fieldDefinition);
+            sql.AppendFormat("{0} {1}", GetNameDelimited(fieldName), fieldDefinition);
 
             if (isPrimaryKey)
             {
@@ -384,7 +389,7 @@ namespace ServiceStack.OrmLite
 			if (isFullSelectStatement) return sqlFilter.SqlFormat(filterParams);
 
 		    sql.AppendFormat("SELECT {0} FROM {1}", tableType.GetColumnNames(),
-		                     OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef));
+		                     GetTableNameDelimited(modelDef));
 			if (!string.IsNullOrEmpty(sqlFilter))
 			{
 				sqlFilter = sqlFilter.SqlFormat(filterParams);
@@ -423,7 +428,7 @@ namespace ServiceStack.OrmLite
 
                 try
                 {
-                    sbColumnNames.Append(string.Format("\"{0}\"", fieldDef.FieldName));
+                    sbColumnNames.Append(GetNameDelimited(fieldDef.Name));
                     sbColumnValues.Append(fieldDef.GetQuotedValue(objWithProperties));
                 }
                 catch (Exception ex)
@@ -434,7 +439,7 @@ namespace ServiceStack.OrmLite
             }
 
             var sql = string.Format("INSERT INTO {0} ({1}) VALUES ({2});",
-                                    OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef), sbColumnNames, sbColumnValues);
+                                    GetTableNameDelimited(modelDef), sbColumnNames, sbColumnValues);
 
             return sql;
 		}
@@ -460,14 +465,14 @@ namespace ServiceStack.OrmLite
                     {
                         if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
 
-                        sqlFilter.AppendFormat("\"{0}\" = {1}", fieldDef.FieldName, fieldDef.GetQuotedValue(objWithProperties));
+                        sqlFilter.AppendFormat("{0} = {1}", GetNameDelimited(fieldDef.FieldName), fieldDef.GetQuotedValue(objWithProperties));
 
                         continue;
                     }
 					
 					if( updateFields.Count>0 && !updateFields.Contains( fieldDef.Name )) continue;
                     if (sql.Length > 0) sql.Append(",");
-                    sql.AppendFormat("\"{0}\" = {1}", fieldDef.FieldName, fieldDef.GetQuotedValue(objWithProperties));
+                    sql.AppendFormat("{0} = {1}", GetNameDelimited(fieldDef.FieldName), fieldDef.GetQuotedValue(objWithProperties));
                 }
                 catch (Exception ex)
                 {
@@ -495,7 +500,7 @@ namespace ServiceStack.OrmLite
                     {
                         if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
 
-                        sqlFilter.AppendFormat("\"{0}\" = {1}", fieldDef.FieldName, fieldDef.GetQuotedValue(objWithProperties));
+                        sqlFilter.AppendFormat("{0} = {1}", GetNameDelimited(fieldDef.FieldName), fieldDef.GetQuotedValue(objWithProperties));
                     }
                 }
                 catch (Exception ex)
@@ -505,14 +510,42 @@ namespace ServiceStack.OrmLite
             }
 
             var deleteSql = string.Format("DELETE FROM {0} WHERE {1}",
-                OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef), sqlFilter);
+                GetTableNameDelimited(modelDef), sqlFilter);
 
             return deleteSql;
         }
 		
+		
+		public virtual string ToDeleteStatement(Type tableType, string sqlFilter, params object[] filterParams)
+        {
+            var sql = new StringBuilder();
+            const string deleteStatement = "DELETE ";
+
+            var isFullDeleteStatement =
+                !string.IsNullOrEmpty(sqlFilter)
+                && sqlFilter.Length > deleteStatement.Length
+                && sqlFilter.Substring(0, deleteStatement.Length).ToUpper().Equals(deleteStatement);
+
+            if (isFullDeleteStatement) return sqlFilter.SqlFormat(filterParams);
+
+            var modelDef = tableType.GetModelDefinition();
+            sql.AppendFormat("DELETE FROM {0}", GetTableNameDelimited(modelDef));
+            if (!string.IsNullOrEmpty(sqlFilter))
+            {
+                sqlFilter = sqlFilter.SqlFormat(filterParams);
+                sql.Append(" WHERE ");
+                sql.Append(sqlFilter);
+            }
+
+            return sql.ToString();
+        }
+		
+		
+		
+		
 		public virtual string ToCreateTableStatement( Type tableType)
         {
-            var sbColumns = new StringBuilder();
+             var sbColumns = new StringBuilder();
             var sbConstraints = new StringBuilder();
 
             var modelDef = tableType.GetModelDefinition();
@@ -520,7 +553,7 @@ namespace ServiceStack.OrmLite
             {
                 if (sbColumns.Length != 0) sbColumns.Append(", \n  ");
 
-                var columnDefinition = OrmLiteConfig.DialectProvider.GetColumnDefinition(
+                var columnDefinition = GetColumnDefinition(
                     fieldDef.FieldName,
                     fieldDef.FieldType,
                     fieldDef.IsPrimaryKey,
@@ -535,11 +568,16 @@ namespace ServiceStack.OrmLite
                 if (fieldDef.ReferencesType == null) continue;
 
                 var refModelDef = fieldDef.ReferencesType.GetModelDefinition();
-                sbConstraints.AppendFormat(", \n\n  CONSTRAINT \"FK_{0}_{1}\" FOREIGN KEY (\"{2}\") REFERENCES \"{3}\" (\"{4}\")",
-                    modelDef.ModelName, refModelDef.ModelName, fieldDef.FieldName, refModelDef.ModelName, modelDef.PrimaryKey.FieldName);
+                sbConstraints.AppendFormat(
+                    ", \n\n  CONSTRAINT {0} FOREIGN KEY ({1}) REFERENCES {2} ({3})",
+                    GetNameDelimited(string.Format("FK_{0}_{1}", modelDef.ModelName,
+					                                             refModelDef.ModelName)),
+                    GetNameDelimited(fieldDef.FieldName),
+                    GetTableNameDelimited(refModelDef),
+                    GetNameDelimited(refModelDef.PrimaryKey.FieldName));
             }
             var sql = new StringBuilder(string.Format(
-                "CREATE TABLE {0} \n(\n  {1}{2} \n); \n", OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef), sbColumns, sbConstraints));
+                "CREATE TABLE {0} \n(\n  {1}{2} \n); \n", GetTableNameDelimited(modelDef), sbColumns, sbConstraints));
 
             return sql.ToString();
         }
@@ -564,10 +602,12 @@ namespace ServiceStack.OrmLite
                 var indexName = GetIndexName(compositeIndex.Unique, modelDef.ModelName.SafeVarName(),
                     string.Join("_", compositeIndex.FieldNames.ToArray()));
 
-                var indexNames = string.Join("\" ASC, \"", compositeIndex.FieldNames.ToArray());
+                var indexNames = string.Join(" ASC, ",
+                                             compositeIndex.FieldNames.ConvertAll(
+                                                 n => GetNameDelimited(n)).ToArray());
 
                 sqlIndexes.Add(
-                    ToCreateIndexStatement(compositeIndex.Unique, indexName, modelDef, indexNames));
+                    ToCreateIndexStatement(compositeIndex.Unique, indexName, modelDef, indexNames, true));
             }
 
             return sqlIndexes;
@@ -578,10 +618,12 @@ namespace ServiceStack.OrmLite
             return string.Format("{0}idx_{1}_{2}", isUnique ? "u" : "", modelName, fieldName).ToLower();
         }
 
-        protected virtual string ToCreateIndexStatement(bool isUnique, string indexName, ModelDefinition modelDef, string fieldName)
+        protected virtual string ToCreateIndexStatement(bool isUnique, string indexName, ModelDefinition modelDef, string fieldName, bool isCombined = false)
         {
-            return string.Format("CREATE {0} INDEX {1} ON {2} (\"{3}\" ASC); \n",
-                    isUnique ? "UNIQUE" : "", indexName, OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef), fieldName);
+            return string.Format("CREATE {0} INDEX {1} ON {2} ({3} ASC); \n",
+                                 isUnique ? "UNIQUE" : "", indexName,
+                                 GetTableNameDelimited(modelDef),
+                                 (isCombined) ? fieldName : GetNameDelimited(fieldName));
         }
 		
 		public virtual string GetColumnNames(ModelDefinition modelDef){
@@ -623,9 +665,6 @@ namespace ServiceStack.OrmLite
 			get {return  OrmLiteConfigExtensions.IdField ;}
 		}
 	
-		public virtual string GetFieldNameDelimited(string fieldName){
-			return string.Format("\"{0}\"", fieldName);
-		}
 		
 		public virtual SqlExpressionVisitor<T> ExpressionVisitor<T>(){
 			throw new NotImplementedException();

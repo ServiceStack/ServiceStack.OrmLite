@@ -14,7 +14,7 @@ namespace ServiceStack.OrmLite.Firebird
 	public class FirebirdOrmLiteDialectProvider:OrmLiteDialectProviderBase
 	{
 		private readonly List<string> RESERVED = new List<string>( new string[] 
-		{"USER","ORDER","PASSWORD", "ACTIVE","LEFT","DOUBLE", "FLOAT", "DECIMAL"} );
+		{"USER","ORDER","PASSWORD", "ACTIVE","LEFT","DOUBLE", "FLOAT", "DECIMAL","STRING", "DATE","DATETIME"} );
 		
 		public static FirebirdOrmLiteDialectProvider Instance = new FirebirdOrmLiteDialectProvider();
 		
@@ -390,7 +390,7 @@ namespace ServiceStack.OrmLite.Firebird
 					fieldDef.FieldName);
 
                 sqlIndexes.Add(
-                    ToCreateIndexStatement(fieldDef.IsUnique, indexName, modelDef, fieldDef.FieldName));
+                    ToCreateIndexStatement(fieldDef.IsUnique, indexName, modelDef, fieldDef.FieldName,false));
             }
 
             foreach (var compositeIndex in modelDef.CompositeIndexes)
@@ -402,13 +402,13 @@ namespace ServiceStack.OrmLite.Firebird
                 var indexNames = string.Join(",", compositeIndex.FieldNames.ToArray());
 
                 sqlIndexes.Add(
-                    ToCreateIndexStatement(compositeIndex.Unique, indexName, modelDef, indexNames));
+                    ToCreateIndexStatement(compositeIndex.Unique, indexName, modelDef, indexNames,false));
             }
 
             return sqlIndexes;
         }
 		
-		protected override string ToCreateIndexStatement(bool isUnique, string indexName, ModelDefinition modelDef, string fieldName)
+		protected override string ToCreateIndexStatement(bool isUnique, string indexName, ModelDefinition modelDef, string fieldName, bool isCombined)
         {
             return string.Format("CREATE {0} INDEX {1} ON {2} ({3} ); \n",
 				isUnique ? "UNIQUE" : "", 
@@ -641,7 +641,7 @@ namespace ServiceStack.OrmLite.Firebird
 		}
 		
 
-		public override string GetFieldNameDelimited(string fieldName){
+		public override string GetNameDelimited(string fieldName){
 			return Quote(fieldName);
 		}
 		

@@ -193,7 +193,7 @@ Below is a complete example of how to use "SqlExpressionVisitor <T>" in OrmLite:
 	}
 
 see full project in :
-https://github.com/aicl/ServiceStack.OrmLite/tree/master/src/FirebirdTests/TestSimpleFirebird04
+https://github.com/aicl/ServiceStack.OrmLite/tree/master/src/FirebirdTests/TestExpressions
 
 For usage samples see :
 

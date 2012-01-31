@@ -95,7 +95,8 @@ namespace TestLiteFirebird00
 					Active=true,
 					Earnings= 99.9m,
 					Comments="ServiceStack.Net ...",
-					City="London"
+					City="London",
+					Rate=10
 				});
 				
 				dbCmd.Insert( new Author(){
@@ -104,7 +105,8 @@ namespace TestLiteFirebird00
 					Active=true,
 					Earnings= 50.25m,
 					Comments="OrmLite.Firebird",
-					City="Bogota"
+					City="Bogota",
+					Rate=9
 				});
 				
 				dbCmd.Insert( new Author(){
@@ -112,7 +114,8 @@ namespace TestLiteFirebird00
 					Birthday= DateTime.Today.AddYears(25),
 					Active=true,
 					Comments="other books...",
-					City="London"
+					City="London",
+					Rate=8
 				});
 			
 				
@@ -121,19 +124,21 @@ namespace TestLiteFirebird00
 					Birthday= DateTime.Today.AddYears(28),
 					Active=false,
 					Comments="other books...",
-					City="Bogota"
+					City="Bogota",
+					Rate=10
 				});
 				
 				//-------------------------------------------------------------------
 				SqlExpressionVisitor<Author> ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<Author>();
 				
-				ev.Insert(r=> new {r.Id, r.Name, r.Birthday, r.Active}); // fields to insert
+				ev.Insert(r=> new {r.Id, r.Name, r.Birthday, r.Active, r.Rate}); // fields to insert
 				
 				var author = new Author(){
 					Name="William",
 					Birthday= DateTime.Today.AddYears(250),
 					Active=false,
 					City="London",
+					Rate= 0,
 					Comments="this will not be inserted" // null in db
 				};
 			
