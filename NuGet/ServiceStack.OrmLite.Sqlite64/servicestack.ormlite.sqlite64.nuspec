@@ -2,10 +2,12 @@
 <package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>ServiceStack.OrmLite.Sqlite64</id> 
-    <version>3.0.6</version> 
+    <version>3.4.2</version> 
     <authors>Demis Bellot</authors> 
     <owners>Demis Bellot</owners>
-    <description>ServiceStack.NET OrmLite - Light, simple and fast convention-based POCO ORM</description> 
+    <description>
+        Light, simple and fast convention-based code-first POCO ORM. Support for Creating and Dropping Table Schemas from POCOs, Complex Property types transparently stored in schemaless text blobs.
+    </description> 
     <projectUrl>https://github.com/ServiceStack/ServiceStack.OrmLite</projectUrl>
     <licenseUrl>https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/LICENSE</licenseUrl>
     <iconUrl>http://www.servicestack.net/logo-100x100.png</iconUrl>
