@@ -421,14 +421,14 @@ namespace ServiceStack.OrmLite
             {
                 if (fieldDef.AutoIncrement) continue;
 
-				if( insertFields.Count>0 && !insertFields.Contains( fieldDef.Name )) continue;
+				if( insertFields.Count>0 && !insertFields.Contains( fieldDef.FieldName )) continue;
 				
                 if (sbColumnNames.Length > 0) sbColumnNames.Append(",");
                 if (sbColumnValues.Length > 0) sbColumnValues.Append(",");
 
                 try
                 {
-                    sbColumnNames.Append(GetNameDelimited(fieldDef.Name));
+                    sbColumnNames.Append(GetNameDelimited(fieldDef.FieldName));
                     sbColumnValues.Append(fieldDef.GetQuotedValue(objWithProperties));
                 }
                 catch (Exception ex)
