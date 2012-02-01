@@ -1,12 +1,10 @@
 using System;
-using System.Data;
 using System.Diagnostics;
 using Northwind.Common.DataModel;
 using NUnit.Framework;
 using ServiceStack.DataAccess;
-using ServiceStack.OrmLite.MySql;
 
-namespace ServiceStack.OrmLite.Tests
+namespace ServiceStack.OrmLite.MySql.Tests
 {
 	[Ignore("Perf test")]
 	[TestFixture]
@@ -38,10 +36,11 @@ namespace ServiceStack.OrmLite.Tests
 
 		private static void LoadNorthwindData(IBasicPersistenceProvider persistenceProvider)
 		{
-			persistenceProvider.StoreAll(NorthwindData.Categories);
+            persistenceProvider.StoreAll(NorthwindData.Categories);
 			persistenceProvider.StoreAll(NorthwindData.Customers);
 			persistenceProvider.StoreAll(NorthwindData.Employees);
 			persistenceProvider.StoreAll(NorthwindData.Shippers);
+            persistenceProvider.StoreAll(NorthwindData.Suppliers);
 			persistenceProvider.StoreAll(NorthwindData.Orders);
 			persistenceProvider.StoreAll(NorthwindData.Products);
 			persistenceProvider.StoreAll(NorthwindData.OrderDetails);

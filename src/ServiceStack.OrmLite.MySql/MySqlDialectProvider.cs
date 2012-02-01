@@ -82,7 +82,6 @@ namespace ServiceStack.OrmLite.MySql
             return Convert.ToInt64(result);
         }
         
-        
         public override SqlExpressionVisitor<T> ExpressionVisitor<T> ()
 		{
 			return new MySqlExpressionVisitor<T>();

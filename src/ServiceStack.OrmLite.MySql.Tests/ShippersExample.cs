@@ -4,9 +4,8 @@ using System.Data;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.DesignPatterns.Model;
-using ServiceStack.OrmLite.MySql;
 
-namespace ServiceStack.OrmLite.Tests
+namespace ServiceStack.OrmLite.MySql.Tests
 {
 	[TestFixture]
 	public class ShippersExample

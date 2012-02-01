@@ -37,6 +37,7 @@ namespace ServiceStack.OrmLite.Tests
 			NorthwindData.Customers.ForEach(x => dbCmd.Insert(x));
 			NorthwindData.Employees.ForEach(x => dbCmd.Insert(x));
 			NorthwindData.Shippers.ForEach(x => dbCmd.Insert(x));
+            NorthwindData.Suppliers.ForEach(x => dbCmd.Insert(x));
 			NorthwindData.Orders.ForEach(x => dbCmd.Insert(x));
 			NorthwindData.Products.ForEach(x => dbCmd.Insert(x));
 			NorthwindData.OrderDetails.ForEach(x => dbCmd.Insert(x));

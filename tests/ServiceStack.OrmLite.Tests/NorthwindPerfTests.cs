@@ -42,6 +42,7 @@ namespace ServiceStack.OrmLite.Tests
 			persistenceProvider.StoreAll(NorthwindData.Customers);
 			persistenceProvider.StoreAll(NorthwindData.Employees);
 			persistenceProvider.StoreAll(NorthwindData.Shippers);
+            persistenceProvider.StoreAll(NorthwindData.Suppliers);
 			persistenceProvider.StoreAll(NorthwindData.Orders);
 			persistenceProvider.StoreAll(NorthwindData.Products);
 			persistenceProvider.StoreAll(NorthwindData.OrderDetails);
