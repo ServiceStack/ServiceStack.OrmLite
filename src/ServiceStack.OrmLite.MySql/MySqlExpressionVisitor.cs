@@ -108,28 +108,8 @@ namespace ServiceStack.OrmLite.MySql
 			}
 			
         }
+				
 		
-		
-		public override string LimitExpression{
-			get{
-				if(!FromRow.HasValue) return "";
-				if(FromRow.Value<=0)
-					throw new ArgumentException("FromRow value must be>0");
-				string rows;
-				if(Rows.HasValue){
-					if( Rows.Value<0) {
-						throw new ArgumentException("Rows  value must be>=0");
-					}
-					rows= string.Format(",{0}", Rows.Value );
-				}
-				else{
-					rows=string.Empty;
-				}
-				return string.Format("LIMIT {0}{1}", FromRow.Value, rows);                   
-			}
-		}
 		
 	}
 }
-
-//SELECT * FROM tbl LIMIT 5,10 gives 10 rows starting from row #5

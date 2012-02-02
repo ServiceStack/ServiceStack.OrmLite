@@ -24,7 +24,7 @@ namespace ServiceStack.OrmLite
 		private string havingExpression;
 		
 		protected  int? Rows{ get ; private set;}
-		protected  int? FromRow { get ; private set;}
+		protected  int? Skip { get ; private set;}
 		
 				
 		public SqlExpressionVisitor ()
@@ -84,43 +84,58 @@ namespace ServiceStack.OrmLite
 				selectExpression=value;
 			}
 		}
+		/// <summary>
+		/// Set the specified offset and rows for SQL Limit clause.
+		/// </summary>
+		/// <param name='skip'>
+		/// Offset of the first row to return. The offset of the initial row is 0
+		/// </param>
+		/// <param name='rows'>
+		/// Number of rows returned by a SELECT statement
+		/// </param>
 		
-		public virtual SqlExpressionVisitor<T> Limit(int fromrow, int rows ){
+		public virtual SqlExpressionVisitor<T> Limit(int skip, int rows ){
 			Rows=rows;
-			FromRow= fromrow;
+			Skip= skip;
 			return this;
 		}
 		
+		/// <summary>
+		/// Set the specified rows for Sql Limit clause.
+		/// </summary>
+		/// <param name='rows'>
+		/// Number of rows returned by a SELECT statement
+		/// </param>
 		public virtual SqlExpressionVisitor<T> Limit(int rows){
-			FromRow= rows;
+			Skip= rows;
 			Rows=null;
 			return this;
 		}
 		
+		/// <summary>
+		/// Clear Sql Limit clause
+		/// </summary>
 		public virtual SqlExpressionVisitor<T> Limit(){
-			FromRow= null;
+			Skip= null;
 			Rows=null;
 			return this;
 		}
+		
 		
 		public virtual string LimitExpression{
 			get{
-				if(!FromRow.HasValue) return "";
-				if(FromRow.Value<=0)
-					throw new ArgumentException("FromRow value must be>0");
+				if(!Skip.HasValue) return "";
 				string rows;
 				if(Rows.HasValue){
-					if( Rows.Value<0) {
-						throw new ArgumentException("Rows  value must be>=0");
-					}
-					rows= string.Format("TO {0}", FromRow.Value+Rows.Value-1 );
+					rows= string.Format(",{0}", Rows.Value );
 				}
 				else{
 					rows=string.Empty;
 				}
-				return string.Format("ROWS {0} {1}", FromRow.Value, rows);                   
+				return string.Format("LIMIT {0}{1}", Skip.Value, rows);                   
 			}
 		}
+		
 		
 		public virtual SqlExpressionVisitor<T> Where(){
 			return Where(null);

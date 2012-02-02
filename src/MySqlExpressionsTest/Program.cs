@@ -19,6 +19,7 @@ namespace MySqlExpressionsTest
 	public class Author{
 		public Author(){}
 		[AutoIncrement]
+		[Alias("AuthorID")]
 		public Int32 Id { get; set;}
 		[Index(Unique = true)]
 		[StringLength(40)]
@@ -28,8 +29,10 @@ namespace MySqlExpressionsTest
 		public Decimal? Earnings { get; set;}  
 		public bool Active { get; set; } 
 		[StringLength(80)]
+		[Alias("JobCity")]
 		public string City { get; set;}
 		[StringLength(80)]
+		[Alias("Comments")]
 		public string Comments { get; set;}
 		public Int16 Rate{ get; set;}
 	}
@@ -197,7 +200,22 @@ namespace MySqlExpressionsTest
 				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", "Claudia Espinel".ToUpper(), author.Name, "Claudia Espinel".ToUpper()==author.Name);
 				
 				
+				//paging :
+				ev.Limit(0,4);// first page, page size=4;
+				result=dbCmd.Select(ev);
+				author = result.FirstOrDefault();
+				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", "Claudia Espinel".ToUpper(), author.Name, "Claudia Espinel".ToUpper()==author.Name);
 				
+				ev.Limit(4,4);// second page
+				result=dbCmd.Select(ev);
+				author = result.FirstOrDefault();
+				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", "Jorge Garzon".ToUpper(), author.Name, "Jorge Garzon".ToUpper()==author.Name);
+				
+				ev.Limit(8,4);// third page
+				result=dbCmd.Select(ev);
+				author = result.FirstOrDefault();
+				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", "Rodger Contreras".ToUpper(), author.Name, "Rodger Contreras".ToUpper()==author.Name);
+							
 				
 				Console.ReadLine();
 				Console.WriteLine("Press Enter to continue");

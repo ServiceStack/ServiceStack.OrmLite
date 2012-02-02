@@ -102,9 +102,13 @@ namespace ServiceStack.OrmLite.Firebird
 				return base.GetQuotedValue(boolValue ? "1" : "0", typeof(string));
 			}
 			
-			//if(fieldType== typeof(TimeSpan) ){
-			//	return string.Format("'{0}'", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") );
-			//}
+			if (fieldType == typeof(decimal ?) || fieldType == typeof(decimal) ||
+				fieldType == typeof(double ?) || fieldType == typeof(double)  ||
+				fieldType == typeof(float ?) || fieldType == typeof(float)  ){
+				var s = base.GetQuotedValue( value, fieldType);
+				if (s.Length>20) s= s.Substring(0,20);
+				return "'" + s + "'";
+			}
 			
 			return base.GetQuotedValue(value, fieldType);
 		}
