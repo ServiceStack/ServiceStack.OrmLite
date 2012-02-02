@@ -24,7 +24,7 @@ namespace ServiceStack.OrmLite.MySql
 
         public override string EscapeParam(object paramValue)
         {
-            return paramValue.ToString().Replace("'", @"\'");
+            return paramValue.ToString().Replace("\\", "\\\\").Replace("'", @"\'");
         }
 
         public override IDbConnection CreateConnection(string connectionString, Dictionary<string, string> options)
