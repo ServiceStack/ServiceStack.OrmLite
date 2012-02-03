@@ -107,7 +107,7 @@ namespace ServiceStack.OrmLite.Firebird
 				fieldType == typeof(float ?) || fieldType == typeof(float)  ){
 				var s = base.GetQuotedValue( value, fieldType);
 				if (s.Length>20) s= s.Substring(0,20);
-				return "'" + s + "'";
+				return "'" + s + "'"; // when quoted exception is more clear!
 			}
 			
 			return base.GetQuotedValue(value, fieldType);
