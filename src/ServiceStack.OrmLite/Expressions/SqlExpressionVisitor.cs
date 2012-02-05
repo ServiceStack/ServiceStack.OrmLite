@@ -9,45 +9,208 @@ namespace ServiceStack.OrmLite
 {
 	public abstract class SqlExpressionVisitor<T>
 	{
-			
-		private string orderBy= string.Empty;
+		
+		private string selectExpression= string.Empty;
+		private string whereExpression;
 		private string groupBy= string.Empty;
+		private string havingExpression;
+		private string orderBy= string.Empty;
+				
 		IList<string> updateFields= new List<string>();
 		IList<string> insertFields= new List<string>();
-		private string selectExpression= string.Empty;
+		
 		private string sep= string.Empty;
+		private bool useFieldName=false;
 		private ModelDefinition modelDef;
 		
-		private bool useFieldName=false;
-		
-		private string whereExpression;
-		private string havingExpression;
-		
-		public int? Rows { get ; set;}
-		public int? Skip { get ; set;}
-						
+									
 		public SqlExpressionVisitor ()
 		{
 			modelDef = typeof(T).GetModelDefinition();
 		}
 		
-		protected internal ModelDefinition ModelDef {
-			get {
-				return modelDef;
-			}
-			set {
-				modelDef = value;
-			}
+		
+				
+		/// <summary>
+		/// Clear select expression. All properties will be selected.
+		/// </summary>
+		public virtual SqlExpressionVisitor<T> Select(){
+			return Select(string.Empty);
 		}
 		
-		protected internal bool UseFieldName {
-			get {
-				return useFieldName;
+		/// <summary>
+		/// set the specified selectExpression.
+		/// </summary>
+		/// <param name='selectExpression'>
+		/// raw Select expression: "Select SomeField1, SomeField2 from SomeTable"
+		/// </param>
+		public virtual SqlExpressionVisitor<T> Select(string selectExpression){
+			
+			if(string.IsNullOrEmpty(selectExpression)){
+				BuildSelectExpression(string.Empty,false);
 			}
-			set {
-				useFieldName = value;
+			else{
+				this.selectExpression=selectExpression;
 			}
+			return this;
 		}
+		
+		/// <summary>
+		/// Fields to be selected.
+		/// </summary>
+		/// <param name='fields'>
+		/// x=> x.SomeProperty1 or x=> new{ x.SomeProperty1, x.SomeProperty2}
+		/// </param>
+		/// <typeparam name='TKey'>
+		/// objectWithProperties
+		/// </typeparam>
+		public virtual SqlExpressionVisitor<T> Select<TKey>(Expression<Func<T, TKey>> fields){
+			sep=string.Empty;
+			useFieldName=true;
+			BuildSelectExpression( Visit(fields),false );
+			return this;
+		}
+				
+		public virtual SqlExpressionVisitor<T> SelectDistinct<TKey>(Expression<Func<T, TKey>> fields){
+			sep=string.Empty;
+			useFieldName=true;
+			BuildSelectExpression( Visit(fields),true );
+			return this;
+		}
+		
+
+		
+		public virtual SqlExpressionVisitor<T> Where(){
+			return Where(string.Empty);
+		}
+		
+		public virtual SqlExpressionVisitor<T> Where (string sqlFilter, params object[] filterParams){
+			whereExpression= !string.IsNullOrEmpty(sqlFilter)? sqlFilter.SqlFormat(filterParams):string.Empty;
+			if(!string.IsNullOrEmpty(whereExpression)) whereExpression= "WHERE " +whereExpression;
+			return this;
+		}
+		
+		public virtual SqlExpressionVisitor<T> Where(Expression<Func<T, bool>> predicate){
+			
+			if(predicate!=null ) {		
+				useFieldName=true;
+				sep=" ";
+				whereExpression= Visit( predicate );
+				if(!string.IsNullOrEmpty(whereExpression)) whereExpression= "WHERE " +whereExpression;
+			}
+			else
+				whereExpression=string.Empty;
+			
+			return this;
+		}
+		
+		
+		public virtual SqlExpressionVisitor<T> GroupBy(){
+			return GroupBy( string.Empty);
+		}
+		
+		public virtual SqlExpressionVisitor<T> GroupBy(string groupBy){
+			this.groupBy= groupBy;
+			return this;
+		}
+		
+		public virtual SqlExpressionVisitor<T> GroupBy<TKey>(Expression<Func<T, TKey>> keySelector){
+			sep=string.Empty;
+			useFieldName=true;
+			groupBy = Visit(keySelector);
+			if(!string.IsNullOrEmpty(groupBy)) groupBy = string.Format("GROUP BY {0}",groupBy);
+			return this;
+		}
+		
+				
+		public virtual SqlExpressionVisitor<T> Having(){
+			return Having(string.Empty);
+		}
+		
+		public virtual SqlExpressionVisitor<T> Having(string sqlFilter, params object[] filterParams){
+			havingExpression= !string.IsNullOrEmpty(sqlFilter)? sqlFilter.SqlFormat(filterParams):string.Empty;
+			if(!string.IsNullOrEmpty(havingExpression)) havingExpression= "HAVING " +havingExpression;
+			return this;
+		}
+				
+		public virtual SqlExpressionVisitor<T> Having(Expression<Func<T, bool>> predicate){
+			
+			if(predicate !=null ) {
+				useFieldName=true;
+				sep=" ";
+				havingExpression= Visit( predicate );
+				if(!string.IsNullOrEmpty(havingExpression)) havingExpression= "HAVING " +havingExpression;
+			}
+			else
+				havingExpression=string.Empty;
+				
+			return this;
+		}
+				
+		
+		
+		public virtual SqlExpressionVisitor<T> OrderBy(){
+			return OrderBy( string.Empty);
+		}
+	
+		public virtual SqlExpressionVisitor<T> OrderBy(string orderBy){
+			this.orderBy=orderBy;
+			return this;
+		}
+		
+		public virtual SqlExpressionVisitor<T> OrderBy<TKey>(Expression<Func<T, TKey>> keySelector){
+			sep=string.Empty;
+			useFieldName=true;
+			orderBy = Visit(keySelector);
+			if (!string.IsNullOrEmpty(orderBy) ) orderBy= string.Format("ORDER BY {0}",orderBy);
+			return this;
+		}	
+		
+		public virtual SqlExpressionVisitor<T> OrderByDescending<TKey>(Expression<Func<T, TKey>> keySelector){
+			sep=string.Empty;
+			useFieldName=true;
+			orderBy = Visit(keySelector);
+			if(!string.IsNullOrEmpty(orderBy))	orderBy= string.Format("ORDER BY {0} DESC",orderBy);
+			return this;
+		}
+				
+				
+		/// <summary>
+		/// Set the specified offset and rows for SQL Limit clause.
+		/// </summary>
+		/// <param name='skip'>
+		/// Offset of the first row to return. The offset of the initial row is 0
+		/// </param>
+		/// <param name='rows'>
+		/// Number of rows returned by a SELECT statement
+		/// </param>	
+		public virtual SqlExpressionVisitor<T> Limit(int skip, int rows ){
+			Rows=rows;
+			Skip= skip;
+			return this;
+		}
+		
+		/// <summary>
+		/// Set the specified rows for Sql Limit clause.
+		/// </summary>
+		/// <param name='rows'>
+		/// Number of rows returned by a SELECT statement
+		/// </param>
+		public virtual SqlExpressionVisitor<T> Limit(int rows){
+			Rows= rows;
+			Skip=0;
+			return this;
+		}
+		
+		/// <summary>
+		/// Clear Sql Limit clause
+		/// </summary>
+		public virtual SqlExpressionVisitor<T> Limit(){
+			Skip= null;
+			Rows=null;
+			return this;
+		}
+				
 		
 		/// <summary>
 		/// Fields to be updated.
@@ -102,110 +265,87 @@ namespace ServiceStack.OrmLite
 			this.insertFields=insertFields;
 			return this;
 		}
+			
+			
+		
+		public virtual string ToDeleteRowStatement(){
+			return string.Format("DELETE FROM {0} {1}", 
+			                     OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef),
+			                     WhereExpression);
+		}
+		
+		public virtual string ToSelectStatement(){
+			StringBuilder sql = new StringBuilder();
+			
+			sql.Append(	SelectExpression );
+			sql.Append( string.IsNullOrEmpty(WhereExpression)?
+			           "":
+			           "\n"+WhereExpression);
+			sql.Append( string.IsNullOrEmpty(GroupByExpression)?
+			           "":
+			           "\n"+GroupByExpression);
+			sql.Append( string.IsNullOrEmpty(HavingExpression)?
+			           "":
+			           "\n"+HavingExpression);
+			sql.Append( string.IsNullOrEmpty(OrderByExpression)?
+			           "":
+			           "\n"+OrderByExpression);
+			sql.Append( string.IsNullOrEmpty(LimitExpression)?
+			           "":
+			           "\n"+LimitExpression);
+			return sql.ToString();
+			
+		}
 				
-		/// <summary>
-		/// Clear select expression
-		/// </summary>
-		public virtual SqlExpressionVisitor<T> Select(){
-			return Select(string.Empty);
-		}
 		
-		/// <summary>
-		/// set the specified selectExpression.
-		/// </summary>
-		/// <param name='selectExpression'>
-		/// raw Select expression: "Select SomeField1, SomeField2 from SomeTable"
-		/// </param>
-		public virtual SqlExpressionVisitor<T> Select(string selectExpression){
-			this.selectExpression=selectExpression;
-			return this;
-		}
-		
-		/// <summary>
-		/// Fields to be inserted.
-		/// </summary>
-		/// <param name='fields'>
-		/// x=> x.SomeProperty1 or x=> new{ x.SomeProperty1, x.SomeProperty2}
-		/// </param>
-		/// <typeparam name='TKey'>
-		/// objectWithProperties
-		/// </typeparam>
-		public virtual SqlExpressionVisitor<T> Select<TKey>(Expression<Func<T, TKey>> fields){
-			sep=string.Empty;
-			useFieldName=true;
-			selectExpression=Visit(fields);
-			return this;
-		}
-		
-		public virtual IList<string> UpdateFields{
+		public string SelectExpression{
 			get{
-				return updateFields;	
-			}
-			set{
-				updateFields=value;
-			}
-		}
-		
-		public virtual IList<string> InsertFields{
-			get {
-				return insertFields;
-			}
-			set{
-				insertFields=value;
-			}
-		}
-		
-		public virtual string SelectExpression{
-			get{
-				return 
-					(!string.IsNullOrEmpty(selectExpression) ?
-						string.Format("SELECT {0} \nFROM {1}",
-						selectExpression,
-						OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef)):
-						selectExpression);
+				if(string.IsNullOrEmpty(selectExpression)) 
+					BuildSelectExpression(string.Empty,false);
+				return 	selectExpression;
 			}
 			set{
 				selectExpression=value;
 			}
 		}
-		/// <summary>
-		/// Set the specified offset and rows for SQL Limit clause.
-		/// </summary>
-		/// <param name='skip'>
-		/// Offset of the first row to return. The offset of the initial row is 0
-		/// </param>
-		/// <param name='rows'>
-		/// Number of rows returned by a SELECT statement
-		/// </param>
 		
-		public virtual SqlExpressionVisitor<T> Limit(int skip, int rows ){
-			Rows=rows;
-			Skip= skip;
-			return this;
+		public string WhereExpression{
+			get{
+				return whereExpression;
+			}
+			set{	
+				whereExpression= value;
+			}
 		}
 		
-		/// <summary>
-		/// Set the specified rows for Sql Limit clause.
-		/// </summary>
-		/// <param name='rows'>
-		/// Number of rows returned by a SELECT statement
-		/// </param>
-		public virtual SqlExpressionVisitor<T> Limit(int rows){
-			Rows= rows;
-			Skip=0;
-			return this;
+		public string GroupByExpression{
+			get {
+				return groupBy;
+			}
+			set{
+				groupBy = value;
+			}
 		}
 		
-		/// <summary>
-		/// Clear Sql Limit clause
-		/// </summary>
-		public virtual SqlExpressionVisitor<T> Limit(){
-			Skip= null;
-			Rows=null;
-			return this;
+		public string HavingExpression{
+			get{
+				return havingExpression;
+			}
+			set{	
+				havingExpression= value;
+			}
 		}
 		
 		
+		public string OrderByExpression{
+			get {
+				return orderBy;
+			}
+			set{
+				orderBy = value;
+			}
+		}
+				
 		public virtual string LimitExpression{
 			get{
 				if(!Skip.HasValue) return "";
@@ -220,146 +360,47 @@ namespace ServiceStack.OrmLite
 			}
 		}
 		
-		
-		public virtual SqlExpressionVisitor<T> Where(){
-			return Where(string.Empty);
-		}
-		
-		public virtual SqlExpressionVisitor<T> Where (string sqlFilter, params object[] filterParams){
-			whereExpression= !string.IsNullOrEmpty(sqlFilter)? sqlFilter.SqlFormat(filterParams):string.Empty;
-			return this;
-		}
-		
-		public virtual SqlExpressionVisitor<T> Where(Expression<Func<T, bool>> predicate){
-			
-			if(predicate!=null ) {		
-				useFieldName=true;
-				sep=" ";
-				whereExpression= Visit( predicate );
-			}
-			else
-				whereExpression=string.Empty;
-			
-			return this;
-		}
-		
-				
-		public virtual SqlExpressionVisitor<T> Having(){
-			return Having(string.Empty);
-		}
-		
-		public virtual SqlExpressionVisitor<T> Having(string sqlFilter, params object[] filterParams){
-			havingExpression= !string.IsNullOrEmpty(sqlFilter)? sqlFilter.SqlFormat(filterParams):string.Empty;
-			return this;
-		}
+		public int? Rows { get ; set;}
+		public int? Skip { get ; set;}
 				
 		
-		public virtual SqlExpressionVisitor<T> Having(Expression<Func<T, bool>> predicate){
-			
-			if(predicate !=null ) {
-				useFieldName=true;
-				sep=" ";
-				havingExpression= Visit( predicate );
-			}
-			else
-				havingExpression=string.Empty;
-				
-			return this;
-		}
-		
-		
-		
-		public virtual SqlExpressionVisitor<T> OrderBy(){
-			return OrderBy( string.Empty);
-		}
-	
-		public virtual SqlExpressionVisitor<T> OrderBy(string orderBy){
-			this.orderBy=orderBy;
-			return this;
-		}
-		
-		public virtual SqlExpressionVisitor<T> OrderBy<TKey>(Expression<Func<T, TKey>> keySelector){
-			sep=string.Empty;
-			useFieldName=true;
-			orderBy = Visit(keySelector);
-			return this;
-		}	
-		
-		public virtual SqlExpressionVisitor<T> OrderByDescending<TKey>(Expression<Func<T, TKey>> keySelector){
-			sep=string.Empty;
-			useFieldName=true;
-			orderBy = Visit(keySelector);
-			if( !string.IsNullOrEmpty(orderBy))
-				orderBy=orderBy+" DESC";
-			return this;
-		}
-
-		
-		
-		public virtual SqlExpressionVisitor<T> GroupBy(){
-			return GroupBy( string.Empty);
-		}
-		
-		public virtual SqlExpressionVisitor<T> GroupBy(string groupBy){
-			this.groupBy= groupBy;
-			return this;
-		}
-		
-		public virtual SqlExpressionVisitor<T> GroupBy<TKey>(Expression<Func<T, TKey>> keySelector){
-			sep=string.Empty;
-			useFieldName=true;
-			groupBy = Visit(keySelector);
-			return this;
-		}
-		
-		
-		public virtual string WhereExpression{
+		public IList<string> UpdateFields{
 			get{
-				return !string.IsNullOrEmpty(whereExpression)?
-					string.Format("WHERE {0}", whereExpression):
-					whereExpression;
-			}
-			set{	
-				whereExpression= value;
-			}
-			
-		}
-		
-		public virtual string HavingExpression{
-			get{
-				
-				return !string.IsNullOrEmpty(havingExpression)?
-					string.Format("HAVING {0}", havingExpression):
-					havingExpression;
-			}
-			set{	
-				havingExpression= value;
-			}
-		}
-		
-		
-		public virtual string OrderByExpression{
-			get {
-				return string.IsNullOrEmpty(orderBy)?
-					string.Empty:
-					string.Format("ORDER BY {0}",orderBy);
+				return updateFields;	
 			}
 			set{
-				orderBy = value;
+				updateFields=value;
 			}
 		}
 		
-		
-		public virtual string GroupByExpression{
+		public IList<string> InsertFields{
 			get {
-				return string.IsNullOrEmpty(groupBy)?
-					string.Empty:
-					string.Format("GROUP BY {0}",groupBy);
+				return insertFields;
 			}
 			set{
-				groupBy = value;
+				insertFields=value;
 			}
 		}
+		
+		protected internal ModelDefinition ModelDef {
+			get {
+				return modelDef;
+			}
+			set {
+				modelDef = value;
+			}
+		}
+		
+		protected internal bool UseFieldName {
+			get {
+				return useFieldName;
+			}
+			set {
+				useFieldName = value;
+			}
+		}
+		
+		
 		
 		protected internal virtual string Visit(Expression exp){
 			
@@ -572,11 +613,11 @@ namespace ServiceStack.OrmLite
 			case "ToLower":
 				return string.Format("lower({0})",r);
 			case "StartsWith":
-				return string.Format("{0} starting with {1} ",r, args[0] );
+				return string.Format("upper({0}) starting with {1} ",r, args[0].ToString().ToUpper() );
 			case "EndsWith":
-				return string.Format("{0} like '%{1}'",r,RemoveQuote(args[0].ToString()) );
+				return string.Format("upper({0}) like '%{1}'",r,RemoveQuote(args[0].ToString()).ToUpper() );
 			case "Contains":	
-				return string.Format("{0} like '%{1}%'",r,RemoveQuote(args[0].ToString()) );
+				return string.Format("upper({0}) like '%{1}%'",r,RemoveQuote(args[0].ToString()).ToUpper() );
 			case "Substring":
 				var startIndex = Int32.Parse(args[0].ToString() ) +1;
 				if (args.Count==2){
@@ -730,40 +771,7 @@ namespace ServiceStack.OrmLite
 			}   
 		}
 		
-		public virtual string ToDeleteRowStatement(){
-			return string.Format("DELETE FROM {0} {1}", 
-			                     OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef),
-			                     (! string.IsNullOrEmpty(WhereExpression)?
-			                     WhereExpression:
-			                     ""));
-		}
-		
-		public virtual string ToSelectStatement(){
-			StringBuilder sql = new StringBuilder();
-			
-			sql.Append(string.IsNullOrEmpty(SelectExpression)? 
-				OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), string.Empty):
-				SelectExpression );
-			sql.Append( string.IsNullOrEmpty(WhereExpression)?
-			           "":
-			           "\n"+WhereExpression);
-			sql.Append( string.IsNullOrEmpty(GroupByExpression)?
-			           "":
-			           "\n"+GroupByExpression);
-			sql.Append( string.IsNullOrEmpty(HavingExpression)?
-			           "":
-			           "\n"+HavingExpression);
-			sql.Append( string.IsNullOrEmpty(OrderByExpression)?
-			           "":
-			           "\n"+OrderByExpression);
-			sql.Append( string.IsNullOrEmpty(LimitExpression)?
-			           "":
-			           "\n"+LimitExpression);
-			return sql.ToString();
-			
-		}
-		
-		
+				
 		protected string RemoveQuote(string exp){
 
 			if (exp.StartsWith("'") )
@@ -782,6 +790,8 @@ namespace ServiceStack.OrmLite
 						GetNameDelimited(x.FieldName)==quotedExp);
 			return (fd!=default(FieldDefinition));
 		}
+		
+		
 		
 		private string GetTrueExpression(){
 			object o = GetQuotedTrueValue();
@@ -811,6 +821,18 @@ namespace ServiceStack.OrmLite
 		private string GetQuotedFalseValue(){
 			return OrmLiteConfig.DialectProvider.GetQuotedValue(false,typeof(bool));
 		}
+		
+		
+		private void BuildSelectExpression(string fields, bool distinct){
+				
+			selectExpression= string.Format("SELECT {0}{1} \nFROM {2}",
+				(distinct?"DISTINCT ":""),
+				(string.IsNullOrEmpty(fields)?
+					OrmLiteConfig.DialectProvider.GetColumnNames(modelDef):
+					fields),
+				OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef));
+		}
+		
 		
 	}
 	

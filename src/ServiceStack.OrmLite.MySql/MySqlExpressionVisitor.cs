@@ -36,7 +36,9 @@ namespace ServiceStack.OrmLite.MySql
 			case "ToLower":
 				return string.Format("lower({0})",r);
 			case "StartsWith": //LEFT( title, 1) = '#'
-				return string.Format("LEFT( {0},{1})= 2 ",r,args[0].ToString().Length ,args[0] );
+				return string.Format("LEFT( {0},{1})= {2} ",r
+					,RemoveQuote(args[0].ToString()).Length,
+					args[0] );
 			case "EndsWith":
 				return string.Format("{0} like '%{1}'",r,RemoveQuote(args[0].ToString()) );
 			case "Contains":	

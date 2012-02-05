@@ -116,8 +116,12 @@ namespace SqliteExpressionsTest
 				Console.WriteLine(ev.WhereExpression);
 				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, result.Count, expected==result.Count);
 				
-				// select authors which name ends with garzon ( case sensitive )
-				expected=1;
+				// select authors which name ends with garzon
+				//A percent symbol ("%") in the LIKE pattern matches any sequence of zero or more characters 
+				//in the string. 
+				//An underscore ("_") in the LIKE pattern matches any single character in the string. 
+				//Any other character matches itself or its lower/upper case equivalent (i.e. case-insensitive matching).
+				expected=3;
 				ev.Where(rn=>  rn.Name.EndsWith("garzon") );
 				result=dbCmd.Select(ev);
 				Console.WriteLine(ev.WhereExpression);
@@ -220,6 +224,14 @@ namespace SqliteExpressionsTest
 				result=dbCmd.Select(ev);
 				author = result.FirstOrDefault();
 				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", "Rodger Contreras".ToUpper(), author.Name, "Rodger Contreras".ToUpper()==author.Name);			
+				
+				// select distinct..
+				ev.Limit(); // clear limit
+				ev.SelectDistinct(r=>r.City);
+				expected=6;
+				result=dbCmd.Select(ev);	
+				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, result.Count, expected==result.Count);
+				
 				
 				Console.ReadLine();
 				Console.WriteLine("Press Enter to continue");
