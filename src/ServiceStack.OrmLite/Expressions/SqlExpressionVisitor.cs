@@ -7,32 +7,68 @@ using System.Linq.Expressions;
 
 namespace ServiceStack.OrmLite
 {
-	public abstract class SqlExpressionVisitor<T>  //where T: new()
+	public abstract class SqlExpressionVisitor<T>
 	{
-				
-		private Expression<Func<T, bool>> wherePredicate;
-		private Expression<Func<T, bool>> havingPredicate;
+			
 		private string orderBy= string.Empty;
 		private string groupBy= string.Empty;
-		List<string> updateFields= new List<string>();
-		List<string> insertFields= new List<string>();
+		IList<string> updateFields= new List<string>();
+		IList<string> insertFields= new List<string>();
 		private string selectExpression= string.Empty;
 		private string sep= string.Empty;
 		private ModelDefinition modelDef;
+		
 		private bool useFieldName=false;
+		
 		private string whereExpression;
 		private string havingExpression;
 		
-		protected  int? Rows{ get ; private set;}
-		protected  int? Skip { get ; private set;}
-		
-				
+		public int? Rows { get ; set;}
+		public int? Skip { get ; set;}
+						
 		public SqlExpressionVisitor ()
 		{
 			modelDef = typeof(T).GetModelDefinition();
 		}
-				
 		
+		protected internal ModelDefinition ModelDef {
+			get {
+				return modelDef;
+			}
+			set {
+				modelDef = value;
+			}
+		}
+		
+		protected internal bool UseFieldName {
+			get {
+				return useFieldName;
+			}
+			set {
+				useFieldName = value;
+			}
+		}
+		
+		/// <summary>
+		/// Fields to be updated.
+		/// </summary>
+		/// <param name='updatefields'>
+		/// IList<string> containing Names of properties to be updated
+		/// </param>
+		public virtual  SqlExpressionVisitor<T> Update(IList<string> updateFields){
+			this.updateFields = updateFields;
+			return this;
+		}
+		
+		/// <summary>
+		/// Fields to be updated.
+		/// </summary>
+		/// <param name='fields'>
+		/// x=> x.SomeProperty1 or x=> new{ x.SomeProperty1, x.SomeProperty2}
+		/// </param>
+		/// <typeparam name='TKey'>
+		/// objectWithProperties
+		/// </typeparam>
 		public virtual SqlExpressionVisitor<T> Update<TKey>(Expression<Func<T, TKey>> fields){
 			sep=string.Empty;
 			useFieldName=false;
@@ -40,6 +76,15 @@ namespace ServiceStack.OrmLite
 			return this;
 		}
 		
+		/// <summary>
+		/// Fields to be inserted.
+		/// </summary>
+		/// <param name='fields'>
+		/// x=> x.SomeProperty1 or x=> new{ x.SomeProperty1, x.SomeProperty2}
+		/// </param>
+		/// <typeparam name='TKey'>
+		/// objectWithProperties
+		/// </typeparam>
 		public virtual SqlExpressionVisitor<T> Insert<TKey>(Expression<Func<T, TKey>> fields){
 			sep=string.Empty;
 			useFieldName=false;
@@ -47,11 +92,44 @@ namespace ServiceStack.OrmLite
 			return this;
 		}
 		
-		
+		/// <summary>
+		/// fields to be inserted.
+		/// </summary>
+		/// <param name='insertFields'>
+		/// IList<string> containing Names of properties to be inserted
+		/// </param>
+		public virtual SqlExpressionVisitor<T> Insert(IList<string> insertFields){
+			this.insertFields=insertFields;
+			return this;
+		}
+				
+		/// <summary>
+		/// Clear select expression
+		/// </summary>
 		public virtual SqlExpressionVisitor<T> Select(){
-			return Select<T>(null);
+			return Select(string.Empty);
 		}
 		
+		/// <summary>
+		/// set the specified selectExpression.
+		/// </summary>
+		/// <param name='selectExpression'>
+		/// raw Select expression: "Select SomeField1, SomeField2 from SomeTable"
+		/// </param>
+		public virtual SqlExpressionVisitor<T> Select(string selectExpression){
+			this.selectExpression=selectExpression;
+			return this;
+		}
+		
+		/// <summary>
+		/// Fields to be inserted.
+		/// </summary>
+		/// <param name='fields'>
+		/// x=> x.SomeProperty1 or x=> new{ x.SomeProperty1, x.SomeProperty2}
+		/// </param>
+		/// <typeparam name='TKey'>
+		/// objectWithProperties
+		/// </typeparam>
 		public virtual SqlExpressionVisitor<T> Select<TKey>(Expression<Func<T, TKey>> fields){
 			sep=string.Empty;
 			useFieldName=true;
@@ -63,11 +141,17 @@ namespace ServiceStack.OrmLite
 			get{
 				return updateFields;	
 			}
+			set{
+				updateFields=value;
+			}
 		}
 		
 		public virtual IList<string> InsertFields{
 			get {
 				return insertFields;
+			}
+			set{
+				insertFields=value;
 			}
 		}
 		
@@ -107,8 +191,8 @@ namespace ServiceStack.OrmLite
 		/// Number of rows returned by a SELECT statement
 		/// </param>
 		public virtual SqlExpressionVisitor<T> Limit(int rows){
-			Skip= rows;
-			Rows=null;
+			Rows= rows;
+			Skip=0;
 			return this;
 		}
 		
@@ -138,31 +222,62 @@ namespace ServiceStack.OrmLite
 		
 		
 		public virtual SqlExpressionVisitor<T> Where(){
-			return Where(null);
+			return Where(string.Empty);
+		}
+		
+		public virtual SqlExpressionVisitor<T> Where (string sqlFilter, params object[] filterParams){
+			whereExpression= !string.IsNullOrEmpty(sqlFilter)? sqlFilter.SqlFormat(filterParams):string.Empty;
+			return this;
 		}
 		
 		public virtual SqlExpressionVisitor<T> Where(Expression<Func<T, bool>> predicate){
-			whereExpression=string.Empty;
-			wherePredicate= predicate;
+			
+			if(predicate!=null ) {		
+				useFieldName=true;
+				sep=" ";
+				whereExpression= Visit( predicate );
+			}
+			else
+				whereExpression=string.Empty;
+			
 			return this;
 		}
 		
+				
 		public virtual SqlExpressionVisitor<T> Having(){
-			return Having(null);
+			return Having(string.Empty);
 		}
+		
+		public virtual SqlExpressionVisitor<T> Having(string sqlFilter, params object[] filterParams){
+			havingExpression= !string.IsNullOrEmpty(sqlFilter)? sqlFilter.SqlFormat(filterParams):string.Empty;
+			return this;
+		}
+				
 		
 		public virtual SqlExpressionVisitor<T> Having(Expression<Func<T, bool>> predicate){
-			havingExpression=string.Empty;
-			havingPredicate= predicate;
+			
+			if(predicate !=null ) {
+				useFieldName=true;
+				sep=" ";
+				havingExpression= Visit( predicate );
+			}
+			else
+				havingExpression=string.Empty;
+				
 			return this;
 		}
+		
 		
 		
 		public virtual SqlExpressionVisitor<T> OrderBy(){
-			orderBy=string.Empty;
-			return this;
+			return OrderBy( string.Empty);
 		}
 	
+		public virtual SqlExpressionVisitor<T> OrderBy(string orderBy){
+			this.orderBy=orderBy;
+			return this;
+		}
+		
 		public virtual SqlExpressionVisitor<T> OrderBy<TKey>(Expression<Func<T, TKey>> keySelector){
 			sep=string.Empty;
 			useFieldName=true;
@@ -178,12 +293,18 @@ namespace ServiceStack.OrmLite
 				orderBy=orderBy+" DESC";
 			return this;
 		}
+
+		
 		
 		public virtual SqlExpressionVisitor<T> GroupBy(){
-			groupBy=string.Empty;
+			return GroupBy( string.Empty);
+		}
+		
+		public virtual SqlExpressionVisitor<T> GroupBy(string groupBy){
+			this.groupBy= groupBy;
 			return this;
 		}
-				
+		
 		public virtual SqlExpressionVisitor<T> GroupBy<TKey>(Expression<Func<T, TKey>> keySelector){
 			sep=string.Empty;
 			useFieldName=true;
@@ -194,24 +315,11 @@ namespace ServiceStack.OrmLite
 		
 		public virtual string WhereExpression{
 			get{
-				if(wherePredicate!=null ) {
-					
-					useFieldName=true;
-					sep=" ";
-					whereExpression= Visit( wherePredicate );
-					
-					if( whereExpression=="1" || whereExpression=="'1'") 
-						whereExpression= string.Empty;
-					else if (whereExpression=="0" || whereExpression=="'0'") 
-						whereExpression= "1=0";
-					
-				}
 				return !string.IsNullOrEmpty(whereExpression)?
 					string.Format("WHERE {0}", whereExpression):
 					whereExpression;
 			}
 			set{	
-				wherePredicate= null;
 				whereExpression= value;
 			}
 			
@@ -219,18 +327,12 @@ namespace ServiceStack.OrmLite
 		
 		public virtual string HavingExpression{
 			get{
-				if(havingPredicate !=null ) {
-					useFieldName=true;
-					sep=" ";
-					havingExpression= Visit( havingPredicate );
-				}
 				
 				return !string.IsNullOrEmpty(havingExpression)?
 					string.Format("HAVING {0}", havingExpression):
 					havingExpression;
 			}
 			set{	
-				havingPredicate= null;
 				havingExpression= value;
 			}
 		}
@@ -259,7 +361,7 @@ namespace ServiceStack.OrmLite
 			}
 		}
 		
-		protected virtual string Visit(Expression exp){
+		protected internal virtual string Visit(Expression exp){
 			
 			if(exp==null) return string.Empty;
 			switch (exp.NodeType){
@@ -663,17 +765,16 @@ namespace ServiceStack.OrmLite
 		
 		
 		protected string RemoveQuote(string exp){
-			
+
 			if (exp.StartsWith("'") )
 				exp=exp.Remove(0,1);
 			if( exp.EndsWith("'") )
 				exp =exp.Remove(exp.Length-1,1);
-			
 			return exp;				
 		}
 		
 		
-		private bool IsFieldName( string quotedExp){
+		protected bool IsFieldName( string quotedExp){
 			FieldDefinition fd =
 				modelDef.FieldDefinitions.
 					FirstOrDefault(x=>

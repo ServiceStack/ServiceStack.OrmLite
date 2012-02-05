@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Linq;
 using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
@@ -32,7 +31,7 @@ namespace MySqlExpressionsTest
 		[Alias("JobCity")]
 		public string City { get; set;}
 		[StringLength(80)]
-		[Alias("Comments")]
+		[Alias("Comment")]
 		public string Comments { get; set;}
 		public Int16 Rate{ get; set;}
 	}
@@ -139,7 +138,7 @@ namespace MySqlExpressionsTest
 				Console.WriteLine(ev.WhereExpression);
 				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, result.Count, expected==result.Count);
 				
-				// select authors with Rate = 10 and city=Mexio 
+				// select authors with Rate = 10 and city=Mexico 
 				expected=1;
 				ev.Where(rn=>  rn.Rate==10 && rn.City=="Mexico");
 				result=dbCmd.Select(ev);
@@ -164,9 +163,14 @@ namespace MySqlExpressionsTest
 				Console.WriteLine(ev.WhereExpression);
 				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, result.Count, expected==result.Count);
 				
+				//update comment for City == null 
+				expected=2;
+				ev.Where( rn => rn.City==null ).Update(rn=> rn.Comments);
+				rows=dbCmd.Update(new Author(){Comments="No comments"}, ev);
+				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, rows, expected==rows);
+				
 				// delete where City is null 
 				expected=2;
-				ev.Where( rn => rn.City==null );
 				rows = dbCmd.Delete( ev);
 				Console.WriteLine(ev.WhereExpression);
 				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, rows, expected==rows);

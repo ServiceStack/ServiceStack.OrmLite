@@ -69,7 +69,7 @@ namespace ServiceStack.OrmLite.Firebird.DbSchema
 
 		public void WriteClass(TTable table, string className)
 		{
-
+			className = ToDotName(className);
 			StringBuilder properties= new StringBuilder();
 			StringBuilder meProperties= new StringBuilder();
 			List<TColumn> columns = Schema.GetColumns(table.Name);
@@ -93,10 +93,10 @@ namespace ServiceStack.OrmLite.Firebird.DbSchema
 				
 				if(GenerateMetadata){
 					if(meProperties.Length==0)
-						meProperties.AppendFormat("\n\t\t\tpublic static string TableName {{ get {{ return \"{0}\"; }}}}",
-						                          table.Name);
-					meProperties.AppendFormat("\n\t\t\tpublic static string {0} {{ get {{ return \"{1}\"; }}}}",
-					                         ToDotName(cl.Name),cl.Name);
+						meProperties.AppendFormat("\n\t\t\tpublic static string ClassName {{ get {{ return \"{0}\"; }}}}",
+						                          className);
+					meProperties.AppendFormat("\n\t\t\tpublic static string {0} {{ get {{ return \"{0}\"; }}}}",
+					                         ToDotName(cl.Name));
 				}
 				
 				if(ToDotName(cl.Name)==IdField){
@@ -107,8 +107,7 @@ namespace ServiceStack.OrmLite.Firebird.DbSchema
 				    
 			if (!Directory.Exists(OutputDirectory))
 				Directory.CreateDirectory(OutputDirectory);
-			
-			className = ToDotName(className);
+					
 
 			using (TextWriter tw = new StreamWriter(Path.Combine(OutputDirectory, className + ".cs")))
 			{
