@@ -3,10 +3,9 @@ using System.Globalization;
 using System.Threading;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.OrmLite.MySql;
 using ServiceStack.Text;
 
-namespace ServiceStack.OrmLite.Tests
+namespace ServiceStack.OrmLite.MySql.Tests
 {
 	[TestFixture]
 	public class LocalizationTests

@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using NUnit.Framework;
-using ServiceStack.OrmLite.MySql;
 
-namespace ServiceStack.OrmLite.Tests.UseCase
+namespace ServiceStack.OrmLite.MySql.Tests.UseCase
 {
 	[TestFixture]
 	public class SimpleUseCase
