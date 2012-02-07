@@ -143,6 +143,13 @@ namespace ServiceStack.OrmLite
             }
         }
 
+		private string paramString = "@";
+		public string ParamString
+		{
+			get { return paramString; }
+			set { paramString = value; }
+		}	
+
         private bool useUnicode;
         public virtual bool UseUnicode
         {
@@ -570,8 +577,8 @@ namespace ServiceStack.OrmLite
                 var refModelDef = fieldDef.ReferencesType.GetModelDefinition();
                 sbConstraints.AppendFormat(
                     ", \n\n  CONSTRAINT {0} FOREIGN KEY ({1}) REFERENCES {2} ({3})",
-                    GetNameDelimited(string.Format("FK_{0}_{1}", modelDef.ModelName,
-					                                             refModelDef.ModelName)),
+                    GetNameDelimited(string.Format("FK_{0}_{1}_{2}", modelDef.ModelName,
+																 refModelDef.ModelName, fieldDef.FieldName)),
                     GetNameDelimited(fieldDef.FieldName),
                     GetTableNameDelimited(refModelDef),
                     GetNameDelimited(refModelDef.PrimaryKey.FieldName));
