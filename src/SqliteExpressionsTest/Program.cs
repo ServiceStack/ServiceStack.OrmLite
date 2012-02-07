@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.ComponentModel.DataAnnotations;
@@ -20,6 +19,7 @@ namespace SqliteExpressionsTest
 	public class Author{
 		public Author(){}
 		[AutoIncrement]
+		[Alias("AuthorID")]
 		public Int32 Id { get; set;}
 		[Index(Unique = true)]
 		[StringLength(40)]
@@ -29,8 +29,10 @@ namespace SqliteExpressionsTest
 		public Decimal? Earnings { get; set;}  
 		public bool Active { get; set; } 
 		[StringLength(80)]
+		[Alias("JobCity")]
 		public string City { get; set;}
 		[StringLength(80)]
+		[Alias("Comment")]
 		public string Comments { get; set;}
 		public Int16 Rate{ get; set;}
 	}
@@ -114,8 +116,12 @@ namespace SqliteExpressionsTest
 				Console.WriteLine(ev.WhereExpression);
 				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, result.Count, expected==result.Count);
 				
-				// select authors which name ends with garzon ( case sensitive )
-				expected=1;
+				// select authors which name ends with garzon
+				//A percent symbol ("%") in the LIKE pattern matches any sequence of zero or more characters 
+				//in the string. 
+				//An underscore ("_") in the LIKE pattern matches any single character in the string. 
+				//Any other character matches itself or its lower/upper case equivalent (i.e. case-insensitive matching).
+				expected=3;
 				ev.Where(rn=>  rn.Name.EndsWith("garzon") );
 				result=dbCmd.Select(ev);
 				Console.WriteLine(ev.WhereExpression);
@@ -162,12 +168,18 @@ namespace SqliteExpressionsTest
 				Console.WriteLine(ev.WhereExpression);
 				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, result.Count, expected==result.Count);
 				
+				//update comment for City == null 
+				expected=2;
+				ev.Where( rn => rn.City==null ).Update(rn=> rn.Comments);
+				rows=dbCmd.Update(new Author(){Comments="No comments"}, ev);
+				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, rows, expected==rows);
+				
 				// delete where City is null 
 				expected=2;
-				ev.Where( rn => rn.City==null );
 				rows = dbCmd.Delete( ev);
 				Console.WriteLine(ev.WhereExpression);
 				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, rows, expected==rows);
+			
 			
 				
 				//   lets select  all records ordered by Rate Descending and Name Ascending
@@ -197,7 +209,28 @@ namespace SqliteExpressionsTest
 				author = result.FirstOrDefault();
 				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", "Claudia Espinel".ToUpper(), author.Name, "Claudia Espinel".ToUpper()==author.Name);
 				
+				//paging :
+				ev.Limit(0,4);// first page, page size=4;
+				result=dbCmd.Select(ev);
+				author = result.FirstOrDefault();
+				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", "Claudia Espinel".ToUpper(), author.Name, "Claudia Espinel".ToUpper()==author.Name);
 				
+				ev.Limit(4,4);// second page
+				result=dbCmd.Select(ev);
+				author = result.FirstOrDefault();
+				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", "Jorge Garzon".ToUpper(), author.Name, "Jorge Garzon".ToUpper()==author.Name);
+				
+				ev.Limit(8,4);// third page
+				result=dbCmd.Select(ev);
+				author = result.FirstOrDefault();
+				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", "Rodger Contreras".ToUpper(), author.Name, "Rodger Contreras".ToUpper()==author.Name);			
+				
+				// select distinct..
+				ev.Limit(); // clear limit
+				ev.SelectDistinct(r=>r.City);
+				expected=6;
+				result=dbCmd.Select(ev);	
+				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, result.Count, expected==result.Count);
 				
 				
 				Console.ReadLine();

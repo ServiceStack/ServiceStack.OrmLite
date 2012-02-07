@@ -36,7 +36,9 @@ namespace ServiceStack.OrmLite.MySql
 			case "ToLower":
 				return string.Format("lower({0})",r);
 			case "StartsWith": //LEFT( title, 1) = '#'
-				return string.Format("LEFT( {0},{1})= 2 ",r,args[0].ToString().Length ,args[0] );
+				return string.Format("LEFT( {0},{1})= {2} ",r
+					,RemoveQuote(args[0].ToString()).Length,
+					args[0] );
 			case "EndsWith":
 				return string.Format("{0} like '%{1}'",r,RemoveQuote(args[0].ToString()) );
 			case "Contains":	
@@ -108,28 +110,8 @@ namespace ServiceStack.OrmLite.MySql
 			}
 			
         }
+				
 		
-		
-		public override string LimitExpression{
-			get{
-				if(!FromRow.HasValue) return "";
-				if(FromRow.Value<=0)
-					throw new ArgumentException("FromRow value must be>0");
-				string rows;
-				if(Rows.HasValue){
-					if( Rows.Value<0) {
-						throw new ArgumentException("Rows  value must be>=0");
-					}
-					rows= string.Format(",{0}", Rows.Value );
-				}
-				else{
-					rows=string.Empty;
-				}
-				return string.Format("LIMIT {0}{1}", FromRow.Value, rows);                   
-			}
-		}
 		
 	}
 }
-
-//SELECT * FROM tbl LIMIT 5,10 gives 10 rows starting from row #5
