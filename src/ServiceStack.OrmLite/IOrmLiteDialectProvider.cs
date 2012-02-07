@@ -18,7 +18,9 @@ namespace ServiceStack.OrmLite
 	public interface IOrmLiteDialectProvider
 	{
 		int DefaultStringLength { get; set; }
-		
+
+		string ParamString { get; set; }
+
 		bool UseUnicode { get; set; }
 
 		string EscapeParam(object paramValue);
