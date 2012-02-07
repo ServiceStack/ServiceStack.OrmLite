@@ -420,8 +420,8 @@ namespace ServiceStack.OrmLite
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
                 if (fieldDef.AutoIncrement) continue;
-
-				if( insertFields.Count>0 && !insertFields.Contains( fieldDef.FieldName )) continue;
+				//insertFields contains Property "Name" of fields to insert ( that's how expressions work )
+				if( insertFields.Count>0 && !insertFields.Contains( fieldDef.Name )) continue;
 				
                 if (sbColumnNames.Length > 0) sbColumnNames.Append(",");
                 if (sbColumnValues.Length > 0) sbColumnValues.Append(",");

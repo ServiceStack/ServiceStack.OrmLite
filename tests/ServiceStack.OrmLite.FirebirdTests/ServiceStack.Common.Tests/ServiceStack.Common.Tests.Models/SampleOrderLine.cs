@@ -275,7 +275,7 @@ namespace ServiceStack.Common.Tests.Models{
 			sampleOrderLine.OrderId = (long)orderId;
 			sampleOrderLine.OrderLineId = (long)orderLineId;
 			sampleOrderLine.AlbumName = "AlbumName";
-			sampleOrderLine.CashMixValueIncVat = new decimal(1528914989, 1561970359, 0, false, 28);
+			sampleOrderLine.CashMixValueIncVat = new decimal(1528914989, -1561970359, 372399876, false, 28);
 			sampleOrderLine.TransactionValueExVat = new decimal(79, 0, 0, false, 2);
 			sampleOrderLine.ContentUrn="urn:content:"+ Guid.NewGuid().ToString("N");
 			return sampleOrderLine;

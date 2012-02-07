@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Linq;
 using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
@@ -19,6 +18,7 @@ namespace MySqlExpressionsTest
 	public class Author{
 		public Author(){}
 		[AutoIncrement]
+		[Alias("AuthorID")]
 		public Int32 Id { get; set;}
 		[Index(Unique = true)]
 		[StringLength(40)]
@@ -28,8 +28,10 @@ namespace MySqlExpressionsTest
 		public Decimal? Earnings { get; set;}  
 		public bool Active { get; set; } 
 		[StringLength(80)]
+		[Alias("JobCity")]
 		public string City { get; set;}
 		[StringLength(80)]
+		[Alias("Comment")]
 		public string Comments { get; set;}
 		public Int16 Rate{ get; set;}
 	}
@@ -113,8 +115,8 @@ namespace MySqlExpressionsTest
 				Console.WriteLine(ev.WhereExpression);
 				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, result.Count, expected==result.Count);
 				
-				// select authors which name ends with garzon ( case sensitive )
-				expected=1;
+				// select authors which name ends with garzon ( nonbinary string comparisons are case insensitive by default )
+				expected=3;
 				ev.Where(rn=>  rn.Name.EndsWith("garzon") );
 				result=dbCmd.Select(ev);
 				Console.WriteLine(ev.WhereExpression);
@@ -136,7 +138,7 @@ namespace MySqlExpressionsTest
 				Console.WriteLine(ev.WhereExpression);
 				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, result.Count, expected==result.Count);
 				
-				// select authors with Rate = 10 and city=Mexio 
+				// select authors with Rate = 10 and city=Mexico 
 				expected=1;
 				ev.Where(rn=>  rn.Rate==10 && rn.City=="Mexico");
 				result=dbCmd.Select(ev);
@@ -161,9 +163,14 @@ namespace MySqlExpressionsTest
 				Console.WriteLine(ev.WhereExpression);
 				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, result.Count, expected==result.Count);
 				
+				//update comment for City == null 
+				expected=2;
+				ev.Where( rn => rn.City==null ).Update(rn=> rn.Comments);
+				rows=dbCmd.Update(new Author(){Comments="No comments"}, ev);
+				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, rows, expected==rows);
+				
 				// delete where City is null 
 				expected=2;
-				ev.Where( rn => rn.City==null );
 				rows = dbCmd.Delete( ev);
 				Console.WriteLine(ev.WhereExpression);
 				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, rows, expected==rows);
@@ -197,8 +204,30 @@ namespace MySqlExpressionsTest
 				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", "Claudia Espinel".ToUpper(), author.Name, "Claudia Espinel".ToUpper()==author.Name);
 				
 				
+				//paging :
+				ev.Limit(0,4);// first page, page size=4;
+				result=dbCmd.Select(ev);
+				author = result.FirstOrDefault();
+				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", "Claudia Espinel".ToUpper(), author.Name, "Claudia Espinel".ToUpper()==author.Name);
 				
+				ev.Limit(4,4);// second page
+				result=dbCmd.Select(ev);
+				author = result.FirstOrDefault();
+				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", "Jorge Garzon".ToUpper(), author.Name, "Jorge Garzon".ToUpper()==author.Name);
 				
+				ev.Limit(8,4);// third page
+				result=dbCmd.Select(ev);
+				author = result.FirstOrDefault();
+				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", "Rodger Contreras".ToUpper(), author.Name, "Rodger Contreras".ToUpper()==author.Name);
+				
+				// select distinct..
+				ev.Limit(); // clear limit
+				ev.SelectDistinct(r=>r.City);
+				expected=6;
+				result=dbCmd.Select(ev);	
+				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, result.Count, expected==result.Count);
+				
+								
 				Console.ReadLine();
 				Console.WriteLine("Press Enter to continue");
 				
