@@ -264,7 +264,7 @@ namespace ServiceStack.OrmLite
 			if (dbCmd.Parameters.Count != 1
 				|| ((IDbDataParameter)dbCmd.Parameters[0]).ParameterName != ModelDefinition<T>.PrimaryKeyName
 				|| lastQueryType != typeof(T))
-				SetFilter<T>(dbCmd, OrmLiteConfig.DialectProvider.GetNameDelimited(ModelDefinition<T>.PrimaryKeyName), value);
+				SetFilter<T>(dbCmd, ModelDefinition<T>.PrimaryKeyName, value);
 
 			((IDbDataParameter)dbCmd.Parameters[0]).Value = value;
 

@@ -146,7 +146,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
 
 		public override SqlExpressionVisitor<T> ExpressionVisitor<T>()
 		{
-			throw new NotImplementedException();
+			return new PostgreSQLExpressionVisitor<T>();
 		}
 	}
 }
