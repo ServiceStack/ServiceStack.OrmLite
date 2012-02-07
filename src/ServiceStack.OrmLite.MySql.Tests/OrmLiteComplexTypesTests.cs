@@ -3,7 +3,7 @@ using System.Linq;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
 
-namespace ServiceStack.OrmLite.Tests
+namespace ServiceStack.OrmLite.MySql.Tests
 {
 	[TestFixture]
 	public class OrmLiteComplexTypesTests

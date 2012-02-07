@@ -5,9 +5,8 @@ using System.Data;
 using System.Linq;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.OrmLite.MySql;
 
-namespace ServiceStack.OrmLite.Tests.UseCase
+namespace ServiceStack.OrmLite.MySql.Tests.UseCase
 {
     public enum PhoneType
     {

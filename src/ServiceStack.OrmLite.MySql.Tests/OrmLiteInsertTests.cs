@@ -1,10 +1,9 @@
-using System;
 using Northwind.Common.DataModel;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
 using ServiceStack.DataAnnotations;
 
-namespace ServiceStack.OrmLite.Tests
+namespace ServiceStack.OrmLite.MySql.Tests
 {
 	[TestFixture]
 	public class OrmLiteInsertTests

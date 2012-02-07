@@ -1,11 +1,9 @@
-using System;
 using System.Collections.Generic;
 using NUnit.Framework;
 using ServiceStack.Common.Extensions;
 using ServiceStack.Common.Tests.Models;
-using ServiceStack.Text;
 
-namespace ServiceStack.OrmLite.Tests
+namespace ServiceStack.OrmLite.MySql.Tests
 {
 	[TestFixture]
 	public class OrmLiteSelectTests

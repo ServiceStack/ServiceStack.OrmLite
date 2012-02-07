@@ -1,9 +1,8 @@
 using System.Data;
-using System.IO;
 using Northwind.Common.DataModel;
 using NUnit.Framework;
 
-namespace ServiceStack.OrmLite.Tests
+namespace ServiceStack.OrmLite.MySql.Tests
 {
     [TestFixture][Ignore("Long running tests")]
 	public class OrmLiteNorthwindTests
@@ -37,6 +36,7 @@ namespace ServiceStack.OrmLite.Tests
 			NorthwindData.Customers.ForEach(x => dbCmd.Insert(x));
 			NorthwindData.Employees.ForEach(x => dbCmd.Insert(x));
 			NorthwindData.Shippers.ForEach(x => dbCmd.Insert(x));
+		    NorthwindData.Suppliers.ForEach(x => dbCmd.Insert(x));
 			NorthwindData.Orders.ForEach(x => dbCmd.Insert(x));
 			NorthwindData.Products.ForEach(x => dbCmd.Insert(x));
 			NorthwindData.OrderDetails.ForEach(x => dbCmd.Insert(x));
