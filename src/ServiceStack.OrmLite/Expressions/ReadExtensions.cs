@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using ServiceStack.Common.Extensions;
 using ServiceStack.Common.Utils;
@@ -13,6 +14,28 @@ namespace ServiceStack.OrmLite
 {
 	public static class ReadExtensions
 	{
+		public static List<T> Select<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
+			where T : new()
+		{
+			var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();
+			string sql= ev.Where(predicate).ToSelectStatement();
+			using (var reader = dbCmd.ExecReader(sql.ToString()))
+			{
+				return ConvertToList<T>(reader);
+			}
+		}
+
+		public static List<T> Select<T>(this IDbCommand dbCmd, Func<SqlExpressionVisitor<T>, SqlExpressionVisitor<T>> expression)
+			where T : new()
+		{
+			var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();
+			string sql= expression(ev).ToSelectStatement();
+			using (var reader = dbCmd.ExecReader(sql.ToString()))
+			{
+				return ConvertToList<T>(reader);
+			}
+		}
+
 		public static List<T> Select<T>(this IDbCommand dbCmd, SqlExpressionVisitor<T> expression)
 			where T : new()
 		{
