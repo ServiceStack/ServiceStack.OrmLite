@@ -39,7 +39,7 @@ As [performance is the most important feature](https://github.com/mythz/ScalingD
 
 [![Download on NuGet](http://www.servicestack.net/img/nuget-servicestack.ormlite.sqlserver.png)](http://nuget.org/List/Packages/ServiceStack.OrmLite.SqlServer)
 
-### 5 flavours of OrmLite is on NuGet: [Sql Server](http://nuget.org/List/Packages/ServiceStack.OrmLite.SqlServer), [MySql](http://nuget.org/List/Packages/ServiceStack.OrmLite.MySql), [Firebird](http://nuget.org/List/Packages/ServiceStack.OrmLite.Firebird), [Sqlite32](http://nuget.org/List/Packages/ServiceStack.OrmLite.Sqlite32) and [Sqlite64](http://nuget.org/List/Packages/ServiceStack.OrmLite.Sqlite64).
+### 6 flavours of OrmLite is on NuGet: [Sql Server](http://nuget.org/List/Packages/ServiceStack.OrmLite.SqlServer), [MySql](http://nuget.org/List/Packages/ServiceStack.OrmLite.MySql), [PostgreSQL](http://nuget.org/List/Packages/ServiceStack.OrmLite.PostgreSQL), [Firebird](http://nuget.org/List/Packages/ServiceStack.OrmLite.Firebird), [Sqlite32](http://nuget.org/List/Packages/ServiceStack.OrmLite.Sqlite32) and [Sqlite64](http://nuget.org/List/Packages/ServiceStack.OrmLite.Sqlite64).
 
 OrmLite is also included in [ServiceStack](https://github.com/ServiceStack/ServiceStack/downloads) or available to download separately in 
 [/downloads](https://github.com/ServiceStack/ServiceStack.OrmLite/downloads).
