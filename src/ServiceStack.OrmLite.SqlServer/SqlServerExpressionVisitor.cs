@@ -82,9 +82,19 @@ namespace ServiceStack.OrmLite.SqlServer
 					var sIn = new StringBuilder();
 					foreach (var e in inArgs)
 					{
-						sIn.AppendFormat("{0}{1}",
-										 sIn.Length > 0 ? "," : "",
-										 OrmLiteConfig.DialectProvider.GetQuotedValue(e, e.GetType()));
+						if(e.GetType().ToString()!="System.Collections.Generic.List`1[System.Object]"){
+							sIn.AppendFormat("{0}{1}",
+						                 sIn.Length>0 ? ",":"",
+						                 OrmLiteConfig.DialectProvider.GetQuotedValue(e, e.GetType()) );
+						}
+						else{
+						var listArgs= e as IList<Object>;
+							foreach(Object el in listArgs){
+								sIn.AppendFormat("{0}{1}",
+						                 sIn.Length>0 ? ",":"",
+						                 OrmLiteConfig.DialectProvider.GetQuotedValue(el, el.GetType()) );
+							}
+						}
 					}
 
 					return string.Format("{0} {1} ({2})", r, m.Method.Name, sIn.ToString());
