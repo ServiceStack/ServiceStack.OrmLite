@@ -178,7 +178,7 @@ namespace AllDialectsTest
 				// select authors from London, Berlin and Madrid : 6
 				expected=6;
 				//Sql.In can take params object[]
-				ev.Where(rn=> Sql.In( rn.City, new object[]{"London", "Madrid", "Berlin"}) );
+				ev.Where(rn=> Sql.In( rn.City, "London", "Madrid", "Berlin") );
 				result=dbCmd.Select(ev);
 				Console.WriteLine(ev.WhereExpression);
 				Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, result.Count, expected==result.Count?"OK":"********* FAILED *********");
