@@ -6,15 +6,27 @@ namespace ServiceStack.OrmLite
 {
 	public static class Sql
 	{
-		public static bool In<T>( T value, IList<Object> list) {
-			foreach( Object obj in list){
-				if(obj==null || value==null ) continue;
-				if( obj.ToString() == value.ToString() ) return true;
+		//public static bool In<T>(T value, IList<Object> list)
+		//{
+		//    foreach (Object obj in list)
+		//    {
+		//        if (obj == null || value == null) continue;
+		//        if (obj.ToString() == value.ToString()) return true;
+		//    }
+		//    return false;
+		//}
+
+		public static bool In<T>(T value, params object[] list)
+		{
+			foreach (var obj in list)
+			{
+				if (obj == null || value == null) continue;
+				if (obj.ToString() == value.ToString()) return true;
 			}
 			return false;
 		}
-		
-		public static string Desc<T>( T value) {
+
+		public static string Desc<T>(T value) {
 			return  value==null? "": value.ToString() + " DESC";
 		}
 		

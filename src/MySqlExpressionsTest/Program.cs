@@ -98,11 +98,12 @@ namespace MySqlExpressionsTest
 				
 				// select authors from Bogota and Cartagena : 7
 				expected=7;
-				List<object> cities = new List<object>(new object[]{"Bogota", "Cartagena"}  ); //works only object..
-				ev.Where(rn=> Sql.In( rn.City, cities) );
-				result=dbCmd.Select(ev);
+				ev.Where(rn => Sql.In(rn.City, new object[] { "Bogota", "Cartagena" }));
+				result = dbCmd.Select(ev);
 				Console.WriteLine(ev.WhereExpression);
 				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, result.Count, expected==result.Count);
+				result = dbCmd.Select<Author>(rn => Sql.In(rn.City, "Bogota", "Cartagena"));
+				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, result.Count, expected == result.Count);
 				
 				
 				// select authors which name starts with A

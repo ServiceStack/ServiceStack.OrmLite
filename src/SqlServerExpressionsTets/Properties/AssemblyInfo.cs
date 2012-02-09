@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("ServiceStack.OrmLite")]
+[assembly: AssemblyTitle("SqlServerExpressionsTets")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Liquidbit")]
-[assembly: AssemblyProduct("ServiceStack.OrmLite")]
-[assembly: AssemblyCopyright("Copyright © Liquidbit 2011")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("SqlServerExpressionsTets")]
+[assembly: AssemblyCopyright("Copyright ©  2012")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("d0f92eb9-6843-4996-951a-a0f04b076ec9")]
+[assembly: Guid("9aed4094-fae8-4623-9c4d-6a8dce0ea60b")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("3.4.8.*")]
-//[assembly: AssemblyFileVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]

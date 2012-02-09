@@ -133,5 +133,10 @@ namespace ServiceStack.OrmLite.SqlServer
             if (result is decimal) return Convert.ToInt64((decimal)result);
 			return (long)result;
 		}
+
+		public override SqlExpressionVisitor<T> ExpressionVisitor<T>()
+		{
+			return new SqlServerExpressionVisitor<T>();
+		}
 	}
 }

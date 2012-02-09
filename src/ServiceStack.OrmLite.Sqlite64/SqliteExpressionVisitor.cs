@@ -4,17 +4,16 @@ using System.Linq;
 using System.Text;
 using System.Collections.ObjectModel;
 using System.Linq.Expressions;
-
-
 using ServiceStack.OrmLite;
-namespace ServiceStack.OrmLite.MySql
+
+namespace ServiceStack.OrmLite.Sqlite
 {
 	/// <summary>
-	/// Description of MySqlExpressionVisitor.
+	/// Description of SqliteExpressionVisitor.
 	/// </summary>
-	public class MySqlExpressionVisitor<T>:SqlExpressionVisitor<T>
+	public class SqliteExpressionVisitor<T>: SqlExpressionVisitor<T>
 	{
-		public MySqlExpressionVisitor():base()
+		public SqliteExpressionVisitor():base()
 		{
 		}
 		
@@ -22,23 +21,21 @@ namespace ServiceStack.OrmLite.MySql
         {           
 			List<Object> args = this.VisitExpressionList(m.Arguments);
 			
-            Object r ;
-			if( m.Object!=null)
+            object r ;
+			if (m.Object!=null)
 				r=Visit(m.Object);
-			else{
+			else {
 				r= args[0];
 				args.RemoveAt(0);
 			}
             						
-			switch(m.Method.Name){
+			switch (m.Method.Name) {
 			case "ToUpper":
 				return string.Format("upper({0})",r);
 			case "ToLower":
 				return string.Format("lower({0})",r);
-			case "StartsWith": //LEFT( title, 1) = '#'
-				return string.Format("LEFT( {0},{1})= {2} ",r
-					,RemoveQuote(args[0].ToString()).Length,
-					args[0] );
+			case "StartsWith": 
+				return string.Format("{0} like '{1}%'",r,RemoveQuote(args[0].ToString()) );
 			case "EndsWith":
 				return string.Format("{0} like '%{1}'",r,RemoveQuote(args[0].ToString()) );
 			case "Contains":	
@@ -47,13 +44,13 @@ namespace ServiceStack.OrmLite.MySql
 				var startIndex = Int32.Parse(args[0].ToString() ) +1;
 				if (args.Count==2){
 					var length = Int32.Parse(  args[1].ToString() );
-					return string.Format("substring({0} from {1} for {2})",
+					return string.Format("substr({0}, {1}, {2})",
 				                     r,
 				                     startIndex,
 				                     length); 
 				}	
 				else
-					return string.Format("substring({0} from {1})",
+					return string.Format("substr({0}, {1})",
 				                     r,
 				                     startIndex); 	                     				
 			case "Round":
@@ -67,8 +64,8 @@ namespace ServiceStack.OrmLite.MySql
 				                     r, 
 				                     args.Count==1? string.Format(",{0}", args[0]):"" );
 			case "Concat":
-				StringBuilder s = new StringBuilder();
-				foreach(Object e in args ){
+				var s = new StringBuilder();
+				foreach (var e in args) {
 					s.AppendFormat( " || {0}", e);
 				}
 				return string.Format("{0}{1}",r, s.ToString());
@@ -79,17 +76,17 @@ namespace ServiceStack.OrmLite.MySql
 			    var lambda = Expression.Lambda<Func<object>>(member);
     			var getter = lambda.Compile();
 				
-				var inArgs = getter() as object[];
+				var inArgs = getter() as IList<Object>;
 				
 				
-				StringBuilder sIn = new StringBuilder();
-				foreach(Object e in inArgs ){
+				var sIn = new StringBuilder();
+				foreach (var e in inArgs) {
 					sIn.AppendFormat("{0}{1}",
 					                 sIn.Length>0 ? ",":"",
-					                 OrmLiteConfig.DialectProvider.GetQuotedValue(e, e.GetType()) );
+					                 OrmLiteConfig.DialectProvider.GetQuotedValue(e, e.GetType()));
 				}
 												
-				return string.Format("{0} {1} ({2})", r, m.Method.Name,  sIn.ToString() );
+				return string.Format("{0} {1} ({2})", r, m.Method.Name,  sIn);
 			case "Desc":
 				return string.Format("{0} DESC", r);
 			case "As":
@@ -100,18 +97,16 @@ namespace ServiceStack.OrmLite.MySql
 			default:
 				Console.WriteLine("******* Returning '{0}' for '{1}' *******", r, m.Method.Name);
 				
-				StringBuilder s2 = new StringBuilder();
-				foreach(Object e in args ){
+				var s2 = new StringBuilder();
+				foreach (var e in args) {
 					s2.AppendFormat(",{0}", 
 					                OrmLiteConfig.DialectProvider.GetQuotedValue(e, e.GetType()) );
 				}
-				return string.Format("{0}({1}{2})",m.Method.Name,r, s2.ToString());
+				return string.Format("{0}({1}{2})", m.Method.Name, r, s2);
 				
 			}
 			
         }
-				
-		
 		
 	}
 }

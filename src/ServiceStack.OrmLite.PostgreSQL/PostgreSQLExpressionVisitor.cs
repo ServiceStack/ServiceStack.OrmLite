@@ -73,7 +73,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
 			    var lambda = Expression.Lambda<Func<object>>(member);
     			var getter = lambda.Compile();
 				
-				var inArgs = getter() as IList<Object>;
+				var inArgs = getter() as object[];
 				
 				
 				StringBuilder sIn = new StringBuilder();

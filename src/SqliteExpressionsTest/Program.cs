@@ -96,14 +96,17 @@ namespace SqliteExpressionsTest
 				result=dbCmd.Select(ev);
 				Console.WriteLine(ev.WhereExpression);
 				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, result.Count, expected==result.Count);
-				
+				result = dbCmd.Select<Author>(rn => Sql.In(rn.City, new[] { "London", "Madrid", "Berlin" }));
+				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, result.Count, expected == result.Count);
+
 				// select authors from Bogota and Cartagena : 7
 				expected=7;
-				List<object> cities = new List<object>(new object[]{"Bogota", "Cartagena"}  ); //works only object..
-				ev.Where(rn=> Sql.In( rn.City, cities) );
+				ev.Where(rn => Sql.In(rn.City, new object[] { "Bogota", "Cartagena" }));
 				result=dbCmd.Select(ev);
 				Console.WriteLine(ev.WhereExpression);
 				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, result.Count, expected==result.Count);
+				result = dbCmd.Select<Author>(rn => Sql.In(rn.City, "Bogota", "Cartagena"));
+				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, result.Count, expected == result.Count);
 				
 				
 				// select authors which name starts with A
@@ -112,6 +115,8 @@ namespace SqliteExpressionsTest
 				result=dbCmd.Select(ev);
 				Console.WriteLine(ev.WhereExpression);
 				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, result.Count, expected==result.Count);
+				result = dbCmd.Select<Author>(rn => rn.Name.StartsWith("A"));
+				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, result.Count, expected == result.Count);
 				
 				// select authors which name ends with Garzon o GARZON o garzon ( no case sensitive )
 				expected=3;
@@ -119,6 +124,8 @@ namespace SqliteExpressionsTest
 				result=dbCmd.Select(ev);
 				Console.WriteLine(ev.WhereExpression);
 				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, result.Count, expected==result.Count);
+				result = dbCmd.Select<Author>(rn => rn.Name.ToUpper().EndsWith("GARZON"));
+				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, result.Count, expected == result.Count);
 				
 				// select authors which name ends with garzon
 				//A percent symbol ("%") in the LIKE pattern matches any sequence of zero or more characters 
@@ -130,6 +137,8 @@ namespace SqliteExpressionsTest
 				result=dbCmd.Select(ev);
 				Console.WriteLine(ev.WhereExpression);
 				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, result.Count, expected==result.Count);
+				result = dbCmd.Select<Author>(rn => rn.Name.EndsWith("garzon"));
+				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, result.Count, expected == result.Count);
 				
 				
 				// select authors which name contains  Benedict 
@@ -138,6 +147,8 @@ namespace SqliteExpressionsTest
 				result=dbCmd.Select(ev);
 				Console.WriteLine(ev.WhereExpression);
 				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, result.Count, expected==result.Count);
+				result = dbCmd.Select<Author>(rn => rn.Name.Contains("Benedict"));
+				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, result.Count, expected == result.Count);
 				
 				
 				// select authors with Earnings <= 50 
@@ -146,6 +157,8 @@ namespace SqliteExpressionsTest
 				result=dbCmd.Select(ev);
 				Console.WriteLine(ev.WhereExpression);
 				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, result.Count, expected==result.Count);
+				result = dbCmd.Select<Author>(rn => rn.Earnings <= 50);
+				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, result.Count, expected == result.Count);
 				
 				// select authors with Rate = 10 and city=Mexio 
 				expected=1;
@@ -153,6 +166,8 @@ namespace SqliteExpressionsTest
 				result=dbCmd.Select(ev);
 				Console.WriteLine(ev.WhereExpression);
 				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, result.Count, expected==result.Count);
+				result = dbCmd.Select<Author>(rn => rn.Rate == 10 && rn.City == "Mexico");
+				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, result.Count, expected == result.Count);
 			
 				//  enough selecting, lets update;
 				// set Active=false where rate =0

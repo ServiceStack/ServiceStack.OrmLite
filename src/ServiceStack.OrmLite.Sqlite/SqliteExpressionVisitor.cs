@@ -21,15 +21,15 @@ namespace ServiceStack.OrmLite.Sqlite
         {           
 			List<Object> args = this.VisitExpressionList(m.Arguments);
 			
-            Object r ;
-			if( m.Object!=null)
+            object r ;
+			if (m.Object!=null)
 				r=Visit(m.Object);
-			else{
+			else {
 				r= args[0];
 				args.RemoveAt(0);
 			}
             						
-			switch(m.Method.Name){
+			switch (m.Method.Name) {
 			case "ToUpper":
 				return string.Format("upper({0})",r);
 			case "ToLower":
@@ -44,13 +44,13 @@ namespace ServiceStack.OrmLite.Sqlite
 				var startIndex = Int32.Parse(args[0].ToString() ) +1;
 				if (args.Count==2){
 					var length = Int32.Parse(  args[1].ToString() );
-					return string.Format("substring({0} from {1} for {2})",
+					return string.Format("substr({0}, {1}, {2})",
 				                     r,
 				                     startIndex,
 				                     length); 
 				}	
 				else
-					return string.Format("substring({0} from {1})",
+					return string.Format("substr({0}, {1})",
 				                     r,
 				                     startIndex); 	                     				
 			case "Round":
@@ -64,11 +64,11 @@ namespace ServiceStack.OrmLite.Sqlite
 				                     r, 
 				                     args.Count==1? string.Format(",{0}", args[0]):"" );
 			case "Concat":
-				StringBuilder s = new StringBuilder();
-				foreach(Object e in args ){
+				var s = new StringBuilder();
+				foreach (var e in args) {
 					s.AppendFormat( " || {0}", e);
 				}
-				return string.Format("{0}{1}",r, s.ToString());
+				return string.Format("{0}{1}", r, s);
 			
 			case "In":
 								
@@ -76,17 +76,17 @@ namespace ServiceStack.OrmLite.Sqlite
 			    var lambda = Expression.Lambda<Func<object>>(member);
     			var getter = lambda.Compile();
 				
-				var inArgs = getter() as IList<Object>;
+				var inArgs = getter() as object[];
 				
 				
-				StringBuilder sIn = new StringBuilder();
-				foreach(Object e in inArgs ){
+				var sIn = new StringBuilder();
+				foreach (var e in inArgs) {
 					sIn.AppendFormat("{0}{1}",
 					                 sIn.Length>0 ? ",":"",
-					                 OrmLiteConfig.DialectProvider.GetQuotedValue(e, e.GetType()) );
+					                 OrmLiteConfig.DialectProvider.GetQuotedValue(e, e.GetType()));
 				}
 												
-				return string.Format("{0} {1} ({2})", r, m.Method.Name,  sIn.ToString() );
+				return string.Format("{0} {1} ({2})", r, m.Method.Name,  sIn);
 			case "Desc":
 				return string.Format("{0} DESC", r);
 			case "As":
@@ -97,15 +97,13 @@ namespace ServiceStack.OrmLite.Sqlite
 			default:
 				Console.WriteLine("******* Returning '{0}' for '{1}' *******", r, m.Method.Name);
 				
-				StringBuilder s2 = new StringBuilder();
-				foreach(Object e in args ){
+				var s2 = new StringBuilder();
+				foreach (var e in args) {
 					s2.AppendFormat(",{0}", 
 					                OrmLiteConfig.DialectProvider.GetQuotedValue(e, e.GetType()) );
 				}
-				return string.Format("{0}({1}{2})",m.Method.Name,r, s2.ToString());
-				
+				return string.Format("{0}({1}{2})", m.Method.Name, r, s2);				
 			}
-			
         }
 		
 	}
