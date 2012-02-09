@@ -92,6 +92,7 @@ namespace TestExpressions
 				
 				// select authors from London, Berlin and Madrid : 6
 				expected=6;
+				//Sql.In can take params object[]
 				ev.Where(rn=> Sql.In( rn.City, new object[]{"London", "Madrid", "Berlin"}) );
 				result=dbCmd.Select(ev);
 				Console.WriteLine(ev.WhereExpression);
@@ -99,8 +100,11 @@ namespace TestExpressions
 				
 				// select authors from Bogota and Cartagena : 7
 				expected=7;
-				List<object> cities = new List<object>(new object[]{"Bogota", "Cartagena"}  ); //works only object..
-				ev.Where(rn=> Sql.In( rn.City, cities) );
+				//... or Sql.In can  take IList<Object>
+				List<Object> cities= new List<Object>();
+				cities.Add("Bogota");
+				cities.Add("Cartagena");
+				ev.Where(rn => Sql.In(rn.City, cities ));
 				result=dbCmd.Select(ev);
 				Console.WriteLine(ev.WhereExpression);
 				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, result.Count, expected==result.Count);
