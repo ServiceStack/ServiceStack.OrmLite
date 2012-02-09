@@ -44,9 +44,7 @@ As [performance is the most important feature](https://github.com/mythz/ScalingD
 OrmLite is also included in [ServiceStack](https://github.com/ServiceStack/ServiceStack/downloads) or available to download separately in 
 [/downloads](https://github.com/ServiceStack/ServiceStack.OrmLite/downloads).
 
-## New Sql Expression strong-typed API
-
-Sql Expression API
+## New strong-typed Sql Expression API
 
 We've now added SQL Expression support to bring you even nicer LINQ-liked querying to all our providers. 
 To give you a flavour here are some examples with their partial SQL output (done in SQL Server): 
@@ -55,29 +53,41 @@ To give you a flavour here are some examples with their partial SQL output (done
     dbCmd.Select<Author>(q => q.Birthday >= new DateTime(agesAgo, 1, 1) && q.Birthday <= new DateTime(agesAgo, 12, 31));
 
 **WHERE (("Birthday" >= '1992-01-01 00:00:00.000') AND ("Birthday" <= '1992-12-31 00:00:00.000'))**
+
 ```csharp
 dbCmd.Select<Author>(q => Sql.In(rn.City, "London", "Madrid", "Berlin"));
 ```
+
 **WHERE "JobCity" In ('London', 'Madrid', 'Berlin')**
+
 ```csharp
 dbCmd.Select<Author>(q => q.Earnings <= 50);
 ```
+
 **WHERE ("Earnings" <= 50)**
+
 ```csharp
 dbCmd.Select<Author>(q => q.Name.StartsWith("A"));
 ```
+
 **WHERE upper("Name") like 'A%'**
+
 ```csharp
 dbCmd.Select<Author>(q => q.Name.EndsWith("garzon"));
 ```
+
 **WHERE upper("Name") like '%GARZON'**
+
 ```csharp
 dbCmd.Select<Author>(q => q.Name.Contains("Benedict"));
 ```
+
 **WHERE upper("Name") like '%BENEDICT%'**
+
 ```csharp
 dbCmd.Select<Author>(q => q.Rate == 10 && q.City == "Mexico");
 ```
+
 **WHERE (("Rate" = 10) AND ("JobCity" = 'Mexico'))**
 
 Right now the Expression support can satisfy many simple queries with a strong-typed API. 
