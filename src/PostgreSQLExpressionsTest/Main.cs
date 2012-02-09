@@ -48,7 +48,7 @@ namespace PostgreSQLExpressionsTest
 			SqlExpressionVisitor<Author> ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<Author>();
 									
 			using (IDbConnection db =
-			       "Server=localhost;Port=5432;User Id=postgres; Password=postgres; Database=jasperserver".OpenDbConnection())
+			       "Server=localhost;Port=5432;User Id=postgres; Password=postgres; Database=ormlite".OpenDbConnection())
 			using ( IDbCommand dbCmd = db.CreateCommand())
 			{
 				dbCmd.DropTable<Author>();
