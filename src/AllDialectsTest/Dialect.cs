@@ -14,10 +14,12 @@ namespace AllDialectsTest
 {
 	public class Dialect
 	{
+		private static Dictionary<string,Types> dialectDbTypes= new Dictionary<string, Types> ();
+		
 		public Dialect ()
 		{
 		}
-		
+			
 		public string Name{ get; set;}
 		public string PathToAssembly{ get; set;}
 		public string AssemblyName{ get; set;}
@@ -50,8 +52,33 @@ namespace AllDialectsTest
 							o, typeof(IOrmLiteDialectProvider) )
 					);
 				
+				
+				Types types ; 
+				if( dialectDbTypes.TryGetValue(Name,out types ) ){
+					DbTypes.ColumnTypeMap=Clone(types.ColumnTypeMap);
+					DbTypes.ColumnDbTypeMap= Clone(types.ColumnDbTypeMap);
+				}
+				else{
+					dialectDbTypes[Name]=new Types(){
+						ColumnTypeMap=Clone( DbTypes.ColumnTypeMap),
+						ColumnDbTypeMap=Clone( DbTypes.ColumnDbTypeMap)
+					};
+				}
 				return dialect;
 			}
+		}
+		
+		
+		private class Types{
+			public Types(){}
+			public Dictionary<Type, string> ColumnTypeMap = new Dictionary<Type, string>();
+        	public Dictionary<Type, DbType> ColumnDbTypeMap = new Dictionary<Type, DbType>();
+		}
+		
+		
+		private  Dictionary<TKey, TValue> Clone<TKey,TValue>( Dictionary<TKey, TValue> original){
+			Dictionary<TKey,TValue> clone = new Dictionary<TKey, TValue>(original);
+			return clone;
 		}
 		
 	}
