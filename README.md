@@ -136,8 +136,8 @@ Below is a complete stand-alone example. No other config or classes is required 
         [Index(Unique = true)] // Creates Unique Index
         public string Email { get; set; }
         
-        public Dictionary<PhoneType, string> PhoneNumbers { get; private set; }  //Blobbed
-        public Dictionary<AddressType, Address> Addresses { get; private set; }  //Blobbed
+        public Dictionary<PhoneType, string> PhoneNumbers { get; set; }  //Blobbed
+        public Dictionary<AddressType, Address> Addresses { get; set; }  //Blobbed
         public DateTime CreatedAt { get; set; }
     }
 
