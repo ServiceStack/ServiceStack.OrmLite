@@ -525,7 +525,7 @@ namespace ServiceStack.OrmLite
 		
 		protected virtual string  VisitMemberAccess(MemberExpression m)
         {
-			if(m.Expression != null){
+			if(m.Expression != null && m.Expression.Type== typeof(T)){
 				string o = GetFieldName( m.Member.Name );
 				return o;
 			}
