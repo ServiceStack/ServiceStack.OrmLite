@@ -164,15 +164,16 @@ namespace AllDialectsTest
 				Console.WriteLine("Selecting.....");
 				
 				int year = DateTime.Today.AddYears(-20).Year;
+				var lastDay= new DateTime(year, 12,31);	
 				int expected=5;
 				
-				ev.Where(rn=> rn.Birthday>=new DateTime(year, 1,1) && rn.Birthday<=new DateTime(year, 12,31));
+				ev.Where(rn=> rn.Birthday>=new DateTime(year, 1,1) && rn.Birthday<=lastDay);
 				List<Author> result=dbCmd.Select(ev);
 				Console.WriteLine(ev.WhereExpression);
 				Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, result.Count, expected==result.Count?"OK":"********* FAILED *********");
-				result = dbCmd.Select<Author>(qry => qry.Where(rn => rn.Birthday >= new DateTime(year, 1, 1) && rn.Birthday <= new DateTime(year, 12, 31)));
+				result = dbCmd.Select<Author>(qry => qry.Where(rn => rn.Birthday >= new DateTime(year, 1, 1) && rn.Birthday <= lastDay));
 				Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, result.Count, expected == result.Count?"OK":"********* FAILED *********");
-				result = dbCmd.Select<Author>(rn => rn.Birthday >= new DateTime(year, 1, 1) && rn.Birthday <= new DateTime(year, 12, 31));
+				result = dbCmd.Select<Author>(rn => rn.Birthday >= new DateTime(year, 1, 1) && rn.Birthday <= lastDay);
 				Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, result.Count, expected == result.Count?"OK":"********* FAILED *********");
 				
 				// select authors from London, Berlin and Madrid : 6
@@ -242,8 +243,9 @@ namespace AllDialectsTest
 				
 				
 				// select authors with Earnings <= 50 
-				expected=3;
-				ev.Where(rn=>  rn.Earnings<=50 );
+				expected=3; 
+				var earnings=50;
+				ev.Where(rn=>  rn.Earnings<=earnings );
 				result=dbCmd.Select(ev);
 				Console.WriteLine(ev.WhereExpression);
 				Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, result.Count, expected==result.Count?"OK":"********* FAILED *********");
@@ -252,7 +254,8 @@ namespace AllDialectsTest
 				
 				// select authors with Rate = 10 and city=Mexio 
 				expected=1;
-				ev.Where(rn=>  rn.Rate==10 && rn.City=="Mexico");
+				var city="Mexico";
+				ev.Where(rn=>  rn.Rate==10 && rn.City==city);
 				result=dbCmd.Select(ev);
 				Console.WriteLine(ev.WhereExpression);
 				Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, result.Count, expected==result.Count?"OK":"********* FAILED *********");
