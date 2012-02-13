@@ -179,7 +179,8 @@ namespace AllDialectsTest
 				// select authors from London, Berlin and Madrid : 6
 				expected=6;
 				//Sql.In can take params object[]
-				ev.Where(rn=> Sql.In( rn.City, "London", "Madrid", "Berlin") );
+				var city="Berlin";
+				ev.Where(rn=> Sql.In( rn.City, "London", "Madrid", city) );
 				result=dbCmd.Select(ev);
 				Console.WriteLine(ev.WhereExpression);
 				Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, result.Count, expected==result.Count?"OK":"********* FAILED *********");
@@ -189,8 +190,9 @@ namespace AllDialectsTest
 				// select authors from Bogota and Cartagena : 7
 				expected=7;
 				//... or Sql.In can  take List<Object>
+				city="Bogota";
 				List<Object> cities= new List<Object>();
-				cities.Add("Bogota");
+				cities.Add(city);
 				cities.Add("Cartagena");
 				ev.Where(rn => Sql.In(rn.City, cities ));
 				result=dbCmd.Select(ev);
@@ -211,11 +213,12 @@ namespace AllDialectsTest
 				
 				// select authors which name ends with Garzon o GARZON o garzon ( no case sensitive )
 				expected=3;
-				ev.Where(rn=>  rn.Name.ToUpper().EndsWith("GARZON") );
+				var name="GARZON";
+				ev.Where(rn=>  rn.Name.ToUpper().EndsWith(name) );
 				result=dbCmd.Select(ev);
 				Console.WriteLine(ev.WhereExpression);
 				Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, result.Count, expected==result.Count?"OK":"********* FAILED *********");
-				result = dbCmd.Select<Author>(rn => rn.Name.ToUpper().EndsWith("GARZON"));
+				result = dbCmd.Select<Author>(rn => rn.Name.ToUpper().EndsWith(name));
 				Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, result.Count, expected == result.Count?"OK":"********* FAILED *********");
 				
 				// select authors which name ends with garzon
@@ -234,7 +237,8 @@ namespace AllDialectsTest
 				
 				// select authors which name contains  Benedict 
 				expected=2;
-				ev.Where(rn=>  rn.Name.Contains("Benedict") );
+				name="Benedict";
+				ev.Where(rn=>  rn.Name.Contains(name));
 				result=dbCmd.Select(ev);
 				Console.WriteLine(ev.WhereExpression);
 				Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, result.Count, expected==result.Count?"OK":"********* FAILED *********");
@@ -254,7 +258,7 @@ namespace AllDialectsTest
 				
 				// select authors with Rate = 10 and city=Mexio 
 				expected=1;
-				var city="Mexico";
+				city="Mexico";
 				ev.Where(rn=>  rn.Rate==10 && rn.City==city);
 				result=dbCmd.Select(ev);
 				Console.WriteLine(ev.WhereExpression);
@@ -265,7 +269,8 @@ namespace AllDialectsTest
 				//  enough selecting, lets update;
 				// set Active=false where rate =0
 				expected=2;
-				ev.Where(rn=>  rn.Rate==0 ).Update(rn=> rn.Active);
+			 	var rate=0;
+				ev.Where(rn=>  rn.Rate==rate).Update(rn=> rn.Active);
 				var rows = dbCmd.Update( new Author(){ Active=false }, ev);
 				Console.WriteLine(ev.WhereExpression);
 				Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, rows, expected==rows?"OK":"********* FAILED *********");
