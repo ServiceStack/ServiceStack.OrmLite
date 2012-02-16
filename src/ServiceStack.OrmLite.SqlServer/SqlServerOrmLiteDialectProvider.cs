@@ -113,7 +113,7 @@ namespace ServiceStack.OrmLite.SqlServer
 			if (fieldType == typeof(DateTime))
 			{
 				var dateValue = (DateTime)value;
-				const string iso8601Format = "yyyy-MM-dd HH:mm:ss.fff";
+				const string iso8601Format = "yyyyMMdd HH:mm:ss.fff";
 				return base.GetQuotedValue(dateValue.ToString(iso8601Format), typeof(string));
 			}
 			if (fieldType == typeof(bool))
