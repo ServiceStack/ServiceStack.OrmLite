@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("ServiceStack.OrmLite")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Liquidbit")]
+[assembly: AssemblyCompany("ServiceStack")]
 [assembly: AssemblyProduct("ServiceStack.OrmLite")]
-[assembly: AssemblyCopyright("Copyright © Liquidbit 2011")]
+[assembly: AssemblyCopyright("Copyright © ServiceStack 2012")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("3.4.9.*")]
+[assembly: AssemblyVersion("3.5.2.*")]
 //[assembly: AssemblyFileVersion("1.0.*")]
