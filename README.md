@@ -55,7 +55,7 @@ To give you a flavour here are some examples with their partial SQL output (done
 **WHERE (("Birthday" >= '1992-01-01 00:00:00.000') AND ("Birthday" <= '1992-12-31 00:00:00.000'))**
 
 ```csharp
-dbCmd.Select<Author>(q => Sql.In(rn.City, "London", "Madrid", "Berlin"));
+dbCmd.Select<Author>(q => Sql.In(q.City, "London", "Madrid", "Berlin"));
 ```
 
 **WHERE "JobCity" In ('London', 'Madrid', 'Berlin')**
