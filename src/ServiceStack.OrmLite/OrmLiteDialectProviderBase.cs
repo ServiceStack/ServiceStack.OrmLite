@@ -450,14 +450,121 @@ namespace ServiceStack.OrmLite
 
             return sql;
 		}
-		
-				
+
+        public virtual IDbCommand CreateParameterizedInsertStatement(object objWithProperties, IDbConnection connection)
+        {
+            return CreateParameterizedInsertStatement(objWithProperties, null, connection);
+        }
+
+        public virtual IDbCommand CreateParameterizedInsertStatement(object objWithProperties, IList<string> insertFields, IDbConnection connection)
+        {
+            if (insertFields == null) insertFields = new List<string>();
+            var sbColumnNames = new StringBuilder();
+            var sbColumnValues = new StringBuilder();
+            var modelDef = objWithProperties.GetType().GetModelDefinition();
+
+            var command = connection.CreateCommand();
+
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+                if (fieldDef.AutoIncrement) continue;
+                //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
+                if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name)) continue;
+
+                if (sbColumnNames.Length > 0) sbColumnNames.Append(",");
+                if (sbColumnValues.Length > 0) sbColumnValues.Append(",");
+
+                try
+                {
+                    sbColumnNames.Append(GetNameDelimited(fieldDef.FieldName));
+                    sbColumnValues.Append(ParamString)
+                                  .Append(fieldDef.FieldName);
+
+                    AddParameterForFieldToCommand(command, fieldDef, objWithProperties);                    
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("ERROR in CreateParameterizedInsertStatement(): " + ex.Message, ex);
+                    throw;
+                }
+            }
+
+            command.CommandText = string.Format("INSERT INTO {0} ({1}) VALUES ({2});",
+                                                GetTableNameDelimited(modelDef), sbColumnNames, sbColumnValues);
+            return command;
+        }
+
+        public void ReParameterizeInsertStatement(object objWithProperties, IDbCommand command)
+        {
+            ReParameterizeInsertStatement(objWithProperties, null, command);
+        }
+
+        public void ReParameterizeInsertStatement(object objWithProperties, IList<string> insertFields, IDbCommand command)
+        {
+            if (insertFields == null) insertFields = new List<string>();
+            var modelDef = objWithProperties.GetType().GetModelDefinition();
+
+            command.Parameters.Clear();
+
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+                if (fieldDef.AutoIncrement) continue;
+                //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
+                if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name)) continue;
+
+                try
+                {
+                    AddParameterForFieldToCommand(command, fieldDef, objWithProperties);                 
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("ERROR in ReParameterizeInsertStatement(): " + ex.Message, ex);
+                    throw;
+                }
+            }
+        }
+
+        private void AddParameterForFieldToCommand(IDbCommand command, FieldDefinition fieldDef, object objWithProperties)
+        {
+            var p = command.CreateParameter();
+            p.ParameterName = String.Format("{0}{1}", ParamString, fieldDef.FieldName);
+            
+            if (DbTypes.ColumnDbTypeMap.ContainsKey(fieldDef.FieldType))
+            {
+                p.DbType = DbTypes.ColumnDbTypeMap[fieldDef.FieldType];
+                p.Value = GetValueOrDbNull(fieldDef, objWithProperties);
+            } else
+            {
+                var unquotedVal = fieldDef.GetQuotedValue(objWithProperties)
+                                          .TrimStart('\'')
+                                          .TrimEnd('\'');
+                p.DbType = DbType.String;
+                p.Value = GetValueOrDbNull(unquotedVal);
+            }
+           
+
+            command.Parameters.Add(p);
+        }
+
+        private object GetValueOrDbNull(FieldDefinition fieldDef, object objWithProperties)
+        {
+            return fieldDef.GetValue(objWithProperties) ?? DBNull.Value;
+        }
+	
+        private object GetValueOrDbNull(String value)
+        {
+            if (String.IsNullOrEmpty(value))
+                return DBNull.Value;
+
+            return value;
+        }
+
 		public virtual string ToUpdateRowStatement(object objWithProperties){
 			return ToUpdateRowStatement(objWithProperties, new List<string>());
 		}
 		
 		
-		public virtual string ToUpdateRowStatement(object objWithProperties, IList<string>updateFields){
+		public virtual string ToUpdateRowStatement(object objWithProperties, IList<string> updateFields){
 			
 			if (updateFields==null) updateFields= new List<string>();
 			var sqlFilter = new StringBuilder();
@@ -493,6 +600,50 @@ namespace ServiceStack.OrmLite
 
             return updateSql;
 		}
+
+        public virtual IDbCommand CreateParameterizedUpdateStatement(object objWithProperties, IDbConnection connection)
+        {
+            return CreateParameterizedUpdateStatement(objWithProperties, null, connection);
+        }
+
+        public virtual IDbCommand CreateParameterizedUpdateStatement(object objWithProperties, IList<string> updateFields, IDbConnection connection)
+        {
+            if (updateFields == null) updateFields = new List<string>();
+            var sqlFilter = new StringBuilder();
+            var sql = new StringBuilder();
+            var modelDef = objWithProperties.GetType().GetModelDefinition();
+
+            var command = connection.CreateCommand();
+
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+                try
+                {
+                    if (fieldDef.IsPrimaryKey && updateFields.Count == 0)
+                    {
+                        if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
+
+                        sqlFilter.AppendFormat("{0} = {1}", GetNameDelimited(fieldDef.FieldName), String.Concat(ParamString, fieldDef.Name));
+                        AddParameterForFieldToCommand(command, fieldDef, objWithProperties);
+
+                        continue;
+                    }
+
+                    if (updateFields.Count > 0 && !updateFields.Contains(fieldDef.Name)) continue;
+                    if (sql.Length > 0) sql.Append(",");
+                    sql.AppendFormat("{0} = {1}", GetNameDelimited(fieldDef.FieldName), String.Concat(ParamString, fieldDef.Name));
+
+                    AddParameterForFieldToCommand(command, fieldDef, objWithProperties);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("ERROR in CreateParameterizedUpdateStatement(): " + ex.Message, ex);
+                }
+            }
+
+            command.CommandText = string.Format("UPDATE {0} SET {1} {2}", GetTableNameDelimited(modelDef), sql, (sqlFilter.Length > 0 ? "WHERE " + sqlFilter : ""));
+            return command;
+        }
 		
 		public virtual string ToDeleteRowStatement(object objWithProperties)
         {
