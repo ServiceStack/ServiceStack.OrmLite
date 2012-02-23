@@ -14,6 +14,7 @@ namespace ServiceStack.OrmLite.Firebird
 
 		private StringBuilder sqlColumns = new StringBuilder();
 		private StringBuilder sqlFieldGenerator = new StringBuilder();
+		private StringBuilder sqlGenerator = new StringBuilder();
 		private StringBuilder sqlProcedures = new StringBuilder();
 
 		private StringBuilder  sqlParameters = new StringBuilder();
@@ -62,7 +63,9 @@ namespace ServiceStack.OrmLite.Firebird
 			using (IDbCommand dbCmd = Connection.CreateCommand())
 			{
 				List<Column> columns =dbCmd.Select<Column>(sql);
-
+				
+				List<Generador> gens = dbCmd.Select<Generador>(sqlGenerator.ToString());
+				
 				sql = string.Format(sqlFieldGenerator.ToString(),
 									string.IsNullOrEmpty(tableName) ? "TRIGGERS.RDB$RELATION_NAME" :
 									   string.Format("'{0}'", tableName));
@@ -77,6 +80,18 @@ namespace ServiceStack.OrmLite.Firebird
 												select q.SequenceName;
 					if (query.Count() == 1)
 						record.Sequence = query.First();
+					else{
+						sql= string.Format("{0} WHERE RDB$GENERATOR_NAME='{1}'",
+						                   sqlGenerator.ToString(),
+						                   tableName+"_"+record.Name+"_GEN"
+						                   );
+						
+						string g = (from gen in gens
+							where gen.Name==tableName+"_"+record.Name+"_GEN"
+							select gen.Name).FirstOrDefault() ;							
+						
+						if( !string.IsNullOrEmpty(g) ) record.Sequence=g.Trim();
+					}
 				}
 
 				return columns;
@@ -251,6 +266,8 @@ namespace ServiceStack.OrmLite.Firebird
 			sqlParameters.Append("ORDER  BY a.rdb$procedure_name, \n");
 			sqlParameters.Append("          a.rdb$parameter_type, \n");
 			sqlParameters.Append("          a.rdb$parameter_number ");
+			
+			sqlGenerator.Append("SELECT trim(RDB$GENERATOR_NAME) AS \"Name\"	FROM RDB$GENERATORS");
 		}
 		
 		private class FieldGenerator
@@ -278,6 +295,11 @@ namespace ServiceStack.OrmLite.Firebird
 			}
 
 		}
+		
+		private class Generador{
+			public string Name { get; set;}
+		}
+		
 	}
 }
 

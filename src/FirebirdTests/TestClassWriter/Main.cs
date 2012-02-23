@@ -1,4 +1,8 @@
 using System;
+using System.IO;
+using System.CodeDom.Compiler;
+using Microsoft.CSharp;
+using System.Collections.Generic;
 using System.Data;
 using ServiceStack.OrmLite;
 using ServiceStack.OrmLite.Firebird;
@@ -35,6 +39,38 @@ namespace TestClassWriter
 				}
 				Console.WriteLine("---------------------------------");
 				Console.WriteLine("See classes in: '{0}'", cw.OutputDirectory);
+				
+				//compilar ...
+				CompilerParameters cp = new CompilerParameters();
+				cp.GenerateExecutable=false;
+				cp.GenerateInMemory=false;
+				cp.ReferencedAssemblies.AddRange(
+					new string[]{
+						"System.dll",
+						"System.ComponentModel.DataAnnotations.dll",
+						Path.Combine( Directory.GetCurrentDirectory(), "ServiceStack.OrmLite.dll"),
+						Path.Combine( Directory.GetCurrentDirectory(), "ServiceStack.Common.dll"),
+						Path.Combine( Directory.GetCurrentDirectory(),"ServiceStack.Interfaces.dll")
+				});
+				cp.OutputAssembly= Path.Combine(cw.OutputDirectory, cw.SpaceName+".dll");
+				
+				var providerOptions = new Dictionary<string,string>();
+    			providerOptions.Add("CompilerVersion", "v3.5");
+				
+				CodeDomProvider cdp =new CSharpCodeProvider(providerOptions);
+			
+				string [] files = Directory.GetFiles(cw.OutputDirectory,"*.cs");
+				CompilerResults cr= cdp.CompileAssemblyFromFile(cp, files);
+				
+				if( cr.Errors.Count==0){
+					Console.WriteLine("Generated file {0}", Path.Combine(cw.OutputDirectory, cw.SpaceName+".dll")); 
+				}
+            	else{							
+            		foreach (CompilerError ce in cr.Errors)
+                		Console.WriteLine(ce.ErrorText);
+				}
+				
+						
 			
 
 			}
