@@ -17,5 +17,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
         public virtual Byte[] Image2 { get; set; }
 
         public virtual Byte[] Image3 { get; set; }
+
+        public virtual object[] Complex { get; set; } 
     }
 }
