@@ -90,7 +90,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
 
 		public override string EscapeParam(object paramValue)
 		{
-			return paramValue.ToString().Replace("'", @"\'");
+			return paramValue.ToString().Replace("'", @"''");
 		}
 
 		public override IDbConnection CreateConnection(string connectionString, Dictionary<string, string> options)
