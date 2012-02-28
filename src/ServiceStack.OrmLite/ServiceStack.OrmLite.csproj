@@ -94,6 +94,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DbTypes.cs" />
+    <Compile Include="INamingStrategy.cs" />
     <Compile Include="OrmLiteConfigExtensions.cs">
       <SubType>Code</SubType>
     </Compile>
