@@ -66,12 +66,17 @@ namespace ServiceStack.OrmLite.MySql
 
         public override string GetTableNameDelimited(ModelDefinition modelDef)
         {
-            return string.Format("`{0}`", modelDef.ModelName);
+            return string.Format("`{0}`", NamingStrategy.GetTableName(modelDef.ModelName));
         }
 
-        public override string GetNameDelimited(string columnName)
+		public override string GetColumnNameDelimited(string columnName)
+		{
+			return string.Format("`{0}`", NamingStrategy.GetColumnName(columnName));
+		}
+
+        public override string GetNameDelimited(string name)
         {
-            return string.Format("`{0}`", columnName);
+			return string.Format("`{0}`", name);
         }
 
         public override long GetLastInsertId(IDbCommand command)

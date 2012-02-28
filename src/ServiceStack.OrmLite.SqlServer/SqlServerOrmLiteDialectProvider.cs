@@ -72,7 +72,7 @@ namespace ServiceStack.OrmLite.SqlServer
             if (!modelDef.IsInSchema)
                 return base.GetTableNameDelimited(modelDef);
 
-            return string.Format("\"{0}\".\"{1}\"", modelDef.Schema, modelDef.ModelName);
+            return string.Format("\"{0}\".\"{1}\"", modelDef.Schema, NamingStrategy.GetTableName(modelDef.ModelName));
         }
 
 		public override object ConvertDbValue(object value, Type type)

@@ -239,7 +239,7 @@ namespace ServiceStack.OrmLite
 
             var sql = string.Format("DELETE FROM {0} WHERE {1} = {2}",
                                     OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef),
-                                    OrmLiteConfig.DialectProvider.GetNameDelimited(modelDef.PrimaryKey.FieldName),
+                                    OrmLiteConfig.DialectProvider.GetColumnNameDelimited(modelDef.PrimaryKey.FieldName),
                                     OrmLiteConfig.DialectProvider.GetQuotedValue(id, id.GetType()));
 
 
@@ -256,7 +256,7 @@ namespace ServiceStack.OrmLite
 
             var sql = string.Format("DELETE FROM {0} WHERE {1} IN ({2})",
                                     OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef),
-                                    OrmLiteConfig.DialectProvider.GetNameDelimited(modelDef.PrimaryKey.FieldName),
+                                    OrmLiteConfig.DialectProvider.GetColumnNameDelimited(modelDef.PrimaryKey.FieldName),
                                     sqlIn);
 
             dbCmd.ExecuteSql(sql);

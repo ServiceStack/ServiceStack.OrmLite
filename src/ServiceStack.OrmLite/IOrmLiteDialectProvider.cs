@@ -23,6 +23,8 @@ namespace ServiceStack.OrmLite
 
 		bool UseUnicode { get; set; }
 
+		INamingStrategy NamingStrategy { get; set; }
+
 		string EscapeParam(object paramValue);
 
 		object ConvertDbValue(object value, Type type);
@@ -33,7 +35,9 @@ namespace ServiceStack.OrmLite
 
 	    string GetTableNameDelimited(ModelDefinition modelDef);
 
-        string GetNameDelimited(string columnName);
+		string GetColumnNameDelimited(string columnName);
+        
+		string GetNameDelimited(string columnName);
 
 		string GetColumnDefinition(
 			string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement, 
