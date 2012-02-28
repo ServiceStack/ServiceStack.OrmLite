@@ -62,7 +62,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
 			}
 
 			var sql = new StringBuilder();
-			sql.AppendFormat("{0} {1}", GetNameDelimited(fieldName), fieldDefinition);
+			sql.AppendFormat("{0} {1}", GetColumnNameDelimited(fieldName), fieldDefinition);
 
 			if (isPrimaryKey)
 			{
@@ -122,16 +122,6 @@ namespace ServiceStack.OrmLite.PostgreSQL
 			if (value == null || value is DBNull) return null;
 		
 			return base.ConvertDbValue(value, type);
-		}
-
-		public override string GetTableNameDelimited(ModelDefinition modelDef)
-		{
-			return string.Format("\"{0}\"", modelDef.ModelName);
-		}
-
-		public override string GetNameDelimited(string columnName)
-		{
-			return string.Format("\"{0}\"", columnName);
 		}
 
 		public override long GetLastInsertId(IDbCommand command)

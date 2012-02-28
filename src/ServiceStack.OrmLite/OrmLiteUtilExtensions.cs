@@ -65,7 +65,7 @@ namespace ServiceStack.OrmLite
             var sqlColumns = new StringBuilder();
 	        modelDef.FieldDefinitions.ForEach(x =>
 	                                          sqlColumns.AppendFormat("{0}{1} ", sqlColumns.Length > 0 ? "," : "",
-	                                                                  OrmLiteConfig.DialectProvider.GetNameDelimited(
+	                                                                  OrmLiteConfig.DialectProvider.GetColumnNameDelimited(
 	                                                                      x.FieldName)));
 
 	        return sqlColumns.ToString();

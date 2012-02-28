@@ -678,7 +678,7 @@ namespace ServiceStack.OrmLite
 				return string.Format("{0} DESC", r);
 			case "As":
 				return string.Format("{0} As {1}", r, 
-					OrmLiteConfig.DialectProvider.GetNameDelimited( RemoveQuote( args[0].ToString() ) ) );
+					OrmLiteConfig.DialectProvider.GetColumnNameDelimited( RemoveQuote( args[0].ToString() ) ) );
 			case "ToString":
 				return r.ToString();
 			default:
@@ -773,7 +773,7 @@ namespace ServiceStack.OrmLite
 			if(useFieldName){
 				FieldDefinition fd = modelDef.FieldDefinitions.FirstOrDefault(x=>x.Name==name);
 				string fn = fd!=default(FieldDefinition)? fd.FieldName:name;
-				return OrmLiteConfig.DialectProvider.GetNameDelimited(fn);
+				return OrmLiteConfig.DialectProvider.GetColumnNameDelimited(fn);
 			}
 			else{
 				return name;
@@ -796,7 +796,7 @@ namespace ServiceStack.OrmLite
 				modelDef.FieldDefinitions.
 					FirstOrDefault(x=>
 						OrmLiteConfig.DialectProvider.
-						GetNameDelimited(x.FieldName)==quotedExp);
+						GetColumnNameDelimited(x.FieldName) == quotedExp);
 			return (fd!=default(FieldDefinition));
 		}
 		
