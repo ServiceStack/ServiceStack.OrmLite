@@ -19,7 +19,7 @@ using ServiceStack.Common.Extensions;
 
 namespace ServiceStack.OrmLite
 {
-	public class OrmLiteNamingStrategyBase
+	public class OrmLiteNamingStrategyBase : ServiceStack.OrmLite.INamingStrategy
 	{
 		public virtual string GetTableName(string name)
 		{

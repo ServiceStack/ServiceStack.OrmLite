@@ -103,7 +103,7 @@ namespace ServiceStack.OrmLite.MySql
 				return string.Format("{0} DESC", r);
 			case "As":
 				return string.Format("{0} As {1}", r, 
-					OrmLiteConfig.DialectProvider.GetNameDelimited( RemoveQuote( args[0].ToString() ) ) );
+					OrmLiteConfig.DialectProvider.GetColumnNameDelimited( RemoveQuote( args[0].ToString() ) ) );
 			case "ToString":
 				return r.ToString();
 			default:
