@@ -20,6 +20,8 @@ namespace ServiceStack.OrmLite.Tests
 			LogManager.LogFactory = new ConsoleLogFactory();
 
 		    OrmLiteConfig.DialectProvider =  PostgreSQLDialectProvider.Instance;
+			OrmLiteConfig.DialectProvider.NamingStrategy = new OrmLiteNamingStrategyBase();
+			OrmLiteConfig.ClearCache();
 		    ConnectionString = ConfigurationManager.ConnectionStrings["testDb"].ConnectionString;
 		}
 
