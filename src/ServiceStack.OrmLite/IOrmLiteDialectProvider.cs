@@ -23,6 +23,8 @@ namespace ServiceStack.OrmLite
 
 		bool UseUnicode { get; set; }
 
+		OrmLiteNamingStrategyBase NamingStrategy { get; set; }
+
 		string EscapeParam(object paramValue);
 
 		object ConvertDbValue(object value, Type type);

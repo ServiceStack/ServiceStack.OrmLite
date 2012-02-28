@@ -164,6 +164,19 @@ namespace ServiceStack.OrmLite
             }
         }
 
+		private OrmLiteNamingStrategyBase namingStrategy = new OrmLiteNamingStrategyBase();
+		public  OrmLiteNamingStrategyBase NamingStrategy
+		{
+			get
+			{
+				return namingStrategy;
+			}
+			set
+			{
+				namingStrategy = value;
+			}
+		}
+
         private void UpdateStringColumnDefinitions()
         {
             this.StringLengthColumnDefinitionFormat = useUnicode
@@ -312,12 +325,12 @@ namespace ServiceStack.OrmLite
 
         public virtual string GetTableNameDelimited(ModelDefinition modelDef)
         {
-            return string.Format("\"{0}\"", modelDef.ModelName);
+            return string.Format("\"{0}\"", namingStrategy.GetTableName(modelDef.ModelName));
         }
 
         public virtual string GetNameDelimited(string columnName)
         {
-            return string.Format("\"{0}\"", columnName);
+			return string.Format("\"{0}\"", namingStrategy.GetColumnName(columnName));
         }
 
         protected virtual string GetUndefinedColumnDefintion(Type fieldType)

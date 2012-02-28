@@ -124,16 +124,6 @@ namespace ServiceStack.OrmLite.PostgreSQL
 			return base.ConvertDbValue(value, type);
 		}
 
-		public override string GetTableNameDelimited(ModelDefinition modelDef)
-		{
-			return string.Format("\"{0}\"", modelDef.ModelName);
-		}
-
-		public override string GetNameDelimited(string columnName)
-		{
-			return string.Format("\"{0}\"", columnName);
-		}
-
 		public override long GetLastInsertId(IDbCommand command)
 		{
 			command.CommandText = "SELECT LASTVAL()";
