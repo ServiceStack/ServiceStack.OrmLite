@@ -14,7 +14,8 @@ namespace ServiceStack.OrmLite.Firebird
 	public class FirebirdOrmLiteDialectProvider:OrmLiteDialectProviderBase
 	{
 		private readonly List<string> RESERVED = new List<string>( new string[] 
-		{"USER","ORDER","PASSWORD", "ACTIVE","LEFT","DOUBLE", "FLOAT", "DECIMAL","STRING", "DATE","DATETIME"} );
+		{"USER","ORDER","PASSWORD", "ACTIVE","LEFT","DOUBLE", "FLOAT", "DECIMAL","STRING", "DATE","DATETIME",
+		 "TYPE"} );
 		
 		public static FirebirdOrmLiteDialectProvider Instance = new FirebirdOrmLiteDialectProvider();
 		
@@ -161,7 +162,9 @@ namespace ServiceStack.OrmLite.Firebird
 					&& dbCommand!=null ) {
 	
 					if( fieldDef.AutoIncrement &&  string.IsNullOrEmpty(fieldDef.Sequence) ){
-						fieldDef.Sequence= Sequence( modelDef.IsInSchema? modelDef.Schema+"_"+modelDef.ModelName: modelDef.ModelName,
+						fieldDef.Sequence= Sequence( modelDef.IsInSchema?
+						                            modelDef.Schema+"_"+NamingStrategy.GetTableName(modelDef.ModelName):
+						                            NamingStrategy.GetTableName(modelDef.ModelName),
 							fieldDef.FieldName, fieldDef.Sequence);
 					}
 				
@@ -184,7 +187,7 @@ namespace ServiceStack.OrmLite.Firebird
 
 				try
 				{
-					sbColumnNames.Append(string.Format("{0}", Quote(fieldDef.FieldName)));
+					sbColumnNames.Append(string.Format("{0}",GetColumnNameDelimited(fieldDef.FieldName)));
 					if( ! string.IsNullOrEmpty( fieldDef.Sequence )  &&  dbCommand==null )
 						sbColumnValues.Append(string.Format("@{0}",fieldDef.Name));
 					else
@@ -221,13 +224,17 @@ namespace ServiceStack.OrmLite.Firebird
 					{
 						if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
 
-						sqlFilter.AppendFormat("{0} = {1}", Quote(fieldDef.FieldName), fieldDef.GetQuotedValue(objWithProperties));
+						sqlFilter.AppendFormat("{0} = {1}", 
+						                       GetColumnNameDelimited(fieldDef.FieldName),
+						                       fieldDef.GetQuotedValue(objWithProperties));
 							
 						continue;
 					}
 					if( updateFields.Count>0 && !updateFields.Contains( fieldDef.Name )) continue;
 					if (sql.Length > 0) sql.Append(",");
-					sql.AppendFormat("{0} = {1}", Quote(fieldDef.FieldName), fieldDef.GetQuotedValue(objWithProperties));
+					sql.AppendFormat("{0} = {1}", 
+					                 GetColumnNameDelimited(fieldDef.FieldName), 
+					                 fieldDef.GetQuotedValue(objWithProperties));
 				}
 				catch (Exception )
 				{
@@ -253,11 +260,13 @@ namespace ServiceStack.OrmLite.Firebird
 			{
 				try
 				{
-					if (fieldDef.IsPrimaryKey || fieldDef.Name== OrmLiteDialectProviderBase.IdField)
+					if(fieldDef.IsPrimaryKey || fieldDef.Name==OrmLiteDialectProviderBase.IdField)
 					{
 						if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
 
-						sqlFilter.AppendFormat("{0} = {1}", Quote(fieldDef.FieldName), fieldDef.GetQuotedValue(objWithProperties));
+						sqlFilter.AppendFormat("{0} = {1}", 
+						                       GetColumnNameDelimited(fieldDef.FieldName), 
+						                       fieldDef.GetQuotedValue(objWithProperties));
 					}
 				}
 				catch (Exception )
@@ -282,8 +291,8 @@ namespace ServiceStack.OrmLite.Firebird
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
 				if(fieldDef.IsPrimaryKey) {
-					if( sbPk.Length !=0) sbPk.AppendFormat(",{0}", Quote(fieldDef.FieldName));
-					else sbPk.AppendFormat("{0}", Quote(fieldDef.FieldName));
+					if( sbPk.Length !=0) sbPk.AppendFormat(",{0}",GetColumnNameDelimited(fieldDef.FieldName));
+					else sbPk.AppendFormat("{0}",GetColumnNameDelimited(fieldDef.FieldName));
 				}
 								
                 if (sbColumns.Length != 0) sbColumns.Append(", \n  ");
@@ -303,12 +312,20 @@ namespace ServiceStack.OrmLite.Firebird
                 if (fieldDef.ReferencesType == null) continue;
 
                 var refModelDef = OrmLiteDialectProviderBase.GetModel( fieldDef.ReferencesType);
+				
+				var modelName= modelDef.IsInSchema? 
+					modelDef.Schema+"_"+ NamingStrategy.GetTableName(modelDef.ModelName):
+					NamingStrategy.GetTableName(modelDef.ModelName);
+				
+				var refModelName= refModelDef.IsInSchema?
+					refModelDef.Schema+"_"+ NamingStrategy.GetTableName(refModelDef.ModelName):
+					NamingStrategy.GetTableName(refModelDef.ModelName) ;
+				
                 sbConstraints.AppendFormat(", \n\n  CONSTRAINT {0} FOREIGN KEY ({1}) REFERENCES {2} ({3})",
-                    Quote( string.Format("FK_{0}_{1}",modelDef.IsInSchema? modelDef.Schema+"_"+ modelDef.ModelName: modelDef.ModelName,
-													  refModelDef.IsInSchema? refModelDef.Schema+"_"+ refModelDef.ModelName: refModelDef.ModelName ) ),
-					Quote(fieldDef.FieldName), 
+                    GetNameDelimited(string.Format("FK_{0}_{1}_{2}",modelName, refModelName, fieldDef.FieldName) ),
+					GetColumnNameDelimited(fieldDef.FieldName), 
 					GetTableNameDelimited(refModelDef), 
-					Quote(refModelDef.PrimaryKey.FieldName));
+					GetColumnNameDelimited(refModelDef.PrimaryKey.FieldName));
             }
 			
 			if( sbPk.Length !=0) sbColumns.AppendFormat(", \n  PRIMARY KEY({0})", sbPk.ToString());
@@ -332,7 +349,10 @@ namespace ServiceStack.OrmLite.Firebird
             {
 				if(fieldDef.AutoIncrement || ! fieldDef.Sequence.IsNullOrEmpty()){
 			
-				 	 gens.Add("CREATE GENERATOR " + Sequence( (modelDef.IsInSchema? modelDef.Schema+"_"+ modelDef.ModelName: modelDef.ModelName), fieldDef.FieldName, fieldDef.Sequence) +";" );
+				 	 gens.Add("CREATE GENERATOR " +
+					         Sequence( (modelDef.IsInSchema?
+					           modelDef.Schema+"_" + NamingStrategy.GetTableName(modelDef.ModelName):
+					           NamingStrategy.GetTableName(modelDef.ModelName)), fieldDef.FieldName, fieldDef.Sequence) +";" );
 					
 				}
 			}
@@ -347,7 +367,8 @@ namespace ServiceStack.OrmLite.Firebird
 
             if (fieldType == typeof(string))
             {
-                fieldDefinition = string.Format(StringLengthColumnDefinitionFormat, fieldLength.GetValueOrDefault(DefaultStringLength));
+                fieldDefinition = string.Format(StringLengthColumnDefinitionFormat,
+				                                fieldLength.GetValueOrDefault(DefaultStringLength));
             }
             else if( fieldType==typeof(Decimal) ){
 				fieldDefinition= string.Format("{0} ({1},{2})", DecimalColumnDefinition, 
@@ -362,7 +383,7 @@ namespace ServiceStack.OrmLite.Firebird
             }
 
             var sql = new StringBuilder();
-            sql.AppendFormat("{0} {1}", Quote(fieldName), fieldDefinition);
+            sql.AppendFormat("{0} {1}", GetColumnNameDelimited(fieldName), fieldDefinition);
 
             
             if ( ! isNullable)
@@ -399,8 +420,10 @@ namespace ServiceStack.OrmLite.Firebird
 
             foreach (var compositeIndex in modelDef.CompositeIndexes)
             {
-                var indexName = GetIndexName(compositeIndex.Unique, 
-					( modelDef.IsInSchema ? modelDef.Schema +"_"+ modelDef.ModelName: modelDef.ModelName ).SafeVarName(),
+                var indexName = GetIndexName(compositeIndex.Unique,
+					(modelDef.IsInSchema ?
+				 		modelDef.Schema +"_"+ GetTableNameDelimited(modelDef):
+				 		GetTableNameDelimited(modelDef) ).SafeVarName(),
                     string.Join("_", compositeIndex.FieldNames.ToArray()));
 
                 var indexNames = string.Join(",", compositeIndex.FieldNames.ToArray());
@@ -418,7 +441,7 @@ namespace ServiceStack.OrmLite.Firebird
 				isUnique ? "UNIQUE" : "", 
 				indexName, 
 				GetTableNameDelimited(modelDef),
-				Quote(fieldName));
+				GetColumnNameDelimited(fieldName));
         }
 		
 		
@@ -455,7 +478,7 @@ namespace ServiceStack.OrmLite.Firebird
 							if ( fieldDef.ReferencesType !=null 
 							    && OrmLiteDialectProviderBase.GetModel( fieldDef.ReferencesType).ModelName == modelDef.ModelName ){
 								if (filter.Length > 0) filter.Append(" AND ");
-								filter.AppendFormat("{0} = {1}", Quote(fieldDef.FieldName),
+								filter.AppendFormat("{0} = {1}", GetColumnNameDelimited(fieldDef.FieldName),
 								                    fpk[i].GetQuotedValue(objWithProperties));	
 								i++;
 								continue;
@@ -477,7 +500,9 @@ namespace ServiceStack.OrmLite.Firebird
 						
 							if ( fieldDef.IsPrimaryKey ){
 								if (filter.Length > 0) filter.Append(" AND ");
-								filter.AppendFormat("{0} = {1}",Quote(fieldDef.FieldName), fieldDef.GetQuotedValue(objWithProperties));	
+								filter.AppendFormat("{0} = {1}",
+								                    GetColumnNameDelimited(fieldDef.FieldName),
+								                    fieldDef.GetQuotedValue(objWithProperties));	
 								continue;
 							}
 						}
@@ -637,7 +662,8 @@ namespace ServiceStack.OrmLite.Firebird
 			else{
 				var sqlColumns = new StringBuilder();
             	modelDef.FieldDefinitions.ForEach(x => 
-                	sqlColumns.AppendFormat("{0} {1}", sqlColumns.Length > 0 ? "," : "",Quote( x.FieldName )));
+                	sqlColumns.AppendFormat("{0} {1}", sqlColumns.Length > 0 ? "," : "",
+				                        GetColumnNameDelimited(x.FieldName) ));
 
 	        	return sqlColumns.ToString();
 			}
@@ -652,11 +678,15 @@ namespace ServiceStack.OrmLite.Firebird
 		public override string GetTableNameDelimited(ModelDefinition modelDef)
         {
             if (!modelDef.IsInSchema)
-                return Quote(modelDef.ModelName);
+                return Quote(NamingStrategy.GetTableName(modelDef.ModelName));
 
-            return Quote(string.Format("{0}_{1}", modelDef.Schema, modelDef.ModelName));
+            return Quote(string.Format("{0}_{1}", modelDef.Schema,
+			                           NamingStrategy.GetTableName(modelDef.ModelName)));
         }
-       		
+       	
+		public override string GetColumnNameDelimited(string fieldName){
+			return Quote(NamingStrategy.GetColumnName(fieldName));
+		}
 		
 		private string Sequence(string modelName,string fieldName, string sequence){
 			

@@ -182,11 +182,11 @@ namespace TestLiteFirebird04
 			Console.WriteLine(sql.WhereExpression);
 			
 						
-			sql.Where( cp => (  cp.Name.In( names ) ));
+			sql.Where( cp => (  Sql.In( cp.Name, names ) ));
 			Console.WriteLine(sql.WhereExpression);
 						
 			
-			sql.Where( cp => (  cp.Id.In( ids ) ));
+			sql.Where( cp => (  Sql.In( cp.Id, ids ) ));
 			Console.WriteLine(sql.WhereExpression);
 			
 			

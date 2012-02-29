@@ -81,11 +81,6 @@ namespace ServiceStack.OrmLite.Firebird
 					if (query.Count() == 1)
 						record.Sequence = query.First();
 					else{
-						sql= string.Format("{0} WHERE RDB$GENERATOR_NAME='{1}'",
-						                   sqlGenerator.ToString(),
-						                   tableName+"_"+record.Name+"_GEN"
-						                   );
-						
 						string g = (from gen in gens
 							where gen.Name==tableName+"_"+record.Name+"_GEN"
 							select gen.Name).FirstOrDefault() ;							

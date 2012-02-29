@@ -22,7 +22,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 			: IHasId<int>
 		{
 			[AutoIncrement]
-			[Alias("ShipperID")]
+			[Alias("Id")]
 			public int Id { get; set; }
 
 			[Required]
@@ -34,6 +34,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 			public string Phone { get; set; }
 
 			[References(typeof(ShipperType))]
+			[Alias("Type")]
 			public int ShipperTypeId { get; set; }
 		}
 
@@ -42,7 +43,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 			: IHasId<int>
 		{
 			[AutoIncrement]
-			[Alias("ShipperTypeID")]
+			[Alias("Id")]
 			public int Id { get; set; }
 
 			[Required]
@@ -53,7 +54,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 		public class SubsetOfShipper
 		{
-			public int ShipperId { get; set; }
+			public int Id { get; set; }
 			public string CompanyName { get; set; }
 		}
 
@@ -103,10 +104,10 @@ namespace ServiceStack.OrmLite.FirebirdTests
 				dbCmd.Insert(new Shipper { CompanyName = "Planes R Us", Phone = "555-PLANES", ShipperTypeId = planesTypeId });
 				dbCmd.Insert(new Shipper { CompanyName = "We do everything!", Phone = "555-UNICORNS", ShipperTypeId = planesTypeId });
 
-				var trainsAreUs = dbCmd.First<Shipper>("ShipperTypeId = {0}", trainsTypeId);
+				var trainsAreUs = dbCmd.First<Shipper>("\"Type\" = {0}", trainsTypeId);
 				Assert.That(trainsAreUs.CompanyName, Is.EqualTo("Trains R Us"));
 				Assert.That(dbCmd.Select<Shipper>("CompanyName = {0} OR Phone = {1}", "Trains R Us", "555-UNICORNS"), Has.Count.EqualTo(2));
-				Assert.That(dbCmd.Select<Shipper>("ShipperTypeId = {0}", planesTypeId), Has.Count.EqualTo(2));
+				Assert.That(dbCmd.Select<Shipper>("\"Type\" = {0}", planesTypeId), Has.Count.EqualTo(2));
 
 				//Lets update a record
 				trainsAreUs.Phone = "666-TRAINS";
@@ -123,12 +124,12 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 				//Performing custom queries
 				//Select only a subset from the table
-				var partialColumns = dbCmd.Select<SubsetOfShipper>(typeof (Shipper), "ShipperTypeId = {0}", planesTypeId);
+				var partialColumns = dbCmd.Select<SubsetOfShipper>(typeof (Shipper), "\"Type\" = {0}", planesTypeId);
 				Assert.That(partialColumns, Has.Count.EqualTo(2));
 
 				//Select into another POCO class that matches sql
 				var rows = dbCmd.Select<ShipperTypeCount>(
-					"SELECT ShipperTypeId, COUNT(*) AS Total FROM ShippersT GROUP BY ShipperTypeId ORDER BY COUNT(*)");
+					"SELECT \"Type\" as ShipperTypeId, COUNT(*) AS Total FROM ShippersT GROUP BY \"Type\" ORDER BY COUNT(*)");
 
 				Assert.That(rows, Has.Count.EqualTo(2));
 				Assert.That(rows[0].ShipperTypeId, Is.EqualTo(trainsTypeId));
