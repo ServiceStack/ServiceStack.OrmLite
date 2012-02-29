@@ -14,7 +14,51 @@ namespace ServiceStack.OrmLite.SqlServer
 		{
 		}
 
-		protected override string VisitMethodCall(MethodCallExpression m)
+        public override string ToSelectStatement()
+        {
+            if (!Skip.HasValue && !Rows.HasValue)
+                return base.ToSelectStatement();
+
+            AssertValidSkipRowValues();
+
+            var buffer = new StringBuilder();
+            var orderBy = !String.IsNullOrEmpty(OrderByExpression)
+                              ? OrderByExpression
+                              : BuildOrderByIdExpression();
+
+            var skip = Skip.HasValue ? Skip.Value : 0;
+            var take = Rows.HasValue ? Rows.Value : int.MaxValue;
+
+            OrderByExpression = String.Empty; // Required because ordering is done by
+                                              // Windowing function
+
+            buffer.AppendFormat("SELECT Paged.* FROM \n" + 
+                                "(SELECT ROW_NUMBER() OVER ({0}) AS __RowNum, PagedTable.* \n" +
+                                "FROM (\n{1}) AS PagedTable) AS Paged \n", orderBy, base.ToSelectStatement());
+
+            buffer.AppendFormat("WHERE __RowNum > {0} AND __RowNum <= {1} \n", skip, skip + take);
+
+            return buffer.ToString();
+        }
+
+        protected virtual void AssertValidSkipRowValues()
+        {
+            if (Skip.HasValue && Skip.Value < 0)
+                throw new ArgumentException(String.Format("Skip value:'{0}' must be>=0", Skip.Value));
+
+            if (Rows.HasValue && Rows.Value <0)
+                throw new ArgumentException(string.Format("Rows value:'{0}' must be>=0", Rows.Value));
+        }
+
+	    protected virtual string BuildOrderByIdExpression()
+	    {
+	        if (ModelDef.PrimaryKey == null)
+                throw new ApplicationException("Malformed model, no PrimaryKey defined");
+
+	        return String.Format("ORDER BY {0}", ModelDef.PrimaryKey.FieldName);
+	    }
+
+	    protected override string VisitMethodCall(MethodCallExpression m)
 		{
 			var args = this.VisitExpressionList(m.Arguments);
 
@@ -119,6 +163,50 @@ namespace ServiceStack.OrmLite.SqlServer
 			}
 
 		}
+
+
+        /*
+        private dynamic BuildPagedResult(string sql = "", string primaryKeyField = "", string where = "", string orderBy = "", string columns = "*", int pageSize = 20, int currentPage = 1, params object[] args)
+        {
+            dynamic result = new ExpandoObject();
+            var countSQL = "";
+            if (!string.IsNullOrEmpty(sql))
+                countSQL = string.Format("SELECT COUNT({0}) FROM ({1}) AS PagedTable", primaryKeyField, sql);
+            else
+                countSQL = string.Format("SELECT COUNT({0}) FROM {1}", PrimaryKeyField, TableName);
+
+            if (String.IsNullOrEmpty(orderBy))
+            {
+                orderBy = string.IsNullOrEmpty(primaryKeyField) ? PrimaryKeyField : primaryKeyField;
+            }
+
+            if (!string.IsNullOrEmpty(where))
+            {
+                if (!where.Trim().StartsWith("where", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    where = " WHERE " + where;
+                }
+            }
+
+            var query = "";
+            if (!string.IsNullOrEmpty(sql))
+                query = string.Format("SELECT {0} FROM (SELECT ROW_NUMBER() OVER (ORDER BY {2}) AS Row, {0} FROM ({3}) AS PagedTable {4}) AS Paged ", columns, pageSize, orderBy, sql, where);
+            else
+                query = string.Format("SELECT {0} FROM (SELECT ROW_NUMBER() OVER (ORDER BY {2}) AS Row, {0} FROM {3} {4}) AS Paged ", columns, pageSize, orderBy, TableName, where);
+
+            var pageStart = (currentPage - 1) * pageSize;
+            query += string.Format(" WHERE Row > {0} AND Row <={1}", pageStart, (pageStart + pageSize));
+            countSQL += where;
+            result.TotalRecords = Scalar(countSQL, args);
+            result.TotalPages = result.TotalRecords / pageSize;
+            if (result.TotalRecords % pageSize > 0)
+                result.TotalPages += 1;
+            result.Items = Query(string.Format(query, columns, TableName), args);
+            return result;
+        }
+        */
+        
+
 
 		//Not supported SQL Server solution sucks
 		//http://stackoverflow.com/questions/2135418/equivalent-of-limit-and-offset-for-sql-server
