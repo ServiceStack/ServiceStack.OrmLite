@@ -124,7 +124,7 @@ namespace ServiceStack.OrmLite
         {
             try
             {
-                dbCmd.ExecuteSql(string.Format("DROP TABLE {0};", OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef)));
+                dbCmd.ExecuteSql(string.Format("DROP TABLE {0};", OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef)));
             }
             catch (Exception )
 
@@ -238,8 +238,8 @@ namespace ServiceStack.OrmLite
             var modelDef = ModelDefinition<T>.Definition;
 
             var sql = string.Format("DELETE FROM {0} WHERE {1} = {2}",
-                                    OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef),
-                                    OrmLiteConfig.DialectProvider.GetColumnNameDelimited(modelDef.PrimaryKey.FieldName),
+                                    OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef),
+                                    OrmLiteConfig.DialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName),
                                     OrmLiteConfig.DialectProvider.GetQuotedValue(id, id.GetType()));
 
 
@@ -255,8 +255,8 @@ namespace ServiceStack.OrmLite
             var modelDef = ModelDefinition<T>.Definition;
 
             var sql = string.Format("DELETE FROM {0} WHERE {1} IN ({2})",
-                                    OrmLiteConfig.DialectProvider.GetTableNameDelimited(modelDef),
-                                    OrmLiteConfig.DialectProvider.GetColumnNameDelimited(modelDef.PrimaryKey.FieldName),
+                                    OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef),
+                                    OrmLiteConfig.DialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName),
                                     sqlIn);
 
             dbCmd.ExecuteSql(sql);

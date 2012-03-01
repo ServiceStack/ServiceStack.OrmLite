@@ -114,7 +114,7 @@ namespace ServiceStack.OrmLite
 			var sql = new StringBuilder();
 			var modelDef = ModelDefinition<TModel>.Definition;
 		    sql.AppendFormat("SELECT {0} FROM {1}", OrmLiteConfig.DialectProvider.GetColumnNames( modelDef),
-		                     OrmLiteConfig.DialectProvider.GetTableNameDelimited(fromTableType.GetModelDefinition()));
+		                     OrmLiteConfig.DialectProvider.GetQuotedTableName(fromTableType.GetModelDefinition()));
             if (!string.IsNullOrEmpty(sqlFilter))
 			{
 				sqlFilter = sqlFilter.SqlFormat(filterParams);
@@ -187,7 +187,7 @@ namespace ServiceStack.OrmLite
 		public static T GetById<T>(this IDbCommand dbCmd, object idValue)
 			where T : new()
 		{
-			return First<T>(dbCmd, OrmLiteConfig.DialectProvider.GetColumnNameDelimited(ModelDefinition<T>.PrimaryKeyName) + " = {0}".SqlFormat(idValue));
+			return First<T>(dbCmd, OrmLiteConfig.DialectProvider.GetQuotedColumnName(ModelDefinition<T>.PrimaryKeyName) + " = {0}".SqlFormat(idValue));
 		}
 
 		[ThreadStatic]
@@ -251,7 +251,7 @@ namespace ServiceStack.OrmLite
 				sb.Append(i == 0 ? " WHERE " : " AND ");
 				var p = (IDbDataParameter)dbCmd.Parameters[i];
 				sb.AppendFormat("{0} = {1}{2}",
-								OrmLiteConfig.DialectProvider.GetColumnNameDelimited(p.ParameterName),
+								OrmLiteConfig.DialectProvider.GetQuotedColumnName(p.ParameterName),
 								OrmLiteConfig.DialectProvider.ParamString,
 								p.ParameterName);
 			}
@@ -417,7 +417,7 @@ namespace ServiceStack.OrmLite
 		public static T GetByIdOrDefault<T>(this IDbCommand dbCmd, object idValue)
 			where T : new()
 		{
-			return FirstOrDefault<T>(dbCmd, OrmLiteConfig.DialectProvider.GetColumnNameDelimited(ModelDefinition<T>.PrimaryKeyName) + " = {0}".SqlFormat(idValue));
+			return FirstOrDefault<T>(dbCmd, OrmLiteConfig.DialectProvider.GetQuotedColumnName(ModelDefinition<T>.PrimaryKeyName) + " = {0}".SqlFormat(idValue));
 		}
 
 		public static List<T> GetByIds<T>(this IDbCommand dbCmd, IEnumerable idValues)
@@ -426,7 +426,7 @@ namespace ServiceStack.OrmLite
 			var sql = idValues.GetIdsInSql();
 			return sql == null
 				? new List<T>()
-				: Select<T>(dbCmd, OrmLiteConfig.DialectProvider.GetColumnNameDelimited(ModelDefinition<T>.PrimaryKeyName) + " IN (" + sql + ")");
+				: Select<T>(dbCmd, OrmLiteConfig.DialectProvider.GetQuotedColumnName(ModelDefinition<T>.PrimaryKeyName) + " IN (" + sql + ")");
 		}
 
 		public static T GetScalar<T>(this IDbCommand dbCmd, string sql, params object[] sqlParams)

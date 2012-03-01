@@ -62,7 +62,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
 			}
 
 			var sql = new StringBuilder();
-			sql.AppendFormat("{0} {1}", GetColumnNameDelimited(fieldName), fieldDefinition);
+			sql.AppendFormat("{0} {1}", GetQuotedColumnName(fieldName), fieldDefinition);
 
 			if (isPrimaryKey)
 			{

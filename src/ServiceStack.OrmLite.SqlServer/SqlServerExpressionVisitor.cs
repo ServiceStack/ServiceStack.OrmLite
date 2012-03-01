@@ -102,7 +102,7 @@ namespace ServiceStack.OrmLite.SqlServer
 					return string.Format("{0} DESC", r);
 				case "As":
 					return string.Format("{0} As {1}", r,
-						OrmLiteConfig.DialectProvider.GetColumnNameDelimited(RemoveQuote(args[0].ToString())));
+						OrmLiteConfig.DialectProvider.GetQuotedColumnName(RemoveQuote(args[0].ToString())));
 				case "ToString":
 					return r.ToString();
 				default:

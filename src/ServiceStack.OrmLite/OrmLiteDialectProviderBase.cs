@@ -323,17 +323,17 @@ namespace ServiceStack.OrmLite
             return paramValue.ToString().Replace("'", "''");
         }
 
-        public virtual string GetTableNameDelimited(ModelDefinition modelDef)
+        public virtual string GetQuotedTableName(ModelDefinition modelDef)
         {
             return string.Format("\"{0}\"", namingStrategy.GetTableName(modelDef.ModelName));
         }
 
-		public virtual string GetColumnNameDelimited(string columnName)
+		public virtual string GetQuotedColumnName(string columnName)
 		{
 			return string.Format("\"{0}\"", namingStrategy.GetColumnName(columnName));
 		}
 
-        public virtual string GetNameDelimited(string name)
+        public virtual string GetQuotedName(string name)
         {
 			return string.Format("\"{0}\"", name);
         }
@@ -368,7 +368,7 @@ namespace ServiceStack.OrmLite
             }
 
             var sql = new StringBuilder();
-            sql.AppendFormat("{0} {1}", GetColumnNameDelimited(fieldName), fieldDefinition);
+            sql.AppendFormat("{0} {1}", GetQuotedColumnName(fieldName), fieldDefinition);
 
             if (isPrimaryKey)
             {
@@ -414,7 +414,7 @@ namespace ServiceStack.OrmLite
 			if (isFullSelectStatement) return sqlFilter.SqlFormat(filterParams);
 
 		    sql.AppendFormat("SELECT {0} FROM {1}", tableType.GetColumnNames(),
-		                     GetTableNameDelimited(modelDef));
+		                     GetQuotedTableName(modelDef));
 			if (!string.IsNullOrEmpty(sqlFilter))
 			{
 				sqlFilter = sqlFilter.SqlFormat(filterParams);
@@ -453,7 +453,7 @@ namespace ServiceStack.OrmLite
 
                 try
                 {
-                    sbColumnNames.Append(GetColumnNameDelimited(fieldDef.FieldName));
+                    sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
                     sbColumnValues.Append(fieldDef.GetQuotedValue(objWithProperties));
                 }
                 catch (Exception ex)
@@ -464,7 +464,7 @@ namespace ServiceStack.OrmLite
             }
 
             var sql = string.Format("INSERT INTO {0} ({1}) VALUES ({2});",
-                                    GetTableNameDelimited(modelDef), sbColumnNames, sbColumnValues);
+                                    GetQuotedTableName(modelDef), sbColumnNames, sbColumnValues);
 
             return sql;
 		}
@@ -494,7 +494,7 @@ namespace ServiceStack.OrmLite
 
                 try
                 {
-                    sbColumnNames.Append(GetColumnNameDelimited(fieldDef.FieldName));
+                    sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
                     sbColumnValues.Append(ParamString)
                                   .Append(fieldDef.FieldName);
 
@@ -508,7 +508,7 @@ namespace ServiceStack.OrmLite
             }
 
             command.CommandText = string.Format("INSERT INTO {0} ({1}) VALUES ({2});",
-                                                GetTableNameDelimited(modelDef), sbColumnNames, sbColumnValues);
+                                                GetQuotedTableName(modelDef), sbColumnNames, sbColumnValues);
             return command;
         }
 
@@ -597,14 +597,14 @@ namespace ServiceStack.OrmLite
                     {
                         if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
 
-                        sqlFilter.AppendFormat("{0} = {1}", GetColumnNameDelimited(fieldDef.FieldName), fieldDef.GetQuotedValue(objWithProperties));
+                        sqlFilter.AppendFormat("{0} = {1}", GetQuotedColumnName(fieldDef.FieldName), fieldDef.GetQuotedValue(objWithProperties));
 
                         continue;
                     }
 					
 					if( updateFields.Count>0 && !updateFields.Contains( fieldDef.Name )) continue;
                     if (sql.Length > 0) sql.Append(",");
-					sql.AppendFormat("{0} = {1}", GetColumnNameDelimited(fieldDef.FieldName), fieldDef.GetQuotedValue(objWithProperties));
+					sql.AppendFormat("{0} = {1}", GetQuotedColumnName(fieldDef.FieldName), fieldDef.GetQuotedValue(objWithProperties));
                 }
                 catch (Exception ex)
                 {
@@ -613,7 +613,7 @@ namespace ServiceStack.OrmLite
             }
 
             var updateSql = string.Format("UPDATE {0} SET {1} {2}",
-                GetTableNameDelimited(modelDef), sql, (sqlFilter.Length>0? "WHERE "+ sqlFilter:""));
+                GetQuotedTableName(modelDef), sql, (sqlFilter.Length>0? "WHERE "+ sqlFilter:""));
 				
 
             return updateSql;
@@ -641,7 +641,7 @@ namespace ServiceStack.OrmLite
                     {
                         if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
 
-						sqlFilter.AppendFormat("{0} = {1}", GetColumnNameDelimited(fieldDef.FieldName), String.Concat(ParamString, fieldDef.Name));
+						sqlFilter.AppendFormat("{0} = {1}", GetQuotedColumnName(fieldDef.FieldName), String.Concat(ParamString, fieldDef.Name));
                         AddParameterForFieldToCommand(command, fieldDef, objWithProperties);
 
                         continue;
@@ -649,7 +649,7 @@ namespace ServiceStack.OrmLite
 
                     if (updateFields.Count > 0 && !updateFields.Contains(fieldDef.Name)) continue;
                     if (sql.Length > 0) sql.Append(",");
-                    sql.AppendFormat("{0} = {1}", GetColumnNameDelimited(fieldDef.FieldName), String.Concat(ParamString, fieldDef.Name));
+                    sql.AppendFormat("{0} = {1}", GetQuotedColumnName(fieldDef.FieldName), String.Concat(ParamString, fieldDef.Name));
 
                     AddParameterForFieldToCommand(command, fieldDef, objWithProperties);
                 }
@@ -659,7 +659,7 @@ namespace ServiceStack.OrmLite
                 }
             }
 
-            command.CommandText = string.Format("UPDATE {0} SET {1} {2}", GetTableNameDelimited(modelDef), sql, (sqlFilter.Length > 0 ? "WHERE " + sqlFilter : ""));
+            command.CommandText = string.Format("UPDATE {0} SET {1} {2}", GetQuotedTableName(modelDef), sql, (sqlFilter.Length > 0 ? "WHERE " + sqlFilter : ""));
             return command;
         }
 		
@@ -676,7 +676,7 @@ namespace ServiceStack.OrmLite
                     {
                         if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
 
-                        sqlFilter.AppendFormat("{0} = {1}", GetColumnNameDelimited(fieldDef.FieldName), fieldDef.GetQuotedValue(objWithProperties));
+                        sqlFilter.AppendFormat("{0} = {1}", GetQuotedColumnName(fieldDef.FieldName), fieldDef.GetQuotedValue(objWithProperties));
                     }
                 }
                 catch (Exception ex)
@@ -686,7 +686,7 @@ namespace ServiceStack.OrmLite
             }
 
             var deleteSql = string.Format("DELETE FROM {0} WHERE {1}",
-                GetTableNameDelimited(modelDef), sqlFilter);
+                GetQuotedTableName(modelDef), sqlFilter);
 
             return deleteSql;
         }
@@ -705,7 +705,7 @@ namespace ServiceStack.OrmLite
             if (isFullDeleteStatement) return sqlFilter.SqlFormat(filterParams);
 
             var modelDef = tableType.GetModelDefinition();
-            sql.AppendFormat("DELETE FROM {0}", GetTableNameDelimited(modelDef));
+            sql.AppendFormat("DELETE FROM {0}", GetQuotedTableName(modelDef));
             if (!string.IsNullOrEmpty(sqlFilter))
             {
                 sqlFilter = sqlFilter.SqlFormat(filterParams);
@@ -746,14 +746,14 @@ namespace ServiceStack.OrmLite
                 var refModelDef = fieldDef.ReferencesType.GetModelDefinition();
                 sbConstraints.AppendFormat(
                     ", \n\n  CONSTRAINT {0} FOREIGN KEY ({1}) REFERENCES {2} ({3})",
-                    GetNameDelimited(string.Format("FK_{0}_{1}_{2}", modelDef.ModelName,
+                    GetQuotedName(string.Format("FK_{0}_{1}_{2}", modelDef.ModelName,
 																 refModelDef.ModelName, fieldDef.FieldName)),
-                    GetColumnNameDelimited(fieldDef.FieldName),
-                    GetTableNameDelimited(refModelDef),
-					GetColumnNameDelimited(refModelDef.PrimaryKey.FieldName));
+                    GetQuotedColumnName(fieldDef.FieldName),
+                    GetQuotedTableName(refModelDef),
+					GetQuotedColumnName(refModelDef.PrimaryKey.FieldName));
             }
             var sql = new StringBuilder(string.Format(
-                "CREATE TABLE {0} \n(\n  {1}{2} \n); \n", GetTableNameDelimited(modelDef), sbColumns, sbConstraints));
+                "CREATE TABLE {0} \n(\n  {1}{2} \n); \n", GetQuotedTableName(modelDef), sbColumns, sbConstraints));
 
             return sql.ToString();
         }
@@ -780,7 +780,7 @@ namespace ServiceStack.OrmLite
 
                 var indexNames = string.Join(" ASC, ",
                                              compositeIndex.FieldNames.ConvertAll(
-                                                 n => GetNameDelimited(n)).ToArray());
+                                                 n => GetQuotedName(n)).ToArray());
 
                 sqlIndexes.Add(
                     ToCreateIndexStatement(compositeIndex.Unique, indexName, modelDef, indexNames, true));
@@ -798,8 +798,8 @@ namespace ServiceStack.OrmLite
         {
             return string.Format("CREATE {0} INDEX {1} ON {2} ({3} ASC); \n",
                                  isUnique ? "UNIQUE" : "", indexName,
-                                 GetTableNameDelimited(modelDef),
-                                 (isCombined) ? fieldName : GetColumnNameDelimited(fieldName));
+                                 GetQuotedTableName(modelDef),
+                                 (isCombined) ? fieldName : GetQuotedColumnName(fieldName));
         }
 		
 		public virtual string GetColumnNames(ModelDefinition modelDef){

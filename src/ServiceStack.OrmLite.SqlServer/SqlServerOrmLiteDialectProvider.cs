@@ -67,10 +67,10 @@ namespace ServiceStack.OrmLite.SqlServer
 			return new SqlConnection(connectionString);
 		}
 
-        public override string GetTableNameDelimited(ModelDefinition modelDef)
+        public override string GetQuotedTableName(ModelDefinition modelDef)
         {
             if (!modelDef.IsInSchema)
-                return base.GetTableNameDelimited(modelDef);
+                return base.GetQuotedTableName(modelDef);
 
             return string.Format("\"{0}\".\"{1}\"", modelDef.Schema, NamingStrategy.GetTableName(modelDef.ModelName));
         }

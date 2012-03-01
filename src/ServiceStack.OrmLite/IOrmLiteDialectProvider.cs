@@ -33,11 +33,11 @@ namespace ServiceStack.OrmLite
 
 		IDbConnection CreateConnection(string filePath, Dictionary<string, string> options);
 
-	    string GetTableNameDelimited(ModelDefinition modelDef);
+	    string GetQuotedTableName(ModelDefinition modelDef);
 
-		string GetColumnNameDelimited(string columnName);
+		string GetQuotedColumnName(string columnName);
         
-		string GetNameDelimited(string columnName);
+		string GetQuotedName(string columnName);
 
 		string GetColumnDefinition(
 			string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement, 

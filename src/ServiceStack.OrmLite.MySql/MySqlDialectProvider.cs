@@ -64,17 +64,17 @@ namespace ServiceStack.OrmLite.MySql
             return base.ConvertDbValue(value, type);
         }
 
-        public override string GetTableNameDelimited(ModelDefinition modelDef)
+        public override string GetQuotedTableName(ModelDefinition modelDef)
         {
             return string.Format("`{0}`", NamingStrategy.GetTableName(modelDef.ModelName));
         }
 
-		public override string GetColumnNameDelimited(string columnName)
+		public override string GetQuotedColumnName(string columnName)
 		{
 			return string.Format("`{0}`", NamingStrategy.GetColumnName(columnName));
 		}
 
-        public override string GetNameDelimited(string name)
+        public override string GetQuotedName(string name)
         {
 			return string.Format("`{0}`", name);
         }
