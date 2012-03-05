@@ -406,10 +406,9 @@ namespace ServiceStack.OrmLite
 			var sql = new StringBuilder();
 			const string SelectStatement = "SELECT ";
 			var modelDef= tableType.GetModelDefinition();
-			var isFullSelectStatement =
-                !string.IsNullOrEmpty(sqlFilter)
-				&& sqlFilter.Length > SelectStatement.Length
-				&& sqlFilter.Substring(0, SelectStatement.Length).ToUpper().Equals(SelectStatement);
+			var isFullSelectStatement = 
+				!string.IsNullOrEmpty(sqlFilter) 
+				&& sqlFilter.TrimStart().StartsWith(SelectStatement, StringComparison.OrdinalIgnoreCase);
 
 			if (isFullSelectStatement) return sqlFilter.SqlFormat(filterParams);
 
