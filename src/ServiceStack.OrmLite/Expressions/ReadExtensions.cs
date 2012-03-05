@@ -35,7 +35,8 @@ namespace ServiceStack.OrmLite
 				return ConvertToList<T>(reader);
 			}
 		}
-
+		
+		
 		public static List<T> Select<T>(this IDbCommand dbCmd, SqlExpressionVisitor<T> expression)
 			where T : new()
 		{
@@ -44,6 +45,15 @@ namespace ServiceStack.OrmLite
 			{
 				return ConvertToList<T>(reader);
 			}
+		}
+		
+		
+		public static T First<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
+			where T : new()
+		{
+			var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();
+			
+			return First<T>(dbCmd, ev.Where(predicate).Limit(1));
 		}
 		
 		
@@ -57,6 +67,15 @@ namespace ServiceStack.OrmLite
 					"{0}: '{1}' does not exist", typeof(T).Name, expression.WhereExpression));
 			}
 			return result;
+		}
+		
+		
+		public static T FirstOrDefault<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
+			where T : new()
+		{
+			var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();
+			
+			return FirstOrDefault<T>(dbCmd, ev.Where(predicate).Limit(1));
 		}
 		
 		
