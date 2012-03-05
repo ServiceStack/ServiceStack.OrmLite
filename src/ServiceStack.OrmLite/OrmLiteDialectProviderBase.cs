@@ -240,7 +240,7 @@ namespace ServiceStack.OrmLite
             string fieldDefinition;
             if (!DbTypes.ColumnTypeMap.TryGetValue(fieldType, out fieldDefinition))
             {
-                fieldDefinition = this.GetUndefinedColumnDefintion(fieldType);
+                fieldDefinition = this.GetUndefinedColumnDefinition(fieldType, null);
             }
 
             return fieldDefinition != IntColumnDefinition
@@ -338,11 +338,11 @@ namespace ServiceStack.OrmLite
 			return string.Format("\"{0}\"", name);
         }
 
-        protected virtual string GetUndefinedColumnDefintion(Type fieldType)
+        protected virtual string GetUndefinedColumnDefinition(Type fieldType, int? fieldLength)
         {
             if (TypeSerializer.CanCreateFromString(fieldType))
             {
-                return this.StringColumnDefinition;
+                return string.Format(StringLengthColumnDefinitionFormat, fieldLength.GetValueOrDefault(DefaultStringLength));
             }
 
             throw new NotSupportedException(
@@ -363,7 +363,7 @@ namespace ServiceStack.OrmLite
             {
                 if (!DbTypes.ColumnTypeMap.TryGetValue(fieldType, out fieldDefinition))
                 {
-                    fieldDefinition = this.GetUndefinedColumnDefintion(fieldType);
+                    fieldDefinition = this.GetUndefinedColumnDefinition(fieldType, fieldLength);
                 }
             }
 
@@ -406,10 +406,9 @@ namespace ServiceStack.OrmLite
 			var sql = new StringBuilder();
 			const string SelectStatement = "SELECT ";
 			var modelDef= tableType.GetModelDefinition();
-			var isFullSelectStatement =
-                !string.IsNullOrEmpty(sqlFilter)
-				&& sqlFilter.Length > SelectStatement.Length
-				&& sqlFilter.Substring(0, SelectStatement.Length).ToUpper().Equals(SelectStatement);
+			var isFullSelectStatement = 
+				!string.IsNullOrEmpty(sqlFilter) 
+				&& sqlFilter.TrimStart().StartsWith(SelectStatement, StringComparison.OrdinalIgnoreCase);
 
 			if (isFullSelectStatement) return sqlFilter.SqlFormat(filterParams);
 
