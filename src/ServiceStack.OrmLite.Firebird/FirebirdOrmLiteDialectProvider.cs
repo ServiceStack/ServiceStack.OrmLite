@@ -378,7 +378,7 @@ namespace ServiceStack.OrmLite.Firebird
             else {
                 if (!DbTypes.ColumnTypeMap.TryGetValue(fieldType, out fieldDefinition))
                 {
-                    fieldDefinition = this.GetUndefinedColumnDefintion(fieldType);
+                    fieldDefinition = GetUndefinedColumnDefinition(fieldType,null);
                 }
             }
 

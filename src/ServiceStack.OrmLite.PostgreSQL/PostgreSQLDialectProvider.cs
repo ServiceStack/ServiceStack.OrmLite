@@ -57,7 +57,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
 				}
 				else if (!DbTypes.ColumnTypeMap.TryGetValue(fieldType, out fieldDefinition))
 				{
-					fieldDefinition = this.GetUndefinedColumnDefintion(fieldType);
+					fieldDefinition = GetUndefinedColumnDefinition(fieldType,null);
 				}
 			}
 

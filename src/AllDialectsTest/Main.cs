@@ -175,6 +175,9 @@ namespace AllDialectsTest
 				Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, result.Count, expected == result.Count?"OK":"********* FAILED *********");
 				result = dbCmd.Select<Author>(rn => rn.Birthday >= new DateTime(year, 1, 1) && rn.Birthday <= lastDay);
 				Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, result.Count, expected == result.Count?"OK":"********* FAILED *********");
+				Author a = new Author(){Birthday=lastDay};	
+				result = dbCmd.Select<Author>(rn => rn.Birthday >= new DateTime(year, 1, 1) && rn.Birthday <= a.Birthday);
+				Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, result.Count, expected == result.Count?"OK":"********* FAILED *********");	
 				
 				// select authors from London, Berlin and Madrid : 6
 				expected=6;
@@ -244,6 +247,9 @@ namespace AllDialectsTest
 				Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, result.Count, expected==result.Count?"OK":"********* FAILED *********");
 				result = dbCmd.Select<Author>(rn => rn.Name.Contains("Benedict"));
 				Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, result.Count, expected == result.Count?"OK":"********* FAILED *********");
+				a.Name=name;	
+				result = dbCmd.Select<Author>(rn => rn.Name.Contains(a.Name));
+				Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, result.Count, expected == result.Count?"OK":"********* FAILED *********");	
 				
 				
 				// select authors with Earnings <= 50 
@@ -266,6 +272,10 @@ namespace AllDialectsTest
 				result = dbCmd.Select<Author>(rn => rn.Rate == 10 && rn.City == "Mexico");
 				Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, result.Count, expected == result.Count?"OK":"********* FAILED *********");
 			
+				a.City= city;
+				result = dbCmd.Select<Author>(rn => rn.Rate == 10 && rn.City == a.City);
+				Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, result.Count, expected == result.Count?"OK":"********* FAILED *********");
+								
 				//  enough selecting, lets update;
 				// set Active=false where rate =0
 				expected=2;
@@ -296,7 +306,7 @@ namespace AllDialectsTest
 				rows = dbCmd.Delete( ev);
 				Console.WriteLine(ev.WhereExpression);
 				Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, rows, expected==rows?"OK":"********* FAILED *********");
-					
+				
 				
 				//   lets select  all records ordered by Rate Descending and Name Ascending
 				expected=14;
