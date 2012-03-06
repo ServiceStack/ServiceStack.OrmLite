@@ -699,6 +699,26 @@ namespace ServiceStack.OrmLite.Firebird
 		{
 			return new FirebirdSqlExpressionVisitor<T>();
 		}
+		
+		public override bool DoesTableExist(IDbCommand dbCmd, string tableName)
+		{
+			if(!QuoteNames){
+				tableName= tableName.ToUpper();
+			}
+			
+			var sql = "SELECT count(*) FROM rdb$relations " +
+				"WHERE rdb$system_flag = 0 AND rdb$view_blr IS NULL AND rdb$relation_name ={0}"
+				.SqlFormat(tableName);
+
+			dbCmd.CommandText = sql; 
+			var result = dbCmd.GetLongScalar();
+
+			return result > 0;
+		}
+		
+		
+		
+		
 	}
 }
 

@@ -9,6 +9,25 @@ namespace ServiceStack.OrmLite.FirebirdTests
 	public class OrmLiteCreateTableTests 
 		: OrmLiteTestBase
 	{
+		[Test]
+		public void Does_table_Exists()
+		{
+			using (var db = ConnectionString.OpenDbConnection())
+			using (var dbCmd = db.CreateCommand())
+			{
+				dbCmd.DropTable<ModelWithIdOnly>();
+
+				Assert.That(
+					OrmLiteConfig.DialectProvider.DoesTableExist(dbCmd, typeof(ModelWithIdOnly).Name),
+					Is.False);
+				
+				dbCmd.CreateTable<ModelWithIdOnly>(true);
+
+				Assert.That(
+					OrmLiteConfig.DialectProvider.DoesTableExist(dbCmd, typeof(ModelWithIdOnly).Name),
+					Is.True);
+			}
+		}
 
 		[Test]
 		public void Can_create_ModelWithIdOnly_table()
