@@ -20,7 +20,6 @@ namespace ServiceStack.OrmLite.PostgreSQL
 			base.DateTimeColumnDefinition = "timestamp";
 			base.DecimalColumnDefinition = "numeric(38,6)";
 			base.GuidColumnDefinition = "uuid";
-			base.DefaultStringLength = 255;
 			base.ParamString = ":";
 			base.BlobColumnDefinition = "bytea";
 			base.RealColumnDefinition = "double precision";

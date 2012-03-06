@@ -180,7 +180,6 @@ namespace ServiceStack.OrmLite.Tests
 		}
 
 
-		[NUnit.Framework.Ignore("Not possible at the moment")]
 		[Test]
 		public void Can_insert_table_with_blobs()
 		{
