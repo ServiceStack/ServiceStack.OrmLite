@@ -358,6 +358,37 @@ namespace AllDialectsTest
 				result=dbCmd.Select(ev);	
 				Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, result.Count, expected==result.Count?"OK":"********* FAILED *********");
 				
+					
+				// Tests for predicate overloads that make use of the expression visitor
+				Console.WriteLine("First author by name (exists)");
+				author = dbCmd.First<Author>(q => q.Name == "Jorge Garzon");
+				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", "Jorge Garzon", author.Name, "Jorge Garzon"==author.Name);
+				
+				try
+				{
+					Console.WriteLine("First author by name (does not exist)");
+					author = dbCmd.First<Author>(q => q.Name == "Does not exist");
+					
+					Console.WriteLine("Expected exception thrown, OK? False");
+				}
+				catch
+				{
+					Console.WriteLine("Expected exception thrown, OK? True");
+				}
+				
+				Console.WriteLine("First author or default (does not exist)");
+				author = dbCmd.FirstOrDefault<Author>(q => q.Name == "Does not exist");
+				Console.WriteLine("Expected:null ; OK? {0}", author == null);
+				
+				Console.WriteLine("First author or default by city (multiple matches)");
+				author = dbCmd.FirstOrDefault<Author>(q => q.City == "Bogota");
+				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", "Angel Colmenares", author.Name, "Angel Colmenares"==author.Name);
+				
+				a.City="Bogota";	
+				author = dbCmd.FirstOrDefault<Author>(q => q.City == a.City);
+				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", "Angel Colmenares", author.Name, "Angel Colmenares"==author.Name);	
+					
+					
 				DateTime t3= DateTime.Now;	
 				Console.WriteLine("Expressions test in: {0}", t3-t2); 	
 				Console.WriteLine("All test in :        {0}", t3-t1); 	
