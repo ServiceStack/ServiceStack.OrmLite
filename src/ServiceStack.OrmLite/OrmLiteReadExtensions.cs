@@ -538,12 +538,13 @@ namespace ServiceStack.OrmLite
 		
 		// somo aditional methods
 		
-		public static bool HasChildren<T>(this IDbCommand dbCmd, object record){
+		public static bool HasChildren<T>(this IDbCommand dbCmd, object record)
+		{
 			return HasChildren<T>(dbCmd, record, string.Empty);
 		}
 		
-		private static bool HasChildren<T>(this IDbCommand dbCmd, object record, string sqlFilter,
-		                                  params object[] filterParams){
+		private static bool HasChildren<T>(this IDbCommand dbCmd, object record, string sqlFilter, params object[] filterParams)
+		{
 			
 			Type fromTableType = typeof(T);
 			
@@ -554,24 +555,19 @@ namespace ServiceStack.OrmLite
 		}
 		
 		
-		public static bool Exists<T>(this IDbCommand dbCmd,  string sqlFilter,
-		                                  params object[] filterParams){
-			
+		public static bool Exists<T>(this IDbCommand dbCmd,  string sqlFilter, params object[] filterParams)
+		{
 			return HasChildren<T>(dbCmd, null, sqlFilter, filterParams);
 		}
 		
-		public  static bool Exists<T>(this IDbCommand dbCmd, object record){
-			
+		public  static bool Exists<T>(this IDbCommand dbCmd, object record)
+		{
 			return HasChildren<T>(dbCmd, record, string.Empty);
 		}
-		
-		
-		
-		// procedures ...
-		
+					
+		// procedures ...		
 		public static List<TOutputModel> SelectFromProcedure<TOutputModel>(this IDbCommand dbCommand,
-		                                          object fromObjWithProperties
-		                                          )
+			object fromObjWithProperties)
 			where TOutputModel : new()
 		{
 			return SelectFromProcedure<TOutputModel>(dbCommand, fromObjWithProperties,string.Empty);
@@ -579,9 +575,9 @@ namespace ServiceStack.OrmLite
 		
 		
 		public static List<TOutputModel> SelectFromProcedure<TOutputModel>(this IDbCommand dbCommand,
-		                                          object fromObjWithProperties,
-		                                          string sqlFilter, 
-		                                          params object[] filterParams)
+			object fromObjWithProperties,
+			string sqlFilter, 
+			params object[] filterParams)
 			where TOutputModel : new()
 		{
 			var modelType = typeof(TOutputModel);	
@@ -589,14 +585,19 @@ namespace ServiceStack.OrmLite
 			string sql = OrmLiteConfig.DialectProvider.ToSelectFromProcedureStatement(
 				fromObjWithProperties,modelType, sqlFilter, filterParams);
 			
-			
 			using (var reader = dbCommand.ExecReader(sql ) )
 			{
 				return reader.ConvertToList<TOutputModel>();
 			}
-
 		}
 		
-			
+		public static long GetLongScalar(this IDbCommand dbCmd)
+		{
+			var result = dbCmd.ExecuteScalar();
+			if (result is DBNull) return default(long);
+			if (result is int) return (int)result;
+			if (result is decimal) return Convert.ToInt64((decimal)result);
+			return (long)result;
+		}			
 	}
 }

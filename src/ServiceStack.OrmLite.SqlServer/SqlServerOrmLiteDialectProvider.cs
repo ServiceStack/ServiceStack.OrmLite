@@ -128,15 +128,26 @@ namespace ServiceStack.OrmLite.SqlServer
 		public override long GetLastInsertId(IDbCommand dbCmd)
 		{
 			dbCmd.CommandText = "SELECT SCOPE_IDENTITY()";
-			var result = dbCmd.ExecuteScalar();
-			if (result is DBNull) return default(long);
-            if (result is decimal) return Convert.ToInt64((decimal)result);
-			return (long)result;
+			return dbCmd.GetLongScalar();
 		}
 
 		public override SqlExpressionVisitor<T> ExpressionVisitor<T>()
 		{
 			return new SqlServerExpressionVisitor<T>();
+		}
+
+		public override bool DoesTableExist(IDbCommand dbCmd, string tableName)
+		{
+			var sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = {0}"
+				.SqlFormat(tableName);
+
+			//if (!string.IsNullOrEmpty(schemaName))
+			//    sql += " AND TABLE_SCHEMA = {0}".SqlFormat(schemaName);
+
+			dbCmd.CommandText = sql;
+			var result = dbCmd.GetLongScalar();
+			
+			return result > 0;
 		}
 	}
 }

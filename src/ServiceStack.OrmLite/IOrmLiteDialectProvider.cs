@@ -69,15 +69,15 @@ namespace ServiceStack.OrmLite
 		string ToDeleteRowStatement(object objWithProperties);
 		string ToDeleteStatement(Type tableType, string sqlFilter, params object[] filterParams);
 		
-		string ToExistStatement( Type fromTableType,
+		string ToExistStatement(Type fromTableType,
 			object objWithProperties,
 			string sqlFilter,
 			params object[] filterParams);
 		
 		string ToSelectFromProcedureStatement(object fromObjWithProperties,
-		                                          Type outputModelType,       
-		                                          string sqlFilter, 
-		                                          params object[] filterParams);
+			Type outputModelType,       
+			string sqlFilter, 
+			params object[] filterParams);
 		
 		string ToExecuteProcedureStatement(object objWithProperties);
 		
@@ -85,6 +85,7 @@ namespace ServiceStack.OrmLite
 		
 		List<string> ToCreateIndexStatements(Type tableType);
 		List<string> ToCreateSequenceStatements(Type tableType);
+		bool DoesTableExist(IDbCommand dbCmd, string tableName);
 		
 		string GetColumnNames(ModelDefinition modelDef);
 				

@@ -91,5 +91,20 @@ namespace ServiceStack.OrmLite.MySql
 		{
 			return new MySqlExpressionVisitor<T>();
 		}
-    }
+
+		public override bool DoesTableExist(IDbCommand dbCmd, string tableName)
+		{
+			//Same as SQL Server apparently?
+			var sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = {0}"
+				.SqlFormat(tableName);
+
+			//if (!string.IsNullOrEmpty(schemaName))
+			//    sql += " AND TABLE_SCHEMA = {0}".SqlFormat(schemaName);
+
+			dbCmd.CommandText = sql;
+			var result = dbCmd.GetLongScalar();
+
+			return result > 0;
+		}
+	}
 }

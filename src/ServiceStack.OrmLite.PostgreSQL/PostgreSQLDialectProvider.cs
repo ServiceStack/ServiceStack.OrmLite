@@ -132,11 +132,21 @@ namespace ServiceStack.OrmLite.PostgreSQL
 				return default(long);
 			return Convert.ToInt64(result);
 		}
-
-
+		
 		public override SqlExpressionVisitor<T> ExpressionVisitor<T>()
 		{
 			return new PostgreSQLExpressionVisitor<T>();
+		}
+
+		public override bool DoesTableExist(IDbCommand dbCmd, string tableName)
+		{
+			var sql = "SELECT relname FROM pg_class WHERE relname = {0}"
+				.SqlFormat(tableName);
+
+			dbCmd.CommandText = sql;
+			var result = dbCmd.GetLongScalar();
+
+			return result > 0;
 		}
 	}
 }

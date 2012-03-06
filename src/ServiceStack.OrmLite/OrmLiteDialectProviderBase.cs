@@ -400,7 +400,6 @@ namespace ServiceStack.OrmLite
 
         public abstract long GetLastInsertId(IDbCommand command);
 		
-			
 		public virtual string ToSelectStatement( Type tableType,  string sqlFilter, params object[] filterParams){
 			
 			var sql = new StringBuilder();
@@ -580,7 +579,6 @@ namespace ServiceStack.OrmLite
 			return ToUpdateRowStatement(objWithProperties, new List<string>());
 		}
 		
-		
 		public virtual string ToUpdateRowStatement(object objWithProperties, IList<string> updateFields){
 			
 			if (updateFields==null) updateFields= new List<string>();
@@ -690,7 +688,6 @@ namespace ServiceStack.OrmLite
             return deleteSql;
         }
 		
-		
 		public virtual string ToDeleteStatement(Type tableType, string sqlFilter, params object[] filterParams)
         {
             var sql = new StringBuilder();
@@ -715,10 +712,7 @@ namespace ServiceStack.OrmLite
             return sql.ToString();
         }
 		
-		
-		
-		
-		public virtual string ToCreateTableStatement( Type tableType)
+		public virtual string ToCreateTableStatement(Type tableType)
         {
              var sbColumns = new StringBuilder();
             var sbConstraints = new StringBuilder();
@@ -787,6 +781,11 @@ namespace ServiceStack.OrmLite
 
             return sqlIndexes;
         }
+
+    	public virtual bool DoesTableExist(IDbCommand dbCmd, string tableName)
+		{
+			return false;
+		}
 
         protected virtual string GetIndexName(bool isUnique, string modelName, string fieldName)
         {

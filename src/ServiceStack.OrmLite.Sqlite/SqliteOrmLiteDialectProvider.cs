@@ -147,5 +147,16 @@ namespace ServiceStack.OrmLite.Sqlite
 		{
 			return new SqliteExpressionVisitor<T>();
 		}
+
+		public override bool DoesTableExist(IDbCommand dbCmd, string tableName)
+		{
+			var sql = "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name = {0}"
+				.SqlFormat(tableName);
+
+			dbCmd.CommandText = sql;
+			var result = dbCmd.GetLongScalar();
+
+			return result > 0;
+		}
 	}
 }

@@ -65,42 +65,52 @@ namespace ServiceStack.OrmLite
                 DropTable(dbCmd, modelDef);
             }
 
+        	var dialectProvider = OrmLiteConfig.DialectProvider;
+
             try
             {
-                ExecuteSql(dbCmd, OrmLiteConfig.DialectProvider.ToCreateTableStatement(modelType));
+				var tableName = dialectProvider.NamingStrategy.GetTableName(modelDef.ModelName);
+				var tableExists = dialectProvider.DoesTableExist(dbCmd, tableName);
+				if (!tableExists)
+				{
+					ExecuteSql(dbCmd, dialectProvider.ToCreateTableStatement(modelType));
 
-                var sqlIndexes = OrmLiteConfig.DialectProvider.ToCreateIndexStatements(modelType);
-                foreach (var sqlIndex in sqlIndexes)
-                {
-                    try
-                    {
-                        dbCmd.ExecuteSql(sqlIndex);
-                    }
-                    catch (Exception exIndex)
-                    {
-                        if (IgnoreAlreadyExistsError(exIndex))
-                        {
-                            Log.DebugFormat("Ignoring existing index '{0}': {1}", sqlIndex, exIndex.Message);
-                            continue;
-                        }
-                        throw;
-                    }
-                }
-				
-				var sequences = OrmLiteConfig.DialectProvider.ToCreateSequenceStatements(modelType);
-				foreach( var seq in sequences) {
-					
-					try{
-						dbCmd.ExecuteSql(seq);
+					var sqlIndexes = dialectProvider.ToCreateIndexStatements(modelType);
+					foreach (var sqlIndex in sqlIndexes)
+					{
+						try
+						{
+							dbCmd.ExecuteSql(sqlIndex);
+						}
+						catch (Exception exIndex)
+						{
+							if (IgnoreAlreadyExistsError(exIndex))
+							{
+								Log.DebugFormat("Ignoring existing index '{0}': {1}", sqlIndex, exIndex.Message);
+								continue;
+							}
+							throw;
+						}
 					}
-					catch (Exception ex){
-						if (IgnoreAlreadyExistsGeneratorError(ex))
-                        {
-                            Log.DebugFormat("Ignoring existing generator '{0}': {1}", seq, ex.Message);
-                            continue;
-                        }
-                        throw;
-					}
+
+					var sequences = dialectProvider.ToCreateSequenceStatements(modelType);
+					foreach (var seq in sequences)
+					{
+
+						try
+						{
+							dbCmd.ExecuteSql(seq);
+						}
+						catch (Exception ex)
+						{
+							if (IgnoreAlreadyExistsGeneratorError(ex))
+							{
+								Log.DebugFormat("Ignoring existing generator '{0}': {1}", seq, ex.Message);
+								continue;
+							}
+							throw;
+						}
+					}					
 				}
             }
             catch (Exception ex)

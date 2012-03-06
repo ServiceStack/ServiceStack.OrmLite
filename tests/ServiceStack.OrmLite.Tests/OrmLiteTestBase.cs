@@ -34,8 +34,8 @@ namespace ServiceStack.OrmLite.Tests
 			LogManager.LogFactory = new ConsoleLogFactory();
 
 			OrmLiteConfig.DialectProvider = SqliteOrmLiteDialectProvider.Instance;
-			//ConnectionString = ":memory:";
 			ConnectionString = GetFileConnectionString();
+			//ConnectionString = ":memory:";
 
 			//OrmLiteConfig.DialectProvider = SqlServerOrmLiteDialectProvider.Instance;
 			//ConnectionString = "~/App_Data/Database1.mdf".MapAbsolutePath();			

@@ -231,7 +231,33 @@ namespace MySqlExpressionsTest
 				expected=6;
 				result=dbCmd.Select(ev);	
 				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, result.Count, expected==result.Count);
-				
+
+				Console.WriteLine();
+				// Tests for predicate overloads that make use of the expression visitor
+				Console.WriteLine("First author by name (exists)");
+				author = dbCmd.First<Author>(a => a.Name == "Jorge Garzon");
+				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", "Jorge Garzon", author.Name, "Jorge Garzon" == author.Name);
+
+				try
+				{
+					Console.WriteLine("First author by name (does not exist)");
+					author = dbCmd.First<Author>(a => a.Name == "Does not exist");
+
+					Console.WriteLine("Expected exception thrown, OK? False");
+				}
+				catch
+				{
+					Console.WriteLine("Expected exception thrown, OK? True");
+				}
+
+				Console.WriteLine("First author or default (does not exist)");
+				author = dbCmd.FirstOrDefault<Author>(a => a.Name == "Does not exist");
+				Console.WriteLine("Expected:null ; OK? {0}", author == null);
+
+				Console.WriteLine("First author or default by city (multiple matches)");
+				author = dbCmd.FirstOrDefault<Author>(a => a.City == "Bogota");
+				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", "Angel Colmenares", author.Name, "Angel Colmenares" == author.Name);
+
 								
 				Console.ReadLine();
 				Console.WriteLine("Press Enter to continue");
