@@ -23,6 +23,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
 			base.ParamString = ":";
 			base.BlobColumnDefinition = "bytea";
 			base.RealColumnDefinition = "double precision";
+			base.StringLengthColumnDefinitionFormat = "text";
 			base.InitColumnTypeMap();
 			DbTypes<TimeSpan>.Set(DbType.Time, "Interval");
 			DbTypes<TimeSpan?>.Set(DbType.Time, "Interval");
