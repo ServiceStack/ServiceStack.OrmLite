@@ -42,7 +42,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
 
 			if (fieldType == typeof(string))
 			{
-				fieldDefinition = string.Format(StringLengthColumnDefinitionFormat, fieldLength.GetValueOrDefault(DefaultStringLength));
+				fieldDefinition = "TEXT";
 			}
 			else
 			{
