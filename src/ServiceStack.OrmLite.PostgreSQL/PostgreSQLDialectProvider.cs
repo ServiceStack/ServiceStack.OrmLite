@@ -140,7 +140,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
 
 		public override bool DoesTableExist(IDbCommand dbCmd, string tableName)
 		{
-			var sql = "SELECT relname FROM pg_class WHERE relname = {0}"
+			var sql = "SELECT COUNT(*) FROM pg_class WHERE relname = {0}"
 				.SqlFormat(tableName);
 
 			dbCmd.CommandText = sql;
