@@ -54,8 +54,10 @@ namespace ServiceStack.OrmLite.Tests.UseCase
 				dbCmd.Insert(new User { Id = 3, Name = "B", CreatedDate = DateTime.Now });
 
 				var rowsB = dbCmd.Select<User>("Name = {0}", "B");
+				var rowsB1 = dbCmd.Select<User>(user => user.Name == "B");
 
 				Assert.That(rowsB, Has.Count.EqualTo(2));
+				Assert.That(rowsB1, Has.Count.EqualTo(2));
 
 				var rowIds = rowsB.ConvertAll(x => x.Id);
 				Assert.That(rowIds, Is.EquivalentTo(new List<long> { 2, 3 }));

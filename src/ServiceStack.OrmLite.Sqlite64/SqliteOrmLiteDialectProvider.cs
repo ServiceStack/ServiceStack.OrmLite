@@ -130,6 +130,11 @@ namespace ServiceStack.OrmLite.Sqlite
 			return (long)result;
 		}
 
+		public override SqlExpressionVisitor<T> ExpressionVisitor<T>()
+		{
+			return new SqliteExpressionVisitor<T>();
+		}
+
 		public override bool DoesTableExist(IDbCommand dbCmd, string tableName)
 		{
 			var sql = "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name = {0}"
@@ -148,6 +153,5 @@ namespace ServiceStack.OrmLite.Sqlite
 				return ret.Replace(" BIGINT ", " INTEGER ");
 			return ret;
 		}
-
 	}
 }

@@ -18,8 +18,8 @@ namespace ServiceStack.OrmLite
 			where T : new()
 		{
 			var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();
-			string sql= ev.Where(predicate).ToSelectStatement();
-			using (var reader = dbCmd.ExecReader(sql.ToString()))
+			string sql = ev.Where(predicate).ToSelectStatement();
+			using (var reader = dbCmd.ExecReader(sql))
 			{
 				return ConvertToList<T>(reader);
 			}
@@ -29,8 +29,8 @@ namespace ServiceStack.OrmLite
 			where T : new()
 		{
 			var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();
-			string sql= expression(ev).ToSelectStatement();
-			using (var reader = dbCmd.ExecReader(sql.ToString()))
+			string sql = expression(ev).ToSelectStatement();
+			using (var reader = dbCmd.ExecReader(sql))
 			{
 				return ConvertToList<T>(reader);
 			}
@@ -40,8 +40,8 @@ namespace ServiceStack.OrmLite
 		public static List<T> Select<T>(this IDbCommand dbCmd, SqlExpressionVisitor<T> expression)
 			where T : new()
 		{
-			string sql= expression.ToSelectStatement();
-			using (var reader = dbCmd.ExecReader(sql.ToString()))
+			string sql = expression.ToSelectStatement();
+			using (var reader = dbCmd.ExecReader(sql))
 			{
 				return ConvertToList<T>(reader);
 			}
