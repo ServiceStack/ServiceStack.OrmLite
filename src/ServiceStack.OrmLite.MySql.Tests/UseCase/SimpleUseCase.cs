@@ -20,7 +20,7 @@ namespace ServiceStack.OrmLite.MySql.Tests.UseCase
 		{
 			public long Id { get; set; }
 
-			[DataAnnotations.Index]
+			[ServiceStack.DataAnnotations.Index]
 			public string Name { get; set; }
 
 			public DateTime CreatedDate { get; set; }

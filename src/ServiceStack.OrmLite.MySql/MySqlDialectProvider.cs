@@ -1,14 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Text;
 using MySql.Data.MySqlClient;
+using ServiceStack.Common.Extensions;
+using ServiceStack.OrmLite.MySql.DataAnnotations;
 
 namespace ServiceStack.OrmLite.MySql
 {
     public class MySqlDialectProvider : OrmLiteDialectProviderBase
     {
         public static MySqlDialectProvider Instance = new MySqlDialectProvider();
+
+        private string TextColumnDefinition = "TEXT";
 
         private MySqlDialectProvider()
         {
@@ -108,5 +113,55 @@ namespace ServiceStack.OrmLite.MySql
 
 			return result > 0;
 		}
+
+        public override string ToCreateTableStatement(Type tableType)
+        {
+            var sbColumns = new StringBuilder();
+            var sbConstraints = new StringBuilder();
+
+            var modelDef = GetModel(tableType);
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+                if (sbColumns.Length != 0) sbColumns.Append(", \n  ");
+
+                sbColumns.Append(GetColumnDefinition(fieldDef));
+
+                if (fieldDef.ReferencesType == null) continue;
+
+                var refModelDef = GetModel(fieldDef.ReferencesType);
+                sbConstraints.AppendFormat(
+                    ", \n\n  CONSTRAINT {0} FOREIGN KEY ({1}) REFERENCES {2} ({3})",
+                    GetQuotedName(string.Format("FK_{0}_{1}_{2}", modelDef.ModelName,
+                                                                 refModelDef.ModelName, fieldDef.FieldName)),
+                    GetQuotedColumnName(fieldDef.FieldName),
+                    GetQuotedTableName(refModelDef),
+                    GetQuotedColumnName(refModelDef.PrimaryKey.FieldName));
+            }
+            var sql = new StringBuilder(string.Format(
+                "CREATE TABLE {0} \n(\n  {1}{2} \n); \n", GetQuotedTableName(modelDef), sbColumns, sbConstraints));
+
+            return sql.ToString();
+        }
+
+        public string GetColumnDefinition(FieldDefinition fieldDefinition)
+        {
+            if (fieldDefinition.PropertyInfo.FirstAttribute<TextAttribute>() != null)
+            {
+                var sql = new StringBuilder();
+                sql.AppendFormat("{0} {1}", GetQuotedColumnName(fieldDefinition.FieldName), TextColumnDefinition);
+                sql.Append(fieldDefinition.IsNullable ? " NULL" : " NOT NULL");
+                return sql.ToString();
+            }
+
+            return base.GetColumnDefinition(
+                fieldDefinition.FieldName, 
+                fieldDefinition.FieldType,
+                fieldDefinition.IsPrimaryKey, 
+                fieldDefinition.AutoIncrement, 
+                fieldDefinition.IsNullable, 
+                fieldDefinition.FieldLength, 
+                null, 
+                fieldDefinition.DefaultValue);
+        }
 	}
 }
