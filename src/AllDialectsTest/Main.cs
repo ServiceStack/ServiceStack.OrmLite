@@ -380,6 +380,11 @@ namespace AllDialectsTest
 					                  result[0].Birthday.ToString("dd.MM.yyyy"),
 					                  expectedResult == result[0].Birthday.ToString("dd.MM.yyyy") ? "OK" : "********* FAILED *********");
 					
+					var r1 = dbCmd.FirstOrDefault(ev);
+					Console.WriteLine("FOD: Expected:{0} Selected {1} {2}",expectedResult, 
+					                  r1.Birthday.ToString("dd.MM.yyyy"),
+					                  expectedResult == r1.Birthday.ToString("dd.MM.yyyy") ? "OK" : "********* FAILED *********");
+					
 					
 					ev.Select(r=> Sql.As( Sql.Min(r.Birthday), "Birthday"));
 					result = dbCmd.Select(ev);
@@ -396,6 +401,11 @@ namespace AllDialectsTest
 					expectedResult= "Berlin";
 					Console.WriteLine("Expected:{0} Selected {1} {2}",expectedResult, 
 					                  result[0].City,
+					                  expectedResult == result[0].City ? "OK" : "********* FAILED *********");
+					
+					r1 = dbCmd.FirstOrDefault(ev);
+					Console.WriteLine("FOD: Expected:{0} Selected {1} {2}",expectedResult, 
+					                  r1.City,
 					                  expectedResult == result[0].City ? "OK" : "********* FAILED *********");
 					
 					
