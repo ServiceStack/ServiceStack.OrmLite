@@ -372,8 +372,33 @@ namespace AllDialectsTest
 					expected = 6;
 					result = dbCmd.Select(ev);
 					Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, result.Count, expected == result.Count ? "OK" : "********* FAILED *********");
-
-
+					
+					ev.Select(r=> Sql.As(Sql.Max(r.Birthday), "Birthday"));
+					result = dbCmd.Select(ev);
+					var expectedResult  = authors.Max(r=>r.Birthday).ToString("dd.MM.yyyy");
+					Console.WriteLine("Expected:{0} Selected {1} {2}",expectedResult, 
+					                  result[0].Birthday.ToString("dd.MM.yyyy"),
+					                  expectedResult == result[0].Birthday.ToString("dd.MM.yyyy") ? "OK" : "********* FAILED *********");
+					
+					
+					ev.Select(r=> Sql.As( Sql.Min(r.Birthday), "Birthday"));
+					result = dbCmd.Select(ev);
+					expectedResult  = authors.Min(r=>r.Birthday).ToString("dd.MM.yyyy");
+					Console.WriteLine("Expected:{0} Selected {1} {2}",expectedResult, 
+					                  result[0].Birthday.ToString("dd.MM.yyyy"),
+					                  expectedResult == result[0].Birthday.ToString("dd.MM.yyyy") ? "OK" : "********* FAILED *********");
+					
+					
+					ev.Select(r=>new{r.City,  MaxResult=Sql.As( Sql.Min(r.Birthday), "Birthday") })
+							.GroupBy(r=>r.City)
+							.OrderBy(r=>r.City);
+					result = dbCmd.Select(ev);
+					expectedResult= "Berlin";
+					Console.WriteLine("Expected:{0} Selected {1} {2}",expectedResult, 
+					                  result[0].City,
+					                  expectedResult == result[0].City ? "OK" : "********* FAILED *********");
+					
+					
 					// Tests for predicate overloads that make use of the expression visitor
 					Console.WriteLine("First author by name (exists)");
 					author = dbCmd.First<Author>(q => q.Name == "Jorge Garzon");
