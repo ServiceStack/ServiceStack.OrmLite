@@ -50,9 +50,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="OrmLiteTestBase.cs" />
+    <Compile Include="..\ServiceStack.OrmLite.Sqlite32Tests\OrmLiteTestBase.cs">
+      <Link>OrmLiteTestBase.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.Sqlite32Tests\UseCase\SimpleUseCase.cs">
+      <Link>UseCase\SimpleUseCase.cs</Link>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UseCase\SimpleUseCase.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Sqlite64\ServiceStack.OrmLite.Sqlite64.csproj">
