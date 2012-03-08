@@ -1,14 +1,7 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using ServiceStack.Common.Extensions;
-using ServiceStack.Common.Utils;
-using ServiceStack.Logging;
 
 namespace ServiceStack.OrmLite
 {
@@ -36,7 +29,6 @@ namespace ServiceStack.OrmLite
 			}
 		}
 		
-		
 		public static List<T> Select<T>(this IDbCommand dbCmd, SqlExpressionVisitor<T> expression)
 			where T : new()
 		{
@@ -47,20 +39,18 @@ namespace ServiceStack.OrmLite
 			}
 		}
 		
-		
 		public static T First<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
 			where T : new()
 		{
 			var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();
 			
-			return First<T>(dbCmd, ev.Where(predicate).Limit(1));
+			return First(dbCmd, ev.Where(predicate).Limit(1));
 		}
-		
 		
 		public static T First<T>(this IDbCommand dbCmd,  SqlExpressionVisitor<T> expression)
 			where T : new()
 		{
-			var result = FirstOrDefault<T>(dbCmd, expression);
+			var result = FirstOrDefault(dbCmd, expression);
 			if (Equals(result, default(T)))
 			{
 				throw new ArgumentNullException(string.Format(
@@ -69,16 +59,14 @@ namespace ServiceStack.OrmLite
 			return result;
 		}
 		
-		
 		public static T FirstOrDefault<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
 			where T : new()
 		{
 			var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();
 			
-			return FirstOrDefault<T>(dbCmd, ev.Where(predicate).Limit(1));
+			return FirstOrDefault(dbCmd, ev.Where(predicate).Limit(1));
 		}
-		
-		
+
 		public static T FirstOrDefault<T>(this IDbCommand dbCmd, SqlExpressionVisitor<T> expression)
 			where T : new()
 		{
@@ -88,7 +76,18 @@ namespace ServiceStack.OrmLite
 				return ConvertTo<T>(dbReader);
 			}
 		}
-		
+
+		/// <summary>
+		/// e.g. dbCmd.GetScalar&lt;MyClass, DateTime&gt;(myClass => Sql.Max(myClass.Timestamp));
+		/// </summary>
+		public static TKey GetScalar<T, TKey>(this IDbCommand dbCmd, Expression<Func<T, TKey>> field)
+			where TKey : new()
+		{
+			var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();
+			ev.Select(field);
+			var sql = ev.ToSelectStatement();
+			return dbCmd.GetScalar<TKey>(sql);
+		}
 		
 		private static T ConvertTo<T>(IDataReader dataReader)
             where T : new()
@@ -128,10 +127,12 @@ namespace ServiceStack.OrmLite
 		
 		private static T PopulateWithSqlReader<T>( T objWithProperties, IDataReader dataReader, FieldDefinition[] fieldDefs)
         {
-			
 			foreach (var fieldDef in fieldDefs)
 			{
 				try{
+					// NOTE: this is a nasty ineffeciency here when we're calling this for multiple rows!
+					// we should only call GetOrdinal once per column per result set
+					// and one could only wish for a -1 return instead of an IndexOutOfRangeException...
 					var index = dataReader.GetOrdinal(fieldDef.FieldName);
 					var value = dataReader.GetValue(index);
 					fieldDef.SetValue(objWithProperties, value);
