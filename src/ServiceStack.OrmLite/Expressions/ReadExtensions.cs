@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq.Expressions;
@@ -99,7 +100,17 @@ namespace ServiceStack.OrmLite
 				if (dataReader.Read())
 				{
 					var row = new T();
-					PopulateWithSqlReader(row, dataReader, fieldDefs);
+					
+					for(int i = 0; i<dataReader.FieldCount; i++){
+						
+						var fieldDef= fieldDefs.FirstOrDefault(
+							x => x.FieldName.ToUpper() ==dataReader.GetName(i).ToUpper());
+						if( fieldDef != default(FieldDefinition)){
+							var value = dataReader.GetValue(i);
+							fieldDef.SetValue(row, value);
+						}
+					}
+					
 					return row;
 				}
 				return default(T);
@@ -115,16 +126,31 @@ namespace ServiceStack.OrmLite
 			var to = new List<T>();
 			using (dataReader)
 			{
+				Dictionary<int, FieldDefinition> df=new Dictionary<int, FieldDefinition>();
 				while (dataReader.Read())
 				{
 					var row = new T();
-					PopulateWithSqlReader(row, dataReader, fieldDefs);
+
+					for(int i = 0; i<dataReader.FieldCount; i++){
+						
+						FieldDefinition fieldDef= default(FieldDefinition);
+						if (! df.TryGetValue(i, out fieldDef)){
+						 	fieldDef= fieldDefs.FirstOrDefault(
+								x => x.FieldName.ToUpper()==dataReader.GetName(i).ToUpper());
+							df[i]=fieldDef;
+						}
+											
+						if( fieldDef != default(FieldDefinition)){
+							var value = dataReader.GetValue(i);
+							fieldDef.SetValue(row, value);
+						}
+					}
 					to.Add(row);
 				}
 			}
 			return to;
 		}
-		
+		/*
 		private static T PopulateWithSqlReader<T>( T objWithProperties, IDataReader dataReader, FieldDefinition[] fieldDefs)
         {
 			foreach (var fieldDef in fieldDefs)
@@ -133,11 +159,15 @@ namespace ServiceStack.OrmLite
 					// NOTE: this is a nasty ineffeciency here when we're calling this for multiple rows!
 					// we should only call GetOrdinal once per column per result set
 					// and one could only wish for a -1 return instead of an IndexOutOfRangeException...
+					// how to get -1 ? 
+					//If the index of the named field is not found, an IndexOutOfRangeException is thrown.
+					//http://msdn.microsoft.com/en-us/library/system.data.idatarecord.getordinal(v=vs.100).aspx
+					
 					var index = dataReader.GetOrdinal(fieldDef.FieldName);
 					var value = dataReader.GetValue(index);
 					fieldDef.SetValue(objWithProperties, value);
 				}
-				catch{
+				catch(IndexOutOfRangeException){
 					// just ignore not retrived fields
 				}
 			}
@@ -145,8 +175,8 @@ namespace ServiceStack.OrmLite
 			
 			return objWithProperties;
         }
-		
-		// First FirstOrDefault  // Use LIMIT to retrive only one row !
+		*/
+		// First FirstOrDefault  // Use LIMIT to retrive only one row ! someone did it
 	}
 }
 
