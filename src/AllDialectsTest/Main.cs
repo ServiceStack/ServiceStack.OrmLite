@@ -415,6 +415,12 @@ namespace AllDialectsTest
 					                  expectedStringResult == result[0].City ? "OK" : "**************  FAILED ***************");
 					
 					
+					var expectedDecimal= authors.Max(e=>e.Earnings);
+					Decimal? r3 = dbCmd.GetScalar<Author,Decimal?>(e=> Sql.Max(e.Earnings));
+					Console.WriteLine("GetScalar : Expected:{0} Selected {1} {2}",expectedDecimal, 
+					                  r3.Value,
+					                  expectedDecimal == r3.Value ? "OK" : "**************  FAILED ***************");
+					
 					// Tests for predicate overloads that make use of the expression visitor
 					Console.WriteLine("First author by name (exists)");
 					author = dbCmd.First<Author>(q => q.Name == "Jorge Garzon");

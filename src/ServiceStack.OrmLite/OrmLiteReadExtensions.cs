@@ -437,9 +437,35 @@ namespace ServiceStack.OrmLite
 
 		public static T GetScalar<T>(this IDataReader reader)
 		{
-			while (reader.Read())
-				return TypeSerializer.DeserializeFromString<T>(reader.GetValue(0).ToString());
-
+			while (reader.Read()){
+				string val;
+				Type t = typeof(T);
+				if(t== typeof(DateTime) || t== typeof(DateTime?)){
+					return (T)(object)reader.GetDateTime(0) ;
+				}
+				else if(t== typeof(Decimal) || t== typeof(Decimal?)) {
+					return (T)(object)reader.GetDecimal(0) ;
+				}
+				else if(t== typeof(Double) || t== typeof(Double?)) {
+					return (T)(object)reader.GetDouble(0) ;
+				}
+				else if(t== typeof(float) || t== typeof(float?)) {
+					return (T)(object)reader.GetFloat(0) ;
+				}
+				else if(t== typeof(Int16) || t== typeof(Int16?)) {
+					return (T)(object)reader.GetInt16(0) ;
+				}
+				else if(t== typeof(Int32) || t== typeof(Int32?)) {
+					return (T)(object)reader.GetInt32(0) ;
+				}
+				else if(t== typeof(Int64) || t== typeof(Int64?)) {
+					return (T)(object)reader.GetInt64(0) ;
+				}
+				else{
+					val =reader.GetValue(0).ToString();
+				}
+				return TypeSerializer.DeserializeFromString<T>(val);
+			}			
 			return default(T);
 		}
 
