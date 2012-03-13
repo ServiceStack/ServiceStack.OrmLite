@@ -23,6 +23,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
 			base.ParamString = ":";
 			base.BlobColumnDefinition = "bytea";
 			base.RealColumnDefinition = "double precision";
+			base.StringLengthColumnDefinitionFormat = "text";
 			base.InitColumnTypeMap();
 			DbTypes<TimeSpan>.Set(DbType.Time, "Interval");
 			DbTypes<TimeSpan?>.Set(DbType.Time, "Interval");
@@ -39,10 +40,18 @@ namespace ServiceStack.OrmLite.PostgreSQL
 			string defaultValue)
 		{
 			string fieldDefinition = null;
-
 			if (fieldType == typeof(string))
 			{
-				fieldDefinition = string.Format(StringLengthColumnDefinitionFormat, fieldLength.GetValueOrDefault(DefaultStringLength));
+				if (fieldLength != null)
+				{
+					fieldDefinition = UseUnicode
+						? string.Format(base.StringLengthUnicodeColumnDefinitionFormat, fieldLength)
+						: string.Format(base.StringLengthNonUnicodeColumnDefinitionFormat, fieldLength);
+				}
+				else
+				{
+					fieldDefinition = StringLengthColumnDefinitionFormat;
+				}
 			}
 			else
 			{
