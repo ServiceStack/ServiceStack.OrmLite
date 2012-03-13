@@ -123,7 +123,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				n.Times(x => dbCmd.Insert(ModelWithIdAndName.Create(x)));
 
-				var count = dbCmd.GetScalar<int>("SELECT COUNT(*) FROM \"ModelWithIdAndName\"");
+				var count = dbCmd.GetScalar<long>("SELECT COUNT(*) FROM \"ModelWithIdAndName\"");
 
 				Assert.That(count, Is.EqualTo(n));
 			}
