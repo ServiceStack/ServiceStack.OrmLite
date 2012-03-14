@@ -78,7 +78,7 @@ namespace ServiceStack.OrmLite
 			if (type == typeof(double))
 				return i => reader.GetDouble(i);
 
-			if (type == typeof(decimal))
+			if (type == typeof(decimal) || type == typeof(decimal?))
 				return i => reader.GetDecimal(i);
 
 			return reader.GetValue;
@@ -438,34 +438,26 @@ namespace ServiceStack.OrmLite
 		public static T GetScalar<T>(this IDataReader reader)
 		{
 			while (reader.Read()){
-				string val;
 				Type t = typeof(T);
-				if(t== typeof(DateTime) || t== typeof(DateTime?)){
-					return (T)(object)reader.GetDateTime(0) ;
-				}
-				else if(t== typeof(Decimal) || t== typeof(Decimal?)) {
-					return (T)(object)reader.GetDecimal(0) ;
-				}
-				else if(t== typeof(Double) || t== typeof(Double?)) {
-					return (T)(object)reader.GetDouble(0) ;
-				}
-				else if(t== typeof(float) || t== typeof(float?)) {
-					return (T)(object)reader.GetFloat(0) ;
-				}
-				else if(t== typeof(Int16) || t== typeof(Int16?)) {
-					return (T)(object)reader.GetInt16(0) ;
-				}
-				else if(t== typeof(Int32) || t== typeof(Int32?)) {
-					return (T)(object)reader.GetInt32(0) ;
-				}
-				else if(t== typeof(Int64) || t== typeof(Int64?)) {
-					return (T)(object)reader.GetInt64(0) ;
-				}
-				else{
-					val =reader.GetValue(0).ToString();
-				}
-				return TypeSerializer.DeserializeFromString<T>(val);
-			}			
+
+				object oValue = reader.GetValue(0);
+				if (oValue == DBNull.Value) return default(T);
+	
+				if (t== typeof(DateTime) || t== typeof(DateTime?)) 
+					return(T)(object) DateTime.Parse(oValue.ToString(), System.Globalization.CultureInfo.CurrentCulture);	
+						
+				if (t== typeof(decimal) || t== typeof(decimal?)) 
+					return(T)(object)decimal.Parse(oValue.ToString(), System.Globalization.CultureInfo.CurrentCulture);	
+						
+				if (t== typeof(double) || t== typeof(double?)) 
+					return(T)(object)double.Parse(oValue.ToString(), System.Globalization.CultureInfo.CurrentCulture);
+						
+				if (t== typeof(float) || t== typeof(float?))
+					return(T)(object)float.Parse(oValue.ToString(), System.Globalization.CultureInfo.CurrentCulture);
+						
+				object o = OrmLiteConfig.DialectProvider.ConvertDbValue(oValue, t);
+				return o == null ? default(T) : (T)o;
+			}
 			return default(T);
 		}
 

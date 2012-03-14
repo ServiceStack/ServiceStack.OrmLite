@@ -102,6 +102,7 @@
     <Compile Include="OrmLiteSelectTests.cs" />
     <Compile Include="OrmLiteTransactionTests.cs" />
     <Compile Include="OrmLiteUpdateTests.cs" />
+    <Compile Include="OrmLiteGetScalarTests.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

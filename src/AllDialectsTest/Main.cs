@@ -140,7 +140,7 @@ namespace AllDialectsTest
 			a.Add(new Author() { Name = "James Benedict II", Birthday = DateTime.Today.AddYears(-22), Active = true, Earnings = 85.5m, Comments = "Java books", Rate = 5, City = "Berlin" });
 			a.Add(new Author() { Name = "Ethan Brown", Birthday = DateTime.Today.AddYears(-20), Active = true, Earnings = 45.0m, Comments = "CSharp books", Rate = 5, City = "Madrid" });
 			a.Add(new Author() { Name = "Xavi Garzon", Birthday = DateTime.Today.AddYears(-22), Active = true, Earnings = 75.0m, Comments = "CSharp books", Rate = 9, City = "Madrid" });
-			a.Add(new Author() { Name = "Luis garzon", Birthday = DateTime.Today.AddYears(-22), Active = true, Earnings = 85.0m, Comments = "CSharp books", Rate = 10, City = "Mexico" });
+			a.Add(new Author() { Name = "Luis garzon", Birthday = DateTime.Today.AddYears(-22), Active = true, Earnings = 85.0m, Comments = "CSharp books", Rate = 10, City = "Mexico", LastActivity= DateTime.Today });
 			return a;
 		}
 
@@ -388,7 +388,7 @@ namespace AllDialectsTest
 					
 					
 					var r2 = dbCmd.GetScalar<Author, DateTime>( e => Sql.Max(e.Birthday) );
-					Console.WriteLine("GetScalar : Expected:{0} Selected {1} {2}",expectedResult, 
+					Console.WriteLine("GetScalar DateTime: Expected:{0} Selected {1} {2}",expectedResult, 
 					                  r2,
 					                  expectedResult == r2 ? "OK" : "**************  FAILED ***************");
 					
@@ -417,9 +417,50 @@ namespace AllDialectsTest
 					
 					var expectedDecimal= authors.Max(e=>e.Earnings);
 					Decimal? r3 = dbCmd.GetScalar<Author,Decimal?>(e=> Sql.Max(e.Earnings));
-					Console.WriteLine("GetScalar : Expected:{0} Selected {1} {2}",expectedDecimal, 
+					Console.WriteLine("GetScalar decimal?: Expected:{0} Selected {1} {2}",expectedDecimal, 
 					                  r3.Value,
 					                  expectedDecimal == r3.Value ? "OK" : "**************  FAILED ***************");
+					
+					var expectedString= authors.Max(e=>e.Name);
+					string r4 = dbCmd.GetScalar<Author,String>(e=> Sql.Max(e.Name));
+					
+					Console.WriteLine("GetScalar string?: Expected:{0} Selected {1} {2}",expectedString, 
+					                  r4,
+					                  expectedString == r4 ? "OK" : "**************  FAILED ***************");
+					
+					var expectedDate= authors.Max(e=>e.LastActivity);
+					DateTime? r5 = dbCmd.GetScalar<Author,DateTime?>(e=> Sql.Max(e.LastActivity));
+					Console.WriteLine("GetScalar datetime?: Expected:{0} Selected {1} {2}",
+					                  expectedDate, 
+					                  r5,
+					                  expectedDate == r5 ? "OK" : "**************  FAILED ***************");
+					
+					
+					var expectedDate51= authors.Where(e=> e.City=="Bogota").Max(e=>e.LastActivity);
+					DateTime? r51 = dbCmd.GetScalar<Author,DateTime?>(
+						e=>  Sql.Max(e.LastActivity),
+					 	e=>  e.City=="Bogota" );
+					
+					Console.WriteLine("GetScalar datetime?: Expected:{0} Selected {1} {2}",
+					                  expectedDate51, 
+					                  r51,
+					                  expectedDate51 == r51 ? "OK" : "**************  FAILED ***************");
+					
+					try{
+						var expectedBool= authors.Max(e=>e.Active);
+						bool r6 = dbCmd.GetScalar<Author,bool>(e=> Sql.Max(e.Active));
+						Console.WriteLine("GetScalar bool: Expected:{0} Selected {1} {2}",expectedBool, 
+					                  r6,
+					                  expectedBool == r6 ? "OK" : "**************  FAILED ***************");
+					}
+					catch(Exception e){
+						if(dialect.Name=="PostgreSQL")
+							Console.WriteLine("OK PostgreSQL: " + e.Message);
+						else
+							Console.WriteLine("**************  FAILED *************** " + e.Message);
+					}
+					
+					
 					
 					// Tests for predicate overloads that make use of the expression visitor
 					Console.WriteLine("First author by name (exists)");

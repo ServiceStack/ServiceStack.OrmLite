@@ -82,13 +82,29 @@ namespace ServiceStack.OrmLite
 		/// e.g. dbCmd.GetScalar&lt;MyClass, DateTime&gt;(myClass => Sql.Max(myClass.Timestamp));
 		/// </summary>
 		public static TKey GetScalar<T, TKey>(this IDbCommand dbCmd, Expression<Func<T, TKey>> field)
-			where TKey : new()
+			where T : new()
 		{
 			var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();
 			ev.Select(field);
 			var sql = ev.ToSelectStatement();
 			return dbCmd.GetScalar<TKey>(sql);
 		}
+		
+		/// <summary>
+		/// dbCmd.GetScalar&lt;MyClass, DateTime&gt;(MyClass=>Sql.Max(myClass.Timestamp),
+		/// 	MyClass=> MyClass.SomeProp== someValue);
+		/// </summary>
+		public static TKey GetScalar<T,TKey>(this IDbCommand dbCmd,Expression<Func<T, TKey>> field,
+		                                     Expression<Func<T, bool>> predicate)
+			where T : new()
+		{
+			var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();
+			ev.Select(field).Where(predicate);
+			string sql = ev.ToSelectStatement();
+			return dbCmd.GetScalar<TKey>(sql);
+		}
+		
+		
 		
 		private static T ConvertTo<T>(IDataReader dataReader)
             where T : new()

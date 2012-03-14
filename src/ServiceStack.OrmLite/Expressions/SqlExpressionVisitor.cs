@@ -684,7 +684,7 @@ namespace ServiceStack.OrmLite
 			case "ToString":
 				return r.ToString();
 			default:
-				Console.WriteLine("******* Returning '{0}' for '{1}' *******", r, m.Method.Name);
+				//Console.WriteLine("******* Returning '{0}' for '{1}' *******", r, m.Method.Name);
 				
 				StringBuilder s2 = new StringBuilder();
 				foreach(Object e in args ){

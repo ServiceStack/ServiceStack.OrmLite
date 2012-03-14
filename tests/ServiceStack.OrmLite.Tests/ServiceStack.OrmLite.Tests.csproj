@@ -126,6 +126,7 @@
     <Compile Include="UseCase\CustomerOrdersUseCase.cs" />
     <Compile Include="UseCase\SchemaUseCase.cs" />
     <Compile Include="UseCase\SimpleUseCase.cs" />
+    <Compile Include="OrmLiteGetScalarTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\..\lib\sqlite3.dll">
