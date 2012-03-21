@@ -90,7 +90,9 @@ namespace ServiceStack.OrmLite
 		string GetColumnNames(ModelDefinition modelDef);
 				
 		SqlExpressionVisitor<T> ExpressionVisitor<T>();
-		
+
+		DbType GetColumnDbType(Type valueType);
+		string GetColumnTypeDefinition(Type fieldType);
 	}
 	
 }

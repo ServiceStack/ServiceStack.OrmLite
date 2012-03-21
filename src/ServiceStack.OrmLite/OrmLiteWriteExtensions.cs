@@ -60,17 +60,18 @@ namespace ServiceStack.OrmLite
         public static void CreateTable(this IDbCommand dbCmd, bool overwrite, Type modelType)
         {
             var modelDef = modelType.GetModelDefinition();
-            if (overwrite)
+
+			var dialectProvider = OrmLiteConfig.DialectProvider;
+			var tableName = dialectProvider.NamingStrategy.GetTableName(modelDef.ModelName);
+			var tableExists = dialectProvider.DoesTableExist(dbCmd, tableName);
+			if (overwrite && tableExists)
             {
                 DropTable(dbCmd, modelDef);
+            	tableExists = false;
             }
-
-        	var dialectProvider = OrmLiteConfig.DialectProvider;
 
             try
             {
-				var tableName = dialectProvider.NamingStrategy.GetTableName(modelDef.ModelName);
-				var tableExists = dialectProvider.DoesTableExist(dbCmd, tableName);
 				if (!tableExists)
 				{
 					ExecuteSql(dbCmd, dialectProvider.ToCreateTableStatement(modelType));
@@ -136,8 +137,7 @@ namespace ServiceStack.OrmLite
             {
                 dbCmd.ExecuteSql(string.Format("DROP TABLE {0};", OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef)));
             }
-            catch (Exception )
-
+            catch (Exception)
             {
                 //Log.DebugFormat("Cannot drop non-existing table '{0}': {1}", modelDef.ModelName, ex.Message);
             }

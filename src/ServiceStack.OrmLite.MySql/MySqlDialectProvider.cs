@@ -9,13 +9,13 @@ using ServiceStack.OrmLite.MySql.DataAnnotations;
 
 namespace ServiceStack.OrmLite.MySql
 {
-    public class MySqlDialectProvider : OrmLiteDialectProviderBase
+    public class MySqlDialectProvider : OrmLiteDialectProviderBase<MySqlDialectProvider>
     {
         public static MySqlDialectProvider Instance = new MySqlDialectProvider();
 
-        private string TextColumnDefinition = "TEXT";
+    	private const string TextColumnDefinition = "TEXT";
 
-        private MySqlDialectProvider()
+    	private MySqlDialectProvider()
         {
             base.AutoIncrementDefinition = "AUTO_INCREMENT";
             base.IntColumnDefinition = "int(11)";

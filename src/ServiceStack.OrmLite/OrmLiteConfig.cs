@@ -17,6 +17,8 @@ namespace ServiceStack.OrmLite
 {
 	public static class OrmLiteConfig
 	{
+		public const string IdField = "Id";
+
 		private static IOrmLiteDialectProvider dialectProvider;
 		public static IOrmLiteDialectProvider DialectProvider
 		{

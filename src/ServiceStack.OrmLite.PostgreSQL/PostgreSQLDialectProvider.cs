@@ -6,10 +6,9 @@ using Npgsql;
 
 namespace ServiceStack.OrmLite.PostgreSQL
 {
-	public class PostgreSQLDialectProvider : OrmLiteDialectProviderBase
+	public class PostgreSQLDialectProvider : OrmLiteDialectProviderBase<PostgreSQLDialectProvider>
 	{
 		public static PostgreSQLDialectProvider Instance = new PostgreSQLDialectProvider();
-
 
 		private PostgreSQLDialectProvider()
 		{
@@ -25,8 +24,8 @@ namespace ServiceStack.OrmLite.PostgreSQL
 			base.RealColumnDefinition = "double precision";
 			base.StringLengthColumnDefinitionFormat = "text";
 			base.InitColumnTypeMap();
-			DbTypes<TimeSpan>.Set(DbType.Time, "Interval");
-			DbTypes<TimeSpan?>.Set(DbType.Time, "Interval");
+			DbTypes<PostgreSQLDialectProvider, TimeSpan>.Set(DbType.Time, "Interval");
+			DbTypes<PostgreSQLDialectProvider, TimeSpan?>.Set(DbType.Time, "Interval");
 		}
 
 		public override string GetColumnDefinition(
@@ -61,11 +60,10 @@ namespace ServiceStack.OrmLite.PostgreSQL
 						fieldDefinition = "bigserial";
 					else if (fieldType == typeof(int))
 						fieldDefinition = "serial";
-
 				}
-				else if (!DbTypes.ColumnTypeMap.TryGetValue(fieldType, out fieldDefinition))
+				else
 				{
-					fieldDefinition = GetUndefinedColumnDefinition(fieldType,null);
+					fieldDefinition = GetColumnTypeDefinition(fieldType);
 				}
 			}
 

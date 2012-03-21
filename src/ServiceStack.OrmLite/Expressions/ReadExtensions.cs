@@ -115,16 +115,15 @@ namespace ServiceStack.OrmLite
 			{
 				if (dataReader.Read())
 				{
-					var row = new T();
-					
-					for(int i = 0; i<dataReader.FieldCount; i++){
-						
-						var fieldDef= fieldDefs.FirstOrDefault(
+					var row = new T();					
+					for (int i = 0; i<dataReader.FieldCount; i++)
+					{						
+						var fieldDef = fieldDefs.FirstOrDefault(
 							x => x.FieldName.ToUpper() ==dataReader.GetName(i).ToUpper());
-						if( fieldDef != default(FieldDefinition)){
-							var value = dataReader.GetValue(i);
-							fieldDef.SetValue(row, value);
-						}
+
+						if (fieldDef == null) continue;
+						var value = dataReader.GetValue(i);
+						fieldDef.SetValue(row, value);
 					}
 					
 					return row;
@@ -138,34 +137,36 @@ namespace ServiceStack.OrmLite
 			where T : new()
 		{
             var fieldDefs = ModelDefinition<T>.Definition.FieldDefinitionsArray;
+			var fieldDefCache = new Dictionary<int, FieldDefinition>();
 
 			var to = new List<T>();
 			using (dataReader)
 			{
-				Dictionary<int, FieldDefinition> df=new Dictionary<int, FieldDefinition>();
 				while (dataReader.Read())
 				{
 					var row = new T();
 
-					for(int i = 0; i<dataReader.FieldCount; i++){
-						
-						FieldDefinition fieldDef= default(FieldDefinition);
-						if (! df.TryGetValue(i, out fieldDef)){
-						 	fieldDef= fieldDefs.FirstOrDefault(
-								x => x.FieldName.ToUpper()==dataReader.GetName(i).ToUpper());
-							df[i]=fieldDef;
+					for (int i = 0; i<dataReader.FieldCount; i++)
+					{
+						FieldDefinition fieldDef;
+						if (!fieldDefCache.TryGetValue(i, out fieldDef))
+						{
+						 	fieldDef = fieldDefs.FirstOrDefault(
+								x => x.FieldName.ToUpper() == dataReader.GetName(i).ToUpper());
+							fieldDefCache[i] = fieldDef;
 						}
-											
-						if( fieldDef != default(FieldDefinition)){
-							var value = dataReader.GetValue(i);
-							fieldDef.SetValue(row, value);
-						}
+
+						if (fieldDef == null) continue;
+
+						var value = dataReader.GetValue(i);
+						fieldDef.SetValue(row, value);
 					}
 					to.Add(row);
 				}
 			}
 			return to;
 		}
+
 		/*
 		private static T PopulateWithSqlReader<T>( T objWithProperties, IDataReader dataReader, FieldDefinition[] fieldDefs)
         {
@@ -193,6 +194,7 @@ namespace ServiceStack.OrmLite
         }
 		*/
 		// First FirstOrDefault  // Use LIMIT to retrive only one row ! someone did it
+
 	}
 }
 

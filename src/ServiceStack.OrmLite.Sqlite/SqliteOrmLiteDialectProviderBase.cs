@@ -8,9 +8,9 @@ using ServiceStack.Text.Common;
 
 namespace ServiceStack.OrmLite.Sqlite
 {
-	public abstract class SqliteOrmLiteDialectProviderBase: OrmLiteDialectProviderBase
+	public abstract class SqliteOrmLiteDialectProviderBase : OrmLiteDialectProviderBase<SqliteOrmLiteDialectProviderBase>
 	{
-		public SqliteOrmLiteDialectProviderBase()
+		protected SqliteOrmLiteDialectProviderBase()
 		{
 			base.DateTimeColumnDefinition = base.StringColumnDefinition;
 			base.BoolColumnDefinition = base.IntColumnDefinition;

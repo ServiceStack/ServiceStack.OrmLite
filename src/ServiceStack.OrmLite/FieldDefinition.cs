@@ -47,10 +47,6 @@ namespace ServiceStack.OrmLite
 
 		public Type ReferencesType { get; set; }
 
-        public ConvertDbValueDelegate ConvertValueFn { get; set; }
-
-        public GetQuotedValueDelegate QuoteValueFn { get; set; }
-
         public PropertyGetterDelegate GetValueFn { get; set; }
         
         public PropertySetterDelegate SetValueFn { get; set; }
@@ -64,14 +60,14 @@ namespace ServiceStack.OrmLite
         {
             if (this.SetValueFn == null) return;
 
-            var convertedValue = ConvertValueFn(withValue, this.FieldType);
+			var convertedValue = OrmLiteConfig.DialectProvider.ConvertDbValue(withValue, this.FieldType);
             SetValueFn(onInstance, convertedValue);
         }
 
 		public string GetQuotedValue(object fromInstance)
 		{
             var value = GetValue(fromInstance);
-			return QuoteValueFn(value, FieldType);
+			return OrmLiteConfig.DialectProvider.GetQuotedValue(value, FieldType);
 		}
 		
 		public string Sequence{

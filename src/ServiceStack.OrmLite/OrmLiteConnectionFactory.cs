@@ -38,6 +38,7 @@ namespace ServiceStack.OrmLite
 			{
 				OrmLiteConfig.DialectProvider = dialectProvider;
 			}
+
 			this.ConnectionFilter = x => x;
 		}
 

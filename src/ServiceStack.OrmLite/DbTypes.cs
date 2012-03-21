@@ -4,14 +4,16 @@ using System.Data;
 
 namespace ServiceStack.OrmLite
 {
-    public static class DbTypes
-    {
-        public static Dictionary<Type, string> ColumnTypeMap = new Dictionary<Type, string>();
-        public static Dictionary<Type, DbType> ColumnDbTypeMap = new Dictionary<Type, DbType>();
-    }
+	public static class DbTypes<TDialect>
+		where TDialect : IOrmLiteDialectProvider
+	{
+		public static Dictionary<Type, string> ColumnTypeMap = new Dictionary<Type, string>();
+		public static Dictionary<Type, DbType> ColumnDbTypeMap = new Dictionary<Type, DbType>();
+	}
 
-    public static class DbTypes<T>
-    {
+	public static class DbTypes<TDialect, T>
+		where TDialect : IOrmLiteDialectProvider
+	{
         public static DbType DbType;
         public static string TextDefinition;
         public static bool ShouldQuoteValue;
@@ -26,8 +28,8 @@ namespace ServiceStack.OrmLite
                 && fieldDefinition != "DECIMAL"
                 && fieldDefinition != "BOOL";
 
-            DbTypes.ColumnTypeMap[typeof(T)] = fieldDefinition;
-            DbTypes.ColumnDbTypeMap[typeof(T)] = dbType;
+			DbTypes<TDialect>.ColumnTypeMap[typeof(T)] = fieldDefinition;
+			DbTypes<TDialect>.ColumnDbTypeMap[typeof(T)] = dbType;
         }
     }
 }

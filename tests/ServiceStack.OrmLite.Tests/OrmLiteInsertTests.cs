@@ -1,7 +1,10 @@
 using System;
+using System.Collections.Generic;
 using Northwind.Common.DataModel;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
+using ServiceStack.DataAnnotations;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -183,6 +186,65 @@ namespace ServiceStack.OrmLite.Tests
 			}
 		}
 
-	}
+		public class UserAuth
+		{
+			public UserAuth()
+			{
+				this.Roles = new List<string>();
+				this.Permissions = new List<string>();
+			}
 
+			[AutoIncrement]
+			public virtual int Id { get; set; }
+			public virtual string UserName { get; set; }
+			public virtual string Email { get; set; }
+			public virtual string PrimaryEmail { get; set; }
+			public virtual string FirstName { get; set; }
+			public virtual string LastName { get; set; }
+			public virtual string DisplayName { get; set; }
+			public virtual string Salt { get; set; }
+			public virtual string PasswordHash { get; set; }
+			public virtual List<string> Roles { get; set; }
+			public virtual List<string> Permissions { get; set; }
+			public virtual DateTime CreatedDate { get; set; }
+			public virtual DateTime ModifiedDate { get; set; }
+			public virtual Dictionary<string, string> Meta { get; set; }
+		}
+
+		[Test]
+		public void Can_insert_table_with_UserAuth()
+		{
+			using (var db = ConnectionString.OpenDbConnection())
+			using (var dbCmd = db.CreateCommand())
+			{
+				dbCmd.CreateTable<UserAuth>(true);
+
+				//var userAuth = new UserAuth {
+				//    Id = 1,
+				//    UserName = "UserName",
+				//    Email = "a@b.com",
+				//    PrimaryEmail = "c@d.com",
+				//    FirstName = "FirstName",
+				//    LastName = "LastName",
+				//    DisplayName = "DisplayName",
+				//    Salt = "Salt",
+				//    PasswordHash = "PasswordHash",
+				//    CreatedDate = DateTime.Now,
+				//    ModifiedDate = DateTime.UtcNow,
+				//};
+
+				var jsv = "{Id:0,UserName:UserName,Email:as@if.com,PrimaryEmail:as@if.com,FirstName:FirstName,LastName:LastName,DisplayName:DisplayName,Salt:WMQi/g==,PasswordHash:oGdE40yKOprIgbXQzEMSYZe3vRCRlKGuqX2i045vx50=,Roles:[],Permissions:[],CreatedDate:2012-03-20T07:53:48.8720739Z,ModifiedDate:2012-03-20T07:53:48.8720739Z}";
+				var userAuth = jsv.To<UserAuth>();
+
+				dbCmd.Insert(userAuth);
+
+				var rows = dbCmd.Select<UserAuth>(q => q.UserName == "UserName");
+
+				Console.WriteLine(rows[0].Dump());
+
+				Assert.That(rows[0].UserName, Is.EqualTo(userAuth.UserName));
+			}
+		}
+
+	}
 }

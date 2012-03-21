@@ -6,8 +6,7 @@ using System.IO;
 
 namespace ServiceStack.OrmLite.SqlServer
 {
-	public class SqlServerOrmLiteDialectProvider 
-		: OrmLiteDialectProviderBase
+	public class SqlServerOrmLiteDialectProvider : OrmLiteDialectProviderBase<SqlServerOrmLiteDialectProvider>
 	{
 		public static SqlServerOrmLiteDialectProvider Instance = new SqlServerOrmLiteDialectProvider();
 

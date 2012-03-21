@@ -84,8 +84,6 @@ namespace ServiceStack.OrmLite
 			return reader.GetValue;
 		}
 
-
-		
 		public static List<T> Select<T>(this IDbCommand dbCmd)
 			where T : new()
 		{
@@ -197,7 +195,7 @@ namespace ServiceStack.OrmLite
 			dbCmd.Parameters.Clear();
 			var p = dbCmd.CreateParameter();
 			p.ParameterName = name;
-			p.DbType = DbTypes.ColumnDbTypeMap[value.GetType()];
+			p.DbType = OrmLiteConfig.DialectProvider.GetColumnDbType(value.GetType());
 			p.Direction = ParameterDirection.Input;
 			dbCmd.Parameters.Add(p);
 			dbCmd.CommandText = GetFilterSql(dbCmd, ModelDefinition<T>.Definition);
@@ -225,7 +223,7 @@ namespace ServiceStack.OrmLite
 
 				var p = dbCmd.CreateParameter();
 				p.ParameterName = pi.Name;
-				p.DbType = DbTypes.ColumnDbTypeMap[pi.PropertyType];
+				p.DbType = OrmLiteConfig.DialectProvider.GetColumnDbType(pi.PropertyType); ;
 				p.Direction = ParameterDirection.Input;
 				p.Value = value;
 				dbCmd.Parameters.Add(p);
@@ -563,13 +561,11 @@ namespace ServiceStack.OrmLite
 		
 		private static bool HasChildren<T>(this IDbCommand dbCmd, object record, string sqlFilter, params object[] filterParams)
 		{
-			
-			Type fromTableType = typeof(T);
-			
-			string sql = OrmLiteConfig.DialectProvider.ToExistStatement(fromTableType, record,sqlFilter, filterParams);
+			var fromTableType = typeof(T);			
+			var sql = OrmLiteConfig.DialectProvider.ToExistStatement(fromTableType, record,sqlFilter, filterParams);
 			dbCmd.CommandText = sql;
-			object result =  dbCmd.ExecuteScalar();
-			return result==null? false: true ;
+			var result =  dbCmd.ExecuteScalar();
+			return result != null;
 		}
 		
 		

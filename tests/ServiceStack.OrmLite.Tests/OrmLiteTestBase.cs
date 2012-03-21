@@ -13,6 +13,11 @@ namespace ServiceStack.OrmLite.Tests
 	{
 		protected virtual string ConnectionString { get; set; }
 
+		protected string GetConnectionString()
+		{
+			return GetFileConnectionString();
+		}
+
 		protected string GetFileConnectionString()
 		{
 			var connectionString = "~/App_Data/db.sqlite".MapAbsolutePath();

@@ -11,17 +11,15 @@ using ServiceStack.Common.Extensions;
 
 namespace ServiceStack.OrmLite.Firebird
 {
-	public class FirebirdOrmLiteDialectProvider:OrmLiteDialectProviderBase
+	public class FirebirdOrmLiteDialectProvider : OrmLiteDialectProviderBase<FirebirdOrmLiteDialectProvider>
 	{
-		private readonly List<string> RESERVED = new List<string>( new string[] 
-		{"USER","ORDER","PASSWORD", "ACTIVE","LEFT","DOUBLE", "FLOAT", "DECIMAL","STRING", "DATE","DATETIME",
-		 "TYPE"} );
+		private readonly List<string> RESERVED = new List<string>(new[] {
+			"USER","ORDER","PASSWORD", "ACTIVE","LEFT","DOUBLE", "FLOAT", "DECIMAL","STRING", "DATE","DATETIME", "TYPE"
+		});
 		
 		public static FirebirdOrmLiteDialectProvider Instance = new FirebirdOrmLiteDialectProvider();
 		
-		internal  long LastInsertId{
-			get; set;
-		}
+		internal long LastInsertId { get; set; }
 		
 		public FirebirdOrmLiteDialectProvider()
 		{
@@ -33,9 +31,7 @@ namespace ServiceStack.OrmLite.Firebird
 			base.RealColumnDefinition= "FLOAT";
 			base.DefaultStringLength=128;
 			base.InitColumnTypeMap();
-			
 		}
-
 		
 		public override IDbConnection CreateConnection(string connectionString, Dictionary<string, string> options)
 		{
@@ -118,7 +114,7 @@ namespace ServiceStack.OrmLite.Firebird
 		{
 			var sql = new StringBuilder();
 			const string SelectStatement = "SELECT ";
-			var modelDef= OrmLiteDialectProviderBase.GetModel(tableType);
+			var modelDef = GetModel(tableType);
 			var isFullSelectStatement = 
 				!string.IsNullOrEmpty(sqlFilter)
 				&& sqlFilter.Length > SelectStatement.Length
@@ -142,14 +138,13 @@ namespace ServiceStack.OrmLite.Firebird
 			return sql.ToString();
 		}
 		
-		
 		public override string ToInsertRowStatement(object objWithProperties, IList<string> insertFields, IDbCommand dbCommand)
 		{
 			var sbColumnNames = new StringBuilder();
 			var sbColumnValues = new StringBuilder();
 
 			var tableType = objWithProperties.GetType();
-			var modelDef= OrmLiteDialectProviderBase.GetModel(tableType);
+			var modelDef= GetModel(tableType);
 			
 			foreach (var fieldDef in modelDef.FieldDefinitions)
 			{
@@ -157,30 +152,32 @@ namespace ServiceStack.OrmLite.Firebird
 				if( fieldDef.IsComputed ) continue;
 				if( insertFields.Count>0 && ! insertFields.Contains( fieldDef.Name )) continue;
 				
-				if( (fieldDef.AutoIncrement || ! string.IsNullOrEmpty(fieldDef.Sequence) 
-					|| fieldDef.Name== OrmLiteDialectProviderBase.IdField ) 
-					&& dbCommand!=null ) {
+				if( (fieldDef.AutoIncrement || ! string.IsNullOrEmpty(fieldDef.Sequence)
+					|| fieldDef.Name == OrmLiteConfig.IdField) 
+					&& dbCommand != null) 
+				{
 	
-					if( fieldDef.AutoIncrement &&  string.IsNullOrEmpty(fieldDef.Sequence) ){
-						fieldDef.Sequence= Sequence( modelDef.IsInSchema?
-						                            modelDef.Schema+"_"+NamingStrategy.GetTableName(modelDef.ModelName):
-						                            NamingStrategy.GetTableName(modelDef.ModelName),
+					if (fieldDef.AutoIncrement &&  string.IsNullOrEmpty(fieldDef.Sequence))
+					{
+						fieldDef.Sequence = Sequence(
+							(modelDef.IsInSchema
+								? modelDef.Schema+"_"+NamingStrategy.GetTableName(modelDef.ModelName)
+								: NamingStrategy.GetTableName(modelDef.ModelName)), 
 							fieldDef.FieldName, fieldDef.Sequence);
 					}
 				
 					PropertyInfo pi = ReflectionUtils.GetPropertyInfo(tableType, fieldDef.Name);
 					
 					var result = GetNextValue(dbCommand, fieldDef.Sequence, pi.GetValue(objWithProperties,  new object[] { }) );
-					if( pi.PropertyType== typeof(String))
+					if (pi.PropertyType == typeof(String))
 						ReflectionUtils.SetProperty(objWithProperties, pi,  result.ToString());	
-					else if(pi.PropertyType== typeof(Int16))
+					else if(pi.PropertyType == typeof(Int16))
 						ReflectionUtils.SetProperty(objWithProperties, pi, Convert.ToInt16(result));	
-					else if(pi.PropertyType== typeof(Int32))
+					else if(pi.PropertyType == typeof(Int32))
 						ReflectionUtils.SetProperty(objWithProperties, pi, Convert.ToInt32(result));	
 					else
-						ReflectionUtils.SetProperty(objWithProperties, pi, Convert.ToInt64( result));			
+						ReflectionUtils.SetProperty(objWithProperties, pi, Convert.ToInt64(result));
 				}
-				
 				
 				if (sbColumnNames.Length > 0) sbColumnNames.Append(",");
 				if (sbColumnValues.Length > 0) sbColumnValues.Append(",");
@@ -188,12 +185,12 @@ namespace ServiceStack.OrmLite.Firebird
 				try
 				{
 					sbColumnNames.Append(string.Format("{0}",GetQuotedColumnName(fieldDef.FieldName)));
-					if( ! string.IsNullOrEmpty( fieldDef.Sequence )  &&  dbCommand==null )
+					if (!string.IsNullOrEmpty(fieldDef.Sequence) && dbCommand==null)
 						sbColumnValues.Append(string.Format("@{0}",fieldDef.Name));
 					else
 						sbColumnValues.Append(fieldDef.GetQuotedValue(objWithProperties));
 				}
-				catch (Exception )
+				catch (Exception)
 				{
 					throw;
 				}
@@ -211,7 +208,7 @@ namespace ServiceStack.OrmLite.Firebird
 			var sqlFilter = new StringBuilder();
 			var sql = new StringBuilder();
 			var tableType = objWithProperties.GetType();
-			var modelDef= OrmLiteDialectProviderBase.GetModel(tableType);
+			var modelDef = GetModel(tableType);
 									
 			foreach (var fieldDef in modelDef.FieldDefinitions)
 			{
@@ -219,24 +216,24 @@ namespace ServiceStack.OrmLite.Firebird
 				
 				try
 				{
-					if ( (fieldDef.IsPrimaryKey || fieldDef.Name== OrmLiteDialectProviderBase.IdField) &&
-					     updateFields.Count==0)
+					if ((fieldDef.IsPrimaryKey || fieldDef.Name == OrmLiteConfig.IdField) 
+						&& updateFields.Count == 0)
 					{
 						if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
 
 						sqlFilter.AppendFormat("{0} = {1}", 
-						                       GetQuotedColumnName(fieldDef.FieldName),
-						                       fieldDef.GetQuotedValue(objWithProperties));
+							GetQuotedColumnName(fieldDef.FieldName),
+							fieldDef.GetQuotedValue(objWithProperties));
 							
 						continue;
 					}
-					if( updateFields.Count>0 && !updateFields.Contains( fieldDef.Name )) continue;
+					if (updateFields.Count>0 && !updateFields.Contains(fieldDef.Name)) continue;
 					if (sql.Length > 0) sql.Append(",");
 					sql.AppendFormat("{0} = {1}", 
-					                 GetQuotedColumnName(fieldDef.FieldName), 
-					                 fieldDef.GetQuotedValue(objWithProperties));
+						GetQuotedColumnName(fieldDef.FieldName), 
+						fieldDef.GetQuotedValue(objWithProperties));
 				}
-				catch (Exception )
+				catch (Exception)
 				{
 					throw;
 				}
@@ -249,10 +246,10 @@ namespace ServiceStack.OrmLite.Firebird
 		}
 				
 		
-		public override string ToDeleteRowStatement( object objWithProperties)
+		public override string ToDeleteRowStatement(object objWithProperties)
 		{
 			var tableType = objWithProperties.GetType();
-			var modelDef= OrmLiteDialectProviderBase.GetModel(tableType);
+			var modelDef = GetModel(tableType);
 			
 			var sqlFilter = new StringBuilder();
 			
@@ -260,16 +257,15 @@ namespace ServiceStack.OrmLite.Firebird
 			{
 				try
 				{
-					if(fieldDef.IsPrimaryKey || fieldDef.Name==OrmLiteDialectProviderBase.IdField)
+					if (fieldDef.IsPrimaryKey || fieldDef.Name == OrmLiteConfig.IdField)
 					{
 						if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
-
 						sqlFilter.AppendFormat("{0} = {1}", 
-						                       GetQuotedColumnName(fieldDef.FieldName), 
-						                       fieldDef.GetQuotedValue(objWithProperties));
+							GetQuotedColumnName(fieldDef.FieldName), 
+							fieldDef.GetQuotedValue(objWithProperties));
 					}
 				}
-				catch (Exception )
+				catch (Exception)
 				{
 					throw;
 				}
@@ -281,20 +277,20 @@ namespace ServiceStack.OrmLite.Firebird
 			return deleteSql;
 		}
 		
-		
-		public override string ToCreateTableStatement( Type tableType){
+		public override string ToCreateTableStatement(Type tableType)
+		{
 			var sbColumns = new StringBuilder();
             var sbConstraints = new StringBuilder();
 			var sbPk= new StringBuilder();			
 						
-            var modelDef = OrmLiteDialectProviderBase.GetModel( tableType);
+            var modelDef = GetModel(tableType);
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
-				if(fieldDef.IsPrimaryKey) {
-					if( sbPk.Length !=0) sbPk.AppendFormat(",{0}",GetQuotedColumnName(fieldDef.FieldName));
-					else sbPk.AppendFormat("{0}",GetQuotedColumnName(fieldDef.FieldName));
+				if (fieldDef.IsPrimaryKey) 
+				{
+					sbPk.AppendFormat(sbPk.Length != 0 ? ",{0}" : "{0}", GetQuotedColumnName(fieldDef.FieldName));
 				}
-								
+			
                 if (sbColumns.Length != 0) sbColumns.Append(", \n  ");
 
                 var columnDefinition = GetColumnDefinition(
@@ -311,24 +307,24 @@ namespace ServiceStack.OrmLite.Firebird
 
                 if (fieldDef.ReferencesType == null) continue;
 
-                var refModelDef = OrmLiteDialectProviderBase.GetModel( fieldDef.ReferencesType);
+                var refModelDef = GetModel(fieldDef.ReferencesType);
 				
-				var modelName= modelDef.IsInSchema? 
-					modelDef.Schema+"_"+ NamingStrategy.GetTableName(modelDef.ModelName):
-					NamingStrategy.GetTableName(modelDef.ModelName);
+				var modelName= modelDef.IsInSchema
+					? modelDef.Schema + "_" + NamingStrategy.GetTableName(modelDef.ModelName)
+					: NamingStrategy.GetTableName(modelDef.ModelName);
 				
-				var refModelName= refModelDef.IsInSchema?
-					refModelDef.Schema+"_"+ NamingStrategy.GetTableName(refModelDef.ModelName):
-					NamingStrategy.GetTableName(refModelDef.ModelName) ;
+				var refModelName= refModelDef.IsInSchema
+					? refModelDef.Schema + "_" + NamingStrategy.GetTableName(refModelDef.ModelName)
+					: NamingStrategy.GetTableName(refModelDef.ModelName);
 				
                 sbConstraints.AppendFormat(", \n\n  CONSTRAINT {0} FOREIGN KEY ({1}) REFERENCES {2} ({3})",
-                    GetQuotedName(string.Format("FK_{0}_{1}_{2}",modelName, refModelName, fieldDef.FieldName) ),
+                    GetQuotedName(string.Format("FK_{0}_{1}_{2}", modelName, refModelName, fieldDef.FieldName)),
 					GetQuotedColumnName(fieldDef.FieldName), 
 					GetQuotedTableName(refModelDef), 
 					GetQuotedColumnName(refModelDef.PrimaryKey.FieldName));
             }
 			
-			if( sbPk.Length !=0) sbColumns.AppendFormat(", \n  PRIMARY KEY({0})", sbPk.ToString());
+			if (sbPk.Length !=0) sbColumns.AppendFormat(", \n  PRIMARY KEY({0})", sbPk);
 			
             var sql = new StringBuilder(string.Format(
                 "CREATE TABLE {0} \n(\n  {1}{2} \n); \n",
@@ -341,19 +337,17 @@ namespace ServiceStack.OrmLite.Firebird
 		}
 		
 		public override List<string> ToCreateSequenceStatements(Type tableType){
-			List<string> gens = new  List<string>();
-			
-			var modelDef = OrmLiteDialectProviderBase.GetModel( tableType);
+			var gens = new  List<string>();			
+			var modelDef = GetModel(tableType);
 			
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
-				if(fieldDef.AutoIncrement || ! fieldDef.Sequence.IsNullOrEmpty()){
-			
-				 	 gens.Add("CREATE GENERATOR " +
-					         Sequence( (modelDef.IsInSchema?
-					           modelDef.Schema+"_" + NamingStrategy.GetTableName(modelDef.ModelName):
-					           NamingStrategy.GetTableName(modelDef.ModelName)), fieldDef.FieldName, fieldDef.Sequence) +";" );
-					
+				if (fieldDef.AutoIncrement || ! fieldDef.Sequence.IsNullOrEmpty())
+				{
+				 	 gens.Add("CREATE GENERATOR " 
+						 + Sequence( (modelDef.IsInSchema
+							? modelDef.Schema+"_" + NamingStrategy.GetTableName(modelDef.ModelName)
+							: NamingStrategy.GetTableName(modelDef.ModelName)), fieldDef.FieldName, fieldDef.Sequence) +";" );					
 				}
 			}
 			return gens;
@@ -375,22 +369,18 @@ namespace ServiceStack.OrmLite.Firebird
 					fieldLength.GetValueOrDefault(DefaultDecimalPrecision),
 					scale.GetValueOrDefault(DefaultDecimalScale) );
 			}
-            else {
-                if (!DbTypes.ColumnTypeMap.TryGetValue(fieldType, out fieldDefinition))
-                {
-                    fieldDefinition = GetUndefinedColumnDefinition(fieldType,null);
-                }
-            }
+            else 
+			{
+				fieldDefinition = GetColumnTypeDefinition(fieldType);
+			}
 
             var sql = new StringBuilder();
             sql.AppendFormat("{0} {1}", GetQuotedColumnName(fieldName), fieldDefinition);
-
-            
-            if ( ! isNullable)
+			
+            if (!isNullable)
             {
                 sql.Append(" NOT NULL");
             }
-            
 
             if (!string.IsNullOrEmpty(defaultValue))
             {
@@ -405,13 +395,16 @@ namespace ServiceStack.OrmLite.Firebird
         {
             var sqlIndexes = new List<string>();
 
-            var modelDef = OrmLiteDialectProviderBase.GetModel(tableType);
+            var modelDef = GetModel(tableType);
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
                 if (!fieldDef.IsIndexed) continue;
 
-                var indexName = GetIndexName(fieldDef.IsUnique,
-					( modelDef.IsInSchema ? modelDef.Schema +"_"+ modelDef.ModelName: modelDef.ModelName ).SafeVarName(), 
+                var indexName = GetIndexName(
+					fieldDef.IsUnique,
+					(modelDef.IsInSchema 
+						? modelDef.Schema + "_" + modelDef.ModelName
+						: modelDef.ModelName).SafeVarName(), 
 					fieldDef.FieldName);
 
                 sqlIndexes.Add(
@@ -451,10 +444,9 @@ namespace ServiceStack.OrmLite.Firebird
 			params object[] filterParams)
 		{
 			
-			var fromModelDef= OrmLiteDialectProviderBase.GetModel(fromTableType);
+			var fromModelDef = GetModel(fromTableType);
 			var sql = new StringBuilder();
-			sql.AppendFormat("SELECT 1 \nFROM {0}", 
-			                 GetQuotedTableName(fromModelDef));
+			sql.AppendFormat("SELECT 1 \nFROM {0}", GetQuotedTableName(fromModelDef));
 			
 			var filter = new StringBuilder();
 			
@@ -463,58 +455,59 @@ namespace ServiceStack.OrmLite.Firebird
 				
 				if(fromTableType!=tableType){
 					int i=0;
-					List<FieldDefinition> fpk= new List<FieldDefinition>();					
-					var modelDef = OrmLiteDialectProviderBase.GetModel(tableType);
+					var fpk= new List<FieldDefinition>();					
+					var modelDef = GetModel(tableType);
 					
-					foreach(var def in modelDef.FieldDefinitions){
-						if( def.IsPrimaryKey) fpk.Add(def);
+					foreach (var def in modelDef.FieldDefinitions)
+					{
+						if (def.IsPrimaryKey) fpk.Add(def);
 					}
 					
 					foreach (var fieldDef in fromModelDef.FieldDefinitions)
 					{
-						if( fieldDef.IsComputed) continue;
-						try{
-						
-							if ( fieldDef.ReferencesType !=null 
-							    && OrmLiteDialectProviderBase.GetModel( fieldDef.ReferencesType).ModelName == modelDef.ModelName ){
+						if (fieldDef.IsComputed) continue;
+						try
+						{
+							if (fieldDef.ReferencesType !=null
+								&& GetModel(fieldDef.ReferencesType).ModelName == modelDef.ModelName)
+							{
 								if (filter.Length > 0) filter.Append(" AND ");
 								filter.AppendFormat("{0} = {1}", GetQuotedColumnName(fieldDef.FieldName),
-								                    fpk[i].GetQuotedValue(objWithProperties));	
+									fpk[i].GetQuotedValue(objWithProperties));	
 								i++;
-								continue;
 							}
-						}
-	
-						catch (Exception ){
+						}	
+						catch (Exception)
+						{
 							throw;
 						}
 					}	
 					
 				}
-				else{
-					var modelDef = OrmLiteDialectProviderBase.GetModel(tableType);
+				else
+				{
+					var modelDef = GetModel(tableType);
 					foreach (var fieldDef in modelDef.FieldDefinitions)
 					{
-						if( fieldDef.IsComputed) continue;
-						try{
-						
-							if ( fieldDef.IsPrimaryKey ){
+						if (fieldDef.IsComputed) continue;
+						try
+						{
+							if (fieldDef.IsPrimaryKey)
+							{
 								if (filter.Length > 0) filter.Append(" AND ");
 								filter.AppendFormat("{0} = {1}",
-								                    GetQuotedColumnName(fieldDef.FieldName),
-								                    fieldDef.GetQuotedValue(objWithProperties));	
-								continue;
+									GetQuotedColumnName(fieldDef.FieldName),
+									fieldDef.GetQuotedValue(objWithProperties));
 							}
 						}
-	
-						catch (Exception ){
+						catch (Exception)
+						{
 							throw;
 						}
 					}
 				}
-				
-								
-				if( filter.Length>0) sql.AppendFormat("\nWHERE {0} ", filter.ToString());
+												
+				if (filter.Length>0) sql.AppendFormat("\nWHERE {0} ", filter);
 			}	
 			
 			if (!string.IsNullOrEmpty(sqlFilter))
@@ -528,25 +521,23 @@ namespace ServiceStack.OrmLite.Firebird
 				sql.Append(sqlFilter);
 			}
 			 		
-			StringBuilder s = new StringBuilder("select 1  from RDB$DATABASE where");
-			s.AppendFormat(" exists ({0})", sql.ToString() );
-			return s.ToString();
+			var sb = new StringBuilder("select 1  from RDB$DATABASE where");
+			sb.AppendFormat(" exists ({0})", sql.ToString() );
+			return sb.ToString();
 		}
 		
-	
-		
-		public override string ToSelectFromProcedureStatement(object fromObjWithProperties,
-		                                          Type outputModelType,       
-		                                          string sqlFilter, 
-		                                          params object[] filterParams)
-		
+		public override string ToSelectFromProcedureStatement(
+			object fromObjWithProperties,
+			Type outputModelType,       
+			string sqlFilter, 
+			params object[] filterParams)		
 		{
 						
 			var sbColumnValues = new StringBuilder();
 			
 			Type fromTableType = fromObjWithProperties.GetType();
 			
-			var modelDef = OrmLiteDialectProviderBase.GetModel(fromTableType);
+			var modelDef = GetModel(fromTableType);
 			
 			foreach (var fieldDef in modelDef.FieldDefinitions)
 			{	
@@ -556,81 +547,77 @@ namespace ServiceStack.OrmLite.Firebird
 				{
 					sbColumnValues.Append( fieldDef.GetQuotedValue(fromObjWithProperties) );	
 				}
-				catch (Exception )
+				catch (Exception)
 				{	
 					throw;
 				}
 			}
-				
 			
-			StringBuilder sql = new StringBuilder();
-			sql.AppendFormat("SELECT {0} \nFROM  {1} {2}{3}{4}  \n", 
-							GetColumnNames( OrmLiteDialectProviderBase.GetModel(outputModelType) ),
-			                GetQuotedTableName(modelDef),
-			                sbColumnValues.Length>0?"(":"",
-			                sbColumnValues.ToString(),
-			                sbColumnValues.Length>0?")":"");
+			var sql = new StringBuilder();
+			sql.AppendFormat("SELECT {0} \nFROM  {1} {2}{3}{4}  \n",
+				GetColumnNames(GetModel(outputModelType)),
+				GetQuotedTableName(modelDef),
+				sbColumnValues.Length > 0 ? "(" : "",
+				sbColumnValues,
+				sbColumnValues.Length > 0 ? ")" : "");
 			
-			
-			if(!string.IsNullOrEmpty(sqlFilter)){
+			if (!string.IsNullOrEmpty(sqlFilter))
+			{
 				sqlFilter = sqlFilter.SqlFormat(filterParams);
 				if (!sqlFilter.StartsWith("\nORDER ", StringComparison.InvariantCultureIgnoreCase)
-						&& !sqlFilter.StartsWith("\nROWS ", StringComparison.InvariantCultureIgnoreCase)) // ROWS <m> [TO <n>]
+					&& !sqlFilter.StartsWith("\nROWS ", StringComparison.InvariantCultureIgnoreCase)) // ROWS <m> [TO <n>]
 				{
 					sql.Append("\nWHERE ");
 				}
 				sql.Append(sqlFilter);
 			}
 			
-			return sql.ToString();
-			
+			return sql.ToString();		
 		}
 		
-		
-		
-		public override string ToExecuteProcedureStatement(object objWithProperties){
-			
+		public override string ToExecuteProcedureStatement(object objWithProperties)
+		{
 			var sbColumnValues = new StringBuilder();
 			
 			var tableType = objWithProperties.GetType();
-			var modelDef = OrmLiteDialectProviderBase.GetModel(tableType);
+			var modelDef = GetModel(tableType);
 			
 			foreach (var fieldDef in modelDef.FieldDefinitions)
 			{
 				if (sbColumnValues.Length > 0) sbColumnValues.Append(",");
 				try
 				{
-					sbColumnValues.Append( fieldDef.GetQuotedValue(objWithProperties) );
-					
+					sbColumnValues.Append(fieldDef.GetQuotedValue(objWithProperties));
 				}
-				catch (Exception )
+				catch (Exception)
 				{
 					throw;
 				}
 			}
 			
 			var sql = string.Format("EXECUTE PROCEDURE {0} {1}{2}{3};",
-									GetQuotedTableName(modelDef),  
-			                        sbColumnValues.Length>0?"(":"",
-			                        sbColumnValues,
-			                        sbColumnValues.Length>0?")":"");
+				GetQuotedTableName(modelDef),  
+				sbColumnValues.Length > 0 ? "(" : "",
+				sbColumnValues,
+				sbColumnValues.Length > 0 ? ")" : "");
 			
 			return sql;
 		}
-
 		
-		
-		private  object GetNextValue( IDbCommand dbCmd, string sequence, object value) 
+		private object GetNextValue(IDbCommand dbCmd, string sequence, object value) 
 		{
 			Object retObj;
 			
-			if (value.ToString() != "0"){
+			if (value.ToString() != "0")
+			{
 				long nv;
-				if (long.TryParse(value.ToString(), out nv) ){
+				if (long.TryParse(value.ToString(), out nv))
+				{
 					LastInsertId=nv;
 					retObj= LastInsertId;
 				}
-				else{
+				else
+				{
 					LastInsertId=0;
 					retObj =value;
 				}
@@ -640,38 +627,35 @@ namespace ServiceStack.OrmLite.Firebird
 			
 			dbCmd.CommandText = string.Format("select next value for {0} from RDB$DATABASE",Quote(sequence));
 			long result = (long) dbCmd.ExecuteScalar();
-			LastInsertId=  result;
-			return  result;	
-			
+			LastInsertId = result;
+			return  result;				
 		}
 		
-		public bool QuoteNames{
-			get; set;
+		public bool QuoteNames { get; set; }
+		
+		private string Quote(string name)
+		{
+			return QuoteNames
+				? string.Format("\"{0}\"",name)
+				: RESERVED.Contains(name.ToUpper())
+					? string.Format("\"{0}\"", name)
+					: name;			
 		}
 		
-		private string Quote(string name){
-			
-			return QuoteNames? 
-				string.Format("\"{0}\"",name):
-				RESERVED.Contains( name.ToUpper() )? string.Format("\"{0}\"",name): name;
-			
-		}
-		
-		public override string GetColumnNames(ModelDefinition modelDef){
-			if(QuoteNames) return modelDef.GetColumnNames();
-			else{
-				var sqlColumns = new StringBuilder();
-            	modelDef.FieldDefinitions.ForEach(x => 
-                	sqlColumns.AppendFormat("{0} {1}", sqlColumns.Length > 0 ? "," : "",
-				                        GetQuotedColumnName(x.FieldName) ));
+		public override string GetColumnNames(ModelDefinition modelDef)
+		{
+			if (QuoteNames) return modelDef.GetColumnNames();
+			var sqlColumns = new StringBuilder();
+			modelDef.FieldDefinitions.ForEach(x => 
+				sqlColumns.AppendFormat("{0} {1}", 
+				sqlColumns.Length > 0 ? "," : "",
+				GetQuotedColumnName(x.FieldName)));
 
-	        	return sqlColumns.ToString();
-			}
-				
+			return sqlColumns.ToString();
 		}
-		
 
-		public override string GetQuotedName(string fieldName){
+		public override string GetQuotedName(string fieldName)
+		{
 			return Quote(fieldName);
 		}
 		
@@ -681,18 +665,19 @@ namespace ServiceStack.OrmLite.Firebird
                 return Quote(NamingStrategy.GetTableName(modelDef.ModelName));
 
             return Quote(string.Format("{0}_{1}", modelDef.Schema,
-			                           NamingStrategy.GetTableName(modelDef.ModelName)));
+				NamingStrategy.GetTableName(modelDef.ModelName)));
         }
        	
-		public override string GetQuotedColumnName(string fieldName){
+		public override string GetQuotedColumnName(string fieldName)
+		{
 			return Quote(NamingStrategy.GetColumnName(fieldName));
 		}
 		
-		private string Sequence(string modelName,string fieldName, string sequence){
-			
-			return sequence.IsNullOrEmpty() ?
-				Quote( modelName+"_"+ fieldName+"_GEN"):
-				Quote(sequence);	
+		private string Sequence(string modelName,string fieldName, string sequence)
+		{
+			return sequence.IsNullOrEmpty() 
+				? Quote(modelName + "_" + fieldName + "_GEN")
+				: Quote(sequence);	
 		}
 		
 		public override SqlExpressionVisitor<T> ExpressionVisitor<T> ()
@@ -702,8 +687,9 @@ namespace ServiceStack.OrmLite.Firebird
 		
 		public override bool DoesTableExist(IDbCommand dbCmd, string tableName)
 		{
-			if(!QuoteNames){
-				tableName= tableName.ToUpper();
+			if (!QuoteNames)
+			{
+				tableName = tableName.ToUpper();
 			}
 			
 			var sql = "SELECT count(*) FROM rdb$relations " +
@@ -715,15 +701,12 @@ namespace ServiceStack.OrmLite.Firebird
 
 			return result > 0;
 		}
-		
-		
-		
-		
+
 	}
 }
 
 /*
- DEBUG: Ignoring existing generator 'CREATE GENERATOR ModelWFDT_Id_GEN;': unsuccessful metadata update
+DEBUG: Ignoring existing generator 'CREATE GENERATOR ModelWFDT_Id_GEN;': unsuccessful metadata update
 DEFINE GENERATOR failed
 attempt to store duplicate value (visible to active transactions) in unique index "RDB$INDEX_11" 
 */

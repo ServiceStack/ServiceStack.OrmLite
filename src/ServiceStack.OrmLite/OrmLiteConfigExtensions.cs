@@ -23,14 +23,12 @@ namespace ServiceStack.OrmLite
 {
 	internal static class OrmLiteConfigExtensions
 	{
-		public const string IdField = "Id";
-
 		private static Dictionary<Type, ModelDefinition> typeModelDefinitionMap = new Dictionary<Type, ModelDefinition>();
 
 		private static bool IsNullableType(Type theType)
 		{
 			return (theType.IsGenericType
-					&& theType.GetGenericTypeDefinition().Equals(typeof(Nullable<>)));
+				&& theType.GetGenericTypeDefinition() == typeof(Nullable<>));
 		}
 
 		internal static bool CheckForIdField(IEnumerable<PropertyInfo> objProperties)
@@ -38,7 +36,7 @@ namespace ServiceStack.OrmLite
 			// Not using Linq.Where() and manually iterating through objProperties just to avoid dependencies on System.Xml??
 			foreach (var objProperty in objProperties)
 			{
-				if (objProperty.Name != IdField) continue;
+				if (objProperty.Name != OrmLiteConfig.IdField) continue;
 				return true;
 			}
 			return false;
@@ -85,7 +83,7 @@ namespace ServiceStack.OrmLite
 				var decimalAttribute = propertyInfo.FirstAttribute<DecimalLengthAttribute>();
                 var isFirst = i++ == 0;
 
-                var isPrimaryKey = propertyInfo.Name == IdField || (!hasIdField && isFirst)
+                var isPrimaryKey = propertyInfo.Name == OrmLiteConfig.IdField || (!hasIdField && isFirst)
 					|| pkAttribute != null;
 
                 var isNullableType = IsNullableType(propertyInfo.PropertyType);
@@ -127,8 +125,6 @@ namespace ServiceStack.OrmLite
                     FieldLength = stringLengthAttr != null ? stringLengthAttr.MaximumLength : (int?)null,
                     DefaultValue = defaultValueAttr != null ? defaultValueAttr.DefaultValue : null,
                     ReferencesType = referencesAttr != null ? referencesAttr.Type : null,
-                    ConvertValueFn = OrmLiteConfig.DialectProvider.ConvertDbValue,
-                    QuoteValueFn = OrmLiteConfig.DialectProvider.GetQuotedValue,
                     GetValueFn = propertyInfo.GetPropertyGetterFn(),
                     SetValueFn = propertyInfo.GetPropertySetterFn(),
 					Sequence= sequenceAttr!=null?sequenceAttr.Name:string.Empty,

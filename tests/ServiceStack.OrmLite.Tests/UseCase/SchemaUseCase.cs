@@ -27,7 +27,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
         [Test]
         public void Can_Create_Tables_With_Schema_In_Sqlite()
         {
-            OrmLiteConfig.DialectProvider = new SqliteOrmLiteDialectProvider();
+            OrmLiteConfig.DialectProvider = SqliteOrmLiteDialectProvider.Instance;
 
             using (IDbConnection db = ":memory:".OpenDbConnection())
             using (IDbCommand dbCmd = db.CreateCommand())
@@ -86,7 +86,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
                 CreateSchemaIfNotExists(dbCmd);
                 dbCmd.CreateTable<User>(true);
 
-                dbCmd.Insert(new User { Id = 1, Name = "A", CreatedDate = DateTime.Now });
+				dbCmd.Insert(new User { Id = 1, Name = "A", CreatedDate = DateTime.Now });
                 dbCmd.Insert(new User { Id = 2, Name = "B", CreatedDate = DateTime.Now });
                 dbCmd.Insert(new User { Id = 3, Name = "B", CreatedDate = DateTime.Now });
 

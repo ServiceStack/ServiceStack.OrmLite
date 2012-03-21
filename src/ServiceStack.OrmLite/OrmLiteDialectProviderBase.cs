@@ -22,9 +22,10 @@ using ServiceStack.Common.Extensions;
 namespace ServiceStack.OrmLite
 {
  
-    public abstract class OrmLiteDialectProviderBase
+    public abstract class OrmLiteDialectProviderBase<TDialect>
         : IOrmLiteDialectProvider
-    {
+		where TDialect : IOrmLiteDialectProvider
+	{
 		private static readonly ILog Log = LogManager.GetLogger(typeof(IOrmLiteDialectProvider));
 
         [Conditional("DEBUG")]
@@ -35,7 +36,6 @@ namespace ServiceStack.OrmLite
             else
                 Log.Debug(fmt);
         }
-		
 		
         #region ADO.NET supported types
         /* ADO.NET UNDERSTOOD DATA TYPES:
@@ -88,7 +88,7 @@ namespace ServiceStack.OrmLite
 		 */
         #endregion
 
-        private static ILog log = LogManager.GetLogger(typeof(OrmLiteDialectProviderBase));
+        private static ILog log = LogManager.GetLogger(typeof(OrmLiteDialectProviderBase<>));
 
         public string StringLengthNonUnicodeColumnDefinitionFormat = "VARCHAR({0})";
         public string StringLengthUnicodeColumnDefinitionFormat = "NVARCHAR({0})";
@@ -110,24 +110,23 @@ namespace ServiceStack.OrmLite
 
         protected OrmLiteDialectProviderBase()
         {
-            InitColumnTypeMap();
-            UpdateStringColumnDefinitions();
+			UpdateStringColumnDefinitions();
         }
-				
 		
 		private int defaultDecimalPrecision=18;
 		private int defaultDecimalScale=12;
 				
-		public int DefaultDecimalPrecision{
-			get { return defaultDecimalPrecision;}
-			set { defaultDecimalPrecision=value;}
+		public int DefaultDecimalPrecision
+		{
+			get { return defaultDecimalPrecision; }
+			set { defaultDecimalPrecision = value; }
 		}
 				
-		public int DefaultDecimalScale{
-			get { return defaultDecimalScale;}
-			set { defaultDecimalScale=value;}
+		public int DefaultDecimalScale
+		{
+			get { return defaultDecimalScale; }
+			set { defaultDecimalScale = value; }
 		}
-		
 		
         private int defaultStringLength = 8000; //SqlServer express limit
         public int DefaultStringLength
@@ -187,50 +186,50 @@ namespace ServiceStack.OrmLite
                 this.StringLengthColumnDefinitionFormat, DefaultStringLength);
         }
 
-        protected void InitColumnTypeMap()
+		protected void InitColumnTypeMap()
         {
-            DbTypes<string>.Set(DbType.String, StringColumnDefinition);
-			DbTypes<char>.Set(DbType.StringFixedLength, StringColumnDefinition);
-			DbTypes<char?>.Set(DbType.StringFixedLength, StringColumnDefinition);
-            DbTypes<char[]>.Set(DbType.String, StringColumnDefinition);
-			DbTypes<bool>.Set(DbType.Boolean, BoolColumnDefinition);
-			DbTypes<bool?>.Set(DbType.Boolean, BoolColumnDefinition);
-			DbTypes<Guid>.Set(DbType.Guid, GuidColumnDefinition);
-			DbTypes<Guid?>.Set(DbType.Guid, GuidColumnDefinition);
-			DbTypes<DateTime>.Set(DbType.DateTime, DateTimeColumnDefinition);
-			DbTypes<DateTime?>.Set(DbType.DateTime, DateTimeColumnDefinition);
-			DbTypes<TimeSpan>.Set(DbType.Time, TimeColumnDefinition);
-			DbTypes<TimeSpan?>.Set(DbType.Time, TimeColumnDefinition);
-			DbTypes<DateTimeOffset>.Set(DbType.Time, TimeColumnDefinition);
-			DbTypes<DateTimeOffset?>.Set(DbType.Time, TimeColumnDefinition);
+			DbTypes<TDialect, string>.Set(DbType.String, StringColumnDefinition);
+			DbTypes<TDialect, char>.Set(DbType.StringFixedLength, StringColumnDefinition);
+			DbTypes<TDialect, char?>.Set(DbType.StringFixedLength, StringColumnDefinition);
+			DbTypes<TDialect, char[]>.Set(DbType.String, StringColumnDefinition);
+			DbTypes<TDialect, bool>.Set(DbType.Boolean, BoolColumnDefinition);
+			DbTypes<TDialect, bool?>.Set(DbType.Boolean, BoolColumnDefinition);
+			DbTypes<TDialect, Guid>.Set(DbType.Guid, GuidColumnDefinition);
+			DbTypes<TDialect, Guid?>.Set(DbType.Guid, GuidColumnDefinition);
+			DbTypes<TDialect, DateTime>.Set(DbType.DateTime, DateTimeColumnDefinition);
+			DbTypes<TDialect, DateTime?>.Set(DbType.DateTime, DateTimeColumnDefinition);
+			DbTypes<TDialect, TimeSpan>.Set(DbType.Time, TimeColumnDefinition);
+			DbTypes<TDialect, TimeSpan?>.Set(DbType.Time, TimeColumnDefinition);
+			DbTypes<TDialect, DateTimeOffset>.Set(DbType.Time, TimeColumnDefinition);
+			DbTypes<TDialect, DateTimeOffset?>.Set(DbType.Time, TimeColumnDefinition);
 
-			DbTypes<byte>.Set(DbType.Byte, IntColumnDefinition);
-			DbTypes<byte?>.Set(DbType.Byte, IntColumnDefinition);
-			DbTypes<sbyte>.Set(DbType.SByte, IntColumnDefinition);
-			DbTypes<sbyte?>.Set(DbType.SByte, IntColumnDefinition);
-			DbTypes<short>.Set(DbType.Int16, IntColumnDefinition);
-			DbTypes<short?>.Set(DbType.Int16, IntColumnDefinition);
-			DbTypes<ushort>.Set(DbType.UInt16, IntColumnDefinition);
-			DbTypes<ushort?>.Set(DbType.UInt16, IntColumnDefinition);
-			DbTypes<int>.Set(DbType.Int32, IntColumnDefinition);
-			DbTypes<int?>.Set(DbType.Int32, IntColumnDefinition);
-			DbTypes<uint>.Set(DbType.UInt32, IntColumnDefinition);
-			DbTypes<uint?>.Set(DbType.UInt32, IntColumnDefinition);
+			DbTypes<TDialect, byte>.Set(DbType.Byte, IntColumnDefinition);
+			DbTypes<TDialect, byte?>.Set(DbType.Byte, IntColumnDefinition);
+			DbTypes<TDialect, sbyte>.Set(DbType.SByte, IntColumnDefinition);
+			DbTypes<TDialect, sbyte?>.Set(DbType.SByte, IntColumnDefinition);
+			DbTypes<TDialect, short>.Set(DbType.Int16, IntColumnDefinition);
+			DbTypes<TDialect, short?>.Set(DbType.Int16, IntColumnDefinition);
+			DbTypes<TDialect, ushort>.Set(DbType.UInt16, IntColumnDefinition);
+			DbTypes<TDialect, ushort?>.Set(DbType.UInt16, IntColumnDefinition);
+			DbTypes<TDialect, int>.Set(DbType.Int32, IntColumnDefinition);
+			DbTypes<TDialect, int?>.Set(DbType.Int32, IntColumnDefinition);
+			DbTypes<TDialect, uint>.Set(DbType.UInt32, IntColumnDefinition);
+			DbTypes<TDialect, uint?>.Set(DbType.UInt32, IntColumnDefinition);
 
-			DbTypes<long>.Set(DbType.Int64, LongColumnDefinition);
-			DbTypes<long?>.Set(DbType.Int64, LongColumnDefinition);
-			DbTypes<ulong>.Set(DbType.UInt64, LongColumnDefinition);
-			DbTypes<ulong?>.Set(DbType.UInt64, LongColumnDefinition);
+			DbTypes<TDialect, long>.Set(DbType.Int64, LongColumnDefinition);
+			DbTypes<TDialect, long?>.Set(DbType.Int64, LongColumnDefinition);
+			DbTypes<TDialect, ulong>.Set(DbType.UInt64, LongColumnDefinition);
+			DbTypes<TDialect, ulong?>.Set(DbType.UInt64, LongColumnDefinition);
 
-			DbTypes<float>.Set(DbType.Single, RealColumnDefinition);
-			DbTypes<float?>.Set(DbType.Single, RealColumnDefinition);
-			DbTypes<double>.Set(DbType.Double, RealColumnDefinition);
-			DbTypes<double?>.Set(DbType.Double, RealColumnDefinition);
+			DbTypes<TDialect, float>.Set(DbType.Single, RealColumnDefinition);
+			DbTypes<TDialect, float?>.Set(DbType.Single, RealColumnDefinition);
+			DbTypes<TDialect, double>.Set(DbType.Double, RealColumnDefinition);
+			DbTypes<TDialect, double?>.Set(DbType.Double, RealColumnDefinition);
 
-			DbTypes<decimal>.Set(DbType.Decimal, DecimalColumnDefinition);
-			DbTypes<decimal?>.Set(DbType.Decimal, DecimalColumnDefinition);
+			DbTypes<TDialect, decimal>.Set(DbType.Decimal, DecimalColumnDefinition);
+			DbTypes<TDialect, decimal?>.Set(DbType.Decimal, DecimalColumnDefinition);
 
-            DbTypes<byte[]>.Set(DbType.Binary, BlobColumnDefinition);
+			DbTypes<TDialect, byte[]>.Set(DbType.Binary, BlobColumnDefinition);
         }
 
         public string DefaultValueFormat = " DEFAULT ({0})";
@@ -238,7 +237,7 @@ namespace ServiceStack.OrmLite
         public virtual bool ShouldQuoteValue(Type fieldType)
         {
             string fieldDefinition;
-            if (!DbTypes.ColumnTypeMap.TryGetValue(fieldType, out fieldDefinition))
+            if (!DbTypes<TDialect>.ColumnTypeMap.TryGetValue(fieldType, out fieldDefinition))
             {
                 fieldDefinition = this.GetUndefinedColumnDefinition(fieldType, null);
             }
@@ -361,7 +360,7 @@ namespace ServiceStack.OrmLite
             }
             else
             {
-                if (!DbTypes.ColumnTypeMap.TryGetValue(fieldType, out fieldDefinition))
+                if (!DbTypes<TDialect>.ColumnTypeMap.TryGetValue(fieldType, out fieldDefinition))
                 {
                     fieldDefinition = this.GetUndefinedColumnDefinition(fieldType, fieldLength);
                 }
@@ -545,11 +544,12 @@ namespace ServiceStack.OrmLite
             var p = command.CreateParameter();
             p.ParameterName = String.Format("{0}{1}", ParamString, fieldDef.FieldName);
             
-            if (DbTypes.ColumnDbTypeMap.ContainsKey(fieldDef.FieldType))
+            if (DbTypes<TDialect>.ColumnDbTypeMap.ContainsKey(fieldDef.FieldType))
             {
-                p.DbType = DbTypes.ColumnDbTypeMap[fieldDef.FieldType];
+				p.DbType = DbTypes<TDialect>.ColumnDbTypeMap[fieldDef.FieldType];
                 p.Value = GetValueOrDbNull(fieldDef, objWithProperties);
-            } else
+            } 
+			else
             {
                 var unquotedVal = fieldDef.GetQuotedValue(objWithProperties)
                                           .TrimStart('\'')
@@ -782,6 +782,18 @@ namespace ServiceStack.OrmLite
             return sqlIndexes;
         }
 
+		public virtual DbType GetColumnDbType(Type valueType)
+		{
+			return DbTypes<TDialect>.ColumnDbTypeMap[valueType];
+		}
+
+		public virtual string GetColumnTypeDefinition(Type fieldType)
+		{
+			string fieldDefinition;
+			DbTypes<TDialect>.ColumnTypeMap.TryGetValue(fieldType, out fieldDefinition);
+			return fieldDefinition ?? GetUndefinedColumnDefinition(fieldType, null);
+		}
+
     	public virtual bool DoesTableExist(IDbCommand dbCmd, string tableName)
 		{
 			return false;
@@ -800,47 +812,48 @@ namespace ServiceStack.OrmLite
                                  (isCombined) ? fieldName : GetQuotedColumnName(fieldName));
         }
 		
-		public virtual string GetColumnNames(ModelDefinition modelDef){
+		public virtual string GetColumnNames(ModelDefinition modelDef)
+		{
 			return modelDef.GetColumnNames();
 		}
 		
-		
-		public virtual List<string> ToCreateSequenceStatements(Type tableType){
+		public virtual List<string> ToCreateSequenceStatements(Type tableType)
+		{
 			return new List<string>();
 		}
 		
 		// TODO : make abstract  ??
-		public virtual string ToExistStatement( Type fromTableType,
+		public virtual string ToExistStatement(Type fromTableType,
 			object objWithProperties,
 			string sqlFilter,
-			params object[] filterParams){
+			params object[] filterParams)
+		{
 			throw new NotImplementedException();
 		}
 		
 		// TODO : make abstract  ??
-		public virtual string ToSelectFromProcedureStatement(object fromObjWithProperties,
-		                                          Type outputModelType,       
-		                                          string sqlFilter, 
-		                                          params object[] filterParams){
+		public virtual string ToSelectFromProcedureStatement(
+			object fromObjWithProperties,
+			Type outputModelType,
+			string sqlFilter,
+			params object[] filterParams)
+		{
 			throw new NotImplementedException();
 		}
 		
 		// TODO : make abstract  ??
-		public virtual string ToExecuteProcedureStatement(object objWithProperties){
+		public virtual string ToExecuteProcedureStatement(object objWithProperties)
+		{
 			throw new NotImplementedException();
 		}
 		
-		protected static ModelDefinition GetModel( Type modelType){
+		protected static ModelDefinition GetModel(Type modelType)
+		{
 			return modelType.GetModelDefinition();
-		}	
-		
-		
-		public static string IdField{
-			get {return  OrmLiteConfigExtensions.IdField ;}
 		}
-	
 		
-		public virtual SqlExpressionVisitor<T> ExpressionVisitor<T>(){
+		public virtual SqlExpressionVisitor<T> ExpressionVisitor<T>()
+		{
 			throw new NotImplementedException();
 		}
 		

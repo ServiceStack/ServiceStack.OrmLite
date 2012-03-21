@@ -26,7 +26,7 @@ namespace ServiceStack.OrmLite.Firebird.DbSchema
 
 			SpaceName = "Database.Records";
 			MetadataClassName="Me";
-			IdField=OrmLiteDialectProviderBase.IdField;
+			IdField = OrmLiteConfig.IdField;
 		}
 
 		public bool GenerateMetadata{get;set;}
@@ -176,8 +176,6 @@ namespace ServiceStack.OrmLite.Firebird.DbSchema
 		{
 			string st = type.ToString();
 			return (!st.Contains("[")) ? st : st.Substring(st.IndexOf("[") + 1, st.IndexOf("]") - st.IndexOf("[") - 1);
-
-
 		}
 
 	}
