@@ -687,7 +687,7 @@ namespace ServiceStack.OrmLite.Firebird
 		
 		public override bool DoesTableExist(IDbCommand dbCmd, string tableName)
 		{
-			if (!QuoteNames)
+			if (!QuoteNames & !RESERVED.Contains(tableName.ToUpper()))
 			{
 				tableName = tableName.ToUpper();
 			}

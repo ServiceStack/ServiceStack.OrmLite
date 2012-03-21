@@ -1,7 +1,10 @@
 using System;
+using System.Collections.Generic;
 using Northwind.Common.DataModel;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
+using ServiceStack.DataAnnotations;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.FirebirdTests
 {
@@ -154,12 +157,87 @@ namespace ServiceStack.OrmLite.FirebirdTests
 			}
 		}
 		 
-		[Test][Ignore]
+		[Test]
 		public void Can_insert_table_with_blobs()
 		{
-			
+			using (var db = ConnectionString.OpenDbConnection())
+			using (var dbConn = db.CreateCommand())
+			{
+				var dsl= OrmLiteConfig.DialectProvider.DefaultStringLength;
+				OrmLiteConfig.DialectProvider.DefaultStringLength=1024;
+				
+				dbConn.CreateTable<OrderBlob>(true);
+				OrmLiteConfig.DialectProvider.DefaultStringLength=dsl;
+
+				var row = OrderBlob.Create(1);
+
+				dbConn.Insert(row);
+
+				var rows = dbConn.Select<OrderBlob>();
+
+				Assert.That(rows, Has.Count.EqualTo(1));
+
+				var newRow = rows[0];
+
+				Assert.That(newRow.Id, Is.EqualTo(row.Id));
+				Assert.That(newRow.Customer.Id, Is.EqualTo(row.Customer.Id));
+				Assert.That(newRow.Employee.Id, Is.EqualTo(row.Employee.Id));
+				Assert.That(newRow.IntIds, Is.EquivalentTo(row.IntIds));
+				Assert.That(newRow.CharMap, Is.EquivalentTo(row.CharMap));
+				Assert.That(newRow.OrderDetails.Count, Is.EqualTo(row.OrderDetails.Count));
+				Assert.That(newRow.OrderDetails[0].ProductId, Is.EqualTo(row.OrderDetails[0].ProductId));
+				Assert.That(newRow.OrderDetails[1].ProductId, Is.EqualTo(row.OrderDetails[1].ProductId));
+				Assert.That(newRow.OrderDetails[2].ProductId, Is.EqualTo(row.OrderDetails[2].ProductId));
+			}
+		}
+		
+		public class UserAuth
+		{
+			public UserAuth()
+			{
+				this.Roles = new List<string>();
+				this.Permissions = new List<string>();
+			}
+
+			[AutoIncrement]
+			public virtual int Id { get; set; }
+			public virtual string UserName { get; set; }
+			public virtual string Email { get; set; }
+			public virtual string PrimaryEmail { get; set; }
+			public virtual string FirstName { get; set; }
+			public virtual string LastName { get; set; }
+			public virtual string DisplayName { get; set; }
+			public virtual string Salt { get; set; }
+			public virtual string PasswordHash { get; set; }
+			public virtual List<string> Roles { get; set; }
+			public virtual List<string> Permissions { get; set; }
+			public virtual DateTime CreatedDate { get; set; }
+			public virtual DateTime ModifiedDate { get; set; }
+			public virtual Dictionary<string, string> Meta { get; set; }
 		}
 
+		[Test]
+		public void Can_insert_table_with_UserAuth()
+		{
+			using (var db = ConnectionString.OpenDbConnection())
+			using (var dbCmd = db.CreateCommand())
+			{
+				dbCmd.CreateTable<UserAuth>(true);
+				
+				var jsv = "{Id:0,UserName:UserName,Email:as@if.com,PrimaryEmail:as@if.com,FirstName:FirstName,LastName:LastName,DisplayName:DisplayName,Salt:WMQi/g==,PasswordHash:oGdE40yKOprIgbXQzEMSYZe3vRCRlKGuqX2i045vx50=,Roles:[],Permissions:[],CreatedDate:2012-03-20T07:53:48.8720739Z,ModifiedDate:2012-03-20T07:53:48.8720739Z}";
+				var userAuth = jsv.To<UserAuth>();
+
+				dbCmd.Insert(userAuth);
+
+				var rows = dbCmd.Select<UserAuth>(q => q.UserName == "UserName");
+
+				Console.WriteLine(rows[0].Dump());
+
+				Assert.That(rows[0].UserName, Is.EqualTo(userAuth.UserName));
+			}
+		}
+		
+		
 	}
 
 }
