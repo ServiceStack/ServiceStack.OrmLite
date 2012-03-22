@@ -44,8 +44,14 @@ namespace ServiceStack.OrmLite.MySql
             if (fieldType == typeof(DateTime))
             {
                 var dateValue = (DateTime)value;
-                const string iso8601Format = "yyyy-MM-dd HH:mm:ss.fff";
-                return base.GetQuotedValue(dateValue.ToString(iso8601Format), typeof(string));
+                /*
+                 * ms not contained in format. MySql ignores ms part anyway
+                 * 
+                 * for more details see: http://dev.mysql.com/doc/refman/5.1/en/datetime.html
+                 */
+                const string dateTimeFormat = "yyyy-MM-dd HH:mm:ss"; 
+
+                return base.GetQuotedValue(dateValue.ToString(dateTimeFormat), typeof(string));
             }
             if (fieldType == typeof(Guid))
             {
@@ -64,6 +70,11 @@ namespace ServiceStack.OrmLite.MySql
             {
                 var intVal = int.Parse(value.ToString());
                 return intVal != 0;
+            }
+
+            if (type == typeof(DateTime))
+            {
+                return DateTime.Parse(value.ToString());
             }
 
             return base.ConvertDbValue(value, type);
