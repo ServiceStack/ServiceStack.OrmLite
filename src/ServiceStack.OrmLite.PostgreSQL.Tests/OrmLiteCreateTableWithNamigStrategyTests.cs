@@ -52,6 +52,55 @@ namespace ServiceStack.OrmLite.Tests
 			}
 		}
 
+		[Test]
+		public void Can_get_data_from_TableWithNamigStrategy_with_GetById()
+		{
+			OrmLite.OrmLiteConfig.DialectProvider.NamingStrategy = OrmLite.OrmLiteConfig.DialectProvider.NamingStrategy = new PrefixNamingStrategy
+			{
+				TablePrefix = "tab_",
+				ColumnPrefix = "col_",
+			};
+
+			using (var db = ConnectionString.OpenDbConnection())
+			using (var dbCmd = db.CreateCommand())
+			{
+				dbCmd.CreateTable<ModelWithOnlyStringFields>(true);
+				ModelWithOnlyStringFields m = new ModelWithOnlyStringFields() { Id= "999", AlbumId = "112", AlbumName="ElectroShip", Name = "MyNameIsBatman"};
+
+				dbCmd.Save<ModelWithOnlyStringFields>(m);
+				var modelFromDb =  dbCmd.GetById<ModelWithOnlyStringFields>("999");
+
+				Assert.AreEqual(m.Name, modelFromDb.Name);
+
+
+			}
+		}
+
+
+		[Test]
+		public void Can_get_data_from_TableWithNamigStrategy_with_query_by_example()
+		{
+			OrmLite.OrmLiteConfig.DialectProvider.NamingStrategy = OrmLite.OrmLiteConfig.DialectProvider.NamingStrategy = new PrefixNamingStrategy
+			{
+				TablePrefix = "tab_",
+				ColumnPrefix = "col_",
+			};
+
+			using (var db = ConnectionString.OpenDbConnection())
+			using (var dbCmd = db.CreateCommand())
+			{
+				dbCmd.CreateTable<ModelWithOnlyStringFields>(true);
+				ModelWithOnlyStringFields m = new ModelWithOnlyStringFields() { Id = "998", AlbumId = "112", AlbumName = "ElectroShip", Name = "QueryByExample" };
+
+				dbCmd.Save<ModelWithOnlyStringFields>(m);
+				var modelFromDb = dbCmd.Where<ModelWithOnlyStringFields>(new { Name = "QueryByExample" })[0];
+
+				Assert.AreEqual(m.Name, modelFromDb.Name);
+
+
+			}
+		}
+
 	}
 
 	public class PrefixNamingStrategy : OrmLiteNamingStrategyBase

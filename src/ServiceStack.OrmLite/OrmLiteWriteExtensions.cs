@@ -184,7 +184,7 @@ namespace ServiceStack.OrmLite
 			{
 				foreach (var fieldDef in fieldDefs)
 				{
-					var index = dataReader.GetOrdinal(fieldDef.FieldName);
+					var index = dataReader.GetOrdinal(OrmLiteConfig.DialectProvider.NamingStrategy.GetColumnName(fieldDef.FieldName));
 					var value = dataReader.GetValue(index);
 					fieldDef.SetValue(objWithProperties, value);
 				}
