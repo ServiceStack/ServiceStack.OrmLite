@@ -490,11 +490,29 @@ namespace AllDialectsTest
 					a.City = "Bogota";
 					author = dbCmd.FirstOrDefault<Author>(q => q.City == a.City);
 					Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", "Angel Colmenares", author.Name, "Angel Colmenares" == author.Name);
-
-
+					
+					// count test
+					
+					var expectedCount= authors.Count();
+					long r7 = dbCmd.GetScalar<Author,long>(e=> Sql.Count(e.Id));
+					Console.WriteLine("GetScalar long: Expected:{0} Selected {1} {2}",expectedCount, 
+					                  r7,
+					                  expectedCount == r7 ? "OK" : "**************  FAILED ***************");
+					
+					expectedCount= authors.Count(e=> e.City=="Bogota");
+					r7 = dbCmd.GetScalar<Author,long>(
+						e=>  Sql.Count(e.Id),
+					 	e=>  e.City=="Bogota" );
+					
+					Console.WriteLine("GetScalar long: Expected:{0} Selected {1} {2}",expectedCount, 
+					                  r7,
+					                  expectedCount == r7 ? "OK" : "**************  FAILED ***************");
+							
 					DateTime t3= DateTime.Now;
 					Console.WriteLine("Expressions test in: {0}", t3 - t2);
 					Console.WriteLine("All test in :        {0}", t3 - t1);
+					
+					
 
 				}
 				catch (Exception e)

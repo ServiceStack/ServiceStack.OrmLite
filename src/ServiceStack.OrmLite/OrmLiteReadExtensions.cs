@@ -198,7 +198,7 @@ namespace ServiceStack.OrmLite
 			p.DbType = OrmLiteConfig.DialectProvider.GetColumnDbType(value.GetType());
 			p.Direction = ParameterDirection.Input;
 			dbCmd.Parameters.Add(p);
-			dbCmd.CommandText = GetFilterSql(dbCmd, ModelDefinition<T>.Definition);
+			dbCmd.CommandText = GetFilterSql<T>(dbCmd);
 			lastQueryType = typeof(T);
 		}
 
@@ -206,7 +206,7 @@ namespace ServiceStack.OrmLite
 		{
 			SetParameters(dbCmd, anonType, excludeNulls);
 
-			dbCmd.CommandText = GetFilterSql(dbCmd, ModelDefinition<T>.Definition);
+			dbCmd.CommandText = GetFilterSql<T>(dbCmd);
 		}
 
 		private static void SetParameters(this IDbCommand dbCmd, object anonType, bool excludeNulls)
@@ -241,19 +241,19 @@ namespace ServiceStack.OrmLite
 			dbCmd.Parameters.Clear();
 		}
 
-		private static string GetFilterSql(IDbCommand dbCmd, ModelDefinition modelDef)
+		private static string GetFilterSql<T>(IDbCommand dbCmd)
 		{
-			var sb = new StringBuilder(modelDef.SqlSelectAllFromTable);
+			var sb = new StringBuilder();
 			for (var i = 0; i < dbCmd.Parameters.Count; i++)
 			{
-				sb.Append(i == 0 ? " WHERE " : " AND ");
+				sb.Append(i == 0 ? " " : " AND ");
 				var p = (IDbDataParameter)dbCmd.Parameters[i];
 				sb.AppendFormat("{0} = {1}{2}",
 								OrmLiteConfig.DialectProvider.GetQuotedColumnName(p.ParameterName),
 								OrmLiteConfig.DialectProvider.ParamString,
 								p.ParameterName);
 			}
-			return sb.ToString();
+			return OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sb.ToString());
 		}
 
 		public static T QueryById<T>(this IDbCommand dbCmd, object value)

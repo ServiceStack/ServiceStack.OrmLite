@@ -103,6 +103,8 @@
     <Compile Include="OrmLiteTransactionTests.cs" />
     <Compile Include="OrmLiteUpdateTests.cs" />
     <Compile Include="OrmLiteGetScalarTests.cs" />
+    <Compile Include="DateTimeColumnTest.cs" />
+    <Compile Include="OrmLiteCreateTableWithNamigStrategyTests.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
