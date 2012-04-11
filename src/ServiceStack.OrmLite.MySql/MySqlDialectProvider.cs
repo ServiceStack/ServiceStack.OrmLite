@@ -19,7 +19,7 @@ namespace ServiceStack.OrmLite.MySql
         {
             base.AutoIncrementDefinition = "AUTO_INCREMENT";
             base.IntColumnDefinition = "int(11)";
-            base.BoolColumnDefinition = "bit(1)";
+            base.BoolColumnDefinition = "tinyint(1)";
             base.TimeColumnDefinition = "time";
             base.DecimalColumnDefinition = "decimal(38,6)";
             base.GuidColumnDefinition = "char(32)";
@@ -68,13 +68,10 @@ namespace ServiceStack.OrmLite.MySql
 
             if (type == typeof(bool))
             {
-                var intVal = int.Parse(value.ToString());
-                return intVal != 0;
-            }
-
-            if (type == typeof(DateTime))
-            {
-                return DateTime.Parse(value.ToString());
+                return
+                    value is bool
+                        ? value
+                        : (int.Parse(value.ToString()) != 0); //backward compatibility (prev version mapped bool as bit(1))
             }
 
             return base.ConvertDbValue(value, type);
