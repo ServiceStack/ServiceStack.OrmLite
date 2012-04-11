@@ -12,7 +12,7 @@ namespace ServiceStack.OrmLite.Firebird.DbSchema
 		where TColumn : IColumn, new()
 		where TProcedure : IProcedure, new()
 		where TParameter : IParameter, new(){
-					
+		
 		public PocoCreator()
 		{
 
@@ -22,7 +22,6 @@ namespace ServiceStack.OrmLite.Firebird.DbSchema
 					"using ServiceStack.Common;\n" +
 					"using ServiceStack.DataAnnotations;\n" +
 					"using ServiceStack.DesignPatterns.Model;\n";
-					//"using ServiceStack.OrmLite;\n";
 
 			SpaceName = "Database.Records";
 			MetadataClassName="Me";
@@ -40,7 +39,13 @@ namespace ServiceStack.OrmLite.Firebird.DbSchema
 			get;
 			set;
 		}
-
+		
+		public string ServiceNameSpace
+		{
+			get;
+			set;
+		}
+		
 		public string Usings
 		{
 			get;
@@ -66,6 +71,7 @@ namespace ServiceStack.OrmLite.Firebird.DbSchema
 
 		public virtual void WriteClass(TTable table, string className)
 		{
+			if(string.IsNullOrEmpty( ServiceNameSpace)) ServiceNameSpace="Interface";
 			className = ToDotName(className);
 			StringBuilder properties= new StringBuilder();
 			StringBuilder meProperties= new StringBuilder();
@@ -117,11 +123,22 @@ namespace ServiceStack.OrmLite.Firebird.DbSchema
 				    
 			if (!Directory.Exists(OutputDirectory))
 				Directory.CreateDirectory(OutputDirectory);
-					
-
-			using (TextWriter tw = new StreamWriter(Path.Combine(OutputDirectory, className + ".cs")))
+			
+			string typesDir=Path.Combine(OutputDirectory,"Types");
+			
+			if(!Directory.Exists(typesDir))		
+				Directory.CreateDirectory(typesDir);
+						
+			string attrDir=Path.Combine(OutputDirectory,"Attributes");
+			if(!Directory.Exists(attrDir))		
+				Directory.CreateDirectory(attrDir);
+			
+			string servDir=Path.Combine(OutputDirectory,"Services");
+			if(!Directory.Exists(servDir))		
+				Directory.CreateDirectory(servDir);
+			
+			using (TextWriter tw = new StreamWriter(Path.Combine(typesDir, className + ".cs")))
 			{
-
 				StringBuilder ns = new StringBuilder();
 				StringBuilder cl =  new StringBuilder();
 				StringBuilder me = new StringBuilder();
@@ -136,17 +153,26 @@ namespace ServiceStack.OrmLite.Firebird.DbSchema
 				                hasIdField?string.Format( ":IHasId<{0}>",idType):"", 
 				                properties.ToString(),
 				                me.ToString());
-
-				
-				
+			
 				ns.AppendFormat("namespace {0}\n{{\n{1}\n}}", SpaceName, cl.ToString());
 				tw.WriteLine(Usings);
-				tw.WriteLine(ns.ToString());
-				
-				
+				tw.WriteLine(ns.ToString());	
 				
 				tw.Close();
 			}
+			
+			using (TextWriter twp = new StreamWriter(Path.Combine(attrDir, className + ".cs")))
+			{
+				twp.Write(string.Format(partialTemplate,SpaceName,className,IdField));				
+				twp.Close();
+			}
+			
+			using (TextWriter twp = new StreamWriter(Path.Combine(servDir, className + "Service.cs")))
+			{
+				twp.Write(string.Format(serviceTemplate,SpaceName, ServiceNameSpace, className));				
+				twp.Close();
+			}
+			
 		}
 
 		public virtual void WriteClass(TProcedure procedure)
@@ -177,6 +203,43 @@ namespace ServiceStack.OrmLite.Firebird.DbSchema
 			string st = type.ToString();
 			return (!st.Contains("[")) ? st : st.Substring(st.IndexOf("[") + 1, st.IndexOf("]") - st.IndexOf("[") - 1);
 		}
+		
+		private string partialTemplate=@"using System;
+using ServiceStack.ServiceHost;
+
+namespace {0}
+{{
+	[RestService(""/{1}/create"",""post"")]
+	[RestService(""/{1}/read"",""get"")]
+	[RestService(""/{1}/read/{{{2}}}"",""get"")]
+	[RestService(""/{1}/update/{{{2}}}"",""put"")]
+	[RestService(""/{1}/destroy/{{{2}}}"",""delete"")]
+	public partial class {1}
+	{{
+	}}
+}}";
+		
+		private string serviceTemplate =@"using System;
+﻿using ServiceStack.CacheAccess;
+using ServiceStack.Common;
+using ServiceStack.ServiceHost;
+using ServiceStack.ServiceInterface;
+
+using {0};
+
+namespace {1}
+{{
+	[Authenticate]
+	[RequiredPermission(""{2}.read"")]
+	[RequiredPermission(ApplyTo.Post, ""{2}.create"")]	
+	[RequiredPermission(ApplyTo.Put , ""{2}.update"")]	
+	[RequiredPermission(ApplyTo.Delete, ""{2}.destroy"")]
+	public class {2}Service:AppRestService<{2}>
+	{{
+		
+	}}
+}}";
+		
 
 	}
 }
