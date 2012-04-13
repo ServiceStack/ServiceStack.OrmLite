@@ -2,12 +2,12 @@
 <package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>ServiceStack.OrmLite.MySql</id> 
-    <version>3.6.4</version> 
+    <version>3.6.9</version> 
     <authors>Demis Bellot</authors> 
     <owners>Demis Bellot</owners>
     <description>
         Light, simple and fast convention-based code-first POCO ORM for MySQL. 
-		Support for Creating and Dropping Table Schemas from POCOs, Complex Property types transparently stored in schemaless text blobs.
+		Support for Creating and Dropping Table Schemas from POCOs, Complex Property types transparently stored in schemaless text blobs in MySQL.
     </description> 
     <projectUrl>https://github.com/ServiceStack/ServiceStack.OrmLite</projectUrl>
     <licenseUrl>https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/LICENSE</licenseUrl>
