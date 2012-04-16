@@ -143,7 +143,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        internal static int ExecuteSql(this IDbCommand dbCmd, string sql)
+        public static int ExecuteSql(this IDbCommand dbCmd, string sql)
         {
             LogDebug(sql);
 
