@@ -320,6 +320,7 @@ namespace ServiceStack.OrmLite.Tests
 
 		public class PocoFlag
 		{
+			public string Name { get; set; }
 			public bool Flag { get; set; }
 		}
 
