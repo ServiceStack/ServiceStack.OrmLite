@@ -318,5 +318,39 @@ namespace ServiceStack.OrmLite.Tests
 			}
 		}
 
+		public class PocoFlag
+		{
+			public bool Flag { get; set; }
+		}
+
+		[Test]
+		public void Can_populate_PocoFlag()
+		{
+			using (var db = ConnectionString.OpenDbConnection())
+			using (var dbCmd = db.CreateCommand())
+			{
+				var rows = dbCmd.Select<PocoFlag>("SELECT 1 as Flag");
+				Assert.That(rows[0].Flag);
+			}
+		}
+
+		public class PocoFlagWithId
+		{
+			public int Id { get; set; }
+			public bool Flag { get; set; }
+		}
+
+		[Test]
+		public void Can_populate_PocoFlagWithId()
+		{
+			using (var db = ConnectionString.OpenDbConnection())
+			using (var dbCmd = db.CreateCommand())
+			{
+				var rows = dbCmd.Select<PocoFlagWithId>("SELECT 1 as Id, 1 as Flag");
+				Assert.That(rows[0].Id, Is.EqualTo(1));
+				Assert.That(rows[0].Flag);
+			}
+		}
+
 	}
 }
