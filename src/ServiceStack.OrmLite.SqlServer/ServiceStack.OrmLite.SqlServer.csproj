@@ -68,6 +68,7 @@
   <ItemGroup>
     <Compile Include="SqlServerExpressionVisitor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SqlServerDateTime2OrmLiteDialectProvider.cs" />
     <Compile Include="SqlServerOrmLiteDialectProvider.cs" />
   </ItemGroup>
   <ItemGroup>
