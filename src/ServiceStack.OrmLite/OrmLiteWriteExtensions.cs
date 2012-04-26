@@ -178,6 +178,7 @@ namespace ServiceStack.OrmLite
             return PopulateWithSqlReader(objWithProperties, dataReader, fieldDefs);
         }
 
+    	private const int NotFound = -1;
         public static T PopulateWithSqlReader<T>(this T objWithProperties, IDataReader dataReader, FieldDefinition[] fieldDefs)
         {
 			try
@@ -185,6 +186,7 @@ namespace ServiceStack.OrmLite
 				foreach (var fieldDef in fieldDefs)
 				{
 					var index = dataReader.GetOrdinal(OrmLiteConfig.DialectProvider.NamingStrategy.GetColumnName(fieldDef.FieldName));
+					if (index == NotFound) continue;
 					var value = dataReader.GetValue(index);
 					fieldDef.SetValue(objWithProperties, value);
 				}
@@ -196,10 +198,6 @@ namespace ServiceStack.OrmLite
 			return objWithProperties;
         }
 		
-        
-		
-        
-
 		public static void Update<T>(this IDbCommand dbCmd, params T[] objs)
 			where T : new()
 		{
