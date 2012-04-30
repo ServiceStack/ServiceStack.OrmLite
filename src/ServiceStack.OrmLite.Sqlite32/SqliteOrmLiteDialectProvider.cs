@@ -12,5 +12,15 @@ namespace ServiceStack.OrmLite.Sqlite
 		{
 			return new SQLiteConnection(connectionString);
 		}
+
+		public SqliteOrmLiteDialectProvider WithPassword(string password) {
+			Password = password;
+			return Instance;
+		}
+
+		public SqliteOrmLiteDialectProvider WithUTFEncoding() {
+			UTF8Encoded = true;
+			return Instance;
+		}
 	}
 }
