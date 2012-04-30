@@ -104,8 +104,6 @@ namespace ServiceStack.OrmLite
 			return dbCmd.GetScalar<TKey>(sql);
 		}
 		
-		
-		
 		private static T ConvertTo<T>(IDataReader dataReader)
             where T : new()
         {
@@ -119,7 +117,7 @@ namespace ServiceStack.OrmLite
 					for (int i = 0; i<dataReader.FieldCount; i++)
 					{						
 						var fieldDef = fieldDefs.FirstOrDefault(
-							x => x.FieldName.ToUpper() ==dataReader.GetName(i).ToUpper());
+							x => x.FieldName.ToUpper() == dataReader.GetName(i).ToUpper());
 
 						if (fieldDef == null) continue;
 						var value = dataReader.GetValue(i);
@@ -131,7 +129,6 @@ namespace ServiceStack.OrmLite
 				return default(T);
 			}
 		}
-		
 		
 		private static List<T> ConvertToList<T>(IDataReader dataReader)
 			where T : new()
@@ -167,33 +164,33 @@ namespace ServiceStack.OrmLite
 			return to;
 		}
 
-		/*
-		private static T PopulateWithSqlReader<T>( T objWithProperties, IDataReader dataReader, FieldDefinition[] fieldDefs)
+        /*
+        private static T PopulateWithSqlReader<T>( T objWithProperties, IDataReader dataReader, FieldDefinition[] fieldDefs)
         {
-			foreach (var fieldDef in fieldDefs)
-			{
-				try{
-					// NOTE: this is a nasty ineffeciency here when we're calling this for multiple rows!
-					// we should only call GetOrdinal once per column per result set
-					// and one could only wish for a -1 return instead of an IndexOutOfRangeException...
-					// how to get -1 ? 
-					//If the index of the named field is not found, an IndexOutOfRangeException is thrown.
-					//http://msdn.microsoft.com/en-us/library/system.data.idatarecord.getordinal(v=vs.100).aspx
+            foreach (var fieldDef in fieldDefs)
+            {
+                try{
+                    // NOTE: this is a nasty ineffeciency here when we're calling this for multiple rows!
+                    // we should only call GetOrdinal once per column per result set
+                    // and one could only wish for a -1 return instead of an IndexOutOfRangeException...
+                    // how to get -1 ? 
+                    //If the index of the named field is not found, an IndexOutOfRangeException is thrown.
+                    //http://msdn.microsoft.com/en-us/library/system.data.idatarecord.getordinal(v=vs.100).aspx
 					
-					var index = dataReader.GetOrdinal(fieldDef.FieldName);
-					var value = dataReader.GetValue(index);
-					fieldDef.SetValue(objWithProperties, value);
-				}
-				catch(IndexOutOfRangeException){
-					// just ignore not retrived fields
-				}
-			}
+                    var index = dataReader.GetColumnIndex(fieldDef.FieldName);
+                    var value = dataReader.GetValue(index);
+                    fieldDef.SetValue(objWithProperties, value);
+                }
+                catch(IndexOutOfRangeException){
+                    // just ignore not retrived fields
+                }
+            }
 		
 			
-			return objWithProperties;
+            return objWithProperties;
         }
-		*/
-		// First FirstOrDefault  // Use LIMIT to retrive only one row ! someone did it
+        */
+        // First FirstOrDefault  // Use LIMIT to retrive only one row ! someone did it
 
 	}
 }

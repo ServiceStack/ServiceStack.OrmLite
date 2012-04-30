@@ -178,6 +178,18 @@ namespace ServiceStack.OrmLite
             return PopulateWithSqlReader(objWithProperties, dataReader, fieldDefs);
         }
 
+        public static int GetColumnIndex(this IDataReader dataReader, string fieldName)
+        {
+            try
+            {
+                return dataReader.GetOrdinal(OrmLiteConfig.DialectProvider.NamingStrategy.GetColumnName(fieldName));
+            }
+            catch (IndexOutOfRangeException ignoreNotFoundExInSomeProviders)
+            {
+                return NotFound;
+            }
+        }
+
     	private const int NotFound = -1;
         public static T PopulateWithSqlReader<T>(this T objWithProperties, IDataReader dataReader, FieldDefinition[] fieldDefs)
         {
@@ -185,7 +197,7 @@ namespace ServiceStack.OrmLite
 			{
 				foreach (var fieldDef in fieldDefs)
 				{
-					var index = dataReader.GetOrdinal(OrmLiteConfig.DialectProvider.NamingStrategy.GetColumnName(fieldDef.FieldName));
+					var index = dataReader.GetColumnIndex(fieldDef.FieldName);
 					if (index == NotFound) continue;
 					var value = dataReader.GetValue(index);
 					fieldDef.SetValue(objWithProperties, value);
