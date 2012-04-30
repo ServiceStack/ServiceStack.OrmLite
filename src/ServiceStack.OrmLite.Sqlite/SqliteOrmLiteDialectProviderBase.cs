@@ -19,6 +19,9 @@ namespace ServiceStack.OrmLite.Sqlite
 			base.InitColumnTypeMap();
 		}
 
+		public static string Password { get; set; }
+		public static bool UTF8Encoded { get; set; }
+
 		public static string CreateFullTextCreateTableStatement(object objectWithProperties)
 		{
 			var sbColumns = new StringBuilder();
@@ -40,7 +43,7 @@ namespace ServiceStack.OrmLite.Sqlite
 		public override IDbConnection CreateConnection(string connectionString, Dictionary<string, string> options)
 		{
 			var isFullConnectionString = connectionString.Contains(";");
-
+		    var connString = new StringBuilder();
 			if (!isFullConnectionString)
 			{
 				if (connectionString != ":memory:")
@@ -51,30 +54,43 @@ namespace ServiceStack.OrmLite.Sqlite
 						Directory.CreateDirectory(existingDir);
 					}
 				}
-				connectionString =
-					@"Data Source=" + connectionString + ";Version=3;New=True;Compress=True;";
+				connString.AppendFormat(@"Data Source={0};Version=3;New=True;Compress=True;", connectionString.Trim());
+
+			} 
+			else
+			{
+				connString.Append(connectionString);
+			}
+			if (!string.IsNullOrEmpty(Password))
+			{
+				connString.AppendFormat("Password={0};", Password);
+			}
+			if (UTF8Encoded)
+			{
+				connString.Append("UseUTF16Encoding=True;");
 			}
 
 			if (options != null)
 			{
 				foreach (var option in options)
 				{
-					connectionString += option.Key + "=" + option.Value + ";";
+					connString.AppendFormat("{0}={1};", option.Key, option.Value);
 				}
 			}
 
-			return CreateConnection(connectionString);
+			return CreateConnection(connString.ToString());
 		}
+
 
 		protected abstract IDbConnection CreateConnection(string connectionString);
 
-        public override string GetQuotedTableName(ModelDefinition modelDef)
-        {
-            if (!modelDef.IsInSchema)
-                return base.GetQuotedTableName(modelDef);
+		public override string GetQuotedTableName(ModelDefinition modelDef)
+		{
+			if (!modelDef.IsInSchema)
+				return base.GetQuotedTableName(modelDef);
 
-            return string.Format("\"{0}_{1}\"", modelDef.Schema, modelDef.ModelName);
-        }
+			return string.Format("\"{0}_{1}\"", modelDef.Schema, modelDef.ModelName);
+		}
 
 		public override object ConvertDbValue(object value, Type type)
 		{
