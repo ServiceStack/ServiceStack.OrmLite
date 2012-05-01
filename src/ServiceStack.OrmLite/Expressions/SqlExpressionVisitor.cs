@@ -536,7 +536,7 @@ namespace ServiceStack.OrmLite
 			    var lambda = Expression.Lambda<Func<object>>(member);
     			var getter = lambda.Compile();
 				object o = getter();
-				return  OrmLiteConfig.DialectProvider.GetQuotedValue(o, o.GetType());
+				return  OrmLiteConfig.DialectProvider.GetQuotedValue(o, o != null ? o.GetType() : null);
 			}
 		}
 		
