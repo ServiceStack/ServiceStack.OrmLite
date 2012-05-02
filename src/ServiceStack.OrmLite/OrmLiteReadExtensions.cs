@@ -212,6 +212,9 @@ namespace ServiceStack.OrmLite
 		private static void SetParameters(this IDbCommand dbCmd, object anonType, bool excludeNulls)
 		{
 			dbCmd.Parameters.Clear();
+			lastQueryType = null;
+			if (anonType == null) return;
+
 			var pis = anonType.GetType().GetSerializableProperties();
 			foreach (var pi in pis)
 			{
@@ -228,7 +231,6 @@ namespace ServiceStack.OrmLite
 				p.Value = value;
 				dbCmd.Parameters.Add(p);
 			}
-			lastQueryType = null;
 		}
 
 		public static void SetFilters<T>(this IDbCommand dbCmd, object anonType)
