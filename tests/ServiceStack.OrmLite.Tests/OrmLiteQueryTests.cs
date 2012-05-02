@@ -115,5 +115,33 @@ namespace ServiceStack.OrmLite.Tests
 			}
 		}
 
+        [Test]
+        public void Can_GetSingle_with_filter_from_ModelWithOnlyStringFields_table()
+        {
+            using (var db = ConnectionString.OpenDbConnection())
+            using (var dbCmd = db.CreateCommand())
+            {
+                dbCmd.CreateTable<ModelWithOnlyStringFields>(true);
+
+                var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
+
+                rowIds.ForEach(x => dbCmd.Insert(ModelWithOnlyStringFields.Create(x)));
+
+                var filterRow = ModelWithOnlyStringFields.Create("id-4");
+                filterRow.AlbumName = "FilteredName";
+
+                dbCmd.Insert(filterRow);
+
+                var row = dbCmd.QuerySingle<ModelWithOnlyStringFields>(new { filterRow.AlbumName });
+                Assert.That(row.Id, Is.EqualTo(filterRow.Id));
+
+                row = dbCmd.QuerySingle<ModelWithOnlyStringFields>(new { filterRow.AlbumName, Id = (object)null });
+                Assert.That(row.AlbumName, Is.EqualTo(filterRow.AlbumName));
+
+                row = dbCmd.QuerySingle<ModelWithOnlyStringFields>(new { AlbumName = "Junk", Id = (object)null });
+                Assert.That(row, Is.Null);
+            }
+        }
+
 	}
 }
