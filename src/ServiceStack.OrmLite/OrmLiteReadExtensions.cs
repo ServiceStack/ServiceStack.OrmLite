@@ -290,7 +290,7 @@ namespace ServiceStack.OrmLite
 		{
 			if (typeof(T).IsValueType) return QueryScalar<T>(dbCmd, anonType);
 
-			dbCmd.SetFilters<T>(anonType);
+			dbCmd.SetFilters<T>(anonType, true);
 
 			using (var dbReader = dbCmd.ExecuteReader())
 				return dbReader.ConvertTo<T>();
