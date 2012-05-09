@@ -4,6 +4,7 @@ using NUnit.Framework;
 using ServiceStack.Common.Extensions;
 using ServiceStack.Common.Tests.Models;
 using ServiceStack.Text;
+using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.FirebirdTests
 {
@@ -325,6 +326,42 @@ namespace ServiceStack.OrmLite.FirebirdTests
 				var rows = dbCmd.Select<ModelWithIdAndName>("Name IN ({0})", selectInNames.SqlInValues());
 
 				Assert.That(rows.Count, Is.EqualTo(selectInNames.Length));
+			}
+		}
+		
+		//[Alias("RDB$DATABASE")]
+		public class PocoFlag
+		{
+			public string Name { get; set; }
+			public bool Flag { get; set; }
+		}
+
+		[Test]
+		public void Can_populate_PocoFlag()
+		{
+			using (var db = ConnectionString.OpenDbConnection())
+			using (var dbCmd = db.CreateCommand())
+			{
+				var rows = dbCmd.Select<PocoFlag>("SELECT 1 as Flag FROM RDB$DATABASE");
+				Assert.That(rows[0].Flag);
+			}
+		}
+
+		public class PocoFlagWithId
+		{
+			public int Id { get; set; }
+			public bool Flag { get; set; }
+		}
+
+		[Test]
+		public void Can_populate_PocoFlagWithId()
+		{
+			using (var db = ConnectionString.OpenDbConnection())
+			using (var dbCmd = db.CreateCommand())
+			{
+				var rows = dbCmd.Select<PocoFlagWithId>("SELECT 1 as Id, 1 as Flag FROM RDB$DATABASE");
+				Assert.That(rows[0].Id, Is.EqualTo(1));
+				Assert.That(rows[0].Flag);
 			}
 		}
 

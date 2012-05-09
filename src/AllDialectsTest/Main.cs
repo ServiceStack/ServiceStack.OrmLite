@@ -350,7 +350,13 @@ namespace AllDialectsTest
 					result = dbCmd.Select(ev);
 					author = result.FirstOrDefault();
 					Console.WriteLine("Expected:{0}  Selected:{1}  {2}", "Claudia Espinel".ToUpper(), author.Name, "Claudia Espinel".ToUpper() == author.Name ? "OK" : "**************  FAILED ***************");
-
+					
+					ev.Select(rn => new { at = Sql.As(rn.Name.ToUpper(), rn.Name), rn.City });
+					Console.WriteLine(ev.SelectExpression);
+					result = dbCmd.Select(ev);
+					author = result.FirstOrDefault();
+					Console.WriteLine("Expected:{0}  Selected:{1}  {2}", "Claudia Espinel".ToUpper(), author.Name, "Claudia Espinel".ToUpper() == author.Name ? "OK" : "**************  FAILED ***************");
+					
 					//paging :
 					ev.Limit(0, 4);// first page, page size=4;
 					result = dbCmd.Select(ev);
@@ -381,6 +387,15 @@ namespace AllDialectsTest
 					                  result[0].Birthday,
 					                  expectedResult == result[0].Birthday ? "OK" : "**************  FAILED ***************");
 					
+					ev.Select(r=> Sql.As(Sql.Max(r.Birthday), r.Birthday));
+					result = dbCmd.Select(ev);
+					expectedResult  = authors.Max(r=>r.Birthday);
+					Console.WriteLine("Expected:{0} Selected {1} {2}",expectedResult, 
+					                  result[0].Birthday,
+					                  expectedResult == result[0].Birthday ? "OK" : "**************  FAILED ***************");
+					
+					
+					
 					var r1 = dbCmd.FirstOrDefault(ev);
 					Console.WriteLine("FOD: Expected:{0} Selected {1} {2}",expectedResult, 
 					                  r1.Birthday,
@@ -400,11 +415,30 @@ namespace AllDialectsTest
 					                  expectedResult == result[0].Birthday? "OK" : "**************  FAILED ***************");
 					
 					
+					
+					ev.Select(r=> Sql.As( Sql.Min(r.Birthday), r.Birthday));
+					result = dbCmd.Select(ev);
+					expectedResult  = authors.Min(r=>r.Birthday);
+					Console.WriteLine("Expected:{0} Selected {1} {2}",expectedResult, 
+					                  result[0].Birthday,
+					                  expectedResult == result[0].Birthday? "OK" : "**************  FAILED ***************");
+					
+					
 					ev.Select(r=>new{r.City,  MaxResult=Sql.As( Sql.Min(r.Birthday), "Birthday") })
 							.GroupBy(r=>r.City)
 							.OrderBy(r=>r.City);
 					result = dbCmd.Select(ev);
 					var expectedStringResult= "Berlin";
+					Console.WriteLine("Expected:{0} Selected {1} {2}",expectedResult, 
+					                  result[0].City,
+					                  expectedStringResult == result[0].City ? "OK" : "**************  FAILED ***************");
+					
+					
+					ev.Select(r=>new{r.City,  MaxResult=Sql.As( Sql.Min(r.Birthday), r.Birthday) })
+							.GroupBy(r=>r.City)
+							.OrderBy(r=>r.City);
+					result = dbCmd.Select(ev);
+					expectedStringResult= "Berlin";
 					Console.WriteLine("Expected:{0} Selected {1} {2}",expectedResult, 
 					                  result[0].City,
 					                  expectedStringResult == result[0].City ? "OK" : "**************  FAILED ***************");
@@ -511,8 +545,6 @@ namespace AllDialectsTest
 					DateTime t3= DateTime.Now;
 					Console.WriteLine("Expressions test in: {0}", t3 - t2);
 					Console.WriteLine("All test in :        {0}", t3 - t1);
-					
-					
 
 				}
 				catch (Exception e)
@@ -525,6 +557,5 @@ namespace AllDialectsTest
 			Console.ReadLine();
 			PaintMenu();
 		}
-
 	}
 }

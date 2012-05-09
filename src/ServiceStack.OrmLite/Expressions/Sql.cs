@@ -30,10 +30,10 @@ namespace ServiceStack.OrmLite
 			return  value==null? "": value.ToString() + " DESC";
 		}
 		
-		public static string As<T>( T value, string asValue) {
+		public static string As<T>( T value, object asValue) {
 			return  value==null? "": string.Format("{0} AS {1}", value.ToString(), asValue);
 		}
-				
+		
 		public static T Sum<T>( T value)  {
 			return value;
 		}

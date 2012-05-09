@@ -96,14 +96,14 @@ namespace ServiceStack.OrmLite.MySql
 					                 OrmLiteConfig.DialectProvider.GetQuotedValue(el, el.GetType()) );
 						}
 					}
-				}
-												
+				}							
 				return string.Format("{0} {1} ({2})", r, m.Method.Name,  sIn.ToString() );
+				
 			case "Desc":
 				return string.Format("{0} DESC", r);
 			case "As":
 				return string.Format("{0} As {1}", r, 
-					OrmLiteConfig.DialectProvider.GetQuotedColumnName( RemoveQuote( args[0].ToString() ) ) );
+					OrmLiteConfig.DialectProvider.GetQuotedColumnName(RemoveQuoteFromAlias(args[0].ToString())));
 			case "ToString":
 				return r.ToString();
 			default:
@@ -115,7 +115,6 @@ namespace ServiceStack.OrmLite.MySql
 					                OrmLiteConfig.DialectProvider.GetQuotedValue(e, e.GetType()) );
 				}
 				return string.Format("{0}({1}{2})",m.Method.Name,r, s2.ToString());
-				
 			}
 			
         }

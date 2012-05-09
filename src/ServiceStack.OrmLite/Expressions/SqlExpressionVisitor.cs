@@ -678,23 +678,21 @@ namespace ServiceStack.OrmLite
 				return string.Format("{0} {1} ({2})", r, m.Method.Name,  sIn.ToString() );
 			case "Desc":
 				return string.Format("{0} DESC", r);
+			case "Alias":	
 			case "As":
 				return string.Format("{0} As {1}", r, 
-					OrmLiteConfig.DialectProvider.GetQuotedColumnName( RemoveQuote( args[0].ToString() ) ) );
+					OrmLiteConfig.DialectProvider.GetQuotedColumnName(RemoveQuoteFromAlias(RemoveQuote(args[0].ToString()))));
 			case "ToString":
 				return r.ToString();
 			default:
-				//Console.WriteLine("******* Returning '{0}' for '{1}' *******", r, m.Method.Name);
-				
+				//Console.WriteLine("******* Returning '{0}' for '{1}' *******", r, m.Method.Name);				
 				StringBuilder s2 = new StringBuilder();
 				foreach(Object e in args ){
 					s2.AppendFormat(",{0}", 
 					                OrmLiteConfig.DialectProvider.GetQuotedValue(e, e.GetType()) );
 				}
 				return string.Format("{0}({1}{2})",m.Method.Name,r, s2.ToString());
-				
 			}
-			
         }
 		
 		protected virtual List<Object> VisitExpressionList(ReadOnlyCollection<Expression> original)
@@ -785,10 +783,23 @@ namespace ServiceStack.OrmLite
 				
 		protected string RemoveQuote(string exp){
 
-			if (exp.StartsWith("'") )
+			if (exp.StartsWith("'") && exp.EndsWith("'"))
+			{
 				exp=exp.Remove(0,1);
-			if( exp.EndsWith("'") )
 				exp =exp.Remove(exp.Length-1,1);
+			}
+			return exp;				
+		}
+		
+		protected string RemoveQuoteFromAlias(string exp){
+
+			if ((exp.StartsWith("\"") || exp.StartsWith("`") || exp.StartsWith("'"))
+			    &&
+			    (exp.EndsWith("\"") || exp.EndsWith("`") || exp.EndsWith("'")))
+			{
+				exp=exp.Remove(0,1);
+				exp =exp.Remove(exp.Length-1,1);
+			}
 			return exp;				
 		}
 		
