@@ -105,8 +105,6 @@ namespace ServiceStack.OrmLite.Sqlite
 			case "ToString":
 				return r.ToString();
 			default:
-				Console.WriteLine("******* Returning '{0}' for '{1}' *******", r, m.Method.Name);
-				
 				var s2 = new StringBuilder();
 				foreach (var e in args) {
 					s2.AppendFormat(",{0}", 
@@ -115,6 +113,5 @@ namespace ServiceStack.OrmLite.Sqlite
 				return string.Format("{0}({1}{2})", m.Method.Name, r, s2);				
 			}
         }
-		
 	}
 }

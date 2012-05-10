@@ -455,7 +455,6 @@ namespace ServiceStack.OrmLite
                 case ExpressionType.NewArrayBounds:
                     return VisitNewArray(exp as NewArrayExpression);
 			default:
-				Console.WriteLine("************* NodeType is :'{0}' **********",  exp.NodeType);
 				return  exp.ToString();
 			}
 		}
@@ -685,7 +684,6 @@ namespace ServiceStack.OrmLite
 			case "ToString":
 				return r.ToString();
 			default:
-				//Console.WriteLine("******* Returning '{0}' for '{1}' *******", r, m.Method.Name);				
 				StringBuilder s2 = new StringBuilder();
 				foreach(Object e in args ){
 					s2.AppendFormat(",{0}", 
@@ -854,8 +852,7 @@ namespace ServiceStack.OrmLite
 					fields),
 				OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef));
 		}
-		
-		
+				
 	}
 	
 }

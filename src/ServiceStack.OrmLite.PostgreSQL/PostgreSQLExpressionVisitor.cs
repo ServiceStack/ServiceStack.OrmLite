@@ -100,9 +100,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
 					OrmLiteConfig.DialectProvider.GetQuotedColumnName(RemoveQuoteFromAlias(args[0].ToString())));
 			case "ToString":
 				return r.ToString();
-			default:
-				Console.WriteLine("******* Returning '{0}' for '{1}' *******", r, m.Method.Name);
-				
+			default:	
 				StringBuilder s2 = new StringBuilder();
 				foreach(Object e in args ){
 					s2.AppendFormat(",{0}", 
@@ -126,7 +124,6 @@ namespace ServiceStack.OrmLite.PostgreSQL
 				return string.Format("LIMIT {0}{1}", Rows.Value, offset);                   
 			}
 		}
-		
 		
 	}
 }
