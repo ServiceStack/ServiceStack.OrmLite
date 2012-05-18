@@ -233,6 +233,26 @@ namespace ServiceStack.OrmLite
 			}
 		}
 
+		private static void SetParameters(this IDbCommand dbCmd, Dictionary<string,object> dict, bool excludeNulls)
+		{
+			dbCmd.Parameters.Clear();
+			lastQueryType = null;
+			if (dict == null) return;
+
+			foreach (var kvp in dict)
+			{
+				var value = dict[kvp.Key];
+				if (excludeNulls && value == null) continue;
+				var p = dbCmd.CreateParameter();
+				p.ParameterName = kvp.Key;
+				p.DbType = OrmLiteConfig.DialectProvider.GetColumnDbType(value.GetType()); ;
+				p.Direction = ParameterDirection.Input;
+				p.Value = value;
+				dbCmd.Parameters.Add(p);
+			}
+		}
+
+
 		public static void SetFilters<T>(this IDbCommand dbCmd, object anonType)
 		{
 			dbCmd.SetFilters<T>(anonType, false);
@@ -336,6 +356,18 @@ namespace ServiceStack.OrmLite
 			where T : new()
 		{
             if (anonType != null) dbCmd.SetParameters(anonType, true);
+			dbCmd.CommandText = sql;
+
+			using (var dbReader = dbCmd.ExecuteReader())
+				return typeof(T).IsValueType
+					? dbReader.GetFirstColumn<T>()
+					: dbReader.ConvertToList<T>();
+		}
+
+		public static List<T> Query<T>(this IDbCommand dbCmd, string sql, Dictionary<string,object> dict = null)
+			where T : new()
+		{
+			if (dict != null) dbCmd.SetParameters(dict, true);
 			dbCmd.CommandText = sql;
 
 			using (var dbReader = dbCmd.ExecuteReader())
