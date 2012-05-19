@@ -15,8 +15,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using ServiceStack.Common.Extensions;
 using ServiceStack.Common.Utils;
 using ServiceStack.Logging;
 
@@ -215,7 +213,7 @@ namespace ServiceStack.OrmLite
 		{
 			foreach (var obj in objs)
 			{
-				dbCmd.ExecuteSql( OrmLiteConfig.DialectProvider.ToUpdateRowStatement( obj)); 
+				dbCmd.ExecuteSql(OrmLiteConfig.DialectProvider.ToUpdateRowStatement(obj)); 
 			}
 		}
 
@@ -258,9 +256,9 @@ namespace ServiceStack.OrmLite
             var modelDef = ModelDefinition<T>.Definition;
 
             var sql = string.Format("DELETE FROM {0} WHERE {1} = {2}",
-                                    OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef),
-                                    OrmLiteConfig.DialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName),
-                                    OrmLiteConfig.DialectProvider.GetQuotedValue(id, id.GetType()));
+                OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef),
+                OrmLiteConfig.DialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName),
+                OrmLiteConfig.DialectProvider.GetQuotedValue(id, id.GetType()));
 
 
             dbCmd.ExecuteSql(sql);
@@ -275,9 +273,9 @@ namespace ServiceStack.OrmLite
             var modelDef = ModelDefinition<T>.Definition;
 
             var sql = string.Format("DELETE FROM {0} WHERE {1} IN ({2})",
-                                    OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef),
-                                    OrmLiteConfig.DialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName),
-                                    sqlIn);
+                OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef),
+                OrmLiteConfig.DialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName),
+                sqlIn);
 
             dbCmd.ExecuteSql(sql);
         }
@@ -408,9 +406,7 @@ namespace ServiceStack.OrmLite
             return dbTrans;
         }
 		
-		
 		// Procedures
-		
 		public static void ExecuteProcedure<T>(this IDbCommand dbCommand, T obj){	
 			
 			string sql= OrmLiteConfig.DialectProvider.ToExecuteProcedureStatement(obj);

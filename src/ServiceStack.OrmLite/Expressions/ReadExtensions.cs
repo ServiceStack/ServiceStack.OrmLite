@@ -8,6 +8,11 @@ namespace ServiceStack.OrmLite
 {
 	public static class ReadExtensions
 	{
+        public static SqlExpressionVisitor<T> CreateExpression<T>()
+        {
+            return OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();            
+        }
+
 		public static List<T> Select<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
 			where T : new()
 		{
