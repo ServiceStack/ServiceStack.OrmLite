@@ -280,6 +280,28 @@ namespace ServiceStack.OrmLite.Tests
 		}
 
 		[Test]
+		public void Can_Query_ModelWithFieldsOfDifferentTypes_with_dictionary_parameters()
+		{
+			using (var db = ConnectionString.OpenDbConnection())
+			using (var dbCmd = db.CreateCommand())
+			{
+				dbCmd.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+
+				var rowIds = new List<int>(new[] { 1, 2, 3 });
+
+				rowIds.ForEach(x => dbCmd.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
+
+				var rows = dbCmd.Query<ModelWithFieldsOfDifferentTypes>("SELECT * FROM \"ModelWithFieldsOfDifferentTypes\" where \"Id\" = :Id ",
+					new Dictionary<string, object> { 
+					{"Id", 3}
+					});
+				 
+				Assert.AreEqual(rows.Count, 1);
+				Assert.AreEqual(rows[0].Id, 3);
+			}
+		}
+
+		[Test]
 		public void Can_Select_Into_ModelWithIdAndName_from_ModelWithFieldsOfDifferentTypes_table()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
