@@ -242,10 +242,11 @@ namespace ServiceStack.OrmLite
 			foreach (var kvp in dict)
 			{
 				var value = dict[kvp.Key];
-				if (excludeNulls && value == null) continue;
-				var p = dbCmd.CreateParameter();
+                if (excludeNulls && value == null) continue;
+				
+                var p = dbCmd.CreateParameter();
 				p.ParameterName = kvp.Key;
-				p.DbType = OrmLiteConfig.DialectProvider.GetColumnDbType(value.GetType()); ;
+				p.DbType = OrmLiteConfig.DialectProvider.GetColumnDbType(value.GetType());
 				p.Direction = ParameterDirection.Input;
 				p.Value = value;
 				dbCmd.Parameters.Add(p);
@@ -359,9 +360,11 @@ namespace ServiceStack.OrmLite
 			dbCmd.CommandText = sql;
 
 			using (var dbReader = dbCmd.ExecuteReader())
+            {
 				return typeof(T).IsValueType
 					? dbReader.GetFirstColumn<T>()
 					: dbReader.ConvertToList<T>();
+            }
 		}
 
 		public static List<T> Query<T>(this IDbCommand dbCmd, string sql, Dictionary<string,object> dict = null)
@@ -371,9 +374,11 @@ namespace ServiceStack.OrmLite
 			dbCmd.CommandText = sql;
 
 			using (var dbReader = dbCmd.ExecuteReader())
+            {
 				return typeof(T).IsValueType
 					? dbReader.GetFirstColumn<T>()
 					: dbReader.ConvertToList<T>();
+            }
 		}
 
 		public static T QueryScalar<T>(this IDbCommand dbCmd, object anonType)
