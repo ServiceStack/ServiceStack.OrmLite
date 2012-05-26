@@ -14,7 +14,7 @@ namespace ServiceStack.OrmLite.Firebird
 	public class FirebirdOrmLiteDialectProvider : OrmLiteDialectProviderBase<FirebirdOrmLiteDialectProvider>
 	{
 		private readonly List<string> RESERVED = new List<string>(new[] {
-			"USER","ORDER","PASSWORD", "ACTIVE","LEFT","DOUBLE", "FLOAT", "DECIMAL","STRING", "DATE","DATETIME", "TYPE"
+			"USER","ORDER","PASSWORD", "ACTIVE","LEFT","DOUBLE", "FLOAT", "DECIMAL","STRING", "DATE","DATETIME", "TYPE","TIMESTAMP"
 		});
 		
 		public static FirebirdOrmLiteDialectProvider Instance = new FirebirdOrmLiteDialectProvider();

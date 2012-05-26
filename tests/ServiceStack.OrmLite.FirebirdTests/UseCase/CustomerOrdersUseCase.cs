@@ -57,7 +57,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
         public Dictionary<AddressType, Address> Addresses { get; set; }
 
-        public DateTime CreatedAt { get; set; }
+        public DateTime Timestamp { get; set; }
     }
 	
 	
@@ -170,7 +170,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
                     {
                         { AddressType.Work, new Address { Line1 = "1 Street", Country = "US", State = "NY", City = "New York", ZipCode = "10101" } },
                     },
-                CreatedAt = DateTime.UtcNow,
+                Timestamp = DateTime.UtcNow,
             };
             dbCmd.Insert(customer);
 
