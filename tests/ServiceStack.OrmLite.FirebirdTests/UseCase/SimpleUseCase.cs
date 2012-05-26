@@ -30,6 +30,11 @@ namespace ServiceStack.OrmLite.FirebirdTests
 			public DateTime CreatedDate { get; set; }
 		}
 
+		public class GuidId
+		{
+			public Guid Id { get; set; }
+		}
+
 		[Test]
 		public void Simple_CRUD_example()
 		{
@@ -58,6 +63,13 @@ namespace ServiceStack.OrmLite.FirebirdTests
 				Assert.That(rowsLeft, Has.Count.EqualTo(1));
 
 				Assert.That(rowsLeft[0].Name, Is.EqualTo("A"));
+
+				dbCmd.CreateTable<GuidId>(true);
+				Guid g = Guid.NewGuid();
+				dbCmd.Insert(new GuidId { Id = g });
+
+				GuidId gid = dbCmd.First<GuidId>("Id = {0}", g);
+				Assert.That(g == gid.Id);
 			}
 		}
 

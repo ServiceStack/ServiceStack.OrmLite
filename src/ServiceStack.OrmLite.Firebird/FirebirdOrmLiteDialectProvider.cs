@@ -175,6 +175,8 @@ namespace ServiceStack.OrmLite.Firebird
 						ReflectionUtils.SetProperty(objWithProperties, pi, Convert.ToInt16(result));	
 					else if(pi.PropertyType == typeof(Int32))
 						ReflectionUtils.SetProperty(objWithProperties, pi, Convert.ToInt32(result));	
+					else if(pi.PropertyType == typeof(Guid))
+						ReflectionUtils.SetProperty(objWithProperties, pi, result);
 					else
 						ReflectionUtils.SetProperty(objWithProperties, pi, Convert.ToInt64(result));
 				}
