@@ -19,7 +19,7 @@ OrmLite was designed with a focus on the core objectives:
   * High performance - with support for indexes, text blobs, etc.
     * Amongst the [fastest Micro ORMs](http://servicestack.net/benchmarks/) for .NET (just behind [Dapper](http://code.google.com/p/dapper-dot-net/)).
   * Expressive power and flexibility - with access to IDbCommand and raw SQL
-  * Cross platform - supports multiple dbs (currently: Sqlite and Sql Server) running on both .NET and Mono platforms.
+  * Cross platform - supports multiple dbs (currently: Sql Server, Sqlite, MySql, PostgreSQL, Firebird) running on both .NET and Mono platforms.
 
 In OrmLite: **1 Class = 1 Table**. There's no hidden behaviour behind the scenes auto-magically managing hidden references to other tables.
 Any non-scalar properties (i.e. complex types) are text blobbed in a schema-less text field using [.NET's fastest Text Serializer](http://www.servicestack.net/mythz_blog/?p=176).
