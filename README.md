@@ -9,7 +9,7 @@ ServiceStack.OrmLite is an **independent library** and can be used with or witho
 # Introduction
 
 OrmLite is a set of light-weight C# extension methods around `System.Data.*` interfaces which is designed to persist POCO classes with a minimal amount of intrusion and configuration.
-Another Orm with similar goals is [sqlite-net](http://code.google.com/p/sqlite-net/).
+Another Orm with similar goals is [sqlite-net](https://github.com/praeclarum/sqlite-net) by Frank Krueger.
 
 OrmLite was designed with a focus on the core objectives:
 
