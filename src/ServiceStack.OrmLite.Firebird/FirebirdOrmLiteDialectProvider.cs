@@ -20,11 +20,21 @@ namespace ServiceStack.OrmLite.Firebird
 		public static FirebirdOrmLiteDialectProvider Instance = new FirebirdOrmLiteDialectProvider();
 		
 		internal long LastInsertId { get; set; }
-		
+		protected bool CompactGuid;
+
+		internal const string DefaultGuidDefinition = "VARCHAR(37)";
+		internal const string CompactGuidDefinition = "CHAR(16) CHARACTER SET OCTETS";
+
 		public FirebirdOrmLiteDialectProvider()
+			: this(false)
 		{
+		}
+
+		public FirebirdOrmLiteDialectProvider(bool compactGuid)
+		{
+			CompactGuid = compactGuid;
 			base.BoolColumnDefinition = base.IntColumnDefinition;
-			base.GuidColumnDefinition = "VARCHAR(37)";
+			base.GuidColumnDefinition = CompactGuid ? CompactGuidDefinition : DefaultGuidDefinition;
 			base.AutoIncrementDefinition= string.Empty;
 			base.DateTimeColumnDefinition="TIMESTAMP";
 			base.TimeColumnDefinition = "TIME";
@@ -64,7 +74,20 @@ namespace ServiceStack.OrmLite.Firebird
 			
 			if(type == typeof(System.Double))
 				return double.Parse(value.ToString());
-						
+
+			if (type == typeof(Guid) && BitConverter.IsLittleEndian) // TODO: check big endian
+			{
+				if (CompactGuid)
+				{
+					byte[] raw = ((Guid)value).ToByteArray();
+					return new Guid(System.Net.IPAddress.NetworkToHostOrder(BitConverter.ToInt32(raw, 0)),
+						System.Net.IPAddress.NetworkToHostOrder(BitConverter.ToInt16(raw, 4)),
+						System.Net.IPAddress.NetworkToHostOrder(BitConverter.ToInt16(raw, 6)),
+						raw[8], raw[9], raw[10], raw[11], raw[12], raw[13], raw[14], raw[15]);
+				}
+				return new Guid(value.ToString());
+			}
+
 			try
 			{
 				return base.ConvertDbValue(value, type);
@@ -82,8 +105,10 @@ namespace ServiceStack.OrmLite.Firebird
 
 			if (fieldType == typeof(Guid))
 			{
-				var guidValue = (Guid)value;
-				return string.Format("CAST('{0}' AS {1})", guidValue, GuidColumnDefinition);  // TODO : check this !!!
+				if (CompactGuid)
+					return "X'" + ((Guid)value).ToString("N") + "'";
+				else
+					return string.Format("CAST('{0}' AS {1})", (Guid)value, DefaultGuidDefinition);  // TODO : check this !!!
 			}
 			if (fieldType == typeof(DateTime) || fieldType == typeof( DateTime?) )
 			{
