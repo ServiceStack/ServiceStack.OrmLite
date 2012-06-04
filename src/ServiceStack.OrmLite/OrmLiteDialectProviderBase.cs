@@ -186,50 +186,51 @@ namespace ServiceStack.OrmLite
                 this.StringLengthColumnDefinitionFormat, DefaultStringLength);
         }
 
+        protected DbTypes<TDialect> DbTypeMap = new DbTypes<TDialect>();
 		protected void InitColumnTypeMap()
         {
-			DbTypes<TDialect, string>.Set(DbType.String, StringColumnDefinition);
-			DbTypes<TDialect, char>.Set(DbType.StringFixedLength, StringColumnDefinition);
-			DbTypes<TDialect, char?>.Set(DbType.StringFixedLength, StringColumnDefinition);
-			DbTypes<TDialect, char[]>.Set(DbType.String, StringColumnDefinition);
-			DbTypes<TDialect, bool>.Set(DbType.Boolean, BoolColumnDefinition);
-			DbTypes<TDialect, bool?>.Set(DbType.Boolean, BoolColumnDefinition);
-			DbTypes<TDialect, Guid>.Set(DbType.Guid, GuidColumnDefinition);
-			DbTypes<TDialect, Guid?>.Set(DbType.Guid, GuidColumnDefinition);
-			DbTypes<TDialect, DateTime>.Set(DbType.DateTime, DateTimeColumnDefinition);
-			DbTypes<TDialect, DateTime?>.Set(DbType.DateTime, DateTimeColumnDefinition);
-			DbTypes<TDialect, TimeSpan>.Set(DbType.Time, TimeColumnDefinition);
-			DbTypes<TDialect, TimeSpan?>.Set(DbType.Time, TimeColumnDefinition);
-			DbTypes<TDialect, DateTimeOffset>.Set(DbType.Time, TimeColumnDefinition);
-			DbTypes<TDialect, DateTimeOffset?>.Set(DbType.Time, TimeColumnDefinition);
+            DbTypeMap.Set<string>(DbType.String, StringColumnDefinition);
+			DbTypeMap.Set<char>(DbType.StringFixedLength, StringColumnDefinition);
+			DbTypeMap.Set<char?>(DbType.StringFixedLength, StringColumnDefinition);
+			DbTypeMap.Set<char[]>(DbType.String, StringColumnDefinition);
+			DbTypeMap.Set<bool>(DbType.Boolean, BoolColumnDefinition);
+			DbTypeMap.Set<bool?>(DbType.Boolean, BoolColumnDefinition);
+			DbTypeMap.Set<Guid>(DbType.Guid, GuidColumnDefinition);
+			DbTypeMap.Set<Guid?>(DbType.Guid, GuidColumnDefinition);
+			DbTypeMap.Set<DateTime>(DbType.DateTime, DateTimeColumnDefinition);
+			DbTypeMap.Set<DateTime?>(DbType.DateTime, DateTimeColumnDefinition);
+			DbTypeMap.Set<TimeSpan>(DbType.Time, TimeColumnDefinition);
+			DbTypeMap.Set<TimeSpan?>(DbType.Time, TimeColumnDefinition);
+			DbTypeMap.Set<DateTimeOffset>(DbType.Time, TimeColumnDefinition);
+			DbTypeMap.Set<DateTimeOffset?>(DbType.Time, TimeColumnDefinition);
 
-			DbTypes<TDialect, byte>.Set(DbType.Byte, IntColumnDefinition);
-			DbTypes<TDialect, byte?>.Set(DbType.Byte, IntColumnDefinition);
-			DbTypes<TDialect, sbyte>.Set(DbType.SByte, IntColumnDefinition);
-			DbTypes<TDialect, sbyte?>.Set(DbType.SByte, IntColumnDefinition);
-			DbTypes<TDialect, short>.Set(DbType.Int16, IntColumnDefinition);
-			DbTypes<TDialect, short?>.Set(DbType.Int16, IntColumnDefinition);
-			DbTypes<TDialect, ushort>.Set(DbType.UInt16, IntColumnDefinition);
-			DbTypes<TDialect, ushort?>.Set(DbType.UInt16, IntColumnDefinition);
-			DbTypes<TDialect, int>.Set(DbType.Int32, IntColumnDefinition);
-			DbTypes<TDialect, int?>.Set(DbType.Int32, IntColumnDefinition);
-			DbTypes<TDialect, uint>.Set(DbType.UInt32, IntColumnDefinition);
-			DbTypes<TDialect, uint?>.Set(DbType.UInt32, IntColumnDefinition);
+			DbTypeMap.Set<byte>(DbType.Byte, IntColumnDefinition);
+			DbTypeMap.Set<byte?>(DbType.Byte, IntColumnDefinition);
+			DbTypeMap.Set<sbyte>(DbType.SByte, IntColumnDefinition);
+			DbTypeMap.Set<sbyte?>(DbType.SByte, IntColumnDefinition);
+			DbTypeMap.Set<short>(DbType.Int16, IntColumnDefinition);
+			DbTypeMap.Set<short?>(DbType.Int16, IntColumnDefinition);
+			DbTypeMap.Set<ushort>(DbType.UInt16, IntColumnDefinition);
+			DbTypeMap.Set<ushort?>(DbType.UInt16, IntColumnDefinition);
+			DbTypeMap.Set<int>(DbType.Int32, IntColumnDefinition);
+			DbTypeMap.Set<int?>(DbType.Int32, IntColumnDefinition);
+			DbTypeMap.Set<uint>(DbType.UInt32, IntColumnDefinition);
+			DbTypeMap.Set<uint?>(DbType.UInt32, IntColumnDefinition);
 
-			DbTypes<TDialect, long>.Set(DbType.Int64, LongColumnDefinition);
-			DbTypes<TDialect, long?>.Set(DbType.Int64, LongColumnDefinition);
-			DbTypes<TDialect, ulong>.Set(DbType.UInt64, LongColumnDefinition);
-			DbTypes<TDialect, ulong?>.Set(DbType.UInt64, LongColumnDefinition);
+			DbTypeMap.Set<long>(DbType.Int64, LongColumnDefinition);
+			DbTypeMap.Set<long?>(DbType.Int64, LongColumnDefinition);
+			DbTypeMap.Set<ulong>(DbType.UInt64, LongColumnDefinition);
+			DbTypeMap.Set<ulong?>(DbType.UInt64, LongColumnDefinition);
 
-			DbTypes<TDialect, float>.Set(DbType.Single, RealColumnDefinition);
-			DbTypes<TDialect, float?>.Set(DbType.Single, RealColumnDefinition);
-			DbTypes<TDialect, double>.Set(DbType.Double, RealColumnDefinition);
-			DbTypes<TDialect, double?>.Set(DbType.Double, RealColumnDefinition);
+			DbTypeMap.Set<float>(DbType.Single, RealColumnDefinition);
+			DbTypeMap.Set<float?>(DbType.Single, RealColumnDefinition);
+			DbTypeMap.Set<double>(DbType.Double, RealColumnDefinition);
+			DbTypeMap.Set<double?>(DbType.Double, RealColumnDefinition);
 
-			DbTypes<TDialect, decimal>.Set(DbType.Decimal, DecimalColumnDefinition);
-			DbTypes<TDialect, decimal?>.Set(DbType.Decimal, DecimalColumnDefinition);
+			DbTypeMap.Set<decimal>(DbType.Decimal, DecimalColumnDefinition);
+			DbTypeMap.Set<decimal?>(DbType.Decimal, DecimalColumnDefinition);
 
-			DbTypes<TDialect, byte[]>.Set(DbType.Binary, BlobColumnDefinition);
+			DbTypeMap.Set<byte[]>(DbType.Binary, BlobColumnDefinition);
         }
 
         public string DefaultValueFormat = " DEFAULT ({0})";
@@ -237,7 +238,7 @@ namespace ServiceStack.OrmLite
         public virtual bool ShouldQuoteValue(Type fieldType)
         {
             string fieldDefinition;
-            if (!DbTypes<TDialect>.ColumnTypeMap.TryGetValue(fieldType, out fieldDefinition))
+            if (!DbTypeMap.ColumnTypeMap.TryGetValue(fieldType, out fieldDefinition))
             {
                 fieldDefinition = this.GetUndefinedColumnDefinition(fieldType, null);
             }
@@ -360,7 +361,7 @@ namespace ServiceStack.OrmLite
             }
             else
             {
-                if (!DbTypes<TDialect>.ColumnTypeMap.TryGetValue(fieldType, out fieldDefinition))
+                if (!DbTypeMap.ColumnTypeMap.TryGetValue(fieldType, out fieldDefinition))
                 {
                     fieldDefinition = this.GetUndefinedColumnDefinition(fieldType, fieldLength);
                 }
@@ -543,10 +544,10 @@ namespace ServiceStack.OrmLite
         {
             var p = command.CreateParameter();
             p.ParameterName = String.Format("{0}{1}", ParamString, fieldDef.FieldName);
-            
-            if (DbTypes<TDialect>.ColumnDbTypeMap.ContainsKey(fieldDef.FieldType))
+
+            if (DbTypeMap.ColumnDbTypeMap.ContainsKey(fieldDef.FieldType))
             {
-				p.DbType = DbTypes<TDialect>.ColumnDbTypeMap[fieldDef.FieldType];
+                p.DbType = DbTypeMap.ColumnDbTypeMap[fieldDef.FieldType];
                 p.Value = GetValueOrDbNull(fieldDef, objWithProperties);
             } 
 			else
@@ -784,13 +785,13 @@ namespace ServiceStack.OrmLite
 
 		public virtual DbType GetColumnDbType(Type valueType)
 		{
-			return DbTypes<TDialect>.ColumnDbTypeMap[valueType];
+            return DbTypeMap.ColumnDbTypeMap[valueType];
 		}
 
 		public virtual string GetColumnTypeDefinition(Type fieldType)
 		{
 			string fieldDefinition;
-			DbTypes<TDialect>.ColumnTypeMap.TryGetValue(fieldType, out fieldDefinition);
+            DbTypeMap.ColumnTypeMap.TryGetValue(fieldType, out fieldDefinition);
 			return fieldDefinition ?? GetUndefinedColumnDefinition(fieldType, null);
 		}
 
