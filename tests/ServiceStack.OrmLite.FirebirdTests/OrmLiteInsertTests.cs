@@ -67,11 +67,31 @@ namespace ServiceStack.OrmLite.FirebirdTests
 			}
 		}
 
-		[Test]
-		public void Can_insert_and_select_from_ModelWithFieldsOfDifferentAndNullableTypes_table()
+        [Test]
+        public void Can_insert_and_select_from_ModelWithFieldsOfDifferentAndNullableTypes_table_default_GUID()
+        {
+            using (var db = ConnectionString.OpenDbConnection())
+            using (var dbConn = db.CreateCommand())
+                Can_insert_and_select_from_ModelWithFieldsOfDifferentAndNullableTypes_table_impl(dbConn);
+        }
+
+        [Test]
+		public void Can_insert_and_select_from_ModelWithFieldsOfDifferentAndNullableTypes_table_compact_GUID()
+        {
+            Firebird.FirebirdOrmLiteDialectProvider dialect = new Firebird.FirebirdOrmLiteDialectProvider(true);
+            OrmLiteConnectionFactory factory = new OrmLiteConnectionFactory(ConnectionString, dialect);
+            using (var db = factory.CreateDbConnection())
+            {
+                db.Open();
+                using (var dbConn = db.CreateCommand())
+                {
+                    Can_insert_and_select_from_ModelWithFieldsOfDifferentAndNullableTypes_table_impl(dbConn);
+                }
+            }
+        }
+
+		private void Can_insert_and_select_from_ModelWithFieldsOfDifferentAndNullableTypes_table_impl(System.Data.IDbCommand dbConn)
 		{
-			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbConn = db.CreateCommand())
 			{
 				dbConn.CreateTable<ModelWithFieldsOfDifferentAndNullableTypes>(true);
 
