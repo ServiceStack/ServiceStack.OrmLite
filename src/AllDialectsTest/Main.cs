@@ -541,7 +541,27 @@ namespace AllDialectsTest
 					Console.WriteLine("GetScalar long: Expected:{0} Selected {1} {2}",expectedCount, 
 					                  r7,
 					                  expectedCount == r7 ? "OK" : "**************  FAILED ***************");
-							
+					
+
+                    // more updates.....
+                    Console.WriteLine("more updates.....................");
+                     ev.Update();// all fields will be updated
+                    // select and update 
+                    expected=1;
+                    var rr= dbCmd.FirstOrDefault<Author>(rn => rn.Name=="Luis garzon");
+                    rr.City="Madrid";
+                    rr.Comments="Updated";
+                    ev.Where(r=>r.Id==rr.Id); // if omit,  then all records will be updated 
+                    rows=dbCmd.Update(rr,ev); // == dbCmd.Update(rr) but it returns void
+                    Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, rows, expected == rows ? "OK" : "**************  FAILED ***************");
+
+                    expected=0;
+                    ev.Where(r=>r.City=="Ciudad Gotica");
+                    rows=dbCmd.Update(rr, ev);
+                    Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, rows, expected == rows ? "OK" : "**************  FAILED ***************");
+
+
+
 					DateTime t3= DateTime.Now;
 					Console.WriteLine("Expressions test in: {0}", t3 - t2);
 					Console.WriteLine("All test in :        {0}", t3 - t1);

@@ -239,6 +239,14 @@ namespace ServiceStack.OrmLite
 			return this;
 		}
 		
+        /// <summary>
+        /// Clear UpdateFields list ( all fields will be updated)
+        /// </summary>
+        public virtual  SqlExpressionVisitor<T> Update(){
+            this.updateFields = new List<string>();
+            return this;
+        }
+
 		/// <summary>
 		/// Fields to be inserted.
 		/// </summary>
@@ -265,15 +273,24 @@ namespace ServiceStack.OrmLite
 			this.insertFields=insertFields;
 			return this;
 		}
-			
+		
+        /// <summary>
+        /// Clear InsertFields list ( all fields will be inserted)
+        /// </summary>
+        public virtual  SqlExpressionVisitor<T> Insert(){
+            this.insertFields = new List<string>();
+            return this;
+        }
 			
 		
 		public virtual string ToDeleteRowStatement(){
+
 			return string.Format("DELETE FROM {0} {1}", 
 			                     OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef),
 			                     WhereExpression);
 		}
-		
+
+
 		public virtual string ToSelectStatement(){
 			StringBuilder sql = new StringBuilder();
 			
@@ -852,7 +869,12 @@ namespace ServiceStack.OrmLite
 					fields),
 				OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef));
 		}
-				
+		
+        public IList<string> GetAllFields(){
+            var md = typeof(T).GetModelDefinition();
+            return md.FieldDefinitions.Select(r=>r.Name).ToList();
+        }
+
 	}
 	
 }

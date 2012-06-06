@@ -17,8 +17,15 @@ namespace ServiceStack.OrmLite
 		public static int Update<T>(this IDbCommand dbCmd, T obj, SqlExpressionVisitor<T> expression )
 			where T : new()
 		{
-			string sql = OrmLiteConfig.DialectProvider.ToUpdateRowStatement( obj, expression.UpdateFields);
-			sql = sql +( !expression.WhereExpression.IsNullOrEmpty()?  expression.WhereExpression:"" ); 	
+            IList<string> uf;
+            if(expression.UpdateFields.Count==0)
+                uf= expression.GetAllFields();
+            else
+                uf= expression.UpdateFields;
+
+			string sql = OrmLiteConfig.DialectProvider.ToUpdateRowStatement( obj, uf);
+
+            if(!expression.WhereExpression.IsNullOrEmpty()) sql= sql+expression.WhereExpression; 
 			return dbCmd.ExecuteSql( sql); 	
 		}
 		
