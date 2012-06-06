@@ -871,8 +871,7 @@ namespace ServiceStack.OrmLite
 		}
 		
         public IList<string> GetAllFields(){
-            var md = typeof(T).GetModelDefinition();
-            return md.FieldDefinitions.Select(r=>r.Name).ToList();
+            return modelDef.FieldDefinitions.Select(r=>r.Name).ToList();
         }
 
 	}
