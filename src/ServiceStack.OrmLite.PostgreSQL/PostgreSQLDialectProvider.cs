@@ -24,8 +24,9 @@ namespace ServiceStack.OrmLite.PostgreSQL
 			base.RealColumnDefinition = "double precision";
 			base.StringLengthColumnDefinitionFormat = "text";
 			base.InitColumnTypeMap();
-			DbTypes<PostgreSQLDialectProvider, TimeSpan>.Set(DbType.Time, "Interval");
-			DbTypes<PostgreSQLDialectProvider, TimeSpan?>.Set(DbType.Time, "Interval");
+
+            DbTypeMap.Set<TimeSpan>(DbType.Time, "Interval");
+            DbTypeMap.Set<TimeSpan?>(DbType.Time, "Interval");
 		}
 
 		public override string GetColumnDefinition(
