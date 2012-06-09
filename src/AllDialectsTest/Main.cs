@@ -560,7 +560,14 @@ namespace AllDialectsTest
                     rows=dbCmd.Update(rr, ev);
                     Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, rows, expected == rows ? "OK" : "**************  FAILED ***************");
 
+                    expected= dbCmd.Select<Author>(x=>x.City=="Madrid").Count;
+                    author = new Author(){Active=false};
+                    rows=dbCmd.Update(author, x=>x.Active,  x=>x.City=="Madrid");
+                    Console.WriteLine("Expected:{0}  Updated:{1}  {2}", expected, rows, expected == rows ? "OK" : "**************  FAILED ***************");
 
+                    expected= dbCmd.Select<Author>(x=>x.Active==false).Count;
+                    rows = dbCmd.Delete<Author>( x=>x.Active==false);
+                    Console.WriteLine("Expected:{0}  Deleted:{1}  {2}", expected, rows, expected == rows ? "OK" : "**************  FAILED ***************");
 
 					DateTime t3= DateTime.Now;
 					Console.WriteLine("Expressions test in: {0}", t3 - t2);

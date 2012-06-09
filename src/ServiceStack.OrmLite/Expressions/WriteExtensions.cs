@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using ServiceStack.Common.Extensions;
 using ServiceStack.Common.Utils;
@@ -47,6 +48,25 @@ namespace ServiceStack.OrmLite
 			return dbCmd.ExecuteSql( sql); 	
 		}
 		
+
+        public static int Delete<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
+            where T : new()
+        {
+            var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();
+            ev.Where(predicate);
+            return dbCmd.Delete(ev);
+        }
+
+        public static int Update<T,TKey>(this IDbCommand dbCmd, T obj,
+                                    Expression<Func<T, TKey>> fields,
+                                    Expression<Func<T, bool>> predicate)
+            where T : new()
+        {
+            var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();
+            ev.Update(fields);
+            ev.Where(predicate);
+            return dbCmd.Update(obj,ev);
+        }
 
 	}
 }
