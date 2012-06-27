@@ -312,7 +312,7 @@ For a one-time use of a connection, you can query straight of the `IDbFactory` w
     var customers = dbFactory.Exec(dbCmd => dbCmd.Where<Customer>(new { Age = 30 }));
 
 The **Select** methods allow you to construct Sql using C# `string.Format()` syntax.
-If you're SQL doesn't start with a **SELECT** statement, it is assumed a WHERE clause is being provided, e.g:
+If your SQL doesn't start with a **SELECT** statement, it is assumed a WHERE clause is being provided, e.g:
 
     var tracks = dbCmd.Select<Track>("Artist = {0} AND Album = {1}", "Nirvana", "Heart Shaped Box");
 
