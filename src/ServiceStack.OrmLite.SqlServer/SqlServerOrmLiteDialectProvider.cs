@@ -71,7 +71,8 @@ namespace ServiceStack.OrmLite.SqlServer
             if (!modelDef.IsInSchema)
                 return base.GetQuotedTableName(modelDef);
 
-            return string.Format("\"{0}\".\"{1}\"", modelDef.Schema, NamingStrategy.GetTableName(modelDef.ModelName));
+            var escapedSchema = modelDef.Schema.Replace(".", "\".\"");
+            return string.Format("\"{0}\".\"{1}\"", escapedSchema, NamingStrategy.GetTableName(modelDef.ModelName));
         }
 
 		public override object ConvertDbValue(object value, Type type)

@@ -21,12 +21,12 @@ using ServiceStack.Common.Extensions;
 
 namespace ServiceStack.OrmLite
 {
- 
+
     public abstract class OrmLiteDialectProviderBase<TDialect>
         : IOrmLiteDialectProvider
-		where TDialect : IOrmLiteDialectProvider
-	{
-		private static readonly ILog Log = LogManager.GetLogger(typeof(IOrmLiteDialectProvider));
+        where TDialect : IOrmLiteDialectProvider
+    {
+        private static readonly ILog Log = LogManager.GetLogger(typeof(IOrmLiteDialectProvider));
 
         [Conditional("DEBUG")]
         private static void LogDebug(string fmt, params object[] args)
@@ -36,7 +36,7 @@ namespace ServiceStack.OrmLite
             else
                 Log.Debug(fmt);
         }
-		
+
         #region ADO.NET supported types
         /* ADO.NET UNDERSTOOD DATA TYPES:
 			COUNTER	DbType.Int64
@@ -110,24 +110,24 @@ namespace ServiceStack.OrmLite
 
         protected OrmLiteDialectProviderBase()
         {
-			UpdateStringColumnDefinitions();
+            UpdateStringColumnDefinitions();
         }
-		
-		private int defaultDecimalPrecision=18;
-		private int defaultDecimalScale=12;
-				
-		public int DefaultDecimalPrecision
-		{
-			get { return defaultDecimalPrecision; }
-			set { defaultDecimalPrecision = value; }
-		}
-				
-		public int DefaultDecimalScale
-		{
-			get { return defaultDecimalScale; }
-			set { defaultDecimalScale = value; }
-		}
-		
+
+        private int defaultDecimalPrecision = 18;
+        private int defaultDecimalScale = 12;
+
+        public int DefaultDecimalPrecision
+        {
+            get { return defaultDecimalPrecision; }
+            set { defaultDecimalPrecision = value; }
+        }
+
+        public int DefaultDecimalScale
+        {
+            get { return defaultDecimalScale; }
+            set { defaultDecimalScale = value; }
+        }
+
         private int defaultStringLength = 8000; //SqlServer express limit
         public int DefaultStringLength
         {
@@ -142,12 +142,12 @@ namespace ServiceStack.OrmLite
             }
         }
 
-		private string paramString = "@";
-		public string ParamString
-		{
-			get { return paramString; }
-			set { paramString = value; }
-		}	
+        private string paramString = "@";
+        public string ParamString
+        {
+            get { return paramString; }
+            set { paramString = value; }
+        }
 
         private bool useUnicode;
         public virtual bool UseUnicode
@@ -163,18 +163,18 @@ namespace ServiceStack.OrmLite
             }
         }
 
-		private INamingStrategy namingStrategy = new OrmLiteNamingStrategyBase();
-		public INamingStrategy NamingStrategy
-		{
-			get
-			{
-				return namingStrategy;
-			}
-			set
-			{
-				namingStrategy = value;
-			}
-		}
+        private INamingStrategy namingStrategy = new OrmLiteNamingStrategyBase();
+        public INamingStrategy NamingStrategy
+        {
+            get
+            {
+                return namingStrategy;
+            }
+            set
+            {
+                namingStrategy = value;
+            }
+        }
 
         private void UpdateStringColumnDefinitions()
         {
@@ -187,50 +187,50 @@ namespace ServiceStack.OrmLite
         }
 
         protected DbTypes<TDialect> DbTypeMap = new DbTypes<TDialect>();
-		protected void InitColumnTypeMap()
+        protected void InitColumnTypeMap()
         {
             DbTypeMap.Set<string>(DbType.String, StringColumnDefinition);
-			DbTypeMap.Set<char>(DbType.StringFixedLength, StringColumnDefinition);
-			DbTypeMap.Set<char?>(DbType.StringFixedLength, StringColumnDefinition);
-			DbTypeMap.Set<char[]>(DbType.String, StringColumnDefinition);
-			DbTypeMap.Set<bool>(DbType.Boolean, BoolColumnDefinition);
-			DbTypeMap.Set<bool?>(DbType.Boolean, BoolColumnDefinition);
-			DbTypeMap.Set<Guid>(DbType.Guid, GuidColumnDefinition);
-			DbTypeMap.Set<Guid?>(DbType.Guid, GuidColumnDefinition);
-			DbTypeMap.Set<DateTime>(DbType.DateTime, DateTimeColumnDefinition);
-			DbTypeMap.Set<DateTime?>(DbType.DateTime, DateTimeColumnDefinition);
-			DbTypeMap.Set<TimeSpan>(DbType.Time, TimeColumnDefinition);
-			DbTypeMap.Set<TimeSpan?>(DbType.Time, TimeColumnDefinition);
-			DbTypeMap.Set<DateTimeOffset>(DbType.Time, TimeColumnDefinition);
-			DbTypeMap.Set<DateTimeOffset?>(DbType.Time, TimeColumnDefinition);
+            DbTypeMap.Set<char>(DbType.StringFixedLength, StringColumnDefinition);
+            DbTypeMap.Set<char?>(DbType.StringFixedLength, StringColumnDefinition);
+            DbTypeMap.Set<char[]>(DbType.String, StringColumnDefinition);
+            DbTypeMap.Set<bool>(DbType.Boolean, BoolColumnDefinition);
+            DbTypeMap.Set<bool?>(DbType.Boolean, BoolColumnDefinition);
+            DbTypeMap.Set<Guid>(DbType.Guid, GuidColumnDefinition);
+            DbTypeMap.Set<Guid?>(DbType.Guid, GuidColumnDefinition);
+            DbTypeMap.Set<DateTime>(DbType.DateTime, DateTimeColumnDefinition);
+            DbTypeMap.Set<DateTime?>(DbType.DateTime, DateTimeColumnDefinition);
+            DbTypeMap.Set<TimeSpan>(DbType.Time, TimeColumnDefinition);
+            DbTypeMap.Set<TimeSpan?>(DbType.Time, TimeColumnDefinition);
+            DbTypeMap.Set<DateTimeOffset>(DbType.Time, TimeColumnDefinition);
+            DbTypeMap.Set<DateTimeOffset?>(DbType.Time, TimeColumnDefinition);
 
-			DbTypeMap.Set<byte>(DbType.Byte, IntColumnDefinition);
-			DbTypeMap.Set<byte?>(DbType.Byte, IntColumnDefinition);
-			DbTypeMap.Set<sbyte>(DbType.SByte, IntColumnDefinition);
-			DbTypeMap.Set<sbyte?>(DbType.SByte, IntColumnDefinition);
-			DbTypeMap.Set<short>(DbType.Int16, IntColumnDefinition);
-			DbTypeMap.Set<short?>(DbType.Int16, IntColumnDefinition);
-			DbTypeMap.Set<ushort>(DbType.UInt16, IntColumnDefinition);
-			DbTypeMap.Set<ushort?>(DbType.UInt16, IntColumnDefinition);
-			DbTypeMap.Set<int>(DbType.Int32, IntColumnDefinition);
-			DbTypeMap.Set<int?>(DbType.Int32, IntColumnDefinition);
-			DbTypeMap.Set<uint>(DbType.UInt32, IntColumnDefinition);
-			DbTypeMap.Set<uint?>(DbType.UInt32, IntColumnDefinition);
+            DbTypeMap.Set<byte>(DbType.Byte, IntColumnDefinition);
+            DbTypeMap.Set<byte?>(DbType.Byte, IntColumnDefinition);
+            DbTypeMap.Set<sbyte>(DbType.SByte, IntColumnDefinition);
+            DbTypeMap.Set<sbyte?>(DbType.SByte, IntColumnDefinition);
+            DbTypeMap.Set<short>(DbType.Int16, IntColumnDefinition);
+            DbTypeMap.Set<short?>(DbType.Int16, IntColumnDefinition);
+            DbTypeMap.Set<ushort>(DbType.UInt16, IntColumnDefinition);
+            DbTypeMap.Set<ushort?>(DbType.UInt16, IntColumnDefinition);
+            DbTypeMap.Set<int>(DbType.Int32, IntColumnDefinition);
+            DbTypeMap.Set<int?>(DbType.Int32, IntColumnDefinition);
+            DbTypeMap.Set<uint>(DbType.UInt32, IntColumnDefinition);
+            DbTypeMap.Set<uint?>(DbType.UInt32, IntColumnDefinition);
 
-			DbTypeMap.Set<long>(DbType.Int64, LongColumnDefinition);
-			DbTypeMap.Set<long?>(DbType.Int64, LongColumnDefinition);
-			DbTypeMap.Set<ulong>(DbType.UInt64, LongColumnDefinition);
-			DbTypeMap.Set<ulong?>(DbType.UInt64, LongColumnDefinition);
+            DbTypeMap.Set<long>(DbType.Int64, LongColumnDefinition);
+            DbTypeMap.Set<long?>(DbType.Int64, LongColumnDefinition);
+            DbTypeMap.Set<ulong>(DbType.UInt64, LongColumnDefinition);
+            DbTypeMap.Set<ulong?>(DbType.UInt64, LongColumnDefinition);
 
-			DbTypeMap.Set<float>(DbType.Single, RealColumnDefinition);
-			DbTypeMap.Set<float?>(DbType.Single, RealColumnDefinition);
-			DbTypeMap.Set<double>(DbType.Double, RealColumnDefinition);
-			DbTypeMap.Set<double?>(DbType.Double, RealColumnDefinition);
+            DbTypeMap.Set<float>(DbType.Single, RealColumnDefinition);
+            DbTypeMap.Set<float?>(DbType.Single, RealColumnDefinition);
+            DbTypeMap.Set<double>(DbType.Double, RealColumnDefinition);
+            DbTypeMap.Set<double?>(DbType.Double, RealColumnDefinition);
 
-			DbTypeMap.Set<decimal>(DbType.Decimal, DecimalColumnDefinition);
-			DbTypeMap.Set<decimal?>(DbType.Decimal, DecimalColumnDefinition);
+            DbTypeMap.Set<decimal>(DbType.Decimal, DecimalColumnDefinition);
+            DbTypeMap.Set<decimal?>(DbType.Decimal, DecimalColumnDefinition);
 
-			DbTypeMap.Set<byte[]>(DbType.Binary, BlobColumnDefinition);
+            DbTypeMap.Set<byte[]>(DbType.Binary, BlobColumnDefinition);
         }
 
         public string DefaultValueFormat = " DEFAULT ({0})";
@@ -279,7 +279,7 @@ namespace ServiceStack.OrmLite
                 var convertedValue = TypeSerializer.DeserializeFromString(value.ToString(), type);
                 return convertedValue;
             }
-            catch (Exception )
+            catch (Exception)
             {
                 log.ErrorFormat("Error ConvertDbValue trying to convert {0} into {1}",
                     value, type.Name);
@@ -328,14 +328,14 @@ namespace ServiceStack.OrmLite
             return string.Format("\"{0}\"", namingStrategy.GetTableName(modelDef.ModelName));
         }
 
-		public virtual string GetQuotedColumnName(string columnName)
-		{
-			return string.Format("\"{0}\"", namingStrategy.GetColumnName(columnName));
-		}
+        public virtual string GetQuotedColumnName(string columnName)
+        {
+            return string.Format("\"{0}\"", namingStrategy.GetColumnName(columnName));
+        }
 
         public virtual string GetQuotedName(string name)
         {
-			return string.Format("\"{0}\"", name);
+            return string.Format("\"{0}\"", name);
         }
 
         protected virtual string GetUndefinedColumnDefinition(Type fieldType, int? fieldLength)
@@ -349,9 +349,9 @@ namespace ServiceStack.OrmLite
                 string.Format("Property of type: {0} is not supported", fieldType.FullName));
         }
 
-        public virtual string GetColumnDefinition(string fieldName, Type fieldType, 
-			bool isPrimaryKey, bool autoIncrement, bool isNullable, 
-			int? fieldLength, int? scale, string defaultValue)
+        public virtual string GetColumnDefinition(string fieldName, Type fieldType,
+            bool isPrimaryKey, bool autoIncrement, bool isNullable,
+            int? fieldLength, int? scale, string defaultValue)
         {
             string fieldDefinition;
 
@@ -399,53 +399,55 @@ namespace ServiceStack.OrmLite
         }
 
         public abstract long GetLastInsertId(IDbCommand command);
-		
-		public virtual string ToSelectStatement( Type tableType,  string sqlFilter, params object[] filterParams){
-			
-			var sql = new StringBuilder();
-			const string SelectStatement = "SELECT ";
-			var modelDef= tableType.GetModelDefinition();
-			var isFullSelectStatement = 
-				!string.IsNullOrEmpty(sqlFilter) 
-				&& sqlFilter.TrimStart().StartsWith(SelectStatement, StringComparison.OrdinalIgnoreCase);
 
-			if (isFullSelectStatement) return sqlFilter.SqlFormat(filterParams);
-
-		    sql.AppendFormat("SELECT {0} FROM {1}", tableType.GetColumnNames(),
-		                     GetQuotedTableName(modelDef));
-			if (!string.IsNullOrEmpty(sqlFilter))
-			{
-				sqlFilter = sqlFilter.SqlFormat(filterParams);
-				if (!sqlFilter.StartsWith("ORDER ", StringComparison.InvariantCultureIgnoreCase)
-					&& !sqlFilter.StartsWith("LIMIT ", StringComparison.InvariantCultureIgnoreCase))
-				{
-					sql.Append(" WHERE ");
-				}
-				sql.Append(sqlFilter);
-			}
-
-			return sql.ToString();
-			
-		}
-		
-		public virtual string ToInsertRowStatement( object objWithProperties,  IDbCommand command)
+        public virtual string ToSelectStatement(Type tableType, string sqlFilter, params object[] filterParams)
         {
-			return ToInsertRowStatement(objWithProperties, new List<string>(), command);
+
+            var sql = new StringBuilder();
+            const string SelectStatement = "SELECT ";
+            var modelDef = tableType.GetModelDefinition();
+            var isFullSelectStatement =
+                !string.IsNullOrEmpty(sqlFilter)
+                && sqlFilter.TrimStart().StartsWith(SelectStatement, StringComparison.OrdinalIgnoreCase);
+
+            if (isFullSelectStatement) return sqlFilter.SqlFormat(filterParams);
+
+            sql.AppendFormat("SELECT {0} FROM {1}", tableType.GetColumnNames(),
+                             GetQuotedTableName(modelDef));
+            if (!string.IsNullOrEmpty(sqlFilter))
+            {
+                sqlFilter = sqlFilter.SqlFormat(filterParams);
+                if (!sqlFilter.StartsWith("ORDER ", StringComparison.InvariantCultureIgnoreCase)
+                    && !sqlFilter.StartsWith("LIMIT ", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    sql.Append(" WHERE ");
+                }
+                sql.Append(sqlFilter);
+            }
+
+            return sql.ToString();
+
         }
-		
-		public virtual string ToInsertRowStatement( object objWithProperties, IList<string>insertFields, IDbCommand command){
-			
-			if( insertFields==null ) insertFields = new List<string>(); 
-			var sbColumnNames = new StringBuilder();
+
+        public virtual string ToInsertRowStatement(object objWithProperties, IDbCommand command)
+        {
+            return ToInsertRowStatement(objWithProperties, new List<string>(), command);
+        }
+
+        public virtual string ToInsertRowStatement(object objWithProperties, IList<string> insertFields, IDbCommand command)
+        {
+
+            if (insertFields == null) insertFields = new List<string>();
+            var sbColumnNames = new StringBuilder();
             var sbColumnValues = new StringBuilder();
-			var modelDef= objWithProperties.GetType().GetModelDefinition();
-                    
+            var modelDef = objWithProperties.GetType().GetModelDefinition();
+
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
                 if (fieldDef.AutoIncrement) continue;
-				//insertFields contains Property "Name" of fields to insert ( that's how expressions work )
-				if( insertFields.Count>0 && !insertFields.Contains( fieldDef.Name )) continue;
-				
+                //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
+                if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name)) continue;
+
                 if (sbColumnNames.Length > 0) sbColumnNames.Append(",");
                 if (sbColumnValues.Length > 0) sbColumnValues.Append(",");
 
@@ -465,7 +467,7 @@ namespace ServiceStack.OrmLite
                                     GetQuotedTableName(modelDef), sbColumnNames, sbColumnValues);
 
             return sql;
-		}
+        }
 
         public virtual IDbCommand CreateParameterizedInsertStatement(object objWithProperties, IDbConnection connection)
         {
@@ -496,7 +498,7 @@ namespace ServiceStack.OrmLite
                     sbColumnValues.Append(ParamString)
                                   .Append(fieldDef.FieldName);
 
-                    AddParameterForFieldToCommand(command, fieldDef, objWithProperties);                    
+                    AddParameterForFieldToCommand(command, fieldDef, objWithProperties);
                 }
                 catch (Exception ex)
                 {
@@ -530,7 +532,7 @@ namespace ServiceStack.OrmLite
 
                 try
                 {
-                    AddParameterForFieldToCommand(command, fieldDef, objWithProperties);                 
+                    AddParameterForFieldToCommand(command, fieldDef, objWithProperties);
                 }
                 catch (Exception ex)
                 {
@@ -543,22 +545,19 @@ namespace ServiceStack.OrmLite
         private void AddParameterForFieldToCommand(IDbCommand command, FieldDefinition fieldDef, object objWithProperties)
         {
             var p = command.CreateParameter();
-            p.ParameterName = String.Format("{0}{1}", ParamString, fieldDef.FieldName);
+            p.ParameterName = string.Format("{0}{1}", ParamString, fieldDef.FieldName);
 
             if (DbTypeMap.ColumnDbTypeMap.ContainsKey(fieldDef.FieldType))
             {
                 p.DbType = DbTypeMap.ColumnDbTypeMap[fieldDef.FieldType];
                 p.Value = GetValueOrDbNull(fieldDef, objWithProperties);
-            } 
-			else
+            }
+            else
             {
-                var unquotedVal = fieldDef.GetQuotedValue(objWithProperties)
-                                          .TrimStart('\'')
-                                          .TrimEnd('\'');
+                var unquotedVal = fieldDef.GetQuotedValue(objWithProperties).TrimStart('\'').TrimEnd('\'');
                 p.DbType = DbType.String;
                 p.Value = GetValueOrDbNull(unquotedVal);
             }
-           
 
             command.Parameters.Add(p);
         }
@@ -567,7 +566,7 @@ namespace ServiceStack.OrmLite
         {
             return fieldDef.GetValue(objWithProperties) ?? DBNull.Value;
         }
-	
+
         private object GetValueOrDbNull(String value)
         {
             if (String.IsNullOrEmpty(value))
@@ -576,22 +575,24 @@ namespace ServiceStack.OrmLite
             return value;
         }
 
-		public virtual string ToUpdateRowStatement(object objWithProperties){
-			return ToUpdateRowStatement(objWithProperties, new List<string>());
-		}
-		
-		public virtual string ToUpdateRowStatement(object objWithProperties, IList<string> updateFields){
-			
-			if (updateFields==null) updateFields= new List<string>();
-			var sqlFilter = new StringBuilder();
+        public virtual string ToUpdateRowStatement(object objWithProperties)
+        {
+            return ToUpdateRowStatement(objWithProperties, new List<string>());
+        }
+
+        public virtual string ToUpdateRowStatement(object objWithProperties, IList<string> updateFields)
+        {
+
+            if (updateFields == null) updateFields = new List<string>();
+            var sqlFilter = new StringBuilder();
             var sql = new StringBuilder();
-			var modelDef= objWithProperties.GetType().GetModelDefinition();
-            
+            var modelDef = objWithProperties.GetType().GetModelDefinition();
+
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
                 try
                 {
-                    if (fieldDef.IsPrimaryKey && updateFields.Count==0)
+                    if (fieldDef.IsPrimaryKey && updateFields.Count == 0)
                     {
                         if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
 
@@ -599,10 +600,10 @@ namespace ServiceStack.OrmLite
 
                         continue;
                     }
-					
-					if( updateFields.Count>0 && !updateFields.Contains( fieldDef.Name )) continue;
+
+                    if (updateFields.Count > 0 && !updateFields.Contains(fieldDef.Name)) continue;
                     if (sql.Length > 0) sql.Append(",");
-					sql.AppendFormat("{0} = {1}", GetQuotedColumnName(fieldDef.FieldName), fieldDef.GetQuotedValue(objWithProperties));
+                    sql.AppendFormat("{0} = {1}", GetQuotedColumnName(fieldDef.FieldName), fieldDef.GetQuotedValue(objWithProperties));
                 }
                 catch (Exception ex)
                 {
@@ -611,11 +612,11 @@ namespace ServiceStack.OrmLite
             }
 
             var updateSql = string.Format("UPDATE {0} SET {1} {2}",
-                GetQuotedTableName(modelDef), sql, (sqlFilter.Length>0? "WHERE "+ sqlFilter:""));
-				
+                GetQuotedTableName(modelDef), sql, (sqlFilter.Length > 0 ? "WHERE " + sqlFilter : ""));
+
 
             return updateSql;
-		}
+        }
 
         public virtual IDbCommand CreateParameterizedUpdateStatement(object objWithProperties, IDbConnection connection)
         {
@@ -639,7 +640,7 @@ namespace ServiceStack.OrmLite
                     {
                         if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
 
-						sqlFilter.AppendFormat("{0} = {1}", GetQuotedColumnName(fieldDef.FieldName), String.Concat(ParamString, fieldDef.Name));
+                        sqlFilter.AppendFormat("{0} = {1}", GetQuotedColumnName(fieldDef.FieldName), String.Concat(ParamString, fieldDef.Name));
                         AddParameterForFieldToCommand(command, fieldDef, objWithProperties);
 
                         continue;
@@ -660,12 +661,12 @@ namespace ServiceStack.OrmLite
             command.CommandText = string.Format("UPDATE {0} SET {1} {2}", GetQuotedTableName(modelDef), sql, (sqlFilter.Length > 0 ? "WHERE " + sqlFilter : ""));
             return command;
         }
-		
-		public virtual string ToDeleteRowStatement(object objWithProperties)
+
+        public virtual string ToDeleteRowStatement(object objWithProperties)
         {
             var sqlFilter = new StringBuilder();
-			var modelDef= objWithProperties.GetType().GetModelDefinition();
-            
+            var modelDef = objWithProperties.GetType().GetModelDefinition();
+
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
                 try
@@ -688,8 +689,8 @@ namespace ServiceStack.OrmLite
 
             return deleteSql;
         }
-		
-		public virtual string ToDeleteStatement(Type tableType, string sqlFilter, params object[] filterParams)
+
+        public virtual string ToDeleteStatement(Type tableType, string sqlFilter, params object[] filterParams)
         {
             var sql = new StringBuilder();
             const string deleteStatement = "DELETE ";
@@ -712,10 +713,10 @@ namespace ServiceStack.OrmLite
 
             return sql.ToString();
         }
-		
-		public virtual string ToCreateTableStatement(Type tableType)
+
+        public virtual string ToCreateTableStatement(Type tableType)
         {
-             var sbColumns = new StringBuilder();
+            var sbColumns = new StringBuilder();
             var sbConstraints = new StringBuilder();
 
             var modelDef = tableType.GetModelDefinition();
@@ -730,7 +731,7 @@ namespace ServiceStack.OrmLite
                     fieldDef.AutoIncrement,
                     fieldDef.IsNullable,
                     fieldDef.FieldLength,
-					null,
+                    null,
                     fieldDef.DefaultValue);
 
                 sbColumns.Append(columnDefinition);
@@ -741,18 +742,18 @@ namespace ServiceStack.OrmLite
                 sbConstraints.AppendFormat(
                     ", \n\n  CONSTRAINT {0} FOREIGN KEY ({1}) REFERENCES {2} ({3})",
                     GetQuotedName(string.Format("FK_{0}_{1}_{2}", modelDef.ModelName,
-																 refModelDef.ModelName, fieldDef.FieldName)),
+                                                                 refModelDef.ModelName, fieldDef.FieldName)),
                     GetQuotedColumnName(fieldDef.FieldName),
                     GetQuotedTableName(refModelDef),
-					GetQuotedColumnName(refModelDef.PrimaryKey.FieldName));
+                    GetQuotedColumnName(refModelDef.PrimaryKey.FieldName));
             }
             var sql = new StringBuilder(string.Format(
                 "CREATE TABLE {0} \n(\n  {1}{2} \n); \n", GetQuotedTableName(modelDef), sbColumns, sbConstraints));
 
             return sql.ToString();
         }
-		
-		public virtual List<string> ToCreateIndexStatements(Type tableType)
+
+        public virtual List<string> ToCreateIndexStatements(Type tableType)
         {
             var sqlIndexes = new List<string>();
 
@@ -783,22 +784,22 @@ namespace ServiceStack.OrmLite
             return sqlIndexes;
         }
 
-		public virtual DbType GetColumnDbType(Type valueType)
-		{
+        public virtual DbType GetColumnDbType(Type valueType)
+        {
             return DbTypeMap.ColumnDbTypeMap[valueType];
-		}
+        }
 
-		public virtual string GetColumnTypeDefinition(Type fieldType)
-		{
-			string fieldDefinition;
+        public virtual string GetColumnTypeDefinition(Type fieldType)
+        {
+            string fieldDefinition;
             DbTypeMap.ColumnTypeMap.TryGetValue(fieldType, out fieldDefinition);
-			return fieldDefinition ?? GetUndefinedColumnDefinition(fieldType, null);
-		}
+            return fieldDefinition ?? GetUndefinedColumnDefinition(fieldType, null);
+        }
 
-    	public virtual bool DoesTableExist(IDbCommand dbCmd, string tableName)
-		{
-			return false;
-		}
+        public virtual bool DoesTableExist(IDbCommand dbCmd, string tableName)
+        {
+            return false;
+        }
 
         protected virtual string GetIndexName(bool isUnique, string modelName, string fieldName)
         {
@@ -812,51 +813,51 @@ namespace ServiceStack.OrmLite
                                  GetQuotedTableName(modelDef),
                                  (isCombined) ? fieldName : GetQuotedColumnName(fieldName));
         }
-		
-		public virtual string GetColumnNames(ModelDefinition modelDef)
-		{
-			return modelDef.GetColumnNames();
-		}
-		
-		public virtual List<string> ToCreateSequenceStatements(Type tableType)
-		{
-			return new List<string>();
-		}
-		
-		// TODO : make abstract  ??
-		public virtual string ToExistStatement(Type fromTableType,
-			object objWithProperties,
-			string sqlFilter,
-			params object[] filterParams)
-		{
-			throw new NotImplementedException();
-		}
-		
-		// TODO : make abstract  ??
-		public virtual string ToSelectFromProcedureStatement(
-			object fromObjWithProperties,
-			Type outputModelType,
-			string sqlFilter,
-			params object[] filterParams)
-		{
-			throw new NotImplementedException();
-		}
-		
-		// TODO : make abstract  ??
-		public virtual string ToExecuteProcedureStatement(object objWithProperties)
-		{
-			throw new NotImplementedException();
-		}
-		
-		protected static ModelDefinition GetModel(Type modelType)
-		{
-			return modelType.GetModelDefinition();
-		}
-		
-		public virtual SqlExpressionVisitor<T> ExpressionVisitor<T>()
-		{
-			throw new NotImplementedException();
-		}
-		
+
+        public virtual string GetColumnNames(ModelDefinition modelDef)
+        {
+            return modelDef.GetColumnNames();
+        }
+
+        public virtual List<string> ToCreateSequenceStatements(Type tableType)
+        {
+            return new List<string>();
+        }
+
+        // TODO : make abstract  ??
+        public virtual string ToExistStatement(Type fromTableType,
+            object objWithProperties,
+            string sqlFilter,
+            params object[] filterParams)
+        {
+            throw new NotImplementedException();
+        }
+
+        // TODO : make abstract  ??
+        public virtual string ToSelectFromProcedureStatement(
+            object fromObjWithProperties,
+            Type outputModelType,
+            string sqlFilter,
+            params object[] filterParams)
+        {
+            throw new NotImplementedException();
+        }
+
+        // TODO : make abstract  ??
+        public virtual string ToExecuteProcedureStatement(object objWithProperties)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected static ModelDefinition GetModel(Type modelType)
+        {
+            return modelType.GetModelDefinition();
+        }
+
+        public virtual SqlExpressionVisitor<T> ExpressionVisitor<T>()
+        {
+            throw new NotImplementedException();
+        }
+
     }
 }
