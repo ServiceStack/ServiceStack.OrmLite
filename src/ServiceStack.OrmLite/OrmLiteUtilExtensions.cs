@@ -81,6 +81,11 @@ namespace ServiceStack.OrmLite
 			return sql.Length == 0 ? null : sql.ToString();
 		}
 
+		public static string Params(this string sqlText, params object[] sqlParams)
+		{
+		    return SqlFormat(sqlText, sqlParams);
+		}
+
 		public static string SqlFormat(this string sqlText, params object[] sqlParams)
 		{
 			var escapedParams = new List<string>();

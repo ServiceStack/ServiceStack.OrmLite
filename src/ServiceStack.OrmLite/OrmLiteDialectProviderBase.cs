@@ -325,7 +325,12 @@ namespace ServiceStack.OrmLite
 
         public virtual string GetQuotedTableName(ModelDefinition modelDef)
         {
-            return string.Format("\"{0}\"", namingStrategy.GetTableName(modelDef.ModelName));
+            return GetQuotedTableName(modelDef.ModelName);
+        }
+
+        public virtual string GetQuotedTableName(string tableName)
+        {
+            return string.Format("\"{0}\"", namingStrategy.GetTableName(tableName));
         }
 
         public virtual string GetQuotedColumnName(string columnName)
@@ -463,7 +468,7 @@ namespace ServiceStack.OrmLite
                 }
             }
 
-            var sql = string.Format("INSERT INTO {0} ({1}) VALUES ({2});",
+            var sql = string.Format("INSERT INTO {0} ({1}) VALUES ({2})",
                                     GetQuotedTableName(modelDef), sbColumnNames, sbColumnValues);
 
             return sql;
@@ -582,7 +587,6 @@ namespace ServiceStack.OrmLite
 
         public virtual string ToUpdateRowStatement(object objWithProperties, IList<string> updateFields)
         {
-
             if (updateFields == null) updateFields = new List<string>();
             var sqlFilter = new StringBuilder();
             var sql = new StringBuilder();
@@ -611,10 +615,12 @@ namespace ServiceStack.OrmLite
                 }
             }
 
-            var updateSql = string.Format("UPDATE {0} SET {1} {2}",
-                GetQuotedTableName(modelDef), sql, (sqlFilter.Length > 0 ? "WHERE " + sqlFilter : ""));
+            var updateSql = string.Format("UPDATE {0} SET {1}{2}",
+                GetQuotedTableName(modelDef), sql, (sqlFilter.Length > 0 ? " WHERE " + sqlFilter : ""));
 
-
+            if (sql.Length == 0)
+                throw new Exception("No valid update properties provided (e.g. p => p.FirstName): " + updateSql);
+            
             return updateSql;
         }
 

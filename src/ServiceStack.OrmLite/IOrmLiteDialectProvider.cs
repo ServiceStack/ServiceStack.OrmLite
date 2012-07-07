@@ -15,84 +15,86 @@ using System.Data;
 
 namespace ServiceStack.OrmLite
 {
-	public interface IOrmLiteDialectProvider
-	{
-		int DefaultStringLength { get; set; }
+    public interface IOrmLiteDialectProvider
+    {
+        int DefaultStringLength { get; set; }
 
-		string ParamString { get; set; }
+        string ParamString { get; set; }
 
-		bool UseUnicode { get; set; }
+        bool UseUnicode { get; set; }
 
-		INamingStrategy NamingStrategy { get; set; }
+        INamingStrategy NamingStrategy { get; set; }
 
-		string EscapeParam(object paramValue);
+        string EscapeParam(object paramValue);
 
-		object ConvertDbValue(object value, Type type);
+        object ConvertDbValue(object value, Type type);
 
-		string GetQuotedValue(object value, Type fieldType);
+        string GetQuotedValue(object value, Type fieldType);
 
-		IDbConnection CreateConnection(string filePath, Dictionary<string, string> options);
+        IDbConnection CreateConnection(string filePath, Dictionary<string, string> options);
 
-	    string GetQuotedTableName(ModelDefinition modelDef);
+        string GetQuotedTableName(ModelDefinition modelDef);
 
-		string GetQuotedColumnName(string columnName);
-        
-		string GetQuotedName(string columnName);
+        string GetQuotedTableName(string tableName);
 
-		string GetColumnDefinition(
-			string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement, 
-			bool isNullable, int? fieldLength, 
-			int? scale, string defaultValue);
+        string GetQuotedColumnName(string columnName);
 
-		long GetLastInsertId(IDbCommand command);
-				
-		// 
-						
-		string ToSelectStatement( Type tableType, string sqlFilter, params object[] filterParams);
-		
-		string ToInsertRowStatement( object objWithProperties, IDbCommand command);
-		string ToInsertRowStatement( object objWithProperties, IList<string>InsertFields, IDbCommand command);
+        string GetQuotedName(string columnName);
 
-	    IDbCommand CreateParameterizedInsertStatement(object objWithProperties, IDbConnection connection);
-	    IDbCommand CreateParameterizedInsertStatement(object objWithProperties, IList<string> insertFields,
-	                                                  IDbConnection connection);
+        string GetColumnDefinition(
+            string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement,
+            bool isNullable, int? fieldLength,
+            int? scale, string defaultValue);
 
-	    void ReParameterizeInsertStatement(object objWithProperties, IDbCommand command);
-	    void ReParameterizeInsertStatement(object objWithProperties, IList<string> insertFields, IDbCommand command);
+        long GetLastInsertId(IDbCommand command);
 
-		string ToUpdateRowStatement(object objWithProperties);
-		string ToUpdateRowStatement(object objWithProperties, IList<string>UpdateFields);
+        // 
 
-	    IDbCommand CreateParameterizedUpdateStatement(object objWithProperties, IDbConnection connection);
-	    IDbCommand CreateParameterizedUpdateStatement(object objWithProperties, IList<string> updateFields, IDbConnection connection);
-		
-		string ToDeleteRowStatement(object objWithProperties);
-		string ToDeleteStatement(Type tableType, string sqlFilter, params object[] filterParams);
-		
-		string ToExistStatement(Type fromTableType,
-			object objWithProperties,
-			string sqlFilter,
-			params object[] filterParams);
-		
-		string ToSelectFromProcedureStatement(object fromObjWithProperties,
-			Type outputModelType,       
-			string sqlFilter, 
-			params object[] filterParams);
-		
-		string ToExecuteProcedureStatement(object objWithProperties);
-		
-		string ToCreateTableStatement(Type tableType);
-		
-		List<string> ToCreateIndexStatements(Type tableType);
-		List<string> ToCreateSequenceStatements(Type tableType);
-		bool DoesTableExist(IDbCommand dbCmd, string tableName);
-		
-		string GetColumnNames(ModelDefinition modelDef);
-				
-		SqlExpressionVisitor<T> ExpressionVisitor<T>();
+        string ToSelectStatement(Type tableType, string sqlFilter, params object[] filterParams);
 
-		DbType GetColumnDbType(Type valueType);
-		string GetColumnTypeDefinition(Type fieldType);
-	}
-	
+        string ToInsertRowStatement(object objWithProperties, IDbCommand command);
+        string ToInsertRowStatement(object objWithProperties, IList<string> InsertFields, IDbCommand command);
+
+        IDbCommand CreateParameterizedInsertStatement(object objWithProperties, IDbConnection connection);
+        IDbCommand CreateParameterizedInsertStatement(object objWithProperties, IList<string> insertFields,
+                                                      IDbConnection connection);
+
+        void ReParameterizeInsertStatement(object objWithProperties, IDbCommand command);
+        void ReParameterizeInsertStatement(object objWithProperties, IList<string> insertFields, IDbCommand command);
+
+        string ToUpdateRowStatement(object objWithProperties);
+        string ToUpdateRowStatement(object objWithProperties, IList<string> UpdateFields);
+
+        IDbCommand CreateParameterizedUpdateStatement(object objWithProperties, IDbConnection connection);
+        IDbCommand CreateParameterizedUpdateStatement(object objWithProperties, IList<string> updateFields, IDbConnection connection);
+
+        string ToDeleteRowStatement(object objWithProperties);
+        string ToDeleteStatement(Type tableType, string sqlFilter, params object[] filterParams);
+
+        string ToExistStatement(Type fromTableType,
+            object objWithProperties,
+            string sqlFilter,
+            params object[] filterParams);
+
+        string ToSelectFromProcedureStatement(object fromObjWithProperties,
+            Type outputModelType,
+            string sqlFilter,
+            params object[] filterParams);
+
+        string ToExecuteProcedureStatement(object objWithProperties);
+
+        string ToCreateTableStatement(Type tableType);
+
+        List<string> ToCreateIndexStatements(Type tableType);
+        List<string> ToCreateSequenceStatements(Type tableType);
+        bool DoesTableExist(IDbCommand dbCmd, string tableName);
+
+        string GetColumnNames(ModelDefinition modelDef);
+
+        SqlExpressionVisitor<T> ExpressionVisitor<T>();
+
+        DbType GetColumnDbType(Type valueType);
+        string GetColumnTypeDefinition(Type fieldType);
+    }
+
 }

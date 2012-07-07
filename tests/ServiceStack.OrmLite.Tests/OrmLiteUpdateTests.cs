@@ -1,5 +1,6 @@
 using System;
 using System.Data;
+using System.Linq;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
 using ServiceStack.Text;
@@ -18,7 +19,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             dbConn = ConnectionString.OpenDbConnection();
             dbCmd = dbConn.CreateCommand();
-            dbCmd.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+            dbCmd.CreateTable<ModelWithFieldsOfDifferentTypes>(overwrite: true);
         }
 
         [TearDown]
@@ -53,7 +54,7 @@ namespace ServiceStack.OrmLite.Tests
 
             row.Name = "UpdatedName";
 
-            dbCmd.Update(row, x => x.LongId <= row.LongId);
+            dbCmd.UpdateOnly(row, x => x.LongId <= row.LongId);
 
             var dbRow = dbCmd.GetById<ModelWithFieldsOfDifferentTypes>(1);
 
@@ -69,7 +70,7 @@ namespace ServiceStack.OrmLite.Tests
             row.DateTime = DateTime.Now;
             row.Name = "UpdatedName";
 
-            dbCmd.Update<ModelWithFieldsOfDifferentTypes>(new { row.Name, row.DateTime }, 
+            dbCmd.Update<ModelWithFieldsOfDifferentTypes>(new { row.Name, row.DateTime },
                 x => x.LongId >= row.LongId && x.LongId <= row.LongId);
 
             var dbRow = dbCmd.GetById<ModelWithFieldsOfDifferentTypes>(row.Id);
@@ -100,7 +101,7 @@ namespace ServiceStack.OrmLite.Tests
             dbCmd.Insert(row);
             row.Name = "UpdatedName";
 
-            dbCmd.Update(table: "ModelWithFieldsOfDifferentTypes", 
+            dbCmd.Update(table: "ModelWithFieldsOfDifferentTypes",
                 set: "NAME = {0}".SqlFormat(row.Name), where: "LongId <= {0}".SqlFormat(row.LongId));
 
             var dbRow = dbCmd.GetById<ModelWithFieldsOfDifferentTypes>(row.Id);

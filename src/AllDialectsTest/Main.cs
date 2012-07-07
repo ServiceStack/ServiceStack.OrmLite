@@ -297,15 +297,15 @@ namespace AllDialectsTest
 					expected = 2;
 					var rate=0;
 					ev.Where(rn => rn.Rate == rate).Update(rn => rn.Active);
-					var rows = dbCmd.Update(new Author() { Active = false }, ev);
+					var rows = dbCmd.UpdateOnly(new Author() { Active = false }, ev);
 					Console.WriteLine(ev.WhereExpression);
 					Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, rows, expected == rows ? "OK" : "**************  FAILED ***************");
 
 					// insert values  only in Id, Name, Birthday, Rate and Active fields 
 					expected = 4;
 					ev.Insert(rn => new { rn.Id, rn.Name, rn.Birthday, rn.Active, rn.Rate });
-					dbCmd.Insert(new Author() { Active = false, Rate = 0, Name = "Victor Grozny", Birthday = DateTime.Today.AddYears(-18) }, ev);
-					dbCmd.Insert(new Author() { Active = false, Rate = 0, Name = "Ivan Chorny", Birthday = DateTime.Today.AddYears(-19) }, ev);
+					dbCmd.InsertOnly(new Author() { Active = false, Rate = 0, Name = "Victor Grozny", Birthday = DateTime.Today.AddYears(-18) }, ev);
+					dbCmd.InsertOnly(new Author() { Active = false, Rate = 0, Name = "Ivan Chorny", Birthday = DateTime.Today.AddYears(-19) }, ev);
 					ev.Where(rn => !rn.Active);
 					result = dbCmd.Select(ev);
 					Console.WriteLine(ev.WhereExpression);
@@ -314,7 +314,7 @@ namespace AllDialectsTest
 					//update comment for City == null 
 					expected = 2;
 					ev.Where(rn => rn.City == null).Update(rn => rn.Comments);
-					rows = dbCmd.Update(new Author() { Comments = "No comments" }, ev);
+					rows = dbCmd.UpdateOnly(new Author() { Comments = "No comments" }, ev);
 					Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, rows, expected == rows ? "OK" : "**************  FAILED ***************");
 
 					// delete where City is null 
@@ -552,17 +552,17 @@ namespace AllDialectsTest
                     rr.City="Madrid";
                     rr.Comments="Updated";
                     ev.Where(r=>r.Id==rr.Id); // if omit,  then all records will be updated 
-                    rows=dbCmd.Update(rr,ev); // == dbCmd.Update(rr) but it returns void
+                    rows=dbCmd.UpdateOnly(rr,ev); // == dbCmd.Update(rr) but it returns void
                     Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, rows, expected == rows ? "OK" : "**************  FAILED ***************");
 
                     expected=0;
                     ev.Where(r=>r.City=="Ciudad Gotica");
-                    rows=dbCmd.Update(rr, ev);
+                    rows=dbCmd.UpdateOnly(rr, ev);
                     Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, rows, expected == rows ? "OK" : "**************  FAILED ***************");
 
                     expected= dbCmd.Select<Author>(x=>x.City=="Madrid").Count;
                     author = new Author(){Active=false};
-                    rows=dbCmd.Update(author, x=>x.Active,  x=>x.City=="Madrid");
+                    rows=dbCmd.UpdateOnly(author, x=>x.Active,  x=>x.City=="Madrid");
                     Console.WriteLine("Expected:{0}  Updated:{1}  {2}", expected, rows, expected == rows ? "OK" : "**************  FAILED ***************");
 
                     expected= dbCmd.Select<Author>(x=>x.Active==false).Count;

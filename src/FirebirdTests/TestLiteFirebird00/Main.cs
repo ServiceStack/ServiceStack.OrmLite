@@ -142,19 +142,19 @@ namespace TestLiteFirebird00
 					Comments="this will not be inserted" // null in db
 				};
 			
-				dbCmd.Insert(author, ev);
+				dbCmd.InsertOnly(author, ev);
 				
 				author.Comments="this will be updated";
 				
 				ev.Update(rn=> rn.Comments).Where(r=>r.Id==author.Id);
-				dbCmd.Update(author, ev);
+				dbCmd.UpdateOnly(author, ev);
 				
 				
 				// update comment for all authors from london...
 				
 				author.Comments="update from london";
 				ev.Where(rn=> rn.City=="London");
-				dbCmd.Update(author, ev);
+				dbCmd.UpdateOnly(author, ev);
 				
 				// select author from Bogota
 				ev.Where(rn=> rn.City=="Bogota");

@@ -141,6 +141,11 @@ namespace ServiceStack.OrmLite
             }
         }
 
+        public static string GetLastSql(this IDbCommand dbCmd)
+        {
+            return dbCmd.CommandText;
+        }
+        
         public static int ExecuteSql(this IDbCommand dbCmd, string sql)
         {
             LogDebug(sql);

@@ -11,52 +11,124 @@ namespace ServiceStack.OrmLite
 {
     public static class WriteExtensions
     {
-        //TODO: Verify this is the behaviour we want, then document it
-        public static int Update<T>(this IDbCommand dbCmd, T obj, SqlExpressionVisitor<T> whereFilterFn)
+        /// <summary>
+        /// Use an expression visitor to select which fields to update and construct the where expression, E.g: 
+        /// 
+        ///   dbCmd.UpdateOnly(new Person { FirstName = "JJ" }, ev => ev.Update(p => p.FirstName).Where(x => x.FirstName == "Jimi"));
+        ///   UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("FirstName" = 'Jimi')
+        /// 
+        ///   What's not in the update expression doesn't get updated. No where expression updates all rows. E.g:
+        /// 
+        ///   dbCmd.UpdateOnly(new Person { FirstName = "JJ", LastName = "Hendo" }, ev => ev.Update(p => p.FirstName));
+        ///   UPDATE "Person" SET "FirstName" = 'JJ'
+        /// </summary>
+        public static int UpdateOnly<T>(this IDbCommand dbCmd, T model, Func<SqlExpressionVisitor<T>, SqlExpressionVisitor<T>> onlyFields)
         {
-            var fieldsToUpdate = whereFilterFn.UpdateFields.Count == 0
-                ? whereFilterFn.GetAllFields()
-                : whereFilterFn.UpdateFields;
+            return dbCmd.UpdateOnly(model, onlyFields(OrmLiteConfig.DialectProvider.ExpressionVisitor<T>()));
+        }
 
-            var sql = OrmLiteConfig.DialectProvider.ToUpdateRowStatement(obj, fieldsToUpdate);
+        /// <summary>
+        /// Use an expression visitor to select which fields to update and construct the where expression, E.g: 
+        /// 
+        ///   var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor&gt;Person&lt;());
+        ///   dbCmd.UpdateOnly(new Person { FirstName = "JJ" }, ev.Update(p => p.FirstName).Where(x => x.FirstName == "Jimi"));
+        ///   UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("FirstName" = 'Jimi')
+        /// 
+        ///   What's not in the update expression doesn't get updated. No where expression updates all rows. E.g:
+        /// 
+        ///   dbCmd.UpdateOnly(new Person { FirstName = "JJ", LastName = "Hendo" }, ev.Update(p => p.FirstName));
+        ///   UPDATE "Person" SET "FirstName" = 'JJ'
+        /// </summary>
+        public static int UpdateOnly<T>(this IDbCommand dbCmd, T model, SqlExpressionVisitor<T> onlyFields)
+        {
+            var fieldsToUpdate = onlyFields.UpdateFields.Count == 0
+                ? onlyFields.GetAllFields()
+                : onlyFields.UpdateFields;
 
-            if (!whereFilterFn.WhereExpression.IsNullOrEmpty()) sql += whereFilterFn.WhereExpression;
+            var sql = OrmLiteConfig.DialectProvider.ToUpdateRowStatement(model, fieldsToUpdate);
+
+            if (!onlyFields.WhereExpression.IsNullOrEmpty()) sql += " " + onlyFields.WhereExpression;
             return dbCmd.ExecuteSql(sql);
         }
 
         /// <summary>
-        /// Updates all non-default values set on item matching the where condition (if any)
+        /// Update record, updating only fields specified in updateOnly that matches the where condition (if any), E.g:
+        /// 
+        ///   dbCmd.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName, p => p.LastName == "Hendrix");
+        ///   UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("LastName" = 'Hendrix')
+        ///
+        ///   dbCmd.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName);
+        ///   UPDATE "Person" SET "FirstName" = 'JJ'
         /// </summary>
-        public static int Update<T>(this IDbCommand dbCmd, T item, Expression<Func<T, bool>> whereFilter = null)
+        public static int UpdateOnly<T, TKey>(this IDbCommand dbCmd, T obj,
+            Expression<Func<T, TKey>> onlyFields = null,
+            Expression<Func<T, bool>> where = null)
         {
-            var dialectProvider = OrmLiteConfig.DialectProvider;
-            var ev = dialectProvider.ExpressionVisitor<T>();
-            ev.Where(whereFilter);
+            if (onlyFields == null)
+                throw new ArgumentNullException("onlyFields");
+
+            var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();
+            ev.Update(onlyFields);
+            ev.Where(where);
+            return dbCmd.UpdateOnly(obj, ev);
+        }
+
+        /// <summary>
+        /// Updates all non-default values set on item matching the where condition (if any). E.g
+        /// 
+        ///   dbCmd.UpdateNonDefault(new Person { FirstName = "JJ" }, p => p.FirstName == "Jimi");
+        ///   UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("FirstName" = 'Jimi')
+        /// </summary>
+        public static int UpdateNonDefault<T>(this IDbCommand dbCmd, T item, Expression<Func<T, bool>> where)
+        {
+            var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();
+            ev.Where(where);
+            var sql = ev.ToUpdateStatement(item, excludeDefaults: true);
+            return dbCmd.ExecuteSql(sql);
+        }
+
+        /// <summary>
+        /// Updates all values set on item matching the where condition (if any). E.g
+        /// 
+        ///   dbCmd.UpdateNonDefault(new Person { FirstName = "JJ" }, p => p.FirstName == "Jimi");
+        ///   UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("FirstName" = 'Jimi')
+        /// 
+        ///   dbCmd.Update(new Person { Id = 1, FirstName = "JJ" }, p => p.LastName == "Hendrix");
+        ///   UPDATE "Person" SET "Id" = 1,"FirstName" = 'JJ',"LastName" = NULL,"Age" = 0 WHERE ("LastName" = 'Hendrix')
+        /// </summary>
+        public static int Update<T>(this IDbCommand dbCmd, T item, Expression<Func<T, bool>> where)
+        {
+            var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();
+            ev.Where(where);
             var sql = ev.ToUpdateStatement(item);
             return dbCmd.ExecuteSql(sql);
         }
 
         /// <summary>
-        /// Updates all matching fields populated on anonymousType that matches where condition (if any)
+        /// Updates all matching fields populated on anonymousType that matches where condition (if any). E.g:
+        /// 
+        ///   dbCmd.Update&lt;Person&gt;(new { FirstName = "JJ" }, p => p.LastName == "Hendrix");
+        ///   UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("LastName" = 'Hendrix')
         /// </summary>
-        public static int Update<T>(this IDbCommand dbCmd, object updateFields, Expression<Func<T, bool>> whereFilterFn = null)
+        public static int Update<T>(this IDbCommand dbCmd, object updateOnly, Expression<Func<T, bool>> where = null)
         {
             var dialectProvider = OrmLiteConfig.DialectProvider;
             var ev = dialectProvider.ExpressionVisitor<T>();
-            var whereSql = ev.Where(whereFilterFn).WhereExpression;
+            var whereSql = ev.Where(where).WhereExpression;
             var sql = new StringBuilder();
             var modelDef = typeof(T).GetModelDefinition();
             var fields = modelDef.FieldDefinitionsArray;
 
-            foreach (var setField in updateFields.GetType().GetPublicProperties())
+            foreach (var setField in updateOnly.GetType().GetPublicProperties())
             {
-                var fieldDef = fields.FirstOrDefault(x => string.Equals(x.Name, setField.Name, StringComparison.InvariantCultureIgnoreCase));
+                var fieldDef = fields.FirstOrDefault(x => 
+                    string.Equals(x.Name, setField.Name, StringComparison.InvariantCultureIgnoreCase));
                 if (fieldDef == null) continue;
 
                 if (sql.Length > 0) sql.Append(",");
                 sql.AppendFormat("{0} = {1}", 
                     dialectProvider.GetQuotedColumnName(fieldDef.FieldName),
-                    dialectProvider.GetQuotedValue(setField.GetPropertyGetterFn()(updateFields), fieldDef.FieldType));
+                    dialectProvider.GetQuotedValue(setField.GetPropertyGetterFn()(updateOnly), fieldDef.FieldType));
             }
 
             var updateSql = string.Format("UPDATE {0} SET {1} {2}",
@@ -65,19 +137,11 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecuteSql(updateSql);
         }
 
-        public static int Update<T, TKey>(this IDbCommand dbCmd, T obj,
-            Expression<Func<T, TKey>> fields,
-            Expression<Func<T, bool>> predicate)
-        {
-            var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();
-            ev.Update(fields);
-            ev.Where(predicate);
-            return dbCmd.Update(obj, ev);
-        }
-
         /// <summary>
-        /// Flexible Update method to succinctly execute a free-text update statement using optional params.
-        /// Use "Field = {0}".SqlFormat("valueToEscape") extension method to correctly escape params.
+        /// Flexible Update method to succinctly execute a free-text update statement using optional params. E.g:
+        /// 
+        ///   dbCmd.Update&lt;Person&gt;(set:"FirstName = {0}".Params("JJ"), where:"LastName = {0}".Params("Hendrix"));
+        ///   UPDATE "Person" SET FirstName = 'JJ' WHERE LastName = 'Hendrix'
         /// </summary>
         public static int Update<T>(this IDbCommand dbCmd, string set = null, string where = null)
         {
@@ -85,16 +149,20 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
-        /// Flexible Update method to succinctly execute a free-text update statement using optional params.
-        /// Use "Field = {0}".SqlFormat("valueToEscape") extension method to correctly escape params.
+        /// Flexible Update method to succinctly execute a free-text update statement using optional params. E.g.
+        /// 
+        ///   dbCmd.Update(table:"Person", set: "FirstName = {0}".Params("JJ"), where: "LastName = {0}".Params("Hendrix"));
+        ///   UPDATE "Person" SET FirstName = 'JJ' WHERE LastName = 'Hendrix'
         /// </summary>
         public static int Update(this IDbCommand dbCmd, string table = null, string set = null, string where = null)
         {
+            if (table == null)
+                throw new ArgumentNullException("table");
             if (set == null)
                 throw new ArgumentNullException("set");
 
             var sql = new StringBuilder("UPDATE ");
-            sql.Append(table);
+            sql.Append(OrmLiteConfig.DialectProvider.GetQuotedTableName(table));
             sql.Append(" SET ");
             sql.Append(set);
             if (!string.IsNullOrEmpty(where))
@@ -106,43 +174,93 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecuteSql(sql.ToString());
         }
 
-        public static void Insert<T>(this IDbCommand dbCmd, T obj, SqlExpressionVisitor<T> expression)
+        /// <summary>
+        /// Using an Expression Visitor to only Insert the fields specified, e.g:
+        /// 
+        ///   dbCmd.InsertOnly(new Person { FirstName = "Amy" }, ev => ev.Insert(p => new { p.FirstName }));
+        ///   INSERT INTO "Person" ("FirstName") VALUES ('Amy');
+        /// </summary>
+        public static void InsertOnly<T>(this IDbCommand dbCmd, T obj, Func<SqlExpressionVisitor<T>, SqlExpressionVisitor<T>> onlyFields)
         {
-            var sql = OrmLiteConfig.DialectProvider.ToInsertRowStatement(obj, expression.InsertFields, dbCmd);
+            dbCmd.InsertOnly(obj, onlyFields(OrmLiteConfig.DialectProvider.ExpressionVisitor<T>()));
+        }
+
+        /// <summary>
+        /// Using an Expression Visitor to only Insert the fields specified, e.g:
+        /// 
+        ///   var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor&gt;Person&lt;());
+        ///   dbCmd.InsertOnly(new Person { FirstName = "Amy" }, ev.Insert(p => new { p.FirstName }));
+        ///   INSERT INTO "Person" ("FirstName") VALUES ('Amy');
+        /// </summary>
+        public static void InsertOnly<T>(this IDbCommand dbCmd, T obj, SqlExpressionVisitor<T> onlyFields)
+        {
+            var sql = OrmLiteConfig.DialectProvider.ToInsertRowStatement(obj, onlyFields.InsertFields, dbCmd);
             dbCmd.ExecuteSql(sql);
         }
 
-        public static int Delete<T>(this IDbCommand dbCmd, SqlExpressionVisitor<T> expression)
-        {
-            string sql = expression.ToDeleteRowStatement();
-            return dbCmd.ExecuteSql(sql);
-        }
-
-        public static int Delete<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
+        /// <summary>
+        /// Delete the rows that matches the where expression, e.g:
+        /// 
+        ///   dbCmd.Delete&lt;Person&gt;(p => p.Age == 27);
+        ///   DELETE FROM "Person" WHERE ("Age" = 27)
+        /// </summary>
+        public static int Delete<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> where)
         {
             var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();
-            ev.Where(predicate);
+            ev.Where(where);
             return dbCmd.Delete(ev);
         }
 
+        /// <summary>
+        /// Delete the rows that matches the where expression, e.g:
+        /// 
+        ///   dbCmd.Delete&lt;Person&gt;(ev => ev.Where(p => p.Age == 27));
+        ///   DELETE FROM "Person" WHERE ("Age" = 27)
+        /// </summary>
+        public static int Delete<T>(this IDbCommand dbCmd, Func<SqlExpressionVisitor<T>, SqlExpressionVisitor<T>> where)
+        {
+            return dbCmd.Delete(where(OrmLiteConfig.DialectProvider.ExpressionVisitor<T>()));
+        }
+
+        /// <summary>
+        /// Delete the rows that matches the where expression, e.g:
+        /// 
+        ///   var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor&gt;Person&lt;());
+        ///   dbCmd.Delete&lt;Person&gt;(ev.Where(p => p.Age == 27));
+        ///   DELETE FROM "Person" WHERE ("Age" = 27)
+        /// </summary>
+        public static int Delete<T>(this IDbCommand dbCmd, SqlExpressionVisitor<T> where)
+        {
+            var sql = where.ToDeleteRowStatement();
+            return dbCmd.ExecuteSql(sql);
+        }
+
+        /// <summary>
+        /// Flexible Delete method to succinctly execute a delete statement using free-text where expression. E.g.
+        /// 
+        ///   dbCmd.Delete&lt;Person&gt;(where:"Age = {0}".Params(27));
+        ///   DELETE FROM "Person" WHERE Age = 27
+        /// </summary>
         public static int Delete<T>(this IDbCommand dbCmd, string where = null)
         {
             return dbCmd.Delete(typeof(T).GetModelDefinition().ModelName, where);
         }
 
         /// <summary>
-        /// Flexible Delete method to succinctly execute a free-text update statement using optional params.
-        /// Use "Field = {0}".SqlFormat("valueToEscape") extension method to correctly escape params.
+        /// Flexible Delete method to succinctly execute a delete statement using free-text where expression. E.g.
+        /// 
+        ///   dbCmd.Delete(table:"Person", where: "Age = {0}".Params(27));
+        ///   DELETE FROM "Person" WHERE Age = 27
         /// </summary>
         public static int Delete(this IDbCommand dbCmd, string table = null, string where = null)
         {
+            if (table == null)
+                throw new ArgumentNullException("table");
             if (where == null)
                 throw new ArgumentNullException("where");
 
-            var sql = new StringBuilder("DELETE FROM ");
-            sql.Append(table);
-            sql.Append(" WHERE ");
-            sql.Append(where);
+            var sql = new StringBuilder();
+            sql.AppendFormat("DELETE FROM {0} WHERE {1}",  OrmLiteConfig.DialectProvider.GetQuotedTableName(table), where);
 
             return dbCmd.ExecuteSql(sql.ToString());
         }

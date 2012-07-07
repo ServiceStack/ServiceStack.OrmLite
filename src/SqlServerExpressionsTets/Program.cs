@@ -173,15 +173,15 @@ namespace SqlServerExpressionsTets
 				// set Active=false where rate =0
 				expected = 2;
 				ev.Where(rn => rn.Rate == 0).Update(rn => rn.Active);
-				var rows = dbCmd.Update(new Author() { Active = false }, ev);
+				var rows = dbCmd.UpdateOnly(new Author() { Active = false }, ev);
 				Console.WriteLine(ev.WhereExpression);
 				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, rows, expected == rows);
 
 				// insert values  only in Id, Name, Birthday, Rate and Active fields 
 				expected = 4;
 				ev.Insert(rn => new { rn.Id, rn.Name, rn.Birthday, rn.Active, rn.Rate });
-				dbCmd.Insert(new Author() { Active = false, Rate = 0, Name = "Victor Grozny", Birthday = DateTime.Today.AddYears(-18) }, ev);
-				dbCmd.Insert(new Author() { Active = false, Rate = 0, Name = "Ivan Chorny", Birthday = DateTime.Today.AddYears(-19) }, ev);
+				dbCmd.InsertOnly(new Author() { Active = false, Rate = 0, Name = "Victor Grozny", Birthday = DateTime.Today.AddYears(-18) }, ev);
+				dbCmd.InsertOnly(new Author() { Active = false, Rate = 0, Name = "Ivan Chorny", Birthday = DateTime.Today.AddYears(-19) }, ev);
 				ev.Where(rn => !rn.Active);
 				result = dbCmd.Select(ev);
 				Console.WriteLine(ev.WhereExpression);
@@ -190,7 +190,7 @@ namespace SqlServerExpressionsTets
 				//update comment for City == null 
 				expected = 2;
 				ev.Where(rn => rn.City == null).Update(rn => rn.Comments);
-				rows = dbCmd.Update(new Author() { Comments = "No comments" }, ev);
+				rows = dbCmd.UpdateOnly(new Author() { Comments = "No comments" }, ev);
 				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, rows, expected == rows);
 
 				// delete where City is null 

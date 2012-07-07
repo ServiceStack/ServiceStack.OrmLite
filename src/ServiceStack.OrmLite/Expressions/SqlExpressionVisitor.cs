@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Collections.ObjectModel;
 using System.Linq.Expressions;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
@@ -320,28 +321,26 @@ namespace ServiceStack.OrmLite
                                  WhereExpression);
         }
 
-        public virtual string ToUpdateStatement(T item)
+        public virtual string ToUpdateStatement(T item, bool excludeDefaults=false)
         {
-            var sb = new StringBuilder();
+            var setFields = new StringBuilder();
             var dialectProvider = OrmLiteConfig.DialectProvider;
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
                 var value = fieldDef.GetValue(item);
-                if (value == null) continue;
+                if (excludeDefaults && (value == null || value.Equals(value.GetType().GetDefaultValue()))) continue;
 
                 fieldDef.GetQuotedValue(item);
 
-                if (sb.Length > 0) sb.Append(",");
-                sb.AppendFormat("{0} = {1}", 
+                if (setFields.Length > 0) setFields.Append(",");
+                setFields.AppendFormat("{0} = {1}", 
                     dialectProvider.GetQuotedColumnName(fieldDef.FieldName),
                     dialectProvider.GetQuotedValue(value, fieldDef.FieldType));
             }
 
             return string.Format("UPDATE {0} SET {1} {2}",
-                OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef),
-                sb,
-                WhereExpression);
+                dialectProvider.GetQuotedTableName(modelDef), setFields, WhereExpression);
         }
 
 
