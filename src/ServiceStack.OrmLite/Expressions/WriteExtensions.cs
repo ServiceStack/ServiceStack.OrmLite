@@ -79,7 +79,7 @@ namespace ServiceStack.OrmLite
         ///   dbCmd.UpdateNonDefault(new Person { FirstName = "JJ" }, p => p.FirstName == "Jimi");
         ///   UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("FirstName" = 'Jimi')
         /// </summary>
-        public static int UpdateNonDefault<T>(this IDbCommand dbCmd, T item, Expression<Func<T, bool>> where)
+        public static int UpdateNonDefaults<T>(this IDbCommand dbCmd, T item, Expression<Func<T, bool>> where)
         {
             var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();
             ev.Where(where);

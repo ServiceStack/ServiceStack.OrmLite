@@ -69,7 +69,7 @@ namespace ServiceStack.OrmLite.Tests
             dbCmd.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName);
             Assert.That(dbCmd.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\" = 'JJ'"));
 
-            dbCmd.UpdateNonDefault(new Person { FirstName = "JJ" }, p => p.LastName == "Hendrix");
+            dbCmd.UpdateNonDefaults(new Person { FirstName = "JJ" }, p => p.LastName == "Hendrix");
             Assert.That(dbCmd.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\" = 'JJ' WHERE (\"LastName\" = 'Hendrix')"));
 
             dbCmd.Update(new Person { Id = 1, FirstName = "JJ" }, p => p.LastName == "Hendrix");
