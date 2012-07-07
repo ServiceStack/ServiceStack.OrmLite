@@ -295,7 +295,7 @@ namespace ServiceStack.OrmLite
         /// fields to be inserted.
         /// </summary>
         /// <param name='insertFields'>
-        /// IList<string> containing Names of properties to be inserted
+        /// IList&lt;string&gt; containing Names of properties to be inserted
         /// </param>
         public virtual SqlExpressionVisitor<T> Insert(IList<string> insertFields)
         {
@@ -311,30 +311,30 @@ namespace ServiceStack.OrmLite
             this.insertFields = new List<string>();
             return this;
         }
-
-
+        
         public virtual string ToDeleteRowStatement()
         {
 
             return string.Format("DELETE FROM {0} {1}",
-                                 OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef),
-                                 WhereExpression);
+                OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef),
+                WhereExpression);
         }
 
-        public virtual string ToUpdateStatement(T item, bool excludeDefaults=false)
+        public virtual string ToUpdateStatement(T item, bool excludeDefaults = false)
         {
             var setFields = new StringBuilder();
             var dialectProvider = OrmLiteConfig.DialectProvider;
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
+                if (updateFields.Count > 0 && !updateFields.Contains(fieldDef.Name)) continue; // added
                 var value = fieldDef.GetValue(item);
-                if (excludeDefaults && (value == null || value.Equals(value.GetType().GetDefaultValue()))) continue;
+                if (excludeDefaults && (value == null || value.Equals(value.GetType().GetDefaultValue()))) continue; //GetDefaultValue?
 
                 fieldDef.GetQuotedValue(item);
 
                 if (setFields.Length > 0) setFields.Append(",");
-                setFields.AppendFormat("{0} = {1}", 
+                setFields.AppendFormat("{0} = {1}",
                     dialectProvider.GetQuotedColumnName(fieldDef.FieldName),
                     dialectProvider.GetQuotedValue(value, fieldDef.FieldType));
             }
@@ -342,7 +342,6 @@ namespace ServiceStack.OrmLite
             return string.Format("UPDATE {0} SET {1} {2}",
                 dialectProvider.GetQuotedTableName(modelDef), setFields, WhereExpression);
         }
-
 
         public virtual string ToSelectStatement()
         {
@@ -367,7 +366,6 @@ namespace ServiceStack.OrmLite
             return sql.ToString();
 
         }
-
 
         public string SelectExpression
         {
@@ -501,8 +499,6 @@ namespace ServiceStack.OrmLite
             }
         }
 
-
-
         protected internal virtual string Visit(Expression exp)
         {
 
@@ -562,7 +558,6 @@ namespace ServiceStack.OrmLite
             }
         }
 
-
         protected virtual string VisitLambda(LambdaExpression lambda)
         {
             if (lambda.Body.NodeType == ExpressionType.MemberAccess && sep == " ")
@@ -578,7 +573,6 @@ namespace ServiceStack.OrmLite
             }
             return Visit(lambda.Body);
         }
-
 
         protected virtual string VisitBinary(BinaryExpression b)
         {
@@ -635,7 +629,6 @@ namespace ServiceStack.OrmLite
             }
         }
 
-
         protected virtual string VisitMemberAccess(MemberExpression m)
         {
             if (m.Expression != null &&
@@ -654,7 +647,6 @@ namespace ServiceStack.OrmLite
                 return OrmLiteConfig.DialectProvider.GetQuotedValue(o, o != null ? o.GetType() : null);
             }
         }
-
 
         protected virtual string VisitNew(NewExpression nex)
         {
@@ -681,7 +673,6 @@ namespace ServiceStack.OrmLite
             }
 
         }
-
 
         protected virtual string VisitParameter(ParameterExpression p)
         {
@@ -715,7 +706,6 @@ namespace ServiceStack.OrmLite
             }
 
         }
-
 
         protected virtual string VisitMethodCall(MethodCallExpression m)
         {
@@ -915,7 +905,6 @@ namespace ServiceStack.OrmLite
             }
         }
 
-
         protected string RemoveQuote(string exp)
         {
 
@@ -940,7 +929,6 @@ namespace ServiceStack.OrmLite
             return exp;
         }
 
-
         protected bool IsFieldName(string quotedExp)
         {
             FieldDefinition fd =
@@ -950,8 +938,6 @@ namespace ServiceStack.OrmLite
                         GetQuotedColumnName(x.FieldName) == quotedExp);
             return (fd != default(FieldDefinition));
         }
-
-
 
         private string GetTrueExpression()
         {
@@ -977,7 +963,6 @@ namespace ServiceStack.OrmLite
             return (exp == GetFalseExpression());
         }
 
-
         private string GetQuotedTrueValue()
         {
             return OrmLiteConfig.DialectProvider.GetQuotedValue(true, typeof(bool));
@@ -987,7 +972,6 @@ namespace ServiceStack.OrmLite
         {
             return OrmLiteConfig.DialectProvider.GetQuotedValue(false, typeof(bool));
         }
-
 
         private void BuildSelectExpression(string fields, bool distinct)
         {
