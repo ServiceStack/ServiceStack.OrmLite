@@ -695,6 +695,12 @@ namespace ServiceStack.OrmLite.Firebird
 				NamingStrategy.GetTableName(modelDef.ModelName)));
         }
        	
+        public override string GetQuotedTableName(string tableName)
+        {
+            return Quote(NamingStrategy.GetTableName(tableName));
+        }
+
+
 		public override string GetQuotedColumnName(string fieldName)
 		{
 			return Quote(NamingStrategy.GetColumnName(fieldName));

@@ -82,6 +82,11 @@ namespace ServiceStack.OrmLite.MySql
             return string.Format("`{0}`", NamingStrategy.GetTableName(modelDef.ModelName));
         }
 
+        public override string GetQuotedTableName(string tableName)
+        {
+            return string.Format("`{0}`", NamingStrategy.GetTableName(tableName));
+        }
+
 		public override string GetQuotedColumnName(string columnName)
 		{
 			return string.Format("`{0}`", NamingStrategy.GetColumnName(columnName));
