@@ -52,6 +52,8 @@ OrmLite is also included in [ServiceStack](https://github.com/ServiceStack/Servi
 We've now added SQL Expression support to bring you even nicer LINQ-liked querying to all our providers. 
 To give you a flavour here are some examples with their partial SQL output (done in SQL Server): 
 
+### Querying with SELECT
+
     int agesAgo = DateTime.Today.AddYears(-20).Year;
     dbCmd.Select<Author>(q => q.Birthday >= new DateTime(agesAgo, 1, 1) && q.Birthday <= new DateTime(agesAgo, 12, 31));
 
@@ -93,8 +95,136 @@ dbCmd.Select<Author>(q => q.Rate == 10 && q.City == "Mexico");
 
 **WHERE (("Rate" = 10) AND ("JobCity" = 'Mexico'))**
 
-Right now the Expression support can satisfy many simple queries with a strong-typed API. 
+Right now the Expression support can satisfy most simple queries with a strong-typed API. 
 For anything more complex (e.g. queries with table joins) you can still easily fall back to raw SQL queries as seen below. 
+
+### INSERT, UPDATE and DELETEs
+
+To see the behaviour of the different APIs, all examples uses this simple model
+
+    public class Person
+    {
+        public int Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public int? Age { get; set; }
+    }
+
+### UPDATE
+
+In its most simple form, updating any model without any filters will update every field, except the **Id** which 
+is used to filter the update to this specific record:
+
+```csharp
+dbCmd.Update(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27});
+```
+**UPDATE "Person" SET "FirstName" = 'Jimi',"LastName" = 'Hendrix',"Age" = 27 WHERE "Id" = 1**
+
+If you supply your own where expression, it updates every field (inc. Id) but uses your filter instead:
+
+```csharp
+dbCmd.Update(new Person { Id = 1, FirstName = "JJ" }, p => p.LastName == "Hendrix");
+```
+**UPDATE "Person" SET "Id" = 1,"FirstName" = 'JJ',"LastName" = NULL,"Age" = NULL WHERE ("LastName" = 'Hendrix')**
+
+One way to limit the fields which gets updated is to use an **Anonymous Type**:
+
+```csharp
+dbCmd.Update<Person>(new { FirstName = "JJ" }, p => p.LastName == "Hendrix");
+```
+
+Or by using `UpdateNonDefaults` which only updates the non-default values in your model using the filter specified:
+
+```csharp
+dbCmd.UpdateNonDefaults(new Person { FirstName = "JJ" }, p => p.LastName == "Hendrix");
+```
+
+**UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("LastName" = 'Hendrix')**
+
+#### UpdateOnly
+
+As updating a partial row is a common use-case in Db's, we've added a number of methods for just 
+this purpose, named **UpdateOnly**.
+
+The first expression in an `UpdateOnly` statement is used to specify which fields should be updated:
+```csharp
+dbCmd.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName);
+```
+**UPDATE "Person" SET "FirstName" = 'JJ'**
+
+When present, the second expression is used as the where filter:
+```csharp
+dbCmd.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName, p => p.LastName == "Hendrix");
+```
+**UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("LastName" = 'Hendrix')**
+
+Instead of using the expression filters above you can choose to use an ExpressionVisitor builder which provides more 
+flexibility when you want to programatically construct the update statement:
+
+```csharp
+dbCmd.UpdateOnly(new Person { FirstName = "JJ", LastName = "Hendo" }, ev => ev.Update(p => p.FirstName));
+```
+**UPDATE "Person" SET "FirstName" = 'JJ'**
+
+```csharp
+dbCmd.UpdateOnly(new Person { FirstName = "JJ" }, ev => ev.Update(p => p.FirstName).Where(x => x.FirstName == "Jimi"));
+```
+**UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("LastName" = 'Hendrix')**
+
+For the ultimate flexibility we also provide un-typed, string-based expressions. Use the `.Params()` extension method
+escape parameters (inspired by [massive](https://github.com/robconery/massive)):
+
+```csharp
+dbCmd.Update<Person>(set: "FirstName = {0}".Params("JJ"), where: "LastName = {0}".Params("Hendrix"));
+```
+Even the Table name can be a string so you perform the same update without requiring the Person model at all:
+
+```csharp
+dbCmd.Update(table: "Person", set: "FirstName = {0}".Params("JJ"), where: "LastName = {0}".Params("Hendrix"));
+```
+**UPDATE "Person" SET FirstName = 'JJ' WHERE LastName = 'Hendrix'**
+
+### INSERT
+
+Insert's are pretty straight forward since in most cases you want to insert every field:
+
+```csharp
+dbCmd.Insert(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27 });
+```
+**INSERT INTO "Person" ("Id","FirstName","LastName","Age") VALUES (1,'Jimi','Hendrix',27)**
+
+But do provide an API that takes an Expression Visitor for the rare cases you don't want to insert every field
+
+```csharp
+dbCmd.InsertOnly(new Person { FirstName = "Amy" }, ev => ev.Insert(p => new { p.FirstName }));
+```
+**INSERT INTO "Person" ("FirstName") VALUES ('Amy')**
+
+### DELETE
+
+Like updates for DELETE's we also provide APIs that take a where Expression:
+```csharp
+dbCmd.Delete<Person>(p => p.Age == 27);
+```
+
+Or an Expression Visitor:
+```csharp
+dbCmd.Delete<Person>(ev => ev.Where(p => p.Age == 27));
+```
+
+**DELETE FROM "Person" WHERE ("Age" = 27)**
+
+As well as un-typed, string-based expressions:
+```csharp
+dbCmd.Delete<Person>(where: "Age = {0}".Params(27));
+```
+
+Which also can take a table name so works without requiring a typed **Person** model
+```csharp
+dbCmd.Delete(table: "Person", where: "Age = {0}".Params(27));
+```
+
+**DELETE FROM "Person" WHERE Age = 27**
 
 
 ## Code-first Customer & Order example with complex types on POCO as text blobs
