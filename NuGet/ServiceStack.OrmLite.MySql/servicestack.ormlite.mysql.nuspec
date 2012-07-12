@@ -2,8 +2,8 @@
 <package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>ServiceStack.OrmLite.MySql</id>
-    <title>Fast, code-first, config-free OrmLite driver for MySQL database</title>
-    <version>3.8.5</version>
+    <title>OrmLite for MySQL: Fast, code-first, config-free Poco ORM</title>
+    <version>3.8.6</version>
     <authors>Demis Bellot</authors> 
     <owners>Demis Bellot</owners>
     <description>
