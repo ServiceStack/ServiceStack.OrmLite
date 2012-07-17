@@ -1,0 +1,76 @@
+﻿<#@ include file="OrmLite.Core.ttinclude" #>
+<#
+	// Settings
+    ConnectionStringName = "";			// Uses last connection string in config if not specified
+    Namespace = "";
+    RepoName = "";
+    GenerateOperations = true;
+	GeneratePocos = true;
+	GenerateCommon = true;
+	ClassPrefix = "";
+	ClassSuffix = "";
+	TrackModifiedColumns = false;
+
+    // Read schema
+	var tables = LoadTables();
+
+
+/*
+	// Tweak Schema
+	tables["tablename"].Ignore = true;							// To ignore a table
+	tables["tablename"].ClassName = "newname";					// To change the class name of a table
+	tables["tablename"]["columnname"].Ignore = true;			// To ignore a column
+	tables["tablename"]["columnname"].PropertyName="newname";	// To change the property name of a column
+	tables["tablename"]["columnname"].PropertyType="bool";		// To change the property type of a column
+*/
+
+	// Generate output
+	if (tables.Count>0)
+	{
+#>
+<#
+if (string.IsNullOrEmpty(Namespace)) Namespace=ConnectionStringName;
+if (string.IsNullOrEmpty(RepoName) && !string.IsNullOrEmpty(ConnectionStringName)) RepoName=ConnectionStringName + "DB";
+if (string.IsNullOrEmpty(Namespace)) Namespace="OrmLitePoco";
+if (string.IsNullOrEmpty(RepoName)) RepoName="PocoDB";
+#>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.ComponentModel.DataAnnotations;
+using ServiceStack.OrmLite;
+using ServiceStack.DataAnnotations;
+using ServiceStack.DesignPatterns.Model;
+
+namespace <#=Namespace #>
+{
+<#
+foreach(Table tbl in from t in tables where !t.Ignore select t)
+{
+#>
+    
+	[Alias("<#=tbl.Name#>")]
+    public partial class <#=tbl.ClassName#><#if (tbl.HasPK()) { #> : IHasId<<#=tbl.PK.PropertyType#>><#}#>
+    {
+<#
+foreach(Column col in from c in tbl.Columns where !c.Ignore select c)
+{
+#><# if ((col.Name!=col.PropertyName) || (col.IsPK)) { #>
+        [Alias("<#=col.Name#>")]
+<# } #><# if (col.IsAutoIncrement) { #>
+        [AutoIncrement]
+<# } #><# if (col.IsNullable != true && col.IsAutoIncrement != true) { #>
+        [Required]
+<# } #><#if (!col.IsPK){#>
+        <#=col.PropertyType#> <#=col.PropertyName#> { get; set;}
+<#} else {#>        
+        <#=col.PropertyType#> Id { get; set;}
+<#}#>
+<# } #>
+    }
+<# } #>	
+}
+<# } #>
+
+
