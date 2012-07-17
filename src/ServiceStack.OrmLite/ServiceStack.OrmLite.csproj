@@ -93,6 +93,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Connection\ConnReadExtensions.cs" />
+    <Compile Include="Connection\ConnWriteExtensions.cs" />
+    <Compile Include="Connection\OrmLiteConnReadExtensions.cs" />
+    <Compile Include="Connection\OrmLiteConnWriteExtensions.cs" />
     <Compile Include="DbTypes.cs" />
     <Compile Include="INamingStrategy.cs" />
     <Compile Include="OrmLiteConfigExtensions.cs">
@@ -150,6 +154,7 @@
   <ItemGroup>
     <None Include="OrmLiteApi.cd" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

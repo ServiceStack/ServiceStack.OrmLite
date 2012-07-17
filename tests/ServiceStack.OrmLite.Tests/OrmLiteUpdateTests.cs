@@ -54,7 +54,7 @@ namespace ServiceStack.OrmLite.Tests
 
             row.Name = "UpdatedName";
 
-            dbCmd.UpdateOnly(row, x => x.LongId <= row.LongId);
+            dbCmd.Update(row, x => x.LongId <= row.LongId);
 
             var dbRow = dbCmd.GetById<ModelWithFieldsOfDifferentTypes>(1);
 

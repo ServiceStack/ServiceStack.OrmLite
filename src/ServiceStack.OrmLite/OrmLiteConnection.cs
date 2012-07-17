@@ -1,3 +1,4 @@
+using System;
 using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
@@ -11,22 +12,22 @@ namespace ServiceStack.OrmLite
 	public class OrmLiteConnection
 		: IDbConnection, IHasDbConnection 
 	{
-		private readonly OrmLiteConnectionFactory factory;
+	    public readonly OrmLiteConnectionFactory Factory;
 		private IDbConnection dbConnection;
 		private bool isOpen;
 
-		public OrmLiteConnection(OrmLiteConnectionFactory factory)
-		{
-			this.factory = factory;
-		}
+        public OrmLiteConnection(OrmLiteConnectionFactory factory)
+        {
+            this.Factory = factory;
+        }
 
-		public IDbConnection DbConnection
+        public IDbConnection DbConnection
 		{
 			get
 			{
 				if (dbConnection == null)
 				{
-					dbConnection = factory.ConnectionString.ToDbConnection();
+					dbConnection = Factory.ConnectionString.ToDbConnection(Factory.DialectProvider);
 				}
 				return dbConnection;
 			}
@@ -34,33 +35,34 @@ namespace ServiceStack.OrmLite
 
 		public void Dispose()
 		{
-			if (!factory.AutoDisposeConnection) return;
+            if (Factory.OnDispose != null) Factory.OnDispose(this);
+            if (!Factory.AutoDisposeConnection) return;
 
 			DbConnection.Dispose();
 			dbConnection = null;
 			isOpen = false;
-		}
+        }
 
 		public IDbTransaction BeginTransaction()
 		{
-			if (factory.AlwaysReturnTransaction != null)
-				return factory.AlwaysReturnTransaction;
+			if (Factory.AlwaysReturnTransaction != null)
+				return Factory.AlwaysReturnTransaction;
 
 			return DbConnection.BeginTransaction();
 		}
 
 		public IDbTransaction BeginTransaction(IsolationLevel isolationLevel)
 		{
-			if (factory.AlwaysReturnTransaction != null)
-				return factory.AlwaysReturnTransaction;
+			if (Factory.AlwaysReturnTransaction != null)
+				return Factory.AlwaysReturnTransaction;
 
 			return DbConnection.BeginTransaction(isolationLevel);
 		}
 
 		public void Close()
 		{
-			DbConnection.Close();
-		}
+            DbConnection.Close();
+        }
 
 		public void ChangeDatabase(string databaseName)
 		{
@@ -69,8 +71,8 @@ namespace ServiceStack.OrmLite
 
 		public IDbCommand CreateCommand()
 		{
-			if (factory.AlwaysReturnCommand != null)
-				return factory.AlwaysReturnCommand;
+			if (Factory.AlwaysReturnCommand != null)
+				return Factory.AlwaysReturnCommand;
 
 			return DbConnection.CreateCommand();
 		}
@@ -85,8 +87,8 @@ namespace ServiceStack.OrmLite
 
 		public string ConnectionString
 		{
-			get { return factory.ConnectionString; }
-			set { factory.ConnectionString = value; }
+			get { return Factory.ConnectionString; }
+			set { Factory.ConnectionString = value; }
 		}
 
 		public int ConnectionTimeout

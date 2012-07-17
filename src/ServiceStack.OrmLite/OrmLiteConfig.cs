@@ -19,17 +19,20 @@ namespace ServiceStack.OrmLite
 	{
 		public const string IdField = "Id";
 
+        [ThreadStatic]
+	    public static IOrmLiteDialectProvider TSDialectProvider;
+
 		private static IOrmLiteDialectProvider dialectProvider;
-		public static IOrmLiteDialectProvider DialectProvider
+	    public static IOrmLiteDialectProvider DialectProvider
 		{
 			get
 			{
 				if (dialectProvider == null)
 				{
 					throw new ArgumentNullException("DialectProvider",
-						"You must set the singleton 'OrmLiteWriteExtensions.DialectProvider' to use the OrmLiteWriteExtensions");
+                        "You must set the singleton 'OrmLiteConfig.DialectProvider' to use the OrmLiteWriteExtensions");
 				}
-				return dialectProvider;
+                return TSDialectProvider ?? dialectProvider;
 			}
 			set
 			{
@@ -37,10 +40,10 @@ namespace ServiceStack.OrmLite
 			}
 		}
 
-		public static IDbConnection ToDbConnection(this string dbConnectionStringOrFilePath)
-		{
-			return DialectProvider.CreateConnection(dbConnectionStringOrFilePath, null);
-		}
+	    public static IDbConnection ToDbConnection(this string dbConnectionStringOrFilePath)
+	    {
+	        return dbConnectionStringOrFilePath.ToDbConnection(DialectProvider);
+	    }
 
 		public static IDbConnection OpenDbConnection(this string dbConnectionStringOrFilePath)
 		{
@@ -76,5 +79,10 @@ namespace ServiceStack.OrmLite
 		{
 			OrmLiteConfigExtensions.ClearCache();
 		}
+
+        public static IDbConnection ToDbConnection(this string dbConnectionStringOrFilePath, IOrmLiteDialectProvider dialectProvider)
+	    {
+            return dialectProvider.CreateConnection(dbConnectionStringOrFilePath, null);
+        }
 	}
 }
