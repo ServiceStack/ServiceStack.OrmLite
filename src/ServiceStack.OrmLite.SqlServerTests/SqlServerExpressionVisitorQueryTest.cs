@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
+using ServiceStack.OrmLite.Connection;
 using ServiceStack.OrmLite.SqlServerTests.UseCase;
 using System.Data;
 
@@ -12,6 +13,22 @@ namespace ServiceStack.OrmLite.SqlServerTests
     [TestFixture]
     public class SqlServerExpressionVisitorQueryTest : OrmLiteTestBase
     {
+        [Test]
+        public void Skip_Take_works_with_injected_Visitor()
+        {
+            using (var dbConn = ConnectionString.OpenDbConnection())
+            {
+                FillTestEntityTableWithTestData(dbConn);
+                
+                var result = dbConn.Select<TestEntity>(q => q.Limit(10, 100));
+                
+                Assert.NotNull(result);
+                Assert.AreEqual(100, result.Count);
+                Assert.Less(10, result[0].Id);
+                Assert.Greater(111, result[99].Id);
+            }
+        }
+
         [Test]
         public void test_if_limit_works_with_rows_and_skip()
         {
@@ -84,6 +101,14 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 var result = dbCmd.Select(ev);
                 Assert.NotNull(result);
                 Assert.IsTrue(result.Count > 0);
+            }
+        }
+        
+        protected void FillTestEntityTableWithTestData(IDbConnection dbConn)
+        {
+            using (var dbCmd = dbConn.CreateCommand())
+            {
+                FillTestEntityTableWithTestData(dbCmd);
             }
         }
 
