@@ -58,9 +58,9 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_open_multiple_nested_connections()
         {
-            var factory = new OrmLiteConnectionFactory(":memory:", false, SqliteOrmLiteDialectProvider.Instance);
-            factory.RegisterConnection("sqlserver", "~/App_Data/Database1.mdf".MapAbsolutePath(), SqlServerOrmLiteDialectProvider.Instance);
-            factory.RegisterConnection("sqlite-file", "~/App_Data/db.sqlite".MapAbsolutePath(), SqliteOrmLiteDialectProvider.Instance);
+            var factory = new OrmLiteConnectionFactory(Config.SqliteMemoryDb, false, SqliteOrmLiteDialectProvider.Instance);
+            factory.RegisterConnection("sqlserver", Config.SqlServerDb, SqlServerOrmLiteDialectProvider.Instance);
+            factory.RegisterConnection("sqlite-file", Config.SqliteFileDb, SqliteOrmLiteDialectProvider.Instance);
 
             var results = new List<Person>();
             using (var db = factory.OpenDbConnection())
@@ -96,9 +96,9 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_open_multiple_nested_connections_in_any_order()
         {
-            var factory = new OrmLiteConnectionFactory(":memory:", false, SqliteOrmLiteDialectProvider.Instance);
-            factory.RegisterConnection("sqlserver", "~/App_Data/Database1.mdf".MapAbsolutePath(), SqlServerOrmLiteDialectProvider.Instance);
-            factory.RegisterConnection("sqlite-file", "~/App_Data/db.sqlite".MapAbsolutePath(), SqliteOrmLiteDialectProvider.Instance);
+            var factory = new OrmLiteConnectionFactory(Config.SqliteMemoryDb, false, SqliteOrmLiteDialectProvider.Instance);
+            factory.RegisterConnection("sqlserver", Config.SqlServerDb, SqlServerOrmLiteDialectProvider.Instance);
+            factory.RegisterConnection("sqlite-file", Config.SqliteFileDb, SqliteOrmLiteDialectProvider.Instance);
 
             var results = new List<Person>();
             using (var db = factory.OpenDbConnection())

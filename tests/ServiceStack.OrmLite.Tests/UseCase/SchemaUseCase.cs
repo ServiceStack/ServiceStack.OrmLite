@@ -30,12 +30,11 @@ namespace ServiceStack.OrmLite.Tests.UseCase
             OrmLiteConfig.DialectProvider = SqliteOrmLiteDialectProvider.Instance;
 
             using (IDbConnection db = ":memory:".OpenDbConnection())
-            using (IDbCommand dbCmd = db.CreateCommand())
             {
-                dbCmd.CreateTable<User>(true);
+                db.CreateTable<User>(true);
 
                 var tables =
-                    dbCmd.GetFirstColumn<string>
+                    db.GetFirstColumn<string>
                         (@"SELECT name FROM sqlite_master WHERE type='table';");
 
                 //sqlite dialect should just concatenate the schema and table name to create a unique table name
@@ -43,15 +42,14 @@ namespace ServiceStack.OrmLite.Tests.UseCase
             }
         }
 
-        private void CreateSchemaIfNotExists(IDbCommand dbCmd)
+        private void CreateSchemaIfNotExists(IDbConnection db)
         {
             //in Sql2008, CREATE SCHEMA must be the first statement in a batch
             const string createSchemaSQL = @"IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = 'Security')
                                         BEGIN
                                         EXEC( 'CREATE SCHEMA Security' );
                                         END";
-            dbCmd.CommandText = createSchemaSQL;
-            dbCmd.ExecuteNonQuery();
+            db.ExecuteSql(createSchemaSQL);
         }
 
         [Test]

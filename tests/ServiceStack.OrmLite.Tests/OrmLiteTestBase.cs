@@ -9,9 +9,16 @@ using ServiceStack.OrmLite.SqlServer;
 
 namespace ServiceStack.OrmLite.Tests
 {
+    public class Config
+    {
+        public static string SqliteInMemoryDb = ":memory:";
+        public static string SqliteFileDb = "~/App_Data/db.sqlite".MapAbsolutePath();
+        public static string SqlServerDb = "~/App_Data/Database1.mdf".MapAbsolutePath();
+    }
+
 	public class OrmLiteTestBase
 	{
-		protected virtual string ConnectionString { get; set; }
+	    protected virtual string ConnectionString { get; set; }
 
 		protected string GetConnectionString()
 		{
@@ -20,15 +27,14 @@ namespace ServiceStack.OrmLite.Tests
 
 	    public static OrmLiteConnectionFactory CreateSqlServerDbFactory()
 	    {
-	        var dbFactory = new OrmLiteConnectionFactory(
-	            "~/App_Data/Database1.mdf".MapAbsolutePath(),
+	        var dbFactory = new OrmLiteConnectionFactory(Config.SqlServerDb,
 	            SqlServerOrmLiteDialectProvider.Instance);
 	        return dbFactory;
 	    }
 
 	    protected string GetFileConnectionString()
 		{
-			var connectionString = "~/App_Data/db.sqlite".MapAbsolutePath();
+            var connectionString = Config.SqliteFileDb;
 			if (File.Exists(connectionString))
 				File.Delete(connectionString);
 
