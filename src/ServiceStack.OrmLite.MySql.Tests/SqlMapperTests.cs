@@ -30,14 +30,13 @@ namespace ServiceStack.OrmLite.Tests
                 ConfigurationManager.ConnectionStrings["testDb"].ConnectionString,
                 MySqlDialectProvider.Instance);
 
-            dbFactory.Exec(dbCmd => dbCmd.CreateTable<User>(overwrite: true));
+            dbFactory.Run(db => db.CreateTable<User>(overwrite: true));
         }
         
         [Test]
         public void BuilderSelectClause()
         {
-            using (var dbConn = dbFactory.OpenDbConnection())
-            using (var dbCmd = dbConn.CreateCommand())
+            using (var db = dbFactory.OpenDbConnection())
             {
                 var rand = new Random(8675309);
                 var data = new List<User>();
@@ -45,8 +44,8 @@ namespace ServiceStack.OrmLite.Tests
                 {
                     var nU = new User { Age = rand.Next(70), Id = i, Name = Guid.NewGuid().ToString() };
                     data.Add(nU);
-                    dbCmd.Insert(nU);
-                    nU.Id = (int) dbCmd.GetLastInsertId();
+                    db.Insert(nU);
+                    nU.Id = (int) db.GetLastInsertId();
                 }
 
                 var builder = new SqlBuilder();
@@ -55,8 +54,8 @@ namespace ServiceStack.OrmLite.Tests
 
                 builder.Select("Id");
 
-                var ids = dbCmd.Query<int>(justId.RawSql, justId.Parameters);
-                var users = dbCmd.Query<User>(all.RawSql, all.Parameters);
+                var ids = db.Query<int>(justId.RawSql, justId.Parameters);
+                var users = db.Query<User>(all.RawSql, all.Parameters);
 
                 foreach (var u in data)
                 {
@@ -75,12 +74,11 @@ namespace ServiceStack.OrmLite.Tests
             if (template.RawSql == null) throw new Exception("RawSql null");
             if (template.Parameters == null) throw new Exception("Parameters null");
 
-            using (var dbConn = dbFactory.OpenDbConnection())
-            using (var dbCmd = dbConn.CreateCommand())
+            using (var db = dbFactory.OpenDbConnection())
             {
-                dbCmd.Insert(new User { Age = 5, Name = "Testy McTestington" });
+                db.Insert(new User { Age = 5, Name = "Testy McTestington" });
 
-                Assert.That(dbCmd.QueryScalar<int>(template.RawSql, template.Parameters), Is.EqualTo(1));
+                Assert.That(db.QueryScalar<int>(template.RawSql, template.Parameters), Is.EqualTo(1));
             }
         }         
     }

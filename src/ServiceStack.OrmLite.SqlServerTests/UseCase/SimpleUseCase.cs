@@ -45,32 +45,31 @@ namespace ServiceStack.OrmLite.SqlServerTests.UseCase
             var sqlServerFactory = new OrmLiteConnectionFactory(connStr, SqlServerOrmLiteDialectProvider.Instance);
 
             using (IDbConnection db = sqlServerFactory.OpenDbConnection())
-            using (IDbCommand dbCmd = db.CreateCommand())
             {
-                dbCmd.CreateTable<Dual>(true);
-                dbCmd.CreateTable<User>(true);
+                db.CreateTable<Dual>(true);
+                db.CreateTable<User>(true);
 
-                dbCmd.Insert(new User { Id = 1, Name = "A", CreatedDate = DateTime.Now });
-                dbCmd.Insert(new User { Id = 2, Name = "B", CreatedDate = DateTime.Now });
-                dbCmd.Insert(new User { Id = 3, Name = "B", CreatedDate = DateTime.Now });
+                db.Insert(new User { Id = 1, Name = "A", CreatedDate = DateTime.Now });
+                db.Insert(new User { Id = 2, Name = "B", CreatedDate = DateTime.Now });
+                db.Insert(new User { Id = 3, Name = "B", CreatedDate = DateTime.Now });
 
-                dbCmd.Insert(new Dual { Name = "Dual" });
-                var lastInsertId = dbCmd.GetLastInsertId();
+                db.Insert(new Dual { Name = "Dual" });
+                var lastInsertId = db.GetLastInsertId();
                 Assert.That(lastInsertId, Is.GreaterThan(0));
 
-                var rowsB = dbCmd.Select<User>("Name = {0}", "B");
+                var rowsB = db.Select<User>("Name = {0}", "B");
 
                 Assert.That(rowsB, Has.Count.EqualTo(2));
 
                 var rowIds = rowsB.ConvertAll(x => x.Id);
                 Assert.That(rowIds, Is.EquivalentTo(new List<long> { 2, 3 }));
 
-                rowsB.ForEach(x => dbCmd.Delete(x));
+                rowsB.ForEach(x => db.Delete(x));
 
-                rowsB = dbCmd.Select<User>("Name = {0}", "B");
+                rowsB = db.Select<User>("Name = {0}", "B");
                 Assert.That(rowsB, Has.Count.EqualTo(0));
 
-                var rowsLeft = dbCmd.Select<User>();
+                var rowsLeft = db.Select<User>();
                 Assert.That(rowsLeft, Has.Count.EqualTo(1));
 
                 Assert.That(rowsLeft[0].Name, Is.EqualTo("A"));

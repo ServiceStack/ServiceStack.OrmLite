@@ -61,7 +61,6 @@ namespace ServiceStack.OrmLite.Firebird
 			return LastInsertId;			
 		}
 		
-		
 		public override object ConvertDbValue(object value, Type type)
 		{
 			if (value == null || value is DBNull) return null;

@@ -4,7 +4,6 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
-using ServiceStack.OrmLite.Connection;
 using ServiceStack.OrmLite.SqlServerTests.UseCase;
 using System.Data;
 
@@ -16,11 +15,11 @@ namespace ServiceStack.OrmLite.SqlServerTests
         [Test]
         public void Skip_Take_works_with_injected_Visitor()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
+            using (var db = ConnectionString.OpenDbConnection())
             {
-                FillTestEntityTableWithTestData(dbConn);
+                FillTestEntityTableWithTestData(db);
                 
-                var result = dbConn.Select<TestEntity>(q => q.Limit(10, 100));
+                var result = db.Select<TestEntity>(q => q.Limit(10, 100));
                 
                 Assert.NotNull(result);
                 Assert.AreEqual(100, result.Count);
@@ -33,14 +32,13 @@ namespace ServiceStack.OrmLite.SqlServerTests
         public void test_if_limit_works_with_rows_and_skip()
         {
             using (var db = ConnectionString.OpenDbConnection())
-            using (var dbCmd = db.CreateCommand())
             {
-                FillTestEntityTableWithTestData(dbCmd);
+                FillTestEntityTableWithTestData(db);
 
                 var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<TestEntity>();
                 ev.Limit(10, 100);
 
-                var result = dbCmd.Select(ev);
+                var result = db.Select(ev);
                 Assert.NotNull(result);
                 Assert.AreEqual(100, result.Count);
                 Assert.Less(10, result[0].Id);
@@ -52,14 +50,13 @@ namespace ServiceStack.OrmLite.SqlServerTests
         public void test_if_limit_works_with_rows()
         {
             using (var db = ConnectionString.OpenDbConnection())
-            using (var dbCmd = db.CreateCommand())
             {
-                FillTestEntityTableWithTestData(dbCmd);
+                FillTestEntityTableWithTestData(db);
 
                 var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<TestEntity>();
                 ev.Limit(100);
 
-                var result = dbCmd.Select(ev);
+                var result = db.Select(ev);
                 Assert.NotNull(result);
                 Assert.AreEqual(100, result.Count);
                 Assert.Less(0, result[0].Id);
@@ -71,15 +68,14 @@ namespace ServiceStack.OrmLite.SqlServerTests
         public void test_if_limit_works_with_rows_and_skip_and_orderby()
         {
             using (var db = ConnectionString.OpenDbConnection())
-            using (var dbCmd = db.CreateCommand())
             {
-                FillTestEntityTableWithTestData(dbCmd);
+                FillTestEntityTableWithTestData(db);
 
                 var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<TestEntity>();
                 ev.Limit(10, 100);
                 ev.OrderBy(e => e.Baz);
 
-                var result = dbCmd.Select(ev);
+                var result = db.Select(ev);
                 Assert.NotNull(result);
                 Assert.AreEqual(100, result.Count);
                 Assert.LessOrEqual(result[10].Baz, result[11].Baz);
@@ -90,35 +86,27 @@ namespace ServiceStack.OrmLite.SqlServerTests
         public void test_if_ev_still_works_without_limit_and_orderby()
         {
             using (var db = ConnectionString.OpenDbConnection())
-            using (var dbCmd = db.CreateCommand())
             {
-                FillTestEntityTableWithTestData(dbCmd);
+                FillTestEntityTableWithTestData(db);
 
                 var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<TestEntity>();
                 ev.OrderBy(e => e.Baz);
                 ev.Where(e => e.Baz < 0.1m);
 
-                var result = dbCmd.Select(ev);
+                var result = db.Select(ev);
                 Assert.NotNull(result);
                 Assert.IsTrue(result.Count > 0);
             }
         }
         
-        protected void FillTestEntityTableWithTestData(IDbConnection dbConn)
+        protected void FillTestEntityTableWithTestData(IDbConnection db)
         {
-            using (var dbCmd = dbConn.CreateCommand())
-            {
-                FillTestEntityTableWithTestData(dbCmd);
-            }
-        }
-
-        protected void FillTestEntityTableWithTestData(IDbCommand dbCmd)
-        {
-            dbCmd.CreateTable<TestEntity>(true);
+            db.CreateTable<TestEntity>(true);
 
             for (int i = 1; i < 1000; i++)
             {
-                dbCmd.Insert(new TestEntity() {
+                db.Insert(new TestEntity()
+                {
                     Foo = RandomString(16),
                     Bar = RandomString(16),
                     Baz = RandomDecimal(i)
