@@ -2,9 +2,6 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using NUnit.Framework;
-using ServiceStack.Common.Extensions;
-using ServiceStack.Common.Tests.Models;
-using ServiceStack.Text;
 using ServiceStack.DataAnnotations;
 using System.ComponentModel.DataAnnotations;
 
@@ -42,158 +39,157 @@ namespace ServiceStack.OrmLite.Tests
 			});
 			
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
-				dbCmd.CreateTable<Author>(true);
-				dbCmd.DeleteAll<Author>();
+				db.CreateTable<Author>(true);
+				db.DeleteAll<Author>();
 
-				dbCmd.InsertAll(authors);
+				db.InsertAll(authors);
 				
 				var expectedDate  = authors.Max(e=>e.Birthday);
-				var r1 = dbCmd.GetScalar<Author, DateTime>( e => Sql.Max(e.Birthday) );
+				var r1 = db.GetScalar<Author, DateTime>( e => Sql.Max(e.Birthday) );
 				Assert.That(expectedDate, Is.EqualTo(r1));
 				
 				expectedDate  = authors.Where(e=>e.City=="London").Max(e=>e.Birthday);
-				r1 = dbCmd.GetScalar<Author, DateTime>( e => Sql.Max(e.Birthday), e=>e.City=="London" );
+				r1 = db.GetScalar<Author, DateTime>( e => Sql.Max(e.Birthday), e=>e.City=="London" );
 				Assert.That(expectedDate, Is.EqualTo(r1));
 				
-				r1 = dbCmd.GetScalar<Author, DateTime>( e => Sql.Max(e.Birthday), e=>e.City=="SinCity" );
+				r1 = db.GetScalar<Author, DateTime>( e => Sql.Max(e.Birthday), e=>e.City=="SinCity" );
 				Assert.That( default(DateTime), Is.EqualTo(r1));
 				
 				
 				var expectedNullableDate= authors.Max(e=>e.LastActivity);
-				DateTime? r2 = dbCmd.GetScalar<Author,DateTime?>(e=> Sql.Max(e.LastActivity));
+				DateTime? r2 = db.GetScalar<Author,DateTime?>(e=> Sql.Max(e.LastActivity));
 				Assert.That(expectedNullableDate, Is.EqualTo(r2));
 								
 				expectedNullableDate= authors.Where(e=> e.City=="Bogota").Max(e=>e.LastActivity);
-				r2 = dbCmd.GetScalar<Author,DateTime?>(
+				r2 = db.GetScalar<Author,DateTime?>(
 					e=>  Sql.Max(e.LastActivity),
 				 	e=>  e.City=="Bogota" );
 				Assert.That(expectedNullableDate, Is.EqualTo(r2));
 				
-				r2 = dbCmd.GetScalar<Author, DateTime?>( e => Sql.Max(e.LastActivity), e=>e.City=="SinCity" );
+				r2 = db.GetScalar<Author, DateTime?>( e => Sql.Max(e.LastActivity), e=>e.City=="SinCity" );
 				Assert.That( default(DateTime?), Is.EqualTo(r2));
 				
 				
 				var expectedDecimal= authors.Max(e=>e.Earnings);
-				decimal r3 = dbCmd.GetScalar<Author,decimal>(e=> Sql.Max(e.Earnings));
+				decimal r3 = db.GetScalar<Author,decimal>(e=> Sql.Max(e.Earnings));
 				Assert.That(expectedDecimal, Is.EqualTo(r3));
 				
 				expectedDecimal= authors.Where(e=>e.City=="London").Max(e=>e.Earnings);
-				r3 = dbCmd.GetScalar<Author,decimal>(e=> Sql.Max(e.Earnings), e=>e.City=="London");
+				r3 = db.GetScalar<Author,decimal>(e=> Sql.Max(e.Earnings), e=>e.City=="London");
 				Assert.That(expectedDecimal, Is.EqualTo(r3));
 				
-				r3 = dbCmd.GetScalar<Author,decimal>(e=> Sql.Max(e.Earnings), e=>e.City=="SinCity");
+				r3 = db.GetScalar<Author,decimal>(e=> Sql.Max(e.Earnings), e=>e.City=="SinCity");
 				Assert.That( default(decimal), Is.EqualTo(r3));
 				
 				
 				var expectedNullableDecimal= authors.Max(e=>e.NEarnings);
-				decimal? r4 = dbCmd.GetScalar<Author,decimal?>(e=> Sql.Max(e.NEarnings));
+				decimal? r4 = db.GetScalar<Author,decimal?>(e=> Sql.Max(e.NEarnings));
 				Assert.That(expectedNullableDecimal, Is.EqualTo(r4));
 				
 				expectedNullableDecimal= authors.Where(e=>e.City=="London").Max(e=>e.NEarnings);
-				r4 = dbCmd.GetScalar<Author,decimal?>(e=> Sql.Max(e.NEarnings), e=>e.City=="London");
+				r4 = db.GetScalar<Author,decimal?>(e=> Sql.Max(e.NEarnings), e=>e.City=="London");
 				Assert.That(expectedNullableDecimal, Is.EqualTo(r4));
 				
-				r4 = dbCmd.GetScalar<Author,decimal?>(e=> Sql.Max(e.NEarnings), e=>e.City=="SinCity");
+				r4 = db.GetScalar<Author,decimal?>(e=> Sql.Max(e.NEarnings), e=>e.City=="SinCity");
 				Assert.That( default(decimal?), Is.EqualTo(r4));
 				
 								
 				var expectedDouble =authors.Max(e=>e.DoubleProperty);
-				double r5 = dbCmd.GetScalar<Author,double>(e=> Sql.Max(e.DoubleProperty));
+				double r5 = db.GetScalar<Author,double>(e=> Sql.Max(e.DoubleProperty));
 				Assert.That(expectedDouble, Is.EqualTo(r5));
 				
 				expectedDouble =authors.Where(e=>e.City=="London").Max(e=>e.DoubleProperty);
-				r5 = dbCmd.GetScalar<Author,double>(e=> Sql.Max(e.DoubleProperty), e=>e.City=="London");
+				r5 = db.GetScalar<Author,double>(e=> Sql.Max(e.DoubleProperty), e=>e.City=="London");
 				Assert.That(expectedDouble, Is.EqualTo(r5));
 				
-				r5 = dbCmd.GetScalar<Author,double>(e=> Sql.Max(e.DoubleProperty), e=>e.City=="SinCity");
+				r5 = db.GetScalar<Author,double>(e=> Sql.Max(e.DoubleProperty), e=>e.City=="SinCity");
 				Assert.That(default(double),Is.EqualTo(r5));
 								
 				
 				var expectedNullableDouble =authors.Max(e=>e.NDoubleProperty);
-				double? r6 = dbCmd.GetScalar<Author,double?>(e=> Sql.Max(e.NDoubleProperty));
+				double? r6 = db.GetScalar<Author,double?>(e=> Sql.Max(e.NDoubleProperty));
 				Assert.That(expectedNullableDouble, Is.EqualTo(r6));
 				
 				
 				expectedNullableDouble =authors.Where(e=>e.City=="London").Max(e=>e.NDoubleProperty);
-				r6 = dbCmd.GetScalar<Author,double?>(e=> Sql.Max(e.NDoubleProperty), e=>e.City=="London");
+				r6 = db.GetScalar<Author,double?>(e=> Sql.Max(e.NDoubleProperty), e=>e.City=="London");
 				Assert.That(expectedNullableDouble, Is.EqualTo(r6));
 				
-				r6 = dbCmd.GetScalar<Author,double?>(e=> Sql.Max(e.NDoubleProperty), e=>e.City=="SinCity");
+				r6 = db.GetScalar<Author,double?>(e=> Sql.Max(e.NDoubleProperty), e=>e.City=="SinCity");
 				Assert.That(default(double?),Is.EqualTo(r6));
 								
 				
 				
 				var expectedFloat =authors.Max(e=>e.FloatProperty);
-				var r7 = dbCmd.GetScalar<Author,float>(e=> Sql.Max(e.FloatProperty));
+				var r7 = db.GetScalar<Author,float>(e=> Sql.Max(e.FloatProperty));
 				Assert.That(expectedFloat, Is.EqualTo(r7));
 				
 				expectedFloat =authors.Where(e=>e.City=="London").Max(e=>e.FloatProperty);
-				r7 = dbCmd.GetScalar<Author,float>(e=> Sql.Max(e.FloatProperty), e=>e.City=="London");
+				r7 = db.GetScalar<Author,float>(e=> Sql.Max(e.FloatProperty), e=>e.City=="London");
 				Assert.That(expectedFloat, Is.EqualTo(r7));
 								
-				r7 = dbCmd.GetScalar<Author,float>(e=> Sql.Max(e.FloatProperty), e=>e.City=="SinCity");
+				r7 = db.GetScalar<Author,float>(e=> Sql.Max(e.FloatProperty), e=>e.City=="SinCity");
 				Assert.That(default(float),Is.EqualTo(r7));
 				
 				
 				var expectedNullableFloat =authors.Max(e=>e.NFloatProperty);
-				var r8 = dbCmd.GetScalar<Author,float?>(e=> Sql.Max(e.NFloatProperty));
+				var r8 = db.GetScalar<Author,float?>(e=> Sql.Max(e.NFloatProperty));
 				Assert.That(expectedNullableFloat, Is.EqualTo(r8));
 				
 				expectedNullableFloat =authors.Where(e=>e.City=="London").Max(e=>e.NFloatProperty);
-				r8 = dbCmd.GetScalar<Author,float?>(e=> Sql.Max(e.NFloatProperty), e=>e.City=="London");
+				r8 = db.GetScalar<Author,float?>(e=> Sql.Max(e.NFloatProperty), e=>e.City=="London");
 				Assert.That(expectedNullableFloat, Is.EqualTo(r8));
 								
-				r8 = dbCmd.GetScalar<Author,float?>(e=> Sql.Max(e.NFloatProperty), e=>e.City=="SinCity");
+				r8 = db.GetScalar<Author,float?>(e=> Sql.Max(e.NFloatProperty), e=>e.City=="SinCity");
 				Assert.That(default(float?),Is.EqualTo(r8));
 				
 				
 				var expectedString=authors.Min(e=>e.Name);
-				var r9 = dbCmd.GetScalar<Author,string>(e=> Sql.Min(e.Name));
+				var r9 = db.GetScalar<Author,string>(e=> Sql.Min(e.Name));
 				Assert.That(expectedString, Is.EqualTo(r9));
 				
 				expectedString=authors.Where(e=>e.City=="London").Min(e=>e.Name);
-				r9 = dbCmd.GetScalar<Author,string>(e=> Sql.Min(e.Name), e=>e.City=="London");
+				r9 = db.GetScalar<Author,string>(e=> Sql.Min(e.Name), e=>e.City=="London");
 				Assert.That(expectedString, Is.EqualTo(r9));
 				
-				r9 = dbCmd.GetScalar<Author,string>(e=> Sql.Max(e.Name), e=>e.City=="SinCity");
+				r9 = db.GetScalar<Author,string>(e=> Sql.Max(e.Name), e=>e.City=="SinCity");
 				Assert.IsNullOrEmpty(r9);
 								
 				var expectedBool=authors.Min(e=>e.Active);
-				var r10 = dbCmd.GetScalar<Author,bool>(e=> Sql.Min(e.Active));
+				var r10 = db.GetScalar<Author,bool>(e=> Sql.Min(e.Active));
 				Assert.That(expectedBool, Is.EqualTo(r10));
 								
 				expectedBool=authors.Max(e=>e.Active);
-				r10 = dbCmd.GetScalar<Author,bool>(e=> Sql.Max(e.Active));
+				r10 = db.GetScalar<Author,bool>(e=> Sql.Max(e.Active));
 				Assert.That(expectedBool, Is.EqualTo(r10));
 				
-				r10 = dbCmd.GetScalar<Author,bool>(e=> Sql.Max(e.Active), e=>e.City=="SinCity");
+				r10 = db.GetScalar<Author,bool>(e=> Sql.Max(e.Active), e=>e.City=="SinCity");
 				Assert.IsFalse(r10);
 				
 				
 				
 				var expectedShort =authors.Max(e=>e.Rate);
-				var r11 = dbCmd.GetScalar<Author,short>(e=> Sql.Max(e.Rate));
+				var r11 = db.GetScalar<Author,short>(e=> Sql.Max(e.Rate));
 				Assert.That(expectedShort, Is.EqualTo(r11));
 				
 				expectedShort =authors.Where(e=>e.City=="London").Max(e=>e.Rate);
-				r11 = dbCmd.GetScalar<Author,short>(e=> Sql.Max(e.Rate), e=>e.City=="London");
+				r11 = db.GetScalar<Author,short>(e=> Sql.Max(e.Rate), e=>e.City=="London");
 				Assert.That(expectedShort, Is.EqualTo(r11));
 								
-				r11 = dbCmd.GetScalar<Author,short>(e=> Sql.Max(e.Rate), e=>e.City=="SinCity");
+				r11 = db.GetScalar<Author,short>(e=> Sql.Max(e.Rate), e=>e.City=="SinCity");
 				Assert.That(default(short),Is.EqualTo(r7));
 				
 				
 				var expectedNullableShort =authors.Max(e=>e.NRate);
-				var r12 = dbCmd.GetScalar<Author,short?>(e=> Sql.Max(e.NRate));
+				var r12 = db.GetScalar<Author,short?>(e=> Sql.Max(e.NRate));
 				Assert.That(expectedNullableShort, Is.EqualTo(r12));
 				
 				expectedNullableShort =authors.Where(e=>e.City=="London").Max(e=>e.NRate);
-				r12 = dbCmd.GetScalar<Author,short?>(e=> Sql.Max(e.NRate), e=>e.City=="London");
+				r12 = db.GetScalar<Author,short?>(e=> Sql.Max(e.NRate), e=>e.City=="London");
 				Assert.That(expectedNullableShort, Is.EqualTo(r12));
 								
-				r12 = dbCmd.GetScalar<Author,short?>(e=> Sql.Max(e.NRate), e=>e.City=="SinCity");
+				r12 = db.GetScalar<Author,short?>(e=> Sql.Max(e.NRate), e=>e.City=="SinCity");
 				Assert.That(default(short?),Is.EqualTo(r12));
 							
 			}

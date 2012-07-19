@@ -25,8 +25,7 @@ namespace ServiceStack.OrmLite.Tests
     public class ApiExpressionTests
         : OrmLiteTestBase
     {
-        private IDbConnection dbConn;
-        private IDbCommand dbCmd;
+        private IDbConnection db;
 
         public Person[] People = new[] {
             new Person(1, "Jimi", "Hendrix", 27), 
@@ -40,9 +39,8 @@ namespace ServiceStack.OrmLite.Tests
         [SetUp]
         public void SetUp()
         {
-            dbConn = ConnectionString.OpenDbConnection();
-            dbCmd = dbConn.CreateCommand();
-            dbCmd.CreateTable<Person>(overwrite: true);
+            db = ConnectionString.OpenDbConnection();
+            db.CreateTable<Person>(overwrite: true);
 
             //People.ToList().ForEach(x => dbCmd.Insert(x));
         }
@@ -50,85 +48,84 @@ namespace ServiceStack.OrmLite.Tests
         [TearDown]
         public void TearDown()
         {
-            dbCmd.Dispose();
-            dbConn.Dispose();
+            db.Dispose();
         }
 
         [Test]
         public void API_Expression_Examples()
         {
-            dbCmd.Insert(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27 });
-            Console.WriteLine(dbCmd.GetLastSql());
+            db.Insert(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27 });
+            Console.WriteLine(db.GetLastSql());
 
 
-            dbCmd.Update(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27});
-            Assert.That(dbCmd.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\" = 'Jimi',\"LastName\" = 'Hendrix',\"Age\" = 27 WHERE \"Id\" = 1"));
-            Console.WriteLine(dbCmd.GetLastSql());
+            db.Update(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27});
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\" = 'Jimi',\"LastName\" = 'Hendrix',\"Age\" = 27 WHERE \"Id\" = 1"));
+            Console.WriteLine(db.GetLastSql());
 
-            dbCmd.Update(new Person { Id = 1, FirstName = "JJ" }, p => p.LastName == "Hendrix");
-            Assert.That(dbCmd.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"Id\" = 1,\"FirstName\" = 'JJ',\"LastName\" = NULL,\"Age\" = NULL WHERE (\"LastName\" = 'Hendrix')"));
-            Console.WriteLine(dbCmd.GetLastSql());
+            db.Update(new Person { Id = 1, FirstName = "JJ" }, p => p.LastName == "Hendrix");
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"Id\" = 1,\"FirstName\" = 'JJ',\"LastName\" = NULL,\"Age\" = NULL WHERE (\"LastName\" = 'Hendrix')"));
+            Console.WriteLine(db.GetLastSql());
 
-            dbCmd.Update<Person>(new { FirstName = "JJ" }, p => p.LastName == "Hendrix");
-            Assert.That(dbCmd.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\" = 'JJ' WHERE (\"LastName\" = 'Hendrix')"));
-            Console.WriteLine(dbCmd.GetLastSql());
+            db.Update<Person>(new { FirstName = "JJ" }, p => p.LastName == "Hendrix");
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\" = 'JJ' WHERE (\"LastName\" = 'Hendrix')"));
+            Console.WriteLine(db.GetLastSql());
 
-            dbCmd.UpdateNonDefaults(new Person { FirstName = "JJ" }, p => p.LastName == "Hendrix");
-            Assert.That(dbCmd.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\" = 'JJ' WHERE (\"LastName\" = 'Hendrix')"));
-            Console.WriteLine(dbCmd.GetLastSql());
-
-
-            dbCmd.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName);
-            Assert.That(dbCmd.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\" = 'JJ'"));
-            Console.WriteLine(dbCmd.GetLastSql());
-
-            dbCmd.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName, p => p.LastName == "Hendrix");
-            Assert.That(dbCmd.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\" = 'JJ' WHERE (\"LastName\" = 'Hendrix')"));
-            Console.WriteLine(dbCmd.GetLastSql());
+            db.UpdateNonDefaults(new Person { FirstName = "JJ" }, p => p.LastName == "Hendrix");
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\" = 'JJ' WHERE (\"LastName\" = 'Hendrix')"));
+            Console.WriteLine(db.GetLastSql());
 
 
-            dbCmd.UpdateOnly(new Person { FirstName = "JJ", LastName = "Hendo" }, ev => ev.Update(p => p.FirstName));
-            Assert.That(dbCmd.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\" = 'JJ'"));
-            Console.WriteLine(dbCmd.GetLastSql());
+            db.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName);
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\" = 'JJ'"));
+            Console.WriteLine(db.GetLastSql());
 
-            dbCmd.UpdateOnly(new Person { FirstName = "JJ" }, ev => ev.Update(p => p.FirstName).Where(x => x.FirstName == "Jimi"));
-            Assert.That(dbCmd.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\" = 'JJ' WHERE (\"FirstName\" = 'Jimi')"));
-            Console.WriteLine(dbCmd.GetLastSql());
-
-
-            dbCmd.Update<Person>(set: "FirstName = {0}".Params("JJ"), where: "LastName = {0}".Params("Hendrix"));
-            Assert.That(dbCmd.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET FirstName = 'JJ' WHERE LastName = 'Hendrix'"));
-            Console.WriteLine(dbCmd.GetLastSql());
-
-            dbCmd.Update(table: "Person", set: "FirstName = {0}".Params("JJ"), where: "LastName = {0}".Params("Hendrix"));
-            Assert.That(dbCmd.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET FirstName = 'JJ' WHERE LastName = 'Hendrix'"));
-            Console.WriteLine(dbCmd.GetLastSql());
+            db.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName, p => p.LastName == "Hendrix");
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\" = 'JJ' WHERE (\"LastName\" = 'Hendrix')"));
+            Console.WriteLine(db.GetLastSql());
 
 
-            dbCmd.InsertOnly(new Person { FirstName = "Amy" }, ev => ev.Insert(p => new { p.FirstName }));
-            Assert.That(dbCmd.GetLastSql(), Is.EqualTo("INSERT INTO \"Person\" (\"FirstName\") VALUES ('Amy')"));
-            Console.WriteLine(dbCmd.GetLastSql());
+            db.UpdateOnly(new Person { FirstName = "JJ", LastName = "Hendo" }, ev => ev.Update(p => p.FirstName));
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\" = 'JJ'"));
+            Console.WriteLine(db.GetLastSql());
+
+            db.UpdateOnly(new Person { FirstName = "JJ" }, ev => ev.Update(p => p.FirstName).Where(x => x.FirstName == "Jimi"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\" = 'JJ' WHERE (\"FirstName\" = 'Jimi')"));
+            Console.WriteLine(db.GetLastSql());
 
 
-            dbCmd.Delete<Person>(p => p.Age == 27);
-            Assert.That(dbCmd.GetLastSql(), Is.EqualTo("DELETE FROM \"Person\" WHERE (\"Age\" = 27)"));
-            Console.WriteLine(dbCmd.GetLastSql());
+            db.Update<Person>(set: "FirstName = {0}".Params("JJ"), where: "LastName = {0}".Params("Hendrix"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET FirstName = 'JJ' WHERE LastName = 'Hendrix'"));
+            Console.WriteLine(db.GetLastSql());
 
-            dbCmd.Delete<Person>(ev => ev.Where(p => p.Age == 27));
-            Assert.That(dbCmd.GetLastSql(), Is.EqualTo("DELETE FROM \"Person\" WHERE (\"Age\" = 27)"));
-            Console.WriteLine(dbCmd.GetLastSql());
+            db.Update(table: "Person", set: "FirstName = {0}".Params("JJ"), where: "LastName = {0}".Params("Hendrix"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET FirstName = 'JJ' WHERE LastName = 'Hendrix'"));
+            Console.WriteLine(db.GetLastSql());
 
-            dbCmd.Delete(OrmLiteConfig.DialectProvider.ExpressionVisitor<Person>().Where(p => p.Age == 27));
-            Assert.That(dbCmd.GetLastSql(), Is.EqualTo("DELETE FROM \"Person\" WHERE (\"Age\" = 27)"));
-            Console.WriteLine(dbCmd.GetLastSql());
 
-            dbCmd.Delete<Person>(where: "Age = {0}".Params(27));
-            Assert.That(dbCmd.GetLastSql(), Is.EqualTo("DELETE FROM \"Person\" WHERE Age = 27"));
-            Console.WriteLine(dbCmd.GetLastSql());
+            db.InsertOnly(new Person { FirstName = "Amy" }, ev => ev.Insert(p => new { p.FirstName }));
+            Assert.That(db.GetLastSql(), Is.EqualTo("INSERT INTO \"Person\" (\"FirstName\") VALUES ('Amy')"));
+            Console.WriteLine(db.GetLastSql());
 
-            dbCmd.Delete(table: "Person", where: "Age = {0}".Params(27));
-            Assert.That(dbCmd.GetLastSql(), Is.EqualTo("DELETE FROM \"Person\" WHERE Age = 27"));
-            Console.WriteLine(dbCmd.GetLastSql());
+
+            db.Delete<Person>(p => p.Age == 27);
+            Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM \"Person\" WHERE (\"Age\" = 27)"));
+            Console.WriteLine(db.GetLastSql());
+
+            db.Delete<Person>(ev => ev.Where(p => p.Age == 27));
+            Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM \"Person\" WHERE (\"Age\" = 27)"));
+            Console.WriteLine(db.GetLastSql());
+
+            db.Delete(OrmLiteConfig.DialectProvider.ExpressionVisitor<Person>().Where(p => p.Age == 27));
+            Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM \"Person\" WHERE (\"Age\" = 27)"));
+            Console.WriteLine(db.GetLastSql());
+
+            db.Delete<Person>(where: "Age = {0}".Params(27));
+            Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM \"Person\" WHERE Age = 27"));
+            Console.WriteLine(db.GetLastSql());
+
+            db.Delete(table: "Person", where: "Age = {0}".Params(27));
+            Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM \"Person\" WHERE Age = 27"));
+            Console.WriteLine(db.GetLastSql());
         }
          
     }

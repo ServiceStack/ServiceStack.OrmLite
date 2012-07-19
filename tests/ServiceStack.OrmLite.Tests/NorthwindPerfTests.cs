@@ -23,12 +23,11 @@ namespace ServiceStack.OrmLite.Tests
 			var stopWatch = new Stopwatch();
 			stopWatch.Start();
 
-			using (var dbConn = ":memory:".OpenDbConnection())
-			using (var dbCmd = dbConn.CreateCommand())
+			using (var db = ":memory:".OpenDbConnection())
 			{
-				using (var client = new OrmLitePersistenceProvider(dbConn))
+				using (var client = new OrmLitePersistenceProvider(db))
 				{
-					OrmLiteNorthwindTests.CreateNorthwindTables(dbCmd);
+					OrmLiteNorthwindTests.CreateNorthwindTables(db);
 					LoadNorthwindData(client);
 				}
 			}

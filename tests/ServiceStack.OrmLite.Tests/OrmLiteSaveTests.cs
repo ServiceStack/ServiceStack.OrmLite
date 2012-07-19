@@ -14,13 +14,12 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_Save_into_ModelWithFieldsOfDifferentTypes_table()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbConn = db.CreateCommand())
 			{
-				dbConn.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
 				var row = ModelWithFieldsOfDifferentTypes.Create(1);
 
-				dbConn.Save(row);
+				db.Save(row);
 			}
 		}
 
@@ -28,15 +27,14 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_Save_and_select_from_ModelWithFieldsOfDifferentTypes_table()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbConn = db.CreateCommand())
 			{
-				dbConn.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
 				var row = ModelWithFieldsOfDifferentTypes.Create(1);
 
-				dbConn.Save(row);
+				db.Save(row);
 
-				var rows = dbConn.Select<ModelWithFieldsOfDifferentTypes>();
+				var rows = db.Select<ModelWithFieldsOfDifferentTypes>();
 
 				Assert.That(rows, Has.Count.EqualTo(1));
 
@@ -48,16 +46,15 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_SaveAll_and_select_from_ModelWithFieldsOfDifferentTypes_table()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbConn = db.CreateCommand())
 			{
-				dbConn.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
 				var rowIds = new List<int> { 1, 2, 3, 4, 5 };
 				var newRows = rowIds.ConvertAll(x => ModelWithFieldsOfDifferentTypes.Create(x));
 
-				dbConn.SaveAll(newRows);
+				db.SaveAll(newRows);
 
-				var rows = dbConn.Select<ModelWithFieldsOfDifferentTypes>();
+				var rows = db.Select<ModelWithFieldsOfDifferentTypes>();
 
 				Assert.That(rows, Has.Count.EqualTo(newRows.Count));
 			}
@@ -67,16 +64,15 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_SaveAll_and_select_from_ModelWithFieldsOfDifferentTypes_table_with_no_ids()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbConn = db.CreateCommand())
 			{
-				dbConn.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
 				var rowIds = new List<int> { 1, 2, 3, 4, 5 };
 				var newRows = rowIds.ConvertAll(x => ModelWithFieldsOfDifferentTypes.Create(default(int)));
 
-				dbConn.SaveAll(newRows);
+				db.SaveAll(newRows);
 
-				var rows = dbConn.Select<ModelWithFieldsOfDifferentTypes>();
+				var rows = db.Select<ModelWithFieldsOfDifferentTypes>();
 
 				Assert.That(rows, Has.Count.EqualTo(newRows.Count));
 			}
@@ -86,16 +82,15 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_Save_table_with_null_fields()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbConn = db.CreateCommand())
 			{
-				dbConn.CreateTable<ModelWithIdAndName>(true);
+				db.CreateTable<ModelWithIdAndName>(true);
 
 				var row = ModelWithIdAndName.Create(1);
 				row.Name = null;
 
-				dbConn.Save(row);
+				db.Save(row);
 
-				var rows = dbConn.Select<ModelWithIdAndName>();
+				var rows = db.Select<ModelWithIdAndName>();
 
 				Assert.That(rows, Has.Count.EqualTo(1));
 
@@ -107,15 +102,14 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_Save_TaskQueue_table()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbConn = db.CreateCommand())
 			{
-				dbConn.CreateTable<TaskQueue>(true);
+				db.CreateTable<TaskQueue>(true);
 
 				var row = TaskQueue.Create(1);
 
-				dbConn.Save(row);
+				db.Save(row);
 
-				var rows = dbConn.Select<TaskQueue>();
+				var rows = db.Select<TaskQueue>();
 
 				Assert.That(rows, Has.Count.EqualTo(1));
 
@@ -130,9 +124,8 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_SaveAll_and_select_from_Movie_table()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbConn = db.CreateCommand())
 			{
-				dbConn.CreateTable<Movie>(true);
+				db.CreateTable<Movie>(true);
 
 				var top5Movies = new List<Movie>
 				{
@@ -143,9 +136,9 @@ namespace ServiceStack.OrmLite.Tests
 					new Movie { Id = "tt0060196", Title = "The Good, the Bad and the Ugly", Rating = 9.0m, Director = "Sergio Leone", ReleaseDate = new DateTime(1967,12,29), TagLine = "They formed an alliance of hate to steal a fortune in dead man's gold", Genres = new List<string>{"Adventure","Western"}, },
 				};
 
-				dbConn.SaveAll(top5Movies);
+				db.SaveAll(top5Movies);
 
-				var rows = dbConn.Select<Movie>();
+				var rows = db.Select<Movie>();
 
 				Assert.That(rows, Has.Count.EqualTo(top5Movies.Count));
 			}

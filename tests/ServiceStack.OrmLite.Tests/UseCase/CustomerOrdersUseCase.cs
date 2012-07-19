@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using NUnit.Framework;
+using ServiceStack.Common.Utils;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.SqlServer;
 using ServiceStack.OrmLite.Sqlite;
@@ -125,36 +126,37 @@ namespace ServiceStack.OrmLite.Tests.UseCase
         public void Run()
         {
             //Setup SQL Server Connection Factory
-			var dbFactory = new OrmLiteConnectionFactory(
-				@"Data Source=.\SQLEXPRESS;AttachDbFilename=|DataDirectory|\App_Data\Database1.mdf;Integrated Security=True;User Instance=True",
-				SqlServerOrmLiteDialectProvider.Instance);
+            var dbFactory = OrmLiteTestBase.CreateSqlServerDbFactory();
+
+            //var dbFactory = new OrmLiteConnectionFactory(
+            //    @"Data Source=.\SQLEXPRESS;AttachDbFilename=|DataDirectory|\App_Data\Database1.mdf;Integrated Security=True;User Instance=True",
+            //    SqlServerOrmLiteDialectProvider.Instance);
 
 			//Use in-memory Sqlite DB instead
 			//var dbFactory = new OrmLiteConnectionFactory(
 			//    ":memory:", false, SqliteOrmLiteDialectProvider.Instance);
 
             //Non-intrusive: All extension methods hang off System.Data.* interfaces
-            IDbConnection dbConn = dbFactory.OpenDbConnection();
-            IDbCommand dbCmd = dbConn.CreateCommand();
+            IDbConnection db = dbFactory.OpenDbConnection();
 
             //Re-Create all table schemas:
-            dbCmd.DropTable<OrderDetail>();
-            dbCmd.DropTable<Order>();
-            dbCmd.DropTable<Customer>();
-            dbCmd.DropTable<Product>();
-            dbCmd.DropTable<Employee>();
+            db.DropTable<OrderDetail>();
+            db.DropTable<Order>();
+            db.DropTable<Customer>();
+            db.DropTable<Product>();
+            db.DropTable<Employee>();
 
-            dbCmd.CreateTable<Employee>();
-            dbCmd.CreateTable<Product>();
-            dbCmd.CreateTable<Customer>();
-            dbCmd.CreateTable<Order>();
-            dbCmd.CreateTable<OrderDetail>();
+            db.CreateTable<Employee>();
+            db.CreateTable<Product>();
+            db.CreateTable<Customer>();
+            db.CreateTable<Order>();
+            db.CreateTable<OrderDetail>();
 
-            dbCmd.Insert(new Employee { Id = 1, Name = "Employee 1" });
-            dbCmd.Insert(new Employee { Id = 2, Name = "Employee 2" });
+            db.Insert(new Employee { Id = 1, Name = "Employee 1" });
+            db.Insert(new Employee { Id = 2, Name = "Employee 2" });
             var product1 = new Product { Id = 1, Name = "Product 1", UnitPrice = 10 };
             var product2 = new Product { Id = 2, Name = "Product 2", UnitPrice = 20 };
-            dbCmd.Save(product1, product2);
+            db.Save(product1, product2);
 
             var customer = new Customer
             {
@@ -173,14 +175,14 @@ namespace ServiceStack.OrmLite.Tests.UseCase
                     },
                 CreatedAt = DateTime.UtcNow,
             };
-            dbCmd.Insert(customer);
+            db.Insert(customer);
 
-            var customerId = dbCmd.GetLastInsertId(); //Get Auto Inserted Id
-            customer = dbCmd.QuerySingle<Customer>(new { customer.Email }); //Query
+            var customerId = db.GetLastInsertId(); //Get Auto Inserted Id
+            customer = db.QuerySingle<Customer>(new { customer.Email }); //Query
             Assert.That(customer.Id, Is.EqualTo(customerId));
 
             //Direct access to System.Data.Transactions:
-            using (var trans = dbCmd.BeginTransaction(IsolationLevel.ReadCommitted))
+            using (var trans = db.BeginTransaction(IsolationLevel.ReadCommitted))
             {
                 var order = new Order
                 {
@@ -190,9 +192,9 @@ namespace ServiceStack.OrmLite.Tests.UseCase
                     Freight = 10.50m,
                     ShippingAddress = new Address { Line1 = "3 Street", Country = "US", State = "NY", City = "New York", ZipCode = "12121" },
                 };
-                dbCmd.Save(order); //Inserts 1st time
+                db.Save(order); //Inserts 1st time
 
-                order.Id = (int)dbCmd.GetLastInsertId(); //Get Auto Inserted Id
+                order.Id = (int)db.GetLastInsertId(); //Get Auto Inserted Id
 
                 var orderDetails = new[] {
                     new OrderDetail
@@ -212,14 +214,16 @@ namespace ServiceStack.OrmLite.Tests.UseCase
                     }
                 };
 
-                dbCmd.Insert(orderDetails);
+                db.Insert(orderDetails);
 
                 order.Total = orderDetails.Sum(x => x.UnitPrice * x.Quantity * x.Discount) + order.Freight;
 
-                dbCmd.Save(order); //Updates 2nd Time
+                db.Save(order); //Updates 2nd Time
 
                 trans.Commit();
             }
+
+            db.Close();
         }
     }
 

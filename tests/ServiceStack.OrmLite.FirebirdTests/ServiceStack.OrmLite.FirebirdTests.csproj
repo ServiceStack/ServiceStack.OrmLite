@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -57,7 +57,6 @@
     <Compile Include="UseCase\SchemaUseCase.cs" />
     <Compile Include="OrmLiteTestBase.cs" />
     <Compile Include="LocalizationTests.cs" />
-    <Compile Include="OrmLiteLinqTests.cs" />
     <Compile Include="ShipperExample.cs" />
     <Compile Include="OrmLiteBasicPersistenceProviderTest.cs" />
     <Compile Include="ServiceStack.Common.Tests\ServiceStack.Common.Tests.Models\ModelWithFieldsOfDifferentTypes.cs" />
@@ -108,11 +107,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <Folder Include="UseCase\" />
-    <Folder Include="ServiceStack.Common.Tests\" />
-    <Folder Include="ServiceStack.Common.Tests\ServiceStack.Common.Tests.Models\" />
-    <Folder Include="Northwind.Common\" />
-    <Folder Include="Northwind.Common\Northwind.Common.DataModel\" />
     <Folder Include="Northwind.Common\Northwind.Common\" />
   </ItemGroup>
   <ItemGroup>

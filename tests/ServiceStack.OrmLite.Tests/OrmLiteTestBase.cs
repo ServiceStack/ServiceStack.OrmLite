@@ -18,7 +18,15 @@ namespace ServiceStack.OrmLite.Tests
 			return GetFileConnectionString();
 		}
 
-		protected string GetFileConnectionString()
+	    public static OrmLiteConnectionFactory CreateSqlServerDbFactory()
+	    {
+	        var dbFactory = new OrmLiteConnectionFactory(
+	            "~/App_Data/Database1.mdf".MapAbsolutePath(),
+	            SqlServerOrmLiteDialectProvider.Instance);
+	        return dbFactory;
+	    }
+
+	    protected string GetFileConnectionString()
 		{
 			var connectionString = "~/App_Data/db.sqlite".MapAbsolutePath();
 			if (File.Exists(connectionString))

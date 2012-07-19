@@ -45,13 +45,12 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_query_using_float_in_alernate_culuture()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
-				dbCmd.CreateTable<Point>(true);
+				db.CreateTable<Point>(true);
 
-				dbCmd.Insert(new Point { Width = 4, Height = 1.123f, Top = 3.456d, Left = 2.345m});
+				db.Insert(new Point { Width = 4, Height = 1.123f, Top = 3.456d, Left = 2.345m});
 
-				var points = dbCmd.Select<Point>("Height={0}", 1.123f);
+				var points = db.Select<Point>("Height={0}", 1.123f);
 
 				Console.WriteLine(points.Dump());
 

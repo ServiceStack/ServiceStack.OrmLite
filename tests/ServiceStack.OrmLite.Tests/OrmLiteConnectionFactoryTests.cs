@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using Northwind.Common.DataModel;
 using NUnit.Framework;
 using ServiceStack.Common.Utils;
-using ServiceStack.OrmLite.Connection;
 using ServiceStack.OrmLite.SqlServer;
 using ServiceStack.OrmLite.Sqlite;
 using ServiceStack.Text;
@@ -18,18 +17,16 @@ namespace ServiceStack.OrmLite.Tests
             OrmLiteConfig.DialectProvider = SqliteOrmLiteDialectProvider.Instance;
             var factory = new OrmLiteConnectionFactory(":memory:", true);
 
-            using (var dbConn = factory.OpenDbConnection())
-            using (var dbCmd = dbConn.CreateCommand())
+            using (var db = factory.OpenDbConnection())
             {
-                dbCmd.CreateTable<Shipper>(false);
-                dbCmd.Insert(new Shipper { CompanyName = "I am shipper" });
+                db.CreateTable<Shipper>(false);
+                db.Insert(new Shipper { CompanyName = "I am shipper" });
             }
 
-            using (var dbConn = factory.OpenDbConnection())
-            using (var dbCmd = dbConn.CreateCommand())
+            using (var db = factory.OpenDbConnection())
             {
-                dbCmd.CreateTable<Shipper>(false);
-                Assert.That(dbCmd.Select<Shipper>(), Has.Count.EqualTo(0));
+                db.CreateTable<Shipper>(false);
+                Assert.That(db.Select<Shipper>(), Has.Count.EqualTo(0));
             }
         }
 
@@ -39,18 +36,16 @@ namespace ServiceStack.OrmLite.Tests
             OrmLiteConfig.DialectProvider = SqliteOrmLiteDialectProvider.Instance;
             var factory = new OrmLiteConnectionFactory(":memory:", false);
 
-            using (var dbConn = factory.OpenDbConnection())
-            using (var dbCmd = dbConn.CreateCommand())
+            using (var db = factory.OpenDbConnection())
             {
-                dbCmd.CreateTable<Shipper>(false);
-                dbCmd.Insert(new Shipper { CompanyName = "I am shipper" });
+                db.CreateTable<Shipper>(false);
+                db.Insert(new Shipper { CompanyName = "I am shipper" });
             }
 
-            using (var dbConn = factory.OpenDbConnection())
-            using (var dbCmd = dbConn.CreateCommand())
+            using (var db = factory.OpenDbConnection())
             {
-                dbCmd.CreateTable<Shipper>(false);
-                Assert.That(dbCmd.Select<Shipper>(), Has.Count.EqualTo(1));
+                db.CreateTable<Shipper>(false);
+                Assert.That(db.Select<Shipper>(), Has.Count.EqualTo(1));
             }
         }
 
@@ -68,27 +63,27 @@ namespace ServiceStack.OrmLite.Tests
             factory.RegisterConnection("sqlite-file", "~/App_Data/db.sqlite".MapAbsolutePath(), SqliteOrmLiteDialectProvider.Instance);
 
             var results = new List<Person>();
-            using (var dbConn = factory.OpenDbConnection())
+            using (var db = factory.OpenDbConnection())
             {
-                dbConn.CreateTable<Person>(true);
-                dbConn.Insert(new Person { Id = 1, Name = "1) :memory:" });
-                dbConn.Insert(new Person { Id = 2, Name = "2) :memory:" });
+                db.CreateTable<Person>(true);
+                db.Insert(new Person { Id = 1, Name = "1) :memory:" });
+                db.Insert(new Person { Id = 2, Name = "2) :memory:" });
 
-                using (var dbConn2 = factory.OpenDbConnection("sqlserver"))
+                using (var db2 = factory.OpenDbConnection("sqlserver"))
                 {
-                    dbConn2.CreateTable<Person>(true);
-                    dbConn2.Insert(new Person { Id = 3, Name = "3) Database1.mdf" });
-                    dbConn2.Insert(new Person { Id = 4, Name = "4) Database1.mdf" });
+                    db2.CreateTable<Person>(true);
+                    db2.Insert(new Person { Id = 3, Name = "3) Database1.mdf" });
+                    db2.Insert(new Person { Id = 4, Name = "4) Database1.mdf" });
 
-                    using (var dbConn3 = factory.OpenDbConnection("sqlite-file"))
+                    using (var db3 = factory.OpenDbConnection("sqlite-file"))
                     {
-                        dbConn3.CreateTable<Person>(true);
-                        dbConn3.Insert(new Person { Id = 5, Name = "5) db.sqlite" });
-                        dbConn3.Insert(new Person { Id = 6, Name = "6) db.sqlite" });
+                        db3.CreateTable<Person>(true);
+                        db3.Insert(new Person { Id = 5, Name = "5) db.sqlite" });
+                        db3.Insert(new Person { Id = 6, Name = "6) db.sqlite" });
 
-                        results.AddRange(dbConn.Select<Person>());
-                        results.AddRange(dbConn2.Select<Person>());
-                        results.AddRange(dbConn3.Select<Person>());
+                        results.AddRange(db.Select<Person>());
+                        results.AddRange(db2.Select<Person>());
+                        results.AddRange(db3.Select<Person>());
                     }
                 }
             }
@@ -106,29 +101,29 @@ namespace ServiceStack.OrmLite.Tests
             factory.RegisterConnection("sqlite-file", "~/App_Data/db.sqlite".MapAbsolutePath(), SqliteOrmLiteDialectProvider.Instance);
 
             var results = new List<Person>();
-            using (var dbConn = factory.OpenDbConnection())
+            using (var db = factory.OpenDbConnection())
             {
-                dbConn.CreateTable<Person>(true);
-                dbConn.Insert(new Person { Id = 1, Name = "1) :memory:" });
+                db.CreateTable<Person>(true);
+                db.Insert(new Person { Id = 1, Name = "1) :memory:" });
 
-                using (var dbConn2 = factory.OpenDbConnection("sqlserver"))
+                using (var db2 = factory.OpenDbConnection("sqlserver"))
                 {
-                    dbConn2.CreateTable<Person>(true);
-                    dbConn.Insert(new Person { Id = 2, Name = "2) :memory:" });
-                    dbConn2.Insert(new Person { Id = 3, Name = "3) Database1.mdf" });
+                    db2.CreateTable<Person>(true);
+                    db.Insert(new Person { Id = 2, Name = "2) :memory:" });
+                    db2.Insert(new Person { Id = 3, Name = "3) Database1.mdf" });
 
-                    using (var dbConn3 = factory.OpenDbConnection("sqlite-file"))
+                    using (var db3 = factory.OpenDbConnection("sqlite-file"))
                     {
-                        dbConn3.CreateTable<Person>(true);
-                        dbConn2.Insert(new Person { Id = 4, Name = "4) Database1.mdf" });
-                        dbConn3.Insert(new Person { Id = 5, Name = "5) db.sqlite" });
+                        db3.CreateTable<Person>(true);
+                        db2.Insert(new Person { Id = 4, Name = "4) Database1.mdf" });
+                        db3.Insert(new Person { Id = 5, Name = "5) db.sqlite" });
 
-                        results.AddRange(dbConn2.Select<Person>());
+                        results.AddRange(db2.Select<Person>());
 
-                        dbConn3.Insert(new Person { Id = 6, Name = "6) db.sqlite" });
-                        results.AddRange(dbConn3.Select<Person>());
+                        db3.Insert(new Person { Id = 6, Name = "6) db.sqlite" });
+                        results.AddRange(db3.Select<Person>());
                     }
-                    results.AddRange(dbConn.Select<Person>());
+                    results.AddRange(db.Select<Person>());
                 }
             }
 

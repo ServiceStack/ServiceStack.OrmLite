@@ -802,6 +802,11 @@ namespace ServiceStack.OrmLite
             return fieldDefinition ?? GetUndefinedColumnDefinition(fieldType, null);
         }
 
+        public virtual bool DoesTableExist(IDbConnection db, string tableName)
+        {
+            return db.Exec(dbCmd => DoesTableExist(dbCmd, tableName));
+        }
+
         public virtual bool DoesTableExist(IDbCommand dbCmd, string tableName)
         {
             return false;

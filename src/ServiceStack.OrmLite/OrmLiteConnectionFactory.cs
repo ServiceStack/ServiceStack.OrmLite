@@ -136,6 +136,7 @@ namespace ServiceStack.OrmLite
 
     public static class OrmLiteConnectionFactoryExtensions
     {
+        [Obsolete("Use IDbConnectionFactory.Run(IDbConnection db => ...) extension method instead")]
         public static void Exec(this IDbConnectionFactory connectionFactory, Action<IDbCommand> runDbCommandsFn)
         {
             using (var dbConn = connectionFactory.OpenDbConnection())
@@ -145,12 +146,29 @@ namespace ServiceStack.OrmLite
             }
         }
 
+        [Obsolete("Use IDbConnectionFactory.Run(IDbConnection db => ...) extension method instead")]
         public static T Exec<T>(this IDbConnectionFactory connectionFactory, Func<IDbCommand, T> runDbCommandsFn)
         {
             using (var dbConn = connectionFactory.OpenDbConnection())
             using (var dbCmd = dbConn.CreateCommand())
             {
                 return runDbCommandsFn(dbCmd);
+            }
+        }
+
+        public static void Run(this IDbConnectionFactory connectionFactory, Action<IDbConnection> runDbCommandsFn)
+        {
+            using (var dbConn = connectionFactory.OpenDbConnection())
+            {
+                runDbCommandsFn(dbConn);
+            }
+        }
+
+        public static T Run<T>(this IDbConnectionFactory connectionFactory, Func<IDbConnection, T> runDbCommandsFn)
+        {
+            using (var dbConn = connectionFactory.OpenDbConnection())
+            {
+                return runDbCommandsFn(dbConn);
             }
         }
     }

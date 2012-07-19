@@ -16,15 +16,14 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_GetById_int_from_ModelWithFieldsOfDifferentTypes_table()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
-				dbCmd.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
 
-				rowIds.ForEach(x => dbCmd.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
+				rowIds.ForEach(x => db.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
 
-				var row = dbCmd.GetById<ModelWithFieldsOfDifferentTypes>(1);
+				var row = db.GetById<ModelWithFieldsOfDifferentTypes>(1);
 
 				Assert.That(row.Id, Is.EqualTo(1));
 			}
@@ -34,15 +33,14 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_GetById_string_from_ModelWithOnlyStringFields_table()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
-				dbCmd.CreateTable<ModelWithOnlyStringFields>(true);
+				db.CreateTable<ModelWithOnlyStringFields>(true);
 
 				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
 
-				rowIds.ForEach(x => dbCmd.Insert(ModelWithOnlyStringFields.Create(x)));
+				rowIds.ForEach(x => db.Insert(ModelWithOnlyStringFields.Create(x)));
 
-				var row = dbCmd.GetById<ModelWithOnlyStringFields>("id-1");
+				var row = db.GetById<ModelWithOnlyStringFields>("id-1");
 
 				Assert.That(row.Id, Is.EqualTo("id-1"));
 			}
@@ -52,15 +50,14 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_GetByIds_int_from_ModelWithFieldsOfDifferentTypes_table()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
-				dbCmd.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
 
-				rowIds.ForEach(x => dbCmd.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
+				rowIds.ForEach(x => db.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
 
-				var rows = dbCmd.GetByIds<ModelWithFieldsOfDifferentTypes>(rowIds);
+				var rows = db.GetByIds<ModelWithFieldsOfDifferentTypes>(rowIds);
 				var dbRowIds = rows.ConvertAll(x => x.Id);
 
 				Assert.That(dbRowIds, Is.EquivalentTo(rowIds));
@@ -71,15 +68,14 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_GetByIds_string_from_ModelWithOnlyStringFields_table()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
-				dbCmd.CreateTable<ModelWithOnlyStringFields>(true);
+				db.CreateTable<ModelWithOnlyStringFields>(true);
 
 				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
 
-				rowIds.ForEach(x => dbCmd.Insert(ModelWithOnlyStringFields.Create(x)));
+				rowIds.ForEach(x => db.Insert(ModelWithOnlyStringFields.Create(x)));
 
-				var rows = dbCmd.GetByIds<ModelWithOnlyStringFields>(rowIds);
+				var rows = db.GetByIds<ModelWithOnlyStringFields>(rowIds);
 				var dbRowIds = rows.ConvertAll(x => x.Id);
 
 				Assert.That(dbRowIds, Is.EquivalentTo(rowIds));
@@ -90,20 +86,19 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_select_with_filter_from_ModelWithOnlyStringFields_table()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
-				dbCmd.CreateTable<ModelWithOnlyStringFields>(true);
+				db.CreateTable<ModelWithOnlyStringFields>(true);
 
 				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
 
-				rowIds.ForEach(x => dbCmd.Insert(ModelWithOnlyStringFields.Create(x)));
+				rowIds.ForEach(x => db.Insert(ModelWithOnlyStringFields.Create(x)));
 
 				var filterRow = ModelWithOnlyStringFields.Create("id-4");
 				filterRow.AlbumName = "FilteredName";
 
-				dbCmd.Insert(filterRow);
+				db.Insert(filterRow);
 
-				var rows = dbCmd.Select<ModelWithOnlyStringFields>("AlbumName = {0}", filterRow.AlbumName);
+				var rows = db.Select<ModelWithOnlyStringFields>("AlbumName = {0}", filterRow.AlbumName);
 				var dbRowIds = rows.ConvertAll(x => x.Id);
 
 				Assert.That(dbRowIds, Has.Count.EqualTo(1));
@@ -117,13 +112,12 @@ namespace ServiceStack.OrmLite.Tests
 			const int n = 5;
 
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
-				dbCmd.CreateTable<ModelWithIdAndName>(true);
+				db.CreateTable<ModelWithIdAndName>(true);
 
-				n.Times(x => dbCmd.Insert(ModelWithIdAndName.Create(x)));
+				n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
 
-				var count = dbCmd.GetScalar<int>("SELECT COUNT(*) FROM ModelWithIdAndName");
+				var count = db.GetScalar<int>("SELECT COUNT(*) FROM ModelWithIdAndName");
 
 				Assert.That(count, Is.EqualTo(n));
 			}
@@ -133,16 +127,15 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_loop_each_string_from_ModelWithOnlyStringFields_table()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
-				dbCmd.CreateTable<ModelWithOnlyStringFields>(true);
+				db.CreateTable<ModelWithOnlyStringFields>(true);
 
 				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
 
-				rowIds.ForEach(x => dbCmd.Insert(ModelWithOnlyStringFields.Create(x)));
+				rowIds.ForEach(x => db.Insert(ModelWithOnlyStringFields.Create(x)));
 
 				var dbRowIds = new List<string>();
-				foreach (var row in dbCmd.Each<ModelWithOnlyStringFields>())
+				foreach (var row in db.Each<ModelWithOnlyStringFields>())
 				{
 					dbRowIds.Add(row.Id);
 				}
@@ -155,21 +148,20 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_loop_each_with_filter_from_ModelWithOnlyStringFields_table()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
-				dbCmd.CreateTable<ModelWithOnlyStringFields>(true);
+				db.CreateTable<ModelWithOnlyStringFields>(true);
 
 				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
 
-				rowIds.ForEach(x => dbCmd.Insert(ModelWithOnlyStringFields.Create(x)));
+				rowIds.ForEach(x => db.Insert(ModelWithOnlyStringFields.Create(x)));
 
 				var filterRow = ModelWithOnlyStringFields.Create("id-4");
 				filterRow.AlbumName = "FilteredName";
 
-				dbCmd.Insert(filterRow);
+				db.Insert(filterRow);
 
 				var dbRowIds = new List<string>();
-				var rows = dbCmd.Each<ModelWithOnlyStringFields>("AlbumName = {0}", filterRow.AlbumName);
+				var rows = db.Each<ModelWithOnlyStringFields>("AlbumName = {0}", filterRow.AlbumName);
 				foreach (var row in rows)
 				{
 					dbRowIds.Add(row.Id);
@@ -186,13 +178,12 @@ namespace ServiceStack.OrmLite.Tests
 			const int n = 5;
 
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
-				dbCmd.CreateTable<ModelWithIdAndName>(true);
+				db.CreateTable<ModelWithIdAndName>(true);
 
-				n.Times(x => dbCmd.Insert(ModelWithIdAndName.Create(x)));
+				n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
 
-				var ids = dbCmd.GetFirstColumn<int>("SELECT Id FROM ModelWithIdAndName");
+				var ids = db.GetFirstColumn<int>("SELECT Id FROM ModelWithIdAndName");
 
 				Assert.That(ids.Count, Is.EqualTo(n));
 			}
@@ -204,13 +195,12 @@ namespace ServiceStack.OrmLite.Tests
 			const int n = 5;
 
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
-				dbCmd.CreateTable<ModelWithIdAndName>(true);
+				db.CreateTable<ModelWithIdAndName>(true);
 
-				n.Times(x => dbCmd.Insert(ModelWithIdAndName.Create(x)));
+				n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
 
-				var ids = dbCmd.GetFirstColumnDistinct<int>("SELECT Id FROM ModelWithIdAndName");
+				var ids = db.GetFirstColumnDistinct<int>("SELECT Id FROM ModelWithIdAndName");
 
 				Assert.That(ids.Count, Is.EqualTo(n));
 			}
@@ -222,17 +212,16 @@ namespace ServiceStack.OrmLite.Tests
 			const int n = 5;
 
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
-				dbCmd.CreateTable<ModelWithIdAndName>(true);
+				db.CreateTable<ModelWithIdAndName>(true);
 
 				n.Times(x => {
 					var row = ModelWithIdAndName.Create(x);
 					row.Name = x % 2 == 0 ? "OddGroup" : "EvenGroup";
-					dbCmd.Insert(row);
+					db.Insert(row);
 				});
 
-				var lookup = dbCmd.GetLookup<string, int>("SELECT Name, Id FROM ModelWithIdAndName");
+				var lookup = db.GetLookup<string, int>("SELECT Name, Id FROM ModelWithIdAndName");
 
 				Assert.That(lookup, Has.Count.EqualTo(2));
 				Assert.That(lookup["OddGroup"], Has.Count.EqualTo(3));
@@ -246,13 +235,12 @@ namespace ServiceStack.OrmLite.Tests
 			const int n = 5;
 
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
-				dbCmd.CreateTable<ModelWithIdAndName>(true);
+				db.CreateTable<ModelWithIdAndName>(true);
 
-				n.Times(x => dbCmd.Insert(ModelWithIdAndName.Create(x)));
+				n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
 
-				var dictionary = dbCmd.GetDictionary<int, string>("SELECT Id, Name FROM ModelWithIdAndName");
+				var dictionary = db.GetDictionary<int, string>("SELECT Id, Name FROM ModelWithIdAndName");
 
 				Assert.That(dictionary, Has.Count.EqualTo(5));
 
@@ -264,15 +252,14 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_Select_subset_ModelWithIdAndName_from_ModelWithFieldsOfDifferentTypes_table()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
-				dbCmd.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
 
-				rowIds.ForEach(x => dbCmd.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
+				rowIds.ForEach(x => db.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
 
-				var rows = dbCmd.Select<ModelWithIdAndName>("SELECT Id, Name FROM ModelWithFieldsOfDifferentTypes");
+				var rows = db.Select<ModelWithIdAndName>("SELECT Id, Name FROM ModelWithFieldsOfDifferentTypes");
 				var dbRowIds = rows.ConvertAll(x => x.Id);
 
 				Assert.That(dbRowIds, Is.EquivalentTo(rowIds));
@@ -283,15 +270,14 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_Select_Into_ModelWithIdAndName_from_ModelWithFieldsOfDifferentTypes_table()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
-				dbCmd.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
 
-				rowIds.ForEach(x => dbCmd.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
+				rowIds.ForEach(x => db.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
 
-				var rows = dbCmd.Select<ModelWithIdAndName>(typeof(ModelWithFieldsOfDifferentTypes));
+				var rows = db.Select<ModelWithIdAndName>(typeof(ModelWithFieldsOfDifferentTypes));
 				var dbRowIds = rows.ConvertAll(x => x.Id);
 
 				Assert.That(dbRowIds, Is.EquivalentTo(rowIds));
@@ -305,14 +291,13 @@ namespace ServiceStack.OrmLite.Tests
 			const int n = 5;
 
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
-				dbCmd.CreateTable<ModelWithIdAndName>(true);
+				db.CreateTable<ModelWithIdAndName>(true);
 
-				n.Times(x => dbCmd.Insert(ModelWithIdAndName.Create(x)));
+				n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
 
 				var selectInNames = new[] {"Name1", "Name2"};
-				var rows = dbCmd.Select<ModelWithIdAndName>("Name IN ({0})", selectInNames.SqlInValues());
+				var rows = db.Select<ModelWithIdAndName>("Name IN ({0})", selectInNames.SqlInValues());
 
 				Assert.That(rows.Count, Is.EqualTo(selectInNames.Length));
 			}
@@ -328,9 +313,8 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_populate_PocoFlag()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
-				var rows = dbCmd.Select<PocoFlag>("SELECT 1 as Flag");
+				var rows = db.Select<PocoFlag>("SELECT 1 as Flag");
 				Assert.That(rows[0].Flag);
 			}
 		}
@@ -345,9 +329,8 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_populate_PocoFlagWithId()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
-				var rows = dbCmd.Select<PocoFlagWithId>("SELECT 1 as Id, 1 as Flag");
+				var rows = db.Select<PocoFlagWithId>("SELECT 1 as Id, 1 as Flag");
 				Assert.That(rows[0].Id, Is.EqualTo(1));
 				Assert.That(rows[0].Flag);
 			}

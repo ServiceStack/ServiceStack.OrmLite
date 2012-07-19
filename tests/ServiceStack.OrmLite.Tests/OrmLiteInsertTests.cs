@@ -17,13 +17,12 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_insert_into_ModelWithFieldsOfDifferentTypes_table()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbConn = db.CreateCommand())
 			{
-				dbConn.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
 				var row = ModelWithFieldsOfDifferentTypes.Create(1);
 
-				dbConn.Insert(row);
+				db.Insert(row);
 			}
 		}
 
@@ -31,15 +30,14 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_insert_and_select_from_ModelWithFieldsOfDifferentTypes_table()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbConn = db.CreateCommand())
 			{
-				dbConn.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
 				var row = ModelWithFieldsOfDifferentTypes.Create(1);
 
-				dbConn.Insert(row);
+				db.Insert(row);
 
-				var rows = dbConn.Select<ModelWithFieldsOfDifferentTypes>();
+				var rows = db.Select<ModelWithFieldsOfDifferentTypes>();
 
 				Assert.That(rows, Has.Count.EqualTo(1));
 
@@ -51,15 +49,14 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_insert_and_select_from_ModelWithFieldsOfNullableTypes_table()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbConn = db.CreateCommand())
 			{
-				dbConn.CreateTable<ModelWithFieldsOfNullableTypes>(true);
+				db.CreateTable<ModelWithFieldsOfNullableTypes>(true);
 
 				var row = ModelWithFieldsOfNullableTypes.Create(1);
 
-				dbConn.Insert(row);
+				db.Insert(row);
 
-				var rows = dbConn.Select<ModelWithFieldsOfNullableTypes>();
+				var rows = db.Select<ModelWithFieldsOfNullableTypes>();
 
 				Assert.That(rows, Has.Count.EqualTo(1));
 
@@ -71,15 +68,14 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_insert_and_select_from_ModelWithFieldsOfDifferentAndNullableTypes_table()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbConn = db.CreateCommand())
 			{
-				dbConn.CreateTable<ModelWithFieldsOfDifferentAndNullableTypes>(true);
+				db.CreateTable<ModelWithFieldsOfDifferentAndNullableTypes>(true);
 
 				var row = ModelWithFieldsOfDifferentAndNullableTypes.Create(1);
 
-				dbConn.Insert(row);
+				db.Insert(row);
 
-				var rows = dbConn.Select<ModelWithFieldsOfDifferentAndNullableTypes>();
+				var rows = db.Select<ModelWithFieldsOfDifferentAndNullableTypes>();
 
 				Assert.That(rows, Has.Count.EqualTo(1));
 
@@ -91,16 +87,15 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_insert_table_with_null_fields()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbConn = db.CreateCommand())
 			{
-				dbConn.CreateTable<ModelWithIdAndName>(true);
+				db.CreateTable<ModelWithIdAndName>(true);
 
 				var row = ModelWithIdAndName.Create(1);
 				row.Name = null;
 
-				dbConn.Insert(row);
+				db.Insert(row);
 
-				var rows = dbConn.Select<ModelWithIdAndName>();
+				var rows = db.Select<ModelWithIdAndName>();
 
 				Assert.That(rows, Has.Count.EqualTo(1));
 
@@ -112,21 +107,20 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_retrieve_LastInsertId_from_inserted_table()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
-				dbCmd.CreateTable<ModelWithIdAndName>(true);
+				db.CreateTable<ModelWithIdAndName>(true);
 
 				var row1 = ModelWithIdAndName.Create(5);
 				var row2 = ModelWithIdAndName.Create(6);
 
-				dbCmd.Insert(row1);
-				var row1LastInsertId = dbCmd.GetLastInsertId();
+				db.Insert(row1);
+				var row1LastInsertId = db.GetLastInsertId();
 
-				dbCmd.Insert(row2);
-				var row2LastInsertId = dbCmd.GetLastInsertId();
+				db.Insert(row2);
+				var row2LastInsertId = db.GetLastInsertId();
 
-				var insertedRow1 = dbCmd.GetById<ModelWithIdAndName>(row1LastInsertId);
-				var insertedRow2 = dbCmd.GetById<ModelWithIdAndName>(row2LastInsertId);
+				var insertedRow1 = db.GetById<ModelWithIdAndName>(row1LastInsertId);
+				var insertedRow2 = db.GetById<ModelWithIdAndName>(row2LastInsertId);
 
 				Assert.That(insertedRow1.Name, Is.EqualTo(row1.Name));
 				Assert.That(insertedRow2.Name, Is.EqualTo(row2.Name));
@@ -137,15 +131,14 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_insert_TaskQueue_table()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbConn = db.CreateCommand())
 			{
-				dbConn.CreateTable<TaskQueue>(true);
+				db.CreateTable<TaskQueue>(true);
 
 				var row = TaskQueue.Create(1);
 
-				dbConn.Insert(row);
+				db.Insert(row);
 
-				var rows = dbConn.Select<TaskQueue>();
+				var rows = db.Select<TaskQueue>();
 
 				Assert.That(rows, Has.Count.EqualTo(1));
 
@@ -160,15 +153,14 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_insert_table_with_blobs()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbConn = db.CreateCommand())
 			{
-				dbConn.CreateTable<OrderBlob>(true);
+				db.CreateTable<OrderBlob>(true);
 
 				var row = OrderBlob.Create(1);
 
-				dbConn.Insert(row);
+				db.Insert(row);
 
-				var rows = dbConn.Select<OrderBlob>();
+				var rows = db.Select<OrderBlob>();
 
 				Assert.That(rows, Has.Count.EqualTo(1));
 
@@ -215,9 +207,8 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_insert_table_with_UserAuth()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
-				dbCmd.CreateTable<UserAuth>(true);
+				db.CreateTable<UserAuth>(true);
 
 				//var userAuth = new UserAuth {
 				//    Id = 1,
@@ -236,9 +227,9 @@ namespace ServiceStack.OrmLite.Tests
 				var jsv = "{Id:0,UserName:UserName,Email:as@if.com,PrimaryEmail:as@if.com,FirstName:FirstName,LastName:LastName,DisplayName:DisplayName,Salt:WMQi/g==,PasswordHash:oGdE40yKOprIgbXQzEMSYZe3vRCRlKGuqX2i045vx50=,Roles:[],Permissions:[],CreatedDate:2012-03-20T07:53:48.8720739Z,ModifiedDate:2012-03-20T07:53:48.8720739Z}";
 				var userAuth = jsv.To<UserAuth>();
 
-				dbCmd.Insert(userAuth);
+				db.Insert(userAuth);
 
-				var rows = dbCmd.Select<UserAuth>(q => q.UserName == "UserName");
+				var rows = db.Select<UserAuth>(q => q.UserName == "UserName");
 
 				Console.WriteLine(rows[0].Dump());
 

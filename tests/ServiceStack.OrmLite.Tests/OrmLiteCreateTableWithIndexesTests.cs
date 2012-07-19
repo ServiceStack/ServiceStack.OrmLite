@@ -13,9 +13,8 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_create_ModelWithIndexFields_table()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbConn = db.CreateCommand())
 			{
-				dbConn.CreateTable<ModelWithIndexFields>(true);
+				db.CreateTable<ModelWithIndexFields>(true);
 
 				var sql =OrmLiteConfig.DialectProvider.ToCreateIndexStatements( typeof (ModelWithIndexFields) ).Join();
 
@@ -28,9 +27,8 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_create_ModelWithCompositeIndexFields_table()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbConn = db.CreateCommand())
 			{
-				dbConn.CreateTable<ModelWithCompositeIndexFields>(true);
+				db.CreateTable<ModelWithCompositeIndexFields>(true);
 
 				var sql = OrmLiteConfig.DialectProvider.ToCreateIndexStatements(typeof(ModelWithCompositeIndexFields)).Join();
 

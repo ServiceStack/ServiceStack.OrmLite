@@ -1,6 +1,5 @@
 using System;
 using System.Data;
-using System.Linq;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
 using ServiceStack.Text;
@@ -11,22 +10,19 @@ namespace ServiceStack.OrmLite.Tests
     public class OrmLiteUpdateTests
         : OrmLiteTestBase
     {
-        private IDbConnection dbConn;
-        private IDbCommand dbCmd;
+        private IDbConnection db;
 
         [SetUp]
         public void SetUp()
         {
-            dbConn = ConnectionString.OpenDbConnection();
-            dbCmd = dbConn.CreateCommand();
-            dbCmd.CreateTable<ModelWithFieldsOfDifferentTypes>(overwrite: true);
+            db = ConnectionString.OpenDbConnection();
+            db.CreateTable<ModelWithFieldsOfDifferentTypes>(overwrite: true);
         }
 
         [TearDown]
         public void TearDown()
         {
-            dbCmd.Dispose();
-            dbConn.Dispose();
+            db.Dispose();
         }
 
         [Test]
@@ -34,13 +30,13 @@ namespace ServiceStack.OrmLite.Tests
         {
             var row = ModelWithFieldsOfDifferentTypes.Create(1);
 
-            dbCmd.Insert(row);
+            db.Insert(row);
 
             row.Name = "UpdatedName";
 
-            dbCmd.Update(row);
+            db.Update(row);
 
-            var dbRow = dbCmd.GetById<ModelWithFieldsOfDifferentTypes>(1);
+            var dbRow = db.GetById<ModelWithFieldsOfDifferentTypes>(1);
 
             ModelWithFieldsOfDifferentTypes.AssertIsEqual(dbRow, row);
         }
@@ -50,13 +46,13 @@ namespace ServiceStack.OrmLite.Tests
         {
             var row = ModelWithFieldsOfDifferentTypes.Create(1);
 
-            dbCmd.Insert(row);
+            db.Insert(row);
 
             row.Name = "UpdatedName";
 
-            dbCmd.Update(row, x => x.LongId <= row.LongId);
+            db.Update(row, x => x.LongId <= row.LongId);
 
-            var dbRow = dbCmd.GetById<ModelWithFieldsOfDifferentTypes>(1);
+            var dbRow = db.GetById<ModelWithFieldsOfDifferentTypes>(1);
 
             ModelWithFieldsOfDifferentTypes.AssertIsEqual(dbRow, row);
         }
@@ -66,14 +62,14 @@ namespace ServiceStack.OrmLite.Tests
         {
             var row = ModelWithFieldsOfDifferentTypes.Create(1);
 
-            dbCmd.Insert(row);
+            db.Insert(row);
             row.DateTime = DateTime.Now;
             row.Name = "UpdatedName";
 
-            dbCmd.Update<ModelWithFieldsOfDifferentTypes>(new { row.Name, row.DateTime },
+            db.Update<ModelWithFieldsOfDifferentTypes>(new { row.Name, row.DateTime },
                 x => x.LongId >= row.LongId && x.LongId <= row.LongId);
 
-            var dbRow = dbCmd.GetById<ModelWithFieldsOfDifferentTypes>(row.Id);
+            var dbRow = db.GetById<ModelWithFieldsOfDifferentTypes>(row.Id);
             Console.WriteLine(dbRow.Dump());
             ModelWithFieldsOfDifferentTypes.AssertIsEqual(dbRow, row);
         }
@@ -83,12 +79,12 @@ namespace ServiceStack.OrmLite.Tests
         {
             var row = ModelWithFieldsOfDifferentTypes.Create(1);
 
-            dbCmd.Insert(row);
+            db.Insert(row);
             row.Name = "UpdatedName";
 
-            dbCmd.Update<ModelWithFieldsOfDifferentTypes>(set: "NAME = {0}".SqlFormat(row.Name), where: "LongId <= {0}".SqlFormat(row.LongId));
+            db.Update<ModelWithFieldsOfDifferentTypes>(set: "NAME = {0}".SqlFormat(row.Name), where: "LongId <= {0}".SqlFormat(row.LongId));
 
-            var dbRow = dbCmd.GetById<ModelWithFieldsOfDifferentTypes>(row.Id);
+            var dbRow = db.GetById<ModelWithFieldsOfDifferentTypes>(row.Id);
             Console.WriteLine(dbRow.Dump());
             ModelWithFieldsOfDifferentTypes.AssertIsEqual(dbRow, row);
         }
@@ -98,13 +94,13 @@ namespace ServiceStack.OrmLite.Tests
         {
             var row = ModelWithFieldsOfDifferentTypes.Create(1);
 
-            dbCmd.Insert(row);
+            db.Insert(row);
             row.Name = "UpdatedName";
 
-            dbCmd.Update(table: "ModelWithFieldsOfDifferentTypes",
+            db.Update(table: "ModelWithFieldsOfDifferentTypes",
                 set: "NAME = {0}".SqlFormat(row.Name), where: "LongId <= {0}".SqlFormat(row.LongId));
 
-            var dbRow = dbCmd.GetById<ModelWithFieldsOfDifferentTypes>(row.Id);
+            var dbRow = db.GetById<ModelWithFieldsOfDifferentTypes>(row.Id);
             Console.WriteLine(dbRow.Dump());
             ModelWithFieldsOfDifferentTypes.AssertIsEqual(dbRow, row);
         }

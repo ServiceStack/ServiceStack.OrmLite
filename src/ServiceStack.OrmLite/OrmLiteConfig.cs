@@ -47,33 +47,19 @@ namespace ServiceStack.OrmLite
 
 		public static IDbConnection OpenDbConnection(this string dbConnectionStringOrFilePath)
 		{
-			try
-			{
-				var sqlConn = dbConnectionStringOrFilePath.ToDbConnection();
-				sqlConn.Open();
-				return sqlConn;
-			}
-			catch (Exception )
-			{
-				throw;
-			}
-		}
+            var sqlConn = dbConnectionStringOrFilePath.ToDbConnection(DialectProvider);
+            sqlConn.Open();
+            return sqlConn;
+        }
 
 		public static IDbConnection OpenReadOnlyDbConnection(this string dbConnectionStringOrFilePath)
 		{
-			try
-			{
-				var options = new Dictionary<string, string> { { "Read Only", "True" } };
+            var options = new Dictionary<string, string> { { "Read Only", "True" } };
 
-				var sqlConn = DialectProvider.CreateConnection(dbConnectionStringOrFilePath, options);
-				sqlConn.Open();
-				return sqlConn;
-			}
-			catch (Exception )
-			{
-				throw;
-			}
-		}
+            var sqlConn = DialectProvider.CreateConnection(dbConnectionStringOrFilePath, options);
+            sqlConn.Open();
+            return sqlConn;
+        }
 
 		public static void ClearCache()
 		{

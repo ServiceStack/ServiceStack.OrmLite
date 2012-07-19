@@ -23,10 +23,9 @@ namespace ServiceStack.OrmLite.Tests
 		{
 			var connString = "Data Source=chi-prod-analytics-db;Initial Catalog=2010-04_MonthlySnapshot;User Id=admin;Password=xxx;";
 
-			using (var dbConn = connString.OpenDbConnection())
-			using (var cmd = dbConn.CreateCommand())
+			using (var db = connString.OpenDbConnection())
 			{
-				var order = cmd.First<OrderDataSubset>("SELECT TOP 1 CreatedDate FROM OrderData");
+				var order = db.First<OrderDataSubset>("SELECT TOP 1 CreatedDate FROM OrderData");
 				Console.WriteLine(order);
 			}
 		}

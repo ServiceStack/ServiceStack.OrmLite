@@ -9,17 +9,10 @@
 //
 // Licensed under the same terms of ServiceStack: new BSD license.
 //
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Reflection;
-using ServiceStack.DataAnnotations;
-using ServiceStack.Common.Extensions;
 
 namespace ServiceStack.OrmLite
 {
-	public class OrmLiteNamingStrategyBase : ServiceStack.OrmLite.INamingStrategy
+	public class OrmLiteNamingStrategyBase : INamingStrategy
 	{
 		public virtual string GetTableName(string name)
 		{

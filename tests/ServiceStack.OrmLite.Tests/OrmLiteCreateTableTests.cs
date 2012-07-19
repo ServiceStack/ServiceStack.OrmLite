@@ -1,7 +1,6 @@
 using System;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
-using ServiceStack.OrmLite.Sqlite;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -13,18 +12,17 @@ namespace ServiceStack.OrmLite.Tests
 		public void Does_table_Exists()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
-				dbCmd.DropTable<ModelWithIdOnly>();
+				db.DropTable<ModelWithIdOnly>();
 
 				Assert.That(
-					OrmLiteConfig.DialectProvider.DoesTableExist(dbCmd, typeof(ModelWithIdOnly).Name),
+                    db.TableExists(typeof(ModelWithIdOnly).Name),
 					Is.False);
 				
-				dbCmd.CreateTable<ModelWithIdOnly>(true);
+				db.CreateTable<ModelWithIdOnly>(true);
 
 				Assert.That(
-					OrmLiteConfig.DialectProvider.DoesTableExist(dbCmd, typeof(ModelWithIdOnly).Name),
+                    db.TableExists(typeof(ModelWithIdOnly).Name),
 					Is.True);
 			}
 		}
@@ -33,9 +31,8 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_create_ModelWithIdOnly_table()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
-				dbCmd.CreateTable<ModelWithIdOnly>(true);
+				db.CreateTable<ModelWithIdOnly>(true);
 			}
 		}
 
@@ -43,9 +40,8 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_create_ModelWithOnlyStringFields_table()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
-				dbCmd.CreateTable<ModelWithOnlyStringFields>(true);
+				db.CreateTable<ModelWithOnlyStringFields>(true);
 			}
 		}
 
@@ -53,9 +49,8 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_create_ModelWithLongIdAndStringFields_table()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
-				dbCmd.CreateTable<ModelWithLongIdAndStringFields>(true);
+				db.CreateTable<ModelWithLongIdAndStringFields>(true);
 			}
 		}
 
@@ -63,9 +58,8 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_create_ModelWithFieldsOfDifferentTypes_table()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
-				dbCmd.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 			}
 		}
 
@@ -73,16 +67,15 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_preserve_ModelWithIdOnly_table()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
-				dbCmd.CreateTable<ModelWithIdOnly>(true);
+				db.CreateTable<ModelWithIdOnly>(true);
 
-				dbCmd.Insert(new ModelWithIdOnly(1));
-				dbCmd.Insert(new ModelWithIdOnly(2));
+				db.Insert(new ModelWithIdOnly(1));
+				db.Insert(new ModelWithIdOnly(2));
 
-				dbCmd.CreateTable<ModelWithIdOnly>(false);
+				db.CreateTable<ModelWithIdOnly>(false);
 
-				var rows = dbCmd.Select<ModelWithIdOnly>();
+				var rows = db.Select<ModelWithIdOnly>();
 
 				Assert.That(rows, Has.Count.EqualTo(2));
 			}
@@ -92,16 +85,15 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_preserve_ModelWithIdAndName_table()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
-				dbCmd.CreateTable<ModelWithIdAndName>(true);
+				db.CreateTable<ModelWithIdAndName>(true);
 
-				dbCmd.Insert(new ModelWithIdAndName(1));
-				dbCmd.Insert(new ModelWithIdAndName(2));
+				db.Insert(new ModelWithIdAndName(1));
+				db.Insert(new ModelWithIdAndName(2));
 
-				dbCmd.CreateTable<ModelWithIdAndName>(false);
+				db.CreateTable<ModelWithIdAndName>(false);
 
-				var rows = dbCmd.Select<ModelWithIdAndName>();
+				var rows = db.Select<ModelWithIdAndName>();
 
 				Assert.That(rows, Has.Count.EqualTo(2));
 			}
@@ -111,16 +103,15 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_overwrite_ModelWithIdOnly_table()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
-				dbCmd.CreateTable<ModelWithIdOnly>(true);
+				db.CreateTable<ModelWithIdOnly>(true);
 
-				dbCmd.Insert(new ModelWithIdOnly(1));
-				dbCmd.Insert(new ModelWithIdOnly(2));
+				db.Insert(new ModelWithIdOnly(1));
+				db.Insert(new ModelWithIdOnly(2));
 
-				dbCmd.CreateTable<ModelWithIdOnly>(true);
+				db.CreateTable<ModelWithIdOnly>(true);
 
-				var rows = dbCmd.Select<ModelWithIdOnly>();
+				var rows = db.Select<ModelWithIdOnly>();
 
 				Assert.That(rows, Has.Count.EqualTo(0));
 			}
@@ -130,18 +121,17 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_create_multiple_tables()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
-				dbCmd.CreateTables(true, typeof(ModelWithIdOnly), typeof(ModelWithIdAndName));
+				db.CreateTables(true, typeof(ModelWithIdOnly), typeof(ModelWithIdAndName));
 
-				dbCmd.Insert(new ModelWithIdOnly(1));
-				dbCmd.Insert(new ModelWithIdOnly(2));
+				db.Insert(new ModelWithIdOnly(1));
+				db.Insert(new ModelWithIdOnly(2));
 
-				dbCmd.Insert(new ModelWithIdAndName(1));
-				dbCmd.Insert(new ModelWithIdAndName(2));
+				db.Insert(new ModelWithIdAndName(1));
+				db.Insert(new ModelWithIdAndName(2));
 
-				var rows1 = dbCmd.Select<ModelWithIdOnly>();
-				var rows2 = dbCmd.Select<ModelWithIdOnly>();
+				var rows1 = db.Select<ModelWithIdOnly>();
+				var rows2 = db.Select<ModelWithIdOnly>();
 
 				Assert.That(rows1, Has.Count.EqualTo(2));
 				Assert.That(rows2, Has.Count.EqualTo(2));

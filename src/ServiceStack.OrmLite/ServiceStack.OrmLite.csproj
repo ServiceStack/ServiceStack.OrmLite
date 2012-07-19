@@ -93,10 +93,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Connection\ConnReadExtensions.cs" />
-    <Compile Include="Connection\ConnWriteExtensions.cs" />
-    <Compile Include="Connection\OrmLiteConnReadExtensions.cs" />
-    <Compile Include="Connection\OrmLiteConnWriteExtensions.cs" />
+    <Compile Include="Dapper\SqlMapper.cs" />
+    <Compile Include="Expressions\ReadConnectionExtensions.cs" />
+    <Compile Include="Expressions\WriteConnectionExtensions.cs" />
+    <Compile Include="OrmLiteReadConnectionExtensions.cs" />
+    <Compile Include="OrmLiteWriteConnectionExtensions.cs" />
     <Compile Include="DbTypes.cs" />
     <Compile Include="INamingStrategy.cs" />
     <Compile Include="OrmLiteConfigExtensions.cs">
@@ -114,7 +115,6 @@
     <Compile Include="OrmLitePersistenceProvider.cs" />
     <Compile Include="IOrmLiteDialectProvider.cs" />
     <Compile Include="OrmLiteDialectProviderBase.cs" />
-    <Compile Include="OrmLiteLinqExtensions.cs" />
     <Compile Include="OrmLiteWriteExtensions.cs" />
     <Compile Include="OrmLiteReadExtensions.cs" />
     <Compile Include="OrmLiteUtilExtensions.cs" />
@@ -127,7 +127,6 @@
     <Compile Include="IgnoreAttribute.cs" />
     <Compile Include="PrimaryKeyAttribute.cs" />
     <Compile Include="SequenceAttribute.cs" />
-    <Compile Include="OrmLiteProcedureExtensions.cs" />
     <Compile Include="DecimalLengthAttribute.cs" />
     <Compile Include="Expressions\ReadExtensions.cs" />
     <Compile Include="Expressions\SqlExpressionVisitor.cs" />
