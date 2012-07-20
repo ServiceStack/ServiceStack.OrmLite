@@ -742,9 +742,9 @@ namespace ServiceStack.OrmLite
 
                 sbColumns.Append(columnDefinition);
 
-                if (fieldDef.ReferencesType == null) continue;
+                if (fieldDef.ForeignKey == null) continue;
 
-                var refModelDef = fieldDef.ReferencesType.ReferenceType.GetModelDefinition();
+                var refModelDef = fieldDef.ForeignKey.ReferenceType.GetModelDefinition();
                 sbConstraints.AppendFormat(
                     ", \n\n  CONSTRAINT {0} FOREIGN KEY ({1}) REFERENCES {2} ({3})",
                     GetQuotedName(string.Format("FK_{0}_{1}_{2}", modelDef.ModelName,
@@ -753,11 +753,11 @@ namespace ServiceStack.OrmLite
                     GetQuotedTableName(refModelDef),
                     GetQuotedColumnName(refModelDef.PrimaryKey.FieldName));
 
-                if (!string.IsNullOrEmpty(fieldDef.ReferencesType.OnDelete))
-                    sbConstraints.AppendFormat(" ON DELETE {0}", fieldDef.ReferencesType.OnDelete);
+                if (!string.IsNullOrEmpty(fieldDef.ForeignKey.OnDelete))
+                    sbConstraints.AppendFormat(" ON DELETE {0}", fieldDef.ForeignKey.OnDelete);
 
-                if (!string.IsNullOrEmpty(fieldDef.ReferencesType.OnUpdate))
-                    sbConstraints.AppendFormat(" ON UPDATE {0}", fieldDef.ReferencesType.OnUpdate);
+                if (!string.IsNullOrEmpty(fieldDef.ForeignKey.OnUpdate))
+                    sbConstraints.AppendFormat(" ON UPDATE {0}", fieldDef.ForeignKey.OnUpdate);
             }
             var sql = new StringBuilder(string.Format(
                 "CREATE TABLE {0} \n(\n  {1}{2} \n); \n", GetQuotedTableName(modelDef), sbColumns, sbConstraints));

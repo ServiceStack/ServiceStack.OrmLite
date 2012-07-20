@@ -131,7 +131,7 @@ namespace ServiceStack.OrmLite
                                                       : (int?) null,
                                               DefaultValue =
                                                   defaultValueAttr != null ? defaultValueAttr.DefaultValue : null,
-                                              ReferencesType =
+                                              ForeignKey =
                                                   foreignKeyAttr == null
                                                       ? referencesAttr == null
                                                             ? null
