@@ -25,6 +25,7 @@ namespace ServiceStack.OrmLite.MySql
             base.GuidColumnDefinition = "char(32)";
             base.DefaultStringLength = 255;
             base.InitColumnTypeMap();
+    	    base.DefaultValueFormat = " DEFAULT '{0}'";
         }
 
         public override string EscapeParam(object paramValue)
@@ -141,7 +142,7 @@ namespace ServiceStack.OrmLite.MySql
 
                 if (fieldDef.ReferencesType == null) continue;
 
-                var refModelDef = GetModel(fieldDef.ReferencesType);
+                var refModelDef = GetModel(fieldDef.ReferencesType.ReferenceType);
                 sbConstraints.AppendFormat(
                     ", \n\n  CONSTRAINT {0} FOREIGN KEY ({1}) REFERENCES {2} ({3})",
                     GetQuotedName(string.Format("FK_{0}_{1}_{2}", modelDef.ModelName,
@@ -149,6 +150,12 @@ namespace ServiceStack.OrmLite.MySql
                     GetQuotedColumnName(fieldDef.FieldName),
                     GetQuotedTableName(refModelDef),
                     GetQuotedColumnName(refModelDef.PrimaryKey.FieldName));
+
+                if (!string.IsNullOrEmpty(fieldDef.ReferencesType.OnDelete))
+                    sbConstraints.AppendFormat(" ON DELETE {0}", fieldDef.ReferencesType.OnDelete);
+
+                if (!string.IsNullOrEmpty(fieldDef.ReferencesType.OnUpdate))
+                    sbConstraints.AppendFormat(" ON UPDATE {0}", fieldDef.ReferencesType.OnUpdate);
             }
             var sql = new StringBuilder(string.Format(
                 "CREATE TABLE {0} \n(\n  {1}{2} \n); \n", GetQuotedTableName(modelDef), sbColumns, sbConstraints));

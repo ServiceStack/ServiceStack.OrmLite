@@ -45,7 +45,8 @@ namespace ServiceStack.OrmLite
 
         public string DefaultValue { get; set; }
 
-        public Type ReferencesType { get; set; }
+        //public Type ReferencesType { get; set; }
+        public ForeignKeyConstraint ReferencesType { get; set; }
 
         public PropertyGetterDelegate GetValueFn { get; set; }
 
@@ -76,5 +77,19 @@ namespace ServiceStack.OrmLite
 
         public string ComputeExpression { get; set; }
 
+    }
+
+    public class ForeignKeyConstraint
+    {
+        public ForeignKeyConstraint(Type type, string onDelete = null, string onUpdate = null)
+        {
+            ReferenceType = type;
+            OnDelete = onDelete;
+            OnUpdate = onUpdate;
+        }
+
+        public Type ReferenceType { get; private set; }
+        public string OnDelete { get; private set; }
+        public string OnUpdate { get; private set; }
     }
 }

@@ -333,7 +333,7 @@ namespace ServiceStack.OrmLite.Firebird
 
                 if (fieldDef.ReferencesType == null) continue;
 
-                var refModelDef = GetModel(fieldDef.ReferencesType);
+                var refModelDef = GetModel(fieldDef.ReferencesType.ReferenceType);
 				
 				var modelName= modelDef.IsInSchema
 					? modelDef.Schema + "_" + NamingStrategy.GetTableName(modelDef.ModelName)
@@ -495,7 +495,7 @@ namespace ServiceStack.OrmLite.Firebird
 						try
 						{
 							if (fieldDef.ReferencesType !=null
-								&& GetModel(fieldDef.ReferencesType).ModelName == modelDef.ModelName)
+								&& GetModel(fieldDef.ReferencesType.ReferenceType).ModelName == modelDef.ModelName)
 							{
 								if (filter.Length > 0) filter.Append(" AND ");
 								filter.AppendFormat("{0} = {1}", GetQuotedColumnName(fieldDef.FieldName),

@@ -52,6 +52,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ForeignKeyAttributeTests.cs" />
     <Compile Include="OrmLiteTestBase.cs" />
     <Compile Include="SqlServerExpressionVisitorQueryTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
