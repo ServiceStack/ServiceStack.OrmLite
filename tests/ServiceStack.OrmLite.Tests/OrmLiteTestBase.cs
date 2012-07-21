@@ -11,7 +11,7 @@ namespace ServiceStack.OrmLite.Tests
 {
     public class Config
     {
-        public static string SqliteInMemoryDb = ":memory:";
+        public static string SqliteMemoryDb = ":memory:";
         public static string SqliteFileDb = "~/App_Data/db.sqlite".MapAbsolutePath();
         public static string SqlServerDb = "~/App_Data/Database1.mdf".MapAbsolutePath();
     }

@@ -132,98 +132,93 @@ namespace ServiceStack.OrmLite.Tests.UseCase
             //    @"Data Source=.\SQLEXPRESS;AttachDbFilename=|DataDirectory|\App_Data\Database1.mdf;Integrated Security=True;User Instance=True",
             //    SqlServerOrmLiteDialectProvider.Instance);
 
-			//Use in-memory Sqlite DB instead
-			//var dbFactory = new OrmLiteConnectionFactory(
-			//    ":memory:", false, SqliteOrmLiteDialectProvider.Instance);
+            //Use in-memory Sqlite DB instead
+            //var dbFactory = new OrmLiteConnectionFactory(
+            //    ":memory:", false, SqliteOrmLiteDialectProvider.Instance);
 
             //Non-intrusive: All extension methods hang off System.Data.* interfaces
-            IDbConnection db = dbFactory.OpenDbConnection();
-
-            //Re-Create all table schemas:
-            db.DropTable<OrderDetail>();
-            db.DropTable<Order>();
-            db.DropTable<Customer>();
-            db.DropTable<Product>();
-            db.DropTable<Employee>();
-
-            db.CreateTable<Employee>();
-            db.CreateTable<Product>();
-            db.CreateTable<Customer>();
-            db.CreateTable<Order>();
-            db.CreateTable<OrderDetail>();
-
-            db.Insert(new Employee { Id = 1, Name = "Employee 1" });
-            db.Insert(new Employee { Id = 2, Name = "Employee 2" });
-            var product1 = new Product { Id = 1, Name = "Product 1", UnitPrice = 10 };
-            var product2 = new Product { Id = 2, Name = "Product 2", UnitPrice = 20 };
-            db.Save(product1, product2);
-
-            var customer = new Customer
+            using (IDbConnection db = dbFactory.OpenDbConnection())
             {
-                FirstName = "Orm",
-                LastName = "Lite",
-                Email = "ormlite@servicestack.net",
-                PhoneNumbers =
+                //Re-Create all table schemas:
+                db.DropTable<OrderDetail>();
+                db.DropTable<Order>();
+                db.DropTable<Customer>();
+                db.DropTable<Product>();
+                db.DropTable<Employee>();
+
+                db.CreateTable<Employee>();
+                db.CreateTable<Product>();
+                db.CreateTable<Customer>();
+                db.CreateTable<Order>();
+                db.CreateTable<OrderDetail>();
+
+                db.Insert(new Employee { Id = 1, Name = "Employee 1" });
+                db.Insert(new Employee { Id = 2, Name = "Employee 2" });
+                var product1 = new Product { Id = 1, Name = "Product 1", UnitPrice = 10 };
+                var product2 = new Product { Id = 2, Name = "Product 2", UnitPrice = 20 };
+                db.Save(product1, product2);
+
+                var customer = new Customer {
+                    FirstName = "Orm",
+                    LastName = "Lite",
+                    Email = "ormlite@servicestack.net",
+                    PhoneNumbers =
                     {
                         { PhoneType.Home, "555-1234" },
                         { PhoneType.Work, "1-800-1234" },
                         { PhoneType.Mobile, "818-123-4567" },
                     },
-                Addresses =
+                    Addresses =
                     {
                         { AddressType.Work, new Address { Line1 = "1 Street", Country = "US", State = "NY", City = "New York", ZipCode = "10101" } },
                     },
-                CreatedAt = DateTime.UtcNow,
-            };
-            db.Insert(customer);
+                    CreatedAt = DateTime.UtcNow,
+                };
+                db.Insert(customer);
 
-            var customerId = db.GetLastInsertId(); //Get Auto Inserted Id
-            customer = db.QuerySingle<Customer>(new { customer.Email }); //Query
-            Assert.That(customer.Id, Is.EqualTo(customerId));
+                var customerId = db.GetLastInsertId(); //Get Auto Inserted Id
+                customer = db.QuerySingle<Customer>(new { customer.Email }); //Query
+                Assert.That(customer.Id, Is.EqualTo(customerId));
 
-            //Direct access to System.Data.Transactions:
-            using (var trans = db.BeginTransaction(IsolationLevel.ReadCommitted))
-            {
-                var order = new Order
+                //Direct access to System.Data.Transactions:
+                using (IDbTransaction trans = db.OpenTransaction(IsolationLevel.ReadCommitted))
                 {
-                    CustomerId = customer.Id,
-                    EmployeeId = 1,
-                    OrderDate = DateTime.UtcNow,
-                    Freight = 10.50m,
-                    ShippingAddress = new Address { Line1 = "3 Street", Country = "US", State = "NY", City = "New York", ZipCode = "12121" },
-                };
-                db.Save(order); //Inserts 1st time
+                    var order = new Order {
+                        CustomerId = customer.Id,
+                        EmployeeId = 1,
+                        OrderDate = DateTime.UtcNow,
+                        Freight = 10.50m,
+                        ShippingAddress = new Address { Line1 = "3 Street", Country = "US", State = "NY", City = "New York", ZipCode = "12121" },
+                    };
+                    db.Save(order); //Inserts 1st time
 
-                order.Id = (int)db.GetLastInsertId(); //Get Auto Inserted Id
+                    order.Id = (int)db.GetLastInsertId(); //Get Auto Inserted Id
 
-                var orderDetails = new[] {
-                    new OrderDetail
-                    {
-                        OrderId = order.Id,
-                        ProductId = product1.Id,
-                        Quantity = 2,
-                        UnitPrice = product1.UnitPrice,
-                    },
-                    new OrderDetail
-                    {
-                        OrderId = order.Id,
-                        ProductId = product2.Id,
-                        Quantity = 2,
-                        UnitPrice = product2.UnitPrice,
-                        Discount = .15m,
-                    }
-                };
+                    var orderDetails = new[] {
+                        new OrderDetail {
+                            OrderId = order.Id,
+                            ProductId = product1.Id,
+                            Quantity = 2,
+                            UnitPrice = product1.UnitPrice,
+                        },
+                        new OrderDetail {
+                            OrderId = order.Id,
+                            ProductId = product2.Id,
+                            Quantity = 2,
+                            UnitPrice = product2.UnitPrice,
+                            Discount = .15m,
+                        }
+                    };
 
-                db.Insert(orderDetails);
+                    db.Insert(orderDetails);
 
-                order.Total = orderDetails.Sum(x => x.UnitPrice * x.Quantity * x.Discount) + order.Freight;
+                    order.Total = orderDetails.Sum(x => x.UnitPrice * x.Quantity * x.Discount) + order.Freight;
 
-                db.Save(order); //Updates 2nd Time
+                    db.Save(order); //Updates 2nd Time
 
-                trans.Commit();
+                    trans.Commit();
+                }
             }
-
-            db.Close();
         }
     }
 

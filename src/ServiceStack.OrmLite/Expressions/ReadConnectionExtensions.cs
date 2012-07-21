@@ -7,7 +7,8 @@ namespace ServiceStack.OrmLite
 {
     public static class ReadConnectionExtensions
     {
-        [ThreadStatic] internal static string LastCommandText;
+        [ThreadStatic]
+        internal static string LastCommandText;
 
         public static T Exec<T>(this IDbConnection dbConn, Func<IDbCommand, T> filter)
         {
@@ -20,6 +21,8 @@ namespace ServiceStack.OrmLite
 
                 using (var dbCmd = dbConn.CreateCommand())
                 {
+                    dbCmd.Transaction = OrmLiteConfig.CurrentTransaction;
+
                     var ret = filter(dbCmd);
                     LastCommandText = dbCmd.CommandText;
                     return ret;
@@ -42,6 +45,8 @@ namespace ServiceStack.OrmLite
 
                 using (var dbCmd = dbConn.CreateCommand())
                 {
+                    dbCmd.Transaction = OrmLiteConfig.CurrentTransaction;
+
                     filter(dbCmd);
                     LastCommandText = dbCmd.CommandText;
                 }
@@ -63,6 +68,8 @@ namespace ServiceStack.OrmLite
 
                 using (var dbCmd = dbConn.CreateCommand())
                 {
+                    dbCmd.Transaction = OrmLiteConfig.CurrentTransaction;
+
                     var results = filter(dbCmd);
                     LastCommandText = dbCmd.CommandText;
                     foreach (var item in results)
@@ -75,6 +82,16 @@ namespace ServiceStack.OrmLite
             {
                 OrmLiteConfig.DialectProvider = dialectProvider;
             }
+        }
+
+        public static IDbTransaction OpenTransaction(this IDbConnection dbConn)
+        {
+            return new OrmLiteTransaction(dbConn.BeginTransaction());
+        }
+
+        public static IDbTransaction OpenTransaction(this IDbConnection dbConn, IsolationLevel isolationLevel)
+        {
+            return new OrmLiteTransaction(dbConn.BeginTransaction(isolationLevel));
         }
 
         public static IOrmLiteDialectProvider GetDialectProvider(this IDbConnection dbConn)

@@ -97,6 +97,7 @@
     <Compile Include="Expressions\ReadConnectionExtensions.cs" />
     <Compile Include="Expressions\WriteConnectionExtensions.cs" />
     <Compile Include="OrmLiteReadConnectionExtensions.cs" />
+    <Compile Include="OrmLiteTransaction.cs" />
     <Compile Include="OrmLiteWriteConnectionExtensions.cs" />
     <Compile Include="DbTypes.cs" />
     <Compile Include="INamingStrategy.cs" />
