@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using Northwind.Common.DataModel;
 using NUnit.Framework;
-using ServiceStack.Common.Utils;
 using ServiceStack.OrmLite.SqlServer;
 using ServiceStack.OrmLite.Sqlite;
 using ServiceStack.Text;
