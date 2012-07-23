@@ -10,9 +10,8 @@ namespace ServiceStack.OrmLite.SqlServerTests
         public void Setup()
         {
             using (var dbConn = ConnectionString.OpenDbConnection())
-            using (var dbCmd = dbConn.CreateCommand())
             {
-                dbCmd.CreateTable<ReferencedType>(true);
+                dbConn.CreateTable<ReferencedType>(true);
             }
         }
 
@@ -20,9 +19,8 @@ namespace ServiceStack.OrmLite.SqlServerTests
         public void CanCreateSimpleForeignKey()
         {
             using (var dbConn = ConnectionString.OpenDbConnection())
-            using (var dbCmd = dbConn.CreateCommand())
             {
-                dbCmd.CreateTable<TypeWithSimpleForeignKey>(true);
+                dbConn.CreateTable<TypeWithSimpleForeignKey>(true);
             }
         }
 
@@ -30,9 +28,8 @@ namespace ServiceStack.OrmLite.SqlServerTests
         public void CanCreateForeignWithOnDeleteCascade()
         {
             using (var dbConn = ConnectionString.OpenDbConnection())
-            using (var dbCmd = dbConn.CreateCommand())
             {
-                dbCmd.CreateTable<TypeWithOnDeleteCascade>(true);
+                dbConn.CreateTable<TypeWithOnDeleteCascade>(true);
             }
         }
 
@@ -40,20 +37,19 @@ namespace ServiceStack.OrmLite.SqlServerTests
         public void CascadesOnDelete()
         {
             using (var dbConn = ConnectionString.OpenDbConnection())
-            using (var dbCmd = dbConn.CreateCommand())
             {
-                dbCmd.CreateTable<TypeWithOnDeleteCascade>(true);
+                dbConn.CreateTable<TypeWithOnDeleteCascade>(true);
 
-                dbCmd.Save(new ReferencedType { Id = 1 });
-                dbCmd.Save(new TypeWithOnDeleteCascade { RefId = 1 });
+                dbConn.Save(new ReferencedType { Id = 1 });
+                dbConn.Save(new TypeWithOnDeleteCascade { RefId = 1 });
 
-                Assert.AreEqual(1, dbCmd.Select<ReferencedType>().Count);
-                Assert.AreEqual(1, dbCmd.Select<TypeWithOnDeleteCascade>().Count);
+                Assert.AreEqual(1, dbConn.Select<ReferencedType>().Count);
+                Assert.AreEqual(1, dbConn.Select<TypeWithOnDeleteCascade>().Count);
 
-                dbCmd.Delete<ReferencedType>(r => r.Id == 1);
+                dbConn.Delete<ReferencedType>(r => r.Id == 1);
 
-                Assert.AreEqual(0, dbCmd.Select<ReferencedType>().Count);
-                Assert.AreEqual(0, dbCmd.Select<TypeWithOnDeleteCascade>().Count);
+                Assert.AreEqual(0, dbConn.Select<ReferencedType>().Count);
+                Assert.AreEqual(0, dbConn.Select<TypeWithOnDeleteCascade>().Count);
             }
         }
 
@@ -61,9 +57,8 @@ namespace ServiceStack.OrmLite.SqlServerTests
         public void CanCreateForeignWithOnDeleteCascadeAndOnUpdateCascade()
         {
             using (var dbConn = ConnectionString.OpenDbConnection())
-            using (var dbCmd = dbConn.CreateCommand())
             {
-                dbCmd.CreateTable<TypeWithOnDeleteAndUpdateCascade>(true);
+                dbConn.CreateTable<TypeWithOnDeleteAndUpdateCascade>(true);
             }
         }
 
@@ -71,9 +66,8 @@ namespace ServiceStack.OrmLite.SqlServerTests
         public void CanCreateForeignWithOnDeleteNoAction()
         {
             using (var dbConn = ConnectionString.OpenDbConnection())
-            using (var dbCmd = dbConn.CreateCommand())
             {
-                dbCmd.CreateTable<TypeWithOnDeleteNoAction>(true);
+                dbConn.CreateTable<TypeWithOnDeleteNoAction>(true);
             }
         }
 
@@ -82,9 +76,8 @@ namespace ServiceStack.OrmLite.SqlServerTests
         public void CanCreateForeignWithOnDeleteRestrict()
         {
             using (var dbConn = ConnectionString.OpenDbConnection())
-            using (var dbCmd = dbConn.CreateCommand())
             {
-                dbCmd.CreateTable<TypeWithOnDeleteRestrict>(true);
+                dbConn.CreateTable<TypeWithOnDeleteRestrict>(true);
             }
         }
         
@@ -92,9 +85,8 @@ namespace ServiceStack.OrmLite.SqlServerTests
         public void CanCreateForeignWithOnDeleteSetDefault()
         {
             using (var dbConn = ConnectionString.OpenDbConnection())
-            using (var dbCmd = dbConn.CreateCommand())
             {
-                dbCmd.CreateTable<TypeWithOnDeleteSetDefault>(true);
+                dbConn.CreateTable<TypeWithOnDeleteSetDefault>(true);
             }
         }
 
@@ -102,9 +94,8 @@ namespace ServiceStack.OrmLite.SqlServerTests
         public void CanCreateForeignWithOnDeleteSetNull()
         {
             using (var dbConn = ConnectionString.OpenDbConnection())
-            using (var dbCmd = dbConn.CreateCommand())
             {
-                dbCmd.CreateTable<TypeWithOnDeleteSetNull>(true);
+                dbConn.CreateTable<TypeWithOnDeleteSetNull>(true);
             }
         }
 
@@ -112,16 +103,15 @@ namespace ServiceStack.OrmLite.SqlServerTests
         public void TearDwon()
         {
             using (var dbConn = ConnectionString.OpenDbConnection())
-            using (var dbCmd = dbConn.CreateCommand())
             {
-                dbCmd.DropTable<TypeWithOnDeleteAndUpdateCascade>();
-                dbCmd.DropTable<TypeWithOnDeleteSetNull>();
-                dbCmd.DropTable<TypeWithOnDeleteSetDefault>();
-                dbCmd.DropTable<TypeWithOnDeleteRestrict>();
-                dbCmd.DropTable<TypeWithOnDeleteNoAction>();
-                dbCmd.DropTable<TypeWithOnDeleteCascade>();
-                dbCmd.DropTable<TypeWithSimpleForeignKey>();
-                dbCmd.DropTable<ReferencedType>();
+                dbConn.DropTable<TypeWithOnDeleteAndUpdateCascade>();
+                dbConn.DropTable<TypeWithOnDeleteSetNull>();
+                dbConn.DropTable<TypeWithOnDeleteSetDefault>();
+                dbConn.DropTable<TypeWithOnDeleteRestrict>();
+                dbConn.DropTable<TypeWithOnDeleteNoAction>();
+                dbConn.DropTable<TypeWithOnDeleteCascade>();
+                dbConn.DropTable<TypeWithSimpleForeignKey>();
+                dbConn.DropTable<ReferencedType>();
             }
         }
     }
