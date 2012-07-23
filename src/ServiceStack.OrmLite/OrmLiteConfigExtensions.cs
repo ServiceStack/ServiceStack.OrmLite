@@ -107,31 +107,46 @@ namespace ServiceStack.OrmLite
                 var defaultValueAttr = propertyInfo.FirstAttribute<DefaultAttribute>();
 
                 var referencesAttr = propertyInfo.FirstAttribute<ReferencesAttribute>();
+                var foreignKeyAttr = propertyInfo.FirstAttribute<ForeignKeyAttribute>();
 				
 				if(decimalAttribute != null  && stringLengthAttr==null)
 					stringLengthAttr= new StringLengthAttribute(decimalAttribute.Precision);
-				
+
                 var fieldDefinition = new FieldDefinition
-                {
-                    Name = propertyInfo.Name,
-                    Alias = aliasAttr != null ? aliasAttr.Name : null,
-                    FieldType = propertyType,
-                    PropertyInfo = propertyInfo,
-                    IsNullable = isNullable,
-                    IsPrimaryKey = isPrimaryKey,
-                    AutoIncrement = isPrimaryKey && propertyInfo.FirstAttribute<AutoIncrementAttribute>() != null,
-                    IsIndexed = isIndex,
-                    IsUnique = isUnique,
-                    FieldLength = stringLengthAttr != null ? stringLengthAttr.MaximumLength : (int?)null,
-                    DefaultValue = defaultValueAttr != null ? defaultValueAttr.DefaultValue : null,
-                    ReferencesType = referencesAttr != null ? referencesAttr.Type : null,
-                    GetValueFn = propertyInfo.GetPropertyGetterFn(),
-                    SetValueFn = propertyInfo.GetPropertySetterFn(),
-					Sequence= sequenceAttr!=null?sequenceAttr.Name:string.Empty,
-					IsComputed= computeAttr!=null,
-					ComputeExpression=  computeAttr!=null? computeAttr.Expression: string.Empty,
-					Scale = decimalAttribute != null ? decimalAttribute.Scale : (int?)null,
-                };
+                                          {
+                                              Name = propertyInfo.Name,
+                                              Alias = aliasAttr != null ? aliasAttr.Name : null,
+                                              FieldType = propertyType,
+                                              PropertyInfo = propertyInfo,
+                                              IsNullable = isNullable,
+                                              IsPrimaryKey = isPrimaryKey,
+                                              AutoIncrement =
+                                                  isPrimaryKey &&
+                                                  propertyInfo.FirstAttribute<AutoIncrementAttribute>() != null,
+                                              IsIndexed = isIndex,
+                                              IsUnique = isUnique,
+                                              FieldLength =
+                                                  stringLengthAttr != null
+                                                      ? stringLengthAttr.MaximumLength
+                                                      : (int?) null,
+                                              DefaultValue =
+                                                  defaultValueAttr != null ? defaultValueAttr.DefaultValue : null,
+                                              ForeignKey =
+                                                  foreignKeyAttr == null
+                                                      ? referencesAttr == null
+                                                            ? null
+                                                            : new ForeignKeyConstraint(referencesAttr.Type)
+                                                      : new ForeignKeyConstraint(foreignKeyAttr.Type,
+                                                                                 foreignKeyAttr.OnDelete,
+                                                                                 foreignKeyAttr.OnUpdate),
+                                              GetValueFn = propertyInfo.GetPropertyGetterFn(),
+                                              SetValueFn = propertyInfo.GetPropertySetterFn(),
+                                              Sequence = sequenceAttr != null ? sequenceAttr.Name : string.Empty,
+                                              IsComputed = computeAttr != null,
+                                              ComputeExpression =
+                                                  computeAttr != null ? computeAttr.Expression : string.Empty,
+                                              Scale = decimalAttribute != null ? decimalAttribute.Scale : (int?) null,
+                                          };
 
                 modelDef.FieldDefinitions.Add(fieldDefinition);
             }
