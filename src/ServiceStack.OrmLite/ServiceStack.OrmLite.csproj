@@ -93,7 +93,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Dapper\SqlMapper.cs" />
     <Compile Include="Expressions\ReadConnectionExtensions.cs" />
     <Compile Include="Expressions\WriteConnectionExtensions.cs" />
     <Compile Include="OrmLiteReadConnectionExtensions.cs" />
@@ -107,7 +106,6 @@
     <Compile Include="OrmLiteNamingStrategyBase.cs" />
     <Compile Include="PropertyInvoker.cs" />
     <Compile Include="FieldDefinition.cs" />
-    <Compile Include="IDbConnectionFactory.cs" />
     <Compile Include="IPropertyInvoker.cs" />
     <Compile Include="ModelDefinition.cs" />
     <Compile Include="OrmLiteConfig.cs" />
