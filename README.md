@@ -42,42 +42,42 @@ To give you a flavour here are some examples with their partial SQL output (done
 ### Querying with SELECT
 
     int agesAgo = DateTime.Today.AddYears(-20).Year;
-    dbCmd.Select<Author>(q => q.Birthday >= new DateTime(agesAgo, 1, 1) && q.Birthday <= new DateTime(agesAgo, 12, 31));
+    db.Select<Author>(q => q.Birthday >= new DateTime(agesAgo, 1, 1) && q.Birthday <= new DateTime(agesAgo, 12, 31));
 
 **WHERE (("Birthday" >= '1992-01-01 00:00:00.000') AND ("Birthday" <= '1992-12-31 00:00:00.000'))**
 
 ```csharp
-dbCmd.Select<Author>(q => Sql.In(q.City, "London", "Madrid", "Berlin"));
+db.Select<Author>(q => Sql.In(q.City, "London", "Madrid", "Berlin"));
 ```
 
 **WHERE "JobCity" In ('London', 'Madrid', 'Berlin')**
 
 ```csharp
-dbCmd.Select<Author>(q => q.Earnings <= 50);
+db.Select<Author>(q => q.Earnings <= 50);
 ```
 
 **WHERE ("Earnings" <= 50)**
 
 ```csharp
-dbCmd.Select<Author>(q => q.Name.StartsWith("A"));
+db.Select<Author>(q => q.Name.StartsWith("A"));
 ```
 
 **WHERE upper("Name") like 'A%'**
 
 ```csharp
-dbCmd.Select<Author>(q => q.Name.EndsWith("garzon"));
+db.Select<Author>(q => q.Name.EndsWith("garzon"));
 ```
 
 **WHERE upper("Name") like '%GARZON'**
 
 ```csharp
-dbCmd.Select<Author>(q => q.Name.Contains("Benedict"));
+db.Select<Author>(q => q.Name.Contains("Benedict"));
 ```
 
 **WHERE upper("Name") like '%BENEDICT%'**
 
 ```csharp
-dbCmd.Select<Author>(q => q.Rate == 10 && q.City == "Mexico");
+db.Select<Author>(q => q.Rate == 10 && q.City == "Mexico");
 ```
 
 **WHERE (("Rate" = 10) AND ("JobCity" = 'Mexico'))**
@@ -103,27 +103,27 @@ In its most simple form, updating any model without any filters will update ever
 is used to filter the update to this specific record:
 
 ```csharp
-dbCmd.Update(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27});
+db.Update(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27});
 ```
 **UPDATE "Person" SET "FirstName" = 'Jimi',"LastName" = 'Hendrix',"Age" = 27 WHERE "Id" = 1**
 
 If you supply your own where expression, it updates every field (inc. Id) but uses your filter instead:
 
 ```csharp
-dbCmd.Update(new Person { Id = 1, FirstName = "JJ" }, p => p.LastName == "Hendrix");
+db.Update(new Person { Id = 1, FirstName = "JJ" }, p => p.LastName == "Hendrix");
 ```
 **UPDATE "Person" SET "Id" = 1,"FirstName" = 'JJ',"LastName" = NULL,"Age" = NULL WHERE ("LastName" = 'Hendrix')**
 
 One way to limit the fields which gets updated is to use an **Anonymous Type**:
 
 ```csharp
-dbCmd.Update<Person>(new { FirstName = "JJ" }, p => p.LastName == "Hendrix");
+db.Update<Person>(new { FirstName = "JJ" }, p => p.LastName == "Hendrix");
 ```
 
 Or by using `UpdateNonDefaults` which only updates the non-default values in your model using the filter specified:
 
 ```csharp
-dbCmd.UpdateNonDefaults(new Person { FirstName = "JJ" }, p => p.LastName == "Hendrix");
+db.UpdateNonDefaults(new Person { FirstName = "JJ" }, p => p.LastName == "Hendrix");
 ```
 
 **UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("LastName" = 'Hendrix')**
@@ -135,13 +135,13 @@ this purpose, named **UpdateOnly**.
 
 The first expression in an `UpdateOnly` statement is used to specify which fields should be updated:
 ```csharp
-dbCmd.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName);
+db.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName);
 ```
 **UPDATE "Person" SET "FirstName" = 'JJ'**
 
 When present, the second expression is used as the where filter:
 ```csharp
-dbCmd.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName, p => p.LastName == "Hendrix");
+db.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName, p => p.LastName == "Hendrix");
 ```
 **UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("LastName" = 'Hendrix')**
 
@@ -149,12 +149,12 @@ Instead of using the expression filters above you can choose to use an Expressio
 flexibility when you want to programatically construct the update statement:
 
 ```csharp
-dbCmd.UpdateOnly(new Person { FirstName = "JJ", LastName = "Hendo" }, ev => ev.Update(p => p.FirstName));
+db.UpdateOnly(new Person { FirstName = "JJ", LastName = "Hendo" }, ev => ev.Update(p => p.FirstName));
 ```
 **UPDATE "Person" SET "FirstName" = 'JJ'**
 
 ```csharp
-dbCmd.UpdateOnly(new Person { FirstName = "JJ" }, ev => ev.Update(p => p.FirstName).Where(x => x.FirstName == "Jimi"));
+db.UpdateOnly(new Person { FirstName = "JJ" }, ev => ev.Update(p => p.FirstName).Where(x => x.FirstName == "Jimi"));
 ```
 **UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("LastName" = 'Hendrix')**
 
@@ -162,12 +162,12 @@ For the ultimate flexibility we also provide un-typed, string-based expressions.
 escape parameters (inspired by [massive](https://github.com/robconery/massive)):
 
 ```csharp
-dbCmd.Update<Person>(set: "FirstName = {0}".Params("JJ"), where: "LastName = {0}".Params("Hendrix"));
+db.Update<Person>(set: "FirstName = {0}".Params("JJ"), where: "LastName = {0}".Params("Hendrix"));
 ```
 Even the Table name can be a string so you perform the same update without requiring the Person model at all:
 
 ```csharp
-dbCmd.Update(table: "Person", set: "FirstName = {0}".Params("JJ"), where: "LastName = {0}".Params("Hendrix"));
+db.Update(table: "Person", set: "FirstName = {0}".Params("JJ"), where: "LastName = {0}".Params("Hendrix"));
 ```
 **UPDATE "Person" SET FirstName = 'JJ' WHERE LastName = 'Hendrix'**
 
@@ -176,14 +176,14 @@ dbCmd.Update(table: "Person", set: "FirstName = {0}".Params("JJ"), where: "LastN
 Insert's are pretty straight forward since in most cases you want to insert every field:
 
 ```csharp
-dbCmd.Insert(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27 });
+db.Insert(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27 });
 ```
 **INSERT INTO "Person" ("Id","FirstName","LastName","Age") VALUES (1,'Jimi','Hendrix',27)**
 
 But do provide an API that takes an Expression Visitor for the rare cases you don't want to insert every field
 
 ```csharp
-dbCmd.InsertOnly(new Person { FirstName = "Amy" }, ev => ev.Insert(p => new { p.FirstName }));
+db.InsertOnly(new Person { FirstName = "Amy" }, ev => ev.Insert(p => new { p.FirstName }));
 ```
 **INSERT INTO "Person" ("FirstName") VALUES ('Amy')**
 
@@ -191,24 +191,24 @@ dbCmd.InsertOnly(new Person { FirstName = "Amy" }, ev => ev.Insert(p => new { p.
 
 Like updates for DELETE's we also provide APIs that take a where Expression:
 ```csharp
-dbCmd.Delete<Person>(p => p.Age == 27);
+db.Delete<Person>(p => p.Age == 27);
 ```
 
 Or an Expression Visitor:
 ```csharp
-dbCmd.Delete<Person>(ev => ev.Where(p => p.Age == 27));
+db.Delete<Person>(ev => ev.Where(p => p.Age == 27));
 ```
 
 **DELETE FROM "Person" WHERE ("Age" = 27)**
 
 As well as un-typed, string-based expressions:
 ```csharp
-dbCmd.Delete<Person>(where: "Age = {0}".Params(27));
+db.Delete<Person>(where: "Age = {0}".Params(27));
 ```
 
 Which also can take a table name so works without requiring a typed **Person** model
 ```csharp
-dbCmd.Delete(table: "Person", where: "Age = {0}".Params(27));
+db.Delete(table: "Person", where: "Age = {0}".Params(27));
 ```
 
 **DELETE FROM "Person" WHERE Age = 27**
@@ -317,27 +317,26 @@ Below is a complete stand-alone example. No other config or classes is required 
     //    ":memory:", false, SqliteOrmLiteDialectProvider.Instance);
 
     //Non-intrusive: All extension methods hang off System.Data.* interfaces
-    IDbConnection dbConn = dbFactory.OpenDbConnection();
-    IDbCommand dbCmd = dbConn.CreateCommand();
+    IDbConnection db = dbFactory.OpenDbConnection();
 
     //Re-Create all table schemas:
-    dbCmd.DropTable<OrderDetail>();
-    dbCmd.DropTable<Order>();
-    dbCmd.DropTable<Customer>();
-    dbCmd.DropTable<Product>();
-    dbCmd.DropTable<Employee>();
+    db.DropTable<OrderDetail>();
+    db.DropTable<Order>();
+    db.DropTable<Customer>();
+    db.DropTable<Product>();
+    db.DropTable<Employee>();
 
-    dbCmd.CreateTable<Employee>();
-    dbCmd.CreateTable<Product>();
-    dbCmd.CreateTable<Customer>();
-    dbCmd.CreateTable<Order>();
-    dbCmd.CreateTable<OrderDetail>();
+    db.CreateTable<Employee>();
+    db.CreateTable<Product>();
+    db.CreateTable<Customer>();
+    db.CreateTable<Order>();
+    db.CreateTable<OrderDetail>();
 
-    dbCmd.Insert(new Employee { Id = 1, Name = "Employee 1" });
-    dbCmd.Insert(new Employee { Id = 2, Name = "Employee 2" });
+    db.Insert(new Employee { Id = 1, Name = "Employee 1" });
+    db.Insert(new Employee { Id = 2, Name = "Employee 2" });
     var product1 = new Product { Id = 1, Name = "Product 1", UnitPrice = 10 };
     var product2 = new Product { Id = 2, Name = "Product 2", UnitPrice = 20 };
-    dbCmd.Save(product1, product2);
+    db.Save(product1, product2);
 
     var customer = new Customer
     {
@@ -356,14 +355,14 @@ Below is a complete stand-alone example. No other config or classes is required 
             },
         CreatedAt = DateTime.UtcNow,
     };
-    dbCmd.Insert(customer);
+    db.Insert(customer);
 
-    var customerId = dbCmd.GetLastInsertId(); //Get Auto Inserted Id
-    customer = dbCmd.QuerySingle<Customer>(new { customer.Email }); //Query
+    var customerId = db.GetLastInsertId(); //Get Auto Inserted Id
+    customer = db.QuerySingle<Customer>(new { customer.Email }); //Query
     Assert.That(customer.Id, Is.EqualTo(customerId));
 
     //Direct access to System.Data.Transactions:
-    using (var trans = dbCmd.BeginTransaction(IsolationLevel.ReadCommitted))
+    using (var trans = db.OpenTransaction(IsolationLevel.ReadCommitted))
     {
         var order = new Order
         {
@@ -373,9 +372,9 @@ Below is a complete stand-alone example. No other config or classes is required 
             Freight = 10.50m,
             ShippingAddress = new Address { Line1 = "3 Street", Country = "US", State = "NY", City = "New York", ZipCode = "12121" },
         };
-        dbCmd.Save(order); //Inserts 1st time
+        db.Save(order); //Inserts 1st time
 
-        order.Id = (int)dbCmd.GetLastInsertId(); //Get Auto Inserted Id
+        order.Id = (int)db.GetLastInsertId(); //Get Auto Inserted Id
 
         var orderDetails = new[] {
             new OrderDetail
@@ -395,11 +394,11 @@ Below is a complete stand-alone example. No other config or classes is required 
             }
         };
 
-        dbCmd.Insert(orderDetails);
+        db.Insert(orderDetails);
 
         order.Total = orderDetails.Sum(x => x.UnitPrice * x.Quantity * x.Discount) + order.Freight;
 
-        dbCmd.Save(order); //Updates 2nd Time
+        db.Save(order); //Updates 2nd Time
 
         trans.Commit();
     }
@@ -426,40 +425,40 @@ Nearly all extension methods hang off the implementation agnostic `IDbCommand`.
 
 For a one-time use of a connection, you can query straight of the `IDbFactory` with:
 
-    var customers = dbFactory.Exec(dbCmd => dbCmd.Where<Customer>(new { Age = 30 }));
+    var customers = dbFactory.Exec(dbCmd => db.Where<Customer>(new { Age = 30 }));
 
 The **Select** methods allow you to construct Sql using C# `string.Format()` syntax.
 If your SQL doesn't start with a **SELECT** statement, it is assumed a WHERE clause is being provided, e.g:
 
-    var tracks = dbCmd.Select<Track>("Artist = {0} AND Album = {1}", "Nirvana", "Heart Shaped Box");
+    var tracks = db.Select<Track>("Artist = {0} AND Album = {1}", "Nirvana", "Heart Shaped Box");
 
 The same results could also be fetched with:
     
-    var tracks = dbCmd.Select<Track>("select * from track WHERE Artist = {0} AND Album = {1}", "Nirvana", "Heart Shaped Box");
+    var tracks = db.Select<Track>("select * from track WHERE Artist = {0} AND Album = {1}", "Nirvana", "Heart Shaped Box");
 
 **Select** returns multiple records 
 
-    List<Track> tracks = dbCmd.Select<Track>()
+    List<Track> tracks = db.Select<Track>()
 
 **Single** returns a single record  
 
-    Track track = dbCmd.Single<Track>("RefId = {0}", refId)
+    Track track = db.Single<Track>("RefId = {0}", refId)
 
 **GetDictionary** returns a Dictionary made from the first to columns
 
-    Dictionary<int,string> trackIdNamesMap = dbCmd.GetDictionary<int, string>("select Id, Name from Track")
+    Dictionary<int,string> trackIdNamesMap = db.GetDictionary<int, string>("select Id, Name from Track")
 
 **GetLookup** returns an `Dictionary<K, List<V>>` made from the first to columns
 
-        var albumTrackNames = dbCmd.GetLookup<int, string>("select AlbumId, Name from Track")
+        var albumTrackNames = db.GetLookup<int, string>("select AlbumId, Name from Track")
 
 **GetFirstColumn** returns a List of first column values
     
-    List<string> trackNames = dbCmd.GetFirstColumn<string>("select Name from Track")
+    List<string> trackNames = db.GetFirstColumn<string>("select Name from Track")
 
 **GetScalar** returns a single scalar value
 
-    var trackCount = dbCmd.GetScalar<int>("select count(*) from Track")
+    var trackCount = db.GetScalar<int>("select count(*) from Track")
 
 All **Insert**, **Update**, and **Delete** methods take multiple params, while `InsertAll`, `UpdateAll` and `DeleteAll` take IEnumerables.
 **GetLastInsertId** returns the last inserted records auto incremented primary key.
@@ -472,16 +471,16 @@ Methods containing the word **Each** return an IEnumerable<T> and are lazily loa
 Selection methods containing the word **Query** or **Where** use parameterized SQL (other selection methods do not).
 Anonymous types passed into **Where** are treated like an **AND** filter.
 
-    var track3 = dbCmd.Where<Track>(new { AlbumName = "Throwing Copper", TrackNo = 3 })
+    var track3 = db.Where<Track>(new { AlbumName = "Throwing Copper", TrackNo = 3 })
 
 **Query** statements take in parameterized SQL using properties from the supplied anonymous type (if any)
 
-    var track3 = dbCmd.Query<Track>("select * from Track Where AlbumName = @album and TrackNo = @trackNo", 
+    var track3 = db.Query<Track>("select * from Track Where AlbumName = @album and TrackNo = @trackNo", 
         new { album = "Throwing Copper", trackNo = 3 })
 
 GetById(s), QueryById(s), etc provide strong-typed convenience methods to fetch by a Table's **Id** primary key field.
 
-    var track = dbCmd.QueryById<Track>(1);
+    var track = db.QueryById<Track>(1);
     
 
 # Limitations 
@@ -503,11 +502,10 @@ In its simplest useage, OrmLite can persist any POCO type without any attributes
 	OrmLiteConfig.DialectProvider = new SqliteOrmLiteDialectProvider();
 
 	using (IDbConnection db = "/path/to/db.sqlite".OpenDbConnection())
-	using (IDbCommand dbConn = db.CreateCommand())
 	{
-		dbConn.CreateTable<SimpleExample>(true);
-		dbConn.Insert(new SimpleExample { Id=1, Name="Hello, World!"});
-		var rows = dbConn.Select<SimpleExample>();
+		db.CreateTable<SimpleExample>(true);
+		db.Insert(new SimpleExample { Id=1, Name="Hello, World!"});
+		var rows = db.Select<SimpleExample>();
 
 		Assert.That(rows, Has.Count(1));
 		Assert.That(rows[0].Id, Is.EqualTo(1));
@@ -568,11 +566,10 @@ So with no other configuration using only the classes below:
 ### Creating tables 
 Creating tables is a simple 1-liner:
 
-	using (IDbConnection dbConn = ":memory:".OpenDbConnection())
-	using (IDbCommand dbCmd = dbConn.CreateCommand())
+	using (IDbConnection db = ":memory:".OpenDbConnection())
 	{
 		const bool overwrite = false;
-		dbCmd.CreateTables(overwrite, typeof(Shipper), typeof(ShipperType));
+		db.CreateTables(overwrite, typeof(Shipper), typeof(ShipperType));
 	}
 
 	/* In debug mode the line above prints:
@@ -599,61 +596,61 @@ Creating tables is a simple 1-liner:
 As we have direct access to IDbCommand and friends - playing with transactions is easy:
 
 	int trainsTypeId, planesTypeId;
-	using (IDbTransaction dbTrans = dbCmd.BeginTransaction())
+	using (IDbTransaction dbTrans = db.OpenTransaction())
 	{
-		dbCmd.Insert(new ShipperType { Name = "Trains" });
-		trainsTypeId = (int) dbCmd.GetLastInsertId();
+		db.Insert(new ShipperType { Name = "Trains" });
+		trainsTypeId = (int) db.GetLastInsertId();
 
-		dbCmd.Insert(new ShipperType { Name = "Planes" });
-		planesTypeId = (int) dbCmd.GetLastInsertId();
+		db.Insert(new ShipperType { Name = "Planes" });
+		planesTypeId = (int) db.GetLastInsertId();
 
 		dbTrans.Commit();
 	}
-	using (IDbTransaction dbTrans = dbCmd.BeginTransaction(IsolationLevel.ReadCommitted))
+	using (IDbTransaction dbTrans = db.OpenTransaction(IsolationLevel.ReadCommitted))
 	{
-		dbCmd.Insert(new ShipperType { Name = "Automobiles" });
-		Assert.That(dbCmd.Select<ShipperType>(), Has.Count(3));
+		db.Insert(new ShipperType { Name = "Automobiles" });
+		Assert.That(db.Select<ShipperType>(), Has.Count(3));
 
 		dbTrans.Rollback();
 	}
-	Assert.That(dbCmd.Select<ShipperType>(), Has.Count(2));
+	Assert.That(db.Select<ShipperType>(), Has.Count(2));
 
 
 ### CRUD Operations 
 No ORM is complete without the standard crud operations:
 
 	//Performing standard Insert's and Selects
-	dbCmd.Insert(new Shipper { CompanyName = "Trains R Us", Phone = "555-TRAINS", ShipperTypeId = trainsTypeId });
-	dbCmd.Insert(new Shipper { CompanyName = "Planes R Us", Phone = "555-PLANES", ShipperTypeId = planesTypeId });
-	dbCmd.Insert(new Shipper { CompanyName = "We do everything!", Phone = "555-UNICORNS", ShipperTypeId = planesTypeId });
+	db.Insert(new Shipper { CompanyName = "Trains R Us", Phone = "555-TRAINS", ShipperTypeId = trainsTypeId });
+	db.Insert(new Shipper { CompanyName = "Planes R Us", Phone = "555-PLANES", ShipperTypeId = planesTypeId });
+	db.Insert(new Shipper { CompanyName = "We do everything!", Phone = "555-UNICORNS", ShipperTypeId = planesTypeId });
 
-	var trainsAreUs = dbCmd.First<Shipper>("ShipperTypeId = {0}", trainsTypeId);
+	var trainsAreUs = db.First<Shipper>("ShipperTypeId = {0}", trainsTypeId);
 	Assert.That(trainsAreUs.CompanyName, Is.EqualTo("Trains R Us"));
-	Assert.That(dbCmd.Select<Shipper>("CompanyName = {0} OR Phone = {1}", "Trains R Us", "555-UNICORNS"), Has.Count(2));
-	Assert.That(dbCmd.Select<Shipper>("ShipperTypeId = {0}", planesTypeId), Has.Count(2));
+	Assert.That(db.Select<Shipper>("CompanyName = {0} OR Phone = {1}", "Trains R Us", "555-UNICORNS"), Has.Count(2));
+	Assert.That(db.Select<Shipper>("ShipperTypeId = {0}", planesTypeId), Has.Count(2));
 
 	//Lets update a record
 	trainsAreUs.Phone = "666-TRAINS";
-	dbCmd.Update(trainsAreUs);
-	Assert.That(dbCmd.GetById<Shipper>(trainsAreUs.Id).Phone, Is.EqualTo("666-TRAINS"));
+	db.Update(trainsAreUs);
+	Assert.That(db.GetById<Shipper>(trainsAreUs.Id).Phone, Is.EqualTo("666-TRAINS"));
 
 	//Then make it disappear
-	dbCmd.Delete(trainsAreUs);
-	Assert.That(dbCmd.GetByIdOrDefault<Shipper>(trainsAreUs.Id), Is.Null);
+	db.Delete(trainsAreUs);
+	Assert.That(db.GetByIdOrDefault<Shipper>(trainsAreUs.Id), Is.Null);
 
 	//And bring it back again
-	dbCmd.Insert(trainsAreUs);
+	db.Insert(trainsAreUs);
 
 
 ### Performing custom queries 
 And with access to raw sql when you need it - the database is your oyster :)
 
 	//Select only a subset from the table
-	var partialColumns = dbCmd.Select<SubsetOfShipper>(typeof (Shipper), "ShipperTypeId = {0}", planesTypeId);
+	var partialColumns = db.Select<SubsetOfShipper>(typeof (Shipper), "ShipperTypeId = {0}", planesTypeId);
 	Assert.That(partialColumns, Has.Count(2));
 
 	//Select into another POCO class that matches the sql results
-	var rows = dbCmd.Select<ShipperTypeCount>(
+	var rows = db.Select<ShipperTypeCount>(
 		"SELECT ShipperTypeId, COUNT(*) AS Total FROM Shippers GROUP BY ShipperTypeId ORDER BY COUNT(*)");
 
 	Assert.That(rows, Has.Count(2));
@@ -664,11 +661,11 @@ And with access to raw sql when you need it - the database is your oyster :)
 
 
 	//And finally lets quickly clean up the mess we've made:
-	dbCmd.DeleteAll<Shipper>();
-	dbCmd.DeleteAll<ShipperType>();
+	db.DeleteAll<Shipper>();
+	db.DeleteAll<ShipperType>();
 
-	Assert.That(dbCmd.Select<Shipper>(), Has.Count(0));
-	Assert.That(dbCmd.Select<ShipperType>(), Has.Count(0));
+	Assert.That(db.Select<Shipper>(), Has.Count(0));
+	Assert.That(db.Select<ShipperType>(), Has.Count(0));
 	
 
 ## Other notable Micro ORMs for .NET
