@@ -64,6 +64,7 @@
   <ItemGroup>
     <Compile Include="BooleanTests.cs" />
     <Compile Include="DateTimeColumnTest.cs" />
+    <Compile Include="ForeignKeyAttributeTests.cs" />
     <Compile Include="LocalizationTests.cs" />
     <Compile Include="StringColumnTests.cs" />
     <Compile Include="NorthwindPerfTests.cs" />

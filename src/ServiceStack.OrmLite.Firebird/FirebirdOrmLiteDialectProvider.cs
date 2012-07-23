@@ -331,9 +331,9 @@ namespace ServiceStack.OrmLite.Firebird
 
                 sbColumns.Append(columnDefinition);
 
-                if (fieldDef.ReferencesType == null) continue;
+                if (fieldDef.ForeignKey == null) continue;
 
-                var refModelDef = GetModel(fieldDef.ReferencesType);
+                var refModelDef = GetModel(fieldDef.ForeignKey.ReferenceType);
 				
 				var modelName= modelDef.IsInSchema
 					? modelDef.Schema + "_" + NamingStrategy.GetTableName(modelDef.ModelName)
@@ -494,8 +494,8 @@ namespace ServiceStack.OrmLite.Firebird
 						if (fieldDef.IsComputed) continue;
 						try
 						{
-							if (fieldDef.ReferencesType !=null
-								&& GetModel(fieldDef.ReferencesType).ModelName == modelDef.ModelName)
+							if (fieldDef.ForeignKey !=null
+								&& GetModel(fieldDef.ForeignKey.ReferenceType).ModelName == modelDef.ModelName)
 							{
 								if (filter.Length > 0) filter.Append(" AND ");
 								filter.AppendFormat("{0} = {1}", GetQuotedColumnName(fieldDef.FieldName),
