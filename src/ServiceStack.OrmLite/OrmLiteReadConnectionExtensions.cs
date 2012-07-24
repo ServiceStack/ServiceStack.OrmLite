@@ -107,13 +107,19 @@ namespace ServiceStack.OrmLite
             return dbConn.Exec(dbCmd => dbCmd.Where<T>(anonType));
         }
 
-        public static List<T> Query<T>(this IDbConnection dbConn, string sql, object anonType = null)
+        public static List<T> Query<T>(this IDbConnection dbConn, string sql)
+            where T : new()
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Query<T>(sql));
+        }
+
+        public static List<T> Query<T>(this IDbConnection dbConn, string sql, object anonType)
             where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.Query<T>(sql, anonType));
         }
 
-        public static List<T> Query<T>(this IDbConnection dbConn, string sql, Dictionary<string, object> dict = null)
+        public static List<T> Query<T>(this IDbConnection dbConn, string sql, Dictionary<string, object> dict)
             where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.Query<T>(sql, dict));

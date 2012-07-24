@@ -371,7 +371,7 @@ namespace ServiceStack.OrmLite
 		}
 
         [Obsolete(UseDbCommandExtensions)]
-        public static List<T> Query<T>(this IDbCommand dbCmd, string sql, object anonType = null)
+        public static List<T> Query<T>(this IDbCommand dbCmd, string sql, object anonType)
 			where T : new()
 		{
             if (anonType != null) dbCmd.SetParameters(anonType, true);
