@@ -78,12 +78,14 @@ Only a blank SqlServer master database needed to be created out-of-band as Sqlit
 
     var dbFactory = new OrmLiteConnectionFactory(
       "Data Source=host;Initial Catalog=RobotsMaster;Integrated Security=SSPI",SqlServerOrmLiteDialectProvider.Instance);
+    
     dbFactory.Run(db => db.CreateTable<MasterRecord>(overwrite:false));
     
     NoOfShards.Times(i => {
         var namedShard = "robots-shard" + i;
         dbFactory.RegisterConnection(namedShard, 
             "~/App_Data/{0}.sqlite".Fmt(shardId).MapAbsolutePath(), SqliteOrmLiteDialectProvider.Instance);
+        
         dbFactory.OpenDbConnection(namedShard).Run(db => db.CreateTable<Robot>(overwrite:false));
     });
 
