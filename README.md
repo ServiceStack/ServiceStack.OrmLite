@@ -39,7 +39,7 @@ We've streamlined our API, now all OrmLite extensions that used to be on `IDbCom
 (just like Dapper), this reduces the boiler-plate when opening a connection to a single line, so now you can 
 create a table and insert a record with just:
 
-    using (IDbConnection db = dbFactory.OpenDbConnection() {
+    using (IDbConnection db = dbFactory.OpenDbConnection()) {
         db.CreateTable<Employee>();
         db.Insert(new Employee { Id = 1, Name = "Employee 1" });
     }
