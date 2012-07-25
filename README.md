@@ -34,6 +34,81 @@ Effectively this allows you to create a table from any POCO type and it should p
 OrmLite is also included in [ServiceStack](https://github.com/ServiceStack/ServiceStack/downloads) or available to download separately in 
 [/downloads](https://github.com/ServiceStack/ServiceStack.OrmLite/downloads).
 
+## New Simplified API
+All OrmLite extensions that used to be off `IDbCommand` now hang of `IDbConnection` like Dapper, this reduces the 
+boiler-plate when opening a connection to a single line, so now you can do create a table and insert a record with:
+
+    using (IDbConnection db = dbFactory.OpenDbConnection() {
+        db.CreateTable<Employee>();
+        db.Insert(new Employee { Id = 1, Name = "Employee 1" });
+    }
+    
+> The methods off `IDbCommand` have now been deprecated and will one day be removed. Update your library.
+
+## Multi nested database connections
+
+We now support multiple nested database connections so you can now trivially use OrmLite to access multiple databases
+on different connections. The `OrmLiteConnectionFactory` class has been extended to support named connections which 
+allows you to conveniently define all your db connections when you register it in your IOC and access them with the 
+named property when you use them.
+
+It now becomes trivial to maintain multiple shards with a master RDBMS in a different RDBMS. 
+Here's a sample of the entire source code (no other config) needed to define, and populate a Master/Shard setup.
+Only a blank SqlServer master database needed to be created out-of-band as Sqlite creates shards on the fly:
+
+### Sharding 1000 Robots into 10 Sqlite DB shards - referencing each in a Master SqlServer RDBMS
+
+    public class MasterRecord {
+        public Guid Id { get; set; }
+        public int RobotId { get; set; }
+        public string RobotName { get; set; }
+        public DateTime? LastActivated { get; set; }
+    }
+
+    public class Robot {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public bool IsActivated { get; set; }
+        public long CellCount { get; set; }
+        public DateTime CreatedDate { get; set; }
+    }
+
+    const int NoOfShards = 10;
+    const int NoOfPeople = 1000;
+
+    var dbFactory = new OrmLiteConnectionFactory(
+      "Data Source=host;Initial Catalog=RobotsMaster;Integrated Security=SSPI",SqlServerOrmLiteDialectProvider.Instance);
+    dbFactory.Run(db => db.CreateTable<MasterRecord>(overwrite:false));
+    
+    NoOfShards.Times(i => {
+        var namedShard = "robots-shard" + i;
+        dbFactory.RegisterConnection(namedShard, 
+            "~/App_Data/{0}.sqlite".Fmt(shardId).MapAbsolutePath(), SqliteOrmLiteDialectProvider.Instance);
+        dbFactory.OpenDbConnection(namedShard).Run(db => db.CreateTable<Robot>(overwrite:false));
+    });
+
+    var newRobots = NoOfPeople.Times(i => //Create 1000 Robots
+        new Robot { Id=i, Name="R2D"+i, CreatedDate=DateTime.UtcNow, CellCount=DateTime.Now.ToUnixTimeMs()%100000 });
+
+    foreach (var newRobot in newRobots) 
+    {
+        using (IDbConnection db = dbFactory.OpenDbConnection()) //Open Connection to Master DB 
+        {
+            db.Insert(new MasterRecord { Id = Guid.NewGuid(), RobotId = newRobot.Id, RobotName = newRobot.Name });
+            using (IDbConnection robotShard = dbFactory.OpenDbConnection("robots-shard" + newRobot.Id%NoOfShards)) //Shard
+            {
+                robotShard.Insert(newRobot);
+            }
+        }
+    }
+
+Using the [SQLite Manager](https://addons.mozilla.org/en-US/firefox/addon/sqlite-manager/?src=search) Firefox extension
+we can peek at one of the created shards to see 100 Robots in each shard. This is the dump of `robots-shard0.sqlite`:
+
+![Data dump of Robot Shard #1](http://www.servicestack.net/files/robots-shard0.png)
+
+As expected each shard has every 10th robot inside.
+
 ## New strong-typed Sql Expression API
 
 We've now added SQL Expression support to bring you even nicer LINQ-liked querying to all our providers. 
