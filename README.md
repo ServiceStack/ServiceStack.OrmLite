@@ -77,7 +77,7 @@ Sqlite can creates DB shards on the fly so only a blank SqlServer master databas
     }
 
     const int NoOfShards = 10;
-    const int NoOfPeople = 1000;
+    const int NoOfRobots = 1000;
 
     var dbFactory = new OrmLiteConnectionFactory(
       "Data Source=host;Initial Catalog=RobotsMaster;Integrated Security=SSPI",SqlServerOrmLiteDialectProvider.Instance);
@@ -92,7 +92,7 @@ Sqlite can creates DB shards on the fly so only a blank SqlServer master databas
         dbFactory.OpenDbConnection(namedShard).Run(db => db.CreateTable<Robot>(overwrite:false));
     });
 
-    var newRobots = NoOfPeople.Times(i => //Create 1000 Robots
+    var newRobots = NoOfRobots.Times(i => //Create 1000 Robots
         new Robot { Id=i, Name="R2D"+i, CreatedDate=DateTime.UtcNow, CellCount=DateTime.Now.ToUnixTimeMs()%100000 });
 
     foreach (var newRobot in newRobots) 
