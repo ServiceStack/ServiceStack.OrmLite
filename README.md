@@ -52,9 +52,12 @@ on different connections. The `OrmLiteConnectionFactory` class has been extended
 allows you to conveniently define all your db connections when you register it in your IOC and access them with the 
 named property when you use them.
 
-It now becomes trivial to maintain multiple shards with a master RDBMS in a different RDBMS. 
-Here's a sample of the entire source code (no other config) needed to define, and populate a Master/Shard setup.
-Only a blank SqlServer master database needed to be created out-of-band as Sqlite creates shards on the fly:
+A popular way of scaling RDBMS's is to create a Master / Shard setup where datasets for queries that span entire system
+are kept in the master database, whilst context-specific related data can be kept together in an isolated shard.
+This feature makes it trivial to maintain multiple separate db shards with a master database in a different RDBMS. 
+
+Here's an (entire source code) sample of the code needed to define, and populate a Master/Shard setup.
+Sqlite can creates DB shards on the fly so only a blank SqlServer master database needed to be created out-of-band:
 
 ### Sharding 1000 Robots into 10 Sqlite DB shards - referencing each in a Master SqlServer RDBMS
 
