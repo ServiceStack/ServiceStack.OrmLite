@@ -566,7 +566,28 @@ GetById(s), QueryById(s), etc provide strong-typed convenience methods to fetch 
 
 # Limitations 
 
-For simplicity, and to be able to have the same POCO class persisted in db4o, memcached, redis or on the filesystem (i.e. providers included in ServiceStack), each model must have an '`Id`' property which is its primary key.  
+For simplicity, and to be able to have the same POCO class persisted in db4o, memcached, redis or on the filesystem 
+(i.e. providers included in ServiceStack), each model must have a single primary key, by convention OrmLite expects it
+to be `Id` although you use `[Alias("DbFieldName")]` attribute it map it to a column with a different name or use 
+the `[PrimaryKey]` attribute to tell OrmLite to use a different property for the primary key.
+
+You can still `SELECT` from these tables, you will just be unable to make use of APIs that rely on it, e.g. 
+`Update` or `Delete` where the filter is implied (i.e. not specified), all the APIs that end with `ById`, etc.
+
+### Workaround single Primary Key limitation
+A potential workaround to support tables with multiple primary keys is to create an auto generated `Id` property that 
+returns a unique value based on all the primary key fields, e.g:
+
+    public class OrderDetail
+    {
+        public string Id { get { return this.OrderId + "/" + this.ProductId; } }
+        
+        public int OrderId { get; set; }
+        public int ProductId { get; set; }
+        public decimal UnitPrice { get; set; }
+        public short Quantity { get; set; }
+        public double Discount { get; set; }
+    }
 
 
 # More Examples 
