@@ -23,7 +23,7 @@ namespace ServiceStack.OrmLite
     public static class OrmLiteWriteExtensions
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(OrmLiteWriteExtensions));
-        private const string UseDbCommandExtensions = "Use IDbCommand Extensions instead";
+        private const string UseDbConnectionExtensions = "Use IDbConnection Extensions instead";
 
         [Conditional("DEBUG")]
         private static void LogDebug(string fmt, params object[] args)
@@ -34,7 +34,7 @@ namespace ServiceStack.OrmLite
                 Log.Debug(fmt);
         }
 
-        [Obsolete(UseDbCommandExtensions)]
+        [Obsolete(UseDbConnectionExtensions)]
         public static void CreateTables(this IDbCommand dbCmd, bool overwrite, params Type[] tableTypes)
         {
             foreach (var tableType in tableTypes)
@@ -43,7 +43,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        [Obsolete(UseDbCommandExtensions)]
+        [Obsolete(UseDbConnectionExtensions)]
         public static void CreateTable<T>(this IDbCommand dbCmd)
             where T : new()
         {
@@ -51,7 +51,7 @@ namespace ServiceStack.OrmLite
             CreateTable(dbCmd, false, tableType);
         }
 
-        [Obsolete(UseDbCommandExtensions)]
+        [Obsolete(UseDbConnectionExtensions)]
         public static void CreateTable<T>(this IDbCommand dbCmd, bool overwrite)
             where T : new()
         {
@@ -59,7 +59,7 @@ namespace ServiceStack.OrmLite
             CreateTable(dbCmd, overwrite, tableType);
         }
 
-        [Obsolete(UseDbCommandExtensions)]
+        [Obsolete(UseDbConnectionExtensions)]
         public static void CreateTable(this IDbCommand dbCmd, bool overwrite, Type modelType)
         {
             var modelDef = modelType.GetModelDefinition();
@@ -128,7 +128,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        [Obsolete(UseDbCommandExtensions)]
+        [Obsolete(UseDbConnectionExtensions)]
         public static void DropTable<T>(this IDbCommand dbCmd)
             where T : new()
         {
@@ -147,13 +147,13 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        [Obsolete(UseDbCommandExtensions)]
+        [Obsolete(UseDbConnectionExtensions)]
         public static string GetLastSql(this IDbCommand dbCmd)
         {
             return dbCmd.CommandText;
         }
 
-        [Obsolete(UseDbCommandExtensions)]
+        [Obsolete(UseDbConnectionExtensions)]
         public static int ExecuteSql(this IDbCommand dbCmd, string sql)
         {
             LogDebug(sql);
@@ -221,7 +221,7 @@ namespace ServiceStack.OrmLite
 			return objWithProperties;
         }
 
-        [Obsolete(UseDbCommandExtensions)]
+        [Obsolete(UseDbConnectionExtensions)]
         public static void Update<T>(this IDbCommand dbCmd, params T[] objs)
 			where T : new()
 		{
@@ -231,7 +231,7 @@ namespace ServiceStack.OrmLite
 			}
 		}
 
-        [Obsolete(UseDbCommandExtensions)]
+        [Obsolete(UseDbConnectionExtensions)]
         public static void UpdateAll<T>(this IDbCommand dbCmd, IEnumerable<T> objs)
 			where T : new()
 		{
@@ -241,14 +241,14 @@ namespace ServiceStack.OrmLite
 			}
 		}
 
-        [Obsolete(UseDbCommandExtensions)]
+        [Obsolete(UseDbConnectionExtensions)]
         public static IDbCommand CreateUpdateStatement<T>(this IDbConnection connection, T obj)
             where T : new()
         {
             return OrmLiteConfig.DialectProvider.CreateParameterizedUpdateStatement(obj, connection);
         }
 
-        [Obsolete(UseDbCommandExtensions)]
+        [Obsolete(UseDbConnectionExtensions)]
         public static void Delete<T>(this IDbCommand dbCmd, params T[] objs)
 			where T : new()
 		{
@@ -258,7 +258,7 @@ namespace ServiceStack.OrmLite
 			}
 		}
 
-        [Obsolete(UseDbCommandExtensions)]
+        [Obsolete(UseDbConnectionExtensions)]
         public static void DeleteAll<T>(this IDbCommand dbCmd, IEnumerable<T> objs)
 			where T : new()
 		{
@@ -268,7 +268,7 @@ namespace ServiceStack.OrmLite
 			}
 		}
 
-        [Obsolete(UseDbCommandExtensions)]
+        [Obsolete(UseDbConnectionExtensions)]
         public static void DeleteById<T>(this IDbCommand dbCmd, object id)
             where T : new()
         {
@@ -283,7 +283,7 @@ namespace ServiceStack.OrmLite
             dbCmd.ExecuteSql(sql);
         }
 
-        [Obsolete(UseDbCommandExtensions)]
+        [Obsolete(UseDbConnectionExtensions)]
         public static void DeleteByIds<T>(this IDbCommand dbCmd, IEnumerable idValues)
             where T : new()
         {
@@ -300,33 +300,33 @@ namespace ServiceStack.OrmLite
             dbCmd.ExecuteSql(sql);
         }
 
-        [Obsolete(UseDbCommandExtensions)]
+        [Obsolete(UseDbConnectionExtensions)]
         public static void DeleteAll<T>(this IDbCommand dbCmd)
         {
             DeleteAll(dbCmd, typeof(T));
         }
 
-        [Obsolete(UseDbCommandExtensions)]
+        [Obsolete(UseDbConnectionExtensions)]
         public static void DeleteAll(this IDbCommand dbCmd, Type tableType)
         {
 			dbCmd.ExecuteSql(OrmLiteConfig.DialectProvider.ToDeleteStatement(tableType, null));
 		}
 
-        [Obsolete(UseDbCommandExtensions)]
+        [Obsolete(UseDbConnectionExtensions)]
         public static void Delete<T>(this IDbCommand dbCmd, string sqlFilter, params object[] filterParams)
             where T : new()
         {
             Delete(dbCmd, typeof(T), sqlFilter, filterParams);
         }
 
-        [Obsolete(UseDbCommandExtensions)]
+        [Obsolete(UseDbConnectionExtensions)]
         public static void Delete(this IDbCommand dbCmd, Type tableType, string sqlFilter, params object[] filterParams)
         {
             dbCmd.ExecuteSql(OrmLiteConfig.DialectProvider.ToDeleteStatement(tableType, sqlFilter, filterParams));
         }
 
 
-        [Obsolete(UseDbCommandExtensions)]
+        [Obsolete(UseDbConnectionExtensions)]
         public static void Save<T>(this IDbCommand dbCmd, T obj)
             where T : new()
         {
@@ -342,7 +342,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        [Obsolete(UseDbCommandExtensions)]
+        [Obsolete(UseDbConnectionExtensions)]
         public static void Insert<T>(this IDbCommand dbCmd, params T[] objs)
 			where T : new()
 		{
@@ -352,7 +352,7 @@ namespace ServiceStack.OrmLite
 			}
 		}
 
-        [Obsolete(UseDbCommandExtensions)]
+        [Obsolete(UseDbConnectionExtensions)]
         public static void InsertAll<T>(this IDbCommand dbCmd, IEnumerable<T> objs)
 			where T : new()
 		{
@@ -362,28 +362,28 @@ namespace ServiceStack.OrmLite
 			}
 		}
 
-        [Obsolete(UseDbCommandExtensions)]
+        [Obsolete(UseDbConnectionExtensions)]
         public static IDbCommand CreateInsertStatement<T>(this IDbConnection connection, T obj)
             where T: new()
         {
             return OrmLiteConfig.DialectProvider.CreateParameterizedInsertStatement(obj, connection);
         }
 
-        [Obsolete(UseDbCommandExtensions)]
+        [Obsolete(UseDbConnectionExtensions)]
         public static void ReparameterizeInsert<T>(this IDbCommand command, T obj)
             where T : new()
         {
             OrmLiteConfig.DialectProvider.ReParameterizeInsertStatement(obj, command);
         }
 
-        [Obsolete(UseDbCommandExtensions)]
+        [Obsolete(UseDbConnectionExtensions)]
         public static void Save<T>(this IDbCommand dbCmd, params T[] objs)
             where T : new()
         {
             SaveAll(dbCmd, objs);
         }
 
-        [Obsolete(UseDbCommandExtensions)]
+        [Obsolete(UseDbConnectionExtensions)]
         public static void SaveAll<T>(this IDbCommand dbCmd, IEnumerable<T> objs)
             where T : new()
         {
@@ -421,7 +421,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        [Obsolete(UseDbCommandExtensions)]
+        [Obsolete(UseDbConnectionExtensions)]
         public static IDbTransaction BeginTransaction(this IDbCommand dbCmd)
         {
             var dbTrans = dbCmd.Connection.BeginTransaction();
@@ -430,7 +430,7 @@ namespace ServiceStack.OrmLite
             return dbTrans;
         }
 
-        [Obsolete(UseDbCommandExtensions)]
+        [Obsolete(UseDbConnectionExtensions)]
         public static IDbTransaction BeginTransaction(this IDbCommand dbCmd, IsolationLevel isolationLevel)
         {
             var dbTrans = dbCmd.Connection.BeginTransaction(isolationLevel);
@@ -440,7 +440,7 @@ namespace ServiceStack.OrmLite
         }
 		
 		// Procedures
-        [Obsolete(UseDbCommandExtensions)]
+        [Obsolete(UseDbConnectionExtensions)]
         public static void ExecuteProcedure<T>(this IDbCommand dbCommand, T obj)
         {	
 			

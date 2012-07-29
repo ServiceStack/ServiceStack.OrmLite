@@ -21,43 +21,42 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
-	internal static class OrmLiteConfigExtensions
-	{
-		private static Dictionary<Type, ModelDefinition> typeModelDefinitionMap = new Dictionary<Type, ModelDefinition>();
+    internal static class OrmLiteConfigExtensions
+    {
+        private static Dictionary<Type, ModelDefinition> typeModelDefinitionMap = new Dictionary<Type, ModelDefinition>();
 
-		private static bool IsNullableType(Type theType)
-		{
-			return (theType.IsGenericType
-				&& theType.GetGenericTypeDefinition() == typeof(Nullable<>));
-		}
+        private static bool IsNullableType(Type theType)
+        {
+            return (theType.IsGenericType
+                && theType.GetGenericTypeDefinition() == typeof(Nullable<>));
+        }
 
-		internal static bool CheckForIdField(IEnumerable<PropertyInfo> objProperties)
-		{
-			// Not using Linq.Where() and manually iterating through objProperties just to avoid dependencies on System.Xml??
-			foreach (var objProperty in objProperties)
-			{
-				if (objProperty.Name != OrmLiteConfig.IdField) continue;
-				return true;
-			}
-			return false;
-		}
+        internal static bool CheckForIdField(IEnumerable<PropertyInfo> objProperties)
+        {
+            // Not using Linq.Where() and manually iterating through objProperties just to avoid dependencies on System.Xml??
+            foreach (var objProperty in objProperties)
+            {
+                if (objProperty.Name != OrmLiteConfig.IdField) continue;
+                return true;
+            }
+            return false;
+        }
 
-		internal static void ClearCache()
-		{
-			typeModelDefinitionMap = new Dictionary<Type, ModelDefinition>();
-		}
+        internal static void ClearCache()
+        {
+            typeModelDefinitionMap = new Dictionary<Type, ModelDefinition>();
+        }
 
-		internal static ModelDefinition GetModelDefinition(this Type modelType)
-		{
+        internal static ModelDefinition GetModelDefinition(this Type modelType)
+        {
             ModelDefinition modelDef;
-            
+
             if (typeModelDefinitionMap.TryGetValue(modelType, out modelDef))
                 return modelDef;
 
             var modelAliasAttr = modelType.FirstAttribute<AliasAttribute>();
-		    var schemaAttr = modelType.FirstAttribute<SchemaAttribute>();
-            modelDef = new ModelDefinition
-            {
+            var schemaAttr = modelType.FirstAttribute<SchemaAttribute>();
+            modelDef = new ModelDefinition {
                 ModelType = modelType,
                 Name = modelType.Name,
                 Alias = modelAliasAttr != null ? modelAliasAttr.Name : null,
@@ -76,15 +75,15 @@ namespace ServiceStack.OrmLite
             var i = 0;
             foreach (var propertyInfo in objProperties)
             {
-				if (propertyInfo.FirstAttribute<IgnoreAttribute>()!=null) continue;
-				var sequenceAttr = propertyInfo.FirstAttribute<SequenceAttribute>();
-				var computeAttr= propertyInfo.FirstAttribute<ComputeAttribute>();
-				var pkAttribute = propertyInfo.FirstAttribute<PrimaryKeyAttribute>();
-				var decimalAttribute = propertyInfo.FirstAttribute<DecimalLengthAttribute>();
+                if (propertyInfo.FirstAttribute<IgnoreAttribute>() != null) continue;
+                var sequenceAttr = propertyInfo.FirstAttribute<SequenceAttribute>();
+                var computeAttr= propertyInfo.FirstAttribute<ComputeAttribute>();
+                var pkAttribute = propertyInfo.FirstAttribute<PrimaryKeyAttribute>();
+                var decimalAttribute = propertyInfo.FirstAttribute<DecimalLengthAttribute>();
                 var isFirst = i++ == 0;
 
                 var isPrimaryKey = propertyInfo.Name == OrmLiteConfig.IdField || (!hasIdField && isFirst)
-					|| pkAttribute != null;
+                    || pkAttribute != null;
 
                 var isNullableType = IsNullableType(propertyInfo.PropertyType);
 
@@ -108,52 +107,51 @@ namespace ServiceStack.OrmLite
 
                 var referencesAttr = propertyInfo.FirstAttribute<ReferencesAttribute>();
                 var foreignKeyAttr = propertyInfo.FirstAttribute<ForeignKeyAttribute>();
-				
-				if(decimalAttribute != null  && stringLengthAttr==null)
-					stringLengthAttr= new StringLengthAttribute(decimalAttribute.Precision);
 
-                var fieldDefinition = new FieldDefinition
-                                          {
-                                              Name = propertyInfo.Name,
-                                              Alias = aliasAttr != null ? aliasAttr.Name : null,
-                                              FieldType = propertyType,
-                                              PropertyInfo = propertyInfo,
-                                              IsNullable = isNullable,
-                                              IsPrimaryKey = isPrimaryKey,
-                                              AutoIncrement =
-                                                  isPrimaryKey &&
-                                                  propertyInfo.FirstAttribute<AutoIncrementAttribute>() != null,
-                                              IsIndexed = isIndex,
-                                              IsUnique = isUnique,
-                                              FieldLength =
-                                                  stringLengthAttr != null
-                                                      ? stringLengthAttr.MaximumLength
-                                                      : (int?) null,
-                                              DefaultValue =
-                                                  defaultValueAttr != null ? defaultValueAttr.DefaultValue : null,
-                                              ForeignKey =
-                                                  foreignKeyAttr == null
-                                                      ? referencesAttr == null
-                                                            ? null
-                                                            : new ForeignKeyConstraint(referencesAttr.Type)
-                                                      : new ForeignKeyConstraint(foreignKeyAttr.Type,
-                                                                                 foreignKeyAttr.OnDelete,
-                                                                                 foreignKeyAttr.OnUpdate),
-                                              GetValueFn = propertyInfo.GetPropertyGetterFn(),
-                                              SetValueFn = propertyInfo.GetPropertySetterFn(),
-                                              Sequence = sequenceAttr != null ? sequenceAttr.Name : string.Empty,
-                                              IsComputed = computeAttr != null,
-                                              ComputeExpression =
-                                                  computeAttr != null ? computeAttr.Expression : string.Empty,
-                                              Scale = decimalAttribute != null ? decimalAttribute.Scale : (int?) null,
-                                          };
+                if (decimalAttribute != null && stringLengthAttr == null)
+                    stringLengthAttr = new StringLengthAttribute(decimalAttribute.Precision);
+
+                var fieldDefinition = new FieldDefinition {
+                    Name = propertyInfo.Name,
+                    Alias = aliasAttr != null ? aliasAttr.Name : null,
+                    FieldType = propertyType,
+                    PropertyInfo = propertyInfo,
+                    IsNullable = isNullable,
+                    IsPrimaryKey = isPrimaryKey,
+                    AutoIncrement =
+                        isPrimaryKey &&
+                        propertyInfo.FirstAttribute<AutoIncrementAttribute>() != null,
+                    IsIndexed = isIndex,
+                    IsUnique = isUnique,
+                    FieldLength =
+                        stringLengthAttr != null
+                            ? stringLengthAttr.MaximumLength
+                            : (int?)null,
+                    DefaultValue =
+                        defaultValueAttr != null ? defaultValueAttr.DefaultValue : null,
+                    ForeignKey =
+                        foreignKeyAttr == null
+                            ? referencesAttr == null
+                                  ? null
+                                  : new ForeignKeyConstraint(referencesAttr.Type)
+                            : new ForeignKeyConstraint(foreignKeyAttr.Type,
+                                                       foreignKeyAttr.OnDelete,
+                                                       foreignKeyAttr.OnUpdate),
+                    GetValueFn = propertyInfo.GetPropertyGetterFn(),
+                    SetValueFn = propertyInfo.GetPropertySetterFn(),
+                    Sequence = sequenceAttr != null ? sequenceAttr.Name : string.Empty,
+                    IsComputed = computeAttr != null,
+                    ComputeExpression =
+                        computeAttr != null ? computeAttr.Expression : string.Empty,
+                    Scale = decimalAttribute != null ? decimalAttribute.Scale : (int?)null,
+                };
 
                 modelDef.FieldDefinitions.Add(fieldDefinition);
             }
 
-		    modelDef.SqlSelectAllFromTable = "SELECT {0} FROM {1} ".Fmt(OrmLiteConfig.DialectProvider.GetColumnNames(modelDef),
-		                                                                OrmLiteConfig.DialectProvider.GetQuotedTableName(
-		                                                                    modelDef));
+            modelDef.SqlSelectAllFromTable = "SELECT {0} FROM {1} ".Fmt(OrmLiteConfig.DialectProvider.GetColumnNames(modelDef),
+                                                                        OrmLiteConfig.DialectProvider.GetQuotedTableName(
+                                                                            modelDef));
             Dictionary<Type, ModelDefinition> snapshot, newCache;
             do
             {
@@ -165,7 +163,7 @@ namespace ServiceStack.OrmLite
                 Interlocked.CompareExchange(ref typeModelDefinitionMap, newCache, snapshot), snapshot));
 
             return modelDef;
-		}
+        }
 
-	}
+    }
 }
