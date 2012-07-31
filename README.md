@@ -46,6 +46,45 @@ create a table and insert a record with just:
     
 > The methods off `IDbCommand` have now been deprecated and will one day be removed. Update your library.
 
+## New Foreign Key attribute for referential actions on Update/Deletes
+
+Creating a foreign key in OrmLite can be done by adding `[References(typeof(ForeignKeyTable))]` on the relation property,
+which will result in OrmLite creating the Foreign Key relationship when it creates the DB table with `db.CreateTable<Poco>`.
+[@brainless83](https://github.com/brainless83) has extended this support further by adding more finer-grain options 
+and behaviours with the new `[ForeignKey]` attribute which will now let you specify the desired behaviour when deleting
+or updating related rows in Foreign Key tables. 
+
+An example of a table with all the different options:
+
+    public class TableWithAllCascadeOptions
+    {
+        [AutoIncrement] public int Id { get; set; }
+        
+        [References(typeof(ForeignKeyTable1))]
+        public int SimpleForeignKey { get; set; }
+        
+        [ForeignKey(typeof(ForeignKeyTable2), OnDelete = "CASCADE", OnUpdate = "CASCADE")]
+        public int? CascadeOnUpdateOrDelete { get; set; }
+
+        [ForeignKey(typeof(ForeignKeyTable3), OnDelete = "NO ACTION")]
+        public int? NoActionOnCascade { get; set; }
+
+        [Default(typeof(int), "17")]
+        [ForeignKey(typeof(ForeignKeyTable4), OnDelete = "SET DEFAULT")]
+        public int SetToDefaultValueOnDelete { get; set; }
+
+        [ForeignKey(typeof(ForeignKeyTable5), OnDelete = "SET NULL")]
+        public int? SetToNullOnDelete { get; set; }
+    }
+
+The [ForeignKeyTests](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLite.Tests/ForeignKeyAttributeTests.cs)
+show the resulting behaviour with each of these configurations in more detail.
+
+>> Note: Only supported on RDBMS's with foreign key/referential action support, e.g. 
+[Sql Server](http://msdn.microsoft.com/en-us/library/ms174979.aspx), 
+[PostgreSQL](http://www.postgresql.org/docs/9.1/static/ddl-constraints.html),
+[MySQL](http://dev.mysql.com/doc/refman/5.5/en/innodb-foreign-key-constraints.html). Otherwise they're ignored.
+
 ## Multi nested database connections
 
 We now support multiple nested database connections so you can now trivially use OrmLite to access multiple databases
