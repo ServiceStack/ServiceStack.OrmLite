@@ -125,7 +125,7 @@ const int NoOfShards = 10;
 const int NoOfRobots = 1000;
 
 var dbFactory = new OrmLiteConnectionFactory(
-    Data Source=host;Initial Catalog=RobotsMaster;Integrated Security=SSPI",   //Connection String
+    "Data Source=host;Initial Catalog=RobotsMaster;Integrated Security=SSPI",  //Connection String
     SqlServerOrmLiteDialectProvider.Instance);                                 //For SqlServer
 
 dbFactory.Run(db => db.CreateTable<MasterRecord>(overwrite:false));
