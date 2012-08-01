@@ -35,7 +35,8 @@ _ReSharper*/
 [Tt]est[Rr]esult*
 App_Data/
 
-NuGet/*.dll
+NuGet/
+build/
 *.nupkg
 *.pidb
 *.userprefs
