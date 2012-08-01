@@ -39,10 +39,12 @@ We've streamlined our API, now all OrmLite extensions that used to be on `IDbCom
 (just like Dapper), this reduces the boiler-plate when opening a connection to a single line, so now you can 
 create a table and insert a record with just:
 
-    using (IDbConnection db = dbFactory.OpenDbConnection()) {
-        db.CreateTable<Employee>();
-        db.Insert(new Employee { Id = 1, Name = "Employee 1" });
-    }
+```csharp
+using (IDbConnection db = dbFactory.OpenDbConnection()) {
+	db.CreateTable<Employee>();
+	db.Insert(new Employee { Id = 1, Name = "Employee 1" });
+}
+```
     
 > The methods off `IDbCommand` have now been deprecated and will one day be removed. Update your library.
 
@@ -56,31 +58,33 @@ or updating related rows in Foreign Key tables.
 
 An example of a table with all the different options:
 
-    public class TableWithAllCascadeOptions
-    {
-        [AutoIncrement] public int Id { get; set; }
-        
-        [References(typeof(ForeignKeyTable1))]
-        public int SimpleForeignKey { get; set; }
-        
-        [ForeignKey(typeof(ForeignKeyTable2), OnDelete = "CASCADE", OnUpdate = "CASCADE")]
-        public int? CascadeOnUpdateOrDelete { get; set; }
-
-        [ForeignKey(typeof(ForeignKeyTable3), OnDelete = "NO ACTION")]
-        public int? NoActionOnCascade { get; set; }
-
-        [Default(typeof(int), "17")]
-        [ForeignKey(typeof(ForeignKeyTable4), OnDelete = "SET DEFAULT")]
-        public int SetToDefaultValueOnDelete { get; set; }
-
-        [ForeignKey(typeof(ForeignKeyTable5), OnDelete = "SET NULL")]
-        public int? SetToNullOnDelete { get; set; }
-    }
+```csharp
+public class TableWithAllCascadeOptions
+{
+	[AutoIncrement] public int Id { get; set; }
+	
+	[References(typeof(ForeignKeyTable1))]
+	public int SimpleForeignKey { get; set; }
+	
+	[ForeignKey(typeof(ForeignKeyTable2), OnDelete = "CASCADE", OnUpdate = "CASCADE")]
+	public int? CascadeOnUpdateOrDelete { get; set; }
+	
+	[ForeignKey(typeof(ForeignKeyTable3), OnDelete = "NO ACTION")]
+	public int? NoActionOnCascade { get; set; }
+	
+	[Default(typeof(int), "17")]
+	[ForeignKey(typeof(ForeignKeyTable4), OnDelete = "SET DEFAULT")]
+	public int SetToDefaultValueOnDelete { get; set; }
+	
+	[ForeignKey(typeof(ForeignKeyTable5), OnDelete = "SET NULL")]
+	public int? SetToNullOnDelete { get; set; }
+}
+```
 
 The [ForeignKeyTests](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLite.Tests/ForeignKeyAttributeTests.cs)
 show the resulting behaviour with each of these configurations in more detail.
 
->> Note: Only supported on RDBMS's with foreign key/referential action support, e.g. 
+> Note: Only supported on RDBMS's with foreign key/referential action support, e.g. 
 [Sql Server](http://msdn.microsoft.com/en-us/library/ms174979.aspx), 
 [PostgreSQL](http://www.postgresql.org/docs/9.1/static/ddl-constraints.html),
 [MySQL](http://dev.mysql.com/doc/refman/5.5/en/innodb-foreign-key-constraints.html). Otherwise they're ignored.
@@ -101,51 +105,53 @@ Sqlite can creates DB shards on the fly so only a blank SqlServer master databas
 
 ### Sharding 1000 Robots into 10 Sqlite DB shards - referencing each in a Master SqlServer RDBMS
 
-    public class MasterRecord {
-        public Guid Id { get; set; }
-        public int RobotId { get; set; }
-        public string RobotName { get; set; }
-        public DateTime? LastActivated { get; set; }
-    }
+```csharp
+public class MasterRecord {
+	public Guid Id { get; set; }
+	public int RobotId { get; set; }
+	public string RobotName { get; set; }
+	public DateTime? LastActivated { get; set; }
+}
 
-    public class Robot {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public bool IsActivated { get; set; }
-        public long CellCount { get; set; }
-        public DateTime CreatedDate { get; set; }
-    }
+public class Robot {
+	public int Id { get; set; }
+	public string Name { get; set; }
+	public bool IsActivated { get; set; }
+	public long CellCount { get; set; }
+	public DateTime CreatedDate { get; set; }
+}
 
-    const int NoOfShards = 10;
-    const int NoOfRobots = 1000;
+const int NoOfShards = 10;
+const int NoOfRobots = 1000;
 
-    var dbFactory = new OrmLiteConnectionFactory(
-      "Data Source=host;Initial Catalog=RobotsMaster;Integrated Security=SSPI",SqlServerOrmLiteDialectProvider.Instance);
-    
-    dbFactory.Run(db => db.CreateTable<MasterRecord>(overwrite:false));
-    
-    NoOfShards.Times(i => {
-        var namedShard = "robots-shard" + i;
-        dbFactory.RegisterConnection(namedShard, 
-            "~/App_Data/{0}.sqlite".Fmt(shardId).MapAbsolutePath(), SqliteOrmLiteDialectProvider.Instance);
-        
-        dbFactory.OpenDbConnection(namedShard).Run(db => db.CreateTable<Robot>(overwrite:false));
-    });
+var dbFactory = new OrmLiteConnectionFactory(
+	Data Source=host;Initial Catalog=RobotsMaster;Integrated Security=SSPI",SqlServerOrmLiteDialectProvider.Instance);
 
-    var newRobots = NoOfRobots.Times(i => //Create 1000 Robots
-        new Robot { Id=i, Name="R2D"+i, CreatedDate=DateTime.UtcNow, CellCount=DateTime.Now.ToUnixTimeMs()%100000 });
+dbFactory.Run(db => db.CreateTable<MasterRecord>(overwrite:false));
 
-    foreach (var newRobot in newRobots) 
-    {
-        using (IDbConnection db = dbFactory.OpenDbConnection()) //Open Connection to Master DB 
-        {
-            db.Insert(new MasterRecord { Id = Guid.NewGuid(), RobotId = newRobot.Id, RobotName = newRobot.Name });
-            using (IDbConnection robotShard = dbFactory.OpenDbConnection("robots-shard" + newRobot.Id%NoOfShards)) //Shard
-            {
-                robotShard.Insert(newRobot);
-            }
-        }
-    }
+NoOfShards.Times(i => {
+	var namedShard = "robots-shard" + i;
+	dbFactory.RegisterConnection(namedShard, 
+	    "~/App_Data/{0}.sqlite".Fmt(shardId).MapAbsolutePath(), SqliteOrmLiteDialectProvider.Instance);
+	
+	dbFactory.OpenDbConnection(namedShard).Run(db => db.CreateTable<Robot>(overwrite:false));
+});
+
+var newRobots = NoOfRobots.Times(i => //Create 1000 Robots
+new Robot { Id=i, Name="R2D"+i, CreatedDate=DateTime.UtcNow, CellCount=DateTime.Now.ToUnixTimeMs()%100000 });
+
+foreach (var newRobot in newRobots) 
+{
+	using (IDbConnection db = dbFactory.OpenDbConnection()) //Open Connection to Master DB 
+	{
+	    db.Insert(new MasterRecord { Id = Guid.NewGuid(), RobotId = newRobot.Id, RobotName = newRobot.Name });
+	    using (IDbConnection robotShard = dbFactory.OpenDbConnection("robots-shard" + newRobot.Id%NoOfShards)) //Shard
+	    {
+	        robotShard.Insert(newRobot);
+	    }
+	}
+}
+```
 
 Using the [SQLite Manager](https://addons.mozilla.org/en-US/firefox/addon/sqlite-manager/?src=search) Firefox extension
 we can peek at one of the created shards to see 100 Robots in each shard. This is the dump of `robots-shard0.sqlite`:
@@ -161,8 +167,10 @@ To give you a flavour here are some examples with their partial SQL output (done
 
 ### Querying with SELECT
 
-    int agesAgo = DateTime.Today.AddYears(-20).Year;
-    db.Select<Author>(q => q.Birthday >= new DateTime(agesAgo, 1, 1) && q.Birthday <= new DateTime(agesAgo, 12, 31));
+```csharp
+int agesAgo = DateTime.Today.AddYears(-20).Year;
+db.Select<Author>(q => q.Birthday >= new DateTime(agesAgo, 1, 1) && q.Birthday <= new DateTime(agesAgo, 12, 31));
+```
 
 **WHERE (("Birthday" >= '1992-01-01 00:00:00.000') AND ("Birthday" <= '1992-12-31 00:00:00.000'))**
 
@@ -209,13 +217,15 @@ For anything more complex (e.g. queries with table joins) you can still easily f
 
 To see the behaviour of the different APIs, all examples uses this simple model
 
-    public class Person
-    {
-        public int Id { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public int? Age { get; set; }
-    }
+```csharp
+public class Person
+{
+	public int Id { get; set; }
+	public string FirstName { get; set; }
+	public string LastName { get; set; }
+	public int? Age { get; set; }
+}
+```
 
 ### UPDATE
 
@@ -543,46 +553,66 @@ Nearly all extension methods hang off the implementation agnostic `IDbCommand`.
 
 `CreateTable<T>` and `DropTable<T>` create and drop tables based on a classes type definition (only public properties used).
 
-For a one-time use of a connection, you can query straight of the `IDbFactory` with:
+For a one-time use of a connection, you can query straight of the `IDbConnectionFactory` with:
 
-    var customers = dbFactory.Exec(dbCmd => db.Where<Customer>(new { Age = 30 }));
+```csharp
+var customers = dbFactory.Run(db => db.Where<Customer>(new { Age = 30 }));
+```
 
 The **Select** methods allow you to construct Sql using C# `string.Format()` syntax.
 If your SQL doesn't start with a **SELECT** statement, it is assumed a WHERE clause is being provided, e.g:
 
-    var tracks = db.Select<Track>("Artist = {0} AND Album = {1}", "Nirvana", "Heart Shaped Box");
+```csharp
+var tracks = db.Select<Track>("Artist = {0} AND Album = {1}", "Nirvana", "Heart Shaped Box");
+```
 
 The same results could also be fetched with:
-    
-    var tracks = db.Select<Track>("select * from track WHERE Artist={0} AND Album={1}", "Nirvana", "Heart Shaped Box");
+
+```csharp
+var tracks = db.Select<Track>("select * from track WHERE Artist={0} AND Album={1}", "Nirvana", "Heart Shaped Box");
+```
 
 **Select** returns multiple records 
 
-    List<Track> tracks = db.Select<Track>()
+```csharp
+List<Track> tracks = db.Select<Track>()
+```
 
 **Single** returns a single record  
 
-    Track track = db.Single<Track>("RefId = {0}", refId)
+```csharp
+Track track = db.Single<Track>("RefId = {0}", refId)
+```
 
 **GetDictionary** returns a Dictionary made from the first to columns
 
-    Dictionary<int,string> trackIdNamesMap = db.GetDictionary<int, string>("select Id, Name from Track")
+```csharp
+Dictionary<int,string> trackIdNamesMap = db.GetDictionary<int, string>("select Id, Name from Track")
+```
 
 **GetLookup** returns an `Dictionary<K, List<V>>` made from the first to columns
 
-        var albumTrackNames = db.GetLookup<int, string>("select AlbumId, Name from Track")
+```csharp
+var albumTrackNames = db.GetLookup<int, string>("select AlbumId, Name from Track")
+```
 
 **GetList** returns a List of first column values
-    
-    List<string> trackNames = db.GetList<string>("select Name from Track")
+
+```csharp
+List<string> trackNames = db.GetList<string>("select Name from Track")
+```
 
 **GetHashSet** returns a HashSet of distinct first column values
-    
-    List<string> uniqueTrackNames = db.GetHashSet<string>("select Name from Track")
+
+```csharp    
+List<string> uniqueTrackNames = db.GetHashSet<string>("select Name from Track")
+```
 
 **GetScalar** returns a single scalar value
 
-    var trackCount = db.GetScalar<int>("select count(*) from Track")
+```csharp
+var trackCount = db.GetScalar<int>("select count(*) from Track")
+```
 
 All **Insert**, **Update**, and **Delete** methods take multiple params, while `InsertAll`, `UpdateAll` and `DeleteAll` take IEnumerables.
 **GetLastInsertId** returns the last inserted records auto incremented primary key.
@@ -595,16 +625,22 @@ Methods containing the word **Each** return an IEnumerable<T> and are lazily loa
 Selection methods containing the word **Query** or **Where** use parameterized SQL (other selection methods do not).
 Anonymous types passed into **Where** are treated like an **AND** filter.
 
-    var track3 = db.Where<Track>(new { AlbumName = "Throwing Copper", TrackNo = 3 })
+```csharp
+var track3 = db.Where<Track>(new { AlbumName = "Throwing Copper", TrackNo = 3 })
+```
 
 **Query** statements take in parameterized SQL using properties from the supplied anonymous type (if any)
 
-    var track3 = db.Query<Track>("select * from Track Where AlbumName = @album and TrackNo = @trackNo", 
-        new { album = "Throwing Copper", trackNo = 3 })
+```csharp
+var track3 = db.Query<Track>("select * from Track Where AlbumName = @album and TrackNo = @trackNo", 
+	new { album = "Throwing Copper", trackNo = 3 })
+```
 
 GetById(s), QueryById(s), etc provide strong-typed convenience methods to fetch by a Table's **Id** primary key field.
 
-    var track = db.QueryById<Track>(1);
+```csharp
+var track = db.QueryById<Track>(1);
+```
     
 
 # Limitations 
@@ -621,96 +657,101 @@ You can still `SELECT` from these tables, you will just be unable to make use of
 A potential workaround to support tables with multiple primary keys is to create an auto generated `Id` property that 
 returns a unique value based on all the primary key fields, e.g:
 
-    public class OrderDetail
-    {
-        public string Id { get { return this.OrderId + "/" + this.ProductId; } }
-        
-        public int OrderId { get; set; }
-        public int ProductId { get; set; }
-        public decimal UnitPrice { get; set; }
-        public short Quantity { get; set; }
-        public double Discount { get; set; }
-    }
-
+```csharp
+public class OrderDetail
+{
+	public string Id { get { return this.OrderId + "/" + this.ProductId; } }
+	
+	public int OrderId { get; set; }
+	public int ProductId { get; set; }
+	public decimal UnitPrice { get; set; }
+	public short Quantity { get; set; }
+	public double Discount { get; set; }
+}
+```
 
 # More Examples 
 
 In its simplest useage, OrmLite can persist any POCO type without any attributes required:
 
-	public class SimpleExample
-	{
-		public int Id { get; set; }
-		public string Name { get; set; }
-	}
+```csharp
+public class SimpleExample
+{
+	public int Id { get; set; }
+	public string Name { get; set; }
+}
 
-	//Set once before use (i.e. in a static constructor).
-	OrmLiteConfig.DialectProvider = new SqliteOrmLiteDialectProvider();
+//Set once before use (i.e. in a static constructor).
+OrmLiteConfig.DialectProvider = new SqliteOrmLiteDialectProvider();
 
-	using (IDbConnection db = "/path/to/db.sqlite".OpenDbConnection())
-	{
-		db.CreateTable<SimpleExample>(true);
-		db.Insert(new SimpleExample { Id=1, Name="Hello, World!"});
-		var rows = db.Select<SimpleExample>();
+using (IDbConnection db = "/path/to/db.sqlite".OpenDbConnection())
+{
+	db.CreateTable<SimpleExample>(true);
+	db.Insert(new SimpleExample { Id=1, Name="Hello, World!"});
+	var rows = db.Select<SimpleExample>();
 
-		Assert.That(rows, Has.Count(1));
-		Assert.That(rows[0].Id, Is.EqualTo(1));
-	}
+	Assert.That(rows, Has.Count(1));
+	Assert.That(rows[0].Id, Is.EqualTo(1));
+}
+```
 
 To get a better idea of the features of OrmLite lets walk through a complete example using sample tables from the Northwind database. 
 _ (Full source code for this example is [available here](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLite.Tests/ShippersExample.cs).) _
 
 So with no other configuration using only the classes below:
 
-	[Alias("Shippers")]
-	public class Shipper
-		: IHasId<int>
-	{
-		[AutoIncrement]
-		[Alias("ShipperID")]
-		public int Id { get; set; }
+```csharp
+[Alias("Shippers")]
+public class Shipper
+	: IHasId<int>
+{
+	[AutoIncrement]
+	[Alias("ShipperID")]
+	public int Id { get; set; }
 
-		[Required]
-		[Index(Unique = true)]
-		[StringLength(40)]
-		public string CompanyName { get; set; }
+	[Required]
+	[Index(Unique = true)]
+	[StringLength(40)]
+	public string CompanyName { get; set; }
 
-		[StringLength(24)]
-		public string Phone { get; set; }
+	[StringLength(24)]
+	public string Phone { get; set; }
 
-		[References(typeof(ShipperType))]
-		public int ShipperTypeId { get; set; }
-	}
+	[References(typeof(ShipperType))]
+	public int ShipperTypeId { get; set; }
+}
 
-	[Alias("ShipperTypes")]
-	public class ShipperType
-		: IHasId<int>
-	{
-		[AutoIncrement]
-		[Alias("ShipperTypeID")]
-		public int Id { get; set; }
+[Alias("ShipperTypes")]
+public class ShipperType
+	: IHasId<int>
+{
+	[AutoIncrement]
+	[Alias("ShipperTypeID")]
+	public int Id { get; set; }
 
-		[Required]
-		[Index(Unique = true)]
-		[StringLength(40)]
-		public string Name { get; set; }
-	}
+	[Required]
+	[Index(Unique = true)]
+	[StringLength(40)]
+	public string Name { get; set; }
+}
 
-	public class SubsetOfShipper
-	{
-		public int ShipperId { get; set; }
-		public string CompanyName { get; set; }
-	}
+public class SubsetOfShipper
+{
+	public int ShipperId { get; set; }
+	public string CompanyName { get; set; }
+}
 
-	public class ShipperTypeCount
-	{
-		public int ShipperTypeId { get; set; }
-		public int Total { get; set; }
-	}
-
+public class ShipperTypeCount
+{
+	public int ShipperTypeId { get; set; }
+	public int Total { get; set; }
+}
+```
 
 ### Creating tables 
 Creating tables is a simple 1-liner:
 
+```csharp
 	using (IDbConnection db = ":memory:".OpenDbConnection())
 	{
 		const bool overwrite = false;
@@ -735,11 +776,12 @@ Creating tables is a simple 1-liner:
 	);
 	DEBUG: CREATE UNIQUE INDEX uidx_shippertypes_name ON "ShipperTypes" ("Name" ASC);
 	*/
-
+```
 
 ### Transaction Support
 As we have direct access to IDbCommand and friends - playing with transactions is easy:
 
+```csharp
 	int trainsTypeId, planesTypeId;
 	using (IDbTransaction dbTrans = db.OpenTransaction())
 	{
@@ -759,11 +801,12 @@ As we have direct access to IDbCommand and friends - playing with transactions i
 		dbTrans.Rollback();
 	}
 	Assert.That(db.Select<ShipperType>(), Has.Count(2));
-
+```
 
 ### CRUD Operations 
 No ORM is complete without the standard crud operations:
 
+```csharp
 	//Performing standard Insert's and Selects
 	db.Insert(new Shipper { CompanyName = "Trains R Us", Phone = "555-TRAINS", ShipperTypeId = trainsTypeId });
 	db.Insert(new Shipper { CompanyName = "Planes R Us", Phone = "555-PLANES", ShipperTypeId = planesTypeId });
@@ -785,11 +828,12 @@ No ORM is complete without the standard crud operations:
 
 	//And bring it back again
 	db.Insert(trainsAreUs);
-
+```
 
 ### Performing custom queries 
 And with access to raw sql when you need it - the database is your oyster :)
 
+```csharp
 	//Select only a subset from the table
 	var partialColumns = db.Select<SubsetOfShipper>(typeof (Shipper), "ShipperTypeId = {0}", planesTypeId);
 	Assert.That(partialColumns, Has.Count(2));
@@ -811,7 +855,7 @@ And with access to raw sql when you need it - the database is your oyster :)
 
 	Assert.That(db.Select<Shipper>(), Has.Count(0));
 	Assert.That(db.Select<ShipperType>(), Has.Count(0));
-	
+```
 
 ## Other notable Micro ORMs for .NET
 Many performance problems can be mitigated and a lot of use-cases can be simplified without the use of a heavyweight ORM, and their config, mappings and infrastructure. 
