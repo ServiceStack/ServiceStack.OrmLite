@@ -101,55 +101,57 @@ are kept in the master database, whilst context-specific related data can be kep
 This feature makes it trivial to maintain multiple separate db shards with a master database in a different RDBMS. 
 
 Here's an (entire source code) sample of the code needed to define, and populate a Master/Shard setup.
-Sqlite can creates DB shards on the fly so only a blank SqlServer master database needed to be created out-of-band:
+Sqlite can create DB shards on the fly so only the blank SqlServer master database needed to be created out-of-band:
 
 ### Sharding 1000 Robots into 10 Sqlite DB shards - referencing each in a Master SqlServer RDBMS
 
 ```csharp
 public class MasterRecord {
-	public Guid Id { get; set; }
-	public int RobotId { get; set; }
-	public string RobotName { get; set; }
-	public DateTime? LastActivated { get; set; }
+    public Guid Id { get; set; }
+    public int RobotId { get; set; }
+    public string RobotName { get; set; }
+    public DateTime? LastActivated { get; set; }
 }
 
 public class Robot {
-	public int Id { get; set; }
-	public string Name { get; set; }
-	public bool IsActivated { get; set; }
-	public long CellCount { get; set; }
-	public DateTime CreatedDate { get; set; }
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public bool IsActivated { get; set; }
+    public long CellCount { get; set; }
+    public DateTime CreatedDate { get; set; }
 }
 
 const int NoOfShards = 10;
 const int NoOfRobots = 1000;
 
 var dbFactory = new OrmLiteConnectionFactory(
-	Data Source=host;Initial Catalog=RobotsMaster;Integrated Security=SSPI",SqlServerOrmLiteDialectProvider.Instance);
+    Data Source=host;Initial Catalog=RobotsMaster;Integrated Security=SSPI",   //Connection String
+    SqlServerOrmLiteDialectProvider.Instance);                                 //For SqlServer
 
 dbFactory.Run(db => db.CreateTable<MasterRecord>(overwrite:false));
 
 NoOfShards.Times(i => {
-	var namedShard = "robots-shard" + i;
-	dbFactory.RegisterConnection(namedShard, 
-	    "~/App_Data/{0}.sqlite".Fmt(shardId).MapAbsolutePath(), SqliteOrmLiteDialectProvider.Instance);
+    var namedShard = "robots-shard" + i;
+    dbFactory.RegisterConnection(namedShard, 
+        "~/App_Data/{0}.sqlite".Fmt(shardId).MapAbsolutePath(),                //Connection String
+        SqliteOrmLiteDialectProvider.Instance);                                //For SQLite
 	
 	dbFactory.OpenDbConnection(namedShard).Run(db => db.CreateTable<Robot>(overwrite:false));
 });
 
 var newRobots = NoOfRobots.Times(i => //Create 1000 Robots
-new Robot { Id=i, Name="R2D"+i, CreatedDate=DateTime.UtcNow, CellCount=DateTime.Now.ToUnixTimeMs()%100000 });
+    new Robot { Id=i, Name="R2D"+i, CreatedDate=DateTime.UtcNow, CellCount=DateTime.Now.ToUnixTimeMs()%100000 });
 
 foreach (var newRobot in newRobots) 
 {
-	using (IDbConnection db = dbFactory.OpenDbConnection()) //Open Connection to Master DB 
-	{
-	    db.Insert(new MasterRecord { Id = Guid.NewGuid(), RobotId = newRobot.Id, RobotName = newRobot.Name });
-	    using (IDbConnection robotShard = dbFactory.OpenDbConnection("robots-shard" + newRobot.Id%NoOfShards)) //Shard
-	    {
-	        robotShard.Insert(newRobot);
-	    }
-	}
+    using (IDbConnection db = dbFactory.OpenDbConnection()) //Open Connection to Master DB 
+    {
+        db.Insert(new MasterRecord { Id = Guid.NewGuid(), RobotId = newRobot.Id, RobotName = newRobot.Name });
+        using (IDbConnection robotShard = dbFactory.OpenDbConnection("robots-shard" + newRobot.Id%NoOfShards)) //Shard
+        {
+            robotShard.Insert(newRobot);
+        }
+    }
 }
 ```
 
