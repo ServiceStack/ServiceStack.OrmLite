@@ -549,12 +549,28 @@ namespace ServiceStack.OrmLite
 			return columValues;
 		}
 
+        /// <summary>
+        /// Alias for GetFirstColumn. Returns the first selected column in a List
+        /// </summary>
+	    internal static List<T> GetList<T>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
+        {
+            return dbCmd.GetFirstColumn<T>(sql, sqlParams);
+	    }
+
         [Obsolete(UseDbConnectionExtensions)]
         public static HashSet<T> GetFirstColumnDistinct<T>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
-		{
-			using (var dbReader = dbCmd.ExecReader(sql.SqlFormat(sqlParams)))
-				return GetFirstColumnDistinct<T>(dbReader);
-		}
+        {
+            using (var dbReader = dbCmd.ExecReader(sql.SqlFormat(sqlParams)))
+                return GetFirstColumnDistinct<T>(dbReader);
+        }
+
+        /// <summary>
+        /// Alias for GetFirstColumnDistinct. Returns the first selected column in a HashSet
+        /// </summary>
+        public static HashSet<T> GetHashSet<T>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
+        {
+            return dbCmd.GetFirstColumnDistinct<T>(sql, sqlParams);
+        }
 
         [Obsolete(UseDbConnectionExtensions)]
         public static HashSet<T> GetFirstColumnDistinct<T>(this IDataReader reader)

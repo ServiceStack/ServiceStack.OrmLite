@@ -185,10 +185,20 @@ namespace ServiceStack.OrmLite
         {
             return dbConn.Exec(dbCmd => dbCmd.GetFirstColumn<T>(sql, sqlParams));
         }
-        
+
+        public static List<T> GetList<T>(this IDbConnection dbConn, string sql, params object[] sqlParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.GetList<T>(sql, sqlParams));
+        }
+
         public static HashSet<T> GetFirstColumnDistinct<T>(this IDbConnection dbConn, string sql, params object[] sqlParams)
         {
             return dbConn.Exec(dbCmd => dbCmd.GetFirstColumnDistinct<T>(sql, sqlParams));
+        }
+
+        public static HashSet<T> GetHashSet<T>(this IDbConnection dbConn, string sql, params object[] sqlParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.GetHashSet<T>(sql, sqlParams));
         }
 
         public static Dictionary<K, List<V>> GetLookup<K, V>(this IDbConnection dbConn, string sql, params object[] sqlParams)

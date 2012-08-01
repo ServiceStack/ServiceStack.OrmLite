@@ -554,7 +554,7 @@ If your SQL doesn't start with a **SELECT** statement, it is assumed a WHERE cla
 
 The same results could also be fetched with:
     
-    var tracks = db.Select<Track>("select * from track WHERE Artist = {0} AND Album = {1}", "Nirvana", "Heart Shaped Box");
+    var tracks = db.Select<Track>("select * from track WHERE Artist={0} AND Album={1}", "Nirvana", "Heart Shaped Box");
 
 **Select** returns multiple records 
 
@@ -572,9 +572,13 @@ The same results could also be fetched with:
 
         var albumTrackNames = db.GetLookup<int, string>("select AlbumId, Name from Track")
 
-**GetFirstColumn** returns a List of first column values
+**GetList** returns a List of first column values
     
-    List<string> trackNames = db.GetFirstColumn<string>("select Name from Track")
+    List<string> trackNames = db.GetList<string>("select Name from Track")
+
+**GetHashSet** returns a HashSet of distinct first column values
+    
+    List<string> uniqueTrackNames = db.GetHashSet<string>("select Name from Track")
 
 **GetScalar** returns a single scalar value
 
