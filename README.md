@@ -586,36 +586,31 @@ List<Track> tracks = db.Select<Track>()
 Track track = db.Single<Track>("RefId = {0}", refId)
 ```
 
-**Dictionary** returns a Dictionary made from the first to columns
+**Dictionary** returns a Dictionary made from the first to columns. Alias: `GetDictionary`
 
 ```csharp
 Dictionary<int, string> trackIdNamesMap = db.Dictionary<int, string>("select Id, Name from Track")
 ```
-Alias: `GetDictionary`
 
-**Lookup** returns an `Dictionary<K, List<V>>` made from the first to columns
+**Lookup** returns an `Dictionary<K, List<V>>` made from the first to columns. Alias: `GetLookup`
 
 ```csharp
 Dictionary<int, List<string>> albumTrackNames = db.Lookup<int, string>("select AlbumId, Name from Track")
 ```
-Alias: `GetLookup`
 
-**List** returns a List of first column values
+**List** returns a List of first column values. Alias: `GetList`
 
 ```csharp
 List<string> trackNames = db.List<string>("select Name from Track")
 ```
-Alias: `GetList`
 
-**HashSet** returns a HashSet of distinct first column values
-Alias: `GetHashSet`
+**HashSet** returns a HashSet of distinct first column values. Alias: `GetHashSet`
 
 ```csharp    
 HashSet<string> uniqueTrackNames = db.HashSet<string>("select Name from Track")
 ```
 
-**Scalar** returns a single scalar value. 
-Alias: `GetScalar`
+**Scalar** returns a single scalar value. Alias: `GetScalar`
 
 ```csharp
 var trackCount = db.Scalar<int>("select count(*) from Track")
