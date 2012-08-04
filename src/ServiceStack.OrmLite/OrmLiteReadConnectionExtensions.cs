@@ -71,6 +71,15 @@ namespace ServiceStack.OrmLite
         {
             return dbConn.Exec(dbCmd => dbCmd.GetById<T>(idValue));
         }
+
+        /// <summary>
+        /// Alias for GetById
+        /// </summary>
+        public static T Id<T>(this IDbConnection dbConn, object idValue)
+            where T : new()
+        {
+            return dbConn.Exec(dbCmd => dbCmd.GetById<T>(idValue));
+        }
         
         public static T QueryById<T>(this IDbConnection dbConn, object value) where T : new()
         {
@@ -165,13 +174,39 @@ namespace ServiceStack.OrmLite
             return dbConn.Exec(dbCmd => dbCmd.GetByIdOrDefault<T>(idValue));
         }
 
+        /// <summary>
+        /// Alias for GetByIds
+        /// </summary>
+        public static T IdOrDefault<T>(this IDbConnection dbConn, object idValue)
+            where T : new()
+        {
+            return dbConn.Exec(dbCmd => dbCmd.GetByIdOrDefault<T>(idValue));
+        }
+
         public static List<T> GetByIds<T>(this IDbConnection dbConn, IEnumerable idValues)
             where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.GetByIds<T>(idValues));
         }
 
+        /// <summary>
+        /// Alias for GetByIds
+        /// </summary>
+        public static List<T> Ids<T>(this IDbConnection dbConn, IEnumerable idValues)
+            where T : new()
+        {
+            return dbConn.Exec(dbCmd => dbCmd.GetByIds<T>(idValues));
+        }
+
         public static T GetScalar<T>(this IDbConnection dbConn, string sql, params object[] sqlParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.GetScalar<T>(sql, sqlParams));
+        }
+
+        /// <summary>
+        /// Alias for Scalar
+        /// </summary>
+        public static T Scalar<T>(this IDbConnection dbConn, string sql, params object[] sqlParams)
         {
             return dbConn.Exec(dbCmd => dbCmd.GetScalar<T>(sql, sqlParams));
         }
@@ -191,6 +226,14 @@ namespace ServiceStack.OrmLite
             return dbConn.Exec(dbCmd => dbCmd.GetList<T>(sql, sqlParams));
         }
 
+        /// <summary>
+        /// Alias for GetList
+        /// </summary>
+        public static List<T> List<T>(this IDbConnection dbConn, string sql, params object[] sqlParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.GetList<T>(sql, sqlParams));
+        }
+
         public static HashSet<T> GetFirstColumnDistinct<T>(this IDbConnection dbConn, string sql, params object[] sqlParams)
         {
             return dbConn.Exec(dbCmd => dbCmd.GetFirstColumnDistinct<T>(sql, sqlParams));
@@ -201,12 +244,36 @@ namespace ServiceStack.OrmLite
             return dbConn.Exec(dbCmd => dbCmd.GetHashSet<T>(sql, sqlParams));
         }
 
+        /// <summary>
+        /// Alias for GetHashSet
+        /// </summary>
+        public static HashSet<T> HashSet<T>(this IDbConnection dbConn, string sql, params object[] sqlParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.GetHashSet<T>(sql, sqlParams));
+        }
+
         public static Dictionary<K, List<V>> GetLookup<K, V>(this IDbConnection dbConn, string sql, params object[] sqlParams)
         {
-            return dbConn.Exec(dbCmd => dbCmd.GetLookup<K,V>(sql, sqlParams));
+            return dbConn.Exec(dbCmd => dbCmd.GetLookup<K, V>(sql, sqlParams));
         }
-        
+
+        /// <summary>
+        /// Alias for GetLookup
+        /// </summary>
+        public static Dictionary<K, List<V>> Lookup<K, V>(this IDbConnection dbConn, string sql, params object[] sqlParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.GetLookup<K, V>(sql, sqlParams));
+        }
+
         public static Dictionary<K, V> GetDictionary<K, V>(this IDbConnection dbConn, string sql, params object[] sqlParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.GetDictionary<K, V>(sql, sqlParams));
+        }
+
+        /// <summary>
+        /// Alias for GetDictionary
+        /// </summary>
+        public static Dictionary<K, V> Dictionary<K, V>(this IDbConnection dbConn, string sql, params object[] sqlParams)
         {
             return dbConn.Exec(dbCmd => dbCmd.GetDictionary<K, V>(sql, sqlParams));
         }

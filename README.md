@@ -586,34 +586,39 @@ List<Track> tracks = db.Select<Track>()
 Track track = db.Single<Track>("RefId = {0}", refId)
 ```
 
-**GetDictionary** returns a Dictionary made from the first to columns
+**Dictionary** returns a Dictionary made from the first to columns
 
 ```csharp
-Dictionary<int,string> trackIdNamesMap = db.GetDictionary<int, string>("select Id, Name from Track")
+Dictionary<int, string> trackIdNamesMap = db.Dictionary<int, string>("select Id, Name from Track")
 ```
+Alias: `GetDictionary`
 
-**GetLookup** returns an `Dictionary<K, List<V>>` made from the first to columns
+**Lookup** returns an `Dictionary<K, List<V>>` made from the first to columns
 
 ```csharp
-Dictionary<int, List<string>> albumTrackNames = db.GetLookup<int, string>("select AlbumId, Name from Track")
+Dictionary<int, List<string>> albumTrackNames = db.Lookup<int, string>("select AlbumId, Name from Track")
 ```
+Alias: `GetLookup`
 
-**GetList** returns a List of first column values
+**List** returns a List of first column values
 
 ```csharp
-List<string> trackNames = db.GetList<string>("select Name from Track")
+List<string> trackNames = db.List<string>("select Name from Track")
 ```
+Alias: `GetList`
 
-**GetHashSet** returns a HashSet of distinct first column values
+**HashSet** returns a HashSet of distinct first column values
+Alias: `GetHashSet`
 
 ```csharp    
-HashSet<string> uniqueTrackNames = db.GetHashSet<string>("select Name from Track")
+HashSet<string> uniqueTrackNames = db.HashSet<string>("select Name from Track")
 ```
 
-**GetScalar** returns a single scalar value
+**Scalar** returns a single scalar value. 
+Alias: `GetScalar`
 
 ```csharp
-var trackCount = db.GetScalar<int>("select count(*) from Track")
+var trackCount = db.Scalar<int>("select count(*) from Track")
 ```
 
 All **Insert**, **Update**, and **Delete** methods take multiple params, while `InsertAll`, `UpdateAll` and `DeleteAll` take IEnumerables.
@@ -642,8 +647,10 @@ GetById(s), QueryById(s), etc provide strong-typed convenience methods to fetch 
 
 ```csharp
 var track = db.QueryById<Track>(1);
+var track = db.Id<Track>(1);                    //Alias: GetById
+var tracks = db.Ids<Track>(new[]{ 1,2,3 });     //Alias: GetByIds
 ```
-    
+
 
 # Limitations 
 
