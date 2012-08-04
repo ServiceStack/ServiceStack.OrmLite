@@ -140,14 +140,14 @@ NoOfShards.Times(i => {
 });
 
 var newRobots = NoOfRobots.Times(i => //Create 1000 Robots
-    new Robot { Id=i, Name="R2D"+i, CreatedDate=DateTime.UtcNow, CellCount=DateTime.Now.ToUnixTimeMs()%100000 });
+    new Robot { Id=i, Name="R2D"+i, CreatedDate=DateTime.UtcNow, CellCount=DateTime.Now.ToUnixTimeMs() % 100000 });
 
 foreach (var newRobot in newRobots) 
 {
     using (IDbConnection db = dbFactory.OpenDbConnection()) //Open Connection to Master DB 
     {
         db.Insert(new MasterRecord { Id = Guid.NewGuid(), RobotId = newRobot.Id, RobotName = newRobot.Name });
-        using (IDbConnection robotShard = dbFactory.OpenDbConnection("robots-shard" + newRobot.Id%NoOfShards)) //Shard
+        using (IDbConnection robotShard = dbFactory.OpenDbConnection("robots-shard"+newRobot.Id % NoOfShards)) //Shard
         {
             robotShard.Insert(newRobot);
         }
@@ -595,7 +595,7 @@ Dictionary<int,string> trackIdNamesMap = db.GetDictionary<int, string>("select I
 **GetLookup** returns an `Dictionary<K, List<V>>` made from the first to columns
 
 ```csharp
-var albumTrackNames = db.GetLookup<int, string>("select AlbumId, Name from Track")
+Dictionary<int, List<string>> albumTrackNames = db.GetLookup<int, string>("select AlbumId, Name from Track")
 ```
 
 **GetList** returns a List of first column values
@@ -607,7 +607,7 @@ List<string> trackNames = db.GetList<string>("select Name from Track")
 **GetHashSet** returns a HashSet of distinct first column values
 
 ```csharp    
-List<string> uniqueTrackNames = db.GetHashSet<string>("select Name from Track")
+HashSet<string> uniqueTrackNames = db.GetHashSet<string>("select Name from Track")
 ```
 
 **GetScalar** returns a single scalar value
