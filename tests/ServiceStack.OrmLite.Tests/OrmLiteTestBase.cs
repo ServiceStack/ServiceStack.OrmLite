@@ -5,7 +5,6 @@ using ServiceStack.Common.Utils;
 using ServiceStack.Logging;
 using ServiceStack.Logging.Support.Logging;
 using ServiceStack.OrmLite.Sqlite;
-using ServiceStack.OrmLite.SqlServer;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -27,8 +26,7 @@ namespace ServiceStack.OrmLite.Tests
 
 	    public static OrmLiteConnectionFactory CreateSqlServerDbFactory()
 	    {
-	        var dbFactory = new OrmLiteConnectionFactory(Config.SqlServerDb,
-	            SqlServerOrmLiteDialectProvider.Instance);
+	        var dbFactory = new OrmLiteConnectionFactory(Config.SqlServerDb, SqlServerDialect.Provider);
 	        return dbFactory;
 	    }
 
@@ -52,7 +50,7 @@ namespace ServiceStack.OrmLite.Tests
 		{
 			LogManager.LogFactory = new ConsoleLogFactory();
 
-			OrmLiteConfig.DialectProvider = SqliteOrmLiteDialectProvider.Instance;
+			OrmLiteConfig.DialectProvider = SqliteDialect.Provider;
 			ConnectionString = GetFileConnectionString();
 			//ConnectionString = ":memory:";
 

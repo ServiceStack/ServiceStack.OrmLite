@@ -46,6 +46,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MySqlDialect.cs" />
     <Compile Include="MySqlDialectProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MySqlExpressionVisitor.cs" />

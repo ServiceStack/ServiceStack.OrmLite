@@ -1,20 +1,13 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Collections.ObjectModel;
 using System.Linq.Expressions;
-using ServiceStack.OrmLite;
 
 namespace ServiceStack.OrmLite.SqlServer
 {
 	public class SqlServerExpressionVisitor<T> : SqlExpressionVisitor<T>
 	{
-		public SqlServerExpressionVisitor() : base()
-		{
-		}
-
-        public override string ToSelectStatement()
+	    public override string ToSelectStatement()
         {
             if (!Skip.HasValue && !Rows.HasValue)
                 return base.ToSelectStatement();

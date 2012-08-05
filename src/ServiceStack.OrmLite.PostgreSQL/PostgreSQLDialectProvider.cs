@@ -6,7 +6,7 @@ using Npgsql;
 
 namespace ServiceStack.OrmLite.PostgreSQL
 {
-	public class PostgreSQLDialectProvider : OrmLiteDialectProviderBase<PostgreSQLDialectProvider>
+    public class PostgreSQLDialectProvider : OrmLiteDialectProviderBase<PostgreSQLDialectProvider>
 	{
 		public static PostgreSQLDialectProvider Instance = new PostgreSQLDialectProvider();
 

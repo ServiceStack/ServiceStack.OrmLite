@@ -1,17 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.IO;
 using System.Reflection;
 using ServiceStack.Common.Utils;
 using System.Text;
 using FirebirdSql.Data.FirebirdClient;
-using ServiceStack.OrmLite;
 using ServiceStack.Common.Extensions;
 
 namespace ServiceStack.OrmLite.Firebird
 {
-	public class FirebirdOrmLiteDialectProvider : OrmLiteDialectProviderBase<FirebirdOrmLiteDialectProvider>
+    public class FirebirdOrmLiteDialectProvider : OrmLiteDialectProviderBase<FirebirdOrmLiteDialectProvider>
 	{
 		private readonly List<string> RESERVED = new List<string>(new[] {
 			"USER","ORDER","PASSWORD", "ACTIVE","LEFT","DOUBLE", "FLOAT", "DECIMAL","STRING", "DATE","DATETIME", "TYPE","TIMESTAMP"
