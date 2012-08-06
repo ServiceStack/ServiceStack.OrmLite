@@ -126,7 +126,7 @@ const int NoOfRobots = 1000;
 
 var dbFactory = new OrmLiteConnectionFactory(
     "Data Source=host;Initial Catalog=RobotsMaster;Integrated Security=SSPI",  //Connection String
-    SqlServerOrmLiteDialectProvider.Instance);                                 //For SqlServer
+    SqlServerDialect.Provider); 
 
 dbFactory.Run(db => db.CreateTable<MasterRecord>(overwrite:false));
 
@@ -134,7 +134,7 @@ NoOfShards.Times(i => {
     var namedShard = "robots-shard" + i;
     dbFactory.RegisterConnection(namedShard, 
         "~/App_Data/{0}.sqlite".Fmt(shardId).MapAbsolutePath(),                //Connection String
-        SqliteOrmLiteDialectProvider.Instance);                                //For SQLite
+        SqliteDialect.Provider);
 	
 	dbFactory.OpenDbConnection(namedShard).Run(db => db.CreateTable<Robot>(overwrite:false));
 });
@@ -442,11 +442,11 @@ Below is a complete stand-alone example. No other config or classes is required 
     //Setup SQL Server Connection Factory
     var dbFactory = new OrmLiteConnectionFactory(
     	@"Data Source=.\SQLEXPRESS;AttachDbFilename=|DataDirectory|\App_Data\Database1.mdf;Integrated Security=True;User Instance=True",
-    	SqlServerOrmLiteDialectProvider.Instance);
+    	SqlServerDialect.Provider);
 
     //Use in-memory Sqlite DB instead
     //var dbFactory = new OrmLiteConnectionFactory(
-    //    ":memory:", false, SqliteOrmLiteDialectProvider.Instance);
+    //    ":memory:", false, SqliteDialect.Provider);
 
     //Non-intrusive: All extension methods hang off System.Data.* interfaces
     IDbConnection db = dbFactory.OpenDbConnection();
@@ -686,7 +686,7 @@ public class SimpleExample
 }
 
 //Set once before use (i.e. in a static constructor).
-OrmLiteConfig.DialectProvider = new SqliteOrmLiteDialectProvider();
+OrmLiteConfig.DialectProvider = SqliteDialect.Provider;
 
 using (IDbConnection db = "/path/to/db.sqlite".OpenDbConnection())
 {

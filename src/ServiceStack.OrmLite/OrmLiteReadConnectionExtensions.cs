@@ -41,8 +41,17 @@ namespace ServiceStack.OrmLite
         {
             return dbConn.ExecLazy(dbCmd => dbCmd.Each<T>(filter, filterParams));
         }
-
+        
         public static T First<T>(this IDbConnection dbConn, string filter, params object[] filterParams)
+            where T : new()
+        {
+            return dbConn.Exec(dbCmd => dbCmd.First<T>(filter, filterParams));
+        }
+
+        /// <summary>
+        /// Alias for First
+        /// </summary>
+        public static T Single<T>(this IDbConnection dbConn, string filter, params object[] filterParams)
             where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.First<T>(filter, filterParams));
@@ -54,13 +63,40 @@ namespace ServiceStack.OrmLite
             return dbConn.Exec(dbCmd => dbCmd.First<T>(filter));
         }
 
+        /// <summary>
+        /// Alias for First
+        /// </summary>
+        public static T Single<T>(this IDbConnection dbConn, string filter)
+            where T : new()
+        {
+            return dbConn.Exec(dbCmd => dbCmd.First<T>(filter));
+        }
+
         public static T FirstOrDefault<T>(this IDbConnection dbConn, string filter, params object[] filterParams)
             where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.FirstOrDefault<T>(filter, filterParams));
         }
 
+        /// <summary>
+        /// Alias for FirstOrDefault
+        /// </summary>
+        public static T SingleOrDefault<T>(this IDbConnection dbConn, string filter, params object[] filterParams)
+            where T : new()
+        {
+            return dbConn.Exec(dbCmd => dbCmd.FirstOrDefault<T>(filter, filterParams));
+        }
+
         public static T FirstOrDefault<T>(this IDbConnection dbConn, string filter)
+            where T : new()
+        {
+            return dbConn.Exec(dbCmd => dbCmd.FirstOrDefault<T>(filter));
+        }
+
+        /// <summary>
+        /// Alias for FirstOrDefault
+        /// </summary>
+        public static T SingleOrDefault<T>(this IDbConnection dbConn, string filter)
             where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.FirstOrDefault<T>(filter));

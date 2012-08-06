@@ -3,10 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using NUnit.Framework;
-using ServiceStack.Common.Utils;
 using ServiceStack.DataAnnotations;
-using ServiceStack.OrmLite.SqlServer;
-using ServiceStack.OrmLite.Sqlite;
 
 namespace ServiceStack.OrmLite.Tests.UseCase
 {
@@ -130,11 +127,11 @@ namespace ServiceStack.OrmLite.Tests.UseCase
 
             //var dbFactory = new OrmLiteConnectionFactory(
             //    @"Data Source=.\SQLEXPRESS;AttachDbFilename=|DataDirectory|\App_Data\Database1.mdf;Integrated Security=True;User Instance=True",
-            //    SqlServerOrmLiteDialectProvider.Instance);
+            //    SqlServerDialect.Provider);
 
             //Use in-memory Sqlite DB instead
             //var dbFactory = new OrmLiteConnectionFactory(
-            //    ":memory:", false, SqliteOrmLiteDialectProvider.Instance);
+            //    ":memory:", false, SqliteDialect.Provider);
 
             //Non-intrusive: All extension methods hang off System.Data.* interfaces
             using (IDbConnection db = dbFactory.OpenDbConnection())

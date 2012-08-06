@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using NUnit.Framework;
-using ServiceStack.OrmLite.Sqlite;
 
 namespace ServiceStack.OrmLite.Tests.UseCase
 {
@@ -13,7 +12,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
 		public void TestFixtureSetUp()
 		{
 			//Inject your database provider here
-			OrmLiteConfig.DialectProvider = new SqliteOrmLiteDialectProvider();
+			OrmLiteConfig.DialectProvider = SqliteDialect.Provider;
 		}
 
 		public class User

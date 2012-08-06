@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Data;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.OrmLite.SqlServer;
-using ServiceStack.OrmLite.Sqlite;
 
 namespace ServiceStack.OrmLite.Tests.UseCase
 {
@@ -18,7 +16,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
             [AutoIncrement]
             public int Id { get; set; }
 
-            [DataAnnotations.Index]
+            [Index]
             public string Name { get; set; }
 
             public DateTime CreatedDate { get; set; }
@@ -27,7 +25,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
         [Test]
         public void Can_Create_Tables_With_Schema_In_Sqlite()
         {
-            OrmLiteConfig.DialectProvider = SqliteOrmLiteDialectProvider.Instance;
+            OrmLiteConfig.DialectProvider = SqliteDialect.Provider;
 
             using (IDbConnection db = ":memory:".OpenDbConnection())
             {

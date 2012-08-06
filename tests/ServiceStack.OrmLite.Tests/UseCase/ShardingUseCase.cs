@@ -3,7 +3,6 @@ using System.Data;
 using NUnit.Framework;
 using ServiceStack.Common;
 using ServiceStack.Common.Utils;
-using ServiceStack.OrmLite.Sqlite;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.UseCase
@@ -35,14 +34,19 @@ namespace ServiceStack.OrmLite.Tests.UseCase
             const int NoOfShards = 10;
             const int NoOfRobots = 1000;
 
-            var dbFactory = new OrmLiteConnectionFactory("~/App_Data/robots-master.sqlite".MapAbsolutePath(), false, SqliteOrmLiteDialectProvider.Instance);
-            //var dbFactory = new OrmLiteConnectionFactory("Data Source=localhost;Initial Catalog=RobotsMaster;Integrated Security=SSPI", SqlServerOrmLiteDialectProvider.Instance);
+            var dbFactory = new OrmLiteConnectionFactory(
+                "~/App_Data/robots-master.sqlite".MapAbsolutePath(), 
+                false, SqliteDialect.Provider);
+            
+            //var dbFactory = new OrmLiteConnectionFactory(
+            //    "Data Source=localhost;Initial Catalog=RobotsMaster;Integrated Security=SSPI", 
+            //    SqlServerDialect.Provider);
             
             //Create Master Table in Master DB
             dbFactory.Run(db => db.CreateTable<MasterRecord>(overwrite: false)); 
             NoOfShards.Times(i => {
                 var shardId = "robots-shard" + i;
-                dbFactory.RegisterConnection(shardId, "~/App_Data/{0}.sqlite".Fmt(shardId).MapAbsolutePath(), SqliteOrmLiteDialectProvider.Instance);
+                dbFactory.RegisterConnection(shardId, "~/App_Data/{0}.sqlite".Fmt(shardId).MapAbsolutePath(), SqliteDialect.Provider);
 
                 //Create Robot table in Shard
                 dbFactory.OpenDbConnection(shardId).Run(db => db.CreateTable<Robot>(overwrite: false)); 
