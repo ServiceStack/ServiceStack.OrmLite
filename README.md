@@ -580,13 +580,13 @@ var tracks = db.Select<Track>("select * from track WHERE Artist={0} AND Album={1
 List<Track> tracks = db.Select<Track>()
 ```
 
-**Single** returns a single record  
+**Single** returns a single record. Alias: `First`  
 
 ```csharp
 Track track = db.Single<Track>("RefId = {0}", refId)
 ```
 
-**Dictionary** returns a Dictionary made from the first to columns. Alias: `GetDictionary`
+**Dictionary** returns a Dictionary made from the first two columns. Alias: `GetDictionary`
 
 ```csharp
 Dictionary<int, string> trackIdNamesMap = db.Dictionary<int, string>("select Id, Name from Track")
