@@ -34,6 +34,16 @@ namespace ServiceStack.OrmLite
             dbConn.Exec(dbCmd => dbCmd.CreateTable(overwrite, modelType));
         }
 
+        public static void DropTables(this IDbConnection dbConn, params Type[] tableTypes)
+        {
+            dbConn.Exec(dbCmd => dbCmd.DropTables(tableTypes));
+        }
+
+        public static void DropTable(this IDbConnection dbConn, Type modelType)
+        {
+            dbConn.Exec(dbCmd => dbCmd.DropTable(modelType));
+        }
+
         public static void DropTable<T>(this IDbConnection dbConn)
             where T : new()
         {
