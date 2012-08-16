@@ -138,7 +138,6 @@ namespace ServiceStack.OrmLite.Tests
 			}
 		}
 
-
 		[Test]
 		public void Can_create_ModelWithIdAndName_table_with_specified_DefaultStringLength()
 		{
