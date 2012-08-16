@@ -135,6 +135,21 @@ namespace ServiceStack.OrmLite
             DropTable(dbCmd, ModelDefinition<T>.Definition);
         }
 
+        [Obsolete(UseDbConnectionExtensions)]
+        public static void DropTable(this IDbCommand dbCmd, Type modelType)
+        {
+            DropTable(dbCmd, modelType.GetModelDefinition());
+        }
+
+        [Obsolete(UseDbConnectionExtensions)]
+        public static void DropTables(this IDbCommand dbCmd, params Type[] tableTypes)
+        {
+            foreach (var modelDef in tableTypes.Select(type => type.GetModelDefinition()))
+            {
+                DropTable(dbCmd, modelDef);
+            }
+        }
+
         private static void DropTable(IDbCommand dbCmd, ModelDefinition modelDef)
         {
             try
