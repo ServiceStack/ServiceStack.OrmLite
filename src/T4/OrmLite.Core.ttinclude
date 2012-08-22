@@ -91,7 +91,6 @@ bool GenerateCommon = true;
 bool GeneratePocos = true;
 bool TrackModifiedColumns = false;
 
-
 public class Table
 {
     public List<Column> Columns;
@@ -131,7 +130,10 @@ public class Table
 	{
 		return ((PK != null) && (string.IsNullOrEmpty(PK.Name) != true));
 	}
-
+    public TableIndex GetIndex(string indexName)
+    {
+        return Indices.Single(x=>string.Compare(x.Name, indexName, true)==0);
+    }
 }
 
 public class Column
@@ -144,7 +146,22 @@ public class Column
 	public bool IsAutoIncrement;
 	public bool Ignore;
 	public int Size;
+	public int Precision;	
 	public string DefaultValue;	
+	public string ProperPropertyType
+	{
+		get
+		{
+		  if(IsNullable)
+		  {
+			if(PropertyType.Equals("string") == false)
+			{
+				return PropertyType +"?";
+			}			
+		  }
+		  return PropertyType;
+		}
+	}
 }
 
 public class Tables : List<Table>
@@ -363,6 +380,32 @@ static string zap_password(string connectionString)
 }
 
 
+public string GetColumnDefaultValue(Column col)
+{
+        string sysType=string.Format("\"{0}\"",col.DefaultValue);
+        switch (col.PropertyType.ToLower()) 
+        {
+			case "long":
+			case "int":				
+			case "double":
+			case "decimal":	
+			case "bool":	
+                sysType= col.DefaultValue.ToString().Replace("'","").Replace("\"","");
+                break;							
+            case "guid":
+                sysType=  string.Format("\"{0}\"",col.DefaultValue);
+                 break;
+            case "datetime":
+			{
+				if (col.DefaultValue.ToLower() == "current_time" || col.DefaultValue.ToLower() == "current_date"|| col.DefaultValue.ToLower() == "current_timestamp")
+					sysType=  "SystemMethods.CurrentDateTime";
+				else
+                	sysType=  "\"" +col.DefaultValue+"\"";
+                break;
+			}
+        }
+        return sysType;	
+}
 
 Tables LoadTables()
 {
@@ -396,6 +439,7 @@ Tables LoadTables()
 		WriteLine("");
 		return new Tables();
 	}
+    WriteLine("//     Factory Name:          `{0}`", _factory.GetType().Name);
 
 	try
 	{
@@ -491,6 +535,43 @@ Tables LoadTables()
         
 }
 
+public bool IsTableNameInList(string tableName, Tables tbls)
+{
+	if (tbls == null)
+		return false;
+	foreach(var tbItem in tbls)
+	{
+		if (String.Equals(tbItem.Name,tableName,StringComparison.InvariantCultureIgnoreCase))
+		{
+			return true;
+		}		
+	}	
+	return false;
+}
+
+public Table GetTableFromListByName(string tableName, Tables tbls)
+{
+	if (tbls == null)
+		return null;
+	foreach(var tbItem in tbls)
+	{
+		if (String.Equals(tbItem.Name,tableName,StringComparison.InvariantCultureIgnoreCase))
+		{
+			return tbItem;
+		}		
+	}	
+	return null;
+}
+
+  void SaveOutput(string outputFileName)
+  {
+      string templateDirectory = Path.GetDirectoryName(Host.TemplateFile);
+      string outputFilePath = Path.Combine(templateDirectory, outputFileName);
+      File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString()); 
+
+      this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);
+  }
+
 abstract class SchemaReader
 {
 	public abstract Tables ReadSchema(DbConnection connection, DbProviderFactory factory);
@@ -502,6 +583,40 @@ abstract class SchemaReader
 
 }
 
+static int GetDatatypePrecision(string type)
+{
+	int startPos = type.IndexOf(",");
+	if (startPos < 0)
+		return -1;
+	int endPos = type.IndexOf(")");	
+	if (endPos < 0)
+		return -1;
+	string typePrecisionStr = type.Substring(startPos+1,endPos-startPos-1);	
+	int result = -1;
+	if (int.TryParse(typePrecisionStr,out result))
+		return result;
+	else
+		return -1;
+}
+
+static int GetDatatypeSize(string type)
+{
+	int startPos = type.IndexOf("(");
+	if (startPos < 0)
+		return -1;
+	int endPos = type.IndexOf(",");	
+	if (endPos < 0)
+	{
+		endPos = type.IndexOf(")");
+	}	
+	string typeSizeStr = type.Substring(startPos+1,endPos-startPos-1);	
+	int result = -1;
+	if (int.TryParse(typeSizeStr,out result))
+		return result;
+	else
+		return -1;
+}
+	
 class SqlServerSchemaReader : SchemaReader
 {
 	// SchemaReader.ReadSchema
@@ -584,6 +699,8 @@ class SqlServerSchemaReader : SchemaReader
 					col.Name=rdr["ColumnName"].ToString();
 					col.PropertyName=CleanUp(col.Name);
 					col.PropertyType=GetPropertyType(rdr["DataType"].ToString());
+					col.Size=GetDatatypeSize(rdr["DataType"].ToString());
+					col.Precision=GetDatatypePrecision(rdr["DataType"].ToString());					
 					col.IsNullable=rdr["IsNullable"].ToString()=="YES";
 					col.IsAutoIncrement=((int)rdr["IsIdentity"])==1;
 					result.Add(col);
@@ -780,6 +897,8 @@ class SqlServerCeSchemaReader : SchemaReader
 					col.Name=rdr["ColumnName"].ToString();
 					col.PropertyName=CleanUp(col.Name);
 					col.PropertyType=GetPropertyType(rdr["DataType"].ToString());
+					col.Size=GetDatatypeSize(rdr["DataType"].ToString());
+					col.Precision=GetDatatypePrecision(rdr["DataType"].ToString());
 					col.IsNullable=rdr["IsNullable"].ToString()=="YES";
 					col.IsAutoIncrement=rdr["AUTOINC_INCREMENT"]!=DBNull.Value;
 					result.Add(col);
@@ -966,6 +1085,8 @@ class PostGreSqlSchemaReader : SchemaReader
 					col.Name=rdr["column_name"].ToString();
 					col.PropertyName=CleanUp(col.Name);
 					col.PropertyType=GetPropertyType(rdr["udt_name"].ToString());
+					col.Size=GetDatatypeSize(rdr["udt_name"].ToString());
+					col.Precision=GetDatatypePrecision(rdr["udt_name"].ToString());
 					col.IsNullable=rdr["is_nullable"].ToString()=="YES";
 					col.IsAutoIncrement = rdr["column_default"].ToString().StartsWith("nextval(");
 					result.Add(col);
@@ -1113,6 +1234,8 @@ class MySqlSchemaReader : SchemaReader
                 col.Name=row["COLUMN_NAME"].ToString();
                 col.PropertyName=CleanUp(col.Name);
                 col.PropertyType=GetPropertyType(row);
+				col.Size=GetDatatypeSize(row["DATA_TYPE"].ToString());
+				col.Precision=GetDatatypePrecision(row["DATA_TYPE"].ToString());
                 col.IsNullable=row["IS_NULLABLE"].ToString()=="YES";
                 col.IsPK=row["COLUMN_KEY"].ToString()=="PRI";
 				col.IsAutoIncrement=row["extra"].ToString().ToLower().IndexOf("auto_increment")>=0;
@@ -1266,8 +1389,10 @@ class OracleSchemaReader : SchemaReader
 					col.Name=rdr["ColumnName"].ToString();
 					col.PropertyName=CleanUp(col.Name);
 					col.PropertyType=GetPropertyType(rdr["DataType"].ToString(), (rdr["DataType"] == DBNull.Value ? null : rdr["DataType"].ToString()));
+					col.Size=GetDatatypeSize(rdr["DataType"].ToString());
+					col.Precision=GetDatatypePrecision(rdr["DataType"].ToString());
 					col.IsNullable=rdr["IsNullable"].ToString()=="YES";
-					col.IsAutoIncrement=true;
+                    col.IsAutoIncrement=false;
 					result.Add(col);
 				}
 			}
@@ -1436,7 +1561,8 @@ class SqliteSchemaReader : SchemaReader
                     col.Name=rdr["name"].ToString();
                     col.PropertyName=CleanUp(col.Name);
                     col.PropertyType=GetPropertyType(rdr["type"].ToString(), (rdr["type"] == DBNull.Value ? null : rdr["type"].ToString()));
-                    col.Size = -1;
+					col.Size=GetDatatypeSize(rdr["type"].ToString());
+					col.Precision=GetDatatypePrecision(rdr["type"].ToString());
                     col.IsNullable=rdr["notnull"].ToString()=="0";
                     col.IsAutoIncrement=false;
                     col.IsPK=rdr["pk"].ToString()!="0";
