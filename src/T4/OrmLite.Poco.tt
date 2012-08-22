@@ -56,16 +56,18 @@ foreach(Table tbl in from t in tables where !t.Ignore select t)
 <#
 foreach(Column col in from c in tbl.Columns where !c.Ignore select c)
 {
-#><# if ((col.Name!=col.PropertyName) || (col.IsPK)) { #>
+ if ((col.Name!=col.PropertyName) || (col.IsPK)) { #>
         [Alias("<#=col.Name#>")]
-<# } #><# if (col.IsAutoIncrement) { #>
+<# }  if (col.PropertyType == "string" && col.Size > 0) { #>
+        [StringLength(<#=col.Size#>)]
+<# }  if (col.IsAutoIncrement) { #>
         [AutoIncrement]
-<# } #><# if (col.IsNullable != true && col.IsAutoIncrement != true) { #>
+<# }  if (col.IsNullable != true && col.IsAutoIncrement != true) { #>
         [Required]
-<# } #><#if (!col.IsPK){#>
-        <#=col.PropertyType#> <#=col.PropertyName#> { get; set;}
-<#} else {#>        
-        <#=col.PropertyType#> Id { get; set;}
+<# } if (!col.IsPK){#>
+        public <#=col.ProperPropertyType#> <#=col.PropertyName#> { get; set;}
+<#} else {#>
+        public <#=col.ProperPropertyType#> Id { get; set;}
 <#}#>
 <# } #>
     }
