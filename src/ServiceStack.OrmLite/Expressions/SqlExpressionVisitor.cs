@@ -24,7 +24,7 @@ namespace ServiceStack.OrmLite
         private bool useFieldName = false;
         private ModelDefinition modelDef;
 
-
+        
         public SqlExpressionVisitor()
         {
             modelDef = typeof(T).GetModelDefinition();
@@ -360,11 +360,8 @@ namespace ServiceStack.OrmLite
             sql.Append(string.IsNullOrEmpty(OrderByExpression) ?
                        "" :
                        "\n" + OrderByExpression);
-            sql.Append(string.IsNullOrEmpty(LimitExpression) ?
-                       "" :
-                       "\n" + LimitExpression);
-            return sql.ToString();
 
+            return ApplyPaging(sql.ToString());
         }
 
         public string SelectExpression
@@ -987,6 +984,12 @@ namespace ServiceStack.OrmLite
         public IList<string> GetAllFields()
         {
             return modelDef.FieldDefinitions.ConvertAll(r => r.Name);
+        }
+
+        protected virtual string ApplyPaging(string sql)
+        {
+            sql = sql + (string.IsNullOrEmpty(LimitExpression) ? "" :"\n" + LimitExpression);
+            return sql;
         }
 
     }
