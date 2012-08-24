@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
 using NUnit.Framework;
 using ServiceStack.Common.Utils;
@@ -26,6 +27,8 @@ namespace ServiceStack.OrmLite.SqlServerTests.UseCase
             public string Name { get; set; }
 
             public DateTime CreatedDate { get; set; }
+
+            public bool IsAdmin { get; set; }
         }
 
         public class Dual
@@ -41,7 +44,7 @@ namespace ServiceStack.OrmLite.SqlServerTests.UseCase
         {
             //using (IDbConnection db = ":memory:".OpenDbConnection())
 
-            var connStr = "Data Source=.;Initial Catalog=TestDb;Integrated Security=True";
+            var connStr = ConfigurationManager.ConnectionStrings["TestDb"].ConnectionString;
             var sqlServerFactory = new OrmLiteConnectionFactory(connStr, SqlServerOrmLiteDialectProvider.Instance);
 
             using (IDbConnection db = sqlServerFactory.OpenDbConnection())
@@ -51,7 +54,7 @@ namespace ServiceStack.OrmLite.SqlServerTests.UseCase
 
                 db.Insert(new User { Id = 1, Name = "A", CreatedDate = DateTime.Now });
                 db.Insert(new User { Id = 2, Name = "B", CreatedDate = DateTime.Now });
-                db.Insert(new User { Id = 3, Name = "B", CreatedDate = DateTime.Now });
+                db.Insert(new User { Id = 3, Name = "B", CreatedDate = DateTime.Now, IsAdmin = true});
 
                 db.Insert(new Dual { Name = "Dual" });
                 var lastInsertId = db.GetLastInsertId();
@@ -60,6 +63,9 @@ namespace ServiceStack.OrmLite.SqlServerTests.UseCase
                 var rowsB = db.Select<User>("Name = {0}", "B");
 
                 Assert.That(rowsB, Has.Count.EqualTo(2));
+
+                var admin = db.Select<User>("IsAdmin = {0}", true);
+                Assert.That(admin[0].Id, Is.EqualTo(3));
 
                 var rowIds = rowsB.ConvertAll(x => x.Id);
                 Assert.That(rowIds, Is.EquivalentTo(new List<long> { 2, 3 }));
