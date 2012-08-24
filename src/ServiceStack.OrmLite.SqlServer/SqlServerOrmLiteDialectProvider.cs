@@ -16,8 +16,6 @@ namespace ServiceStack.OrmLite.SqlServer
 		{
 			base.AutoIncrementDefinition = "IDENTITY(1,1)";
 			base.StringColumnDefinition = "VARCHAR(8000)";
-			//base.DateTimeColumnDefinition = base.StringColumnDefinition;
-			base.BoolColumnDefinition = base.IntColumnDefinition;
 			base.GuidColumnDefinition = "UniqueIdentifier";
 			base.RealColumnDefinition = "FLOAT";
 			base.DecimalColumnDefinition = "DECIMAL(38,6)";
