@@ -18,6 +18,7 @@ namespace ServiceStack.OrmLite.SqlServer
 			base.StringColumnDefinition = "VARCHAR(8000)";
 			base.GuidColumnDefinition = "UniqueIdentifier";
 			base.RealColumnDefinition = "FLOAT";
+		    base.BoolColumnDefinition = "BIT";
 			base.DecimalColumnDefinition = "DECIMAL(38,6)";
 			base.TimeColumnDefinition = "TIME"; //SQLSERVER 2008+
 		    base.BlobColumnDefinition = "VARBINARY(MAX)";
