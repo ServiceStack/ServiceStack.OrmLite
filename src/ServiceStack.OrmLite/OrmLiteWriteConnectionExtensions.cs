@@ -17,6 +17,19 @@ namespace ServiceStack.OrmLite
             dbConn.Exec(dbCmd => dbCmd.CreateTables(overwrite, tableTypes));
         }
 
+        public static void CreateTableIfNotExists(this IDbConnection dbConn, params Type[] tableTypes)
+        {
+            dbConn.Exec(dbCmd => dbCmd.CreateTables(false, tableTypes));
+        }
+
+        public static void DropAndCreateTables(this IDbConnection dbConn, params Type[] tableTypes)
+        {
+            dbConn.Exec(dbCmd => dbCmd.CreateTables(true, tableTypes));
+        }
+
+        /// <summary>
+        /// Alias for CreateTableIfNotExists
+        /// </summary>
         public static void CreateTable<T>(this IDbConnection dbConn)
             where T : new()
         {
@@ -29,9 +42,31 @@ namespace ServiceStack.OrmLite
             dbConn.Exec(dbCmd => dbCmd.CreateTable<T>(overwrite));
         }
 
+        public static void CreateTableIfNotExists<T>(this IDbConnection dbConn)
+            where T : new()
+        {
+            dbConn.Exec(dbCmd => dbCmd.CreateTable<T>(false));
+        }
+
+        public static void DropAndCreateTable<T>(this IDbConnection dbConn)
+            where T : new()
+        {
+            dbConn.Exec(dbCmd => dbCmd.CreateTable<T>(true));
+        }
+
         public static void CreateTable(this IDbConnection dbConn, bool overwrite, Type modelType)
         {
             dbConn.Exec(dbCmd => dbCmd.CreateTable(overwrite, modelType));
+        }
+
+        public static void CreateTableIfNotExists(this IDbConnection dbConn, Type modelType)
+        {
+            dbConn.Exec(dbCmd => dbCmd.CreateTable(false, modelType));
+        }
+
+        public static void DropAndCreateTable(this IDbConnection dbConn, Type modelType)
+        {
+            dbConn.Exec(dbCmd => dbCmd.CreateTable(true, modelType));
         }
 
         public static void DropTables(this IDbConnection dbConn, params Type[] tableTypes)
