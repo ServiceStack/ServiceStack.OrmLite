@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 using System.Linq.Expressions;
+using System.Text.RegularExpressions;
 
 namespace ServiceStack.OrmLite.SqlServer
 {
@@ -154,71 +156,79 @@ namespace ServiceStack.OrmLite.SqlServer
 
 		}
 
-
-        /*
-        private dynamic BuildPagedResult(string sql = "", string primaryKeyField = "", string where = "", string orderBy = "", string columns = "*", int pageSize = 20, int currentPage = 1, params object[] args)
-        {
-            dynamic result = new ExpandoObject();
-            var countSQL = "";
-            if (!string.IsNullOrEmpty(sql))
-                countSQL = string.Format("SELECT COUNT({0}) FROM ({1}) AS PagedTable", primaryKeyField, sql);
-            else
-                countSQL = string.Format("SELECT COUNT({0}) FROM {1}", PrimaryKeyField, TableName);
-
-            if (String.IsNullOrEmpty(orderBy))
-            {
-                orderBy = string.IsNullOrEmpty(primaryKeyField) ? PrimaryKeyField : primaryKeyField;
-            }
-
-            if (!string.IsNullOrEmpty(where))
-            {
-                if (!where.Trim().StartsWith("where", StringComparison.CurrentCultureIgnoreCase))
-                {
-                    where = " WHERE " + where;
-                }
-            }
-
-            var query = "";
-            if (!string.IsNullOrEmpty(sql))
-                query = string.Format("SELECT {0} FROM (SELECT ROW_NUMBER() OVER (ORDER BY {2}) AS Row, {0} FROM ({3}) AS PagedTable {4}) AS Paged ", columns, pageSize, orderBy, sql, where);
-            else
-                query = string.Format("SELECT {0} FROM (SELECT ROW_NUMBER() OVER (ORDER BY {2}) AS Row, {0} FROM {3} {4}) AS Paged ", columns, pageSize, orderBy, TableName, where);
-
-            var pageStart = (currentPage - 1) * pageSize;
-            query += string.Format(" WHERE Row > {0} AND Row <={1}", pageStart, (pageStart + pageSize));
-            countSQL += where;
-            result.TotalRecords = Scalar(countSQL, args);
-            result.TotalPages = result.TotalRecords / pageSize;
-            if (result.TotalRecords % pageSize > 0)
-                result.TotalPages += 1;
-            result.Items = Query(string.Format(query, columns, TableName), args);
-            return result;
-        }
-        */
-        
-
-
-		//Not supported SQL Server solution sucks
-		//http://stackoverflow.com/questions/2135418/equivalent-of-limit-and-offset-for-sql-server
 		public override string LimitExpression
 		{
 			get
 			{
-				return null;
-				//if (!Rows.HasValue) return "";
-				//string offset;
-				//if (Skip.HasValue)
-				//{
-				//    offset = string.Format(" OFFSET {0}", Skip.Value);
-				//}
-				//else
-				//{
-				//    offset = string.Empty;
-				//}
-				//return string.Format("LIMIT {0}{1}", Rows.Value, offset);
+				return "";
 			}
 		}
 
+
+        //Modified paging code from https://github.com/markrendle/Simple.Data/blob/master/Simple.Data.SqlServer/SqlQueryPager.cs
+        protected override string ApplyPaging(string sql)
+        {
+            if (!Rows.HasValue) 
+                return sql;
+            if (!Skip.HasValue)
+            {
+                Skip = 0;
+            }
+            var builder = new StringBuilder("WITH __Data AS (SELECT ");
+
+            var match = ColumnExtract.Match(sql);
+            var columns = match.Groups[1].Value.Trim();
+            var fromEtc = match.Groups[2].Value.Trim();
+
+            builder.Append(columns);
+
+            var orderBy = ExtractOrderBy(columns, ref fromEtc);
+
+            builder.AppendFormat(", ROW_NUMBER() OVER({0}) AS [_#_]", orderBy);
+            builder.AppendLine();
+            builder.Append(fromEtc);
+            builder.AppendLine(")");
+            builder.AppendFormat("SELECT {0} FROM __Data WHERE [_#_] BETWEEN {1} AND {2}", DequalifyColumns(columns),
+                                 Skip.Value + 1, Skip.Value + Rows.Value);
+
+            return builder.ToString();
+        }
+
+        private static readonly Regex ColumnExtract = new Regex(@"SELECT\s*(.*)\s*(FROM.*)", RegexOptions.Multiline | RegexOptions.IgnoreCase);
+        private static readonly Regex SelectMatch = new Regex(@"^SELECT\s*", RegexOptions.IgnoreCase);
+
+        private static string DequalifyColumns(string original)
+        {
+            var q = from part in original.Split(',')
+                    select part.Substring(Math.Max(part.LastIndexOf('.') + 1, part.LastIndexOf('[')));
+            if (q != null)
+                return string.Join(",", q.ToArray());
+            else
+                return "";
+        }
+
+        private static string ExtractOrderBy(string columns, ref string fromEtc)
+        {
+            string orderBy;
+            int index = fromEtc.IndexOf("ORDER BY", StringComparison.InvariantCultureIgnoreCase);
+            if (index > -1)
+            {
+                orderBy = fromEtc.Substring(index).Trim();
+                fromEtc = fromEtc.Remove(index).Trim();
+            }
+            else
+            {
+                orderBy = "ORDER BY " + columns.Split(',').First().Trim();
+
+                var aliasIndex = orderBy.IndexOf(" AS [", StringComparison.InvariantCultureIgnoreCase);
+
+                if (aliasIndex > -1)
+                {
+                    orderBy = orderBy.Substring(0, aliasIndex);
+                }
+            }
+            return orderBy;
+        }
 
 	}
 }

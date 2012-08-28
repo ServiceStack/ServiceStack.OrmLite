@@ -86,10 +86,15 @@ namespace ServiceStack.OrmLite
         string ToCreateTableStatement(Type tableType);
 
         List<string> ToCreateIndexStatements(Type tableType);
-        List<string> ToCreateSequenceStatements(Type tableType);
+        List<string> ToCreateSequenceStatements(Type tableType);        
+        string ToCreateSequenceStatement(Type tableType, string sequenceName);
+
+        List<string> SequenceList(Type tableType);
 
         bool DoesTableExist(IDbConnection db, string tableName);
         bool DoesTableExist(IDbCommand dbCmd, string tableName);
+
+        bool DoesSequenceExist(IDbCommand dbCmd, string sequencName);
 
         string GetColumnNames(ModelDefinition modelDef);
 

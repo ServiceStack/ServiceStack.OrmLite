@@ -97,24 +97,39 @@ namespace ServiceStack.OrmLite
 						}
 					}
 
-					var sequences = dialectProvider.ToCreateSequenceStatements(modelType);
-					foreach (var seq in sequences)
-					{
+                    var sequenceList = dialectProvider.SequenceList(modelType);
+                    if (sequenceList.Count > 0)
+                    {
+                        foreach (var seq in sequenceList)
+                        {
+                            if (dialectProvider.DoesSequenceExist(dbCmd, seq) == false)
+                            {
+                                var seqSql = dialectProvider.ToCreateSequenceStatement(modelType, seq);
+                                dbCmd.ExecuteSql(seqSql);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        var sequences = dialectProvider.ToCreateSequenceStatements(modelType);
+                        foreach (var seq in sequences)
+                        {
 
-						try
-						{
-							dbCmd.ExecuteSql(seq);
-						}
-						catch (Exception ex)
-						{
-							if (IgnoreAlreadyExistsGeneratorError(ex))
-							{
-								Log.DebugFormat("Ignoring existing generator '{0}': {1}", seq, ex.Message);
-								continue;
-							}
-							throw;
-						}
-					}					
+                            try
+                            {
+                                dbCmd.ExecuteSql(seq);
+                            }
+                            catch (Exception ex)
+                            {
+                                if (IgnoreAlreadyExistsGeneratorError(ex))
+                                {
+                                    Log.DebugFormat("Ignoring existing generator '{0}': {1}", seq, ex.Message);
+                                    continue;
+                                }
+                                throw;
+                            }
+                        }
+                    }
 				}
             }
             catch (Exception ex)
@@ -154,7 +169,7 @@ namespace ServiceStack.OrmLite
         {
             try
             {
-                dbCmd.ExecuteSql(string.Format("DROP TABLE {0};", OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef)));
+                dbCmd.ExecuteSql(string.Format("DROP TABLE {0} ", OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef)));
             }
             catch (Exception)
             {

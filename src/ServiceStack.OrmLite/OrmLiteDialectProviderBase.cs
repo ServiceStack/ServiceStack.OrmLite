@@ -818,6 +818,11 @@ namespace ServiceStack.OrmLite
             return false;
         }
 
+        public virtual bool DoesSequenceExist(IDbCommand dbCmd, string sequenceName)
+        {
+            return true;
+        }
+
         protected virtual string GetIndexName(bool isUnique, string modelName, string fieldName)
         {
             return string.Format("{0}idx_{1}_{2}", isUnique ? "u" : "", modelName, fieldName).ToLower();
@@ -837,6 +842,16 @@ namespace ServiceStack.OrmLite
         }
 
         public virtual List<string> ToCreateSequenceStatements(Type tableType)
+        {
+            return new List<string>();
+        }
+
+        public virtual string ToCreateSequenceStatement(Type tableType, string sequenceName)
+        {
+            return "";
+        }        
+
+        public virtual List<string> SequenceList(Type tableType)
         {
             return new List<string>();
         }
