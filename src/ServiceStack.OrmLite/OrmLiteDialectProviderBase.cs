@@ -343,6 +343,45 @@ namespace ServiceStack.OrmLite
             return string.Format("\"{0}\"", name);
         }
 
+        public virtual string GetUnQuotedTableName(ModelDefinition modelDef)
+        {
+            return  UnQuoteName(GetQuotedTableName(modelDef));
+        }
+
+        public virtual string GetUnQuotedTableName(string tableName)
+        {
+            return UnQuoteName(GetQuotedTableName(tableName));
+        }
+
+        public virtual string GetUnQuotedColumnName(string columnName)
+        {
+            return UnQuoteName(GetQuotedColumnName(columnName));
+        }
+
+        public virtual string GetUnQuotedName(string name)
+        {
+            return UnQuoteName(GetQuotedName(name));
+        }
+
+        public virtual string GetQuoteChar()
+        {
+            return "\"";
+        }
+
+        public virtual string UnQuoteName(string name)
+        {
+            string result = name;
+            if (result.StartsWith(GetQuoteChar()))
+            {
+                result = result.Substring(GetQuoteChar().Length);
+            }
+            if (result.EndsWith(GetQuoteChar()))
+            {
+                result = result.Substring(0,result.Length - GetQuoteChar().Length);
+            }
+            return result;
+        }
+
         protected virtual string GetUndefinedColumnDefinition(Type fieldType, int? fieldLength)
         {
             if (TypeSerializer.CanCreateFromString(fieldType))
@@ -850,6 +889,36 @@ namespace ServiceStack.OrmLite
             throw new NotImplementedException();
         }
 
+        public virtual string ToCountStatement(Type fromTableType,
+            string sqlFilter,
+            params object[] filterParams)
+        {
+            var sql = new StringBuilder();
+            const string SelectStatement = "SELECT ";
+            var modelDef = fromTableType.GetModelDefinition();
+            var isFullSelectStatement =
+                !string.IsNullOrEmpty(sqlFilter)
+                && sqlFilter.TrimStart().StartsWith(SelectStatement, StringComparison.OrdinalIgnoreCase);
+
+            if (isFullSelectStatement) return (filterParams != null ? sqlFilter.SqlFormat(filterParams) : sqlFilter);
+
+            sql.AppendFormat("SELECT {0} FROM {1}", "COUNT(*)",
+                             GetQuotedTableName(modelDef));
+            if (!string.IsNullOrEmpty(sqlFilter))
+            {
+                sqlFilter = filterParams != null ? sqlFilter.SqlFormat(filterParams) : sqlFilter;
+                if ( (!sqlFilter.StartsWith("ORDER ", StringComparison.InvariantCultureIgnoreCase)
+                    && !sqlFilter.StartsWith("LIMIT ", StringComparison.InvariantCultureIgnoreCase))
+                    && (!sqlFilter.StartsWith("WHERE ", StringComparison.InvariantCultureIgnoreCase)))
+                {
+                    sql.Append(" WHERE ");
+                }
+                sql.Append(" " + sqlFilter);
+            }
+
+            return sql.ToString();
+        }
+        
         // TODO : make abstract  ??
         public virtual string ToSelectFromProcedureStatement(
             object fromObjWithProperties,

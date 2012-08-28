@@ -247,6 +247,16 @@ namespace ServiceStack.OrmLite
             return dbConn.Exec(dbCmd => dbCmd.GetScalar<T>(sql, sqlParams));
         }
 
+        public static long Count<T>(this IDbConnection dbConn, string sqlFilter, params object[] filterParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Count<T>(sqlFilter, filterParams));
+        }
+
+        public static long Count<T>(this IDbConnection dbConn)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Count<T>("", null));
+        }
+
         public static long GetLastInsertId(this IDbConnection dbConn)
         {
             return dbConn.Exec(dbCmd => dbCmd.GetLastInsertId());

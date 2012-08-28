@@ -367,6 +367,11 @@ namespace ServiceStack.OrmLite
 
         }
 
+        public virtual string ToCountStatement()
+        {
+            return OrmLiteConfig.DialectProvider.ToCountStatement(modelDef.ModelType, WhereExpression, null);
+        }
+
         public string SelectExpression
         {
             get

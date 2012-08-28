@@ -41,6 +41,15 @@ namespace ServiceStack.OrmLite
 
         string GetQuotedName(string columnName);
 
+        string GetQuoteChar();
+
+        string GetUnQuotedTableName(ModelDefinition modelDef);
+        string GetUnQuotedTableName(string tableName);
+        string GetUnQuotedColumnName(string columnName);
+        string GetUnQuotedName(string name);
+
+        string UnQuoteName(string name);
+
         string GetColumnDefinition(
             string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement,
             bool isNullable, int? fieldLength,
@@ -73,6 +82,10 @@ namespace ServiceStack.OrmLite
 
         string ToExistStatement(Type fromTableType,
             object objWithProperties,
+            string sqlFilter,
+            params object[] filterParams);
+
+        string ToCountStatement(Type fromTableType,
             string sqlFilter,
             params object[] filterParams);
 

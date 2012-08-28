@@ -97,6 +97,11 @@ namespace ServiceStack.OrmLite.MySql
 			return string.Format("`{0}`", name);
         }
 
+        public override string GetQuoteChar()
+        {
+            return "\'";
+        }
+
         public override long GetLastInsertId(IDbCommand command)
         {
             command.CommandText = "SELECT LAST_INSERT_ID()";

@@ -12,6 +12,16 @@ namespace ServiceStack.OrmLite
             return dbConn.GetDialectProvider().DoesTableExist(dbConn, tableName);
         }
 
+        public static bool TableExists(this IDbConnection dbConn, Type modelType)
+        {
+            return dbConn.GetDialectProvider().DoesTableExist(dbConn, OrmLiteConfig.DialectProvider.GetUnQuotedTableName(modelType.GetModelDefinition()));
+        }
+
+        public static bool TableExists<T>(this IDbConnection dbConn)
+        {
+            return dbConn.GetDialectProvider().DoesTableExist(dbConn, OrmLiteConfig.DialectProvider.GetUnQuotedTableName(ModelDefinition<T>.Definition));
+        }
+
         public static void CreateTables(this IDbConnection dbConn, bool overwrite, params Type[] tableTypes)
         {
             dbConn.Exec(dbCmd => dbCmd.CreateTables(overwrite, tableTypes));

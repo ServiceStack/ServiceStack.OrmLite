@@ -277,8 +277,57 @@ namespace SqliteExpressionsTest
 				Console.WriteLine("First author or default by city (multiple matches)");
 				author = dbCmd.FirstOrDefault<Author>(a => a.City == "Bogota");
 				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", "Angel Colmenares", author.Name, "Angel Colmenares"==author.Name);
-				
-				
+
+                Console.WriteLine();
+                // Tests for count
+                Console.WriteLine("Count Test");
+
+                var a1 = dbCmd.Count<Author>();
+                Console.WriteLine("Expected:{0} ; Count:{1}, OK? {2}", 14, a1, 14 == a1);
+
+                var a2 = dbCmd.Count<Author>(i=> 1 == 1);
+                Console.WriteLine("Expected:{0} ; Count:{1}, OK? {2}", 14, a2, 14 == a2);
+
+                var a3 = dbCmd.Count<Author>(a => a.City == "Bogota");
+                Console.WriteLine("Expected:{0} ; Count:{1}, OK? {2}", 5, a3, 5 == a3);
+
+                SqlExpressionVisitor<Author> ev2 = OrmLiteConfig.DialectProvider.ExpressionVisitor<Author>();
+
+                ev2.Where(a => a.City == "Bogota");
+                var a4 = dbCmd.Count<Author>(ev2);
+                Console.WriteLine("Expected:{0} ; Count:{1}, OK? {2}", 5, a4, 5 == a4);
+
+                a1 = db.Count<Author>();
+                Console.WriteLine("Expected:{0} ; Count:{1}, OK? {2}", 14, a1, 14 == a1);
+
+                a2 = db.Count<Author>(i => 1 == 1);
+                Console.WriteLine("Expected:{0} ; Count:{1}, OK? {2}", 14, a2, 14 == a2);
+
+                a3 = db.Count<Author>(a => a.City == "Bogota");
+                Console.WriteLine("Expected:{0} ; Count:{1}, OK? {2}", 5, a3, 5 == a3);
+
+                ev2.Where(a => a.City == "Bogota");
+                a4 = db.Count<Author>(ev2);
+                Console.WriteLine("Expected:{0} ; Count:{1}, OK? {2}", 5, a4, 5 == a4);                
+
+                Console.WriteLine();
+                // Tests for table exists
+                Console.WriteLine("Table Exists Test");
+
+                bool t1 = db.TableExists<Author>();
+                Console.WriteLine("Expected:{0} ; Exists:{1}, OK? {2}", true, t1, true == t1);
+
+                t1 = db.TableExists(typeof(Author));
+                Console.WriteLine("Expected:{0} ; Exists:{1}, OK? {2}", true, t1, true == t1);
+
+                db.DropTable<Author>();
+
+                t1 = db.TableExists<Author>();
+                Console.WriteLine("Expected:{0} ; Exists:{1}, OK? {2}", false, t1, false == t1);
+
+                t1 = db.TableExists(typeof(Author));
+                Console.WriteLine("Expected:{0} ; Exists:{1}, OK? {2}", false, t1, false == t1);
+
 				Console.ReadLine();
 				Console.WriteLine("Press Enter to continue");
 				

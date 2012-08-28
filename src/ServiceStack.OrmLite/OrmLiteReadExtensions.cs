@@ -658,6 +658,15 @@ namespace ServiceStack.OrmLite
 			return result != null;
 		}
 
+        [Obsolete(UseDbConnectionExtensions)]
+        public static long Count<T>(this IDbCommand dbCmd, string sqlFilter, params object[] filterParams)
+        {
+            var fromTableType = typeof(T);
+            var sql = OrmLiteConfig.DialectProvider.ToCountStatement(fromTableType, sqlFilter, filterParams);
+            dbCmd.CommandText = sql;
+            var result = dbCmd.GetLongScalar();
+            return result;
+        }
 
         [Obsolete(UseDbConnectionExtensions)]
         public static bool Exists<T>(this IDbCommand dbCmd, string sqlFilter, params object[] filterParams)

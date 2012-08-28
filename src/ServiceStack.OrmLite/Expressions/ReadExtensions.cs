@@ -108,7 +108,29 @@ namespace ServiceStack.OrmLite
 			string sql = ev.ToSelectStatement();
 			return dbCmd.GetScalar<TKey>(sql);
 		}
-		
+
+        public static long Count<T>(this IDbCommand dbCmd, SqlExpressionVisitor<T> expression)
+            where T : new()
+        {
+            string sql = expression.ToCountStatement();
+            return dbCmd.GetScalar<long>(sql);
+        }
+
+        public static long Count<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
+            where T : new()
+        {
+            var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();
+            ev.Where(predicate);
+            string sql = ev.ToCountStatement();
+            return dbCmd.GetScalar<long>(sql);
+        }
+
+        public static long Count<T>(this IDbCommand dbCmd)
+            where T : new()
+        {
+            return dbCmd.Count<T>(i=> 1 == 1);
+        }
+
 		private static T ConvertTo<T>(IDataReader dataReader)
             where T : new()
         {

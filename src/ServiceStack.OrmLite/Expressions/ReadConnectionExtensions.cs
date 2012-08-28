@@ -161,5 +161,17 @@ namespace ServiceStack.OrmLite
         {
             return dbConn.Exec(dbCmd => dbCmd.GetScalar(field, predicate));
         }
+
+        public static long Count<T>(this IDbConnection dbConn, SqlExpressionVisitor<T> expression)
+            where T : new()
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Count(expression));
+        }
+
+        public static long Count<T>(this IDbConnection dbConn, Expression<Func<T, bool>> expression)
+            where T : new()
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Count(expression));
+        }
     }
 }
