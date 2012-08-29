@@ -29,7 +29,7 @@ Effectively this allows you to create a table from any POCO type and it should p
 
 [![Download on NuGet](http://www.servicestack.net/img/nuget-servicestack.ormlite.sqlserver.png)](http://nuget.org/List/Packages/ServiceStack.OrmLite.SqlServer)
 
-### 7 flavours of OrmLite is on NuGet: 
+### 8 flavours of OrmLite is on NuGet: 
 
   - [Sql Server](http://nuget.org/List/Packages/ServiceStack.OrmLite.SqlServer)
   - [MySql](http://nuget.org/List/Packages/ServiceStack.OrmLite.MySql)
@@ -38,6 +38,7 @@ Effectively this allows you to create a table from any POCO type and it should p
   - [Firebird](http://nuget.org/List/Packages/ServiceStack.OrmLite.Firebird) 
   - [Sqlite32](http://nuget.org/List/Packages/ServiceStack.OrmLite.Sqlite32)
   - [Sqlite64](http://nuget.org/List/Packages/ServiceStack.OrmLite.Sqlite64)
+  - [Sqlite.Mono](http://nuget.org/packages/ServiceStack.OrmLite.Sqlite.Mono) - 32bit unmanaged dll, compatible with .NET / Mono
 
 OrmLite is also included in [ServiceStack](https://github.com/ServiceStack/ServiceStack/downloads) or available to download separately in 
 [/downloads](https://github.com/ServiceStack/ServiceStack.OrmLite/downloads).
