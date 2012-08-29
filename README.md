@@ -36,8 +36,8 @@ Effectively this allows you to create a table from any POCO type and it should p
   - [PostgreSQL](http://nuget.org/List/Packages/ServiceStack.OrmLite.PostgreSQL)
   - [Oracle](http://nuget.org/packages/ServiceStack.OrmLite.Oracle)
   - [Firebird](http://nuget.org/List/Packages/ServiceStack.OrmLite.Firebird) 
-  - [Sqlite32](http://nuget.org/List/Packages/ServiceStack.OrmLite.Sqlite32)
-  - [Sqlite64](http://nuget.org/List/Packages/ServiceStack.OrmLite.Sqlite64)
+  - [Sqlite32](http://nuget.org/List/Packages/ServiceStack.OrmLite.Sqlite32) - 32bit Mixed mode .NET only assembly 
+  - [Sqlite64](http://nuget.org/List/Packages/ServiceStack.OrmLite.Sqlite64) - 64bit Mixed mode .NET only assembly 
   - [Sqlite.Mono](http://nuget.org/packages/ServiceStack.OrmLite.Sqlite.Mono) - 32bit unmanaged dll, compatible with .NET / Mono
 
 OrmLite is also included in [ServiceStack](https://github.com/ServiceStack/ServiceStack/downloads) or available to download separately in 
