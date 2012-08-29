@@ -29,7 +29,15 @@ Effectively this allows you to create a table from any POCO type and it should p
 
 [![Download on NuGet](http://www.servicestack.net/img/nuget-servicestack.ormlite.sqlserver.png)](http://nuget.org/List/Packages/ServiceStack.OrmLite.SqlServer)
 
-### 6 flavours of OrmLite is on NuGet: [Sql Server](http://nuget.org/List/Packages/ServiceStack.OrmLite.SqlServer), [MySql](http://nuget.org/List/Packages/ServiceStack.OrmLite.MySql), [PostgreSQL](http://nuget.org/List/Packages/ServiceStack.OrmLite.PostgreSQL), [Firebird](http://nuget.org/List/Packages/ServiceStack.OrmLite.Firebird), [Sqlite32](http://nuget.org/List/Packages/ServiceStack.OrmLite.Sqlite32) and [Sqlite64](http://nuget.org/List/Packages/ServiceStack.OrmLite.Sqlite64).
+### 7 flavours of OrmLite is on NuGet: 
+
+  - [Sql Server](http://nuget.org/List/Packages/ServiceStack.OrmLite.SqlServer)
+  - [MySql](http://nuget.org/List/Packages/ServiceStack.OrmLite.MySql)
+  - [PostgreSQL](http://nuget.org/List/Packages/ServiceStack.OrmLite.PostgreSQL)
+  - [Oracle](http://nuget.org/packages/ServiceStack.OrmLite.Oracle)
+  - [Firebird](http://nuget.org/List/Packages/ServiceStack.OrmLite.Firebird) 
+  - [Sqlite32](http://nuget.org/List/Packages/ServiceStack.OrmLite.Sqlite32)
+  - [Sqlite64](http://nuget.org/List/Packages/ServiceStack.OrmLite.Sqlite64)
 
 OrmLite is also included in [ServiceStack](https://github.com/ServiceStack/ServiceStack/downloads) or available to download separately in 
 [/downloads](https://github.com/ServiceStack/ServiceStack.OrmLite/downloads).
