@@ -47,6 +47,11 @@ namespace ServiceStack.OrmLite
             typeModelDefinitionMap = new Dictionary<Type, ModelDefinition>();
         }
 
+        public static ModelDefinition Init(this Type modelType)
+        {
+            return modelType.GetModelDefinition();
+        }
+
         internal static ModelDefinition GetModelDefinition(this Type modelType)
         {
             ModelDefinition modelDef;
