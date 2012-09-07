@@ -16,24 +16,57 @@ namespace ServiceStack.OrmLite.SqlServer
 
             AssertValidSkipRowValues();
 
-            var buffer = new StringBuilder();
-            var orderBy = !String.IsNullOrEmpty(OrderByExpression)
-                              ? OrderByExpression
-                              : BuildOrderByIdExpression();
-
             var skip = Skip.HasValue ? Skip.Value : 0;
             var take = Rows.HasValue ? Rows.Value : int.MaxValue;
 
-            OrderByExpression = String.Empty; // Required because ordering is done by
-                                              // Windowing function
+            //Temporary hack till we come up with a more robust paging sln for SqlServer
+            if (skip == 0)
+            {
+                if (take == int.MaxValue)
+                    return base.ToSelectStatement();
 
-            buffer.AppendFormat("SELECT Paged.* FROM \n" + 
-                                "(SELECT ROW_NUMBER() OVER ({0}) AS __RowNum, PagedTable.* \n" +
-                                "FROM (\n{1}) AS PagedTable) AS Paged \n", orderBy, base.ToSelectStatement());
+                var sql = base.ToSelectStatement();
+                if (sql == null || sql.Length < "SELECT".Length) return sql;
+                sql = "SELECT TOP " + take + " " + sql.Substring("SELECT".Length, sql.Length - "SELECT".Length);
+                return sql;
+            }
+	        
+            var orderBy = !String.IsNullOrEmpty(OrderByExpression)
+	                          ? OrderByExpression
+	                          : BuildOrderByIdExpression();
 
-            buffer.AppendFormat("WHERE __RowNum > {0} AND __RowNum <= {1} \n", skip, skip + take);
+	        OrderByExpression = String.Empty; // Required because ordering is done by Windowing function
 
-            return buffer.ToString();
+	        var sb = new StringBuilder();
+
+	        //This breaks in SQL Server 2008
+	        sb.AppendFormat("SELECT Paged.* FROM \n" +
+	                        "(SELECT ROW_NUMBER() OVER ({0}) AS __RowNum, PagedTable.* \n" +
+	                        "FROM (\n{1}) AS PagedTable) AS Paged \n", orderBy, base.ToSelectStatement());
+
+	        sb.AppendFormat("WHERE __RowNum > {0} AND __RowNum <= {1} \n", skip, skip + take);
+
+            //Broken SQL:
+            /*
+                SELECT Paged.* FROM 
+                (SELECT ROW_NUMBER() OVER (ORDER BY Id) AS __RowNum, PagedTable.* 
+                FROM (
+                WITH __Data AS (SELECT "Id" ,...., ROW_NUMBER() OVER(ORDER BY "Id") AS [_#_]
+                FROM "CVProject")
+                SELECT "Id" ,... FROM __Data WHERE [_#_] BETWEEN 1 AND 1) AS PagedTable) AS Paged 
+                WHERE __RowNum > 0 AND __RowNum <= 1 
+
+             * ERROR: 
+             * 
+                Msg 156, Level 15, State 1, Line 4
+                Incorrect syntax near the keyword 'WITH'.
+                Msg 319, Level 15, State 1, Line 4
+                Incorrect syntax near the keyword 'with'. If this statement is a common table expression, an xmlnamespaces clause or a change tracking context clause, the previous statement must be terminated with a semicolon.
+                Msg 102, Level 15, State 1, Line 6
+                Incorrect syntax near ')'.
+             */
+
+            return sb.ToString();
         }
 
         protected virtual void AssertValidSkipRowValues()
@@ -174,6 +207,10 @@ namespace ServiceStack.OrmLite.SqlServer
             {
                 Skip = 0;
             }
+
+            //SEE broken comment in: ToSelectStatement()
+            if (Skip == 0) return sql; //short-circuit for only Take queries
+
             var builder = new StringBuilder("WITH __Data AS (SELECT ");
 
             var match = ColumnExtract.Match(sql);
