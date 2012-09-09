@@ -171,5 +171,20 @@ namespace ServiceStack.OrmLite
                 return runDbCommandsFn(dbConn);
             }
         }
+
+        public static IDbConnection Open(this IDbConnectionFactory connectionFactory)
+        {
+            return connectionFactory.OpenDbConnection();
+        }
+
+        public static IDbConnection Open(this IDbConnectionFactory connectionFactory, string namedConnection)
+        {
+            return ((OrmLiteConnectionFactory)connectionFactory).OpenDbConnection(namedConnection);
+        }
+
+        public static IDbConnection OpenDbConnection(this IDbConnectionFactory connectionFactory, string namedConnection)
+        {
+            return ((OrmLiteConnectionFactory)connectionFactory).OpenDbConnection(namedConnection);
+        }
     }
 }
