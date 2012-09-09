@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Data;
 using ServiceStack.OrmLite;
 using ServiceStack.OrmLite.Firebird;
-using ServiceStack.OrmLite.Firebird.DbSchema;
 
 namespace TestClassWriter
 {
