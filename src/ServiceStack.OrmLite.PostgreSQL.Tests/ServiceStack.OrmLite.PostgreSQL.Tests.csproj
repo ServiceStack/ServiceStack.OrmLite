@@ -65,6 +65,7 @@
     <Reference Include="System.Configuration" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EnumTests.cs" />
     <Compile Include="ForeignKeyAttributeTests.cs" />
     <Compile Include="NorthwindPerfTests.cs" />
     <Compile Include="OrmLiteBasicPersistenceProviderTests.cs" />

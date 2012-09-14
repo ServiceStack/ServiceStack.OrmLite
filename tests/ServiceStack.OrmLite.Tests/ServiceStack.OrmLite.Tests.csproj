@@ -98,6 +98,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApiExpressionTests.cs" />
+    <Compile Include="EnumTests.cs" />
     <Compile Include="ForeignKeyAttributeTests.cs" />
     <Compile Include="OrmLiteDropTableTests.cs" />
     <Compile Include="OrmLiteQueryTests.cs" />
