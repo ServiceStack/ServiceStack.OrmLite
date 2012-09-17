@@ -44,10 +44,19 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 con.Save(new TypeWithEnum { Id = 1, EnumValue = SomeEnum.Value1 });
                 con.Save(new TypeWithEnum { Id = 2, EnumValue = SomeEnum.Value1 });
                 con.Save(new TypeWithEnum { Id = 3, EnumValue = SomeEnum.Value2 });
+                con.Save(new TypeWithEnum { Id = 4, EnumValue = SomeEnum.Value3 });
 
                 var target = con.Select<TypeWithEnum>(q => q.EnumValue == SomeEnum.Value1);
-
                 Assert.AreEqual(2, target.Count());
+
+                target = con.Select<TypeWithEnum>(q => SomeEnum.Value1 == q.EnumValue);
+                Assert.AreEqual(2, target.Count());
+
+                target = con.Select<TypeWithEnum>(q => q.EnumValue != SomeEnum.Value2 && q.EnumValue != SomeEnum.Value3);
+                Assert.AreEqual(2, target.Count());
+
+                target = con.Select<TypeWithEnum>(q => q.EnumValue != SomeEnum.Value2);
+                Assert.AreEqual(3, target.Count());
             }
         }
 

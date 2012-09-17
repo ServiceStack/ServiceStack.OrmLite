@@ -798,6 +798,9 @@ namespace ServiceStack.OrmLite
 
         public virtual DbType GetColumnDbType(Type valueType)
         {
+            if (valueType.IsEnum)
+                return DbTypeMap.ColumnDbTypeMap[typeof (string)];
+
             return DbTypeMap.ColumnDbTypeMap[valueType];
         }
 
