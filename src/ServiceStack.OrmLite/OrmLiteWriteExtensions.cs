@@ -222,7 +222,7 @@ namespace ServiceStack.OrmLite
         public static int GetColumnIndex(this IDataReader dataReader, string fieldName)
         {
             try
-            {
+            {                
                 return dataReader.GetOrdinal(OrmLiteConfig.DialectProvider.NamingStrategy.GetColumnName(fieldName));
             }
             catch (IndexOutOfRangeException ignoreNotFoundExInSomeProviders)
@@ -231,17 +231,40 @@ namespace ServiceStack.OrmLite
             }
         }
 
+        public static bool HasColumn(this IDataRecord dr, string columnName)
+        {
+            for (int i = 0; i < dr.FieldCount; i++)
+            {
+                if (dr.GetName(i).Equals(columnName, StringComparison.InvariantCultureIgnoreCase))
+                    return true;
+            }
+
+            return false;
+        }
+
     	private const int NotFound = -1;
         public static T PopulateWithSqlReader<T>(this T objWithProperties, IDataReader dataReader, FieldDefinition[] fieldDefs)
         {
 			try
 			{
+                Dictionary<string, bool> hasCols = new Dictionary<string, bool>();
 				foreach (var fieldDef in fieldDefs)
 				{
-					var index = dataReader.GetColumnIndex(fieldDef.FieldName);
-					if (index == NotFound) continue;
-					var value = dataReader.GetValue(index);
-					fieldDef.SetValue(objWithProperties, value);
+                    if (!hasCols.ContainsKey(fieldDef.FieldName))
+                    {
+                        hasCols[fieldDef.FieldName] = dataReader.HasColumn(fieldDef.FieldName);
+                    }
+                    if (hasCols[fieldDef.FieldName])
+                    {
+                        var index = dataReader.GetColumnIndex(fieldDef.FieldName);
+                        if (index == NotFound) continue;
+                        var value = dataReader.GetValue(index);
+                        fieldDef.SetValue(objWithProperties, value);
+                    }
+                    else
+                    {
+                        continue;
+                    }
 				}
 			}
 			catch (Exception ex)
