@@ -498,14 +498,21 @@ namespace ServiceStack.OrmLite
 
         protected internal virtual string Visit(Expression exp)
         {
+            Type tmp = null;
+            return Visit(exp, out tmp);
+        }
+
+        protected internal virtual string Visit(Expression exp, out Type valueType)
+        {
+            valueType = null;
 
             if (exp == null) return string.Empty;
             switch (exp.NodeType)
             {
                 case ExpressionType.Lambda:
-                    return VisitLambda(exp as LambdaExpression);
+                    return VisitLambda(exp as LambdaExpression, out valueType);
                 case ExpressionType.MemberAccess:
-                    return VisitMemberAccess(exp as MemberExpression);
+                    return VisitMemberAccess(exp as MemberExpression, out valueType);
                 case ExpressionType.Constant:
                     return VisitConstant(exp as ConstantExpression);
                 case ExpressionType.Add:
@@ -531,7 +538,7 @@ namespace ServiceStack.OrmLite
                 case ExpressionType.RightShift:
                 case ExpressionType.LeftShift:
                 case ExpressionType.ExclusiveOr:
-                    return "(" + VisitBinary(exp as BinaryExpression) + ")";
+                    return "(" + VisitBinary(exp as BinaryExpression, out valueType) + ")";
                 case ExpressionType.Negate:
                 case ExpressionType.NegateChecked:
                 case ExpressionType.Not:
@@ -540,7 +547,7 @@ namespace ServiceStack.OrmLite
                 case ExpressionType.ArrayLength:
                 case ExpressionType.Quote:
                 case ExpressionType.TypeAs:
-                    return VisitUnary(exp as UnaryExpression);
+                    return VisitUnary(exp as UnaryExpression, out valueType);
                 case ExpressionType.Parameter:
                     return VisitParameter(exp as ParameterExpression);
                 case ExpressionType.Call:
@@ -555,15 +562,16 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        protected virtual string VisitLambda(LambdaExpression lambda)
+        protected virtual string VisitLambda(LambdaExpression lambda, out Type valueType)
         {
+            valueType = null;
             if (lambda.Body.NodeType == ExpressionType.MemberAccess && sep == " ")
             {
                 MemberExpression m = lambda.Body as MemberExpression;
 
                 if (m.Expression != null)
                 {
-                    string r = VisitMemberAccess(m);
+                    string r = VisitMemberAccess(m, out valueType);
                     return string.Format("{0}={1}", r, GetQuotedTrueValue());
                 }
 
@@ -571,8 +579,9 @@ namespace ServiceStack.OrmLite
             return Visit(lambda.Body);
         }
 
-        protected virtual string VisitBinary(BinaryExpression b)
+        protected virtual string VisitBinary(BinaryExpression b, out Type valueType)
         {
+            valueType = null;
             string left, right;
             var operand = BindOperant(b.NodeType);   //sep= " " ??
             if (operand == "AND" || operand == "OR")
@@ -580,7 +589,7 @@ namespace ServiceStack.OrmLite
                 MemberExpression m = b.Left as MemberExpression;
                 if (m != null && m.Expression != null)
                 {
-                    string r = VisitMemberAccess(m);
+                    string r = VisitMemberAccess(m, out valueType);
                     left = string.Format("{0}={1}", r, GetQuotedTrueValue());
                 }
                 else
@@ -590,7 +599,7 @@ namespace ServiceStack.OrmLite
                 m = b.Right as MemberExpression;
                 if (m != null && m.Expression != null)
                 {
-                    string r = VisitMemberAccess(m);
+                    string r = VisitMemberAccess(m, out valueType);
                     right = string.Format("{0}={1}", r, GetQuotedTrueValue());
                 }
                 else
@@ -600,8 +609,22 @@ namespace ServiceStack.OrmLite
             }
             else
             {
-                left = Visit(b.Left);
-                right = Visit(b.Right);
+                left = Visit(b.Left, out valueType);
+
+                if (valueType != null && valueType.IsEnum)
+                    right =
+                        OrmLiteConfig.DialectProvider.GetQuotedValue(
+                            Enum.ToObject(valueType, Int64.Parse(Visit(b.Right))).ToString(), typeof (string));
+                else
+                {
+                    right = Visit(b.Right, out valueType);
+
+                    if (valueType != null && valueType.IsEnum)
+                        left =
+                            OrmLiteConfig.DialectProvider.GetQuotedValue(
+                                Enum.ToObject(valueType, Int64.Parse(left)).ToString(), typeof (string));
+                }
+                
             }
 
             if (operand == "=" && right == "null") operand = "is";
@@ -626,8 +649,10 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        protected virtual string VisitMemberAccess(MemberExpression m)
+        protected virtual string VisitMemberAccess(MemberExpression m, out Type valueType)
         {
+            valueType = m.Member.DeclaringType.GetProperty(m.Member.Name).PropertyType;
+
             if (m.Expression != null &&
                m.Expression.NodeType == ExpressionType.Parameter
                && m.Expression.Type == typeof(T))
@@ -689,16 +714,17 @@ namespace ServiceStack.OrmLite
                 return OrmLiteConfig.DialectProvider.GetQuotedValue(c.Value, c.Value.GetType());
         }
 
-        protected virtual string VisitUnary(UnaryExpression u)
+        protected virtual string VisitUnary(UnaryExpression u, out Type valueType)
         {
+            valueType = null;
             switch (u.NodeType)
             {
                 case ExpressionType.Not:
-                    string o = Visit(u.Operand);
+                    string o = Visit(u.Operand, out valueType);
                     if (IsFieldName(o)) o = o + "=" + OrmLiteConfig.DialectProvider.GetQuotedValue(true, typeof(bool));
                     return "NOT (" + o + ")";
                 default:
-                    return Visit(u.Operand);
+                    return Visit(u.Operand, out valueType);
 
             }
 
