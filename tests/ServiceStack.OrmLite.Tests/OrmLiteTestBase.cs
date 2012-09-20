@@ -11,6 +11,7 @@ namespace ServiceStack.OrmLite.Tests
     public class Config
     {
         public static string SqliteMemoryDb = ":memory:";
+        public static string SqliteFileDir = "~/App_Data/".MapAbsolutePath();
         public static string SqliteFileDb = "~/App_Data/db.sqlite".MapAbsolutePath();
         public static string SqlServerDb = "~/App_Data/Database1.mdf".MapAbsolutePath();
     }
@@ -30,7 +31,7 @@ namespace ServiceStack.OrmLite.Tests
 	        return dbFactory;
 	    }
 
-	    protected string GetFileConnectionString()
+	    protected virtual string GetFileConnectionString()
 		{
             var connectionString = Config.SqliteFileDb;
 			if (File.Exists(connectionString))
