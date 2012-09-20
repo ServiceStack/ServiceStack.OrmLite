@@ -10,11 +10,7 @@ namespace ServiceStack.OrmLite.Oracle
 {
 	public class OracleSqlExpressionVisitor<T>:SqlExpressionVisitor<T>
 	{
-		public OracleSqlExpressionVisitor ():base()
-		{
-		}
-
-        protected override string VisitMethodCall(MethodCallExpression m)
+	    protected override object VisitMethodCall(MethodCallExpression m)
         {
             List<Object> args = this.VisitExpressionList(m.Arguments);
 
