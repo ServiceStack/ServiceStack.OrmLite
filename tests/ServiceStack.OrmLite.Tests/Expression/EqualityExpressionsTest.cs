@@ -216,6 +216,46 @@ namespace ServiceStack.OrmLite.Tests.Expression
             CollectionAssert.Contains(actual, expected);
         }
 
+        [Test]
+        public void Can_select_equals_null_espression()
+        {
+            var expected = new TestType()
+            {
+                IntColumn = 12,
+                BoolColumn = false,
+                StringColumn = "test",
+                NullableCol = new TestType { StringColumn = "sometext" }
+            };
+
+            EstablishContext(10, expected);
+
+            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.NullableCol == null);
+
+            Assert.IsNotNull(actual);
+            Assert.AreEqual(actual.Count, 10);
+            CollectionAssert.DoesNotContain(actual, expected);
+        }
+
+        [Test]
+        public void Can_select_not_equals_null_espression()
+        {
+            var expected = new TestType()
+            {
+                IntColumn = 12,
+                BoolColumn = false,
+                StringColumn = "test",
+                NullableCol = new TestType { StringColumn = "sometext" }
+            };
+
+            EstablishContext(10, expected);
+
+            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.NullableCol != null);
+
+            Assert.IsNotNull(actual);
+            Assert.AreEqual(actual.Count, 1);
+            CollectionAssert.Contains(actual, expected);
+        }
+
         // Assume not equal works ;-)
         #endregion
     }

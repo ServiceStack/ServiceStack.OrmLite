@@ -85,7 +85,7 @@ namespace AllDialectsTest
 				AssemblyName = "ServiceStack.OrmLite.SqlServer.dll",
 				ClassName = "ServiceStack.OrmLite.SqlServer.SqlServerOrmLiteDialectProvider",
 				InstanceFieldName = "Instance",
-                ConnectionString = "~/test.mdf".MapAbsolutePath()
+                ConnectionString = "Data Source=localhost;Initial Catalog=TestDb;Integrated Security=SSPI;Connect Timeout=120;MultipleActiveResultSets=True"
 			};
 			l.Add(d);
 

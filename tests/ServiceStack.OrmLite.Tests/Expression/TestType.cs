@@ -7,6 +7,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
         public int IntColumn { get; set; }
         public bool BoolColumn { get; set; }
         public string StringColumn { get; set; }
+        public object NullableCol { get; set; }
 
         [AutoIncrement]
         public int Id { get; set; }

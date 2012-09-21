@@ -66,6 +66,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EnumTests.cs" />
+    <Compile Include="Expressions\Author.cs" />
+    <Compile Include="Expressions\AuthorUseCase.cs" />
     <Compile Include="ForeignKeyAttributeTests.cs" />
     <Compile Include="NorthwindPerfTests.cs" />
     <Compile Include="OrmLiteBasicPersistenceProviderTests.cs" />

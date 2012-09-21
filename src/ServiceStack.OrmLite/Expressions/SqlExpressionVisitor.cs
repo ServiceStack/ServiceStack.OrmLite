@@ -29,8 +29,6 @@ namespace ServiceStack.OrmLite
             modelDef = typeof(T).GetModelDefinition();
         }
 
-
-
         /// <summary>
         /// Clear select expression. All properties will be selected.
         /// </summary>
@@ -653,14 +651,14 @@ namespace ServiceStack.OrmLite
             }
 
             if (operand == "=" && right.ToString() == "null") operand = "is";
-            else if (operand == "<>" && right == "null") operand = "is not";
+            else if (operand == "<>" && right.ToString() == "null") operand = "is not";
             else if (operand == "=" || operand == "<>")
             {
-                if (IsTrueExpression(right)) right = GetQuotedTrueValue();
-                else if (IsFalseExpression(right)) right = GetQuotedFalseValue();
+                //if (IsTrueExpression(right)) right = GetQuotedTrueValue();
+                //else if (IsFalseExpression(right)) right = GetQuotedFalseValue();
 
-                if (IsTrueExpression(left)) left = GetQuotedTrueValue();
-                else if (IsFalseExpression(left)) left = GetQuotedFalseValue();
+                //if (IsTrueExpression(left)) left = GetQuotedTrueValue();
+                //else if (IsFalseExpression(left)) left = GetQuotedFalseValue();
 
             }
 
@@ -754,7 +752,7 @@ namespace ServiceStack.OrmLite
                         return !((bool)o);
 
                     if (IsFieldName(o))
-                        o = o + "=" +  GetQuotedTrueValue(); //OrmLiteConfig.DialectProvider.GetQuotedValue(true, typeof(bool));
+                        o = o + "=" +  GetQuotedTrueValue();
 
                     return new PartialSqlString("NOT (" + o + ")");
                 default:
@@ -782,109 +780,6 @@ namespace ServiceStack.OrmLite
                 return VisitColumnAccessMethod(m);
 
             return Expression.Lambda(m).Compile().DynamicInvoke();
-
-            //List<Object> args = this.VisitExpressionList(m.Arguments);
-
-            //Object r;
-            //if (m.Object != null)
-            //    r = Visit(m.Object);
-            //else
-            //{
-            //    r = args[0];
-            //    args.RemoveAt(0);
-            //}
-
-            //switch (m.Method.Name)
-            //{
-            //    case "ToUpper":
-            //        return string.Format("upper({0})", r);
-            //    case "ToLower":
-            //        return string.Format("lower({0})", r);
-            //    case "StartsWith":
-            //        return string.Format("upper({0}) starting with {1} ", r, args[0].ToString().ToUpper());
-            //    case "EndsWith":
-            //        return string.Format("upper({0}) like '%{1}'", r, RemoveQuote(args[0].ToString()).ToUpper());
-            //    case "Contains":
-            //        return string.Format("upper({0}) like '%{1}%'", r, RemoveQuote(args[0].ToString()).ToUpper());
-            //    case "Substring":
-            //        var startIndex = Int32.Parse(args[0].ToString()) + 1;
-            //        if (args.Count == 2)
-            //        {
-            //            var length = Int32.Parse(args[1].ToString());
-            //            return string.Format("substring({0} from {1} for {2})",
-            //                             r,
-            //                             startIndex,
-            //                             length);
-            //        }
-            //        else
-            //            return string.Format("substring({0} from {1})",
-            //                             r,
-            //                             startIndex);
-            //    case "Round":
-            //    case "Floor":
-            //    case "Ceiling":
-            //    case "Coalesce":
-            //    case "Abs":
-            //    case "Sum":
-            //        return string.Format("{0}({1}{2})",
-            //                             m.Method.Name,
-            //                             r,
-            //                             args.Count == 1 ? string.Format(",{0}", args[0]) : "");
-            //    case "Concat":
-            //        StringBuilder s = new StringBuilder();
-            //        foreach (Object e in args)
-            //        {
-            //            s.AppendFormat(" || {0}", e);
-            //        }
-            //        return string.Format("{0}{1}", r, s.ToString());
-
-            //    case "In":
-
-            //        var member = Expression.Convert(m.Arguments[1], typeof(object));
-            //        var lambda = Expression.Lambda<Func<object>>(member);
-            //        var getter = lambda.Compile();
-
-            //        var inArgs = getter() as object[];
-
-            //        StringBuilder sIn = new StringBuilder();
-            //        foreach (Object e in inArgs)
-            //        {
-            //            if (e.GetType().ToString() != "System.Collections.Generic.List`1[System.Object]")
-            //            {
-            //                sIn.AppendFormat("{0}{1}",
-            //                             sIn.Length > 0 ? "," : "",
-            //                             OrmLiteConfig.DialectProvider.GetQuotedValue(e, e.GetType()));
-            //            }
-            //            else
-            //            {
-            //                var listArgs = e as IList<Object>;
-            //                foreach (Object el in listArgs)
-            //                {
-            //                    sIn.AppendFormat("{0}{1}",
-            //                             sIn.Length > 0 ? "," : "",
-            //                             OrmLiteConfig.DialectProvider.GetQuotedValue(el, el.GetType()));
-            //                }
-            //            }
-            //        }
-
-            //        return string.Format("{0} {1} ({2})", r, m.Method.Name, sIn.ToString());
-            //    case "Desc":
-            //        return string.Format("{0} DESC", r);
-            //    case "Alias":
-            //    case "As":
-            //        return string.Format("{0} As {1}", r,
-            //            OrmLiteConfig.DialectProvider.GetQuotedColumnName(RemoveQuoteFromAlias(RemoveQuote(args[0].ToString()))));
-            //    case "ToString":
-            //        return r.ToString();
-            //    default:
-            //        StringBuilder s2 = new StringBuilder();
-            //        foreach (Object e in args)
-            //        {
-            //            s2.AppendFormat(",{0}",
-            //                            OrmLiteConfig.DialectProvider.GetQuotedValue(e, e.GetType()));
-            //        }
-            //        return string.Format("{0}({1}{2})", m.Method.Name, r, s2.ToString());
-            //}
         }
 
         protected virtual List<Object> VisitExpressionList(ReadOnlyCollection<Expression> original)
@@ -1015,26 +910,12 @@ namespace ServiceStack.OrmLite
 
         private object GetTrueExpression()
         {
-            object o = GetQuotedTrueValue();
-            return new PartialSqlString(string.Format("({0}={1})", o, o));
+            return GetQuotedTrueValue();
         }
 
         private object GetFalseExpression()
         {
-
-            return string.Format("({0}={1})",
-                GetQuotedTrueValue(),
-                GetQuotedFalseValue());
-        }
-
-        private bool IsTrueExpression(object exp)
-        {
-            return (exp == GetTrueExpression());
-        }
-
-        private bool IsFalseExpression(object exp)
-        {
-            return (exp == GetFalseExpression());
+            return GetQuotedFalseValue();
         }
 
         private static object GetQuotedTrueValue()
@@ -1075,7 +956,7 @@ namespace ServiceStack.OrmLite
             object quotedColName = args[0];
             args.RemoveAt(0);
 
-            var statement = "";
+            string statement;
 
             switch (m.Method.Name)
             {
@@ -1149,7 +1030,7 @@ namespace ServiceStack.OrmLite
                     statement = string.Format("lower({0})", quotedColName);
                     break;
                 case "StartsWith":
-                    statement = string.Format("upper({0}) starting with {1} ", quotedColName, args[0].ToString().ToUpper());
+                    statement = string.Format("upper({0}) like '{1}%' ", quotedColName, args[0].ToString().ToUpper());
                     break;
                 case "EndsWith":
                     statement = string.Format("upper({0}) like '%{1}'", quotedColName, RemoveQuote(args[0].ToString()).ToUpper());
