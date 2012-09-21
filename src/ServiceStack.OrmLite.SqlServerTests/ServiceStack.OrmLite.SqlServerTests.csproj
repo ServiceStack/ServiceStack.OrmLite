@@ -43,6 +43,7 @@
       <HintPath>..\..\lib\ServiceStack.Text.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -53,6 +54,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EnumTests.cs" />
+    <Compile Include="Expressions\Author.cs" />
+    <Compile Include="Expressions\AuthorUseCase.cs" />
     <Compile Include="ForeignKeyAttributeTests.cs" />
     <Compile Include="OrmLiteTestBase.cs" />
     <Compile Include="SqlServerExpressionVisitorQueryTest.cs" />
