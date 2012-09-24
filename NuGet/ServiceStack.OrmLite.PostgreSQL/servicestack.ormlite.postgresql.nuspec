@@ -3,9 +3,9 @@
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>ServiceStack.OrmLite.PostgreSQL</id>
     <title>OrmLite.PostgreSQL - Fast, code-first, config-free Poco ORM</title>
-    <version>3.9.6</version>
-    <authors>Demis Bellot</authors> 
-    <owners>Demis Bellot</owners>
+    <version>3.9.14</version>
+    <authors>Demis Bellot, Tomasz Kubacki</authors> 
+    <owners>Demis Bellot, Tomasz Kubacki</owners>
     <description>
         Light, simple and fast convention-based code-first POCO ORM for PostgreSQL. 
 		Support for Creating and Dropping Table Schemas from POCOs, Complex Property types transparently stored in schemaless text blobs in Postgres.
