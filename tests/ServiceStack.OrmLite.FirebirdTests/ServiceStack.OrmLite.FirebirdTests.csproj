@@ -52,6 +52,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Expressions\Author.cs" />
+    <Compile Include="Expressions\AuthorUseCase.cs" />
     <Compile Include="UseCase\SimpleUseCase.cs" />
     <Compile Include="UseCase\CustomerOrdersUseCase.cs" />
     <Compile Include="UseCase\SchemaUseCase.cs" />

@@ -24,6 +24,11 @@ namespace ServiceStack.OrmLite
         private bool useFieldName = false;
         private ModelDefinition modelDef;
         
+        protected string Sep
+        {
+            get { return sep; }
+        }
+
         public SqlExpressionVisitor()
         {
             modelDef = typeof(T).GetModelDefinition();
@@ -652,15 +657,6 @@ namespace ServiceStack.OrmLite
 
             if (operand == "=" && right.ToString() == "null") operand = "is";
             else if (operand == "<>" && right.ToString() == "null") operand = "is not";
-            else if (operand == "=" || operand == "<>")
-            {
-                //if (IsTrueExpression(right)) right = GetQuotedTrueValue();
-                //else if (IsFalseExpression(right)) right = GetQuotedFalseValue();
-
-                //if (IsTrueExpression(left)) left = GetQuotedTrueValue();
-                //else if (IsFalseExpression(left)) left = GetQuotedFalseValue();
-
-            }
 
             switch (operand)
             {
@@ -908,22 +904,22 @@ namespace ServiceStack.OrmLite
             return (fd != default(FieldDefinition));
         }
 
-        private object GetTrueExpression()
+        protected object GetTrueExpression()
         {
             return GetQuotedTrueValue();
         }
 
-        private object GetFalseExpression()
+        protected object GetFalseExpression()
         {
             return GetQuotedFalseValue();
         }
 
-        private static object GetQuotedTrueValue()
+        protected static object GetQuotedTrueValue()
         {
             return new PartialSqlString(OrmLiteConfig.DialectProvider.GetQuotedValue(true, typeof (bool)));
         }
 
-        private static object GetQuotedFalseValue()
+        protected static object GetQuotedFalseValue()
         {
             return new PartialSqlString(OrmLiteConfig.DialectProvider.GetQuotedValue(false, typeof(bool)));
         }
