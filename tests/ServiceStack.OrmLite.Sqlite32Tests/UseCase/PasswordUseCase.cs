@@ -38,7 +38,9 @@ namespace ServiceStack.OrmLite.Tests.UseCase
 
         [Test]
         public void Simple_CRUD_example() {
-            var path = "~/App_Data/db.sqlite".MapAbsolutePath();
+            var path = Config.SqliteFileDb;
+            if (File.Exists(path))
+                File.Delete(path);
             var connectionFactory = new OrmLiteConnectionFactory(path, SqliteOrmLiteDialectProvider.Instance.WithPassword("bob"));
             using (var dbConn = connectionFactory.OpenDbConnection())
             using (var dbCmd = dbConn.CreateCommand()) {

@@ -115,6 +115,20 @@ namespace ServiceStack.OrmLite.Firebird
             }
         }
 
+        protected override object VisitConstant(ConstantExpression c)
+        {
+            if (c.Value == null)
+                return new PartialSqlString("null");
+
+            if (c.Value is bool)
+            {
+                object o = OrmLiteConfig.DialectProvider.GetQuotedValue(c.Value, c.Value.GetType());
+                return new PartialSqlString(string.Format("({0}={1})", GetQuotedTrueValue(), o));
+            }
+
+            return c.Value;
+        }
+
         private bool IsTrueExpression(object exp)
         {
             return (exp.ToString() == _trueExpression);
