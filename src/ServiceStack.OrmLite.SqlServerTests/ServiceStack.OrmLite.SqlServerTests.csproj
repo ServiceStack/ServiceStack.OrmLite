@@ -43,6 +43,7 @@
       <HintPath>..\..\lib\ServiceStack.Text.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -53,10 +54,23 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EnumTests.cs" />
+    <Compile Include="Expressions\AdditiveExpressionsTest.cs" />
+    <Compile Include="Expressions\Author.cs" />
+    <Compile Include="Expressions\AuthorUseCase.cs" />
+    <Compile Include="Expressions\ConditionalExpressionTest.cs" />
+    <Compile Include="Expressions\EqualityExpressionsTest.cs" />
+    <Compile Include="Expressions\ExpressionsTestBase.cs" />
+    <Compile Include="Expressions\LogicalExpressionsTest.cs" />
+    <Compile Include="Expressions\MultiplicativeExpressionsTest.cs" />
+    <Compile Include="Expressions\PrimaryExpressionsTest.cs" />
+    <Compile Include="Expressions\RelationalExpressionsTest.cs" />
+    <Compile Include="Expressions\TestType.cs" />
+    <Compile Include="Expressions\UnaryExpressionsTest.cs" />
     <Compile Include="ForeignKeyAttributeTests.cs" />
     <Compile Include="OrmLiteTestBase.cs" />
     <Compile Include="SqlServerExpressionVisitorQueryTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UpdateTests.cs" />
     <Compile Include="UseCase\SimpleUseCase.cs" />
     <Compile Include="UseCase\TestEntity.cs" />
   </ItemGroup>

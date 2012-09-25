@@ -99,6 +99,17 @@
   <ItemGroup>
     <Compile Include="ApiExpressionTests.cs" />
     <Compile Include="EnumTests.cs" />
+    <Compile Include="ExpressionVisitorTests.cs" />
+    <Compile Include="Expression\AdditiveExpressionsTest.cs" />
+    <Compile Include="Expression\ConditionalExpressionTest.cs" />
+    <Compile Include="Expression\EqualityExpressionsTest.cs" />
+    <Compile Include="Expression\ExpressionsTestBase.cs" />
+    <Compile Include="Expression\LogicalExpressionsTest.cs" />
+    <Compile Include="Expression\MultiplicativeExpressionsTest.cs" />
+    <Compile Include="Expression\PrimaryExpressionsTest.cs" />
+    <Compile Include="Expression\RelationalExpressionsTest.cs" />
+    <Compile Include="Expression\TestType.cs" />
+    <Compile Include="Expression\UnaryExpressionsTest.cs" />
     <Compile Include="ForeignKeyAttributeTests.cs" />
     <Compile Include="OrmLiteDropTableTests.cs" />
     <Compile Include="OrmLiteQueryTests.cs" />
