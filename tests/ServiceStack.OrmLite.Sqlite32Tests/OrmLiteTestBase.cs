@@ -8,13 +8,20 @@ using ServiceStack.OrmLite.Sqlite;
 
 namespace ServiceStack.OrmLite.Tests
 {
+    public class Config
+    {
+        public static string SqliteMemoryDb = ":memory:";
+        public static string SqliteFileDir = "~/App_Data/".MapAbsolutePath();
+        public static string SqliteFileDb = "~/App_Data/db.sqlite".MapAbsolutePath();
+    }
+
 	public class OrmLiteTestBase
 	{
 		protected virtual string ConnectionString { get; set; }
 
-		protected string GetFileConnectionString()
+		protected virtual string GetFileConnectionString()
 		{
-			var connectionString = "~/App_Data/db.sqlite".MapAbsolutePath();
+            var connectionString = Config.SqliteFileDb;
 			if (File.Exists(connectionString))
 				File.Delete(connectionString);
 

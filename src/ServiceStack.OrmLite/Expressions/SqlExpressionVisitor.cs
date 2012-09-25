@@ -728,12 +728,6 @@ namespace ServiceStack.OrmLite
             if (c.Value == null)
                 return new PartialSqlString("null");
             
-            if (c.Value is bool)
-            {
-                object o = OrmLiteConfig.DialectProvider.GetQuotedValue(c.Value, c.Value.GetType());
-                return new PartialSqlString(string.Format("({0}={1})", GetQuotedTrueValue(), o));
-            }
-            
             return c.Value;
         }
 
@@ -906,12 +900,12 @@ namespace ServiceStack.OrmLite
 
         protected object GetTrueExpression()
         {
-            return GetQuotedTrueValue();
+            return new PartialSqlString(string.Format("({0}={1})", GetQuotedTrueValue(), GetQuotedTrueValue()));
         }
 
         protected object GetFalseExpression()
         {
-            return GetQuotedFalseValue();
+            return new PartialSqlString(string.Format("({0}={1})", GetQuotedTrueValue(), GetQuotedFalseValue()));
         }
 
         protected static object GetQuotedTrueValue()

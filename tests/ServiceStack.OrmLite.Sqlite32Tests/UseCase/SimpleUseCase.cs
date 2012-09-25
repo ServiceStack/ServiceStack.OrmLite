@@ -42,7 +42,9 @@ namespace ServiceStack.OrmLite.Tests.UseCase
 		[Test]
 		public void Simple_CRUD_example()
 		{
-			var path = "~/App_Data/db.sqlite".MapAbsolutePath();
+            var path = Config.SqliteFileDb;
+            if (File.Exists(path))
+                File.Delete(path);
 			//using (IDbConnection db = ":memory:".OpenDbConnection())
 			using (IDbConnection db = path.OpenDbConnection())
 			using (IDbCommand dbCmd = db.CreateCommand())
@@ -79,7 +81,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
 		[Test]
 		public void Simple_CRUD_example2()
 		{
-			var path = "~/App_Data/db2.sqlite".MapAbsolutePath();
+            var path = Config.SqliteFileDb;
 			if(File.Exists(path))
 				File.Delete(path);
 			//using (IDbConnection db = ":memory:".OpenDbConnection())
