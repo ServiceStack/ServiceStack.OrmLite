@@ -605,7 +605,7 @@ namespace ServiceStack.OrmLite
                         continue;
                     }
 
-                    if (updateFields.Count > 0 && !updateFields.Contains(fieldDef.Name)) continue;
+                    if (updateFields.Count > 0 && !updateFields.Contains(fieldDef.Name) || fieldDef.AutoIncrement) continue;
                     if (sql.Length > 0) sql.Append(",");
                     sql.AppendFormat("{0} = {1}", GetQuotedColumnName(fieldDef.FieldName), fieldDef.GetQuotedValue(objWithProperties));
                 }

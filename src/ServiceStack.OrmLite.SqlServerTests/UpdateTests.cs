@@ -27,6 +27,31 @@ namespace ServiceStack.OrmLite.SqlServerTests
             }
         }
 
+        [Test]
+        public void Can_execute_update_only()
+        {
+            using (var con = ConnectionString.OpenDbConnection())
+            {
+                con.CreateTable<SimpleType>(true);
+                var obj = new SimpleType { Name = "Somename" };
+                con.Save(obj);
+                var storedObj = con.GetById<SimpleType>(con.GetLastInsertId());
+
+                Assert.AreEqual(obj.Name, storedObj.Name);
+
+                var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<SimpleType>();
+                ev.Update();
+                ev.Where(q => q.Id == storedObj.Id); 
+                storedObj.Name = "Someothername";
+
+                con.UpdateOnly(storedObj, ev);
+
+                var target = con.GetById<SimpleType>(storedObj.Id);
+
+                Assert.AreEqual("Someothername", target.Name);
+            }
+        }
+
 
         [Test]
         public void Can_execute_update()
