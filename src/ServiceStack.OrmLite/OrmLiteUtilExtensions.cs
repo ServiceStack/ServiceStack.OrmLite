@@ -46,11 +46,6 @@ namespace ServiceStack.OrmLite
 			{
                 // Create index cache
                 Dictionary<string, int> indexCache = new Dictionary<string, int>();
-                foreach (var fieldDef in fieldDefs)
-                {
-                    var index = dataReader.GetColumnIndex(fieldDef.FieldName);
-                    indexCache.Add(fieldDef.Name, index);
-                }
 				while (dataReader.Read())
 				{
 					var row = new T();

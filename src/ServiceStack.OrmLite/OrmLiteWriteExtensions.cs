@@ -238,8 +238,21 @@ namespace ServiceStack.OrmLite
 			{
 				foreach (var fieldDef in fieldDefs)
 				{
-                    // [EDIT] Parameter indexCache and checking if is set, then use them else ask for every fielname.
-                    var index = indexCache == null ? dataReader.GetColumnIndex(fieldDef.FieldName) : indexCache[fieldDef.Name];
+                    // If index cache is set then try get value. If not present then get and store it.
+                    int index = NotFound;
+                    if (indexCache != null)
+                    {
+                        if (!indexCache.TryGetValue(fieldDef.Name, out index))
+                        {
+                            index = dataReader.GetColumnIndex(fieldDef.FieldName);
+                            indexCache.Add(fieldDef.Name, index);
+                        }
+                    }
+                    else
+                    {
+                        index = dataReader.GetColumnIndex(fieldDef.FieldName);
+                    }
+                       
 					if (index == NotFound) continue;
 					var value = dataReader.GetValue(index);
 					fieldDef.SetValue(objWithProperties, value);
