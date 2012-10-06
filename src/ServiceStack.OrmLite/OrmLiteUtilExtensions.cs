@@ -44,10 +44,12 @@ namespace ServiceStack.OrmLite
 			var to = new List<T>();
 			using (dataReader)
 			{
+                // Create index cache
+                Dictionary<string, int> indexCache = new Dictionary<string, int>();
 				while (dataReader.Read())
 				{
 					var row = new T();
-					row.PopulateWithSqlReader(dataReader, fieldDefs);
+					row.PopulateWithSqlReader(dataReader, fieldDefs, indexCache);
 					to.Add(row);
 				}
 			}
