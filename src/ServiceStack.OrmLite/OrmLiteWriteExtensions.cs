@@ -232,13 +232,14 @@ namespace ServiceStack.OrmLite
         }
 
     	private const int NotFound = -1;
-        public static T PopulateWithSqlReader<T>(this T objWithProperties, IDataReader dataReader, FieldDefinition[] fieldDefs)
+        public static T PopulateWithSqlReader<T>(this T objWithProperties, IDataReader dataReader, FieldDefinition[] fieldDefs, Dictionary<string, int> indexCache = null)
         {
 			try
 			{
 				foreach (var fieldDef in fieldDefs)
 				{
-					var index = dataReader.GetColumnIndex(fieldDef.FieldName);
+                    // [EDIT] Parameter indexCache and checking if is set, then use them else ask for every fielname.
+                    var index = indexCache == null ? dataReader.GetColumnIndex(fieldDef.FieldName) : indexCache[fieldDef.Name];
 					if (index == NotFound) continue;
 					var value = dataReader.GetValue(index);
 					fieldDef.SetValue(objWithProperties, value);
