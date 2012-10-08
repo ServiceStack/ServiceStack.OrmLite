@@ -89,5 +89,51 @@ namespace ServiceStack.OrmLite.Tests.Expression
             Assert.AreEqual(11, actual.Count);
             CollectionAssert.Contains(actual, expected);
         }
+
+        [Test]
+        public void Can_select_evaluated_invalid_conditional_or_valid_expression()
+        {
+            // ReSharper disable ConvertToConstant.Local
+            var a = true;
+            // ReSharper restore ConvertToConstant.Local
+
+            var expected = new TestType()
+            {
+                IntColumn = 3,
+                BoolColumn = true,
+                StringColumn = "4"
+            };
+
+            EstablishContext(10, expected);
+
+            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => !q.BoolColumn || a);
+
+            Assert.IsNotNull(actual);
+            Assert.Greater(actual.Count, 0);
+            CollectionAssert.Contains(actual, expected);
+        }
+        [Test]
+        public void Can_select_evaluated_conditional_and_valid_expression()
+        {
+            var model = new
+                {
+                    StringValue = "4"
+                };
+
+            var expected = new TestType()
+            {
+                IntColumn = 3,
+                BoolColumn = true,
+                StringColumn = "4"
+            };
+
+            EstablishContext(10, expected);
+
+            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.BoolColumn && q.StringColumn == model.StringValue);
+
+            Assert.IsNotNull(actual);
+            Assert.Greater(actual.Count, 0);
+            CollectionAssert.Contains(actual, expected);
+        }
     }
 }
