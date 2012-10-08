@@ -232,13 +232,27 @@ namespace ServiceStack.OrmLite
         }
 
     	private const int NotFound = -1;
-        public static T PopulateWithSqlReader<T>(this T objWithProperties, IDataReader dataReader, FieldDefinition[] fieldDefs)
+        public static T PopulateWithSqlReader<T>(this T objWithProperties, IDataReader dataReader, FieldDefinition[] fieldDefs, Dictionary<string, int> indexCache = null)
         {
 			try
 			{
 				foreach (var fieldDef in fieldDefs)
 				{
-					var index = dataReader.GetColumnIndex(fieldDef.FieldName);
+                    // If index cache is set then try get value. If not present then get and store it.
+                    int index = NotFound;
+                    if (indexCache != null)
+                    {
+                        if (!indexCache.TryGetValue(fieldDef.Name, out index))
+                        {
+                            index = dataReader.GetColumnIndex(fieldDef.FieldName);
+                            indexCache.Add(fieldDef.Name, index);
+                        }
+                    }
+                    else
+                    {
+                        index = dataReader.GetColumnIndex(fieldDef.FieldName);
+                    }
+                       
 					if (index == NotFound) continue;
 					var value = dataReader.GetValue(index);
 					fieldDef.SetValue(objWithProperties, value);
