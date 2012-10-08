@@ -146,10 +146,11 @@ namespace ServiceStack.OrmLite
 			using (var reader = dbCmd.ExecReader(
 				OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T),  filter, filterParams)))
 			{
-				while (reader.Read())
+                var indexCache = new Dictionary<string, int>();
+                while (reader.Read())
 				{
 					var row = new T();
-					row.PopulateWithSqlReader(reader, fieldDefs);
+                    row.PopulateWithSqlReader(reader, fieldDefs, indexCache);
 					yield return row;
 				}
 			}
@@ -445,10 +446,11 @@ namespace ServiceStack.OrmLite
 			var fieldDefs = ModelDefinition<T>.Definition.FieldDefinitionsArray;
 			using (var reader = dbCmd.ExecuteReader())
 			{
-				while (reader.Read())
+                var indexCache = new Dictionary<string, int>();
+                while (reader.Read())
 				{
 					var row = new T();
-					row.PopulateWithSqlReader(reader, fieldDefs);
+					row.PopulateWithSqlReader(reader, fieldDefs, indexCache);
 					yield return row;
 				}
 			}
@@ -463,10 +465,11 @@ namespace ServiceStack.OrmLite
 			var fieldDefs = ModelDefinition<T>.Definition.FieldDefinitionsArray;
 			using (var reader = dbCmd.ExecuteReader())
 			{
-				while (reader.Read())
+                var indexCache = new Dictionary<string, int>();
+                while (reader.Read())
 				{
 					var row = new T();
-					row.PopulateWithSqlReader(reader, fieldDefs);
+                    row.PopulateWithSqlReader(reader, fieldDefs, indexCache);
 					yield return row;
 				}
 			}

@@ -75,7 +75,7 @@ namespace ServiceStack.OrmLite.SqlServer
             }
 
             return string.Format("UPDATE {0} SET {1} {2}",
-                                                dialectProvider.GetQuotedTableName(ModelDef), setFields, WhereExpression);
+                dialectProvider.GetQuotedTableName(ModelDef), setFields, WhereExpression);
         }
 
         protected virtual void AssertValidSkipRowValues()
