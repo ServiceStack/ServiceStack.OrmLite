@@ -216,7 +216,7 @@ namespace ServiceStack.OrmLite
         {
             var fieldDefs = ModelDefinition<T>.Definition.FieldDefinitions.ToArray();
 
-            return PopulateWithSqlReader(objWithProperties, dataReader, fieldDefs);
+            return PopulateWithSqlReader(objWithProperties, dataReader, fieldDefs, null);
         }
 
         public static int GetColumnIndex(this IDataReader dataReader, string fieldName)
@@ -232,13 +232,12 @@ namespace ServiceStack.OrmLite
         }
 
     	private const int NotFound = -1;
-        public static T PopulateWithSqlReader<T>(this T objWithProperties, IDataReader dataReader, FieldDefinition[] fieldDefs, Dictionary<string, int> indexCache = null)
+        public static T PopulateWithSqlReader<T>(this T objWithProperties, IDataReader dataReader, FieldDefinition[] fieldDefs, Dictionary<string, int> indexCache)
         {
 			try
 			{
 				foreach (var fieldDef in fieldDefs)
 				{
-                    // If index cache is set then try get value. If not present then get and store it.
                     int index = NotFound;
                     if (indexCache != null)
                     {
