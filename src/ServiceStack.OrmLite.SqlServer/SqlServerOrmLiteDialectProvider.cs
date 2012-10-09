@@ -115,6 +115,12 @@ namespace ServiceStack.OrmLite.SqlServer
 				const string iso8601Format = "yyyyMMdd HH:mm:ss.fff";
 				return base.GetQuotedValue(dateValue.ToString(iso8601Format), typeof(string));
 			}
+			if (fieldType == typeof(DateTimeOffset))
+ 			{
+ 				var dateValue = (DateTimeOffset)value;
+ 				const string dateTimeOffsetFormat = "yyyy-MM-dd HH:mm:ss.ffffff zzz";
+ 				return base.GetQuotedValue(dateValue.ToString(dateTimeOffsetFormat), typeof(string));
+ 			}
 			if (fieldType == typeof(bool))
 			{
 				var boolValue = (bool)value;
