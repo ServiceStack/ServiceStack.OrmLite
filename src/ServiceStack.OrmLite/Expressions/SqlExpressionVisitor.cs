@@ -584,7 +584,7 @@ namespace ServiceStack.OrmLite
                 var m = b.Left as MemberExpression;
                 if (m != null && m.Expression != null 
                     && m.Expression.NodeType == ExpressionType.Parameter
-                    && m.Expression.Type == typeof(T))
+                    && m.Expression.Type.IsAssignableFrom(typeof(T)))
                     left = new PartialSqlString(string.Format("{0}={1}", VisitMemberAccess(m), GetQuotedTrueValue()));
                 else
                     left = Visit(b.Left);
@@ -592,7 +592,7 @@ namespace ServiceStack.OrmLite
                 m = b.Right as MemberExpression;
                 if (m != null && m.Expression != null
                     && m.Expression.NodeType == ExpressionType.Parameter
-                    && m.Expression.Type == typeof(T))
+                    && m.Expression.Type.IsAssignableFrom(typeof(T)))
                     right = new PartialSqlString(string.Format("{0}={1}", VisitMemberAccess(m), GetQuotedTrueValue()));
                 else
                     right = Visit(b.Right);
@@ -667,7 +667,7 @@ namespace ServiceStack.OrmLite
         {
             if (m.Expression != null &&
                m.Expression.NodeType == ExpressionType.Parameter
-               && m.Expression.Type == typeof(T))
+               && m.Expression.Type.IsAssignableFrom(typeof(T)))
             {
                 var propertyInfo = m.Member as PropertyInfo;
 
@@ -1015,13 +1015,13 @@ namespace ServiceStack.OrmLite
                     statement = string.Format("lower({0})", quotedColName);
                     break;
                 case "StartsWith":
-                    statement = string.Format("upper({0}) like '{1}%' ", quotedColName, args[0].ToString().ToUpper());
+                    statement = string.Format("upper({0}) like '{1}%' ", quotedColName, OrmLiteConfig.DialectProvider.EscapeParam(args[0]).ToUpper());
                     break;
                 case "EndsWith":
-                    statement = string.Format("upper({0}) like '%{1}'", quotedColName, RemoveQuote(args[0].ToString()).ToUpper());
+                    statement = string.Format("upper({0}) like '%{1}'", quotedColName, OrmLiteConfig.DialectProvider.EscapeParam(args[0]).ToUpper());
                     break;
                 case "Contains":
-                    statement = string.Format("upper({0}) like '%{1}%'", quotedColName, RemoveQuote(args[0].ToString()).ToUpper());
+                    statement = string.Format("upper({0}) like '%{1}%'", quotedColName, OrmLiteConfig.DialectProvider.EscapeParam(args[0]).ToUpper());
                     break;
                 case "Substring":
                     var startIndex = Int32.Parse(args[0].ToString()) + 1;

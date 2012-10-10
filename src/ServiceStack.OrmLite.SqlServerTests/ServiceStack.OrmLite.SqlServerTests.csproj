@@ -64,6 +64,7 @@
     <Compile Include="Expressions\MultiplicativeExpressionsTest.cs" />
     <Compile Include="Expressions\PrimaryExpressionsTest.cs" />
     <Compile Include="Expressions\RelationalExpressionsTest.cs" />
+    <Compile Include="Expressions\StringFunctionTests.cs" />
     <Compile Include="Expressions\TestType.cs" />
     <Compile Include="Expressions\UnaryExpressionsTest.cs" />
     <Compile Include="ForeignKeyAttributeTests.cs" />
