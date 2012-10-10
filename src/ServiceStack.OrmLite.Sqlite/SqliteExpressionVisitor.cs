@@ -13,28 +13,11 @@ namespace ServiceStack.OrmLite.Sqlite
         protected override object VisitColumnAccessMethod(MethodCallExpression m)
 	    {
 	        List<Object> args = this.VisitExpressionList(m.Arguments);
-
 	        var quotedColName = Visit(m.Object);
-
 	        string statement;
 
 	        switch (m.Method.Name)
 	        {
-	            case "ToUpper":
-	                statement = string.Format("upper({0})", quotedColName);
-	                break;
-	            case "ToLower":
-	                statement = string.Format("lower({0})", quotedColName);
-	                break;
-	            case "StartsWith":
-	                statement = string.Format("{0} like '{1}%'", quotedColName, RemoveQuote(args[0].ToString()));
-	                break;
-	            case "EndsWith":
-	                statement = string.Format("{0} like '%{1}'", quotedColName, RemoveQuote(args[0].ToString()));
-	                break;
-	            case "Contains":
-	                statement = string.Format("{0} like '%{1}%'", quotedColName, RemoveQuote(args[0].ToString()));
-	                break;
 	            case "Substring":
 	                var startIndex = Int32.Parse(args[0].ToString()) + 1;
 	                if (args.Count == 2)
@@ -46,7 +29,7 @@ namespace ServiceStack.OrmLite.Sqlite
 	                    statement = string.Format("substr({0}, {1})", quotedColName, startIndex);
 	                break;
 	            default:
-	                throw new NotSupportedException();
+	                return base.VisitColumnAccessMethod(m);
 	        }
 	        return new PartialSqlString(statement);
 	    }
