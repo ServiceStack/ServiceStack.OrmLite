@@ -22,16 +22,14 @@ namespace ServiceStack.OrmLite.Firebird
             {
                 var m = b.Left as MemberExpression;
                 if (m != null && m.Expression != null
-                    && m.Expression.NodeType == ExpressionType.Parameter
-                    && m.Expression.Type.IsAssignableFrom(typeof(T)))
+                    && m.Expression.NodeType == ExpressionType.Parameter)
                     left = new PartialSqlString(string.Format("{0}={1}", VisitMemberAccess(m), GetQuotedTrueValue()));
                 else
                     left = Visit(b.Left);
 
                 m = b.Right as MemberExpression;
                 if (m != null && m.Expression != null
-                    && m.Expression.NodeType == ExpressionType.Parameter
-                    && m.Expression.Type.IsAssignableFrom(typeof(T)))
+                    && m.Expression.NodeType == ExpressionType.Parameter)
                     right = new PartialSqlString(string.Format("{0}={1}", VisitMemberAccess(m), GetQuotedTrueValue()));
                 else
                     right = Visit(b.Right);

@@ -583,16 +583,14 @@ namespace ServiceStack.OrmLite
             {
                 var m = b.Left as MemberExpression;
                 if (m != null && m.Expression != null 
-                    && m.Expression.NodeType == ExpressionType.Parameter
-                    && m.Expression.Type.IsAssignableFrom(typeof(T)))
+                    && m.Expression.NodeType == ExpressionType.Parameter)
                     left = new PartialSqlString(string.Format("{0}={1}", VisitMemberAccess(m), GetQuotedTrueValue()));
                 else
                     left = Visit(b.Left);
 
                 m = b.Right as MemberExpression;
                 if (m != null && m.Expression != null
-                    && m.Expression.NodeType == ExpressionType.Parameter
-                    && m.Expression.Type.IsAssignableFrom(typeof(T)))
+                    && m.Expression.NodeType == ExpressionType.Parameter)
                     right = new PartialSqlString(string.Format("{0}={1}", VisitMemberAccess(m), GetQuotedTrueValue()));
                 else
                     right = Visit(b.Right);
@@ -641,7 +639,6 @@ namespace ServiceStack.OrmLite
                 {
                     var result = Expression.Lambda(b).Compile().DynamicInvoke();
                     return result;
-                    //return new PartialSqlString(OrmLiteConfig.DialectProvider.GetQuotedValue(result, result.GetType()));
                 }
                 else if (left as PartialSqlString == null)
                     left = OrmLiteConfig.DialectProvider.GetQuotedValue(left, left != null ? left.GetType() : null);
@@ -665,9 +662,8 @@ namespace ServiceStack.OrmLite
 
         protected virtual object VisitMemberAccess(MemberExpression m)
         {
-            if (m.Expression != null &&
-               m.Expression.NodeType == ExpressionType.Parameter
-               && m.Expression.Type.IsAssignableFrom(typeof(T)))
+            if (m.Expression != null 
+                && m.Expression.NodeType == ExpressionType.Parameter)
             {
                 var propertyInfo = m.Member as PropertyInfo;
 
@@ -857,17 +853,6 @@ namespace ServiceStack.OrmLite
             {
                 return memberName;
             }
-        }
-
-        protected string RemoveQuote(string exp)
-        {
-
-            if (exp.StartsWith("'") && exp.EndsWith("'"))
-            {
-                exp = exp.Remove(0, 1);
-                exp = exp.Remove(exp.Length - 1, 1);
-            }
-            return exp;
         }
 
         protected string RemoveQuoteFromAlias(string exp)
