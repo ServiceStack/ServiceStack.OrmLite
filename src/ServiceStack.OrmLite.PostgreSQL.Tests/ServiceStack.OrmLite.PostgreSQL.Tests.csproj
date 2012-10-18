@@ -74,6 +74,7 @@
     <Compile Include="Expressions\ExpressionsTestBase.cs" />
     <Compile Include="Expressions\LogicalExpressionsTest.cs" />
     <Compile Include="Expressions\MultiplicativeExpressionsTest.cs" />
+    <Compile Include="Expressions\OrmLiteCountTests.cs" />
     <Compile Include="Expressions\PrimaryExpressionsTest.cs" />
     <Compile Include="Expressions\RelationalExpressionsTest.cs" />
     <Compile Include="Expressions\StringFunctionTests.cs" />

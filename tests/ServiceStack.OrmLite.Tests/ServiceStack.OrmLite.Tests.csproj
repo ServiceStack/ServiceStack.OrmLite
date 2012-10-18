@@ -106,6 +106,7 @@
     <Compile Include="Expression\ExpressionsTestBase.cs" />
     <Compile Include="Expression\LogicalExpressionsTest.cs" />
     <Compile Include="Expression\MultiplicativeExpressionsTest.cs" />
+    <Compile Include="Expression\OrmLiteCountTests.cs" />
     <Compile Include="Expression\PrimaryExpressionsTest.cs" />
     <Compile Include="Expression\RelationalExpressionsTest.cs" />
     <Compile Include="Expression\StringFunctionTests.cs" />
