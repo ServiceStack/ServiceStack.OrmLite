@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <id>ServiceStack.OrmLite.Oracle</id> 
+    <title>OrmLite.Oracle - Fast, code-first, config-free Poco ORM</title>
+    <version>3.9.25</version>
+    <authors>Demis Bellot, Guru Kathiresan</authors> 
+    <owners>Demis Bellot, Guru Kathiresan</owners>
+    <description>
+        Light, simple and fast convention-based code-first POCO ORM for Oracle RDBMS.
+        Support for Creating and Dropping Table Schemas from POCOs, Complex Property types transparently stored in schemaless text blobs in Oracle.
+    </description> 
+    <projectUrl>https://github.com/ServiceStack/ServiceStack.OrmLite</projectUrl>
+    <licenseUrl>https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/LICENSE</licenseUrl>
+    <iconUrl>http://www.servicestack.net/logo-100x100.png</iconUrl>
+    <tags>Oracle SQL OrmLite POCO Code-First Orm Schema-less Blobs</tags>
+    <language>en-US</language> 
+    <copyright>ServiceStack 2012 and contributors</copyright>
+    <dependencies>
+      <dependency id="ServiceStack.Common" />
+    </dependencies> 
+  </metadata> 
+</package>
