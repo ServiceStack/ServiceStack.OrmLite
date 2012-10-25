@@ -105,17 +105,15 @@ namespace ServiceStack.OrmLite
 
         public virtual SqlExpressionVisitor<T> Where(Expression<Func<T, bool>> predicate)
         {
-
             if (predicate != null)
             {
-                useFieldName = true;
-                sep = " ";
-                whereExpression = Visit(predicate).ToString();
-                if (!string.IsNullOrEmpty(whereExpression)) whereExpression = "WHERE " + whereExpression;
-                underlyingExpression = predicate;
+                And(predicate);
             }
             else
+            {
+                underlyingExpression = null;
                 whereExpression = string.Empty;
+            }
 
             return this;
         }

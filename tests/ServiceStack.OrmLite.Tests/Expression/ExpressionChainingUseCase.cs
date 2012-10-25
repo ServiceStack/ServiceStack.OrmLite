@@ -95,5 +95,29 @@ namespace ServiceStack.OrmLite.Tests.Expression
             Assert.AreEqual(5, results.Count);
             Assert.IsFalse(results.Any(x => x.FirstName == "Elvis"));
         }
+
+        [Test]
+        public void When_chaining_expressions_using_Where_it_behaves_like_And()
+        {
+            db.InsertAll(People);
+
+            var visitor = ReadExtensions.CreateExpression<Person>();
+
+            visitor.Where(x => x.FirstName.StartsWith("Jim"));
+            visitor.Where(x => x.LastName.StartsWith("Hen"));
+            //WHERE (upper("FirstName") like 'JIM%'  AND upper("LastName") like 'HEN%' )
+            var results = db.Select<Person>(visitor); 
+            Assert.AreEqual(1, results.Count);
+
+            visitor.Or(x => x.FirstName.StartsWith("M"));
+            //WHERE ((upper("FirstName") like 'JIM%'  AND upper("LastName") like 'HEN%' ) OR upper("FirstName") like 'M%' )
+            results = db.Select(visitor);
+            Assert.AreEqual(2,results.Count);
+
+            visitor.Where(x => x.FirstName.StartsWith("M"));
+            //WHERE (((upper("FirstName") like 'JIM%'  AND upper("LastName") like 'HEN%' ) OR upper("FirstName") like 'M%' ) AND upper("FirstName") like 'M%' )
+            results = db.Select(visitor);
+            Assert.AreEqual(1, results.Count);
+        }
     }
 }
