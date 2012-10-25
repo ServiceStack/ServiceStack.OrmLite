@@ -10,6 +10,11 @@ namespace ServiceStack.OrmLite
         [ThreadStatic]
         internal static string LastCommandText;
 
+        public static SqlExpressionVisitor<T> CreateExpression<T>(this IDbConnection dbConn) where T : new()
+        {
+            return dbConn.GetDialectProvider().ExpressionVisitor<T>();
+        }
+
         public static T Exec<T>(this IDbConnection dbConn, Func<IDbCommand, T> filter)
         {
             var holdProvider = OrmLiteConfig.TSDialectProvider;

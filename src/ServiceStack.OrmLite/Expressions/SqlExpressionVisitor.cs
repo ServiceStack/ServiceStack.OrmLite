@@ -11,6 +11,7 @@ namespace ServiceStack.OrmLite
 {
     public abstract class SqlExpressionVisitor<T>
     {
+        private Expression<Func<T, bool>> underlyingExpression;
         private string selectExpression = string.Empty;
         private string whereExpression;
         private string groupBy = string.Empty;
@@ -91,6 +92,7 @@ namespace ServiceStack.OrmLite
 
         public virtual SqlExpressionVisitor<T> Where()
         {
+            if (underlyingExpression != null) underlyingExpression = null; //Where() clears the expression
             return Where(string.Empty);
         }
 
@@ -103,18 +105,53 @@ namespace ServiceStack.OrmLite
 
         public virtual SqlExpressionVisitor<T> Where(Expression<Func<T, bool>> predicate)
         {
-
             if (predicate != null)
             {
-                useFieldName = true;
-                sep = " ";
-                whereExpression = Visit(predicate).ToString();
-                if (!string.IsNullOrEmpty(whereExpression)) whereExpression = "WHERE " + whereExpression;
+                And(predicate);
             }
             else
+            {
+                underlyingExpression = null;
                 whereExpression = string.Empty;
+            }
 
             return this;
+        }
+
+        public virtual SqlExpressionVisitor<T> And(Expression<Func<T, bool>> predicate)
+        {
+            if (predicate != null)
+            {
+                if (underlyingExpression == null)
+                    underlyingExpression = predicate;
+                else
+                    underlyingExpression = underlyingExpression.And(predicate);
+
+                ProcessInternalExpression();
+            }
+            return this;
+        }
+
+        public virtual SqlExpressionVisitor<T> Or(Expression<Func<T, bool>> predicate)
+        {
+            if (predicate != null)
+            {
+                if (underlyingExpression == null)
+                    underlyingExpression = predicate;
+                else
+                    underlyingExpression = underlyingExpression.Or(predicate);
+
+                ProcessInternalExpression();
+            }
+            return this;
+        }
+
+        private void ProcessInternalExpression()
+        {
+            useFieldName = true;
+            sep = " ";
+            whereExpression = Visit(underlyingExpression).ToString();
+            if (!string.IsNullOrEmpty(whereExpression)) whereExpression = "WHERE " + whereExpression;
         }
         
         public virtual SqlExpressionVisitor<T> GroupBy()
