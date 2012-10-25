@@ -93,6 +93,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Expressions\ExpressionVisitor.cs" />
+    <Compile Include="Expressions\ParameterRebinder.cs" />
+    <Compile Include="Expressions\PredicateBuilder.cs" />
     <Compile Include="Expressions\ReadConnectionExtensions.cs" />
     <Compile Include="Expressions\WriteConnectionExtensions.cs" />
     <Compile Include="ForeignKeyAttribute.cs" />

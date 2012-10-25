@@ -103,6 +103,7 @@
     <Compile Include="Expression\AdditiveExpressionsTest.cs" />
     <Compile Include="Expression\ConditionalExpressionTest.cs" />
     <Compile Include="Expression\EqualityExpressionsTest.cs" />
+    <Compile Include="Expression\ExpressionChainingUseCase.cs" />
     <Compile Include="Expression\ExpressionsTestBase.cs" />
     <Compile Include="Expression\LogicalExpressionsTest.cs" />
     <Compile Include="Expression\MultiplicativeExpressionsTest.cs" />
