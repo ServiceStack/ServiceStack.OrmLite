@@ -180,7 +180,7 @@ namespace AllDialectsTest
 					var lastDay= new DateTime(year, 12, 31);
 					int expected=5;
 
-					ev.Where(rn => rn.Birthday >= new DateTime(year, 1, 1) && rn.Birthday <= lastDay);
+					ev.Where().Where(rn => rn.Birthday >= new DateTime(year, 1, 1) && rn.Birthday <= lastDay);
 					Console.WriteLine(ev.ToSelectStatement());
 					List<Author> result=db.Select(ev);
 					Console.WriteLine(ev.WhereExpression);
@@ -197,7 +197,7 @@ namespace AllDialectsTest
 					expected = 6;
 					//Sql.In can take params object[]
 					var city="Berlin";
-					ev.Where(rn => Sql.In(rn.City, "London", "Madrid", city));
+					ev.Where().Where(rn => Sql.In(rn.City, "London", "Madrid", city)); //clean prev
 					result = db.Select(ev);
 					Console.WriteLine(ev.WhereExpression);
 					Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, result.Count, expected == result.Count ? "OK" : "**************  FAILED ***************");
@@ -211,7 +211,7 @@ namespace AllDialectsTest
 					List<Object> cities= new List<Object>();
 					cities.Add(city);
 					cities.Add("Cartagena");
-					ev.Where(rn => Sql.In(rn.City, cities));
+					ev.Where().Where(rn => Sql.In(rn.City, cities));
 					result = db.Select(ev);
 					Console.WriteLine(ev.WhereExpression);
 					Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, result.Count, expected == result.Count ? "OK" : "**************  FAILED ***************");
@@ -221,7 +221,7 @@ namespace AllDialectsTest
 
 					// select authors which name starts with A
 					expected = 3;
-					ev.Where(rn => rn.Name.StartsWith("A"));
+					ev.Where().Where(rn => rn.Name.StartsWith("A"));
 					result = db.Select(ev);
 					Console.WriteLine(ev.WhereExpression);
 					Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, result.Count, expected == result.Count ? "OK" : "**************  FAILED ***************");
@@ -231,7 +231,7 @@ namespace AllDialectsTest
 					// select authors which name ends with Garzon o GARZON o garzon ( no case sensitive )
 					expected = 3;
 					var name="GARZON";
-					ev.Where(rn => rn.Name.ToUpper().EndsWith(name));
+					ev.Where().Where(rn => rn.Name.ToUpper().EndsWith(name));
 					result = db.Select(ev);
 					Console.WriteLine(ev.WhereExpression);
 					Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, result.Count, expected == result.Count ? "OK" : "**************  FAILED ***************");
@@ -244,7 +244,7 @@ namespace AllDialectsTest
 					//An underscore ("_") in the LIKE pattern matches any single character in the string. 
 					//Any other character matches itself or its lower/upper case equivalent (i.e. case-insensitive matching).
 					expected = 3;
-					ev.Where(rn => rn.Name.EndsWith("garzon"));
+					ev.Where().Where(rn => rn.Name.EndsWith("garzon"));
 					result = db.Select(ev);
 					Console.WriteLine(ev.WhereExpression);
 					Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, result.Count, expected == result.Count ? "OK" : "**************  FAILED ***************");
@@ -255,7 +255,7 @@ namespace AllDialectsTest
 					// select authors which name contains  Benedict 
 					expected = 2;
 					name = "Benedict";
-					ev.Where(rn => rn.Name.Contains(name));
+					ev.Where().Where(rn => rn.Name.Contains(name));
 					result = db.Select(ev);
 					Console.WriteLine(ev.WhereExpression);
 					Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, result.Count, expected == result.Count ? "OK" : "**************  FAILED ***************");
@@ -269,7 +269,7 @@ namespace AllDialectsTest
 					// select authors with Earnings <= 50 
 					expected = 3;
 					var earnings=50;
-					ev.Where(rn => rn.Earnings <= earnings);
+					ev.Where().Where(rn => rn.Earnings <= earnings);
 					result = db.Select(ev);
 					Console.WriteLine(ev.WhereExpression);
 					Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, result.Count, expected == result.Count ? "OK" : "**************  FAILED ***************");
@@ -279,7 +279,7 @@ namespace AllDialectsTest
 					// select authors with Rate = 10 and city=Mexio 
 					expected = 1;
 					city = "Mexico";
-					ev.Where(rn => rn.Rate == 10 && rn.City == city);
+					ev.Where().Where(rn => rn.Rate == 10 && rn.City == city);
 					result = db.Select(ev);
 					Console.WriteLine(ev.WhereExpression);
 					Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, result.Count, expected == result.Count ? "OK" : "**************  FAILED ***************");
@@ -294,7 +294,7 @@ namespace AllDialectsTest
 					// set Active=false where rate =0
 					expected = 2;
 					var rate=0;
-					ev.Where(rn => rn.Rate == rate).Update(rn => rn.Active);
+					ev.Where().Where(rn => rn.Rate == rate).Update(rn => rn.Active);
 					var rows = db.UpdateOnly(new Author() { Active = false }, ev);
 					Console.WriteLine(ev.WhereExpression);
 					Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, rows, expected == rows ? "OK" : "**************  FAILED ***************");
@@ -304,14 +304,14 @@ namespace AllDialectsTest
 					ev.Insert(rn => new { rn.Id, rn.Name, rn.Birthday, rn.Active, rn.Rate });
 					db.InsertOnly(new Author() { Active = false, Rate = 0, Name = "Victor Grozny", Birthday = DateTime.Today.AddYears(-18) }, ev);
 					db.InsertOnly(new Author() { Active = false, Rate = 0, Name = "Ivan Chorny", Birthday = DateTime.Today.AddYears(-19) }, ev);
-					ev.Where(rn => !rn.Active);
+					ev.Where().Where(rn => !rn.Active);
 					result = db.Select(ev);
 					Console.WriteLine(ev.WhereExpression);
 					Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, result.Count, expected == result.Count ? "OK" : "**************  FAILED ***************");
 
 					//update comment for City == null 
 					expected = 2;
-					ev.Where(rn => rn.City == null).Update(rn => rn.Comments);
+					ev.Where().Where(rn => rn.City == null).Update(rn => rn.Comments);
 					rows = db.UpdateOnly(new Author() { Comments = "No comments" }, ev);
 					Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, rows, expected == rows ? "OK" : "**************  FAILED ***************");
 
@@ -549,12 +549,12 @@ namespace AllDialectsTest
                     var rr= db.FirstOrDefault<Author>(rn => rn.Name=="Luis garzon");
                     rr.City="Madrid";
                     rr.Comments="Updated";
-                    ev.Where(r=>r.Id==rr.Id); // if omit,  then all records will be updated 
+                    ev.Where().Where(r=>r.Id==rr.Id); // if omit,  then all records will be updated 
                     rows=db.UpdateOnly(rr,ev); // == dbCmd.Update(rr) but it returns void
                     Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, rows, expected == rows ? "OK" : "**************  FAILED ***************");
 
                     expected=0;
-                    ev.Where(r=>r.City=="Ciudad Gotica");
+                    ev.Where().Where(r=>r.City=="Ciudad Gotica");
                     rows=db.UpdateOnly(rr, ev);
                     Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, rows, expected == rows ? "OK" : "**************  FAILED ***************");
 
