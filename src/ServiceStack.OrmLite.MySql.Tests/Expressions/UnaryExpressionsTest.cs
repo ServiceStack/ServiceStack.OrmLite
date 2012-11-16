@@ -178,6 +178,56 @@ namespace ServiceStack.OrmLite.MySql.Tests.Expressions
             CollectionAssert.Contains(actual, expected);
         }
 
+        [Test]
+        public void Can_select_unary_cast_variable_with_explicit_userdefined_type_conversion_expression()
+        {
+            // ReSharper disable ConvertToConstant.Local
+            var intVal = 12;
+            // ReSharper restore ConvertToConstant.Local
+
+            var expected = new TestType()
+            {
+                IntColumn = 12,
+                BoolColumn = true,
+                StringColumn = "test"
+            };
+
+            EstablishContext(10, expected);
+
+            var value = new IntWrapper(intVal);
+
+            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.IntColumn == (int)value);
+
+            Assert.IsNotNull(actual);
+            Assert.AreEqual(1, actual.Count);
+            CollectionAssert.Contains(actual, expected);
+        }
+
+        [Test]
+        public void Can_select_unary_cast_variable_with_implicit_userdefined_type_conversion_expression()
+        {
+            // ReSharper disable ConvertToConstant.Local
+            var intVal = 12;
+            // ReSharper restore ConvertToConstant.Local
+
+            var expected = new TestType()
+            {
+                IntColumn = 12,
+                BoolColumn = true,
+                StringColumn = "test"
+            };
+
+            EstablishContext(10, expected);
+
+            var value = new IntWrapper(intVal);
+
+            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.IntColumn == value);
+
+            Assert.IsNotNull(actual);
+            Assert.AreEqual(1, actual.Count);
+            CollectionAssert.Contains(actual, expected);
+        }
+
         #endregion
 
         #region method
@@ -221,5 +271,25 @@ namespace ServiceStack.OrmLite.MySql.Tests.Expressions
         }
 
         #endregion
+    }
+
+    public struct IntWrapper
+    {
+        private readonly int _id;
+
+        public IntWrapper(int projectId)
+        {
+            _id = projectId;
+        }
+
+        public static explicit operator IntWrapper(int value)
+        {
+            return new IntWrapper(value);
+        }
+
+        public static implicit operator int(IntWrapper value)
+        {
+            return value._id;
+        }
     }
 }

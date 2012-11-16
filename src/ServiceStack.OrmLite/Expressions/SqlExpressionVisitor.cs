@@ -773,9 +773,13 @@ namespace ServiceStack.OrmLite
                         o = o + "=" +  GetQuotedTrueValue();
 
                     return new PartialSqlString("NOT (" + o + ")");
-                default:
-                    return Visit(u.Operand);
+                case ExpressionType.Convert:
+                    if (u.Method != null)
+                        return Expression.Lambda(u).Compile().DynamicInvoke();
+                    break;
             }
+
+            return Visit(u.Operand);
 
         }
 
