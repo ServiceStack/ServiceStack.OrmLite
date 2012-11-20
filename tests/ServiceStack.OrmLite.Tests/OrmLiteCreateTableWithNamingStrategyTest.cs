@@ -101,6 +101,26 @@ namespace ServiceStack.OrmLite.Tests
 			OrmLiteConfig.DialectProvider.NamingStrategy= new OrmLiteNamingStrategyBase();
 		}
 		
+		[Test]
+		public void Can_get_data_from_TableWithUnderscoreSeparatedCompoundNamingStrategy_with_ReadConnectionExtension()
+		{
+			OrmLiteConfig.DialectProvider.NamingStrategy = new UnderscoreSeparatedCompoundNamingStrategy();
+
+			using (var db = ConnectionString.OpenDbConnection())
+			{
+				db.CreateTable<ModelWithOnlyStringFields>(true);
+				var m = new ModelWithOnlyStringFields
+							{
+								Id = "997",
+								AlbumId = "112",
+								AlbumName = "ElectroShip",
+								Name = "ReadConnectionExtensionFirst"
+							};
+				db.Save(m);
+				var modelFromDb = db.First<ModelWithOnlyStringFields>(x => x.Name == "ReadConnectionExtensionFirst");
+				Assert.AreEqual(m.AlbumName, modelFromDb.AlbumName);
+			}
+		}
 		
 		[Test]
 		public void Can_get_data_from_TableWithNamigStrategy_AfterChangingNamingStrategy()
