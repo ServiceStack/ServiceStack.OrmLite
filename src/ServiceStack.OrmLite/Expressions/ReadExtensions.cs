@@ -120,7 +120,8 @@ namespace ServiceStack.OrmLite
 				{
 					var row = new T();					
 					for (int i = 0; i<dataReader.FieldCount; i++)
-					{						
+					{
+						//Bug: Not respecting the dialect's naming strategy
 						var fieldDef = fieldDefs.FirstOrDefault(
 							x => x.FieldName.ToUpper() == dataReader.GetName(i).ToUpper());
 
@@ -153,6 +154,7 @@ namespace ServiceStack.OrmLite
 						FieldDefinition fieldDef;
 						if (!fieldDefCache.TryGetValue(i, out fieldDef))
 						{
+							//Bug: Not respecting the dialect's naming strategy
 						 	fieldDef = fieldDefs.FirstOrDefault(
 								x => x.FieldName.ToUpper() == dataReader.GetName(i).ToUpper());
 							fieldDefCache[i] = fieldDef;
