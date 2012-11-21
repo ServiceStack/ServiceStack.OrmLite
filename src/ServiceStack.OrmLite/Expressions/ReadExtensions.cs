@@ -118,12 +118,16 @@ namespace ServiceStack.OrmLite
 			{
 				if (dataReader.Read())
 				{
-					var row = new T();					
+					var row = new T();
+
+				    var namingStrategy = OrmLiteConfig.DialectProvider.NamingStrategy;
+
 					for (int i = 0; i<dataReader.FieldCount; i++)
 					{
-						//Bug: Not respecting the dialect's naming strategy
-						var fieldDef = fieldDefs.FirstOrDefault(
-							x => x.FieldName.ToUpper() == dataReader.GetName(i).ToUpper());
+					    var fieldDef = fieldDefs.FirstOrDefault(
+					        x =>
+					        namingStrategy.GetColumnName(x.FieldName).ToUpper() ==
+					        dataReader.GetName(i).ToUpper());
 
 						if (fieldDef == null) continue;
 						var value = dataReader.GetValue(i);
@@ -149,14 +153,17 @@ namespace ServiceStack.OrmLite
 				{
 					var row = new T();
 
+                    var namingStrategy = OrmLiteConfig.DialectProvider.NamingStrategy;
+
 					for (int i = 0; i<dataReader.FieldCount; i++)
 					{
 						FieldDefinition fieldDef;
 						if (!fieldDefCache.TryGetValue(i, out fieldDef))
 						{
-							//Bug: Not respecting the dialect's naming strategy
-						 	fieldDef = fieldDefs.FirstOrDefault(
-								x => x.FieldName.ToUpper() == dataReader.GetName(i).ToUpper());
+						    fieldDef = fieldDefs.FirstOrDefault(
+						        x =>
+						        namingStrategy.GetColumnName(x.FieldName).ToUpper() ==
+						        dataReader.GetName(i).ToUpper());
 							fieldDefCache[i] = fieldDef;
 						}
 
