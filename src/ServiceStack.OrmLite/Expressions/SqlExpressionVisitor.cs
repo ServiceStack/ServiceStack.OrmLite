@@ -12,6 +12,7 @@ namespace ServiceStack.OrmLite
     public abstract class SqlExpressionVisitor<T>
     {
         private Expression<Func<T, bool>> underlyingExpression;
+        private List<string> orderByProperties = new List<string>(); 
         private string selectExpression = string.Empty;
         private string whereExpression;
         private string groupBy = string.Empty;
@@ -212,6 +213,7 @@ namespace ServiceStack.OrmLite
 
         public virtual SqlExpressionVisitor<T> OrderBy(string orderBy)
         {
+            orderByProperties.Clear();
             this.orderBy = orderBy;
             return this;
         }
@@ -220,8 +222,20 @@ namespace ServiceStack.OrmLite
         {
             sep = string.Empty;
             useFieldName = true;
-            orderBy = Visit(keySelector).ToString();
-            if (!string.IsNullOrEmpty(orderBy)) orderBy = string.Format("ORDER BY {0}", orderBy);
+            orderByProperties.Clear();
+            var property  = Visit(keySelector).ToString();
+            orderByProperties.Add(property + " ASC");
+            BuildOrderByClauseInternal();
+            return this;
+        }
+
+        public virtual SqlExpressionVisitor<T> ThenBy<TKey> (Expression<Func<T,TKey>> keySelector)
+        {
+            sep = string.Empty;
+            useFieldName = true;
+            var property = Visit(keySelector).ToString();
+            orderByProperties.Add(property + " ASC");
+            BuildOrderByClauseInternal();
             return this;
         }
 
@@ -229,9 +243,38 @@ namespace ServiceStack.OrmLite
         {
             sep = string.Empty;
             useFieldName = true;
-            orderBy = Visit(keySelector).ToString();
-            if (!string.IsNullOrEmpty(orderBy)) orderBy = string.Format("ORDER BY {0} DESC", orderBy);
+            orderByProperties.Clear();
+            var property = Visit(keySelector).ToString();
+            orderByProperties.Add(property + " DESC");
+            BuildOrderByClauseInternal();
             return this;
+        }
+
+        public virtual SqlExpressionVisitor<T> ThenByDescending<TKey>(Expression<Func<T, TKey>> keySelector)
+        {
+            sep = string.Empty;
+            useFieldName = true;
+            var property = Visit(keySelector).ToString();
+            orderByProperties.Add(property + " DESC");
+            BuildOrderByClauseInternal();
+            return this;
+        }
+
+        private void BuildOrderByClauseInternal()
+        {
+            if (orderByProperties.Count > 0)
+            {
+                orderBy = "ORDER BY ";
+                foreach(var prop in orderByProperties)
+                {
+                    orderBy += prop + ",";
+                }
+                orderBy = orderBy.TrimEnd(',');
+            }
+            else
+            {
+                orderBy = null;
+            }
         }
 
 
