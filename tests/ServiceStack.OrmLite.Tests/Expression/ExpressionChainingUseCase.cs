@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
 using System.Linq;
 using NUnit.Framework;
 namespace ServiceStack.OrmLite.Tests.Expression
@@ -43,6 +44,11 @@ namespace ServiceStack.OrmLite.Tests.Expression
             public string FirstName { get; set; }
             public string LastName { get; set; }
             public int? Age { get; set; }
+
+            public override string ToString()
+            {
+                return string.Format("Id: {0}, FirstName: {1}, LastName: {2}, Age: {3}", Id, FirstName, LastName, Age);
+            }
         }
 
         private IDbConnection db;
@@ -54,7 +60,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                                          new Person(3, "Jim", "Morrisson", 27),
                                          new Person(4, "Kurt", "Cobain", 27),
                                          new Person(5, "Elvis", "Presley", 42),
-                                         new Person(6, "Michael", "Jackson", 50),
+                                         new Person(6, "Michael", "Jackson", 50)
                                      };
 
         [Test]
@@ -118,6 +124,66 @@ namespace ServiceStack.OrmLite.Tests.Expression
             //WHERE (((upper("FirstName") like 'JIM%'  AND upper("LastName") like 'HEN%' ) OR upper("FirstName") like 'M%' ) AND upper("FirstName") like 'M%' )
             results = db.Select(visitor);
             Assert.AreEqual(1, results.Count);
+        }
+
+        [Test]
+        public void Can_Chain_Order_Expressions_using_ThenBy()
+        {
+            db.InsertAll(People);
+
+            var visitor = ReadExtensions.CreateExpression<Person>();
+            visitor.OrderBy(x => x.Age);
+            visitor.ThenBy(x => x.FirstName);
+
+            var results = db.Select(visitor);
+
+            Console.WriteLine("Sorting using Linq");
+            var expected = People.OrderBy(x => x.Age).ThenBy(x => x.FirstName).ToList();
+            foreach (var e in expected)
+            {
+                Console.WriteLine(e.ToString());
+            }
+
+            Console.WriteLine("Retrieved from DB");
+            foreach (var r in results)
+            {
+                Console.WriteLine(r.ToString());
+            }
+
+            for (int i = 0; i < expected.Count();i++)
+            {
+                if (results[i].Id != expected[i].Id)
+                {
+                    Assert.Fail("Expected person with id {0}, got {1}",expected[i].Id,results[i].Id);
+                }
+            }
+
+            visitor.OrderBy(); //clears orderBy Expression
+
+            visitor.OrderBy(x => x.Age);
+            visitor.ThenByDescending(x => x.FirstName);
+            results = db.Select(visitor);
+
+            Console.WriteLine("Sorting using Linq");
+            expected = People.OrderBy(x => x.Age).ThenByDescending(x => x.FirstName).ToList();
+            foreach (var e in expected)
+            {
+                Console.WriteLine(e.ToString());
+            }
+
+            Console.WriteLine("Retrieved from DB");
+            foreach (var r in results)
+            {
+                Console.WriteLine(r.ToString());
+            }
+
+            for (int i = 0; i < expected.Count(); i++)
+            {
+                if (results[i].Id != expected[i].Id)
+                {
+                    Assert.Fail("Expected person with id {0}, got {1}", expected[i].Id, results[i].Id);
+                }
+            }
         }
     }
 }
