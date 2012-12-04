@@ -39,8 +39,21 @@ Effectively this allows you to create a table from any POCO type and it should p
   - [Sqlite64](http://nuget.org/List/Packages/ServiceStack.OrmLite.Sqlite64) - 64bit Mixed mode .NET only assembly 
   - [Sqlite.Mono](http://nuget.org/packages/ServiceStack.OrmLite.Sqlite.Mono) - 32bit unmanaged dll, compatible with .NET / Mono
 
-OrmLite is also included in [ServiceStack](https://github.com/ServiceStack/ServiceStack/downloads) or available to download separately in 
-[/downloads](https://github.com/ServiceStack/ServiceStack.OrmLite/downloads).
+OrmLite.SqlServer is also included in [ServiceStack](https://github.com/ServiceStack/ServiceStack/downloads).
+
+## Download published NuGet binaries without NuGet
+
+For environments that doesn't have NuGet installed (e.g. OSX/Linux) you can still download the published binaries by 
+extracting them from the published NuGet packages. The url to download a nuget package is: 
+
+    http://packages.nuget.org/api/v1/package/{PackageName}/{Version}
+    
+ So to get the OrmLite MySQL provider in OSX/Linux (or using gnu tools for Windows) you can just do:
+
+    wget -O OrmLite.MySql.zip http://packages.nuget.org/api/v1/package/ServiceStack.OrmLite.MySql/3.9.28
+    unzip OrmLite.MySql.zip 'lib/*'
+
+which will download and extract the dlls into your local local `lib/` folder.
 
 ## New Simplified API
 We've streamlined our API, now all OrmLite extensions that used to be on `IDbCommand` now hang off `IDbConnection` 
