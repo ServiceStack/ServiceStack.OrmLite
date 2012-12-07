@@ -691,7 +691,7 @@ namespace ServiceStack.OrmLite
                 left = Visit(b.Left);
                 right = Visit(b.Right);
 
-                if (left as EnumMemberAccess != null)
+                if (left as EnumMemberAccess != null && right as PartialSqlString == null)
                 {
                     var enumType = ((EnumMemberAccess)left).EnumType;
 
@@ -703,7 +703,7 @@ namespace ServiceStack.OrmLite
                     else
                         right = OrmLiteConfig.DialectProvider.GetQuotedValue(right, right.GetType());
                 }
-                else if (right as EnumMemberAccess != null)
+                else if (right as EnumMemberAccess != null && left as PartialSqlString == null)
                 {
                     var enumType = ((EnumMemberAccess)right).EnumType;
 
