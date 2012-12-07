@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 
 namespace ServiceStack.OrmLite.Tests
@@ -82,6 +83,33 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.AreEqual(2, target.Count());
             }
         }
+
+        [Test]
+        public void can_select_enum_equals_other_enum()
+        {
+            using (var connection = ConnectionString.OpenDbConnection())
+            {
+                connection.CreateTable<DoubleState>();
+                connection.Insert(new DoubleState() { Id = "1", State1 = DoubleState.State.OK, State2 = DoubleState.State.KO });
+                connection.Insert(new DoubleState() { Id = "2", State1 = DoubleState.State.OK, State2 = DoubleState.State.OK });
+                IEnumerable<DoubleState> doubleStates = connection.Select<DoubleState>(x => x.State1 != x.State2);
+                Assert.AreEqual(1, doubleStates.Count());
+            }
+        }
+    }
+
+
+    public class DoubleState
+    {
+        public enum State
+        {
+            OK,
+            KO
+        }
+
+        public string Id { get; set; }
+        public State State1 { get; set; }
+        public State State2 { get; set; }
     }
 
     public enum SomeEnum
