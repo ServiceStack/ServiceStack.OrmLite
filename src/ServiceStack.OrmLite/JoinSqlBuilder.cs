@@ -10,8 +10,7 @@ namespace ServiceStack.OrmLite
         private List<Join> joinList = new List<Join>();
         private List<KeyValuePair<string, WhereType>> whereList = new List<KeyValuePair<string, WhereType>>();
         private List<string> columnList = new List<string>();
-        private List<string> orderByList = new List<string>();
-        private List<string> orderByDescList = new List<string>();
+        private List<KeyValuePair<string, bool>> orderByList = new List<KeyValuePair<string, bool>>();
 
         private string baseTableName = "";
 
@@ -148,10 +147,9 @@ namespace ServiceStack.OrmLite
                 throw new Exception("Either the source or destination table should be associated ");
             }
 
-            if (byDesc)
-                this.orderByDescList.AddRange(ColumnList(associatedType.GetModelDefinition().ModelName, orderByColumns));
-            else
-                this.orderByList.AddRange(ColumnList(associatedType.GetModelDefinition().ModelName, orderByColumns));
+            var lst = ColumnList(associatedType.GetModelDefinition().ModelName, orderByColumns);
+            foreach (var item in lst)
+                    orderByList.Add(new KeyValuePair<string,bool>(item,!byDesc));
             return this;
         }
 
@@ -161,7 +159,6 @@ namespace ServiceStack.OrmLite
             whereList.Clear();
             columnList.Clear();
             orderByList.Clear();
-            orderByDescList.Clear();
             return this;
         }
 
@@ -330,16 +327,12 @@ namespace ServiceStack.OrmLite
                 sb.Append("WHERE " + whereSB.ToString() + " \n");
             }
 
-            if (orderByList.Count > 0 || orderByDescList.Count > 0 )
+            if (orderByList.Count > 0 )
             {
                 var orderBySB = new StringBuilder();
                 foreach (var ob in orderByList)
                 {
-                    orderBySB.AppendFormat("{0}{1} ASC ", orderBySB.Length > 0 ? "," : "", ob);
-                }
-                foreach (var obd in orderByDescList)
-                {
-                    orderBySB.AppendFormat("{0}{1} DESC ", orderBySB.Length > 0 ? "," : "", obd);
+                    orderBySB.AppendFormat("{0}{1} {2} ", orderBySB.Length > 0 ? "," : "", ob.Key, ob.Value ? "ASC" : "DESC");
                 }
                 sb.Append("ORDER BY " + orderBySB.ToString()+" \n");
             }

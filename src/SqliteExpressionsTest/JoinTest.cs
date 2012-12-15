@@ -114,6 +114,7 @@ namespace SqliteExpressionsTest
                        .LeftOuterJoin<User, UserService>(x => x.UserServiceId, x => x.Id)
                        .OrderByDescending<User>(x => x.Name)
                        .OrderBy<User>(x => x.Id)
+                       .OrderByDescending<UserService>(x => x.ServiceName)
                        .Where<User>(x => x.Id > 0)
                        .Or<User>(x => x.Id < 10)
                        .And<User>(x => x.Name != "" || x.Name != null);
