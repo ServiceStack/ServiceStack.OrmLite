@@ -99,8 +99,8 @@ namespace SqliteExpressionsTest
                 var rowsB1 = dbCmd.Select<User>(user => user.Name == "B");
 
                 var jn = new JoinSqlBuilder<UserEx, User>();
-                jn = jn.InnerJoin<User, UserData>(x => x.UserDataId, x => x.Id, x => new { x.Name, x.Id }, x => new { x.UserDataValue })
-                       .LeftOuterJoin<User, UserService>(x => x.UserServiceId, x => x.Id, null, x => new { x.ServiceName })
+                jn = jn.Join<User, UserData>(x => x.UserDataId, x => x.Id, x => new { x.Name, x.Id }, x => new { x.UserDataValue })
+                       .LeftJoin<User, UserService>(x => x.UserServiceId, x => x.Id, null, x => new { x.ServiceName })
                        .OrderByDescending<User>(x=>x.Name)
                        .OrderBy<User>(x=>x.Id)
                        .Select<User>(x=>x.Id)
@@ -110,8 +110,11 @@ namespace SqliteExpressionsTest
                 var items = db.Query<UserEx>(sql);
                 
                 jn.Clear();
-                jn = jn.InnerJoin<User, UserData>(x => x.UserDataId, x => x.Id)
-                       .LeftOuterJoin<User, UserService>(x => x.UserServiceId, x => x.Id)
+                jn = jn.Join<User, UserData>(x => x.UserDataId, x => x.Id)
+                       .LeftJoin<User, UserService>(x => x.UserServiceId, x => x.Id)
+                       .RightJoin<User, UserService>(x => x.UserServiceId, x => x.Id)
+                       .SelfJoin<User>(x => x.UserServiceId, x => x.Id)
+                       .CrossJoin<User, UserService>(x => x.UserServiceId, x => x.Id)
                        .OrderByDescending<User>(x => x.Name)
                        .OrderBy<User>(x => x.Id)
                        .OrderByDescending<UserService>(x => x.ServiceName)

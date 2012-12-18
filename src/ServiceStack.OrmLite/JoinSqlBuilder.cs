@@ -13,10 +13,12 @@ namespace ServiceStack.OrmLite
         private List<KeyValuePair<string, bool>> orderByList = new List<KeyValuePair<string, bool>>();
 
         private string baseTableName = "";
+        private Type basePocoType;
 
         public JoinSqlBuilder()
         {
-            baseTableName = typeof(TBasePoco).GetModelDefinition().ModelName;
+            basePocoType = typeof(TBasePoco);
+            baseTableName = basePocoType.GetModelDefinition().ModelName;
         }
 
         private string Column<T>(string tableName, Expression<Func<T, object>> func)
@@ -173,22 +175,22 @@ namespace ServiceStack.OrmLite
             return OrderByInternal<T>(true, sourceColumn);
         }
 
-        public JoinSqlBuilder<TNewPoco, TBasePoco> InnerJoin<TSourceTable, TDestinationTable>(Expression<Func<TSourceTable, object>> sourceColumn, Expression<Func<TDestinationTable, object>> destinationColumn, Expression<Func<TSourceTable, object>> sourceTableColumnSelection = null, Expression<Func<TDestinationTable, object>> destinationTableColumnSelection = null, Expression<Func<TSourceTable, bool>> sourceWhere = null, Expression<Func<TDestinationTable, bool>> destinationWhere = null)
+        public JoinSqlBuilder<TNewPoco, TBasePoco> Join<TSourceTable, TDestinationTable>(Expression<Func<TSourceTable, object>> sourceColumn, Expression<Func<TDestinationTable, object>> destinationColumn, Expression<Func<TSourceTable, object>> sourceTableColumnSelection = null, Expression<Func<TDestinationTable, object>> destinationTableColumnSelection = null, Expression<Func<TSourceTable, bool>> sourceWhere = null, Expression<Func<TDestinationTable, bool>> destinationWhere = null)
         {
             return JoinInternal<Join, TSourceTable, TDestinationTable>(JoinType.INNER,joinList, sourceColumn, destinationColumn, sourceTableColumnSelection, destinationTableColumnSelection, sourceWhere, destinationWhere);
         }
 
-        public JoinSqlBuilder<TNewPoco, TBasePoco> LeftOuterJoin<TSourceTable, TDestinationTable>(Expression<Func<TSourceTable, object>> sourceColumn, Expression<Func<TDestinationTable, object>> destinationColumn, Expression<Func<TSourceTable, object>> sourceTableColumnSelection = null, Expression<Func<TDestinationTable, object>> destinationTableColumnSelection = null, Expression<Func<TSourceTable, bool>> sourceWhere = null, Expression<Func<TDestinationTable, bool>> destinationWhere = null)
+        public JoinSqlBuilder<TNewPoco, TBasePoco> LeftJoin<TSourceTable, TDestinationTable>(Expression<Func<TSourceTable, object>> sourceColumn, Expression<Func<TDestinationTable, object>> destinationColumn, Expression<Func<TSourceTable, object>> sourceTableColumnSelection = null, Expression<Func<TDestinationTable, object>> destinationTableColumnSelection = null, Expression<Func<TSourceTable, bool>> sourceWhere = null, Expression<Func<TDestinationTable, bool>> destinationWhere = null)
         {
             return JoinInternal<Join, TSourceTable, TDestinationTable>(JoinType.LEFTOUTER,joinList, sourceColumn, destinationColumn, sourceTableColumnSelection, destinationTableColumnSelection, sourceWhere, destinationWhere);
         }
 
-        public JoinSqlBuilder<TNewPoco, TBasePoco> RightOuterJoin<TSourceTable, TDestinationTable>(Expression<Func<TSourceTable, object>> sourceColumn, Expression<Func<TDestinationTable, object>> destinationColumn, Expression<Func<TSourceTable, object>> sourceTableColumnSelection = null, Expression<Func<TDestinationTable, object>> destinationTableColumnSelection = null, Expression<Func<TSourceTable, bool>> sourceWhere = null, Expression<Func<TDestinationTable, bool>> destinationWhere = null)
+        public JoinSqlBuilder<TNewPoco, TBasePoco> RightJoin<TSourceTable, TDestinationTable>(Expression<Func<TSourceTable, object>> sourceColumn, Expression<Func<TDestinationTable, object>> destinationColumn, Expression<Func<TSourceTable, object>> sourceTableColumnSelection = null, Expression<Func<TDestinationTable, object>> destinationTableColumnSelection = null, Expression<Func<TSourceTable, bool>> sourceWhere = null, Expression<Func<TDestinationTable, bool>> destinationWhere = null)
         {
             return JoinInternal<Join, TSourceTable, TDestinationTable>(JoinType.RIGHTOUTER, joinList, sourceColumn, destinationColumn, sourceTableColumnSelection, destinationTableColumnSelection, sourceWhere, destinationWhere);
         }
 
-        public JoinSqlBuilder<TNewPoco, TBasePoco> FullOuterJoin<TSourceTable, TDestinationTable>(Expression<Func<TSourceTable, object>> sourceColumn, Expression<Func<TDestinationTable, object>> destinationColumn, Expression<Func<TSourceTable, object>> sourceTableColumnSelection = null, Expression<Func<TDestinationTable, object>> destinationTableColumnSelection = null, Expression<Func<TSourceTable, bool>> sourceWhere = null, Expression<Func<TDestinationTable, bool>> destinationWhere = null)
+        public JoinSqlBuilder<TNewPoco, TBasePoco> FullJoin<TSourceTable, TDestinationTable>(Expression<Func<TSourceTable, object>> sourceColumn, Expression<Func<TDestinationTable, object>> destinationColumn, Expression<Func<TSourceTable, object>> sourceTableColumnSelection = null, Expression<Func<TDestinationTable, object>> destinationTableColumnSelection = null, Expression<Func<TSourceTable, bool>> sourceWhere = null, Expression<Func<TDestinationTable, bool>> destinationWhere = null)
         {
             return JoinInternal<Join, TSourceTable, TDestinationTable>(JoinType.FULLOUTER, joinList, sourceColumn, destinationColumn, sourceTableColumnSelection, destinationTableColumnSelection, sourceWhere, destinationWhere);
         }
@@ -196,6 +198,11 @@ namespace ServiceStack.OrmLite
         public JoinSqlBuilder<TNewPoco, TBasePoco> SelfJoin<TSourceTable>(Expression<Func<TSourceTable, object>> sourceColumn, Expression<Func<TSourceTable, object>> destinationColumn, Expression<Func<TSourceTable, object>> sourceTableColumnSelection = null, Expression<Func<TSourceTable, object>> destinationTableColumnSelection = null, Expression<Func<TSourceTable, bool>> sourceWhere = null, Expression<Func<TSourceTable, bool>> destinationWhere = null)
         {
             return JoinInternal<Join, TSourceTable, TSourceTable>(JoinType.INNER, joinList, sourceColumn, destinationColumn, sourceTableColumnSelection, destinationTableColumnSelection, sourceWhere, destinationWhere);
+        }
+
+        public JoinSqlBuilder<TNewPoco, TBasePoco> CrossJoin<TSourceTable, TDestinationTable>(Expression<Func<TSourceTable, object>> sourceTableColumnSelection = null, Expression<Func<TDestinationTable, object>> destinationTableColumnSelection = null, Expression<Func<TSourceTable, bool>> sourceWhere = null, Expression<Func<TDestinationTable, bool>> destinationWhere = null)
+        {
+            return JoinInternal<Join, TSourceTable, TDestinationTable>(JoinType.CROSS, joinList, null, null, sourceTableColumnSelection, destinationTableColumnSelection, sourceWhere, destinationWhere);
         }
 
         private JoinSqlBuilder<TNewPoco, TBasePoco> JoinInternal<TJoin, TSourceTable, TDestinationTable>(JoinType joinType, List<TJoin> joinObjList, Expression<Func<TSourceTable, object>> sourceColumn, Expression<Func<TDestinationTable, object>> destinationColumn, Expression<Func<TSourceTable, object>> sourceTableColumnSelection, Expression<Func<TDestinationTable, object>> destinationTableColumnSelection, Expression<Func<TSourceTable, bool>> sourceWhere = null, Expression<Func<TDestinationTable, bool>> destinationWhere = null) where TJoin : Join, new()
@@ -219,8 +226,12 @@ namespace ServiceStack.OrmLite
             join.Class1TableName = join.Class1Type.GetModelDefinition().ModelName;
             join.Class2TableName = join.Class2Type.GetModelDefinition().ModelName;
             join.RefTypeTableName = join.RefType.GetModelDefinition().ModelName;
-            join.Class1ColumnName = Column<TSourceTable>(join.Class1TableName,sourceColumn);
-            join.Class2ColumnName = Column<TDestinationTable>(join.Class2TableName,destinationColumn);
+            
+            if (join.JoinType != JoinType.CROSS)
+            {
+                join.Class1ColumnName = Column<TSourceTable>(join.Class1TableName, sourceColumn);
+                join.Class2ColumnName = Column<TDestinationTable>(join.Class2TableName, destinationColumn);
+            }
 
             if (sourceTableColumnSelection != null)
             {
@@ -256,9 +267,9 @@ namespace ServiceStack.OrmLite
 
         private Type PreviousAssociatedType(Type sourceTableType, Type destinationTableType)
         {
-            if (sourceTableType == typeof(TBasePoco) || destinationTableType == typeof(TBasePoco))
+            if (sourceTableType == basePocoType || destinationTableType == basePocoType)
             {
-                return typeof(TBasePoco);
+                return basePocoType;
             }
 
             foreach (var j in joinList)
@@ -313,8 +324,15 @@ namespace ServiceStack.OrmLite
                     sb.Append(" RIGHT OUTER JOIN ");
                 else if (join.JoinType == JoinType.FULLOUTER)
                     sb.Append(" FULL OUTER JOIN ");
+                else if (join.JoinType == JoinType.CROSS)
+                {
+                    sb.Append(" CROSS JOIN ");
+                }
 
-                sb.AppendFormat(" {0} ON {1} = {2}  \n", join.RefTypeTableName, join.Class1ColumnName, join.Class2ColumnName);
+                if (join.JoinType == JoinType.CROSS)
+                    sb.AppendFormat(" {0} ON {1} = {2}  \n", join.RefTypeTableName);
+                else
+                    sb.AppendFormat(" {0} ON {1} = {2}  \n", join.RefTypeTableName, join.Class1ColumnName, join.Class2ColumnName);
             }
 
             if (whereList.Count > 0)
@@ -353,7 +371,8 @@ namespace ServiceStack.OrmLite
         INNER,
         LEFTOUTER,
         RIGHTOUTER,
-        FULLOUTER
+        FULLOUTER,
+        CROSS
     }
 
     class Join
