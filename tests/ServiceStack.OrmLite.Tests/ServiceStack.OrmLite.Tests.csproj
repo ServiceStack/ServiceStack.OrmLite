@@ -118,6 +118,7 @@
     <Compile Include="OrmLiteQueryTests.cs" />
     <Compile Include="LocalizationTests.cs" />
     <Compile Include="OrmLiteConnectionFactoryTests.cs" />
+    <Compile Include="OrmLiteUtilExtensionsTests.cs" />
     <Compile Include="ShippersExample.cs" />
     <Compile Include="NorthwindPerfTests.cs" />
     <Compile Include="OrmLiteComplexTypesTests.cs" />
