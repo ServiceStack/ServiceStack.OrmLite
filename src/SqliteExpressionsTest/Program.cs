@@ -44,7 +44,10 @@ namespace SqliteExpressionsTest
 		public static void Main (string[] args)
 		{
 			Console.WriteLine ("Hello World!");
-			
+
+            Console.WriteLine("Join Test");
+            JoinTest.Test();
+
 			OrmLiteConfig.DialectProvider = SqliteOrmLiteDialectProvider.Instance;
 			SqlExpressionVisitor<Author> ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<Author>();
 									

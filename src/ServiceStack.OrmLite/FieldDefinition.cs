@@ -76,6 +76,7 @@ namespace ServiceStack.OrmLite
 
         public string ComputeExpression { get; set; }
 
+        public string BelongToModelName { get; set; }
     }
 
     public class ForeignKeyConstraint
