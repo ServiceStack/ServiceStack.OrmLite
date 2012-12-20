@@ -25,7 +25,9 @@ namespace ServiceStack.OrmLite
         private string sep = string.Empty;
         private bool useFieldName = false;
         private ModelDefinition modelDef;
-        
+        public bool PrefixFieldWithTableName {get;set;}
+        public bool WhereStatementWithoutWhereString { get; set; }
+
         protected string Sep
         {
             get { return sep; }
@@ -34,6 +36,8 @@ namespace ServiceStack.OrmLite
         public SqlExpressionVisitor()
         {
             modelDef = typeof(T).GetModelDefinition();
+            PrefixFieldWithTableName = false;
+            WhereStatementWithoutWhereString = false;
         }
 
         /// <summary>
@@ -100,7 +104,7 @@ namespace ServiceStack.OrmLite
         public virtual SqlExpressionVisitor<T> Where(string sqlFilter, params object[] filterParams)
         {
             whereExpression = !string.IsNullOrEmpty(sqlFilter) ? sqlFilter.SqlFormat(filterParams) : string.Empty;
-            if (!string.IsNullOrEmpty(whereExpression)) whereExpression = "WHERE " + whereExpression;
+            if (!string.IsNullOrEmpty(whereExpression)) whereExpression = (WhereStatementWithoutWhereString ? "" : "WHERE ") + whereExpression;
             return this;
         }
 
@@ -152,7 +156,7 @@ namespace ServiceStack.OrmLite
             useFieldName = true;
             sep = " ";
             whereExpression = Visit(underlyingExpression).ToString();
-            if (!string.IsNullOrEmpty(whereExpression)) whereExpression = "WHERE " + whereExpression;
+            if (!string.IsNullOrEmpty(whereExpression)) whereExpression = (WhereStatementWithoutWhereString ? "" : "WHERE ") + whereExpression;
         }
         
         public virtual SqlExpressionVisitor<T> GroupBy()
@@ -748,9 +752,9 @@ namespace ServiceStack.OrmLite
                 var propertyInfo = m.Member as PropertyInfo;
 
                 if (propertyInfo.PropertyType.IsEnum)
-                    return new EnumMemberAccess(GetQuotedColumnName(m.Member.Name), propertyInfo.PropertyType);
+                    return new EnumMemberAccess((PrefixFieldWithTableName ? OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef.ModelName) + "." : "") + GetQuotedColumnName(m.Member.Name), propertyInfo.PropertyType);
 
-                return new PartialSqlString(GetQuotedColumnName(m.Member.Name));
+                return new PartialSqlString((PrefixFieldWithTableName ? OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef.ModelName)+"." : "") + GetQuotedColumnName(m.Member.Name));
             }
 
             var member = Expression.Convert(m, typeof(object));
