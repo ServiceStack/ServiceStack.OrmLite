@@ -134,7 +134,7 @@ namespace ServiceStack.OrmLite
             return dbConn.Exec(dbCmd => dbCmd.QuerySingle<T>(anonType));
         }
 
-        public static T QuerySingle<T>(this IDbConnection dbConn, string sql, object anonType)
+        public static T QuerySingle<T>(this IDbConnection dbConn, string sql, object anonType = null)
             where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.QuerySingle<T>(sql, anonType));

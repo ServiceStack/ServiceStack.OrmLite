@@ -85,6 +85,7 @@ namespace ServiceStack.OrmLite
                 var computeAttr= propertyInfo.FirstAttribute<ComputeAttribute>();
                 var pkAttribute = propertyInfo.FirstAttribute<PrimaryKeyAttribute>();
                 var decimalAttribute = propertyInfo.FirstAttribute<DecimalLengthAttribute>();
+                var belongToAttribute = propertyInfo.FirstAttribute<BelongToAttribute>();
                 var isFirst = i++ == 0;
 
                 var isPrimaryKey = propertyInfo.Name == OrmLiteConfig.IdField || (!hasIdField && isFirst)
@@ -149,6 +150,7 @@ namespace ServiceStack.OrmLite
                     ComputeExpression =
                         computeAttr != null ? computeAttr.Expression : string.Empty,
                     Scale = decimalAttribute != null ? decimalAttribute.Scale : (int?)null,
+                    BelongToModelName = belongToAttribute != null ? belongToAttribute.BelongToTableType.GetModelDefinition().ModelName : null, 
                 };
 
                 modelDef.FieldDefinitions.Add(fieldDefinition);
