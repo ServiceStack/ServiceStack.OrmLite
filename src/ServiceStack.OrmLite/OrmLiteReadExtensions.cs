@@ -241,7 +241,7 @@ namespace ServiceStack.OrmLite
 				p.ParameterName = pi.Name;
 				p.DbType = OrmLiteConfig.DialectProvider.GetColumnDbType(pi.PropertyType); ;
 				p.Direction = ParameterDirection.Input;
-				p.Value = value;
+				p.Value = OrmLiteConfig.DialectProvider.GetQuotedValue(value, pi.PropertyType).Replace("'", "");
 				dbCmd.Parameters.Add(p);
 			}
 		}
