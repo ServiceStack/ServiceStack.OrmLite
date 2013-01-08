@@ -407,18 +407,17 @@ namespace ServiceStack.OrmLite
 
         public virtual string ToSelectStatement(Type tableType, string sqlFilter, params object[] filterParams)
         {
-
-            var sql = new StringBuilder();
             const string SelectStatement = "SELECT ";
-            var modelDef = tableType.GetModelDefinition();
             var isFullSelectStatement =
                 !string.IsNullOrEmpty(sqlFilter)
-                && sqlFilter.TrimStart().StartsWith(SelectStatement, StringComparison.OrdinalIgnoreCase);
+                && sqlFilter.TrimStart().StartsWith(SelectStatement, StringComparison.InvariantCultureIgnoreCase);
 
-            if (isFullSelectStatement) return sqlFilter.SqlFormat(filterParams);
+            if (isFullSelectStatement) 
+                return sqlFilter.SqlFormat(filterParams);
 
-            sql.AppendFormat("SELECT {0} FROM {1}", tableType.GetColumnNames(),
-                             GetQuotedTableName(modelDef));
+            var modelDef = tableType.GetModelDefinition();
+            var sql = new StringBuilder("SELECT " + tableType.GetColumnNames() + " FROM " + GetQuotedTableName(modelDef));
+
             if (!string.IsNullOrEmpty(sqlFilter))
             {
                 sqlFilter = sqlFilter.SqlFormat(filterParams);
@@ -427,11 +426,11 @@ namespace ServiceStack.OrmLite
                 {
                     sql.Append(" WHERE ");
                 }
+
                 sql.Append(sqlFilter);
             }
 
             return sql.ToString();
-
         }
 
         public virtual string ToInsertRowStatement(object objWithProperties, IDbCommand command)

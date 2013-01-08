@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
+using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -136,6 +138,50 @@ namespace ServiceStack.OrmLite.Tests
                 row = db.QuerySingle<ModelWithOnlyStringFields>(new { AlbumName = "Junk", Id = (object)null });
                 Assert.That(row, Is.Null);
             }
+        }
+
+        class Note
+        {
+            [AutoIncrement] // Creates Auto primary key
+            public int Id { get; set; }
+
+            public string SchemaUri { get; set; }
+            public string NoteText { get; set; }
+            public DateTime? LastUpdated { get; set; }
+            public string UpdatedBy { get; set; }
+        }
+
+        [Test]
+        public void Can_query_where_and_select_Notes()
+        {
+            using (var db = ConnectionString.OpenDbConnection())
+            {
+                db.CreateTableIfNotExists<Note>();
+
+                db.Insert(new Note
+                    {
+                        SchemaUri = "tcm:0-0-0",
+                        NoteText = "Hello world 5",
+                        LastUpdated = new DateTime(2013, 1, 5),
+                        UpdatedBy = "RC"
+                    });
+
+                var notes = db.Where<Note>(new { SchemaUri = "tcm:0-0-0" });
+                Assert.That(notes[0].Id, Is.EqualTo(1));
+                Assert.That(notes[0].NoteText, Is.EqualTo("Hello world 5"));
+
+                notes = db.Select<Note>("SchemaUri={0}", "tcm:0-0-0");
+                Assert.That(notes[0].Id, Is.EqualTo(1));
+                Assert.That(notes[0].NoteText, Is.EqualTo("Hello world 5"));
+
+                notes = db.Query<Note>("SELECT * FROM Note WHERE SchemaUri=@schemaUri", new { schemaUri = "tcm:0-0-0" });
+                Assert.That(notes[0].Id, Is.EqualTo(1));
+                Assert.That(notes[0].NoteText, Is.EqualTo("Hello world 5"));
+
+                notes = db.Query<Note>("SchemaUri=@schemaUri", new { schemaUri = "tcm:0-0-0" });
+                Assert.That(notes[0].Id, Is.EqualTo(1));
+                Assert.That(notes[0].NoteText, Is.EqualTo("Hello world 5"));
+            }            
         }
 
 	}

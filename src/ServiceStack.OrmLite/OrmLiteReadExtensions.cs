@@ -239,7 +239,7 @@ namespace ServiceStack.OrmLite
 
 				var p = dbCmd.CreateParameter();
 				p.ParameterName = pi.Name;
-				p.DbType = OrmLiteConfig.DialectProvider.GetColumnDbType(pi.PropertyType); ;
+				p.DbType = OrmLiteConfig.DialectProvider.GetColumnDbType(pi.PropertyType);
 				p.Direction = ParameterDirection.Input;
 				p.Value = value;
 				dbCmd.Parameters.Add(p);
@@ -339,7 +339,7 @@ namespace ServiceStack.OrmLite
 			if (typeof(T).IsValueType) return QueryScalar<T>(dbCmd, sql, anonType);
 
 			dbCmd.SetParameters(anonType, true);
-			dbCmd.CommandText = sql;
+            dbCmd.CommandText = OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sql);
 
 			using (var dbReader = dbCmd.ExecuteReader())
 				return dbReader.ConvertTo<T>();
@@ -376,7 +376,7 @@ namespace ServiceStack.OrmLite
 			where T : new()
 		{
             if (anonType != null) dbCmd.SetParameters(anonType, true);
-			dbCmd.CommandText = sql;
+            dbCmd.CommandText = OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sql);
 
 			using (var dbReader = dbCmd.ExecuteReader())
 				return typeof(T).IsValueType
@@ -389,7 +389,7 @@ namespace ServiceStack.OrmLite
 			where T : new()
 		{
 			if (dict != null) dbCmd.SetParameters(dict, true);
-			dbCmd.CommandText = sql;
+            dbCmd.CommandText = OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sql);
 
 			using (var dbReader = dbCmd.ExecuteReader())
 				return typeof(T).IsValueType
@@ -410,7 +410,7 @@ namespace ServiceStack.OrmLite
         public static T QueryScalar<T>(this IDbCommand dbCmd, string sql, object anonType = null)
 		{
             if (anonType != null) dbCmd.SetParameters(anonType, true);
-			dbCmd.CommandText = sql;
+            dbCmd.CommandText = OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sql);
 
 			using (var dbReader = dbCmd.ExecuteReader())
 				return GetScalar<T>(dbReader);
@@ -431,7 +431,7 @@ namespace ServiceStack.OrmLite
 			where T : new()
 		{
             if (anonType != null) dbCmd.SetParameters(anonType, true);
-			dbCmd.CommandText = sql;
+            dbCmd.CommandText = OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sql);
 
 			using (var dbReader = dbCmd.ExecuteReader())
 				return dbReader.ConvertToList<T>();
