@@ -10,8 +10,8 @@ namespace ServiceStack.OrmLite
 
         public OrmLiteTransaction(IDbTransaction trans)
         {
-            prevTrans = OrmLiteConfig.CurrentTransaction;
-            OrmLiteConfig.CurrentTransaction = this.trans = trans;
+            prevTrans = OrmLiteConfig.TSTransaction;
+            OrmLiteConfig.TSTransaction = this.trans = trans;
         }
 
         public void Dispose()
@@ -22,7 +22,7 @@ namespace ServiceStack.OrmLite
             }
             finally 
             {
-                OrmLiteConfig.CurrentTransaction = prevTrans;
+                OrmLiteConfig.TSTransaction = prevTrans;
             }
         }
 

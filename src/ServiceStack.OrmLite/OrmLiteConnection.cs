@@ -13,6 +13,7 @@ namespace ServiceStack.OrmLite
 		: IDbConnection, IHasDbConnection 
 	{
 	    public readonly OrmLiteConnectionFactory Factory;
+        public IDbTransaction Transaction { get; private set; }
 		private IDbConnection dbConnection;
 		private bool isOpen;
 
@@ -48,7 +49,8 @@ namespace ServiceStack.OrmLite
 			if (Factory.AlwaysReturnTransaction != null)
 				return Factory.AlwaysReturnTransaction;
 
-			return DbConnection.BeginTransaction();
+            Transaction = DbConnection.BeginTransaction();
+            return Transaction;
 		}
 
 		public IDbTransaction BeginTransaction(IsolationLevel isolationLevel)
@@ -56,7 +58,8 @@ namespace ServiceStack.OrmLite
 			if (Factory.AlwaysReturnTransaction != null)
 				return Factory.AlwaysReturnTransaction;
 
-			return DbConnection.BeginTransaction(isolationLevel);
+			Transaction = DbConnection.BeginTransaction(isolationLevel);
+            return Transaction;
 		}
 
 		public void Close()
@@ -74,7 +77,9 @@ namespace ServiceStack.OrmLite
 			if (Factory.AlwaysReturnCommand != null)
 				return Factory.AlwaysReturnCommand;
 
-			return DbConnection.CreateCommand();
+			var cmd = DbConnection.CreateCommand();
+            if(Transaction != null) { cmd.Transaction = Transaction; }
+            return cmd;
 		}
 
 		public void Open()
