@@ -94,6 +94,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BelongToAttribute.cs" />
+    <Compile Include="DataAnnotationsCollection.cs" />
     <Compile Include="Expressions\ExpressionVisitor.cs" />
     <Compile Include="Expressions\ParameterRebinder.cs" />
     <Compile Include="Expressions\PredicateBuilder.cs" />

@@ -54,6 +54,24 @@ namespace ServiceStack.OrmLite
             dbConn.Exec(dbCmd => dbCmd.CreateTable<T>(true));
         }
 
+        public static void CreateTable<T>(this IDbConnection dbConn, bool overwrite, DataAnnotationsCollection runtimeAnnotations)
+            where T : new()
+        {
+            dbConn.Exec(dbCmd => dbCmd.CreateTable<T>(overwrite, runtimeAnnotations));
+        }
+
+        public static void CreateTableIfNotExists<T>(this IDbConnection dbConn, DataAnnotationsCollection runtimeAnnotations)
+            where T : new()
+        {
+            dbConn.Exec(dbCmd => dbCmd.CreateTable<T>(false, runtimeAnnotations));
+        }
+
+        public static void DropAndCreateTable<T>(this IDbConnection dbConn, DataAnnotationsCollection runtimeAnnotations)
+            where T : new()
+        {
+            dbConn.Exec(dbCmd => dbCmd.CreateTable<T>(true, runtimeAnnotations));
+        }
+
         public static void CreateTable(this IDbConnection dbConn, bool overwrite, Type modelType)
         {
             dbConn.Exec(dbCmd => dbCmd.CreateTable(overwrite, modelType));
@@ -67,6 +85,21 @@ namespace ServiceStack.OrmLite
         public static void DropAndCreateTable(this IDbConnection dbConn, Type modelType)
         {
             dbConn.Exec(dbCmd => dbCmd.CreateTable(true, modelType));
+        }
+
+        public static void CreateTable(this IDbConnection dbConn, bool overwrite, Type modelType, DataAnnotationsCollection runtimeAnnotations)
+        {
+            dbConn.Exec(dbCmd => dbCmd.CreateTable(overwrite, modelType, runtimeAnnotations));
+        }
+
+        public static void CreateTableIfNotExists(this IDbConnection dbConn, Type modelType, DataAnnotationsCollection runtimeAnnotations)
+        {
+            dbConn.Exec(dbCmd => dbCmd.CreateTable(false, modelType, runtimeAnnotations));
+        }
+
+        public static void DropAndCreateTable(this IDbConnection dbConn, Type modelType, DataAnnotationsCollection runtimeAnnotations)
+        {
+            dbConn.Exec(dbCmd => dbCmd.CreateTable(true, modelType, runtimeAnnotations));
         }
 
         public static void DropTables(this IDbConnection dbConn, params Type[] tableTypes)

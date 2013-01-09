@@ -60,9 +60,17 @@ namespace ServiceStack.OrmLite
         }
 
         [Obsolete(UseDbConnectionExtensions)]
-        public static void CreateTable(this IDbCommand dbCmd, bool overwrite, Type modelType)
+        public static void CreateTable<T>(this IDbCommand dbCmd, bool overwrite, DataAnnotationsCollection runtimeAnnotations)
+            where T : new()
         {
-            var modelDef = modelType.GetModelDefinition();
+            var tableType = typeof(T);
+            CreateTable(dbCmd, overwrite, tableType, runtimeAnnotations);
+        }
+
+        [Obsolete(UseDbConnectionExtensions)]
+        public static void CreateTable(this IDbCommand dbCmd, bool overwrite, Type modelType, DataAnnotationsCollection runtimeAnnotations = null)
+        {
+            var modelDef = modelType.GetModelDefinition(runtimeAnnotations);
 
 			var dialectProvider = OrmLiteConfig.DialectProvider;
 			var tableName = dialectProvider.NamingStrategy.GetTableName(modelDef.ModelName);
