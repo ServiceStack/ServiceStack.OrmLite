@@ -20,7 +20,7 @@ namespace ServiceStack.OrmLite
 		public const string IdField = "Id";
 
         [ThreadStatic] public static IOrmLiteDialectProvider TSDialectProvider;
-	    [ThreadStatic] public static IDbTransaction CurrentTransaction;
+	    [ThreadStatic] public static IDbTransaction TSTransaction;
 
 	    private static IOrmLiteDialectProvider dialectProvider;
 	    public static IOrmLiteDialectProvider DialectProvider
