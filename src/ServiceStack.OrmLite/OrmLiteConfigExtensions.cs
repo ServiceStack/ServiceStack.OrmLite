@@ -52,15 +52,57 @@ namespace ServiceStack.OrmLite
             return modelType.GetModelDefinition();
         }
 
-        internal static ModelDefinition GetModelDefinition(this Type modelType)
+        /// <summary>
+        /// Facilitates specifying Class attributes at runtime when creating a table.
+        /// </summary>
+        /// <typeparam name="TAttribute"></typeparam>
+        /// <param name="classType"></param>
+        /// <param name="runtimeAnnotations">A bunch of data annotation Attributes</param>
+        /// <returns></returns>
+        private static TAttribute FindAttribute<TAttribute>(Type classtype, DataAnnotationsCollection runtimeAnnotations)
+        {
+            var attribute = classtype.FirstAttribute<TAttribute>();
+
+            //let's check if runtimeAnnotations have been specified first, to
+            //minimize execution for existing users who are not using runtime annotations 
+            if (runtimeAnnotations != null && attribute == null)
+            {
+                attribute = runtimeAnnotations.FindAnnotation<TAttribute>(classtype.Name);
+            }
+
+            return attribute;
+        }
+
+        /// <summary>
+        /// Facilitates specifying Property attributes at runtime when creating a table.
+        /// </summary>
+        /// <typeparam name="TAttribute"></typeparam>
+        /// <param name="propertyInfo"></param>
+        /// <param name="runtimeAnnotations">A bunch of data annotation Attributes</param>
+        /// <returns></returns>
+        private static TAttribute FindAttribute<TAttribute>(PropertyInfo propertyInfo, DataAnnotationsCollection runtimeAnnotations)
+        {
+            var attribute = propertyInfo.FirstAttribute<TAttribute>();
+
+            //let's check if runtimeAnnotations have been specified first, to
+            //minimize execution for existing users who are not using runtime annotations 
+            if (runtimeAnnotations != null && attribute == null)
+            {
+                attribute= runtimeAnnotations.FindAnnotation<TAttribute>(propertyInfo.Name);
+            }
+
+            return attribute;
+        }
+        
+        internal static ModelDefinition GetModelDefinition(this Type modelType, DataAnnotationsCollection runtimeAnnotations = null)
         {
             ModelDefinition modelDef;
 
             if (typeModelDefinitionMap.TryGetValue(modelType, out modelDef))
                 return modelDef;
 
-            var modelAliasAttr = modelType.FirstAttribute<AliasAttribute>();
-            var schemaAttr = modelType.FirstAttribute<SchemaAttribute>();
+            var modelAliasAttr = FindAttribute<AliasAttribute>(modelType, runtimeAnnotations);
+            var schemaAttr = FindAttribute<SchemaAttribute>(modelType, runtimeAnnotations);
             modelDef = new ModelDefinition {
                 ModelType = modelType,
                 Name = modelType.Name,
@@ -80,12 +122,12 @@ namespace ServiceStack.OrmLite
             var i = 0;
             foreach (var propertyInfo in objProperties)
             {
-                if (propertyInfo.FirstAttribute<IgnoreAttribute>() != null) continue;
-                var sequenceAttr = propertyInfo.FirstAttribute<SequenceAttribute>();
-                var computeAttr= propertyInfo.FirstAttribute<ComputeAttribute>();
-                var pkAttribute = propertyInfo.FirstAttribute<PrimaryKeyAttribute>();
-                var decimalAttribute = propertyInfo.FirstAttribute<DecimalLengthAttribute>();
-                var belongToAttribute = propertyInfo.FirstAttribute<BelongToAttribute>();
+                if (FindAttribute<IgnoreAttribute>(propertyInfo, runtimeAnnotations) != null) continue;
+                var sequenceAttr = FindAttribute<SequenceAttribute>(propertyInfo, runtimeAnnotations);
+                var computeAttr = FindAttribute<ComputeAttribute>(propertyInfo, runtimeAnnotations);
+                var pkAttribute = FindAttribute<PrimaryKeyAttribute>(propertyInfo, runtimeAnnotations);
+                var decimalAttribute = FindAttribute<DecimalLengthAttribute>(propertyInfo, runtimeAnnotations);
+                var belongToAttribute = FindAttribute<BelongToAttribute>(propertyInfo, runtimeAnnotations);
                 var isFirst = i++ == 0;
 
                 var isPrimaryKey = propertyInfo.Name == OrmLiteConfig.IdField || (!hasIdField && isFirst)
@@ -94,25 +136,25 @@ namespace ServiceStack.OrmLite
                 var isNullableType = IsNullableType(propertyInfo.PropertyType);
 
                 var isNullable = (!propertyInfo.PropertyType.IsValueType
-                                   && propertyInfo.FirstAttribute<RequiredAttribute>() == null)
+                                   && FindAttribute<RequiredAttribute>(propertyInfo, runtimeAnnotations) == null)
                                  || isNullableType;
 
                 var propertyType = isNullableType
                     ? Nullable.GetUnderlyingType(propertyInfo.PropertyType)
                     : propertyInfo.PropertyType;
 
-                var aliasAttr = propertyInfo.FirstAttribute<AliasAttribute>();
+                var aliasAttr = FindAttribute<AliasAttribute>(propertyInfo, runtimeAnnotations);
 
-                var indexAttr = propertyInfo.FirstAttribute<IndexAttribute>();
+                var indexAttr = FindAttribute<IndexAttribute>(propertyInfo, runtimeAnnotations);
                 var isIndex = indexAttr != null;
                 var isUnique = isIndex && indexAttr.Unique;
 
-                var stringLengthAttr = propertyInfo.FirstAttribute<StringLengthAttribute>();
+                var stringLengthAttr = FindAttribute<StringLengthAttribute>(propertyInfo, runtimeAnnotations);
 
-                var defaultValueAttr = propertyInfo.FirstAttribute<DefaultAttribute>();
+                var defaultValueAttr = FindAttribute<DefaultAttribute>(propertyInfo, runtimeAnnotations);
 
-                var referencesAttr = propertyInfo.FirstAttribute<ReferencesAttribute>();
-                var foreignKeyAttr = propertyInfo.FirstAttribute<ForeignKeyAttribute>();
+                var referencesAttr = FindAttribute<ReferencesAttribute>(propertyInfo, runtimeAnnotations);
+                var foreignKeyAttr = FindAttribute<ForeignKeyAttribute>(propertyInfo, runtimeAnnotations);
 
                 if (decimalAttribute != null && stringLengthAttr == null)
                     stringLengthAttr = new StringLengthAttribute(decimalAttribute.Precision);
@@ -126,7 +168,7 @@ namespace ServiceStack.OrmLite
                     IsPrimaryKey = isPrimaryKey,
                     AutoIncrement =
                         isPrimaryKey &&
-                        propertyInfo.FirstAttribute<AutoIncrementAttribute>() != null,
+                        FindAttribute<AutoIncrementAttribute>(propertyInfo, runtimeAnnotations) != null,
                     IsIndexed = isIndex,
                     IsUnique = isUnique,
                     FieldLength =
@@ -150,7 +192,7 @@ namespace ServiceStack.OrmLite
                     ComputeExpression =
                         computeAttr != null ? computeAttr.Expression : string.Empty,
                     Scale = decimalAttribute != null ? decimalAttribute.Scale : (int?)null,
-                    BelongToModelName = belongToAttribute != null ? belongToAttribute.BelongToTableType.GetModelDefinition().ModelName : null, 
+                    BelongToModelName = belongToAttribute != null ? belongToAttribute.BelongToTableType.GetModelDefinition().ModelName : null,
                 };
 
                 modelDef.FieldDefinitions.Add(fieldDefinition);

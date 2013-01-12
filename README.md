@@ -803,6 +803,70 @@ Creating tables is a simple 1-liner:
 	*/
 ```
 
+### Applying Attributes to classes at runtime
+
+ServiceStack.OrmLite does not require attributes and aims to support pure POCO. This helps support truly "Data Access Layer agnostic" models.
+
+To this end, you can apply attributes at table-creation time, via the DataAnnotationsCollection class.
+
+Note that because the models in the business layer should be considered authoritative, real attributes decorating the model are given preference.
+
+```csharp
+  namespace Pets.Business.Model
+  {
+      public class Cat
+      {
+          public int CatId { get; set; }
+  
+          [StringLength(20)]
+          public string CatName { get; set; }
+      }
+  
+      public class Fur
+      {
+          [StringLength(20)]
+          public string CatName { get; set; }
+  
+          public string FurColor { get; set; }
+      }
+  }
+```
+
+
+```csharp
+  using (var db = "c:/Pets.sdb".OpenDbConnection())
+  {
+      var catAnnotations = new DataAnnotationsCollection();
+      //Add attributes against the class name or a property name.
+      catAnnotations.Add("Cat", new AliasAttribute("Feline"));
+      //You can specify a single data annotation attribute, or an array of them
+      catAnnotations.Add("CatId", new Attribute[]
+              {
+                  new IndexAttribute { Unique = true },
+                  new AutoIncrementAttribute()
+              });
+      catAnnotations.Add("CatName", new IndexAttribute { Unique = true });
+      db.CreateTable<Cat>(false, catAnnotations);
+  
+  }
+```
+
+**You can also use strongly-typed references for the Classes and Properties, to better handle refactoring of the model library:**
+
+```csharp
+  var fur = new Fur();
+  var furAnnotations = new DataAnnotationsCollection();
+  furAnnotations.Add(fur.GetType(), new AliasAttribute("Coat"));
+  furAnnotations.Add(() => fur.CatName, new Attribute[]
+          {
+              new ForeignKeyAttribute(typeof(Cat)),
+              new StringLengthAttribute(40)
+          });
+  db.CreateTable(false, fur.GetType(), furAnnotations);
+```
+
+Note that the max string length for the CatName property of Fur will remain 20, because that is what is specified in the original class.
+
 ### Transaction Support
 As we have direct access to IDbCommand and friends - playing with transactions is easy:
 
