@@ -144,8 +144,7 @@ namespace ServiceStack.OrmLite.MySql
                 var refModelDef = GetModel(fieldDef.ForeignKey.ReferenceType);
                 sbConstraints.AppendFormat(
                     ", \n\n  CONSTRAINT {0} FOREIGN KEY ({1}) REFERENCES {2} ({3})",
-                    GetQuotedName(string.Format("FK_{0}_{1}_{2}", modelDef.ModelName,
-                                                                 refModelDef.ModelName, fieldDef.FieldName)),
+                    GetQuotedName(fieldDef.ForeignKey.GetForeignKeyName(modelDef, refModelDef, NamingStrategy, fieldDef)),
                     GetQuotedColumnName(fieldDef.FieldName),
                     GetQuotedTableName(refModelDef),
                     GetQuotedColumnName(refModelDef.PrimaryKey.FieldName));

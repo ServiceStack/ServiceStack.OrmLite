@@ -336,17 +336,9 @@ namespace ServiceStack.OrmLite.Oracle
                 if (fieldDef.ForeignKey == null) continue;
 
                 var refModelDef = GetModel(fieldDef.ForeignKey.ReferenceType);
-				
-				var modelName= modelDef.IsInSchema
-					? modelDef.Schema + "_" + NamingStrategy.GetTableName(modelDef.ModelName)
-					: NamingStrategy.GetTableName(modelDef.ModelName);
-				
-				var refModelName= refModelDef.IsInSchema
-					? refModelDef.Schema + "_" + NamingStrategy.GetTableName(refModelDef.ModelName)
-					: NamingStrategy.GetTableName(refModelDef.ModelName);
-				
+                                				
                 sbConstraints.AppendFormat(", \n\n  CONSTRAINT {0} FOREIGN KEY ({1}) REFERENCES {2} ({3})",
-                    GetQuotedName(string.Format("FK_{0}_{1}_{2}", modelName, refModelName, fieldDef.FieldName)),
+                    GetQuotedName(fieldDef.ForeignKey.GetForeignKeyName(modelDef, refModelDef, NamingStrategy, fieldDef)),
 					GetQuotedColumnName(fieldDef.FieldName), 
 					GetQuotedTableName(refModelDef), 
 					GetQuotedColumnName(refModelDef.PrimaryKey.FieldName));
