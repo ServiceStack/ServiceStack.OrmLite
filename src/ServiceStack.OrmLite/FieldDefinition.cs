@@ -11,6 +11,7 @@
 
 using System;
 using System.Reflection;
+using ServiceStack.Common;
 
 namespace ServiceStack.OrmLite
 {
@@ -81,15 +82,31 @@ namespace ServiceStack.OrmLite
 
     public class ForeignKeyConstraint
     {
-        public ForeignKeyConstraint(Type type, string onDelete = null, string onUpdate = null)
+        public ForeignKeyConstraint(Type type, string onDelete = null, string onUpdate = null, string foreignKeyName = null)
         {
             ReferenceType = type;
             OnDelete = onDelete;
             OnUpdate = onUpdate;
+            ForeignKeyName = foreignKeyName;
         }
 
         public Type ReferenceType { get; private set; }
         public string OnDelete { get; private set; }
         public string OnUpdate { get; private set; }
+        public string ForeignKeyName { get; private set; }
+
+        public string GetForeignKeyName(ModelDefinition modelDef, ModelDefinition refModelDef, INamingStrategy NamingStrategy, FieldDefinition fieldDef)
+        {
+            if(ForeignKeyName.IsNullOrEmpty()) {
+                var modelName = modelDef.IsInSchema
+                    ? modelDef.Schema + "_" + NamingStrategy.GetTableName(modelDef.ModelName)
+                    : NamingStrategy.GetTableName(modelDef.ModelName);
+
+                var refModelName = refModelDef.IsInSchema
+                    ? refModelDef.Schema + "_" + NamingStrategy.GetTableName(refModelDef.ModelName)
+                    : NamingStrategy.GetTableName(refModelDef.ModelName);
+                return string.Format("FK_{0}_{1}_{2}", modelName, refModelName, fieldDef.FieldName);
+            } else { return ForeignKeyName; }
+        }
     }
 }
