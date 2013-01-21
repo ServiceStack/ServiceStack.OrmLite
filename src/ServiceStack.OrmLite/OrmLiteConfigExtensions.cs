@@ -142,7 +142,8 @@ namespace ServiceStack.OrmLite
                                   : new ForeignKeyConstraint(referencesAttr.Type)
                             : new ForeignKeyConstraint(foreignKeyAttr.Type,
                                                        foreignKeyAttr.OnDelete,
-                                                       foreignKeyAttr.OnUpdate),
+                                                       foreignKeyAttr.OnUpdate,
+                                                       foreignKeyAttr.ForeignKeyName),
                     GetValueFn = propertyInfo.GetPropertyGetterFn(),
                     SetValueFn = propertyInfo.GetPropertySetterFn(),
                     Sequence = sequenceAttr != null ? sequenceAttr.Name : string.Empty,
