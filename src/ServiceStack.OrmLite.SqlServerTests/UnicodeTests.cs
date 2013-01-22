@@ -19,7 +19,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
 
             var testData = new[]{
                 "árvíztűrő tükörfúrógép",
-                "ÁRVÍZTŰRŐ TÜKÖRFÚRÓGÉP", //these are the Hungarian "special" characters, they work fine out of the box
+                "ÁRVÍZTŰRŐ TÜKÖRFÚRÓGÉP", //these are the Hungarian "special" characters, they work fine out of the box. At least on Hungarian_Technical_CI_AS
                 "♪♪♫"                     //this one comes back as 'ddd'
             };
 
