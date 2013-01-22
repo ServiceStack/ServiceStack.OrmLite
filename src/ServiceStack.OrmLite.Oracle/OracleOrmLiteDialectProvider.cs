@@ -697,18 +697,6 @@ namespace ServiceStack.OrmLite.Oracle
 					: name;			
 		}
 		
-		public override string GetColumnNames(ModelDefinition modelDef)
-		{
-			if (QuoteNames) return modelDef.GetColumnNames();
-			var sqlColumns = new StringBuilder();
-			modelDef.FieldDefinitions.ForEach(x => 
-				sqlColumns.AppendFormat("{0} {1}", 
-				sqlColumns.Length > 0 ? "," : "",
-				GetQuotedColumnName(x.FieldName)));
-
-			return sqlColumns.ToString();
-		}
-
 		public override string GetQuotedName(string fieldName)
 		{
 			return Quote(fieldName);

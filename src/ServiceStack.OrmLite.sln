@@ -84,19 +84,21 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceStack.OrmLite.Oracle
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "OracleTests", "OracleTests", "{86A84A8B-29B8-4C4D-839B-76836AD59D28}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestClassWriter", "ServiceStack.OrmLite.Oracle.Tests\TestClassWriter\TestClassWriter.csproj", "{AAE7E422-EAC0-4B06-A973-C32E7E600769}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestClassWriter", "OracleTests\TestClassWriter\TestClassWriter.csproj", "{AAE7E422-EAC0-4B06-A973-C32E7E600769}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestExpression02", "ServiceStack.OrmLite.Oracle.Tests\TestExpression02\TestExpression02.csproj", "{3D07D1C9-62EA-48C7-8242-CDC10BC46E6F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestExpression02", "OracleTests\TestExpression02\TestExpression02.csproj", "{3D07D1C9-62EA-48C7-8242-CDC10BC46E6F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestExpressions", "ServiceStack.OrmLite.Oracle.Tests\TestExpressions\TestExpressions.csproj", "{619CF480-0DFB-429E-8FC1-B039E8C47AD9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestExpressions", "OracleTests\TestExpressions\TestExpressions.csproj", "{619CF480-0DFB-429E-8FC1-B039E8C47AD9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestLiteOracle00", "ServiceStack.OrmLite.Oracle.Tests\TestLiteOracle00\TestLiteOracle00.csproj", "{81280460-2358-40D2-94AA-85951612EA04}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestLiteOracle00", "OracleTests\TestLiteOracle00\TestLiteOracle00.csproj", "{81280460-2358-40D2-94AA-85951612EA04}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestLiteOracle04", "ServiceStack.OrmLite.Oracle.Tests\TestLiteOracle04\TestLiteOracle04.csproj", "{583D79EF-27D8-4725-B706-BFE041F096A4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestLiteOracle04", "OracleTests\TestLiteOracle04\TestLiteOracle04.csproj", "{583D79EF-27D8-4725-B706-BFE041F096A4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceStack.OrmLite.Sqlite32v40", "ServiceStack.OrmLite.Sqlite32\ServiceStack.OrmLite.Sqlite32v40.csproj", "{7F6CDD89-2031-4436-B9C2-231D9CE3AD1E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceStack.OrmLite.Sqlite64v40", "ServiceStack.OrmLite.Sqlite64\ServiceStack.OrmLite.Sqlite64v40.csproj", "{15969125-34A1-4041-8D94-5C574C032EE6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceStack.OrmLite.Oracle.Tests", "ServiceStack.OrmLite.Oracle.Tests\ServiceStack.OrmLite.Oracle.Tests.csproj", "{DE5CA3EB-010D-492A-A0B7-501D7941FA51}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1068,6 +1070,31 @@ Global
 		{15969125-34A1-4041-8D94-5C574C032EE6}.STATIC_ONLY NO_EXPRESSIONS|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{15969125-34A1-4041-8D94-5C574C032EE6}.STATIC_ONLY NO_EXPRESSIONS|Mixed Platforms.Build.0 = Release|Any CPU
 		{15969125-34A1-4041-8D94-5C574C032EE6}.STATIC_ONLY NO_EXPRESSIONS|x86.ActiveCfg = Release|Any CPU
+		{DE5CA3EB-010D-492A-A0B7-501D7941FA51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE5CA3EB-010D-492A-A0B7-501D7941FA51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE5CA3EB-010D-492A-A0B7-501D7941FA51}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{DE5CA3EB-010D-492A-A0B7-501D7941FA51}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{DE5CA3EB-010D-492A-A0B7-501D7941FA51}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{DE5CA3EB-010D-492A-A0B7-501D7941FA51}.Default|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE5CA3EB-010D-492A-A0B7-501D7941FA51}.Default|Any CPU.Build.0 = Debug|Any CPU
+		{DE5CA3EB-010D-492A-A0B7-501D7941FA51}.Default|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{DE5CA3EB-010D-492A-A0B7-501D7941FA51}.Default|Mixed Platforms.Build.0 = Debug|Any CPU
+		{DE5CA3EB-010D-492A-A0B7-501D7941FA51}.Default|x86.ActiveCfg = Debug|Any CPU
+		{DE5CA3EB-010D-492A-A0B7-501D7941FA51}.MonoTouch|Any CPU.ActiveCfg = Release|Any CPU
+		{DE5CA3EB-010D-492A-A0B7-501D7941FA51}.MonoTouch|Any CPU.Build.0 = Release|Any CPU
+		{DE5CA3EB-010D-492A-A0B7-501D7941FA51}.MonoTouch|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{DE5CA3EB-010D-492A-A0B7-501D7941FA51}.MonoTouch|Mixed Platforms.Build.0 = Release|Any CPU
+		{DE5CA3EB-010D-492A-A0B7-501D7941FA51}.MonoTouch|x86.ActiveCfg = Release|Any CPU
+		{DE5CA3EB-010D-492A-A0B7-501D7941FA51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE5CA3EB-010D-492A-A0B7-501D7941FA51}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE5CA3EB-010D-492A-A0B7-501D7941FA51}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{DE5CA3EB-010D-492A-A0B7-501D7941FA51}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{DE5CA3EB-010D-492A-A0B7-501D7941FA51}.Release|x86.ActiveCfg = Release|Any CPU
+		{DE5CA3EB-010D-492A-A0B7-501D7941FA51}.STATIC_ONLY NO_EXPRESSIONS|Any CPU.ActiveCfg = Release|Any CPU
+		{DE5CA3EB-010D-492A-A0B7-501D7941FA51}.STATIC_ONLY NO_EXPRESSIONS|Any CPU.Build.0 = Release|Any CPU
+		{DE5CA3EB-010D-492A-A0B7-501D7941FA51}.STATIC_ONLY NO_EXPRESSIONS|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{DE5CA3EB-010D-492A-A0B7-501D7941FA51}.STATIC_ONLY NO_EXPRESSIONS|Mixed Platforms.Build.0 = Release|Any CPU
+		{DE5CA3EB-010D-492A-A0B7-501D7941FA51}.STATIC_ONLY NO_EXPRESSIONS|x86.ActiveCfg = Release|Any CPU	
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
