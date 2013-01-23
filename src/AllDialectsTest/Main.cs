@@ -119,6 +119,16 @@ namespace AllDialectsTest
 			};
 			l.Add(d);
 
+            d = new Dialect() {
+                Name = "Oracle",
+                PathToAssembly = "../../../ServiceStack.OrmLite.Oracle/bin/Debug",
+                AssemblyName = "ServiceStack.OrmLite.Oracle.dll",
+                ClassName = "ServiceStack.OrmLite.Oracle.OracleOrmLiteDialectProvider",
+                InstanceFieldName = "Instance",
+                ConnectionString = "Data Source=localhost:1521/XE;User ID=servicestack_test;Password=servicestack_test;Unicode=True"
+            };
+            l.Add(d);
+
 			return l;
 
 		}
