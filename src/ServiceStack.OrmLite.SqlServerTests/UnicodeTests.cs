@@ -15,7 +15,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
         [Test]
         public void can_insert_and_retrieve_unicode_values()
         {
-            OrmLiteConfig.DialectProvider.UseUnicode = true;
+            //OrmLiteConfig.DialectProvider.UseUnicode = true;
 
             var testData = new[]{
                 "árvíztűrő tükörfúrógép",
