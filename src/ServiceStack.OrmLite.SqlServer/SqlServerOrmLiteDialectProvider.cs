@@ -120,9 +120,9 @@ namespace ServiceStack.OrmLite.SqlServer
 				var boolValue = (bool)value;
 				return base.GetQuotedValue(boolValue ? 1 : 0, typeof(int));
 			}
-            if(UseUnicode && fieldType == typeof(string)) {
-                return "N'" + EscapeParam(value) + "'";
-            }
+			if(UseUnicode && fieldType == typeof(string)) {
+				return "N" + base.GetQuotedValue(value, fieldType);
+			}
 
 			return base.GetQuotedValue(value, fieldType);
 		}
