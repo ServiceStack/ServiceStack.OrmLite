@@ -15,23 +15,59 @@ namespace ServiceStack.OrmLite.SqlServerTests
         [Test]
         public void can_insert_and_retrieve_unicode_values()
         {
-            //OrmLiteConfig.DialectProvider.UseUnicode = true;
+            //save and restore state, so it doesn't mess with other tests
+            bool prevUnicodestate = OrmLiteConfig.DialectProvider.UseUnicode;
+            try {
+                OrmLiteConfig.DialectProvider.UseUnicode = true;
 
-            var testData = new[]{
+                var testData = new[]{
                 "árvíztűrő tükörfúrógép",
                 "ÁRVÍZTŰRŐ TÜKÖRFÚRÓGÉP", //these are the Hungarian "special" characters, they work fine out of the box. At least on Hungarian_Technical_CI_AS
-                "♪♪♫"                     //this one comes back as 'ddd'
+                "♪♪♫",                    //this one comes back as 'ddd'
+                //greek alphabet
+                @"
+Letter	Name	Sound value
+Ancient[5]	Modern[6]
+Α α	alpha	[a] [aː]	[a]
+Β β	beta	[b]	[v]
+Γ γ	gamma	[ɡ]	[ɣ] ~ [ʝ]
+Δ δ	delta	[d]	[ð]
+Ε ε	epsilon	[e]	[e]
+Ζ ζ	zeta	[zd] (or [dz][7])	[z]
+Η η	eta	[ɛː]	[i]
+Θ θ	theta	[tʰ]	[θ]
+Ι ι	iota	[i] [iː]	[i]
+Κ κ	kappa	[k]	[k] ~ [c]
+Λ λ	lambda	[l]	[l]
+Μ μ	mu	[m]	[m]	
+Letter	Name	Sound value
+Ancient	Modern
+Ν ν	nu	[n]	[n]
+Ξ ξ	xi	[ks]	[ks]
+Ο ο	omicron	[o]	[o]
+Π π	pi	[p]	[p]
+Ρ ρ	rho	[r]	[r]
+Σ σς	sigma	[s]	[s]
+Τ τ	tau	[t]	[t]
+Υ υ	upsilon	[y] [yː]	[i]
+Φ φ	phi	[pʰ]	[f]
+Χ χ	chi	[kʰ]	[x] ~ [ç]
+Ψ ψ	psi	[ps]	[ps]
+Ω ω	omega	[ɔː]	[o]
+"
             };
 
-            using(var con = ConnectionString.OpenDbConnection()) {
-                con.ExecuteSql(table_re_creation_script);
+                using(var con = ConnectionString.OpenDbConnection()) {
+                    con.ExecuteSql(table_re_creation_script);
 
-                foreach(var item in testData) { con.Insert(new Unicode_poco { Text = item }); }
+                    foreach(var item in testData) { con.Insert(new Unicode_poco { Text = item }); }
 
-                var fromDb = con.Select<Unicode_poco>().Select(x => x.Text).ToArray();
+                    var fromDb = con.Select<Unicode_poco>().Select(x => x.Text).ToArray();
 
-                CollectionAssert.AreEquivalent(testData, fromDb);
+                    CollectionAssert.AreEquivalent(testData, fromDb);
+                }
             }
+            finally { OrmLiteConfig.DialectProvider.UseUnicode = prevUnicodestate; }
         }
 
 
