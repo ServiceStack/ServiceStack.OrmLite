@@ -3,7 +3,7 @@
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>ServiceStack.OrmLite.Sqlite64</id>
     <title>OrmLite.Sqlite.64bit - Fast, code-first, config-free Poco ORM</title>
-    <version>3.9.33</version>
+    <version>3.9.35</version>
     <authors>Demis Bellot</authors> 
     <owners>Demis Bellot</owners>
     <description>
@@ -14,7 +14,7 @@
     <iconUrl>http://www.servicestack.net/logo-100x100.png</iconUrl>
     <tags>Sqlite 64bit OrmLite POCO Code-First Orm Schema-less Blobs</tags>
     <language>en-US</language> 
-    <copyright>ServiceStack 2012 and contributors</copyright>
+    <copyright>ServiceStack 2013 and contributors</copyright>
     <dependencies>
         <dependency id="ServiceStack.Common" />
         <dependency id="System.Data.SQLite.x64" />

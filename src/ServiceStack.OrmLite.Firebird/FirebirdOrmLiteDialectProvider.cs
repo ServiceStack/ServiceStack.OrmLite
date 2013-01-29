@@ -188,8 +188,9 @@ namespace ServiceStack.OrmLite.Firebird
 							fieldDef.FieldName, fieldDef.Sequence);
 					}
 				
-					PropertyInfo pi = ReflectionUtils.GetPropertyInfo(tableType, fieldDef.Name);
-					
+					PropertyInfo pi = tableType.GetProperty(fieldDef.Name, 
+                        BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy);
+
 					var result = GetNextValue(dbCommand, fieldDef.Sequence, pi.GetValue(objWithProperties,  new object[] { }) );
 					if (pi.PropertyType == typeof(String))
 						ReflectionUtils.SetProperty(objWithProperties, pi,  result.ToString());	
