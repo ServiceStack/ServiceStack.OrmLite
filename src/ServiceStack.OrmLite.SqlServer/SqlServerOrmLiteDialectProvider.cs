@@ -123,6 +123,10 @@ namespace ServiceStack.OrmLite.SqlServer
 			if(fieldType == typeof(string)) {
 				return UseUnicode ? "N'" + EscapeParam(value) + "'" : "'" + EscapeParam(value) + "'";
 			}
+            if (fieldType == typeof(byte[]))
+            {
+                return "0x" + BitConverter.ToString((byte[])value).Replace("-", "");
+            }
 
 			return base.GetQuotedValue(value, fieldType);
 		}
