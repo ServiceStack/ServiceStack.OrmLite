@@ -184,5 +184,39 @@ namespace ServiceStack.OrmLite.Tests
             }            
         }
 
+        class NoteDto
+        {
+            public int Id { get; set; }
+            public string SchemaUri { get; set; }
+            public string NoteText { get; set; }
+        }
+
+        [Test]
+        public void Can_select_NotesDto_with_pretty_sql()
+        {
+            using (var db = ConnectionString.OpenDbConnection())
+            {
+                db.CreateTableIfNotExists<Note>();
+
+                db.Insert(new Note
+                {
+                    SchemaUri = "tcm:0-0-0",
+                    NoteText = "Hello world 5",
+                    LastUpdated = new DateTime(2013, 1, 5),
+                    UpdatedBy = "RC"
+                });
+
+                var sql = @"
+SELECT
+Id, SchemaUri, NoteText
+FROM Note
+WHERE SchemaUri=@schemaUri
+";
+
+                var notes = db.Query<NoteDto>(sql, new { schemaUri = "tcm:0-0-0" });
+                Assert.That(notes[0].Id, Is.EqualTo(1));
+                Assert.That(notes[0].NoteText, Is.EqualTo("Hello world 5"));
+            }
+        }
 	}
 }
