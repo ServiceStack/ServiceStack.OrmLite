@@ -1070,7 +1070,7 @@ namespace ServiceStack.OrmLite
                     throw new NotSupportedException();
 			}
 
-			return statement;
+            return new PartialSqlString(statement);
 		}
 
 		protected virtual object VisitSqlMethodCall(MethodCallExpression m)
