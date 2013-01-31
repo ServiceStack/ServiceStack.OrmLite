@@ -1014,27 +1014,27 @@ namespace ServiceStack.OrmLite
         private bool IsArrayMethod(MethodCallExpression m)
         {
             if (m.Object == null && m.Method.Name == "Contains")
-			{
-				if (m.Arguments.Count == 2)
-					return true;
-			}
+            {
+                if (m.Arguments.Count == 2)
+                    return true;
+            }
 
             return false;
         }
 
         protected virtual object VisitArrayMethodCall(MethodCallExpression m)
         {
-			string statement;
+            string statement;
 
-			switch (m.Method.Name)
-			{
-				case "Contains":
-		            List<Object> args = this.VisitExpressionList(m.Arguments);
-					object quotedColName = args[1];
+            switch (m.Method.Name)
+            {
+                case "Contains":
+                    List<Object> args = this.VisitExpressionList(m.Arguments);
+                    object quotedColName = args[1];
 
-					var memberExpr = m.Arguments[0];
-					if (memberExpr.NodeType == ExpressionType.MemberAccess)
-						memberExpr = (m.Arguments[0] as MemberExpression);
+                    var memberExpr = m.Arguments[0];
+                    if (memberExpr.NodeType == ExpressionType.MemberAccess)
+                        memberExpr = (m.Arguments[0] as MemberExpression);
 
                     var member = Expression.Convert(memberExpr, typeof(object));
                     var lambda = Expression.Lambda<Func<object>>(member);
@@ -1064,16 +1064,16 @@ namespace ServiceStack.OrmLite
                     }
 
                     statement = string.Format("{0} {1} ({2})", quotedColName, "In", sIn.ToString());
-					break;
+                    break;
 
-				default:
+                default:
                     throw new NotSupportedException();
-			}
+            }
 
-			return statement;
-		}
+            return new PartialSqlString(statement);
+        }
 
-		protected virtual object VisitSqlMethodCall(MethodCallExpression m)
+        protected virtual object VisitSqlMethodCall(MethodCallExpression m)
         {
             List<Object> args = this.VisitExpressionList(m.Arguments);
             object quotedColName = args[0];
