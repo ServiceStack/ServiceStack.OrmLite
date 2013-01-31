@@ -123,11 +123,11 @@ namespace ServiceStack.OrmLite.Tests
             var vals = new object[]{ TestEnum.Val0, TestEnum.Val1 };
 
             var visitor1 = OrmLiteConfig.DialectProvider.ExpressionVisitor<TestType>();
-            visitor1.Where(q => vals.Contains(q.EnumCol));
+            visitor1.Where(q => vals.Contains(q.EnumCol) || vals.Contains(q.EnumCol));
             var sql1 = visitor1.ToSelectStatement();
 
             var visitor2 = OrmLiteConfig.DialectProvider.ExpressionVisitor<TestType>();
-            visitor2.Where(q => Sql.In(q.EnumCol, vals));
+            visitor2.Where(q => Sql.In(q.EnumCol, vals) || Sql.In(q.EnumCol, vals));
             var sql2 = visitor2.ToSelectStatement();
 
             Assert.AreEqual(sql1, sql2);
