@@ -107,6 +107,26 @@ namespace ServiceStack.OrmLite
             dbConn.Exec(dbCmd => dbCmd.UpdateAll(objs));
         }
 
+        public static void UpdateParametized<T>(this IDbConnection dbConn, T obj)
+            where T : new()
+        {
+            dbConn.Exec(dbCmd =>
+            {
+                var updateStmt = dbConn.CreateUpdateStatement(obj);
+
+                dbCmd.CommandText = updateStmt.CommandText;
+                foreach (IDbDataParameter genParam in updateStmt.Parameters)
+                {
+                    var newParam = dbCmd.CreateParameter();
+                    newParam.ParameterName = genParam.ParameterName;
+                    newParam.Value = genParam.Value;
+                    dbCmd.Parameters.Add(newParam);
+                }
+
+                dbCmd.ExecuteNonQuery();
+            });
+        }
+
         public static void Delete<T>(this IDbConnection dbConn, params T[] objs)
             where T : new()
         {
@@ -123,6 +143,12 @@ namespace ServiceStack.OrmLite
             where T : new()
         {
             dbConn.Exec(dbCmd => dbCmd.DeleteById<T>(id));
+        }
+
+        public static void DeleteByIdParametized<T>(this IDbConnection dbConn, object id)
+where T : new()
+        {
+            dbConn.Exec(dbCmd => dbConn.DeleteByIdParametized<T>(id));
         }
 
         public static void DeleteByIds<T>(this IDbConnection dbConn, IEnumerable idValues)
@@ -168,6 +194,26 @@ namespace ServiceStack.OrmLite
             where T : new()
         {
             dbConn.Exec(dbCmd => dbCmd.InsertAll(objs));
+        }
+
+        public static void InsertParametized<T>(this IDbConnection dbConn, T obj)
+    where T : new()
+        {
+            dbConn.Exec(dbCmd =>
+            {
+                var insertStmt = dbConn.CreateInsertStatement(obj);
+
+                dbCmd.CommandText = insertStmt.CommandText;
+                foreach (IDbDataParameter genParam in insertStmt.Parameters)
+                {
+                    var newParam = dbCmd.CreateParameter();
+                    newParam.ParameterName = genParam.ParameterName;
+                    newParam.Value = genParam.Value;
+                    dbCmd.Parameters.Add(newParam);
+                }
+
+                dbCmd.ExecuteNonQuery();
+            });
         }
 
         public static void Save<T>(this IDbConnection dbConn, params T[] objs)

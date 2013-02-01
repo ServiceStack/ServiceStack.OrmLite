@@ -39,6 +39,7 @@ namespace ServiceStack.OrmLite.Oracle
 			base.RealColumnDefinition= "FLOAT";
 			base.DefaultStringLength=128;
 			base.InitColumnTypeMap();
+            base.ParamString = ":";
 		}
 		
 		public override IDbConnection CreateConnection(string connectionString, Dictionary<string, string> options)

@@ -489,7 +489,9 @@ namespace ServiceStack.OrmLite
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
-                if (fieldDef.AutoIncrement) continue;
+                if (fieldDef.AutoIncrement)
+                        continue;
+                    
                 //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
                 if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name)) continue;
 
@@ -511,7 +513,7 @@ namespace ServiceStack.OrmLite
                 }
             }
 
-            command.CommandText = string.Format("INSERT INTO {0} ({1}) VALUES ({2});",
+            command.CommandText = string.Format("INSERT INTO {0} ({1}) VALUES ({2})",
                                                 GetQuotedTableName(modelDef), sbColumnNames, sbColumnValues);
             return command;
         }
@@ -892,5 +894,11 @@ namespace ServiceStack.OrmLite
             throw new NotImplementedException();
         }
 
+
+
+        public IDbCommand CreateParameterizedDeleteStatement(object objWithProperties, IDbConnection connection)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

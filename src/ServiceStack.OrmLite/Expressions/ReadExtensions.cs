@@ -44,6 +44,19 @@ namespace ServiceStack.OrmLite
 				return ConvertToList<T>(reader);
 			}
 		}
+
+        public static List<T> SelectParametized<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
+    where T : new()
+        {
+            var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();
+            ev.IsParameterized = true;
+            string sql = ev.Where(predicate).ToSelectStatement();
+
+            using (var reader = dbCmd.ExecReader(sql, ev.Params.Select( s=>s.Value)))
+            {
+                return ConvertToList<T>(reader);
+            }
+        }
 		
 		public static T First<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
 			where T : new()

@@ -50,6 +50,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="OracleParamTests.cs" />
     <Compile Include="OracleSyntaxTests.cs" />
     <Compile Include="OracleTestBase.cs">
       <SubType>Code</SubType>
