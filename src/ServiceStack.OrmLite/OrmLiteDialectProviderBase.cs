@@ -182,8 +182,14 @@ namespace ServiceStack.OrmLite
                 ? StringLengthUnicodeColumnDefinitionFormat
                 : StringLengthNonUnicodeColumnDefinitionFormat;
 
+
+            this.defaultStringLength = useUnicode
+                ? 4000
+                : 8000;
+
             this.StringColumnDefinition = string.Format(
                 this.StringLengthColumnDefinitionFormat, DefaultStringLength);
+
         }
 
         protected DbTypes<TDialect> DbTypeMap = new DbTypes<TDialect>();
