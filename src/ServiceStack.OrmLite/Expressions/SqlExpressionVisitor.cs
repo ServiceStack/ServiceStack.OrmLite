@@ -838,8 +838,8 @@ namespace ServiceStack.OrmLite
             var exp = m.Object as MemberExpression;
             return exp != null 
                 && exp.Expression != null 
-                && (m.Object as MemberExpression).Expression.Type == typeof(T)
-                && (m.Object as MemberExpression).Expression.NodeType == ExpressionType.Parameter;
+                && exp.Expression.Type == typeof(T)
+                && exp.Expression.NodeType == ExpressionType.Parameter;
         }
 
         protected virtual object VisitMethodCall(MethodCallExpression m)
