@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.SqlServer 
 {
@@ -15,7 +16,7 @@ namespace ServiceStack.OrmLite.SqlServer
 		public SqlServerOrmLiteDialectProvider()
 		{
 			base.AutoIncrementDefinition = "IDENTITY(1,1)";
-			base.StringColumnDefinition = "VARCHAR(8000)";
+			StringColumnDefinition = UseUnicode ?  "NVARCHAR(4000)" : "VARCHAR(8000)";
 			base.GuidColumnDefinition = "UniqueIdentifier";
 			base.RealColumnDefinition = "FLOAT";
 		    base.BoolColumnDefinition = "BIT";
@@ -129,6 +130,8 @@ namespace ServiceStack.OrmLite.SqlServer
             }
 
 			return base.GetQuotedValue(value, fieldType);
+
+
 		}
 
 		public override long GetLastInsertId(IDbCommand dbCmd)
