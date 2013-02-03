@@ -835,7 +835,9 @@ namespace ServiceStack.OrmLite
             if (m.Object != null && m.Object as MethodCallExpression != null)
                 return IsColumnAccess(m.Object as MethodCallExpression);
 
-            return m.Object as MemberExpression != null
+            var exp = m.Object as MemberExpression;
+            return exp != null 
+                && exp.Expression != null 
                 && (m.Object as MemberExpression).Expression.Type == typeof(T)
                 && (m.Object as MemberExpression).Expression.NodeType == ExpressionType.Parameter;
         }
