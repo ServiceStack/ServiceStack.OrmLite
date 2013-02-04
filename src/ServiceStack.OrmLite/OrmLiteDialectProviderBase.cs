@@ -26,7 +26,7 @@ namespace ServiceStack.OrmLite
         : IOrmLiteDialectProvider
         where TDialect : IOrmLiteDialectProvider
     {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(IOrmLiteDialectProvider));
+        protected static readonly ILog Log = LogManager.GetLogger(typeof(IOrmLiteDialectProvider));
 
         [Conditional("DEBUG")]
         private static void LogDebug(string fmt, params object[] args)
@@ -548,7 +548,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        private void AddParameterForFieldToCommand(IDbCommand command, FieldDefinition fieldDef, object objWithProperties)
+        protected void AddParameterForFieldToCommand(IDbCommand command, FieldDefinition fieldDef, object objWithProperties)
         {
             var p = command.CreateParameter();
             p.ParameterName = string.Format("{0}{1}", ParamString, fieldDef.FieldName);

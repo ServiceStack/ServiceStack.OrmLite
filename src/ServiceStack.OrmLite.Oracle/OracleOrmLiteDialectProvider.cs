@@ -5,6 +5,7 @@ using System.Reflection;
 using ServiceStack.Common.Utils;
 using System.Text;
 using ServiceStack.Common.Extensions;
+using ServiceStack.OrmLite;
 using System.Data.OracleClient;
 
 namespace ServiceStack.OrmLite.Oracle
@@ -164,6 +165,81 @@ namespace ServiceStack.OrmLite.Oracle
 			}
 			return sql.ToString();
 		}
+
+        public override IDbCommand CreateParameterizedInsertStatement(object objWithProperties, IDbConnection connection)
+        {
+            return CreateParameterizedInsertStatement(objWithProperties, null, connection);
+        }
+
+        public override IDbCommand CreateParameterizedInsertStatement(object objWithProperties, IList<string> insertFields, IDbConnection connection)
+        {
+            if (insertFields == null) insertFields = new List<string>();
+            var sbColumnNames = new StringBuilder();
+            var sbColumnValues = new StringBuilder();
+            var modelDef = GetModel(objWithProperties.GetType());
+
+            var dbCommand = connection.CreateCommand();
+
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+                if (fieldDef.IsComputed) continue;
+                if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name)) continue;
+
+                if ((fieldDef.AutoIncrement || !string.IsNullOrEmpty(fieldDef.Sequence)
+                    || fieldDef.Name == OrmLiteConfig.IdField)
+                    && dbCommand != null)
+                {
+
+                    if (fieldDef.AutoIncrement && string.IsNullOrEmpty(fieldDef.Sequence))
+                    {
+                        fieldDef.Sequence = Sequence(
+                            (modelDef.IsInSchema
+                                ? modelDef.Schema + "_" + NamingStrategy.GetTableName(modelDef.ModelName)
+                                : NamingStrategy.GetTableName(modelDef.ModelName)),
+                            fieldDef.FieldName, fieldDef.Sequence);
+                    }
+
+                    PropertyInfo pi = objWithProperties.GetType().GetProperty(fieldDef.Name,
+                        BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy);
+
+                    var result = GetNextValue(dbCommand, fieldDef.Sequence, pi.GetValue(objWithProperties, new object[] { }));
+                    if (pi.PropertyType == typeof(String))
+                        ReflectionUtils.SetProperty(objWithProperties, pi, result.ToString());
+                    else if (pi.PropertyType == typeof(Int16))
+                        ReflectionUtils.SetProperty(objWithProperties, pi, Convert.ToInt16(result));
+                    else if (pi.PropertyType == typeof(Int32))
+                        ReflectionUtils.SetProperty(objWithProperties, pi, Convert.ToInt32(result));
+                    else if (pi.PropertyType == typeof(Guid))
+                        ReflectionUtils.SetProperty(objWithProperties, pi, result);
+                    else
+                        ReflectionUtils.SetProperty(objWithProperties, pi, Convert.ToInt64(result));
+                }
+
+                //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
+                if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name)) continue;
+
+                if (sbColumnNames.Length > 0) sbColumnNames.Append(",");
+                if (sbColumnValues.Length > 0) sbColumnValues.Append(",");
+
+                try
+                {
+                    sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
+                    sbColumnValues.Append(ParamString)
+                                  .Append(fieldDef.FieldName);
+
+                    AddParameterForFieldToCommand(dbCommand, fieldDef, objWithProperties);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("ERROR in CreateParameterizedInsertStatement(): " + ex.Message, ex);
+                    throw;
+                }
+            }
+
+            dbCommand.CommandText = string.Format("INSERT INTO {0} ({1}) VALUES ({2})",
+                                                GetQuotedTableName(modelDef), sbColumnNames, sbColumnValues);
+            return dbCommand;
+        }
 		
 		public override string ToInsertRowStatement(object objWithProperties, IList<string> insertFields, IDbCommand dbCommand)
 		{

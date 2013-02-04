@@ -804,11 +804,11 @@ namespace ServiceStack.OrmLite
 
         protected virtual object VisitConstant(ConstantExpression c)
         {
+            if (c.Value == null)
+                return new PartialSqlString("null");
+
             if (!IsParameterized)
             {
-                if (c.Value == null)
-                    return new PartialSqlString("null");
-
                 return c.Value;
             }
             else
