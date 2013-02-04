@@ -798,12 +798,25 @@ namespace ServiceStack.OrmLite
             return p.Name;
         }
 
+        public bool IsParameterized { get; set; }
+        public Dictionary<string, object> Params = new Dictionary<string, object>();
+        int paramCounter = 0;
+
         protected virtual object VisitConstant(ConstantExpression c)
         {
             if (c.Value == null)
                 return new PartialSqlString("null");
-            
-            return c.Value;
+
+            if (!IsParameterized)
+            {
+                return c.Value;
+            }
+            else
+            {
+                string paramPlaceholder = OrmLiteConfig.DialectProvider.ParamString + paramCounter++;
+                Params.Add(paramPlaceholder, c.Value);
+                return new PartialSqlString(paramPlaceholder);
+            }
         }
 
         protected virtual object VisitUnary(UnaryExpression u)
