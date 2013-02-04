@@ -95,10 +95,10 @@ namespace ServiceStack.OrmLite.PostgreSQL
 			return sql.ToString();
 		}		
 
-		public override string EscapeParam(object paramValue)
-		{
-			return paramValue.ToString().Replace("'", @"''");
-		}
+        public override string GetQuotedParam(string paramValue)
+        {
+            return "'" + paramValue.Replace("'", @"''") + "'";
+        }
 
 		public override IDbConnection CreateConnection(string connectionString, Dictionary<string, string> options)
 		{
