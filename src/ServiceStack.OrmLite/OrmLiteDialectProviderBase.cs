@@ -301,7 +301,7 @@ namespace ServiceStack.OrmLite
             {
                 if (TypeSerializer.CanCreateFromString(fieldType))
                 {
-                    return "'" + EscapeParam(TypeSerializer.SerializeToString(value)) + "'";
+                    return OrmLiteConfig.DialectProvider.GetQuotedParam(TypeSerializer.SerializeToString(value));
                 }
 
                 throw new NotSupportedException(
@@ -318,15 +318,15 @@ namespace ServiceStack.OrmLite
                 return ((decimal)value).ToString(CultureInfo.InvariantCulture);
 
             return ShouldQuoteValue(fieldType)
-                    ? "'" + EscapeParam(value) + "'"
+                    ? OrmLiteConfig.DialectProvider.GetQuotedParam(value.ToString())
                     : value.ToString();
         }
 
         public abstract IDbConnection CreateConnection(string filePath, Dictionary<string, string> options);
 
-        public virtual string EscapeParam(object paramValue)
+        public virtual string GetQuotedParam(string paramValue)
         {
-            return paramValue.ToString().Replace("'", "''");
+            return "'" + paramValue.Replace("'", "''") + "'";
         }
 
         public virtual string GetQuotedTableName(ModelDefinition modelDef)
