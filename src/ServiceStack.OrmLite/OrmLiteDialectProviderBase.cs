@@ -26,7 +26,7 @@ namespace ServiceStack.OrmLite
         : IOrmLiteDialectProvider
         where TDialect : IOrmLiteDialectProvider
     {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(IOrmLiteDialectProvider));
+        protected static readonly ILog Log = LogManager.GetLogger(typeof(IOrmLiteDialectProvider));
 
         [Conditional("DEBUG")]
         private static void LogDebug(string fmt, params object[] args)
@@ -495,7 +495,9 @@ namespace ServiceStack.OrmLite
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
-                if (fieldDef.AutoIncrement) continue;
+                if (fieldDef.AutoIncrement)
+                        continue;
+                    
                 //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
                 if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name)) continue;
 
@@ -517,7 +519,7 @@ namespace ServiceStack.OrmLite
                 }
             }
 
-            command.CommandText = string.Format("INSERT INTO {0} ({1}) VALUES ({2});",
+            command.CommandText = string.Format("INSERT INTO {0} ({1}) VALUES ({2})",
                                                 GetQuotedTableName(modelDef), sbColumnNames, sbColumnValues);
             return command;
         }
@@ -552,7 +554,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        private void AddParameterForFieldToCommand(IDbCommand command, FieldDefinition fieldDef, object objWithProperties)
+        protected void AddParameterForFieldToCommand(IDbCommand command, FieldDefinition fieldDef, object objWithProperties)
         {
             var p = command.CreateParameter();
             p.ParameterName = string.Format("{0}{1}", ParamString, fieldDef.FieldName);
@@ -898,5 +900,11 @@ namespace ServiceStack.OrmLite
             throw new NotImplementedException();
         }
 
+
+
+        public IDbCommand CreateParameterizedDeleteStatement(object objWithProperties, IDbConnection connection)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -71,6 +71,8 @@ namespace ServiceStack.OrmLite
         string ToDeleteRowStatement(object objWithProperties);
         string ToDeleteStatement(Type tableType, string sqlFilter, params object[] filterParams);
 
+        IDbCommand CreateParameterizedDeleteStatement(object objWithProperties, IDbConnection connection);
+
         string ToExistStatement(Type fromTableType,
             object objWithProperties,
             string sqlFilter,
@@ -103,5 +105,4 @@ namespace ServiceStack.OrmLite
         DbType GetColumnDbType(Type valueType);
         string GetColumnTypeDefinition(Type fieldType);
     }
-
 }
