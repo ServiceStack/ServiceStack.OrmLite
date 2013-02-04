@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.SqlServer 
 {
@@ -15,7 +16,7 @@ namespace ServiceStack.OrmLite.SqlServer
 		public SqlServerOrmLiteDialectProvider()
 		{
 			base.AutoIncrementDefinition = "IDENTITY(1,1)";
-			base.StringColumnDefinition = "VARCHAR(8000)";
+			StringColumnDefinition = UseUnicode ?  "NVARCHAR(4000)" : "VARCHAR(8000)";
 			base.GuidColumnDefinition = "UniqueIdentifier";
 			base.RealColumnDefinition = "FLOAT";
 		    base.BoolColumnDefinition = "BIT";
@@ -104,6 +105,17 @@ namespace ServiceStack.OrmLite.SqlServer
 		{
 			if (value == null) return "NULL";
 
+            if (!fieldType.UnderlyingSystemType.IsValueType && fieldType != typeof(string))
+            {
+                if (TypeSerializer.CanCreateFromString(fieldType))
+                {
+                    return (UseUnicode ? "N'" : "'") + EscapeParam(TypeSerializer.SerializeToString(value)) + "'";
+                }
+
+                throw new NotSupportedException(
+                    string.Format("Property of type: {0} is not supported", fieldType.FullName));
+            }
+
 			if (fieldType == typeof(Guid))
 			{
 				var guidValue = (Guid)value;
@@ -121,7 +133,7 @@ namespace ServiceStack.OrmLite.SqlServer
 				return base.GetQuotedValue(boolValue ? 1 : 0, typeof(int));
 			}
 			if(fieldType == typeof(string)) {
-				return UseUnicode ? "N'" + EscapeParam(value) + "'" : "'" + EscapeParam(value) + "'";
+				return (UseUnicode ? "N'" : "'") + EscapeParam(value) + "'";
 			}
             if (fieldType == typeof(byte[]))
             {
@@ -129,6 +141,8 @@ namespace ServiceStack.OrmLite.SqlServer
             }
 
 			return base.GetQuotedValue(value, fieldType);
+
+
 		}
 
 		public override long GetLastInsertId(IDbCommand dbCmd)
