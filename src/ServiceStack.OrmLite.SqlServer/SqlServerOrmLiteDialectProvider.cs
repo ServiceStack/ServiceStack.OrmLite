@@ -27,6 +27,11 @@ namespace ServiceStack.OrmLite.SqlServer
 			base.InitColumnTypeMap();
 		}
 
+        public override string GetQuotedParam(string paramValue)
+        {
+            return (UseUnicode ? "N'" : "'") + paramValue.Replace("'", "''") + "'";
+        }
+
 		public override IDbConnection CreateConnection(string connectionString, Dictionary<string, string> options)
 		{
 			var isFullConnectionString = connectionString.Contains(";");
@@ -101,20 +106,10 @@ namespace ServiceStack.OrmLite.SqlServer
 			}
 		}
 
+
 		public override string GetQuotedValue(object value, Type fieldType)
 		{
 			if (value == null) return "NULL";
-
-            if (!fieldType.UnderlyingSystemType.IsValueType && fieldType != typeof(string))
-            {
-                if (TypeSerializer.CanCreateFromString(fieldType))
-                {
-                    return (UseUnicode ? "N'" : "'") + EscapeParam(TypeSerializer.SerializeToString(value)) + "'";
-                }
-
-                throw new NotSupportedException(
-                    string.Format("Property of type: {0} is not supported", fieldType.FullName));
-            }
 
 			if (fieldType == typeof(Guid))
 			{
@@ -133,7 +128,7 @@ namespace ServiceStack.OrmLite.SqlServer
 				return base.GetQuotedValue(boolValue ? 1 : 0, typeof(int));
 			}
 			if(fieldType == typeof(string)) {
-				return (UseUnicode ? "N'" : "'") + EscapeParam(value) + "'";
+                return GetQuotedParam(value.ToString());
 			}
             if (fieldType == typeof(byte[]))
             {

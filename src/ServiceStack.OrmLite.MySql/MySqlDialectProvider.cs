@@ -27,9 +27,9 @@ namespace ServiceStack.OrmLite.MySql
     	    base.DefaultValueFormat = " DEFAULT '{0}'";
         }
 
-        public override string EscapeParam(object paramValue)
+        public override string GetQuotedParam(string paramValue)
         {
-            return paramValue.ToString().Replace("\\", "\\\\").Replace("'", @"\'");
+            return "'" + paramValue.Replace("\\", "\\\\").Replace("'", @"\'") + "'";
         }
 
         public override IDbConnection CreateConnection(string connectionString, Dictionary<string, string> options)

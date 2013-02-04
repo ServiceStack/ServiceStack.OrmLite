@@ -25,7 +25,13 @@ namespace ServiceStack.OrmLite
 
         INamingStrategy NamingStrategy { get; set; }
 
-        string EscapeParam(object paramValue);
+        /// <summary>
+        /// Quote the string so that it can be used inside an SQL-expression
+        /// Escape quotes inside the string
+        /// </summary>
+        /// <param name="paramValue"></param>
+        /// <returns></returns>
+        string GetQuotedParam(string paramValue);
 
         object ConvertDbValue(object value, Type type);
 
