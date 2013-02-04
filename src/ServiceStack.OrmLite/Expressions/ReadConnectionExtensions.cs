@@ -130,7 +130,7 @@ namespace ServiceStack.OrmLite
             return dbConn.Exec(dbCmd => dbCmd.Select(expression));
         }
 
-        public static List<T> SelectParametized<T>(this IDbConnection dbConn, Expression<Func<T, bool>> predicate)
+        public static List<T> SelectParameterized<T>(this IDbConnection dbConn, Expression<Func<T, bool>> predicate)
             where T : new ()
         {
             return dbConn.Exec(dbCmd => dbCmd.SelectParametized(predicate));

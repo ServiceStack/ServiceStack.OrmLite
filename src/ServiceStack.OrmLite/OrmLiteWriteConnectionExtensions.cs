@@ -107,11 +107,13 @@ namespace ServiceStack.OrmLite
             dbConn.Exec(dbCmd => dbCmd.UpdateAll(objs));
         }
 
-        public static void UpdateParametized<T>(this IDbConnection dbConn, T obj)
+        public static void UpdateParameterized<T>(this IDbConnection dbConn, T obj)
             where T : new()
         {
             dbConn.Exec(dbCmd =>
             {
+                //var updateStmt = dbCmd.ReparameterizeInsert(obj)
+
                 var updateStmt = dbConn.CreateUpdateStatement(obj);
 
                 dbCmd.CommandText = updateStmt.CommandText;
@@ -196,7 +198,7 @@ where T : new()
             dbConn.Exec(dbCmd => dbCmd.InsertAll(objs));
         }
 
-        public static void InsertParametized<T>(this IDbConnection dbConn, T obj)
+        public static void InsertParameterized<T>(this IDbConnection dbConn, T obj)
     where T : new()
         {
             dbConn.Exec(dbCmd =>

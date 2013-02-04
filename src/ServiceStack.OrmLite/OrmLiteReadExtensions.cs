@@ -48,7 +48,7 @@ namespace ServiceStack.OrmLite
 			return dbCmd.ExecuteReader();
 		}
 
-        internal static IDataReader ExecReader(this IDbCommand dbCmd, string sql, IEnumerable<object> parameters)
+        internal static IDataReader ExecReader(this IDbCommand dbCmd, string sql, IEnumerable<IDataParameter> parameters)
         {
             LogDebug(sql);
 			dbCmd.CommandText = sql;

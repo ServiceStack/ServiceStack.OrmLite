@@ -52,7 +52,17 @@ namespace ServiceStack.OrmLite
             ev.IsParameterized = true;
             string sql = ev.Where(predicate).ToSelectStatement();
 
-            using (var reader = dbCmd.ExecReader(sql, ev.Params.Select( s=>s.Value)))
+            dbCmd.Parameters.Clear();
+            List<IDataParameter> paramsToInsert = new List<IDataParameter>();
+            foreach (var param in ev.Params)
+            {
+                var cmdParam = dbCmd.CreateParameter();
+                cmdParam.ParameterName = param.Key;
+                cmdParam.Value = param.Value ?? DBNull.Value;
+                paramsToInsert.Add(cmdParam);
+            }
+
+            using (var reader = dbCmd.ExecReader(sql, paramsToInsert))
             {
                 return ConvertToList<T>(reader);
             }
