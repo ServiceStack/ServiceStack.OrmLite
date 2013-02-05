@@ -150,7 +150,7 @@ namespace ServiceStack.OrmLite
         public static void DeleteByIdParametized<T>(this IDbConnection dbConn, object id)
 where T : new()
         {
-            dbConn.Exec(dbCmd => dbConn.DeleteByIdParametized<T>(id));
+            dbConn.Exec(dbCmd => dbCmd.DeleteByIdParameterized<T>(id));
         }
 
         public static void DeleteByIds<T>(this IDbConnection dbConn, IEnumerable idValues)
