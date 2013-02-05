@@ -164,5 +164,23 @@ namespace ServiceStack.OrmLite.SqlServer
 			
 			return result > 0;
 		}
+
+        public override bool UseUnicode
+        {
+            get
+            {
+                return useUnicode;
+            }
+            set
+            {
+                useUnicode = value;
+                if (useUnicode && this.DefaultStringLength > 4000)
+                {
+                    this.DefaultStringLength = 4000;
+                }
+
+                // UpdateStringColumnDefinitions(); is called by changing DefaultStringLength 
+            }
+        }
 	}
 }
