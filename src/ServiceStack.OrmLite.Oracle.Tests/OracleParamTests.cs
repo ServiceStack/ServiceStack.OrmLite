@@ -84,6 +84,7 @@ namespace ServiceStack.OrmLite.Oracle.Tests
                 bo1.Int = 10000;
                 bo1.Info = "OneUpdated";
                 bo1.NullableBool = null;
+                bo1.DateTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
 
                 db.UpdateParameterized(bo1);
 
@@ -92,6 +93,32 @@ namespace ServiceStack.OrmLite.Oracle.Tests
                 Assert.AreEqual(bo1.Double, bo1Check.Double);
                 Assert.AreEqual(bo1.Int, bo1Check.Int);
                 Assert.AreEqual(bo1.Info, bo1Check.Info);
+                Assert.AreEqual(bo1.DateTime, bo1Check.DateTime);
+            }
+        }
+
+        [Test]
+        public void ORA_ParamTestDelete()
+        {
+            using (var db = ConnectionString.OpenDbConnection())
+            {
+                DropAndCreateTables(db);
+
+                db.Insert(new ParamTestBO() { Id = 1 });
+                db.Insert(new ParamTestBO() { Id = 2 });
+                db.Insert(new ParamTestBO() { Id = 3 });
+
+                Assert.IsNotNull(db.Select<ParamTestBO>(q => q.Id == 1).FirstOrDefault());
+                Assert.IsNotNull(db.Select<ParamTestBO>(q => q.Id == 2).FirstOrDefault());
+                Assert.IsNotNull(db.Select<ParamTestBO>(q => q.Id == 3).FirstOrDefault());
+
+                db.DeleteByIdParametized<ParamTestBO>(1);
+                db.DeleteByIdParametized<ParamTestBO>(2);
+                db.DeleteByIdParametized<ParamTestBO>(3);
+
+                Assert.IsNull(db.Select<ParamTestBO>(q => q.Id == 1).FirstOrDefault());
+                Assert.IsNull(db.Select<ParamTestBO>(q => q.Id == 2).FirstOrDefault());
+                Assert.IsNull(db.Select<ParamTestBO>(q => q.Id == 3).FirstOrDefault());
             }
         }
 
@@ -168,6 +195,7 @@ namespace ServiceStack.OrmLite.Oracle.Tests
         public class ParamTestBO
         {
             public int Id { get; set; }
+            [StringLength(400)]
             public string Info { get; set; }
             public int Int { get; set; }
             public double Double { get; set; }

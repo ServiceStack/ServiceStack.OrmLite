@@ -344,6 +344,24 @@ namespace ServiceStack.OrmLite
         }
 
         [Obsolete(UseDbConnectionExtensions)]
+        public static void DeleteByIdParameterized<T>(this IDbCommand dbCmd, object id)
+        {
+            var modelDef = ModelDefinition<T>.Definition;
+            var idParamString = OrmLiteConfig.DialectProvider.ParamString+"0";
+
+            var sql = string.Format("DELETE FROM {0} WHERE {1} = {2}",
+                OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef),
+                OrmLiteConfig.DialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName),
+                idParamString);
+
+            var idParam = dbCmd.CreateParameter();
+            idParam.ParameterName = idParamString;
+            idParam.Value = OrmLiteConfig.DialectProvider.GetQuotedValue(id, id.GetType());
+
+            dbCmd.ExecuteSql(sql);
+        }
+
+        [Obsolete(UseDbConnectionExtensions)]
         public static void DeleteAll<T>(this IDbCommand dbCmd)
         {
             DeleteAll(dbCmd, typeof(T));
