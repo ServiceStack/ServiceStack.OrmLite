@@ -356,8 +356,9 @@ namespace ServiceStack.OrmLite
 
             var idParam = dbCmd.CreateParameter();
             idParam.ParameterName = idParamString;
-            idParam.Value = OrmLiteConfig.DialectProvider.GetQuotedValue(id, id.GetType());
-
+            idParam.Value = id;
+            dbCmd.Parameters.Add(idParam);
+            
             dbCmd.ExecuteSql(sql);
         }
 

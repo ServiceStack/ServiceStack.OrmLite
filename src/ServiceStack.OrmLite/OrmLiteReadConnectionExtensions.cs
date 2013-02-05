@@ -108,6 +108,12 @@ namespace ServiceStack.OrmLite
             return dbConn.Exec(dbCmd => dbCmd.GetById<T>(idValue));
         }
 
+        public static T GetByIdParameterized<T>(this IDbConnection dbConn, object idValue)
+            where T: new()
+        {
+            return dbConn.Exec(dbCmd => dbCmd.GetByIdParameterized<T>(idValue));
+        }
+
         /// <summary>
         /// Alias for GetById
         /// </summary>

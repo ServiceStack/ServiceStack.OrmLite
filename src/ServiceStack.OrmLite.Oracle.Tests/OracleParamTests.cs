@@ -123,6 +123,23 @@ namespace ServiceStack.OrmLite.Oracle.Tests
         }
 
         [Test]
+        public void ORA_ParamTestGetById()
+        {
+            using (var db = ConnectionString.OpenDbConnection())
+            {
+                DropAndCreateTables(db);
+
+                db.Insert(new ParamTestBO() { Id = 1, Info = "Item1" });
+                db.Insert(new ParamTestBO() { Id = 2, Info = "Item2" });
+                db.Insert(new ParamTestBO() { Id = 3, Info = "Item3" });
+
+                Assert.AreEqual("Item1", db.GetByIdParameterized<ParamTestBO>(1).Info);
+                Assert.AreEqual("Item2", db.GetByIdParameterized<ParamTestBO>(2).Info);
+                Assert.AreEqual("Item3", db.GetByIdParameterized<ParamTestBO>(3).Info);
+            }
+        }
+
+        [Test]
         public void ORA_ParamTestSelectLambda()
         {
             using (var db = ConnectionString.OpenDbConnection())
@@ -195,7 +212,6 @@ namespace ServiceStack.OrmLite.Oracle.Tests
         public class ParamTestBO
         {
             public int Id { get; set; }
-            [StringLength(400)]
             public string Info { get; set; }
             public int Int { get; set; }
             public double Double { get; set; }

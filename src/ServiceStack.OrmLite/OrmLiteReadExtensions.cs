@@ -17,6 +17,7 @@ using System.Diagnostics;
 using System.Text;
 using ServiceStack.Logging;
 using ServiceStack.Text;
+using System.Linq;
 
 namespace ServiceStack.OrmLite
 {
@@ -505,6 +506,27 @@ namespace ServiceStack.OrmLite
 				? new List<T>()
 				: Select<T>(dbCmd, OrmLiteConfig.DialectProvider.GetQuotedColumnName(ModelDefinition<T>.PrimaryKeyName) + " IN (" + sql + ")");
 		}
+
+        [Obsolete(UseDbConnectionExtensions)]
+        public static T GetByIdParameterized<T>(this IDbCommand dbCmd, object id)
+            where T : new()
+        {
+            var modelDef = ModelDefinition<T>.Definition;
+            var idParamString = OrmLiteConfig.DialectProvider.ParamString + "0";
+
+            var sql = string.Format("{0} WHERE {1} = {2}",
+                OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), "", null),
+                OrmLiteConfig.DialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName),
+                idParamString);
+
+            var idParam = dbCmd.CreateParameter();
+            idParam.ParameterName = idParamString;
+            idParam.Value = id;
+            List<IDataParameter> paramsToInsert = new List<IDataParameter>();
+            paramsToInsert.Add(idParam);
+
+            return dbCmd.ExecReader(sql, paramsToInsert).ConvertTo<T>();
+        }
 
         [Obsolete(UseDbConnectionExtensions)]
         public static T GetScalar<T>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
