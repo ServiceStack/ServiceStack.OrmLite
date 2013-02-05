@@ -149,7 +149,7 @@ namespace ServiceStack.OrmLite
             set { paramString = value; }
         }
 
-        private bool useUnicode;
+        protected bool useUnicode;
         public virtual bool UseUnicode
         {
             get
@@ -181,11 +181,6 @@ namespace ServiceStack.OrmLite
             this.StringLengthColumnDefinitionFormat = useUnicode
                 ? StringLengthUnicodeColumnDefinitionFormat
                 : StringLengthNonUnicodeColumnDefinitionFormat;
-
-
-            this.defaultStringLength = useUnicode
-                ? 4000
-                : 8000;
 
             this.StringColumnDefinition = string.Format(
                 this.StringLengthColumnDefinitionFormat, DefaultStringLength);
