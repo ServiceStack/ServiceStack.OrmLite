@@ -140,6 +140,21 @@ namespace ServiceStack.OrmLite.SqlServer
 
 		}
 
+        protected override string GetUndefinedColumnDefinition(Type fieldType, int? fieldLength)
+        {
+            if (TypeSerializer.CanCreateFromString(fieldType))
+            {
+                // store JSV objects in VARCHAR(MAX) columns, same as VARCHAR(8000), but is stored as 
+                // blob if bigger than 8000 chars. So no problem storing huge dictionaries etc.
+                // Very little performance penalty, see
+                // http://www.simple-talk.com/sql/database-administration/whats-the-point-of-using-varchar%28n%29-anymore/
+                return string.Format(StringLengthColumnDefinitionFormat, "MAX");
+            }
+
+            throw new NotSupportedException(
+                string.Format("Property of type: {0} is not supported", fieldType.FullName));
+        }
+
 		public override long GetLastInsertId(IDbCommand dbCmd)
 		{
 			dbCmd.CommandText = "SELECT SCOPE_IDENTITY()";
