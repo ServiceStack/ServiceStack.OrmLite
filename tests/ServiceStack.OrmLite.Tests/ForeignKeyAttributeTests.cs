@@ -100,7 +100,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [TestFixtureTearDown]
-        public void TearDwon()
+        public void TearDown()
         {
             using (var dbConn = ConnectionString.OpenDbConnection())
             {
