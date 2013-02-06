@@ -45,7 +45,7 @@ namespace ServiceStack.OrmLite
 			}
 		}
 
-        public static List<T> SelectParametized<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
+        public static List<T> SelectParam<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
     where T : new()
         {
             var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();
