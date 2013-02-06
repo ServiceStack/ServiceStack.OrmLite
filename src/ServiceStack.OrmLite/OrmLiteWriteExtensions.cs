@@ -344,7 +344,7 @@ namespace ServiceStack.OrmLite
         }
 
         [Obsolete(UseDbConnectionExtensions)]
-        public static void DeleteByIdParameterized<T>(this IDbCommand dbCmd, object id)
+        public static void DeleteByIdParam<T>(this IDbCommand dbCmd, object id)
         {
             var modelDef = ModelDefinition<T>.Definition;
             var idParamString = OrmLiteConfig.DialectProvider.ParamString+"0";

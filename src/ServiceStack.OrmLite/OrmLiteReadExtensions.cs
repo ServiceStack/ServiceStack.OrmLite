@@ -508,7 +508,7 @@ namespace ServiceStack.OrmLite
 		}
 
         [Obsolete(UseDbConnectionExtensions)]
-        public static T GetByIdParameterized<T>(this IDbCommand dbCmd, object id)
+        public static T GetByIdParam<T>(this IDbCommand dbCmd, object id)
             where T : new()
         {
             var modelDef = ModelDefinition<T>.Definition;

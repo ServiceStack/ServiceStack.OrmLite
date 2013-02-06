@@ -107,7 +107,10 @@ namespace ServiceStack.OrmLite
             dbConn.Exec(dbCmd => dbCmd.UpdateAll(objs));
         }
 
-        public static void UpdateParameterized<T>(this IDbConnection dbConn, T obj)
+        /// <summary>
+        /// Performs an Update<T>() except arguments are passed as parameters to the generated SQL
+        /// </summary>
+        public static void UpdateParam<T>(this IDbConnection dbConn, T obj)
             where T : new()
         {
             dbConn.Exec(dbCmd =>
@@ -147,10 +150,13 @@ namespace ServiceStack.OrmLite
             dbConn.Exec(dbCmd => dbCmd.DeleteById<T>(id));
         }
 
-        public static void DeleteByIdParametized<T>(this IDbConnection dbConn, object id)
+        /// <summary>
+        /// Performs a DeleteById() except argument is passed as a parameter to the generated SQL
+        /// </summary>
+        public static void DeleteByIdParam<T>(this IDbConnection dbConn, object id)
 where T : new()
         {
-            dbConn.Exec(dbCmd => dbCmd.DeleteByIdParameterized<T>(id));
+            dbConn.Exec(dbCmd => dbCmd.DeleteByIdParam<T>(id));
         }
 
         public static void DeleteByIds<T>(this IDbConnection dbConn, IEnumerable idValues)
@@ -198,7 +204,10 @@ where T : new()
             dbConn.Exec(dbCmd => dbCmd.InsertAll(objs));
         }
 
-        public static void InsertParameterized<T>(this IDbConnection dbConn, T obj)
+        /// <summary>
+        /// Performs an Insert() except arguments are passed as parameters to the generated SQL
+        /// </summary>
+        public static void InsertParam<T>(this IDbConnection dbConn, T obj)
     where T : new()
         {
             dbConn.Exec(dbCmd =>
