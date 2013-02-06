@@ -155,5 +155,34 @@ namespace ServiceStack.OrmLite.PostgreSQL
 
 			return result > 0;
 		}
+
+		public override string ToExecuteProcedureStatement(object objWithProperties)
+		{
+			var sbColumnValues = new StringBuilder();
+
+			var tableType = objWithProperties.GetType();
+			var modelDef = GetModel(tableType);
+
+			foreach (var fieldDef in modelDef.FieldDefinitions)
+			{
+				if (sbColumnValues.Length > 0) sbColumnValues.Append(",");
+				try
+				{
+					sbColumnValues.Append(fieldDef.GetQuotedValue(objWithProperties));
+				}
+				catch (Exception)
+				{
+					throw;
+				}
+			}
+
+			var sql = string.Format("{0} {1}{2}{3};",
+				GetQuotedTableName(modelDef),
+				sbColumnValues.Length > 0 ? "(" : "",
+				sbColumnValues,
+				sbColumnValues.Length > 0 ? ")" : "");
+
+			return sql;
+		}
 	}
 }
