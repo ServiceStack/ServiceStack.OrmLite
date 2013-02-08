@@ -8,10 +8,10 @@ namespace ServiceStack.OrmLite
 {
 	public static class ReadExtensions
 	{
-        public static SqlExpressionVisitor<T> CreateExpression<T>()
-        {
-            return OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();            
-        }
+		public static SqlExpressionVisitor<T> CreateExpression<T>()
+		{
+			return OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();            
+		}
 
 		public static List<T> Select<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
 			where T : new()
@@ -135,7 +135,7 @@ namespace ServiceStack.OrmLite
 		private static T ConvertTo<T>(IDataReader dataReader)
             where T : new()
         {
-			var fieldDefs = ModelDefinition<T>.Definition.FieldDefinitionsArray;
+			var fieldDefs = ModelDefinition<T>.Definition.AllFieldDefinitionsArray;
 
 			using (dataReader)
 			{
@@ -166,7 +166,7 @@ namespace ServiceStack.OrmLite
 		private static List<T> ConvertToList<T>(IDataReader dataReader)
 			where T : new()
 		{
-            var fieldDefs = ModelDefinition<T>.Definition.FieldDefinitionsArray;
+			var fieldDefs = ModelDefinition<T>.Definition.AllFieldDefinitionsArray;
 			var fieldDefCache = new Dictionary<int, FieldDefinition>();
 
 			var to = new List<T>();

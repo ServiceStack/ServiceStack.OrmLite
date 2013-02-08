@@ -22,7 +22,7 @@ namespace ServiceStack.OrmLite
 		public static T ConvertTo<T>(this IDataReader dataReader)
             where T : new()
         {
-			var fieldDefs = ModelDefinition<T>.Definition.FieldDefinitionsArray;
+			var fieldDefs = ModelDefinition<T>.Definition.AllFieldDefinitionsArray;
 
 			using (dataReader)
 			{
@@ -39,7 +39,7 @@ namespace ServiceStack.OrmLite
 		public static List<T> ConvertToList<T>(this IDataReader dataReader)
 			where T : new()
 		{
-            var fieldDefs = ModelDefinition<T>.Definition.FieldDefinitionsArray;
+            var fieldDefs = ModelDefinition<T>.Definition.AllFieldDefinitionsArray;
 
 			var to = new List<T>();
 			using (dataReader)

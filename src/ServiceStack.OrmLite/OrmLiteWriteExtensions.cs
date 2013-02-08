@@ -214,7 +214,7 @@ namespace ServiceStack.OrmLite
 		
         public static T PopulateWithSqlReader<T>(this T objWithProperties, IDataReader dataReader)
         {
-            var fieldDefs = ModelDefinition<T>.Definition.FieldDefinitions.ToArray();
+            var fieldDefs = ModelDefinition<T>.Definition.AllFieldDefinitionsArray;
 
             return PopulateWithSqlReader(objWithProperties, dataReader, fieldDefs, null);
         }

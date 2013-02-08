@@ -21,6 +21,7 @@ namespace ServiceStack.OrmLite
 		public ModelDefinition()
 		{
 			this.FieldDefinitions = new List<FieldDefinition>();
+			this.IgnoredFieldDefinitions = new List<FieldDefinition>();
 			this.CompositeIndexes = new List<CompositeIndexAttribute>();
 		}
 
@@ -63,7 +64,37 @@ namespace ServiceStack.OrmLite
 				return fieldDefinitionsArray;
 			}
 		}
+		
+		public List<FieldDefinition> IgnoredFieldDefinitions { get; set; }
 
+		private FieldDefinition[] ignoredFieldDefinitionsArray;
+		public FieldDefinition[] IgnoredFieldDefinitionsArray
+		{
+			get
+			{
+				if (ignoredFieldDefinitionsArray == null)
+				{
+					ignoredFieldDefinitionsArray = IgnoredFieldDefinitions.ToArray();
+				}
+				return ignoredFieldDefinitionsArray;
+			}
+		}
+
+		private FieldDefinition[] allFieldDefinitionsArray;
+		public FieldDefinition[] AllFieldDefinitionsArray
+		{
+			get
+			{
+				if (allFieldDefinitionsArray == null)
+				{
+					List<FieldDefinition> allItems = new List<FieldDefinition>(FieldDefinitions);
+					allItems.AddRange(IgnoredFieldDefinitions);
+					allFieldDefinitionsArray = allItems.ToArray(); 
+				}
+				return allFieldDefinitionsArray;
+			}
+		}
+		
 		public List<CompositeIndexAttribute> CompositeIndexes { get; set; }
 	}
 

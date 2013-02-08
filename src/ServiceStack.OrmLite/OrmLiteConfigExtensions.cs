@@ -80,7 +80,6 @@ namespace ServiceStack.OrmLite
             var i = 0;
             foreach (var propertyInfo in objProperties)
             {
-                if (propertyInfo.FirstAttribute<IgnoreAttribute>() != null) continue;
                 var sequenceAttr = propertyInfo.FirstAttribute<SequenceAttribute>();
                 var computeAttr= propertyInfo.FirstAttribute<ComputeAttribute>();
                 var pkAttribute = propertyInfo.FirstAttribute<PrimaryKeyAttribute>();
@@ -154,7 +153,10 @@ namespace ServiceStack.OrmLite
                     BelongToModelName = belongToAttribute != null ? belongToAttribute.BelongToTableType.GetModelDefinition().ModelName : null, 
                 };
 
-                modelDef.FieldDefinitions.Add(fieldDefinition);
+                if (propertyInfo.FirstAttribute<IgnoreAttribute>() != null)
+                  modelDef.IgnoredFieldDefinitions.Add(fieldDefinition);
+                else
+                  modelDef.FieldDefinitions.Add(fieldDefinition);                
             }
 
             modelDef.SqlSelectAllFromTable = "SELECT {0} FROM {1} ".Fmt(OrmLiteConfig.DialectProvider.GetColumnNames(modelDef),
