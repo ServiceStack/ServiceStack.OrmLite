@@ -66,6 +66,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CountTest.cs" />
     <Compile Include="IgnoredFieldSelectTest.cs" />
     <Compile Include="JoinTest.cs" />
     <Compile Include="Program.cs" />

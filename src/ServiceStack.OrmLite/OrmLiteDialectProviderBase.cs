@@ -406,6 +406,33 @@ namespace ServiceStack.OrmLite
 
         public abstract long GetLastInsertId(IDbCommand command);
 
+        public virtual string ToCountStatement(Type fromTableType, string sqlFilter, params object[] filterParams)
+        {
+            var sql = new StringBuilder();
+            const string SelectStatement = "SELECT ";
+            var modelDef = fromTableType.GetModelDefinition();
+            var isFullSelectStatement =
+                !string.IsNullOrEmpty(sqlFilter)
+                && sqlFilter.TrimStart().StartsWith(SelectStatement, StringComparison.OrdinalIgnoreCase);
+
+            if (isFullSelectStatement) return (filterParams != null ? sqlFilter.SqlFormat(filterParams) : sqlFilter);
+
+            sql.AppendFormat("SELECT {0} FROM {1}", "COUNT(*)",
+                             GetQuotedTableName(modelDef));
+            if (!string.IsNullOrEmpty(sqlFilter))
+            {
+                sqlFilter = filterParams != null ? sqlFilter.SqlFormat(filterParams) : sqlFilter;
+                if ((!sqlFilter.StartsWith("ORDER ", StringComparison.InvariantCultureIgnoreCase)
+                    && !sqlFilter.StartsWith("LIMIT ", StringComparison.InvariantCultureIgnoreCase))
+                    && (!sqlFilter.StartsWith("WHERE ", StringComparison.InvariantCultureIgnoreCase)))
+                {
+                    sql.Append(" WHERE ");
+                }
+                sql.Append(" " + sqlFilter);
+            }
+            return sql.ToString();
+        }
+
         public virtual string ToSelectStatement(Type tableType, string sqlFilter, params object[] filterParams)
         {
             const string SelectStatement = "SELECT ";

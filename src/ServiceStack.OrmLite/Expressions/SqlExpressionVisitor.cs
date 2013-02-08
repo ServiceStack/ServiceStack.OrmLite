@@ -449,6 +449,11 @@ namespace ServiceStack.OrmLite
             return ApplyPaging(sql.ToString());
         }
 
+        public virtual string ToCountStatement()
+        {
+            return OrmLiteConfig.DialectProvider.ToCountStatement(modelDef.ModelType, WhereExpression, null);
+        }
+
         public string SelectExpression
         {
             get
