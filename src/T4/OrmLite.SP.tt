@@ -182,9 +182,9 @@ namespace <#=StoredProcedures #>
 		private static DbParameter CreateNewParameter(DbCommand dbCommand, string paramName, object paramValue, ParameterDirection paramDirection, DbType paramType)
 		{
 			DbParameter param = dbCommand.CreateParameter();
-            param.Direction = paramDirection;
-            param.DbType = paramType;
-            param.ParameterName = paramName;
+			param.Direction = paramDirection;
+			param.DbType = paramType;
+			param.ParameterName = paramName;
 			param.Value = paramValue;
 			return param;
 		}
@@ -193,9 +193,9 @@ namespace <#=StoredProcedures #>
 		public static OrmLiteSPStatement <#=sp.Name#>(this IDbConnection dbConnection <#foreach(var param in sp.Parameters){#> , <#=param.NullableSysType#> <#=Inflector.MakeInitialLowerCase(param.Name)#>  = null <#}#>)
 		{
 			DbCommand dbCommand = (DbCommand)dbConnection.CreateCommand();
-            dbCommand.CommandText = "<#=sp.Name#>";
-            dbCommand.CommandType = CommandType.StoredProcedure;
-			dbCommand.Transaction = OrmLiteConfig.CurrentTransaction!= null ? (DbTransaction)OrmLiteConfig.CurrentTransaction : null;
+			dbCommand.CommandText = "<#=sp.Name#>";
+			dbCommand.CommandType = CommandType.StoredProcedure;
+			dbCommand.Transaction = OrmLiteConfig.TSTransaction!= null ? (DbTransaction)OrmLiteConfig.TSTransaction : null;
 <#if (sp.Parameters.Count > 0) { foreach(var param in sp.Parameters){#>
 			dbCommand.Parameters.Add(CreateNewParameter(dbCommand,"<#=param.Name#>",<#=Inflector.MakeInitialLowerCase(param.Name)#>,ParameterDirection.Input,<#=param.DbType#>));
 <#}#> <#}#>
