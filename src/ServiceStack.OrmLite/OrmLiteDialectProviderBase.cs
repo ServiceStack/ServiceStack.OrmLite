@@ -18,6 +18,7 @@ using ServiceStack.Logging;
 using ServiceStack.Text;
 using System.Diagnostics;
 using ServiceStack.Common.Extensions;
+using System.IO;
 
 namespace ServiceStack.OrmLite
 {
@@ -257,6 +258,9 @@ namespace ServiceStack.OrmLite
 
             if (value.GetType() == type)
             {
+                if (type == typeof(byte[]))
+                    return TypeSerializer.DeserializeFromStream<byte[]>(new MemoryStream((byte[])value));
+
                 return value;
             }
 
