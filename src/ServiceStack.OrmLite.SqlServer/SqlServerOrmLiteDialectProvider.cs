@@ -98,6 +98,9 @@ namespace ServiceStack.OrmLite.SqlServer
 					return dateTimeValue - timeSpanOffset;
 				}
 
+                if (type == typeof(byte[]))
+                    return value;
+
 				return base.ConvertDbValue(value, type);
 			}
 			catch (Exception ex)
@@ -130,6 +133,7 @@ namespace ServiceStack.OrmLite.SqlServer
 			if(fieldType == typeof(string)) {
                 return GetQuotedParam(value.ToString());
 			}
+
             if (fieldType == typeof(byte[]))
             {
                 return "0x" + BitConverter.ToString((byte[])value).Replace("-", "");
