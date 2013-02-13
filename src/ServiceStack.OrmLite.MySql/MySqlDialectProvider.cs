@@ -59,6 +59,11 @@ namespace ServiceStack.OrmLite.MySql
                 return base.GetQuotedValue(guidValue.ToString("N"), typeof(string));
             }
 
+            if (fieldType == typeof(byte[]))
+            {
+                return "0x" + BitConverter.ToString((byte[])value).Replace("-", "");
+            }
+
             return base.GetQuotedValue(value, fieldType);
         }
 
@@ -73,6 +78,9 @@ namespace ServiceStack.OrmLite.MySql
                         ? value
                         : (int.Parse(value.ToString()) != 0); //backward compatibility (prev version mapped bool as bit(1))
             }
+
+            if (type == typeof(byte[]))
+                return value;
 
             return base.ConvertDbValue(value, type);
         }

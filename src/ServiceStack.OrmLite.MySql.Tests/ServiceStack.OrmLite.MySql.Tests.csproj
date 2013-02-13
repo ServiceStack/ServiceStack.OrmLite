@@ -101,6 +101,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ShippersExample.cs" />
     <Compile Include="SqlMapperTests.cs" />
+    <Compile Include="TypeWithByteArrayFieldTests.cs" />
     <Compile Include="UseCase\CustomerOrdersUseCase.cs" />
     <Compile Include="UseCase\SimpleUseCase.cs" />
     <Compile Include="OrmLiteGetScalarTests.cs" />
