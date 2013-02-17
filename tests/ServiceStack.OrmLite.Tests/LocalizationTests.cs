@@ -15,16 +15,14 @@ namespace ServiceStack.OrmLite.Tests
 		private readonly CultureInfo CurrentCulture = Thread.CurrentThread.CurrentCulture;
 		private readonly CultureInfo CurrentUICulture = Thread.CurrentThread.CurrentUICulture;
 
-		[TestFixtureSetUp]
+		[SetUp]
 		public void TestFixtureSetUp()
 		{
 			Thread.CurrentThread.CurrentCulture = new CultureInfo("vi-VN");
 			Thread.CurrentThread.CurrentUICulture = new CultureInfo("vi-VN");
-
-			OrmLiteConfig.DialectProvider = new SqliteOrmLiteDialectProvider();
 		}
 
-		[TestFixtureTearDown]
+		[TearDown]
 		public void TestFixtureTearDown()
 		{
 			Thread.CurrentThread.CurrentCulture = CurrentCulture;

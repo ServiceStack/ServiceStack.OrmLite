@@ -16,7 +16,7 @@ namespace ServiceStack.OrmLite.Tests
 		{
 			using (var db = ConnectionString.OpenDbConnection())
 			{
-				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+                db.DropAndCreateTable<ModelWithFieldsOfDifferentTypes>();
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
 
@@ -33,7 +33,7 @@ namespace ServiceStack.OrmLite.Tests
 		{
 			using (var db = ConnectionString.OpenDbConnection())
 			{
-				db.CreateTable<ModelWithOnlyStringFields>(true);
+                db.DropAndCreateTable<ModelWithOnlyStringFields>();
 
 				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
 
@@ -50,7 +50,7 @@ namespace ServiceStack.OrmLite.Tests
 		{
 			using (var db = ConnectionString.OpenDbConnection())
 			{
-				db.CreateTable<ModelWithOnlyStringFields>(true);
+                db.DropAndCreateTable<ModelWithOnlyStringFields>();
 
 				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
 
@@ -90,7 +90,7 @@ namespace ServiceStack.OrmLite.Tests
 		{
 			using (var db = ConnectionString.OpenDbConnection())
 			{
-				db.CreateTable<ModelWithOnlyStringFields>(true);
+                db.DropAndCreateTable<ModelWithOnlyStringFields>();
 
 				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
 
@@ -118,7 +118,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var db = ConnectionString.OpenDbConnection())
             {
-                db.CreateTable<ModelWithOnlyStringFields>(true);
+                db.DropAndCreateTable<ModelWithOnlyStringFields>();
 
                 var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
 
@@ -156,7 +156,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var db = ConnectionString.OpenDbConnection())
             {
-                db.CreateTableIfNotExists<Note>();
+                db.DropAndCreateTable<Note>();
 
                 db.Insert(new Note
                     {
@@ -196,7 +196,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var db = ConnectionString.OpenDbConnection())
             {
-                db.CreateTableIfNotExists<Note>();
+                db.DropAndCreateTable<Note>();
 
                 db.Insert(new Note
                 {

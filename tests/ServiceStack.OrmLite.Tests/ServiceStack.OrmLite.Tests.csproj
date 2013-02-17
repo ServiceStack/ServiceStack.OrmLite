@@ -132,7 +132,7 @@
     <Compile Include="SqlFormatTests.cs" />
     <Compile Include="OrmLiteTransactionTests.cs" />
     <Compile Include="OrmLiteBasicPersistenceProviderTests.cs" />
-    <Compile Include="OrmLiteConnectionTests.cs" />
+    <Compile Include="SqliteOrmLiteConnectionTests.cs" />
     <Compile Include="OrmLiteDeleteTests.cs" />
     <Compile Include="OrmLiteUpdateTests.cs" />
     <Compile Include="OrmLiteSelectTests.cs" />
@@ -155,13 +155,6 @@
     <Content Include="..\..\lib\sqlite3.dll">
       <Link>sqlite3.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="App_Data\Database1.mdf">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="App_Data\Database1_log.ldf">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <DependentUpon>Database1.mdf</DependentUpon>
     </Content>
   </ItemGroup>
   <ItemGroup>

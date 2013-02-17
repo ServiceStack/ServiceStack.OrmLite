@@ -4,6 +4,9 @@ using System.Data;
 using System.Linq;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
+using ServiceStack.Logging;
+using ServiceStack.Logging.Support.Logging;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.UseCase
 {
@@ -122,8 +125,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
         [Test]
         public void Run()
         {
-            //Setup SQL Server Connection Factory
-            var dbFactory = OrmLiteTestBase.CreateSqlServerDbFactory();
+            LogManager.LogFactory = new ConsoleLogFactory();
 
             //var dbFactory = new OrmLiteConnectionFactory(
             //    @"Data Source=.\SQLEXPRESS;AttachDbFilename=|DataDirectory|\App_Data\Database1.mdf;Integrated Security=True;User Instance=True",
@@ -134,7 +136,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
             //    ":memory:", false, SqliteDialect.Provider);
 
             //Non-intrusive: All extension methods hang off System.Data.* interfaces
-            using (IDbConnection db = dbFactory.OpenDbConnection())
+            using (IDbConnection db = Config.OpenDbConnection())
             {
                 //Re-Create all table schemas:
                 db.DropTable<OrderDetail>();

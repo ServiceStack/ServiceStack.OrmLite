@@ -112,5 +112,7 @@ namespace ServiceStack.OrmLite
 
         DbType GetColumnDbType(Type valueType);
         string GetColumnTypeDefinition(Type fieldType);
+
+        string GetDropForeignKeyConstraints(ModelDefinition modelDef);
     }
 }

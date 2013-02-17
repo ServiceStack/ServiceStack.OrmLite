@@ -57,7 +57,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
             using (IDbConnection db = dbFactory.OpenDbConnection())
             {
                 CreateSchemaIfNotExists(db);
-                db.CreateTable<User>(true);
+                db.DropAndCreateTable<User>();
 
                 var tables = db.GetFirstColumn<string>
                     (@"SELECT '['+SCHEMA_NAME(schema_id)+'].['+name+']' AS SchemaTable FROM sys.tables");

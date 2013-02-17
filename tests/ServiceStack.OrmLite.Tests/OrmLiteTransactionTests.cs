@@ -12,10 +12,10 @@ namespace ServiceStack.OrmLite.Tests
 		{
 			using (var db = ConnectionString.OpenDbConnection())
 			{
-				db.CreateTable<ModelWithIdAndName>(true);
+				db.DropAndCreateTable<ModelWithIdAndName>();
 				db.Insert(new ModelWithIdAndName(1));
 
-				using (var dbTrans = db.BeginTransaction())
+				using (var dbTrans = db.OpenTransaction())
 				{
 					db.Insert(new ModelWithIdAndName(2));
 					db.Insert(new ModelWithIdAndName(3));
@@ -36,10 +36,10 @@ namespace ServiceStack.OrmLite.Tests
 		{
 			using (var db = ConnectionString.OpenDbConnection())
 			{
-				db.CreateTable<ModelWithIdAndName>(true);
+                db.DropAndCreateTable<ModelWithIdAndName>();
 				db.Insert(new ModelWithIdAndName(1));
 
-				using (var dbTrans = db.BeginTransaction())
+                using (var dbTrans = db.OpenTransaction())
 				{
 					db.Insert(new ModelWithIdAndName(2));
 					db.Insert(new ModelWithIdAndName(3));
@@ -58,13 +58,13 @@ namespace ServiceStack.OrmLite.Tests
 		{
 			using (var db = ConnectionString.OpenDbConnection())
 			{
-				db.CreateTable<ModelWithIdAndName>(true);
-				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
-				db.CreateTable<ModelWithOnlyStringFields>(true);
+                db.DropAndCreateTable<ModelWithIdAndName>();
+                db.DropAndCreateTable<ModelWithFieldsOfDifferentTypes>();
+                db.DropAndCreateTable<ModelWithOnlyStringFields>();
 
 				db.Insert(new ModelWithIdAndName(1));
 
-				using (var dbTrans = db.BeginTransaction())
+                using (var dbTrans = db.OpenTransaction())
 				{
 					db.Insert(new ModelWithIdAndName(2));
 					db.Insert(ModelWithFieldsOfDifferentTypes.Create(3));
@@ -86,13 +86,13 @@ namespace ServiceStack.OrmLite.Tests
 		{
 			using (var db = ConnectionString.OpenDbConnection())
 			{
-				db.CreateTable<ModelWithIdAndName>(true);
-				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
-				db.CreateTable<ModelWithOnlyStringFields>(true);
+                db.DropAndCreateTable<ModelWithIdAndName>();
+                db.DropAndCreateTable<ModelWithFieldsOfDifferentTypes>();
+                db.DropAndCreateTable<ModelWithOnlyStringFields>();
 
 				db.Insert(new ModelWithIdAndName(1));
 
-				using (var dbTrans = db.BeginTransaction())
+                using (var dbTrans = db.OpenTransaction())
 				{
 					db.Insert(new ModelWithIdAndName(2));
 					db.Insert(ModelWithFieldsOfDifferentTypes.Create(3));

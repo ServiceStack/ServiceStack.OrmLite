@@ -169,11 +169,19 @@ namespace ServiceStack.OrmLite
         {
             try
             {
-                dbCmd.ExecuteSql(string.Format("DROP TABLE {0} ", OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef)));
+                if (OrmLiteConfig.DialectProvider.DoesTableExist(dbCmd, modelDef.ModelName))
+                {
+                    var dropTableFks = OrmLiteConfig.DialectProvider.GetDropForeignKeyConstraints(modelDef);
+                    if (!string.IsNullOrEmpty(dropTableFks))
+                    {
+                        dbCmd.ExecuteSql(dropTableFks);
+                    }
+                    dbCmd.ExecuteSql("DROP TABLE " + OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef));
+                }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                //Log.DebugFormat("Cannot drop non-existing table '{0}': {1}", modelDef.ModelName, ex.Message);
+                Log.DebugFormat("Could not drop table '{0}': {1}", modelDef.ModelName, ex.Message);
             }
         }
 
@@ -208,9 +216,7 @@ namespace ServiceStack.OrmLite
         {
             const string fbError = "attempt to store duplicate value";
             return ex.Message.Contains(fbError);
-                   
         }
-		
 		
         public static T PopulateWithSqlReader<T>(this T objWithProperties, IDataReader dataReader)
         {

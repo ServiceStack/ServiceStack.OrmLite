@@ -439,7 +439,7 @@ namespace ServiceStack.OrmLite
 
         public virtual string ToSelectStatement(Type tableType, string sqlFilter, params object[] filterParams)
         {
-            const string SelectStatement = "SELECT ";
+            const string SelectStatement = "SELECT";
             var isFullSelectStatement =
                 !string.IsNullOrEmpty(sqlFilter)
                 && sqlFilter.TrimStart().StartsWith(SelectStatement, StringComparison.InvariantCultureIgnoreCase);
@@ -785,16 +785,23 @@ namespace ServiceStack.OrmLite
                     GetQuotedTableName(refModelDef),
                     GetQuotedColumnName(refModelDef.PrimaryKey.FieldName));
 
-                if (!string.IsNullOrEmpty(fieldDef.ForeignKey.OnDelete))
-                    sbConstraints.AppendFormat(" ON DELETE {0}", fieldDef.ForeignKey.OnDelete);
-
-                if (!string.IsNullOrEmpty(fieldDef.ForeignKey.OnUpdate))
-                    sbConstraints.AppendFormat(" ON UPDATE {0}", fieldDef.ForeignKey.OnUpdate);
+                sbConstraints.Append(GetForeignKeyOnDeleteClause(fieldDef.ForeignKey));
+                sbConstraints.Append(GetForeignKeyOnUpdateClause(fieldDef.ForeignKey));
             }
             var sql = new StringBuilder(string.Format(
                 "CREATE TABLE {0} \n(\n  {1}{2} \n); \n", GetQuotedTableName(modelDef), sbColumns, sbConstraints));
 
             return sql.ToString();
+        }
+
+        public virtual string GetForeignKeyOnDeleteClause(ForeignKeyConstraint foreignKey)
+        {
+            return !string.IsNullOrEmpty(foreignKey.OnDelete) ? " ON DELETE " + foreignKey.OnDelete : "";
+        }
+
+        public virtual string GetForeignKeyOnUpdateClause(ForeignKeyConstraint foreignKey)
+        {
+            return !string.IsNullOrEmpty(foreignKey.OnUpdate) ? " ON UPDATE " + foreignKey.OnUpdate : "";
         }
 
         public virtual List<string> ToCreateIndexStatements(Type tableType)
@@ -926,11 +933,19 @@ namespace ServiceStack.OrmLite
             throw new NotImplementedException();
         }
 
-
-
         public IDbCommand CreateParameterizedDeleteStatement(object objWithProperties, IDbConnection connection)
         {
             throw new NotImplementedException();
+        }
+
+        public virtual string GetDropForeignKeyConstraints(ModelDefinition modelDef)
+        {
+            return null;
+        }
+
+        public static ModelDefinition GetModelDefinition(Type modelType)
+        {
+            return modelType.GetModelDefinition();
         }
     }
 }

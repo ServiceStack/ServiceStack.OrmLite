@@ -1,10 +1,10 @@
 using System;
+using System.Data;
 using System.IO;
 using NUnit.Framework;
 using ServiceStack.Common.Utils;
 using ServiceStack.Logging;
 using ServiceStack.Logging.Support.Logging;
-using ServiceStack.OrmLite.Sqlite;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -14,6 +14,21 @@ namespace ServiceStack.OrmLite.Tests
         public static string SqliteFileDir = "~/App_Data/".MapAbsolutePath();
         public static string SqliteFileDb = "~/App_Data/db.sqlite".MapAbsolutePath();
         public static string SqlServerDb = "~/App_Data/Database1.mdf".MapAbsolutePath();
+        public static string SqlServerBuildDb = "Server=pc;Database=test;User Id=pc;Password=pc;";
+
+        public static IOrmLiteDialectProvider DefaultProvider = SqlServerDialect.Provider;
+        public static string DefaultConnection = SqlServerBuildDb;
+
+        public static string GetDefaultConnection()
+        {
+            OrmLiteConfig.DialectProvider = DefaultProvider;
+            return DefaultConnection;
+        }
+
+        public static IDbConnection OpenDbConnection()
+        {
+            return GetDefaultConnection().OpenDbConnection();
+        }
     }
 
 	public class OrmLiteTestBase
@@ -27,7 +42,7 @@ namespace ServiceStack.OrmLite.Tests
 
 	    public static OrmLiteConnectionFactory CreateSqlServerDbFactory()
 	    {
-	        var dbFactory = new OrmLiteConnectionFactory(Config.SqlServerDb, SqlServerDialect.Provider);
+            var dbFactory = new OrmLiteConnectionFactory(Config.SqlServerBuildDb, SqlServerDialect.Provider);
 	        return dbFactory;
 	    }
 
@@ -51,12 +66,15 @@ namespace ServiceStack.OrmLite.Tests
 		{
 			LogManager.LogFactory = new ConsoleLogFactory();
 
-			OrmLiteConfig.DialectProvider = SqliteDialect.Provider;
-			ConnectionString = GetFileConnectionString();
-			//ConnectionString = ":memory:";
+            //OrmLiteConfig.DialectProvider = SqliteDialect.Provider;
+		    //ConnectionString = GetFileConnectionString();
+		    //ConnectionString = ":memory:";
+            
+            //OrmLiteConfig.DialectProvider = SqlServerDialect.Provider;
+            //ConnectionString = Config.SqlServerBuildDb;
+            //ConnectionString = "~/App_Data/Database1.mdf".MapAbsolutePath();			
 
-			//OrmLiteConfig.DialectProvider = SqlServerOrmLiteDialectProvider.Instance;
-			//ConnectionString = "~/App_Data/Database1.mdf".MapAbsolutePath();			
+		    ConnectionString = Config.GetDefaultConnection();
 		}
 
 		public void Log(string text)

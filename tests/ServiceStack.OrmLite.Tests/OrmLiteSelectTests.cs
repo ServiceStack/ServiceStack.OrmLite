@@ -17,7 +17,7 @@ namespace ServiceStack.OrmLite.Tests
 		{
 			using (var db = ConnectionString.OpenDbConnection())
 			{
-				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+                db.DropAndCreateTable<ModelWithFieldsOfDifferentTypes>();
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
 
@@ -34,7 +34,7 @@ namespace ServiceStack.OrmLite.Tests
 		{
 			using (var db = ConnectionString.OpenDbConnection())
 			{
-				db.CreateTable<ModelWithOnlyStringFields>(true);
+                db.DropAndCreateTable<ModelWithOnlyStringFields>();
 
 				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
 
@@ -51,7 +51,7 @@ namespace ServiceStack.OrmLite.Tests
 		{
 			using (var db = ConnectionString.OpenDbConnection())
 			{
-				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+                db.DropAndCreateTable<ModelWithFieldsOfDifferentTypes>();
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
 
@@ -69,7 +69,7 @@ namespace ServiceStack.OrmLite.Tests
 		{
 			using (var db = ConnectionString.OpenDbConnection())
 			{
-				db.CreateTable<ModelWithOnlyStringFields>(true);
+                db.DropAndCreateTable<ModelWithOnlyStringFields>();
 
 				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
 
@@ -87,7 +87,7 @@ namespace ServiceStack.OrmLite.Tests
 		{
 			using (var db = ConnectionString.OpenDbConnection())
 			{
-				db.CreateTable<ModelWithOnlyStringFields>(true);
+                db.DropAndCreateTable<ModelWithOnlyStringFields>();
 
 				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
 
@@ -113,7 +113,7 @@ namespace ServiceStack.OrmLite.Tests
 
 			using (var db = ConnectionString.OpenDbConnection())
 			{
-				db.CreateTable<ModelWithIdAndName>(true);
+                db.DropAndCreateTable<ModelWithIdAndName>();
 
 				n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
 
@@ -128,7 +128,7 @@ namespace ServiceStack.OrmLite.Tests
 		{
 			using (var db = ConnectionString.OpenDbConnection())
 			{
-				db.CreateTable<ModelWithOnlyStringFields>(true);
+                db.DropAndCreateTable<ModelWithOnlyStringFields>();
 
 				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
 
@@ -149,7 +149,7 @@ namespace ServiceStack.OrmLite.Tests
 		{
 			using (var db = ConnectionString.OpenDbConnection())
 			{
-				db.CreateTable<ModelWithOnlyStringFields>(true);
+                db.DropAndCreateTable<ModelWithOnlyStringFields>();
 
 				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
 
@@ -179,7 +179,7 @@ namespace ServiceStack.OrmLite.Tests
 
 			using (var db = ConnectionString.OpenDbConnection())
 			{
-				db.CreateTable<ModelWithIdAndName>(true);
+                db.DropAndCreateTable<ModelWithIdAndName>();
 
 				n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
 
@@ -196,7 +196,7 @@ namespace ServiceStack.OrmLite.Tests
 
 			using (var db = ConnectionString.OpenDbConnection())
 			{
-				db.CreateTable<ModelWithIdAndName>(true);
+                db.DropAndCreateTable<ModelWithIdAndName>();
 
 				n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
 
@@ -213,7 +213,7 @@ namespace ServiceStack.OrmLite.Tests
 
 			using (var db = ConnectionString.OpenDbConnection())
 			{
-				db.CreateTable<ModelWithIdAndName>(true);
+                db.DropAndCreateTable<ModelWithIdAndName>();
 
 				n.Times(x => {
 					var row = ModelWithIdAndName.Create(x);
@@ -236,7 +236,7 @@ namespace ServiceStack.OrmLite.Tests
 
 			using (var db = ConnectionString.OpenDbConnection())
 			{
-				db.CreateTable<ModelWithIdAndName>(true);
+				db.DropAndCreateTable<ModelWithIdAndName>();
 
 				n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
 
@@ -253,7 +253,7 @@ namespace ServiceStack.OrmLite.Tests
 		{
 			using (var db = ConnectionString.OpenDbConnection())
 			{
-				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+                db.DropAndCreateTable<ModelWithFieldsOfDifferentTypes>();
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
 
@@ -271,7 +271,7 @@ namespace ServiceStack.OrmLite.Tests
 		{
 			using (var db = ConnectionString.OpenDbConnection())
 			{
-				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+                db.DropAndCreateTable<ModelWithFieldsOfDifferentTypes>();
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
 
@@ -292,7 +292,7 @@ namespace ServiceStack.OrmLite.Tests
 
 			using (var db = ConnectionString.OpenDbConnection())
 			{
-				db.CreateTable<ModelWithIdAndName>(true);
+                db.DropAndCreateTable<ModelWithIdAndName>();
 
 				n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
 

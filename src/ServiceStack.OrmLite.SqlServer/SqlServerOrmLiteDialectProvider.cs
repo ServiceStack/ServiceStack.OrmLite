@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
+using System.Text;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.SqlServer 
@@ -186,5 +187,45 @@ namespace ServiceStack.OrmLite.SqlServer
                 // UpdateStringColumnDefinitions(); is called by changing DefaultStringLength 
             }
         }
-	}
+
+        public override string GetForeignKeyOnDeleteClause(ForeignKeyConstraint foreignKey)
+        {
+            return "RESTRICT" == (foreignKey.OnDelete ?? "").ToUpper()
+                ? ""
+                : base.GetForeignKeyOnDeleteClause(foreignKey);
+        }
+
+        public override string GetForeignKeyOnUpdateClause(ForeignKeyConstraint foreignKey)
+        {
+            return "RESTRICT" == (foreignKey.OnDelete ?? "").ToUpper()
+                ? ""
+                : base.GetForeignKeyOnUpdateClause(foreignKey);
+        }
+
+        public override string GetDropForeignKeyConstraints(ModelDefinition modelDef)
+        {
+            //TODO: find out if this should go in base class?
+
+            var sb = new StringBuilder();
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+                if (fieldDef.ForeignKey != null)
+                {
+                    var foreignKeyName = fieldDef.ForeignKey.GetForeignKeyName(
+                        modelDef,
+                        GetModelDefinition(fieldDef.ForeignKey.ReferenceType),
+                        NamingStrategy,
+                        fieldDef);
+
+                    var tableName = GetQuotedTableName(modelDef);
+                    sb.AppendLine("IF EXISTS (SELECT name FROM sys.foreign_keys WHERE name = '{0}')".Fmt(foreignKeyName));
+                    sb.AppendLine("BEGIN");
+                    sb.AppendLine("  ALTER TABLE {0} DROP {1};".Fmt(tableName, foreignKeyName));
+                    sb.AppendLine("END");
+                }
+            }
+
+            return sb.ToString();
+        }
+    }
 }

@@ -108,7 +108,7 @@ namespace ServiceStack.OrmLite.Tests
 		{
 			using (var db = ConnectionString.OpenDbConnection())
 			{
-				db.CreateTable<ModelWithIdAndName>(true);
+                db.DropAndCreateTable<ModelWithIdAndName>();
 
 				var row1 = ModelWithIdAndName.Create(5);
 				var row2 = ModelWithIdAndName.Create(6);
@@ -154,11 +154,11 @@ namespace ServiceStack.OrmLite.Tests
 		{
 			using (var db = ConnectionString.OpenDbConnection())
 			{
-				db.CreateTable<OrderBlob>(true);
+				db.DropAndCreateTable<OrderBlob>();
 
 				var row = OrderBlob.Create(1);
 
-				db.Insert(row);
+				db.InsertParam(row);
 
 				var rows = db.Select<OrderBlob>();
 
