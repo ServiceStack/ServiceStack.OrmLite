@@ -43,7 +43,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="MySql.Data">
-      <HintPath>..\..\lib\mysql.data.dll</HintPath>
+      <HintPath>..\..\lib\MySql.Data.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
