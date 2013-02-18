@@ -387,7 +387,7 @@ namespace ServiceStack.OrmLite
 		}
 
         [Obsolete(UseDbConnectionExtensions)]
-        public static List<T> Query<T>(this IDbCommand dbCmd, string sql, object anonType)
+        public static List<T> Query<T>(this IDbCommand dbCmd, string sql, object anonType = null)
 			where T : new()
 		{
             if (anonType != null) dbCmd.SetParameters(anonType, true);
@@ -400,7 +400,7 @@ namespace ServiceStack.OrmLite
 		}
 
         [Obsolete(UseDbConnectionExtensions)]
-        public static List<T> Query<T>(this IDbCommand dbCmd, string sql, Dictionary<string, object> dict = null)
+        public static List<T> Query<T>(this IDbCommand dbCmd, string sql, Dictionary<string, object> dict)
 			where T : new()
 		{
 			if (dict != null) dbCmd.SetParameters(dict, true);
@@ -430,6 +430,48 @@ namespace ServiceStack.OrmLite
 			using (var dbReader = dbCmd.ExecuteReader())
 				return GetScalar<T>(dbReader);
 		}
+
+        internal static List<T> SqlList<T>(this IDbCommand dbCmd, string sql, object anonType = null)
+            where T : new()
+        {
+            if (anonType != null) dbCmd.SetParameters(anonType, true);
+            dbCmd.CommandText = sql;
+
+            using (var dbReader = dbCmd.ExecuteReader())
+                return typeof(T).IsValueType
+                    ? dbReader.GetFirstColumn<T>()
+                    : dbReader.ConvertToList<T>();
+        }
+
+        internal static List<T> SqlList<T>(this IDbCommand dbCmd, string sql, Dictionary<string, object> dict)
+            where T : new()
+        {
+            if (dict != null) dbCmd.SetParameters(dict, true);
+            dbCmd.CommandText = sql;
+
+            using (var dbReader = dbCmd.ExecuteReader())
+                return typeof(T).IsValueType
+                    ? dbReader.GetFirstColumn<T>()
+                    : dbReader.ConvertToList<T>();
+        }
+
+	    internal static T SqlScalar<T>(this IDbCommand dbCmd, string sql, object anonType = null)
+        {
+            if (anonType != null) dbCmd.SetParameters(anonType, true);
+            dbCmd.CommandText = sql;
+
+            using (var dbReader = dbCmd.ExecuteReader())
+                return GetScalar<T>(dbReader);
+        }
+
+        internal static T SqlScalar<T>(this IDbCommand dbCmd, string sql, Dictionary<string, object> dict)
+        {
+            if (dict != null) dbCmd.SetParameters(dict, true);
+            dbCmd.CommandText = sql;
+
+            using (var dbReader = dbCmd.ExecuteReader())
+                return GetScalar<T>(dbReader);
+        }
 
         [Obsolete(UseDbConnectionExtensions)]
         public static List<T> ByExampleWhere<T>(this IDbCommand dbCmd, object anonType)

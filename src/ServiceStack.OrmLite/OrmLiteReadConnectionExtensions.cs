@@ -188,7 +188,35 @@ namespace ServiceStack.OrmLite
         {
             return dbConn.Exec(dbCmd => dbCmd.QueryScalar<T>(sql, anonType));
         }
+        
+        public static List<T> SqlList<T>(this IDbConnection dbConn, string sql)
+            where T : new()
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(sql));
+        }
 
+        public static List<T> SqlList<T>(this IDbConnection dbConn, string sql, object anonType)
+            where T : new()
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(sql, anonType));
+        }
+
+        public static List<T> SqlList<T>(this IDbConnection dbConn, string sql, Dictionary<string, object> dict)
+            where T : new()
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(sql, dict));
+        }
+
+        public static T SqlScalar<T>(this IDbConnection dbConn, string sql, object anonType = null)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SqlScalar<T>(sql, anonType));
+        }
+
+        public static T SqlScalar<T>(this IDbConnection dbConn, string sql, Dictionary<string, object> dict)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SqlScalar<T>(sql, dict));
+        }
+        
         public static List<T> ByExampleWhere<T>(this IDbConnection dbConn, object anonType)
             where T : new()
         {
