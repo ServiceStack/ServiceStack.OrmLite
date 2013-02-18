@@ -7,9 +7,11 @@ namespace ServiceStack.OrmLite
     {
         private readonly IDbTransaction prevTrans;
         private readonly IDbTransaction trans;
+        private readonly IDbConnection db;
 
-        public OrmLiteTransaction(IDbTransaction trans)
+        public OrmLiteTransaction(IDbConnection db, IDbTransaction trans)
         {
+            this.db = db;
             prevTrans = OrmLiteConfig.TSTransaction;
             OrmLiteConfig.TSTransaction = this.trans = trans;
         }
@@ -20,9 +22,14 @@ namespace ServiceStack.OrmLite
             {
                 trans.Dispose();                
             }
-            finally 
+            finally
             {
                 OrmLiteConfig.TSTransaction = prevTrans;
+                var ormLiteDbConn = this.db as OrmLiteConnection;
+                if (ormLiteDbConn != null)
+                {
+                    ormLiteDbConn.Transaction = prevTrans;
+                }
             }
         }
 

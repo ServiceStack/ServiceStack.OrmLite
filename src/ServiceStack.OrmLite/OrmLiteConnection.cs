@@ -13,7 +13,7 @@ namespace ServiceStack.OrmLite
 		: IDbConnection, IHasDbConnection 
 	{
 	    public readonly OrmLiteConnectionFactory Factory;
-        public IDbTransaction Transaction { get; private set; }
+        public IDbTransaction Transaction { get; internal set; }
 		private IDbConnection dbConnection;
 		private bool isOpen;
 

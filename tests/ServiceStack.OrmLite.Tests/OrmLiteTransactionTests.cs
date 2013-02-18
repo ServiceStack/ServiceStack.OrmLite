@@ -1,5 +1,9 @@
+using System;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
+using ServiceStack.DataAnnotations;
+using ServiceStack.OrmLite.Sqlite;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -110,7 +114,86 @@ namespace ServiceStack.OrmLite.Tests
 				Assert.That(db.Select<ModelWithOnlyStringFields>(), Has.Count.EqualTo(1));
 			}
 		}
+        
+        class MyTable
+        {
+            [AutoIncrement]
+            public int Id { get; set; }
+            public String SomeTextField { get; set; }
+        }
 
+        [Test]
+        public void Does_Sqlite_transactions()
+        {
+            var factory = new OrmLiteConnectionFactory(":memory:", true, SqliteDialect.Provider);
 
+            // test 1 - no transactions
+            try
+            {
+                using (var conn = factory.OpenDbConnection())
+                {
+                    conn.CreateTable<MyTable>();
+
+                    conn.Insert(new MyTable { SomeTextField = "Example" });
+                    var record = conn.GetById<MyTable>(1);
+                }
+
+                "Test 1 Success".Print();
+            }
+            catch (Exception e)
+            {
+                Assert.Fail("Test 1 Failed: {0}".Fmt(e.Message));
+            }
+
+            // test 2 - all transactions
+            try
+            {
+                using (var conn = factory.OpenDbConnection())
+                {
+                    conn.CreateTable<MyTable>();
+
+                    using (var tran = conn.OpenTransaction())
+                    {
+                        conn.Insert(new MyTable { SomeTextField = "Example" });
+                        tran.Commit();
+                    }
+
+                    using (var tran = conn.OpenTransaction())
+                    {
+                        var record = conn.GetById<MyTable>(1);
+                    }
+                }
+
+                "Test 2 Success".Print();
+            }
+            catch (Exception e)
+            {
+                Assert.Fail("Test 2 Failed: {0}".Fmt(e.Message));
+            }
+
+            // test 3 - transaction for insert, not for select
+            try
+            {
+                using (var conn = factory.OpenDbConnection())
+                {
+                    conn.CreateTable<MyTable>();
+
+                    using (var tran = conn.OpenTransaction())
+                    {
+                        conn.Insert(new MyTable { SomeTextField = "Example" });
+                        tran.Commit();
+                    }
+
+                    var record = conn.GetById<MyTable>(1);
+                }
+
+                "Test 3 Success".Print();
+            }
+            catch (Exception e)
+            {
+                Assert.Fail("Test 3 Failed: {0}".Fmt(e.Message));
+            }
+        }
+ 
 	}
 }

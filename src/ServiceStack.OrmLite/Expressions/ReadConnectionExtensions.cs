@@ -91,12 +91,12 @@ namespace ServiceStack.OrmLite
 
         public static IDbTransaction OpenTransaction(this IDbConnection dbConn)
         {
-            return new OrmLiteTransaction(dbConn.BeginTransaction());
+            return new OrmLiteTransaction(dbConn, dbConn.BeginTransaction());
         }
 
         public static IDbTransaction OpenTransaction(this IDbConnection dbConn, IsolationLevel isolationLevel)
         {
-            return new OrmLiteTransaction(dbConn.BeginTransaction(isolationLevel));
+            return new OrmLiteTransaction(dbConn, dbConn.BeginTransaction(isolationLevel));
         }
 
         public static IOrmLiteDialectProvider GetDialectProvider(this IDbConnection dbConn)
