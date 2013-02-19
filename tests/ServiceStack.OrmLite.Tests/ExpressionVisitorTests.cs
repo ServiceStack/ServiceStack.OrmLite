@@ -101,6 +101,33 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        public void Can_Select_using_IN_using_params()
+        {
+            var visitor = OrmLiteConfig.DialectProvider.ExpressionVisitor<TestType>();
+            visitor.Where(q => Sql.In(q.Id, 1, 2, 3));
+            var target = ConnectionString.OpenDbConnection().Select(visitor);
+            Assert.AreEqual(3, target.Count);
+        }
+
+        [Test]
+        public void Can_Select_using_IN_using_int_array()
+        {
+            var visitor = OrmLiteConfig.DialectProvider.ExpressionVisitor<TestType>();
+            visitor.Where(q => Sql.In(q.Id, new[] {1, 2, 3}));
+            var target = ConnectionString.OpenDbConnection().Select(visitor);
+            Assert.AreEqual(3, target.Count);
+        }
+
+        [Test]
+        public void Can_Select_using_IN_using_object_array()
+        {
+            var visitor = OrmLiteConfig.DialectProvider.ExpressionVisitor<TestType>();
+            visitor.Where(q => Sql.In(q.Id, new object[] { 1, 2, 3 }));
+            var target = ConnectionString.OpenDbConnection().Select(visitor);
+            Assert.AreEqual(3, target.Count);
+        }
+
+        [Test]
         public void Can_Select_using_Startswith()
         {
             var target = ConnectionString.OpenDbConnection().Select<TestType>(q => q.TextCol.StartsWith("asdf"));

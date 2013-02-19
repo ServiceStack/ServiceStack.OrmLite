@@ -11,6 +11,15 @@ namespace ServiceStack.OrmLite.SqlServerTests
         {
             using (var dbConn = ConnectionString.OpenDbConnection())
             {
+                dbConn.DropTable<TypeWithOnDeleteAndUpdateCascade>();
+                dbConn.DropTable<TypeWithOnDeleteSetNull>();
+                dbConn.DropTable<TypeWithOnDeleteSetDefault>();
+                dbConn.DropTable<TypeWithOnDeleteRestrict>();
+                dbConn.DropTable<TypeWithOnDeleteNoAction>();
+                dbConn.DropTable<TypeWithOnDeleteCascade>();
+                dbConn.DropTable<TypeWithSimpleForeignKey>();
+                dbConn.DropTable<ReferencedType>();
+
                 dbConn.CreateTable<ReferencedType>(true);
             }
         }
@@ -96,22 +105,6 @@ namespace ServiceStack.OrmLite.SqlServerTests
             using (var dbConn = ConnectionString.OpenDbConnection())
             {
                 dbConn.CreateTable<TypeWithOnDeleteSetNull>(true);
-            }
-        }
-
-        [TestFixtureTearDown]
-        public void TearDwon()
-        {
-            using (var dbConn = ConnectionString.OpenDbConnection())
-            {
-                dbConn.DropTable<TypeWithOnDeleteAndUpdateCascade>();
-                dbConn.DropTable<TypeWithOnDeleteSetNull>();
-                dbConn.DropTable<TypeWithOnDeleteSetDefault>();
-                dbConn.DropTable<TypeWithOnDeleteRestrict>();
-                dbConn.DropTable<TypeWithOnDeleteNoAction>();
-                dbConn.DropTable<TypeWithOnDeleteCascade>();
-                dbConn.DropTable<TypeWithSimpleForeignKey>();
-                dbConn.DropTable<ReferencedType>();
             }
         }
     }
