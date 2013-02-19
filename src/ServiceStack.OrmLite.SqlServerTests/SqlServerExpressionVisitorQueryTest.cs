@@ -107,14 +107,15 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 db.CreateTable<TestEntity>(true);
                 db.Insert(new TestEntity
                 {
-                    Id = 2000,
                     Foo = this.RandomString(16),
                     Bar = this.RandomString(16),
                     Baz = this.RandomDecimal()
                 });
 
+                var id = (int)db.GetLastInsertId();
+
                 var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<TestEntity>();
-                ev.Where(e => e.Id == 2000);
+                ev.Where(e => e.Id == id);
                 int? i = null;
                 ev.And(e => e.NullInt == i);
 

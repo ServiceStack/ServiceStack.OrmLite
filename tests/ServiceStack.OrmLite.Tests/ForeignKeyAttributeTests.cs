@@ -11,6 +11,15 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var dbConn = ConnectionString.OpenDbConnection())
             {
+                dbConn.DropTable<TypeWithOnDeleteAndUpdateCascade>();
+                dbConn.DropTable<TypeWithOnDeleteSetNull>();
+                dbConn.DropTable<TypeWithOnDeleteSetDefault>();
+                dbConn.DropTable<TypeWithOnDeleteRestrict>();
+                dbConn.DropTable<TypeWithOnDeleteNoAction>();
+                dbConn.DropTable<TypeWithOnDeleteCascade>();
+                dbConn.DropTable<TypeWithSimpleForeignKey>();
+                dbConn.DropTable<ReferencedType>();
+
                 dbConn.DropAndCreateTable<ReferencedType>();
             }
         }

@@ -737,8 +737,8 @@ namespace ServiceStack.OrmLite
                     
             }
 
-            if (operand == "=" && right.ToString() == "null") operand = "is";
-            else if (operand == "<>" && right.ToString() == "null") operand = "is not";
+            if (operand == "=" && right.ToString().Equals("null", StringComparison.InvariantCultureIgnoreCase)) operand = "is";
+            else if (operand == "<>" && right.ToString().Equals("null", StringComparison.InvariantCultureIgnoreCase)) operand = "is not";
 
             switch (operand)
             {
