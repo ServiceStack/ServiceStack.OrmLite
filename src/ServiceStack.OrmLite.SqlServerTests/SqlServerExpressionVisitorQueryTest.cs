@@ -98,6 +98,31 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 Assert.IsTrue(result.Count > 0);
             }
         }
+
+        [Test]
+        public void test_if_and_works_with_nullable_parameter()
+        {
+            using(var db = ConnectionString.OpenDbConnection())
+            {
+                db.CreateTable<TestEntity>(true);
+                db.Insert(new TestEntity
+                {
+                    Id = 2000,
+                    Foo = this.RandomString(16),
+                    Bar = this.RandomString(16),
+                    Baz = this.RandomDecimal()
+                });
+
+                var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<TestEntity>();
+                ev.Where(e => e.Id == 2000);
+                int? i = null;
+                ev.And(e => e.NullInt == i);
+
+                var result = db.Select(ev);
+                Assert.NotNull(result);
+                Assert.IsTrue(result.Count > 0);
+            }
+        }
         
         protected void FillTestEntityTableWithTestData(IDbConnection db)
         {

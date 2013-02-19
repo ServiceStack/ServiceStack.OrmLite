@@ -15,6 +15,8 @@ namespace ServiceStack.OrmLite.SqlServerTests.UseCase
 
         public String Foo { get; set; }
         public String Bar { get; set; }
+        public int? NullInt { get; set; }
+
         [Index]
         public Decimal Baz { get; set; }
 
