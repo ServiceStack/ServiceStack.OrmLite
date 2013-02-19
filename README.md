@@ -102,7 +102,7 @@ List<Poco> results = db.SqlList<Poco>("EXEC GetAnalyticsForWeek @weekNo", new { 
 List<int> results = db.SqlList<int>("EXEC GetTotalsForWeek 1");
 List<int> results = db.SqlList<int>("EXEC GetTotalsForWeek @weekNo", new { weekNo = 1 });
 
-int result = db.SqlScalar<int>("EXEC SELECT 10");
+int result = db.SqlScalar<int>("SELECT 10");
 ```
 
 Some more examples can be found in [SqlServerProviderTests](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLite.Tests/SqlServerProviderTests.cs).
