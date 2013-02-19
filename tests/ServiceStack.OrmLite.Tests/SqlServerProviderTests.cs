@@ -143,6 +143,9 @@ END;";
 
             result = db.SqlScalar<int>("EXEC DummyScalar @Times", new Dictionary<string, object> { { "Times", 10 } });
             Assert.That(result, Is.EqualTo(expected));
+
+            result = db.SqlScalar<int>("SELECT 10");
+            Assert.That(result, Is.EqualTo(expected));
         }
 
     }

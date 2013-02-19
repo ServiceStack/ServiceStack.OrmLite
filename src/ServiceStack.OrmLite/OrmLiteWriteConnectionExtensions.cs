@@ -115,8 +115,6 @@ namespace ServiceStack.OrmLite
         {
             dbConn.Exec(dbCmd =>
             {
-                //var updateStmt = dbCmd.ReparameterizeInsert(obj)
-
                 var updateStmt = dbConn.CreateUpdateStatement(obj);
 
                 dbCmd.CommandText = updateStmt.CommandText;

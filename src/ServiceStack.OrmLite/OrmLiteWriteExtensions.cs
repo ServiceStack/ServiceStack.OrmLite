@@ -290,8 +290,7 @@ namespace ServiceStack.OrmLite
 			}
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static IDbCommand CreateUpdateStatement<T>(this IDbConnection connection, T obj)
+        internal static IDbCommand CreateUpdateStatement<T>(this IDbConnection connection, T obj)
             where T : new()
         {
             return OrmLiteConfig.DialectProvider.CreateParameterizedUpdateStatement(obj, connection);
@@ -430,18 +429,10 @@ namespace ServiceStack.OrmLite
 			}
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static IDbCommand CreateInsertStatement<T>(this IDbConnection connection, T obj)
+        internal static IDbCommand CreateInsertStatement<T>(this IDbConnection connection, T obj)
             where T: new()
         {
             return OrmLiteConfig.DialectProvider.CreateParameterizedInsertStatement(obj, connection);
-        }
-
-        [Obsolete(UseDbConnectionExtensions)]
-        public static void ReparameterizeInsert<T>(this IDbCommand command, T obj)
-            where T : new()
-        {
-            OrmLiteConfig.DialectProvider.ReParameterizeInsertStatement(obj, command);
         }
 
         [Obsolete(UseDbConnectionExtensions)]

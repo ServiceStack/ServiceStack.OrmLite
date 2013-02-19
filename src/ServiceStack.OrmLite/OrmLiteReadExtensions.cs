@@ -549,8 +549,7 @@ namespace ServiceStack.OrmLite
 				: Select<T>(dbCmd, OrmLiteConfig.DialectProvider.GetQuotedColumnName(ModelDefinition<T>.PrimaryKeyName) + " IN (" + sql + ")");
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static T GetByIdParam<T>(this IDbCommand dbCmd, object id)
+	    internal static T GetByIdParam<T>(this IDbCommand dbCmd, object id)
             where T : new()
         {
             var modelDef = ModelDefinition<T>.Definition;
