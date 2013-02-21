@@ -184,5 +184,15 @@ namespace ServiceStack.OrmLite.PostgreSQL
 
 			return sql;
 		}
+
+        public override string GetQuotedTableName(ModelDefinition modelDef)
+        {
+            if (!modelDef.IsInSchema)
+            {
+                return base.GetQuotedTableName(modelDef);
+            }
+            string escapedSchema = modelDef.Schema.Replace(".", "\".\"");
+            return string.Format("\"{0}\".\"{1}\"", escapedSchema, base.NamingStrategy.GetTableName(modelDef.ModelName));
+        }
 	}
 }
