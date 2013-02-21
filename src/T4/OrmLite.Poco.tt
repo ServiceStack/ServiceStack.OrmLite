@@ -1,11 +1,11 @@
 <#@ include file="OrmLite.Core.ttinclude" #>
 <#
 	// Settings
-    ConnectionStringName = "PressDB";			// Uses last connection string in config if not specified
-    Namespace = "IQM.Data";
+	ConnectionStringName = "";			// Uses last connection string in config if not specified
+	Namespace = "";
 	ClassPrefix = "";
 	ClassSuffix = "";
-	bool SplitIntoMultipleFiles = true;
+	bool SplitIntoMultipleFiles = false;
 
     // Read schema
 	var tables = LoadTables();
