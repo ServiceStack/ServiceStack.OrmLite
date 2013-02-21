@@ -90,6 +90,7 @@
     <Compile Include="OrmLiteTestBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="OrmLiteGetScalarTests.cs" />
+    <Compile Include="SchemaTests.cs" />
     <Compile Include="TypeWithByteArrayFieldTests.cs" />
   </ItemGroup>
   <ItemGroup>
