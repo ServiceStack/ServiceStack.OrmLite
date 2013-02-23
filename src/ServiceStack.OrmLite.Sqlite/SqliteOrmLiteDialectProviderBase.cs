@@ -96,7 +96,7 @@ namespace ServiceStack.OrmLite.Sqlite
 		{
 			if (value == null || value is DBNull) return null;
 
-			if (type == typeof(bool))
+			if (type == typeof(bool) && !(value is bool))
 			{
 				var intVal = int.Parse(value.ToString());
 				return intVal != 0;
