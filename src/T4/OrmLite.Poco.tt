@@ -5,10 +5,13 @@
 	Namespace = "";
 	ClassPrefix = "";
 	ClassSuffix = "";
-	bool SplitIntoMultipleFiles = false;
+	bool SplitIntoMultipleFiles = false;		// if true: Generates one file for every class
+	bool MakeSingular = true;			// if true: Changes the classname to singular if tablename is not singular
+	bool UseIdAsPK = true;				// if true: Changes the primary key property name to Id
+	bool GenerateConstructor = false;		// if true: Generates the default empty constructor 
 
     // Read schema
-	var tables = LoadTables();
+	var tables = LoadTables(MakeSingular);
 
 
 /*
@@ -53,14 +56,20 @@ foreach(Table tbl in from t in tables where !t.Ignore select t)
 {
 manager.StartNewFile(tbl.Name + ".cs");
 #>
-
+<# if (MakeSingular) {#>
 	[Alias("<#=tbl.Name#>")]
-    public partial class <#=tbl.ClassName#><#if (tbl.HasPK()) { #> : IHasId<<#=tbl.PK.PropertyType#>><#}#>
+<#}#>
+    public partial class <#=tbl.ClassName#><#if (tbl.HasPK() && UseIdAsPK) { #> : IHasId<<#=tbl.PK.PropertyType#>><#}#> 
     {
-<#
+<# if (GenerateConstructor) { #>
+		public <#=tbl.ClassName#>()
+		{
+		}
+
+<# }
 foreach(Column col in from c in tbl.Columns where !c.Ignore select c)
 {
- if ((col.Name!=col.PropertyName) || (col.IsPK)) { #>
+ if ((col.Name!=col.PropertyName) || (col.IsPK && UseIdAsPK)) { #>
         [Alias("<#=col.Name#>")]
 <# }  if (col.PropertyType == "string" && col.Size > 0) { #>
         [StringLength(<#=col.Size#>)]
@@ -70,9 +79,12 @@ foreach(Column col in from c in tbl.Columns where !c.Ignore select c)
         [Required]
 <# } if (!col.IsPK){#>
         public <#=col.ProperPropertyType#> <#=col.PropertyName#> { get; set;}
-<#} else {#>
+<# } if (col.IsPK && UseIdAsPK) { #>
         public <#=col.ProperPropertyType#> Id { get; set;}
-<#}#>
+<# } if (col.IsPK && !UseIdAsPK) { #>
+		[PrimaryKey]
+        public <#=col.ProperPropertyType#> <#=col.PropertyName#> { get; set;}
+<# } #>
 <# } #>
     }
 <#  manager.EndBlock(); #>
