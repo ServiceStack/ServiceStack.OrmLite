@@ -147,9 +147,7 @@ END;";
             db.ExecuteSql("IF OBJECT_ID('DummyColumn') IS NOT NULL DROP PROC DummyColumn");
             db.ExecuteSql(sql);
 
-            var expected = 0;
-            10.Times(i => expected += i);
-
+	    // This produces a compiler error
             var results = db.SqlList<string>("EXEC DummyColumn @Times", new { Times = 10 });
             results.PrintDump();
             Assert.That(results.Count, Is.EqualTo(10));
