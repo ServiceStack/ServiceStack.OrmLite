@@ -119,6 +119,41 @@ END;";
         }
 
         [Test]
+        public void Can_SqlList_StoredProc_returning_StringColumn()
+        {
+            var sql = @"CREATE PROCEDURE dbo.DummyColumn
+    @Times integer
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    CREATE TABLE #Temp
+    (
+        Name nvarchar(30) not null
+    );
+ 
+	declare @i int
+	set @i=1
+	WHILE @i < @Times
+	BEGIN
+	    INSERT INTO #Temp (Name) VALUES (CAST(NEWID() AS nvarchar(30)))
+		SET @i = @i + 1
+	END
+
+	SELECT * FROM #Temp;
+	 
+    DROP TABLE #Temp;
+END;";
+            db.ExecuteSql("IF OBJECT_ID('DummyColumn') IS NOT NULL DROP PROC DummyColumn");
+            db.ExecuteSql(sql);
+
+	    // This produces a compiler error
+            var results = db.SqlList<string>("EXEC DummyColumn @Times", new { Times = 10 });
+            results.PrintDump();
+            Assert.That(results.Count, Is.EqualTo(10));
+        }
+
+        [Test]
         public void Can_SqlList_StoredProc_returning_Scalar()
         {
             var sql = @"CREATE PROCEDURE dbo.DummyScalar
@@ -147,6 +182,8 @@ END;";
             result = db.SqlScalar<int>("SELECT 10");
             Assert.That(result, Is.EqualTo(expected));
         }
+
+
 
     }
 }
