@@ -227,24 +227,22 @@ namespace ServiceStack.OrmLite
 
         public static int GetColumnIndex(this IDataReader dataReader, string fieldName)
         {
-            try
+            for (int i = 0; i < dataReader.FieldCount; i++)
             {
-                return dataReader.GetOrdinal(OrmLiteConfig.DialectProvider.NamingStrategy.GetColumnName(fieldName));
+                if (dataReader.GetName(i).Equals(OrmLiteConfig.DialectProvider.NamingStrategy.GetColumnName(fieldName), StringComparison.InvariantCultureIgnoreCase))
+                    return i;
             }
-            catch (IndexOutOfRangeException ignoreNotFoundExInSomeProviders)
-            {
-                return NotFound;
-            }
+            return NotFound;
         }
 
     	private const int NotFound = -1;
-        public static T PopulateWithSqlReader<T>(this T objWithProperties, IDataReader dataReader, FieldDefinition[] fieldDefs, Dictionary<string, int> indexCache)
+        public static T PopulateWithSqlReader<T>(this T objWithProperties, IDataReader dataReader, IEnumerable<FieldDefinition> fieldDefs, Dictionary<string, int> indexCache)
         {
 			try
 			{
 				foreach (var fieldDef in fieldDefs)
 				{
-                    int index = NotFound;
+                    int index;
                     if (indexCache != null)
                     {
                         if (!indexCache.TryGetValue(fieldDef.Name, out index))
