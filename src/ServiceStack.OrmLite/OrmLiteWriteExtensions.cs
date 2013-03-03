@@ -229,7 +229,7 @@ namespace ServiceStack.OrmLite
         {
             for (int i = 0; i < dataReader.FieldCount; i++)
             {
-                if (dataReader.GetName(i).Equals(fieldName, StringComparison.InvariantCultureIgnoreCase))
+                if (dataReader.GetName(i).Equals(OrmLiteConfig.DialectProvider.NamingStrategy.GetColumnName(fieldName), StringComparison.InvariantCultureIgnoreCase))
                     return i;
             }
             return NotFound;
