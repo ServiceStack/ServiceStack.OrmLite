@@ -1,5 +1,5 @@
 using NUnit.Framework;
-using ServiceStack.Common.Extensions;
+using ServiceStack.Common;
 using ServiceStack.Common.Tests.Models;
 
 namespace ServiceStack.OrmLite.Tests

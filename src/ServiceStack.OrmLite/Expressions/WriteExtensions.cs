@@ -4,7 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
-using ServiceStack.Common.Extensions;
+using ServiceStack.Common;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite

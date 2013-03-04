@@ -4,7 +4,7 @@ using System.Data;
 using System.Reflection;
 using ServiceStack.Common.Utils;
 using System.Text;
-using ServiceStack.Common.Extensions;
+using ServiceStack.Common;
 using ServiceStack.OrmLite;
 using System.Data.OracleClient;
 
