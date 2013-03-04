@@ -102,14 +102,12 @@ namespace ServiceStack.OrmLite
 
         [Obsolete(UseDbConnectionExtensions)]
         public static List<T> Select<T>(this IDbCommand dbCmd)
-			where T : new()
 		{
 			return Select<T>(dbCmd, (string)null);
 		}
 
         [Obsolete(UseDbConnectionExtensions)]
         public static List<T> Select<T>(this IDbCommand dbCmd, string sqlFilter, params object[] filterParams)
-			where T : new()
 		{
 			using (var reader = dbCmd.ExecReader(
 				OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sqlFilter, filterParams)))
@@ -120,14 +118,12 @@ namespace ServiceStack.OrmLite
 
         [Obsolete(UseDbConnectionExtensions)]
         public static List<TModel> Select<TModel>(this IDbCommand dbCmd, Type fromTableType)
-			where TModel : new()
 		{
 			return Select<TModel>(dbCmd, fromTableType, null);
 		}
 
         [Obsolete(UseDbConnectionExtensions)]
         public static List<TModel> Select<TModel>(this IDbCommand dbCmd, Type fromTableType, string sqlFilter, params object[] filterParams)
-			where TModel : new()
 		{
 			var sql = new StringBuilder();
 			var modelDef = ModelDefinition<TModel>.Definition;
@@ -148,14 +144,12 @@ namespace ServiceStack.OrmLite
 
         [Obsolete(UseDbConnectionExtensions)]
         public static IEnumerable<T> Each<T>(this IDbCommand dbCmd)
-			where T : new()
 		{
 			return Each<T>(dbCmd, null);
 		}
 
         [Obsolete(UseDbConnectionExtensions)]
         public static IEnumerable<T> Each<T>(this IDbCommand dbCmd, string filter, params object[] filterParams)
-			where T : new()
 		{
 			var fieldDefs = ModelDefinition<T>.Definition.FieldDefinitionsArray;
 			using (var reader = dbCmd.ExecReader(
@@ -164,7 +158,7 @@ namespace ServiceStack.OrmLite
                 var indexCache = new Dictionary<string, int>();
                 while (reader.Read())
 				{
-					var row = new T();
+                    var row = OrmLiteUtilExtensions.CreateInstance<T>();
                     row.PopulateWithSqlReader(reader, fieldDefs, indexCache);
 					yield return row;
 				}
@@ -173,14 +167,12 @@ namespace ServiceStack.OrmLite
 
         [Obsolete(UseDbConnectionExtensions)]
         public static T First<T>(this IDbCommand dbCmd, string filter, params object[] filterParams)
-			where T : new()
 		{
 			return First<T>(dbCmd, filter.SqlFormat(filterParams));
 		}
 
         [Obsolete(UseDbConnectionExtensions)]
         public static T First<T>(this IDbCommand dbCmd, string filter)
-			where T : new()
 		{
 			var result = FirstOrDefault<T>(dbCmd, filter);
 			if (Equals(result, default(T)))
@@ -193,14 +185,12 @@ namespace ServiceStack.OrmLite
 
         [Obsolete(UseDbConnectionExtensions)]
         public static T FirstOrDefault<T>(this IDbCommand dbCmd, string filter, params object[] filterParams)
-			where T : new()
 		{
 			return FirstOrDefault<T>(dbCmd, filter.SqlFormat(filterParams));
 		}
 
         [Obsolete(UseDbConnectionExtensions)]
         public static T FirstOrDefault<T>(this IDbCommand dbCmd, string filter)
-			where T : new()
 		{
 			using (var dbReader = dbCmd.ExecReader(
 				OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T),  filter)))
@@ -211,7 +201,6 @@ namespace ServiceStack.OrmLite
 
         [Obsolete(UseDbConnectionExtensions)]
         public static T GetById<T>(this IDbCommand dbCmd, object idValue)
-			where T : new()
 		{
 			return First<T>(dbCmd, OrmLiteConfig.DialectProvider.GetQuotedColumnName(ModelDefinition<T>.PrimaryKeyName) + " = {0}".SqlFormat(idValue));
 		}
@@ -308,7 +297,6 @@ namespace ServiceStack.OrmLite
 
         [Obsolete(UseDbConnectionExtensions)]
         public static T QueryById<T>(this IDbCommand dbCmd, object value)
-			where T : new()
 		{
 			if (dbCmd.Parameters.Count != 1
 				|| ((IDbDataParameter)dbCmd.Parameters[0]).ParameterName != ModelDefinition<T>.PrimaryKeyName
@@ -323,7 +311,6 @@ namespace ServiceStack.OrmLite
 
         [Obsolete(UseDbConnectionExtensions)]
         public static T SingleWhere<T>(this IDbCommand dbCmd, string name, object value)
-			where T : new()
 		{
 			if (dbCmd.Parameters.Count != 1 || ((IDbDataParameter)dbCmd.Parameters[0]).ParameterName != name
 				|| lastQueryType != typeof(T))
@@ -337,7 +324,6 @@ namespace ServiceStack.OrmLite
 
         [Obsolete(UseDbConnectionExtensions)]
         public static T QuerySingle<T>(this IDbCommand dbCmd, object anonType)
-			where T : new()
 		{
 			if (typeof(T).IsValueType) return QueryScalar<T>(dbCmd, anonType);
 
@@ -349,7 +335,6 @@ namespace ServiceStack.OrmLite
 
         [Obsolete(UseDbConnectionExtensions)]
         public static T QuerySingle<T>(this IDbCommand dbCmd, string sql, object anonType)
-			where T : new()
 		{
 			if (typeof(T).IsValueType) return QueryScalar<T>(dbCmd, sql, anonType);
 
@@ -362,7 +347,6 @@ namespace ServiceStack.OrmLite
 
         [Obsolete(UseDbConnectionExtensions)]
         public static List<T> Where<T>(this IDbCommand dbCmd, string name, object value)
-			where T : new()
 		{
 			if (dbCmd.Parameters.Count != 1 || ((IDbDataParameter)dbCmd.Parameters[0]).ParameterName != name
 				|| lastQueryType != typeof(T))
@@ -376,7 +360,6 @@ namespace ServiceStack.OrmLite
 
         [Obsolete(UseDbConnectionExtensions)]
         public static List<T> Where<T>(this IDbCommand dbCmd, object anonType)
-			where T : new()
 		{
 			dbCmd.SetFilters<T>(anonType);
 
@@ -388,7 +371,6 @@ namespace ServiceStack.OrmLite
 
         [Obsolete(UseDbConnectionExtensions)]
         public static List<T> Query<T>(this IDbCommand dbCmd, string sql, object anonType = null)
-			where T : new()
 		{
             if (anonType != null) dbCmd.SetParameters(anonType, true);
             dbCmd.CommandText = OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sql);
@@ -401,7 +383,6 @@ namespace ServiceStack.OrmLite
 
         [Obsolete(UseDbConnectionExtensions)]
         public static List<T> Query<T>(this IDbCommand dbCmd, string sql, Dictionary<string, object> dict)
-			where T : new()
 		{
 			if (dict != null) dbCmd.SetParameters(dict, true);
             dbCmd.CommandText = OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sql);
@@ -432,7 +413,6 @@ namespace ServiceStack.OrmLite
 		}
 
         internal static List<T> SqlList<T>(this IDbCommand dbCmd, string sql, object anonType = null)
-            where T : new()
         {
             if (anonType != null) dbCmd.SetParameters(anonType, true);
             dbCmd.CommandText = sql;
@@ -444,7 +424,6 @@ namespace ServiceStack.OrmLite
         }
 
         internal static List<T> SqlList<T>(this IDbCommand dbCmd, string sql, Dictionary<string, object> dict)
-            where T : new()
         {
             if (dict != null) dbCmd.SetParameters(dict, true);
             dbCmd.CommandText = sql;
@@ -475,7 +454,6 @@ namespace ServiceStack.OrmLite
 
         [Obsolete(UseDbConnectionExtensions)]
         public static List<T> ByExampleWhere<T>(this IDbCommand dbCmd, object anonType)
-			where T : new()
 		{
 			dbCmd.SetFilters<T>(anonType, true);
 
@@ -485,7 +463,6 @@ namespace ServiceStack.OrmLite
 
         [Obsolete(UseDbConnectionExtensions)]
         public static List<T> QueryByExample<T>(this IDbCommand dbCmd, string sql, object anonType = null)
-			where T : new()
 		{
             if (anonType != null) dbCmd.SetParameters(anonType, true);
             dbCmd.CommandText = OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sql);
@@ -496,7 +473,6 @@ namespace ServiceStack.OrmLite
 
         [Obsolete(UseDbConnectionExtensions)]
         public static IEnumerable<T> QueryEach<T>(this IDbCommand dbCmd, string sql, object anonType = null)
-			where T : new()
 		{
             if (anonType != null) dbCmd.SetFilters<T>(anonType);
 
@@ -506,7 +482,7 @@ namespace ServiceStack.OrmLite
                 var indexCache = new Dictionary<string, int>();
                 while (reader.Read())
 				{
-					var row = new T();
+                    var row = OrmLiteUtilExtensions.CreateInstance<T>();
 					row.PopulateWithSqlReader(reader, fieldDefs, indexCache);
 					yield return row;
 				}
@@ -515,7 +491,6 @@ namespace ServiceStack.OrmLite
 
         [Obsolete(UseDbConnectionExtensions)]
         public static IEnumerable<T> EachWhere<T>(this IDbCommand dbCmd, object anonType)
-			where T : new()
 		{
 			dbCmd.SetFilters<T>(anonType);
 
@@ -525,7 +500,7 @@ namespace ServiceStack.OrmLite
                 var indexCache = new Dictionary<string, int>();
                 while (reader.Read())
 				{
-					var row = new T();
+                    var row = OrmLiteUtilExtensions.CreateInstance<T>();
                     row.PopulateWithSqlReader(reader, fieldDefs, indexCache);
 					yield return row;
 				}
@@ -534,14 +509,12 @@ namespace ServiceStack.OrmLite
 
         [Obsolete(UseDbConnectionExtensions)]
         public static T GetByIdOrDefault<T>(this IDbCommand dbCmd, object idValue)
-			where T : new()
 		{
 			return FirstOrDefault<T>(dbCmd, OrmLiteConfig.DialectProvider.GetQuotedColumnName(ModelDefinition<T>.PrimaryKeyName) + " = {0}".SqlFormat(idValue));
 		}
 
         [Obsolete(UseDbConnectionExtensions)]
         public static List<T> GetByIds<T>(this IDbCommand dbCmd, IEnumerable idValues)
-			where T : new()
 		{
 			var sql = idValues.GetIdsInSql();
 			return sql == null
@@ -550,7 +523,6 @@ namespace ServiceStack.OrmLite
 		}
 
 	    internal static T GetByIdParam<T>(this IDbCommand dbCmd, object id)
-            where T : new()
         {
             var modelDef = ModelDefinition<T>.Definition;
             var idParamString = OrmLiteConfig.DialectProvider.ParamString + "0";
@@ -755,7 +727,6 @@ namespace ServiceStack.OrmLite
         [Obsolete(UseDbConnectionExtensions)]
         public static List<TOutputModel> SelectFromProcedure<TOutputModel>(this IDbCommand dbCommand,
 			object fromObjWithProperties)
-			where TOutputModel : new()
 		{
 			return SelectFromProcedure<TOutputModel>(dbCommand, fromObjWithProperties,string.Empty);
 		}
@@ -765,7 +736,6 @@ namespace ServiceStack.OrmLite
 			object fromObjWithProperties,
 			string sqlFilter, 
 			params object[] filterParams)
-			where TOutputModel : new()
 		{
 			var modelType = typeof(TOutputModel);	
 			

@@ -10,7 +10,7 @@ namespace ServiceStack.OrmLite
         [ThreadStatic]
         internal static string LastCommandText;
 
-        public static SqlExpressionVisitor<T> CreateExpression<T>(this IDbConnection dbConn) where T : new()
+        public static SqlExpressionVisitor<T> CreateExpression<T>(this IDbConnection dbConn) 
         {
             return dbConn.GetDialectProvider().ExpressionVisitor<T>();
         }
@@ -113,19 +113,16 @@ namespace ServiceStack.OrmLite
         }
 
         public static List<T> Select<T>(this IDbConnection dbConn, Expression<Func<T, bool>> predicate)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.Select(predicate));
         }
 
         public static List<T> Select<T>(this IDbConnection dbConn, Func<SqlExpressionVisitor<T>, SqlExpressionVisitor<T>> expression)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.Select(expression));
         }
 
         public static List<T> Select<T>(this IDbConnection dbConn, SqlExpressionVisitor<T> expression)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.Select(expression));
         }
@@ -135,62 +132,52 @@ namespace ServiceStack.OrmLite
         /// Currently does not support complex SQL.## ,  .StartsWith(), EndsWith() and Contains() operators
         /// </summary>
         public static List<T> SelectParam<T>(this IDbConnection dbConn, Expression<Func<T, bool>> predicate)
-            where T : new ()
         {
             return dbConn.Exec(dbCmd => dbCmd.SelectParam(predicate));
         }
 
         public static T First<T>(this IDbConnection dbConn, Expression<Func<T, bool>> predicate)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.First(predicate));
         }
 
         public static T First<T>(this IDbConnection dbConn, SqlExpressionVisitor<T> expression)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.First(expression));
         }
 
         public static T FirstOrDefault<T>(this IDbConnection dbConn, Expression<Func<T, bool>> predicate)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.FirstOrDefault(predicate));
         }
 
         public static T FirstOrDefault<T>(this IDbConnection dbConn, SqlExpressionVisitor<T> expression)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.FirstOrDefault(expression));
         }
 
         public static TKey GetScalar<T, TKey>(this IDbConnection dbConn, Expression<Func<T, TKey>> field)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.GetScalar(field));
         }
 
         public static TKey GetScalar<T, TKey>(this IDbConnection dbConn, Expression<Func<T, TKey>> field,
                                              Expression<Func<T, bool>> predicate)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.GetScalar(field, predicate));
         }
 
         public static long Count<T>(this IDbConnection dbConn, SqlExpressionVisitor<T> expression)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.Count(expression));
         }
 
         public static long Count<T>(this IDbConnection dbConn, Expression<Func<T, bool>> expression)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.Count(expression));
         }
 
         public static long Count<T>(this IDbConnection dbConn)
-            where T : new()
         {
             SqlExpressionVisitor<T> expression = OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();
             return dbConn.Exec(dbCmd => dbCmd.Count(expression));
