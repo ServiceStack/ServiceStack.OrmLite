@@ -18,30 +18,27 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void Can_create_primary_key_varchar_with_string_length_255()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
-            using (var dbCmd = dbConn.CreateCommand())
+            using (var db = ConnectionString.OpenDbConnection())
             {
-                dbCmd.CreateTable<TypeWithStringId_255>(true);
+                db.CreateTable<TypeWithStringId_255>(true);
             }
         }
 
         [Test]
         public void Can_create_primary_key_varchar_without_setting_string_length()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
-            using (var dbCmd = dbConn.CreateCommand())
+            using (var db = ConnectionString.OpenDbConnection())
             {
-                dbCmd.CreateTable<TypeWithStringId>(true);
+                db.CreateTable<TypeWithStringId>(true);
             }
         }
 
         [Test]
         public void Can_create_unique_key_on_varchar_without_setting_string_length()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
-            using (var dbCmd = dbConn.CreateCommand())
+            using (var db = ConnectionString.OpenDbConnection())
             {
-                dbCmd.CreateTable<TypeWithUniqeKeyOnVarchar>(true);
+                db.CreateTable<TypeWithUniqeKeyOnVarchar>(true);
             }
         }
 
@@ -49,10 +46,9 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void Cannot_create_unique_key_on_varchar_greater_than_255()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
-            using (var dbCmd = dbConn.CreateCommand())
+            using (var db = ConnectionString.OpenDbConnection())
             {
-                dbCmd.CreateTable<TypeWithUniqeKeyOnVarchar_256>(true);
+                db.CreateTable<TypeWithUniqeKeyOnVarchar_256>(true);
             }
         }
 
@@ -60,31 +56,28 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void Cannot_create_primary_key_varchar_with_string_length_greater_than_255()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
-            using (var dbCmd = dbConn.CreateCommand())
+            using (var db = ConnectionString.OpenDbConnection())
             {
-                dbCmd.CreateTable<TypeWithStringId_256>(true);
+                db.CreateTable<TypeWithStringId_256>(true);
             }
         }
 
         [Test]
         public void Can_store_and_retrieve_string_with_8000_characters_from_varchar_field()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
-            using (var dbCmd = dbConn.CreateCommand())
+            using (var db = ConnectionString.OpenDbConnection())
             {
-                dbCmd.CreateTable<TypeWithStringId>(true);
+                db.CreateTable<TypeWithStringId>(true);
 
-                var obj = new TypeWithStringId
-                              {
-                                  Id = "a",
-                                  Value = CreateString(8000)
-                              };
+                var obj = new TypeWithStringId {
+                    Id = "a",
+                    Value = CreateString(8000)
+                };
 
                 Assert.AreEqual(8000, obj.Value.Length);
 
-                dbCmd.Save(obj);
-                var target = dbCmd.GetById<TypeWithStringId>(obj.Id);
+                db.Save(obj);
+                var target = db.GetById<TypeWithStringId>(obj.Id);
 
                 Assert.AreEqual(obj.Value, target.Value);
                 Assert.AreEqual(8000, obj.Value.Length);
@@ -94,22 +87,20 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void Can_store_and_retrieve_string_with_8000_characters_from_text_field()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
-            using (var dbCmd = dbConn.CreateCommand())
+            using (var db = ConnectionString.OpenDbConnection())
             {
-                dbCmd.CreateTable<TypeWithTextField>(true);
+                db.CreateTable<TypeWithTextField>(true);
 
-                var obj = new TypeWithTextField()
-                {
+                var obj = new TypeWithTextField() {
                     Value = CreateString(8000)
                 };
 
                 Assert.AreEqual(8000, obj.Value.Length);
 
-                dbCmd.Save(obj);
-                obj.Id = (int)dbCmd.GetLastInsertId();
+                db.Save(obj);
+                obj.Id = (int)db.GetLastInsertId();
 
-                var target = dbCmd.GetById<TypeWithTextField>(obj.Id);
+                var target = db.GetById<TypeWithTextField>(obj.Id);
 
                 Assert.AreEqual(obj.Value, target.Value);
                 Assert.AreEqual(8000, obj.Value.Length);
@@ -135,7 +126,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
             public string Value { get; set; }
         }
 
-        class TypeWithStringId : IHasStringId 
+        class TypeWithStringId : IHasStringId
         {
             public string Id { get; set; }
             [StringLength(8000)]

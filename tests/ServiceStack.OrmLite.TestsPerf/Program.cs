@@ -21,11 +21,11 @@ namespace ServiceStack.OrmLite.TestsPerf
 		{
 			return new List<DatabaseScenarioBase>
 			{
-				//new InsertModelWithFieldsOfDifferentTypesScenario(),
+				//new InsertModelWithFieldsOfDifferentTypesPerfScenario(),
 				//new InsertSampleOrderLineScenario(),
-				//new SelectOneModelWithFieldsOfDifferentTypesScenario(),
+				//new SelectOneModelWithFieldsOfDifferentTypesPerfScenario(),
 				//new SelectOneSampleOrderLineScenario(),
-				//new SelectManyModelWithFieldsOfDifferentTypesScenario(),
+				//new SelectManyModelWithFieldsOfDifferentTypesPerfScenario(),
 				//new SelectManySampleOrderLineScenario(),
 				new InsertNorthwindDataScenario(),
 			};

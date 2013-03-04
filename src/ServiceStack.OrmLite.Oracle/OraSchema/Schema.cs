@@ -31,25 +31,16 @@ namespace ServiceStack.OrmLite.Oracle
 		{
 			get
 			{
-				using (IDbCommand dbCmd = Connection.CreateCommand())
-				{
-					return dbCmd.Select<Table>(sqlTables);
-				}
+                return Connection.Select<Table>(sqlTables);
 			}
 		}
 
 		public Table GetTable(string name)
 		{
+			string sql = sqlTables + string.Format("    WHERE TABLE_NAME ='{0}' ", name);
 
-			string sql = sqlTables +
-                        string.Format("    WHERE TABLE_NAME ='{0}' ", name);
-			
-			using (IDbCommand dbCmd = Connection.CreateCommand())
-			{
-				var query = dbCmd.Select<Table>(sql);
-				return query.FirstOrDefault();
-			}
-
+            var query = Connection.Select<Table>(sql);
+            return query.FirstOrDefault();
 		}
 		
 		public List<Column> GetColumns(string tableName)
@@ -57,25 +48,22 @@ namespace ServiceStack.OrmLite.Oracle
 
 			string sql = string.Format(sqlColumns.ToString(),string.IsNullOrEmpty(tableName) ? "\'\'" : string.Format("\'{0}\'", tableName));
 
-			using (IDbCommand dbCmd = Connection.CreateCommand())
-			{
-				List<Column> columns = dbCmd.Select<Column>(sql);
+            List<Column> columns = Connection.Select<Column>(sql);
 
-				List<Generador> gens = dbCmd.Select<Generador>(sqlGenerator.ToString());
-				
-				foreach (var record in columns)
-				{
-                    record.IsPrimaryKey = (dbCmd.GetScalar<int>(string.Format(sqlColConstrains.ToString(), tableName, record.Name, "P")) > 0);
-                    record.IsUnique = (dbCmd.GetScalar<int>(string.Format(sqlColConstrains.ToString(), tableName, record.Name, "U")) > 0);
-                    string g = (from gen in gens
-					    where gen.Name==tableName+"_"+record.Name+"_GEN"
-						select gen.Name).FirstOrDefault() ;							
-						
-                    if( !string.IsNullOrEmpty(g) ) record.Sequence=g.Trim();
-				}
-				return columns;
-			}
-		}
+            List<Generador> gens = Connection.Select<Generador>(sqlGenerator.ToString());
+
+            foreach (var record in columns)
+            {
+                record.IsPrimaryKey = (Connection.GetScalar<int>(string.Format(sqlColConstrains.ToString(), tableName, record.Name, "P")) > 0);
+                record.IsUnique = (Connection.GetScalar<int>(string.Format(sqlColConstrains.ToString(), tableName, record.Name, "U")) > 0);
+                string g = (from gen in gens
+                            where gen.Name == tableName + "_" + record.Name + "_GEN"
+                            select gen.Name).FirstOrDefault();
+
+                if (!string.IsNullOrEmpty(g)) record.Sequence = g.Trim();
+            }
+            return columns;
+        }
 
 		public List<Column> GetColumns(Table table)
 		{
@@ -86,22 +74,15 @@ namespace ServiceStack.OrmLite.Oracle
 		public Procedure GetProcedure(string name)
 		{
 			string sql=  string.Format(" sqlProcedures.ToString() ", name);
-
-			using (IDbCommand dbCmd = Connection.CreateCommand())
-			{
-				var query = dbCmd.Select<Procedure>(sql);
-				return query.FirstOrDefault();
-			}
-		}
+            var query = Connection.Select<Procedure>(sql);
+            return query.FirstOrDefault();
+        }
 
 		public List<Procedure> Procedures
 		{
 			get
 			{
-				using (IDbCommand dbCmd = Connection.CreateCommand())
-				{
-					return dbCmd.Select<Procedure>(sqlProcedures.ToString());
-				}
+                return Connection.Select<Procedure>(sqlProcedures.ToString());
 			}
 		}
 
@@ -112,19 +93,12 @@ namespace ServiceStack.OrmLite.Oracle
 
 		public List<Parameter> GetParameters(string procedureName)
 		{
-
 			string sql = string.Format(sqlParameters.ToString(), string.IsNullOrEmpty(procedureName) ? "" :procedureName);
-
-			using (IDbCommand dbCmd = Connection.CreateCommand())
-			{
-				return dbCmd.Select<Parameter>(sql);
-			}
-
+            return Connection.Select<Parameter>(sql);
 		}
 		
 		private void Init()
 		{
-
             sqlTables = "select TABLE_NAME, USER TABLE_SCHEMA  from USER_TABLES ";
 
 			sqlColumns.Append(" select * \n");
@@ -137,8 +111,7 @@ namespace ServiceStack.OrmLite.Oracle
             sqlProcedures.Append("SELECT * FROM ALL_PROCEDURES WHERE OBJECT_TYPE = \'PROCEDURE\'  OR  OBJECT_TYPE = \'FUNCTION\' \n");
 			sqlParameters.Append("select * from user_arguments WHERE OBJECT_NAME = \'{0}\' ORDER BY Position asc\n");
             sqlGenerator.Append("SELECT TABLE_NAME AS \"Name\" FROM ALL_CATALOG WHERE Table_Type = \'SEQUENCE\' ");
-
-
+            
             sqlColConstrains.Append(" SELECT Count(cols.position) \n");
             sqlColConstrains.Append(" FROM all_constraints cons, all_cons_columns cols \n");
             sqlColConstrains.Append(" WHERE cols.table_name = \'{0}\' \n");
@@ -149,9 +122,10 @@ namespace ServiceStack.OrmLite.Oracle
             sqlColConstrains.Append(" ORDER BY cols.table_name, cols.position \n");
 		}		
 		
-		private class Generador{
-			public string Name { get; set;}
+		private class Generador
+        {
+			public string Name { get; set; }
 		}
-		
 	}
+
 }

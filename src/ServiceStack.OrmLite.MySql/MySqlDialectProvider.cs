@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Text;
 using MySql.Data.MySqlClient;
-using ServiceStack.Common.Extensions;
 using ServiceStack.OrmLite.MySql.DataAnnotations;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.MySql
 {

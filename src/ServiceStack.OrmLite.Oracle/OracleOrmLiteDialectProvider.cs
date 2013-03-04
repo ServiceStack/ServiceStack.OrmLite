@@ -759,8 +759,11 @@ namespace ServiceStack.OrmLite.Oracle
 			}
 
             //dbCmd.CommandText = string.Format("SELECT {0}.NEXTVAL FROM dual", Quote(sequence));
-            long result = dbCmd.GetScalar<long>(string.Format("SELECT {0}.NEXTVAL FROM dual", Quote(sequence)));
-			LastInsertId = result;
+            var sql = string.Format("SELECT {0}.NEXTVAL FROM dual", Quote(sequence));
+            dbCmd.CommandText = sql;
+            var result = dbCmd.GetLongScalar();
+            
+            LastInsertId = result;
 			return  result;				
 		}
 		

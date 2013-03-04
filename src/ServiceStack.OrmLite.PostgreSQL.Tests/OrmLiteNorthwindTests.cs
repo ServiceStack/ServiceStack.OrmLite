@@ -12,25 +12,25 @@ namespace ServiceStack.OrmLite.Tests
 	public class OrmLiteNorthwindTests
 		: OrmLiteTestBase
 	{
-		public static void CreateNorthwindTables(IDbCommand dbCmd)
+		public static void CreateNorthwindTables(IDbConnection db)
 		{
 		
-			dbCmd.DropTable<EmployeeTerritory>();
-			dbCmd.DropTable<Territory>();
-			dbCmd.DropTable<Region>();
-			dbCmd.DropTable<CustomerDemographic>();			
-			dbCmd.DropTable<CustomerCustomerDemo>();
-			dbCmd.DropTable<OrderDetail>();
-			dbCmd.DropTable<Product>();
-			dbCmd.DropTable<Order>();
-			dbCmd.DropTable<Supplier>();
-			dbCmd.DropTable<Shipper>();
-			dbCmd.DropTable<Customer>();
-			dbCmd.DropTable<Category>();
-			dbCmd.DropTable<Employee>();
+			db.DropTable<EmployeeTerritory>();
+			db.DropTable<Territory>();
+			db.DropTable<Region>();
+			db.DropTable<CustomerDemographic>();			
+			db.DropTable<CustomerCustomerDemo>();
+			db.DropTable<OrderDetail>();
+			db.DropTable<Product>();
+			db.DropTable<Order>();
+			db.DropTable<Supplier>();
+			db.DropTable<Shipper>();
+			db.DropTable<Customer>();
+			db.DropTable<Category>();
+			db.DropTable<Employee>();
 			
  
-			dbCmd.CreateTables
+			db.CreateTables
 			(
 				 true,
 				 typeof(Employee),
@@ -50,29 +50,28 @@ namespace ServiceStack.OrmLite.Tests
 			);
 		}
 
-		private static void LoadNorthwindData(IDbCommand dbCmd)
+		private static void LoadNorthwindData(IDbConnection db)
 		{
-			NorthwindData.Categories.ForEach(x => dbCmd.Insert(x));
-			NorthwindData.Customers.ForEach(x => dbCmd.Insert(x));
-			NorthwindData.Employees.ForEach(x => dbCmd.Insert(x));
-			NorthwindData.Shippers.ForEach(x => dbCmd.Insert(x));
-			NorthwindData.Orders.ForEach(x => dbCmd.Insert(x));
-			NorthwindData.Suppliers.ForEach(x => dbCmd.Insert(x));
-			NorthwindData.Products.ForEach(x => dbCmd.Insert(x));
-			NorthwindData.OrderDetails.ForEach(x => dbCmd.Insert(x));
-			NorthwindData.CustomerCustomerDemos.ForEach(x => dbCmd.Insert(x));
-			NorthwindData.Regions.ForEach(x => dbCmd.Insert(x));
-			NorthwindData.Territories.ForEach(x => dbCmd.Insert(x));
-			NorthwindData.EmployeeTerritories.ForEach(x => dbCmd.Insert(x));
+			NorthwindData.Categories.ForEach(x => db.Insert(x));
+			NorthwindData.Customers.ForEach(x => db.Insert(x));
+			NorthwindData.Employees.ForEach(x => db.Insert(x));
+			NorthwindData.Shippers.ForEach(x => db.Insert(x));
+			NorthwindData.Orders.ForEach(x => db.Insert(x));
+			NorthwindData.Suppliers.ForEach(x => db.Insert(x));
+			NorthwindData.Products.ForEach(x => db.Insert(x));
+			NorthwindData.OrderDetails.ForEach(x => db.Insert(x));
+			NorthwindData.CustomerCustomerDemos.ForEach(x => db.Insert(x));
+			NorthwindData.Regions.ForEach(x => db.Insert(x));
+			NorthwindData.Territories.ForEach(x => db.Insert(x));
+			NorthwindData.EmployeeTerritories.ForEach(x => db.Insert(x));
 		}
 
 		[Test]
 		public void Can_create_all_Northwind_tables()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
-				CreateNorthwindTables(dbCmd);
+				CreateNorthwindTables(db);
 			}
 		}
 
@@ -80,12 +79,11 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_insert_Northwind_Data()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
-				CreateNorthwindTables(dbCmd);
+				CreateNorthwindTables(db);
 
 				NorthwindData.LoadData(false);
-				LoadNorthwindData(dbCmd);
+				LoadNorthwindData(db);
 			}
 		}
 
@@ -93,12 +91,11 @@ namespace ServiceStack.OrmLite.Tests
 		public void Can_insert_Northwind_Data_with_images()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
-				CreateNorthwindTables(dbCmd);
+				CreateNorthwindTables(db);
 
 				NorthwindData.LoadData(true);
-				LoadNorthwindData(dbCmd);
+				LoadNorthwindData(db);
 			}
 		}
 

@@ -13,10 +13,9 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void Can_store_and_read_bool_values()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
-            using (var dbCmd = dbConn.CreateCommand())
+            using (var db = ConnectionString.OpenDbConnection())
             {
-                dbCmd.CreateTable<Boolies>(true);
+                db.DropAndCreateTable<Boolies>();
 
                 var boolies = new List<Boolies> {
                   new Boolies { plainBool = true,  netBool = true },
@@ -24,9 +23,9 @@ namespace ServiceStack.OrmLite.MySql.Tests
                   new Boolies { plainBool = true,  netBool = false },
                   new Boolies { plainBool = false, netBool = false },
                 };
-                dbCmd.InsertAll(boolies);
+                db.InsertAll(boolies);
 
-                var target = dbCmd.Select<Boolies>();
+                var target = db.Select<Boolies>();
 
                 Assert.AreEqual(boolies.Count, target.Count);
 
@@ -41,13 +40,12 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void Can_store_and_read_bool_values_mapped_as_bit_column()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
-            using (var dbCmd = dbConn.CreateCommand())
+            using (var db = ConnectionString.OpenDbConnection())
             {
-                dbCmd.CreateTable<Boolies>(true);
+                db.CreateTable<Boolies>(true);
 
-                dbCmd.CommandText = "ALTER TABLE `Boolies` CHANGE `plainBool` `plainBool` bit( 1 ) NOT NULL, " +
-                                                          "CHANGE `netBool`   `netBool`   bit( 1 ) NOT NULL";
+                db.ExecuteSql("ALTER TABLE `Boolies` CHANGE `plainBool` `plainBool` bit( 1 ) NOT NULL, " 
+                    + "CHANGE `netBool`   `netBool`   bit( 1 ) NOT NULL");
 
                 var boolies = new List<Boolies> {
                   new Boolies { plainBool = true,  netBool = true },
@@ -55,9 +53,9 @@ namespace ServiceStack.OrmLite.MySql.Tests
                   new Boolies { plainBool = true,  netBool = false },
                   new Boolies { plainBool = false, netBool = false },
                 };
-                dbCmd.InsertAll(boolies);
+                db.InsertAll(boolies);
 
-                var target = dbCmd.Select<Boolies>();
+                var target = db.Select<Boolies>();
 
                 Assert.AreEqual(boolies.Count, target.Count);
 

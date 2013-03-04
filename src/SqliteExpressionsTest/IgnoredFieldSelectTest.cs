@@ -69,35 +69,34 @@ namespace SqliteExpressionsTest
                 File.Delete(path);
             //using (IDbConnection db = ":memory:".OpenDbConnection())
             using (IDbConnection db = path.OpenDbConnection())
-            using (IDbCommand dbCmd = db.CreateCommand())
             {
-                dbCmd.CreateTable<User_2>(true);
-                dbCmd.CreateTable<UserData_2>(true);
-                dbCmd.CreateTable<UserService_2>(true);
+                db.CreateTable<User_2>(true);
+                db.CreateTable<UserData_2>(true);
+                db.CreateTable<UserService_2>(true);
 
                 //Insert Test
-                dbCmd.Insert(new UserData_2 { Id = 5, DataValue = "Value-5" });
-                dbCmd.Insert(new UserData_2 { Id = 6, DataValue = "Value-6" });
+                db.Insert(new UserData_2 { Id = 5, DataValue = "Value-5" });
+                db.Insert(new UserData_2 { Id = 6, DataValue = "Value-6" });
 
-                dbCmd.Insert(new UserService_2 { Id = 8, ServiceName = "Value-8" });
-                dbCmd.Insert(new UserService_2 { Id = 9, ServiceName = "Value-9" });
+                db.Insert(new UserService_2 { Id = 8, ServiceName = "Value-8" });
+                db.Insert(new UserService_2 { Id = 9, ServiceName = "Value-9" });
 
                 var user2 = new User_2 { Id = 1, Name = "A", CreatedDate = DateTime.Now, UserDataId = 5, UserServiceId = 8 };
-                dbCmd.Insert(user2);
-                dbCmd.Insert(new User_2 { Id = 2, Name = "B", CreatedDate = DateTime.Now, UserDataId = 5, UserServiceId = 9 });
-                dbCmd.Insert(new User_2 { Id = 3, Name = "B", CreatedDate = DateTime.Now });
+                db.Insert(user2);
+                db.Insert(new User_2 { Id = 2, Name = "B", CreatedDate = DateTime.Now, UserDataId = 5, UserServiceId = 9 });
+                db.Insert(new User_2 { Id = 3, Name = "B", CreatedDate = DateTime.Now });
                 
                 //Update Test
                 user2.CreatedDate = DateTime.Now;
-                dbCmd.Update<User_2>(user2,x=>x.Id == 1);
+                db.Update<User_2>(user2,x=>x.Id == 1);
 
                 //Select Test
 
-                var rowsB = dbCmd.Select<User_2>("Name = {0}", "B");
-                var rowsB1 = dbCmd.Select<User_2>(user => user.Name == "B");
+                var rowsB = db.Select<User_2>("Name = {0}", "B");
+                var rowsB1 = db.Select<User_2>(user => user.Name == "B");
 
-                var rowsUData = dbCmd.Select<UserData_2>();
-                var rowsUServ = dbCmd.Select<UserService_2>();
+                var rowsUData = db.Select<UserData_2>();
+                var rowsUServ = db.Select<UserService_2>();
 
                 var jn2 = new JoinSqlBuilder<User_2, User_2>();
                 jn2 = jn2.Join<User_2, UserData_2>(x => x.UserDataId, x => x.Id, x => new { x.Name, x.Id }, x => new { x.DataValue})

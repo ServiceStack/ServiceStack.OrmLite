@@ -14,14 +14,13 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_insert_into_ModelWithComplexTypes_table()
 		{
-			using (var dbConn = ConnectionString.OpenDbConnection())
-			using (var dbCmd = dbConn.CreateCommand())
+            using (var db = ConnectionString.OpenDbConnection())
 			{
-				dbCmd.CreateTable<ModelWithComplexTypes>(true);
+				db.CreateTable<ModelWithComplexTypes>(true);
 
 				var row = ModelWithComplexTypes.Create(1);
 
-				dbCmd.Insert(row);
+				db.Insert(row);
 			}
 		}
 
@@ -29,16 +28,15 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_insert_and_select_from_ModelWithComplexTypes_table()
 		{
-			using (var dbConn = ConnectionString.OpenDbConnection())
-			using (var dbCmd = dbConn.CreateCommand())
+            using (var db = ConnectionString.OpenDbConnection())
 			{
-				dbCmd.CreateTable<ModelWithComplexTypes>(true);
+				db.CreateTable<ModelWithComplexTypes>(true);
 
 				var row = ModelWithComplexTypes.Create(1);
 
-				dbCmd.Insert(row);
+				db.Insert(row);
 
-				var rows = dbCmd.Select<ModelWithComplexTypes>();
+				var rows = db.Select<ModelWithComplexTypes>();
 
 				Assert.That(rows, Has.Count.EqualTo(1));
 
@@ -49,24 +47,19 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_insert_and_select_from_OrderLineData()
 		{
-			using (var dbConn = ConnectionString.OpenDbConnection())
-			using (var dbCmd = dbConn.CreateCommand())
+			using (var db = ConnectionString.OpenDbConnection())
 			{
-				dbCmd.CreateTable<SampleOrderLine>(true);
+				db.CreateTable<SampleOrderLine>(true);
 
 				var orderIds = new[] { 1, 2, 3, 4, 5 }.ToList();
 
-				orderIds.ForEach(x => dbCmd.Insert(
+				orderIds.ForEach(x => db.Insert(
 					SampleOrderLine.Create(Guid.NewGuid(), x, 1)));
 
-				var rows = dbCmd.Select<SampleOrderLine>();
+				var rows = db.Select<SampleOrderLine>();
 				Assert.That(rows, Has.Count.EqualTo(orderIds.Count));
-
 			}
-
 		}
 
-
 	}
-
 }

@@ -10,7 +10,7 @@ namespace ServiceStack.OrmLite.TestsPerf.Scenarios.Northwind
 	public class SelectNorthwindDataScenario
 		: DatabaseScenarioBase
 	{
-		protected override void Run(IDbCommand dbCmd)
+        protected override void Run(IDbConnection dbCmd)
 		{
 			if (this.IsFirstRun)
 			{

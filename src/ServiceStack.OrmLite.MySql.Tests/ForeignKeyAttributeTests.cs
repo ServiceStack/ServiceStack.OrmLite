@@ -9,75 +9,74 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [TestFixtureSetUp]
         public void Setup()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
-            using (var dbCmd = dbConn.CreateCommand())
+            using (var db = ConnectionString.OpenDbConnection())
             {
-                dbCmd.CreateTable<ReferencedType>(true);
+                db.CreateTable<ReferencedType>(true);
             }
         }
 
         [Test]
         public void CanCreateSimpleForeignKey()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
+            using (var db = ConnectionString.OpenDbConnection())
             {
-                dbConn.CreateTable<TypeWithSimpleForeignKey>(true);
+                db.CreateTable<TypeWithSimpleForeignKey>(true);
             }
         }
 
         [Test]
         public void CanCreateForeignWithOnDeleteCascade()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
+            using (var db = ConnectionString.OpenDbConnection())
             {
-                dbConn.CreateTable<TypeWithOnDeleteCascade>(true);
+                db.CreateTable<TypeWithOnDeleteCascade>(true);
             }
         }
 
         [Test]
         public void CascadesOnDelete()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
+            using (var db = ConnectionString.OpenDbConnection())
             {
-                dbConn.CreateTable<TypeWithOnDeleteCascade>(true);
+                db.CreateTable<TypeWithOnDeleteCascade>(true);
 
-                dbConn.Save(new ReferencedType { Id = 1 });
-                dbConn.Save(new TypeWithOnDeleteCascade { RefId = 1 });
+                db.Save(new ReferencedType { Id = 1 });
+                db.Save(new TypeWithOnDeleteCascade { RefId = 1 });
 
-                Assert.AreEqual(1, dbConn.Select<ReferencedType>().Count);
-                Assert.AreEqual(1, dbConn.Select<TypeWithOnDeleteCascade>().Count);
+                Assert.AreEqual(1, db.Select<ReferencedType>().Count);
+                Assert.AreEqual(1, db.Select<TypeWithOnDeleteCascade>().Count);
 
-                dbConn.Delete<ReferencedType>(r => r.Id == 1);
+                db.Delete<ReferencedType>(r => r.Id == 1);
 
-                Assert.AreEqual(0, dbConn.Select<ReferencedType>().Count);
-                Assert.AreEqual(0, dbConn.Select<TypeWithOnDeleteCascade>().Count);
+                Assert.AreEqual(0, db.Select<ReferencedType>().Count);
+                Assert.AreEqual(0, db.Select<TypeWithOnDeleteCascade>().Count);
             }
         }
 
         [Test]
         public void CanCreateForeignWithOnDeleteCascadeAndOnUpdateCascade()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
+            using (var db = ConnectionString.OpenDbConnection())
             {
-                dbConn.CreateTable<TypeWithOnDeleteAndUpdateCascade>(true);
+                db.CreateTable<TypeWithOnDeleteAndUpdateCascade>(true);
             }
         }
 
         [Test]
         public void CanCreateForeignWithOnDeleteNoAction()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
+            using (var db = ConnectionString.OpenDbConnection())
             {
-                dbConn.CreateTable<TypeWithOnDeleteNoAction>(true);
+                db.CreateTable<TypeWithOnDeleteNoAction>(true);
             }
         }
 
         [Test]
         public void CanCreateForeignWithOnDeleteRestrict()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
+            using (var db = ConnectionString.OpenDbConnection())
             {
-                dbConn.CreateTable<TypeWithOnDeleteRestrict>(true);
+                db.CreateTable<TypeWithOnDeleteRestrict>(true);
             }
         }
 
@@ -85,34 +84,34 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void CanCreateForeignWithOnDeleteSetDefault()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
+            using (var db = ConnectionString.OpenDbConnection())
             {
-                dbConn.CreateTable<TypeWithOnDeleteSetDefault>(true);
+                db.CreateTable<TypeWithOnDeleteSetDefault>(true);
             }
         }
 
         [Test]
         public void CanCreateForeignWithOnDeleteSetNull()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
+            using (var db = ConnectionString.OpenDbConnection())
             {
-                dbConn.CreateTable<TypeWithOnDeleteSetNull>(true);
+                db.CreateTable<TypeWithOnDeleteSetNull>(true);
             }
         }
 
         [TestFixtureTearDown]
         public void TearDwon()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
+            using (var db = ConnectionString.OpenDbConnection())
             {
-                dbConn.DropTable<TypeWithOnDeleteAndUpdateCascade>();
-                dbConn.DropTable<TypeWithOnDeleteSetNull>();
-                dbConn.DropTable<TypeWithOnDeleteSetDefault>();
-                dbConn.DropTable<TypeWithOnDeleteRestrict>();
-                dbConn.DropTable<TypeWithOnDeleteNoAction>();
-                dbConn.DropTable<TypeWithOnDeleteCascade>();
-                dbConn.DropTable<TypeWithSimpleForeignKey>();
-                dbConn.DropTable<ReferencedType>();
+                db.DropTable<TypeWithOnDeleteAndUpdateCascade>();
+                db.DropTable<TypeWithOnDeleteSetNull>();
+                db.DropTable<TypeWithOnDeleteSetDefault>();
+                db.DropTable<TypeWithOnDeleteRestrict>();
+                db.DropTable<TypeWithOnDeleteNoAction>();
+                db.DropTable<TypeWithOnDeleteCascade>();
+                db.DropTable<TypeWithSimpleForeignKey>();
+                db.DropTable<ReferencedType>();
             }
         }
     }

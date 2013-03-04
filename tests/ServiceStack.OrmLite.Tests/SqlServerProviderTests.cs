@@ -129,14 +129,14 @@ BEGIN
  
     CREATE TABLE #Temp
     (
-        Name nvarchar(30) not null
+        Name nvarchar(50) not null
     );
  
 	declare @i int
-	set @i=1
+	set @i=0
 	WHILE @i < @Times
 	BEGIN
-	    INSERT INTO #Temp (Name) VALUES (CAST(NEWID() AS nvarchar(30)))
+	    INSERT INTO #Temp (Name) VALUES (CAST(NEWID() AS nvarchar(50)))
 		SET @i = @i + 1
 	END
 

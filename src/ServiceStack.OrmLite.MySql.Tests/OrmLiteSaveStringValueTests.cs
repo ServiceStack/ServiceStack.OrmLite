@@ -9,18 +9,17 @@ namespace ServiceStack.OrmLite.MySql.Tests
         public void Can_save_string_including_single_quote()
         {
             using (var db = ConnectionString.OpenDbConnection())
-            using (var dbConn = db.CreateCommand())
             {
-                dbConn.DropTable<StringTable>();
-                dbConn.CreateTable<StringTable>(true);
+                db.DropTable<StringTable>();
+                db.CreateTable<StringTable>(true);
 
                 var text = "It worked! Didn't it?";
                 var row = new StringTable() {Value = text};
 
-                dbConn.Save(row);
-                var id = dbConn.GetLastInsertId();
+                db.Save(row);
+                var id = db.GetLastInsertId();
 
-                var selectedRow = dbConn.GetById<StringTable>(id);
+                var selectedRow = db.GetById<StringTable>(id);
                 Assert.AreEqual(text, selectedRow.Value);
             }
         }
@@ -29,18 +28,17 @@ namespace ServiceStack.OrmLite.MySql.Tests
         public void Can_save_string_including_double_quote()
         {
             using (var db = ConnectionString.OpenDbConnection())
-            using (var dbConn = db.CreateCommand())
             {
-                dbConn.DropTable<StringTable>();
-                dbConn.CreateTable<StringTable>(true);
+                db.DropTable<StringTable>();
+                db.CreateTable<StringTable>(true);
 
                 var text = "\"It worked!\"";
                 var row = new StringTable() { Value = text };
 
-                dbConn.Save(row);
-                var id = dbConn.GetLastInsertId();
+                db.Save(row);
+                var id = db.GetLastInsertId();
 
-                var selectedRow = dbConn.GetById<StringTable>(id);
+                var selectedRow = db.GetById<StringTable>(id);
                 Assert.AreEqual(text, selectedRow.Value);
             }
         }
@@ -49,23 +47,20 @@ namespace ServiceStack.OrmLite.MySql.Tests
         public void Can_save_string_including_backslash()
         {
             using (var db = ConnectionString.OpenDbConnection())
-            using (var dbConn = db.CreateCommand())
             {
-                dbConn.DropTable<StringTable>();
-                dbConn.CreateTable<StringTable>(true);
+                db.DropTable<StringTable>();
+                db.CreateTable<StringTable>(true);
 
                 var text = "\\\\mycomputer\\hasashareddirectory";
                 var row = new StringTable() { Value = text };
 
-                dbConn.Save(row);
-                var id = dbConn.GetLastInsertId();
+                db.Save(row);
+                var id = db.GetLastInsertId();
 
-                var selectedRow = dbConn.GetById<StringTable>(id);
+                var selectedRow = db.GetById<StringTable>(id);
                 Assert.AreEqual(text, selectedRow.Value);
             }
         }
-
-
     }
 
     public class StringTable

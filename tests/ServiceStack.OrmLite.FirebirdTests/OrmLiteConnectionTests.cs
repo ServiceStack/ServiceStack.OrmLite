@@ -14,7 +14,6 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		{
 			var connString ="User=SYSDBA;Password=masterkey;Database=ormlite-tests.fdb;DataSource=localhost;Dialect=3;charset=ISO8859_1;";
 			using (var db = connString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
 			}
 		}
@@ -23,7 +22,6 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		public void Can_create_connection()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
 			}
 		}
@@ -32,7 +30,6 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		public void Can_create_ReadOnly_connection()
 		{
 			using (var db = ConnectionString.OpenReadOnlyDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
 			}
 		}
@@ -41,12 +38,11 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		public void Can_create_table_with_ReadOnly_connection()
 		{
 			using (var db = ConnectionString.OpenReadOnlyDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
 				try
 				{
-					dbCmd.CreateTable<ModelWithIdAndName>(true);
-					dbCmd.Insert(new ModelWithIdAndName(0));
+					db.CreateTable<ModelWithIdAndName>(true);
+					db.Insert(new ModelWithIdAndName(0));
 				}
 				catch (Exception ex)
 				{
@@ -61,19 +57,13 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		public void Can_open_two_ReadOnlyConnections_to_same_database()
 		{
 			var db = "User=SYSDBA;Password=masterkey;Database=ormlite-tests.fdb;DataSource=localhost;Dialect=3;charset=ISO8859_1;".OpenDbConnection();
-			using (var dbCmd = db.CreateCommand())
-			{
-				dbCmd.CreateTable<ModelWithIdAndName>(true);
-				dbCmd.Insert(new ModelWithIdAndName(1));
-			}
+            db.CreateTable<ModelWithIdAndName>(true);
+            db.Insert(new ModelWithIdAndName(1));
 
 			var dbReadOnly = "User=SYSDBA;Password=masterkey;Database=ormlite-tests.fdb;DataSource=localhost;Dialect=3;charset=ISO8859_1;".OpenDbConnection();
-			using (var dbReadOnlyCmd = dbReadOnly.CreateCommand())
-			{
-				dbReadOnlyCmd.Insert(new ModelWithIdAndName(2));
-				var rows = dbReadOnlyCmd.Select<ModelWithIdAndName>();
-				Assert.That(rows, Has.Count.EqualTo(2));
-			}
+            dbReadOnly.Insert(new ModelWithIdAndName(2));
+            var rows = dbReadOnly.Select<ModelWithIdAndName>();
+            Assert.That(rows, Has.Count.EqualTo(2));
 
 			dbReadOnly.Dispose();
 			db.Dispose();
