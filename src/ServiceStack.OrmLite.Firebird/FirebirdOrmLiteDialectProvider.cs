@@ -5,7 +5,7 @@ using System.Reflection;
 using ServiceStack.Common.Utils;
 using System.Text;
 using FirebirdSql.Data.FirebirdClient;
-using ServiceStack.Common.Extensions;
+using ServiceStack.Common;
 
 namespace ServiceStack.OrmLite.Firebird
 {

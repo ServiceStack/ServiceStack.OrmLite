@@ -15,7 +15,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using ServiceStack.Common.Extensions;
+using ServiceStack.Common;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Text;
 

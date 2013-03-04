@@ -17,7 +17,7 @@ using System.Text;
 using ServiceStack.Logging;
 using ServiceStack.Text;
 using System.Diagnostics;
-using ServiceStack.Common.Extensions;
+using ServiceStack.Common;
 using System.IO;
 
 namespace ServiceStack.OrmLite
