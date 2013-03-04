@@ -7,43 +7,37 @@ namespace ServiceStack.OrmLite
 {
     public static class OrmLiteReadConnectionExtensions
     {
-        public static List<T> Select<T>(this IDbConnection dbConn) where T : new()
+        public static List<T> Select<T>(this IDbConnection dbConn) 
         {
             return dbConn.Exec(dbCmd => dbCmd.Select<T>());
         }
 
         public static List<T> Select<T>(this IDbConnection dbConn, string sqlFilter, params object[] filterParams)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.Select<T>(sqlFilter, filterParams));
         }
 
         public static List<TModel> Select<TModel>(this IDbConnection dbConn, Type fromTableType)
-            where TModel : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.Select<TModel>(fromTableType));
         }
 
         public static List<TModel> Select<TModel>(this IDbConnection dbConn, Type fromTableType, string sqlFilter, params object[] filterParams)
-            where TModel : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.Select<TModel>(fromTableType, sqlFilter, filterParams));
         }
 
         public static IEnumerable<T> Each<T>(this IDbConnection dbConn)
-            where T : new()
         {
             return dbConn.ExecLazy(dbCmd => dbCmd.Each<T>());
         }
 
         public static IEnumerable<T> Each<T>(this IDbConnection dbConn, string filter, params object[] filterParams)
-            where T : new()
         {
             return dbConn.ExecLazy(dbCmd => dbCmd.Each<T>(filter, filterParams));
         }
         
         public static T First<T>(this IDbConnection dbConn, string filter, params object[] filterParams)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.First<T>(filter, filterParams));
         }
@@ -52,13 +46,11 @@ namespace ServiceStack.OrmLite
         /// Alias for First
         /// </summary>
         public static T Single<T>(this IDbConnection dbConn, string filter, params object[] filterParams)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.First<T>(filter, filterParams));
         }
 
         public static T First<T>(this IDbConnection dbConn, string filter)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.First<T>(filter));
         }
@@ -67,13 +59,11 @@ namespace ServiceStack.OrmLite
         /// Alias for First
         /// </summary>
         public static T Single<T>(this IDbConnection dbConn, string filter)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.First<T>(filter));
         }
 
         public static T FirstOrDefault<T>(this IDbConnection dbConn, string filter, params object[] filterParams)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.FirstOrDefault<T>(filter, filterParams));
         }
@@ -82,13 +72,11 @@ namespace ServiceStack.OrmLite
         /// Alias for FirstOrDefault
         /// </summary>
         public static T SingleOrDefault<T>(this IDbConnection dbConn, string filter, params object[] filterParams)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.FirstOrDefault<T>(filter, filterParams));
         }
 
         public static T FirstOrDefault<T>(this IDbConnection dbConn, string filter)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.FirstOrDefault<T>(filter));
         }
@@ -97,13 +85,11 @@ namespace ServiceStack.OrmLite
         /// Alias for FirstOrDefault
         /// </summary>
         public static T SingleOrDefault<T>(this IDbConnection dbConn, string filter)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.FirstOrDefault<T>(filter));
         }
 
         public static T GetById<T>(this IDbConnection dbConn, object idValue)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.GetById<T>(idValue));
         }
@@ -112,7 +98,6 @@ namespace ServiceStack.OrmLite
         /// Performs an GetById() except argument is passed as a parameter to the generated SQL
         /// </summary>
         public static T GetByIdParam<T>(this IDbConnection dbConn, object idValue)
-            where T: new()
         {
             return dbConn.Exec(dbCmd => dbCmd.GetByIdParam<T>(idValue));
         }
@@ -121,60 +106,51 @@ namespace ServiceStack.OrmLite
         /// Alias for GetById
         /// </summary>
         public static T Id<T>(this IDbConnection dbConn, object idValue)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.GetById<T>(idValue));
         }
         
-        public static T QueryById<T>(this IDbConnection dbConn, object value) where T : new()
+        public static T QueryById<T>(this IDbConnection dbConn, object value) 
         {
             return dbConn.Exec(dbCmd => dbCmd.QueryById<T>(value));
         }
 
         public static T SingleWhere<T>(this IDbConnection dbConn, string name, object value)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.SingleWhere<T>(name, value));
         }
 
         public static T QuerySingle<T>(this IDbConnection dbConn, object anonType)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.QuerySingle<T>(anonType));
         }
 
         public static T QuerySingle<T>(this IDbConnection dbConn, string sql, object anonType = null)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.QuerySingle<T>(sql, anonType));
         }
 
         public static List<T> Where<T>(this IDbConnection dbConn, string name, object value)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.Where<T>(name, value));
         }
 
         public static List<T> Where<T>(this IDbConnection dbConn, object anonType)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.Where<T>(anonType));
         }
 
         public static List<T> Query<T>(this IDbConnection dbConn, string sql)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.Query<T>(sql));
         }
 
         public static List<T> Query<T>(this IDbConnection dbConn, string sql, object anonType)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.Query<T>(sql, anonType));
         }
 
         public static List<T> Query<T>(this IDbConnection dbConn, string sql, Dictionary<string, object> dict)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.Query<T>(sql, dict));
         }
@@ -190,19 +166,16 @@ namespace ServiceStack.OrmLite
         }
         
         public static List<T> SqlList<T>(this IDbConnection dbConn, string sql)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(sql));
         }
 
         public static List<T> SqlList<T>(this IDbConnection dbConn, string sql, object anonType)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(sql, anonType));
         }
 
         public static List<T> SqlList<T>(this IDbConnection dbConn, string sql, Dictionary<string, object> dict)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(sql, dict));
         }
@@ -218,31 +191,26 @@ namespace ServiceStack.OrmLite
         }
         
         public static List<T> ByExampleWhere<T>(this IDbConnection dbConn, object anonType)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.ByExampleWhere<T>(anonType));
         }
 
         public static List<T> QueryByExample<T>(this IDbConnection dbConn, string sql, object anonType = null)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.QueryByExample<T>(sql, anonType));
         }
 
         public static IEnumerable<T> QueryEach<T>(this IDbConnection dbConn, string sql, object anonType = null)
-            where T : new()
         {
             return dbConn.ExecLazy(dbCmd => dbCmd.QueryEach<T>(sql, anonType));
         }
 
         public static IEnumerable<T> EachWhere<T>(this IDbConnection dbConn, object anonType)
-            where T : new()
         {
             return dbConn.ExecLazy(dbCmd => dbCmd.EachWhere<T>(anonType));
         }
 
         public static T GetByIdOrDefault<T>(this IDbConnection dbConn, object idValue)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.GetByIdOrDefault<T>(idValue));
         }
@@ -251,13 +219,11 @@ namespace ServiceStack.OrmLite
         /// Alias for GetByIds
         /// </summary>
         public static T IdOrDefault<T>(this IDbConnection dbConn, object idValue)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.GetByIdOrDefault<T>(idValue));
         }
 
         public static List<T> GetByIds<T>(this IDbConnection dbConn, IEnumerable idValues)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.GetByIds<T>(idValues));
         }
@@ -266,7 +232,6 @@ namespace ServiceStack.OrmLite
         /// Alias for GetByIds
         /// </summary>
         public static List<T> Ids<T>(this IDbConnection dbConn, IEnumerable idValues)
-            where T : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.GetByIds<T>(idValues));
         }
@@ -371,7 +336,6 @@ namespace ServiceStack.OrmLite
         // procedures ...		
         public static List<TOutputModel> SelectFromProcedure<TOutputModel>(this IDbConnection dbConn,
             object fromObjWithProperties)
-            where TOutputModel : new()
         {
             return dbConn.Exec(dbCmd => dbCmd.SelectFromProcedure<TOutputModel>(fromObjWithProperties));
         }

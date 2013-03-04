@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -736,8 +737,8 @@ namespace ServiceStack.OrmLite
                     
             }
 
-            if (operand == "=" && right.ToString() == "null") operand = "is";
-            else if (operand == "<>" && right.ToString() == "null") operand = "is not";
+            if (operand == "=" && right.ToString().Equals("null", StringComparison.InvariantCultureIgnoreCase)) operand = "is";
+            else if (operand == "<>" && right.ToString().Equals("null", StringComparison.InvariantCultureIgnoreCase)) operand = "is not";
 
             switch (operand)
             {
@@ -1114,7 +1115,7 @@ namespace ServiceStack.OrmLite
                     StringBuilder sIn = new StringBuilder();
                     foreach (Object e in inArgs)
                     {
-                        if (e.GetType().ToString() != "System.Collections.Generic.List`1[System.Object]")
+                        if (!typeof(ICollection).IsAssignableFrom(e.GetType()))
                         {
                             sIn.AppendFormat("{0}{1}",
                                          sIn.Length > 0 ? "," : "",
@@ -1122,7 +1123,7 @@ namespace ServiceStack.OrmLite
                         }
                         else
                         {
-                            var listArgs = e as IList<Object>;
+                            var listArgs = e as ICollection;
                             foreach (Object el in listArgs)
                             {
                                 sIn.AppendFormat("{0}{1}",
