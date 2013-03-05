@@ -65,6 +65,7 @@
     <Reference Include="System.Configuration" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CreatePostgreSQLTablesTests.cs" />
     <Compile Include="EnumTests.cs" />
     <Compile Include="Expressions\AdditiveExpressionsTest.cs" />
     <Compile Include="Expressions\Author.cs" />
