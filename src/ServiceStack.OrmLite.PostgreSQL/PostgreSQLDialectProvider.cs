@@ -9,6 +9,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
     public class PostgreSQLDialectProvider : OrmLiteDialectProviderBase<PostgreSQLDialectProvider>
 	{
 		public static PostgreSQLDialectProvider Instance = new PostgreSQLDialectProvider();
+        const string textColumnDefinition = "text";
 
 		private PostgreSQLDialectProvider()
 		{
@@ -22,7 +23,10 @@ namespace ServiceStack.OrmLite.PostgreSQL
 			base.ParamString = ":";
 			base.BlobColumnDefinition = "bytea";
 			base.RealColumnDefinition = "double precision";
-			base.StringLengthColumnDefinitionFormat = "text";
+            base.StringLengthColumnDefinitionFormat = textColumnDefinition;
+            //there is no "n"varchar in postgres. All strings are either unicode or non-unicode, inherited from the database.
+            base.StringLengthUnicodeColumnDefinitionFormat = "character varying({0})";
+            base.StringLengthNonUnicodeColumnDefinitionFormat = "character varying({0})"; 
 			base.InitColumnTypeMap();
 
             DbTypeMap.Set<TimeSpan>(DbType.Time, "Interval");
@@ -44,13 +48,11 @@ namespace ServiceStack.OrmLite.PostgreSQL
 			{
 				if (fieldLength != null)
 				{
-					fieldDefinition = UseUnicode
-						? string.Format(base.StringLengthUnicodeColumnDefinitionFormat, fieldLength)
-						: string.Format(base.StringLengthNonUnicodeColumnDefinitionFormat, fieldLength);
+					fieldDefinition = string.Format(base.StringLengthColumnDefinitionFormat, fieldLength);
 				}
 				else
 				{
-					fieldDefinition = StringLengthColumnDefinitionFormat;
+                    fieldDefinition = textColumnDefinition;
 				}
 			}
 			else
