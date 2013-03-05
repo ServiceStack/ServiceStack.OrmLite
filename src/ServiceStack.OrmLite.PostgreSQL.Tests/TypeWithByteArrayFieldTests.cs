@@ -4,11 +4,19 @@ using ServiceStack.OrmLite.Tests;
 namespace ServiceStack.OrmLite.PostgreSQL.Tests
 {
     public class TypeWithByteArrayFieldTests : OrmLiteTestBase
-    {        
+    {
+        TypeWithByteArrayField getSampleObject()
+        {
+            var testByteArray = new byte[256];
+            for(int i = 0; i < 256; i++) { testByteArray[i] = (byte)i; }
+            
+            return new TypeWithByteArrayField { Id = 1, Content = testByteArray };
+        }
+
         [Test]
         public void CanInsertAndSelectByteArray()
         {
-            var orig = new TypeWithByteArrayField { Id = 1, Content = new byte[] { 0, 17, 0, 17, 0, 7 } };
+            var orig = getSampleObject();
 
             using (var db = ConnectionString.OpenDbConnection())
             {
@@ -26,7 +34,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         [Test]
         public void CanInsertAndSelectByteArray__manual_insert__manual_select()
         {
-            var orig = new TypeWithByteArrayField { Id = 1, Content = new byte[] { 0, 17, 0, 17, 0, 7 } };
+            var orig = getSampleObject();
 
             using(var db = ConnectionString.OpenDbConnection()) {
                 //insert and select manually - ok
@@ -40,7 +48,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         [Test]
         public void CanInsertAndSelectByteArray__InsertParam_insert__manual_select()
         {
-            var orig = new TypeWithByteArrayField { Id = 1, Content = new byte[] { 0, 17, 0, 17, 0, 7 } };
+            var orig = getSampleObject();
 
             using(var db = ConnectionString.OpenDbConnection()) {
                 //insert using InsertParam, and select manually - ok
@@ -54,7 +62,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         [Test]
         public void CanInsertAndSelectByteArray__InsertParam_insert__GetById_select()
         {
-            var orig = new TypeWithByteArrayField { Id = 1, Content = new byte[] { 0, 17, 0, 17, 0, 7 } };
+            var orig = getSampleObject();
 
             using(var db = ConnectionString.OpenDbConnection()) {
                 //InsertParam + GetByID - fails
@@ -71,7 +79,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         [Test]
         public void CanInsertAndSelectByteArray__Insert_insert__GetById_select()
         {
-            var orig = new TypeWithByteArrayField { Id = 1, Content = new byte[] { 0, 17, 0, 17, 0, 7 } };
+            var orig = getSampleObject();
 
             using(var db = ConnectionString.OpenDbConnection()) {
                 //InsertParam + GetByID - fails
@@ -88,7 +96,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         [Test]
         public void CanInsertAndSelectByteArray__Insert_insert__manual_select()
         {
-            var orig = new TypeWithByteArrayField { Id = 1, Content = new byte[] { 0, 17, 0, 17, 0, 7 } };
+            var orig = getSampleObject();
 
             using(var db = ConnectionString.OpenDbConnection()) {
                 //InsertParam + GetByID - fails
@@ -115,7 +123,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         private static void _insertManually(TypeWithByteArrayField orig, System.Data.IDbConnection db)
         {
             using(var cmd = db.CreateCommand()) {
-                cmd.CommandText = @"INSERT INTO ""TypeWithByteArrayField"" (""Id"",""Content"") VALUES (@Id, @Content) --manual insert";
+                cmd.CommandText = @"INSERT INTO ""TypeWithByteArrayField"" (""Id"",""Content"") VALUES (@Id, @Content) --manual parameterized insert";
 
                 var p_id = cmd.CreateParameter();
                 p_id.ParameterName = "@Id";
