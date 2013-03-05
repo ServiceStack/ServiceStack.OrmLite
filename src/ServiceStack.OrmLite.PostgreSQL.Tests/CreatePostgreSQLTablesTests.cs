@@ -21,7 +21,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
 
             //table creation fails after either of these:
             //OrmLiteConfig.DialectProvider.UseUnicode = true;
-            //OrmLiteConfig.DialectProvider.UseUnicode = false;
+            //OrmLiteConfig.DialectProvider.UseUnicode = false; 
             OrmLiteConfig.DialectProvider.DefaultStringLength = 123;
 
             _reCreateTheTable();
