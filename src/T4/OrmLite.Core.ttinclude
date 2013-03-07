@@ -150,10 +150,7 @@ public class Column
 		{
 		  if(IsNullable)
 		  {
-			if(PropertyType.Equals("string") == false)
-			{
-				return PropertyType +"?";
-			}			
+			return PropertyType + CheckNullable(this);		
 		  }
 		  return PropertyType;
 		}
@@ -270,7 +267,7 @@ static Func<string, string> CleanUp = (str) =>
     return str;
 };
 
-string CheckNullable(Column col)
+static string CheckNullable(Column col)
 {
     string result="";
     if(col.IsNullable && 
@@ -448,7 +445,7 @@ public string GetColumnDefaultValue(Column col)
         return sysType;	
 }
 
-Tables LoadTables()
+Tables LoadTables(bool makeSingular)
 {
 	InitConnectionString();
 
@@ -547,7 +544,12 @@ Tables LoadTables()
 			var rxClean = new Regex("^(Equals|GetHashCode|GetType|ToString|repo|Save|IsNew|Insert|Update|Delete|Exists|SingleOrDefault|Single|First|FirstOrDefault|Fetch|Page|Query)$");
 			foreach (var t in result)
 			{
+				if (!makeSingular)
+				{
+					t.ClassName = t.CleanName;
+				}
 				t.ClassName = ClassPrefix + t.ClassName + ClassSuffix;
+				
 				foreach (var c in t.Columns)
 				{
 					c.PropertyName = rxClean.Replace(c.PropertyName, "_$1");
@@ -956,13 +958,26 @@ class SqlServerSchemaReader : SchemaReader
 			p.Value=table;
 			cmd.Parameters.Add(p);
 
-			var result=cmd.ExecuteScalar();
-
-			if(result!=null)
-				return result.ToString();    
+			var result = "";
+			DbDataReader reader = cmd.ExecuteReader();
+			try
+			{
+				if (reader.Read())
+				{
+					result = reader[0].ToString();
+					if (reader.Read())
+					{
+						result = "";
+					}
+				}
+			}
+			finally
+			{
+				// Always call Close when done reading.
+				reader.Close();
+			}
+			return result;    
 		}	         
-		
-		return "";
 	}
 	
 	string GetPropertyType(string sqlType)
@@ -1274,13 +1289,26 @@ class SqlServerCeSchemaReader : SchemaReader
 			p.Value=table;
 			cmd.Parameters.Add(p);
 
-			var result=cmd.ExecuteScalar();
-
-			if(result!=null)
-				return result.ToString();    
+			var result = "";
+			DbDataReader reader = cmd.ExecuteReader();
+			try
+			{
+				if (reader.Read())
+				{
+					result = reader[0].ToString();
+					if (reader.Read())
+					{
+						result = "";
+					}
+				}
+			}
+			finally
+			{
+				// Always call Close when done reading.
+				reader.Close();
+			}
+			return result;    
 		}	         
-		
-		return "";
 	}
 	
 	string GetPropertyType(string sqlType)
@@ -1467,13 +1495,26 @@ class PostGreSqlSchemaReader : SchemaReader
 			p.Value=table;
 			cmd.Parameters.Add(p);
 
-			var result=cmd.ExecuteScalar();
-
-			if(result!=null)
-				return result.ToString();    
+			var result = "";
+			DbDataReader reader = cmd.ExecuteReader();
+			try
+			{
+				if (reader.Read())
+				{
+					result = reader[0].ToString();
+					if (reader.Read())
+					{
+						result = "";
+					}
+				}
+			}
+			finally
+			{
+				// Always call Close when done reading.
+				reader.Close();
+			}
+			return result;   
 		}	         
-		
-		return "";
 	}
 	
 	string GetPropertyType(string sqlType)
@@ -1781,13 +1822,26 @@ and ucc.position = 1";
 			p.Value=table;
 			cmd.Parameters.Add(p);
 
-			var result=cmd.ExecuteScalar();
-
-			if(result!=null)
-				return result.ToString();    
+			var result = "";
+			DbDataReader reader = cmd.ExecuteReader();
+			try
+			{
+				if (reader.Read())
+				{
+					result = reader[0].ToString();
+					if (reader.Read())
+					{
+						result = "";
+					}
+				}
+			}
+			finally
+			{
+				// Always call Close when done reading.
+				reader.Close();
+			}
+			return result;   
 		}	         
-		
-		return "";
 	}
 	
 	string GetPropertyType(string sqlType, string dataScale)
