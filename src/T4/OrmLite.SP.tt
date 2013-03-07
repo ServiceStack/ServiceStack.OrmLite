@@ -3,7 +3,6 @@
 	// Settings
     ConnectionStringName = "";			// Uses last connection string in config if not specified
     var SPNamespace = "StoredProcedures";
-    RepoName = "";
 	ClassPrefix = "";
 	ClassSuffix = "";
 
@@ -16,9 +15,7 @@
 #>
 <#
 if (string.IsNullOrEmpty(SPNamespace)) SPNamespace=ConnectionStringName;
-if (string.IsNullOrEmpty(RepoName) && !string.IsNullOrEmpty(ConnectionStringName)) RepoName=ConnectionStringName + "DB";
 if (string.IsNullOrEmpty(SPNamespace)) Namespace="StoredProcedures";
-if (string.IsNullOrEmpty(RepoName)) RepoName="PocoDB";
 #>
 using System;
 using System.Data.Common;
@@ -26,7 +23,7 @@ using System.Data;
 using System.Collections.Generic;
 using ServiceStack.OrmLite;
 
-namespace <#=StoredProcedures #>
+namespace <#=SPNamespace#>
 {
 	public static class SPList 
 	{
@@ -41,7 +38,7 @@ namespace <#=StoredProcedures #>
 		}
 
 <#foreach(var sp in sps){#>
-		public static OrmLiteSPStatement <#=sp.Name#>(this IDbConnection dbConnection <#foreach(var param in sp.Parameters){#> , <#=param.NullableSysType#> <#=Inflector.MakeInitialLowerCase(param.Name)#>  = null <#}#>)
+		public static OrmLiteSPStatement <#=sp.CleanName#>(this IDbConnection dbConnection <#foreach(var param in sp.Parameters){#> , <#=param.NullableSysType#> <#=Inflector.MakeInitialLowerCase(param.Name)#>  = null <#}#>)
 		{
 			DbCommand dbCommand = (DbCommand)dbConnection.CreateCommand();
 			dbCommand.CommandText = "<#=sp.Name#>";
