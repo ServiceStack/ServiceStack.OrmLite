@@ -102,6 +102,7 @@
     <Compile Include="ForeignKeyAttribute.cs" />
     <Compile Include="JoinSqlBuilder.cs" />
     <Compile Include="OrmLiteReadConnectionExtensions.cs" />
+    <Compile Include="OrmLiteSPStatement.cs" />
     <Compile Include="OrmLiteTransaction.cs" />
     <Compile Include="OrmLiteWriteConnectionExtensions.cs" />
     <Compile Include="DbTypes.cs" />

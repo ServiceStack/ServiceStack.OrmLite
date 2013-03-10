@@ -122,6 +122,10 @@ namespace ServiceStack.OrmLite.PostgreSQL
 				var guidValue = (Guid)value;
 				return base.GetQuotedValue(guidValue.ToString("N"), typeof(string));
 			}
+			if(fieldType == typeof(byte[]))
+			{
+				return "E'" + ToBinary(value) + "'";
+			}
 
 			return base.GetQuotedValue(value, fieldType);
 		}
@@ -129,7 +133,9 @@ namespace ServiceStack.OrmLite.PostgreSQL
 		public override object ConvertDbValue(object value, Type type)
 		{
 			if (value == null || value is DBNull) return null;
-		
+			
+			if(type == typeof(byte[])) { return value; }
+
 			return base.ConvertDbValue(value, type);
 		}
 
@@ -196,5 +202,27 @@ namespace ServiceStack.OrmLite.PostgreSQL
             string escapedSchema = modelDef.Schema.Replace(".", "\".\"");
             return string.Format("\"{0}\".\"{1}\"", escapedSchema, base.NamingStrategy.GetTableName(modelDef.ModelName));
         }
+
+		/// <summary>
+		/// based on Npgsql2's source: Npgsql2\src\NpgsqlTypes\NpgsqlTypeConverters.cs
+		/// </summary>
+		/// <param name="TypeInfo"></param>
+		/// <param name="NativeData"></param>
+		/// <param name="ForExtendedQuery"></param>
+		/// <returns></returns>
+		internal static String ToBinary(Object NativeData)
+		{
+			Byte[] byteArray = (Byte[])NativeData;
+			StringBuilder res = new StringBuilder(byteArray.Length * 5);
+			foreach(byte b in byteArray)
+				if(b >= 0x20 && b < 0x7F && b != 0x27 && b != 0x5C)
+					res.Append((char)b);
+				else
+					res.Append("\\\\")
+						.Append((char)('0' + (7 & (b >> 6))))
+						.Append((char)('0' + (7 & (b >> 3))))
+						.Append((char)('0' + (7 & b)));
+			return res.ToString();
+		}
 	}
 }

@@ -3,7 +3,6 @@
 	// Settings
     ConnectionStringName = "";			// Uses last connection string in config if not specified
     var SPNamespace = "StoredProcedures";
-    RepoName = "";
 	ClassPrefix = "";
 	ClassSuffix = "";
 
@@ -16,9 +15,7 @@
 #>
 <#
 if (string.IsNullOrEmpty(SPNamespace)) SPNamespace=ConnectionStringName;
-if (string.IsNullOrEmpty(RepoName) && !string.IsNullOrEmpty(ConnectionStringName)) RepoName=ConnectionStringName + "DB";
 if (string.IsNullOrEmpty(SPNamespace)) Namespace="StoredProcedures";
-if (string.IsNullOrEmpty(RepoName)) RepoName="PocoDB";
 #>
 using System;
 using System.Data.Common;
@@ -26,157 +23,8 @@ using System.Data;
 using System.Collections.Generic;
 using ServiceStack.OrmLite;
 
-namespace <#=StoredProcedures #>
+namespace <#=SPNamespace#>
 {
-    public class OrmLiteSPStatement
-    {
-        private IDbCommand command { get; set; }
-
-        public OrmLiteSPStatement(IDbCommand cmd)
-        {
-            command = cmd;
-        }
-
-        public List<T> ConvertToList<T>() where T : new()
-        {
-            if ((typeof(T).IsPrimitive) || (typeof(T) == typeof(string)) || (typeof(T) == typeof(String)) )
-            throw new Exception("Type " + typeof(T).Name + " is a primitive type. Use ConvertScalarToList function.");
-
-            IDataReader reader = null;
-            try
-            {
-                reader = command.ExecuteReader();
-                return reader.ConvertToList<T>();
-            }
-            finally
-            {
-                if (reader != null)
-                    reader.Close();
-            }
-        }
-
-        public List<T> ConvertToScalarList<T>()
-        {
-            if (!((typeof(T).IsPrimitive) || (typeof(T) == typeof(string)) || (typeof(T) == typeof(String))))
-                throw new Exception("Type " + typeof(T).Name + " is a non primitive type. Use ConvertToList function.");
-
-            IDataReader reader = null;
-            try
-            {
-                reader = command.ExecuteReader();
-#pragma warning disable 618
-                return reader.GetFirstColumn<T>();
-#pragma warning restore 618
-            }
-            finally
-            {
-                if (reader != null)
-                    reader.Close();
-            }
-        }
-
-        public T ConvertTo<T>() where T : new()
-        {
-            if ((typeof(T).IsPrimitive) || (typeof(T) == typeof(string)) || (typeof(T) == typeof(String)))
-                throw new Exception("Type " + typeof(T).Name + " is a primitive type. Use ConvertScalarTo function.");
-
-            IDataReader reader = null;
-            try
-            {
-                reader = command.ExecuteReader();
-                return reader.ConvertTo<T>();
-            }
-            finally
-            {
-                if (reader != null)
-                    reader.Close();
-            }
-        }
-
-        public T ConvertToScalar<T>()
-        {
-            if (!((typeof(T).IsPrimitive) || (typeof(T) == typeof(string)) || (typeof(T) == typeof(String))))
-                throw new Exception("Type " + typeof(T).Name + " is a non primitive type. Use ConvertTo function.");
-
-            IDataReader reader = null;
-            try
-            {
-                reader = command.ExecuteReader();
-#pragma warning disable 618
-                return reader.GetScalar<T>();
-#pragma warning restore 618
-            }
-            finally
-            {
-                if (reader != null)
-                    reader.Close();
-            }
-        }
-
-        public List<T> ConvertFirstColumnToList<T>()
-        {
-            if (!((typeof(T).IsPrimitive) || (typeof(T) == typeof(string)) || (typeof(T) == typeof(String))))
-                throw new Exception("Type " + typeof(T).Name + " is a non primitive type. Only primitive type can be used.");
-
-            IDataReader reader = null;
-            try
-            {
-                reader = command.ExecuteReader();
-#pragma warning disable 618
-                return reader.GetFirstColumn<T>();
-#pragma warning restore 618
-            }
-            finally
-            {
-                if (reader != null)
-                    reader.Close();
-            }
-        }
-
-        public HashSet<T> ConvertFirstColumnToListDistinct<T>() where T : new()
-        {
-            if (!((typeof(T).IsPrimitive) || (typeof(T) == typeof(string)) || (typeof(T) == typeof(String))))
-                throw new Exception("Type " + typeof(T).Name + " is a non primitive type. Only primitive type can be used.");
-
-            IDataReader reader = null;
-            try
-            {
-                reader = command.ExecuteReader();
-#pragma warning disable 618
-                return reader.GetFirstColumnDistinct<T>();
-#pragma warning restore 618
-            }
-            finally
-            {
-                if (reader != null)
-                    reader.Close();
-            }
-        }
-
-        public int ExecuteNonQuery()
-        {
-            return command.ExecuteNonQuery();
-        }
-
-        public bool HasResult()
-        {
-            IDataReader reader = null;
-            try
-            {
-                reader = command.ExecuteReader();
-                if (reader.Read())
-                    return true;
-                else
-                    return false;
-            }
-            finally
-            {
-                if (reader != null)
-                    reader.Close();
-            }
-        }
-    }
-
 	public static class SPList 
 	{
 		private static DbParameter CreateNewParameter(DbCommand dbCommand, string paramName, object paramValue, ParameterDirection paramDirection, DbType paramType)
@@ -190,7 +38,7 @@ namespace <#=StoredProcedures #>
 		}
 
 <#foreach(var sp in sps){#>
-		public static OrmLiteSPStatement <#=sp.Name#>(this IDbConnection dbConnection <#foreach(var param in sp.Parameters){#> , <#=param.NullableSysType#> <#=Inflector.MakeInitialLowerCase(param.Name)#>  = null <#}#>)
+		public static OrmLiteSPStatement <#=sp.CleanName#>(this IDbConnection dbConnection <#foreach(var param in sp.Parameters){#> , <#=param.NullableSysType#> <#=Inflector.MakeInitialLowerCase(param.Name)#>  = null <#}#>)
 		{
 			DbCommand dbCommand = (DbCommand)dbConnection.CreateCommand();
 			dbCommand.CommandText = "<#=sp.Name#>";
