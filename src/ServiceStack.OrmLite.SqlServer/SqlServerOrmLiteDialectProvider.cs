@@ -145,6 +145,31 @@ namespace ServiceStack.OrmLite.SqlServer
 
 		}
 
+		protected bool _useDateTime2;
+		public void UseDatetime2(bool shouldUseDatetime2)
+		{
+			_useDateTime2 = shouldUseDatetime2;
+			DateTimeColumnDefinition = shouldUseDatetime2 ? "datetime2" : "datetime";
+			InitColumnTypeMap();
+		}
+
+		protected override void AddParameterForFieldToCommand(IDbCommand command, FieldDefinition fieldDef, object objWithProperties)
+		{
+			//have to override, because DbTypeMap.Set<T> expects DbType, and SqlDbType is not a DbType...
+			if(_useDateTime2 && (fieldDef.FieldType == typeof(DateTime) || fieldDef.FieldType == typeof(DateTime?))) {
+				var sqlCmd = (SqlCommand)command;//should be SqlCommand...
+				var p = sqlCmd.CreateParameter();
+				p.ParameterName = string.Format("{0}{1}", ParamString, fieldDef.FieldName);
+
+				p.SqlDbType = SqlDbType.DateTime2;
+				p.Value = GetValueOrDbNull(fieldDef, objWithProperties);
+
+				command.Parameters.Add(p);
+			} else {
+				base.AddParameterForFieldToCommand(command, fieldDef, objWithProperties);
+			}
+		}
+
 		public override long GetLastInsertId(IDbCommand dbCmd)
 		{
 			dbCmd.CommandText = "SELECT SCOPE_IDENTITY()";
