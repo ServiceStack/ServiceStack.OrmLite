@@ -53,6 +53,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Datetime2Tests.cs" />
     <Compile Include="InsertParam_GetLastInsertId.cs" />
     <Compile Include="NestedTransactions.cs" />
     <Compile Include="EnumTests.cs" />

@@ -580,7 +580,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        protected void AddParameterForFieldToCommand(IDbCommand command, FieldDefinition fieldDef, object objWithProperties)
+        protected virtual void AddParameterForFieldToCommand(IDbCommand command, FieldDefinition fieldDef, object objWithProperties)
         {
             var p = command.CreateParameter();
             p.ParameterName = string.Format("{0}{1}", ParamString, fieldDef.FieldName);
@@ -600,7 +600,7 @@ namespace ServiceStack.OrmLite
             command.Parameters.Add(p);
         }
 
-        private object GetValueOrDbNull(FieldDefinition fieldDef, object objWithProperties)
+        protected object GetValueOrDbNull(FieldDefinition fieldDef, object objWithProperties)
         {
             return fieldDef.GetValue(objWithProperties) ?? DBNull.Value;
         }
