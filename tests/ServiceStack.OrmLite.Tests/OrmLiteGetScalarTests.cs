@@ -156,15 +156,16 @@ namespace ServiceStack.OrmLite.Tests
 				r9 = db.GetScalar<Author,string>(e=> Sql.Max(e.Name), e=>e.City=="SinCity");
 				Assert.IsNullOrEmpty(r9);
 								
+                //Can't MIN(bit)/MAX(bit) in SQL Server
 				var expectedBool=authors.Min(e=>e.Active);
-				var r10 = db.GetScalar<Author,bool>(e=> Sql.Min(e.Active));
+                var r10 = db.GetScalar<Author, bool>(e => Sql.Count(e.Active)); 
 				Assert.That(expectedBool, Is.EqualTo(r10));
 								
 				expectedBool=authors.Max(e=>e.Active);
-				r10 = db.GetScalar<Author,bool>(e=> Sql.Max(e.Active));
+                r10 = db.GetScalar<Author, bool>(e => Sql.Count(e.Active));
 				Assert.That(expectedBool, Is.EqualTo(r10));
-				
-				r10 = db.GetScalar<Author,bool>(e=> Sql.Max(e.Active), e=>e.City=="SinCity");
+
+                r10 = db.GetScalar<Author, bool>(e => Sql.Count(e.Active), e => e.City == "SinCity");
 				Assert.IsFalse(r10);
 				
 				

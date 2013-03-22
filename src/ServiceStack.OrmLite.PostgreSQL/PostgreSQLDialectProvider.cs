@@ -9,6 +9,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
     public class PostgreSQLDialectProvider : OrmLiteDialectProviderBase<PostgreSQLDialectProvider>
 	{
 		public static PostgreSQLDialectProvider Instance = new PostgreSQLDialectProvider();
+        const string textColumnDefinition = "text";
 
 		private PostgreSQLDialectProvider()
 		{
@@ -22,7 +23,10 @@ namespace ServiceStack.OrmLite.PostgreSQL
 			base.ParamString = ":";
 			base.BlobColumnDefinition = "bytea";
 			base.RealColumnDefinition = "double precision";
-			base.StringLengthColumnDefinitionFormat = "text";
+            base.StringLengthColumnDefinitionFormat = textColumnDefinition;
+            //there is no "n"varchar in postgres. All strings are either unicode or non-unicode, inherited from the database.
+            base.StringLengthUnicodeColumnDefinitionFormat = "character varying({0})";
+            base.StringLengthNonUnicodeColumnDefinitionFormat = "character varying({0})"; 
 			base.InitColumnTypeMap();
 
             DbTypeMap.Set<TimeSpan>(DbType.Time, "Interval");
@@ -44,13 +48,11 @@ namespace ServiceStack.OrmLite.PostgreSQL
 			{
 				if (fieldLength != null)
 				{
-					fieldDefinition = UseUnicode
-						? string.Format(base.StringLengthUnicodeColumnDefinitionFormat, fieldLength)
-						: string.Format(base.StringLengthNonUnicodeColumnDefinitionFormat, fieldLength);
+					fieldDefinition = string.Format(base.StringLengthColumnDefinitionFormat, fieldLength);
 				}
 				else
 				{
-					fieldDefinition = StringLengthColumnDefinitionFormat;
+                    fieldDefinition = textColumnDefinition;
 				}
 			}
 			else
@@ -95,10 +97,10 @@ namespace ServiceStack.OrmLite.PostgreSQL
 			return sql.ToString();
 		}		
 
-		public override string EscapeParam(object paramValue)
-		{
-			return paramValue.ToString().Replace("'", @"''");
-		}
+        public override string GetQuotedParam(string paramValue)
+        {
+            return "'" + paramValue.Replace("'", @"''") + "'";
+        }
 
 		public override IDbConnection CreateConnection(string connectionString, Dictionary<string, string> options)
 		{
@@ -120,6 +122,10 @@ namespace ServiceStack.OrmLite.PostgreSQL
 				var guidValue = (Guid)value;
 				return base.GetQuotedValue(guidValue.ToString("N"), typeof(string));
 			}
+			if(fieldType == typeof(byte[]))
+			{
+				return "E'" + ToBinary(value) + "'";
+			}
 
 			return base.GetQuotedValue(value, fieldType);
 		}
@@ -127,7 +133,9 @@ namespace ServiceStack.OrmLite.PostgreSQL
 		public override object ConvertDbValue(object value, Type type)
 		{
 			if (value == null || value is DBNull) return null;
-		
+			
+			if(type == typeof(byte[])) { return value; }
+
 			return base.ConvertDbValue(value, type);
 		}
 
@@ -154,6 +162,67 @@ namespace ServiceStack.OrmLite.PostgreSQL
 			var result = dbCmd.GetLongScalar();
 
 			return result > 0;
+		}
+
+		public override string ToExecuteProcedureStatement(object objWithProperties)
+		{
+			var sbColumnValues = new StringBuilder();
+
+			var tableType = objWithProperties.GetType();
+			var modelDef = GetModel(tableType);
+
+			foreach (var fieldDef in modelDef.FieldDefinitions)
+			{
+				if (sbColumnValues.Length > 0) sbColumnValues.Append(",");
+				try
+				{
+					sbColumnValues.Append(fieldDef.GetQuotedValue(objWithProperties));
+				}
+				catch (Exception)
+				{
+					throw;
+				}
+			}
+
+			var sql = string.Format("{0} {1}{2}{3};",
+				GetQuotedTableName(modelDef),
+				sbColumnValues.Length > 0 ? "(" : "",
+				sbColumnValues,
+				sbColumnValues.Length > 0 ? ")" : "");
+
+			return sql;
+		}
+
+        public override string GetQuotedTableName(ModelDefinition modelDef)
+        {
+            if (!modelDef.IsInSchema)
+            {
+                return base.GetQuotedTableName(modelDef);
+            }
+            string escapedSchema = modelDef.Schema.Replace(".", "\".\"");
+            return string.Format("\"{0}\".\"{1}\"", escapedSchema, base.NamingStrategy.GetTableName(modelDef.ModelName));
+        }
+
+		/// <summary>
+		/// based on Npgsql2's source: Npgsql2\src\NpgsqlTypes\NpgsqlTypeConverters.cs
+		/// </summary>
+		/// <param name="TypeInfo"></param>
+		/// <param name="NativeData"></param>
+		/// <param name="ForExtendedQuery"></param>
+		/// <returns></returns>
+		internal static String ToBinary(Object NativeData)
+		{
+			Byte[] byteArray = (Byte[])NativeData;
+			StringBuilder res = new StringBuilder(byteArray.Length * 5);
+			foreach(byte b in byteArray)
+				if(b >= 0x20 && b < 0x7F && b != 0x27 && b != 0x5C)
+					res.Append((char)b);
+				else
+					res.Append("\\\\")
+						.Append((char)('0' + (7 & (b >> 6))))
+						.Append((char)('0' + (7 & (b >> 3))))
+						.Append((char)('0' + (7 & b)));
+			return res.ToString();
 		}
 	}
 }

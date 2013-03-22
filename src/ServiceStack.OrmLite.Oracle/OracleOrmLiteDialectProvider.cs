@@ -4,7 +4,8 @@ using System.Data;
 using System.Reflection;
 using ServiceStack.Common.Utils;
 using System.Text;
-using ServiceStack.Common.Extensions;
+using ServiceStack.Common;
+using ServiceStack.OrmLite;
 using System.Data.OracleClient;
 
 namespace ServiceStack.OrmLite.Oracle
@@ -39,6 +40,7 @@ namespace ServiceStack.OrmLite.Oracle
 			base.RealColumnDefinition= "FLOAT";
 			base.DefaultStringLength=128;
 			base.InitColumnTypeMap();
+            base.ParamString = ":";
 		}
 		
 		public override IDbConnection CreateConnection(string connectionString, Dictionary<string, string> options)
@@ -163,6 +165,81 @@ namespace ServiceStack.OrmLite.Oracle
 			}
 			return sql.ToString();
 		}
+
+        public override IDbCommand CreateParameterizedInsertStatement(object objWithProperties, IDbConnection connection)
+        {
+            return CreateParameterizedInsertStatement(objWithProperties, null, connection);
+        }
+
+        public override IDbCommand CreateParameterizedInsertStatement(object objWithProperties, IList<string> insertFields, IDbConnection connection)
+        {
+            if (insertFields == null) insertFields = new List<string>();
+            var sbColumnNames = new StringBuilder();
+            var sbColumnValues = new StringBuilder();
+            var modelDef = GetModel(objWithProperties.GetType());
+
+            var dbCommand = connection.CreateCommand();
+
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+                if (fieldDef.IsComputed) continue;
+                if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name)) continue;
+
+                if ((fieldDef.AutoIncrement || !string.IsNullOrEmpty(fieldDef.Sequence)
+                    || fieldDef.Name == OrmLiteConfig.IdField)
+                    && dbCommand != null)
+                {
+
+                    if (fieldDef.AutoIncrement && string.IsNullOrEmpty(fieldDef.Sequence))
+                    {
+                        fieldDef.Sequence = Sequence(
+                            (modelDef.IsInSchema
+                                ? modelDef.Schema + "_" + NamingStrategy.GetTableName(modelDef.ModelName)
+                                : NamingStrategy.GetTableName(modelDef.ModelName)),
+                            fieldDef.FieldName, fieldDef.Sequence);
+                    }
+
+                    PropertyInfo pi = objWithProperties.GetType().GetProperty(fieldDef.Name,
+                        BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy);
+
+                    var result = GetNextValue(dbCommand, fieldDef.Sequence, pi.GetValue(objWithProperties, new object[] { }));
+                    if (pi.PropertyType == typeof(String))
+                        ReflectionUtils.SetProperty(objWithProperties, pi, result.ToString());
+                    else if (pi.PropertyType == typeof(Int16))
+                        ReflectionUtils.SetProperty(objWithProperties, pi, Convert.ToInt16(result));
+                    else if (pi.PropertyType == typeof(Int32))
+                        ReflectionUtils.SetProperty(objWithProperties, pi, Convert.ToInt32(result));
+                    else if (pi.PropertyType == typeof(Guid))
+                        ReflectionUtils.SetProperty(objWithProperties, pi, result);
+                    else
+                        ReflectionUtils.SetProperty(objWithProperties, pi, Convert.ToInt64(result));
+                }
+
+                //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
+                if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name)) continue;
+
+                if (sbColumnNames.Length > 0) sbColumnNames.Append(",");
+                if (sbColumnValues.Length > 0) sbColumnValues.Append(",");
+
+                try
+                {
+                    sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
+                    sbColumnValues.Append(ParamString)
+                                  .Append(fieldDef.FieldName);
+
+                    AddParameterForFieldToCommand(dbCommand, fieldDef, objWithProperties);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("ERROR in CreateParameterizedInsertStatement(): " + ex.Message, ex);
+                    throw;
+                }
+            }
+
+            dbCommand.CommandText = string.Format("INSERT INTO {0} ({1}) VALUES ({2})",
+                                                GetQuotedTableName(modelDef), sbColumnNames, sbColumnValues);
+            return dbCommand;
+        }
 		
 		public override string ToInsertRowStatement(object objWithProperties, IList<string> insertFields, IDbCommand dbCommand)
 		{
@@ -191,8 +268,9 @@ namespace ServiceStack.OrmLite.Oracle
 								: NamingStrategy.GetTableName(modelDef.ModelName)), 
 							fieldDef.FieldName, fieldDef.Sequence);
 					}
-				
-					PropertyInfo pi = ReflectionUtils.GetPropertyInfo(tableType, fieldDef.Name);
+
+                    PropertyInfo pi = tableType.GetProperty(fieldDef.Name,
+                        BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy);
 					
 					var result = GetNextValue(dbCommand, fieldDef.Sequence, pi.GetValue(objWithProperties,  new object[] { }) );
 					if (pi.PropertyType == typeof(String))
@@ -336,17 +414,9 @@ namespace ServiceStack.OrmLite.Oracle
                 if (fieldDef.ForeignKey == null) continue;
 
                 var refModelDef = GetModel(fieldDef.ForeignKey.ReferenceType);
-				
-				var modelName= modelDef.IsInSchema
-					? modelDef.Schema + "_" + NamingStrategy.GetTableName(modelDef.ModelName)
-					: NamingStrategy.GetTableName(modelDef.ModelName);
-				
-				var refModelName= refModelDef.IsInSchema
-					? refModelDef.Schema + "_" + NamingStrategy.GetTableName(refModelDef.ModelName)
-					: NamingStrategy.GetTableName(refModelDef.ModelName);
-				
+                                				
                 sbConstraints.AppendFormat(", \n\n  CONSTRAINT {0} FOREIGN KEY ({1}) REFERENCES {2} ({3})",
-                    GetQuotedName(string.Format("FK_{0}_{1}_{2}", modelName, refModelName, fieldDef.FieldName)),
+                    GetQuotedName(fieldDef.ForeignKey.GetForeignKeyName(modelDef, refModelDef, NamingStrategy, fieldDef)),
 					GetQuotedColumnName(fieldDef.FieldName), 
 					GetQuotedTableName(refModelDef), 
 					GetQuotedColumnName(refModelDef.PrimaryKey.FieldName));
@@ -689,8 +759,11 @@ namespace ServiceStack.OrmLite.Oracle
 			}
 
             //dbCmd.CommandText = string.Format("SELECT {0}.NEXTVAL FROM dual", Quote(sequence));
-            long result = dbCmd.GetScalar<long>(string.Format("SELECT {0}.NEXTVAL FROM dual", Quote(sequence)));
-			LastInsertId = result;
+            var sql = string.Format("SELECT {0}.NEXTVAL FROM dual", Quote(sequence));
+            dbCmd.CommandText = sql;
+            var result = dbCmd.GetLongScalar();
+            
+            LastInsertId = result;
 			return  result;				
 		}
 		
@@ -705,18 +778,6 @@ namespace ServiceStack.OrmLite.Oracle
 					: name;			
 		}
 		
-		public override string GetColumnNames(ModelDefinition modelDef)
-		{
-			if (QuoteNames) return modelDef.GetColumnNames();
-			var sqlColumns = new StringBuilder();
-			modelDef.FieldDefinitions.ForEach(x => 
-				sqlColumns.AppendFormat("{0} {1}", 
-				sqlColumns.Length > 0 ? "," : "",
-				GetQuotedColumnName(x.FieldName)));
-
-			return sqlColumns.ToString();
-		}
-
 		public override string GetQuotedName(string fieldName)
 		{
 			return Quote(fieldName);

@@ -1,5 +1,5 @@
 using NUnit.Framework;
-using ServiceStack.Common.Extensions;
+using ServiceStack.Common;
 using ServiceStack.Common.Tests.Models;
 
 namespace ServiceStack.OrmLite.MySql.Tests
@@ -13,9 +13,8 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		public void Can_create_ModelWithIndexFields_table()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbConn = db.CreateCommand())
 			{
-				dbConn.CreateTable<ModelWithIndexFields>(true);
+				db.CreateTable<ModelWithIndexFields>(true);
 
 				var sql = OrmLiteConfig.DialectProvider.ToCreateIndexStatements( typeof (ModelWithIndexFields) ).Join();
 				
@@ -27,10 +26,9 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		[Test]
 		public void Can_create_ModelWithCompositeIndexFields_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbConn = db.CreateCommand())
+            using (var db = ConnectionString.OpenDbConnection())
 			{
-				dbConn.CreateTable<ModelWithCompositeIndexFields>(true);
+				db.CreateTable<ModelWithCompositeIndexFields>(true);
 
 				var sql = OrmLiteConfig.DialectProvider.ToCreateIndexStatements(typeof(ModelWithCompositeIndexFields)).Join();
 

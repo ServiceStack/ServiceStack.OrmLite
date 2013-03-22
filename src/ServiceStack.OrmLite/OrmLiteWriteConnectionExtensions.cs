@@ -107,6 +107,20 @@ namespace ServiceStack.OrmLite
             dbConn.Exec(dbCmd => dbCmd.UpdateAll(objs));
         }
 
+        /// <summary>
+        /// Performs an Update<T>() except arguments are passed as parameters to the generated SQL
+        /// </summary>
+        public static void UpdateParam<T>(this IDbConnection dbConn, T obj) where T : new()
+        {
+            dbConn.Exec(dbCmd =>
+            {
+                using(var updateStmt = dbConn.CreateUpdateStatement(obj)) {
+                    copyCommandtextAndParametersForParameterizedStatements(dbCmd, updateStmt);
+                }
+                dbCmd.ExecuteNonQuery();
+            });
+        }
+
         public static void Delete<T>(this IDbConnection dbConn, params T[] objs)
             where T : new()
         {
@@ -123,6 +137,15 @@ namespace ServiceStack.OrmLite
             where T : new()
         {
             dbConn.Exec(dbCmd => dbCmd.DeleteById<T>(id));
+        }
+
+        /// <summary>
+        /// Performs a DeleteById() except argument is passed as a parameter to the generated SQL
+        /// </summary>
+        public static void DeleteByIdParam<T>(this IDbConnection dbConn, object id)
+where T : new()
+        {
+            dbConn.Exec(dbCmd => dbCmd.DeleteByIdParam<T>(id));
         }
 
         public static void DeleteByIds<T>(this IDbConnection dbConn, IEnumerable idValues)
@@ -168,6 +191,36 @@ namespace ServiceStack.OrmLite
             where T : new()
         {
             dbConn.Exec(dbCmd => dbCmd.InsertAll(objs));
+        }
+
+        /// <summary>
+        /// Performs an Insert() except arguments are passed as parameters to the generated SQL
+        /// </summary>
+        public static void InsertParam<T>(this IDbConnection dbConn, T obj) where T : new()
+        {
+            dbConn.Exec(dbCmd =>
+            {
+                using(var insertStmt = dbConn.CreateInsertStatement(obj)) {
+                    copyCommandtextAndParametersForParameterizedStatements(dbCmd, insertStmt);
+                }
+                dbCmd.ExecuteNonQuery();
+            });
+        }
+
+        private static void copyCommandtextAndParametersForParameterizedStatements(IDbCommand dbCmd, IDbCommand tempParameterizedStatement)
+        {
+            dbCmd.CommandText = tempParameterizedStatement.CommandText;
+
+            //instead of creating new generic DbParameters, copy them from the "dummy" IDbCommand, so it can keep provider specific information. for example: SqlServer "datetime2" dbtype
+            //first must create a temporary list, because DbParam can't belong to two DbCommands...
+            List<IDbDataParameter> tmpParams = new List<IDbDataParameter>(tempParameterizedStatement.Parameters.Count);
+
+            foreach(IDbDataParameter genParam in tempParameterizedStatement.Parameters) {
+                tmpParams.Add(genParam);
+            }
+            tempParameterizedStatement.Parameters.Clear();
+
+            tmpParams.ForEach(x => dbCmd.Parameters.Add(x));
         }
 
         public static void Save<T>(this IDbConnection dbConn, params T[] objs)

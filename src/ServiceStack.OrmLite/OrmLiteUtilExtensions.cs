@@ -14,21 +14,26 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
 	public static class OrmLiteUtilExtensions
 	{
-		public static T ConvertTo<T>(this IDataReader dataReader)
-            where T : new()
+        public static T CreateInstance<T>()
         {
-			var fieldDefs = ModelDefinition<T>.Definition.FieldDefinitionsArray;
+            return (T)ReflectionExtensions.CreateInstance<T>();
+        }
+
+		public static T ConvertTo<T>(this IDataReader dataReader)
+        {
+			var fieldDefs = ModelDefinition<T>.Definition.AllFieldDefinitionsArray;
 
 			using (dataReader)
 			{
 				if (dataReader.Read())
 				{
-					var row = new T();
+                    var row = CreateInstance<T>();
 					row.PopulateWithSqlReader(dataReader, fieldDefs, null);
 					return row;
 				}
@@ -37,9 +42,8 @@ namespace ServiceStack.OrmLite
 		}
 
 		public static List<T> ConvertToList<T>(this IDataReader dataReader)
-			where T : new()
 		{
-            var fieldDefs = ModelDefinition<T>.Definition.FieldDefinitionsArray;
+            var fieldDefs = ModelDefinition<T>.Definition.AllFieldDefinitionsArray;
 
 			var to = new List<T>();
 			using (dataReader)
@@ -47,7 +51,7 @@ namespace ServiceStack.OrmLite
                 var indexCache = new Dictionary<string, int>();
 				while (dataReader.Read())
 				{
-					var row = new T();
+                    var row = CreateInstance<T>();
 					row.PopulateWithSqlReader(dataReader, fieldDefs, indexCache);
 					to.Add(row);
 				}

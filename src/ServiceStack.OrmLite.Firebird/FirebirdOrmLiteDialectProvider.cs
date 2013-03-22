@@ -5,14 +5,15 @@ using System.Reflection;
 using ServiceStack.Common.Utils;
 using System.Text;
 using FirebirdSql.Data.FirebirdClient;
-using ServiceStack.Common.Extensions;
+using ServiceStack.Common;
 
 namespace ServiceStack.OrmLite.Firebird
 {
     public class FirebirdOrmLiteDialectProvider : OrmLiteDialectProviderBase<FirebirdOrmLiteDialectProvider>
 	{
 		private readonly List<string> RESERVED = new List<string>(new[] {
-			"USER","ORDER","PASSWORD", "ACTIVE","LEFT","DOUBLE", "FLOAT", "DECIMAL","STRING", "DATE","DATETIME", "TYPE","TIMESTAMP"
+			"USER","ORDER","PASSWORD", "ACTIVE","LEFT","DOUBLE", "FLOAT", "DECIMAL","STRING", "DATE","DATETIME", "TYPE","TIMESTAMP",
+			"INDEX","UNIQUE", "PRIMARY", "KEY", "ALTER", "DROP", "CREATE", "DELETE"
 		});
 		
 		public static FirebirdOrmLiteDialectProvider Instance = new FirebirdOrmLiteDialectProvider();
@@ -188,8 +189,9 @@ namespace ServiceStack.OrmLite.Firebird
 							fieldDef.FieldName, fieldDef.Sequence);
 					}
 				
-					PropertyInfo pi = ReflectionUtils.GetPropertyInfo(tableType, fieldDef.Name);
-					
+					PropertyInfo pi = tableType.GetProperty(fieldDef.Name, 
+                        BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy);
+
 					var result = GetNextValue(dbCommand, fieldDef.Sequence, pi.GetValue(objWithProperties,  new object[] { }) );
 					if (pi.PropertyType == typeof(String))
 						ReflectionUtils.SetProperty(objWithProperties, pi,  result.ToString());	
@@ -342,7 +344,7 @@ namespace ServiceStack.OrmLite.Firebird
 					: NamingStrategy.GetTableName(refModelDef.ModelName);
 				
                 sbConstraints.AppendFormat(", \n\n  CONSTRAINT {0} FOREIGN KEY ({1}) REFERENCES {2} ({3})",
-                    GetQuotedName(string.Format("FK_{0}_{1}_{2}", modelName, refModelName, fieldDef.FieldName)),
+                    GetQuotedName(fieldDef.ForeignKey.GetForeignKeyName(modelDef, refModelDef, NamingStrategy, fieldDef)),
 					GetQuotedColumnName(fieldDef.FieldName), 
 					GetQuotedTableName(refModelDef), 
 					GetQuotedColumnName(refModelDef.PrimaryKey.FieldName));

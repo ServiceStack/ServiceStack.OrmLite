@@ -1,6 +1,6 @@
 using System;
 using NUnit.Framework;
-using ServiceStack.Common.Extensions;
+using ServiceStack.Common;
 using ServiceStack.Common.Tests.Models;
 
 namespace ServiceStack.OrmLite.FirebirdTests
@@ -15,9 +15,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		{
 			OrmLiteConfig.DialectProvider.DefaultStringLength=128;
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbConn = db.CreateCommand())
 			{
-				dbConn.CreateTable<ModelWithIndexFields>(true);
+				db.CreateTable<ModelWithIndexFields>(true);
 
 				var sql = OrmLiteConfig.DialectProvider.ToCreateIndexStatements( typeof (ModelWithIndexFields)).Join();
 
@@ -31,9 +30,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		{
 			OrmLiteConfig.DialectProvider.DefaultStringLength=128;
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbConn = db.CreateCommand())
 			{
-				dbConn.CreateTable<ModelWithCompositeIndexFields>(true);
+				db.CreateTable<ModelWithCompositeIndexFields>(true);
 
 				var sql = OrmLiteConfig.DialectProvider.ToCreateIndexStatements(typeof(ModelWithCompositeIndexFields)).Join();
 

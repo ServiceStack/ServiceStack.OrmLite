@@ -6,7 +6,7 @@ using System.Data;
 
 using ServiceStack.Common.Utils;
 using ServiceStack.DataAnnotations;
-using ServiceStack.Common.Extensions;
+using ServiceStack.Common;
 using System.Reflection;
 
 using ServiceStack.OrmLite;
@@ -79,17 +79,16 @@ namespace TestLiteOracle00
 									
 			using (IDbConnection db =
                    "Data Source=x;User Id=x;Password=x;".OpenDbConnection())
-			using ( IDbCommand dbCmd = db.CreateCommand())
 			{
 			//try{
 				// due to firebirdslq features, we have to drop book first  and then author
-				dbCmd.DropTable<Book>();
-				dbCmd.DropTable<Author>();
+				db.DropTable<Book>();
+				db.DropTable<Author>();
 				
-				dbCmd.CreateTable<Author>();
-				dbCmd.CreateTable<Book>();
+				db.CreateTable<Author>();
+				db.CreateTable<Book>();
 				
-				dbCmd.Insert( new Author(){
+				db.Insert( new Author(){
 					Name="Demis Bellot",
 					Birthday= DateTime.Today.AddYears(20),
 					Active=true,
@@ -99,7 +98,7 @@ namespace TestLiteOracle00
 					Rate=10
 				});
 				
-				dbCmd.Insert( new Author(){
+				db.Insert( new Author(){
 					Name="Angel Colmenares",
 					Birthday= DateTime.Today.AddYears(30),
 					Active=true,
@@ -109,7 +108,7 @@ namespace TestLiteOracle00
 					Rate=9
 				});
 				
-				dbCmd.Insert( new Author(){
+				db.Insert( new Author(){
 					Name="Adam Witco",
 					Birthday= DateTime.Today.AddYears(25),
 					Active=true,
@@ -119,7 +118,7 @@ namespace TestLiteOracle00
 				});
 			
 				
-				dbCmd.Insert( new Author(){
+				db.Insert( new Author(){
 					Name="Claudia Espinel",
 					Birthday= DateTime.Today.AddYears(28),
 					Active=false,
@@ -142,33 +141,33 @@ namespace TestLiteOracle00
 					Comments="this will not be inserted" // null in db
 				};
 			
-				dbCmd.InsertOnly(author, ev);
+				db.InsertOnly(author, ev);
 				
 				author.Comments="this will be updated";
 				
 				ev.Update(rn=> rn.Comments).Where(r=>r.Id==author.Id);
-				dbCmd.UpdateOnly(author, ev);
+				db.UpdateOnly(author, ev);
 				
 				
 				// update comment for all authors from london...
 				
 				author.Comments="update from london";
 				ev.Where(rn=> rn.City=="London");
-				dbCmd.UpdateOnly(author, ev);
+				db.UpdateOnly(author, ev);
 				
 				// select author from Bogota
 				ev.Where(rn=> rn.City=="Bogota");
-				var authors = dbCmd.Select(ev);
+				var authors = db.Select(ev);
 				Console.WriteLine(authors.Count);
 				
 				// select author from Bogota and Active=true;
 				
 				ev.Where(rn=> rn.City=="Bogota" && rn.Active==true); // sorry for firebird must write ==true !
-				authors = dbCmd.Select(ev);
+				authors = db.Select(ev);
 				Console.WriteLine(authors.Count);
 				
 				//-------------------------------------------------------------------
-				authors = dbCmd.Select<Author>();
+				authors = db.Select<Author>();
 				
 				Console.WriteLine("Rows in  Author : '{0}'",authors.Count);
 				
@@ -181,12 +180,12 @@ namespace TestLiteOracle00
 				author= authors.FirstOrDefault<Author>(r=>r.Name=="Angel Colmenares");
 				if( author != default(Author) ){
 					
-					dbCmd.Insert( new Book(){
+					db.Insert( new Book(){
 						IdAuthor= author.Id,
 						Title= "The big book",
 						Price= 18.55m,
 					});
-					Console.WriteLine("{0} == {1}", dbCmd.HasChildren<Book>( author), true ) ;
+					Console.WriteLine("{0} == {1}", db.HasChildren<Book>( author), true ) ;
 				}
 				else{
 					Console.WriteLine("Something wrong ");
@@ -197,13 +196,13 @@ namespace TestLiteOracle00
 				if( author != default(Author) ){
 					
 					
-					Console.WriteLine("{0} == {1}", dbCmd.HasChildren<Book>( author), false ) ;
+					Console.WriteLine("{0} == {1}", db.HasChildren<Book>( author), false ) ;
 				}
 				else{
 					Console.WriteLine("Something wrong ");
 				}
 				
-				var books = dbCmd.Select<Book>();
+				var books = db.Select<Book>();
 				
 				foreach(var b in books){
 					Console.WriteLine("Title {0}  Price {1}",b.Title, b.Price);
@@ -211,17 +210,15 @@ namespace TestLiteOracle00
 				
 				ev.Select(r=>new { r.Name, r.Active}).Where(); // only Name and Active fields will be retrived
 								
-				authors = dbCmd.Select(ev);
+				authors = db.Select(ev);
 				Console.WriteLine(ev.SelectExpression);
 				
 				foreach(Author r in authors){
 					Console.WriteLine("'{0}' '{1}' '{2}'", r.Name, r.Active, r.Id);
 				}
 				
-				
-				dbCmd.DeleteAll<Book>();
-				dbCmd.DeleteAll<Author>();
-				
+				db.DeleteAll<Book>();
+				db.DeleteAll<Author>();
 				
 				//}
 				
@@ -230,7 +227,6 @@ namespace TestLiteOracle00
 				//	return;
 				//}
 				Console.WriteLine("This is The End my friend !");
-				
 			}
 		}
 	}

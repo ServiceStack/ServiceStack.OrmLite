@@ -101,6 +101,33 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        public void Can_Select_using_IN_using_params()
+        {
+            var visitor = OrmLiteConfig.DialectProvider.ExpressionVisitor<TestType>();
+            visitor.Where(q => Sql.In(q.Id, 1, 2, 3));
+            var target = ConnectionString.OpenDbConnection().Select(visitor);
+            Assert.AreEqual(3, target.Count);
+        }
+
+        [Test]
+        public void Can_Select_using_IN_using_int_array()
+        {
+            var visitor = OrmLiteConfig.DialectProvider.ExpressionVisitor<TestType>();
+            visitor.Where(q => Sql.In(q.Id, new[] {1, 2, 3}));
+            var target = ConnectionString.OpenDbConnection().Select(visitor);
+            Assert.AreEqual(3, target.Count);
+        }
+
+        [Test]
+        public void Can_Select_using_IN_using_object_array()
+        {
+            var visitor = OrmLiteConfig.DialectProvider.ExpressionVisitor<TestType>();
+            visitor.Where(q => Sql.In(q.Id, new object[] { 1, 2, 3 }));
+            var target = ConnectionString.OpenDbConnection().Select(visitor);
+            Assert.AreEqual(3, target.Count);
+        }
+
+        [Test]
         public void Can_Select_using_Startswith()
         {
             var target = ConnectionString.OpenDbConnection().Select<TestType>(q => q.TextCol.StartsWith("asdf"));
@@ -115,6 +142,22 @@ namespace ServiceStack.OrmLite.Tests
             visitor.Where(q => q.TextCol.ToUpper().StartsWith(value));
             var target = ConnectionString.OpenDbConnection().Select(visitor);
             Assert.AreEqual(2, target.Count);
+        }
+
+        [Test]
+        public void Can_Select_using_Array_Contains()
+        {
+            var vals = new object[]{ TestEnum.Val0, TestEnum.Val1 };
+
+            var visitor1 = OrmLiteConfig.DialectProvider.ExpressionVisitor<TestType>();
+            visitor1.Where(q => vals.Contains(q.EnumCol) || vals.Contains(q.EnumCol));
+            var sql1 = visitor1.ToSelectStatement();
+
+            var visitor2 = OrmLiteConfig.DialectProvider.ExpressionVisitor<TestType>();
+            visitor2.Where(q => Sql.In(q.EnumCol, vals) || Sql.In(q.EnumCol, vals));
+            var sql2 = visitor2.ToSelectStatement();
+
+            Assert.AreEqual(sql1, sql2);
         }
 
         private int MethodReturningInt(int val)

@@ -17,7 +17,8 @@ using System.Text;
 using ServiceStack.Logging;
 using ServiceStack.Text;
 using System.Diagnostics;
-using ServiceStack.Common.Extensions;
+using ServiceStack.Common;
+using System.IO;
 
 namespace ServiceStack.OrmLite
 {
@@ -26,7 +27,7 @@ namespace ServiceStack.OrmLite
         : IOrmLiteDialectProvider
         where TDialect : IOrmLiteDialectProvider
     {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(IOrmLiteDialectProvider));
+        protected static readonly ILog Log = LogManager.GetLogger(typeof(IOrmLiteDialectProvider));
 
         [Conditional("DEBUG")]
         private static void LogDebug(string fmt, params object[] args)
@@ -149,7 +150,7 @@ namespace ServiceStack.OrmLite
             set { paramString = value; }
         }
 
-        private bool useUnicode;
+        protected bool useUnicode;
         public virtual bool UseUnicode
         {
             get
@@ -184,6 +185,7 @@ namespace ServiceStack.OrmLite
 
             this.StringColumnDefinition = string.Format(
                 this.StringLengthColumnDefinitionFormat, DefaultStringLength);
+
         }
 
         protected DbTypes<TDialect> DbTypeMap = new DbTypes<TDialect>();
@@ -256,6 +258,9 @@ namespace ServiceStack.OrmLite
 
             if (value.GetType() == type)
             {
+                if (type == typeof(byte[]))
+                    return TypeSerializer.DeserializeFromStream<byte[]>(new MemoryStream((byte[])value));
+
                 return value;
             }
 
@@ -295,7 +300,7 @@ namespace ServiceStack.OrmLite
             {
                 if (TypeSerializer.CanCreateFromString(fieldType))
                 {
-                    return "'" + EscapeParam(TypeSerializer.SerializeToString(value)) + "'";
+                    return OrmLiteConfig.DialectProvider.GetQuotedParam(TypeSerializer.SerializeToString(value));
                 }
 
                 throw new NotSupportedException(
@@ -312,15 +317,15 @@ namespace ServiceStack.OrmLite
                 return ((decimal)value).ToString(CultureInfo.InvariantCulture);
 
             return ShouldQuoteValue(fieldType)
-                    ? "'" + EscapeParam(value) + "'"
+                    ? OrmLiteConfig.DialectProvider.GetQuotedParam(value.ToString())
                     : value.ToString();
         }
 
         public abstract IDbConnection CreateConnection(string filePath, Dictionary<string, string> options);
 
-        public virtual string EscapeParam(object paramValue)
+        public virtual string GetQuotedParam(string paramValue)
         {
-            return paramValue.ToString().Replace("'", "''");
+            return "'" + paramValue.Replace("'", "''") + "'";
         }
 
         public virtual string GetQuotedTableName(ModelDefinition modelDef)
@@ -405,9 +410,36 @@ namespace ServiceStack.OrmLite
 
         public abstract long GetLastInsertId(IDbCommand command);
 
+        public virtual string ToCountStatement(Type fromTableType, string sqlFilter, params object[] filterParams)
+        {
+            var sql = new StringBuilder();
+            const string SelectStatement = "SELECT ";
+            var modelDef = fromTableType.GetModelDefinition();
+            var isFullSelectStatement =
+                !string.IsNullOrEmpty(sqlFilter)
+                && sqlFilter.TrimStart().StartsWith(SelectStatement, StringComparison.OrdinalIgnoreCase);
+
+            if (isFullSelectStatement) return (filterParams != null ? sqlFilter.SqlFormat(filterParams) : sqlFilter);
+
+            sql.AppendFormat("SELECT {0} FROM {1}", "COUNT(*)",
+                             GetQuotedTableName(modelDef));
+            if (!string.IsNullOrEmpty(sqlFilter))
+            {
+                sqlFilter = filterParams != null ? sqlFilter.SqlFormat(filterParams) : sqlFilter;
+                if ((!sqlFilter.StartsWith("ORDER ", StringComparison.InvariantCultureIgnoreCase)
+                    && !sqlFilter.StartsWith("LIMIT ", StringComparison.InvariantCultureIgnoreCase))
+                    && (!sqlFilter.StartsWith("WHERE ", StringComparison.InvariantCultureIgnoreCase)))
+                {
+                    sql.Append(" WHERE ");
+                }
+                sql.Append(" " + sqlFilter);
+            }
+            return sql.ToString();
+        }
+
         public virtual string ToSelectStatement(Type tableType, string sqlFilter, params object[] filterParams)
         {
-            const string SelectStatement = "SELECT ";
+            const string SelectStatement = "SELECT";
             var isFullSelectStatement =
                 !string.IsNullOrEmpty(sqlFilter)
                 && sqlFilter.TrimStart().StartsWith(SelectStatement, StringComparison.InvariantCultureIgnoreCase);
@@ -489,7 +521,9 @@ namespace ServiceStack.OrmLite
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
-                if (fieldDef.AutoIncrement) continue;
+                if (fieldDef.AutoIncrement)
+                        continue;
+                    
                 //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
                 if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name)) continue;
 
@@ -511,7 +545,7 @@ namespace ServiceStack.OrmLite
                 }
             }
 
-            command.CommandText = string.Format("INSERT INTO {0} ({1}) VALUES ({2});",
+            command.CommandText = string.Format("INSERT INTO {0} ({1}) VALUES ({2})",
                                                 GetQuotedTableName(modelDef), sbColumnNames, sbColumnValues);
             return command;
         }
@@ -546,7 +580,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        private void AddParameterForFieldToCommand(IDbCommand command, FieldDefinition fieldDef, object objWithProperties)
+        protected virtual void AddParameterForFieldToCommand(IDbCommand command, FieldDefinition fieldDef, object objWithProperties)
         {
             var p = command.CreateParameter();
             p.ParameterName = string.Format("{0}{1}", ParamString, fieldDef.FieldName);
@@ -566,7 +600,7 @@ namespace ServiceStack.OrmLite
             command.Parameters.Add(p);
         }
 
-        private object GetValueOrDbNull(FieldDefinition fieldDef, object objWithProperties)
+        protected object GetValueOrDbNull(FieldDefinition fieldDef, object objWithProperties)
         {
             return fieldDef.GetValue(objWithProperties) ?? DBNull.Value;
         }
@@ -746,22 +780,28 @@ namespace ServiceStack.OrmLite
                 var refModelDef = fieldDef.ForeignKey.ReferenceType.GetModelDefinition();
                 sbConstraints.AppendFormat(
                     ", \n\n  CONSTRAINT {0} FOREIGN KEY ({1}) REFERENCES {2} ({3})",
-                    GetQuotedName(string.Format("FK_{0}_{1}_{2}", modelDef.ModelName,
-                                                                 refModelDef.ModelName, fieldDef.FieldName)),
+                    GetQuotedName(fieldDef.ForeignKey.GetForeignKeyName(modelDef, refModelDef, NamingStrategy, fieldDef)),
                     GetQuotedColumnName(fieldDef.FieldName),
                     GetQuotedTableName(refModelDef),
                     GetQuotedColumnName(refModelDef.PrimaryKey.FieldName));
 
-                if (!string.IsNullOrEmpty(fieldDef.ForeignKey.OnDelete))
-                    sbConstraints.AppendFormat(" ON DELETE {0}", fieldDef.ForeignKey.OnDelete);
-
-                if (!string.IsNullOrEmpty(fieldDef.ForeignKey.OnUpdate))
-                    sbConstraints.AppendFormat(" ON UPDATE {0}", fieldDef.ForeignKey.OnUpdate);
+                sbConstraints.Append(GetForeignKeyOnDeleteClause(fieldDef.ForeignKey));
+                sbConstraints.Append(GetForeignKeyOnUpdateClause(fieldDef.ForeignKey));
             }
             var sql = new StringBuilder(string.Format(
                 "CREATE TABLE {0} \n(\n  {1}{2} \n); \n", GetQuotedTableName(modelDef), sbColumns, sbConstraints));
 
             return sql.ToString();
+        }
+
+        public virtual string GetForeignKeyOnDeleteClause(ForeignKeyConstraint foreignKey)
+        {
+            return !string.IsNullOrEmpty(foreignKey.OnDelete) ? " ON DELETE " + foreignKey.OnDelete : "";
+        }
+
+        public virtual string GetForeignKeyOnUpdateClause(ForeignKeyConstraint foreignKey)
+        {
+            return !string.IsNullOrEmpty(foreignKey.OnUpdate) ? " ON UPDATE " + foreignKey.OnUpdate : "";
         }
 
         public virtual List<string> ToCreateIndexStatements(Type tableType)
@@ -893,5 +933,19 @@ namespace ServiceStack.OrmLite
             throw new NotImplementedException();
         }
 
+        public IDbCommand CreateParameterizedDeleteStatement(object objWithProperties, IDbConnection connection)
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual string GetDropForeignKeyConstraints(ModelDefinition modelDef)
+        {
+            return null;
+        }
+
+        public static ModelDefinition GetModelDefinition(Type modelType)
+        {
+            return modelType.GetModelDefinition();
+        }
     }
 }

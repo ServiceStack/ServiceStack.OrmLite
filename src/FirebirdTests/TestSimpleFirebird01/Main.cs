@@ -5,7 +5,7 @@ using System.Data;
 
 using ServiceStack.Common.Utils;
 using ServiceStack.DataAnnotations;
-using ServiceStack.Common.Extensions;
+using ServiceStack.Common;
 using System.Reflection;
 
 using ServiceStack.OrmLite;
@@ -79,12 +79,11 @@ namespace TestLiteFirebird01
 									
 			using (IDbConnection db =
 			       "User=SYSDBA;Password=masterkey;Database=employee.fdb;DataSource=localhost;Dialect=3;charset=ISO8859_1;".OpenDbConnection())
-			using ( IDbCommand dbConn = db.CreateCommand())
 			{
 				//try{
 					
 					
-    				dbConn.Insert(new User 
+    				db.Insert(new User 
 					{ 	
 						Name= string.Format("Hello, World! {0}", DateTime.Now),
 						Password="jkkoo",
@@ -104,22 +103,22 @@ namespace TestLiteFirebird01
 					};
 					
 					
-					dbConn.Insert(user);
+					db.Insert(user);
 					
 					Console.WriteLine("++++++++++Id for {0} {1}",user.Name,  user.Id);
 						
 					
-    				var rows = dbConn.Select<User>();
+    				var rows = db.Select<User>();
 					
 					Console.WriteLine("++++++++++++++records in users {0}", rows.Count);
 					foreach(User u in rows){
 						Console.WriteLine("{0} -- {1} -- {2} -- {3} -{4} --{5} ", u.Id, u.Name, u.SomeStringProperty, u.SomeDateTimeProperty,
 						                  (u.SomeInt32NullableProperty.HasValue)?u.SomeDateTimeNullableProperty.Value.ToString(): "",
 						                  u.Active);						
-						dbConn.Delete(u);
+						db.Delete(u);
 					}
 					
-					rows = dbConn.Select<User>();
+					rows = db.Select<User>();
 					
 					Console.WriteLine("-------------records in users after delete {0}", rows.Count);
 					

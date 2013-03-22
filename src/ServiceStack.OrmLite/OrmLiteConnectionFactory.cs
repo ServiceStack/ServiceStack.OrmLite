@@ -99,7 +99,9 @@ namespace ServiceStack.OrmLite
                 ? new OrmLiteConnection(this)
                 : OrmLiteConnection;
 
-            return ConnectionFilter(connection);
+            //moved setting up the ConnectionFilter to OrmLiteConnection.Open
+            //return ConnectionFilter(connection);
+            return connection;
         }
 
         public IDbConnection OpenDbConnection(string connectionKey)
@@ -112,7 +114,8 @@ namespace ServiceStack.OrmLite
                 ? new OrmLiteConnection(factory)
                 : factory.OrmLiteConnection;
 
-            connection = factory.ConnectionFilter(connection);
+            //moved setting up the ConnectionFilter to OrmLiteConnection.Open
+            //connection = factory.ConnectionFilter(connection);
             connection.Open();
 
             return connection;

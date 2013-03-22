@@ -6,9 +6,9 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.TestsPerf.Model
 {
-	public class ModelWithFieldsOfDifferentTypes
+	public class ModelWithFieldsOfDifferentTypesPerf
 	{
-		private static readonly ILog Log = LogManager.GetLogger(typeof(ModelWithFieldsOfDifferentTypes));
+		private static readonly ILog Log = LogManager.GetLogger(typeof(ModelWithFieldsOfDifferentTypesPerf));
 
 		[AutoIncrement]
 		public int Id { get; set; }
@@ -25,9 +25,9 @@ namespace ServiceStack.OrmLite.TestsPerf.Model
 
 		public double Double { get; set; }
 
-		public static ModelWithFieldsOfDifferentTypes Create(int id)
+		public static ModelWithFieldsOfDifferentTypesPerf Create(int id)
 		{
-			var row = new ModelWithFieldsOfDifferentTypes {
+			var row = new ModelWithFieldsOfDifferentTypesPerf {
 				Id = id,
 				Bool = id % 2 == 0,
 				DateTime = DateTime.Now.AddDays(id),
@@ -40,7 +40,7 @@ namespace ServiceStack.OrmLite.TestsPerf.Model
 			return row;
 		}
 
-		public static void AssertIsEqual(ModelWithFieldsOfDifferentTypes actual, ModelWithFieldsOfDifferentTypes expected)
+		public static void AssertIsEqual(ModelWithFieldsOfDifferentTypesPerf actual, ModelWithFieldsOfDifferentTypesPerf expected)
 		{
 			Assert.That(actual.Id, Is.EqualTo(expected.Id));
 			Assert.That(actual.Name, Is.EqualTo(expected.Name));

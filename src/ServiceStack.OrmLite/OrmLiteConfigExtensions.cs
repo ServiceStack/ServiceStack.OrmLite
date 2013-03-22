@@ -15,7 +15,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using ServiceStack.Common.Extensions;
+using ServiceStack.Common;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Text;
 
@@ -80,7 +80,6 @@ namespace ServiceStack.OrmLite
             var i = 0;
             foreach (var propertyInfo in objProperties)
             {
-                if (propertyInfo.FirstAttribute<IgnoreAttribute>() != null) continue;
                 var sequenceAttr = propertyInfo.FirstAttribute<SequenceAttribute>();
                 var computeAttr= propertyInfo.FirstAttribute<ComputeAttribute>();
                 var pkAttribute = propertyInfo.FirstAttribute<PrimaryKeyAttribute>();
@@ -142,7 +141,8 @@ namespace ServiceStack.OrmLite
                                   : new ForeignKeyConstraint(referencesAttr.Type)
                             : new ForeignKeyConstraint(foreignKeyAttr.Type,
                                                        foreignKeyAttr.OnDelete,
-                                                       foreignKeyAttr.OnUpdate),
+                                                       foreignKeyAttr.OnUpdate,
+                                                       foreignKeyAttr.ForeignKeyName),
                     GetValueFn = propertyInfo.GetPropertyGetterFn(),
                     SetValueFn = propertyInfo.GetPropertySetterFn(),
                     Sequence = sequenceAttr != null ? sequenceAttr.Name : string.Empty,
@@ -153,7 +153,10 @@ namespace ServiceStack.OrmLite
                     BelongToModelName = belongToAttribute != null ? belongToAttribute.BelongToTableType.GetModelDefinition().ModelName : null, 
                 };
 
-                modelDef.FieldDefinitions.Add(fieldDefinition);
+                if (propertyInfo.FirstAttribute<IgnoreAttribute>() != null)
+                  modelDef.IgnoredFieldDefinitions.Add(fieldDefinition);
+                else
+                  modelDef.FieldDefinitions.Add(fieldDefinition);                
             }
 
             modelDef.SqlSelectAllFromTable = "SELECT {0} FROM {1} ".Fmt(OrmLiteConfig.DialectProvider.GetColumnNames(modelDef),

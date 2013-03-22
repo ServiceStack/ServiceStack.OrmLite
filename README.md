@@ -50,10 +50,62 @@ extracting them from the published NuGet packages. The url to download a nuget p
     
  So to get the OrmLite MySQL provider in OSX/Linux (or using gnu tools for Windows) you can just do:
 
-    wget -O OrmLite.MySql.zip http://packages.nuget.org/api/v1/package/ServiceStack.OrmLite.MySql/3.9.28
+    wget -O OrmLite.MySql.zip http://packages.nuget.org/api/v1/package/ServiceStack.OrmLite.MySql/3.9.42
     unzip OrmLite.MySql.zip 'lib/*'
 
 which will download and extract the dlls into your local local `lib/` folder.
+
+## IMPORTANT NOTICE
+
+Please upgrade your client code to use non-deprecated methods as we will be removing access to deprecated APIs in the next release of OrmLite.
+
+***
+
+## T4 Template Support
+
+[Guru Kathiresan](https://github.com/gkathire) continues to enhance [OrmLite's T4 Template support](https://github.com/ServiceStack/ServiceStack.OrmLite/tree/master/src/T4) which are useful when you want to automatically generate POCO's and strong-typed wrappers for executing stored procedures. 
+
+
+## New Parameterized API's
+
+We've now added API's that use parameterized statements for all SQL operations, these are identified with a **Param** suffix, e.g:
+
+### Parameterized Write operations
+
+```csharp
+db.InsertParam(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27})
+db.UpdateParam(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27})
+db.DeleteByIdParam<Person>(1)
+```
+
+### Parameterized Read operations
+
+```csharp
+var people = db.SelectParam<Person>(q => q.Age == 27)
+var person = db.GetByIdParam<Person>(1)
+
+//Existing parameterized query API's
+var people = db.Where<Person>(new { FirstName = "Jimi", Age = 27 })
+var people = db.Query<Track>("FirstName = @name and Age = @age", new { name = "Jimi", age = 27 })
+```
+
+Apart from a slight performance increase, parameterized API's now lets you insert and update binary blob data. At the same time as these new parameterized API's, we've also added support for querying binary blob data.
+
+## New API's to execute custom SQL
+
+Prior to v3.9.42 the ways to execute custom SQL was with `db.ExecuteSql()` which as it only returned an int code, users were using `db.Query` to read arbitrary sql returning tabular resultsets. However db.Query is only intended for SELECT statements. For this purpose we've introduced new API's for executing custom sql, e.g:
+
+```csharp
+List<Poco> results = db.SqlList<Poco>("EXEC GetAnalyticsForWeek 1");
+List<Poco> results = db.SqlList<Poco>("EXEC GetAnalyticsForWeek @weekNo", new { weekNo = 1 });
+
+List<int> results = db.SqlList<int>("EXEC GetTotalsForWeek 1");
+List<int> results = db.SqlList<int>("EXEC GetTotalsForWeek @weekNo", new { weekNo = 1 });
+
+int result = db.SqlScalar<int>("SELECT 10");
+```
+
+Some more examples can be found in [SqlServerProviderTests](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLite.Tests/SqlServerProviderTests.cs).
 
 ## New Simplified API
 We've streamlined our API, now all OrmLite extensions that used to be on `IDbCommand` now hang off `IDbConnection` 

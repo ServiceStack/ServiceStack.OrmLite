@@ -15,51 +15,46 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void Can_create_table_containing_DateTime_column()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
-            using (var dbCmd = dbConn.CreateCommand())
+            using (var db = ConnectionString.OpenDbConnection())
             {
-                dbCmd.CreateTable<Analyze>(true);
+                db.CreateTable<Analyze>(true);
             }
         }
 
         [Test]
         public void Can_store_DateTime_Value()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
-            using (var dbCmd = dbConn.CreateCommand())
+            using (var db = ConnectionString.OpenDbConnection())
             {
-                dbCmd.CreateTable<Analyze>(true);
+                db.CreateTable<Analyze>(true);
 
-                var obj = new Analyze
-                              {
-                                  Id = 1,
-                                  Date = DateTime.Now,
-                                  Url = "http://www.google.com"
-                              };
+                var obj = new Analyze {
+                    Id = 1,
+                    Date = DateTime.Now,
+                    Url = "http://www.google.com"
+                };
 
-                dbCmd.Save(obj);
+                db.Save(obj);
             }
         }
 
         [Test]
         public void Can_store_and_retrieve_DateTime_Value()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
-            using (var dbCmd = dbConn.CreateCommand())
+            using (var db = ConnectionString.OpenDbConnection())
             {
-                dbCmd.CreateTable<Analyze>(true);
+                db.CreateTable<Analyze>(true);
 
-                var obj = new Analyze
-                {
+                var obj = new Analyze {
                     Id = 1,
                     Date = DateTime.Now,
                     Url = "http://www.google.com"
                 };
 
-                dbCmd.Save(obj);
+                db.Save(obj);
 
-                var id = (int) dbCmd.GetLastInsertId();
-                var target = dbCmd.QueryById<Analyze>(id);
+                var id = (int)db.GetLastInsertId();
+                var target = db.QueryById<Analyze>(id);
 
                 Assert.IsNotNull(target);
                 Assert.AreEqual(id, target.Id);

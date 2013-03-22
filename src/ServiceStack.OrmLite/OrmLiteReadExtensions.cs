@@ -17,6 +17,7 @@ using System.Diagnostics;
 using System.Text;
 using ServiceStack.Logging;
 using ServiceStack.Text;
+using System.Linq;
 
 namespace ServiceStack.OrmLite
 {
@@ -47,6 +48,20 @@ namespace ServiceStack.OrmLite
 			dbCmd.CommandText = sql;
 			return dbCmd.ExecuteReader();
 		}
+
+        internal static IDataReader ExecReader(this IDbCommand dbCmd, string sql, IEnumerable<IDataParameter> parameters)
+        {
+            LogDebug(sql);
+			dbCmd.CommandText = sql;
+            dbCmd.Parameters.Clear();
+
+            foreach (var param in parameters)
+            {
+                dbCmd.Parameters.Add(param);
+            }
+
+			return dbCmd.ExecuteReader();
+        }
 
 		public static GetValueDelegate GetValueFn<T>(IDataRecord reader)
 		{
@@ -85,16 +100,17 @@ namespace ServiceStack.OrmLite
 			return reader.GetValue;
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static List<T> Select<T>(this IDbCommand dbCmd)
-			where T : new()
+        public static bool IsScalar<T>()
+        {
+            return typeof(T).IsValueType || typeof(T) == typeof(string);
+        }
+
+	    internal static List<T> Select<T>(this IDbCommand dbCmd)
 		{
 			return Select<T>(dbCmd, (string)null);
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static List<T> Select<T>(this IDbCommand dbCmd, string sqlFilter, params object[] filterParams)
-			where T : new()
+	    internal static List<T> Select<T>(this IDbCommand dbCmd, string sqlFilter, params object[] filterParams)
 		{
 			using (var reader = dbCmd.ExecReader(
 				OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sqlFilter, filterParams)))
@@ -103,16 +119,12 @@ namespace ServiceStack.OrmLite
 			}
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static List<TModel> Select<TModel>(this IDbCommand dbCmd, Type fromTableType)
-			where TModel : new()
+	    internal static List<TModel> Select<TModel>(this IDbCommand dbCmd, Type fromTableType)
 		{
 			return Select<TModel>(dbCmd, fromTableType, null);
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static List<TModel> Select<TModel>(this IDbCommand dbCmd, Type fromTableType, string sqlFilter, params object[] filterParams)
-			where TModel : new()
+	    internal static List<TModel> Select<TModel>(this IDbCommand dbCmd, Type fromTableType, string sqlFilter, params object[] filterParams)
 		{
 			var sql = new StringBuilder();
 			var modelDef = ModelDefinition<TModel>.Definition;
@@ -131,16 +143,12 @@ namespace ServiceStack.OrmLite
 			}
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static IEnumerable<T> Each<T>(this IDbCommand dbCmd)
-			where T : new()
+	    internal static IEnumerable<T> Each<T>(this IDbCommand dbCmd)
 		{
 			return Each<T>(dbCmd, null);
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static IEnumerable<T> Each<T>(this IDbCommand dbCmd, string filter, params object[] filterParams)
-			where T : new()
+	    internal static IEnumerable<T> Each<T>(this IDbCommand dbCmd, string filter, params object[] filterParams)
 		{
 			var fieldDefs = ModelDefinition<T>.Definition.FieldDefinitionsArray;
 			using (var reader = dbCmd.ExecReader(
@@ -149,23 +157,19 @@ namespace ServiceStack.OrmLite
                 var indexCache = new Dictionary<string, int>();
                 while (reader.Read())
 				{
-					var row = new T();
+                    var row = OrmLiteUtilExtensions.CreateInstance<T>();
                     row.PopulateWithSqlReader(reader, fieldDefs, indexCache);
 					yield return row;
 				}
 			}
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static T First<T>(this IDbCommand dbCmd, string filter, params object[] filterParams)
-			where T : new()
+	    internal static T First<T>(this IDbCommand dbCmd, string filter, params object[] filterParams)
 		{
 			return First<T>(dbCmd, filter.SqlFormat(filterParams));
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static T First<T>(this IDbCommand dbCmd, string filter)
-			where T : new()
+	    internal static T First<T>(this IDbCommand dbCmd, string filter)
 		{
 			var result = FirstOrDefault<T>(dbCmd, filter);
 			if (Equals(result, default(T)))
@@ -176,16 +180,12 @@ namespace ServiceStack.OrmLite
 			return result;
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static T FirstOrDefault<T>(this IDbCommand dbCmd, string filter, params object[] filterParams)
-			where T : new()
+	    internal static T FirstOrDefault<T>(this IDbCommand dbCmd, string filter, params object[] filterParams)
 		{
 			return FirstOrDefault<T>(dbCmd, filter.SqlFormat(filterParams));
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static T FirstOrDefault<T>(this IDbCommand dbCmd, string filter)
-			where T : new()
+	    internal static T FirstOrDefault<T>(this IDbCommand dbCmd, string filter)
 		{
 			using (var dbReader = dbCmd.ExecReader(
 				OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T),  filter)))
@@ -194,9 +194,7 @@ namespace ServiceStack.OrmLite
 			}
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static T GetById<T>(this IDbCommand dbCmd, object idValue)
-			where T : new()
+	    internal static T GetById<T>(this IDbCommand dbCmd, object idValue)
 		{
 			return First<T>(dbCmd, OrmLiteConfig.DialectProvider.GetQuotedColumnName(ModelDefinition<T>.PrimaryKeyName) + " = {0}".SqlFormat(idValue));
 		}
@@ -291,9 +289,7 @@ namespace ServiceStack.OrmLite
 			return OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sb.ToString());
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static T QueryById<T>(this IDbCommand dbCmd, object value)
-			where T : new()
+        internal static T QueryById<T>(this IDbCommand dbCmd, object value)
 		{
 			if (dbCmd.Parameters.Count != 1
 				|| ((IDbDataParameter)dbCmd.Parameters[0]).ParameterName != ModelDefinition<T>.PrimaryKeyName
@@ -306,9 +302,7 @@ namespace ServiceStack.OrmLite
 				return dbReader.ConvertTo<T>();
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static T SingleWhere<T>(this IDbCommand dbCmd, string name, object value)
-			where T : new()
+        internal static T SingleWhere<T>(this IDbCommand dbCmd, string name, object value)
 		{
 			if (dbCmd.Parameters.Count != 1 || ((IDbDataParameter)dbCmd.Parameters[0]).ParameterName != name
 				|| lastQueryType != typeof(T))
@@ -320,11 +314,9 @@ namespace ServiceStack.OrmLite
 				return dbReader.ConvertTo<T>();
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static T QuerySingle<T>(this IDbCommand dbCmd, object anonType)
-			where T : new()
+        internal static T QuerySingle<T>(this IDbCommand dbCmd, object anonType)
 		{
-			if (typeof(T).IsValueType) return QueryScalar<T>(dbCmd, anonType);
+			if (IsScalar<T>()) return QueryScalar<T>(dbCmd, anonType);
 
 			dbCmd.SetFilters<T>(anonType, true);
 
@@ -332,11 +324,9 @@ namespace ServiceStack.OrmLite
 				return dbReader.ConvertTo<T>();
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static T QuerySingle<T>(this IDbCommand dbCmd, string sql, object anonType)
-			where T : new()
+        internal static T QuerySingle<T>(this IDbCommand dbCmd, string sql, object anonType)
 		{
-			if (typeof(T).IsValueType) return QueryScalar<T>(dbCmd, sql, anonType);
+			if (IsScalar<T>()) return QueryScalar<T>(dbCmd, sql, anonType);
 
 			dbCmd.SetParameters(anonType, true);
             dbCmd.CommandText = OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sql);
@@ -345,9 +335,7 @@ namespace ServiceStack.OrmLite
 				return dbReader.ConvertTo<T>();
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static List<T> Where<T>(this IDbCommand dbCmd, string name, object value)
-			where T : new()
+        internal static List<T> Where<T>(this IDbCommand dbCmd, string name, object value)
 		{
 			if (dbCmd.Parameters.Count != 1 || ((IDbDataParameter)dbCmd.Parameters[0]).ParameterName != name
 				|| lastQueryType != typeof(T))
@@ -359,46 +347,39 @@ namespace ServiceStack.OrmLite
 				return dbReader.ConvertToList<T>();
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static List<T> Where<T>(this IDbCommand dbCmd, object anonType)
-			where T : new()
+        internal static List<T> Where<T>(this IDbCommand dbCmd, object anonType)
 		{
 			dbCmd.SetFilters<T>(anonType);
 
 			using (var dbReader = dbCmd.ExecuteReader())
-				return typeof(T).IsValueType
+				return IsScalar<T>()
 					? dbReader.GetFirstColumn<T>()
 					: dbReader.ConvertToList<T>();
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static List<T> Query<T>(this IDbCommand dbCmd, string sql, object anonType)
-			where T : new()
+        internal static List<T> Query<T>(this IDbCommand dbCmd, string sql, object anonType = null)
 		{
             if (anonType != null) dbCmd.SetParameters(anonType, true);
             dbCmd.CommandText = OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sql);
 
 			using (var dbReader = dbCmd.ExecuteReader())
-				return typeof(T).IsValueType
+				return IsScalar<T>()
 					? dbReader.GetFirstColumn<T>()
 					: dbReader.ConvertToList<T>();
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static List<T> Query<T>(this IDbCommand dbCmd, string sql, Dictionary<string, object> dict = null)
-			where T : new()
+        internal static List<T> Query<T>(this IDbCommand dbCmd, string sql, Dictionary<string, object> dict)
 		{
 			if (dict != null) dbCmd.SetParameters(dict, true);
             dbCmd.CommandText = OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sql);
 
 			using (var dbReader = dbCmd.ExecuteReader())
-				return typeof(T).IsValueType
+				return IsScalar<T>()
 					? dbReader.GetFirstColumn<T>()
 					: dbReader.ConvertToList<T>();
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static T QueryScalar<T>(this IDbCommand dbCmd, object anonType)
+	    internal static T QueryScalar<T>(this IDbCommand dbCmd, object anonType)
 		{
 			dbCmd.SetFilters<T>(anonType, true);
 
@@ -406,8 +387,7 @@ namespace ServiceStack.OrmLite
 				return GetScalar<T>(dbReader);
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static T QueryScalar<T>(this IDbCommand dbCmd, string sql, object anonType = null)
+	    internal static T QueryScalar<T>(this IDbCommand dbCmd, string sql, object anonType = null)
 		{
             if (anonType != null) dbCmd.SetParameters(anonType, true);
             dbCmd.CommandText = OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sql);
@@ -416,9 +396,47 @@ namespace ServiceStack.OrmLite
 				return GetScalar<T>(dbReader);
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static List<T> ByExampleWhere<T>(this IDbCommand dbCmd, object anonType)
-			where T : new()
+        internal static List<T> SqlList<T>(this IDbCommand dbCmd, string sql, object anonType = null)
+        {
+            if (anonType != null) dbCmd.SetParameters(anonType, true);
+            dbCmd.CommandText = sql;
+
+            using (var dbReader = dbCmd.ExecuteReader())
+                return IsScalar<T>()
+                    ? dbReader.GetFirstColumn<T>()
+                    : dbReader.ConvertToList<T>();
+        }
+
+        internal static List<T> SqlList<T>(this IDbCommand dbCmd, string sql, Dictionary<string, object> dict)
+        {
+            if (dict != null) dbCmd.SetParameters(dict, true);
+            dbCmd.CommandText = sql;
+
+            using (var dbReader = dbCmd.ExecuteReader())
+                return IsScalar<T>()
+                    ? dbReader.GetFirstColumn<T>()
+                    : dbReader.ConvertToList<T>();
+        }
+
+	    internal static T SqlScalar<T>(this IDbCommand dbCmd, string sql, object anonType = null)
+        {
+            if (anonType != null) dbCmd.SetParameters(anonType, true);
+            dbCmd.CommandText = sql;
+
+            using (var dbReader = dbCmd.ExecuteReader())
+                return GetScalar<T>(dbReader);
+        }
+
+        internal static T SqlScalar<T>(this IDbCommand dbCmd, string sql, Dictionary<string, object> dict)
+        {
+            if (dict != null) dbCmd.SetParameters(dict, true);
+            dbCmd.CommandText = sql;
+
+            using (var dbReader = dbCmd.ExecuteReader())
+                return GetScalar<T>(dbReader);
+        }
+
+	    internal static List<T> ByExampleWhere<T>(this IDbCommand dbCmd, object anonType)
 		{
 			dbCmd.SetFilters<T>(anonType, true);
 
@@ -426,9 +444,7 @@ namespace ServiceStack.OrmLite
 				return dbReader.ConvertToList<T>();
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static List<T> QueryByExample<T>(this IDbCommand dbCmd, string sql, object anonType = null)
-			where T : new()
+	    internal static List<T> QueryByExample<T>(this IDbCommand dbCmd, string sql, object anonType = null)
 		{
             if (anonType != null) dbCmd.SetParameters(anonType, true);
             dbCmd.CommandText = OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sql);
@@ -437,9 +453,7 @@ namespace ServiceStack.OrmLite
 				return dbReader.ConvertToList<T>();
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static IEnumerable<T> QueryEach<T>(this IDbCommand dbCmd, string sql, object anonType = null)
-			where T : new()
+	    internal static IEnumerable<T> QueryEach<T>(this IDbCommand dbCmd, string sql, object anonType = null)
 		{
             if (anonType != null) dbCmd.SetFilters<T>(anonType);
 
@@ -449,16 +463,14 @@ namespace ServiceStack.OrmLite
                 var indexCache = new Dictionary<string, int>();
                 while (reader.Read())
 				{
-					var row = new T();
+                    var row = OrmLiteUtilExtensions.CreateInstance<T>();
 					row.PopulateWithSqlReader(reader, fieldDefs, indexCache);
 					yield return row;
 				}
 			}
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static IEnumerable<T> EachWhere<T>(this IDbCommand dbCmd, object anonType)
-			where T : new()
+	    internal static IEnumerable<T> EachWhere<T>(this IDbCommand dbCmd, object anonType)
 		{
 			dbCmd.SetFilters<T>(anonType);
 
@@ -468,23 +480,19 @@ namespace ServiceStack.OrmLite
                 var indexCache = new Dictionary<string, int>();
                 while (reader.Read())
 				{
-					var row = new T();
+                    var row = OrmLiteUtilExtensions.CreateInstance<T>();
                     row.PopulateWithSqlReader(reader, fieldDefs, indexCache);
 					yield return row;
 				}
 			}
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static T GetByIdOrDefault<T>(this IDbCommand dbCmd, object idValue)
-			where T : new()
+	    internal static T GetByIdOrDefault<T>(this IDbCommand dbCmd, object idValue)
 		{
 			return FirstOrDefault<T>(dbCmd, OrmLiteConfig.DialectProvider.GetQuotedColumnName(ModelDefinition<T>.PrimaryKeyName) + " = {0}".SqlFormat(idValue));
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static List<T> GetByIds<T>(this IDbCommand dbCmd, IEnumerable idValues)
-			where T : new()
+	    internal static List<T> GetByIds<T>(this IDbCommand dbCmd, IEnumerable idValues)
 		{
 			var sql = idValues.GetIdsInSql();
 			return sql == null
@@ -492,15 +500,32 @@ namespace ServiceStack.OrmLite
 				: Select<T>(dbCmd, OrmLiteConfig.DialectProvider.GetQuotedColumnName(ModelDefinition<T>.PrimaryKeyName) + " IN (" + sql + ")");
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static T GetScalar<T>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
+	    internal static T GetByIdParam<T>(this IDbCommand dbCmd, object id)
+        {
+            var modelDef = ModelDefinition<T>.Definition;
+            var idParamString = OrmLiteConfig.DialectProvider.ParamString + "0";
+
+            var sql = string.Format("{0} WHERE {1} = {2}",
+                OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), "", null),
+                OrmLiteConfig.DialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName),
+                idParamString);
+
+            var idParam = dbCmd.CreateParameter();
+            idParam.ParameterName = idParamString;
+            idParam.Value = id;
+            List<IDataParameter> paramsToInsert = new List<IDataParameter>();
+            paramsToInsert.Add(idParam);
+
+            return dbCmd.ExecReader(sql, paramsToInsert).ConvertTo<T>();
+        }
+
+	    internal static T GetScalar<T>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
 		{
 			using (var reader = dbCmd.ExecReader(sql.SqlFormat(sqlParams)))
 				return GetScalar<T>(reader);
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static T GetScalar<T>(this IDataReader reader)
+	    internal static T GetScalar<T>(this IDataReader reader)
 		{
 			while (reader.Read()){
 				Type t = typeof(T);
@@ -526,21 +551,18 @@ namespace ServiceStack.OrmLite
 			return default(T);
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static long GetLastInsertId(this IDbCommand dbCmd)
+	    internal static long GetLastInsertId(this IDbCommand dbCmd)
 		{
 			return OrmLiteConfig.DialectProvider.GetLastInsertId(dbCmd);
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static List<T> GetFirstColumn<T>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
+	    internal static List<T> GetFirstColumn<T>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
 		{
 			using (var dbReader = dbCmd.ExecReader(sql.SqlFormat(sqlParams)))
 				return GetFirstColumn<T>(dbReader);
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static List<T> GetFirstColumn<T>(this IDataReader reader)
+	    internal static List<T> GetFirstColumn<T>(this IDataReader reader)
 		{
 			var columValues = new List<T>();
 			var getValueFn = GetValueFn<T>(reader);
@@ -560,8 +582,7 @@ namespace ServiceStack.OrmLite
             return dbCmd.GetFirstColumn<T>(sql, sqlParams);
 	    }
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static HashSet<T> GetFirstColumnDistinct<T>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
+	    internal static HashSet<T> GetFirstColumnDistinct<T>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
         {
             using (var dbReader = dbCmd.ExecReader(sql.SqlFormat(sqlParams)))
                 return GetFirstColumnDistinct<T>(dbReader);
@@ -575,8 +596,7 @@ namespace ServiceStack.OrmLite
             return dbCmd.GetFirstColumnDistinct<T>(sql, sqlParams);
         }
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static HashSet<T> GetFirstColumnDistinct<T>(this IDataReader reader)
+	    internal static HashSet<T> GetFirstColumnDistinct<T>(this IDataReader reader)
 		{
 			var columValues = new HashSet<T>();
 			var getValueFn = GetValueFn<T>(reader);
@@ -588,15 +608,13 @@ namespace ServiceStack.OrmLite
 			return columValues;
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static Dictionary<K, List<V>> GetLookup<K, V>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
+	    internal static Dictionary<K, List<V>> GetLookup<K, V>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
 		{
 			using (var dbReader = dbCmd.ExecReader(sql.SqlFormat(sqlParams)))
 				return GetLookup<K, V>(dbReader);
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static Dictionary<K, List<V>> GetLookup<K, V>(this IDataReader reader)
+	    internal static Dictionary<K, List<V>> GetLookup<K, V>(this IDataReader reader)
 		{
 			var lookup = new Dictionary<K, List<V>>();
 
@@ -619,15 +637,13 @@ namespace ServiceStack.OrmLite
 			return lookup;
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static Dictionary<K, V> GetDictionary<K, V>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
+	    internal static Dictionary<K, V> GetDictionary<K, V>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
 		{
 			using (var dbReader = dbCmd.ExecReader(sql.SqlFormat(sqlParams)))
 				return GetDictionary<K, V>(dbReader);
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static Dictionary<K, V> GetDictionary<K, V>(this IDataReader reader)
+	    internal static Dictionary<K, V> GetDictionary<K, V>(this IDataReader reader)
 		{
 			var map = new Dictionary<K, V>();
 
@@ -646,8 +662,7 @@ namespace ServiceStack.OrmLite
 		
 		// somo aditional methods
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static bool HasChildren<T>(this IDbCommand dbCmd, object record)
+	    internal static bool HasChildren<T>(this IDbCommand dbCmd, object record)
 		{
 			return HasChildren<T>(dbCmd, record, string.Empty);
 		}
@@ -662,47 +677,40 @@ namespace ServiceStack.OrmLite
 		}
 
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static bool Exists<T>(this IDbCommand dbCmd, string sqlFilter, params object[] filterParams)
+	    internal static bool Exists<T>(this IDbCommand dbCmd, string sqlFilter, params object[] filterParams)
 		{
 			return HasChildren<T>(dbCmd, null, sqlFilter, filterParams);
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static bool Exists<T>(this IDbCommand dbCmd, object record)
+	    internal static bool Exists<T>(this IDbCommand dbCmd, object record)
 		{
 			return HasChildren<T>(dbCmd, record, string.Empty);
 		}
 					
 		// procedures ...		
-        [Obsolete(UseDbConnectionExtensions)]
-        public static List<TOutputModel> SelectFromProcedure<TOutputModel>(this IDbCommand dbCommand,
+	    internal static List<TOutputModel> SelectFromProcedure<TOutputModel>(this IDbCommand dbCommand,
 			object fromObjWithProperties)
-			where TOutputModel : new()
 		{
 			return SelectFromProcedure<TOutputModel>(dbCommand, fromObjWithProperties,string.Empty);
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static List<TOutputModel> SelectFromProcedure<TOutputModel>(this IDbCommand dbCommand,
+	    internal static List<TOutputModel> SelectFromProcedure<TOutputModel>(this IDbCommand dbCommand,
 			object fromObjWithProperties,
 			string sqlFilter, 
 			params object[] filterParams)
-			where TOutputModel : new()
 		{
 			var modelType = typeof(TOutputModel);	
 			
 			string sql = OrmLiteConfig.DialectProvider.ToSelectFromProcedureStatement(
 				fromObjWithProperties,modelType, sqlFilter, filterParams);
 			
-			using (var reader = dbCommand.ExecReader(sql ) )
+			using (var reader = dbCommand.ExecReader(sql))
 			{
 				return reader.ConvertToList<TOutputModel>();
 			}
 		}
 
-        [Obsolete(UseDbConnectionExtensions)]
-        public static long GetLongScalar(this IDbCommand dbCmd)
+	    public static long GetLongScalar(this IDbCommand dbCmd)
 		{
 			var result = dbCmd.ExecuteScalar();
 			if (result is DBNull) return default(long);

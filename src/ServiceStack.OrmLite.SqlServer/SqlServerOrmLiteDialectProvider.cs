@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
+using System.Text;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.SqlServer 
 {
@@ -15,7 +17,7 @@ namespace ServiceStack.OrmLite.SqlServer
 		public SqlServerOrmLiteDialectProvider()
 		{
 			base.AutoIncrementDefinition = "IDENTITY(1,1)";
-			base.StringColumnDefinition = "VARCHAR(8000)";
+			StringColumnDefinition = UseUnicode ?  "NVARCHAR(4000)" : "VARCHAR(8000)";
 			base.GuidColumnDefinition = "UniqueIdentifier";
 			base.RealColumnDefinition = "FLOAT";
 		    base.BoolColumnDefinition = "BIT";
@@ -25,6 +27,11 @@ namespace ServiceStack.OrmLite.SqlServer
 
 			base.InitColumnTypeMap();
 		}
+
+        public override string GetQuotedParam(string paramValue)
+        {
+            return (UseUnicode ? "N'" : "'") + paramValue.Replace("'", "''") + "'";
+        }
 
 		public override IDbConnection CreateConnection(string connectionString, Dictionary<string, string> options)
 		{
@@ -92,6 +99,9 @@ namespace ServiceStack.OrmLite.SqlServer
 					return dateTimeValue - timeSpanOffset;
 				}
 
+                if (type == typeof(byte[]))
+                    return value;
+
 				return base.ConvertDbValue(value, type);
 			}
 			catch (Exception ex)
@@ -99,6 +109,7 @@ namespace ServiceStack.OrmLite.SqlServer
 				throw;
 			}
 		}
+
 
 		public override string GetQuotedValue(object value, Type fieldType)
 		{
@@ -120,8 +131,43 @@ namespace ServiceStack.OrmLite.SqlServer
 				var boolValue = (bool)value;
 				return base.GetQuotedValue(boolValue ? 1 : 0, typeof(int));
 			}
+			if(fieldType == typeof(string)) {
+                return GetQuotedParam(value.ToString());
+			}
+
+            if (fieldType == typeof(byte[]))
+            {
+                return "0x" + BitConverter.ToString((byte[])value).Replace("-", "");
+            }
 
 			return base.GetQuotedValue(value, fieldType);
+
+
+		}
+
+		protected bool _useDateTime2;
+		public void UseDatetime2(bool shouldUseDatetime2)
+		{
+			_useDateTime2 = shouldUseDatetime2;
+			DateTimeColumnDefinition = shouldUseDatetime2 ? "datetime2" : "datetime";
+			InitColumnTypeMap();
+		}
+
+		protected override void AddParameterForFieldToCommand(IDbCommand command, FieldDefinition fieldDef, object objWithProperties)
+		{
+			//have to override, because DbTypeMap.Set<T> expects DbType, and SqlDbType is not a DbType...
+			if(_useDateTime2 && (fieldDef.FieldType == typeof(DateTime) || fieldDef.FieldType == typeof(DateTime?))) {
+				var sqlCmd = (SqlCommand)command;//should be SqlCommand...
+				var p = sqlCmd.CreateParameter();
+				p.ParameterName = string.Format("{0}{1}", ParamString, fieldDef.FieldName);
+
+				p.SqlDbType = SqlDbType.DateTime2;
+				p.Value = GetValueOrDbNull(fieldDef, objWithProperties);
+
+				command.Parameters.Add(p);
+			} else {
+				base.AddParameterForFieldToCommand(command, fieldDef, objWithProperties);
+			}
 		}
 
 		public override long GetLastInsertId(IDbCommand dbCmd)
@@ -148,5 +194,63 @@ namespace ServiceStack.OrmLite.SqlServer
 			
 			return result > 0;
 		}
-	}
+
+        public override bool UseUnicode
+        {
+            get
+            {
+                return useUnicode;
+            }
+            set
+            {
+                useUnicode = value;
+                if (useUnicode && this.DefaultStringLength > 4000)
+                {
+                    this.DefaultStringLength = 4000;
+                }
+
+                // UpdateStringColumnDefinitions(); is called by changing DefaultStringLength 
+            }
+        }
+
+        public override string GetForeignKeyOnDeleteClause(ForeignKeyConstraint foreignKey)
+        {
+            return "RESTRICT" == (foreignKey.OnDelete ?? "").ToUpper()
+                ? ""
+                : base.GetForeignKeyOnDeleteClause(foreignKey);
+        }
+
+        public override string GetForeignKeyOnUpdateClause(ForeignKeyConstraint foreignKey)
+        {
+            return "RESTRICT" == (foreignKey.OnDelete ?? "").ToUpper()
+                ? ""
+                : base.GetForeignKeyOnUpdateClause(foreignKey);
+        }
+
+        public override string GetDropForeignKeyConstraints(ModelDefinition modelDef)
+        {
+            //TODO: find out if this should go in base class?
+
+            var sb = new StringBuilder();
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+                if (fieldDef.ForeignKey != null)
+                {
+                    var foreignKeyName = fieldDef.ForeignKey.GetForeignKeyName(
+                        modelDef,
+                        GetModelDefinition(fieldDef.ForeignKey.ReferenceType),
+                        NamingStrategy,
+                        fieldDef);
+
+                    var tableName = GetQuotedTableName(modelDef);
+                    sb.AppendLine("IF EXISTS (SELECT name FROM sys.foreign_keys WHERE name = '{0}')".Fmt(foreignKeyName));
+                    sb.AppendLine("BEGIN");
+                    sb.AppendLine("  ALTER TABLE {0} DROP {1};".Fmt(tableName, foreignKeyName));
+                    sb.AppendLine("END");
+                }
+            }
+
+            return sb.ToString();
+        }
+    }
 }

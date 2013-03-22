@@ -1,51 +1,51 @@
 using System.Data;
 using Northwind.Perf;
-using ServiceStack.Common.Extensions;
+using ServiceStack.Common;
 using ServiceStack.OrmLite.TestsPerf.Model;
 
 namespace ServiceStack.OrmLite.TestsPerf.Scenarios.OrmLite
 {
-	public class InsertModelWithFieldsOfDifferentTypesScenario
+	public class InsertModelWithFieldsOfDifferentTypesPerfScenario
 		: DatabaseScenarioBase
 	{
-		protected override void Run(IDbCommand dbCmd)
+		protected override void Run(IDbConnection db)
 		{
 			if (this.IsFirstRun)
 			{
-				dbCmd.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+				db.CreateTable<ModelWithFieldsOfDifferentTypesPerf>(true);
 			}
 
-			dbCmd.Insert(ModelWithFieldsOfDifferentTypes.Create(this.Iteration));
+			db.Insert(ModelWithFieldsOfDifferentTypesPerf.Create(this.Iteration));
 		}
 	}
 
-	public class SelectOneModelWithFieldsOfDifferentTypesScenario
+	public class SelectOneModelWithFieldsOfDifferentTypesPerfScenario
 		: DatabaseScenarioBase
 	{
-		protected override void Run(IDbCommand dbCmd)
+        protected override void Run(IDbConnection db)
 		{
 			if (this.IsFirstRun)
 			{
-				dbCmd.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
-				dbCmd.Insert(ModelWithFieldsOfDifferentTypes.Create(this.Iteration));
+				db.CreateTable<ModelWithFieldsOfDifferentTypesPerf>(true);
+				db.Insert(ModelWithFieldsOfDifferentTypesPerf.Create(this.Iteration));
 			}
 
-			var row = dbCmd.Select<ModelWithFieldsOfDifferentTypes>();
+			var row = db.Select<ModelWithFieldsOfDifferentTypesPerf>();
 		}
 	}
 
-	public class SelectManyModelWithFieldsOfDifferentTypesScenario
+	public class SelectManyModelWithFieldsOfDifferentTypesPerfScenario
 		: DatabaseScenarioBase
 	{
-		protected override void Run(IDbCommand dbCmd)
+        protected override void Run(IDbConnection db)
 		{
 			if (this.IsFirstRun)
 			{
-				dbCmd.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
-				20.Times(i => dbCmd.Insert(ModelWithFieldsOfDifferentTypes.Create(i)));
+				db.CreateTable<ModelWithFieldsOfDifferentTypesPerf>(true);
+				20.Times(i => db.Insert(ModelWithFieldsOfDifferentTypesPerf.Create(i)));
 			}
 
-			var rows = dbCmd.Select<ModelWithFieldsOfDifferentTypes>();
+			var rows = db.Select<ModelWithFieldsOfDifferentTypesPerf>();
 		}
 	}
 

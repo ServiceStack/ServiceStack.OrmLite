@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -449,6 +450,11 @@ namespace ServiceStack.OrmLite
             return ApplyPaging(sql.ToString());
         }
 
+        public virtual string ToCountStatement()
+        {
+            return OrmLiteConfig.DialectProvider.ToCountStatement(modelDef.ModelType, WhereExpression, null);
+        }
+
         public string SelectExpression
         {
             get
@@ -731,8 +737,8 @@ namespace ServiceStack.OrmLite
                     
             }
 
-            if (operand == "=" && right.ToString() == "null") operand = "is";
-            else if (operand == "<>" && right.ToString() == "null") operand = "is not";
+            if (operand == "=" && right.ToString().Equals("null", StringComparison.InvariantCultureIgnoreCase)) operand = "is";
+            else if (operand == "<>" && right.ToString().Equals("null", StringComparison.InvariantCultureIgnoreCase)) operand = "is not";
 
             switch (operand)
             {
@@ -798,12 +804,25 @@ namespace ServiceStack.OrmLite
             return p.Name;
         }
 
+        public bool IsParameterized { get; set; }
+        public Dictionary<string, object> Params = new Dictionary<string, object>();
+        int paramCounter = 0;
+
         protected virtual object VisitConstant(ConstantExpression c)
         {
             if (c.Value == null)
                 return new PartialSqlString("null");
-            
-            return c.Value;
+
+            if (!IsParameterized)
+            {
+                return c.Value;
+            }
+            else
+            {
+                string paramPlaceholder = OrmLiteConfig.DialectProvider.ParamString + paramCounter++;
+                Params.Add(paramPlaceholder, c.Value);
+                return new PartialSqlString(paramPlaceholder);
+            }
         }
 
         protected virtual object VisitUnary(UnaryExpression u)
@@ -835,15 +854,20 @@ namespace ServiceStack.OrmLite
             if (m.Object != null && m.Object as MethodCallExpression != null)
                 return IsColumnAccess(m.Object as MethodCallExpression);
 
-            return m.Object as MemberExpression != null
-                && (m.Object as MemberExpression).Expression.Type == typeof(T)
-                && (m.Object as MemberExpression).Expression.NodeType == ExpressionType.Parameter;
+            var exp = m.Object as MemberExpression;
+            return exp != null 
+                && exp.Expression != null 
+                && exp.Expression.Type == typeof(T)
+                && exp.Expression.NodeType == ExpressionType.Parameter;
         }
 
         protected virtual object VisitMethodCall(MethodCallExpression m)
         {
             if (m.Method.DeclaringType == typeof(Sql))
                 return VisitSqlMethodCall(m);
+
+			if (IsArrayMethod(m))
+                return VisitArrayMethodCall(m);
 
             if (IsColumnAccess(m))
                 return VisitColumnAccessMethod(m);
@@ -1008,6 +1032,68 @@ namespace ServiceStack.OrmLite
             return sql;
         }
 
+        private bool IsArrayMethod(MethodCallExpression m)
+        {
+            if (m.Object == null && m.Method.Name == "Contains")
+            {
+                if (m.Arguments.Count == 2)
+                    return true;
+            }
+
+            return false;
+        }
+
+        protected virtual object VisitArrayMethodCall(MethodCallExpression m)
+        {
+            string statement;
+
+            switch (m.Method.Name)
+            {
+                case "Contains":
+                    List<Object> args = this.VisitExpressionList(m.Arguments);
+                    object quotedColName = args[1];
+
+                    var memberExpr = m.Arguments[0];
+                    if (memberExpr.NodeType == ExpressionType.MemberAccess)
+                        memberExpr = (m.Arguments[0] as MemberExpression);
+
+                    var member = Expression.Convert(memberExpr, typeof(object));
+                    var lambda = Expression.Lambda<Func<object>>(member);
+                    var getter = lambda.Compile();
+
+                    var inArgs = getter() as object[];
+
+                    StringBuilder sIn = new StringBuilder();
+                    foreach (Object e in inArgs)
+                    {
+                        if (e.GetType().ToString() != "System.Collections.Generic.List`1[System.Object]")
+                        {
+                            sIn.AppendFormat("{0}{1}",
+                                         sIn.Length > 0 ? "," : "",
+                                         OrmLiteConfig.DialectProvider.GetQuotedValue(e, e.GetType()));
+                        }
+                        else
+                        {
+                            var listArgs = e as IList<Object>;
+                            foreach (Object el in listArgs)
+                            {
+                                sIn.AppendFormat("{0}{1}",
+                                         sIn.Length > 0 ? "," : "",
+                                         OrmLiteConfig.DialectProvider.GetQuotedValue(el, el.GetType()));
+                            }
+                        }
+                    }
+
+                    statement = string.Format("{0} {1} ({2})", quotedColName, "In", sIn.ToString());
+                    break;
+
+                default:
+                    throw new NotSupportedException();
+            }
+
+            return new PartialSqlString(statement);
+        }
+
         protected virtual object VisitSqlMethodCall(MethodCallExpression m)
         {
             List<Object> args = this.VisitExpressionList(m.Arguments);
@@ -1029,7 +1115,7 @@ namespace ServiceStack.OrmLite
                     StringBuilder sIn = new StringBuilder();
                     foreach (Object e in inArgs)
                     {
-                        if (e.GetType().ToString() != "System.Collections.Generic.List`1[System.Object]")
+                        if (!typeof(ICollection).IsAssignableFrom(e.GetType()))
                         {
                             sIn.AppendFormat("{0}{1}",
                                          sIn.Length > 0 ? "," : "",
@@ -1037,7 +1123,7 @@ namespace ServiceStack.OrmLite
                         }
                         else
                         {
-                            var listArgs = e as IList<Object>;
+                            var listArgs = e as ICollection;
                             foreach (Object el in listArgs)
                             {
                                 sIn.AppendFormat("{0}{1}",
@@ -1088,13 +1174,13 @@ namespace ServiceStack.OrmLite
                     statement = string.Format("lower({0})", quotedColName);
                     break;
                 case "StartsWith":
-                    statement = string.Format("upper({0}) like '{1}%' ", quotedColName, OrmLiteConfig.DialectProvider.EscapeParam(args[0]).ToUpper());
+                    statement = string.Format("upper({0}) like {1} ", quotedColName, OrmLiteConfig.DialectProvider.GetQuotedParam(args[0].ToString().ToUpper() + "%"));
                     break;
                 case "EndsWith":
-                    statement = string.Format("upper({0}) like '%{1}'", quotedColName, OrmLiteConfig.DialectProvider.EscapeParam(args[0]).ToUpper());
+                    statement = string.Format("upper({0}) like {1}", quotedColName, OrmLiteConfig.DialectProvider.GetQuotedParam("%" + args[0].ToString().ToUpper()));
                     break;
                 case "Contains":
-                    statement = string.Format("upper({0}) like '%{1}%'", quotedColName, OrmLiteConfig.DialectProvider.EscapeParam(args[0]).ToUpper());
+                    statement = string.Format("upper({0}) like {1}", quotedColName, OrmLiteConfig.DialectProvider.GetQuotedParam("%" + args[0].ToString().ToUpper() + "%"));
                     break;
                 case "Substring":
                     var startIndex = Int32.Parse(args[0].ToString()) + 1;

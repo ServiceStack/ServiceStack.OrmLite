@@ -12,8 +12,8 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var db = ConnectionString.OpenDbConnection())
             {
-                db.CreateTable(true, typeof(ModelWithIdOnly));
-                db.CreateTable<ModelWithIdAndName>();
+                db.DropAndCreateTable(typeof(ModelWithIdOnly));
+                db.DropAndCreateTable<ModelWithIdAndName>();
 
                 Assert.That(
                     db.TableExists(typeof(ModelWithIdOnly).Name),
@@ -39,7 +39,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var db = ConnectionString.OpenDbConnection())
             {
-                db.CreateTables(true, typeof(ModelWithIdOnly), typeof(ModelWithIdAndName));
+                db.DropAndCreateTables(typeof(ModelWithIdOnly), typeof(ModelWithIdAndName));
 
                 Assert.That(
                     db.TableExists(typeof(ModelWithIdOnly).Name),

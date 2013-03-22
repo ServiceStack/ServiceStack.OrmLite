@@ -42,6 +42,7 @@ COPY ..\lib\x64\net35\System.Data.SQLite.dll  ..\..\ServiceStack\release\latest\
 COPY ..\lib\x64\net40\System.Data.SQLite.dll  ..\..\ServiceStack\release\latest\ServiceStack.OrmLite\x64\net40
 
 COPY ..\src\ServiceStack.OrmLite.Sqlite\bin\%BUILD%\ServiceStack.OrmLite.* ..\..\ServiceStack\lib
+COPY ..\src\ServiceStack.OrmLite.Sqlite64\bin\%BUILD%\ServiceStack.OrmLite.Sqlite* ..\..\ServiceStack\lib\x64
 COPY ..\src\ServiceStack.OrmLite.SqlServer\bin\%BUILD%\ServiceStack.OrmLite.* ..\..\ServiceStack\lib
 
 COPY ..\src\ServiceStack.OrmLite.Sqlite\bin\%BUILD%\ServiceStack.OrmLite.* ..\..\ServiceStack.Examples\lib

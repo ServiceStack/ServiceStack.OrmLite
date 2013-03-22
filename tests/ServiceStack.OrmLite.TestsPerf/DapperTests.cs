@@ -67,7 +67,7 @@ namespace ServiceStack.OrmLite.TestsPerf
             public void Run(int iterations)
             {
                 OrmLiteConfig.DialectProvider = SqlServerOrmLiteDialectProvider.Instance; //Using SQL Server
-                IDbCommand ormLiteCmd = GetOpenConnection().CreateCommand();
+                IDbConnection ormLiteCmd = GetOpenConnection();
 
                 var tests = new Tests();
                 //tests.Add(id => ormLiteCmd.GetById<Post>(id), "OrmLite Query GetById");
@@ -78,7 +78,6 @@ namespace ServiceStack.OrmLite.TestsPerf
                 tests.Run(iterations);
             }
         }
-
 
         [Alias("Posts")]
         //[Soma.Core.Table(Name = "Posts")]

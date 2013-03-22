@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Text;
 using MySql.Data.MySqlClient;
-using ServiceStack.Common.Extensions;
 using ServiceStack.OrmLite.MySql.DataAnnotations;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.MySql
 {
@@ -27,9 +27,9 @@ namespace ServiceStack.OrmLite.MySql
     	    base.DefaultValueFormat = " DEFAULT '{0}'";
         }
 
-        public override string EscapeParam(object paramValue)
+        public override string GetQuotedParam(string paramValue)
         {
-            return paramValue.ToString().Replace("\\", "\\\\").Replace("'", @"\'");
+            return "'" + paramValue.Replace("\\", "\\\\").Replace("'", @"\'") + "'";
         }
 
         public override IDbConnection CreateConnection(string connectionString, Dictionary<string, string> options)
@@ -59,6 +59,11 @@ namespace ServiceStack.OrmLite.MySql
                 return base.GetQuotedValue(guidValue.ToString("N"), typeof(string));
             }
 
+            if (fieldType == typeof(byte[]))
+            {
+                return "0x" + BitConverter.ToString((byte[])value).Replace("-", "");
+            }
+
             return base.GetQuotedValue(value, fieldType);
         }
 
@@ -73,6 +78,9 @@ namespace ServiceStack.OrmLite.MySql
                         ? value
                         : (int.Parse(value.ToString()) != 0); //backward compatibility (prev version mapped bool as bit(1))
             }
+
+            if (type == typeof(byte[]))
+                return value;
 
             return base.ConvertDbValue(value, type);
         }
@@ -144,8 +152,7 @@ namespace ServiceStack.OrmLite.MySql
                 var refModelDef = GetModel(fieldDef.ForeignKey.ReferenceType);
                 sbConstraints.AppendFormat(
                     ", \n\n  CONSTRAINT {0} FOREIGN KEY ({1}) REFERENCES {2} ({3})",
-                    GetQuotedName(string.Format("FK_{0}_{1}_{2}", modelDef.ModelName,
-                                                                 refModelDef.ModelName, fieldDef.FieldName)),
+                    GetQuotedName(fieldDef.ForeignKey.GetForeignKeyName(modelDef, refModelDef, NamingStrategy, fieldDef)),
                     GetQuotedColumnName(fieldDef.FieldName),
                     GetQuotedTableName(refModelDef),
                     GetQuotedColumnName(refModelDef.PrimaryKey.FieldName));

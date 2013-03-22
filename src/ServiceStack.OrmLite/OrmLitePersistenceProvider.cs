@@ -13,7 +13,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
-using ServiceStack.Common.Extensions;
+using ServiceStack.Common;
 using ServiceStack.Common.Utils;
 using ServiceStack.DataAccess;
 

@@ -11,7 +11,16 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var dbConn = ConnectionString.OpenDbConnection())
             {
-                dbConn.CreateTable<ReferencedType>(true);
+                dbConn.DropTable<TypeWithOnDeleteAndUpdateCascade>();
+                dbConn.DropTable<TypeWithOnDeleteSetNull>();
+                dbConn.DropTable<TypeWithOnDeleteSetDefault>();
+                dbConn.DropTable<TypeWithOnDeleteRestrict>();
+                dbConn.DropTable<TypeWithOnDeleteNoAction>();
+                dbConn.DropTable<TypeWithOnDeleteCascade>();
+                dbConn.DropTable<TypeWithSimpleForeignKey>();
+                dbConn.DropTable<ReferencedType>();
+
+                dbConn.DropAndCreateTable<ReferencedType>();
             }
         }
 
@@ -20,7 +29,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var dbConn = ConnectionString.OpenDbConnection())
             {
-                dbConn.CreateTable<TypeWithSimpleForeignKey>(true);
+                dbConn.DropAndCreateTable<TypeWithSimpleForeignKey>();
             }
         }
 
@@ -29,7 +38,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var dbConn = ConnectionString.OpenDbConnection())
             {
-                dbConn.CreateTable<TypeWithOnDeleteCascade>(true);
+                dbConn.DropAndCreateTable<TypeWithOnDeleteCascade>();
             }
         }
 
@@ -38,7 +47,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var dbConn = ConnectionString.OpenDbConnection())
             {
-                dbConn.CreateTable<TypeWithOnDeleteCascade>(true);
+                dbConn.DropAndCreateTable<TypeWithOnDeleteCascade>();
 
                 dbConn.Save(new ReferencedType { Id = 1 });
                 dbConn.Save(new TypeWithOnDeleteCascade { RefId = 1 });
@@ -58,7 +67,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var dbConn = ConnectionString.OpenDbConnection())
             {
-                dbConn.CreateTable<TypeWithOnDeleteAndUpdateCascade>(true);
+                dbConn.DropAndCreateTable<TypeWithOnDeleteAndUpdateCascade>();
             }
         }
 
@@ -68,7 +77,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var dbConn = ConnectionString.OpenDbConnection())
             {
-                dbConn.CreateTable<TypeWithOnDeleteNoAction>(true);
+                dbConn.DropAndCreateTable<TypeWithOnDeleteNoAction>();
             }
         }
 
@@ -77,7 +86,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var dbConn = ConnectionString.OpenDbConnection())
             {
-                dbConn.CreateTable<TypeWithOnDeleteRestrict>(true);
+                dbConn.DropAndCreateTable<TypeWithOnDeleteRestrict>();
             }
         }
         
@@ -86,7 +95,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var dbConn = ConnectionString.OpenDbConnection())
             {
-                dbConn.CreateTable<TypeWithOnDeleteSetDefault>(true);
+                dbConn.DropAndCreateTable<TypeWithOnDeleteSetDefault>();
             }
         }
 
@@ -95,23 +104,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var dbConn = ConnectionString.OpenDbConnection())
             {
-                dbConn.CreateTable<TypeWithOnDeleteSetNull>(true);
-            }
-        }
-
-        [TestFixtureTearDown]
-        public void TearDwon()
-        {
-            using (var dbConn = ConnectionString.OpenDbConnection())
-            {
-                dbConn.DropTable<TypeWithOnDeleteAndUpdateCascade>();
-                dbConn.DropTable<TypeWithOnDeleteSetNull>();
-                dbConn.DropTable<TypeWithOnDeleteSetDefault>();
-                dbConn.DropTable<TypeWithOnDeleteRestrict>();
-                dbConn.DropTable<TypeWithOnDeleteNoAction>();
-                dbConn.DropTable<TypeWithOnDeleteCascade>();
-                dbConn.DropTable<TypeWithSimpleForeignKey>();
-                dbConn.DropTable<ReferencedType>();
+                dbConn.DropAndCreateTable<TypeWithOnDeleteSetNull>();
             }
         }
     }

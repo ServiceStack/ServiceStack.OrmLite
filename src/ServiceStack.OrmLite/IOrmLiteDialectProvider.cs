@@ -25,7 +25,13 @@ namespace ServiceStack.OrmLite
 
         INamingStrategy NamingStrategy { get; set; }
 
-        string EscapeParam(object paramValue);
+        /// <summary>
+        /// Quote the string so that it can be used inside an SQL-expression
+        /// Escape quotes inside the string
+        /// </summary>
+        /// <param name="paramValue"></param>
+        /// <returns></returns>
+        string GetQuotedParam(string paramValue);
 
         object ConvertDbValue(object value, Type type);
 
@@ -71,6 +77,8 @@ namespace ServiceStack.OrmLite
         string ToDeleteRowStatement(object objWithProperties);
         string ToDeleteStatement(Type tableType, string sqlFilter, params object[] filterParams);
 
+        IDbCommand CreateParameterizedDeleteStatement(object objWithProperties, IDbConnection connection);
+
         string ToExistStatement(Type fromTableType,
             object objWithProperties,
             string sqlFilter,
@@ -80,6 +88,8 @@ namespace ServiceStack.OrmLite
             Type outputModelType,
             string sqlFilter,
             params object[] filterParams);
+
+        string ToCountStatement(Type fromTableType, string sqlFilter, params object[] filterParams);
 
         string ToExecuteProcedureStatement(object objWithProperties);
 
@@ -102,6 +112,7 @@ namespace ServiceStack.OrmLite
 
         DbType GetColumnDbType(Type valueType);
         string GetColumnTypeDefinition(Type fieldType);
-    }
 
+        string GetDropForeignKeyConstraints(ModelDefinition modelDef);
+    }
 }

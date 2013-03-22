@@ -104,13 +104,10 @@ namespace SqlMapper
 
 			//ServiceStack.OrmLite Provider:
 			OrmLiteConfig.DialectProvider = SqlServerOrmLiteDialectProvider.Instance; //Using SQL Server
-			IDbCommand ormLiteCmd = Program.GetOpenConnection().CreateCommand();
-			tests.Add(id => ormLiteCmd.Select<Post>("select * from Posts where Id = {0}", id), "OrmLite Query");
-
-
+			IDbConnection ormLiteConn = Program.GetOpenConnection();
+			tests.Add(id => ormLiteConn.Select<Post>("select * from Posts where Id = {0}", id), "OrmLite Query");
 
             // HAND CODED 
-
             var connection = Program.GetOpenConnection();
 
             var postCommand = new SqlCommand();
@@ -145,9 +142,7 @@ namespace SqlMapper
             }, "hand coded");
 
             tests.Run(iterations);
-
         }
-
     }
 
     static class SqlDataReaderHelper

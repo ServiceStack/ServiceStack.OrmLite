@@ -45,15 +45,14 @@ namespace ServiceStack.OrmLite.FirebirdTests
 			var dbFactory = new OrmLiteConnectionFactory(
 				GetFileConnectionString(),
 				FirebirdOrmLiteDialectProvider.Instance);
-			
-			using (var db =dbFactory.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
-			{
-				dbCmd.CreateTable<Point>(true);
 
-				dbCmd.Insert(new Point { Width = 4, Height = 1.123f, Top = 3.456d, Left = 2.345m});
+            using (var db = dbFactory.Open())
+			{
+				db.CreateTable<Point>(true);
+
+				db.Insert(new Point { Width = 4, Height = 1.123f, Top = 3.456d, Left = 2.345m});
 								
-				var points = dbCmd.Select<Point>();
+				var points = db.Select<Point>();
 
 				Console.WriteLine(points.Dump());
 
@@ -62,14 +61,10 @@ namespace ServiceStack.OrmLite.FirebirdTests
 				Assert.That(points[0].Top, Is.EqualTo(3.456d));
 				Assert.That(points[0].Left, Is.EqualTo(2.345m));
 				
-				points = dbCmd.Select<Point>("Height={0}", 1.123f);  // returns no rows! FirebirdSql bug?
+				points = db.Select<Point>("Height={0}", 1.123f);  // returns no rows! FirebirdSql bug?
 				
 				Assert.That(points.Count>0);
-					
-				
-				
 			}
-
 		}
 
 	}

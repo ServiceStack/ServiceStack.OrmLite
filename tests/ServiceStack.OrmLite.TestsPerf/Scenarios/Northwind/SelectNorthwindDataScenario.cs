@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Data;
 using Northwind.Common.DataModel;
 using Northwind.Perf;
-using ServiceStack.Common.Extensions;
+using ServiceStack.Common;
 
 namespace ServiceStack.OrmLite.TestsPerf.Scenarios.Northwind
 {
 	public class SelectNorthwindDataScenario
 		: DatabaseScenarioBase
 	{
-		protected override void Run(IDbCommand dbCmd)
+        protected override void Run(IDbConnection dbCmd)
 		{
 			if (this.IsFirstRun)
 			{

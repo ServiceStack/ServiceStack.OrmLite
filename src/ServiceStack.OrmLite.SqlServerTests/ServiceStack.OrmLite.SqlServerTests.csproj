@@ -53,6 +53,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Datetime2Tests.cs" />
+    <Compile Include="InsertParam_GetLastInsertId.cs" />
     <Compile Include="NestedTransactions.cs" />
     <Compile Include="EnumTests.cs" />
     <Compile Include="Expressions\AdditiveExpressionsTest.cs" />
@@ -73,6 +75,8 @@
     <Compile Include="OrmLiteTestBase.cs" />
     <Compile Include="SqlServerExpressionVisitorQueryTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TypeWithByteArrayFieldTests.cs" />
+    <Compile Include="UnicodeTests.cs" />
     <Compile Include="UpdateTests.cs" />
     <Compile Include="UseCase\SimpleUseCase.cs" />
     <Compile Include="UseCase\TestEntity.cs" />

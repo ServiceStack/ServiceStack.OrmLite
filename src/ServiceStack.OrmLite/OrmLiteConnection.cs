@@ -13,7 +13,7 @@ namespace ServiceStack.OrmLite
 		: IDbConnection, IHasDbConnection 
 	{
 	    public readonly OrmLiteConnectionFactory Factory;
-        public IDbTransaction Transaction { get; private set; }
+        public IDbTransaction Transaction { get; internal set; }
 		private IDbConnection dbConnection;
 		private bool isOpen;
 
@@ -87,6 +87,8 @@ namespace ServiceStack.OrmLite
 			if (isOpen) return;
 			
 			DbConnection.Open();
+            //so the internal connection is wrapped for example by miniprofiler
+            if(Factory.ConnectionFilter != null) { dbConnection = Factory.ConnectionFilter(dbConnection); }
 			isOpen = true;
 		}
 

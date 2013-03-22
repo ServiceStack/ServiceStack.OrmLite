@@ -78,25 +78,24 @@ namespace SqliteExpressionsTest
                 File.Delete(path);
             //using (IDbConnection db = ":memory:".OpenDbConnection())
             using (IDbConnection db = path.OpenDbConnection())
-            using (IDbCommand dbCmd = db.CreateCommand())
             {
-                dbCmd.CreateTable<User>(true);
-                dbCmd.CreateTable<UserData>(true);
-                dbCmd.CreateTable<UserService>(true);
+                db.CreateTable<User>(true);
+                db.CreateTable<UserData>(true);
+                db.CreateTable<UserService>(true);
 
-                dbCmd.Insert(new UserData { Id = 5, UserDataValue = "Value-5" });
-                dbCmd.Insert(new UserData { Id = 6, UserDataValue = "Value-6" });
+                db.Insert(new UserData { Id = 5, UserDataValue = "Value-5" });
+                db.Insert(new UserData { Id = 6, UserDataValue = "Value-6" });
 
-                dbCmd.Insert(new UserService { Id = 8, ServiceName = "Value-8" });
-                dbCmd.Insert(new UserService { Id = 9, ServiceName = "Value-9" });
+                db.Insert(new UserService { Id = 8, ServiceName = "Value-8" });
+                db.Insert(new UserService { Id = 9, ServiceName = "Value-9" });
 
-                dbCmd.Insert(new User { Id = 1, Name = "A", CreatedDate = DateTime.Now, UserDataId = 5, UserServiceId = 8 });
-                dbCmd.Insert(new User { Id = 2, Name = "B", CreatedDate = DateTime.Now, UserDataId = 5, UserServiceId = 9 });
-                dbCmd.Insert(new User { Id = 3, Name = "B", CreatedDate = DateTime.Now });
+                db.Insert(new User { Id = 1, Name = "A", CreatedDate = DateTime.Now, UserDataId = 5, UserServiceId = 8 });
+                db.Insert(new User { Id = 2, Name = "B", CreatedDate = DateTime.Now, UserDataId = 5, UserServiceId = 9 });
+                db.Insert(new User { Id = 3, Name = "B", CreatedDate = DateTime.Now });
 
 
-                var rowsB = dbCmd.Select<User>("Name = {0}", "B");
-                var rowsB1 = dbCmd.Select<User>(user => user.Name == "B");
+                var rowsB = db.Select<User>("Name = {0}", "B");
+                var rowsB1 = db.Select<User>(user => user.Name == "B");
 
                 var jn = new JoinSqlBuilder<UserEx, User>();
                 jn = jn.Join<User, UserData>(x => x.UserDataId, x => x.Id, x => new { x.Name, x.Id }, x => new { x.UserDataValue })

@@ -2,6 +2,7 @@
 using System.Data;
 using System.Linq;
 using NUnit.Framework;
+using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -22,6 +23,15 @@ namespace ServiceStack.OrmLite.Tests
         }
     }
 
+    public class AutoIdPerson
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public int? Age { get; set; }
+    }
+
     public class ApiExpressionTests
         : OrmLiteTestBase
     {
@@ -40,7 +50,8 @@ namespace ServiceStack.OrmLite.Tests
         public void SetUp()
         {
             db = ConnectionString.OpenDbConnection();
-            db.CreateTable<Person>(overwrite: true);
+            db.DropAndCreateTable<Person>();
+            db.DropAndCreateTable<AutoIdPerson>();
 
             //People.ToList().ForEach(x => dbCmd.Insert(x));
         }
@@ -102,8 +113,8 @@ namespace ServiceStack.OrmLite.Tests
             Console.WriteLine(db.GetLastSql());
 
 
-            db.InsertOnly(new Person { FirstName = "Amy" }, ev => ev.Insert(p => new { p.FirstName }));
-            Assert.That(db.GetLastSql(), Is.EqualTo("INSERT INTO \"Person\" (\"FirstName\") VALUES ('Amy')"));
+            db.InsertOnly(new AutoIdPerson { FirstName = "Amy" }, ev => ev.Insert(p => new { p.FirstName }));
+            Assert.That(db.GetLastSql(), Is.EqualTo("INSERT INTO \"AutoIdPerson\" (\"FirstName\") VALUES ('Amy')"));
             Console.WriteLine(db.GetLastSql());
 
 

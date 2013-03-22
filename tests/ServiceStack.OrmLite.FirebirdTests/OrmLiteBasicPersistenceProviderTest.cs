@@ -20,15 +20,14 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		public void Can_GetById_from_basic_persistence_provider()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
-				dbCmd.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
 				var basicProvider = new OrmLitePersistenceProvider(db);
 
 				var row = ModelWithFieldsOfDifferentTypes.Create(1);
 
-				dbCmd.Insert(row);
+				db.Insert(row);
 
 				var providerRow = basicProvider.GetById<ModelWithFieldsOfDifferentTypes>(1);
 
@@ -40,9 +39,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		public void Can_GetByIds_from_basic_persistence_provider()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
-				dbCmd.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
 				var basicProvider = new OrmLitePersistenceProvider(db);
 
@@ -50,7 +48,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 				var rows = rowIds.ConvertAll(x => ModelWithFieldsOfDifferentTypes.Create(x));
 
-				rows.ForEach(x => dbCmd.Insert(x));
+				rows.ForEach(x => db.Insert(x));
 
 				var getRowIds = new[] { 2, 4 };
 				var providerRows = basicProvider.GetByIds<ModelWithFieldsOfDifferentTypes>(getRowIds).ToList();
@@ -64,9 +62,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		public void Can_Store_from_basic_persistence_provider()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
-				dbCmd.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
 				var basicProvider = new OrmLitePersistenceProvider(db);
 
@@ -77,7 +74,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 				rows.ForEach(x => basicProvider.Store(x));
 
 				var getRowIds = new[] { 2, 4 };
-				var providerRows = dbCmd.GetByIds<ModelWithFieldsOfDifferentTypes>(getRowIds).ToList();
+				var providerRows = db.GetByIds<ModelWithFieldsOfDifferentTypes>(getRowIds).ToList();
 				var providerRowIds = providerRows.ConvertAll(x => x.Id);
 
 				Assert.That(providerRowIds, Is.EquivalentTo(getRowIds));
@@ -88,9 +85,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		public void Can_Delete_from_basic_persistence_provider()
 		{
 			using (var db = ConnectionString.OpenDbConnection())
-			using (var dbCmd = db.CreateCommand())
 			{
-				dbCmd.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
 				var basicProvider = new OrmLitePersistenceProvider(db);
 
@@ -98,7 +94,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 				var rows = rowIds.ConvertAll(x => ModelWithFieldsOfDifferentTypes.Create(x));
 
-				rows.ForEach(x => dbCmd.Insert(x));
+				rows.ForEach(x => db.Insert(x));
 
 				var deleteRowIds = new List<int> { 2, 4 };
 

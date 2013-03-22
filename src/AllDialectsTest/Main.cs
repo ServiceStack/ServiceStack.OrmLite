@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Data;
 using ServiceStack.Common.Utils;
 using ServiceStack.DataAnnotations;
-using ServiceStack.Common.Extensions;
+using ServiceStack.Common;
 using ServiceStack.OrmLite;
 
 namespace AllDialectsTest
@@ -118,6 +118,16 @@ namespace AllDialectsTest
 				ConnectionString = "User=SYSDBA;Password=masterkey;Database=employee.fdb;DataSource=localhost;Dialect=3;charset=ISO8859_1;"
 			};
 			l.Add(d);
+
+            d = new Dialect() {
+                Name = "Oracle",
+                PathToAssembly = "../../../ServiceStack.OrmLite.Oracle/bin/Debug",
+                AssemblyName = "ServiceStack.OrmLite.Oracle.dll",
+                ClassName = "ServiceStack.OrmLite.Oracle.OracleOrmLiteDialectProvider",
+                InstanceFieldName = "Instance",
+                ConnectionString = "Data Source=localhost:1521/XE;User ID=servicestack_test;Password=servicestack_test;Unicode=True"
+            };
+            l.Add(d);
 
 			return l;
 

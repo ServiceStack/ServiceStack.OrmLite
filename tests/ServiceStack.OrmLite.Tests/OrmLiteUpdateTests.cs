@@ -16,7 +16,6 @@ namespace ServiceStack.OrmLite.Tests
         public void SetUp()
         {
             db = ConnectionString.OpenDbConnection();
-            db.CreateTable<ModelWithFieldsOfDifferentTypes>(overwrite: true);
         }
 
         [TearDown]
@@ -25,10 +24,18 @@ namespace ServiceStack.OrmLite.Tests
             db.Dispose();
         }
 
+        private ModelWithFieldsOfDifferentTypes CreateModelWithFieldsOfDifferentTypes()
+        {
+            db.DropAndCreateTable<ModelWithFieldsOfDifferentTypes>();
+
+            var row = ModelWithFieldsOfDifferentTypes.Create(1);
+            return row;
+        }
+
         [Test]
         public void Can_update_ModelWithFieldsOfDifferentTypes_table()
         {
-            var row = ModelWithFieldsOfDifferentTypes.Create(1);
+            var row = CreateModelWithFieldsOfDifferentTypes();
 
             db.Insert(row);
 
@@ -44,7 +51,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_update_ModelWithFieldsOfDifferentTypes_table_with_filter()
         {
-            var row = ModelWithFieldsOfDifferentTypes.Create(1);
+            var row = CreateModelWithFieldsOfDifferentTypes();
 
             db.Insert(row);
 
@@ -60,7 +67,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_update_with_anonymousType_and_expr_filter()
         {
-            var row = ModelWithFieldsOfDifferentTypes.Create(1);
+            var row = CreateModelWithFieldsOfDifferentTypes();
 
             db.Insert(row);
             row.DateTime = DateTime.Now;
@@ -77,7 +84,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_update_with_optional_string_params()
         {
-            var row = ModelWithFieldsOfDifferentTypes.Create(1);
+            var row = CreateModelWithFieldsOfDifferentTypes();
 
             db.Insert(row);
             row.Name = "UpdatedName";
@@ -92,7 +99,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_update_with_tableName_and_optional_string_params()
         {
-            var row = ModelWithFieldsOfDifferentTypes.Create(1);
+            var row = CreateModelWithFieldsOfDifferentTypes();
 
             db.Insert(row);
             row.Name = "UpdatedName";

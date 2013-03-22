@@ -14,33 +14,33 @@ namespace ServiceStack.OrmLite.TestsPerf.Scenarios.Northwind
 			NorthwindData.LoadData(false);
 		}
 
-		protected override void Run(IDbCommand dbCmd)
+        protected override void Run(IDbConnection db)
 		{
-			InsertData(dbCmd);
+			InsertData(db);
 		}
 
-		public void InsertData(IDbCommand dbCmd)
+        public void InsertData(IDbConnection db)
 		{
 			if (this.IsFirstRun)
 			{
-				dbCmd.CreateTables(true, NorthwindFactory.ModelTypes.ToArray());
+				db.CreateTables(true, NorthwindFactory.ModelTypes.ToArray());
 			}
 			else
 			{
-				NorthwindFactory.ModelTypes.ForEach(x => dbCmd.DeleteAll(x));
+				NorthwindFactory.ModelTypes.ForEach(x => db.DeleteAll(x));
 			}
 
-			NorthwindData.Categories.ForEach(x => dbCmd.Insert(x));
-			NorthwindData.Customers.ForEach(x => dbCmd.Insert(x));
-			NorthwindData.Employees.ForEach(x => dbCmd.Insert(x));
-			NorthwindData.Shippers.ForEach(x => dbCmd.Insert(x));
-			NorthwindData.Orders.ForEach(x => dbCmd.Insert(x));
-			NorthwindData.Products.ForEach(x => dbCmd.Insert(x));
-			NorthwindData.OrderDetails.ForEach(x => dbCmd.Insert(x));
-			NorthwindData.CustomerCustomerDemos.ForEach(x => dbCmd.Insert(x));
-			NorthwindData.Regions.ForEach(x => dbCmd.Insert(x));
-			NorthwindData.Territories.ForEach(x => dbCmd.Insert(x));
-			NorthwindData.EmployeeTerritories.ForEach(x => dbCmd.Insert(x));
+			NorthwindData.Categories.ForEach(x => db.Insert(x));
+			NorthwindData.Customers.ForEach(x => db.Insert(x));
+			NorthwindData.Employees.ForEach(x => db.Insert(x));
+			NorthwindData.Shippers.ForEach(x => db.Insert(x));
+			NorthwindData.Orders.ForEach(x => db.Insert(x));
+			NorthwindData.Products.ForEach(x => db.Insert(x));
+			NorthwindData.OrderDetails.ForEach(x => db.Insert(x));
+			NorthwindData.CustomerCustomerDemos.ForEach(x => db.Insert(x));
+			NorthwindData.Regions.ForEach(x => db.Insert(x));
+			NorthwindData.Territories.ForEach(x => db.Insert(x));
+			NorthwindData.EmployeeTerritories.ForEach(x => db.Insert(x));
 		}
 	}
 }
