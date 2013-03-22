@@ -344,6 +344,11 @@ db.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName);
 ```
 **UPDATE "Person" SET "FirstName" = 'JJ'**
 
+```csharp
+db.UpdateOnly(new Person { FirstName = "JJ", Age = 12 }, p => new { p.FirstName, p.Age });
+```
+**UPDATE "Person" SET "FirstName" = 'JJ', "Age" = 12**
+
 When present, the second expression is used as the where filter:
 ```csharp
 db.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName, p => p.LastName == "Hendrix");
