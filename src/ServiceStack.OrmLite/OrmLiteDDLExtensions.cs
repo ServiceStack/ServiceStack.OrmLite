@@ -8,6 +8,7 @@ namespace ServiceStack.OrmLite
 		Cascade,
 		SetNull,
 		NoAction,
+		SetDefault,
 		Restrict
 	}
 	

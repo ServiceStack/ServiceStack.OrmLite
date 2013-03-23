@@ -25,7 +25,8 @@ namespace ServiceStack.OrmLite.DDLTest
 				AddColumnString="ALTER TABLE Model ADD Column1 VARCHAR(128) ;",
 				AlterColumnString="ALTER TABLE Model ALTER Column2 VARCHAR(50) ;",
 				ChangeColumnNameString="ALTER TABLE Model ALTER OldColumn3 TO Column3 ;",
-				AddFKString="ALTER TABLE Child ADD CONSTRAINT JustOneFK FOREIGN KEY (IdModel) REFERENCES Model (Id) ON UPDATE NO ACTION ON DELETE CASCADE;",
+				AddFKString="ALTER TABLE Child ADD CONSTRAINT JustOneFK FOREIGN KEY (IdModel) REFERENCES Model (Id) ON DELETE CASCADE ON UPDATE NO ACTION;",
+				AddFKRestrictString="ALTER TABLE Child ADD CONSTRAINT JustOneMoreFK FOREIGN KEY (IdModel) REFERENCES Model (Id) ON UPDATE NO ACTION;",
 				CreateIndexString="CREATE UNIQUE INDEX JustIndexOnColumn3 ON Model(Column3);"
 
 			});
@@ -34,7 +35,8 @@ namespace ServiceStack.OrmLite.DDLTest
 				AddColumnString="ALTER TABLE `Model` ADD COLUMN `Column1` VARCHAR(255) NULL;",
 				AlterColumnString="ALTER TABLE `Model` MODIFY COLUMN `Column2` VARCHAR(50) NULL;",
 				ChangeColumnNameString="ALTER TABLE `Model` CHANGE COLUMN `OldColumn3` `Column3` VARCHAR(255) NULL;",
-				AddFKString="ALTER TABLE `Child` ADD CONSTRAINT `JustOneFK` FOREIGN KEY (`IdModel`) REFERENCES `Model` (`Id`) ON UPDATE NO ACTION ON DELETE CASCADE;",
+				AddFKString="ALTER TABLE `Child` ADD CONSTRAINT `JustOneFK` FOREIGN KEY (`IdModel`) REFERENCES `Model` (`Id`) ON DELETE CASCADE ON UPDATE NO ACTION;",
+				AddFKRestrictString="ALTER TABLE `Child` ADD CONSTRAINT `JustOneMoreFK` FOREIGN KEY (`IdModel`) REFERENCES `Model` (`Id`) ON DELETE RESTRICT ON UPDATE NO ACTION;",
 				CreateIndexString="CREATE UNIQUE INDEX `JustIndexOnColumn3` ON `Model`(`Column3`);"
 			});
 
@@ -91,7 +93,22 @@ namespace ServiceStack.OrmLite.DDLTest
 			foreach (var d in dialects) 
 			{
 				OrmLiteConfig.DialectProvider=d.Provider;		
-				Assert.AreEqual(d.AddFKString,d.Provider.ToAddForeignKeyStatement<Child,Model>(f=>f.IdModel, fk=>fk.Id,OnFkOption.NoAction,OnFkOption.Cascade, "JustOneFK"));
+				Assert.AreEqual(d.AddFKString,
+				                d.Provider.ToAddForeignKeyStatement<Child,Model>(f=>f.IdModel,
+				                                                 fk=>fk.Id,OnFkOption.NoAction,OnFkOption.Cascade, "JustOneFK"));
+			}
+		}
+
+		[Test()]
+		public void CanAddForeignKeyRestrict ()
+		{
+			
+			foreach (var d in dialects) 
+			{
+				OrmLiteConfig.DialectProvider=d.Provider;		
+				Assert.AreEqual(d.AddFKRestrictString,
+				                d.Provider.ToAddForeignKeyStatement<Child,Model>(f=>f.IdModel,
+				                                                 fk=>fk.Id,OnFkOption.NoAction,OnFkOption.Restrict, "JustOneMoreFK"));
 			}
 		}
 
@@ -140,6 +157,7 @@ namespace ServiceStack.OrmLite.DDLTest
 		public string AlterColumnString { get; set; }
 		public string ChangeColumnNameString { get; set; }
 		public string AddFKString { get; set; }
+		public string AddFKRestrictString { get; set; }
 		public string CreateIndexString { get; set; }
 
 	}
