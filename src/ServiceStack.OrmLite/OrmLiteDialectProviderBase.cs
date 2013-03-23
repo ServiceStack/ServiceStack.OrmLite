@@ -1015,14 +1015,14 @@ namespace ServiceStack.OrmLite
 			                            "fk_"+sourceMD.ModelName+"_"+ fieldName+"_"+referenceFieldName:
 			                            foreignKeyName);
 			
-			return string.Format("ALTER TABLE {0} ADD CONSTRAINT {1} FOREIGN KEY ({2}) REFERENCES {3} ({4}) ON UPDATE {5} ON DELETE {6};",
+			return string.Format("ALTER TABLE {0} ADD CONSTRAINT {1} FOREIGN KEY ({2}) REFERENCES {3} ({4}){5}{6};",
 			                     GetQuotedTableName(sourceMD.ModelName),
 			                     name,
 			                     GetQuotedColumnName(fieldName),
 			                     GetQuotedTableName(referenceMD.ModelName),
 			                     GetQuotedColumnName(referenceFieldName),
-			                     FkOptionToString(onUpdate),
-			                     FkOptionToString(onDelete));	
+			                     GetForeignKeyOnDeleteClause(new ForeignKeyConstraint(typeof(T), onDelete: FkOptionToString( onDelete))),
+			                     GetForeignKeyOnUpdateClause(new ForeignKeyConstraint(typeof(T), onUpdate: FkOptionToString(onUpdate))));	
 		}
 
 		public virtual string ToCreateIndexStatement<T>(Expression<Func<T,object>> field,
@@ -1046,12 +1046,13 @@ namespace ServiceStack.OrmLite
 		}
 
 
-		protected string FkOptionToString(OnFkOption option){
+		protected virtual string FkOptionToString(OnFkOption option){
 			switch(option){
 			case OnFkOption.Cascade: return "CASCADE";
 			case OnFkOption.NoAction: return "NO ACTION"; 
-			case OnFkOption.Restrict: return "RESTRICT"; 
 			case OnFkOption.SetNull: return "SET NULL"; 
+			case OnFkOption.SetDefault: return "SET DEFAULT";
+			case OnFkOption.Restrict:
 			default: return "RESTRICT";
 			}
 		}
