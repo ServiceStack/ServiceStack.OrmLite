@@ -14,7 +14,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 		protected string GetFileConnectionString()
 		{
-			return "User=SYSDBA;Password=masterkey;Database=D:\\ormlite-tests.fdb;DataSource=localhost;Dialect=3;charset=ISO8859_1;MinPoolSize=0;MaxPoolSize=100";
+			// add ormlite-tests.fdb = D:\\ormlite-tests.fdb to your firebird  alias.conf 
+			return "User=SYSDBA;Password=masterkey;Database=ormlite-tests.fdb;DataSource=localhost;Dialect=3;charset=ISO8859_1;MinPoolSize=0;MaxPoolSize=100";
 		}
 
 		protected void CreateNewDatabase()

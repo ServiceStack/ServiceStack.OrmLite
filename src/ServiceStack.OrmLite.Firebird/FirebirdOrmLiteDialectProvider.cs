@@ -40,6 +40,7 @@ namespace ServiceStack.OrmLite.Firebird
 			base.RealColumnDefinition= "FLOAT";
 			base.DefaultStringLength=128;
 			base.InitColumnTypeMap();
+			DefaultValueFormat = " DEFAULT '{0}'";
 		}
 		
 		public override IDbConnection CreateConnection(string connectionString, Dictionary<string, string> options)
@@ -340,6 +341,9 @@ namespace ServiceStack.OrmLite.Firebird
 					GetQuotedColumnName(fieldDef.FieldName), 
 					GetQuotedTableName(refModelDef), 
 					GetQuotedColumnName(refModelDef.PrimaryKey.FieldName));
+
+				sbConstraints.Append(GetForeignKeyOnDeleteClause(fieldDef.ForeignKey));
+				sbConstraints.Append(GetForeignKeyOnUpdateClause(fieldDef.ForeignKey));
             }
 			
 			if (sbPk.Length !=0) sbColumns.AppendFormat(", \n  PRIMARY KEY({0})", sbPk);
@@ -394,16 +398,16 @@ namespace ServiceStack.OrmLite.Firebird
 
             var sql = new StringBuilder();
             sql.AppendFormat("{0} {1}", GetQuotedColumnName(fieldName), fieldDefinition);
-			
+
+			if (!string.IsNullOrEmpty(defaultValue))
+			{
+				sql.AppendFormat(DefaultValueFormat, defaultValue);
+			}
+
             if (!isNullable)
             {
                 sql.Append(" NOT NULL");
-            }
-
-            if (!string.IsNullOrEmpty(defaultValue))
-            {
-                sql.AppendFormat(DefaultValueFormat, defaultValue);
-            }
+            }           
 
             return sql.ToString();
 		}
@@ -726,6 +730,16 @@ namespace ServiceStack.OrmLite.Firebird
 			return result > 0;
 		}
 
+
+		public override string GetForeignKeyOnDeleteClause(ForeignKeyConstraint foreignKey)
+		{
+			return (!string.IsNullOrEmpty(foreignKey.OnDelete) && foreignKey.OnDelete.ToUpper()!="RESTRICT" )? " ON DELETE " + foreignKey.OnDelete : "";
+		}
+		
+		public override string GetForeignKeyOnUpdateClause(ForeignKeyConstraint foreignKey)
+		{
+			return (!string.IsNullOrEmpty(foreignKey.OnUpdate) && foreignKey.OnUpdate.ToUpper()!="RESTRICT" )? " ON UPDATE " + foreignKey.OnUpdate : "";
+		}
 
 		#region DDL
 		public override string ToAddColumnStatement(Type modelType, FieldDefinition fieldDef){
