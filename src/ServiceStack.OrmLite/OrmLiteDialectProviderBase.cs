@@ -19,6 +19,7 @@ using ServiceStack.Text;
 using System.Diagnostics;
 using ServiceStack.Common;
 using System.IO;
+using System.Linq.Expressions;
 
 namespace ServiceStack.OrmLite
 {
@@ -947,5 +948,115 @@ namespace ServiceStack.OrmLite
         {
             return modelType.GetModelDefinition();
         }
+
+		#region DDL
+		public virtual string ToAddColumnStatement(Type modelType, FieldDefinition fieldDef)
+		{
+
+			var column = GetColumnDefinition(fieldDef.FieldName,
+			                                 fieldDef.FieldType,
+			                                 fieldDef.IsPrimaryKey,
+			                                 fieldDef.AutoIncrement,
+			                                 fieldDef.IsNullable,
+			                                 fieldDef.FieldLength,
+			                                 fieldDef.Scale,
+			                                 fieldDef.DefaultValue);
+			return string.Format("ALTER TABLE {0} ADD COLUMN {1};",
+			                     GetQuotedTableName(modelType.GetModelDefinition().ModelName),
+			                     column);
+		}
+
+
+		public virtual string ToAlterColumnStatement(Type modelType, FieldDefinition fieldDef)
+		{		
+			var column = GetColumnDefinition(fieldDef.FieldName,
+			                                 fieldDef.FieldType,
+			                                 fieldDef.IsPrimaryKey,
+			                                 fieldDef.AutoIncrement,
+			                                 fieldDef.IsNullable,
+			                                 fieldDef.FieldLength,
+			                                 fieldDef.Scale,
+			                                 fieldDef.DefaultValue);
+			return string.Format("ALTER TABLE {0} MODIFY COLUMN {1};",
+			                     GetQuotedTableName(modelType.GetModelDefinition().ModelName),
+			                     column);
+		}
+		
+		public virtual string ToChangeColumnNameStatement(Type modelType,
+		                                                  FieldDefinition fieldDef,
+		                                                  string oldColumnName)
+		{
+			var column = GetColumnDefinition(fieldDef.FieldName,
+			                                 fieldDef.FieldType,
+			                                 fieldDef.IsPrimaryKey,
+			                                 fieldDef.AutoIncrement,
+			                                 fieldDef.IsNullable,
+			                                 fieldDef.FieldLength,
+			                                 fieldDef.Scale,
+			                                 fieldDef.DefaultValue);
+			return string.Format("ALTER TABLE {0} CHANGE COLUMN {1} {2};",
+			                     GetQuotedTableName(modelType.GetModelDefinition().ModelName),
+			                     GetQuotedColumnName(oldColumnName),
+			                     column);
+		}
+
+		public virtual string  ToAddForeignKeyStatement<T,TForeign>(Expression<Func<T,object>> field,
+		                                                            Expression<Func<TForeign,object>> foreignField,
+		                                                            OnFkOption onUpdate,
+		                                                            OnFkOption onDelete,
+		                                                            string foreignKeyName=null){
+			var sourceMD = ModelDefinition<T>.Definition;
+			var fieldName = sourceMD.GetFieldDefinition (field).FieldName; 
+						
+			var referenceMD=ModelDefinition<TForeign>.Definition;
+			var referenceFieldName= referenceMD.GetFieldDefinition(foreignField).FieldName;
+			
+			string name = GetQuotedName(foreignKeyName.IsNullOrEmpty()?
+			                            "fk_"+sourceMD.ModelName+"_"+ fieldName+"_"+referenceFieldName:
+			                            foreignKeyName);
+			
+			return string.Format("ALTER TABLE {0} ADD CONSTRAINT {1} FOREIGN KEY ({2}) REFERENCES {3} ({4}) ON UPDATE {5} ON DELETE {6};",
+			                     GetQuotedTableName(sourceMD.ModelName),
+			                     name,
+			                     GetQuotedColumnName(fieldName),
+			                     GetQuotedTableName(referenceMD.ModelName),
+			                     GetQuotedColumnName(referenceFieldName),
+			                     FkOptionToString(onUpdate),
+			                     FkOptionToString(onDelete));	
+		}
+
+		public virtual string ToCreateIndexStatement<T>(Expression<Func<T,object>> field,
+		                                                string indexName=null, bool unique=false)
+		{
+			
+			var sourceMD = ModelDefinition<T>.Definition;
+			var fieldName = sourceMD.GetFieldDefinition (field).FieldName;
+			
+			string name =GetQuotedName(indexName.IsNullOrEmpty()?
+			                           (unique?"uidx":"idx") +"_"+sourceMD.ModelName+"_"+fieldName:
+			                           indexName);
+			
+			string command = string.Format("CREATE{0}INDEX {1} ON {2}({3});",
+			                               unique?" UNIQUE ": " ",
+			                               name,
+			                               GetQuotedTableName(sourceMD.ModelName),
+			                               GetQuotedColumnName(fieldName)
+			                               );
+			return command;
+		}
+
+
+		protected string FkOptionToString(OnFkOption option){
+			switch(option){
+			case OnFkOption.Cascade: return "CASCADE";
+			case OnFkOption.NoAction: return "NO ACTION"; 
+			case OnFkOption.Restrict: return "RESTRICT"; 
+			case OnFkOption.SetNull: return "SET NULL"; 
+			default: return "RESTRICT";
+			}
+		}
+
+		#endregion DDL
+
     }
 }
