@@ -133,7 +133,12 @@ namespace ServiceStack.OrmLite
 
         public void RegisterConnection(string connectionKey, string connectionString, IOrmLiteDialectProvider dialectProvider, bool autoDisposeConnection = true)
         {
-            NamedConnections[connectionKey] = new OrmLiteConnectionFactory(connectionString, autoDisposeConnection, dialectProvider, autoDisposeConnection);
+            RegisterConnection(connectionKey, new OrmLiteConnectionFactory(connectionString, autoDisposeConnection, dialectProvider, autoDisposeConnection));
+        }
+
+        public void RegisterConnection(string connectionKey, OrmLiteConnectionFactory connectionFactory)
+        {
+            NamedConnections[connectionKey] = connectionFactory;
         }
     }
 
