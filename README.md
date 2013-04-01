@@ -344,6 +344,11 @@ db.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName);
 ```
 **UPDATE "Person" SET "FirstName" = 'JJ'**
 
+```csharp
+db.UpdateOnly(new Person { FirstName = "JJ", Age = 12 }, p => new { p.FirstName, p.Age });
+```
+**UPDATE "Person" SET "FirstName" = 'JJ', "Age" = 12**
+
 When present, the second expression is used as the where filter:
 ```csharp
 db.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName, p => p.LastName == "Hendrix");
@@ -947,3 +952,9 @@ As [performance is the most important feature](https://github.com/mythz/ScalingD
   * **[Simple.Data](https://github.com/markrendle/Simple.Data)** - by [@markrendle](http://twitter.com/markrendle)
     - A little slower than above ORMS, most wrist-friendly courtesy of a dynamic API, multiple RDBMS support inc. Mongo DB. Requires .NET 4.
 	
+
+# Community Resources
+
+  - [Simple ServiceStack OrmLite Example](http://www.curlette.com/?p=1068) by [@robrtc](https://twitter.com/robrtc)
+  - [OrmLite Blobbing done with NHibernate and Serialized JSON](http://www.philliphaydon.com/2012/03/ormlite-blobbing-done-with-nhibernate-and-serialized-json/) by [@philliphaydon](https://twitter.com/philliphaydon)
+  - [Creating An ASP.NET MVC Blog With ServiceStack.OrmLite](http://www.eggheadcafe.com/tutorials/asp-net/285cbe96-9922-406a-b193-3a0b40e31c40/creating-an-aspnet-mvc-blog-with-servicestackormlite.aspx) by [@peterbromberg](https://twitter.com/peterbromberg)

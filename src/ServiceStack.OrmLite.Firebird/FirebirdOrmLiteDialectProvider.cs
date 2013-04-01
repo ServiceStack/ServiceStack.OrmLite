@@ -40,6 +40,7 @@ namespace ServiceStack.OrmLite.Firebird
 			base.RealColumnDefinition= "FLOAT";
 			base.DefaultStringLength=128;
 			base.InitColumnTypeMap();
+			DefaultValueFormat = " DEFAULT '{0}'";
 		}
 		
 		public override IDbConnection CreateConnection(string connectionString, Dictionary<string, string> options)
@@ -334,20 +335,15 @@ namespace ServiceStack.OrmLite.Firebird
                 if (fieldDef.ForeignKey == null) continue;
 
                 var refModelDef = GetModel(fieldDef.ForeignKey.ReferenceType);
-				
-				var modelName= modelDef.IsInSchema
-					? modelDef.Schema + "_" + NamingStrategy.GetTableName(modelDef.ModelName)
-					: NamingStrategy.GetTableName(modelDef.ModelName);
-				
-				var refModelName= refModelDef.IsInSchema
-					? refModelDef.Schema + "_" + NamingStrategy.GetTableName(refModelDef.ModelName)
-					: NamingStrategy.GetTableName(refModelDef.ModelName);
-				
+								
                 sbConstraints.AppendFormat(", \n\n  CONSTRAINT {0} FOREIGN KEY ({1}) REFERENCES {2} ({3})",
                     GetQuotedName(fieldDef.ForeignKey.GetForeignKeyName(modelDef, refModelDef, NamingStrategy, fieldDef)),
 					GetQuotedColumnName(fieldDef.FieldName), 
 					GetQuotedTableName(refModelDef), 
 					GetQuotedColumnName(refModelDef.PrimaryKey.FieldName));
+
+				sbConstraints.Append(GetForeignKeyOnDeleteClause(fieldDef.ForeignKey));
+				sbConstraints.Append(GetForeignKeyOnUpdateClause(fieldDef.ForeignKey));
             }
 			
 			if (sbPk.Length !=0) sbColumns.AppendFormat(", \n  PRIMARY KEY({0})", sbPk);
@@ -402,16 +398,16 @@ namespace ServiceStack.OrmLite.Firebird
 
             var sql = new StringBuilder();
             sql.AppendFormat("{0} {1}", GetQuotedColumnName(fieldName), fieldDefinition);
-			
+
+			if (!string.IsNullOrEmpty(defaultValue))
+			{
+				sql.AppendFormat(DefaultValueFormat, defaultValue);
+			}
+
             if (!isNullable)
             {
                 sql.Append(" NOT NULL");
-            }
-
-            if (!string.IsNullOrEmpty(defaultValue))
-            {
-                sql.AppendFormat(DefaultValueFormat, defaultValue);
-            }
+            }           
 
             return sql.ToString();
 		}
@@ -734,6 +730,59 @@ namespace ServiceStack.OrmLite.Firebird
 			return result > 0;
 		}
 
+
+		public override string GetForeignKeyOnDeleteClause(ForeignKeyConstraint foreignKey)
+		{
+			return (!string.IsNullOrEmpty(foreignKey.OnDelete) && foreignKey.OnDelete.ToUpper()!="RESTRICT" )? " ON DELETE " + foreignKey.OnDelete : "";
+		}
+		
+		public override string GetForeignKeyOnUpdateClause(ForeignKeyConstraint foreignKey)
+		{
+			return (!string.IsNullOrEmpty(foreignKey.OnUpdate) && foreignKey.OnUpdate.ToUpper()!="RESTRICT" )? " ON UPDATE " + foreignKey.OnUpdate : "";
+		}
+
+		#region DDL
+		public override string ToAddColumnStatement(Type modelType, FieldDefinition fieldDef){
+			
+			var column = GetColumnDefinition(fieldDef.FieldName,
+			                                 fieldDef.FieldType,
+			                                 fieldDef.IsPrimaryKey,
+			                                 fieldDef.AutoIncrement,
+			                                 fieldDef.IsNullable,
+			                                 fieldDef.FieldLength,
+			                                 fieldDef.Scale,
+			                                 fieldDef.DefaultValue);
+			return string.Format("ALTER TABLE {0} ADD {1} ;",
+			                     GetQuotedTableName(GetModel(modelType).ModelName),
+			                     column);
+		}
+		
+		public override string ToAlterColumnStatement(Type modelType, FieldDefinition fieldDef)
+		{
+			
+			var column = GetColumnDefinition(fieldDef.FieldName,
+			                                 fieldDef.FieldType,
+			                                 fieldDef.IsPrimaryKey,
+			                                 fieldDef.AutoIncrement,
+			                                 fieldDef.IsNullable,
+			                                 fieldDef.FieldLength,
+			                                 fieldDef.Scale,
+			                                 fieldDef.DefaultValue);
+			return string.Format("ALTER TABLE {0} ALTER {1} ;",
+			                     GetQuotedTableName(GetModel(modelType).ModelName),
+			                     column);
+		}
+		
+		public override string ToChangeColumnNameStatement(Type modelType,
+		                                                   FieldDefinition fieldDef,
+		                                                   string oldColumnName)
+		{	
+			return string.Format("ALTER TABLE {0} ALTER {1} TO {2} ;",
+			                     GetQuotedTableName(GetModel(modelType).ModelName),
+			                     GetQuotedColumnName(oldColumnName),
+			                     GetQuotedColumnName(fieldDef.FieldName));
+		}
+		#endregion DDL
 	}
 }
 

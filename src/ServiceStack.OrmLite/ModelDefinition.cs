@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ServiceStack.DataAnnotations;
+using System.Linq.Expressions;
 
 namespace ServiceStack.OrmLite
 {
@@ -96,6 +97,29 @@ namespace ServiceStack.OrmLite
 		}
 		
 		public List<CompositeIndexAttribute> CompositeIndexes { get; set; }
+
+
+		public FieldDefinition GetFieldDefinition<T>(Expression<Func<T,object>> field)
+		{
+			var fn = GetFieldName (field);
+			return  FieldDefinitions.First(f=>f.Name==fn );
+		}
+
+		string GetFieldName<T>(Expression<Func<T,object>> field){
+			
+			var lambda = (field as LambdaExpression);
+			if( lambda.Body.NodeType==ExpressionType.MemberAccess)
+			{
+				var me = lambda.Body as MemberExpression;
+				return me.Member.Name;
+			}
+			else
+			{
+				var operand = (lambda.Body as UnaryExpression).Operand ;
+				return (operand as MemberExpression).Member.Name;
+			}
+		}
+
 	}
 
 
