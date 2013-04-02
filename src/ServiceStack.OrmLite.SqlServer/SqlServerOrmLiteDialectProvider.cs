@@ -99,6 +99,12 @@ namespace ServiceStack.OrmLite.SqlServer
 					return dateTimeValue - timeSpanOffset;
 				}
 
+                if (_ensureUtc && type == typeof (DateTime))
+                {
+                    var result = (DateTime)base.ConvertDbValue(value, type);
+                    return DateTime.SpecifyKind(result, DateTimeKind.Utc);
+                }
+
                 if (type == typeof(byte[]))
                     return value;
 
@@ -111,7 +117,7 @@ namespace ServiceStack.OrmLite.SqlServer
 		}
 
 
-		public override string GetQuotedValue(object value, Type fieldType)
+		public override string  GetQuotedValue(object value, Type fieldType)
 		{
 			if (value == null) return "NULL";
 
@@ -122,7 +128,9 @@ namespace ServiceStack.OrmLite.SqlServer
 			}
 			if (fieldType == typeof(DateTime))
 			{
-				var dateValue = (DateTime)value;
+                var dateValue = (DateTime)value;
+			    if (_ensureUtc && dateValue.Kind == DateTimeKind.Local)
+			        dateValue = dateValue.ToUniversalTime(); 
 				const string iso8601Format = "yyyyMMdd HH:mm:ss.fff";
 				return base.GetQuotedValue(dateValue.ToString(iso8601Format), typeof(string));
 			}
@@ -152,6 +160,12 @@ namespace ServiceStack.OrmLite.SqlServer
 			DateTimeColumnDefinition = shouldUseDatetime2 ? "datetime2" : "datetime";
 			base.DbTypeMap.Set<DateTime>(shouldUseDatetime2 ? DbType.DateTime2 : DbType.DateTime, DateTimeColumnDefinition);
 			base.DbTypeMap.Set<DateTime?>(shouldUseDatetime2 ? DbType.DateTime2 : DbType.DateTime, DateTimeColumnDefinition);
+		}
+
+		protected bool _ensureUtc;
+		public void EnsureUtc(bool shouldEnsureUtc)
+		{
+		    _ensureUtc = shouldEnsureUtc;
 		}
 
 		public override long GetLastInsertId(IDbCommand dbCmd)
