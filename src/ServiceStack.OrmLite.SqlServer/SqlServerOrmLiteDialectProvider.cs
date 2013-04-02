@@ -101,8 +101,10 @@ namespace ServiceStack.OrmLite.SqlServer
 
                 if (_ensureUtc && type == typeof (DateTime))
                 {
-                    var result = (DateTime)base.ConvertDbValue(value, type);
-                    return DateTime.SpecifyKind(result, DateTimeKind.Utc);
+                    var result = base.ConvertDbValue(value, type);
+                    if(result is DateTime)
+                        return DateTime.SpecifyKind((DateTime)result, DateTimeKind.Utc);
+                    return result;
                 }
 
                 if (type == typeof(byte[]))
