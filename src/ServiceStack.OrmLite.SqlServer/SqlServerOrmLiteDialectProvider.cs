@@ -99,6 +99,14 @@ namespace ServiceStack.OrmLite.SqlServer
 					return dateTimeValue - timeSpanOffset;
 				}
 
+                if (_ensureUtc && type == typeof (DateTime))
+                {
+                    var result = base.ConvertDbValue(value, type);
+                    if(result is DateTime)
+                        return DateTime.SpecifyKind((DateTime)result, DateTimeKind.Utc);
+                    return result;
+                }
+
                 if (type == typeof(byte[]))
                     return value;
 
@@ -111,7 +119,7 @@ namespace ServiceStack.OrmLite.SqlServer
 		}
 
 
-		public override string GetQuotedValue(object value, Type fieldType)
+		public override string  GetQuotedValue(object value, Type fieldType)
 		{
 			if (value == null) return "NULL";
 
@@ -122,7 +130,9 @@ namespace ServiceStack.OrmLite.SqlServer
 			}
 			if (fieldType == typeof(DateTime))
 			{
-				var dateValue = (DateTime)value;
+                var dateValue = (DateTime)value;
+			    if (_ensureUtc && dateValue.Kind == DateTimeKind.Local)
+			        dateValue = dateValue.ToUniversalTime(); 
 				const string iso8601Format = "yyyyMMdd HH:mm:ss.fff";
 				return base.GetQuotedValue(dateValue.ToString(iso8601Format), typeof(string));
 			}
@@ -150,24 +160,14 @@ namespace ServiceStack.OrmLite.SqlServer
 		{
 			_useDateTime2 = shouldUseDatetime2;
 			DateTimeColumnDefinition = shouldUseDatetime2 ? "datetime2" : "datetime";
-			InitColumnTypeMap();
+			base.DbTypeMap.Set<DateTime>(shouldUseDatetime2 ? DbType.DateTime2 : DbType.DateTime, DateTimeColumnDefinition);
+			base.DbTypeMap.Set<DateTime?>(shouldUseDatetime2 ? DbType.DateTime2 : DbType.DateTime, DateTimeColumnDefinition);
 		}
 
-		protected override void AddParameterForFieldToCommand(IDbCommand command, FieldDefinition fieldDef, object objWithProperties)
+		protected bool _ensureUtc;
+		public void EnsureUtc(bool shouldEnsureUtc)
 		{
-			//have to override, because DbTypeMap.Set<T> expects DbType, and SqlDbType is not a DbType...
-			if(_useDateTime2 && (fieldDef.FieldType == typeof(DateTime) || fieldDef.FieldType == typeof(DateTime?))) {
-				var sqlCmd = (SqlCommand)command;//should be SqlCommand...
-				var p = sqlCmd.CreateParameter();
-				p.ParameterName = string.Format("{0}{1}", ParamString, fieldDef.FieldName);
-
-				p.SqlDbType = SqlDbType.DateTime2;
-				p.Value = GetValueOrDbNull(fieldDef, objWithProperties);
-
-				command.Parameters.Add(p);
-			} else {
-				base.AddParameterForFieldToCommand(command, fieldDef, objWithProperties);
-			}
+		    _ensureUtc = shouldEnsureUtc;
 		}
 
 		public override long GetLastInsertId(IDbCommand dbCmd)

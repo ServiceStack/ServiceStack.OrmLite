@@ -50,7 +50,7 @@ extracting them from the published NuGet packages. The url to download a nuget p
     
  So to get the OrmLite MySQL provider in OSX/Linux (or using gnu tools for Windows) you can just do:
 
-    wget -O OrmLite.MySql.zip http://packages.nuget.org/api/v1/package/ServiceStack.OrmLite.MySql/3.9.42
+    wget -O OrmLite.MySql.zip http://packages.nuget.org/api/v1/package/ServiceStack.OrmLite.MySql/3.9.43
     unzip OrmLite.MySql.zip 'lib/*'
 
 which will download and extract the dlls into your local local `lib/` folder.
@@ -93,7 +93,7 @@ Apart from a slight performance increase, parameterized API's now lets you inser
 
 ## New API's to execute custom SQL
 
-Prior to v3.9.42 the ways to execute custom SQL was with `db.ExecuteSql()` which as it only returned an int code, users were using `db.Query` to read arbitrary sql returning tabular resultsets. However db.Query is only intended for SELECT statements. For this purpose we've introduced new API's for executing custom sql, e.g:
+Prior to v3.9.43 the ways to execute custom SQL was with `db.ExecuteSql()` which as it only returned an int code, users were using `db.Query` to read arbitrary sql returning tabular resultsets. However db.Query is only intended for SELECT statements. For this purpose we've introduced new API's for executing custom sql, e.g:
 
 ```csharp
 List<Poco> results = db.SqlList<Poco>("EXEC GetAnalyticsForWeek 1");
@@ -343,6 +343,11 @@ The first expression in an `UpdateOnly` statement is used to specify which field
 db.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName);
 ```
 **UPDATE "Person" SET "FirstName" = 'JJ'**
+
+```csharp
+db.UpdateOnly(new Person { FirstName = "JJ", Age = 12 }, p => new { p.FirstName, p.Age });
+```
+**UPDATE "Person" SET "FirstName" = 'JJ', "Age" = 12**
 
 When present, the second expression is used as the where filter:
 ```csharp
@@ -947,3 +952,9 @@ As [performance is the most important feature](https://github.com/mythz/ScalingD
   * **[Simple.Data](https://github.com/markrendle/Simple.Data)** - by [@markrendle](http://twitter.com/markrendle)
     - A little slower than above ORMS, most wrist-friendly courtesy of a dynamic API, multiple RDBMS support inc. Mongo DB. Requires .NET 4.
 	
+
+# Community Resources
+
+  - [Simple ServiceStack OrmLite Example](http://www.curlette.com/?p=1068) by [@robrtc](https://twitter.com/robrtc)
+  - [OrmLite Blobbing done with NHibernate and Serialized JSON](http://www.philliphaydon.com/2012/03/ormlite-blobbing-done-with-nhibernate-and-serialized-json/) by [@philliphaydon](https://twitter.com/philliphaydon)
+  - [Creating An ASP.NET MVC Blog With ServiceStack.OrmLite](http://www.eggheadcafe.com/tutorials/asp-net/285cbe96-9922-406a-b193-3a0b40e31c40/creating-an-aspnet-mvc-blog-with-servicestackormlite.aspx) by [@peterbromberg](https://twitter.com/peterbromberg)

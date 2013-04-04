@@ -47,10 +47,3 @@ COPY ..\src\ServiceStack.OrmLite.SqlServer\bin\%BUILD%\ServiceStack.OrmLite.* ..
 
 COPY ..\src\ServiceStack.OrmLite.Sqlite\bin\%BUILD%\ServiceStack.OrmLite.* ..\..\ServiceStack.Examples\lib
 COPY ..\src\ServiceStack.OrmLite.Sqlite\bin\%BUILD%\ServiceStack.OrmLite.* ..\..\ServiceStack.Contrib\lib
-
-
-REM Now using NuGet package
-REM COPY ..\lib\x32\net35\System.Data.SQLite.dll  ..\..\ServiceStack.OrmLite\NuGet\ServiceStack.OrmLite.Sqlite32\lib\net35
-REM COPY ..\lib\x32\net40\System.Data.SQLite.dll  ..\..\ServiceStack.OrmLite\NuGet\ServiceStack.OrmLite.Sqlite32\lib\net40
-REM COPY ..\lib\x64\net35\System.Data.SQLite.dll  ..\..\ServiceStack.OrmLite\NuGet\ServiceStack.OrmLite.Sqlite64\lib\net35
-REM COPY ..\lib\x64\net40\System.Data.SQLite.dll  ..\..\ServiceStack.OrmLite\NuGet\ServiceStack.OrmLite.Sqlite64\lib\net40

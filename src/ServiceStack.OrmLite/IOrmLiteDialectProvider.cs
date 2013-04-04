@@ -12,6 +12,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq.Expressions;
 
 namespace ServiceStack.OrmLite
 {
@@ -114,5 +115,19 @@ namespace ServiceStack.OrmLite
         string GetColumnTypeDefinition(Type fieldType);
 
         string GetDropForeignKeyConstraints(ModelDefinition modelDef);
+
+		#region DDL 
+		string ToAddColumnStatement (Type modelType, FieldDefinition fieldDef);
+		string ToAlterColumnStatement(Type modelType, FieldDefinition fieldDef);
+		string ToChangeColumnNameStatement(Type modelType, FieldDefinition fieldDef, string oldColumnName);
+		string ToAddForeignKeyStatement<T,TForeign>(Expression<Func<T,object>> field,
+		                                             Expression<Func<TForeign,object>> foreignField,
+		                                             OnFkOption onUpdate,
+		                                             OnFkOption onDelete,
+		                                             string foreignKeyName=null);
+		string ToCreateIndexStatement<T>(Expression<Func<T,object>> field,
+		                                 string indexName=null, bool unique=false);
+		#endregion DDL
+
     }
 }
