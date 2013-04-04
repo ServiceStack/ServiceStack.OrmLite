@@ -65,6 +65,9 @@
     <Reference Include="System.Configuration" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\GlobalAssemblyInfo.cs">
+      <Link>Properties\GlobalAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="CreatePostgreSQLTablesTests.cs" />
     <Compile Include="EnumTests.cs" />
     <Compile Include="Expressions\AdditiveExpressionsTest.cs" />
