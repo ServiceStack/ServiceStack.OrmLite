@@ -11,6 +11,8 @@ namespace ServiceStack.OrmLite
         private List<KeyValuePair<string, WhereType>> whereList = new List<KeyValuePair<string, WhereType>>();
         private List<string> columnList = new List<string>();
         private List<KeyValuePair<string, bool>> orderByList = new List<KeyValuePair<string, bool>>();
+        private bool isDistinct = false;
+        private bool isAggregateUsed = false;
 
         private string baseTableName = "";
         private Type basePocoType;
@@ -35,6 +37,21 @@ namespace ServiceStack.OrmLite
             if (func == null || func.Body == null)
                 return result;
             PropertyList(tableName,func.Body, result,withTablePrefix);
+            return result;
+        }
+
+        private List<string> ColumnList<T>(bool withTablePrefix = true)
+        {
+            var pocoType = typeof(T);
+            var tableName = pocoType.GetModelDefinition().ModelName;
+            List<string> result = new List<string>(pocoType.GetModelDefinition().FieldDefinitions.Count);
+            foreach (var item in pocoType.GetModelDefinition().FieldDefinitions)
+            {
+                if (withTablePrefix)
+                    result.Add(string.Format("{0}.{1}", OrmLiteConfig.DialectProvider.GetQuotedTableName(tableName), OrmLiteConfig.DialectProvider.GetQuotedColumnName(item.Name)));
+                else
+                    result.Add(string.Format("{0}", OrmLiteConfig.DialectProvider.GetQuotedColumnName(item.Name)));
+            }
             return result;
         }
 
@@ -107,6 +124,74 @@ namespace ServiceStack.OrmLite
             }
 
             this.columnList.AddRange(ColumnList(associatedType.GetModelDefinition().ModelName, selectColumns));
+            return this;
+        }
+
+        public JoinSqlBuilder<TNewPoco, TBasePoco> SelectAll<T>()
+        {
+            Type associatedType = this.PreviousAssociatedType(typeof(T), typeof(T));
+            if (associatedType == null)
+            {
+                throw new Exception("Either the source or destination table should be associated ");
+            }
+            this.columnList.AddRange(ColumnList<T>());
+            return this;
+        }
+
+        public JoinSqlBuilder<TNewPoco, TBasePoco> SelectDistinct()
+        {
+            isDistinct = true;
+            return this;
+        }
+
+        public JoinSqlBuilder<TNewPoco, TBasePoco> SelectMax<T>(Expression<Func<T, object>> selectColumn)
+        {
+            return SelectGenericAggregate<T>(selectColumn, "MAX");
+        }
+
+        public JoinSqlBuilder<TNewPoco, TBasePoco> SelectMin<T>(Expression<Func<T, object>> selectColumn)
+        {
+            return SelectGenericAggregate<T>(selectColumn, "MIN");
+        }
+
+        public JoinSqlBuilder<TNewPoco, TBasePoco> SelectCount<T>(Expression<Func<T, object>> selectColumn)
+        {
+            return SelectGenericAggregate<T>(selectColumn, "COUNT");
+        }
+
+        public JoinSqlBuilder<TNewPoco, TBasePoco> SelectAverage<T>(Expression<Func<T, object>> selectColumn)
+        {
+            return SelectGenericAggregate<T>(selectColumn, "AVG");
+        }
+
+        public JoinSqlBuilder<TNewPoco, TBasePoco> SelectSum<T>(Expression<Func<T, object>> selectColumn)
+        {
+            return SelectGenericAggregate<T>(selectColumn, "SUM");
+        }
+
+        private JoinSqlBuilder<TNewPoco, TBasePoco> SelectGenericAggregate<T>(Expression<Func<T, object>> selectColumn, string functionName)
+        {
+            Type associatedType = this.PreviousAssociatedType(typeof(T), typeof(T));
+            if (associatedType == null)
+            {
+                throw new Exception("Either the source or destination table should be associated ");
+            }
+            isAggregateUsed = true;
+
+            CheckAggregateUsage(true);
+            
+            var columns = ColumnList(associatedType.GetModelDefinition().ModelName, selectColumn);
+            if ((columns.Count == 0) || (columns.Count > 1))
+            {
+                throw new Exception("Expression should select only one Column ");            
+            }
+            this.columnList.Add(string.Format(" {0}({1}) ",functionName.ToUpper(),columns[0]));
+            return this;
+        }
+
+        public JoinSqlBuilder<TNewPoco, TBasePoco> SelectMin()
+        {
+            isDistinct = true;
             return this;
         }
 
@@ -298,8 +383,18 @@ namespace ServiceStack.OrmLite
             return null;
         }
 
+        private void CheckAggregateUsage(bool ignoreCurrentItem)
+        {
+            if ((columnList.Count > ( ignoreCurrentItem ? 0 : 1)) && (isAggregateUsed == true))
+            {
+                throw new Exception("Aggregate function cannot be used with non aggregate select columns");
+            }
+        }
+
         public string ToSql()
         {
+            CheckAggregateUsage(false);
+
             var sb = new StringBuilder();
             sb.Append("SELECT ");
 
@@ -307,6 +402,9 @@ namespace ServiceStack.OrmLite
 
             if (columnList.Count > 0)
             {
+                if (isDistinct)
+                    sb.Append(" DISTINCT ");
+
                 foreach (var col in columnList)
                 {
                     colSB.AppendFormat("{0}{1}", colSB.Length > 0 ? "," : "", col);
@@ -314,6 +412,9 @@ namespace ServiceStack.OrmLite
             }
             else
             {
+                if (isDistinct && typeof(TNewPoco).GetModelDefinition().FieldDefinitions.Count > 0)
+                    sb.Append(" DISTINCT ");
+
                 foreach ( var fi in typeof(TNewPoco).GetModelDefinition().FieldDefinitions)
                 {
                     colSB.AppendFormat("{0}{1}", colSB.Length > 0 ? "," : "", String.IsNullOrEmpty(fi.BelongToModelName) ? (fi.FieldName) : ((OrmLiteConfig.DialectProvider.GetQuotedTableName(fi.BelongToModelName) + "." + OrmLiteConfig.DialectProvider.GetQuotedColumnName(fi.FieldName))));

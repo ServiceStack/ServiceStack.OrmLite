@@ -121,6 +121,91 @@ namespace SqliteExpressionsTest
                 var sql2 = jn.ToSql();
                 var item = db.QuerySingle<UserEx>(sql2);
 
+                jn.Clear();
+                jn = new JoinSqlBuilder<UserEx, User>();
+                jn = jn.Join<User, UserData>(x => x.UserDataId, x => x.Id)
+                       .LeftJoin<User, UserService>(x => x.UserServiceId, x => x.Id)
+                       .OrderByDescending<User>(x=>x.Name)
+                       .OrderBy<User>(x=>x.Id)
+                       .SelectAll<UserData>()
+                       .Where<User>(x=> x.Id == 0);
+
+                var sql3 = jn.ToSql();
+                var items3 = db.Query<UserEx>(sql3);
+
+                jn.Clear();
+                jn = new JoinSqlBuilder<UserEx, User>();
+                jn = jn.Join<User, UserData>(x => x.UserDataId, x => x.Id, x => new { x.Name, x.Id }, x => new { x.UserDataValue })
+                       .LeftJoin<User, UserService>(x => x.UserServiceId, x => x.Id, null, x => new { x.ServiceName })
+                       .OrderByDescending<User>(x=>x.Name)
+                       .OrderBy<User>(x=>x.Id)
+                       .SelectDistinct()
+                       .SelectAll<UserData>()
+                       .Where<User>(x=> x.Id == 0);
+
+                var sql4 = jn.ToSql();
+                var items4 = db.Query<UserEx>(sql4);
+
+                jn.Clear();
+                jn = new JoinSqlBuilder<UserEx, User>();
+                jn = jn.Join<User, UserData>(x => x.UserDataId, x => x.Id)
+                       .LeftJoin<User, UserService>(x => x.UserServiceId, x => x.Id)
+                       .OrderByDescending<User>(x=>x.Name)
+                       .OrderBy<User>(x=>x.Id)
+                       .SelectCount<User>(x=>x.Id)
+                       .Where<User>(x=> x.Id == 0);
+
+                var sql5 = jn.ToSql();
+                var items5 = db.GetScalar<long>(sql5);
+
+                jn.Clear();
+                jn = new JoinSqlBuilder<UserEx, User>();
+                jn = jn.Join<User, UserData>(x => x.UserDataId, x => x.Id)
+                       .LeftJoin<User, UserService>(x => x.UserServiceId, x => x.Id)
+                       .OrderByDescending<User>(x => x.Name)
+                       .OrderBy<User>(x=>x.Id)
+                       .SelectMax<User>(x=>x.Id)
+                       .Where<User>(x=> x.Id == 0);
+
+                var sql6 = jn.ToSql();
+                var items6 = db.GetScalar<long>(sql6);
+
+                jn.Clear();
+                jn = new JoinSqlBuilder<UserEx, User>();
+                jn = jn.Join<User, UserData>(x => x.UserDataId, x => x.Id)
+                       .LeftJoin<User, UserService>(x => x.UserServiceId, x => x.Id)
+                       .OrderByDescending<User>(x => x.Name)
+                       .OrderBy<User>(x=>x.Id)
+                       .SelectMin<User>(x=>x.Id)
+                       .Where<User>(x=> x.Id == 0);
+
+                var sql7 = jn.ToSql();
+                var items7 = db.GetScalar<long>(sql7);
+
+                jn.Clear();
+                jn = new JoinSqlBuilder<UserEx, User>();
+                jn = jn.Join<User, UserData>(x => x.UserDataId, x => x.Id)
+                       .LeftJoin<User, UserService>(x => x.UserServiceId, x => x.Id)
+                       .OrderByDescending<User>(x => x.Name)
+                       .OrderBy<User>(x=>x.Id)
+                       .SelectAverage<User>(x=>x.Id)
+                       .Where<User>(x=> x.Id == 0);
+
+                var sql8 = jn.ToSql();
+                var items8 = db.GetScalar<long>(sql8);
+
+                jn.Clear();
+                jn = new JoinSqlBuilder<UserEx, User>();
+                jn = jn.Join<User, UserData>(x => x.UserDataId, x => x.Id)
+                       .LeftJoin<User, UserService>(x => x.UserServiceId, x => x.Id)
+                       .OrderByDescending<User>(x => x.Name)
+                       .OrderBy<User>(x=>x.Id)
+                       .SelectSum<User>(x=>x.Id)
+                       .Where<User>(x=> x.Id == 0);
+
+                var sql9 = jn.ToSql();
+                var items9 = db.GetScalar<long>(sql9);
+
             }
 
             File.Delete(path);
