@@ -16,6 +16,7 @@ namespace ServiceStack.OrmLite
         public IDbTransaction Transaction { get; internal set; }
 		private IDbConnection dbConnection;
 		private bool isOpen;
+        private int transactionThreadId = -1;
 
         public OrmLiteConnection(OrmLiteConnectionFactory factory)
         {
@@ -113,7 +114,13 @@ namespace ServiceStack.OrmLite
 			get { return DbConnection.State; }
 		}
 
-		public static explicit operator SqlConnection(OrmLiteConnection dbConn)
+	    public int TransactionThreadId
+	    {
+            get { lock(this){return transactionThreadId;} }
+            set { lock (this){transactionThreadId = value;} }
+	    }
+
+	    public static explicit operator SqlConnection(OrmLiteConnection dbConn)
 		{
 			return (SqlConnection)dbConn.DbConnection;
 		}

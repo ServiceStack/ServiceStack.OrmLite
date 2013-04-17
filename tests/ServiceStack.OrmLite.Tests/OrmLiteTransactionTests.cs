@@ -1,4 +1,6 @@
 using System;
+using System.Data;
+using System.Diagnostics;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
 using ServiceStack.DataAnnotations;
@@ -11,6 +13,9 @@ namespace ServiceStack.OrmLite.Tests
 	public class OrmLiteTransactionTests 
 		: OrmLiteTestBase
 	{
+        private bool _firstThreadCompleted = false;
+	    private bool _secondThreadFinished = false;
+
 		[Test]
 		public void Transaction_commit_persists_data_to_the_db()
 		{
@@ -122,78 +127,181 @@ namespace ServiceStack.OrmLite.Tests
             public String SomeTextField { get; set; }
         }
 
-        [Test]
-        public void Does_Sqlite_transactions()
-        {
-            var factory = new OrmLiteConnectionFactory(":memory:", true, SqliteDialect.Provider);
+	    [Test]
+	    public void Does_Sqlite_transactions()
+	    {
+	        var factory = new OrmLiteConnectionFactory(":memory:", true, SqliteDialect.Provider);
 
-            // test 1 - no transactions
+	        // test 1 - no transactions
+	        try
+	        {
+	            using (var conn = factory.OpenDbConnection())
+	            {
+	                conn.CreateTable<MyTable>();
+
+	                conn.Insert(new MyTable {SomeTextField = "Example"});
+	                var record = conn.GetById<MyTable>(1);
+	            }
+
+	            "Test 1 Success".Print();
+	        }
+	        catch (Exception e)
+	        {
+	            Assert.Fail("Test 1 Failed: {0}".Fmt(e.Message));
+	        }
+
+	        // test 2 - all transactions
+	        try
+	        {
+	            using (var conn = factory.OpenDbConnection())
+	            {
+	                conn.CreateTable<MyTable>();
+
+	                using (var tran = conn.OpenTransaction())
+	                {
+	                    conn.Insert(new MyTable {SomeTextField = "Example"});
+	                    tran.Commit();
+	                }
+
+	                using (var tran = conn.OpenTransaction())
+	                {
+	                    var record = conn.GetById<MyTable>(1);
+	                }
+	            }
+
+	            "Test 2 Success".Print();
+	        }
+	        catch (Exception e)
+	        {
+	            Assert.Fail("Test 2 Failed: {0}".Fmt(e.Message));
+	        }
+
+	        // test 3 - transaction for insert, not for select
+	        try
+	        {
+	            using (var conn = factory.OpenDbConnection())
+	            {
+	                conn.CreateTable<MyTable>();
+
+	                using (var tran = conn.OpenTransaction())
+	                {
+	                    conn.Insert(new MyTable {SomeTextField = "Example"});
+	                    tran.Commit();
+	                }
+
+	                var record = conn.GetById<MyTable>(1);
+	            }
+
+	            "Test 3 Success".Print();
+	        }
+	        catch (Exception e)
+	        {
+	            Assert.Fail("Test 3 Failed: {0}".Fmt(e.Message));
+	        }
+
+	        // test 4 - use transaction
+	        try
+	        {
+	            using (var conn = factory.OpenDbConnection())
+	            {
+	                conn.CreateTable<MyTable>();
+
+	                conn.UseTransaction((T) =>
+	                    {
+	                        conn.Insert(new MyTable {SomeTextField = "Example"});
+	                        T.Commit();
+	                    });
+
+	                var record = conn.GetById<MyTable>(1);
+	            }
+
+	            "Test 4 Success".Print();
+	        }
+	        catch (Exception e)
+	        {
+	            Assert.Fail("Test 4 Failed: {0}".Fmt(e.Message));
+	        }
+
+            // test 5 - use transaction blocks writes
             try
             {
-                using (var conn = factory.OpenDbConnection())
-                {
-                    conn.CreateTable<MyTable>();
+                var conn = factory.OpenDbConnection();
+                conn.CreateTable<MyTable>();
 
+                var thread = new System.Threading.Thread(() =>
+                    {
+                        conn.Insert(new MyTable { SomeTextField = "Example2" });
+                        if (_firstThreadCompleted)
+                            conn.Dispose();
+                        _secondThreadFinished = true;
+                    });
+
+                conn.UseTransaction((T) =>
+                {
                     conn.Insert(new MyTable { SomeTextField = "Example" });
-                    var record = conn.GetById<MyTable>(1);
-                }
+                    thread.Start();
+                    System.Threading.Thread.Sleep(3000);
+                    T.Commit();
+                    Assert.That(_secondThreadFinished, Is.EqualTo(false));
+                });
 
-                "Test 1 Success".Print();
+                var record = conn.GetById<MyTable>(1);
+
+                _firstThreadCompleted = true;
+
+                if(_secondThreadFinished)
+                    conn.Dispose();
+
+                "Test 5 Success".Print();
             }
             catch (Exception e)
             {
-                Assert.Fail("Test 1 Failed: {0}".Fmt(e.Message));
+                Assert.Fail("Test 5 Failed: {0}".Fmt(e.Message));
             }
 
-            // test 2 - all transactions
+            _firstThreadCompleted = false;
+	        _secondThreadFinished = false;
+
+            // test 6 - use transaction blocks use transactions from other threads
             try
             {
-                using (var conn = factory.OpenDbConnection())
+                var conn = factory.OpenDbConnection();
+                conn.CreateTable<MyTable>();
+
+                var thread = new System.Threading.Thread(() =>
                 {
-                    conn.CreateTable<MyTable>();
+                    conn.UseTransaction((T) =>
+                        {
+                            //no-op;
+                        });
+                    
+                    if (_firstThreadCompleted)
+                        conn.Dispose();
+                    _secondThreadFinished = true;
+                });
 
-                    using (var tran = conn.OpenTransaction())
-                    {
-                        conn.Insert(new MyTable { SomeTextField = "Example" });
-                        tran.Commit();
-                    }
+                conn.UseTransaction((T) =>
+                {
+                    conn.Insert(new MyTable { SomeTextField = "Example" });
+                    thread.Start();
+                    System.Threading.Thread.Sleep(3000);
+                    T.Commit();
+                    Assert.That(_secondThreadFinished, Is.EqualTo(false));
+                });
 
-                    using (var tran = conn.OpenTransaction())
-                    {
-                        var record = conn.GetById<MyTable>(1);
-                    }
-                }
+                var record = conn.GetById<MyTable>(1);
 
-                "Test 2 Success".Print();
+                _firstThreadCompleted = true;
+
+                if (_secondThreadFinished)
+                    conn.Dispose();
+
+                "Test 6 Success".Print();
             }
             catch (Exception e)
             {
-                Assert.Fail("Test 2 Failed: {0}".Fmt(e.Message));
+                Assert.Fail("Test 6 Failed: {0}".Fmt(e.Message));
             }
-
-            // test 3 - transaction for insert, not for select
-            try
-            {
-                using (var conn = factory.OpenDbConnection())
-                {
-                    conn.CreateTable<MyTable>();
-
-                    using (var tran = conn.OpenTransaction())
-                    {
-                        conn.Insert(new MyTable { SomeTextField = "Example" });
-                        tran.Commit();
-                    }
-
-                    var record = conn.GetById<MyTable>(1);
-                }
-
-                "Test 3 Success".Print();
-            }
-            catch (Exception e)
-            {
-                Assert.Fail("Test 3 Failed: {0}".Fmt(e.Message));
-            }
-        }
- 
+	    }
 	}
 }
