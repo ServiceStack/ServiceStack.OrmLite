@@ -15,54 +15,84 @@ namespace ServiceStack.OrmLite
             return dbConn.GetDialectProvider().ExpressionVisitor<T>();
         }
 
+        private static bool LockNeeded(IDbConnection dbConn)
+        {
+            var currentThreadId = System.Threading.Thread.CurrentThread.ManagedThreadId;
+            return dbConn is OrmLiteConnection &&
+                   ((OrmLiteConnection)dbConn).TransactionThreadId != currentThreadId;
+        }
+
         public static T Exec<T>(this IDbConnection dbConn, Func<IDbCommand, T> filter)
         {
-            var holdProvider = OrmLiteConfig.TSDialectProvider;
-            try
-            {
-                var ormLiteDbConn = dbConn as OrmLiteConnection;
-                if (ormLiteDbConn != null)
-                    OrmLiteConfig.TSDialectProvider = ormLiteDbConn.Factory.DialectProvider;
-
-                using (var dbCmd = dbConn.CreateCommand())
+            Func<T> func = () =>
                 {
-                    dbCmd.Transaction = (ormLiteDbConn != null) ? ormLiteDbConn.Transaction : OrmLiteConfig.TSTransaction;
+                    var holdProvider = OrmLiteConfig.TSDialectProvider;
+                    try
+                    {
+                        var ormLiteDbConn = dbConn as OrmLiteConnection;
+                        if (ormLiteDbConn != null)
+                            OrmLiteConfig.TSDialectProvider = ormLiteDbConn.Factory.DialectProvider;
 
-                    var ret = filter(dbCmd);
-                    LastCommandText = dbCmd.CommandText;
-                    return ret;
-                }
-            }
-            finally
-            {
-                OrmLiteConfig.TSDialectProvider = holdProvider;
-            }
+                        using (var dbCmd = dbConn.CreateCommand())
+                        {
+                            dbCmd.Transaction = (ormLiteDbConn != null) ? ormLiteDbConn.Transaction : OrmLiteConfig.TSTransaction;
+
+                            var ret = filter(dbCmd);
+                            LastCommandText = dbCmd.CommandText;
+                            return ret;
+                        }
+                    }
+                    finally
+                    {
+                        OrmLiteConfig.TSDialectProvider = holdProvider;
+                    }
+                };
+
+            if (LockNeeded(dbConn))
+                lock (dbConn)
+                    return func.Invoke();
+
+            return func.Invoke();
         }
 
         public static void Exec(this IDbConnection dbConn, Action<IDbCommand> filter)
         {
-            var dialectProvider = OrmLiteConfig.DialectProvider;
-            try
-            {
-                var ormLiteDbConn = dbConn as OrmLiteConnection;
-                if (ormLiteDbConn != null)
-                    OrmLiteConfig.DialectProvider = ormLiteDbConn.Factory.DialectProvider;
-
-                using (var dbCmd = dbConn.CreateCommand())
+            Action func = () =>
                 {
-                    dbCmd.Transaction = (ormLiteDbConn != null) ? ormLiteDbConn.Transaction : OrmLiteConfig.TSTransaction;
+                    var dialectProvider = OrmLiteConfig.DialectProvider;
+                    try
+                    {
+                        var ormLiteDbConn = dbConn as OrmLiteConnection;
+                        if (ormLiteDbConn != null)
+                            OrmLiteConfig.DialectProvider = ormLiteDbConn.Factory.DialectProvider;
 
-                    filter(dbCmd);
-                    LastCommandText = dbCmd.CommandText;
+                        using (var dbCmd = dbConn.CreateCommand())
+                        {
+                            dbCmd.Transaction = (ormLiteDbConn != null)
+                                                    ? ormLiteDbConn.Transaction
+                                                    : OrmLiteConfig.TSTransaction;
+
+                            filter(dbCmd);
+                            LastCommandText = dbCmd.CommandText;
+                        }
+                    }
+                    finally
+                    {
+                        OrmLiteConfig.DialectProvider = dialectProvider;
+                    }
+                };
+
+            if (LockNeeded(dbConn))
+                lock (dbConn)
+                {
+                    func.Invoke();
+                    return;
                 }
-            }
-            finally
-            {
-                OrmLiteConfig.DialectProvider = dialectProvider;
-            }
+                    
+            func.Invoke();
         }
 
-        public static IEnumerable<T> ExecLazy<T>(this IDbConnection dbConn, Func<IDbCommand, IEnumerable<T>> filter)
+        private static IEnumerable<T> ExecLazyMain<T>(this IDbConnection dbConn, Func<IDbCommand, IEnumerable<T>> filter)
         {
             var dialectProvider = OrmLiteConfig.DialectProvider;
             try
@@ -86,6 +116,39 @@ namespace ServiceStack.OrmLite
             finally
             {
                 OrmLiteConfig.DialectProvider = dialectProvider;
+            }
+        }
+
+        public static IEnumerable<T> ExecLazy<T>(this IDbConnection dbConn, Func<IDbCommand, IEnumerable<T>> filter)
+        {
+            if (LockNeeded(dbConn))
+                lock (dbConn)
+                    return ExecLazyMain<T>(dbConn, filter);
+
+            return ExecLazyMain<T>(dbConn, filter);
+        }
+
+        public static void UseTransaction(this IDbConnection dbConn, Action<IDbTransaction> action, IsolationLevel? isolationLevel = null)
+        {
+            var currentThreadId = System.Threading.Thread.CurrentThread.ManagedThreadId;
+            if (dbConn is OrmLiteConnection && ((OrmLiteConnection) dbConn).TransactionThreadId != currentThreadId)
+            {
+                lock (dbConn)
+                {
+                    using (var trans = (null == isolationLevel ? dbConn.OpenTransaction() : dbConn.OpenTransaction(isolationLevel.Value)))
+                    {
+                        ((OrmLiteConnection) dbConn).TransactionThreadId = currentThreadId;
+                        action.Invoke(trans);
+                        ((OrmLiteConnection)dbConn).TransactionThreadId = -1;
+                    }   
+                }
+            }
+            else
+            {
+                using (var trans = (null == isolationLevel ? dbConn.OpenTransaction() : dbConn.OpenTransaction(isolationLevel.Value)))
+                {
+                    action.Invoke(trans);
+                }
             }
         }
 
