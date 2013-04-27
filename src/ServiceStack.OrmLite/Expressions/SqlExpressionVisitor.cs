@@ -1167,6 +1167,15 @@ namespace ServiceStack.OrmLite
 
             switch (m.Method.Name)
             {
+                case "Trim":
+                    statement = string.Format("ltrim(rtrim({0}))", quotedColName);
+                    break;
+                case "LTrim":
+                    statement = string.Format("ltrim({0})", quotedColName);
+                    break;
+                case "RTrim":
+                    statement = string.Format("rtrim({0})", quotedColName);
+                    break;
                 case "ToUpper":
                     statement = string.Format("upper({0})", quotedColName);
                     break;
