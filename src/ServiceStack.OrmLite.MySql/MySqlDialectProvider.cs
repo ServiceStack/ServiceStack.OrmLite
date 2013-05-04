@@ -12,7 +12,7 @@ namespace ServiceStack.OrmLite.MySql
     {
         public static MySqlDialectProvider Instance = new MySqlDialectProvider();
 
-    	private const string TextColumnDefinition = "TEXT";
+    	//private const string TextColumnDefinition = "TEXT";
 
     	private MySqlDialectProvider()
         {
@@ -171,10 +171,28 @@ namespace ServiceStack.OrmLite.MySql
 
         public string GetColumnDefinition(FieldDefinition fieldDefinition)
         {
-            if (fieldDefinition.PropertyInfo.FirstAttribute<TextAttribute>() != null)
+            var textAttribute = fieldDefinition.PropertyInfo.FirstAttribute<TextAttribute>();
+            if (textAttribute != null)
             {
+                string textColumnDefinition;
+                switch (textAttribute.MySqlTextType)
+                {
+                    case MySqlTextType.TINYTEXT:
+                        textColumnDefinition = "TINYTEXT";
+                        break;
+                    case MySqlTextType.MEDIUMTEXT:
+                        textColumnDefinition = "MEDIUMTEXT";
+                        break;
+                    case MySqlTextType.LONGTEXT:
+                        textColumnDefinition = "LONGTEXT";
+                        break;
+                    case MySqlTextType.TEXT:
+                    default:
+                        textColumnDefinition = "TEXT";
+                        break;
+                }
                 var sql = new StringBuilder();
-                sql.AppendFormat("{0} {1}", GetQuotedColumnName(fieldDefinition.FieldName), TextColumnDefinition);
+                sql.AppendFormat("{0} {1}", GetQuotedColumnName(fieldDefinition.FieldName), textColumnDefinition);
                 sql.Append(fieldDefinition.IsNullable ? " NULL" : " NOT NULL");
                 return sql.ToString();
             }
