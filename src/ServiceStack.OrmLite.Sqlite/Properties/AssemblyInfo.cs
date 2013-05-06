@@ -9,8 +9,12 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Microsoft")]
-[assembly: AssemblyProduct("ServiceStack.OrmLite.Sqlite")]
-[assembly: AssemblyCopyright("Copyright © Microsoft 2009")]
+#if NET35
+[assembly: AssemblyProduct("ServiceStack.OrmLite.Sqlite CLI 3.5")]
+#elif NET40
+[assembly: AssemblyProduct("ServiceStack.OrmLite.Sqlite CLI 4.0")]
+#endif
+[assembly: AssemblyCopyright("Copyright © ServiceStack 2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
