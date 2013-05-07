@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using ServiceStack.Text;
@@ -134,7 +135,7 @@ namespace ServiceStack.OrmLite.SqlServer
 			    if (_ensureUtc && dateValue.Kind == DateTimeKind.Local)
 			        dateValue = dateValue.ToUniversalTime(); 
 				const string iso8601Format = "yyyyMMdd HH:mm:ss.fff";
-				return base.GetQuotedValue(dateValue.ToString(iso8601Format), typeof(string));
+				return base.GetQuotedValue(dateValue.ToString(iso8601Format,CultureInfo.InvariantCulture) , typeof(string));
 			}
 			if (fieldType == typeof(bool))
 			{
