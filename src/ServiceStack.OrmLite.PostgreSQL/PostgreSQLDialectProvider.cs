@@ -157,7 +157,15 @@ namespace ServiceStack.OrmLite.PostgreSQL
 		{
 			var sql = "SELECT COUNT(*) FROM pg_class WHERE relname = {0}"
 				.SqlFormat(tableName);
-
+		    var conn = dbCmd.Connection;
+            if (conn != null)
+            {
+                var builder = new NpgsqlConnectionStringBuilder(conn.ConnectionString);
+                // If a search path (schema) is specified, and there is only one, then assume the CREATE TABLE directive should apply to that schema.
+                if (!String.IsNullOrEmpty(builder.SearchPath) && !builder.SearchPath.Contains(","))
+                    sql = "SELECT COUNT(*) FROM pg_class JOIN pg_catalog.pg_namespace n ON n.oid = pg_class.relnamespace WHERE relname = {0} AND nspname = {1}"
+                          .SqlFormat(tableName, builder.SearchPath);
+            }     
 			dbCmd.CommandText = sql;
 			var result = dbCmd.GetLongScalar();
 
