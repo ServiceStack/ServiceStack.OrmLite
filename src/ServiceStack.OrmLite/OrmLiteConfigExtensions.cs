@@ -112,6 +112,7 @@ namespace ServiceStack.OrmLite
 
                 var referencesAttr = propertyInfo.FirstAttribute<ReferencesAttribute>();
                 var foreignKeyAttr = propertyInfo.FirstAttribute<ForeignKeyAttribute>();
+                var pkNameAttribute = propertyInfo.FirstAttribute<PrimaryKeyNameAttribute>();
 
                 if (decimalAttribute != null && stringLengthAttr == null)
                     stringLengthAttr = new StringLengthAttribute(decimalAttribute.Precision);
@@ -150,7 +151,8 @@ namespace ServiceStack.OrmLite
                     ComputeExpression =
                         computeAttr != null ? computeAttr.Expression : string.Empty,
                     Scale = decimalAttribute != null ? decimalAttribute.Scale : (int?)null,
-                    BelongToModelName = belongToAttribute != null ? belongToAttribute.BelongToTableType.GetModelDefinition().ModelName : null, 
+                    BelongToModelName = belongToAttribute != null ? belongToAttribute.BelongToTableType.GetModelDefinition().ModelName : null,
+                    PrimaryKeyNameTemplate = pkNameAttribute != null ? pkNameAttribute.Template : string.Empty,
                 };
 
                 if (propertyInfo.FirstAttribute<IgnoreAttribute>() != null)

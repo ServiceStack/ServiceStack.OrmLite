@@ -114,6 +114,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="OrmLiteNamingStrategyBase.cs" />
+    <Compile Include="PrimaryKeyNameAttribute.cs" />
     <Compile Include="PropertyInvoker.cs" />
     <Compile Include="FieldDefinition.cs" />
     <Compile Include="IPropertyInvoker.cs" />

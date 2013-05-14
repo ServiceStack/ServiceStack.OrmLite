@@ -276,10 +276,13 @@ namespace ServiceStack.OrmLite.SqlServer
 
                 if (fieldDef.IsPrimaryKey)
                 {
+                    string primaryKeyTemplateName = string.IsNullOrEmpty(fieldDef.PrimaryKeyNameTemplate) ? "PK_{0}_{1}" : fieldDef.PrimaryKeyNameTemplate;
+                    primaryKeyTemplateName = string.Format("CONSTRAINT [{0}] PRIMARY KEY", primaryKeyTemplateName);
+
                     columnDefinition = columnDefinition.Replace(
                         "PRIMARY KEY",
                         string.Format(
-                            "CONSTRAINT [PK_{0}_{1}] PRIMARY KEY",
+                            primaryKeyTemplateName,
                             NamingStrategy.GetTableName(modelDef.Name),
                             modelDef.PrimaryKey.FieldName));
                 }
