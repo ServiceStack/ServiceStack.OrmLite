@@ -76,6 +76,7 @@
     <Compile Include="Expressions\TestType.cs" />
     <Compile Include="Expressions\UnaryExpressionsTest.cs" />
     <Compile Include="ForeignKeyAttributeTests.cs" />
+    <Compile Include="OrmLiteCreateTableTests.cs" />
     <Compile Include="OrmLiteTestBase.cs" />
     <Compile Include="SqlServerExpressionVisitorQueryTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

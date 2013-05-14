@@ -253,5 +253,57 @@ namespace ServiceStack.OrmLite.SqlServer
 
             return sb.ToString();
         }
+
+        public override string ToCreateTableStatement(Type tableType)
+        {
+            var sbColumns = new StringBuilder();
+            var sbConstraints = new StringBuilder();
+
+            var modelDef = GetModel(tableType);
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+                if (sbColumns.Length != 0) sbColumns.Append(", \n  ");
+
+                var columnDefinition = GetColumnDefinition(
+                    fieldDef.FieldName,
+                    fieldDef.FieldType,
+                    fieldDef.IsPrimaryKey,
+                    fieldDef.AutoIncrement,
+                    fieldDef.IsNullable,
+                    fieldDef.FieldLength,
+                    null,
+                    fieldDef.DefaultValue);
+
+                if (fieldDef.IsPrimaryKey)
+                {
+                    columnDefinition = columnDefinition.Replace(
+                        "PRIMARY KEY",
+                        string.Format(
+                            "CONSTRAINT [PK_{0}_{1}] PRIMARY KEY",
+                            NamingStrategy.GetTableName(modelDef.Name),
+                            modelDef.PrimaryKey.FieldName));
+                }
+
+                sbColumns.Append(columnDefinition);
+
+                if (fieldDef.ForeignKey == null) continue;
+
+                var refModelDef = GetModel(fieldDef.ForeignKey.ReferenceType);
+                sbConstraints.AppendFormat(
+                    ", \n\n  CONSTRAINT {0} FOREIGN KEY ({1}) REFERENCES {2} ({3})",
+                    GetQuotedName(fieldDef.ForeignKey.GetForeignKeyName(modelDef, refModelDef, NamingStrategy, fieldDef)),
+                    GetQuotedColumnName(fieldDef.FieldName),
+                    GetQuotedTableName(refModelDef),
+                    GetQuotedColumnName(refModelDef.PrimaryKey.FieldName));
+
+                sbConstraints.Append(GetForeignKeyOnDeleteClause(fieldDef.ForeignKey));
+                sbConstraints.Append(GetForeignKeyOnUpdateClause(fieldDef.ForeignKey));
+            }
+
+            var sql = new StringBuilder(string.Format(
+              "CREATE TABLE {0} \n(\n  {1}{2} \n); \n", GetQuotedTableName(modelDef), sbColumns, sbConstraints));
+
+            return sql.ToString();
+        }
     }
 }
