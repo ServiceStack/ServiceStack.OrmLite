@@ -28,6 +28,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
             base.StringLengthUnicodeColumnDefinitionFormat = "character varying({0})";
             base.StringLengthNonUnicodeColumnDefinitionFormat = "character varying({0})"; 
 			base.InitColumnTypeMap();
+		    this.NamingStrategy = new PostgreSqlNamingStrategy();
 
             DbTypeMap.Set<TimeSpan>(DbType.Time, "Interval");
             DbTypeMap.Set<TimeSpan?>(DbType.Time, "Interval");
