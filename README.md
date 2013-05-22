@@ -752,6 +752,9 @@ public class OrderDetail
 }
 ```
 
+### Ignoring DTO Properties
+You may use the [Ignore] attribute to denote DTO properties that are not fields in the table. This will force the SQL generation to ignore that property.
+
 # More Examples 
 
 In its simplest useage, OrmLite can persist any POCO type without any attributes required:
