@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -55,6 +55,10 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
+    <ProjectReference Include="..\ServiceStack.OrmLite.SqlServer\ServiceStack.OrmLite.SqlServer.csproj">
+      <Project>{1887dc99-9139-43e3-a7aa-6d74714b3a5d}</Project>
+      <Name>ServiceStack.OrmLite.SqlServer</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj">
       <Project>{96179AC6-F6F1-40C3-9FDD-4F6582F54C5C}</Project>
       <Name>ServiceStack.OrmLite</Name>
