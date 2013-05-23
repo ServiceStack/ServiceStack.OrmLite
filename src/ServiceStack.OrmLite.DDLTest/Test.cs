@@ -3,6 +3,7 @@ using NUnit.Framework;
 using ServiceStack.OrmLite;
 using ServiceStack.OrmLite.Firebird;
 using ServiceStack.OrmLite.MySql;
+using ServiceStack.OrmLite.SqlServer;
 using System.Collections.Generic;
 using ServiceStack.Logging;
 using ServiceStack.Logging.Support.Logging;
@@ -38,6 +39,16 @@ namespace ServiceStack.OrmLite.DDLTest
 				AddFKString="ALTER TABLE `Child` ADD CONSTRAINT `JustOneFK` FOREIGN KEY (`IdModel`) REFERENCES `Model` (`Id`) ON DELETE CASCADE ON UPDATE NO ACTION;",
 				AddFKRestrictString="ALTER TABLE `Child` ADD CONSTRAINT `JustOneMoreFK` FOREIGN KEY (`IdModel`) REFERENCES `Model` (`Id`) ON DELETE RESTRICT ON UPDATE NO ACTION;",
 				CreateIndexString="CREATE UNIQUE INDEX `JustIndexOnColumn3` ON `Model`(`Column3`);"
+			});
+
+			dialects.Add ( new Dialect{
+				Provider= SqlServerOrmLiteDialectProvider.Instance,
+				AddColumnString = @"ALTER TABLE ""Model"" ADD ""Column1"" VARCHAR(8000) NULL;",
+				AlterColumnString = @"ALTER TABLE ""Model"" ALTER COLUMN ""Column2"" VARCHAR(50) NULL;",
+				ChangeColumnNameString = @"EXEC sp_rename 'Model.OldColumn3', 'Column3', 'COLUMN';",
+				AddFKString = @"ALTER TABLE ""Child"" ADD CONSTRAINT ""JustOneFK"" FOREIGN KEY (""IdModel"") REFERENCES ""Model"" (""Id"") ON DELETE CASCADE ON UPDATE NO ACTION;",
+				AddFKRestrictString = @"ALTER TABLE ""Child"" ADD CONSTRAINT ""JustOneMoreFK"" FOREIGN KEY (""IdModel"") REFERENCES ""Model"" (""Id"") ON UPDATE NO ACTION;",
+				CreateIndexString = @"CREATE UNIQUE INDEX ""JustIndexOnColumn3"" ON ""Model""(""Column3"");"
 			});
 
 			LogManager.LogFactory = new ConsoleLogFactory();
