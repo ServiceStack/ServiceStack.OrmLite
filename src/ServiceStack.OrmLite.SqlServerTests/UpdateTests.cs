@@ -135,7 +135,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 obj.Name = "Someothername";
                 con.UpdateParam(obj);
 
-                var target = con.GetById<SimpleType>(storedObj.Id);
+                var target = con.GetById<SimpleAliasedType>(storedObj.Id);
 
                 Assert.AreEqual(obj.Name, target.Name);
             }
