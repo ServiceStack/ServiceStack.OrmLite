@@ -74,12 +74,91 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 Assert.AreEqual(obj.Name, target.Name);
             }
         }
+
+        [Test]
+        public void Can_execute_update_using_aliased_columns()
+        {
+            using (var con = ConnectionString.OpenDbConnection())
+            {
+                con.CreateTable<SimpleAliasedType>(true);
+                var obj = new SimpleAliasedType { Name = "Somename" };
+                con.Save(obj);
+                var storedObj = con.GetById<SimpleAliasedType>(con.GetLastInsertId());
+
+                Assert.AreEqual(obj.Name, storedObj.Name);
+
+                obj.Id = storedObj.Id;
+                obj.Name = "Someothername";
+                con.Update(obj);
+
+                var target = con.GetById<SimpleAliasedType>(storedObj.Id);
+
+                Assert.AreEqual(obj.Name, target.Name);
+            }
+        }
+
+        [Test]
+        public void Can_execute_updateParam()
+        {
+            using (var con = ConnectionString.OpenDbConnection())
+            {
+                con.CreateTable<SimpleType>(true);
+                var obj = new SimpleType { Name = "Somename" };
+                con.Save(obj);
+                var storedObj = con.GetById<SimpleType>(con.GetLastInsertId());
+
+                Assert.AreEqual(obj.Name, storedObj.Name);
+
+                obj.Id = storedObj.Id;
+                obj.Name = "Someothername";
+                con.UpdateParam(obj);
+
+                var target = con.GetById<SimpleType>(storedObj.Id);
+
+                Assert.AreEqual(obj.Name, target.Name);
+            }
+        }
+
+        [Test]
+        public void Can_execute_updateParam_using_aliased_columns()
+        {
+            using (var con = ConnectionString.OpenDbConnection())
+            {
+                con.CreateTable<SimpleAliasedType>(true);
+                var obj = new SimpleAliasedType { Name = "Somename" };
+                con.Save(obj);
+                var storedObj = con.GetById<SimpleAliasedType>(con.GetLastInsertId());
+
+                Assert.AreEqual(obj.Name, storedObj.Name);
+
+                obj.Id = storedObj.Id;
+                obj.Name = "Someothername";
+                con.UpdateParam(obj);
+
+                var target = con.GetById<SimpleType>(storedObj.Id);
+
+                Assert.AreEqual(obj.Name, target.Name);
+            }
+        }
     }
+
+
+
+
 
     public class SimpleType
     {
         [AutoIncrement]
         public int Id { get; set; }
         public string Name { get; set; }
+    }
+
+    public class SimpleAliasedType
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+        [Alias("NewName")]
+        public string Name { get; set; }
+      
     }
 }
