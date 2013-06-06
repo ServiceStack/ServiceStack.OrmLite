@@ -33,8 +33,8 @@
 	* PostGreSQL
 	* Oracle
 	* Sqlite
-	
- For connection and provider settings the template will look for the web.config or app.config file of the 
+
+ For connection and provider settings the template will look for the web.config or app.config file of the
  containing Visual Studio project.  It will not however read DbProvider settings from this file.
 
  In order to work, the appropriate driver must be registered in the system machine.config file.  If you're
@@ -58,7 +58,7 @@
 		</DbProviderFactories>
 	</system.data>
 
- Also, the providers and their dependencies need to be installed to GAC.  
+ Also, the providers and their dependencies need to be installed to GAC.
 
  Eg; this is how I installed the drivers for PostgreSQL
 
@@ -66,22 +66,21 @@
 	 gacutil /i Mono.Security.dll
 
  -----------------------------------------------------------------------------------------
- 
+
  SubSonic - http://subsonicproject.com
- 
+
  The contents of this file are subject to the New BSD
  License (the "License"); you may not use this file
  except in compliance with the License. You may obtain a copy of
  the License at http://www.opensource.org/licenses/bsd-license.php
- 
- Software distributed under the License is distributed on an 
+
+ Software distributed under the License is distributed on an
  "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
  implied. See the License for the specific language governing
  rights and limitations under the License.
 */
 
 string ConnectionStringName = "";
-string Namespace = "";
 string ClassPrefix = "";
 string ClassSuffix = "";
 string SchemaName = null;
@@ -90,8 +89,8 @@ bool IncludeViews = false;
 public class Table
 {
     public List<Column> Columns;
-    public List<TableIndex> Indices;	
-    public List<FKey> FKeys;	
+    public List<TableIndex> Indices;
+    public List<FKey> FKeys;
     public string Name;
 	public string Schema;
 	public bool IsView;
@@ -100,7 +99,7 @@ public class Table
 	public string SequenceName;
 	public bool Ignore;
 	public string SQL;
-	
+
     public Column PK
     {
         get
@@ -121,7 +120,7 @@ public class Table
 			return GetColumn(columnName);
 		}
 	}
-	
+
 	public bool HasPK()
 	{
 		return ((PK != null) && (string.IsNullOrEmpty(PK.Name) != true));
@@ -142,15 +141,15 @@ public class Column
 	public bool IsAutoIncrement;
 	public bool Ignore;
 	public int Size;
-	public int Precision;	
-	public string DefaultValue;	
+	public int Precision;
+	public string DefaultValue;
 	public string ProperPropertyType
 	{
 		get
 		{
 		  if(IsNullable)
 		  {
-			return PropertyType + CheckNullable(this);		
+			return PropertyType + CheckNullable(this);
 		  }
 		  return PropertyType;
 		}
@@ -162,7 +161,7 @@ public class Tables : List<Table>
 	public Tables()
 	{
 	}
-	
+
 	public Table GetTable(string tableName)
 	{
 		return this.Single(x=>string.Compare(x.Name, tableName, true)==0);
@@ -204,11 +203,13 @@ public class SP
     public string Name;
     public string CleanName;
     public string ClassName;
+    public string Schema;
+    public string SchemaQualifiedName {get{return Schema+"."+Name;}}
     public List<SPParam> Parameters;
     public SP()
 	{
         Parameters=new List<SPParam>();
-    }        
+    }
     public string ArgList
 	{
         get
@@ -247,14 +248,14 @@ public class SPParam
 
 static Regex rxCleanUp = new Regex(@"[^\w\d_]", RegexOptions.Compiled);
 
-static string[] cs_keywords = { "abstract", "event", "new", "struct", "as", "explicit", "null", 
-	 "switch", "base", "extern", "object", "this", "bool", "false", "operator", "throw", 
-	 "break", "finally", "out", "true", "byte", "fixed", "override", "try", "case", "float", 
-	 "params", "typeof", "catch", "for", "private", "uint", "char", "foreach", "protected", 
-	 "ulong", "checked", "goto", "public", "unchecked", "class", "if", "readonly", "unsafe", 
-	 "const", "implicit", "ref", "ushort", "continue", "in", "return", "using", "decimal", 
-	 "int", "sbyte", "virtual", "default", "interface", "sealed", "volatile", "delegate", 
-	 "internal", "short", "void", "do", "is", "sizeof", "while", "double", "lock", 
+static string[] cs_keywords = { "abstract", "event", "new", "struct", "as", "explicit", "null",
+	 "switch", "base", "extern", "object", "this", "bool", "false", "operator", "throw",
+	 "break", "finally", "out", "true", "byte", "fixed", "override", "try", "case", "float",
+	 "params", "typeof", "catch", "for", "private", "uint", "char", "foreach", "protected",
+	 "ulong", "checked", "goto", "public", "unchecked", "class", "if", "readonly", "unsafe",
+	 "const", "implicit", "ref", "ushort", "continue", "in", "return", "using", "decimal",
+	 "int", "sbyte", "virtual", "default", "interface", "sealed", "volatile", "delegate",
+	 "internal", "short", "void", "do", "is", "sizeof", "while", "double", "lock",
 	 "stackalloc", "else", "long", "static", "enum", "namespace", "string" };
 
 static Func<string, string> CleanUp = (str) =>
@@ -263,15 +264,15 @@ static Func<string, string> CleanUp = (str) =>
 
 	if (char.IsDigit(str[0]) || cs_keywords.Contains(str))
 		str = "@" + str;
-	
+
     return str;
 };
 
 static string CheckNullable(Column col)
 {
     string result="";
-    if(col.IsNullable && 
-		col.PropertyType !="byte[]" && 
+    if(col.IsNullable &&
+		col.PropertyType !="byte[]" &&
 		col.PropertyType !="string" &&
 		col.PropertyType !="Microsoft.SqlServer.Types.SqlGeography" &&
 		col.PropertyType !="Microsoft.SqlServer.Types.SqlGeometry"
@@ -285,15 +286,15 @@ string GetConnectionString(ref string connectionStringName, out string providerN
     var _CurrentProject = GetCurrentProject();
 
 	providerName=null;
-    
+
     string result="";
     ExeConfigurationFileMap configFile = new ExeConfigurationFileMap();
     configFile.ExeConfigFilename = GetConfigPath();
 
     if (string.IsNullOrEmpty(configFile.ExeConfigFilename))
         throw new ArgumentNullException("The project does not contain App.config or Web.config file.");
-    
-    
+
+
     var config = System.Configuration.ConfigurationManager.OpenMappedExeConfiguration(configFile, ConfigurationUserLevel.None);
     var connSection=config.ConnectionStrings;
 
@@ -307,7 +308,7 @@ string GetConnectionString(ref string connectionStringName, out string providerN
 			connectionStringName = connSection.ConnectionStrings[connSection.ConnectionStrings.Count-1].Name;
             result=connSection.ConnectionStrings[connSection.ConnectionStrings.Count-1].ConnectionString;
             providerName=connSection.ConnectionStrings[connSection.ConnectionStrings.Count-1].ProviderName;
-        }            
+        }
     }
     else
     {
@@ -324,7 +325,7 @@ string GetConnectionString(ref string connectionStringName, out string providerN
 
 //	if (String.IsNullOrEmpty(providerName))
 //		providerName="System.Data.SqlClient";
-    
+
     return result;
 }
 
@@ -342,13 +343,13 @@ void InitConnectionString()
 			//have to replace it
 			string dataFilePath=GetDataDirectory();
 			_connectionString=_connectionString.Replace("|DataDirectory|",dataFilePath);
-		}    
+		}
 	}
 }
 
 public string ConnectionString
 {
-    get 
+    get
     {
 		InitConnectionString();
         return _connectionString;
@@ -357,7 +358,7 @@ public string ConnectionString
 
 public string ProviderName
 {
-    get 
+    get
     {
 		InitConnectionString();
         return _providerName;
@@ -369,19 +370,19 @@ public EnvDTE.Project GetCurrentProject()  {
     IServiceProvider _ServiceProvider = (IServiceProvider)Host;
     if (_ServiceProvider == null)
         throw new Exception("Host property returned unexpected value (null)");
-	
+
     EnvDTE.DTE dte = (EnvDTE.DTE)_ServiceProvider.GetService(typeof(EnvDTE.DTE));
     if (dte == null)
         throw new Exception("Unable to retrieve EnvDTE.DTE");
-	
+
     Array activeSolutionProjects = (Array)dte.ActiveSolutionProjects;
     if (activeSolutionProjects == null)
         throw new Exception("DTE.ActiveSolutionProjects returned null");
-	
+
     EnvDTE.Project dteProject = (EnvDTE.Project)activeSolutionProjects.GetValue(0);
     if (dteProject == null)
         throw new Exception("DTE.ActiveSolutionProjects[0] returned null");
-	
+
     return dteProject;
 
 }
@@ -421,15 +422,15 @@ static string zap_password(string connectionString)
 public string GetColumnDefaultValue(Column col)
 {
         string sysType=string.Format("\"{0}\"",col.DefaultValue);
-        switch (col.PropertyType.ToLower()) 
+        switch (col.PropertyType.ToLower())
         {
 			case "long":
-			case "int":				
+			case "int":
 			case "double":
-			case "decimal":	
-			case "bool":	
+			case "decimal":
+			case "bool":
                 sysType= col.DefaultValue.ToString().Replace("'","").Replace("\"","");
-                break;							
+                break;
             case "guid":
                 sysType=  string.Format("\"{0}\"",col.DefaultValue);
                  break;
@@ -442,7 +443,7 @@ public string GetColumnDefaultValue(Column col)
                 break;
 			}
         }
-        return sysType;	
+        return sysType;
 }
 
 Tables LoadTables(bool makeSingular)
@@ -484,11 +485,11 @@ Tables LoadTables(bool makeSingular)
 		Tables result;
 		using(var conn=_factory.CreateConnection())
 		{
-			conn.ConnectionString=ConnectionString;         
+			conn.ConnectionString=ConnectionString;
 			conn.Open();
-        
+
 			SchemaReader reader=null;
-        
+
 			if (_factory.GetType().Name == "MySqlClientFactory")
 			{
 				// MySql
@@ -537,45 +538,43 @@ Tables LoadTables(bool makeSingular)
 					continue;
 				}
 			}
+        }
 
-			conn.Close();
+        var rxClean = new Regex("^(Equals|GetHashCode|GetType|ToString|repo|Save|IsNew|Insert|Update|Delete|Exists|SingleOrDefault|Single|First|FirstOrDefault|Fetch|Page|Query)$");
+        foreach (var t in result)
+        {
+            if (!makeSingular)
+            {
+                t.ClassName = t.CleanName;
+            }
+            t.ClassName = ClassPrefix + t.ClassName + ClassSuffix;
+
+            foreach (var c in t.Columns)
+            {
+                c.PropertyName = rxClean.Replace(c.PropertyName, "_$1");
+
+                // Make sure property name doesn't clash with class name
+                if (c.PropertyName == t.ClassName)
+                    c.PropertyName = "_" + c.PropertyName;
+            }
+        }
+
+        return result;
+
+    }
+    catch (Exception x)
+    {
+        var error=x.Message.Replace("\r\n", "\n").Replace("\n", " ");
+        Warning(string.Format("Failed to read database schema - {0}", error));
+        WriteLine("");
+        WriteLine("// -----------------------------------------------------------------------------------------");
+        WriteLine("// Failed to read database schema - {0}", error);
+        WriteLine("// -----------------------------------------------------------------------------------------");
+        WriteLine("");
+        return new Tables();
+    }
 
 
-			var rxClean = new Regex("^(Equals|GetHashCode|GetType|ToString|repo|Save|IsNew|Insert|Update|Delete|Exists|SingleOrDefault|Single|First|FirstOrDefault|Fetch|Page|Query)$");
-			foreach (var t in result)
-			{
-				if (!makeSingular)
-				{
-					t.ClassName = t.CleanName;
-				}
-				t.ClassName = ClassPrefix + t.ClassName + ClassSuffix;
-				
-				foreach (var c in t.Columns)
-				{
-					c.PropertyName = rxClean.Replace(c.PropertyName, "_$1");
-
-					// Make sure property name doesn't clash with class name
-					if (c.PropertyName == t.ClassName)
-						c.PropertyName = "_" + c.PropertyName;
-				}
-			}
-
-		    return result;
-		}
-	}
-	catch (Exception x)
-	{
-		var error=x.Message.Replace("\r\n", "\n").Replace("\n", " ");
-		Warning(string.Format("Failed to read database schema - {0}", error));
-		WriteLine("");
-		WriteLine("// -----------------------------------------------------------------------------------------");
-		WriteLine("// Failed to read database schema - {0}", error);
-		WriteLine("// -----------------------------------------------------------------------------------------");
-		WriteLine("");
-		return new Tables();
-	}
-
-        
 }
 
 List<SP> SPsNotSupported(string providerName)
@@ -627,16 +626,16 @@ List<SP> LoadSPs()
 		List<SP> result;
 		using(var conn=_factory.CreateConnection())
 		{
-			conn.ConnectionString=ConnectionString;         
+			conn.ConnectionString=ConnectionString;
 			conn.Open();
-        
+
 			SchemaReader reader=null;
-        
+
 			if (_factory.GetType().Name == "MySqlClientFactory")
 			{
 				// MySql
 				reader=new MySqlSchemaReader();
-				return SPsNotSupported(ProviderName); 
+				return SPsNotSupported(ProviderName);
 			}
 			else if (_factory.GetType().Name == "SqlCeProviderFactory")
 			{
@@ -668,26 +667,33 @@ List<SP> LoadSPs()
 				reader=new SqlServerSchemaReader();
 			}
 
-			reader.outer=this;
-			result=reader.ReadSPList(conn, _factory);
-			conn.Close();
+            reader.outer=this;
+            result=reader.ReadSPList(conn, _factory);
+            // Remove unrequired procedures
+            for (int i=result.Count-1; i>=0; i--)
+            {
+                if (SchemaName!=null && string.Compare(result[i].Schema, SchemaName, true)!=0)
+                {
+                    result.RemoveAt(i);
+                    continue;
+                }
+            }
+        }
+        return result;
+    }
+    catch (Exception x)
+    {
+        var error=x.Message.Replace("\r\n", "\n").Replace("\n", " ");
+        Warning(string.Format("Failed to read database schema - {0}", error));
+        WriteLine("");
+        WriteLine("// -----------------------------------------------------------------------------------------");
+        WriteLine("// Failed to read database schema - {0}", error);
+        WriteLine("// -----------------------------------------------------------------------------------------");
+        WriteLine("");
+        return new List<SP>();
+    }
 
-		    return result;
-		}
-	}
-	catch (Exception x)
-	{
-		var error=x.Message.Replace("\r\n", "\n").Replace("\n", " ");
-		Warning(string.Format("Failed to read database schema - {0}", error));
-		WriteLine("");
-		WriteLine("// -----------------------------------------------------------------------------------------");
-		WriteLine("// Failed to read database schema - {0}", error);
-		WriteLine("// -----------------------------------------------------------------------------------------");
-		WriteLine("");
-		return new List<SP>();
-	}
 
-        
 }
 
 public bool IsTableNameInList(string tableName, Tables tbls)
@@ -699,8 +705,8 @@ public bool IsTableNameInList(string tableName, Tables tbls)
 		if (String.Equals(tbItem.Name,tableName,StringComparison.InvariantCultureIgnoreCase))
 		{
 			return true;
-		}		
-	}	
+		}
+	}
 	return false;
 }
 
@@ -713,8 +719,8 @@ public Table GetTableFromListByName(string tableName, Tables tbls)
 		if (String.Equals(tbItem.Name,tableName,StringComparison.InvariantCultureIgnoreCase))
 		{
 			return tbItem;
-		}		
-	}	
+		}
+	}
 	return null;
 }
 
@@ -722,7 +728,7 @@ public Table GetTableFromListByName(string tableName, Tables tbls)
   {
       string templateDirectory = Path.GetDirectoryName(Host.TemplateFile);
       string outputFilePath = Path.Combine(templateDirectory, outputFileName);
-      File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString()); 
+      File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString());
 
       this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);
   }
@@ -744,10 +750,10 @@ static int GetDatatypePrecision(string type)
 	int startPos = type.IndexOf(",");
 	if (startPos < 0)
 		return -1;
-	int endPos = type.IndexOf(")");	
+	int endPos = type.IndexOf(")");
 	if (endPos < 0)
 		return -1;
-	string typePrecisionStr = type.Substring(startPos+1,endPos-startPos-1);	
+	string typePrecisionStr = type.Substring(startPos+1,endPos-startPos-1);
 	int result = -1;
 	if (int.TryParse(typePrecisionStr,out result))
 		return result;
@@ -760,26 +766,26 @@ static int GetDatatypeSize(string type)
 	int startPos = type.IndexOf("(");
 	if (startPos < 0)
 		return -1;
-	int endPos = type.IndexOf(",");	
+	int endPos = type.IndexOf(",");
 	if (endPos < 0)
 	{
 		endPos = type.IndexOf(")");
-	}	
-	string typeSizeStr = type.Substring(startPos+1,endPos-startPos-1);	
+	}
+	string typeSizeStr = type.Substring(startPos+1,endPos-startPos-1);
 	int result = -1;
 	if (int.TryParse(typeSizeStr,out result))
 		return result;
 	else
 		return -1;
 }
-	
+
 class SqlServerSchemaReader : SchemaReader
 {
 	// SchemaReader.ReadSchema
 	public override Tables ReadSchema(DbConnection connection, DbProviderFactory factory)
 	{
 		var result=new Tables();
-		
+
 		_connection=connection;
 		_factory=factory;
 
@@ -810,7 +816,7 @@ class SqlServerSchemaReader : SchemaReader
 		foreach (var tbl in result)
 		{
 			tbl.Columns=LoadColumns(tbl);
-		            
+
 			// Mark the primary key
 			string PrimaryKey=GetPK(tbl.Name);
 			var pkColumn=tbl.Columns.SingleOrDefault(x=>x.Name.ToLower().Trim()==PrimaryKey.ToLower().Trim());
@@ -819,7 +825,7 @@ class SqlServerSchemaReader : SchemaReader
 				pkColumn.IsPK=true;
 			}
 		}
-	    
+
 
 		return result;
 	}
@@ -827,7 +833,7 @@ class SqlServerSchemaReader : SchemaReader
 	public override List<SP> ReadSPList(DbConnection connection, DbProviderFactory factory)
 	{
 		var result=new List<SP>();
-		
+
 		_connection=connection;
 		_factory=factory;
 
@@ -835,35 +841,35 @@ class SqlServerSchemaReader : SchemaReader
 		cmd.Connection=connection;
 		cmd.CommandText=SP_NAMES_SQL;
 
-		//pull the tables in a reader
-		using(cmd)
-		{
-			using (var rdr=cmd.ExecuteReader())
-			{
-				while(rdr.Read())
-				{
-					SP sp=new SP();
-					sp.Name=rdr["sp_name"].ToString();
-					sp.CleanName=CleanUp(sp.Name);
-					sp.ClassName=Inflector.MakeSingular(sp.CleanName);
-					result.Add(sp);
-				}
-			}
-		}
-		foreach (var sp in result)
-		{
-			sp.Parameters=LoadSPParams(sp);
-		}
-		return result;
-	}
-	
-	DbConnection _connection;
-	DbProviderFactory _factory;
-	
+        //pull the tables in a reader
+        using(cmd)
+        {
+            using (var rdr=cmd.ExecuteReader())
+            {
+                while(rdr.Read())
+                {
+                    SP sp=new SP();
+                    sp.Name=rdr["sp_name"].ToString();
+                    sp.Schema = rdr["schema_name"].ToString();
+                    sp.CleanName=CleanUp(sp.Name);
+                    sp.ClassName=Inflector.MakeSingular(sp.CleanName);
+                    result.Add(sp);
+                }
+            }
+        }
+        foreach (var sp in result)
+        {
+            sp.Parameters=LoadSPParams(sp);
+        }
+        return result;
+    }
+
+    DbConnection _connection;
+    DbProviderFactory _factory;
 
 	List<Column> LoadColumns(Table tbl)
 	{
-	
+
 		using (var cmd=_factory.CreateCommand())
 		{
 			cmd.Connection=_connection;
@@ -889,7 +895,7 @@ class SqlServerSchemaReader : SchemaReader
 					col.PropertyName=CleanUp(col.Name);
 					col.PropertyType=GetPropertyType(rdr["DataType"].ToString());
 					col.Size=GetDatatypeSize(rdr["DataType"].ToString());
-					col.Precision=GetDatatypePrecision(rdr["DataType"].ToString());					
+					col.Precision=GetDatatypePrecision(rdr["DataType"].ToString());
 					col.IsNullable=rdr["IsNullable"].ToString()=="YES";
 					col.IsAutoIncrement=((int)rdr["IsIdentity"])==1;
 					result.Add(col);
@@ -922,7 +928,7 @@ class SqlServerSchemaReader : SchemaReader
 					SPParam param=new SPParam();
 					param.SysType=GetPropertyType(rdr["DATA_TYPE"].ToString());
 					param.NullableSysType=GetNullablePropertyType(rdr["DATA_TYPE"].ToString());
-					param.DbType=GetDbType(rdr["DATA_TYPE"].ToString()).ToString();					
+					param.DbType=GetDbType(rdr["DATA_TYPE"].ToString()).ToString();
 					param.Name=rdr["PARAMETER_NAME"].ToString().Replace("@","");
 					param.CleanName=CleanUp(param.Name);
 				    if (rdr["PARAMETER_MODE"].ToString().ToUpper() == "OUT")
@@ -930,21 +936,21 @@ class SqlServerSchemaReader : SchemaReader
 					else if (rdr["PARAMETER_MODE"].ToString().ToUpper() == "IN")
 					   param.Direction = SPParamDir.InDirection;
 					else
-					   param.Direction = SPParamDir.InAndOutDirection;  
+					   param.Direction = SPParamDir.InAndOutDirection;
 					result.Add(param);
 				}
 			}
 			return result;
-		}		
+		}
 	}
 
 
-	string GetPK(string table){
-		
-		string sql=@"SELECT c.name AS ColumnName
-                FROM sys.indexes AS i 
-                INNER JOIN sys.index_columns AS ic ON i.object_id = ic.object_id AND i.index_id = ic.index_id 
-                INNER JOIN sys.objects AS o ON i.object_id = o.object_id 
+    string GetPK(string table){
+
+        string sql=@"SELECT c.name AS ColumnName
+                FROM sys.indexes AS i
+                INNER JOIN sys.index_columns AS ic ON i.object_id = ic.object_id AND i.index_id = ic.index_id
+                INNER JOIN sys.objects AS o ON i.object_id = o.object_id
                 LEFT OUTER JOIN sys.columns AS c ON ic.object_id = c.object_id AND c.column_id = ic.column_id
                 WHERE (i.is_primary_key = 1) AND (o.name = @tableName)";
 
@@ -976,10 +982,10 @@ class SqlServerSchemaReader : SchemaReader
 				// Always call Close when done reading.
 				reader.Close();
 			}
-			return result;    
-		}	         
+			return result;
+		}
 	}
-	
+
 	string GetPropertyType(string sqlType)
 	{
 		string propertyType,dbType;
@@ -987,14 +993,14 @@ class SqlServerSchemaReader : SchemaReader
 		return propertyType;
 	}
 
-	string GetNullablePropertyType(string sqlType)
-	{
-		string value = GetPropertyType(sqlType);
-		if (value.ToUpper() != "STRING")
-			return value + "?";
-		else
-			return value;
-	}
+    string GetNullablePropertyType(string sqlType)
+    {
+        string value = GetPropertyType(sqlType);
+        if (value.ToUpper() != "STRING" && value.ToUpper() != "BYTE[]")
+            return value + "?";
+        else
+            return value;
+    }
 
 	string GetDbType(string sqlType)
 	{
@@ -1007,8 +1013,8 @@ class SqlServerSchemaReader : SchemaReader
 	void GetPropertyAndDbType(string sqlType, out string propertyType,out string dbType)
 	{
 		string sysType="string";
-		string sysDbType="DbType.String";		
-		switch (sqlType) 
+		string sysDbType="DbType.String";
+		switch (sqlType)
 		{
 			case "varchar":
 				sysType = "string";
@@ -1034,7 +1040,7 @@ class SqlServerSchemaReader : SchemaReader
 			case "datetime":
 			case "datetime2":
 			case "date":
-			case "time":				
+			case "time":
 				sysType=  "DateTime";
 				sysDbType = "DbType.DateTime";
 				break;
@@ -1054,7 +1060,7 @@ class SqlServerSchemaReader : SchemaReader
 			case "smallmoney":
 			case "decimal":
 			case "money":
-				sysType=  "decimal";				 
+				sysType=  "decimal";
 				sysDbType = "DbType.Decimal";
 				break;
 			case "tinyint":
@@ -1081,14 +1087,14 @@ class SqlServerSchemaReader : SchemaReader
 				sysDbType = "DbType.";
 				break;
 		}
-		propertyType = sysType; 
+		propertyType = sysType;
 		dbType = sysDbType;
 	}
 
 	string GetDBType(string sqlType)
 	{
 		string sysType="string";
-		switch (sqlType) 
+		switch (sqlType)
 		{
 			case "bigint":
 				sysType = "long";
@@ -1147,36 +1153,40 @@ class SqlServerSchemaReader : SchemaReader
 	}
 
 
-	const string TABLE_SQL=@"SELECT *
-		FROM  INFORMATION_SCHEMA.TABLES
-		WHERE TABLE_TYPE='BASE TABLE' OR TABLE_TYPE='VIEW'";
+    const string TABLE_SQL=@"SELECT *
+        FROM  INFORMATION_SCHEMA.TABLES
+        WHERE TABLE_TYPE='BASE TABLE' OR TABLE_TYPE='VIEW'";
 
-	const string COLUMN_SQL=@"SELECT 
-			TABLE_CATALOG AS [Database],
-			TABLE_SCHEMA AS Owner, 
-			TABLE_NAME AS TableName, 
-			COLUMN_NAME AS ColumnName, 
-			ORDINAL_POSITION AS OrdinalPosition, 
-			COLUMN_DEFAULT AS DefaultSetting, 
-			IS_NULLABLE AS IsNullable, DATA_TYPE AS DataType, 
-			CHARACTER_MAXIMUM_LENGTH AS MaxLength, 
-			DATETIME_PRECISION AS DatePrecision,
-			COLUMNPROPERTY(object_id('[' + TABLE_SCHEMA + '].[' + TABLE_NAME + ']'), COLUMN_NAME, 'IsIdentity') AS IsIdentity,
-			COLUMNPROPERTY(object_id('[' + TABLE_SCHEMA + '].[' + TABLE_NAME + ']'), COLUMN_NAME, 'IsComputed') as IsComputed
-		FROM  INFORMATION_SCHEMA.COLUMNS
-		WHERE TABLE_NAME=@tableName AND TABLE_SCHEMA=@schemaName
-		ORDER BY OrdinalPosition ASC";
-	  
-	const string SP_NAMES_SQL=@"SELECT o.name as sp_name
-    from sysobjects o
-    where o.xtype in ('P', 'FN', 'IF', 'TF')
-    and o.category = 0
-    and o.name not in ('fn_diagramobjects', 'sp_alterdiagram', 'sp_creatediagram', 'sp_dropdiagram', 'sp_helpdiagramdefinition', 'sp_helpdiagrams', 'sp_renamediagram', 'sp_upgraddiagrams', 'sysdiagrams')";
+    const string COLUMN_SQL=@"SELECT
+            TABLE_CATALOG AS [Database],
+            TABLE_SCHEMA AS Owner,
+            TABLE_NAME AS TableName,
+            COLUMN_NAME AS ColumnName,
+            ORDINAL_POSITION AS OrdinalPosition,
+            COLUMN_DEFAULT AS DefaultSetting,
+            IS_NULLABLE AS IsNullable, DATA_TYPE AS DataType,
+            CHARACTER_MAXIMUM_LENGTH AS MaxLength,
+            DATETIME_PRECISION AS DatePrecision,
+            COLUMNPROPERTY(object_id('[' + TABLE_SCHEMA + '].[' + TABLE_NAME + ']'), COLUMN_NAME, 'IsIdentity') AS IsIdentity,
+            COLUMNPROPERTY(object_id('[' + TABLE_SCHEMA + '].[' + TABLE_NAME + ']'), COLUMN_NAME, 'IsComputed') as IsComputed
+        FROM  INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME=@tableName AND TABLE_SCHEMA=@schemaName
+        ORDER BY OrdinalPosition ASC";
+
+    const string SP_NAMES_SQL=@"SELECT  o.name AS sp_name, s.name AS schema_name
+FROM    sys.objects o
+        INNER JOIN sys.schemas s ON o.schema_id = s.schema_id
+WHERE   o.type = 'P'
+        AND o.name NOT IN ( 'fn_diagramobjects', 'sp_alterdiagram',
+                            'sp_creatediagram', 'sp_dropdiagram',
+                            'sp_helpdiagramdefinition', 'sp_helpdiagrams',
+                            'sp_renamediagram', 'sp_upgraddiagrams',
+                            'sysdiagrams' )";
 
 
-	const string SP_PARAMETERS_SQL=@"SELECT * from information_schema.PARAMETERS
-							    where SPECIFIC_NAME = @spname
-								order by ORDINAL_POSITION";
+    const string SP_PARAMETERS_SQL=@"SELECT * from information_schema.PARAMETERS
+                                where SPECIFIC_NAME = @spname
+                                order by ORDINAL_POSITION";
 
 }
 
@@ -1186,7 +1196,7 @@ class SqlServerCeSchemaReader : SchemaReader
 	public override Tables ReadSchema(DbConnection connection, DbProviderFactory factory)
 	{
 		var result=new Tables();
-		
+
 		_connection=connection;
 		_factory=factory;
 
@@ -1215,18 +1225,18 @@ class SqlServerCeSchemaReader : SchemaReader
 		foreach (var tbl in result)
 		{
 			tbl.Columns=LoadColumns(tbl);
-		            
+
 			// Mark the primary key
 			string PrimaryKey=GetPK(tbl.Name);
 			var pkColumn=tbl.Columns.SingleOrDefault(x=>x.Name.ToLower().Trim()==PrimaryKey.ToLower().Trim());
 			if(pkColumn!=null)
 				pkColumn.IsPK=true;
 		}
-	    
+
 
 		return result;
 	}
-	
+
 	public override List<SP> ReadSPList(DbConnection connection, DbProviderFactory factory)
 	{
 		return new List<SP>();
@@ -1234,11 +1244,11 @@ class SqlServerCeSchemaReader : SchemaReader
 
 	DbConnection _connection;
 	DbProviderFactory _factory;
-	
+
 
 	List<Column> LoadColumns(Table tbl)
 	{
-	
+
 		using (var cmd=_factory.CreateCommand())
 		{
 			cmd.Connection=_connection;
@@ -1271,8 +1281,8 @@ class SqlServerCeSchemaReader : SchemaReader
 	}
 
 	string GetPK(string table){
-		
-		string sql=@"SELECT KCU.COLUMN_NAME 
+
+		string sql=@"SELECT KCU.COLUMN_NAME
 			FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE KCU
 			JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS TC
 			ON KCU.CONSTRAINT_NAME=TC.CONSTRAINT_NAME
@@ -1307,14 +1317,14 @@ class SqlServerCeSchemaReader : SchemaReader
 				// Always call Close when done reading.
 				reader.Close();
 			}
-			return result;    
-		}	         
+			return result;
+		}
 	}
-	
+
 	string GetPropertyType(string sqlType)
 	{
 		string sysType="string";
-		switch (sqlType) 
+		switch (sqlType)
 		{
 			case "bigint":
 				sysType = "long";
@@ -1368,21 +1378,21 @@ class SqlServerCeSchemaReader : SchemaReader
 		FROM  INFORMATION_SCHEMA.TABLES
 		WHERE TABLE_TYPE='TABLE'";
 
-	const string COLUMN_SQL=@"SELECT 
+	const string COLUMN_SQL=@"SELECT
 			TABLE_CATALOG AS [Database],
-			TABLE_SCHEMA AS Owner, 
-			TABLE_NAME AS TableName, 
-			COLUMN_NAME AS ColumnName, 
-			ORDINAL_POSITION AS OrdinalPosition, 
-			COLUMN_DEFAULT AS DefaultSetting, 
-			IS_NULLABLE AS IsNullable, DATA_TYPE AS DataType, 
+			TABLE_SCHEMA AS Owner,
+			TABLE_NAME AS TableName,
+			COLUMN_NAME AS ColumnName,
+			ORDINAL_POSITION AS OrdinalPosition,
+			COLUMN_DEFAULT AS DefaultSetting,
+			IS_NULLABLE AS IsNullable, DATA_TYPE AS DataType,
 			AUTOINC_INCREMENT,
-			CHARACTER_MAXIMUM_LENGTH AS MaxLength, 
+			CHARACTER_MAXIMUM_LENGTH AS MaxLength,
 			DATETIME_PRECISION AS DatePrecision
 		FROM  INFORMATION_SCHEMA.COLUMNS
 		WHERE TABLE_NAME=@tableName
 		ORDER BY OrdinalPosition ASC";
-	  
+
 }
 
 
@@ -1392,7 +1402,7 @@ class PostGreSqlSchemaReader : SchemaReader
 	public override Tables ReadSchema(DbConnection connection, DbProviderFactory factory)
 	{
 		var result=new Tables();
-		
+
 		_connection=connection;
 		_factory=factory;
 
@@ -1421,18 +1431,18 @@ class PostGreSqlSchemaReader : SchemaReader
 		foreach (var tbl in result)
 		{
 			tbl.Columns=LoadColumns(tbl);
-		            
+
 			// Mark the primary key
 			string PrimaryKey=GetPK(tbl.Name);
 			var pkColumn=tbl.Columns.SingleOrDefault(x=>x.Name.ToLower().Trim()==PrimaryKey.ToLower().Trim());
 			if(pkColumn!=null)
 				pkColumn.IsPK=true;
 		}
-	    
+
 
 		return result;
 	}
-	
+
 	public override List<SP> ReadSPList(DbConnection connection, DbProviderFactory factory)
 	{
 		return new List<SP>();
@@ -1440,11 +1450,11 @@ class PostGreSqlSchemaReader : SchemaReader
 
 	DbConnection _connection;
 	DbProviderFactory _factory;
-	
+
 
 	List<Column> LoadColumns(Table tbl)
 	{
-	
+
 		using (var cmd=_factory.CreateCommand())
 		{
 			cmd.Connection=_connection;
@@ -1477,8 +1487,8 @@ class PostGreSqlSchemaReader : SchemaReader
 	}
 
 	string GetPK(string table){
-		
-		string sql=@"SELECT kcu.column_name 
+
+		string sql=@"SELECT kcu.column_name
 			FROM information_schema.key_column_usage kcu
 			JOIN information_schema.table_constraints tc
 			ON kcu.constraint_name=tc.constraint_name
@@ -1513,48 +1523,48 @@ class PostGreSqlSchemaReader : SchemaReader
 				// Always call Close when done reading.
 				reader.Close();
 			}
-			return result;   
-		}	         
+			return result;
+		}
 	}
-	
+
 	string GetPropertyType(string sqlType)
 	{
 		switch (sqlType)
 		{
 			case "int8":
-			case "serial8":	
+			case "serial8":
 				return "long";
 
-			case "bool":	
+			case "bool":
 				return "bool";
 
-			case "bytea	":	
+			case "bytea	":
 				return "byte[]";
 
-			case "float8":	
+			case "float8":
 				return "double";
 
-			case "int4":	
-			case "serial4":	
+			case "int4":
+			case "serial4":
 				return "int";
 
-			case "money	":	
+			case "money	":
 				return "decimal";
 
-			case "numeric":	
+			case "numeric":
 				return "decimal";
 
-			case "float4":	
+			case "float4":
 				return "float";
 
-			case "int2":	
+			case "int2":
 				return "short";
 
 			case "time":
 			case "timetz":
 			case "timestamp":
-			case "timestamptz":	
-			case "date":	
+			case "timestamptz":
+			case "date":
 				return "DateTime";
 
 			default:
@@ -1566,17 +1576,17 @@ class PostGreSqlSchemaReader : SchemaReader
 
 	const string TABLE_SQL=@"
 			SELECT table_name, table_schema, table_type
-			FROM information_schema.tables 
+			FROM information_schema.tables
 			WHERE (table_type='BASE TABLE' OR table_type='VIEW')
 				AND table_schema NOT IN ('pg_catalog', 'information_schema');
 			";
 
 	const string COLUMN_SQL=@"
 			SELECT column_name, is_nullable, udt_name, column_default
-			FROM information_schema.columns 
+			FROM information_schema.columns
 			WHERE table_name=@tableName;
 			";
-	
+
 }
 
 class MySqlSchemaReader : SchemaReader
@@ -1585,7 +1595,7 @@ class MySqlSchemaReader : SchemaReader
 	public override Tables ReadSchema(DbConnection connection, DbProviderFactory factory)
 	{
 		var result=new Tables();
-	
+
 
 		var cmd=factory.CreateCommand();
 		cmd.Connection=connection;
@@ -1614,13 +1624,13 @@ class MySqlSchemaReader : SchemaReader
         var schema  = connection.GetSchema("COLUMNS");
 
         //loop again - but this time pull by table name
-        foreach (var item in result) 
+        foreach (var item in result)
         {
             item.Columns=new List<Column>();
 
             //pull the columns from the schema
             var columns = schema.Select("TABLE_NAME='" + item.Name + "'");
-            foreach (var row in columns) 
+            foreach (var row in columns)
             {
                 Column col=new Column();
                 col.Name=row["COLUMN_NAME"].ToString();
@@ -1635,9 +1645,9 @@ class MySqlSchemaReader : SchemaReader
                 item.Columns.Add(col);
             }
         }
-        
+
         return result;
-	
+
 	}
 
 	public override List<SP> ReadSPList(DbConnection connection, DbProviderFactory factory)
@@ -1649,7 +1659,7 @@ class MySqlSchemaReader : SchemaReader
 	{
 		bool bUnsigned = row["COLUMN_TYPE"].ToString().IndexOf("unsigned")>=0;
 		string propType="string";
-		switch (row["DATA_TYPE"].ToString()) 
+		switch (row["DATA_TYPE"].ToString())
 		{
 			case "bigint":
 				propType= bUnsigned ? "ulong" : "long";
@@ -1697,14 +1707,14 @@ class MySqlSchemaReader : SchemaReader
 			case "varbinary":
 				propType=  "byte[]";
 				 break;
-				 
+
 		}
 		return propType;
 	}
 
 	const string TABLE_SQL=@"
-			SELECT * 
-			FROM information_schema.tables 
+			SELECT *
+			FROM information_schema.tables
 			WHERE (table_type='BASE TABLE' OR table_type='VIEW')
 			";
 
@@ -1716,7 +1726,7 @@ class OracleSchemaReader : SchemaReader
 	public override Tables ReadSchema(DbConnection connection, DbProviderFactory factory)
 	{
 		var result=new Tables();
-		
+
 		_connection=connection;
 		_factory=factory;
 
@@ -1747,18 +1757,18 @@ class OracleSchemaReader : SchemaReader
 		foreach (var tbl in result)
 		{
 			tbl.Columns=LoadColumns(tbl);
-		            
+
 			// Mark the primary key
 			string PrimaryKey=GetPK(tbl.Name);
 			var pkColumn=tbl.Columns.SingleOrDefault(x=>x.Name.ToLower().Trim()==PrimaryKey.ToLower().Trim());
 			if(pkColumn!=null)
 				pkColumn.IsPK=true;
 		}
-	    
+
 
 		return result;
 	}
-	
+
 	public override List<SP> ReadSPList(DbConnection connection, DbProviderFactory factory)
 	{
 		return new List<SP>();
@@ -1766,11 +1776,11 @@ class OracleSchemaReader : SchemaReader
 
 	DbConnection _connection;
 	DbProviderFactory _factory;
-	
+
 
 	List<Column> LoadColumns(Table tbl)
 	{
-	
+
 		using (var cmd=_factory.CreateCommand())
 		{
 			cmd.Connection=_connection;
@@ -1804,7 +1814,7 @@ class OracleSchemaReader : SchemaReader
 	}
 
 	string GetPK(string table){
-		
+
 		string sql=@"select column_name from USER_CONSTRAINTS uc
   inner join USER_CONS_COLUMNS ucc on uc.constraint_name = ucc.constraint_name
 where uc.constraint_type = 'P'
@@ -1840,14 +1850,14 @@ and ucc.position = 1";
 				// Always call Close when done reading.
 				reader.Close();
 			}
-			return result;   
-		}	         
+			return result;
+		}
 	}
-	
+
 	string GetPropertyType(string sqlType, string dataScale)
 	{
 		string sysType="string";
-		switch (sqlType.ToLower()) 
+		switch (sqlType.ToLower())
 		{
 			case "bigint":
 				sysType = "long";
@@ -1890,10 +1900,10 @@ and ucc.position = 1";
 				sysType=  "byte[]";
 				 break;
 		}
-		
+
 		if (sqlType == "number" && dataScale == "0")
 			return "long";
-		
+
 		return sysType;
 	}
 
@@ -1906,15 +1916,15 @@ select VIEW_NAME, 'View', USER
 from USER_VIEWS";
 
 
-	const string COLUMN_SQL=@"select table_name TableName, 
- column_name ColumnName, 
- data_type DataType, 
+	const string COLUMN_SQL=@"select table_name TableName,
+ column_name ColumnName,
+ data_type DataType,
  data_scale DataScale,
  nullable IsNullable
- from USER_TAB_COLS utc 
+ from USER_TAB_COLS utc
  where table_name = :tableName
  order by column_id";
-	  
+
 }
 
 
@@ -1923,10 +1933,10 @@ class SqliteSchemaReader : SchemaReader
     // SchemaReader.ReadSchema
     public override Tables ReadSchema(DbConnection connection, DbProviderFactory factory)
     {
-        var result=new Tables();	
+        var result=new Tables();
         _connection=connection;
         _factory=factory;
-        var cmd=_factory.CreateCommand();        
+        var cmd=_factory.CreateCommand();
         cmd.Connection=connection;
         cmd.CommandText=TABLE_SQL;
         //cmd.GetType().GetProperty("BindByName").SetValue(cmd, true, null);
@@ -1961,10 +1971,10 @@ class SqliteSchemaReader : SchemaReader
 	{
 		return new List<SP>();
 	}
-    
+
     DbConnection _connection;
     DbProviderFactory _factory;
-    
+
     List<Column> LoadColumns(Table tbl)
     {
         using (var cmd=_factory.CreateCommand())
@@ -1989,7 +1999,7 @@ class SqliteSchemaReader : SchemaReader
                     if (col.IsPK)
                        col.IsAutoIncrement = tbl.SQL.ToUpper().Contains("AUTOINCREMENT");
                     else
-                    	col.IsAutoIncrement = false;					
+                    	col.IsAutoIncrement = false;
                     col.DefaultValue = rdr["dflt_value"] == DBNull.Value ? null : rdr["dflt_value"].ToString();
                     result.Add(col);
                 }
@@ -2000,29 +2010,29 @@ class SqliteSchemaReader : SchemaReader
 
     List<TableIndex> LoadIndices(string tableName)
     {
-        var result=new List<TableIndex>();	
+        var result=new List<TableIndex>();
         using (var cmd1=_factory.CreateCommand())
-        {			
+        {
             cmd1.Connection=_connection;
             cmd1.CommandText=string.Format(INDEX_SQL,tableName);
             using (IDataReader rdr1=cmd1.ExecuteReader())
             {
             	while(rdr1.Read())
-            	{			
+            	{
             	    TableIndex indx=new TableIndex();
-            	    indx.Name=rdr1["name"].ToString();					
+            	    indx.Name=rdr1["name"].ToString();
             	    indx.SQL=rdr1["sql"].ToString();
             	    indx.IndexColumns = new List<IndexColumn>();
             	    indx.IsUnique = indx.SQL.ToUpper().Contains("UNIQUE");
             	    using (var cmd2=_factory.CreateCommand())
             	    {
             	        cmd2.Connection=_connection;
-            	        cmd2.CommandText=string.Format(INDEX_INFO_SQL,indx.Name);			            
+            	        cmd2.CommandText=string.Format(INDEX_INFO_SQL,indx.Name);
             	        using (IDataReader rdr2=cmd2.ExecuteReader())
             	        {
             	            while(rdr2.Read())
             	            {
-            	              IndexColumn col = new IndexColumn();								
+            	              IndexColumn col = new IndexColumn();
             	              col.Name = rdr2["name"].ToString();
             	              indx.IndexColumns.Add(col);
             	            }
@@ -2034,7 +2044,7 @@ class SqliteSchemaReader : SchemaReader
         }
         return result;
 	}
-	
+
     List<FKey> LoadFKeys(string tblName)
     {
         using (var cmd=_factory.CreateCommand())
@@ -2057,12 +2067,12 @@ class SqliteSchemaReader : SchemaReader
             return result;
         }
     }
-	
-	
+
+
     string GetPropertyType(string sqlType, string dataScale)
     {
         string sysType="string";
-        switch (sqlType.ToLower()) 
+        switch (sqlType.ToLower())
         {
 			case "integer":
             case "int":
@@ -2070,9 +2080,9 @@ class SqliteSchemaReader : SchemaReader
             case "smallint":
             case "mediumint":
             case "int2":
-            case "int8":				
+            case "int8":
                 sysType= "long";
-                break;				
+                break;
             case "bigint":
             case "unsigned big int":
                 sysType= "long";
@@ -2084,7 +2094,7 @@ class SqliteSchemaReader : SchemaReader
             case "datetime":
             case "date":
                 sysType=  "DateTime";
-                  break;				
+                  break;
             case "float":
             case "double precision":
             case "double":
@@ -2108,21 +2118,21 @@ class SqliteSchemaReader : SchemaReader
                 sysType=  "byte[]";
                  break;
         }
-        
+
         if (sqlType == "number" && dataScale == "0")
             return "long";
-        
+
         return sysType;
     }
 
     const string TABLE_SQL=@"SELECT name, type , sql FROM sqlite_master WHERE type IN ('table','view') and name not in ('sqlite_sequence') ";
     const string COLUMN_SQL=@"pragma table_info({0})";
-	
+
     const string INDEX_SQL=@"SELECT name , sql  FROM sqlite_master WHERE type IN ('index') and lower(tbl_name) = lower('{0}')";
-    const string INDEX_INFO_SQL=@"pragma index_info({0})";	
-	
-    const string FKEY_INFO_SQL=@"pragma foreign_key_list({0})";	
-      
+    const string INDEX_INFO_SQL=@"pragma index_info({0})";
+
+    const string FKEY_INFO_SQL=@"pragma foreign_key_list({0})";
+
 }
 
 /// <summary>
@@ -2292,6 +2302,10 @@ public static class Inflector {
         return MakeInitialCaps(Regex.Replace(lowercaseAndUnderscoredWord, @"_", " "));
     }
 
+    public static string ToPascalCase(string underscoredWords){
+        return UpperCaseFirstCharacter(Regex.Replace(underscoredWords,@"_([a-z])",
+            delegate(Match match){return match.Captures[0].Value.ToUpper();}).Replace("_",""));
+    }
 
     /// <summary>
     /// Adds the underscores.
@@ -2377,12 +2391,12 @@ public static class Inflector {
     /// </summary>
     private class InflectorRule {
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public readonly Regex regex;
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public readonly string replacement;
 
@@ -2416,16 +2430,15 @@ public static class Inflector {
     #endregion
 }
 
-/*
-    Manager.tt from Damien Guard: http://damieng.com/blog/2009/11/06/multiple-outputs-from-t4-made-easy-revisited
-*/
-
+// https://raw.github.com/damieng/DamienGKit
+// http://damieng.com/blog/2009/11/06/multiple-outputs-from-t4-made-easy-revisited
 
 // Manager class records the various blocks so it can split them up
 class Manager {
     private class Block {
         public String Name;
         public int Start, Length;
+        public bool IncludeInDefault;
     }
 
     private Block currentBlock;
@@ -2440,23 +2453,20 @@ class Manager {
         return (host is IServiceProvider) ? new VSManager(host, template) : new Manager(host, template);
     }
 
-    public void KeepGeneratedFile(String name) {
-        name = Path.Combine(Path.GetDirectoryName(host.TemplateFile), name);
-        generatedFileNames.Add(name);
-    }
-    
     public void StartNewFile(String name) {
         if (name == null)
             throw new ArgumentNullException("name");
         CurrentBlock = new Block { Name = name };
     }
 
-    public void StartFooter() {
+    public void StartFooter(bool includeInDefault = true) {
         CurrentBlock = footer;
+        footer.IncludeInDefault = includeInDefault;
     }
 
-    public void StartHeader() {
+    public void StartHeader(bool includeInDefault = true) {
         CurrentBlock = header;
+        header.IncludeInDefault = includeInDefault;
     }
 
     public void EndBlock() {
@@ -2468,20 +2478,24 @@ class Manager {
         currentBlock = null;
     }
 
-    public virtual void Process(bool split) {
+    public virtual void Process(bool split, bool sync = true) {
         if (split) {
             EndBlock();
             String headerText = template.ToString(header.Start, header.Length);
             String footerText = template.ToString(footer.Start, footer.Length);
             String outputPath = Path.GetDirectoryName(host.TemplateFile);
             files.Reverse();
-            foreach (Block block in files) {
+            if (!footer.IncludeInDefault)
+                template.Remove(footer.Start, footer.Length);
+            foreach(Block block in files) {
                 String fileName = Path.Combine(outputPath, block.Name);
                 String content = headerText + template.ToString(block.Start, block.Length) + footerText;
                 generatedFileNames.Add(fileName);
                 CreateFile(fileName, content);
                 template.Remove(block.Start, block.Length);
             }
+            if (!header.IncludeInDefault)
+                template.Remove(header.Start, header.Length);
         }
     }
 
@@ -2518,7 +2532,7 @@ class Manager {
         }
     }
 
-    private class VSManager : Manager {
+    private class VSManager: Manager {
         private EnvDTE.ProjectItem templateProjectItem;
         private EnvDTE.DTE dte;
         private Action<String> checkOutAction;
@@ -2534,11 +2548,12 @@ class Manager {
             return dte.Solution.FindProjectItem(fileName).Properties.Item("CustomToolNamespace").Value.ToString();
         }
 
-        public override void Process(bool split) {
+        public override void Process(bool split, bool sync) {
             if (templateProjectItem.ProjectItems == null)
                 return;
-            base.Process(split);
-            projectSyncAction.EndInvoke(projectSyncAction.BeginInvoke(generatedFileNames, null, null));
+            base.Process(split, sync);
+            if (sync)
+                projectSyncAction.EndInvoke(projectSyncAction.BeginInvoke(generatedFileNames, null, null));
         }
 
         protected override void CreateFile(String fileName, String content) {
@@ -2550,10 +2565,10 @@ class Manager {
 
         internal VSManager(ITextTemplatingEngineHost host, StringBuilder template)
             : base(host, template) {
-            var hostServiceProvider = (IServiceProvider)host;
+            var hostServiceProvider = (IServiceProvider) host;
             if (hostServiceProvider == null)
                 throw new ArgumentNullException("Could not obtain IServiceProvider");
-            dte = (EnvDTE.DTE)hostServiceProvider.GetService(typeof(EnvDTE.DTE));
+            dte = (EnvDTE.DTE) hostServiceProvider.GetService(typeof(EnvDTE.DTE));
             if (dte == null)
                 throw new ArgumentNullException("Could not obtain DTE from host");
             templateProjectItem = dte.Solution.FindProjectItem(host.TemplateFile);
@@ -2565,16 +2580,16 @@ class Manager {
             var keepFileNameSet = new HashSet<String>(keepFileNames);
             var projectFiles = new Dictionary<String, EnvDTE.ProjectItem>();
             var originalFilePrefix = Path.GetFileNameWithoutExtension(templateProjectItem.get_FileNames(0)) + ".";
-            foreach (EnvDTE.ProjectItem projectItem in templateProjectItem.ProjectItems)
+            foreach(EnvDTE.ProjectItem projectItem in templateProjectItem.ProjectItems)
                 projectFiles.Add(projectItem.get_FileNames(0), projectItem);
 
             // Remove unused items from the project
-            foreach (var pair in projectFiles)
+            foreach(var pair in projectFiles)
                 if (!keepFileNames.Contains(pair.Key) && !(Path.GetFileNameWithoutExtension(pair.Key) + ".").StartsWith(originalFilePrefix))
                     pair.Value.Delete();
 
             // Add missing files to the project
-            foreach (String fileName in keepFileNameSet)
+            foreach(String fileName in keepFileNameSet)
                 if (!projectFiles.ContainsKey(fileName))
                     templateProjectItem.ProjectItems.AddFromFile(fileName);
         }
