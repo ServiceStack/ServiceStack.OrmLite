@@ -435,12 +435,7 @@ namespace ServiceStack.OrmLite.Firebird
 
             foreach (var compositeIndex in modelDef.CompositeIndexes)
             {
-                var indexName = GetIndexName(compositeIndex.Unique,
-					(modelDef.IsInSchema ?
-				 		modelDef.Schema +"_"+ GetQuotedTableName(modelDef):
-				 		GetQuotedTableName(modelDef) ).SafeVarName(),
-                    string.Join("_", compositeIndex.FieldNames.ToArray()));
-
+                var indexName = GetCompositeIndexNameWithSchema(compositeIndex, modelDef);
                 var indexNames = string.Join(",", compositeIndex.FieldNames.ToArray());
 
                 sqlIndexes.Add(
@@ -449,8 +444,8 @@ namespace ServiceStack.OrmLite.Firebird
 
             return sqlIndexes;
         }
-		
-		protected override string ToCreateIndexStatement(bool isUnique, string indexName, ModelDefinition modelDef, string fieldName, bool isCombined)
+
+        protected override string ToCreateIndexStatement(bool isUnique, string indexName, ModelDefinition modelDef, string fieldName, bool isCombined)
         {
             return string.Format("CREATE {0} INDEX {1} ON {2} ({3} ); \n",
 				isUnique ? "UNIQUE" : "", 

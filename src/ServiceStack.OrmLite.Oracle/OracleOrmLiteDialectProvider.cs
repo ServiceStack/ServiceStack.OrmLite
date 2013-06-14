@@ -5,7 +5,6 @@ using System.Reflection;
 using ServiceStack.Common.Utils;
 using System.Text;
 using ServiceStack.Common;
-using ServiceStack.OrmLite;
 using System.Data.OracleClient;
 
 namespace ServiceStack.OrmLite.Oracle
@@ -546,12 +545,7 @@ namespace ServiceStack.OrmLite.Oracle
 
             foreach (var compositeIndex in modelDef.CompositeIndexes)
             {
-                var indexName = GetIndexName(compositeIndex.Unique,
-					(modelDef.IsInSchema ?
-				 		modelDef.Schema +"_"+ GetQuotedTableName(modelDef):
-				 		GetQuotedTableName(modelDef) ).SafeVarName(),
-                    string.Join("_", compositeIndex.FieldNames.ToArray()));
-
+                var indexName = GetCompositeIndexNameWithSchema(compositeIndex, modelDef);
                 var indexNames = string.Join(",", compositeIndex.FieldNames.ToArray());
 
                 sqlIndexes.Add(
