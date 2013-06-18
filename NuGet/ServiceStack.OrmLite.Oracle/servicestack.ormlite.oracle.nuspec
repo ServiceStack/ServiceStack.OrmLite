@@ -3,7 +3,7 @@
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>ServiceStack.OrmLite.Oracle</id> 
     <title>OrmLite.Oracle - Fast, code-first, config-free Poco ORM</title>
-    <version>3.9.53</version>
+    <version>3.9.54</version>
     <authors>Demis Bellot, Guru Kathiresan</authors> 
     <owners>Demis Bellot, Guru Kathiresan</owners>
     <description>
