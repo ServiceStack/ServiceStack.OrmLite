@@ -18,6 +18,7 @@ namespace ServiceStack.OrmLite.Oracle.Tests
 
             db.CreateTable<ParamTestBO>(true);
             db.CreateTable<ParamRelBO>(true);
+            db.CreateTable<ParamByteBO>(true);
         }
 
         [Test]
@@ -226,6 +227,26 @@ namespace ServiceStack.OrmLite.Oracle.Tests
             }
         }
 
+        [Test]
+        public void ORA_ParamByteTest()
+        {
+            using (var db = ConnectionString.OpenDbConnection())
+            {
+                DropAndCreateTables(db);
+
+                db.DeleteAll<ParamByteBO>();
+                var bo1 = new ParamByteBO() { Id = 1, Data = new byte[] { 1, 25, 43, 3, 1, 66, 82, 23, 11, 44, 66, 22, 52, 62, 76, 19, 30, 91, 4 } };
+
+                db.InsertParam(bo1);
+                var bo1Check = db.SelectParam<ParamByteBO>(s => s.Id == bo1.Id).Single();
+
+                Assert.AreEqual(bo1.Id, bo1Check.Id);
+                Assert.AreEqual(bo1.Data, bo1Check.Data);
+
+                db.DeleteAll<ParamByteBO>();
+            }
+        }
+
 
 
         public class ParamTestBO
@@ -250,6 +271,12 @@ namespace ServiceStack.OrmLite.Oracle.Tests
 
             [Alias("InfoStr")]
             public string Info { get; set; }
+        }
+
+        public class ParamByteBO
+        {
+            public int Id { get; set; }
+            public byte[] Data { get; set; }
         }
     }
 }
