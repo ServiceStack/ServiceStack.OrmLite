@@ -56,7 +56,6 @@ namespace ServiceStack.OrmLite.SqlServer
 
         public override string ToUpdateStatement(T item, bool excludeDefaults = false)
         {
-
             var setFields = new StringBuilder();
             var dialectProvider = OrmLiteConfig.DialectProvider;
 
@@ -92,7 +91,7 @@ namespace ServiceStack.OrmLite.SqlServer
 	        if (ModelDef.PrimaryKey == null)
                 throw new ApplicationException("Malformed model, no PrimaryKey defined");
 
-	        return String.Format("ORDER BY {0}", ModelDef.PrimaryKey.FieldName);
+	        return String.Format("ORDER BY {0}", OrmLiteConfig.DialectProvider.GetQuotedColumnName(ModelDef.PrimaryKey.FieldName));
 	    }
 
 		public override string LimitExpression
