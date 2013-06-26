@@ -86,6 +86,9 @@ namespace ServiceStack.OrmLite.Oracle
 				return new Guid(value.ToString());
 			}
 
+            if (type == typeof(byte[]))
+                return value;
+
 			try
 			{
 				return base.ConvertDbValue(value, type);
