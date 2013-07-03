@@ -81,6 +81,7 @@
 */
 
 string ConnectionStringName = "";
+string Namespace = "";
 string ClassPrefix = "";
 string ClassSuffix = "";
 string SchemaName = null;
