@@ -2303,11 +2303,6 @@ public static class Inflector {
         return MakeInitialCaps(Regex.Replace(lowercaseAndUnderscoredWord, @"_", " "));
     }
 
-    public static string ToPascalCase(string underscoredWords){
-        return UpperCaseFirstCharacter(Regex.Replace(underscoredWords,@"_([a-z])",
-            delegate(Match match){return match.Captures[0].Value.ToUpper();}).Replace("_",""));
-    }
-
     /// <summary>
     /// Adds the underscores.
     /// </summary>
