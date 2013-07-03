@@ -31,6 +31,17 @@ namespace ServiceStack.OrmLite
                 && theType.GetGenericTypeDefinition() == typeof(Nullable<>));
         }
 
+        internal static bool CheckForPkAttribute(IEnumerable<PropertyInfo> objProperties)
+        {
+            // Not using Linq.Where() and manually iterating through objProperties just to avoid dependencies on System.Xml??
+            foreach (var objProperty in objProperties)
+            {
+                var pkAttribute = objProperty.FirstAttribute<PrimaryKeyAttribute>();
+                if (pkAttribute != null) return true;
+            }
+            return false;
+        }
+
         internal static bool CheckForIdField(IEnumerable<PropertyInfo> objProperties)
         {
             // Not using Linq.Where() and manually iterating through objProperties just to avoid dependencies on System.Xml??
@@ -75,6 +86,7 @@ namespace ServiceStack.OrmLite
             var objProperties = modelType.GetProperties(
                 BindingFlags.Public | BindingFlags.Instance).ToList();
 
+            var hasPkAttribute = CheckForPkAttribute(objProperties);
             var hasIdField = CheckForIdField(objProperties);
 
             var i = 0;
@@ -87,8 +99,7 @@ namespace ServiceStack.OrmLite
                 var belongToAttribute = propertyInfo.FirstAttribute<BelongToAttribute>();
                 var isFirst = i++ == 0;
 
-                var isPrimaryKey = propertyInfo.Name == OrmLiteConfig.IdField || (!hasIdField && isFirst)
-                    || pkAttribute != null;
+                var isPrimaryKey = hasPkAttribute ? pkAttribute != null : propertyInfo.Name == OrmLiteConfig.IdField || (!hasIdField && isFirst);
 
                 var isNullableType = IsNullableType(propertyInfo.PropertyType);
 
