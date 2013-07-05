@@ -48,9 +48,9 @@ namespace ServiceStack.OrmLite
             foreach (var item in pocoType.GetModelDefinition().FieldDefinitions)
             {
                 if (withTablePrefix)
-                    result.Add(string.Format("{0}.{1}", OrmLiteConfig.DialectProvider.GetQuotedTableName(tableName), OrmLiteConfig.DialectProvider.GetQuotedColumnName(item.Name)));
+                    result.Add(string.Format("{0}.{1}", OrmLiteConfig.DialectProvider.GetQuotedTableName(tableName), OrmLiteConfig.DialectProvider.GetQuotedColumnName(item.FieldName)));
                 else
-                    result.Add(string.Format("{0}", OrmLiteConfig.DialectProvider.GetQuotedColumnName(item.Name)));
+                    result.Add(string.Format("{0}", OrmLiteConfig.DialectProvider.GetQuotedColumnName(item.FieldName)));
             }
             return result;
         }
