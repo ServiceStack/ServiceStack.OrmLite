@@ -69,15 +69,15 @@ namespace ServiceStack.OrmLite
             throw new Exception("Invalid Expression provided");
         }
 
-        protected void ProcessMemberAccess(string tableName, MemberExpression m, List<string> lst, bool withTablePrefix)
+        protected void ProcessMemberAccess(string tableName, MemberExpression m, List<string> lst, bool withTablePrefix, string alias = "")
         {
             if (m.Expression != null
                 && (m.Expression.NodeType == ExpressionType.Parameter || m.Expression.NodeType == ExpressionType.Convert))
             {
                 if (withTablePrefix)
-                    lst.Add(string.Format("{0}.{1}", OrmLiteConfig.DialectProvider.GetQuotedTableName(tableName), OrmLiteConfig.DialectProvider.GetQuotedColumnName(m.Member.Name)));
+                    lst.Add(string.Format("{0}.{1}{2}", OrmLiteConfig.DialectProvider.GetQuotedTableName(tableName), OrmLiteConfig.DialectProvider.GetQuotedColumnName(m.Member.Name), string.IsNullOrEmpty(alias) ? string.Empty : string.Format(" AS {0}", OrmLiteConfig.DialectProvider.GetQuotedColumnName(alias))));
                 else
-                    lst.Add(string.Format("{0}", OrmLiteConfig.DialectProvider.GetQuotedColumnName(m.Member.Name)));
+                    lst.Add(string.Format("{0}{1}", OrmLiteConfig.DialectProvider.GetQuotedColumnName(m.Member.Name), string.IsNullOrEmpty(alias) ? string.Empty : string.Format(" AS {0}", OrmLiteConfig.DialectProvider.GetQuotedColumnName(alias))));
                 return;
             }
             throw new Exception("Only Members are allowed");
@@ -87,12 +87,19 @@ namespace ServiceStack.OrmLite
         {
             if (nex.Arguments == null || nex.Arguments.Count == 0)
                 throw new Exception("Only column list allowed");
-            foreach (var arg in nex.Arguments)
-                PropertyList(tableName, arg, lst, withTablePrefix);
+
+            var expressionProperties = nex.Type.GetProperties();
+            for (int i=0; i< nex.Arguments.Count;i++)
+            {
+                var arg = nex.Arguments[i];
+                var alias = expressionProperties[i].Name;
+
+                PropertyList(tableName, arg, lst, withTablePrefix, alias);
+            }
             return;
         }
 
-        private void PropertyList(string tableName, Expression exp, List<string> lst, bool withTablePrefix)
+        private void PropertyList(string tableName, Expression exp, List<string> lst, bool withTablePrefix, string alias = "")
         {
             if (exp == null)
                 return;
@@ -100,7 +107,7 @@ namespace ServiceStack.OrmLite
             switch (exp.NodeType)
             {
                 case ExpressionType.MemberAccess:
-                    ProcessMemberAccess(tableName, exp as MemberExpression, lst, withTablePrefix);
+                    ProcessMemberAccess(tableName, exp as MemberExpression, lst, withTablePrefix, alias);
                     return;
 
                 case ExpressionType.Convert:
