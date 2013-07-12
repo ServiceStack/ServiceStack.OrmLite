@@ -23,7 +23,7 @@ namespace ServiceStack.OrmLite
             baseTableName = basePocoType.GetModelDefinition().ModelName;
         }
 
-        private string Column<T>(string tableName, Expression<Func<T, object>> func,bool withTablePrefix)
+        private string Column<T>(string tableName, Expression<Func<T, object>> func, bool withTablePrefix)
         {
             var lst = ColumnList(tableName, func, withTablePrefix);
             if (lst == null || lst.Count != 1)
@@ -36,7 +36,7 @@ namespace ServiceStack.OrmLite
             List<string> result = new List<string>();
             if (func == null || func.Body == null)
                 return result;
-            PropertyList(tableName,func.Body, result,withTablePrefix);
+            PropertyList(tableName, func.Body, result, withTablePrefix);
             return result;
         }
 
@@ -55,7 +55,7 @@ namespace ServiceStack.OrmLite
             return result;
         }
 
-        private void ProcessUnary(string tableName, UnaryExpression u, List<string> lst, bool withTablePrefix )
+        private void ProcessUnary(string tableName, UnaryExpression u, List<string> lst, bool withTablePrefix)
         {
             if (u.NodeType == ExpressionType.Convert)
             {
@@ -63,7 +63,7 @@ namespace ServiceStack.OrmLite
                 {
                     throw new Exception("Invalid Expression provided");
                 }
-                PropertyList(tableName,u.Operand, lst,withTablePrefix );
+                PropertyList(tableName, u.Operand, lst, withTablePrefix);
                 return;
             }
             throw new Exception("Invalid Expression provided");
@@ -88,7 +88,7 @@ namespace ServiceStack.OrmLite
             if (nex.Arguments == null || nex.Arguments.Count == 0)
                 throw new Exception("Only column list allowed");
             foreach (var arg in nex.Arguments)
-                PropertyList(tableName,arg, lst,withTablePrefix);
+                PropertyList(tableName, arg, lst, withTablePrefix);
             return;
         }
 
@@ -100,16 +100,16 @@ namespace ServiceStack.OrmLite
             switch (exp.NodeType)
             {
                 case ExpressionType.MemberAccess:
-                    ProcessMemberAccess(tableName,exp as MemberExpression, lst, withTablePrefix );
+                    ProcessMemberAccess(tableName, exp as MemberExpression, lst, withTablePrefix);
                     return;
 
                 case ExpressionType.Convert:
                     var ue = exp as UnaryExpression;
-                    ProcessUnary(tableName,ue, lst,withTablePrefix );
+                    ProcessUnary(tableName, ue, lst, withTablePrefix);
                     return;
 
                 case ExpressionType.New:
-                    ProcessNew(tableName,exp as NewExpression, lst,withTablePrefix );
+                    ProcessNew(tableName, exp as NewExpression, lst, withTablePrefix);
                     return;
             }
             throw new Exception("Only columns are allowed");
@@ -179,13 +179,13 @@ namespace ServiceStack.OrmLite
             isAggregateUsed = true;
 
             CheckAggregateUsage(true);
-            
+
             var columns = ColumnList(associatedType.GetModelDefinition().ModelName, selectColumn);
             if ((columns.Count == 0) || (columns.Count > 1))
             {
-                throw new Exception("Expression should select only one Column ");            
+                throw new Exception("Expression should select only one Column ");
             }
-            this.columnList.Add(string.Format(" {0}({1}) ",functionName.ToUpper(),columns[0]));
+            this.columnList.Add(string.Format(" {0}({1}) ", functionName.ToUpper(), columns[0]));
             return this;
         }
 
@@ -199,23 +199,23 @@ namespace ServiceStack.OrmLite
         {
             return WhereInternal(WhereType.AND, where);
         }
-        
+
         public JoinSqlBuilder<TNewPoco, TBasePoco> Or<T>(Expression<Func<T, bool>> where)
         {
             return WhereInternal(WhereType.OR, where);
         }
-        
+
         public JoinSqlBuilder<TNewPoco, TBasePoco> And<T>(Expression<Func<T, bool>> where)
         {
             return WhereInternal(WhereType.AND, where);
         }
 
-        private JoinSqlBuilder<TNewPoco, TBasePoco> WhereInternal<T>(WhereType whereType,Expression<Func<T, bool>> where)
+        private JoinSqlBuilder<TNewPoco, TBasePoco> WhereInternal<T>(WhereType whereType, Expression<Func<T, bool>> where)
         {
             Type associatedType = this.PreviousAssociatedType(typeof(T), typeof(T));
             if (associatedType == null)
             {
-                throw new Exception("Either the source or destination table should be associated ");            
+                throw new Exception("Either the source or destination table should be associated ");
             }
             var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();
             ev.WhereStatementWithoutWhereString = true;
@@ -224,7 +224,7 @@ namespace ServiceStack.OrmLite
             var str = ev.WhereExpression;
             if (String.IsNullOrEmpty(str) == false)
             {
-                this.whereList.Add(new KeyValuePair<string,WhereType>(str,whereType));
+                this.whereList.Add(new KeyValuePair<string, WhereType>(str, whereType));
             }
             return this;
         }
@@ -239,7 +239,7 @@ namespace ServiceStack.OrmLite
 
             var lst = ColumnList(associatedType.GetModelDefinition().ModelName, orderByColumns);
             foreach (var item in lst)
-                    orderByList.Add(new KeyValuePair<string,bool>(item,!byDesc));
+                orderByList.Add(new KeyValuePair<string, bool>(item, !byDesc));
             return this;
         }
 
@@ -255,7 +255,7 @@ namespace ServiceStack.OrmLite
 
         public JoinSqlBuilder<TNewPoco, TBasePoco> OrderBy<T>(Expression<Func<T, object>> sourceColumn)
         {
-            return OrderByInternal<T>(false, sourceColumn);        
+            return OrderByInternal<T>(false, sourceColumn);
         }
 
         public JoinSqlBuilder<TNewPoco, TBasePoco> OrderByDescending<T>(Expression<Func<T, object>> sourceColumn)
@@ -265,12 +265,12 @@ namespace ServiceStack.OrmLite
 
         public JoinSqlBuilder<TNewPoco, TBasePoco> Join<TSourceTable, TDestinationTable>(Expression<Func<TSourceTable, object>> sourceColumn, Expression<Func<TDestinationTable, object>> destinationColumn, Expression<Func<TSourceTable, object>> sourceTableColumnSelection = null, Expression<Func<TDestinationTable, object>> destinationTableColumnSelection = null, Expression<Func<TSourceTable, bool>> sourceWhere = null, Expression<Func<TDestinationTable, bool>> destinationWhere = null)
         {
-            return JoinInternal<Join, TSourceTable, TDestinationTable>(JoinType.INNER,joinList, sourceColumn, destinationColumn, sourceTableColumnSelection, destinationTableColumnSelection, sourceWhere, destinationWhere);
+            return JoinInternal<Join, TSourceTable, TDestinationTable>(JoinType.INNER, joinList, sourceColumn, destinationColumn, sourceTableColumnSelection, destinationTableColumnSelection, sourceWhere, destinationWhere);
         }
 
         public JoinSqlBuilder<TNewPoco, TBasePoco> LeftJoin<TSourceTable, TDestinationTable>(Expression<Func<TSourceTable, object>> sourceColumn, Expression<Func<TDestinationTable, object>> destinationColumn, Expression<Func<TSourceTable, object>> sourceTableColumnSelection = null, Expression<Func<TDestinationTable, object>> destinationTableColumnSelection = null, Expression<Func<TSourceTable, bool>> sourceWhere = null, Expression<Func<TDestinationTable, bool>> destinationWhere = null)
         {
-            return JoinInternal<Join, TSourceTable, TDestinationTable>(JoinType.LEFTOUTER,joinList, sourceColumn, destinationColumn, sourceTableColumnSelection, destinationTableColumnSelection, sourceWhere, destinationWhere);
+            return JoinInternal<Join, TSourceTable, TDestinationTable>(JoinType.LEFTOUTER, joinList, sourceColumn, destinationColumn, sourceTableColumnSelection, destinationTableColumnSelection, sourceWhere, destinationWhere);
         }
 
         public JoinSqlBuilder<TNewPoco, TBasePoco> RightJoin<TSourceTable, TDestinationTable>(Expression<Func<TSourceTable, object>> sourceColumn, Expression<Func<TDestinationTable, object>> destinationColumn, Expression<Func<TSourceTable, object>> sourceTableColumnSelection = null, Expression<Func<TDestinationTable, object>> destinationTableColumnSelection = null, Expression<Func<TSourceTable, bool>> sourceWhere = null, Expression<Func<TDestinationTable, bool>> destinationWhere = null)
@@ -306,7 +306,7 @@ namespace ServiceStack.OrmLite
             join.JoinType = joinType;
             join.Class1Type = typeof(TSourceTable);
             join.Class2Type = typeof(TDestinationTable);
-           
+
             if (associatedType == join.Class1Type)
                 join.RefType = join.Class2Type;
             else
@@ -315,29 +315,29 @@ namespace ServiceStack.OrmLite
             join.Class1TableName = join.Class1Type.GetModelDefinition().ModelName;
             join.Class2TableName = join.Class2Type.GetModelDefinition().ModelName;
             join.RefTypeTableName = join.RefType.GetModelDefinition().ModelName;
-            
+
             if (join.JoinType != JoinType.CROSS)
             {
                 if (join.JoinType == JoinType.SELF)
                 {
-                    join.Class1ColumnName = Column<TSourceTable>(join.Class1TableName, sourceColumn,false);
-                    join.Class2ColumnName = Column<TDestinationTable>(join.Class2TableName, destinationColumn,false);
+                    join.Class1ColumnName = Column<TSourceTable>(join.Class1TableName, sourceColumn, false);
+                    join.Class2ColumnName = Column<TDestinationTable>(join.Class2TableName, destinationColumn, false);
                 }
                 else
                 {
-                    join.Class1ColumnName = Column<TSourceTable>(join.Class1TableName, sourceColumn,true);
-                    join.Class2ColumnName = Column<TDestinationTable>(join.Class2TableName, destinationColumn,true);
+                    join.Class1ColumnName = Column<TSourceTable>(join.Class1TableName, sourceColumn, true);
+                    join.Class2ColumnName = Column<TDestinationTable>(join.Class2TableName, destinationColumn, true);
                 }
             }
 
             if (sourceTableColumnSelection != null)
             {
-                columnList.AddRange(ColumnList<TSourceTable>(join.Class1TableName,sourceTableColumnSelection));
+                columnList.AddRange(ColumnList<TSourceTable>(join.Class1TableName, sourceTableColumnSelection));
             }
 
             if (destinationTableColumnSelection != null)
             {
-                columnList.AddRange(ColumnList<TDestinationTable>(join.Class2TableName,destinationTableColumnSelection));
+                columnList.AddRange(ColumnList<TDestinationTable>(join.Class2TableName, destinationTableColumnSelection));
             }
 
             if (sourceWhere != null)
@@ -346,7 +346,7 @@ namespace ServiceStack.OrmLite
                 ev.Where(sourceWhere);
                 var where = ev.WhereExpression;
                 if (!String.IsNullOrEmpty(where))
-                    whereList.Add(new KeyValuePair<string, WhereType>(where,WhereType.AND));
+                    whereList.Add(new KeyValuePair<string, WhereType>(where, WhereType.AND));
             }
 
             if (destinationWhere != null)
@@ -357,7 +357,7 @@ namespace ServiceStack.OrmLite
                 if (!String.IsNullOrEmpty(where))
                     whereList.Add(new KeyValuePair<string, WhereType>(where, WhereType.AND));
             }
-            
+
             joinObjList.Add(join);
             return this;
         }
@@ -385,7 +385,7 @@ namespace ServiceStack.OrmLite
 
         private void CheckAggregateUsage(bool ignoreCurrentItem)
         {
-            if ((columnList.Count > ( ignoreCurrentItem ? 0 : 1)) && (isAggregateUsed == true))
+            if ((columnList.Count > (ignoreCurrentItem ? 0 : 1)) && (isAggregateUsed == true))
             {
                 throw new Exception("Aggregate function cannot be used with non aggregate select columns");
             }
@@ -415,17 +415,17 @@ namespace ServiceStack.OrmLite
                 if (isDistinct && typeof(TNewPoco).GetModelDefinition().FieldDefinitions.Count > 0)
                     sb.Append(" DISTINCT ");
 
-                foreach ( var fi in typeof(TNewPoco).GetModelDefinition().FieldDefinitions)
+                foreach (var fi in typeof(TNewPoco).GetModelDefinition().FieldDefinitions)
                 {
                     colSB.AppendFormat("{0}{1}", colSB.Length > 0 ? "," : "", String.IsNullOrEmpty(fi.BelongToModelName) ? (fi.FieldName) : ((OrmLiteConfig.DialectProvider.GetQuotedTableName(fi.BelongToModelName) + "." + OrmLiteConfig.DialectProvider.GetQuotedColumnName(fi.FieldName))));
                 }
                 if (colSB.Length == 0)
-                    colSB.AppendFormat("\"{0}\".*", baseTableName);
+                    colSB.AppendFormat("\"{0}\".*", OrmLiteConfig.DialectProvider.GetQuotedTableName(baseTableName));
             }
 
             sb.Append(colSB.ToString() + " \n");
 
-            sb.AppendFormat("FROM {0} \n", baseTableName);
+            sb.AppendFormat("FROM {0} \n", OrmLiteConfig.DialectProvider.GetQuotedTableName(baseTableName));
             int i = 0;
             foreach (var join in joinList)
             {
@@ -445,17 +445,17 @@ namespace ServiceStack.OrmLite
 
                 if (join.JoinType == JoinType.CROSS)
                 {
-                    sb.AppendFormat(" {0} ON {1} = {2}  \n", join.RefTypeTableName);
+                    sb.AppendFormat(" {0} ON {1} = {2}  \n", OrmLiteConfig.DialectProvider.GetQuotedTableName(join.RefTypeTableName));
                 }
                 else
                 {
                     if (join.JoinType != JoinType.SELF)
                     {
-                        sb.AppendFormat(" {0} ON {1} = {2}  \n", join.RefTypeTableName, join.Class1ColumnName, join.Class2ColumnName);
+                        sb.AppendFormat(" {0} ON {1} = {2}  \n", OrmLiteConfig.DialectProvider.GetQuotedTableName(join.RefTypeTableName), join.Class1ColumnName, join.Class2ColumnName);
                     }
                     else
                     {
-                        sb.AppendFormat(" {0} AS {1} ON {1}.{2} = \"{0}\".{3}  \n", join.RefTypeTableName, join.RefTypeTableName + "_" + i.ToString(), join.Class1ColumnName, join.Class2ColumnName);
+                        sb.AppendFormat(" {0} AS {1} ON {1}.{2} = \"{0}\".{3}  \n", OrmLiteConfig.DialectProvider.GetQuotedTableName(join.RefTypeTableName), OrmLiteConfig.DialectProvider.GetQuotedTableName(join.RefTypeTableName) + "_" + i.ToString(), join.Class1ColumnName, join.Class2ColumnName);
                     }
                 }
             }
@@ -470,14 +470,14 @@ namespace ServiceStack.OrmLite
                 sb.Append("WHERE " + whereSB.ToString() + " \n");
             }
 
-            if (orderByList.Count > 0 )
+            if (orderByList.Count > 0)
             {
                 var orderBySB = new StringBuilder();
                 foreach (var ob in orderByList)
                 {
                     orderBySB.AppendFormat("{0}{1} {2} ", orderBySB.Length > 0 ? "," : "", ob.Key, ob.Value ? "ASC" : "DESC");
                 }
-                sb.Append("ORDER BY " + orderBySB.ToString()+" \n");
+                sb.Append("ORDER BY " + orderBySB.ToString() + " \n");
             }
 
             return sb.ToString();
@@ -503,15 +503,14 @@ namespace ServiceStack.OrmLite
 
     class Join
     {
-        public Type Class1Type {get;set; }
-        public Type Class2Type {get;set; }
-        public Type RefType {get;set; }
+        public Type Class1Type { get; set; }
+        public Type Class2Type { get; set; }
+        public Type RefType { get; set; }
         public JoinType JoinType { get; set; }
         public string Class1TableName { get; set; }
         public string Class2TableName { get; set; }
         public string RefTypeTableName { get; set; }
-        public string Class1ColumnName {get;set; }
-        public string Class2ColumnName {get;set; }        
+        public string Class1ColumnName { get; set; }
+        public string Class2ColumnName { get; set; }
     }
-
 }
