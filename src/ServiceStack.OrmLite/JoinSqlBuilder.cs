@@ -90,10 +90,11 @@ namespace ServiceStack.OrmLite
             if (nex.Arguments == null || nex.Arguments.Count == 0)
                 throw new Exception("Only column list allowed");
 
+            var expressionProperties = nex.Type.GetProperties();
             for (int i=0; i< nex.Arguments.Count;i++)
             {
                 var arg = nex.Arguments[i];
-                var alias = nex.Type.GetProperties()[i].Name;
+                var alias = expressionProperties[i].Name;
 
                 PropertyList(tableName, arg, lst, withTablePrefix, alias);
             }
