@@ -684,7 +684,7 @@ namespace ServiceStack.OrmLite
                     {
                         if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
 
-                        sqlFilter.AppendFormat("{0} = {1}", GetQuotedColumnName(fieldDef.FieldName), String.Concat(ParamString, fieldDef.Name));
+                        sqlFilter.AppendFormat("{0} = {1}", GetQuotedColumnName(fieldDef.FieldName), String.Concat(ParamString, fieldDef.FieldName));
                         AddParameterForFieldToCommand(command, fieldDef, objWithProperties);
 
                         continue;
@@ -692,7 +692,7 @@ namespace ServiceStack.OrmLite
 
                     if (updateFields.Count > 0 && !updateFields.Contains(fieldDef.Name)) continue;
                     if (sql.Length > 0) sql.Append(",");
-                    sql.AppendFormat("{0} = {1}", GetQuotedColumnName(fieldDef.FieldName), String.Concat(ParamString, fieldDef.Name));
+                    sql.AppendFormat("{0} = {1}", GetQuotedColumnName(fieldDef.FieldName), String.Concat(ParamString, fieldDef.FieldName));
 
                     AddParameterForFieldToCommand(command, fieldDef, objWithProperties);
                 }
