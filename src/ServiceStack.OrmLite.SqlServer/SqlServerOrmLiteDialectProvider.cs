@@ -82,6 +82,17 @@ namespace ServiceStack.OrmLite.SqlServer
             return string.Format("\"{0}\".\"{1}\"", escapedSchema, NamingStrategy.GetTableName(modelDef.ModelName));
         }
 
+        public override string GetColumnDefinition(string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement, bool isNullable, int? fieldLength, int? scale, string defaultValue)
+        {
+            //this is kind of hack for the column of type byte and fieldname verion
+            if (fieldType == typeof(byte[]) && fieldName.ToLowerInvariant().Contains("version"))
+            {
+                return GetQuotedColumnName(fieldName) + " Timestamp NOT NULL";
+            }
+
+            return base.GetColumnDefinition(fieldName, fieldType, isPrimaryKey, autoIncrement, isNullable, fieldLength, scale, defaultValue);
+        }
+
 		public override object ConvertDbValue(object value, Type type)
 		{
 			try

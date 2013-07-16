@@ -128,6 +128,7 @@ namespace ServiceStack.OrmLite
                         propertyInfo.FirstAttribute<AutoIncrementAttribute>() != null,
                     IsIndexed = isIndex,
                     IsUnique = isUnique,
+                    IsRowVersion = propertyInfo.FirstAttribute<TimestampAttribute>() != null,
                     FieldLength =
                         stringLengthAttr != null
                             ? stringLengthAttr.MaximumLength

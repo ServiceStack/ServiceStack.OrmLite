@@ -32,6 +32,8 @@ namespace ServiceStack.OrmLite
 
         public bool IsPrimaryKey { get; set; }
 
+        public bool IsRowVersion { get; set; }
+
         public bool AutoIncrement { get; set; }
 
         public bool IsNullable { get; set; }

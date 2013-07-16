@@ -140,11 +140,41 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 Assert.AreEqual(obj.Name, target.Name);
             }
         }
+        [Test]
+        public void Can_execute_updateParam_using_versioned_row()
+        {
+            using (var con = ConnectionString.OpenDbConnection())
+            {
+                con.CreateTable<SimpleVersionedType>(true);
+                var obj = new SimpleVersionedType { Name = "Somename" };
+                con.Save(obj);
+                var storedObj = con.GetById<SimpleVersionedType>(con.GetLastInsertId());
+
+                Assert.IsNotNull(storedObj, "could not retrive the object from databse");
+
+                int nrRowsChangedFirst = con.UpdateParam(storedObj);
+
+                int nrRowsChangedSecond = con.UpdateParam(storedObj);
+
+                Assert.AreEqual(1, nrRowsChangedFirst, "first update must change exectly one row");
+                Assert.AreEqual(0, nrRowsChangedSecond, "second update must not change any rows");
+
+
+            }
+        }
     }
 
 
 
+    public class SimpleVersionedType
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+        public string Name { get; set; }
+        [Timestamp]
+        public byte[] RowVersion { get; set; }
 
+    }
 
     public class SimpleType
     {
