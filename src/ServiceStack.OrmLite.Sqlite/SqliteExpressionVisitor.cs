@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq.Expressions;
@@ -49,27 +50,14 @@ namespace ServiceStack.OrmLite.Sqlite
                     var lambda = Expression.Lambda<Func<object>>(member);
                     var getter = lambda.Compile();
 
-                    var inArgs = getter() as object[];
+                    var inArgs = Sql.Flatten(getter() as IEnumerable);
 
                     var sIn = new StringBuilder();
                     foreach (var e in inArgs)
                     {
-                        if (e.GetType().ToString() != "System.Collections.Generic.List`1[System.Object]")
-                        {
-                            sIn.AppendFormat("{0}{1}",
-                                         sIn.Length > 0 ? "," : "",
-                                         OrmLiteConfig.DialectProvider.GetQuotedValue(e, e.GetType()));
-                        }
-                        else
-                        {
-                            var listArgs = e as IList<Object>;
-                            foreach (Object el in listArgs)
-                            {
-                                sIn.AppendFormat("{0}{1}",
-                                         sIn.Length > 0 ? "," : "",
-                                         OrmLiteConfig.DialectProvider.GetQuotedValue(el, el.GetType()));
-                            }
-                        }
+                        sIn.AppendFormat("{0}{1}",
+                                     sIn.Length > 0 ? "," : "",
+                                     OrmLiteConfig.DialectProvider.GetQuotedValue(e, e.GetType()));
                     }
                     statement = string.Format("{0} {1} ({2})", quotedColName, m.Method.Name, sIn);
                     break;
