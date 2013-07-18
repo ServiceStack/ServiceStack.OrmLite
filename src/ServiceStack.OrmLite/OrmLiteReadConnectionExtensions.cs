@@ -140,6 +140,11 @@ namespace ServiceStack.OrmLite
             return dbConn.Exec(dbCmd => dbCmd.Where<T>(anonType));
         }
 
+        public static List<T> Where<T>(this IDbConnection dbConn, System.Linq.Expressions.Expression<Func<T,bool>> Predicate)
+        {
+            return (List<T>) dbConn.Select<T>(Predicate);
+        }
+
         public static List<T> Query<T>(this IDbConnection dbConn, string sql)
         {
             return dbConn.Exec(dbCmd => dbCmd.Query<T>(sql));
