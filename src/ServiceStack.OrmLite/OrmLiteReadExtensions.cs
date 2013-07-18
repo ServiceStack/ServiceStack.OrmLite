@@ -215,18 +215,20 @@ namespace ServiceStack.OrmLite
 
 		public static void SetFilters<T>(this IDbCommand dbCmd, object anonType, bool excludeNulls)
 		{
-			SetParameters(dbCmd, anonType, excludeNulls);
+			SetParameters<T>(dbCmd, anonType, excludeNulls);
 
 			dbCmd.CommandText = GetFilterSql<T>(dbCmd);
 		}
 
-		private static void SetParameters(this IDbCommand dbCmd, object anonType, bool excludeNulls)
+		private static void SetParameters<T>(this IDbCommand dbCmd, object anonType, bool excludeNulls)
 		{
 			dbCmd.Parameters.Clear();
 			lastQueryType = null;
 			if (anonType == null) return;
 
-			var pis = anonType.GetType().GetSerializableProperties();
+            var pis = anonType.GetType().GetSerializableProperties();
+                ModelDefinition model = ModelDefinition<T>.Definition;
+
 			foreach (var pi in pis)
 			{
 				var mi = pi.GetGetMethod();
@@ -235,8 +237,15 @@ namespace ServiceStack.OrmLite
 				var value = mi.Invoke(anonType, new object[0]);
 				if (excludeNulls && value == null) continue;
 
+
 				var p = dbCmd.CreateParameter();
-				p.ParameterName = pi.Name;
+
+                FieldDefinition targetField = model.FieldDefinitions.FirstOrDefault(f => string.Equals(f.Name, pi.Name));
+                if (targetField != null && !string.IsNullOrEmpty(targetField.Alias))
+                    p.ParameterName = targetField.Alias;
+                else
+                    p.ParameterName = pi.Name;
+
 				p.DbType = OrmLiteConfig.DialectProvider.GetColumnDbType(pi.PropertyType);
 				p.Direction = ParameterDirection.Input;
 				p.Value = value;
@@ -328,7 +337,7 @@ namespace ServiceStack.OrmLite
 		{
 			if (IsScalar<T>()) return QueryScalar<T>(dbCmd, sql, anonType);
 
-			dbCmd.SetParameters(anonType, true);
+			dbCmd.SetParameters<T>(anonType, true);
             dbCmd.CommandText = OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sql);
 
 			using (var dbReader = dbCmd.ExecuteReader())
@@ -359,7 +368,7 @@ namespace ServiceStack.OrmLite
 
         internal static List<T> Query<T>(this IDbCommand dbCmd, string sql, object anonType = null)
 		{
-            if (anonType != null) dbCmd.SetParameters(anonType, true);
+            if (anonType != null) dbCmd.SetParameters<T>(anonType, true);
             dbCmd.CommandText = OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sql);
 
 			using (var dbReader = dbCmd.ExecuteReader())
@@ -389,7 +398,7 @@ namespace ServiceStack.OrmLite
 
 	    internal static T QueryScalar<T>(this IDbCommand dbCmd, string sql, object anonType = null)
 		{
-            if (anonType != null) dbCmd.SetParameters(anonType, true);
+            if (anonType != null) dbCmd.SetParameters<T>(anonType, true);
             dbCmd.CommandText = OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sql);
 
 			using (var dbReader = dbCmd.ExecuteReader())
@@ -398,7 +407,7 @@ namespace ServiceStack.OrmLite
 
         internal static List<T> SqlList<T>(this IDbCommand dbCmd, string sql, object anonType = null)
         {
-            if (anonType != null) dbCmd.SetParameters(anonType, true);
+            if (anonType != null) dbCmd.SetParameters<T>(anonType, true);
             dbCmd.CommandText = sql;
 
             using (var dbReader = dbCmd.ExecuteReader())
@@ -420,7 +429,7 @@ namespace ServiceStack.OrmLite
 
 	    internal static T SqlScalar<T>(this IDbCommand dbCmd, string sql, object anonType = null)
         {
-            if (anonType != null) dbCmd.SetParameters(anonType, true);
+            if (anonType != null) dbCmd.SetParameters<T>(anonType, true);
             dbCmd.CommandText = sql;
 
             using (var dbReader = dbCmd.ExecuteReader())
@@ -446,7 +455,7 @@ namespace ServiceStack.OrmLite
 
 	    internal static List<T> QueryByExample<T>(this IDbCommand dbCmd, string sql, object anonType = null)
 		{
-            if (anonType != null) dbCmd.SetParameters(anonType, true);
+            if (anonType != null) dbCmd.SetParameters<T>(anonType, true);
             dbCmd.CommandText = OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sql);
 
 			using (var dbReader = dbCmd.ExecuteReader())
