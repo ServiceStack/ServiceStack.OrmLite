@@ -145,12 +145,28 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        public void Can_Select_using_Array_Contains()
+        public void Can_Select_using_object_Array_Contains()
         {
             var vals = new object[]{ TestEnum.Val0, TestEnum.Val1 };
 
             var visitor1 = OrmLiteConfig.DialectProvider.ExpressionVisitor<TestType>();
             visitor1.Where(q => vals.Contains(q.EnumCol) || vals.Contains(q.EnumCol));
+            var sql1 = visitor1.ToSelectStatement();
+
+            var visitor2 = OrmLiteConfig.DialectProvider.ExpressionVisitor<TestType>();
+            visitor2.Where(q => Sql.In(q.EnumCol, vals) || Sql.In(q.EnumCol, vals));
+            var sql2 = visitor2.ToSelectStatement();
+
+            Assert.AreEqual(sql1, sql2);
+        }
+
+        [Test]
+        public void Can_Select_using_int_Array_Contains()
+        {
+            var vals = new int[] { (int)TestEnum.Val0, (int)TestEnum.Val1 };
+
+            var visitor1 = OrmLiteConfig.DialectProvider.ExpressionVisitor<TestType>();
+            visitor1.Where(q => vals.Contains((int)q.EnumCol) || vals.Contains((int)q.EnumCol));
             var sql1 = visitor1.ToSelectStatement();
 
             var visitor2 = OrmLiteConfig.DialectProvider.ExpressionVisitor<TestType>();
