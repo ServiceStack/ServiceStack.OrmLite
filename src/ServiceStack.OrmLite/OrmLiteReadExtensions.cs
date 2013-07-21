@@ -248,7 +248,7 @@ namespace ServiceStack.OrmLite
 
 				p.DbType = OrmLiteConfig.DialectProvider.GetColumnDbType(pi.PropertyType);
 				p.Direction = ParameterDirection.Input;
-				p.Value = value;
+                p.Value = value ?? DBNull.Value;
 				dbCmd.Parameters.Add(p);
 			}
 		}
@@ -265,9 +265,14 @@ namespace ServiceStack.OrmLite
 				if (excludeNulls && value == null) continue;
 				var p = dbCmd.CreateParameter();
 				p.ParameterName = kvp.Key;
-				p.DbType = OrmLiteConfig.DialectProvider.GetColumnDbType(value.GetType()); ;
+
+                if (value != null)
+                {
+                    p.DbType = OrmLiteConfig.DialectProvider.GetColumnDbType(value.GetType());
+                }
+				
 				p.Direction = ParameterDirection.Input;
-				p.Value = value;
+                p.Value = value ?? DBNull.Value;
 				dbCmd.Parameters.Add(p);
 			}
 		}
@@ -275,7 +280,7 @@ namespace ServiceStack.OrmLite
 
 		public static void SetFilters<T>(this IDbCommand dbCmd, object anonType)
 		{
-			dbCmd.SetFilters<T>(anonType, false);
+            dbCmd.SetFilters<T>(anonType, excludeNulls: false);
 		}
 
 		public static void ClearFilters(this IDbCommand dbCmd)
@@ -327,7 +332,7 @@ namespace ServiceStack.OrmLite
 		{
 			if (IsScalar<T>()) return QueryScalar<T>(dbCmd, anonType);
 
-			dbCmd.SetFilters<T>(anonType, true);
+            dbCmd.SetFilters<T>(anonType, excludeNulls: false);
 
 			using (var dbReader = dbCmd.ExecuteReader())
 				return dbReader.ConvertTo<T>();
@@ -337,7 +342,7 @@ namespace ServiceStack.OrmLite
 		{
 			if (IsScalar<T>()) return QueryScalar<T>(dbCmd, sql, anonType);
 
-			dbCmd.SetParameters<T>(anonType, true);
+            dbCmd.SetParameters<T>(anonType, excludeNulls: false);
             dbCmd.CommandText = OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sql);
 
 			using (var dbReader = dbCmd.ExecuteReader())
@@ -368,7 +373,7 @@ namespace ServiceStack.OrmLite
 
         internal static List<T> Query<T>(this IDbCommand dbCmd, string sql, object anonType = null)
 		{
-            if (anonType != null) dbCmd.SetParameters<T>(anonType, true);
+            if (anonType != null) dbCmd.SetParameters<T>(anonType, excludeNulls: false);
             dbCmd.CommandText = OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sql);
 
 			using (var dbReader = dbCmd.ExecuteReader())
@@ -379,7 +384,7 @@ namespace ServiceStack.OrmLite
 
         internal static List<T> Query<T>(this IDbCommand dbCmd, string sql, Dictionary<string, object> dict)
 		{
-			if (dict != null) dbCmd.SetParameters(dict, true);
+            if (dict != null) dbCmd.SetParameters(dict, excludeNulls: false);
             dbCmd.CommandText = OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sql);
 
 			using (var dbReader = dbCmd.ExecuteReader())
@@ -390,7 +395,7 @@ namespace ServiceStack.OrmLite
 
 	    internal static T QueryScalar<T>(this IDbCommand dbCmd, object anonType)
 		{
-			dbCmd.SetFilters<T>(anonType, true);
+            dbCmd.SetFilters<T>(anonType, excludeNulls: false);
 
 			using (var dbReader = dbCmd.ExecuteReader())
 				return GetScalar<T>(dbReader);
@@ -398,7 +403,7 @@ namespace ServiceStack.OrmLite
 
 	    internal static T QueryScalar<T>(this IDbCommand dbCmd, string sql, object anonType = null)
 		{
-            if (anonType != null) dbCmd.SetParameters<T>(anonType, true);
+            if (anonType != null) dbCmd.SetParameters<T>(anonType, excludeNulls: false);
             dbCmd.CommandText = OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sql);
 
 			using (var dbReader = dbCmd.ExecuteReader())
@@ -407,7 +412,7 @@ namespace ServiceStack.OrmLite
 
         internal static List<T> SqlList<T>(this IDbCommand dbCmd, string sql, object anonType = null)
         {
-            if (anonType != null) dbCmd.SetParameters<T>(anonType, true);
+            if (anonType != null) dbCmd.SetParameters<T>(anonType, excludeNulls: false);
             dbCmd.CommandText = sql;
 
             using (var dbReader = dbCmd.ExecuteReader())
@@ -418,7 +423,7 @@ namespace ServiceStack.OrmLite
 
         internal static List<T> SqlList<T>(this IDbCommand dbCmd, string sql, Dictionary<string, object> dict)
         {
-            if (dict != null) dbCmd.SetParameters(dict, true);
+            if (dict != null) dbCmd.SetParameters(dict, excludeNulls: false);
             dbCmd.CommandText = sql;
 
             using (var dbReader = dbCmd.ExecuteReader())
@@ -429,7 +434,7 @@ namespace ServiceStack.OrmLite
 
 	    internal static T SqlScalar<T>(this IDbCommand dbCmd, string sql, object anonType = null)
         {
-            if (anonType != null) dbCmd.SetParameters<T>(anonType, true);
+            if (anonType != null) dbCmd.SetParameters<T>(anonType, excludeNulls: false);
             dbCmd.CommandText = sql;
 
             using (var dbReader = dbCmd.ExecuteReader())
@@ -438,7 +443,7 @@ namespace ServiceStack.OrmLite
 
         internal static T SqlScalar<T>(this IDbCommand dbCmd, string sql, Dictionary<string, object> dict)
         {
-            if (dict != null) dbCmd.SetParameters(dict, true);
+            if (dict != null) dbCmd.SetParameters(dict, excludeNulls: false);
             dbCmd.CommandText = sql;
 
             using (var dbReader = dbCmd.ExecuteReader())
@@ -447,7 +452,7 @@ namespace ServiceStack.OrmLite
 
 	    internal static List<T> ByExampleWhere<T>(this IDbCommand dbCmd, object anonType)
 		{
-			dbCmd.SetFilters<T>(anonType, true);
+            dbCmd.SetFilters<T>(anonType, excludeNulls: false);
 
 			using (var dbReader = dbCmd.ExecuteReader())
 				return dbReader.ConvertToList<T>();
@@ -455,7 +460,7 @@ namespace ServiceStack.OrmLite
 
 	    internal static List<T> QueryByExample<T>(this IDbCommand dbCmd, string sql, object anonType = null)
 		{
-            if (anonType != null) dbCmd.SetParameters<T>(anonType, true);
+            if (anonType != null) dbCmd.SetParameters<T>(anonType, excludeNulls: false);
             dbCmd.CommandText = OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sql);
 
 			using (var dbReader = dbCmd.ExecuteReader())
@@ -578,6 +583,9 @@ namespace ServiceStack.OrmLite
 			while (reader.Read())
 			{
 				var value = getValueFn(0);
+                if (value == DBNull.Value)
+                    value = default(T);
+
 				columValues.Add((T)value);
 			}
 			return columValues;
@@ -612,6 +620,9 @@ namespace ServiceStack.OrmLite
 			while (reader.Read())
 			{
 				var value = getValueFn(0);
+                if (value == DBNull.Value)
+                    value = default(T);
+
 				columValues.Add((T)value);
 			}
 			return columValues;
