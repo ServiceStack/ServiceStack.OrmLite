@@ -62,7 +62,13 @@ namespace ServiceStack.OrmLite
             if (this.SetValueFn == null) return;
 
             var convertedValue = OrmLiteConfig.DialectProvider.ConvertDbValue(withValue, this.FieldType);
-            SetValueFn(onInstance, convertedValue);
+            try
+            {
+                SetValueFn(onInstance, convertedValue);
+            }
+            catch (NullReferenceException ex)
+            {
+            }
         }
 
         public string GetQuotedValue(object fromInstance)
