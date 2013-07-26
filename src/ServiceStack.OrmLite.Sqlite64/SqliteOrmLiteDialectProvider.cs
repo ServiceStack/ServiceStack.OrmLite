@@ -10,7 +10,7 @@ namespace ServiceStack.OrmLite.Sqlite
 
 		protected override IDbConnection CreateConnection(string connectionString)
 		{
-			return new SQLiteConnection(connectionString);
+            return new SQLiteConnection(connectionString, parseViaFramework: ParseViaFramework);
 		}
 	}
 }

@@ -19,8 +19,9 @@ namespace ServiceStack.OrmLite.Sqlite
 			base.InitColumnTypeMap();
 		}
 
-		public static string Password { get; set; }
-		public static bool UTF8Encoded { get; set; }
+        public static string Password { get; set; }
+        public static bool UTF8Encoded { get; set; }
+        public static bool ParseViaFramework { get; set; }
 
 		public static string CreateFullTextCreateTableStatement(object objectWithProperties)
 		{
