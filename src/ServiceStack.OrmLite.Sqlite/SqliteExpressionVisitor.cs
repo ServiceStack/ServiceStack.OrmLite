@@ -6,42 +6,42 @@ using System.Linq.Expressions;
 
 namespace ServiceStack.OrmLite.Sqlite
 {
-	/// <summary>
-	/// Description of SqliteExpressionVisitor.
-	/// </summary>
-	public class SqliteExpressionVisitor<T>: SqlExpressionVisitor<T>
-	{
+    /// <summary>
+    /// Description of SqliteExpressionVisitor.
+    /// </summary>
+    public class SqliteExpressionVisitor<T> : SqlExpressionVisitor<T>
+    {
         protected override object VisitColumnAccessMethod(MethodCallExpression m)
-	    {
-	        List<Object> args = this.VisitExpressionList(m.Arguments);
-	        var quotedColName = Visit(m.Object);
-	        string statement;
+        {
+            List<Object> args = this.VisitExpressionList(m.Arguments);
+            var quotedColName = Visit(m.Object);
+            string statement;
 
-	        switch (m.Method.Name)
-	        {
-	            case "Substring":
-	                var startIndex = Int32.Parse(args[0].ToString()) + 1;
-	                if (args.Count == 2)
-	                {
-	                    var length = Int32.Parse(args[1].ToString());
-	                    statement = string.Format("substr({0}, {1}, {2})", quotedColName, startIndex, length);
-	                }
-	                else
-	                    statement = string.Format("substr({0}, {1})", quotedColName, startIndex);
-	                break;
-	            default:
-	                return base.VisitColumnAccessMethod(m);
-	        }
-	        return new PartialSqlString(statement);
-	    }
+            switch (m.Method.Name)
+            {
+                case "Substring":
+                    var startIndex = Int32.Parse(args[0].ToString()) + 1;
+                    if (args.Count == 2)
+                    {
+                        var length = Int32.Parse(args[1].ToString());
+                        statement = string.Format("substr({0}, {1}, {2})", quotedColName, startIndex, length);
+                    }
+                    else
+                        statement = string.Format("substr({0}, {1})", quotedColName, startIndex);
+                    break;
+                default:
+                    return base.VisitColumnAccessMethod(m);
+            }
+            return new PartialSqlString(statement);
+        }
 
         protected override object VisitSqlMethodCall(MethodCallExpression m)
-	    {
+        {
             List<Object> args = this.VisitExpressionList(m.Arguments);
-	        object quotedColName = args[0];
+            object quotedColName = args[0];
             args.RemoveAt(0);
 
-	        var statement = "";
+            var statement = "";
 
             switch (m.Method.Name)
             {
@@ -82,7 +82,7 @@ namespace ServiceStack.OrmLite.Sqlite
                     throw new NotSupportedException();
             }
 
-	        return new PartialSqlString(statement);
-	    }
-	}
+            return new PartialSqlString(statement);
+        }
+    }
 }
