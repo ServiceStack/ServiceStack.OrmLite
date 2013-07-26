@@ -521,6 +521,7 @@ namespace ServiceStack.OrmLite
             var modelDef = objWithProperties.GetType().GetModelDefinition();
 
             var command = connection.CreateCommand();
+            command.CommandTimeout = OrmLiteConfig.CommandTimeout;
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
@@ -675,7 +676,7 @@ namespace ServiceStack.OrmLite
             var modelDef = objWithProperties.GetType().GetModelDefinition();
 
             var command = connection.CreateCommand();
-
+            command.CommandTimeout = OrmLiteConfig.CommandTimeout;
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
                 try

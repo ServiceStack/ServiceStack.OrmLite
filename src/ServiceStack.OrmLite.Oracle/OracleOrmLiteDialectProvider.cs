@@ -181,7 +181,7 @@ namespace ServiceStack.OrmLite.Oracle
             var modelDef = GetModel(objWithProperties.GetType());
 
             var dbCommand = connection.CreateCommand();
-
+            dbCommand.CommandTimeout = OrmLiteConfig.CommandTimeout;
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
                 if (fieldDef.IsComputed) continue;

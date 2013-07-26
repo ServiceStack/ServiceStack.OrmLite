@@ -27,7 +27,7 @@ namespace ServiceStack.OrmLite
                 using (var dbCmd = dbConn.CreateCommand())
                 {
                     dbCmd.Transaction = (ormLiteDbConn != null) ? ormLiteDbConn.Transaction : OrmLiteConfig.TSTransaction;
-
+                    dbCmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
                     var ret = filter(dbCmd);
                     LastCommandText = dbCmd.CommandText;
                     return ret;
@@ -51,6 +51,7 @@ namespace ServiceStack.OrmLite
                 using (var dbCmd = dbConn.CreateCommand())
                 {
                     dbCmd.Transaction = (ormLiteDbConn != null) ? ormLiteDbConn.Transaction : OrmLiteConfig.TSTransaction;
+                    dbCmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
 
                     filter(dbCmd);
                     LastCommandText = dbCmd.CommandText;
@@ -74,6 +75,7 @@ namespace ServiceStack.OrmLite
                 using (var dbCmd = dbConn.CreateCommand())
                 {
                     dbCmd.Transaction = (ormLiteDbConn != null) ? ormLiteDbConn.Transaction : OrmLiteConfig.TSTransaction;
+                    dbCmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
 
                     var results = filter(dbCmd);
                     LastCommandText = dbCmd.CommandText;

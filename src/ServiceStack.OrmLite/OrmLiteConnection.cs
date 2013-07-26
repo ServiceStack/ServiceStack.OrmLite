@@ -79,6 +79,7 @@ namespace ServiceStack.OrmLite
 
 			var cmd = DbConnection.CreateCommand();
             if(Transaction != null) { cmd.Transaction = Transaction; }
+			cmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
             return cmd;
 		}
 

@@ -18,6 +18,25 @@ namespace ServiceStack.OrmLite
 	public static class OrmLiteConfig
 	{
 		public const string IdField = "Id";
+		
+        private const int defaultCommandTimeout = 30;
+        private static int? commandTimeout;
+        [ThreadStatic] public static int? TSCommandTimeout;
+        public static int CommandTimeout
+        {
+            get
+            {
+                if (TSCommandTimeout != null)
+                    return TSCommandTimeout.Value;
+                if (commandTimeout != null)
+                    return commandTimeout.Value;
+                return defaultCommandTimeout;
+            }
+            set
+            {
+                commandTimeout = value;
+            }
+        }
 
         [ThreadStatic] public static IOrmLiteDialectProvider TSDialectProvider;
 	    [ThreadStatic] public static IDbTransaction TSTransaction;

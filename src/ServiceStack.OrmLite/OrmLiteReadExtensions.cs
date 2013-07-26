@@ -45,6 +45,7 @@ namespace ServiceStack.OrmLite
 		internal static IDataReader ExecReader(this IDbCommand dbCmd, string sql)
 		{
 			LogDebug(sql);
+			dbCmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
 			dbCmd.CommandText = sql;
 			return dbCmd.ExecuteReader();
 		}
@@ -52,6 +53,7 @@ namespace ServiceStack.OrmLite
         internal static IDataReader ExecReader(this IDbCommand dbCmd, string sql, IEnumerable<IDataParameter> parameters)
         {
             LogDebug(sql);
+			dbCmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
 			dbCmd.CommandText = sql;
             dbCmd.Parameters.Clear();
 
