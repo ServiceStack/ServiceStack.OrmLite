@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
+using System.Text.RegularExpressions;
 using ServiceStack.Common.Utils;
 using ServiceStack.Logging;
 
@@ -235,18 +236,27 @@ namespace ServiceStack.OrmLite
 			{
 				foreach (var fieldDef in fieldDefs)
 				{
-                    int index = NotFound;
+                    int index;
                     if (indexCache != null)
                     {
                         if (!indexCache.TryGetValue(fieldDef.Name, out index))
                         {
                             index = dataReader.GetColumnIndex(fieldDef.FieldName);
+                            if (index == NotFound)
+                            {
+                                index = TryGuessColumnIndex(fieldDef.FieldName, dataReader);
+                            }
+
                             indexCache.Add(fieldDef.Name, index);
                         }
                     }
                     else
                     {
                         index = dataReader.GetColumnIndex(fieldDef.FieldName);
+                        if (index == NotFound)
+                        {
+                            index = TryGuessColumnIndex(fieldDef.FieldName, dataReader);
+                        }
                     }
                        
 					if (index == NotFound) continue;
@@ -259,6 +269,71 @@ namespace ServiceStack.OrmLite
 				Log.Error(ex);
 			} 
 			return objWithProperties;
+        }
+
+        private static readonly Regex AllowedPropertyCharsRegex = new Regex(@"[^0-9a-zA-Z_]",
+            RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+        private static int TryGuessColumnIndex(string fieldName, IDataReader dataReader)
+        {
+            var fieldCount = dataReader.FieldCount;
+            for (var i = 0; i < fieldCount; i++)
+            {
+                var dbFieldName = dataReader.GetName(i);
+
+                // First guess: Maybe the DB field has underscores? (most common)
+                // e.g. CustomerId (C#) vs customer_id (DB)
+                var dbFieldNameWithNoUnderscores = dbFieldName.Replace("_", "");
+                if (string.Compare(fieldName, dbFieldNameWithNoUnderscores, StringComparison.InvariantCultureIgnoreCase) == 0)
+                {
+                    return i;
+                }
+
+                // Next guess: Maybe the DB field has special characters?
+                // e.g. Quantity (C#) vs quantity% (DB)
+                var dbFieldNameSanitized = AllowedPropertyCharsRegex.Replace(dbFieldName, string.Empty);
+                if (string.Compare(fieldName, dbFieldNameSanitized, StringComparison.InvariantCultureIgnoreCase) == 0)
+                {
+                    return i;
+                }
+
+                // Next guess: Maybe the DB field has special characters *and* has underscores?
+                // e.g. Quantity (C#) vs quantity_% (DB)
+                if (string.Compare(fieldName, dbFieldNameSanitized.Replace("_", string.Empty), StringComparison.InvariantCultureIgnoreCase) == 0)
+                {
+                    return i;
+                }
+
+                // Next guess: Maybe the DB field has some prefix that we don't have in our C# field?
+                // e.g. CustomerId (C#) vs t130CustomerId (DB)
+                if (dbFieldName.EndsWith(fieldName, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return i;
+                }
+
+                // Next guess: Maybe the DB field has some prefix that we don't have in our C# field *and* has underscores?
+                // e.g. CustomerId (C#) vs t130_CustomerId (DB)
+                if (dbFieldNameWithNoUnderscores.EndsWith(fieldName, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return i;
+                }
+
+                // Next guess: Maybe the DB field has some prefix that we don't have in our C# field *and* has special characters?
+                // e.g. CustomerId (C#) vs t130#CustomerId (DB)
+                if (dbFieldNameSanitized.EndsWith(fieldName, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return i;
+                }
+
+                // Next guess: Maybe the DB field has some prefix that we don't have in our C# field *and* has underscores *and* has special characters?
+                // e.g. CustomerId (C#) vs t130#Customer_I#d (DB)
+                if (dbFieldNameSanitized.Replace("_", "").EndsWith(fieldName, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return i;
+                }
+            }
+
+            return NotFound;
         }
 
         internal static void Update<T>(this IDbCommand dbCmd, params T[] objs)
