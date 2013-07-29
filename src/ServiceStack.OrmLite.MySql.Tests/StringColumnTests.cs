@@ -107,6 +107,81 @@ namespace ServiceStack.OrmLite.MySql.Tests
             }
         }
 
+        [Test]
+        public void Can_store_and_retrieve_string_with_200_characters_from_tinytext_field()
+        {
+            using (var db = ConnectionString.OpenDbConnection())
+            {
+                db.CreateTable<TypeWithTinyTextField>(true);
+
+                var obj = new TypeWithTinyTextField()
+                {
+                    Value = CreateString(200)
+                };
+
+                Assert.AreEqual(200, obj.Value.Length);
+
+                db.Save(obj);
+                obj.Id = (int)db.GetLastInsertId();
+
+                var target = db.GetById<TypeWithTinyTextField>(obj.Id);
+
+                Assert.AreEqual(obj.Value, target.Value);
+                Assert.AreEqual(200, obj.Value.Length);
+            }
+        }
+
+        [Test]
+        public void Can_store_and_retrieve_string_with_100000_characters_from_mediumtext_field()
+        {
+            using (var db = ConnectionString.OpenDbConnection())
+            {
+                db.CreateTable<TypeWithMediumTextField>(true);
+
+                var obj = new TypeWithMediumTextField()
+                {
+                    Value = new string('ъ', 100000) // non-ASCII char, up to 3
+                };
+
+                Assert.AreEqual(100000, obj.Value.Length);
+
+                db.Save(obj);
+                obj.Id = (int)db.GetLastInsertId();
+
+                var target = db.GetById<TypeWithMediumTextField>(obj.Id);
+
+                Assert.AreEqual(obj.Value, target.Value);
+                Assert.AreEqual(100000, obj.Value.Length);
+            }
+        }
+
+
+        [Test]
+        public void Can_store_and_retrieve_string_with_17000000_characters_from_longtext_field()
+        {
+            using (var db = ConnectionString.OpenDbConnection())
+            {
+                db.ExecuteSql("SET GLOBAL max_allowed_packet=60000000;");
+                db.CreateTable<TypeWithLongTextField>(true);
+
+                var obj = new TypeWithLongTextField()
+                {
+                    Value = new string('ъ', 17000000) // non-ASCII char, up to 3
+                };
+
+                Assert.AreEqual(17000000, obj.Value.Length);
+
+                db.Save(obj);
+                obj.Id = (int)db.GetLastInsertId();
+
+                var target = db.GetById<TypeWithLongTextField>(obj.Id);
+
+                Assert.AreEqual(obj.Value, target.Value);
+                Assert.AreEqual(17000000, obj.Value.Length);
+            }
+        }
+
+
         #region classes
 
         class TypeWithUniqeKeyOnVarchar
@@ -149,6 +224,33 @@ namespace ServiceStack.OrmLite.MySql.Tests
             public int Id { get; set; }
 
             [Text]
+            public string Value { get; set; }
+        }
+
+        class TypeWithMediumTextField
+        {
+            [AutoIncrement]
+            public int Id { get; set; }
+
+            [Text(MySqlTextType.MEDIUMTEXT)]
+            public string Value { get; set; }
+        }
+
+        class TypeWithTinyTextField
+        {
+            [AutoIncrement]
+            public int Id { get; set; }
+
+            [Text(MySqlTextType.TINYTEXT)]
+            public string Value { get; set; }
+        }
+
+        class TypeWithLongTextField
+        {
+            [AutoIncrement]
+            public int Id { get; set; }
+
+            [Text(MySqlTextType.LONGTEXT)]
             public string Value { get; set; }
         }
 
