@@ -218,5 +218,44 @@ WHERE SchemaUri=@schemaUri
                 Assert.That(notes[0].NoteText, Is.EqualTo("Hello world 5"));
             }
         }
-	}
+
+        class CustomerDto
+        {
+            public int CustomerId { get; set; }
+            public string @CustomerName { get; set; }
+            public DateTime Customer_Birth_Date { get; set; }
+        }
+
+        [Test]
+        [TestCase("customer_id", "customer_name", "customer_birth_date")]
+        [TestCase("customerid%", "@customername", "customer_b^irth_date")]
+        [TestCase("customerid_%", "@customer_name", "customer$_birth_#date")]
+        [TestCase("c!u@s#t$o%m^e&r*i(d_%", "__cus_tomer__nam_e__", "~cus`tomer$_birth_#date")]
+        [TestCase("t030CustomerId", "t030CustomerName", "t030Customer_birth_date")]
+        [TestCase("t030_customer_id", "t030_customer_name", "t130_customer_birth_date")]
+        [TestCase("t030#Customer_I#d", "t030CustomerNa$^me", "t030Cust^omer_birth_date")]
+        public void Can_query_CustomerDto_and_map_db_fields_not_identical_by_guessing_the_mapping(string field1Name, string field2Name, string field3Name)
+        {
+            using (var db = ConnectionString.OpenDbConnection())
+            {
+                var sql = string.Format(@"
+                    SELECT 1 AS [{0}], 'John' AS [{1}], '1970-01-01' AS [{2}]
+                    UNION ALL
+                    SELECT 2 AS [{0}], 'Jane' AS [{1}], '1980-01-01' AS [{2}]",
+                                        field1Name, field2Name, field3Name);
+
+                var customers = db.Query<CustomerDto>(sql);
+
+                Assert.That(customers.Count, Is.EqualTo(2));
+
+                Assert.That(customers[0].CustomerId, Is.EqualTo(1));
+                Assert.That(customers[0].CustomerName, Is.EqualTo("John"));
+                Assert.That(customers[0].Customer_Birth_Date, Is.EqualTo(new DateTime(1970, 01, 01)));
+
+                Assert.That(customers[1].CustomerId, Is.EqualTo(2));
+                Assert.That(customers[1].CustomerName, Is.EqualTo("Jane"));
+                Assert.That(customers[1].Customer_Birth_Date, Is.EqualTo(new DateTime(1980, 01, 01)));
+            }
+        }
+    }
 }
