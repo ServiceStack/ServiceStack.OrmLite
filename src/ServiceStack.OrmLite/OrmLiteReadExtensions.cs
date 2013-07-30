@@ -156,7 +156,7 @@ namespace ServiceStack.OrmLite
 			using (var reader = dbCmd.ExecReader(
 				OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T),  filter, filterParams)))
 			{
-                var indexCache = new Dictionary<string, int>();
+				var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition);
                 while (reader.Read())
 				{
                     var row = OrmLiteUtilExtensions.CreateInstance<T>();
@@ -476,7 +476,7 @@ namespace ServiceStack.OrmLite
 			var fieldDefs = ModelDefinition<T>.Definition.FieldDefinitionsArray;
 			using (var reader = dbCmd.ExecuteReader())
 			{
-                var indexCache = new Dictionary<string, int>();
+				var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition);
                 while (reader.Read())
 				{
                     var row = OrmLiteUtilExtensions.CreateInstance<T>();
@@ -493,7 +493,7 @@ namespace ServiceStack.OrmLite
 			var fieldDefs = ModelDefinition<T>.Definition.FieldDefinitionsArray;
 			using (var reader = dbCmd.ExecuteReader())
 			{
-                var indexCache = new Dictionary<string, int>();
+				var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition);
                 while (reader.Read())
 				{
                     var row = OrmLiteUtilExtensions.CreateInstance<T>();
