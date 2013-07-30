@@ -127,6 +127,16 @@ namespace ServiceStack.OrmLite.PostgreSQL
 			{
 				return "E'" + ToBinary(value) + "'";
 			}
+			if (fieldType.IsArray && typeof(string).IsAssignableFrom(fieldType.GetElementType()))
+			{
+				var stringArray = (string[]) value;
+				return ToArray(stringArray);
+			}
+			if (fieldType.IsArray && typeof(int).IsAssignableFrom(fieldType.GetElementType()))
+			{
+				var integerArray = (int[]) value;
+				return ToArray(integerArray);
+			}
 
 			return base.GetQuotedValue(value, fieldType);
 		}
@@ -232,6 +242,17 @@ namespace ServiceStack.OrmLite.PostgreSQL
 						.Append((char)('0' + (7 & (b >> 3))))
 						.Append((char)('0' + (7 & b)));
 			return res.ToString();
+		}
+
+		internal string ToArray<T>(T[] source)
+		{
+			var values = new StringBuilder();
+			foreach (var value in source)
+			{
+				if (values.Length > 0) values.Append(",");
+				values.Append(base.GetQuotedValue(value, typeof(T)));
+			}
+			return "ARRAY[" + values + "]";
 		}
 	}
 }
