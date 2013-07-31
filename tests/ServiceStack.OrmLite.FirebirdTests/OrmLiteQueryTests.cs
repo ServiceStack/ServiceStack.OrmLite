@@ -13,7 +13,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_GetById_int_from_ModelWithFieldsOfDifferentTypes_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
 			{
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
@@ -30,7 +30,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_GetById_string_from_ModelWithOnlyStringFields_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
 			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 
@@ -47,7 +47,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_select_with_filter_from_ModelWithOnlyStringFields_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
 			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 
@@ -87,7 +87,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_loop_each_with_filter_from_ModelWithOnlyStringFields_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
 			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 

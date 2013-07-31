@@ -135,4 +135,7 @@
       <Name>ServiceStack.OrmLite.Firebird</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
 </Project>
