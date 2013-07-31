@@ -19,8 +19,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_Delete_from_ModelWithFieldsOfDifferentTypes_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
-			{
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+            {
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
@@ -41,8 +41,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_DeleteById_from_ModelWithFieldsOfDifferentTypes_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
-			{
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+            {
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
@@ -60,8 +60,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_DeleteByIds_from_ModelWithFieldsOfDifferentTypes_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
-			{
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+            {
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });

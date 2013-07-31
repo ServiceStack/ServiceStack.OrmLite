@@ -13,8 +13,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_Save_into_ModelWithFieldsOfDifferentTypes_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
-			{
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+            {
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
 				var row = ModelWithFieldsOfDifferentTypes.Create(1);
@@ -26,8 +26,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_Save_and_select_from_ModelWithFieldsOfDifferentTypes_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
-			{
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+            {
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
 				var row = ModelWithFieldsOfDifferentTypes.Create(1);
@@ -45,8 +45,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_SaveAll_and_select_from_ModelWithFieldsOfDifferentTypes_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
-			{
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+            {
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
 				var rowIds = new List<int> { 1, 2, 3, 4, 5 };
@@ -63,8 +63,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_SaveAll_and_select_from_ModelWithFieldsOfDifferentTypes_table_with_no_ids()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
-			{
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+            {
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 				db.DeleteAll<ModelWithFieldsOfDifferentTypes>();
 				var rowIds = new List<int> { 1, 2, 3, 4, 5 };
@@ -81,8 +81,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_Save_table_with_null_fields()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
-			{
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+            {
 				db.CreateTable<ModelWithIdAndName>(true);
 				db.DeleteAll<ModelWithIdAndName>();
 				var row = ModelWithIdAndName.Create(0);
@@ -101,8 +101,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_Save_TaskQueue_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
-			{
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+            {
 				db.CreateTable<TaskQueue>(true);
 
 				var row = TaskQueue.Create(1);
@@ -123,8 +123,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_SaveAll_and_select_from_Movie_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
-			{
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+            {
 				db.CreateTable<Movie>(true);
 
 				var top5Movies = new List<Movie>

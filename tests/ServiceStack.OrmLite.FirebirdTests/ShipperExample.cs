@@ -68,7 +68,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Shippers_UseCase()
 		{
-			using (IDbConnection db = "User=SYSDBA;Password=masterkey;Database=ormlite-tests.fdb;DataSource=localhost;Dialect=3;charset=ISO8859_1;".OpenDbConnection())
+			using (IDbConnection db = @"User=SYSDBA;Password=masterkey;Database=E:\GitHub\ServiceStack.OrmLite\src\ServiceStack.OrmLite.Firebird\App_Data\ormlite-tests.fdb;DataSource=localhost;Dialect=3;charset=ISO8859_1;".OpenDbConnection())
 			{
 				const bool overwrite = false;
 				db.DropTable<Shipper>();

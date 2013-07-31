@@ -16,8 +16,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_insert_into_ModelWithFieldsOfDifferentTypes_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
-			{
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+            {
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
 				var row = ModelWithFieldsOfDifferentTypes.Create(1);
@@ -29,8 +29,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_insert_and_select_from_ModelWithFieldsOfDifferentTypes_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
-			{
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+            {
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
 				var row = ModelWithFieldsOfDifferentTypes.Create(1);
@@ -48,8 +48,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_insert_and_select_from_ModelWithFieldsOfNullableTypes_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
-			{
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+            {
 				db.CreateTable<ModelWithFieldsOfNullableTypes>(true);
 
 				var row = ModelWithFieldsOfNullableTypes.Create(1);
@@ -67,7 +67,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
         [Test]
         public void Can_insert_and_select_from_ModelWithFieldsOfDifferentAndNullableTypes_table_default_GUID()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
                 Can_insert_and_select_from_ModelWithFieldsOfDifferentAndNullableTypes_table_impl(db);
         }
 
@@ -104,8 +104,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_insert_table_with_null_fields()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
-			{
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+            {
 				db.CreateTable<ModelWithIdAndName>(true);
 				db.DeleteAll<ModelWithIdAndName>();
 				var row = ModelWithIdAndName.Create(0);
@@ -124,8 +124,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_retrieve_LastInsertId_from_inserted_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
-			{
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+            {
 				db.CreateTable<ModelWithIdAndName>(true);
 
 				var row1 = ModelWithIdAndName.Create(5);
@@ -148,8 +148,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_insert_TaskQueue_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
-			{
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+            {
 				db.CreateTable<TaskQueue>(true);
 
 				var row = TaskQueue.Create(1);
@@ -170,8 +170,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_insert_table_with_blobs()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
-			{
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+            {
 				var dsl= OrmLiteConfig.DialectProvider.DefaultStringLength;
 				OrmLiteConfig.DialectProvider.DefaultStringLength=1024;
 				
@@ -228,8 +228,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_insert_table_with_UserAuth()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
-			{
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+            {
 				db.CreateTable<UserAuth>(true);
 				
 				var jsv = "{Id:0,UserName:UserName,Email:as@if.com,PrimaryEmail:as@if.com,FirstName:FirstName,LastName:LastName,DisplayName:DisplayName,Salt:WMQi/g==,PasswordHash:oGdE40yKOprIgbXQzEMSYZe3vRCRlKGuqX2i045vx50=,Roles:[],Permissions:[],CreatedDate:2012-03-20T07:53:48.8720739Z,ModifiedDate:2012-03-20T07:53:48.8720739Z}";

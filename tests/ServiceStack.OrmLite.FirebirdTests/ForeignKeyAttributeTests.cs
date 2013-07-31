@@ -9,8 +9,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[TestFixtureSetUp]
 		public void Setup()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
-			{
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+            {
 				db.CreateTable<ReferencedType>(true);
 			}
 		}
@@ -18,8 +18,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void CanCreateSimpleForeignKey()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
-			{
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+            {
 				db.CreateTable<TypeWithSimpleForeignKey>(true);
 			}
 		}
@@ -27,8 +27,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void CanCreateForeignWithOnDeleteCascade()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
-			{
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+            {
 				db.CreateTable<TypeWithOnDeleteCascade>(true);
 			}
 		}
@@ -36,8 +36,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void CascadesOnDelete()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
-			{
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+            {
 				db.CreateTable<TypeWithOnDeleteCascade>(true);
 				
 				db.Save(new ReferencedType { Id = 1 });
@@ -56,8 +56,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void CanCreateForeignWithOnDeleteCascadeAndOnUpdateCascade()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
-			{
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+            {
 				db.CreateTable<TypeWithOnDeleteAndUpdateCascade>(true);
 			}
 		}
@@ -65,8 +65,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void CanCreateForeignWithOnDeleteNoAction()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
-			{
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+            {
 				db.CreateTable<TypeWithOnDeleteNoAction>(true);
 			}
 		}
@@ -74,8 +74,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void CanCreateForeignWithOnDeleteRestrict()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
-			{
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+            {
 				db.CreateTable<TypeWithOnDeleteRestrict>(true);
 			}
 		}
@@ -84,8 +84,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void CanCreateForeignWithOnDeleteSetDefault()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
-			{
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+            {
 				db.CreateTable<TypeWithOnDeleteSetDefault>(true);
 			}
 		}
@@ -93,8 +93,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void CanCreateForeignWithOnDeleteSetNull()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
-			{
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+            {
 				db.CreateTable<TypeWithOnDeleteSetNull>(true);
 			}
 		}
@@ -102,8 +102,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[TestFixtureTearDown]
 		public void TearDwon()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
-			{
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+            {
 				db.DropTable<TypeWithOnDeleteAndUpdateCascade>();
 				db.DropTable<TypeWithOnDeleteSetNull>();
 				db.DropTable<TypeWithOnDeleteSetDefault>();

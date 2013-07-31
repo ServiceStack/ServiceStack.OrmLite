@@ -9,13 +9,12 @@ using ServiceStack.DesignPatterns.Model;
 namespace ServiceStack.OrmLite.FirebirdTests
 {
     [TestFixture]
-    public class DateTimeColumnTest
-        : OrmLiteTestBase
+    public class DateTimeColumnTest: OrmLiteTestBase
     {
         [Test]
         public void Can_create_table_containing_DateTime_column()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
             {
                 db.CreateTable<Analyze>(true);
             }
@@ -24,7 +23,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
         [Test]
         public void Can_store_DateTime_Value()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
             {
                 db.CreateTable<Analyze>(true);
 
@@ -41,7 +40,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
         [Test]
         public void Can_store_and_retrieve_DateTime_Value()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
             {
                 db.CreateTable<Analyze>(true);
 
