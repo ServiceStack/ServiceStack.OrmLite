@@ -1,9 +1,9 @@
-Follow [@demisbellot](http://twitter.com/demisbellot) and [@ServiceStack](http://twitter.com/servicestack)
-for twitter updates. [Ask questions on StackOverflow](http://stackoverflow.com/search?q=servicestack).
+[Join the ServiceStack Google+ group](https://plus.google.com/u/0/communities/112445368900682590445) or
+follow [@servicestack](http://twitter.com/servicestack) for updates.
 
-ServiceStack.OrmLite is a **convention-based, configuration-free lightweight ORM** that uses standard **POCO classes and Data Annotation attributes** to infer its table schema.
+# An Open Source Micro ORM for .NET
 
-ServiceStack.OrmLite is an **independent library** and can be used with or without the ServiceStack webservices framework. 
+_Note: the source code is provided as-is - there is no commercial support available for ServiceStack_
 
 # Introduction
 
@@ -20,7 +20,7 @@ OrmLite was designed with a focus on the core objectives:
   * Expressive power and flexibility - with access to IDbCommand and raw SQL
   * Cross platform - supports multiple dbs (currently: Sql Server, Sqlite, MySql, PostgreSQL, Firebird) running on both .NET and Mono platforms.
 
-In OrmLite: **1 Class = 1 Table**. There's no hidden behaviour behind the scenes auto-magically managing hidden references to other tables.
+In OrmLite: **1 Class = 1 Table**. There should be no surprising or hidden behaviour.
 Any non-scalar properties (i.e. complex types) are text blobbed in a schema-less text field using [.NET's fastest Text Serializer](http://www.servicestack.net/mythz_blog/?p=176).
 Effectively this allows you to create a table from any POCO type and it should persist as expected in a DB Table with columns for each of the classes 1st level public properties.
 
@@ -40,6 +40,8 @@ Effectively this allows you to create a table from any POCO type and it should p
   - [Sqlite.Mono](http://nuget.org/packages/ServiceStack.OrmLite.Sqlite.Mono) - 32bit unmanaged dll, compatible with .NET / Mono
 
 OrmLite.SqlServer is also included in [ServiceStack](https://github.com/ServiceStack/ServiceStack/downloads).
+
+_Note: the binary packages are provided as-is - there is no commercial support available for ServiceStack_
 
 ## Download published NuGet binaries without NuGet
 
