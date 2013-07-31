@@ -13,8 +13,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_GetById_int_from_ModelWithFieldsOfDifferentTypes_table()
 		{
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
-            {
+			using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+			{
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
@@ -30,8 +30,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_GetById_string_from_ModelWithOnlyStringFields_table()
 		{
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
-            {
+			using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 
 				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
@@ -47,8 +47,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_select_with_filter_from_ModelWithOnlyStringFields_table()
 		{
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
-            {
+			using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 
 				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
@@ -87,8 +87,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_loop_each_with_filter_from_ModelWithOnlyStringFields_table()
 		{
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
-            {
+			using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 
 				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });

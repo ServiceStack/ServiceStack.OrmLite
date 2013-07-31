@@ -42,12 +42,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_query_using_float_in_alernate_culuture()
 		{
-			var dbFactory = new OrmLiteConnectionFactory(
-				GetFileConnectionString(),
-				FirebirdOrmLiteDialectProvider.Instance);
-
-            using (var db = dbFactory.Open())
-			{
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+            {
 				db.CreateTable<Point>(true);
 
 				db.Insert(new Point { Width = 4, Height = 1.123f, Top = 3.456d, Left = 2.345m});
