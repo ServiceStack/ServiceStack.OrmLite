@@ -16,8 +16,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		{
 			OrmLite.OrmLiteConfig.DialectProvider.NamingStrategy = new UnderscoreSeparatedCompoundNamingStrategy();
 
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
-            {
+			using (var db = ConnectionString.OpenDbConnection())
+			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 			}
 			
@@ -33,8 +33,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 				ColumnPrefix = "col_",
 			};
 
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
-            {
+			using (var db = ConnectionString.OpenDbConnection())
+			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 				ModelWithOnlyStringFields m = new ModelWithOnlyStringFields() { Id= "999", AlbumId = "112", AlbumName="ElectroShip", Name = "MyNameIsBatman"};
 
@@ -56,8 +56,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 				ColumnPrefix = "col_",
 			};
 
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
-            {
+			using (var db = ConnectionString.OpenDbConnection())
+			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 				ModelWithOnlyStringFields m = new ModelWithOnlyStringFields() { Id = "998", AlbumId = "112", AlbumName = "ElectroShip", Name = "QueryByExample" };
 
@@ -78,8 +78,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 				ColumnPrefix = "col_",
 			};
 
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
-            {
+			using (var db = ConnectionString.OpenDbConnection())
+			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 				ModelWithOnlyStringFields m = new ModelWithOnlyStringFields() { Id = "998", AlbumId = "112", AlbumName = "ElectroShip", Name = "QueryByExample" };
 
@@ -94,9 +94,9 @@ namespace ServiceStack.OrmLite.FirebirdTests
 			}
 			
 			OrmLite.OrmLiteConfig.DialectProvider.NamingStrategy= new OrmLiteNamingStrategyBase();
-
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
-            {
+			
+			using (var db = ConnectionString.OpenDbConnection())
+			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 				ModelWithOnlyStringFields m = new ModelWithOnlyStringFields() { Id = "998", AlbumId = "112", AlbumName = "ElectroShip", Name = "QueryByExample" };
 
@@ -116,8 +116,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 				ColumnPrefix = "col_",
 			};
 
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
-            {
+			using (var db = ConnectionString.OpenDbConnection())
+			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 				ModelWithOnlyStringFields m = new ModelWithOnlyStringFields() { Id = "998", AlbumId = "112", AlbumName = "ElectroShip", Name = "QueryByExample" };
 

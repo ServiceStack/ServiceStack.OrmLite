@@ -16,8 +16,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_GetById_int_from_ModelWithFieldsOfDifferentTypes_table()
 		{
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
-            {
+			using (var db = ConnectionString.OpenDbConnection())
+			{
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
@@ -33,8 +33,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_GetById_string_from_ModelWithOnlyStringFields_table()
 		{
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
-            {
+			using (var db = ConnectionString.OpenDbConnection())
+			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 
 				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
@@ -50,8 +50,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_GetByIds_int_from_ModelWithFieldsOfDifferentTypes_table()
 		{
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
-            {
+			using (var db = ConnectionString.OpenDbConnection())
+			{
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
@@ -68,8 +68,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_GetByIds_string_from_ModelWithOnlyStringFields_table()
 		{
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
-            {
+			using (var db = ConnectionString.OpenDbConnection())
+			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 
 				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
@@ -86,8 +86,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_select_with_filter_from_ModelWithOnlyStringFields_table()
 		{
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
-            {
+			using (var db = ConnectionString.OpenDbConnection())
+			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 
 				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
@@ -112,8 +112,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		{
 			const int n = 5;
 
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
-            {
+			using (var db = ConnectionString.OpenDbConnection())
+			{
 				db.CreateTable<ModelWithIdAndName>(true);
 				db.DeleteAll<ModelWithIdAndName>();
 
@@ -128,8 +128,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_loop_each_string_from_ModelWithOnlyStringFields_table()
 		{
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
-            {
+			using (var db = ConnectionString.OpenDbConnection())
+			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 
 				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
@@ -149,8 +149,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_loop_each_with_filter_from_ModelWithOnlyStringFields_table()
 		{
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
-            {
+			using (var db = ConnectionString.OpenDbConnection())
+			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 
 				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
@@ -179,8 +179,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		{
 			const int n = 5;
 
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
-            {
+			using (var db = ConnectionString.OpenDbConnection())
+			{
 				db.CreateTable<ModelWithIdAndName>(true);
 				db.DeleteAll<ModelWithIdAndName>();
 
@@ -197,8 +197,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		{
 			const int n = 5;
 
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
-            {
+			using (var db = ConnectionString.OpenDbConnection())
+			{
 				db.CreateTable<ModelWithIdAndName>(true);
 				db.DeleteAll<ModelWithIdAndName>();
 
@@ -215,8 +215,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		{
 			const int n = 5;
 
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
-            {
+			using (var db = ConnectionString.OpenDbConnection())
+			{
 				db.CreateTable<ModelWithIdAndName>(true);
 				db.DeleteAll<ModelWithIdAndName>();
 
@@ -239,8 +239,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		{
 			const int n = 5;
 
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
-            {
+			using (var db = ConnectionString.OpenDbConnection())
+			{
 				db.CreateTable<ModelWithIdAndName>(true);
 				db.DeleteAll<ModelWithIdAndName>();
 				n.Times(x => db.Insert(ModelWithIdAndName.Create(0)));
@@ -256,8 +256,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_Select_subset_ModelWithIdAndName_from_ModelWithFieldsOfDifferentTypes_table()
 		{
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
-            {
+			using (var db = ConnectionString.OpenDbConnection())
+			{
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
@@ -274,8 +274,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_Select_Into_ModelWithIdAndName_from_ModelWithFieldsOfDifferentTypes_table()
 		{
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
-            {
+			using (var db = ConnectionString.OpenDbConnection())
+			{
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
@@ -295,8 +295,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		{
 			const int n = 5;
 
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
-            {
+			using (var db = ConnectionString.OpenDbConnection())
+			{
 				db.CreateTable<ModelWithIdAndName>(true);
 				db.DeleteAll<ModelWithIdAndName>();
 				
@@ -324,8 +324,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_populate_PocoFlag()
 		{
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
-            {
+			using (var db = ConnectionString.OpenDbConnection())
+			{
 				var rows = db.Select<PocoFlag>("SELECT 1 as Flag FROM RDB$DATABASE");
 				Assert.That(rows[0].Flag);
 			}
@@ -340,8 +340,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_populate_PocoFlagWithId()
 		{
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
-            {
+			using (var db = ConnectionString.OpenDbConnection())
+			{
 				var rows = db.Select<PocoFlagWithId>("SELECT 1 as Id, 1 as Flag FROM RDB$DATABASE");
 				Assert.That(rows[0].Id, Is.EqualTo(1));
 				Assert.That(rows[0].Flag);

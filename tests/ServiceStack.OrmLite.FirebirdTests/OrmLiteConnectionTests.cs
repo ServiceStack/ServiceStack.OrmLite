@@ -12,7 +12,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test][Ignore]
 		public void Can_create_connection_to_blank_database()
 		{
-            var connString = "User=SYSDBA;Password=masterkey;Database=ormlite-tests.fdb;DataSource=localhost;Dialect=3;charset=ISO8859_1;";
+			var connString ="User=SYSDBA;Password=masterkey;Database=ormlite-tests.fdb;DataSource=localhost;Dialect=3;charset=ISO8859_1;";
 			using (var db = connString.OpenDbConnection())
 			{
 			}
@@ -21,15 +21,15 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_create_connection()
 		{
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
-            {
+			using (var db = ConnectionString.OpenDbConnection())
+			{
 			}
 		}
 
 		[Test]
 		public void Can_create_ReadOnly_connection()
 		{
-            using (var db = ConnectionString.OpenReadOnlyDbConnection())
+			using (var db = ConnectionString.OpenReadOnlyDbConnection())
 			{
 			}
 		}
@@ -56,11 +56,11 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_open_two_ReadOnlyConnections_to_same_database()
 		{
-            var db = ConnectionString.OpenReadOnlyDbConnection();
+			var db = "User=SYSDBA;Password=masterkey;Database=ormlite-tests.fdb;DataSource=localhost;Dialect=3;charset=ISO8859_1;".OpenDbConnection();
             db.CreateTable<ModelWithIdAndName>(true);
             db.Insert(new ModelWithIdAndName(1));
 
-            var dbReadOnly = ConnectionString.OpenReadOnlyDbConnection();
+			var dbReadOnly = "User=SYSDBA;Password=masterkey;Database=ormlite-tests.fdb;DataSource=localhost;Dialect=3;charset=ISO8859_1;".OpenDbConnection();
             dbReadOnly.Insert(new ModelWithIdAndName(2));
             var rows = dbReadOnly.Select<ModelWithIdAndName>();
             Assert.That(rows, Has.Count.EqualTo(2));

@@ -19,8 +19,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_GetById_from_basic_persistence_provider()
 		{
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
-            {
+			using (var db = ConnectionString.OpenDbConnection())
+			{
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
 				var basicProvider = new OrmLitePersistenceProvider(db);
@@ -38,8 +38,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_GetByIds_from_basic_persistence_provider()
 		{
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
-            {
+			using (var db = ConnectionString.OpenDbConnection())
+			{
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
 				var basicProvider = new OrmLitePersistenceProvider(db);
@@ -61,8 +61,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_Store_from_basic_persistence_provider()
 		{
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
-            {
+			using (var db = ConnectionString.OpenDbConnection())
+			{
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
 				var basicProvider = new OrmLitePersistenceProvider(db);
@@ -84,8 +84,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_Delete_from_basic_persistence_provider()
 		{
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
-            {
+			using (var db = ConnectionString.OpenDbConnection())
+			{
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
 				var basicProvider = new OrmLitePersistenceProvider(db);

@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Configuration;
 using NUnit.Framework;
 using ServiceStack.Common.Utils;
 using ServiceStack.Logging;
@@ -16,7 +15,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		protected string GetFileConnectionString()
 		{
 			// add ormlite-tests.fdb = D:\\ormlite-tests.fdb to your firebird  alias.conf 
-			return ConfigurationManager.ConnectionStrings["testDb"].ConnectionString;
+			return "User=SYSDBA;Password=masterkey;Database=ormlite-tests.fdb;DataSource=localhost;Dialect=3;charset=ISO8859_1;MinPoolSize=0;MaxPoolSize=100";
 		}
 
 		protected void CreateNewDatabase()
@@ -30,7 +29,9 @@ namespace ServiceStack.OrmLite.FirebirdTests
 			LogManager.LogFactory = new ConsoleLogFactory();
 
 			OrmLiteConfig.DialectProvider = FirebirdOrmLiteDialectProvider.Instance;
-    	    ConnectionString = GetFileConnectionString();
+			
+			ConnectionString = GetFileConnectionString();
+
 		}
 
 		public void Log(string text)

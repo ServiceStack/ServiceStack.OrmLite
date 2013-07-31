@@ -9,7 +9,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
         {
             var orig = new TypeWithByteArrayField { Id = 1, Content = new byte[] { 0, 17, 0, 17, 0, 7 } };
 
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+            using (var db = ConnectionString.OpenDbConnection())
             {
                 db.CreateTable<TypeWithByteArrayField>(true);
 

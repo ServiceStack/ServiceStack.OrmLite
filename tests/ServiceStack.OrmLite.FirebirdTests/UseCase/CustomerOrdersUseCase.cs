@@ -128,8 +128,12 @@ namespace ServiceStack.OrmLite.FirebirdTests
         public void Run()
         {
             //Setup FirebridSQL Server Connection Factory
-            string connectionString = "User=SYSDBA;Password=masterkey;Database=ormlite-tests.fdb;DataSource=localhost;Dialect=3;charset=ISO8859_1;";
-            var db = new OrmLiteConnectionFactory(connectionString, FirebirdDialect.Provider).Open();	
+			var dbFactory = new OrmLiteConnectionFactory(
+				"User=SYSDBA;Password=masterkey;Database=ormlite-tests.fdb;DataSource=localhost;Dialect=3;charset=ISO8859_1;",
+				FirebirdOrmLiteDialectProvider.Instance);
+
+			
+            IDbConnection db = dbFactory.OpenDbConnection();
 
             //Re-Create all table schemas:
             db.DropTable<OrderDetail>();

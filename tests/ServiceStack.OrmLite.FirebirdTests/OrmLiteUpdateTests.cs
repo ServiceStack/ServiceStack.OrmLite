@@ -12,8 +12,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_update_ModelWithFieldsOfDifferentTypes_table()
 		{
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
-            {
+			using (var db = ConnectionString.OpenDbConnection())
+			{
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
 				var row = ModelWithFieldsOfDifferentTypes.Create(1);
