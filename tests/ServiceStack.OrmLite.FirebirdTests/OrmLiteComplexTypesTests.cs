@@ -14,7 +14,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_insert_into_ModelWithComplexTypes_table()
 		{
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
 			{
 				db.CreateTable<ModelWithComplexTypes>(true);
 
@@ -28,7 +28,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_insert_and_select_from_ModelWithComplexTypes_table()
 		{
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
 			{
 				db.CreateTable<ModelWithComplexTypes>(true);
 
@@ -47,7 +47,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_insert_and_select_from_OrderLineData()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
 			{
 				db.CreateTable<SampleOrderLine>(true);
 
