@@ -3,7 +3,7 @@ follow [@servicestack](http://twitter.com/servicestack) for updates.
 
 # An Open Source Micro ORM for .NET
 
-_Note: the source code is provided as-is - there is no commercial support available for ServiceStack_
+_Note: the source code is provided as-is - no direct or commercial support is available for ServiceStack_
 
 # Introduction
 
