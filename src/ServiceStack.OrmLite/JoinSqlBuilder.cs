@@ -14,12 +14,14 @@ namespace ServiceStack.OrmLite
         private bool isDistinct = false;
         private bool isAggregateUsed = false;
 
+        private string baseSchema = "";
         private string baseTableName = "";
         private Type basePocoType;
 
         public JoinSqlBuilder()
         {
             basePocoType = typeof(TBasePoco);
+            baseSchema = GetSchema(basePocoType);
             baseTableName = basePocoType.GetModelDefinition().ModelName;
         }
 
@@ -89,7 +91,7 @@ namespace ServiceStack.OrmLite
                 throw new Exception("Only column list allowed");
 
             var expressionProperties = nex.Type.GetProperties();
-            for (int i=0; i< nex.Arguments.Count;i++)
+            for (int i = 0; i < nex.Arguments.Count; i++)
             {
                 var arg = nex.Arguments[i];
                 var alias = expressionProperties[i].Name;
@@ -319,8 +321,11 @@ namespace ServiceStack.OrmLite
             else
                 join.RefType = join.Class1Type;
 
+            join.Class1Schema = GetSchema(join.Class1Type);
             join.Class1TableName = join.Class1Type.GetModelDefinition().ModelName;
+            join.Class2Schema = GetSchema(join.Class2Type);
             join.Class2TableName = join.Class2Type.GetModelDefinition().ModelName;
+            join.RefTypeSchema = GetSchema(join.RefType);
             join.RefTypeTableName = join.RefType.GetModelDefinition().ModelName;
 
             if (join.JoinType != JoinType.CROSS)
@@ -367,6 +372,11 @@ namespace ServiceStack.OrmLite
 
             joinObjList.Add(join);
             return this;
+        }
+
+        private string GetSchema(Type type)
+        {
+            return string.IsNullOrEmpty(type.GetModelDefinition().Schema) ? string.Empty : string.Format("{0}.", type.GetModelDefinition().Schema);
         }
 
         private Type PreviousAssociatedType(Type sourceTableType, Type destinationTableType)
@@ -427,12 +437,12 @@ namespace ServiceStack.OrmLite
                     colSB.AppendFormat("{0}{1}", colSB.Length > 0 ? "," : "", String.IsNullOrEmpty(fi.BelongToModelName) ? (fi.FieldName) : ((OrmLiteConfig.DialectProvider.GetQuotedTableName(fi.BelongToModelName) + "." + OrmLiteConfig.DialectProvider.GetQuotedColumnName(fi.FieldName))));
                 }
                 if (colSB.Length == 0)
-                    colSB.AppendFormat("\"{0}\".*", OrmLiteConfig.DialectProvider.GetQuotedTableName(baseTableName));
+                    colSB.AppendFormat("\"{0}{1}\".*", baseSchema, OrmLiteConfig.DialectProvider.GetQuotedTableName(baseTableName));
             }
 
             sb.Append(colSB.ToString() + " \n");
 
-            sb.AppendFormat("FROM {0} \n", OrmLiteConfig.DialectProvider.GetQuotedTableName(baseTableName));
+            sb.AppendFormat("FROM {0}{1} \n", baseSchema, OrmLiteConfig.DialectProvider.GetQuotedTableName(baseTableName));
             int i = 0;
             foreach (var join in joinList)
             {
@@ -452,17 +462,17 @@ namespace ServiceStack.OrmLite
 
                 if (join.JoinType == JoinType.CROSS)
                 {
-                    sb.AppendFormat(" {0} ON {1} = {2}  \n", OrmLiteConfig.DialectProvider.GetQuotedTableName(join.RefTypeTableName));
+                    sb.AppendFormat(" {0}{1} ON {2} = {3}  \n", join.RefTypeSchema, OrmLiteConfig.DialectProvider.GetQuotedTableName(join.RefTypeTableName));
                 }
                 else
                 {
                     if (join.JoinType != JoinType.SELF)
                     {
-                        sb.AppendFormat(" {0} ON {1} = {2}  \n", OrmLiteConfig.DialectProvider.GetQuotedTableName(join.RefTypeTableName), join.Class1ColumnName, join.Class2ColumnName);
+                        sb.AppendFormat(" {0}{1} ON {2} = {3}  \n", join.RefTypeSchema, OrmLiteConfig.DialectProvider.GetQuotedTableName(join.RefTypeTableName), join.Class1ColumnName, join.Class2ColumnName);
                     }
                     else
                     {
-                        sb.AppendFormat(" {0} AS {1} ON {1}.{2} = \"{0}\".{3}  \n", OrmLiteConfig.DialectProvider.GetQuotedTableName(join.RefTypeTableName), OrmLiteConfig.DialectProvider.GetQuotedTableName(join.RefTypeTableName) + "_" + i.ToString(), join.Class1ColumnName, join.Class2ColumnName);
+                        sb.AppendFormat(" {0}{1} AS {2} ON {2}.{3} = \"{1}\".{4}  \n", join.RefTypeSchema, OrmLiteConfig.DialectProvider.GetQuotedTableName(join.RefTypeTableName), OrmLiteConfig.DialectProvider.GetQuotedTableName(join.RefTypeTableName) + "_" + i.ToString(), join.Class1ColumnName, join.Class2ColumnName);
                     }
                 }
             }
@@ -514,8 +524,11 @@ namespace ServiceStack.OrmLite
         public Type Class2Type { get; set; }
         public Type RefType { get; set; }
         public JoinType JoinType { get; set; }
+        public string Class1Schema { get; set; }
+        public string Class2Schema { get; set; }
         public string Class1TableName { get; set; }
         public string Class2TableName { get; set; }
+        public string RefTypeSchema { get; set; }
         public string RefTypeTableName { get; set; }
         public string Class1ColumnName { get; set; }
         public string Class2ColumnName { get; set; }
