@@ -452,9 +452,14 @@ namespace ServiceStack.OrmLite
                 return GetScalar<T>(dbReader);
         }
 
-	    internal static List<T> ByExampleWhere<T>(this IDbCommand dbCmd, object anonType)
+        internal static List<T> ByExampleWhere<T>(this IDbCommand dbCmd, object anonType)
+        {
+            return ByExampleWhere<T>(dbCmd, anonType, false);
+        }
+
+        internal static List<T> ByExampleWhere<T>(this IDbCommand dbCmd, object anonType, bool excludeNulls)
 		{
-            dbCmd.SetFilters<T>(anonType, excludeNulls: false);
+            dbCmd.SetFilters<T>(anonType, excludeNulls);
 
 			using (var dbReader = dbCmd.ExecuteReader())
 				return dbReader.ConvertToList<T>();
