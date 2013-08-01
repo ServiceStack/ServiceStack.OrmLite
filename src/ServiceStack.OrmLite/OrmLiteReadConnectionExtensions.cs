@@ -200,6 +200,11 @@ namespace ServiceStack.OrmLite
             return dbConn.Exec(dbCmd => dbCmd.ByExampleWhere<T>(anonType));
         }
 
+        public static List<T> ByExampleWhere<T>(this IDbConnection dbConn, object anonType, bool excludeNulls)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.ByExampleWhere<T>(anonType, excludeNulls));
+        }
+
         public static List<T> QueryByExample<T>(this IDbConnection dbConn, string sql, object anonType = null)
         {
             return dbConn.Exec(dbCmd => dbCmd.QueryByExample<T>(sql, anonType));
