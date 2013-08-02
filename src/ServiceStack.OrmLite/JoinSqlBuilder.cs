@@ -376,7 +376,7 @@ namespace ServiceStack.OrmLite
 
         private string GetSchema(Type type)
         {
-            return string.IsNullOrEmpty(type.GetModelDefinition().Schema) ? string.Empty : string.Format("{0}.", type.GetModelDefinition().Schema);
+            return string.IsNullOrEmpty(type.GetModelDefinition().Schema) ? string.Empty : string.Format("\"{0}\".", type.GetModelDefinition().Schema);
         }
 
         private Type PreviousAssociatedType(Type sourceTableType, Type destinationTableType)
