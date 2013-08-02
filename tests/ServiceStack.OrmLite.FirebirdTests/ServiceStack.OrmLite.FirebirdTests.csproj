@@ -42,6 +42,7 @@
     <Reference Include="FirebirdSql.Data.FirebirdClient">
       <HintPath>..\..\lib\FirebirdSql.Data.FirebirdClient.dll</HintPath>
     </Reference>
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.DataSetExtensions" />
