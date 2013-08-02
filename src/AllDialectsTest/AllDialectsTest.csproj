@@ -75,7 +75,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\SqlServerExpressionsTets\test.mdf">
+    <Content Include="..\SqlServerExpressionsTest\test.mdf">
       <Link>test.mdf</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
