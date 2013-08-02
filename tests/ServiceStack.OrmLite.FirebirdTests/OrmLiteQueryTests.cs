@@ -71,7 +71,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 				Assert.That(dbRowIds[0], Is.EqualTo(filterRow.Id));
 
 				var queryByExample = new ModelWithOnlyStringFields { AlbumName = filterRow.AlbumName };
-				rows = db.ByExampleWhere<ModelWithOnlyStringFields>(queryByExample);
+				rows = db.ByExampleWhere<ModelWithOnlyStringFields>(queryByExample, excludeNulls: true);
 				dbRowIds = rows.ConvertAll(x => x.Id);
 				Assert.That(dbRowIds, Has.Count.EqualTo(1));
 				Assert.That(dbRowIds[0], Is.EqualTo(filterRow.Id));

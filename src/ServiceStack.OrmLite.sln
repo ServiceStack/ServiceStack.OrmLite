@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.20617.1 PREVIEW
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{6CEB3EDE-9F02-4F4F-BD8A-1B2939C1AE6E}"
 	ProjectSection(SolutionItems) = preProject
 		..\build\build.bat = ..\build\build.bat
@@ -72,7 +74,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqliteExpressionsTest", "Sq
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PostgreSQLExpressionsTest", "PostgreSQLExpressionsTest\PostgreSQLExpressionsTest.csproj", "{348E82EE-7D30-4D60-90E5-CA60C290C589}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlServerExpressionsTets", "SqlServerExpressionsTets\SqlServerExpressionsTets.csproj", "{19825530-1D25-4528-AB6D-E236809A7F34}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlServerExpressionsTest", "SqlServerExpressionsTest\SqlServerExpressionsTest.csproj", "{19825530-1D25-4528-AB6D-E236809A7F34}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AllDialectsTest", "AllDialectsTest\AllDialectsTest.csproj", "{A55FAA4E-7900-4F77-AEA2-FA7F44D0A480}"
 EndProject

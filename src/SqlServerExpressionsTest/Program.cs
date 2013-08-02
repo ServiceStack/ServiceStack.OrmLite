@@ -14,7 +14,7 @@ using ServiceStack.OrmLite;
 using ServiceStack.OrmLite.SqlServer;
 
 
-namespace SqlServerExpressionsTets
+namespace SqlServerExpressionsTest
 {
 	public class Author
 	{
@@ -48,6 +48,12 @@ namespace SqlServerExpressionsTets
 
 			OrmLiteConfig.DialectProvider = SqlServerOrmLiteDialectProvider.Instance;
 			SqlExpressionVisitor<Author> ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<Author>();
+
+            Console.WriteLine("Join Test");
+            //JoinTest.Test(GetFileConnectionString());
+
+            Console.WriteLine("Ignored Field Select Test");
+            IgnoredFieldSelectTest.Test(GetFileConnectionString());
 
 			using (IDbConnection db = GetFileConnectionString().OpenDbConnection())
 			{
@@ -290,8 +296,7 @@ namespace SqlServerExpressionsTets
 
 		private static string GetFileConnectionString()
 		{
-			var connectionString = "~/test.mdf".MapAbsolutePath();
-
+            var connectionString = "~/test.mdf".MapAbsolutePath();
 
 
 			return connectionString;
