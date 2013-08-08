@@ -110,15 +110,19 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Performs an Update<T>() except arguments are passed as parameters to the generated SQL
         /// </summary>
-        public static void UpdateParam<T>(this IDbConnection dbConn, T obj) where T : new()
+        public static int UpdateParam<T>(this IDbConnection dbConn, T obj) where T : new()
         {
+            int rowsChanged = -1;
             dbConn.Exec(dbCmd =>
             {
-                using(var updateStmt = dbConn.CreateUpdateStatement(obj)) {
+                using (var updateStmt = dbConn.CreateUpdateStatement(obj))
+                {
                     copyCommandtextAndParametersForParameterizedStatements(dbCmd, updateStmt);
                 }
-                dbCmd.ExecuteNonQuery();
+                rowsChanged = dbCmd.ExecuteNonQuery();
             });
+
+            return rowsChanged;
         }
 
         public static void Delete<T>(this IDbConnection dbConn, params T[] objs)

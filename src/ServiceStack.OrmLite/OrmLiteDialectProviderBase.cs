@@ -484,6 +484,7 @@ namespace ServiceStack.OrmLite
             {
                 if (fieldDef.IsComputed) continue;
                 if (fieldDef.AutoIncrement) continue;
+                if (fieldDef.IsRowVersion) continue;
                 //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
                 if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name)) continue;
 
@@ -527,6 +528,8 @@ namespace ServiceStack.OrmLite
             {
                 if (fieldDef.AutoIncrement)
                         continue;
+                if (fieldDef.IsRowVersion)
+                    continue;
                     
                 //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
                 if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name)) continue;
@@ -681,7 +684,7 @@ namespace ServiceStack.OrmLite
             {
                 try
                 {
-                    if (fieldDef.IsPrimaryKey && updateFields.Count == 0)
+                    if ((fieldDef.IsPrimaryKey || fieldDef.IsRowVersion) && updateFields.Count == 0)
                     {
                         if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
 
