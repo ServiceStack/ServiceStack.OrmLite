@@ -16,6 +16,7 @@ namespace ServiceStack.OrmLite
         public IDbTransaction Transaction { get; internal set; }
 		private IDbConnection dbConnection;
 		private bool isOpen;
+		public long LastInsertedId { get; set; }
 
         public OrmLiteConnection(OrmLiteConnectionFactory factory)
         {
