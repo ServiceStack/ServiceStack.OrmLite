@@ -261,7 +261,10 @@ namespace ServiceStack.OrmLite
 
         public static long GetLastInsertId(this IDbConnection dbConn)
         {
-            return dbConn.Exec(dbCmd => dbCmd.GetLastInsertId());
+            var ormliteConnection = dbConn as OrmLiteConnection;
+            return (ormliteConnection != null && ormliteConnection.LastInsertedId > 0)
+                ? ormliteConnection.LastInsertedId
+                : dbConn.Exec(dbCmd => dbCmd.GetLastInsertId());
         }
 
         public static List<T> GetFirstColumn<T>(this IDbConnection dbConn, string sql, params object[] sqlParams)
