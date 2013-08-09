@@ -204,6 +204,7 @@ where T : new()
                     copyCommandtextAndParametersForParameterizedStatements(dbCmd, insertStmt);
                 }
                 dbCmd.ExecuteNonQuery();
+                var ormLiteDbConn = dbConn as OrmLiteConnection;
                 if (ormLiteDbConn != null)
                 {
                     var param = dbCmd.Parameters["_newId"] as IDbDataParameter;
