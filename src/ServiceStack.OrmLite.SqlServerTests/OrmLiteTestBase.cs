@@ -13,14 +13,15 @@ namespace ServiceStack.OrmLite.SqlServerTests
     public class OrmLiteTestBase
     {
         protected virtual string ConnectionString { get; set; }
+        protected OrmLiteConnectionFactory ConnectionFactory { get; set; }
 
         [TestFixtureSetUp]
         public void TestFixtureSetUp()
         {
             LogManager.LogFactory = new ConsoleLogFactory();
 
-            OrmLiteConfig.DialectProvider = SqlServerOrmLiteDialectProvider.Instance;
             ConnectionString = ConfigurationManager.ConnectionStrings["testDb"].ConnectionString;
+            ConnectionFactory = new OrmLiteConnectionFactory(ConnectionString, SqlServerOrmLiteDialectProvider.Instance);
         }
 
         public void Log(string text)
