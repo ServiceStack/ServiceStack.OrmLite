@@ -113,6 +113,8 @@ namespace ServiceStack.OrmLite
                 var referencesAttr = propertyInfo.FirstAttribute<ReferencesAttribute>();
                 var foreignKeyAttr = propertyInfo.FirstAttribute<ForeignKeyAttribute>();
 
+                var ignoreAttr = propertyInfo.FirstAttribute<IgnoreAttribute>();
+
                 if (decimalAttribute != null && stringLengthAttr == null)
                     stringLengthAttr = new StringLengthAttribute(decimalAttribute.Precision);
 
@@ -123,6 +125,7 @@ namespace ServiceStack.OrmLite
                     PropertyInfo = propertyInfo,
                     IsNullable = isNullable,
                     IsPrimaryKey = isPrimaryKey,
+                    AlwaysIgnored = ignoreAttr != null && ignoreAttr.AlwaysIgnore,
                     AutoIncrement =
                         isPrimaryKey &&
                         propertyInfo.FirstAttribute<AutoIncrementAttribute>() != null,
@@ -153,7 +156,7 @@ namespace ServiceStack.OrmLite
                     BelongToModelName = belongToAttribute != null ? belongToAttribute.BelongToTableType.GetModelDefinition().ModelName : null, 
                 };
 
-                if (propertyInfo.FirstAttribute<IgnoreAttribute>() != null)
+                if (ignoreAttr != null)
                   modelDef.IgnoredFieldDefinitions.Add(fieldDefinition);
                 else
                   modelDef.FieldDefinitions.Add(fieldDefinition);                
