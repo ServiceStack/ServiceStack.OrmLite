@@ -14,6 +14,25 @@ namespace ServiceStack.DataAnnotations
 	[AttributeUsage( AttributeTargets.Property)]
 	public class IgnoreAttribute : Attribute
 	{
+        public bool AlwaysIgnore { get; set; }
 
+
+        /// <summary>
+        /// Ignores field from SQL Table creation
+        /// </summary>
+        public IgnoreAttribute()
+        {
+
+        }
+
+
+        /// <summary>
+        /// Ignores field from SQL Table creation
+        /// </summary>
+        /// <param name="alwaysIgnore">Dont try to fetch from table</param>
+        public IgnoreAttribute(bool alwaysIgnore)
+        {
+            AlwaysIgnore = alwaysIgnore;
+        }
 	}
 }
