@@ -20,11 +20,13 @@ namespace ServiceStack.OrmLite.MySql
             base.IntColumnDefinition = "int(11)";
             base.BoolColumnDefinition = "tinyint(1)";
             base.TimeColumnDefinition = "time";
-            base.DecimalColumnDefinition = "decimal(38,6)";
+            //base.DecimalColumnDefinition = "decimal(38,6)";
             base.GuidColumnDefinition = "char(32)";
             base.DefaultStringLength = 255;
             base.InitColumnTypeMap();
     	    base.DefaultValueFormat = " DEFAULT '{0}'";
+			DefaultDecimalPrecision=38;
+			DefaultDecimalScale=6;
         }
 
         public override string GetQuotedParam(string paramValue)

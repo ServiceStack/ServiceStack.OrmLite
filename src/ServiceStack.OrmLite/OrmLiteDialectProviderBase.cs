@@ -371,7 +371,13 @@ namespace ServiceStack.OrmLite
             {
                 fieldDefinition = string.Format(StringLengthColumnDefinitionFormat, fieldLength.GetValueOrDefault(DefaultStringLength));
             }
-            else
+			else if( fieldType==typeof(decimal) )
+			{
+				fieldDefinition= string.Format("{0} ({1},{2})", DecimalColumnDefinition, 
+				                               fieldLength.GetValueOrDefault(DefaultDecimalPrecision),
+				                               scale.GetValueOrDefault(DefaultDecimalScale) );
+			}
+			else
             {
                 if (!DbTypeMap.ColumnTypeMap.TryGetValue(fieldType, out fieldDefinition))
                 {
