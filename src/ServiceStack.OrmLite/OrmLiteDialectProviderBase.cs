@@ -467,15 +467,11 @@ namespace ServiceStack.OrmLite
             return sql.ToString();
         }
 
-        public virtual string ToInsertRowStatement(object objWithProperties, IDbCommand command)
+        public virtual string ToInsertRowStatement(IDbCommand command, object objWithProperties, ICollection<string> insertFields = null)
         {
-            return ToInsertRowStatement(objWithProperties, new List<string>(), command);
-        }
+            if (insertFields == null) 
+                insertFields = new List<string>();
 
-        public virtual string ToInsertRowStatement(object objWithProperties, IList<string> insertFields, IDbCommand command)
-        {
-
-            if (insertFields == null) insertFields = new List<string>();
             var sbColumnNames = new StringBuilder();
             var sbColumnValues = new StringBuilder();
             var modelDef = objWithProperties.GetType().GetModelDefinition();
@@ -508,14 +504,11 @@ namespace ServiceStack.OrmLite
             return sql;
         }
 
-        public virtual IDbCommand CreateParameterizedInsertStatement(object objWithProperties, IDbConnection connection)
+        public virtual IDbCommand CreateParameterizedInsertStatement(IDbConnection connection, object objWithProperties, ICollection<string> insertFields = null)
         {
-            return CreateParameterizedInsertStatement(objWithProperties, null, connection);
-        }
+            if (insertFields == null) 
+                insertFields = new List<string>();
 
-        public virtual IDbCommand CreateParameterizedInsertStatement(object objWithProperties, IList<string> insertFields, IDbConnection connection)
-        {
-            if (insertFields == null) insertFields = new List<string>();
             var sbColumnNames = new StringBuilder();
             var sbColumnValues = new StringBuilder();
             var modelDef = objWithProperties.GetType().GetModelDefinition();
@@ -554,16 +547,13 @@ namespace ServiceStack.OrmLite
             return command;
         }
 
-        public void ReParameterizeInsertStatement(object objWithProperties, IDbCommand command)
+        public void ReParameterizeInsertStatement(IDbCommand command, object objWithProperties, ICollection<string> insertFields = null)
         {
-            ReParameterizeInsertStatement(objWithProperties, null, command);
-        }
+            if (insertFields == null) 
+                insertFields = new List<string>();
 
-        public void ReParameterizeInsertStatement(object objWithProperties, IList<string> insertFields, IDbCommand command)
-        {
-            if (insertFields == null) insertFields = new List<string>();
             var modelDef = objWithProperties.GetType().GetModelDefinition();
-
+            
             command.Parameters.Clear();
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
@@ -617,14 +607,11 @@ namespace ServiceStack.OrmLite
             return value;
         }
 
-        public virtual string ToUpdateRowStatement(object objWithProperties)
+        public virtual string ToUpdateRowStatement(object objWithProperties, ICollection<string> updateFields = null)
         {
-            return ToUpdateRowStatement(objWithProperties, new List<string>());
-        }
+            if (updateFields == null) 
+                updateFields = new List<string>();
 
-        public virtual string ToUpdateRowStatement(object objWithProperties, IList<string> updateFields)
-        {
-            if (updateFields == null) updateFields = new List<string>();
             var sqlFilter = new StringBuilder();
             var sql = new StringBuilder();
             var modelDef = objWithProperties.GetType().GetModelDefinition();
@@ -663,14 +650,11 @@ namespace ServiceStack.OrmLite
             return updateSql;
         }
 
-        public virtual IDbCommand CreateParameterizedUpdateStatement(object objWithProperties, IDbConnection connection)
+        public virtual IDbCommand CreateParameterizedUpdateStatement(IDbConnection connection, object objWithProperties, ICollection<string> updateFields = null)
         {
-            return CreateParameterizedUpdateStatement(objWithProperties, null, connection);
-        }
+            if (updateFields == null) 
+                updateFields = new List<string>();
 
-        public virtual IDbCommand CreateParameterizedUpdateStatement(object objWithProperties, IList<string> updateFields, IDbConnection connection)
-        {
-            if (updateFields == null) updateFields = new List<string>();
             var sqlFilter = new StringBuilder();
             var sql = new StringBuilder();
             var modelDef = objWithProperties.GetType().GetModelDefinition();
@@ -952,7 +936,7 @@ namespace ServiceStack.OrmLite
             throw new NotImplementedException();
         }
 
-        public IDbCommand CreateParameterizedDeleteStatement(object objWithProperties, IDbConnection connection)
+        public IDbCommand CreateParameterizedDeleteStatement(IDbConnection connection, object objWithProperties)
         {
             throw new NotImplementedException();
         }

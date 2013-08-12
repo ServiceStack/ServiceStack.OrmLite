@@ -358,7 +358,7 @@ namespace ServiceStack.OrmLite
 
         internal static IDbCommand CreateUpdateStatement<T>(this IDbConnection connection, T obj)
         {
-            return OrmLiteConfig.DialectProvider.CreateParameterizedUpdateStatement(obj, connection);
+            return OrmLiteConfig.DialectProvider.CreateParameterizedUpdateStatement(connection, obj);
         }
 
         internal static void Delete<T>(this IDbCommand dbCmd, params T[] objs)
@@ -460,7 +460,7 @@ namespace ServiceStack.OrmLite
 		{
 			foreach (var obj in objs)
 			{
-				dbCmd.ExecuteSql(OrmLiteConfig.DialectProvider.ToInsertRowStatement(obj, dbCmd));
+				dbCmd.ExecuteSql(OrmLiteConfig.DialectProvider.ToInsertRowStatement(dbCmd, obj));
 			}
 		}
 
@@ -468,13 +468,13 @@ namespace ServiceStack.OrmLite
 		{
 			foreach (var obj in objs)
 			{
-				dbCmd.ExecuteSql(OrmLiteConfig.DialectProvider.ToInsertRowStatement(obj, dbCmd));
+				dbCmd.ExecuteSql(OrmLiteConfig.DialectProvider.ToInsertRowStatement(dbCmd, obj));
 			}
 		}
 
         internal static IDbCommand CreateInsertStatement<T>(this IDbConnection connection, T obj)
         {
-            return OrmLiteConfig.DialectProvider.CreateParameterizedInsertStatement(obj, connection);
+            return OrmLiteConfig.DialectProvider.CreateParameterizedInsertStatement(connection, obj);
         }
 
         internal static void Save<T>(this IDbCommand dbCmd, params T[] objs)

@@ -168,14 +168,11 @@ namespace ServiceStack.OrmLite.Oracle
 			return sql.ToString();
 		}
 
-        public override IDbCommand CreateParameterizedInsertStatement(object objWithProperties, IDbConnection connection)
+        public override IDbCommand CreateParameterizedInsertStatement(IDbConnection connection, object objWithProperties, ICollection<string> insertFields = null)
         {
-            return CreateParameterizedInsertStatement(objWithProperties, null, connection);
-        }
+            if (insertFields == null)
+                insertFields = new List<string>();
 
-        public override IDbCommand CreateParameterizedInsertStatement(object objWithProperties, IList<string> insertFields, IDbConnection connection)
-        {
-            if (insertFields == null) insertFields = new List<string>();
             var sbColumnNames = new StringBuilder();
             var sbColumnValues = new StringBuilder();
             var modelDef = GetModel(objWithProperties.GetType());
@@ -243,8 +240,11 @@ namespace ServiceStack.OrmLite.Oracle
             return dbCommand;
         }
 		
-		public override string ToInsertRowStatement(object objWithProperties, IList<string> insertFields, IDbCommand dbCommand)
+		public override string ToInsertRowStatement(IDbCommand dbCommand, object objWithProperties, ICollection<string> insertFields = null)
 		{
+            if (insertFields == null)
+                insertFields = new List<string>();
+
 			var sbColumnNames = new StringBuilder();
 			var sbColumnValues = new StringBuilder();
 
@@ -311,7 +311,7 @@ namespace ServiceStack.OrmLite.Oracle
 		}
 
 		
-		public override string ToUpdateRowStatement(object objWithProperties, IList<string> updateFields)
+		public override string ToUpdateRowStatement(object objWithProperties, ICollection<string> updateFields)
 		{
 			var sqlFilter = new StringBuilder();
 			var sql = new StringBuilder();

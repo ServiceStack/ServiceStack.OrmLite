@@ -90,7 +90,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 				var row = ModelWithFieldsOfDifferentAndNullableTypes.Create(1);
 				
-				Console.WriteLine(OrmLiteConfig.DialectProvider.ToInsertRowStatement(row, null));
+				Console.WriteLine(OrmLiteConfig.DialectProvider.ToInsertRowStatement(null, row));
 				db.Insert(row);
 
 				var rows = db.Select<ModelWithFieldsOfDifferentAndNullableTypes>();

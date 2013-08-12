@@ -162,9 +162,12 @@ namespace ServiceStack.OrmLite.Firebird
 			return sql.ToString();
 		}
 		
-		public override string ToInsertRowStatement(object objWithProperties, IList<string> insertFields, IDbCommand dbCommand)
+		public override string ToInsertRowStatement(IDbCommand dbCommand, object objWithProperties, ICollection<string> insertFields = null)
 		{
-			var sbColumnNames = new StringBuilder();
+            if (insertFields == null)
+                insertFields = new List<string>();
+
+            var sbColumnNames = new StringBuilder();
 			var sbColumnValues = new StringBuilder();
 
 			var tableType = objWithProperties.GetType();
@@ -230,7 +233,7 @@ namespace ServiceStack.OrmLite.Firebird
 		}
 
 		
-		public override string ToUpdateRowStatement(object objWithProperties, IList<string> updateFields)
+		public override string ToUpdateRowStatement(object objWithProperties, ICollection<string> updateFields)
 		{
 			var sqlFilter = new StringBuilder();
 			var sql = new StringBuilder();
