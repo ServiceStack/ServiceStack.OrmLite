@@ -89,7 +89,6 @@
     <Compile Include="NorthwindPerfTests.cs" />
     <Compile Include="OrmLiteBasicPersistenceProviderTests.cs" />
     <Compile Include="OrmLiteCreateTableWithNamigStrategyTests.cs" />
-    <Compile Include="OrmLiteDropTableTests.cs" />
     <Compile Include="OrmLiteDropTableWithNamingStrategyTests.cs" />
     <Compile Include="OrmLiteExecuteProcedureTests.cs" />
     <Compile Include="OrmLiteInsertTests.cs" />
