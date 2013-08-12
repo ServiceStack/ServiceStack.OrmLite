@@ -23,7 +23,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
 			}
 
 			//test with InsertParam
-			using(var con = ConnectionString.OpenDbConnection()) {
+			using(var con = ConnectionFactory.OpenDbConnection()) {
 				con.CreateTable<SimpleType>(true);
 
 				con.InsertParam(testObject);

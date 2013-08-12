@@ -297,5 +297,18 @@ namespace ServiceStack.OrmLite.SqlServer
                                  GetQuotedParam(fieldDef.FieldName),
                                  GetQuotedParam("COLUMN"));
         }
+        
+        public override IDbCommand CreateParameterizedInsertStatement(object objWithProperties, IDbConnection connection)
+        {
+            return CreateParameterizedInsertStatement(objWithProperties, null, connection);
+        }
+
+        public override IDbCommand CreateParameterizedInsertStatement(object objWithProperties, IList<string> insertFields, IDbConnection connection)
+        {
+            var command = base.CreateParameterizedInsertStatement(objWithProperties, insertFields, connection);
+            command.CommandText = string.Format("{0};{1}", command.CommandText, "SET @_newId = SCOPE_IDENTITY()");
+            command.Parameters.Add(new SqlParameter("_newId", SqlDbType.BigInt, 0, ParameterDirection.Output, true, 0, 0, null, DataRowVersion.Default, null));
+            return command;
+        }
     }
 }
