@@ -25,6 +25,7 @@ namespace ServiceStack.OrmLite.SqlServer
 			base.DecimalColumnDefinition = "DECIMAL(38,6)";
 			base.TimeColumnDefinition = "TIME"; //SQLSERVER 2008+
 		    base.BlobColumnDefinition = "VARBINARY(MAX)";
+		    base.SelectIdentitySql = "SELECT SCOPE_IDENTITY()";
 
 			base.InitColumnTypeMap();
 		}
@@ -169,12 +170,6 @@ namespace ServiceStack.OrmLite.SqlServer
 		public void EnsureUtc(bool shouldEnsureUtc)
 		{
 		    _ensureUtc = shouldEnsureUtc;
-		}
-
-		public override long GetLastInsertId(IDbCommand dbCmd)
-		{
-			dbCmd.CommandText = "SELECT SCOPE_IDENTITY()";
-			return dbCmd.GetLongScalar();
 		}
 
 		public override SqlExpressionVisitor<T> ExpressionVisitor<T>()

@@ -197,16 +197,21 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Performs an Insert() except arguments are passed as parameters to the generated SQL
         /// </summary>
-        public static void InsertParam<T>(this IDbConnection dbConn, T obj) 
+        public static long InsertParam<T>(this IDbConnection dbConn, T obj, bool selectIdentity = false)
             where T : new()
         {
-            dbConn.Exec(dbCmd =>
+            return dbConn.Exec(dbCmd =>
             {
                 using (var insertStmt = dbConn.CreateInsertStatement(obj))
                 {
                     dbCmd.CopyParameterizedStatementTo(insertStmt);
                 }
+
+                if (selectIdentity)
+                    return OrmLiteConfig.DialectProvider.InsertAndGetLastInsertId<T>(dbCmd);
+
                 dbCmd.ExecuteNonQuery();
+                return -1;
             });
         }
 

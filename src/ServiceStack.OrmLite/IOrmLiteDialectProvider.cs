@@ -55,6 +55,8 @@ namespace ServiceStack.OrmLite
 
         long GetLastInsertId(IDbCommand command);
 
+        long InsertAndGetLastInsertId<T>(IDbCommand dbCmd);
+
         string ToSelectStatement(Type tableType, string sqlFilter, params object[] filterParams);
 
         string ToInsertRowStatement(IDbCommand command, object objWithProperties, ICollection<string> InsertFields = null);

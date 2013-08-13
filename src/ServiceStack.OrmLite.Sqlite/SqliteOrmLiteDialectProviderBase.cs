@@ -15,6 +15,7 @@ namespace ServiceStack.OrmLite.Sqlite
             base.DateTimeColumnDefinition = base.StringColumnDefinition;
             base.BoolColumnDefinition = base.IntColumnDefinition;
             base.GuidColumnDefinition = "CHAR(32)";
+            base.SelectIdentitySql = "SELECT last_insert_rowid()";
 
             base.InitColumnTypeMap();
         }
@@ -147,13 +148,6 @@ namespace ServiceStack.OrmLite.Sqlite
             }
 
             return base.GetQuotedValue(value, fieldType);
-        }
-
-        public override long GetLastInsertId(IDbCommand dbCmd)
-        {
-            dbCmd.CommandText = "SELECT last_insert_rowid()";
-            var result = dbCmd.ExecuteScalar();
-            return (long)result;
         }
 
         public override SqlExpressionVisitor<T> ExpressionVisitor<T>()

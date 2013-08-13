@@ -410,8 +410,26 @@ namespace ServiceStack.OrmLite
             return sql.ToString();
         }
 
-        public abstract long GetLastInsertId(IDbCommand command);
+        public virtual string SelectIdentitySql { get; set; }
 
+        public virtual long GetLastInsertId(IDbCommand dbCmd)
+        {
+            if (SelectIdentitySql == null)
+                throw new NotImplementedException("Returning last inserted identity is not implemented on this DB Provider.");
+
+            dbCmd.CommandText = SelectIdentitySql;
+            return dbCmd.GetLongScalar();
+        }
+
+        public virtual long InsertAndGetLastInsertId<T>(IDbCommand dbCmd)
+        {
+            if (SelectIdentitySql == null)
+                throw new NotImplementedException("Returning last inserted identity is not implemented on this DB Provider.");
+            
+            dbCmd.CommandText += "; " + SelectIdentitySql;
+            return dbCmd.GetLongScalar();
+        }
+        
         public virtual string ToCountStatement(Type fromTableType, string sqlFilter, params object[] filterParams)
         {
             var sql = new StringBuilder();
@@ -513,8 +531,8 @@ namespace ServiceStack.OrmLite
             var sbColumnValues = new StringBuilder();
             var modelDef = objWithProperties.GetType().GetModelDefinition();
 
-            var command = connection.CreateCommand();
-            command.CommandTimeout = OrmLiteConfig.CommandTimeout;
+            var cmd = connection.CreateCommand();
+            cmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
@@ -533,7 +551,7 @@ namespace ServiceStack.OrmLite
                     sbColumnValues.Append(ParamString)
                                   .Append(fieldDef.FieldName);
 
-                    AddParameterForFieldToCommand(command, fieldDef, objWithProperties);
+                    AddParameterForFieldToCommand(cmd, fieldDef, objWithProperties);
                 }
                 catch (Exception ex)
                 {
@@ -542,9 +560,10 @@ namespace ServiceStack.OrmLite
                 }
             }
 
-            command.CommandText = string.Format("INSERT INTO {0} ({1}) VALUES ({2})",
-                                                GetQuotedTableName(modelDef), sbColumnNames, sbColumnValues);
-            return command;
+            cmd.CommandText = string.Format("INSERT INTO {0} ({1}) VALUES ({2})",
+                                            GetQuotedTableName(modelDef), sbColumnNames, sbColumnValues);
+
+            return cmd;
         }
 
         public void ReParameterizeInsertStatement(IDbCommand command, object objWithProperties, ICollection<string> insertFields = null)
