@@ -237,5 +237,29 @@ namespace ServiceStack.OrmLite.Tests
 			}
 		}
 
-	}
+        [Test]
+        public void Can_GetLastInsertedId_using_InsertParam()
+        {
+            var testObject = new UserAuth { UserName = "test" };
+
+            //verify that "normal" Insert works as expected
+            using (var con = ConnectionString.OpenDbConnection())
+            {
+                con.CreateTable<UserAuth>(true);
+
+                con.Insert(testObject);
+                var normalLastInsertedId = con.GetLastInsertId();
+                Assert.Greater(normalLastInsertedId, 0, "normal Insert");
+            }
+
+            //test with InsertParam
+            using (var con = ConnectionString.OpenDbConnection())
+            {
+                con.CreateTable<UserAuth>(true);
+
+                var lastInsertId = con.InsertParam(testObject, selectIdentity: true);
+                Assert.Greater(lastInsertId, 0, "with InsertParam");
+            }
+        }
+    }
 }
