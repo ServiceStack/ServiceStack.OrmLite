@@ -9,7 +9,7 @@
     #endregion using
 
     [TestFixture]
-    public class OrmLiteNonQueryTests
+    public class OrmLiteExecuteNonQueryTests
     {
         public class UsingAnonType : OrmLiteTestBase
         {
@@ -22,7 +22,7 @@
 
                     var name = "Jane Doe";
 
-                    var affectedRows = db.NonQuery("insert into Person (Name) Values (@name);", new
+                    var affectedRows = db.ExecuteNonQuery("insert into Person (Name) Values (@name);", new
                     {
                         name
                     });
@@ -46,7 +46,7 @@
                     var name1 = "Jane Doe";
                     var name2 = "john Smith";
 
-                    var affectedRows = db.NonQuery(@"
+                    var affectedRows = db.ExecuteNonQuery(@"
                                                 insert into Person (Name)
                                                 Select @name1
                                                 Union
@@ -82,7 +82,7 @@
 
                     var newName = "John Smith";
 
-                    var affectedRows = db.NonQuery("Update Person Set Name = @newName where Id = @personId", new
+                    var affectedRows = db.ExecuteNonQuery("Update Person Set Name = @newName where Id = @personId", new
                     {
                         personId,
                         newName
@@ -111,7 +111,7 @@
 
                     var personId = db.GetLastInsertId();
 
-                    var affectedRows = db.NonQuery("Delete From Person where Id = @personId", new
+                    var affectedRows = db.ExecuteNonQuery("Delete From Person where Id = @personId", new
                     {
                         personId
                     });
@@ -130,7 +130,7 @@
                 {
                     db.DropAndCreateTable<Person>();
 
-                    var affectedRows = db.NonQuery(@"Delete From Person Where Id = @nonExistingId", new
+                    var affectedRows = db.ExecuteNonQuery(@"Delete From Person Where Id = @nonExistingId", new
                     {
                         nonExistingId = -1
                     });
@@ -151,7 +151,7 @@
 
                     var name = "Jane Doe";
 
-                    var affectedRows = db.NonQuery("insert into Person (Name) Values (@name);", new Dictionary<string, object>
+                    var affectedRows = db.ExecuteNonQuery("insert into Person (Name) Values (@name);", new Dictionary<string, object>
                     {
                         { "name", name }
                     });
@@ -175,7 +175,7 @@
                     var name1 = "Jane Doe";
                     var name2 = "john Smith";
 
-                    var affectedRows = db.NonQuery(@"
+                    var affectedRows = db.ExecuteNonQuery(@"
                                                 insert into Person (Name)
                                                 Select @name1
                                                 Union
@@ -211,7 +211,7 @@
 
                     var newName = "John Smith";
 
-                    var affectedRows = db.NonQuery("Update Person Set Name = @newName where Id = @personId", new Dictionary<string, object>
+                    var affectedRows = db.ExecuteNonQuery("Update Person Set Name = @newName where Id = @personId", new Dictionary<string, object>
                     {
                         { "personId", personId },
                         { "newName", newName }
@@ -240,7 +240,7 @@
 
                     var personId = db.GetLastInsertId();
 
-                    var affectedRows = db.NonQuery("Delete From Person where Id = @personId", new Dictionary<string, object>
+                    var affectedRows = db.ExecuteNonQuery("Delete From Person where Id = @personId", new Dictionary<string, object>
                     {
                         { "personId", personId }
                     });
@@ -259,7 +259,7 @@
                 {
                     db.DropAndCreateTable<Person>();
 
-                    var affectedRows = db.NonQuery(@"Delete From Person Where Id = @nonExistingId", new Dictionary<string, object>
+                    var affectedRows = db.ExecuteNonQuery(@"Delete From Person Where Id = @nonExistingId", new Dictionary<string, object>
                     {
                         { "nonExistingId", -1 }
                     });
@@ -282,7 +282,7 @@
 
                     var sql = string.Format("insert into Person (Name) Values ('{0}');", name);
 
-                    var affectedRows = db.NonQuery(sql);
+                    var affectedRows = db.ExecuteNonQuery(sql);
 
                     var personId = db.GetLastInsertId();
 
@@ -305,7 +305,7 @@
 
                     var sql = string.Format(@"insert into Person (Name) Select '{0}' Union Select '{1}'", name1, name2);
 
-                    var affectedRows = db.NonQuery(sql);
+                    var affectedRows = db.ExecuteNonQuery(sql);
 
                     var rows = db.SqlList<Person>("select * from Person order by name");
 
@@ -335,7 +335,7 @@
 
                     var sql = string.Format(@"Update Person Set Name = '{0}' where Id = {1}", newName, personId);
 
-                    var affectedRows = db.NonQuery(sql);
+                    var affectedRows = db.ExecuteNonQuery(sql);
 
                     var updatedPerson = db.GetById<Person>(personId);
 
@@ -362,7 +362,7 @@
 
                     var sql = string.Format(@"Delete From Person where Id = {0}", personId);
 
-                    var affectedRows = db.NonQuery(sql);
+                    var affectedRows = db.ExecuteNonQuery(sql);
 
                     var count = db.Count<Person>();
 
@@ -380,7 +380,7 @@
 
                     var sql = string.Format(@"Delete From Person where Id = {0}", -1);
 
-                    var affectedRows = db.NonQuery(sql);
+                    var affectedRows = db.ExecuteNonQuery(sql);
 
                     Assert.That(affectedRows, Is.EqualTo(0));
                 }

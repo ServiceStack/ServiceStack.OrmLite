@@ -118,7 +118,7 @@
     <Compile Include="ForeignKeyAttributeTests.cs" />
     <Compile Include="OrmLiteDropTableTests.cs" />
     <Compile Include="OrmLiteDropTableWithNamingStrategyTests.cs" />
-    <Compile Include="OrmLiteNonQueryTests.cs" />
+    <Compile Include="OrmLiteExecuteNonQueryTests.cs" />
     <Compile Include="OrmLiteQueryTests.cs" />
     <Compile Include="LocalizationTests.cs" />
     <Compile Include="OrmLiteConnectionFactoryTests.cs" />

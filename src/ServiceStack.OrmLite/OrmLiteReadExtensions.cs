@@ -424,7 +424,7 @@ namespace ServiceStack.OrmLite
 					: dbReader.ConvertToList<T>();
 		}
 
-        internal static int NonQuery(this IDbCommand dbCmd, string sql, object anonType = null)
+        internal static int ExecuteNonQuery(this IDbCommand dbCmd, string sql, object anonType = null)
         {
             if (anonType != null)
                 dbCmd.SetParameters(anonType, excludeNulls: false);
@@ -433,7 +433,7 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecuteNonQuery();
         }
 
-        internal static int NonQuery(this IDbCommand dbCmd, string sql, Dictionary<string, object> dict)
+        internal static int ExecuteNonQuery(this IDbCommand dbCmd, string sql, Dictionary<string, object> dict)
         {
             if (dict != null)
                 dbCmd.SetParameters(dict, excludeNulls: false);

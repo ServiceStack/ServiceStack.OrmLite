@@ -160,19 +160,19 @@ namespace ServiceStack.OrmLite
             return dbConn.Exec(dbCmd => dbCmd.Query<T>(sql, dict));
         }
 
-        public static int NonQuery(this IDbConnection dbConn, string sql)
+        public static int ExecuteNonQuery(this IDbConnection dbConn, string sql)
         {
-            return dbConn.Exec(dbCmd => dbCmd.NonQuery(sql));
+            return dbConn.Exec(dbCmd => dbCmd.ExecuteNonQuery(sql));
         }
 
-        public static int NonQuery(this IDbConnection dbConn, string sql, object anonType)
+        public static int ExecuteNonQuery(this IDbConnection dbConn, string sql, object anonType)
         {
-            return dbConn.Exec(dbCmd => dbCmd.NonQuery(sql, anonType));
+            return dbConn.Exec(dbCmd => dbCmd.ExecuteNonQuery(sql, anonType));
         }
 
-        public static int NonQuery(this IDbConnection dbConn, string sql, Dictionary<string, object> dict)
+        public static int ExecuteNonQuery(this IDbConnection dbConn, string sql, Dictionary<string, object> dict)
         {
-            return dbConn.Exec(dbCmd => dbCmd.NonQuery(sql, dict));
+            return dbConn.Exec(dbCmd => dbCmd.ExecuteNonQuery(sql, dict));
         }
 
         public static T QueryScalar<T>(this IDbConnection dbConn, object anonType)
