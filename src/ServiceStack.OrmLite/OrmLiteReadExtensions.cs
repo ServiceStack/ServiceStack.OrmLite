@@ -255,6 +255,35 @@ namespace ServiceStack.OrmLite
 			}
 		}
 
+        private static void SetParameters(this IDbCommand dbCmd, object anonType, bool excludeNulls)
+        {
+            dbCmd.Parameters.Clear();
+            lastQueryType = null;
+            if (anonType == null)
+                return;
+
+            var pis = anonType.GetType().GetSerializableProperties();
+
+            foreach (var pi in pis)
+            {
+                var mi = pi.GetGetMethod();
+                if (mi == null)
+                    continue;
+
+                var value = mi.Invoke(anonType, new object[0]);
+                if (excludeNulls && value == null)
+                    continue;
+
+                var p = dbCmd.CreateParameter();
+
+                p.ParameterName = pi.Name;
+                p.DbType = OrmLiteConfig.DialectProvider.GetColumnDbType(pi.PropertyType);
+                p.Direction = ParameterDirection.Input;
+                p.Value = value ?? DBNull.Value;
+                dbCmd.Parameters.Add(p);
+            }
+        }	
+
 		private static void SetParameters(this IDbCommand dbCmd, Dictionary<string,object> dict, bool excludeNulls)
 		{
 			dbCmd.Parameters.Clear();
@@ -394,6 +423,24 @@ namespace ServiceStack.OrmLite
 					? dbReader.GetFirstColumn<T>()
 					: dbReader.ConvertToList<T>();
 		}
+
+        internal static int NonQuery(this IDbCommand dbCmd, string sql, object anonType = null)
+        {
+            if (anonType != null)
+                dbCmd.SetParameters(anonType, excludeNulls: false);
+            dbCmd.CommandText = sql;
+
+            return dbCmd.ExecuteNonQuery();
+        }
+
+        internal static int NonQuery(this IDbCommand dbCmd, string sql, Dictionary<string, object> dict)
+        {
+            if (dict != null)
+                dbCmd.SetParameters(dict, excludeNulls: false);
+            dbCmd.CommandText = sql;
+
+            return dbCmd.ExecuteNonQuery();
+        }
 
 	    internal static T QueryScalar<T>(this IDbCommand dbCmd, object anonType)
 		{
