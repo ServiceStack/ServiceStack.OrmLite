@@ -236,9 +236,6 @@ namespace ServiceStack.OrmLite
 			{
 				foreach (var fieldDef in fieldDefs)
 				{
-                    if (fieldDef.AlwaysIgnored)
-                        continue;
-
                     int index;
                     if (indexCache != null)
                     {

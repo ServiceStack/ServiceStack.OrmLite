@@ -38,8 +38,6 @@ namespace ServiceStack.OrmLite
 
         public bool IsIndexed { get; set; }
 
-        public bool AlwaysIgnored { get; set; }
-
         public bool IsUnique { get; set; }
 
         public int? FieldLength { get; set; }  // Precision for Decimal Type
