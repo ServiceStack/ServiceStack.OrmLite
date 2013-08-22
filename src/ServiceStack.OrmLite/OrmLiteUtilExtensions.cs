@@ -151,25 +151,22 @@ namespace ServiceStack.OrmLite
 			return new SqlInValues(values);
 		}
 
-		public static Dictionary<string, int> GetIndexFieldsCache(this IDataReader reader, ModelDefinition modelDefinition = null)
-		{
-			var rv = new Dictionary<string, int>();
-			for (var i = 0; i < reader.FieldCount; i++)
-			{
-				rv.Add(reader.GetName(i), i);
-			}
-			if (modelDefinition != null)
-			{
-				modelDefinition.IgnoredFieldDefinitions.ForEach(field =>
-				{
-					if (!rv.ContainsKey(field.FieldName))
-					{
-						rv.Add(field.FieldName, -1);
-					}
-				});
-			}
-			return rv;
-		}
+        public static Dictionary<string, int> GetIndexFieldsCache(this IDataReader reader, ModelDefinition modelDefinition = null)
+        {
+            var cache = new Dictionary<string, int>();
+            if (modelDefinition != null)
+            {
+                foreach (var field in modelDefinition.IgnoredFieldDefinitions)
+                {
+                    cache[field.FieldName] = -1;
+                }
+            }
+            for (var i = 0; i < reader.FieldCount; i++)
+            {
+                cache[reader.GetName(i)] = i;
+            }
+            return cache;
+        }
 
 	}
 }
