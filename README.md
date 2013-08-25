@@ -672,7 +672,7 @@ Track track = db.Single<Track>("RefId = {0}", refId)
 Dictionary<int, string> trackIdNamesMap = db.Dictionary<int, string>("select Id, Name from Track")
 ```
 
-**Lookup** returns an `Dictionary<K, List<V>>` made from the first to columns. Alias: `GetLookup`
+**Lookup** returns an `Dictionary<K, List<V>>` made from the first two columns. Alias: `GetLookup`
 
 ```csharp
 Dictionary<int, List<string>> albumTrackNames = db.Lookup<int, string>("select AlbumId, Name from Track")
