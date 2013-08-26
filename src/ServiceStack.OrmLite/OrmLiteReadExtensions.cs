@@ -790,6 +790,7 @@ namespace ServiceStack.OrmLite
 			if (result is DBNull) return default(long);
 			if (result is int) return (int)result;
 			if (result is decimal) return Convert.ToInt64((decimal)result);
+			if (result is ulong) return Convert.ToInt64(result);
 			return (long)result;
 		}			
 	}
