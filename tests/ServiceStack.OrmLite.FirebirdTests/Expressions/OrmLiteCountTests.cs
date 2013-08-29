@@ -65,15 +65,13 @@ namespace ServiceStack.OrmLite.FirebirdTests.Expressions
 
         long Count<T>(IDbConnection db) where T : IHasId<int>, new()
         {
-            T request = new T();
-            return db.GetScalar<T, long>(e => Sql.Count(request.Id));
+            return db.GetScalar<T, long>(e => Sql.Count(e.Id));
         }
 
 
         long CountByColumn<T>(IDbConnection db) where T : IHasCountColumn, new()
         {
-            T request = new T();
-            return db.GetScalar<T, long?>(e => Sql.Count(request.CountColumn)).Value;
+            return db.GetScalar<T, long?>(e => Sql.Count(e.CountColumn)).Value;
         }
 
 
