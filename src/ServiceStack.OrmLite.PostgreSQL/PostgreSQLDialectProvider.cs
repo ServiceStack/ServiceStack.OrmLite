@@ -138,6 +138,11 @@ namespace ServiceStack.OrmLite.PostgreSQL
 				var integerArray = (int[]) value;
 				return ToArray(integerArray);
 			}
+			if (fieldType.IsArray && typeof(long).IsAssignableFrom(fieldType.GetElementType()))
+			{
+				var longArray = (long[]) value;
+				return ToArray(longArray);
+			}
 
 			return base.GetQuotedValue(value, fieldType);
 		}
