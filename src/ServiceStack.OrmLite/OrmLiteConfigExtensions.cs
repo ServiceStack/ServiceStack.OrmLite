@@ -24,6 +24,7 @@ namespace ServiceStack.OrmLite
     internal static class OrmLiteConfigExtensions
     {
         private static Dictionary<Type, ModelDefinition> typeModelDefinitionMap = new Dictionary<Type, ModelDefinition>();
+        private static readonly IList<PropertyInfo> emptyPropertyList = new List<PropertyInfo>();
 
         private static bool IsNullableType(Type theType)
         {
@@ -72,10 +73,16 @@ namespace ServiceStack.OrmLite
                 modelType.GetCustomAttributes(typeof(CompositeIndexAttribute), true).ToList()
                 .ConvertAll(x => (CompositeIndexAttribute)x));
 
-            var objProperties = modelType.GetProperties(
-                BindingFlags.Public | BindingFlags.Instance).ToList();
+            var hasIdField = false;
+            var objProperties = emptyPropertyList;
 
-            var hasIdField = CheckForIdField(objProperties);
+            if (IsStringOrDateTime(modelType) == false)
+            {
+                objProperties = modelType.GetProperties(BindingFlags.Public 
+                    | BindingFlags.Instance).ToList();
+
+                hasIdField = CheckForIdField(objProperties);
+            }
 
             var i = 0;
             foreach (var propertyInfo in objProperties)
@@ -174,6 +181,10 @@ namespace ServiceStack.OrmLite
 
             return modelDef;
         }
-
+        
+        private static bool IsStringOrDateTime(Type modelType)
+        {
+            return modelType == typeof(String) || modelType == typeof(DateTime);
+        }
     }
 }
