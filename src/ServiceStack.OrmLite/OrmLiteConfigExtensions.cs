@@ -24,7 +24,7 @@ namespace ServiceStack.OrmLite
     internal static class OrmLiteConfigExtensions
     {
         private static Dictionary<Type, ModelDefinition> typeModelDefinitionMap = new Dictionary<Type, ModelDefinition>();
-        private static readonly IList<PropertyInfo> emptyPropertyList = new List<PropertyInfo>();
+        private static readonly List<PropertyInfo> emptyPropertyList = new List<PropertyInfo>();
 
         private static bool IsNullableType(Type theType)
         {
@@ -76,7 +76,7 @@ namespace ServiceStack.OrmLite
             var hasIdField = false;
             var objProperties = emptyPropertyList;
 
-            if (IsStringOrDateTime(modelType) == false)
+            if (modelType != typeof(String) && modelType != typeof(DateTime))
             {
                 objProperties = modelType.GetProperties(BindingFlags.Public 
                     | BindingFlags.Instance).ToList();
@@ -180,11 +180,6 @@ namespace ServiceStack.OrmLite
                 Interlocked.CompareExchange(ref typeModelDefinitionMap, newCache, snapshot), snapshot));
 
             return modelDef;
-        }
-        
-        private static bool IsStringOrDateTime(Type modelType)
-        {
-            return modelType == typeof(String) || modelType == typeof(DateTime);
         }
     }
 }
