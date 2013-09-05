@@ -45,7 +45,7 @@ namespace <#=SPNamespace#>
 			dbCommand.CommandType = CommandType.StoredProcedure;
 			dbCommand.Transaction = OrmLiteConfig.TSTransaction!= null ? (DbTransaction)OrmLiteConfig.TSTransaction : null;
 <#if (sp.Parameters.Count > 0) { foreach(var param in sp.Parameters){#>
-			dbCommand.Parameters.Add(CreateNewParameter(dbCommand,"<#=param.Name#>",<#=Inflector.MakeInitialLowerCase(param.Name)#>,ParameterDirection.Input,<#=param.DbType#>));
+			dbCommand.Parameters.Add(CreateNewParameter(dbCommand,"<#=param.Name#>",<#=Inflector.MakeInitialLowerCase(param.Name)#>,<#=param.Direction#>,<#=param.DbType#>));
 <#}#> <#}#>
 			return new OrmLiteSPStatement(dbCommand);
 		}
