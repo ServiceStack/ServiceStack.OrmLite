@@ -207,7 +207,9 @@ namespace SqliteExpressionsTest.iOS
 
                 // insert values  only in Id, Name, Birthday, Rate and Active fields 
                 expected = 4;
-                ev.Insert(rn => new { rn.Id, rn.Name, rn.Birthday, rn.Active, rn.Rate });
+				//ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<Author>();
+
+                //ev.Insert(rn => new { rn.Id, rn.Name, rn.Birthday, rn.Active, rn.Rate });
                 db.InsertOnly(new Author() { Active = false, Rate = 0, Name = "Victor Grozny", Birthday = DateTime.Today.AddYears(-18) }, ev);
                 db.InsertOnly(new Author() { Active = false, Rate = 0, Name = "Ivan Chorny", Birthday = DateTime.Today.AddYears(-19) }, ev);
                 ev.Where(rn => !rn.Active);
@@ -230,17 +232,18 @@ namespace SqliteExpressionsTest.iOS
 
 
                 //   lets select  all records ordered by Rate Descending and Name Ascending
-                expected = 14;
-                ev.Where().OrderBy(rn => new { at = Sql.Desc(rn.Rate), rn.Name }); // clear where condition
-                result = db.Select(ev);
-                Console.WriteLine(ev.WhereExpression);
-                Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, result.Count, expected == result.Count);
-                Console.WriteLine(ev.OrderByExpression);
-                var author = result.FirstOrDefault();
-                Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", "Claudia Espinel", author.Name, "Claudia Espinel" == author.Name);
+                //expected = 14;
+                //ev.Where().OrderBy(rn => new { at = Sql.Desc(rn.Rate), rn.Name }); // clear where condition
+                //result = db.Select(ev);
+                //Console.WriteLine(ev.WhereExpression);
+                //Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", expected, result.Count, expected == result.Count);
+                //Console.WriteLine(ev.OrderByExpression);
+                //var author = result.FirstOrDefault();
+                //Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", "Claudia Espinel", author.Name, "Claudia Espinel" == author.Name);
 
                 // select  only first 5 rows ....
 
+				ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<Author>();
                 expected = 5;
                 ev.Limit(5); // note: order is the same as in the last sentence
                 result = db.Select(ev);
@@ -250,16 +253,16 @@ namespace SqliteExpressionsTest.iOS
 
                 // and finally lets select only Name and City (name will be "UPPERCASED" )
 
-                ev.Select(rn => new { at = Sql.As(rn.Name.ToUpper(), "Name"), rn.City });
-                Console.WriteLine(ev.SelectExpression);
-                result = db.Select(ev);
-                author = result.FirstOrDefault();
-                Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", "Claudia Espinel".ToUpper(), author.Name, "Claudia Espinel".ToUpper() == author.Name);
+                //ev.Select(rn => new { at = Sql.As(rn.Name.ToUpper(), "Name"), rn.City });
+                //Console.WriteLine(ev.SelectExpression);
+                //result = db.Select(ev);
+                //var author = result.FirstOrDefault();
+                //Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", "Claudia Espinel".ToUpper(), author.Name, "Claudia Espinel".ToUpper() == author.Name);
 
                 //paging :
                 ev.Limit(0, 4);// first page, page size=4;
                 result = db.Select(ev);
-                author = result.FirstOrDefault();
+                var author = result.FirstOrDefault();
                 Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", "Claudia Espinel".ToUpper(), author.Name, "Claudia Espinel".ToUpper() == author.Name);
 
                 ev.Limit(4, 4);// second page
