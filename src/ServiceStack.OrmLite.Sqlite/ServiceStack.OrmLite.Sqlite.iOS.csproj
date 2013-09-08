@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">iPhoneSimulator</Platform>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{E6EA93E2-37BC-477F-8B87-BC30C3BBDB85}</ProjectGuid>
@@ -42,7 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.iOS.csproj">
-      <Project>{7e3fea8a-c770-4d50-8ad5-f56fcf0b7e07}</Project>
+      <Project>{7E3FEA8A-C770-4D50-8AD5-F56FCF0B7E07}</Project>
       <Name>ServiceStack.OrmLite.iOS</Name>
     </ProjectReference>
   </ItemGroup>
