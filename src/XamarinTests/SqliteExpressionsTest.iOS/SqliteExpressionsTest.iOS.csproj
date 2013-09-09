@@ -95,11 +95,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\ServiceStack.OrmLite.Sqlite\ServiceStack.OrmLite.Sqlite.iOS.csproj">
-      <Project>{e6ea93e2-37bc-477f-8b87-bc30c3bbdb85}</Project>
+      <Project>{E6EA93E2-37BC-477F-8B87-BC30C3BBDB85}</Project>
       <Name>ServiceStack.OrmLite.Sqlite.iOS</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\ServiceStack.OrmLite\ServiceStack.OrmLite.iOS.csproj">
-      <Project>{7e3fea8a-c770-4d50-8ad5-f56fcf0b7e07}</Project>
+      <Project>{7E3FEA8A-C770-4D50-8AD5-F56FCF0B7E07}</Project>
       <Name>ServiceStack.OrmLite.iOS</Name>
     </ProjectReference>
   </ItemGroup>
