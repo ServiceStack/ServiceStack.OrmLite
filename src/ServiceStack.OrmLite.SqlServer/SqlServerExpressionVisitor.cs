@@ -26,9 +26,8 @@ namespace ServiceStack.OrmLite.SqlServer
 
                 sql = base.ToSelectStatement();
                 if (sql == null || sql.Length < "SELECT".Length) return sql;
-                bool hasDistinctInBaseQuery = sql.StartsWithIgnoreCase("SELECT DISTINCT");
-                string stringToRemoveFromBaseQuery = hasDistinctInBaseQuery ? "SELECT DISTINCT" : "SELECT";
-                sql = stringToRemoveFromBaseQuery + " TOP " + take + " " + sql.Substring(stringToRemoveFromBaseQuery.Length, sql.Length - stringToRemoveFromBaseQuery.Length);
+                var selectType = sql.StartsWithIgnoreCase("SELECT DISTINCT") ? "SELECT DISTINCT" : "SELECT";
+                sql = selectType + " TOP " + take + " " + sql.Substring(selectType.Length, sql.Length - selectType.Length);
                 return sql;
             }
 	        
