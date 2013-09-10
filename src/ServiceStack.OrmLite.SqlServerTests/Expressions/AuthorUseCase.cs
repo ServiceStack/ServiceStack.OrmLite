@@ -224,9 +224,16 @@ namespace ServiceStack.OrmLite.SqlServerTests.Expressions
                 Assert.AreEqual("Rodger Contreras".ToUpper(), author.Name);
 
                 // select distinct..
-                ev.Limit().OrderBy(); // clear limit, clear order for postres
+                ev.Limit().OrderBy(); // clear limit, clear orde
                 ev.SelectDistinct(r => r.City);
                 expected = 6;
+                result = db.Select(ev);
+                Assert.AreEqual(expected, result.Count);
+
+                // select distinct with limit
+                ev.Limit(0, 4);
+                ev.SelectDistinct(r => r.City);
+                expected = 4;
                 result = db.Select(ev);
                 Assert.AreEqual(expected, result.Count);
 

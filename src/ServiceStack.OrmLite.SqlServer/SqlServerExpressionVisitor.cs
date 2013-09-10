@@ -26,7 +26,9 @@ namespace ServiceStack.OrmLite.SqlServer
 
                 sql = base.ToSelectStatement();
                 if (sql == null || sql.Length < "SELECT".Length) return sql;
-                sql = "SELECT TOP " + take + " " + sql.Substring("SELECT".Length, sql.Length - "SELECT".Length);
+                bool hasDistinctInBaseQuery = sql.StartsWithIgnoreCase("SELECT DISTINCT");
+                string stringToRemoveFromBaseQuery = hasDistinctInBaseQuery ? "SELECT DISTINCT" : "SELECT";
+                sql = stringToRemoveFromBaseQuery + " TOP " + take + " " + sql.Substring(stringToRemoveFromBaseQuery.Length, sql.Length - stringToRemoveFromBaseQuery.Length);
                 return sql;
             }
 	        
