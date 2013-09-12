@@ -16,8 +16,8 @@
     <language>en-US</language> 
     <copyright>ServiceStack 2013 and contributors</copyright>
     <dependencies>
-        <dependency id="ServiceStack.Common" />
-        <dependency id="System.Data.SQLite.x86" />
+      <dependency id="ServiceStack.Common" version="[3,4)" />
+      <dependency id="System.Data.SQLite.x86" />
     </dependencies> 
   </metadata> 
 </package>
