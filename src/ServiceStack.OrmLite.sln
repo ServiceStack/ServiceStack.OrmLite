@@ -1,8 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.20617.1 PREVIEW
-MinimumVisualStudioVersion = 10.0.40219.1
+# Visual Studio 2012
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{6CEB3EDE-9F02-4F4F-BD8A-1B2939C1AE6E}"
 	ProjectSection(SolutionItems) = preProject
 		..\build\build.bat = ..\build\build.bat
@@ -105,6 +103,13 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceStack.OrmLite.DDLTest", "ServiceStack.OrmLite.DDLTest\ServiceStack.OrmLite.DDLTest.csproj", "{E106F587-2DFF-4550-BA49-9A81A2EC344F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceStack.OrmLite.Sqlitev40", "ServiceStack.OrmLite.Sqlite\ServiceStack.OrmLite.Sqlitev40.csproj", "{8CA77485-7F0F-4C59-8C25-312D43EF1F8C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "T4", "T4", "{ACB237F8-B931-4945-9533-FA2207510F75}"
+	ProjectSection(SolutionItems) = preProject
+		T4\OrmLite.Core.ttinclude = T4\OrmLite.Core.ttinclude
+		T4\OrmLite.Poco.tt = T4\OrmLite.Poco.tt
+		T4\OrmLite.SP.tt = T4\OrmLite.SP.tt
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

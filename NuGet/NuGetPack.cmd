@@ -6,4 +6,5 @@ nuget pack ServiceStack.OrmLite.MySql\servicestack.ormlite.mysql.nuspec
 nuget pack ServiceStack.OrmLite.PostgreSQL\servicestack.ormlite.postgresql.nuspec
 nuget pack ServiceStack.OrmLite.Oracle\servicestack.ormlite.oracle.nuspec
 nuget pack ServiceStack.OrmLite.Firebird\servicestack.ormlite.firebird.nuspec
+nuget pack ServiceStack.OrmLite.T4\servicestack.ormlite.t4.nuspec
 
