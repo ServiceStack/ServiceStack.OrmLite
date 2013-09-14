@@ -120,7 +120,9 @@ namespace ServiceStack.OrmLite.Tests
 				var modelFromDb = db.First<ModelWithOnlyStringFields>(x => x.Name == "ReadConnectionExtensionFirst");
 				Assert.AreEqual(m.AlbumName, modelFromDb.AlbumName);
 			}
-		}
+
+            OrmLiteConfig.DialectProvider.NamingStrategy = new OrmLiteNamingStrategyBase();
+        }
 		
 		[Test]
 		public void Can_get_data_from_TableWithNamigStrategy_AfterChangingNamingStrategy()
