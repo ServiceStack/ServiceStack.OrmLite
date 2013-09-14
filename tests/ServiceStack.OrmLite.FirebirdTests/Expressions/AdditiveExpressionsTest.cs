@@ -17,7 +17,7 @@ namespace ServiceStack.OrmLite.FirebirdTests.Expressions
             EstablishContext(10, expected);
 
 
-            using (var con =  ConnectionString.OpenDbConnection())
+            using (var con =  OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.IntColumn == 4 + 3);
 
@@ -39,7 +39,7 @@ namespace ServiceStack.OrmLite.FirebirdTests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.IntColumn == 10 - 3);
 
@@ -66,7 +66,7 @@ namespace ServiceStack.OrmLite.FirebirdTests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.IntColumn == a + b);
 
@@ -93,7 +93,7 @@ namespace ServiceStack.OrmLite.FirebirdTests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.IntColumn == a - b);
 
@@ -115,7 +115,7 @@ namespace ServiceStack.OrmLite.FirebirdTests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.IntColumn == GetValue(4) + GetValue(3));
 
@@ -137,7 +137,7 @@ namespace ServiceStack.OrmLite.FirebirdTests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.IntColumn == GetValue(10) - GetValue(3));
 

@@ -13,7 +13,7 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_Save_into_ModelWithFieldsOfDifferentTypes_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
@@ -26,7 +26,7 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_Save_and_select_from_ModelWithFieldsOfDifferentTypes_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
@@ -45,7 +45,7 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_SaveAll_and_select_from_ModelWithFieldsOfDifferentTypes_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
@@ -63,7 +63,7 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_SaveAll_and_select_from_ModelWithFieldsOfDifferentTypes_table_with_no_ids()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
@@ -81,7 +81,7 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_Save_table_with_null_fields()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithIdAndName>(true);
 
@@ -101,7 +101,7 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_Save_TaskQueue_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<TaskQueue>(true);
 
@@ -123,7 +123,7 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_SaveAll_and_select_from_Movie_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<Movie>(true);
 

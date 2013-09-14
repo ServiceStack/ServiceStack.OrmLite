@@ -59,6 +59,9 @@ namespace ServiceStack.OrmLite
             if (typeModelDefinitionMap.TryGetValue(modelType, out modelDef))
                 return modelDef;
 
+            if (modelType.IsValueType() || modelType == typeof(string))
+                return null;
+
             var modelAliasAttr = modelType.FirstAttribute<AliasAttribute>();
             var schemaAttr = modelType.FirstAttribute<SchemaAttribute>();
             modelDef = new ModelDefinition {

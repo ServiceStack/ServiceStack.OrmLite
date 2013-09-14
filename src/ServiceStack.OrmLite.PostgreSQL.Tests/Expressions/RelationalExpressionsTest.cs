@@ -16,7 +16,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.IntColumn > 1);
 
@@ -38,7 +38,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.IntColumn >= 1);
 
@@ -60,7 +60,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.IntColumn < 1);
 
@@ -81,7 +81,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.IntColumn <= 1);
 

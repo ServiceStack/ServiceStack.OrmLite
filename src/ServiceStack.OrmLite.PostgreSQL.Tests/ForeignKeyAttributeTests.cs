@@ -10,7 +10,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         [TestFixtureSetUp]
         public void Setup()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
+            using (var dbConn = OpenDbConnection())
             {
                 dbConn.CreateTable<ReferencedType>(true);
             }
@@ -19,7 +19,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         [Test]
         public void CanCreateSimpleForeignKey()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
+            using (var dbConn = OpenDbConnection())
             {
                 dbConn.CreateTable<TypeWithSimpleForeignKey>(true);
             }
@@ -28,7 +28,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         [Test]
         public void CanCreateForeignWithOnDeleteCascade()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
+            using (var dbConn = OpenDbConnection())
             {
                 dbConn.CreateTable<TypeWithOnDeleteCascade>(true);
             }
@@ -37,7 +37,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         [Test]
         public void CascadesOnDelete()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
+            using (var dbConn = OpenDbConnection())
             {
                 dbConn.CreateTable<TypeWithOnDeleteCascade>(true);
 
@@ -57,7 +57,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         [Test]
         public void CanCreateForeignWithOnDeleteCascadeAndOnUpdateCascade()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
+            using (var dbConn = OpenDbConnection())
             {
                 dbConn.CreateTable<TypeWithOnDeleteAndUpdateCascade>(true);
             }
@@ -66,7 +66,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         [Test]
         public void CanCreateForeignWithOnDeleteNoAction()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
+            using (var dbConn = OpenDbConnection())
             {
                 dbConn.CreateTable<TypeWithOnDeleteNoAction>(true);
             }
@@ -75,7 +75,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         [Test]
         public void CanCreateForeignWithOnDeleteRestrict()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
+            using (var dbConn = OpenDbConnection())
             {
                 dbConn.CreateTable<TypeWithOnDeleteRestrict>(true);
             }
@@ -84,7 +84,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         [Test]
         public void CanCreateForeignWithOnDeleteSetDefault()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
+            using (var dbConn = OpenDbConnection())
             {
                 dbConn.CreateTable<TypeWithOnDeleteSetDefault>(true);
             }
@@ -93,7 +93,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         [Test]
         public void CanCreateForeignWithOnDeleteSetNull()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
+            using (var dbConn = OpenDbConnection())
             {
                 dbConn.CreateTable<TypeWithOnDeleteSetNull>(true);
             }
@@ -102,7 +102,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         [TestFixtureTearDown]
         public void TearDwon()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
+            using (var dbConn = OpenDbConnection())
             {
                 dbConn.DropTable<TypeWithOnDeleteAndUpdateCascade>();
                 dbConn.DropTable<TypeWithOnDeleteSetNull>();

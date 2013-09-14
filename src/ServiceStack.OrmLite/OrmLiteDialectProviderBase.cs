@@ -235,6 +235,8 @@ namespace ServiceStack.OrmLite
             DbTypeMap.Set<decimal?>(DbType.Decimal, DecimalColumnDefinition);
 
             DbTypeMap.Set<byte[]>(DbType.Binary, BlobColumnDefinition);
+
+            DbTypeMap.Set<object>(DbType.Object, StringColumnDefinition);
         }
 
         public string DefaultValueFormat = " DEFAULT ({0})";

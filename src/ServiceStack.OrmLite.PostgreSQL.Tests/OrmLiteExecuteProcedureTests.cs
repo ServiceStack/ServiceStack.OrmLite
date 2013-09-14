@@ -48,7 +48,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         [Test]
         public void Can_execute_stored_procedure_with_array_arguments()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.ExecuteSql(Create);
 

@@ -18,7 +18,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
 		[Test]
 		public void DropAndCreateTable_DropsTableAndCreatesTable()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.DropTable<TestData>();
 				db.CreateTable<TestData>();
@@ -49,7 +49,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
 
         private void _reCreateTheTable()
         {
-            using(var db = ConnectionString.OpenDbConnection()) {
+            using(var db = OpenDbConnection()) {
                 db.CreateTable<CreatePostgreSQLTablesTests_dummy_table>(true);
             }
         }
@@ -71,7 +71,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
             var builder = new Npgsql.NpgsqlConnectionStringBuilder(ConnectionString);
             var schema1 = "schema_1";
             var schema2 = "schema_2";
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 CreateSchemaIfNotExists(db, schema1);
                 CreateSchemaIfNotExists(db, schema2);

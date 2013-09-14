@@ -1,4 +1,5 @@
 using System;
+using System.Data;
 using System.IO;
 using NUnit.Framework;
 using ServiceStack.Common.Utils;
@@ -51,5 +52,28 @@ namespace ServiceStack.OrmLite.Tests
 		{
 			Console.WriteLine(text);
 		}
-	}
+
+        public IDbConnection InMemoryDbConnection { get; set; }
+
+        public IDbConnection OpenDbConnection(string connString = null)
+        {
+            connString = connString ?? ConnectionString;
+            if (connString == ":memory:")
+            {
+                if (InMemoryDbConnection == null)
+                {
+                    var dbConn = connString.OpenDbConnection();
+                    InMemoryDbConnection = new OrmLiteConnectionWrapper(dbConn)
+                    {
+                        DialectProvider = OrmLiteConfig.DialectProvider,
+                        AutoDisposeConnection = false,
+                    };
+                }
+
+                return InMemoryDbConnection;
+            }
+
+            return connString.OpenDbConnection();
+        }
+    }
 }

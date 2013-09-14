@@ -68,7 +68,7 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_create_all_Northwind_tables()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				CreateNorthwindTables(db);
 			}
@@ -77,7 +77,7 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_insert_Northwind_Data()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				CreateNorthwindTables(db);
 
@@ -89,7 +89,7 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_insert_Northwind_Data_with_images()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				CreateNorthwindTables(db);
 

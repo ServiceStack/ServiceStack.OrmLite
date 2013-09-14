@@ -229,7 +229,7 @@ namespace ServiceStack.OrmLite
 			if (anonType == null) return;
 
             var pis = anonType.GetType().GetSerializableProperties();
-                ModelDefinition model = ModelDefinition<T>.Definition;
+            var model = ModelDefinition<T>.Definition;
 
 			foreach (var pi in pis)
 			{
@@ -242,7 +242,7 @@ namespace ServiceStack.OrmLite
 
 				var p = dbCmd.CreateParameter();
 
-                FieldDefinition targetField = model.FieldDefinitions.FirstOrDefault(f => string.Equals(f.Name, pi.Name));
+                var targetField = model != null ? model.FieldDefinitions.FirstOrDefault(f => string.Equals(f.Name, pi.Name)) : null;
                 if (targetField != null && !string.IsNullOrEmpty(targetField.Alias))
                     p.ParameterName = targetField.Alias;
                 else
@@ -501,7 +501,7 @@ namespace ServiceStack.OrmLite
 
         internal static List<T> ByExampleWhere<T>(this IDbCommand dbCmd, object anonType)
         {
-            return ByExampleWhere<T>(dbCmd, anonType, false);
+            return ByExampleWhere<T>(dbCmd, anonType, true);
         }
 
         internal static List<T> ByExampleWhere<T>(this IDbCommand dbCmd, object anonType, bool excludeNulls)
