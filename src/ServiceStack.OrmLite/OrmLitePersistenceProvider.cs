@@ -35,7 +35,8 @@ namespace ServiceStack.OrmLite
 			{
 				if (connection == null)
 				{
-					connection = this.ConnectionString.OpenDbConnection();
+				    var connStr = this.ConnectionString;
+                    connection = connStr.OpenDbConnection();
 				}
 				return connection;
 			}

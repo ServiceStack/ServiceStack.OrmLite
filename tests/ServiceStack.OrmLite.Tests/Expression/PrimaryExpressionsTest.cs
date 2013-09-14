@@ -66,7 +66,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.IntColumn == tmp.Property);
+            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn == tmp.Property);
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(1, actual.Count);
@@ -87,7 +87,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.IntColumn == tmp._field);
+            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn == tmp._field);
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(1, actual.Count);
@@ -108,7 +108,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.IntColumn == tmp.Mehtod());
+            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn == tmp.Mehtod());
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(1, actual.Count);
@@ -127,7 +127,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.IntColumn == TestClass.StaticProperty);
+            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn == TestClass.StaticProperty);
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(1, actual.Count);
@@ -146,7 +146,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.IntColumn == TestClass._staticField);
+            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn == TestClass._staticField);
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(1, actual.Count);
@@ -165,7 +165,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.IntColumn == TestClass<int>.StaticMethod(12));
+            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn == TestClass<int>.StaticMethod(12));
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(1, actual.Count);
@@ -184,7 +184,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.IntColumn == new TestClass<int>(12).Property);
+            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn == new TestClass<int>(12).Property);
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(1, actual.Count);
@@ -205,7 +205,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.IntColumn == tmp._field);
+            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn == tmp._field);
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(1, actual.Count);
@@ -226,7 +226,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.IntColumn == tmp.Property);
+            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn == tmp.Property);
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(1, actual.Count);
@@ -247,7 +247,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.IntColumn == tmp.Mehtod());
+            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn == tmp.Mehtod());
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(1, actual.Count);
@@ -273,7 +273,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.BoolColumn == tmp.Property);
+            var actual = OpenDbConnection().Select<TestType>(q => q.BoolColumn == tmp.Property);
 
             Assert.IsNotNull(actual);
             Assert.Greater(actual.Count, 1);
@@ -294,7 +294,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.BoolColumn == tmp._field);
+            var actual = OpenDbConnection().Select<TestType>(q => q.BoolColumn == tmp._field);
 
             Assert.IsNotNull(actual);
             Assert.Greater(actual.Count, 1);
@@ -315,7 +315,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.BoolColumn == tmp.Mehtod());
+            var actual = OpenDbConnection().Select<TestType>(q => q.BoolColumn == tmp.Mehtod());
 
             Assert.IsNotNull(actual);
             Assert.Greater(actual.Count, 1);
@@ -334,7 +334,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.BoolColumn == TestClass<bool>.StaticMethod(false));
+            var actual = OpenDbConnection().Select<TestType>(q => q.BoolColumn == TestClass<bool>.StaticMethod(false));
 
             Assert.IsNotNull(actual);
             Assert.Greater(actual.Count, 1);
@@ -353,7 +353,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.BoolColumn == new TestClass<bool>(false).Property);
+            var actual = OpenDbConnection().Select<TestType>(q => q.BoolColumn == new TestClass<bool>(false).Property);
 
             Assert.IsNotNull(actual);
             Assert.Greater(actual.Count, 1);

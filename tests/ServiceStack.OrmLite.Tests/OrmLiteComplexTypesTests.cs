@@ -12,7 +12,7 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_insert_into_ModelWithComplexTypes_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithComplexTypes>(true);
 
@@ -25,7 +25,7 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_insert_and_select_from_ModelWithComplexTypes_table()
 		{
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithComplexTypes>(true);
 
@@ -44,7 +44,7 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_insert_and_select_from_OrderLineData()
 		{
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
 			{
 				db.CreateTable<SampleOrderLine>(true);
 

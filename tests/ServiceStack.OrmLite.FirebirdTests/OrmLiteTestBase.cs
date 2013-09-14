@@ -1,4 +1,5 @@
 using System;
+using System.Data;
 using System.IO;
 using System.Configuration;
 using NUnit.Framework;
@@ -37,5 +38,11 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		{
 			Console.WriteLine(text);
 		}
-	}
+
+        public IDbConnection OpenDbConnection(string connString = null)
+        {
+            connString = connString ?? ConnectionString;
+            return connString.OpenDbConnection();
+        }
+    }
 }

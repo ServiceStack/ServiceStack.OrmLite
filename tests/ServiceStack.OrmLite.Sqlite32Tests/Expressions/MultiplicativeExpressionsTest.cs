@@ -16,7 +16,7 @@ namespace ServiceStack.OrmLite.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.IntColumn == 4 * 3);
+            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn == 4 * 3);
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(1, actual.Count);
@@ -35,7 +35,7 @@ namespace ServiceStack.OrmLite.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.IntColumn == 36 / 3);
+            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn == 36 / 3);
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(1, actual.Count);
@@ -54,7 +54,7 @@ namespace ServiceStack.OrmLite.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.IntColumn == 37 % 10);
+            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn == 37 % 10);
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(1, actual.Count);
@@ -78,7 +78,7 @@ namespace ServiceStack.OrmLite.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.IntColumn == a * b);
+            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn == a * b);
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(1, actual.Count);
@@ -102,7 +102,7 @@ namespace ServiceStack.OrmLite.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.IntColumn == a / b);
+            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn == a / b);
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(1, actual.Count);
@@ -126,7 +126,7 @@ namespace ServiceStack.OrmLite.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.IntColumn == a % b);
+            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn == a % b);
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(1, actual.Count);
@@ -145,7 +145,7 @@ namespace ServiceStack.OrmLite.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.IntColumn == GetValue(4) * GetValue(3));
+            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn == GetValue(4) * GetValue(3));
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(1, actual.Count);
@@ -164,7 +164,7 @@ namespace ServiceStack.OrmLite.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.IntColumn == GetValue(36) / GetValue(3));
+            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn == GetValue(36) / GetValue(3));
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(1, actual.Count);
@@ -183,7 +183,7 @@ namespace ServiceStack.OrmLite.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.IntColumn == GetValue(37) % GetValue(10));
+            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn == GetValue(37) % GetValue(10));
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(1, actual.Count);

@@ -15,7 +15,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
         [Test]
         public void Skip_Take_works_with_injected_Visitor()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 FillTestEntityTableWithTestData(db);
                 
@@ -31,7 +31,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
         [Test]
         public void test_if_limit_works_with_rows_and_skip()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 FillTestEntityTableWithTestData(db);
 
@@ -49,7 +49,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
         [Test]
         public void test_if_limit_works_with_rows()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 FillTestEntityTableWithTestData(db);
 
@@ -67,7 +67,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
         [Test]
         public void test_if_limit_works_with_rows_and_skip_and_orderby()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 FillTestEntityTableWithTestData(db);
 
@@ -85,7 +85,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
         [Test]
         public void test_if_ev_still_works_without_limit_and_orderby()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 FillTestEntityTableWithTestData(db);
 
@@ -102,7 +102,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
         [Test]
         public void test_if_and_works_with_nullable_parameter()
         {
-            using(var db = ConnectionString.OpenDbConnection())
+            using(var db = OpenDbConnection())
             {
                 db.CreateTable<TestEntity>(true);
                 db.Insert(new TestEntity
@@ -128,7 +128,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
         [Test]
         public void test_if_limit_works_with_rows_and_skip_if_pk_columnname_has_space()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 FillAliasedTestEntityTableWithTestData(db);
 
@@ -144,7 +144,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
         [Test]
         public void test_if_limit_works_with_rows_and_skip_and_orderby_if_pk_columnname_has_space()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 FillAliasedTestEntityTableWithTestData(db);
 

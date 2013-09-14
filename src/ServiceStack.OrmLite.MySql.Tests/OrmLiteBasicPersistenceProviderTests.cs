@@ -18,7 +18,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		[Test]
 		public void Can_GetById_from_basic_persistence_provider()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
@@ -37,7 +37,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		[Test]
 		public void Can_GetByIds_from_basic_persistence_provider()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
@@ -60,7 +60,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		[Test]
 		public void Can_Store_from_basic_persistence_provider()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
@@ -83,7 +83,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		[Test]
 		public void Can_Delete_from_basic_persistence_provider()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 

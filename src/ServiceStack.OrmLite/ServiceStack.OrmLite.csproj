@@ -104,6 +104,7 @@
     <Compile Include="Expressions\WriteConnectionExtensions.cs" />
     <Compile Include="ForeignKeyAttribute.cs" />
     <Compile Include="JoinSqlBuilder.cs" />
+    <Compile Include="OrmLiteConnectionWrapper.cs" />
     <Compile Include="OrmLiteReadConnectionExtensions.cs" />
     <Compile Include="OrmLiteSPStatement.cs" />
     <Compile Include="OrmLiteTransaction.cs" />

@@ -21,7 +21,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 			var stopWatch = new Stopwatch();
 			stopWatch.Start();
 
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
 			{
 				using (var client = new OrmLitePersistenceProvider(db))
 				{

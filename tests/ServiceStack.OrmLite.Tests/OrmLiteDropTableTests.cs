@@ -10,7 +10,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_drop_existing_table()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable(typeof(ModelWithIdOnly));
                 db.DropAndCreateTable<ModelWithIdAndName>();
@@ -37,7 +37,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_drop_multiple_tables()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTables(typeof(ModelWithIdOnly), typeof(ModelWithIdAndName));
 

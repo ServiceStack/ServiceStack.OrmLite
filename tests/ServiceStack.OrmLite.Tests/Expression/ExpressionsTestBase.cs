@@ -2,8 +2,6 @@
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
-using ServiceStack.Logging;
-using ServiceStack.Logging.Support.Logging;
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {
@@ -12,7 +10,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
         [SetUp]
         public void Setup()
         {
-            ConnectionString.OpenDbConnection().CreateTable<TestType>(true);
+            OpenDbConnection().DropAndCreateTable<TestType>();
         }
 
         public T GetValue<T>(T item)
@@ -30,7 +28,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
             if (obj == null)
                 obj = new TestType[0];
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 foreach (var t in obj)
                 {

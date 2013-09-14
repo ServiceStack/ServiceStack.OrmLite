@@ -12,7 +12,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		[Test]
 		public void Can_create_ModelWithIndexFields_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithIndexFields>(true);
 
@@ -26,7 +26,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		[Test]
 		public void Can_create_ModelWithCompositeIndexFields_table()
 		{
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithCompositeIndexFields>(true);
 
@@ -40,7 +40,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void Can_create_ModelWithNamedCompositeIndex_table()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithNamedCompositeIndex>(true);
 

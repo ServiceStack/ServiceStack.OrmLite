@@ -41,7 +41,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 				NDoubleProperty= 8.25
 			});
 			
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<Author>(true);
 				db.DeleteAll<Author>();

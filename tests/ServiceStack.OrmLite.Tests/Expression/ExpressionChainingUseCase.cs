@@ -12,7 +12,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
         [SetUp]
         public void SetUp()
         {
-            db = ConnectionString.OpenDbConnection();
+            db = OpenDbConnection();
             db.CreateTable<Person>(overwrite: true);
 
             //People.ToList().ForEach(x => dbCmd.Insert(x));
