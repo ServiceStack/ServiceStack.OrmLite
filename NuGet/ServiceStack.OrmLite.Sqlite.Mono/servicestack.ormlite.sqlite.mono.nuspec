@@ -19,4 +19,9 @@
       <dependency id="ServiceStack.Common" version="[3,4)" />
     </dependencies> 
   </metadata> 
+  <files>
+    <file src="lib\**\*.*" target="lib" />
+    <file src="..\..\src\ServiceStack.OrmLite\**\*.cs" target="src\ServiceStack.OrmLite" />
+    <file src="..\..\src\ServiceStack.OrmLite.Sqlite\**\*.cs" target="src\ServiceStack.OrmLite.Sqlite" />
+  </files>
 </package>
