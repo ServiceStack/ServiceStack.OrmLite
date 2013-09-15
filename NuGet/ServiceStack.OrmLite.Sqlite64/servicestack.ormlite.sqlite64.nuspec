@@ -20,4 +20,11 @@
       <dependency id="System.Data.SQLite.x64" />
     </dependencies> 
   </metadata> 
+  <files>
+    <file src="lib\**\*.*" target="lib" />
+    <file src="..\..\src\ServiceStack.OrmLite\**\*.cs" target="src\ServiceStack.OrmLite" />
+    <file src="..\..\src\ServiceStack.OrmLite.Sqlite\SqliteExpressionVisitor.cs" target="src\ServiceStack.OrmLite.Sqlite32" />
+    <file src="..\..\src\ServiceStack.OrmLite.Sqlite\SqliteOrmLiteDialectProviderBase.cs" target="src\ServiceStack.OrmLite.Sqlite32" />
+    <file src="..\..\src\ServiceStack.OrmLite.Sqlite64\**\*.cs" target="src\ServiceStack.OrmLite.Sqlite64" />
+  </files>
 </package>
