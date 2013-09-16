@@ -1,5 +1,6 @@
 using System;
 using System.Configuration;
+using System.Data;
 using System.IO;
 using NUnit.Framework;
 using ServiceStack.Common.Utils;
@@ -23,5 +24,11 @@ namespace ServiceStack.OrmLite.Oracle.Tests
 			OrmLiteConfig.ClearCache();
 		    ConnectionString = ConfigurationManager.ConnectionStrings["testDb"].ConnectionString;
 		}
-	}
+    
+        public IDbConnection OpenDbConnection(string connString = null)
+        {
+            connString = connString ?? ConnectionString;
+            return connString.OpenDbConnection();
+        }
+    }
 }

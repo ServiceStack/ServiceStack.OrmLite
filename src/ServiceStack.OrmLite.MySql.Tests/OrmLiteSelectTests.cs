@@ -13,7 +13,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		[Test]
 		public void Can_GetById_int_from_ModelWithFieldsOfDifferentTypes_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
@@ -30,7 +30,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		[Test]
 		public void Can_GetById_string_from_ModelWithOnlyStringFields_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 
@@ -47,7 +47,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		[Test]
 		public void Can_GetByIds_int_from_ModelWithFieldsOfDifferentTypes_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
@@ -65,7 +65,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		[Test]
 		public void Can_GetByIds_string_from_ModelWithOnlyStringFields_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 
@@ -83,7 +83,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		[Test]
 		public void Can_select_with_filter_from_ModelWithOnlyStringFields_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 
@@ -109,7 +109,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		{
 			const int n = 5;
 
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithIdAndName>(true);
 
@@ -124,7 +124,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		[Test]
 		public void Can_loop_each_string_from_ModelWithOnlyStringFields_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 
@@ -145,7 +145,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		[Test]
 		public void Can_loop_each_with_filter_from_ModelWithOnlyStringFields_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 
@@ -175,7 +175,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		{
 			const int n = 5;
 
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithIdAndName>(true);
 
@@ -192,7 +192,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		{
 			const int n = 5;
 
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithIdAndName>(true);
 
@@ -209,7 +209,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		{
 			const int n = 5;
 
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithIdAndName>(true);
 
@@ -232,7 +232,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		{
 			const int n = 5;
 
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithIdAndName>(true);
 
@@ -249,7 +249,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		[Test]
 		public void Can_Select_subset_ModelWithIdAndName_from_ModelWithFieldsOfDifferentTypes_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
@@ -267,7 +267,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		[Test]
 		public void Can_Select_Into_ModelWithIdAndName_from_ModelWithFieldsOfDifferentTypes_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
@@ -287,7 +287,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		{
 			const int n = 5;
 
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithIdAndName>(true);
 

@@ -11,7 +11,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		[Test]
 		public void Can_update_ModelWithFieldsOfDifferentTypes_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 

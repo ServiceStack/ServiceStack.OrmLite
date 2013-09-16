@@ -8,7 +8,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
         [Test]
         public void Can_execute_update_using_expression()
         {
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 con.CreateTable<SimpleType>(true);
                 var obj = new SimpleType { Name = "Somename" };
@@ -30,7 +30,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
         [Test]
         public void Can_execute_update_only()
         {
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 con.CreateTable<SimpleType>(true);
                 var obj = new SimpleType { Name = "Somename" };
@@ -56,7 +56,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
         [Test]
         public void Can_execute_update()
         {
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 con.CreateTable<SimpleType>(true);
                 var obj = new SimpleType { Name = "Somename" };
@@ -78,7 +78,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
         [Test]
         public void Can_execute_update_using_aliased_columns()
         {
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 con.CreateTable<SimpleAliasedType>(true);
                 var obj = new SimpleAliasedType { Name = "Somename" };
@@ -100,7 +100,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
         [Test]
         public void Can_execute_updateParam()
         {
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 con.CreateTable<SimpleType>(true);
                 var obj = new SimpleType { Name = "Somename" };
@@ -122,7 +122,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
         [Test]
         public void Can_execute_updateParam_using_aliased_columns()
         {
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 con.CreateTable<SimpleAliasedType>(true);
                 var obj = new SimpleAliasedType { Name = "Somename" };

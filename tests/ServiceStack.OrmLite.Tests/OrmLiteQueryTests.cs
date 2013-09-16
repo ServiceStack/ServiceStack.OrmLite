@@ -14,7 +14,7 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_GetById_int_from_ModelWithFieldsOfDifferentTypes_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
                 db.DropAndCreateTable<ModelWithFieldsOfDifferentTypes>();
 
@@ -31,7 +31,7 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_GetById_string_from_ModelWithOnlyStringFields_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
                 db.DropAndCreateTable<ModelWithOnlyStringFields>();
 
@@ -48,7 +48,7 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_select_with_filter_from_ModelWithOnlyStringFields_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
                 db.DropAndCreateTable<ModelWithOnlyStringFields>();
 
@@ -88,7 +88,7 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_loop_each_with_filter_from_ModelWithOnlyStringFields_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
                 db.DropAndCreateTable<ModelWithOnlyStringFields>();
 
@@ -116,7 +116,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_GetSingle_with_filter_from_ModelWithOnlyStringFields_table()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<ModelWithOnlyStringFields>();
 
@@ -132,7 +132,7 @@ namespace ServiceStack.OrmLite.Tests
                 var row = db.QuerySingle<ModelWithOnlyStringFields>(new { filterRow.AlbumName });
                 Assert.That(row.Id, Is.EqualTo(filterRow.Id));
 
-                row = db.QuerySingle<ModelWithOnlyStringFields>(new { filterRow.AlbumName, Id = (object)null });
+                row = db.QuerySingle<ModelWithOnlyStringFields>(new { filterRow.AlbumName });
                 Assert.That(row.AlbumName, Is.EqualTo(filterRow.AlbumName));
 
                 row = db.QuerySingle<ModelWithOnlyStringFields>(new { AlbumName = "Junk", Id = (object)null });
@@ -154,7 +154,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_query_where_and_select_Notes()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<Note>();
 
@@ -194,7 +194,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_select_NotesDto_with_pretty_sql()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<Note>();
 
@@ -236,7 +236,7 @@ WHERE SchemaUri=@schemaUri
         [TestCase("t030#Customer_I#d", "t030CustomerNa$^me", "t030Cust^omer_birth_date")]
         public void Can_query_CustomerDto_and_map_db_fields_not_identical_by_guessing_the_mapping(string field1Name, string field2Name, string field3Name)
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 var sql = string.Format(@"
                     SELECT 1 AS [{0}], 'John' AS [{1}], '1970-01-01' AS [{2}]

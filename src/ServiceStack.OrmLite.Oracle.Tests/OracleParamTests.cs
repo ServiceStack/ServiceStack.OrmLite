@@ -24,7 +24,7 @@ namespace ServiceStack.OrmLite.Oracle.Tests
         [Test]
         public void ORA_ParamTestInsert()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 DropAndCreateTables(db);
                 var dateTimeNow =new DateTime( DateTime.Now.Year,  DateTime.Now.Month,  DateTime.Now.Day);
@@ -74,7 +74,7 @@ namespace ServiceStack.OrmLite.Oracle.Tests
         [Test]
         public void ORA_ParamTestUpdate()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 DropAndCreateTables(db);
 
@@ -120,7 +120,7 @@ namespace ServiceStack.OrmLite.Oracle.Tests
         [Test]
         public void ORA_ParamTestDelete()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 DropAndCreateTables(db);
 
@@ -145,7 +145,7 @@ namespace ServiceStack.OrmLite.Oracle.Tests
         [Test]
         public void ORA_ParamTestGetById()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 DropAndCreateTables(db);
 
@@ -162,7 +162,7 @@ namespace ServiceStack.OrmLite.Oracle.Tests
         [Test]
         public void ORA_ParamTestSelectLambda()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 DropAndCreateTables(db);
 
@@ -186,7 +186,7 @@ namespace ServiceStack.OrmLite.Oracle.Tests
         [Test]
         public void ORA_ParamTestSelectLambda2()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 DropAndCreateTables(db);
 
@@ -216,7 +216,7 @@ namespace ServiceStack.OrmLite.Oracle.Tests
         [Test]
         public void ORA_ParamTestSelectLambdaComplex()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 //various special cases that still need to be addressed
 
@@ -230,7 +230,7 @@ namespace ServiceStack.OrmLite.Oracle.Tests
         [Test]
         public void ORA_ParamByteTest()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 DropAndCreateTables(db);
 

@@ -9,7 +9,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             var orig = new TypeWithByteArrayField { Id = 1, Content = new byte[] { 0, 17, 0, 17, 0, 7 } };
 
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.CreateTable<TypeWithByteArrayField>(true);
 

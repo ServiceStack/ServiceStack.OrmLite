@@ -23,7 +23,7 @@ namespace ServiceStack.OrmLite.FirebirdTests.Expressions
             if (obj == null)
                 obj = new TestType[0];
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 con.CreateTable<TestType>();
                 con.DeleteAll<TestType>();

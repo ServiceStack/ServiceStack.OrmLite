@@ -15,7 +15,7 @@ namespace ServiceStack.OrmLite.Tests
                 ColumnPrefix = "col_"
             };
 
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithOnlyStringFields>(true);
 
@@ -32,7 +32,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             OrmLiteConfig.DialectProvider.NamingStrategy = new LowercaseNamingStrategy();
 
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithOnlyStringFields>(true);
 
@@ -50,7 +50,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             OrmLiteConfig.DialectProvider.NamingStrategy = new UnderscoreSeparatedCompoundNamingStrategy();
 
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithOnlyStringFields>(true);
 

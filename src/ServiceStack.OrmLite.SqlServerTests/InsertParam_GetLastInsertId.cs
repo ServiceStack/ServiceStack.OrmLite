@@ -14,7 +14,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
             var testObject = new SimpleType { Name = "test" };
 
             //verify that "normal" Insert works as expected
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 con.CreateTable<SimpleType>(true);
 
@@ -24,7 +24,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
             }
 
             //test with InsertParam
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 con.CreateTable<SimpleType>(true);
 

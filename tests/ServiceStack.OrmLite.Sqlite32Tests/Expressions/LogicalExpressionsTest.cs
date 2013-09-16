@@ -7,7 +7,7 @@ namespace ServiceStack.OrmLite.Tests.Expressions
         #region constants
 
         // Unlikely 
-        // ConnectionString.OpenDbConnection().Select<TestType>(q => q.BoolColumn == (true & false));
+        // OpenDbConnection().Select<TestType>(q => q.BoolColumn == (true & false));
 
         #endregion
 
@@ -30,7 +30,7 @@ namespace ServiceStack.OrmLite.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.BoolColumn == (a & b));
+            var actual = OpenDbConnection().Select<TestType>(q => q.BoolColumn == (a & b));
 
             Assert.IsNotNull(actual);
             Assert.Greater(actual.Count, 0);
@@ -54,7 +54,7 @@ namespace ServiceStack.OrmLite.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.BoolColumn == (a | b));
+            var actual = OpenDbConnection().Select<TestType>(q => q.BoolColumn == (a | b));
 
             Assert.IsNotNull(actual);
             Assert.Greater(actual.Count, 0);
@@ -78,7 +78,7 @@ namespace ServiceStack.OrmLite.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.BoolColumn == (a ^ b));
+            var actual = OpenDbConnection().Select<TestType>(q => q.BoolColumn == (a ^ b));
 
             Assert.IsNotNull(actual);
             Assert.Greater(actual.Count, 0);
@@ -101,7 +101,7 @@ namespace ServiceStack.OrmLite.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.BoolColumn == (GetValue(true) & GetValue(false)));
+            var actual = OpenDbConnection().Select<TestType>(q => q.BoolColumn == (GetValue(true) & GetValue(false)));
 
             Assert.IsNotNull(actual);
             Assert.Greater(actual.Count, 0);
@@ -120,7 +120,7 @@ namespace ServiceStack.OrmLite.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.BoolColumn == (GetValue(true) | GetValue(false)));
+            var actual = OpenDbConnection().Select<TestType>(q => q.BoolColumn == (GetValue(true) | GetValue(false)));
 
             Assert.IsNotNull(actual);
             Assert.Greater(actual.Count, 0);
@@ -139,7 +139,7 @@ namespace ServiceStack.OrmLite.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.BoolColumn == (GetValue(true) ^ GetValue(false)));
+            var actual = OpenDbConnection().Select<TestType>(q => q.BoolColumn == (GetValue(true) ^ GetValue(false)));
 
             Assert.IsNotNull(actual);
             Assert.Greater(actual.Count, 0);

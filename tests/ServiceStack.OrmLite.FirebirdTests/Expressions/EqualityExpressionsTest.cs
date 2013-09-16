@@ -18,7 +18,7 @@ namespace ServiceStack.OrmLite.FirebirdTests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.IntColumn == 3);
 
@@ -44,7 +44,7 @@ namespace ServiceStack.OrmLite.FirebirdTests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.IntColumn == columnValue);
 
@@ -66,7 +66,7 @@ namespace ServiceStack.OrmLite.FirebirdTests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.IntColumn == GetValue(3));
+            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn == GetValue(3));
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(1, actual.Count);
@@ -85,7 +85,7 @@ namespace ServiceStack.OrmLite.FirebirdTests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.IntColumn != 3);
 
@@ -111,7 +111,7 @@ namespace ServiceStack.OrmLite.FirebirdTests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.IntColumn != columnValue);
 
@@ -133,7 +133,7 @@ namespace ServiceStack.OrmLite.FirebirdTests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.IntColumn != GetValue(3));
 
@@ -159,7 +159,7 @@ namespace ServiceStack.OrmLite.FirebirdTests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 // ReSharper disable RedundantBoolCompare
                 var actual = con.Select<TestType>(q => q.BoolColumn == true);
@@ -183,7 +183,7 @@ namespace ServiceStack.OrmLite.FirebirdTests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 // ReSharper disable RedundantBoolCompare
                 var actual = con.Select<TestType>(q => q.BoolColumn);
@@ -211,7 +211,7 @@ namespace ServiceStack.OrmLite.FirebirdTests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.BoolColumn == columnValue);
 
@@ -233,7 +233,7 @@ namespace ServiceStack.OrmLite.FirebirdTests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.BoolColumn == GetValue(true));
 
@@ -256,7 +256,7 @@ namespace ServiceStack.OrmLite.FirebirdTests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.NullableCol == null);
 
@@ -279,7 +279,7 @@ namespace ServiceStack.OrmLite.FirebirdTests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.NullableCol != null);
 

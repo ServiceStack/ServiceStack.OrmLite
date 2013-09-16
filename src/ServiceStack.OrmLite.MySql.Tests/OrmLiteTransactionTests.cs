@@ -10,7 +10,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		[Test]
 		public void Transaction_commit_persists_data_to_the_db()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithIdAndName>(true);
 				db.Insert(new ModelWithIdAndName(1));
@@ -34,7 +34,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		[Test]
 		public void Transaction_rollsback_if_not_committed()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithIdAndName>(true);
 				db.Insert(new ModelWithIdAndName(1));
@@ -56,7 +56,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		[Test]
 		public void Transaction_rollsback_transactions_to_different_tables()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithIdAndName>(true);
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
@@ -84,7 +84,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		[Test]
 		public void Transaction_commits_inserts_to_different_tables()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithIdAndName>(true);
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
