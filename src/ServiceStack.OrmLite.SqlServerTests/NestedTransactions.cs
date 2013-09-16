@@ -17,13 +17,13 @@ namespace ServiceStack.OrmLite.SqlServerTests
         {
             //must use the factory, because that returns an OrmLiteConnection, that can saves the current transaction
             var factory = new OrmLiteConnectionFactory(ConnectionString, SqlServerDialect.Provider);
-            //using(var outerConn = ConnectionString.OpenDbConnection()) {
+            //using(var outerConn = OpenDbConnection()) {
             using(var outerConn = factory.OpenDbConnection()) {
                 //(re)create tables
                 outerConn.DropAndCreateTable<Can_use_nested_transactions_Table1>();
                 outerConn.DropAndCreateTable<Can_use_nested_transactions_Table2>();
 
-                //using(var innerConn = ConnectionString.OpenDbConnection()) {//use the factory to get the connections
+                //using(var innerConn = OpenDbConnection()) {//use the factory to get the connections
                 using(var innerConn = factory.OpenDbConnection()) {
 
                     using(var outerTran = outerConn.OpenTransaction()) {

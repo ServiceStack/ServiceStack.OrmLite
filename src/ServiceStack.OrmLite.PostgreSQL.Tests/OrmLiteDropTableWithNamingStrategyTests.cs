@@ -13,7 +13,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         {
             OrmLiteConfig.DialectProvider.NamingStrategy = new PostgreSqlNamingStrategy();
 
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithOnlyStringFields>(true);
                 db.DropTable<ModelWithOnlyStringFields>();

@@ -13,7 +13,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void Can_store_and_read_bool_values()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<Boolies>();
 
@@ -40,7 +40,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void Can_store_and_read_bool_values_mapped_as_bit_column()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.CreateTable<Boolies>(true);
 

@@ -15,7 +15,7 @@ namespace ServiceStack.OrmLite.Tests
         [SetUp]
         public void SetUp()
         {
-            db = ConnectionString.OpenDbConnection();
+            db = OpenDbConnection();
         }
 
         [TearDown]

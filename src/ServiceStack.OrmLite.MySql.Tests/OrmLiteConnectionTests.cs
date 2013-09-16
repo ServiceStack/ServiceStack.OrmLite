@@ -19,7 +19,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		[Test]
 		public void Can_create_connection()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			using (var dbCmd = db.CreateCommand())
 			{
 			}

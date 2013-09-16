@@ -11,7 +11,7 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Does_table_Exists()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.DropTable<ModelWithIdOnly>();
 
@@ -30,7 +30,7 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_create_ModelWithIdOnly_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithIdOnly>(true);
 			}
@@ -39,7 +39,7 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_create_ModelWithOnlyStringFields_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 			}
@@ -48,7 +48,7 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_create_ModelWithLongIdAndStringFields_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithLongIdAndStringFields>(true);
 			}
@@ -57,7 +57,7 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_create_ModelWithFieldsOfDifferentTypes_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 			}
@@ -66,7 +66,7 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_preserve_ModelWithIdOnly_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithIdOnly>(true);
 
@@ -84,7 +84,7 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_preserve_ModelWithIdAndName_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithIdAndName>(true);
 
@@ -102,7 +102,7 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_overwrite_ModelWithIdOnly_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithIdOnly>(true);
 
@@ -120,7 +120,7 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_create_multiple_tables()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTables(true, typeof(ModelWithIdOnly), typeof(ModelWithIdAndName));
 

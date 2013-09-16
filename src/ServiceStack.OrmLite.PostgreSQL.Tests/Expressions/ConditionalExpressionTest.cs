@@ -16,7 +16,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.IntColumn > 2 && q.IntColumn < 4);
 
@@ -38,7 +38,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.IntColumn == 3 || q.IntColumn < 0);
 
@@ -65,7 +65,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.BoolColumn == (a >= b && a > 0));
 
@@ -92,7 +92,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.IntColumn == 3 || a > b);
 
@@ -118,7 +118,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => !q.BoolColumn || a);
+            var actual = OpenDbConnection().Select<TestType>(q => !q.BoolColumn || a);
 
             Assert.IsNotNull(actual);
             Assert.Greater(actual.Count, 0);
@@ -141,7 +141,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.BoolColumn && q.StringColumn == model.StringValue);
+            var actual = OpenDbConnection().Select<TestType>(q => q.BoolColumn && q.StringColumn == model.StringValue);
 
             Assert.IsNotNull(actual);
             Assert.Greater(actual.Count, 0);

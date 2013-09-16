@@ -16,7 +16,7 @@
             [Test]
             public void Can_insert_one_row_and_get_one_affected_row()
             {
-                using (var db = ConnectionString.OpenDbConnection())
+                using (var db = OpenDbConnection())
                 {
                     db.DropAndCreateTable<Person>();
 
@@ -39,7 +39,7 @@
             [Test]
             public void Can_insert_multiple_rows_and_get_matching_number_of_affected_rows()
             {
-                using (var db = ConnectionString.OpenDbConnection())
+                using (var db = OpenDbConnection())
                 {
                     db.DropAndCreateTable<Person>();
 
@@ -67,7 +67,7 @@
             [Test]
             public void Can_update_and_returns_appropriate_number_of_affected_rows()
             {
-                using (var db = ConnectionString.OpenDbConnection())
+                using (var db = OpenDbConnection())
                 {
                     db.DropAndCreateTable<Person>();
 
@@ -98,7 +98,7 @@
             [Test]
             public void Can_delete_and_returns_appropriate_number_of_affected_rows()
             {
-                using (var db = ConnectionString.OpenDbConnection())
+                using (var db = OpenDbConnection())
                 {
                     db.DropAndCreateTable<Person>();
 
@@ -126,7 +126,7 @@
             [Test]
             public void Can_exec_statement_which_performs_no_changes_and_returns_no_affected_rows()
             {
-                using (var db = ConnectionString.OpenDbConnection())
+                using (var db = OpenDbConnection())
                 {
                     db.DropAndCreateTable<Person>();
 
@@ -145,7 +145,7 @@
             [Test]
             public void Can_insert_one_row_and_get_one_affected_row()
             {
-                using (var db = ConnectionString.OpenDbConnection())
+                using (var db = OpenDbConnection())
                 {
                     db.DropAndCreateTable<Person>();
 
@@ -168,7 +168,7 @@
             [Test]
             public void Can_insert_multiple_rows_and_get_matching_number_of_affected_rows()
             {
-                using (var db = ConnectionString.OpenDbConnection())
+                using (var db = OpenDbConnection())
                 {
                     db.DropAndCreateTable<Person>();
 
@@ -196,7 +196,7 @@
             [Test]
             public void Can_update_and_returns_appropriate_number_of_affected_rows()
             {
-                using (var db = ConnectionString.OpenDbConnection())
+                using (var db = OpenDbConnection())
                 {
                     db.DropAndCreateTable<Person>();
 
@@ -227,7 +227,7 @@
             [Test]
             public void Can_delete_and_returns_appropriate_number_of_affected_rows()
             {
-                using (var db = ConnectionString.OpenDbConnection())
+                using (var db = OpenDbConnection())
                 {
                     db.DropAndCreateTable<Person>();
 
@@ -255,7 +255,7 @@
             [Test]
             public void Can_exec_statement_which_performs_no_changes_and_returns_no_affected_rows()
             {
-                using (var db = ConnectionString.OpenDbConnection())
+                using (var db = OpenDbConnection())
                 {
                     db.DropAndCreateTable<Person>();
 
@@ -274,7 +274,7 @@
             [Test]
             public void Can_insert_one_row_and_get_one_affected_row()
             {
-                using (var db = ConnectionString.OpenDbConnection())
+                using (var db = OpenDbConnection())
                 {
                     db.DropAndCreateTable<Person>();
 
@@ -296,7 +296,7 @@
             [Test]
             public void Can_insert_multiple_rows_and_get_matching_number_of_affected_rows()
             {
-                using (var db = ConnectionString.OpenDbConnection())
+                using (var db = OpenDbConnection())
                 {
                     db.DropAndCreateTable<Person>();
 
@@ -318,7 +318,7 @@
             [Test]
             public void Can_update_and_returns_appropriate_number_of_affected_rows()
             {
-                using (var db = ConnectionString.OpenDbConnection())
+                using (var db = OpenDbConnection())
                 {
                     db.DropAndCreateTable<Person>();
 
@@ -347,7 +347,7 @@
             [Test]
             public void Can_delete_and_returns_appropriate_number_of_affected_rows()
             {
-                using (var db = ConnectionString.OpenDbConnection())
+                using (var db = OpenDbConnection())
                 {
                     db.DropAndCreateTable<Person>();
 
@@ -374,7 +374,7 @@
             [Test]
             public void Can_exec_statement_which_performs_no_changes_and_returns_no_affected_rows()
             {
-                using (var db = ConnectionString.OpenDbConnection())
+                using (var db = OpenDbConnection())
                 {
                     db.DropAndCreateTable<Person>();
 

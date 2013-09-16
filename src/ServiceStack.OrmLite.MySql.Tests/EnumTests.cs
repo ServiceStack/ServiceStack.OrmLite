@@ -8,13 +8,13 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void CanCreateTable()
         {
-            ConnectionString.OpenDbConnection().CreateTable<TypeWithEnum>(true);
+            OpenDbConnection().CreateTable<TypeWithEnum>(true);
         }
 
         [Test]
         public void CanStoreEnumValue()
         {
-            using(var con = ConnectionString.OpenDbConnection())
+            using(var con = OpenDbConnection())
             {
                 con.CreateTable<TypeWithEnum>(true);
                 con.Save(new TypeWithEnum {Id = 1, EnumValue = SomeEnum.Value1});
@@ -24,7 +24,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void CanGetEnumValue()
         {
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 con.CreateTable<TypeWithEnum>(true);
                 var obj = new TypeWithEnum { Id = 1, EnumValue = SomeEnum.Value1 };
@@ -38,7 +38,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void CanQueryByEnumValue_using_select_with_expression()
         {
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 con.CreateTable<TypeWithEnum>(true);
                 con.Save(new TypeWithEnum { Id = 1, EnumValue = SomeEnum.Value1 });
@@ -54,7 +54,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void CanQueryByEnumValue_using_select_with_string()
         {
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 con.CreateTable<TypeWithEnum>(true);
                 con.Save(new TypeWithEnum { Id = 1, EnumValue = SomeEnum.Value1 });
@@ -70,7 +70,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void CanQueryByEnumValue_using_where_with_AnonType()
         {
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 con.CreateTable<TypeWithEnum>(true);
                 con.Save(new TypeWithEnum { Id = 1, EnumValue = SomeEnum.Value1 });

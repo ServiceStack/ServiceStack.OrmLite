@@ -17,7 +17,12 @@
     <language>en-US</language> 
     <copyright>ServiceStack 2013 and contributors</copyright>
     <dependencies>
-      <dependency id="ServiceStack.Common" />
+      <dependency id="ServiceStack.Common" version="[3,4)" />
     </dependencies> 
   </metadata> 
+  <files>
+    <file src="lib\**\*.*" target="lib" />
+    <file src="..\..\src\ServiceStack.OrmLite\**\*.cs" target="src\ServiceStack.OrmLite" />
+    <file src="..\..\src\ServiceStack.OrmLite.Oracle\**\*.cs" target="src\ServiceStack.OrmLite.Oracle" />
+  </files>
 </package>

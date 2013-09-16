@@ -18,7 +18,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void Can_create_primary_key_varchar_with_string_length_255()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.CreateTable<TypeWithStringId_255>(true);
             }
@@ -27,7 +27,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void Can_create_primary_key_varchar_without_setting_string_length()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.CreateTable<TypeWithStringId>(true);
             }
@@ -36,7 +36,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void Can_create_unique_key_on_varchar_without_setting_string_length()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.CreateTable<TypeWithUniqeKeyOnVarchar>(true);
             }
@@ -46,7 +46,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void Cannot_create_unique_key_on_varchar_greater_than_255()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.CreateTable<TypeWithUniqeKeyOnVarchar_256>(true);
             }
@@ -56,7 +56,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void Cannot_create_primary_key_varchar_with_string_length_greater_than_255()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.CreateTable<TypeWithStringId_256>(true);
             }
@@ -65,7 +65,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void Can_store_and_retrieve_string_with_8000_characters_from_varchar_field()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.CreateTable<TypeWithStringId>(true);
 
@@ -87,7 +87,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void Can_store_and_retrieve_string_with_8000_characters_from_text_field()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.CreateTable<TypeWithTextField>(true);
 

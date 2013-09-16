@@ -16,8 +16,8 @@ namespace ServiceStack.OrmLite.Tests
         public void SetUp()
         {
             CreateNewDatabase();
-            db = ConnectionString.OpenDbConnection();
-            db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+            db = OpenDbConnection();
+            db.DropAndCreateTable<ModelWithFieldsOfDifferentTypes>();
         }
 
         [TearDown]
@@ -60,7 +60,7 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_DeleteByIds_from_ModelWithFieldsOfDifferentTypes_table()
 		{
-            db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+            db.DropAndCreateTable<ModelWithFieldsOfDifferentTypes>();
 
             var rowIds = new List<int>(new[] { 1, 2, 3 });
             rowIds.ForEach(x => db.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));

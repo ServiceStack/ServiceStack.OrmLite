@@ -18,7 +18,7 @@ namespace ServiceStack.OrmLite.FirebirdTests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.IntColumn == +12);
 
@@ -40,7 +40,7 @@ namespace ServiceStack.OrmLite.FirebirdTests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.IntColumn == -12);
 
@@ -62,7 +62,7 @@ namespace ServiceStack.OrmLite.FirebirdTests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.BoolColumn == !true);
 
@@ -84,7 +84,7 @@ namespace ServiceStack.OrmLite.FirebirdTests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => !q.BoolColumn);
 
@@ -114,7 +114,7 @@ namespace ServiceStack.OrmLite.FirebirdTests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.IntColumn == intVal);
 
@@ -140,7 +140,7 @@ namespace ServiceStack.OrmLite.FirebirdTests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.IntColumn == intVal);
 
@@ -166,7 +166,7 @@ namespace ServiceStack.OrmLite.FirebirdTests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.BoolColumn == !boolVal);
 
@@ -192,7 +192,7 @@ namespace ServiceStack.OrmLite.FirebirdTests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.IntColumn == (int) intVal);
 
@@ -218,7 +218,7 @@ namespace ServiceStack.OrmLite.FirebirdTests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.BoolColumn == !GetValue(true));
 
@@ -240,7 +240,7 @@ namespace ServiceStack.OrmLite.FirebirdTests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.IntColumn == (int) GetValue((object) 12));
 

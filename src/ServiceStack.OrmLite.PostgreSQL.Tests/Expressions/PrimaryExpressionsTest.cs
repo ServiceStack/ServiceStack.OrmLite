@@ -66,7 +66,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.IntColumn == tmp.Property);
 
@@ -90,7 +90,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.IntColumn == tmp._field);
 
@@ -114,7 +114,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.IntColumn == tmp.Mehtod());
 
@@ -136,7 +136,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.IntColumn == TestClass.StaticProperty);
+            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn == TestClass.StaticProperty);
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(1, actual.Count);
@@ -155,7 +155,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.IntColumn == TestClass._staticField);
 
@@ -177,7 +177,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.IntColumn == TestClass<int>.StaticMethod(12));
 
@@ -199,7 +199,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.IntColumn == new TestClass<int>(12).Property);
 
@@ -223,7 +223,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.IntColumn == tmp._field);
 
@@ -247,7 +247,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.IntColumn == tmp.Property);
 
@@ -271,7 +271,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.IntColumn == tmp.Mehtod());
 
@@ -300,7 +300,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.BoolColumn == tmp.Property);
 
@@ -324,7 +324,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.BoolColumn == tmp._field);
 
@@ -348,7 +348,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.BoolColumn == tmp.Mehtod());
 
@@ -370,7 +370,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.BoolColumn == TestClass<bool>.StaticMethod(false));
+            var actual = OpenDbConnection().Select<TestType>(q => q.BoolColumn == TestClass<bool>.StaticMethod(false));
 
             Assert.IsNotNull(actual);
             Assert.Greater(actual.Count, 1);
@@ -389,7 +389,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.BoolColumn == new TestClass<bool>(false).Property);
 

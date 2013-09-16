@@ -1,45 +1,57 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using NUnit.Framework;
 
 namespace ServiceStack.OrmLite.Tests
 {
+    [TestFixture]
     public class ExpressionVisitorTests : OrmLiteTestBase
     {
+        [SetUp]
+        public void Setup()
+        {
+            using (var con = OpenDbConnection())
+            {
+                con.DropAndCreateTable<TestType>();
+                con.Insert(new TestType { Id = 1, BoolCol = true, DateCol = new DateTime(2012, 1, 1), TextCol = "asdf", EnumCol = TestEnum.Val0 });
+                con.Insert(new TestType { Id = 2, BoolCol = true, DateCol = new DateTime(2012, 2, 1), TextCol = "asdf123", EnumCol = TestEnum.Val1 });
+                con.Insert(new TestType { Id = 3, BoolCol = false, DateCol = new DateTime(2012, 3, 1), TextCol = "qwer", EnumCol = TestEnum.Val2 });
+                con.Insert(new TestType { Id = 4, BoolCol = false, DateCol = new DateTime(2012, 4, 1), TextCol = "qwer123", EnumCol = TestEnum.Val3 });
+            }
+        }
+
         [Test]
         public void Can_Select_by_const_int()
         {
-            var target = ConnectionString.OpenDbConnection().Select<TestType>(q => q.Id == 1);
+            var target = OpenDbConnection().Select<TestType>(q => q.Id == 1);
             Assert.AreEqual(1, target.Count);
         }
 
         [Test]
         public void Can_Select_by_value_returned_by_method_without_params()
         {
-            var target = ConnectionString.OpenDbConnection().Select<TestType>(q => q.Id == MethodReturningInt());
+            var target = OpenDbConnection().Select<TestType>(q => q.Id == MethodReturningInt());
             Assert.AreEqual(1, target.Count);
         }
 
         [Test]
         public void Can_Select_by_value_returned_by_method_with_param()
         {
-            var target = ConnectionString.OpenDbConnection().Select<TestType>(q => q.Id == MethodReturningInt(1));
+            var target = OpenDbConnection().Select<TestType>(q => q.Id == MethodReturningInt(1));
             Assert.AreEqual(1, target.Count);
         }
 
         [Test]
         public void Can_Select_by_const_enum()
         {
-            var target = ConnectionString.OpenDbConnection().Select<TestType>(q => q.EnumCol == TestEnum.Val0);
+            var target = OpenDbConnection().Select<TestType>(q => q.EnumCol == TestEnum.Val0);
             Assert.AreEqual(1, target.Count);
         }
 
         [Test]
         public void Can_Select_by_enum_returned_by_method()
         {
-            var target = ConnectionString.OpenDbConnection().Select<TestType>(q => q.EnumCol == MethodReturningEnum());
+            var target = OpenDbConnection().Select<TestType>(q => q.EnumCol == MethodReturningEnum());
             Assert.AreEqual(1, target.Count);
         }
 
@@ -47,7 +59,7 @@ namespace ServiceStack.OrmLite.Tests
         public void Can_Select_using_ToUpper_on_string_property_of_T()
         {
             var target =
-                ConnectionString.OpenDbConnection().Select<TestType>(q => q.TextCol.ToUpper() == "ASDF");
+                OpenDbConnection().Select<TestType>(q => q.TextCol.ToUpper() == "ASDF");
             Assert.AreEqual(1, target.Count);
         }
 
@@ -57,7 +69,7 @@ namespace ServiceStack.OrmLite.Tests
             var obj = new TestType {TextCol = "ASDF"};
 
             var target =
-                ConnectionString.OpenDbConnection().Select<TestType>(q => q.TextCol == obj.TextCol.ToLower());
+                OpenDbConnection().Select<TestType>(q => q.TextCol == obj.TextCol.ToLower());
             Assert.AreEqual(1, target.Count);
         }
 
@@ -65,14 +77,14 @@ namespace ServiceStack.OrmLite.Tests
         public void Can_Select_using_Constant_Bool_Value()
         {
             var target =
-                ConnectionString.OpenDbConnection().Select<TestType>(q => q.BoolCol == true);
+                OpenDbConnection().Select<TestType>(q => q.BoolCol == true);
             Assert.AreEqual(2, target.Count);
         }
 
         [Test]
         public void Can_Select_using_new()
         {
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 con.Insert(new TestType
                                {
@@ -85,7 +97,7 @@ namespace ServiceStack.OrmLite.Tests
                                });
 
                 var target =
-                    ConnectionString.OpenDbConnection().Select<TestType>(
+                    OpenDbConnection().Select<TestType>(
                         q => q.ComplexObjCol == new TestType() {TextCol = "poiu"});
                 Assert.AreEqual(1, target.Count);
             }
@@ -96,7 +108,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             var visitor = OrmLiteConfig.DialectProvider.ExpressionVisitor<TestType>();
             visitor.Where(q => Sql.In(q.TextCol, "asdf", "qwer"));
-            var target = ConnectionString.OpenDbConnection().Select(visitor);
+            var target = OpenDbConnection().Select(visitor);
             Assert.AreEqual(2, target.Count);
         }
 
@@ -105,7 +117,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             var visitor = OrmLiteConfig.DialectProvider.ExpressionVisitor<TestType>();
             visitor.Where(q => Sql.In(q.Id, 1, 2, 3));
-            var target = ConnectionString.OpenDbConnection().Select(visitor);
+            var target = OpenDbConnection().Select(visitor);
             Assert.AreEqual(3, target.Count);
         }
 
@@ -114,7 +126,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             var visitor = OrmLiteConfig.DialectProvider.ExpressionVisitor<TestType>();
             visitor.Where(q => Sql.In(q.Id, new[] {1, 2, 3}));
-            var target = ConnectionString.OpenDbConnection().Select(visitor);
+            var target = OpenDbConnection().Select(visitor);
             Assert.AreEqual(3, target.Count);
         }
 
@@ -123,14 +135,14 @@ namespace ServiceStack.OrmLite.Tests
         {
             var visitor = OrmLiteConfig.DialectProvider.ExpressionVisitor<TestType>();
             visitor.Where(q => Sql.In(q.Id, new object[] { 1, 2, 3 }));
-            var target = ConnectionString.OpenDbConnection().Select(visitor);
+            var target = OpenDbConnection().Select(visitor);
             Assert.AreEqual(3, target.Count);
         }
 
         [Test]
         public void Can_Select_using_Startswith()
         {
-            var target = ConnectionString.OpenDbConnection().Select<TestType>(q => q.TextCol.StartsWith("asdf"));
+            var target = OpenDbConnection().Select<TestType>(q => q.TextCol.StartsWith("asdf"));
             Assert.AreEqual(2, target.Count);
         }
 
@@ -140,7 +152,7 @@ namespace ServiceStack.OrmLite.Tests
             var value = "ASDF";
             var visitor = OrmLiteConfig.DialectProvider.ExpressionVisitor<TestType>();
             visitor.Where(q => q.TextCol.ToUpper().StartsWith(value));
-            var target = ConnectionString.OpenDbConnection().Select(visitor);
+            var target = OpenDbConnection().Select(visitor);
             Assert.AreEqual(2, target.Count);
         }
 
@@ -189,19 +201,6 @@ namespace ServiceStack.OrmLite.Tests
         private TestEnum MethodReturningEnum()
         {
             return TestEnum.Val0;
-        }
-
-        [SetUp]
-        public void Setup()
-        {
-            using(var con = ConnectionString.OpenDbConnection())
-            {
-                con.CreateTable<TestType>(true);   
-                con.Insert(new TestType { Id = 1, BoolCol = true, DateCol = new DateTime(2012, 1, 1), TextCol = "asdf", EnumCol = TestEnum.Val0});
-                con.Insert(new TestType { Id = 2, BoolCol = true, DateCol = new DateTime(2012, 2, 1), TextCol = "asdf123", EnumCol = TestEnum.Val1 });
-                con.Insert(new TestType { Id = 3, BoolCol = false, DateCol = new DateTime(2012, 3, 1), TextCol = "qwer", EnumCol = TestEnum.Val2 });
-                con.Insert(new TestType { Id = 4, BoolCol = false, DateCol = new DateTime(2012, 4, 1), TextCol = "qwer123", EnumCol = TestEnum.Val3 });
-            }
         }
     }
 
