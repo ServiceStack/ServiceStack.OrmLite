@@ -18,7 +18,7 @@
     <copyright>ServiceStack 2013 and contributors</copyright>
     <dependencies>
       <dependency id="MySql.Data" />
-      <dependency id="ServiceStack.Common" version="[3,4)" />
+      <dependency id="ServiceStack.Common" version="4" />
     </dependencies> 
   </metadata> 
   <files>

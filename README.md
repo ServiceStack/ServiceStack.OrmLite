@@ -3,8 +3,6 @@ follow [@servicestack](http://twitter.com/servicestack) for updates.
 
 # An Open Source Micro ORM for .NET
 
-_Note: the source code is provided as-is - no direct or commercial support is available for ServiceStack_
-
 # Introduction
 
 OrmLite is a set of light-weight C# extension methods around `System.Data.*` interfaces which is designed to persist POCO classes with a minimal amount of intrusion and configuration.
@@ -41,7 +39,16 @@ Effectively this allows you to create a table from any POCO type and it should p
 
 OrmLite.SqlServer is also included in [ServiceStack](https://github.com/ServiceStack/ServiceStack/downloads).
 
-_Note: the binary packages are provided as-is - there is no commercial support available for ServiceStack_
+_Commercial support will be available for ServiceStack, contact team@servicestack.net for details_
+
+## Copying
+
+Since September 2013, ServiceStack source code is available under GNU Affero General Public License/FOSS License Exception, see license.txt in the source. Alternative commercial licensing is also available, contact team@servicestack.net for details.
+
+## Contributing
+
+Commits should be made to the **v3-fixes** branch so they can be merged into both **v3** and **master** (v4) release branches. 
+Contributors need to approve the [Contributor License Agreement](https://docs.google.com/forms/d/16Op0fmKaqYtxGL4sg7w_g-cXXyCoWjzppgkuqzOeKyk/viewform) before any code will be reviewed, see the [Contributing wiki](https://github.com/ServiceStack/ServiceStack/wiki/Contributing) for more details. 
 
 ## Download published NuGet binaries without NuGet
 
