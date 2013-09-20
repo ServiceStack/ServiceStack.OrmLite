@@ -6,8 +6,6 @@ namespace ServiceStack.DataAnnotations
 	/// Compute attribute.
 	/// Use to indicate that a property is a Calculated Field 
 	/// </summary>
-	// 
-	//
 	[AttributeUsage(AttributeTargets.Property)]
 	public class ComputeAttribute:Attribute
 	{
