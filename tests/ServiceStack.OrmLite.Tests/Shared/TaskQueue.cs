@@ -1,6 +1,5 @@
 using System;
 using NUnit.Framework;
-using ServiceStack.Common.Extensions;
 using ServiceStack.Logging;
 using ServiceStack.Text;
 
