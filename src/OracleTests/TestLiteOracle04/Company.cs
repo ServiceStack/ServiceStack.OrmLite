@@ -2,7 +2,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using ServiceStack.Common;
 using ServiceStack.DataAnnotations;
-using ServiceStack.DesignPatterns.Model;
+using ServiceStack.Model;
 using ServiceStack.OrmLite;
 
 namespace Database.Records

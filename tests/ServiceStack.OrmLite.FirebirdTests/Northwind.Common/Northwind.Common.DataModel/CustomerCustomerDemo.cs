@@ -1,4 +1,4 @@
-﻿using ServiceStack.DesignPatterns.Model;
+﻿using ServiceStack.Model;
 using ServiceStack.DataAnnotations;
 using System.ComponentModel.DataAnnotations;
 using System;

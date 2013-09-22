@@ -3,7 +3,7 @@ using System.Configuration;
 using System.Data;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.DesignPatterns.Model;
+using ServiceStack.Model;
 
 namespace ServiceStack.OrmLite.MySql.Tests
 {

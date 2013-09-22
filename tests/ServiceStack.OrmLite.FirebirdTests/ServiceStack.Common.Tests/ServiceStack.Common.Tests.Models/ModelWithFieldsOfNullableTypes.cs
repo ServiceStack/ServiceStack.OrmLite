@@ -1,5 +1,5 @@
 ﻿using System;
-using ServiceStack.DesignPatterns.Model;
+using ServiceStack.Model;
 using ServiceStack.Logging;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;

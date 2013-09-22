@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using ServiceStack.Common.Utils;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Common;
-using ServiceStack.DesignPatterns.Model;
+using ServiceStack.Model;
 
 using ServiceStack.OrmLite;
 using ServiceStack.OrmLite.Firebird;

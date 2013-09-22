@@ -6,7 +6,7 @@ using System.Text;
 using MySql.Data.MySqlClient;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.DesignPatterns.Model;
+using ServiceStack.Model;
 using ServiceStack.OrmLite.MySql.DataAnnotations;
 
 namespace ServiceStack.OrmLite.MySql.Tests
