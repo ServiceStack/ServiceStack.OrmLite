@@ -3,7 +3,7 @@ using System.Data;
 using System.IO;
 using NUnit.Framework;
 using ServiceStack.Common.Utils;
-using ServiceStack.DataAccess;
+using ServiceStack.Data;
 using ServiceStack.Logging;
 using ServiceStack.Logging.Support.Logging;
 
