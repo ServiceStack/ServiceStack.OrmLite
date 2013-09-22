@@ -3,7 +3,7 @@ using System.Configuration;
 using System.Data;
 using System.IO;
 using NUnit.Framework;
-using ServiceStack.Common.Utils;
+using ServiceStack.Utils;
 using ServiceStack.Logging;
 using ServiceStack.Logging.Support.Logging;
 using ServiceStack.OrmLite.Oracle;

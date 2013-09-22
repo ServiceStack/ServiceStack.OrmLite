@@ -16,7 +16,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
-using ServiceStack.Common.Utils;
+using ServiceStack.Utils;
 using ServiceStack.Logging;
 
 namespace ServiceStack.OrmLite

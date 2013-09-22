@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 using System.Data;
 using System.Collections.Generic;
 
-using ServiceStack.Common.Utils;
+using ServiceStack.Utils;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Common;
 

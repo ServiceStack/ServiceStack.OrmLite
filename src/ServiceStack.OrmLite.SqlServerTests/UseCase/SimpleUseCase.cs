@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using NUnit.Framework;
-using ServiceStack.Common.Utils;
+using ServiceStack.Utils;
 using ServiceStack.OrmLite.SqlServer;
 using ServiceStack.DataAnnotations;
 

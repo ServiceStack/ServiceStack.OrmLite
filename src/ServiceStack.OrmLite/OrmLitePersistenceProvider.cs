@@ -9,12 +9,10 @@
 // Licensed under the same terms of ServiceStack: new BSD license.
 //
 
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
-using ServiceStack.Common;
-using ServiceStack.Common.Utils;
+using ServiceStack.Utils;
 using ServiceStack.Data;
 
 namespace ServiceStack.OrmLite

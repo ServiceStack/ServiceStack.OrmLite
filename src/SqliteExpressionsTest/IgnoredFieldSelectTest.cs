@@ -6,7 +6,7 @@ using ServiceStack.OrmLite;
 using System.IO;
 using System.Data;
 using ServiceStack.DataAnnotations;
-using ServiceStack.Common.Utils;
+using ServiceStack.Utils;
 using ServiceStack.OrmLite.Sqlite;
 
 namespace SqliteExpressionsTest

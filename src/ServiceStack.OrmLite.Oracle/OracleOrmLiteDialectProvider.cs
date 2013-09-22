@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Reflection;
-using ServiceStack.Common.Utils;
+using ServiceStack.Text;
+using ServiceStack.Utils;
 using System.Text;
-using ServiceStack.Common;
 using System.Data.OracleClient;
 
 namespace ServiceStack.OrmLite.Oracle

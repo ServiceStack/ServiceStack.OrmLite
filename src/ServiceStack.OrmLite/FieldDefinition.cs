@@ -11,7 +11,7 @@
 
 using System;
 using System.Reflection;
-using ServiceStack.Common;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
@@ -103,7 +103,7 @@ namespace ServiceStack.OrmLite
 
         public string GetForeignKeyName(ModelDefinition modelDef, ModelDefinition refModelDef, INamingStrategy NamingStrategy, FieldDefinition fieldDef)
         {
-            if(ForeignKeyName.IsNullOrEmpty()) {
+            if (ForeignKeyName.IsNullOrEmpty()) {
                 var modelName = modelDef.IsInSchema
                     ? modelDef.Schema + "_" + NamingStrategy.GetTableName(modelDef.ModelName)
                     : NamingStrategy.GetTableName(modelDef.ModelName);

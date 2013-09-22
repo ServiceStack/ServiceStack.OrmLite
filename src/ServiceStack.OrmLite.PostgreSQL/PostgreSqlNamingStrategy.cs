@@ -1,5 +1,4 @@
-﻿using System;
-using ServiceStack.Common;
+﻿using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.PostgreSQL
 {

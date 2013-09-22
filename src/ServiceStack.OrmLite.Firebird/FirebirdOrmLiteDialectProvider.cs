@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Reflection;
-using ServiceStack.Common.Utils;
+using ServiceStack.Text;
+using ServiceStack.Utils;
 using System.Text;
 using FirebirdSql.Data.FirebirdClient;
-using ServiceStack.Common;
 
 namespace ServiceStack.OrmLite.Firebird
 {

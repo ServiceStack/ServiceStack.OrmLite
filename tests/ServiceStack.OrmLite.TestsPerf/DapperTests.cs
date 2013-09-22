@@ -5,7 +5,7 @@ using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
 using NUnit.Framework;
-using ServiceStack.Common.Utils;
+using ServiceStack.Utils;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.SqlServer;
 using ServiceStack.Text;

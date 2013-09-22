@@ -14,7 +14,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
@@ -22,7 +21,7 @@ namespace ServiceStack.OrmLite
 	{
         public static T CreateInstance<T>()
         {
-            return (T)ReflectionExtensions.CreateInstance<T>();
+            return (T)Text.ReflectionExtensions.CreateInstance<T>();
         }
 
 		public static T ConvertTo<T>(this IDataReader dataReader)

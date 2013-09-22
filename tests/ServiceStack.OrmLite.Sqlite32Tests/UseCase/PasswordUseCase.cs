@@ -7,7 +7,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
 
     using NUnit.Framework;
 
-    using ServiceStack.Common.Utils;
+    using ServiceStack.Utils;
     using ServiceStack.DataAnnotations;
     using ServiceStack.OrmLite.Sqlite;
 
