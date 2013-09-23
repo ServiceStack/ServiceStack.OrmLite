@@ -86,6 +86,7 @@
       <SqliteMonoNet35Files Include="$(LibDir)/Mono.Data.Sqlite.dll"></SqliteMonoNet35Files>
       <SqliteMonoNet40Files Include="$(SrcDir)/ServiceStack.OrmLite.Sqlite/x86/$(Configuration)/ServiceStack.OrmLite.*"></SqliteMonoNet40Files>
       <SqliteMonoNet40Files Include="$(LibDir)/Mono.Data.Sqlite.dll"></SqliteMonoNet40Files>
+      <SqliteMonoContentFiles Include="$(LibDir)/sqlite3.dll"></SqliteMonoContentFiles>
 
       <SqlServerFiles Include="$(SrcDir)/ServiceStack.OrmLite.SqlServer/bin/$(Configuration)/ServiceStack.OrmLite.*"></SqlServerFiles>
 
@@ -145,7 +146,10 @@
 
     <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite.Mono/lib/net35" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite.Mono/lib/net35')" />
     <Copy SourceFiles="%(SqliteMonoNet35Files.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite.Mono/lib/net35" />
-    
+
+    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite.Mono/content" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite.Mono/content')" />
+    <Copy SourceFiles="%(SqliteMonoContentFiles.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite.Mono/content" />
+
     <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite.Mono/servicestack.ormlite.sqlite.mono.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
             LogStandardErrorAsError="true" />
 
