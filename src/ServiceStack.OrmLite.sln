@@ -17,6 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{6CEB3EDE
 		..\NuGet\ServiceStack.OrmLite.Sqlite32\servicestack.ormlite.sqlite32.nuspec = ..\NuGet\ServiceStack.OrmLite.Sqlite32\servicestack.ormlite.sqlite32.nuspec
 		..\NuGet\ServiceStack.OrmLite.Sqlite64\servicestack.ormlite.sqlite64.nuspec = ..\NuGet\ServiceStack.OrmLite.Sqlite64\servicestack.ormlite.sqlite64.nuspec
 		..\NuGet\ServiceStack.OrmLite.SqlServer\servicestack.ormlite.sqlserver.nuspec = ..\NuGet\ServiceStack.OrmLite.SqlServer\servicestack.ormlite.sqlserver.nuspec
+		..\NuGet\ServiceStack.OrmLite.T4\servicestack.ormlite.t4.nuspec = ..\NuGet\ServiceStack.OrmLite.T4\servicestack.ormlite.t4.nuspec
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FirebirdTests", "FirebirdTests", "{AA7D8994-D1CA-484E-B3A4-EF6044CBE9BB}"
