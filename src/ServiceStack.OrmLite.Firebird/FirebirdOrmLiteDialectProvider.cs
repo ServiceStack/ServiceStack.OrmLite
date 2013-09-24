@@ -86,6 +86,9 @@ namespace ServiceStack.OrmLite.Firebird
 				}
 				return new Guid(value.ToString());
 			}
+			
+			if (type == typeof(byte[]) && value.GetType() == typeof(byte[]))
+                		return value;
 
 			try
 			{
