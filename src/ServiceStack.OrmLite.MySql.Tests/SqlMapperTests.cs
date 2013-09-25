@@ -30,7 +30,8 @@ namespace ServiceStack.OrmLite.Tests
                 ConfigurationManager.ConnectionStrings["testDb"].ConnectionString,
                 MySqlDialectProvider.Instance);
 
-            dbFactory.Run(db => db.CreateTable<User>(overwrite: true));
+            using (var db = dbFactory.Open())
+                db.DropAndCreateTable<User>();
         }
         
         [Test]

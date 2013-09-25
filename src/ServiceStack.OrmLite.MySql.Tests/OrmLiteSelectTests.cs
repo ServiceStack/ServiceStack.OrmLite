@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using NUnit.Framework;
-using ServiceStack.Common;
 using ServiceStack.Common.Tests.Models;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.MySql.Tests
 {

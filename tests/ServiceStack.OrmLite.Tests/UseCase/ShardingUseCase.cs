@@ -43,13 +43,16 @@ namespace ServiceStack.OrmLite.Tests.UseCase
             //    SqlServerDialect.Provider);
             
             //Create Master Table in Master DB
-            dbFactory.Run(db => db.CreateTable<MasterRecord>(overwrite: false)); 
+            using (var db = dbFactory.Open())
+                db.CreateTable<MasterRecord>();
+
             NoOfShards.Times(i => {
                 var shardId = "robots-shard" + i;
                 dbFactory.RegisterConnection(shardId, "~/App_Data/{0}.sqlite".Fmt(shardId).MapAbsolutePath(), SqliteDialect.Provider);
 
                 //Create Robot table in Shard
-                dbFactory.OpenDbConnection(shardId).Run(db => db.CreateTable<Robot>(overwrite: false)); 
+                using (var db = dbFactory.Open(shardId))
+                    db.CreateTable<Robot>(); 
             });
 
             var newRobots = NoOfRobots.Times(i => //Create 1000 Robots
@@ -57,7 +60,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
 
             foreach (var newRobot in newRobots)
             {
-                using (IDbConnection db = dbFactory.OpenDbConnection()) //Open Connection to Master DB
+                using (IDbConnection db = dbFactory.Open()) //Open Connection to Master DB
                 {
                     db.Insert(new MasterRecord { Id = Guid.NewGuid(), RobotId = newRobot.Id, RobotName = newRobot.Name });
                     using (IDbConnection robotShard = dbFactory.OpenDbConnection("robots-shard" + newRobot.Id % NoOfShards)) //Shard DB

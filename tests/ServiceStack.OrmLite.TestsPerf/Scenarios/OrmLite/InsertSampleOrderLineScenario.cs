@@ -1,8 +1,8 @@
 using System;
 using System.Data;
 using Northwind.Perf;
-using ServiceStack.Common;
 using ServiceStack.OrmLite.TestsPerf.Model;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.TestsPerf.Scenarios.OrmLite
 {
