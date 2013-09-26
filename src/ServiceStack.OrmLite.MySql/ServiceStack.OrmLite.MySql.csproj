@@ -50,9 +50,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\GlobalAssemblyInfo.cs">
-      <Link>Properties\GlobalAssemblyInfo.cs</Link>
-    </Compile>
     <Compile Include="MySqlDialect.cs" />
     <Compile Include="MySqlDialectProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
