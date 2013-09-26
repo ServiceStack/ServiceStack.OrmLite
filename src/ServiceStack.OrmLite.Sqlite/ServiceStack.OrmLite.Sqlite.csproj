@@ -89,9 +89,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\GlobalAssemblyInfo.cs">
-      <Link>Properties\GlobalAssemblyInfo.cs</Link>
-    </Compile>
     <Compile Include="SqliteDialect.cs" />
     <Compile Include="SqliteOrmLiteDialectProviderBase.cs" />
     <Compile Include="SqliteOrmLiteDialectProvider.cs" />
