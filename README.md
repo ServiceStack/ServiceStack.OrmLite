@@ -112,6 +112,8 @@ List<int> results = db.SqlList<int>("EXEC GetTotalsForWeek 1");
 List<int> results = db.SqlList<int>("EXEC GetTotalsForWeek @weekNo", new { weekNo = 1 });
 
 int result = db.SqlScalar<int>("SELECT 10");
+string result = db.SqlScalar<string>("SELECT 'Hello world'");
+DateTime result = db.SqlScalar<DateTime>("SELECT '2000-01-01'");
 ```
 
 Some more examples can be found in [SqlServerProviderTests](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLite.Tests/SqlServerProviderTests.cs).

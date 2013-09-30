@@ -114,7 +114,7 @@ END;";
             results = db.SqlList<int>("EXEC DummyColumn 10");
             Assert.That(results.Sum(), Is.EqualTo(expected));
 
-            results = db.SqlList<int>("EXEC DummyTable @Times", new Dictionary<string, object> { { "Times", 10 } });
+            results = db.SqlList<int>("EXEC DummyColumn @Times", new Dictionary<string, object> { { "Times", 10 } });
             Assert.That(results.Sum(), Is.EqualTo(expected));
         }
 
@@ -154,7 +154,7 @@ END;";
         }
 
         [Test]
-        public void Can_SqlList_StoredProc_returning_Scalar()
+        public void Can_SqlList_StoredProc_returning_int_Scalar()
         {
             var sql = @"CREATE PROCEDURE dbo.DummyScalar
     @Times integer
@@ -180,6 +180,78 @@ END;";
             Assert.That(result, Is.EqualTo(expected));
 
             result = db.SqlScalar<int>("SELECT 10");
+            Assert.That(result, Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void Can_SqlList_StoredProc_returning_string_Scalar()
+        {
+            var sql = @"CREATE PROCEDURE dbo.DummyScalar
+    @Text nvarchar(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+	SELECT @Text AS Text
+END;";
+            db.ExecuteSql("IF OBJECT_ID('DummyScalar') IS NOT NULL DROP PROC DummyScalar");
+            db.ExecuteSql(sql);
+
+            const string expected = "Hello World";
+
+            var result = db.SqlScalar<string>("EXEC DummyScalar @Text", new
+            {
+                Text = "Hello World"
+            });
+            result.PrintDump();
+            Assert.That(result, Is.EqualTo(expected));
+
+            result = db.SqlScalar<string>("EXEC DummyScalar 'Hello World'");
+            Assert.That(result, Is.EqualTo(expected));
+
+            result = db.SqlScalar<string>("EXEC DummyScalar @Text", new Dictionary<string, object>
+            {
+                { "Text", "Hello World" }
+            });
+            Assert.That(result, Is.EqualTo(expected));
+
+            result = db.SqlScalar<string>("SELECT 'Hello World'");
+            Assert.That(result, Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void Can_SqlList_StoredProc_returning_DateTime_Scalar()
+        {
+            var sql = @"CREATE PROCEDURE dbo.DummyScalar
+    @DateTime datetime
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+	SELECT @DateTime AS SomeDate
+END;";
+            db.ExecuteSql("IF OBJECT_ID('DummyScalar') IS NOT NULL DROP PROC DummyScalar");
+            db.ExecuteSql(sql);
+
+            var expected = new DateTime(2000, 1, 1, 14, 30, 00);
+
+            var result = db.SqlScalar<DateTime>("EXEC DummyScalar @DateTime", new
+            {
+                DateTime = "2000-01-01 14:30:00"
+            });
+            result.PrintDump();
+            Assert.That(result, Is.EqualTo(expected));
+
+            result = db.SqlScalar<DateTime>("EXEC DummyScalar '2000-01-01 14:30:00'");
+            Assert.That(result, Is.EqualTo(expected));
+
+            result = db.SqlScalar<DateTime>("EXEC DummyScalar @DateTime", new Dictionary<string, object>
+            {
+                { "DateTime", "2000-01-01 14:30:00" }
+            });
+            Assert.That(result, Is.EqualTo(expected));
+
+            result = db.SqlScalar<DateTime>("SELECT '2000-01-01 14:30:00'");
             Assert.That(result, Is.EqualTo(expected));
         }
 
