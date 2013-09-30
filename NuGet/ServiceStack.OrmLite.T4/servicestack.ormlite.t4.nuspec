@@ -10,7 +10,7 @@
         Generate POCO models for all existing tables and stored procedures in a database for use with OrmLite.
 	</description> 
     <projectUrl>https://github.com/ServiceStack/ServiceStack.OrmLite</projectUrl>
-    <licenseUrl>https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/LICENSE</licenseUrl>
+    <licenseUrl>https://github.com/ServiceStack/ServiceStack/blob/master/license.txt</licenseUrl>
     <iconUrl>http://www.servicestack.net/logo-100x100.png</iconUrl>
     <tags>T4 SQL Templates CodeGen OrmLite POCO Code-First Orm Schema-less Blobs</tags>
     <language>en-US</language> 
