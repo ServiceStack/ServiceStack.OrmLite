@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 
@@ -27,7 +28,7 @@ namespace ServiceStack.OrmLite
 
         private string Column<T>(string tableName, Expression<Func<T, object>> func, bool withTablePrefix)
         {
-            var lst = ColumnList(tableName, func, withTablePrefix);
+            var lst = ColumnList<T>(tableName, func, withTablePrefix);
             if (lst == null || lst.Count != 1)
                 throw new Exception("Expression should have only one column");
             return lst[0];
@@ -38,7 +39,7 @@ namespace ServiceStack.OrmLite
             List<string> result = new List<string>();
             if (func == null || func.Body == null)
                 return result;
-            PropertyList(tableName, func.Body, result, withTablePrefix);
+            PropertyList<T>(tableName, func.Body, result, withTablePrefix);
             return result;
         }
 
@@ -57,7 +58,7 @@ namespace ServiceStack.OrmLite
             return result;
         }
 
-        private void ProcessUnary(string tableName, UnaryExpression u, List<string> lst, bool withTablePrefix)
+        private void ProcessUnary<T>(string tableName, UnaryExpression u, List<string> lst, bool withTablePrefix)
         {
             if (u.NodeType == ExpressionType.Convert)
             {
@@ -65,27 +66,30 @@ namespace ServiceStack.OrmLite
                 {
                     throw new Exception("Invalid Expression provided");
                 }
-                PropertyList(tableName, u.Operand, lst, withTablePrefix);
+                PropertyList<T>(tableName, u.Operand, lst, withTablePrefix);
                 return;
             }
             throw new Exception("Invalid Expression provided");
         }
 
-        protected void ProcessMemberAccess(string tableName, MemberExpression m, List<string> lst, bool withTablePrefix, string alias = "")
+        protected void ProcessMemberAccess<T>(string tableName, MemberExpression m, List<string> lst, bool withTablePrefix, string alias = "")
         {
             if (m.Expression != null
                 && (m.Expression.NodeType == ExpressionType.Parameter || m.Expression.NodeType == ExpressionType.Convert))
             {
+                var pocoType = typeof(T);
+                var fieldName = pocoType.GetModelDefinition().FieldDefinitions.First(f => f.Name == m.Member.Name).Alias;
+
                 if (withTablePrefix)
-                    lst.Add(string.Format("{0}.{1}{2}", OrmLiteConfig.DialectProvider.GetQuotedTableName(tableName), OrmLiteConfig.DialectProvider.GetQuotedColumnName(m.Member.Name), string.IsNullOrEmpty(alias) ? string.Empty : string.Format(" AS {0}", OrmLiteConfig.DialectProvider.GetQuotedColumnName(alias))));
+                    lst.Add(string.Format("{0}.{1}{2}", OrmLiteConfig.DialectProvider.GetQuotedTableName(tableName), OrmLiteConfig.DialectProvider.GetQuotedColumnName(fieldName), string.IsNullOrEmpty(alias) ? string.Empty : string.Format(" AS {0}", OrmLiteConfig.DialectProvider.GetQuotedColumnName(alias))));
                 else
-                    lst.Add(string.Format("{0}{1}", OrmLiteConfig.DialectProvider.GetQuotedColumnName(m.Member.Name), string.IsNullOrEmpty(alias) ? string.Empty : string.Format(" AS {0}", OrmLiteConfig.DialectProvider.GetQuotedColumnName(alias))));
+                    lst.Add(string.Format("{0}{1}", OrmLiteConfig.DialectProvider.GetQuotedColumnName(fieldName), string.IsNullOrEmpty(alias) ? string.Empty : string.Format(" AS {0}", OrmLiteConfig.DialectProvider.GetQuotedColumnName(alias))));
                 return;
             }
             throw new Exception("Only Members are allowed");
         }
 
-        private void ProcessNew(string tableName, NewExpression nex, List<string> lst, bool withTablePrefix)
+        private void ProcessNew<T>(string tableName, NewExpression nex, List<string> lst, bool withTablePrefix)
         {
             if (nex.Arguments == null || nex.Arguments.Count == 0)
                 throw new Exception("Only column list allowed");
@@ -96,12 +100,12 @@ namespace ServiceStack.OrmLite
                 var arg = nex.Arguments[i];
                 var alias = expressionProperties[i].Name;
 
-                PropertyList(tableName, arg, lst, withTablePrefix, alias);
+                PropertyList<T>(tableName, arg, lst, withTablePrefix, alias);
             }
             return;
         }
 
-        private void PropertyList(string tableName, Expression exp, List<string> lst, bool withTablePrefix, string alias = "")
+        private void PropertyList<T>(string tableName, Expression exp, List<string> lst, bool withTablePrefix, string alias = "")
         {
             if (exp == null)
                 return;
@@ -109,16 +113,16 @@ namespace ServiceStack.OrmLite
             switch (exp.NodeType)
             {
                 case ExpressionType.MemberAccess:
-                    ProcessMemberAccess(tableName, exp as MemberExpression, lst, withTablePrefix, alias);
+                    ProcessMemberAccess<T>(tableName, exp as MemberExpression, lst, withTablePrefix, alias);
                     return;
 
                 case ExpressionType.Convert:
                     var ue = exp as UnaryExpression;
-                    ProcessUnary(tableName, ue, lst, withTablePrefix);
+                    ProcessUnary<T>(tableName, ue, lst, withTablePrefix);
                     return;
 
                 case ExpressionType.New:
-                    ProcessNew(tableName, exp as NewExpression, lst, withTablePrefix);
+                    ProcessNew<T>(tableName, exp as NewExpression, lst, withTablePrefix);
                     return;
             }
             throw new Exception("Only columns are allowed");
