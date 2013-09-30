@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Data;
 using NUnit.Framework;
-using ServiceStack.Common;
-using ServiceStack.Utils;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.UseCase

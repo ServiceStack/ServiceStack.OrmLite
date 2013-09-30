@@ -2,14 +2,11 @@ namespace ServiceStack.OrmLite.Tests.UseCase
 {
     using System;
     using System.Collections.Generic;
-    using System.Data;
     using System.IO;
 
     using NUnit.Framework;
-
-    using ServiceStack.Utils;
-    using ServiceStack.DataAnnotations;
-    using ServiceStack.OrmLite.Sqlite;
+    using DataAnnotations;
+    using Sqlite;
 
     [TestFixture]
     public class PasswordUseCase {

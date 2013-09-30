@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
 using Northwind.Perf;
-using ServiceStack.Utils;
 using ServiceStack.OrmLite.Sqlite;
 
 namespace ServiceStack.OrmLite.TestsPerf.Scenarios.OrmLite

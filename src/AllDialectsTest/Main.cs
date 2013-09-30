@@ -1,11 +1,8 @@
 using System;
 using System.Linq;
-using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
 using System.Data;
-using ServiceStack.Utils;
-using ServiceStack.DataAnnotations;
-using ServiceStack.Common;
+using ServiceStack;
 using ServiceStack.OrmLite;
 
 namespace AllDialectsTest

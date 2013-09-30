@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using Northwind.Perf;
-using ServiceStack.Utils;
 using ServiceStack.OrmLite.TestsPerf.Scenarios.OrmLite;
 
 namespace ServiceStack.OrmLite.TestsPerf.PerfTests

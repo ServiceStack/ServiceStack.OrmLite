@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Reflection;
 using ServiceStack.Text;
-using ServiceStack.Utils;
 using System.Text;
 using FirebirdSql.Data.FirebirdClient;
 
@@ -200,17 +199,17 @@ namespace ServiceStack.OrmLite.Firebird
                         BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy);
 
 					var result = GetNextValue(dbCommand, fieldDef.Sequence, pi.GetValue(objWithProperties,  new object[] { }) );
-					if (pi.PropertyType == typeof(String))
-						ReflectionUtils.SetProperty(objWithProperties, pi,  result.ToString());	
-					else if(pi.PropertyType == typeof(Int16))
-						ReflectionUtils.SetProperty(objWithProperties, pi, Convert.ToInt16(result));	
-					else if(pi.PropertyType == typeof(Int32))
-						ReflectionUtils.SetProperty(objWithProperties, pi, Convert.ToInt32(result));	
-					else if(pi.PropertyType == typeof(Guid))
-						ReflectionUtils.SetProperty(objWithProperties, pi, result);
-					else
-						ReflectionUtils.SetProperty(objWithProperties, pi, Convert.ToInt64(result));
-				}
+                    if (pi.PropertyType == typeof(String))
+                        pi.SetProperty(objWithProperties, result.ToString());
+                    else if (pi.PropertyType == typeof(Int16))
+                        pi.SetProperty(objWithProperties, Convert.ToInt16(result));
+                    else if (pi.PropertyType == typeof(Int32))
+                        pi.SetProperty(objWithProperties, Convert.ToInt32(result));
+                    else if (pi.PropertyType == typeof(Guid))
+                        pi.SetProperty(objWithProperties, result);
+                    else
+                        pi.SetProperty(objWithProperties, Convert.ToInt64(result));
+                }
 				
 				if (sbColumnNames.Length > 0) sbColumnNames.Append(",");
 				if (sbColumnValues.Length > 0) sbColumnValues.Append(",");

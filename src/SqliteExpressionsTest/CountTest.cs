@@ -1,8 +1,8 @@
 ﻿using System;
+using ServiceStack;
 using ServiceStack.OrmLite;
 using System.IO;
 using System.Data;
-using ServiceStack.Utils;
 using ServiceStack.OrmLite.Sqlite;
 
 namespace SqliteExpressionsTest

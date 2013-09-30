@@ -2,7 +2,6 @@ using System;
 using System.Data;
 using System.IO;
 using NUnit.Framework;
-using ServiceStack.Utils;
 using ServiceStack.Logging;
 
 namespace ServiceStack.OrmLite.Tests

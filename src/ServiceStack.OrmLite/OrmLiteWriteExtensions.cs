@@ -16,7 +16,6 @@ using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
-using ServiceStack.Utils;
 using ServiceStack.Logging;
 
 namespace ServiceStack.OrmLite
@@ -489,7 +488,7 @@ namespace ServiceStack.OrmLite
             var firstRow = saveRows.FirstOrDefault();
             if (Equals(firstRow, default(T))) return;
 
-            var defaultIdValue = ReflectionUtils.GetDefaultValue(firstRow.GetId().GetType());
+            var defaultIdValue = AutoMappingUtils.GetDefaultValue(firstRow.GetId().GetType());
 
             var idMap = defaultIdValue != null
                 ? saveRows.Where(x => !defaultIdValue.Equals(x.GetId())).ToDictionary(x => x.GetId())

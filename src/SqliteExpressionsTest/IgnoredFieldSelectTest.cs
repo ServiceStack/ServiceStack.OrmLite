@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using ServiceStack;
 using ServiceStack.OrmLite;
 using System.IO;
 using System.Data;
 using ServiceStack.DataAnnotations;
-using ServiceStack.Utils;
 using ServiceStack.OrmLite.Sqlite;
 
 namespace SqliteExpressionsTest

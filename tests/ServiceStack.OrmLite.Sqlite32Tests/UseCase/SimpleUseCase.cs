@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.IO;
 using NUnit.Framework;
-using ServiceStack.Utils;
 using ServiceStack.OrmLite.Sqlite;
 using ServiceStack.DataAnnotations;
 

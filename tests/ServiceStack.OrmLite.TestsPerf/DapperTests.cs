@@ -5,10 +5,8 @@ using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
 using NUnit.Framework;
-using ServiceStack.Utils;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.SqlServer;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.TestsPerf
 {

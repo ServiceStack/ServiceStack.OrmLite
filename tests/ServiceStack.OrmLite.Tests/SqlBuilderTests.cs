@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using NUnit.Framework;
-using ServiceStack.Utils;
 using ServiceStack.DataAnnotations;
-using ServiceStack.OrmLite.SqlServer;
 
 namespace ServiceStack.OrmLite.Tests
 {
