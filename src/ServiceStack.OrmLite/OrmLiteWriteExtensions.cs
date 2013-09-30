@@ -162,11 +162,7 @@ namespace ServiceStack.OrmLite
         {
             try
             {
-
-                var dialectProvider = OrmLiteConfig.DialectProvider;
-                var tableName = dialectProvider.NamingStrategy.GetTableName(modelDef.ModelName);
-
-                if (OrmLiteConfig.DialectProvider.DoesTableExist(dbCmd, tableName))
+                if (OrmLiteConfig.DialectProvider.DoesTableExist(dbCmd, modelDef))
                 {
                     var dropTableFks = OrmLiteConfig.DialectProvider.GetDropForeignKeyConstraints(modelDef);
                     if (!string.IsNullOrEmpty(dropTableFks))

@@ -872,6 +872,11 @@ namespace ServiceStack.OrmLite
             return false;
         }
 
+        public virtual bool DoesTableExist(IDbCommand dbCmd, ModelDefinition modelDef)
+        {
+            return DoesTableExist(dbCmd, modelDef.ModelName);
+        }
+
         public virtual bool DoesSequenceExist(IDbCommand dbCmd, string sequenceName)
         {
             return true;

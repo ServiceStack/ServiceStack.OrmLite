@@ -166,6 +166,20 @@ namespace ServiceStack.OrmLite.Sqlite
             return result > 0;
         }
 
+        public override bool DoesTableExist(IDbCommand dbCmd, ModelDefinition modelDef)
+        {
+            if (!modelDef.IsInSchema)
+                return DoesTableExist(dbCmd, modelDef.ModelName);
+
+            var sql = "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name = {0}"
+                .SqlFormat(string.Format("{0}_{1}", modelDef.Schema, modelDef.ModelName));
+
+            dbCmd.CommandText = sql;
+            var result = dbCmd.GetLongScalar();
+
+            return result > 0;
+        }
+
         public override string GetColumnDefinition(string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement, bool isNullable, int? fieldLength, int? scale, string defaultValue)
         {
             // http://www.sqlite.org/lang_createtable.html#rowid
