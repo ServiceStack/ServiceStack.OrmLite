@@ -3,7 +3,6 @@ using System.Configuration;
 using System.Data;
 using NUnit.Framework;
 using ServiceStack.Logging;
-using ServiceStack.Logging.Support.Logging;
 
 namespace ServiceStack.OrmLite.MySql.Tests
 {

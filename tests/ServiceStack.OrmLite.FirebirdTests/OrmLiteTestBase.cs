@@ -1,11 +1,7 @@
 using System;
 using System.Data;
-using System.IO;
-using System.Configuration;
 using NUnit.Framework;
-using ServiceStack.Utils;
 using ServiceStack.Logging;
-using ServiceStack.Logging.Support.Logging;
 using ServiceStack.OrmLite.Firebird;
 
 namespace ServiceStack.OrmLite.FirebirdTests

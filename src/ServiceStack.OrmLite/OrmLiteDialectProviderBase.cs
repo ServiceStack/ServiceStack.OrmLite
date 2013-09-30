@@ -458,7 +458,8 @@ namespace ServiceStack.OrmLite
             }
             return sql.ToString();
         }
-
+        
+        // Fmt
         public virtual string ToSelectStatement(Type tableType, string sqlFilter, params object[] filterParams)
         {
             const string SelectStatement = "SELECT";
@@ -487,6 +488,7 @@ namespace ServiceStack.OrmLite
             return sql.ToString();
         }
 
+        /// Fmt
         public virtual string ToInsertRowStatement(IDbCommand command, object objWithProperties, ICollection<string> insertFields = null)
         {
             if (insertFields == null) 
@@ -524,6 +526,7 @@ namespace ServiceStack.OrmLite
             return sql;
         }
 
+        // Param
         public virtual IDbCommand CreateParameterizedInsertStatement(IDbConnection connection, object objWithProperties, ICollection<string> insertFields = null)
         {
             if (insertFields == null) 

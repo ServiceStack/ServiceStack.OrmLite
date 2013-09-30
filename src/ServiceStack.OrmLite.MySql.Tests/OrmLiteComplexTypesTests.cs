@@ -4,7 +4,6 @@ using System.Linq;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
 using ServiceStack.Logging;
-using ServiceStack.Logging.Support.Logging;
 
 namespace ServiceStack.OrmLite.MySql.Tests
 {

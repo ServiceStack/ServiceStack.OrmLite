@@ -1,12 +1,9 @@
-using System;
 using NUnit.Framework;
-using ServiceStack.OrmLite;
 using ServiceStack.OrmLite.Firebird;
 using ServiceStack.OrmLite.MySql;
 using ServiceStack.OrmLite.SqlServer;
 using System.Collections.Generic;
 using ServiceStack.Logging;
-using ServiceStack.Logging.Support.Logging;
 using System.ComponentModel.DataAnnotations;
 
 namespace ServiceStack.OrmLite.DDLTest

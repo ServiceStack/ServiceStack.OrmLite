@@ -4,7 +4,6 @@ using System.IO;
 using NUnit.Framework;
 using ServiceStack.Utils;
 using ServiceStack.Logging;
-using ServiceStack.Logging.Support.Logging;
 using ServiceStack.OrmLite.Sqlite;
 
 namespace ServiceStack.OrmLite.Tests

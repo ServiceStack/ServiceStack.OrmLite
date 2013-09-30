@@ -5,8 +5,6 @@ using System.Linq;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Logging;
-using ServiceStack.Logging.Support.Logging;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.UseCase
 {

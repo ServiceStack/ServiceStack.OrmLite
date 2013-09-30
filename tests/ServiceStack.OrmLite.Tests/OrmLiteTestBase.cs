@@ -3,9 +3,7 @@ using System.Data;
 using System.IO;
 using NUnit.Framework;
 using ServiceStack.Utils;
-using ServiceStack.Data;
 using ServiceStack.Logging;
-using ServiceStack.Logging.Support.Logging;
 
 namespace ServiceStack.OrmLite.Tests
 {
