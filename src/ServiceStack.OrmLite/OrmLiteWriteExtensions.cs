@@ -488,7 +488,7 @@ namespace ServiceStack.OrmLite
             var firstRow = saveRows.FirstOrDefault();
             if (Equals(firstRow, default(T))) return;
 
-            var defaultIdValue = AutoMappingUtils.GetDefaultValue(firstRow.GetId().GetType());
+            var defaultIdValue = firstRow.GetId().GetType().GetDefaultValue();
 
             var idMap = defaultIdValue != null
                 ? saveRows.Where(x => !defaultIdValue.Equals(x.GetId())).ToDictionary(x => x.GetId())
@@ -502,7 +502,7 @@ namespace ServiceStack.OrmLite
 
                 foreach (var saveRow in saveRows)
                 {
-                    var id = IdUtils.GetId(saveRow);
+                    var id = saveRow.GetId();
                     if (id != defaultIdValue && existingRowsMap.ContainsKey(id))
                     {
                         dbCmd.Update(saveRow);
