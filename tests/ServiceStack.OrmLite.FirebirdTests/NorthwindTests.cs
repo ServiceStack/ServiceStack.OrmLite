@@ -29,8 +29,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
                 var sql = jn.ToSql();
                 // here sql should contain Employees.EmployeID instead of Employees.Id
 
-                var result = db.Query<Northwind.Common.DataModel.Employee>(sql); 
-            
+                var result = db.Query<Northwind.Common.DataModel.Employee>(sql);
+                // the generated Sql is ok if the Query doesn't fail
             }
         }
     }
