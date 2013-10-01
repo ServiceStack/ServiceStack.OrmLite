@@ -67,6 +67,7 @@
     <Compile Include="Expressions\StringFunctionTests.cs" />
     <Compile Include="Expressions\TestType.cs" />
     <Compile Include="Expressions\UnaryExpressionsTest.cs" />
+    <Compile Include="NorthwindTests.cs" />
     <Compile Include="TypeWithByteArrayFieldTests.cs" />
     <Compile Include="UseCase\SimpleUseCase.cs" />
     <Compile Include="UseCase\CustomerOrdersUseCase.cs" />
