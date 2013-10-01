@@ -433,12 +433,15 @@ namespace ServiceStack.OrmLite
             }
             else
             {
-                if (isDistinct && typeof(TNewPoco).GetModelDefinition().FieldDefinitions.Count > 0)
+                // improve performance avoiding multiple calls to GetModelDefinition()
+                var modelDef = typeof(TNewPoco).GetModelDefinition();
+
+                if (isDistinct && modelDef.FieldDefinitions.Count > 0)
                     sb.Append(" DISTINCT ");
 
-                foreach (var fi in typeof(TNewPoco).GetModelDefinition().FieldDefinitions)
+                foreach (var fi in modelDef.FieldDefinitions)
                 {
-                    colSB.AppendFormat("{0}{1}", colSB.Length > 0 ? "," : "", String.IsNullOrEmpty(fi.BelongToModelName) ? (fi.FieldName) : ((OrmLiteConfig.DialectProvider.GetQuotedTableName(fi.BelongToModelName) + "." + OrmLiteConfig.DialectProvider.GetQuotedColumnName(fi.FieldName))));
+                    colSB.AppendFormat("{0}{1}", colSB.Length > 0 ? "," : "", (String.IsNullOrEmpty(fi.BelongToModelName) ? (OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef.ModelName)) : (OrmLiteConfig.DialectProvider.GetQuotedTableName(fi.BelongToModelName))) + "." + OrmLiteConfig.DialectProvider.GetQuotedColumnName(fi.FieldName));
                 }
                 if (colSB.Length == 0)
                     colSB.AppendFormat("\"{0}{1}\".*", baseSchema, OrmLiteConfig.DialectProvider.GetQuotedTableName(baseTableName));
