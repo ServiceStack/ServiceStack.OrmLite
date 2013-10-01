@@ -24,7 +24,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
                 jn = jn.Join<Northwind.Common.DataModel.Employee, Northwind.Common.DataModel.EmployeeTerritory>(x => x.Id, x => x.EmployeeId)
                        .LeftJoin<Northwind.Common.DataModel.EmployeeTerritory, Northwind.Common.DataModel.Territory>(x => x.TerritoryId, x => x.Id)
-                       .Where<Northwind.Common.DataModel.Territory>(x => x.TerritoryDescription == "Westboro");
+                       .Where<Northwind.Common.DataModel.Territory>(x => x.TerritoryDescription.Trim() == "Westboro");
                 
                 var sql = jn.ToSql();
                 // here sql should contain Employees.EmployeID instead of Employees.Id
