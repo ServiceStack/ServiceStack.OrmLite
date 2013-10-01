@@ -40,6 +40,32 @@ namespace ServiceStack.OrmLite.Tests.UseCase
             }
         }
 
+        [Test]
+        public void Can_Drop_Tables_With_Schema_In_Sqlite()
+        {
+            OrmLiteConfig.DialectProvider = SqliteDialect.Provider;
+
+            using (IDbConnection db = ":memory:".OpenDbConnection())
+            {
+                db.CreateTable<User>(true);
+
+                var tables =
+                    db.GetFirstColumn<string>
+                        (@"SELECT name FROM sqlite_master WHERE type='table';");
+
+                //sqlite dialect should just concatenate the schema and table name to create a unique table name
+                Assume.That(tables.Contains("Security_Users"));
+
+                db.DropTable<User>();
+
+                var tablesAfterDrop =
+                    db.GetFirstColumn<string>
+                        (@"SELECT name FROM sqlite_master WHERE type='table';");
+
+                Assert.That(tablesAfterDrop.Contains("Security_Users"), Is.False);
+            }
+        }
+
         private void CreateSchemaIfNotExists(IDbConnection db)
         {
             //in Sql2008, CREATE SCHEMA must be the first statement in a batch

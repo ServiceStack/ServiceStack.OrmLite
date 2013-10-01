@@ -98,6 +98,7 @@ namespace ServiceStack.OrmLite
 
         bool DoesTableExist(IDbConnection db, string tableName);
         bool DoesTableExist(IDbCommand dbCmd, string tableName);
+        bool DoesTableExist(IDbCommand dbCmd, ModelDefinition modelDef);
 
         bool DoesSequenceExist(IDbCommand dbCmd, string sequencName);
 
