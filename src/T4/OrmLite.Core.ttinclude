@@ -140,6 +140,7 @@ public class Column
     public bool IsPK;
     public bool IsNullable;
 	public bool IsAutoIncrement;
+	public bool IsComputed;
 	public bool Ignore;
 	public int Size;
 	public int Precision;
@@ -899,6 +900,7 @@ class SqlServerSchemaReader : SchemaReader
 					col.Precision=GetDatatypePrecision(rdr["DataType"].ToString());
 					col.IsNullable=rdr["IsNullable"].ToString()=="YES";
 					col.IsAutoIncrement=((int)rdr["IsIdentity"])==1;
+					col.IsComputed=((int)rdr["IsComputed"])==1;                    
 					result.Add(col);
 				}
 			}
