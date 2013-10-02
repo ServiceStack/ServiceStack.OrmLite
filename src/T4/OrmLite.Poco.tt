@@ -75,6 +75,8 @@ foreach(Column col in from c in tbl.Columns where !c.Ignore select c)
         [StringLength(<#=col.Size#>)]
 <# }  if (col.IsAutoIncrement) { #>
         [AutoIncrement]
+<# }  if (col.IsComputed) { #>
+        [Compute]        
 <# }  if (col.IsNullable != true && col.IsAutoIncrement != true) { #>
         [Required]
 <# } if (!col.IsPK){#>
