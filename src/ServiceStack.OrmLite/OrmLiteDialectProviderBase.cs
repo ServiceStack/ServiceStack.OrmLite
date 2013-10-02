@@ -541,6 +541,7 @@ namespace ServiceStack.OrmLite
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
+                if (fieldDef.IsComputed) continue;
                 if (fieldDef.AutoIncrement)
                         continue;
                     
@@ -582,6 +583,7 @@ namespace ServiceStack.OrmLite
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
+                if (fieldDef.IsComputed) continue;
                 if (fieldDef.AutoIncrement) continue;
                 //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
                 if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name)) continue;
@@ -687,6 +689,7 @@ namespace ServiceStack.OrmLite
             command.CommandTimeout = OrmLiteConfig.CommandTimeout;
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
+                if (fieldDef.IsComputed) continue;
                 try
                 {
                     if (fieldDef.IsPrimaryKey && updateFields.Count == 0)
