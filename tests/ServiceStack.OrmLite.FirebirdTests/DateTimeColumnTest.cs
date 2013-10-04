@@ -54,7 +54,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
                 db.Save(obj);
 
                 var id = (int)db.GetLastInsertId();
-                var target = db.QueryById<Analyze>(id);
+                var target = db.SelectById<Analyze>(id);
 
                 Assert.IsNotNull(target);
                 Assert.AreEqual(id, target.Id);

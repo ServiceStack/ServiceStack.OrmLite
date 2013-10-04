@@ -110,24 +110,24 @@ namespace ServiceStack.OrmLite
             return dbConn.Exec(dbCmd => dbCmd.GetById<T>(idValue));
         }
         
-        public static T QueryById<T>(this IDbConnection dbConn, object value) 
+        public static T SelectById<T>(this IDbConnection dbConn, object value) 
         {
-            return dbConn.Exec(dbCmd => dbCmd.QueryById<T>(value));
+            return dbConn.Exec(dbCmd => dbCmd.SelectById<T>(value));
         }
 
         public static T SingleWhere<T>(this IDbConnection dbConn, string name, object value)
         {
-            return dbConn.Exec(dbCmd => dbCmd.SingleWhere<T>(name, value));
+            return dbConn.Exec(dbCmd => dbCmd.FirstWhere<T>(name, value));
         }
 
         public static T QuerySingle<T>(this IDbConnection dbConn, object anonType)
         {
-            return dbConn.Exec(dbCmd => dbCmd.QuerySingle<T>(anonType));
+            return dbConn.Exec(dbCmd => dbCmd.First<T>(anonType));
         }
 
         public static T QuerySingle<T>(this IDbConnection dbConn, string sql, object anonType = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.QuerySingle<T>(sql, anonType));
+            return dbConn.Exec(dbCmd => dbCmd.First<T>(sql, anonType));
         }
 
         public static List<T> Where<T>(this IDbConnection dbConn, string name, object value)
@@ -177,12 +177,12 @@ namespace ServiceStack.OrmLite
 
         public static T QueryScalar<T>(this IDbConnection dbConn, object anonType)
         {
-            return dbConn.Exec(dbCmd => dbCmd.QueryScalar<T>(anonType));
+            return dbConn.Exec(dbCmd => dbCmd.Scalar<T>(anonType));
         }
 
         public static T QueryScalar<T>(this IDbConnection dbConn, string sql, object anonType = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.QueryScalar<T>(sql, anonType));
+            return dbConn.Exec(dbCmd => dbCmd.Scalar<T>(sql, anonType));
         }
         
         public static List<T> SqlList<T>(this IDbConnection dbConn, string sql)
@@ -212,27 +212,27 @@ namespace ServiceStack.OrmLite
         
         public static List<T> ByExampleWhere<T>(this IDbConnection dbConn, object anonType)
         {
-            return dbConn.Exec(dbCmd => dbCmd.ByExampleWhere<T>(anonType));
+            return dbConn.Exec(dbCmd => dbCmd.SelectByExample<T>(anonType));
         }
 
         public static List<T> ByExampleWhere<T>(this IDbConnection dbConn, object anonType, bool excludeNulls)
         {
-            return dbConn.Exec(dbCmd => dbCmd.ByExampleWhere<T>(anonType, excludeNulls));
+            return dbConn.Exec(dbCmd => dbCmd.SelectByExample<T>(anonType, excludeNulls));
         }
 
         public static List<T> QueryByExample<T>(this IDbConnection dbConn, string sql, object anonType = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.QueryByExample<T>(sql, anonType));
+            return dbConn.Exec(dbCmd => dbCmd.SelectByExample<T>(sql, anonType));
         }
 
         public static IEnumerable<T> QueryEach<T>(this IDbConnection dbConn, string sql, object anonType = null)
         {
-            return dbConn.ExecLazy(dbCmd => dbCmd.QueryEach<T>(sql, anonType));
+            return dbConn.ExecLazy(dbCmd => dbCmd.Lazy<T>(sql, anonType));
         }
 
         public static IEnumerable<T> EachWhere<T>(this IDbConnection dbConn, object anonType)
         {
-            return dbConn.ExecLazy(dbCmd => dbCmd.EachWhere<T>(anonType));
+            return dbConn.ExecLazy(dbCmd => dbCmd.LazyWhere<T>(anonType));
         }
 
         public static T GetByIdOrDefault<T>(this IDbConnection dbConn, object idValue)

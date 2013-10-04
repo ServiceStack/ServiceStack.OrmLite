@@ -384,7 +384,7 @@ namespace ServiceStack.OrmLite
         }
 
         // Param
-        internal static T QueryById<T>(this IDbCommand dbCmd, object value)
+        internal static T SelectById<T>(this IDbCommand dbCmd, object value)
 		{
             if (!dbCmd.CanReuseParam<T>(ModelDefinition<T>.PrimaryKeyName))
 				SetFilter<T>(dbCmd, ModelDefinition<T>.PrimaryKeyName, value);
@@ -395,7 +395,7 @@ namespace ServiceStack.OrmLite
 				return dbReader.ConvertTo<T>();
 		}
 
-        internal static T SingleWhere<T>(this IDbCommand dbCmd, string name, object value)
+        internal static T FirstWhere<T>(this IDbCommand dbCmd, string name, object value)
 		{
             if (!dbCmd.CanReuseParam<T>(name))
 				SetFilter<T>(dbCmd, name, value);
@@ -406,9 +406,9 @@ namespace ServiceStack.OrmLite
 				return dbReader.ConvertTo<T>();
 		}
 
-        internal static T QuerySingle<T>(this IDbCommand dbCmd, object anonType)
+        internal static T First<T>(this IDbCommand dbCmd, object anonType)
 		{
-			if (IsScalar<T>()) return QueryScalar<T>(dbCmd, anonType);
+			if (IsScalar<T>()) return Scalar<T>(dbCmd, anonType);
 
             dbCmd.SetFilters<T>(anonType, excludeNulls: false);
 
@@ -416,9 +416,9 @@ namespace ServiceStack.OrmLite
 				return dbReader.ConvertTo<T>();
 		}
 
-        internal static T QuerySingle<T>(this IDbCommand dbCmd, string sql, object anonType)
+        internal static T First<T>(this IDbCommand dbCmd, string sql, object anonType)
 		{
-			if (IsScalar<T>()) return QueryScalar<T>(dbCmd, sql, anonType);
+			if (IsScalar<T>()) return Scalar<T>(dbCmd, sql, anonType);
 
             dbCmd.SetParameters<T>(anonType, excludeNulls: false);
             dbCmd.CommandText = OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sql);
@@ -488,7 +488,7 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecuteNonQuery();
         }
 
-	    internal static T QueryScalar<T>(this IDbCommand dbCmd, object anonType)
+	    internal static T Scalar<T>(this IDbCommand dbCmd, object anonType)
 		{
             dbCmd.SetFilters<T>(anonType, excludeNulls: false);
 
@@ -496,7 +496,7 @@ namespace ServiceStack.OrmLite
 				return GetScalar<T>(dbReader);
 		}
 
-	    internal static T QueryScalar<T>(this IDbCommand dbCmd, string sql, object anonType = null)
+	    internal static T Scalar<T>(this IDbCommand dbCmd, string sql, object anonType = null)
 		{
             if (anonType != null) dbCmd.SetParameters<T>(anonType, excludeNulls: false);
             dbCmd.CommandText = OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sql);
@@ -545,12 +545,12 @@ namespace ServiceStack.OrmLite
                 return GetScalar<T>(dbReader);
         }
 
-        internal static List<T> ByExampleWhere<T>(this IDbCommand dbCmd, object anonType)
+        internal static List<T> SelectByExample<T>(this IDbCommand dbCmd, object anonType)
         {
-            return ByExampleWhere<T>(dbCmd, anonType, true);
+            return SelectByExample<T>(dbCmd, anonType, true);
         }
 
-        internal static List<T> ByExampleWhere<T>(this IDbCommand dbCmd, object anonType, bool excludeNulls)
+        internal static List<T> SelectByExample<T>(this IDbCommand dbCmd, object anonType, bool excludeNulls)
 		{
             dbCmd.SetFilters<T>(anonType, excludeNulls);
 
@@ -558,7 +558,7 @@ namespace ServiceStack.OrmLite
 				return dbReader.ConvertToList<T>();
 		}
 
-	    internal static List<T> QueryByExample<T>(this IDbCommand dbCmd, string sql, object anonType = null)
+	    internal static List<T> SelectByExample<T>(this IDbCommand dbCmd, string sql, object anonType = null)
 		{
             if (anonType != null) dbCmd.SetParameters<T>(anonType, excludeNulls: false);
             dbCmd.CommandText = OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sql);
@@ -567,7 +567,7 @@ namespace ServiceStack.OrmLite
 				return dbReader.ConvertToList<T>();
 		}
 
-	    internal static IEnumerable<T> QueryEach<T>(this IDbCommand dbCmd, string sql, object anonType = null)
+	    internal static IEnumerable<T> Lazy<T>(this IDbCommand dbCmd, string sql, object anonType = null)
 		{
             if (anonType != null) dbCmd.SetFilters<T>(anonType);
 
@@ -584,7 +584,7 @@ namespace ServiceStack.OrmLite
 			}
 		}
 
-	    internal static IEnumerable<T> EachWhere<T>(this IDbCommand dbCmd, object anonType)
+	    internal static IEnumerable<T> LazyWhere<T>(this IDbCommand dbCmd, object anonType)
 		{
 			dbCmd.SetFilters<T>(anonType);
 

@@ -20,7 +20,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 
 				rowIds.ForEach(x => db.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
 
-				var row = db.QueryById<ModelWithFieldsOfDifferentTypes>(1);
+				var row = db.SelectById<ModelWithFieldsOfDifferentTypes>(1);
 
 				Assert.That(row.Id, Is.EqualTo(1));
 			}
@@ -37,7 +37,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 
 				rowIds.ForEach(x => db.Insert(ModelWithOnlyStringFields.Create(x)));
 
-				var row = db.QueryById<ModelWithOnlyStringFields>("id-1");
+				var row = db.SelectById<ModelWithOnlyStringFields>("id-1");
 
 				Assert.That(row.Id, Is.EqualTo("id-1"));
 			}

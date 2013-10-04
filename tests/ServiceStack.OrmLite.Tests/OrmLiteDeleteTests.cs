@@ -94,7 +94,7 @@ namespace ServiceStack.OrmLite.Tests
 
             db.Insert(row);
 
-            db.Delete<ModelWithFieldsOfDifferentTypes>(where: "LongId <= {0}".SqlFormat(row.LongId));
+            db.DeleteFmt<ModelWithFieldsOfDifferentTypes>(where: "LongId <= {0}".SqlFormat(row.LongId));
 
             var dbRow = db.GetByIdOrDefault<ModelWithFieldsOfDifferentTypes>(row.Id);
 
@@ -108,7 +108,7 @@ namespace ServiceStack.OrmLite.Tests
 
             db.Insert(row);
 
-            db.Delete(table: "ModelWithFieldsOfDifferentTypes", where: "LongId <= {0}".SqlFormat(row.LongId));
+            db.DeleteFmt(table: "ModelWithFieldsOfDifferentTypes", where: "LongId <= {0}".SqlFormat(row.LongId));
 
             var dbRow = db.GetByIdOrDefault<ModelWithFieldsOfDifferentTypes>(row.Id);
 

@@ -97,7 +97,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
 				var last = db.GetLastInsertId();
 				Assert.AreEqual(5000000001L, last);
 
-				var obj2 = db.QueryById<User2>(last);
+				var obj2 = db.SelectById<User2>(last);
 				Assert.AreEqual(obj1.Value, obj2.Value);
 			}
 			File.Delete(path);
