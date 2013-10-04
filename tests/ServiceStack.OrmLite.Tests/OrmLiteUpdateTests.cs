@@ -89,7 +89,7 @@ namespace ServiceStack.OrmLite.Tests
             db.Insert(row);
             row.Name = "UpdatedName";
 
-            db.Update<ModelWithFieldsOfDifferentTypes>(set: "NAME = {0}".SqlFormat(row.Name), where: "LongId <= {0}".SqlFormat(row.LongId));
+            db.UpdateFmt<ModelWithFieldsOfDifferentTypes>(set: "NAME = {0}".SqlFormat(row.Name), where: "LongId <= {0}".SqlFormat(row.LongId));
 
             var dbRow = db.GetById<ModelWithFieldsOfDifferentTypes>(row.Id);
             Console.WriteLine(dbRow.Dump());
@@ -104,7 +104,7 @@ namespace ServiceStack.OrmLite.Tests
             db.Insert(row);
             row.Name = "UpdatedName";
 
-            db.Update(table: "ModelWithFieldsOfDifferentTypes",
+            db.UpdateFmt(table: "ModelWithFieldsOfDifferentTypes",
                 set: "NAME = {0}".SqlFormat(row.Name), where: "LongId <= {0}".SqlFormat(row.LongId));
 
             var dbRow = db.GetById<ModelWithFieldsOfDifferentTypes>(row.Id);

@@ -106,11 +106,11 @@ namespace ServiceStack.OrmLite.Tests
             db.GetLastSql().Print();
 
 
-            db.Update<Person>(set: "FirstName = {0}".Params("JJ"), where: "LastName = {0}".Params("Hendrix"));
+            db.UpdateFmt<Person>(set: "FirstName = {0}".Params("JJ"), where: "LastName = {0}".Params("Hendrix"));
             Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET FirstName = 'JJ' WHERE LastName = 'Hendrix'"));
             db.GetLastSql().Print();
 
-            db.Update(table: "Person", set: "FirstName = {0}".Params("JJ"), where: "LastName = {0}".Params("Hendrix"));
+            db.UpdateFmt(table: "Person", set: "FirstName = {0}".Params("JJ"), where: "LastName = {0}".Params("Hendrix"));
             Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET FirstName = 'JJ' WHERE LastName = 'Hendrix'"));
             db.GetLastSql().Print();
 
@@ -132,11 +132,11 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM \"Person\" WHERE (\"Age\" = 27)"));
             db.GetLastSql().Print();
 
-            db.Delete<Person>(where: "Age = {0}".Params(27));
+            db.DeleteFmt<Person>(where: "Age = {0}".Params(27));
             Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM \"Person\" WHERE Age = 27"));
             db.GetLastSql().Print();
 
-            db.Delete(table: "Person", where: "Age = {0}".Params(27));
+            db.DeleteFmt(table: "Person", where: "Age = {0}".Params(27));
             Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM \"Person\" WHERE Age = 27"));
             db.GetLastSql().Print();
         }
@@ -151,7 +151,7 @@ namespace ServiceStack.OrmLite.Tests
 
             //db.Query<Person>(q => q);
             //db.GetLastSql().Print();
-            db.QueryById<Person>(1).PrintDump();
+            db.SelectById<Person>(1).PrintDump();
             db.GetLastSql().Print();
             
             db.GetByIdParam<Person>(1).PrintDump();
@@ -201,7 +201,7 @@ namespace ServiceStack.OrmLite.Tests
         public void benchmark()
         {
             Measure(() => db.GetByIdParam<Person>(1), times: 1).ToString().Print("Test 2: {0}");
-            Measure(() => db.QueryById<Person>(1), times: 1).ToString().Print("Test 1: {0}");
+            Measure(() => db.SelectById<Person>(1), times: 1).ToString().Print("Test 1: {0}");
         }
 
     }

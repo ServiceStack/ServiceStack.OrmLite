@@ -143,7 +143,7 @@ namespace ServiceStack.OrmLite
         ///   dbCmd.Update&lt;Person&gt;(set:"FirstName = {0}".Params("JJ"), where:"LastName = {0}".Params("Hendrix"));
         ///   UPDATE "Person" SET FirstName = 'JJ' WHERE LastName = 'Hendrix'
         /// </summary>
-        public static int Update<T>(this IDbCommand dbCmd, string set = null, string where = null)
+        public static int UpdateFmt<T>(this IDbCommand dbCmd, string set = null, string where = null)
         {
             return dbCmd.Update(typeof(T).GetModelDefinition().ModelName, set, where);
         }
@@ -241,9 +241,9 @@ namespace ServiceStack.OrmLite
         ///   dbCmd.Delete&lt;Person&gt;(where:"Age = {0}".Params(27));
         ///   DELETE FROM "Person" WHERE Age = 27
         /// </summary>
-        public static int Delete<T>(this IDbCommand dbCmd, string where = null)
+        public static int DeleteFmt<T>(this IDbCommand dbCmd, string where = null)
         {
-            return dbCmd.Delete(typeof(T).GetModelDefinition().ModelName, where);
+            return dbCmd.DeleteFmt(typeof(T).GetModelDefinition().ModelName, where);
         }
 
         /// <summary>
@@ -252,7 +252,7 @@ namespace ServiceStack.OrmLite
         ///   dbCmd.Delete(table:"Person", where: "Age = {0}".Params(27));
         ///   DELETE FROM "Person" WHERE Age = 27
         /// </summary>
-        public static int Delete(this IDbCommand dbCmd, string table = null, string where = null)
+        public static int DeleteFmt(this IDbCommand dbCmd, string table = null, string where = null)
         {
             if (table == null)
                 throw new ArgumentNullException("table");

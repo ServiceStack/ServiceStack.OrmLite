@@ -38,12 +38,12 @@ namespace ServiceStack.OrmLite
             return dbConn.Exec(dbCmd => dbCmd.Update(updateOnly, where));
         }
 
-        public static int Update<T>(this IDbConnection dbConn, string set = null, string where = null)
+        public static int UpdateFmt<T>(this IDbConnection dbConn, string set = null, string where = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Update<T>(set, where));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateFmt<T>(set, where));
         }
 
-        public static int Update(this IDbConnection dbConn, string table = null, string set = null, string where = null)
+        public static int UpdateFmt(this IDbConnection dbConn, string table = null, string set = null, string where = null)
         {
             return dbConn.Exec(dbCmd => dbCmd.Update(table, set, where));
         }
@@ -73,14 +73,14 @@ namespace ServiceStack.OrmLite
             return dbConn.Exec(dbCmd => dbCmd.Delete(where));
         }
 
-        public static int Delete<T>(this IDbConnection dbConn, string where = null)
+        public static int DeleteFmt<T>(this IDbConnection dbConn, string where = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Delete<T>(where));
+            return dbConn.Exec(dbCmd => dbCmd.DeleteFmt<T>(where));
         }
 
-        public static int Delete(this IDbConnection dbConn, string table = null, string where = null)
+        public static int DeleteFmt(this IDbConnection dbConn, string table = null, string where = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Delete(table, where));
+            return dbConn.Exec(dbCmd => dbCmd.DeleteFmt(table, where));
         }         
     }
 }
