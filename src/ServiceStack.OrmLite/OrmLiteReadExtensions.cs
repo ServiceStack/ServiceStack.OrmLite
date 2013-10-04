@@ -4,9 +4,9 @@
 // Authors:
 //   Demis Bellot (demis.bellot@gmail.com)
 //
-// Copyright 2010 Liquidbit Ltd.
+// Copyright 2013 Service Stack LLC. All Rights Reserved.
 //
-// Licensed under the same terms of ServiceStack: new BSD license.
+// Licensed under the same terms of ServiceStack.
 //
 
 using System;
@@ -345,12 +345,48 @@ namespace ServiceStack.OrmLite
 			return OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sb.ToString());
 		}
 
+        internal static T GetByIdOrDefault<T>(this IDbCommand dbCmd, object idValue)
+        {
+            return FirstOrDefault<T>(dbCmd, OrmLiteConfig.DialectProvider.GetQuotedColumnName(ModelDefinition<T>.PrimaryKeyName) + " = {0}".SqlFormat(idValue));
+        }
+
+        internal static List<T> GetByIds<T>(this IDbCommand dbCmd, IEnumerable idValues)
+        {
+            var sql = idValues.GetIdsInSql();
+            return sql == null
+                ? new List<T>()
+                : Select<T>(dbCmd, OrmLiteConfig.DialectProvider.GetQuotedColumnName(ModelDefinition<T>.PrimaryKeyName) + " IN (" + sql + ")");
+        }
+
+        internal static T GetByIdParam<T>(this IDbCommand dbCmd, object id)
+        {
+            var modelDef = ModelDefinition<T>.Definition;
+            var idParamString = OrmLiteConfig.DialectProvider.ParamString + "0";
+
+            var sql = string.Format("{0} WHERE {1} = {2}",
+                OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), "", null),
+                OrmLiteConfig.DialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName),
+                idParamString);
+
+            var idParam = dbCmd.CreateParameter();
+            idParam.ParameterName = idParamString;
+            idParam.Value = id;
+            var paramsToInsert = new List<IDataParameter> {idParam};
+
+            return dbCmd.ExecReader(sql, paramsToInsert).ConvertTo<T>();
+        }
+
+        internal static bool CanReuseParam<T>(this IDbCommand dbCmd, string paramName)
+        {
+            return (dbCmd.Parameters.Count == 1
+                    && ((IDbDataParameter) dbCmd.Parameters[0]).ParameterName == paramName
+                    && lastQueryType != typeof(T));
+        }
+
         // Param
         internal static T QueryById<T>(this IDbCommand dbCmd, object value)
 		{
-			if (dbCmd.Parameters.Count != 1
-				|| ((IDbDataParameter)dbCmd.Parameters[0]).ParameterName != ModelDefinition<T>.PrimaryKeyName
-				|| lastQueryType != typeof(T))
+            if (!dbCmd.CanReuseParam<T>(ModelDefinition<T>.PrimaryKeyName))
 				SetFilter<T>(dbCmd, ModelDefinition<T>.PrimaryKeyName, value);
 
 			((IDbDataParameter)dbCmd.Parameters[0]).Value = value;
@@ -361,8 +397,7 @@ namespace ServiceStack.OrmLite
 
         internal static T SingleWhere<T>(this IDbCommand dbCmd, string name, object value)
 		{
-			if (dbCmd.Parameters.Count != 1 || ((IDbDataParameter)dbCmd.Parameters[0]).ParameterName != name
-				|| lastQueryType != typeof(T))
+            if (!dbCmd.CanReuseParam<T>(name))
 				SetFilter<T>(dbCmd, name, value);
 
 			((IDbDataParameter)dbCmd.Parameters[0]).Value = value;
@@ -394,9 +429,8 @@ namespace ServiceStack.OrmLite
 
         internal static List<T> Where<T>(this IDbCommand dbCmd, string name, object value)
 		{
-			if (dbCmd.Parameters.Count != 1 || ((IDbDataParameter)dbCmd.Parameters[0]).ParameterName != name
-				|| lastQueryType != typeof(T))
-				SetFilter<T>(dbCmd, name, value);
+            if (!dbCmd.CanReuseParam<T>(name))
+                SetFilter<T>(dbCmd, name, value);
 
 			((IDbDataParameter)dbCmd.Parameters[0]).Value = value;
 
@@ -566,38 +600,6 @@ namespace ServiceStack.OrmLite
 				}
 			}
 		}
-
-	    internal static T GetByIdOrDefault<T>(this IDbCommand dbCmd, object idValue)
-		{
-			return FirstOrDefault<T>(dbCmd, OrmLiteConfig.DialectProvider.GetQuotedColumnName(ModelDefinition<T>.PrimaryKeyName) + " = {0}".SqlFormat(idValue));
-		}
-
-	    internal static List<T> GetByIds<T>(this IDbCommand dbCmd, IEnumerable idValues)
-		{
-			var sql = idValues.GetIdsInSql();
-			return sql == null
-				? new List<T>()
-				: Select<T>(dbCmd, OrmLiteConfig.DialectProvider.GetQuotedColumnName(ModelDefinition<T>.PrimaryKeyName) + " IN (" + sql + ")");
-		}
-
-	    internal static T GetByIdParam<T>(this IDbCommand dbCmd, object id)
-        {
-            var modelDef = ModelDefinition<T>.Definition;
-            var idParamString = OrmLiteConfig.DialectProvider.ParamString + "0";
-
-            var sql = string.Format("{0} WHERE {1} = {2}",
-                OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), "", null),
-                OrmLiteConfig.DialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName),
-                idParamString);
-
-            var idParam = dbCmd.CreateParameter();
-            idParam.ParameterName = idParamString;
-            idParam.Value = id;
-            List<IDataParameter> paramsToInsert = new List<IDataParameter>();
-            paramsToInsert.Add(idParam);
-
-            return dbCmd.ExecReader(sql, paramsToInsert).ConvertTo<T>();
-        }
 
 	    internal static T GetScalar<T>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
 		{

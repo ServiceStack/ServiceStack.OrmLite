@@ -1,9 +1,9 @@
 ﻿using System;
 using ServiceStack.Model;
 using ServiceStack.DataAnnotations;
-using System.ComponentModel.DataAnnotations;
 
-namespace Northwind.Common.DataModel{
+namespace Northwind.Common.DataModel
+{
 	
 	public class Region : IHasIntId, IHasId<int>
 	{

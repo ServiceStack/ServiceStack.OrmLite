@@ -1,6 +1,6 @@
 ﻿using System;
 using ServiceStack.Model;
-using System.ComponentModel.DataAnnotations;
+
 using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.Common.Tests.Models{

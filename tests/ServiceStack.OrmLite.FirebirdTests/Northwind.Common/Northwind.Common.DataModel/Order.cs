@@ -1,9 +1,9 @@
 using System;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Model;
-using System.ComponentModel.DataAnnotations;
 
-namespace Northwind.Common.DataModel{
+namespace Northwind.Common.DataModel
+{
 
 	[Alias("Orders")]
 	public class Order : IHasIntId, IHasId<int>

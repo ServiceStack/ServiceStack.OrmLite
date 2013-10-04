@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using System.ComponentModel.DataAnnotations;
 using System.Data;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite;

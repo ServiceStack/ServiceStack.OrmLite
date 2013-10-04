@@ -94,15 +94,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BelongToAttribute.cs" />
     <Compile Include="Expressions\ExpressionVisitor.cs" />
     <Compile Include="Expressions\ParameterRebinder.cs" />
     <Compile Include="Expressions\PredicateBuilder.cs" />
     <Compile Include="Expressions\ReadConnectionExtensions.cs" />
     <Compile Include="Expressions\WriteConnectionExtensions.cs" />
-    <Compile Include="ForeignKeyAttribute.cs" />
     <Compile Include="JoinSqlBuilder.cs" />
     <Compile Include="OrmLiteConnectionWrapper.cs" />
+    <Compile Include="OrmLiteDialectProviderExtensions.cs" />
     <Compile Include="OrmLiteReadConnectionExtensions.cs" />
     <Compile Include="OrmLiteSPStatement.cs" />
     <Compile Include="OrmLiteTransaction.cs" />
@@ -128,14 +127,8 @@
     <Compile Include="OrmLiteUtilExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReflectionPropertyInvoker.cs" />
-    <Compile Include="SchemaAttribute.cs" />
     <Compile Include="SqlBuilder.cs" />
     <Compile Include="SqlInValues.cs" />
-    <Compile Include="ComputeAttribute.cs" />
-    <Compile Include="IgnoreAttribute.cs" />
-    <Compile Include="PrimaryKeyAttribute.cs" />
-    <Compile Include="SequenceAttribute.cs" />
-    <Compile Include="DecimalLengthAttribute.cs" />
     <Compile Include="Expressions\ReadExtensions.cs" />
     <Compile Include="Expressions\SqlExpressionVisitor.cs" />
     <Compile Include="Expressions\WriteExtensions.cs" />

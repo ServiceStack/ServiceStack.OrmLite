@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
 using System.Data;
 using ServiceStack.DataAnnotations;
@@ -10,7 +9,8 @@ using ServiceStack.OrmLite.MySql;
 
 namespace MySqlExpressionsTest
 {
-	public class Author{
+	public class Author
+    {
 		public Author(){}
 		[AutoIncrement]
 		[Alias("AuthorID")]

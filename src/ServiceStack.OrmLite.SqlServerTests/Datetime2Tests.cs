@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.SqlServer;
@@ -17,7 +14,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
 			var dbFactory = new OrmLiteConnectionFactory(base.ConnectionString, SqlServerOrmLiteDialectProvider.Instance);
 
 			//change to datetime2 - check for higher range and precision
-			(SqlServerOrmLiteDialectProvider.Instance as SqlServerOrmLiteDialectProvider).UseDatetime2(true);
+			SqlServerOrmLiteDialectProvider.Instance.UseDatetime2(true);
 
 			using(var conn = dbFactory.OpenDbConnection()) {
 				var test_object_ValidForDatetime2 = Table_for_datetime2_tests.get_test_object_ValidForDatetime2();

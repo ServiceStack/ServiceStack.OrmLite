@@ -1,8 +1,9 @@
 using System;
-using System.ComponentModel.DataAnnotations;
+
 using System.Data;
 using System.Linq.Expressions;
 using NUnit.Framework;
+using ServiceStack.DataAnnotations;
 using ServiceStack.Model;
 
 namespace ServiceStack.OrmLite.MySql.Tests.Expressions

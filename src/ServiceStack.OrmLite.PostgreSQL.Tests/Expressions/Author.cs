@@ -1,5 +1,4 @@
 using System;
-using System.ComponentModel.DataAnnotations;
 using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions

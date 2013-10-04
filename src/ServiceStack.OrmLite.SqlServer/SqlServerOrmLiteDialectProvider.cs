@@ -13,7 +13,7 @@ namespace ServiceStack.OrmLite.SqlServer
 	{
 		public static SqlServerOrmLiteDialectProvider Instance = new SqlServerOrmLiteDialectProvider();
 
-		private static DateTime timeSpanOffset = new DateTime(1900,01,01);
+		private static readonly DateTime timeSpanOffset = new DateTime(1900,01,01);
 
 		public SqlServerOrmLiteDialectProvider()
 		{

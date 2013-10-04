@@ -4,9 +4,9 @@
 // Authors:
 //   Demis Bellot (demis.bellot@gmail.com)
 //
-// Copyright 2010 Liquidbit Ltd.
+// Copyright 2013 Service Stack LLC. All Rights Reserved.
 //
-// Licensed under the same terms of ServiceStack: new BSD license.
+// Licensed under the same terms of ServiceStack.
 //
 
 using System;
@@ -42,15 +42,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        internal static void CreateTable<T>(this IDbCommand dbCmd)
-            where T : new()
-        {
-            var tableType = typeof(T);
-            CreateTable(dbCmd, false, tableType);
-        }
-
-        internal static void CreateTable<T>(this IDbCommand dbCmd, bool overwrite)
-            where T : new()
+        internal static void CreateTable<T>(this IDbCommand dbCmd, bool overwrite = true)
         {
             var tableType = typeof(T);
             CreateTable(dbCmd, overwrite, tableType);
@@ -140,7 +132,7 @@ namespace ServiceStack.OrmLite
         }
 
         internal static void DropTable<T>(this IDbCommand dbCmd)
-            where T : new()
+            
         {
             DropTable(dbCmd, ModelDefinition<T>.Definition);
         }
