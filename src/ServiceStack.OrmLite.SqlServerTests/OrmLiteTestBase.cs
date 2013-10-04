@@ -3,7 +3,6 @@ using System.Configuration;
 using System.Data;
 using NUnit.Framework;
 using ServiceStack.Logging;
-using ServiceStack.OrmLite.SqlServer;
 
 namespace ServiceStack.OrmLite.SqlServerTests
 {
@@ -16,7 +15,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
         {
             LogManager.LogFactory = new ConsoleLogFactory();
 
-            OrmLiteConfig.DialectProvider = SqlServerOrmLiteDialectProvider.Instance;
+            OrmLiteConfig.DialectProvider = SqlServerDialect.Provider;
             ConnectionString = ConfigurationManager.ConnectionStrings["testDb"].ConnectionString;
         }
 

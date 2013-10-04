@@ -1,9 +1,9 @@
 ﻿using ServiceStack.DataAnnotations;
 using ServiceStack.Model;
-using System.ComponentModel.DataAnnotations;
 using System;
 
-namespace Northwind.Common.DataModel{
+namespace Northwind.Common.DataModel
+{
 	[Alias("Customers")]
 	public class Customer : IHasStringId, IHasId<string>
 	{

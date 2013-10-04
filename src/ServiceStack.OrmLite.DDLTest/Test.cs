@@ -1,10 +1,11 @@
 using NUnit.Framework;
+using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.Firebird;
 using ServiceStack.OrmLite.MySql;
 using ServiceStack.OrmLite.SqlServer;
 using System.Collections.Generic;
 using ServiceStack.Logging;
-using System.ComponentModel.DataAnnotations;
+
 
 namespace ServiceStack.OrmLite.DDLTest
 {

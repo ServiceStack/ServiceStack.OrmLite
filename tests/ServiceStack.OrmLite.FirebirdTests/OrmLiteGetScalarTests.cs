@@ -6,7 +6,7 @@ using ServiceStack.Common;
 using ServiceStack.Common.Tests.Models;
 using ServiceStack.Text;
 using ServiceStack.DataAnnotations;
-using System.ComponentModel.DataAnnotations;
+
 
 namespace ServiceStack.OrmLite.FirebirdTests
 {

@@ -4,18 +4,16 @@
 // Authors:
 //   Demis Bellot (demis.bellot@gmail.com)
 //
-// Copyright 2010 Liquidbit Ltd.
+// Copyright 2013 Service Stack LLC. All Rights Reserved.
 //
-// Licensed under the same terms of ServiceStack: new BSD license.
+// Licensed under the same terms of ServiceStack.
 //
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using ServiceStack.Common;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Text;
 
@@ -85,19 +83,18 @@ namespace ServiceStack.OrmLite
             {
                 var sequenceAttr = propertyInfo.FirstAttribute<SequenceAttribute>();
                 var computeAttr= propertyInfo.FirstAttribute<ComputeAttribute>();
-                var pkAttribute = propertyInfo.FirstAttribute<PrimaryKeyAttribute>();
                 var decimalAttribute = propertyInfo.FirstAttribute<DecimalLengthAttribute>();
                 var belongToAttribute = propertyInfo.FirstAttribute<BelongToAttribute>();
                 var isFirst = i++ == 0;
 
                 var isPrimaryKey = propertyInfo.Name == OrmLiteConfig.IdField || (!hasIdField && isFirst)
-                    || pkAttribute != null;
+                    || propertyInfo.HasAttributeNamed(typeof(PrimaryKeyAttribute).Name);
 
                 var isNullableType = IsNullableType(propertyInfo.PropertyType);
 
                 var isNullable = (!propertyInfo.PropertyType.IsValueType
-                                   && propertyInfo.FirstAttribute<RequiredAttribute>() == null)
-                                 || isNullableType;
+                                   && propertyInfo.HasAttributeNamed(typeof(RequiredAttribute).Name))
+                                   || isNullableType;
 
                 var propertyType = isNullableType
                     ? Nullable.GetUnderlyingType(propertyInfo.PropertyType)
@@ -109,15 +106,12 @@ namespace ServiceStack.OrmLite
                 var isIndex = indexAttr != null;
                 var isUnique = isIndex && indexAttr.Unique;
 
-                var stringLengthAttr = propertyInfo.FirstAttribute<StringLengthAttribute>();
+                var stringLengthAttr = propertyInfo.CalculateStringLength(decimalAttribute);
 
                 var defaultValueAttr = propertyInfo.FirstAttribute<DefaultAttribute>();
 
                 var referencesAttr = propertyInfo.FirstAttribute<ReferencesAttribute>();
                 var foreignKeyAttr = propertyInfo.FirstAttribute<ForeignKeyAttribute>();
-
-                if (decimalAttribute != null && stringLengthAttr == null)
-                    stringLengthAttr = new StringLengthAttribute(decimalAttribute.Precision);
 
                 var fieldDefinition = new FieldDefinition {
                     Name = propertyInfo.Name,
@@ -128,43 +122,38 @@ namespace ServiceStack.OrmLite
                     IsPrimaryKey = isPrimaryKey,
                     AutoIncrement =
                         isPrimaryKey &&
-                        propertyInfo.FirstAttribute<AutoIncrementAttribute>() != null,
+                        propertyInfo.HasAttributeNamed(typeof(AutoIncrementAttribute).Name),
                     IsIndexed = isIndex,
                     IsUnique = isUnique,
-                    FieldLength =
-                        stringLengthAttr != null
-                            ? stringLengthAttr.MaximumLength
-                            : (int?)null,
-                    DefaultValue =
-                        defaultValueAttr != null ? defaultValueAttr.DefaultValue : null,
-                    ForeignKey =
-                        foreignKeyAttr == null
-                            ? referencesAttr == null
-                                  ? null
-                                  : new ForeignKeyConstraint(referencesAttr.Type)
-                            : new ForeignKeyConstraint(foreignKeyAttr.Type,
-                                                       foreignKeyAttr.OnDelete,
-                                                       foreignKeyAttr.OnUpdate,
-                                                       foreignKeyAttr.ForeignKeyName),
+                    FieldLength = stringLengthAttr != null
+                        ? stringLengthAttr.MaximumLength
+                        : (int?)null,
+                    DefaultValue = defaultValueAttr != null ? defaultValueAttr.DefaultValue : null,
+                    ForeignKey = foreignKeyAttr == null
+                        ? referencesAttr != null ? new ForeignKeyConstraint(referencesAttr.Type) : null
+                        : new ForeignKeyConstraint(foreignKeyAttr.Type,
+                                                    foreignKeyAttr.OnDelete,
+                                                    foreignKeyAttr.OnUpdate,
+                                                    foreignKeyAttr.ForeignKeyName),
                     GetValueFn = propertyInfo.GetPropertyGetterFn(),
                     SetValueFn = propertyInfo.GetPropertySetterFn(),
                     Sequence = sequenceAttr != null ? sequenceAttr.Name : string.Empty,
                     IsComputed = computeAttr != null,
-                    ComputeExpression =
-                        computeAttr != null ? computeAttr.Expression : string.Empty,
+                    ComputeExpression = computeAttr != null ? computeAttr.Expression : string.Empty,
                     Scale = decimalAttribute != null ? decimalAttribute.Scale : (int?)null,
                     BelongToModelName = belongToAttribute != null ? belongToAttribute.BelongToTableType.GetModelDefinition().ModelName : null, 
                 };
 
-                if (propertyInfo.FirstAttribute<IgnoreAttribute>() != null)
+                if (propertyInfo.HasAttributeNamed(typeof(IgnoreAttribute).Name))
                   modelDef.IgnoredFieldDefinitions.Add(fieldDefinition);
                 else
                   modelDef.FieldDefinitions.Add(fieldDefinition);                
             }
 
-            modelDef.SqlSelectAllFromTable = "SELECT {0} FROM {1} ".Fmt(OrmLiteConfig.DialectProvider.GetColumnNames(modelDef),
-                                                                        OrmLiteConfig.DialectProvider.GetQuotedTableName(
-                                                                            modelDef));
+            modelDef.SqlSelectAllFromTable = "SELECT {0} FROM {1} "
+                .Fmt(OrmLiteConfig.DialectProvider.GetColumnNames(modelDef),
+                     OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef));
+
             Dictionary<Type, ModelDefinition> snapshot, newCache;
             do
             {
@@ -176,6 +165,18 @@ namespace ServiceStack.OrmLite
                 Interlocked.CompareExchange(ref typeModelDefinitionMap, newCache, snapshot), snapshot));
 
             return modelDef;
+        }
+
+        public static StringLengthAttribute CalculateStringLength(this PropertyInfo propertyInfo, DecimalLengthAttribute decimalAttribute)
+        {
+            var attr = propertyInfo.FirstAttribute<StringLengthAttribute>();
+            if (attr != null) return attr;
+
+            var componentAttr = propertyInfo.FirstAttribute<System.ComponentModel.DataAnnotations.StringLengthAttribute>();
+            if (componentAttr != null) 
+                return new StringLengthAttribute(componentAttr.MaximumLength);
+
+            return decimalAttribute != null ? new StringLengthAttribute(decimalAttribute.Precision) : null;
         }
 
     }

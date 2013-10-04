@@ -18,7 +18,7 @@ namespace ServiceStack.OrmLite.Oracle.DbSchema
 
 			OutputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "src");
 			Usings ="using System;\n" +
-					"using System.ComponentModel.DataAnnotations;\n" +
+					"\n" +
 					"using ServiceStack.Common;\n" +
 					"using ServiceStack.DataAnnotations;\n" +
 					"using ServiceStack.Model;\n";

@@ -1,9 +1,8 @@
 ﻿using ServiceStack.DataAnnotations;
 using ServiceStack.Model;
-using System.ComponentModel.DataAnnotations;
-using System;
 
-namespace Northwind.Common.DataModel{
+namespace Northwind.Common.DataModel
+{
 	[Alias("Categories")]
 	public class Category : IHasIntId, IHasId<int>
 	{

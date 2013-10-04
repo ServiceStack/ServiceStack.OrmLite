@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using System.Data;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;

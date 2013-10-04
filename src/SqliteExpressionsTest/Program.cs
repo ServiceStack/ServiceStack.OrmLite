@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
 using System.Data;
 using ServiceStack;
@@ -12,7 +11,8 @@ using ServiceStack.OrmLite.Sqlite;
 
 namespace SqliteExpressionsTest
 {
-	public class Author{
+	public class Author
+    {
 		public Author(){}
 		[AutoIncrement]
 		[Alias("AuthorID")]

@@ -1,5 +1,5 @@
 using System;
-using System.ComponentModel.DataAnnotations;
+
 using ServiceStack.Common;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Model;

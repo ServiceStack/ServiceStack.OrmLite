@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
 using System.Data;
 using ServiceStack.DataAnnotations;
@@ -10,8 +9,8 @@ using ServiceStack.OrmLite.Firebird;
 
 namespace TestExpressions
 {
-	public class Author{
-		public Author(){}
+	public class Author
+    {
 		[AutoIncrement]
 		[Alias("AuthorID")]
 		public Int32 Id { get; set;}
@@ -30,8 +29,6 @@ namespace TestExpressions
 		public string Comments { get; set;}
 		public Int16 Rate{ get; set;}
 	}
-	
-	
 	
 	class MainClass
 	{

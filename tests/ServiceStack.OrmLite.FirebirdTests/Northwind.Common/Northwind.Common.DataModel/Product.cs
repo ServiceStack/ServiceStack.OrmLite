@@ -1,10 +1,8 @@
-using System;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Model;
-using System.ComponentModel.DataAnnotations;
 
-namespace Northwind.Common.DataModel{
-		
+namespace Northwind.Common.DataModel
+{
 	[Alias("Products")]
 	public class Product : IHasIntId, IHasId<int>
 	{
