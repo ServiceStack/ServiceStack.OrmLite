@@ -134,7 +134,7 @@
     <Compile Include="Expressions\WriteExtensions.cs" />
     <Compile Include="Expressions\Sql.cs" />
     <Compile Include="OrmLiteDDLExtensions.cs" />
-    <Compile Include="SqlMapper.cs" />
+    <Compile Include="Dapper\SqlMapper.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
