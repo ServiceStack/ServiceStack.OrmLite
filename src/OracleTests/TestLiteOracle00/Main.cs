@@ -121,7 +121,7 @@ namespace TestLiteOracle00
 				});
 				
 				//-------------------------------------------------------------------
-				SqlExpressionVisitor<Author> ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<Author>();
+				SqlExpressionVisitor<Author> ev = OrmLiteConfig.DialectProvider.SqlExpression<Author>();
 				
 				ev.Insert(r=> new {r.Id, r.Name, r.Birthday, r.Active, r.Rate}); // fields to insert
 				
@@ -178,7 +178,7 @@ namespace TestLiteOracle00
 						Title= "The big book",
 						Price= 18.55m,
 					});
-					Console.WriteLine("{0} == {1}", db.HasChildren<Book>( author), true ) ;
+					Console.WriteLine("{0} == {1}", db.Exists<Book>( author), true ) ;
 				}
 				else{
 					Console.WriteLine("Something wrong ");
@@ -189,7 +189,7 @@ namespace TestLiteOracle00
 				if( author != default(Author) ){
 					
 					
-					Console.WriteLine("{0} == {1}", db.HasChildren<Book>( author), false ) ;
+					Console.WriteLine("{0} == {1}", db.Exists<Book>( author), false ) ;
 				}
 				else{
 					Console.WriteLine("Something wrong ");

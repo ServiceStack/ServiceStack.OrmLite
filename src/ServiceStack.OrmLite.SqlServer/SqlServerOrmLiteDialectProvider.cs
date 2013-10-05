@@ -172,7 +172,7 @@ namespace ServiceStack.OrmLite.SqlServer
 		    _ensureUtc = shouldEnsureUtc;
 		}
 
-		public override SqlExpressionVisitor<T> ExpressionVisitor<T>()
+		public override SqlExpressionVisitor<T> SqlExpression<T>()
 		{
 			return new SqlServerExpressionVisitor<T>();
 		}
@@ -186,7 +186,7 @@ namespace ServiceStack.OrmLite.SqlServer
 			//    sql += " AND TABLE_SCHEMA = {0}".SqlFormat(schemaName);
 
 			dbCmd.CommandText = sql;
-			var result = dbCmd.GetLongScalar();
+			var result = dbCmd.LongScalar();
 			
 			return result > 0;
 		}

@@ -32,7 +32,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
                 db.CreateTable<User>(true);
 
                 var tables =
-                    db.GetFirstColumn<string>
+                    db.Column<string>
                         (@"SELECT name FROM sqlite_master WHERE type='table';");
 
                 //sqlite dialect should just concatenate the schema and table name to create a unique table name
@@ -59,7 +59,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
                 CreateSchemaIfNotExists(db);
                 db.DropAndCreateTable<User>();
 
-                var tables = db.GetFirstColumn<string>
+                var tables = db.Column<string>
                     (@"SELECT '['+SCHEMA_NAME(schema_id)+'].['+name+']' AS SchemaTable FROM sys.tables");
 
                 //sql server dialect should create the table in the schema
@@ -80,10 +80,10 @@ namespace ServiceStack.OrmLite.Tests.UseCase
                 db.Insert(new User { Id = 2, Name = "B", CreatedDate = DateTime.Now });
                 db.Insert(new User { Id = 3, Name = "B", CreatedDate = DateTime.Now });
 
-                var lastInsertId = db.GetLastInsertId();
+                var lastInsertId = db.LastInsertId();
                 Assert.That(lastInsertId, Is.GreaterThan(0));
 
-                var rowsB = db.Select<User>("Name = {0}", "B");
+                var rowsB = db.SelectFmt<User>("Name = {0}", "B");
                 Assert.That(rowsB, Has.Count.EqualTo(2));
 
                 var rowIds = rowsB.ConvertAll(x => x.Id);
@@ -91,7 +91,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
 
                 rowsB.ForEach(x => db.Delete(x));
 
-                rowsB = db.Select<User>("Name = {0}", "B");
+                rowsB = db.SelectFmt<User>("Name = {0}", "B");
                 Assert.That(rowsB, Has.Count.EqualTo(0));
 
                 var rowsLeft = db.Select<User>();

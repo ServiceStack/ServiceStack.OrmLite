@@ -35,7 +35,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
             {
                 FillTestEntityTableWithTestData(db);
 
-                var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<TestEntity>();
+                var ev = OrmLiteConfig.DialectProvider.SqlExpression<TestEntity>();
                 ev.Limit(10, 100);
 
                 var result = db.Select(ev);
@@ -53,7 +53,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
             {
                 FillTestEntityTableWithTestData(db);
 
-                var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<TestEntity>();
+                var ev = OrmLiteConfig.DialectProvider.SqlExpression<TestEntity>();
                 ev.Limit(100);
 
                 var result = db.Select(ev);
@@ -71,7 +71,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
             {
                 FillTestEntityTableWithTestData(db);
 
-                var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<TestEntity>();
+                var ev = OrmLiteConfig.DialectProvider.SqlExpression<TestEntity>();
                 ev.Limit(10, 100);
                 ev.OrderBy(e => e.Baz);
 
@@ -89,7 +89,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
             {
                 FillTestEntityTableWithTestData(db);
 
-                var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<TestEntity>();
+                var ev = OrmLiteConfig.DialectProvider.SqlExpression<TestEntity>();
                 ev.OrderBy(e => e.Baz);
                 ev.Where(e => e.Baz < 0.1m);
 
@@ -112,9 +112,9 @@ namespace ServiceStack.OrmLite.SqlServerTests
                     Baz = this.RandomDecimal()
                 });
 
-                var id = (int)db.GetLastInsertId();
+                var id = (int)db.LastInsertId();
 
-                var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<TestEntity>();
+                var ev = OrmLiteConfig.DialectProvider.SqlExpression<TestEntity>();
                 ev.Where(e => e.Id == id);
                 int? i = null;
                 ev.And(e => e.NullInt == i);
@@ -132,7 +132,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
             {
                 FillAliasedTestEntityTableWithTestData(db);
 
-                var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<TestEntityWithAliases>();
+                var ev = OrmLiteConfig.DialectProvider.SqlExpression<TestEntityWithAliases>();
                 ev.Limit(10, 100);
 
                 var result = db.Select(ev);
@@ -148,7 +148,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
             {
                 FillAliasedTestEntityTableWithTestData(db);
 
-                var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<TestEntityWithAliases>();
+                var ev = OrmLiteConfig.DialectProvider.SqlExpression<TestEntityWithAliases>();
                 ev.Limit(10, 100);
                 ev.OrderBy(e => e.Baz);
 

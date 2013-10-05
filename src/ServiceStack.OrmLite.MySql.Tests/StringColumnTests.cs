@@ -77,7 +77,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
                 Assert.AreEqual(8000, obj.Value.Length);
 
                 db.Save(obj);
-                var target = db.GetById<TypeWithStringId>(obj.Id);
+                var target = db.SingleById<TypeWithStringId>(obj.Id);
 
                 Assert.AreEqual(obj.Value, target.Value);
                 Assert.AreEqual(8000, obj.Value.Length);
@@ -98,9 +98,9 @@ namespace ServiceStack.OrmLite.MySql.Tests
                 Assert.AreEqual(8000, obj.Value.Length);
 
                 db.Save(obj);
-                obj.Id = (int)db.GetLastInsertId();
+                obj.Id = (int)db.LastInsertId();
 
-                var target = db.GetById<TypeWithTextField>(obj.Id);
+                var target = db.SingleById<TypeWithTextField>(obj.Id);
 
                 Assert.AreEqual(obj.Value, target.Value);
                 Assert.AreEqual(8000, obj.Value.Length);

@@ -230,7 +230,7 @@ namespace ServiceStack.OrmLite
             {
                 throw new Exception("Either the source or destination table should be associated ");
             }
-            var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();
+            var ev = OrmLiteConfig.DialectProvider.SqlExpression<T>();
             ev.WhereStatementWithoutWhereString = true;
             ev.PrefixFieldWithTableName = true;
             ev.Where(where);
@@ -358,7 +358,7 @@ namespace ServiceStack.OrmLite
 
             if (sourceWhere != null)
             {
-                var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<TSourceTable>();
+                var ev = OrmLiteConfig.DialectProvider.SqlExpression<TSourceTable>();
                 ev.Where(sourceWhere);
                 var where = ev.WhereExpression;
                 if (!String.IsNullOrEmpty(where))
@@ -367,7 +367,7 @@ namespace ServiceStack.OrmLite
 
             if (destinationWhere != null)
             {
-                var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<TDestinationTable>();
+                var ev = OrmLiteConfig.DialectProvider.SqlExpression<TDestinationTable>();
                 ev.Where(destinationWhere);
                 var where = ev.WhereExpression;
                 if (!String.IsNullOrEmpty(where))

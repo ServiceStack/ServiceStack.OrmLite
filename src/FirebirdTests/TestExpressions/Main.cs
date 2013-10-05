@@ -37,7 +37,7 @@ namespace TestExpressions
 			Console.WriteLine ("Hello World!");
 			
 			OrmLiteConfig.DialectProvider = new FirebirdOrmLiteDialectProvider();
-			SqlExpressionVisitor<Author> ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<Author>();
+			SqlExpressionVisitor<Author> ev = OrmLiteConfig.DialectProvider.SqlExpression<Author>();
 									
 			using (IDbConnection db =
 			       "User=SYSDBA;Password=masterkey;Database=employee.fdb;DataSource=localhost;Dialect=3;charset=ISO8859_1;".OpenDbConnection())

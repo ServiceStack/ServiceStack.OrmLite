@@ -135,7 +135,7 @@ namespace ServiceStack.OrmLite.Tests
                     conn.CreateTable<MyTable>();
 
                     conn.Insert(new MyTable { SomeTextField = "Example" });
-                    var record = conn.GetById<MyTable>(1);
+                    var record = conn.SingleById<MyTable>(1);
                 }
 
                 "Test 1 Success".Print();
@@ -160,7 +160,7 @@ namespace ServiceStack.OrmLite.Tests
 
                     using (var tran = conn.OpenTransaction())
                     {
-                        var record = conn.GetById<MyTable>(1);
+                        var record = conn.SingleById<MyTable>(1);
                     }
                 }
 
@@ -184,7 +184,7 @@ namespace ServiceStack.OrmLite.Tests
                         tran.Commit();
                     }
 
-                    var record = conn.GetById<MyTable>(1);
+                    var record = conn.SingleById<MyTable>(1);
                 }
 
                 "Test 3 Success".Print();

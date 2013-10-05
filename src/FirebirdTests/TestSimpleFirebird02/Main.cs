@@ -34,13 +34,13 @@ namespace TestLiteFirebird2
                 try
                 {
 
-                    Console.WriteLine(db.HasChildren<Company>(new Company() { Id = 1000 }));
+                    Console.WriteLine(db.Exists<Company>(new Company() { Id = 1000 }));
 
-                    Console.WriteLine(db.HasChildren<Company>(new Company() { Id = 5 }));
+                    Console.WriteLine(db.Exists<Company>(new Company() { Id = 5 }));
 
-                    Console.WriteLine(db.Exists<Company>(Company.Me.Id + "={0}", 5));
+                    Console.WriteLine(db.ExistsFmt<Company>(Company.Me.Id + "={0}", 5));
 
-                    Console.WriteLine(db.Exists<Company>(Company.Me.Id + "={0}", 1000));
+                    Console.WriteLine(db.ExistsFmt<Company>(Company.Me.Id + "={0}", 1000));
 
 
                     var rows = db.Select<Company>();
@@ -65,7 +65,7 @@ namespace TestLiteFirebird2
                     }
                     Console.WriteLine("----------------------");
 
-                    rows = db.Select<Company>(Company.Me.Id + ">={0} order by " + Company.Me.Id + " descending rows 5",
+                    rows = db.SelectFmt<Company>(Company.Me.Id + ">={0} order by " + Company.Me.Id + " descending rows 5",
                                                   10);
                     Console.WriteLine(rows.Count);
                     foreach (Company u in rows)

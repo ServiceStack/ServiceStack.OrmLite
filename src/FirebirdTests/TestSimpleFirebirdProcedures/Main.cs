@@ -198,7 +198,7 @@ namespace TestLiteFirebirdProcedures
 
         public List<ProcedureAllLangsResult> Execute(IDbConnection db)
         {
-            return db.SelectFromProcedure<ProcedureAllLangsResult>(this);
+            return db.SqlProcedure<ProcedureAllLangsResult>(this);
         }
 
         //public List<ProcedureAllLangsResult> Results{
@@ -303,7 +303,7 @@ namespace TestLiteFirebirdProcedures
                         HeadDepartament = "000"
                     };
 
-                    var results = db.SelectFromProcedure<ProcedureSubTotalBudgetResult>(p, "");
+                    var results = db.SqlProcedure<ProcedureSubTotalBudgetResult>(p, "");
 
 
                     foreach (var r in results)
@@ -325,7 +325,7 @@ namespace TestLiteFirebirdProcedures
                         Country = "England"
                     };
 
-                    var ls = db.SelectFromProcedure<ProcedureShowLangsResult>(l, "");
+                    var ls = db.SqlProcedure<ProcedureShowLangsResult>(l, "");
 
                     foreach (var lr in ls)
                     {

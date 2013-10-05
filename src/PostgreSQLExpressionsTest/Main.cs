@@ -39,7 +39,7 @@ namespace PostgreSQLExpressionsTest
 			Console.WriteLine ("Hello World!");
 			
 			OrmLiteConfig.DialectProvider = PostgreSQLDialectProvider.Instance;
-			SqlExpressionVisitor<Author> ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<Author>();
+			SqlExpressionVisitor<Author> ev = OrmLiteConfig.DialectProvider.SqlExpression<Author>();
 									
 			using (IDbConnection db =
 			       "Server=localhost;Port=5432;User Id=postgres; Password=postgres; Database=ormlite".OpenDbConnection())
@@ -228,13 +228,13 @@ namespace PostgreSQLExpressionsTest
 				Console.WriteLine();
 				// Tests for predicate overloads that make use of the expression visitor
 				Console.WriteLine("First author by name (exists)");
-				author = db.First<Author>(a => a.Name == "Jorge Garzon");
+                author = db.Single<Author>(a => a.Name == "Jorge Garzon");
 				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", "Jorge Garzon", author.Name, "Jorge Garzon" == author.Name);
 
 				try
 				{
 					Console.WriteLine("First author by name (does not exist)");
-					author = db.First<Author>(a => a.Name == "Does not exist");
+                    author = db.Single<Author>(a => a.Name == "Does not exist");
 
 					Console.WriteLine("Expected exception thrown, OK? False");
 				}
@@ -244,11 +244,11 @@ namespace PostgreSQLExpressionsTest
 				}
 
 				Console.WriteLine("First author or default (does not exist)");
-				author = db.FirstOrDefault<Author>(a => a.Name == "Does not exist");
+				author = db.Single<Author>(a => a.Name == "Does not exist");
 				Console.WriteLine("Expected:null ; OK? {0}", author == null);
 
 				Console.WriteLine("First author or default by city (multiple matches)");
-				author = db.FirstOrDefault<Author>(a => a.City == "Bogota");
+				author = db.Single<Author>(a => a.City == "Bogota");
 				Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", "Angel Colmenares", author.Name, "Angel Colmenares" == author.Name);
 				
 				Console.ReadLine();

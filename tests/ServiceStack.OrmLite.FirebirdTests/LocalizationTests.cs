@@ -57,7 +57,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 				Assert.That(points[0].Top, Is.EqualTo(3.456d));
 				Assert.That(points[0].Left, Is.EqualTo(2.345m));
 				
-				points = db.Select<Point>("Height={0}", 1.123f);  // returns no rows! FirebirdSql bug?
+				points = db.SelectFmt<Point>("Height={0}", 1.123f);  // returns no rows! FirebirdSql bug?
 				
 				Assert.That(points.Count>0);
 			}

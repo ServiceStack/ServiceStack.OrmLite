@@ -72,7 +72,7 @@ namespace SqlServerExpressionsTest
 
                 //Select Test
 
-                var rowsB = db.Select<User_2>("Name = {0}", "B");
+                var rowsB = db.SelectFmt<User_2>("Name = {0}", "B");
                 var rowsB1 = db.Select<User_2>(user => user.Name == "B");
 
                 var rowsUData = db.Select<UserData_2>();
@@ -86,10 +86,10 @@ namespace SqlServerExpressionsTest
                        .Select<User_2>(x => x.Id);
 
                 var sql2 = jn2.ToSql();
-                var items2 = db.Query<User_2>(sql2);
+                var items2 = db.Select<User_2>(sql2);
                 Console.WriteLine("Ignored Field Selected Items - {0}",items2.Count());
 
-                var item = db.FirstOrDefault<User_2>(sql2);
+                var item = db.Single<User_2>(sql2);
                 
             }
         }

@@ -150,7 +150,7 @@ namespace ServiceStack.OrmLite.Sqlite
             return base.GetQuotedValue(value, fieldType);
         }
 
-        public override SqlExpressionVisitor<T> ExpressionVisitor<T>()
+        public override SqlExpressionVisitor<T> SqlExpression<T>()
         {
             return new SqliteExpressionVisitor<T>();
         }
@@ -161,7 +161,7 @@ namespace ServiceStack.OrmLite.Sqlite
                 .SqlFormat(tableName);
 
             dbCmd.CommandText = sql;
-            var result = dbCmd.GetLongScalar();
+            var result = dbCmd.LongScalar();
 
             return result > 0;
         }

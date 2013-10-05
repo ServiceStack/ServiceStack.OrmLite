@@ -15,7 +15,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
 
                 db.Save(orig);
 
-                var target = db.GetById<TypeWithByteArrayField>(orig.Id);
+                var target = db.SingleById<TypeWithByteArrayField>(orig.Id);
 
                 Assert.AreEqual(orig.Id, target.Id);
                 Assert.AreEqual(orig.Content, target.Content);

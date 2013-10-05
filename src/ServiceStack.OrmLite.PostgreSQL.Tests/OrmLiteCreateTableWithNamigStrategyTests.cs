@@ -70,7 +70,7 @@ namespace ServiceStack.OrmLite.Tests
 				ModelWithOnlyStringFields m = new ModelWithOnlyStringFields() { Id= "999", AlbumId = "112", AlbumName="ElectroShip", Name = "MyNameIsBatman"};
 
 				db.Save<ModelWithOnlyStringFields>(m);
-				var modelFromDb =  db.GetById<ModelWithOnlyStringFields>("999");
+                var modelFromDb = db.SingleById<ModelWithOnlyStringFields>("999");
 
 				Assert.AreEqual(m.Name, modelFromDb.Name);
 			}
@@ -121,8 +121,8 @@ namespace ServiceStack.OrmLite.Tests
 				var modelFromDb = db.Where<ModelWithOnlyStringFields>(new { Name = "QueryByExample" })[0];
 
 				Assert.AreEqual(m.Name, modelFromDb.Name);
-				
-				modelFromDb =  db.GetById<ModelWithOnlyStringFields>("998");
+
+                modelFromDb = db.SingleById<ModelWithOnlyStringFields>("998");
 				Assert.AreEqual(m.Name, modelFromDb.Name);
 				
 			}
@@ -138,8 +138,8 @@ namespace ServiceStack.OrmLite.Tests
 				var modelFromDb = db.Where<ModelWithOnlyStringFields>(new { Name = "QueryByExample" })[0];
 
 				Assert.AreEqual(m.Name, modelFromDb.Name);
-				
-				modelFromDb =  db.GetById<ModelWithOnlyStringFields>("998");
+
+                modelFromDb = db.SingleById<ModelWithOnlyStringFields>("998");
 				Assert.AreEqual(m.Name, modelFromDb.Name);	
 			}
 			
@@ -158,8 +158,8 @@ namespace ServiceStack.OrmLite.Tests
 				var modelFromDb = db.Where<ModelWithOnlyStringFields>(new { Name = "QueryByExample" })[0];
 
 				Assert.AreEqual(m.Name, modelFromDb.Name);
-				
-				modelFromDb =  db.GetById<ModelWithOnlyStringFields>("998");
+
+                modelFromDb = db.SingleById<ModelWithOnlyStringFields>("998");
 				Assert.AreEqual(m.Name, modelFromDb.Name);
 			}
 			

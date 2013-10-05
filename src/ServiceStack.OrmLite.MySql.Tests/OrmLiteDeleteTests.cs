@@ -29,7 +29,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 
 				db.Delete(row2);
 
-				rows = db.GetByIds<ModelWithFieldsOfDifferentTypes>(rowIds);
+				rows = db.SelectByIds<ModelWithFieldsOfDifferentTypes>(rowIds);
 				var dbRowIds = rows.ConvertAll(x => x.Id);
 
 				Assert.That(dbRowIds, Is.EquivalentTo(new[] { 1, 3 }));
@@ -48,7 +48,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 
 				db.DeleteById<ModelWithFieldsOfDifferentTypes>(2);
 
-				var rows = db.GetByIds<ModelWithFieldsOfDifferentTypes>(rowIds);
+				var rows = db.SelectByIds<ModelWithFieldsOfDifferentTypes>(rowIds);
 				var dbRowIds = rows.ConvertAll(x => x.Id);
 
 				Assert.That(dbRowIds, Is.EquivalentTo(new[] { 1, 3 }));
@@ -67,7 +67,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 
 				db.DeleteByIds<ModelWithFieldsOfDifferentTypes>(new[] { 1, 3 });
 
-				var rows = db.GetByIds<ModelWithFieldsOfDifferentTypes>(rowIds);
+				var rows = db.SelectByIds<ModelWithFieldsOfDifferentTypes>(rowIds);
 				var dbRowIds = rows.ConvertAll(x => x.Id);
 
 				Assert.That(dbRowIds, Is.EquivalentTo(new[] { 2 }));

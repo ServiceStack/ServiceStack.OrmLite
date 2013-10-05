@@ -128,7 +128,7 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM \"Person\" WHERE (\"Age\" = 27)"));
             db.GetLastSql().Print();
 
-            db.Delete(OrmLiteConfig.DialectProvider.ExpressionVisitor<Person>().Where(p => p.Age == 27));
+            db.Delete(OrmLiteConfig.DialectProvider.SqlExpression<Person>().Where(p => p.Age == 27));
             Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM \"Person\" WHERE (\"Age\" = 27)"));
             db.GetLastSql().Print();
 
@@ -151,10 +151,7 @@ namespace ServiceStack.OrmLite.Tests
 
             //db.Query<Person>(q => q);
             //db.GetLastSql().Print();
-            db.SelectById<Person>(1).PrintDump();
-            db.GetLastSql().Print();
-            
-            db.GetByIdParam<Person>(1).PrintDump();
+            db.SingleById<Person>(1).PrintDump();
             db.GetLastSql().Print();
         }
         
@@ -200,8 +197,8 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void benchmark()
         {
-            Measure(() => db.GetByIdParam<Person>(1), times: 1).ToString().Print("Test 2: {0}");
-            Measure(() => db.SelectById<Person>(1), times: 1).ToString().Print("Test 1: {0}");
+            Measure(() => db.SingleById<Person>(1), times: 1).ToString().Print("Test 2: {0}");
+            Measure(() => db.SingleById<Person>(1), times: 1).ToString().Print("Test 1: {0}");
         }
 
     }

@@ -417,7 +417,7 @@ namespace ServiceStack.OrmLite
                 throw new NotImplementedException("Returning last inserted identity is not implemented on this DB Provider.");
 
             dbCmd.CommandText = SelectIdentitySql;
-            return dbCmd.GetLongScalar();
+            return dbCmd.LongScalar();
         }
 
         public virtual long InsertAndGetLastInsertId<T>(IDbCommand dbCmd)
@@ -426,7 +426,7 @@ namespace ServiceStack.OrmLite
                 throw new NotImplementedException("Returning last inserted identity is not implemented on this DB Provider.");
             
             dbCmd.CommandText += "; " + SelectIdentitySql;
-            return dbCmd.GetLongScalar();
+            return dbCmd.LongScalar();
         }
         
         public virtual string ToCountStatement(Type fromTableType, string sqlFilter, params object[] filterParams)
@@ -955,7 +955,7 @@ namespace ServiceStack.OrmLite
             return modelType.GetModelDefinition();
         }
 
-        public virtual SqlExpressionVisitor<T> ExpressionVisitor<T>()
+        public virtual SqlExpressionVisitor<T> SqlExpression<T>()
         {
             throw new NotImplementedException();
         }

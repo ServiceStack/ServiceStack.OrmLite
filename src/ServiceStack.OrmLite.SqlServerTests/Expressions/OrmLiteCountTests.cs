@@ -20,7 +20,7 @@ namespace ServiceStack.OrmLite.SqlServerTests.Expressions
 
                 db.Insert(new CountTestTable { Id = 1, StringValue = "Your string value" });
 
-                var count = db.GetScalar<CountTestTable, long>(e => Sql.Count(e.Id));
+                var count = db.Scalar<CountTestTable, long>(e => Sql.Count(e.Id));
 
                 Assert.That(count, Is.EqualTo(1));
 
@@ -66,25 +66,25 @@ namespace ServiceStack.OrmLite.SqlServerTests.Expressions
         long Count<T>(IDbConnection db) where T : IHasId<int>, new()
         {
             T request = new T();
-            return db.GetScalar<T, long>(e => Sql.Count(request.Id));
+            return db.Scalar<T, long>(e => Sql.Count(request.Id));
         }
 
 
         long CountByColumn<T>(IDbConnection db) where T : IHasCountColumn, new()
         {
             T request = new T();
-            return db.GetScalar<T, long?>(e => Sql.Count(request.CountColumn)).Value;
+            return db.Scalar<T, long?>(e => Sql.Count(request.CountColumn)).Value;
         }
 
 
         int Count<T>(IDbConnection db, Expression<Func<T, bool>> predicate) where T : IHasId<int>, new()
         {
-            return db.GetScalar<T, int>(e => Sql.Count(e.Id), predicate);
+            return db.Scalar<T, int>(e => Sql.Count(e.Id), predicate);
         }
 
         int CountByColumn<T>(IDbConnection db, Expression<Func<T, bool>> predicate) where T : IHasCountColumn, new()
         {
-            return db.GetScalar<T, int?>(e => Sql.Count(e.CountColumn), predicate).Value;
+            return db.Scalar<T, int?>(e => Sql.Count(e.CountColumn), predicate).Value;
         }
 
     }

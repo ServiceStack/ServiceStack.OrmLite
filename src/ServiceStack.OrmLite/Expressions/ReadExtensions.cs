@@ -10,22 +10,12 @@ namespace ServiceStack.OrmLite
 	{
 		public static SqlExpressionVisitor<T> CreateExpression<T>()
 		{
-			return OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();            
-		}
-
-		public static List<T> Select<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
-		{
-			var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();
-			string sql = ev.Where(predicate).ToSelectStatement();
-			using (var reader = dbCmd.ExecReader(sql))
-			{
-				return ConvertToList<T>(reader);
-			}
+			return OrmLiteConfig.DialectProvider.SqlExpression<T>();            
 		}
 
 		public static List<T> Select<T>(this IDbCommand dbCmd, Func<SqlExpressionVisitor<T>, SqlExpressionVisitor<T>> expression)
 		{
-			var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();
+			var ev = OrmLiteConfig.DialectProvider.SqlExpression<T>();
 			string sql = expression(ev).ToSelectStatement();
 			using (var reader = dbCmd.ExecReader(sql))
 			{
@@ -42,14 +32,14 @@ namespace ServiceStack.OrmLite
 			}
 		}
 
-        public static List<T> SelectParam<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
+        public static List<T> Select<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
         {
-            var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();
+            var ev = OrmLiteConfig.DialectProvider.SqlExpression<T>();
             ev.IsParameterized = true;
             string sql = ev.Where(predicate).ToSelectStatement();
 
             dbCmd.Parameters.Clear();
-            List<IDataParameter> paramsToInsert = new List<IDataParameter>();
+            var paramsToInsert = new List<IDataParameter>();
             foreach (var param in ev.Params)
             {
                 var cmdParam = dbCmd.CreateParameter();
@@ -64,32 +54,14 @@ namespace ServiceStack.OrmLite
             }
         }
 		
-		public static T First<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
+		public static T Single<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
 		{
-			var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();
+			var ev = OrmLiteConfig.DialectProvider.SqlExpression<T>();
 			
-			return First(dbCmd, ev.Where(predicate).Limit(1));
-		}
-		
-		public static T First<T>(this IDbCommand dbCmd,  SqlExpressionVisitor<T> expression)
-		{
-			var result = FirstOrDefault(dbCmd, expression);
-			if (Equals(result, default(T)))
-			{
-				throw new ArgumentNullException(string.Format(
-					"{0}: '{1}' does not exist", typeof(T).Name, expression.WhereExpression));
-			}
-			return result;
-		}
-		
-		public static T FirstOrDefault<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
-		{
-			var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();
-			
-			return FirstOrDefault(dbCmd, ev.Where(predicate).Limit(1));
+			return Single(dbCmd, ev.Where(predicate).Limit(1));
 		}
 
-		public static T FirstOrDefault<T>(this IDbCommand dbCmd, SqlExpressionVisitor<T> expression)
+		public static T Single<T>(this IDbCommand dbCmd, SqlExpressionVisitor<T> expression)
 		{
 			string sql= expression.ToSelectStatement();
 			using (var dbReader = dbCmd.ExecReader(sql))
@@ -98,49 +70,42 @@ namespace ServiceStack.OrmLite
 			}
 		}
 
-		/// <summary>
-		/// e.g. dbCmd.GetScalar&lt;MyClass, DateTime&gt;(myClass => Sql.Max(myClass.Timestamp));
-		/// </summary>
-		public static TKey GetScalar<T, TKey>(this IDbCommand dbCmd, Expression<Func<T, TKey>> field)
+		public static TKey Scalar<T, TKey>(this IDbCommand dbCmd, Expression<Func<T, TKey>> field)
 		{
-			var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();
+			var ev = OrmLiteConfig.DialectProvider.SqlExpression<T>();
 			ev.Select(field);
 			var sql = ev.ToSelectStatement();
-			return dbCmd.GetScalar<TKey>(sql);
+			return dbCmd.ScalarFmt<TKey>(sql);
 		}
 		
-		/// <summary>
-		/// dbCmd.GetScalar&lt;MyClass, DateTime&gt;(MyClass=>Sql.Max(myClass.Timestamp),
-		/// 	MyClass=> MyClass.SomeProp== someValue);
-		/// </summary>
-		public static TKey GetScalar<T,TKey>(this IDbCommand dbCmd,Expression<Func<T, TKey>> field,
+		public static TKey Scalar<T,TKey>(this IDbCommand dbCmd,Expression<Func<T, TKey>> field,
 		                                     Expression<Func<T, bool>> predicate)
 		{
-			var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();
+			var ev = OrmLiteConfig.DialectProvider.SqlExpression<T>();
 			ev.Select(field).Where(predicate);
 			string sql = ev.ToSelectStatement();
-			return dbCmd.GetScalar<TKey>(sql);
+			return dbCmd.ScalarFmt<TKey>(sql);
 		}
 
         public static long Count<T>(this IDbCommand dbCmd)
         {
-            SqlExpressionVisitor<T> expression = OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();
+            SqlExpressionVisitor<T> expression = OrmLiteConfig.DialectProvider.SqlExpression<T>();
             string sql = expression.ToCountStatement();
-            return dbCmd.GetScalar<long>(sql);
+            return dbCmd.ScalarFmt<long>(sql);
         }
 
         public static long Count<T>(this IDbCommand dbCmd, SqlExpressionVisitor<T> expression)
         {
             string sql = expression.ToCountStatement();
-            return dbCmd.GetScalar<long>(sql);
+            return dbCmd.ScalarFmt<long>(sql);
         }
 
         public static long Count<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
         {
-            var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();
+            var ev = OrmLiteConfig.DialectProvider.SqlExpression<T>();
             ev.Where(predicate);
             string sql = ev.ToCountStatement();
-            return dbCmd.GetScalar<long>(sql);
+            return dbCmd.ScalarFmt<long>(sql);
         }
 		
 		private static T ConvertTo<T>(IDataReader dataReader)

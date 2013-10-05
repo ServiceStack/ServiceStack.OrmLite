@@ -132,13 +132,13 @@ namespace ServiceStack.OrmLite.FirebirdTests
 				var row2 = ModelWithIdAndName.Create(6);
 
 				db.Insert(row1);
-				var row1LastInsertId = db.GetLastInsertId();
+				var row1LastInsertId = db.LastInsertId();
 
 				db.Insert(row2);
-				var row2LastInsertId = db.GetLastInsertId();
+				var row2LastInsertId = db.LastInsertId();
 
-				var insertedRow1 = db.GetById<ModelWithIdAndName>(row1LastInsertId);
-				var insertedRow2 = db.GetById<ModelWithIdAndName>(row2LastInsertId);
+                var insertedRow1 = db.SingleById<ModelWithIdAndName>(row1LastInsertId);
+                var insertedRow2 = db.SingleById<ModelWithIdAndName>(row2LastInsertId);
 
 				Assert.That(insertedRow1.Name, Is.EqualTo(row1.Name));
 				Assert.That(insertedRow2.Name, Is.EqualTo(row2.Name));

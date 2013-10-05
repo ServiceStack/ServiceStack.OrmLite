@@ -51,7 +51,7 @@ $$;";
                 CreateSchemaIfNotExists(db);
                 db.DropAndCreateTable<User>();
 
-                var tables = db.GetFirstColumn<string>
+                var tables = db.Column<string>
                     (@"SELECT '[' || n.nspname || '].[' || c.relname ||']' FROM pg_class c LEFT JOIN pg_namespace n ON n.oid = c.relnamespace WHERE c.relname = 'Users' AND n.nspname = 'TestSchema'");
                 
                 //PostgreSQL dialect should create the table in the schema
@@ -72,10 +72,10 @@ $$;";
                 db.Insert(new User { Id = 2, Name = "B", CreatedDate = DateTime.Now });
                 db.Insert(new User { Id = 3, Name = "B", CreatedDate = DateTime.Now });
 
-                var lastInsertId = db.GetLastInsertId();
+                var lastInsertId = db.LastInsertId();
                 Assert.That(lastInsertId, Is.GreaterThan(0));
 
-                var rowsB = db.Select<User>("\"Name\" = {0}", "B");
+                var rowsB = db.SelectFmt<User>("\"Name\" = {0}", "B");
                 Assert.That(rowsB, Has.Count.EqualTo(2));
 
                 var rowIds = rowsB.ConvertAll(x => x.Id);
@@ -83,7 +83,7 @@ $$;";
 
                 rowsB.ForEach(x => db.Delete(x));
 
-                rowsB = db.Select<User>("\"Name\" = {0}", "B");
+                rowsB = db.SelectFmt<User>("\"Name\" = {0}", "B");
                 Assert.That(rowsB, Has.Count.EqualTo(0));
 
                 var rowsLeft = db.Select<User>();

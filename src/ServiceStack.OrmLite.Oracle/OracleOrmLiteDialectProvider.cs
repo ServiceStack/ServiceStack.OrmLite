@@ -757,7 +757,7 @@ namespace ServiceStack.OrmLite.Oracle
             //dbCmd.CommandText = string.Format("SELECT {0}.NEXTVAL FROM dual", Quote(sequence));
             var sql = string.Format("SELECT {0}.NEXTVAL FROM dual", Quote(sequence));
             dbCmd.CommandText = sql;
-            var result = dbCmd.GetLongScalar();
+            var result = dbCmd.LongScalar();
             
             LastInsertId = result;
 			return  result;				
@@ -806,7 +806,7 @@ namespace ServiceStack.OrmLite.Oracle
 				: Quote(sequence);	
 		}
 		
-		public override SqlExpressionVisitor<T> ExpressionVisitor<T> ()
+		public override SqlExpressionVisitor<T> SqlExpression<T> ()
 		{
 			return new OracleSqlExpressionVisitor<T>();
 		}
@@ -821,7 +821,7 @@ namespace ServiceStack.OrmLite.Oracle
             var sql = "SELECT count(*) FROM all_tables where table_name={0}".SqlFormat(tableName);
 
 			dbCmd.CommandText = sql; 
-			var result = dbCmd.GetLongScalar();
+			var result = dbCmd.LongScalar();
 
 			return result > 0;
 		}
@@ -835,7 +835,7 @@ namespace ServiceStack.OrmLite.Oracle
 
             var sql = "SELECT count(*) FROM ALL_SEQUENCES WHERE UPPER(Sequence_NAME) = {0}".SqlFormat(sequencName);
             dbCmd.CommandText = sql;
-            var result = dbCmd.GetLongScalar();
+            var result = dbCmd.LongScalar();
             return result > 0;
         }
 

@@ -46,7 +46,7 @@ namespace ServiceStack.OrmLite.Tests
                     var nU = new User { Age = rand.Next(70), Id = i, Name = Guid.NewGuid().ToString() };
                     data.Add(nU);
                     db.Insert(nU);
-                    nU.Id = (int) db.GetLastInsertId();
+                    nU.Id = (int) db.LastInsertId();
                 }
 
                 var builder = new SqlBuilder();
@@ -55,8 +55,8 @@ namespace ServiceStack.OrmLite.Tests
 
                 builder.Select("Id");
 
-                var ids = db.Query<int>(justId.RawSql, justId.Parameters);
-                var users = db.Query<User>(all.RawSql, all.Parameters);
+                var ids = db.Select<int>(justId.RawSql, justId.Parameters);
+                var users = db.Select<User>(all.RawSql, all.Parameters);
 
                 foreach (var u in data)
                 {
@@ -79,7 +79,7 @@ namespace ServiceStack.OrmLite.Tests
             {
                 db.Insert(new User { Age = 5, Name = "Testy McTestington" });
 
-                Assert.That(db.QueryScalar<int>(template.RawSql, template.Parameters), Is.EqualTo(1));
+                Assert.That(db.Scalar<int>(template.RawSql, template.Parameters), Is.EqualTo(1));
             }
         }         
     }
