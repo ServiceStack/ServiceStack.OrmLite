@@ -39,7 +39,7 @@ namespace PostgreSQLExpressionsTest
 			Console.WriteLine ("Hello World!");
 			
 			OrmLiteConfig.DialectProvider = PostgreSQLDialectProvider.Instance;
-			SqlExpressionVisitor<Author> ev = OrmLiteConfig.DialectProvider.SqlExpression<Author>();
+			SqlExpression<Author> ev = OrmLiteConfig.DialectProvider.SqlExpression<Author>();
 									
 			using (IDbConnection db =
 			       "Server=localhost;Port=5432;User Id=postgres; Password=postgres; Database=ormlite".OpenDbConnection())

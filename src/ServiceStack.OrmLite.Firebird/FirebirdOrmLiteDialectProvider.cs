@@ -711,9 +711,9 @@ namespace ServiceStack.OrmLite.Firebird
 				: Quote(sequence);	
 		}
 		
-		public override SqlExpressionVisitor<T> SqlExpression<T> ()
+		public override SqlExpression<T> SqlExpression<T> ()
 		{
-			return new FirebirdSqlExpressionVisitor<T>();
+			return new FirebirdSqlExpression<T>();
 		}
 		
 		public override bool DoesTableExist(IDbCommand dbCmd, string tableName)

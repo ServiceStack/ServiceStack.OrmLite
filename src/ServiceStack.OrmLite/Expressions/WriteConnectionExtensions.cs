@@ -6,12 +6,12 @@ namespace ServiceStack.OrmLite
 {
     public static class WriteConnectionExtensions
     {
-        public static int UpdateOnly<T>(this IDbConnection dbConn, T model, Func<SqlExpressionVisitor<T>, SqlExpressionVisitor<T>> onlyFields)
+        public static int UpdateOnly<T>(this IDbConnection dbConn, T model, Func<SqlExpression<T>, SqlExpression<T>> onlyFields)
         {
             return dbConn.Exec(dbCmd => dbCmd.UpdateOnly(model, onlyFields));
         }
 
-        public static int UpdateOnly<T>(this IDbConnection dbConn, T model, SqlExpressionVisitor<T> onlyFields)
+        public static int UpdateOnly<T>(this IDbConnection dbConn, T model, SqlExpression<T> onlyFields)
         {
             return dbConn.Exec(dbCmd => dbCmd.UpdateOnly(model, onlyFields));
         }
@@ -48,12 +48,12 @@ namespace ServiceStack.OrmLite
             return dbConn.Exec(dbCmd => dbCmd.UpdateFmt(table, set, where));
         }
 
-        public static void InsertOnly<T>(this IDbConnection dbConn, T obj, Func<SqlExpressionVisitor<T>, SqlExpressionVisitor<T>> onlyFields)
+        public static void InsertOnly<T>(this IDbConnection dbConn, T obj, Func<SqlExpression<T>, SqlExpression<T>> onlyFields)
         {
             dbConn.Exec(dbCmd => dbCmd.InsertOnly(obj, onlyFields));
         }
 
-        public static void InsertOnly<T>(this IDbConnection dbConn, T obj, SqlExpressionVisitor<T> onlyFields)
+        public static void InsertOnly<T>(this IDbConnection dbConn, T obj, SqlExpression<T> onlyFields)
         {
             dbConn.Exec(dbCmd => dbCmd.InsertOnly(obj, onlyFields));
         }
@@ -63,12 +63,12 @@ namespace ServiceStack.OrmLite
             return dbConn.Exec(dbCmd => dbCmd.Delete(where));
         }
 
-        public static int Delete<T>(this IDbConnection dbConn, Func<SqlExpressionVisitor<T>, SqlExpressionVisitor<T>> where)
+        public static int Delete<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> where)
         {
             return dbConn.Exec(dbCmd => dbCmd.Delete(where));
         }
 
-        public static int Delete<T>(this IDbConnection dbConn, SqlExpressionVisitor<T> where)
+        public static int Delete<T>(this IDbConnection dbConn, SqlExpression<T> where)
         {
             return dbConn.Exec(dbCmd => dbCmd.Delete(where));
         }

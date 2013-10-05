@@ -41,7 +41,7 @@ namespace SqlServerExpressionsTest
 			Console.WriteLine("Hello World!");
 
 			OrmLiteConfig.DialectProvider = SqlServerOrmLiteDialectProvider.Instance;
-			SqlExpressionVisitor<Author> ev = OrmLiteConfig.DialectProvider.SqlExpression<Author>();
+			SqlExpression<Author> ev = OrmLiteConfig.DialectProvider.SqlExpression<Author>();
 
             Console.WriteLine("Join Test");
             //JoinTest.Test(GetFileConnectionString());

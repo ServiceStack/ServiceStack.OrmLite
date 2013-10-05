@@ -806,9 +806,9 @@ namespace ServiceStack.OrmLite.Oracle
 				: Quote(sequence);	
 		}
 		
-		public override SqlExpressionVisitor<T> SqlExpression<T> ()
+		public override SqlExpression<T> SqlExpression<T> ()
 		{
-			return new OracleSqlExpressionVisitor<T>();
+			return new OracleSqlExpression<T>();
 		}
 		
 		public override bool DoesTableExist(IDbCommand dbCmd, string tableName)

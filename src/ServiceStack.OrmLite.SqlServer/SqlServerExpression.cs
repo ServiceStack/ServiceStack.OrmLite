@@ -4,7 +4,7 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.SqlServer
 {
-	public class SqlServerExpressionVisitor<T> : SqlExpressionVisitor<T>
+	public class SqlServerExpression<T> : SqlExpression<T>
 	{
 	    public override string ToSelectStatement()
         {

@@ -1,6 +1,6 @@
 namespace ServiceStack.OrmLite.PostgreSQL
 {
-	public class PostgreSQLExpressionVisitor<T>:SqlExpressionVisitor<T>
+	public class PostgreSqlExpression<T>:SqlExpression<T>
 	{
 		public override string LimitExpression{
 			get{

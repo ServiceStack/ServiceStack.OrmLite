@@ -156,9 +156,9 @@ namespace ServiceStack.OrmLite.PostgreSQL
 			return base.ConvertDbValue(value, type);
 		}
 		
-		public override SqlExpressionVisitor<T> SqlExpression<T>()
+		public override SqlExpression<T> SqlExpression<T>()
 		{
-			return new PostgreSQLExpressionVisitor<T>();
+			return new PostgreSqlExpression<T>();
 		}
 
 		public override bool DoesTableExist(IDbCommand dbCmd, string tableName)

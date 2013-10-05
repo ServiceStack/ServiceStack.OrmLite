@@ -10,7 +10,7 @@ namespace ServiceStack.OrmLite
         [ThreadStatic]
         internal static string LastCommandText;
 
-        public static SqlExpressionVisitor<T> SqlExpression<T>(this IDbConnection dbConn) 
+        public static SqlExpression<T> SqlExpression<T>(this IDbConnection dbConn) 
         {
             return dbConn.GetDialectProvider().SqlExpression<T>();
         }
@@ -109,17 +109,17 @@ namespace ServiceStack.OrmLite
                 : OrmLiteConfig.DialectProvider;
         }
 
-        public static SqlExpressionVisitor<T> SqlExpression<T>()
+        public static SqlExpression<T> SqlExpression<T>()
         {
             return OrmLiteConfig.DialectProvider.SqlExpression<T>();
         }
 
-        public static List<T> Select<T>(this IDbConnection dbConn, Func<SqlExpressionVisitor<T>, SqlExpressionVisitor<T>> expression)
+        public static List<T> Select<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression)
         {
             return dbConn.Exec(dbCmd => dbCmd.Select(expression));
         }
 
-        public static List<T> Select<T>(this IDbConnection dbConn, SqlExpressionVisitor<T> expression)
+        public static List<T> Select<T>(this IDbConnection dbConn, SqlExpression<T> expression)
         {
             return dbConn.Exec(dbCmd => dbCmd.Select(expression));
         }
@@ -134,7 +134,7 @@ namespace ServiceStack.OrmLite
             return dbConn.Exec(dbCmd => dbCmd.Single(predicate));
         }
 
-        public static T Single<T>(this IDbConnection dbConn, SqlExpressionVisitor<T> expression)
+        public static T Single<T>(this IDbConnection dbConn, SqlExpression<T> expression)
         {
             return dbConn.Exec(dbCmd => dbCmd.Single(expression));
         }
@@ -150,7 +150,7 @@ namespace ServiceStack.OrmLite
             return dbConn.Exec(dbCmd => dbCmd.Scalar(field, predicate));
         }
 
-        public static long Count<T>(this IDbConnection dbConn, SqlExpressionVisitor<T> expression)
+        public static long Count<T>(this IDbConnection dbConn, SqlExpression<T> expression)
         {
             return dbConn.Exec(dbCmd => dbCmd.Count(expression));
         }
