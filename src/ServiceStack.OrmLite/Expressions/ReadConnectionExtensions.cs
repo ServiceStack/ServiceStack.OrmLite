@@ -131,7 +131,7 @@ namespace ServiceStack.OrmLite
 
         public static List<T> SelectFmt<T>(this IDbConnection dbConn, Expression<Func<T, bool>> predicate)
         {
-            return dbConn.Exec(dbCmd => dbCmd.SelectFmt(predicate));
+            return dbConn.Exec(dbCmd => dbCmd.Select(predicate));
         }
 
         public static T Single<T>(this IDbConnection dbConn, Expression<Func<T, bool>> predicate)
