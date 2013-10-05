@@ -158,7 +158,7 @@ namespace AllDialectsTest
 
 			OrmLiteConfig.ClearCache();
 			OrmLiteConfig.DialectProvider = dialect.DialectProvider;
-			SqlExpressionVisitor<Author> ev = OrmLiteConfig.DialectProvider.SqlExpression<Author>();
+			SqlExpression<Author> ev = OrmLiteConfig.DialectProvider.SqlExpression<Author>();
 
 			using (IDbConnection db = dialect.ConnectionString.OpenDbConnection())
 			{

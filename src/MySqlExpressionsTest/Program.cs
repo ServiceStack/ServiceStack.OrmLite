@@ -40,7 +40,7 @@ namespace MySqlExpressionsTest
 			Console.WriteLine ("Hello World!");
 			
 			OrmLiteConfig.DialectProvider = MySqlDialectProvider.Instance;
-			SqlExpressionVisitor<Author> ev = OrmLiteConfig.DialectProvider.SqlExpression<Author>();
+			SqlExpression<Author> ev = OrmLiteConfig.DialectProvider.SqlExpression<Author>();
 									
 			using (IDbConnection db =
 			       "Server = 127.0.0.1; Database = ormlite; Uid = root; Pwd = password".OpenDbConnection())

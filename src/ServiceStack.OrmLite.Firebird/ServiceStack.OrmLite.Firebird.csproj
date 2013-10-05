@@ -65,7 +65,7 @@
     <Compile Include="FbSchema\Procedure.cs" />
     <Compile Include="FbSchema\Schema.cs" />
     <Compile Include="FbSchema\Table.cs" />
-    <Compile Include="FirebirdSqlExpressionVisitor.cs" />
+    <Compile Include="FirebirdSqlExpression.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup />

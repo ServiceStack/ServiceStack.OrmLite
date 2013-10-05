@@ -106,9 +106,9 @@ namespace ServiceStack.OrmLite.MySql
 			return string.Format("`{0}`", name);
         }
         
-        public override SqlExpressionVisitor<T> SqlExpression<T> ()
+        public override SqlExpression<T> SqlExpression<T> ()
 		{
-			return new MySqlExpressionVisitor<T>();
+			return new MySqlExpression<T>();
 		}
 
 		public override bool DoesTableExist(IDbCommand dbCmd, string tableName)

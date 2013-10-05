@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 namespace ServiceStack.OrmLite
 {
     //http://blogs.msdn.com/b/meek/archive/2008/05/02/linq-to-entities-combining-predicates.aspx
-    public class ParameterRebinder : ExpressionVisitor
+    public class ParameterRebinder : SqlExpressionVisitor
     {
         private readonly Dictionary<ParameterExpression, ParameterExpression> map;
 

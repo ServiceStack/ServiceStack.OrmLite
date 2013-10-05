@@ -121,7 +121,7 @@ namespace TestLiteOracle00
 				});
 				
 				//-------------------------------------------------------------------
-				SqlExpressionVisitor<Author> ev = OrmLiteConfig.DialectProvider.SqlExpression<Author>();
+				SqlExpression<Author> ev = OrmLiteConfig.DialectProvider.SqlExpression<Author>();
 				
 				ev.Insert(r=> new {r.Id, r.Name, r.Birthday, r.Active, r.Rate}); // fields to insert
 				

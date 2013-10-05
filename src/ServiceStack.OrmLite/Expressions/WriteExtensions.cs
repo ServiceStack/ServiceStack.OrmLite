@@ -20,7 +20,7 @@ namespace ServiceStack.OrmLite
         ///   dbCmd.UpdateOnly(new Person { FirstName = "JJ", LastName = "Hendo" }, ev => ev.Update(p => p.FirstName));
         ///   UPDATE "Person" SET "FirstName" = 'JJ'
         /// </summary>
-        public static int UpdateOnly<T>(this IDbCommand dbCmd, T model, Func<SqlExpressionVisitor<T>, SqlExpressionVisitor<T>> onlyFields)
+        public static int UpdateOnly<T>(this IDbCommand dbCmd, T model, Func<SqlExpression<T>, SqlExpression<T>> onlyFields)
         {
             return dbCmd.UpdateOnly(model, onlyFields(OrmLiteConfig.DialectProvider.SqlExpression<T>()));
         }
@@ -37,7 +37,7 @@ namespace ServiceStack.OrmLite
         ///   dbCmd.UpdateOnly(new Person { FirstName = "JJ", LastName = "Hendo" }, ev.Update(p => p.FirstName));
         ///   UPDATE "Person" SET "FirstName" = 'JJ'
         /// </summary>
-        public static int UpdateOnly<T>(this IDbCommand dbCmd, T model, SqlExpressionVisitor<T> onlyFields)
+        public static int UpdateOnly<T>(this IDbCommand dbCmd, T model, SqlExpression<T> onlyFields)
         {
             var fieldsToUpdate = onlyFields.UpdateFields.Count == 0
                 ? onlyFields.GetAllFields()
@@ -178,7 +178,7 @@ namespace ServiceStack.OrmLite
         ///   dbCmd.InsertOnly(new Person { FirstName = "Amy" }, ev => ev.Insert(p => new { p.FirstName }));
         ///   INSERT INTO "Person" ("FirstName") VALUES ('Amy');
         /// </summary>
-        public static void InsertOnly<T>(this IDbCommand dbCmd, T obj, Func<SqlExpressionVisitor<T>, SqlExpressionVisitor<T>> onlyFields)
+        public static void InsertOnly<T>(this IDbCommand dbCmd, T obj, Func<SqlExpression<T>, SqlExpression<T>> onlyFields)
         {
             dbCmd.InsertOnly(obj, onlyFields(OrmLiteConfig.DialectProvider.SqlExpression<T>()));
         }
@@ -190,7 +190,7 @@ namespace ServiceStack.OrmLite
         ///   dbCmd.InsertOnly(new Person { FirstName = "Amy" }, ev.Insert(p => new { p.FirstName }));
         ///   INSERT INTO "Person" ("FirstName") VALUES ('Amy');
         /// </summary>
-        public static void InsertOnly<T>(this IDbCommand dbCmd, T obj, SqlExpressionVisitor<T> onlyFields)
+        public static void InsertOnly<T>(this IDbCommand dbCmd, T obj, SqlExpression<T> onlyFields)
         {
             var sql = OrmLiteConfig.DialectProvider.ToInsertRowStatement(dbCmd, obj, onlyFields.InsertFields);
             dbCmd.ExecuteSql(sql);
@@ -215,7 +215,7 @@ namespace ServiceStack.OrmLite
         ///   dbCmd.Delete&lt;Person&gt;(ev => ev.Where(p => p.Age == 27));
         ///   DELETE FROM "Person" WHERE ("Age" = 27)
         /// </summary>
-        public static int Delete<T>(this IDbCommand dbCmd, Func<SqlExpressionVisitor<T>, SqlExpressionVisitor<T>> where)
+        public static int Delete<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> where)
         {
             return dbCmd.Delete(where(OrmLiteConfig.DialectProvider.SqlExpression<T>()));
         }
@@ -227,7 +227,7 @@ namespace ServiceStack.OrmLite
         ///   dbCmd.Delete&lt;Person&gt;(ev.Where(p => p.Age == 27));
         ///   DELETE FROM "Person" WHERE ("Age" = 27)
         /// </summary>
-        public static int Delete<T>(this IDbCommand dbCmd, SqlExpressionVisitor<T> where)
+        public static int Delete<T>(this IDbCommand dbCmd, SqlExpression<T> where)
         {
             var sql = where.ToDeleteRowStatement();
             return dbCmd.ExecuteSql(sql);

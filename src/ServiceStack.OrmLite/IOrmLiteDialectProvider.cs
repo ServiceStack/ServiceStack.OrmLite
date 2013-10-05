@@ -103,7 +103,7 @@ namespace ServiceStack.OrmLite
 
         string GetColumnNames(ModelDefinition modelDef);
 
-        SqlExpressionVisitor<T> SqlExpression<T>();
+        SqlExpression<T> SqlExpression<T>();
 
         DbType GetColumnDbType(Type valueType);
         string GetColumnTypeDefinition(Type fieldType);

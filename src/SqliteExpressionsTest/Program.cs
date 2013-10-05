@@ -51,7 +51,7 @@ namespace SqliteExpressionsTest
             CountTest.Test();
 
 			OrmLiteConfig.DialectProvider = SqliteOrmLiteDialectProvider.Instance;
-			SqlExpressionVisitor<Author> ev = OrmLiteConfig.DialectProvider.SqlExpression<Author>();
+			SqlExpression<Author> ev = OrmLiteConfig.DialectProvider.SqlExpression<Author>();
 									
 			using (IDbConnection db = GetFileConnectionString().OpenDbConnection())
 			{

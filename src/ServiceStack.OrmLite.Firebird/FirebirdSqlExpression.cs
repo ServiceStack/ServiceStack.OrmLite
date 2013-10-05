@@ -4,12 +4,12 @@ using System.Linq.Expressions;
 
 namespace ServiceStack.OrmLite.Firebird
 {
-	public class FirebirdSqlExpressionVisitor<T>:SqlExpressionVisitor<T>
+	public class FirebirdSqlExpression<T>:SqlExpression<T>
 	{
 	    private readonly string _trueExpression;
 	    private readonly string _falseExpression;
 
-	    public FirebirdSqlExpressionVisitor()
+	    public FirebirdSqlExpression()
         {
             _trueExpression = string.Format("({0}={1})", GetQuotedTrueValue(), GetQuotedTrueValue());
             _falseExpression = string.Format("({0}={1})", GetQuotedTrueValue(), GetQuotedFalseValue());

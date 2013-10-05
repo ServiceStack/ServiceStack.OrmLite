@@ -150,9 +150,9 @@ namespace ServiceStack.OrmLite.Sqlite
             return base.GetQuotedValue(value, fieldType);
         }
 
-        public override SqlExpressionVisitor<T> SqlExpression<T>()
+        public override SqlExpression<T> SqlExpression<T>()
         {
-            return new SqliteExpressionVisitor<T>();
+            return new SqliteExpression<T>();
         }
 
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName)

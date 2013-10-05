@@ -14,9 +14,9 @@ namespace ServiceStack.OrmLite.Tests
             OrmLiteConfig.DialectProvider = new SqliteOrmLiteDialectProvider();
         }
 
-        public static SqliteExpressionVisitor<Person> expr()
+        public static SqliteExpression<Person> expr()
         {
-            return new SqliteExpressionVisitor<Person>();
+            return new SqliteExpression<Person>();
         }
 
         [Test]

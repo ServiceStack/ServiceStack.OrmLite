@@ -8,12 +8,12 @@ namespace ServiceStack.OrmLite
 {
 	public static class ReadExtensions
 	{
-		public static SqlExpressionVisitor<T> CreateExpression<T>()
+		public static SqlExpression<T> SqlExpression<T>()
 		{
 			return OrmLiteConfig.DialectProvider.SqlExpression<T>();            
 		}
 
-		public static List<T> Select<T>(this IDbCommand dbCmd, Func<SqlExpressionVisitor<T>, SqlExpressionVisitor<T>> expression)
+		public static List<T> Select<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression)
 		{
 			var ev = OrmLiteConfig.DialectProvider.SqlExpression<T>();
 			string sql = expression(ev).ToSelectStatement();
@@ -23,7 +23,7 @@ namespace ServiceStack.OrmLite
 			}
 		}
 		
-		public static List<T> Select<T>(this IDbCommand dbCmd, SqlExpressionVisitor<T> expression)
+		public static List<T> Select<T>(this IDbCommand dbCmd, SqlExpression<T> expression)
 		{
 			string sql = expression.ToSelectStatement();
 			using (var reader = dbCmd.ExecReader(sql))
@@ -61,7 +61,7 @@ namespace ServiceStack.OrmLite
 			return Single(dbCmd, ev.Where(predicate).Limit(1));
 		}
 
-		public static T Single<T>(this IDbCommand dbCmd, SqlExpressionVisitor<T> expression)
+		public static T Single<T>(this IDbCommand dbCmd, SqlExpression<T> expression)
 		{
 			string sql= expression.ToSelectStatement();
 			using (var dbReader = dbCmd.ExecReader(sql))
@@ -89,12 +89,12 @@ namespace ServiceStack.OrmLite
 
         public static long Count<T>(this IDbCommand dbCmd)
         {
-            SqlExpressionVisitor<T> expression = OrmLiteConfig.DialectProvider.SqlExpression<T>();
+            SqlExpression<T> expression = OrmLiteConfig.DialectProvider.SqlExpression<T>();
             string sql = expression.ToCountStatement();
             return dbCmd.ScalarFmt<long>(sql);
         }
 
-        public static long Count<T>(this IDbCommand dbCmd, SqlExpressionVisitor<T> expression)
+        public static long Count<T>(this IDbCommand dbCmd, SqlExpression<T> expression)
         {
             string sql = expression.ToCountStatement();
             return dbCmd.ScalarFmt<long>(sql);

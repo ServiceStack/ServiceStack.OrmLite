@@ -94,7 +94,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Expressions\ExpressionVisitor.cs" />
+    <Compile Include="Expressions\SqlExpressionVisitor.cs" />
     <Compile Include="Expressions\ParameterRebinder.cs" />
     <Compile Include="Expressions\PredicateBuilder.cs" />
     <Compile Include="Expressions\ReadConnectionExtensions.cs" />
@@ -130,7 +130,7 @@
     <Compile Include="SqlBuilder.cs" />
     <Compile Include="SqlInValues.cs" />
     <Compile Include="Expressions\ReadExtensions.cs" />
-    <Compile Include="Expressions\SqlExpressionVisitor.cs" />
+    <Compile Include="Expressions\SqlExpression.cs" />
     <Compile Include="Expressions\WriteExtensions.cs" />
     <Compile Include="Expressions\Sql.cs" />
     <Compile Include="OrmLiteDDLExtensions.cs" />

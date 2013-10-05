@@ -172,9 +172,9 @@ namespace ServiceStack.OrmLite.SqlServer
 		    _ensureUtc = shouldEnsureUtc;
 		}
 
-		public override SqlExpressionVisitor<T> SqlExpression<T>()
+		public override SqlExpression<T> SqlExpression<T>()
 		{
-			return new SqlServerExpressionVisitor<T>();
+			return new SqlServerExpression<T>();
 		}
 
 		public override bool DoesTableExist(IDbCommand dbCmd, string tableName)

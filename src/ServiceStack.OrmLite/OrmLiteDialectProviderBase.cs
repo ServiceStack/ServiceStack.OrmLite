@@ -953,7 +953,7 @@ namespace ServiceStack.OrmLite
             return modelType.GetModelDefinition();
         }
 
-        public virtual SqlExpressionVisitor<T> SqlExpression<T>()
+        public virtual SqlExpression<T> SqlExpression<T>()
         {
             throw new NotImplementedException();
         }

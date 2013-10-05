@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 
 namespace ServiceStack.OrmLite.Oracle
 {
-	public class OracleSqlExpressionVisitor<T>:SqlExpressionVisitor<T>
+	public class OracleSqlExpression<T>:SqlExpression<T>
 	{
         protected override object VisitColumnAccessMethod(MethodCallExpression m)
         {

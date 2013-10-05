@@ -9,7 +9,7 @@ namespace ServiceStack.OrmLite.Sqlite
     /// <summary>
     /// Description of SqliteExpressionVisitor.
     /// </summary>
-    public class SqliteExpressionVisitor<T> : SqlExpressionVisitor<T>
+    public class SqliteExpression<T> : SqlExpression<T>
     {
         protected override object VisitColumnAccessMethod(MethodCallExpression m)
         {

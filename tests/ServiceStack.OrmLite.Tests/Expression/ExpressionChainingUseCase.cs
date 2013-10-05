@@ -68,7 +68,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
         {
             db.InsertAll(People);
 
-            var visitor = ReadExtensions.CreateExpression<Person>();
+            var visitor = ReadExtensions.SqlExpression<Person>();
 
             visitor.Where(x => x.FirstName.StartsWith("Jim")).And(x => x.LastName.StartsWith("Hen"));
             var results = db.Select<Person>(visitor);
@@ -107,7 +107,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
         {
             db.InsertAll(People);
 
-            var visitor = ReadExtensions.CreateExpression<Person>();
+            var visitor = ReadExtensions.SqlExpression<Person>();
 
             visitor.Where(x => x.FirstName.StartsWith("Jim"));
             visitor.Where(x => x.LastName.StartsWith("Hen"));
@@ -131,7 +131,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
         {
             db.InsertAll(People);
 
-            var visitor = ReadExtensions.CreateExpression<Person>();
+            var visitor = ReadExtensions.SqlExpression<Person>();
             visitor.OrderBy(x => x.Age);
             visitor.ThenBy(x => x.FirstName);
 
