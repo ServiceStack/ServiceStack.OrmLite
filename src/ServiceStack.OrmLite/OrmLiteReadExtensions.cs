@@ -614,18 +614,19 @@ namespace ServiceStack.OrmLite
 
 				object oValue = reader.GetValue(0);
 				if (oValue == DBNull.Value) return default(T);
-	
-				if (t== typeof(DateTime) || t== typeof(DateTime?)) 
-					return(T)(object) DateTime.Parse(oValue.ToString(), System.Globalization.CultureInfo.CurrentCulture);	
-						
-				if (t== typeof(decimal) || t== typeof(decimal?)) 
-					return(T)(object)decimal.Parse(oValue.ToString(), System.Globalization.CultureInfo.CurrentCulture);	
-						
-				if (t== typeof(double) || t== typeof(double?)) 
-					return(T)(object)double.Parse(oValue.ToString(), System.Globalization.CultureInfo.CurrentCulture);
-						
-				if (t== typeof(float) || t== typeof(float?))
-					return(T)(object)float.Parse(oValue.ToString(), System.Globalization.CultureInfo.CurrentCulture);
+
+                var typeCode = typeof(T).GetUnderlyingTypeCode();
+                switch (typeCode)
+                {
+                    case TypeCode.DateTime:
+                        return (T)(object)DateTime.Parse(oValue.ToString(), System.Globalization.CultureInfo.CurrentCulture);
+                    case TypeCode.Decimal:
+                        return (T)(object)decimal.Parse(oValue.ToString(), System.Globalization.CultureInfo.CurrentCulture);
+                    case TypeCode.Single:
+                        return (T)(object)float.Parse(oValue.ToString(), System.Globalization.CultureInfo.CurrentCulture);
+                    case TypeCode.Double:
+                        return (T)(object)double.Parse(oValue.ToString(), System.Globalization.CultureInfo.CurrentCulture);
+                }
 						
 				object o = OrmLiteConfig.DialectProvider.ConvertDbValue(oValue, t);
 				return o == null ? default(T) : (T)o;

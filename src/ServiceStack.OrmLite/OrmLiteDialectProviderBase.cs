@@ -258,7 +258,7 @@ namespace ServiceStack.OrmLite
 
         public virtual object ConvertDbValue(object value, Type type)
         {
-            if (value == null || value.GetType() == typeof(DBNull)) return null;
+            if (value == null || value is DBNull) return null;
 
             if (value.GetType() == type)
             {
@@ -268,20 +268,18 @@ namespace ServiceStack.OrmLite
                 return value;
             }
 
-            if (type.IsValueType)
+            var typeCode = type.GetUnderlyingTypeCode();
+            switch (typeCode)
             {
-                if (type == typeof(float))
+                case TypeCode.Single:
                     return value is double ? (float)((double)value) : (float)value;
-
-                if (type == typeof(double))
+                case TypeCode.Double:
                     return value is float ? (double)((float)value) : (double)value;
-
-                if (type == typeof(decimal))
+                case TypeCode.Decimal:
                     return (decimal)value;
+                case TypeCode.String:
+                    return value;
             }
-
-            if (type == typeof(string))
-                return value;
 
             try
             {
@@ -290,8 +288,7 @@ namespace ServiceStack.OrmLite
             }
             catch (Exception)
             {
-                log.ErrorFormat("Error ConvertDbValue trying to convert {0} into {1}",
-                    value, type.Name);
+                log.ErrorFormat("Error ConvertDbValue trying to convert {0} into {1}", value, type.Name);
                 throw;
             }
         }
