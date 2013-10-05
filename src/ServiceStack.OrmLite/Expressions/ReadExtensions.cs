@@ -22,20 +22,29 @@ namespace ServiceStack.OrmLite
 				return ConvertToList<T>(reader);
 			}
 		}
-		
-		public static List<T> Select<T>(this IDbCommand dbCmd, SqlExpression<T> expression)
-		{
-			string sql = expression.ToSelectStatement();
-			using (var reader = dbCmd.ExecReader(sql))
-			{
-				return ConvertToList<T>(reader);
-			}
-		}
+
+        public static List<T> Select<T>(this IDbCommand dbCmd, SqlExpression<T> expression)
+        {
+            string sql = expression.ToSelectStatement();
+            using (var reader = dbCmd.ExecReader(sql))
+            {
+                return ConvertToList<T>(reader);
+            }
+        }
+
+        public static List<T> SelectFmt<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
+        {
+            var ev = OrmLiteConfig.DialectProvider.SqlExpression<T>();
+            string sql = ev.Where(predicate).ToSelectStatement();
+            using (var reader = dbCmd.ExecReader(sql))
+            {
+                return ConvertToList<T>(reader);
+            }
+        }
 
         public static List<T> Select<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
         {
-            var ev = OrmLiteConfig.DialectProvider.SqlExpression<T>();
-            ev.IsParameterized = true;
+            var ev = OrmLiteConfig.DialectProvider.SqlExpression<T>().AsParameterized();
             string sql = ev.Where(predicate).ToSelectStatement();
 
             dbCmd.Parameters.Clear();

@@ -32,7 +32,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         /// <param name="paramValue"></param>
         /// <returns></returns>
-        string GetQuotedParam(string paramValue);
+        string GetQuotedValue(string paramValue);
 
         object ConvertDbValue(object value, Type type);
 

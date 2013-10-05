@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -701,29 +702,44 @@ namespace ServiceStack.OrmLite
                 left = Visit(b.Left);
                 right = Visit(b.Right);
 
-                if (left as EnumMemberAccess != null && right as PartialSqlString == null)
-                {
-                    var enumType = ((EnumMemberAccess)left).EnumType;
+                var leftEnum = left as EnumMemberAccess;
+                var rightEnum = right as EnumMemberAccess;
+                var rightNeedsCoercing = leftEnum != null && rightEnum == null;
+                var leftNeedsCoercing = rightEnum != null && leftEnum == null;
 
-                    //enum value was returned by Visit(b.Right)
-                    long numvericVal;
-                    if (Int64.TryParse(right.ToString(), out numvericVal))
-                        right = OrmLiteConfig.DialectProvider.GetQuotedValue(Enum.ToObject(enumType, numvericVal).ToString(),
-                                                                     typeof(string));
+                if (rightNeedsCoercing)
+                {
+                    var rightPartialSql = right as PartialSqlString;
+                    if (rightPartialSql != null)
+                    {
+                        if (IsParameterized)
+                        {
+                            //rewrite last param value with enum string  
+                            var enumValue = Params[rightPartialSql.Text];
+                            Params[rightPartialSql.Text] = Enum.ToObject(leftEnum.EnumType, enumValue).ToString();
+                        }
+                    }
                     else
-                        right = OrmLiteConfig.DialectProvider.GetQuotedValue(right, right.GetType());
+                    {
+                        right = ConvertToEnum(leftEnum.EnumType, right.ToString(), right);
+                    }
                 }
-                else if (right as EnumMemberAccess != null && left as PartialSqlString == null)
+                else if (leftNeedsCoercing)
                 {
-                    var enumType = ((EnumMemberAccess)right).EnumType;
-
-                    //enum value was returned by Visit(b.Left)
-                    long numvericVal;
-                    if (Int64.TryParse(left.ToString(), out numvericVal))
-                        left = OrmLiteConfig.DialectProvider.GetQuotedValue(Enum.ToObject(enumType, numvericVal).ToString(),
-                                                                     typeof(string));
+                    var leftPartialSql = left as PartialSqlString;
+                    if (leftPartialSql != null)
+                    {
+                        if (IsParameterized)
+                        {
+                            //rewrite last param value with enum string  
+                            var enumValue = Params[leftPartialSql.Text];
+                            Params[leftPartialSql.Text] = Enum.ToObject(rightEnum.EnumType, enumValue).ToString();
+                        }
+                    }
                     else
-                        left = OrmLiteConfig.DialectProvider.GetQuotedValue(left, left.GetType());
+                    {
+                        left = ConvertToEnum(rightEnum.EnumType, left.ToString(), left);
+                    }
                 }
                 else if (left as PartialSqlString == null && right as PartialSqlString == null)
                 {
@@ -748,6 +764,16 @@ namespace ServiceStack.OrmLite
                 default:
                     return new PartialSqlString("(" + left + sep + operand + sep + right +")");
             }
+        }
+
+        private static string ConvertToEnum(Type enumType, string enumStr, object otherExpr)
+        {
+            //enum value was returned by Visit(b.Right)
+            long numvericVal;
+            var result = Int64.TryParse(enumStr, out numvericVal)
+                ? OrmLiteConfig.DialectProvider.GetQuotedValue(Enum.ToObject(enumType, numvericVal).ToString(), typeof(string))
+                : OrmLiteConfig.DialectProvider.GetQuotedValue(otherExpr, otherExpr.GetType());
+            return result;
         }
 
         protected virtual object VisitMemberAccess(MemberExpression m)
@@ -819,7 +845,7 @@ namespace ServiceStack.OrmLite
             }
             else
             {
-                string paramPlaceholder = OrmLiteConfig.DialectProvider.ParamString + paramCounter++;
+                string paramPlaceholder = OrmLiteConfig.DialectProvider.GetParam(paramCounter++);
                 Params.Add(paramPlaceholder, c.Value);
                 return new PartialSqlString(paramPlaceholder);
             }
@@ -1170,13 +1196,31 @@ namespace ServiceStack.OrmLite
                     statement = string.Format("lower({0})", quotedColName);
                     break;
                 case "StartsWith":
-                    statement = string.Format("upper({0}) like {1} ", quotedColName, OrmLiteConfig.DialectProvider.GetQuotedParam(args[0].ToString().ToUpper() + "%"));
+                    var startsWithParam = OrmLiteConfig.DialectProvider.GetQuotedValue(args[0].ToString().ToUpper() + "%");
+                    if (IsParameterized)
+                    {
+                        startsWithParam = args[0].ToString();                       //= @1
+                        Params[startsWithParam] += "%";                             //= abc%
+                    }
+                    statement = string.Format("upper({0}) like {1} ", quotedColName, startsWithParam);
                     break;
                 case "EndsWith":
-                    statement = string.Format("upper({0}) like {1}", quotedColName, OrmLiteConfig.DialectProvider.GetQuotedParam("%" + args[0].ToString().ToUpper()));
+                    var endsWithParam = OrmLiteConfig.DialectProvider.GetQuotedValue("%" + args[0].ToString().ToUpper());
+                    if (IsParameterized)
+                    {
+                        endsWithParam = args[0].ToString();                         //= @1
+                        Params[endsWithParam] = "%" + Params[endsWithParam];        //= %abc
+                    }
+                    statement = string.Format("upper({0}) like {1}", quotedColName, endsWithParam);
                     break;
                 case "Contains":
-                    statement = string.Format("upper({0}) like {1}", quotedColName, OrmLiteConfig.DialectProvider.GetQuotedParam("%" + args[0].ToString().ToUpper() + "%"));
+                    var containsParam = OrmLiteConfig.DialectProvider.GetQuotedValue("%" + args[0].ToString().ToUpper() + "%");
+                    if (IsParameterized)
+                    {
+                        containsParam = args[0].ToString();                         //= @1
+                        Params[containsParam] = "%" + Params[containsParam] + "%";  //= %abc%
+                    }
+                    statement = string.Format("upper({0}) like {1}", quotedColName, containsParam);
                     break;
                 case "Substring":
                     var startIndex = Int32.Parse(args[0].ToString()) + 1;
@@ -1197,6 +1241,12 @@ namespace ServiceStack.OrmLite
                     throw new NotSupportedException();
             }
             return new PartialSqlString(statement);
+        }
+
+        public SqlExpression<T> AsParameterized()
+        {
+            IsParameterized = true;
+            return this;
         }
     }
 

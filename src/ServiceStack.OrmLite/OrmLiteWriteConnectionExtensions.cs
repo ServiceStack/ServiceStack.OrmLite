@@ -153,7 +153,7 @@ namespace ServiceStack.OrmLite
             dbConn.Exec(dbCmd => dbCmd.InsertAll(objs));
         }
 
-        public static long InsertParam<T>(this IDbConnection dbConn, T obj, bool selectIdentity = false)
+        public static long Insert<T>(this IDbConnection dbConn, T obj, bool selectIdentity = false)
         {
             return dbConn.Exec(dbCmd => dbCmd.Insert(obj, selectIdentity));
         }

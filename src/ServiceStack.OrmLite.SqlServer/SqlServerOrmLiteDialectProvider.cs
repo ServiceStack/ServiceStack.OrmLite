@@ -30,7 +30,7 @@ namespace ServiceStack.OrmLite.SqlServer
 			base.InitColumnTypeMap();
 		}
 
-        public override string GetQuotedParam(string paramValue)
+        public override string GetQuotedValue(string paramValue)
         {
             return (UseUnicode ? "N'" : "'") + paramValue.Replace("'", "''") + "'";
         }
@@ -144,7 +144,7 @@ namespace ServiceStack.OrmLite.SqlServer
 				return base.GetQuotedValue(boolValue ? 1 : 0, typeof(int));
 			}
 			if(fieldType == typeof(string)) {
-                return GetQuotedParam(value.ToString());
+                return GetQuotedValue(value.ToString());
 			}
 
             if (fieldType == typeof(byte[]))
@@ -288,9 +288,9 @@ namespace ServiceStack.OrmLite.SqlServer
                 oldColumnName);
 
             return string.Format("EXEC sp_rename {0}, {1}, {2};",
-                                 GetQuotedParam(objectName),
-                                 GetQuotedParam(fieldDef.FieldName),
-                                 GetQuotedParam("COLUMN"));
+                                 GetQuotedValue(objectName),
+                                 GetQuotedValue(fieldDef.FieldName),
+                                 GetQuotedValue("COLUMN"));
         }
     }
 }

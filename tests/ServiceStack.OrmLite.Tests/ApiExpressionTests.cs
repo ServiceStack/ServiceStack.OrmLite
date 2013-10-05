@@ -154,6 +154,13 @@ namespace ServiceStack.OrmLite.Tests
             db.SingleById<Person>(1).PrintDump();
             db.GetLastSql().Print();
         }
+
+        [Explicit]
+        public void Benchmark()
+        {
+            Measure(() => db.SingleById<Person>(1), times: 1).ToString().Print("Test 2: {0}");
+            Measure(() => db.SingleById<Person>(1), times: 1).ToString().Print("Test 1: {0}");
+        }
         
         static double MeasureFor(Action fn, int timeMinimum)
         {
@@ -193,13 +200,5 @@ namespace ServiceStack.OrmLite.Tests
 
             return result;
         }
-
-        [Test]
-        public void benchmark()
-        {
-            Measure(() => db.SingleById<Person>(1), times: 1).ToString().Print("Test 2: {0}");
-            Measure(() => db.SingleById<Person>(1), times: 1).ToString().Print("Test 1: {0}");
-        }
-
     }
 }

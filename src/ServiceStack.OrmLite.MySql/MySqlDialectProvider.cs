@@ -28,7 +28,7 @@ namespace ServiceStack.OrmLite.MySql
     	    base.SelectIdentitySql = "SELECT LAST_INSERT_ID()";
         }
 
-        public override string GetQuotedParam(string paramValue)
+        public override string GetQuotedValue(string paramValue)
         {
             return "'" + paramValue.Replace("\\", "\\\\").Replace("'", @"\'") + "'";
         }

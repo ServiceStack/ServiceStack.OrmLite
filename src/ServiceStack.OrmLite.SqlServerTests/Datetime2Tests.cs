@@ -38,7 +38,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
 
 
 				//check InsertParam
-				conn.InsertParam(test_object_ValidForDatetime2);
+				conn.Insert(test_object_ValidForDatetime2);
 			}
 		}
 		[Test]
@@ -70,10 +70,10 @@ namespace ServiceStack.OrmLite.SqlServerTests
 
 				
 				//check InsertParam
-				conn.InsertParam(test_object_ValidForNormalDatetime);
+				conn.Insert(test_object_ValidForNormalDatetime);
 				//InsertParam fails differently:
 				var insertParamException = Assert.Throws<System.Data.SqlTypes.SqlTypeException>(() => {
-					conn.InsertParam(test_object_ValidForDatetime2);
+					conn.Insert(test_object_ValidForDatetime2);
 				});
 				Assert.That(insertParamException.Message.Contains("SqlDateTime overflow"));
 			}
