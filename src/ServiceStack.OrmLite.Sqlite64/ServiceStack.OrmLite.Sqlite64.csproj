@@ -54,8 +54,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\ServiceStack.OrmLite.Sqlite\SqliteExpressionVisitor.cs">
-      <Link>SqliteExpressionVisitor.cs</Link>
+    <Compile Include="..\ServiceStack.OrmLite.Sqlite\SqliteExpression.cs">
+      <Link>SqliteExpression.cs</Link>
     </Compile>
     <Compile Include="..\ServiceStack.OrmLite.Sqlite\SqliteOrmLiteDialectProviderBase.cs">
       <Link>SqliteOrmLiteDialectProviderBase.cs</Link>
