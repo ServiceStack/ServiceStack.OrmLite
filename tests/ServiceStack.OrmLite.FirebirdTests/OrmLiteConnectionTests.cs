@@ -42,7 +42,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 				try
 				{
 					db.CreateTable<ModelWithIdAndName>(true);
-					db.Insert(new ModelWithIdAndName(0));
+					db.InsertAll(new ModelWithIdAndName(0));
 				}
 				catch (Exception ex)
 				{
@@ -58,10 +58,10 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		{
             var db = ConnectionString.OpenReadOnlyDbConnection();
             db.CreateTable<ModelWithIdAndName>(true);
-            db.Insert(new ModelWithIdAndName(1));
+            db.InsertAll(new ModelWithIdAndName(1));
 
             var dbReadOnly = ConnectionString.OpenReadOnlyDbConnection();
-            dbReadOnly.Insert(new ModelWithIdAndName(2));
+            dbReadOnly.InsertAll(new ModelWithIdAndName(2));
             var rows = dbReadOnly.Select<ModelWithIdAndName>();
             Assert.That(rows, Has.Count.EqualTo(2));
 

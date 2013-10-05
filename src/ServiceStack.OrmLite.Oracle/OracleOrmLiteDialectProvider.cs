@@ -11,7 +11,8 @@ namespace ServiceStack.OrmLite.Oracle
     public class OracleOrmLiteDialectProvider : OrmLiteDialectProviderBase<OracleOrmLiteDialectProvider>
 	{
 		private readonly List<string> RESERVED = new List<string>(new[] {
-			"USER","ORDER","PASSWORD", "ACTIVE","LEFT","DOUBLE", "FLOAT", "DECIMAL","STRING", "DATE","DATETIME", "TYPE","TIMESTAMP", "COMMENT"
+			"USER","ORDER","PASSWORD", "ACTIVE","LEFT","DOUBLE", "FLOAT", "DECIMAL","STRING", "DATE",
+            "DATETIME", "TYPE","TIMESTAMP", "COMMENT"
 		});
 		
 		public static OracleOrmLiteDialectProvider Instance = new OracleOrmLiteDialectProvider();
@@ -167,7 +168,7 @@ namespace ServiceStack.OrmLite.Oracle
 			return sql.ToString();
 		}
 
-        public override IDbCommand CreateParameterizedInsertStatement(IDbConnection connection, object objWithProperties, ICollection<string> insertFields = null)
+        public override IDbCommand CreateParameterizedInsertStatement(IDbCommand dbCommand, object objWithProperties, ICollection<string> insertFields = null)
         {
             if (insertFields == null)
                 insertFields = new List<string>();
@@ -176,7 +177,6 @@ namespace ServiceStack.OrmLite.Oracle
             var sbColumnValues = new StringBuilder();
             var modelDef = GetModel(objWithProperties.GetType());
 
-            var dbCommand = connection.CreateCommand();
             dbCommand.CommandTimeout = OrmLiteConfig.CommandTimeout;
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {

@@ -524,7 +524,7 @@ namespace ServiceStack.OrmLite
         }
 
         // Param
-        public virtual IDbCommand CreateParameterizedInsertStatement(IDbConnection connection, object objWithProperties, ICollection<string> insertFields = null)
+        public virtual IDbCommand CreateParameterizedInsertStatement(IDbCommand cmd, object objWithProperties, ICollection<string> insertFields = null)
         {
             if (insertFields == null) 
                 insertFields = new List<string>();
@@ -533,7 +533,6 @@ namespace ServiceStack.OrmLite
             var sbColumnValues = new StringBuilder();
             var modelDef = objWithProperties.GetType().GetModelDefinition();
 
-            var cmd = connection.CreateCommand();
             cmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
@@ -673,7 +672,7 @@ namespace ServiceStack.OrmLite
             return updateSql;
         }
 
-        public virtual IDbCommand CreateParameterizedUpdateStatement(IDbConnection connection, object objWithProperties, ICollection<string> updateFields = null)
+        public virtual IDbCommand CreateParameterizedUpdateStatement(IDbCommand command, object objWithProperties, ICollection<string> updateFields = null)
         {
             if (updateFields == null) 
                 updateFields = new List<string>();
@@ -682,7 +681,6 @@ namespace ServiceStack.OrmLite
             var sql = new StringBuilder();
             var modelDef = objWithProperties.GetType().GetModelDefinition();
 
-            var command = connection.CreateCommand();
             command.CommandTimeout = OrmLiteConfig.CommandTimeout;
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {

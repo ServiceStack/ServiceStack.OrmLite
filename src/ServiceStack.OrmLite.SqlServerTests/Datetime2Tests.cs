@@ -23,7 +23,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
 				conn.CreateTable<Table_for_datetime2_tests>(true);
 
 				//normal insert
-				conn.Insert(test_object_ValidForDatetime2);
+				conn.InsertAll(test_object_ValidForDatetime2);
 				var insertedId = (int)conn.LastInsertId();
 
 				//read back, and verify precision
@@ -32,7 +32,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
 
 				//update
 				fromDb.ToVerifyPrecision = test_object_ValidForDatetime2.ToVerifyPrecision.Value.AddYears(1);
-				conn.UpdateParam(fromDb);
+				conn.Update(fromDb);
                 var fromDb2 = conn.SingleById<Table_for_datetime2_tests>(insertedId);
 				Assert.AreEqual(test_object_ValidForDatetime2.ToVerifyPrecision.Value.AddYears(1), fromDb2.ToVerifyPrecision);
 
@@ -56,7 +56,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
 				conn.CreateTable<Table_for_datetime2_tests>(true);
 
 				//normal insert
-				conn.Insert(test_object_ValidForNormalDatetime);
+				conn.InsertAll(test_object_ValidForNormalDatetime);
 				var insertedId = conn.LastInsertId();
 
 				//insert works, but can't regular datetime's precision is not great enough.
@@ -64,7 +64,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
 				Assert.AreNotEqual(test_object_ValidForNormalDatetime.ToVerifyPrecision, fromDb.ToVerifyPrecision);
 
 				var thrown = Assert.Throws<SqlException>(() => {
-					conn.Insert(test_object_ValidForDatetime2);
+					conn.InsertAll(test_object_ValidForDatetime2);
 				});
 				Assert.That(thrown.Message.Contains("The conversion of a varchar data type to a datetime data type resulted in an out-of-range value."));
 

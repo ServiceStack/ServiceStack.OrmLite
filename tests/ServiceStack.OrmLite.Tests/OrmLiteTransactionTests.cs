@@ -17,12 +17,12 @@ namespace ServiceStack.OrmLite.Tests
 			using (var db = Config.OpenDbConnection())
 			{
 				db.DropAndCreateTable<ModelWithIdAndName>();
-				db.Insert(new ModelWithIdAndName(1));
+				db.InsertAll(new ModelWithIdAndName(1));
 
 				using (var dbTrans = db.OpenTransaction())
 				{
-					db.Insert(new ModelWithIdAndName(2));
-					db.Insert(new ModelWithIdAndName(3));
+					db.InsertAll(new ModelWithIdAndName(2));
+					db.InsertAll(new ModelWithIdAndName(3));
 
 					var rowsInTrans = db.Select<ModelWithIdAndName>();
 					Assert.That(rowsInTrans, Has.Count.EqualTo(3));
@@ -41,12 +41,12 @@ namespace ServiceStack.OrmLite.Tests
             using (var db = Config.OpenDbConnection())
 			{
                 db.DropAndCreateTable<ModelWithIdAndName>();
-				db.Insert(new ModelWithIdAndName(1));
+				db.InsertAll(new ModelWithIdAndName(1));
 
                 using (var dbTrans = db.OpenTransaction())
 				{
-					db.Insert(new ModelWithIdAndName(2));
-					db.Insert(new ModelWithIdAndName(3));
+					db.InsertAll(new ModelWithIdAndName(2));
+					db.InsertAll(new ModelWithIdAndName(3));
 
 					var rowsInTrans = db.Select<ModelWithIdAndName>();
 					Assert.That(rowsInTrans, Has.Count.EqualTo(3));
@@ -66,13 +66,13 @@ namespace ServiceStack.OrmLite.Tests
                 db.DropAndCreateTable<ModelWithFieldsOfDifferentTypes>();
                 db.DropAndCreateTable<ModelWithOnlyStringFields>();
 
-				db.Insert(new ModelWithIdAndName(1));
+				db.InsertAll(new ModelWithIdAndName(1));
 
                 using (var dbTrans = db.OpenTransaction())
 				{
-					db.Insert(new ModelWithIdAndName(2));
-					db.Insert(ModelWithFieldsOfDifferentTypes.Create(3));
-					db.Insert(ModelWithOnlyStringFields.Create("id3"));
+					db.InsertAll(new ModelWithIdAndName(2));
+					db.InsertAll(ModelWithFieldsOfDifferentTypes.Create(3));
+					db.InsertAll(ModelWithOnlyStringFields.Create("id3"));
 
 					Assert.That(db.Select<ModelWithIdAndName>(), Has.Count.EqualTo(2));
 					Assert.That(db.Select<ModelWithFieldsOfDifferentTypes>(), Has.Count.EqualTo(1));
@@ -94,13 +94,13 @@ namespace ServiceStack.OrmLite.Tests
                 db.DropAndCreateTable<ModelWithFieldsOfDifferentTypes>();
                 db.DropAndCreateTable<ModelWithOnlyStringFields>();
 
-				db.Insert(new ModelWithIdAndName(1));
+				db.InsertAll(new ModelWithIdAndName(1));
 
                 using (var dbTrans = db.OpenTransaction())
 				{
-					db.Insert(new ModelWithIdAndName(2));
-					db.Insert(ModelWithFieldsOfDifferentTypes.Create(3));
-					db.Insert(ModelWithOnlyStringFields.Create("id3"));
+					db.InsertAll(new ModelWithIdAndName(2));
+					db.InsertAll(ModelWithFieldsOfDifferentTypes.Create(3));
+					db.InsertAll(ModelWithOnlyStringFields.Create("id3"));
 
 					Assert.That(db.Select<ModelWithIdAndName>(), Has.Count.EqualTo(2));
 					Assert.That(db.Select<ModelWithFieldsOfDifferentTypes>(), Has.Count.EqualTo(1));
@@ -134,7 +134,7 @@ namespace ServiceStack.OrmLite.Tests
                 {
                     conn.CreateTable<MyTable>();
 
-                    conn.Insert(new MyTable { SomeTextField = "Example" });
+                    conn.InsertAll(new MyTable { SomeTextField = "Example" });
                     var record = conn.SingleById<MyTable>(1);
                 }
 
@@ -154,7 +154,7 @@ namespace ServiceStack.OrmLite.Tests
 
                     using (var tran = conn.OpenTransaction())
                     {
-                        conn.Insert(new MyTable { SomeTextField = "Example" });
+                        conn.InsertAll(new MyTable { SomeTextField = "Example" });
                         tran.Commit();
                     }
 
@@ -180,7 +180,7 @@ namespace ServiceStack.OrmLite.Tests
 
                     using (var tran = conn.OpenTransaction())
                     {
-                        conn.Insert(new MyTable { SomeTextField = "Example" });
+                        conn.InsertAll(new MyTable { SomeTextField = "Example" });
                         tran.Commit();
                     }
 

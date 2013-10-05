@@ -46,7 +46,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 				db.CreateTable<Author>(true);
 				db.DeleteAll<Author>();
 
-				db.InsertAll(authors);
+				db.InsertAll<Author>(authors);
 				
 				var expectedDate  = authors.Max(e=>e.Birthday);
 				var r1 = db.Scalar<Author, DateTime>( e => Sql.Max(e.Birthday) );

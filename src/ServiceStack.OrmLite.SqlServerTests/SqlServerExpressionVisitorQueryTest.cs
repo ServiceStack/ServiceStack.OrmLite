@@ -105,7 +105,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
             using(var db = OpenDbConnection())
             {
                 db.CreateTable<TestEntity>(true);
-                db.Insert(new TestEntity
+                db.InsertAll(new TestEntity
                 {
                     Foo = this.RandomString(16),
                     Bar = this.RandomString(16),
@@ -165,7 +165,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
 
             for (int i = 1; i < 1000; i++)
             {
-                db.Insert(new TestEntity()
+                db.InsertAll(new TestEntity()
                 {
                     Foo = RandomString(16),
                     Bar = RandomString(16),
@@ -180,7 +180,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
 
             for (int i = 1; i < 1000; i++)
             {
-                db.Insert(new TestEntityWithAliases()
+                db.InsertAll(new TestEntityWithAliases()
                 {
                     Foo = RandomString(16),
                     Bar = RandomString(16),

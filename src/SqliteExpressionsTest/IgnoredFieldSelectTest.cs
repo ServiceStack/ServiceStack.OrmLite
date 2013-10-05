@@ -73,16 +73,16 @@ namespace SqliteExpressionsTest
                 db.CreateTable<UserService_2>(true);
 
                 //Insert Test
-                db.Insert(new UserData_2 { Id = 5, DataValue = "Value-5" });
-                db.Insert(new UserData_2 { Id = 6, DataValue = "Value-6" });
+                db.InsertAll(new UserData_2 { Id = 5, DataValue = "Value-5" });
+                db.InsertAll(new UserData_2 { Id = 6, DataValue = "Value-6" });
 
-                db.Insert(new UserService_2 { Id = 8, ServiceName = "Value-8" });
-                db.Insert(new UserService_2 { Id = 9, ServiceName = "Value-9" });
+                db.InsertAll(new UserService_2 { Id = 8, ServiceName = "Value-8" });
+                db.InsertAll(new UserService_2 { Id = 9, ServiceName = "Value-9" });
 
                 var user2 = new User_2 { Id = 1, Name = "A", CreatedDate = DateTime.Now, UserDataId = 5, UserServiceId = 8 };
-                db.Insert(user2);
-                db.Insert(new User_2 { Id = 2, Name = "B", CreatedDate = DateTime.Now, UserDataId = 5, UserServiceId = 9 });
-                db.Insert(new User_2 { Id = 3, Name = "B", CreatedDate = DateTime.Now });
+                db.InsertAll(user2);
+                db.InsertAll(new User_2 { Id = 2, Name = "B", CreatedDate = DateTime.Now, UserDataId = 5, UserServiceId = 9 });
+                db.InsertAll(new User_2 { Id = 3, Name = "B", CreatedDate = DateTime.Now });
                 
                 //Update Test
                 user2.CreatedDate = DateTime.Now;

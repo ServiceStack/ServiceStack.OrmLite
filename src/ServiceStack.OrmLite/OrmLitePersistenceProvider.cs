@@ -88,12 +88,12 @@ namespace ServiceStack.OrmLite
 			if (existingEntity != null)
 			{
 				existingEntity.PopulateWith(entity);
-				dbCmd.Update(entity);
+				dbCmd.UpdateAll(entity);
 
 				return existingEntity;
 			}
 
-			dbCmd.Insert(entity);
+			dbCmd.InsertAll(entity);
 			return entity;
 		}
 

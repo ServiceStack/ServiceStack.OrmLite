@@ -23,7 +23,7 @@ namespace ServiceStack.OrmLite.Oracle.Tests
                 Assert.AreEqual(0, noRows.Count());
 
                 for(int i = 0; i < 150; i++) {
-                    db.Insert<FirstColMustBeQuoted>(new FirstColMustBeQuoted { COMMENT = "row #" + i });
+                    db.InsertAll<FirstColMustBeQuoted>(new FirstColMustBeQuoted { COMMENT = "row #" + i });
                 }
 
                 var hundredRows = db.Select<FirstColMustBeQuoted>(ev => ev.Limit(100));
@@ -42,7 +42,7 @@ namespace ServiceStack.OrmLite.Oracle.Tests
                 Assert.AreEqual(0, noRows.Count());
 
                 for(int i = 0; i < 150; i++) {
-                    db.Insert<FirstColNoQuotes>(new FirstColNoQuotes { COMMENT = "row #" + i });
+                    db.InsertAll<FirstColNoQuotes>(new FirstColNoQuotes { COMMENT = "row #" + i });
                 }
 
                 var hundredRows = db.Select<FirstColNoQuotes>(ev => ev.Limit(100));
@@ -61,7 +61,7 @@ namespace ServiceStack.OrmLite.Oracle.Tests
                 Assert.AreEqual(0, noRows.Count());
 
                 for(int i = 0; i < 150; i++) {
-                    db.Insert(new COMMENT_first { COMMENT = "COMMENT row #" + i });
+                    db.InsertAll(new COMMENT_first { COMMENT = "COMMENT row #" + i });
                 }
 
                 var hundredRows = db.Select<COMMENT_first>(ev => ev.Limit(100));
@@ -80,7 +80,7 @@ namespace ServiceStack.OrmLite.Oracle.Tests
                 Assert.AreEqual(0, noRows.Count());
 
                 for(int i = 0; i < 150; i++) {
-                    db.Insert(new COMMENT_other { COMMENT = "COMMENT row #" + i });
+                    db.InsertAll(new COMMENT_other { COMMENT = "COMMENT row #" + i });
                 }
 
                 var hundredRows = db.Select<COMMENT_other>(ev => ev.Limit(100));

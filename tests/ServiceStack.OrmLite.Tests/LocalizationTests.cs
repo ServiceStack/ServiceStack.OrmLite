@@ -46,7 +46,7 @@ namespace ServiceStack.OrmLite.Tests
 			{
 				db.CreateTable<Point>(true);
 
-				db.Insert(new Point { Width = 4, Height = 1.123f, Top = 3.456d, Left = 2.345m});
+				db.InsertAll(new Point { Width = 4, Height = 1.123f, Top = 3.456d, Left = 2.345m});
 
 				var points = db.SelectFmt<Point>("Height={0}", 1.123f);
 

@@ -22,7 +22,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 				var row = ModelWithFieldsOfDifferentTypes.Create(1);
 
-				db.Insert(row);
+				db.InsertAll(row);
 			}
 		}
 
@@ -35,7 +35,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 				var row = ModelWithFieldsOfDifferentTypes.Create(1);
 
-				db.Insert(row);
+				db.InsertAll(row);
 
 				var rows = db.Select<ModelWithFieldsOfDifferentTypes>();
 
@@ -54,7 +54,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 				var row = ModelWithFieldsOfNullableTypes.Create(1);
 
-				db.Insert(row);
+				db.InsertAll(row);
 
 				var rows = db.Select<ModelWithFieldsOfNullableTypes>();
 
@@ -91,7 +91,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 				var row = ModelWithFieldsOfDifferentAndNullableTypes.Create(1);
 				
 				Console.WriteLine(OrmLiteConfig.DialectProvider.ToInsertRowStatement(null, row));
-				db.Insert(row);
+				db.InsertAll(row);
 
 				var rows = db.Select<ModelWithFieldsOfDifferentAndNullableTypes>();
 
@@ -111,7 +111,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 				var row = ModelWithIdAndName.Create(0);
 				row.Name = null;
 
-				db.Insert(row);
+				db.InsertAll(row);
 
 				var rows = db.Select<ModelWithIdAndName>();
 
@@ -131,10 +131,10 @@ namespace ServiceStack.OrmLite.FirebirdTests
 				var row1 = ModelWithIdAndName.Create(5);
 				var row2 = ModelWithIdAndName.Create(6);
 
-				db.Insert(row1);
+				db.InsertAll(row1);
 				var row1LastInsertId = db.LastInsertId();
 
-				db.Insert(row2);
+				db.InsertAll(row2);
 				var row2LastInsertId = db.LastInsertId();
 
                 var insertedRow1 = db.SingleById<ModelWithIdAndName>(row1LastInsertId);
@@ -154,7 +154,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 				var row = TaskQueue.Create(1);
 
-				db.Insert(row);
+				db.InsertAll(row);
 
 				var rows = db.Select<TaskQueue>();
 
@@ -180,7 +180,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 				var row = OrderBlob.Create(1);
 
-				db.Insert(row);
+				db.InsertAll(row);
 
 				var rows = db.Select<OrderBlob>();
 
@@ -235,7 +235,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 				var jsv = "{Id:0,UserName:UserName,Email:as@if.com,PrimaryEmail:as@if.com,FirstName:FirstName,LastName:LastName,DisplayName:DisplayName,Salt:WMQi/g==,PasswordHash:oGdE40yKOprIgbXQzEMSYZe3vRCRlKGuqX2i045vx50=,Roles:[],Permissions:[],CreatedDate:2012-03-20T07:53:48.8720739Z,ModifiedDate:2012-03-20T07:53:48.8720739Z}";
 				var userAuth = jsv.To<UserAuth>();
 
-				db.Insert(userAuth);
+				db.InsertAll(userAuth);
 
 				var rows = db.Select<UserAuth>(q => q.UserName == "UserName");
 

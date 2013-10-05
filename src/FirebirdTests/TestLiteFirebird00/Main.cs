@@ -81,7 +81,7 @@ namespace TestLiteFirebird00
 				db.CreateTable<Author>();
 				db.CreateTable<Book>();
 				
-				db.Insert( new Author(){
+				db.InsertAll( new Author(){
 					Name="Demis Bellot",
 					Birthday= DateTime.Today.AddYears(20),
 					Active=true,
@@ -91,7 +91,7 @@ namespace TestLiteFirebird00
 					Rate=10
 				});
 				
-				db.Insert( new Author(){
+				db.InsertAll( new Author(){
 					Name="Angel Colmenares",
 					Birthday= DateTime.Today.AddYears(30),
 					Active=true,
@@ -101,7 +101,7 @@ namespace TestLiteFirebird00
 					Rate=9
 				});
 				
-				db.Insert( new Author(){
+				db.InsertAll( new Author(){
 					Name="Adam Witco",
 					Birthday= DateTime.Today.AddYears(25),
 					Active=true,
@@ -111,7 +111,7 @@ namespace TestLiteFirebird00
 				});
 			
 				
-				db.Insert( new Author(){
+				db.InsertAll( new Author(){
 					Name="Claudia Espinel",
 					Birthday= DateTime.Today.AddYears(28),
 					Active=false,
@@ -173,7 +173,7 @@ namespace TestLiteFirebird00
 				author= authors.FirstOrDefault<Author>(r=>r.Name=="Angel Colmenares");
 				if( author != default(Author) ){
 					
-					db.Insert( new Book(){
+					db.InsertAll( new Book(){
 						IdAuthor= author.Id,
 						Title= "The big book",
 						Price= 18.55m,

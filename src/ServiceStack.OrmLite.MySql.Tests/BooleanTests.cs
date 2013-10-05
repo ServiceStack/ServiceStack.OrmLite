@@ -23,7 +23,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
                   new Boolies { plainBool = true,  netBool = false },
                   new Boolies { plainBool = false, netBool = false },
                 };
-                db.InsertAll(boolies);
+                db.InsertAll<Boolies>(boolies);
 
                 var target = db.Select<Boolies>();
 
@@ -53,7 +53,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
                   new Boolies { plainBool = true,  netBool = false },
                   new Boolies { plainBool = false, netBool = false },
                 };
-                db.InsertAll(boolies);
+                db.InsertAll<Boolies>(boolies);
 
                 var target = db.Select<Boolies>();
 

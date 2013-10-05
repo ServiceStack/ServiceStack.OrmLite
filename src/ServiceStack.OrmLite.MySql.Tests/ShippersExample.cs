@@ -77,17 +77,17 @@ namespace ServiceStack.OrmLite.MySql.Tests
 				//Playing with transactions
 				using (IDbTransaction dbTrans = db.BeginTransaction())
 				{
-					db.Insert(new ShipperType { Name = "Trains" });
+					db.InsertAll(new ShipperType { Name = "Trains" });
 					trainsTypeId = (int)db.LastInsertId();
 
-					db.Insert(new ShipperType { Name = "Planes" });
+					db.InsertAll(new ShipperType { Name = "Planes" });
 					planesTypeId = (int)db.LastInsertId();
 
 					dbTrans.Commit();
 				}
 				using (IDbTransaction dbTrans = db.BeginTransaction(IsolationLevel.ReadCommitted))
 				{
-					db.Insert(new ShipperType { Name = "Automobiles" });
+					db.InsertAll(new ShipperType { Name = "Automobiles" });
 					Assert.That(db.Select<ShipperType>(), Has.Count.EqualTo(3));
 
 					dbTrans.Rollback();
@@ -96,9 +96,9 @@ namespace ServiceStack.OrmLite.MySql.Tests
 
 
 				//Performing standard Insert's and Selects
-				db.Insert(new Shipper { CompanyName = "Trains R Us", Phone = "555-TRAINS", ShipperTypeId = trainsTypeId });
-				db.Insert(new Shipper { CompanyName = "Planes R Us", Phone = "555-PLANES", ShipperTypeId = planesTypeId });
-				db.Insert(new Shipper { CompanyName = "We do everything!", Phone = "555-UNICORNS", ShipperTypeId = planesTypeId });
+				db.InsertAll(new Shipper { CompanyName = "Trains R Us", Phone = "555-TRAINS", ShipperTypeId = trainsTypeId });
+				db.InsertAll(new Shipper { CompanyName = "Planes R Us", Phone = "555-PLANES", ShipperTypeId = planesTypeId });
+				db.InsertAll(new Shipper { CompanyName = "We do everything!", Phone = "555-UNICORNS", ShipperTypeId = planesTypeId });
 
 				var trainsAreUs = db.SingleFmt<Shipper>("ShipperTypeId = {0}", trainsTypeId);
 				Assert.That(trainsAreUs.CompanyName, Is.EqualTo("Trains R Us"));
@@ -107,7 +107,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 
 				//Lets update a record
 				trainsAreUs.Phone = "666-TRAINS";
-				db.Update(trainsAreUs);
+				db.UpdateAll(trainsAreUs);
                 Assert.That(db.SingleById<Shipper>(trainsAreUs.Id).Phone, Is.EqualTo("666-TRAINS"));
 				
 				//Then make it dissappear
@@ -115,7 +115,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
                 Assert.That(db.SingleById<Shipper>(trainsAreUs.Id), Is.Null);
 
 				//And bring it back again
-				db.Insert(trainsAreUs);
+				db.InsertAll(trainsAreUs);
 
 
 				//Performing custom queries

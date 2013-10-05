@@ -67,11 +67,11 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void API_Expression_Examples()
         {
-            db.Insert(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27 });
+            db.InsertAll(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27 });
             db.GetLastSql().Print();
 
 
-            db.Update(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27});
+            db.UpdateAll(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27});
             Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\" = 'Jimi',\"LastName\" = 'Hendrix',\"Age\" = 27 WHERE \"Id\" = 1"));
             db.GetLastSql().Print();
 

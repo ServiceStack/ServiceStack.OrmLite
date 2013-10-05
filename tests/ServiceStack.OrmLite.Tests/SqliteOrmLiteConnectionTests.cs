@@ -40,7 +40,7 @@ namespace ServiceStack.OrmLite.Tests
 				try
 				{
 					db.CreateTable<ModelWithIdAndName>(true);
-					db.Insert(new ModelWithIdAndName(1));
+					db.InsertAll(new ModelWithIdAndName(1));
 				}
 				catch (Exception ex)
 				{
@@ -57,11 +57,11 @@ namespace ServiceStack.OrmLite.Tests
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<ModelWithIdAndName>();
-                db.Insert(new ModelWithIdAndName(1));
+                db.InsertAll(new ModelWithIdAndName(1));
 
                 using (var dbReadOnly = OpenDbConnection())
                 {
-                    dbReadOnly.Insert(new ModelWithIdAndName(2));
+                    dbReadOnly.InsertAll(new ModelWithIdAndName(2));
                     var rows = dbReadOnly.Select<ModelWithIdAndName>();
                     Assert.That(rows, Has.Count.EqualTo(2));
                 }

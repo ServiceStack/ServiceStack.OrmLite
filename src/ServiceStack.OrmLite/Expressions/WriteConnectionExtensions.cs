@@ -45,7 +45,7 @@ namespace ServiceStack.OrmLite
 
         public static int UpdateFmt(this IDbConnection dbConn, string table = null, string set = null, string where = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Update(table, set, where));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateFmt(table, set, where));
         }
 
         public static void InsertOnly<T>(this IDbConnection dbConn, T obj, Func<SqlExpressionVisitor<T>, SqlExpressionVisitor<T>> onlyFields)

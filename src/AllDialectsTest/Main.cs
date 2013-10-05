@@ -177,7 +177,7 @@ namespace AllDialectsTest
 					db.DeleteAll<Author>();
 					Console.WriteLine("Inserting...");
 					DateTime t1= DateTime.Now;
-					db.InsertAll(authors);
+					db.InsertAll<Author>(authors);
 					DateTime t2= DateTime.Now;
 					Console.WriteLine("Inserted {0} rows in {1}", authors.Count, t2 - t1);
 

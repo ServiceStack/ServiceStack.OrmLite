@@ -52,8 +52,8 @@ namespace ServiceStack.OrmLite.MySql.Tests
 			{
 				db.CreateTable<ModelWithIdOnly>(true);
 
-				db.Insert(new ModelWithIdOnly(1));
-				db.Insert(new ModelWithIdOnly(2));
+				db.InsertAll(new ModelWithIdOnly(1));
+				db.InsertAll(new ModelWithIdOnly(2));
 
 				db.CreateTable<ModelWithIdOnly>(false);
 
@@ -70,8 +70,8 @@ namespace ServiceStack.OrmLite.MySql.Tests
 			{
 				db.CreateTable<ModelWithIdAndName>(true);
 
-				db.Insert(new ModelWithIdAndName(1));
-				db.Insert(new ModelWithIdAndName(2));
+				db.InsertAll(new ModelWithIdAndName(1));
+				db.InsertAll(new ModelWithIdAndName(2));
 
 				db.CreateTable<ModelWithIdAndName>(false);
 
@@ -88,8 +88,8 @@ namespace ServiceStack.OrmLite.MySql.Tests
 			{
 				db.CreateTable<ModelWithIdOnly>(true);
 
-				db.Insert(new ModelWithIdOnly(1));
-				db.Insert(new ModelWithIdOnly(2));
+				db.InsertAll(new ModelWithIdOnly(1));
+				db.InsertAll(new ModelWithIdOnly(2));
 
 				db.CreateTable<ModelWithIdOnly>(true);
 
@@ -106,11 +106,11 @@ namespace ServiceStack.OrmLite.MySql.Tests
 			{
 				db.CreateTables(true, typeof(ModelWithIdOnly), typeof(ModelWithIdAndName));
 
-				db.Insert(new ModelWithIdOnly(1));
-				db.Insert(new ModelWithIdOnly(2));
+				db.InsertAll(new ModelWithIdOnly(1));
+				db.InsertAll(new ModelWithIdOnly(2));
 
-				db.Insert(new ModelWithIdAndName(1));
-				db.Insert(new ModelWithIdAndName(2));
+				db.InsertAll(new ModelWithIdAndName(1));
+				db.InsertAll(new ModelWithIdAndName(2));
 
 				var rows1 = db.Select<ModelWithIdOnly>();
 				var rows2 = db.Select<ModelWithIdOnly>();

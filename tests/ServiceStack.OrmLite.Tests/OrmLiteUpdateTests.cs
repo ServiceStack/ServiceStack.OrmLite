@@ -37,11 +37,11 @@ namespace ServiceStack.OrmLite.Tests
         {
             var row = CreateModelWithFieldsOfDifferentTypes();
 
-            db.Insert(row);
+            db.InsertAll(row);
 
             row.Name = "UpdatedName";
 
-            db.Update(row);
+            db.UpdateAll(row);
 
             var dbRow = db.SingleById<ModelWithFieldsOfDifferentTypes>(1);
 
@@ -53,7 +53,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             var row = CreateModelWithFieldsOfDifferentTypes();
 
-            db.Insert(row);
+            db.InsertAll(row);
 
             row.Name = "UpdatedName";
 
@@ -69,7 +69,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             var row = CreateModelWithFieldsOfDifferentTypes();
 
-            db.Insert(row);
+            db.InsertAll(row);
             row.DateTime = DateTime.Now;
             row.Name = "UpdatedName";
 
@@ -86,7 +86,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             var row = CreateModelWithFieldsOfDifferentTypes();
 
-            db.Insert(row);
+            db.InsertAll(row);
             row.Name = "UpdatedName";
 
             db.UpdateFmt<ModelWithFieldsOfDifferentTypes>(set: "NAME = {0}".SqlFormat(row.Name), where: "LongId <= {0}".SqlFormat(row.LongId));
@@ -101,7 +101,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             var row = CreateModelWithFieldsOfDifferentTypes();
 
-            db.Insert(row);
+            db.InsertAll(row);
             row.Name = "UpdatedName";
 
             db.UpdateFmt(table: "ModelWithFieldsOfDifferentTypes",

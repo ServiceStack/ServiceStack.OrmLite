@@ -1,10 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
-using ServiceStack.Common;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
@@ -145,7 +143,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static int UpdateFmt<T>(this IDbCommand dbCmd, string set = null, string where = null)
         {
-            return dbCmd.Update(typeof(T).GetModelDefinition().ModelName, set, where);
+            return dbCmd.UpdateFmt(typeof(T).GetModelDefinition().ModelName, set, where);
         }
 
         /// <summary>
@@ -154,7 +152,7 @@ namespace ServiceStack.OrmLite
         ///   dbCmd.Update(table:"Person", set: "FirstName = {0}".Params("JJ"), where: "LastName = {0}".Params("Hendrix"));
         ///   UPDATE "Person" SET FirstName = 'JJ' WHERE LastName = 'Hendrix'
         /// </summary>
-        public static int Update(this IDbCommand dbCmd, string table = null, string set = null, string where = null)
+        public static int UpdateFmt(this IDbCommand dbCmd, string table = null, string set = null, string where = null)
         {
             if (table == null)
                 throw new ArgumentNullException("table");

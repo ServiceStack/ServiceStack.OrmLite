@@ -48,9 +48,9 @@ namespace ServiceStack.OrmLite.Tests.UseCase
 			{
 				db.CreateTable<User>(true);
 
-				db.Insert(new User { Id = 1, Name = "A", CreatedDate = DateTime.Now });
-				db.Insert(new User { Id = 2, Name = "B", CreatedDate = DateTime.Now });
-				db.Insert(new User { Id = 3, Name = "B", CreatedDate = DateTime.Now });
+				db.InsertAll(new User { Id = 1, Name = "A", CreatedDate = DateTime.Now });
+				db.InsertAll(new User { Id = 2, Name = "B", CreatedDate = DateTime.Now });
+				db.InsertAll(new User { Id = 3, Name = "B", CreatedDate = DateTime.Now });
 
 				var rowsB = db.SelectFmt<User>("Name = {0}", "B");
 				var rowsB1 = db.Select<User>(user => user.Name == "B");
@@ -92,7 +92,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
                 db.ExecuteSql("INSERT INTO Users VALUES(5000000000, -1)");
 
 				var obj1 = new User2 {Value = 6000000000L};
-				db.Insert(obj1);
+				db.InsertAll(obj1);
 
 				var last = db.LastInsertId();
 				Assert.AreEqual(5000000001L, last);

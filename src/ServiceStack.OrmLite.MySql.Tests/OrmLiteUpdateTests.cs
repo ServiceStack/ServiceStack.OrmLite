@@ -17,11 +17,11 @@ namespace ServiceStack.OrmLite.MySql.Tests
 
 				var row = ModelWithFieldsOfDifferentTypes.Create(1);
 
-				db.Insert(row);
+				db.InsertAll(row);
 
 				row.Name = "UpdatedName";
 
-				db.Update(row);
+				db.UpdateAll(row);
 
                 var dbRow = db.SingleById<ModelWithFieldsOfDifferentTypes>(1);
 

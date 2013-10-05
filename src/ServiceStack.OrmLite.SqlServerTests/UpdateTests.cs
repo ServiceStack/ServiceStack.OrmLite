@@ -67,7 +67,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
 
                 obj.Id = storedObj.Id;
                 obj.Name = "Someothername";
-                con.Update(obj);
+                con.UpdateAll(obj);
 
                 var target = con.SingleById<SimpleType>(storedObj.Id);
 
@@ -89,7 +89,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
 
                 obj.Id = storedObj.Id;
                 obj.Name = "Someothername";
-                con.Update(obj);
+                con.UpdateAll(obj);
 
                 var target = con.SingleById<SimpleAliasedType>(storedObj.Id);
 
@@ -111,7 +111,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
 
                 obj.Id = storedObj.Id;
                 obj.Name = "Someothername";
-                con.UpdateParam(obj);
+                con.Update(obj);
 
                 var target = con.SingleById<SimpleType>(storedObj.Id);
 
@@ -133,7 +133,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
 
                 obj.Id = storedObj.Id;
                 obj.Name = "Someothername";
-                con.UpdateParam(obj);
+                con.Update(obj);
 
                 var target = con.SingleById<SimpleAliasedType>(storedObj.Id);
 

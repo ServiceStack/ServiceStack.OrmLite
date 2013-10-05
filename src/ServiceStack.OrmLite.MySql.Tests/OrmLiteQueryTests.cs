@@ -18,7 +18,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
 
-				rowIds.ForEach(x => db.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
+				rowIds.ForEach(x => db.InsertAll(ModelWithFieldsOfDifferentTypes.Create(x)));
 
 				var row = db.SingleById<ModelWithFieldsOfDifferentTypes>(1);
 
@@ -35,7 +35,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 
 				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
 
-				rowIds.ForEach(x => db.Insert(ModelWithOnlyStringFields.Create(x)));
+				rowIds.ForEach(x => db.InsertAll(ModelWithOnlyStringFields.Create(x)));
 
 				var row = db.SingleById<ModelWithOnlyStringFields>("id-1");
 
@@ -52,12 +52,12 @@ namespace ServiceStack.OrmLite.MySql.Tests
 
 				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
 
-				rowIds.ForEach(x => db.Insert(ModelWithOnlyStringFields.Create(x)));
+				rowIds.ForEach(x => db.InsertAll(ModelWithOnlyStringFields.Create(x)));
 
 				var filterRow = ModelWithOnlyStringFields.Create("id-4");
 				filterRow.AlbumName = "FilteredName";
 
-				db.Insert(filterRow);
+				db.InsertAll(filterRow);
 
 				var rows = db.Where<ModelWithOnlyStringFields>(new { filterRow.AlbumName });
 				var dbRowIds = rows.ConvertAll(x => x.Id);
@@ -92,12 +92,12 @@ namespace ServiceStack.OrmLite.MySql.Tests
 
 				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
 
-				rowIds.ForEach(x => db.Insert(ModelWithOnlyStringFields.Create(x)));
+				rowIds.ForEach(x => db.InsertAll(ModelWithOnlyStringFields.Create(x)));
 
 				var filterRow = ModelWithOnlyStringFields.Create("id-4");
 				filterRow.AlbumName = "FilteredName";
 
-				db.Insert(filterRow);
+				db.InsertAll(filterRow);
 
 				var dbRowIds = new List<string>();
 				var rows = db.LazyWhere<ModelWithOnlyStringFields>(new { filterRow.AlbumName });
