@@ -32,32 +32,11 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        public static List<T> SelectFmt<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
+        public static List<T> Select<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
         {
             var ev = OrmLiteConfig.DialectProvider.SqlExpression<T>();
             string sql = ev.Where(predicate).ToSelectStatement();
             using (var reader = dbCmd.ExecReader(sql))
-            {
-                return ConvertToList<T>(reader);
-            }
-        }
-
-        public static List<T> Select<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
-        {
-            var ev = OrmLiteConfig.DialectProvider.SqlExpression<T>().AsParameterized();
-            string sql = ev.Where(predicate).ToSelectStatement();
-
-            dbCmd.Parameters.Clear();
-            var paramsToInsert = new List<IDataParameter>();
-            foreach (var param in ev.Params)
-            {
-                var cmdParam = dbCmd.CreateParameter();
-                cmdParam.ParameterName = param.Key;
-                cmdParam.Value = param.Value ?? DBNull.Value;
-                paramsToInsert.Add(cmdParam);
-            }
-
-            using (var reader = dbCmd.ExecReader(sql, paramsToInsert))
             {
                 return ConvertToList<T>(reader);
             }

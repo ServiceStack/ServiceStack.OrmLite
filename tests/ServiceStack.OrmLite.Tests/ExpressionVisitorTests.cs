@@ -147,13 +147,6 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        public void Can_SelectFmt_using_Startswith()
-        {
-            var target = OpenDbConnection().SelectFmt<TestType>(q => q.TextCol.StartsWith("asdf"));
-            Assert.AreEqual(2, target.Count);
-        }
-
-        [Test]
         public void Can_Select_using_Endswith()
         {
             var target = OpenDbConnection().Select<TestType>(q => q.TextCol.EndsWith("123"));
@@ -161,23 +154,9 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        public void Can_SelectFmt_using_Endswith()
-        {
-            var target = OpenDbConnection().SelectFmt<TestType>(q => q.TextCol.EndsWith("123"));
-            Assert.AreEqual(2, target.Count);
-        }
-
-        [Test]
         public void Can_Select_using_Contains()
         {
             var target = OpenDbConnection().Select<TestType>(q => q.TextCol.Contains("df"));
-            Assert.AreEqual(2, target.Count);
-        }
-
-        [Test]
-        public void Can_SelectFmt_using_Contains()
-        {
-            var target = OpenDbConnection().SelectFmt<TestType>(q => q.TextCol.Contains("df"));
             Assert.AreEqual(2, target.Count);
         }
 

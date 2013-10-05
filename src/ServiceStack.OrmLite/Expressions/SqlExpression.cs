@@ -95,8 +95,6 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
-
-
         public virtual SqlExpression<T> Where()
         {
             if (underlyingExpression != null) underlyingExpression = null; //Where() clears the expression
@@ -710,16 +708,7 @@ namespace ServiceStack.OrmLite
                 if (rightNeedsCoercing)
                 {
                     var rightPartialSql = right as PartialSqlString;
-                    if (rightPartialSql != null)
-                    {
-                        if (IsParameterized)
-                        {
-                            //rewrite last param value with enum string  
-                            var enumValue = Params[rightPartialSql.Text];
-                            Params[rightPartialSql.Text] = Enum.ToObject(leftEnum.EnumType, enumValue).ToString();
-                        }
-                    }
-                    else
+                    if (rightPartialSql == null)
                     {
                         right = ConvertToEnum(leftEnum.EnumType, right.ToString(), right);
                     }
@@ -727,16 +716,7 @@ namespace ServiceStack.OrmLite
                 else if (leftNeedsCoercing)
                 {
                     var leftPartialSql = left as PartialSqlString;
-                    if (leftPartialSql != null)
-                    {
-                        if (IsParameterized)
-                        {
-                            //rewrite last param value with enum string  
-                            var enumValue = Params[leftPartialSql.Text];
-                            Params[leftPartialSql.Text] = Enum.ToObject(rightEnum.EnumType, enumValue).ToString();
-                        }
-                    }
-                    else
+                    if (leftPartialSql == null)
                     {
                         left = ConvertToEnum(rightEnum.EnumType, left.ToString(), left);
                     }
@@ -830,25 +810,14 @@ namespace ServiceStack.OrmLite
             return p.Name;
         }
 
-        public bool IsParameterized { get; set; }
         public Dictionary<string, object> Params = new Dictionary<string, object>();
-        int paramCounter = 0;
 
         protected virtual object VisitConstant(ConstantExpression c)
         {
             if (c.Value == null)
                 return new PartialSqlString("null");
 
-            if (!IsParameterized)
-            {
-                return c.Value;
-            }
-            else
-            {
-                string paramPlaceholder = OrmLiteConfig.DialectProvider.GetParam(paramCounter++);
-                Params.Add(paramPlaceholder, c.Value);
-                return new PartialSqlString(paramPlaceholder);
-            }
+            return c.Value;
         }
 
         protected virtual object VisitUnary(UnaryExpression u)
@@ -1121,7 +1090,7 @@ namespace ServiceStack.OrmLite
 
                     var member = Expression.Convert(m.Arguments[1], typeof(object));
                     var lambda = Expression.Lambda<Func<object>>(member);
-                    var getter = lambda.Compile();
+                    var getter = lambda.Compile(); 
 
                     var inArgs = Sql.Flatten(getter() as IEnumerable);
 
@@ -1196,31 +1165,16 @@ namespace ServiceStack.OrmLite
                     statement = string.Format("lower({0})", quotedColName);
                     break;
                 case "StartsWith":
-                    var startsWithParam = OrmLiteConfig.DialectProvider.GetQuotedValue(args[0].ToString().ToUpper() + "%");
-                    if (IsParameterized)
-                    {
-                        startsWithParam = args[0].ToString();                       //= @1
-                        Params[startsWithParam] += "%";                             //= abc%
-                    }
-                    statement = string.Format("upper({0}) like {1} ", quotedColName, startsWithParam);
+                    statement = string.Format("upper({0}) like {1} ", 
+                        quotedColName, OrmLiteConfig.DialectProvider.GetQuotedValue(args[0].ToString().ToUpper() + "%"));
                     break;
                 case "EndsWith":
-                    var endsWithParam = OrmLiteConfig.DialectProvider.GetQuotedValue("%" + args[0].ToString().ToUpper());
-                    if (IsParameterized)
-                    {
-                        endsWithParam = args[0].ToString();                         //= @1
-                        Params[endsWithParam] = "%" + Params[endsWithParam];        //= %abc
-                    }
-                    statement = string.Format("upper({0}) like {1}", quotedColName, endsWithParam);
+                    statement = string.Format("upper({0}) like {1}",
+                        quotedColName, OrmLiteConfig.DialectProvider.GetQuotedValue("%" + args[0].ToString().ToUpper()));
                     break;
                 case "Contains":
-                    var containsParam = OrmLiteConfig.DialectProvider.GetQuotedValue("%" + args[0].ToString().ToUpper() + "%");
-                    if (IsParameterized)
-                    {
-                        containsParam = args[0].ToString();                         //= @1
-                        Params[containsParam] = "%" + Params[containsParam] + "%";  //= %abc%
-                    }
-                    statement = string.Format("upper({0}) like {1}", quotedColName, containsParam);
+                    statement = string.Format("upper({0}) like {1}",
+                        quotedColName, OrmLiteConfig.DialectProvider.GetQuotedValue("%" + args[0].ToString().ToUpper() + "%"));
                     break;
                 case "Substring":
                     var startIndex = Int32.Parse(args[0].ToString()) + 1;
@@ -1241,12 +1195,6 @@ namespace ServiceStack.OrmLite
                     throw new NotSupportedException();
             }
             return new PartialSqlString(statement);
-        }
-
-        public SqlExpression<T> AsParameterized()
-        {
-            IsParameterized = true;
-            return this;
         }
     }
 
