@@ -93,7 +93,7 @@ namespace ServiceStack.OrmLite
                 var isNullableType = IsNullableType(propertyInfo.PropertyType);
 
                 var isNullable = (!propertyInfo.PropertyType.IsValueType
-                                   && propertyInfo.HasAttributeNamed(typeof(RequiredAttribute).Name))
+                                   && !propertyInfo.HasAttributeNamed(typeof(RequiredAttribute).Name))
                                    || isNullableType;
 
                 var propertyType = isNullableType

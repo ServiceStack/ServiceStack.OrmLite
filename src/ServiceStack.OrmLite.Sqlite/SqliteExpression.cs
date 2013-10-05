@@ -56,8 +56,8 @@ namespace ServiceStack.OrmLite.Sqlite
                     foreach (var e in inArgs)
                     {
                         sIn.AppendFormat("{0}{1}",
-                                     sIn.Length > 0 ? "," : "",
-                                     OrmLiteConfig.DialectProvider.GetQuotedValue(e, e.GetType()));
+                            sIn.Length > 0 ? "," : "",
+                            OrmLiteConfig.DialectProvider.GetQuotedValue(e, e.GetType()));
                     }
                     statement = string.Format("{0} {1} ({2})", quotedColName, m.Method.Name, sIn);
                     break;
@@ -74,9 +74,9 @@ namespace ServiceStack.OrmLite.Sqlite
                 case "Max":
                 case "Avg":
                     statement = string.Format("{0}({1}{2})",
-                                         m.Method.Name,
-                                         quotedColName,
-                                         args.Count == 1 ? string.Format(",{0}", args[0]) : "");
+                        m.Method.Name,
+                        quotedColName,
+                        args.Count == 1 ? string.Format(",{0}", args[0]) : "");
                     break;
                 default:
                     throw new NotSupportedException();

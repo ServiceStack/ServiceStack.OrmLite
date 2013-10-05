@@ -29,10 +29,10 @@ namespace ServiceStack.OrmLite.Oracle.Tests
                 DropAndCreateTables(db);
                 var dateTimeNow =new DateTime( DateTime.Now.Year,  DateTime.Now.Month,  DateTime.Now.Day);
 
-                db.InsertParam(new ParamTestBO() { Id = 1, Double = 0.001, Int = 100, Info = "One", NullableBool = null, DateTime = dateTimeNow });
-                db.InsertParam(new ParamTestBO() { Id = 2, Double = 0.002, Int = 200, Info = "Two", NullableBool = true, DateTime = dateTimeNow });
-                db.InsertParam(new ParamTestBO() { Id = 3, Double = 0.003, Int = 300, Info = "Three", NullableBool = false, DateTime = dateTimeNow.AddDays(23) });
-                db.InsertParam(new ParamTestBO() { Id = 4, Double = 0.004, Int = 400, Info = "Four", NullableBool = null });
+                db.Insert(new ParamTestBO() { Id = 1, Double = 0.001, Int = 100, Info = "One", NullableBool = null, DateTime = dateTimeNow });
+                db.Insert(new ParamTestBO() { Id = 2, Double = 0.002, Int = 200, Info = "Two", NullableBool = true, DateTime = dateTimeNow });
+                db.Insert(new ParamTestBO() { Id = 3, Double = 0.003, Int = 300, Info = "Three", NullableBool = false, DateTime = dateTimeNow.AddDays(23) });
+                db.Insert(new ParamTestBO() { Id = 4, Double = 0.004, Int = 400, Info = "Four", NullableBool = null });
 
                 var bo1 = db.Select<ParamTestBO>(q => q.Id == 1).Single();
                 var bo2 = db.Select<ParamTestBO>(q => q.Id == 2).Single();
@@ -80,8 +80,8 @@ namespace ServiceStack.OrmLite.Oracle.Tests
 
                 var bo1 = new ParamTestBO() { Id = 1, Double = 0.001, Int = 100, Info = "One", NullableBool = true };
                 var bo2 = new ParamTestBO() { Id = 2, Double = 0.002, Int = 200, Info = "Two", NullableBool = true, DateTime = DateTime.Now };
-                db.InsertParam(bo1);
-                db.InsertParam(bo2);
+                db.Insert(bo1);
+                db.Insert(bo2);
 
                 bo1.Double = 0.01;
                 bo1.Int = 10000;
@@ -166,10 +166,10 @@ namespace ServiceStack.OrmLite.Oracle.Tests
             {
                 DropAndCreateTables(db);
 
-                db.InsertParam(new ParamTestBO() { Id = 1, Double = 0.001, Int = 100, Info = "One", NullableBool = null });
-                db.InsertParam(new ParamTestBO() { Id = 2, Double = 0.002, Int = 200, Info = "Two", NullableBool = true });
-                db.InsertParam(new ParamTestBO() { Id = 3, Double = 0.003, Int = 300, Info = "Three", NullableBool = false });
-                db.InsertParam(new ParamTestBO() { Id = 4, Double = 0.004, Int = 400, Info = "Four", NullableBool = null });
+                db.Insert(new ParamTestBO() { Id = 1, Double = 0.001, Int = 100, Info = "One", NullableBool = null });
+                db.Insert(new ParamTestBO() { Id = 2, Double = 0.002, Int = 200, Info = "Two", NullableBool = true });
+                db.Insert(new ParamTestBO() { Id = 3, Double = 0.003, Int = 300, Info = "Three", NullableBool = false });
+                db.Insert(new ParamTestBO() { Id = 4, Double = 0.004, Int = 400, Info = "Four", NullableBool = null });
 
                 //select multiple items
                 Assert.AreEqual(2, db.Select<ParamTestBO>(q => q.NullableBool == null).Count);
@@ -190,21 +190,21 @@ namespace ServiceStack.OrmLite.Oracle.Tests
             {
                 DropAndCreateTables(db);
 
-                db.InsertParam(new ParamTestBO() { Id = 1, Double = 0.001, Int = 100, Info = "One", NullableBool = null });
-                db.InsertParam(new ParamTestBO() { Id = 2, Double = 0.002, Int = 200, Info = "Two", NullableBool = true });
-                db.InsertParam(new ParamTestBO() { Id = 3, Double = 0.003, Int = 300, Info = "Three", NullableBool = false });
-                db.InsertParam(new ParamTestBO() { Id = 4, Double = 0.004, Int = 400, Info = "Four", NullableBool = null });
+                db.Insert(new ParamTestBO() { Id = 1, Double = 0.001, Int = 100, Info = "One", NullableBool = null });
+                db.Insert(new ParamTestBO() { Id = 2, Double = 0.002, Int = 200, Info = "Two", NullableBool = true });
+                db.Insert(new ParamTestBO() { Id = 3, Double = 0.003, Int = 300, Info = "Three", NullableBool = false });
+                db.Insert(new ParamTestBO() { Id = 4, Double = 0.004, Int = 400, Info = "Four", NullableBool = null });
 
-                db.InsertParam(new ParamRelBO() { PTId = 1, Info = "T1" });
-                db.InsertParam(new ParamRelBO() { PTId = 1, Info = "T1" });
-                db.InsertParam(new ParamRelBO() { PTId = 1, Info = "T1" });
-                db.InsertParam(new ParamRelBO() { PTId = 1, Info = "T1" });
-                db.InsertParam(new ParamRelBO() { PTId = 2, Info = "T1" });
-                db.InsertParam(new ParamRelBO() { PTId = 2, Info = "T1" });
-                db.InsertParam(new ParamRelBO() { PTId = 3, Info = "T1" });
-                db.InsertParam(new ParamRelBO() { PTId = 4, Info = "T1" });
-                db.InsertParam(new ParamRelBO() { PTId = 3, Info = "T2" });
-                db.InsertParam(new ParamRelBO() { PTId = 4, Info = "T2" });
+                db.Insert(new ParamRelBO() { PTId = 1, Info = "T1" });
+                db.Insert(new ParamRelBO() { PTId = 1, Info = "T1" });
+                db.Insert(new ParamRelBO() { PTId = 1, Info = "T1" });
+                db.Insert(new ParamRelBO() { PTId = 1, Info = "T1" });
+                db.Insert(new ParamRelBO() { PTId = 2, Info = "T1" });
+                db.Insert(new ParamRelBO() { PTId = 2, Info = "T1" });
+                db.Insert(new ParamRelBO() { PTId = 3, Info = "T1" });
+                db.Insert(new ParamRelBO() { PTId = 4, Info = "T1" });
+                db.Insert(new ParamRelBO() { PTId = 3, Info = "T2" });
+                db.Insert(new ParamRelBO() { PTId = 4, Info = "T2" });
 
                 Assert.AreEqual(8, db.Select<ParamRelBO>(q => q.Info == "T1").Count);
                 Assert.AreEqual(2, db.Select<ParamRelBO>(q => q.Info == "T2").Count);
@@ -237,7 +237,7 @@ namespace ServiceStack.OrmLite.Oracle.Tests
                 db.DeleteAll<ParamByteBO>();
                 var bo1 = new ParamByteBO() { Id = 1, Data = new byte[] { 1, 25, 43, 3, 1, 66, 82, 23, 11, 44, 66, 22, 52, 62, 76, 19, 30, 91, 4 } };
 
-                db.InsertParam(bo1);
+                db.Insert(bo1);
                 var bo1Check = db.Select<ParamByteBO>(s => s.Id == bo1.Id).Single();
 
                 Assert.AreEqual(bo1.Id, bo1Check.Id);

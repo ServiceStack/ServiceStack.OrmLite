@@ -18,9 +18,9 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
 			{
 				db.DropTable<TestData>();
 				db.CreateTable<TestData>();
-				db.InsertParam<TestData>(new TestData { Id = Guid.NewGuid() });
+				db.Insert<TestData>(new TestData { Id = Guid.NewGuid() });
 				db.DropAndCreateTable<TestData>();
-				db.InsertParam<TestData>(new TestData { Id = Guid.NewGuid() });
+				db.Insert<TestData>(new TestData { Id = Guid.NewGuid() });
 			}
 		}
 

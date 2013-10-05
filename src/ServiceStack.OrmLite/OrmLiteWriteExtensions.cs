@@ -333,8 +333,9 @@ namespace ServiceStack.OrmLite
             using (var updateStmt = dbCmd.CreateUpdateStatement(obj))
             {
                 dbCmd.CopyParameterizedStatementTo(updateStmt);
+
+                dbCmd.ExecuteNonQuery();
             }
-            dbCmd.ExecuteNonQuery();
         }
 
         internal static void UpdateAll<T>(this IDbCommand dbCmd, params T[] objs)
@@ -461,13 +462,13 @@ namespace ServiceStack.OrmLite
             using (var insertStmt = dbCmd.CreateInsertStatement(obj))
             {
                 dbCmd.CopyParameterizedStatementTo(insertStmt);
+
+                if (selectIdentity)
+                    return OrmLiteConfig.DialectProvider.InsertAndGetLastInsertId<T>(dbCmd);
+
+                dbCmd.ExecuteNonQuery();
+                return -1;
             }
-
-            if (selectIdentity)
-                return OrmLiteConfig.DialectProvider.InsertAndGetLastInsertId<T>(dbCmd);
-
-            dbCmd.ExecuteNonQuery();
-            return -1;
         }
 
         internal static void InsertAll<T>(this IDbCommand dbCmd, params T[] objs)

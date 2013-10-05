@@ -53,7 +53,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
             using(var db = OpenDbConnection()) {
                 //insert using InsertParam, and select manually - ok
                 db.CreateTable<TypeWithByteArrayField>(true);
-                db.InsertParam(orig);
+                db.Insert(orig);
 
                 _selectAndVerifyManually(orig, db);
             }
@@ -67,7 +67,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
             using(var db = OpenDbConnection()) {
                 //InsertParam + GetByID - fails
                 db.CreateTable<TypeWithByteArrayField>(true);
-                db.InsertParam(orig);
+                db.Insert(orig);
 
                 var target = db.SingleById<TypeWithByteArrayField>(orig.Id);
 

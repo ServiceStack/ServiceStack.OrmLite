@@ -301,7 +301,7 @@ namespace ServiceStack.OrmLite
             {
                 if (TypeSerializer.CanCreateFromString(fieldType))
                 {
-                    return OrmLiteConfig.DialectProvider.GetQuotedParam(TypeSerializer.SerializeToString(value));
+                    return OrmLiteConfig.DialectProvider.GetQuotedValue(TypeSerializer.SerializeToString(value));
                 }
 
                 throw new NotSupportedException(
@@ -318,13 +318,13 @@ namespace ServiceStack.OrmLite
                 return ((decimal)value).ToString(CultureInfo.InvariantCulture);
 
             return ShouldQuoteValue(fieldType)
-                    ? OrmLiteConfig.DialectProvider.GetQuotedParam(value.ToString())
+                    ? OrmLiteConfig.DialectProvider.GetQuotedValue(value.ToString())
                     : value.ToString();
         }
 
         public abstract IDbConnection CreateConnection(string filePath, Dictionary<string, string> options);
 
-        public virtual string GetQuotedParam(string paramValue)
+        public virtual string GetQuotedValue(string paramValue)
         {
             return "'" + paramValue.Replace("'", "''") + "'";
         }

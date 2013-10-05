@@ -85,31 +85,64 @@ namespace ServiceStack.OrmLite
 
 		public static GetValueDelegate GetValueFn<T>(IDataRecord reader)
 		{
-		    var typeCode = typeof(T).GetUnderlyingTypeCode();
-		    switch (typeCode)
-		    {
-		        case TypeCode.String:
-                    return reader.GetString;
-                case TypeCode.Boolean:
-                    return i => reader.GetBoolean(i);
-                case TypeCode.Int16:
-                    return i => reader.GetInt16(i);
-                case TypeCode.Int32:
-                    return i => reader.GetInt32(i);
-                case TypeCode.Int64:
-                    return i => reader.GetInt64(i);
-                case TypeCode.Single:
-                    return i => reader.GetFloat(i);
-                case TypeCode.Double:
-                    return i => reader.GetDouble(i);
-                case TypeCode.Decimal:
-                    return i => reader.GetDecimal(i);
-                case TypeCode.DateTime:
-                    return i => reader.GetDateTime(i);
-            }
+            var nullableType = Nullable.GetUnderlyingType(typeof(T));
 
-			if (typeof(T) == typeof(Guid))
-				return i => reader.GetGuid(i);
+            if (nullableType == null)
+            {
+                var typeCode = Type.GetTypeCode(typeof(T));
+                switch (typeCode)
+                {
+                    case TypeCode.String:
+                        return reader.GetString;
+                    case TypeCode.Boolean:
+                        return i => reader.GetBoolean(i);
+                    case TypeCode.Int16:
+                        return i => reader.GetInt16(i);
+                    case TypeCode.Int32:
+                        return i => reader.GetInt32(i);
+                    case TypeCode.Int64:
+                        return i => reader.GetInt64(i);
+                    case TypeCode.Single:
+                        return i => reader.GetFloat(i);
+                    case TypeCode.Double:
+                        return i => reader.GetDouble(i);
+                    case TypeCode.Decimal:
+                        return i => reader.GetDecimal(i);
+                    case TypeCode.DateTime:
+                        return i => reader.GetDateTime(i);
+                }
+
+                if (typeof(T) == typeof(Guid))
+                    return i => reader.GetGuid(i);
+            }
+            else
+            {
+                var typeCode = Type.GetTypeCode(nullableType);
+                switch (typeCode)
+                {
+                    case TypeCode.String:
+                        return reader.GetString;
+                    case TypeCode.Boolean:
+                        return i => reader.IsDBNull(i) ? null : (bool?)reader.GetBoolean(i);
+                    case TypeCode.Int16:
+                        return i => reader.IsDBNull(i) ? null : (short?)reader.GetInt16(i);
+                    case TypeCode.Int32:
+                        return i => reader.IsDBNull(i) ? null : (int?)reader.GetInt32(i);
+                    case TypeCode.Int64:
+                        return i => reader.IsDBNull(i) ? null : (long?)reader.GetInt64(i);
+                    case TypeCode.Single:
+                        return i => reader.IsDBNull(i) ? null : (float?)reader.GetFloat(i);
+                    case TypeCode.Double:
+                        return i => reader.IsDBNull(i) ? null : (double?)reader.GetDouble(i);
+                    case TypeCode.Decimal:
+                        return i => reader.IsDBNull(i) ? null : (decimal?)reader.GetDecimal(i);
+                    case TypeCode.DateTime:
+                        return i => reader.IsDBNull(i) ? null : (DateTime?)reader.GetDateTime(i);
+                }
+
+                if (typeof(T) == typeof(Guid))
+                    return i => reader.IsDBNull(i) ? null : (Guid?)reader.GetGuid(i);
+            }
 
 			return reader.GetValue;
 		}
@@ -182,7 +215,7 @@ namespace ServiceStack.OrmLite
 
         internal static T SingleFmt<T>(this IDbCommand dbCmd, string filter, params object[] filterParams)
 		{
-            using (var dbReader = dbCmd.ExecReader(OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), filter)))
+            using (var dbReader = dbCmd.ExecReader(OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), filter, filterParams)))
             {
                 return dbReader.ConvertTo<T>();
             }

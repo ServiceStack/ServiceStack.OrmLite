@@ -99,7 +99,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
 			return sql.ToString();
 		}		
 
-        public override string GetQuotedParam(string paramValue)
+        public override string GetQuotedValue(string paramValue)
         {
             return "'" + paramValue.Replace("'", @"''") + "'";
         }

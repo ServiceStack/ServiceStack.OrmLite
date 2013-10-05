@@ -158,7 +158,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				var row = OrderBlob.Create(1);
 
-				db.InsertParam(row);
+				db.Insert(row);
 
 				var rows = db.Select<OrderBlob>();
 
@@ -238,26 +238,26 @@ namespace ServiceStack.OrmLite.Tests
 		}
 
         [Test]
-        public void Can_GetLastInsertedId_using_InsertParam()
+        public void Can_GetLastInsertedId_using_Insert()
         {
             var testObject = new UserAuth { UserName = "test" };
 
             //verify that "normal" Insert works as expected
-            using (var con = OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
-                con.CreateTable<UserAuth>(true);
+                db.CreateTable<UserAuth>(true);
 
-                con.InsertAll(testObject);
-                var normalLastInsertedId = con.LastInsertId();
+                db.InsertAll(testObject);
+                var normalLastInsertedId = db.LastInsertId();
                 Assert.Greater(normalLastInsertedId, 0, "normal Insert");
             }
 
             //test with InsertParam
-            using (var con = OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
-                con.CreateTable<UserAuth>(true);
+                db.CreateTable<UserAuth>(true);
 
-                var lastInsertId = con.InsertParam(testObject, selectIdentity: true);
+                var lastInsertId = db.Insert(testObject, selectIdentity: true);
                 Assert.Greater(lastInsertId, 0, "with InsertParam");
             }
         }
