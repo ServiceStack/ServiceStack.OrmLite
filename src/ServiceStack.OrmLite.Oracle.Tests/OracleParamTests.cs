@@ -89,7 +89,7 @@ namespace ServiceStack.OrmLite.Oracle.Tests
                 bo1.NullableBool = null;
                 bo1.DateTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
 
-                db.UpdateParam(bo1);
+                db.Update(bo1);
 
                 var bo1Check = db.SingleById<ParamTestBO>(1);
 
@@ -106,7 +106,7 @@ namespace ServiceStack.OrmLite.Oracle.Tests
                 bo2.NullableBool = false;
                 bo2.DateTime = DateTime.Now.AddDays(10);
 
-                db.UpdateParam(bo2);
+                db.Update(bo2);
 
                 var bo2Check = db.SingleById<ParamTestBO>(2);
 
@@ -124,17 +124,17 @@ namespace ServiceStack.OrmLite.Oracle.Tests
             {
                 DropAndCreateTables(db);
 
-                db.Insert(new ParamTestBO() { Id = 1 });
-                db.Insert(new ParamTestBO() { Id = 2 });
-                db.Insert(new ParamTestBO() { Id = 3 });
+                db.InsertAll(new ParamTestBO() { Id = 1 });
+                db.InsertAll(new ParamTestBO() { Id = 2 });
+                db.InsertAll(new ParamTestBO() { Id = 3 });
 
                 Assert.IsNotNull(db.Select<ParamTestBO>(q => q.Id == 1).FirstOrDefault());
                 Assert.IsNotNull(db.Select<ParamTestBO>(q => q.Id == 2).FirstOrDefault());
                 Assert.IsNotNull(db.Select<ParamTestBO>(q => q.Id == 3).FirstOrDefault());
 
-                db.DeleteByIdParam<ParamTestBO>(1);
-                db.DeleteByIdParam<ParamTestBO>(2);
-                db.DeleteByIdParam<ParamTestBO>(3);
+                db.DeleteById<ParamTestBO>(1);
+                db.DeleteById<ParamTestBO>(2);
+                db.DeleteById<ParamTestBO>(3);
 
                 Assert.IsNull(db.Select<ParamTestBO>(q => q.Id == 1).FirstOrDefault());
                 Assert.IsNull(db.Select<ParamTestBO>(q => q.Id == 2).FirstOrDefault());
@@ -149,9 +149,9 @@ namespace ServiceStack.OrmLite.Oracle.Tests
             {
                 DropAndCreateTables(db);
 
-                db.Insert(new ParamTestBO() { Id = 1, Info = "Item1" });
-                db.Insert(new ParamTestBO() { Id = 2, Info = "Item2" });
-                db.Insert(new ParamTestBO() { Id = 3, Info = "Item3" });
+                db.InsertAll(new ParamTestBO() { Id = 1, Info = "Item1" });
+                db.InsertAll(new ParamTestBO() { Id = 2, Info = "Item2" });
+                db.InsertAll(new ParamTestBO() { Id = 3, Info = "Item3" });
 
                 Assert.AreEqual("Item1", db.SingleById<ParamTestBO>(1).Info);
                 Assert.AreEqual("Item2", db.SingleById<ParamTestBO>(2).Info);

@@ -60,10 +60,10 @@ namespace ServiceStack.OrmLite.Tests.UseCase
             {
                 using (IDbConnection db = dbFactory.Open()) //Open Connection to Master DB
                 {
-                    db.Insert(new MasterRecord { Id = Guid.NewGuid(), RobotId = newRobot.Id, RobotName = newRobot.Name });
+                    db.InsertAll(new MasterRecord { Id = Guid.NewGuid(), RobotId = newRobot.Id, RobotName = newRobot.Name });
                     using (IDbConnection robotShard = dbFactory.OpenDbConnection("robots-shard" + newRobot.Id % NoOfShards)) //Shard DB
                     {
-                        robotShard.Insert(newRobot);
+                        robotShard.InsertAll(newRobot);
                     }
                 }
             }

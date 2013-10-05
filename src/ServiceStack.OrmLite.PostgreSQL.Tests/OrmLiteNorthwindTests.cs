@@ -51,18 +51,18 @@ namespace ServiceStack.OrmLite.Tests
 
 		private static void LoadNorthwindData(IDbConnection db)
 		{
-			NorthwindData.Categories.ForEach(x => db.Insert(x));
-			NorthwindData.Customers.ForEach(x => db.Insert(x));
-			NorthwindData.Employees.ForEach(x => db.Insert(x));
-			NorthwindData.Shippers.ForEach(x => db.Insert(x));
-			NorthwindData.Orders.ForEach(x => db.Insert(x));
-			NorthwindData.Suppliers.ForEach(x => db.Insert(x));
-			NorthwindData.Products.ForEach(x => db.Insert(x));
-			NorthwindData.OrderDetails.ForEach(x => db.Insert(x));
-			NorthwindData.CustomerCustomerDemos.ForEach(x => db.Insert(x));
-			NorthwindData.Regions.ForEach(x => db.Insert(x));
-			NorthwindData.Territories.ForEach(x => db.Insert(x));
-			NorthwindData.EmployeeTerritories.ForEach(x => db.Insert(x));
+			NorthwindData.Categories.ForEach(x => db.InsertAll(x));
+			NorthwindData.Customers.ForEach(x => db.InsertAll(x));
+			NorthwindData.Employees.ForEach(x => db.InsertAll(x));
+			NorthwindData.Shippers.ForEach(x => db.InsertAll(x));
+			NorthwindData.Orders.ForEach(x => db.InsertAll(x));
+			NorthwindData.Suppliers.ForEach(x => db.InsertAll(x));
+			NorthwindData.Products.ForEach(x => db.InsertAll(x));
+			NorthwindData.OrderDetails.ForEach(x => db.InsertAll(x));
+			NorthwindData.CustomerCustomerDemos.ForEach(x => db.InsertAll(x));
+			NorthwindData.Regions.ForEach(x => db.InsertAll(x));
+			NorthwindData.Territories.ForEach(x => db.InsertAll(x));
+			NorthwindData.EmployeeTerritories.ForEach(x => db.InsertAll(x));
 		}
 
 		[Test]

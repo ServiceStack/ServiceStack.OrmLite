@@ -72,7 +72,7 @@ namespace SqlServerExpressionsTest
 					new Author { Name = "Luis garzon", Birthday = DateTime.Today.AddYears(-22), Active = true, Earnings = 85.0m, Comments = "CSharp books", Rate = 10, City = "Mexico" },
 				};
 
-				db.InsertAll(authors);
+				db.InsertAll<Author>(authors);
 
 
 				// lets start!

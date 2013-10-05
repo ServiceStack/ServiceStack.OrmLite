@@ -21,7 +21,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
 
-				rowIds.ForEach(x => db.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
+				rowIds.ForEach(x => db.InsertAll(ModelWithFieldsOfDifferentTypes.Create(x)));
 
                 var row = db.SingleById<ModelWithFieldsOfDifferentTypes>(1);
 
@@ -38,7 +38,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
 
-				rowIds.ForEach(x => db.Insert(ModelWithOnlyStringFields.Create(x)));
+				rowIds.ForEach(x => db.InsertAll(ModelWithOnlyStringFields.Create(x)));
 
                 var row = db.SingleById<ModelWithOnlyStringFields>("id-1");
 
@@ -55,7 +55,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
 
-				rowIds.ForEach(x => db.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
+				rowIds.ForEach(x => db.InsertAll(ModelWithFieldsOfDifferentTypes.Create(x)));
 
 				var rows = db.SelectByIds<ModelWithFieldsOfDifferentTypes>(rowIds);
 				var dbRowIds = rows.ConvertAll(x => x.Id);
@@ -73,7 +73,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
 
-				rowIds.ForEach(x => db.Insert(ModelWithOnlyStringFields.Create(x)));
+				rowIds.ForEach(x => db.InsertAll(ModelWithOnlyStringFields.Create(x)));
 
 				var rows = db.SelectByIds<ModelWithOnlyStringFields>(rowIds);
 				var dbRowIds = rows.ConvertAll(x => x.Id);
@@ -91,12 +91,12 @@ namespace ServiceStack.OrmLite.Tests
 
 				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
 
-				rowIds.ForEach(x => db.Insert(ModelWithOnlyStringFields.Create(x)));
+				rowIds.ForEach(x => db.InsertAll(ModelWithOnlyStringFields.Create(x)));
 
 				var filterRow = ModelWithOnlyStringFields.Create("id-4");
 				filterRow.AlbumName = "FilteredName";
 
-				db.Insert(filterRow);
+				db.InsertAll(filterRow);
 
 				var rows = db.SelectFmt<ModelWithOnlyStringFields>("\"AlbumName\" = {0}", filterRow.AlbumName);
 				var dbRowIds = rows.ConvertAll(x => x.Id);
@@ -115,7 +115,7 @@ namespace ServiceStack.OrmLite.Tests
 			{
 				db.CreateTable<ModelWithIdAndName>(true);
 
-				n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
+				n.Times(x => db.InsertAll(ModelWithIdAndName.Create(x)));
 
 				var count = db.ScalarFmt<long>("SELECT COUNT(*) FROM \"ModelWithIdAndName\"");
 
@@ -132,7 +132,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
 
-				rowIds.ForEach(x => db.Insert(ModelWithOnlyStringFields.Create(x)));
+				rowIds.ForEach(x => db.InsertAll(ModelWithOnlyStringFields.Create(x)));
 
 				var dbRowIds = new List<string>();
 				foreach (var row in db.Lazy<ModelWithOnlyStringFields>())
@@ -153,12 +153,12 @@ namespace ServiceStack.OrmLite.Tests
 
 				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
 
-				rowIds.ForEach(x => db.Insert(ModelWithOnlyStringFields.Create(x)));
+				rowIds.ForEach(x => db.InsertAll(ModelWithOnlyStringFields.Create(x)));
 
 				var filterRow = ModelWithOnlyStringFields.Create("id-4");
 				filterRow.AlbumName = "FilteredName";
 
-				db.Insert(filterRow);
+				db.InsertAll(filterRow);
 
 				var dbRowIds = new List<string>();
 				var rows = db.LazyFmt<ModelWithOnlyStringFields>("\"AlbumName\" = {0}", filterRow.AlbumName);
@@ -181,7 +181,7 @@ namespace ServiceStack.OrmLite.Tests
 			{
 				db.CreateTable<ModelWithIdAndName>(true);
 
-				n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
+				n.Times(x => db.InsertAll(ModelWithIdAndName.Create(x)));
 
 				var ids = db.Column<int>("SELECT \"Id\" FROM \"ModelWithIdAndName\"");
 
@@ -198,7 +198,7 @@ namespace ServiceStack.OrmLite.Tests
 			{
 				db.CreateTable<ModelWithIdAndName>(true);
 
-				n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
+				n.Times(x => db.InsertAll(ModelWithIdAndName.Create(x)));
 
 				var ids = db.ColumnDistinctFmt<int>("SELECT \"Id\" FROM \"ModelWithIdAndName\"");
 
@@ -218,7 +218,7 @@ namespace ServiceStack.OrmLite.Tests
 				n.Times(x => {
 					var row = ModelWithIdAndName.Create(x);
 					row.Name = x % 2 == 0 ? "OddGroup" : "EvenGroup";
-					db.Insert(row);
+					db.InsertAll(row);
 				});
 
 				var lookup = db.LookupFmt<string, int>("SELECT \"Name\", \"Id\" FROM \"ModelWithIdAndName\"");
@@ -238,7 +238,7 @@ namespace ServiceStack.OrmLite.Tests
 			{
 				db.CreateTable<ModelWithIdAndName>(true);
 
-				n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
+				n.Times(x => db.InsertAll(ModelWithIdAndName.Create(x)));
 
 				var dictionary = db.Dictionary<int, string>("SELECT \"Id\", \"Name\" FROM \"ModelWithIdAndName\"");
 
@@ -257,7 +257,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
 
-				rowIds.ForEach(x => db.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
+				rowIds.ForEach(x => db.InsertAll(ModelWithFieldsOfDifferentTypes.Create(x)));
 
 				var rows = db.SelectFmt<ModelWithIdAndName>("SELECT \"Id\", \"Name\" FROM \"ModelWithFieldsOfDifferentTypes\"");
 				var dbRowIds = rows.ConvertAll(x => x.Id);
@@ -275,7 +275,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
 
-				rowIds.ForEach(x => db.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
+				rowIds.ForEach(x => db.InsertAll(ModelWithFieldsOfDifferentTypes.Create(x)));
 
 				var rows = db.Select<ModelWithFieldsOfDifferentTypes>("SELECT * FROM \"ModelWithFieldsOfDifferentTypes\" where \"Id\" = :Id ",
 					new Dictionary<string, object> { 
@@ -296,7 +296,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
 
-				rowIds.ForEach(x => db.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
+				rowIds.ForEach(x => db.InsertAll(ModelWithFieldsOfDifferentTypes.Create(x)));
 
 				var rows = db.Select<ModelWithIdAndName>(typeof(ModelWithFieldsOfDifferentTypes));
 				var dbRowIds = rows.ConvertAll(x => x.Id);
@@ -315,7 +315,7 @@ namespace ServiceStack.OrmLite.Tests
 			{
 				db.CreateTable<ModelWithIdAndName>(true);
 
-				n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
+				n.Times(x => db.InsertAll(ModelWithIdAndName.Create(x)));
 
 				var selectInNames = new[] {"Name1", "Name2"};
 				var rows = db.SelectFmt<ModelWithIdAndName>("\"Name\" IN ({0})", selectInNames.SqlInValues());

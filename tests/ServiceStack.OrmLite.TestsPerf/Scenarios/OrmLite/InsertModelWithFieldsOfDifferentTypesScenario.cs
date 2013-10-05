@@ -15,7 +15,7 @@ namespace ServiceStack.OrmLite.TestsPerf.Scenarios.OrmLite
 				db.CreateTable<ModelWithFieldsOfDifferentTypesPerf>(true);
 			}
 
-			db.Insert(ModelWithFieldsOfDifferentTypesPerf.Create(this.Iteration));
+			db.InsertAll(ModelWithFieldsOfDifferentTypesPerf.Create(this.Iteration));
 		}
 	}
 
@@ -27,7 +27,7 @@ namespace ServiceStack.OrmLite.TestsPerf.Scenarios.OrmLite
 			if (this.IsFirstRun)
 			{
 				db.CreateTable<ModelWithFieldsOfDifferentTypesPerf>(true);
-				db.Insert(ModelWithFieldsOfDifferentTypesPerf.Create(this.Iteration));
+				db.InsertAll(ModelWithFieldsOfDifferentTypesPerf.Create(this.Iteration));
 			}
 
 			var row = db.Select<ModelWithFieldsOfDifferentTypesPerf>();
@@ -42,7 +42,7 @@ namespace ServiceStack.OrmLite.TestsPerf.Scenarios.OrmLite
 			if (this.IsFirstRun)
 			{
 				db.CreateTable<ModelWithFieldsOfDifferentTypesPerf>(true);
-				20.Times(i => db.Insert(ModelWithFieldsOfDifferentTypesPerf.Create(i)));
+				20.Times(i => db.InsertAll(ModelWithFieldsOfDifferentTypesPerf.Create(i)));
 			}
 
 			var rows = db.Select<ModelWithFieldsOfDifferentTypesPerf>();

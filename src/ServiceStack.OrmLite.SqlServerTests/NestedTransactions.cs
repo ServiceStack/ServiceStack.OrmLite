@@ -27,16 +27,16 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 using(var innerConn = factory.OpenDbConnection()) {
 
                     using(var outerTran = outerConn.OpenTransaction()) {
-                        outerConn.Insert(new Can_use_nested_transactions_Table1 { Dummy = DateTime.Now });
+                        outerConn.InsertAll(new Can_use_nested_transactions_Table1 { Dummy = DateTime.Now });
 
                         using(var innerTran = innerConn.OpenTransaction()) {
                             //The other transaction inserts into table1, Table2 is not locked
-                            innerConn.Insert(new Can_use_nested_transactions_Table2 { Dummy = DateTime.Now });
+                            innerConn.InsertAll(new Can_use_nested_transactions_Table2 { Dummy = DateTime.Now });
 
                             //fails here, because innerTran has overwritten the ThreadStatic OrmLiteConfig.CurrentTransaction
-                            outerConn.Insert(new Can_use_nested_transactions_Table1 { Dummy = DateTime.Now });
+                            outerConn.InsertAll(new Can_use_nested_transactions_Table1 { Dummy = DateTime.Now });
 
-                            outerConn.Insert(new Can_use_nested_transactions_Table1 { Dummy = DateTime.Now });
+                            outerConn.InsertAll(new Can_use_nested_transactions_Table1 { Dummy = DateTime.Now });
                         }
                     }
                 }

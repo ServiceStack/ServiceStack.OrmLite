@@ -18,7 +18,7 @@ namespace ServiceStack.OrmLite.TestsPerf.Scenarios.OrmLite
 				db.CreateTable<SampleOrderLine>(true);
 			}
 
-			db.Insert(SampleOrderLine.Create(userId, this.Iteration, 1));
+			db.InsertAll(SampleOrderLine.Create(userId, this.Iteration, 1));
 		}
 	}
 
@@ -32,7 +32,7 @@ namespace ServiceStack.OrmLite.TestsPerf.Scenarios.OrmLite
 			if (this.IsFirstRun)
 			{
 				db.CreateTable<SampleOrderLine>(true);
-				db.Insert(SampleOrderLine.Create(userId, this.Iteration, 1));
+				db.InsertAll(SampleOrderLine.Create(userId, this.Iteration, 1));
 			}
 
 			var row = db.Select<SampleOrderLine>();
@@ -49,7 +49,7 @@ namespace ServiceStack.OrmLite.TestsPerf.Scenarios.OrmLite
 			if (this.IsFirstRun)
 			{
 				db.CreateTable<SampleOrderLine>(true);
-				20.Times(i => db.Insert(SampleOrderLine.Create(userId, i, 1)));
+				20.Times(i => db.InsertAll(SampleOrderLine.Create(userId, i, 1)));
 			}
 
 			var rows = db.Select<SampleOrderLine>();

@@ -76,7 +76,7 @@ namespace TestLiteFirebird01
 				//try{
 					
 					
-    				db.Insert(new User 
+    				db.InsertAll(new User 
 					{ 	
 						Name= string.Format("Hello, World! {0}", DateTime.Now),
 						Password="jkkoo",
@@ -96,7 +96,7 @@ namespace TestLiteFirebird01
 					};
 					
 					
-					db.Insert(user);
+					db.InsertAll(user);
 					
 					Console.WriteLine("++++++++++Id for {0} {1}",user.Name,  user.Id);
 						

@@ -41,9 +41,9 @@ namespace ServiceStack.OrmLite.FirebirdTests
 			{
 				db.CreateTable<User>(true);
 				
-				db.Insert(new User { Id = 1, Name = "A", CreatedDate = DateTime.Now });
-				db.Insert(new User { Id = 2, Name = "B", CreatedDate = DateTime.Now });
-				db.Insert(new User { Id = 3, Name = "B", CreatedDate = DateTime.Now });
+				db.InsertAll(new User { Id = 1, Name = "A", CreatedDate = DateTime.Now });
+				db.InsertAll(new User { Id = 2, Name = "B", CreatedDate = DateTime.Now });
+				db.InsertAll(new User { Id = 3, Name = "B", CreatedDate = DateTime.Now });
 				
 				var rowsB = db.SelectFmt<User>("Name = {0}", "B");
 
@@ -64,7 +64,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 				db.CreateTable<GuidId>(true);
 				Guid g = Guid.NewGuid();
-				db.Insert(new GuidId { Id = g });
+				db.InsertAll(new GuidId { Id = g });
 
 				GuidId gid = db.SingleFmt<GuidId>("Id = {0}", g);
 				Assert.That(g == gid.Id);

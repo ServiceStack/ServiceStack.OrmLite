@@ -28,7 +28,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 
 				var row = ModelWithComplexTypes.Create(1);
 
-				db.Insert(row);
+				db.InsertAll(row);
 			}
 		}
 
@@ -41,7 +41,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 
 				var row = ModelWithComplexTypes.Create(1);
 
-				db.Insert(row);
+				db.InsertAll(row);
 
 				var rows = db.Select<ModelWithComplexTypes>();
 
@@ -60,7 +60,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 
 				var orderIds = new[] { 1, 2, 3, 4, 5 }.ToList();
 
-				orderIds.ForEach(x => db.Insert(
+				orderIds.ForEach(x => db.InsertAll(
 					SampleOrderLine.Create(Guid.NewGuid(), x, 1)));
 
 				var rows = db.Select<SampleOrderLine>();

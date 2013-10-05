@@ -42,7 +42,7 @@ namespace ServiceStack.OrmLite.Tests
             {
                 var nU = new User { Age = rand.Next(70), Id = i, Name = Guid.NewGuid().ToString() };
                 data.Add(nU);
-                db.Insert(nU);
+                db.InsertAll(nU);
                 nU.Id = (int)db.LastInsertId();
             }
 
@@ -71,7 +71,7 @@ namespace ServiceStack.OrmLite.Tests
             if (template.RawSql == null) throw new Exception("RawSql null");
             if (template.Parameters == null) throw new Exception("Parameters null");
 
-            db.Insert(new User { Age = 5, Name = "Testy McTestington" });
+            db.InsertAll(new User { Age = 5, Name = "Testy McTestington" });
 
             Assert.That(db.Scalar<int>(template.RawSql, template.Parameters), Is.EqualTo(1));
         }         

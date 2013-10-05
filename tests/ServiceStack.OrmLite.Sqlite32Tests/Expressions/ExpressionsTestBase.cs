@@ -32,7 +32,7 @@ namespace ServiceStack.OrmLite.Tests.Expressions
             {
                 foreach (var t in obj)
                 {
-                    con.Insert(t);
+                    con.InsertAll(t);
                 }
 
                 var random = new Random((int)(DateTime.UtcNow.Ticks ^ (DateTime.UtcNow.Ticks >> 4)));
@@ -55,7 +55,7 @@ namespace ServiceStack.OrmLite.Tests.Expressions
                             o = null;
                     }
 
-                    con.Insert(o);
+                    con.InsertAll(o);
                 }
             }
         }

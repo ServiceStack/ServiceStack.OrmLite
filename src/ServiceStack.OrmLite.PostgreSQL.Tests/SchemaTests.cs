@@ -68,9 +68,9 @@ $$;";
                 CreateSchemaIfNotExists(db);
                 db.CreateTable<User>(true);
 
-                db.Insert(new User { Id = 1, Name = "A", CreatedDate = DateTime.Now });
-                db.Insert(new User { Id = 2, Name = "B", CreatedDate = DateTime.Now });
-                db.Insert(new User { Id = 3, Name = "B", CreatedDate = DateTime.Now });
+                db.InsertAll(new User { Id = 1, Name = "A", CreatedDate = DateTime.Now });
+                db.InsertAll(new User { Id = 2, Name = "B", CreatedDate = DateTime.Now });
+                db.InsertAll(new User { Id = 3, Name = "B", CreatedDate = DateTime.Now });
 
                 var lastInsertId = db.LastInsertId();
                 Assert.That(lastInsertId, Is.GreaterThan(0));

@@ -31,9 +31,9 @@ namespace SqliteExpressionsTest
             {
                 db.CreateTable<User>(true);
  
-                db.Insert(new User { Id = 1, Name = "A", CreatedDate = DateTime.Now, UserDataId = 5, UserServiceId = 8 });
-                db.Insert(new User { Id = 2, Name = "B", CreatedDate = DateTime.Now, UserDataId = 5, UserServiceId = 9 });
-                db.Insert(new User { Id = 3, Name = "B", CreatedDate = DateTime.Now });
+                db.InsertAll(new User { Id = 1, Name = "A", CreatedDate = DateTime.Now, UserDataId = 5, UserServiceId = 8 });
+                db.InsertAll(new User { Id = 2, Name = "B", CreatedDate = DateTime.Now, UserDataId = 5, UserServiceId = 9 });
+                db.InsertAll(new User { Id = 3, Name = "B", CreatedDate = DateTime.Now });
 
                 SqlExpressionVisitor<User> ev = OrmLiteConfig.DialectProvider.SqlExpression<User>();
 

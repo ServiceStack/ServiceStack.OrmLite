@@ -161,7 +161,7 @@ namespace ServiceStack.OrmLite
                 if (OrmLiteConfig.DialectProvider.DoesTableExist(dbCmd, tableName))
                 {
                     var dropTableFks = OrmLiteConfig.DialectProvider.GetDropForeignKeyConstraints(modelDef);
-                    if (!string.IsNullOrEmpty(dropTableFks))
+                    if (!String.IsNullOrEmpty(dropTableFks))
                     {
                         dbCmd.ExecuteSql(dropTableFks);
                     }
@@ -174,7 +174,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        internal static string GetLastSql(this IDbCommand dbCmd)
+        internal static string LastSql(this IDbCommand dbCmd)
         {
             return dbCmd.CommandText;
         }
@@ -195,9 +195,6 @@ namespace ServiceStack.OrmLite
 			 return ex.Message.Contains(sqliteAlreadyExistsError)
                    || ex.Message.Contains(sqlServerAlreadyExistsError)	;
         }
-		
-		//DEFINE GENERATOR failed
-		//
 		
 		private static bool IgnoreAlreadyExistsGeneratorError(Exception ex)
         {
@@ -279,22 +276,22 @@ namespace ServiceStack.OrmLite
                 // First guess: Maybe the DB field has underscores? (most common)
                 // e.g. CustomerId (C#) vs customer_id (DB)
                 var dbFieldNameWithNoUnderscores = dbFieldName.Replace("_", "");
-                if (string.Compare(fieldName, dbFieldNameWithNoUnderscores, StringComparison.InvariantCultureIgnoreCase) == 0)
+                if (String.Compare(fieldName, dbFieldNameWithNoUnderscores, StringComparison.InvariantCultureIgnoreCase) == 0)
                 {
                     return i;
                 }
 
                 // Next guess: Maybe the DB field has special characters?
                 // e.g. Quantity (C#) vs quantity% (DB)
-                var dbFieldNameSanitized = AllowedPropertyCharsRegex.Replace(dbFieldName, string.Empty);
-                if (string.Compare(fieldName, dbFieldNameSanitized, StringComparison.InvariantCultureIgnoreCase) == 0)
+                var dbFieldNameSanitized = AllowedPropertyCharsRegex.Replace(dbFieldName, String.Empty);
+                if (String.Compare(fieldName, dbFieldNameSanitized, StringComparison.InvariantCultureIgnoreCase) == 0)
                 {
                     return i;
                 }
 
                 // Next guess: Maybe the DB field has special characters *and* has underscores?
                 // e.g. Quantity (C#) vs quantity_% (DB)
-                if (string.Compare(fieldName, dbFieldNameSanitized.Replace("_", string.Empty), StringComparison.InvariantCultureIgnoreCase) == 0)
+                if (String.Compare(fieldName, dbFieldNameSanitized.Replace("_", String.Empty), StringComparison.InvariantCultureIgnoreCase) == 0)
                 {
                     return i;
                 }
@@ -331,13 +328,22 @@ namespace ServiceStack.OrmLite
             return NotFound;
         }
 
-        internal static void Update<T>(this IDbCommand dbCmd, params T[] objs)
-		{
-			foreach (var obj in objs)
-			{
-				dbCmd.ExecuteSql(OrmLiteConfig.DialectProvider.ToUpdateRowStatement(obj)); 
-			}
-		}
+        internal static void Update<T>(this IDbCommand dbCmd, T obj)
+        {
+            using (var updateStmt = dbCmd.CreateUpdateStatement(obj))
+            {
+                dbCmd.CopyParameterizedStatementTo(updateStmt);
+            }
+            dbCmd.ExecuteNonQuery();
+        }
+
+        internal static void UpdateAll<T>(this IDbCommand dbCmd, params T[] objs)
+        {
+            foreach (var obj in objs)
+            {
+                dbCmd.ExecuteSql(OrmLiteConfig.DialectProvider.ToUpdateRowStatement(obj));
+            }
+        }
 
         internal static void UpdateAll<T>(this IDbCommand dbCmd, IEnumerable<T> objs)
 		{
@@ -347,9 +353,24 @@ namespace ServiceStack.OrmLite
 			}
 		}
 
-        internal static IDbCommand CreateUpdateStatement<T>(this IDbConnection connection, T obj)
+        internal static IDbCommand CreateUpdateStatement<T>(this IDbCommand dbCmd, T obj)
         {
-            return OrmLiteConfig.DialectProvider.CreateParameterizedUpdateStatement(connection, obj);
+            return OrmLiteConfig.DialectProvider.CreateParameterizedUpdateStatement(dbCmd, obj);
+        }
+
+        internal static void CopyParameterizedStatementTo(this IDbCommand dbCmd, IDbCommand tmpStmt)
+        {
+            dbCmd.CommandText = tmpStmt.CommandText;
+
+            //Instead of creating new generic DbParameters, copy them from the "dummy" IDbCommand, 
+            //to keep provider specific information. E.g: SqlServer "datetime2" dbtype
+            //We must first create a temp list, as DbParam can't belong to two DbCommands
+            var tmpParams = new List<IDbDataParameter>(tmpStmt.Parameters.Count);
+            tmpParams.AddRange(tmpStmt.Parameters.Cast<IDbDataParameter>());
+
+            tmpStmt.Parameters.Clear();
+
+            tmpParams.ForEach(x => dbCmd.Parameters.Add(x));
         }
 
         internal static void Delete<T>(this IDbCommand dbCmd, params T[] objs)
@@ -368,18 +389,6 @@ namespace ServiceStack.OrmLite
 			}
 		}
 
-        internal static void DeleteById<T>(this IDbCommand dbCmd, object id)
-        {
-            var modelDef = ModelDefinition<T>.Definition;
-
-            var sql = string.Format("DELETE FROM {0} WHERE {1} = {2}",
-                OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef),
-                OrmLiteConfig.DialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName),
-                OrmLiteConfig.DialectProvider.GetQuotedValue(id, id.GetType()));
-
-            dbCmd.ExecuteSql(sql);
-        }
-
         internal static void DeleteByIds<T>(this IDbCommand dbCmd, IEnumerable idValues)
         {
             var sqlIn = idValues.GetIdsInSql();
@@ -387,7 +396,7 @@ namespace ServiceStack.OrmLite
 
             var modelDef = ModelDefinition<T>.Definition;
 
-            var sql = string.Format("DELETE FROM {0} WHERE {1} IN ({2})",
+            var sql = String.Format("DELETE FROM {0} WHERE {1} IN ({2})",
                 OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef),
                 OrmLiteConfig.DialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName),
                 sqlIn);
@@ -395,12 +404,12 @@ namespace ServiceStack.OrmLite
             dbCmd.ExecuteSql(sql);
         }
 
-        internal static void DeleteByIdParam<T>(this IDbCommand dbCmd, object id)
+        internal static void DeleteById<T>(this IDbCommand dbCmd, object id)
         {
             var modelDef = ModelDefinition<T>.Definition;
-            var idParamString = OrmLiteConfig.DialectProvider.ParamString+"0";
+            var idParamString = OrmLiteConfig.DialectProvider.GetParam();
 
-            var sql = string.Format("DELETE FROM {0} WHERE {1} = {2}",
+            var sql = String.Format("DELETE FROM {0} WHERE {1} = {2}",
                 OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef),
                 OrmLiteConfig.DialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName),
                 idParamString);
@@ -423,12 +432,12 @@ namespace ServiceStack.OrmLite
 			dbCmd.ExecuteSql(OrmLiteConfig.DialectProvider.ToDeleteStatement(tableType, null));
 		}
 
-        internal static void Delete<T>(this IDbCommand dbCmd, string sqlFilter, params object[] filterParams)
+        internal static void DeleteFmt<T>(this IDbCommand dbCmd, string sqlFilter, params object[] filterParams)
         {
-            Delete(dbCmd, typeof(T), sqlFilter, filterParams);
+            DeleteFmt(dbCmd, typeof(T), sqlFilter, filterParams);
         }
 
-        internal static void Delete(this IDbCommand dbCmd, Type tableType, string sqlFilter, params object[] filterParams)
+        internal static void DeleteFmt(this IDbCommand dbCmd, Type tableType, string sqlFilter, params object[] filterParams)
         {
             dbCmd.ExecuteSql(OrmLiteConfig.DialectProvider.ToDeleteStatement(tableType, sqlFilter, filterParams));
         }
@@ -439,21 +448,35 @@ namespace ServiceStack.OrmLite
             var existingRow = dbCmd.SingleById<T>(id);
             if (Equals(existingRow, default(T)))
             {
-                dbCmd.Insert(obj);
+                dbCmd.InsertAll(obj);
             }
             else
             {
-                dbCmd.Update(obj);
+                dbCmd.UpdateAll(obj);
             }
         }
 
-        internal static void Insert<T>(this IDbCommand dbCmd, params T[] objs)
-		{
-			foreach (var obj in objs)
-			{
-				dbCmd.ExecuteSql(OrmLiteConfig.DialectProvider.ToInsertRowStatement(dbCmd, obj));
-			}
-		}
+        internal static long Insert<T>(this IDbCommand dbCmd, T obj, bool selectIdentity = false)
+        {
+            using (var insertStmt = dbCmd.CreateInsertStatement(obj))
+            {
+                dbCmd.CopyParameterizedStatementTo(insertStmt);
+            }
+
+            if (selectIdentity)
+                return OrmLiteConfig.DialectProvider.InsertAndGetLastInsertId<T>(dbCmd);
+
+            dbCmd.ExecuteNonQuery();
+            return -1;
+        }
+
+        internal static void InsertAll<T>(this IDbCommand dbCmd, params T[] objs)
+        {
+            foreach (var obj in objs)
+            {
+                dbCmd.ExecuteSql(OrmLiteConfig.DialectProvider.ToInsertRowStatement(dbCmd, obj));
+            }
+        }
 
         internal static void InsertAll<T>(this IDbCommand dbCmd, IEnumerable<T> objs)
 		{
@@ -463,9 +486,9 @@ namespace ServiceStack.OrmLite
 			}
 		}
 
-        internal static IDbCommand CreateInsertStatement<T>(this IDbConnection connection, T obj)
+        internal static IDbCommand CreateInsertStatement<T>(this IDbCommand command, T obj)
         {
-            return OrmLiteConfig.DialectProvider.CreateParameterizedInsertStatement(connection, obj);
+            return OrmLiteConfig.DialectProvider.CreateParameterizedInsertStatement(command, obj);
         }
 
         internal static void Save<T>(this IDbCommand dbCmd, params T[] objs)
@@ -497,11 +520,11 @@ namespace ServiceStack.OrmLite
                     var id = saveRow.GetId();
                     if (id != defaultIdValue && existingRowsMap.ContainsKey(id))
                     {
-                        dbCmd.Update(saveRow);
+                        dbCmd.UpdateAll(saveRow);
                     }
                     else
                     {
-                        dbCmd.Insert(saveRow);
+                        dbCmd.InsertAll(saveRow);
                     }
                 }
 
@@ -532,6 +555,5 @@ namespace ServiceStack.OrmLite
 			dbCommand.CommandType= CommandType.StoredProcedure;
 			dbCommand.ExecuteSql(sql);
 		}
-		
     }
 }

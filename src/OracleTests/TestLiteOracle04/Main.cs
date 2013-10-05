@@ -40,7 +40,7 @@ namespace TestLiteOracle04
                 Console.WriteLine(company.Id.In(ids));
                 Console.WriteLine(company.Name.In(names));
 
-                db.Insert<Company>(company);
+                db.InsertAll<Company>(company);
 
                 sql.Where(cp => cp.Name == "On more Company");
                 Console.WriteLine(sql.WhereExpression);

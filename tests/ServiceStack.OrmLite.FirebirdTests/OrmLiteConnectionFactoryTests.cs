@@ -23,7 +23,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
             using (var db = factory.OpenDbConnection())
             {
                 db.CreateTable<Shipper>(true);
-                db.Insert(new Shipper { CompanyName = "I am shipper 1" });
+                db.InsertAll(new Shipper { CompanyName = "I am shipper 1" });
             }
 
             using (var db = factory.OpenDbConnection())
@@ -44,7 +44,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
             using (var db = factory.OpenDbConnection())
             {
                 db.CreateTable<Shipper>(false);
-                db.Insert(new Shipper { CompanyName = "I am shipper 2" });
+                db.InsertAll(new Shipper { CompanyName = "I am shipper 2" });
             }
 
             using (var db = factory.OpenDbConnection())

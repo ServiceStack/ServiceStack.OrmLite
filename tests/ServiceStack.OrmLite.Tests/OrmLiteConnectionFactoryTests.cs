@@ -19,7 +19,7 @@ namespace ServiceStack.OrmLite.Tests
             using (var db = factory.OpenDbConnection())
             {
                 db.CreateTable<Shipper>(false);
-                db.Insert(new Shipper { CompanyName = "I am shipper" });
+                db.InsertAll(new Shipper { CompanyName = "I am shipper" });
             }
 
             using (var db = factory.OpenDbConnection())
@@ -38,7 +38,7 @@ namespace ServiceStack.OrmLite.Tests
             using (var db = factory.OpenDbConnection())
             {
                 db.CreateTable<Shipper>(false);
-                db.Insert(new Shipper { CompanyName = "I am shipper" });
+                db.InsertAll(new Shipper { CompanyName = "I am shipper" });
             }
 
             using (var db = factory.OpenDbConnection())
@@ -65,20 +65,20 @@ namespace ServiceStack.OrmLite.Tests
             using (var db = factory.OpenDbConnection())
             {
                 db.DropAndCreateTable<Person>();
-                db.Insert(new Person { Id = 1, Name = "1) :memory:" });
-                db.Insert(new Person { Id = 2, Name = "2) :memory:" });
+                db.InsertAll(new Person { Id = 1, Name = "1) :memory:" });
+                db.InsertAll(new Person { Id = 2, Name = "2) :memory:" });
 
                 using (var db2 = factory.OpenDbConnection("sqlserver"))
                 {
                     db2.CreateTable<Person>(true);
-                    db2.Insert(new Person { Id = 3, Name = "3) Database1.mdf" });
-                    db2.Insert(new Person { Id = 4, Name = "4) Database1.mdf" });
+                    db2.InsertAll(new Person { Id = 3, Name = "3) Database1.mdf" });
+                    db2.InsertAll(new Person { Id = 4, Name = "4) Database1.mdf" });
 
                     using (var db3 = factory.OpenDbConnection("sqlite-file"))
                     {
                         db3.CreateTable<Person>(true);
-                        db3.Insert(new Person { Id = 5, Name = "5) db.sqlite" });
-                        db3.Insert(new Person { Id = 6, Name = "6) db.sqlite" });
+                        db3.InsertAll(new Person { Id = 5, Name = "5) db.sqlite" });
+                        db3.InsertAll(new Person { Id = 6, Name = "6) db.sqlite" });
 
                         results.AddRange(db.Select<Person>());
                         results.AddRange(db2.Select<Person>());
@@ -103,23 +103,23 @@ namespace ServiceStack.OrmLite.Tests
             using (var db = factory.OpenDbConnection())
             {
                 db.CreateTable<Person>(true);
-                db.Insert(new Person { Id = 1, Name = "1) :memory:" });
+                db.InsertAll(new Person { Id = 1, Name = "1) :memory:" });
 
                 using (var db2 = factory.OpenDbConnection("sqlserver"))
                 {
                     db2.CreateTable<Person>(true);
-                    db.Insert(new Person { Id = 2, Name = "2) :memory:" });
-                    db2.Insert(new Person { Id = 3, Name = "3) Database1.mdf" });
+                    db.InsertAll(new Person { Id = 2, Name = "2) :memory:" });
+                    db2.InsertAll(new Person { Id = 3, Name = "3) Database1.mdf" });
 
                     using (var db3 = factory.OpenDbConnection("sqlite-file"))
                     {
                         db3.CreateTable<Person>(true);
-                        db2.Insert(new Person { Id = 4, Name = "4) Database1.mdf" });
-                        db3.Insert(new Person { Id = 5, Name = "5) db.sqlite" });
+                        db2.InsertAll(new Person { Id = 4, Name = "4) Database1.mdf" });
+                        db3.InsertAll(new Person { Id = 5, Name = "5) db.sqlite" });
 
                         results.AddRange(db2.Select<Person>());
 
-                        db3.Insert(new Person { Id = 6, Name = "6) db.sqlite" });
+                        db3.InsertAll(new Person { Id = 6, Name = "6) db.sqlite" });
                         results.AddRange(db3.Select<Person>());
                     }
                     results.AddRange(db.Select<Person>());

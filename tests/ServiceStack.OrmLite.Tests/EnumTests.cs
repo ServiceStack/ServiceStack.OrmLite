@@ -90,8 +90,8 @@ namespace ServiceStack.OrmLite.Tests
             using (var connection = OpenDbConnection())
             {
                 connection.DropAndCreateTable<DoubleState>();
-                connection.Insert(new DoubleState { Id = "1", State1 = DoubleState.State.OK, State2 = DoubleState.State.KO });
-                connection.Insert(new DoubleState { Id = "2", State1 = DoubleState.State.OK, State2 = DoubleState.State.OK });
+                connection.InsertAll(new DoubleState { Id = "1", State1 = DoubleState.State.OK, State2 = DoubleState.State.KO });
+                connection.InsertAll(new DoubleState { Id = "2", State1 = DoubleState.State.OK, State2 = DoubleState.State.OK });
                 IEnumerable<DoubleState> doubleStates = connection.Select<DoubleState>(x => x.State1 != x.State2);
                 Assert.AreEqual(1, doubleStates.Count());
             }
