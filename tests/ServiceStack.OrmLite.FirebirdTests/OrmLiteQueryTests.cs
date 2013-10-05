@@ -21,7 +21,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 				rowIds.ForEach(x => db.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
 
-				var row = db.SelectById<ModelWithFieldsOfDifferentTypes>(1);
+				var row = db.SingleById<ModelWithFieldsOfDifferentTypes>(1);
 
 				Assert.That(row.Id, Is.EqualTo(1));
 			}
@@ -38,7 +38,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 				rowIds.ForEach(x => db.Insert(ModelWithOnlyStringFields.Create(x)));
 
-				var row = db.SelectById<ModelWithOnlyStringFields>("id-1");
+				var row = db.SingleById<ModelWithOnlyStringFields>("id-1");
 
 				Assert.That(row.Id, Is.EqualTo("id-1"));
 			}
@@ -71,12 +71,12 @@ namespace ServiceStack.OrmLite.FirebirdTests
 				Assert.That(dbRowIds[0], Is.EqualTo(filterRow.Id));
 
 				var queryByExample = new ModelWithOnlyStringFields { AlbumName = filterRow.AlbumName };
-				rows = db.ByExampleWhere<ModelWithOnlyStringFields>(queryByExample, excludeNulls: true);
+				rows = db.SelectByExample(queryByExample);
 				dbRowIds = rows.ConvertAll(x => x.Id);
 				Assert.That(dbRowIds, Has.Count.EqualTo(1));
 				Assert.That(dbRowIds[0], Is.EqualTo(filterRow.Id));
 
-				rows = db.Query<ModelWithOnlyStringFields>(
+				rows = db.Select<ModelWithOnlyStringFields>(
 					"SELECT * FROM ModelWithOnlyStringFields WHERE AlbumName = @AlbumName", new { filterRow.AlbumName });
 				dbRowIds = rows.ConvertAll(x => x.Id);
 				Assert.That(dbRowIds, Has.Count.EqualTo(1));
@@ -101,7 +101,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 				db.Insert(filterRow);
 
 				var dbRowIds = new List<string>();
-				var rows = db.EachWhere<ModelWithOnlyStringFields>(new { filterRow.AlbumName });
+				var rows = db.LazyWhere<ModelWithOnlyStringFields>(new { filterRow.AlbumName });
 				foreach (var row in rows)
 				{
 					dbRowIds.Add(row.Id);

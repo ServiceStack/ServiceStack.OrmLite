@@ -64,14 +64,14 @@ END;";
             var expected = 0;
             10.Times(i => expected += i);
 
-            var results = db.SqlList<DummyTable>("EXEC DummyTable @Times", new { Times = 10 });
+            var results = db.SqlColumn<DummyTable>("EXEC DummyTable @Times", new { Times = 10 });
             results.PrintDump();
             Assert.That(results.Sum(x => x.Id), Is.EqualTo(expected));
 
-            results = db.SqlList<DummyTable>("EXEC DummyTable 10");
+            results = db.SqlColumn<DummyTable>("EXEC DummyTable 10");
             Assert.That(results.Sum(x => x.Id), Is.EqualTo(expected));
 
-            results = db.SqlList<DummyTable>("EXEC DummyTable @Times", new Dictionary<string, object> { {"Times", 10}});
+            results = db.SqlColumn<DummyTable>("EXEC DummyTable @Times", new Dictionary<string, object> { {"Times", 10}});
             Assert.That(results.Sum(x => x.Id), Is.EqualTo(expected));
         }
 
@@ -107,14 +107,14 @@ END;";
             var expected = 0;
             10.Times(i => expected += i);
 
-            var results = db.SqlList<int>("EXEC DummyColumn @Times", new { Times = 10 });
+            var results = db.SqlColumn<int>("EXEC DummyColumn @Times", new { Times = 10 });
             results.PrintDump();
             Assert.That(results.Sum(), Is.EqualTo(expected));
 
-            results = db.SqlList<int>("EXEC DummyColumn 10");
+            results = db.SqlColumn<int>("EXEC DummyColumn 10");
             Assert.That(results.Sum(), Is.EqualTo(expected));
 
-            results = db.SqlList<int>("EXEC DummyTable @Times", new Dictionary<string, object> { { "Times", 10 } });
+            results = db.SqlColumn<int>("EXEC DummyTable @Times", new Dictionary<string, object> { { "Times", 10 } });
             Assert.That(results.Sum(), Is.EqualTo(expected));
         }
 
@@ -148,7 +148,7 @@ END;";
             db.ExecuteSql(sql);
 
 	    // This produces a compiler error
-            var results = db.SqlList<string>("EXEC DummyColumn @Times", new { Times = 10 });
+            var results = db.SqlColumn<string>("EXEC DummyColumn @Times", new { Times = 10 });
             results.PrintDump();
             Assert.That(results.Count, Is.EqualTo(10));
         }
@@ -229,7 +229,7 @@ END;";
             db.ExecuteSql("IF OBJECT_ID('DummyProc') IS NOT NULL DROP PROC DummyProc");
             db.ExecuteSql(sql);
 
-            var results = db.SqlList<DummyTable>("EXEC DummyProc @Name", new { Name = (string)null });
+            var results = db.SqlColumn<DummyTable>("EXEC DummyProc @Name", new { Name = (string)null });
             Assert.That(results.Count, Is.EqualTo(2));
             Assert.That(results[0].Name, Is.EqualTo("Name_1"));
             Assert.That(results[1].Name, Is.EqualTo("Name_3"));
@@ -250,7 +250,7 @@ END;";
             db.ExecuteSql("IF OBJECT_ID('DummyScalar') IS NOT NULL DROP PROC DummyScalar");
             db.ExecuteSql(sql);
 
-            var results = db.SqlList<int?>("EXEC DummyScalar");
+            var results = db.SqlColumn<int?>("EXEC DummyScalar");
             Assert.That(results.Count, Is.EqualTo(2));
             Assert.That(results[0], Is.Null);
             Assert.That(results[1], Is.Null);

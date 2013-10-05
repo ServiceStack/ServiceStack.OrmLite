@@ -35,7 +35,7 @@ namespace SqliteExpressionsTest
                 db.Insert(new User { Id = 2, Name = "B", CreatedDate = DateTime.Now, UserDataId = 5, UserServiceId = 9 });
                 db.Insert(new User { Id = 3, Name = "B", CreatedDate = DateTime.Now });
 
-                SqlExpressionVisitor<User> ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<User>();
+                SqlExpressionVisitor<User> ev = OrmLiteConfig.DialectProvider.SqlExpression<User>();
 
                 var count1 = db.Count<User>(x => x.Id == 1);
                 var count2 = db.Count<User>(ev.Where(x => x.Id == 2));

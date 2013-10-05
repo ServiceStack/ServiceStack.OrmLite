@@ -106,7 +106,7 @@ namespace ServiceStack.OrmLite.MySql
 			return string.Format("`{0}`", name);
         }
         
-        public override SqlExpressionVisitor<T> ExpressionVisitor<T> ()
+        public override SqlExpressionVisitor<T> SqlExpression<T> ()
 		{
 			return new MySqlExpressionVisitor<T>();
 		}
@@ -123,7 +123,7 @@ namespace ServiceStack.OrmLite.MySql
 			//    sql += " AND TABLE_SCHEMA = {0}".SqlFormat(schemaName);
 
 			dbCmd.CommandText = sql;
-			var result = dbCmd.GetLongScalar();
+			var result = dbCmd.LongScalar();
 
 			return result > 0;
 		}

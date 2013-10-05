@@ -24,7 +24,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
 
                 db.Save(orig);
 
-                var target = db.GetById<TypeWithByteArrayField>(orig.Id);
+                var target = db.SingleById<TypeWithByteArrayField>(orig.Id);
 
                 Assert.AreEqual(orig.Id, target.Id);
                 Assert.AreEqual(orig.Content, target.Content);
@@ -69,7 +69,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
                 db.CreateTable<TypeWithByteArrayField>(true);
                 db.InsertParam(orig);
 
-                var target = db.GetById<TypeWithByteArrayField>(orig.Id);
+                var target = db.SingleById<TypeWithByteArrayField>(orig.Id);
 
                 Assert.AreEqual(orig.Id, target.Id);
                 Assert.AreEqual(orig.Content, target.Content);
@@ -86,7 +86,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
                 db.CreateTable<TypeWithByteArrayField>(true);
                 db.Insert(orig);
 
-                var target = db.GetById<TypeWithByteArrayField>(orig.Id);
+                var target = db.SingleById<TypeWithByteArrayField>(orig.Id);
 
                 Assert.AreEqual(orig.Id, target.Id);
                 Assert.AreEqual(orig.Content, target.Content);

@@ -29,7 +29,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
                 con.CreateTable<TypeWithEnum>(true);
                 var obj = new TypeWithEnum { Id = 1, EnumValue = SomeEnum.Value1 };
                 con.Save(obj);
-                var target = con.GetById<TypeWithEnum>(obj.Id);
+                var target = con.SingleById<TypeWithEnum>(obj.Id);
                 Assert.AreEqual(obj.Id, target.Id);
                 Assert.AreEqual(obj.EnumValue, target.EnumValue);
             }
@@ -61,7 +61,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
                 con.Save(new TypeWithEnum { Id = 2, EnumValue = SomeEnum.Value1 });
                 con.Save(new TypeWithEnum { Id = 3, EnumValue = SomeEnum.Value2 });
 
-                var target = con.Select<TypeWithEnum>("EnumValue = {0}", SomeEnum.Value1);
+                var target = con.SelectFmt<TypeWithEnum>("EnumValue = {0}", SomeEnum.Value1);
 
                 Assert.AreEqual(2, target.Count());
             }

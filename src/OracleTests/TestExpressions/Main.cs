@@ -37,7 +37,7 @@ namespace TestExpressions
 			Console.WriteLine ("Hello World!");
 			
 			OrmLiteConfig.DialectProvider = new OracleOrmLiteDialectProvider();
-			SqlExpressionVisitor<Author> ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<Author>();
+			SqlExpressionVisitor<Author> ev = OrmLiteConfig.DialectProvider.SqlExpression<Author>();
 									
 			using (IDbConnection db =
                    "Data Source=x;User Id=x;Password=x;".OpenDbConnection())

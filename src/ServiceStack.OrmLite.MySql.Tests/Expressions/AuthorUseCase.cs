@@ -41,7 +41,7 @@ namespace ServiceStack.OrmLite.MySql.Tests.Expressions
         [Test]
         public void AuthorUsesCases()
         {
-            var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<Author>();
+            var ev = OrmLiteConfig.DialectProvider.SqlExpression<Author>();
 
             using (var db = OpenDbConnection())
             {
@@ -240,10 +240,10 @@ namespace ServiceStack.OrmLite.MySql.Tests.Expressions
                 expectedResult = authors.Max(r => r.Birthday);
                 Assert.AreEqual(expectedResult, result[0].Birthday);
 
-                var r1 = db.FirstOrDefault(ev);
+                var r1 = db.Single(ev);
                 Assert.AreEqual(expectedResult, r1.Birthday);
 
-                var r2 = db.GetScalar<Author, DateTime>(e => Sql.Max(e.Birthday));
+                var r2 = db.Scalar<Author, DateTime>(e => Sql.Max(e.Birthday));
                 Assert.AreEqual(expectedResult, r2);
 
                 ev.Select(r => Sql.As(Sql.Min(r.Birthday), "Birthday"));
@@ -271,23 +271,23 @@ namespace ServiceStack.OrmLite.MySql.Tests.Expressions
                 expectedStringResult = "Berlin";
                 Assert.AreEqual(expectedStringResult, result[0].City);
 
-                r1 = db.FirstOrDefault(ev);
+                r1 = db.Single(ev);
                 Assert.AreEqual(expectedStringResult, r1.City);
 
                 var expectedDecimal = authors.Max(e => e.Earnings);
-                Decimal? r3 = db.GetScalar<Author, Decimal?>(e => Sql.Max(e.Earnings));
+                Decimal? r3 = db.Scalar<Author, Decimal?>(e => Sql.Max(e.Earnings));
                 Assert.AreEqual(expectedDecimal, r3.Value);
 
                 var expectedString = authors.Max(e => e.Name);
-                string r4 = db.GetScalar<Author, String>(e => Sql.Max(e.Name));
+                string r4 = db.Scalar<Author, String>(e => Sql.Max(e.Name));
                 Assert.AreEqual(expectedString, r4);
 
                 var expectedDate = authors.Max(e => e.LastActivity);
-                DateTime? r5 = db.GetScalar<Author, DateTime?>(e => Sql.Max(e.LastActivity));
+                DateTime? r5 = db.Scalar<Author, DateTime?>(e => Sql.Max(e.LastActivity));
                 Assert.AreEqual(expectedDate, r5);
 
                 var expectedDate51 = authors.Where(e => e.City == "Bogota").Max(e => e.LastActivity);
-                DateTime? r51 = db.GetScalar<Author, DateTime?>(
+                DateTime? r51 = db.Scalar<Author, DateTime?>(
                     e => Sql.Max(e.LastActivity),
                     e => e.City == "Bogota");
                 Assert.AreEqual(expectedDate51, r51);
@@ -295,7 +295,7 @@ namespace ServiceStack.OrmLite.MySql.Tests.Expressions
                 try
                 {
                     var expectedBool = authors.Max(e => e.Active);
-                    bool r6 = db.GetScalar<Author, bool>(e => Sql.Max(e.Active));
+                    bool r6 = db.Scalar<Author, bool>(e => Sql.Max(e.Active));
                     Assert.AreEqual(expectedBool, r6);
                 }
                 catch (Exception e)
@@ -310,11 +310,11 @@ namespace ServiceStack.OrmLite.MySql.Tests.Expressions
 
 
                 // Tests for predicate overloads that make use of the expression visitor
-                author = db.First<Author>(q => q.Name == "Jorge Garzon");
+                author = db.Single<Author>(q => q.Name == "Jorge Garzon");
 
                 try
                 {
-                    author = db.First<Author>(q => q.Name == "Does not exist");
+                    author = db.Single<Author>(q => q.Name == "Does not exist");
                     Assert.Fail();
                 }
                 catch
@@ -322,24 +322,24 @@ namespace ServiceStack.OrmLite.MySql.Tests.Expressions
                     //"Expected exception thrown, OK? True"
                 }
 
-                author = db.FirstOrDefault<Author>(q => q.Name == "Does not exist");
+                author = db.Single<Author>(q => q.Name == "Does not exist");
                 Assert.IsNull(author);
 
-                author = db.FirstOrDefault<Author>(q => q.City == "Bogota");
+                author = db.Single<Author>(q => q.City == "Bogota");
                 Assert.AreEqual("Angel Colmenares", author.Name);
 
                 a.City = "Bogota";
-                author = db.FirstOrDefault<Author>(q => q.City == a.City);
+                author = db.Single<Author>(q => q.City == a.City);
                 Assert.AreEqual("Angel Colmenares", author.Name);
 
                 // count test
 
                 var expectedCount = authors.Count();
-                long r7 = db.GetScalar<Author, long>(e => Sql.Count(e.Id));
+                long r7 = db.Scalar<Author, long>(e => Sql.Count(e.Id));
                 Assert.AreEqual(expectedCount, r7);
 
                 expectedCount = authors.Count(e => e.City == "Bogota");
-                r7 = db.GetScalar<Author, long>(
+                r7 = db.Scalar<Author, long>(
                     e => Sql.Count(e.Id),
                     e => e.City == "Bogota");
                 Assert.AreEqual(expectedCount, r7);
@@ -347,7 +347,7 @@ namespace ServiceStack.OrmLite.MySql.Tests.Expressions
                 ev.Update();// all fields will be updated
                 // select and update 
                 expected = 1;
-                var rr = db.FirstOrDefault<Author>(rn => rn.Name == "Luis garzon");
+                var rr = db.Single<Author>(rn => rn.Name == "Luis garzon");
                 rr.City = "Madrid";
                 rr.Comments = "Updated";
 				ev.Where().Where(r => r.Id == rr.Id); // if omit,  then all records will be updated 

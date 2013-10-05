@@ -711,7 +711,7 @@ namespace ServiceStack.OrmLite.Firebird
 				: Quote(sequence);	
 		}
 		
-		public override SqlExpressionVisitor<T> ExpressionVisitor<T> ()
+		public override SqlExpressionVisitor<T> SqlExpression<T> ()
 		{
 			return new FirebirdSqlExpressionVisitor<T>();
 		}
@@ -728,7 +728,7 @@ namespace ServiceStack.OrmLite.Firebird
 				.SqlFormat(tableName);
 
 			dbCmd.CommandText = sql; 
-			var result = dbCmd.GetLongScalar();
+			var result = dbCmd.LongScalar();
 
 			return result > 0;
 		}

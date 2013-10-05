@@ -24,7 +24,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static int UpdateOnly<T>(this IDbCommand dbCmd, T model, Func<SqlExpressionVisitor<T>, SqlExpressionVisitor<T>> onlyFields)
         {
-            return dbCmd.UpdateOnly(model, onlyFields(OrmLiteConfig.DialectProvider.ExpressionVisitor<T>()));
+            return dbCmd.UpdateOnly(model, onlyFields(OrmLiteConfig.DialectProvider.SqlExpression<T>()));
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace ServiceStack.OrmLite
             if (onlyFields == null)
                 throw new ArgumentNullException("onlyFields");
 
-            var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();
+            var ev = OrmLiteConfig.DialectProvider.SqlExpression<T>();
             ev.Update(onlyFields);
             ev.Where(where);
             return dbCmd.UpdateOnly(obj, ev);
@@ -81,7 +81,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static int UpdateNonDefaults<T>(this IDbCommand dbCmd, T item, Expression<Func<T, bool>> where)
         {
-            var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();
+            var ev = OrmLiteConfig.DialectProvider.SqlExpression<T>();
             ev.Where(where);
             var sql = ev.ToUpdateStatement(item, excludeDefaults: true);
             return dbCmd.ExecuteSql(sql);
@@ -98,7 +98,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static int Update<T>(this IDbCommand dbCmd, T item, Expression<Func<T, bool>> where)
         {
-            var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();
+            var ev = OrmLiteConfig.DialectProvider.SqlExpression<T>();
             ev.Where(where);
             var sql = ev.ToUpdateStatement(item);
             return dbCmd.ExecuteSql(sql);
@@ -113,7 +113,7 @@ namespace ServiceStack.OrmLite
         public static int Update<T>(this IDbCommand dbCmd, object updateOnly, Expression<Func<T, bool>> where = null)
         {
             var dialectProvider = OrmLiteConfig.DialectProvider;
-            var ev = dialectProvider.ExpressionVisitor<T>();
+            var ev = dialectProvider.SqlExpression<T>();
             var whereSql = ev.Where(where).WhereExpression;
             var sql = new StringBuilder();
             var modelDef = typeof(T).GetModelDefinition();
@@ -182,7 +182,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static void InsertOnly<T>(this IDbCommand dbCmd, T obj, Func<SqlExpressionVisitor<T>, SqlExpressionVisitor<T>> onlyFields)
         {
-            dbCmd.InsertOnly(obj, onlyFields(OrmLiteConfig.DialectProvider.ExpressionVisitor<T>()));
+            dbCmd.InsertOnly(obj, onlyFields(OrmLiteConfig.DialectProvider.SqlExpression<T>()));
         }
 
         /// <summary>
@@ -206,7 +206,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static int Delete<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> where)
         {
-            var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<T>();
+            var ev = OrmLiteConfig.DialectProvider.SqlExpression<T>();
             ev.Where(where);
             return dbCmd.Delete(ev);
         }
@@ -219,7 +219,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static int Delete<T>(this IDbCommand dbCmd, Func<SqlExpressionVisitor<T>, SqlExpressionVisitor<T>> where)
         {
-            return dbCmd.Delete(where(OrmLiteConfig.DialectProvider.ExpressionVisitor<T>()));
+            return dbCmd.Delete(where(OrmLiteConfig.DialectProvider.SqlExpression<T>()));
         }
 
         /// <summary>

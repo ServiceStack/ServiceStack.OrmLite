@@ -13,7 +13,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 con.CreateTable<SimpleType>(true);
                 var obj = new SimpleType { Name = "Somename" };
                 con.Save(obj);
-                var storedObj = con.GetById<SimpleType>(con.GetLastInsertId());
+                var storedObj = con.SingleById<SimpleType>(con.LastInsertId());
 
                 Assert.AreEqual(obj.Name, storedObj.Name);
 
@@ -21,7 +21,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 obj.Name = "Someothername";
                 con.Update(obj, q => q.Id == storedObj.Id);
 
-                var target = con.GetById<SimpleType>(storedObj.Id);
+                var target = con.SingleById<SimpleType>(storedObj.Id);
 
                 Assert.AreEqual(obj.Name, target.Name);
             }
@@ -35,18 +35,18 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 con.CreateTable<SimpleType>(true);
                 var obj = new SimpleType { Name = "Somename" };
                 con.Save(obj);
-                var storedObj = con.GetById<SimpleType>(con.GetLastInsertId());
+                var storedObj = con.SingleById<SimpleType>(con.LastInsertId());
 
                 Assert.AreEqual(obj.Name, storedObj.Name);
 
-                var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<SimpleType>();
+                var ev = OrmLiteConfig.DialectProvider.SqlExpression<SimpleType>();
                 ev.Update();
                 ev.Where(q => q.Id == storedObj.Id); 
                 storedObj.Name = "Someothername";
 
                 con.UpdateOnly(storedObj, ev);
 
-                var target = con.GetById<SimpleType>(storedObj.Id);
+                var target = con.SingleById<SimpleType>(storedObj.Id);
 
                 Assert.AreEqual("Someothername", target.Name);
             }
@@ -61,7 +61,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 con.CreateTable<SimpleType>(true);
                 var obj = new SimpleType { Name = "Somename" };
                 con.Save(obj);
-                var storedObj = con.GetById<SimpleType>(con.GetLastInsertId());
+                var storedObj = con.SingleById<SimpleType>(con.LastInsertId());
 
                 Assert.AreEqual(obj.Name, storedObj.Name);
 
@@ -69,7 +69,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 obj.Name = "Someothername";
                 con.Update(obj);
 
-                var target = con.GetById<SimpleType>(storedObj.Id);
+                var target = con.SingleById<SimpleType>(storedObj.Id);
 
                 Assert.AreEqual(obj.Name, target.Name);
             }
@@ -83,7 +83,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 con.CreateTable<SimpleAliasedType>(true);
                 var obj = new SimpleAliasedType { Name = "Somename" };
                 con.Save(obj);
-                var storedObj = con.GetById<SimpleAliasedType>(con.GetLastInsertId());
+                var storedObj = con.SingleById<SimpleAliasedType>(con.LastInsertId());
 
                 Assert.AreEqual(obj.Name, storedObj.Name);
 
@@ -91,7 +91,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 obj.Name = "Someothername";
                 con.Update(obj);
 
-                var target = con.GetById<SimpleAliasedType>(storedObj.Id);
+                var target = con.SingleById<SimpleAliasedType>(storedObj.Id);
 
                 Assert.AreEqual(obj.Name, target.Name);
             }
@@ -105,7 +105,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 con.CreateTable<SimpleType>(true);
                 var obj = new SimpleType { Name = "Somename" };
                 con.Save(obj);
-                var storedObj = con.GetById<SimpleType>(con.GetLastInsertId());
+                var storedObj = con.SingleById<SimpleType>(con.LastInsertId());
 
                 Assert.AreEqual(obj.Name, storedObj.Name);
 
@@ -113,7 +113,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 obj.Name = "Someothername";
                 con.UpdateParam(obj);
 
-                var target = con.GetById<SimpleType>(storedObj.Id);
+                var target = con.SingleById<SimpleType>(storedObj.Id);
 
                 Assert.AreEqual(obj.Name, target.Name);
             }
@@ -127,7 +127,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 con.CreateTable<SimpleAliasedType>(true);
                 var obj = new SimpleAliasedType { Name = "Somename" };
                 con.Save(obj);
-                var storedObj = con.GetById<SimpleAliasedType>(con.GetLastInsertId());
+                var storedObj = con.SingleById<SimpleAliasedType>(con.LastInsertId());
 
                 Assert.AreEqual(obj.Name, storedObj.Name);
 
@@ -135,15 +135,12 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 obj.Name = "Someothername";
                 con.UpdateParam(obj);
 
-                var target = con.GetById<SimpleAliasedType>(storedObj.Id);
+                var target = con.SingleById<SimpleAliasedType>(storedObj.Id);
 
                 Assert.AreEqual(obj.Name, target.Name);
             }
         }
     }
-
-
-
 
 
     public class SimpleType

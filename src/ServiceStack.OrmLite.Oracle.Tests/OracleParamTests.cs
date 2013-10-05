@@ -34,10 +34,10 @@ namespace ServiceStack.OrmLite.Oracle.Tests
                 db.InsertParam(new ParamTestBO() { Id = 3, Double = 0.003, Int = 300, Info = "Three", NullableBool = false, DateTime = dateTimeNow.AddDays(23) });
                 db.InsertParam(new ParamTestBO() { Id = 4, Double = 0.004, Int = 400, Info = "Four", NullableBool = null });
 
-                var bo1 = db.SelectParam<ParamTestBO>(q => q.Id == 1).Single();
-                var bo2 = db.SelectParam<ParamTestBO>(q => q.Id == 2).Single();
-                var bo3 = db.SelectParam<ParamTestBO>(q => q.Id == 3).Single();
-                var bo4 = db.SelectParam<ParamTestBO>(q => q.Id == 4).Single();
+                var bo1 = db.Select<ParamTestBO>(q => q.Id == 1).Single();
+                var bo2 = db.Select<ParamTestBO>(q => q.Id == 2).Single();
+                var bo3 = db.Select<ParamTestBO>(q => q.Id == 3).Single();
+                var bo4 = db.Select<ParamTestBO>(q => q.Id == 4).Single();
 
                 Assert.AreEqual(1, bo1.Id);
                 Assert.AreEqual(2, bo2.Id);
@@ -91,7 +91,7 @@ namespace ServiceStack.OrmLite.Oracle.Tests
 
                 db.UpdateParam(bo1);
 
-                var bo1Check = db.GetById<ParamTestBO>(1);
+                var bo1Check = db.SingleById<ParamTestBO>(1);
 
                 Assert.AreEqual(bo1.Double, bo1Check.Double);
                 Assert.AreEqual(bo1.Int, bo1Check.Int);
@@ -108,7 +108,7 @@ namespace ServiceStack.OrmLite.Oracle.Tests
 
                 db.UpdateParam(bo2);
 
-                var bo2Check = db.GetById<ParamTestBO>(2);
+                var bo2Check = db.SingleById<ParamTestBO>(2);
 
                 Assert.Less(DateTime.Now, bo2.DateTime);
                 Assert.AreEqual("TwoUpdated", bo2Check.Info);
@@ -153,9 +153,9 @@ namespace ServiceStack.OrmLite.Oracle.Tests
                 db.Insert(new ParamTestBO() { Id = 2, Info = "Item2" });
                 db.Insert(new ParamTestBO() { Id = 3, Info = "Item3" });
 
-                Assert.AreEqual("Item1", db.GetByIdParam<ParamTestBO>(1).Info);
-                Assert.AreEqual("Item2", db.GetByIdParam<ParamTestBO>(2).Info);
-                Assert.AreEqual("Item3", db.GetByIdParam<ParamTestBO>(3).Info);
+                Assert.AreEqual("Item1", db.SingleById<ParamTestBO>(1).Info);
+                Assert.AreEqual("Item2", db.SingleById<ParamTestBO>(2).Info);
+                Assert.AreEqual("Item3", db.SingleById<ParamTestBO>(3).Info);
             }
         }
 
@@ -173,13 +173,13 @@ namespace ServiceStack.OrmLite.Oracle.Tests
 
                 //select multiple items
                 Assert.AreEqual(2, db.Select<ParamTestBO>(q => q.NullableBool == null).Count);
-                Assert.AreEqual(2, db.SelectParam<ParamTestBO>(q => q.NullableBool == null).Count);
-                Assert.AreEqual(1, db.SelectParam<ParamTestBO>(q => q.NullableBool == true).Count);
-                Assert.AreEqual(1, db.SelectParam<ParamTestBO>(q => q.NullableBool == false).Count);
+                Assert.AreEqual(2, db.Select<ParamTestBO>(q => q.NullableBool == null).Count);
+                Assert.AreEqual(1, db.Select<ParamTestBO>(q => q.NullableBool == true).Count);
+                Assert.AreEqual(1, db.Select<ParamTestBO>(q => q.NullableBool == false).Count);
 
-                Assert.AreEqual(1, db.SelectParam<ParamTestBO>(q => q.Info == "Two").Count);
-                Assert.AreEqual(1, db.SelectParam<ParamTestBO>(q => q.Int == 300).Count);
-                Assert.AreEqual(1, db.SelectParam<ParamTestBO>(q => q.Double == 0.003).Count);
+                Assert.AreEqual(1, db.Select<ParamTestBO>(q => q.Info == "Two").Count);
+                Assert.AreEqual(1, db.Select<ParamTestBO>(q => q.Int == 300).Count);
+                Assert.AreEqual(1, db.Select<ParamTestBO>(q => q.Double == 0.003).Count);
             }
         }
 
@@ -206,10 +206,10 @@ namespace ServiceStack.OrmLite.Oracle.Tests
                 db.InsertParam(new ParamRelBO() { PTId = 3, Info = "T2" });
                 db.InsertParam(new ParamRelBO() { PTId = 4, Info = "T2" });
 
-                Assert.AreEqual(8, db.SelectParam<ParamRelBO>(q => q.Info == "T1").Count);
-                Assert.AreEqual(2, db.SelectParam<ParamRelBO>(q => q.Info == "T2").Count);
+                Assert.AreEqual(8, db.Select<ParamRelBO>(q => q.Info == "T1").Count);
+                Assert.AreEqual(2, db.Select<ParamRelBO>(q => q.Info == "T2").Count);
                
-                Assert.AreEqual(3, db.SelectParam<ParamRelBO>(q => q.Info == "T1" && (q.PTId == 2 || q.PTId == 3) ).Count);
+                Assert.AreEqual(3, db.Select<ParamRelBO>(q => q.Info == "T1" && (q.PTId == 2 || q.PTId == 3) ).Count);
             }
         }
 
@@ -238,7 +238,7 @@ namespace ServiceStack.OrmLite.Oracle.Tests
                 var bo1 = new ParamByteBO() { Id = 1, Data = new byte[] { 1, 25, 43, 3, 1, 66, 82, 23, 11, 44, 66, 22, 52, 62, 76, 19, 30, 91, 4 } };
 
                 db.InsertParam(bo1);
-                var bo1Check = db.SelectParam<ParamByteBO>(s => s.Id == bo1.Id).Single();
+                var bo1Check = db.Select<ParamByteBO>(s => s.Id == bo1.Id).Single();
 
                 Assert.AreEqual(bo1.Id, bo1Check.Id);
                 Assert.AreEqual(bo1.Data, bo1Check.Data);

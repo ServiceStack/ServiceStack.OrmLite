@@ -7,377 +7,356 @@ namespace ServiceStack.OrmLite
 {
     public static class OrmLiteReadConnectionExtensions
     {
+        /// <summary>
+        /// Returns results from the active connection.
+        /// </summary>
         public static List<T> Select<T>(this IDbConnection dbConn) 
         {
             return dbConn.Exec(dbCmd => dbCmd.Select<T>());
         }
 
-        public static List<T> Select<T>(this IDbConnection dbConn, string sqlFilter, params object[] filterParams)
+        /// <summary>
+        /// Returns results from using sql.
+        /// </summary>
+        public static List<T> Select<T>(this IDbConnection dbConn, string sql)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Select<T>(sqlFilter, filterParams));
+            return dbConn.Exec(dbCmd => dbCmd.Select<T>(sql));
         }
 
+        /// <summary>
+        /// Returns results from using a parameterized query.
+        /// </summary>
+        public static List<T> Select<T>(this IDbConnection dbConn, string sql, object anonType)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Select<T>(sql, anonType));
+        }
+
+        /// <summary>
+        /// Returns results from using a parameterized query.
+        /// </summary>
+        public static List<T> Select<T>(this IDbConnection dbConn, string sql, Dictionary<string, object> dict)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Select<T>(sql, dict));
+        }
+
+        /// <summary>
+        /// Returns results from using an SqlFormat query.
+        /// </summary>
+        public static List<T> SelectFmt<T>(this IDbConnection dbConn, string sqlFilter, params object[] filterParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SelectFmt<T>(sqlFilter, filterParams));
+        }
+
+        /// <summary>
+        /// Returns a subset of results from the specified tableType.
+        /// </summary>
         public static List<TModel> Select<TModel>(this IDbConnection dbConn, Type fromTableType)
         {
             return dbConn.Exec(dbCmd => dbCmd.Select<TModel>(fromTableType));
         }
 
-        public static List<TModel> Select<TModel>(this IDbConnection dbConn, Type fromTableType, string sqlFilter, params object[] filterParams)
+        /// <summary>
+        /// Returns a subset of results from the specified tableType using a SqlFormat query.
+        /// </summary>
+        public static List<TModel> SelectFmt<TModel>(this IDbConnection dbConn, Type fromTableType, string sqlFilter, params object[] filterParams)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Select<TModel>(fromTableType, sqlFilter, filterParams));
-        }
-
-        public static IEnumerable<T> Each<T>(this IDbConnection dbConn)
-        {
-            return dbConn.ExecLazy(dbCmd => dbCmd.Each<T>());
-        }
-
-        public static IEnumerable<T> Each<T>(this IDbConnection dbConn, string filter, params object[] filterParams)
-        {
-            return dbConn.ExecLazy(dbCmd => dbCmd.Each<T>(filter, filterParams));
-        }
-        
-        public static T First<T>(this IDbConnection dbConn, string filter, params object[] filterParams)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.First<T>(filter, filterParams));
+            return dbConn.Exec(dbCmd => dbCmd.SelectFmt<TModel>(fromTableType, sqlFilter, filterParams));
         }
 
         /// <summary>
-        /// Alias for First
+        /// Returns results from using a single name, value filter.
         /// </summary>
-        public static T Single<T>(this IDbConnection dbConn, string filter, params object[] filterParams)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.First<T>(filter, filterParams));
-        }
-
-        public static T First<T>(this IDbConnection dbConn, string filter)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.First<T>(filter));
-        }
-
-        /// <summary>
-        /// Alias for First
-        /// </summary>
-        public static T Single<T>(this IDbConnection dbConn, string filter)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.First<T>(filter));
-        }
-
-        public static T FirstOrDefault<T>(this IDbConnection dbConn, string filter, params object[] filterParams)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.FirstOrDefault<T>(filter, filterParams));
-        }
-
-        /// <summary>
-        /// Alias for FirstOrDefault
-        /// </summary>
-        public static T SingleOrDefault<T>(this IDbConnection dbConn, string filter, params object[] filterParams)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.FirstOrDefault<T>(filter, filterParams));
-        }
-
-        public static T FirstOrDefault<T>(this IDbConnection dbConn, string filter)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.FirstOrDefault<T>(filter));
-        }
-
-        /// <summary>
-        /// Alias for FirstOrDefault
-        /// </summary>
-        public static T SingleOrDefault<T>(this IDbConnection dbConn, string filter)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.FirstOrDefault<T>(filter));
-        }
-
-        public static T GetById<T>(this IDbConnection dbConn, object idValue)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.GetById<T>(idValue));
-        }
-
-        /// <summary>
-        /// Performs an GetById() except argument is passed as a parameter to the generated SQL
-        /// </summary>
-        public static T GetByIdParam<T>(this IDbConnection dbConn, object idValue)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.GetByIdParam<T>(idValue));
-        }
-
-        /// <summary>
-        /// Alias for GetById
-        /// </summary>
-        public static T Id<T>(this IDbConnection dbConn, object idValue)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.GetById<T>(idValue));
-        }
-        
-        public static T SelectById<T>(this IDbConnection dbConn, object value) 
-        {
-            return dbConn.Exec(dbCmd => dbCmd.SelectById<T>(value));
-        }
-
-        public static T SingleWhere<T>(this IDbConnection dbConn, string name, object value)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.FirstWhere<T>(name, value));
-        }
-
-        public static T QuerySingle<T>(this IDbConnection dbConn, object anonType)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.First<T>(anonType));
-        }
-
-        public static T QuerySingle<T>(this IDbConnection dbConn, string sql, object anonType = null)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.First<T>(sql, anonType));
-        }
-
         public static List<T> Where<T>(this IDbConnection dbConn, string name, object value)
         {
             return dbConn.Exec(dbCmd => dbCmd.Where<T>(name, value));
         }
 
+        /// <summary>
+        /// Returns results from using an anonymous type filter.
+        /// </summary>
         public static List<T> Where<T>(this IDbConnection dbConn, object anonType)
         {
             return dbConn.Exec(dbCmd => dbCmd.Where<T>(anonType));
         }
 
-        public static List<T> Where<T>(this IDbConnection dbConn, System.Linq.Expressions.Expression<Func<T,bool>> Predicate)
+        /// <summary>
+        /// Returns results using the supplied primary key ids.
+        /// </summary>
+        public static List<T> SelectByIds<T>(this IDbConnection dbConn, IEnumerable idValues)
         {
-            return (List<T>) dbConn.Select<T>(Predicate);
+            return dbConn.Exec(dbCmd => dbCmd.SelectByIds<T>(idValues));
         }
 
-        public static List<T> Query<T>(this IDbConnection dbConn, string sql)
+        /// <summary>
+        /// Query results using the non-default values in the supplied partially populated POCO example.
+        /// </summary>
+        public static List<T> SelectByExample<T>(this IDbConnection dbConn, T byExample)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Query<T>(sql));
+            return dbConn.Exec(dbCmd => dbCmd.SelectByExample<T>(byExample));
         }
 
-        public static List<T> Query<T>(this IDbConnection dbConn, string sql, object anonType)
+        /// <summary>
+        /// Query results using the non-default values in the supplied partially populated POCO example.
+        /// </summary>
+        public static List<T> SelectByExample<T>(this IDbConnection dbConn, string sql, T byExample)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Query<T>(sql, anonType));
+            return dbConn.Exec(dbCmd => dbCmd.SelectByExample<T>(sql, byExample));
         }
 
-        public static List<T> Query<T>(this IDbConnection dbConn, string sql, Dictionary<string, object> dict)
+        /// <summary>
+        /// Returns a lazyily loaded stream of results.
+        /// </summary>
+        public static IEnumerable<T> Lazy<T>(this IDbConnection dbConn)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Query<T>(sql, dict));
+            return dbConn.ExecLazy(dbCmd => dbCmd.Lazy<T>());
         }
 
-        public static int ExecuteNonQuery(this IDbConnection dbConn, string sql)
+        /// <summary>
+        /// Returns a lazyily loaded stream of results using a parameterized query.
+        /// </summary>
+        public static IEnumerable<T> Lazy<T>(this IDbConnection dbConn, string sql, object anonType = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.ExecuteNonQuery(sql));
+            return dbConn.ExecLazy(dbCmd => dbCmd.Lazy<T>(sql, anonType));
         }
 
-        public static int ExecuteNonQuery(this IDbConnection dbConn, string sql, object anonType)
+        /// <summary>
+        /// Returns a stream of results that are lazily loaded using a parameterized query.
+        /// </summary>
+        public static IEnumerable<T> LazyWhere<T>(this IDbConnection dbConn, object anonType)
         {
-            return dbConn.Exec(dbCmd => dbCmd.ExecuteNonQuery(sql, anonType));
+            return dbConn.ExecLazy(dbCmd => dbCmd.LazyWhere<T>(anonType));
         }
 
-        public static int ExecuteNonQuery(this IDbConnection dbConn, string sql, Dictionary<string, object> dict)
+        /// <summary>
+        /// Returns a lazyily loaded stream of results using an SqlFilter query.
+        /// </summary>
+        public static IEnumerable<T> LazyFmt<T>(this IDbConnection dbConn, string filter, params object[] filterParams)
         {
-            return dbConn.Exec(dbCmd => dbCmd.ExecuteNonQuery(sql, dict));
+            return dbConn.ExecLazy(dbCmd => dbCmd.LazyFmt<T>(filter, filterParams));
         }
 
-        public static T QueryScalar<T>(this IDbConnection dbConn, object anonType)
+        /// <summary>
+        /// Returns the first result using a SqlFormat query.
+        /// </summary>
+        public static T SingleFmt<T>(this IDbConnection dbConn, string filter, params object[] filterParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SingleFmt<T>(filter, filterParams));
+        }
+
+        /// <summary>
+        /// Returns the first result using a primary key id.
+        /// </summary>
+        public static T SingleById<T>(this IDbConnection dbConn, object idValue)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SingleById<T>(idValue));
+        }
+
+        /// <summary>
+        /// Returns the first result using a name, value filter.
+        /// </summary>
+        public static T SingleWhere<T>(this IDbConnection dbConn, string name, object value)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SingleWhere<T>(name, value));
+        }
+
+        /// <summary>
+        /// Returns the first result using a parameterized query.
+        /// </summary>
+        public static T Single<T>(this IDbConnection dbConn, object anonType)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Single<T>(anonType));
+        }
+
+        /// <summary>
+        /// Returns results from using a single name, value filter.
+        /// </summary>
+        public static T Single<T>(this IDbConnection dbConn, string sql, object anonType = null)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Single<T>(sql, anonType));
+        }
+
+        /// <summary>
+        /// Returns a single scalar value using a parameterized query.
+        /// </summary>
+        public static T Scalar<T>(this IDbConnection dbConn, object anonType)
         {
             return dbConn.Exec(dbCmd => dbCmd.Scalar<T>(anonType));
         }
 
-        public static T QueryScalar<T>(this IDbConnection dbConn, string sql, object anonType = null)
+        /// <summary>
+        /// Returns a single scalar value using a parameterized query.
+        /// </summary>
+        public static T Scalar<T>(this IDbConnection dbConn, string sql, object anonType = null)
         {
             return dbConn.Exec(dbCmd => dbCmd.Scalar<T>(sql, anonType));
         }
-        
-        public static List<T> SqlList<T>(this IDbConnection dbConn, string sql)
+
+        /// <summary>
+        /// Returns a single scalar value using an SqlFormat query.
+        /// </summary>
+        public static T ScalarFmt<T>(this IDbConnection dbConn, string sql, params object[] sqlParams)
         {
-            return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(sql));
+            return dbConn.Exec(dbCmd => dbCmd.ScalarFmt<T>(sql, sqlParams));
         }
 
-        public static List<T> SqlList<T>(this IDbConnection dbConn, string sql, object anonType)
+        /// <summary>
+        /// Returns the first column in a List using sql.
+        /// </summary>
+        public static List<T> SqlColumn<T>(this IDbConnection dbConn, string sql)
         {
-            return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(sql, anonType));
+            return dbConn.Exec(dbCmd => dbCmd.SqlColumn<T>(sql));
         }
 
-        public static List<T> SqlList<T>(this IDbConnection dbConn, string sql, Dictionary<string, object> dict)
+        /// <summary>
+        /// Returns the first column in a List using a parameterized query.
+        /// </summary>
+        public static List<T> SqlColumn<T>(this IDbConnection dbConn, string sql, object anonType)
         {
-            return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(sql, dict));
+            return dbConn.Exec(dbCmd => dbCmd.SqlColumn<T>(sql, anonType));
         }
 
+        /// <summary>
+        /// Returns a single Scalar value using a parameterized query.
+        /// </summary>
+        public static List<T> SqlColumn<T>(this IDbConnection dbConn, string sql, Dictionary<string, object> dict)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SqlColumn<T>(sql, dict));
+        }
+
+        /// <summary>
+        /// Returns a single Scalar value using a parameterized query.
+        /// </summary>
         public static T SqlScalar<T>(this IDbConnection dbConn, string sql, object anonType = null)
         {
             return dbConn.Exec(dbCmd => dbCmd.SqlScalar<T>(sql, anonType));
         }
 
+        /// <summary>
+        /// Returns a single Scalar value using a parameterized query.
+        /// </summary>
         public static T SqlScalar<T>(this IDbConnection dbConn, string sql, Dictionary<string, object> dict)
         {
             return dbConn.Exec(dbCmd => dbCmd.SqlScalar<T>(sql, dict));
         }
-        
-        public static List<T> ByExampleWhere<T>(this IDbConnection dbConn, object anonType)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.SelectByExample<T>(anonType));
-        }
 
-        public static List<T> ByExampleWhere<T>(this IDbConnection dbConn, object anonType, bool excludeNulls)
+        /// <summary>
+        /// Returns the first column in a List using a SqlFormat query.
+        /// </summary>
+        public static List<T> Column<T>(this IDbConnection dbConn, string sql, params object[] sqlParams)
         {
-            return dbConn.Exec(dbCmd => dbCmd.SelectByExample<T>(anonType, excludeNulls));
-        }
-
-        public static List<T> QueryByExample<T>(this IDbConnection dbConn, string sql, object anonType = null)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.SelectByExample<T>(sql, anonType));
-        }
-
-        public static IEnumerable<T> QueryEach<T>(this IDbConnection dbConn, string sql, object anonType = null)
-        {
-            return dbConn.ExecLazy(dbCmd => dbCmd.Lazy<T>(sql, anonType));
-        }
-
-        public static IEnumerable<T> EachWhere<T>(this IDbConnection dbConn, object anonType)
-        {
-            return dbConn.ExecLazy(dbCmd => dbCmd.LazyWhere<T>(anonType));
-        }
-
-        public static T GetByIdOrDefault<T>(this IDbConnection dbConn, object idValue)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.GetByIdOrDefault<T>(idValue));
+            return dbConn.Exec(dbCmd => dbCmd.Column<T>(sql, sqlParams));
         }
 
         /// <summary>
-        /// Alias for GetByIds
+        /// Returns the distinct first column values in a HashSet using an SqlFormat query.
         /// </summary>
-        public static T IdOrDefault<T>(this IDbConnection dbConn, object idValue)
+        public static HashSet<T> ColumnDistinctFmt<T>(this IDbConnection dbConn, string sql, params object[] sqlParams)
         {
-            return dbConn.Exec(dbCmd => dbCmd.GetByIdOrDefault<T>(idValue));
-        }
-
-        public static List<T> GetByIds<T>(this IDbConnection dbConn, IEnumerable idValues)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.GetByIds<T>(idValues));
+            return dbConn.Exec(dbCmd => dbCmd.ColumnDistinctFmt<T>(sql, sqlParams));
         }
 
         /// <summary>
-        /// Alias for GetByIds
+        /// Returns an Dictionary{K, List{V}} grouping made from the first two columns using an SqlFormat query.
         /// </summary>
-        public static List<T> Ids<T>(this IDbConnection dbConn, IEnumerable idValues)
+        public static Dictionary<K, List<V>> LookupFmt<K, V>(this IDbConnection dbConn, string sql, params object[] sqlParams)
         {
-            return dbConn.Exec(dbCmd => dbCmd.GetByIds<T>(idValues));
-        }
-
-        public static T GetScalar<T>(this IDbConnection dbConn, string sql, params object[] sqlParams)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.GetScalar<T>(sql, sqlParams));
+            return dbConn.Exec(dbCmd => dbCmd.LookupFmt<K, V>(sql, sqlParams));
         }
 
         /// <summary>
-        /// Alias for Scalar
+        /// Returns a Dictionary from the first 2 columns: Column 1 (Keys), Column 2 (Values) using sql.
         /// </summary>
-        public static T Scalar<T>(this IDbConnection dbConn, string sql, params object[] sqlParams)
+        public static Dictionary<K, V> Dictionary<K, V>(this IDbConnection dbConn, string sql)
         {
-            return dbConn.Exec(dbCmd => dbCmd.GetScalar<T>(sql, sqlParams));
-        }
-
-        public static long GetLastInsertId(this IDbConnection dbConn)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.GetLastInsertId());
-        }
-
-        public static List<T> GetFirstColumn<T>(this IDbConnection dbConn, string sql, params object[] sqlParams)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.GetFirstColumn<T>(sql, sqlParams));
-        }
-
-        public static List<T> GetList<T>(this IDbConnection dbConn, string sql, params object[] sqlParams)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.GetList<T>(sql, sqlParams));
+            return dbConn.Exec(dbCmd => dbCmd.Dictionary<K, V>(sql));
         }
 
         /// <summary>
-        /// Alias for GetList
+        /// Returns a Dictionary from the first 2 columns: Column 1 (Keys), Column 2 (Values) using an SqlFormat query.
         /// </summary>
-        public static List<T> List<T>(this IDbConnection dbConn, string sql, params object[] sqlParams)
+        public static Dictionary<K, V> DictionaryFmt<K, V>(this IDbConnection dbConn, string sql, params object[] sqlParams)
         {
-            return dbConn.Exec(dbCmd => dbCmd.GetList<T>(sql, sqlParams));
-        }
-
-        public static HashSet<T> GetFirstColumnDistinct<T>(this IDbConnection dbConn, string sql, params object[] sqlParams)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.GetFirstColumnDistinct<T>(sql, sqlParams));
-        }
-
-        public static HashSet<T> GetHashSet<T>(this IDbConnection dbConn, string sql, params object[] sqlParams)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.GetHashSet<T>(sql, sqlParams));
+            return dbConn.Exec(dbCmd => dbCmd.DictionaryFmt<K, V>(sql, sqlParams));
         }
 
         /// <summary>
-        /// Alias for GetHashSet
+        /// Returns true if the Query returns any records, using an SqlFormat query.
         /// </summary>
-        public static HashSet<T> HashSet<T>(this IDbConnection dbConn, string sql, params object[] sqlParams)
+        public static bool ExistsFmt<T>(this IDbConnection dbConn, string sqlFilter, params object[] filterParams)
         {
-            return dbConn.Exec(dbCmd => dbCmd.GetHashSet<T>(sql, sqlParams));
-        }
-
-        public static Dictionary<K, List<V>> GetLookup<K, V>(this IDbConnection dbConn, string sql, params object[] sqlParams)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.GetLookup<K, V>(sql, sqlParams));
+            return dbConn.Exec(dbCmd => dbCmd.ExistsFmt<T>(null, sqlFilter, filterParams));
         }
 
         /// <summary>
-        /// Alias for GetLookup
+        /// Returns true if the Query returns any records, using a parameterized query.
         /// </summary>
-        public static Dictionary<K, List<V>> Lookup<K, V>(this IDbConnection dbConn, string sql, params object[] sqlParams)
+        public static bool Exists<T>(this IDbConnection dbConn, object anonType)
         {
-            return dbConn.Exec(dbCmd => dbCmd.GetLookup<K, V>(sql, sqlParams));
-        }
-
-        public static Dictionary<K, V> GetDictionary<K, V>(this IDbConnection dbConn, string sql, params object[] sqlParams)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.GetDictionary<K, V>(sql, sqlParams));
+            return dbConn.Exec(dbCmd => dbCmd.Exists<T>(anonType));
         }
 
         /// <summary>
-        /// Alias for GetDictionary
+        /// Returns the last insert Id made from this connection.
         /// </summary>
-        public static Dictionary<K, V> Dictionary<K, V>(this IDbConnection dbConn, string sql, params object[] sqlParams)
+        public static long LastInsertId(this IDbConnection dbConn)
         {
-            return dbConn.Exec(dbCmd => dbCmd.GetDictionary<K, V>(sql, sqlParams));
+            return dbConn.Exec(dbCmd => dbCmd.LastInsertId());
         }
 
-        // somo aditional methods
-
-        public static bool HasChildren<T>(this IDbConnection dbConn, object record)
+        /// <summary>
+        /// Executes a raw sql non-query using sql.
+        /// </summary>
+        /// <returns>number of rows affected</returns>
+        public static int ExecuteNonQuery(this IDbConnection dbConn, string sql)
         {
-            return dbConn.Exec(dbCmd => dbCmd.HasChildren<T>(record));
+            return dbConn.Exec(dbCmd => dbCmd.ExecuteNonQuery(sql));
         }
 
-        public static bool Exists<T>(this IDbConnection dbConn, string sqlFilter, params object[] filterParams)
+        /// <summary>
+        /// Executes a raw sql non-query using a parameterized query.
+        /// </summary>
+        /// <returns>number of rows affected</returns>
+        public static int ExecuteNonQuery(this IDbConnection dbConn, string sql, object anonType)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Exists<T>(sqlFilter, filterParams));
+            return dbConn.Exec(dbCmd => dbCmd.ExecuteNonQuery(sql, anonType));
         }
 
-        public static bool Exists<T>(this IDbConnection dbConn, object record)
+        /// <summary>
+        /// Executes a raw sql non-query using a parameterized query.
+        /// </summary>
+        /// <returns>number of rows affected</returns>
+        public static int ExecuteNonQuery(this IDbConnection dbConn, string sql, Dictionary<string, object> dict)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Exists<T>(record));
+            return dbConn.Exec(dbCmd => dbCmd.ExecuteNonQuery(sql, dict));
         }
 
-        // procedures ...		
-        public static List<TOutputModel> SelectFromProcedure<TOutputModel>(this IDbConnection dbConn,
-            object fromObjWithProperties)
+        /// <summary>
+        /// Returns results from a Stored Procedure, using a parameterized query.
+        /// </summary>
+        public static List<TOutputModel> SqlProcedure<TOutputModel>(this IDbConnection dbConn, object anonType)
         {
-            return dbConn.Exec(dbCmd => dbCmd.SelectFromProcedure<TOutputModel>(fromObjWithProperties));
+            return dbConn.Exec(dbCmd => dbCmd.SqlProcedure<TOutputModel>(anonType));
         }
-        
-        public static List<TOutputModel> SelectFromProcedure<TOutputModel>(this IDbConnection dbConn,
-            object fromObjWithProperties,
+
+        /// <summary>
+        /// Returns results from a Stored Procedure using an SqlFormat query.
+        /// </summary>
+        public static List<TOutputModel> SqlProcedure<TOutputModel>(this IDbConnection dbConn,
+            object anonType,
             string sqlFilter,
             params object[] filterParams)
             where TOutputModel : new()
         {
-            return dbConn.Exec(dbCmd => dbCmd.SelectFromProcedure<TOutputModel>(
-                fromObjWithProperties, sqlFilter, filterParams));
+            return dbConn.Exec(dbCmd => dbCmd.SqlProcedureFmt<TOutputModel>(
+                anonType, sqlFilter, filterParams));
         }
 
-        public static long GetLongScalar(this IDbConnection dbConn)
+        /// <summary>
+        /// Returns the scalar result as a long.
+        /// </summary>
+        public static long LongScalar(this IDbConnection dbConn)
         {
-            return dbConn.Exec(dbCmd => dbCmd.GetLongScalar());
+            return dbConn.Exec(dbCmd => dbCmd.LongScalar());
         }			
     }
 }

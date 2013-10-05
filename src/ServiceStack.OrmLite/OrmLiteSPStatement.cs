@@ -43,7 +43,7 @@ namespace ServiceStack.OrmLite
             {
                 reader = command.ExecuteReader();
 #pragma warning disable 618
-                return reader.GetFirstColumn<T>();
+                return reader.Column<T>();
 #pragma warning restore 618
             }
             finally
@@ -81,7 +81,7 @@ namespace ServiceStack.OrmLite
             {
                 reader = command.ExecuteReader();
 #pragma warning disable 618
-                return reader.GetScalar<T>();
+                return reader.Scalar<T>();
 #pragma warning restore 618
             }
             finally
@@ -101,7 +101,7 @@ namespace ServiceStack.OrmLite
             {
                 reader = command.ExecuteReader();
 #pragma warning disable 618
-                return reader.GetFirstColumn<T>();
+                return reader.Column<T>();
 #pragma warning restore 618
             }
             finally
@@ -121,7 +121,7 @@ namespace ServiceStack.OrmLite
             {
                 reader = command.ExecuteReader();
 #pragma warning disable 618
-                return reader.GetFirstColumnDistinct<T>();
+                return reader.ColumnDistinct<T>();
 #pragma warning restore 618
             }
             finally

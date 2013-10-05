@@ -17,9 +17,9 @@ namespace ServiceStack.OrmLite.MySql.Tests
                 var row = new StringTable() {Value = text};
 
                 db.Save(row);
-                var id = db.GetLastInsertId();
+                var id = db.LastInsertId();
 
-                var selectedRow = db.GetById<StringTable>(id);
+                var selectedRow = db.SingleById<StringTable>(id);
                 Assert.AreEqual(text, selectedRow.Value);
             }
         }
@@ -36,9 +36,9 @@ namespace ServiceStack.OrmLite.MySql.Tests
                 var row = new StringTable() { Value = text };
 
                 db.Save(row);
-                var id = db.GetLastInsertId();
+                var id = db.LastInsertId();
 
-                var selectedRow = db.GetById<StringTable>(id);
+                var selectedRow = db.SingleById<StringTable>(id);
                 Assert.AreEqual(text, selectedRow.Value);
             }
         }
@@ -55,9 +55,9 @@ namespace ServiceStack.OrmLite.MySql.Tests
                 var row = new StringTable() { Value = text };
 
                 db.Save(row);
-                var id = db.GetLastInsertId();
+                var id = db.LastInsertId();
 
-                var selectedRow = db.GetById<StringTable>(id);
+                var selectedRow = db.SingleById<StringTable>(id);
                 Assert.AreEqual(text, selectedRow.Value);
             }
         }

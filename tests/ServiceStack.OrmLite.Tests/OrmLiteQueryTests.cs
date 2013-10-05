@@ -22,7 +22,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				rowIds.ForEach(x => db.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
 
-				var row = db.SelectById<ModelWithFieldsOfDifferentTypes>(1);
+				var row = db.SingleById<ModelWithFieldsOfDifferentTypes>(1);
 
 				Assert.That(row.Id, Is.EqualTo(1));
 			}
@@ -39,7 +39,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				rowIds.ForEach(x => db.Insert(ModelWithOnlyStringFields.Create(x)));
 
-				var row = db.SelectById<ModelWithOnlyStringFields>("id-1");
+				var row = db.SingleById<ModelWithOnlyStringFields>("id-1");
 
 				Assert.That(row.Id, Is.EqualTo("id-1"));
 			}
@@ -72,12 +72,12 @@ namespace ServiceStack.OrmLite.Tests
 				Assert.That(dbRowIds[0], Is.EqualTo(filterRow.Id));
 
 				var queryByExample = new ModelWithOnlyStringFields { AlbumName = filterRow.AlbumName };
-				rows = db.ByExampleWhere<ModelWithOnlyStringFields>(queryByExample);
+				rows = db.SelectByExample<ModelWithOnlyStringFields>(queryByExample);
 				dbRowIds = rows.ConvertAll(x => x.Id);
 				Assert.That(dbRowIds, Has.Count.EqualTo(1));
 				Assert.That(dbRowIds[0], Is.EqualTo(filterRow.Id));
 
-				rows = db.Query<ModelWithOnlyStringFields>(
+				rows = db.Select<ModelWithOnlyStringFields>(
 					"SELECT * FROM ModelWithOnlyStringFields WHERE AlbumName = @AlbumName", new { filterRow.AlbumName });
 				dbRowIds = rows.ConvertAll(x => x.Id);
 				Assert.That(dbRowIds, Has.Count.EqualTo(1));
@@ -102,7 +102,7 @@ namespace ServiceStack.OrmLite.Tests
 				db.Insert(filterRow);
 
 				var dbRowIds = new List<string>();
-				var rows = db.EachWhere<ModelWithOnlyStringFields>(new { filterRow.AlbumName });
+				var rows = db.LazyWhere<ModelWithOnlyStringFields>(new { filterRow.AlbumName });
 				foreach (var row in rows)
 				{
 					dbRowIds.Add(row.Id);
@@ -129,13 +129,13 @@ namespace ServiceStack.OrmLite.Tests
 
                 db.Insert(filterRow);
 
-                var row = db.QuerySingle<ModelWithOnlyStringFields>(new { filterRow.AlbumName });
+                var row = db.Single<ModelWithOnlyStringFields>(new { filterRow.AlbumName });
                 Assert.That(row.Id, Is.EqualTo(filterRow.Id));
 
-                row = db.QuerySingle<ModelWithOnlyStringFields>(new { filterRow.AlbumName });
+                row = db.Single<ModelWithOnlyStringFields>(new { filterRow.AlbumName });
                 Assert.That(row.AlbumName, Is.EqualTo(filterRow.AlbumName));
 
-                row = db.QuerySingle<ModelWithOnlyStringFields>(new { AlbumName = "Junk", Id = (object)null });
+                row = db.Single<ModelWithOnlyStringFields>(new { AlbumName = "Junk", Id = (object)null });
                 Assert.That(row, Is.Null);
             }
         }
@@ -170,15 +170,15 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(notes[0].Id, Is.EqualTo(1));
                 Assert.That(notes[0].NoteText, Is.EqualTo("Hello world 5"));
 
-                notes = db.Select<Note>("SchemaUri={0}", "tcm:0-0-0");
+                notes = db.SelectFmt<Note>("SchemaUri={0}", "tcm:0-0-0");
                 Assert.That(notes[0].Id, Is.EqualTo(1));
                 Assert.That(notes[0].NoteText, Is.EqualTo("Hello world 5"));
 
-                notes = db.Query<Note>("SELECT * FROM Note WHERE SchemaUri=@schemaUri", new { schemaUri = "tcm:0-0-0" });
+                notes = db.Select<Note>("SELECT * FROM Note WHERE SchemaUri=@schemaUri", new { schemaUri = "tcm:0-0-0" });
                 Assert.That(notes[0].Id, Is.EqualTo(1));
                 Assert.That(notes[0].NoteText, Is.EqualTo("Hello world 5"));
 
-                notes = db.Query<Note>("SchemaUri=@schemaUri", new { schemaUri = "tcm:0-0-0" });
+                notes = db.Select<Note>("SchemaUri=@schemaUri", new { schemaUri = "tcm:0-0-0" });
                 Assert.That(notes[0].Id, Is.EqualTo(1));
                 Assert.That(notes[0].NoteText, Is.EqualTo("Hello world 5"));
             }            
@@ -213,7 +213,7 @@ FROM Note
 WHERE SchemaUri=@schemaUri
 ";
 
-                var notes = db.Query<NoteDto>(sql, new { schemaUri = "tcm:0-0-0" });
+                var notes = db.Select<NoteDto>(sql, new { schemaUri = "tcm:0-0-0" });
                 Assert.That(notes[0].Id, Is.EqualTo(1));
                 Assert.That(notes[0].NoteText, Is.EqualTo("Hello world 5"));
             }
@@ -244,7 +244,7 @@ WHERE SchemaUri=@schemaUri
                     SELECT 2 AS [{0}], 'Jane' AS [{1}], '1980-01-01' AS [{2}]",
                                         field1Name, field2Name, field3Name);
 
-                var customers = db.Query<CustomerDto>(sql);
+                var customers = db.Select<CustomerDto>(sql);
 
                 Assert.That(customers.Count, Is.EqualTo(2));
 

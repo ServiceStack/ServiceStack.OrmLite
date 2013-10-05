@@ -73,7 +73,7 @@ namespace SqlServerExpressionsTest
                 db.Insert(new User { Id = 3, Name = "B", CreatedDate = DateTime.Now });
 
 
-                var rowsB = db.Select<User>("Name = {0}", "B");
+                var rowsB = db.SelectFmt<User>("Name = {0}", "B");
                 var rowsB1 = db.Select<User>(user => user.Name == "B");
 
                 var jn = new JoinSqlBuilder<UserEx, User>();
@@ -85,7 +85,7 @@ namespace SqlServerExpressionsTest
                        .Where<User>(x=> x.Id == 0);
 
                 var sql = jn.ToSql();
-                var items = db.Query<UserEx>(sql);
+                var items = db.Select<UserEx>(sql);
                 
                 jn.Clear();
                 jn = jn.Join<User, UserData>(x => x.UserDataId, x => x.Id)
@@ -98,7 +98,7 @@ namespace SqlServerExpressionsTest
                        .And<User>(x => x.Name != "" || x.Name != null);
 
                 var sql2 = jn.ToSql();
-                var item = db.QuerySingle<UserEx>(sql2);
+                var item = db.Single<UserEx>(sql2);
 
                 jn.Clear();
                 jn = new JoinSqlBuilder<UserEx, User>();
@@ -110,7 +110,7 @@ namespace SqlServerExpressionsTest
                        .Where<User>(x=> x.Id == 0);
 
                 var sql3 = jn.ToSql();
-                var items3 = db.Query<UserEx>(sql3);
+                var items3 = db.Select<UserEx>(sql3);
 
                 jn.Clear();
                 jn = new JoinSqlBuilder<UserEx, User>();
@@ -123,7 +123,7 @@ namespace SqlServerExpressionsTest
                        .Where<User>(x=> x.Id == 0);
 
                 var sql4 = jn.ToSql();
-                var items4 = db.Query<UserEx>(sql4);
+                var items4 = db.Select<UserEx>(sql4);
 
                 jn.Clear();
                 jn = new JoinSqlBuilder<UserEx, User>();
@@ -135,7 +135,7 @@ namespace SqlServerExpressionsTest
                        .Where<User>(x=> x.Id == 0);
 
                 var sql5 = jn.ToSql();
-                var items5 = db.GetScalar<long>(sql5);
+                var items5 = db.ScalarFmt<long>(sql5);
 
                 jn.Clear();
                 jn = new JoinSqlBuilder<UserEx, User>();
@@ -147,7 +147,7 @@ namespace SqlServerExpressionsTest
                        .Where<User>(x=> x.Id == 0);
 
                 var sql6 = jn.ToSql();
-                var items6 = db.GetScalar<long>(sql6);
+                var items6 = db.ScalarFmt<long>(sql6);
 
                 jn.Clear();
                 jn = new JoinSqlBuilder<UserEx, User>();
@@ -159,7 +159,7 @@ namespace SqlServerExpressionsTest
                        .Where<User>(x=> x.Id == 0);
 
                 var sql7 = jn.ToSql();
-                var items7 = db.GetScalar<long>(sql7);
+                var items7 = db.ScalarFmt<long>(sql7);
 
                 jn.Clear();
                 jn = new JoinSqlBuilder<UserEx, User>();
@@ -171,7 +171,7 @@ namespace SqlServerExpressionsTest
                        .Where<User>(x=> x.Id == 0);
 
                 var sql8 = jn.ToSql();
-                var items8 = db.GetScalar<long>(sql8);
+                var items8 = db.ScalarFmt<long>(sql8);
 
                 jn.Clear();
                 jn = new JoinSqlBuilder<UserEx, User>();
@@ -183,7 +183,7 @@ namespace SqlServerExpressionsTest
                        .Where<User>(x=> x.Id == 0);
 
                 var sql9 = jn.ToSql();
-                var items9 = db.GetScalar<long>(sql9);
+                var items9 = db.ScalarFmt<long>(sql9);
 
             }
         }

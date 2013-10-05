@@ -27,9 +27,9 @@
                         name
                     });
 
-                    var personId = db.GetLastInsertId();
+                    var personId = db.LastInsertId();
 
-                    var insertedRow = db.GetById<Person>(personId);
+                    var insertedRow = db.SingleById<Person>(personId);
 
                     Assert.That(affectedRows, Is.EqualTo(1));
                     Assert.That(insertedRow.Name, Is.EqualTo(name));
@@ -56,7 +56,7 @@
                         name2
                     });
 
-                    var rows = db.SqlList<Person>("select * from Person order by name");
+                    var rows = db.SqlColumn<Person>("select * from Person order by name");
 
                     Assert.That(affectedRows, Is.EqualTo(2));
                     Assert.That(rows[0].Name, Is.EqualTo(name1));
@@ -78,7 +78,7 @@
 
                     db.Insert(person);
 
-                    var personId = db.GetLastInsertId();
+                    var personId = db.LastInsertId();
 
                     var newName = "John Smith";
 
@@ -88,7 +88,7 @@
                         newName
                     });
 
-                    var updatedPerson = db.GetById<Person>(personId);
+                    var updatedPerson = db.SingleById<Person>(personId);
 
                     Assert.That(affectedRows, Is.EqualTo(1));
                     Assert.That(updatedPerson.Name, Is.EqualTo(newName));
@@ -109,7 +109,7 @@
 
                     db.Insert(person);
 
-                    var personId = db.GetLastInsertId();
+                    var personId = db.LastInsertId();
 
                     var affectedRows = db.ExecuteNonQuery("Delete From Person where Id = @personId", new
                     {
@@ -156,9 +156,9 @@
                         { "name", name }
                     });
 
-                    var personId = db.GetLastInsertId();
+                    var personId = db.LastInsertId();
 
-                    var insertedRow = db.GetById<Person>(personId);
+                    var insertedRow = db.SingleById<Person>(personId);
 
                     Assert.That(affectedRows, Is.EqualTo(1));
                     Assert.That(insertedRow.Name, Is.EqualTo(name));
@@ -185,7 +185,7 @@
                         { "name2", name2 }
                     });
 
-                    var rows = db.SqlList<Person>("select * from Person order by name");
+                    var rows = db.SqlColumn<Person>("select * from Person order by name");
 
                     Assert.That(affectedRows, Is.EqualTo(2));
                     Assert.That(rows[0].Name, Is.EqualTo(name1));
@@ -207,7 +207,7 @@
 
                     db.Insert(person);
 
-                    var personId = db.GetLastInsertId();
+                    var personId = db.LastInsertId();
 
                     var newName = "John Smith";
 
@@ -217,7 +217,7 @@
                         { "newName", newName }
                     });
 
-                    var updatedPerson = db.GetById<Person>(personId);
+                    var updatedPerson = db.SingleById<Person>(personId);
 
                     Assert.That(affectedRows, Is.EqualTo(1));
                     Assert.That(updatedPerson.Name, Is.EqualTo(newName));
@@ -238,7 +238,7 @@
 
                     db.Insert(person);
 
-                    var personId = db.GetLastInsertId();
+                    var personId = db.LastInsertId();
 
                     var affectedRows = db.ExecuteNonQuery("Delete From Person where Id = @personId", new Dictionary<string, object>
                     {
@@ -284,9 +284,9 @@
 
                     var affectedRows = db.ExecuteNonQuery(sql);
 
-                    var personId = db.GetLastInsertId();
+                    var personId = db.LastInsertId();
 
-                    var insertedRow = db.GetById<Person>(personId);
+                    var insertedRow = db.SingleById<Person>(personId);
 
                     Assert.That(affectedRows, Is.EqualTo(1));
                     Assert.That(insertedRow.Name, Is.EqualTo(name));
@@ -307,7 +307,7 @@
 
                     var affectedRows = db.ExecuteNonQuery(sql);
 
-                    var rows = db.SqlList<Person>("select * from Person order by name");
+                    var rows = db.SqlColumn<Person>("select * from Person order by name");
 
                     Assert.That(affectedRows, Is.EqualTo(2));
                     Assert.That(rows[0].Name, Is.EqualTo(name1));
@@ -329,7 +329,7 @@
 
                     db.Insert(person);
 
-                    var personId = db.GetLastInsertId();
+                    var personId = db.LastInsertId();
 
                     var newName = "John Smith";
 
@@ -337,7 +337,7 @@
 
                     var affectedRows = db.ExecuteNonQuery(sql);
 
-                    var updatedPerson = db.GetById<Person>(personId);
+                    var updatedPerson = db.SingleById<Person>(personId);
 
                     Assert.That(affectedRows, Is.EqualTo(1));
                     Assert.That(updatedPerson.Name, Is.EqualTo(newName));
@@ -358,7 +358,7 @@
 
                     db.Insert(person);
 
-                    var personId = db.GetLastInsertId();
+                    var personId = db.LastInsertId();
 
                     var sql = string.Format(@"Delete From Person where Id = {0}", personId);
 

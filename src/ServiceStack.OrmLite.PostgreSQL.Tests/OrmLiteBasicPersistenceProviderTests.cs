@@ -73,7 +73,7 @@ namespace ServiceStack.OrmLite.Tests
 				rows.ForEach(x => basicProvider.Store(x));
 
 				var getRowIds = new[] { 2, 4 };
-				var providerRows = db.GetByIds<ModelWithFieldsOfDifferentTypes>(getRowIds).ToList();
+				var providerRows = db.SelectByIds<ModelWithFieldsOfDifferentTypes>(getRowIds).ToList();
 				var providerRowIds = providerRows.ConvertAll(x => x.Id);
 
 				Assert.That(providerRowIds, Is.EquivalentTo(getRowIds));

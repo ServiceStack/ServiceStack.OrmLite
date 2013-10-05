@@ -24,7 +24,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 				db.Update(row);
 
-				var dbRow = db.GetById<ModelWithFieldsOfDifferentTypes>(1);
+                var dbRow = db.SingleById<ModelWithFieldsOfDifferentTypes>(1);
 
 				ModelWithFieldsOfDifferentTypes.AssertIsEqual(dbRow, row);
 			}

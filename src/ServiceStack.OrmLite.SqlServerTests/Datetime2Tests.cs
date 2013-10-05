@@ -24,16 +24,16 @@ namespace ServiceStack.OrmLite.SqlServerTests
 
 				//normal insert
 				conn.Insert(test_object_ValidForDatetime2);
-				var insertedId = (int)conn.GetLastInsertId();
+				var insertedId = (int)conn.LastInsertId();
 
 				//read back, and verify precision
-				var fromDb = conn.GetById<Table_for_datetime2_tests>(insertedId);
+                var fromDb = conn.SingleById<Table_for_datetime2_tests>(insertedId);
 				Assert.AreEqual(test_object_ValidForDatetime2.ToVerifyPrecision, fromDb.ToVerifyPrecision);
 
 				//update
 				fromDb.ToVerifyPrecision = test_object_ValidForDatetime2.ToVerifyPrecision.Value.AddYears(1);
 				conn.UpdateParam(fromDb);
-				var fromDb2 = conn.GetById<Table_for_datetime2_tests>(insertedId);
+                var fromDb2 = conn.SingleById<Table_for_datetime2_tests>(insertedId);
 				Assert.AreEqual(test_object_ValidForDatetime2.ToVerifyPrecision.Value.AddYears(1), fromDb2.ToVerifyPrecision);
 
 
@@ -57,10 +57,10 @@ namespace ServiceStack.OrmLite.SqlServerTests
 
 				//normal insert
 				conn.Insert(test_object_ValidForNormalDatetime);
-				var insertedId = conn.GetLastInsertId();
+				var insertedId = conn.LastInsertId();
 
 				//insert works, but can't regular datetime's precision is not great enough.
-				var fromDb = conn.GetById<Table_for_datetime2_tests>(insertedId);
+                var fromDb = conn.SingleById<Table_for_datetime2_tests>(insertedId);
 				Assert.AreNotEqual(test_object_ValidForNormalDatetime.ToVerifyPrecision, fromDb.ToVerifyPrecision);
 
 				var thrown = Assert.Throws<SqlException>(() => {

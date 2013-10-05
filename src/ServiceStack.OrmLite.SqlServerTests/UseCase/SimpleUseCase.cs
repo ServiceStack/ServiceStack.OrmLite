@@ -56,14 +56,14 @@ namespace ServiceStack.OrmLite.SqlServerTests.UseCase
                 db.Insert(new User { Id = 3, Name = "B", CreatedDate = DateTime.Now, IsAdmin = true});
 
                 db.Insert(new Dual { Name = "Dual" });
-                var lastInsertId = db.GetLastInsertId();
+                var lastInsertId = db.LastInsertId();
                 Assert.That(lastInsertId, Is.GreaterThan(0));
 
-                var rowsB = db.Select<User>("Name = {0}", "B");
+                var rowsB = db.SelectFmt<User>("Name = {0}", "B");
 
                 Assert.That(rowsB, Has.Count.EqualTo(2));
 
-                var admin = db.Select<User>("IsAdmin = {0}", true);
+                var admin = db.SelectFmt<User>("IsAdmin = {0}", true);
                 Assert.That(admin[0].Id, Is.EqualTo(3));
 
                 var rowIds = rowsB.ConvertAll(x => x.Id);
@@ -71,7 +71,7 @@ namespace ServiceStack.OrmLite.SqlServerTests.UseCase
 
                 rowsB.ForEach(x => db.Delete(x));
 
-                rowsB = db.Select<User>("Name = {0}", "B");
+                rowsB = db.SelectFmt<User>("Name = {0}", "B");
                 Assert.That(rowsB, Has.Count.EqualTo(0));
 
                 var rowsLeft = db.Select<User>();

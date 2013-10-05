@@ -37,7 +37,7 @@ namespace ServiceStack.OrmLite.Tests
 
             db.Delete(row2);
 
-            rows = db.GetByIds<ModelWithFieldsOfDifferentTypes>(rowIds);
+            rows = db.SelectByIds<ModelWithFieldsOfDifferentTypes>(rowIds);
             var dbRowIds = rows.ConvertAll(x => x.Id);
 
             Assert.That(dbRowIds, Is.EquivalentTo(new[] { 1, 3 }));
@@ -51,7 +51,7 @@ namespace ServiceStack.OrmLite.Tests
 
             db.DeleteById<ModelWithFieldsOfDifferentTypes>(2);
 
-            var rows = db.GetByIds<ModelWithFieldsOfDifferentTypes>(rowIds);
+            var rows = db.SelectByIds<ModelWithFieldsOfDifferentTypes>(rowIds);
             var dbRowIds = rows.ConvertAll(x => x.Id);
 
             Assert.That(dbRowIds, Is.EquivalentTo(new[] { 1, 3 }));
@@ -67,7 +67,7 @@ namespace ServiceStack.OrmLite.Tests
 
             db.DeleteByIds<ModelWithFieldsOfDifferentTypes>(new[] { 1, 3 });
 
-            var rows = db.GetByIds<ModelWithFieldsOfDifferentTypes>(rowIds);
+            var rows = db.SelectByIds<ModelWithFieldsOfDifferentTypes>(rowIds);
             var dbRowIds = rows.ConvertAll(x => x.Id);
 
             Assert.That(dbRowIds, Is.EquivalentTo(new[] { 2 }));
@@ -82,7 +82,7 @@ namespace ServiceStack.OrmLite.Tests
 
             db.Delete<ModelWithFieldsOfDifferentTypes>(x => x.LongId <= row.LongId);
 
-            var dbRow = db.GetByIdOrDefault<ModelWithFieldsOfDifferentTypes>(row.Id);
+            var dbRow = db.SingleById<ModelWithFieldsOfDifferentTypes>(row.Id);
 
             Assert.That(dbRow, Is.Null);
         }
@@ -96,7 +96,7 @@ namespace ServiceStack.OrmLite.Tests
 
             db.DeleteFmt<ModelWithFieldsOfDifferentTypes>(where: "LongId <= {0}".SqlFormat(row.LongId));
 
-            var dbRow = db.GetByIdOrDefault<ModelWithFieldsOfDifferentTypes>(row.Id);
+            var dbRow = db.SingleById<ModelWithFieldsOfDifferentTypes>(row.Id);
 
             Assert.That(dbRow, Is.Null);
         }
@@ -110,7 +110,7 @@ namespace ServiceStack.OrmLite.Tests
 
             db.DeleteFmt(table: "ModelWithFieldsOfDifferentTypes", where: "LongId <= {0}".SqlFormat(row.LongId));
 
-            var dbRow = db.GetByIdOrDefault<ModelWithFieldsOfDifferentTypes>(row.Id);
+            var dbRow = db.SingleById<ModelWithFieldsOfDifferentTypes>(row.Id);
 
             Assert.That(dbRow, Is.Null);
         }

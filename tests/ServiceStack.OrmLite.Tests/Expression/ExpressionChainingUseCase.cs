@@ -87,7 +87,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
         {
             db.InsertAll(People);
 
-            var visitor = db.CreateExpression<Person>();
+            var visitor = db.SqlExpression<Person>();
 
             visitor.Where(x => x.FirstName.StartsWith("Jim")).Or(x => x.LastName.StartsWith("Cob"));
             

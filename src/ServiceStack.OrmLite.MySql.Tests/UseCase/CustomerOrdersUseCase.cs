@@ -169,8 +169,8 @@ namespace ServiceStack.OrmLite.MySql.Tests.UseCase
             };
             db.Insert(customer);
 
-            var customerId = db.GetLastInsertId(); //Get Auto Inserted Id
-            customer = db.QuerySingle<Customer>(new { customer.Email }); //Query
+            var customerId = db.LastInsertId(); //Get Auto Inserted Id
+            customer = db.Single<Customer>(new { customer.Email }); //Query
             Assert.That(customer.Id, Is.EqualTo(customerId));
 
             //Direct access to System.Data.Transactions:
@@ -186,7 +186,7 @@ namespace ServiceStack.OrmLite.MySql.Tests.UseCase
                 };
                 db.Save(order); //Inserts 1st time
 
-                order.Id = (int)db.GetLastInsertId(); //Get Auto Inserted Id
+                order.Id = (int)db.LastInsertId(); //Get Auto Inserted Id
 
                 var orderDetails = new[] {
                     new OrderDetail

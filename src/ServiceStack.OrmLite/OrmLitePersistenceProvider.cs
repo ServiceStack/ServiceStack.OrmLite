@@ -61,7 +61,7 @@ namespace ServiceStack.OrmLite
 		{
 			using (var dbCmd = CreateCommand())
 			{
-				return dbCmd.GetByIdOrDefault<T>(id);
+				return dbCmd.SingleById<T>(id);
 			}
 		}
 
@@ -69,7 +69,7 @@ namespace ServiceStack.OrmLite
 		{
 			using (var dbCmd = CreateCommand())
 			{
-				return dbCmd.GetByIds<T>(ids);
+				return dbCmd.SelectByIds<T>(ids);
 			}
 		}
 
@@ -84,7 +84,7 @@ namespace ServiceStack.OrmLite
 		private static T InsertOrUpdate<T>(IDbCommand dbCmd, T entity)
 		{
 			var id = entity.GetId();
-			var existingEntity = dbCmd.GetByIdOrDefault<T>(id);
+            var existingEntity = dbCmd.SingleById<T>(id);
 			if (existingEntity != null)
 			{
 				existingEntity.PopulateWith(entity);

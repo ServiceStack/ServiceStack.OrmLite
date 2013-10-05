@@ -436,7 +436,7 @@ namespace ServiceStack.OrmLite
         internal static void Save<T>(this IDbCommand dbCmd, T obj)
         {
             var id = obj.GetId();
-            var existingRow = dbCmd.GetByIdOrDefault<T>(id);
+            var existingRow = dbCmd.SingleById<T>(id);
             if (Equals(existingRow, default(T)))
             {
                 dbCmd.Insert(obj);
@@ -486,7 +486,7 @@ namespace ServiceStack.OrmLite
                 ? saveRows.Where(x => !defaultIdValue.Equals(x.GetId())).ToDictionary(x => x.GetId())
                 : saveRows.Where(x => x.GetId() != null).ToDictionary(x => x.GetId());
 
-            var existingRowsMap = dbCmd.GetByIds<T>(idMap.Keys).ToDictionary(x => x.GetId());
+            var existingRowsMap = dbCmd.SelectByIds<T>(idMap.Keys).ToDictionary(x => x.GetId());
 
             using (var dbTrans = dbCmd.Connection.BeginTransaction())
             {

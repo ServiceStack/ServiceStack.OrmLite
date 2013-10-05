@@ -158,7 +158,7 @@ namespace AllDialectsTest
 
 			OrmLiteConfig.ClearCache();
 			OrmLiteConfig.DialectProvider = dialect.DialectProvider;
-			SqlExpressionVisitor<Author> ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<Author>();
+			SqlExpressionVisitor<Author> ev = OrmLiteConfig.DialectProvider.SqlExpression<Author>();
 
 			using (IDbConnection db = dialect.ConnectionString.OpenDbConnection())
 			{
@@ -401,13 +401,13 @@ namespace AllDialectsTest
 					
 					
 					
-					var r1 = db.FirstOrDefault(ev);
+					var r1 = db.Single(ev);
 					Console.WriteLine("FOD: Expected:{0} Selected {1} {2}",expectedResult, 
 					                  r1.Birthday,
 					                  expectedResult == r1.Birthday ? "OK" : "**************  FAILED ***************");
 					
 					
-					var r2 = db.GetScalar<Author, DateTime>( e => Sql.Max(e.Birthday) );
+					var r2 = db.Scalar<Author, DateTime>( e => Sql.Max(e.Birthday) );
 					Console.WriteLine("GetScalar DateTime: Expected:{0} Selected {1} {2}",expectedResult, 
 					                  r2,
 					                  expectedResult == r2 ? "OK" : "**************  FAILED ***************");
@@ -448,27 +448,27 @@ namespace AllDialectsTest
 					                  result[0].City,
 					                  expectedStringResult == result[0].City ? "OK" : "**************  FAILED ***************");
 					
-					r1 = db.FirstOrDefault(ev);
+					r1 = db.Single(ev);
 					Console.WriteLine("FOD: Expected:{0} Selected {1} {2}",expectedResult, 
 					                  r1.City,
 					                  expectedStringResult == result[0].City ? "OK" : "**************  FAILED ***************");
 					
 					
 					var expectedDecimal= authors.Max(e=>e.Earnings);
-					Decimal? r3 = db.GetScalar<Author,Decimal?>(e=> Sql.Max(e.Earnings));
+					Decimal? r3 = db.Scalar<Author,Decimal?>(e=> Sql.Max(e.Earnings));
 					Console.WriteLine("GetScalar decimal?: Expected:{0} Selected {1} {2}",expectedDecimal, 
 					                  r3.Value,
 					                  expectedDecimal == r3.Value ? "OK" : "**************  FAILED ***************");
 					
 					var expectedString= authors.Max(e=>e.Name);
-					string r4 = db.GetScalar<Author,String>(e=> Sql.Max(e.Name));
+					string r4 = db.Scalar<Author,String>(e=> Sql.Max(e.Name));
 					
 					Console.WriteLine("GetScalar string?: Expected:{0} Selected {1} {2}",expectedString, 
 					                  r4,
 					                  expectedString == r4 ? "OK" : "**************  FAILED ***************");
 					
 					var expectedDate= authors.Max(e=>e.LastActivity);
-					DateTime? r5 = db.GetScalar<Author,DateTime?>(e=> Sql.Max(e.LastActivity));
+					DateTime? r5 = db.Scalar<Author,DateTime?>(e=> Sql.Max(e.LastActivity));
 					Console.WriteLine("GetScalar datetime?: Expected:{0} Selected {1} {2}",
 					                  expectedDate, 
 					                  r5,
@@ -476,7 +476,7 @@ namespace AllDialectsTest
 					
 					
 					var expectedDate51= authors.Where(e=> e.City=="Bogota").Max(e=>e.LastActivity);
-					DateTime? r51 = db.GetScalar<Author,DateTime?>(
+					DateTime? r51 = db.Scalar<Author,DateTime?>(
 						e=>  Sql.Max(e.LastActivity),
 					 	e=>  e.City=="Bogota" );
 					
@@ -487,7 +487,7 @@ namespace AllDialectsTest
 					
 					try{
 						var expectedBool= authors.Max(e=>e.Active);
-						bool r6 = db.GetScalar<Author,bool>(e=> Sql.Max(e.Active));
+						bool r6 = db.Scalar<Author,bool>(e=> Sql.Max(e.Active));
 						Console.WriteLine("GetScalar bool: Expected:{0} Selected {1} {2}",expectedBool, 
 					                  r6,
 					                  expectedBool == r6 ? "OK" : "**************  FAILED ***************");
@@ -503,13 +503,13 @@ namespace AllDialectsTest
 					
 					// Tests for predicate overloads that make use of the expression visitor
 					Console.WriteLine("First author by name (exists)");
-					author = db.First<Author>(q => q.Name == "Jorge Garzon");
+                    author = db.Single<Author>(q => q.Name == "Jorge Garzon");
 					Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", "Jorge Garzon", author.Name, "Jorge Garzon" == author.Name);
 
 					try
 					{
 						Console.WriteLine("First author by name (does not exist)");
-						author = db.First<Author>(q => q.Name == "Does not exist");
+                        author = db.Single<Author>(q => q.Name == "Does not exist");
 
 						Console.WriteLine("Expected exception thrown, OK? False");
 					}
@@ -519,27 +519,27 @@ namespace AllDialectsTest
 					}
 
 					Console.WriteLine("First author or default (does not exist)");
-					author = db.FirstOrDefault<Author>(q => q.Name == "Does not exist");
+					author = db.Single<Author>(q => q.Name == "Does not exist");
 					Console.WriteLine("Expected:null ; OK? {0}", author == null);
 
 					Console.WriteLine("First author or default by city (multiple matches)");
-					author = db.FirstOrDefault<Author>(q => q.City == "Bogota");
+					author = db.Single<Author>(q => q.City == "Bogota");
 					Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", "Angel Colmenares", author.Name, "Angel Colmenares" == author.Name);
 
 					a.City = "Bogota";
-					author = db.FirstOrDefault<Author>(q => q.City == a.City);
+					author = db.Single<Author>(q => q.City == a.City);
 					Console.WriteLine("Expected:{0} ; Selected:{1}, OK? {2}", "Angel Colmenares", author.Name, "Angel Colmenares" == author.Name);
 					
 					// count test
 					
 					var expectedCount= authors.Count();
-					long r7 = db.GetScalar<Author,long>(e=> Sql.Count(e.Id));
+					long r7 = db.Scalar<Author,long>(e=> Sql.Count(e.Id));
 					Console.WriteLine("GetScalar long: Expected:{0} Selected {1} {2}",expectedCount, 
 					                  r7,
 					                  expectedCount == r7 ? "OK" : "**************  FAILED ***************");
 					
 					expectedCount= authors.Count(e=> e.City=="Bogota");
-					r7 = db.GetScalar<Author,long>(
+					r7 = db.Scalar<Author,long>(
 						e=>  Sql.Count(e.Id),
 					 	e=>  e.City=="Bogota" );
 					
@@ -553,7 +553,7 @@ namespace AllDialectsTest
                      ev.Update();// all fields will be updated
                     // select and update 
                     expected=1;
-                    var rr= db.FirstOrDefault<Author>(rn => rn.Name=="Luis garzon");
+                    var rr= db.Single<Author>(rn => rn.Name=="Luis garzon");
                     rr.City="Madrid";
                     rr.Comments="Updated";
                     ev.Where().Where(r=>r.Id==rr.Id); // if omit,  then all records will be updated 

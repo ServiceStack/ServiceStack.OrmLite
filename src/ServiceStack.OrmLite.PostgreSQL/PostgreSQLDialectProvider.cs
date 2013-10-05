@@ -156,7 +156,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
 			return base.ConvertDbValue(value, type);
 		}
 		
-		public override SqlExpressionVisitor<T> ExpressionVisitor<T>()
+		public override SqlExpressionVisitor<T> SqlExpression<T>()
 		{
 			return new PostgreSQLExpressionVisitor<T>();
 		}
@@ -175,7 +175,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
                           .SqlFormat(tableName, builder.SearchPath);
             }     
 			dbCmd.CommandText = sql;
-			var result = dbCmd.GetLongScalar();
+			var result = dbCmd.LongScalar();
 
 			return result > 0;
 		}

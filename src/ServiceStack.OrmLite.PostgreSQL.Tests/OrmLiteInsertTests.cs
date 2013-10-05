@@ -113,13 +113,13 @@ namespace ServiceStack.OrmLite.Tests
                 var row2 = new ModelWithIdAndName1() { Name = "B", Id = 5 };
 
 				db.Insert(row1);
-				var row1LastInsertId = db.GetLastInsertId();
+				var row1LastInsertId = db.LastInsertId();
 
 				db.Insert(row2);
-				var row2LastInsertId = db.GetLastInsertId();
+				var row2LastInsertId = db.LastInsertId();
 
-                var insertedRow1 = db.GetById<ModelWithIdAndName1>(row1LastInsertId);
-                var insertedRow2 = db.GetById<ModelWithIdAndName1>(row2LastInsertId);
+                var insertedRow1 = db.SingleById<ModelWithIdAndName1>(row1LastInsertId);
+                var insertedRow2 = db.SingleById<ModelWithIdAndName1>(row2LastInsertId);
 
 				Assert.That(insertedRow1.Name, Is.EqualTo(row1.Name));
 				Assert.That(insertedRow2.Name, Is.EqualTo(row2.Name));
@@ -137,9 +137,9 @@ namespace ServiceStack.OrmLite.Tests
 				var row1 = new ModelWithIdAndName1() { Name = @"'", Id = 55};
 				
 				db.Insert(row1);
-				var row1LastInsertId = db.GetLastInsertId();
-                
-				var insertedRow1 = db.GetById<ModelWithIdAndName1>(row1LastInsertId);
+				var row1LastInsertId = db.LastInsertId();
+
+                var insertedRow1 = db.SingleById<ModelWithIdAndName1>(row1LastInsertId);
 			 
 				Assert.That(insertedRow1.Name, Is.EqualTo(row1.Name));				 
 			}
