@@ -463,7 +463,7 @@ namespace ServiceStack.OrmLite.Firebird
         }
 		
 		
-		public override string ToExistStatement( Type fromTableType,
+		public override string ToExistStatement(Type fromTableType,
 			object objWithProperties,
 			string sqlFilter,
 			params object[] filterParams)

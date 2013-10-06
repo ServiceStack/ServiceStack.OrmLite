@@ -135,7 +135,7 @@ namespace ServiceStack.OrmLite.Tests
 				rowIds.ForEach(x => db.InsertAll(ModelWithOnlyStringFields.Create(x)));
 
 				var dbRowIds = new List<string>();
-				foreach (var row in db.Lazy<ModelWithOnlyStringFields>())
+				foreach (var row in db.SelectLazy<ModelWithOnlyStringFields>())
 				{
 					dbRowIds.Add(row.Id);
 				}
@@ -161,7 +161,7 @@ namespace ServiceStack.OrmLite.Tests
 				db.InsertAll(filterRow);
 
 				var dbRowIds = new List<string>();
-				var rows = db.LazyFmt<ModelWithOnlyStringFields>("AlbumName = {0}", filterRow.AlbumName);
+				var rows = db.SelectLazyFmt<ModelWithOnlyStringFields>("AlbumName = {0}", filterRow.AlbumName);
 				foreach (var row in rows)
 				{
 					dbRowIds.Add(row.Id);
@@ -183,7 +183,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				n.Times(x => db.InsertAll(ModelWithIdAndName.Create(x)));
 
-				var ids = db.Column<int>("SELECT Id FROM ModelWithIdAndName");
+				var ids = db.ColumnFmt<int>("SELECT Id FROM ModelWithIdAndName");
 
 				Assert.That(ids.Count, Is.EqualTo(n));
 			}

@@ -51,7 +51,7 @@ $$;";
                 CreateSchemaIfNotExists(db);
                 db.DropAndCreateTable<User>();
 
-                var tables = db.Column<string>
+                var tables = db.ColumnFmt<string>
                     (@"SELECT '[' || n.nspname || '].[' || c.relname ||']' FROM pg_class c LEFT JOIN pg_namespace n ON n.oid = c.relnamespace WHERE c.relname = 'Users' AND n.nspname = 'TestSchema'");
                 
                 //PostgreSQL dialect should create the table in the schema
