@@ -44,7 +44,7 @@ namespace ServiceStack.OrmLite.SqlServer
 	        var statement = string.Format("{0} {1} {2}", WhereExpression, GroupByExpression, HavingExpression).Trim(); 
 
 	        var retVal = string.Format(
-	            "{0} FROM (SELECT ROW_NUMBER() OVER ({1}) As RowNum, * FROM {2} {3} ) AS RowConstrainedResult WHERE RowNum > {4} AND RowNum <= {5}",
+	            "{0} FROM (SELECT ROW_NUMBER() OVER ({1}) As RowNum, * FROM {2} {3}) AS RowConstrainedResult WHERE RowNum > {4} AND RowNum <= {5}",
 	            selectExpression,
 	            orderBy,
 	            tableName,
@@ -68,8 +68,10 @@ namespace ServiceStack.OrmLite.SqlServer
 
                 fieldDef.GetQuotedValue(item);
 
-                if (setFields.Length > 0) setFields.Append(",");
-                setFields.AppendFormat("{0} = {1}",
+                if (setFields.Length > 0) 
+                    setFields.Append(", ");
+
+                setFields.AppendFormat("{0}={1}",
                     dialectProvider.GetQuotedColumnName(fieldDef.FieldName),
                     dialectProvider.GetQuotedValue(value, fieldDef.FieldType));
             }

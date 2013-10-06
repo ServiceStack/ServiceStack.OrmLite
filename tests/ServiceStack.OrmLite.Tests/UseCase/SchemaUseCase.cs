@@ -32,7 +32,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
                 db.CreateTable<User>(true);
 
                 var tables =
-                    db.Column<string>
+                    db.ColumnFmt<string>
                         (@"SELECT name FROM sqlite_master WHERE type='table';");
 
                 //sqlite dialect should just concatenate the schema and table name to create a unique table name
@@ -59,7 +59,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
                 CreateSchemaIfNotExists(db);
                 db.DropAndCreateTable<User>();
 
-                var tables = db.Column<string>
+                var tables = db.ColumnFmt<string>
                     (@"SELECT '['+SCHEMA_NAME(schema_id)+'].['+name+']' AS SchemaTable FROM sys.tables");
 
                 //sql server dialect should create the table in the schema

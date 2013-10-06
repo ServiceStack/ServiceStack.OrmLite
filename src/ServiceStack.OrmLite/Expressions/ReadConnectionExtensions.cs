@@ -66,27 +66,32 @@ namespace ServiceStack.OrmLite
         public static IEnumerable<T> ExecLazy<T>(this IDbConnection dbConn, Func<IDbCommand, IEnumerable<T>> filter)
         {
             var dialectProvider = OrmLiteConfig.DialectProvider;
+            IDbCommand dbCmd = null;
             try
             {
                 var ormLiteDbConn = dbConn as OrmLiteConnection;
                 if (ormLiteDbConn != null)
                     OrmLiteConfig.DialectProvider = ormLiteDbConn.Factory.DialectProvider;
 
-                using (var dbCmd = dbConn.CreateCommand())
-                {
-                    dbCmd.Transaction = (ormLiteDbConn != null) ? ormLiteDbConn.Transaction : OrmLiteConfig.TSTransaction;
-                    dbCmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
+                dbCmd = dbConn.CreateCommand();
+                dbCmd.Transaction = (ormLiteDbConn != null) ? ormLiteDbConn.Transaction : OrmLiteConfig.TSTransaction;
+                dbCmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
 
-                    var results = filter(dbCmd);
-                    LastCommandText = dbCmd.CommandText;
-                    foreach (var item in results)
-                    {
-                        yield return item;
-                    }
+                LastCommandText = null;
+                var results = filter(dbCmd);
+
+                foreach (var item in results)
+                {
+                    yield return item;
                 }
             }
             finally
             {
+                if (dbCmd != null)
+                {
+                    LastCommandText = dbCmd.CommandText;
+                    dbCmd.Dispose();
+                }
                 OrmLiteConfig.DialectProvider = dialectProvider;
             }
         }

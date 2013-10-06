@@ -268,12 +268,15 @@ namespace ServiceStack.OrmLite
         {
             if (orderByProperties.Count > 0)
             {
-                orderBy = "ORDER BY ";
+                var sb = new StringBuilder();
                 foreach(var prop in orderByProperties)
                 {
-                    orderBy += prop + ",";
+                    if (sb.Length > 0)
+                        sb.Append(", ");
+
+                    sb.Append(prop);
                 }
-                orderBy = orderBy.TrimEnd(',');
+                orderBy = "ORDER BY " + sb;
             }
             else
             {
@@ -401,8 +404,7 @@ namespace ServiceStack.OrmLite
         public virtual string ToDeleteRowStatement()
         {
             return string.Format("DELETE FROM {0} {1}",
-                                                   OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef),
-                                                   WhereExpression);
+                OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef), WhereExpression);
         }
 
         public virtual string ToUpdateStatement(T item, bool excludeDefaults = false)
@@ -418,14 +420,16 @@ namespace ServiceStack.OrmLite
 
                 fieldDef.GetQuotedValue(item);
 
-                if (setFields.Length > 0) setFields.Append(",");
-                setFields.AppendFormat("{0} = {1}",
+                if (setFields.Length > 0) 
+                    setFields.Append(", ");
+
+                setFields.AppendFormat("{0}={1}",
                     dialectProvider.GetQuotedColumnName(fieldDef.FieldName),
                     dialectProvider.GetQuotedValue(value, fieldDef.FieldType));
             }
 
             return string.Format("UPDATE {0} SET {1} {2}",
-                                                dialectProvider.GetQuotedTableName(modelDef), setFields, WhereExpression);
+                dialectProvider.GetQuotedTableName(modelDef), setFields, WhereExpression);
         }
 
         public virtual string ToSelectStatement()

@@ -123,8 +123,10 @@ namespace ServiceStack.OrmLite
                     string.Equals(x.Name, setField.Name, StringComparison.InvariantCultureIgnoreCase));
                 if (fieldDef == null) continue;
 
-                if (sql.Length > 0) sql.Append(",");
-                sql.AppendFormat("{0} = {1}", 
+                if (sql.Length > 0) 
+                    sql.Append(", ");
+
+                sql.AppendFormat("{0}={1}", 
                     dialectProvider.GetQuotedColumnName(fieldDef.FieldName),
                     dialectProvider.GetQuotedValue(setField.GetPropertyGetterFn()(updateOnly), fieldDef.FieldType));
             }

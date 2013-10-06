@@ -648,14 +648,16 @@ namespace ServiceStack.OrmLite
                     {
                         if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
 
-                        sqlFilter.AppendFormat("{0} = {1}", GetQuotedColumnName(fieldDef.FieldName), fieldDef.GetQuotedValue(objWithProperties));
+                        sqlFilter.AppendFormat("{0}={1}", GetQuotedColumnName(fieldDef.FieldName), fieldDef.GetQuotedValue(objWithProperties));
 
                         continue;
                     }
 
                     if (updateFields.Count > 0 && !updateFields.Contains(fieldDef.Name) || fieldDef.AutoIncrement) continue;
-                    if (sql.Length > 0) sql.Append(",");
-                    sql.AppendFormat("{0} = {1}", GetQuotedColumnName(fieldDef.FieldName), fieldDef.GetQuotedValue(objWithProperties));
+                    if (sql.Length > 0) 
+                        sql.Append(", ");
+                    
+                    sql.AppendFormat("{0}={1}", GetQuotedColumnName(fieldDef.FieldName), fieldDef.GetQuotedValue(objWithProperties));
                 }
                 catch (Exception ex)
                 {
