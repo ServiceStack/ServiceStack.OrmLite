@@ -947,7 +947,7 @@ namespace ServiceStack.OrmLite
         // TODO : make abstract  ??
         public virtual string ToExecuteProcedureStatement(object objWithProperties)
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         protected static ModelDefinition GetModel(Type modelType)

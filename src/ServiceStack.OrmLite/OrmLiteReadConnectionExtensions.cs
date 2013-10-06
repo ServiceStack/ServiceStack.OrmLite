@@ -17,8 +17,8 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns results from using sql. E.g:
-        /// <para>  - db.Select&lt;Person&gt;("Age > 40")</para>
-        /// <para>  - db.Select&lt;Person&gt;("SELECT * FROM Person WHERE Age > 40")</para>
+        /// <para>  - db.Select&lt;Person&gt;("Age &gt; 40")</para>
+        /// <para>  - db.Select&lt;Person&gt;("SELECT * FROM Person WHERE Age &gt; 40")</para>
         /// </summary>
         public static List<T> Select<T>(this IDbConnection dbConn, string sql)
         {
@@ -27,8 +27,8 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns results from using a parameterized query. E.g:
-        /// <para>  - db.Select&lt;Person&gt;("Age > @age", new { age = 40})</para>
-        /// <para>  - db.Select&lt;Person&gt;("SELECT * FROM Person WHERE Age > @age", new { age = 40})</para>
+        /// <para>  - db.Select&lt;Person&gt;("Age &gt; @age", new { age = 40})</para>
+        /// <para>  - db.Select&lt;Person&gt;("SELECT * FROM Person WHERE Age &gt; @age", new { age = 40})</para>
         /// </summary>
         public static List<T> Select<T>(this IDbConnection dbConn, string sql, object anonType)
         {
@@ -37,8 +37,8 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns results from using a parameterized query. E.g:
-        /// <para>  - db.Select&lt;Person&gt;("Age > @age", new Dictionary&lt;string, object&gt; { { "age", 40 } })</para>
-        /// <para>  - db.Select&lt;Person&gt;("SELECT * FROM Person WHERE Age > @age", new Dictionary&lt;string, object&gt; { { "age", 40 } })</para>
+        /// <para>  - db.Select&lt;Person&gt;("Age &gt; @age", new Dictionary&lt;string, object&gt; { { "age", 40 } })</para>
+        /// <para>  - db.Select&lt;Person&gt;("SELECT * FROM Person WHERE Age &gt; @age", new Dictionary&lt;string, object&gt; { { "age", 40 } })</para>
         /// </summary>
         public static List<T> Select<T>(this IDbConnection dbConn, string sql, Dictionary<string, object> dict)
         {
@@ -47,8 +47,8 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns results from using an SqlFormat query. E.g:
-        /// <para>  - db.SelectFmt&lt;Person&gt;("Age > {0}", 40)</para>
-        /// <para>  - db.SelectFmt&lt;Person&gt;("SELECT * FROM Person WHERE Age > {0}", 40)</para>
+        /// <para>  - db.SelectFmt&lt;Person&gt;("Age &gt; {0}", 40)</para>
+        /// <para>  - db.SelectFmt&lt;Person&gt;("SELECT * FROM Person WHERE Age &gt; {0}", 40)</para>
         /// </summary>
         public static List<T> SelectFmt<T>(this IDbConnection dbConn, string sqlFormat, params object[] filterParams)
         {
@@ -67,7 +67,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns a partial subset of results from the specified tableType using a SqlFormat query. E.g:
-        /// <para>  - db.SelectFmt&lt;EntityWithId&gt;(typeof(Person), "Age > {0}", 40)</para>
+        /// <para>  - db.SelectFmt&lt;EntityWithId&gt;(typeof(Person), "Age &gt; {0}", 40)</para>
         /// </summary>
         public static List<TModel> SelectFmt<TModel>(this IDbConnection dbConn, Type fromTableType, string sqlFormat, params object[] filterParams)
         {
@@ -76,7 +76,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns results from using a single name, value filter. E.g:
-        /// <para>  - db.Where<Person>("Age", 27)</para>
+        /// <para>  - db.Where&lt;Person&gt;("Age", 27)</para>
         /// </summary>
         public static List<T> Where<T>(this IDbConnection dbConn, string name, object value)
         {
@@ -85,7 +85,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns results from using an anonymous type filter. E.g:
-        /// <para>  - db.Where<Person>(new { Age = 27 })</para>
+        /// <para>  - db.Where&lt;Person&gt;(new { Age = 27 })</para>
         /// </summary>
         public static List<T> Where<T>(this IDbConnection dbConn, object anonType)
         {
@@ -94,7 +94,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns results using the supplied primary key ids. E.g:
-        /// <para>  - db.SelectByIds<Person>(new[] { 1, 2, 3 })</para>
+        /// <para>  - db.SelectByIds&lt;Person&gt;(new[] { 1, 2, 3 })</para>
         /// </summary>
         public static List<T> SelectByIds<T>(this IDbConnection dbConn, IEnumerable idValues)
         {
@@ -112,7 +112,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Query results using the non-default values in the supplied partially populated POCO example. E.g:
-        /// <para>  - db.SelectByExample("Age > @Age", new Person { Age = 42 })</para>
+        /// <para>  - db.SelectByExample("Age &gt; @Age", new Person { Age = 42 })</para>
         /// </summary>
         public static List<T> SelectByExample<T>(this IDbConnection dbConn, string sql, T byExample)
         {
@@ -121,7 +121,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns a lazyily loaded stream of results. E.g:
-        /// <para>  - db.SelectLazy<Person>()</para>
+        /// <para>  - db.SelectLazy&lt;Person&gt;()</para>
         /// </summary>
         public static IEnumerable<T> SelectLazy<T>(this IDbConnection dbConn)
         {
@@ -130,7 +130,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns a lazyily loaded stream of results using a parameterized query. E.g:
-        /// <para>  - db.SelectLazy<Person>("Age > @age", new { age = 40 })</para>
+        /// <para>  - db.SelectLazy&lt;Person&gt;("Age &gt; @age", new { age = 40 })</para>
         /// </summary>
         public static IEnumerable<T> SelectLazy<T>(this IDbConnection dbConn, string sql, object anonType = null)
         {
@@ -139,7 +139,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns a lazyily loaded stream of results using an SqlFilter query. E.g:
-        /// <para>  - db.SelectLazyFmt<Person>("Age > {0}", 40)</para>
+        /// <para>  - db.SelectLazyFmt&lt;Person&gt;("Age &gt; {0}", 40)</para>
         /// </summary>
         public static IEnumerable<T> SelectLazyFmt<T>(this IDbConnection dbConn, string sqlFormat, params object[] filterParams)
         {
@@ -148,7 +148,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns a stream of results that are lazily loaded using a parameterized query. E.g:
-        /// <para>  - db.WhereLazy<Person>(new { Age = 27 })</para>
+        /// <para>  - db.WhereLazy&lt;Person&gt;(new { Age = 27 })</para>
         /// </summary>
         public static IEnumerable<T> WhereLazy<T>(this IDbConnection dbConn, object anonType)
         {
@@ -157,7 +157,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns the first result using a parameterized query. E.g:
-        /// <para>  - db.Single<Person>(new { Age = 42 })</para>
+        /// <para>  - db.Single&lt;Person&gt;(new { Age = 42 })</para>
         /// </summary>
         public static T Single<T>(this IDbConnection dbConn, object anonType)
         {
@@ -166,7 +166,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns results from using a single name, value filter. E.g:
-        /// <para>  - db.Single<Person>("Age = @age", new { age = 42 })</para>
+        /// <para>  - db.Single&lt;Person&gt;("Age = @age", new { age = 42 })</para>
         /// </summary>
         public static T Single<T>(this IDbConnection dbConn, string sql, object anonType = null)
         {
@@ -175,7 +175,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns the first result using a SqlFormat query. E.g:
-        /// <para>  - db.SingleFmt<Person>("Age = {0}", 42)</para>
+        /// <para>  - db.SingleFmt&lt;Person&gt;("Age = {0}", 42)</para>
         /// </summary>
         public static T SingleFmt<T>(this IDbConnection dbConn, string sqlFormat, params object[] filterParams)
         {
@@ -184,7 +184,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns the first result using a primary key id. E.g:
-        /// <para>  - db.SingleById<Person>(1)</para>
+        /// <para>  - db.SingleById&lt;Person&gt;(1)</para>
         /// </summary>
         public static T SingleById<T>(this IDbConnection dbConn, object idValue)
         {
@@ -193,7 +193,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns the first result using a name, value filter. E.g:
-        /// <para>  - db.SingleWhere<Person>("Age", 42)</para>
+        /// <para>  - db.SingleWhere&lt;Person&gt;("Age", 42)</para>
         /// </summary>
         public static T SingleWhere<T>(this IDbConnection dbConn, string name, object value)
         {
@@ -202,7 +202,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns a single scalar value using a parameterized query. E.g:
-        /// <para>  - db.Scalar<int>("SELECT COUNT(*) FROM Person WHERE Age > @age", new { age = 40 })</para>
+        /// <para>  - db.Scalar&lt;int&gt;("SELECT COUNT(*) FROM Person WHERE Age &gt; @age", new { age = 40 })</para>
         /// </summary>
         public static T Scalar<T>(this IDbConnection dbConn, string sql, object anonType = null)
         {
@@ -211,7 +211,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns a single scalar value using an SqlFormat query. E.g:
-        /// <para>  - db.ScalarFmt<int>("SELECT COUNT(*) FROM Person WHERE Age > {0}", 40)</para>
+        /// <para>  - db.ScalarFmt&lt;int&gt;("SELECT COUNT(*) FROM Person WHERE Age &gt; {0}", 40)</para>
         /// </summary>
         public static T ScalarFmt<T>(this IDbConnection dbConn, string sqlFormat, params object[] sqlParams)
         {
@@ -220,7 +220,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns the first column in a List using a SqlFormat query. E.g:
-        /// <para>  - db.Column<string>("SELECT LastName FROM Person WHERE Age = @age", new { age = 27 })</para>
+        /// <para>  - db.Column&lt;string&gt;("SELECT LastName FROM Person WHERE Age = @age", new { age = 27 })</para>
         /// </summary>
         public static List<T> Column<T>(this IDbConnection dbConn, string sql, object anonType = null)
         {
@@ -229,7 +229,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns the first column in a List using a SqlFormat query. E.g:
-        /// <para>  - db.ColumnFmt<string>("SELECT LastName FROM Person WHERE Age = {0}", 27)</para>
+        /// <para>  - db.ColumnFmt&lt;string&gt;("SELECT LastName FROM Person WHERE Age = {0}", 27)</para>
         /// </summary>
         public static List<T> ColumnFmt<T>(this IDbConnection dbConn, string sqlFormat, params object[] sqlParams)
         {
@@ -238,7 +238,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns the distinct first column values in a HashSet using an SqlFormat query. E.g:
-        /// <para>  - db.ColumnDistinct<int>("SELECT Age FROM Person WHERE Age &lt; @age", new { age = 50 })</para>
+        /// <para>  - db.ColumnDistinct&lt;int&gt;("SELECT Age FROM Person WHERE Age &lt; @age", new { age = 50 })</para>
         /// </summary>
         public static HashSet<T> ColumnDistinct<T>(this IDbConnection dbConn, string sql, object anonType = null)
         {
@@ -247,7 +247,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns the distinct first column values in a HashSet using an SqlFormat query. E.g:
-        /// <para>  - db.ColumnDistinctFmt<int>("SELECT Age FROM Person WHERE Age &lt; {0}", 50)</para>
+        /// <para>  - db.ColumnDistinctFmt&lt;int&gt;("SELECT Age FROM Person WHERE Age &lt; {0}", 50)</para>
         /// </summary>
         public static HashSet<T> ColumnDistinctFmt<T>(this IDbConnection dbConn, string sqlFormat, params object[] sqlParams)
         {
@@ -256,7 +256,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns an Dictionary&lt;K, List&lt;V&gt;&gt; grouping made from the first two columns using an parameterized query. E.g:
-        /// <para>  - db.Lookup<int, string>("SELECT Age, LastName FROM Person WHERE Age &lt; @age", new { age = 50 })</para>
+        /// <para>  - db.Lookup&lt;int, string&gt;("SELECT Age, LastName FROM Person WHERE Age &lt; @age", new { age = 50 })</para>
         /// </summary>
         public static Dictionary<K, List<V>> Lookup<K, V>(this IDbConnection dbConn, string sql, object anonType = null)
         {
@@ -265,7 +265,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns an Dictionary&lt;K, List&lt;V&gt;&gt; grouping made from the first two columns using an SqlFormat query. E.g:
-        /// <para>  - db.LookupFmt<int, string>("SELECT Age, LastName FROM Person WHERE Age &lt; {0}", 50)</para>
+        /// <para>  - db.LookupFmt&lt;int, string&gt;("SELECT Age, LastName FROM Person WHERE Age &lt; {0}", 50)</para>
         /// </summary>
         public static Dictionary<K, List<V>> LookupFmt<K, V>(this IDbConnection dbConn, string sqlFormat, params object[] sqlParams)
         {
@@ -274,7 +274,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns a Dictionary from the first 2 columns: Column 1 (Keys), Column 2 (Values) using sql. E.g:
-        /// <para>  - db.Dictionary<int, string>("SELECT Id, LastName FROM Person WHERE Age &lt; @age", new { age = 50 })</para>
+        /// <para>  - db.Dictionary&lt;int, string&gt;("SELECT Id, LastName FROM Person WHERE Age &lt; @age", new { age = 50 })</para>
         /// </summary>
         public static Dictionary<K, V> Dictionary<K, V>(this IDbConnection dbConn, string sql, object anonType = null)
         {
@@ -283,7 +283,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns a Dictionary from the first 2 columns: Column 1 (Keys), Column 2 (Values) using an SqlFormat query. E.g:
-        /// <para>  - db.DictionaryFmt<int, string>("SELECT Id, LastName FROM Person WHERE Age &lt; {0}", 50)</para>
+        /// <para>  - db.DictionaryFmt&lt;int, string&gt;("SELECT Id, LastName FROM Person WHERE Age &lt; {0}", 50)</para>
         /// </summary>
         public static Dictionary<K, V> DictionaryFmt<K, V>(this IDbConnection dbConn, string sqlFormat, params object[] sqlParams)
         {
@@ -291,9 +291,18 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Returns true if the Query returns any records, using an SqlFormat query. E.g:
+        /// <para>  - db.Exists&lt;Person&gt;(new { Age = 42 })</para>
+        /// </summary>
+        public static bool Exists<T>(this IDbConnection dbConn, object anonType)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Exists<T>(anonType));
+        }
+
+        /// <summary>
         /// Returns true if the Query returns any records, using a parameterized query. E.g:
-        /// <para>  - db.Exists<Person>("Age = @age", new { age = 42 })</para>
-        /// <para>  - db.Exists<Person>("SELECT * FROM Person WHERE Age = @age", new { age = 42 })</para>
+        /// <para>  - db.Exists&lt;Person&gt;("Age = @age", new { age = 42 })</para>
+        /// <para>  - db.Exists&lt;Person&gt;("SELECT * FROM Person WHERE Age = @age", new { age = 42 })</para>
         /// </summary>
         public static bool Exists<T>(this IDbConnection dbConn, string sql, object anonType = null)
         {
@@ -302,8 +311,8 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns true if the Query returns any records, using an SqlFormat query. E.g:
-        /// <para>  - db.ExistsFmt<Person>("Age = {0}", 42)</para>
-        /// <para>  - db.ExistsFmt<Person>("SELECT * FROM Person WHERE Age = {0}", 42)</para>
+        /// <para>  - db.ExistsFmt&lt;Person&gt;("Age = {0}", 42)</para>
+        /// <para>  - db.ExistsFmt&lt;Person&gt;("SELECT * FROM Person WHERE Age = {0}", 42)</para>
         /// </summary>
         public static bool ExistsFmt<T>(this IDbConnection dbConn, string sqlFormat, params object[] filterParams)
         {
@@ -312,7 +321,7 @@ namespace ServiceStack.OrmLite
         
         /// <summary>
         /// Returns the first column in a List using a parameterized query. E.g:
-        /// <para>  - db.SqlColumn<string>("SELECT LastName FROM Person WHERE Age &lt; @age", new { age = 50 })</para>
+        /// <para>  - db.SqlColumn&lt;string&gt;("SELECT LastName FROM Person WHERE Age &lt; @age", new { age = 50 })</para>
         /// </summary>
         public static List<T> SqlColumn<T>(this IDbConnection dbConn, string sql, object anonType = null)
         {
@@ -321,7 +330,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns a single Scalar value using a parameterized query. E.g:
-        /// <para>  - db.SqlColumn<string>("SELECT LastName FROM Person WHERE Age &lt; @age", new Dictionary<string, object> { { "age", 50 } })</para>
+        /// <para>  - db.SqlColumn&lt;string&gt;("SELECT LastName FROM Person WHERE Age &lt; @age", new Dictionary&lt;string, object&gt; { { "age", 50 } })</para>
         /// </summary>
         public static List<T> SqlColumn<T>(this IDbConnection dbConn, string sql, Dictionary<string, object> dict)
         {
@@ -330,7 +339,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns a single Scalar value using a parameterized query. E.g:
-        /// <para>  - db.SqlScalar<int>("SELECT COUNT(*) FROM Person WHERE Age &lt; @age", new { age = 50 })</para>
+        /// <para>  - db.SqlScalar&lt;int&gt;("SELECT COUNT(*) FROM Person WHERE Age &lt; @age", new { age = 50 })</para>
         /// </summary>
         public static T SqlScalar<T>(this IDbConnection dbConn, string sql, object anonType = null)
         {
@@ -339,7 +348,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns a single Scalar value using a parameterized query. E.g:
-        /// <para>  - db.SqlScalar<int>("SELECT COUNT(*) FROM Person WHERE Age &lt; @age", new Dictionary<string, object> { { "age", 50 } })</para>
+        /// <para>  - db.SqlScalar&lt;int&gt;("SELECT COUNT(*) FROM Person WHERE Age &lt; @age", new Dictionary&lt;string, object&gt; { { "age", 50 } })</para>
         /// </summary>
         public static T SqlScalar<T>(this IDbConnection dbConn, string sql, Dictionary<string, object> dict)
         {
