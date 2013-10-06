@@ -12,7 +12,6 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using ServiceStack.DataAccess;
 
 namespace ServiceStack.OrmLite
 {
