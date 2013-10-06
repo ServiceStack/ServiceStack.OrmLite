@@ -119,53 +119,102 @@ namespace ServiceStack.OrmLite
             return OrmLiteConfig.DialectProvider.SqlExpression<T>();
         }
 
-        public static List<T> Select<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.Select(expression));
-        }
-
-        public static List<T> Select<T>(this IDbConnection dbConn, SqlExpression<T> expression)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.Select(expression));
-        }
-
+        /// <summary>
+        /// Returns results from using a LINQ Expression. E.g:
+        /// <para>  - db.Select&lt;Person&gt;(x =&gt; x.Age &gt; 40)</para>
+        /// </summary>
         public static List<T> Select<T>(this IDbConnection dbConn, Expression<Func<T, bool>> predicate)
         {
             return dbConn.Exec(dbCmd => dbCmd.Select(predicate));
         }
 
-        public static List<T> SelectFmt<T>(this IDbConnection dbConn, Expression<Func<T, bool>> predicate)
+        /// <summary>
+        /// Returns results from using an SqlExpression lambda. E.g:
+        /// <para>  - db.Select&lt;Person&gt;(q =&gt; q.Where(x =&gt; x.Age &gt; 40))</para>
+        /// </summary>
+        public static List<T> Select<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Select(predicate));
+            return dbConn.Exec(dbCmd => dbCmd.Select(expression));
         }
 
+        /// <summary>
+        /// Returns results from using an SqlExpression lambda. E.g:
+        /// <para>  - db.Select(db.SqlExpression&lt;Person&gt;().Where(x =&gt; x.Age &gt; 40))</para>
+        /// </summary>
+        public static List<T> Select<T>(this IDbConnection dbConn, SqlExpression<T> expression)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Select(expression));
+        }
+
+        /// <summary>
+        /// Returns a single result from using a LINQ Expression. E.g:
+        /// <para>  - db.Single&lt;Person&gt;(x =&gt; x.Age == 42)</para>
+        /// </summary>
         public static T Single<T>(this IDbConnection dbConn, Expression<Func<T, bool>> predicate)
         {
             return dbConn.Exec(dbCmd => dbCmd.Single(predicate));
         }
 
+        /// <summary>
+        /// Returns a single result from using an SqlExpression lambda. E.g:
+        /// <para>  - db.Single&lt;Person&gt;(q =&gt; q.Where(x =&gt; x.Age == 42))</para>
+        /// </summary>
+        public static T Single<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Single(expression));
+        }
+
+        /// <summary>
+        /// Returns results from using an SqlExpression lambda. E.g:
+        /// <para>  - db.Select&lt;Person&gt;(x =&gt; x.Age &gt; 40)</para>
+        /// </summary>
         public static T Single<T>(this IDbConnection dbConn, SqlExpression<T> expression)
         {
             return dbConn.Exec(dbCmd => dbCmd.Single(expression));
         }
 
+        /// <summary>
+        /// Returns a scalar result from using an SqlExpression lambda. E.g:
+        /// <para>  - db.Scalar&lt;Person, int&gt;(x =&gt; Sql.Max(x.Age))</para>
+        /// </summary>
         public static TKey Scalar<T, TKey>(this IDbConnection dbConn, Expression<Func<T, TKey>> field)
         {
             return dbConn.Exec(dbCmd => dbCmd.Scalar(field));
         }
 
-        public static TKey Scalar<T, TKey>(this IDbConnection dbConn, Expression<Func<T, TKey>> field,
-                                             Expression<Func<T, bool>> predicate)
+        /// <summary>
+        /// Returns a scalar result from using an SqlExpression lambda. E.g:
+        /// <para>  - db.Scalar&lt;Person, int&gt;(x =&gt; Sql.Max(x.Age), , x =&gt; x.Age &lt; 50)</para>
+        /// </summary>        
+        public static TKey Scalar<T, TKey>(this IDbConnection dbConn, 
+            Expression<Func<T, TKey>> field, Expression<Func<T, bool>> predicate)
         {
             return dbConn.Exec(dbCmd => dbCmd.Scalar(field, predicate));
         }
 
-        public static long Count<T>(this IDbConnection dbConn, SqlExpression<T> expression)
+        /// <summary>
+        /// Returns the count of rows that match the LINQ expression, E.g:
+        /// <para>  - db.Count&lt;Person&gt;(x =&gt; x.Age &lt; 50)</para>
+        /// </summary>
+        public static long Count<T>(this IDbConnection dbConn, Expression<Func<T, bool>> expression)
         {
             return dbConn.Exec(dbCmd => dbCmd.Count(expression));
         }
 
-        public static long Count<T>(this IDbConnection dbConn, Expression<Func<T, bool>> expression)
+        /// <summary>
+        /// Returns the count of rows that match the SqlExpression lambda, E.g:
+        /// <para>  - db.Count&lt;Person&gt;(q =&gt; q.Where(x =&gt; x.Age &lt; 50))</para>
+        /// </summary>
+        public static long Count<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Count(expression));
+        }
+
+        /// <summary>
+        /// Returns the count of rows that match the supplied SqlExpression, E.g:
+        /// <para>  - db.Count(db.SqlExpression&lt;Person&gt;().Where(x =&gt; x.Age &lt; 50))</para>
+        /// </summary>
+        public static long Count<T>(this IDbConnection dbConn, SqlExpression<T> expression)
         {
             return dbConn.Exec(dbCmd => dbCmd.Count(expression));
         }

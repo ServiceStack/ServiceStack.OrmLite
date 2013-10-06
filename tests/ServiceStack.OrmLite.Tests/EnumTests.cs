@@ -55,23 +55,6 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        public void CanQueryByEnumValue_using_selectfmt_with_expression()
-        {
-            using (var con = OpenDbConnection())
-            {
-                con.CreateTable<TypeWithEnum>(true);
-                con.Save(new TypeWithEnum { Id = 1, EnumValue = SomeEnum.Value1 });
-                con.Save(new TypeWithEnum { Id = 2, EnumValue = SomeEnum.Value1 });
-                con.Save(new TypeWithEnum { Id = 3, EnumValue = SomeEnum.Value2 });
-
-                var results = con.SelectFmt<TypeWithEnum>(q => q.EnumValue == SomeEnum.Value1);
-                Assert.That(results.Count, Is.EqualTo(2));
-                results = con.SelectFmt<TypeWithEnum>(q => q.EnumValue == SomeEnum.Value2);
-                Assert.That(results.Count, Is.EqualTo(1));
-            }
-        }
-
-        [Test]
         public void CanQueryByEnumValue_using_select_with_string()
         {
             using (var con = OpenDbConnection())
@@ -112,19 +95,6 @@ namespace ServiceStack.OrmLite.Tests
                 db.InsertAll(new DoubleState { Id = "1", State1 = DoubleState.State.OK, State2 = DoubleState.State.KO });
                 db.InsertAll(new DoubleState { Id = "2", State1 = DoubleState.State.OK, State2 = DoubleState.State.OK });
                 IEnumerable<DoubleState> doubleStates = db.Select<DoubleState>(x => x.State1 != x.State2);
-                Assert.AreEqual(1, doubleStates.Count());
-            }
-        }
-
-        [Test]
-        public void can_selectfmt_enum_equals_other_enum()
-        {
-            using (var db = OpenDbConnection())
-            {
-                db.DropAndCreateTable<DoubleState>();
-                db.InsertAll(new DoubleState { Id = "1", State1 = DoubleState.State.OK, State2 = DoubleState.State.KO });
-                db.InsertAll(new DoubleState { Id = "2", State1 = DoubleState.State.OK, State2 = DoubleState.State.OK });
-                IEnumerable<DoubleState> doubleStates = db.SelectFmt<DoubleState>(x => x.State1 != x.State2);
                 Assert.AreEqual(1, doubleStates.Count());
             }
         }
