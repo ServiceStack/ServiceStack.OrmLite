@@ -5,129 +5,175 @@ using ServiceStack.Common.Tests.Models;
 
 namespace ServiceStack.OrmLite.Tests
 {
-	[TestFixture]
-	public class OrmLiteSaveTests
-		: OrmLiteTestBase
-	{
+    [TestFixture]
+    public class OrmLiteSaveTests
+        : OrmLiteTestBase
+    {
+        [Test]
+        public void Save_populates_AutoIncrementId()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTable<PersonWithAutoId>(overwrite: true);
 
-		[Test]
-		public void Can_Save_into_ModelWithFieldsOfDifferentTypes_table()
-		{
-			using (var db = OpenDbConnection())
-			{
-				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+                var row = new PersonWithAutoId
+                {
+                    FirstName = "Jimi",
+                    LastName = "Hendrix",
+                    Age = 27
+                };
 
-				var row = ModelWithFieldsOfDifferentTypes.Create(1);
+                db.Save(row);
 
-				db.Save(row);
-			}
-		}
+                Assert.That(row.Id, Is.EqualTo(1));
+            }
+        }
 
-		[Test]
-		public void Can_Save_and_select_from_ModelWithFieldsOfDifferentTypes_table()
-		{
-			using (var db = OpenDbConnection())
-			{
-				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+        [Test]
+        public void SaveAll_populates_AutoIncrementId()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTable<PersonWithAutoId>(overwrite: true);
 
-				var row = ModelWithFieldsOfDifferentTypes.Create(1);
+                var rows = new[] {
+                    new PersonWithAutoId {
+                        FirstName = "Jimi",
+                        LastName = "Hendrix",
+                        Age = 27
+                    },
+                    new PersonWithAutoId {
+                        FirstName = "Kurt",
+                        LastName = "Cobain",
+                        Age = 27
+                    },
+                };
 
-				db.Save(row);
+                db.Save(rows);
 
-				var rows = db.Select<ModelWithFieldsOfDifferentTypes>();
+                Assert.That(rows[0].Id, Is.EqualTo(1));
+                Assert.That(rows[1].Id, Is.EqualTo(2));
+            }
+        }
 
-				Assert.That(rows, Has.Count.EqualTo(1));
+        [Test]
+        public void Can_Save_into_ModelWithFieldsOfDifferentTypes_table()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
-				ModelWithFieldsOfDifferentTypes.AssertIsEqual(rows[0], row);
-			}
-		}
+                var row = ModelWithFieldsOfDifferentTypes.Create(1);
 
-		[Test]
-		public void Can_SaveAll_and_select_from_ModelWithFieldsOfDifferentTypes_table()
-		{
-			using (var db = OpenDbConnection())
-			{
-				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+                db.Save(row);
+            }
+        }
 
-				var rowIds = new List<int> { 1, 2, 3, 4, 5 };
-				var newRows = rowIds.ConvertAll(x => ModelWithFieldsOfDifferentTypes.Create(x));
+        [Test]
+        public void Can_Save_and_select_from_ModelWithFieldsOfDifferentTypes_table()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
-				db.SaveAll(newRows);
+                var row = ModelWithFieldsOfDifferentTypes.Create(1);
 
-				var rows = db.Select<ModelWithFieldsOfDifferentTypes>();
+                db.Save(row);
 
-				Assert.That(rows, Has.Count.EqualTo(newRows.Count));
-			}
-		}
+                var rows = db.Select<ModelWithFieldsOfDifferentTypes>();
 
-		[Test]
-		public void Can_SaveAll_and_select_from_ModelWithFieldsOfDifferentTypes_table_with_no_ids()
-		{
-			using (var db = OpenDbConnection())
-			{
-				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+                Assert.That(rows, Has.Count.EqualTo(1));
 
-				var rowIds = new List<int> { 1, 2, 3, 4, 5 };
-				var newRows = rowIds.ConvertAll(x => ModelWithFieldsOfDifferentTypes.Create(default(int)));
+                ModelWithFieldsOfDifferentTypes.AssertIsEqual(rows[0], row);
+            }
+        }
 
-				db.SaveAll(newRows);
+        [Test]
+        public void Can_SaveAll_and_select_from_ModelWithFieldsOfDifferentTypes_table()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
-				var rows = db.Select<ModelWithFieldsOfDifferentTypes>();
+                var rowIds = new List<int> { 1, 2, 3, 4, 5 };
+                var newRows = rowIds.ConvertAll(x => ModelWithFieldsOfDifferentTypes.Create(x));
 
-				Assert.That(rows, Has.Count.EqualTo(newRows.Count));
-			}
-		}
+                db.SaveAll(newRows);
 
-		[Test]
-		public void Can_Save_table_with_null_fields()
-		{
-			using (var db = OpenDbConnection())
-			{
-				db.CreateTable<ModelWithIdAndName>(true);
+                var rows = db.Select<ModelWithFieldsOfDifferentTypes>();
 
-				var row = ModelWithIdAndName.Create(1);
-				row.Name = null;
+                Assert.That(rows, Has.Count.EqualTo(newRows.Count));
+            }
+        }
 
-				db.Save(row);
+        [Test]
+        public void Can_SaveAll_and_select_from_ModelWithFieldsOfDifferentTypes_table_with_no_ids()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
-				var rows = db.Select<ModelWithIdAndName>();
+                var rowIds = new List<int> { 1, 2, 3, 4, 5 };
+                var newRows = rowIds.ConvertAll(x => ModelWithFieldsOfDifferentTypes.Create(default(int)));
 
-				Assert.That(rows, Has.Count.EqualTo(1));
+                db.SaveAll(newRows);
 
-				ModelWithIdAndName.AssertIsEqual(rows[0], row);
-			}
-		}
+                var rows = db.Select<ModelWithFieldsOfDifferentTypes>();
 
-		[Test]
-		public void Can_Save_TaskQueue_table()
-		{
-			using (var db = OpenDbConnection())
-			{
-				db.CreateTable<TaskQueue>(true);
+                Assert.That(rows, Has.Count.EqualTo(newRows.Count));
+            }
+        }
 
-				var row = TaskQueue.Create(1);
+        [Test]
+        public void Can_Save_table_with_null_fields()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTable<ModelWithIdAndName>(true);
 
-				db.Save(row);
+                var row = ModelWithIdAndName.Create(1);
+                row.Name = null;
 
-				var rows = db.Select<TaskQueue>();
+                db.Save(row);
 
-				Assert.That(rows, Has.Count.EqualTo(1));
+                var rows = db.Select<ModelWithIdAndName>();
 
-				//Update the auto-increment id
-				row.Id = rows[0].Id;
+                Assert.That(rows, Has.Count.EqualTo(1));
 
-				TaskQueue.AssertIsEqual(rows[0], row);
-			}
-		}
+                ModelWithIdAndName.AssertIsEqual(rows[0], row);
+            }
+        }
 
-		[Test]
-		public void Can_SaveAll_and_select_from_Movie_table()
-		{
-			using (var db = OpenDbConnection())
-			{
-				db.CreateTable<Movie>(true);
+        [Test]
+        public void Can_Save_TaskQueue_table()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTable<TaskQueue>(true);
 
-				var top5Movies = new List<Movie>
+                var row = TaskQueue.Create(1);
+
+                db.Save(row);
+
+                var rows = db.Select<TaskQueue>();
+
+                Assert.That(rows, Has.Count.EqualTo(1));
+
+                //Update the auto-increment id
+                row.Id = rows[0].Id;
+
+                TaskQueue.AssertIsEqual(rows[0], row);
+            }
+        }
+
+        [Test]
+        public void Can_SaveAll_and_select_from_Movie_table()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTable<Movie>(true);
+
+                var top5Movies = new List<Movie>
 				{
 					new Movie { Id = "tt0111161", Title = "The Shawshank Redemption", Rating = 9.2m, Director = "Frank Darabont", ReleaseDate = new DateTime(1995,2,17), TagLine = "Fear can hold you prisoner. Hope can set you free.", Genres = new List<string>{"Crime","Drama"}, },
 					new Movie { Id = "tt0068646", Title = "The Godfather", Rating = 9.2m, Director = "Francis Ford Coppola", ReleaseDate = new DateTime(1972,3,24), TagLine = "An offer you can't refuse.", Genres = new List<string> {"Crime","Drama", "Thriller"}, },
@@ -136,13 +182,13 @@ namespace ServiceStack.OrmLite.Tests
 					new Movie { Id = "tt0060196", Title = "The Good, the Bad and the Ugly", Rating = 9.0m, Director = "Sergio Leone", ReleaseDate = new DateTime(1967,12,29), TagLine = "They formed an alliance of hate to steal a fortune in dead man's gold", Genres = new List<string>{"Adventure","Western"}, },
 				};
 
-				db.SaveAll(top5Movies);
+                db.SaveAll(top5Movies);
 
-				var rows = db.Select<Movie>();
+                var rows = db.Select<Movie>();
 
-				Assert.That(rows, Has.Count.EqualTo(top5Movies.Count));
-			}
-		}
+                Assert.That(rows, Has.Count.EqualTo(top5Movies.Count));
+            }
+        }
 
-	}
+    }
 }

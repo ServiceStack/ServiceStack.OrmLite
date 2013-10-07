@@ -227,6 +227,8 @@ namespace ServiceStack.OrmLite
         {
 			try
 			{
+			    var dialectProvider = OrmLiteConfig.DialectProvider;
+
 				foreach (var fieldDef in fieldDefs)
 				{
                     int index;
@@ -252,9 +254,7 @@ namespace ServiceStack.OrmLite
                         }
                     }
                        
-					if (index == NotFound) continue;
-					var value = dataReader.GetValue(index);
-					fieldDef.SetValue(objWithProperties, value);
+                    dialectProvider.SetDbValue(fieldDef, dataReader, index, objWithProperties);
 				}
 			}
 			catch (Exception ex)
@@ -486,20 +486,6 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecuteSql(OrmLiteConfig.DialectProvider.ToDeleteStatement(tableType, sqlFilter, filterParams));
         }
 
-        internal static bool Save<T>(this IDbCommand dbCmd, T obj)
-        {
-            var id = obj.GetId();
-            var existingRow = dbCmd.SingleById<T>(id);
-            if (Equals(existingRow, default(T)))
-            {
-                dbCmd.Insert(obj);
-                return true;
-            }
-            
-            dbCmd.Update(obj);
-            return false;
-        }
-
         internal static long Insert<T>(this IDbCommand dbCmd, T obj, bool selectIdentity = false)
         {
             OrmLiteConfig.DialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd);
@@ -552,6 +538,30 @@ namespace ServiceStack.OrmLite
             return SaveAll(dbCmd, objs);
         }
 
+        internal static bool Save<T>(this IDbCommand dbCmd, T obj)
+        {
+            var id = obj.GetId();
+            var existingRow = dbCmd.SingleById<T>(id);
+            if (Equals(existingRow, default(T)))
+            {
+                var modelDef = typeof(T).GetModelDefinition();
+                if (modelDef.HasAutoIncrementId)
+                {
+                    var newId = dbCmd.Insert(obj, selectIdentity: true);
+                    var safeId = OrmLiteConfig.DialectProvider.ConvertDbValue(newId, modelDef.PrimaryKey.FieldType);
+                    modelDef.PrimaryKey.SetValueFn(obj, safeId);
+                }
+                else
+                {
+                    dbCmd.Insert(obj);
+                }
+                return true;
+            }
+
+            dbCmd.Update(obj);
+            return false;
+        }
+
         internal static int SaveAll<T>(this IDbCommand dbCmd, IEnumerable<T> objs)
         {
             var saveRows = objs.ToList();
@@ -567,21 +577,33 @@ namespace ServiceStack.OrmLite
 
             var existingRowsMap = dbCmd.SelectByIds<T>(idMap.Keys).ToDictionary(x => x.GetId());
 
+            var modelDef = typeof(T).GetModelDefinition();
+
             var rowsAdded = 0;
             using (var dbTrans = dbCmd.Connection.BeginTransaction())
             {
                 dbCmd.Transaction = dbTrans;
 
-                foreach (var saveRow in saveRows)
+                foreach (var row in saveRows)
                 {
-                    var id = saveRow.GetId();
+                    var id = row.GetId();
                     if (id != defaultIdValue && existingRowsMap.ContainsKey(id))
                     {
-                        dbCmd.Update(saveRow);
+                        dbCmd.Update(row);
                     }
                     else
                     {
-                        dbCmd.Insert(saveRow);
+                        if (modelDef.HasAutoIncrementId)
+                        {
+                            var newId = dbCmd.Insert(row, selectIdentity: true);
+                            var safeId = OrmLiteConfig.DialectProvider.ConvertDbValue(newId, modelDef.PrimaryKey.FieldType);
+                            modelDef.PrimaryKey.SetValueFn(row, safeId);
+                        }
+                        else
+                        {
+                            dbCmd.Insert(row);
+                        }
+
                         rowsAdded++;
                     }
                 }
