@@ -17,7 +17,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\iPhone\Debug</OutputPath>
-    <DefineConstants>DEBUG;NO_EXPRESSIONS</DefineConstants>
+    <DefineConstants>DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
@@ -76,7 +76,6 @@
     <Compile Include="ReflectionPropertyInvoker.cs" />
     <Compile Include="SchemaAttribute.cs" />
     <Compile Include="SequenceAttribute.cs" />
-    <Compile Include="SqlBuilder.cs" />
     <Compile Include="SqlInValues.cs" />
   </ItemGroup>
   <ItemGroup>
