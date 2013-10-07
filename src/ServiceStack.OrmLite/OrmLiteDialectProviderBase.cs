@@ -702,6 +702,9 @@ namespace ServiceStack.OrmLite
                 ? fieldDef.GetValue(obj)
                 : GetAnonValue<T>(fieldDef, obj);
 
+            if (value == null)
+                return DBNull.Value;
+
             var unquotedVal = OrmLiteConfig.DialectProvider.GetQuotedValue(value, fieldDef.FieldType)
                 .TrimStart('\'').TrimEnd('\''); ;
 

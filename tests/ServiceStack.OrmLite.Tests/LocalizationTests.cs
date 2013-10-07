@@ -50,7 +50,9 @@ namespace ServiceStack.OrmLite.Tests
 
 				var points = db.SelectFmt<Point>("Height={0}", 1.123f);
 
-				Console.WriteLine(points.Dump());
+			    points.PrintDump();
+
+                db.Select<Point>().PrintDump();
 
 				Assert.That(points[0].Width, Is.EqualTo(4));
 				Assert.That(points[0].Height, Is.EqualTo(1.123f));
