@@ -17,6 +17,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using ServiceStack.Logging;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
@@ -42,7 +43,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        internal static void CreateTable<T>(this IDbCommand dbCmd, bool overwrite = true)
+        internal static void CreateTable<T>(this IDbCommand dbCmd, bool overwrite = false)
         {
             var tableType = typeof(T);
             CreateTable(dbCmd, overwrite, tableType);
@@ -328,84 +329,111 @@ namespace ServiceStack.OrmLite
             return NotFound;
         }
 
-        internal static void Update<T>(this IDbCommand dbCmd, T obj)
+        internal static int Update<T>(this IDbCommand dbCmd, T obj)
         {
-            using (var updateStmt = dbCmd.CreateUpdateStatement(obj))
-            {
-                dbCmd.CopyParameterizedStatementTo(updateStmt);
+            OrmLiteConfig.DialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
 
-                dbCmd.ExecuteNonQuery();
-            }
+            OrmLiteConfig.DialectProvider.SetParameterValues<T>(dbCmd, obj);
+
+            return dbCmd.ExecuteNonQuery();
         }
 
-        internal static void UpdateAll<T>(this IDbCommand dbCmd, params T[] objs)
+        internal static void Update<T>(this IDbCommand dbCmd, params T[] objs)
         {
-            foreach (var obj in objs)
-            {
-                dbCmd.ExecuteSql(OrmLiteConfig.DialectProvider.ToUpdateRowStatement(obj));
-            }
+            dbCmd.UpdateAll(objs);
         }
 
         internal static void UpdateAll<T>(this IDbCommand dbCmd, IEnumerable<T> objs)
 		{
-			foreach (var obj in objs)
-			{
-				dbCmd.ExecuteSql(OrmLiteConfig.DialectProvider.ToUpdateRowStatement(obj));
-			}
-		}
+            try
+            {
+                var dialectProvider = OrmLiteConfig.DialectProvider;
 
-        internal static IDbCommand CreateUpdateStatement<T>(this IDbCommand dbCmd, T obj)
-        {
-            return OrmLiteConfig.DialectProvider.CreateParameterizedUpdateStatement(dbCmd, obj);
+                dialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
+
+                using (var dbTrans = dbCmd.Connection.BeginTransaction())
+                {
+                    dbCmd.Transaction = dbTrans;
+
+                    foreach (var obj in objs)
+                    {
+                        dialectProvider.SetParameterValues<T>(dbCmd, obj);
+
+                        dbCmd.ExecuteNonQuery();
+                    }
+
+                    dbTrans.Commit();
+                }
+            }
+            catch
+            {
+                if (dbCmd.Transaction != null)
+                    dbCmd.Transaction.Rollback();
+            }
         }
 
-        internal static void CopyParameterizedStatementTo(this IDbCommand dbCmd, IDbCommand tmpStmt)
+        internal static int Delete<T>(this IDbCommand dbCmd, object anonType)
         {
-            dbCmd.CommandText = tmpStmt.CommandText;
+            OrmLiteConfig.DialectProvider.PrepareParameterizedDeleteStatement<T>(dbCmd, anonType.AllFields<T>());
 
-            //Instead of creating new generic DbParameters, copy them from the "dummy" IDbCommand, 
-            //to keep provider specific information. E.g: SqlServer "datetime2" dbtype
-            //We must first create a temp list, as DbParam can't belong to two DbCommands
-            var tmpParams = new List<IDbDataParameter>(tmpStmt.Parameters.Count);
-            tmpParams.AddRange(tmpStmt.Parameters.Cast<IDbDataParameter>());
+            OrmLiteConfig.DialectProvider.SetParameterValues<T>(dbCmd, anonType);
 
-            tmpStmt.Parameters.Clear();
-
-            tmpParams.ForEach(x => dbCmd.Parameters.Add(x));
+            return dbCmd.ExecuteNonQuery();
         }
 
-        internal static void Delete<T>(this IDbCommand dbCmd, params T[] objs)
-		{
-			foreach (var obj in objs)
-			{
-				dbCmd.ExecuteSql(OrmLiteConfig.DialectProvider.ToDeleteRowStatement(obj));
-			}
-		}
-
-        internal static void DeleteAll<T>(this IDbCommand dbCmd, IEnumerable<T> objs)
-		{
-			foreach (var obj in objs)
-			{
-				dbCmd.ExecuteSql(OrmLiteConfig.DialectProvider.ToDeleteRowStatement(obj));
-			}
-		}
-
-        internal static void DeleteByIds<T>(this IDbCommand dbCmd, IEnumerable idValues)
+        internal static int DeleteNonDefaults<T>(this IDbCommand dbCmd, T filter)
         {
-            var sqlIn = idValues.GetIdsInSql();
-            if (sqlIn == null) return;
+            OrmLiteConfig.DialectProvider.PrepareParameterizedDeleteStatement<T>(dbCmd, filter.NonDefaultFields<T>());
 
-            var modelDef = ModelDefinition<T>.Definition;
+            OrmLiteConfig.DialectProvider.SetParameterValues<T>(dbCmd, filter);
 
-            var sql = String.Format("DELETE FROM {0} WHERE {1} IN ({2})",
-                OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef),
-                OrmLiteConfig.DialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName),
-                sqlIn);
-
-            dbCmd.ExecuteSql(sql);
+            return dbCmd.ExecuteNonQuery();
         }
 
-        internal static void DeleteById<T>(this IDbCommand dbCmd, object id)
+        internal static void Delete<T>(this IDbCommand dbCmd, params object[] objs)
+        {
+            if (objs.Length == 0) return;
+
+            DeleteAll<T>(dbCmd, objs[0].AllFields<T>(), objs);
+        }
+
+        internal static void DeleteNonDefaults<T>(this IDbCommand dbCmd, params T[] filters)
+        {
+            if (filters.Length == 0) return;
+
+            DeleteAll<T>(dbCmd, filters[0].NonDefaultFields<T>(), filters.Map(x => (object)x));
+        }
+
+        private static void DeleteAll<T>(IDbCommand dbCmd, ICollection<string> deleteFields, IEnumerable<object> objs)
+        {
+            try
+            {
+                var dialectProvider = OrmLiteConfig.DialectProvider;
+
+                dialectProvider.PrepareParameterizedDeleteStatement<T>(dbCmd, deleteFields);
+
+                using (var dbTrans = dbCmd.Connection.BeginTransaction())
+                {
+                    dbCmd.Transaction = dbTrans;
+
+                    foreach (var obj in objs)
+                    {
+                        dialectProvider.SetParameterValues<T>(dbCmd, obj);
+
+                        dbCmd.ExecuteNonQuery();
+                    }
+
+                    dbTrans.Commit();
+                }
+            }
+            catch
+            {
+                if (dbCmd.Transaction != null)
+                    dbCmd.Transaction.Rollback();
+            }
+        }
+
+        internal static int DeleteById<T>(this IDbCommand dbCmd, object id)
         {
             var modelDef = ModelDefinition<T>.Definition;
             var idParamString = OrmLiteConfig.DialectProvider.GetParam();
@@ -419,99 +447,127 @@ namespace ServiceStack.OrmLite
             idParam.ParameterName = idParamString;
             idParam.Value = id;
             dbCmd.Parameters.Add(idParam);
-            
-            dbCmd.ExecuteSql(sql);
+
+            return dbCmd.ExecuteSql(sql);
         }
 
-        internal static void DeleteAll<T>(this IDbCommand dbCmd)
+        internal static int DeleteByIds<T>(this IDbCommand dbCmd, IEnumerable idValues)
         {
-            DeleteAll(dbCmd, typeof(T));
+            var sqlIn = idValues.GetIdsInSql();
+            if (sqlIn == null) return 0;
+
+            var modelDef = ModelDefinition<T>.Definition;
+
+            var sql = String.Format("DELETE FROM {0} WHERE {1} IN ({2})",
+                OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef),
+                OrmLiteConfig.DialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName),
+                sqlIn);
+
+            return dbCmd.ExecuteSql(sql);
         }
 
-        internal static void DeleteAll(this IDbCommand dbCmd, Type tableType)
+        internal static int DeleteAll<T>(this IDbCommand dbCmd)
         {
-			dbCmd.ExecuteSql(OrmLiteConfig.DialectProvider.ToDeleteStatement(tableType, null));
+            return DeleteAll(dbCmd, typeof(T));
+        }
+
+        internal static int DeleteAll(this IDbCommand dbCmd, Type tableType)
+        {
+			return dbCmd.ExecuteSql(OrmLiteConfig.DialectProvider.ToDeleteStatement(tableType, null));
 		}
 
-        internal static void DeleteFmt<T>(this IDbCommand dbCmd, string sqlFilter, params object[] filterParams)
+        internal static int DeleteFmt<T>(this IDbCommand dbCmd, string sqlFilter, params object[] filterParams)
         {
-            DeleteFmt(dbCmd, typeof(T), sqlFilter, filterParams);
+            return DeleteFmt(dbCmd, typeof(T), sqlFilter, filterParams);
         }
 
-        internal static void DeleteFmt(this IDbCommand dbCmd, Type tableType, string sqlFilter, params object[] filterParams)
+        internal static int DeleteFmt(this IDbCommand dbCmd, Type tableType, string sqlFilter, params object[] filterParams)
         {
-            dbCmd.ExecuteSql(OrmLiteConfig.DialectProvider.ToDeleteStatement(tableType, sqlFilter, filterParams));
+            return dbCmd.ExecuteSql(OrmLiteConfig.DialectProvider.ToDeleteStatement(tableType, sqlFilter, filterParams));
         }
 
-        internal static void Save<T>(this IDbCommand dbCmd, T obj)
+        internal static bool Save<T>(this IDbCommand dbCmd, T obj)
         {
             var id = obj.GetId();
             var existingRow = dbCmd.SingleById<T>(id);
             if (Equals(existingRow, default(T)))
             {
-                dbCmd.InsertAll(obj);
+                dbCmd.Insert(obj);
+                return true;
             }
-            else
-            {
-                dbCmd.UpdateAll(obj);
-            }
+            
+            dbCmd.Update(obj);
+            return false;
         }
 
         internal static long Insert<T>(this IDbCommand dbCmd, T obj, bool selectIdentity = false)
         {
-            using (var insertStmt = dbCmd.CreateInsertStatement(obj))
-            {
-                dbCmd.CopyParameterizedStatementTo(insertStmt);
+            OrmLiteConfig.DialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd);
 
-                if (selectIdentity)
-                    return OrmLiteConfig.DialectProvider.InsertAndGetLastInsertId<T>(dbCmd);
+            OrmLiteConfig.DialectProvider.SetParameterValues<T>(dbCmd, obj);
 
-                dbCmd.ExecuteNonQuery();
-                return -1;
-            }
+            if (selectIdentity)
+                return OrmLiteConfig.DialectProvider.InsertAndGetLastInsertId<T>(dbCmd);
+
+            dbCmd.ExecuteNonQuery();
+            return -1;
         }
 
-        internal static void InsertAll<T>(this IDbCommand dbCmd, params T[] objs)
+        internal static void Insert<T>(this IDbCommand dbCmd, params T[] objs)
         {
-            foreach (var obj in objs)
-            {
-                dbCmd.ExecuteSql(OrmLiteConfig.DialectProvider.ToInsertRowStatement(dbCmd, obj));
-            }
+            InsertAll(dbCmd, objs);
         }
 
         internal static void InsertAll<T>(this IDbCommand dbCmd, IEnumerable<T> objs)
 		{
-			foreach (var obj in objs)
-			{
-				dbCmd.ExecuteSql(OrmLiteConfig.DialectProvider.ToInsertRowStatement(dbCmd, obj));
-			}
-		}
+            try
+            {
+                var dialectProvider = OrmLiteConfig.DialectProvider;
 
-        internal static IDbCommand CreateInsertStatement<T>(this IDbCommand command, T obj)
-        {
-            return OrmLiteConfig.DialectProvider.CreateParameterizedInsertStatement(command, obj);
+                dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd);
+
+                using (var dbTrans = dbCmd.Connection.BeginTransaction())
+                {
+                    dbCmd.Transaction = dbTrans;
+
+                    foreach (var obj in objs)
+                    {
+                        dialectProvider.SetParameterValues<T>(dbCmd, obj);
+
+                        dbCmd.ExecuteNonQuery();
+                    }
+
+                    dbTrans.Commit();
+                }
+            }
+            catch
+            {
+                if (dbCmd.Transaction != null)
+                    dbCmd.Transaction.Rollback();
+            }
         }
 
-        internal static void Save<T>(this IDbCommand dbCmd, params T[] objs)
+        internal static int Save<T>(this IDbCommand dbCmd, params T[] objs)
         {
-            SaveAll(dbCmd, objs);
+            return SaveAll(dbCmd, objs);
         }
 
-        internal static void SaveAll<T>(this IDbCommand dbCmd, IEnumerable<T> objs)
+        internal static int SaveAll<T>(this IDbCommand dbCmd, IEnumerable<T> objs)
         {
             var saveRows = objs.ToList();
 
             var firstRow = saveRows.FirstOrDefault();
-            if (Equals(firstRow, default(T))) return;
+            if (Equals(firstRow, default(T))) return 0;
 
             var defaultIdValue = firstRow.GetId().GetType().GetDefaultValue();
 
             var idMap = defaultIdValue != null
-                ? saveRows.Where(x => !defaultIdValue.Equals(x.GetId())).ToDictionary(x => x.GetId())
-                : saveRows.Where(x => x.GetId() != null).ToDictionary(x => x.GetId());
+                ? saveRows.Where(x => !defaultIdValue.Equals(x.GetId())).ToSafeDictionary(x => x.GetId())
+                : saveRows.Where(x => x.GetId() != null).ToSafeDictionary(x => x.GetId());
 
             var existingRowsMap = dbCmd.SelectByIds<T>(idMap.Keys).ToDictionary(x => x.GetId());
 
+            var rowsAdded = 0;
             using (var dbTrans = dbCmd.Connection.BeginTransaction())
             {
                 dbCmd.Transaction = dbTrans;
@@ -521,39 +577,25 @@ namespace ServiceStack.OrmLite
                     var id = saveRow.GetId();
                     if (id != defaultIdValue && existingRowsMap.ContainsKey(id))
                     {
-                        dbCmd.UpdateAll(saveRow);
+                        dbCmd.Update(saveRow);
                     }
                     else
                     {
-                        dbCmd.InsertAll(saveRow);
+                        dbCmd.Insert(saveRow);
+                        rowsAdded++;
                     }
                 }
 
                 dbTrans.Commit();
             }
-        }
-
-        internal static IDbTransaction BeginTransaction(this IDbCommand dbCmd)
-        {
-            var dbTrans = dbCmd.Connection.BeginTransaction();
-            dbCmd.ClearFilters();
-            dbCmd.Transaction = dbTrans;
-            return dbTrans;
-        }
-
-        internal static IDbTransaction BeginTransaction(this IDbCommand dbCmd, IsolationLevel isolationLevel)
-        {
-            var dbTrans = dbCmd.Connection.BeginTransaction(isolationLevel);
-            dbCmd.ClearFilters();
-            dbCmd.Transaction = dbTrans;
-            return dbTrans;
+            return rowsAdded;
         }
 		
 		// Procedures
         internal static void ExecuteProcedure<T>(this IDbCommand dbCommand, T obj)
         {
 			string sql = OrmLiteConfig.DialectProvider.ToExecuteProcedureStatement(obj);
-			dbCommand.CommandType= CommandType.StoredProcedure;
+			dbCommand.CommandType = CommandType.StoredProcedure;
 			dbCommand.ExecuteSql(sql);
 		}
     }

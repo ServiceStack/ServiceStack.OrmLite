@@ -71,8 +71,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 			{
 				db.CreateTable<ModelWithIdOnly>(true);
 
-				db.InsertAll(new ModelWithIdOnly(1));
-				db.InsertAll(new ModelWithIdOnly(2));
+				db.Insert(new ModelWithIdOnly(1));
+				db.Insert(new ModelWithIdOnly(2));
 
 				db.CreateTable<ModelWithIdOnly>(false);
 
@@ -90,8 +90,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 				db.CreateTable<ModelWithIdAndName>(true);
 				db.DeleteAll<ModelWithIdAndName>();
 
-				db.InsertAll(new ModelWithIdAndName(0));
-				db.InsertAll(new ModelWithIdAndName(0));
+				db.Insert(new ModelWithIdAndName(0));
+				db.Insert(new ModelWithIdAndName(0));
 
 				db.CreateTable<ModelWithIdAndName>(false);
 
@@ -108,8 +108,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 			{
 				db.CreateTable<ModelWithIdOnly>(true);
 
-				db.InsertAll(new ModelWithIdOnly(1));
-				db.InsertAll(new ModelWithIdOnly(2));
+				db.Insert(new ModelWithIdOnly(1));
+				db.Insert(new ModelWithIdOnly(2));
 
 				db.CreateTable<ModelWithIdOnly>(true);
 
@@ -126,11 +126,11 @@ namespace ServiceStack.OrmLite.FirebirdTests
 			{
 				db.CreateTables(true, typeof(ModelWithIdOnly), typeof(ModelWithIdAndName));
 
-				db.InsertAll(new ModelWithIdOnly(1));
-				db.InsertAll(new ModelWithIdOnly(2));
+				db.Insert(new ModelWithIdOnly(1));
+				db.Insert(new ModelWithIdOnly(2));
 
-				db.InsertAll(new ModelWithIdAndName(0));
-				db.InsertAll(new ModelWithIdAndName(0));
+				db.Insert(new ModelWithIdAndName(0));
+				db.Insert(new ModelWithIdAndName(0));
 
 				var rows1 = db.Select<ModelWithIdOnly>();
 				var rows2 = db.Select<ModelWithIdOnly>();

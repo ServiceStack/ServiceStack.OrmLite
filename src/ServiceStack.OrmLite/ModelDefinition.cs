@@ -81,20 +81,37 @@ namespace ServiceStack.OrmLite
 			}
 		}
 
-		private FieldDefinition[] allFieldDefinitionsArray;
-		public FieldDefinition[] AllFieldDefinitionsArray
-		{
-			get
-			{
-				if (allFieldDefinitionsArray == null)
-				{
-					List<FieldDefinition> allItems = new List<FieldDefinition>(FieldDefinitions);
-					allItems.AddRange(IgnoredFieldDefinitions);
-					allFieldDefinitionsArray = allItems.ToArray(); 
-				}
-				return allFieldDefinitionsArray;
-			}
-		}
+        private FieldDefinition[] allFieldDefinitionsArray;
+        public FieldDefinition[] AllFieldDefinitionsArray
+        {
+            get
+            {
+                if (allFieldDefinitionsArray == null)
+                {
+                    List<FieldDefinition> allItems = new List<FieldDefinition>(FieldDefinitions);
+                    allItems.AddRange(IgnoredFieldDefinitions);
+                    allFieldDefinitionsArray = allItems.ToArray();
+                }
+                return allFieldDefinitionsArray;
+            }
+        }
+
+        private Dictionary<string, FieldDefinition> fieldDefinitionMap;
+        public Dictionary<string, FieldDefinition> FieldDefinitionMap
+        {
+            get
+            {
+                if (fieldDefinitionMap == null)
+                {
+                    fieldDefinitionMap = new Dictionary<string, FieldDefinition>();
+                    foreach (var fieldDef in FieldDefinitionsArray)
+                    {
+                        fieldDefinitionMap[fieldDef.FieldName] = fieldDef;
+                    }
+                }
+                return fieldDefinitionMap;
+            }
+        }
 		
 		public List<CompositeIndexAttribute> CompositeIndexes { get; set; }
 

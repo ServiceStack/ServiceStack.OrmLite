@@ -158,7 +158,7 @@ namespace ServiceStack.OrmLite.Sqlite
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName)
         {
             var sql = "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name = {0}"
-                .SqlFormat(tableName);
+                .SqlFmt(tableName);
 
             dbCmd.CommandText = sql;
             var result = dbCmd.LongScalar();

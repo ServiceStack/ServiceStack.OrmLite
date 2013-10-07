@@ -66,7 +66,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
         [Test]
         public void Can_Chain_Expressions_Using_And()
         {
-            db.InsertAll(People);
+            db.Insert(People);
 
             var visitor = ReadExtensions.SqlExpression<Person>();
 
@@ -85,7 +85,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
         [Test]
         public void Can_Chain_expressions_Using_Or()
         {
-            db.InsertAll(People);
+            db.Insert(People);
 
             var visitor = db.SqlExpression<Person>();
 
@@ -105,7 +105,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
         [Test]
         public void When_chaining_expressions_using_Where_it_behaves_like_And()
         {
-            db.InsertAll(People);
+            db.Insert(People);
 
             var visitor = ReadExtensions.SqlExpression<Person>();
 
@@ -129,7 +129,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
         [Test]
         public void Can_Chain_Order_Expressions_using_ThenBy()
         {
-            db.InsertAll(People);
+            db.Insert(People);
 
             var visitor = ReadExtensions.SqlExpression<Person>();
             visitor.OrderBy(x => x.Age);

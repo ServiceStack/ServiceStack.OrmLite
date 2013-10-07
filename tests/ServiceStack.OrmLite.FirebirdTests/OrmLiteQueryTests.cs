@@ -19,7 +19,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
 
-				rowIds.ForEach(x => db.InsertAll(ModelWithFieldsOfDifferentTypes.Create(x)));
+				rowIds.ForEach(x => db.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
 
 				var row = db.SingleById<ModelWithFieldsOfDifferentTypes>(1);
 
@@ -36,7 +36,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
 
-				rowIds.ForEach(x => db.InsertAll(ModelWithOnlyStringFields.Create(x)));
+				rowIds.ForEach(x => db.Insert(ModelWithOnlyStringFields.Create(x)));
 
 				var row = db.SingleById<ModelWithOnlyStringFields>("id-1");
 
@@ -53,12 +53,12 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
 
-				rowIds.ForEach(x => db.InsertAll(ModelWithOnlyStringFields.Create(x)));
+				rowIds.ForEach(x => db.Insert(ModelWithOnlyStringFields.Create(x)));
 
 				var filterRow = ModelWithOnlyStringFields.Create("id-4");
 				filterRow.AlbumName = "FilteredName";
 
-				db.InsertAll(filterRow);
+				db.Insert(filterRow);
 
 				var rows = db.Where<ModelWithOnlyStringFields>(new { filterRow.AlbumName });
 				var dbRowIds = rows.ConvertAll(x => x.Id);
@@ -71,7 +71,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 				Assert.That(dbRowIds[0], Is.EqualTo(filterRow.Id));
 
 				var queryByExample = new ModelWithOnlyStringFields { AlbumName = filterRow.AlbumName };
-				rows = db.SelectByExample(queryByExample);
+				rows = db.SelectNonDefaults(queryByExample);
 				dbRowIds = rows.ConvertAll(x => x.Id);
 				Assert.That(dbRowIds, Has.Count.EqualTo(1));
 				Assert.That(dbRowIds[0], Is.EqualTo(filterRow.Id));
@@ -93,12 +93,12 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
 
-				rowIds.ForEach(x => db.InsertAll(ModelWithOnlyStringFields.Create(x)));
+				rowIds.ForEach(x => db.Insert(ModelWithOnlyStringFields.Create(x)));
 
 				var filterRow = ModelWithOnlyStringFields.Create("id-4");
 				filterRow.AlbumName = "FilteredName";
 
-				db.InsertAll(filterRow);
+				db.Insert(filterRow);
 
 				var dbRowIds = new List<string>();
 				var rows = db.WhereLazy<ModelWithOnlyStringFields>(new { filterRow.AlbumName });

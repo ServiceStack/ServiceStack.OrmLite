@@ -117,7 +117,7 @@ namespace ServiceStack.OrmLite.MySql
 			var sql = ("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES " +
 				"WHERE TABLE_NAME = {0} AND " +
 				"TABLE_SCHEMA = {1}")
-				.SqlFormat(tableName, dbCmd.Connection.Database);
+				.SqlFmt(tableName, dbCmd.Connection.Database);
 
 			//if (!string.IsNullOrEmpty(schemaName))
 			//    sql += " AND TABLE_SCHEMA = {0}".SqlFormat(schemaName);

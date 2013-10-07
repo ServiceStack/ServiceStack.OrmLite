@@ -27,9 +27,9 @@ namespace ServiceStack.OrmLite.Tests.UseCase
             {
                 db.CreateTable<Foo>(false);
 
-                db.InsertAll(new Foo { Bar = "some_value" });
-                db.InsertAll(new Foo { Bar = "a totally different value" });
-                db.InsertAll(new Foo { Bar = "whatever" });
+                db.Insert(new Foo { Bar = "some_value" });
+                db.Insert(new Foo { Bar = "a totally different value" });
+                db.Insert(new Foo { Bar = "whatever" });
 
                 // the original classes property name is used to create the anonymous type
                 List<Foo> foos = db.Where<Foo>(new { Bar = "some_value" });

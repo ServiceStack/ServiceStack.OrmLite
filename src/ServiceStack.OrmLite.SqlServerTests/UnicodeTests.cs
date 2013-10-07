@@ -60,7 +60,7 @@ Ancient	Modern
                 using(var con = OpenDbConnection()) {
                     con.ExecuteSql(table_re_creation_script);
 
-                    foreach(var item in testData) { con.InsertAll(new Unicode_poco { Text = item }); }
+                    foreach(var item in testData) { con.Insert(new Unicode_poco { Text = item }); }
 
                     var fromDb = con.Select<Unicode_poco>().Select(x => x.Text).ToArray();
 

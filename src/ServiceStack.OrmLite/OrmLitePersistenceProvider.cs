@@ -88,12 +88,12 @@ namespace ServiceStack.OrmLite
 			if (existingEntity != null)
 			{
 				existingEntity.PopulateWith(entity);
-				dbCmd.UpdateAll(entity);
+				dbCmd.Update(entity);
 
 				return existingEntity;
 			}
 
-			dbCmd.InsertAll(entity);
+			dbCmd.Insert(entity);
 			return entity;
 		}
 
@@ -114,7 +114,7 @@ namespace ServiceStack.OrmLite
 		{
 			using (var dbCmd = CreateCommand())
 			{
-				dbCmd.Delete(entity);
+				dbCmd.Delete<T>(entity);
 			}
 		}
 

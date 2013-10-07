@@ -85,17 +85,12 @@ namespace ServiceStack.OrmLite
 			foreach (var idValue in idValues)
 			{
 				if (sql.Length > 0) sql.Append(",");
-				sql.AppendFormat("{0}".SqlFormat(idValue));
+				sql.AppendFormat("{0}".SqlFmt(idValue));
 			}
 			return sql.Length == 0 ? null : sql.ToString();
 		}
 
-		public static string Params(this string sqlText, params object[] sqlParams)
-		{
-		    return SqlFormat(sqlText, sqlParams);
-		}
-
-		public static string SqlFormat(this string sqlText, params object[] sqlParams)
+		public static string SqlFmt(this string sqlText, params object[] sqlParams)
 		{
 			var escapedParams = new List<string>();
 			foreach (var sqlParam in sqlParams)

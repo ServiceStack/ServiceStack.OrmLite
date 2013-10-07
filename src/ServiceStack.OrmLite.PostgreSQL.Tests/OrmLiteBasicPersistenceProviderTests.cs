@@ -26,7 +26,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				var row = ModelWithFieldsOfDifferentTypes.Create(1);
 
-				db.InsertAll(row);
+				db.Insert(row);
 
 				var providerRow = basicProvider.GetById<ModelWithFieldsOfDifferentTypes>(1);
 
@@ -47,7 +47,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				var rows = rowIds.ConvertAll(x => ModelWithFieldsOfDifferentTypes.Create(x));
 
-				rows.ForEach(x => db.InsertAll(x));
+				rows.ForEach(x => db.Insert(x));
 
 				var getRowIds = new[] { 2, 4 };
 				var providerRows = basicProvider.GetByIds<ModelWithFieldsOfDifferentTypes>(getRowIds).ToList();
@@ -93,7 +93,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				var rows = rowIds.ConvertAll(x => ModelWithFieldsOfDifferentTypes.Create(x));
 
-				rows.ForEach(x => db.InsertAll(x));
+				rows.ForEach(x => db.Insert(x));
 
 				var deleteRowIds = new List<int> { 2, 4 };
 

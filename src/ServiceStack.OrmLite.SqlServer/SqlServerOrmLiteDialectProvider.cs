@@ -180,7 +180,7 @@ namespace ServiceStack.OrmLite.SqlServer
 		public override bool DoesTableExist(IDbCommand dbCmd, string tableName)
 		{
 			var sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = {0}"
-				.SqlFormat(tableName);
+				.SqlFmt(tableName);
 
 			//if (!string.IsNullOrEmpty(schemaName))
 			//    sql += " AND TABLE_SCHEMA = {0}".SqlFormat(schemaName);

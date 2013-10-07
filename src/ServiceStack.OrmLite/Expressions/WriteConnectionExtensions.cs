@@ -23,9 +23,9 @@ namespace ServiceStack.OrmLite
             return dbConn.Exec(dbCmd => dbCmd.UpdateOnly(obj, onlyFields, where));
         }
 
-        public static int UpdateNonDefaults<T>(this IDbConnection dbConn, T item, Expression<Func<T, bool>> where)
+        public static int UpdateNonDefaults<T>(this IDbConnection dbConn, T item, Expression<Func<T, bool>> obj)
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateNonDefaults(item, where));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateNonDefaults(item, obj));
         }
 
         public static int Update<T>(this IDbConnection dbConn, T item, Expression<Func<T, bool>> where)
@@ -48,6 +48,10 @@ namespace ServiceStack.OrmLite
             return dbConn.Exec(dbCmd => dbCmd.UpdateFmt(table, set, where));
         }
 
+        /// <summary>
+        /// Insert only fields in POCO specified by the SqlExpression lambda. E.g:
+        /// <para>db.InsertOnly(new Person { FirstName = "Amy", Age = 27 }, ev =&gt; ev.Insert(p =&gt; new { p.FirstName, p.Age }))</para>
+        /// </summary>
         public static void InsertOnly<T>(this IDbConnection dbConn, T obj, Func<SqlExpression<T>, SqlExpression<T>> onlyFields)
         {
             dbConn.Exec(dbCmd => dbCmd.InsertOnly(obj, onlyFields));
