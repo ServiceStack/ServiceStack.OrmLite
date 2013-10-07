@@ -55,7 +55,7 @@ namespace TestLiteFirebird2
                     };
 
 
-                    db.InsertAll(cp);
+                    db.Insert(cp);
 
                     rows = db.Select<Company>();
                     Console.WriteLine("Company: rows after  insert :{0}", rows.Count);

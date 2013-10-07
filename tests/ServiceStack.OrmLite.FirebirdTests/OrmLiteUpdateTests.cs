@@ -18,11 +18,11 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 				var row = ModelWithFieldsOfDifferentTypes.Create(1);
 
-				db.InsertAll(row);
+				db.Insert(row);
 
 				row.Name = "UpdatedName";
 
-				db.UpdateAll(row);
+				db.Update(row);
 
                 var dbRow = db.SingleById<ModelWithFieldsOfDifferentTypes>(1);
 

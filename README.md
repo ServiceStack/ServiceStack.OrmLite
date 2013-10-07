@@ -703,7 +703,7 @@ HashSet<string> uniqueTrackNames = db.HashSet<string>("select Name from Track")
 var trackCount = db.Scalar<int>("select count(*) from Track")
 ```
 
-All **Insert**, **Update**, and **Delete** methods take multiple params, while `InsertAll`, `UpdateAll` and `DeleteAll` take IEnumerables.
+All **Insert**, **Update**, and **Delete** methods take multiple params, while `Insert`, `UpdateAll` and `DeleteAll` take IEnumerables.
 **GetLastInsertId** returns the last inserted records auto incremented primary key.
 
 `Save` and `SaveAll` will Insert if no record with **Id** exists, otherwise it Updates. 

@@ -12,16 +12,33 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using ServiceStack.Data;
 
 namespace ServiceStack.OrmLite
 {
+    public enum SqlType
+    {
+        Custom,
+        Insert,
+        Select,
+        Update,
+        Delete,
+        Save,
+        Ddl,
+        StoredProcedure,
+    }
+
+    public interface ISqlFilter
+    {
+        T ResultsFilter<T>(IDbCommand dbCmd, SqlType sqlType, T results = default(T));
+    }
+
     public static class OrmLiteConfig
     {
         public const string IdField = "Id";
 
         private const int defaultCommandTimeout = 30;
         private static int? commandTimeout;
+
         [ThreadStatic]
         public static int? TSCommandTimeout;
         public static int CommandTimeout
@@ -62,6 +79,8 @@ namespace ServiceStack.OrmLite
                 dialectProvider = value;
             }
         }
+
+        public static ISqlFilter SqlFilter { get; set; }
 
         public static IDbConnection ToDbConnection(this string dbConnectionStringOrFilePath)
         {

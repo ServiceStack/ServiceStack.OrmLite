@@ -275,7 +275,7 @@ namespace TestLiteFirebirdProcedures
                     };
                     int count = employees.Count;
 
-                    db.InsertAll(employee);
+                    db.Insert(employee);
                     Console.WriteLine("Id for new employee : '{0}'", employee.Id);
 
                     employees = db.Select<Employee>();

@@ -74,13 +74,13 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Updates all non-default values set on item matching the where condition (if any). E.g
         /// 
-        ///   dbCmd.UpdateNonDefault(new Person { FirstName = "JJ" }, p => p.FirstName == "Jimi");
+        ///   dbCmd.UpdateNonDefaults(new Person { FirstName = "JJ" }, p => p.FirstName == "Jimi");
         ///   UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("FirstName" = 'Jimi')
         /// </summary>
-        public static int UpdateNonDefaults<T>(this IDbCommand dbCmd, T item, Expression<Func<T, bool>> where)
+        public static int UpdateNonDefaults<T>(this IDbCommand dbCmd, T item, Expression<Func<T, bool>> obj)
         {
             var ev = OrmLiteConfig.DialectProvider.SqlExpression<T>();
-            ev.Where(where);
+            ev.Where(obj);
             var sql = ev.ToUpdateStatement(item, excludeDefaults: true);
             return dbCmd.ExecuteSql(sql);
         }
@@ -88,16 +88,13 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Updates all values set on item matching the where condition (if any). E.g
         /// 
-        ///   dbCmd.UpdateNonDefault(new Person { FirstName = "JJ" }, p => p.FirstName == "Jimi");
-        ///   UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("FirstName" = 'Jimi')
-        /// 
         ///   dbCmd.Update(new Person { Id = 1, FirstName = "JJ" }, p => p.LastName == "Hendrix");
         ///   UPDATE "Person" SET "Id" = 1,"FirstName" = 'JJ',"LastName" = NULL,"Age" = 0 WHERE ("LastName" = 'Hendrix')
         /// </summary>
-        public static int Update<T>(this IDbCommand dbCmd, T item, Expression<Func<T, bool>> where)
+        public static int Update<T>(this IDbCommand dbCmd, T item, Expression<Func<T, bool>> expression)
         {
             var ev = OrmLiteConfig.DialectProvider.SqlExpression<T>();
-            ev.Where(where);
+            ev.Where(expression);
             var sql = ev.ToUpdateStatement(item);
             return dbCmd.ExecuteSql(sql);
         }

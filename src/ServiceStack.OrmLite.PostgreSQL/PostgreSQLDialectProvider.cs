@@ -164,7 +164,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
 		public override bool DoesTableExist(IDbCommand dbCmd, string tableName)
 		{
 			var sql = "SELECT COUNT(*) FROM pg_class WHERE relname = {0}"
-				.SqlFormat(tableName);
+				.SqlFmt(tableName);
 		    var conn = dbCmd.Connection;
             if (conn != null)
             {
@@ -172,7 +172,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
                 // If a search path (schema) is specified, and there is only one, then assume the CREATE TABLE directive should apply to that schema.
                 if (!String.IsNullOrEmpty(builder.SearchPath) && !builder.SearchPath.Contains(","))
                     sql = "SELECT COUNT(*) FROM pg_class JOIN pg_catalog.pg_namespace n ON n.oid = pg_class.relnamespace WHERE relname = {0} AND nspname = {1}"
-                          .SqlFormat(tableName, builder.SearchPath);
+                          .SqlFmt(tableName, builder.SearchPath);
             }     
 			dbCmd.CommandText = sql;
 			var result = dbCmd.LongScalar();

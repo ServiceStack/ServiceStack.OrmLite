@@ -18,7 +18,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
             {
                 con.CreateTable<SimpleType>(true);
 
-                con.InsertAll(testObject);
+                con.Insert(testObject);
                 var normalLastInsertedId = con.LastInsertId();
                 Assert.Greater(normalLastInsertedId, 0, "normal Insert");
             }

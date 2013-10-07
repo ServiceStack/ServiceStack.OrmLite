@@ -150,14 +150,14 @@ namespace ServiceStack.OrmLite.Oracle
                 && sqlFilter.Trim().Length > SelectStatement.Length
                 && sqlFilter.Trim().Substring(0, SelectStatement.Length).ToUpper().Equals(SelectStatement);
 
-			if (isFullSelectStatement) 	return sqlFilter.SqlFormat(filterParams);
+			if (isFullSelectStatement) 	return sqlFilter.SqlFmt(filterParams);
 			
 			sql.AppendFormat("SELECT {0} \nFROM {1}", 
 			                 GetColumnNames(modelDef), 
 			                 GetQuotedTableName(modelDef));
 			if (!string.IsNullOrEmpty(sqlFilter))
 			{
-				sqlFilter = sqlFilter.SqlFormat(filterParams);
+				sqlFilter = sqlFilter.SqlFmt(filterParams);
 				if (!sqlFilter.StartsWith("\nORDER ", StringComparison.InvariantCultureIgnoreCase)
 					&& !sqlFilter.StartsWith("\nROWS ", StringComparison.InvariantCultureIgnoreCase)) // ROWS <m> [TO <n>])
 				{
@@ -168,14 +168,14 @@ namespace ServiceStack.OrmLite.Oracle
 			return sql.ToString();
 		}
 
-        public override IDbCommand CreateParameterizedInsertStatement(IDbCommand dbCommand, object objWithProperties, ICollection<string> insertFields = null)
+        public override void PrepareParameterizedInsertStatement<T>(IDbCommand dbCommand, ICollection<string> insertFields = null)
         {
             if (insertFields == null)
                 insertFields = new List<string>();
 
             var sbColumnNames = new StringBuilder();
             var sbColumnValues = new StringBuilder();
-            var modelDef = GetModel(objWithProperties.GetType());
+            var modelDef = GetModel(typeof(T));
 
             dbCommand.CommandTimeout = OrmLiteConfig.CommandTimeout;
             foreach (var fieldDef in modelDef.FieldDefinitions)
@@ -183,9 +183,48 @@ namespace ServiceStack.OrmLite.Oracle
                 if (fieldDef.IsComputed) continue;
                 if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name)) continue;
 
-                if ((fieldDef.AutoIncrement || !string.IsNullOrEmpty(fieldDef.Sequence)
-                    || fieldDef.Name == OrmLiteConfig.IdField)
-                    && dbCommand != null)
+                //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
+                if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name)) continue;
+
+                if (sbColumnNames.Length > 0) sbColumnNames.Append(",");
+                if (sbColumnValues.Length > 0) sbColumnValues.Append(",");
+
+                try
+                {
+                    sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
+                    sbColumnValues.Append(this.GetParam(fieldDef.FieldName));
+
+                    AddParameter(dbCommand, fieldDef);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("ERROR in CreateParameterizedInsertStatement(): " + ex.Message, ex);
+                    throw;
+                }
+            }
+
+            dbCommand.CommandText = string.Format("INSERT INTO {0} ({1}) VALUES ({2})",
+                GetQuotedTableName(modelDef), sbColumnNames, sbColumnValues);
+        }
+
+        public override void SetParameterValues<T>(IDbCommand dbCmd, object obj)
+        {
+            var modelDef = GetModel(typeof(T));
+            var fieldMap = modelDef.FieldDefinitionMap;
+
+            foreach (IDataParameter p in dbCmd.Parameters)
+            {
+                FieldDefinition fieldDef;
+                var fieldName = this.ToFieldName(p.ParameterName);
+                fieldMap.TryGetValue(fieldName, out fieldDef);
+
+                if (fieldDef == null)
+                    throw new ArgumentException("Field Definition '{0}' was not found".Fmt(fieldName));
+
+
+                if ((fieldDef.AutoIncrement
+                    || !string.IsNullOrEmpty(fieldDef.Sequence)
+                    || fieldDef.Name == OrmLiteConfig.IdField))
                 {
 
                     if (fieldDef.AutoIncrement && string.IsNullOrEmpty(fieldDef.Sequence))
@@ -197,46 +236,26 @@ namespace ServiceStack.OrmLite.Oracle
                             fieldDef.FieldName, fieldDef.Sequence);
                     }
 
-                    PropertyInfo pi = objWithProperties.GetType().GetProperty(fieldDef.Name,
+                    var pi = typeof(T).GetProperty(fieldDef.Name,
                         BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy);
 
-                    var result = GetNextValue(dbCommand, fieldDef.Sequence, pi.GetValue(objWithProperties, new object[] { }));
+                    var result = GetNextValue(dbCmd, fieldDef.Sequence, pi.GetValue(obj, new object[] { }));
                     if (pi.PropertyType == typeof(String))
-                        pi.SetProperty(objWithProperties, result.ToString());
+                        pi.SetProperty(obj, result.ToString());
                     else if (pi.PropertyType == typeof(Int16))
-                        pi.SetProperty(objWithProperties, Convert.ToInt16(result));
+                        pi.SetProperty(obj, Convert.ToInt16(result));
                     else if (pi.PropertyType == typeof(Int32))
-                        pi.SetProperty(objWithProperties, Convert.ToInt32(result));
+                        pi.SetProperty(obj, Convert.ToInt32(result));
                     else if (pi.PropertyType == typeof(Guid))
-                        pi.SetProperty(objWithProperties, result);
+                        pi.SetProperty(obj, result);
                     else
-                        pi.SetProperty(objWithProperties, Convert.ToInt64(result));
+                        pi.SetProperty(obj, Convert.ToInt64(result));
                 }
 
-                //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
-                if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name)) continue;
-
-                if (sbColumnNames.Length > 0) sbColumnNames.Append(",");
-                if (sbColumnValues.Length > 0) sbColumnValues.Append(",");
-
-                try
-                {
-                    sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
-                    sbColumnValues.Append(ParamString)
-                                  .Append(fieldDef.FieldName);
-
-                    AddParameterForFieldToCommand(dbCommand, fieldDef, objWithProperties);
-                }
-                catch (Exception ex)
-                {
-                    Log.Error("ERROR in CreateParameterizedInsertStatement(): " + ex.Message, ex);
-                    throw;
-                }
+                p.Value = DbTypeMap.ColumnDbTypeMap.ContainsKey(fieldDef.FieldType) 
+                    ? GetValueOrDbNull<T>(fieldDef, obj) 
+                    : GetQuotedValueOrDbNull<T>(fieldDef, obj);
             }
-
-            dbCommand.CommandText = string.Format("INSERT INTO {0} ({1}) VALUES ({2})",
-                                                GetQuotedTableName(modelDef), sbColumnNames, sbColumnValues);
-            return dbCommand;
         }
 		
 		public override string ToInsertRowStatement(IDbCommand dbCommand, object objWithProperties, ICollection<string> insertFields = null)
@@ -641,7 +660,7 @@ namespace ServiceStack.OrmLite.Oracle
 			
 			if (!string.IsNullOrEmpty(sqlFilter))
 			{
-				sqlFilter = sqlFilter.SqlFormat(filterParams);
+				sqlFilter = sqlFilter.SqlFmt(filterParams);
 				if (!sqlFilter.StartsWith("\nORDER ", StringComparison.InvariantCultureIgnoreCase)
 					&& !sqlFilter.StartsWith("\nROWS ", StringComparison.InvariantCultureIgnoreCase)) // ROWS <m> [TO <n>])
 				{
@@ -692,7 +711,7 @@ namespace ServiceStack.OrmLite.Oracle
 			
 			if (!string.IsNullOrEmpty(sqlFilter))
 			{
-				sqlFilter = sqlFilter.SqlFormat(filterParams);
+				sqlFilter = sqlFilter.SqlFmt(filterParams);
 				if (!sqlFilter.StartsWith("\nORDER ", StringComparison.InvariantCultureIgnoreCase)
 					&& !sqlFilter.StartsWith("\nROWS ", StringComparison.InvariantCultureIgnoreCase)) // ROWS <m> [TO <n>]
 				{
@@ -818,7 +837,7 @@ namespace ServiceStack.OrmLite.Oracle
 				tableName = tableName.ToUpper();
 			}
 
-            var sql = "SELECT count(*) FROM all_tables where table_name={0}".SqlFormat(tableName);
+            var sql = "SELECT count(*) FROM all_tables where table_name={0}".SqlFmt(tableName);
 
 			dbCmd.CommandText = sql; 
 			var result = dbCmd.LongScalar();
@@ -833,7 +852,7 @@ namespace ServiceStack.OrmLite.Oracle
                 sequencName = sequencName.ToUpper();
             }
 
-            var sql = "SELECT count(*) FROM ALL_SEQUENCES WHERE UPPER(Sequence_NAME) = {0}".SqlFormat(sequencName);
+            var sql = "SELECT count(*) FROM ALL_SEQUENCES WHERE UPPER(Sequence_NAME) = {0}".SqlFmt(sequencName);
             dbCmd.CommandText = sql;
             var result = dbCmd.LongScalar();
             return result > 0;

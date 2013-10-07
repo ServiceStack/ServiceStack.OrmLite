@@ -43,9 +43,9 @@ namespace ServiceStack.OrmLite.Tests.UseCase
             {
                 db.CreateTable<User>(true);
 
-                db.InsertAll(new User { Id = 1, Name = "A", CreatedDate = DateTime.Now });
-                db.InsertAll(new User { Id = 2, Name = "B", CreatedDate = DateTime.Now });
-                db.InsertAll(new User { Id = 3, Name = "B", CreatedDate = DateTime.Now });
+                db.Insert(new User { Id = 1, Name = "A", CreatedDate = DateTime.Now });
+                db.Insert(new User { Id = 2, Name = "B", CreatedDate = DateTime.Now });
+                db.Insert(new User { Id = 3, Name = "B", CreatedDate = DateTime.Now });
 
                 var rowsB = db.SelectFmt<User>("Name = {0}", "B");
                 var rowsB1 = db.Select<User>(user => user.Name == "B");

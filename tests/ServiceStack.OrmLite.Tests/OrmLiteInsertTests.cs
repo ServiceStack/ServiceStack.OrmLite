@@ -22,7 +22,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				var row = ModelWithFieldsOfDifferentTypes.Create(1);
 
-				db.InsertAll(row);
+				db.Insert(row);
 			}
 		}
 
@@ -35,7 +35,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				var row = ModelWithFieldsOfDifferentTypes.Create(1);
 
-				db.InsertAll(row);
+				db.Insert(row);
 
 				var rows = db.Select<ModelWithFieldsOfDifferentTypes>();
 
@@ -54,7 +54,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				var row = ModelWithFieldsOfNullableTypes.Create(1);
 
-				db.InsertAll(row);
+				db.Insert(row);
 
 				var rows = db.Select<ModelWithFieldsOfNullableTypes>();
 
@@ -73,7 +73,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				var row = ModelWithFieldsOfDifferentAndNullableTypes.Create(1);
 
-				db.InsertAll(row);
+				db.Insert(row);
 
 				var rows = db.Select<ModelWithFieldsOfDifferentAndNullableTypes>();
 
@@ -93,7 +93,7 @@ namespace ServiceStack.OrmLite.Tests
 				var row = ModelWithIdAndName.Create(1);
 				row.Name = null;
 
-				db.InsertAll(row);
+				db.Insert(row);
 
 				var rows = db.Select<ModelWithIdAndName>();
 
@@ -113,10 +113,10 @@ namespace ServiceStack.OrmLite.Tests
 				var row1 = ModelWithIdAndName.Create(5);
 				var row2 = ModelWithIdAndName.Create(6);
 
-				db.InsertAll(row1);
+				db.Insert(row1);
 				var row1LastInsertId = db.LastInsertId();
 
-				db.InsertAll(row2);
+				db.Insert(row2);
 				var row2LastInsertId = db.LastInsertId();
 
                 var insertedRow1 = db.SingleById<ModelWithIdAndName>(row1LastInsertId);
@@ -136,7 +136,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				var row = TaskQueue.Create(1);
 
-				db.InsertAll(row);
+				db.Insert(row);
 
 				var rows = db.Select<TaskQueue>();
 
@@ -227,7 +227,7 @@ namespace ServiceStack.OrmLite.Tests
 				var jsv = "{Id:0,UserName:UserName,Email:as@if.com,PrimaryEmail:as@if.com,FirstName:FirstName,LastName:LastName,DisplayName:DisplayName,Salt:WMQi/g==,PasswordHash:oGdE40yKOprIgbXQzEMSYZe3vRCRlKGuqX2i045vx50=,Roles:[],Permissions:[],CreatedDate:2012-03-20T07:53:48.8720739Z,ModifiedDate:2012-03-20T07:53:48.8720739Z}";
 				var userAuth = jsv.To<UserAuth>();
 
-				db.InsertAll(userAuth);
+				db.Insert(userAuth);
 
 				var rows = db.Select<UserAuth>(q => q.UserName == "UserName");
 
@@ -247,7 +247,7 @@ namespace ServiceStack.OrmLite.Tests
             {
                 db.CreateTable<UserAuth>(true);
 
-                db.InsertAll(testObject);
+                db.Insert(testObject);
                 var normalLastInsertedId = db.LastInsertId();
                 Assert.Greater(normalLastInsertedId, 0, "normal Insert");
             }

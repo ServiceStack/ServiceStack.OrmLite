@@ -19,7 +19,7 @@ namespace ServiceStack.OrmLite.MySql.Tests.Expressions
                 db.CreateTable<CountTestTable>(true);
                 db.DeleteAll<CountTestTable>();
 
-                db.InsertAll(new CountTestTable { Id = 1, StringValue = "Your string value" });
+                db.Insert(new CountTestTable { Id = 1, StringValue = "Your string value" });
 
                 var count = db.Scalar<CountTestTable, long>(e => Sql.Count(e.Id));
 
@@ -43,7 +43,7 @@ namespace ServiceStack.OrmLite.MySql.Tests.Expressions
             {
                 db.CreateTable<CountTestTable>(true);
                 db.DeleteAll<CountTestTable>();
-                db.InsertAll(new CountTestTable { Id = 1, StringValue = "Your string value" });
+                db.Insert(new CountTestTable { Id = 1, StringValue = "Your string value" });
 
                 Expression<Func<CountTestTable, bool>> exp = q => q.Id == 2;
                 var count = Count(db, exp);

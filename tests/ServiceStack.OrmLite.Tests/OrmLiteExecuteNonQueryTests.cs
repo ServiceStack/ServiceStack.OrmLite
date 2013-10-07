@@ -76,7 +76,7 @@
                         Name = "Jane Doe"
                     };
 
-                    db.InsertAll(person);
+                    db.Insert(person);
 
                     var personId = db.LastInsertId();
 
@@ -107,7 +107,7 @@
                         Name = "Jane Doe"
                     };
 
-                    db.InsertAll(person);
+                    db.Insert(person);
 
                     var personId = db.LastInsertId();
 
@@ -205,7 +205,7 @@
                         Name = "Jane Doe"
                     };
 
-                    db.InsertAll(person);
+                    db.Insert(person);
 
                     var personId = db.LastInsertId();
 
@@ -236,7 +236,7 @@
                         Name = "Jane Doe"
                     };
 
-                    db.InsertAll(person);
+                    db.Insert(person);
 
                     var personId = db.LastInsertId();
 
@@ -327,7 +327,7 @@
                         Name = "Jane Doe"
                     };
 
-                    db.InsertAll(person);
+                    db.Insert(person);
 
                     var personId = db.LastInsertId();
 
@@ -356,7 +356,7 @@
                         Name = "Jane Doe"
                     };
 
-                    db.InsertAll(person);
+                    db.Insert(person);
 
                     var personId = db.LastInsertId();
 

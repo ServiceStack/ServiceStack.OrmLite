@@ -39,7 +39,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
         private static DateTimeObject InsertAndSelectDateTime(IDbConnection db, DateTime dateTime)
         {
             db.DropAndCreateTable<DateTimeObject>();
-            db.InsertAll(new DateTimeObject {Test = dateTime});
+            db.Insert(new DateTimeObject { Test = dateTime });
             var x = db.Select<DateTimeObject>().First();
             return x;
         }

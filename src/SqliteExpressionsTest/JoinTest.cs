@@ -80,15 +80,15 @@ namespace SqliteExpressionsTest
                 db.CreateTable<UserData>(true);
                 db.CreateTable<UserService>(true);
 
-                db.InsertAll(new UserData { Id = 5, UserDataValue = "Value-5" });
-                db.InsertAll(new UserData { Id = 6, UserDataValue = "Value-6" });
+                db.Insert(new UserData { Id = 5, UserDataValue = "Value-5" });
+                db.Insert(new UserData { Id = 6, UserDataValue = "Value-6" });
 
-                db.InsertAll(new UserService { Id = 8, ServiceName = "Value-8" });
-                db.InsertAll(new UserService { Id = 9, ServiceName = "Value-9" });
+                db.Insert(new UserService { Id = 8, ServiceName = "Value-8" });
+                db.Insert(new UserService { Id = 9, ServiceName = "Value-9" });
 
-                db.InsertAll(new User { Id = 1, Name = "A", CreatedDate = DateTime.Now, UserDataId = 5, UserServiceId = 8 });
-                db.InsertAll(new User { Id = 2, Name = "B", CreatedDate = DateTime.Now, UserDataId = 5, UserServiceId = 9 });
-                db.InsertAll(new User { Id = 3, Name = "B", CreatedDate = DateTime.Now });
+                db.Insert(new User { Id = 1, Name = "A", CreatedDate = DateTime.Now, UserDataId = 5, UserServiceId = 8 });
+                db.Insert(new User { Id = 2, Name = "B", CreatedDate = DateTime.Now, UserDataId = 5, UserServiceId = 9 });
+                db.Insert(new User { Id = 3, Name = "B", CreatedDate = DateTime.Now });
 
 
                 var rowsB = db.SelectFmt<User>("Name = {0}", "B");

@@ -124,9 +124,9 @@ namespace ServiceStack.OrmLite.Oracle.Tests
             {
                 DropAndCreateTables(db);
 
-                db.InsertAll(new ParamTestBO() { Id = 1 });
-                db.InsertAll(new ParamTestBO() { Id = 2 });
-                db.InsertAll(new ParamTestBO() { Id = 3 });
+                db.Insert(new ParamTestBO() { Id = 1 });
+                db.Insert(new ParamTestBO() { Id = 2 });
+                db.Insert(new ParamTestBO() { Id = 3 });
 
                 Assert.IsNotNull(db.Select<ParamTestBO>(q => q.Id == 1).FirstOrDefault());
                 Assert.IsNotNull(db.Select<ParamTestBO>(q => q.Id == 2).FirstOrDefault());
@@ -149,9 +149,9 @@ namespace ServiceStack.OrmLite.Oracle.Tests
             {
                 DropAndCreateTables(db);
 
-                db.InsertAll(new ParamTestBO() { Id = 1, Info = "Item1" });
-                db.InsertAll(new ParamTestBO() { Id = 2, Info = "Item2" });
-                db.InsertAll(new ParamTestBO() { Id = 3, Info = "Item3" });
+                db.Insert(new ParamTestBO() { Id = 1, Info = "Item1" });
+                db.Insert(new ParamTestBO() { Id = 2, Info = "Item2" });
+                db.Insert(new ParamTestBO() { Id = 3, Info = "Item3" });
 
                 Assert.AreEqual("Item1", db.SingleById<ParamTestBO>(1).Info);
                 Assert.AreEqual("Item2", db.SingleById<ParamTestBO>(2).Info);

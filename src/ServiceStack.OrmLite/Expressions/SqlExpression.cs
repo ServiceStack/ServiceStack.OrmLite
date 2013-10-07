@@ -1,13 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Collections.ObjectModel;
 using System.Linq.Expressions;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
@@ -103,7 +101,7 @@ namespace ServiceStack.OrmLite
 
         public virtual SqlExpression<T> Where(string sqlFilter, params object[] filterParams)
         {
-            whereExpression = !string.IsNullOrEmpty(sqlFilter) ? sqlFilter.SqlFormat(filterParams) : string.Empty;
+            whereExpression = !string.IsNullOrEmpty(sqlFilter) ? sqlFilter.SqlFmt(filterParams) : string.Empty;
             if (!string.IsNullOrEmpty(whereExpression)) whereExpression = (WhereStatementWithoutWhereString ? "" : "WHERE ") + whereExpression;
             return this;
         }
@@ -187,7 +185,7 @@ namespace ServiceStack.OrmLite
 
         public virtual SqlExpression<T> Having(string sqlFilter, params object[] filterParams)
         {
-            havingExpression = !string.IsNullOrEmpty(sqlFilter) ? sqlFilter.SqlFormat(filterParams) : string.Empty;
+            havingExpression = !string.IsNullOrEmpty(sqlFilter) ? sqlFilter.SqlFmt(filterParams) : string.Empty;
             if (!string.IsNullOrEmpty(havingExpression)) havingExpression = "HAVING " + havingExpression;
             return this;
         }
@@ -423,9 +421,10 @@ namespace ServiceStack.OrmLite
                 if (setFields.Length > 0) 
                     setFields.Append(", ");
 
-                setFields.AppendFormat("{0}={1}",
-                    dialectProvider.GetQuotedColumnName(fieldDef.FieldName),
-                    dialectProvider.GetQuotedValue(value, fieldDef.FieldType));
+                setFields
+                    .Append(dialectProvider.GetQuotedColumnName(fieldDef.FieldName))
+                    .Append("=")
+                    .Append(dialectProvider.GetQuotedValue(value, fieldDef.FieldType));
             }
 
             return string.Format("UPDATE {0} SET {1} {2}",
@@ -794,15 +793,16 @@ namespace ServiceStack.OrmLite
                 var getter = lambda.Compile();
                 return getter();
             }
-            catch (System.InvalidOperationException)
+            catch (InvalidOperationException)
             { // FieldName ?
-                List<Object> exprs = VisitExpressionList(nex.Arguments);
-                StringBuilder r = new StringBuilder();
-                foreach (Object e in exprs)
+                var exprs = VisitExpressionList(nex.Arguments);
+                var r = new StringBuilder();
+                foreach (object e in exprs)
                 {
-                    r.AppendFormat("{0}{1}",
-                                   r.Length > 0 ? "," : "",
-                                   e);
+                    if (r.Length > 0)
+                        r.Append(",");
+
+                    r.Append(e);
                 }
                 return r.ToString();
             }
@@ -1062,15 +1062,16 @@ namespace ServiceStack.OrmLite
 
                     var inArgs = Sql.Flatten(getter() as IEnumerable);
 
-                    StringBuilder sIn = new StringBuilder();
-                    foreach (Object e in inArgs)
+                    var sIn = new StringBuilder();
+                    foreach (object e in inArgs)
                     {
-                        sIn.AppendFormat("{0}{1}",
-                                     sIn.Length > 0 ? "," : "",
-                                     OrmLiteConfig.DialectProvider.GetQuotedValue(e, e.GetType()));
+                        if (sIn.Length > 0)
+                            sIn.Append(",");
+
+                        sIn.Append(OrmLiteConfig.DialectProvider.GetQuotedValue(e, e.GetType()));
                     }
 
-                    statement = string.Format("{0} {1} ({2})", quotedColName, "In", sIn.ToString());
+                    statement = string.Format("{0} {1} ({2})", quotedColName, "In", sIn);
                     break;
 
                 default:
@@ -1098,23 +1099,25 @@ namespace ServiceStack.OrmLite
 
                     var inArgs = Sql.Flatten(getter() as IEnumerable);
 
-                    StringBuilder sIn = new StringBuilder();
-                    foreach (Object e in inArgs)
+                    var sIn = new StringBuilder();
+                    foreach (object e in inArgs)
                     {
-                        if (!typeof(ICollection).IsAssignableFrom(e.GetType()))
+                        if (!(e is ICollection))
                         {
-                            sIn.AppendFormat("{0}{1}",
-                                         sIn.Length > 0 ? "," : "",
-                                         OrmLiteConfig.DialectProvider.GetQuotedValue(e, e.GetType()));
+                            if (sIn.Length > 0)
+                                sIn.Append(",");
+
+                            sIn.Append(OrmLiteConfig.DialectProvider.GetQuotedValue(e, e.GetType()));
                         }
                         else
                         {
                             var listArgs = e as ICollection;
-                            foreach (Object el in listArgs)
+                            foreach (object el in listArgs)
                             {
-                                sIn.AppendFormat("{0}{1}",
-                                         sIn.Length > 0 ? "," : "",
-                                         OrmLiteConfig.DialectProvider.GetQuotedValue(el, el.GetType()));
+                                if (sIn.Length > 0)
+                                    sIn.Append(",");
+
+                                sIn.Append(OrmLiteConfig.DialectProvider.GetQuotedValue(el, el.GetType()));
                             }
                         }
                     }

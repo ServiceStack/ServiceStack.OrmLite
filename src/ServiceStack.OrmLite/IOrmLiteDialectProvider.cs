@@ -61,13 +61,15 @@ namespace ServiceStack.OrmLite
 
         string ToInsertRowStatement(IDbCommand command, object objWithProperties, ICollection<string> InsertFields = null);
 
-        IDbCommand CreateParameterizedInsertStatement(IDbCommand command, object objWithProperties, ICollection<string> insertFields = null);
+        void PrepareParameterizedInsertStatement<T>(IDbCommand cmd, ICollection<string> insertFields = null);
 
-        void ReParameterizeInsertStatement(IDbCommand command, object objWithProperties, ICollection<string> insertFields = null);
+        void PrepareParameterizedUpdateStatement<T>(IDbCommand cmd, ICollection<string> updateFields = null);
+
+        void PrepareParameterizedDeleteStatement<T>(IDbCommand cmd, ICollection<string> deleteFields = null);
+
+        void SetParameterValues<T>(IDbCommand dbCmd, object obj);
 
         string ToUpdateRowStatement(object objWithProperties, ICollection<string> UpdateFields = null);
-
-        IDbCommand CreateParameterizedUpdateStatement(IDbCommand command, object objWithProperties, ICollection<string> updateFields = null);
 
         string ToDeleteRowStatement(object objWithProperties);
         string ToDeleteStatement(Type tableType, string sqlFilter, params object[] filterParams);

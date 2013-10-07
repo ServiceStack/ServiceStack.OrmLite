@@ -147,8 +147,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
             db.CreateTable<Order>();
             db.CreateTable<OrderDetail>();
 
-            db.InsertAll(new Employee { Id = 1, Name = "Employee 1" });
-            db.InsertAll(new Employee { Id = 2, Name = "Employee 2" });
+            db.Insert(new Employee { Id = 1, Name = "Employee 1" });
+            db.Insert(new Employee { Id = 2, Name = "Employee 2" });
             var product1 = new Product { Id = 1, Name = "Product 1", UnitPrice = 10 };
             var product2 = new Product { Id = 2, Name = "Product 2", UnitPrice = 20 };
             db.Save(product1, product2);
@@ -170,7 +170,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
                     },
                 Timestamp = DateTime.UtcNow,
             };
-            db.InsertAll(customer);
+            db.Insert(customer);
 
             var customerId = db.LastInsertId(); //Get Auto Inserted Id
             customer = db.Single<Customer>(new { customer.Email }); //Query
@@ -209,7 +209,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
                     }
                 };
 
-                db.InsertAll(orderDetails);
+                db.Insert(orderDetails);
 
                 order.Total = orderDetails.Sum(x => x.UnitPrice * x.Quantity * x.Discount) + order.Freight;
 

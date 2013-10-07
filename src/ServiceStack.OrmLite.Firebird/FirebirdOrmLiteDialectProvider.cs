@@ -146,14 +146,14 @@ namespace ServiceStack.OrmLite.Firebird
 				&& sqlFilter.Length > SelectStatement.Length
 				&& sqlFilter.Substring(0, SelectStatement.Length).ToUpper().Equals(SelectStatement);
 
-			if (isFullSelectStatement) 	return sqlFilter.SqlFormat(filterParams);
+			if (isFullSelectStatement) 	return sqlFilter.SqlFmt(filterParams);
 			
 			sql.AppendFormat("SELECT {0} \nFROM {1}", 
 			                 GetColumnNames(modelDef), 
 			                 GetQuotedTableName(modelDef));
 			if (!string.IsNullOrEmpty(sqlFilter))
 			{
-				sqlFilter = sqlFilter.SqlFormat(filterParams);
+				sqlFilter = sqlFilter.SqlFmt(filterParams);
 				if (!sqlFilter.StartsWith("\nORDER ", StringComparison.InvariantCultureIgnoreCase)
 					&& !sqlFilter.StartsWith("\nROWS ", StringComparison.InvariantCultureIgnoreCase)) // ROWS <m> [TO <n>])
 				{
@@ -537,7 +537,7 @@ namespace ServiceStack.OrmLite.Firebird
 			
 			if (!string.IsNullOrEmpty(sqlFilter))
 			{
-				sqlFilter = sqlFilter.SqlFormat(filterParams);
+				sqlFilter = sqlFilter.SqlFmt(filterParams);
 				if (!sqlFilter.StartsWith("\nORDER ", StringComparison.InvariantCultureIgnoreCase)
 					&& !sqlFilter.StartsWith("\nROWS ", StringComparison.InvariantCultureIgnoreCase)) // ROWS <m> [TO <n>])
 				{
@@ -588,7 +588,7 @@ namespace ServiceStack.OrmLite.Firebird
 			
 			if (!string.IsNullOrEmpty(sqlFilter))
 			{
-				sqlFilter = sqlFilter.SqlFormat(filterParams);
+				sqlFilter = sqlFilter.SqlFmt(filterParams);
 				if (!sqlFilter.StartsWith("\nORDER ", StringComparison.InvariantCultureIgnoreCase)
 					&& !sqlFilter.StartsWith("\nROWS ", StringComparison.InvariantCultureIgnoreCase)) // ROWS <m> [TO <n>]
 				{
@@ -725,7 +725,7 @@ namespace ServiceStack.OrmLite.Firebird
 			
 			var sql = "SELECT count(*) FROM rdb$relations " +
 				"WHERE rdb$system_flag = 0 AND rdb$view_blr IS NULL AND rdb$relation_name ={0}"
-				.SqlFormat(tableName);
+				.SqlFmt(tableName);
 
 			dbCmd.CommandText = sql; 
 			var result = dbCmd.LongScalar();

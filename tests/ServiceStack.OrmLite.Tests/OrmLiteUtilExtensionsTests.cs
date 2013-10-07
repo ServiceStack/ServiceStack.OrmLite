@@ -12,7 +12,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             var list = new string[] { "A", "B", "C" };
 
-            var sql = "IN ({0})".Params(list.SqlInValues());
+            var sql = "IN ({0})".SqlFmt(list.SqlInValues());
 
             Assert.AreEqual("IN ('A','B','C')", sql);
         }
@@ -22,7 +22,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             var list = new int[] { 1, 2, 3 };
 
-            var sql = "IN ({0})".Params(list.SqlInValues());
+            var sql = "IN ({0})".SqlFmt(list.SqlInValues());
 
             Assert.AreEqual("IN (1,2,3)", sql);
         }
@@ -32,7 +32,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             var list = new string[] {};
 
-            var sql = "IN ({0})".Params(list.SqlInValues());
+            var sql = "IN ({0})".SqlFmt(list.SqlInValues());
 
             Assert.AreEqual("IN (NULL)", sql);
         }

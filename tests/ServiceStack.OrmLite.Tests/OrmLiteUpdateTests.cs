@@ -37,11 +37,11 @@ namespace ServiceStack.OrmLite.Tests
         {
             var row = CreateModelWithFieldsOfDifferentTypes();
 
-            db.InsertAll(row);
+            db.Insert(row);
 
             row.Name = "UpdatedName";
 
-            db.UpdateAll(row);
+            db.Update(row);
 
             var dbRow = db.SingleById<ModelWithFieldsOfDifferentTypes>(1);
 
@@ -53,7 +53,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             var row = CreateModelWithFieldsOfDifferentTypes();
 
-            db.InsertAll(row);
+            db.Insert(row);
 
             row.Name = "UpdatedName";
 
@@ -69,7 +69,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             var row = CreateModelWithFieldsOfDifferentTypes();
 
-            db.InsertAll(row);
+            db.Insert(row);
             row.DateTime = DateTime.Now;
             row.Name = "UpdatedName";
 
@@ -86,10 +86,10 @@ namespace ServiceStack.OrmLite.Tests
         {
             var row = CreateModelWithFieldsOfDifferentTypes();
 
-            db.InsertAll(row);
+            db.Insert(row);
             row.Name = "UpdatedName";
 
-            db.UpdateFmt<ModelWithFieldsOfDifferentTypes>(set: "NAME = {0}".SqlFormat(row.Name), where: "LongId <= {0}".SqlFormat(row.LongId));
+            db.UpdateFmt<ModelWithFieldsOfDifferentTypes>(set: "NAME = {0}".SqlFmt(row.Name), where: "LongId <= {0}".SqlFmt(row.LongId));
 
             var dbRow = db.SingleById<ModelWithFieldsOfDifferentTypes>(row.Id);
             Console.WriteLine(dbRow.Dump());
@@ -101,11 +101,11 @@ namespace ServiceStack.OrmLite.Tests
         {
             var row = CreateModelWithFieldsOfDifferentTypes();
 
-            db.InsertAll(row);
+            db.Insert(row);
             row.Name = "UpdatedName";
 
             db.UpdateFmt(table: "ModelWithFieldsOfDifferentTypes",
-                set: "NAME = {0}".SqlFormat(row.Name), where: "LongId <= {0}".SqlFormat(row.LongId));
+                set: "NAME = {0}".SqlFmt(row.Name), where: "LongId <= {0}".SqlFmt(row.LongId));
 
             var dbRow = db.SingleById<ModelWithFieldsOfDifferentTypes>(row.Id);
             Console.WriteLine(dbRow.Dump());

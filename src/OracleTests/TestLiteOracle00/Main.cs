@@ -81,7 +81,7 @@ namespace TestLiteOracle00
 				db.CreateTable<Author>();
 				db.CreateTable<Book>();
 				
-				db.InsertAll( new Author(){
+				db.Insert( new Author(){
 					Name="Demis Bellot",
 					Birthday= DateTime.Today.AddYears(20),
 					Active=true,
@@ -91,7 +91,7 @@ namespace TestLiteOracle00
 					Rate=10
 				});
 				
-				db.InsertAll( new Author(){
+				db.Insert( new Author(){
 					Name="Angel Colmenares",
 					Birthday= DateTime.Today.AddYears(30),
 					Active=true,
@@ -101,7 +101,7 @@ namespace TestLiteOracle00
 					Rate=9
 				});
 				
-				db.InsertAll( new Author(){
+				db.Insert( new Author(){
 					Name="Adam Witco",
 					Birthday= DateTime.Today.AddYears(25),
 					Active=true,
@@ -111,7 +111,7 @@ namespace TestLiteOracle00
 				});
 			
 				
-				db.InsertAll( new Author(){
+				db.Insert( new Author(){
 					Name="Claudia Espinel",
 					Birthday= DateTime.Today.AddYears(28),
 					Active=false,
@@ -173,7 +173,7 @@ namespace TestLiteOracle00
 				author= authors.FirstOrDefault<Author>(r=>r.Name=="Angel Colmenares");
 				if( author != default(Author) ){
 					
-					db.InsertAll( new Book(){
+					db.Insert( new Book(){
 						IdAuthor= author.Id,
 						Title= "The big book",
 						Price= 18.55m,

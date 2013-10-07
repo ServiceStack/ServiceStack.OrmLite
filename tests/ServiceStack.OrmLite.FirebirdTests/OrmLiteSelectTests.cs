@@ -22,7 +22,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
 
-				rowIds.ForEach(x => db.InsertAll(ModelWithFieldsOfDifferentTypes.Create(x)));
+				rowIds.ForEach(x => db.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
 
 				var row = db.SingleById<ModelWithFieldsOfDifferentTypes>(1);
 
@@ -39,7 +39,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
 
-				rowIds.ForEach(x => db.InsertAll(ModelWithOnlyStringFields.Create(x)));
+				rowIds.ForEach(x => db.Insert(ModelWithOnlyStringFields.Create(x)));
 
                 var row = db.SingleById<ModelWithOnlyStringFields>("id-1");
 
@@ -56,7 +56,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
 
-				rowIds.ForEach(x => db.InsertAll(ModelWithFieldsOfDifferentTypes.Create(x)));
+				rowIds.ForEach(x => db.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
 
 				var rows = db.SelectByIds<ModelWithFieldsOfDifferentTypes>(rowIds);
 				var dbRowIds = rows.ConvertAll(x => x.Id);
@@ -74,7 +74,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
 
-				rowIds.ForEach(x => db.InsertAll(ModelWithOnlyStringFields.Create(x)));
+				rowIds.ForEach(x => db.Insert(ModelWithOnlyStringFields.Create(x)));
 
 				var rows = db.SelectByIds<ModelWithOnlyStringFields>(rowIds);
 				var dbRowIds = rows.ConvertAll(x => x.Id);
@@ -92,12 +92,12 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
 
-				rowIds.ForEach(x => db.InsertAll(ModelWithOnlyStringFields.Create(x)));
+				rowIds.ForEach(x => db.Insert(ModelWithOnlyStringFields.Create(x)));
 
 				var filterRow = ModelWithOnlyStringFields.Create("id-4");
 				filterRow.AlbumName = "FilteredName";
 
-				db.InsertAll(filterRow);
+				db.Insert(filterRow);
 
 				var rows = db.SelectFmt<ModelWithOnlyStringFields>("AlbumName = {0}", filterRow.AlbumName);
 				var dbRowIds = rows.ConvertAll(x => x.Id);
@@ -117,7 +117,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 				db.CreateTable<ModelWithIdAndName>(true);
 				db.DeleteAll<ModelWithIdAndName>();
 
-				n.Times(x => db.InsertAll(ModelWithIdAndName.Create(0)));
+				n.Times(x => db.Insert(ModelWithIdAndName.Create(0)));
 
 				var count = db.ScalarFmt<int>("SELECT COUNT(*) FROM ModelWIN");
 
@@ -134,7 +134,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
 
-				rowIds.ForEach(x => db.InsertAll(ModelWithOnlyStringFields.Create(x)));
+				rowIds.ForEach(x => db.Insert(ModelWithOnlyStringFields.Create(x)));
 
 				var dbRowIds = new List<string>();
 				foreach (var row in db.SelectLazy<ModelWithOnlyStringFields>())
@@ -155,12 +155,12 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
 
-				rowIds.ForEach(x => db.InsertAll(ModelWithOnlyStringFields.Create(x)));
+				rowIds.ForEach(x => db.Insert(ModelWithOnlyStringFields.Create(x)));
 
 				var filterRow = ModelWithOnlyStringFields.Create("id-4");
 				filterRow.AlbumName = "FilteredName";
 
-				db.InsertAll(filterRow);
+				db.Insert(filterRow);
 
 				var dbRowIds = new List<string>();
 				var rows = db.SelectLazyFmt<ModelWithOnlyStringFields>("AlbumName = {0}", filterRow.AlbumName);
@@ -184,7 +184,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 				db.CreateTable<ModelWithIdAndName>(true);
 				db.DeleteAll<ModelWithIdAndName>();
 
-				n.Times(x => db.InsertAll(ModelWithIdAndName.Create(0)));
+				n.Times(x => db.Insert(ModelWithIdAndName.Create(0)));
 
 				var ids = db.ColumnFmt<int>("SELECT Id FROM ModelWIN");
 
@@ -202,7 +202,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 				db.CreateTable<ModelWithIdAndName>(true);
 				db.DeleteAll<ModelWithIdAndName>();
 
-				n.Times(x => db.InsertAll(ModelWithIdAndName.Create(0)));
+				n.Times(x => db.Insert(ModelWithIdAndName.Create(0)));
 
 				var ids = db.ColumnDistinctFmt<int>("SELECT Id FROM ModelWIN");
 
@@ -223,7 +223,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 				n.Times(x => {
 					var row = ModelWithIdAndName.Create(0);
 					row.Name = x % 2 == 0 ? "OddGroup" : "EvenGroup";
-					db.InsertAll(row);
+					db.Insert(row);
 				});
 
 				var lookup = db.LookupFmt<string, int>("SELECT Name, Id FROM ModelWIN");
@@ -243,7 +243,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 			{
 				db.CreateTable<ModelWithIdAndName>(true);
 				db.DeleteAll<ModelWithIdAndName>();
-				n.Times(x => db.InsertAll(ModelWithIdAndName.Create(0)));
+				n.Times(x => db.Insert(ModelWithIdAndName.Create(0)));
 
 				var dictionary = db.Dictionary<int, string>("SELECT Id, Name FROM ModelWIN");
 
@@ -262,7 +262,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
 
-				rowIds.ForEach(x => db.InsertAll(ModelWithFieldsOfDifferentTypes.Create(x)));
+				rowIds.ForEach(x => db.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
 
 				var rows = db.SelectFmt<ModelWithIdAndName>("SELECT Id, Name FROM ModelWFDT");
 				var dbRowIds = rows.ConvertAll(x => x.Id);
@@ -280,7 +280,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
 
-				rowIds.ForEach(x => db.InsertAll(ModelWithFieldsOfDifferentTypes.Create(x)));
+				rowIds.ForEach(x => db.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
 
 				var rows = db.Select<ModelWithIdAndName>(typeof(ModelWithFieldsOfDifferentTypes));
 				var dbRowIds = rows.ConvertAll(x => x.Id);
@@ -304,7 +304,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 					ModelWithIdAndName m = new ModelWithIdAndName(){
 						Name= 	"Name"+i.ToString()
 					};
-					db.InsertAll(m);
+					db.Insert(m);
 				}
 				
 				var selectInNames = new[] {"Name1", "Name2"};

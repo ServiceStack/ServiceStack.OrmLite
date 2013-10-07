@@ -14,6 +14,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
+using System.Reflection;
 using System.Text;
 using ServiceStack.Logging;
 using ServiceStack.Text;
@@ -179,7 +180,7 @@ namespace ServiceStack.OrmLite
 		                     OrmLiteConfig.DialectProvider.GetQuotedTableName(fromTableType.GetModelDefinition()));
             if (!string.IsNullOrEmpty(sqlFilter))
 			{
-				sqlFilter = sqlFilter.SqlFormat(filterParams);
+				sqlFilter = sqlFilter.SqlFmt(filterParams);
 				sql.Append(" WHERE ");
 				sql.Append(sqlFilter);
 			}
@@ -223,7 +224,7 @@ namespace ServiceStack.OrmLite
 
         internal static T SelectByIdFmt<T>(this IDbCommand dbCmd, object idValue)
 		{
-			return SingleFmt<T>(dbCmd, OrmLiteConfig.DialectProvider.GetQuotedColumnName(ModelDefinition<T>.PrimaryKeyName) + " = {0}".SqlFormat(idValue));
+			return SingleFmt<T>(dbCmd, OrmLiteConfig.DialectProvider.GetQuotedColumnName(ModelDefinition<T>.PrimaryKeyName) + " = {0}".SqlFmt(idValue));
 		}
 
 		[ThreadStatic]
@@ -251,34 +252,57 @@ namespace ServiceStack.OrmLite
 		{
 			dbCmd.Parameters.Clear();
 			lastQueryType = null;
-			if (anonType == null) return;
+
+            anonType.ForEachParam<T>(excludeDefaults, (pi, columnName, value) => 
+            {
+                var p = dbCmd.CreateParameter();
+                p.ParameterName = columnName;
+                p.DbType = OrmLiteConfig.DialectProvider.GetColumnDbType(pi.PropertyType);
+                p.Direction = ParameterDirection.Input;
+                p.Value = value ?? DBNull.Value;
+                dbCmd.Parameters.Add(p);
+            });
+		}
+
+	    internal delegate void ParamIterDelegate(PropertyInfo pi, string columnName, object value);
+
+        internal static void ForEachParam<T>(this object anonType, bool excludeDefaults, ParamIterDelegate fn)
+        {
+            if (anonType == null) return;
 
             var pis = anonType.GetType().GetSerializableProperties();
             var model = ModelDefinition<T>.Definition;
 
-			foreach (var pi in pis)
-			{
-				var mi = pi.GetGetMethod();
-				if (mi == null) continue;
-                 
-				var value = mi.Invoke(anonType, new object[0]);
+            foreach (var pi in pis)
+            {
+                var mi = pi.GetGetMethod();
+                if (mi == null) continue;
+
+                var value = mi.Invoke(anonType, new object[0]);
                 if (excludeDefaults && (value == null || value.Equals(pi.PropertyType.GetDefaultValue()))) continue;
 
-
-				var p = dbCmd.CreateParameter();
-
                 var targetField = model != null ? model.FieldDefinitions.FirstOrDefault(f => string.Equals(f.Name, pi.Name)) : null;
-                if (targetField != null && !string.IsNullOrEmpty(targetField.Alias))
-                    p.ParameterName = targetField.Alias;
-                else
-                    p.ParameterName = pi.Name;
+                var columnName = targetField != null && !string.IsNullOrEmpty(targetField.Alias)
+                    ? targetField.Alias
+                    : pi.Name;
 
-				p.DbType = OrmLiteConfig.DialectProvider.GetColumnDbType(pi.PropertyType);
-				p.Direction = ParameterDirection.Input;
-                p.Value = value ?? DBNull.Value;
-				dbCmd.Parameters.Add(p);
-			}
-		}
+                fn(pi, columnName, value);
+            }
+        }
+
+        internal static List<string> AllFields<T>(this object anonType)
+        {
+            var ret = new List<string>();
+            ForEachParam<T>(anonType, excludeDefaults: false, fn: (pi, columnName, value) => ret.Add(pi.Name));
+            return ret;
+        }
+
+        internal static List<string> NonDefaultFields<T>(this object anonType)
+        {
+            var ret = new List<string>();
+            ForEachParam<T>(anonType, excludeDefaults: true, fn: (pi, columnName, value) => ret.Add(pi.Name));
+            return ret;
+        }
 
         private static void SetParameters(this IDbCommand dbCmd, object anonType, bool excludeDefaults)
         {
@@ -498,15 +522,15 @@ namespace ServiceStack.OrmLite
                 return Scalar<T>(dbReader);
         }
 
-        internal static List<T> SelectByExample<T>(this IDbCommand dbCmd, object anonType)
+        internal static List<T> SelectNonDefaults<T>(this IDbCommand dbCmd, object filter)
 		{
-            dbCmd.SetFilters<T>(anonType, excludeDefaults:true);
+            dbCmd.SetFilters<T>(filter, excludeDefaults:true);
 
 			using (var dbReader = dbCmd.ExecuteReader())
 				return dbReader.ConvertToList<T>();
 		}
 
-	    internal static List<T> SelectByExample<T>(this IDbCommand dbCmd, string sql, object anonType = null)
+	    internal static List<T> SelectNonDefaults<T>(this IDbCommand dbCmd, string sql, object anonType = null)
 		{
             if (anonType != null) dbCmd.SetParameters<T>(anonType, excludeDefaults: false);
             dbCmd.CommandText = OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sql);
@@ -561,7 +585,7 @@ namespace ServiceStack.OrmLite
 
 	    internal static T ScalarFmt<T>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
 		{
-			using (var reader = dbCmd.ExecReader(sql.SqlFormat(sqlParams)))
+			using (var reader = dbCmd.ExecReader(sql.SqlFmt(sqlParams)))
 				return Scalar<T>(reader);
 		}
 
@@ -608,7 +632,7 @@ namespace ServiceStack.OrmLite
 
 	    internal static List<T> ColumnFmt<T>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
 		{
-			using (var dbReader = dbCmd.ExecReader(sql.SqlFormat(sqlParams)))
+			using (var dbReader = dbCmd.ExecReader(sql.SqlFmt(sqlParams)))
 				return Column<T>(dbReader);
 		}
 
@@ -638,7 +662,7 @@ namespace ServiceStack.OrmLite
 
         internal static HashSet<T> ColumnDistinctFmt<T>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
         {
-            using (var dbReader = dbCmd.ExecReader(sql.SqlFormat(sqlParams)))
+            using (var dbReader = dbCmd.ExecReader(sql.SqlFmt(sqlParams)))
                 return ColumnDistinct<T>(dbReader);
         }
 
@@ -668,7 +692,7 @@ namespace ServiceStack.OrmLite
 
         internal static Dictionary<K, List<V>> LookupFmt<K, V>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
         {
-            using (var dbReader = dbCmd.ExecReader(sql.SqlFormat(sqlParams)))
+            using (var dbReader = dbCmd.ExecReader(sql.SqlFmt(sqlParams)))
                 return Lookup<K, V>(dbReader);
         }
 
@@ -706,7 +730,7 @@ namespace ServiceStack.OrmLite
 
         internal static Dictionary<K, V> DictionaryFmt<K, V>(this IDbCommand dbCmd, string sqlFormat, params object[] sqlParams)
         {
-            using (var dbReader = dbCmd.ExecReader(sqlFormat.SqlFormat(sqlParams)))
+            using (var dbReader = dbCmd.ExecReader(sqlFormat.SqlFmt(sqlParams)))
                 return Dictionary<K, V>(dbReader);
         }
 

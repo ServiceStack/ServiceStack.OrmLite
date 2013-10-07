@@ -22,7 +22,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
-				rowIds.ForEach(x => db.InsertAll(ModelWithFieldsOfDifferentTypes.Create(x)));
+				rowIds.ForEach(x => db.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
 
 				var rows = db.Select<ModelWithFieldsOfDifferentTypes>();
 				var row2 = rows.First(x => x.Id == 2);
@@ -44,7 +44,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
-				rowIds.ForEach(x => db.InsertAll(ModelWithFieldsOfDifferentTypes.Create(x)));
+				rowIds.ForEach(x => db.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
 
 				db.DeleteById<ModelWithFieldsOfDifferentTypes>(2);
 
@@ -63,7 +63,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
-				rowIds.ForEach(x => db.InsertAll(ModelWithFieldsOfDifferentTypes.Create(x)));
+				rowIds.ForEach(x => db.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
 
 				db.DeleteByIds<ModelWithFieldsOfDifferentTypes>(new[] { 1, 3 });
 
