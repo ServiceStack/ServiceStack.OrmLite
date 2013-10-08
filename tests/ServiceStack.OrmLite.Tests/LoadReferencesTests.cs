@@ -31,7 +31,7 @@ namespace ServiceStack.OrmLite.Tests
     {
         [AutoIncrement]
         public int Id { get; set; }
-        public int CustomerFetchId { get; set; }
+        public int CustomerId { get; set; }
         public string AddressLine1 { get; set; }
         public string AddressLine2 { get; set; }
         public string City { get; set; }
@@ -43,7 +43,7 @@ namespace ServiceStack.OrmLite.Tests
     {
         [AutoIncrement]
         public int Id { get; set; }
-        public int CustomerFetchId { get; set; }
+        public int CustomerId { get; set; }
         public string LineItem { get; set; }
         public int Qty { get; set; }
         public decimal Cost { get; set; }
@@ -73,7 +73,7 @@ namespace ServiceStack.OrmLite.Tests
         public void Does_not_include_complex_reference_type_in_sql()
         {
             db.Select<Customer>();
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"Name\" FROM \"CustomerFetch\""));
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"Name\" FROM \"Customer\""));
         }
 
         [Test]
@@ -97,13 +97,13 @@ namespace ServiceStack.OrmLite.Tests
             db.Save(customer);
 
             Assert.That(customer.Id, Is.GreaterThan(0));
-            Assert.That(customer.PrimaryAddress.CustomerFetchId, Is.EqualTo(0));
+            Assert.That(customer.PrimaryAddress.CustomerId, Is.EqualTo(0));
 
             db.SaveReference(customer, customer.PrimaryAddress);
-            Assert.That(customer.PrimaryAddress.CustomerFetchId, Is.EqualTo(customer.Id));
+            Assert.That(customer.PrimaryAddress.CustomerId, Is.EqualTo(customer.Id));
 
             db.SaveReference(customer, customer.Orders);
-            Assert.That(customer.Orders.All(x => x.CustomerFetchId == customer.Id));
+            Assert.That(customer.Orders.All(x => x.CustomerId == customer.Id));
 
             var dbCustomer = db.LoadSingleById<Customer>(customer.Id);
 
