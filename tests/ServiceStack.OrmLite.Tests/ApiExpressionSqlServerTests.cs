@@ -26,7 +26,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        public void API_Expression_Examples()
+        public void API_SqlServer_Examples()
         {
             db.Insert(Person.Rockstars);
 
