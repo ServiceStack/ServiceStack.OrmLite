@@ -12,37 +12,21 @@ namespace ServiceStack.OrmLite
     public class OrmLiteConnectionFactory : IDbConnectionFactory
     {
         public OrmLiteConnectionFactory()
-            : this(null, true)
-        {
-        }
+            : this(null, null, true) {}
 
         public OrmLiteConnectionFactory(string connectionString)
-            : this(connectionString, true)
-        {
-        }
-
-        public OrmLiteConnectionFactory(string connectionString, bool autoDisposeConnection)
-            : this(connectionString, autoDisposeConnection, null)
-        {
-        }
+            : this(connectionString, null, true) {}
 
         public OrmLiteConnectionFactory(string connectionString, IOrmLiteDialectProvider dialectProvider)
-            : this(connectionString, true, dialectProvider)
-        {
-        }
+            : this(connectionString, dialectProvider, true) {}
 
-        public OrmLiteConnectionFactory(string connectionString, bool autoDisposeConnection, IOrmLiteDialectProvider dialectProvider)
-            : this(connectionString, autoDisposeConnection, dialectProvider, true)
-        {
-        }
-
-        public OrmLiteConnectionFactory(string connectionString, bool autoDisposeConnection, IOrmLiteDialectProvider dialectProvider, bool setGlobalConnection)
+        public OrmLiteConnectionFactory(string connectionString, IOrmLiteDialectProvider dialectProvider, bool setGlobalDialectProvider)
         {
             ConnectionString = connectionString;
-            AutoDisposeConnection = autoDisposeConnection;
+            AutoDisposeConnection = connectionString != ":memory:";
             this.DialectProvider = dialectProvider ?? OrmLiteConfig.DialectProvider;
 
-            if (setGlobalConnection && dialectProvider != null)
+            if (setGlobalDialectProvider && dialectProvider != null)
             {
                 OrmLiteConfig.DialectProvider = dialectProvider;
             }
@@ -132,9 +116,9 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        public void RegisterConnection(string connectionKey, string connectionString, IOrmLiteDialectProvider dialectProvider, bool autoDisposeConnection = true)
+        public void RegisterConnection(string connectionKey, string connectionString, IOrmLiteDialectProvider dialectProvider)
         {
-            RegisterConnection(connectionKey, new OrmLiteConnectionFactory(connectionString, autoDisposeConnection, dialectProvider, autoDisposeConnection));
+            RegisterConnection(connectionKey, new OrmLiteConnectionFactory(connectionString, dialectProvider, setGlobalDialectProvider:false));
         }
 
         public void RegisterConnection(string connectionKey, OrmLiteConnectionFactory connectionFactory)

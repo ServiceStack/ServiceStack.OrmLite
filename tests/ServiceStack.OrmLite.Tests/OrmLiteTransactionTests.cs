@@ -125,7 +125,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Does_Sqlite_transactions()
         {
-            var factory = new OrmLiteConnectionFactory(":memory:", true, SqliteDialect.Provider);
+            var factory = new OrmLiteConnectionFactory(":memory:", SqliteDialect.Provider);
 
             // test 1 - no transactions
             try
