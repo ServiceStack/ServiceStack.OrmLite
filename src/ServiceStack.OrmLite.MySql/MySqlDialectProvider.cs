@@ -120,7 +120,7 @@ namespace ServiceStack.OrmLite.MySql
 				.SqlFmt(tableName, dbCmd.Connection.Database);
 
 			//if (!string.IsNullOrEmpty(schemaName))
-			//    sql += " AND TABLE_SCHEMA = {0}".SqlFormat(schemaName);
+            //    sql += " AND TABLE_SCHEMA = {0}".SqlFmt(schemaName);
 
 			dbCmd.CommandText = sql;
 			var result = dbCmd.LongScalar();
