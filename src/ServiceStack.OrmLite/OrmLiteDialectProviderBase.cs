@@ -19,7 +19,6 @@ using ServiceStack.DataAnnotations;
 using ServiceStack.Logging;
 using ServiceStack.Text;
 using System.Diagnostics;
-using System.IO;
 using System.Linq.Expressions;
 
 namespace ServiceStack.OrmLite

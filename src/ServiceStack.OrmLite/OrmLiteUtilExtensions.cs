@@ -14,6 +14,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
@@ -24,22 +25,22 @@ namespace ServiceStack.OrmLite
             return (T)Text.ReflectionExtensions.CreateInstance<T>();
         }
 
-		public static T ConvertTo<T>(this IDataReader dataReader)
+        public static T ConvertTo<T>(this IDataReader dataReader)
         {
-			var fieldDefs = ModelDefinition<T>.Definition.AllFieldDefinitionsArray;
+            var fieldDefs = ModelDefinition<T>.Definition.AllFieldDefinitionsArray;
 
-			using (dataReader)
-			{
-				if (dataReader.Read())
-				{
+            using (dataReader)
+            {
+                if (dataReader.Read())
+                {
                     var row = CreateInstance<T>();
-					var indexCache = dataReader.GetIndexFieldsCache(ModelDefinition<T>.Definition);
-					row.PopulateWithSqlReader(dataReader, fieldDefs, indexCache);
-					return row;
-				}
-				return default(T);
-			}
-		}
+                    var indexCache = dataReader.GetIndexFieldsCache(ModelDefinition<T>.Definition);
+                    row.PopulateWithSqlReader(dataReader, fieldDefs, indexCache);
+                    return row;
+                }
+                return default(T);
+            }
+        }
 
 		public static List<T> ConvertToList<T>(this IDataReader dataReader)
 		{
@@ -58,6 +59,44 @@ namespace ServiceStack.OrmLite
 			}
 			return to;
 		}
+
+        public static object ConvertTo(this IDataReader dataReader, Type type)
+        {
+            var modelDef = type.GetModelDefinition();
+            var fieldDefs = modelDef.AllFieldDefinitionsArray;
+
+            using (dataReader)
+            {
+                if (dataReader.Read())
+                {
+                    var row = type.CreateInstance();
+                    var indexCache = dataReader.GetIndexFieldsCache(modelDef);
+                    row.PopulateWithSqlReader(dataReader, fieldDefs, indexCache);
+                    return row;
+                }
+                return type.GetDefaultValue();
+            }
+        }
+
+        public static IList ConvertToList(this IDataReader dataReader, Type type)
+        {
+            var modelDef = type.GetModelDefinition();
+            var fieldDefs = modelDef.AllFieldDefinitionsArray;
+
+            var listInstance = typeof(List<>).MakeGenericType(type).CreateInstance();
+            var to = (IList)listInstance;
+            using (dataReader)
+            {
+                var indexCache = dataReader.GetIndexFieldsCache(modelDef);
+                while (dataReader.Read())
+                {
+                    var row = type.CreateInstance();
+                    row.PopulateWithSqlReader(dataReader, fieldDefs, indexCache);
+                    to.Add(row);
+                }
+            }
+            return to;
+        }
 
 		internal static string GetColumnNames(this Type tableType)
 		{

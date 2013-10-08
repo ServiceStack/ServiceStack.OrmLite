@@ -810,6 +810,77 @@ namespace ServiceStack.OrmLite
 			if (result is decimal) return Convert.ToInt64((decimal)result);
 			if (result is ulong) return (long)Convert.ToUInt64(result);
 			return (long)result;
-		}			
+		}
+
+        public static void SaveReference<T, TRef>(this IDbCommand dbCmd, T instance, params TRef[] refs)
+        {
+            var modelDef = ModelDefinition<T>.Definition;
+            var pkValue = modelDef.PrimaryKey.GetValue(instance);
+
+            var refType = typeof(TRef);
+            var refModelDef = ModelDefinition<TRef>.Definition;
+
+            foreach (var oRef in refs)
+            {
+                var refField = GetRefFieldDef(modelDef, refModelDef, refType);
+
+                refField.SetValueFn(oRef, pkValue);
+            }
+
+            dbCmd.SaveAll(refs);
+        }
+
+        public static void LoadReferences<T>(this IDbCommand dbCmd, T instance)
+        {
+            var modelDef = ModelDefinition<T>.Definition;
+            var fieldDefs = modelDef.AllFieldDefinitionsArray.Where(x => x.IsReference);
+            var pkValue = modelDef.PrimaryKey.GetValue(instance);
+            var ormLiteDialectProvider = OrmLiteConfig.DialectProvider;
+
+            foreach (var fieldDef in fieldDefs)
+            {
+                var listInterface = fieldDef.FieldType.GetTypeWithGenericInterfaceOf(typeof(IList<>));
+                if (listInterface != null)
+                {
+                    var refType = listInterface.GenericTypeArguments()[0];
+                    var refModelDef = refType.GetModelDefinition();
+
+                    var refField = GetRefFieldDef(modelDef, refModelDef, refType);
+
+                    var sqlFilter = ormLiteDialectProvider.GetQuotedColumnName(refField.FieldName) + "={0}";
+                    var sql = ormLiteDialectProvider.ToSelectStatement(refType, sqlFilter, pkValue);
+
+                    using (var dbReader = dbCmd.ExecReader(sql))
+                    {
+                        var results = dbReader.ConvertToList(refType);
+                        fieldDef.SetValueFn(instance, results);
+                    }
+                }
+                else
+                {
+                    var refType = fieldDef.FieldType;
+                    var refModelDef = refType.GetModelDefinition();
+                    var refField = GetRefFieldDef(modelDef, refModelDef, fieldDef.FieldType);
+
+                    var sqlFilter = ormLiteDialectProvider.GetQuotedColumnName(refField.FieldName) + "={0}";
+                    var sql = ormLiteDialectProvider.ToSelectStatement(refType, sqlFilter, pkValue);
+
+                    using (var dbReader = dbCmd.ExecReader(sql))
+                    {
+                        var result = dbReader.ConvertTo(refType);
+                        fieldDef.SetValueFn(instance, result);
+                    }
+                }
+            }
+        }
+
+	    private static FieldDefinition GetRefFieldDef(ModelDefinition modelDef, ModelDefinition refModelDef, Type refType)
+	    {
+	        var refNameConvention = modelDef.ModelName + "Id";
+	        var refField = refModelDef.FieldDefinitions.FirstOrDefault(x => x.Name == refNameConvention);
+	        if (refField == null)
+	            throw new ArgumentException("Cant find '{0}' Property on Type '{1}'".Fmt(refNameConvention, refType.Name));
+	        return refField;
+	    }
 	}
 }

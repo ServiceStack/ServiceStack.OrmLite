@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 
 namespace ServiceStack.OrmLite
 {
@@ -420,6 +421,26 @@ namespace ServiceStack.OrmLite
         public static long LongScalar(this IDbConnection dbConn)
         {
             return dbConn.Exec(dbCmd => dbCmd.LongScalar());
-        }			
+        }
+
+        public static void SaveReference<T, TRef>(this IDbConnection dbConn, T instance, params TRef[] refs)
+        {
+            dbConn.Exec(dbCmd => dbCmd.SaveReference(instance, refs));
+        }
+
+        public static void SaveReference<T, TRef>(this IDbConnection dbConn, T instance, List<TRef> refs)
+        {
+            dbConn.Exec(dbCmd => dbCmd.SaveReference(instance, refs.ToArray()));
+        }
+
+        public static void SaveReferences<T, TRef>(this IDbConnection dbConn, T instance, IEnumerable<TRef> refs)
+        {
+            dbConn.Exec(dbCmd => dbCmd.SaveReference(instance, refs.ToArray()));
+        }
+
+        public static void LoadReferences<T>(this IDbConnection dbConn, T instance)
+        {
+            dbConn.Exec(dbCmd => dbCmd.LoadReferences(instance));
+        }
     }
 }

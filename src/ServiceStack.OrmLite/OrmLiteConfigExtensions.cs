@@ -111,6 +111,7 @@ namespace ServiceStack.OrmLite
                 var defaultValueAttr = propertyInfo.FirstAttribute<DefaultAttribute>();
 
                 var referencesAttr = propertyInfo.FirstAttribute<ReferencesAttribute>();
+                var referenceAttr  = propertyInfo.FirstAttribute<ReferenceAttribute>();
                 var foreignKeyAttr = propertyInfo.FirstAttribute<ForeignKeyAttribute>();
 
                 var fieldDefinition = new FieldDefinition {
@@ -135,6 +136,7 @@ namespace ServiceStack.OrmLite
                                                     foreignKeyAttr.OnDelete,
                                                     foreignKeyAttr.OnUpdate,
                                                     foreignKeyAttr.ForeignKeyName),
+                    IsReference = referenceAttr != null && propertyType.IsClass,
                     GetValueFn = propertyInfo.GetPropertyGetterFn(),
                     SetValueFn = propertyInfo.GetPropertySetterFn(),
                     Sequence = sequenceAttr != null ? sequenceAttr.Name : string.Empty,
@@ -144,7 +146,9 @@ namespace ServiceStack.OrmLite
                     BelongToModelName = belongToAttribute != null ? belongToAttribute.BelongToTableType.GetModelDefinition().ModelName : null, 
                 };
 
-                if (propertyInfo.HasAttributeNamed(typeof(IgnoreAttribute).Name))
+                var isIgnored = propertyInfo.HasAttributeNamed(typeof(IgnoreAttribute).Name)
+                    || fieldDefinition.IsReference;
+                if (isIgnored)
                   modelDef.IgnoredFieldDefinitions.Add(fieldDefinition);
                 else
                   modelDef.FieldDefinitions.Add(fieldDefinition);                

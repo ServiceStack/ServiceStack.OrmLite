@@ -95,8 +95,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ApiExpressionSqlServerTests.cs" />
-    <Compile Include="ApiExpressionSqliteTests.cs" />
+    <Compile Include="ApiSqlServerTests.cs" />
+    <Compile Include="ApiSqliteTests.cs" />
+    <Compile Include="LoadReferencesTests.cs" />
+    <Compile Include="TypeDescriptorMetadataTests.cs" />
     <Compile Include="Shared\ApiUtilExtensions.cs" />
     <Compile Include="EnumTests.cs" />
     <Compile Include="ExpressionTests.cs" />
