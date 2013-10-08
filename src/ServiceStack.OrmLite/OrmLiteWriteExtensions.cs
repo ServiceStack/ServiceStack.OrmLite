@@ -17,7 +17,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using ServiceStack.Logging;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
@@ -345,30 +344,31 @@ namespace ServiceStack.OrmLite
 
         internal static void UpdateAll<T>(this IDbCommand dbCmd, IEnumerable<T> objs)
 		{
+            IDbTransaction dbTrans = null;
+
             try
             {
+                if (dbCmd.Transaction == null)
+                    dbCmd.Transaction = dbTrans = dbCmd.Connection.BeginTransaction();
+
                 var dialectProvider = OrmLiteConfig.DialectProvider;
 
                 dialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
 
-                using (var dbTrans = dbCmd.Connection.BeginTransaction())
+                foreach (var obj in objs)
                 {
-                    dbCmd.Transaction = dbTrans;
+                    dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
-                    foreach (var obj in objs)
-                    {
-                        dialectProvider.SetParameterValues<T>(dbCmd, obj);
-
-                        dbCmd.ExecuteNonQuery();
-                    }
-
-                    dbTrans.Commit();
+                    dbCmd.ExecuteNonQuery();
                 }
+
+                if (dbTrans != null)
+                    dbTrans.Commit();
             }
-            catch
+            finally
             {
-                if (dbCmd.Transaction != null)
-                    dbCmd.Transaction.Rollback();
+                if (dbTrans != null)
+                    dbTrans.Dispose();
             }
         }
 
@@ -406,30 +406,31 @@ namespace ServiceStack.OrmLite
 
         private static void DeleteAll<T>(IDbCommand dbCmd, ICollection<string> deleteFields, IEnumerable<object> objs)
         {
+            IDbTransaction dbTrans = null;
+
             try
             {
+                if (dbCmd.Transaction == null)
+                    dbCmd.Transaction = dbTrans = dbCmd.Connection.BeginTransaction();
+
                 var dialectProvider = OrmLiteConfig.DialectProvider;
 
                 dialectProvider.PrepareParameterizedDeleteStatement<T>(dbCmd, deleteFields);
 
-                using (var dbTrans = dbCmd.Connection.BeginTransaction())
+                foreach (var obj in objs)
                 {
-                    dbCmd.Transaction = dbTrans;
+                    dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
-                    foreach (var obj in objs)
-                    {
-                        dialectProvider.SetParameterValues<T>(dbCmd, obj);
-
-                        dbCmd.ExecuteNonQuery();
-                    }
-
-                    dbTrans.Commit();
+                    dbCmd.ExecuteNonQuery();
                 }
+
+                if (dbTrans != null)
+                    dbTrans.Commit();
             }
-            catch
+            finally
             {
-                if (dbCmd.Transaction != null)
-                    dbCmd.Transaction.Rollback();
+                if (dbTrans != null)
+                    dbTrans.Dispose();
             }
         }
 
@@ -506,30 +507,31 @@ namespace ServiceStack.OrmLite
 
         internal static void InsertAll<T>(this IDbCommand dbCmd, IEnumerable<T> objs)
 		{
+            IDbTransaction dbTrans = null;
+
             try
             {
+                if (dbCmd.Transaction == null)
+                    dbCmd.Transaction = dbTrans = dbCmd.Connection.BeginTransaction();
+
                 var dialectProvider = OrmLiteConfig.DialectProvider;
 
                 dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd);
 
-                using (var dbTrans = dbCmd.Connection.BeginTransaction())
+                foreach (var obj in objs)
                 {
-                    dbCmd.Transaction = dbTrans;
+                    dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
-                    foreach (var obj in objs)
-                    {
-                        dialectProvider.SetParameterValues<T>(dbCmd, obj);
-
-                        dbCmd.ExecuteNonQuery();
-                    }
-
-                    dbTrans.Commit();
+                    dbCmd.ExecuteNonQuery();
                 }
+
+                if (dbTrans != null)
+                    dbTrans.Commit();
             }
-            catch
+            finally
             {
-                if (dbCmd.Transaction != null)
-                    dbCmd.Transaction.Rollback();
+                if (dbTrans != null)
+                    dbTrans.Dispose();
             }
         }
 
