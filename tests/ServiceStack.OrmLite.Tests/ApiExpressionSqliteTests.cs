@@ -1,68 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Linq;
 using NUnit.Framework;
-using ServiceStack.DataAnnotations;
-using ServiceStack.Text;
+using ServiceStack.OrmLite.Tests.Shared;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    public class Person
-    {
-        public int Id { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public int Age { get; set; }
-
-        public Person() { }
-        public Person(int id, string firstName, string lastName, int age)
-        {
-            Id = id;
-            FirstName = firstName;
-            LastName = lastName;
-            Age = age;
-        }
-    }
-
-    public class PersonWithAutoId
-    {
-        [AutoIncrement]
-        public int Id { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public int Age { get; set; }
-    }
-
-    public class EntityWithId
-    {
-        public int Id { get; set; }
-    }
-
-    public class ApiExpressionTests
+    [Explicit]
+    public class ApiExpressionSqliteTests
         : OrmLiteTestBase
     {
         private IDbConnection db;
 
-        public Person[] People = new[] {
-            new Person(1, "Jimi", "Hendrix", 27), 
-            new Person(2, "Janis", "Joplin", 27), 
-            new Person(3, "Jim", "Morrisson", 27), 
-            new Person(4, "Kurt", "Cobain", 27),              
-            new Person(5, "Elvis", "Presley", 42), 
-            new Person(6, "Michael", "Jackson", 50), 
-        };
-
         [SetUp]
         public void SetUp()
         {
-            //db = OpenDbConnection();
             db = CreateSqlServerDbFactory().OpenDbConnection();
             db.DropAndCreateTable<Person>();
             db.DropAndCreateTable<PersonWithAutoId>();
-
-            //People.ToList().ForEach(x => dbCmd.Insert(x));
         }
 
         [TearDown]
@@ -74,7 +29,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void API_Expression_Examples()
         {
-            db.Insert(People);
+            db.Insert(Person.Rockstars);
 
             db.Select<Person>(x => x.Age > 40);
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"FirstName\", \"LastName\", \"Age\" \nFROM \"Person\"\nWHERE (\"Age\" > 40)"));
@@ -355,76 +310,6 @@ namespace ServiceStack.OrmLite.Tests
 
             db.SaveAll(new[]{ new Person { Id = 14, FirstName = "Amy", LastName = "Winehouse", Age = 27 },
                               new Person { Id = 15, FirstName = "Amy", LastName = "Winehouse", Age = 27 } });
-        }
-
-        [Test]
-        public void Parameterized_query_tests()
-        {
-            db.Insert(People);
-
-            //db.Select<Person>().PrintDump();
-            //db.GetLastSql().Print();
-
-            //db.Query<Person>(q => q);
-            //db.GetLastSql().Print();
-            db.SingleById<Person>(1).PrintDump();
-            db.GetLastSql().Print();
-        }
-
-        [Explicit]
-        public void Benchmark()
-        {
-            Measure(() => db.SingleById<Person>(1), times: 1).ToString().Print("Test 2: {0}");
-            Measure(() => db.SingleById<Person>(1), times: 1).ToString().Print("Test 1: {0}");
-        }
-
-        static double MeasureFor(Action fn, int timeMinimum)
-        {
-            int iter = 0;
-            Stopwatch watch = new Stopwatch();
-            watch.Start();
-            long elapsed = 0;
-            while (elapsed < timeMinimum)
-            {
-                fn();
-                elapsed = watch.ElapsedMilliseconds;
-                iter++;
-            }
-            return 1000.0 * elapsed / iter;
-        }
-
-        static double Measure(Action fn, int times = 10, int runfor = 2000, Action setup = null, Action warmup = null, Action teardown = null)
-        {
-            if (setup != null)
-                setup();
-
-            // Warmup for at least 100ms. Discard result.
-            if (warmup == null)
-                warmup = fn;
-
-            MeasureFor(() => { warmup(); }, 100);
-
-            // Run the benchmark for at least 2000ms.
-            double result = MeasureFor(() =>
-            {
-                for (var i = 0; i < times; i++)
-                    fn();
-            }, runfor);
-
-            if (teardown != null)
-                teardown();
-
-            return result;
-        }
-    }
-
-    internal static class StaticExt
-    {
-        public static string PrintLastSql(this IDbConnection dbConn)
-        {
-            dbConn.GetLastSql().Print();
-            "".Print();
-            return dbConn.GetLastSql();
         }
 
     }
