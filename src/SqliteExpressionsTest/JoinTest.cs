@@ -29,6 +29,7 @@ namespace SqliteExpressionsTest
         public long Id { get; set; }
         [BelongTo(typeof(User))]
         public string Name { get; set; }
+        [BelongTo(typeof(User))]
         public DateTime CreatedDate { get; set; }
         [BelongTo(typeof(UserData))]
         public string UserDataValue { get; set; }

@@ -78,12 +78,15 @@ namespace ServiceStack.OrmLite
                 && (m.Expression.NodeType == ExpressionType.Parameter || m.Expression.NodeType == ExpressionType.Convert))
             {
                 var pocoType = typeof(T);
-                var fieldName = pocoType.GetModelDefinition().FieldDefinitions.First(f => f.Name == m.Member.Name).Alias;
+                var fieldDef = pocoType.GetModelDefinition().FieldDefinitions.First(f => f.Name == m.Member.Name);
+                var fieldName = String.IsNullOrEmpty(fieldDef.Alias) ? fieldDef.Name : fieldDef.Alias;
+
+                alias = string.IsNullOrEmpty(alias) ? string.Empty : string.Format(" AS {0}", OrmLiteConfig.DialectProvider.GetQuotedColumnName(alias));
 
                 if (withTablePrefix)
-                    lst.Add(string.Format("{0}.{1}{2}", OrmLiteConfig.DialectProvider.GetQuotedTableName(tableName), OrmLiteConfig.DialectProvider.GetQuotedColumnName(fieldName), string.IsNullOrEmpty(alias) ? string.Empty : string.Format(" AS {0}", OrmLiteConfig.DialectProvider.GetQuotedColumnName(alias))));
+                    lst.Add(string.Format("{0}.{1}{2}", OrmLiteConfig.DialectProvider.GetQuotedTableName(tableName), OrmLiteConfig.DialectProvider.GetQuotedColumnName(fieldName), alias));
                 else
-                    lst.Add(string.Format("{0}{1}", OrmLiteConfig.DialectProvider.GetQuotedColumnName(fieldName), string.IsNullOrEmpty(alias) ? string.Empty : string.Format(" AS {0}", OrmLiteConfig.DialectProvider.GetQuotedColumnName(alias))));
+                    lst.Add(string.Format("{0}{1}", OrmLiteConfig.DialectProvider.GetQuotedColumnName(fieldName), alias));
                 return;
             }
             throw new Exception("Only Members are allowed");
