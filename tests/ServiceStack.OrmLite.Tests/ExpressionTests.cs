@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using NUnit.Framework;
 using ServiceStack.OrmLite.Sqlite;
+using ServiceStack.OrmLite.Tests.Shared;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests

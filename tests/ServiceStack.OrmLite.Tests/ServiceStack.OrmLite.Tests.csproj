@@ -95,7 +95,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ApiExpressionTests.cs" />
+    <Compile Include="ApiExpressionSqlServerTests.cs" />
+    <Compile Include="ApiExpressionSqliteTests.cs" />
+    <Compile Include="Shared\ApiUtilExtensions.cs" />
     <Compile Include="EnumTests.cs" />
     <Compile Include="ExpressionTests.cs" />
     <Compile Include="ExpressionVisitorTests.cs" />
@@ -120,6 +122,7 @@
     <Compile Include="LocalizationTests.cs" />
     <Compile Include="OrmLiteConnectionFactoryTests.cs" />
     <Compile Include="OrmLiteUtilExtensionsTests.cs" />
+    <Compile Include="Shared\Person.cs" />
     <Compile Include="Shared\BuiltInsFactory.cs" />
     <Compile Include="Shared\IModelFactory.cs" />
     <Compile Include="Shared\ModelFactoryBase.cs" />
