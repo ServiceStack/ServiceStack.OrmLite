@@ -812,6 +812,17 @@ namespace ServiceStack.OrmLite
 			return (long)result;
 		}
 
+        internal static T LoadSingleById<T>(this IDbCommand dbCmd, object value)
+        {
+            var row = dbCmd.SingleById<T>(value);
+            if (row == null)
+                return default(T);
+
+            dbCmd.LoadReferences(row);
+
+            return row;
+        }
+
         public static void SaveReference<T, TRef>(this IDbCommand dbCmd, T instance, params TRef[] refs)
         {
             var modelDef = ModelDefinition<T>.Definition;

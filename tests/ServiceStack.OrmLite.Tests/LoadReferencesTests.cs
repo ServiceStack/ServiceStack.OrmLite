@@ -98,9 +98,7 @@ namespace ServiceStack.OrmLite.Tests
             db.SaveReference(customer, customer.Orders);
             Assert.That(customer.Orders.All(x => x.CustomerFetchId == customer.Id));
 
-            var dbCustomer = db.SingleById<CustomerFetch>(customer.Id);
-
-            db.LoadReferences(dbCustomer);
+            var dbCustomer = db.LoadSingleById<CustomerFetch>(customer.Id);
 
             dbCustomer.PrintDump();
             
