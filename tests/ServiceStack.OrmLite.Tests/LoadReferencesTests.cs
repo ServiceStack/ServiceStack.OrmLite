@@ -7,7 +7,14 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    public class CustomerFetch
+    /// <summary>
+    /// Example of adding reference types to a POCO that:
+    ///   - Doesn't persist as complex type blob in OrmLite.
+    ///   - Doesn't impact other queries using the POCO.
+    ///   - Can save and load references independently from itself.
+    ///   - Loaded references are serialized in Text serializers.
+    /// </summary>
+    public class Customer
     {
         [AutoIncrement]
         public int Id { get; set; }
@@ -17,7 +24,7 @@ namespace ServiceStack.OrmLite.Tests
         public CustomerAddress PrimaryAddress { get; set; }
 
         [Reference]
-        public List<OrderFetch> Orders { get; set; }
+        public List<Order> Orders { get; set; }
     }
 
     public class CustomerAddress
@@ -32,7 +39,7 @@ namespace ServiceStack.OrmLite.Tests
         public string Country { get; set; }
     }
 
-    public class OrderFetch
+    public class Order
     {
         [AutoIncrement]
         public int Id { get; set; }
@@ -51,9 +58,9 @@ namespace ServiceStack.OrmLite.Tests
         public void TestFixtureSetUp()
         {
             db = base.OpenDbConnection();
-            db.DropAndCreateTable<CustomerFetch>();
+            db.DropAndCreateTable<Customer>();
             db.DropAndCreateTable<CustomerAddress>();
-            db.DropAndCreateTable<OrderFetch>();
+            db.DropAndCreateTable<Order>();
         }
 
         [TestFixtureTearDown]
@@ -65,27 +72,27 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Does_not_include_complex_reference_type_in_sql()
         {
-            db.Select<CustomerFetch>();
+            db.Select<Customer>();
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"Name\" FROM \"CustomerFetch\""));
         }
 
         [Test]
         public void Can_Save_and_Load_References()
         {
-            var customer = new CustomerFetch
-                {
-                    Name = "Customer 1",
-                    PrimaryAddress = new CustomerAddress {
-                        AddressLine1 = "1 Humpty Street",
-                        City = "Humpty Doo",
-                        State = "Northern Territory",
-                        Country = "Australia"
-                    },
-                    Orders = new[] { 
-                        new OrderFetch { LineItem = "Line 1", Qty = 1, Cost = 1.99m },
-                        new OrderFetch { LineItem = "Line 2", Qty = 2, Cost = 2.99m },
-                    }.ToList(),
-                };
+            var customer = new Customer
+            {
+                Name = "Customer 1",
+                PrimaryAddress = new CustomerAddress {
+                    AddressLine1 = "1 Humpty Street",
+                    City = "Humpty Doo",
+                    State = "Northern Territory",
+                    Country = "Australia"
+                },
+                Orders = new[] { 
+                    new Order { LineItem = "Line 1", Qty = 1, Cost = 1.99m },
+                    new Order { LineItem = "Line 2", Qty = 2, Cost = 2.99m },
+                }.ToList(),
+            };
 
             db.Save(customer);
 
@@ -98,7 +105,7 @@ namespace ServiceStack.OrmLite.Tests
             db.SaveReference(customer, customer.Orders);
             Assert.That(customer.Orders.All(x => x.CustomerFetchId == customer.Id));
 
-            var dbCustomer = db.LoadSingleById<CustomerFetch>(customer.Id);
+            var dbCustomer = db.LoadSingleById<Customer>(customer.Id);
 
             dbCustomer.PrintDump();
             
