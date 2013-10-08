@@ -77,6 +77,8 @@ namespace ServiceStack.OrmLite.Tests
 
 				var rows = db.Select<ModelWithFieldsOfDifferentAndNullableTypes>();
 
+                rows.PrintDump();
+
 				Assert.That(rows, Has.Count.EqualTo(1));
 
 				ModelWithFieldsOfDifferentAndNullableTypes.AssertIsEqual(rows[0], row);

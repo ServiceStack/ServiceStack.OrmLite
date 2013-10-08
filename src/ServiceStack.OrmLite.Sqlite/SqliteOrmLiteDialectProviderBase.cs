@@ -4,6 +4,7 @@ using System.Data;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using ServiceStack.Text;
 using ServiceStack.Text.Common;
 
 namespace ServiceStack.OrmLite.Sqlite
@@ -13,11 +14,24 @@ namespace ServiceStack.OrmLite.Sqlite
         protected SqliteOrmLiteDialectProviderBase()
         {
             base.DateTimeColumnDefinition = base.StringColumnDefinition;
+            base.TimeColumnDefinition = base.StringColumnDefinition;
             base.BoolColumnDefinition = base.IntColumnDefinition;
             base.GuidColumnDefinition = "CHAR(32)";
             base.SelectIdentitySql = "SELECT last_insert_rowid()";
 
             base.InitColumnTypeMap();
+        }
+
+        public override void OnAfterInitColumnTypeMap()
+        {
+            DbTypeMap.Set<TimeSpan>(DbType.String, StringColumnDefinition);
+            DbTypeMap.Set<TimeSpan?>(DbType.String, StringColumnDefinition);
+            DbTypeMap.Set<Guid>(DbType.String, StringColumnDefinition);
+            DbTypeMap.Set<Guid?>(DbType.String, StringColumnDefinition);
+
+            return;
+            DbTypeMap.Set<DateTime>(DbType.String, StringColumnDefinition);
+            DbTypeMap.Set<DateTime?>(DbType.String, StringColumnDefinition);
         }
 
         public static string Password { get; set; }
@@ -125,6 +139,55 @@ namespace ServiceStack.OrmLite.Sqlite
             }
         }
 
+        public override void SetParameter(FieldDefinition fieldDef, IDbDataParameter p)
+        {
+            base.SetParameter(fieldDef, p);
+        }
+
+        public override void SetDbValue(FieldDefinition fieldDef, IDataReader dataReader, int colIndex, object instance)
+        {
+            if (fieldDef == null || fieldDef.SetValueFn == null || colIndex == NotFound) return;
+            if (dataReader.IsDBNull(colIndex))
+            {
+                fieldDef.SetValueFn(instance, null);
+                return;
+            }
+
+            var fieldType = Nullable.GetUnderlyingType(fieldDef.FieldType) ?? fieldDef.FieldType;
+            if (fieldType == typeof(Guid))
+            {
+                var guidStr = dataReader.GetString(colIndex);
+                var guidValue = new Guid(guidStr);
+
+                fieldDef.SetValueFn(instance, guidValue);
+            }
+            else if (fieldType == typeof(DateTime))
+            {
+                try
+                {
+                    var dbValue = dataReader.GetDateTime(colIndex);
+
+                    fieldDef.SetValueFn(instance, dbValue);
+                }
+                catch (Exception)
+                {
+                    var dateStr = dataReader.GetString(colIndex);
+                    var dateValue = DateTimeSerializer.ParseShortestXsdDateTime(dateStr);
+                    fieldDef.SetValueFn(instance, dateValue);
+                }
+            }
+            else if (fieldType == typeof(TimeSpan))
+            {
+                var timeString = dataReader.GetString(colIndex);
+                var timeValue = TimeSpan.Parse(timeString);
+                fieldDef.SetValueFn(instance, timeValue);
+            }
+            else
+            {
+                base.SetDbValue(fieldDef, dataReader, colIndex, instance);
+            }
+        }
+
         public override string GetQuotedValue(object value, Type fieldType)
         {
             if (value == null) return "NULL";
@@ -137,9 +200,16 @@ namespace ServiceStack.OrmLite.Sqlite
             if (fieldType == typeof(DateTime))
             {
                 var dateValue = (DateTime)value;
-                return base.GetQuotedValue(
-                    DateTimeSerializer.ToShortestXsdDateTimeString(dateValue),
-                    typeof(string));
+                
+                //Not forcing co-ercsion into UTC for Sqlite
+                var dateStr = DateTimeSerializer.ToLocalXsdDateTimeString(dateValue);
+                const int tzPos = 6; //"-00:00".Length;
+                var timeZoneMod = dateStr.Substring(dateStr.Length - tzPos, 1);
+                if (timeZoneMod == "+" || timeZoneMod == "-")
+                {
+                    dateStr = dateStr.Substring(0, dateStr.Length - tzPos);
+                }
+                return base.GetQuotedValue(dateStr, typeof(string));
             }
             if (fieldType == typeof(bool))
             {

@@ -78,10 +78,11 @@ namespace ServiceStack.OrmLite.Tests.UseCase
 
 				db.Insert(new User { Id = 1, Name = "A", CreatedDate = DateTime.Now });
                 db.Insert(new User { Id = 2, Name = "B", CreatedDate = DateTime.Now });
-                db.Insert(new User { Id = 3, Name = "B", CreatedDate = DateTime.Now });
 
-                var lastInsertId = db.LastInsertId();
-                Assert.That(lastInsertId, Is.GreaterThan(0));
+                var user = new User {Id = 3, Name = "B", CreatedDate = DateTime.Now};
+                user.Id = (int)db.Insert(user, selectIdentity:true);
+
+                Assert.That(user.Id, Is.GreaterThan(0));
 
                 var rowsB = db.SelectFmt<User>("Name = {0}", "B");
                 Assert.That(rowsB, Has.Count.EqualTo(2));

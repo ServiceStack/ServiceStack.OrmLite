@@ -6,13 +6,18 @@ using ServiceStack.Data;
 
 namespace ServiceStack.OrmLite
 {
+    internal interface IHasDbTransaction
+    {
+        IDbTransaction Transaction { get; set; }
+    }
+
     /// <summary>
     /// Wrapper IDbConnection class to manage db connection events
     /// </summary>
     public class OrmLiteConnectionWrapper
-        : IDbConnection, IHasDbConnection
+        : IDbConnection, IHasDbConnection, IHasDbTransaction
     {
-        public IDbTransaction Transaction { get; internal set; }
+        public IDbTransaction Transaction { get; set; }
         public bool AutoDisposeConnection { get; set; }
         public Action<OrmLiteConnectionWrapper> OnDispose { get; set; }
         public IDbTransaction AlwaysReturnTransaction { get; set; }

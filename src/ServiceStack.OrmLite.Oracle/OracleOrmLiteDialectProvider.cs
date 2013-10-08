@@ -252,9 +252,7 @@ namespace ServiceStack.OrmLite.Oracle
                         pi.SetProperty(obj, Convert.ToInt64(result));
                 }
 
-                p.Value = DbTypeMap.ColumnDbTypeMap.ContainsKey(fieldDef.FieldType) 
-                    ? GetValueOrDbNull<T>(fieldDef, obj) 
-                    : GetQuotedValueOrDbNull<T>(fieldDef, obj);
+                SetParameterValue<T>(fieldDef, p, obj);
             }
         }
 		

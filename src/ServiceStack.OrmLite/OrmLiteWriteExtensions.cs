@@ -580,10 +580,14 @@ namespace ServiceStack.OrmLite
             var modelDef = typeof(T).GetModelDefinition();
 
             var rowsAdded = 0;
-            using (var dbTrans = dbCmd.Connection.BeginTransaction())
-            {
-                dbCmd.Transaction = dbTrans;
 
+            IDbTransaction dbTrans = null;
+
+            if (dbCmd.Transaction == null)
+                dbCmd.Transaction = dbTrans = dbCmd.Connection.BeginTransaction();
+
+            try
+            {
                 foreach (var row in saveRows)
                 {
                     var id = row.GetId();
@@ -608,8 +612,15 @@ namespace ServiceStack.OrmLite
                     }
                 }
 
-                dbTrans.Commit();
+                if (dbTrans != null)
+                    dbTrans.Commit();
             }
+            finally
+            {
+                if (dbTrans != null)
+                    dbTrans.Dispose();
+            }
+
             return rowsAdded;
         }
 		

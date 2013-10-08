@@ -25,7 +25,7 @@ namespace ServiceStack.OrmLite
             finally
             {
                 OrmLiteConfig.TSTransaction = prevTrans;
-                var ormLiteDbConn = this.db as OrmLiteConnection;
+                var ormLiteDbConn = this.db as IHasDbTransaction;
                 if (ormLiteDbConn != null)
                 {
                     ormLiteDbConn.Transaction = prevTrans;

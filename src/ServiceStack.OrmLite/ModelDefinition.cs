@@ -34,6 +34,11 @@ namespace ServiceStack.OrmLite
 
         public bool IsInSchema { get { return this.Schema != null; } }
 
+	    public bool HasAutoIncrementId
+	    {
+	        get { return PrimaryKey != null && PrimaryKey.AutoIncrement; }
+	    }
+
 		public string ModelName
 		{
 			get { return this.Alias ?? this.Name; }
