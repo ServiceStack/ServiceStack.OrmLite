@@ -174,9 +174,8 @@ namespace ServiceStack.OrmLite.Tests.UseCase
                     },
                     CreatedAt = DateTime.UtcNow,
                 };
-                db.Insert(customer);
 
-                var customerId = db.LastInsertId(); //Get Auto Inserted Id
+                var customerId = db.Insert(customer, selectIdentity: true); //Get Auto Inserted Id
                 customer = db.Single<Customer>(new { customer.Email }); //Query
                 Assert.That(customer.Id, Is.EqualTo(customerId));
 
@@ -192,7 +191,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
                     };
                     db.Save(order); //Inserts 1st time
 
-                    order.Id = (int)db.LastInsertId(); //Get Auto Inserted Id
+                    //order.Id populated on Save().
 
                     var orderDetails = new[] {
                         new OrderDetail {
@@ -210,7 +209,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
                         }
                     };
 
-                    db.Insert(orderDetails);
+                    db.Save(orderDetails);
 
                     order.Total = orderDetails.Sum(x => x.UnitPrice * x.Quantity * x.Discount) + order.Freight;
 

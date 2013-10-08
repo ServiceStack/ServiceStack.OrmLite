@@ -57,25 +57,6 @@ namespace ServiceStack.OrmLite
             return this.GetValueFn == null ? null : this.GetValueFn(onInstance);
         }
 
-        public bool CanInsert
-        {
-            get { return !AutoIncrement && !IsComputed; }
-        }
-
-        public void SetValue(object onInstance, object withValue)
-        {
-            if (this.SetValueFn == null) return;
-
-            var convertedValue = OrmLiteConfig.DialectProvider.ConvertDbValue(withValue, this.FieldType);
-            try
-            {
-                SetValueFn(onInstance, convertedValue);
-            }
-            catch (NullReferenceException ex)
-            {
-            }
-        }
-
         public string GetQuotedValue(object fromInstance)
         {
             var value = GetValue(fromInstance);

@@ -19,7 +19,6 @@ using ServiceStack.DataAnnotations;
 using ServiceStack.Logging;
 using ServiceStack.Text;
 using System.Diagnostics;
-using ServiceStack.Common;
 using System.IO;
 using System.Linq.Expressions;
 
@@ -180,7 +179,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        private void UpdateStringColumnDefinitions()
+        public virtual void UpdateStringColumnDefinitions()
         {
             this.StringLengthColumnDefinitionFormat = useUnicode
                 ? StringLengthUnicodeColumnDefinitionFormat
@@ -238,6 +237,12 @@ namespace ServiceStack.OrmLite
             DbTypeMap.Set<byte[]>(DbType.Binary, BlobColumnDefinition);
 
             DbTypeMap.Set<object>(DbType.Object, StringColumnDefinition);
+
+            OnAfterInitColumnTypeMap();
+        }
+
+        public virtual void OnAfterInitColumnTypeMap()
+        {
         }
 
         public string DefaultValueFormat = " DEFAULT ({0})";
@@ -257,29 +262,70 @@ namespace ServiceStack.OrmLite
                    && fieldDefinition != BoolColumnDefinition;
         }
 
+        protected const int NotFound = -1;
+
+        /// <summary>
+        /// Populates row fields during re-hydration of results.
+        /// </summary>
+        public virtual void SetDbValue(FieldDefinition fieldDef, IDataReader dataReader, int colIndex, object instance)
+        {
+            if (fieldDef == null || fieldDef.SetValueFn == null || colIndex == NotFound) return;
+            if (dataReader.IsDBNull(colIndex))
+            {
+                fieldDef.SetValueFn(instance, null);
+                return;
+            }
+
+            object value;
+
+            if (fieldDef.FieldType == typeof(Guid))
+            {
+                value = dataReader.GetGuid(colIndex);
+            }
+            else
+            {
+                value = dataReader.GetValue(colIndex);
+            }
+
+            var convertedValue = ConvertDbValue(value, fieldDef.FieldType);
+            try
+            {
+                fieldDef.SetValueFn(instance, convertedValue);
+            }
+            catch (NullReferenceException ex)
+            {
+            }
+        }
+
         public virtual object ConvertDbValue(object value, Type type)
         {
             if (value == null || value is DBNull) return null;
 
             if (value.GetType() == type)
             {
-                if (type == typeof(byte[]))
-                    return TypeSerializer.DeserializeFromStream<byte[]>(new MemoryStream((byte[])value));
-
                 return value;
             }
 
-            var typeCode = type.GetUnderlyingTypeCode();
-            switch (typeCode)
+            if (!type.IsEnum)
             {
-                case TypeCode.Single:
-                    return value is double ? (float)((double)value) : (float)value;
-                case TypeCode.Double:
-                    return value is float ? (double)((float)value) : (double)value;
-                case TypeCode.Decimal:
-                    return (decimal)value;
-                case TypeCode.String:
-                    return value;
+                var typeCode = type.GetUnderlyingTypeCode();
+                switch (typeCode)
+                {
+                    case TypeCode.Single:
+                        return value is double ? (float)((double)value) : (float)value;
+                    case TypeCode.Double:
+                        return value is float ? (double)((float)value) : (double)value;
+                    case TypeCode.Decimal:
+                        return (decimal)value;
+                    case TypeCode.String:
+                        return value;
+                    case TypeCode.Int16:
+                        return Convert.ToInt16(value);
+                    case TypeCode.Int32:
+                        return Convert.ToInt32(value);
+                    case TypeCode.Int64:
+                        return Convert.ToInt64(value);
+                }
             }
 
             try
@@ -535,7 +581,7 @@ namespace ServiceStack.OrmLite
 
             foreach (var fieldDef in modelDef.FieldDefinitionsArray)
             {
-                if (!fieldDef.CanInsert) continue;
+                if (fieldDef.AutoIncrement || fieldDef.IsComputed) continue;
 
                 //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
                 if (insertFields != null && !insertFields.Contains(fieldDef.Name)) continue;
@@ -657,7 +703,7 @@ namespace ServiceStack.OrmLite
             cmd.Parameters.Add(p);
         }
 
-        private void SetParameter(FieldDefinition fieldDef, IDbDataParameter p)
+        public virtual void SetParameter(FieldDefinition fieldDef, IDbDataParameter p)
         {
             p.ParameterName = OrmLiteConfig.DialectProvider.GetParam(fieldDef.FieldName);
 
@@ -681,19 +727,30 @@ namespace ServiceStack.OrmLite
                 if (fieldDef == null)
                     throw new ArgumentException("Field Definition '{0}' was not found".Fmt(fieldName));
 
-                if (!fieldDef.CanInsert) continue; //TODO: needed??
-
-                p.Value = DbTypeMap.ColumnDbTypeMap.ContainsKey(fieldDef.FieldType)
-                    ? GetValueOrDbNull<T>(fieldDef, obj)
-                    : GetQuotedValueOrDbNull<T>(fieldDef, obj);
+                SetParameterValue<T>(fieldDef, p, obj);
             }
+        }
+
+        public virtual void SetParameterValue<T>(FieldDefinition fieldDef, IDataParameter p, object obj)
+        {
+            var knownType = DbTypeMap.ColumnDbTypeMap.ContainsKey(fieldDef.FieldType);
+            var value = knownType
+                ? GetValueOrDbNull<T>(fieldDef, obj)
+                : GetQuotedValueOrDbNull<T>(fieldDef, obj);
+
+            p.Value = value;
+        }
+
+        protected object GetValue<T>(FieldDefinition fieldDef, object obj)
+        {
+            return obj is T
+               ? fieldDef.GetValue(obj)
+               : GetAnonValue<T>(fieldDef, obj);
         }
 
         protected virtual object GetValueOrDbNull<T>(FieldDefinition fieldDef, object obj)
         {
-            return obj is T 
-                ? (fieldDef.GetValue(obj) ?? DBNull.Value)
-                : (GetAnonValue<T>(fieldDef, obj) ?? DBNull.Value);
+            return GetValue<T>(fieldDef, obj) ?? DBNull.Value;
         }
 
         protected virtual object GetQuotedValueOrDbNull<T>(FieldDefinition fieldDef, object obj)

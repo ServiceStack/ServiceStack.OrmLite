@@ -47,12 +47,9 @@ namespace ServiceStack.OrmLite.Tests
 				db.CreateTable<Point>(true);
 
 				db.Insert(new Point { Width = 4, Height = 1.123f, Top = 3.456d, Left = 2.345m});
+                db.PrintLastSql();
 
-				var points = db.SelectFmt<Point>("Height={0}", 1.123f);
-
-			    points.PrintDump();
-
-                db.Select<Point>().PrintDump();
+                var points = db.SelectFmt<Point>("round(Height,3)={0}", 1.123);
 
 				Assert.That(points[0].Width, Is.EqualTo(4));
 				Assert.That(points[0].Height, Is.EqualTo(1.123f));

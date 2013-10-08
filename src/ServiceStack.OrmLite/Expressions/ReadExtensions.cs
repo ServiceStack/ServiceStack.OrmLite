@@ -112,6 +112,7 @@ namespace ServiceStack.OrmLite
 		private static T ConvertTo<T>(IDataReader dataReader)
         {
 			var fieldDefs = ModelDefinition<T>.Definition.AllFieldDefinitionsArray;
+            var dialectProvider = OrmLiteConfig.DialectProvider;
 
 			using (dataReader)
 			{
@@ -123,14 +124,10 @@ namespace ServiceStack.OrmLite
 
 					for (int i = 0; i<dataReader.FieldCount; i++)
 					{
-					    var fieldDef = fieldDefs.FirstOrDefault(
-					        x =>
-					        namingStrategy.GetColumnName(x.FieldName).ToUpper() ==
-					        dataReader.GetName(i).ToUpper());
+					    var fieldDef = fieldDefs.FirstOrDefault(x =>
+					        namingStrategy.GetColumnName(x.FieldName).ToUpper() == dataReader.GetName(i).ToUpper());
 
-						if (fieldDef == null) continue;
-						var value = dataReader.GetValue(i);
-						fieldDef.SetValue(row, value);
+                        dialectProvider.SetDbValue(fieldDef, dataReader, i, row);
 					}
 					
 					return row;
@@ -143,6 +140,7 @@ namespace ServiceStack.OrmLite
 		{
 			var fieldDefs = ModelDefinition<T>.Definition.AllFieldDefinitionsArray;
 			var fieldDefCache = new Dictionary<int, FieldDefinition>();
+            var dialectProvider = OrmLiteConfig.DialectProvider;
 
 			var to = new List<T>();
 			using (dataReader)
@@ -151,24 +149,20 @@ namespace ServiceStack.OrmLite
 				{
                     var row = OrmLiteUtilExtensions.CreateInstance<T>();
 
-                    var namingStrategy = OrmLiteConfig.DialectProvider.NamingStrategy;
+				    var namingStrategy = dialectProvider.NamingStrategy;
 
 					for (int i = 0; i<dataReader.FieldCount; i++)
 					{
 						FieldDefinition fieldDef;
 						if (!fieldDefCache.TryGetValue(i, out fieldDef))
 						{
-						    fieldDef = fieldDefs.FirstOrDefault(
-						        x =>
-						        namingStrategy.GetColumnName(x.FieldName).ToUpper() ==
-						        dataReader.GetName(i).ToUpper());
-							fieldDefCache[i] = fieldDef;
+						    fieldDef = fieldDefs.FirstOrDefault(x =>
+						        namingStrategy.GetColumnName(x.FieldName).ToUpper() == dataReader.GetName(i).ToUpper());
+							
+                            fieldDefCache[i] = fieldDef;
 						}
 
-						if (fieldDef == null) continue;
-
-						var value = dataReader.GetValue(i);
-						fieldDef.SetValue(row, value);
+                        dialectProvider.SetDbValue(fieldDef, dataReader, i, row);
 					}
 					to.Add(row);
 				}
