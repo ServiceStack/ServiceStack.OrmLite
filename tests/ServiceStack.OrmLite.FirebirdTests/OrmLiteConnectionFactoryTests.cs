@@ -18,7 +18,10 @@ namespace ServiceStack.OrmLite.FirebirdTests
         [Test]
         public void AutoDispose_ConnectionFactory_disposes_connection()
         {
-            var factory = new OrmLiteConnectionFactory("User=SYSDBA;Password=masterkey;Database=ormlite-tests.fdb;DataSource=localhost;Dialect=3;charset=ISO8859_1;", true);
+            var factory = new OrmLiteConnectionFactory("User=SYSDBA;Password=masterkey;Database=ormlite-tests.fdb;DataSource=localhost;Dialect=3;charset=ISO8859_1;")
+            {
+                AutoDisposeConnection = true,
+            };
 
             using (var db = factory.OpenDbConnection())
             {
@@ -39,7 +42,10 @@ namespace ServiceStack.OrmLite.FirebirdTests
         [Test]
         public void NonAutoDispose_ConnectionFactory_reuses_connection()
         {
-            var factory = new OrmLiteConnectionFactory("User=SYSDBA;Password=masterkey;Database=ormlite-tests.fdb;DataSource=localhost;Dialect=3;charset=ISO8859_1;", false);
+            var factory = new OrmLiteConnectionFactory("User=SYSDBA;Password=masterkey;Database=ormlite-tests.fdb;DataSource=localhost;Dialect=3;charset=ISO8859_1;")
+            {
+                AutoDisposeConnection = false,
+            };
 
             using (var db = factory.OpenDbConnection())
             {
@@ -60,7 +66,10 @@ namespace ServiceStack.OrmLite.FirebirdTests
         [Test]
         public void NonAutoDispose_ConnectionFactory_delete_and_drop()
         {
-            var factory = new OrmLiteConnectionFactory("User=SYSDBA;Password=masterkey;Database=ormlite-tests.fdb;DataSource=localhost;Dialect=3;charset=ISO8859_1;", false);
+            var factory = new OrmLiteConnectionFactory("User=SYSDBA;Password=masterkey;Database=ormlite-tests.fdb;DataSource=localhost;Dialect=3;charset=ISO8859_1;")
+            {
+                AutoDisposeConnection = false,
+            };
 
             using (var db = factory.OpenDbConnection())
             {

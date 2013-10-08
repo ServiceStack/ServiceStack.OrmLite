@@ -33,8 +33,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
             const int NoOfRobots = 1000;
 
             var dbFactory = new OrmLiteConnectionFactory(
-                "~/App_Data/robots-master.sqlite".MapAbsolutePath(), 
-                false, SqliteDialect.Provider);
+                "~/App_Data/robots-master.sqlite".MapAbsolutePath(), SqliteDialect.Provider);
             
             //var dbFactory = new OrmLiteConnectionFactory(
             //    "Data Source=localhost;Initial Catalog=RobotsMaster;Integrated Security=SSPI", 

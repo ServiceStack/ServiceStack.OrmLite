@@ -1,8 +1,6 @@
 using System.Collections.Generic;
 using Northwind.Common.DataModel;
 using NUnit.Framework;
-using ServiceStack.OrmLite.SqlServer;
-using ServiceStack.OrmLite.Sqlite;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
@@ -14,7 +12,10 @@ namespace ServiceStack.OrmLite.Tests
         public void AutoDispose_ConnectionFactory_disposes_connection()
         {
             OrmLiteConfig.DialectProvider = SqliteDialect.Provider;
-            var factory = new OrmLiteConnectionFactory(":memory:", true);
+            var factory = new OrmLiteConnectionFactory(":memory:")
+            {
+                AutoDisposeConnection = true
+            };
 
             using (var db = factory.OpenDbConnection())
             {
@@ -33,7 +34,29 @@ namespace ServiceStack.OrmLite.Tests
         public void NonAutoDispose_ConnectionFactory_reuses_connection()
         {
             OrmLiteConfig.DialectProvider = SqliteDialect.Provider;
-            var factory = new OrmLiteConnectionFactory(":memory:", false);
+            var factory = new OrmLiteConnectionFactory(":memory:")
+            {
+                AutoDisposeConnection = false,
+            };
+
+            using (var db = factory.OpenDbConnection())
+            {
+                db.CreateTable<Shipper>(false);
+                db.Insert(new Shipper { CompanyName = "I am shipper" });
+            }
+
+            using (var db = factory.OpenDbConnection())
+            {
+                db.CreateTable<Shipper>(false);
+                Assert.That(db.Select<Shipper>(), Has.Count.EqualTo(1));
+            }
+        }
+
+        [Test]
+        public void Default_inmemory_ConnectionFactory_reuses_connection()
+        {
+            OrmLiteConfig.DialectProvider = SqliteDialect.Provider;
+            var factory = new OrmLiteConnectionFactory(":memory:");
 
             using (var db = factory.OpenDbConnection())
             {
@@ -57,7 +80,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_open_multiple_nested_connections()
         {
-            var factory = new OrmLiteConnectionFactory(Config.SqliteMemoryDb, false, SqliteDialect.Provider);
+            var factory = new OrmLiteConnectionFactory(Config.SqliteMemoryDb, SqliteDialect.Provider);
             factory.RegisterConnection("sqlserver", Config.SqlServerBuildDb, SqlServerDialect.Provider);
             factory.RegisterConnection("sqlite-file", Config.SqliteFileDb, SqliteDialect.Provider);
 
@@ -95,7 +118,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_open_multiple_nested_connections_in_any_order()
         {
-            var factory = new OrmLiteConnectionFactory(Config.SqliteMemoryDb, false, SqliteDialect.Provider);
+            var factory = new OrmLiteConnectionFactory(Config.SqliteMemoryDb, SqliteDialect.Provider);
             factory.RegisterConnection("sqlserver", Config.SqlServerBuildDb, SqlServerDialect.Provider);
             factory.RegisterConnection("sqlite-file", Config.SqliteFileDb, SqliteDialect.Provider);
 
