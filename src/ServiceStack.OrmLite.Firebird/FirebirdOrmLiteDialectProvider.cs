@@ -40,6 +40,8 @@ namespace ServiceStack.OrmLite.Firebird
 			base.DefaultStringLength=128;
 			base.InitColumnTypeMap();
 			DefaultValueFormat = " DEFAULT '{0}'";
+
+            NamingStrategy = new UpperCaseNamingStrategy();
 		}
 		
 		public override IDbConnection CreateConnection(string connectionString, Dictionary<string, string> options)
