@@ -11,7 +11,7 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Returns results from the active connection.
         /// </summary>
-        public static List<T> Select<T>(this IDbConnection dbConn) 
+        public static List<T> Select<T>(this IDbConnection dbConn)
         {
             return dbConn.Exec(dbCmd => dbCmd.Select<T>());
         }
@@ -319,7 +319,7 @@ namespace ServiceStack.OrmLite
         {
             return dbConn.Exec(dbCmd => dbCmd.ExistsFmt<T>(sqlFormat, filterParams));
         }
-        
+
         /// <summary>
         /// Returns the first column in a List using a parameterized query. E.g:
         /// <para>db.SqlColumn&lt;string&gt;("SELECT LastName FROM Person WHERE Age &lt; @age", new { age = 50 })</para>

@@ -52,38 +52,38 @@ namespace ServiceStack.OrmLite
         {
             var modelDef = modelType.GetModelDefinition();
 
-			var dialectProvider = OrmLiteConfig.DialectProvider;
-			var tableName = dialectProvider.NamingStrategy.GetTableName(modelDef.ModelName);
-			var tableExists = dialectProvider.DoesTableExist(dbCmd, tableName);
-			if (overwrite && tableExists)
+            var dialectProvider = OrmLiteConfig.DialectProvider;
+            var tableName = dialectProvider.NamingStrategy.GetTableName(modelDef.ModelName);
+            var tableExists = dialectProvider.DoesTableExist(dbCmd, tableName);
+            if (overwrite && tableExists)
             {
                 DropTable(dbCmd, modelDef);
-            	tableExists = false;
+                tableExists = false;
             }
 
             try
             {
-				if (!tableExists)
-				{
-					ExecuteSql(dbCmd, dialectProvider.ToCreateTableStatement(modelType));
+                if (!tableExists)
+                {
+                    ExecuteSql(dbCmd, dialectProvider.ToCreateTableStatement(modelType));
 
-					var sqlIndexes = dialectProvider.ToCreateIndexStatements(modelType);
-					foreach (var sqlIndex in sqlIndexes)
-					{
-						try
-						{
-							dbCmd.ExecuteSql(sqlIndex);
-						}
-						catch (Exception exIndex)
-						{
-							if (IgnoreAlreadyExistsError(exIndex))
-							{
-								Log.DebugFormat("Ignoring existing index '{0}': {1}", sqlIndex, exIndex.Message);
-								continue;
-							}
-							throw;
-						}
-					}
+                    var sqlIndexes = dialectProvider.ToCreateIndexStatements(modelType);
+                    foreach (var sqlIndex in sqlIndexes)
+                    {
+                        try
+                        {
+                            dbCmd.ExecuteSql(sqlIndex);
+                        }
+                        catch (Exception exIndex)
+                        {
+                            if (IgnoreAlreadyExistsError(exIndex))
+                            {
+                                Log.DebugFormat("Ignoring existing index '{0}': {1}", sqlIndex, exIndex.Message);
+                                continue;
+                            }
+                            throw;
+                        }
+                    }
 
                     var sequenceList = dialectProvider.SequenceList(modelType);
                     if (sequenceList.Count > 0)
@@ -118,7 +118,7 @@ namespace ServiceStack.OrmLite
                             }
                         }
                     }
-				}
+                }
             }
             catch (Exception ex)
             {
@@ -132,7 +132,6 @@ namespace ServiceStack.OrmLite
         }
 
         internal static void DropTable<T>(this IDbCommand dbCmd)
-            
         {
             DropTable(dbCmd, ModelDefinition<T>.Definition);
         }
@@ -198,16 +197,16 @@ namespace ServiceStack.OrmLite
             //ignore Sqlite table already exists error
             const string sqliteAlreadyExistsError = "already exists";
             const string sqlServerAlreadyExistsError = "There is already an object named";
-			 return ex.Message.Contains(sqliteAlreadyExistsError)
-                   || ex.Message.Contains(sqlServerAlreadyExistsError)	;
+            return ex.Message.Contains(sqliteAlreadyExistsError)
+                  || ex.Message.Contains(sqlServerAlreadyExistsError);
         }
-		
-		private static bool IgnoreAlreadyExistsGeneratorError(Exception ex)
+
+        private static bool IgnoreAlreadyExistsGeneratorError(Exception ex)
         {
             const string fbError = "attempt to store duplicate value";
             return ex.Message.Contains(fbError);
         }
-		
+
         public static T PopulateWithSqlReader<T>(this T objWithProperties, IDataReader dataReader)
         {
             var fieldDefs = ModelDefinition<T>.Definition.AllFieldDefinitionsArray;
@@ -227,15 +226,15 @@ namespace ServiceStack.OrmLite
             }
         }
 
-    	private const int NotFound = -1;
+        private const int NotFound = -1;
         public static T PopulateWithSqlReader<T>(this T objWithProperties, IDataReader dataReader, FieldDefinition[] fieldDefs, Dictionary<string, int> indexCache)
         {
-			try
-			{
-			    var dialectProvider = OrmLiteConfig.DialectProvider;
+            try
+            {
+                var dialectProvider = OrmLiteConfig.DialectProvider;
 
-				foreach (var fieldDef in fieldDefs)
-				{
+                foreach (var fieldDef in fieldDefs)
+                {
                     int index;
                     if (indexCache != null)
                     {
@@ -258,15 +257,15 @@ namespace ServiceStack.OrmLite
                             index = TryGuessColumnIndex(fieldDef.FieldName, dataReader);
                         }
                     }
-                       
+
                     dialectProvider.SetDbValue(fieldDef, dataReader, index, objWithProperties);
-				}
-			}
-			catch (Exception ex)
-			{
-				Log.Error(ex);
-			} 
-			return objWithProperties;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex);
+            }
+            return objWithProperties;
         }
 
         private static readonly Regex AllowedPropertyCharsRegex = new Regex(@"[^0-9a-zA-Z_]",
@@ -349,7 +348,7 @@ namespace ServiceStack.OrmLite
         }
 
         internal static int UpdateAll<T>(this IDbCommand dbCmd, IEnumerable<T> objs)
-		{
+        {
             IDbTransaction dbTrans = null;
 
             int count = 0;
@@ -379,7 +378,7 @@ namespace ServiceStack.OrmLite
             }
 
             return count;
-		}
+        }
 
         internal static int Delete<T>(this IDbCommand dbCmd, object anonType)
         {
@@ -486,8 +485,8 @@ namespace ServiceStack.OrmLite
 
         internal static int DeleteAll(this IDbCommand dbCmd, Type tableType)
         {
-			return dbCmd.ExecuteSql(OrmLiteConfig.DialectProvider.ToDeleteStatement(tableType, null));
-		}
+            return dbCmd.ExecuteSql(OrmLiteConfig.DialectProvider.ToDeleteStatement(tableType, null));
+        }
 
         internal static int DeleteFmt<T>(this IDbCommand dbCmd, string sqlFilter, params object[] filterParams)
         {
@@ -517,7 +516,7 @@ namespace ServiceStack.OrmLite
         }
 
         internal static void InsertAll<T>(this IDbCommand dbCmd, IEnumerable<T> objs)
-		{
+        {
             IDbTransaction dbTrans = null;
 
             try
@@ -636,13 +635,13 @@ namespace ServiceStack.OrmLite
 
             return rowsAdded;
         }
-		
-		// Procedures
+
+        // Procedures
         internal static void ExecuteProcedure<T>(this IDbCommand dbCommand, T obj)
         {
-			string sql = OrmLiteConfig.DialectProvider.ToExecuteProcedureStatement(obj);
-			dbCommand.CommandType = CommandType.StoredProcedure;
-			dbCommand.ExecuteSql(sql);
-		}
+            string sql = OrmLiteConfig.DialectProvider.ToExecuteProcedureStatement(obj);
+            dbCommand.CommandType = CommandType.StoredProcedure;
+            dbCommand.ExecuteSql(sql);
+        }
     }
 }

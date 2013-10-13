@@ -10,7 +10,7 @@ namespace ServiceStack.OrmLite
         [ThreadStatic]
         internal static string LastCommandText;
 
-        public static SqlExpression<T> SqlExpression<T>(this IDbConnection dbConn) 
+        public static SqlExpression<T> SqlExpression<T>(this IDbConnection dbConn)
         {
             return dbConn.GetDialectProvider().SqlExpression<T>();
         }
@@ -118,8 +118,8 @@ namespace ServiceStack.OrmLite
         public static IOrmLiteDialectProvider GetDialectProvider(this IDbConnection dbConn)
         {
             var ormLiteDbConn = dbConn as OrmLiteConnection;
-            return ormLiteDbConn != null 
-                ? ormLiteDbConn.Factory.DialectProvider 
+            return ormLiteDbConn != null
+                ? ormLiteDbConn.Factory.DialectProvider
                 : OrmLiteConfig.DialectProvider;
         }
 
@@ -198,7 +198,7 @@ namespace ServiceStack.OrmLite
         /// Returns a scalar result from using an SqlExpression lambda. E.g:
         /// <para>db.Scalar&lt;Person, int&gt;(x =&gt; Sql.Max(x.Age), , x =&gt; x.Age &lt; 50)</para>
         /// </summary>        
-        public static TKey Scalar<T, TKey>(this IDbConnection dbConn, 
+        public static TKey Scalar<T, TKey>(this IDbConnection dbConn,
             Expression<Func<T, TKey>> field, Expression<Func<T, bool>> predicate)
         {
             return dbConn.Exec(dbCmd => dbCmd.Scalar(field, predicate));

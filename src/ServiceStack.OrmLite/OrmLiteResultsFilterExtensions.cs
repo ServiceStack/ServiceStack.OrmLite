@@ -15,7 +15,7 @@ namespace ServiceStack.OrmLite
         {
             if (anonType != null)
                 dbCmd.SetParameters(anonType, (bool)false);
-            
+
             dbCmd.CommandText = sql;
 
             if (OrmLiteConfig.ResultsFilter != null)
@@ -244,7 +244,7 @@ namespace ServiceStack.OrmLite
 
             if (OrmLiteConfig.ResultsFilter != null)
             {
-                return OrmLiteConfig.ResultsFilter.GetLookup<K,V>(dbCmd);
+                return OrmLiteConfig.ResultsFilter.GetLookup<K, V>(dbCmd);
             }
 
             using (var reader = dbCmd.ExecReader(dbCmd.CommandText))

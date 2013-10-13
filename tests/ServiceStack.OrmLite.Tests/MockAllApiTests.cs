@@ -35,7 +35,8 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_mock_all_Select_Apis()
         {
-            using (new ResultsFilter {
+            using (new ResultsFilter
+            {
                 Results = new[] {
                     new Person { Id = 1, FirstName = "Mocked", LastName = "Person", Age = 100 }
                 },
@@ -81,21 +82,24 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_nest_ResultFilters()
         {
-            using (new ResultsFilter {
-                Results = new[] { new Person {Id = 1, FirstName = "Mocked", LastName = "Person", Age = 100} } 
+            using (new ResultsFilter
+            {
+                Results = new[] { new Person { Id = 1, FirstName = "Mocked", LastName = "Person", Age = 100 } }
             })
             {
                 Assert.That(db.Select<Person>(x => x.Age > 40)[0].FirstName, Is.EqualTo("Mocked"));
 
-                using (new ResultsFilter {
+                using (new ResultsFilter
+                {
                     Results = new[] { new Person { Id = 1, FirstName = "MockedInner", LastName = "Person", Age = 100 } }
                 })
                 {
                     Assert.That(db.Select<Person>(x => x.Age > 40)[0].FirstName, Is.EqualTo("MockedInner"));
 
-                    using (new ResultsFilter {
+                    using (new ResultsFilter
+                    {
                         Results = new[] { new Person { Id = 1, FirstName = "MockedInnerInner", LastName = "Person", Age = 100 } }
-                    }) 
+                    })
                     {
                         Assert.That(db.Select<Person>(x => x.Age > 40)[0].FirstName, Is.EqualTo("MockedInnerInner"));
                     }
@@ -317,13 +321,13 @@ namespace ServiceStack.OrmLite.Tests
             })
             {
                 int i = 0;
-                
+
                 i++; db.Insert(new Person { Id = 7, FirstName = "Amy", LastName = "Winehouse", Age = 27 });
                 Assert.That(sqlStatements.Count, Is.EqualTo(i));
-                
+
                 i++; db.InsertAll(new[] { new Person { Id = 10, FirstName = "Biggie", LastName = "Smalls", Age = 24 } });
                 Assert.That(sqlStatements.Count, Is.EqualTo(i));
-                
+
                 i++; db.InsertOnly(new PersonWithAutoId { FirstName = "Amy", Age = 27 }, ev => ev.Insert(p => new { p.FirstName, p.Age }));
                 Assert.That(sqlStatements.Count, Is.EqualTo(i));
 
@@ -349,14 +353,14 @@ namespace ServiceStack.OrmLite.Tests
             })
             {
                 int i = 0;
-                
+
                 //Force Insert by returning null for existingRow
                 using (new ResultsFilter { SqlFilter = sql => sqlStatements.Add(sql) })
                 {
                     i += 2; db.Save(new Person { Id = 11, FirstName = "Amy", LastName = "Winehouse", Age = 27 }); //1 Read + 1 Insert
                 }
-                
-                i+=2; db.Save(new Person { Id = 11, FirstName = "Amy", LastName = "Winehouse", Age = 27 }); //1 Read + 1 Update
+
+                i += 2; db.Save(new Person { Id = 11, FirstName = "Amy", LastName = "Winehouse", Age = 27 }); //1 Read + 1 Update
                 Assert.That(sqlStatements.Count, Is.EqualTo(i));
 
                 i += 3; db.SaveAll(new[]{ new Person { Id = 14, FirstName = "Amy", LastName = "Winehouse", Age = 27 },
@@ -386,7 +390,7 @@ namespace ServiceStack.OrmLite.Tests
                     new Order { LineItem = "Line 2", Qty = 2, Cost = 2.99m },
                 }.ToList(),
             };
-            
+
             var sqlStatements = new List<string>();
             using (new ResultsFilter
                 {

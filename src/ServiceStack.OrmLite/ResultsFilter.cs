@@ -22,7 +22,7 @@ namespace ServiceStack.OrmLite
         T GetSingle<T>(IDbCommand dbCmd);
 
         object GetRefSingle(IDbCommand dbCmd, Type refType);
-        
+
         T GetScalar<T>(IDbCommand dbCmd);
 
         object GetScalar(IDbCommand dbCmd);
@@ -75,12 +75,12 @@ namespace ServiceStack.OrmLite
 
         public ResultsFilter(IEnumerable results = null)
         {
-            this.Results = results ?? new object[]{};
+            this.Results = results ?? new object[] { };
 
             previousFilter = OrmLiteConfig.ResultsFilter;
             OrmLiteConfig.ResultsFilter = this;
         }
-        
+
         private void Filter(IDbCommand dbCmd)
         {
             if (SqlFilter != null)
@@ -290,7 +290,7 @@ namespace ServiceStack.OrmLite
                     to[key] = list = new List<V>();
                 }
 
-                list.AddRange(from object item in (IEnumerable) entry.Value select (V) item);
+                list.AddRange(from object item in (IEnumerable)entry.Value select (V)item);
             }
 
             return to;
