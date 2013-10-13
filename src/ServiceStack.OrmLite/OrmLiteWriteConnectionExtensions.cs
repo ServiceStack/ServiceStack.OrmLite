@@ -184,18 +184,18 @@ namespace ServiceStack.OrmLite
         /// <para>db.Update(new Person { Id = 1, FirstName = "Tupac", LastName = "Shakur", Age = 25 },</para>
         /// <para>new Person { Id = 2, FirstName = "Biggie", LastName = "Smalls", Age = 24 })</para>
         /// </summary>
-        public static void Update<T>(this IDbConnection dbConn, params T[] objs)
+        public static int Update<T>(this IDbConnection dbConn, params T[] objs)
         {
-            dbConn.Exec(dbCmd => dbCmd.Update(objs));
+            return dbConn.Exec(dbCmd => dbCmd.Update(objs));
         }
 
         /// <summary>
         /// Updates 1 or more POCOs in a transaction. E.g:
         /// <para>db.UpdateAll(new[] { new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27 } })</para>
         /// </summary>
-        public static void UpdateAll<T>(this IDbConnection dbConn, IEnumerable<T> objs)
+        public static int UpdateAll<T>(this IDbConnection dbConn, IEnumerable<T> objs)
         {
-            dbConn.Exec(dbCmd => dbCmd.UpdateAll(objs));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateAll(objs));
         }
 
         /// <summary>
@@ -212,9 +212,9 @@ namespace ServiceStack.OrmLite
         /// Delete 1 or more rows in a transaction using an anonymous type filter. E.g:
         /// <para>db.Delete&lt;Person&gt;(new { FirstName = "Jimi", Age = 27 }, new { FirstName = "Janis", Age = 27 })</para>
         /// </summary>
-        public static void Delete<T>(this IDbConnection dbConn, params object[] anonFilters)
+        public static int Delete<T>(this IDbConnection dbConn, params object[] anonFilters)
         {
-            dbConn.Exec(dbCmd => dbCmd.Delete<T>(anonFilters));
+            return dbConn.Exec(dbCmd => dbCmd.Delete<T>(anonFilters));
         }
 
         /// <summary>
@@ -231,9 +231,9 @@ namespace ServiceStack.OrmLite
         /// Delete 1 or more rows in a transaction using all fields in the filter. E.g:
         /// <para>db.Delete(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27 })</para>
         /// </summary>
-        public static void Delete<T>(this IDbConnection dbConn, params T[] allFieldsFilters)
+        public static int Delete<T>(this IDbConnection dbConn, params T[] allFieldsFilters)
         {
-            dbConn.Exec(dbCmd => dbCmd.Delete<T>(allFieldsFilters));
+            return dbConn.Exec(dbCmd => dbCmd.Delete<T>(allFieldsFilters));
         }
 
         /// <summary>
@@ -252,9 +252,9 @@ namespace ServiceStack.OrmLite
         /// new Person { FirstName = "Janis", Age = 27 })</para>
         /// </summary>
         /// <returns>number of rows deleted</returns>
-        public static void DeleteNonDefaults<T>(this IDbConnection dbConn, params T[] nonDefaultsFilters)
+        public static int DeleteNonDefaults<T>(this IDbConnection dbConn, params T[] nonDefaultsFilters)
         {
-            dbConn.Exec(dbCmd => dbCmd.DeleteNonDefaults(nonDefaultsFilters));
+            return dbConn.Exec(dbCmd => dbCmd.DeleteNonDefaults(nonDefaultsFilters));
         }
 
         /// <summary>
@@ -311,9 +311,9 @@ namespace ServiceStack.OrmLite
         /// </summary>
         /// <para>db.DeleteFmt(typeof(Person), "Age = {0}", 27)</para>
         /// <returns>number of rows deleted</returns>
-        public static void DeleteFmt(this IDbConnection dbConn, Type tableType, string sqlFilter, params object[] filterParams)
+        public static int DeleteFmt(this IDbConnection dbConn, Type tableType, string sqlFilter, params object[] filterParams)
         {
-            dbConn.Exec(dbCmd => dbCmd.DeleteFmt(tableType, sqlFilter, filterParams));
+            return dbConn.Exec(dbCmd => dbCmd.DeleteFmt(tableType, sqlFilter, filterParams));
         }
 
         /// <summary>

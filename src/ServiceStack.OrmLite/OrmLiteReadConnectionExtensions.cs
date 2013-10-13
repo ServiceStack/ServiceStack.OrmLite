@@ -371,7 +371,7 @@ namespace ServiceStack.OrmLite
         /// <returns>number of rows affected</returns>
         public static int ExecuteNonQuery(this IDbConnection dbConn, string sql)
         {
-            return dbConn.Exec(dbCmd => dbCmd.ExecuteNonQuery(sql));
+            return dbConn.Exec(dbCmd => dbCmd.ExecNonQuery(sql));
         }
 
         /// <summary>
@@ -381,7 +381,7 @@ namespace ServiceStack.OrmLite
         /// <returns>number of rows affected</returns>
         public static int ExecuteNonQuery(this IDbConnection dbConn, string sql, object anonType)
         {
-            return dbConn.Exec(dbCmd => dbCmd.ExecuteNonQuery(sql, anonType));
+            return dbConn.Exec(dbCmd => dbCmd.ExecNonQuery(sql, anonType));
         }
 
         /// <summary>
@@ -390,7 +390,7 @@ namespace ServiceStack.OrmLite
         /// <returns>number of rows affected</returns>
         public static int ExecuteNonQuery(this IDbConnection dbConn, string sql, Dictionary<string, object> dict)
         {
-            return dbConn.Exec(dbCmd => dbCmd.ExecuteNonQuery(sql, dict));
+            return dbConn.Exec(dbCmd => dbCmd.ExecNonQuery(sql, dict));
         }
 
         /// <summary>
@@ -420,7 +420,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static long LongScalar(this IDbConnection dbConn)
         {
-            return dbConn.Exec(dbCmd => dbCmd.LongScalar());
+            return dbConn.Exec(dbCmd => dbCmd.ExecLongScalar());
         }
 
         /// <summary>
@@ -436,18 +436,18 @@ namespace ServiceStack.OrmLite
         /// Populates the related references with the instance primary key and saves them. Uses '(T)Id' naming convention. E.g:
         /// <para>db.SaveReference(customer, customer.Orders)</para> 
         /// </summary>
-        public static void SaveReference<T, TRef>(this IDbConnection dbConn, T instance, params TRef[] refs)
+        public static void SaveReferences<T, TRef>(this IDbConnection dbConn, T instance, params TRef[] refs)
         {
-            dbConn.Exec(dbCmd => dbCmd.SaveReference(instance, refs));
+            dbConn.Exec(dbCmd => dbCmd.SaveReferences(instance, refs));
         }
 
         /// <summary>
         /// Populates the related references with the instance primary key and saves them. Uses '(T)Id' naming convention. E.g:
         /// <para>db.SaveReference(customer, customer.Orders)</para> 
         /// </summary>
-        public static void SaveReference<T, TRef>(this IDbConnection dbConn, T instance, List<TRef> refs)
+        public static void SaveReferences<T, TRef>(this IDbConnection dbConn, T instance, List<TRef> refs)
         {
-            dbConn.Exec(dbCmd => dbCmd.SaveReference(instance, refs.ToArray()));
+            dbConn.Exec(dbCmd => dbCmd.SaveReferences(instance, refs.ToArray()));
         }
 
         /// <summary>
@@ -456,7 +456,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static void SaveReferences<T, TRef>(this IDbConnection dbConn, T instance, IEnumerable<TRef> refs)
         {
-            dbConn.Exec(dbCmd => dbCmd.SaveReference(instance, refs.ToArray()));
+            dbConn.Exec(dbCmd => dbCmd.SaveReferences(instance, refs.ToArray()));
         }
 
         /// <summary>

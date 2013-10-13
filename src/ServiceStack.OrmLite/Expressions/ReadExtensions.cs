@@ -17,29 +17,23 @@ namespace ServiceStack.OrmLite
 		{
 			var expr = OrmLiteConfig.DialectProvider.SqlExpression<T>();
 			string sql = expression(expr).ToSelectStatement();
-			using (var reader = dbCmd.ExecReader(sql))
-			{
-				return ConvertToList<T>(reader);
-			}
+
+            return dbCmd.ExprConvertToList<T>(sql);
 		}
 
 	    internal static List<T> Select<T>(this IDbCommand dbCmd, SqlExpression<T> expression)
         {
             string sql = expression.ToSelectStatement();
-            using (var reader = dbCmd.ExecReader(sql))
-            {
-                return ConvertToList<T>(reader);
-            }
+
+            return dbCmd.ExprConvertToList<T>(sql);
         }
 
 	    internal static List<T> Select<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
         {
             var expr = OrmLiteConfig.DialectProvider.SqlExpression<T>();
             string sql = expr.Where(predicate).ToSelectStatement();
-            using (var reader = dbCmd.ExecReader(sql))
-            {
-                return ConvertToList<T>(reader);
-            }
+
+            return dbCmd.ExprConvertToList<T>(sql);
         }
 
         internal static T Single<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression)
@@ -58,10 +52,8 @@ namespace ServiceStack.OrmLite
 	    internal static T Single<T>(this IDbCommand dbCmd, SqlExpression<T> expression)
 		{
             string sql = expression.Limit(1).ToSelectStatement();
-			using (var dbReader = dbCmd.ExecReader(sql))
-			{
-				return ConvertTo<T>(dbReader);
-			}
+
+            return dbCmd.ExprConvertTo<T>(sql);
 		}
 
 		public static TKey Scalar<T, TKey>(this IDbCommand dbCmd, Expression<Func<T, TKey>> field)
@@ -108,8 +100,8 @@ namespace ServiceStack.OrmLite
             string sql = ev.ToCountStatement();
             return dbCmd.Scalar<long>(sql);
         }
-		
-		private static T ConvertTo<T>(IDataReader dataReader)
+
+	    internal static T ExprConvertTo<T>(this IDataReader dataReader)
         {
 			var fieldDefs = ModelDefinition<T>.Definition.AllFieldDefinitionsArray;
             var dialectProvider = OrmLiteConfig.DialectProvider;
@@ -135,8 +127,8 @@ namespace ServiceStack.OrmLite
 				return default(T);
 			}
 		}
-		
-		private static List<T> ConvertToList<T>(IDataReader dataReader)
+
+        internal static List<T> ExprConvertToList<T>(this IDataReader dataReader)
 		{
 			var fieldDefs = ModelDefinition<T>.Definition.AllFieldDefinitionsArray;
 			var fieldDefCache = new Dictionary<int, FieldDefinition>();
@@ -169,35 +161,7 @@ namespace ServiceStack.OrmLite
 			}
 			return to;
 		}
-
-        /*
-        private static T PopulateWithSqlReader<T>( T objWithProperties, IDataReader dataReader, FieldDefinition[] fieldDefs)
-        {
-            foreach (var fieldDef in fieldDefs)
-            {
-                try{
-                    // NOTE: this is a nasty ineffeciency here when we're calling this for multiple rows!
-                    // we should only call GetOrdinal once per column per result set
-                    // and one could only wish for a -1 return instead of an IndexOutOfRangeException...
-                    // how to get -1 ? 
-                    //If the index of the named field is not found, an IndexOutOfRangeException is thrown.
-                    //http://msdn.microsoft.com/en-us/library/system.data.idatarecord.getordinal(v=vs.100).aspx
-					
-                    var index = dataReader.GetColumnIndex(fieldDef.FieldName);
-                    var value = dataReader.GetValue(index);
-                    fieldDef.SetValue(objWithProperties, value);
-                }
-                catch(IndexOutOfRangeException){
-                    // just ignore not retrived fields
-                }
-            }
-		
-			
-            return objWithProperties;
-        }
-        */
-        // First FirstOrDefault  // Use LIMIT to retrive only one row ! someone did it
-
+        
 	}
 }
 

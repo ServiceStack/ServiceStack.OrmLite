@@ -99,10 +99,10 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(customer.Id, Is.GreaterThan(0));
             Assert.That(customer.PrimaryAddress.CustomerId, Is.EqualTo(0));
 
-            db.SaveReference(customer, customer.PrimaryAddress);
+            db.SaveReferences(customer, customer.PrimaryAddress);
             Assert.That(customer.PrimaryAddress.CustomerId, Is.EqualTo(customer.Id));
 
-            db.SaveReference(customer, customer.Orders);
+            db.SaveReferences(customer, customer.Orders);
             Assert.That(customer.Orders.All(x => x.CustomerId == customer.Id));
 
             var dbCustomer = db.LoadSingleById<Customer>(customer.Id);

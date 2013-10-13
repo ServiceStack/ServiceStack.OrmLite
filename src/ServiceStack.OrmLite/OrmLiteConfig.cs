@@ -15,23 +15,6 @@ using System.Data;
 
 namespace ServiceStack.OrmLite
 {
-    public enum SqlType
-    {
-        Custom,
-        Insert,
-        Select,
-        Update,
-        Delete,
-        Save,
-        Ddl,
-        StoredProcedure,
-    }
-
-    public interface ISqlFilter
-    {
-        T ResultsFilter<T>(IDbCommand dbCmd, SqlType sqlType, T results = default(T));
-    }
-
     public static class OrmLiteConfig
     {
         public const string IdField = "Id";
@@ -80,7 +63,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        public static ISqlFilter SqlFilter { get; set; }
+        public static IResultsFilter ResultsFilter { get; set; }
 
         public static IDbConnection ToDbConnection(this string dbConnectionStringOrFilePath)
         {

@@ -259,7 +259,7 @@ namespace ServiceStack.OrmLite.Tests
             db.Delete<Person>(new { FirstName = "Jimi", Age = 27 });
             Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM \"Person\" WHERE \"FirstName\"=@FirstName AND \"Age\"=@Age"));
 
-            db.Delete<Person>(new { FirstName = "Jimi", Age = 27 },
+            db.Delete<Person>(new { FirstName = "Jimi", Age = 27 }, 
                               new { FirstName = "Janis", Age = 27 });
             Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM \"Person\" WHERE \"FirstName\"=@FirstName AND \"Age\"=@Age"));
 

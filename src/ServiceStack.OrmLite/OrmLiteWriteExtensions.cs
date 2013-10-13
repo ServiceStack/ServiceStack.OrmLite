@@ -184,6 +184,12 @@ namespace ServiceStack.OrmLite
             LogDebug(sql);
 
             dbCmd.CommandText = sql;
+
+            if (OrmLiteConfig.ResultsFilter != null)
+            {
+                return OrmLiteConfig.ResultsFilter.ExecuteSql(dbCmd);
+            }
+
             return dbCmd.ExecuteNonQuery();
         }
 
@@ -334,18 +340,19 @@ namespace ServiceStack.OrmLite
 
             OrmLiteConfig.DialectProvider.SetParameterValues<T>(dbCmd, obj);
 
-            return dbCmd.ExecuteNonQuery();
+            return dbCmd.ExecNonQuery();
         }
 
-        internal static void Update<T>(this IDbCommand dbCmd, params T[] objs)
+        internal static int Update<T>(this IDbCommand dbCmd, params T[] objs)
         {
-            dbCmd.UpdateAll(objs);
+            return dbCmd.UpdateAll(objs);
         }
 
-        internal static void UpdateAll<T>(this IDbCommand dbCmd, IEnumerable<T> objs)
+        internal static int UpdateAll<T>(this IDbCommand dbCmd, IEnumerable<T> objs)
 		{
             IDbTransaction dbTrans = null;
 
+            int count = 0;
             try
             {
                 if (dbCmd.Transaction == null)
@@ -359,7 +366,7 @@ namespace ServiceStack.OrmLite
                 {
                     dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
-                    dbCmd.ExecuteNonQuery();
+                    count += dbCmd.ExecNonQuery();
                 }
 
                 if (dbTrans != null)
@@ -370,7 +377,9 @@ namespace ServiceStack.OrmLite
                 if (dbTrans != null)
                     dbTrans.Dispose();
             }
-        }
+
+            return count;
+		}
 
         internal static int Delete<T>(this IDbCommand dbCmd, object anonType)
         {
@@ -378,7 +387,7 @@ namespace ServiceStack.OrmLite
 
             OrmLiteConfig.DialectProvider.SetParameterValues<T>(dbCmd, anonType);
 
-            return dbCmd.ExecuteNonQuery();
+            return dbCmd.ExecNonQuery();
         }
 
         internal static int DeleteNonDefaults<T>(this IDbCommand dbCmd, T filter)
@@ -387,27 +396,28 @@ namespace ServiceStack.OrmLite
 
             OrmLiteConfig.DialectProvider.SetParameterValues<T>(dbCmd, filter);
 
-            return dbCmd.ExecuteNonQuery();
+            return dbCmd.ExecNonQuery();
         }
 
-        internal static void Delete<T>(this IDbCommand dbCmd, params object[] objs)
+        internal static int Delete<T>(this IDbCommand dbCmd, params object[] objs)
         {
-            if (objs.Length == 0) return;
+            if (objs.Length == 0) return 0;
 
-            DeleteAll<T>(dbCmd, objs[0].AllFields<T>(), objs);
+            return DeleteAll<T>(dbCmd, objs[0].AllFields<T>(), objs);
         }
 
-        internal static void DeleteNonDefaults<T>(this IDbCommand dbCmd, params T[] filters)
+        internal static int DeleteNonDefaults<T>(this IDbCommand dbCmd, params T[] filters)
         {
-            if (filters.Length == 0) return;
+            if (filters.Length == 0) return 0;
 
-            DeleteAll<T>(dbCmd, filters[0].NonDefaultFields<T>(), filters.Map(x => (object)x));
+            return DeleteAll<T>(dbCmd, filters[0].NonDefaultFields<T>(), filters.Map(x => (object)x));
         }
 
-        private static void DeleteAll<T>(IDbCommand dbCmd, ICollection<string> deleteFields, IEnumerable<object> objs)
+        private static int DeleteAll<T>(IDbCommand dbCmd, ICollection<string> deleteFields, IEnumerable<object> objs)
         {
             IDbTransaction dbTrans = null;
 
+            int count = 0;
             try
             {
                 if (dbCmd.Transaction == null)
@@ -421,7 +431,7 @@ namespace ServiceStack.OrmLite
                 {
                     dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
-                    dbCmd.ExecuteNonQuery();
+                    count += dbCmd.ExecNonQuery();
                 }
 
                 if (dbTrans != null)
@@ -432,6 +442,8 @@ namespace ServiceStack.OrmLite
                 if (dbTrans != null)
                     dbTrans.Dispose();
             }
+
+            return count;
         }
 
         internal static int DeleteById<T>(this IDbCommand dbCmd, object id)
@@ -496,8 +508,7 @@ namespace ServiceStack.OrmLite
             if (selectIdentity)
                 return OrmLiteConfig.DialectProvider.InsertAndGetLastInsertId<T>(dbCmd);
 
-            dbCmd.ExecuteNonQuery();
-            return -1;
+            return dbCmd.ExecNonQuery();
         }
 
         internal static void Insert<T>(this IDbCommand dbCmd, params T[] objs)
@@ -522,7 +533,7 @@ namespace ServiceStack.OrmLite
                 {
                     dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
-                    dbCmd.ExecuteNonQuery();
+                    dbCmd.ExecNonQuery();
                 }
 
                 if (dbTrans != null)
