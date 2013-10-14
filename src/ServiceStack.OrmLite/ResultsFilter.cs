@@ -56,15 +56,15 @@ namespace ServiceStack.OrmLite
         public int ExecuteSqlResult { get; set; }
 
         public Func<IDbCommand, int> ExecuteSqlFn { get; set; }
-        public Func<IDbCommand, IEnumerable> ResultsFn { get; set; }
+        public Func<IDbCommand, Type, IEnumerable> ResultsFn { get; set; }
         public Func<IDbCommand, Type, IEnumerable> RefResultsFn { get; set; }
-        public Func<IDbCommand, IEnumerable> ColumnResultsFn { get; set; }
-        public Func<IDbCommand, IEnumerable> ColumnDistinctResultsFn { get; set; }
-        public Func<IDbCommand, IDictionary> DictionaryResultsFn { get; set; }
-        public Func<IDbCommand, IDictionary> LookupResultsFn { get; set; }
-        public Func<IDbCommand, object> SingleResultFn { get; set; }
+        public Func<IDbCommand, Type, IEnumerable> ColumnResultsFn { get; set; }
+        public Func<IDbCommand, Type, IEnumerable> ColumnDistinctResultsFn { get; set; }
+        public Func<IDbCommand, Type, Type, IDictionary> DictionaryResultsFn { get; set; }
+        public Func<IDbCommand, Type, Type, IDictionary> LookupResultsFn { get; set; }
+        public Func<IDbCommand, Type, object> SingleResultFn { get; set; }
         public Func<IDbCommand, Type, object> RefSingleResultFn { get; set; }
-        public Func<IDbCommand, object> ScalarResultFn { get; set; }
+        public Func<IDbCommand, Type, object> ScalarResultFn { get; set; }
         public Func<IDbCommand, long> LongScalarResultFn { get; set; }
         public Func<IDbCommand, long> LastInsertIdFn { get; set; }
 
@@ -94,9 +94,9 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        private IEnumerable GetResults(IDbCommand dbCmd)
+        private IEnumerable GetResults<T>(IDbCommand dbCmd)
         {
-            return ResultsFn != null ? ResultsFn(dbCmd) : Results;
+            return ResultsFn != null ? ResultsFn(dbCmd, typeof(T)) : Results;
         }
 
         private IEnumerable GetRefResults(IDbCommand dbCmd, Type refType)
@@ -104,29 +104,29 @@ namespace ServiceStack.OrmLite
             return RefResultsFn != null ? RefResultsFn(dbCmd, refType) : RefResults;
         }
 
-        private IEnumerable GetColumnResults(IDbCommand dbCmd)
+        private IEnumerable GetColumnResults<T>(IDbCommand dbCmd)
         {
-            return ColumnResultsFn != null ? ColumnResultsFn(dbCmd) : ColumnResults;
+            return ColumnResultsFn != null ? ColumnResultsFn(dbCmd, typeof(T)) : ColumnResults;
         }
 
-        private IEnumerable GetColumnDistinctResults(IDbCommand dbCmd)
+        private IEnumerable GetColumnDistinctResults<T>(IDbCommand dbCmd)
         {
-            return ColumnDistinctResultsFn != null ? ColumnDistinctResultsFn(dbCmd) : ColumnDistinctResults;
+            return ColumnDistinctResultsFn != null ? ColumnDistinctResultsFn(dbCmd, typeof(T)) : ColumnDistinctResults;
         }
 
-        private IDictionary GetDictionaryResults(IDbCommand dbCmd)
+        private IDictionary GetDictionaryResults<K,V>(IDbCommand dbCmd)
         {
-            return DictionaryResultsFn != null ? DictionaryResultsFn(dbCmd) : DictionaryResults;
+            return DictionaryResultsFn != null ? DictionaryResultsFn(dbCmd, typeof(K), typeof(V)) : DictionaryResults;
         }
 
-        private IDictionary GetLookupResults(IDbCommand dbCmd)
+        private IDictionary GetLookupResults<K,V>(IDbCommand dbCmd)
         {
-            return LookupResultsFn != null ? LookupResultsFn(dbCmd) : LookupResults;
+            return LookupResultsFn != null ? LookupResultsFn(dbCmd, typeof(K), typeof(V)) : LookupResults;
         }
 
-        private object GetSingleResult(IDbCommand dbCmd)
+        private object GetSingleResult<T>(IDbCommand dbCmd)
         {
-            return SingleResultFn != null ? SingleResultFn(dbCmd) : SingleResult;
+            return SingleResultFn != null ? SingleResultFn(dbCmd, typeof(T)) : SingleResult;
         }
 
         private object GetRefSingleResult(IDbCommand dbCmd, Type refType)
@@ -134,9 +134,9 @@ namespace ServiceStack.OrmLite
             return RefSingleResultFn != null ? RefSingleResultFn(dbCmd, refType) : RefSingleResult;
         }
 
-        private object GetScalarResult(IDbCommand dbCmd)
+        private object GetScalarResult<T>(IDbCommand dbCmd)
         {
-            return ScalarResultFn != null ? ScalarResultFn(dbCmd) : ScalarResult;
+            return ScalarResultFn != null ? ScalarResultFn(dbCmd, typeof(T)) : ScalarResult;
         }
 
         private long GetLongScalarResult(IDbCommand dbCmd)
@@ -152,7 +152,7 @@ namespace ServiceStack.OrmLite
         public List<T> GetList<T>(IDbCommand dbCmd)
         {
             Filter(dbCmd);
-            return (from object result in GetResults(dbCmd) select (T)result).ToList();
+            return (from object result in GetResults<T>(dbCmd) select (T)result).ToList();
         }
 
         public IList GetRefList(IDbCommand dbCmd, Type refType)
@@ -170,9 +170,9 @@ namespace ServiceStack.OrmLite
         {
             Filter(dbCmd);
             if (SingleResult != null || SingleResultFn != null)
-                return (T)GetSingleResult(dbCmd);
+                return (T)GetSingleResult<T>(dbCmd);
 
-            foreach (var result in GetResults(dbCmd))
+            foreach (var result in GetResults<T>(dbCmd))
             {
                 return (T)result;
             }
@@ -195,7 +195,7 @@ namespace ServiceStack.OrmLite
         public T GetScalar<T>(IDbCommand dbCmd)
         {
             Filter(dbCmd);
-            return ConvertTo<T>(GetScalarResult(dbCmd));
+            return ConvertTo<T>(GetScalarResult<T>(dbCmd));
         }
 
         public long GetLongScalar(IDbCommand dbCmd)
@@ -240,19 +240,19 @@ namespace ServiceStack.OrmLite
         public object GetScalar(IDbCommand dbCmd)
         {
             Filter(dbCmd);
-            return GetScalarResult(dbCmd) ?? GetResults(dbCmd).Cast<object>().FirstOrDefault();
+            return GetScalarResult<object>(dbCmd) ?? GetResults<object>(dbCmd).Cast<object>().FirstOrDefault();
         }
 
         public List<T> GetColumn<T>(IDbCommand dbCmd)
         {
             Filter(dbCmd);
-            return (from object result in GetColumnResults(dbCmd) select (T)result).ToList();
+            return (from object result in GetColumnResults<T>(dbCmd) select (T)result).ToList();
         }
 
         public HashSet<T> GetColumnDistinct<T>(IDbCommand dbCmd)
         {
             Filter(dbCmd);
-            var results = GetColumnDistinctResults(dbCmd) ?? GetColumnResults(dbCmd);
+            var results = GetColumnDistinctResults<T>(dbCmd) ?? GetColumnResults<T>(dbCmd);
             return (from object result in results select (T)result).ToHashSet();
         }
 
@@ -260,7 +260,7 @@ namespace ServiceStack.OrmLite
         {
             Filter(dbCmd);
             var to = new Dictionary<K, V>();
-            var map = GetDictionaryResults(dbCmd);
+            var map = GetDictionaryResults<K,V>(dbCmd);
             if (map == null)
                 return to;
 
@@ -276,7 +276,7 @@ namespace ServiceStack.OrmLite
         {
             Filter(dbCmd);
             var to = new Dictionary<K, List<V>>();
-            var map = GetLookupResults(dbCmd);
+            var map = GetLookupResults<K,V>(dbCmd);
             if (map == null)
                 return to;
 

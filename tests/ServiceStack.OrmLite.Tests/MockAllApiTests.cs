@@ -117,9 +117,9 @@ namespace ServiceStack.OrmLite.Tests
             using (new ResultsFilter
             {
                 PrintSql = true,
-                ResultsFn = dbCmd => new[] { new Person { Id = 1, FirstName = "Mocked", LastName = "Person", Age = 100 } },
-                SingleResultFn = dbCmd => new Person { Id = 1, FirstName = "MockedSingle", LastName = "Person", Age = 100 },
-                ScalarResultFn = dbCmd => 1000,
+                ResultsFn = (dbCmd,type) => new[] { new Person { Id = 1, FirstName = "Mocked", LastName = "Person", Age = 100 } },
+                SingleResultFn = (dbCmd, type) => new Person { Id = 1, FirstName = "MockedSingle", LastName = "Person", Age = 100 },
+                ScalarResultFn = (dbCmd, type) => 1000,
             })
             {
                 Assert.That(db.Select<Person>(x => x.Age > 40)[0].FirstName, Is.EqualTo("Mocked"));
@@ -137,9 +137,9 @@ namespace ServiceStack.OrmLite.Tests
             using (new ResultsFilter
             {
                 SqlFilter = sql => sqlStatements.Add(sql),
-                ResultsFn = dbCmd => new[] { new Person { Id = 1, FirstName = "Mocked", LastName = "Person", Age = 100 } },
-                SingleResultFn = dbCmd => new Person { Id = 1, FirstName = "MockedSingle", LastName = "Person", Age = 100 },
-                ScalarResultFn = dbCmd => 1000,
+                ResultsFn = (dbCmd, type) => new[] { new Person { Id = 1, FirstName = "Mocked", LastName = "Person", Age = 100 } },
+                SingleResultFn = (dbCmd, type) => new Person { Id = 1, FirstName = "MockedSingle", LastName = "Person", Age = 100 },
+                ScalarResultFn = (dbCmd, type) => 1000,
             })
             {
                 Assert.That(db.Select<Person>(x => x.Age > 40)[0].FirstName, Is.EqualTo("Mocked"));
