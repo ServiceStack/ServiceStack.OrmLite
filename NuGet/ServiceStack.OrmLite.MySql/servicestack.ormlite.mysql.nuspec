@@ -18,12 +18,11 @@
     <copyright>ServiceStack 2013 and contributors</copyright>
     <dependencies>
       <dependency id="MySql.Data" />
-      <dependency id="ServiceStack.Common" version="4.0" />
+      <dependency id="ServiceStack.OrmLite" version="4.0" />
     </dependencies> 
   </metadata> 
   <files>
     <file src="lib\**\*.*" target="lib" />
-    <file src="..\..\src\ServiceStack.OrmLite\**\*.cs" target="src\ServiceStack.OrmLite" />
     <file src="..\..\src\ServiceStack.OrmLite.MySql\**\*.cs" target="src\ServiceStack.OrmLite.MySql" />
   </files>
 </package>
