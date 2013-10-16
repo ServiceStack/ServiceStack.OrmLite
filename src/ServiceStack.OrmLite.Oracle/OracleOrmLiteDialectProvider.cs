@@ -311,9 +311,12 @@ namespace ServiceStack.OrmLite.Oracle
 		}
 
 		
-		public override string ToUpdateRowStatement(object objWithProperties, ICollection<string> updateFields)
+		public override string ToUpdateRowStatement(object objWithProperties, ICollection<string> updateFields = null)
 		{
-			var sqlFilter = new StringBuilder();
+		    if (updateFields == null)
+                updateFields = new List<string>();
+
+		    var sqlFilter = new StringBuilder();
 			var sql = new StringBuilder();
 			var tableType = objWithProperties.GetType();
 			var modelDef = GetModel(tableType);
