@@ -22,6 +22,8 @@ namespace ServiceStack.OrmLite
 
         string ParamString { get; set; }
 
+        string EmptySetExpression { get; set; }
+
         bool UseUnicode { get; set; }
 
         INamingStrategy NamingStrategy { get; set; }

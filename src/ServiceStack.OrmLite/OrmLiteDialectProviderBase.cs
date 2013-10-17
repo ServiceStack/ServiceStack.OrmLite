@@ -166,6 +166,13 @@ namespace ServiceStack.OrmLite
             }
         }
 
+        private string emptySetExpression = "NULL";
+        public string EmptySetExpression
+        {
+            get { return emptySetExpression; }
+            set { emptySetExpression = value; }
+        }
+
         private INamingStrategy namingStrategy = new OrmLiteNamingStrategyBase();
         public INamingStrategy NamingStrategy
         {

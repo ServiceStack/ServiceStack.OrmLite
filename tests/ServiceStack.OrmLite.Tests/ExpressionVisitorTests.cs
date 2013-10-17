@@ -140,6 +140,26 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        public void Can_Select_using_IN_using_empty_Array()
+        {
+            var emptyIds = new int[] { };
+
+            var visitor = OrmLiteConfig.DialectProvider.ExpressionVisitor<TestType>();
+            visitor.Where(q => Sql.In(q.Id, emptyIds));
+            var target = OpenDbConnection().Select(visitor);
+            Assert.AreEqual(0, target.Count);
+        }
+
+        [Test]
+        public void Can_Select_using_empty_Array_Contains()
+        {
+            var emptyIds = new int[] { };
+
+            var target = OpenDbConnection().Select<TestType>(t => emptyIds.Contains(t.Id));
+            Assert.AreEqual(0, target.Count);
+        }
+
+        [Test]
         public void Can_Select_using_Startswith()
         {
             var target = OpenDbConnection().Select<TestType>(q => q.TextCol.StartsWith("asdf"));
