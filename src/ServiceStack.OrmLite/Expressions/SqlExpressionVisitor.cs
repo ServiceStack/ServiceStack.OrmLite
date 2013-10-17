@@ -1064,11 +1064,21 @@ namespace ServiceStack.OrmLite
                     var inArgs = Sql.Flatten(getter() as IEnumerable);
 
                     StringBuilder sIn = new StringBuilder();
-                    foreach (Object e in inArgs)
+
+                    if (inArgs.Any())
                     {
-                        sIn.AppendFormat("{0}{1}",
-                                     sIn.Length > 0 ? "," : "",
-                                     OrmLiteConfig.DialectProvider.GetQuotedValue(e, e.GetType()));
+                        foreach (Object e in inArgs)
+                        {
+                            sIn.AppendFormat("{0}{1}",
+                                             sIn.Length > 0 ? "," : "",
+                                             OrmLiteConfig.DialectProvider.GetQuotedValue(e, e.GetType()));
+                        }
+                    }
+                    else
+                    {
+                        // The collection is empty, so avoid generating invalid SQL syntax of "ColumnName IN ()".
+                        // Instead, just select from the null set via "ColumnName IN (NULL)"
+                        sIn.Append("NULL");
                     }
 
                     statement = string.Format("{0} {1} ({2})", quotedColName, "In", sIn.ToString());
