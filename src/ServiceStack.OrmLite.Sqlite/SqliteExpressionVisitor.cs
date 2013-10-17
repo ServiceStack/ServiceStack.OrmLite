@@ -52,14 +52,9 @@ namespace ServiceStack.OrmLite.Sqlite
 
                     var inArgs = Sql.Flatten(getter() as IEnumerable);
 
-                    var sIn = new StringBuilder();
-                    foreach (var e in inArgs)
-                    {
-                        sIn.AppendFormat("{0}{1}",
-                                     sIn.Length > 0 ? "," : "",
-                                     OrmLiteConfig.DialectProvider.GetQuotedValue(e, e.GetType()));
-                    }
-                    statement = string.Format("{0} {1} ({2})", quotedColName, m.Method.Name, sIn);
+                    var inExpression = ComposeInExpression(inArgs);
+
+                    statement = string.Format("{0} {1} ({2})", quotedColName, m.Method.Name, inExpression);
                     break;
                 case "Desc":
                     statement = string.Format("{0} DESC", quotedColName);

@@ -1063,25 +1063,9 @@ namespace ServiceStack.OrmLite
 
                     var inArgs = Sql.Flatten(getter() as IEnumerable);
 
-                    StringBuilder sIn = new StringBuilder();
+                    var inExpression = ComposeInExpression(inArgs);
 
-                    if (inArgs.Any())
-                    {
-                        foreach (Object e in inArgs)
-                        {
-                            sIn.AppendFormat("{0}{1}",
-                                             sIn.Length > 0 ? "," : "",
-                                             OrmLiteConfig.DialectProvider.GetQuotedValue(e, e.GetType()));
-                        }
-                    }
-                    else
-                    {
-                        // The collection is empty, so avoid generating invalid SQL syntax of "ColumnName IN ()".
-                        // Instead, just select from the null set via "ColumnName IN (NULL)"
-                        sIn.Append("NULL");
-                    }
-
-                    statement = string.Format("{0} {1} ({2})", quotedColName, "In", sIn.ToString());
+                    statement = string.Format("{0} {1} ({2})", quotedColName, "In", inExpression);
                     break;
 
                 default:
@@ -1089,6 +1073,40 @@ namespace ServiceStack.OrmLite
             }
 
             return new PartialSqlString(statement);
+        }
+
+        protected string ComposeInExpression(List<object> inArgs)
+        {
+            var sIn = new StringBuilder();
+
+            if (!inArgs.Any())
+            {
+                sIn.Append(OrmLiteConfig.DialectProvider.EmptySetExpression);
+            }
+            else
+            {
+                foreach (var e in inArgs)
+                {
+                    if (!typeof(ICollection).IsAssignableFrom(e.GetType()))
+                    {
+                        sIn.AppendFormat("{0}{1}",
+                                     sIn.Length > 0 ? "," : "",
+                                     OrmLiteConfig.DialectProvider.GetQuotedValue(e, e.GetType()));
+                    }
+                    else
+                    {
+                        var listArgs = e as ICollection;
+                        foreach (var el in listArgs)
+                        {
+                            sIn.AppendFormat("{0}{1}",
+                                     sIn.Length > 0 ? "," : "",
+                                     OrmLiteConfig.DialectProvider.GetQuotedValue(el, el.GetType()));
+                        }
+                    }
+                }
+            }
+
+            return sIn.ToString();
         }
 
         protected virtual object VisitSqlMethodCall(MethodCallExpression m)
@@ -1109,28 +1127,9 @@ namespace ServiceStack.OrmLite
 
                     var inArgs = Sql.Flatten(getter() as IEnumerable);
 
-                    StringBuilder sIn = new StringBuilder();
-                    foreach (Object e in inArgs)
-                    {
-                        if (!typeof(ICollection).IsAssignableFrom(e.GetType()))
-                        {
-                            sIn.AppendFormat("{0}{1}",
-                                         sIn.Length > 0 ? "," : "",
-                                         OrmLiteConfig.DialectProvider.GetQuotedValue(e, e.GetType()));
-                        }
-                        else
-                        {
-                            var listArgs = e as ICollection;
-                            foreach (Object el in listArgs)
-                            {
-                                sIn.AppendFormat("{0}{1}",
-                                         sIn.Length > 0 ? "," : "",
-                                         OrmLiteConfig.DialectProvider.GetQuotedValue(el, el.GetType()));
-                            }
-                        }
-                    }
+                    var inExpression = ComposeInExpression(inArgs);
 
-                    statement = string.Format("{0} {1} ({2})", quotedColName, m.Method.Name, sIn.ToString());
+                    statement = string.Format("{0} {1} ({2})", quotedColName, m.Method.Name, inExpression);
                     break;
                 case "Desc":
                     statement = string.Format("{0} DESC", quotedColName);
