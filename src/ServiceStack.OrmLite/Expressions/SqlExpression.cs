@@ -865,8 +865,11 @@ namespace ServiceStack.OrmLite
             if (m.Method.DeclaringType == typeof(Sql))
                 return VisitSqlMethodCall(m);
 
-			if (IsArrayMethod(m))
-                return VisitArrayMethodCall(m);
+            if (IsStaticArrayMethod(m))
+                return VisitStaticArrayMethodCall(m);
+
+            if (IsEnumerableMethod(m))
+                return VisitEnumerableMethodCall(m);
 
             if (IsColumnAccess(m))
                 return VisitColumnAccessMethod(m);
@@ -1031,53 +1034,87 @@ namespace ServiceStack.OrmLite
             return sql;
         }
 
-        private bool IsArrayMethod(MethodCallExpression m)
+        private bool IsStaticArrayMethod(MethodCallExpression m)
         {
             if (m.Object == null && m.Method.Name == "Contains")
             {
-                if (m.Arguments.Count == 2)
-                    return true;
+                return m.Arguments.Count == 2;
             }
 
             return false;
         }
 
-        protected virtual object VisitArrayMethodCall(MethodCallExpression m)
+        protected virtual object VisitStaticArrayMethodCall(MethodCallExpression m)
         {
-            string statement;
-
             switch (m.Method.Name)
             {
                 case "Contains":
                     List<Object> args = this.VisitExpressionList(m.Arguments);
                     object quotedColName = args[1];
 
-                    var memberExpr = m.Arguments[0];
+                    Expression memberExpr = m.Arguments[0];
                     if (memberExpr.NodeType == ExpressionType.MemberAccess)
                         memberExpr = (m.Arguments[0] as MemberExpression);
 
-                    var member = Expression.Convert(memberExpr, typeof(object));
-                    var lambda = Expression.Lambda<Func<object>>(member);
-                    var getter = lambda.Compile();
-
-                    var inArgs = Sql.Flatten(getter() as IEnumerable);
-
-                    var sIn = new StringBuilder();
-                    foreach (object e in inArgs)
-                    {
-                        if (sIn.Length > 0)
-                            sIn.Append(",");
-
-                        sIn.Append(OrmLiteConfig.DialectProvider.GetQuotedValue(e, e.GetType()));
-                    }
-
-                    statement = string.Format("{0} {1} ({2})", quotedColName, "In", sIn);
-                    break;
+                    return ToInPartialString(memberExpr, quotedColName);
 
                 default:
                     throw new NotSupportedException();
             }
+        }
 
+        private bool IsEnumerableMethod(MethodCallExpression m)
+        {
+            if (m.Object != null
+                && m.Object.Type.IsOrHasGenericInterfaceTypeOf(typeof(IEnumerable<>))
+                && m.Object.Type != typeof(string)
+                && m.Method.Name == "Contains")
+            {
+                return m.Arguments.Count == 1;
+            }
+
+            return false;
+        }
+
+        protected virtual object VisitEnumerableMethodCall(MethodCallExpression m)
+        {
+            switch (m.Method.Name)
+            {
+                case "Contains":
+                    List<Object> args = this.VisitExpressionList(m.Arguments);
+                    object quotedColName = args[0];
+                    return ToInPartialString(m.Object, quotedColName);
+
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+
+        private static object ToInPartialString(Expression memberExpr, object quotedColName)
+        {
+            var member = Expression.Convert(memberExpr, typeof (object));
+            var lambda = Expression.Lambda<Func<object>>(member);
+            var getter = lambda.Compile();
+
+            var inArgs = Sql.Flatten(getter() as IEnumerable);
+
+            var sIn = new StringBuilder();
+            if (inArgs.Count > 0)
+            {
+                foreach (object e in inArgs)
+                {
+                    if (sIn.Length > 0)
+                        sIn.Append(",");
+
+                    sIn.Append(OrmLiteConfig.DialectProvider.GetQuotedValue(e, e.GetType()));
+                }
+            }
+            else
+            {
+                sIn.Append("NULL");
+            }
+
+            var statement = string.Format("{0} {1} ({2})", quotedColName, "In", sIn);
             return new PartialSqlString(statement);
         }
 
