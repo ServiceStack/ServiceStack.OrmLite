@@ -41,9 +41,6 @@
     <Reference Include="ServiceStack.Common">
       <HintPath>..\..\lib\ServiceStack.Common.dll</HintPath>
     </Reference>
-    <Reference Include="ServiceStack.Common.Tests">
-      <HintPath>..\..\lib\tests\ServiceStack.Common.Tests.dll</HintPath>
-    </Reference>
     <Reference Include="ServiceStack.Interfaces">
       <HintPath>..\..\lib\ServiceStack.Interfaces.dll</HintPath>
     </Reference>
@@ -106,6 +103,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\tests\ServiceStack.OrmLite.Tests\ServiceStack.OrmLite.Tests.csproj">
+      <Project>{9b64f4a7-c008-46a8-ad6f-99626dcfefbd}</Project>
+      <Name>ServiceStack.OrmLite.Tests</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ServiceStack.OrmLite.PostgreSQL\ServiceStack.OrmLite.PostgreSQL.csproj">
       <Project>{3220F088-BDD0-6979-AC0C-8C541C2E7DE5}</Project>
       <Name>ServiceStack.OrmLite.PostgreSQL</Name>
