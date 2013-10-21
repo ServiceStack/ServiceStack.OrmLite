@@ -109,6 +109,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceStack.OrmLite.Sqlite
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceStack.OrmLite.Sqlite32Tests", "..\tests\ServiceStack.OrmLite.Sqlite32Tests\ServiceStack.OrmLite.Sqlite32Tests.csproj", "{956FD518-A6CC-46B1-A93A-1C92779BF942}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Signed", "Signed", "{4A755D3C-CE48-4DB1-BF29-90A696ACD71B}"
+	ProjectSection(SolutionItems) = preProject
+		..\NuGet.Signed\ServiceStack.OrmLite.Signed\servicestack.ormlite.signed.nuspec = ..\NuGet.Signed\ServiceStack.OrmLite.Signed\servicestack.ormlite.signed.nuspec
+		..\NuGet.Signed\ServiceStack.OrmLite.SqlServer.Signed\servicestack.ormlite.sqlserver.signed.nuspec = ..\NuGet.Signed\ServiceStack.OrmLite.SqlServer.Signed\servicestack.ormlite.sqlserver.signed.nuspec
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1095,6 +1101,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{4A755D3C-CE48-4DB1-BF29-90A696ACD71B} = {6CEB3EDE-9F02-4F4F-BD8A-1B2939C1AE6E}
 		{924A8BBF-4D88-41A3-9F83-4332B0019D0C} = {AA7D8994-D1CA-484E-B3A4-EF6044CBE9BB}
 		{E4489930-7E42-43B8-93C3-7E1974845D88} = {AA7D8994-D1CA-484E-B3A4-EF6044CBE9BB}
 		{60B6BD41-6415-418E-A71F-FB6622C379D9} = {AA7D8994-D1CA-484E-B3A4-EF6044CBE9BB}

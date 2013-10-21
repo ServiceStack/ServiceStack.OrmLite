@@ -64,7 +64,7 @@ namespace ServiceStack.OrmLite
         }
 
         [ThreadStatic] 
-        public static IResultsFilter ResultsFilter;
+        public static IOrmLiteResultsFilter ResultsFilter;
 
         public static IDbConnection ToDbConnection(this string dbConnectionStringOrFilePath)
         {

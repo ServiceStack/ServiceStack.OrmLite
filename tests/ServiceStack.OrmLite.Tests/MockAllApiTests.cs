@@ -35,7 +35,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_mock_all_Select_Apis()
         {
-            using (new ResultsFilter
+            using (new OrmLiteResultsFilter
             {
                 Results = new[] {
                     new Person { Id = 1, FirstName = "Mocked", LastName = "Person", Age = 100 }
@@ -82,21 +82,21 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_nest_ResultFilters()
         {
-            using (new ResultsFilter
+            using (new OrmLiteResultsFilter
             {
                 Results = new[] { new Person { Id = 1, FirstName = "Mocked", LastName = "Person", Age = 100 } }
             })
             {
                 Assert.That(db.Select<Person>(x => x.Age > 40)[0].FirstName, Is.EqualTo("Mocked"));
 
-                using (new ResultsFilter
+                using (new OrmLiteResultsFilter
                 {
                     Results = new[] { new Person { Id = 1, FirstName = "MockedInner", LastName = "Person", Age = 100 } }
                 })
                 {
                     Assert.That(db.Select<Person>(x => x.Age > 40)[0].FirstName, Is.EqualTo("MockedInner"));
 
-                    using (new ResultsFilter
+                    using (new OrmLiteResultsFilter
                     {
                         Results = new[] { new Person { Id = 1, FirstName = "MockedInnerInner", LastName = "Person", Age = 100 } }
                     })
@@ -114,7 +114,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_mock_Apis_with_FilterFns()
         {
-            using (new ResultsFilter
+            using (new OrmLiteResultsFilter
             {
                 PrintSql = true,
                 ResultsFn = (dbCmd,type) => new[] { new Person { Id = 1, FirstName = "Mocked", LastName = "Person", Age = 100 } },
@@ -134,7 +134,7 @@ namespace ServiceStack.OrmLite.Tests
         public void Can_trace_all_generated_sql()
         {
             var sqlStatements = new List<string>();
-            using (new ResultsFilter
+            using (new OrmLiteResultsFilter
             {
                 SqlFilter = sql => sqlStatements.Add(sql),
                 ResultsFn = (dbCmd, type) => new[] { new Person { Id = 1, FirstName = "Mocked", LastName = "Person", Age = 100 } },
@@ -156,7 +156,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_mock_all_Single_Apis()
         {
-            using (new ResultsFilter
+            using (new OrmLiteResultsFilter
             {
                 PrintSql = true,
                 SingleResult = new Person { Id = 1, FirstName = "Mocked", LastName = "Person", Age = 100 },
@@ -175,7 +175,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_mock_all_Scalar_Apis()
         {
-            using (new ResultsFilter
+            using (new OrmLiteResultsFilter
             {
                 PrintSql = true,
                 ScalarResult = 1000,
@@ -196,7 +196,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_mock_all_Column_Apis()
         {
-            using (new ResultsFilter
+            using (new OrmLiteResultsFilter
             {
                 PrintSql = true,
                 ColumnResults = new[] { "Mock1", "Mock2", "Mock3" },
@@ -212,7 +212,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_mock_all_ColumnDistinct_Apis()
         {
-            using (new ResultsFilter
+            using (new OrmLiteResultsFilter
             {
                 PrintSql = true,
                 ColumnDistinctResults = new[] { 101, 102, 103 },
@@ -226,7 +226,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_mock_all_Dictionary_Apis()
         {
-            using (new ResultsFilter
+            using (new OrmLiteResultsFilter
             {
                 PrintSql = true,
                 DictionaryResults = new Dictionary<int, string> { { 1, "MockValue" } },
@@ -240,7 +240,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_mock_all_Update_Apis()
         {
-            using (new ResultsFilter
+            using (new OrmLiteResultsFilter
             {
                 PrintSql = true,
                 ExecuteSqlResult = 10,
@@ -264,7 +264,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_mock_all_Delete_Apis()
         {
-            using (new ResultsFilter
+            using (new OrmLiteResultsFilter
             {
                 PrintSql = true,
                 ExecuteSqlResult = 10,
@@ -288,7 +288,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_mock_all_CustomSql_Apis()
         {
-            using (new ResultsFilter
+            using (new OrmLiteResultsFilter
             {
                 PrintSql = true,
                 Results = new[] { new Person { Id = 1, FirstName = "Mocked", LastName = "Person", Age = 100 } },
@@ -315,7 +315,7 @@ namespace ServiceStack.OrmLite.Tests
             //we count the number of sql statements generated instead.
 
             var sqlStatements = new List<string>();
-            using (new ResultsFilter
+            using (new OrmLiteResultsFilter
             {
                 SqlFilter = sql => sqlStatements.Add(sql),
             })
@@ -346,7 +346,7 @@ namespace ServiceStack.OrmLite.Tests
             //we count the number of sql statements generated instead.
 
             var sqlStatements = new List<string>();
-            using (new ResultsFilter
+            using (new OrmLiteResultsFilter
             {
                 SingleResult = new Person { Id = 1, FirstName = "Mocked", LastName = "Person", Age = 100 },
                 SqlFilter = sql => sqlStatements.Add(sql),
@@ -355,7 +355,7 @@ namespace ServiceStack.OrmLite.Tests
                 int i = 0;
 
                 //Force Insert by returning null for existingRow
-                using (new ResultsFilter { SqlFilter = sql => sqlStatements.Add(sql) })
+                using (new OrmLiteResultsFilter { SqlFilter = sql => sqlStatements.Add(sql) })
                 {
                     i += 2; db.Save(new Person { Id = 11, FirstName = "Amy", LastName = "Winehouse", Age = 27 }); //1 Read + 1 Insert
                 }
@@ -392,7 +392,7 @@ namespace ServiceStack.OrmLite.Tests
             };
 
             var sqlStatements = new List<string>();
-            using (new ResultsFilter
+            using (new OrmLiteResultsFilter
                 {
                     SqlFilter = sql => sqlStatements.Add(sql),
                     SingleResult = customer,

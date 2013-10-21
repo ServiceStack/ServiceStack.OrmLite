@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace ServiceStack.OrmLite
 {
-    public interface IResultsFilter
+    public interface IOrmLiteResultsFilter
     {
         long GetLastInsertId(IDbCommand dbCmd);
 
@@ -39,7 +39,7 @@ namespace ServiceStack.OrmLite
         int ExecuteSql(IDbCommand dbCmd);
     }
 
-    public class ResultsFilter : IResultsFilter, IDisposable
+    public class OrmLiteResultsFilter : IOrmLiteResultsFilter, IDisposable
     {
         public IEnumerable Results { get; set; }
         public IEnumerable RefResults { get; set; }
@@ -70,9 +70,9 @@ namespace ServiceStack.OrmLite
         public Action<string> SqlFilter { get; set; }
         public bool PrintSql { get; set; }
 
-        private readonly IResultsFilter previousFilter;
+        private readonly IOrmLiteResultsFilter previousFilter;
 
-        public ResultsFilter(IEnumerable results = null)
+        public OrmLiteResultsFilter(IEnumerable results = null)
         {
             this.Results = results ?? new object[] { };
 
