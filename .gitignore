@@ -36,6 +36,7 @@ _ReSharper*/
 App_Data/
 
 NuGet/
+NuGet.Signed/
 build/
 *.nupkg
 *.pidb
