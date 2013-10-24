@@ -37,6 +37,8 @@ App_Data/
 
 NuGet/
 NuGet.Signed/
+*.pfx
+
 build/
 *.nupkg
 *.pidb
