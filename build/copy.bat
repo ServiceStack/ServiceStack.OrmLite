@@ -45,3 +45,6 @@ COPY ..\src\ServiceStack.OrmLite.Sqlite64\bin\x64\ServiceStack.OrmLite.Sqlite* .
 COPY ..\src\ServiceStack.OrmLite.SqlServer\bin\%BUILD%\ServiceStack.OrmLite.* ..\..\ServiceStack\lib
 
 COPY ..\src\ServiceStack.OrmLite.Sqlite\bin\%BUILD%\ServiceStack.OrmLite.* ..\..\ServiceStack.Contrib\lib
+
+COPY ..\src\ServiceStack.OrmLite\bin\Signed\ServiceStack.OrmLite.* ..\..\ServiceStack\lib\signed
+COPY ..\src\ServiceStack.OrmLite.SqlServer\bin\Signed\ServiceStack.OrmLite.SqlServer.* ..\..\ServiceStack\lib\signed
