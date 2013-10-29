@@ -13,7 +13,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		[Test]
 		public void Can_insert_into_ModelWithFieldsOfDifferentTypes_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
@@ -26,7 +26,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		[Test]
 		public void Can_insert_and_select_from_ModelWithFieldsOfDifferentTypes_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
@@ -45,7 +45,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		[Test]
 		public void Can_insert_and_select_from_ModelWithFieldsOfNullableTypes_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithFieldsOfNullableTypes>(true);
 
@@ -64,7 +64,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		[Test]
 		public void Can_insert_and_select_from_ModelWithFieldsOfDifferentAndNullableTypes_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithFieldsOfDifferentAndNullableTypes>(true);
 
@@ -83,7 +83,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		[Test]
 		public void Can_insert_table_with_null_fields()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithIdAndName>(true);
 
@@ -103,7 +103,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		[Test]
 		public void Can_retrieve_LastInsertId_from_inserted_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithIdAndName1>(true);
 
@@ -127,7 +127,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		[Test]
 		public void Can_insert_TaskQueue_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<TaskQueue>(true);
 
@@ -150,7 +150,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		[Test]
 		public void Can_insert_table_with_blobs()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<OrderBlob>(true);
 

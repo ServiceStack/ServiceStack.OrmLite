@@ -140,6 +140,11 @@ namespace ServiceStack.OrmLite
             return dbConn.Exec(dbCmd => dbCmd.Where<T>(anonType));
         }
 
+        public static List<T> Where<T>(this IDbConnection dbConn, System.Linq.Expressions.Expression<Func<T,bool>> Predicate)
+        {
+            return (List<T>) dbConn.Select<T>(Predicate);
+        }
+
         public static List<T> Query<T>(this IDbConnection dbConn, string sql)
         {
             return dbConn.Exec(dbCmd => dbCmd.Query<T>(sql));
@@ -153,6 +158,21 @@ namespace ServiceStack.OrmLite
         public static List<T> Query<T>(this IDbConnection dbConn, string sql, Dictionary<string, object> dict)
         {
             return dbConn.Exec(dbCmd => dbCmd.Query<T>(sql, dict));
+        }
+
+        public static int ExecuteNonQuery(this IDbConnection dbConn, string sql)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.ExecuteNonQuery(sql));
+        }
+
+        public static int ExecuteNonQuery(this IDbConnection dbConn, string sql, object anonType)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.ExecuteNonQuery(sql, anonType));
+        }
+
+        public static int ExecuteNonQuery(this IDbConnection dbConn, string sql, Dictionary<string, object> dict)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.ExecuteNonQuery(sql, dict));
         }
 
         public static T QueryScalar<T>(this IDbConnection dbConn, object anonType)
@@ -193,6 +213,11 @@ namespace ServiceStack.OrmLite
         public static List<T> ByExampleWhere<T>(this IDbConnection dbConn, object anonType)
         {
             return dbConn.Exec(dbCmd => dbCmd.ByExampleWhere<T>(anonType));
+        }
+
+        public static List<T> ByExampleWhere<T>(this IDbConnection dbConn, object anonType, bool excludeNulls)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.ByExampleWhere<T>(anonType, excludeNulls));
         }
 
         public static List<T> QueryByExample<T>(this IDbConnection dbConn, string sql, object anonType = null)

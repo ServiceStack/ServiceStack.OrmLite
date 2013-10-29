@@ -19,7 +19,7 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_create_connection()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 			}
 		}
@@ -54,12 +54,12 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_open_two_ReadOnlyConnections_to_same_database()
 		{
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<ModelWithIdAndName>();
                 db.Insert(new ModelWithIdAndName(1));
 
-                using (var dbReadOnly = ConnectionString.OpenDbConnection())
+                using (var dbReadOnly = OpenDbConnection())
                 {
                     dbReadOnly.Insert(new ModelWithIdAndName(2));
                     var rows = dbReadOnly.Select<ModelWithIdAndName>();

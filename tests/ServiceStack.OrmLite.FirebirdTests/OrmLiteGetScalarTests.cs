@@ -41,7 +41,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 				NDoubleProperty= 8.25
 			});
 			
-			using (var db = ConnectionString.OpenDbConnection())
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
 			{
 				db.CreateTable<Author>(true);
 				db.DeleteAll<Author>();

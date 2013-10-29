@@ -35,7 +35,8 @@ namespace ServiceStack.OrmLite
 			{
 				if (connection == null)
 				{
-					connection = this.ConnectionString.OpenDbConnection();
+				    var connStr = this.ConnectionString;
+                    connection = connStr.OpenDbConnection();
 				}
 				return connection;
 			}
@@ -52,10 +53,17 @@ namespace ServiceStack.OrmLite
 			this.DisposeConnection = false;
 		}
 
+		private IDbCommand CreateCommand()
+		{
+			var cmd = this.Connection.CreateCommand();
+			cmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
+			return cmd;
+		}
+
 		public T GetById<T>(object id)
 			where T : class, new()
 		{
-			using (var dbCmd = this.Connection.CreateCommand())
+			using (var dbCmd = CreateCommand())
 			{
 				return dbCmd.GetByIdOrDefault<T>(id);
 			}
@@ -64,7 +72,7 @@ namespace ServiceStack.OrmLite
 		public IList<T> GetByIds<T>(ICollection ids)
 			where T : class, new()
 		{
-			using (var dbCmd = this.Connection.CreateCommand())
+			using (var dbCmd = CreateCommand())
 			{
 				return dbCmd.GetByIds<T>(ids);
 			}
@@ -73,7 +81,7 @@ namespace ServiceStack.OrmLite
 		public T Store<T>(T entity)
 			where T : class, new()
 		{
-			using (var dbCmd = this.Connection.CreateCommand())
+			using (var dbCmd = CreateCommand())
 			{
 				return InsertOrUpdate(dbCmd, entity);
 			}
@@ -99,7 +107,7 @@ namespace ServiceStack.OrmLite
 		public void StoreAll<TEntity>(IEnumerable<TEntity> entities) 
 			where TEntity : class, new()
 		{
-			using (var dbCmd = this.Connection.CreateCommand())
+			using (var dbCmd = CreateCommand())
 			using (var dbTrans = this.Connection.BeginTransaction())
 			{
 				foreach (var entity in entities)
@@ -113,7 +121,7 @@ namespace ServiceStack.OrmLite
 		public void Delete<T>(T entity)
 			where T : class, new()
 		{
-			using (var dbCmd = this.Connection.CreateCommand())
+			using (var dbCmd = CreateCommand())
 			{
 				dbCmd.Delete(entity);
 			}
@@ -121,7 +129,7 @@ namespace ServiceStack.OrmLite
 
 		public void DeleteById<T>(object id) where T : class, new()
 		{
-			using (var dbCmd = this.Connection.CreateCommand())
+			using (var dbCmd = CreateCommand())
 			{
 				dbCmd.DeleteById<T>(id);
 			}
@@ -129,7 +137,7 @@ namespace ServiceStack.OrmLite
 
 		public void DeleteByIds<T>(ICollection ids) where T : class, new()
 		{
-			using (var dbCmd = this.Connection.CreateCommand())
+			using (var dbCmd = this.CreateCommand())
 			{
 				dbCmd.DeleteByIds<T>(ids);
 			}
@@ -137,7 +145,7 @@ namespace ServiceStack.OrmLite
 
 		public void DeleteAll<TEntity>() where TEntity : class, new()
 		{
-			using (var dbCmd = this.Connection.CreateCommand())
+			using (var dbCmd = CreateCommand())
 			{
 				dbCmd.DeleteAll<TEntity>();
 			}

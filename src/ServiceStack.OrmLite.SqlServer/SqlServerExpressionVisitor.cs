@@ -26,7 +26,8 @@ namespace ServiceStack.OrmLite.SqlServer
 
                 sql = base.ToSelectStatement();
                 if (sql == null || sql.Length < "SELECT".Length) return sql;
-                sql = "SELECT TOP " + take + " " + sql.Substring("SELECT".Length, sql.Length - "SELECT".Length);
+                var selectType = sql.StartsWithIgnoreCase("SELECT DISTINCT") ? "SELECT DISTINCT" : "SELECT";
+                sql = selectType + " TOP " + take + " " + sql.Substring(selectType.Length, sql.Length - selectType.Length);
                 return sql;
             }
 	        
@@ -56,7 +57,6 @@ namespace ServiceStack.OrmLite.SqlServer
 
         public override string ToUpdateStatement(T item, bool excludeDefaults = false)
         {
-
             var setFields = new StringBuilder();
             var dialectProvider = OrmLiteConfig.DialectProvider;
 
@@ -92,7 +92,7 @@ namespace ServiceStack.OrmLite.SqlServer
 	        if (ModelDef.PrimaryKey == null)
                 throw new ApplicationException("Malformed model, no PrimaryKey defined");
 
-	        return String.Format("ORDER BY {0}", ModelDef.PrimaryKey.FieldName);
+	        return String.Format("ORDER BY {0}", OrmLiteConfig.DialectProvider.GetQuotedColumnName(ModelDef.PrimaryKey.FieldName));
 	    }
 
 		public override string LimitExpression

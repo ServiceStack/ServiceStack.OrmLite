@@ -86,6 +86,9 @@ namespace ServiceStack.OrmLite.Firebird
 				}
 				return new Guid(value.ToString());
 			}
+			
+			if (type == typeof(byte[]) && value.GetType() == typeof(byte[]))
+                		return value;
 
 			try
 			{
@@ -162,9 +165,12 @@ namespace ServiceStack.OrmLite.Firebird
 			return sql.ToString();
 		}
 		
-		public override string ToInsertRowStatement(object objWithProperties, IList<string> insertFields, IDbCommand dbCommand)
+		public override string ToInsertRowStatement(IDbCommand dbCommand, object objWithProperties, ICollection<string> insertFields = null)
 		{
-			var sbColumnNames = new StringBuilder();
+            if (insertFields == null)
+                insertFields = new List<string>();
+
+            var sbColumnNames = new StringBuilder();
 			var sbColumnValues = new StringBuilder();
 
 			var tableType = objWithProperties.GetType();
@@ -230,8 +236,11 @@ namespace ServiceStack.OrmLite.Firebird
 		}
 
 		
-		public override string ToUpdateRowStatement(object objWithProperties, IList<string> updateFields)
+		public override string ToUpdateRowStatement(object objWithProperties, ICollection<string> updateFields=null)
 		{
+			if (updateFields == null) 
+				updateFields = new List<string>();
+				
 			var sqlFilter = new StringBuilder();
 			var sql = new StringBuilder();
 			var tableType = objWithProperties.GetType();
@@ -435,12 +444,7 @@ namespace ServiceStack.OrmLite.Firebird
 
             foreach (var compositeIndex in modelDef.CompositeIndexes)
             {
-                var indexName = GetIndexName(compositeIndex.Unique,
-					(modelDef.IsInSchema ?
-				 		modelDef.Schema +"_"+ GetQuotedTableName(modelDef):
-				 		GetQuotedTableName(modelDef) ).SafeVarName(),
-                    string.Join("_", compositeIndex.FieldNames.ToArray()));
-
+                var indexName = GetCompositeIndexNameWithSchema(compositeIndex, modelDef);
                 var indexNames = string.Join(",", compositeIndex.FieldNames.ToArray());
 
                 sqlIndexes.Add(
@@ -449,8 +453,8 @@ namespace ServiceStack.OrmLite.Firebird
 
             return sqlIndexes;
         }
-		
-		protected override string ToCreateIndexStatement(bool isUnique, string indexName, ModelDefinition modelDef, string fieldName, bool isCombined)
+
+        protected override string ToCreateIndexStatement(bool isUnique, string indexName, ModelDefinition modelDef, string fieldName, bool isCombined)
         {
             return string.Format("CREATE {0} INDEX {1} ON {2} ({3} ); \n",
 				isUnique ? "UNIQUE" : "", 

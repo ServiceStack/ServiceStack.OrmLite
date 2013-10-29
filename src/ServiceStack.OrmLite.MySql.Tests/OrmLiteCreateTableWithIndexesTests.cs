@@ -12,7 +12,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		[Test]
 		public void Can_create_ModelWithIndexFields_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithIndexFields>(true);
 
@@ -26,7 +26,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		[Test]
 		public void Can_create_ModelWithCompositeIndexFields_table()
 		{
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithCompositeIndexFields>(true);
 
@@ -37,6 +37,20 @@ namespace ServiceStack.OrmLite.MySql.Tests
 			}
 		}
 
+        [Test]
+        public void Can_create_ModelWithNamedCompositeIndex_table()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTable<ModelWithNamedCompositeIndex>(true);
+
+                var sql = OrmLiteConfig.DialectProvider.ToCreateIndexStatements(typeof(ModelWithNamedCompositeIndex)).Join();
+
+                Assert.IsTrue(sql.Contains("idx_modelwithnamedcompositeindex_name"));
+                Assert.IsTrue(sql.Contains("custom_index_name"));
+                Assert.IsFalse(sql.Contains("uidx_modelwithnamedcompositeindexfields_composite1_composite2"));
+            }
+        }
 
 	}
 }

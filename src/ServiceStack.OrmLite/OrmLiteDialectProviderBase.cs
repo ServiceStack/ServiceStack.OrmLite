@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.Text;
+using ServiceStack.DataAnnotations;
 using ServiceStack.Logging;
 using ServiceStack.Text;
 using System.Diagnostics;
@@ -234,6 +235,8 @@ namespace ServiceStack.OrmLite
             DbTypeMap.Set<decimal?>(DbType.Decimal, DecimalColumnDefinition);
 
             DbTypeMap.Set<byte[]>(DbType.Binary, BlobColumnDefinition);
+
+            DbTypeMap.Set<object>(DbType.Object, StringColumnDefinition);
         }
 
         public string DefaultValueFormat = " DEFAULT ({0})";
@@ -409,8 +412,26 @@ namespace ServiceStack.OrmLite
             return sql.ToString();
         }
 
-        public abstract long GetLastInsertId(IDbCommand command);
+        public virtual string SelectIdentitySql { get; set; }
 
+        public virtual long GetLastInsertId(IDbCommand dbCmd)
+        {
+            if (SelectIdentitySql == null)
+                throw new NotImplementedException("Returning last inserted identity is not implemented on this DB Provider.");
+
+            dbCmd.CommandText = SelectIdentitySql;
+            return dbCmd.GetLongScalar();
+        }
+
+        public virtual long InsertAndGetLastInsertId<T>(IDbCommand dbCmd)
+        {
+            if (SelectIdentitySql == null)
+                throw new NotImplementedException("Returning last inserted identity is not implemented on this DB Provider.");
+            
+            dbCmd.CommandText += "; " + SelectIdentitySql;
+            return dbCmd.GetLongScalar();
+        }
+        
         public virtual string ToCountStatement(Type fromTableType, string sqlFilter, params object[] filterParams)
         {
             var sql = new StringBuilder();
@@ -466,21 +487,18 @@ namespace ServiceStack.OrmLite
             return sql.ToString();
         }
 
-        public virtual string ToInsertRowStatement(object objWithProperties, IDbCommand command)
+        public virtual string ToInsertRowStatement(IDbCommand command, object objWithProperties, ICollection<string> insertFields = null)
         {
-            return ToInsertRowStatement(objWithProperties, new List<string>(), command);
-        }
+            if (insertFields == null) 
+                insertFields = new List<string>();
 
-        public virtual string ToInsertRowStatement(object objWithProperties, IList<string> insertFields, IDbCommand command)
-        {
-
-            if (insertFields == null) insertFields = new List<string>();
             var sbColumnNames = new StringBuilder();
             var sbColumnValues = new StringBuilder();
             var modelDef = objWithProperties.GetType().GetModelDefinition();
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
+                if (fieldDef.IsComputed) continue;
                 if (fieldDef.AutoIncrement) continue;
                 //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
                 if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name)) continue;
@@ -506,22 +524,21 @@ namespace ServiceStack.OrmLite
             return sql;
         }
 
-        public virtual IDbCommand CreateParameterizedInsertStatement(object objWithProperties, IDbConnection connection)
+        public virtual IDbCommand CreateParameterizedInsertStatement(IDbConnection connection, object objWithProperties, ICollection<string> insertFields = null)
         {
-            return CreateParameterizedInsertStatement(objWithProperties, null, connection);
-        }
+            if (insertFields == null) 
+                insertFields = new List<string>();
 
-        public virtual IDbCommand CreateParameterizedInsertStatement(object objWithProperties, IList<string> insertFields, IDbConnection connection)
-        {
-            if (insertFields == null) insertFields = new List<string>();
             var sbColumnNames = new StringBuilder();
             var sbColumnValues = new StringBuilder();
             var modelDef = objWithProperties.GetType().GetModelDefinition();
 
-            var command = connection.CreateCommand();
+            var cmd = connection.CreateCommand();
+            cmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
+                if (fieldDef.IsComputed) continue;
                 if (fieldDef.AutoIncrement)
                         continue;
                     
@@ -537,7 +554,7 @@ namespace ServiceStack.OrmLite
                     sbColumnValues.Append(ParamString)
                                   .Append(fieldDef.FieldName);
 
-                    AddParameterForFieldToCommand(command, fieldDef, objWithProperties);
+                    AddParameterForFieldToCommand(cmd, fieldDef, objWithProperties);
                 }
                 catch (Exception ex)
                 {
@@ -546,25 +563,24 @@ namespace ServiceStack.OrmLite
                 }
             }
 
-            command.CommandText = string.Format("INSERT INTO {0} ({1}) VALUES ({2})",
-                                                GetQuotedTableName(modelDef), sbColumnNames, sbColumnValues);
-            return command;
+            cmd.CommandText = string.Format("INSERT INTO {0} ({1}) VALUES ({2})",
+                                            GetQuotedTableName(modelDef), sbColumnNames, sbColumnValues);
+
+            return cmd;
         }
 
-        public void ReParameterizeInsertStatement(object objWithProperties, IDbCommand command)
+        public void ReParameterizeInsertStatement(IDbCommand command, object objWithProperties, ICollection<string> insertFields = null)
         {
-            ReParameterizeInsertStatement(objWithProperties, null, command);
-        }
+            if (insertFields == null) 
+                insertFields = new List<string>();
 
-        public void ReParameterizeInsertStatement(object objWithProperties, IList<string> insertFields, IDbCommand command)
-        {
-            if (insertFields == null) insertFields = new List<string>();
             var modelDef = objWithProperties.GetType().GetModelDefinition();
-
+            
             command.Parameters.Clear();
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
+                if (fieldDef.IsComputed) continue;
                 if (fieldDef.AutoIncrement) continue;
                 //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
                 if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name)) continue;
@@ -614,20 +630,19 @@ namespace ServiceStack.OrmLite
             return value;
         }
 
-        public virtual string ToUpdateRowStatement(object objWithProperties)
+        public virtual string ToUpdateRowStatement(object objWithProperties, ICollection<string> updateFields = null)
         {
-            return ToUpdateRowStatement(objWithProperties, new List<string>());
-        }
+            if (updateFields == null) 
+                updateFields = new List<string>();
 
-        public virtual string ToUpdateRowStatement(object objWithProperties, IList<string> updateFields)
-        {
-            if (updateFields == null) updateFields = new List<string>();
             var sqlFilter = new StringBuilder();
             var sql = new StringBuilder();
             var modelDef = objWithProperties.GetType().GetModelDefinition();
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
+                if (fieldDef.IsComputed) continue;
+
                 try
                 {
                     if (fieldDef.IsPrimaryKey && updateFields.Count == 0)
@@ -658,29 +673,27 @@ namespace ServiceStack.OrmLite
             return updateSql;
         }
 
-        public virtual IDbCommand CreateParameterizedUpdateStatement(object objWithProperties, IDbConnection connection)
+        public virtual IDbCommand CreateParameterizedUpdateStatement(IDbConnection connection, object objWithProperties, ICollection<string> updateFields = null)
         {
-            return CreateParameterizedUpdateStatement(objWithProperties, null, connection);
-        }
+            if (updateFields == null) 
+                updateFields = new List<string>();
 
-        public virtual IDbCommand CreateParameterizedUpdateStatement(object objWithProperties, IList<string> updateFields, IDbConnection connection)
-        {
-            if (updateFields == null) updateFields = new List<string>();
             var sqlFilter = new StringBuilder();
             var sql = new StringBuilder();
             var modelDef = objWithProperties.GetType().GetModelDefinition();
 
             var command = connection.CreateCommand();
-
+            command.CommandTimeout = OrmLiteConfig.CommandTimeout;
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
+                if (fieldDef.IsComputed) continue;
                 try
                 {
                     if (fieldDef.IsPrimaryKey && updateFields.Count == 0)
                     {
                         if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
 
-                        sqlFilter.AppendFormat("{0} = {1}", GetQuotedColumnName(fieldDef.FieldName), String.Concat(ParamString, fieldDef.Name));
+                        sqlFilter.AppendFormat("{0} = {1}", GetQuotedColumnName(fieldDef.FieldName), String.Concat(ParamString, fieldDef.FieldName));
                         AddParameterForFieldToCommand(command, fieldDef, objWithProperties);
 
                         continue;
@@ -688,7 +701,7 @@ namespace ServiceStack.OrmLite
 
                     if (updateFields.Count > 0 && !updateFields.Contains(fieldDef.Name)) continue;
                     if (sql.Length > 0) sql.Append(",");
-                    sql.AppendFormat("{0} = {1}", GetQuotedColumnName(fieldDef.FieldName), String.Concat(ParamString, fieldDef.Name));
+                    sql.AppendFormat("{0} = {1}", GetQuotedColumnName(fieldDef.FieldName), String.Concat(ParamString, fieldDef.FieldName));
 
                     AddParameterForFieldToCommand(command, fieldDef, objWithProperties);
                 }
@@ -822,9 +835,7 @@ namespace ServiceStack.OrmLite
 
             foreach (var compositeIndex in modelDef.CompositeIndexes)
             {
-                var indexName = GetIndexName(compositeIndex.Unique, modelDef.ModelName.SafeVarName(),
-                    string.Join("_", compositeIndex.FieldNames.ToArray()));
-
+                var indexName = GetCompositeIndexName(compositeIndex, modelDef);
                 var indexNames = string.Join(" ASC, ",
                                              compositeIndex.FieldNames.ConvertAll(
                                                  n => GetQuotedName(n)).ToArray());
@@ -869,6 +880,21 @@ namespace ServiceStack.OrmLite
         protected virtual string GetIndexName(bool isUnique, string modelName, string fieldName)
         {
             return string.Format("{0}idx_{1}_{2}", isUnique ? "u" : "", modelName, fieldName).ToLower();
+        }
+
+        protected virtual string GetCompositeIndexName(CompositeIndexAttribute compositeIndex, ModelDefinition modelDef)
+        {
+            return compositeIndex.Name ?? GetIndexName(compositeIndex.Unique, modelDef.ModelName.SafeVarName(),
+                                                       string.Join("_", compositeIndex.FieldNames.ToArray()));
+        }
+
+        protected virtual string GetCompositeIndexNameWithSchema(CompositeIndexAttribute compositeIndex, ModelDefinition modelDef)
+        {
+            return compositeIndex.Name ?? GetIndexName(compositeIndex.Unique,
+                    (modelDef.IsInSchema ?
+                        modelDef.Schema + "_" + GetQuotedTableName(modelDef) :
+                        GetQuotedTableName(modelDef)).SafeVarName(),
+                    string.Join("_", compositeIndex.FieldNames.ToArray()));
         }
 
         protected virtual string ToCreateIndexStatement(bool isUnique, string indexName, ModelDefinition modelDef, string fieldName, bool isCombined = false)
@@ -934,7 +960,7 @@ namespace ServiceStack.OrmLite
             throw new NotImplementedException();
         }
 
-        public IDbCommand CreateParameterizedDeleteStatement(object objWithProperties, IDbConnection connection)
+        public IDbCommand CreateParameterizedDeleteStatement(IDbConnection connection, object objWithProperties)
         {
             throw new NotImplementedException();
         }

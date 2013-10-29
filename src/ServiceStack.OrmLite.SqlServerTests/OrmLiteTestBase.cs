@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
@@ -26,6 +27,12 @@ namespace ServiceStack.OrmLite.SqlServerTests
         public void Log(string text)
         {
             Console.WriteLine(text);
+        }
+
+        public IDbConnection OpenDbConnection(string connString = null)
+        {
+            connString = connString ?? ConnectionString;
+            return connString.OpenDbConnection();
         }
     }
 }

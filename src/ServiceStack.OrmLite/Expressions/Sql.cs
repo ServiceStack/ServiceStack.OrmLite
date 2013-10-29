@@ -1,26 +1,40 @@
-using System;
+using System.Collections;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Collections.Generic;
+
 namespace ServiceStack.OrmLite
 {
 	public static class Sql
 	{
-		public static bool In<T>(T value, params object[] list)
-		{
-			if(value == null)
-				return false;
+        public static bool In<T, TItem>(T value, params TItem[] list)
+        {
+            return value != null && Flatten(list).Any(obj => obj.ToString() == value.ToString());
+        }
 
-			foreach (var obj in list)
-			{
-				if (obj == null) continue;
-				if (obj.ToString() == value.ToString()) return true;
-			}
+	    public static List<object> Flatten(IEnumerable list)
+        {
+            var ret = new List<object>();
+	        if (list == null) return ret;
 
-			return false;
-		}
+            foreach (var item in list)
+            {
+                if (item == null) continue;
 
-		public static string Desc<T>(T value) {
+                var arr = item as IEnumerable;
+                if (arr != null && !(item is string))
+                {
+                    ret.AddRange(arr.Cast<object>());
+                }
+                else
+                {
+                    ret.Add(item);
+                }
+            }
+            return ret;
+        }
+
+	    public static string Desc<T>(T value)
+        {
 			return  value==null? "": value.ToString() + " DESC";
 		}
 		

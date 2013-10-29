@@ -25,7 +25,8 @@ namespace Northwind.Perf
 			{
 				if (db == null)
 				{
-					db = ConnectionString.OpenDbConnection();
+				    var connStr = ConnectionString;
+                    db = connStr.OpenDbConnection();
 				}
 				return db;
 			}

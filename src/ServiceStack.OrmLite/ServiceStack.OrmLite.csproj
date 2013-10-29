@@ -93,9 +93,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\GlobalAssemblyInfo.cs">
-      <Link>Properties\GlobalAssemblyInfo.cs</Link>
-    </Compile>
     <Compile Include="BelongToAttribute.cs" />
     <Compile Include="Expressions\ExpressionVisitor.cs" />
     <Compile Include="Expressions\ParameterRebinder.cs" />
@@ -104,6 +101,7 @@
     <Compile Include="Expressions\WriteConnectionExtensions.cs" />
     <Compile Include="ForeignKeyAttribute.cs" />
     <Compile Include="JoinSqlBuilder.cs" />
+    <Compile Include="OrmLiteConnectionWrapper.cs" />
     <Compile Include="OrmLiteReadConnectionExtensions.cs" />
     <Compile Include="OrmLiteSPStatement.cs" />
     <Compile Include="OrmLiteTransaction.cs" />

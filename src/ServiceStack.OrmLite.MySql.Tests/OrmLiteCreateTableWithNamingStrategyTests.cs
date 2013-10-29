@@ -19,7 +19,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 				 ColumnPrefix = "col_",
 			};
 			
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 			}
@@ -32,7 +32,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		{
 			OrmLite.OrmLiteConfig.DialectProvider.NamingStrategy = new LowercaseNamingStrategy();
 
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 			}
@@ -46,7 +46,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		{
 			OrmLite.OrmLiteConfig.DialectProvider.NamingStrategy = new UnderscoreSeparatedCompoundNamingStrategy();
 
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 			}
@@ -63,7 +63,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 				ColumnPrefix = "col_",
 			};
 
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 				ModelWithOnlyStringFields m = new ModelWithOnlyStringFields() { Id= "999", AlbumId = "112", AlbumName="ElectroShip", Name = "MyNameIsBatman"};
@@ -87,7 +87,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 				ColumnPrefix = "col_",
 			};
 
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 				ModelWithOnlyStringFields m = new ModelWithOnlyStringFields() { Id = "998", AlbumId = "112", AlbumName = "ElectroShip", Name = "QueryByExample" };
@@ -111,7 +111,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 				ColumnPrefix = "col_",
 			};
 
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 				ModelWithOnlyStringFields m = new ModelWithOnlyStringFields() { Id = "998", AlbumId = "112", AlbumName = "ElectroShip", Name = "QueryByExample" };
@@ -128,7 +128,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 			
 			OrmLite.OrmLiteConfig.DialectProvider.NamingStrategy= new OrmLiteNamingStrategyBase();
 			
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 				ModelWithOnlyStringFields m = new ModelWithOnlyStringFields() { Id = "998", AlbumId = "112", AlbumName = "ElectroShip", Name = "QueryByExample" };
@@ -148,7 +148,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 				ColumnPrefix = "col_",
 			};
 
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 				ModelWithOnlyStringFields m = new ModelWithOnlyStringFields() { Id = "998", AlbumId = "112", AlbumName = "ElectroShip", Name = "QueryByExample" };

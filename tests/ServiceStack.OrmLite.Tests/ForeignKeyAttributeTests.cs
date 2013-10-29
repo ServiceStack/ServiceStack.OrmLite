@@ -9,7 +9,7 @@ namespace ServiceStack.OrmLite.Tests
         [TestFixtureSetUp]
         public void Setup()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
+            using (var dbConn = OpenDbConnection())
             {
                 dbConn.DropTable<TypeWithOnDeleteAndUpdateCascade>();
                 dbConn.DropTable<TypeWithOnDeleteSetNull>();
@@ -27,7 +27,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void CanCreateSimpleForeignKey()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
+            using (var dbConn = OpenDbConnection())
             {
                 dbConn.DropAndCreateTable<TypeWithSimpleForeignKey>();
             }
@@ -36,7 +36,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void CanCreateForeignWithOnDeleteCascade()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
+            using (var dbConn = OpenDbConnection())
             {
                 dbConn.DropAndCreateTable<TypeWithOnDeleteCascade>();
             }
@@ -45,7 +45,11 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void CascadesOnDelete()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
+            //Ignore for Sqlite who doesn't support Cascade deletes. TODO: group tests around db features
+            if (OrmLiteConfig.DialectProvider == SqliteDialect.Provider)
+                return;
+
+            using (var dbConn = OpenDbConnection())
             {
                 dbConn.DropAndCreateTable<TypeWithOnDeleteCascade>();
 
@@ -65,7 +69,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void CanCreateForeignWithOnDeleteCascadeAndOnUpdateCascade()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
+            using (var dbConn = OpenDbConnection())
             {
                 dbConn.DropAndCreateTable<TypeWithOnDeleteAndUpdateCascade>();
             }
@@ -75,7 +79,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void CanCreateForeignWithOnDeleteNoAction()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
+            using (var dbConn = OpenDbConnection())
             {
                 dbConn.DropAndCreateTable<TypeWithOnDeleteNoAction>();
             }
@@ -84,7 +88,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void CanCreateForeignWithOnDeleteRestrict()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
+            using (var dbConn = OpenDbConnection())
             {
                 dbConn.DropAndCreateTable<TypeWithOnDeleteRestrict>();
             }
@@ -93,7 +97,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void CanCreateForeignWithOnDeleteSetDefault()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
+            using (var dbConn = OpenDbConnection())
             {
                 dbConn.DropAndCreateTable<TypeWithOnDeleteSetDefault>();
             }
@@ -102,7 +106,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void CanCreateForeignWithOnDeleteSetNull()
         {
-            using (var dbConn = ConnectionString.OpenDbConnection())
+            using (var dbConn = OpenDbConnection())
             {
                 dbConn.DropAndCreateTable<TypeWithOnDeleteSetNull>();
             }

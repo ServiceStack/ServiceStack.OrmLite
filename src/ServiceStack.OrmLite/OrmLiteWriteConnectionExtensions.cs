@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 
 namespace ServiceStack.OrmLite
 {
@@ -114,8 +115,9 @@ namespace ServiceStack.OrmLite
         {
             dbConn.Exec(dbCmd =>
             {
-                using(var updateStmt = dbConn.CreateUpdateStatement(obj)) {
-                    copyCommandtextAndParametersForParameterizedStatements(dbCmd, updateStmt);
+                using (var updateStmt = dbConn.CreateUpdateStatement(obj))
+                {
+                    dbCmd.CopyParameterizedStatementTo(updateStmt);
                 }
                 dbCmd.ExecuteNonQuery();
             });
@@ -142,8 +144,7 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Performs a DeleteById() except argument is passed as a parameter to the generated SQL
         /// </summary>
-        public static void DeleteByIdParam<T>(this IDbConnection dbConn, object id)
-where T : new()
+        public static void DeleteByIdParam<T>(this IDbConnection dbConn, object id) where T : new()
         {
             dbConn.Exec(dbCmd => dbCmd.DeleteByIdParam<T>(id));
         }
@@ -196,29 +197,35 @@ where T : new()
         /// <summary>
         /// Performs an Insert() except arguments are passed as parameters to the generated SQL
         /// </summary>
-        public static void InsertParam<T>(this IDbConnection dbConn, T obj) where T : new()
+        public static long InsertParam<T>(this IDbConnection dbConn, T obj, bool selectIdentity = false)
+            where T : new()
         {
-            dbConn.Exec(dbCmd =>
+            return dbConn.Exec(dbCmd =>
             {
-                using(var insertStmt = dbConn.CreateInsertStatement(obj)) {
-                    copyCommandtextAndParametersForParameterizedStatements(dbCmd, insertStmt);
+                using (var insertStmt = dbConn.CreateInsertStatement(obj))
+                {
+                    dbCmd.CopyParameterizedStatementTo(insertStmt);
                 }
+
+                if (selectIdentity)
+                    return OrmLiteConfig.DialectProvider.InsertAndGetLastInsertId<T>(dbCmd);
+
                 dbCmd.ExecuteNonQuery();
+                return -1;
             });
         }
 
-        private static void copyCommandtextAndParametersForParameterizedStatements(IDbCommand dbCmd, IDbCommand tempParameterizedStatement)
+        private static void CopyParameterizedStatementTo(this IDbCommand dbCmd, IDbCommand tmpStmt)
         {
-            dbCmd.CommandText = tempParameterizedStatement.CommandText;
+            dbCmd.CommandText = tmpStmt.CommandText;
 
-            //instead of creating new generic DbParameters, copy them from the "dummy" IDbCommand, so it can keep provider specific information. for example: SqlServer "datetime2" dbtype
-            //first must create a temporary list, because DbParam can't belong to two DbCommands...
-            List<IDbDataParameter> tmpParams = new List<IDbDataParameter>(tempParameterizedStatement.Parameters.Count);
+            //Instead of creating new generic DbParameters, copy them from the "dummy" IDbCommand, 
+            //to keep provider specific information. E.g: SqlServer "datetime2" dbtype
+            //We must first create a temp list, as DbParam can't belong to two DbCommands
+            var tmpParams = new List<IDbDataParameter>(tmpStmt.Parameters.Count);
+            tmpParams.AddRange(tmpStmt.Parameters.Cast<IDbDataParameter>());
 
-            foreach(IDbDataParameter genParam in tempParameterizedStatement.Parameters) {
-                tmpParams.Add(genParam);
-            }
-            tempParameterizedStatement.Parameters.Clear();
+            tmpStmt.Parameters.Clear();
 
             tmpParams.ForEach(x => dbCmd.Parameters.Add(x));
         }

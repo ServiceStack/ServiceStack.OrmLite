@@ -10,7 +10,7 @@ namespace ServiceStack.OrmLite.MySql.Tests.Expressions
         [SetUp]
         public void Setup()
         {
-            ConnectionString.OpenDbConnection().CreateTable<TestType>(true);
+            OpenDbConnection().CreateTable<TestType>(true);
         }
 
         public T GetValue<T>(T item)
@@ -28,7 +28,7 @@ namespace ServiceStack.OrmLite.MySql.Tests.Expressions
             if (obj == null)
                 obj = new TestType[0];
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 foreach (var t in obj)
                 {

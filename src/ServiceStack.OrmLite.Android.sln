@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceStack.OrmLite.Android", "ServiceStack.OrmLite\ServiceStack.OrmLite.Android.csproj", "{42BF9D4F-100D-4577-8538-5FD309D2CBEB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceStack.OrmLite.Sqlite.Android", "ServiceStack.OrmLite.Sqlite\ServiceStack.OrmLite.Sqlite.Android.csproj", "{85DC23CC-BB59-4775-AA9C-552FF2BBEB22}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{42BF9D4F-100D-4577-8538-5FD309D2CBEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42BF9D4F-100D-4577-8538-5FD309D2CBEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42BF9D4F-100D-4577-8538-5FD309D2CBEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42BF9D4F-100D-4577-8538-5FD309D2CBEB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{85DC23CC-BB59-4775-AA9C-552FF2BBEB22}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{85DC23CC-BB59-4775-AA9C-552FF2BBEB22}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{85DC23CC-BB59-4775-AA9C-552FF2BBEB22}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{85DC23CC-BB59-4775-AA9C-552FF2BBEB22}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = ServiceStack.OrmLite\ServiceStack.OrmLite.Android.csproj
+	EndGlobalSection
+EndGlobal

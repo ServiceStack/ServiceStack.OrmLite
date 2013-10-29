@@ -14,7 +14,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		public void Can_create_ModelWithIndexFields_table()
 		{
 			OrmLiteConfig.DialectProvider.DefaultStringLength=128;
-			using (var db = ConnectionString.OpenDbConnection())
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
 			{
 				db.CreateTable<ModelWithIndexFields>(true);
 
@@ -29,7 +29,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		public void Can_create_ModelWithCompositeIndexFields_table()
 		{
 			OrmLiteConfig.DialectProvider.DefaultStringLength=128;
-			using (var db = ConnectionString.OpenDbConnection())
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
 			{
 				db.CreateTable<ModelWithCompositeIndexFields>(true);
 

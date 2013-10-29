@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Default"
+    xmlns='http://schemas.microsoft.com/developer/msbuild/2003' ToolsVersion="4.0">
+  <Import Project="$(MSBuildProjectDirectory)/build.tasks" />
+
+  <PropertyGroup>
+    <MajorVersion Condition="$(MajorVersion) == ''">3</MajorVersion>
+    <MinorVersion Condition="$(MinorVersion) == ''">9</MinorVersion>
+    <PatchVersion Condition="$(PatchVersion) == ''">$(BUILD_NUMBER)</PatchVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <BuildSolutionDir>$(MSBuildProjectDirectory)/..</BuildSolutionDir>
+    <SrcDir>$(BuildSolutionDir)/src</SrcDir>
+    <LibDir>$(BuildSolutionDir)/lib</LibDir>
+    <Configuration Condition="$(Configuration) == ''">Release</Configuration>
+    <NuGetPath>$(BuildSolutionDir)/src/.nuget/nuget.exe</NuGetPath>
+    <NuGetPackageDir>$(BuildSolutionDir)/NuGet</NuGetPackageDir>
+    <Version>$(MajorVersion).$(MinorVersion).$(PatchVersion).0</Version>
+    <UnstableTag Condition="$(RELEASE) == ''">-unstable</UnstableTag>
+    <PackageVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)$(UnstableTag)</PackageVersion>
+    <EnvVersion>$(MajorVersion).$(MinorVersion)$(PatchVersion)</EnvVersion>
+  </PropertyGroup>
+
+
+  <ItemGroup>
+      <NugetPackageFilesToDelete Include="$(NuGetPackageDir)/*.nupkg"/>
+  </ItemGroup>
+
+  
+  <PropertyGroup>
+    <DoBuildSolutionsDependsOn>
+      BeforeBuildSolutions;
+      BuildSolutions
+    </DoBuildSolutionsDependsOn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <NugetPackageFilesToDelete Include="$(NuGetPackageDir)/*.nupkg"/>
+  </ItemGroup>
+
+  <Target Name="Default" DependsOnTargets="$(DoBuildSolutionsDependsOn)" />
+
+  <Target Name="TeamCityBuild">
+    <!--<Copy SourceFiles="$(BuildSolutionDir)/tests/ServiceStack.Common.Tests/ci.app.config" DestinationFiles="$(BuildSolutionDir)/tests/ServiceStack.Common.Tests/app.config" />-->
+    <CallTarget Targets="Default" />
+  </Target>
+
+  <Target Name="Default" DependsOnTargets="$(DoBuildSolutionsDependsOn)" />
+
+  <Target Name="BeforeBuildSolutions">
+    <Message Text="*****Before building solution*****" Importance="high"/>
+    <!--<Copy SourceFiles="Test/ci.app.config" DestinationFiles="Test/app.config" />-->
+  </Target>
+
+  <Target Name="UnitTests" DependsOnTargets="$(DoBuildSolutionsDependsOn)">
+      <Exec Command="$(BuildSolutionDir)/lib/tests/nunit-console/nunit-console-x86.exe $(BuildSolutionDir)/tests/ServiceStack.OrmLite.Tests/bin/$(Configuration)/ServiceStack.OrmLite.Tests.dll"/>
+  </Target>
+
+  <Target Name="BuildSolutions">
+    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.sln" Targets="Build"
+      Properties="Configuration=$(Configuration)" />
+  </Target>
+  
+  <Target Name="NuGetPack">
+
+    <!-- Update Version -->
+    <ItemGroup>
+        <RegexTransform Include="$(SrcDir)/**/AssemblyInfo.cs">
+            <Find>\d+\.\d+\.\d+\.\d+</Find>
+            <ReplaceWith>$(Version)</ReplaceWith>
+        </RegexTransform>
+    </ItemGroup>
+
+    <RegexTransform Items="@(RegexTransform)" />
+
+    <Delete Files="@(NugetPackageFilesToDelete)" />
+    
+    <ItemGroup>
+      <Sqlite32Net35Files Include="$(SrcDir)/ServiceStack.OrmLite.Sqlite32/bin/$(Configuration)/ServiceStack.OrmLite.*"></Sqlite32Net35Files>
+      <Sqlite32Net40Files Include="$(SrcDir)/ServiceStack.OrmLite.Sqlite32/bin/x86/ServiceStack.OrmLite.*"></Sqlite32Net40Files>
+      <Sqlite64Net35Files Include="$(SrcDir)/ServiceStack.OrmLite.Sqlite64/bin/$(Configuration)/ServiceStack.OrmLite.*"></Sqlite64Net35Files>
+      <Sqlite64Net40Files Include="$(SrcDir)/ServiceStack.OrmLite.Sqlite64/bin/x64/ServiceStack.OrmLite.*"></Sqlite64Net40Files>
+
+      <SqliteMonoNet35Files Include="$(SrcDir)/ServiceStack.OrmLite.Sqlite/bin/$(Configuration)/ServiceStack.OrmLite.*"></SqliteMonoNet35Files>
+      <SqliteMonoNet35Files Include="$(LibDir)/Mono.Data.Sqlite.dll"></SqliteMonoNet35Files>
+      <SqliteMonoNet40Files Include="$(SrcDir)/ServiceStack.OrmLite.Sqlite/x86/$(Configuration)/ServiceStack.OrmLite.*"></SqliteMonoNet40Files>
+      <SqliteMonoNet40Files Include="$(LibDir)/Mono.Data.Sqlite.dll"></SqliteMonoNet40Files>
+      <SqliteMonoContentFiles Include="$(LibDir)/sqlite3.dll"></SqliteMonoContentFiles>
+
+      <SqlServerFiles Include="$(SrcDir)/ServiceStack.OrmLite.SqlServer/bin/$(Configuration)/ServiceStack.OrmLite.*"></SqlServerFiles>
+
+      <MySqlFiles Include="$(SrcDir)/ServiceStack.OrmLite.MySql/bin/$(Configuration)/ServiceStack.OrmLite.*"></MySqlFiles>
+      <PostgreSqlFiles Include="$(SrcDir)/ServiceStack.OrmLite.PostgreSQL/bin/$(Configuration)/ServiceStack.OrmLite.*"></PostgreSqlFiles>
+      <OracleFiles Include="$(SrcDir)/ServiceStack.OrmLite.Oracle/bin/$(Configuration)/ServiceStack.OrmLite.*"></OracleFiles>
+      
+      <FirebirdFiles Include="$(SrcDir)/ServiceStack.OrmLite.Firebird/bin/$(Configuration)/ServiceStack.OrmLite.*"></FirebirdFiles>
+      <FirebirdFiles Include="$(SrcDir)/ServiceStack.OrmLite.Firebird/bin/$(Configuration)/FirebirdSql.Data.FirebirdClient.dll"></FirebirdFiles>
+    
+      <T4Files Include="$(SrcDir)/T4/*.*"></T4Files>
+    </ItemGroup>
+
+    <!-- Sqlite32.NET -->
+
+    <MSBuild Projects="$(SrcDir)/ServiceStack.OrmLite.Sqlite32/ServiceStack.OrmLite.Sqlite32.csproj"
+             Targets="Build"
+             Properties="Version=$(PackageVersion);Configuration=$(Configuration)" />
+
+    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite32/lib/net35" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite32/lib/net35')" />
+    <Copy SourceFiles="%(Sqlite32Net35Files.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite32/lib/net35" />
+
+    <MSBuild Projects="$(SrcDir)/ServiceStack.OrmLite.Sqlite32/ServiceStack.OrmLite.Sqlite32v40.csproj"
+             Targets="Build"
+             Properties="Version=$(PackageVersion);Configuration=$(Configuration)" />
+
+    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite32/lib/net40" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite32/lib/net40')" />
+    <Copy SourceFiles="%(Sqlite32Net40Files.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite32/lib/net40" />
+    
+    <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite32/servicestack.ormlite.sqlite32.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
+            LogStandardErrorAsError="true" />
+
+    <!-- Sqlite64.NET -->
+
+    <MSBuild Projects="$(SrcDir)/ServiceStack.OrmLite.Sqlite64/ServiceStack.OrmLite.Sqlite64.csproj"
+             Targets="Build"
+             Properties="Version=$(PackageVersion);Configuration=$(Configuration)" />
+
+    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite64/lib/net35" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite64/lib/net35')" />
+    <Copy SourceFiles="%(Sqlite64Net35Files.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite64/lib/net35" />
+
+    <MSBuild Projects="$(SrcDir)/ServiceStack.OrmLite.Sqlite64/ServiceStack.OrmLite.Sqlite64v40.csproj"
+             Targets="Build"
+             Properties="Version=$(PackageVersion);Configuration=$(Configuration)" />
+
+    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite64/lib/net40" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite64/lib/net40')" />
+    <Copy SourceFiles="%(Sqlite64Net40Files.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite64/lib/net40" />
+    
+    <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite64/servicestack.ormlite.sqlite64.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
+            LogStandardErrorAsError="true" />
+
+    <!-- Sqlite Mono/.NET -->
+
+    <MSBuild Projects="$(SrcDir)/ServiceStack.OrmLite.Sqlite/ServiceStack.OrmLite.Sqlite.csproj"
+             Targets="Build"
+             Properties="Version=$(PackageVersion);Configuration=$(Configuration)" />
+
+    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite.Mono/lib/net35" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite.Mono/lib/net35')" />
+    <Copy SourceFiles="%(SqliteMonoNet35Files.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite.Mono/lib/net35" />
+
+    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite.Mono/content" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite.Mono/content')" />
+    <Copy SourceFiles="%(SqliteMonoContentFiles.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite.Mono/content" />
+
+    <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite.Mono/servicestack.ormlite.sqlite.mono.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
+            LogStandardErrorAsError="true" />
+
+    <!-- SqlServer -->
+
+    <MSBuild Projects="$(SrcDir)/ServiceStack.OrmLite.SqlServer/ServiceStack.OrmLite.SqlServer.csproj"
+             Targets="Build"
+             Properties="Version=$(PackageVersion);Configuration=$(Configuration)" />
+
+    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.SqlServer/lib/net35" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.SqlServer/lib/net35')" />
+    <Copy SourceFiles="%(SqlServerFiles.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.SqlServer/lib/net35" />
+    
+    <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.SqlServer/servicestack.ormlite.sqlserver.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
+            LogStandardErrorAsError="true" />
+
+    <!-- MySql -->
+
+    <MSBuild Projects="$(SrcDir)/ServiceStack.OrmLite.MySql/ServiceStack.OrmLite.MySql.csproj"
+             Targets="Build"
+             Properties="Version=$(PackageVersion);Configuration=$(Configuration)" />
+
+    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.MySql/lib/net35" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.MySql/lib/net35')" />
+    <Copy SourceFiles="%(MySqlFiles.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.MySql/lib/net35" />
+    
+    <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.MySql/servicestack.ormlite.mysql.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
+            LogStandardErrorAsError="true" />
+
+    <!-- PostgreSQL -->
+
+    <MSBuild Projects="$(SrcDir)/ServiceStack.OrmLite.PostgreSQL/ServiceStack.OrmLite.PostgreSQL.csproj"
+             Targets="Build"
+             Properties="Version=$(PackageVersion);Configuration=$(Configuration)" />
+
+    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.PostgreSQL/lib/net35" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.PostgreSQL/lib/net35')" />
+    <Copy SourceFiles="%(PostgreSqlFiles.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.PostgreSQL/lib/net35" />
+    
+    <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.PostgreSQL/servicestack.ormlite.postgresql.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
+            LogStandardErrorAsError="true" />
+
+    <!-- Oracle -->
+
+    <MSBuild Projects="$(SrcDir)/ServiceStack.OrmLite.Oracle/ServiceStack.OrmLite.Oracle.csproj"
+             Targets="Build"
+             Properties="Version=$(PackageVersion);Configuration=$(Configuration)" />
+
+    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.Oracle/lib/net35" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.Oracle/lib/net35')" />
+    <Copy SourceFiles="%(OracleFiles.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.Oracle/lib/net35" />
+    
+    <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.Oracle/servicestack.ormlite.oracle.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
+            LogStandardErrorAsError="true" />
+
+    <!-- Firebird -->
+
+    <MSBuild Projects="$(SrcDir)/ServiceStack.OrmLite.Firebird/ServiceStack.OrmLite.Firebird.csproj"
+             Targets="Build"
+             Properties="Version=$(PackageVersion);Configuration=$(Configuration)" />
+
+    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.Firebird/lib/net35" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.Firebird/lib/net35')" />
+    <Copy SourceFiles="%(FirebirdFiles.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.Firebird/lib/net35" />
+    
+    <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.Firebird/servicestack.ormlite.firebird.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
+            LogStandardErrorAsError="true" />
+  
+    <!-- T4 -->
+
+    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.T4/content" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.T4/content')" />
+    <Copy SourceFiles="%(T4Files.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.T4/content" />
+
+   <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.T4/servicestack.ormlite.t4.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion)"
+            LogStandardErrorAsError="true" />
+
+  </Target>
+</Project>

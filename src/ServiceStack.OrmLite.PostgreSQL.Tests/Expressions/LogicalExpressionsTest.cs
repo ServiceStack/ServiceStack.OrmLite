@@ -7,7 +7,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
         #region constants
 
         // Unlikely 
-        // ConnectionString.OpenDbConnection().Select<TestType>(q => q.BoolColumn == (true & false));
+        // OpenDbConnection().Select<TestType>(q => q.BoolColumn == (true & false));
 
         #endregion
 
@@ -30,7 +30,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.BoolColumn == (a & b));
 
@@ -57,7 +57,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.BoolColumn == (a | b));
 
@@ -84,7 +84,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.BoolColumn == (a ^ b));
 
@@ -110,7 +110,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.BoolColumn == (GetValue(true) & GetValue(false)));
 
@@ -132,7 +132,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.BoolColumn == (GetValue(true) | GetValue(false)));
 
@@ -154,7 +154,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 var actual = con.Select<TestType>(q => q.BoolColumn == (GetValue(true) ^ GetValue(false)));
 

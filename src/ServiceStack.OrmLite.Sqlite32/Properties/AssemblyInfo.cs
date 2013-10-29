@@ -9,8 +9,12 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Microsoft")]
-[assembly: AssemblyProduct("ServiceStack.OrmLite.Sqlite32")]
-[assembly: AssemblyCopyright("Copyright © Microsoft 2011")]
+#if NET35
+[assembly: AssemblyProduct("ServiceStack.OrmLite.Sqlite32 .NET 3.5")]
+#elif NET40
+[assembly: AssemblyProduct("ServiceStack.OrmLite.Sqlite32 .NET 4.0")]
+#endif
+[assembly: AssemblyCopyright("Copyright © ServiceStack 2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -22,3 +26,4 @@ using System.Runtime.InteropServices;
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("81b2eb97-03e7-4e80-9cb8-9c4e1fe414cc")]
 
+[assembly: AssemblyVersion("1.0.0.0")]

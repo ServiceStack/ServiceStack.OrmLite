@@ -15,7 +15,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
         [Test]
         public void Skip_Take_works_with_injected_Visitor()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 FillTestEntityTableWithTestData(db);
                 
@@ -31,7 +31,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
         [Test]
         public void test_if_limit_works_with_rows_and_skip()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 FillTestEntityTableWithTestData(db);
 
@@ -49,7 +49,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
         [Test]
         public void test_if_limit_works_with_rows()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 FillTestEntityTableWithTestData(db);
 
@@ -67,7 +67,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
         [Test]
         public void test_if_limit_works_with_rows_and_skip_and_orderby()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 FillTestEntityTableWithTestData(db);
 
@@ -85,7 +85,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
         [Test]
         public void test_if_ev_still_works_without_limit_and_orderby()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 FillTestEntityTableWithTestData(db);
 
@@ -102,7 +102,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
         [Test]
         public void test_if_and_works_with_nullable_parameter()
         {
-            using(var db = ConnectionString.OpenDbConnection())
+            using(var db = OpenDbConnection())
             {
                 db.CreateTable<TestEntity>(true);
                 db.Insert(new TestEntity
@@ -124,6 +124,40 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 Assert.IsTrue(result.Count > 0);
             }
         }
+
+        [Test]
+        public void test_if_limit_works_with_rows_and_skip_if_pk_columnname_has_space()
+        {
+            using (var db = OpenDbConnection())
+            {
+                FillAliasedTestEntityTableWithTestData(db);
+
+                var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<TestEntityWithAliases>();
+                ev.Limit(10, 100);
+
+                var result = db.Select(ev);
+                Assert.NotNull(result);
+                Assert.AreEqual(100, result.Count);
+            }
+        }
+
+        [Test]
+        public void test_if_limit_works_with_rows_and_skip_and_orderby_if_pk_columnname_has_space()
+        {
+            using (var db = OpenDbConnection())
+            {
+                FillAliasedTestEntityTableWithTestData(db);
+
+                var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<TestEntityWithAliases>();
+                ev.Limit(10, 100);
+                ev.OrderBy(e => e.Baz);
+
+                var result = db.Select(ev);
+                Assert.NotNull(result);
+                Assert.AreEqual(100, result.Count);
+                Assert.LessOrEqual(result[10].Baz, result[11].Baz);
+            }
+        }
         
         protected void FillTestEntityTableWithTestData(IDbConnection db)
         {
@@ -132,6 +166,21 @@ namespace ServiceStack.OrmLite.SqlServerTests
             for (int i = 1; i < 1000; i++)
             {
                 db.Insert(new TestEntity()
+                {
+                    Foo = RandomString(16),
+                    Bar = RandomString(16),
+                    Baz = RandomDecimal(i)
+                });
+            }
+        }
+
+        protected void FillAliasedTestEntityTableWithTestData(IDbConnection db)
+        {
+            db.CreateTable<TestEntityWithAliases>(true);
+
+            for (int i = 1; i < 1000; i++)
+            {
+                db.Insert(new TestEntityWithAliases()
                 {
                     Foo = RandomString(16),
                     Bar = RandomString(16),

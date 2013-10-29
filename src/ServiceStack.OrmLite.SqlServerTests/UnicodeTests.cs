@@ -57,7 +57,7 @@ Ancient	Modern
 "
             };
 
-                using(var con = ConnectionString.OpenDbConnection()) {
+                using(var con = OpenDbConnection()) {
                     con.ExecuteSql(table_re_creation_script);
 
                     foreach(var item in testData) { con.Insert(new Unicode_poco { Text = item }); }

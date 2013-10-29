@@ -5,7 +5,6 @@ using System.Reflection;
 using ServiceStack.Common.Utils;
 using System.Text;
 using ServiceStack.Common;
-using ServiceStack.OrmLite;
 using System.Data.OracleClient;
 
 namespace ServiceStack.OrmLite.Oracle
@@ -87,6 +86,9 @@ namespace ServiceStack.OrmLite.Oracle
 				return new Guid(value.ToString());
 			}
 
+            if (type == typeof(byte[]))
+                return value;
+
 			try
 			{
 				return base.ConvertDbValue(value, type);
@@ -166,20 +168,17 @@ namespace ServiceStack.OrmLite.Oracle
 			return sql.ToString();
 		}
 
-        public override IDbCommand CreateParameterizedInsertStatement(object objWithProperties, IDbConnection connection)
+        public override IDbCommand CreateParameterizedInsertStatement(IDbConnection connection, object objWithProperties, ICollection<string> insertFields = null)
         {
-            return CreateParameterizedInsertStatement(objWithProperties, null, connection);
-        }
+            if (insertFields == null)
+                insertFields = new List<string>();
 
-        public override IDbCommand CreateParameterizedInsertStatement(object objWithProperties, IList<string> insertFields, IDbConnection connection)
-        {
-            if (insertFields == null) insertFields = new List<string>();
             var sbColumnNames = new StringBuilder();
             var sbColumnValues = new StringBuilder();
             var modelDef = GetModel(objWithProperties.GetType());
 
             var dbCommand = connection.CreateCommand();
-
+            dbCommand.CommandTimeout = OrmLiteConfig.CommandTimeout;
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
                 if (fieldDef.IsComputed) continue;
@@ -241,8 +240,11 @@ namespace ServiceStack.OrmLite.Oracle
             return dbCommand;
         }
 		
-		public override string ToInsertRowStatement(object objWithProperties, IList<string> insertFields, IDbCommand dbCommand)
+		public override string ToInsertRowStatement(IDbCommand dbCommand, object objWithProperties, ICollection<string> insertFields = null)
 		{
+            if (insertFields == null)
+                insertFields = new List<string>();
+
 			var sbColumnNames = new StringBuilder();
 			var sbColumnValues = new StringBuilder();
 
@@ -309,9 +311,12 @@ namespace ServiceStack.OrmLite.Oracle
 		}
 
 		
-		public override string ToUpdateRowStatement(object objWithProperties, IList<string> updateFields)
+		public override string ToUpdateRowStatement(object objWithProperties, ICollection<string> updateFields = null)
 		{
-			var sqlFilter = new StringBuilder();
+		    if (updateFields == null)
+                updateFields = new List<string>();
+
+		    var sqlFilter = new StringBuilder();
 			var sql = new StringBuilder();
 			var tableType = objWithProperties.GetType();
 			var modelDef = GetModel(tableType);
@@ -546,12 +551,7 @@ namespace ServiceStack.OrmLite.Oracle
 
             foreach (var compositeIndex in modelDef.CompositeIndexes)
             {
-                var indexName = GetIndexName(compositeIndex.Unique,
-					(modelDef.IsInSchema ?
-				 		modelDef.Schema +"_"+ GetQuotedTableName(modelDef):
-				 		GetQuotedTableName(modelDef) ).SafeVarName(),
-                    string.Join("_", compositeIndex.FieldNames.ToArray()));
-
+                var indexName = GetCompositeIndexNameWithSchema(compositeIndex, modelDef);
                 var indexNames = string.Join(",", compositeIndex.FieldNames.ToArray());
 
                 sqlIndexes.Add(

@@ -183,5 +183,77 @@ END;";
             Assert.That(result, Is.EqualTo(expected));
         }
 
+        [Test]
+        public void Can_SqlScalar_StoredProc_passing_null_parameter()
+        {
+            const string sql = @"CREATE PROCEDURE dbo.DummyScalar
+    @Times integer
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+	SELECT @Times AS Id
+END;";
+            db.ExecuteSql("IF OBJECT_ID('DummyScalar') IS NOT NULL DROP PROC DummyScalar");
+            db.ExecuteSql(sql);
+
+            var result = db.SqlScalar<int?>("EXEC DummyScalar @Times", new { Times = (int?)null });
+            Assert.That(result, Is.Null);
+
+            result = db.SqlScalar<int?>("EXEC DummyScalar NULL");
+            Assert.That(result, Is.Null);
+
+            result = db.SqlScalar<int?>("EXEC DummyScalar @Times", new Dictionary<string, object> { { "Times", null } });
+            Assert.That(result, Is.Null);
+
+            result = db.SqlScalar<int?>("SELECT NULL");
+            Assert.That(result, Is.Null);
+        }
+
+        [Test]
+        public void Can_SqlList_StoredProc_passing_null_parameter()
+        {
+            const string sql = @"CREATE PROCEDURE dbo.DummyProc
+    @Name nvarchar(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+	SELECT 1 AS Id, 'Name_1' AS Name WHERE @Name IS NULL
+    UNION ALL
+	SELECT 2 AS Id, 'Name_2' AS Name WHERE @Name IS NOT NULL
+    UNION ALL
+	SELECT 3 AS Id, 'Name_3' AS Name WHERE @Name IS NULL
+
+END;";
+            db.ExecuteSql("IF OBJECT_ID('DummyProc') IS NOT NULL DROP PROC DummyProc");
+            db.ExecuteSql(sql);
+
+            var results = db.SqlList<DummyTable>("EXEC DummyProc @Name", new { Name = (string)null });
+            Assert.That(results.Count, Is.EqualTo(2));
+            Assert.That(results[0].Name, Is.EqualTo("Name_1"));
+            Assert.That(results[1].Name, Is.EqualTo("Name_3"));
+        }
+
+        [Test]
+        public void Can_SqlList_StoredProc_receiving_only_first_column_and_null()
+        {
+            const string sql = @"CREATE PROCEDURE dbo.DummyScalar
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+	SELECT NULL AS Id, 'Name_1' AS Name
+    UNION ALL
+	SELECT NULL AS Id, 'Name_2' AS Name
+END;";
+            db.ExecuteSql("IF OBJECT_ID('DummyScalar') IS NOT NULL DROP PROC DummyScalar");
+            db.ExecuteSql(sql);
+
+            var results = db.SqlList<int?>("EXEC DummyScalar");
+            Assert.That(results.Count, Is.EqualTo(2));
+            Assert.That(results[0], Is.Null);
+            Assert.That(results[1], Is.Null);
+        }
     }
 }

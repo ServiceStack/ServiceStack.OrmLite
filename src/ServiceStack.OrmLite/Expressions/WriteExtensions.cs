@@ -194,7 +194,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static void InsertOnly<T>(this IDbCommand dbCmd, T obj, SqlExpressionVisitor<T> onlyFields)
         {
-            var sql = OrmLiteConfig.DialectProvider.ToInsertRowStatement(obj, onlyFields.InsertFields, dbCmd);
+            var sql = OrmLiteConfig.DialectProvider.ToInsertRowStatement(dbCmd, obj, onlyFields.InsertFields);
             dbCmd.ExecuteSql(sql);
         }
 

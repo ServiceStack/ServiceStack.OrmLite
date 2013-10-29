@@ -3,6 +3,7 @@ using System.Data;
 using System.IO;
 using NUnit.Framework;
 using ServiceStack.Common.Utils;
+using ServiceStack.DataAccess;
 using ServiceStack.Logging;
 using ServiceStack.Logging.Support.Logging;
 
@@ -67,10 +68,11 @@ namespace ServiceStack.OrmLite.Tests
 		{
 			LogManager.LogFactory = new ConsoleLogFactory();
 
-            //OrmLiteConfig.DialectProvider = SqliteDialect.Provider;
-		    //ConnectionString = GetFileConnectionString();
-		    //ConnectionString = ":memory:";
-            
+            OrmLiteConfig.DialectProvider = SqliteDialect.Provider;
+            ConnectionString = GetFileConnectionString();
+            ConnectionString = ":memory:";
+            return;
+
             //OrmLiteConfig.DialectProvider = SqlServerDialect.Provider;
             //ConnectionString = Config.SqlServerBuildDb;
             //ConnectionString = "~/App_Data/Database1.mdf".MapAbsolutePath();			
@@ -82,5 +84,28 @@ namespace ServiceStack.OrmLite.Tests
 		{
 			Console.WriteLine(text);
 		}
+
+        public IDbConnection InMemoryDbConnection { get; set; }
+
+        public IDbConnection OpenDbConnection(string connString = null)
+        {
+            connString = connString ?? ConnectionString;
+            if (connString == ":memory:")
+            {
+                if (InMemoryDbConnection == null)
+                {
+                    var dbConn = connString.OpenDbConnection();
+                    InMemoryDbConnection = new OrmLiteConnectionWrapper(dbConn)
+                    {
+                        DialectProvider = OrmLiteConfig.DialectProvider,
+                        AutoDisposeConnection = false,
+                    };                    
+                }
+
+                return InMemoryDbConnection;
+            }
+
+            return connString.OpenDbConnection();            
+        }
 	}
 }

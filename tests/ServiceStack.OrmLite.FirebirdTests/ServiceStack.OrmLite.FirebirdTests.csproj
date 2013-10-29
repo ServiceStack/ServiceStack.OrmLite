@@ -42,6 +42,7 @@
     <Reference Include="FirebirdSql.Data.FirebirdClient">
       <HintPath>..\..\lib\FirebirdSql.Data.FirebirdClient.dll</HintPath>
     </Reference>
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -66,6 +67,7 @@
     <Compile Include="Expressions\StringFunctionTests.cs" />
     <Compile Include="Expressions\TestType.cs" />
     <Compile Include="Expressions\UnaryExpressionsTest.cs" />
+    <Compile Include="NorthwindTests.cs" />
     <Compile Include="TypeWithByteArrayFieldTests.cs" />
     <Compile Include="UseCase\SimpleUseCase.cs" />
     <Compile Include="UseCase\CustomerOrdersUseCase.cs" />
@@ -134,5 +136,8 @@
       <Project>{317B64BA-D7A6-4A15-8719-821B38147C63}</Project>
       <Name>ServiceStack.OrmLite.Firebird</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
   </ItemGroup>
 </Project>

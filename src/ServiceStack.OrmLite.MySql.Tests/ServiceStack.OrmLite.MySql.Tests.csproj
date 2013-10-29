@@ -62,9 +62,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\GlobalAssemblyInfo.cs">
-      <Link>Properties\GlobalAssemblyInfo.cs</Link>
-    </Compile>
     <Compile Include="BooleanTests.cs" />
     <Compile Include="DateTimeColumnTest.cs" />
     <Compile Include="EnumTests.cs" />

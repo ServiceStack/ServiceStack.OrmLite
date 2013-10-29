@@ -13,7 +13,7 @@ namespace ServiceStack.OrmLite.Tests.Expressions
         [Test]
         public void CanDoCountWithInterface()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.CreateTable<CountTestTable>(true);
                 db.DeleteAll<CountTestTable>();
@@ -38,7 +38,7 @@ namespace ServiceStack.OrmLite.Tests.Expressions
         [Test]
         public void CanDoCountWithInterfaceAndPredicate()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.CreateTable<CountTestTable>(true);
                 db.DeleteAll<CountTestTable>();

@@ -9,7 +9,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [TestFixtureSetUp]
         public void Setup()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.CreateTable<ReferencedType>(true);
             }
@@ -18,7 +18,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void CanCreateSimpleForeignKey()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.CreateTable<TypeWithSimpleForeignKey>(true);
             }
@@ -27,7 +27,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void CanCreateForeignWithOnDeleteCascade()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.CreateTable<TypeWithOnDeleteCascade>(true);
             }
@@ -36,7 +36,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void CascadesOnDelete()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.CreateTable<TypeWithOnDeleteCascade>(true);
 
@@ -56,7 +56,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void CanCreateForeignWithOnDeleteCascadeAndOnUpdateCascade()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.CreateTable<TypeWithOnDeleteAndUpdateCascade>(true);
             }
@@ -65,7 +65,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void CanCreateForeignWithOnDeleteNoAction()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.CreateTable<TypeWithOnDeleteNoAction>(true);
             }
@@ -74,7 +74,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void CanCreateForeignWithOnDeleteRestrict()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.CreateTable<TypeWithOnDeleteRestrict>(true);
             }
@@ -84,7 +84,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void CanCreateForeignWithOnDeleteSetDefault()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.CreateTable<TypeWithOnDeleteSetDefault>(true);
             }
@@ -93,7 +93,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void CanCreateForeignWithOnDeleteSetNull()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.CreateTable<TypeWithOnDeleteSetNull>(true);
             }
@@ -102,7 +102,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [TestFixtureTearDown]
         public void TearDwon()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.DropTable<TypeWithOnDeleteAndUpdateCascade>();
                 db.DropTable<TypeWithOnDeleteSetNull>();

@@ -28,6 +28,8 @@ namespace ServiceStack.OrmLite.PostgreSQL
             base.StringLengthUnicodeColumnDefinitionFormat = "character varying({0})";
             base.StringLengthNonUnicodeColumnDefinitionFormat = "character varying({0})"; 
 			base.InitColumnTypeMap();
+		    base.SelectIdentitySql = "SELECT LASTVAL()";
+		    this.NamingStrategy = new PostgreSqlNamingStrategy();
 
             DbTypeMap.Set<TimeSpan>(DbType.Time, "Interval");
             DbTypeMap.Set<TimeSpan?>(DbType.Time, "Interval");
@@ -126,6 +128,21 @@ namespace ServiceStack.OrmLite.PostgreSQL
 			{
 				return "E'" + ToBinary(value) + "'";
 			}
+			if (fieldType.IsArray && typeof(string).IsAssignableFrom(fieldType.GetElementType()))
+			{
+				var stringArray = (string[]) value;
+				return ToArray(stringArray);
+			}
+			if (fieldType.IsArray && typeof(int).IsAssignableFrom(fieldType.GetElementType()))
+			{
+				var integerArray = (int[]) value;
+				return ToArray(integerArray);
+			}
+			if (fieldType.IsArray && typeof(long).IsAssignableFrom(fieldType.GetElementType()))
+			{
+				var longArray = (long[]) value;
+				return ToArray(longArray);
+			}
 
 			return base.GetQuotedValue(value, fieldType);
 		}
@@ -134,18 +151,9 @@ namespace ServiceStack.OrmLite.PostgreSQL
 		{
 			if (value == null || value is DBNull) return null;
 			
-			if(type == typeof(byte[])) { return value; }
+			if (type == typeof(byte[])) { return value; }
 
 			return base.ConvertDbValue(value, type);
-		}
-
-		public override long GetLastInsertId(IDbCommand command)
-		{
-			command.CommandText = "SELECT LASTVAL()";
-			var result = command.ExecuteScalar();
-			if (result is DBNull)
-				return default(long);
-			return Convert.ToInt64(result);
 		}
 		
 		public override SqlExpressionVisitor<T> ExpressionVisitor<T>()
@@ -157,7 +165,15 @@ namespace ServiceStack.OrmLite.PostgreSQL
 		{
 			var sql = "SELECT COUNT(*) FROM pg_class WHERE relname = {0}"
 				.SqlFormat(tableName);
-
+		    var conn = dbCmd.Connection;
+            if (conn != null)
+            {
+                var builder = new NpgsqlConnectionStringBuilder(conn.ConnectionString);
+                // If a search path (schema) is specified, and there is only one, then assume the CREATE TABLE directive should apply to that schema.
+                if (!String.IsNullOrEmpty(builder.SearchPath) && !builder.SearchPath.Contains(","))
+                    sql = "SELECT COUNT(*) FROM pg_class JOIN pg_catalog.pg_namespace n ON n.oid = pg_class.relnamespace WHERE relname = {0} AND nspname = {1}"
+                          .SqlFormat(tableName, builder.SearchPath);
+            }     
 			dbCmd.CommandText = sql;
 			var result = dbCmd.GetLongScalar();
 
@@ -223,6 +239,17 @@ namespace ServiceStack.OrmLite.PostgreSQL
 						.Append((char)('0' + (7 & (b >> 3))))
 						.Append((char)('0' + (7 & b)));
 			return res.ToString();
+		}
+
+		internal string ToArray<T>(T[] source)
+		{
+			var values = new StringBuilder();
+			foreach (var value in source)
+			{
+				if (values.Length > 0) values.Append(",");
+				values.Append(base.GetQuotedValue(value, typeof(T)));
+			}
+			return "ARRAY[" + values + "]";
 		}
 	}
 }

@@ -15,7 +15,7 @@ namespace ServiceStack.OrmLite.Oracle.Tests
         [Test]
         public void can_generate_correct_paging_if_first_column_must_be_quoted()
         {
-            using(var db = ConnectionString.OpenDbConnection()) {
+            using(var db = OpenDbConnection()) {
                 db.CreateTable<FirstColMustBeQuoted>(true);
 
                 var noRows = db.Select<FirstColMustBeQuoted>(ev => ev.Limit(100));
@@ -34,7 +34,7 @@ namespace ServiceStack.OrmLite.Oracle.Tests
         [Test]
         public void can_generate_correct_paging_if_first_column_dont_have_to_be_quoted()
         {
-            using(var db = ConnectionString.OpenDbConnection()) {
+            using(var db = OpenDbConnection()) {
                 db.CreateTable<FirstColNoQuotes>(true);
 
                 var noRows = db.Select<FirstColNoQuotes>(ev => ev.Limit(100));
@@ -53,7 +53,7 @@ namespace ServiceStack.OrmLite.Oracle.Tests
         [Test]
         public void can_generate_correct_paging_if_TABLE_NAME_must_be_quoted_and_first_column_have_to_be_quoted()
         {
-            using(var db = ConnectionString.OpenDbConnection()) {
+            using(var db = OpenDbConnection()) {
                 db.CreateTable<COMMENT_first>(true);
 
                 var noRows = db.Select<COMMENT_first>(ev => ev.Limit(100));
@@ -72,7 +72,7 @@ namespace ServiceStack.OrmLite.Oracle.Tests
         [Test]
         public void can_generate_correct_paging_if_TABLE_NAME_must_be_quoted_and_first_column_dont_have_to_be_quoted()
         {
-            using(var db = ConnectionString.OpenDbConnection()) {
+            using(var db = OpenDbConnection()) {
                 db.CreateTable<COMMENT_other>(true);
 
                 var noRows = db.Select<COMMENT_other>(ev => ev.Limit(100));

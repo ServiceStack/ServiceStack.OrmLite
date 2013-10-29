@@ -66,9 +66,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\GlobalAssemblyInfo.cs">
-      <Link>Properties\GlobalAssemblyInfo.cs</Link>
-    </Compile>
     <Compile Include="CountTest.cs" />
     <Compile Include="IgnoredFieldSelectTest.cs" />
     <Compile Include="JoinTest.cs" />

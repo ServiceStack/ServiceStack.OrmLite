@@ -43,7 +43,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		[Test]
 		public void Can_query_using_float_in_alernate_culuture()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<Point>(true);
 

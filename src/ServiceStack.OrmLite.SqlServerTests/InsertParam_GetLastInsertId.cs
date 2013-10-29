@@ -6,30 +6,31 @@ using NUnit.Framework;
 
 namespace ServiceStack.OrmLite.SqlServerTests
 {
-	public class InsertParam_GetLastInsertId : OrmLiteTestBase
-	{
-		[Test]
-		public void Can_GetLastInsertedId_using_InsertParam()
-		{
-			var testObject = new SimpleType { Name = "test" };
+    public class InsertParam_GetLastInsertId : OrmLiteTestBase
+    {
+        [Test]
+        public void Can_GetLastInsertedId_using_InsertParam()
+        {
+            var testObject = new SimpleType { Name = "test" };
 
-			//verify that "normal" Insert works as expected
-			using(var con = ConnectionString.OpenDbConnection()) {
-				con.CreateTable<SimpleType>(true);
+            //verify that "normal" Insert works as expected
+            using (var con = OpenDbConnection())
+            {
+                con.CreateTable<SimpleType>(true);
 
-				con.Insert(testObject);
-				var normalLastInsertedId = con.GetLastInsertId();
-				Assert.Greater(normalLastInsertedId, 0, "normal Insert");
-			}
+                con.Insert(testObject);
+                var normalLastInsertedId = con.GetLastInsertId();
+                Assert.Greater(normalLastInsertedId, 0, "normal Insert");
+            }
 
-			//test with InsertParam
-			using(var con = ConnectionString.OpenDbConnection()) {
-				con.CreateTable<SimpleType>(true);
+            //test with InsertParam
+            using (var con = OpenDbConnection())
+            {
+                con.CreateTable<SimpleType>(true);
 
-				con.InsertParam(testObject);
-				var insertParamLastInsertedId = con.GetLastInsertId();
-				Assert.Greater(insertParamLastInsertedId, 0, "with InsertParam");
-			}
-		}
-	}
+                var lastInsertId = con.InsertParam(testObject, selectIdentity:true);
+                Assert.Greater(lastInsertId, 0, "with InsertParam");
+            }
+        }
+    }
 }

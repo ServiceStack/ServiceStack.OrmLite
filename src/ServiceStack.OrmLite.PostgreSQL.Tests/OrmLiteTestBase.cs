@@ -1,5 +1,6 @@
 using System;
 using System.Configuration;
+using System.Data;
 using System.IO;
 using NUnit.Framework;
 using ServiceStack.Common.Utils;
@@ -29,5 +30,11 @@ namespace ServiceStack.OrmLite.Tests
 		{
 			Console.WriteLine(text);
 		}
-	}
+    
+        public IDbConnection OpenDbConnection(string connString = null)
+        {
+            connString = connString ?? ConnectionString;
+            return connString.OpenDbConnection();
+        }
+    }
 }

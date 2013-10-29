@@ -55,30 +55,24 @@ namespace ServiceStack.OrmLite
 
         long GetLastInsertId(IDbCommand command);
 
-        // 
+        long InsertAndGetLastInsertId<T>(IDbCommand dbCmd);
 
         string ToSelectStatement(Type tableType, string sqlFilter, params object[] filterParams);
 
-        string ToInsertRowStatement(object objWithProperties, IDbCommand command);
-        string ToInsertRowStatement(object objWithProperties, IList<string> InsertFields, IDbCommand command);
+        string ToInsertRowStatement(IDbCommand command, object objWithProperties, ICollection<string> InsertFields = null);
 
-        IDbCommand CreateParameterizedInsertStatement(object objWithProperties, IDbConnection connection);
-        IDbCommand CreateParameterizedInsertStatement(object objWithProperties, IList<string> insertFields,
-                                                      IDbConnection connection);
+        IDbCommand CreateParameterizedInsertStatement(IDbConnection connection, object objWithProperties, ICollection<string> insertFields = null);
 
-        void ReParameterizeInsertStatement(object objWithProperties, IDbCommand command);
-        void ReParameterizeInsertStatement(object objWithProperties, IList<string> insertFields, IDbCommand command);
+        void ReParameterizeInsertStatement(IDbCommand command, object objWithProperties, ICollection<string> insertFields = null);
 
-        string ToUpdateRowStatement(object objWithProperties);
-        string ToUpdateRowStatement(object objWithProperties, IList<string> UpdateFields);
+        string ToUpdateRowStatement(object objWithProperties, ICollection<string> UpdateFields = null);
 
-        IDbCommand CreateParameterizedUpdateStatement(object objWithProperties, IDbConnection connection);
-        IDbCommand CreateParameterizedUpdateStatement(object objWithProperties, IList<string> updateFields, IDbConnection connection);
+        IDbCommand CreateParameterizedUpdateStatement(IDbConnection connection, object objWithProperties, ICollection<string> updateFields = null);
 
         string ToDeleteRowStatement(object objWithProperties);
         string ToDeleteStatement(Type tableType, string sqlFilter, params object[] filterParams);
 
-        IDbCommand CreateParameterizedDeleteStatement(object objWithProperties, IDbConnection connection);
+        IDbCommand CreateParameterizedDeleteStatement(IDbConnection connection, object objWithProperties);
 
         string ToExistStatement(Type fromTableType,
             object objWithProperties,

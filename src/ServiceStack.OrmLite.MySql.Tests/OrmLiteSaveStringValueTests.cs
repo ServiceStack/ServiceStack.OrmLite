@@ -8,7 +8,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void Can_save_string_including_single_quote()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.DropTable<StringTable>();
                 db.CreateTable<StringTable>(true);
@@ -27,7 +27,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void Can_save_string_including_double_quote()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.DropTable<StringTable>();
                 db.CreateTable<StringTable>(true);
@@ -46,7 +46,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void Can_save_string_including_backslash()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.DropTable<StringTable>();
                 db.CreateTable<StringTable>(true);

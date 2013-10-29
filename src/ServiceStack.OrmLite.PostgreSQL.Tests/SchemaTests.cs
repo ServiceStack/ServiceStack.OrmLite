@@ -45,7 +45,7 @@ $$;";
         [Test]
         public void Can_Create_Tables_With_Schema_in_PostgreSQL()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             using (var dbCmd = db.CreateCommand())
             {
                 CreateSchemaIfNotExists(db);
@@ -62,7 +62,7 @@ $$;";
         [Test]
         public void Can_Perform_CRUD_Operations_On_Table_With_Schema()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             using (var dbCmd = db.CreateCommand())
             {
                 CreateSchemaIfNotExists(db);

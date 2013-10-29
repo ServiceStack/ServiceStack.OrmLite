@@ -11,6 +11,8 @@
     <AssemblyName>ServiceStack.OrmLite.Oracle</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkProfile />
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -43,9 +45,6 @@
     <Reference Include="System.Data.OracleClient" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\GlobalAssemblyInfo.cs">
-      <Link>Properties\GlobalAssemblyInfo.cs</Link>
-    </Compile>
     <Compile Include="DbSchema\IColumn.cs" />
     <Compile Include="DbSchema\IParameter.cs" />
     <Compile Include="DbSchema\IProcedure.cs" />
@@ -77,4 +76,5 @@
       <Name>ServiceStack.OrmLite</Name>
     </ProjectReference>
   </ItemGroup>
+  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
 </Project>

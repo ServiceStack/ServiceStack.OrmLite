@@ -15,7 +15,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void Can_create_table_containing_DateTime_column()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.CreateTable<Analyze>(true);
             }
@@ -24,7 +24,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void Can_store_DateTime_Value()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.CreateTable<Analyze>(true);
 
@@ -41,7 +41,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void Can_store_and_retrieve_DateTime_Value()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.CreateTable<Analyze>(true);
 

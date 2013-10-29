@@ -13,7 +13,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_GetById_int_from_ModelWithFieldsOfDifferentTypes_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
 			{
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
@@ -30,7 +30,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_GetById_string_from_ModelWithOnlyStringFields_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
 			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 
@@ -47,7 +47,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_select_with_filter_from_ModelWithOnlyStringFields_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
 			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 
@@ -71,7 +71,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 				Assert.That(dbRowIds[0], Is.EqualTo(filterRow.Id));
 
 				var queryByExample = new ModelWithOnlyStringFields { AlbumName = filterRow.AlbumName };
-				rows = db.ByExampleWhere<ModelWithOnlyStringFields>(queryByExample);
+				rows = db.ByExampleWhere<ModelWithOnlyStringFields>(queryByExample, excludeNulls: true);
 				dbRowIds = rows.ConvertAll(x => x.Id);
 				Assert.That(dbRowIds, Has.Count.EqualTo(1));
 				Assert.That(dbRowIds[0], Is.EqualTo(filterRow.Id));
@@ -87,7 +87,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_loop_each_with_filter_from_ModelWithOnlyStringFields_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
 			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 

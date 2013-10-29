@@ -31,7 +31,7 @@ namespace ServiceStack.OrmLite.Tests.Expressions
         [SetUp]
         public void Setup()
         {
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 con.CreateTable<Author>(true);
                 con.SaveAll(authors);
@@ -43,7 +43,7 @@ namespace ServiceStack.OrmLite.Tests.Expressions
         {
             var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<Author>();
 
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 int year = DateTime.Today.AddYears(-20).Year;
                 var lastDay = new DateTime(year, 12, 31);

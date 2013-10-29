@@ -31,7 +31,7 @@ namespace ServiceStack.OrmLite.SqlServerTests.Expressions
         [SetUp]
         public void Setup()
         {
-            using (var con = ConnectionString.OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 con.CreateTable<Author>(true);
                 con.SaveAll(authors);
@@ -43,7 +43,7 @@ namespace ServiceStack.OrmLite.SqlServerTests.Expressions
         {
             var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<Author>();
 
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 int year = DateTime.Today.AddYears(-20).Year;
                 var lastDay = new DateTime(year, 12, 31);
@@ -224,9 +224,16 @@ namespace ServiceStack.OrmLite.SqlServerTests.Expressions
                 Assert.AreEqual("Rodger Contreras".ToUpper(), author.Name);
 
                 // select distinct..
-                ev.Limit().OrderBy(); // clear limit, clear order for postres
+                ev.Limit().OrderBy(); // clear limit, clear orde
                 ev.SelectDistinct(r => r.City);
                 expected = 6;
+                result = db.Select(ev);
+                Assert.AreEqual(expected, result.Count);
+
+                // select distinct with limit
+                ev.Limit(0, 4);
+                ev.SelectDistinct(r => r.City);
+                expected = 4;
                 result = db.Select(ev);
                 Assert.AreEqual(expected, result.Count);
 

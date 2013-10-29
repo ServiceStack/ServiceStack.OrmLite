@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ServiceStack.OrmLite.Tests</RootNamespace>
     <AssemblyName>ServiceStack.OrmLite.Tests</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <FileUpgradeFlags>
@@ -31,6 +31,7 @@
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -89,9 +90,6 @@
     <Reference Include="ServiceStack.Common">
       <HintPath>..\..\lib\ServiceStack.Common.dll</HintPath>
     </Reference>
-    <Reference Include="ServiceStack.Common.Tests">
-      <HintPath>..\..\lib\tests\ServiceStack.Common.Tests.dll</HintPath>
-    </Reference>
     <Reference Include="ServiceStack.Interfaces">
       <HintPath>..\..\lib\ServiceStack.Interfaces.dll</HintPath>
     </Reference>
@@ -99,6 +97,7 @@
   <ItemGroup>
     <Compile Include="ApiExpressionTests.cs" />
     <Compile Include="EnumTests.cs" />
+    <Compile Include="ExpressionTests.cs" />
     <Compile Include="ExpressionVisitorTests.cs" />
     <Compile Include="Expression\AdditiveExpressionsTest.cs" />
     <Compile Include="Expression\ConditionalExpressionTest.cs" />
@@ -116,10 +115,36 @@
     <Compile Include="ForeignKeyAttributeTests.cs" />
     <Compile Include="OrmLiteDropTableTests.cs" />
     <Compile Include="OrmLiteDropTableWithNamingStrategyTests.cs" />
+    <Compile Include="OrmLiteExecuteNonQueryTests.cs" />
     <Compile Include="OrmLiteQueryTests.cs" />
     <Compile Include="LocalizationTests.cs" />
     <Compile Include="OrmLiteConnectionFactoryTests.cs" />
     <Compile Include="OrmLiteUtilExtensionsTests.cs" />
+    <Compile Include="Shared\BuiltInsFactory.cs" />
+    <Compile Include="Shared\IModelFactory.cs" />
+    <Compile Include="Shared\ModelFactoryBase.cs" />
+    <Compile Include="Shared\ModelWithComplexTypes.cs" />
+    <Compile Include="Shared\ModelWithComplexTypesFactory.cs" />
+    <Compile Include="Shared\ModelWithCompositeIndexFields.cs" />
+    <Compile Include="Shared\ModelWithFieldsOfDifferentAndNullableTypes.cs" />
+    <Compile Include="Shared\ModelWithFieldsOfDifferentAndNullableTypesFactory.cs" />
+    <Compile Include="Shared\ModelWithFieldsOfDifferentTypes.cs" />
+    <Compile Include="Shared\ModelWithFieldsOfDifferentTypesFactory.cs" />
+    <Compile Include="Shared\ModelWithFieldsOfNullableTypes.cs" />
+    <Compile Include="Shared\ModelWithFieldsOfNullableTypesFactory.cs" />
+    <Compile Include="Shared\ModelWithIdAndName.cs" />
+    <Compile Include="Shared\ModelWithIdOnly.cs" />
+    <Compile Include="Shared\ModelWithIndexFields.cs" />
+    <Compile Include="Shared\ModelWithLongIdAndStringFields.cs" />
+    <Compile Include="Shared\ModelWithMapAndList.cs" />
+    <Compile Include="Shared\ModelWithNamedCompositeIndex.cs" />
+    <Compile Include="Shared\ModelWithOnlyStringFields.cs" />
+    <Compile Include="Shared\Movie.cs" />
+    <Compile Include="Shared\Poco.cs" />
+    <Compile Include="Shared\SampleOrderLine.cs" />
+    <Compile Include="Shared\Shipper.cs" />
+    <Compile Include="Shared\ShipperFactory.cs" />
+    <Compile Include="Shared\TaskQueue.cs" />
     <Compile Include="ShippersExample.cs" />
     <Compile Include="NorthwindPerfTests.cs" />
     <Compile Include="OrmLiteComplexTypesTests.cs" />
@@ -145,6 +170,7 @@
     <Compile Include="SqlBuilderTests.cs" />
     <Compile Include="SqlServerProviderTests.cs" />
     <Compile Include="TypeWithByteArrayFieldTests.cs" />
+    <Compile Include="UseCase\AliasedFieldUseCase.cs" />
     <Compile Include="UseCase\CustomerOrdersUseCase.cs" />
     <Compile Include="UseCase\SchemaUseCase.cs" />
     <Compile Include="UseCase\ShardingUseCase.cs" />
@@ -232,6 +258,7 @@
       <Name>ServiceStack.OrmLite</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

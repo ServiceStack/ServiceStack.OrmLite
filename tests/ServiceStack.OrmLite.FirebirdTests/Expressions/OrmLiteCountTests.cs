@@ -13,7 +13,7 @@ namespace ServiceStack.OrmLite.FirebirdTests.Expressions
         [Test]
         public void CanDoCountWithInterface()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.CreateTable<CountTestTable>(true);
                 db.DeleteAll<CountTestTable>();
@@ -38,7 +38,7 @@ namespace ServiceStack.OrmLite.FirebirdTests.Expressions
         [Test]
         public void CanDoCountWithInterfaceAndPredicate()
         {
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.CreateTable<CountTestTable>(true);
                 db.DeleteAll<CountTestTable>();
@@ -65,15 +65,13 @@ namespace ServiceStack.OrmLite.FirebirdTests.Expressions
 
         long Count<T>(IDbConnection db) where T : IHasId<int>, new()
         {
-            T request = new T();
-            return db.GetScalar<T, long>(e => Sql.Count(request.Id));
+            return db.GetScalar<T, long>(e => Sql.Count(e.Id));
         }
 
 
         long CountByColumn<T>(IDbConnection db) where T : IHasCountColumn, new()
         {
-            T request = new T();
-            return db.GetScalar<T, long?>(e => Sql.Count(request.CountColumn)).Value;
+            return db.GetScalar<T, long?>(e => Sql.Count(e.CountColumn)).Value;
         }
 
 

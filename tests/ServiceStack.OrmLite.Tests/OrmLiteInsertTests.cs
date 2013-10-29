@@ -16,7 +16,7 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_insert_into_ModelWithFieldsOfDifferentTypes_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
@@ -29,7 +29,7 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_insert_and_select_from_ModelWithFieldsOfDifferentTypes_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
@@ -48,7 +48,7 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_insert_and_select_from_ModelWithFieldsOfNullableTypes_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithFieldsOfNullableTypes>(true);
 
@@ -67,7 +67,7 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_insert_and_select_from_ModelWithFieldsOfDifferentAndNullableTypes_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithFieldsOfDifferentAndNullableTypes>(true);
 
@@ -86,7 +86,7 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_insert_table_with_null_fields()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithIdAndName>(true);
 
@@ -106,7 +106,7 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_retrieve_LastInsertId_from_inserted_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
                 db.DropAndCreateTable<ModelWithIdAndName>();
 
@@ -130,7 +130,7 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_insert_TaskQueue_table()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<TaskQueue>(true);
 
@@ -152,7 +152,7 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_insert_table_with_blobs()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.DropAndCreateTable<OrderBlob>();
 
@@ -206,7 +206,7 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_insert_table_with_UserAuth()
 		{
-			using (var db = ConnectionString.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<UserAuth>(true);
 
@@ -237,5 +237,29 @@ namespace ServiceStack.OrmLite.Tests
 			}
 		}
 
-	}
+        [Test]
+        public void Can_GetLastInsertedId_using_InsertParam()
+        {
+            var testObject = new UserAuth { UserName = "test" };
+
+            //verify that "normal" Insert works as expected
+            using (var con = OpenDbConnection())
+            {
+                con.CreateTable<UserAuth>(true);
+
+                con.Insert(testObject);
+                var normalLastInsertedId = con.GetLastInsertId();
+                Assert.Greater(normalLastInsertedId, 0, "normal Insert");
+            }
+
+            //test with InsertParam
+            using (var con = OpenDbConnection())
+            {
+                con.CreateTable<UserAuth>(true);
+
+                var lastInsertId = con.InsertParam(testObject, selectIdentity: true);
+                Assert.Greater(lastInsertId, 0, "with InsertParam");
+            }
+        }
+    }
 }

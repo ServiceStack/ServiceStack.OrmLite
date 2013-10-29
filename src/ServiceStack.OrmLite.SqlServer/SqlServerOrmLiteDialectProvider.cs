@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using ServiceStack.Text;
@@ -24,6 +25,7 @@ namespace ServiceStack.OrmLite.SqlServer
 			base.DecimalColumnDefinition = "DECIMAL(38,6)";
 			base.TimeColumnDefinition = "TIME"; //SQLSERVER 2008+
 		    base.BlobColumnDefinition = "VARBINARY(MAX)";
+		    base.SelectIdentitySql = "SELECT SCOPE_IDENTITY()";
 
 			base.InitColumnTypeMap();
 		}
@@ -134,7 +136,7 @@ namespace ServiceStack.OrmLite.SqlServer
 			    if (_ensureUtc && dateValue.Kind == DateTimeKind.Local)
 			        dateValue = dateValue.ToUniversalTime(); 
 				const string iso8601Format = "yyyyMMdd HH:mm:ss.fff";
-				return base.GetQuotedValue(dateValue.ToString(iso8601Format), typeof(string));
+				return base.GetQuotedValue(dateValue.ToString(iso8601Format,CultureInfo.InvariantCulture) , typeof(string));
 			}
 			if (fieldType == typeof(bool))
 			{
@@ -168,12 +170,6 @@ namespace ServiceStack.OrmLite.SqlServer
 		public void EnsureUtc(bool shouldEnsureUtc)
 		{
 		    _ensureUtc = shouldEnsureUtc;
-		}
-
-		public override long GetLastInsertId(IDbCommand dbCmd)
-		{
-			dbCmd.CommandText = "SELECT SCOPE_IDENTITY()";
-			return dbCmd.GetLongScalar();
 		}
 
 		public override SqlExpressionVisitor<T> ExpressionVisitor<T>()
@@ -251,6 +247,50 @@ namespace ServiceStack.OrmLite.SqlServer
             }
 
             return sb.ToString();
+        }
+
+        public override string ToAddColumnStatement(Type modelType, FieldDefinition fieldDef)
+        {
+            var column = GetColumnDefinition(fieldDef.FieldName,
+                                             fieldDef.FieldType,
+                                             fieldDef.IsPrimaryKey,
+                                             fieldDef.AutoIncrement,
+                                             fieldDef.IsNullable,
+                                             fieldDef.FieldLength,
+                                             fieldDef.Scale,
+                                             fieldDef.DefaultValue);
+
+            return string.Format("ALTER TABLE {0} ADD {1};",
+                                 GetQuotedTableName(GetModel(modelType).ModelName),
+                                 column);
+        }
+
+        public override string ToAlterColumnStatement(Type modelType, FieldDefinition fieldDef)
+        {
+            var column = GetColumnDefinition(fieldDef.FieldName,
+                                             fieldDef.FieldType,
+                                             fieldDef.IsPrimaryKey,
+                                             fieldDef.AutoIncrement,
+                                             fieldDef.IsNullable,
+                                             fieldDef.FieldLength,
+                                             fieldDef.Scale,
+                                             fieldDef.DefaultValue);
+
+            return string.Format("ALTER TABLE {0} ALTER COLUMN {1};",
+                                 GetQuotedTableName(GetModel(modelType).ModelName),
+                                 column);
+        }
+
+        public override string ToChangeColumnNameStatement(Type modelType, FieldDefinition fieldDef, string oldColumnName)
+        {
+            var objectName = string.Format("{0}.{1}",
+                NamingStrategy.GetTableName(GetModel(modelType).ModelName),
+                oldColumnName);
+
+            return string.Format("EXEC sp_rename {0}, {1}, {2};",
+                                 GetQuotedParam(objectName),
+                                 GetQuotedParam(fieldDef.FieldName),
+                                 GetQuotedParam("COLUMN"));
         }
     }
 }

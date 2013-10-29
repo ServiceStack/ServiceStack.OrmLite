@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 
 namespace ServiceStack.OrmLite.Firebird
@@ -120,6 +121,29 @@ namespace ServiceStack.OrmLite.Firebird
             }
 
             return c.Value;
+        }
+
+        protected override object VisitColumnAccessMethod(MethodCallExpression m)
+        {
+            List<Object> args = this.VisitExpressionList(m.Arguments);
+            var quotedColName = Visit(m.Object);
+            var statement = "";
+
+            switch (m.Method.Name)
+            {
+                case "Trim":
+                    statement = string.Format("trim({0})", quotedColName);
+                    break;
+                case "LTrim":
+                    statement = string.Format("trim(leading from {0})", quotedColName);
+                    break;
+                case "RTrim":
+                    statement = string.Format("trim(trailing from {0})", quotedColName);
+                    break;
+                default:
+                    return base.VisitColumnAccessMethod(m);
+            }
+            return new PartialSqlString(statement);
         }
 
         private bool IsTrueExpression(object exp)

@@ -29,7 +29,7 @@
             <param name="assemblyName"></param>
             <returns>The type if it exists</returns>
         </member>
-        <member name="M:ServiceStack.Text.Common.DateTimeSerializer.Prepare(System.DateTime)">
+        <member name="M:ServiceStack.Text.Common.DateTimeSerializer.Prepare(System.DateTime,System.Boolean)">
             <summary>
             If AlwaysUseUtc is set to true then convert all DateTime to UTC.
             </summary>
@@ -153,6 +153,17 @@
             Gets or sets a value indicating if the framework should always convert <see cref="T:System.DateTime"/> to UTC format instead of local time. 
             </summary>
         </member>
+        <member name="F:ServiceStack.Text.JsConfig.sAssumeUtc">
+            <summary>
+            Gets or sets a value indicating if the framework should always assume <see cref="T:System.DateTime"/> is in UTC format if Kind is Unspecified. 
+            </summary>
+        </member>
+        <member name="F:ServiceStack.Text.JsConfig.sAppendUtcOffset">
+            <summary>
+            Gets or sets whether we should append the Utc offset when we serialize Utc dates. Defaults to no.
+            Only supported for when the JsConfig.DateHandler == JsonDateHandler.TimestampOffset
+            </summary>
+        </member>
         <member name="F:ServiceStack.Text.JsConfig.sEscapeUnicode">
             <summary>
             Gets or sets a value indicating if unicode symbols should be serialized as "\uXXXX".
@@ -161,6 +172,11 @@
         <member name="F:ServiceStack.Text.JsConfig.sIncludePublicFields">
             <summary>
             If set to true, Interface types will be prefered over concrete types when serializing.
+            </summary>
+        </member>
+        <member name="F:ServiceStack.Text.JsConfig.sMaxDepth">
+            <summary>
+            Sets the maximum depth to avoid circular dependencies
             </summary>
         </member>
         <member name="F:ServiceStack.Text.JsConfig.sModelFactory">

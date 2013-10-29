@@ -18,7 +18,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         {
             var orig = getSampleObject();
 
-            using (var db = ConnectionString.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.CreateTable<TypeWithByteArrayField>(true);
 
@@ -36,7 +36,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         {
             var orig = getSampleObject();
 
-            using(var db = ConnectionString.OpenDbConnection()) {
+            using(var db = OpenDbConnection()) {
                 //insert and select manually - ok
                 db.CreateTable<TypeWithByteArrayField>(true);
                 _insertManually(orig, db);
@@ -50,7 +50,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         {
             var orig = getSampleObject();
 
-            using(var db = ConnectionString.OpenDbConnection()) {
+            using(var db = OpenDbConnection()) {
                 //insert using InsertParam, and select manually - ok
                 db.CreateTable<TypeWithByteArrayField>(true);
                 db.InsertParam(orig);
@@ -64,7 +64,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         {
             var orig = getSampleObject();
 
-            using(var db = ConnectionString.OpenDbConnection()) {
+            using(var db = OpenDbConnection()) {
                 //InsertParam + GetByID - fails
                 db.CreateTable<TypeWithByteArrayField>(true);
                 db.InsertParam(orig);
@@ -81,7 +81,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         {
             var orig = getSampleObject();
 
-            using(var db = ConnectionString.OpenDbConnection()) {
+            using(var db = OpenDbConnection()) {
                 //InsertParam + GetByID - fails
                 db.CreateTable<TypeWithByteArrayField>(true);
                 db.Insert(orig);
@@ -98,7 +98,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         {
             var orig = getSampleObject();
 
-            using(var db = ConnectionString.OpenDbConnection()) {
+            using(var db = OpenDbConnection()) {
                 //InsertParam + GetByID - fails
                 db.CreateTable<TypeWithByteArrayField>(true);
                 db.Insert(orig);

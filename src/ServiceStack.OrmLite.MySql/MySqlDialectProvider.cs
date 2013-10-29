@@ -25,6 +25,7 @@ namespace ServiceStack.OrmLite.MySql
             base.DefaultStringLength = 255;
             base.InitColumnTypeMap();
     	    base.DefaultValueFormat = " DEFAULT '{0}'";
+    	    base.SelectIdentitySql = "SELECT LAST_INSERT_ID()";
         }
 
         public override string GetQuotedParam(string paramValue)
@@ -103,14 +104,6 @@ namespace ServiceStack.OrmLite.MySql
         public override string GetQuotedName(string name)
         {
 			return string.Format("`{0}`", name);
-        }
-
-        public override long GetLastInsertId(IDbCommand command)
-        {
-            command.CommandText = "SELECT LAST_INSERT_ID()";
-            var result = command.ExecuteScalar();
-            if (result is DBNull) return default(long);
-            return Convert.ToInt64(result);
         }
         
         public override SqlExpressionVisitor<T> ExpressionVisitor<T> ()

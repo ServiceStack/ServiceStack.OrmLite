@@ -18,7 +18,7 @@ namespace ServiceStack.OrmLite.MySql.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.StringColumn.Contains(stringVal));
+            var actual = OpenDbConnection().Select<TestType>(q => q.StringColumn.Contains(stringVal));
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(1, actual.Count);
@@ -39,7 +39,7 @@ namespace ServiceStack.OrmLite.MySql.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.StringColumn.Contains(stringVal));
+            var actual = OpenDbConnection().Select<TestType>(q => q.StringColumn.Contains(stringVal));
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(1, actual.Count);
@@ -60,7 +60,7 @@ namespace ServiceStack.OrmLite.MySql.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.StringColumn.Contains(stringVal));
+            var actual = OpenDbConnection().Select<TestType>(q => q.StringColumn.Contains(stringVal));
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(1, actual.Count);
@@ -81,7 +81,7 @@ namespace ServiceStack.OrmLite.MySql.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.StringColumn.Contains(stringVal));
+            var actual = OpenDbConnection().Select<TestType>(q => q.StringColumn.Contains(stringVal));
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(1, actual.Count);
@@ -102,7 +102,7 @@ namespace ServiceStack.OrmLite.MySql.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.StringColumn.StartsWith(prefix));
+            var actual = OpenDbConnection().Select<TestType>(q => q.StringColumn.StartsWith(prefix));
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(1, actual.Count);
@@ -123,7 +123,7 @@ namespace ServiceStack.OrmLite.MySql.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.StringColumn.StartsWith(prefix));
+            var actual = OpenDbConnection().Select<TestType>(q => q.StringColumn.StartsWith(prefix));
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(1, actual.Count);
@@ -144,7 +144,7 @@ namespace ServiceStack.OrmLite.MySql.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.StringColumn.StartsWith(prefix));
+            var actual = OpenDbConnection().Select<TestType>(q => q.StringColumn.StartsWith(prefix));
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(1, actual.Count);
@@ -165,7 +165,7 @@ namespace ServiceStack.OrmLite.MySql.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.StringColumn.StartsWith(prefix));
+            var actual = OpenDbConnection().Select<TestType>(q => q.StringColumn.StartsWith(prefix));
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(1, actual.Count);
@@ -186,7 +186,7 @@ namespace ServiceStack.OrmLite.MySql.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.StringColumn.EndsWith(postfix));
+            var actual = OpenDbConnection().Select<TestType>(q => q.StringColumn.EndsWith(postfix));
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(1, actual.Count);
@@ -207,7 +207,7 @@ namespace ServiceStack.OrmLite.MySql.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.StringColumn.EndsWith(postfix));
+            var actual = OpenDbConnection().Select<TestType>(q => q.StringColumn.EndsWith(postfix));
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(1, actual.Count);
@@ -228,7 +228,7 @@ namespace ServiceStack.OrmLite.MySql.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.StringColumn.EndsWith(postfix));
+            var actual = OpenDbConnection().Select<TestType>(q => q.StringColumn.EndsWith(postfix));
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(1, actual.Count);
@@ -249,7 +249,7 @@ namespace ServiceStack.OrmLite.MySql.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = ConnectionString.OpenDbConnection().Select<TestType>(q => q.StringColumn.EndsWith(postfix));
+            var actual = OpenDbConnection().Select<TestType>(q => q.StringColumn.EndsWith(postfix));
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(1, actual.Count);
