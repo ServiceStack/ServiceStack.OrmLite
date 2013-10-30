@@ -399,7 +399,7 @@ namespace ServiceStack.OrmLite
         {
             if (TypeSerializer.CanCreateFromString(fieldType))
             {
-                return string.Format(StringLengthColumnDefinitionFormat, fieldLength.GetValueOrDefault(DefaultStringLength));
+                return string.Format(StringLengthColumnDefinitionFormat, fieldLength.HasValue ? fieldLength.Value.ToString() : "MAX");
             }
 
             throw new NotSupportedException(
