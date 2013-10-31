@@ -359,6 +359,7 @@ namespace ServiceStack.OrmLite
             if (sourceWhere != null)
             {
                 var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<TSourceTable>();
+                ev.WhereStatementWithoutWhereString = true;
                 ev.Where(sourceWhere);
                 var where = ev.WhereExpression;
                 if (!String.IsNullOrEmpty(where))
@@ -368,6 +369,7 @@ namespace ServiceStack.OrmLite
             if (destinationWhere != null)
             {
                 var ev = OrmLiteConfig.DialectProvider.ExpressionVisitor<TDestinationTable>();
+                ev.WhereStatementWithoutWhereString = true;
                 ev.Where(destinationWhere);
                 var where = ev.WhereExpression;
                 if (!String.IsNullOrEmpty(where))
