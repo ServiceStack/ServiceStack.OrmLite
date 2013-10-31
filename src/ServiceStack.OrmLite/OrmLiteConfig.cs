@@ -92,6 +92,11 @@ namespace ServiceStack.OrmLite
             OrmLiteConfigExtensions.ClearCache();
         }
 
+        public static ModelDefinition GetModelDefinition(Type modelType)
+        {
+            return OrmLiteConfigExtensions.GetModelDefinition(modelType);
+        }
+
         public static IDbConnection ToDbConnection(this string dbConnectionStringOrFilePath, IOrmLiteDialectProvider dialectProvider)
         {
             var dbConn = dialectProvider.CreateConnection(dbConnectionStringOrFilePath, options: null);
