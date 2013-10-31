@@ -361,6 +361,8 @@ namespace ServiceStack.OrmLite
             if (sourceWhere != null)
             {
                 var ev = OrmLiteConfig.DialectProvider.SqlExpression<TSourceTable>();
+                ev.WhereStatementWithoutWhereString = true;
+                ev.PrefixFieldWithTableName = true;
                 ev.Where(sourceWhere);
                 var where = ev.WhereExpression;
                 if (!String.IsNullOrEmpty(where))
@@ -370,6 +372,8 @@ namespace ServiceStack.OrmLite
             if (destinationWhere != null)
             {
                 var ev = OrmLiteConfig.DialectProvider.SqlExpression<TDestinationTable>();
+                ev.WhereStatementWithoutWhereString = true;
+                ev.PrefixFieldWithTableName = true;
                 ev.Where(destinationWhere);
                 var where = ev.WhereExpression;
                 if (!String.IsNullOrEmpty(where))
