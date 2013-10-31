@@ -78,8 +78,19 @@ namespace ServiceStack.OrmLite
                 && (m.Expression.NodeType == ExpressionType.Parameter || m.Expression.NodeType == ExpressionType.Convert))
             {
                 var pocoType = typeof(T);
-                var fieldName = pocoType.GetModelDefinition().FieldDefinitions.First(f => f.Name == m.Member.Name).Alias;
+                
+                var field = pocoType.GetModelDefinition().FieldDefinitions.First(f => f.Name == m.Member.Name);
+                var fieldName = "";
 
+                if (field.Alias != null)
+                {
+                    fieldName = field.Alias;
+                }
+                else
+                {
+                    fieldName = field.Name;
+                }
+                
                 if (withTablePrefix)
                     lst.Add(string.Format("{0}.{1}{2}", OrmLiteConfig.DialectProvider.GetQuotedTableName(tableName), OrmLiteConfig.DialectProvider.GetQuotedColumnName(fieldName), string.IsNullOrEmpty(alias) ? string.Empty : string.Format(" AS {0}", OrmLiteConfig.DialectProvider.GetQuotedColumnName(alias))));
                 else
