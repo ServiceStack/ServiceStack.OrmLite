@@ -177,6 +177,7 @@
     <Compile Include="UseCase\SimpleUseCase.cs" />
     <Compile Include="OrmLiteGetScalarTests.cs" />
     <Compile Include="OrmLiteCreateTableWithNamingStrategyTest.cs" />
+    <Compile Include="JoinSqlBuilderTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\..\lib\sqlite3.dll">
