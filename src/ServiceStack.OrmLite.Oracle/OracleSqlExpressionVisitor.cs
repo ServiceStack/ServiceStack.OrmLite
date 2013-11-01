@@ -50,6 +50,7 @@ namespace ServiceStack.OrmLite.Oracle
         {
             var idx1 = sql.IndexOf("select") + 7;
             var idx2 = sql.IndexOf(",", idx1);
+            idx2 -= sql.Substring(idx2, 1) == "\"" ? 1 : 0;
             return sql.Substring(idx1, idx2 - 7).Trim();
         }
 
