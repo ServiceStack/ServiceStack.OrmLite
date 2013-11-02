@@ -119,8 +119,7 @@ namespace ServiceStack.OrmLite.SqlServer
 				throw;
 			}
 		}
-
-
+        
 		public override string  GetQuotedValue(object value, Type fieldType)
 		{
 			if (value == null) return "NULL";
@@ -153,9 +152,16 @@ namespace ServiceStack.OrmLite.SqlServer
             }
 
 			return base.GetQuotedValue(value, fieldType);
-
-
 		}
+
+        protected override string GetUndefinedColumnDefinition(Type fieldType, int? fieldLength)
+        {
+            if (TypeSerializer.CanCreateFromString(fieldType))
+            {
+                return string.Format(StringLengthColumnDefinitionFormat, fieldLength.HasValue ? fieldLength.Value.ToString() : "MAX");
+            }
+            return base.GetUndefinedColumnDefinition(fieldType, fieldLength);
+        }
 
 		protected bool _useDateTime2;
 		public void UseDatetime2(bool shouldUseDatetime2)
