@@ -413,20 +413,42 @@ namespace ServiceStack.OrmLite
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
-                if (updateFields.Count > 0 && !updateFields.Contains(fieldDef.Name)) continue; // added
+                if (!ContainsUpdateFieldFor(fieldDef)) continue;
                 var value = fieldDef.GetValue(item);
                 if (excludeDefaults && (value == null || value.Equals(value.GetType().GetDefaultValue()))) continue; //GetDefaultValue?
 
                 fieldDef.GetQuotedValue(item);
 
                 if (setFields.Length > 0) setFields.Append(",");
-                setFields.AppendFormat("{0} = {1}",
-                    dialectProvider.GetQuotedColumnName(fieldDef.FieldName),
-                    dialectProvider.GetQuotedValue(value, fieldDef.FieldType));
+                setFields.Append(GetUpdateAssignmentStatement(fieldDef, value));
             }
 
             return string.Format("UPDATE {0} SET {1} {2}",
                                                 dialectProvider.GetQuotedTableName(modelDef), setFields, WhereExpression);
+        }
+
+        private bool ContainsUpdateFieldFor(FieldDefinition fieldDef)
+        {
+            var expectedNameByFieldDefinition = PrefixFieldWithTableName
+                                                    ? "{0}.{1}".Fmt(
+                                                        OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef.ModelName),
+                                                        fieldDef.Name)
+                                                    : fieldDef.Name;
+
+            return updateFields.Count > 0 && updateFields.Contains(expectedNameByFieldDefinition);
+        }
+
+        private string GetUpdateAssignmentStatement(FieldDefinition fieldDef, object value)
+        {
+            var column = PrefixFieldWithTableName
+                             ? "{0}.{1}".Fmt(
+                                 OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef.ModelName),
+                                 OrmLiteConfig.DialectProvider.GetQuotedColumnName(fieldDef.FieldName))
+                             : OrmLiteConfig.DialectProvider.GetQuotedColumnName(fieldDef.FieldName);
+
+            var assignedValue = OrmLiteConfig.DialectProvider.GetQuotedValue(value, fieldDef.FieldType);
+
+            return "{0}={1}".Fmt(column, assignedValue);
         }
 
         public virtual string ToSelectStatement()
