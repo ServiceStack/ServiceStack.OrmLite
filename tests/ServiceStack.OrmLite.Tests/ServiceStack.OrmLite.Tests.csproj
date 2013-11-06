@@ -185,6 +185,7 @@
     <Compile Include="OrmLiteTestBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SqlBuilderTests.cs" />
+    <Compile Include="SqliteOrmLiteDialectProviderTests.cs" />
     <Compile Include="SqlServerProviderTests.cs" />
     <Compile Include="TypeWithByteArrayFieldTests.cs" />
     <Compile Include="UseCase\AliasedFieldUseCase.cs" />
