@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Text;
@@ -18,6 +19,10 @@ namespace ServiceStack.OrmLite.Sqlite
             base.SelectIdentitySql = "SELECT last_insert_rowid()";
 
             base.InitColumnTypeMap();
+
+            // add support for DateTimeOffset
+            DbTypeMap.Set<DateTimeOffset>(DbType.DateTimeOffset, StringColumnDefinition);
+            DbTypeMap.Set<DateTimeOffset?>(DbType.DateTimeOffset, StringColumnDefinition);
         }
 
         public static string Password { get; set; }
@@ -115,6 +120,13 @@ namespace ServiceStack.OrmLite.Sqlite
                 }
             }
 
+            // support for parsing datetime offset
+            if(type == typeof(DateTimeOffset))
+            {
+                var moment = DateTimeOffset.Parse((string)value, null, DateTimeStyles.RoundtripKind);
+                return moment;
+            }
+
             try
             {
                 return base.ConvertDbValue(value, type);
@@ -145,6 +157,13 @@ namespace ServiceStack.OrmLite.Sqlite
             {
                 var boolValue = (bool)value;
                 return base.GetQuotedValue(boolValue ? 1 : 0, typeof(int));
+            }
+
+            // output datetimeoffset as a string formatted for roundtripping.
+            if (fieldType == typeof (DateTimeOffset))
+            {
+                var dateTimeOffsetValue = (DateTimeOffset) value;
+                return base.GetQuotedValue(dateTimeOffsetValue.ToString("o"), typeof (string));
             }
 
             return base.GetQuotedValue(value, fieldType);
