@@ -65,6 +65,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ServiceStack">
+      <HintPath>..\..\lib\tests\ServiceStack.dll</HintPath>
+    </Reference>
     <Reference Include="ServiceStack.Text">
       <HintPath>..\..\lib\ServiceStack.Text.dll</HintPath>
     </Reference>
@@ -108,6 +111,7 @@
     <Compile Include="ApiSqlServerTests.cs" />
     <Compile Include="ApiSqliteTests.cs" />
     <Compile Include="Expression\MethodExpressionTests.cs" />
+    <Compile Include="LicenseUsageTests.cs" />
     <Compile Include="LoadReferencesTests.cs" />
     <Compile Include="MockAllApiTests.cs" />
     <Compile Include="TypeDescriptorMetadataTests.cs" />

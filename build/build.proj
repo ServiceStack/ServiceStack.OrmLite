@@ -61,18 +61,26 @@
     <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.sln" Targets="Build"
       Properties="Configuration=$(Configuration)" />
   </Target>
-  
-  <Target Name="NuGetPack">
 
+  <Target Name="UpdateVersion">
     <!-- Update Version -->
     <ItemGroup>
-        <RegexTransform Include="$(SrcDir)/**/AssemblyInfo.cs">
-            <Find>\d+\.\d+\.\d+\.\d+</Find>
-            <ReplaceWith>$(Version)</ReplaceWith>
-        </RegexTransform>
+      <RegexTransform Include="$(SrcDir)/**/AssemblyInfo.cs">
+        <Find>\d+\.\d+\.\d+\.\d+</Find>
+        <ReplaceWith>$(Version)</ReplaceWith>
+      </RegexTransform>
+      <RegexTransform Include="$(BuildSolutionDir)/tests/**/*.config">
+        <Find>key="servicestack:license".*</Find>
+        <ReplaceWith>key="servicestack:license" value="$([System.IO.File]::ReadAllText($(MSBuildProjectDirectory)/appsettings.license.txt))" /&gt;</ReplaceWith>
+      </RegexTransform>
     </ItemGroup>
 
     <RegexTransform Items="@(RegexTransform)" />
+  </Target>
+
+  <Target Name="NuGetPack">
+
+    <CallTarget Targets="UpdateVersion" />
 
     <Delete Files="@(NugetPackageFilesToDelete)" />
     

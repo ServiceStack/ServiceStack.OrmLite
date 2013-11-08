@@ -15,7 +15,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using ServiceStack.DataAnnotations;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
@@ -167,6 +166,8 @@ namespace ServiceStack.OrmLite
 
             } while (!ReferenceEquals(
                 Interlocked.CompareExchange(ref typeModelDefinitionMap, newCache, snapshot), snapshot));
+            
+            LicenseUtils.AssertValidUsage(LicenseFeature.OrmLite, QuotaType.Tables, typeModelDefinitionMap.Count);
 
             return modelDef;
         }

@@ -550,7 +550,7 @@ namespace ServiceStack.OrmLite
             return SaveAll(dbCmd, objs);
         }
 
-        internal static bool Save<T>(this IDbCommand dbCmd, T obj)
+        internal static bool Save<T>(this IDbCommand dbCmd, T obj, bool saveReferences = false)
         {
             var id = obj.GetId();
             var existingRow = dbCmd.SingleById<T>(id);
