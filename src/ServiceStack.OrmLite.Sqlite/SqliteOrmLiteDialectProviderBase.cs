@@ -21,10 +21,6 @@ namespace ServiceStack.OrmLite.Sqlite
             base.SelectIdentitySql = "SELECT last_insert_rowid()";
 
             base.InitColumnTypeMap();
-
-            // add support for DateTimeOffset
-            DbTypeMap.Set<DateTimeOffset>(DbType.DateTimeOffset, StringColumnDefinition);
-            DbTypeMap.Set<DateTimeOffset?>(DbType.DateTimeOffset, StringColumnDefinition);
         }
 
         public override void OnAfterInitColumnTypeMap()
@@ -33,10 +29,8 @@ namespace ServiceStack.OrmLite.Sqlite
             DbTypeMap.Set<TimeSpan?>(DbType.String, StringColumnDefinition);
             DbTypeMap.Set<Guid>(DbType.String, StringColumnDefinition);
             DbTypeMap.Set<Guid?>(DbType.String, StringColumnDefinition);
-
-            return;
-            DbTypeMap.Set<DateTime>(DbType.String, StringColumnDefinition);
-            DbTypeMap.Set<DateTime?>(DbType.String, StringColumnDefinition);
+            DbTypeMap.Set<DateTimeOffset>(DbType.DateTimeOffset, StringColumnDefinition);
+            DbTypeMap.Set<DateTimeOffset?>(DbType.DateTimeOffset, StringColumnDefinition);
         }
 
         public static string Password { get; set; }
@@ -237,6 +231,18 @@ namespace ServiceStack.OrmLite.Sqlite
             }
 
             return base.GetQuotedValue(value, fieldType);
+        }
+
+        protected override object GetValueOrDbNull<T>(FieldDefinition fieldDef, object obj)
+        {
+            var value = GetValue<T>(fieldDef, obj);
+            if (fieldDef.FieldType == typeof(DateTimeOffset))
+            {
+                var dateTimeOffsetValue = (DateTimeOffset)value;
+                return dateTimeOffsetValue.ToString("o");
+            }
+
+            return value ?? DBNull.Value;
         }
 
         public override SqlExpression<T> SqlExpression<T>()

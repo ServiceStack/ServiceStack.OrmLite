@@ -33,13 +33,14 @@ namespace ServiceStack.OrmLite.Tests
             {
                 var dto = DateTimeOffset.Now;
 
-                db.CreateTable<HasDateTimeOffsetMemeber>(false);
-                db.Insert(new HasDateTimeOffsetMemeber() {MomentInTime = dto});
+                db.CreateTable<HasDateTimeOffsetMemeber>();
+                db.Insert(new HasDateTimeOffsetMemeber { MomentInTime = dto });
 
                 List<HasDateTimeOffsetMemeber> list = db.Select<HasDateTimeOffsetMemeber>();
 
                 Assert.That(list.Count == 1);
-                Assert.That(list.First().MomentInTime.CompareTo(dto) == 0);
+                var actual = list.First().MomentInTime;
+                Assert.That(actual.CompareTo(dto) == 0);
             }
         }
 
@@ -50,14 +51,15 @@ namespace ServiceStack.OrmLite.Tests
             {
                 var dto = DateTimeOffset.Now;
 
-                db.CreateTable<HasNullableDateTimeOffsetMemeber>(false);
-                db.Insert(new HasNullableDateTimeOffsetMemeber() { MomentInTime = dto });
+                db.CreateTable<HasNullableDateTimeOffsetMemeber>();
+                db.Insert(new HasNullableDateTimeOffsetMemeber { MomentInTime = dto });
 
                 List<HasNullableDateTimeOffsetMemeber> list = db.Select<HasNullableDateTimeOffsetMemeber>();
 
                 Assert.That(list.Count == 1);
-                Assert.That(list.First().MomentInTime.HasValue);
-                Assert.That(list.First().MomentInTime.Value.CompareTo(dto) == 0);
+                var actual = list.First().MomentInTime;
+                Assert.That(actual.HasValue);
+                Assert.That(actual.Value.CompareTo(dto) == 0);
             }
         }
     }
