@@ -789,6 +789,44 @@ namespace ServiceStack.OrmLite
             return row;
         }
 
+        public static void SaveAllReferences<T>(this IDbCommand dbCmd, T instance)
+        {
+            var modelDef = ModelDefinition<T>.Definition;
+            var pkValue = modelDef.PrimaryKey.GetValue(instance);
+
+            var fieldDefs = modelDef.AllFieldDefinitionsArray.Where(x => x.IsReference);
+            foreach (var fieldDef in fieldDefs)
+            {
+                var listInterface = fieldDef.FieldType.GetTypeWithGenericInterfaceOf(typeof(IList<>));
+                if (listInterface != null)
+                {
+                    var refType = listInterface.GenericTypeArguments()[0];
+                    var refModelDef = refType.GetModelDefinition();
+
+                    var refField = GetRefFieldDef(modelDef, refModelDef, refType);
+
+                    var results = (IEnumerable)fieldDef.GetValue(instance);
+                    foreach (var oRef in results)
+                    {
+                        refField.SetValueFn(oRef, pkValue);
+                    }
+
+                    refType.GetUntypedApi().SaveAll(dbCmd, results);
+                }
+                else
+                {
+                    var refType = fieldDef.FieldType;
+                    var refModelDef = refType.GetModelDefinition();
+                    var refField = GetRefFieldDef(modelDef, refModelDef, fieldDef.FieldType);
+
+                    var result = fieldDef.GetValue(instance);
+                    refField.SetValueFn(result, pkValue);
+
+                    refType.GetUntypedApi().Save(dbCmd, result);
+                }
+            }
+        }
+
         public static void SaveReferences<T, TRef>(this IDbCommand dbCmd, T instance, params TRef[] refs)
         {
             var modelDef = ModelDefinition<T>.Definition;

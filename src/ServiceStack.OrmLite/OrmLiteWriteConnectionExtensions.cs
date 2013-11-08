@@ -317,13 +317,21 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
-        /// Insert a new row or update existing row. Returns true if a new row was inserted. E.g:
-        /// <para>db.Save(new Person { Id = 10, FirstName = "Amy", LastName = "Winehouse", Age = 27 })</para>
+        /// Insert a new row or update existing row. Returns true if a new row was inserted. 
+        /// Optional references param decides whether to save all related references as well. E.g:
+        /// <para>db.Save(customer, references:true)</para>
         /// </summary>
         /// <returns>true if a row was inserted; false if it was updated</returns>
-        public static bool Save<T>(this IDbConnection dbConn, T obj)
+        public static bool Save<T>(this IDbConnection dbConn, T obj, bool references=false)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Save(obj));
+            if (!references)
+                return dbConn.Exec(dbCmd => dbCmd.Save(obj));
+
+            return dbConn.Exec(dbCmd => {
+                var ret = dbCmd.Save(obj);
+                dbCmd.SaveAllReferences(obj);
+                return ret;
+            });
         }
 
         /// <summary>

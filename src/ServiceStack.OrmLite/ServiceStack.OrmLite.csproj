@@ -146,6 +146,7 @@
     <Compile Include="Expressions\Sql.cs" />
     <Compile Include="OrmLiteDDLExtensions.cs" />
     <Compile Include="Dapper\SqlMapper.cs" />
+    <Compile Include="UntypedApi.cs" />
     <Compile Include="UpperCaseNamingStrategy.cs" />
   </ItemGroup>
   <ItemGroup>
