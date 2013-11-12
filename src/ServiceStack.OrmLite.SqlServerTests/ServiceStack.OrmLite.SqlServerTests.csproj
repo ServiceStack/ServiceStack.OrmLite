@@ -54,6 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Datetime2Tests.cs" />
+    <Compile Include="DateTimeOffsetTests.cs" />
     <Compile Include="EnsureUtcTest.cs" />
     <Compile Include="InsertParam_GetLastInsertId.cs" />
     <Compile Include="NestedTransactions.cs" />
