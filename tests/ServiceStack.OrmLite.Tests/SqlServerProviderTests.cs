@@ -64,19 +64,19 @@ END;";
             var expected = 0;
             10.Times(i => expected += i);
 
-            var results = db.SqlColumn<DummyTable>("EXEC DummyTable @Times", new { Times = 10 });
+            var results = db.SqlList<DummyTable>("EXEC DummyTable @Times", new { Times = 10 });
             results.PrintDump();
             Assert.That(results.Sum(x => x.Id), Is.EqualTo(expected));
 
-            results = db.SqlColumn<DummyTable>("EXEC DummyTable 10");
+            results = db.SqlList<DummyTable>("EXEC DummyTable 10");
             Assert.That(results.Sum(x => x.Id), Is.EqualTo(expected));
 
-            results = db.SqlColumn<DummyTable>("EXEC DummyTable @Times", new Dictionary<string, object> { {"Times", 10}});
+            results = db.SqlList<DummyTable>("EXEC DummyTable @Times", new Dictionary<string, object> { { "Times", 10 } });
             Assert.That(results.Sum(x => x.Id), Is.EqualTo(expected));
         }
 
         [Test]
-        public void Can_SqlList_StoredProc_returning_Column()
+        public void Can_SqlColumn_StoredProc_returning_Column()
         {
             var sql = @"CREATE PROCEDURE dbo.DummyColumn
     @Times integer
@@ -119,7 +119,7 @@ END;";
         }
 
         [Test]
-        public void Can_SqlList_StoredProc_returning_StringColumn()
+        public void Can_SqlColumn_StoredProc_returning_StringColumn()
         {
             var sql = @"CREATE PROCEDURE dbo.DummyColumn
     @Times integer
@@ -154,7 +154,7 @@ END;";
         }
 
         [Test]
-        public void Can_SqlList_StoredProc_returning_Scalar()
+        public void Can_SqlScalar_StoredProc_returning_Scalar()
         {
             var sql = @"CREATE PROCEDURE dbo.DummyScalar
     @Times integer

@@ -424,6 +424,22 @@ namespace ServiceStack.OrmLite
                 : dbCmd.ConvertToList<T>();
         }
 
+        internal static List<T> SqlList<T>(this IDbCommand dbCmd, string sql, object anonType = null)
+        {
+            if (anonType != null) dbCmd.SetParameters<T>(anonType, excludeDefaults: false);
+            dbCmd.CommandText = sql;
+
+            return dbCmd.ConvertToList<T>();
+        }
+
+        internal static List<T> SqlList<T>(this IDbCommand dbCmd, string sql, Dictionary<string, object> dict)
+        {
+            if (dict != null) SetParameters(dbCmd, dict, false);
+            dbCmd.CommandText = sql;
+
+            return dbCmd.ConvertToList<T>();
+        }
+
         internal static List<T> SqlColumn<T>(this IDbCommand dbCmd, string sql, object anonType = null)
         {
             if (anonType != null) dbCmd.SetParameters<T>(anonType, excludeDefaults: false);

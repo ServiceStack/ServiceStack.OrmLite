@@ -177,6 +177,11 @@ namespace ServiceStack.OrmLite.Tests
             db.ExistsFmt<Person>("SELECT * FROM Person WHERE Age = {0}", 42);
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT * FROM Person WHERE Age = 42"));
 
+            db.SqlList<Person>("SELECT * FROM Person WHERE Age < @age", new { age = 50 });
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT * FROM Person WHERE Age < @age"));
+
+            db.SqlList<Person>("SELECT * FROM Person WHERE Age < @age", new Dictionary<string, object> { { "age", 50 } });
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT * FROM Person WHERE Age < @age"));
 
             db.SqlColumn<string>("SELECT LastName FROM Person WHERE Age < @age", new { age = 50 });
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT LastName FROM Person WHERE Age < @age"));

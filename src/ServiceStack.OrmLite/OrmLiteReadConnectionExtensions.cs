@@ -313,11 +313,29 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Returns true if the Query returns any records, using an SqlFormat query. E.g:
         /// <para>db.ExistsFmt&lt;Person&gt;("Age = {0}", 42)</para>
-        /// <para>db.ExistsFmt&lt;Person&gt;("SELECT * FROM Person WHERE Age = {0}", 42)</para>
+        /// <para>db.ExistsFmt&lt;Person&gt;("SELECT * FROM Person WHERE Age = {0}", 50)</para>
         /// </summary>
         public static bool ExistsFmt<T>(this IDbConnection dbConn, string sqlFormat, params object[] filterParams)
         {
             return dbConn.Exec(dbCmd => dbCmd.ExistsFmt<T>(sqlFormat, filterParams));
+        }
+
+        /// <summary>
+        /// Returns results from an arbitrary parameterized raw sql query. E.g:
+        /// <para>db.SqlList&lt;Person&gt;("EXEC GetRockstarsAged @age", new { age = 50 })</para>
+        /// </summary>
+        public static List<T> SqlList<T>(this IDbConnection dbConn, string sql, object anonType = null)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(sql, anonType));
+        }
+
+        /// <summary>
+        /// Returns results from an arbitrary parameterized raw sql query. E.g:
+        /// <para>db.SqlList&lt;Person&gt;("EXEC GetRockstarsAged @age", new Dictionary&lt;string, object&gt; { { "age", 42 } })</para>
+        /// </summary>
+        public static List<T> SqlList<T>(this IDbConnection dbConn, string sql, Dictionary<string, object> dict)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(sql, dict));
         }
 
         /// <summary>
@@ -330,7 +348,7 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
-        /// Returns a single Scalar value using a parameterized query. E.g:
+        /// Returns the first column in a List using a parameterized query. E.g:
         /// <para>db.SqlColumn&lt;string&gt;("SELECT LastName FROM Person WHERE Age &lt; @age", new Dictionary&lt;string, object&gt; { { "age", 50 } })</para>
         /// </summary>
         public static List<T> SqlColumn<T>(this IDbConnection dbConn, string sql, Dictionary<string, object> dict)
