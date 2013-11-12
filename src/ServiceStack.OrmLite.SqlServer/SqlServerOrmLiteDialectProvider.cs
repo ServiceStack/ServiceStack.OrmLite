@@ -14,6 +14,7 @@ namespace ServiceStack.OrmLite.SqlServer
 		public static SqlServerOrmLiteDialectProvider Instance = new SqlServerOrmLiteDialectProvider();
 
 		private static readonly DateTime timeSpanOffset = new DateTime(1900,01,01);
+        private const string DateTimeOffsetColumnDefinition = "DATETIMEOFFSET";
 
 		public SqlServerOrmLiteDialectProvider()
 		{
@@ -29,6 +30,14 @@ namespace ServiceStack.OrmLite.SqlServer
 
 			base.InitColumnTypeMap();
 		}
+
+        public override void OnAfterInitColumnTypeMap()
+        {
+            base.OnAfterInitColumnTypeMap();
+
+            DbTypeMap.Set<DateTimeOffset>(DbType.DateTimeOffset, DateTimeOffsetColumnDefinition);
+            DbTypeMap.Set<DateTimeOffset?>(DbType.DateTimeOffset, DateTimeOffsetColumnDefinition);
+        }
 
         public override string GetQuotedValue(string paramValue)
         {
@@ -137,6 +146,12 @@ namespace ServiceStack.OrmLite.SqlServer
 				const string iso8601Format = "yyyyMMdd HH:mm:ss.fff";
 				return base.GetQuotedValue(dateValue.ToString(iso8601Format,CultureInfo.InvariantCulture) , typeof(string));
 			}
+            if (fieldType == typeof(DateTimeOffset))
+            {
+                var dateValue = (DateTimeOffset)value;
+                const string iso8601Format = "yyyyMMdd HH:mm:ss.fff zzz";
+                return base.GetQuotedValue(dateValue.ToString(iso8601Format, CultureInfo.InvariantCulture), typeof(string));
+            }
 			if (fieldType == typeof(bool))
 			{
 				var boolValue = (bool)value;
