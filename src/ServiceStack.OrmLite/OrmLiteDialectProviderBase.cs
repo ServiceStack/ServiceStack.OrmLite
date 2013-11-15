@@ -609,9 +609,8 @@ namespace ServiceStack.OrmLite
             }
             else
             {
-                var unquotedVal = fieldDef.GetQuotedValue(objWithProperties).TrimStart('\'').TrimEnd('\'');
                 p.DbType = DbType.String;
-                p.Value = GetValueOrDbNull(unquotedVal);
+                p.Value = GetQuotedValueOrDbNull(fieldDef, objWithProperties);
             }
 
             command.Parameters.Add(p);
@@ -622,12 +621,20 @@ namespace ServiceStack.OrmLite
             return fieldDef.GetValue(objWithProperties) ?? DBNull.Value;
         }
 
-        private object GetValueOrDbNull(String value)
+        protected object GetQuotedValueOrDbNull(FieldDefinition fieldDef, object objWithProperties)
         {
-            if (String.IsNullOrEmpty(value))
+            var value = fieldDef.GetValue(objWithProperties);
+
+            if (value == null)
                 return DBNull.Value;
 
-            return value;
+            var unquotedVal = OrmLiteConfig.DialectProvider.GetQuotedValue(value, fieldDef.FieldType)
+                .TrimStart('\'').TrimEnd('\''); ;
+
+            if (string.IsNullOrEmpty(unquotedVal))
+                return DBNull.Value;
+
+            return unquotedVal;
         }
 
         public virtual string ToUpdateRowStatement(object objWithProperties, ICollection<string> updateFields = null)
