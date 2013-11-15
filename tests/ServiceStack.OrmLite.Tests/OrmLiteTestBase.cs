@@ -65,16 +65,21 @@ namespace ServiceStack.OrmLite.Tests
 		{
 			LogManager.LogFactory = new ConsoleLogFactory();
 
-            OrmLiteConfig.DialectProvider = SqliteDialect.Provider;
-            ConnectionString = GetFileConnectionString();
-            ConnectionString = ":memory:";
-            return;
-
-            //OrmLiteConfig.DialectProvider = SqlServerDialect.Provider;
-            //ConnectionString = Config.SqlServerBuildDb;
+		    var useSqlite = true;
+            if (useSqlite)
+            {
+                OrmLiteConfig.DialectProvider = SqliteDialect.Provider;
+                ConnectionString = GetFileConnectionString();
+                ConnectionString = ":memory:";
+            }
+            else
+            {
+                OrmLiteConfig.DialectProvider = SqlServerDialect.Provider;
+                ConnectionString = Config.SqlServerBuildDb;
+            }
+            
             //ConnectionString = "~/App_Data/Database1.mdf".MapAbsolutePath();			
-
-		    ConnectionString = Config.GetDefaultConnection();
+            //ConnectionString = Config.GetDefaultConnection();
 		}
 
 		public void Log(string text)
