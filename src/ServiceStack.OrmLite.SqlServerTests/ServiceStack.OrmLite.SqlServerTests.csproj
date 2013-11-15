@@ -83,6 +83,7 @@
     <Compile Include="TypeWithByteArrayFieldTests.cs" />
     <Compile Include="UnicodeTests.cs" />
     <Compile Include="UpdateTests.cs" />
+    <Compile Include="UseCase\NestedComplexTypeUseCase.cs" />
     <Compile Include="UseCase\TestEntityWithAliases.cs" />
     <Compile Include="UseCase\SimpleUseCase.cs" />
     <Compile Include="UseCase\TestEntity.cs" />
