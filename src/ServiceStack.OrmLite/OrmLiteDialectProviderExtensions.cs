@@ -16,5 +16,15 @@ namespace ServiceStack.OrmLite
         {
             return paramName.Substring(dialect.ParamString.Length);
         }
+
+        public static string FmtTable(this string tableName)
+        {
+            return OrmLiteConfig.DialectProvider.NamingStrategy.GetTableName(tableName);
+        }
+
+        public static string FmtColumn(this string columnName)
+        {
+            return OrmLiteConfig.DialectProvider.NamingStrategy.GetColumnName(columnName);
+        }
     }
 }
