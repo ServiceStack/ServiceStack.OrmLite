@@ -12,7 +12,7 @@
       OrmLite is a suite extension methods on ADO.NET's underlying IDbConnection providing DRY, typed access for common data usage patterns that map to clean, simple POCOs. Great support for testing where OrmLite methods can be mocked.
   	</description> 
     <projectUrl>https://github.com/ServiceStack/ServiceStack.OrmLite</projectUrl>
-    <licenseUrl>https://github.com/ServiceStack/ServiceStack/blob/master/license.txt</licenseUrl>
+    <licenseUrl>https://servicestack.net/terms</licenseUrl>
     <iconUrl>http://www.servicestack.net/logo-100x100.png</iconUrl>
     <tags>OrmLite POCO Code-First Orm Schema-less Blobs</tags>
     <language>en-US</language> 
