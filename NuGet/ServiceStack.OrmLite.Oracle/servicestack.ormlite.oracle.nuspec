@@ -4,8 +4,8 @@
     <id>ServiceStack.OrmLite.Oracle</id> 
     <title>OrmLite.Oracle - Fast, code-first, config-free Poco ORM</title>
     <version>4.0.0</version>
-    <authors>Demis Bellot, Guru Kathiresan</authors> 
-    <owners>Demis Bellot, Guru Kathiresan</owners>
+    <authors>Service Stack, Guru Kathiresan</authors> 
+    <owners>Service Stack, Guru Kathiresan</owners>
     <description>
         Light, simple and fast convention-based code-first POCO ORM for Oracle RDBMS.
         Support for Creating and Dropping Table Schemas from POCOs, Complex Property types transparently stored in schemaless text blobs in Oracle.

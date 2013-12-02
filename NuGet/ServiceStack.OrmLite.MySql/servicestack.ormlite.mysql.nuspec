@@ -4,8 +4,8 @@
     <id>ServiceStack.OrmLite.MySql</id>
     <title>OrmLite.MySQL - Fast, code-first, config-free Poco ORM</title>
     <version>4.0.0</version>
-    <authors>Demis Bellot, Thomas Grassauer</authors> 
-    <owners>Demis Bellot, Thomas Grassauer</owners>
+    <authors>Service Stack, Thomas Grassauer</authors> 
+    <owners>Service Stack, Thomas Grassauer</owners>
     <description>
         Light, simple and fast convention-based code-first POCO ORM for MySQL. 
 		Support for Creating and Dropping Table Schemas from POCOs, Complex Property types transparently stored in schemaless text blobs in MySQL.

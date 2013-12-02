@@ -4,8 +4,8 @@
     <id>ServiceStack.OrmLite.SqlServer.Signed</id> 
     <title>ServiceStack.OrmLite.SqlServer.Signed</title>
     <version>4.0.0</version>
-    <authors>Demis Bellot</authors> 
-    <owners>Demis Bellot</owners>
+    <authors>Service Stack</authors> 
+    <owners>Service Stack</owners>
     <description>
 		Light, simple and fast convention-based code-first POCO ORM for Sql Server.
 		Support for Creating and Dropping Table Schemas from POCOs, Complex Property types transparently stored in schemaless text blobs in SQLServer.

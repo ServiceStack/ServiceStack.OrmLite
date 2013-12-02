@@ -4,8 +4,8 @@
     <id>ServiceStack.OrmLite.T4</id> 
     <title>OrmLite.T4 - T4 schema-generation templates for OrmLite</title>
     <version>4.0.0</version>
-    <authors>Demis Bellot</authors> 
-    <owners>Demis Bellot</owners>
+    <authors>Service Stack</authors> 
+    <owners>Service Stack</owners>
     <description>
       Generate POCO models for all existing tables and stored procedures in a database for use with OrmLite.
     </description> 
