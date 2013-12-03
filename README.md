@@ -19,12 +19,12 @@ OrmLite was designed with a focus on the core objectives:
   * Cross platform - supports multiple dbs (currently: Sql Server, Sqlite, MySql, PostgreSQL, Firebird) running on both .NET and Mono platforms.
 
 In OrmLite: **1 Class = 1 Table**. There should be no surprising or hidden behaviour.
-Any non-scalar properties (i.e. complex types) are text blobbed in a schema-less text field using [.NET's fastest Text Serializer](http://www.servicestack.net/mythz_blog/?p=176).
+Any non-scalar properties (i.e. complex types) are text blobbed in a schema-less text field using [.NET's fastest Text Serializer](http://mono.servicestack.net/mythz_blog/?p=176).
 Effectively this allows you to create a table from any POCO type and it should persist as expected in a DB Table with columns for each of the classes 1st level public properties.
 
 # Download 
 
-[![Download on NuGet](http://www.servicestack.net/img/nuget-servicestack.ormlite.sqlserver.png)](http://nuget.org/List/Packages/ServiceStack.OrmLite.SqlServer)
+[![Download on NuGet](http://mono.servicestack.net/img/nuget-servicestack.ormlite.sqlserver.png)](http://nuget.org/List/Packages/ServiceStack.OrmLite.SqlServer)
 
 ### 8 flavours of OrmLite is on NuGet: 
 
@@ -240,7 +240,7 @@ foreach (var newRobot in newRobots)
 Using the [SQLite Manager](https://addons.mozilla.org/en-US/firefox/addon/sqlite-manager/?src=search) Firefox extension
 we can peek at one of the created shards to see 100 Robots in each shard. This is the dump of `robots-shard0.sqlite`:
 
-![Data dump of Robot Shard #1](http://www.servicestack.net/files/robots-shard0.png)
+![Data dump of Robot Shard #1](http://mono.servicestack.net/files/robots-shard0.png)
 
 As expected each shard has every 10th robot inside.
 
@@ -625,10 +625,10 @@ Below is a complete stand-alone example. No other config or classes is required 
 
 Running this against a SQL Server database will yield the results below:
 
-[![SQL Server Management Studio results](http://www.servicestack.net/files/ormlite-example.png)](http://www.servicestack.net/files/ormlite-example.png)
+[![SQL Server Management Studio results](http://mono.servicestack.net/files/ormlite-example.png)](http://www.servicestack.net/files/ormlite-example.png)
 
-Notice the POCO types are stored in the [very fast](http://www.servicestack.net/mythz_blog/?p=176) 
-and [Versatile](http://www.servicestack.net/mythz_blog/?p=314) 
+Notice the POCO types are stored in the [very fast](http://mono.servicestack.net/mythz_blog/?p=176) 
+and [Versatile](http://mono.servicestack.net/mythz_blog/?p=314) 
 [JSV Format](https://github.com/ServiceStack/ServiceStack.Text/wiki/JSV-Format) which although hard to do - 
 is actually more compact, human and parser-friendly than JSON :)
 
@@ -636,7 +636,7 @@ is actually more compact, human and parser-friendly than JSON :)
 
 The API is minimal, providing basic shortcuts for the primitive SQL statements:
 
-[![OrmLite API](http://www.servicestack.net/files/ormlite-api.png)](http://www.servicestack.net/files/ormlite-api.png)
+[![OrmLite API](http://mono.servicestack.net/files/ormlite-api.png)](http://www.servicestack.net/files/ormlite-api.png)
 
 Nearly all extension methods hang off the implementation agnostic `IDbCommand`.
 

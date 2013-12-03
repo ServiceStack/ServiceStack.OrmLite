@@ -11,7 +11,7 @@
     </description> 
     <projectUrl>https://github.com/ServiceStack/ServiceStack.OrmLite</projectUrl>
     <licenseUrl>https://github.com/ServiceStack/ServiceStack/blob/master/license.txt</licenseUrl>
-    <iconUrl>http://www.servicestack.net/logo-100x100.png</iconUrl>
+    <iconUrl>https://servicestack.net/img/logo-32.png</iconUrl>
     <tags>T4 SQL Templates CodeGen OrmLite POCO Code-First Orm Schema-less Blobs</tags>
     <language>en-US</language> 
     <copyright>ServiceStack 2013 and contributors</copyright>
