@@ -343,7 +343,7 @@ namespace ServiceStack.OrmLite
         {
             if (value == null) return "NULL";
 
-            if (!fieldType.UnderlyingSystemType.IsValueType && fieldType != typeof(string))
+            if ((!fieldType.UnderlyingSystemType.IsValueType || JsConfig.TreatValueAsRefTypes.Contains(fieldType.IsGeneric() ? fieldType.GenericTypeDefinition() : fieldType)) && fieldType != typeof(string))
             {
                 if (TypeSerializer.CanCreateFromString(fieldType))
                 {
