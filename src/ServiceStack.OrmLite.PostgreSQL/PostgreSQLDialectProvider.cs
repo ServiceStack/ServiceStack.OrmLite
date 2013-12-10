@@ -33,6 +33,8 @@ namespace ServiceStack.OrmLite.PostgreSQL
 
             DbTypeMap.Set<TimeSpan>(DbType.Time, "Interval");
             DbTypeMap.Set<TimeSpan?>(DbType.Time, "Interval");
+            DbTypeMap.Set<DateTimeOffset>(DbType.DateTimeOffset, "timestamp with time zone");
+            DbTypeMap.Set<DateTimeOffset?>(DbType.DateTimeOffset, "timestamp with time zone");
 		}
 
 		public override string GetColumnDefinition(
