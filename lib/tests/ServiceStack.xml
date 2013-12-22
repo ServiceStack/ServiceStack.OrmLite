@@ -4938,12 +4938,22 @@
         </member>
         <member name="P:ServiceStack.IAppHost.GlobalRequestFilters">
             <summary>
-            Add Request Filters
+            Add Request Filters for HTTP Requests
             </summary>
         </member>
         <member name="P:ServiceStack.IAppHost.GlobalResponseFilters">
             <summary>
-            Add Response Filters
+            Add Response Filters for HTTP Responses
+            </summary>
+        </member>
+        <member name="P:ServiceStack.IAppHost.GlobalMessageRequestFilters">
+            <summary>
+            Add Request Filters for MQ/TCP Requests
+            </summary>
+        </member>
+        <member name="P:ServiceStack.IAppHost.GlobalMessageResponseFilters">
+            <summary>
+            Add Response Filters for MQ/TCP Responses
             </summary>
         </member>
         <member name="P:ServiceStack.IAppHost.ViewEngines">
