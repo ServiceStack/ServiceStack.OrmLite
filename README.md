@@ -59,21 +59,18 @@ extracting them from the published NuGet packages. The url to download a nuget p
     
  So to get the OrmLite MySQL provider in OSX/Linux (or using gnu tools for Windows) you can just do:
 
-    wget -O OrmLite.MySql.zip http://packages.nuget.org/api/v1/package/ServiceStack.OrmLite.MySql/3.9.60
+    wget -O OrmLite.MySql.zip http://packages.nuget.org/api/v1/package/ServiceStack.OrmLite.MySql/4.0.5
     unzip OrmLite.MySql.zip 'lib/*'
 
 which will download and extract the dlls into your local local `lib/` folder.
-
-## IMPORTANT NOTICE
-
-Please upgrade your client code to use non-deprecated methods as we will be removing access to deprecated APIs in the next release of OrmLite.
 
 ***
 
 ## T4 Template Support
 
-[Guru Kathiresan](https://github.com/gkathire) continues to enhance [OrmLite's T4 Template support](https://github.com/ServiceStack/ServiceStack.OrmLite/tree/master/src/T4) which are useful when you want to automatically generate POCO's and strong-typed wrappers for executing stored procedures. 
+[Guru Kathiresan](https://github.com/gkathire) continues to enhance [OrmLite's T4 Template support](https://github.com/ServiceStack/ServiceStack.OrmLite/tree/master/src/T4) which are useful when you want to automatically generate POCO's and strong-typed wrappers for executing stored procedures. OrmLite's T4 support can be added via NuGet with:
 
+    PM> Install-Package ServiceStack.OrmLite.T4
 
 ## New Parameterized API's
 
@@ -82,20 +79,20 @@ We've now added API's that use parameterized statements for all SQL operations, 
 ### Parameterized Write operations
 
 ```csharp
-db.InsertParam(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27})
-db.UpdateParam(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27})
-db.DeleteByIdParam<Person>(1)
+db.Insert(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27})
+db.Update(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27})
+db.DeleteById<Person>(1)
 ```
 
 ### Parameterized Read operations
 
 ```csharp
-var people = db.SelectParam<Person>(q => q.Age == 27)
-var person = db.GetByIdParam<Person>(1)
+var people = db.Select<Person>(q => q.Age == 27)
+var person = db.GetById<Person>(1)
 
 //Existing parameterized query API's
 var people = db.Where<Person>(new { FirstName = "Jimi", Age = 27 })
-var people = db.Query<Track>("FirstName = @name and Age = @age", new { name = "Jimi", age = 27 })
+var people = db.Select<Track>("FirstName = @name and Age = @age", new { name = "Jimi", age = 27 })
 ```
 
 Apart from a slight performance increase, parameterized API's now lets you insert and update binary blob data. At the same time as these new parameterized API's, we've also added support for querying binary blob data.
@@ -536,90 +533,89 @@ Below is a complete stand-alone example. No other config or classes is required 
     //    ":memory:", false, SqliteDialect.Provider);
 
     //Non-intrusive: All extension methods hang off System.Data.* interfaces
-    IDbConnection db = dbFactory.OpenDbConnection();
-
-    //Re-Create all table schemas:
-    db.DropTable<OrderDetail>();
-    db.DropTable<Order>();
-    db.DropTable<Customer>();
-    db.DropTable<Product>();
-    db.DropTable<Employee>();
-
-    db.CreateTable<Employee>();
-    db.CreateTable<Product>();
-    db.CreateTable<Customer>();
-    db.CreateTable<Order>();
-    db.CreateTable<OrderDetail>();
-
-    db.Insert(new Employee { Id = 1, Name = "Employee 1" });
-    db.Insert(new Employee { Id = 2, Name = "Employee 2" });
-    var product1 = new Product { Id = 1, Name = "Product 1", UnitPrice = 10 };
-    var product2 = new Product { Id = 2, Name = "Product 2", UnitPrice = 20 };
-    db.Save(product1, product2);
-
-    var customer = new Customer
+    using (IDbConnection db = Config.OpenDbConnection())
     {
-        FirstName = "Orm",
-        LastName = "Lite",
-        Email = "ormlite@servicestack.net",
-        PhoneNumbers =
-            {
-                { PhoneType.Home, "555-1234" },
-                { PhoneType.Work, "1-800-1234" },
-                { PhoneType.Mobile, "818-123-4567" },
-            },
-        Addresses =
-            {
-                { AddressType.Work, new Address { Line1 = "1 Street", Country = "US", State = "NY", City = "New York", ZipCode = "10101" } },
-            },
-        CreatedAt = DateTime.UtcNow,
-    };
-    db.Insert(customer);
+      //Re-Create all table schemas:
+      db.DropTable<OrderDetail>();
+      db.DropTable<Order>();
+      db.DropTable<Customer>();
+      db.DropTable<Product>();
+      db.DropTable<Employee>();
 
-    var customerId = db.GetLastInsertId(); //Get Auto Inserted Id
-    customer = db.QuerySingle<Customer>(new { customer.Email }); //Query
-    Assert.That(customer.Id, Is.EqualTo(customerId));
+      db.CreateTable<Employee>();
+      db.CreateTable<Product>();
+      db.CreateTable<Customer>();
+      db.CreateTable<Order>();
+      db.CreateTable<OrderDetail>();
 
-    //Direct access to System.Data.Transactions:
-    using (var trans = db.OpenTransaction(IsolationLevel.ReadCommitted))
-    {
-        var order = new Order
-        {
-            CustomerId = customer.Id,
-            EmployeeId = 1,
-            OrderDate = DateTime.UtcNow,
-            Freight = 10.50m,
-            ShippingAddress = new Address { Line1 = "3 Street", Country = "US", State = "NY", City = "New York", ZipCode = "12121" },
-        };
-        db.Save(order); //Inserts 1st time
+      db.Insert(new Employee { Id = 1, Name = "Employee 1" });
+      db.Insert(new Employee { Id = 2, Name = "Employee 2" });
+      var product1 = new Product { Id = 1, Name = "Product 1", UnitPrice = 10 };
+      var product2 = new Product { Id = 2, Name = "Product 2", UnitPrice = 20 };
+      db.Save(product1, product2);
 
-        order.Id = (int)db.GetLastInsertId(); //Get Auto Inserted Id
+      var customer = new Customer {
+          FirstName = "Orm",
+          LastName = "Lite",
+          Email = "ormlite@servicestack.net",
+          PhoneNumbers =
+          {
+              { PhoneType.Home, "555-1234" },
+              { PhoneType.Work, "1-800-1234" },
+              { PhoneType.Mobile, "818-123-4567" },
+          },
+          Addresses =
+          {
+              { AddressType.Work, new Address { 
+                Line1 = "1 Street", Country = "US", State = "NY", City = "New York", ZipCode = "10101" } 
+              },
+          },
+          CreatedAt = DateTime.UtcNow,
+      };
 
-        var orderDetails = new[] {
-            new OrderDetail
-            {
-                OrderId = order.Id,
-                ProductId = product1.Id,
-                Quantity = 2,
-                UnitPrice = product1.UnitPrice,
-            },
-            new OrderDetail
-            {
-                OrderId = order.Id,
-                ProductId = product2.Id,
-                Quantity = 2,
-                UnitPrice = product2.UnitPrice,
-                Discount = .15m,
-            }
-        };
+      var customerId = db.Insert(customer, selectIdentity: true); //Get Auto Inserted Id
+      customer = db.Single<Customer>(new { customer.Email }); //Query
+      Assert.That(customer.Id, Is.EqualTo(customerId));
 
-        db.Insert(orderDetails);
+      //Direct access to System.Data.Transactions:
+      using (IDbTransaction trans = db.OpenTransaction(IsolationLevel.ReadCommitted))
+      {
+          var order = new Order {
+              CustomerId = customer.Id,
+              EmployeeId = 1,
+              OrderDate = DateTime.UtcNow,
+              Freight = 10.50m,
+              ShippingAddress = new Address { 
+                Line1 = "3 Street", Country = "US", State = "NY", City = "New York", ZipCode = "12121" },
+          };
+          db.Save(order); //Inserts 1st time
 
-        order.Total = orderDetails.Sum(x => x.UnitPrice * x.Quantity * x.Discount) + order.Freight;
+          //order.Id populated on Save().
 
-        db.Save(order); //Updates 2nd Time
+          var orderDetails = new[] {
+              new OrderDetail {
+                  OrderId = order.Id,
+                  ProductId = product1.Id,
+                  Quantity = 2,
+                  UnitPrice = product1.UnitPrice,
+              },
+              new OrderDetail {
+                  OrderId = order.Id,
+                  ProductId = product2.Id,
+                  Quantity = 2,
+                  UnitPrice = product2.UnitPrice,
+                  Discount = .15m,
+              }
+          };
 
-        trans.Commit();
+          db.Save(orderDetails);
+
+          order.Total = orderDetails.Sum(x => x.UnitPrice * x.Quantity * x.Discount) + order.Freight;
+
+          db.Save(order); //Updates 2nd Time
+
+          trans.Commit();
+      }
     }
 ```
 
@@ -645,20 +641,20 @@ Nearly all extension methods hang off the implementation agnostic `IDbCommand`.
 For a one-time use of a connection, you can query straight of the `IDbConnectionFactory` with:
 
 ```csharp
-var customers = dbFactory.Run(db => db.Where<Customer>(new { Age = 30 }));
+var customers = db.Where<Customer>(new { Age = 30 });
 ```
 
 The **Select** methods allow you to construct Sql using C# `string.Format()` syntax.
 If your SQL doesn't start with a **SELECT** statement, it is assumed a WHERE clause is being provided, e.g:
 
 ```csharp
-var tracks = db.Select<Track>("Artist = {0} AND Album = {1}", "Nirvana", "Heart Shaped Box");
+var tracks = db.SelectFmt<Track>("Artist = {0} AND Album = {1}", "Nirvana", "Heart Shaped Box");
 ```
 
 The same results could also be fetched with:
 
 ```csharp
-var tracks = db.Select<Track>("select * from track WHERE Artist={0} AND Album={1}", "Nirvana", "Heart Shaped Box");
+var tracks = db.SelectFmt<Track>("select * from track WHERE Artist={0} AND Album={1}", "Nirvana", "Heart Shaped Box");
 ```
 
 **Select** returns multiple records 
@@ -670,7 +666,7 @@ List<Track> tracks = db.Select<Track>()
 **Single** returns a single record. Alias: `First`  
 
 ```csharp
-Track track = db.Single<Track>("RefId = {0}", refId)
+Track track = db.SingleFmt<Track>("RefId = {0}", refId)
 ```
 
 **Dictionary** returns a Dictionary made from the first two columns. Alias: `GetDictionary`
@@ -688,13 +684,13 @@ Dictionary<int, List<string>> albumTrackNames = db.Lookup<int, string>("select A
 **List** returns a List of first column values. Alias: `GetList`
 
 ```csharp
-List<string> trackNames = db.List<string>("select Name from Track")
+List<string> trackNames = db.Column<string>("select Name from Track")
 ```
 
 **HashSet** returns a HashSet of distinct first column values. Alias: `GetHashSet`
 
 ```csharp    
-HashSet<string> uniqueTrackNames = db.HashSet<string>("select Name from Track")
+HashSet<string> uniqueTrackNames = db.ColumnDistinct<string>("select Name from Track")
 ```
 
 **Scalar** returns a single scalar value. Alias: `GetScalar`
@@ -711,26 +707,25 @@ Both take multiple items, optimized to perform a single read to check for existi
 
 Methods containing the word **Each** return an IEnumerable<T> and are lazily loaded (i.e. non-buffered).
 
-Selection methods containing the word **Query** or **Where** use parameterized SQL (other selection methods do not).
+By default Selection methods use parameterized SQL whilst any selection methods ending with **Fmt** do not.
 Anonymous types passed into **Where** are treated like an **AND** filter.
 
 ```csharp
 var track3 = db.Where<Track>(new { AlbumName = "Throwing Copper", TrackNo = 3 })
 ```
 
-**Query** statements take in parameterized SQL using properties from the supplied anonymous type (if any)
+**Select** statements take in parameterized SQL using properties from the supplied anonymous type (if any)
 
 ```csharp
-var track3 = db.Query<Track>("select * from Track Where AlbumName = @album and TrackNo = @trackNo", 
+var track3 = db.Select<Track>("select * from Track Where AlbumName = @album and TrackNo = @trackNo", 
 	new { album = "Throwing Copper", trackNo = 3 })
 ```
 
-GetById(s), QueryById(s), etc provide strong-typed convenience methods to fetch by a Table's **Id** primary key field.
+SingleById(s), SelectById(s), etc provide strong-typed convenience methods to fetch by a Table's **Id** primary key field.
 
 ```csharp
-var track = db.QueryById<Track>(1);
-var track = db.Id<Track>(1);                    //Alias: GetById
-var tracks = db.Ids<Track>(new[]{ 1,2,3 });     //Alias: GetByIds
+var track = db.SingleById<Track>(1);
+var tracks = db.SelectByIds<Track>(new[]{ 1,2,3 });     //Alias: GetByIds
 ```
 
 
@@ -918,7 +913,7 @@ No ORM is complete without the standard crud operations:
 
 	//Then make it disappear
 	db.Delete(trainsAreUs);
-	Assert.That(db.GetByIdOrDefault<Shipper>(trainsAreUs.Id), Is.Null);
+	Assert.That(db.GetById<Shipper>(trainsAreUs.Id), Is.Null);
 
 	//And bring it back again
 	db.Insert(trainsAreUs);
