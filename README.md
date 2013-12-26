@@ -72,31 +72,6 @@ which will download and extract the dlls into your local local `lib/` folder.
 
     PM> Install-Package ServiceStack.OrmLite.T4
 
-## New Parameterized API's
-
-We've now added API's that use parameterized statements for all SQL operations, these are identified with a **Param** suffix, e.g:
-
-### Parameterized Write operations
-
-```csharp
-db.Insert(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27})
-db.Update(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27})
-db.DeleteById<Person>(1)
-```
-
-### Parameterized Read operations
-
-```csharp
-var people = db.Select<Person>(q => q.Age == 27)
-var person = db.GetById<Person>(1)
-
-//Existing parameterized query API's
-var people = db.Where<Person>(new { FirstName = "Jimi", Age = 27 })
-var people = db.Select<Track>("FirstName = @name and Age = @age", new { name = "Jimi", age = 27 })
-```
-
-Apart from a slight performance increase, parameterized API's now lets you insert and update binary blob data. At the same time as these new parameterized API's, we've also added support for querying binary blob data.
-
 ## New API's to execute custom SQL
 
 Prior to v3.9.60 the ways to execute custom SQL was with `db.ExecuteSql()` which as it only returned an int code, users were using `db.Query` to read arbitrary sql returning tabular resultsets. However db.Query is only intended for SELECT statements. For this purpose we've introduced new API's for executing custom sql, e.g:
@@ -725,7 +700,7 @@ SingleById(s), SelectById(s), etc provide strong-typed convenience methods to fe
 
 ```csharp
 var track = db.SingleById<Track>(1);
-var tracks = db.SelectByIds<Track>(new[]{ 1,2,3 });     //Alias: GetByIds
+var tracks = db.SelectByIds<Track>(new[]{ 1,2,3 });
 ```
 
 
@@ -909,11 +884,11 @@ No ORM is complete without the standard crud operations:
 	//Lets update a record
 	trainsAreUs.Phone = "666-TRAINS";
 	db.Update(trainsAreUs);
-	Assert.That(db.GetById<Shipper>(trainsAreUs.Id).Phone, Is.EqualTo("666-TRAINS"));
+	Assert.That(db.SingleById<Shipper>(trainsAreUs.Id).Phone, Is.EqualTo("666-TRAINS"));
 
 	//Then make it disappear
 	db.Delete(trainsAreUs);
-	Assert.That(db.GetById<Shipper>(trainsAreUs.Id), Is.Null);
+	Assert.That(db.SingleById<Shipper>(trainsAreUs.Id), Is.Null);
 
 	//And bring it back again
 	db.Insert(trainsAreUs);
