@@ -160,7 +160,7 @@ namespace ServiceStack.OrmLite
                 if (OrmLiteConfig.DialectProvider.DoesTableExist(dbCmd, tableName))
                 {
                     var dropTableFks = OrmLiteConfig.DialectProvider.GetDropForeignKeyConstraints(modelDef);
-                    if (!String.IsNullOrEmpty(dropTableFks))
+                    if (!string.IsNullOrEmpty(dropTableFks))
                     {
                         dbCmd.ExecuteSql(dropTableFks);
                     }
@@ -170,6 +170,7 @@ namespace ServiceStack.OrmLite
             catch (Exception ex)
             {
                 Log.DebugFormat("Could not drop table '{0}': {1}", modelDef.ModelName, ex.Message);
+                throw;
             }
         }
 
