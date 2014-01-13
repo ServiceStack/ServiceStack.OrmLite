@@ -27,11 +27,32 @@ namespace ServiceStack.OrmLite.SqlServerTests
             using (var con = OpenDbConnection())
             {
                 con.CreateTable<TypeWithEnum>(true);
-                var obj = new TypeWithEnum { Id = 1, EnumValue = SomeEnum.Value1 };
+                var obj = new TypeWithEnum { Id = 1, EnumValue = SomeEnum.Value2 };
                 con.Save(obj);
                 var target = con.GetById<TypeWithEnum>(obj.Id);
                 Assert.AreEqual(obj.Id, target.Id);
                 Assert.AreEqual(obj.EnumValue, target.EnumValue);
+            }
+        }
+
+        [Test]
+        public void CanGetEnumValue_when_using_unicode_and_InsertParam()
+        {
+            bool originalUseUnicode = SqlServerDialect.Provider.UseUnicode;
+            try {
+                SqlServerDialect.Provider.UseUnicode = true;
+
+                using(var con = OpenDbConnection()) {
+                    con.CreateTable<TypeWithEnum>(true);
+                    var obj = new TypeWithEnum { Id = 1, EnumValue = SomeEnum.Value2 };
+                    con.InsertParam(obj);
+                    var target = con.GetById<TypeWithEnum>(obj.Id);
+                    Assert.AreEqual(obj.Id, target.Id);
+                    Assert.AreEqual(obj.EnumValue, target.EnumValue);
+                }
+            }
+            finally {
+                SqlServerDialect.Provider.UseUnicode = originalUseUnicode;
             }
         }
 
