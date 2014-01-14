@@ -28,6 +28,13 @@ namespace ServiceStack.OrmLite
 
         public Type FieldType { get; set; }
 
+        public Type TreatAsType { get; set; }
+
+        public Type ColumnType
+        {
+            get { return TreatAsType ?? FieldType; }
+        }
+
         public PropertyInfo PropertyInfo { get; set; }
 
         public bool IsPrimaryKey { get; set; }

@@ -708,7 +708,7 @@ namespace ServiceStack.OrmLite
             p.ParameterName = OrmLiteConfig.DialectProvider.GetParam(fieldDef.FieldName);
 
             DbType dbType;
-            p.DbType = DbTypeMap.ColumnDbTypeMap.TryGetValue(fieldDef.FieldType, out dbType)
+            p.DbType = DbTypeMap.ColumnDbTypeMap.TryGetValue(fieldDef.ColumnType, out dbType)
                 ? dbType
                 : DbType.String;
         }
@@ -733,7 +733,7 @@ namespace ServiceStack.OrmLite
 
         public virtual void SetParameterValue<T>(FieldDefinition fieldDef, IDataParameter p, object obj)
         {
-            var knownType = DbTypeMap.ColumnDbTypeMap.ContainsKey(fieldDef.FieldType);
+            var knownType = DbTypeMap.ColumnDbTypeMap.ContainsKey(fieldDef.ColumnType);
             var value = knownType
                 ? GetValueOrDbNull<T>(fieldDef, obj)
                 : GetQuotedValueOrDbNull<T>(fieldDef, obj);

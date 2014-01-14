@@ -99,6 +99,12 @@ namespace ServiceStack.OrmLite
                     ? Nullable.GetUnderlyingType(propertyInfo.PropertyType)
                     : propertyInfo.PropertyType;
 
+                Type treatAsType = null;
+                if (propertyType.IsEnum && propertyType.HasAttribute<FlagsAttribute>())
+                {
+                    treatAsType = Enum.GetUnderlyingType(propertyType);
+                }
+
                 var aliasAttr = propertyInfo.FirstAttribute<AliasAttribute>();
 
                 var indexAttr = propertyInfo.FirstAttribute<IndexAttribute>();
@@ -117,6 +123,7 @@ namespace ServiceStack.OrmLite
                     Name = propertyInfo.Name,
                     Alias = aliasAttr != null ? aliasAttr.Name : null,
                     FieldType = propertyType,
+                    TreatAsType = treatAsType,
                     PropertyInfo = propertyInfo,
                     IsNullable = isNullable,
                     IsPrimaryKey = isPrimaryKey,
