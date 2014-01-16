@@ -896,7 +896,7 @@ namespace ServiceStack.OrmLite
 
                 var columnDefinition = GetColumnDefinition(
                     fieldDef.FieldName,
-                    fieldDef.FieldType,
+                    fieldDef.ColumnType,
                     fieldDef.IsPrimaryKey,
                     fieldDef.AutoIncrement,
                     fieldDef.IsNullable,

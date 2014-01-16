@@ -123,6 +123,20 @@ namespace ServiceStack.OrmLite.Tests
                 }
             }
         }
+
+        [Test]
+        public void Creates_int_field_for_enum_flags()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<TypeWithFlagsEnum>();
+
+                db.GetLastSql().Print();
+
+                Assert.That(db.GetLastSql(), Is.StringContaining("\"Flags\" INT"));
+            }
+        }
+
     }
 
 
