@@ -44,21 +44,21 @@
     <Reference Include="System.Data" />
     <Reference Include="Mono.Data.Sqlite" />
     <Reference Include="ServiceStack.Common">
-      <HintPath>..\..\lib\MonoDroid\ServiceStack.Common.dll</HintPath>
+      <HintPath>..\..\lib\ServiceStack.Common.dll</HintPath>
     </Reference>
     <Reference Include="ServiceStack.Interfaces">
-      <HintPath>..\..\lib\MonoDroid\ServiceStack.Interfaces.dll</HintPath>
+      <HintPath>..\..\lib\ServiceStack.Interfaces.dll</HintPath>
     </Reference>
     <Reference Include="ServiceStack.Text">
-      <HintPath>..\..\lib\MonoDroid\ServiceStack.Text.dll</HintPath>
+      <HintPath>..\..\lib\ServiceStack.Text.dll</HintPath>
     </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Novell\Novell.MonoDroid.CSharp.targets" />
   <ItemGroup>
     <Compile Include="SqliteDialect.cs" />
-    <Compile Include="SqliteExpressionVisitor.cs" />
     <Compile Include="SqliteOrmLiteDialectProvider.cs" />
     <Compile Include="SqliteOrmLiteDialectProviderBase.cs" />
+    <Compile Include="SqliteExpression.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.Android.csproj">
