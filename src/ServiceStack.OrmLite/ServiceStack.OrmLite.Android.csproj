@@ -42,20 +42,19 @@
     <Reference Include="System.Core" />
     <Reference Include="Mono.Android" />
     <Reference Include="System.Data" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="ServiceStack.Common">
-      <HintPath>..\..\lib\MonoDroid\ServiceStack.Common.dll</HintPath>
+      <HintPath>..\..\lib\ServiceStack.Common.dll</HintPath>
     </Reference>
     <Reference Include="ServiceStack.Interfaces">
-      <HintPath>..\..\lib\MonoDroid\ServiceStack.Interfaces.dll</HintPath>
+      <HintPath>..\..\lib\ServiceStack.Interfaces.dll</HintPath>
     </Reference>
     <Reference Include="ServiceStack.Text">
-      <HintPath>..\..\lib\MonoDroid\ServiceStack.Text.dll</HintPath>
+      <HintPath>..\..\lib\ServiceStack.Text.dll</HintPath>
     </Reference>
-    <Reference Include="System.ComponentModel.DataAnnotations" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Novell\Novell.MonoDroid.CSharp.targets" />
   <ItemGroup>
-    <Compile Include="Expressions\ExpressionVisitor.cs" />
     <Compile Include="Expressions\ParameterRebinder.cs" />
     <Compile Include="Expressions\PredicateBuilder.cs" />
     <Compile Include="Expressions\ReadConnectionExtensions.cs" />
@@ -64,13 +63,8 @@
     <Compile Include="Expressions\SqlExpressionVisitor.cs" />
     <Compile Include="Expressions\WriteConnectionExtensions.cs" />
     <Compile Include="Expressions\WriteExtensions.cs" />
-    <Compile Include="BelongToAttribute.cs" />
-    <Compile Include="ComputeAttribute.cs" />
     <Compile Include="DbTypes.cs" />
-    <Compile Include="DecimalLengthAttribute.cs" />
     <Compile Include="FieldDefinition.cs" />
-    <Compile Include="ForeignKeyAttribute.cs" />
-    <Compile Include="IgnoreAttribute.cs" />
     <Compile Include="INamingStrategy.cs" />
     <Compile Include="IOrmLiteDialectProvider.cs" />
     <Compile Include="IPropertyInvoker.cs" />
@@ -91,13 +85,18 @@
     <Compile Include="OrmLiteUtilExtensions.cs" />
     <Compile Include="OrmLiteWriteConnectionExtensions.cs" />
     <Compile Include="OrmLiteWriteExtensions.cs" />
-    <Compile Include="PrimaryKeyAttribute.cs" />
     <Compile Include="PropertyInvoker.cs" />
     <Compile Include="ReflectionPropertyInvoker.cs" />
-    <Compile Include="SchemaAttribute.cs" />
-    <Compile Include="SequenceAttribute.cs" />
     <Compile Include="SqlBuilder.cs" />
     <Compile Include="SqlInValues.cs" />
+    <Compile Include="OrmLiteConnectionWrapper.cs" />
+    <Compile Include="Expressions\SqlExpression.cs" />
+    <Compile Include="OrmLiteResultsFilter.cs" />
+    <Compile Include="OrmLiteResultsFilterExtensions.cs" />
+    <Compile Include="OrmLiteDialectProviderExtensions.cs" />
+    <Compile Include="UntypedApi.cs" />
+    <Compile Include="UpperCaseNamingStrategy.cs" />
+    <Compile Include="Dapper\SqlMapper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="OrmLiteApi.cd" />
