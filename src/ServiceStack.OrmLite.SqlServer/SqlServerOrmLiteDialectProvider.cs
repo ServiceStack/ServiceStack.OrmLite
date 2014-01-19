@@ -14,7 +14,6 @@ namespace ServiceStack.OrmLite.SqlServer
 		public static SqlServerOrmLiteDialectProvider Instance = new SqlServerOrmLiteDialectProvider();
 
 		private static readonly DateTime timeSpanOffset = new DateTime(1900,01,01);
-        private const string DateTimeOffsetColumnDefinition = "DATETIMEOFFSET";
 
 		public SqlServerOrmLiteDialectProvider()
 		{
@@ -35,8 +34,8 @@ namespace ServiceStack.OrmLite.SqlServer
         {
             base.OnAfterInitColumnTypeMap();
 
-            DbTypeMap.Set<DateTimeOffset>(DbType.DateTimeOffset, DateTimeOffsetColumnDefinition);
-            DbTypeMap.Set<DateTimeOffset?>(DbType.DateTimeOffset, DateTimeOffsetColumnDefinition);
+            DbTypeMap.Set<TimeSpan>(DbType.DateTime, TimeColumnDefinition);
+            DbTypeMap.Set<TimeSpan?>(DbType.DateTime, TimeColumnDefinition);
         }
 
         public override string GetQuotedValue(string paramValue)

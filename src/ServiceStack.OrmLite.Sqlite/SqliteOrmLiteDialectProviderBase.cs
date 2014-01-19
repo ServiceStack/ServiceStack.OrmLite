@@ -5,7 +5,6 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using ServiceStack.Text;
 using ServiceStack.Text.Common;
 
 namespace ServiceStack.OrmLite.Sqlite
@@ -15,7 +14,6 @@ namespace ServiceStack.OrmLite.Sqlite
         protected SqliteOrmLiteDialectProviderBase()
         {
             base.DateTimeColumnDefinition = base.StringColumnDefinition;
-            base.TimeColumnDefinition = base.StringColumnDefinition;
             base.BoolColumnDefinition = base.IntColumnDefinition;
             base.GuidColumnDefinition = "CHAR(32)";
             base.SelectIdentitySql = "SELECT last_insert_rowid()";
@@ -25,8 +23,6 @@ namespace ServiceStack.OrmLite.Sqlite
 
         public override void OnAfterInitColumnTypeMap()
         {
-            DbTypeMap.Set<TimeSpan>(DbType.String, StringColumnDefinition);
-            DbTypeMap.Set<TimeSpan?>(DbType.String, StringColumnDefinition);
             DbTypeMap.Set<Guid>(DbType.String, StringColumnDefinition);
             DbTypeMap.Set<Guid?>(DbType.String, StringColumnDefinition);
             DbTypeMap.Set<DateTimeOffset>(DbType.DateTimeOffset, StringColumnDefinition);
@@ -114,18 +110,7 @@ namespace ServiceStack.OrmLite.Sqlite
             if (type == typeof(bool) && !(value is bool))
             {
                 var intVal = int.Parse(value.ToString());
-                return intVal != 0;
-            }
-            if (type == typeof(TimeSpan))
-            {
-                var dateValue = value as DateTime?;
-                if (dateValue != null)
-                {
-                    var now = DateTime.Now;
-                    var todayWithoutTime = new DateTime(now.Year, now.Month, now.Day);
-                    var ts = dateValue.Value - todayWithoutTime;
-                    return ts;
-                }
+                return intVal != 0; 
             }
 
             // support for parsing datetime offset
@@ -181,12 +166,6 @@ namespace ServiceStack.OrmLite.Sqlite
                     var dateValue = DateTimeSerializer.ParseShortestXsdDateTime(dateStr);
                     fieldDef.SetValueFn(instance, dateValue);
                 }
-            }
-            else if (fieldType == typeof(TimeSpan))
-            {
-                var timeString = dataReader.GetString(colIndex);
-                var timeValue = TimeSpan.Parse(timeString);
-                fieldDef.SetValueFn(instance, timeValue);
             }
             else
             {

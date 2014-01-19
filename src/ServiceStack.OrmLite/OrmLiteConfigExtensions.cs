@@ -105,6 +105,11 @@ namespace ServiceStack.OrmLite
                     treatAsType = Enum.GetUnderlyingType(propertyType);
                 }
 
+                if (propertyType == typeof(TimeSpan))
+                {
+                    treatAsType = typeof(long);
+                }
+
                 var aliasAttr = propertyInfo.FirstAttribute<AliasAttribute>();
 
                 var indexAttr = propertyInfo.FirstAttribute<IndexAttribute>();

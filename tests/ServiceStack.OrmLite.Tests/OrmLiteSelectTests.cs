@@ -336,5 +336,27 @@ namespace ServiceStack.OrmLite.Tests
 			}
 		}
 
+        public class TypeWithTimeSpan
+        {
+            public int Id { get; set; }
+            public TimeSpan TimeSpan { get; set; }
+        }
+
+        [Test]
+        public void Can_handle_TimeSpans()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<TypeWithTimeSpan>();
+
+                var timeSpan = new TimeSpan(1, 1, 1, 1);
+                db.Insert(new TypeWithTimeSpan { Id = 1, TimeSpan = timeSpan });
+
+                var model = db.SingleById<TypeWithTimeSpan>(1);
+
+                Assert.That(model.TimeSpan, Is.EqualTo(timeSpan));
+            }
+        }
+
 	}
 }

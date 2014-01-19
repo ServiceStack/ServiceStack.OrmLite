@@ -108,7 +108,8 @@ namespace ServiceStack.OrmLite
         public string DecimalColumnDefinition = "DECIMAL";
         public string BlobColumnDefinition = "BLOB";
         public string DateTimeColumnDefinition = "DATETIME";
-        public string TimeColumnDefinition = "DATETIME";
+        public string TimeColumnDefinition = "INTEGER";
+        public string DateTimeOffsetColumnDefinition = "DATETIMEOFFSET";
 
         protected OrmLiteDialectProviderBase()
         {
@@ -202,10 +203,11 @@ namespace ServiceStack.OrmLite
             DbTypeMap.Set<Guid?>(DbType.Guid, GuidColumnDefinition);
             DbTypeMap.Set<DateTime>(DbType.DateTime, DateTimeColumnDefinition);
             DbTypeMap.Set<DateTime?>(DbType.DateTime, DateTimeColumnDefinition);
-            DbTypeMap.Set<TimeSpan>(DbType.Time, TimeColumnDefinition);
-            DbTypeMap.Set<TimeSpan?>(DbType.Time, TimeColumnDefinition);
-            DbTypeMap.Set<DateTimeOffset>(DbType.Time, TimeColumnDefinition);
-            DbTypeMap.Set<DateTimeOffset?>(DbType.Time, TimeColumnDefinition);
+
+            DbTypeMap.Set<TimeSpan>(DbType.Int64, TimeColumnDefinition); //using ticks
+            DbTypeMap.Set<TimeSpan?>(DbType.Int64, TimeColumnDefinition);
+            DbTypeMap.Set<DateTimeOffset>(DbType.DateTimeOffset, DateTimeOffsetColumnDefinition);
+            DbTypeMap.Set<DateTimeOffset?>(DbType.DateTimeOffset, DateTimeOffsetColumnDefinition);
 
             DbTypeMap.Set<byte>(DbType.Byte, IntColumnDefinition);
             DbTypeMap.Set<byte?>(DbType.Byte, IntColumnDefinition);
@@ -235,7 +237,7 @@ namespace ServiceStack.OrmLite
 
             DbTypeMap.Set<byte[]>(DbType.Binary, BlobColumnDefinition);
 
-            DbTypeMap.Set<object>(DbType.Object, StringColumnDefinition);
+            DbTypeMap.Set<object>(DbType.String, StringColumnDefinition);
 
             OnAfterInitColumnTypeMap();
         }
@@ -324,6 +326,12 @@ namespace ServiceStack.OrmLite
                         return Convert.ToInt32(value);
                     case TypeCode.Int64:
                         return Convert.ToInt64(value);
+                }
+
+                if (type == typeof(TimeSpan))
+                {
+                    var ticks = (long) value;
+                    return TimeSpan.FromTicks(ticks);
                 }
             }
 
@@ -741,16 +749,32 @@ namespace ServiceStack.OrmLite
             p.Value = value;
         }
 
-        protected object GetValue<T>(FieldDefinition fieldDef, object obj)
+        protected virtual object GetValue<T>(FieldDefinition fieldDef, object obj)
         {
-            return obj is T
+            var value = obj is T
                ? fieldDef.GetValue(obj)
                : GetAnonValue<T>(fieldDef, obj);
+
+            if (value != null)
+            {
+                if (fieldDef.ColumnType == typeof(object))
+                {
+                    return value.ToJsv();
+                }
+                if (fieldDef.FieldType == typeof(TimeSpan))
+                {
+                    var timespan = (TimeSpan)value;
+                    return timespan.Ticks;
+                }
+            }
+
+            return value;
         }
 
         protected virtual object GetValueOrDbNull<T>(FieldDefinition fieldDef, object obj)
         {
-            return GetValue<T>(fieldDef, obj) ?? DBNull.Value;
+            var value = GetValue<T>(fieldDef, obj);
+            return value ?? DBNull.Value;
         }
 
         protected virtual object GetQuotedValueOrDbNull<T>(FieldDefinition fieldDef, object obj)
