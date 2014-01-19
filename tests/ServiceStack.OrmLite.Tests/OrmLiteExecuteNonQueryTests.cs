@@ -22,12 +22,11 @@
 
                     var name = "Jane Doe";
 
-                    var affectedRows = db.ExecuteNonQuery("insert into Person (Name) Values (@name);", new
-                    {
+                    var affectedRows = db.ExecuteNonQuery("insert into Person (Name) Values (@name);", new {
                         name
                     });
 
-                    var personId = db.LastInsertId();
+                    var personId = db.Single<Person>(q => q.Name == name).Id;
 
                     var insertedRow = db.SingleById<Person>(personId);
 
@@ -76,9 +75,7 @@
                         Name = "Jane Doe"
                     };
 
-                    db.Insert(person);
-
-                    var personId = db.LastInsertId();
+                    var personId = db.Insert(person, selectIdentity:true);
 
                     var newName = "John Smith";
 
@@ -102,17 +99,13 @@
                 {
                     db.DropAndCreateTable<Person>();
 
-                    var person = new Person()
-                    {
+                    var person = new Person {
                         Name = "Jane Doe"
                     };
 
-                    db.Insert(person);
+                    var personId = db.Insert(person, selectIdentity:true);
 
-                    var personId = db.LastInsertId();
-
-                    var affectedRows = db.ExecuteNonQuery("Delete From Person where Id = @personId", new
-                    {
+                    var affectedRows = db.ExecuteNonQuery("Delete From Person where Id = @personId", new {
                         personId
                     });
 
@@ -156,7 +149,7 @@
                         { "name", name }
                     });
 
-                    var personId = db.LastInsertId();
+                    var personId = db.Single<Person>(q => q.Name == name).Id;
 
                     var insertedRow = db.SingleById<Person>(personId);
 
@@ -205,9 +198,7 @@
                         Name = "Jane Doe"
                     };
 
-                    db.Insert(person);
-
-                    var personId = db.LastInsertId();
+                    var personId = db.Insert(person, selectIdentity: true);
 
                     var newName = "John Smith";
 
@@ -236,9 +227,7 @@
                         Name = "Jane Doe"
                     };
 
-                    db.Insert(person);
-
-                    var personId = db.LastInsertId();
+                    var personId = db.Insert(person, selectIdentity: true);
 
                     var affectedRows = db.ExecuteNonQuery("Delete From Person where Id = @personId", new Dictionary<string, object>
                     {
@@ -327,9 +316,7 @@
                         Name = "Jane Doe"
                     };
 
-                    db.Insert(person);
-
-                    var personId = db.LastInsertId();
+                    var personId = db.Insert(person, selectIdentity: true);
 
                     var newName = "John Smith";
 
@@ -356,9 +343,7 @@
                         Name = "Jane Doe"
                     };
 
-                    db.Insert(person);
-
-                    var personId = db.LastInsertId();
+                    var personId = db.Insert(person, selectIdentity: true);
 
                     var sql = string.Format(@"Delete From Person where Id = {0}", personId);
 
