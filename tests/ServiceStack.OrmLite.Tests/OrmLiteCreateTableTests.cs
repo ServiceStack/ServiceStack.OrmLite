@@ -1,6 +1,7 @@
 using System;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -148,5 +149,32 @@ namespace ServiceStack.OrmLite.Tests
 			Assert.That(createTableSql.Contains("VARCHAR(255)"), Is.True);
 		}
 
+        public class ModelWithGuid
+        {
+            public long Id { get; set; }
+            public Guid Guid { get; set; }
+        }
+
+        [Test]
+        public void Can_handle_table_with_Guid()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<ModelWithGuid>();
+
+                db.GetLastSql().Print();
+    
+                var models = new[] {
+                    new ModelWithGuid { Id = 1, Guid = Guid.NewGuid() }, 
+                    new ModelWithGuid { Id = 2, Guid = Guid.NewGuid() }
+                };
+
+                db.SaveAll(models);
+
+                var newModel = db.SingleById<ModelWithGuid>(models[0].Id);
+
+                Assert.That(newModel.Guid, Is.EqualTo(models[0].Guid));
+            }
+        }
 	}
 }
