@@ -827,7 +827,7 @@ namespace ServiceStack.OrmLite
                         refField.SetValueFn(oRef, pkValue);
                     }
 
-                    refType.GetUntypedApi().SaveAll(dbCmd, results);
+                    dbCmd.CreateTypedApi(refType).SaveAll(results);
                 }
                 else
                 {
@@ -838,7 +838,7 @@ namespace ServiceStack.OrmLite
                     var result = fieldDef.GetValue(instance);
                     refField.SetValueFn(result, pkValue);
 
-                    refType.GetUntypedApi().Save(dbCmd, result);
+                    dbCmd.CreateTypedApi(refType).Save(result);
                 }
             }
         }

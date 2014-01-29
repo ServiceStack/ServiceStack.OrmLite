@@ -24,17 +24,35 @@ namespace ServiceStack.OrmLite.Tests
                 var row = (BaseClass)new Target { Id = 1, Name = "Foo" };
 
                 var useType = row.GetType();
+                var typedApi = db.CreateTypedApi(useType);
 
                 db.DropAndCreateTables(useType);
 
                 db.GetLastSql().Print();
 
-                using (var dbCmd = db.CreateCommand())
-                {
-                    useType.GetUntypedApi().Save(dbCmd, row);
-                }
+                typedApi.Save(row);
 
                 var typedRow = db.SingleById<Target>(1);
+
+                Assert.That(typedRow.Name, Is.EqualTo("Foo"));
+
+                var updateRow = (BaseClass)new Target { Id = 1, Name = "Bar" };
+
+                typedApi.Update(updateRow);
+
+                typedRow = db.SingleById<Target>(1);
+
+                Assert.That(typedRow.Name, Is.EqualTo("Bar"));
+
+                typedApi.Delete(typedRow, new { Id = 1 });
+
+                typedRow = db.SingleById<Target>(1);
+
+                Assert.That(typedRow, Is.Null);
+
+                typedApi.Save(row);
+
+                typedRow = db.SingleById<Target>(1);
 
                 Assert.That(typedRow.Name, Is.EqualTo("Foo"));
             }
