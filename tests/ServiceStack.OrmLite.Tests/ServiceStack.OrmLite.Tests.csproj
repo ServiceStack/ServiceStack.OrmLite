@@ -193,6 +193,7 @@
     <Compile Include="SqliteOrmLiteDialectProviderTests.cs" />
     <Compile Include="SqlServerProviderTests.cs" />
     <Compile Include="TypeWithByteArrayFieldTests.cs" />
+    <Compile Include="UntypedApiTests.cs" />
     <Compile Include="UseCase\AliasedFieldUseCase.cs" />
     <Compile Include="UseCase\CustomerOrdersUseCase.cs" />
     <Compile Include="UseCase\NestedComplexTypeUseCase.cs" />
