@@ -455,7 +455,8 @@ namespace ServiceStack.OrmLite.Firebird
             return sqlIndexes;
         }
 
-        protected override string ToCreateIndexStatement(bool isUnique, string indexName, ModelDefinition modelDef, string fieldName, bool isCombined)
+        protected override string ToCreateIndexStatement(bool isUnique, string indexName, ModelDefinition modelDef, string fieldName,
+            bool isCombined = false, FieldDefinition fieldDef = null)
         {
             return string.Format("CREATE {0} INDEX {1} ON {2} ({3} ); \n",
 				isUnique ? "UNIQUE" : "", 
