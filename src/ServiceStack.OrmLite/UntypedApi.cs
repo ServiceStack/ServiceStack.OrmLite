@@ -28,24 +28,6 @@ namespace ServiceStack.OrmLite
         }
     }
 
-    public interface IUntypedApi
-    {
-        IDbConnection Db { get; set; }
-        IDbCommand DbCmd { get; set; }
-
-        int SaveAll(IEnumerable objs);
-        bool Save(object obj);
-
-        void InsertAll(IEnumerable objs);
-        long Insert(object obj, bool selectIdentity = false);
-        
-        int UpdateAll(IEnumerable objs);
-        int Update(object obj);
-
-        int Delete(object obj, object anonType);
-        int DeleteNonDefaults(object obj, object filter);
-    }
-
     public class UntypedApi<T> : IUntypedApi
     {
         public IDbConnection Db { get; set; }
@@ -94,6 +76,11 @@ namespace ServiceStack.OrmLite
             return Exec(dbCmd => dbCmd.Update((T)obj));
         }
 
+        public int DeleteAll()
+        {
+            return Exec(dbCmd => dbCmd.DeleteAll<T>());
+        }
+
         public int Delete(object obj, object anonType)
         {
             return Exec(dbCmd => dbCmd.Delete<T>(anonType));
@@ -102,6 +89,16 @@ namespace ServiceStack.OrmLite
         public int DeleteNonDefaults(object obj, object filter)
         {
             return Exec(dbCmd => dbCmd.DeleteNonDefaults((T)filter));
+        }
+
+        public int DeleteById(object id)
+        {
+            return Exec(dbCmd => dbCmd.DeleteById<T>(id));
+        }
+
+        public int DeleteByIds(IEnumerable idValues)
+        {
+            return Exec(dbCmd => dbCmd.DeleteByIds<T>(idValues));
         }
     }
 }

@@ -50,7 +50,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 Assert.That(typedRow, Is.Null);
 
-                typedApi.Save(row);
+                typedApi.Insert(row);
 
                 typedRow = db.SingleById<Target>(1);
 
