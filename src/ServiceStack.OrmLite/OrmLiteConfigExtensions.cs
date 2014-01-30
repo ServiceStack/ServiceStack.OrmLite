@@ -137,6 +137,8 @@ namespace ServiceStack.OrmLite
                         propertyInfo.HasAttributeNamed(typeof(AutoIncrementAttribute).Name),
                     IsIndexed = isIndex,
                     IsUnique = isUnique,
+                    IsClustered = indexAttr != null && indexAttr.Clustered,
+                    IsNonClustered = indexAttr != null && indexAttr.NonClustered,
                     FieldLength = stringLengthAttr != null
                         ? stringLengthAttr.MaximumLength
                         : (int?)null,

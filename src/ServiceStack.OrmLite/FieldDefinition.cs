@@ -47,6 +47,10 @@ namespace ServiceStack.OrmLite
 
         public bool IsUnique { get; set; }
 
+        public bool IsClustered { get; set; }
+
+        public bool IsNonClustered { get; set; }
+
         public int? FieldLength { get; set; }  // Precision for Decimal Type
 
         public int? Scale { get; set; }  //  for decimal type

@@ -971,7 +971,7 @@ namespace ServiceStack.OrmLite
                 var indexName = GetIndexName(fieldDef.IsUnique, modelDef.ModelName.SafeVarName(), fieldDef.FieldName);
 
                 sqlIndexes.Add(
-                    ToCreateIndexStatement(fieldDef.IsUnique, indexName, modelDef, fieldDef.FieldName));
+                    ToCreateIndexStatement(fieldDef.IsUnique, indexName, modelDef, fieldDef.FieldName, isCombined:false, fieldDef:fieldDef));
             }
 
             foreach (var compositeIndex in modelDef.CompositeIndexes)
@@ -1038,10 +1038,14 @@ namespace ServiceStack.OrmLite
                     string.Join("_", compositeIndex.FieldNames.ToArray()));
         }
 
-        protected virtual string ToCreateIndexStatement(bool isUnique, string indexName, ModelDefinition modelDef, string fieldName, bool isCombined = false)
+        protected virtual string ToCreateIndexStatement(bool isUnique, string indexName, ModelDefinition modelDef, string fieldName, 
+            bool isCombined = false, FieldDefinition fieldDef = null)
         {
-            return string.Format("CREATE {0} INDEX {1} ON {2} ({3} ASC); \n",
-                                 isUnique ? "UNIQUE" : "", indexName,
+            return string.Format("CREATE {0}{1}{2} INDEX {3} ON {4} ({5} ASC); \n",
+                                 isUnique ? "UNIQUE" : "",
+                                 fieldDef != null && fieldDef.IsClustered ? " CLUSTERED" : "",
+                                 fieldDef != null && fieldDef.IsNonClustered ? " NONCLUSTERED" : "",
+                                 indexName,
                                  GetQuotedTableName(modelDef),
                                  (isCombined) ? fieldName : GetQuotedColumnName(fieldName));
         }
