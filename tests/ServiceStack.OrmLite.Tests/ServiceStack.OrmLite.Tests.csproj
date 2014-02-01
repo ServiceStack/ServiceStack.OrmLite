@@ -271,6 +271,14 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.MySql\ServiceStack.OrmLite.MySql.csproj">
+      <Project>{FD20F088-ACC0-4979-AC0C-8C541C2E7DE5}</Project>
+      <Name>ServiceStack.OrmLite.MySql</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.PostgreSQL\ServiceStack.OrmLite.PostgreSQL.csproj">
+      <Project>{3220F088-BDD0-6979-AC0C-8C541C2E7DE5}</Project>
+      <Name>ServiceStack.OrmLite.PostgreSQL</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Sqlite\ServiceStack.OrmLite.Sqlite.csproj">
       <Project>{CF68A37D-D071-469D-AE04-68594CB95382}</Project>
       <Name>ServiceStack.OrmLite.Sqlite</Name>

@@ -174,6 +174,10 @@ namespace ServiceStack.OrmLite.Tests
                 var newModel = db.SingleById<ModelWithGuid>(models[0].Id);
 
                 Assert.That(newModel.Guid, Is.EqualTo(models[0].Guid));
+
+                newModel = db.Single<ModelWithGuid>(q => q.Guid == models[0].Guid);
+
+                Assert.That(newModel.Guid, Is.EqualTo(models[0].Guid));
             }
         }
 	}

@@ -65,6 +65,10 @@ namespace ServiceStack.OrmLite.Tests
 		{
 			LogManager.LogFactory = new ConsoleLogFactory();
 
+            //OrmLiteConfig.DialectProvider = MySqlDialect.Provider;
+            //ConnectionString = "Server=localhost;Database=test;UID=root;Password=test";
+            //return;
+
 		    var useSqlite = true;
             if (useSqlite)
             {

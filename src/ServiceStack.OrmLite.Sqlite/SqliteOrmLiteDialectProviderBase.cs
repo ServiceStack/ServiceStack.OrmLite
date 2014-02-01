@@ -15,7 +15,7 @@ namespace ServiceStack.OrmLite.Sqlite
         {
             base.DateTimeColumnDefinition = base.StringColumnDefinition;
             base.BoolColumnDefinition = base.IntColumnDefinition;
-            base.GuidColumnDefinition = "CHAR(32)";
+            base.GuidColumnDefinition = "CHAR(36)";
             base.SelectIdentitySql = "SELECT last_insert_rowid()";
 
             base.InitColumnTypeMap();
@@ -23,8 +23,8 @@ namespace ServiceStack.OrmLite.Sqlite
 
         public override void OnAfterInitColumnTypeMap()
         {
-            DbTypeMap.Set<Guid>(DbType.String, StringColumnDefinition);
-            DbTypeMap.Set<Guid?>(DbType.String, StringColumnDefinition);
+            DbTypeMap.Set<Guid>(DbType.String, GuidColumnDefinition);
+            DbTypeMap.Set<Guid?>(DbType.String, GuidColumnDefinition);
             DbTypeMap.Set<DateTimeOffset>(DbType.DateTimeOffset, StringColumnDefinition);
             DbTypeMap.Set<DateTimeOffset?>(DbType.DateTimeOffset, StringColumnDefinition);
         }
@@ -113,8 +113,7 @@ namespace ServiceStack.OrmLite.Sqlite
                 return intVal != 0; 
             }
 
-            // support for parsing datetime offset
-            if(type == typeof(DateTimeOffset))
+            if (type == typeof(DateTimeOffset))
             {
                 var moment = DateTimeOffset.Parse((string)value, null, DateTimeStyles.RoundtripKind);
                 return moment;
@@ -177,11 +176,6 @@ namespace ServiceStack.OrmLite.Sqlite
         {
             if (value == null) return "NULL";
 
-            if (fieldType == typeof(Guid))
-            {
-                var guidValue = (Guid)value;
-                return base.GetQuotedValue(guidValue.ToString("N"), typeof(string));
-            }
             if (fieldType == typeof(DateTime))
             {
                 var dateValue = (DateTime)value;
