@@ -5,7 +5,9 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
-	[TestFixture]
+    using ServiceStack.DataAnnotations;
+
+    [TestFixture]
 	public class OrmLiteCreateTableTests 
 		: OrmLiteTestBase
 	{
@@ -178,6 +180,26 @@ namespace ServiceStack.OrmLite.Tests
                 newModel = db.Single<ModelWithGuid>(q => q.Guid == models[0].Guid);
 
                 Assert.That(newModel.Guid, Is.EqualTo(models[0].Guid));
+            }
+        }
+
+        public class ModelWithOddIds
+        {
+            [Index(false)]
+            public long Id { get; set; }
+
+            [PrimaryKey]
+            public Guid Guid { get; set; }
+        }
+
+        [Test]
+        public void Can_handle_table_with_non_conventional_id()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<ModelWithOddIds>();
+
+                db.GetLastSql().Print();
             }
         }
 	}
