@@ -111,7 +111,7 @@ namespace ServiceStack.OrmLite
                     fieldDefinitionMap = new Dictionary<string, FieldDefinition>();
                     foreach (var fieldDef in FieldDefinitionsArray)
                     {
-                        fieldDefinitionMap[fieldDef.FieldName] = fieldDef;
+                        fieldDefinitionMap[fieldDef.FieldName.Replace(" ","")] = fieldDef;
                     }
                 }
                 return fieldDefinitionMap;
