@@ -75,6 +75,8 @@ namespace ServiceStack.OrmLite
             var objProperties = modelType.GetProperties(
                 BindingFlags.Public | BindingFlags.Instance).ToList();
 
+            var hasPkAttr = objProperties.Any(p => p.HasAttribute<PrimaryKeyAttribute>());
+
             var hasIdField = CheckForIdField(objProperties);
 
             var i = 0;
@@ -86,7 +88,7 @@ namespace ServiceStack.OrmLite
                 var belongToAttribute = propertyInfo.FirstAttribute<BelongToAttribute>();
                 var isFirst = i++ == 0;
 
-                var isPrimaryKey = propertyInfo.Name == OrmLiteConfig.IdField || (!hasIdField && isFirst)
+                var isPrimaryKey = (!hasPkAttr && (propertyInfo.Name == OrmLiteConfig.IdField || (!hasIdField && isFirst)))
                     || propertyInfo.HasAttributeNamed(typeof(PrimaryKeyAttribute).Name);
 
                 var isNullableType = IsNullableType(propertyInfo.PropertyType);
