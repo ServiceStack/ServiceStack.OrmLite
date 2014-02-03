@@ -200,6 +200,13 @@ namespace ServiceStack.OrmLite.Tests
                 db.DropAndCreateTable<ModelWithOddIds>();
 
                 db.GetLastSql().Print();
+
+                db.Insert(new ModelWithOddIds { Id = 1, Guid = Guid.NewGuid() });
+                db.Insert(new ModelWithOddIds { Id = 1, Guid = Guid.NewGuid() });
+
+                var rows = db.Select<ModelWithOddIds>(q => q.Id == 1);
+
+                Assert.That(rows.Count, Is.EqualTo(2));
             }
         }
 	}
