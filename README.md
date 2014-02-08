@@ -39,7 +39,9 @@ Effectively this allows you to create a table from any POCO type and it should p
 
 OrmLite.SqlServer is also included in [ServiceStack](https://github.com/ServiceStack/ServiceStack/downloads).
 
-_Commercial support will be available for ServiceStack, contact team@servicestack.net for details_
+_Commercial support is now available for ServiceStack, see https://servicestack.net/pricing for details_
+
+### [Docs and Downloads for v3](https://github.com/ServiceStackV3/ServiceStackV3)
 
 ## Copying
 
