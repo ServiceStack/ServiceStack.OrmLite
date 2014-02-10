@@ -925,7 +925,7 @@ namespace ServiceStack.OrmLite
                     fieldDef.AutoIncrement,
                     fieldDef.IsNullable,
                     fieldDef.FieldLength,
-                    null,
+                    fieldDef.Scale,
                     fieldDef.DefaultValue);
 
                 sbColumns.Append(columnDefinition);

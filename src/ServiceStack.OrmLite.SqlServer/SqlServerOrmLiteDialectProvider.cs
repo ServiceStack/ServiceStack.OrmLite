@@ -22,10 +22,12 @@ namespace ServiceStack.OrmLite.SqlServer
 			base.GuidColumnDefinition = "UniqueIdentifier";
 			base.RealColumnDefinition = "FLOAT";
 		    base.BoolColumnDefinition = "BIT";
-			base.DecimalColumnDefinition = "DECIMAL(38,6)";
 			base.TimeColumnDefinition = "TIME"; //SQLSERVER 2008+
 		    base.BlobColumnDefinition = "VARBINARY(MAX)";
-		    base.SelectIdentitySql = "SELECT SCOPE_IDENTITY()";
+            base.SelectIdentitySql = "SELECT SCOPE_IDENTITY()";
+            base.DecimalColumnDefinition = "DECIMAL(38,6)";
+            base.DefaultDecimalPrecision = 38;
+            base.DefaultDecimalScale = 6;
 
 			base.InitColumnTypeMap();
 		}
@@ -311,6 +313,23 @@ namespace ServiceStack.OrmLite.SqlServer
                                  GetQuotedValue(objectName),
                                  GetQuotedValue(fieldDef.FieldName),
                                  GetQuotedValue("COLUMN"));
+        }
+
+        public override string GetColumnDefinition(string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement, 
+            bool isNullable, int? fieldLength, int? scale, string defaultValue)
+        {
+            var definition = base.GetColumnDefinition(fieldName, fieldType, isPrimaryKey, autoIncrement,
+                isNullable, fieldLength, scale, defaultValue);
+
+            if (fieldType == typeof(Decimal) && fieldLength != DefaultDecimalPrecision && scale != DefaultDecimalScale)
+            {
+                string validDecimal = String.Format("DECIMAL({0},{1})",
+                    fieldLength.GetValueOrDefault(DefaultDecimalPrecision),
+                    scale.GetValueOrDefault(DefaultDecimalScale));
+                definition = definition.Replace(DecimalColumnDefinition, validDecimal);
+            }
+
+            return definition;
         }
     }
 }
