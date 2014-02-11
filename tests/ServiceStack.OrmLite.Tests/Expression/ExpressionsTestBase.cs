@@ -45,11 +45,11 @@ namespace ServiceStack.OrmLite.Tests.Expression
                         int intVal = random.Next();
 
                         o = new TestType
-                                {
-                                    BoolColumn = random.Next()%2 == 0,
-                                    IntColumn = intVal,
-                                    StringColumn = Guid.NewGuid().ToString()
-                                };
+                        {
+                            BoolColumn = random.Next() % 2 == 0,
+                            IntColumn = intVal,
+                            StringColumn = Guid.NewGuid().ToString()
+                        };
 
                         if (obj.Any(x => x.IntColumn == intVal))
                             o = null;
