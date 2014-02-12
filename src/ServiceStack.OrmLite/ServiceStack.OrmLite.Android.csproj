@@ -97,6 +97,7 @@
     <Compile Include="UntypedApi.cs" />
     <Compile Include="UpperCaseNamingStrategy.cs" />
     <Compile Include="Dapper\SqlMapper.cs" />
+    <Compile Include="IUntypedApi.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="OrmLiteApi.cd" />
