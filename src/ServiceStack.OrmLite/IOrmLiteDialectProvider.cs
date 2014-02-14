@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq.Expressions;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
@@ -25,6 +26,8 @@ namespace ServiceStack.OrmLite
         bool UseUnicode { get; set; }
 
         INamingStrategy NamingStrategy { get; set; }
+
+        IStringSerializer StringSerializer { get; set; }
 
         /// <summary>
         /// Quote the string so that it can be used inside an SQL-expression

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Text;
 using Npgsql;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.PostgreSQL
 {
@@ -30,6 +31,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
 			base.InitColumnTypeMap();
 		    base.SelectIdentitySql = "SELECT LASTVAL()";
 		    this.NamingStrategy = new PostgreSqlNamingStrategy();
+            this.StringSerializer = new JsonStringSerializer();
 
             DbTypeMap.Set<TimeSpan>(DbType.Time, "Interval");
             DbTypeMap.Set<TimeSpan?>(DbType.Time, "Interval");

@@ -172,11 +172,7 @@ namespace ServiceStack.OrmLite.SqlServer
 
         protected override string GetUndefinedColumnDefinition(Type fieldType, int? fieldLength)
         {
-            if (TypeSerializer.CanCreateFromString(fieldType))
-            {
-                return string.Format(StringLengthColumnDefinitionFormat, fieldLength.HasValue ? fieldLength.Value.ToString() : "MAX");
-            }
-            return base.GetUndefinedColumnDefinition(fieldType, fieldLength);
+            return string.Format(StringLengthColumnDefinitionFormat, fieldLength.HasValue ? fieldLength.Value.ToString() : "MAX");
         }
 
 		protected bool _useDateTime2;

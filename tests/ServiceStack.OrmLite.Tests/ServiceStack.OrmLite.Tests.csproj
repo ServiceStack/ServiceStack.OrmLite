@@ -68,6 +68,10 @@
     <Reference Include="ServiceStack">
       <HintPath>..\..\lib\tests\ServiceStack.dll</HintPath>
     </Reference>
+    <Reference Include="ServiceStack.Client, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\ServiceStack.Client.dll</HintPath>
+    </Reference>
     <Reference Include="ServiceStack.Text">
       <HintPath>..\..\lib\ServiceStack.Text.dll</HintPath>
     </Reference>
@@ -116,6 +120,7 @@
     <Compile Include="LicenseUsageTests.cs" />
     <Compile Include="LoadReferencesTests.cs" />
     <Compile Include="MockAllApiTests.cs" />
+    <Compile Include="StringSerializerTests.cs" />
     <Compile Include="TypeDescriptorMetadataTests.cs" />
     <Compile Include="Shared\ApiUtilExtensions.cs" />
     <Compile Include="EnumTests.cs" />

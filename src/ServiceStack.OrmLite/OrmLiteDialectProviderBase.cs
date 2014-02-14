@@ -114,6 +114,7 @@ namespace ServiceStack.OrmLite
         protected OrmLiteDialectProviderBase()
         {
             UpdateStringColumnDefinitions();
+            StringSerializer = new JsvStringSerializer();
         }
 
         private int defaultDecimalPrecision = 18;
@@ -178,6 +179,8 @@ namespace ServiceStack.OrmLite
                 namingStrategy = value;
             }
         }
+
+        public IStringSerializer StringSerializer { get; set; }
 
         public virtual void UpdateStringColumnDefinitions()
         {
@@ -337,7 +340,7 @@ namespace ServiceStack.OrmLite
 
             try
             {
-                var convertedValue = TypeSerializer.DeserializeFromString(value.ToString(), type);
+                var convertedValue = OrmLiteConfig.DialectProvider.StringSerializer.DeserializeFromString(value.ToString(), type);
                 return convertedValue;
             }
             catch (Exception)
@@ -351,15 +354,10 @@ namespace ServiceStack.OrmLite
         {
             if (value == null) return "NULL";
 
+            var dialectProvider = OrmLiteConfig.DialectProvider;
             if ((!fieldType.UnderlyingSystemType.IsValueType || JsConfig.TreatValueAsRefTypes.Contains(fieldType.IsGeneric() ? fieldType.GenericTypeDefinition() : fieldType)) && fieldType != typeof(string))
             {
-                if (TypeSerializer.CanCreateFromString(fieldType))
-                {
-                    return OrmLiteConfig.DialectProvider.GetQuotedValue(TypeSerializer.SerializeToString(value));
-                }
-
-                throw new NotSupportedException(
-                    string.Format("Property of type: {0} is not supported", fieldType.FullName));
+                return dialectProvider.GetQuotedValue(dialectProvider.StringSerializer.SerializeToString(value));
             }
 
             if (fieldType == typeof(float))
@@ -372,7 +370,7 @@ namespace ServiceStack.OrmLite
                 return ((decimal)value).ToString(CultureInfo.InvariantCulture);
 
             return ShouldQuoteValue(fieldType)
-                    ? OrmLiteConfig.DialectProvider.GetQuotedValue(value.ToString())
+                    ? dialectProvider.GetQuotedValue(value.ToString())
                     : value.ToString();
         }
 
@@ -405,13 +403,7 @@ namespace ServiceStack.OrmLite
 
         protected virtual string GetUndefinedColumnDefinition(Type fieldType, int? fieldLength)
         {
-            if (TypeSerializer.CanCreateFromString(fieldType))
-            {
-                return string.Format(StringLengthColumnDefinitionFormat, fieldLength.GetValueOrDefault(DefaultStringLength));
-            }
-
-            throw new NotSupportedException(
-                string.Format("Property of type: {0} is not supported", fieldType.FullName));
+            return string.Format(StringLengthColumnDefinitionFormat, fieldLength.GetValueOrDefault(DefaultStringLength));
         }
 
         public virtual string GetColumnDefinition(string fieldName, Type fieldType,
