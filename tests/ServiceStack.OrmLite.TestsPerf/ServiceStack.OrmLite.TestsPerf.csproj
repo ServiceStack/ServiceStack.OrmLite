@@ -135,9 +135,6 @@
     <Compile Include="Scenarios\OrmLite\OrmLiteScenrioConfig.cs" />
     <Compile Include="Scenarios\OrmLite\InsertModelWithFieldsOfDifferentTypesScenario.cs" />
     <Compile Include="Scenarios\OrmLite\InsertSampleOrderLineScenario.cs" />
-    <Compile Include="Scenarios\Text\NorthwindCustomerToStringScenario.cs" />
-    <Compile Include="Scenarios\Text\NorthwindSupplierToStringScenario.cs" />
-    <Compile Include="Scenarios\Text\NorthwindOrderToStringScenario.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Sqlite\ServiceStack.OrmLite.Sqlite.csproj">
