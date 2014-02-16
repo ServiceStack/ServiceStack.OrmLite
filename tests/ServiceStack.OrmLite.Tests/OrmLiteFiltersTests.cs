@@ -13,6 +13,7 @@ namespace ServiceStack.OrmLite.Tests
 
     public class AuditTableA : IAudit
     {
+        [AutoIncrement]
         public int Id { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime ModifiedDate { get; set; }
@@ -127,7 +128,7 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(insertRowB.ModifiedDate, Is.EqualTo(insertDate));
 
                 a.ModifiedBy = "Updated";
-                db.Update(a);
+                db.Save(a);
 
                 a = db.SingleById<AuditTableA>(a.Id);
                 Assert.That(a.ModifiedDate, Is.EqualTo(updateDate));
