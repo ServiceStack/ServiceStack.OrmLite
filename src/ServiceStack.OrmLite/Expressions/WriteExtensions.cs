@@ -39,6 +39,9 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static int UpdateOnly<T>(this IDbCommand dbCmd, T model, SqlExpression<T> onlyFields)
         {
+            if (OrmLiteConfig.UpdateFilter != null)
+                OrmLiteConfig.UpdateFilter(dbCmd, model);
+
             var fieldsToUpdate = onlyFields.UpdateFields.Count == 0
                 ? onlyFields.GetAllFields()
                 : onlyFields.UpdateFields;
@@ -79,6 +82,9 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static int UpdateNonDefaults<T>(this IDbCommand dbCmd, T item, Expression<Func<T, bool>> obj)
         {
+            if (OrmLiteConfig.UpdateFilter != null)
+                OrmLiteConfig.UpdateFilter(dbCmd, item);
+
             var ev = OrmLiteConfig.DialectProvider.SqlExpression<T>();
             ev.Where(obj);
             var sql = ev.ToUpdateStatement(item, excludeDefaults: true);
@@ -93,6 +99,9 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static int Update<T>(this IDbCommand dbCmd, T item, Expression<Func<T, bool>> expression)
         {
+            if (OrmLiteConfig.UpdateFilter != null)
+                OrmLiteConfig.UpdateFilter(dbCmd, item);
+
             var ev = OrmLiteConfig.DialectProvider.SqlExpression<T>();
             ev.Where(expression);
             var sql = ev.ToUpdateStatement(item);
@@ -191,6 +200,9 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static void InsertOnly<T>(this IDbCommand dbCmd, T obj, SqlExpression<T> onlyFields)
         {
+            if (OrmLiteConfig.InsertFilter != null)
+                OrmLiteConfig.InsertFilter(dbCmd, obj);
+
             var sql = OrmLiteConfig.DialectProvider.ToInsertRowStatement(dbCmd, obj, onlyFields.InsertFields);
             dbCmd.ExecuteSql(sql);
         }

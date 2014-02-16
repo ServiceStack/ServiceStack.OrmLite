@@ -336,6 +336,9 @@ namespace ServiceStack.OrmLite
 
         internal static int Update<T>(this IDbCommand dbCmd, T obj)
         {
+            if (OrmLiteConfig.UpdateFilter != null)
+                OrmLiteConfig.UpdateFilter(dbCmd, obj);
+
             OrmLiteConfig.DialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
 
             OrmLiteConfig.DialectProvider.SetParameterValues<T>(dbCmd, obj);
@@ -364,6 +367,9 @@ namespace ServiceStack.OrmLite
 
                 foreach (var obj in objs)
                 {
+                    if (OrmLiteConfig.UpdateFilter != null)
+                        OrmLiteConfig.UpdateFilter(dbCmd, obj);
+
                     dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
                     count += dbCmd.ExecNonQuery();
@@ -501,6 +507,9 @@ namespace ServiceStack.OrmLite
 
         internal static long Insert<T>(this IDbCommand dbCmd, T obj, bool selectIdentity = false)
         {
+            if (OrmLiteConfig.InsertFilter != null)
+                OrmLiteConfig.InsertFilter(dbCmd, obj);
+
             OrmLiteConfig.DialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd);
 
             OrmLiteConfig.DialectProvider.SetParameterValues<T>(dbCmd, obj);
@@ -531,6 +540,9 @@ namespace ServiceStack.OrmLite
 
                 foreach (var obj in objs)
                 {
+                    if (OrmLiteConfig.InsertFilter != null)
+                        OrmLiteConfig.InsertFilter(dbCmd, obj);
+
                     dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
                     dbCmd.ExecNonQuery();
@@ -566,10 +578,16 @@ namespace ServiceStack.OrmLite
                 }
                 else
                 {
+                    if (OrmLiteConfig.InsertFilter != null)
+                        OrmLiteConfig.InsertFilter(dbCmd, obj);
+
                     dbCmd.Insert(obj);
                 }
                 return true;
             }
+
+            if (OrmLiteConfig.UpdateFilter != null)
+                OrmLiteConfig.UpdateFilter(dbCmd, obj);
 
             dbCmd.Update(obj);
             return false;
@@ -606,6 +624,9 @@ namespace ServiceStack.OrmLite
                     var id = row.GetId();
                     if (id != defaultIdValue && existingRowsMap.ContainsKey(id))
                     {
+                        if (OrmLiteConfig.UpdateFilter != null)
+                            OrmLiteConfig.UpdateFilter(dbCmd, row);
+
                         dbCmd.Update(row);
                     }
                     else
@@ -618,6 +639,9 @@ namespace ServiceStack.OrmLite
                         }
                         else
                         {
+                            if (OrmLiteConfig.InsertFilter != null)
+                                OrmLiteConfig.InsertFilter(dbCmd, row);
+
                             dbCmd.Insert(row);
                         }
 
