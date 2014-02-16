@@ -160,10 +160,10 @@ namespace ServiceStack.OrmLite.Tests
                     db.Insert(new AuditTableA());
                     Assert.Fail("Should throw");
                 }
-                catch (ArgumentNullException) {}
+                catch (ArgumentNullException) { }
                 Assert.That(db.Count<AuditTableA>(), Is.EqualTo(0));
 
-                var a = new AuditTableA {ModifiedBy = "Me!"};
+                var a = new AuditTableA { ModifiedBy = "Me!" };
                 db.Insert(a);
 
                 a.ModifiedBy = null;
