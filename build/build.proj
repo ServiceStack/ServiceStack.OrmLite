@@ -93,7 +93,9 @@
       <OrmLiteFiles Include="$(SrcDir)/ServiceStack.OrmLite/bin/$(Configuration)/ServiceStack.OrmLite.*"></OrmLiteFiles>
 
       <Sqlite32Files Include="$(SrcDir)/ServiceStack.OrmLite.Sqlite32/bin/$(Configuration)/ServiceStack.OrmLite.SqliteNET.*"></Sqlite32Files>
+      <Sqlite32Files Include="$(SrcDir)/ServiceStack.OrmLite.Sqlite32/bin/$(Configuration)/System.Data.SQLite.*"></Sqlite32Files>
       <Sqlite64Files Include="$(SrcDir)/ServiceStack.OrmLite.Sqlite64/bin/$(Configuration)/ServiceStack.OrmLite.SqliteNET.*"></Sqlite64Files>
+      <Sqlite64Files Include="$(SrcDir)/ServiceStack.OrmLite.Sqlite64/bin/$(Configuration)/System.Data.SQLite.*"></Sqlite64Files>
 
       <SqliteWindowsFiles Include="$(SrcDir)/ServiceStack.OrmLite.Sqlite.Windows/bin/$(Configuration)/ServiceStack.OrmLite.Sqlite.Windows.*"></SqliteWindowsFiles>
 
