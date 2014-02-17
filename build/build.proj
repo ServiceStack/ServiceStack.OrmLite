@@ -151,7 +151,7 @@
 
     <!-- Sqlite.Windows -->
 
-    <MSBuild Projects="$(SrcDir)/ServiceStack.OrmLite.Sqlite64/ServiceStack.OrmLite.Sqlite.Windows.csproj"
+    <MSBuild Projects="$(SrcDir)/ServiceStack.OrmLite.Sqlite.Windows/ServiceStack.OrmLite.Sqlite.Windows.csproj"
              Targets="Build"
              Properties="Version=$(PackageVersion);Configuration=$(Configuration)" />
 
