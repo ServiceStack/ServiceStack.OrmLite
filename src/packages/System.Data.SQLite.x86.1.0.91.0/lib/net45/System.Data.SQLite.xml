@@ -424,6 +424,23 @@
             contains an unbalanced backslash or double-quote character.
             </returns>
         </member>
+        <member name="M:System.Data.SQLite.SQLiteConvert.ToStringWithProvider(System.Object,System.IFormatProvider)">
+            <summary>
+            Queries and returns the string representation for an object, using the
+            specified (or current) format provider.
+            </summary>
+            <param name="obj">
+            The object instance to return the string representation for.
+            </param>
+            <param name="provider">
+            The format provider to use -OR- null if the current format provider for
+            the thread should be used instead.
+            </param>
+            <returns>
+            The string representation for the object instance -OR- null if the
+            object instance is also null.
+            </returns>
+        </member>
         <member name="M:System.Data.SQLite.SQLiteConvert.ToBoolean(System.Object)">
             <summary>
             Convert a value to true or false.
@@ -463,11 +480,12 @@
             <param name="typ">The DbType to get the size of</param>
             <returns></returns>
         </member>
-        <member name="M:System.Data.SQLite.SQLiteConvert.DbTypeToTypeName(System.Data.DbType,System.Data.SQLite.SQLiteConnectionFlags)">
+        <member name="M:System.Data.SQLite.SQLiteConvert.DbTypeToTypeName(System.Data.SQLite.SQLiteConnection,System.Data.DbType,System.Data.SQLite.SQLiteConnectionFlags)">
             <summary>
             Determines the type name for the given database value type.
             </summary>
-            <param name="typ">The database value type.</param>
+            <param name="connection">The connection context for custom type mappings, if any.</param>
+            <param name="dbType">The database value type.</param>
             <param name="flags">The flags associated with the parent connection object.</param>
             <returns>The type name or an empty string if it cannot be determined.</returns>
         </member>
@@ -495,11 +513,12 @@
             provider.
             </returns>
         </member>
-        <member name="M:System.Data.SQLite.SQLiteConvert.TypeNameToDbType(System.String,System.Data.SQLite.SQLiteConnectionFlags)">
+        <member name="M:System.Data.SQLite.SQLiteConvert.TypeNameToDbType(System.Data.SQLite.SQLiteConnection,System.String,System.Data.SQLite.SQLiteConnectionFlags)">
             <summary>
             For a given type name, return a closest-match .NET type
             </summary>
-            <param name="Name">The name of the type to match</param>
+            <param name="connection">The connection context for custom type mappings, if any.</param>
+            <param name="name">The name of the type to match</param>
             <param name="flags">The flags associated with the parent connection object.</param>
             <returns>The .NET DBType the text evaluates to.</returns>
         </member>
@@ -1439,11 +1458,85 @@
             that cannot be easily reported through other means.
             </summary>
         </member>
+        <member name="F:System.Data.SQLite.SQLiteConnectionFlags.ConvertInvariantText">
+            <summary>
+            When binding parameter values, always use the invariant culture when
+            converting their values from strings.
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.SQLiteConnectionFlags.BindInvariantText">
+            <summary>
+            When binding parameter values, always use the invariant culture when
+            converting their values to strings.
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.SQLiteConnectionFlags.NoConnectionPool">
+            <summary>
+            Disable using the connection pool by default.  If the "Pooling"
+            connection string property is specified, its value will override
+            this flag.  The precise outcome of combining this flag with the
+            <see cref="F:System.Data.SQLite.SQLiteConnectionFlags.UseConnectionPool"/> flag is unspecified; however,
+            one of the flags will be in effect.
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.SQLiteConnectionFlags.UseConnectionPool">
+            <summary>
+            Enable using the connection pool by default.  If the "Pooling"
+            connection string property is specified, its value will override
+            this flag.  The precise outcome of combining this flag with the
+            <see cref="F:System.Data.SQLite.SQLiteConnectionFlags.NoConnectionPool"/> flag is unspecified; however,
+            one of the flags will be in effect.
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.SQLiteConnectionFlags.UseConnectionTypes">
+            <summary>
+            Enable using per-connection mappings between type names and
+            <see cref="T:System.Data.DbType"/> values.  Also see the
+            <see cref="M:System.Data.SQLite.SQLiteConnection.ClearTypeMappings"/>,
+            <see cref="M:System.Data.SQLite.SQLiteConnection.GetTypeMappings"/>, and
+            <see cref="M:System.Data.SQLite.SQLiteConnection.AddTypeMapping(System.String,System.Data.DbType,System.Boolean)"/> methods.  These
+            per-connection mappings, when present, override the corresponding
+            global mappings.
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.SQLiteConnectionFlags.NoGlobalTypes">
+            <summary>
+            Disable using global mappings between type names and
+            <see cref="T:System.Data.DbType"/> values.  This may be useful in some very narrow
+            cases; however, if there are no per-connection type mappings, the
+            fallback defaults will be used for both type names and their
+            associated <see cref="T:System.Data.DbType"/> values.  Therefore, use of this flag
+            is not recommended.
+            </summary>
+        </member>
         <member name="F:System.Data.SQLite.SQLiteConnectionFlags.BindAndGetAllAsText">
             <summary>
-            When binding and returning column values, always treat them as though
-            they were plain text (i.e. no numeric, date/time, or other conversions
-            should be attempted).
+            When binding parameter values or returning column values, always
+            treat them as though they were plain text (i.e. no numeric,
+            date/time, or other conversions should be attempted).
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.SQLiteConnectionFlags.ConvertAndBindInvariantText">
+            <summary>
+            When binding parameter values, always use the invariant culture when
+            converting their values to strings or from strings.
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.SQLiteConnectionFlags.BindAndGetAllAsInvariantText">
+            <summary>
+            When binding parameter values or returning column values, always
+            treat them as though they were plain text (i.e. no numeric,
+            date/time, or other conversions should be attempted) and always
+            use the invariant culture when converting their values to strings.
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.SQLiteConnectionFlags.ConvertAndBindAndGetAllAsInvariantText">
+            <summary>
+            When binding parameter values or returning column values, always
+            treat them as though they were plain text (i.e. no numeric,
+            date/time, or other conversions should be attempted) and always
+            use the invariant culture when converting their values to strings
+            or from strings.
             </summary>
         </member>
         <member name="F:System.Data.SQLite.SQLiteConnectionFlags.LogAll">
@@ -2259,6 +2352,12 @@
             Whether or not the connection is enlisted in a distrubuted transaction
             </summary>
         </member>
+        <member name="F:System.Data.SQLite.SQLiteConnection._typeNames">
+            <summary>
+            The per-connection mappings between type names and <see cref="T:System.Data.DbType"/>
+            values.  These mappings override the corresponding global mappings.
+            </summary>
+        </member>
         <member name="F:System.Data.SQLite.SQLiteConnection._sql">
             <summary>
             The base SQLite object to interop with
@@ -2399,6 +2498,47 @@
             during the backup process.  A value less than zero means that no sleep
             should be performed.
             </param>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteConnection.ClearTypeMappings">
+            <summary>
+            Clears the per-connection type mappings.
+            </summary>
+            <returns>
+            The total number of per-connection type mappings cleared.
+            </returns>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteConnection.GetTypeMappings">
+            <summary>
+            Returns the per-connection type mappings.
+            </summary>
+            <returns>
+            The per-connection type mappings -OR- null if they are unavailable.
+            </returns>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteConnection.AddTypeMapping(System.String,System.Data.DbType,System.Boolean)">
+            <summary>
+            Adds a per-connection type mapping, possibly replacing one or more
+            that already exist.
+            </summary>
+            <param name="typeName">
+            The case-insensitive database type name (e.g. "MYDATE").  The value
+            of this parameter cannot be null.  Using an empty string value (or
+            a string value consisting entirely of whitespace) for this parameter
+            is not recommended.
+            </param>
+            <param name="dataType">
+            The <see cref="T:System.Data.DbType"/> value that should be associated with the
+            specified type name.
+            </param>
+            <param name="primary">
+            Non-zero if this mapping should be considered to be the primary one
+            for the specified <see cref="T:System.Data.DbType"/>.
+            </param>
+            <returns>
+            A negative value if nothing was done.  Zero if no per-connection type
+            mappings were replaced (i.e. it was a pure add operation).  More than
+            zero if some per-connection type mappings were replaced.
+            </returns>
         </member>
         <member name="M:System.Data.SQLite.SQLiteConnection.BindFunction(System.Data.SQLite.SQLiteFunctionAttribute,System.Data.SQLite.SQLiteFunction)">
             <summary>
@@ -2690,6 +2830,17 @@
             <returns>
             A byte array containing the parsed byte values or null if an error
             was encountered.
+            </returns>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteConnection.GetDefaultPooling">
+            <summary>
+            This method figures out what the default connection pool setting should
+            be based on the connection flags.  When present, the "Pooling" connection
+            string property value always overrides the value returned by this method.
+            </summary>
+            <returns>
+            Non-zero if the connection pool should be enabled by default; otherwise,
+            zero.
             </returns>
         </member>
         <member name="M:System.Data.SQLite.SQLiteConnection.Open">
@@ -3345,6 +3496,12 @@
             SQLite core library.
             </summary>
         </member>
+        <member name="P:System.Data.SQLite.SQLiteConnection.SQLiteCompileOptions">
+            <summary>
+            Returns a string containing the compile-time options used to
+            compile the SQLite core native library, delimited with spaces.
+            </summary>
+        </member>
         <member name="P:System.Data.SQLite.SQLiteConnection.InteropVersion">
             <summary>
             This method returns the version of the interop SQLite assembly
@@ -3360,6 +3517,12 @@
             assembly.  If the SQLite interop assembly is not in use or the
             necessary information cannot be obtained for any reason, a null
             value may be returned.
+            </summary>
+        </member>
+        <member name="P:System.Data.SQLite.SQLiteConnection.InteropCompileOptions">
+            <summary>
+            Returns a string containing the compile-time options used to
+            compile the SQLite interop assembly, delimited with spaces.
             </summary>
         </member>
         <member name="P:System.Data.SQLite.SQLiteConnection.ProviderVersion">
@@ -4446,11 +4609,11 @@
             </summary>
         </member>
         <member name="F:System.Data.SQLite.SQLiteAuthorizerActionCode.CreateIndex">
-            <summary>
-            An index will be created.  The action-specific arguments are the
-            index name and the table name.
+             <summary>
+             An index will be created.  The action-specific arguments are the
+             index name and the table name.
             
-            </summary>
+             </summary>
         </member>
         <member name="F:System.Data.SQLite.SQLiteAuthorizerActionCode.CreateTable">
             <summary>
@@ -4638,6 +4801,12 @@
             A savepoint will be created, released, or rolled back.  The
             action-specific arguments are the name of the operation (BEGIN,
             RELEASE, or ROLLBACK) and the savepoint name.
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.SQLiteAuthorizerActionCode.Recursive">
+            <summary>
+            A recursive query will be executed.  The action-specific arguments
+            are two null values.
             </summary>
         </member>
         <member name="T:System.Data.SQLite.SQLiteAuthorizerReturnCode">
@@ -5100,6 +5269,16 @@
             Moves to the next resultset in multiple row-returning SQL command.
             </summary>
             <returns>True if the command was successful and a new resultset is available, False otherwise.</returns>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteDataReader.GetConnection(System.Data.SQLite.SQLiteDataReader)">
+            <summary>
+            This method attempts to query the database connection associated with
+            the data reader in use.  If the underlying command or connection is
+            unavailable, a null value will be returned.
+            </summary>
+            <returns>
+            The connection object -OR- null if it is unavailable.
+            </returns>
         </member>
         <member name="M:System.Data.SQLite.SQLiteDataReader.GetFlags(System.Data.SQLite.SQLiteDataReader)">
             <summary>
@@ -6951,6 +7130,93 @@
               &lt;MetaDataC [rest of string was truncated]&quot;;.
              </summary>
         </member>
+        <member name="F:System.Data.SQLite.UnsafeNativeMethods.DllFileExtension">
+            <summary>
+            The file extension used for dynamic link libraries.
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.UnsafeNativeMethods.ConfigFileExtension">
+            <summary>
+            The file extension used for the XML configuration file.
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.UnsafeNativeMethods.XmlConfigFileName">
+            <summary>
+            This is the name of the XML configuration file specific to the
+            System.Data.SQLite assembly.
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.UnsafeNativeMethods.staticSyncRoot">
+            <summary>
+            This lock is used to protect the static _SQLiteNativeModuleFileName,
+            _SQLiteNativeModuleHandle, and processorArchitecturePlatforms fields.
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.UnsafeNativeMethods.processorArchitecturePlatforms">
+            <summary>
+            This dictionary stores the mappings between processor architecture
+            names and platform names.  These mappings are now used for two
+            purposes.  First, they are used to determine if the assembly code
+            base should be used instead of the location, based upon whether one
+            or more of the named sub-directories exist within the assembly code
+            base.  Second, they are used to assist in loading the appropriate
+            SQLite interop assembly into the current process.
+            </summary>
+        </member>
+        <member name="M:System.Data.SQLite.UnsafeNativeMethods.#cctor">
+            <summary>
+            For now, this method simply calls the Initialize method.
+            </summary>
+        </member>
+        <member name="M:System.Data.SQLite.UnsafeNativeMethods.Initialize">
+            <summary>
+            Attempts to initialize this class by pre-loading the native SQLite
+            library for the processor architecture of the current process.
+            </summary>
+        </member>
+        <member name="M:System.Data.SQLite.UnsafeNativeMethods.GetXmlConfigFileName">
+            <summary>
+            Queries and returns the XML configuration file name for the assembly
+            containing the managed System.Data.SQLite components.
+            </summary>
+            <returns>
+            The XML configuration file name -OR- null if it cannot be determined
+            or does not exist.
+            </returns>
+        </member>
+        <member name="M:System.Data.SQLite.UnsafeNativeMethods.GetSettingValue(System.String,System.String)">
+            <summary>
+            Queries and returns the value of the specified setting, using the XML
+            configuration file and/or the environment variables for the current
+            process and/or the current system, when available.
+            </summary>
+            <param name="name">
+            The name of the setting.
+            </param>
+            <param name="default">
+            The value to be returned if the setting has not been set explicitly
+            or cannot be determined.
+            </param>
+            <returns>
+            The value of the setting -OR- the default value specified by
+            <paramref name="default" /> if it has not been set explicitly or
+            cannot be determined.  By default, all references to existing
+            environment variables will be expanded to their corresponding values
+            within the value to be returned unless either the "No_Expand" or
+            "No_Expand_<paramref name="name" />" environment variable is set [to
+            anything].
+            </returns>
+        </member>
+        <member name="M:System.Data.SQLite.UnsafeNativeMethods.GetAssemblyDirectory">
+            <summary>
+            Queries and returns the directory for the assembly currently being
+            executed.
+            </summary>
+            <returns>
+            The directory for the assembly currently being executed -OR- null if
+            it cannot be determined.
+            </returns>
+        </member>
         <member name="F:System.Data.SQLite.UnsafeNativeMethods.PROCESSOR_ARCHITECTURE">
             <summary>
             The name of the environment variable containing the processor
@@ -6970,34 +7236,36 @@
             The native module handle upon success -OR- IntPtr.Zero on failure.
             </returns>
         </member>
-        <member name="F:System.Data.SQLite.UnsafeNativeMethods.staticSyncRoot">
+        <member name="F:System.Data.SQLite.UnsafeNativeMethods._SQLiteNativeModuleFileName">
             <summary>
-            This lock is used to protect the static _SQLiteModule and
-            processorArchitecturePlatforms fields, below.
+            The native module file name for the native SQLite library or null.
             </summary>
         </member>
-        <member name="F:System.Data.SQLite.UnsafeNativeMethods.processorArchitecturePlatforms">
-            <summary>
-            Stores the mappings between processor architecture names and platform
-            names.
-            </summary>
-        </member>
-        <member name="F:System.Data.SQLite.UnsafeNativeMethods._SQLiteModule">
+        <member name="F:System.Data.SQLite.UnsafeNativeMethods._SQLiteNativeModuleHandle">
             <summary>
             The native module handle for the native SQLite library or the value
             IntPtr.Zero.
             </summary>
         </member>
-        <member name="M:System.Data.SQLite.UnsafeNativeMethods.#cctor">
+        <member name="M:System.Data.SQLite.UnsafeNativeMethods.SearchForDirectory(System.String@,System.String@)">
             <summary>
-            For now, this method simply calls the Initialize method.
+            Searches for the native SQLite library in the directory containing
+            the assembly currently being executed as well as the base directory
+            for the current application domain.
             </summary>
-        </member>
-        <member name="M:System.Data.SQLite.UnsafeNativeMethods.Initialize">
-            <summary>
-            Attempts to initialize this class by pre-loading the native SQLite
-            library for the processor architecture of the current process.
-            </summary>
+            <param name="baseDirectory">
+            Upon success, this parameter will be modified to refer to the base
+            directory containing the native SQLite library.
+            </param>
+            <param name="processorArchitecture">
+            Upon success, this parameter will be modified to refer to the name
+            of the immediate directory (i.e. the offset from the base directory)
+            containing the native SQLite library.
+            </param>
+            <returns>
+            Non-zero (success) if the native SQLite library was found; otherwise,
+            zero (failure).
+            </returns>
         </member>
         <member name="M:System.Data.SQLite.UnsafeNativeMethods.GetBaseDirectory">
             <summary>
@@ -7044,12 +7312,12 @@
             if it cannot be determined.
             </returns>
         </member>
-        <member name="M:System.Data.SQLite.UnsafeNativeMethods.PreLoadSQLiteDll(System.String,System.String)">
+        <member name="M:System.Data.SQLite.UnsafeNativeMethods.PreLoadSQLiteDll(System.String,System.String,System.String@,System.IntPtr@)">
             <summary>
             Attempts to load the native SQLite library based on the specified
             directory and processor architecture.
             </summary>
-            <param name="directory">
+            <param name="baseDirectory">
             The base directory to use, null for default (the base directory of
             the current application domain).  This directory should contain the
             processor architecture specific sub-directories.
@@ -7059,9 +7327,18 @@
             processor architecture of the current process).  This caller should
             almost always specify null for this parameter.
             </param>
+            <param name="nativeModuleFileName">
+            The candidate native module file name to load will be stored here,
+            if necessary.
+            </param>
+            <param name="nativeModuleHandle">
+            The native module handle as returned by LoadLibrary will be stored
+            here, if necessary.  This value will be IntPtr.Zero if the call to
+            LoadLibrary fails.
+            </param>
             <returns>
-            The native module handle as returned by LoadLibrary -OR- IntPtr.Zero
-            if the loading fails for any reason.
+            Non-zero if the native module was loaded successfully; otherwise,
+            zero.
             </returns>
         </member>
         <member name="T:System.Data.SQLite.SQLiteContext">
@@ -9844,6 +10121,22 @@
             The <see cref="T:System.IntPtr"/> value to write.
             </param>
         </member>
+        <member name="M:System.Data.SQLite.SQLiteMarshal.GetHashCode(System.Object,System.Boolean)">
+            <summary>
+            Generates a hash code value for the object.
+            </summary>
+            <param name="value">
+            The object instance used to calculate the hash code.
+            </param>
+            <param name="identity">
+            Non-zero if different object instances with the same value should
+            generate different hash codes, where applicable.  This parameter
+            has no effect on the .NET Compact Framework.
+            </param>
+            <returns>
+            The hash code value -OR- zero if the object is null.
+            </returns>
+        </member>
         <member name="T:System.Data.SQLite.SQLiteModule">
             <summary>
             This class represents a managed virtual table module implementation.
@@ -10030,7 +10323,7 @@
             A standard SQLite return code.
             </returns>
         </member>
-        <member name="M:System.Data.SQLite.SQLiteModule.SetTableError(System.Data.SQLite.SQLiteModule,System.IntPtr,System.Boolean,System.String)">
+        <member name="M:System.Data.SQLite.SQLiteModule.SetTableError(System.Data.SQLite.SQLiteModule,System.IntPtr,System.Boolean,System.Boolean,System.String)">
             <summary>
             Arranges for the specified error message to be placed into the
             zErrMsg field of a sqlite3_vtab derived structure, freeing the
@@ -10046,6 +10339,10 @@
             Non-zero if this error message should also be logged using the
             <see cref="T:System.Data.SQLite.SQLiteLog"/> class.
             </param>
+            <param name="logExceptions">
+            Non-zero if caught exceptions should be logged using the
+            <see cref="T:System.Data.SQLite.SQLiteLog"/> class.
+            </param>
             <param name="error">
             The error message.
             </param>
@@ -10053,7 +10350,7 @@
             Non-zero upon success.
             </returns>
         </member>
-        <member name="M:System.Data.SQLite.SQLiteModule.SetTableError(System.Data.SQLite.SQLiteModule,System.Data.SQLite.SQLiteVirtualTable,System.Boolean,System.String)">
+        <member name="M:System.Data.SQLite.SQLiteModule.SetTableError(System.Data.SQLite.SQLiteModule,System.Data.SQLite.SQLiteVirtualTable,System.Boolean,System.Boolean,System.String)">
             <summary>
             Arranges for the specified error message to be placed into the
             zErrMsg field of a sqlite3_vtab derived structure, freeing the
@@ -10070,6 +10367,10 @@
             Non-zero if this error message should also be logged using the
             <see cref="T:System.Data.SQLite.SQLiteLog"/> class.
             </param>
+            <param name="logExceptions">
+            Non-zero if caught exceptions should be logged using the
+            <see cref="T:System.Data.SQLite.SQLiteLog"/> class.
+            </param>
             <param name="error">
             The error message.
             </param>
@@ -10077,7 +10378,7 @@
             Non-zero upon success.
             </returns>
         </member>
-        <member name="M:System.Data.SQLite.SQLiteModule.SetCursorError(System.Data.SQLite.SQLiteModule,System.IntPtr,System.Boolean,System.String)">
+        <member name="M:System.Data.SQLite.SQLiteModule.SetCursorError(System.Data.SQLite.SQLiteModule,System.IntPtr,System.Boolean,System.Boolean,System.String)">
             <summary>
             Arranges for the specified error message to be placed into the
             zErrMsg field of a sqlite3_vtab derived structure, freeing the
@@ -10095,6 +10396,10 @@
             Non-zero if this error message should also be logged using the
             <see cref="T:System.Data.SQLite.SQLiteLog"/> class.
             </param>
+            <param name="logExceptions">
+            Non-zero if caught exceptions should be logged using the
+            <see cref="T:System.Data.SQLite.SQLiteLog"/> class.
+            </param>
             <param name="error">
             The error message.
             </param>
@@ -10102,7 +10407,7 @@
             Non-zero upon success.
             </returns>
         </member>
-        <member name="M:System.Data.SQLite.SQLiteModule.SetCursorError(System.Data.SQLite.SQLiteModule,System.Data.SQLite.SQLiteVirtualTableCursor,System.Boolean,System.String)">
+        <member name="M:System.Data.SQLite.SQLiteModule.SetCursorError(System.Data.SQLite.SQLiteModule,System.Data.SQLite.SQLiteVirtualTableCursor,System.Boolean,System.Boolean,System.String)">
             <summary>
             Arranges for the specified error message to be placed into the
             zErrMsg field of a sqlite3_vtab derived structure, freeing the
@@ -10117,6 +10422,10 @@
             </param>
             <param name="logErrors">
             Non-zero if this error message should also be logged using the
+            <see cref="T:System.Data.SQLite.SQLiteLog"/> class.
+            </param>
+            <param name="logExceptions">
+            Non-zero if caught exceptions should be logged using the
             <see cref="T:System.Data.SQLite.SQLiteLog"/> class.
             </param>
             <param name="error">
@@ -11243,8 +11552,10 @@
             Returns or sets a boolean value indicating whether exceptions
             caught in the
             <see cref="M:System.Data.SQLite.ISQLiteNativeModule.xDisconnect(System.IntPtr)"/> method,
-            <see cref="M:System.Data.SQLite.ISQLiteNativeModule.xDestroy(System.IntPtr)"/> method, and the
-            <see cref="M:System.Data.SQLite.SQLiteModule.Dispose"/> method should be logged using the
+            the <see cref="M:System.Data.SQLite.ISQLiteNativeModule.xDestroy(System.IntPtr)"/> method,
+            the <see cref="M:System.Data.SQLite.SQLiteModule.SetTableError(System.IntPtr,System.String)"/> method,
+            the <see cref="M:System.Data.SQLite.SQLiteModule.SetTableError(System.Data.SQLite.SQLiteVirtualTable,System.String)"/> method,
+            and the <see cref="M:System.Data.SQLite.SQLiteModule.Dispose"/> method should be logged using the
             <see cref="T:System.Data.SQLite.SQLiteLog"/> class.
             </summary>
         </member>
@@ -11289,6 +11600,13 @@
         <member name="F:System.Data.SQLite.SQLiteModule.SQLiteNativeModule.DefaultLogErrors">
             <summary>
             This is the value that is always used for the "logErrors"
+            parameter to the various static error handling methods provided
+            by the <see cref="T:System.Data.SQLite.SQLiteModule"/> class.
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.SQLiteModule.SQLiteNativeModule.DefaultLogExceptions">
+            <summary>
+            This is the value that is always used for the "logExceptions"
             parameter to the various static error handling methods provided
             by the <see cref="T:System.Data.SQLite.SQLiteModule"/> class.
             </summary>
@@ -12298,6 +12616,13 @@
             for the virtual table.
             </summary>
         </member>
+        <member name="F:System.Data.SQLite.SQLiteModuleEnumerable.objectIdentity">
+            <summary>
+            Non-zero if different object instances with the same value should
+            generate different row identifiers, where applicable.  This has no
+            effect on the .NET Compact Framework.
+            </summary>
+        </member>
         <member name="M:System.Data.SQLite.SQLiteModuleEnumerable.#ctor(System.String,System.Collections.IEnumerable)">
             <summary>
             Constructs an instance of this class.
@@ -12308,6 +12633,23 @@
             <param name="enumerable">
             The <see cref="T:System.Collections.IEnumerable"/> instance to expose as a virtual
             table.  This parameter cannot be null.
+            </param>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteModuleEnumerable.#ctor(System.String,System.Collections.IEnumerable,System.Boolean)">
+            <summary>
+            Constructs an instance of this class.
+            </summary>
+            <param name="name">
+            The name of the module.  This parameter cannot be null.
+            </param>
+            <param name="enumerable">
+            The <see cref="T:System.Collections.IEnumerable"/> instance to expose as a virtual
+            table.  This parameter cannot be null.
+            </param>
+            <param name="objectIdentity">
+            Non-zero if different object instances with the same value should
+            generate different row identifiers, where applicable.  This
+            parameter has no effect on the .NET Compact Framework.
             </param>
         </member>
         <member name="M:System.Data.SQLite.SQLiteModuleEnumerable.GetSqlForDeclareTable">
