@@ -24,5 +24,6 @@
     <file src="lib\**\*.*" target="lib" />
     <file src="..\..\src\ServiceStack.OrmLite.Sqlite\**\*.cs" target="src\ServiceStack.OrmLite.Sqlite" />
     <file src="content\**\*.*" target="content" />
+    <file src="tools\**\*.*" target="tools" />
   </files>
 </package>
