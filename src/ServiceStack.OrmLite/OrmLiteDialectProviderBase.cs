@@ -369,6 +369,9 @@ namespace ServiceStack.OrmLite
             if (fieldType == typeof(decimal))
                 return ((decimal)value).ToString(CultureInfo.InvariantCulture);
 
+            if (fieldType == typeof(TimeSpan))
+                return ((TimeSpan)value).Ticks.ToString(CultureInfo.InvariantCulture);
+
             return ShouldQuoteValue(fieldType)
                     ? dialectProvider.GetQuotedValue(value.ToString())
                     : value.ToString();
