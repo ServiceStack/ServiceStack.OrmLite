@@ -338,7 +338,8 @@ namespace ServiceStack.OrmLite.Firebird
                     fieldDef.IsNullable,
                     fieldDef.FieldLength,
 					fieldDef.Scale,
-                    fieldDef.DefaultValue);
+                    fieldDef.DefaultValue,
+                    fieldDef.CustomFieldDefinition);
 
                 sbColumns.Append(columnDefinition);
 
@@ -387,11 +388,15 @@ namespace ServiceStack.OrmLite.Firebird
 		
 		public override string GetColumnDefinition (string fieldName, Type fieldType, 
 			bool isPrimaryKey, bool autoIncrement, bool isNullable, 
-			int? fieldLength, int? scale, string defaultValue)
+			int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
 		{
 			string fieldDefinition;
 
-            if (fieldType == typeof(string))
+            if (customFieldDefinition != null)
+            {
+                fieldDefinition = customFieldDefinition;
+            }
+            else if (fieldType == typeof(string))
             {
                 fieldDefinition = string.Format(StringLengthColumnDefinitionFormat,
 				                                fieldLength.GetValueOrDefault(DefaultStringLength));
@@ -757,7 +762,8 @@ namespace ServiceStack.OrmLite.Firebird
 			                                 fieldDef.IsNullable,
 			                                 fieldDef.FieldLength,
 			                                 fieldDef.Scale,
-			                                 fieldDef.DefaultValue);
+			                                 fieldDef.DefaultValue,
+                                             fieldDef.CustomFieldDefinition);
 			return string.Format("ALTER TABLE {0} ADD {1} ;",
 			                     GetQuotedTableName(GetModel(modelType).ModelName),
 			                     column);
@@ -773,7 +779,8 @@ namespace ServiceStack.OrmLite.Firebird
 			                                 fieldDef.IsNullable,
 			                                 fieldDef.FieldLength,
 			                                 fieldDef.Scale,
-			                                 fieldDef.DefaultValue);
+			                                 fieldDef.DefaultValue,
+                                             fieldDef.CustomFieldDefinition);
 			return string.Format("ALTER TABLE {0} ALTER {1} ;",
 			                     GetQuotedTableName(GetModel(modelType).ModelName),
 			                     column);

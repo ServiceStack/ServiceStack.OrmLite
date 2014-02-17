@@ -276,7 +276,8 @@ namespace ServiceStack.OrmLite.SqlServer
                                              fieldDef.IsNullable,
                                              fieldDef.FieldLength,
                                              fieldDef.Scale,
-                                             fieldDef.DefaultValue);
+                                             fieldDef.DefaultValue,
+                                             fieldDef.CustomFieldDefinition);
 
             return string.Format("ALTER TABLE {0} ADD {1};",
                                  GetQuotedTableName(GetModel(modelType).ModelName),
@@ -292,7 +293,8 @@ namespace ServiceStack.OrmLite.SqlServer
                                              fieldDef.IsNullable,
                                              fieldDef.FieldLength,
                                              fieldDef.Scale,
-                                             fieldDef.DefaultValue);
+                                             fieldDef.DefaultValue,
+                                             fieldDef.CustomFieldDefinition);
 
             return string.Format("ALTER TABLE {0} ALTER COLUMN {1};",
                                  GetQuotedTableName(GetModel(modelType).ModelName),
@@ -312,10 +314,10 @@ namespace ServiceStack.OrmLite.SqlServer
         }
 
         public override string GetColumnDefinition(string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement, 
-            bool isNullable, int? fieldLength, int? scale, string defaultValue)
+            bool isNullable, int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
         {
             var definition = base.GetColumnDefinition(fieldName, fieldType, isPrimaryKey, autoIncrement,
-                isNullable, fieldLength, scale, defaultValue);
+                isNullable, fieldLength, scale, defaultValue, customFieldDefinition);
 
             if (fieldType == typeof(Decimal) && fieldLength != DefaultDecimalPrecision && scale != DefaultDecimalScale)
             {

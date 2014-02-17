@@ -425,7 +425,8 @@ namespace ServiceStack.OrmLite.Oracle
                     fieldDef.IsNullable,
                     fieldDef.FieldLength,
 					fieldDef.Scale,
-                    fieldDef.DefaultValue);
+                    fieldDef.DefaultValue,
+                    fieldDef.CustomFieldDefinition);
 
                 sbColumns.Append(columnDefinition);
 
@@ -506,16 +507,21 @@ namespace ServiceStack.OrmLite.Oracle
 
 		public override string GetColumnDefinition (string fieldName, Type fieldType, 
 			bool isPrimaryKey, bool autoIncrement, bool isNullable, 
-			int? fieldLength, int? scale, string defaultValue)
+			int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
 		{
 			string fieldDefinition;
 
-            if (fieldType == typeof(string))
+            if (customFieldDefinition != null)
+            {
+                fieldDefinition = customFieldDefinition;
+            }
+            else if (fieldType == typeof(string))
             {
                 fieldDefinition = string.Format(StringLengthColumnDefinitionFormat,
 				                                fieldLength.GetValueOrDefault(DefaultStringLength));
             }
-            else if( fieldType==typeof(Decimal) ){
+            else if (fieldType==typeof(Decimal))
+            {
 				fieldDefinition= string.Format("{0} ({1},{2})", DecimalColumnDefinition, 
 					fieldLength.GetValueOrDefault(DefaultDecimalPrecision),
 					scale.GetValueOrDefault(DefaultDecimalScale) );

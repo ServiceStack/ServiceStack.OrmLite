@@ -181,7 +181,8 @@ namespace ServiceStack.OrmLite.MySql
                 fieldDefinition.IsNullable, 
                 fieldDefinition.FieldLength, 
                 null, 
-                fieldDefinition.DefaultValue);
+                fieldDefinition.DefaultValue,
+                fieldDefinition.CustomFieldDefinition);
         }
 	}
 }

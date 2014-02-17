@@ -45,10 +45,15 @@ namespace ServiceStack.OrmLite.PostgreSQL
             bool isNullable,
             int? fieldLength,
             int? scale,
-            string defaultValue)
+            string defaultValue,
+            string customFieldDefinition)
         {
             string fieldDefinition = null;
-            if (fieldType == typeof(string))
+            if (customFieldDefinition != null)
+            {
+                fieldDefinition = customFieldDefinition;
+            }
+            else if (fieldType == typeof(string))
             {
                 if (fieldLength != null)
                 {

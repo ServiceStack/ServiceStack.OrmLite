@@ -56,7 +56,8 @@ namespace ServiceStack.OrmLite
         string GetColumnDefinition(
             string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement,
             bool isNullable, int? fieldLength,
-            int? scale, string defaultValue);
+            int? scale, string defaultValue, 
+            string customFieldDefinition);
 
         long GetLastInsertId(IDbCommand command);
 

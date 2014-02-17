@@ -83,6 +83,8 @@ namespace ServiceStack.OrmLite
         public string BelongToModelName { get; set; }
 
         public bool IsReference { get; set; }
+
+        public string CustomFieldDefinition { get; set; }
     }
 
     public class ForeignKeyConstraint

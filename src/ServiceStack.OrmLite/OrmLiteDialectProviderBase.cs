@@ -408,11 +408,15 @@ namespace ServiceStack.OrmLite
 
         public virtual string GetColumnDefinition(string fieldName, Type fieldType,
             bool isPrimaryKey, bool autoIncrement, bool isNullable,
-            int? fieldLength, int? scale, string defaultValue)
+            int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
         {
             string fieldDefinition;
 
-            if (fieldType == typeof(string))
+            if (customFieldDefinition != null)
+            {
+                fieldDefinition = customFieldDefinition;
+            }
+            else if (fieldType == typeof(string))
             {
                 fieldDefinition = string.Format(StringLengthColumnDefinitionFormat, fieldLength.GetValueOrDefault(DefaultStringLength));
             }
@@ -918,7 +922,8 @@ namespace ServiceStack.OrmLite
                     fieldDef.IsNullable,
                     fieldDef.FieldLength,
                     fieldDef.Scale,
-                    fieldDef.DefaultValue);
+                    fieldDef.DefaultValue,
+                    fieldDef.CustomFieldDefinition);
 
                 sbColumns.Append(columnDefinition);
 
@@ -1123,7 +1128,8 @@ namespace ServiceStack.OrmLite
                                              fieldDef.IsNullable,
                                              fieldDef.FieldLength,
                                              fieldDef.Scale,
-                                             fieldDef.DefaultValue);
+                                             fieldDef.DefaultValue,
+                                             fieldDef.CustomFieldDefinition);
             return string.Format("ALTER TABLE {0} ADD COLUMN {1};",
                                  GetQuotedTableName(modelType.GetModelDefinition().ModelName),
                                  column);
@@ -1139,7 +1145,8 @@ namespace ServiceStack.OrmLite
                                              fieldDef.IsNullable,
                                              fieldDef.FieldLength,
                                              fieldDef.Scale,
-                                             fieldDef.DefaultValue);
+                                             fieldDef.DefaultValue,
+                                             fieldDef.CustomFieldDefinition);
             return string.Format("ALTER TABLE {0} MODIFY COLUMN {1};",
                                  GetQuotedTableName(modelType.GetModelDefinition().ModelName),
                                  column);
@@ -1156,7 +1163,8 @@ namespace ServiceStack.OrmLite
                                              fieldDef.IsNullable,
                                              fieldDef.FieldLength,
                                              fieldDef.Scale,
-                                             fieldDef.DefaultValue);
+                                             fieldDef.DefaultValue,
+                                             fieldDef.CustomFieldDefinition);
             return string.Format("ALTER TABLE {0} CHANGE COLUMN {1} {2};",
                                  GetQuotedTableName(modelType.GetModelDefinition().ModelName),
                                  GetQuotedColumnName(oldColumnName),
