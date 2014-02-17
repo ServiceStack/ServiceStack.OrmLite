@@ -1,3 +1,4 @@
+using System.IO;
 using NUnit.Framework;
 
 namespace ServiceStack.OrmLite.Tests
@@ -21,11 +22,45 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.AreEqual(orig.Content, target.Content);
             }
         }
+
+        [Test, Explicit]
+        public void Can_add_attachment()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Attachment>();
+
+                var bytes = "https://www.google.com/images/srpr/logo11w.png".GetBytesFromUrl();
+
+                var file = new Attachment {
+                    Data = bytes,
+                    Description = "Google Logo",
+                    Type = "png",
+                    FileName = "logo11w.png"
+                };
+
+                db.Insert(file);
+
+                var fromDb = db.Single<Attachment>(q => q.FileName == "logo11w.png");
+
+                Assert.AreEqual(file.Data, fromDb.Data);
+
+                File.WriteAllBytes(fromDb.FileName, fromDb.Data);
+            }
+        }
     }
 
     class TypeWithByteArrayField
     {
         public int Id { get; set; }
         public byte[] Content { get; set; }
+    }
+
+    public class Attachment
+    {
+        public string Description { get; set; }
+        public string FileName { get; set; }
+        public string Type { get; set; }
+        public byte[] Data { get; set; }
     }
 }
