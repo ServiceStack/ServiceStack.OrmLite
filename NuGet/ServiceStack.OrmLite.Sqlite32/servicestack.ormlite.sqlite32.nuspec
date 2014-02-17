@@ -7,7 +7,8 @@
     <authors>Service Stack</authors> 
     <owners>Service Stack</owners>
     <description>
-        Light, simple and fast convention-based code-first POCO ORM. Support for Creating and Dropping Table Schemas from POCOs, Complex Property types transparently stored in schemaless text blobs in Sqlite.
+      This package is deprecated. 
+      Use the new ServiceStack.OrmLite.Sqlite.Windows NuGet package which supports both x86/x64 architectures.
     </description> 
     <projectUrl>https://github.com/ServiceStack/ServiceStack.OrmLite</projectUrl>
     <licenseUrl>https://servicestack.net/terms</licenseUrl>
@@ -17,7 +18,6 @@
     <language>en-US</language> 
     <copyright>ServiceStack 2013 and contributors</copyright>
     <dependencies>
-      <dependency id="System.Data.SQLite.x86" version="1.0.90.0" />
       <dependency id="ServiceStack.OrmLite" version="4.0" />
     </dependencies> 
   </metadata> 
