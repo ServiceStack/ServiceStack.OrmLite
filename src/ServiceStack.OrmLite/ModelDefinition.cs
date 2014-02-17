@@ -32,6 +32,14 @@ namespace ServiceStack.OrmLite
 
         public string Schema { get; set; }
 
+        public string PreCreateTableSql { get; set; }
+
+        public string PostCreateTableSql { get; set; }
+
+        public string PreDropTableSql { get; set; }
+
+        public string PostDropTableSql { get; set; }
+
         public bool IsInSchema { get { return this.Schema != null; } }
 
 	    public bool HasAutoIncrementId

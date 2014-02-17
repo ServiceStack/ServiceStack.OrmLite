@@ -1,0 +1,136 @@
+﻿using System;
+using NUnit.Framework;
+using ServiceStack.DataAnnotations;
+using ServiceStack.Text;
+
+namespace ServiceStack.OrmLite.Tests
+{
+    public class ModelWithCharField
+    {
+        public int Id { get; set; }
+
+        [CustomField("CHAR(20) null")]
+        public string Chars { get; set; }
+    }
+
+    [PreCreateTable("CREATE INDEX udxNoTable on NonExistingTable (Name);")]
+    public class ModelWithPreCreateSql
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+
+        public string Name { get; set; }
+    }
+
+    [PostCreateTable("INSERT INTO ModelWithSeedDataSql (Name) VALUES ('Foo');" +
+                     "INSERT INTO ModelWithSeedDataSql (Name) VALUES ('Bar');")]
+    public class ModelWithSeedDataSql
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+
+        public string Name { get; set; }
+    }
+
+    [PreDropTable("CREATE INDEX udxNoTable on NonExistingTable (Name);")]
+    public class ModelWithPreDropSql
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+
+        public string Name { get; set; }
+    }
+
+    [PostDropTable("CREATE INDEX udxNoTable on NonExistingTable (Name);")]
+    public class ModelWithPostDropSql
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+
+        public string Name { get; set; }
+    }
+
+
+    [TestFixture]
+    public class CustomSqlTests
+        : OrmLiteTestBase
+    {
+        [Test]
+        public void Can_create_field_with_custom_sql()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<ModelWithCharField>();
+
+                Assert.That(db.GetLastSql(), Is.StringContaining("\"Chars\" CHAR(20) null"));
+            }
+        }
+
+        [Test]
+        public void Does_execute_CustomSql_before_table_created()
+        {
+            using (var db = OpenDbConnection())
+            {
+                try
+                {
+                    db.CreateTable<ModelWithPreCreateSql>();
+                    Assert.Fail("Should throw");
+                }
+                catch (Exception)
+                {
+                    Assert.That(!db.TableExists("ModelWithPreCreateSql"));
+                }
+            }
+        }
+
+        [Test]
+        public void Does_execute_CustomSql_after_table_created()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<ModelWithSeedDataSql>();
+
+                var seedDataNames = db.Select<ModelWithSeedDataSql>().ConvertAll(x => x.Name);
+
+                Assert.That(seedDataNames, Is.EquivalentTo(new[] { "Foo", "Bar" }));
+            }
+        }
+
+        [Test]
+        public void Does_execute_CustomSql_before_table_dropped()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTable<ModelWithPreDropSql>();
+                try
+                {
+                    db.DropTable<ModelWithPreDropSql>();
+                    Assert.Fail("Should throw");
+                }
+                catch (Exception)
+                {
+                    Assert.That(db.TableExists("ModelWithPreDropSql"));
+                }
+            }
+        }
+
+        [Test]
+        public void Does_execute_CustomSql_after_table_dropped()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTable<ModelWithPostDropSql>();
+                try
+                {
+                    db.DropTable<ModelWithPostDropSql>();
+                    Assert.Fail("Should throw");
+                }
+                catch (Exception)
+                {
+                    Assert.That(!db.TableExists("ModelWithPostDropSql"));
+                }
+            }
+        }
+
+    }
+}

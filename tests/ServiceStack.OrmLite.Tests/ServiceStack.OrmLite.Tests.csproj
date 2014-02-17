@@ -114,6 +114,7 @@
   <ItemGroup>
     <Compile Include="ApiSqlServerTests.cs" />
     <Compile Include="ApiSqliteTests.cs" />
+    <Compile Include="CustomSqlTests.cs" />
     <Compile Include="DateTimeOffsetTests.cs" />
     <Compile Include="Expression\MethodExpressionTests.cs" />
     <Compile Include="Expression\SelectExpressionTests.cs" />

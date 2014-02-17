@@ -57,15 +57,36 @@ namespace ServiceStack.OrmLite
             var tableExists = dialectProvider.DoesTableExist(dbCmd, tableName);
             if (overwrite && tableExists)
             {
+                if (modelDef.PreDropTableSql != null)
+                {
+                    ExecuteSql(dbCmd, modelDef.PreDropTableSql);
+                }
+
                 DropTable(dbCmd, modelDef);
+
+                if (modelDef.PostDropTableSql != null)
+                {
+                    ExecuteSql(dbCmd, modelDef.PostDropTableSql);
+                }
+
                 tableExists = false;
             }
 
             try
             {
                 if (!tableExists)
-                {
+                { 
+                    if (modelDef.PreCreateTableSql != null)
+                    {
+                        ExecuteSql(dbCmd, modelDef.PreCreateTableSql);
+                    }
+
                     ExecuteSql(dbCmd, dialectProvider.ToCreateTableStatement(modelType));
+
+                    if (modelDef.PostCreateTableSql != null)
+                    {
+                        ExecuteSql(dbCmd, modelDef.PostCreateTableSql);
+                    }
 
                     var sqlIndexes = dialectProvider.ToCreateIndexStatements(modelType);
                     foreach (var sqlIndex in sqlIndexes)
@@ -159,12 +180,22 @@ namespace ServiceStack.OrmLite
 
                 if (OrmLiteConfig.DialectProvider.DoesTableExist(dbCmd, tableName))
                 {
+                    if (modelDef.PreDropTableSql != null)
+                    {
+                        ExecuteSql(dbCmd, modelDef.PreDropTableSql);
+                    }
+
                     var dropTableFks = OrmLiteConfig.DialectProvider.GetDropForeignKeyConstraints(modelDef);
                     if (!string.IsNullOrEmpty(dropTableFks))
                     {
                         dbCmd.ExecuteSql(dropTableFks);
                     }
                     dbCmd.ExecuteSql("DROP TABLE " + OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef));
+
+                    if (modelDef.PostDropTableSql != null)
+                    {
+                        ExecuteSql(dbCmd, modelDef.PostDropTableSql);
+                    }
                 }
             }
             catch (Exception ex)

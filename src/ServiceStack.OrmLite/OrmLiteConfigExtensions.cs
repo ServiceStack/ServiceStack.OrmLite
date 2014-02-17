@@ -61,11 +61,21 @@ namespace ServiceStack.OrmLite
 
             var modelAliasAttr = modelType.FirstAttribute<AliasAttribute>();
             var schemaAttr = modelType.FirstAttribute<SchemaAttribute>();
+
+            var preCreate = modelType.FirstAttribute<PreCreateTableAttribute>();
+            var postCreate = modelType.FirstAttribute<PostCreateTableAttribute>();
+            var preDrop = modelType.FirstAttribute<PreDropTableAttribute>();
+            var postDrop = modelType.FirstAttribute<PostDropTableAttribute>();
+
             modelDef = new ModelDefinition {
                 ModelType = modelType,
                 Name = modelType.Name,
                 Alias = modelAliasAttr != null ? modelAliasAttr.Name : null,
-                Schema = schemaAttr != null ? schemaAttr.Name : null
+                Schema = schemaAttr != null ? schemaAttr.Name : null,
+                PreCreateTableSql = preCreate != null ? preCreate.Sql : null,
+                PostCreateTableSql = postCreate != null ? postCreate.Sql : null,
+                PreDropTableSql = preDrop != null ? preDrop.Sql : null,
+                PostDropTableSql = postDrop != null ? postDrop.Sql : null,
             };
 
             modelDef.CompositeIndexes.AddRange(
@@ -125,6 +135,7 @@ namespace ServiceStack.OrmLite
                 var referencesAttr = propertyInfo.FirstAttribute<ReferencesAttribute>();
                 var referenceAttr  = propertyInfo.FirstAttribute<ReferenceAttribute>();
                 var foreignKeyAttr = propertyInfo.FirstAttribute<ForeignKeyAttribute>();
+                var customFieldAttr = propertyInfo.FirstAttribute<CustomFieldAttribute>();
 
                 var fieldDefinition = new FieldDefinition {
                     Name = propertyInfo.Name,
@@ -159,6 +170,7 @@ namespace ServiceStack.OrmLite
                     ComputeExpression = computeAttr != null ? computeAttr.Expression : string.Empty,
                     Scale = decimalAttribute != null ? decimalAttribute.Scale : (int?)null,
                     BelongToModelName = belongToAttribute != null ? belongToAttribute.BelongToTableType.GetModelDefinition().ModelName : null, 
+                    CustomFieldDefinition = customFieldAttr != null ? customFieldAttr.Sql : null,
                 };
 
                 var isIgnored = propertyInfo.HasAttributeNamed(typeof(IgnoreAttribute).Name)
@@ -166,7 +178,7 @@ namespace ServiceStack.OrmLite
                 if (isIgnored)
                   modelDef.IgnoredFieldDefinitions.Add(fieldDefinition);
                 else
-                  modelDef.FieldDefinitions.Add(fieldDefinition);                
+                  modelDef.FieldDefinitions.Add(fieldDefinition);
             }
 
             modelDef.SqlSelectAllFromTable = "SELECT {0} FROM {1} "
