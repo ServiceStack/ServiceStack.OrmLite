@@ -280,9 +280,17 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Firebird\ServiceStack.OrmLite.Firebird.csproj">
+      <Project>{317B64BA-D7A6-4A15-8719-821B38147C63}</Project>
+      <Name>ServiceStack.OrmLite.Firebird</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite.MySql\ServiceStack.OrmLite.MySql.csproj">
       <Project>{FD20F088-ACC0-4979-AC0C-8C541C2E7DE5}</Project>
       <Name>ServiceStack.OrmLite.MySql</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Oracle\ServiceStack.OrmLite.Oracle.csproj">
+      <Project>{517B64BA-D7A6-4A15-8719-821B38147C61}</Project>
+      <Name>ServiceStack.OrmLite.Oracle</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite.PostgreSQL\ServiceStack.OrmLite.PostgreSQL.csproj">
       <Project>{3220F088-BDD0-6979-AC0C-8C541C2E7DE5}</Project>
