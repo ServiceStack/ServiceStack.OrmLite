@@ -5,11 +5,11 @@ using System.Linq.Expressions;
 
 namespace ServiceStack.OrmLite.MySql
 {
-	/// <summary>
-	/// Description of MySqlExpressionVisitor.
-	/// </summary>
-	public class MySqlExpression<T>:SqlExpression<T>
-	{
+    /// <summary>
+    /// Description of MySqlExpressionVisitor.
+    /// </summary>
+    public class MySqlExpression<T> : SqlExpression<T>
+    {
         protected override object VisitColumnAccessMethod(MethodCallExpression m)
         {
             if (m.Method.Name == "StartsWith")
@@ -24,5 +24,10 @@ namespace ServiceStack.OrmLite.MySql
 
             return base.VisitColumnAccessMethod(m);
         }
-	}
+
+        public override SqlExpression<T> Clone()
+        {
+            return CopyTo(new MySqlExpression<T>());
+        }
+    }
 }

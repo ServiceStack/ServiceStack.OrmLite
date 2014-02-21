@@ -1,12 +1,11 @@
 using System;
 using System.Text;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.SqlServer
 {
 	public class SqlServerExpression<T> : SqlExpression<T>
 	{
-	    public override string ToSelectStatement()
+        public override string ToSelectStatement()
         {
             if (!Skip.HasValue && !Rows.HasValue)
                 return base.ToSelectStatement();
@@ -55,7 +54,12 @@ namespace ServiceStack.OrmLite.SqlServer
 	        return retVal;
         }
 
-        public override string ToUpdateStatement(T item, bool excludeDefaults = false)
+	    public override SqlExpression<T> Clone()
+	    {
+	        return CopyTo(new SqlServerExpression<T>());
+	    }
+
+	    public override string ToUpdateStatement(T item, bool excludeDefaults = false)
         {
             var setFields = new StringBuilder();
             var dialectProvider = OrmLiteConfig.DialectProvider;
