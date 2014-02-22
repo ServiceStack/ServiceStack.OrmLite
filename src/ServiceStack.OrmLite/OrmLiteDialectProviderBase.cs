@@ -379,7 +379,7 @@ namespace ServiceStack.OrmLite
                 case TypeCode.UInt32:
                 case TypeCode.UInt64:
                     if (fieldType.IsNumericType())
-                        return ((int)value).ToString(CultureInfo.InvariantCulture);
+                        return Convert.ChangeType(value, fieldType).ToString();
                     break;
             }
 
