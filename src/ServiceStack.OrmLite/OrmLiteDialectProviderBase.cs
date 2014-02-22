@@ -360,6 +360,10 @@ namespace ServiceStack.OrmLite
                 return dialectProvider.GetQuotedValue(dialectProvider.StringSerializer.SerializeToString(value));
             }
 
+            if (fieldType == typeof(int))
+                if (value.GetType().IsEnum)
+                    return ((int)value).ToString(CultureInfo.InvariantCulture);
+
             if (fieldType == typeof(float))
                 return ((float)value).ToString(CultureInfo.InvariantCulture);
 

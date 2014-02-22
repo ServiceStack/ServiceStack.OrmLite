@@ -137,6 +137,27 @@ namespace ServiceStack.OrmLite.Tests
             }
         }
 
+        [Test]
+        public void Updates_enum_flags_with_int_value()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<TypeWithFlagsEnum>();
+
+                db.Insert(new TypeWithFlagsEnum { Id = 1, Flags = FlagsEnum.FlagOne });
+                db.Insert(new TypeWithFlagsEnum { Id = 2, Flags = FlagsEnum.FlagTwo });
+                db.Insert(new TypeWithFlagsEnum { Id = 3, Flags = FlagsEnum.FlagOne | FlagsEnum.FlagTwo });
+
+                db.Update(new TypeWithFlagsEnum { Id = 1, Flags = FlagsEnum.FlagThree });
+                Assert.That(db.GetLastSql(), Is.StringContaining("=@Flags"));
+                db.GetLastSql().Print();
+
+                db.UpdateOnly(new TypeWithFlagsEnum { Id = 1, Flags = FlagsEnum.FlagThree }, q => q.Flags);
+                Assert.That(db.GetLastSql(), Is.StringContaining("=" + (int)FlagsEnum.FlagThree));
+                db.GetLastSql().Print();
+            }
+        }
+
     }
 
 

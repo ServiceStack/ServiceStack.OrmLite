@@ -71,7 +71,7 @@ namespace ServiceStack.OrmLite
         public string GetQuotedValue(object fromInstance)
         {
             var value = GetValue(fromInstance);
-            return OrmLiteConfig.DialectProvider.GetQuotedValue(value, FieldType);
+            return OrmLiteConfig.DialectProvider.GetQuotedValue(value, ColumnType);
         }
 
         public string Sequence { get; set; }
