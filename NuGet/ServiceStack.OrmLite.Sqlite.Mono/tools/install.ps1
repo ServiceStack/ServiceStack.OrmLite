@@ -21,4 +21,4 @@ if ($property -eq $null) {
   continue
 }
 
-$property.Value = 1
+$property.Value = 2
