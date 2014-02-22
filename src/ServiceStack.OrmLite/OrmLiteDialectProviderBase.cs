@@ -108,7 +108,7 @@ namespace ServiceStack.OrmLite
         public string DecimalColumnDefinition = "DECIMAL";
         public string BlobColumnDefinition = "BLOB";
         public string DateTimeColumnDefinition = "DATETIME";
-        public string TimeColumnDefinition = "INTEGER";
+        public string TimeColumnDefinition = "BIGINT";
         public string DateTimeOffsetColumnDefinition = "DATETIMEOFFSET";
 
         protected OrmLiteDialectProviderBase()
