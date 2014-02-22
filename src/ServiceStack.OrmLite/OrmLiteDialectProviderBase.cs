@@ -360,18 +360,28 @@ namespace ServiceStack.OrmLite
                 return dialectProvider.GetQuotedValue(dialectProvider.StringSerializer.SerializeToString(value));
             }
 
-            if (fieldType == typeof(int))
-                if (value.GetType().IsEnum)
-                    return ((int)value).ToString(CultureInfo.InvariantCulture);
+            var typeCode = fieldType.GetTypeCode();
+            switch (typeCode)
+            {
+                case TypeCode.Single:
+                    return ((float)value).ToString(CultureInfo.InvariantCulture);
+                case TypeCode.Double:
+                    return ((double)value).ToString(CultureInfo.InvariantCulture);
+                case TypeCode.Decimal:
+                    return ((decimal)value).ToString(CultureInfo.InvariantCulture);
 
-            if (fieldType == typeof(float))
-                return ((float)value).ToString(CultureInfo.InvariantCulture);
-
-            if (fieldType == typeof(double))
-                return ((double)value).ToString(CultureInfo.InvariantCulture);
-
-            if (fieldType == typeof(decimal))
-                return ((decimal)value).ToString(CultureInfo.InvariantCulture);
+                case TypeCode.Byte:
+                case TypeCode.Int16:
+                case TypeCode.Int32:
+                case TypeCode.Int64:
+                case TypeCode.SByte:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
+                    if (fieldType.IsNumericType())
+                        return ((int)value).ToString(CultureInfo.InvariantCulture);
+                    break;
+            }
 
             if (fieldType == typeof(TimeSpan))
                 return ((TimeSpan)value).Ticks.ToString(CultureInfo.InvariantCulture);
