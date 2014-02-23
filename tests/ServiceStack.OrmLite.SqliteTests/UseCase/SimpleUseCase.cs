@@ -20,6 +20,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
 
 		public class User
 		{
+            [AutoIncrement]
 			public long Id { get; set; }
 
 			[Index]

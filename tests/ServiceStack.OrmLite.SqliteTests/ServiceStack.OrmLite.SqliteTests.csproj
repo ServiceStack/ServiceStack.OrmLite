@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ServiceStack.OrmLite.Tests</RootNamespace>
-    <AssemblyName>ServiceStack.OrmLite.Sqlite32Tests</AssemblyName>
+    <AssemblyName>ServiceStack.OrmLite.SqliteTests</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -84,14 +84,20 @@
     <Compile Include="UseCase\SimpleUseCase.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Sqlite32\ServiceStack.OrmLite.Sqlite32.csproj">
-      <Project>{eaa0f35e-66cd-4b3d-bb17-7ce8ede83ae7}</Project>
-      <Name>ServiceStack.OrmLite.Sqlite32</Name>
+    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Sqlite\ServiceStack.OrmLite.Sqlite.csproj">
+      <Project>{cf68a37d-d071-469d-ae04-68594cb95382}</Project>
+      <Name>ServiceStack.OrmLite.Sqlite</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj">
       <Project>{96179AC6-F6F1-40C3-9FDD-4F6582F54C5C}</Project>
       <Name>ServiceStack.OrmLite</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\..\lib\sqlite3.dll">
+      <Link>sqlite3.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

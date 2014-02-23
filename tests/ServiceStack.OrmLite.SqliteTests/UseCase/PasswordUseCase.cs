@@ -9,14 +9,17 @@ namespace ServiceStack.OrmLite.Tests.UseCase
     using Sqlite;
 
     [TestFixture]
-    public class PasswordUseCase {
+    public class PasswordUseCase
+    {
         [TestFixtureSetUp]
-        public void TestFixtureSetUp() {
+        public void TestFixtureSetUp()
+        {
             //Inject your database provider here
             //OrmLiteConfig.DialectProvider = new SqliteOrmLiteDialectProvider();
         }
 
-        public class User {
+        public class User
+        {
             public long Id { get; set; }
 
             [Index]
@@ -26,7 +29,8 @@ namespace ServiceStack.OrmLite.Tests.UseCase
         }
 
         [Alias("Users")]
-        public class User2 {
+        public class User2
+        {
             [AutoIncrement]
             public long Id { get; set; }
 
@@ -34,11 +38,13 @@ namespace ServiceStack.OrmLite.Tests.UseCase
         }
 
         [Test]
-        public void Simple_CRUD_example() {
+        public void Simple_CRUD_example()
+        {
             var path = Config.SqliteFileDb;
             if (File.Exists(path))
                 File.Delete(path);
-            var connectionFactory = new OrmLiteConnectionFactory(path, SqliteOrmLiteDialectProvider.Instance.WithPassword("bob"));
+
+            var connectionFactory = new OrmLiteConnectionFactory(path, SqliteDialect.Provider.Configure(password: "bob"));
             using (var db = connectionFactory.OpenDbConnection())
             {
                 db.CreateTable<User>(true);

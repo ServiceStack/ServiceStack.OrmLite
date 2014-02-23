@@ -251,4 +251,20 @@ namespace ServiceStack.OrmLite.Sqlite
             return ret;
         }
     }
+
+    public static class SqliteExtensions
+    {
+        public static IOrmLiteDialectProvider Configure(this IOrmLiteDialectProvider provider,
+            string password = null, bool parseViaFramework = false, bool utf8Encoding = false)
+        {
+            if (password != null)
+                SqliteOrmLiteDialectProviderBase.Password = password;
+            if (parseViaFramework)
+                SqliteOrmLiteDialectProviderBase.ParseViaFramework = true;
+            if (utf8Encoding)
+                SqliteOrmLiteDialectProviderBase.UTF8Encoded = true;
+
+            return provider;
+        }
+    }
 }

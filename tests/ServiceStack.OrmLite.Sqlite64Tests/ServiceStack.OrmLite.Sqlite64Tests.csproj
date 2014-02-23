@@ -73,10 +73,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Sqlite64\ServiceStack.OrmLite.Sqlite64.csproj">
-      <Project>{59e6b217-24ad-4f55-b032-fcd0090cd300}</Project>
-      <Name>ServiceStack.OrmLite.Sqlite64</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj">
       <Project>{96179AC6-F6F1-40C3-9FDD-4F6582F54C5C}</Project>
       <Name>ServiceStack.OrmLite</Name>
