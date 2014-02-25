@@ -36,7 +36,7 @@ Effectively this allows you to create a table from any POCO type and it should p
   - [ServiceStack.OrmLite.Oracle](http://nuget.org/packages/ServiceStack.OrmLite.Oracle)
   - [ServiceStack.OrmLite.Firebird](http://nuget.org/List/Packages/ServiceStack.OrmLite.Firebird) 
    
-_Latest v4+ release on NuGet is a commercial library with [free quotas](https://servicestack.net/download#free-quotas), see https://servicestack.net/pricing for details._
+_Latest v4+ on NuGet is a commercial release with [free quotas](https://servicestack.net/download#free-quotas)._
 
 ### [Docs and Downloads for older v3 BSD releases](https://github.com/ServiceStackV3/ServiceStackV3)
 
