@@ -1,7 +1,7 @@
 [Join the ServiceStack Google+ group](https://plus.google.com/u/0/communities/112445368900682590445) or
 follow [@servicestack](http://twitter.com/servicestack) for updates.
 
-# An Open Source Micro ORM for .NET
+# A Fast Micro ORM for .NET
 
 # Introduction
 
@@ -28,20 +28,17 @@ Effectively this allows you to create a table from any POCO type and it should p
 
 ### 8 flavours of OrmLite is on NuGet: 
 
-  - [Sql Server](http://nuget.org/List/Packages/ServiceStack.OrmLite.SqlServer)
-  - [MySql](http://nuget.org/List/Packages/ServiceStack.OrmLite.MySql)
-  - [PostgreSQL](http://nuget.org/List/Packages/ServiceStack.OrmLite.PostgreSQL)
-  - [Oracle](http://nuget.org/packages/ServiceStack.OrmLite.Oracle)
-  - [Firebird](http://nuget.org/List/Packages/ServiceStack.OrmLite.Firebird) 
-  - [Sqlite32](http://nuget.org/List/Packages/ServiceStack.OrmLite.Sqlite32) - 32bit Mixed mode .NET only assembly 
-  - [Sqlite64](http://nuget.org/List/Packages/ServiceStack.OrmLite.Sqlite64) - 64bit Mixed mode .NET only assembly 
-  - [Sqlite.Mono](http://nuget.org/packages/ServiceStack.OrmLite.Sqlite.Mono) - 32bit unmanaged dll, compatible with .NET / Mono
+  - [ServiceStack.OrmLite.Sql Server](http://nuget.org/List/Packages/ServiceStack.OrmLite.SqlServer)
+  - [ServiceStack.OrmLite.MySql](http://nuget.org/List/Packages/ServiceStack.OrmLite.MySql)
+  - [ServiceStack.OrmLite.PostgreSQL](http://nuget.org/List/Packages/ServiceStack.OrmLite.PostgreSQL)
+  - [ServiceStack.OrmLite.Sqlite.Windows](http://nuget.org/List/Packages/ServiceStack.OrmLite.Sqlite.Windows) - 32/64bit Mixed mode .NET for WIndows only 
+  - [ServiceStack.OrmLite.Sqlite.Mono](http://nuget.org/packages/ServiceStack.OrmLite.Sqlite.Mono) - Compatible 
+  - [ServiceStack.OrmLite.Oracle](http://nuget.org/packages/ServiceStack.OrmLite.Oracle)
+  - [ServiceStack.OrmLite.Firebird](http://nuget.org/List/Packages/ServiceStack.OrmLite.Firebird) 
+   
+_Latest NuGet releases is a commercial library with [free quotas](https://servicestack.net/download#free-quotas)_
 
-OrmLite.SqlServer is also included in [ServiceStack](https://github.com/ServiceStack/ServiceStack/downloads).
-
-_Commercial support is now available for ServiceStack, see https://servicestack.net/pricing for details_
-
-### [Docs and Downloads for v3](https://github.com/ServiceStackV3/ServiceStackV3)
+### [Docs and Downloads for older v3 BSD releases](https://github.com/ServiceStackV3/ServiceStackV3)
 
 ## Copying
 
