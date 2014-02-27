@@ -1,5 +1,6 @@
 using System.IO;
 using NUnit.Framework;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -29,6 +30,7 @@ namespace ServiceStack.OrmLite.Tests
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<Attachment>();
+                db.GetLastSql().Print();
 
                 var bytes = "https://www.google.com/images/srpr/logo11w.png".GetBytesFromUrl();
 
@@ -46,6 +48,44 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.AreEqual(file.Data, fromDb.Data);
 
                 File.WriteAllBytes(fromDb.FileName, fromDb.Data);
+            }
+        }
+
+        [Test, Explicit]
+        public void Can_upload_attachment_via_sp()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Attachment>();
+
+                try
+                {
+                    db.ExecuteSql("DROP PROCEDURE dbo.[SP_upload_file]");
+                }
+                catch (System.Exception ex) {}
+
+                db.ExecuteSql(@"
+CREATE PROCEDURE dbo.[SP_upload_file](          
+      @filename varchar(50),
+      @filetype varchar(50),
+      @filecontent varbinary(MAX))
+AS
+begin
+INSERT INTO [Attachment]([FileName], [Type], [Data], [Description])
+VALUES (@filename, @filetype, @filecontent, @filename) 
+end");
+                var bytes = "https://www.google.com/images/srpr/logo11w.png".GetBytesFromUrl();
+
+                db.ExecuteNonQuery("EXEC SP_upload_file @filename, @filetype, @filecontent", 
+                    new {
+                        filename = "logo11w.png",
+                        filetype = "png",
+                        filecontent = bytes,
+                    });
+
+                var fromDb = db.Single<Attachment>(q => q.FileName == "logo11w.png");
+
+                Assert.AreEqual(bytes, fromDb.Data);
             }
         }
     }
