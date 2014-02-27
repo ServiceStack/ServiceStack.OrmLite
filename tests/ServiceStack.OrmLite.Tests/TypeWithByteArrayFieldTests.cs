@@ -90,7 +90,7 @@ end");
             }
         }
 
-        [Test]
+        [Test, Explicit]
         public void Can_upload_attachment_via_sp_with_ADONET()
         {
             using (var db = OpenDbConnection())
