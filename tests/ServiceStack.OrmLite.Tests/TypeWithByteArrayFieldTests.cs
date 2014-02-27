@@ -1,3 +1,4 @@
+using System.Data;
 using System.IO;
 using NUnit.Framework;
 using ServiceStack.Text;
@@ -82,6 +83,61 @@ end");
                         filetype = "png",
                         filecontent = bytes,
                     });
+
+                var fromDb = db.Single<Attachment>(q => q.FileName == "logo11w.png");
+
+                Assert.AreEqual(bytes, fromDb.Data);
+            }
+        }
+
+        [Test]
+        public void Can_upload_attachment_via_sp_with_ADONET()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Attachment>();
+
+                try
+                {
+                    db.ExecuteSql("DROP PROCEDURE dbo.[SP_upload_file]");
+                }
+                catch (System.Exception ex) { }
+
+                db.ExecuteSql(@"
+CREATE PROCEDURE dbo.[SP_upload_file](          
+      @filename varchar(50),
+      @filetype varchar(50),
+      @filecontent varbinary(MAX))
+AS
+begin
+INSERT INTO [Attachment]([FileName], [Type], [Data], [Description])
+VALUES (@filename, @filetype, @filecontent, @filename) 
+end");
+                var bytes = "https://www.google.com/images/srpr/logo11w.png".GetBytesFromUrl();
+
+                using (var dbCmd = db.CreateCommand())
+                {
+                    var p = dbCmd.CreateParameter();
+                    p.ParameterName = "filename";
+                    p.DbType = DbType.String;
+                    p.Value = "logo11w.png";
+                    dbCmd.Parameters.Add(p);
+
+                    p = dbCmd.CreateParameter();
+                    p.ParameterName = "filetype";
+                    p.DbType = DbType.String;
+                    p.Value = "png";
+                    dbCmd.Parameters.Add(p);
+
+                    p = dbCmd.CreateParameter();
+                    p.ParameterName = "filecontent";
+                    p.DbType = DbType.Binary;
+                    p.Value = bytes;
+                    dbCmd.Parameters.Add(p);
+
+                    dbCmd.CommandText = "EXEC SP_upload_file @filename, @filetype, @filecontent";
+                    dbCmd.ExecuteNonQuery();
+                }
 
                 var fromDb = db.Single<Attachment>(q => q.FileName == "logo11w.png");
 
