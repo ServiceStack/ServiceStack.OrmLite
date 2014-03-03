@@ -28,6 +28,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
             //there is no "n"varchar in postgres. All strings are either unicode or non-unicode, inherited from the database.
             base.StringLengthUnicodeColumnDefinitionFormat = "character varying({0})";
             base.StringLengthNonUnicodeColumnDefinitionFormat = "character varying({0})";
+            base.MaxStringColumnDefinition = "TEXT";
             base.InitColumnTypeMap();
             base.SelectIdentitySql = "SELECT LASTVAL()";
             this.NamingStrategy = new PostgreSqlNamingStrategy();

@@ -99,6 +99,13 @@ namespace ServiceStack.OrmLite
         public string StringColumnDefinition;
         public string StringLengthColumnDefinitionFormat;
 
+        private string maxStringColumnDefinition;
+        public string MaxStringColumnDefinition
+        {
+            get { return maxStringColumnDefinition ?? StringColumnDefinition; }
+            set { maxStringColumnDefinition = value; }
+        }
+
         public string AutoIncrementDefinition = "AUTOINCREMENT"; //SqlServer express limit
         public string IntColumnDefinition = "INTEGER";
         public string LongColumnDefinition = "BIGINT";
@@ -190,7 +197,6 @@ namespace ServiceStack.OrmLite
 
             this.StringColumnDefinition = string.Format(
                 this.StringLengthColumnDefinitionFormat, DefaultStringLength);
-
         }
 
         protected DbTypes<TDialect> DbTypeMap = new DbTypes<TDialect>();
@@ -435,7 +441,9 @@ namespace ServiceStack.OrmLite
             }
             else if (fieldType == typeof(string))
             {
-                fieldDefinition = string.Format(StringLengthColumnDefinitionFormat, fieldLength.GetValueOrDefault(DefaultStringLength));
+                fieldDefinition =  fieldLength == StringLengthAttribute.MaxText
+                    ? MaxStringColumnDefinition
+                    : string.Format(StringLengthColumnDefinitionFormat, fieldLength.GetValueOrDefault(DefaultStringLength));
             }
             else
             {

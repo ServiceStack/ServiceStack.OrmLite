@@ -38,6 +38,7 @@ namespace ServiceStack.OrmLite.Oracle
 			base.TimeColumnDefinition = "TIME";
 			base.RealColumnDefinition= "FLOAT";
 			base.DefaultStringLength=128;
+		    base.MaxStringColumnDefinition = "VARCHAR2(4000)";
 			base.InitColumnTypeMap();
             base.ParamString = ":";
 		}

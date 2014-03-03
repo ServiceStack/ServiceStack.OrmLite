@@ -13,6 +13,7 @@ namespace ServiceStack.OrmLite.Sqlite
     {
         protected SqliteOrmLiteDialectProviderBase()
         {
+            base.MaxStringColumnDefinition = "VARCHAR(1000000)"; //Default Max is really 1B
             base.DateTimeColumnDefinition = base.StringColumnDefinition;
             base.BoolColumnDefinition = base.IntColumnDefinition;
             base.GuidColumnDefinition = "CHAR(36)";

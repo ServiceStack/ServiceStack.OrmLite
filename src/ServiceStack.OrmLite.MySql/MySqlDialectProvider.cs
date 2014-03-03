@@ -23,6 +23,7 @@ namespace ServiceStack.OrmLite.MySql
             base.DecimalColumnDefinition = "decimal(38,6)";
             base.GuidColumnDefinition = "char(36)";
             base.DefaultStringLength = 255;
+    	    base.MaxStringColumnDefinition = "TEXT";
             base.InitColumnTypeMap();
     	    base.DefaultValueFormat = " DEFAULT '{0}'";
     	    base.SelectIdentitySql = "SELECT LAST_INSERT_ID()";

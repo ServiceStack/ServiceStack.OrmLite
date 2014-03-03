@@ -19,6 +19,7 @@ namespace ServiceStack.OrmLite.SqlServer
 		{
 			base.AutoIncrementDefinition = "IDENTITY(1,1)";
 			StringColumnDefinition = UseUnicode ?  "NVARCHAR(4000)" : "VARCHAR(8000)";
+		    base.MaxStringColumnDefinition = "VARCHAR(MAX)";
 			base.GuidColumnDefinition = "UniqueIdentifier";
 			base.RealColumnDefinition = "FLOAT";
 		    base.BoolColumnDefinition = "BIT";
@@ -222,8 +223,6 @@ namespace ServiceStack.OrmLite.SqlServer
                 {
                     this.DefaultStringLength = 4000;
                 }
-
-                // UpdateStringColumnDefinitions(); is called by changing DefaultStringLength 
             }
         }
 

@@ -38,6 +38,7 @@ namespace ServiceStack.OrmLite.Firebird
 			base.TimeColumnDefinition = "TIME";
 			base.RealColumnDefinition= "FLOAT";
 			base.DefaultStringLength=128;
+		    base.MaxStringColumnDefinition = "VARCHAR(32767)";
 			base.InitColumnTypeMap();
 			DefaultValueFormat = " DEFAULT '{0}'";
 
