@@ -59,8 +59,14 @@ namespace ServiceStack.OrmLite
                     dbCmd.Transaction = (ormLiteDbConn != null) ? ormLiteDbConn.Transaction : OrmLiteConfig.TSTransaction;
                     dbCmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
 
-                    filter(dbCmd);
-                    LastCommandText = dbCmd.CommandText;
+                    try
+                    {
+                        filter(dbCmd);
+                    }
+                    finally
+                    {
+                        LastCommandText = dbCmd.CommandText;
+                    }
                 }
             }
             finally
