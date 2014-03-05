@@ -28,9 +28,15 @@ namespace ServiceStack.OrmLite
                 {
                     dbCmd.Transaction = (ormLiteDbConn != null) ? ormLiteDbConn.Transaction : OrmLiteConfig.TSTransaction;
                     dbCmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
-                    var ret = filter(dbCmd);
-                    LastCommandText = dbCmd.CommandText;
-                    return ret;
+                    try
+                    {
+                        var ret = filter(dbCmd);
+                        return ret;
+                    }
+                    finally
+                    {
+                        LastCommandText = dbCmd.CommandText;
+                    } 
                 }
             }
             finally
@@ -53,8 +59,14 @@ namespace ServiceStack.OrmLite
                     dbCmd.Transaction = (ormLiteDbConn != null) ? ormLiteDbConn.Transaction : OrmLiteConfig.TSTransaction;
                     dbCmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
 
-                    filter(dbCmd);
-                    LastCommandText = dbCmd.CommandText;
+                    try
+                    {
+                        filter(dbCmd);
+                    }
+                    finally
+                    {
+                        LastCommandText = dbCmd.CommandText;
+                    }
                 }
             }
             finally

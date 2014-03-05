@@ -1,4 +1,5 @@
-﻿using ServiceStack.DataAnnotations;
+﻿using System;
+using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {
@@ -8,6 +9,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
         public bool BoolColumn { get; set; }
         public string StringColumn { get; set; }
         public object NullableCol { get; set; }
+        public TimeSpan TimeSpanColumn { get; set; }
 
         [AutoIncrement]
         public int Id { get; set; }

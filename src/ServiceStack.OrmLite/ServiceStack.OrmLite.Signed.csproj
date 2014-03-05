@@ -115,6 +115,7 @@
     <Compile Include="Expressions\PredicateBuilder.cs" />
     <Compile Include="Expressions\ReadConnectionExtensions.cs" />
     <Compile Include="Expressions\WriteConnectionExtensions.cs" />
+    <Compile Include="IUntypedApi.cs" />
     <Compile Include="JoinSqlBuilder.cs" />
     <Compile Include="OrmLiteConnectionWrapper.cs" />
     <Compile Include="OrmLiteDialectProviderExtensions.cs" />

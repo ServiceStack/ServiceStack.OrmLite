@@ -40,8 +40,7 @@ COPY ..\src\ServiceStack.OrmLite.Firebird\bin\%BUILD%\FirebirdSql.Data.FirebirdC
 COPY ..\src\ServiceStack.OrmLite.Sqlite\bin\%BUILD%\ServiceStack.OrmLite.* ..\..\ServiceStack\lib
 COPY ..\src\ServiceStack.OrmLite.Sqlite\bin\x86\sqlite3.dll ..\..\ServiceStack\lib
 COPY ..\src\ServiceStack.OrmLite.Sqlite\bin\x86\Mono.Data.Sqlite.dll ..\..\ServiceStack\lib
-COPY ..\src\ServiceStack.OrmLite.Sqlite32\bin\x86\ServiceStack.OrmLite.Sqlite* ..\..\ServiceStack\lib\x86
-COPY ..\src\ServiceStack.OrmLite.Sqlite64\bin\x64\ServiceStack.OrmLite.Sqlite* ..\..\ServiceStack\lib\x64
+COPY ..\src\ServiceStack.OrmLite.Sqlite.Windows\bin\%BUILD%\ServiceStack.OrmLite.Sqlite.Windows* ..\..\ServiceStack\lib
 COPY ..\src\ServiceStack.OrmLite.SqlServer\bin\%BUILD%\ServiceStack.OrmLite.* ..\..\ServiceStack\lib
 
 COPY ..\src\ServiceStack.OrmLite.Sqlite\bin\%BUILD%\ServiceStack.OrmLite.* ..\..\ServiceStack.Contrib\lib

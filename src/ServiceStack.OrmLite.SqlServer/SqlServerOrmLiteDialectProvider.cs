@@ -14,19 +14,21 @@ namespace ServiceStack.OrmLite.SqlServer
 		public static SqlServerOrmLiteDialectProvider Instance = new SqlServerOrmLiteDialectProvider();
 
 		private static readonly DateTime timeSpanOffset = new DateTime(1900,01,01);
-        private const string DateTimeOffsetColumnDefinition = "DATETIMEOFFSET";
 
 		public SqlServerOrmLiteDialectProvider()
 		{
 			base.AutoIncrementDefinition = "IDENTITY(1,1)";
 			StringColumnDefinition = UseUnicode ?  "NVARCHAR(4000)" : "VARCHAR(8000)";
+		    base.MaxStringColumnDefinition = "VARCHAR(MAX)";
 			base.GuidColumnDefinition = "UniqueIdentifier";
 			base.RealColumnDefinition = "FLOAT";
 		    base.BoolColumnDefinition = "BIT";
-			base.DecimalColumnDefinition = "DECIMAL(38,6)";
 			base.TimeColumnDefinition = "TIME"; //SQLSERVER 2008+
 		    base.BlobColumnDefinition = "VARBINARY(MAX)";
-		    base.SelectIdentitySql = "SELECT SCOPE_IDENTITY()";
+            base.SelectIdentitySql = "SELECT SCOPE_IDENTITY()";
+            base.DecimalColumnDefinition = "DECIMAL(38,6)";
+            base.DefaultDecimalPrecision = 38;
+            base.DefaultDecimalScale = 6;
 
 			base.InitColumnTypeMap();
 		}
@@ -35,8 +37,8 @@ namespace ServiceStack.OrmLite.SqlServer
         {
             base.OnAfterInitColumnTypeMap();
 
-            DbTypeMap.Set<DateTimeOffset>(DbType.DateTimeOffset, DateTimeOffsetColumnDefinition);
-            DbTypeMap.Set<DateTimeOffset?>(DbType.DateTimeOffset, DateTimeOffsetColumnDefinition);
+            DbTypeMap.Set<TimeSpan>(DbType.DateTime, TimeColumnDefinition);
+            DbTypeMap.Set<TimeSpan?>(DbType.DateTime, TimeColumnDefinition);
         }
 
         public override string GetQuotedValue(string paramValue)
@@ -171,11 +173,7 @@ namespace ServiceStack.OrmLite.SqlServer
 
         protected override string GetUndefinedColumnDefinition(Type fieldType, int? fieldLength)
         {
-            if (TypeSerializer.CanCreateFromString(fieldType))
-            {
-                return string.Format(StringLengthColumnDefinitionFormat, fieldLength.HasValue ? fieldLength.Value.ToString() : "MAX");
-            }
-            return base.GetUndefinedColumnDefinition(fieldType, fieldLength);
+            return string.Format(StringLengthColumnDefinitionFormat, fieldLength.HasValue ? fieldLength.Value.ToString() : "MAX");
         }
 
 		protected bool _useDateTime2;
@@ -225,8 +223,6 @@ namespace ServiceStack.OrmLite.SqlServer
                 {
                     this.DefaultStringLength = 4000;
                 }
-
-                // UpdateStringColumnDefinitions(); is called by changing DefaultStringLength 
             }
         }
 
@@ -279,7 +275,8 @@ namespace ServiceStack.OrmLite.SqlServer
                                              fieldDef.IsNullable,
                                              fieldDef.FieldLength,
                                              fieldDef.Scale,
-                                             fieldDef.DefaultValue);
+                                             fieldDef.DefaultValue,
+                                             fieldDef.CustomFieldDefinition);
 
             return string.Format("ALTER TABLE {0} ADD {1};",
                                  GetQuotedTableName(GetModel(modelType).ModelName),
@@ -295,7 +292,8 @@ namespace ServiceStack.OrmLite.SqlServer
                                              fieldDef.IsNullable,
                                              fieldDef.FieldLength,
                                              fieldDef.Scale,
-                                             fieldDef.DefaultValue);
+                                             fieldDef.DefaultValue,
+                                             fieldDef.CustomFieldDefinition);
 
             return string.Format("ALTER TABLE {0} ALTER COLUMN {1};",
                                  GetQuotedTableName(GetModel(modelType).ModelName),
@@ -312,6 +310,23 @@ namespace ServiceStack.OrmLite.SqlServer
                                  GetQuotedValue(objectName),
                                  GetQuotedValue(fieldDef.FieldName),
                                  GetQuotedValue("COLUMN"));
+        }
+
+        public override string GetColumnDefinition(string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement, 
+            bool isNullable, int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
+        {
+            var definition = base.GetColumnDefinition(fieldName, fieldType, isPrimaryKey, autoIncrement,
+                isNullable, fieldLength, scale, defaultValue, customFieldDefinition);
+
+            if (fieldType == typeof(Decimal) && fieldLength != DefaultDecimalPrecision && scale != DefaultDecimalScale)
+            {
+                string validDecimal = String.Format("DECIMAL({0},{1})",
+                    fieldLength.GetValueOrDefault(DefaultDecimalPrecision),
+                    scale.GetValueOrDefault(DefaultDecimalScale));
+                definition = definition.Replace(DecimalColumnDefinition, validDecimal);
+            }
+
+            return definition;
         }
     }
 }

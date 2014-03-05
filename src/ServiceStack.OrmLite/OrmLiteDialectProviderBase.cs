@@ -99,6 +99,13 @@ namespace ServiceStack.OrmLite
         public string StringColumnDefinition;
         public string StringLengthColumnDefinitionFormat;
 
+        private string maxStringColumnDefinition;
+        public string MaxStringColumnDefinition
+        {
+            get { return maxStringColumnDefinition ?? StringColumnDefinition; }
+            set { maxStringColumnDefinition = value; }
+        }
+
         public string AutoIncrementDefinition = "AUTOINCREMENT"; //SqlServer express limit
         public string IntColumnDefinition = "INTEGER";
         public string LongColumnDefinition = "BIGINT";
@@ -108,11 +115,13 @@ namespace ServiceStack.OrmLite
         public string DecimalColumnDefinition = "DECIMAL";
         public string BlobColumnDefinition = "BLOB";
         public string DateTimeColumnDefinition = "DATETIME";
-        public string TimeColumnDefinition = "DATETIME";
+        public string TimeColumnDefinition = "BIGINT";
+        public string DateTimeOffsetColumnDefinition = "DATETIMEOFFSET";
 
         protected OrmLiteDialectProviderBase()
         {
             UpdateStringColumnDefinitions();
+            StringSerializer = new JsvStringSerializer();
         }
 
         private int defaultDecimalPrecision = 18;
@@ -178,6 +187,8 @@ namespace ServiceStack.OrmLite
             }
         }
 
+        public IStringSerializer StringSerializer { get; set; }
+
         public virtual void UpdateStringColumnDefinitions()
         {
             this.StringLengthColumnDefinitionFormat = useUnicode
@@ -186,7 +197,6 @@ namespace ServiceStack.OrmLite
 
             this.StringColumnDefinition = string.Format(
                 this.StringLengthColumnDefinitionFormat, DefaultStringLength);
-
         }
 
         protected DbTypes<TDialect> DbTypeMap = new DbTypes<TDialect>();
@@ -202,10 +212,11 @@ namespace ServiceStack.OrmLite
             DbTypeMap.Set<Guid?>(DbType.Guid, GuidColumnDefinition);
             DbTypeMap.Set<DateTime>(DbType.DateTime, DateTimeColumnDefinition);
             DbTypeMap.Set<DateTime?>(DbType.DateTime, DateTimeColumnDefinition);
-            DbTypeMap.Set<TimeSpan>(DbType.Time, TimeColumnDefinition);
-            DbTypeMap.Set<TimeSpan?>(DbType.Time, TimeColumnDefinition);
-            DbTypeMap.Set<DateTimeOffset>(DbType.Time, TimeColumnDefinition);
-            DbTypeMap.Set<DateTimeOffset?>(DbType.Time, TimeColumnDefinition);
+
+            DbTypeMap.Set<TimeSpan>(DbType.Int64, TimeColumnDefinition); //using ticks
+            DbTypeMap.Set<TimeSpan?>(DbType.Int64, TimeColumnDefinition);
+            DbTypeMap.Set<DateTimeOffset>(DbType.DateTimeOffset, DateTimeOffsetColumnDefinition);
+            DbTypeMap.Set<DateTimeOffset?>(DbType.DateTimeOffset, DateTimeOffsetColumnDefinition);
 
             DbTypeMap.Set<byte>(DbType.Byte, IntColumnDefinition);
             DbTypeMap.Set<byte?>(DbType.Byte, IntColumnDefinition);
@@ -235,7 +246,7 @@ namespace ServiceStack.OrmLite
 
             DbTypeMap.Set<byte[]>(DbType.Binary, BlobColumnDefinition);
 
-            DbTypeMap.Set<object>(DbType.Object, StringColumnDefinition);
+            DbTypeMap.Set<object>(DbType.String, StringColumnDefinition);
 
             OnAfterInitColumnTypeMap();
         }
@@ -325,11 +336,17 @@ namespace ServiceStack.OrmLite
                     case TypeCode.Int64:
                         return Convert.ToInt64(value);
                 }
+
+                if (type == typeof(TimeSpan))
+                {
+                    var ticks = (long) value;
+                    return TimeSpan.FromTicks(ticks);
+                }
             }
 
             try
             {
-                var convertedValue = TypeSerializer.DeserializeFromString(value.ToString(), type);
+                var convertedValue = OrmLiteConfig.DialectProvider.StringSerializer.DeserializeFromString(value.ToString(), type);
                 return convertedValue;
             }
             catch (Exception)
@@ -343,28 +360,40 @@ namespace ServiceStack.OrmLite
         {
             if (value == null) return "NULL";
 
+            var dialectProvider = OrmLiteConfig.DialectProvider;
             if ((!fieldType.UnderlyingSystemType.IsValueType || JsConfig.TreatValueAsRefTypes.Contains(fieldType.IsGeneric() ? fieldType.GenericTypeDefinition() : fieldType)) && fieldType != typeof(string))
             {
-                if (TypeSerializer.CanCreateFromString(fieldType))
-                {
-                    return OrmLiteConfig.DialectProvider.GetQuotedValue(TypeSerializer.SerializeToString(value));
-                }
-
-                throw new NotSupportedException(
-                    string.Format("Property of type: {0} is not supported", fieldType.FullName));
+                return dialectProvider.GetQuotedValue(dialectProvider.StringSerializer.SerializeToString(value));
             }
 
-            if (fieldType == typeof(float))
-                return ((float)value).ToString(CultureInfo.InvariantCulture);
+            var typeCode = fieldType.GetTypeCode();
+            switch (typeCode)
+            {
+                case TypeCode.Single:
+                    return ((float)value).ToString(CultureInfo.InvariantCulture);
+                case TypeCode.Double:
+                    return ((double)value).ToString(CultureInfo.InvariantCulture);
+                case TypeCode.Decimal:
+                    return ((decimal)value).ToString(CultureInfo.InvariantCulture);
 
-            if (fieldType == typeof(double))
-                return ((double)value).ToString(CultureInfo.InvariantCulture);
+                case TypeCode.Byte:
+                case TypeCode.Int16:
+                case TypeCode.Int32:
+                case TypeCode.Int64:
+                case TypeCode.SByte:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
+                    if (fieldType.IsNumericType())
+                        return Convert.ChangeType(value, fieldType).ToString();
+                    break;
+            }
 
-            if (fieldType == typeof(decimal))
-                return ((decimal)value).ToString(CultureInfo.InvariantCulture);
+            if (fieldType == typeof(TimeSpan))
+                return ((TimeSpan)value).Ticks.ToString(CultureInfo.InvariantCulture);
 
             return ShouldQuoteValue(fieldType)
-                    ? OrmLiteConfig.DialectProvider.GetQuotedValue(value.ToString())
+                    ? dialectProvider.GetQuotedValue(value.ToString())
                     : value.ToString();
         }
 
@@ -397,24 +426,24 @@ namespace ServiceStack.OrmLite
 
         protected virtual string GetUndefinedColumnDefinition(Type fieldType, int? fieldLength)
         {
-            if (TypeSerializer.CanCreateFromString(fieldType))
-            {
-                return string.Format(StringLengthColumnDefinitionFormat, fieldLength.GetValueOrDefault(DefaultStringLength));
-            }
-
-            throw new NotSupportedException(
-                string.Format("Property of type: {0} is not supported", fieldType.FullName));
+            return string.Format(StringLengthColumnDefinitionFormat, fieldLength.GetValueOrDefault(DefaultStringLength));
         }
 
         public virtual string GetColumnDefinition(string fieldName, Type fieldType,
             bool isPrimaryKey, bool autoIncrement, bool isNullable,
-            int? fieldLength, int? scale, string defaultValue)
+            int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
         {
             string fieldDefinition;
 
-            if (fieldType == typeof(string))
+            if (customFieldDefinition != null)
             {
-                fieldDefinition = string.Format(StringLengthColumnDefinitionFormat, fieldLength.GetValueOrDefault(DefaultStringLength));
+                fieldDefinition = customFieldDefinition;
+            }
+            else if (fieldType == typeof(string))
+            {
+                fieldDefinition =  fieldLength == StringLengthAttribute.MaxText
+                    ? MaxStringColumnDefinition
+                    : string.Format(StringLengthColumnDefinitionFormat, fieldLength.GetValueOrDefault(DefaultStringLength));
             }
             else
             {
@@ -708,7 +737,7 @@ namespace ServiceStack.OrmLite
             p.ParameterName = OrmLiteConfig.DialectProvider.GetParam(fieldDef.FieldName);
 
             DbType dbType;
-            p.DbType = DbTypeMap.ColumnDbTypeMap.TryGetValue(fieldDef.FieldType, out dbType)
+            p.DbType = DbTypeMap.ColumnDbTypeMap.TryGetValue(fieldDef.ColumnType, out dbType)
                 ? dbType
                 : DbType.String;
         }
@@ -733,7 +762,7 @@ namespace ServiceStack.OrmLite
 
         public virtual void SetParameterValue<T>(FieldDefinition fieldDef, IDataParameter p, object obj)
         {
-            var knownType = DbTypeMap.ColumnDbTypeMap.ContainsKey(fieldDef.FieldType);
+            var knownType = DbTypeMap.ColumnDbTypeMap.ContainsKey(fieldDef.ColumnType);
             var value = knownType
                 ? GetValueOrDbNull<T>(fieldDef, obj)
                 : GetQuotedValueOrDbNull<T>(fieldDef, obj);
@@ -741,16 +770,32 @@ namespace ServiceStack.OrmLite
             p.Value = value;
         }
 
-        protected object GetValue<T>(FieldDefinition fieldDef, object obj)
+        protected virtual object GetValue<T>(FieldDefinition fieldDef, object obj)
         {
-            return obj is T
+            var value = obj is T
                ? fieldDef.GetValue(obj)
                : GetAnonValue<T>(fieldDef, obj);
+
+            if (value != null)
+            {
+                if (fieldDef.ColumnType == typeof(object))
+                {
+                    return value.ToJsv();
+                }
+                if (fieldDef.FieldType == typeof(TimeSpan))
+                {
+                    var timespan = (TimeSpan)value;
+                    return timespan.Ticks;
+                }
+            }
+
+            return value;
         }
 
         protected virtual object GetValueOrDbNull<T>(FieldDefinition fieldDef, object obj)
         {
-            return GetValue<T>(fieldDef, obj) ?? DBNull.Value;
+            var value = GetValue<T>(fieldDef, obj);
+            return value ?? DBNull.Value;
         }
 
         protected virtual object GetQuotedValueOrDbNull<T>(FieldDefinition fieldDef, object obj)
@@ -896,13 +941,14 @@ namespace ServiceStack.OrmLite
 
                 var columnDefinition = GetColumnDefinition(
                     fieldDef.FieldName,
-                    fieldDef.FieldType,
+                    fieldDef.ColumnType,
                     fieldDef.IsPrimaryKey,
                     fieldDef.AutoIncrement,
                     fieldDef.IsNullable,
                     fieldDef.FieldLength,
-                    null,
-                    fieldDef.DefaultValue);
+                    fieldDef.Scale,
+                    fieldDef.DefaultValue,
+                    fieldDef.CustomFieldDefinition);
 
                 sbColumns.Append(columnDefinition);
 
@@ -947,7 +993,7 @@ namespace ServiceStack.OrmLite
                 var indexName = GetIndexName(fieldDef.IsUnique, modelDef.ModelName.SafeVarName(), fieldDef.FieldName);
 
                 sqlIndexes.Add(
-                    ToCreateIndexStatement(fieldDef.IsUnique, indexName, modelDef, fieldDef.FieldName));
+                    ToCreateIndexStatement(fieldDef.IsUnique, indexName, modelDef, fieldDef.FieldName, isCombined:false, fieldDef:fieldDef));
             }
 
             foreach (var compositeIndex in modelDef.CompositeIndexes)
@@ -1014,10 +1060,14 @@ namespace ServiceStack.OrmLite
                     string.Join("_", compositeIndex.FieldNames.ToArray()));
         }
 
-        protected virtual string ToCreateIndexStatement(bool isUnique, string indexName, ModelDefinition modelDef, string fieldName, bool isCombined = false)
+        protected virtual string ToCreateIndexStatement(bool isUnique, string indexName, ModelDefinition modelDef, string fieldName, 
+            bool isCombined = false, FieldDefinition fieldDef = null)
         {
-            return string.Format("CREATE {0} INDEX {1} ON {2} ({3} ASC); \n",
-                                 isUnique ? "UNIQUE" : "", indexName,
+            return string.Format("CREATE {0}{1}{2} INDEX {3} ON {4} ({5} ASC); \n",
+                                 isUnique ? "UNIQUE" : "",
+                                 fieldDef != null && fieldDef.IsClustered ? " CLUSTERED" : "",
+                                 fieldDef != null && fieldDef.IsNonClustered ? " NONCLUSTERED" : "",
+                                 indexName,
                                  GetQuotedTableName(modelDef),
                                  (isCombined) ? fieldName : GetQuotedColumnName(fieldName));
         }
@@ -1103,7 +1153,8 @@ namespace ServiceStack.OrmLite
                                              fieldDef.IsNullable,
                                              fieldDef.FieldLength,
                                              fieldDef.Scale,
-                                             fieldDef.DefaultValue);
+                                             fieldDef.DefaultValue,
+                                             fieldDef.CustomFieldDefinition);
             return string.Format("ALTER TABLE {0} ADD COLUMN {1};",
                                  GetQuotedTableName(modelType.GetModelDefinition().ModelName),
                                  column);
@@ -1119,7 +1170,8 @@ namespace ServiceStack.OrmLite
                                              fieldDef.IsNullable,
                                              fieldDef.FieldLength,
                                              fieldDef.Scale,
-                                             fieldDef.DefaultValue);
+                                             fieldDef.DefaultValue,
+                                             fieldDef.CustomFieldDefinition);
             return string.Format("ALTER TABLE {0} MODIFY COLUMN {1};",
                                  GetQuotedTableName(modelType.GetModelDefinition().ModelName),
                                  column);
@@ -1136,7 +1188,8 @@ namespace ServiceStack.OrmLite
                                              fieldDef.IsNullable,
                                              fieldDef.FieldLength,
                                              fieldDef.Scale,
-                                             fieldDef.DefaultValue);
+                                             fieldDef.DefaultValue,
+                                             fieldDef.CustomFieldDefinition);
             return string.Format("ALTER TABLE {0} CHANGE COLUMN {1} {2};",
                                  GetQuotedTableName(modelType.GetModelDefinition().ModelName),
                                  GetQuotedColumnName(oldColumnName),

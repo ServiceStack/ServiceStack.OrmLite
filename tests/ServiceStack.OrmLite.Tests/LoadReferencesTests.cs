@@ -3,6 +3,7 @@ using System.Data;
 using System.Linq;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
+using ServiceStack.OrmLite.Tests.UseCase;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
@@ -58,9 +59,10 @@ namespace ServiceStack.OrmLite.Tests
         public void TestFixtureSetUp()
         {
             db = base.OpenDbConnection();
+            db.DropTable<OrderDetail>();
+            db.DropAndCreateTable<Order>();
             db.DropAndCreateTable<Customer>();
             db.DropAndCreateTable<CustomerAddress>();
-            db.DropAndCreateTable<Order>();
         }
 
         [TestFixtureTearDown]

@@ -2,6 +2,8 @@
 using System.Data;
 using System.Linq;
 using NUnit.Framework;
+using ServiceStack.Text;
+
 namespace ServiceStack.OrmLite.Tests.Expression
 {
     [TestFixture]
@@ -68,7 +70,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
         {
             db.Insert(People);
 
-            var visitor = ReadExtensions.SqlExpression<Person>();
+            var visitor = db.SqlExpression<Person>();
 
             visitor.Where(x => x.FirstName.StartsWith("Jim")).And(x => x.LastName.StartsWith("Hen"));
             var results = db.Select<Person>(visitor);
@@ -107,7 +109,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
         {
             db.Insert(People);
 
-            var visitor = ReadExtensions.SqlExpression<Person>();
+            var visitor = db.SqlExpression<Person>();
 
             visitor.Where(x => x.FirstName.StartsWith("Jim"));
             visitor.Where(x => x.LastName.StartsWith("Hen"));
@@ -131,7 +133,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
         {
             db.Insert(People);
 
-            var visitor = ReadExtensions.SqlExpression<Person>();
+            var visitor = db.SqlExpression<Person>();
             visitor.OrderBy(x => x.Age);
             visitor.ThenBy(x => x.FirstName);
 
@@ -184,6 +186,24 @@ namespace ServiceStack.OrmLite.Tests.Expression
                     Assert.Fail("Expected person with id {0}, got {1}", expected[i].Id, results[i].Id);
                 }
             }
+        }
+
+        [Test]
+        public void Can_clone_expressions()
+        {
+            db.Insert(People);
+
+            var query = db.SqlExpression<Person>()
+                .Where(x => x.FirstName.StartsWith("Jim"));
+
+            Assert.That(db.Select(query).Count, Is.EqualTo(2));
+
+            var querySnapshot = query.Clone();
+
+            query.Where(x => x.LastName.StartsWith("Hen"));
+            Assert.That(db.Select(query).Count, Is.EqualTo(1));
+
+            Assert.That(db.Select(querySnapshot).Count, Is.EqualTo(2));
         }
     }
 }

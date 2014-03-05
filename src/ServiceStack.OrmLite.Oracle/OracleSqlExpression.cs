@@ -5,8 +5,8 @@ using System.Linq.Expressions;
 
 namespace ServiceStack.OrmLite.Oracle
 {
-	public class OracleSqlExpression<T>:SqlExpression<T>
-	{
+    public class OracleSqlExpression<T> : SqlExpression<T>
+    {
         protected override object VisitColumnAccessMethod(MethodCallExpression m)
         {
             if (m.Method.Name == "Substring")
@@ -30,12 +30,13 @@ namespace ServiceStack.OrmLite.Oracle
             return base.VisitColumnAccessMethod(m);
         }
 
-		public override string LimitExpression{
-			get
+        public override string LimitExpression
+        {
+            get
             {
                 return "";
-			}
-		}
+            }
+        }
 
         //from Simple.Data.Oracle implementation https://github.com/flq/Simple.Data.Oracle/blob/master/Simple.Data.Oracle/OraclePager.cs
         private static string UpdateWithOrderByIfNecessary(string sql)
@@ -55,7 +56,7 @@ namespace ServiceStack.OrmLite.Oracle
 
         protected override string ApplyPaging(string sql)
         {
-            if (!Rows.HasValue) 
+            if (!Rows.HasValue)
                 return sql;
             if (!Skip.HasValue)
             {
@@ -71,9 +72,12 @@ namespace ServiceStack.OrmLite.Oracle
             sb.AppendFormat("WHERE \"_ss_ormlite_2_\".RNUM > {0}", Skip.Value);
 
             return sb.ToString();
-
         }
-				
-	}
+
+        public override SqlExpression<T> Clone()
+        {
+            return CopyTo(new OracleSqlExpression<T>());
+        }
+    }
 }
 

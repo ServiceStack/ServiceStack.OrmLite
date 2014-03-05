@@ -8,34 +8,97 @@ namespace ServiceStack.OrmLite
 {
     public static class UntypedApiExtensions
     {
-        static readonly ConcurrentDictionary<Type,IUntypedApi> untypedApiMap = 
-            new ConcurrentDictionary<Type, IUntypedApi>();
+        static readonly ConcurrentDictionary<Type, Type> untypedApiMap = 
+            new ConcurrentDictionary<Type, Type>();
 
-        public static IUntypedApi GetUntypedApi(this Type forType)
+        public static IUntypedApi CreateTypedApi(this IDbConnection db, Type forType)
         {
-            return untypedApiMap.GetOrAdd(forType, key => {
-                    var genericType = typeof(UntypedApi<>).MakeGenericType(key);
-                    return (IUntypedApi)genericType.CreateInstance();
-                });
+            var genericType = untypedApiMap.GetOrAdd(forType, key => typeof(UntypedApi<>).MakeGenericType(key));
+            var unTypedApi = genericType.CreateInstance<IUntypedApi>();
+            unTypedApi.Db = db;
+            return unTypedApi;
         }
-    }
 
-    public interface IUntypedApi
-    {
-        int SaveAll(IDbCommand dbCmd, IEnumerable objs);
-        bool Save(IDbCommand dbCmd, object obj);
+        public static IUntypedApi CreateTypedApi(this IDbCommand dbCmd, Type forType)
+        {
+            var genericType = untypedApiMap.GetOrAdd(forType, key => typeof(UntypedApi<>).MakeGenericType(key));
+            var unTypedApi = genericType.CreateInstance<IUntypedApi>();
+            unTypedApi.DbCmd = dbCmd;
+            return unTypedApi;
+        }
     }
 
     public class UntypedApi<T> : IUntypedApi
     {
-        public int SaveAll(IDbCommand dbCmd, IEnumerable objs)
+        public IDbConnection Db { get; set; }
+        public IDbCommand DbCmd { get; set; }
+
+        public T Exec<T>(Func<IDbCommand, T> filter)
         {
-            return dbCmd.SaveAll((IEnumerable<T>)objs);
+            return DbCmd != null ? filter(DbCmd) : Db.Exec(filter);
         }
 
-        public bool Save(IDbCommand dbCmd, object obj)
+        public void Exec(Action<IDbCommand> filter)
         {
-            return dbCmd.Save((T)obj);
+            if (DbCmd != null)
+                filter(DbCmd);
+            else
+                Db.Exec(filter);
+        }
+
+        public int SaveAll(IEnumerable objs)
+        {
+            return Exec(dbCmd => dbCmd.SaveAll((IEnumerable<T>)objs));
+        }
+
+        public bool Save(object obj)
+        {
+            return Exec(dbCmd => dbCmd.Save((T)obj));
+        }
+
+        public void InsertAll(IEnumerable objs)
+        {
+            Exec(dbCmd => dbCmd.InsertAll((IEnumerable<T>)objs));
+        }
+
+        public long Insert(object obj, bool selectIdentity = false)
+        {
+            return Exec(dbCmd => dbCmd.Insert((T)obj, selectIdentity: selectIdentity));
+        }
+
+        public int UpdateAll(IEnumerable objs)
+        {
+            return Exec(dbCmd => dbCmd.UpdateAll((IEnumerable<T>)objs));
+        }
+
+        public int Update(object obj)
+        {
+            return Exec(dbCmd => dbCmd.Update((T)obj));
+        }
+
+        public int DeleteAll()
+        {
+            return Exec(dbCmd => dbCmd.DeleteAll<T>());
+        }
+
+        public int Delete(object obj, object anonType)
+        {
+            return Exec(dbCmd => dbCmd.Delete<T>(anonType));
+        }
+
+        public int DeleteNonDefaults(object obj, object filter)
+        {
+            return Exec(dbCmd => dbCmd.DeleteNonDefaults((T)filter));
+        }
+
+        public int DeleteById(object id)
+        {
+            return Exec(dbCmd => dbCmd.DeleteById<T>(id));
+        }
+
+        public int DeleteByIds(IEnumerable idValues)
+        {
+            return Exec(dbCmd => dbCmd.DeleteByIds<T>(idValues));
         }
     }
 }

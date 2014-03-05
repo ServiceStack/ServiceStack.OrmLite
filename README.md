@@ -1,7 +1,7 @@
 [Join the ServiceStack Google+ group](https://plus.google.com/u/0/communities/112445368900682590445) or
 follow [@servicestack](http://twitter.com/servicestack) for updates.
 
-# An Open Source Micro ORM for .NET
+# A Fast Micro ORM for .NET
 
 # Introduction
 
@@ -28,18 +28,17 @@ Effectively this allows you to create a table from any POCO type and it should p
 
 ### 8 flavours of OrmLite is on NuGet: 
 
-  - [Sql Server](http://nuget.org/List/Packages/ServiceStack.OrmLite.SqlServer)
-  - [MySql](http://nuget.org/List/Packages/ServiceStack.OrmLite.MySql)
-  - [PostgreSQL](http://nuget.org/List/Packages/ServiceStack.OrmLite.PostgreSQL)
-  - [Oracle](http://nuget.org/packages/ServiceStack.OrmLite.Oracle)
-  - [Firebird](http://nuget.org/List/Packages/ServiceStack.OrmLite.Firebird) 
-  - [Sqlite32](http://nuget.org/List/Packages/ServiceStack.OrmLite.Sqlite32) - 32bit Mixed mode .NET only assembly 
-  - [Sqlite64](http://nuget.org/List/Packages/ServiceStack.OrmLite.Sqlite64) - 64bit Mixed mode .NET only assembly 
-  - [Sqlite.Mono](http://nuget.org/packages/ServiceStack.OrmLite.Sqlite.Mono) - 32bit unmanaged dll, compatible with .NET / Mono
+  - [ServiceStack.OrmLite.Sql Server](http://nuget.org/List/Packages/ServiceStack.OrmLite.SqlServer)
+  - [ServiceStack.OrmLite.MySql](http://nuget.org/List/Packages/ServiceStack.OrmLite.MySql)
+  - [ServiceStack.OrmLite.PostgreSQL](http://nuget.org/List/Packages/ServiceStack.OrmLite.PostgreSQL)
+  - [ServiceStack.OrmLite.Sqlite.Windows](http://nuget.org/List/Packages/ServiceStack.OrmLite.Sqlite.Windows) - 32/64bit Mixed mode .NET for WIndows only 
+  - [ServiceStack.OrmLite.Sqlite.Mono](http://nuget.org/packages/ServiceStack.OrmLite.Sqlite.Mono) - - Compatible with Mono / Windows (x86) 
+  - [ServiceStack.OrmLite.Oracle](http://nuget.org/packages/ServiceStack.OrmLite.Oracle)
+  - [ServiceStack.OrmLite.Firebird](http://nuget.org/List/Packages/ServiceStack.OrmLite.Firebird) 
+   
+_Latest v4+ on NuGet is a commercial release with [free quotas](https://servicestack.net/download#free-quotas)._
 
-OrmLite.SqlServer is also included in [ServiceStack](https://github.com/ServiceStack/ServiceStack/downloads).
-
-_Commercial support will be available for ServiceStack, contact team@servicestack.net for details_
+### [Docs and Downloads for older v3 BSD releases](https://github.com/ServiceStackV3/ServiceStackV3)
 
 ## Copying
 
@@ -59,46 +58,18 @@ extracting them from the published NuGet packages. The url to download a nuget p
     
  So to get the OrmLite MySQL provider in OSX/Linux (or using gnu tools for Windows) you can just do:
 
-    wget -O OrmLite.MySql.zip http://packages.nuget.org/api/v1/package/ServiceStack.OrmLite.MySql/3.9.60
+    wget -O OrmLite.MySql.zip http://packages.nuget.org/api/v1/package/ServiceStack.OrmLite.MySql/4.0.5
     unzip OrmLite.MySql.zip 'lib/*'
 
 which will download and extract the dlls into your local local `lib/` folder.
-
-## IMPORTANT NOTICE
-
-Please upgrade your client code to use non-deprecated methods as we will be removing access to deprecated APIs in the next release of OrmLite.
 
 ***
 
 ## T4 Template Support
 
-[Guru Kathiresan](https://github.com/gkathire) continues to enhance [OrmLite's T4 Template support](https://github.com/ServiceStack/ServiceStack.OrmLite/tree/master/src/T4) which are useful when you want to automatically generate POCO's and strong-typed wrappers for executing stored procedures. 
+[Guru Kathiresan](https://github.com/gkathire) continues to enhance [OrmLite's T4 Template support](https://github.com/ServiceStack/ServiceStack.OrmLite/tree/master/src/T4) which are useful when you want to automatically generate POCO's and strong-typed wrappers for executing stored procedures. OrmLite's T4 support can be added via NuGet with:
 
-
-## New Parameterized API's
-
-We've now added API's that use parameterized statements for all SQL operations, these are identified with a **Param** suffix, e.g:
-
-### Parameterized Write operations
-
-```csharp
-db.InsertParam(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27})
-db.UpdateParam(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27})
-db.DeleteByIdParam<Person>(1)
-```
-
-### Parameterized Read operations
-
-```csharp
-var people = db.SelectParam<Person>(q => q.Age == 27)
-var person = db.GetByIdParam<Person>(1)
-
-//Existing parameterized query API's
-var people = db.Where<Person>(new { FirstName = "Jimi", Age = 27 })
-var people = db.Query<Track>("FirstName = @name and Age = @age", new { name = "Jimi", age = 27 })
-```
-
-Apart from a slight performance increase, parameterized API's now lets you insert and update binary blob data. At the same time as these new parameterized API's, we've also added support for querying binary blob data.
+    PM> Install-Package ServiceStack.OrmLite.T4
 
 ## New API's to execute custom SQL
 
@@ -439,188 +410,187 @@ Below is a complete stand-alone example. No other config or classes is required 
 [stand-alone unit test](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLite.Tests/UseCase/CustomerOrdersUseCase.cs).
 
 ```csharp
-    public enum PhoneType {
-        Home,
-        Work,
-        Mobile,
+public enum PhoneType {
+    Home,
+    Work,
+    Mobile,
+}
+
+public enum AddressType {
+    Home,
+    Work,
+    Other,
+}
+
+public class Address {
+    public string Line1 { get; set; }
+    public string Line2 { get; set; }
+    public string ZipCode { get; set; }
+    public string State { get; set; }
+    public string City { get; set; }
+    public string Country { get; set; }
+}
+
+public class Customer {
+    public Customer() {
+        this.PhoneNumbers = new Dictionary<PhoneType, string>();
+        this.Addresses = new Dictionary<AddressType, Address>();
     }
 
-    public enum AddressType {
-        Home,
-        Work,
-        Other,
-    }
+    [AutoIncrement] // Creates Auto primary key
+    public int Id { get; set; }
+    
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+    
+    [Index(Unique = true)] // Creates Unique Index
+    public string Email { get; set; }
+    
+    public Dictionary<PhoneType, string> PhoneNumbers { get; set; }  //Blobbed
+    public Dictionary<AddressType, Address> Addresses { get; set; }  //Blobbed
+    public DateTime CreatedAt { get; set; }
+}
 
-    public class Address {
-        public string Line1 { get; set; }
-        public string Line2 { get; set; }
-        public string ZipCode { get; set; }
-        public string State { get; set; }
-        public string City { get; set; }
-        public string Country { get; set; }
-    }
+public class Order {
+    
+    [AutoIncrement]
+    public int Id { get; set; }
+    
+    [References(typeof(Customer))]      //Creates Foreign Key
+    public int CustomerId { get; set; }
+    
+    [References(typeof(Employee))]      //Creates Foreign Key
+    public int EmployeeId { get; set; }
+    
+    public Address ShippingAddress { get; set; } //Blobbed (no Address table)
+    
+    public DateTime? OrderDate { get; set; }
+    public DateTime? RequiredDate { get; set; }
+    public DateTime? ShippedDate { get; set; }
+    public int? ShipVia { get; set; }
+    public decimal Freight { get; set; }
+    public decimal Total { get; set; }
+}
 
-    public class Customer {
-        public Customer() {
-            this.PhoneNumbers = new Dictionary<PhoneType, string>();
-            this.Addresses = new Dictionary<AddressType, Address>();
-        }
+public class OrderDetail {
+    
+    [AutoIncrement]
+    public int Id { get; set; }
+    
+    [References(typeof(Order))] //Creates Foreign Key
+    public int OrderId { get; set; }
+    
+    public int ProductId { get; set; }
+    public decimal UnitPrice { get; set; }
+    public short Quantity { get; set; }
+    public decimal Discount { get; set; }
+}
 
-        [AutoIncrement] // Creates Auto primary key
-        public int Id { get; set; }
-        
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        
-        [Index(Unique = true)] // Creates Unique Index
-        public string Email { get; set; }
-        
-        public Dictionary<PhoneType, string> PhoneNumbers { get; set; }  //Blobbed
-        public Dictionary<AddressType, Address> Addresses { get; set; }  //Blobbed
-        public DateTime CreatedAt { get; set; }
-    }
+public class Employee {
+    public int Id { get; set; }
+    public string Name { get; set; }
+}
 
-    public class Order {
-        
-        [AutoIncrement]
-        public int Id { get; set; }
-        
-        [References(typeof(Customer))]      //Creates Foreign Key
-        public int CustomerId { get; set; }
-        
-        [References(typeof(Employee))]      //Creates Foreign Key
-        public int EmployeeId { get; set; }
-        
-        public Address ShippingAddress { get; set; } //Blobbed (no Address table)
-        
-        public DateTime? OrderDate { get; set; }
-        public DateTime? RequiredDate { get; set; }
-        public DateTime? ShippedDate { get; set; }
-        public int? ShipVia { get; set; }
-        public decimal Freight { get; set; }
-        public decimal Total { get; set; }
-    }
+public class Product {
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public decimal UnitPrice { get; set; }
+}
 
-    public class OrderDetail {
-        
-        [AutoIncrement]
-        public int Id { get; set; }
-        
-        [References(typeof(Order))] //Creates Foreign Key
-        public int OrderId { get; set; }
-        
-        public int ProductId { get; set; }
-        public decimal UnitPrice { get; set; }
-        public short Quantity { get; set; }
-        public decimal Discount { get; set; }
-    }
+//Setup SQL Server Connection Factory
+var dbFactory = new OrmLiteConnectionFactory(
+	@"Data Source=.\SQLEXPRESS;AttachDbFilename=|DataDirectory|\App_Data\Database1.mdf;Integrated Security=True;User Instance=True",
+	SqlServerDialect.Provider);
 
-    public class Employee {
-        public int Id { get; set; }
-        public string Name { get; set; }
-    }
+//Use in-memory Sqlite DB instead
+//var dbFactory = new OrmLiteConnectionFactory(
+//    ":memory:", false, SqliteDialect.Provider);
 
-    public class Product {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public decimal UnitPrice { get; set; }
-    }
+//Non-intrusive: All extension methods hang off System.Data.* interfaces
+using (IDbConnection db = Config.OpenDbConnection())
+{
+  //Re-Create all table schemas:
+  db.DropTable<OrderDetail>();
+  db.DropTable<Order>();
+  db.DropTable<Customer>();
+  db.DropTable<Product>();
+  db.DropTable<Employee>();
 
-    //Setup SQL Server Connection Factory
-    var dbFactory = new OrmLiteConnectionFactory(
-    	@"Data Source=.\SQLEXPRESS;AttachDbFilename=|DataDirectory|\App_Data\Database1.mdf;Integrated Security=True;User Instance=True",
-    	SqlServerDialect.Provider);
+  db.CreateTable<Employee>();
+  db.CreateTable<Product>();
+  db.CreateTable<Customer>();
+  db.CreateTable<Order>();
+  db.CreateTable<OrderDetail>();
 
-    //Use in-memory Sqlite DB instead
-    //var dbFactory = new OrmLiteConnectionFactory(
-    //    ":memory:", false, SqliteDialect.Provider);
+  db.Insert(new Employee { Id = 1, Name = "Employee 1" });
+  db.Insert(new Employee { Id = 2, Name = "Employee 2" });
+  var product1 = new Product { Id = 1, Name = "Product 1", UnitPrice = 10 };
+  var product2 = new Product { Id = 2, Name = "Product 2", UnitPrice = 20 };
+  db.Save(product1, product2);
 
-    //Non-intrusive: All extension methods hang off System.Data.* interfaces
-    IDbConnection db = dbFactory.OpenDbConnection();
+  var customer = new Customer {
+      FirstName = "Orm",
+      LastName = "Lite",
+      Email = "ormlite@servicestack.net",
+      PhoneNumbers =
+      {
+          { PhoneType.Home, "555-1234" },
+          { PhoneType.Work, "1-800-1234" },
+          { PhoneType.Mobile, "818-123-4567" },
+      },
+      Addresses =
+      {
+          { AddressType.Work, new Address { 
+            Line1 = "1 Street", Country = "US", State = "NY", City = "New York", ZipCode = "10101" } 
+          },
+      },
+      CreatedAt = DateTime.UtcNow,
+  };
 
-    //Re-Create all table schemas:
-    db.DropTable<OrderDetail>();
-    db.DropTable<Order>();
-    db.DropTable<Customer>();
-    db.DropTable<Product>();
-    db.DropTable<Employee>();
+  var customerId = db.Insert(customer, selectIdentity: true); //Get Auto Inserted Id
+  customer = db.Single<Customer>(new { customer.Email }); //Query
+  Assert.That(customer.Id, Is.EqualTo(customerId));
 
-    db.CreateTable<Employee>();
-    db.CreateTable<Product>();
-    db.CreateTable<Customer>();
-    db.CreateTable<Order>();
-    db.CreateTable<OrderDetail>();
+  //Direct access to System.Data.Transactions:
+  using (IDbTransaction trans = db.OpenTransaction(IsolationLevel.ReadCommitted))
+  {
+      var order = new Order {
+          CustomerId = customer.Id,
+          EmployeeId = 1,
+          OrderDate = DateTime.UtcNow,
+          Freight = 10.50m,
+          ShippingAddress = new Address { 
+            Line1 = "3 Street", Country = "US", State = "NY", City = "New York", ZipCode = "12121" },
+      };
+      db.Save(order); //Inserts 1st time
 
-    db.Insert(new Employee { Id = 1, Name = "Employee 1" });
-    db.Insert(new Employee { Id = 2, Name = "Employee 2" });
-    var product1 = new Product { Id = 1, Name = "Product 1", UnitPrice = 10 };
-    var product2 = new Product { Id = 2, Name = "Product 2", UnitPrice = 20 };
-    db.Save(product1, product2);
+      //order.Id populated on Save().
 
-    var customer = new Customer
-    {
-        FirstName = "Orm",
-        LastName = "Lite",
-        Email = "ormlite@servicestack.net",
-        PhoneNumbers =
-            {
-                { PhoneType.Home, "555-1234" },
-                { PhoneType.Work, "1-800-1234" },
-                { PhoneType.Mobile, "818-123-4567" },
-            },
-        Addresses =
-            {
-                { AddressType.Work, new Address { Line1 = "1 Street", Country = "US", State = "NY", City = "New York", ZipCode = "10101" } },
-            },
-        CreatedAt = DateTime.UtcNow,
-    };
-    db.Insert(customer);
+      var orderDetails = new[] {
+          new OrderDetail {
+              OrderId = order.Id,
+              ProductId = product1.Id,
+              Quantity = 2,
+              UnitPrice = product1.UnitPrice,
+          },
+          new OrderDetail {
+              OrderId = order.Id,
+              ProductId = product2.Id,
+              Quantity = 2,
+              UnitPrice = product2.UnitPrice,
+              Discount = .15m,
+          }
+      };
 
-    var customerId = db.GetLastInsertId(); //Get Auto Inserted Id
-    customer = db.QuerySingle<Customer>(new { customer.Email }); //Query
-    Assert.That(customer.Id, Is.EqualTo(customerId));
+      db.Save(orderDetails);
 
-    //Direct access to System.Data.Transactions:
-    using (var trans = db.OpenTransaction(IsolationLevel.ReadCommitted))
-    {
-        var order = new Order
-        {
-            CustomerId = customer.Id,
-            EmployeeId = 1,
-            OrderDate = DateTime.UtcNow,
-            Freight = 10.50m,
-            ShippingAddress = new Address { Line1 = "3 Street", Country = "US", State = "NY", City = "New York", ZipCode = "12121" },
-        };
-        db.Save(order); //Inserts 1st time
+      order.Total = orderDetails.Sum(x => x.UnitPrice * x.Quantity * x.Discount) + order.Freight;
 
-        order.Id = (int)db.GetLastInsertId(); //Get Auto Inserted Id
+      db.Save(order); //Updates 2nd Time
 
-        var orderDetails = new[] {
-            new OrderDetail
-            {
-                OrderId = order.Id,
-                ProductId = product1.Id,
-                Quantity = 2,
-                UnitPrice = product1.UnitPrice,
-            },
-            new OrderDetail
-            {
-                OrderId = order.Id,
-                ProductId = product2.Id,
-                Quantity = 2,
-                UnitPrice = product2.UnitPrice,
-                Discount = .15m,
-            }
-        };
-
-        db.Insert(orderDetails);
-
-        order.Total = orderDetails.Sum(x => x.UnitPrice * x.Quantity * x.Discount) + order.Freight;
-
-        db.Save(order); //Updates 2nd Time
-
-        trans.Commit();
-    }
+      trans.Commit();
+  }
+}
 ```
 
 Running this against a SQL Server database will yield the results below:
@@ -645,20 +615,20 @@ Nearly all extension methods hang off the implementation agnostic `IDbCommand`.
 For a one-time use of a connection, you can query straight of the `IDbConnectionFactory` with:
 
 ```csharp
-var customers = dbFactory.Run(db => db.Where<Customer>(new { Age = 30 }));
+var customers = db.Where<Customer>(new { Age = 30 });
 ```
 
 The **Select** methods allow you to construct Sql using C# `string.Format()` syntax.
 If your SQL doesn't start with a **SELECT** statement, it is assumed a WHERE clause is being provided, e.g:
 
 ```csharp
-var tracks = db.Select<Track>("Artist = {0} AND Album = {1}", "Nirvana", "Heart Shaped Box");
+var tracks = db.SelectFmt<Track>("Artist = {0} AND Album = {1}", "Nirvana", "Heart Shaped Box");
 ```
 
 The same results could also be fetched with:
 
 ```csharp
-var tracks = db.Select<Track>("select * from track WHERE Artist={0} AND Album={1}", "Nirvana", "Heart Shaped Box");
+var tracks = db.SelectFmt<Track>("select * from track WHERE Artist={0} AND Album={1}", "Nirvana", "Heart Shaped Box");
 ```
 
 **Select** returns multiple records 
@@ -670,7 +640,7 @@ List<Track> tracks = db.Select<Track>()
 **Single** returns a single record. Alias: `First`  
 
 ```csharp
-Track track = db.Single<Track>("RefId = {0}", refId)
+Track track = db.SingleFmt<Track>("RefId = {0}", refId)
 ```
 
 **Dictionary** returns a Dictionary made from the first two columns. Alias: `GetDictionary`
@@ -688,13 +658,13 @@ Dictionary<int, List<string>> albumTrackNames = db.Lookup<int, string>("select A
 **List** returns a List of first column values. Alias: `GetList`
 
 ```csharp
-List<string> trackNames = db.List<string>("select Name from Track")
+List<string> trackNames = db.Column<string>("select Name from Track")
 ```
 
 **HashSet** returns a HashSet of distinct first column values. Alias: `GetHashSet`
 
 ```csharp    
-HashSet<string> uniqueTrackNames = db.HashSet<string>("select Name from Track")
+HashSet<string> uniqueTrackNames = db.ColumnDistinct<string>("select Name from Track")
 ```
 
 **Scalar** returns a single scalar value. Alias: `GetScalar`
@@ -711,26 +681,25 @@ Both take multiple items, optimized to perform a single read to check for existi
 
 Methods containing the word **Each** return an IEnumerable<T> and are lazily loaded (i.e. non-buffered).
 
-Selection methods containing the word **Query** or **Where** use parameterized SQL (other selection methods do not).
+By default Selection methods use parameterized SQL whilst any selection methods ending with **Fmt** do not.
 Anonymous types passed into **Where** are treated like an **AND** filter.
 
 ```csharp
 var track3 = db.Where<Track>(new { AlbumName = "Throwing Copper", TrackNo = 3 })
 ```
 
-**Query** statements take in parameterized SQL using properties from the supplied anonymous type (if any)
+**Select** statements take in parameterized SQL using properties from the supplied anonymous type (if any)
 
 ```csharp
-var track3 = db.Query<Track>("select * from Track Where AlbumName = @album and TrackNo = @trackNo", 
+var track3 = db.Select<Track>("select * from Track Where AlbumName = @album and TrackNo = @trackNo", 
 	new { album = "Throwing Copper", trackNo = 3 })
 ```
 
-GetById(s), QueryById(s), etc provide strong-typed convenience methods to fetch by a Table's **Id** primary key field.
+SingleById(s), SelectById(s), etc provide strong-typed convenience methods to fetch by a Table's **Id** primary key field.
 
 ```csharp
-var track = db.QueryById<Track>(1);
-var track = db.Id<Track>(1);                    //Alias: GetById
-var tracks = db.Ids<Track>(new[]{ 1,2,3 });     //Alias: GetByIds
+var track = db.SingleById<Track>(1);
+var tracks = db.SelectByIds<Track>(new[]{ 1,2,3 });
 ```
 
 
@@ -914,11 +883,11 @@ No ORM is complete without the standard crud operations:
 	//Lets update a record
 	trainsAreUs.Phone = "666-TRAINS";
 	db.Update(trainsAreUs);
-	Assert.That(db.GetById<Shipper>(trainsAreUs.Id).Phone, Is.EqualTo("666-TRAINS"));
+	Assert.That(db.SingleById<Shipper>(trainsAreUs.Id).Phone, Is.EqualTo("666-TRAINS"));
 
 	//Then make it disappear
 	db.Delete(trainsAreUs);
-	Assert.That(db.GetByIdOrDefault<Shipper>(trainsAreUs.Id), Is.Null);
+	Assert.That(db.SingleById<Shipper>(trainsAreUs.Id), Is.Null);
 
 	//And bring it back again
 	db.Insert(trainsAreUs);

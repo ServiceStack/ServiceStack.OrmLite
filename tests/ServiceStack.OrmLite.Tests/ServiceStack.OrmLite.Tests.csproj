@@ -68,6 +68,10 @@
     <Reference Include="ServiceStack">
       <HintPath>..\..\lib\tests\ServiceStack.dll</HintPath>
     </Reference>
+    <Reference Include="ServiceStack.Client, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\ServiceStack.Client.dll</HintPath>
+    </Reference>
     <Reference Include="ServiceStack.Text">
       <HintPath>..\..\lib\ServiceStack.Text.dll</HintPath>
     </Reference>
@@ -75,6 +79,7 @@
     <Reference Include="System.ComponentModel.DataAnnotations">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -83,6 +88,7 @@
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Security" />
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -108,13 +114,19 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AdoNetDataAccessTests.cs" />
     <Compile Include="ApiSqlServerTests.cs" />
     <Compile Include="ApiSqliteTests.cs" />
+    <Compile Include="CustomSqlTests.cs" />
     <Compile Include="DateTimeOffsetTests.cs" />
     <Compile Include="Expression\MethodExpressionTests.cs" />
+    <Compile Include="Expression\SelectExpressionTests.cs" />
+    <Compile Include="Issues\MismatchSchemaTests.cs" />
     <Compile Include="LicenseUsageTests.cs" />
     <Compile Include="LoadReferencesTests.cs" />
     <Compile Include="MockAllApiTests.cs" />
+    <Compile Include="OrmLiteFiltersTests.cs" />
+    <Compile Include="StringSerializerTests.cs" />
     <Compile Include="TypeDescriptorMetadataTests.cs" />
     <Compile Include="Shared\ApiUtilExtensions.cs" />
     <Compile Include="EnumTests.cs" />
@@ -193,6 +205,7 @@
     <Compile Include="SqliteOrmLiteDialectProviderTests.cs" />
     <Compile Include="SqlServerProviderTests.cs" />
     <Compile Include="TypeWithByteArrayFieldTests.cs" />
+    <Compile Include="UntypedApiTests.cs" />
     <Compile Include="UseCase\AliasedFieldUseCase.cs" />
     <Compile Include="UseCase\CustomerOrdersUseCase.cs" />
     <Compile Include="UseCase\NestedComplexTypeUseCase.cs" />
@@ -270,6 +283,22 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Firebird\ServiceStack.OrmLite.Firebird.csproj">
+      <Project>{317B64BA-D7A6-4A15-8719-821B38147C63}</Project>
+      <Name>ServiceStack.OrmLite.Firebird</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.MySql\ServiceStack.OrmLite.MySql.csproj">
+      <Project>{FD20F088-ACC0-4979-AC0C-8C541C2E7DE5}</Project>
+      <Name>ServiceStack.OrmLite.MySql</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Oracle\ServiceStack.OrmLite.Oracle.csproj">
+      <Project>{517B64BA-D7A6-4A15-8719-821B38147C61}</Project>
+      <Name>ServiceStack.OrmLite.Oracle</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.PostgreSQL\ServiceStack.OrmLite.PostgreSQL.csproj">
+      <Project>{3220F088-BDD0-6979-AC0C-8C541C2E7DE5}</Project>
+      <Name>ServiceStack.OrmLite.PostgreSQL</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Sqlite\ServiceStack.OrmLite.Sqlite.csproj">
       <Project>{CF68A37D-D071-469D-AE04-68594CB95382}</Project>
       <Name>ServiceStack.OrmLite.Sqlite</Name>
