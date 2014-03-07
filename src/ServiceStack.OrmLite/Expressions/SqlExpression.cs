@@ -225,8 +225,6 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
-
-
         public virtual SqlExpression<T> OrderBy()
         {
             return OrderBy(string.Empty);
@@ -235,7 +233,9 @@ namespace ServiceStack.OrmLite
         public virtual SqlExpression<T> OrderBy(string orderBy)
         {
             orderByProperties.Clear();
-            this.orderBy = orderBy;
+            this.orderBy = string.IsNullOrEmpty(orderBy)
+                ? null
+                : "ORDER BY " + orderBy;
             return this;
         }
 

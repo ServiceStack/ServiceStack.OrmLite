@@ -205,5 +205,24 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
             Assert.That(db.Select(querySnapshot).Count, Is.EqualTo(2));
         }
+
+        [Test]
+        public void Can_OrderBy_string()
+        {
+            db.Insert(People);
+
+            var query = db.SqlExpression<Person>();
+
+            query.OrderBy("Age DESC");
+
+            var ages = db.Select(query).ConvertAll(x => x.Age.Value);
+
+            db.GetLastSql().Print();
+            Assert.That(db.GetLastSql(), Is.StringContaining("ORDER BY Age DESC"));
+
+            ages.PrintDump();
+
+            Assert.That(ages, Is.EqualTo(People.ToList().ConvertAll(x => x.Age).OrderByDescending(x => x)));
+        }
     }
 }
