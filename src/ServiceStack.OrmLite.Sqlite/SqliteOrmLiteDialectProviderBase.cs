@@ -187,17 +187,10 @@ namespace ServiceStack.OrmLite.Sqlite
             if (fieldType == typeof(DateTime))
             {
                 var dateValue = (DateTime)value;
-                
-                //Not forcing co-ercsion into UTC for Sqlite
-                var dateStr = DateTimeSerializer.ToLocalXsdDateTimeString(dateValue);
-                const int tzPos = 6; //"-00:00".Length;
-                var timeZoneMod = dateStr.Substring(dateStr.Length - tzPos, 1);
-                if (timeZoneMod == "+" || timeZoneMod == "-")
-                {
-                    dateStr = dateStr.Substring(0, dateStr.Length - tzPos);
-                }
+                var dateStr = dateValue.ToSqliteDateString();
                 return base.GetQuotedValue(dateStr, typeof(string));
             }
+
             if (fieldType == typeof(bool))
             {
                 var boolValue = (bool)value;
@@ -266,6 +259,21 @@ namespace ServiceStack.OrmLite.Sqlite
                 SqliteOrmLiteDialectProviderBase.UTF8Encoded = true;
 
             return provider;
+        }
+
+        public static string ToSqliteDateString(this DateTime dateTime)
+        {
+            //Not forcing co-ercsion into UTC for Sqlite
+            var dateStr = DateTimeSerializer.ToLocalXsdDateTimeString(dateTime);
+            dateStr = dateStr.Replace("T", " ");
+            const int tzPos = 6; //"-00:00".Length;
+            var timeZoneMod = dateStr.Substring(dateStr.Length - tzPos, 1);
+            if (timeZoneMod == "+" || timeZoneMod == "-")
+            {
+                dateStr = dateStr.Substring(0, dateStr.Length - tzPos);
+            }
+
+            return dateStr;
         }
     }
 }
