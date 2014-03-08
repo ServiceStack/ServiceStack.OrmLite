@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using NUnit.Framework;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -64,6 +65,12 @@ namespace ServiceStack.OrmLite.Tests
                 "Field = 'Value';select Table, '' FROM A".SqlVerifyFragment());
             Assert.Throws<ArgumentException>(() =>
                 "Field = 'Value';delete Table where '' = ''".SqlVerifyFragment());
+        }
+
+        [Test]
+        public void SqlParam_sanitizes_param_values()
+        {
+            Assert.That("' or Field LIKE '%".SqlParam(), Is.EqualTo("'' or Field LIKE ''%"));
         }
     }
 }

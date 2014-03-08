@@ -153,27 +153,34 @@ namespace ServiceStack.OrmLite
 			return string.Format(sqlText, escapedParams.ToArray());
 		}
 
-        static string[] IllegalSqlFragmentTokens = { 
-            "--", ";--", ";", "/*", "*/", "@@", "@", 
+	    public static string[] IllegalSqlFragmentTokens = { 
+            "--", ";--", ";", "%", "/*", "*/", "@@", "@", 
             "char", "nchar", "varchar", "nvarchar",
             "alter", "begin", "cast", "create", "cursor", "declare", "delete",
             "drop", "end", "exec", "execute", "fetch", "insert", "kill",
             "open", "select", "sys", "sysobjects", "syscolumns", "table", "update" };
 
-        public static void SqlVerifyFragment(this string sqlFragment)
+        public static string SqlVerifyFragment(this string sqlFragment)
         {
-            sqlFragment = sqlFragment
+            var fragmentToVerify = sqlFragment
                 .StripQuotedStrings('\'')
                 .StripQuotedStrings('"')
                 .ToLower();
 
             for (int i = 0; i <= IllegalSqlFragmentTokens.Length - 1; i++)
             {
-                if ((sqlFragment.IndexOf(IllegalSqlFragmentTokens[i], StringComparison.Ordinal) >= 0))
+                if ((fragmentToVerify.IndexOf(IllegalSqlFragmentTokens[i], StringComparison.Ordinal) >= 0))
                 {
                     throw new ArgumentException("Potential illegal fragment detected: " + sqlFragment);
                 }
             }
+            
+            return sqlFragment;
+        }
+
+        public static string SqlParam(this string paramValue)
+        {
+            return paramValue.Replace("'", "''");
         }
 
         public static string StripQuotedStrings(this string text, char quote = '\'')
