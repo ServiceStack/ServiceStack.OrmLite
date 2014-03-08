@@ -153,6 +153,49 @@ namespace ServiceStack.OrmLite
 			return string.Format(sqlText, escapedParams.ToArray());
 		}
 
+        static string[] IllegalSqlFragmentTokens = { 
+            "--", ";--", ";", "/*", "*/", "@@", "@", 
+            "char", "nchar", "varchar", "nvarchar",
+            "alter", "begin", "cast", "create", "cursor", "declare", "delete",
+            "drop", "end", "exec", "execute", "fetch", "insert", "kill",
+            "open", "select", "sys", "sysobjects", "syscolumns", "table", "update" };
+
+        public static void SqlVerifyFragment(this string sqlFragment)
+        {
+            sqlFragment = sqlFragment
+                .StripQuotedStrings('\'')
+                .StripQuotedStrings('"')
+                .ToLower();
+
+            for (int i = 0; i <= IllegalSqlFragmentTokens.Length - 1; i++)
+            {
+                if ((sqlFragment.IndexOf(IllegalSqlFragmentTokens[i], StringComparison.Ordinal) >= 0))
+                {
+                    throw new ArgumentException("Potential illegal fragment detected: " + sqlFragment);
+                }
+            }
+        }
+
+        public static string StripQuotedStrings(this string text, char quote = '\'')
+        {
+            var sb = new StringBuilder();
+            bool inQuotes = false;
+            for (int i = 0; i < text.Length; i++)
+            {
+                var c = text[i];
+                if (c == quote)
+                {
+                    inQuotes = !inQuotes;
+                    continue;
+                }
+
+                if (!inQuotes)
+                    sb.Append(c);
+            }
+
+            return sb.ToString();
+        }
+
 		public static string SqlJoin<T>(this List<T> values)
 		{
 			var sb = new StringBuilder();
