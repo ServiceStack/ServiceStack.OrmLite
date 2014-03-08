@@ -26,14 +26,34 @@ namespace ServiceStack.OrmLite.VistaDB
             base.RealColumnDefinition = "FLOAT";
             base.BoolColumnDefinition = "BIT";
             base.BlobColumnDefinition = "VARBINARY";
-            base.IntColumnDefinition = "INT";        
+            base.IntColumnDefinition = "INT";
+            base.DefaultValueFormat = " DEFAULT {0}";
 
-            base.InitColumnTypeMap();
+            base.InitColumnTypeMap();           
+        }
+
+        public override void OnAfterInitColumnTypeMap()
+        {
+            DbTypeMap.ColumnTypeMap.Remove(typeof(object));
+            DbTypeMap.ColumnDbTypeMap.Remove(typeof(object));
         }
 
         public override string GetQuotedValue(string paramValue)
         {
             return (this.UseUnicode ? "N'" : "'") + paramValue.Replace("'", "''") + "'";
+        }
+
+        public override void SetParameterValues<T>(IDbCommand dbCmd, object obj)
+        {
+            base.SetParameterValues<T>(dbCmd, obj);
+
+            foreach (IDbDataParameter p in dbCmd.Parameters)
+            {
+                var newName = p.ParameterName.Replace(" ", "___");
+                dbCmd.CommandText = dbCmd.CommandText.Replace(p.ParameterName, newName);
+
+                p.ParameterName = newName;
+            }
         }
 
         public override IDbConnection CreateConnection(string connectionString, Dictionary<string, string> options)

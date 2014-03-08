@@ -27,6 +27,7 @@ namespace ServiceStack.OrmLite.VistaDB.Tests
         }
 
         [Test]
+        [Ignore("VistaDB does not support DateTimeOffset")]
         public void EnsureDateTimeOffsetSaves()
         {
             var dbFactory = new OrmLiteConnectionFactory(base.ConnectionString, VistaDB4Dialect.Provider);
@@ -40,6 +41,7 @@ namespace ServiceStack.OrmLite.VistaDB.Tests
         }
 
         [Test]
+        [Ignore("VistaDB does not support DateTimeOffset")]
         public void EnsureNullableDateTimeOffsetSaves()
         {
             var dbFactory = new OrmLiteConnectionFactory(base.ConnectionString, VistaDB4Dialect.Provider);

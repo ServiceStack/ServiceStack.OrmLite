@@ -24,6 +24,7 @@ namespace ServiceStack.OrmLite.VistaDB
             _connectionWrapper = connectionWrapper;
 
             this.VistaDbCommand = vistaDbCommand;
+            this.Parameters = new OrmLiteVistaDbParameterCollection(vistaDbCommand.Parameters);
         }
 
         #region IDbCommand Members
@@ -63,7 +64,9 @@ namespace ServiceStack.OrmLite.VistaDB
 
         public IDbDataParameter CreateParameter()
         {
-            return this.VistaDbCommand.CreateParameter();
+            var vistaDbParameter = this.VistaDbCommand.CreateParameter();
+
+            return new OrmLiteVistaDbParameter(vistaDbParameter);
         }
 
         public int ExecuteNonQuery()
@@ -86,7 +89,7 @@ namespace ServiceStack.OrmLite.VistaDB
             return this.VistaDbCommand.ExecuteScalar();
         }
 
-        public IDataParameterCollection Parameters { get { return this.VistaDbCommand.Parameters; } }
+        public IDataParameterCollection Parameters { get; private set; }
 
         public void Prepare()
         {
