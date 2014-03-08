@@ -16,7 +16,7 @@ namespace ServiceStack.OrmLite.VistaDB.Tests
             LogManager.LogFactory = new ConsoleLogFactory();
 
             OrmLiteConfig.DialectProvider = VistaDB4Dialect.Provider;
-            ConnectionString = ConfigurationManager.ConnectionStrings["testDb"].ConnectionString;
+            ConnectionString = "Data Source=ci.vdb4;";
         }
 
         public void Log(string text)

@@ -82,11 +82,6 @@
     <Compile Include="UseCase\TestEntityWithAliases.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config">
-      <SubType>Designer</SubType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\ServiceStack.OrmLite.VistaDB\ServiceStack.OrmLite.VistaDB.csproj">
       <Project>{d18d9d3c-b3b3-433c-9578-68e978587858}</Project>
       <Name>ServiceStack.OrmLite.VistaDB</Name>
