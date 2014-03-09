@@ -38,6 +38,7 @@ namespace ServiceStack.OrmLite.Oracle
 			base.TimeColumnDefinition = "TIME";
 			base.RealColumnDefinition= "FLOAT";
 			base.DefaultStringLength=128;
+		    base.MaxStringColumnDefinition = "VARCHAR2(4000)";
 			base.InitColumnTypeMap();
             base.ParamString = ":";
 		}
@@ -239,7 +240,7 @@ namespace ServiceStack.OrmLite.Oracle
                     var pi = typeof(T).GetProperty(fieldDef.Name,
                         BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy);
 
-                    var result = GetNextValue(dbCmd, fieldDef.Sequence, pi.GetValue(obj, new object[] { }));
+                    var result = GetNextValue(dbCmd.Connection, fieldDef.Sequence, pi.GetValue(obj, new object[] { }));
                     if (pi.PropertyType == typeof(String))
                         pi.SetProperty(obj, result.ToString());
                     else if (pi.PropertyType == typeof(Int16))
@@ -289,8 +290,8 @@ namespace ServiceStack.OrmLite.Oracle
 
                     PropertyInfo pi = tableType.GetProperty(fieldDef.Name,
                         BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy);
-					
-					var result = GetNextValue(dbCommand, fieldDef.Sequence, pi.GetValue(objWithProperties,  new object[] { }) );
+
+                    var result = GetNextValue(dbCommand.Connection, fieldDef.Sequence, pi.GetValue(objWithProperties, new object[] { }));
 					if (pi.PropertyType == typeof(String))
                         pi.SetProperty(objWithProperties, result.ToString());	
 					else if(pi.PropertyType == typeof(Int16))
@@ -425,7 +426,8 @@ namespace ServiceStack.OrmLite.Oracle
                     fieldDef.IsNullable,
                     fieldDef.FieldLength,
 					fieldDef.Scale,
-                    fieldDef.DefaultValue);
+                    fieldDef.DefaultValue,
+                    fieldDef.CustomFieldDefinition);
 
                 sbColumns.Append(columnDefinition);
 
@@ -506,16 +508,21 @@ namespace ServiceStack.OrmLite.Oracle
 
 		public override string GetColumnDefinition (string fieldName, Type fieldType, 
 			bool isPrimaryKey, bool autoIncrement, bool isNullable, 
-			int? fieldLength, int? scale, string defaultValue)
+			int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
 		{
 			string fieldDefinition;
 
-            if (fieldType == typeof(string))
+            if (customFieldDefinition != null)
+            {
+                fieldDefinition = customFieldDefinition;
+            }
+            else if (fieldType == typeof(string))
             {
                 fieldDefinition = string.Format(StringLengthColumnDefinitionFormat,
 				                                fieldLength.GetValueOrDefault(DefaultStringLength));
             }
-            else if( fieldType==typeof(Decimal) ){
+            else if (fieldType==typeof(Decimal))
+            {
 				fieldDefinition= string.Format("{0} ({1},{2})", DecimalColumnDefinition, 
 					fieldLength.GetValueOrDefault(DefaultDecimalPrecision),
 					scale.GetValueOrDefault(DefaultDecimalScale) );
@@ -573,8 +580,9 @@ namespace ServiceStack.OrmLite.Oracle
 
             return sqlIndexes;
         }
-		
-		protected override string ToCreateIndexStatement(bool isUnique, string indexName, ModelDefinition modelDef, string fieldName, bool isCombined)
+
+        protected override string ToCreateIndexStatement(bool isUnique, string indexName, ModelDefinition modelDef, string fieldName,
+            bool isCombined = false, FieldDefinition fieldDef = null)
         {
             return string.Format("CREATE {0} INDEX {1} ON {2} ({3} ) \n",
 				isUnique ? "UNIQUE" : "", 
@@ -750,7 +758,7 @@ namespace ServiceStack.OrmLite.Oracle
 			return sql;
 		}
 		
-		private object GetNextValue(IDbCommand dbCmd, string sequence, object value) 
+		private object GetNextValue(IDbConnection connection, string sequence, object value) 
 		{
 			Object retObj;
 			
@@ -772,12 +780,13 @@ namespace ServiceStack.OrmLite.Oracle
 			}
 
             //dbCmd.CommandText = string.Format("SELECT {0}.NEXTVAL FROM dual", Quote(sequence));
-            var sql = string.Format("SELECT {0}.NEXTVAL FROM dual", Quote(sequence));
-            dbCmd.CommandText = sql;
-            var result = dbCmd.LongScalar();
-            
-            LastInsertId = result;
-			return  result;				
+            using (var dbCmd = connection.CreateCommand())
+            {
+                dbCmd.CommandText = string.Format("SELECT {0}.NEXTVAL FROM dual", Quote(sequence));
+                var result = dbCmd.LongScalar();
+                LastInsertId = result;
+                return result;
+            }
 		}
 		
 		public bool QuoteNames { get; set; }

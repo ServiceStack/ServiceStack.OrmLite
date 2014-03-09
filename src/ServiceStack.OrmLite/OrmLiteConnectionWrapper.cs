@@ -1,7 +1,6 @@
 using System;
 using System.Data;
 using System.Data.Common;
-using System.Data.SqlClient;
 using ServiceStack.Data;
 
 namespace ServiceStack.OrmLite
@@ -112,11 +111,6 @@ namespace ServiceStack.OrmLite
         public ConnectionState State
         {
             get { return DbConnection.State; }
-        }
-
-        public static explicit operator SqlConnection(OrmLiteConnectionWrapper dbConn)
-        {
-            return (SqlConnection)dbConn.DbConnection;
         }
 
         public static explicit operator DbConnection(OrmLiteConnectionWrapper dbConn)

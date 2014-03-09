@@ -4,18 +4,23 @@ using System.Linq.Expressions;
 
 namespace ServiceStack.OrmLite.Firebird
 {
-	public class FirebirdSqlExpression<T>:SqlExpression<T>
-	{
-	    private readonly string _trueExpression;
-	    private readonly string _falseExpression;
+    public class FirebirdSqlExpression<T> : SqlExpression<T>
+    {
+        private readonly string _trueExpression;
+        private readonly string _falseExpression;
 
-	    public FirebirdSqlExpression()
+        public FirebirdSqlExpression()
         {
             _trueExpression = string.Format("({0}={1})", GetQuotedTrueValue(), GetQuotedTrueValue());
             _falseExpression = string.Format("({0}={1})", GetQuotedTrueValue(), GetQuotedFalseValue());
-        } 
+        }
 
-	    protected override object VisitBinary(BinaryExpression b)
+        public override SqlExpression<T> Clone()
+        {
+            return CopyTo(new FirebirdSqlExpression<T>());
+        }
+
+        protected override object VisitBinary(BinaryExpression b)
         {
             object left, right;
             var operand = BindOperant(b.NodeType);   //sep= " " ??
@@ -151,33 +156,38 @@ namespace ServiceStack.OrmLite.Firebird
             return (exp.ToString() == _trueExpression);
         }
 
-	    private bool IsFalseExpression(object exp)
+        private bool IsFalseExpression(object exp)
         {
             return (exp.ToString() == _falseExpression);
         }
 
-	    public override string LimitExpression{
-			get{
-				if(!Skip.HasValue) return "";
-				int fromRow= Skip.Value+1;
-				if(fromRow<=0)
-					throw new ArgumentException(
-						string.Format("Skip value:'{0}' must be>=0",Skip.Value ));
-				string toRow;
-				if(Rows.HasValue){
-					if( Rows.Value<0) {
-						throw new ArgumentException(
-							string.Format("Rows value:'{0}' must be>=0", Rows.Value));
-					}
-					toRow= string.Format("TO {0}", fromRow+Rows.Value-1 );
-				}
-				else{
-					toRow=string.Empty;
-				}
-				return string.Format("ROWS {0} {1}", fromRow, toRow);                   
-			}
-		}
-				
-	}
+        public override string LimitExpression
+        {
+            get
+            {
+                if (!Skip.HasValue) return "";
+                int fromRow = Skip.Value + 1;
+                if (fromRow <= 0)
+                    throw new ArgumentException(
+                        string.Format("Skip value:'{0}' must be>=0", Skip.Value));
+                string toRow;
+                if (Rows.HasValue)
+                {
+                    if (Rows.Value < 0)
+                    {
+                        throw new ArgumentException(
+                            string.Format("Rows value:'{0}' must be>=0", Rows.Value));
+                    }
+                    toRow = string.Format("TO {0}", fromRow + Rows.Value - 1);
+                }
+                else
+                {
+                    toRow = string.Empty;
+                }
+                return string.Format("ROWS {0} {1}", fromRow, toRow);
+            }
+        }
+
+    }
 }
 

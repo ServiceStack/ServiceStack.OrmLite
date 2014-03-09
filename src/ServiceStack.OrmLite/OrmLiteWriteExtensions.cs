@@ -57,15 +57,36 @@ namespace ServiceStack.OrmLite
             var tableExists = dialectProvider.DoesTableExist(dbCmd, tableName);
             if (overwrite && tableExists)
             {
+                if (modelDef.PreDropTableSql != null)
+                {
+                    ExecuteSql(dbCmd, modelDef.PreDropTableSql);
+                }
+
                 DropTable(dbCmd, modelDef);
+
+                if (modelDef.PostDropTableSql != null)
+                {
+                    ExecuteSql(dbCmd, modelDef.PostDropTableSql);
+                }
+
                 tableExists = false;
             }
 
             try
             {
                 if (!tableExists)
-                {
+                { 
+                    if (modelDef.PreCreateTableSql != null)
+                    {
+                        ExecuteSql(dbCmd, modelDef.PreCreateTableSql);
+                    }
+
                     ExecuteSql(dbCmd, dialectProvider.ToCreateTableStatement(modelType));
+
+                    if (modelDef.PostCreateTableSql != null)
+                    {
+                        ExecuteSql(dbCmd, modelDef.PostCreateTableSql);
+                    }
 
                     var sqlIndexes = dialectProvider.ToCreateIndexStatements(modelType);
                     foreach (var sqlIndex in sqlIndexes)
@@ -159,17 +180,28 @@ namespace ServiceStack.OrmLite
 
                 if (OrmLiteConfig.DialectProvider.DoesTableExist(dbCmd, tableName))
                 {
+                    if (modelDef.PreDropTableSql != null)
+                    {
+                        ExecuteSql(dbCmd, modelDef.PreDropTableSql);
+                    }
+
                     var dropTableFks = OrmLiteConfig.DialectProvider.GetDropForeignKeyConstraints(modelDef);
-                    if (!String.IsNullOrEmpty(dropTableFks))
+                    if (!string.IsNullOrEmpty(dropTableFks))
                     {
                         dbCmd.ExecuteSql(dropTableFks);
                     }
                     dbCmd.ExecuteSql("DROP TABLE " + OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef));
+
+                    if (modelDef.PostDropTableSql != null)
+                    {
+                        ExecuteSql(dbCmd, modelDef.PostDropTableSql);
+                    }
                 }
             }
             catch (Exception ex)
             {
                 Log.DebugFormat("Could not drop table '{0}': {1}", modelDef.ModelName, ex.Message);
+                throw;
             }
         }
 
@@ -335,6 +367,9 @@ namespace ServiceStack.OrmLite
 
         internal static int Update<T>(this IDbCommand dbCmd, T obj)
         {
+            if (OrmLiteConfig.UpdateFilter != null)
+                OrmLiteConfig.UpdateFilter(dbCmd, obj);
+
             OrmLiteConfig.DialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
 
             OrmLiteConfig.DialectProvider.SetParameterValues<T>(dbCmd, obj);
@@ -363,6 +398,9 @@ namespace ServiceStack.OrmLite
 
                 foreach (var obj in objs)
                 {
+                    if (OrmLiteConfig.UpdateFilter != null)
+                        OrmLiteConfig.UpdateFilter(dbCmd, obj);
+
                     dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
                     count += dbCmd.ExecNonQuery();
@@ -500,6 +538,9 @@ namespace ServiceStack.OrmLite
 
         internal static long Insert<T>(this IDbCommand dbCmd, T obj, bool selectIdentity = false)
         {
+            if (OrmLiteConfig.InsertFilter != null)
+                OrmLiteConfig.InsertFilter(dbCmd, obj);
+
             OrmLiteConfig.DialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd);
 
             OrmLiteConfig.DialectProvider.SetParameterValues<T>(dbCmd, obj);
@@ -530,6 +571,9 @@ namespace ServiceStack.OrmLite
 
                 foreach (var obj in objs)
                 {
+                    if (OrmLiteConfig.InsertFilter != null)
+                        OrmLiteConfig.InsertFilter(dbCmd, obj);
+
                     dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
                     dbCmd.ExecNonQuery();
@@ -565,10 +609,16 @@ namespace ServiceStack.OrmLite
                 }
                 else
                 {
+                    if (OrmLiteConfig.InsertFilter != null)
+                        OrmLiteConfig.InsertFilter(dbCmd, obj);
+
                     dbCmd.Insert(obj);
                 }
                 return true;
             }
+
+            if (OrmLiteConfig.UpdateFilter != null)
+                OrmLiteConfig.UpdateFilter(dbCmd, obj);
 
             dbCmd.Update(obj);
             return false;
@@ -605,6 +655,9 @@ namespace ServiceStack.OrmLite
                     var id = row.GetId();
                     if (id != defaultIdValue && existingRowsMap.ContainsKey(id))
                     {
+                        if (OrmLiteConfig.UpdateFilter != null)
+                            OrmLiteConfig.UpdateFilter(dbCmd, row);
+
                         dbCmd.Update(row);
                     }
                     else
@@ -617,6 +670,9 @@ namespace ServiceStack.OrmLite
                         }
                         else
                         {
+                            if (OrmLiteConfig.InsertFilter != null)
+                                OrmLiteConfig.InsertFilter(dbCmd, row);
+
                             dbCmd.Insert(row);
                         }
 

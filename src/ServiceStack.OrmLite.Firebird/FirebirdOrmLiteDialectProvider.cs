@@ -10,9 +10,9 @@ namespace ServiceStack.OrmLite.Firebird
 {
     public class FirebirdOrmLiteDialectProvider : OrmLiteDialectProviderBase<FirebirdOrmLiteDialectProvider>
 	{
-		private readonly List<string> RESERVED = new List<string>(new[] {
+		public static List<string> RESERVED = new List<string>(new[] {
 			"USER","ORDER","PASSWORD", "ACTIVE","LEFT","DOUBLE", "FLOAT", "DECIMAL","STRING", "DATE","DATETIME", "TYPE","TIMESTAMP",
-			"INDEX","UNIQUE", "PRIMARY", "KEY", "ALTER", "DROP", "CREATE", "DELETE", "VALUES"
+			"INDEX","UNIQUE", "PRIMARY", "KEY", "ALTER", "DROP", "CREATE", "DELETE", "VALUES", "FUNCTION"
 		});
 		
 		public static FirebirdOrmLiteDialectProvider Instance = new FirebirdOrmLiteDialectProvider();
@@ -38,6 +38,7 @@ namespace ServiceStack.OrmLite.Firebird
 			base.TimeColumnDefinition = "TIME";
 			base.RealColumnDefinition= "FLOAT";
 			base.DefaultStringLength=128;
+		    base.MaxStringColumnDefinition = "VARCHAR(32767)";
 			base.InitColumnTypeMap();
 			DefaultValueFormat = " DEFAULT '{0}'";
 
@@ -338,7 +339,8 @@ namespace ServiceStack.OrmLite.Firebird
                     fieldDef.IsNullable,
                     fieldDef.FieldLength,
 					fieldDef.Scale,
-                    fieldDef.DefaultValue);
+                    fieldDef.DefaultValue,
+                    fieldDef.CustomFieldDefinition);
 
                 sbColumns.Append(columnDefinition);
 
@@ -387,11 +389,15 @@ namespace ServiceStack.OrmLite.Firebird
 		
 		public override string GetColumnDefinition (string fieldName, Type fieldType, 
 			bool isPrimaryKey, bool autoIncrement, bool isNullable, 
-			int? fieldLength, int? scale, string defaultValue)
+			int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
 		{
 			string fieldDefinition;
 
-            if (fieldType == typeof(string))
+            if (customFieldDefinition != null)
+            {
+                fieldDefinition = customFieldDefinition;
+            }
+            else if (fieldType == typeof(string))
             {
                 fieldDefinition = string.Format(StringLengthColumnDefinitionFormat,
 				                                fieldLength.GetValueOrDefault(DefaultStringLength));
@@ -455,7 +461,8 @@ namespace ServiceStack.OrmLite.Firebird
             return sqlIndexes;
         }
 
-        protected override string ToCreateIndexStatement(bool isUnique, string indexName, ModelDefinition modelDef, string fieldName, bool isCombined)
+        protected override string ToCreateIndexStatement(bool isUnique, string indexName, ModelDefinition modelDef, string fieldName,
+            bool isCombined = false, FieldDefinition fieldDef = null)
         {
             return string.Format("CREATE {0} INDEX {1} ON {2} ({3} ); \n",
 				isUnique ? "UNIQUE" : "", 
@@ -756,7 +763,8 @@ namespace ServiceStack.OrmLite.Firebird
 			                                 fieldDef.IsNullable,
 			                                 fieldDef.FieldLength,
 			                                 fieldDef.Scale,
-			                                 fieldDef.DefaultValue);
+			                                 fieldDef.DefaultValue,
+                                             fieldDef.CustomFieldDefinition);
 			return string.Format("ALTER TABLE {0} ADD {1} ;",
 			                     GetQuotedTableName(GetModel(modelType).ModelName),
 			                     column);
@@ -772,7 +780,8 @@ namespace ServiceStack.OrmLite.Firebird
 			                                 fieldDef.IsNullable,
 			                                 fieldDef.FieldLength,
 			                                 fieldDef.Scale,
-			                                 fieldDef.DefaultValue);
+			                                 fieldDef.DefaultValue,
+                                             fieldDef.CustomFieldDefinition);
 			return string.Format("ALTER TABLE {0} ALTER {1} ;",
 			                     GetQuotedTableName(GetModel(modelType).ModelName),
 			                     column);

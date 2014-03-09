@@ -21,11 +21,18 @@ namespace ServiceStack.OrmLite.MySql
             base.BoolColumnDefinition = "tinyint(1)";
             base.TimeColumnDefinition = "time";
             base.DecimalColumnDefinition = "decimal(38,6)";
-            base.GuidColumnDefinition = "char(32)";
+            base.GuidColumnDefinition = "char(36)";
             base.DefaultStringLength = 255;
+    	    base.MaxStringColumnDefinition = "TEXT";
             base.InitColumnTypeMap();
     	    base.DefaultValueFormat = " DEFAULT '{0}'";
     	    base.SelectIdentitySql = "SELECT LAST_INSERT_ID()";
+        }
+
+        public override void OnAfterInitColumnTypeMap()
+        {
+            DbTypeMap.Set<Guid>(DbType.String, GuidColumnDefinition);
+            DbTypeMap.Set<Guid?>(DbType.String, GuidColumnDefinition);
         }
 
         public override string GetQuotedValue(string paramValue)
@@ -53,11 +60,6 @@ namespace ServiceStack.OrmLite.MySql
                 const string dateTimeFormat = "yyyy-MM-dd HH:mm:ss"; 
 
                 return base.GetQuotedValue(dateValue.ToString(dateTimeFormat), typeof(string));
-            }
-            if (fieldType == typeof(Guid))
-            {
-                var guidValue = (Guid)value;
-                return base.GetQuotedValue(guidValue.ToString("N"), typeof(string));
             }
 
             if (fieldType == typeof(byte[]))
@@ -180,7 +182,8 @@ namespace ServiceStack.OrmLite.MySql
                 fieldDefinition.IsNullable, 
                 fieldDefinition.FieldLength, 
                 null, 
-                fieldDefinition.DefaultValue);
+                fieldDefinition.DefaultValue,
+                fieldDefinition.CustomFieldDefinition);
         }
 	}
 }

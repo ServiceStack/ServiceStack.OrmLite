@@ -61,11 +61,21 @@ namespace ServiceStack.OrmLite
 
             var modelAliasAttr = modelType.FirstAttribute<AliasAttribute>();
             var schemaAttr = modelType.FirstAttribute<SchemaAttribute>();
+
+            var preCreate = modelType.FirstAttribute<PreCreateTableAttribute>();
+            var postCreate = modelType.FirstAttribute<PostCreateTableAttribute>();
+            var preDrop = modelType.FirstAttribute<PreDropTableAttribute>();
+            var postDrop = modelType.FirstAttribute<PostDropTableAttribute>();
+
             modelDef = new ModelDefinition {
                 ModelType = modelType,
                 Name = modelType.Name,
                 Alias = modelAliasAttr != null ? modelAliasAttr.Name : null,
-                Schema = schemaAttr != null ? schemaAttr.Name : null
+                Schema = schemaAttr != null ? schemaAttr.Name : null,
+                PreCreateTableSql = preCreate != null ? preCreate.Sql : null,
+                PostCreateTableSql = postCreate != null ? postCreate.Sql : null,
+                PreDropTableSql = preDrop != null ? preDrop.Sql : null,
+                PostDropTableSql = postDrop != null ? postDrop.Sql : null,
             };
 
             modelDef.CompositeIndexes.AddRange(
@@ -74,6 +84,8 @@ namespace ServiceStack.OrmLite
 
             var objProperties = modelType.GetProperties(
                 BindingFlags.Public | BindingFlags.Instance).ToList();
+
+            var hasPkAttr = objProperties.Any(p => p.HasAttribute<PrimaryKeyAttribute>());
 
             var hasIdField = CheckForIdField(objProperties);
 
@@ -86,7 +98,7 @@ namespace ServiceStack.OrmLite
                 var belongToAttribute = propertyInfo.FirstAttribute<BelongToAttribute>();
                 var isFirst = i++ == 0;
 
-                var isPrimaryKey = propertyInfo.Name == OrmLiteConfig.IdField || (!hasIdField && isFirst)
+                var isPrimaryKey = (!hasPkAttr && (propertyInfo.Name == OrmLiteConfig.IdField || (!hasIdField && isFirst)))
                     || propertyInfo.HasAttributeNamed(typeof(PrimaryKeyAttribute).Name);
 
                 var isNullableType = IsNullableType(propertyInfo.PropertyType);
@@ -98,6 +110,17 @@ namespace ServiceStack.OrmLite
                 var propertyType = isNullableType
                     ? Nullable.GetUnderlyingType(propertyInfo.PropertyType)
                     : propertyInfo.PropertyType;
+
+                Type treatAsType = null;
+                if (propertyType.IsEnum && propertyType.HasAttribute<FlagsAttribute>())
+                {
+                    treatAsType = Enum.GetUnderlyingType(propertyType);
+                }
+
+                if (propertyType == typeof(TimeSpan))
+                {
+                    treatAsType = typeof(long);
+                }
 
                 var aliasAttr = propertyInfo.FirstAttribute<AliasAttribute>();
 
@@ -112,11 +135,13 @@ namespace ServiceStack.OrmLite
                 var referencesAttr = propertyInfo.FirstAttribute<ReferencesAttribute>();
                 var referenceAttr  = propertyInfo.FirstAttribute<ReferenceAttribute>();
                 var foreignKeyAttr = propertyInfo.FirstAttribute<ForeignKeyAttribute>();
+                var customFieldAttr = propertyInfo.FirstAttribute<CustomFieldAttribute>();
 
                 var fieldDefinition = new FieldDefinition {
                     Name = propertyInfo.Name,
                     Alias = aliasAttr != null ? aliasAttr.Name : null,
                     FieldType = propertyType,
+                    TreatAsType = treatAsType,
                     PropertyInfo = propertyInfo,
                     IsNullable = isNullable,
                     IsPrimaryKey = isPrimaryKey,
@@ -125,6 +150,8 @@ namespace ServiceStack.OrmLite
                         propertyInfo.HasAttributeNamed(typeof(AutoIncrementAttribute).Name),
                     IsIndexed = isIndex,
                     IsUnique = isUnique,
+                    IsClustered = indexAttr != null && indexAttr.Clustered,
+                    IsNonClustered = indexAttr != null && indexAttr.NonClustered,
                     FieldLength = stringLengthAttr != null
                         ? stringLengthAttr.MaximumLength
                         : (int?)null,
@@ -143,6 +170,7 @@ namespace ServiceStack.OrmLite
                     ComputeExpression = computeAttr != null ? computeAttr.Expression : string.Empty,
                     Scale = decimalAttribute != null ? decimalAttribute.Scale : (int?)null,
                     BelongToModelName = belongToAttribute != null ? belongToAttribute.BelongToTableType.GetModelDefinition().ModelName : null, 
+                    CustomFieldDefinition = customFieldAttr != null ? customFieldAttr.Sql : null,
                 };
 
                 var isIgnored = propertyInfo.HasAttributeNamed(typeof(IgnoreAttribute).Name)
@@ -150,7 +178,7 @@ namespace ServiceStack.OrmLite
                 if (isIgnored)
                   modelDef.IgnoredFieldDefinitions.Add(fieldDefinition);
                 else
-                  modelDef.FieldDefinitions.Add(fieldDefinition);                
+                  modelDef.FieldDefinitions.Add(fieldDefinition);
             }
 
             modelDef.SqlSelectAllFromTable = "SELECT {0} FROM {1} "

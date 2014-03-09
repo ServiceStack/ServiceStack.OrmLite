@@ -84,5 +84,10 @@ namespace ServiceStack.OrmLite.Sqlite
 
             return new PartialSqlString(statement);
         }
+
+        public override SqlExpression<T> Clone()
+        {
+            return CopyTo(new SqliteExpression<T>());
+        }
     }
 }

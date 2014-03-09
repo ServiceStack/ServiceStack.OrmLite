@@ -97,5 +97,8 @@ namespace ServiceStack.OrmLite
             var dbConn = dialectProvider.CreateConnection(dbConnectionStringOrFilePath, options: null);
             return dbConn;
         }
+
+        public static Action<IDbCommand, object> InsertFilter { get; set; }
+        public static Action<IDbCommand, object> UpdateFilter { get; set; }
     }
 }

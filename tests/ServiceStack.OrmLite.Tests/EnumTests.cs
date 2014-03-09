@@ -5,6 +5,8 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
+    using System;
+
     public class EnumTests : OrmLiteTestBase
     {
         [Test]
@@ -16,10 +18,10 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void CanStoreEnumValue()
         {
-            using(var con = OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 con.CreateTable<TypeWithEnum>(true);
-                con.Save(new TypeWithEnum {Id = 1, EnumValue = SomeEnum.Value1});
+                con.Save(new TypeWithEnum { Id = 1, EnumValue = SomeEnum.Value1 });
             }
         }
 
@@ -98,6 +100,64 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.AreEqual(1, doubleStates.Count());
             }
         }
+
+        [Test]
+        public void StoresFlagEnumsAsNumericValues()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<TypeWithFlagsEnum>();
+                db.Insert(
+                    new TypeWithFlagsEnum { Id = 1, Flags = FlagsEnum.FlagOne | FlagsEnum.FlagTwo | FlagsEnum.FlagThree });
+
+                try
+                {
+                    var expectedFlags = (int)(FlagsEnum.FlagOne | FlagsEnum.FlagTwo | FlagsEnum.FlagThree);
+                    Assert.AreEqual(db.Scalar<int>("SELECT Flags FROM TypeWithFlagsEnum WHERE Id = 1"), expectedFlags);
+                }
+                catch (FormatException)
+                {
+                    // Probably a string then
+                    var value = db.Scalar<string>("SELECT Flags FROM TypeWithFlagsEnum WHERE Id = 1");
+                    throw new Exception(string.Format("Expected integer value but got string value {0}", value));
+                }
+            }
+        }
+
+        [Test]
+        public void Creates_int_field_for_enum_flags()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<TypeWithFlagsEnum>();
+
+                db.GetLastSql().Print();
+
+                Assert.That(db.GetLastSql(), Is.StringContaining("\"Flags\" INT"));
+            }
+        }
+
+        [Test]
+        public void Updates_enum_flags_with_int_value()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<TypeWithFlagsEnum>();
+
+                db.Insert(new TypeWithFlagsEnum { Id = 1, Flags = FlagsEnum.FlagOne });
+                db.Insert(new TypeWithFlagsEnum { Id = 2, Flags = FlagsEnum.FlagTwo });
+                db.Insert(new TypeWithFlagsEnum { Id = 3, Flags = FlagsEnum.FlagOne | FlagsEnum.FlagTwo });
+
+                db.Update(new TypeWithFlagsEnum { Id = 1, Flags = FlagsEnum.FlagThree });
+                Assert.That(db.GetLastSql(), Is.StringContaining("=@Flags"));
+                db.GetLastSql().Print();
+
+                db.UpdateOnly(new TypeWithFlagsEnum { Id = 1, Flags = FlagsEnum.FlagThree }, q => q.Flags);
+                Assert.That(db.GetLastSql(), Is.StringContaining("=" + (int)FlagsEnum.FlagThree));
+                db.GetLastSql().Print();
+            }
+        }
+
     }
 
 
@@ -124,6 +184,20 @@ namespace ServiceStack.OrmLite.Tests
     public class TypeWithEnum
     {
         public int Id { get; set; }
-        public SomeEnum EnumValue { get; set; } 
+        public SomeEnum EnumValue { get; set; }
+    }
+
+    [Flags]
+    public enum FlagsEnum
+    {
+        FlagOne = 0x0,
+        FlagTwo = 0x01,
+        FlagThree = 0x02
+    }
+
+    public class TypeWithFlagsEnum
+    {
+        public int Id { get; set; }
+        public FlagsEnum Flags { get; set; }
     }
 }

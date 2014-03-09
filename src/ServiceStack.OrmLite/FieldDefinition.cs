@@ -28,6 +28,13 @@ namespace ServiceStack.OrmLite
 
         public Type FieldType { get; set; }
 
+        public Type TreatAsType { get; set; }
+
+        public Type ColumnType
+        {
+            get { return TreatAsType ?? FieldType; }
+        }
+
         public PropertyInfo PropertyInfo { get; set; }
 
         public bool IsPrimaryKey { get; set; }
@@ -39,6 +46,10 @@ namespace ServiceStack.OrmLite
         public bool IsIndexed { get; set; }
 
         public bool IsUnique { get; set; }
+
+        public bool IsClustered { get; set; }
+
+        public bool IsNonClustered { get; set; }
 
         public int? FieldLength { get; set; }  // Precision for Decimal Type
 
@@ -60,7 +71,7 @@ namespace ServiceStack.OrmLite
         public string GetQuotedValue(object fromInstance)
         {
             var value = GetValue(fromInstance);
-            return OrmLiteConfig.DialectProvider.GetQuotedValue(value, FieldType);
+            return OrmLiteConfig.DialectProvider.GetQuotedValue(value, ColumnType);
         }
 
         public string Sequence { get; set; }
@@ -72,6 +83,8 @@ namespace ServiceStack.OrmLite
         public string BelongToModelName { get; set; }
 
         public bool IsReference { get; set; }
+
+        public string CustomFieldDefinition { get; set; }
     }
 
     public class ForeignKeyConstraint

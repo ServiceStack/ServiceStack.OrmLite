@@ -51,6 +51,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <DocumentationFile>bin\Release\ServiceStack.OrmLite.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'STATIC_ONLY NO_EXPRESSIONS|AnyCPU' ">
     <DebugSymbols>True</DebugSymbols>
@@ -108,6 +109,7 @@
     <Compile Include="Expressions\PredicateBuilder.cs" />
     <Compile Include="Expressions\ReadConnectionExtensions.cs" />
     <Compile Include="Expressions\WriteConnectionExtensions.cs" />
+    <Compile Include="IUntypedApi.cs" />
     <Compile Include="JoinSqlBuilder.cs" />
     <Compile Include="OrmLiteConnectionWrapper.cs" />
     <Compile Include="OrmLiteDialectProviderExtensions.cs" />

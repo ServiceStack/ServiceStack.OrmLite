@@ -115,11 +115,9 @@ namespace ServiceStack.OrmLite.Tests
 				var row1 = ModelWithIdAndName.Create(5);
 				var row2 = ModelWithIdAndName.Create(6);
 
-				db.Insert(row1);
-				var row1LastInsertId = db.LastInsertId();
+                var row1LastInsertId = db.Insert(row1, selectIdentity:true);
 
-				db.Insert(row2);
-				var row2LastInsertId = db.LastInsertId();
+                var row2LastInsertId = db.Insert(row2, selectIdentity:true);
 
                 var insertedRow1 = db.SingleById<ModelWithIdAndName>(row1LastInsertId);
                 var insertedRow2 = db.SingleById<ModelWithIdAndName>(row2LastInsertId);
@@ -242,14 +240,16 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_GetLastInsertedId_using_Insert()
         {
-            var testObject = new UserAuth { UserName = "test" };
+            var date = new DateTime(2000, 1, 1);
+            var testObject = new UserAuth { UserName = "test", CreatedDate = date, ModifiedDate = date };
 
             //verify that "normal" Insert works as expected
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<UserAuth>(true);
 
-                db.Insert(testObject);
+                db.ExecuteSql("INSERT INTO UserAuth (UserName,CreatedDate,ModifiedDate) VALUES ({0},'2000-01-01','2000-01-01')"
+                    .SqlFmt(testObject.UserName));
                 var normalLastInsertedId = db.LastInsertId();
                 Assert.Greater(normalLastInsertedId, 0, "normal Insert");
             }
@@ -257,7 +257,7 @@ namespace ServiceStack.OrmLite.Tests
             //test with InsertParam
             using (var db = OpenDbConnection())
             {
-                db.CreateTable<UserAuth>(true);
+                db.DropAndCreateTable<UserAuth>();
 
                 var lastInsertId = db.Insert(testObject, selectIdentity: true);
                 Assert.Greater(lastInsertId, 0, "with InsertParam");
