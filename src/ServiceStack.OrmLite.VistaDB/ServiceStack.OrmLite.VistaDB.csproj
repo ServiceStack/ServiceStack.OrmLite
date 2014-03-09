@@ -45,6 +45,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="VistaDB5DialectProvider .cs" />
+    <Compile Include="VistaDB5Expression.cs" />
+    <Compile Include="VistaDB5Dialect.cs" />
     <Compile Include="OrmLiteVistaDbCommand.cs" />
     <Compile Include="OrmLiteVistaDbConnection.cs" />
     <Compile Include="OrmLiteVistaDbParameter.cs" />
