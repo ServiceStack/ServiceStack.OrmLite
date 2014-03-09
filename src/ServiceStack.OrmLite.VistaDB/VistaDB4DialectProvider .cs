@@ -96,7 +96,7 @@ namespace ServiceStack.OrmLite.VistaDB
                     columns.Append(", \n  ");
                 
                 var columnDefinition = this.GetColumnDefinition(
-                    fd.FieldName, fd.FieldType, false, fd.AutoIncrement, fd.IsNullable, fd.FieldLength, null, fd.DefaultValue);
+                    fd.FieldName, fd.FieldType, false, fd.AutoIncrement, fd.IsNullable, fd.FieldLength, null, fd.DefaultValue, fd.CustomFieldDefinition);
                 
                 columns.Append(columnDefinition);
 
@@ -127,7 +127,7 @@ namespace ServiceStack.OrmLite.VistaDB
                 constraints);
         }
         
-        public override string GetColumnDefinition(string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement, bool isNullable, int? fieldLength, int? scale, string defaultValue)
+        public override string GetColumnDefinition(string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement, bool isNullable, int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
         {
             string fieldDefinition;
             if (fieldType == typeof(string))
@@ -350,7 +350,8 @@ namespace ServiceStack.OrmLite.VistaDB
                 fieldDef.IsNullable,
                 fieldDef.FieldLength,
                 fieldDef.Scale,
-                fieldDef.DefaultValue);
+                fieldDef.DefaultValue,
+                fieldDef.CustomFieldDefinition);
 
             return string.Format("ALTER TABLE {0} ADD {1};",
                 GetQuotedTableName(GetModel(modelType).ModelName),
@@ -367,7 +368,8 @@ namespace ServiceStack.OrmLite.VistaDB
                 fieldDef.IsNullable,
                 fieldDef.FieldLength,
                 fieldDef.Scale,
-                fieldDef.DefaultValue);
+                fieldDef.DefaultValue,
+                fieldDef.CustomFieldDefinition);
 
             return string.Format("ALTER TABLE {0} ALTER COLUMN {1};",
                 GetQuotedTableName(GetModel(modelType).ModelName),

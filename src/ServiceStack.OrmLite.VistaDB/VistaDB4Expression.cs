@@ -226,5 +226,10 @@ namespace ServiceStack.OrmLite.VistaDB
                 return base.VisitColumnAccessMethod(m);
             }
         }
+
+        public override SqlExpression<T> Clone()
+        {
+            return CopyTo(new VistaDB4Expression<T>());
+        }
     }
 }
