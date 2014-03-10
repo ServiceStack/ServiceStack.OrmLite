@@ -8,128 +8,38 @@ namespace ServiceStack.OrmLite.VistaDB
 {
     public class VistaDB5Expression<T> : SqlExpression<T>
     {
-        private const string SelectClause = "SELECT";
-        private const string SelectDistinctClause = "SELECT DISTINCT";
-
-        private static string GetFieldsList(string sql, out bool isDistinct)
+        protected virtual string GetPagingOffsetExpression(int rows)
         {
-            isDistinct = sql.StartsWith(SelectDistinctClause);
-
-            var prefix = isDistinct
-                ? SelectDistinctClause
-                : SelectClause;
-
-            var fieldsList = sql.Substring(prefix.Length);
-            return fieldsList.Remove(fieldsList.IndexOf("FROM")).Trim();
+            return String.Format("\nOFFSET {0} ROWS", rows);
         }
 
-        private string ApplyEfficientPaging(int skip, int take, string orderBy)
+        protected virtual string GetPagingFetchExpression(int rows)
         {
-            var tableName = OrmLiteConfig.DialectProvider.GetQuotedTableName(ModelDef).Trim();
+            return String.Format("\nFETCH NEXT {0} ROWS ONLY", Rows.Value);
+        }
 
-            bool isDistinct;
-            var fieldsList = GetFieldsList(SelectExpression, out isDistinct);
+        protected override string ApplyPaging(string sql)
+        {
+            var skip = Skip.GetValueOrDefault();
 
-            if (isDistinct)
-                throw new NotSupportedException("Distinct is not supported with both skip and take");
+            if ((skip > 0 || Rows.HasValue) && String.IsNullOrWhiteSpace(OrderByExpression))
+            {
+                //Ordering by the first column in select list
+                sql += "\nORDER BY 1";
+            }
 
-            var sql = this.BuildDeclareFirstIdExpression();
-            sql += String.Join(" ",
-                this.BuildSelectTopNIdExpression(skip),
-                " FROM " + tableName,
-                GroupByExpression,
-                HavingExpression,
-                orderBy,
-                ";");
+            if (skip > 0)
+                sql += this.GetPagingOffsetExpression(skip);
 
-            sql += String.Join(" ",
-                SelectClause + " TOP " + take,
-                fieldsList,
-                " FROM " + tableName,
-                this.BuildWhereIdGTEFirstId(),
-                GroupByExpression,
-                HavingExpression,
-                orderBy).Trim();
+            if (Rows.HasValue)
+            {
+                if (skip == 0)
+                    sql += this.GetPagingOffsetExpression(0);
+
+                sql += this.GetPagingFetchExpression(Rows.Value);
+            }
 
             return sql;
-        }
-
-        public override string ToSelectStatement()
-        {
-            if (!Skip.HasValue && !Rows.HasValue)
-                return base.ToSelectStatement();
-
-            AssertValidSkipRowValues();
-
-            var skip = this.Skip.GetValueOrDefault();
-            var take = this.Rows.HasValue ? this.Rows.Value : int.MaxValue;
-
-            var sql = "";
-            if (skip == 0)
-            {
-                sql = base.ToSelectStatement();
-                if (take == int.MaxValue || sql == null)
-                    return sql; ;
-
-                bool isDistinct;
-                var fieldsList = GetFieldsList(SelectExpression, out isDistinct);
-
-                var clause = isDistinct
-                    ? SelectDistinctClause
-                    : SelectClause;
-
-                if (sql.Length < clause.Length)
-                    return sql;
-
-                if (isDistinct)
-                    return "SELECT TOP " + take + " t.* FROM (" + sql + ") t;";
-                else 
-                    return SelectClause + " TOP " + take + " " + sql.Substring(clause.Length, sql.Length - clause.Length);
-            }
-            else
-            {
-                var orderBy = this.BuildOrderByIdExpression();
-
-                if (String.IsNullOrEmpty(OrderByExpression))
-                    return this.ApplyEfficientPaging(skip, take, orderBy);
-
-                if (OrderByExpression.Equals(orderBy, StringComparison.OrdinalIgnoreCase) ||
-                    OrderByExpression.Equals(orderBy + " ASC", StringComparison.OrdinalIgnoreCase) ||
-                    OrderByExpression.Equals(orderBy + " DESC", StringComparison.OrdinalIgnoreCase))
-                    return this.ApplyEfficientPaging(skip, take, orderBy);
-
-                var tableName = OrmLiteConfig.DialectProvider.GetQuotedTableName(ModelDef).Trim();
-
-                bool isDistinct;
-                var fieldsList = GetFieldsList(SelectExpression, out isDistinct);
-
-                if (isDistinct)
-                    throw new NotSupportedException("Distinct is not supported with both skip and take");
-
-                var select = String.Join(" ",
-                    String.Format("SELECT TOP {0} {1} ",
-                        skip,
-                        OrmLiteConfig.DialectProvider.GetQuotedColumnName(ModelDef.PrimaryKey.FieldName)),
-                    "FROM " + tableName,
-                    GroupByExpression,
-                    HavingExpression,
-                    OrderByExpression);
-
-                var where = String.IsNullOrWhiteSpace(WhereExpression)
-                    ? String.Format("{0} NOT IN ({1})", OrmLiteConfig.DialectProvider.GetQuotedColumnName(ModelDef.PrimaryKey.FieldName), select)
-                    : String.Format("({0}) AND {1} NOT IN ({2})", WhereExpression.Trim().Substring("WHERE".Length), OrmLiteConfig.DialectProvider.GetQuotedColumnName(ModelDef.PrimaryKey.FieldName), select);
-
-                where = "WHERE " + where;
-
-                return String.Join(" ",
-                    SelectClause + " TOP " + take,
-                    fieldsList,
-                    " FROM " + tableName,
-                    where,
-                    GroupByExpression,
-                    HavingExpression,
-                    OrderByExpression).Trim();
-            }
         }
 
         public override string ToUpdateStatement(T item, bool excludeDefaults = false)
@@ -204,13 +114,7 @@ namespace ServiceStack.OrmLite.VistaDB
                 OrmLiteConfig.DialectProvider.GetColumnTypeDefinition(ModelDef.PrimaryKey.FieldType));
         }
 
-        public override string LimitExpression
-        {
-            get
-            {
-                return "";
-            }
-        }
+        public override string LimitExpression { get { return ""; } }
 
         protected override object VisitColumnAccessMethod(MethodCallExpression m)
         {

@@ -25,9 +25,10 @@ namespace ServiceStack.OrmLite.VistaDB
             base.GuidColumnDefinition = "UniqueIdentifier";
             base.RealColumnDefinition = "FLOAT";
             base.BoolColumnDefinition = "BIT";
-            base.BlobColumnDefinition = "VARBINARY";
+            base.BlobColumnDefinition = "VARBINARY(MAX)";
             base.IntColumnDefinition = "INT";
             base.DefaultValueFormat = " DEFAULT {0}";
+            base.TimeColumnDefinition = "BIGINT"; //TIME"; //SQLSERVER 2008+
 
             base.InitColumnTypeMap();           
         }
@@ -36,6 +37,9 @@ namespace ServiceStack.OrmLite.VistaDB
         {
             DbTypeMap.ColumnTypeMap.Remove(typeof(object));
             DbTypeMap.ColumnDbTypeMap.Remove(typeof(object));
+            
+            DbTypeMap.Set<TimeSpan>(DbType.DateTime, TimeColumnDefinition);
+            DbTypeMap.Set<TimeSpan?>(DbType.DateTime, TimeColumnDefinition);
         }
 
         public override string GetQuotedValue(string paramValue)
@@ -263,6 +267,12 @@ namespace ServiceStack.OrmLite.VistaDB
             {
                 var dateValue = (DateTime)value;
 
+                return base.GetQuotedValue(dateValue.ToString(dateTimeFormat, CultureInfo.InvariantCulture), typeof(string));
+            }
+            if (fieldType == typeof(DateTimeOffset))
+            {
+                var dateValue = (DateTimeOffset)value;
+                
                 return base.GetQuotedValue(dateValue.ToString(dateTimeFormat, CultureInfo.InvariantCulture), typeof(string));
             }
 
