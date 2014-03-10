@@ -125,6 +125,7 @@
     <Compile Include="LicenseUsageTests.cs" />
     <Compile Include="LoadReferencesTests.cs" />
     <Compile Include="MockAllApiTests.cs" />
+    <Compile Include="OrmLiteExecFilterTests.cs" />
     <Compile Include="OrmLiteFiltersTests.cs" />
     <Compile Include="StringSerializerTests.cs" />
     <Compile Include="TypeDescriptorMetadataTests.cs" />

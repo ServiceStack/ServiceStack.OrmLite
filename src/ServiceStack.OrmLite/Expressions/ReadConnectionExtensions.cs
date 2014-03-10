@@ -12,96 +12,22 @@ namespace ServiceStack.OrmLite
 
         public static SqlExpression<T> SqlExpression<T>(this IDbConnection dbConn)
         {
-            return dbConn.GetDialectProvider().SqlExpression<T>();
+            return OrmLiteConfig.ExecFilter.SqlExpression<T>(dbConn);
         }
 
         public static T Exec<T>(this IDbConnection dbConn, Func<IDbCommand, T> filter)
         {
-            var holdProvider = OrmLiteConfig.TSDialectProvider;
-            IDbCommand dbCmd = null;
-            try
-            {
-                var ormLiteDbConn = dbConn as OrmLiteConnection;
-                if (ormLiteDbConn != null)
-                    OrmLiteConfig.TSDialectProvider = ormLiteDbConn.Factory.DialectProvider;
-
-                dbCmd = dbConn.CreateCommand();
-                dbCmd.Transaction = (ormLiteDbConn != null) ? ormLiteDbConn.Transaction : OrmLiteConfig.TSTransaction;
-                dbCmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
-
-                var ret = filter(dbCmd);
-                return ret;
-            }
-            finally
-            {
-                if (dbCmd != null)
-                {
-                    LastCommandText = dbCmd.CommandText;
-                    dbCmd.Dispose();
-                }
-                OrmLiteConfig.TSDialectProvider = holdProvider;
-            }
+            return OrmLiteConfig.ExecFilter.Exec(dbConn, filter);
         }
 
         public static void Exec(this IDbConnection dbConn, Action<IDbCommand> filter)
         {
-            var holdProvider = OrmLiteConfig.DialectProvider;
-            IDbCommand dbCmd = null;
-            try
-            {
-                var ormLiteDbConn = dbConn as OrmLiteConnection;
-                if (ormLiteDbConn != null)
-                    OrmLiteConfig.DialectProvider = ormLiteDbConn.Factory.DialectProvider;
-
-                dbCmd = dbConn.CreateCommand();
-
-                dbCmd.Transaction = (ormLiteDbConn != null) ? ormLiteDbConn.Transaction : OrmLiteConfig.TSTransaction;
-                dbCmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
-
-                filter(dbCmd);
-            }
-            finally
-            {
-                if (dbCmd != null)
-                {
-                    LastCommandText = dbCmd.CommandText;
-                    dbCmd.Dispose();
-                }
-                OrmLiteConfig.DialectProvider = holdProvider;
-            }
+            OrmLiteConfig.ExecFilter.Exec(dbConn, filter);
         }
 
         public static IEnumerable<T> ExecLazy<T>(this IDbConnection dbConn, Func<IDbCommand, IEnumerable<T>> filter)
         {
-            var holdProvider = OrmLiteConfig.DialectProvider;
-            IDbCommand dbCmd = null;
-            try
-            {
-                var ormLiteDbConn = dbConn as OrmLiteConnection;
-                if (ormLiteDbConn != null)
-                    OrmLiteConfig.DialectProvider = ormLiteDbConn.Factory.DialectProvider;
-
-                dbCmd = dbConn.CreateCommand();
-                dbCmd.Transaction = (ormLiteDbConn != null) ? ormLiteDbConn.Transaction : OrmLiteConfig.TSTransaction;
-                dbCmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
-
-                LastCommandText = null;
-                var results = filter(dbCmd);
-
-                foreach (var item in results)
-                {
-                    yield return item;
-                }
-            }
-            finally
-            {
-                if (dbCmd != null)
-                {
-                    LastCommandText = dbCmd.CommandText;
-                    dbCmd.Dispose();
-                }
-                OrmLiteConfig.DialectProvider = holdProvider;
-            }
+            return OrmLiteConfig.ExecFilter.ExecLazy(dbConn, filter);
         }
 
         /// <summary>
