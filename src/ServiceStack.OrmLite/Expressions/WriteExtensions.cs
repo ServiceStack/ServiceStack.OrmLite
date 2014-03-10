@@ -126,7 +126,7 @@ namespace ServiceStack.OrmLite
             foreach (var setField in updateOnly.GetType().GetPublicProperties())
             {
                 var fieldDef = fields.FirstOrDefault(x => 
-                    string.Equals(x.Name, setField.Name, StringComparison.InvariantCultureIgnoreCase));
+                    string.Equals(x.Name, setField.Name, StringComparison.OrdinalIgnoreCase));
                 if (fieldDef == null) continue;
 
                 if (sql.Length > 0) 

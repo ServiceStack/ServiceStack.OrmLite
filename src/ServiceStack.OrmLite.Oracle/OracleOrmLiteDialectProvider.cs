@@ -159,8 +159,8 @@ namespace ServiceStack.OrmLite.Oracle
 			if (!string.IsNullOrEmpty(sqlFilter))
 			{
 				sqlFilter = sqlFilter.SqlFmt(filterParams);
-				if (!sqlFilter.StartsWith("\nORDER ", StringComparison.InvariantCultureIgnoreCase)
-					&& !sqlFilter.StartsWith("\nROWS ", StringComparison.InvariantCultureIgnoreCase)) // ROWS <m> [TO <n>])
+				if (!sqlFilter.StartsWith("\nORDER ", StringComparison.OrdinalIgnoreCase)
+					&& !sqlFilter.StartsWith("\nROWS ", StringComparison.OrdinalIgnoreCase)) // ROWS <m> [TO <n>])
 				{
 					sql.Append("\nWHERE ");
 				}
@@ -667,8 +667,8 @@ namespace ServiceStack.OrmLite.Oracle
 			if (!string.IsNullOrEmpty(sqlFilter))
 			{
 				sqlFilter = sqlFilter.SqlFmt(filterParams);
-				if (!sqlFilter.StartsWith("\nORDER ", StringComparison.InvariantCultureIgnoreCase)
-					&& !sqlFilter.StartsWith("\nROWS ", StringComparison.InvariantCultureIgnoreCase)) // ROWS <m> [TO <n>])
+				if (!sqlFilter.StartsWith("\nORDER ", StringComparison.OrdinalIgnoreCase)
+					&& !sqlFilter.StartsWith("\nROWS ", StringComparison.OrdinalIgnoreCase)) // ROWS <m> [TO <n>])
 				{
 					sql.Append( filter.Length>0? " AND  ": "\nWHERE ");
 				}
@@ -718,8 +718,8 @@ namespace ServiceStack.OrmLite.Oracle
 			if (!string.IsNullOrEmpty(sqlFilter))
 			{
 				sqlFilter = sqlFilter.SqlFmt(filterParams);
-				if (!sqlFilter.StartsWith("\nORDER ", StringComparison.InvariantCultureIgnoreCase)
-					&& !sqlFilter.StartsWith("\nROWS ", StringComparison.InvariantCultureIgnoreCase)) // ROWS <m> [TO <n>]
+				if (!sqlFilter.StartsWith("\nORDER ", StringComparison.OrdinalIgnoreCase)
+					&& !sqlFilter.StartsWith("\nROWS ", StringComparison.OrdinalIgnoreCase)) // ROWS <m> [TO <n>]
 				{
 					sql.Append("\nWHERE ");
 				}

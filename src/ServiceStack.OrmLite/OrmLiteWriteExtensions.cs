@@ -313,7 +313,7 @@ namespace ServiceStack.OrmLite
                 // First guess: Maybe the DB field has underscores? (most common)
                 // e.g. CustomerId (C#) vs customer_id (DB)
                 var dbFieldNameWithNoUnderscores = dbFieldName.Replace("_", "");
-                if (String.Compare(fieldName, dbFieldNameWithNoUnderscores, StringComparison.InvariantCultureIgnoreCase) == 0)
+                if (String.Compare(fieldName, dbFieldNameWithNoUnderscores, StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     return i;
                 }
@@ -321,42 +321,42 @@ namespace ServiceStack.OrmLite
                 // Next guess: Maybe the DB field has special characters?
                 // e.g. Quantity (C#) vs quantity% (DB)
                 var dbFieldNameSanitized = AllowedPropertyCharsRegex.Replace(dbFieldName, String.Empty);
-                if (String.Compare(fieldName, dbFieldNameSanitized, StringComparison.InvariantCultureIgnoreCase) == 0)
+                if (String.Compare(fieldName, dbFieldNameSanitized, StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     return i;
                 }
 
                 // Next guess: Maybe the DB field has special characters *and* has underscores?
                 // e.g. Quantity (C#) vs quantity_% (DB)
-                if (String.Compare(fieldName, dbFieldNameSanitized.Replace("_", String.Empty), StringComparison.InvariantCultureIgnoreCase) == 0)
+                if (String.Compare(fieldName, dbFieldNameSanitized.Replace("_", String.Empty), StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     return i;
                 }
 
                 // Next guess: Maybe the DB field has some prefix that we don't have in our C# field?
                 // e.g. CustomerId (C#) vs t130CustomerId (DB)
-                if (dbFieldName.EndsWith(fieldName, StringComparison.InvariantCultureIgnoreCase))
+                if (dbFieldName.EndsWith(fieldName, StringComparison.OrdinalIgnoreCase))
                 {
                     return i;
                 }
 
                 // Next guess: Maybe the DB field has some prefix that we don't have in our C# field *and* has underscores?
                 // e.g. CustomerId (C#) vs t130_CustomerId (DB)
-                if (dbFieldNameWithNoUnderscores.EndsWith(fieldName, StringComparison.InvariantCultureIgnoreCase))
+                if (dbFieldNameWithNoUnderscores.EndsWith(fieldName, StringComparison.OrdinalIgnoreCase))
                 {
                     return i;
                 }
 
                 // Next guess: Maybe the DB field has some prefix that we don't have in our C# field *and* has special characters?
                 // e.g. CustomerId (C#) vs t130#CustomerId (DB)
-                if (dbFieldNameSanitized.EndsWith(fieldName, StringComparison.InvariantCultureIgnoreCase))
+                if (dbFieldNameSanitized.EndsWith(fieldName, StringComparison.OrdinalIgnoreCase))
                 {
                     return i;
                 }
 
                 // Next guess: Maybe the DB field has some prefix that we don't have in our C# field *and* has underscores *and* has special characters?
                 // e.g. CustomerId (C#) vs t130#Customer_I#d (DB)
-                if (dbFieldNameSanitized.Replace("_", "").EndsWith(fieldName, StringComparison.InvariantCultureIgnoreCase))
+                if (dbFieldNameSanitized.Replace("_", "").EndsWith(fieldName, StringComparison.OrdinalIgnoreCase))
                 {
                     return i;
                 }

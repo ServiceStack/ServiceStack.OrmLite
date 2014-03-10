@@ -521,9 +521,9 @@ namespace ServiceStack.OrmLite
             if (!string.IsNullOrEmpty(sqlFilter))
             {
                 sqlFilter = filterParams != null ? sqlFilter.SqlFmt(filterParams) : sqlFilter;
-                if ((!sqlFilter.StartsWith("ORDER ", StringComparison.InvariantCultureIgnoreCase)
-                    && !sqlFilter.StartsWith("LIMIT ", StringComparison.InvariantCultureIgnoreCase))
-                    && (!sqlFilter.StartsWith("WHERE ", StringComparison.InvariantCultureIgnoreCase)))
+                if ((!sqlFilter.StartsWith("ORDER ", StringComparison.OrdinalIgnoreCase)
+                    && !sqlFilter.StartsWith("LIMIT ", StringComparison.OrdinalIgnoreCase))
+                    && (!sqlFilter.StartsWith("WHERE ", StringComparison.OrdinalIgnoreCase)))
                 {
                     sql.Append(" WHERE ");
                 }
@@ -538,7 +538,7 @@ namespace ServiceStack.OrmLite
             const string SelectStatement = "SELECT";
             var isFullSelectStatement =
                 !string.IsNullOrEmpty(sqlFilter)
-                && sqlFilter.TrimStart().StartsWith(SelectStatement, StringComparison.InvariantCultureIgnoreCase);
+                && sqlFilter.TrimStart().StartsWith(SelectStatement, StringComparison.OrdinalIgnoreCase);
 
             if (isFullSelectStatement)
                 return sqlFilter.SqlFmt(filterParams);
@@ -549,8 +549,8 @@ namespace ServiceStack.OrmLite
             if (!string.IsNullOrEmpty(sqlFilter))
             {
                 sqlFilter = sqlFilter.SqlFmt(filterParams);
-                if (!sqlFilter.StartsWith("ORDER ", StringComparison.InvariantCultureIgnoreCase)
-                    && !sqlFilter.StartsWith("LIMIT ", StringComparison.InvariantCultureIgnoreCase))
+                if (!sqlFilter.StartsWith("ORDER ", StringComparison.OrdinalIgnoreCase)
+                    && !sqlFilter.StartsWith("LIMIT ", StringComparison.OrdinalIgnoreCase))
                 {
                     sql.Append(" WHERE ");
                 }
