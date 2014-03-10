@@ -36,21 +36,17 @@ namespace ServiceStack.OrmLite
 
         public virtual void DisposeCommand(IDbCommand dbCmd)
         {
-            if (dbCmd != null)
-            {
-                ReadConnectionExtensions.LastCommandText = dbCmd.CommandText;
-                dbCmd.Dispose();
-            }
+            if (dbCmd == null) return;
+            ReadConnectionExtensions.LastCommandText = dbCmd.CommandText;
+            dbCmd.Dispose();
         }
 
         public virtual T Exec<T>(IDbConnection dbConn, Func<IDbCommand, T> filter)
         {
             var holdProvider = OrmLiteConfig.DialectProvider;
-            IDbCommand dbCmd = null;
+            var dbCmd = CreateCommand(dbConn);
             try
             {
-                dbCmd = CreateCommand(dbConn);
-
                 var ret = filter(dbCmd);
                 return ret;
             }
@@ -64,11 +60,9 @@ namespace ServiceStack.OrmLite
         public virtual void Exec(IDbConnection dbConn, Action<IDbCommand> filter)
         {
             var holdProvider = OrmLiteConfig.DialectProvider;
-            IDbCommand dbCmd = null;
+            var dbCmd = CreateCommand(dbConn);
             try
             {
-                dbCmd = CreateCommand(dbConn);
-
                 filter(dbCmd);
             }
             finally
@@ -81,11 +75,9 @@ namespace ServiceStack.OrmLite
         public virtual IEnumerable<T> ExecLazy<T>(IDbConnection dbConn, Func<IDbCommand, IEnumerable<T>> filter)
         {
             var holdProvider = OrmLiteConfig.DialectProvider;
-            IDbCommand dbCmd = null;
+            var dbCmd = CreateCommand(dbConn);
             try
             {
-                dbCmd = CreateCommand(dbConn);
-
                 var results = filter(dbCmd);
 
                 foreach (var item in results)
