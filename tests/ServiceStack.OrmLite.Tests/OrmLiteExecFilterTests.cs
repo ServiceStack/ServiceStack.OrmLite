@@ -4,20 +4,20 @@ using ServiceStack.Common.Tests.Models;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    public class ReplyOrmLiteExecFilter : OrmLiteExecFilter
+    public class ReplayOrmLiteExecFilter : OrmLiteExecFilter
     {
-        public int ReplyTimes { get; set; }
+        public int ReplayTimes { get; set; }
 
         public override T Exec<T>(IDbConnection dbConn, System.Func<IDbCommand, T> filter)
         {
-            var holdProvider = OrmLiteConfig.TSDialectProvider;
+            var holdProvider = OrmLiteConfig.DialectProvider;
             IDbCommand dbCmd = null;
             try
             {
                 dbCmd = CreateCommand(dbConn);
 
                 var ret = default(T);
-                for (var i = 0; i < ReplyTimes; i++)
+                for (var i = 0; i < ReplayTimes; i++)
                 {
                     ret = filter(dbCmd);
                 }
@@ -25,7 +25,8 @@ namespace ServiceStack.OrmLite.Tests
             }
             finally
             {
-                DisposeCommand(dbCmd, holdProvider);
+                DisposeCommand(dbCmd);
+                OrmLiteConfig.DialectProvider = holdProvider;
             }
         }
     }
@@ -35,10 +36,10 @@ namespace ServiceStack.OrmLite.Tests
         : OrmLiteTestBase
     {
         [Test]
-        public void Can_add_retry_logic()
+        public void Can_add_replay_logic()
         {
             var holdExecFilter = OrmLiteConfig.ExecFilter;
-            OrmLiteConfig.ExecFilter = new ReplyOrmLiteExecFilter { ReplyTimes = 3 };
+            OrmLiteConfig.ExecFilter = new ReplayOrmLiteExecFilter { ReplayTimes = 3 };
 
             using (var db = OpenDbConnection())
             {

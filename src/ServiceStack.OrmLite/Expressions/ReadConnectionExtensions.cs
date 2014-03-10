@@ -10,11 +10,6 @@ namespace ServiceStack.OrmLite
         [ThreadStatic]
         internal static string LastCommandText;
 
-        public static SqlExpression<T> SqlExpression<T>(this IDbConnection dbConn)
-        {
-            return OrmLiteConfig.ExecFilter.SqlExpression<T>(dbConn);
-        }
-
         public static T Exec<T>(this IDbConnection dbConn, Func<IDbCommand, T> filter)
         {
             return OrmLiteConfig.ExecFilter.Exec(dbConn, filter);
@@ -28,6 +23,14 @@ namespace ServiceStack.OrmLite
         public static IEnumerable<T> ExecLazy<T>(this IDbConnection dbConn, Func<IDbCommand, IEnumerable<T>> filter)
         {
             return OrmLiteConfig.ExecFilter.ExecLazy(dbConn, filter);
+        }
+
+        /// <summary>
+        /// Create a new SqlExpression builder allowing typed LINQ-like queries.
+        /// </summary>
+        public static SqlExpression<T> SqlExpression<T>(this IDbConnection dbConn)
+        {
+            return OrmLiteConfig.ExecFilter.SqlExpression<T>(dbConn);
         }
 
         /// <summary>
@@ -55,14 +58,6 @@ namespace ServiceStack.OrmLite
             return ormLiteDbConn != null
                 ? ormLiteDbConn.Factory.DialectProvider
                 : OrmLiteConfig.DialectProvider;
-        }
-
-        /// <summary>
-        /// Create a new SqlExpression builder allowing typed LINQ-like queries.
-        /// </summary>
-        public static SqlExpression<T> SqlExpression<T>()
-        {
-            return OrmLiteConfig.DialectProvider.SqlExpression<T>();
         }
 
         /// <summary>

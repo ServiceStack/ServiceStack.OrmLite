@@ -8,7 +8,7 @@ namespace ServiceStack.OrmLite
     {
         SqlExpression<T> SqlExpression<T>(IDbConnection dbConn);
         IDbCommand CreateCommand(IDbConnection dbConn);
-        void DisposeCommand(IDbCommand dbCmd, IOrmLiteDialectProvider holdProvider);
+        void DisposeCommand(IDbCommand dbCmd);
         T Exec<T>(IDbConnection dbConn, Func<IDbCommand, T> filter);
         void Exec(IDbConnection dbConn, Action<IDbCommand> filter);
         IEnumerable<T> ExecLazy<T>(IDbConnection dbConn, Func<IDbCommand, IEnumerable<T>> filter);
@@ -34,19 +34,18 @@ namespace ServiceStack.OrmLite
             return dbCmd;
         }
 
-        public virtual void DisposeCommand(IDbCommand dbCmd, IOrmLiteDialectProvider holdProvider)
+        public virtual void DisposeCommand(IDbCommand dbCmd)
         {
             if (dbCmd != null)
             {
                 ReadConnectionExtensions.LastCommandText = dbCmd.CommandText;
                 dbCmd.Dispose();
             }
-            OrmLiteConfig.TSDialectProvider = holdProvider;
         }
 
         public virtual T Exec<T>(IDbConnection dbConn, Func<IDbCommand, T> filter)
         {
-            var holdProvider = OrmLiteConfig.TSDialectProvider;
+            var holdProvider = OrmLiteConfig.DialectProvider;
             IDbCommand dbCmd = null;
             try
             {
@@ -57,7 +56,8 @@ namespace ServiceStack.OrmLite
             }
             finally
             {
-                DisposeCommand(dbCmd, holdProvider);
+                DisposeCommand(dbCmd);
+                OrmLiteConfig.DialectProvider = holdProvider;
             }
         }
 
@@ -73,7 +73,8 @@ namespace ServiceStack.OrmLite
             }
             finally
             {
-                DisposeCommand(dbCmd, holdProvider);
+                DisposeCommand(dbCmd);
+                OrmLiteConfig.DialectProvider = holdProvider;
             }
         }
 
@@ -94,7 +95,8 @@ namespace ServiceStack.OrmLite
             }
             finally
             {
-                DisposeCommand(dbCmd, holdProvider);
+                DisposeCommand(dbCmd);
+                OrmLiteConfig.DialectProvider = holdProvider;
             }
         }
     }
