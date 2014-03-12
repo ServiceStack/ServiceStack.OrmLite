@@ -1,6 +1,10 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
+using System.Linq;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
+using ServiceStack.OrmLite.Tests.Shared;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -29,6 +33,26 @@ namespace ServiceStack.OrmLite.Tests
         }
     }
 
+    public class MockStoredProcExecFilter : OrmLiteExecFilter
+    {
+        public override T Exec<T>(IDbConnection dbConn, System.Func<IDbCommand, T> filter)
+        {
+            try
+            {
+                return base.Exec(dbConn, filter);
+            }
+            catch (Exception ex)
+            {
+                var sql = dbConn.GetLastSql();
+                if (sql == "exec sp_name @firstName, @age")
+                {
+                    return (T)(object)new[] { new Person { FirstName = "Mocked" } }.ToList();
+                }
+                throw;
+            }
+        }
+    }
+
     [TestFixture]
     public class OrmLiteExecFilterTests
         : OrmLiteTestBase
@@ -46,6 +70,23 @@ namespace ServiceStack.OrmLite.Tests
 
                 var rowsInserted = db.Count<ModelWithIdAndName>(q => q.Name == "Multiplicity");
                 Assert.That(rowsInserted, Is.EqualTo(3));
+            }
+
+            OrmLiteConfig.ExecFilter = holdExecFilter;
+        }
+
+        [Test]
+        public void Can_mock_store_procedure()
+        {
+            var holdExecFilter = OrmLiteConfig.ExecFilter;
+            OrmLiteConfig.ExecFilter = new MockStoredProcExecFilter();
+
+            using (var db = OpenDbConnection())
+            {
+                var person = db.SqlList<Person>("exec sp_name @firstName, @age",
+                    new { firstName = "aName", age = 1 });
+
+                Assert.That(person[0].FirstName, Is.EqualTo("Mocked"));
             }
 
             OrmLiteConfig.ExecFilter = holdExecFilter;
