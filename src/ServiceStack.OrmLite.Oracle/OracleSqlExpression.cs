@@ -49,7 +49,7 @@ namespace ServiceStack.OrmLite.Oracle
 
         private static string GetFirstColumn(string sql)
         {
-            var idx1 = sql.IndexOf("select") + 7;
+            var idx1 = sql.IndexOf("select", StringComparison.OrdinalIgnoreCase) + 7;
             var idx2 = sql.IndexOf(",", idx1);
             return sql.Substring(idx1, idx2 - 7).Trim();
         }
