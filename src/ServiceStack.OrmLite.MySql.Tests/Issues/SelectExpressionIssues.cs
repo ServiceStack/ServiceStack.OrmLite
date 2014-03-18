@@ -62,6 +62,10 @@ namespace ServiceStack.OrmLite.MySql.Tests.Issues
                 db.GetLastSql().Print();
                 contacts.PrintDump();
 
+                contacts = db.Select<Contact>("Flags & @has = @has", new { has = AvailableFlags.glam });
+                db.GetLastSql().Print();
+                contacts.PrintDump();
+
                 contacts = db.SelectFmt<Contact>("Flags & {0} = {0}", (int)AvailableFlags.glam);
                 db.GetLastSql().Print();
                 contacts.PrintDump();
