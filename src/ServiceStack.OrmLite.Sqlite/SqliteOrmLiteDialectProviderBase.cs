@@ -206,10 +206,10 @@ namespace ServiceStack.OrmLite.Sqlite
         }
 
         public override string GetColumnDefinition(string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement, 
-            bool isNullable, int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
+            bool isRowVersion, bool isNullable, int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
         {
             // http://www.sqlite.org/lang_createtable.html#rowid
-            var ret = base.GetColumnDefinition(fieldName, fieldType, isPrimaryKey, autoIncrement, isNullable, fieldLength, scale, defaultValue, customFieldDefinition);
+            var ret = base.GetColumnDefinition(fieldName, fieldType, isPrimaryKey, autoIncrement, isRowVersion, isNullable, fieldLength, scale, defaultValue, customFieldDefinition);
             if (isPrimaryKey)
                 return ret.Replace(" BIGINT ", " INTEGER ");
             return ret;

@@ -171,7 +171,8 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
-        /// Updates 1 POCO. All fields are updated except for the PrimaryKey which is used as the identity selector. E.g:
+        /// Updates 1 POCO. All fields are updated except for the PrimaryKey which is used as the identity selector
+        /// and any optimistic concurrency fields which are used to verify no other changes since read. E.g:
         /// <para>db.Update(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27 })</para>
         /// </summary>
         public static int Update<T>(this IDbConnection dbConn, T obj)

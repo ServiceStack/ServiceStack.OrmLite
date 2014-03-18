@@ -339,8 +339,13 @@ namespace ServiceStack.OrmLite
                 : MaxStringColumnDefinition;
         }
 
+        protected virtual string GetRowVersionColumnDefinition(Type fieldType)
+        {
+            return LongColumnDefinition;
+        }
+
         public virtual string GetColumnDefinition(string fieldName, Type fieldType,
-            bool isPrimaryKey, bool autoIncrement, bool isNullable,
+            bool isPrimaryKey, bool autoIncrement, bool isRowVersion, bool isNullable,
             int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
         {
             string fieldDefinition;
@@ -354,6 +359,15 @@ namespace ServiceStack.OrmLite
                 fieldDefinition = fieldLength == StringLengthAttribute.MaxText
                     ? MaxStringColumnDefinition
                     : string.Format(StringLengthColumnDefinitionFormat, fieldLength.GetValueOrDefault(DefaultStringLength));
+            }
+            else if (isRowVersion)
+            {
+                isPrimaryKey = isNullable = false;
+                defaultValue = null;
+//TODO I think I want to make a call into the provider here or perhaps ??? IMO it would be nice to use a long field, but that won't work on SQLServer so we can't. If we use a byte[]
+//TODO as SQLServer requires (it uses 8 bytes), then by default we get a blob definition which is definitely not a good idea. For PostgreSQL can use xmin. For SQLite, Oracle, MySQL
+//TODO have to invent our own. For Firebird it has the equivalent of PostgreSQL xmin but so far I don't know if it is accessible.
+                fieldDefinition = GetRowVersionColumnDefinition(fieldType);
             }
             else
             {
@@ -485,6 +499,7 @@ namespace ServiceStack.OrmLite
             {
                 if (fieldDef.IsComputed) continue;
                 if (fieldDef.AutoIncrement) continue;
+                if (fieldDef.IsRowVersion) continue;
                 //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
                 if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name)) continue;
 
@@ -521,6 +536,7 @@ namespace ServiceStack.OrmLite
             foreach (var fieldDef in modelDef.FieldDefinitionsArray)
             {
                 if (fieldDef.AutoIncrement || fieldDef.IsComputed) continue;
+                if (fieldDef.IsRowVersion) continue;
 
                 //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
                 if (insertFields != null && !insertFields.Contains(fieldDef.Name)) continue;
@@ -548,8 +564,9 @@ namespace ServiceStack.OrmLite
                                             GetQuotedTableName(modelDef), sbColumnNames, sbColumnValues);
         }
 
-        public virtual void PrepareParameterizedUpdateStatement<T>(IDbCommand cmd, ICollection<string> updateFields = null)
+        public virtual bool PrepareParameterizedUpdateStatement<T>(IDbCommand cmd, ICollection<string> updateFields = null)
         {
+            var containsConcurrencyField = false;
             var sqlFilter = new StringBuilder();
             var sql = new StringBuilder();
             var modelDef = typeof(T).GetModelDefinition();
@@ -562,8 +579,9 @@ namespace ServiceStack.OrmLite
                 if (fieldDef.IsComputed) continue;
                 try
                 {
-                    if (fieldDef.IsPrimaryKey && (updateFields == null || updateFields.Count == 0))
+                    if ((fieldDef.IsPrimaryKey || fieldDef.IsRowVersion) && (updateFields == null || updateFields.Count == 0))
                     {
+                        containsConcurrencyField |= fieldDef.IsRowVersion;
                         if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
 
                         sqlFilter
@@ -595,10 +613,11 @@ namespace ServiceStack.OrmLite
             }
 
             if (sql.Length < 1)
-                return;
+                return false;
 
             cmd.CommandText = string.Format("UPDATE {0} SET {1} {2}",
                 GetQuotedTableName(modelDef), sql, (sqlFilter.Length > 0 ? "WHERE " + sqlFilter : ""));
+            return containsConcurrencyField;
         }
 
         public virtual void PrepareParameterizedDeleteStatement<T>(IDbCommand cmd, ICollection<string> deleteFields = null)
@@ -767,6 +786,7 @@ namespace ServiceStack.OrmLite
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
                 if (fieldDef.IsComputed) continue;
+                if (fieldDef.IsRowVersion) continue;
 
                 try
                 {
@@ -867,6 +887,7 @@ namespace ServiceStack.OrmLite
                     fieldDef.ColumnType,
                     fieldDef.IsPrimaryKey,
                     fieldDef.AutoIncrement,
+                    fieldDef.IsRowVersion,
                     fieldDef.IsNullable,
                     fieldDef.FieldLength,
                     fieldDef.Scale,
@@ -1071,6 +1092,7 @@ namespace ServiceStack.OrmLite
                                              fieldDef.ColumnType,
                                              fieldDef.IsPrimaryKey,
                                              fieldDef.AutoIncrement,
+                                             fieldDef.IsRowVersion,
                                              fieldDef.IsNullable,
                                              fieldDef.FieldLength,
                                              fieldDef.Scale,
@@ -1088,6 +1110,7 @@ namespace ServiceStack.OrmLite
                                              fieldDef.ColumnType,
                                              fieldDef.IsPrimaryKey,
                                              fieldDef.AutoIncrement,
+                                             fieldDef.IsRowVersion,
                                              fieldDef.IsNullable,
                                              fieldDef.FieldLength,
                                              fieldDef.Scale,
@@ -1106,6 +1129,7 @@ namespace ServiceStack.OrmLite
                                              fieldDef.ColumnType,
                                              fieldDef.IsPrimaryKey,
                                              fieldDef.AutoIncrement,
+                                             fieldDef.IsRowVersion,
                                              fieldDef.IsNullable,
                                              fieldDef.FieldLength,
                                              fieldDef.Scale,

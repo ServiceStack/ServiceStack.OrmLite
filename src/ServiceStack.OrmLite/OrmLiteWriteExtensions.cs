@@ -371,13 +371,17 @@ namespace ServiceStack.OrmLite
             if (OrmLiteConfig.UpdateFilter != null)
                 OrmLiteConfig.UpdateFilter(dbCmd, obj);
 
-            OrmLiteConfig.DialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
+            var doesConcurrencyCheck = OrmLiteConfig.DialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
             if (string.IsNullOrEmpty(dbCmd.CommandText))
                 return 0;
 
             OrmLiteConfig.DialectProvider.SetParameterValues<T>(dbCmd, obj);
 
-            return dbCmd.ExecNonQuery();
+            var rowsUpdated = dbCmd.ExecNonQuery();
+
+            if (doesConcurrencyCheck && rowsUpdated == 0) throw new RowModifiedException();
+
+            return rowsUpdated;
         }
 
         internal static int Update<T>(this IDbCommand dbCmd, params T[] objs)

@@ -61,7 +61,7 @@ namespace ServiceStack.OrmLite
 
         string GetColumnDefinition(
             string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement,
-            bool isNullable, int? fieldLength,
+            bool isRowVersion, bool isNullable, int? fieldLength,
             int? scale, string defaultValue,
             string customFieldDefinition);
 
@@ -75,7 +75,7 @@ namespace ServiceStack.OrmLite
 
         void PrepareParameterizedInsertStatement<T>(IDbCommand cmd, ICollection<string> insertFields = null);
 
-        void PrepareParameterizedUpdateStatement<T>(IDbCommand cmd, ICollection<string> updateFields = null);
+        bool PrepareParameterizedUpdateStatement<T>(IDbCommand cmd, ICollection<string> updateFields = null);
 
         void PrepareParameterizedDeleteStatement<T>(IDbCommand cmd, ICollection<string> deleteFields = null);
 

@@ -631,6 +631,7 @@ namespace ServiceStack.OrmLite.Oracle
                     fieldDef.FieldName,
                     fieldDef.ColumnType,
                     fieldDef.IsPrimaryKey,
+                    fieldDef.IsRowVersion,
                     fieldDef.AutoIncrement,
                     fieldDef.IsNullable,
                     fieldDef.FieldLength,
@@ -712,12 +713,18 @@ namespace ServiceStack.OrmLite.Oracle
         }
 
         public override string GetColumnDefinition(string fieldName, Type fieldType,
-            bool isPrimaryKey, bool autoIncrement, bool isNullable,
+			bool isPrimaryKey, bool autoIncrement, bool isRowVersion, bool isNullable, 
             int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
         {
             string fieldDefinition;
 
-            if (customFieldDefinition != null)
+            if (isRowVersion)
+            {
+                isNullable = false;
+                defaultValue = null;
+                fieldDefinition = GetRowVersionColumnDefinition(fieldType);
+            }
+            else if (customFieldDefinition != null)
             {
                 fieldDefinition = customFieldDefinition;
             }
