@@ -46,7 +46,7 @@ namespace ServiceStack.OrmLite.Tests
                 var sql = dbConn.GetLastSql();
                 if (sql == "exec sp_name @firstName, @age")
                 {
-                    return (T)(object)new[] { new Person { FirstName = "Mocked" } }.ToList();
+                    return (T)(object)new Person { FirstName = "Mocked" };
                 }
                 throw;
             }
@@ -83,10 +83,10 @@ namespace ServiceStack.OrmLite.Tests
 
             using (var db = OpenDbConnection())
             {
-                var person = db.SqlList<Person>("exec sp_name @firstName, @age",
+                var person = db.SqlScalar<Person>("exec sp_name @firstName, @age",
                     new { firstName = "aName", age = 1 });
 
-                Assert.That(person[0].FirstName, Is.EqualTo("Mocked"));
+                Assert.That(person.FirstName, Is.EqualTo("Mocked"));
             }
 
             OrmLiteConfig.ExecFilter = holdExecFilter;
