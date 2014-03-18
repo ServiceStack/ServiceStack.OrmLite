@@ -14,7 +14,7 @@ namespace ServiceStack.OrmLite.MySql.Tests.Issues
         public string Email { get; set; }
         public int Age { get; set; }
         public AvailableTags Tag { get; set; }
-        public AvailableFlags Flags { get; set; }
+        public AvailableFlags Tags { get; set; }
     }
 
     public enum AvailableTags
@@ -55,18 +55,18 @@ namespace ServiceStack.OrmLite.MySql.Tests.Issues
                     Email = "demo+mike@servicestack.net",
                     Age = 50,
                     Tag = AvailableTags.glam,
-                    Flags = AvailableFlags.funk | AvailableFlags.glam,
+                    Tags = AvailableFlags.funk | AvailableFlags.glam,
                 });
 
                 var contacts = db.Select<Contact>(c => tags.Contains(c.Tag));
                 db.GetLastSql().Print();
                 contacts.PrintDump();
 
-                contacts = db.Select<Contact>("Flags & @has = @has", new { has = AvailableFlags.glam });
+                contacts = db.Select<Contact>("Tags & @has = @has", new { has = AvailableFlags.glam });
                 db.GetLastSql().Print();
                 contacts.PrintDump();
 
-                contacts = db.SelectFmt<Contact>("Flags & {0} = {0}", (int)AvailableFlags.glam);
+                contacts = db.SelectFmt<Contact>("Tags & {0} = {0}", (int)AvailableFlags.glam);
                 db.GetLastSql().Print();
                 contacts.PrintDump();
             }
