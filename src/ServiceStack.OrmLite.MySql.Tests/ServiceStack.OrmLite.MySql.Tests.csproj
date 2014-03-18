@@ -93,6 +93,7 @@
     <Compile Include="Expressions\TestType.cs" />
     <Compile Include="Expressions\UnaryExpressionsTest.cs" />
     <Compile Include="ForeignKeyAttributeTests.cs" />
+    <Compile Include="Issues\SelectExpressionIssues.cs" />
     <Compile Include="LocalizationTests.cs" />
     <Compile Include="StringColumnTests.cs" />
     <Compile Include="NorthwindPerfTests.cs" />
