@@ -39,13 +39,13 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Devart.Data, Version=5.0.882.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
+    <Reference Include="Devart.Data, Version=5.0.907.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\dotConnect.Express.for.Oracle.8.2.90\lib\Devart.Data.dll</HintPath>
+      <HintPath>..\packages\dotConnect.Express.for.Oracle.8.3.115\lib\Devart.Data.dll</HintPath>
     </Reference>
-    <Reference Include="Devart.Data.Oracle, Version=8.2.90.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
+    <Reference Include="Devart.Data.Oracle, Version=8.3.115.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\dotConnect.Express.for.Oracle.8.2.90\lib\Devart.Data.Oracle.dll</HintPath>
+      <HintPath>..\packages\dotConnect.Express.for.Oracle.8.3.115\lib\Devart.Data.Oracle.dll</HintPath>
     </Reference>
     <Reference Include="Oracle.DataAccess">
       <HintPath>..\packages\odp.net.x64.112.3.20\lib\net40\Oracle.DataAccess.dll</HintPath>
