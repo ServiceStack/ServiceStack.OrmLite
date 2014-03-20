@@ -193,7 +193,7 @@ namespace ServiceStack.OrmLite.Oracle
                 try
                 {
                     sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
-                    sbColumnValues.Append(this.GetParam(fieldDef.FieldName));
+                    sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
 
                     AddParameter(dbCommand, fieldDef);
                 }
@@ -211,7 +211,7 @@ namespace ServiceStack.OrmLite.Oracle
         public override void SetParameterValues<T>(IDbCommand dbCmd, object obj)
         {
             var modelDef = GetModel(typeof(T));
-            var fieldMap = modelDef.FieldDefinitionMap;
+            var fieldMap = modelDef.GetFieldDefinitionMap(SanitizeFieldNameForParamName);
 
             foreach (IDataParameter p in dbCmd.Parameters)
             {

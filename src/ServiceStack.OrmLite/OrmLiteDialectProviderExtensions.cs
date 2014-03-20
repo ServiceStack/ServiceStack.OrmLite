@@ -4,7 +4,7 @@ namespace ServiceStack.OrmLite
     {
         public static string GetParam(this IOrmLiteDialectProvider dialect, string name)
         {
-            return dialect.ParamString + (name ?? "").Replace(" ","");
+            return dialect.ParamString + name;
         }
 
         public static string GetParam(this IOrmLiteDialectProvider dialect, int indexNo = 0)
