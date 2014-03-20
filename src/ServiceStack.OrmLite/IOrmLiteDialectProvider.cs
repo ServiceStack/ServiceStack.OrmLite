@@ -53,6 +53,8 @@ namespace ServiceStack.OrmLite
 
         string GetQuotedName(string columnName);
 
+        string SanitizeFieldNameForParamName(string fieldName);
+
         string GetColumnDefinition(
             string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement,
             bool isNullable, int? fieldLength,
