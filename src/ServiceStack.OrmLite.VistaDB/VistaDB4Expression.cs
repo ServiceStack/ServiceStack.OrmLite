@@ -216,10 +216,10 @@ namespace ServiceStack.OrmLite.VistaDB
         {
             if (m.Arguments.Count == 1 && m.Method.Name == "Equals")
             {
-                var caller = this.Visit(m.Object);
-                var arg = this.Visit(m.Arguments.First());
-
-                return new PartialSqlString(String.Format("{0} = {1}", caller, arg));
+                return Visit(
+                    Expression.Equal(
+                        Expression.Convert(m.Object, typeof(object)),
+                        Expression.Convert(m.Arguments.First(), typeof(object))));
             }
             else
             {
