@@ -113,6 +113,7 @@
     <Compile Include="JoinSqlBuilder.cs" />
     <Compile Include="OrmLiteConnectionWrapper.cs" />
     <Compile Include="OrmLiteDialectProviderExtensions.cs" />
+    <Compile Include="OrmLiteExecFilter.cs" />
     <Compile Include="OrmLiteReadConnectionExtensions.cs" />
     <Compile Include="OrmLiteResultsFilterExtensions.cs" />
     <Compile Include="OrmLiteSPStatement.cs" />

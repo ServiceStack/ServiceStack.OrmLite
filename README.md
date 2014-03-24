@@ -73,7 +73,7 @@ which will download and extract the dlls into your local local `lib/` folder.
 
 ## New API's to execute custom SQL
 
-Prior to v3.9.60 the ways to execute custom SQL was with `db.ExecuteSql()` which as it only returned an int code, users were using `db.Query` to read arbitrary sql returning tabular resultsets. However db.Query is only intended for SELECT statements. For this purpose we've introduced new API's for executing custom sql, e.g:
+Prior to v3.9.60 the ways to execute custom SQL was with `db.ExecuteSql()` which as it only returned an int code, users were using `db.Select` to read arbitrary sql returning tabular resultsets. However db.Select is only intended for SELECT statements. For this purpose we've introduced new API's for executing custom sql, e.g:
 
 ```csharp
 List<Poco> results = db.SqlList<Poco>("EXEC GetAnalyticsForWeek 1");

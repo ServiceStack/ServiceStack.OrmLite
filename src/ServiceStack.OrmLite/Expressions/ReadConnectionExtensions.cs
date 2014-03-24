@@ -10,102 +10,27 @@ namespace ServiceStack.OrmLite
         [ThreadStatic]
         internal static string LastCommandText;
 
-        public static SqlExpression<T> SqlExpression<T>(this IDbConnection dbConn)
-        {
-            return dbConn.GetDialectProvider().SqlExpression<T>();
-        }
-
         public static T Exec<T>(this IDbConnection dbConn, Func<IDbCommand, T> filter)
         {
-            var holdProvider = OrmLiteConfig.TSDialectProvider;
-            try
-            {
-                var ormLiteDbConn = dbConn as OrmLiteConnection;
-                if (ormLiteDbConn != null)
-                    OrmLiteConfig.TSDialectProvider = ormLiteDbConn.Factory.DialectProvider;
-
-                using (var dbCmd = dbConn.CreateCommand())
-                {
-                    dbCmd.Transaction = (ormLiteDbConn != null) ? ormLiteDbConn.Transaction : OrmLiteConfig.TSTransaction;
-                    dbCmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
-                    try
-                    {
-                        var ret = filter(dbCmd);
-                        return ret;
-                    }
-                    finally
-                    {
-                        LastCommandText = dbCmd.CommandText;
-                    } 
-                }
-            }
-            finally
-            {
-                OrmLiteConfig.TSDialectProvider = holdProvider;
-            }
+            return OrmLiteConfig.ExecFilter.Exec(dbConn, filter);
         }
 
         public static void Exec(this IDbConnection dbConn, Action<IDbCommand> filter)
         {
-            var dialectProvider = OrmLiteConfig.DialectProvider;
-            try
-            {
-                var ormLiteDbConn = dbConn as OrmLiteConnection;
-                if (ormLiteDbConn != null)
-                    OrmLiteConfig.DialectProvider = ormLiteDbConn.Factory.DialectProvider;
-
-                using (var dbCmd = dbConn.CreateCommand())
-                {
-                    dbCmd.Transaction = (ormLiteDbConn != null) ? ormLiteDbConn.Transaction : OrmLiteConfig.TSTransaction;
-                    dbCmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
-
-                    try
-                    {
-                        filter(dbCmd);
-                    }
-                    finally
-                    {
-                        LastCommandText = dbCmd.CommandText;
-                    }
-                }
-            }
-            finally
-            {
-                OrmLiteConfig.DialectProvider = dialectProvider;
-            }
+            OrmLiteConfig.ExecFilter.Exec(dbConn, filter);
         }
 
         public static IEnumerable<T> ExecLazy<T>(this IDbConnection dbConn, Func<IDbCommand, IEnumerable<T>> filter)
         {
-            var dialectProvider = OrmLiteConfig.DialectProvider;
-            IDbCommand dbCmd = null;
-            try
-            {
-                var ormLiteDbConn = dbConn as OrmLiteConnection;
-                if (ormLiteDbConn != null)
-                    OrmLiteConfig.DialectProvider = ormLiteDbConn.Factory.DialectProvider;
+            return OrmLiteConfig.ExecFilter.ExecLazy(dbConn, filter);
+        }
 
-                dbCmd = dbConn.CreateCommand();
-                dbCmd.Transaction = (ormLiteDbConn != null) ? ormLiteDbConn.Transaction : OrmLiteConfig.TSTransaction;
-                dbCmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
-
-                LastCommandText = null;
-                var results = filter(dbCmd);
-
-                foreach (var item in results)
-                {
-                    yield return item;
-                }
-            }
-            finally
-            {
-                if (dbCmd != null)
-                {
-                    LastCommandText = dbCmd.CommandText;
-                    dbCmd.Dispose();
-                }
-                OrmLiteConfig.DialectProvider = dialectProvider;
-            }
+        /// <summary>
+        /// Create a new SqlExpression builder allowing typed LINQ-like queries.
+        /// </summary>
+        public static SqlExpression<T> SqlExpression<T>(this IDbConnection dbConn)
+        {
+            return OrmLiteConfig.ExecFilter.SqlExpression<T>(dbConn);
         }
 
         /// <summary>
@@ -133,14 +58,6 @@ namespace ServiceStack.OrmLite
             return ormLiteDbConn != null
                 ? ormLiteDbConn.Factory.DialectProvider
                 : OrmLiteConfig.DialectProvider;
-        }
-
-        /// <summary>
-        /// Create a new SqlExpression builder allowing typed LINQ-like queries.
-        /// </summary>
-        public static SqlExpression<T> SqlExpression<T>()
-        {
-            return OrmLiteConfig.DialectProvider.SqlExpression<T>();
         }
 
         /// <summary>

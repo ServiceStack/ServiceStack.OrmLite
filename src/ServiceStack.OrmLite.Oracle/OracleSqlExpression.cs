@@ -41,7 +41,7 @@ namespace ServiceStack.OrmLite.Oracle
         //from Simple.Data.Oracle implementation https://github.com/flq/Simple.Data.Oracle/blob/master/Simple.Data.Oracle/OraclePager.cs
         private static string UpdateWithOrderByIfNecessary(string sql)
         {
-            if (sql.IndexOf("order by ", StringComparison.InvariantCultureIgnoreCase) != -1)
+            if (sql.IndexOf("order by ", StringComparison.OrdinalIgnoreCase) != -1)
                 return sql;
             var col = GetFirstColumn(sql);
             return sql + " ORDER BY " + col;
@@ -49,7 +49,7 @@ namespace ServiceStack.OrmLite.Oracle
 
         private static string GetFirstColumn(string sql)
         {
-            var idx1 = sql.IndexOf("select") + 7;
+            var idx1 = sql.IndexOf("select", StringComparison.OrdinalIgnoreCase) + 7;
             var idx2 = sql.IndexOf(",", idx1);
             return sql.Substring(idx1, idx2 - 7).Trim();
         }

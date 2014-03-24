@@ -68,9 +68,11 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		{
 			using (IDbConnection db = ConfigurationManager.ConnectionStrings["testDb"].ConnectionString.OpenDbConnection())
 			{
-				const bool overwrite = true;
-			    db.CreateTable<ShipperType>(overwrite);
-                db.CreateTable<Shipper>(overwrite);
+                db.DropTable<Shipper>();
+                db.DropTable<ShipperType>();
+
+                db.CreateTable<ShipperType>();
+                db.CreateTable<Shipper>();
 
 				int trainsTypeId, planesTypeId;
 

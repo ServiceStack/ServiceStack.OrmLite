@@ -125,6 +125,7 @@
     <Compile Include="LicenseUsageTests.cs" />
     <Compile Include="LoadReferencesTests.cs" />
     <Compile Include="MockAllApiTests.cs" />
+    <Compile Include="OrmLiteExecFilterTests.cs" />
     <Compile Include="OrmLiteFiltersTests.cs" />
     <Compile Include="StringSerializerTests.cs" />
     <Compile Include="TypeDescriptorMetadataTests.cs" />
@@ -210,6 +211,7 @@
     <Compile Include="UseCase\CustomerOrdersUseCase.cs" />
     <Compile Include="UseCase\NestedComplexTypeUseCase.cs" />
     <Compile Include="UseCase\SchemaUseCase.cs" />
+    <Compile Include="UseCase\ServiceStack_OrmLite_UseCase.cs" />
     <Compile Include="UseCase\ShardingUseCase.cs" />
     <Compile Include="UseCase\SimpleUseCase.cs" />
     <Compile Include="OrmLiteGetScalarTests.cs" />

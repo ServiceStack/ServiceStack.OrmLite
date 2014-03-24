@@ -418,5 +418,28 @@ namespace ServiceStack.OrmLite.Tests
             }
         }
 
+        [Test]
+        public void Can_mock_stored_procedures()
+        {
+            using (new OrmLiteResultsFilter {
+                Results = new[] {
+                    new Person { Id = 1, FirstName = "Mocked", LastName = "Person", Age = 100 }
+                },
+            })
+            {
+                Assert.That(db.SqlList<Person>("exec sp_name @firstName, @age",
+                        new { firstName = "aName", age = 1 }).First().FirstName,
+                    Is.EqualTo("Mocked"));
+            }
+
+            using (new OrmLiteResultsFilter {
+                ScalarResult = new Person { Id = 1, FirstName = "Mocked", LastName = "Person", Age = 100 },
+            })
+            {
+                Assert.That(db.SqlScalar<Person>("exec sp_name @firstName, @age",
+                        new { firstName = "aName", age = 1 }).FirstName,
+                    Is.EqualTo("Mocked"));
+            }
+        }
     }
 }

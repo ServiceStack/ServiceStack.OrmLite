@@ -98,6 +98,8 @@ namespace ServiceStack.OrmLite
             return dbConn;
         }
 
+        public static IOrmLiteExecFilter ExecFilter = new OrmLiteExecFilter();
+
         public static Action<IDbCommand, object> InsertFilter { get; set; }
         public static Action<IDbCommand, object> UpdateFilter { get; set; }
     }

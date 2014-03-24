@@ -159,8 +159,8 @@ namespace ServiceStack.OrmLite.Oracle
 			if (!string.IsNullOrEmpty(sqlFilter))
 			{
 				sqlFilter = sqlFilter.SqlFmt(filterParams);
-				if (!sqlFilter.StartsWith("\nORDER ", StringComparison.InvariantCultureIgnoreCase)
-					&& !sqlFilter.StartsWith("\nROWS ", StringComparison.InvariantCultureIgnoreCase)) // ROWS <m> [TO <n>])
+				if (!sqlFilter.StartsWith("\nORDER ", StringComparison.OrdinalIgnoreCase)
+					&& !sqlFilter.StartsWith("\nROWS ", StringComparison.OrdinalIgnoreCase)) // ROWS <m> [TO <n>])
 				{
 					sql.Append("\nWHERE ");
 				}
@@ -193,7 +193,7 @@ namespace ServiceStack.OrmLite.Oracle
                 try
                 {
                     sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
-                    sbColumnValues.Append(this.GetParam(fieldDef.FieldName));
+                    sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
 
                     AddParameter(dbCommand, fieldDef);
                 }
@@ -211,7 +211,7 @@ namespace ServiceStack.OrmLite.Oracle
         public override void SetParameterValues<T>(IDbCommand dbCmd, object obj)
         {
             var modelDef = GetModel(typeof(T));
-            var fieldMap = modelDef.FieldDefinitionMap;
+            var fieldMap = modelDef.GetFieldDefinitionMap(SanitizeFieldNameForParamName);
 
             foreach (IDataParameter p in dbCmd.Parameters)
             {
@@ -667,8 +667,8 @@ namespace ServiceStack.OrmLite.Oracle
 			if (!string.IsNullOrEmpty(sqlFilter))
 			{
 				sqlFilter = sqlFilter.SqlFmt(filterParams);
-				if (!sqlFilter.StartsWith("\nORDER ", StringComparison.InvariantCultureIgnoreCase)
-					&& !sqlFilter.StartsWith("\nROWS ", StringComparison.InvariantCultureIgnoreCase)) // ROWS <m> [TO <n>])
+				if (!sqlFilter.StartsWith("\nORDER ", StringComparison.OrdinalIgnoreCase)
+					&& !sqlFilter.StartsWith("\nROWS ", StringComparison.OrdinalIgnoreCase)) // ROWS <m> [TO <n>])
 				{
 					sql.Append( filter.Length>0? " AND  ": "\nWHERE ");
 				}
@@ -718,8 +718,8 @@ namespace ServiceStack.OrmLite.Oracle
 			if (!string.IsNullOrEmpty(sqlFilter))
 			{
 				sqlFilter = sqlFilter.SqlFmt(filterParams);
-				if (!sqlFilter.StartsWith("\nORDER ", StringComparison.InvariantCultureIgnoreCase)
-					&& !sqlFilter.StartsWith("\nROWS ", StringComparison.InvariantCultureIgnoreCase)) // ROWS <m> [TO <n>]
+				if (!sqlFilter.StartsWith("\nORDER ", StringComparison.OrdinalIgnoreCase)
+					&& !sqlFilter.StartsWith("\nROWS ", StringComparison.OrdinalIgnoreCase)) // ROWS <m> [TO <n>]
 				{
 					sql.Append("\nWHERE ");
 				}

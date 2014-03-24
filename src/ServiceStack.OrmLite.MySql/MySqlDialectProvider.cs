@@ -19,7 +19,6 @@ namespace ServiceStack.OrmLite.MySql
             base.AutoIncrementDefinition = "AUTO_INCREMENT";
             base.IntColumnDefinition = "int(11)";
             base.BoolColumnDefinition = "tinyint(1)";
-            base.TimeColumnDefinition = "time";
             base.DecimalColumnDefinition = "decimal(38,6)";
             base.GuidColumnDefinition = "char(36)";
             base.DefaultStringLength = 255;

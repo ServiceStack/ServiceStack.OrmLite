@@ -2,6 +2,7 @@ using Northwind.Common.DataModel;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
 using ServiceStack.DataAnnotations;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.MySql.Tests
 {
@@ -47,7 +48,8 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		{
 			using (var db = OpenDbConnection())
 			{
-				db.CreateTable<ModelWithFieldsOfNullableTypes>(true);
+                db.DropAndCreateTable<ModelWithFieldsOfNullableTypes>();
+                db.GetLastSql().Print();
 
 				var row = ModelWithFieldsOfNullableTypes.Create(1);
 
@@ -66,7 +68,8 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		{
 			using (var db = OpenDbConnection())
 			{
-				db.CreateTable<ModelWithFieldsOfDifferentAndNullableTypes>(true);
+				db.DropAndCreateTable<ModelWithFieldsOfDifferentAndNullableTypes>();
+			    db.GetLastSql().Print();
 
 				var row = ModelWithFieldsOfDifferentAndNullableTypes.Create(1);
 

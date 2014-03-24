@@ -424,6 +424,11 @@ namespace ServiceStack.OrmLite
             return string.Format("\"{0}\"", name);
         }
 
+        public virtual string SanitizeFieldNameForParamName(string fieldName)
+        {
+            return (fieldName ?? "").Replace(" ", "");
+        }
+
         protected virtual string GetUndefinedColumnDefinition(Type fieldType, int? fieldLength)
         {
             return string.Format(StringLengthColumnDefinitionFormat, fieldLength.GetValueOrDefault(DefaultStringLength));
@@ -521,9 +526,9 @@ namespace ServiceStack.OrmLite
             if (!string.IsNullOrEmpty(sqlFilter))
             {
                 sqlFilter = filterParams != null ? sqlFilter.SqlFmt(filterParams) : sqlFilter;
-                if ((!sqlFilter.StartsWith("ORDER ", StringComparison.InvariantCultureIgnoreCase)
-                    && !sqlFilter.StartsWith("LIMIT ", StringComparison.InvariantCultureIgnoreCase))
-                    && (!sqlFilter.StartsWith("WHERE ", StringComparison.InvariantCultureIgnoreCase)))
+                if ((!sqlFilter.StartsWith("ORDER ", StringComparison.OrdinalIgnoreCase)
+                    && !sqlFilter.StartsWith("LIMIT ", StringComparison.OrdinalIgnoreCase))
+                    && (!sqlFilter.StartsWith("WHERE ", StringComparison.OrdinalIgnoreCase)))
                 {
                     sql.Append(" WHERE ");
                 }
@@ -538,7 +543,7 @@ namespace ServiceStack.OrmLite
             const string SelectStatement = "SELECT";
             var isFullSelectStatement =
                 !string.IsNullOrEmpty(sqlFilter)
-                && sqlFilter.TrimStart().StartsWith(SelectStatement, StringComparison.InvariantCultureIgnoreCase);
+                && sqlFilter.TrimStart().StartsWith(SelectStatement, StringComparison.OrdinalIgnoreCase);
 
             if (isFullSelectStatement)
                 return sqlFilter.SqlFmt(filterParams);
@@ -549,8 +554,8 @@ namespace ServiceStack.OrmLite
             if (!string.IsNullOrEmpty(sqlFilter))
             {
                 sqlFilter = sqlFilter.SqlFmt(filterParams);
-                if (!sqlFilter.StartsWith("ORDER ", StringComparison.InvariantCultureIgnoreCase)
-                    && !sqlFilter.StartsWith("LIMIT ", StringComparison.InvariantCultureIgnoreCase))
+                if (!sqlFilter.StartsWith("ORDER ", StringComparison.OrdinalIgnoreCase)
+                    && !sqlFilter.StartsWith("LIMIT ", StringComparison.OrdinalIgnoreCase))
                 {
                     sql.Append(" WHERE ");
                 }
@@ -623,7 +628,7 @@ namespace ServiceStack.OrmLite
                 try
                 {
                     sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
-                    sbColumnValues.Append(OrmLiteConfig.DialectProvider.GetParam(fieldDef.FieldName));
+                    sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
 
                     AddParameter(cmd, fieldDef);
                 }
@@ -659,7 +664,7 @@ namespace ServiceStack.OrmLite
                         sqlFilter
                             .Append(GetQuotedColumnName(fieldDef.FieldName))
                             .Append("=")
-                            .Append(this.GetParam(fieldDef.FieldName));
+                            .Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
 
                         AddParameter(cmd, fieldDef);
 
@@ -674,7 +679,7 @@ namespace ServiceStack.OrmLite
 
                     sql.Append(GetQuotedColumnName(fieldDef.FieldName))
                        .Append("=")
-                       .Append(this.GetParam(fieldDef.FieldName));
+                       .Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
 
                     AddParameter(cmd, fieldDef);
                 }
@@ -711,7 +716,7 @@ namespace ServiceStack.OrmLite
                     sqlFilter
                         .Append(GetQuotedColumnName(fieldDef.FieldName))
                         .Append("=")
-                        .Append(this.GetParam(fieldDef.FieldName));
+                        .Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
 
                     AddParameter(cmd, fieldDef);
                 }
@@ -734,7 +739,7 @@ namespace ServiceStack.OrmLite
 
         public virtual void SetParameter(FieldDefinition fieldDef, IDbDataParameter p)
         {
-            p.ParameterName = OrmLiteConfig.DialectProvider.GetParam(fieldDef.FieldName);
+            p.ParameterName = this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName));
 
             DbType dbType;
             p.DbType = DbTypeMap.ColumnDbTypeMap.TryGetValue(fieldDef.ColumnType, out dbType)
@@ -745,7 +750,7 @@ namespace ServiceStack.OrmLite
         public virtual void SetParameterValues<T>(IDbCommand dbCmd, object obj)
         {
             var modelDef = GetModel(typeof(T));
-            var fieldMap = modelDef.FieldDefinitionMap;
+            var fieldMap = modelDef.GetFieldDefinitionMap(SanitizeFieldNameForParamName);
 
             foreach (IDataParameter p in dbCmd.Parameters)
             {
