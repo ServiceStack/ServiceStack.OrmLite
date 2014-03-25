@@ -5,5 +5,6 @@ namespace ServiceStack.OrmLite
 	{
 		string GetTableName(string name);
 		string GetColumnName(string name);
+		string ApplyNameRestrictions(string name);
 	}
 }

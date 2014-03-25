@@ -112,7 +112,9 @@ namespace ServiceStack.OrmLite
                 var refModelName = refModelDef.IsInSchema
                     ? refModelDef.Schema + "_" + NamingStrategy.GetTableName(refModelDef.ModelName)
                     : NamingStrategy.GetTableName(refModelDef.ModelName);
-                return string.Format("FK_{0}_{1}_{2}", modelName, refModelName, fieldDef.FieldName);
+
+                var fkName = string.Format("FK_{0}_{1}_{2}", modelName, refModelName, fieldDef.FieldName);
+                return NamingStrategy.ApplyNameRestrictions(fkName);
             } else { return ForeignKeyName; }
         }
     }
