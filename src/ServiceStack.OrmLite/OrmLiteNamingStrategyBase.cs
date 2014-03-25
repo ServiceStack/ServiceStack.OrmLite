@@ -23,5 +23,10 @@ namespace ServiceStack.OrmLite
 		{
 			return name;
 		}
+
+		public virtual string ApplyNameRestrictions(string name)
+		{
+			return name;
+		}
 	}
 }
