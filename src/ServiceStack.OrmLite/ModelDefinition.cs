@@ -110,20 +110,19 @@ namespace ServiceStack.OrmLite
         }
 
         private Dictionary<string, FieldDefinition> fieldDefinitionMap;
-        public Dictionary<string, FieldDefinition> FieldDefinitionMap
+	    private Func<string, string> fieldNameSanitizer;
+        public Dictionary<string, FieldDefinition> GetFieldDefinitionMap(Func<string, string> sanitizeFieldName)
         {
-            get
+            if (fieldDefinitionMap == null || fieldNameSanitizer != sanitizeFieldName)
             {
-                if (fieldDefinitionMap == null)
+                fieldNameSanitizer = sanitizeFieldName;
+                fieldDefinitionMap = new Dictionary<string, FieldDefinition>();
+                foreach (var fieldDef in FieldDefinitionsArray)
                 {
-                    fieldDefinitionMap = new Dictionary<string, FieldDefinition>();
-                    foreach (var fieldDef in FieldDefinitionsArray)
-                    {
-                        fieldDefinitionMap[fieldDef.FieldName.Replace(" ","")] = fieldDef;
-                    }
+                    fieldDefinitionMap[sanitizeFieldName(fieldDef.FieldName)] = fieldDef;
                 }
-                return fieldDefinitionMap;
             }
+            return fieldDefinitionMap;
         }
 		
 		public List<CompositeIndexAttribute> CompositeIndexes { get; set; }
