@@ -222,5 +222,15 @@ namespace ServiceStack.OrmLite.Tests
             }
         }
 
+        [Test]
+        public void Can_Save_Update_Into_Table_With_Id_Only()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTable<ModelWithIdOnly>(true);
+                db.Save(new ModelWithIdOnly(1));
+                db.Save(new ModelWithIdOnly(1));
+            }
+        }
     }
 }

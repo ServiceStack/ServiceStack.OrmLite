@@ -645,6 +645,7 @@ namespace ServiceStack.OrmLite
 
         public virtual void PrepareParameterizedUpdateStatement<T>(IDbCommand cmd, ICollection<string> updateFields = null)
         {
+            var dataParameterCount = 0;
             var sqlFilter = new StringBuilder();
             var sql = new StringBuilder();
             var modelDef = typeof(T).GetModelDefinition();
@@ -688,6 +689,8 @@ namespace ServiceStack.OrmLite
                     Log.Error("ERROR in PrepareParameterizedUpdateStatement(): " + ex.Message, ex);
                 }
             }
+
+            if (sql.Length < 1) throw new InvalidOperationException("No columns to update");
 
             cmd.CommandText = string.Format("UPDATE {0} SET {1} {2}",
                 GetQuotedTableName(modelDef), sql, (sqlFilter.Length > 0 ? "WHERE " + sqlFilter : ""));
