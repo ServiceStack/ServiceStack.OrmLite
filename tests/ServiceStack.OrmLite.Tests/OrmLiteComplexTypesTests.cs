@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -66,14 +67,15 @@ namespace ServiceStack.OrmLite.Tests
 	    {
             using (var db = OpenDbConnection())
             {
-                db.CreateTable<WithAListOfGuids>(true);
+                db.DropAndCreateTable<WithAListOfGuids>();
 
-                var item = new WithAListOfGuids
-                               {
-                                   GuidOne = new Guid("32cb0acb-db43-4061-a6aa-7f4902a7002a"),
-                                   GuidTwo = new Guid("13083231-b005-4ff4-ab62-41bdc7f50a4d"),
-                                   TheGuids = new[] { new Guid("18176030-7a1c-4288-82df-a52f71832381"), new Guid("017f986b-f7be-4b6f-b978-ff05fba3b0aa") },
-                               };
+                JsConfig<Guid>.RawSerializeFn = x => x.ToString();
+
+                var item = new WithAListOfGuids {
+                    GuidOne = new Guid("32cb0acb-db43-4061-a6aa-7f4902a7002a"),
+                    GuidTwo = new Guid("13083231-b005-4ff4-ab62-41bdc7f50a4d"),
+                    TheGuids = new[] { new Guid("18176030-7a1c-4288-82df-a52f71832381"), new Guid("017f986b-f7be-4b6f-b978-ff05fba3b0aa") },
+                };
 
                 db.Insert(item);
 
@@ -85,6 +87,8 @@ namespace ServiceStack.OrmLite.Tests
 
                 var savedGuidList = db.Select<string>("SELECT TheGuids FROM WithAListOfGuids").First();
                 Assert.That(savedGuidList, Is.EqualTo("[18176030-7a1c-4288-82df-a52f71832381,017f986b-f7be-4b6f-b978-ff05fba3b0aa]"));
+
+                JsConfig.Reset();
             }
 	    }
 
