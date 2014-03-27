@@ -645,7 +645,6 @@ namespace ServiceStack.OrmLite
 
         public virtual void PrepareParameterizedUpdateStatement<T>(IDbCommand cmd, ICollection<string> updateFields = null)
         {
-            var dataParameterCount = 0;
             var sqlFilter = new StringBuilder();
             var sql = new StringBuilder();
             var modelDef = typeof(T).GetModelDefinition();

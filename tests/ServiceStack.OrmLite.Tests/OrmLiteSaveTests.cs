@@ -229,6 +229,7 @@ namespace ServiceStack.OrmLite.Tests
             {
                 db.CreateTable<ModelWithIdOnly>(true);
                 db.Save(new ModelWithIdOnly(1));
+
                 db.Save(new ModelWithIdOnly(1));
             }
         }
