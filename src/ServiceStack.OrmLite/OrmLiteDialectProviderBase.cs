@@ -689,6 +689,8 @@ namespace ServiceStack.OrmLite
                 }
             }
 
+            if (sql.Length < 1) throw new InvalidOperationException("No columns to update");
+
             cmd.CommandText = string.Format("UPDATE {0} SET {1} {2}",
                 GetQuotedTableName(modelDef), sql, (sqlFilter.Length > 0 ? "WHERE " + sqlFilter : ""));
         }

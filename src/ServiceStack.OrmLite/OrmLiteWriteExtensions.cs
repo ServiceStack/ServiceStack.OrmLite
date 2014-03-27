@@ -370,7 +370,15 @@ namespace ServiceStack.OrmLite
             if (OrmLiteConfig.UpdateFilter != null)
                 OrmLiteConfig.UpdateFilter(dbCmd, obj);
 
-            OrmLiteConfig.DialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
+            try
+            {
+                OrmLiteConfig.DialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
+            }
+            catch (InvalidOperationException ex)
+            {
+                Log.Debug(ex.Message);
+                return 0;
+            }
 
             OrmLiteConfig.DialectProvider.SetParameterValues<T>(dbCmd, obj);
 
@@ -394,7 +402,15 @@ namespace ServiceStack.OrmLite
 
                 var dialectProvider = OrmLiteConfig.DialectProvider;
 
-                dialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
+                try
+                {
+                    dialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
+                }
+                catch (InvalidOperationException ex)
+                {
+                    Log.Debug(ex.Message);
+                    return count;
+                }
 
                 foreach (var obj in objs)
                 {

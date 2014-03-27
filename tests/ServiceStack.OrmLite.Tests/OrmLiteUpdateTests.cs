@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Data;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
@@ -112,5 +113,28 @@ namespace ServiceStack.OrmLite.Tests
             ModelWithFieldsOfDifferentTypes.AssertIsEqual(dbRow, row);
         }
 
+        [Test]
+        public void Can_Update_Into_Table_With_Id_Only()
+        {
+            db.CreateTable<ModelWithIdOnly>(true);
+            var row1 = new ModelWithIdOnly(1);
+            db.Insert(row1);
+
+            db.Update(row1);
+        }
+
+        [Test]
+        public void Can_Update_Many_Into_Table_With_Id_Only()
+        {
+            db.CreateTable<ModelWithIdOnly>(true);
+            var row1 = new ModelWithIdOnly(1);
+            var row2 = new ModelWithIdOnly(2);
+            db.Insert(row1, row2);
+
+            db.Update(row1, row2);
+
+            var list = new List<ModelWithIdOnly> { row1, row2 };
+            db.UpdateAll(list);
+        }
     }
 }
