@@ -227,10 +227,13 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var db = OpenDbConnection())
             {
-                db.CreateTable<ModelWithIdOnly>(true);
+                db.DropAndCreateTable<ModelWithIdOnly>();
+
                 db.Save(new ModelWithIdOnly(1));
 
                 db.Save(new ModelWithIdOnly(1));
+
+                db.Update(new ModelWithIdOnly(1));
             }
         }
     }
