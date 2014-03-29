@@ -163,6 +163,12 @@ namespace ServiceStack.OrmLite.Tests
             db.DictionaryFmt<int, string>("SELECT Id, LastName FROM Person WHERE Age < {0}", 50);
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT Id, LastName FROM Person WHERE Age < 50"));
 
+            db.Exists<Person>(x => x.Age < 50);
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT COUNT(*) FROM \"Person\" WHERE (\"Age\" < 50)"));
+
+            db.Exists(db.SqlExpression<Person>().Where(x => x.Age < 50));
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT COUNT(*) FROM \"Person\" WHERE (\"Age\" < 50)"));
+
             db.Exists<Person>(new { Age = 42 });
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"FirstName\", \"LastName\", \"Age\" FROM \"Person\" WHERE \"Age\" = @Age"));
 

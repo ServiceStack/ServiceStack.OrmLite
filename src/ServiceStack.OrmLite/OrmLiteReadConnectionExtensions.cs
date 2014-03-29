@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Linq.Expressions;
 
 namespace ServiceStack.OrmLite
 {
@@ -291,6 +292,32 @@ namespace ServiceStack.OrmLite
             return dbConn.Exec(dbCmd => dbCmd.DictionaryFmt<K, V>(sqlFormat, sqlParams));
         }
 
+        /// <summary>
+        /// Returns true if the Query returns any records that match the LINQ expression, E.g:
+        /// <para>db.Exists&lt;Person&gt;(x =&gt; x.Age &lt; 50)</para>
+        /// </summary>
+        public static bool Exists<T>(this IDbConnection dbConn, Expression<Func<T, bool>> expression)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Count(expression)) > 0;
+        }
+
+        /// <summary>
+        /// Returns true if the Query returns any records that match the SqlExpression lambda, E.g:
+        /// <para>db.Exists&lt;Person&gt;(q =&gt; q.Where(x =&gt; x.Age &lt; 50))</para>
+        /// </summary>
+        public static bool Exists<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Count(expression)) > 0;
+        }
+
+        /// <summary>
+        /// Returns true if the Query returns any records that match the supplied SqlExpression, E.g:
+        /// <para>db.Exists(db.SqlExpression&lt;Person&gt;().Where(x =&gt; x.Age &lt; 50))</para>
+        /// </summary>
+        public static bool Exists<T>(this IDbConnection dbConn, SqlExpression<T> expression)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Count(expression)) > 0;
+        }
         /// <summary>
         /// Returns true if the Query returns any records, using an SqlFormat query. E.g:
         /// <para>db.Exists&lt;Person&gt;(new { Age = 42 })</para>
