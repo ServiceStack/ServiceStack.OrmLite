@@ -323,26 +323,30 @@ bool has42YearOlds = db.Exists<Person>(new { Age = 42 });
 **WHERE "Age" = @Age**
 
 ```csharp
-List<string> results = db.Column<string>(db.From<Person>().Select(x => x.LastName).Where(q => q.Age == 27));
+List<string> results = db.Column<string>(db.From<Person>().Select(x => x.LastName)
+                         .Where(q => q.Age == 27));
 ```
 
 **SELECT "LastName" FROM "Person" WHERE ("Age" = 27)**
 
 ```csharp
-HashSet<int> results = db.ColumnDistinct<int>(db.From<Person>().Select(x => x.Age).Where(q => q.Age < 50));
+HashSet<int> results = db.ColumnDistinct<int>(db.From<Person>().Select(x => x.Age)
+                         .Where(q => q.Age < 50));
 ```
 
 **SELECT "Age" FROM "Person" WHERE ("Age" < 50)**
 
 ```csharp
-Dictionary<int,string> results = db.Dictionary<int, string>(db.From<Person>().Select(x => new { x.Id, x.LastName }).Where(x => x.Age < 50));
+Dictionary<int,string> results = db.Dictionary<int, string>(
+    db.From<Person>().Select(x => new { x.Id, x.LastName }).Where(x => x.Age < 50));
 ```
 
 **SELECT "Id","LastName" FROM "Person" WHERE ("Age" < 50)**
 
 
 ```csharp
-Dictionary<int, List<string>> results = db.Lookup<int, string>(db.From<Person>().Select(x => new { x.Age, x.LastName }).Where(q => q.Age < 50));
+Dictionary<int, List<string>> results = db.Lookup<int, string>(
+    db.From<Person>().Select(x => new { x.Age, x.LastName }).Where(q => q.Age < 50));
 ```
 
 **SELECT "Age","LastName" FROM "Person" WHERE ("Age" < 50)**
