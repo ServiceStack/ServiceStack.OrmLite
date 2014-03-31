@@ -119,7 +119,9 @@
     <Compile Include="ApiSqliteTests.cs" />
     <Compile Include="CustomSqlTests.cs" />
     <Compile Include="DateTimeOffsetTests.cs" />
+    <Compile Include="Expression\FromExpressionTests.cs" />
     <Compile Include="Expression\MethodExpressionTests.cs" />
+    <Compile Include="Expression\SqlExpressionTests.cs" />
     <Compile Include="Expression\SelectExpressionTests.cs" />
     <Compile Include="Issues\MismatchSchemaTests.cs" />
     <Compile Include="LicenseUsageTests.cs" />

@@ -203,6 +203,15 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Returns a single scalar value using an SqlExpression. E.g:
+        /// <para>db.Column&lt;int&gt;(db.From&lt;Persion&gt;().Select(x => Sql.Count("*")).Where(q => q.Age > 40))</para>
+        /// </summary>
+        public static T Scalar<T>(this IDbConnection dbConn, ISqlExpression sqlExpression)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Scalar<T>(sqlExpression.ToSelectStatement()));
+        }
+
+        /// <summary>
         /// Returns a single scalar value using a parameterized query. E.g:
         /// <para>db.Scalar&lt;int&gt;("SELECT COUNT(*) FROM Person WHERE Age &gt; @age", new { age = 40 })</para>
         /// </summary>
@@ -218,6 +227,15 @@ namespace ServiceStack.OrmLite
         public static T ScalarFmt<T>(this IDbConnection dbConn, string sqlFormat, params object[] sqlParams)
         {
             return dbConn.Exec(dbCmd => dbCmd.ScalarFmt<T>(sqlFormat, sqlParams));
+        }
+
+        /// <summary>
+        /// Returns the distinct first column values in a HashSet using an SqlExpression. E.g:
+        /// <para>db.Column&lt;int&gt;(db.From&lt;Persion&gt;().Select(x => x.LastName).Where(q => q.Age == 27))</para>
+        /// </summary>
+        public static List<T> Column<T>(this IDbConnection dbConn, ISqlExpression query)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Column<T>(query.ToSelectStatement()));
         }
 
         /// <summary>
@@ -239,6 +257,15 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Returns the distinct first column values in a HashSet using an SqlExpression. E.g:
+        /// <para>db.ColumnDistinct&lt;int&gt;(db.From&lt;Persion&gt;().Select(x => x.Age).Where(q => q.Age < 50))</para>
+        /// </summary>
+        public static HashSet<T> ColumnDistinct<T>(this IDbConnection dbConn, ISqlExpression query)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.ColumnDistinct<T>(query.ToSelectStatement()));
+        }
+
+        /// <summary>
         /// Returns the distinct first column values in a HashSet using an SqlFormat query. E.g:
         /// <para>db.ColumnDistinct&lt;int&gt;("SELECT Age FROM Person WHERE Age &lt; @age", new { age = 50 })</para>
         /// </summary>
@@ -257,6 +284,15 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Returns an Dictionary&lt;K, List&lt;V&gt;&gt; grouping made from the first two columns using an Sql Expression. E.g:
+        /// <para>db.Lookup&lt;int, string&gt;(db.From&lt;Person&gt;().Select(x => new { x.Age, x.LastName }).Where(q => q.Age < 50))</para>
+        /// </summary>
+        public static Dictionary<K, List<V>> Lookup<K, V>(this IDbConnection dbConn, ISqlExpression sqlExpression)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Lookup<K, V>(sqlExpression.ToSelectStatement()));
+        }
+
+        /// <summary>
         /// Returns an Dictionary&lt;K, List&lt;V&gt;&gt; grouping made from the first two columns using an parameterized query. E.g:
         /// <para>db.Lookup&lt;int, string&gt;("SELECT Age, LastName FROM Person WHERE Age &lt; @age", new { age = 50 })</para>
         /// </summary>
@@ -272,6 +308,15 @@ namespace ServiceStack.OrmLite
         public static Dictionary<K, List<V>> LookupFmt<K, V>(this IDbConnection dbConn, string sqlFormat, params object[] sqlParams)
         {
             return dbConn.Exec(dbCmd => dbCmd.LookupFmt<K, V>(sqlFormat, sqlParams));
+        }
+
+        /// <summary>
+        /// Returns a Dictionary from the first 2 columns: Column 1 (Keys), Column 2 (Values) using an SqlExpression. E.g:
+        /// <para>db.Dictionary&lt;int, string&gt;(db.From&lt;Person&gt;().Select(x => new { x.Id, x.LastName }).Where(x => x.Age < 50))</para>
+        /// </summary>
+        public static Dictionary<K, V> Dictionary<K, V>(this IDbConnection dbConn, ISqlExpression query)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Dictionary<K, V>(query.ToSelectStatement()));
         }
 
         /// <summary>
@@ -312,7 +357,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns true if the Query returns any records that match the supplied SqlExpression, E.g:
-        /// <para>db.Exists(db.SqlExpression&lt;Person&gt;().Where(x =&gt; x.Age &lt; 50))</para>
+        /// <para>db.Exists(db.From&lt;Person&gt;().Where(x =&gt; x.Age &lt; 50))</para>
         /// </summary>
         public static bool Exists<T>(this IDbConnection dbConn, SqlExpression<T> expression)
         {
@@ -348,6 +393,15 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Returns results from an arbitrary SqlExpression. E.g:
+        /// <para>db.SqlList&lt;Person&gt;(db.From&lt;Person&gt;().Select("*").Where(q => q.Age &lt; 50))</para>
+        /// </summary>
+        public static List<T> SqlList<T>(this IDbConnection dbConn, ISqlExpression sqlExpression)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(sqlExpression.ToSelectStatement()));
+        }
+
+        /// <summary>
         /// Returns results from an arbitrary parameterized raw sql query. E.g:
         /// <para>db.SqlList&lt;Person&gt;("EXEC GetRockstarsAged @age", new { age = 50 })</para>
         /// </summary>
@@ -366,6 +420,15 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Returns the first column in a List using an SqlExpression. E.g:
+        /// <para>db.SqlColumn&lt;string&gt;(db.From&lt;Person&gt;().Select(x => x.LastName).Where(q => q.Age < 50))</para>
+        /// </summary>
+        public static List<T> SqlColumn<T>(this IDbConnection dbConn, ISqlExpression sqlExpression)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SqlColumn<T>(sqlExpression.ToSelectStatement()));
+        }
+
+        /// <summary>
         /// Returns the first column in a List using a parameterized query. E.g:
         /// <para>db.SqlColumn&lt;string&gt;("SELECT LastName FROM Person WHERE Age &lt; @age", new { age = 50 })</para>
         /// </summary>
@@ -381,6 +444,15 @@ namespace ServiceStack.OrmLite
         public static List<T> SqlColumn<T>(this IDbConnection dbConn, string sql, Dictionary<string, object> dict)
         {
             return dbConn.Exec(dbCmd => dbCmd.SqlColumn<T>(sql, dict));
+        }
+
+        /// <summary>
+        /// Returns a single Scalar value using an SqlExpression. E.g:
+        /// <para>db.SqlScalar&lt;int&gt;(db.From&lt;Person&gt;().Select(Sql.Count("*")).Where(q => q.Age &lt; 50))</para>
+        /// </summary>
+        public static T SqlScalar<T>(this IDbConnection dbConn, ISqlExpression sqlExpression)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SqlScalar<T>(sqlExpression.ToSelectStatement()));
         }
 
         /// <summary>
