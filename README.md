@@ -87,6 +87,17 @@ int result = db.SqlScalar<int>("SELECT 10");
 
 Some more examples can be found in [SqlServerProviderTests](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLite.Tests/SqlServerProviderTests.cs).
 
+### Using typed SqlExpression in Custom SQL APIs
+
+From v4.0.16 you can now use typed sql expressions in Custom SQL API's 
+
+```csharp
+List<Person> results = db.SqlList<Person>(db.From<Person>().Select("*").Where(q => q.Age < 50));
+List<string> results = db.SqlColumn<string>(db.From<Person>().Select(x => x.LastName).Where(q => q.Age < 50));
+HashSet<int> results = db.ColumnDistinct<int>(db.From<Person>().Select(x => x.Age).Where(q => q.Age < 50));
+int result = db.SqlScalar<int>(db.From<Person>().Select(Sql.Count("*")).Where(q => q.Age < 50));
+```
+
 ## New Simplified API
 We've streamlined our API, now all OrmLite extensions that used to be on `IDbCommand` now hang off `IDbConnection` 
 (just like Dapper), this reduces the boiler-plate when opening a connection to a single line, so now you can 
@@ -267,6 +278,71 @@ db.Select<Author>(q => q.Rate == 10 && q.City == "Mexico");
 
 Right now the Expression support can satisfy most simple queries with a strong-typed API. 
 For anything more complex (e.g. queries with table joins) you can still easily fall back to raw SQL queries as seen below. 
+
+### Convenient common usage data access patterns 
+
+OrmLite also includes a number of convenient API's providing DRY, typed data access for common queries:
+
+```csharp
+Person personById = db.SingleById<Person>(1);
+```
+
+**SELECT "Id", "FirstName", "LastName", "Age" FROM "Person" WHERE "Id" = @Id**
+
+```csharp
+Person personByAge = db.Single<Person>(x => x.Age == 42);
+```
+
+**SELECT TOP 1 "Id", "FirstName", "LastName", "Age"  FROM "Person" WHERE ("Age" = 42)**
+
+```csharp
+int maxAgeUnder50 = db.Scalar<Person, int>(x => Sql.Max(x.Age), x => x.Age < 50);
+```
+
+**SELECT Max("Age") FROM "Person" WHERE ("Age" < 50)**
+
+```csharp
+int peopleOver40 = db.Scalar<int>(db.From<Person>().Select(Sql.Count("*")).Where(q => q.Age > 40));
+```
+
+**SELECT COUNT(*) FROM "Person" WHERE ("Age" > 40)**
+
+```csharp
+int peopleUnder50 = db.Count<Person>(x => x.Age < 50);
+```
+
+**SELECT COUNT(*) FROM "Person" WHERE ("Age" < 50)**
+
+```csharp
+bool has42YearOlds = db.Exists<Person>(new { Age = 42 });
+```
+
+**WHERE "Age" = @Age**
+
+```csharp
+List<string> results = db.Column<string>(db.From<Person>().Select(x => x.LastName).Where(q => q.Age == 27));
+```
+
+**SELECT "LastName" FROM "Person" WHERE ("Age" = 27)**
+
+```csharp
+HashSet<int> results = db.ColumnDistinct<int>(db.From<Person>().Select(x => x.Age).Where(q => q.Age < 50));
+```
+
+**SELECT "Age" FROM "Person" WHERE ("Age" < 50)**
+
+```csharp
+Dictionary<int,string> results = db.Dictionary<int, string>(db.From<Person>().Select(x => new { x.Id, x.LastName }).Where(x => x.Age < 50));
+```
+
+**SELECT "Id","LastName" FROM "Person" WHERE ("Age" < 50)**
+
+
+```csharp
+Dictionary<int, List<string>> results = db.Lookup<int, string>(db.From<Person>().Select(x => new { x.Age, x.LastName }).Where(q => q.Age < 50));
+```
+
+**SELECT "Age","LastName" FROM "Person" WHERE ("Age" < 50)**
 
 ### INSERT, UPDATE and DELETEs
 
