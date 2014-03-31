@@ -9,11 +9,12 @@ using System.Linq.Expressions;
 
 namespace ServiceStack.OrmLite
 {
-    public abstract class SqlExpression<T>
+    public abstract class SqlExpression<T> : ISqlExpression
     {
         private Expression<Func<T, bool>> underlyingExpression;
         private List<string> orderByProperties = new List<string>();
         private string selectExpression = string.Empty;
+        private string fromExpression = null;
         private string whereExpression;
         private string groupBy = string.Empty;
         private string havingExpression;
@@ -47,6 +48,7 @@ namespace ServiceStack.OrmLite
             to.underlyingExpression = underlyingExpression;
             to.orderByProperties = orderByProperties;
             to.selectExpression = selectExpression;
+            to.fromExpression = fromExpression;
             to.whereExpression = whereExpression;
             to.groupBy = groupBy;
             to.havingExpression = havingExpression;
@@ -109,6 +111,30 @@ namespace ServiceStack.OrmLite
             sep = string.Empty;
             useFieldName = true;
             BuildSelectExpression(Visit(fields).ToString(), true);
+            return this;
+        }
+
+        public virtual SqlExpression<T> From(string tables)
+        {
+            if (string.IsNullOrEmpty(tables))
+            {
+                FromExpression = null;
+            }
+            else
+            {
+                tables.SqlVerifyFragment();
+                var singleTable = tables.ToLower().IndexOfAny("join", ",") >= 0;
+                FromExpression = singleTable
+                    ? " \nFROM " + OrmLiteConfig.DialectProvider.GetQuotedTableName(tables)
+                    : " \nFROM " + tables;
+            }
+
+            return this;
+        }
+
+        public virtual SqlExpression<T> From<Table>()
+        {
+            FromExpression = " \nFROM " + OrmLiteConfig.DialectProvider.GetQuotedTableName(typeof(Table).GetModelDefinition());
             return this;
         }
 
@@ -457,6 +483,9 @@ namespace ServiceStack.OrmLite
             var sql = new StringBuilder();
 
             sql.Append(SelectExpression);
+
+            sql.Append(FromExpression);
+
             sql.Append(string.IsNullOrEmpty(WhereExpression) ?
                        "" :
                        "\n" + WhereExpression);
@@ -490,6 +519,17 @@ namespace ServiceStack.OrmLite
             {
                 selectExpression = value;
             }
+        }
+
+        public string FromExpression
+        {
+            get
+            {
+                return string.IsNullOrEmpty(fromExpression)
+                    ? " \nFROM " + OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef)
+                    : fromExpression;
+            }
+            set { fromExpression = value; }
         }
 
         public string WhereExpression
@@ -1035,13 +1075,11 @@ namespace ServiceStack.OrmLite
 
         private void BuildSelectExpression(string fields, bool distinct)
         {
-
-            selectExpression = string.Format("SELECT {0}{1} \nFROM {2}",
+            selectExpression = string.Format("SELECT {0}{1}",
                 (distinct ? "DISTINCT " : ""),
                 (string.IsNullOrEmpty(fields) ?
                     OrmLiteConfig.DialectProvider.GetColumnNames(modelDef) :
-                    fields),
-                OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef));
+                    fields));
         }
 
         public IList<string> GetAllFields()
@@ -1261,6 +1299,11 @@ namespace ServiceStack.OrmLite
             }
             return new PartialSqlString(statement);
         }
+    }
+
+    public interface ISqlExpression
+    {
+        string ToSelectStatement();
     }
 
     public class PartialSqlString
