@@ -93,12 +93,16 @@ From v4.0.16 you can now use typed sql expressions in Custom SQL API's
 
 ```csharp
 List<Person> results = db.SqlList<Person>(db.From<Person>().Select("*").Where(q => q.Age < 50));
+List<Person> results = db.SqlList<Person>("SELECT * FROM Person WHERE Age < @age", new { age=50});
 
-List<string> results = db.SqlColumn<string>(db.From<Person>().Select(x => x.LastName);
+List<string> results = db.SqlColumn<string>(db.From<Person>().Select(x => x.LastName));
+List<string> results = db.SqlColumn<string>("SELECT LastName FROM Person");
 
-HashSet<int> results = db.ColumnDistinct<int>(db.From<Person>().Select(x => x.Age);
+HashSet<int> results = db.ColumnDistinct<int>(db.From<Person>().Select(x => x.Age));
+HashSet<int> results = db.ColumnDistinct<int>("SELECT Age FROM Person");
 
 int result = db.SqlScalar<int>(db.From<Person>().Select(Sql.Count("*")).Where(q => q.Age < 50));
+int result = db.SqlScalar<int>("SELCT COUNT(*) FROM Person WHERE Age < 50");
 ```
 
 ## New Simplified API
