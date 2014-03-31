@@ -34,6 +34,25 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Creates a new SqlExpression builder allowing typed LINQ-like queries.
+        /// Alias for SqlExpression.
+        /// </summary>
+        public static SqlExpression<T> From<T>(this IDbConnection dbConn)
+        {
+            return OrmLiteConfig.ExecFilter.SqlExpression<T>(dbConn);
+        }
+
+        /// <summary>
+        /// Creates a new SqlExpression builder for the specified type using a user-defined FROM sql expression.
+        /// </summary>
+        public static SqlExpression<T> From<T>(this IDbConnection dbConn, string fromExpression)
+        {
+            var expr = OrmLiteConfig.ExecFilter.SqlExpression<T>(dbConn);
+            expr.From(fromExpression);
+            return expr;
+        }
+
+        /// <summary>
         /// Open a Transaction in OrmLite
         /// </summary>
         public static IDbTransaction OpenTransaction(this IDbConnection dbConn)
