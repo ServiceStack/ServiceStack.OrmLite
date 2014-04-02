@@ -341,8 +341,25 @@ namespace ServiceStack.OrmLite
         /// </param>	
         public virtual SqlExpression<T> Limit(int skip, int rows)
         {
-            Rows = rows;
             Skip = skip;
+            Rows = rows;
+            return this;
+        }
+        /// <summary>
+        /// Set the specified offset and rows for SQL Limit clause where they're not null.
+        /// </summary>
+        /// <param name='skip'>
+        /// Offset of the first row to return. The offset of the initial row is 0
+        /// </param>
+        /// <param name='rows'>
+        /// Number of rows returned by a SELECT statement
+        /// </param>	
+        public virtual SqlExpression<T> Limit(int? skip, int? rows)
+        {
+            if (skip != null)
+                Skip = skip;
+            if (rows != null)
+                Rows = rows;
             return this;
         }
 
