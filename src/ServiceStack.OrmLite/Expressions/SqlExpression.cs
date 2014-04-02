@@ -402,6 +402,14 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
+        /// <summary>
+        /// Clear Offset and Limit clauses. Alias for Limit()
+        /// </summary>
+        /// <returns></returns>
+        public virtual SqlExpression<T> ClearLimits()
+        {
+            return Limit();
+        }
 
         /// <summary>
         /// Fields to be updated.
