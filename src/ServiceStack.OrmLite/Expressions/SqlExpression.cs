@@ -374,7 +374,7 @@ namespace ServiceStack.OrmLite
         /// </param>	
         public virtual SqlExpression<T> Limit(int? skip, int? rows)
         {
-            Offset = skip ?? 0;
+            Offset = skip;
             Rows = rows;
             return this;
         }
@@ -387,7 +387,7 @@ namespace ServiceStack.OrmLite
         /// </param>
         public virtual SqlExpression<T> Limit(int rows)
         {
-            Offset = 0;
+            Offset = null;
             Rows = rows;
             return this;
         }
@@ -626,17 +626,12 @@ namespace ServiceStack.OrmLite
         {
             get
             {
-                if (!Offset.HasValue) return "";
-                string rows;
-                if (Rows.HasValue)
-                {
-                    rows = string.Format(",{0}", Rows.Value);
-                }
-                else
-                {
-                    rows = string.Empty;
-                }
-                return string.Format("LIMIT {0}{1}", Offset.Value, rows);
+                if (Offset == null && Rows == null)
+                    return "";
+
+                return Offset == null
+                    ? "LIMIT " + Rows
+                    : "LIMIT " + Rows.GetValueOrDefault(int.MaxValue) + " OFFSET " + Offset;
             }
         }
 
@@ -1130,7 +1125,8 @@ namespace ServiceStack.OrmLite
 
         protected virtual string ApplyPaging(string sql)
         {
-            sql = sql + (string.IsNullOrEmpty(LimitExpression) ? "" : "\n" + LimitExpression);
+            var limitExpression = LimitExpression;
+            sql = sql + (string.IsNullOrEmpty(limitExpression) ? "" : "\n" + limitExpression);
             return sql;
         }
 
