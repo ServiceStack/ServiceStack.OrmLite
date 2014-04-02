@@ -8,9 +8,9 @@ namespace ServiceStack.OrmLite.PostgreSQL
             {
                 if (!Rows.HasValue) return "";
                 string offset;
-                if (Skip.HasValue)
+                if (Offset.HasValue)
                 {
-                    offset = string.Format(" OFFSET {0}", Skip.Value);
+                    offset = string.Format(" OFFSET {0}", Offset.Value);
                 }
                 else
                 {

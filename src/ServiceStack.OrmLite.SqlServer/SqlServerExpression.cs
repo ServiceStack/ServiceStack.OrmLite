@@ -7,12 +7,12 @@ namespace ServiceStack.OrmLite.SqlServer
 	{
         public override string ToSelectStatement()
         {
-            if (!Skip.HasValue && !Rows.HasValue)
+            if (!Offset.HasValue && !Rows.HasValue)
                 return base.ToSelectStatement();
 
             AssertValidSkipRowValues();
 
-            var skip = Skip.HasValue ? Skip.Value : 0;
+            var skip = Offset.HasValue ? Offset.Value : 0;
             var take = Rows.HasValue ? Rows.Value : int.MaxValue;
 
 	        var sql = "";
@@ -86,8 +86,8 @@ namespace ServiceStack.OrmLite.SqlServer
 
         protected virtual void AssertValidSkipRowValues()
         {
-            if (Skip.HasValue && Skip.Value < 0)
-                throw new ArgumentException(String.Format("Skip value:'{0}' must be>=0", Skip.Value));
+            if (Offset.HasValue && Offset.Value < 0)
+                throw new ArgumentException(String.Format("Skip value:'{0}' must be>=0", Offset.Value));
 
             if (Rows.HasValue && Rows.Value <0)
                 throw new ArgumentException(string.Format("Rows value:'{0}' must be>=0", Rows.Value));

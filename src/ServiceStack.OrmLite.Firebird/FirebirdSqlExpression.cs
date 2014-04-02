@@ -165,11 +165,11 @@ namespace ServiceStack.OrmLite.Firebird
         {
             get
             {
-                if (!Skip.HasValue) return "";
-                int fromRow = Skip.Value + 1;
+                if (!Offset.HasValue) return "";
+                int fromRow = Offset.Value + 1;
                 if (fromRow <= 0)
                     throw new ArgumentException(
-                        string.Format("Skip value:'{0}' must be>=0", Skip.Value));
+                        string.Format("Skip value:'{0}' must be>=0", Offset.Value));
                 string toRow;
                 if (Rows.HasValue)
                 {

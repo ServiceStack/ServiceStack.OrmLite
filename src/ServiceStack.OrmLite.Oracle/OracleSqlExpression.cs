@@ -58,9 +58,9 @@ namespace ServiceStack.OrmLite.Oracle
         {
             if (!Rows.HasValue)
                 return sql;
-            if (!Skip.HasValue)
+            if (!Offset.HasValue)
             {
-                Skip = 0;
+                Offset = 0;
             }
             sql = UpdateWithOrderByIfNecessary(sql);
             var sb = new StringBuilder();
@@ -68,8 +68,8 @@ namespace ServiceStack.OrmLite.Oracle
             sb.AppendLine("SELECT \"_ss_ormlite_1_\".*, ROWNUM RNUM FROM (");
             sb.Append(sql);
             sb.AppendLine(") \"_ss_ormlite_1_\"");
-            sb.AppendFormat("WHERE ROWNUM <= {0} + {1}) \"_ss_ormlite_2_\" ", Skip.Value, Rows.Value);
-            sb.AppendFormat("WHERE \"_ss_ormlite_2_\".RNUM > {0}", Skip.Value);
+            sb.AppendFormat("WHERE ROWNUM <= {0} + {1}) \"_ss_ormlite_2_\" ", Offset.Value, Rows.Value);
+            sb.AppendFormat("WHERE \"_ss_ormlite_2_\".RNUM > {0}", Offset.Value);
 
             return sb.ToString();
         }

@@ -329,6 +329,23 @@ namespace ServiceStack.OrmLite
             }
         }
 
+        /// <summary>
+        /// Offset of the first row to return. The offset of the initial row is 0
+        /// </summary>
+        public virtual SqlExpression<T> Skip(int? skip = null)
+        {
+            Offset = skip;
+            return this;
+        }
+
+        /// <summary>
+        /// Number of rows returned by a SELECT statement
+        /// </summary>
+        public virtual SqlExpression<T> Take(int? take = null)
+        {
+            Rows = take;
+            return this;
+        }
 
         /// <summary>
         /// Set the specified offset and rows for SQL Limit clause.
@@ -341,12 +358,13 @@ namespace ServiceStack.OrmLite
         /// </param>	
         public virtual SqlExpression<T> Limit(int skip, int rows)
         {
-            Skip = skip;
+            Offset = skip;
             Rows = rows;
             return this;
         }
+
         /// <summary>
-        /// Set the specified offset and rows for SQL Limit clause where they're not null.
+        /// Set the specified offset and rows for SQL Limit clause where they exist.
         /// </summary>
         /// <param name='skip'>
         /// Offset of the first row to return. The offset of the initial row is 0
@@ -356,10 +374,8 @@ namespace ServiceStack.OrmLite
         /// </param>	
         public virtual SqlExpression<T> Limit(int? skip, int? rows)
         {
-            if (skip != null)
-                Skip = skip;
-            if (rows != null)
-                Rows = rows;
+            Offset = skip ?? 0;
+            Rows = rows;
             return this;
         }
 
@@ -371,8 +387,8 @@ namespace ServiceStack.OrmLite
         /// </param>
         public virtual SqlExpression<T> Limit(int rows)
         {
+            Offset = 0;
             Rows = rows;
-            Skip = 0;
             return this;
         }
 
@@ -381,7 +397,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public virtual SqlExpression<T> Limit()
         {
-            Skip = null;
+            Offset = null;
             Rows = null;
             return this;
         }
@@ -602,7 +618,7 @@ namespace ServiceStack.OrmLite
         {
             get
             {
-                if (!Skip.HasValue) return "";
+                if (!Offset.HasValue) return "";
                 string rows;
                 if (Rows.HasValue)
                 {
@@ -612,12 +628,12 @@ namespace ServiceStack.OrmLite
                 {
                     rows = string.Empty;
                 }
-                return string.Format("LIMIT {0}{1}", Skip.Value, rows);
+                return string.Format("LIMIT {0}{1}", Offset.Value, rows);
             }
         }
 
         public int? Rows { get; set; }
-        public int? Skip { get; set; }
+        public int? Offset { get; set; }
 
         public IList<string> UpdateFields
         {
