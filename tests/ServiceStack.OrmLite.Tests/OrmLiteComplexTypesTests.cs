@@ -6,7 +6,6 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    using System.Collections;
     using System.Collections.Generic;
 
     [TestFixture]
@@ -65,8 +64,6 @@ namespace ServiceStack.OrmLite.Tests
 	    [Test]
 	    public void Lists_Of_Guids_Are_Formatted_Correctly()
 	    {
-            SuppressIfOracle("Can't read a list of Guids with Oracle provider because core OrmLite doesn't give provider a chance to override conversion");
-
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<WithAListOfGuids>();

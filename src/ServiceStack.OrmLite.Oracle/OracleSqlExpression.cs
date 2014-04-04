@@ -11,7 +11,7 @@ namespace ServiceStack.OrmLite.Oracle
         {
             if (m.Method.Name == "Substring")
             {
-                List<Object> args = this.VisitExpressionList(m.Arguments);
+                List<Object> args = VisitExpressionList(m.Arguments);
                 var quotedColName = Visit(m.Object);
                 var startIndex = Int32.Parse(args[0].ToString()) + 1;
                 if (args.Count == 2)
@@ -50,7 +50,7 @@ namespace ServiceStack.OrmLite.Oracle
         private static string GetFirstColumn(string sql)
         {
             var idx1 = sql.IndexOf("select", StringComparison.OrdinalIgnoreCase) + 7;
-            var idx2 = sql.IndexOf(",", idx1);
+            var idx2 = sql.IndexOf(",", idx1, StringComparison.Ordinal);
             return sql.Substring(idx1, idx2 - 7).Trim();
         }
 

@@ -22,6 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -41,6 +42,12 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Northwind.Common">
+      <HintPath>..\..\lib\tests\Northwind.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Northwind.Perf">
+      <HintPath>..\..\lib\tests\Northwind.Perf.dll</HintPath>
+    </Reference>
     <Reference Include="nunit.framework, Version=2.6.2.12296, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\tests\nunit.framework.dll</HintPath>
@@ -51,23 +58,274 @@
     <Reference Include="ServiceStack.Interfaces">
       <HintPath>..\..\lib\ServiceStack.Interfaces.dll</HintPath>
     </Reference>
+    <Reference Include="ServiceStack.Text, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\ServiceStack.Text.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\CustomSqlTests.cs">
+      <Link>CustomSqlTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\DateTimeOffsetTests.cs">
+      <Link>DateTimeOffsetTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\EnumTests.cs">
+      <Link>EnumTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\ExpressionVisitorTests.cs">
+      <Link>ExpressionVisitorTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\AdditiveExpressionsTest.cs">
+      <Link>Expression\AdditiveExpressionsTest.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\ConditionalExpressionTest.cs">
+      <Link>Expression\ConditionalExpressionTest.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\EqualityExpressionsTest.cs">
+      <Link>Expression\EqualityExpressionsTest.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\ExpressionChainingUseCase.cs">
+      <Link>Expression\ExpressionChainingUseCase.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\ExpressionsTestBase.cs">
+      <Link>Expression\ExpressionsTestBase.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\LogicalExpressionsTest.cs">
+      <Link>Expression\LogicalExpressionsTest.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\MethodExpressionTests.cs">
+      <Link>Expression\MethodExpressionTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\MultiplicativeExpressionsTest.cs">
+      <Link>Expression\MultiplicativeExpressionsTest.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\OrmLiteCountTests.cs">
+      <Link>Expression\OrmLiteCountTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\PrimaryExpressionsTest.cs">
+      <Link>Expression\PrimaryExpressionsTest.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\RelationalExpressionsTest.cs">
+      <Link>Expression\RelationalExpressionsTest.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\SelectExpressionTests.cs">
+      <Link>Expression\SelectExpressionTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\StringFunctionTests.cs">
+      <Link>Expression\StringFunctionTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\TestType.cs">
+      <Link>Expression\TestType.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\UnaryExpressionsTest.cs">
+      <Link>Expression\UnaryExpressionsTest.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\JoinSqlBuilderTests.cs">
+      <Link>JoinSqlBuilderTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\LoadReferencesTests.cs">
+      <Link>LoadReferencesTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\LocalizationTests.cs">
+      <Link>LocalizationTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\MockAllApiTests.cs">
+      <Link>MockAllApiTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\NorthwindPerfTests.cs">
+      <Link>NorthwindPerfTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\OrmLiteBasicPersistenceProviderTests.cs">
+      <Link>OrmLiteBasicPersistenceProviderTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\OrmLiteComplexTypesTests.cs">
+      <Link>OrmLiteComplexTypesTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\OrmLiteCreateTableTests.cs">
+      <Link>OrmLiteCreateTableTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\OrmLiteCreateTableWithIndexesTests.cs">
+      <Link>OrmLiteCreateTableWithIndexesTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\OrmLiteCreateTableWithNamingStrategyTest.cs">
+      <Link>OrmLiteCreateTableWithNamingStrategyTest.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\OrmLiteDeleteTests.cs">
+      <Link>OrmLiteDeleteTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\OrmLiteDropTableTests.cs">
+      <Link>OrmLiteDropTableTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\OrmLiteDropTableWithNamingStrategyTests.cs">
+      <Link>OrmLiteDropTableWithNamingStrategyTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\OrmLiteExecFilterTests.cs">
+      <Link>OrmLiteExecFilterTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\OrmLiteFiltersTests.cs">
+      <Link>OrmLiteFiltersTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\OrmLiteGetScalarTests.cs">
+      <Link>OrmLiteGetScalarTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\OrmLiteInsertTests.cs">
+      <Link>OrmLiteInsertTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\OrmLiteNorthwindTests.cs">
+      <Link>OrmLiteNorthwindTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\OrmLiteQueryTests.cs">
+      <Link>OrmLiteQueryTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\OrmLiteSaveTests.cs">
+      <Link>OrmLiteSaveTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\OrmLiteSelectTests.cs">
+      <Link>OrmLiteSelectTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\OrmLiteUpdateTests.cs">
+      <Link>OrmLiteUpdateTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\OrmLiteUtilExtensionsTests.cs">
+      <Link>OrmLiteUtilExtensionsTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ApiUtilExtensions.cs">
+      <Link>Shared\ApiUtilExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\BuiltInsFactory.cs">
+      <Link>Shared\BuiltInsFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\IModelFactory.cs">
+      <Link>Shared\IModelFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelFactoryBase.cs">
+      <Link>Shared\ModelFactoryBase.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelWithComplexTypes.cs">
+      <Link>Shared\ModelWithComplexTypes.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelWithComplexTypesFactory.cs">
+      <Link>Shared\ModelWithComplexTypesFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelWithCompositeIndexFields.cs">
+      <Link>Shared\ModelWithCompositeIndexFields.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelWithFieldsOfDifferentAndNullableTypes.cs">
+      <Link>Shared\ModelWithFieldsOfDifferentAndNullableTypes.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelWithFieldsOfDifferentAndNullableTypesFactory.cs">
+      <Link>Shared\ModelWithFieldsOfDifferentAndNullableTypesFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelWithFieldsOfDifferentTypes.cs">
+      <Link>Shared\ModelWithFieldsOfDifferentTypes.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelWithFieldsOfDifferentTypesFactory.cs">
+      <Link>Shared\ModelWithFieldsOfDifferentTypesFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelWithFieldsOfNullableTypes.cs">
+      <Link>Shared\ModelWithFieldsOfNullableTypes.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelWithFieldsOfNullableTypesFactory.cs">
+      <Link>Shared\ModelWithFieldsOfNullableTypesFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelWithIdAndName.cs">
+      <Link>Shared\ModelWithIdAndName.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelWithIdOnly.cs">
+      <Link>Shared\ModelWithIdOnly.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelWithIndexFields.cs">
+      <Link>Shared\ModelWithIndexFields.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelWithLongIdAndStringFields.cs">
+      <Link>Shared\ModelWithLongIdAndStringFields.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelWithMapAndList.cs">
+      <Link>Shared\ModelWithMapAndList.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelWithNamedCompositeIndex.cs">
+      <Link>Shared\ModelWithNamedCompositeIndex.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelWithOnlyStringFields.cs">
+      <Link>Shared\ModelWithOnlyStringFields.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\Movie.cs">
+      <Link>Shared\Movie.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\Person.cs">
+      <Link>Shared\Person.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\Poco.cs">
+      <Link>Shared\Poco.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\SampleOrderLine.cs">
+      <Link>Shared\SampleOrderLine.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\Shipper.cs">
+      <Link>Shared\Shipper.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ShipperFactory.cs">
+      <Link>Shared\ShipperFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\TaskQueue.cs">
+      <Link>Shared\TaskQueue.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\ShippersExample.cs">
+      <Link>ShippersExample.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\SqlBuilderTests.cs">
+      <Link>SqlBuilderTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\SqlFormatTests.cs">
+      <Link>SqlFormatTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\TypeDescriptorMetadataTests.cs">
+      <Link>TypeDescriptorMetadataTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\TypeWithByteArrayFieldTests.cs">
+      <Link>TypeWithByteArrayFieldTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\UntypedApiTests.cs">
+      <Link>UntypedApiTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\UseCase\AliasedFieldUseCase.cs">
+      <Link>UseCase\AliasedFieldUseCase.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\UseCase\CustomerOrdersUseCase.cs">
+      <Link>UseCase\CustomerOrdersUseCase.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\UseCase\ImageBlobDto.cs">
+      <Link>UseCase\ImageBlobDto.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\UseCase\NestedComplexTypeUseCase.cs">
+      <Link>UseCase\NestedComplexTypeUseCase.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\UseCase\ServiceStack_OrmLite_UseCase.cs">
+      <Link>UseCase\ServiceStack_OrmLite_UseCase.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\UseCase\SimpleUseCase.cs">
+      <Link>UseCase\SimpleUseCase.cs</Link>
+    </Compile>
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="OracleParamTests.cs" />
-    <Compile Include="OracleSyntaxTests.cs" />
-    <Compile Include="OracleTestBase.cs">
+    <Compile Include="DateTimeColumnTest.cs" />
+    <Compile Include="ForeignKeyAttributeTests.cs" />
+    <Compile Include="OracleParamTests.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="OracleSyntaxTests.cs" />
+    <Compile Include="OrmLiteExecuteNonQueryTests.cs" />
+    <Compile Include="OrmLiteTestBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -84,6 +342,11 @@
     <None Include="app.config">
       <SubType>Designer</SubType>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\tests\ServiceStack.OrmLite.Tests\UseCase\ImageBlobResource.resx">
+      <Link>UseCase\ImageBlobResource.resx</Link>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -53,37 +53,35 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void FieldNameLeftJoinTest ()
 		{
-            SuppressIfOracle("These assert comparisons don't work with Oracle provider because it doesn't quote every name");
-
 			var joinQuery = new JoinSqlBuilder<User, User> ().LeftJoin<User, Address> (x => x.Id, x => x.UserId).ToSql ();
 			var expected = "SELECT \"User\".\"Id\",\"User\".\"Name\",\"User\".\"Age\" \nFROM \"User\" \n LEFT OUTER JOIN  \"Address\" ON \"User\".\"Id\" = \"Address\".\"UserId\"  \n";
+            var expectedNq = "SELECT \"User\".Id,\"User\".Name,\"User\".Age \nFROM \"User\" \n LEFT OUTER JOIN  Address ON \"User\".Id = Address.UserId  \n";
 
-			Assert.AreEqual (expected, joinQuery);
-
+			Assert.That(joinQuery, Is.EqualTo(expected).Or.EqualTo(expectedNq));
 
 			joinQuery = new JoinSqlBuilder<WithAliasUser, WithAliasUser> ().LeftJoin<WithAliasUser, WithAliasAddress> (x => x.Id, x => x.UserId).ToSql ();
 			expected = "SELECT \"Users\".\"Id\",\"Users\".\"Nickname\",\"Users\".\"Agealias\" \nFROM \"Users\" \n LEFT OUTER JOIN  \"Addresses\" ON \"Users\".\"Id\" = \"Addresses\".\"UserId\"  \n";
+            expectedNq = "SELECT Users.Id,Users.Nickname,Users.Agealias \nFROM Users \n LEFT OUTER JOIN  Addresses ON Users.Id = Addresses.UserId  \n";
 
-			Assert.AreEqual (expected, joinQuery);
-
-
+            Assert.That(joinQuery, Is.EqualTo(expected).Or.EqualTo(expectedNq));
+            
 			joinQuery = new JoinSqlBuilder<User, User> ().LeftJoin<User, WithAliasAddress> (x => x.Id, x => x.UserId).ToSql ();
 			expected = "SELECT \"User\".\"Id\",\"User\".\"Name\",\"User\".\"Age\" \nFROM \"User\" \n LEFT OUTER JOIN  \"Addresses\" ON \"User\".\"Id\" = \"Addresses\".\"UserId\"  \n";
+            expectedNq = "SELECT \"User\".Id,\"User\".Name,\"User\".Age \nFROM \"User\" \n LEFT OUTER JOIN  Addresses ON \"User\".Id = Addresses.UserId  \n";
 
-			Assert.AreEqual (expected, joinQuery);
-		}
+            Assert.That(joinQuery, Is.EqualTo(expected).Or.EqualTo(expectedNq));
+        }
 
 		[Test]
 		public void DoubleWhereLeftJoinTest ()
 		{
-            SuppressIfOracle("These assert comparisons don't work with Oracle provider because it doesn't quote every name");
-
             var joinQuery = new JoinSqlBuilder<User, User>().LeftJoin<User, WithAliasAddress>(x => x.Id, x => x.UserId
 			                                                                                    , sourceWhere: x => x.Age > 18
 			                                                                                    , destinationWhere: x => x.Country == "Italy").ToSql ();
 			var expected = "SELECT \"User\".\"Id\",\"User\".\"Name\",\"User\".\"Age\" \nFROM \"User\" \n LEFT OUTER JOIN  \"Addresses\" ON \"User\".\"Id\" = \"Addresses\".\"UserId\"  \nWHERE (\"User\".\"Age\" > 18) AND (\"Addresses\".\"Countryalias\" = 'Italy') \n";
+            var expectedNq = "SELECT \"User\".Id,\"User\".Name,\"User\".Age \nFROM \"User\" \n LEFT OUTER JOIN  Addresses ON \"User\".Id = Addresses.UserId  \nWHERE (\"User\".Age > 18) AND (Addresses.Countryalias = 'Italy') \n";
 
-			Assert.AreEqual (expected, joinQuery);
-		}
+            Assert.That(joinQuery, Is.EqualTo(expected).Or.EqualTo(expectedNq));
+        }
 	}
 }
