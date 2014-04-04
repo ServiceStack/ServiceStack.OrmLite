@@ -324,5 +324,28 @@ namespace ServiceStack.OrmLite.Tests
 			}
 		}
 
+		[Test]
+		public void Can_Select_With_Subquery()
+		{
+			const int n = 5;
+
+			using (var db = OpenDbConnection())
+			{
+				db.CreateTable<ModelWithFieldsOfDifferentTypes>();
+
+				n.Times(x => db.Insert(ModelWithFieldsOfDifferentTypes.Create(n)));
+
+				var sql = @"
+					WITH max_id AS (
+						SELECT 3 AS three)
+					SELECT *
+					FROM ModelWithFieldsOfDifferentTypes
+					WHERE id <= (SELECT three FROM max_id)";
+
+				var rows = db.Select<ModelWithFieldsOfDifferentTypes>(sql);
+
+				Assert.That(rows.Count, Is.EqualTo((3)));
+			}
+		}
 	}
 }
