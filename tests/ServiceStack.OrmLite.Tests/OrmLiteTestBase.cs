@@ -113,5 +113,10 @@ namespace ServiceStack.OrmLite.Tests
 
             return connString.OpenDbConnection();            
         }
+
+        protected void SuppressIfOracle(string reason, params object[] args)
+        {
+            // Not Oracle if this base class used
+        }
 	}
 }

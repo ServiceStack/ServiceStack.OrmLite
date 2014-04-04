@@ -59,14 +59,5 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 }
             }
         }
-
-        protected override string GetFileConnectionString()
-        {
-            var connectionString = Config.SqliteFileDir + this.GetType().Name + ".sqlite";
-            if (File.Exists(connectionString))
-                File.Delete(connectionString);
-
-            return connectionString;
-        }
     }
 }

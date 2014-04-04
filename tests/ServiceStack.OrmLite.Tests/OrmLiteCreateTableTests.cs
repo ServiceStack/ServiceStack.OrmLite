@@ -148,7 +148,7 @@ namespace ServiceStack.OrmLite.Tests
             var createTableSql = OrmLiteConfig.DialectProvider.ToCreateTableStatement(typeof(ModelWithIdAndName));
 
             Console.WriteLine("createTableSql: " + createTableSql);
-            Assert.That(createTableSql.Contains("VARCHAR(255)"), Is.True);
+            Assert.That(createTableSql, Is.StringContaining("VARCHAR(255)").Or.StringContaining("VARCHAR2(255)"));
         }
 
         public class ModelWithGuid

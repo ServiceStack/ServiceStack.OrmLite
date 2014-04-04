@@ -7,13 +7,8 @@ using ServiceStack.DataAnnotations;
 namespace ServiceStack.OrmLite.Tests.UseCase
 {
     [TestFixture]
-    public class AliasedFieldUseCase
+    public class AliasedFieldUseCase : OrmLiteTestBase
     {
-        [TestFixtureSetUp]
-        public void TestFixtureSetup() {
-            OrmLiteConfig.DialectProvider = SqliteDialect.Provider;
-        }
-
         public class Foo
         {
             [Alias("SOME_COLUMN_NAME")]
@@ -23,9 +18,9 @@ namespace ServiceStack.OrmLite.Tests.UseCase
         [Test]
         public void CanResolveAliasedFieldNameInAnonymousType()
         {
-            using (IDbConnection db = ":memory:".OpenDbConnection())
+            using (IDbConnection db = OpenDbConnection())
             {
-                db.CreateTable<Foo>(false);
+                db.CreateTable<Foo>(true);
 
                 db.Insert(new Foo { Bar = "some_value" });
                 db.Insert(new Foo { Bar = "a totally different value" });

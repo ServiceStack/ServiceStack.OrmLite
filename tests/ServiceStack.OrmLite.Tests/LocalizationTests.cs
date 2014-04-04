@@ -3,20 +3,17 @@ using System.Globalization;
 using System.Threading;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.OrmLite.Sqlite;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
 	[TestFixture]
-	public class LocalizationTests
-		: OrmLiteTestBase
+	public class LocalizationTests : OrmLiteTestBase
 	{
 		private readonly CultureInfo CurrentCulture = Thread.CurrentThread.CurrentCulture;
 		private readonly CultureInfo CurrentUICulture = Thread.CurrentThread.CurrentUICulture;
 
 		[SetUp]
-		public void TestFixtureSetUp()
+		public void TestSetUp()
 		{
 			Thread.CurrentThread.CurrentCulture = new CultureInfo("vi-VN");
 			Thread.CurrentThread.CurrentUICulture = new CultureInfo("vi-VN");

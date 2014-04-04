@@ -4,19 +4,16 @@ using System.Diagnostics;
 using Northwind.Common.DataModel;
 using NUnit.Framework;
 using ServiceStack.Data;
-using ServiceStack.OrmLite.Sqlite;
 
 namespace ServiceStack.OrmLite.Tests
 {
 	[Ignore("Perf test")]
 	[TestFixture]
-	public class NorthwindPerfTests
+	public class NorthwindPerfTests : OrmLiteTestBase
 	{
 		[Test]
 		public void Load_Northwind_database_with_OrmLite_sqlite_memory_db()
 		{
-			OrmLiteConfig.DialectProvider = new SqliteOrmLiteDialectProvider();
-
 			NorthwindData.LoadData(false);
 			GC.Collect();
 

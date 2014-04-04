@@ -117,7 +117,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
     }
 
     [TestFixture]
-    public class CustomerOrdersUseCase
+    public class CustomerOrdersUseCase : OrmLiteTestBase
     {
         //Stand-alone class, No other configs, nothing but POCOs.
         [Test]

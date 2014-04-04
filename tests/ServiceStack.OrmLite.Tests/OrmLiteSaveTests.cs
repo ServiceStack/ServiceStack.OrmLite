@@ -26,7 +26,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 db.Save(row);
 
-                Assert.That(row.Id, Is.EqualTo(1));
+                Assert.That(row.Id, Is.Not.EqualTo(0));
             }
         }
 
@@ -52,8 +52,9 @@ namespace ServiceStack.OrmLite.Tests
 
                 db.Save(rows);
 
-                Assert.That(rows[0].Id, Is.EqualTo(1));
-                Assert.That(rows[1].Id, Is.EqualTo(2));
+                Assert.That(rows[0].Id, Is.Not.EqualTo(0));
+                Assert.That(rows[1].Id, Is.Not.EqualTo(0));
+                Assert.That(rows[0].Id, Is.Not.EqualTo(rows[1].Id));
             }
         }
 
@@ -80,8 +81,9 @@ namespace ServiceStack.OrmLite.Tests
 
                 db.Save(rows);
 
-                Assert.That(rows[0].Id, Is.EqualTo(1));
-                Assert.That(rows[1].Id, Is.EqualTo(2));
+                Assert.That(rows[0].Id, Is.Not.EqualTo(0));
+                Assert.That(rows[1].Id, Is.Not.EqualTo(0));
+                Assert.That(rows[0].Id, Is.Not.EqualTo(rows[1].Id));
 
                 trans.Commit();
             }

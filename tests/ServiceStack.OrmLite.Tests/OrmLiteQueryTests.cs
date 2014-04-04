@@ -14,17 +14,18 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_GetById_int_from_ModelWithFieldsOfDifferentTypes_table()
 		{
-			using (var db = OpenDbConnection())
+            using (var db = OpenDbConnection())
 			{
                 db.DropAndCreateTable<ModelWithFieldsOfDifferentTypes>();
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
 
-				rowIds.ForEach(x => db.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
+                for (var i = 0; i < rowIds.Count; i++)
+                    rowIds[i] = (int)db.Insert(ModelWithFieldsOfDifferentTypes.Create(rowIds[i]), selectIdentity: true);
 
-				var row = db.SingleById<ModelWithFieldsOfDifferentTypes>(1);
+                var row = db.SingleById<ModelWithFieldsOfDifferentTypes>(rowIds[0]);
 
-				Assert.That(row.Id, Is.EqualTo(1));
+				Assert.That(row.Id, Is.EqualTo(rowIds[0]));
 			}
 		}
 
@@ -77,7 +78,9 @@ namespace ServiceStack.OrmLite.Tests
 				Assert.That(dbRowIds, Has.Count.EqualTo(1));
 				Assert.That(dbRowIds[0], Is.EqualTo(filterRow.Id));
 
-				rows = db.Select<ModelWithOnlyStringFields>(
+                SuppressIfOracle("Oracle provider is not smart enough to substitute ':' for '@' parameter delimiter.");
+
+                rows = db.Select<ModelWithOnlyStringFields>(
 					"SELECT * FROM ModelWithOnlyStringFields WHERE AlbumName = @AlbumName", new { filterRow.AlbumName });
 				dbRowIds = rows.ConvertAll(x => x.Id);
 				Assert.That(dbRowIds, Has.Count.EqualTo(1));
@@ -158,29 +161,32 @@ namespace ServiceStack.OrmLite.Tests
             {
                 db.DropAndCreateTable<Note>();
 
-                db.Insert(new Note
-                    {
-                        SchemaUri = "tcm:0-0-0",
-                        NoteText = "Hello world 5",
-                        LastUpdated = new DateTime(2013, 1, 5),
-                        UpdatedBy = "RC"
-                    });
+                var note = new Note
+                        {
+                            SchemaUri = "tcm:0-0-0",
+                            NoteText = "Hello world 5",
+                            LastUpdated = new DateTime(2013, 1, 5),
+                            UpdatedBy = "RC"
+                        };
+                note.Id = (int)db.Insert(note, selectIdentity: true);
 
                 var notes = db.Where<Note>(new { SchemaUri = "tcm:0-0-0" });
-                Assert.That(notes[0].Id, Is.EqualTo(1));
-                Assert.That(notes[0].NoteText, Is.EqualTo("Hello world 5"));
+                Assert.That(notes[0].Id, Is.EqualTo(note.Id));
+                Assert.That(notes[0].NoteText, Is.EqualTo(note.NoteText));
 
                 notes = db.SelectFmt<Note>("SchemaUri={0}", "tcm:0-0-0");
-                Assert.That(notes[0].Id, Is.EqualTo(1));
-                Assert.That(notes[0].NoteText, Is.EqualTo("Hello world 5"));
+                Assert.That(notes[0].Id, Is.EqualTo(note.Id));
+                Assert.That(notes[0].NoteText, Is.EqualTo(note.NoteText));
+
+                SuppressIfOracle("Oracle provider is not smart enough to substitute ':' for '@' parameter delimiter.");
 
                 notes = db.Select<Note>("SELECT * FROM Note WHERE SchemaUri=@schemaUri", new { schemaUri = "tcm:0-0-0" });
-                Assert.That(notes[0].Id, Is.EqualTo(1));
-                Assert.That(notes[0].NoteText, Is.EqualTo("Hello world 5"));
+                Assert.That(notes[0].Id, Is.EqualTo(note.Id));
+                Assert.That(notes[0].NoteText, Is.EqualTo(note.NoteText));
 
                 notes = db.Select<Note>("SchemaUri=@schemaUri", new { schemaUri = "tcm:0-0-0" });
-                Assert.That(notes[0].Id, Is.EqualTo(1));
-                Assert.That(notes[0].NoteText, Is.EqualTo("Hello world 5"));
+                Assert.That(notes[0].Id, Is.EqualTo(note.Id));
+                Assert.That(notes[0].NoteText, Is.EqualTo(note.NoteText));
             }            
         }
 
@@ -205,6 +211,8 @@ namespace ServiceStack.OrmLite.Tests
                     LastUpdated = new DateTime(2013, 1, 5),
                     UpdatedBy = "RC"
                 });
+
+                SuppressIfOracle("Oracle provider is not smart enough to substitute ':' for '@' parameter delimiter.");
 
                 var sql = @"
 SELECT
@@ -236,6 +244,8 @@ WHERE SchemaUri=@schemaUri
         [TestCase("t030#Customer_I#d", "t030CustomerNa$^me", "t030Cust^omer_birth_date")]
         public void Can_query_CustomerDto_and_map_db_fields_not_identical_by_guessing_the_mapping(string field1Name, string field2Name, string field3Name)
         {
+            SuppressIfOracle("Oracle provider is not smart enough to insert 'from dual' everywhere required in user supplied SQL");
+
             using (var db = OpenDbConnection())
             {
                 var sql = string.Format(@"

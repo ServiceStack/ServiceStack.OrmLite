@@ -12,13 +12,15 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_create_ModelWithIndexFields_table()
 		{
-			using (var db = OpenDbConnection())
+            using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithIndexFields>(true);
 
 				var sql = OrmLiteConfig.DialectProvider.ToCreateIndexStatements( typeof (ModelWithIndexFields) ).Join();
 
-				Assert.IsTrue(sql.Contains("idx_modelwithindexfields_name"));
+                SuppressIfOracle("Assert comparisons don't work with Oracle provider because it had to squash names to satisfy length restrictions");
+
+                Assert.IsTrue(sql.Contains("idx_modelwithindexfields_name"));
 				Assert.IsTrue(sql.Contains("uidx_modelwithindexfields_uniquename"));
 			}
 		}
@@ -26,13 +28,15 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_create_ModelWithCompositeIndexFields_table()
 		{
-			using (var db = OpenDbConnection())
+            using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithCompositeIndexFields>(true);
 
 				var sql = OrmLiteConfig.DialectProvider.ToCreateIndexStatements(typeof(ModelWithCompositeIndexFields)).Join();
 
-				Assert.IsTrue(sql.Contains("idx_modelwithcompositeindexfields_name"));
+                SuppressIfOracle("Assert comparisons don't work with Oracle provider because it had to squash names to satisfy length restrictions");
+
+                Assert.IsTrue(sql.Contains("idx_modelwithcompositeindexfields_name"));
 				Assert.IsTrue(sql.Contains("idx_modelwithcompositeindexfields_composite1_composite2"));
 			}
 		}
@@ -45,6 +49,8 @@ namespace ServiceStack.OrmLite.Tests
                 db.CreateTable<ModelWithNamedCompositeIndex>(true);
 
                 var sql = OrmLiteConfig.DialectProvider.ToCreateIndexStatements(typeof(ModelWithNamedCompositeIndex)).Join();
+
+                SuppressIfOracle("Assert comparisons don't work with Oracle provider because it had to squash names to satisfy length restrictions");
 
                 Assert.IsTrue(sql.Contains("idx_modelwithnamedcompositeindex_name"));
                 Assert.IsTrue(sql.Contains("custom_index_name"));

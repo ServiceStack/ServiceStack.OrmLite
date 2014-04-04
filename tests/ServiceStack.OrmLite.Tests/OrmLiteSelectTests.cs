@@ -21,11 +21,12 @@ namespace ServiceStack.OrmLite.Tests
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
 
-				rowIds.ForEach(x => db.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
+                for (var i = 0; i < rowIds.Count; i++)
+                    rowIds[i] = (int)db.Insert(ModelWithFieldsOfDifferentTypes.Create(rowIds[i]), selectIdentity: true);
 
-                var row = db.SingleById<ModelWithFieldsOfDifferentTypes>(1);
+                var row = db.SingleById<ModelWithFieldsOfDifferentTypes>(rowIds[1]);
 
-				Assert.That(row.Id, Is.EqualTo(1));
+                Assert.That(row.Id, Is.EqualTo(rowIds[1]));
 			}
 		}
 
@@ -55,12 +56,13 @@ namespace ServiceStack.OrmLite.Tests
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
 
-				rowIds.ForEach(x => db.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
+                for (var i = 0; i < rowIds.Count; i++)
+                    rowIds[i] = (int)db.Insert(ModelWithFieldsOfDifferentTypes.Create(rowIds[i]), selectIdentity: true);
 
 				var rows = db.SelectByIds<ModelWithFieldsOfDifferentTypes>(rowIds);
 				var dbRowIds = rows.ConvertAll(x => x.Id);
 
-				Assert.That(dbRowIds, Is.EquivalentTo(rowIds));
+                Assert.That(dbRowIds, Is.EquivalentTo(rowIds));
 			}
 		}
 
@@ -257,9 +259,12 @@ namespace ServiceStack.OrmLite.Tests
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
 
-				rowIds.ForEach(x => db.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
+                for (var i = 0; i < rowIds.Count; i++)
+                    rowIds[i] = (int)db.Insert(ModelWithFieldsOfDifferentTypes.Create(rowIds[i]), selectIdentity: true);
 
-				var rows = db.SelectFmt<ModelWithIdAndName>("SELECT Id, Name FROM ModelWithFieldsOfDifferentTypes");
+                SuppressIfOracle("Oracle provider doesn't modify user supplied SQL to conform to name length restrictions");
+
+                var rows = db.SelectFmt<ModelWithIdAndName>("SELECT Id, Name FROM ModelWithFieldsOfDifferentTypes");
 				var dbRowIds = rows.ConvertAll(x => x.Id);
 
 				Assert.That(dbRowIds, Is.EquivalentTo(rowIds));
@@ -269,18 +274,19 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_Select_Into_ModelWithIdAndName_from_ModelWithFieldsOfDifferentTypes_table()
 		{
-			using (var db = OpenDbConnection())
+            using (var db = OpenDbConnection())
 			{
                 db.DropAndCreateTable<ModelWithFieldsOfDifferentTypes>();
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
 
-				rowIds.ForEach(x => db.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
-
+                for (var i = 0; i < rowIds.Count; i++)
+                    rowIds[i] = (int)db.Insert(ModelWithFieldsOfDifferentTypes.Create(rowIds[i]), selectIdentity: true);
+                
 				var rows = db.Select<ModelWithIdAndName>(typeof(ModelWithFieldsOfDifferentTypes));
 				var dbRowIds = rows.ConvertAll(x => x.Id);
 
-				Assert.That(dbRowIds, Is.EquivalentTo(rowIds));
+                Assert.That(dbRowIds, Is.EquivalentTo(rowIds));
 			}
 		}
 

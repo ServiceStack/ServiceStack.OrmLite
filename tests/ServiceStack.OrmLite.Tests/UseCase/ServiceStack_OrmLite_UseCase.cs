@@ -15,13 +15,12 @@ namespace ServiceStack.OrmLite.Tests.UseCase
     }
 
     [TestFixture]
-    public class ServiceStack_OrmLite_UseCase
+    public class ServiceStack_OrmLite_UseCase : OrmLiteTestBase
     {
         [Test]
         public void Can_Add_Update_and_Delete_Todo_item()
         {
-            var dbFactory = new OrmLiteConnectionFactory(":memory:", SqliteDialect.Provider);
-            using (IDbConnection db = dbFactory.Open())
+            using (IDbConnection db = OpenDbConnection())
             {
                 db.DropAndCreateTable<Todo>();
                 var todo = new Todo

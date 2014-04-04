@@ -60,6 +60,8 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_add_replay_logic()
         {
+            SuppressIfOracle("Can't run this with Oracle until use trigger for AutoIncrement primary key insertion");
+
             var holdExecFilter = OrmLiteConfig.ExecFilter;
             OrmLiteConfig.ExecFilter = new ReplayOrmLiteExecFilter { ReplayTimes = 3 };
 

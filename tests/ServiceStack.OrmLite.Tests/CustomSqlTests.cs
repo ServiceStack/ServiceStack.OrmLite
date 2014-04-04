@@ -75,8 +75,10 @@ namespace ServiceStack.OrmLite.Tests
                 var createTableSql = db.GetLastSql();
                 createTableSql.Print();
 
-                Assert.That(createTableSql, Is.StringContaining("\"CharColumn\" CHAR(20) null"));
-                Assert.That(createTableSql, Is.StringContaining("\"DecimalColumn\" DECIMAL(18,4) null"));
+                Assert.That(createTableSql, Is.StringContaining("\"CharColumn\" CHAR(20) null")
+                                            .Or.StringContaining("CharColumn CHAR(20) null"));
+                Assert.That(createTableSql, Is.StringContaining("\"DecimalColumn\" DECIMAL(18,4) null")
+                                            .Or.StringContaining("DecimalColumn DECIMAL(18,4) null"));
             }
         }
 
@@ -100,6 +102,8 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Does_execute_CustomSql_after_table_created()
         {
+            SuppressIfOracle("For Oracle need wrap multiple SQL statements in an anonymous block");
+
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<ModelWithSeedDataSql>();
@@ -113,6 +117,8 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Does_execute_CustomSql_after_table_created_using_dynamic_attribute()
         {
+            SuppressIfOracle("For Oracle need wrap multiple SQL statements in an anonymous block");
+
             typeof(DynamicAttributeSeedData)
                 .AddAttributes(new PostCreateTableAttribute(
                     "INSERT INTO DynamicAttributeSeedData (Name) VALUES ('Foo');" +

@@ -133,7 +133,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 db.GetLastSql().Print();
 
-                Assert.That(db.GetLastSql(), Is.StringContaining("\"Flags\" INT"));
+                Assert.That(db.GetLastSql(), Is.StringContaining("\"Flags\" INT").Or.StringContaining("Flags INT"));
             }
         }
 
@@ -149,7 +149,7 @@ namespace ServiceStack.OrmLite.Tests
                 db.Insert(new TypeWithFlagsEnum { Id = 3, Flags = FlagsEnum.FlagOne | FlagsEnum.FlagTwo });
 
                 db.Update(new TypeWithFlagsEnum { Id = 1, Flags = FlagsEnum.FlagThree });
-                Assert.That(db.GetLastSql(), Is.StringContaining("=@Flags"));
+                Assert.That(db.GetLastSql(), Is.StringContaining("=@Flags").Or.StringContaining("=:Flags"));
                 db.GetLastSql().Print();
 
                 db.UpdateOnly(new TypeWithFlagsEnum { Id = 1, Flags = FlagsEnum.FlagThree }, q => q.Flags);

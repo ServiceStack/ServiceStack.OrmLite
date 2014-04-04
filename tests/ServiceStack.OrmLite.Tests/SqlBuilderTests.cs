@@ -8,7 +8,7 @@ using ServiceStack.DataAnnotations;
 namespace ServiceStack.OrmLite.Tests
 {
     [TestFixture]
-    public class SqlBuilderTests
+    public class SqlBuilderTests : OrmLiteTestBase
     {
         [Alias("Users")]
         public class User 
@@ -64,6 +64,8 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void BuilderTemplateWOComposition()
         {
+            SuppressIfOracle("Oracle provider is not smart enough to replace '@' parameter delimiter with ':'");
+
             var builder = new SqlBuilder();
             var template = builder.AddTemplate("SELECT COUNT(*) FROM Users WHERE Age = @age", new { age = 5 });
 
