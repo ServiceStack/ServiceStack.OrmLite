@@ -65,6 +65,28 @@ which will download and extract the dlls into your local local `lib/` folder.
 
 ***
 
+## Oracle Provider Notes
+The Oracle provider requires an installation of Oracle's ODP.NET. It has been tested with Oracle 11g but should work with 10g and perhaps even older versions. It has not been tested with Oracle 12c and does not support any new 12c features such as AutoIncrement keys. It also does not support the new Oracle fully-managed client.
+
+By default the Oracle provider stores Guids in the database as character strings and when generating SQL it quotes only table and column names that are reserved words in Oracle. That requires that you use the same quoting if you code your own SQL. Both of these options can be overridden, but overriding them will cause problems: the provider can store Guids as raw(16) but it cannot read them.
+
+The Oracle provider uses Oracle sequences to implement AutoIncrement columns and it queries the sequence to get a new value in a separate database call. You can override the automatically generated sequence name with a
+
+	[Sequence("name")]
+
+attribute on a field. The Sequence attribute implies [AutoIncrement], but you can use both on the same field.
+
+Since Oracle has a very restrictive 30 character limit on names, it is strongly suggested that you use short entity class and field names or aliases, remembering that indexes and foreign keys get compound names. If you use long names, the provider will squash them to make them compliant with the restriction. The algorithm used is to remove all vowels ("aeiouy") and if still too long then every fourth letter starting with the third one and finally if still too long to truncate the name. You must apply the same squashing algorithm if you are coding your own SQL.  
+
+The previous version of ServiceStack.OrmLite.Oracle used System.Data.OracleClient to talk to the database. Microsoft has deprecated that client, but it does still mostly work if you construct the Oracle provider like this:
+
+    OracleOrmLiteDialectProvider.Instance = new OracleOrmLiteDialectProvider(
+		compactGuid: false,
+		quoteNames: false,
+		clientProvider: OracleOrmLiteDialectProvider.MicrosoftProvider); 
+
+DateTimeOffset fields and, in locales that use a comma to separate the fractional part of a floating point number, some aspects of using floating point numbers, do not work with System.Data.OracleClient.
+
 ## T4 Template Support
 
 [Guru Kathiresan](https://github.com/gkathire) continues to enhance [OrmLite's T4 Template support](https://github.com/ServiceStack/ServiceStack.OrmLite/tree/master/src/T4) which are useful when you want to automatically generate POCO's and strong-typed wrappers for executing stored procedures. OrmLite's T4 support can be added via NuGet with:
