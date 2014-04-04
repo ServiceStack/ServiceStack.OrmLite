@@ -72,5 +72,6 @@ namespace ServiceStack.OrmLite.Tests
         {
             Assert.That("' or Field LIKE '%".SqlParam(), Is.EqualTo("'' or Field LIKE ''%"));
         }
+        
     }
 }

@@ -153,7 +153,22 @@ namespace ServiceStack.OrmLite
 			return string.Format(sqlText, escapedParams.ToArray());
 		}
 
-	    public static string[] IllegalSqlFragmentTokens = { 
+        public static string SqlColumn(this string columnName)
+        {
+            return OrmLiteConfig.DialectProvider.GetQuotedColumnName(columnName);
+        }
+
+        public static string SqlTable(this string tableName)
+        {
+            return OrmLiteConfig.DialectProvider.GetQuotedTableName(tableName);
+        }
+
+        public static string SqlValue(this object value)
+        {
+            return "{0}".SqlFmt(value);
+        }
+
+        public static string[] IllegalSqlFragmentTokens = { 
             "--", ";--", ";", "%", "/*", "*/", "@@", "@", 
             "char", "nchar", "varchar", "nvarchar",
             "alter", "begin", "cast", "create", "cursor", "declare", "delete",

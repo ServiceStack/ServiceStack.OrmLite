@@ -1,6 +1,8 @@
 using System;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
+using ServiceStack.OrmLite.PostgreSQL;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -53,6 +55,45 @@ namespace ServiceStack.OrmLite.Tests
 			
 			OrmLiteConfig.DialectProvider.NamingStrategy= new OrmLiteNamingStrategyBase();
 		}
+
+        [Test]
+        public void Can_create_TableWithNamigStrategy_table_aliases()
+        {
+	        var aliasNamingStrategy = new AliasNamingStrategy
+	        {
+                TableAliases = { { "ModelWithOnlyStringFields", "TableAlias" } },
+                ColumnAliases = { { "Name", "ColumnAlias" } },
+            };
+	        OrmLiteConfig.DialectProvider.NamingStrategy = aliasNamingStrategy;
+
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTable<ModelWithOnlyStringFields>(true);
+
+                var sql = db.GetLastSql();
+                Assert.That(sql, Is.StringContaining("CREATE TABLE \"TableAlias\""));
+                Assert.That(sql, Is.StringContaining("\"ColumnAlias\""));
+
+                var result = db.SqlList<ModelWithIdAndName>(
+                    "SELECT * FROM {0} WHERE {1} = {2}"
+                        .Fmt("ModelWithOnlyStringFields".SqlTable(),
+                             "Name".SqlColumn(),
+                             "foo".SqlValue()));
+
+                Assert.That(db.GetLastSql(), Is.EqualTo("SELECT * FROM \"TableAlias\" WHERE \"ColumnAlias\" = 'foo'"));
+
+                db.DropTable<ModelWithOnlyStringFields>();
+
+                aliasNamingStrategy.UseNamingStrategy = new PostgreSqlNamingStrategy();
+
+                db.CreateTable<ModelWithOnlyStringFields>(true);
+                sql = db.GetLastSql();
+                Assert.That(sql, Is.StringContaining("CREATE TABLE \"table_alias\""));
+                Assert.That(sql, Is.StringContaining("\"column_alias\""));
+            }
+
+            OrmLiteConfig.DialectProvider.NamingStrategy = new OrmLiteNamingStrategyBase();
+        }
 
 		[Test]
 		public void Can_get_data_from_TableWithNamigStrategy_with_GetById()
