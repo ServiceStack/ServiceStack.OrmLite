@@ -6,6 +6,20 @@ namespace ServiceStack.OrmLite.Tests
     public class OrmLiteDropTableWithNamingStrategyTests
         : OrmLiteTestBase
     {
+        private INamingStrategy PreviousNamingStrategy { get; set; }
+
+        [SetUp]
+        public void SetUp()
+        {
+            PreviousNamingStrategy = OrmLiteConfig.DialectProvider.NamingStrategy;
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            OrmLiteConfig.DialectProvider.NamingStrategy = PreviousNamingStrategy;
+        }
+
         [Test]
         public void Can_drop_TableWithNamigStrategy_table_prefix()
         {
@@ -23,8 +37,6 @@ namespace ServiceStack.OrmLite.Tests
 
                 Assert.False(db.TableExists("tab_ModelWithOnlyStringFields"));
             }
-            
-            OrmLiteConfig.DialectProvider.NamingStrategy = new OrmLiteNamingStrategyBase();
         }
 
         [Test]
@@ -40,8 +52,6 @@ namespace ServiceStack.OrmLite.Tests
 
                 Assert.False(db.TableExists("modelwithonlystringfields"));
             }
-
-            OrmLiteConfig.DialectProvider.NamingStrategy = new OrmLiteNamingStrategyBase();
         }
 
 
@@ -58,8 +68,6 @@ namespace ServiceStack.OrmLite.Tests
 
                 Assert.False(db.TableExists("model_with_only_string_fields"));
             }
-
-            OrmLiteConfig.DialectProvider.NamingStrategy = new OrmLiteNamingStrategyBase();
         }
     }
 }

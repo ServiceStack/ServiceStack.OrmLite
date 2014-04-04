@@ -15,6 +15,7 @@ namespace ServiceStack.OrmLite.Tests
         [SetUp]
         public void SetUp()
         {
+            SuppressIfOracle("SQL Server tests");
             db = CreateSqlServerDbFactory().OpenDbConnection();
             db.DropAndCreateTable<Person>();
             db.DropAndCreateTable<PersonWithAutoId>();

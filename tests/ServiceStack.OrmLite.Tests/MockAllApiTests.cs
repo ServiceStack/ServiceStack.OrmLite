@@ -405,6 +405,8 @@ namespace ServiceStack.OrmLite.Tests
                 i += 2; db.Save(customer);
                 Assert.That(sqlStatements.Count, Is.EqualTo(i));
 
+                SuppressIfOracle("This seems wrong here as the save actually goes through to the database in Oracle to get the next number from the sequence");
+
                 i += 1; db.SaveReferences(customer, customer.PrimaryAddress);
                 Assert.That(sqlStatements.Count, Is.EqualTo(i));
 

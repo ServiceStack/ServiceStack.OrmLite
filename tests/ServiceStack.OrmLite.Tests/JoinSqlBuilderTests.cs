@@ -4,8 +4,8 @@ using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.Tests
 {
-	[TestFixture ()]
-	public class JoinSqlBuilderTests
+	[TestFixture]
+	public class JoinSqlBuilderTests : OrmLiteTestBase
 	{
 		[Alias("Users")]
 		public class WithAliasUser 
@@ -50,9 +50,11 @@ namespace ServiceStack.OrmLite.Tests
 		}
 
 
-		[Test ()]
+		[Test]
 		public void FieldNameLeftJoinTest ()
 		{
+            SuppressIfOracle("These assert comparisons don't work with Oracle provider because it doesn't quote every name");
+
 			var joinQuery = new JoinSqlBuilder<User, User> ().LeftJoin<User, Address> (x => x.Id, x => x.UserId).ToSql ();
 			var expected = "SELECT \"User\".\"Id\",\"User\".\"Name\",\"User\".\"Age\" \nFROM \"User\" \n LEFT OUTER JOIN  \"Address\" ON \"User\".\"Id\" = \"Address\".\"UserId\"  \n";
 
@@ -71,10 +73,12 @@ namespace ServiceStack.OrmLite.Tests
 			Assert.AreEqual (expected, joinQuery);
 		}
 
-		[Test ()]
+		[Test]
 		public void DoubleWhereLeftJoinTest ()
 		{
-			var joinQuery = new JoinSqlBuilder<User, User> ().LeftJoin<User, WithAliasAddress> (x => x.Id, x => x.UserId
+            SuppressIfOracle("These assert comparisons don't work with Oracle provider because it doesn't quote every name");
+
+            var joinQuery = new JoinSqlBuilder<User, User>().LeftJoin<User, WithAliasAddress>(x => x.Id, x => x.UserId
 			                                                                                    , sourceWhere: x => x.Age > 18
 			                                                                                    , destinationWhere: x => x.Country == "Italy").ToSql ();
 			var expected = "SELECT \"User\".\"Id\",\"User\".\"Name\",\"User\".\"Age\" \nFROM \"User\" \n LEFT OUTER JOIN  \"Addresses\" ON \"User\".\"Id\" = \"Addresses\".\"UserId\"  \nWHERE (\"User\".\"Age\" > 18) AND (\"Addresses\".\"Countryalias\" = 'Italy') \n";

@@ -6,15 +6,8 @@ using NUnit.Framework;
 namespace ServiceStack.OrmLite.Tests.UseCase
 {
 	[TestFixture]
-	public class SimpleUseCase
+	public class SimpleUseCase : OrmLiteTestBase
 	{
-		[TestFixtureSetUp]
-		public void TestFixtureSetUp()
-		{
-			//Inject your database provider here
-			OrmLiteConfig.DialectProvider = SqliteDialect.Provider;
-		}
-
 		public class User
 		{
 			public long Id { get; set; }
@@ -28,9 +21,9 @@ namespace ServiceStack.OrmLite.Tests.UseCase
 		[Test]
 		public void Simple_CRUD_example()
 		{
-			using (IDbConnection db = ":memory:".OpenDbConnection())
+			using (IDbConnection db = OpenDbConnection())
 			{
-				db.CreateTable<User>(false);
+				db.DropAndCreateTable<User>();
 
 				db.Insert(new User { Id = 1, Name = "A", CreatedDate = DateTime.Now });
 				db.Insert(new User { Id = 2, Name = "B", CreatedDate = DateTime.Now });

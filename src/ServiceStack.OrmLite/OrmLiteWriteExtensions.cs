@@ -371,7 +371,7 @@ namespace ServiceStack.OrmLite
                 OrmLiteConfig.UpdateFilter(dbCmd, obj);
 
             OrmLiteConfig.DialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
-            if (dbCmd.CommandText == null)
+            if (string.IsNullOrEmpty(dbCmd.CommandText))
                 return 0;
 
             OrmLiteConfig.DialectProvider.SetParameterValues<T>(dbCmd, obj);
@@ -397,7 +397,7 @@ namespace ServiceStack.OrmLite
                 var dialectProvider = OrmLiteConfig.DialectProvider;
 
                 dialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
-                if (dbCmd.CommandText == null)
+                if (string.IsNullOrEmpty(dbCmd.CommandText))
                     return 0;
 
                 foreach (var obj in objs)

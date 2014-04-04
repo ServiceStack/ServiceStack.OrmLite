@@ -38,13 +38,13 @@ namespace ServiceStack.OrmLite.Tests
         {
             var row = CreateModelWithFieldsOfDifferentTypes();
 
-            db.Insert(row);
+            row.Id = (int)db.Insert(row, selectIdentity: true);
 
             row.Name = "UpdatedName";
 
             db.Update(row);
 
-            var dbRow = db.SingleById<ModelWithFieldsOfDifferentTypes>(1);
+            var dbRow = db.SingleById<ModelWithFieldsOfDifferentTypes>(row.Id);
 
             ModelWithFieldsOfDifferentTypes.AssertIsEqual(dbRow, row);
         }
@@ -54,13 +54,13 @@ namespace ServiceStack.OrmLite.Tests
         {
             var row = CreateModelWithFieldsOfDifferentTypes();
 
-            db.Insert(row);
+            row.Id = (int)db.Insert(row, selectIdentity: true);
 
             row.Name = "UpdatedName";
 
             db.Update(row, x => x.LongId <= row.LongId);
 
-            var dbRow = db.SingleById<ModelWithFieldsOfDifferentTypes>(1);
+            var dbRow = db.SingleById<ModelWithFieldsOfDifferentTypes>(row.Id);
 
             ModelWithFieldsOfDifferentTypes.AssertIsEqual(dbRow, row);
         }
@@ -70,7 +70,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             var row = CreateModelWithFieldsOfDifferentTypes();
 
-            db.Insert(row);
+            row.Id = (int)db.Insert(row, selectIdentity: true);
             row.DateTime = DateTime.Now;
             row.Name = "UpdatedName";
 
@@ -87,7 +87,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             var row = CreateModelWithFieldsOfDifferentTypes();
 
-            db.Insert(row);
+            row.Id = (int)db.Insert(row, selectIdentity: true);
             row.Name = "UpdatedName";
 
             db.UpdateFmt<ModelWithFieldsOfDifferentTypes>(set: "NAME = {0}".SqlFmt(row.Name), where: "LongId <= {0}".SqlFmt(row.LongId));
@@ -102,7 +102,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             var row = CreateModelWithFieldsOfDifferentTypes();
 
-            db.Insert(row);
+            row.Id = (int)db.Insert(row, selectIdentity: true);
             row.Name = "UpdatedName";
 
             db.UpdateFmt(table: "ModelWithFieldsOfDifferentTypes",

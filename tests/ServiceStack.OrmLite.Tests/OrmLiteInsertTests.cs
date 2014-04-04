@@ -152,6 +152,8 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_insert_table_with_blobs()
 		{
+            SuppressIfOracle("Oracle provider's default string length is short enough that this fails. I think solution is better handling of blobs");
+
 			using (var db = OpenDbConnection())
 			{
 				db.DropAndCreateTable<OrderBlob>();
@@ -240,6 +242,8 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_GetLastInsertedId_using_Insert()
         {
+            SuppressIfOracle("Need trigger for autoincrement keys to work in Oracle with caller supplied SQL");
+
             var date = new DateTime(2000, 1, 1);
             var testObject = new UserAuth { UserName = "test", CreatedDate = date, ModifiedDate = date };
 

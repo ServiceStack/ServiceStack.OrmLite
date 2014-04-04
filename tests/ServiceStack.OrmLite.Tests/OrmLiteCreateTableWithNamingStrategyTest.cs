@@ -1,4 +1,4 @@
-using System;
+using System.Globalization;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
 
@@ -9,6 +9,19 @@ namespace ServiceStack.OrmLite.Tests
 	public class OrmLiteCreateTableWithNamigStrategyTests 
 		: OrmLiteTestBase
 	{
+	    private INamingStrategy PreviousNamingStrategy { get; set; }
+
+        [SetUp]
+        public void SetUp()
+        {
+            PreviousNamingStrategy = OrmLiteConfig.DialectProvider.NamingStrategy;
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            OrmLiteConfig.DialectProvider.NamingStrategy = PreviousNamingStrategy;
+        }
 
 		[Test]
 		public void Can_create_TableWithNamigStrategy_table_prefix()
@@ -23,8 +36,6 @@ namespace ServiceStack.OrmLite.Tests
 			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 			}
-			
-			OrmLiteConfig.DialectProvider.NamingStrategy= new OrmLiteNamingStrategyBase();
 		}
 
 		[Test]
@@ -36,8 +47,6 @@ namespace ServiceStack.OrmLite.Tests
 			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 			}
-			
-			OrmLiteConfig.DialectProvider.NamingStrategy= new OrmLiteNamingStrategyBase();
 		}
 
 
@@ -50,14 +59,12 @@ namespace ServiceStack.OrmLite.Tests
 			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 			}
-			
-			OrmLiteConfig.DialectProvider.NamingStrategy= new OrmLiteNamingStrategyBase();
 		}
 
 		[Test]
 		public void Can_get_data_from_TableWithNamigStrategy_with_GetById()
 		{
-			OrmLiteConfig.DialectProvider.NamingStrategy = OrmLiteConfig.DialectProvider.NamingStrategy = new PrefixNamingStrategy
+			OrmLiteConfig.DialectProvider.NamingStrategy = new PrefixNamingStrategy
 			{
 				TablePrefix = "tab_",
 				ColumnPrefix = "col_",
@@ -73,15 +80,13 @@ namespace ServiceStack.OrmLite.Tests
 
 				Assert.AreEqual(m.Name, modelFromDb.Name);
 			}
-			
-			OrmLiteConfig.DialectProvider.NamingStrategy= new OrmLiteNamingStrategyBase();
 		}
 
 
 		[Test]
 		public void Can_get_data_from_TableWithNamigStrategy_with_query_by_example()
 		{
-			OrmLiteConfig.DialectProvider.NamingStrategy = OrmLiteConfig.DialectProvider.NamingStrategy = new PrefixNamingStrategy
+			OrmLiteConfig.DialectProvider.NamingStrategy = new PrefixNamingStrategy
 			{
 				TablePrefix = "tab_",
 				ColumnPrefix = "col_",
@@ -97,8 +102,6 @@ namespace ServiceStack.OrmLite.Tests
 
 				Assert.AreEqual(m.Name, modelFromDb.Name);
 			}
-			
-			OrmLiteConfig.DialectProvider.NamingStrategy= new OrmLiteNamingStrategyBase();
 		}
 		
 		[Test]
@@ -120,14 +123,12 @@ namespace ServiceStack.OrmLite.Tests
                 var modelFromDb = db.Single<ModelWithOnlyStringFields>(x => x.Name == "ReadConnectionExtensionFirst");
 				Assert.AreEqual(m.AlbumName, modelFromDb.AlbumName);
 			}
-
-            OrmLiteConfig.DialectProvider.NamingStrategy = new OrmLiteNamingStrategyBase();
         }
 		
 		[Test]
 		public void Can_get_data_from_TableWithNamigStrategy_AfterChangingNamingStrategy()
 		{			
-			OrmLiteConfig.DialectProvider.NamingStrategy = OrmLiteConfig.DialectProvider.NamingStrategy = new PrefixNamingStrategy
+			OrmLiteConfig.DialectProvider.NamingStrategy = new PrefixNamingStrategy
 			{
 				TablePrefix = "tab_",
 				ColumnPrefix = "col_",
@@ -164,7 +165,7 @@ namespace ServiceStack.OrmLite.Tests
 				Assert.AreEqual(m.Name, modelFromDb.Name);	
 			}
 			
-			OrmLiteConfig.DialectProvider.NamingStrategy = OrmLiteConfig.DialectProvider.NamingStrategy = new PrefixNamingStrategy
+			OrmLiteConfig.DialectProvider.NamingStrategy = new PrefixNamingStrategy
 			{
 				TablePrefix = "tab_",
 				ColumnPrefix = "col_",
@@ -183,8 +184,6 @@ namespace ServiceStack.OrmLite.Tests
                 modelFromDb = db.SingleById<ModelWithOnlyStringFields>("998");
 				Assert.AreEqual(m.Name, modelFromDb.Name);
 			}
-			
-			OrmLiteConfig.DialectProvider.NamingStrategy = new OrmLiteNamingStrategyBase();
 		}
 
 	}
@@ -240,11 +239,10 @@ namespace ServiceStack.OrmLite.Tests
 		string toUnderscoreSeparatedCompound(string name)
 		{
 
-			string r = char.ToLower(name[0]).ToString();
+			string r = char.ToLower(name[0]).ToString(CultureInfo.InvariantCulture);
 
 			for (int i = 1; i < name.Length; i++)
 			{
-				char c = name[i];
 				if (char.IsUpper(name[i]))
 				{
 					r += "_";

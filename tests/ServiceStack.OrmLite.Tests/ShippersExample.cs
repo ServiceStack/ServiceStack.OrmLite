@@ -1,20 +1,14 @@
+using System;
 using System.Data;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Model;
-using ServiceStack.OrmLite.Sqlite;
 
 namespace ServiceStack.OrmLite.Tests
 {
 	[TestFixture]
-	public class ShippersExample
+	public class ShippersExample : OrmLiteTestBase
 	{
-		static ShippersExample()
-		{
-			OrmLiteConfig.DialectProvider = SqliteOrmLiteDialectProvider.Instance;
-		}
-
-
 		[Alias("Shippers")]
 		public class Shipper
 			: IHasId<int>
@@ -65,10 +59,11 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Shippers_UseCase()
 		{
-            using (IDbConnection db = ":memory:".OpenDbConnection())
+            using (IDbConnection db = OpenDbConnection())
 			{
+                db.DropTables(typeof(Shipper), typeof(ShipperType));
 				const bool overwrite = false;
-				db.CreateTables(overwrite, typeof(Shipper), typeof(ShipperType));
+                db.CreateTables(overwrite, typeof(ShipperType), typeof(Shipper));
 
 				int trainsTypeId, planesTypeId;
 
