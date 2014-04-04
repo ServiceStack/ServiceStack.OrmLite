@@ -68,7 +68,7 @@ namespace ServiceStack.OrmLite.Tests
 				int trainsTypeId, planesTypeId;
 
 				//Playing with transactions
-				using (IDbTransaction dbTrans = db.BeginTransaction())
+				using (IDbTransaction dbTrans = db.OpenTransaction())
 				{
 					db.Insert(new ShipperType { Name = "Trains" });
 					trainsTypeId = (int)db.LastInsertId();
@@ -78,7 +78,7 @@ namespace ServiceStack.OrmLite.Tests
 
 					dbTrans.Commit();
 				}
-				using (IDbTransaction dbTrans = db.BeginTransaction(IsolationLevel.ReadCommitted))
+				using (IDbTransaction dbTrans = db.OpenTransaction(IsolationLevel.ReadCommitted))
 				{
 					db.Insert(new ShipperType { Name = "Automobiles" });
 					Assert.That(db.Select<ShipperType>(), Has.Count.EqualTo(3));
