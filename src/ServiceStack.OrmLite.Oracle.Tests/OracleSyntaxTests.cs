@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 using NUnit.Framework;
-using System.Data;
 using ServiceStack.DataAnnotations;
 
-namespace ServiceStack.OrmLite.Oracle.Tests
+namespace ServiceStack.OrmLite.Tests
 {
     [TestFixture]
-    public class OracleSyntaxTests : OracleTestBase
+    public class OracleSyntaxTests : OrmLiteTestBase
     {
         [Test]
         public void can_generate_correct_paging_if_first_column_must_be_quoted()
@@ -23,7 +18,7 @@ namespace ServiceStack.OrmLite.Oracle.Tests
                 Assert.AreEqual(0, noRows.Count());
 
                 for(int i = 0; i < 150; i++) {
-                    db.Insert<FirstColMustBeQuoted>(new FirstColMustBeQuoted { COMMENT = "row #" + i });
+                    db.Insert(new FirstColMustBeQuoted { COMMENT = "row #" + i });
                 }
 
                 var hundredRows = db.Select<FirstColMustBeQuoted>(ev => ev.Limit(100));
@@ -42,7 +37,7 @@ namespace ServiceStack.OrmLite.Oracle.Tests
                 Assert.AreEqual(0, noRows.Count());
 
                 for(int i = 0; i < 150; i++) {
-                    db.Insert<FirstColNoQuotes>(new FirstColNoQuotes { COMMENT = "row #" + i });
+                    db.Insert(new FirstColNoQuotes { COMMENT = "row #" + i });
                 }
 
                 var hundredRows = db.Select<FirstColNoQuotes>(ev => ev.Limit(100));
@@ -60,7 +55,7 @@ namespace ServiceStack.OrmLite.Oracle.Tests
 
                 Assert.AreEqual(0, noRows.Count());
 
-                for(int i = 0; i < 150; i++) {
+                for (var i = 0; i < 150; i++) {
                     db.Insert(new COMMENT_first { COMMENT = "COMMENT row #" + i });
                 }
 
@@ -79,7 +74,7 @@ namespace ServiceStack.OrmLite.Oracle.Tests
 
                 Assert.AreEqual(0, noRows.Count());
 
-                for(int i = 0; i < 150; i++) {
+                for (var i = 0; i < 150; i++) {
                     db.Insert(new COMMENT_other { COMMENT = "COMMENT row #" + i });
                 }
 

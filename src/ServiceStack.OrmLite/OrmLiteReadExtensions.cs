@@ -870,6 +870,7 @@ namespace ServiceStack.OrmLite
 
             foreach (var fieldDef in fieldDefs)
             {
+                dbCmd.Parameters.Clear();
                 var listInterface = fieldDef.FieldType.GetTypeWithGenericInterfaceOf(typeof(IList<>));
                 if (listInterface != null)
                 {

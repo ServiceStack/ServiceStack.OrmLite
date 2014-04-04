@@ -74,10 +74,9 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Does_not_include_complex_reference_type_in_sql()
         {
-            SuppressIfOracle("These assert comparisons don't work with Oracle provider because it doesn't quote every name");
-
             db.Select<Customer>();
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"Name\" FROM \"Customer\""));
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"Name\" FROM \"Customer\"")
+                                         .Or.EqualTo("SELECT Id, Name FROM Customer"));
         }
 
         [Test]

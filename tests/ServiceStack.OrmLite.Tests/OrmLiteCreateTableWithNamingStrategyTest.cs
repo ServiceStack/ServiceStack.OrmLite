@@ -1,14 +1,13 @@
 using System.Globalization;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
-using ServiceStack.OrmLite.PostgreSQL;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
 
 	[TestFixture]
-	public class OrmLiteCreateTableWithNamigStrategyTests 
+	public class OrmLiteCreateTableWithNamingStrategyTests 
 		: OrmLiteTestBase
 	{
 	    private INamingStrategy PreviousNamingStrategy { get; set; }
@@ -26,7 +25,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
 		[Test]
-		public void Can_create_TableWithNamigStrategy_table_prefix()
+		public void Can_create_TableWithNamingStrategy_table_prefix()
 		{
 			OrmLiteConfig.DialectProvider.NamingStrategy = new PrefixNamingStrategy
 			{
@@ -41,7 +40,7 @@ namespace ServiceStack.OrmLite.Tests
 		}
 
 		[Test]
-		public void Can_create_TableWithNamigStrategy_table_lowered()
+		public void Can_create_TableWithNamingStrategy_table_lowered()
 		{
 			OrmLiteConfig.DialectProvider.NamingStrategy = new LowercaseNamingStrategy();
 
@@ -53,7 +52,7 @@ namespace ServiceStack.OrmLite.Tests
 
 
 		[Test]
-		public void Can_create_TableWithNamigStrategy_table_nameUnderscoreCoumpound()
+		public void Can_create_TableWithNamingStrategy_table_nameUnderscoreCoumpound()
 		{
 			OrmLiteConfig.DialectProvider.NamingStrategy = new UnderscoreSeparatedCompoundNamingStrategy();
 
@@ -64,7 +63,7 @@ namespace ServiceStack.OrmLite.Tests
 		}
 
         [Test]
-        public void Can_create_TableWithNamigStrategy_table_aliases()
+        public void Can_create_TableWithNamingStrategy_table_aliases()
         {
 	        var aliasNamingStrategy = new AliasNamingStrategy
 	        {
@@ -78,8 +77,9 @@ namespace ServiceStack.OrmLite.Tests
                 db.CreateTable<ModelWithOnlyStringFields>(true);
 
                 var sql = db.GetLastSql();
-                Assert.That(sql, Is.StringContaining("CREATE TABLE \"TableAlias\""));
-                Assert.That(sql, Is.StringContaining("\"ColumnAlias\""));
+                Assert.That(sql, Is.StringContaining("CREATE TABLE \"TableAlias\"")
+                                 .Or.StringContaining("CREATE TABLE TableAlias"));
+                Assert.That(sql, Is.StringContaining("ColumnAlias"));
 
                 var result = db.SqlList<ModelWithIdAndName>(
                     "SELECT * FROM {0} WHERE {1} = {2}"
@@ -87,23 +87,25 @@ namespace ServiceStack.OrmLite.Tests
                              "Name".SqlColumn(),
                              "foo".SqlValue()));
 
-                Assert.That(db.GetLastSql(), Is.EqualTo("SELECT * FROM \"TableAlias\" WHERE \"ColumnAlias\" = 'foo'"));
+                Assert.That(db.GetLastSql(), Is.EqualTo("SELECT * FROM \"TableAlias\" WHERE \"ColumnAlias\" = 'foo'")
+                                             .Or.EqualTo("SELECT * FROM TableAlias WHERE ColumnAlias = 'foo'"));
 
                 db.DropTable<ModelWithOnlyStringFields>();
 
-                aliasNamingStrategy.UseNamingStrategy = new PostgreSqlNamingStrategy();
+                aliasNamingStrategy.UseNamingStrategy = new LowerCaseUnderscoreNamingStrategy();
 
                 db.CreateTable<ModelWithOnlyStringFields>(true);
                 sql = db.GetLastSql();
-                Assert.That(sql, Is.StringContaining("CREATE TABLE \"table_alias\""));
-                Assert.That(sql, Is.StringContaining("\"column_alias\""));
+                Assert.That(sql, Is.StringContaining("CREATE TABLE \"table_alias\"")
+                                 .Or.StringContaining("CREATE TABLE table_alias"));
+                Assert.That(sql, Is.StringContaining("column_alias"));
             }
 
             OrmLiteConfig.DialectProvider.NamingStrategy = new OrmLiteNamingStrategyBase();
         }
 
 		[Test]
-		public void Can_get_data_from_TableWithNamigStrategy_with_GetById()
+		public void Can_get_data_from_TableWithNamingStrategy_with_GetById()
 		{
 			OrmLiteConfig.DialectProvider.NamingStrategy = new PrefixNamingStrategy
 			{
@@ -125,7 +127,7 @@ namespace ServiceStack.OrmLite.Tests
 
 
 		[Test]
-		public void Can_get_data_from_TableWithNamigStrategy_with_query_by_example()
+		public void Can_get_data_from_TableWithNamingStrategy_with_query_by_example()
 		{
 			OrmLiteConfig.DialectProvider.NamingStrategy = new PrefixNamingStrategy
 			{
@@ -167,7 +169,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 		
 		[Test]
-		public void Can_get_data_from_TableWithNamigStrategy_AfterChangingNamingStrategy()
+		public void Can_get_data_from_TableWithNamingStrategy_AfterChangingNamingStrategy()
 		{			
 			OrmLiteConfig.DialectProvider.NamingStrategy = new PrefixNamingStrategy
 			{
@@ -299,4 +301,16 @@ namespace ServiceStack.OrmLite.Tests
 
 	}
 
+    public class LowerCaseUnderscoreNamingStrategy : OrmLiteNamingStrategyBase
+    {
+        public override string GetTableName(string name)
+        {
+            return name.ToLowercaseUnderscore();
+        }
+
+        public override string GetColumnName(string name)
+        {
+            return name.ToLowercaseUnderscore();
+        }
+    }
 }
