@@ -342,7 +342,7 @@ namespace ServiceStack.OrmLite.Tests
 					FROM ModelWithFieldsOfDifferentTypes
 					WHERE id <= (SELECT three FROM max_id)";
 
-				var rows = db.Select<ModelWithFieldsOfDifferentTypes>(sql);
+				var rows = db.SqlList<ModelWithFieldsOfDifferentTypes>(sql);
 
 				Assert.That(rows.Count, Is.EqualTo((3)));
 			}
