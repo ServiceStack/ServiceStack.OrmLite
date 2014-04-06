@@ -81,17 +81,35 @@ namespace ServiceStack.OrmLite
                     case TypeCode.Boolean:
                         return i => reader.GetBoolean(i);
                     case TypeCode.Int16:
-                        return i => reader.GetInt16(i);
                     case TypeCode.Int32:
-                        return i => reader.GetInt32(i);
                     case TypeCode.Int64:
-                        return i => reader.GetInt64(i);
                     case TypeCode.Single:
-                        return i => reader.GetFloat(i);
                     case TypeCode.Double:
-                        return i => reader.GetDouble(i);
                     case TypeCode.Decimal:
-                        return i => reader.GetDecimal(i);
+                        return i =>
+                        {
+                            var value = reader.GetValue(i);
+                            if (value is T)
+                                return value;
+
+                            switch (typeCode)
+                            {
+                                case TypeCode.Int16:
+                                    return Convert.ToInt16(value);
+                                case TypeCode.Int32:
+                                    return Convert.ToInt32(value);
+                                case TypeCode.Int64:
+                                    return Convert.ToInt16(value);
+                                case TypeCode.Single:
+                                    return Convert.ToSingle(value);
+                                case TypeCode.Double:
+                                    return Convert.ToDouble(value);
+                                case TypeCode.Decimal:
+                                    return Convert.ToDecimal(value);
+                                default:
+                                    return value;
+                            }
+                        };
                     case TypeCode.DateTime:
                         return i => reader.GetDateTime(i);
                 }

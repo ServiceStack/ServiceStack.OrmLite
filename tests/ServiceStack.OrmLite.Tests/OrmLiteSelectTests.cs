@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using NUnit.Framework;
 using ServiceStack.Common;
 using ServiceStack.Common.Tests.Models;
@@ -361,6 +363,28 @@ namespace ServiceStack.OrmLite.Tests
                 var model = db.SingleById<TypeWithTimeSpan>(1);
 
                 Assert.That(model.TimeSpan, Is.EqualTo(timeSpan));
+            }
+        }
+
+	    [Test]
+	    public void Does_return_correct_numeric_values()
+	    {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<ModelWithDifferentNumTypes>();
+
+                var row = ModelWithDifferentNumTypes.Create(1);
+
+                db.Insert(row);
+
+                var fromDb = db.Select<ModelWithDifferentNumTypes>().First();
+
+                Assert.That(row.Short, Is.EqualTo(fromDb.Short));
+                Assert.That(row.Int, Is.EqualTo(fromDb.Int));
+                Assert.That(row.Long, Is.EqualTo(fromDb.Long));
+                Assert.That(row.Float, Is.EqualTo(fromDb.Float));
+                Assert.That(row.Double, Is.EqualTo(fromDb.Double));
+                Assert.That(row.Decimal, Is.EqualTo(fromDb.Decimal));
             }
         }
 

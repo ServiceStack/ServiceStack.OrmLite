@@ -129,6 +129,7 @@
     <Compile Include="MockAllApiTests.cs" />
     <Compile Include="OrmLiteExecFilterTests.cs" />
     <Compile Include="OrmLiteFiltersTests.cs" />
+    <Compile Include="PerfTests.cs" />
     <Compile Include="StringSerializerTests.cs" />
     <Compile Include="TypeDescriptorMetadataTests.cs" />
     <Compile Include="Shared\ApiUtilExtensions.cs" />

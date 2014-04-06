@@ -198,6 +198,9 @@
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\OrmLiteUtilExtensionsTests.cs">
       <Link>OrmLiteUtilExtensionsTests.cs</Link>
     </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\PerfTests.cs">
+      <Link>PerfTests.cs</Link>
+    </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ApiUtilExtensions.cs">
       <Link>Shared\ApiUtilExtensions.cs</Link>
     </Compile>
