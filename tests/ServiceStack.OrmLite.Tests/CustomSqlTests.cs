@@ -9,10 +9,10 @@ namespace ServiceStack.OrmLite.Tests
     {
         public int Id { get; set; }
 
-        [CustomField("CHAR(20) null")]
+        [CustomField("CHAR(20)")]
         public string CharColumn { get; set; }
 
-        [CustomField("DECIMAL(18,4) null")]
+        [CustomField("DECIMAL(18,4)")]
         public decimal? DecimalColumn { get; set; }
     }
 
@@ -72,7 +72,7 @@ namespace ServiceStack.OrmLite.Tests
             {
                 db.DropAndCreateTable<PocoTable>();
 
-                var createTableSql = db.GetLastSql();
+                var createTableSql = db.GetLastSql().Replace("NULL","null");
                 createTableSql.Print();
 
                 Assert.That(createTableSql, Is.StringContaining("\"CharColumn\" CHAR(20) null")

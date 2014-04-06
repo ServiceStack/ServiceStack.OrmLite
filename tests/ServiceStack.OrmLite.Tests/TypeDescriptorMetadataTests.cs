@@ -65,11 +65,11 @@ namespace ServiceStack.OrmLite.Tests
 
             typeof(DynamicCacheEntry)
                 .GetProperty("Data")
-                .AddAttributes(new StringLengthAttribute(64000));
+                .AddAttributes(new StringLengthAttribute(7000));
 
             db.DropAndCreateTable<DynamicCacheEntry>();
 
-            Assert.That(db.GetLastSql(), Is.StringContaining("\"Data\" VARCHAR(64000)"));
+            Assert.That(db.GetLastSql(), Is.StringContaining("\"Data\" VARCHAR(7000)"));
             db.GetLastSql().Print();
         }
 

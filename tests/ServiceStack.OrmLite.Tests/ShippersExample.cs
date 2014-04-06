@@ -61,42 +61,42 @@ namespace ServiceStack.OrmLite.Tests
 		{
             using (IDbConnection db = OpenDbConnection())
 			{
-                db.DropTables(typeof(Shipper), typeof(ShipperType));
-				const bool overwrite = false;
-                db.CreateTables(overwrite, typeof(ShipperType), typeof(Shipper));
+                db.DropTable<Shipper>();
+                db.DropTable<ShipperType>();
 
-				int trainsTypeId, planesTypeId;
+                db.CreateTable<ShipperType>();
+                db.CreateTable<Shipper>();
+
+                var trainsType = new ShipperType { Name = "Trains" };
+                var planesType = new ShipperType { Name = "Planes" };
 
 				//Playing with transactions
 				using (IDbTransaction dbTrans = db.OpenTransaction())
 				{
-					db.Insert(new ShipperType { Name = "Trains" });
-					trainsTypeId = (int)db.LastInsertId();
-
-					db.Insert(new ShipperType { Name = "Planes" });
-					planesTypeId = (int)db.LastInsertId();
+                    db.Save(trainsType);
+                    db.Save(planesType);
 
 					dbTrans.Commit();
 				}
+
 				using (IDbTransaction dbTrans = db.OpenTransaction(IsolationLevel.ReadCommitted))
 				{
 					db.Insert(new ShipperType { Name = "Automobiles" });
 					Assert.That(db.Select<ShipperType>(), Has.Count.EqualTo(3));
 
-					dbTrans.Rollback();
 				}
 				Assert.That(db.Select<ShipperType>(), Has.Count.EqualTo(2));
 
 
 				//Performing standard Insert's and Selects
-				db.Insert(new Shipper { CompanyName = "Trains R Us", Phone = "555-TRAINS", ShipperTypeId = trainsTypeId });
-				db.Insert(new Shipper { CompanyName = "Planes R Us", Phone = "555-PLANES", ShipperTypeId = planesTypeId });
-				db.Insert(new Shipper { CompanyName = "We do everything!", Phone = "555-UNICORNS", ShipperTypeId = planesTypeId });
+				db.Insert(new Shipper { CompanyName = "Trains R Us", Phone = "555-TRAINS", ShipperTypeId = trainsType.Id });
+				db.Insert(new Shipper { CompanyName = "Planes R Us", Phone = "555-PLANES", ShipperTypeId = planesType.Id });
+				db.Insert(new Shipper { CompanyName = "We do everything!", Phone = "555-UNICORNS", ShipperTypeId = planesType.Id });
 
-				var trainsAreUs = db.SingleFmt<Shipper>("ShipperTypeId = {0}", trainsTypeId);
+				var trainsAreUs = db.SingleFmt<Shipper>("ShipperTypeId = {0}", trainsType.Id);
 				Assert.That(trainsAreUs.CompanyName, Is.EqualTo("Trains R Us"));
 				Assert.That(db.SelectFmt<Shipper>("CompanyName = {0} OR Phone = {1}", "Trains R Us", "555-UNICORNS"), Has.Count.EqualTo(2));
-				Assert.That(db.SelectFmt<Shipper>("ShipperTypeId = {0}", planesTypeId), Has.Count.EqualTo(2));
+				Assert.That(db.SelectFmt<Shipper>("ShipperTypeId = {0}", planesType.Id), Has.Count.EqualTo(2));
 
 				//Lets update a record
 				trainsAreUs.Phone = "666-TRAINS";
@@ -113,7 +113,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				//Performing custom queries
 				//Select only a subset from the table
-				var partialColumns = db.SelectFmt<SubsetOfShipper>(typeof (Shipper), "ShipperTypeId = {0}", planesTypeId);
+				var partialColumns = db.SelectFmt<SubsetOfShipper>(typeof (Shipper), "ShipperTypeId = {0}", planesType.Id);
 				Assert.That(partialColumns, Has.Count.EqualTo(2));
 
 				//Select into another POCO class that matches sql
@@ -121,9 +121,9 @@ namespace ServiceStack.OrmLite.Tests
 					"SELECT ShipperTypeId, COUNT(*) AS Total FROM Shippers GROUP BY ShipperTypeId ORDER BY COUNT(*)");
 
 				Assert.That(rows, Has.Count.EqualTo(2));
-				Assert.That(rows[0].ShipperTypeId, Is.EqualTo(trainsTypeId));
+				Assert.That(rows[0].ShipperTypeId, Is.EqualTo(trainsType.Id));
 				Assert.That(rows[0].Total, Is.EqualTo(1));
-				Assert.That(rows[1].ShipperTypeId, Is.EqualTo(planesTypeId));
+				Assert.That(rows[1].ShipperTypeId, Is.EqualTo(planesType.Id));
 				Assert.That(rows[1].Total, Is.EqualTo(2));
 
 

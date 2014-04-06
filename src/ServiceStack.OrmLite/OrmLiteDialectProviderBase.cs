@@ -282,7 +282,14 @@ namespace ServiceStack.OrmLite
             if (fieldDef == null || fieldDef.SetValueFn == null || colIndex == NotFound) return;
             if (dataReader.IsDBNull(colIndex))
             {
-                fieldDef.SetValueFn(instance, null);
+                if (fieldDef.IsNullable)
+                {
+                    fieldDef.SetValueFn(instance, null);
+                }
+                else
+                {
+                    fieldDef.SetValueFn(instance, fieldDef.FieldType.GetDefaultValue());
+                }
                 return;
             }
 

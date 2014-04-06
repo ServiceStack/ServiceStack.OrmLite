@@ -13,6 +13,11 @@ namespace ServiceStack.OrmLite.Tests
 
     public class AuditTableA : IAudit
     {
+        public AuditTableA()
+        {
+            this.CreatedDate = this.ModifiedDate = DateTime.UtcNow;
+        }
+
         [AutoIncrement]
         public int Id { get; set; }
         public DateTime CreatedDate { get; set; }

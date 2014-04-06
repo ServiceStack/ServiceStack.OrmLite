@@ -99,7 +99,7 @@ namespace ServiceStack.OrmLite
                                 case TypeCode.Int32:
                                     return Convert.ToInt32(value);
                                 case TypeCode.Int64:
-                                    return Convert.ToInt16(value);
+                                    return Convert.ToInt64(value);
                                 case TypeCode.Single:
                                     return Convert.ToSingle(value);
                                 case TypeCode.Double:

@@ -78,11 +78,11 @@ namespace ServiceStack.OrmLite.Tests
 
                 db.Insert(item);
 
-                var savedGuidOne = db.Select<string>("SELECT GuidOne FROM WithAListOfGuids").First();
-                Assert.That(savedGuidOne, Is.EqualTo("32cb0acb-db43-4061-a6aa-7f4902a7002a"));
+                var savedGuidOne = db.Select<Guid>("SELECT GuidOne FROM WithAListOfGuids").First();
+                Assert.That(savedGuidOne, Is.EqualTo(new Guid("32cb0acb-db43-4061-a6aa-7f4902a7002a")));
 
-                var savedGuidTwo = db.Select<string>("SELECT GuidTwo FROM WithAListOfGuids").First();
-                Assert.That(savedGuidTwo, Is.EqualTo("13083231-b005-4ff4-ab62-41bdc7f50a4d"));
+                var savedGuidTwo = db.Select<Guid>("SELECT GuidTwo FROM WithAListOfGuids").First();
+                Assert.That(savedGuidTwo, Is.EqualTo(new Guid("13083231-b005-4ff4-ab62-41bdc7f50a4d")));
 
                 var savedGuidList = db.Select<string>("SELECT TheGuids FROM WithAListOfGuids").First();
                 Assert.That(savedGuidList, Is.EqualTo("[18176030-7a1c-4288-82df-a52f71832381,017f986b-f7be-4b6f-b978-ff05fba3b0aa]"));

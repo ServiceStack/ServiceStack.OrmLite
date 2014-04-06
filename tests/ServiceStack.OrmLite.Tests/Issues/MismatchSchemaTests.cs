@@ -32,7 +32,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
         {
             using (var db = OpenDbConnection())
             {
-                db.CreateTable<Nullable.ModelIntValue>();
+                db.DropAndCreateTable<Nullable.ModelIntValue>();
 
                 db.Insert(new Nullable.ModelIntValue { Id = 1, Value = null, Text = "Foo" });
 
