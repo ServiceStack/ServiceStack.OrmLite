@@ -60,30 +60,47 @@ namespace ServiceStack.OrmLite.Tests
 				ConnectionString = GetFileConnectionString();
 		}
 
+        enum DbType
+        {
+            Sqlite,
+            SqlServer,
+            PostgreSql,
+            MySql,
+            SqlServerMdf,
+        }
+
 		[TestFixtureSetUp]
 		public void TestFixtureSetUp()
 		{
 			LogManager.LogFactory = new ConsoleLogFactory();
 
-            //OrmLiteConfig.DialectProvider = MySqlDialect.Provider;
-            //ConnectionString = "Server=localhost;Database=test;UID=root;Password=test";
-            //return;
+            //var dbType = DbType.Sqlite;
+            var dbType = DbType.SqlServer;
 
-		    var useSqlite = true;
-            if (useSqlite)
-            {
-                OrmLiteConfig.DialectProvider = SqliteDialect.Provider;
-                ConnectionString = GetFileConnectionString();
-                ConnectionString = ":memory:";
+		    switch (dbType)
+		    {
+		        case DbType.Sqlite:
+                    OrmLiteConfig.DialectProvider = SqliteDialect.Provider;
+                    ConnectionString = GetFileConnectionString();
+                    ConnectionString = ":memory:";
+                    return;
+                case DbType.SqlServer:
+                    OrmLiteConfig.DialectProvider = SqlServerDialect.Provider;
+                    ConnectionString = Config.SqlServerBuildDb;
+                    return;
+                case DbType.MySql:
+                    OrmLiteConfig.DialectProvider = MySqlDialect.Provider;
+                    ConnectionString = "Server=localhost;Database=test;UID=root;Password=test";
+                    return;
+                case DbType.PostgreSql:
+                    OrmLiteConfig.DialectProvider = PostgreSqlDialect.Provider;
+                    ConnectionString = Environment.GetEnvironmentVariable("PGSQL_TEST");
+                    return;
+                case DbType.SqlServerMdf:
+                    ConnectionString = "~/App_Data/Database1.mdf".MapAbsolutePath();			
+                    ConnectionString = Config.GetDefaultConnection();
+                    return;
             }
-            else
-            {
-                OrmLiteConfig.DialectProvider = SqlServerDialect.Provider;
-                ConnectionString = Config.SqlServerBuildDb;
-            }
-            
-            //ConnectionString = "~/App_Data/Database1.mdf".MapAbsolutePath();			
-            //ConnectionString = Config.GetDefaultConnection();
 		}
 
 		public void Log(string text)
