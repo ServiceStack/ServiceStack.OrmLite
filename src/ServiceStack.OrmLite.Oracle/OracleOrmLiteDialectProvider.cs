@@ -16,14 +16,15 @@ namespace ServiceStack.OrmLite.Oracle
         public const string OdpProvider = "Oracle.DataAccess.Client";
         public const string MicrosoftProvider = "System.Data.OracleClient";
 
-		protected readonly List<string> ReservedNames = new List<string> {
-			"USER","ORDER","PASSWORD", "ACTIVE","LEFT","DOUBLE", "FLOAT", "DECIMAL","STRING", "DATE",
-            "DATETIME", "TYPE","TIMESTAMP", "COMMENT"
+		protected readonly List<string> ReservedNames = new List<string>
+        {
+			"USER", "ORDER", "PASSWORD", "ACTIVE", "LEFT", "DOUBLE", "FLOAT", "DECIMAL", "STRING", "DATE",
+            "DATETIME", "TYPE","TIMESTAMP", "COMMENT", "LONG"
 		};
 
         protected readonly List<string> ReservedParameterNames = new List<string>
             {
-                "COMMENT", "DATE", "DECIMAL", "FLOAT", "ORDER", "USER"
+                "COMMENT", "DATE", "DECIMAL", "FLOAT", "ORDER", "USER", "LONG"
             };
 
         protected const int MaxNameLength = 30;
@@ -176,6 +177,42 @@ namespace ServiceStack.OrmLite.Oracle
 
     		return base.ConvertDbValue(value, type);
 		}
+
+        public override GetValueDelegate GetReaderGuidDelegate(IDataRecord reader)
+        {
+            if (CompactGuid)
+            {
+                return i =>
+                {
+                    var guid = reader.GetValue(i);
+                    return new Guid((byte[])guid);
+                };
+            }
+            return i =>
+            {
+                var guid = reader.GetValue(i);
+                return new Guid(guid.ToString());
+            };
+        }
+
+        public override GetValueDelegate GetReaderNullableGuidDelegate(IDataRecord reader)
+        {
+            if (CompactGuid)
+            {
+                return i =>
+                {
+                    if (reader.IsDBNull(i)) return null;
+                    var guid = reader.GetValue(i);
+                    return new Guid((Byte[])guid);
+                };
+            }
+            return i =>
+            {
+                if (reader.IsDBNull(i)) return null;
+                var guid = reader.GetValue(i);
+                return new Guid(guid.ToString());
+            };
+        }
 
         public override string GetQuotedValue(object value, Type fieldType)
 		{
@@ -740,12 +777,9 @@ namespace ServiceStack.OrmLite.Oracle
                 sql.AppendFormat(DefaultValueFormat, defaultValue);
             }
 
-            if (!isNullable)
-            {
-                sql.Append(" NOT NULL");
-            }
+		    sql.Append(isNullable ? " NULL" : " NOT NULL");
 
-            return sql.ToString();
+		    return sql.ToString();
 		}
 		
 		

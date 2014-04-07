@@ -368,6 +368,16 @@ namespace ServiceStack.OrmLite
             }
         }
 
+        public virtual GetValueDelegate GetReaderGuidDelegate(IDataRecord reader)
+        {
+            return i => reader.GetGuid(i);
+        }
+
+        public virtual GetValueDelegate GetReaderNullableGuidDelegate(IDataRecord reader)
+        {
+            return i => reader.IsDBNull(i) ? null : (Guid?)reader.GetGuid(i);
+        }
+
         public virtual string GetQuotedValue(object value, Type fieldType)
         {
             if (value == null) return "NULL";
