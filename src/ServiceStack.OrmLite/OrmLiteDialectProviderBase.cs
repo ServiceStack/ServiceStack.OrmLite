@@ -368,16 +368,6 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        public virtual GetValueDelegate GetReaderGuidDelegate(IDataRecord reader)
-        {
-            return i => reader.GetGuid(i);
-        }
-
-        public virtual GetValueDelegate GetReaderNullableGuidDelegate(IDataRecord reader)
-        {
-            return i => reader.IsDBNull(i) ? null : (Guid?)reader.GetGuid(i);
-        }
-
         public virtual string GetQuotedValue(object value, Type fieldType)
         {
             if (value == null) return "NULL";
@@ -1172,7 +1162,6 @@ namespace ServiceStack.OrmLite
             return modelType.GetModelDefinition();
         }
 
-        #region DDL
         public virtual string ToAddColumnStatement(Type modelType, FieldDefinition fieldDef)
         {
 
@@ -1286,7 +1275,87 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        #endregion DDL
+        public virtual GetValueDelegate GetValueFn<T>(IDataRecord reader)
+        {
+            var nullableType = Nullable.GetUnderlyingType(typeof(T));
+
+            if (nullableType == null)
+            {
+                var typeCode = Type.GetTypeCode(typeof(T));
+                switch (typeCode)
+                {
+                    case TypeCode.String:
+                        return reader.GetString;
+                    case TypeCode.Boolean:
+                        return i => reader.GetBoolean(i);
+                    case TypeCode.Int16:
+                    case TypeCode.Int32:
+                    case TypeCode.Int64:
+                    case TypeCode.Single:
+                    case TypeCode.Double:
+                    case TypeCode.Decimal:
+                        return i =>
+                        {
+                            var value = reader.GetValue(i);
+                            if (value is T)
+                                return value;
+
+                            switch (typeCode)
+                            {
+                                case TypeCode.Int16:
+                                    return Convert.ToInt16(value);
+                                case TypeCode.Int32:
+                                    return Convert.ToInt32(value);
+                                case TypeCode.Int64:
+                                    return Convert.ToInt64(value);
+                                case TypeCode.Single:
+                                    return Convert.ToSingle(value);
+                                case TypeCode.Double:
+                                    return Convert.ToDouble(value);
+                                case TypeCode.Decimal:
+                                    return Convert.ToDecimal(value);
+                                default:
+                                    return value;
+                            }
+                        };
+                    case TypeCode.DateTime:
+                        return i => reader.GetDateTime(i);
+                }
+
+                if (typeof(T) == typeof(Guid))
+                    return i => reader.GetGuid(i);
+            }
+            else
+            {
+                var typeCode = Type.GetTypeCode(nullableType);
+                switch (typeCode)
+                {
+                    case TypeCode.String:
+                        return reader.GetString;
+                    case TypeCode.Boolean:
+                        return i => reader.IsDBNull(i) ? null : (bool?)reader.GetBoolean(i);
+                    case TypeCode.Int16:
+                        return i => reader.IsDBNull(i) ? null : (short?)reader.GetInt16(i);
+                    case TypeCode.Int32:
+                        return i => reader.IsDBNull(i) ? null : (int?)reader.GetInt32(i);
+                    case TypeCode.Int64:
+                        return i => reader.IsDBNull(i) ? null : (long?)reader.GetInt64(i);
+                    case TypeCode.Single:
+                        return i => reader.IsDBNull(i) ? null : (float?)reader.GetFloat(i);
+                    case TypeCode.Double:
+                        return i => reader.IsDBNull(i) ? null : (double?)reader.GetDouble(i);
+                    case TypeCode.Decimal:
+                        return i => reader.IsDBNull(i) ? null : (decimal?)reader.GetDecimal(i);
+                    case TypeCode.DateTime:
+                        return i => reader.IsDBNull(i) ? null : (DateTime?)reader.GetDateTime(i);
+                }
+
+                if (typeof(T) == typeof(Guid))
+                    return i => reader.IsDBNull(i) ? null : (Guid?)reader.GetGuid(i);
+            }
+
+            return reader.GetValue;
+        }
 
     }
 }

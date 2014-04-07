@@ -23,9 +23,9 @@ namespace ServiceStack.OrmLite.Oracle
 		};
 
         protected readonly List<string> ReservedParameterNames = new List<string>
-            {
-                "COMMENT", "DATE", "DECIMAL", "FLOAT", "ORDER", "USER", "LONG"
-            };
+        {
+            "COMMENT", "DATE", "DECIMAL", "FLOAT", "ORDER", "USER", "LONG"
+        };
 
         protected const int MaxNameLength = 30;
         protected const int MaxStringColumnLength = 4000;
@@ -178,41 +178,52 @@ namespace ServiceStack.OrmLite.Oracle
     		return base.ConvertDbValue(value, type);
 		}
 
-        public override GetValueDelegate GetReaderGuidDelegate(IDataRecord reader)
+        public override GetValueDelegate GetValueFn<T>(IDataRecord reader)
         {
-            if (CompactGuid)
+            var nullableType = Nullable.GetUnderlyingType(typeof(T));
+            if (nullableType == null)
             {
-                return i =>
+                if (typeof(T) == typeof(Guid))
                 {
-                    var guid = reader.GetValue(i);
-                    return new Guid((byte[])guid);
-                };
+                    if (CompactGuid)
+                    {
+                        return i =>
+                        {
+                            var guid = reader.GetValue(i);
+                            return new Guid((byte[])guid);
+                        };
+                    }
+                    return i =>
+                    {
+                        var guid = reader.GetValue(i);
+                        return new Guid(guid.ToString());
+                    };
+                }
             }
-            return i =>
+            else
             {
-                var guid = reader.GetValue(i);
-                return new Guid(guid.ToString());
-            };
-        }
+                if (typeof (T) == typeof (Guid))
+                {
+                    if (CompactGuid)
+                    {
+                        return i =>
+                        {
+                            if (reader.IsDBNull(i)) return null;
+                            var guid = reader.GetValue(i);
+                            return new Guid((Byte[])guid);
+                        };
+                    }
+                    return i =>
+                    {
+                        if (reader.IsDBNull(i)) return null;
+                        var guid = reader.GetValue(i);
+                        return new Guid(guid.ToString());
+                    };
+                }
+            }
 
-        public override GetValueDelegate GetReaderNullableGuidDelegate(IDataRecord reader)
-        {
-            if (CompactGuid)
-            {
-                return i =>
-                {
-                    if (reader.IsDBNull(i)) return null;
-                    var guid = reader.GetValue(i);
-                    return new Guid((Byte[])guid);
-                };
-            }
-            return i =>
-            {
-                if (reader.IsDBNull(i)) return null;
-                var guid = reader.GetValue(i);
-                return new Guid(guid.ToString());
-            };
-        }
+            return GetValueFn<T>(reader);
+        } 
 
         public override string GetQuotedValue(object value, Type fieldType)
 		{

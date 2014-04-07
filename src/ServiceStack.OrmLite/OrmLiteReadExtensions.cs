@@ -67,88 +67,6 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecuteReader();
         }
 
-        public static GetValueDelegate GetValueFn<T>(IDataRecord reader)
-        {
-            var nullableType = Nullable.GetUnderlyingType(typeof(T));
-
-            if (nullableType == null)
-            {
-                var typeCode = Type.GetTypeCode(typeof(T));
-                switch (typeCode)
-                {
-                    case TypeCode.String:
-                        return reader.GetString;
-                    case TypeCode.Boolean:
-                        return i => reader.GetBoolean(i);
-                    case TypeCode.Int16:
-                    case TypeCode.Int32:
-                    case TypeCode.Int64:
-                    case TypeCode.Single:
-                    case TypeCode.Double:
-                    case TypeCode.Decimal:
-                        return i =>
-                        {
-                            var value = reader.GetValue(i);
-                            if (value is T)
-                                return value;
-
-                            switch (typeCode)
-                            {
-                                case TypeCode.Int16:
-                                    return Convert.ToInt16(value);
-                                case TypeCode.Int32:
-                                    return Convert.ToInt32(value);
-                                case TypeCode.Int64:
-                                    return Convert.ToInt64(value);
-                                case TypeCode.Single:
-                                    return Convert.ToSingle(value);
-                                case TypeCode.Double:
-                                    return Convert.ToDouble(value);
-                                case TypeCode.Decimal:
-                                    return Convert.ToDecimal(value);
-                                default:
-                                    return value;
-                            }
-                        };
-                    case TypeCode.DateTime:
-                        return i => reader.GetDateTime(i);
-                }
-
-                if (typeof (T) == typeof(Guid))
-                    return OrmLiteConfig.DialectProvider.GetReaderGuidDelegate(reader);
-            }
-            else
-            {
-                var typeCode = Type.GetTypeCode(nullableType);
-                switch (typeCode)
-                {
-                    case TypeCode.String:
-                        return reader.GetString;
-                    case TypeCode.Boolean:
-                        return i => reader.IsDBNull(i) ? null : (bool?)reader.GetBoolean(i);
-                    case TypeCode.Int16:
-                        return i => reader.IsDBNull(i) ? null : (short?)reader.GetInt16(i);
-                    case TypeCode.Int32:
-                        return i => reader.IsDBNull(i) ? null : (int?)reader.GetInt32(i);
-                    case TypeCode.Int64:
-                        return i => reader.IsDBNull(i) ? null : (long?)reader.GetInt64(i);
-                    case TypeCode.Single:
-                        return i => reader.IsDBNull(i) ? null : (float?)reader.GetFloat(i);
-                    case TypeCode.Double:
-                        return i => reader.IsDBNull(i) ? null : (double?)reader.GetDouble(i);
-                    case TypeCode.Decimal:
-                        return i => reader.IsDBNull(i) ? null : (decimal?)reader.GetDecimal(i);
-                    case TypeCode.DateTime:
-                        return i => reader.IsDBNull(i) ? null : (DateTime?)reader.GetDateTime(i);
-                }
-
-                if (typeof(T) == typeof(Guid))
-                    return OrmLiteConfig.DialectProvider.GetReaderNullableGuidDelegate(reader);
-            }
-
-            return reader.GetValue;
-        }
-
         public static bool IsScalar<T>()
         {
             return typeof(T).IsValueType || typeof(T) == typeof(string);
@@ -654,7 +572,7 @@ namespace ServiceStack.OrmLite
         internal static List<T> Column<T>(this IDataReader reader)
         {
             var columValues = new List<T>();
-            var getValueFn = GetValueFn<T>(reader);
+            var getValueFn = OrmLiteConfig.DialectProvider.GetValueFn<T>(reader);
             while (reader.Read())
             {
                 var value = getValueFn(0);
@@ -681,7 +599,7 @@ namespace ServiceStack.OrmLite
         internal static HashSet<T> ColumnDistinct<T>(this IDataReader reader)
         {
             var columValues = new HashSet<T>();
-            var getValueFn = GetValueFn<T>(reader);
+            var getValueFn = OrmLiteConfig.DialectProvider.GetValueFn<T>(reader);
             while (reader.Read())
             {
                 var value = getValueFn(0);
@@ -709,8 +627,8 @@ namespace ServiceStack.OrmLite
         {
             var lookup = new Dictionary<K, List<V>>();
 
-            var getKeyFn = GetValueFn<K>(reader);
-            var getValueFn = GetValueFn<V>(reader);
+            var getKeyFn = OrmLiteConfig.DialectProvider.GetValueFn<K>(reader);
+            var getValueFn = OrmLiteConfig.DialectProvider.GetValueFn<V>(reader);
             while (reader.Read())
             {
                 var key = (K)getKeyFn(0);
@@ -744,8 +662,8 @@ namespace ServiceStack.OrmLite
         {
             var map = new Dictionary<K, V>();
 
-            var getKeyFn = GetValueFn<K>(reader);
-            var getValueFn = GetValueFn<V>(reader);
+            var getKeyFn = OrmLiteConfig.DialectProvider.GetValueFn<K>(reader);
+            var getValueFn = OrmLiteConfig.DialectProvider.GetValueFn<V>(reader);
             while (reader.Read())
             {
                 var key = (K)getKeyFn(0);
