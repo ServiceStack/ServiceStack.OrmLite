@@ -74,8 +74,8 @@ namespace ServiceStack.OrmLite.Tests
 		{
 			LogManager.LogFactory = new ConsoleLogFactory();
 
-            //var dbType = DbType.Sqlite;
-            var dbType = DbType.SqlServer;
+            var dbType = DbType.Sqlite;
+            //var dbType = DbType.SqlServer;
 
 		    switch (dbType)
 		    {
