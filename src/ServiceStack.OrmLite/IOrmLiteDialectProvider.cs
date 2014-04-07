@@ -41,6 +41,9 @@ namespace ServiceStack.OrmLite
 
         object ConvertDbValue(object value, Type type);
 
+        GetValueDelegate GetReaderGuidDelegate(IDataRecord reader);
+        GetValueDelegate GetReaderNullableGuidDelegate(IDataRecord reader);
+
         string GetQuotedValue(object value, Type fieldType);
 
         IDbConnection CreateConnection(string filePath, Dictionary<string, string> options);

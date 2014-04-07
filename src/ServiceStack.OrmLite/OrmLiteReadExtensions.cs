@@ -114,8 +114,8 @@ namespace ServiceStack.OrmLite
                         return i => reader.GetDateTime(i);
                 }
 
-                if (typeof(T) == typeof(Guid))
-                    return i => reader.GetGuid(i);
+                if (typeof (T) == typeof(Guid))
+                    return OrmLiteConfig.DialectProvider.GetReaderGuidDelegate(reader);
             }
             else
             {
@@ -143,7 +143,7 @@ namespace ServiceStack.OrmLite
                 }
 
                 if (typeof(T) == typeof(Guid))
-                    return i => reader.IsDBNull(i) ? null : (Guid?)reader.GetGuid(i);
+                    return OrmLiteConfig.DialectProvider.GetReaderNullableGuidDelegate(reader);
             }
 
             return reader.GetValue;
