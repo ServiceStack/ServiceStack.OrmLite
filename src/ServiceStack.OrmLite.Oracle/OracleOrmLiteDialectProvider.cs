@@ -116,13 +116,7 @@ namespace ServiceStack.OrmLite.Oracle
 
         public override void SetDbValue(FieldDefinition fieldDef, IDataReader dataReader, int colIndex, object instance)
         {
-            if (fieldDef == null || fieldDef.SetValueFn == null || colIndex == NotFound) return;
-
-            if (dataReader.IsDBNull(colIndex))
-            {
-                fieldDef.SetValueFn(instance, null);
-                return;
-            }
+            if (HandledDbNullValue(fieldDef, dataReader, colIndex, instance)) return;
 
             object convertedValue;
             if (fieldDef.FieldType == typeof(DateTimeOffset))

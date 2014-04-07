@@ -279,22 +279,9 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public virtual void SetDbValue(FieldDefinition fieldDef, IDataReader dataReader, int colIndex, object instance)
         {
-            if (fieldDef == null || fieldDef.SetValueFn == null || colIndex == NotFound) return;
-            if (dataReader.IsDBNull(colIndex))
-            {
-                if (fieldDef.IsNullable)
-                {
-                    fieldDef.SetValueFn(instance, null);
-                }
-                else
-                {
-                    fieldDef.SetValueFn(instance, fieldDef.FieldType.GetDefaultValue());
-                }
-                return;
-            }
+            if (HandledDbNullValue(fieldDef, dataReader, colIndex, instance)) return;
 
             object value;
-
             if (fieldDef.FieldType == typeof(Guid))
             {
                 value = dataReader.GetGuid(colIndex);
@@ -312,6 +299,24 @@ namespace ServiceStack.OrmLite
             catch (NullReferenceException ex)
             {
             }
+        }
+
+        public static bool HandledDbNullValue(FieldDefinition fieldDef, IDataReader dataReader, int colIndex, object instance)
+        {
+            if (fieldDef == null || fieldDef.SetValueFn == null || colIndex == NotFound) return true;
+            if (dataReader.IsDBNull(colIndex))
+            {
+                if (fieldDef.IsNullable)
+                {
+                    fieldDef.SetValueFn(instance, null);
+                }
+                else
+                {
+                    fieldDef.SetValueFn(instance, fieldDef.FieldType.GetDefaultValue());
+                }
+                return true;
+            }
+            return false;
         }
 
         public virtual object ConvertDbValue(object value, Type type)

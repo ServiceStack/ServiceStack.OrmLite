@@ -137,6 +137,8 @@ namespace ServiceStack.OrmLite.Sqlite
 
         public override void SetDbValue(FieldDefinition fieldDef, IDataReader dataReader, int colIndex, object instance)
         {
+            if (HandledDbNullValue(fieldDef, dataReader, colIndex, instance)) return;
+
             var fieldType = Nullable.GetUnderlyingType(fieldDef.FieldType) ?? fieldDef.FieldType;
             if (fieldType == typeof(Guid))
             {
