@@ -123,7 +123,7 @@ namespace ServiceStack.OrmLite
             else
             {
                 tables.SqlVerifyFragment();
-                var singleTable = tables.ToLower().IndexOfAny("join", ",") >= 0;
+                var singleTable = tables.ToLower().IndexOfAny("join", ",") == -1;
                 FromExpression = singleTable
                     ? " \nFROM " + OrmLiteConfig.DialectProvider.GetQuotedTableName(tables)
                     : " \nFROM " + tables;
