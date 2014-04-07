@@ -222,7 +222,7 @@ namespace ServiceStack.OrmLite.Oracle
                 }
             }
 
-            return GetValueFn<T>(reader);
+            return base.GetValueFn<T>(reader);
         } 
 
         public override string GetQuotedValue(object value, Type fieldType)
