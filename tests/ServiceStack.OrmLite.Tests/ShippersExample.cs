@@ -92,8 +92,12 @@ namespace ServiceStack.OrmLite.Tests
 				db.Insert(new Shipper { CompanyName = "Planes R Us", Phone = "555-PLANES", ShipperTypeId = planesType.Id });
 				db.Insert(new Shipper { CompanyName = "We do everything!", Phone = "555-UNICORNS", ShipperTypeId = planesType.Id });
 
-				var trainsAreUs = db.SingleFmt<Shipper>("ShipperTypeId = {0}", trainsType.Id);
+                var trainsAreUs = db.Single<Shipper>(q => q.ShipperTypeId == trainsType.Id);
+                Assert.That(trainsAreUs.CompanyName, Is.EqualTo("Trains R Us"));
+
+                trainsAreUs = db.SingleFmt<Shipper>("ShipperTypeId = {0}", trainsType.Id);
 				Assert.That(trainsAreUs.CompanyName, Is.EqualTo("Trains R Us"));
+
 
                 Assert.That(db.Select<Shipper>(q => q.CompanyName == "Trains R Us" || q.Phone == "555-UNICORNS"), Has.Count.EqualTo(2));
                 Assert.That(db.SelectFmt<Shipper>("CompanyName = {0} OR Phone = {1}", "Trains R Us", "555-UNICORNS"), Has.Count.EqualTo(2));
@@ -116,15 +120,14 @@ namespace ServiceStack.OrmLite.Tests
 
 				//Performing custom queries
 				//Select only a subset from the table
-                var partialColumns = db.Select<SubsetOfShipper>(
-                    db.From<Shipper>().Where(q => q.ShipperTypeId == 2));
+                var partialColumns = db.Select<SubsetOfShipper>(db.From<Shipper>().Where(q => q.ShipperTypeId == 2));
                 Assert.That(partialColumns, Has.Count.EqualTo(2));
 
                 partialColumns = db.SelectFmt<SubsetOfShipper>(typeof (Shipper), "ShipperTypeId = {0}", planesType.Id);
 				Assert.That(partialColumns, Has.Count.EqualTo(2));
 
 				//Select into another POCO class that matches sql
-				var rows = db.SelectFmt<ShipperTypeCount>(
+				var rows = db.SqlList<ShipperTypeCount>(
 					"SELECT ShipperTypeId, COUNT(*) AS Total FROM Shippers GROUP BY ShipperTypeId ORDER BY COUNT(*)");
 
 				Assert.That(rows, Has.Count.EqualTo(2));
