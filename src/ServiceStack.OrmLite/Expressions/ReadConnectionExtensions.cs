@@ -99,11 +99,20 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns results from using an SqlExpression lambda. E.g:
-        /// <para>db.Select(db.SqlExpression&lt;Person&gt;().Where(x =&gt; x.Age &gt; 40))</para>
+        /// <para>db.Select(db.From&lt;Person&gt;().Where(x =&gt; x.Age &gt; 40))</para>
         /// </summary>
         public static List<T> Select<T>(this IDbConnection dbConn, SqlExpression<T> expression)
         {
             return dbConn.Exec(dbCmd => dbCmd.Select(expression));
+        }
+
+        /// <summary>
+        /// Returns results from using an SqlExpression lambda. E.g:
+        /// <para>db.Select(db.From&lt;Person&gt;().Where(x =&gt; x.Age &gt; 40))</para>
+        /// </summary>
+        public static List<T> Select<T>(this IDbConnection dbConn, ISqlExpression expression)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(expression.ToSelectStatement()));
         }
 
         /// <summary>
@@ -172,7 +181,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns the count of rows that match the supplied SqlExpression, E.g:
-        /// <para>db.Count(db.SqlExpression&lt;Person&gt;().Where(x =&gt; x.Age &lt; 50))</para>
+        /// <para>db.Count(db.From&lt;Person&gt;().Where(x =&gt; x.Age &lt; 50))</para>
         /// </summary>
         public static long Count<T>(this IDbConnection dbConn, SqlExpression<T> expression)
         {

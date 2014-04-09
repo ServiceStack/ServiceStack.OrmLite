@@ -83,7 +83,6 @@ namespace ServiceStack.OrmLite.Tests
 				{
 					db.Insert(new ShipperType { Name = "Automobiles" });
 					Assert.That(db.Select<ShipperType>(), Has.Count.EqualTo(3));
-
 				}
 				Assert.That(db.Select<ShipperType>(), Has.Count.EqualTo(2));
 
@@ -95,8 +94,12 @@ namespace ServiceStack.OrmLite.Tests
 
 				var trainsAreUs = db.SingleFmt<Shipper>("ShipperTypeId = {0}", trainsType.Id);
 				Assert.That(trainsAreUs.CompanyName, Is.EqualTo("Trains R Us"));
-				Assert.That(db.SelectFmt<Shipper>("CompanyName = {0} OR Phone = {1}", "Trains R Us", "555-UNICORNS"), Has.Count.EqualTo(2));
-				Assert.That(db.SelectFmt<Shipper>("ShipperTypeId = {0}", planesType.Id), Has.Count.EqualTo(2));
+
+                Assert.That(db.Select<Shipper>(q => q.CompanyName == "Trains R Us" || q.Phone == "555-UNICORNS"), Has.Count.EqualTo(2));
+                Assert.That(db.SelectFmt<Shipper>("CompanyName = {0} OR Phone = {1}", "Trains R Us", "555-UNICORNS"), Has.Count.EqualTo(2));
+
+                Assert.That(db.Select<Shipper>(q => q.ShipperTypeId == planesType.Id), Has.Count.EqualTo(2));
+                Assert.That(db.SelectFmt<Shipper>("ShipperTypeId = {0}", planesType.Id), Has.Count.EqualTo(2));
 
 				//Lets update a record
 				trainsAreUs.Phone = "666-TRAINS";
@@ -113,7 +116,11 @@ namespace ServiceStack.OrmLite.Tests
 
 				//Performing custom queries
 				//Select only a subset from the table
-				var partialColumns = db.SelectFmt<SubsetOfShipper>(typeof (Shipper), "ShipperTypeId = {0}", planesType.Id);
+                var partialColumns = db.Select<SubsetOfShipper>(
+                    db.From<Shipper>().Where(q => q.ShipperTypeId == 2));
+                Assert.That(partialColumns, Has.Count.EqualTo(2));
+
+                partialColumns = db.SelectFmt<SubsetOfShipper>(typeof (Shipper), "ShipperTypeId = {0}", planesType.Id);
 				Assert.That(partialColumns, Has.Count.EqualTo(2));
 
 				//Select into another POCO class that matches sql

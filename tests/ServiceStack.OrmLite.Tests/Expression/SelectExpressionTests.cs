@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using NUnit.Framework;
+using ServiceStack.DataAnnotations;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Expression
@@ -76,6 +77,65 @@ namespace ServiceStack.OrmLite.Tests.Expression
                                                        q.StoryDate < storyDateTime + new TimeSpan(1,0,0,0)).Count,
                     Is.EqualTo(3));
             }
+        }
+
+        public class Shipper
+        {
+            [AutoIncrement]
+            public int Id { get; set; }
+
+            public string CompanyName { get; set; }
+
+            public string Phone { get; set; }
+
+            public int ShipperTypeId { get; set; }
+        }
+
+        public class SubsetOfShipper
+        {
+            public string Phone { get; set; }
+            public string CompanyName { get; set; }
+        }
+
+        [Test]
+        public void Can_select_Partial_SQL_Statements()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Shipper>();
+
+                db.Insert(new Shipper { CompanyName = "Trains R Us", Phone = "555-TRAINS", ShipperTypeId = 1 });
+                db.Insert(new Shipper { CompanyName = "Planes R Us", Phone = "555-PLANES", ShipperTypeId = 2 });
+                db.Insert(new Shipper { CompanyName = "We do everything!", Phone = "555-UNICORNS", ShipperTypeId = 2 });
+
+                var partialColumns = db.Select<SubsetOfShipper>(
+                    db.From<Shipper>().Where(q => q.ShipperTypeId == 2));
+
+                Assert.That(partialColumns.Map(x => x.Phone),
+                    Is.EquivalentTo(new[] { "555-UNICORNS", "555-PLANES" }));
+                Assert.That(partialColumns.Map(x => x.CompanyName),
+                    Is.EquivalentTo(new[] { "Planes R Us", "We do everything!" }));
+
+
+                var partialDto = db.Select<Shipper>(q =>
+                    q.Select(x => new { x.Phone, x.CompanyName })
+                     .Where(x => x.ShipperTypeId == 2));
+
+                Assert.That(partialDto.Map(x => x.Phone),
+                    Is.EquivalentTo(new[] { "555-UNICORNS", "555-PLANES" }));
+                Assert.That(partialDto.Map(x => x.CompanyName),
+                    Is.EquivalentTo(new[] { "Planes R Us", "We do everything!" }));
+
+
+                partialDto = db.Select<Shipper>(q =>
+                    q.Select("Phone, CompanyName")
+                     .Where(x => x.ShipperTypeId == 2));
+
+                Assert.That(partialDto.Map(x => x.Phone),
+                    Is.EquivalentTo(new[] { "555-UNICORNS", "555-PLANES" }));
+                Assert.That(partialDto.Map(x => x.CompanyName),
+                    Is.EquivalentTo(new[] { "Planes R Us", "We do everything!" }));
+            }            
         }
     }
 
