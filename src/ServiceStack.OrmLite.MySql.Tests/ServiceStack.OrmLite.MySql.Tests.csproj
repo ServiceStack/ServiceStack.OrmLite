@@ -95,6 +95,7 @@
     <Compile Include="ForeignKeyAttributeTests.cs" />
     <Compile Include="Issues\SelectExpressionIssues.cs" />
     <Compile Include="LocalizationTests.cs" />
+    <Compile Include="MySqlAdminTests.cs" />
     <Compile Include="StringColumnTests.cs" />
     <Compile Include="NorthwindPerfTests.cs" />
     <Compile Include="OrmLiteBasicPersistenceProviderTests.cs" />
