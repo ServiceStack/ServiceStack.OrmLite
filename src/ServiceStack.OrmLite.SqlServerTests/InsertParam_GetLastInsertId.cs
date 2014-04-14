@@ -18,9 +18,8 @@ namespace ServiceStack.OrmLite.SqlServerTests
             {
                 con.CreateTable<SimpleType>(true);
 
-                con.Insert(testObject);
-                var normalLastInsertedId = con.LastInsertId();
-                Assert.Greater(normalLastInsertedId, 0, "normal Insert");
+                con.Save(testObject);
+                Assert.That(testObject.Id, Is.GreaterThan(0), "normal Insert");
             }
 
             //test with InsertParam
@@ -29,7 +28,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 con.CreateTable<SimpleType>(true);
 
                 var lastInsertId = con.Insert(testObject, selectIdentity:true);
-                Assert.Greater(lastInsertId, 0, "with InsertParam");
+                Assert.That(lastInsertId, Is.GreaterThan(0), "with InsertParam");
             }
         }
     }

@@ -13,7 +13,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 con.CreateTable<SimpleType>(true);
                 var obj = new SimpleType { Name = "Somename" };
                 con.Save(obj);
-                var storedObj = con.SingleById<SimpleType>(con.LastInsertId());
+                var storedObj = con.SingleById<SimpleType>(obj.Id);
 
                 Assert.AreEqual(obj.Name, storedObj.Name);
 
@@ -35,7 +35,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 con.CreateTable<SimpleType>(true);
                 var obj = new SimpleType { Name = "Somename" };
                 con.Save(obj);
-                var storedObj = con.SingleById<SimpleType>(con.LastInsertId());
+                var storedObj = con.SingleById<SimpleType>(obj.Id);
 
                 Assert.AreEqual(obj.Name, storedObj.Name);
 
@@ -61,7 +61,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 con.CreateTable<SimpleType>(true);
                 var obj = new SimpleType { Name = "Somename" };
                 con.Save(obj);
-                var storedObj = con.SingleById<SimpleType>(con.LastInsertId());
+                var storedObj = con.SingleById<SimpleType>(obj.Id);
 
                 Assert.AreEqual(obj.Name, storedObj.Name);
 
@@ -83,7 +83,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 con.CreateTable<SimpleAliasedType>(true);
                 var obj = new SimpleAliasedType { Name = "Somename" };
                 con.Save(obj);
-                var storedObj = con.SingleById<SimpleAliasedType>(con.LastInsertId());
+                var storedObj = con.SingleById<SimpleAliasedType>(obj.Id);
 
                 Assert.AreEqual(obj.Name, storedObj.Name);
 
@@ -105,7 +105,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 con.CreateTable<SimpleType>(true);
                 var obj = new SimpleType { Name = "Somename" };
                 con.Save(obj);
-                var storedObj = con.SingleById<SimpleType>(con.LastInsertId());
+                var storedObj = con.SingleById<SimpleType>(obj.Id);
 
                 Assert.AreEqual(obj.Name, storedObj.Name);
 
@@ -127,7 +127,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 con.CreateTable<SimpleAliasedType>(true);
                 var obj = new SimpleAliasedType { Name = "Somename" };
                 con.Save(obj);
-                var storedObj = con.SingleById<SimpleAliasedType>(con.LastInsertId());
+                var storedObj = con.SingleById<SimpleAliasedType>(obj.Id);
 
                 Assert.AreEqual(obj.Name, storedObj.Name);
 
