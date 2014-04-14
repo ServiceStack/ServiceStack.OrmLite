@@ -37,14 +37,12 @@ namespace ServiceStack.OrmLite.SqlServer
 	        OrderByExpression = String.Empty; // Required because ordering is done by Windowing function
 
             //todo: review needed only check against sql server 2008 R2
-
-	        var selectExpression = SelectExpression.Remove(SelectExpression.IndexOf("FROM")).Trim(); //0
 	        var tableName = OrmLiteConfig.DialectProvider.GetQuotedTableName(ModelDef).Trim(); //2
 	        var statement = string.Format("{0} {1} {2}", WhereExpression, GroupByExpression, HavingExpression).Trim(); 
 
 	        var retVal = string.Format(
 	            "{0} FROM (SELECT ROW_NUMBER() OVER ({1}) As RowNum, * FROM {2} {3}) AS RowConstrainedResult WHERE RowNum > {4} AND RowNum <= {5}",
-	            selectExpression,
+                SelectExpression,
 	            orderBy,
 	            tableName,
                 statement,
