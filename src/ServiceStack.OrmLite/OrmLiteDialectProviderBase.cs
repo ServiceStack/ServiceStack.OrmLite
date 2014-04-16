@@ -1020,6 +1020,11 @@ namespace ServiceStack.OrmLite
             return modelDef.GetColumnNames();
         }
 
+        public virtual List<string> ToCreateTriggerStatements(Type tableType)
+        {
+            return new List<string>();
+        }
+
         public virtual List<string> ToCreateSequenceStatements(Type tableType)
         {
             return new List<string>();

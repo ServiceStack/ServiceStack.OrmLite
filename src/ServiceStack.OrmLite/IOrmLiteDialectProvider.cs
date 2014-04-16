@@ -104,6 +104,8 @@ namespace ServiceStack.OrmLite
 
         string ToCreateTableStatement(Type tableType);
 
+        List<string> ToCreateTriggerStatements(Type tableType);
+
         List<string> ToCreateIndexStatements(Type tableType);
         List<string> ToCreateSequenceStatements(Type tableType);
         string ToCreateSequenceStatement(Type tableType, string sequenceName);

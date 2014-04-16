@@ -759,6 +759,27 @@ namespace ServiceStack.OrmLite.Oracle
         }
 
 
+        public override List<string> ToCreateTriggerStatements(Type tableType)
+        {
+            var triggers = new List<string>();
+            var modelDef = GetModel(tableType);
+
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+                if (!fieldDef.IsRowVersion) continue;
+
+                const string rowVersionTriggerName = "RowVersionIncrementTrigger";
+                string triggerAction = string.Format(":NEW.{0} := :OLD.{0}+1;", GetQuotedColumnName(fieldDef.FieldName));
+                var rowVersionUpdateTrigger = string.Format("CREATE TRIGGER {0} BEFORE UPDATE ON {1} FOR EACH ROW BEGIN {2} END;\n",
+                                                      rowVersionTriggerName,
+                                                      GetQuotedTableName(modelDef),
+                                                      triggerAction);
+                triggers.Add(rowVersionUpdateTrigger);
+            }
+
+            return triggers;
+        }
+
         public override List<string> ToCreateIndexStatements(Type tableType)
         {
             var sqlIndexes = new List<string>();

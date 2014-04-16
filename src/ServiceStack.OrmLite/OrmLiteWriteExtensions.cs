@@ -133,6 +133,23 @@ namespace ServiceStack.OrmLite
                             }
                         }
                     }
+                    var triggerList = dialectProvider.ToCreateTriggerStatements(modelType);
+                    foreach (var trigger in triggerList)
+                    {
+                        try
+                        {
+                            dbCmd.ExecuteSql(trigger);
+                        }
+                        catch (Exception exTrigger)
+                        {
+                            if (IgnoreAlreadyExistsError(exTrigger))
+                            {
+                                Log.DebugFormat("Ignoring existing trigger '{0}': {1}", exTrigger, exTrigger.Message);
+                                continue;
+                            }
+                            throw;
+                        }
+                    }
                 }
             }
             catch (Exception ex)
