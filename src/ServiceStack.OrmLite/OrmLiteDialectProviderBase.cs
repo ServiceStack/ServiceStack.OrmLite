@@ -632,7 +632,7 @@ namespace ServiceStack.OrmLite
             {
                 if (fieldDef.IsComputed) continue;
 
-                if ((deleteFields != null && deleteFields.Count > 0) && !deleteFields.Contains(fieldDef.Name))
+                if (!fieldDef.IsRowVersion && (deleteFields != null && deleteFields.Count > 0) && !deleteFields.Contains(fieldDef.Name))
                     continue;
 
                 try
