@@ -7,6 +7,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 
 namespace ServiceStack.OrmLite.Oracle
@@ -285,7 +286,8 @@ namespace ServiceStack.OrmLite.Oracle
 
 			if (isFullSelectStatement)
 			{
-			    if (!sqlFilter.Trim().ToUpperInvariant().Contains(" FROM ")) sqlFilter += " FROM DUAL";
+                if (Regex.Matches(sqlFilter.Trim().ToUpperInvariant(), @"(\b|\n)FROM(\b|\n)").Count < 1)
+                    sqlFilter += " FROM DUAL";
 			    return sqlFilter.SqlFmt(filterParams);
 			}
 			

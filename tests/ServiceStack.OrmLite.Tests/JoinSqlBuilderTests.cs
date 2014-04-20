@@ -1,5 +1,5 @@
+using System.Text.RegularExpressions;
 using NUnit.Framework;
-using System;
 using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.Tests
@@ -82,6 +82,9 @@ namespace ServiceStack.OrmLite.Tests
             var expectedNq = "SELECT \"User\".Id,\"User\".Name,\"User\".Age \nFROM \"User\" \n LEFT OUTER JOIN  Addresses ON \"User\".Id = Addresses.UserId  \nWHERE (\"User\".Age > 18) AND (Addresses.Countryalias = 'Italy') \n";
 
             Assert.That(joinQuery, Is.EqualTo(expected).Or.EqualTo(expectedNq));
+
+            var stmt = OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(User), joinQuery);
+            Assert.That(Regex.Matches(stmt, @"(\b|\n)FROM(\b|\n)", RegexOptions.IgnoreCase).Count, Is.EqualTo(1));
         }
-	}
+    }
 }
