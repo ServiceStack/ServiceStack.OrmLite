@@ -31,7 +31,7 @@ namespace ServiceStack.OrmLite.Oracle
             if (prop != null && prop.CanWrite && prop.PropertyType == typeof(bool)
                 && prop.GetIndexParameters().Length == 0 && (setter = prop.GetSetMethod()) != null)
             {
-                var methodName = commandType.GetOperationName() + "_BindByName";
+                var methodName = GetOperationName(commandType) + "_BindByName";
                 var method = new DynamicMethod(methodName, null, new []{ typeof(IDbCommand), typeof(bool) });
                 var il = method.GetILGenerator();
                 il.Emit(OpCodes.Ldarg_0);
@@ -43,6 +43,13 @@ namespace ServiceStack.OrmLite.Oracle
             }
             Cache.Add(commandType, action);
             return action;
+        }
+
+        private static string GetOperationName(Type type)
+        {
+            return type.FullName != null //can be null, e.g. generic types
+                ? type.FullName.Replace(type.Namespace + ".", "").Replace("+", ".")
+                : type.Name;
         }
     }
 }
