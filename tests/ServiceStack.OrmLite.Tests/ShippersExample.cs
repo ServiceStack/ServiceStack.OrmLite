@@ -120,7 +120,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				//Performing custom queries
 				//Select only a subset from the table
-                var partialColumns = db.Select<SubsetOfShipper>(db.From<Shipper>().Where(q => q.ShipperTypeId == 2));
+                var partialColumns = db.Select<SubsetOfShipper>(db.From<Shipper>().Where(q => q.ShipperTypeId == planesType.Id));
                 Assert.That(partialColumns, Has.Count.EqualTo(2));
 
                 partialColumns = db.SelectFmt<SubsetOfShipper>(typeof (Shipper), "ShipperTypeId = {0}", planesType.Id);
