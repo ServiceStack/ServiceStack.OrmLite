@@ -47,6 +47,9 @@
     <AssemblyOriginatorKeyFile>servicestack-sn.pfx</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ServiceStack.Client">
+      <HintPath>..\..\lib\ServiceStack.Client.dll</HintPath>
+    </Reference>
     <Reference Include="ServiceStack.Text">
       <HintPath>..\..\lib\signed\ServiceStack.Text.dll</HintPath>
     </Reference>
