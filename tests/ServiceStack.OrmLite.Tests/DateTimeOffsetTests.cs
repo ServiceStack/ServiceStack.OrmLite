@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using NUnit.Framework;
@@ -72,6 +73,48 @@ namespace ServiceStack.OrmLite.Tests
         {
             int Id { get; set; }
             T Test { get; set; }
+        }
+
+
+        public class HasDateTimeOffsetMemeber
+        {
+            public DateTimeOffset MomentInTime { get; set; }
+        }
+
+        public class HasNullableDateTimeOffsetMemeber
+        {
+            public DateTimeOffset? MomentInTime { get; set; }
+        }
+
+        [Test]
+        public void CanPersistAndRetrieveDateTimeOffset()
+        {
+            var now = DateTimeOffset.Now;
+
+            db.DropAndCreateTable<HasDateTimeOffsetMemeber>();
+            db.Insert(new HasDateTimeOffsetMemeber { MomentInTime = now });
+
+            List<HasDateTimeOffsetMemeber> list = db.Select<HasDateTimeOffsetMemeber>();
+
+            Assert.That(list.Count == 1);
+            var actual = list.First().MomentInTime;
+            Assert.That(actual.Date, Is.EqualTo(now.Date));
+        }
+
+        [Test]
+        public void CanPersistAndRetrieveNullableDateTimeOffset()
+        {
+            var now = DateTimeOffset.Now;
+
+            db.DropAndCreateTable<HasNullableDateTimeOffsetMemeber>();
+            db.Insert(new HasNullableDateTimeOffsetMemeber { MomentInTime = now });
+
+            List<HasNullableDateTimeOffsetMemeber> list = db.Select<HasNullableDateTimeOffsetMemeber>();
+
+            Assert.That(list.Count == 1);
+            var actual = list.First().MomentInTime;
+            Assert.That(actual.HasValue);
+            Assert.That(actual.Value.Date, Is.EqualTo(now.Date));
         }
     }
 }

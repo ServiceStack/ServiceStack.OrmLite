@@ -76,10 +76,9 @@ namespace ServiceStack.OrmLite.Tests
             {
                 db.CreateTable<ModelWithOnlyStringFields>(true);
 
-                var sql = db.GetLastSql();
-                Assert.That(sql, Is.StringContaining("CREATE TABLE \"TableAlias\"")
-                                 .Or.StringContaining("CREATE TABLE TableAlias"));
-                Assert.That(sql, Is.StringContaining("ColumnAlias"));
+                var sql = db.GetLastSql().NormalizeSql();
+                Assert.That(sql, Is.StringContaining("CREATE TABLE TableAlias".NormalizeSql()));
+                Assert.That(sql, Is.StringContaining("ColumnAlias".NormalizeSql()));
 
                 var result = db.SqlList<ModelWithIdAndName>(
                     "SELECT * FROM {0} WHERE {1} = {2}"
@@ -87,18 +86,17 @@ namespace ServiceStack.OrmLite.Tests
                              "Name".SqlColumn(),
                              "foo".SqlValue()));
 
-                Assert.That(db.GetLastSql(), Is.EqualTo("SELECT * FROM \"TableAlias\" WHERE \"ColumnAlias\" = 'foo'")
-                                             .Or.EqualTo("SELECT * FROM TableAlias WHERE ColumnAlias = 'foo'"));
+                Assert.That(db.GetLastSql().NormalizeSql(),
+                    Is.EqualTo("SELECT * FROM TableAlias WHERE ColumnAlias = 'foo'".NormalizeSql()));
 
                 db.DropTable<ModelWithOnlyStringFields>();
 
                 aliasNamingStrategy.UseNamingStrategy = new LowerCaseUnderscoreNamingStrategy();
 
                 db.CreateTable<ModelWithOnlyStringFields>(true);
-                sql = db.GetLastSql();
-                Assert.That(sql, Is.StringContaining("CREATE TABLE \"table_alias\"")
-                                 .Or.StringContaining("CREATE TABLE table_alias"));
-                Assert.That(sql, Is.StringContaining("column_alias"));
+                sql = db.GetLastSql().NormalizeSql();
+                Assert.That(sql, Is.StringContaining("CREATE TABLE table_alias".NormalizeSql()));
+                Assert.That(sql, Is.StringContaining("column_alias".NormalizeSql()));
             }
 
             OrmLiteConfig.DialectProvider.NamingStrategy = new OrmLiteNamingStrategyBase();

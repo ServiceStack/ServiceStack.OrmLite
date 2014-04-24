@@ -128,7 +128,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
 
                 partialDto = db.Select<Shipper>(q =>
-                    q.Select("Phone, CompanyName")
+                    q.Select("Phone, " + "CompanyName".SqlColumn())
                      .Where(x => x.ShipperTypeId == 2));
 
                 Assert.That(partialDto.Map(x => x.Phone),

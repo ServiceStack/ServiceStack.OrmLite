@@ -11,8 +11,8 @@ namespace ServiceStack.OrmLite.Tests
 	{
 		
 		[Test]
-		public void Can_get_scalar_value(){
-			
+		public void Can_get_scalar_value()
+        {
 			List<Author> authors = new List<Author>();
 			authors.Add(new Author() { Name = "Demis Bellot", Birthday = DateTime.Today.AddYears(-20), Active = true, Earnings = 99.9m, Comments = "CSharp books", Rate = 10, City = "London", FloatProperty=10.25f, DoubleProperty=3.23 });
 			authors.Add(new Author() { Name = "Angel Colmenares", Birthday = DateTime.Today.AddYears(-25), Active = true, Earnings = 50.0m, Comments = "CSharp books", Rate = 5, City = "Bogota",FloatProperty=7.59f,DoubleProperty=4.23 });
@@ -36,7 +36,7 @@ namespace ServiceStack.OrmLite.Tests
 				DoubleProperty= 1.25,
 				NDoubleProperty= 8.25
 			});
-			
+
 			using (var db = OpenDbConnection())
 			{
 				db.CreateTable<Author>(true);
@@ -156,18 +156,19 @@ namespace ServiceStack.OrmLite.Tests
 				Assert.IsNullOrEmpty(r9);
 								
                 //Can't MIN(bit)/MAX(bit) in SQL Server
-				var expectedBool=authors.Min(e=>e.Active);
-                var r10 = db.Scalar<Author, bool>(e => Sql.Count(e.Active)); 
-				Assert.That(expectedBool, Is.EqualTo(r10));
-								
-				expectedBool=authors.Max(e=>e.Active);
-                r10 = db.Scalar<Author, bool>(e => Sql.Count(e.Active));
-				Assert.That(expectedBool, Is.EqualTo(r10));
+                if (Dialect == Dialect.SqlServer)
+                {
+                    var expectedBool = authors.Min(e => e.Active);
+                    var r10 = db.Scalar<Author, bool>(e => Sql.Count(e.Active));
+                    Assert.That(expectedBool, Is.EqualTo(r10));
 
-                r10 = db.Scalar<Author, bool>(e => Sql.Count(e.Active), e => e.City == "SinCity");
-				Assert.IsFalse(r10);
-				
-				
+                    expectedBool = authors.Max(e => e.Active);
+                    r10 = db.Scalar<Author, bool>(e => Sql.Count(e.Active));
+                    Assert.That(expectedBool, Is.EqualTo(r10));
+
+                    r10 = db.Scalar<Author, bool>(e => Sql.Count(e.Active), e => e.City == "SinCity");
+                    Assert.IsFalse(r10);
+                }
 				
 				var expectedShort =authors.Max(e=>e.Rate);
 				var r11 = db.Scalar<Author,short>(e=> Sql.Max(e.Rate));

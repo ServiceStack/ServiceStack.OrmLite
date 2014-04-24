@@ -16,7 +16,7 @@ namespace ServiceStack.OrmLite.Tests
 			{
 				db.CreateTable<ModelWithIndexFields>(true);
 
-				var sql = OrmLiteConfig.DialectProvider.ToCreateIndexStatements( typeof (ModelWithIndexFields) ).Join();
+				var sql = OrmLiteConfig.DialectProvider.ToCreateIndexStatements(typeof(ModelWithIndexFields)).Join();
 
                 SuppressIfOracle("Assert comparisons don't work with Oracle provider because it had to squash names to satisfy length restrictions");
 
@@ -28,6 +28,8 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_create_ModelWithCompositeIndexFields_table()
 		{
+            if (Dialect == Dialect.PostgreSql) return; //Incompatible ColumnName in Attribute
+
             using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithCompositeIndexFields>(true);
@@ -44,6 +46,8 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_create_ModelWithNamedCompositeIndex_table()
         {
+            if (Dialect == Dialect.PostgreSql) return; //Incompatible ColumnName in Attribute
+
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithNamedCompositeIndex>(true);

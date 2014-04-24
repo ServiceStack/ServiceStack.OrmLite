@@ -93,5 +93,23 @@ namespace ServiceStack.OrmLite.Tests
 
             OrmLiteConfig.ExecFilter = holdExecFilter;
         }
+
+        [Test]
+        public void Does_use_StringFilter()
+        {
+            OrmLiteConfig.StringFilter = s => s.TrimEnd();
+
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Poco>();
+
+                db.Insert(new Poco { Name = "Value with trailing   " });
+                var row = db.Select<Poco>().First();
+
+                Assert.That(row.Name, Is.EqualTo("Value with trailing"));
+            }
+
+            OrmLiteConfig.StringFilter = null;
+        }
     }
 }

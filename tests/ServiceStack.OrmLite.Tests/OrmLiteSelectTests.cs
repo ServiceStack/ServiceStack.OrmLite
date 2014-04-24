@@ -102,7 +102,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				db.Insert(filterRow);
 
-				var rows = db.SelectFmt<ModelWithOnlyStringFields>("AlbumName = {0}", filterRow.AlbumName);
+				var rows = db.SelectFmt<ModelWithOnlyStringFields>("AlbumName".SqlColumn() + " = {0}", filterRow.AlbumName);
 				var dbRowIds = rows.ConvertAll(x => x.Id);
 
 				Assert.That(dbRowIds, Has.Count.EqualTo(1));
@@ -121,7 +121,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
 
-				var count = db.ScalarFmt<int>("SELECT COUNT(*) FROM ModelWithIdAndName");
+                var count = db.ScalarFmt<int>("SELECT COUNT(*) FROM {0}".Fmt("ModelWithIdAndName".SqlTable()));
 
 				Assert.That(count, Is.EqualTo(n));
 			}
@@ -165,7 +165,7 @@ namespace ServiceStack.OrmLite.Tests
 				db.Insert(filterRow);
 
 				var dbRowIds = new List<string>();
-				var rows = db.SelectLazyFmt<ModelWithOnlyStringFields>("AlbumName = {0}", filterRow.AlbumName);
+				var rows = db.SelectLazyFmt<ModelWithOnlyStringFields>("AlbumName".SqlColumn() + " = {0}", filterRow.AlbumName);
 				foreach (var row in rows)
 				{
 					dbRowIds.Add(row.Id);
@@ -187,7 +187,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
 
-				var ids = db.ColumnFmt<int>("SELECT Id FROM ModelWithIdAndName");
+                var ids = db.ColumnFmt<int>("SELECT Id FROM {0}".Fmt("ModelWithIdAndName".SqlTable()));
 
 				Assert.That(ids.Count, Is.EqualTo(n));
 			}
@@ -204,7 +204,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
 
-				var ids = db.ColumnDistinctFmt<int>("SELECT Id FROM ModelWithIdAndName");
+                var ids = db.ColumnDistinctFmt<int>("SELECT Id FROM {0}".Fmt("ModelWithIdAndName".SqlTable()));
 
 				Assert.That(ids.Count, Is.EqualTo(n));
 			}
@@ -225,7 +225,7 @@ namespace ServiceStack.OrmLite.Tests
 					db.Insert(row);
 				});
 
-				var lookup = db.LookupFmt<string, int>("SELECT Name, Id FROM ModelWithIdAndName");
+                var lookup = db.LookupFmt<string, int>("SELECT Name, Id FROM {0}".Fmt("ModelWithIdAndName".SqlTable()));
 
 				Assert.That(lookup, Has.Count.EqualTo(2));
 				Assert.That(lookup["OddGroup"], Has.Count.EqualTo(3));
@@ -244,7 +244,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
 
-				var dictionary = db.Dictionary<int, string>("SELECT Id, Name FROM ModelWithIdAndName");
+                var dictionary = db.Dictionary<int, string>("SELECT Id, Name FROM {0}".Fmt("ModelWithIdAndName".SqlTable()));
 
 				Assert.That(dictionary, Has.Count.EqualTo(5));
 
@@ -266,7 +266,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 SuppressIfOracle("Oracle provider doesn't modify user supplied SQL to conform to name length restrictions");
 
-                var rows = db.SelectFmt<ModelWithIdAndName>("SELECT Id, Name FROM ModelWithFieldsOfDifferentTypes");
+                var rows = db.SelectFmt<ModelWithIdAndName>("SELECT Id, Name FROM {0}".Fmt("ModelWithFieldsOfDifferentTypes".SqlTable()));
 				var dbRowIds = rows.ConvertAll(x => x.Id);
 
 				Assert.That(dbRowIds, Is.EquivalentTo(rowIds));

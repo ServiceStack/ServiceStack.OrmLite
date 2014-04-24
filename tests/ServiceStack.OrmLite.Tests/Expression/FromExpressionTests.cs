@@ -30,7 +30,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
             {
                 Init(db);
 
-                var results = db.Select(db.From<Person>("Person INNER JOIN Band ON Person.Id = Band.PersonId"));
+                var results = db.Select(db.From<Person>("Person INNER JOIN Band ON Person.Id = Band.{0}".Fmt("PersonId".SqlColumn())));
 
                 Assert.That(results.Count, Is.EqualTo(2));
                 Assert.That(results.ConvertAll(x => x.FirstName), Is.EquivalentTo(new[] { "Kurt", "Jim" }));

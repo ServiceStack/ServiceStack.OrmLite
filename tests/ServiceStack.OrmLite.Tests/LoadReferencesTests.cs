@@ -75,8 +75,8 @@ namespace ServiceStack.OrmLite.Tests
         public void Does_not_include_complex_reference_type_in_sql()
         {
             db.Select<Customer>();
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"Name\" FROM \"Customer\"")
-                                         .Or.EqualTo("SELECT Id, Name FROM Customer"));
+            Assert.That(db.GetLastSql().NormalizeSql(), 
+                Is.EqualTo("select id, name from customer"));
         }
 
         [Test]

@@ -19,13 +19,13 @@ namespace ServiceStack.OrmLite.Tests
                 db.DropTable<ModelWithIdOnly>();
 
                 Assert.That(
-                    db.TableExists(typeof(ModelWithIdOnly).Name),
+                    db.TableExists(typeof(ModelWithIdOnly).Name.SqlTableRaw()),
                     Is.False);
 
                 db.CreateTable<ModelWithIdOnly>(true);
 
                 Assert.That(
-                    db.TableExists(typeof(ModelWithIdOnly).Name),
+                    db.TableExists(typeof(ModelWithIdOnly).Name.SqlTableRaw()),
                     Is.True);
             }
         }
@@ -148,7 +148,14 @@ namespace ServiceStack.OrmLite.Tests
             var createTableSql = OrmLiteConfig.DialectProvider.ToCreateTableStatement(typeof(ModelWithIdAndName));
 
             Console.WriteLine("createTableSql: " + createTableSql);
-            Assert.That(createTableSql, Is.StringContaining("VARCHAR(255)").Or.StringContaining("VARCHAR2(255)"));
+            if (Dialect != Dialect.PostgreSql)
+            {
+                Assert.That(createTableSql, Is.StringContaining("VARCHAR(255)").Or.StringContaining("VARCHAR2(255)"));
+            }
+            else
+            {
+                Assert.That(createTableSql, Is.StringContaining("text"));
+            }
         }
 
         public class ModelWithGuid

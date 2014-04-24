@@ -54,22 +54,22 @@ namespace ServiceStack.OrmLite.Tests
 		public void FieldNameLeftJoinTest ()
 		{
 			var joinQuery = new JoinSqlBuilder<User, User> ().LeftJoin<User, Address> (x => x.Id, x => x.UserId).ToSql ();
-			var expected = "SELECT \"User\".\"Id\",\"User\".\"Name\",\"User\".\"Age\" \nFROM \"User\" \n LEFT OUTER JOIN  \"Address\" ON \"User\".\"Id\" = \"Address\".\"UserId\"  \n";
-            var expectedNq = "SELECT \"User\".Id,\"User\".Name,\"User\".Age \nFROM \"User\" \n LEFT OUTER JOIN  Address ON \"User\".Id = Address.UserId  \n";
+            var expected = "SELECT \"User\".\"Id\",\"User\".\"Name\",\"User\".\"Age\" \nFROM \"User\" \n LEFT OUTER JOIN  \"Address\" ON \"User\".\"Id\" = \"Address\".\"UserId\"  \n".NormalizeSql();
+            var expectedNq = "SELECT \"User\".Id,\"User\".Name,\"User\".Age \nFROM \"User\" \n LEFT OUTER JOIN  Address ON \"User\".Id = Address.UserId  \n".NormalizeSql();
 
-			Assert.That(joinQuery, Is.EqualTo(expected).Or.EqualTo(expectedNq));
+            Assert.That(joinQuery.NormalizeSql(), Is.EqualTo(expected).Or.EqualTo(expectedNq));
 
 			joinQuery = new JoinSqlBuilder<WithAliasUser, WithAliasUser> ().LeftJoin<WithAliasUser, WithAliasAddress> (x => x.Id, x => x.UserId).ToSql ();
-			expected = "SELECT \"Users\".\"Id\",\"Users\".\"Nickname\",\"Users\".\"Agealias\" \nFROM \"Users\" \n LEFT OUTER JOIN  \"Addresses\" ON \"Users\".\"Id\" = \"Addresses\".\"UserId\"  \n";
-            expectedNq = "SELECT Users.Id,Users.Nickname,Users.Agealias \nFROM Users \n LEFT OUTER JOIN  Addresses ON Users.Id = Addresses.UserId  \n";
+            expected = "SELECT \"Users\".\"Id\",\"Users\".\"Nickname\",\"Users\".\"Agealias\" \nFROM \"Users\" \n LEFT OUTER JOIN  \"Addresses\" ON \"Users\".\"Id\" = \"Addresses\".\"UserId\"  \n".NormalizeSql();
+            expectedNq = "SELECT Users.Id,Users.Nickname,Users.Agealias \nFROM Users \n LEFT OUTER JOIN  Addresses ON Users.Id = Addresses.UserId  \n".NormalizeSql();
 
-            Assert.That(joinQuery, Is.EqualTo(expected).Or.EqualTo(expectedNq));
+            Assert.That(joinQuery.NormalizeSql(), Is.EqualTo(expected).Or.EqualTo(expectedNq));
             
 			joinQuery = new JoinSqlBuilder<User, User> ().LeftJoin<User, WithAliasAddress> (x => x.Id, x => x.UserId).ToSql ();
-			expected = "SELECT \"User\".\"Id\",\"User\".\"Name\",\"User\".\"Age\" \nFROM \"User\" \n LEFT OUTER JOIN  \"Addresses\" ON \"User\".\"Id\" = \"Addresses\".\"UserId\"  \n";
-            expectedNq = "SELECT \"User\".Id,\"User\".Name,\"User\".Age \nFROM \"User\" \n LEFT OUTER JOIN  Addresses ON \"User\".Id = Addresses.UserId  \n";
+            expected = "SELECT \"User\".\"Id\",\"User\".\"Name\",\"User\".\"Age\" \nFROM \"User\" \n LEFT OUTER JOIN  \"Addresses\" ON \"User\".\"Id\" = \"Addresses\".\"UserId\"  \n".NormalizeSql();
+            expectedNq = "SELECT \"User\".Id,\"User\".Name,\"User\".Age \nFROM \"User\" \n LEFT OUTER JOIN  Addresses ON \"User\".Id = Addresses.UserId  \n".NormalizeSql();
 
-            Assert.That(joinQuery, Is.EqualTo(expected).Or.EqualTo(expectedNq));
+            Assert.That(joinQuery.NormalizeSql(), Is.EqualTo(expected).Or.EqualTo(expectedNq));
         }
 
 		[Test]
@@ -78,10 +78,10 @@ namespace ServiceStack.OrmLite.Tests
             var joinQuery = new JoinSqlBuilder<User, User>().LeftJoin<User, WithAliasAddress>(x => x.Id, x => x.UserId
 			                                                                                    , sourceWhere: x => x.Age > 18
 			                                                                                    , destinationWhere: x => x.Country == "Italy").ToSql ();
-			var expected = "SELECT \"User\".\"Id\",\"User\".\"Name\",\"User\".\"Age\" \nFROM \"User\" \n LEFT OUTER JOIN  \"Addresses\" ON \"User\".\"Id\" = \"Addresses\".\"UserId\"  \nWHERE (\"User\".\"Age\" > 18) AND (\"Addresses\".\"Countryalias\" = 'Italy') \n";
-            var expectedNq = "SELECT \"User\".Id,\"User\".Name,\"User\".Age \nFROM \"User\" \n LEFT OUTER JOIN  Addresses ON \"User\".Id = Addresses.UserId  \nWHERE (\"User\".Age > 18) AND (Addresses.Countryalias = 'Italy') \n";
+			var expected = "SELECT \"User\".\"Id\",\"User\".\"Name\",\"User\".\"Age\" \nFROM \"User\" \n LEFT OUTER JOIN  \"Addresses\" ON \"User\".\"Id\" = \"Addresses\".\"UserId\"  \nWHERE (\"User\".\"Age\" > 18) AND (\"Addresses\".\"Countryalias\" = 'Italy') \n".NormalizeSql();
+            var expectedNq = "SELECT \"User\".Id,\"User\".Name,\"User\".Age \nFROM \"User\" \n LEFT OUTER JOIN  Addresses ON \"User\".Id = Addresses.UserId  \nWHERE (\"User\".Age > 18) AND (Addresses.Countryalias = 'Italy') \n".NormalizeSql();
 
-            Assert.That(joinQuery, Is.EqualTo(expected).Or.EqualTo(expectedNq));
+            Assert.That(joinQuery.NormalizeSql(), Is.EqualTo(expected).Or.EqualTo(expectedNq));
 
             var stmt = OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(User), joinQuery);
             Assert.That(Regex.Matches(stmt, @"(\b|\n)FROM(\b|\n)", RegexOptions.IgnoreCase).Count, Is.EqualTo(1));

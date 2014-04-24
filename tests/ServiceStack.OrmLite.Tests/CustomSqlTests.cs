@@ -72,13 +72,12 @@ namespace ServiceStack.OrmLite.Tests
             {
                 db.DropAndCreateTable<PocoTable>();
 
-                var createTableSql = db.GetLastSql().Replace("NULL","null");
+                var createTableSql = db.GetLastSql().NormalizeSql();
+
                 createTableSql.Print();
 
-                Assert.That(createTableSql, Is.StringContaining("\"CharColumn\" CHAR(20) null")
-                                            .Or.StringContaining("CharColumn CHAR(20) null"));
-                Assert.That(createTableSql, Is.StringContaining("\"DecimalColumn\" DECIMAL(18,4) null")
-                                            .Or.StringContaining("DecimalColumn DECIMAL(18,4) null"));
+                Assert.That(createTableSql, Is.StringContaining("charcolumn char(20) null"));
+                Assert.That(createTableSql, Is.StringContaining("decimalcolumn decimal(18,4) null"));
             }
         }
 
@@ -94,7 +93,7 @@ namespace ServiceStack.OrmLite.Tests
                 }
                 catch (Exception)
                 {
-                    Assert.That(!db.TableExists("ModelWithPreCreateSql"));
+                    Assert.That(!db.TableExists("ModelWithPreCreateSql".SqlColumn()));
                 }
             }
         }
@@ -103,6 +102,7 @@ namespace ServiceStack.OrmLite.Tests
         public void Does_execute_CustomSql_after_table_created()
         {
             SuppressIfOracle("For Oracle need wrap multiple SQL statements in an anonymous block");
+            if (Dialect == Dialect.PostgreSql || Dialect == Dialect.Oracle) return;
 
             using (var db = OpenDbConnection())
             {
@@ -121,8 +121,8 @@ namespace ServiceStack.OrmLite.Tests
 
             typeof(DynamicAttributeSeedData)
                 .AddAttributes(new PostCreateTableAttribute(
-                    "INSERT INTO DynamicAttributeSeedData (Name) VALUES ('Foo');" +
-                    "INSERT INTO DynamicAttributeSeedData (Name) VALUES ('Bar');"));
+                    "INSERT INTO {0} (Name) VALUES ('Foo');".Fmt("DynamicAttributeSeedData".SqlTable()) +
+                    "INSERT INTO {0} (Name) VALUES ('Bar');".Fmt("DynamicAttributeSeedData".SqlTable())));
 
             using (var db = OpenDbConnection())
             {
@@ -147,7 +147,7 @@ namespace ServiceStack.OrmLite.Tests
                 }
                 catch (Exception)
                 {
-                    Assert.That(db.TableExists("ModelWithPreDropSql"));
+                    Assert.That(db.TableExists("ModelWithPreDropSql".SqlTableRaw()));
                 }
             }
         }

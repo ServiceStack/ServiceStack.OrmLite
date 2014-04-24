@@ -37,6 +37,11 @@ namespace ServiceStack.OrmLite.Tests
             });
         }
 
+        public string TestSql
+        {
+            get { return "SELECT {0} from {1}".Fmt("ComplexType".SqlColumn(), "ModelWithComplexType".SqlTable()); }
+        }
+
         [Test]
         public void Serializes_complex_types_with_JSV_by_default_except_uses_JSON_for_PostgreSQL()
         {
@@ -44,7 +49,7 @@ namespace ServiceStack.OrmLite.Tests
             {
                 InsertModelWithComplexType(db);
 
-                var str = db.SqlScalar<string>("SELECT ComplexType from ModelWithComplexType");
+                var str = db.SqlScalar<string>(TestSql);
 
                 if (!(OrmLiteConfig.DialectProvider is PostgreSQLDialectProvider))
                 {
@@ -70,7 +75,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 InsertModelWithComplexType(db);
 
-                var str = db.SqlScalar<string>("SELECT ComplexType from ModelWithComplexType");
+                var str = db.SqlScalar<string>(TestSql);
                 Assert.That(str, Is.EqualTo("{Id:2,SubType:{Name:Sub}}"));
 
                 var data = db.SingleById<ModelWithComplexType>(1);
@@ -90,7 +95,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 InsertModelWithComplexType(db);
 
-                var str = db.SqlScalar<string>("SELECT ComplexType from ModelWithComplexType");
+                var str = db.SqlScalar<string>(TestSql);
                 Assert.That(str, Is.EqualTo("{\"Id\":2,\"SubType\":{\"Name\":\"Sub\"}}"));
 
                 var data = db.SingleById<ModelWithComplexType>(1);
@@ -110,7 +115,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 InsertModelWithComplexType(db);
 
-                var str = db.SqlScalar<string>("SELECT ComplexType from ModelWithComplexType");
+                var str = db.SqlScalar<string>(TestSql);
                 Assert.That(str, Is.EqualTo("{\"Id\":2,\"SubType\":{\"Name\":\"Sub\"}}"));
 
                 var data = db.SingleById<ModelWithComplexType>(1);
@@ -130,7 +135,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 InsertModelWithComplexType(db);
 
-                var str = db.SqlScalar<string>("SELECT ComplexType from ModelWithComplexType");
+                var str = db.SqlScalar<string>(TestSql);
                 Assert.That(str, Is.EqualTo("<ComplexType xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://schemas.datacontract.org/2004/07/ServiceStack.OrmLite.Tests\"><Id>2</Id><SubType><Name>Sub</Name></SubType></ComplexType>"));
 
                 var data = db.SingleById<ModelWithComplexType>(1);
@@ -150,7 +155,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 InsertModelWithComplexType(db);
 
-                var str = db.SqlScalar<string>("SELECT ComplexType from ModelWithComplexType");
+                var str = db.SqlScalar<string>(TestSql);
                 Assert.That(str, Is.EqualTo("<?xml version=\"1.0\" encoding=\"utf-8\"?><ComplexType xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"><Id>2</Id><SubType><Name>Sub</Name></SubType></ComplexType>"));
 
                 var data = db.SingleById<ModelWithComplexType>(1);

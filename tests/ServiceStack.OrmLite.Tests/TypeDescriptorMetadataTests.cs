@@ -62,6 +62,7 @@ namespace ServiceStack.OrmLite.Tests
         public void Can_change_column_definition()
         {
             SuppressIfOracle("Test assert fails with Oracle because Oracle does not allow 64000 character fields and uses VARCHAR2 not VARCHAR");
+            if (Dialect == Dialect.PostgreSql) return; //Uses 'text' for strings by default
 
             typeof(DynamicCacheEntry)
                 .GetProperty("Data")
@@ -69,15 +70,23 @@ namespace ServiceStack.OrmLite.Tests
 
             db.DropAndCreateTable<DynamicCacheEntry>();
 
-            Assert.That(db.GetLastSql(), Is.StringContaining("\"Data\" VARCHAR(7000)"));
+            Assert.That(db.GetLastSql().NormalizeSql(), 
+                Is.StringContaining("Data VARCHAR(7000)".NormalizeSql()));
             db.GetLastSql().Print();
         }
 
         [Test]
         public void Can_Create_Table_with_MaxText_column()
         {
-            db.DropAndCreateTable<CacheEntry>();
+            try
+            {
+                db.DropAndCreateTable<CacheEntry>();
 
+            }
+            catch (Exception)
+            {
+                db.DropAndCreateTable<CacheEntry>();
+            }
             db.GetLastSql().Print();
         }
     }

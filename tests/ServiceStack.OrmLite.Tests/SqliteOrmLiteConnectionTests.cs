@@ -24,7 +24,7 @@ namespace ServiceStack.OrmLite.Tests
 			}
 		}
 
-		[Test]
+		[Test, Ignore("Not supported in latest sqlite")]
 		public void Can_create_ReadOnly_connection()
 		{
 			using (var db = ConnectionString.OpenReadOnlyDbConnection()) 
@@ -32,8 +32,8 @@ namespace ServiceStack.OrmLite.Tests
 			}
 		}
 
-		[Test]
-		public void Can_create_table_with_ReadOnly_connection()
+        [Test, Ignore("Not supported in latest sqlite")]
+        public void Can_create_table_with_ReadOnly_connection()
 		{
 			using (var db = ConnectionString.OpenReadOnlyDbConnection())
 			{

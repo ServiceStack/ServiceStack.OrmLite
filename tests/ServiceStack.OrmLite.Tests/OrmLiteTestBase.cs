@@ -30,6 +30,16 @@ namespace ServiceStack.OrmLite.Tests
         }
     }
 
+    public enum Dialect
+    {
+        Sqlite,
+        SqlServer,
+        PostgreSql,
+        MySql,
+        SqlServerMdf,
+        Oracle,
+    }
+
 	public class OrmLiteTestBase
 	{
 	    protected virtual string ConnectionString { get; set; }
@@ -59,44 +69,33 @@ namespace ServiceStack.OrmLite.Tests
 			if (ConnectionString.Contains(".sqlite"))
 				ConnectionString = GetFileConnectionString();
 		}
-
-        enum DbType
-        {
-            Sqlite,
-            SqlServer,
-            PostgreSql,
-            MySql,
-            SqlServerMdf,
-        }
+	    public Dialect Dialect = Dialect.Sqlite;
 
 		[TestFixtureSetUp]
 		public void TestFixtureSetUp()
 		{
 			LogManager.LogFactory = new ConsoleLogFactory();
 
-            var dbType = DbType.Sqlite;
-            //var dbType = DbType.SqlServer;
-
-		    switch (dbType)
+		    switch (Dialect)
 		    {
-		        case DbType.Sqlite:
+		        case Dialect.Sqlite:
                     OrmLiteConfig.DialectProvider = SqliteDialect.Provider;
                     ConnectionString = GetFileConnectionString();
                     ConnectionString = ":memory:";
                     return;
-                case DbType.SqlServer:
+                case Dialect.SqlServer:
                     OrmLiteConfig.DialectProvider = SqlServerDialect.Provider;
                     ConnectionString = Config.SqlServerBuildDb;
                     return;
-                case DbType.MySql:
+                case Dialect.MySql:
                     OrmLiteConfig.DialectProvider = MySqlDialect.Provider;
                     ConnectionString = "Server=localhost;Database=test;UID=root;Password=test";
                     return;
-                case DbType.PostgreSql:
+                case Dialect.PostgreSql:
                     OrmLiteConfig.DialectProvider = PostgreSqlDialect.Provider;
-                    ConnectionString = Environment.GetEnvironmentVariable("PGSQL_TEST");
+                    ConnectionString = "Server=localhost;Port=5432;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200";
                     return;
-                case DbType.SqlServerMdf:
+                case Dialect.SqlServerMdf:
                     ConnectionString = "~/App_Data/Database1.mdf".MapAbsolutePath();			
                     ConnectionString = Config.GetDefaultConnection();
                     return;
@@ -110,7 +109,7 @@ namespace ServiceStack.OrmLite.Tests
 
         public IDbConnection InMemoryDbConnection { get; set; }
 
-        public IDbConnection OpenDbConnection(string connString = null)
+        public virtual IDbConnection OpenDbConnection(string connString = null)
         {
             connString = connString ?? ConnectionString;
             if (connString == ":memory:")
@@ -136,4 +135,12 @@ namespace ServiceStack.OrmLite.Tests
             // Not Oracle if this base class used
         }
 	}
+
+    public static class TestHelpers
+    {
+        public static string NormalizeSql(this string sql)
+        {
+            return sql.ToLower().Replace("\"", "").Replace("`", "").Replace("_","");
+        }
+    }
 }

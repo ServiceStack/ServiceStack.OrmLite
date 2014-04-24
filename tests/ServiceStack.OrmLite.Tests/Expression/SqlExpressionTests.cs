@@ -46,7 +46,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
                 query.ToSelectStatement().Print();
 
-                var map = db.Dictionary<string, int>(query);
+                var map = new SortedDictionary<string, int>(db.Dictionary<string, int>(query));
                 Assert.That(map.EquivalentTo(new Dictionary<string, int> {
                     { "A", 1 }, { "B", 2 }, { "C", 3 },
                 }));

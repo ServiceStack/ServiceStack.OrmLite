@@ -66,7 +66,8 @@ namespace ServiceStack.OrmLite.Tests
                 con.Save(new TypeWithEnum { Id = 2, EnumValue = SomeEnum.Value1 });
                 con.Save(new TypeWithEnum { Id = 3, EnumValue = SomeEnum.Value2 });
 
-                var target = con.SelectFmt<TypeWithEnum>("EnumValue = {0}", SomeEnum.Value1);
+                var target = con.SelectFmt<TypeWithEnum>(
+                    "EnumValue".SqlColumn() + " = {0}", SomeEnum.Value1);
 
                 Assert.AreEqual(2, target.Count());
             }
@@ -113,7 +114,8 @@ namespace ServiceStack.OrmLite.Tests
                 try
                 {
                     var expectedFlags = (int)(FlagsEnum.FlagOne | FlagsEnum.FlagTwo | FlagsEnum.FlagThree);
-                    Assert.AreEqual(db.Scalar<int>("SELECT Flags FROM TypeWithFlagsEnum WHERE Id = 1"), expectedFlags);
+                    Assert.AreEqual(db.Scalar<int>("SELECT Flags FROM {0} WHERE Id = 1"
+                        .Fmt("TypeWithFlagsEnum".SqlColumn())), expectedFlags);
                 }
                 catch (FormatException)
                 {
@@ -131,9 +133,10 @@ namespace ServiceStack.OrmLite.Tests
             {
                 db.DropAndCreateTable<TypeWithFlagsEnum>();
 
-                db.GetLastSql().Print();
+                var createTableSql = db.GetLastSql().NormalizeSql();
+                createTableSql.Print();
 
-                Assert.That(db.GetLastSql(), Is.StringContaining("\"Flags\" INT").Or.StringContaining("Flags INT"));
+                Assert.That(createTableSql, Is.StringContaining("flags int"));
             }
         }
 

@@ -46,14 +46,16 @@ namespace ServiceStack.OrmLite.Tests
 				db.Insert(new Point { Width = 4, Height = 1.123f, Top = 3.456d, Left = 2.345m});
                 db.PrintLastSql();
 
-                var points = db.SelectFmt<Point>("round(Height,3)={0}", 1.123);
+                var sql = OrmLiteConfig.DialectProvider == PostgreSqlDialect.Provider
+                    ? "round(cast(Height as numeric),3)={0}"
+                    : "round(Height,3)={0}";
+                var points = db.SelectFmt<Point>(sql, 1.123);
 
 				Assert.That(points[0].Width, Is.EqualTo(4));
 				Assert.That(points[0].Height, Is.EqualTo(1.123f));
 				Assert.That(points[0].Top, Is.EqualTo(3.456d));
 				Assert.That(points[0].Left, Is.EqualTo(2.345m));
 			}
-
 		}
 
 	}
