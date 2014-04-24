@@ -102,5 +102,7 @@ namespace ServiceStack.OrmLite
 
         public static Action<IDbCommand, object> InsertFilter { get; set; }
         public static Action<IDbCommand, object> UpdateFilter { get; set; }
+
+        public static Func<string, string> StringFilter { get; set; }
     }
 }
