@@ -158,9 +158,19 @@ namespace ServiceStack.OrmLite
             return OrmLiteConfig.DialectProvider.GetQuotedColumnName(columnName);
         }
 
+        public static string SqlColumnRaw(this string columnName)
+        {
+            return OrmLiteConfig.DialectProvider.NamingStrategy.GetColumnName(columnName);
+        }
+
         public static string SqlTable(this string tableName)
         {
             return OrmLiteConfig.DialectProvider.GetQuotedTableName(tableName);
+        }
+
+        public static string SqlTableRaw(this string tableName)
+        {
+            return OrmLiteConfig.DialectProvider.NamingStrategy.GetTableName(tableName);
         }
 
         public static string SqlValue(this object value)
