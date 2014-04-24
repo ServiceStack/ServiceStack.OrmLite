@@ -19,6 +19,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
             base.BoolColumnDefinition = "boolean";
             base.TimeColumnDefinition = "time";
             base.DateTimeColumnDefinition = "timestamp";
+            base.DateTimeOffsetColumnDefinition = "timestamp";
             base.DecimalColumnDefinition = "numeric(38,6)";
             base.GuidColumnDefinition = "uuid";
             base.ParamString = ":";
@@ -33,9 +34,16 @@ namespace ServiceStack.OrmLite.PostgreSQL
             base.SelectIdentitySql = "SELECT LASTVAL()";
             this.NamingStrategy = new PostgreSqlNamingStrategy();
             this.StringSerializer = new JsonStringSerializer();
+        }
 
-            DbTypeMap.Set<TimeSpan>(DbType.Time, "Interval");
-            DbTypeMap.Set<TimeSpan?>(DbType.Time, "Interval");
+        public override void OnAfterInitColumnTypeMap()
+        {
+            DbTypeMap.Set<TimeSpan>(DbType.Time, "interval");
+            DbTypeMap.Set<TimeSpan?>(DbType.Time, "interval");
+            DbTypeMap.Set<DateTimeOffset>(DbType.DateTimeOffset, DateTimeOffsetColumnDefinition);
+            DbTypeMap.Set<DateTimeOffset?>(DbType.DateTimeOffset, DateTimeOffsetColumnDefinition);
+
+            base.OnAfterInitColumnTypeMap();
         }
 
         public override string GetColumnDefinition(
@@ -56,14 +64,11 @@ namespace ServiceStack.OrmLite.PostgreSQL
             }
             else if (fieldType == typeof(string))
             {
-                if (fieldLength != null)
-                {
-                    fieldDefinition = string.Format(base.StringLengthColumnDefinitionFormat, fieldLength);
-                }
-                else
-                {
-                    fieldDefinition = textColumnDefinition;
-                }
+                fieldDefinition = fieldLength == int.MaxValue
+                    ? MaxStringColumnDefinition
+                    : fieldLength != null ?
+                        string.Format(StringLengthColumnDefinitionFormat, fieldLength) :
+                        textColumnDefinition;
             }
             else
             {
