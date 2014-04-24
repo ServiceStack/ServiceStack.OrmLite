@@ -76,13 +76,15 @@ namespace ServiceStack.OrmLite.Tests
         }
 
 
-        public class HasDateTimeOffsetMemeber
+        public class HasDateTimeOffsetMember
         {
+            public int Id { get; set; }
             public DateTimeOffset MomentInTime { get; set; }
         }
 
-        public class HasNullableDateTimeOffsetMemeber
+        public class HasNullableDateTimeOffsetMember
         {
+            public int Id { get; set; }
             public DateTimeOffset? MomentInTime { get; set; }
         }
 
