@@ -333,7 +333,7 @@ namespace ServiceStack.OrmLite.Firebird
 
                 var columnDefinition = GetColumnDefinition(
                     fieldDef.FieldName,
-                    fieldDef.FieldType,
+                    fieldDef.ColumnType,
                     fieldDef.IsPrimaryKey,
                     fieldDef.AutoIncrement,
                     fieldDef.IsNullable,
@@ -757,7 +757,7 @@ namespace ServiceStack.OrmLite.Firebird
 		public override string ToAddColumnStatement(Type modelType, FieldDefinition fieldDef){
 			
 			var column = GetColumnDefinition(fieldDef.FieldName,
-			                                 fieldDef.FieldType,
+                                             fieldDef.ColumnType,
 			                                 fieldDef.IsPrimaryKey,
 			                                 fieldDef.AutoIncrement,
 			                                 fieldDef.IsNullable,
@@ -774,7 +774,7 @@ namespace ServiceStack.OrmLite.Firebird
 		{
 			
 			var column = GetColumnDefinition(fieldDef.FieldName,
-			                                 fieldDef.FieldType,
+                                             fieldDef.ColumnType,
 			                                 fieldDef.IsPrimaryKey,
 			                                 fieldDef.AutoIncrement,
 			                                 fieldDef.IsNullable,

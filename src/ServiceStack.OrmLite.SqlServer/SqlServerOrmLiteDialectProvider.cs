@@ -269,7 +269,7 @@ namespace ServiceStack.OrmLite.SqlServer
         public override string ToAddColumnStatement(Type modelType, FieldDefinition fieldDef)
         {
             var column = GetColumnDefinition(fieldDef.FieldName,
-                                             fieldDef.FieldType,
+                                             fieldDef.ColumnType,
                                              fieldDef.IsPrimaryKey,
                                              fieldDef.AutoIncrement,
                                              fieldDef.IsNullable,
@@ -286,7 +286,7 @@ namespace ServiceStack.OrmLite.SqlServer
         public override string ToAlterColumnStatement(Type modelType, FieldDefinition fieldDef)
         {
             var column = GetColumnDefinition(fieldDef.FieldName,
-                                             fieldDef.FieldType,
+                                             fieldDef.ColumnType,
                                              fieldDef.IsPrimaryKey,
                                              fieldDef.AutoIncrement,
                                              fieldDef.IsNullable,

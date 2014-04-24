@@ -32,6 +32,8 @@ namespace ServiceStack.OrmLite.MySql
         {
             DbTypeMap.Set<Guid>(DbType.String, GuidColumnDefinition);
             DbTypeMap.Set<Guid?>(DbType.String, GuidColumnDefinition);
+            DbTypeMap.Set<DateTimeOffset>(DbType.DateTimeOffset, StringColumnDefinition);
+            DbTypeMap.Set<DateTimeOffset?>(DbType.DateTimeOffset, StringColumnDefinition);
         }
 
         public override string GetQuotedValue(string paramValue)
@@ -174,8 +176,8 @@ namespace ServiceStack.OrmLite.MySql
             }
 
             return base.GetColumnDefinition(
-                fieldDefinition.FieldName, 
-                fieldDefinition.FieldType,
+                fieldDefinition.FieldName,
+                fieldDefinition.ColumnType,
                 fieldDefinition.IsPrimaryKey, 
                 fieldDefinition.AutoIncrement, 
                 fieldDefinition.IsNullable, 
