@@ -360,6 +360,12 @@ namespace ServiceStack.OrmLite
                 {
                     return i;
                 }
+
+                // Cater for Naming Strategies like PostgreSQL that has lower_underscore names
+                if (dbFieldNameSanitized.Replace("_", "").EndsWith(fieldName.Replace("_",""), StringComparison.OrdinalIgnoreCase))
+                {
+                    return i;
+                }
             }
 
             return NotFound;
