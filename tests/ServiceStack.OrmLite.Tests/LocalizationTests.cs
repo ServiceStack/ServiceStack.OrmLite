@@ -46,7 +46,7 @@ namespace ServiceStack.OrmLite.Tests
 				db.Insert(new Point { Width = 4, Height = 1.123f, Top = 3.456d, Left = 2.345m});
                 db.PrintLastSql();
 
-                var sql = OrmLiteConfig.DialectProvider == PostgreSqlDialect.Provider
+                var sql = Dialect == Dialect.PostgreSql
                     ? "round(cast(Height as numeric),3)={0}"
                     : "round(Height,3)={0}";
                 var points = db.SelectFmt<Point>(sql, 1.123);

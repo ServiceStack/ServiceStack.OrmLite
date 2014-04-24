@@ -30,16 +30,6 @@ namespace ServiceStack.OrmLite.Tests
         }
     }
 
-    public enum Dialect
-    {
-        Sqlite,
-        SqlServer,
-        PostgreSql,
-        MySql,
-        SqlServerMdf,
-        Oracle,
-    }
-
 	public class OrmLiteTestBase
 	{
 	    protected virtual string ConnectionString { get; set; }
@@ -135,12 +125,4 @@ namespace ServiceStack.OrmLite.Tests
             // Not Oracle if this base class used
         }
 	}
-
-    public static class TestHelpers
-    {
-        public static string NormalizeSql(this string sql)
-        {
-            return sql.ToLower().Replace("\"", "").Replace("`", "").Replace("_","");
-        }
-    }
 }

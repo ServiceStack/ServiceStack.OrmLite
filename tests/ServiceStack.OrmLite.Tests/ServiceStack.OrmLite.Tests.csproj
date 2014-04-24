@@ -131,6 +131,7 @@
     <Compile Include="OrmLiteFiltersTests.cs" />
     <Compile Include="PerfTests.cs" />
     <Compile Include="StringSerializerTests.cs" />
+    <Compile Include="TestHelpers.cs" />
     <Compile Include="TypeDescriptorMetadataTests.cs" />
     <Compile Include="Shared\ApiUtilExtensions.cs" />
     <Compile Include="EnumTests.cs" />

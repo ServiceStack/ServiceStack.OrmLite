@@ -294,6 +294,9 @@
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\SqlFormatTests.cs">
       <Link>SqlFormatTests.cs</Link>
     </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\TestHelpers.cs">
+      <Link>TestHelpers.cs</Link>
+    </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\TypeDescriptorMetadataTests.cs">
       <Link>TypeDescriptorMetadataTests.cs</Link>
     </Compile>
