@@ -277,28 +277,16 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Populates row fields during re-hydration of results.
         /// </summary>
-        public virtual void SetDbValue(FieldDefinition fieldDef, IDataReader dataReader, int colIndex, object instance)
+        public virtual void SetDbValue(FieldDefinition fieldDef, IDataReader reader, int colIndex, object instance)
         {
-            if (HandledDbNullValue(fieldDef, dataReader, colIndex, instance)) return;
+            if (HandledDbNullValue(fieldDef, reader, colIndex, instance)) return;
 
-            object value;
-            if (fieldDef.FieldType == typeof(Guid))
-            {
-                value = dataReader.GetGuid(colIndex);
-            }
-            else
-            {
-                value = dataReader.GetValue(colIndex);
-            }
-
-            var convertedValue = ConvertDbValue(value, fieldDef.FieldType);
+            var convertedValue = ConvertDbValue(reader.GetValue(colIndex), fieldDef.FieldType);
             try
             {
                 fieldDef.SetValueFn(instance, convertedValue);
             }
-            catch (NullReferenceException ex)
-            {
-            }
+            catch (NullReferenceException ignore) {}
         }
 
         public static bool HandledDbNullValue(FieldDefinition fieldDef, IDataReader dataReader, int colIndex, object instance)
@@ -317,96 +305,6 @@ namespace ServiceStack.OrmLite
                 return true;
             }
             return false;
-        }
-
-        public virtual object ConvertDbValue(object value, Type type)
-        {
-            if (value == null || value is DBNull) return null;
-
-            if (value.GetType() == type)
-            {
-                return value;
-            }
-
-            if (!type.IsEnum)
-            {
-                var typeCode = type.GetUnderlyingTypeCode();
-                switch (typeCode)
-                {
-                    case TypeCode.Single:
-                        return value is double ? (float)((double)value) : (float)value;
-                    case TypeCode.Double:
-                        return value is float ? (double)((float)value) : (double)value;
-                    case TypeCode.Decimal:
-                        return (decimal)value;
-                    case TypeCode.String:
-                        return value;
-                    case TypeCode.Int16:
-                        return Convert.ToInt16(value);
-                    case TypeCode.Int32:
-                        return Convert.ToInt32(value);
-                    case TypeCode.Int64:
-                        return Convert.ToInt64(value);
-                }
-
-                if (type == typeof(TimeSpan))
-                {
-                    var ticks = (long) value;
-                    return TimeSpan.FromTicks(ticks);
-                }
-            }
-
-            try
-            {
-                var convertedValue = OrmLiteConfig.DialectProvider.StringSerializer.DeserializeFromString(value.ToString(), type);
-                return convertedValue;
-            }
-            catch (Exception)
-            {
-                log.ErrorFormat("Error ConvertDbValue trying to convert {0} into {1}", value, type.Name);
-                throw;
-            }
-        }
-
-        public virtual string GetQuotedValue(object value, Type fieldType)
-        {
-            if (value == null) return "NULL";
-
-            var dialectProvider = OrmLiteConfig.DialectProvider;
-            if ((!fieldType.UnderlyingSystemType.IsValueType || JsConfig.TreatValueAsRefTypes.Contains(fieldType.IsGeneric() ? fieldType.GenericTypeDefinition() : fieldType)) && fieldType != typeof(string))
-            {
-                return dialectProvider.GetQuotedValue(dialectProvider.StringSerializer.SerializeToString(value));
-            }
-
-            var typeCode = fieldType.GetTypeCode();
-            switch (typeCode)
-            {
-                case TypeCode.Single:
-                    return ((float)value).ToString(CultureInfo.InvariantCulture);
-                case TypeCode.Double:
-                    return ((double)value).ToString(CultureInfo.InvariantCulture);
-                case TypeCode.Decimal:
-                    return ((decimal)value).ToString(CultureInfo.InvariantCulture);
-
-                case TypeCode.Byte:
-                case TypeCode.Int16:
-                case TypeCode.Int32:
-                case TypeCode.Int64:
-                case TypeCode.SByte:
-                case TypeCode.UInt16:
-                case TypeCode.UInt32:
-                case TypeCode.UInt64:
-                    if (fieldType.IsNumericType())
-                        return Convert.ChangeType(value, fieldType).ToString();
-                    break;
-            }
-
-            if (fieldType == typeof(TimeSpan))
-                return ((TimeSpan)value).Ticks.ToString(CultureInfo.InvariantCulture);
-
-            return ShouldQuoteValue(fieldType)
-                    ? dialectProvider.GetQuotedValue(value.ToString())
-                    : value.ToString();
         }
 
         public abstract IDbConnection CreateConnection(string filePath, Dictionary<string, string> options);
@@ -443,7 +341,9 @@ namespace ServiceStack.OrmLite
 
         protected virtual string GetUndefinedColumnDefinition(Type fieldType, int? fieldLength)
         {
-            return string.Format(StringLengthColumnDefinitionFormat, fieldLength.GetValueOrDefault(DefaultStringLength));
+            return fieldLength.HasValue 
+                ? string.Format(StringLengthColumnDefinitionFormat, fieldLength.GetValueOrDefault(DefaultStringLength))
+                : MaxStringColumnDefinition;
         }
 
         public virtual string GetColumnDefinition(string fieldName, Type fieldType,
@@ -1020,8 +920,7 @@ namespace ServiceStack.OrmLite
             {
                 var indexName = GetCompositeIndexName(compositeIndex, modelDef);
                 var indexNames = string.Join(" ASC, ",
-                                             compositeIndex.FieldNames.ConvertAll(
-                                                 n => GetQuotedName(n)).ToArray());
+                    compositeIndex.FieldNames.ConvertAll(GetQuotedName).ToArray());
 
                 sqlIndexes.Add(
                     ToCreateIndexStatement(compositeIndex.Unique, indexName, modelDef, indexNames, true));
@@ -1166,7 +1065,7 @@ namespace ServiceStack.OrmLite
         {
 
             var column = GetColumnDefinition(fieldDef.FieldName,
-                                             fieldDef.FieldType,
+                                             fieldDef.ColumnType,
                                              fieldDef.IsPrimaryKey,
                                              fieldDef.AutoIncrement,
                                              fieldDef.IsNullable,
@@ -1183,7 +1082,7 @@ namespace ServiceStack.OrmLite
         public virtual string ToAlterColumnStatement(Type modelType, FieldDefinition fieldDef)
         {
             var column = GetColumnDefinition(fieldDef.FieldName,
-                                             fieldDef.FieldType,
+                                             fieldDef.ColumnType,
                                              fieldDef.IsPrimaryKey,
                                              fieldDef.AutoIncrement,
                                              fieldDef.IsNullable,
@@ -1201,7 +1100,7 @@ namespace ServiceStack.OrmLite
                                                           string oldColumnName)
         {
             var column = GetColumnDefinition(fieldDef.FieldName,
-                                             fieldDef.FieldType,
+                                             fieldDef.ColumnType,
                                              fieldDef.IsPrimaryKey,
                                              fieldDef.AutoIncrement,
                                              fieldDef.IsNullable,
@@ -1256,8 +1155,7 @@ namespace ServiceStack.OrmLite
                                            unique ? " UNIQUE " : " ",
                                            name,
                                            GetQuotedTableName(sourceMD.ModelName),
-                                           GetQuotedColumnName(fieldName)
-                                           );
+                                           GetQuotedColumnName(fieldName));
             return command;
         }
 
@@ -1275,86 +1173,117 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        public virtual GetValueDelegate GetValueFn<T>(IDataRecord reader)
+        public virtual object ConvertDbValue(object value, Type type)
         {
-            var nullableType = Nullable.GetUnderlyingType(typeof(T));
+            if (value == null || value is DBNull) return null;
 
-            if (nullableType == null)
+            var strValue = value as string;
+            if (strValue != null && OrmLiteConfig.StringFilter != null)
             {
-                var typeCode = Type.GetTypeCode(typeof(T));
-                switch (typeCode)
-                {
-                    case TypeCode.String:
-                        return reader.GetString;
-                    case TypeCode.Boolean:
-                        return i => reader.GetBoolean(i);
-                    case TypeCode.Int16:
-                    case TypeCode.Int32:
-                    case TypeCode.Int64:
-                    case TypeCode.Single:
-                    case TypeCode.Double:
-                    case TypeCode.Decimal:
-                        return i =>
-                        {
-                            var value = reader.GetValue(i);
-                            if (value is T)
-                                return value;
-
-                            switch (typeCode)
-                            {
-                                case TypeCode.Int16:
-                                    return Convert.ToInt16(value);
-                                case TypeCode.Int32:
-                                    return Convert.ToInt32(value);
-                                case TypeCode.Int64:
-                                    return Convert.ToInt64(value);
-                                case TypeCode.Single:
-                                    return Convert.ToSingle(value);
-                                case TypeCode.Double:
-                                    return Convert.ToDouble(value);
-                                case TypeCode.Decimal:
-                                    return Convert.ToDecimal(value);
-                                default:
-                                    return value;
-                            }
-                        };
-                    case TypeCode.DateTime:
-                        return i => reader.GetDateTime(i);
-                }
-
-                if (typeof(T) == typeof(Guid))
-                    return i => reader.GetGuid(i);
-            }
-            else
-            {
-                var typeCode = Type.GetTypeCode(nullableType);
-                switch (typeCode)
-                {
-                    case TypeCode.String:
-                        return reader.GetString;
-                    case TypeCode.Boolean:
-                        return i => reader.IsDBNull(i) ? null : (bool?)reader.GetBoolean(i);
-                    case TypeCode.Int16:
-                        return i => reader.IsDBNull(i) ? null : (short?)reader.GetInt16(i);
-                    case TypeCode.Int32:
-                        return i => reader.IsDBNull(i) ? null : (int?)reader.GetInt32(i);
-                    case TypeCode.Int64:
-                        return i => reader.IsDBNull(i) ? null : (long?)reader.GetInt64(i);
-                    case TypeCode.Single:
-                        return i => reader.IsDBNull(i) ? null : (float?)reader.GetFloat(i);
-                    case TypeCode.Double:
-                        return i => reader.IsDBNull(i) ? null : (double?)reader.GetDouble(i);
-                    case TypeCode.Decimal:
-                        return i => reader.IsDBNull(i) ? null : (decimal?)reader.GetDecimal(i);
-                    case TypeCode.DateTime:
-                        return i => reader.IsDBNull(i) ? null : (DateTime?)reader.GetDateTime(i);
-                }
-
-                if (typeof(T) == typeof(Guid))
-                    return i => reader.IsDBNull(i) ? null : (Guid?)reader.GetGuid(i);
+                value = OrmLiteConfig.StringFilter(strValue);
             }
 
-            return reader.GetValue;
+            if (value.GetType() == type)
+            {
+                return value;
+            }
+
+            if (type == typeof(DateTimeOffset))
+            {
+                if (strValue != null)
+                {
+                    var moment = DateTimeOffset.Parse(strValue, null, DateTimeStyles.RoundtripKind);
+                    return moment;
+                }
+                if (value is DateTime)
+                {
+                    return new DateTimeOffset((DateTime)value);
+                }
+            }
+
+            if (!type.IsEnum)
+            {
+                var typeCode = type.GetUnderlyingTypeCode();
+                switch (typeCode)
+                {
+                    case TypeCode.Int16:
+                        return value is short ? value : Convert.ToInt16(value);
+                    case TypeCode.UInt16:
+                        return value is ushort ? value : Convert.ToUInt16(value);
+                    case TypeCode.Int32:
+                        return value is int ? value : Convert.ToInt32(value);
+                    case TypeCode.UInt32:
+                        return value is uint ? value : Convert.ToUInt32(value);
+                    case TypeCode.Int64:
+                        return value is long ? value : Convert.ToInt64(value);
+                    case TypeCode.UInt64:
+                        return value is ulong ? value : Convert.ToUInt64(value);
+                    case TypeCode.Single:
+                        return value is float ? value : Convert.ToSingle(value);
+                    case TypeCode.Double:
+                        return value is double ? value : Convert.ToDouble(value);
+                    case TypeCode.Decimal:
+                        return value is decimal ? value : Convert.ToDecimal(value);
+                }
+
+                if (type == typeof(TimeSpan))
+                {
+                    var ticks = (long)value;
+                    return TimeSpan.FromTicks(ticks);
+                }
+            }
+
+            try
+            {
+                var convertedValue = OrmLiteConfig.DialectProvider.StringSerializer.DeserializeFromString(value.ToString(), type);
+                return convertedValue;
+            }
+            catch (Exception)
+            {
+                log.ErrorFormat("Error ConvertDbValue trying to convert {0} into {1}", value, type.Name);
+                throw;
+            }
+        }
+
+        public virtual string GetQuotedValue(object value, Type fieldType)
+        {
+            if (value == null) return "NULL";
+
+            var dialectProvider = OrmLiteConfig.DialectProvider;
+            if ((!fieldType.UnderlyingSystemType.IsValueType || JsConfig.TreatValueAsRefTypes.Contains(fieldType.IsGeneric() ? fieldType.GenericTypeDefinition() : fieldType)) && fieldType != typeof(string))
+            {
+                return dialectProvider.GetQuotedValue(dialectProvider.StringSerializer.SerializeToString(value));
+            }
+
+            var typeCode = fieldType.GetTypeCode();
+            switch (typeCode)
+            {
+                case TypeCode.Single:
+                    return ((float)value).ToString(CultureInfo.InvariantCulture);
+                case TypeCode.Double:
+                    return ((double)value).ToString(CultureInfo.InvariantCulture);
+                case TypeCode.Decimal:
+                    return ((decimal)value).ToString(CultureInfo.InvariantCulture);
+
+                case TypeCode.Byte:
+                case TypeCode.Int16:
+                case TypeCode.Int32:
+                case TypeCode.Int64:
+                case TypeCode.SByte:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
+                    if (fieldType.IsNumericType())
+                        return Convert.ChangeType(value, fieldType).ToString();
+                    break;
+            }
+
+            if (fieldType == typeof(TimeSpan))
+                return ((TimeSpan)value).Ticks.ToString(CultureInfo.InvariantCulture);
+
+            return ShouldQuoteValue(fieldType)
+                    ? dialectProvider.GetQuotedValue(value.ToString())
+                    : value.ToString();
         }
 
     }

@@ -146,7 +146,11 @@ namespace ServiceStack.OrmLite
                 p.ParameterName = columnName;
                 p.DbType = OrmLiteConfig.DialectProvider.GetColumnDbType(pi.PropertyType);
                 p.Direction = ParameterDirection.Input;
-                p.Value = value ?? DBNull.Value;
+                p.Value = value == null ? 
+                    DBNull.Value
+                  : p.DbType == DbType.String ? 
+                    value.ToString() : 
+                    value;
                 dbCmd.Parameters.Add(p);
             });
         }
@@ -572,10 +576,11 @@ namespace ServiceStack.OrmLite
         internal static List<T> Column<T>(this IDataReader reader)
         {
             var columValues = new List<T>();
-            var getValueFn = OrmLiteConfig.DialectProvider.GetValueFn<T>(reader);
+
+            var dialectProvider = OrmLiteConfig.DialectProvider;
             while (reader.Read())
             {
-                var value = getValueFn(0);
+                var value = dialectProvider.ConvertDbValue(reader.GetValue(0), typeof(T));
                 if (value == DBNull.Value)
                     value = default(T);
 
@@ -598,11 +603,11 @@ namespace ServiceStack.OrmLite
 
         internal static HashSet<T> ColumnDistinct<T>(this IDataReader reader)
         {
+            var dialectProvider = OrmLiteConfig.DialectProvider;
             var columValues = new HashSet<T>();
-            var getValueFn = OrmLiteConfig.DialectProvider.GetValueFn<T>(reader);
             while (reader.Read())
             {
-                var value = getValueFn(0);
+                var value = dialectProvider.ConvertDbValue(reader.GetValue(0), typeof(T));
                 if (value == DBNull.Value)
                     value = default(T);
 
@@ -627,12 +632,11 @@ namespace ServiceStack.OrmLite
         {
             var lookup = new Dictionary<K, List<V>>();
 
-            var getKeyFn = OrmLiteConfig.DialectProvider.GetValueFn<K>(reader);
-            var getValueFn = OrmLiteConfig.DialectProvider.GetValueFn<V>(reader);
+            var dialectProvider = OrmLiteConfig.DialectProvider;
             while (reader.Read())
             {
-                var key = (K)getKeyFn(0);
-                var value = (V)getValueFn(1);
+                var key = (K)dialectProvider.ConvertDbValue(reader.GetValue(0), typeof(K));
+                var value = (V)dialectProvider.ConvertDbValue(reader.GetValue(1), typeof(V));
 
                 List<V> values;
                 if (!lookup.TryGetValue(key, out values))
@@ -662,12 +666,11 @@ namespace ServiceStack.OrmLite
         {
             var map = new Dictionary<K, V>();
 
-            var getKeyFn = OrmLiteConfig.DialectProvider.GetValueFn<K>(reader);
-            var getValueFn = OrmLiteConfig.DialectProvider.GetValueFn<V>(reader);
+            var dialectProvider = OrmLiteConfig.DialectProvider;
             while (reader.Read())
             {
-                var key = (K)getKeyFn(0);
-                var value = (V)getValueFn(1);
+                var key = (K)dialectProvider.ConvertDbValue(reader.GetValue(0), typeof(K));
+                var value = (V)dialectProvider.ConvertDbValue(reader.GetValue(1), typeof(V));
 
                 map.Add(key, value);
             }

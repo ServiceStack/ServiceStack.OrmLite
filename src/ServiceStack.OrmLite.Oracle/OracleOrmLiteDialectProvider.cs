@@ -116,19 +116,19 @@ namespace ServiceStack.OrmLite.Oracle
             return GetLastInsertId(dbCmd);
         }
 
-        public override void SetDbValue(FieldDefinition fieldDef, IDataReader dataReader, int colIndex, object instance)
+        public override void SetDbValue(FieldDefinition fieldDef, IDataReader reader, int colIndex, object instance)
         {
-            if (HandledDbNullValue(fieldDef, dataReader, colIndex, instance)) return;
+            if (HandledDbNullValue(fieldDef, reader, colIndex, instance)) return;
 
             object convertedValue;
             if (fieldDef.FieldType == typeof(DateTimeOffset))
             {
                 SetOracleTimestampTzFormat();
-                convertedValue = ConvertTimestampTzToDateTimeOffset(dataReader, colIndex);
+                convertedValue = ConvertTimestampTzToDateTimeOffset(reader, colIndex);
             }
             else
             {
-                var value = dataReader.GetValue(colIndex);
+                var value = reader.GetValue(colIndex);
                 convertedValue = ConvertDbValue(value, fieldDef.FieldType);
             }
             try
@@ -178,53 +178,6 @@ namespace ServiceStack.OrmLite.Oracle
 
     		return base.ConvertDbValue(value, type);
 		}
-
-        public override GetValueDelegate GetValueFn<T>(IDataRecord reader)
-        {
-            var nullableType = Nullable.GetUnderlyingType(typeof(T));
-            if (nullableType == null)
-            {
-                if (typeof(T) == typeof(Guid))
-                {
-                    if (CompactGuid)
-                    {
-                        return i =>
-                        {
-                            var guid = reader.GetValue(i);
-                            return new Guid((byte[])guid);
-                        };
-                    }
-                    return i =>
-                    {
-                        var guid = reader.GetValue(i);
-                        return new Guid(guid.ToString());
-                    };
-                }
-            }
-            else
-            {
-                if (typeof (T) == typeof (Guid))
-                {
-                    if (CompactGuid)
-                    {
-                        return i =>
-                        {
-                            if (reader.IsDBNull(i)) return null;
-                            var guid = reader.GetValue(i);
-                            return new Guid((Byte[])guid);
-                        };
-                    }
-                    return i =>
-                    {
-                        if (reader.IsDBNull(i)) return null;
-                        var guid = reader.GetValue(i);
-                        return new Guid(guid.ToString());
-                    };
-                }
-            }
-
-            return base.GetValueFn<T>(reader);
-        } 
 
         public override string GetQuotedValue(object value, Type fieldType)
 		{

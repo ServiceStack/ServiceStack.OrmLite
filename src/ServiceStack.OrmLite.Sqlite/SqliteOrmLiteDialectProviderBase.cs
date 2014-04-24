@@ -114,35 +114,17 @@ namespace ServiceStack.OrmLite.Sqlite
                 return intVal != 0; 
             }
 
-            if (type == typeof(DateTimeOffset))
-            {
-                var moment = DateTimeOffset.Parse((string)value, null, DateTimeStyles.RoundtripKind);
-                return moment;
-            }
-
-            try
-            {
-                return base.ConvertDbValue(value, type);
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
+            return base.ConvertDbValue(value, type);
         }
 
-        public override void SetParameter(FieldDefinition fieldDef, IDbDataParameter p)
+        public override void SetDbValue(FieldDefinition fieldDef, IDataReader reader, int colIndex, object instance)
         {
-            base.SetParameter(fieldDef, p);
-        }
-
-        public override void SetDbValue(FieldDefinition fieldDef, IDataReader dataReader, int colIndex, object instance)
-        {
-            if (HandledDbNullValue(fieldDef, dataReader, colIndex, instance)) return;
+            if (HandledDbNullValue(fieldDef, reader, colIndex, instance)) return;
 
             var fieldType = Nullable.GetUnderlyingType(fieldDef.FieldType) ?? fieldDef.FieldType;
             if (fieldType == typeof(Guid))
             {
-                var guidStr = dataReader.GetString(colIndex);
+                var guidStr = reader.GetString(colIndex);
                 var guidValue = new Guid(guidStr);
 
                 fieldDef.SetValueFn(instance, guidValue);
@@ -151,20 +133,20 @@ namespace ServiceStack.OrmLite.Sqlite
             {
                 try
                 {
-                    var dbValue = dataReader.GetDateTime(colIndex);
+                    var dbValue = reader.GetDateTime(colIndex);
 
                     fieldDef.SetValueFn(instance, dbValue);
                 }
                 catch (Exception)
                 {
-                    var dateStr = dataReader.GetString(colIndex);
+                    var dateStr = reader.GetString(colIndex);
                     var dateValue = DateTimeSerializer.ParseShortestXsdDateTime(dateStr);
                     fieldDef.SetValueFn(instance, dateValue);
                 }
             }
             else
             {
-                base.SetDbValue(fieldDef, dataReader, colIndex, instance);
+                base.SetDbValue(fieldDef, reader, colIndex, instance);
             }
         }
 
