@@ -93,10 +93,10 @@ namespace ServiceStack.OrmLite.Tests
         {
             var now = DateTimeOffset.Now;
 
-            db.DropAndCreateTable<HasDateTimeOffsetMemeber>();
-            db.Insert(new HasDateTimeOffsetMemeber { MomentInTime = now });
+            db.DropAndCreateTable<HasDateTimeOffsetMember>();
+            db.Insert(new HasDateTimeOffsetMember { MomentInTime = now });
 
-            List<HasDateTimeOffsetMemeber> list = db.Select<HasDateTimeOffsetMemeber>();
+            List<HasDateTimeOffsetMember> list = db.Select<HasDateTimeOffsetMember>();
 
             Assert.That(list.Count == 1);
             var actual = list.First().MomentInTime;
@@ -108,10 +108,10 @@ namespace ServiceStack.OrmLite.Tests
         {
             var now = DateTimeOffset.Now;
 
-            db.DropAndCreateTable<HasNullableDateTimeOffsetMemeber>();
-            db.Insert(new HasNullableDateTimeOffsetMemeber { MomentInTime = now });
+            db.DropAndCreateTable<HasNullableDateTimeOffsetMember>();
+            db.Insert(new HasNullableDateTimeOffsetMember { MomentInTime = now });
 
-            List<HasNullableDateTimeOffsetMemeber> list = db.Select<HasNullableDateTimeOffsetMemeber>();
+            List<HasNullableDateTimeOffsetMember> list = db.Select<HasNullableDateTimeOffsetMember>();
 
             Assert.That(list.Count == 1);
             var actual = list.First().MomentInTime;
