@@ -286,7 +286,7 @@ namespace ServiceStack.OrmLite
             {
                 fieldDef.SetValueFn(instance, convertedValue);
             }
-            catch (NullReferenceException ignore) {}
+            catch (NullReferenceException ignore) { }
         }
 
         public static bool HandledDbNullValue(FieldDefinition fieldDef, IDataReader dataReader, int colIndex, object instance)
@@ -341,7 +341,7 @@ namespace ServiceStack.OrmLite
 
         protected virtual string GetUndefinedColumnDefinition(Type fieldType, int? fieldLength)
         {
-            return fieldLength.HasValue 
+            return fieldLength.HasValue
                 ? string.Format(StringLengthColumnDefinitionFormat, fieldLength.GetValueOrDefault(DefaultStringLength))
                 : MaxStringColumnDefinition;
         }
@@ -358,7 +358,7 @@ namespace ServiceStack.OrmLite
             }
             else if (fieldType == typeof(string))
             {
-                fieldDefinition =  fieldLength == StringLengthAttribute.MaxText
+                fieldDefinition = fieldLength == StringLengthAttribute.MaxText
                     ? MaxStringColumnDefinition
                     : string.Format(StringLengthColumnDefinitionFormat, fieldLength.GetValueOrDefault(DefaultStringLength));
             }
@@ -601,7 +601,7 @@ namespace ServiceStack.OrmLite
                 }
             }
 
-            if (sql.Length < 1) 
+            if (sql.Length < 1)
                 return;
 
             cmd.CommandText = string.Format("UPDATE {0} SET {1} {2}",
@@ -913,7 +913,7 @@ namespace ServiceStack.OrmLite
                 var indexName = GetIndexName(fieldDef.IsUnique, modelDef.ModelName.SafeVarName(), fieldDef.FieldName);
 
                 sqlIndexes.Add(
-                    ToCreateIndexStatement(fieldDef.IsUnique, indexName, modelDef, fieldDef.FieldName, isCombined:false, fieldDef:fieldDef));
+                    ToCreateIndexStatement(fieldDef.IsUnique, indexName, modelDef, fieldDef.FieldName, isCombined: false, fieldDef: fieldDef));
             }
 
             foreach (var compositeIndex in modelDef.CompositeIndexes)
@@ -979,7 +979,7 @@ namespace ServiceStack.OrmLite
                     string.Join("_", compositeIndex.FieldNames.ToArray()));
         }
 
-        protected virtual string ToCreateIndexStatement(bool isUnique, string indexName, ModelDefinition modelDef, string fieldName, 
+        protected virtual string ToCreateIndexStatement(bool isUnique, string indexName, ModelDefinition modelDef, string fieldName,
             bool isCombined = false, FieldDefinition fieldDef = null)
         {
             return string.Format("CREATE {0}{1}{2} INDEX {3} ON {4} ({5} ASC); \n",

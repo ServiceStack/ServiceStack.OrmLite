@@ -12,9 +12,9 @@ namespace ServiceStack.OrmLite.MySql
     {
         public static MySqlDialectProvider Instance = new MySqlDialectProvider();
 
-    	private const string TextColumnDefinition = "TEXT";
+        private const string TextColumnDefinition = "TEXT";
 
-    	private MySqlDialectProvider()
+        private MySqlDialectProvider()
         {
             base.AutoIncrementDefinition = "AUTO_INCREMENT";
             base.IntColumnDefinition = "int(11)";
@@ -22,10 +22,10 @@ namespace ServiceStack.OrmLite.MySql
             base.DecimalColumnDefinition = "decimal(38,6)";
             base.GuidColumnDefinition = "char(36)";
             base.DefaultStringLength = 255;
-    	    base.MaxStringColumnDefinition = "TEXT";
+            base.MaxStringColumnDefinition = "TEXT";
             base.InitColumnTypeMap();
-    	    base.DefaultValueFormat = " DEFAULT '{0}'";
-    	    base.SelectIdentitySql = "SELECT LAST_INSERT_ID()";
+            base.DefaultValueFormat = " DEFAULT '{0}'";
+            base.SelectIdentitySql = "SELECT LAST_INSERT_ID()";
         }
 
         public override void OnAfterInitColumnTypeMap()
@@ -58,7 +58,7 @@ namespace ServiceStack.OrmLite.MySql
                  * 
                  * for more details see: http://dev.mysql.com/doc/refman/5.1/en/datetime.html
                  */
-                const string dateTimeFormat = "yyyy-MM-dd HH:mm:ss"; 
+                const string dateTimeFormat = "yyyy-MM-dd HH:mm:ss";
 
                 return base.GetQuotedValue(dateValue.ToString(dateTimeFormat), typeof(string));
             }
@@ -99,37 +99,37 @@ namespace ServiceStack.OrmLite.MySql
             return string.Format("`{0}`", NamingStrategy.GetTableName(tableName));
         }
 
-		public override string GetQuotedColumnName(string columnName)
-		{
-			return string.Format("`{0}`", NamingStrategy.GetColumnName(columnName));
-		}
+        public override string GetQuotedColumnName(string columnName)
+        {
+            return string.Format("`{0}`", NamingStrategy.GetColumnName(columnName));
+        }
 
         public override string GetQuotedName(string name)
         {
-			return string.Format("`{0}`", name);
+            return string.Format("`{0}`", name);
         }
-        
-        public override SqlExpression<T> SqlExpression<T> ()
-		{
-			return new MySqlExpression<T>();
-		}
 
-		public override bool DoesTableExist(IDbCommand dbCmd, string tableName)
-		{
-			//Same as SQL Server apparently?
-			var sql = ("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES " +
-				"WHERE TABLE_NAME = {0} AND " +
-				"TABLE_SCHEMA = {1}")
-				.SqlFmt(tableName, dbCmd.Connection.Database);
+        public override SqlExpression<T> SqlExpression<T>()
+        {
+            return new MySqlExpression<T>();
+        }
 
-			//if (!string.IsNullOrEmpty(schemaName))
+        public override bool DoesTableExist(IDbCommand dbCmd, string tableName)
+        {
+            //Same as SQL Server apparently?
+            var sql = ("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES " +
+                "WHERE TABLE_NAME = {0} AND " +
+                "TABLE_SCHEMA = {1}")
+                .SqlFmt(tableName, dbCmd.Connection.Database);
+
+            //if (!string.IsNullOrEmpty(schemaName))
             //    sql += " AND TABLE_SCHEMA = {0}".SqlFmt(schemaName);
 
-			dbCmd.CommandText = sql;
-			var result = dbCmd.LongScalar();
+            dbCmd.CommandText = sql;
+            var result = dbCmd.LongScalar();
 
-			return result > 0;
-		}
+            return result > 0;
+        }
 
         public override string ToCreateTableStatement(Type tableType)
         {
@@ -178,13 +178,13 @@ namespace ServiceStack.OrmLite.MySql
             return base.GetColumnDefinition(
                 fieldDefinition.FieldName,
                 fieldDefinition.ColumnType,
-                fieldDefinition.IsPrimaryKey, 
-                fieldDefinition.AutoIncrement, 
-                fieldDefinition.IsNullable, 
-                fieldDefinition.FieldLength, 
-                null, 
+                fieldDefinition.IsPrimaryKey,
+                fieldDefinition.AutoIncrement,
+                fieldDefinition.IsNullable,
+                fieldDefinition.FieldLength,
+                null,
                 fieldDefinition.DefaultValue,
                 fieldDefinition.CustomFieldDefinition);
         }
-	}
+    }
 }

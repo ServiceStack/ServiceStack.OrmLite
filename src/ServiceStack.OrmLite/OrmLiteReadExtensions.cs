@@ -146,10 +146,10 @@ namespace ServiceStack.OrmLite
                 p.ParameterName = columnName;
                 p.DbType = OrmLiteConfig.DialectProvider.GetColumnDbType(pi.PropertyType);
                 p.Direction = ParameterDirection.Input;
-                p.Value = value == null ? 
+                p.Value = value == null ?
                     DBNull.Value
-                  : p.DbType == DbType.String ? 
-                    value.ToString() : 
+                  : p.DbType == DbType.String ?
+                    value.ToString() :
                     value;
                 dbCmd.Parameters.Add(p);
             });

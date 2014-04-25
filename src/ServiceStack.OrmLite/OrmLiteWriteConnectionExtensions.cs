@@ -49,7 +49,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static void DropAndCreateTables(this IDbConnection dbConn, params Type[] tableTypes)
         {
-            dbConn.Exec(dbCmd => dbCmd.CreateTables(overwrite:true, tableTypes:tableTypes));
+            dbConn.Exec(dbCmd => dbCmd.CreateTables(overwrite: true, tableTypes: tableTypes));
         }
 
         /// <summary>
@@ -322,12 +322,13 @@ namespace ServiceStack.OrmLite
         /// <para>db.Save(customer, references:true)</para>
         /// </summary>
         /// <returns>true if a row was inserted; false if it was updated</returns>
-        public static bool Save<T>(this IDbConnection dbConn, T obj, bool references=false)
+        public static bool Save<T>(this IDbConnection dbConn, T obj, bool references = false)
         {
             if (!references)
                 return dbConn.Exec(dbCmd => dbCmd.Save(obj));
 
-            return dbConn.Exec(dbCmd => {
+            return dbConn.Exec(dbCmd =>
+            {
                 var ret = dbCmd.Save(obj);
                 dbCmd.SaveAllReferences(obj);
                 return ret;

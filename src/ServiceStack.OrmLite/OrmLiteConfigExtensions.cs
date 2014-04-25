@@ -67,7 +67,8 @@ namespace ServiceStack.OrmLite
             var preDrop = modelType.FirstAttribute<PreDropTableAttribute>();
             var postDrop = modelType.FirstAttribute<PostDropTableAttribute>();
 
-            modelDef = new ModelDefinition {
+            modelDef = new ModelDefinition
+            {
                 ModelType = modelType,
                 Name = modelType.Name,
                 Alias = modelAliasAttr != null ? modelAliasAttr.Name : null,
@@ -93,7 +94,7 @@ namespace ServiceStack.OrmLite
             foreach (var propertyInfo in objProperties)
             {
                 var sequenceAttr = propertyInfo.FirstAttribute<SequenceAttribute>();
-                var computeAttr= propertyInfo.FirstAttribute<ComputeAttribute>();
+                var computeAttr = propertyInfo.FirstAttribute<ComputeAttribute>();
                 var decimalAttribute = propertyInfo.FirstAttribute<DecimalLengthAttribute>();
                 var belongToAttribute = propertyInfo.FirstAttribute<BelongToAttribute>();
                 var isFirst = i++ == 0;
@@ -133,11 +134,12 @@ namespace ServiceStack.OrmLite
                 var defaultValueAttr = propertyInfo.FirstAttribute<DefaultAttribute>();
 
                 var referencesAttr = propertyInfo.FirstAttribute<ReferencesAttribute>();
-                var referenceAttr  = propertyInfo.FirstAttribute<ReferenceAttribute>();
+                var referenceAttr = propertyInfo.FirstAttribute<ReferenceAttribute>();
                 var foreignKeyAttr = propertyInfo.FirstAttribute<ForeignKeyAttribute>();
                 var customFieldAttr = propertyInfo.FirstAttribute<CustomFieldAttribute>();
 
-                var fieldDefinition = new FieldDefinition {
+                var fieldDefinition = new FieldDefinition
+                {
                     Name = propertyInfo.Name,
                     Alias = aliasAttr != null ? aliasAttr.Name : null,
                     FieldType = propertyType,
@@ -169,16 +171,16 @@ namespace ServiceStack.OrmLite
                     IsComputed = computeAttr != null,
                     ComputeExpression = computeAttr != null ? computeAttr.Expression : string.Empty,
                     Scale = decimalAttribute != null ? decimalAttribute.Scale : (int?)null,
-                    BelongToModelName = belongToAttribute != null ? belongToAttribute.BelongToTableType.GetModelDefinition().ModelName : null, 
+                    BelongToModelName = belongToAttribute != null ? belongToAttribute.BelongToTableType.GetModelDefinition().ModelName : null,
                     CustomFieldDefinition = customFieldAttr != null ? customFieldAttr.Sql : null,
                 };
 
                 var isIgnored = propertyInfo.HasAttributeNamed(typeof(IgnoreAttribute).Name)
                     || fieldDefinition.IsReference;
                 if (isIgnored)
-                  modelDef.IgnoredFieldDefinitions.Add(fieldDefinition);
+                    modelDef.IgnoredFieldDefinitions.Add(fieldDefinition);
                 else
-                  modelDef.FieldDefinitions.Add(fieldDefinition);
+                    modelDef.FieldDefinitions.Add(fieldDefinition);
             }
 
             modelDef.SqlSelectAllFromTable = "SELECT {0} FROM {1} "
@@ -194,7 +196,7 @@ namespace ServiceStack.OrmLite
 
             } while (!ReferenceEquals(
                 Interlocked.CompareExchange(ref typeModelDefinitionMap, newCache, snapshot), snapshot));
-            
+
             LicenseUtils.AssertValidUsage(LicenseFeature.OrmLite, QuotaType.Tables, typeModelDefinitionMap.Count);
 
             return modelDef;
@@ -206,7 +208,7 @@ namespace ServiceStack.OrmLite
             if (attr != null) return attr;
 
             var componentAttr = propertyInfo.FirstAttribute<System.ComponentModel.DataAnnotations.StringLengthAttribute>();
-            if (componentAttr != null) 
+            if (componentAttr != null)
                 return new StringLengthAttribute(componentAttr.MaximumLength);
 
             return decimalAttribute != null ? new StringLengthAttribute(decimalAttribute.Precision) : null;

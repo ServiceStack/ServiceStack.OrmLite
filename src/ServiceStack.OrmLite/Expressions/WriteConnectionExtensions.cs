@@ -85,6 +85,6 @@ namespace ServiceStack.OrmLite
         public static int DeleteFmt(this IDbConnection dbConn, string table = null, string where = null)
         {
             return dbConn.Exec(dbCmd => dbCmd.DeleteFmt(table, where));
-        }         
+        }
     }
 }

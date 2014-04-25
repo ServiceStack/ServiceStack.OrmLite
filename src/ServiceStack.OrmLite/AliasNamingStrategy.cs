@@ -11,7 +11,7 @@ namespace ServiceStack.OrmLite
         public override string GetTableName(string name)
         {
             string alias;
-            return UseNamingStrategy != null 
+            return UseNamingStrategy != null
                 ? UseNamingStrategy.GetTableName(TableAliases.TryGetValue(name, out alias) ? alias : name)
                 : base.GetTableName(TableAliases.TryGetValue(name, out alias) ? alias : name);
         }

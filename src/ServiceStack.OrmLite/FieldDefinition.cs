@@ -104,7 +104,8 @@ namespace ServiceStack.OrmLite
 
         public string GetForeignKeyName(ModelDefinition modelDef, ModelDefinition refModelDef, INamingStrategy NamingStrategy, FieldDefinition fieldDef)
         {
-            if (ForeignKeyName.IsNullOrEmpty()) {
+            if (ForeignKeyName.IsNullOrEmpty())
+            {
                 var modelName = modelDef.IsInSchema
                     ? modelDef.Schema + "_" + NamingStrategy.GetTableName(modelDef.ModelName)
                     : NamingStrategy.GetTableName(modelDef.ModelName);
@@ -115,7 +116,8 @@ namespace ServiceStack.OrmLite
 
                 var fkName = string.Format("FK_{0}_{1}_{2}", modelName, refModelName, fieldDef.FieldName);
                 return NamingStrategy.ApplyNameRestrictions(fkName);
-            } else { return ForeignKeyName; }
+            }
+            else { return ForeignKeyName; }
         }
     }
 }

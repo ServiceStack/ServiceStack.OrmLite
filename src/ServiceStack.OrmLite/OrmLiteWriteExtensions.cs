@@ -75,7 +75,7 @@ namespace ServiceStack.OrmLite
             try
             {
                 if (!tableExists)
-                { 
+                {
                     if (modelDef.PreCreateTableSql != null)
                     {
                         ExecuteSql(dbCmd, modelDef.PreCreateTableSql);
@@ -362,7 +362,7 @@ namespace ServiceStack.OrmLite
                 }
 
                 // Cater for Naming Strategies like PostgreSQL that has lower_underscore names
-                if (dbFieldNameSanitized.Replace("_", "").EndsWith(fieldName.Replace("_",""), StringComparison.OrdinalIgnoreCase))
+                if (dbFieldNameSanitized.Replace("_", "").EndsWith(fieldName.Replace("_", ""), StringComparison.OrdinalIgnoreCase))
                 {
                     return i;
                 }

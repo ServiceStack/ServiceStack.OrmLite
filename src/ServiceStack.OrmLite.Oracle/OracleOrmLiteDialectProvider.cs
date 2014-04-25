@@ -17,7 +17,7 @@ namespace ServiceStack.OrmLite.Oracle
         public const string OdpProvider = "Oracle.DataAccess.Client";
         public const string MicrosoftProvider = "System.Data.OracleClient";
 
-		protected readonly List<string> ReservedNames = new List<string>
+        protected readonly List<string> ReservedNames = new List<string>
         {
 			"USER", "ORDER", "PASSWORD", "ACTIVE", "LEFT", "DOUBLE", "FLOAT", "DECIMAL", "STRING", "DATE",
             "DATETIME", "TYPE","TIMESTAMP", "COMMENT", "LONG"
@@ -31,43 +31,44 @@ namespace ServiceStack.OrmLite.Oracle
         protected const int MaxNameLength = 30;
         protected const int MaxStringColumnLength = 4000;
 
-		public static OracleOrmLiteDialectProvider Instance = new OracleOrmLiteDialectProvider();
-		
-		internal long LastInsertId { get; set; }
-		protected bool CompactGuid;
+        public static OracleOrmLiteDialectProvider Instance = new OracleOrmLiteDialectProvider();
 
-		internal const string StringGuidDefinition = "VARCHAR2(37)";
-		internal const string CompactGuidDefinition = "RAW(16)";
+        internal long LastInsertId { get; set; }
+        protected bool CompactGuid;
 
-		public OracleOrmLiteDialectProvider() : this(false, false)
-		{
-		}
+        internal const string StringGuidDefinition = "VARCHAR2(37)";
+        internal const string CompactGuidDefinition = "RAW(16)";
 
-		public OracleOrmLiteDialectProvider(bool compactGuid, bool quoteNames, string clientProvider = OdpProvider)
-		{
-		    ClientProvider = clientProvider;
-			CompactGuid = compactGuid;
-		    QuoteNames = quoteNames;
-			BoolColumnDefinition = "NUMBER(1)";
-			GuidColumnDefinition = CompactGuid ? CompactGuidDefinition : StringGuidDefinition;
-		    LongColumnDefinition = "NUMERIC(18)";
-			AutoIncrementDefinition = string.Empty;
-			DateTimeColumnDefinition ="TIMESTAMP";
-		    DateTimeOffsetColumnDefinition = "TIMESTAMP WITH TIME ZONE";
+        public OracleOrmLiteDialectProvider()
+            : this(false, false)
+        {
+        }
+
+        public OracleOrmLiteDialectProvider(bool compactGuid, bool quoteNames, string clientProvider = OdpProvider)
+        {
+            ClientProvider = clientProvider;
+            CompactGuid = compactGuid;
+            QuoteNames = quoteNames;
+            BoolColumnDefinition = "NUMBER(1)";
+            GuidColumnDefinition = CompactGuid ? CompactGuidDefinition : StringGuidDefinition;
+            LongColumnDefinition = "NUMERIC(18)";
+            AutoIncrementDefinition = string.Empty;
+            DateTimeColumnDefinition = "TIMESTAMP";
+            DateTimeOffsetColumnDefinition = "TIMESTAMP WITH TIME ZONE";
             TimeColumnDefinition = LongColumnDefinition;
-			RealColumnDefinition = "FLOAT";
+            RealColumnDefinition = "FLOAT";
             // Order-dependency here: must set following values before setting DefaultStringLength
             StringLengthNonUnicodeColumnDefinitionFormat = "VARCHAR2({0})";
             StringLengthUnicodeColumnDefinitionFormat = "NVARCHAR2({0})";
-		    MaxStringColumnDefinition = StringLengthNonUnicodeColumnDefinitionFormat.Fmt(MaxStringColumnLength);
+            MaxStringColumnDefinition = StringLengthNonUnicodeColumnDefinitionFormat.Fmt(MaxStringColumnLength);
             DefaultStringLength = 128;
 
-			InitColumnTypeMap();
+            InitColumnTypeMap();
             ParamString = ":";
 
             NamingStrategy = new OracleNamingStrategy(MaxNameLength);
             OrmLiteConfig.ExecFilter = new OracleExecFilter();
-		}
+        }
 
         public override void OnAfterInitColumnTypeMap()
         {
@@ -91,24 +92,24 @@ namespace ServiceStack.OrmLite.Oracle
 
         protected string ClientProvider = OdpProvider;
 
-		public override IDbConnection CreateConnection(string connectionString, Dictionary<string, string> options)
-		{
-			if (options != null)
-			{
-			    connectionString = options.Aggregate(connectionString, (current, option) => current + (option.Key + "=" + option.Value + ";"));
-			}
+        public override IDbConnection CreateConnection(string connectionString, Dictionary<string, string> options)
+        {
+            if (options != null)
+            {
+                connectionString = options.Aggregate(connectionString, (current, option) => current + (option.Key + "=" + option.Value + ";"));
+            }
 
-		    var factory = DbProviderFactories.GetFactory(ClientProvider);
+            var factory = DbProviderFactories.GetFactory(ClientProvider);
             InitializeOracleTimestampSetting(factory);
-		    IDbConnection connection = factory.CreateConnection();
-		    if (connection != null) connection.ConnectionString = connectionString;
+            IDbConnection connection = factory.CreateConnection();
+            if (connection != null) connection.ConnectionString = connectionString;
             return connection;
-		}
+        }
 
-		public override long GetLastInsertId(IDbCommand dbCmd)
-		{
-			return LastInsertId;			
-		}
+        public override long GetLastInsertId(IDbCommand dbCmd)
+        {
+            return LastInsertId;
+        }
 
         public override long InsertAndGetLastInsertId<T>(IDbCommand dbCmd)
         {
@@ -141,31 +142,31 @@ namespace ServiceStack.OrmLite.Oracle
             }
         }
 
-		public override object ConvertDbValue(object value, Type type)
-		{
-			if (value == null || value is DBNull) return null;
+        public override object ConvertDbValue(object value, Type type)
+        {
+            if (value == null || value is DBNull) return null;
 
-			if (type == typeof(bool))
-			{
-				var intVal = int.Parse(value.ToString());
-				return intVal != 0;
-			}
+            if (type == typeof(bool))
+            {
+                var intVal = int.Parse(value.ToString());
+                return intVal != 0;
+            }
 
-			if (type == typeof(Double))
-				return double.Parse(value.ToString());
+            if (type == typeof(Double))
+                return double.Parse(value.ToString());
 
-		    if (type == typeof(float))
-		        return float.Parse(value.ToString());
+            if (type == typeof(float))
+                return float.Parse(value.ToString());
 
-			if (type == typeof(Guid))
-			{
-				if (CompactGuid)
-				{
-					var raw = (byte[])value;
-					return new Guid(raw);
-				}
-				return new Guid(value.ToString());
-			}
+            if (type == typeof(Guid))
+            {
+                if (CompactGuid)
+                {
+                    var raw = (byte[])value;
+                    return new Guid(raw);
+                }
+                return new Guid(value.ToString());
+            }
 
             if (type == typeof(byte[]))
                 return value;
@@ -176,24 +177,24 @@ namespace ServiceStack.OrmLite.Oracle
                 return TimeSpan.FromTicks(ticks);
             }
 
-    		return base.ConvertDbValue(value, type);
-		}
+            return base.ConvertDbValue(value, type);
+        }
 
         public override string GetQuotedValue(object value, Type fieldType)
-		{
-			if (value == null) return "NULL";
+        {
+            if (value == null) return "NULL";
 
-			if (fieldType == typeof(Guid))
-			{
-			    var guid = (Guid)value;
-			    return CompactGuid ? "'" + BitConverter.ToString(guid.ToByteArray()).Replace("-", "") + "'"
+            if (fieldType == typeof(Guid))
+            {
+                var guid = (Guid)value;
+                return CompactGuid ? "'" + BitConverter.ToString(guid.ToByteArray()).Replace("-", "") + "'"
                                    : string.Format("CAST('{0}' AS {1})", guid, StringGuidDefinition);
-			}
+            }
 
             if (fieldType == typeof(DateTime) || fieldType == typeof(DateTime?))
-			{
-				var dateValue = (DateTime)value;
-				string iso8601Format= "yyyy-MM-dd";
+            {
+                var dateValue = (DateTime)value;
+                string iso8601Format = "yyyy-MM-dd";
                 string oracleFormat = "YYYY-MM-DD";
                 if (dateValue.ToString("yyyy-MM-dd HH:mm:ss.fff").EndsWith("00:00:00.000") == false)
                 {
@@ -201,7 +202,7 @@ namespace ServiceStack.OrmLite.Oracle
                     oracleFormat = "YYYY-MM-DD HH24:MI:SS.FF3";
                 }
                 return "TO_TIMESTAMP(" + base.GetQuotedValue(dateValue.ToString(iso8601Format), typeof(string)) + ", " + base.GetQuotedValue(oracleFormat, typeof(string)) + ")";
-			}
+            }
 
             if ((value is TimeSpan) && (fieldType == typeof(Int64) || fieldType == typeof(Int64?)))
             {
@@ -209,56 +210,56 @@ namespace ServiceStack.OrmLite.Oracle
                 return base.GetQuotedValue(longValue, fieldType);
             }
 
-			if (fieldType == typeof(bool?) || fieldType == typeof(bool))
-			{
-				var boolValue = (bool)value;
-				return base.GetQuotedValue(boolValue ? "1" : "0", typeof(string));
-			}
-			
-			if (fieldType == typeof(decimal?) || fieldType == typeof(decimal) ||
-				fieldType == typeof(double?) || fieldType == typeof(double) ||
-				fieldType == typeof(float?) || fieldType == typeof(float))
+            if (fieldType == typeof(bool?) || fieldType == typeof(bool))
             {
-				var s = base.GetQuotedValue(value, fieldType);
-				if (s.Length > 20) s = s.Substring(0, 20);
-				return "'" + s + "'"; // when quoted exception is more clear!
-			}
+                var boolValue = (bool)value;
+                return base.GetQuotedValue(boolValue ? "1" : "0", typeof(string));
+            }
 
-			return base.GetQuotedValue(value, fieldType);
-		}
+            if (fieldType == typeof(decimal?) || fieldType == typeof(decimal) ||
+                fieldType == typeof(double?) || fieldType == typeof(double) ||
+                fieldType == typeof(float?) || fieldType == typeof(float))
+            {
+                var s = base.GetQuotedValue(value, fieldType);
+                if (s.Length > 20) s = s.Substring(0, 20);
+                return "'" + s + "'"; // when quoted exception is more clear!
+            }
 
-		public override string ToSelectStatement(Type tableType,  string sqlFilter, params object[] filterParams)
-		{
-			var sql = new StringBuilder();
-			const string selectStatement = "SELECT ";
-			var modelDef = GetModel(tableType);
-			var isFullSelectStatement = 
-				!string.IsNullOrEmpty(sqlFilter)
+            return base.GetQuotedValue(value, fieldType);
+        }
+
+        public override string ToSelectStatement(Type tableType, string sqlFilter, params object[] filterParams)
+        {
+            var sql = new StringBuilder();
+            const string selectStatement = "SELECT ";
+            var modelDef = GetModel(tableType);
+            var isFullSelectStatement =
+                !string.IsNullOrEmpty(sqlFilter)
                 && sqlFilter.Trim().Length > selectStatement.Length
                 && sqlFilter.Trim().Substring(0, selectStatement.Length).ToUpper().Equals(selectStatement);
 
-			if (isFullSelectStatement)
-			{
+            if (isFullSelectStatement)
+            {
                 if (Regex.Matches(sqlFilter.Trim().ToUpperInvariant(), @"(\b|\n)FROM(\b|\n)").Count < 1)
                     sqlFilter += " FROM DUAL";
-			    return sqlFilter.SqlFmt(filterParams);
-			}
-			
-			sql.AppendFormat("SELECT {0} FROM {1}", 
-			                 GetColumnNames(modelDef), 
-			                 GetQuotedTableName(modelDef));
-			if (!string.IsNullOrEmpty(sqlFilter))
-			{
-				sqlFilter = sqlFilter.SqlFmt(filterParams);
-				if (!sqlFilter.StartsWith("\nORDER ", StringComparison.OrdinalIgnoreCase)
-					&& !sqlFilter.StartsWith("\nROWS ", StringComparison.OrdinalIgnoreCase)) // ROWS <m> [TO <n>])
-				{
-					sql.Append("\nWHERE ");
-				}
-				sql.Append(sqlFilter);
-			}
-			return sql.ToString();
-		}
+                return sqlFilter.SqlFmt(filterParams);
+            }
+
+            sql.AppendFormat("SELECT {0} FROM {1}",
+                             GetColumnNames(modelDef),
+                             GetQuotedTableName(modelDef));
+            if (!string.IsNullOrEmpty(sqlFilter))
+            {
+                sqlFilter = sqlFilter.SqlFmt(filterParams);
+                if (!sqlFilter.StartsWith("\nORDER ", StringComparison.OrdinalIgnoreCase)
+                    && !sqlFilter.StartsWith("\nROWS ", StringComparison.OrdinalIgnoreCase)) // ROWS <m> [TO <n>])
+                {
+                    sql.Append("\nWHERE ");
+                }
+                sql.Append(sqlFilter);
+            }
+            return sql.ToString();
+        }
 
         public override void PrepareParameterizedInsertStatement<T>(IDbCommand dbCommand, ICollection<string> insertFields = null)
         {
@@ -417,7 +418,7 @@ namespace ServiceStack.OrmLite.Oracle
 
                 ClientInfo = globalizationType.InvokeMember("GetClientInfo", InvokeStaticPublic, null, null, null);
                 const BindingFlags setProperty = BindingFlags.Public | BindingFlags.SetProperty | BindingFlags.Instance;
-                globalizationType.InvokeMember("TimeStampTZFormat", setProperty, null, ClientInfo, new object[] {TimestampTzFormat});
+                globalizationType.InvokeMember("TimeStampTZFormat", setProperty, null, ClientInfo, new object[] { TimestampTzFormat });
                 SetThreadInfo = globalizationType.GetMethod("SetThreadInfo", BindingFlags.Public | BindingFlags.Static);
 
                 var parameterType = OracleAssembly.GetType("Oracle.DataAccess.Client.OracleParameter");
@@ -439,15 +440,15 @@ namespace ServiceStack.OrmLite.Oracle
                 DateTimeOffsetInputFormat = "dd-MMM-yy hh:mm:ss tt";
                 TimestampTzFormat = "DD-MON-RR HH.MI.SSXFF AM";
 
-//                var parameterType = OracleAssembly.GetType("System.Data.OracleClient.OracleParameter");
-//                var oracleTypeProperty = parameterType.GetProperty("OracleType", BindingFlags.Public | BindingFlags.Instance);
-//                SetOracleDbType = oracleTypeProperty.GetSetMethod();
+                //                var parameterType = OracleAssembly.GetType("System.Data.OracleClient.OracleParameter");
+                //                var oracleTypeProperty = parameterType.GetProperty("OracleType", BindingFlags.Public | BindingFlags.Instance);
+                //                SetOracleDbType = oracleTypeProperty.GetSetMethod();
 
                 var oracleDbType = OracleAssembly.GetType("System.Data.OracleClient.OracleType");
                 TimestampTz = Enum.Parse(oracleDbType, "TimestampWithTZ");
 
-//                var readerType = OracleAssembly.GetType("System.Data.OracleClient.OracleDataReader");
-//                GetOracleValue = readerType.GetMethod("GetOracleValue", BindingFlags.Public | BindingFlags.Instance);
+                //                var readerType = OracleAssembly.GetType("System.Data.OracleClient.OracleDataReader");
+                //                GetOracleValue = readerType.GetMethod("GetOracleValue", BindingFlags.Public | BindingFlags.Instance);
             }
         }
 
@@ -464,14 +465,14 @@ namespace ServiceStack.OrmLite.Oracle
 
         private void SetOracleParameterTypeTimestampTz(IDataParameter p)
         {
-            if (SetOracleDbType != null) SetOracleDbType.Invoke(p, new[] {TimestampTz});
+            if (SetOracleDbType != null) SetOracleDbType.Invoke(p, new[] { TimestampTz });
         }
 
         private DateTimeOffset ConvertTimestampTzToDateTimeOffset(IDataReader dataReader, int colIndex)
         {
             if (GetOracleValue != null)
             {
-                var value = GetOracleValue.Invoke(dataReader, new object[] {colIndex}).ToString();
+                var value = GetOracleValue.Invoke(dataReader, new object[] { colIndex }).ToString();
                 return DateTimeOffset.ParseExact(value, DateTimeOffsetInputFormat, CultureInfo.InvariantCulture);
             }
             else
@@ -480,148 +481,148 @@ namespace ServiceStack.OrmLite.Oracle
                 return new DateTimeOffset((DateTime)value);
             }
         }
-		
-		public override string ToInsertRowStatement(IDbCommand dbCommand, object objWithProperties, ICollection<string> insertFields = null)
-		{
+
+        public override string ToInsertRowStatement(IDbCommand dbCommand, object objWithProperties, ICollection<string> insertFields = null)
+        {
             if (insertFields == null)
                 insertFields = new List<string>();
 
-			var sbColumnNames = new StringBuilder();
-			var sbColumnValues = new StringBuilder();
+            var sbColumnNames = new StringBuilder();
+            var sbColumnValues = new StringBuilder();
 
-			var tableType = objWithProperties.GetType();
-			var modelDef= GetModel(tableType);
-			
-			foreach (var fieldDef in modelDef.FieldDefinitions)
-			{
-				if (fieldDef.IsComputed ) continue;
-				if (insertFields.Count>0 && !insertFields.Contains(fieldDef.Name)) continue;
-				
-				if ((fieldDef.AutoIncrement || !string.IsNullOrEmpty(fieldDef.Sequence))
-					&& dbCommand != null) 
-				{
-					if (fieldDef.AutoIncrement && string.IsNullOrEmpty(fieldDef.Sequence))
-					{
-						fieldDef.Sequence = Sequence(GetTableName(modelDef), fieldDef.FieldName, fieldDef.Sequence);
-					}
+            var tableType = objWithProperties.GetType();
+            var modelDef = GetModel(tableType);
+
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+                if (fieldDef.IsComputed) continue;
+                if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name)) continue;
+
+                if ((fieldDef.AutoIncrement || !string.IsNullOrEmpty(fieldDef.Sequence))
+                    && dbCommand != null)
+                {
+                    if (fieldDef.AutoIncrement && string.IsNullOrEmpty(fieldDef.Sequence))
+                    {
+                        fieldDef.Sequence = Sequence(GetTableName(modelDef), fieldDef.FieldName, fieldDef.Sequence);
+                    }
 
                     var pi = tableType.GetProperty(fieldDef.Name,
                         BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy);
 
                     var result = GetNextValue(dbCommand.Connection, dbCommand.Transaction, fieldDef.Sequence,
-                                              pi.GetValue(objWithProperties, new object[]{}), isInsert: true);
-					if (pi.PropertyType == typeof(String))
-                        pi.SetProperty(objWithProperties, result.ToString());	
-					else if (pi.PropertyType == typeof(Int16))
-                        pi.SetProperty(objWithProperties, Convert.ToInt16(result));	
-					else if (pi.PropertyType == typeof(Int32))
-                        pi.SetProperty(objWithProperties, Convert.ToInt32(result));	
-					else if (pi.PropertyType == typeof(Guid))
+                                              pi.GetValue(objWithProperties, new object[] { }), isInsert: true);
+                    if (pi.PropertyType == typeof(String))
+                        pi.SetProperty(objWithProperties, result.ToString());
+                    else if (pi.PropertyType == typeof(Int16))
+                        pi.SetProperty(objWithProperties, Convert.ToInt16(result));
+                    else if (pi.PropertyType == typeof(Int32))
+                        pi.SetProperty(objWithProperties, Convert.ToInt32(result));
+                    else if (pi.PropertyType == typeof(Guid))
                         pi.SetProperty(objWithProperties, result);
-					else
+                    else
                         pi.SetProperty(objWithProperties, Convert.ToInt64(result));
-				}
-				
-				if (sbColumnNames.Length > 0) sbColumnNames.Append(",");
-				if (sbColumnValues.Length > 0) sbColumnValues.Append(",");
+                }
 
-			    try
-			    {
+                if (sbColumnNames.Length > 0) sbColumnNames.Append(",");
+                if (sbColumnValues.Length > 0) sbColumnValues.Append(",");
+
+                try
+                {
                     sbColumnNames.Append(string.Format("{0}", GetQuotedColumnName(fieldDef.FieldName)));
                     if (!string.IsNullOrEmpty(fieldDef.Sequence) && dbCommand == null)
                         sbColumnValues.Append(string.Format(":{0}", fieldDef.Name));
                     else
                         sbColumnValues.Append(fieldDef.GetQuotedValue(objWithProperties));
-			    }
-			    catch (Exception ex)
-			    {
-			        Log.ErrorFormat("Error in ToInsertRowStatement on column {0}: {1}", fieldDef.FieldName, ex);
-			        throw;
-			    }
-			}
-
-			var sql = string.Format("INSERT INTO {0} ({1}) VALUES ({2}) ",
-									GetQuotedTableName(modelDef), sbColumnNames, sbColumnValues);
-
-			return sql;
-		}
-
-		
-		public override string ToUpdateRowStatement(object objWithProperties, ICollection<string> updateFields = null)
-		{
-			var sqlFilter = new StringBuilder();
-			var sql = new StringBuilder();
-			var tableType = objWithProperties.GetType();
-			var modelDef = GetModel(tableType);
-									
-			foreach (var fieldDef in modelDef.FieldDefinitions)
-			{
-				if (fieldDef.IsComputed) continue;
-
-			    var updateFieldsEmptyOrNull = updateFields == null || updateFields.Count == 0;
-                if ((fieldDef.IsPrimaryKey || fieldDef.Name == OrmLiteConfig.IdField) 
-	                && updateFieldsEmptyOrNull)
+                }
+                catch (Exception ex)
                 {
-	                if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
+                    Log.ErrorFormat("Error in ToInsertRowStatement on column {0}: {1}", fieldDef.FieldName, ex);
+                    throw;
+                }
+            }
 
-	                sqlFilter.AppendFormat("{0} = {1}", 
-		                GetQuotedColumnName(fieldDef.FieldName),
-		                fieldDef.GetQuotedValue(objWithProperties));
-							
-	                continue;
+            var sql = string.Format("INSERT INTO {0} ({1}) VALUES ({2}) ",
+                                    GetQuotedTableName(modelDef), sbColumnNames, sbColumnValues);
+
+            return sql;
+        }
+
+
+        public override string ToUpdateRowStatement(object objWithProperties, ICollection<string> updateFields = null)
+        {
+            var sqlFilter = new StringBuilder();
+            var sql = new StringBuilder();
+            var tableType = objWithProperties.GetType();
+            var modelDef = GetModel(tableType);
+
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+                if (fieldDef.IsComputed) continue;
+
+                var updateFieldsEmptyOrNull = updateFields == null || updateFields.Count == 0;
+                if ((fieldDef.IsPrimaryKey || fieldDef.Name == OrmLiteConfig.IdField)
+                    && updateFieldsEmptyOrNull)
+                {
+                    if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
+
+                    sqlFilter.AppendFormat("{0} = {1}",
+                        GetQuotedColumnName(fieldDef.FieldName),
+                        fieldDef.GetQuotedValue(objWithProperties));
+
+                    continue;
                 }
                 if (!updateFieldsEmptyOrNull && !updateFields.Contains(fieldDef.Name)) continue;
                 if (sql.Length > 0) sql.Append(",");
-                sql.AppendFormat("{0}={1}", 
-	                GetQuotedColumnName(fieldDef.FieldName), 
-	                fieldDef.GetQuotedValue(objWithProperties));
-			}
+                sql.AppendFormat("{0}={1}",
+                    GetQuotedColumnName(fieldDef.FieldName),
+                    fieldDef.GetQuotedValue(objWithProperties));
+            }
 
-			var updateSql = string.Format("UPDATE {0} \nSET {1} {2}",
-				GetQuotedTableName(modelDef), sql, (sqlFilter.Length>0? "\nWHERE "+ sqlFilter:""));
+            var updateSql = string.Format("UPDATE {0} \nSET {1} {2}",
+                GetQuotedTableName(modelDef), sql, (sqlFilter.Length > 0 ? "\nWHERE " + sqlFilter : ""));
 
-			return updateSql;
-		}
-				
-		
-		public override string ToDeleteRowStatement(object objWithProperties)
-		{
-			var tableType = objWithProperties.GetType();
-			var modelDef = GetModel(tableType);
-			
-			var sqlFilter = new StringBuilder();
-			
-			foreach (var fieldDef in modelDef.FieldDefinitions)
-			{
+            return updateSql;
+        }
+
+
+        public override string ToDeleteRowStatement(object objWithProperties)
+        {
+            var tableType = objWithProperties.GetType();
+            var modelDef = GetModel(tableType);
+
+            var sqlFilter = new StringBuilder();
+
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
                 if (fieldDef.IsPrimaryKey || fieldDef.Name == OrmLiteConfig.IdField)
                 {
-	                if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
-	                sqlFilter.AppendFormat("{0} = {1}", 
-		                GetQuotedColumnName(fieldDef.FieldName), 
-		                fieldDef.GetQuotedValue(objWithProperties));
+                    if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
+                    sqlFilter.AppendFormat("{0} = {1}",
+                        GetQuotedColumnName(fieldDef.FieldName),
+                        fieldDef.GetQuotedValue(objWithProperties));
                 }
-			}
+            }
 
-			var deleteSql = string.Format("DELETE FROM {0} WHERE {1}",
-				GetQuotedTableName(modelDef), sqlFilter);
+            var deleteSql = string.Format("DELETE FROM {0} WHERE {1}",
+                GetQuotedTableName(modelDef), sqlFilter);
 
-			return deleteSql;
-		}
-		
-		public override string ToCreateTableStatement(Type tableType)
-		{
-			var sbColumns = new StringBuilder();
+            return deleteSql;
+        }
+
+        public override string ToCreateTableStatement(Type tableType)
+        {
+            var sbColumns = new StringBuilder();
             var sbConstraints = new StringBuilder();
-			var sbPk= new StringBuilder();			
-						
+            var sbPk = new StringBuilder();
+
             var modelDef = GetModel(tableType);
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
-				if (fieldDef.IsPrimaryKey) 
-				{
-					sbPk.AppendFormat(sbPk.Length != 0 ? ",{0}" : "{0}", GetQuotedColumnName(fieldDef.FieldName));
-				}
-			
+                if (fieldDef.IsPrimaryKey)
+                {
+                    sbPk.AppendFormat(sbPk.Length != 0 ? ",{0}" : "{0}", GetQuotedColumnName(fieldDef.FieldName));
+                }
+
                 if (sbColumns.Length != 0) sbColumns.Append(", \n  ");
 
                 var columnDefinition = GetColumnDefinition(
@@ -631,7 +632,7 @@ namespace ServiceStack.OrmLite.Oracle
                     fieldDef.AutoIncrement,
                     fieldDef.IsNullable,
                     fieldDef.FieldLength,
-					fieldDef.Scale,
+                    fieldDef.Scale,
                     fieldDef.DefaultValue,
                     fieldDef.CustomFieldDefinition);
 
@@ -643,20 +644,20 @@ namespace ServiceStack.OrmLite.Oracle
                 sbConstraints.AppendFormat(
                     ", \n\n  CONSTRAINT {0} FOREIGN KEY ({1}) REFERENCES {2} ({3})",
                     GetQuotedName(fieldDef.ForeignKey.GetForeignKeyName(modelDef, refModelDef, NamingStrategy, fieldDef)),
-					GetQuotedColumnName(fieldDef.FieldName), 
-					GetQuotedTableName(refModelDef), 
-					GetQuotedColumnName(refModelDef.PrimaryKey.FieldName));
+                    GetQuotedColumnName(fieldDef.FieldName),
+                    GetQuotedTableName(refModelDef),
+                    GetQuotedColumnName(refModelDef.PrimaryKey.FieldName));
 
                 sbConstraints.Append(GetForeignKeyOnDeleteClause(fieldDef.ForeignKey));
             }
-			
-			if (sbPk.Length != 0) sbColumns.AppendFormat(", \n  PRIMARY KEY({0})", sbPk);
-			
+
+            if (sbPk.Length != 0) sbColumns.AppendFormat(", \n  PRIMARY KEY({0})", sbPk);
+
             var sql = new StringBuilder(string.Format(
                 "CREATE TABLE {0} \n(\n  {1}{2} \n) \n", GetQuotedTableName(modelDef), sbColumns, sbConstraints));
-			
-			return sql.ToString();
-		}
+
+            return sql.ToString();
+        }
 
         public override string GetForeignKeyOnDeleteClause(ForeignKeyConstraint foreignKey)
         {
@@ -684,11 +685,11 @@ namespace ServiceStack.OrmLite.Oracle
             }
             return result;
         }
-		
-		public override List<string> ToCreateSequenceStatements(Type tableType)
-		{
-		    return SequenceList(tableType).Select(seq => "CREATE SEQUENCE " + GetQuotedName(seq)).ToList();
-		}
+
+        public override List<string> ToCreateSequenceStatements(Type tableType)
+        {
+            return SequenceList(tableType).Select(seq => "CREATE SEQUENCE " + GetQuotedName(seq)).ToList();
+        }
 
         public override List<string> SequenceList(Type tableType)
         {
@@ -708,11 +709,11 @@ namespace ServiceStack.OrmLite.Oracle
             return gens;
         }
 
-		public override string GetColumnDefinition (string fieldName, Type fieldType, 
-			bool isPrimaryKey, bool autoIncrement, bool isNullable, 
-			int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
-		{
-			string fieldDefinition;
+        public override string GetColumnDefinition(string fieldName, Type fieldType,
+            bool isPrimaryKey, bool autoIncrement, bool isNullable,
+            int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
+        {
+            string fieldDefinition;
 
             if (customFieldDefinition != null)
             {
@@ -726,14 +727,14 @@ namespace ServiceStack.OrmLite.Oracle
             }
             else if (fieldType == typeof(Decimal))
             {
-				fieldDefinition = string.Format("{0} ({1},{2})", DecimalColumnDefinition, 
-					fieldLength.GetValueOrDefault(DefaultDecimalPrecision),
-					scale.GetValueOrDefault(DefaultDecimalScale) );
-			}
-            else 
-			{
-				fieldDefinition = GetColumnTypeDefinition(fieldType);
-			}
+                fieldDefinition = string.Format("{0} ({1},{2})", DecimalColumnDefinition,
+                    fieldLength.GetValueOrDefault(DefaultDecimalPrecision),
+                    scale.GetValueOrDefault(DefaultDecimalScale));
+            }
+            else
+            {
+                fieldDefinition = GetColumnTypeDefinition(fieldType);
+            }
 
             var sql = new StringBuilder();
             sql.AppendFormat("{0} {1}", GetQuotedColumnName(fieldName), fieldDefinition);
@@ -743,13 +744,13 @@ namespace ServiceStack.OrmLite.Oracle
                 sql.AppendFormat(DefaultValueFormat, defaultValue);
             }
 
-		    sql.Append(isNullable ? " NULL" : " NOT NULL");
+            sql.Append(isNullable ? " NULL" : " NOT NULL");
 
-		    return sql.ToString();
-		}
-		
-		
-		public override List<string> ToCreateIndexStatements(Type tableType)
+            return sql.ToString();
+        }
+
+
+        public override List<string> ToCreateIndexStatements(Type tableType)
         {
             var sqlIndexes = new List<string>();
 
@@ -759,11 +760,11 @@ namespace ServiceStack.OrmLite.Oracle
                 if (!fieldDef.IsIndexed) continue;
 
                 var indexName = GetIndexName(
-					fieldDef.IsUnique,
-					(modelDef.IsInSchema 
-						? modelDef.Schema + "_" + modelDef.ModelName
-						: modelDef.ModelName).SafeVarName(), 
-					fieldDef.FieldName);
+                    fieldDef.IsUnique,
+                    (modelDef.IsInSchema
+                        ? modelDef.Schema + "_" + modelDef.ModelName
+                        : modelDef.ModelName).SafeVarName(),
+                    fieldDef.FieldName);
                 indexName = NamingStrategy.ApplyNameRestrictions(indexName);
 
                 sqlIndexes.Add(
@@ -787,166 +788,166 @@ namespace ServiceStack.OrmLite.Oracle
             bool isCombined = false, FieldDefinition fieldDef = null)
         {
             return string.Format("CREATE {0} INDEX {1} ON {2} ({3} ) \n",
-				isUnique ? "UNIQUE" : "", 
-				indexName, 
-				GetQuotedTableName(modelDef),
-				GetQuotedColumnName(fieldName));
+                isUnique ? "UNIQUE" : "",
+                indexName,
+                GetQuotedTableName(modelDef),
+                GetQuotedColumnName(fieldName));
         }
-		
-		
-		public override string ToExistStatement(Type fromTableType,
-			object objWithProperties,
-			string sqlFilter,
-			params object[] filterParams)
-		{
-			
-			var fromModelDef = GetModel(fromTableType);
-			var sql = new StringBuilder();
-			sql.AppendFormat("SELECT 1 FROM {0}", GetQuotedTableName(fromModelDef));
-			
-			var filter = new StringBuilder();
-			
-			if (objWithProperties!=null)
+
+
+        public override string ToExistStatement(Type fromTableType,
+            object objWithProperties,
+            string sqlFilter,
+            params object[] filterParams)
+        {
+
+            var fromModelDef = GetModel(fromTableType);
+            var sql = new StringBuilder();
+            sql.AppendFormat("SELECT 1 FROM {0}", GetQuotedTableName(fromModelDef));
+
+            var filter = new StringBuilder();
+
+            if (objWithProperties != null)
             {
-				var tableType = objWithProperties.GetType();
-				
-				if (fromTableType!=tableType)
+                var tableType = objWithProperties.GetType();
+
+                if (fromTableType != tableType)
                 {
-					var i = 0;
-				    var modelDef = GetModel(tableType);
+                    var i = 0;
+                    var modelDef = GetModel(tableType);
 
-				    var fpk = modelDef.FieldDefinitions.Where(def => def.IsPrimaryKey).ToList();
+                    var fpk = modelDef.FieldDefinitions.Where(def => def.IsPrimaryKey).ToList();
 
-				    foreach (var fieldDef in fromModelDef.FieldDefinitions)
-					{
-						if (fieldDef.IsComputed) continue;
-						if (fieldDef.ForeignKey !=null
-							&& GetModel(fieldDef.ForeignKey.ReferenceType).ModelName == modelDef.ModelName)
-						{
-							if (filter.Length > 0) filter.Append(" AND ");
-							filter.AppendFormat("{0} = {1}", GetQuotedColumnName(fieldDef.FieldName),
-								fpk[i].GetQuotedValue(objWithProperties));	
-							i++;
-						}
-					}	
-				}
-				else
-				{
-					var modelDef = GetModel(tableType);
-					foreach (var fieldDef in modelDef.FieldDefinitions)
-					{
-						if (fieldDef.IsComputed) continue;
-						if (fieldDef.IsPrimaryKey)
-						{
-							if (filter.Length > 0) filter.Append(" AND ");
-							filter.AppendFormat("{0} = {1}",
-								GetQuotedColumnName(fieldDef.FieldName),
-								fieldDef.GetQuotedValue(objWithProperties));
-						}
-					}
-				}
-												
-				if (filter.Length>0) sql.AppendFormat("\nWHERE {0} ", filter);
-			}	
-			
-			if (!string.IsNullOrEmpty(sqlFilter))
-			{
-				sqlFilter = sqlFilter.SqlFmt(filterParams);
-				if (!sqlFilter.StartsWith("\nORDER ", StringComparison.OrdinalIgnoreCase)
-					&& !sqlFilter.StartsWith("\nROWS ", StringComparison.OrdinalIgnoreCase)) // ROWS <m> [TO <n>])
-				{
-					sql.Append(filter.Length>0? " AND  ": "\nWHERE ");
-				}
-				sql.Append(sqlFilter);
-			}
-			 		
-			var sb = new StringBuilder("select 1  from dual where");
-			sb.AppendFormat(" exists ({0})", sql);
-			return sb.ToString();
-		}
-		
-		public override string ToSelectFromProcedureStatement(
-			object fromObjWithProperties,
-			Type outputModelType,       
-			string sqlFilter, 
-			params object[] filterParams)		
-		{
-						
-			var sbColumnValues = new StringBuilder();
-			
-			Type fromTableType = fromObjWithProperties.GetType();
-			
-			var modelDef = GetModel(fromTableType);
-			
-			foreach (var fieldDef in modelDef.FieldDefinitions)
-			{	
-				if (sbColumnValues.Length > 0) sbColumnValues.Append(",");
+                    foreach (var fieldDef in fromModelDef.FieldDefinitions)
+                    {
+                        if (fieldDef.IsComputed) continue;
+                        if (fieldDef.ForeignKey != null
+                            && GetModel(fieldDef.ForeignKey.ReferenceType).ModelName == modelDef.ModelName)
+                        {
+                            if (filter.Length > 0) filter.Append(" AND ");
+                            filter.AppendFormat("{0} = {1}", GetQuotedColumnName(fieldDef.FieldName),
+                                fpk[i].GetQuotedValue(objWithProperties));
+                            i++;
+                        }
+                    }
+                }
+                else
+                {
+                    var modelDef = GetModel(tableType);
+                    foreach (var fieldDef in modelDef.FieldDefinitions)
+                    {
+                        if (fieldDef.IsComputed) continue;
+                        if (fieldDef.IsPrimaryKey)
+                        {
+                            if (filter.Length > 0) filter.Append(" AND ");
+                            filter.AppendFormat("{0} = {1}",
+                                GetQuotedColumnName(fieldDef.FieldName),
+                                fieldDef.GetQuotedValue(objWithProperties));
+                        }
+                    }
+                }
 
-				sbColumnValues.Append(fieldDef.GetQuotedValue(fromObjWithProperties) );	
-			}
-			
-			var sql = new StringBuilder();
-			sql.AppendFormat("SELECT {0} FROM  {1} {2}{3}{4}  \n",
-				GetColumnNames(GetModel(outputModelType)),
-				GetQuotedTableName(modelDef),
-				sbColumnValues.Length > 0 ? "(" : "",
-				sbColumnValues,
-				sbColumnValues.Length > 0 ? ")" : "");
-			
-			if (!string.IsNullOrEmpty(sqlFilter))
-			{
-				sqlFilter = sqlFilter.SqlFmt(filterParams);
-				if (!sqlFilter.StartsWith("\nORDER ", StringComparison.OrdinalIgnoreCase)
-					&& !sqlFilter.StartsWith("\nROWS ", StringComparison.OrdinalIgnoreCase)) // ROWS <m> [TO <n>]
-				{
-					sql.Append("\nWHERE ");
-				}
-				sql.Append(sqlFilter);
-			}
-			
-			return sql.ToString();		
-		}
-		
-		public override string ToExecuteProcedureStatement(object objWithProperties)
-		{
-			var sbColumnValues = new StringBuilder();
-			
-			var tableType = objWithProperties.GetType();
-			var modelDef = GetModel(tableType);
-			
-			foreach (var fieldDef in modelDef.FieldDefinitions)
-			{
-				if (sbColumnValues.Length > 0) sbColumnValues.Append(",");
-				sbColumnValues.Append(fieldDef.GetQuotedValue(objWithProperties));
-			}
-			
-			var sql = string.Format("EXECUTE PROCEDURE {0} {1}{2}{3};",
-				GetQuotedTableName(modelDef),  
-				sbColumnValues.Length > 0 ? "(" : "",
-				sbColumnValues,
-				sbColumnValues.Length > 0 ? ")" : "");
-			
-			return sql;
-		}
-		
-		private object GetNextValue(IDbConnection connection, IDbTransaction transaction, string sequence, object value, bool isInsert) 
-		{
-		    if (!isInsert)
-			{
-				long nv;
-			    Object retObj;
-			    if (long.TryParse(value.ToString(), out nv))
-				{
-					LastInsertId = nv;
-					retObj = LastInsertId;
-				}
-				else
-				{
-					LastInsertId = 0;
-					retObj = value;
-				}
-				return retObj;
-			}
+                if (filter.Length > 0) sql.AppendFormat("\nWHERE {0} ", filter);
+            }
+
+            if (!string.IsNullOrEmpty(sqlFilter))
+            {
+                sqlFilter = sqlFilter.SqlFmt(filterParams);
+                if (!sqlFilter.StartsWith("\nORDER ", StringComparison.OrdinalIgnoreCase)
+                    && !sqlFilter.StartsWith("\nROWS ", StringComparison.OrdinalIgnoreCase)) // ROWS <m> [TO <n>])
+                {
+                    sql.Append(filter.Length > 0 ? " AND  " : "\nWHERE ");
+                }
+                sql.Append(sqlFilter);
+            }
+
+            var sb = new StringBuilder("select 1  from dual where");
+            sb.AppendFormat(" exists ({0})", sql);
+            return sb.ToString();
+        }
+
+        public override string ToSelectFromProcedureStatement(
+            object fromObjWithProperties,
+            Type outputModelType,
+            string sqlFilter,
+            params object[] filterParams)
+        {
+
+            var sbColumnValues = new StringBuilder();
+
+            Type fromTableType = fromObjWithProperties.GetType();
+
+            var modelDef = GetModel(fromTableType);
+
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+                if (sbColumnValues.Length > 0) sbColumnValues.Append(",");
+
+                sbColumnValues.Append(fieldDef.GetQuotedValue(fromObjWithProperties));
+            }
+
+            var sql = new StringBuilder();
+            sql.AppendFormat("SELECT {0} FROM  {1} {2}{3}{4}  \n",
+                GetColumnNames(GetModel(outputModelType)),
+                GetQuotedTableName(modelDef),
+                sbColumnValues.Length > 0 ? "(" : "",
+                sbColumnValues,
+                sbColumnValues.Length > 0 ? ")" : "");
+
+            if (!string.IsNullOrEmpty(sqlFilter))
+            {
+                sqlFilter = sqlFilter.SqlFmt(filterParams);
+                if (!sqlFilter.StartsWith("\nORDER ", StringComparison.OrdinalIgnoreCase)
+                    && !sqlFilter.StartsWith("\nROWS ", StringComparison.OrdinalIgnoreCase)) // ROWS <m> [TO <n>]
+                {
+                    sql.Append("\nWHERE ");
+                }
+                sql.Append(sqlFilter);
+            }
+
+            return sql.ToString();
+        }
+
+        public override string ToExecuteProcedureStatement(object objWithProperties)
+        {
+            var sbColumnValues = new StringBuilder();
+
+            var tableType = objWithProperties.GetType();
+            var modelDef = GetModel(tableType);
+
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+                if (sbColumnValues.Length > 0) sbColumnValues.Append(",");
+                sbColumnValues.Append(fieldDef.GetQuotedValue(objWithProperties));
+            }
+
+            var sql = string.Format("EXECUTE PROCEDURE {0} {1}{2}{3};",
+                GetQuotedTableName(modelDef),
+                sbColumnValues.Length > 0 ? "(" : "",
+                sbColumnValues,
+                sbColumnValues.Length > 0 ? ")" : "");
+
+            return sql;
+        }
+
+        private object GetNextValue(IDbConnection connection, IDbTransaction transaction, string sequence, object value, bool isInsert)
+        {
+            if (!isInsert)
+            {
+                long nv;
+                Object retObj;
+                if (long.TryParse(value.ToString(), out nv))
+                {
+                    LastInsertId = nv;
+                    retObj = LastInsertId;
+                }
+                else
+                {
+                    LastInsertId = 0;
+                    retObj = value;
+                }
+                return retObj;
+            }
 
             using (var dbCmd = connection.CreateCommand())
             {
@@ -956,29 +957,29 @@ namespace ServiceStack.OrmLite.Oracle
                 LastInsertId = result;
                 return result;
             }
-		}
-		
-		public bool QuoteNames { get; set; }
-		
+        }
+
+        public bool QuoteNames { get; set; }
+
         private bool WillQuote(string name)
         {
             return QuoteNames || ReservedNames.Contains(name.ToUpper())
                               || name.Contains(" ");
         }
 
-		private string Quote(string name)
-		{
+        private string Quote(string name)
+        {
             return WillQuote(name) ? string.Format("\"{0}\"", name) : name;
-		}
-		
-		public override string GetQuotedName(string fieldName)
-		{
-			return Quote(fieldName);
-		}
+        }
 
-		public override string GetQuotedTableName(ModelDefinition modelDef)
-		{
-		    return Quote(GetTableName(modelDef));
+        public override string GetQuotedName(string fieldName)
+        {
+            return Quote(fieldName);
+        }
+
+        public override string GetQuotedTableName(ModelDefinition modelDef)
+        {
+            return Quote(GetTableName(modelDef));
         }
 
         public override string GetQuotedTableName(string tableName)
@@ -994,10 +995,10 @@ namespace ServiceStack.OrmLite.Oracle
                        : NamingStrategy.GetTableName(modelDef.ModelName);
         }
 
-		public override string GetQuotedColumnName(string fieldName)
-		{
-			return Quote(NamingStrategy.GetColumnName(fieldName));
-		}
+        public override string GetQuotedColumnName(string fieldName)
+        {
+            return Quote(NamingStrategy.GetColumnName(fieldName));
+        }
 
         public override string SanitizeFieldNameForParamName(string fieldName)
         {
@@ -1012,31 +1013,31 @@ namespace ServiceStack.OrmLite.Oracle
             }
             return name;
         }
-		
-		private string Sequence(string modelName, string fieldName, string sequence)
-		{
+
+        private string Sequence(string modelName, string fieldName, string sequence)
+        {
             //TODO used to return Quote(sequence)
-		    if (!sequence.IsNullOrEmpty()) return sequence;
-		    var seqName = NamingStrategy.ApplyNameRestrictions(modelName + "_" + fieldName + "_GEN");
-			return seqName;
-		}
-		
-		public override SqlExpression<T> SqlExpression<T> ()
-		{
-			return new OracleSqlExpression<T>();
-		}
-		
-		public override bool DoesTableExist(IDbCommand dbCmd, string tableName)
-		{
-			if (!WillQuote(tableName)) tableName = tableName.ToUpper();
+            if (!sequence.IsNullOrEmpty()) return sequence;
+            var seqName = NamingStrategy.ApplyNameRestrictions(modelName + "_" + fieldName + "_GEN");
+            return seqName;
+        }
+
+        public override SqlExpression<T> SqlExpression<T>()
+        {
+            return new OracleSqlExpression<T>();
+        }
+
+        public override bool DoesTableExist(IDbCommand dbCmd, string tableName)
+        {
+            if (!WillQuote(tableName)) tableName = tableName.ToUpper();
 
             var sql = "SELECT count(*) FROM USER_TABLES WHERE TABLE_NAME = {0}".SqlFmt(tableName);
 
-			dbCmd.CommandText = sql; 
-			var result = dbCmd.LongScalar();
+            dbCmd.CommandText = sql;
+            var result = dbCmd.LongScalar();
 
-			return result > 0;
-		}
+            return result > 0;
+        }
 
         public override bool DoesSequenceExist(IDbCommand dbCmd, string sequenceName)
         {
@@ -1070,7 +1071,7 @@ namespace ServiceStack.OrmLite.Oracle
                                  GetQuotedColumnName(fieldName),
                                  GetQuotedTableName(referenceMd.ModelName),
                                  GetQuotedColumnName(referenceFieldName),
-                                 GetForeignKeyOnDeleteClause(new ForeignKeyConstraint(typeof (T), FkOptionToString(onDelete))));
+                                 GetForeignKeyOnDeleteClause(new ForeignKeyConstraint(typeof(T), FkOptionToString(onDelete))));
         }
     }
 }

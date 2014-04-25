@@ -12,13 +12,13 @@ namespace ServiceStack.OrmLite
     public class OrmLiteConnectionFactory : IDbConnectionFactory
     {
         public OrmLiteConnectionFactory()
-            : this(null, null, true) {}
+            : this(null, null, true) { }
 
         public OrmLiteConnectionFactory(string connectionString)
-            : this(connectionString, null, true) {}
+            : this(connectionString, null, true) { }
 
         public OrmLiteConnectionFactory(string connectionString, IOrmLiteDialectProvider dialectProvider)
-            : this(connectionString, dialectProvider, true) {}
+            : this(connectionString, dialectProvider, true) { }
 
         public OrmLiteConnectionFactory(string connectionString, IOrmLiteDialectProvider dialectProvider, bool setGlobalDialectProvider)
         {
@@ -118,7 +118,7 @@ namespace ServiceStack.OrmLite
 
         public void RegisterConnection(string connectionKey, string connectionString, IOrmLiteDialectProvider dialectProvider)
         {
-            RegisterConnection(connectionKey, new OrmLiteConnectionFactory(connectionString, dialectProvider, setGlobalDialectProvider:false));
+            RegisterConnection(connectionKey, new OrmLiteConnectionFactory(connectionString, dialectProvider, setGlobalDialectProvider: false));
         }
 
         public void RegisterConnection(string connectionKey, OrmLiteConnectionFactory connectionFactory)

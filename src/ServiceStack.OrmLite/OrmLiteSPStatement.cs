@@ -15,7 +15,7 @@ namespace ServiceStack.OrmLite
             command = cmd;
         }
 
-        public List<T> ConvertToList<T>() 
+        public List<T> ConvertToList<T>()
         {
             if ((typeof(T).IsPrimitive) || (typeof(T) == typeof(string)) || (typeof(T) == typeof(String)))
                 throw new Exception("Type " + typeof(T).Name + " is a primitive type. Use ConvertScalarToList function.");
@@ -53,7 +53,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        public T ConvertTo<T>() 
+        public T ConvertTo<T>()
         {
             if ((typeof(T).IsPrimitive) || (typeof(T) == typeof(string)) || (typeof(T) == typeof(String)))
                 throw new Exception("Type " + typeof(T).Name + " is a primitive type. Use ConvertScalarTo function.");
@@ -111,7 +111,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        public HashSet<T> ConvertFirstColumnToListDistinct<T>() 
+        public HashSet<T> ConvertFirstColumnToListDistinct<T>()
         {
             if (!((typeof(T).IsPrimitive) || (typeof(T) == typeof(string)) || (typeof(T) == typeof(String))))
                 throw new Exception("Type " + typeof(T).Name + " is a non primitive type. Only primitive type can be used.");
