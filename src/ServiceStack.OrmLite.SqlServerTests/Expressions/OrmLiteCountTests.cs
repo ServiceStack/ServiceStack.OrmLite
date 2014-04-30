@@ -63,26 +63,24 @@ namespace ServiceStack.OrmLite.SqlServerTests.Expressions
             }
         }
 
-        long Count<T>(IDbConnection db) where T : IHasId<int>, new()
+        long Count<T>(IDbConnection db) where T : IHasId<int>
         {
-            T request = new T();
-            return db.Scalar<T, long>(e => Sql.Count(request.Id));
+            return db.Scalar<T, long>(e => Sql.Count(e.Id));
         }
 
 
-        long CountByColumn<T>(IDbConnection db) where T : IHasCountColumn, new()
+        long CountByColumn<T>(IDbConnection db) where T : IHasCountColumn
         {
-            T request = new T();
-            return db.Scalar<T, long?>(e => Sql.Count(request.CountColumn)).Value;
+            return db.Scalar<T, long?>(e => Sql.Count(e.CountColumn)).Value;
         }
 
 
-        int Count<T>(IDbConnection db, Expression<Func<T, bool>> predicate) where T : IHasId<int>, new()
+        int Count<T>(IDbConnection db, Expression<Func<T, bool>> predicate) where T : IHasId<int>
         {
             return db.Scalar<T, int>(e => Sql.Count(e.Id), predicate);
         }
 
-        int CountByColumn<T>(IDbConnection db, Expression<Func<T, bool>> predicate) where T : IHasCountColumn, new()
+        int CountByColumn<T>(IDbConnection db, Expression<Func<T, bool>> predicate) where T : IHasCountColumn
         {
             return db.Scalar<T, int?>(e => Sql.Count(e.CountColumn), predicate).Value;
         }
