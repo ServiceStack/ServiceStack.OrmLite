@@ -64,17 +64,15 @@ namespace ServiceStack.OrmLite.MySql.Tests.Expressions
             }
         }
 
-        long Count<T>(IDbConnection db) where T : IHasId<int>, new()
+        long Count<T>(IDbConnection db) where T : IHasId<int>
         {
-            T request = new T();
-            return db.Scalar<T, long>(e => Sql.Count(request.Id));
+            return db.Scalar<T, long>(e => Sql.Count(e.Id));
         }
 
 
-        long CountByColumn<T>(IDbConnection db) where T : IHasCountColumn, new()
+        long CountByColumn<T>(IDbConnection db) where T : IHasCountColumn
         {
-            T request = new T();
-            return db.Scalar<T, long?>(e => Sql.Count(request.CountColumn)).Value;
+            return db.Scalar<T, long?>(e => Sql.Count(e.CountColumn)).Value;
         }
 
 
