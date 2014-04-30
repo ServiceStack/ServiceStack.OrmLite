@@ -76,12 +76,12 @@ namespace ServiceStack.OrmLite.MySql.Tests.Expressions
         }
 
 
-        int Count<T>(IDbConnection db, Expression<Func<T, bool>> predicate) where T : IHasId<int>, new()
+        int Count<T>(IDbConnection db, Expression<Func<T, bool>> predicate) where T : IHasId<int>
         {
             return db.Scalar<T, int>(e => Sql.Count(e.Id), predicate);
         }
 
-        int CountByColumn<T>(IDbConnection db, Expression<Func<T, bool>> predicate) where T : IHasCountColumn, new()
+        int CountByColumn<T>(IDbConnection db, Expression<Func<T, bool>> predicate) where T : IHasCountColumn
         {
             return db.Scalar<T, int?>(e => Sql.Count(e.CountColumn), predicate).Value;
         }
