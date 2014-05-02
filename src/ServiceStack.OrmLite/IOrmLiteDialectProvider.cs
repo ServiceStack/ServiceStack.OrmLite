@@ -25,6 +25,8 @@ namespace ServiceStack.OrmLite
 
         bool UseUnicode { get; set; }
 
+        string EscapeWildcards(string value);
+
         INamingStrategy NamingStrategy { get; set; }
 
         IStringSerializer StringSerializer { get; set; }

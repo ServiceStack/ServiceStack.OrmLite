@@ -1286,5 +1286,15 @@ namespace ServiceStack.OrmLite
                     : value.ToString();
         }
 
+        public virtual string EscapeWildcards(string value)
+        {
+            if (value == null)
+                return null;
+
+            return value
+                .Replace(@"\", @"\\")
+                .Replace("_", @"\_")
+                .Replace("%", @"\%");
+        }
     }
 }

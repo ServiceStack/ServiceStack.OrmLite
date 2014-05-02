@@ -59,7 +59,8 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 };
 
                 var i = 0;
-                dates.Each(x => db.Insert(new Submission {
+                dates.Each(x => db.Insert(new Submission
+                {
                     Id = i++,
                     StoryDate = x,
                     Headline = "Headline" + i,
@@ -73,8 +74,8 @@ namespace ServiceStack.OrmLite.Tests.Expression
                     Is.EqualTo(3));
 
                 var storyDateTime = new DateTime(2014, 1, 1);
-                Assert.That(db.Select<Submission>(q => q.StoryDate > storyDateTime - new TimeSpan(1,0,0,0) &&
-                                                       q.StoryDate < storyDateTime + new TimeSpan(1,0,0,0)).Count,
+                Assert.That(db.Select<Submission>(q => q.StoryDate > storyDateTime - new TimeSpan(1, 0, 0, 0) &&
+                                                       q.StoryDate < storyDateTime + new TimeSpan(1, 0, 0, 0)).Count,
                     Is.EqualTo(3));
             }
         }
@@ -135,7 +136,35 @@ namespace ServiceStack.OrmLite.Tests.Expression
                     Is.EquivalentTo(new[] { "555-UNICORNS", "555-PLANES" }));
                 Assert.That(partialDto.Map(x => x.CompanyName),
                     Is.EquivalentTo(new[] { "Planes R Us", "We do everything!" }));
-            }            
+            }
+        }
+
+        [Test]
+        public void Can_escape_wildcards()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Shipper>();
+
+                db.Insert(new Shipper { CompanyName = "a" });
+                db.Insert(new Shipper { CompanyName = "ab" });
+                db.Insert(new Shipper { CompanyName = "a_c" });
+                db.Insert(new Shipper { CompanyName = "a_cd" });
+                db.Insert(new Shipper { CompanyName = "abcd" });
+                db.Insert(new Shipper { CompanyName = "a%" });
+                db.Insert(new Shipper { CompanyName = "a%b" });
+                db.Insert(new Shipper { CompanyName = "a%bc" });
+                db.Insert(new Shipper { CompanyName = "a\\" });
+                db.Insert(new Shipper { CompanyName = "a\\b" });
+                db.Insert(new Shipper { CompanyName = "a\\bc" });
+
+                Assert.That(db.Count<Shipper>(q => q.CompanyName == "a_"), Is.EqualTo(0));
+                Assert.That(db.Count<Shipper>(q => q.CompanyName.StartsWith("a_")), Is.EqualTo(2));
+                Assert.That(db.Count<Shipper>(q => q.CompanyName.StartsWith("a%")), Is.EqualTo(3));
+                Assert.That(db.Count<Shipper>(q => q.CompanyName.StartsWith("a_c")), Is.EqualTo(2));
+                Assert.That(db.Count<Shipper>(q => q.CompanyName.StartsWith(@"a\")), Is.EqualTo(3));
+                Assert.That(db.Count<Shipper>(q => q.CompanyName.StartsWith(@"a\b")), Is.EqualTo(2));
+            }
         }
     }
 
