@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
+using ServiceStack.DataAnnotations;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
@@ -92,7 +93,30 @@ namespace ServiceStack.OrmLite.Tests
             }
 	    }
 
-	}
+        [Test]
+        public void Can_insert_Contact_with_Complex_NameDetail()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Contact>();
+
+                var contact = new Contact
+                {
+                    FullName = new NameDetail("Test", "Contact"),
+                    Email = "test@email.com",
+                    Age = 10
+                };
+                db.Save(contact);
+
+                var dbContact = db.Single<Contact>(q => q.Email == contact.Email);
+
+                Assert.That(dbContact.Email, Is.EqualTo(contact.Email));
+                Assert.That(dbContact.Age, Is.EqualTo(contact.Age));
+                Assert.That(dbContact.FullName.First, Is.EqualTo(contact.FullName.First));
+                Assert.That(dbContact.FullName.Last, Is.EqualTo(contact.FullName.Last));
+            }
+        }
+    }
 
     public class WithAListOfGuids
     {
@@ -101,5 +125,58 @@ namespace ServiceStack.OrmLite.Tests
         public Guid GuidTwo { get; set; }
 
         public IEnumerable<Guid> TheGuids { get; set; }
+    }
+
+    public class Contact
+    {
+        public Contact()
+        {
+            Tags = new List<AvailableTags>();
+            FullName = new NameDetail();
+        }
+
+        [AutoIncrement]
+        public int Id { get; set; }
+
+        public string Email { get; set; }
+        public int Age { get; set; }
+        public List<AvailableTags> Tags { get; set; }
+
+        public NameDetail FullName { get; set; }
+
+        [DataAnnotations.Ignore]
+        public string Name
+        {
+            get { return FullName.ToString(); }
+        }
+    }
+
+    public class NameDetail
+    {
+        public NameDetail() { }
+
+        public NameDetail(string first, string last)
+        {
+            First = first;
+            Last = last;
+        }
+
+        public string First { get; set; }
+
+        public string Last { get; set; }
+
+        public override string ToString()
+        {
+            return string.Format("{0} {1}", First, Last).Trim();
+        }
+    }
+
+    public enum AvailableTags
+    {
+        other,
+        glam,
+        hiphop,
+        grunge,
+        funk
     }
 }
