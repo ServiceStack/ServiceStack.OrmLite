@@ -87,18 +87,17 @@ namespace ServiceStack.OrmLite.Tests
             using (var con = OpenDbConnection())
             {
                 con.Insert(new TestType
-                               {
-                                   Id = 5,
-                                   BoolCol = false,
-                                   DateCol = new DateTime(2012, 5, 1),
-                                   TextCol = "uiop",
-                                   EnumCol = TestEnum.Val3,
-                                   ComplexObjCol = new TestType {TextCol = "poiu"}
-                               });
+                {
+                    Id = 5,
+                    BoolCol = false,
+                    DateCol = new DateTime(2012, 5, 1),
+                    TextCol = "uiop",
+                    EnumCol = TestEnum.Val3,
+                    ComplexObjCol = new TestType { TextCol = "poiu" }
+                });
 
-                var target =
-                    OpenDbConnection().Select<TestType>(
-                        q => q.ComplexObjCol == new TestType() {TextCol = "poiu"});
+                var target = OpenDbConnection().Select<TestType>(
+                        q => q.ComplexObjCol == new TestType { TextCol = "poiu"});
                 Assert.AreEqual(1, target.Count);
             }
         }

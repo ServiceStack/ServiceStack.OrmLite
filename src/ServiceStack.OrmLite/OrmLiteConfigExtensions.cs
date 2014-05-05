@@ -173,8 +173,9 @@ namespace ServiceStack.OrmLite
                     Scale = decimalAttribute != null ? decimalAttribute.Scale : (int?)null,
                     BelongToModelName = belongToAttribute != null ? belongToAttribute.BelongToTableType.GetModelDefinition().ModelName : null,
                     CustomFieldDefinition = customFieldAttr != null ? customFieldAttr.Sql : null,
+                    IsRefType = propertyType.IsRefType(),
                 };
-
+                
                 var isIgnored = propertyInfo.HasAttributeNamed(typeof(IgnoreAttribute).Name)
                     || fieldDefinition.IsReference;
                 if (isIgnored)

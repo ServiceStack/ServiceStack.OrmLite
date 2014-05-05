@@ -11,7 +11,6 @@
 
 using System;
 using System.Reflection;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
@@ -85,6 +84,8 @@ namespace ServiceStack.OrmLite
         public bool IsReference { get; set; }
 
         public string CustomFieldDefinition { get; set; }
+
+        public bool IsRefType { get; set; }
     }
 
     public class ForeignKeyConstraint

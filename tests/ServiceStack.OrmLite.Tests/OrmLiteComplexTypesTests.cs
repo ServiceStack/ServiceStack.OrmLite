@@ -102,8 +102,8 @@ namespace ServiceStack.OrmLite.Tests
 
                 var contact = new Contact
                 {
-                    FullName = new NameDetail("Test", "Contact"),
-                    Email = "test@email.com",
+                    FullName = new NameDetail("Sinéad", "O'Connor"),
+                    Email = "Sinéad@O'Connor.com",
                     Age = 10
                 };
                 db.Save(contact);

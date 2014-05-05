@@ -14,6 +14,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
@@ -279,5 +280,13 @@ namespace ServiceStack.OrmLite
             return cache;
         }
 
+        public static bool IsRefType(this Type fieldType)
+        {
+            return (!fieldType.UnderlyingSystemType.IsValueType
+                || JsConfig.TreatValueAsRefTypes.Contains(fieldType.IsGeneric()
+                    ? fieldType.GenericTypeDefinition()
+                    : fieldType))
+                && fieldType != typeof(string);
+        }
     }
 }
