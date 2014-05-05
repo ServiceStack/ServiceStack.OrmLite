@@ -350,10 +350,7 @@ namespace ServiceStack.OrmLite.Oracle
 
         public override void SetParameterValue<T>(FieldDefinition fieldDef, IDataParameter p, object obj)
         {
-            var knownType = DbTypeMap.ColumnDbTypeMap.ContainsKey(fieldDef.ColumnType);
-            var value = knownType
-                ? GetValueOrDbNull<T>(fieldDef, obj)
-                : GetQuotedValueOrDbNull<T>(fieldDef, obj);
+            var value = GetValueOrDbNull<T>(fieldDef, obj);
 
             if (fieldDef.ColumnType == typeof(DateTimeOffset) || fieldDef.ColumnType == typeof(DateTimeOffset?))
             {
@@ -370,9 +367,14 @@ namespace ServiceStack.OrmLite.Oracle
 
             if (value != null)
             {
-                if (fieldDef.ColumnType == typeof(object))
+                if (fieldDef.IsRefType)
                 {
-                    return value.ToJsv();
+                    //Let ADO.NET providers handle byte[]
+                    if (fieldDef.FieldType == typeof(byte[]))
+                    {
+                        return value;
+                    }
+                    return OrmLiteConfig.DialectProvider.StringSerializer.SerializeToString(value);
                 }
                 if (fieldDef.FieldType == typeof(TimeSpan))
                 {
