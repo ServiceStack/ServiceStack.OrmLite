@@ -1305,20 +1305,46 @@ namespace ServiceStack.OrmLite
                     statement = string.Format("lower({0})", quotedColName);
                     break;
                 case "StartsWith":
-                    statement = string.Format("upper({0}) like {1} escape '\\'",
-                        quotedColName, OrmLiteConfig.DialectProvider.GetQuotedValue(
-                            OrmLiteConfig.DialectProvider.EscapeWildcards(args[0].ToString()).ToUpper() + "%"));
+                    if (!OrmLiteConfig.StripUpperInLike)
+                    {
+                        statement = string.Format("upper({0}) like {1} escape '\\'",
+                            quotedColName, OrmLiteConfig.DialectProvider.GetQuotedValue(
+                                OrmLiteConfig.DialectProvider.EscapeWildcards(args[0].ToString()).ToUpper() + "%"));
+                    }
+                    else
+                    {
+                        statement = string.Format("{0} like {1} escape '\\'",
+                            quotedColName, OrmLiteConfig.DialectProvider.GetQuotedValue(
+                                OrmLiteConfig.DialectProvider.EscapeWildcards(args[0].ToString()) + "%"));
+                    }
                     break;
                 case "EndsWith":
-                    statement = string.Format("upper({0}) like {1} escape '\\'",
-                        quotedColName, OrmLiteConfig.DialectProvider.GetQuotedValue("%" +
-                        OrmLiteConfig.DialectProvider.EscapeWildcards(args[0].ToString()).ToUpper()));
+                    if (!OrmLiteConfig.StripUpperInLike)
+                    {
+                        statement = string.Format("upper({0}) like {1} escape '\\'",
+                            quotedColName, OrmLiteConfig.DialectProvider.GetQuotedValue("%" +
+                            OrmLiteConfig.DialectProvider.EscapeWildcards(args[0].ToString()).ToUpper()));
+                    }
+                    else
+                    {
+                        statement = string.Format("{0} like {1} escape '\\'",
+                            quotedColName, OrmLiteConfig.DialectProvider.GetQuotedValue("%" +
+                            OrmLiteConfig.DialectProvider.EscapeWildcards(args[0].ToString())));
+                    }
                     break;
                 case "Contains":
-                    statement = string.Format("upper({0}) like {1} escape '\\'",
-                        quotedColName, OrmLiteConfig.DialectProvider.GetQuotedValue("%" +
-                            OrmLiteConfig.DialectProvider.EscapeWildcards(args[0].ToString()).ToUpper() 
-                            + "%"));
+                    if (!OrmLiteConfig.StripUpperInLike)
+                    {
+                        statement = string.Format("upper({0}) like {1} escape '\\'",
+                            quotedColName, OrmLiteConfig.DialectProvider.GetQuotedValue("%" +
+                                OrmLiteConfig.DialectProvider.EscapeWildcards(args[0].ToString()).ToUpper() + "%"));
+                    }
+                    else
+                    {
+                        statement = string.Format("{0} like {1} escape '\\'",
+                            quotedColName, OrmLiteConfig.DialectProvider.GetQuotedValue("%" +
+                                OrmLiteConfig.DialectProvider.EscapeWildcards(args[0].ToString()) + "%"));
+                    }
                     break;
                 case "Substring":
                     var startIndex = Int32.Parse(args[0].ToString()) + 1;

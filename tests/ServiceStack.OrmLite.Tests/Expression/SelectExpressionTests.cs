@@ -167,6 +167,50 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 Assert.That(db.Count<Poco>(q => q.Name.StartsWith(@"a\b")), Is.EqualTo(2));
             }
         }
+
+        [Test]
+        public void Can_perform_case_sensitive_likes()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Poco>();
+
+                db.Insert(new Poco { Name = "Apple" });
+                db.Insert(new Poco { Name = "ABCDE" });
+                db.Insert(new Poco { Name = "abc" });
+
+                Func<string> normalizedSql = () =>
+                    db.GetLastSql().Replace("\"", "").Replace("`", "").Replace("Name", "name");
+
+                db.Count<Poco>(q => q.Name.StartsWith("A"));
+                Assert.That(normalizedSql(),
+                    Is.StringContaining("WHERE upper(name) like 'A%'"));
+
+                db.Count<Poco>(q => q.Name.EndsWith("e"));
+                Assert.That(normalizedSql(),
+                    Is.StringContaining("WHERE upper(name) like '%E'"));
+
+                db.Count<Poco>(q => q.Name.Contains("b"));
+                Assert.That(normalizedSql(),
+                    Is.StringContaining("WHERE upper(name) like '%B%'"));
+
+                OrmLiteConfig.StripUpperInLike = true;
+
+                db.Count<Poco>(q => q.Name.StartsWith("A"));
+                Assert.That(normalizedSql(),
+                    Is.StringContaining("WHERE name like 'A%'"));
+
+                db.Count<Poco>(q => q.Name.EndsWith("e"));
+                Assert.That(normalizedSql(),
+                    Is.StringContaining("WHERE name like '%e'"));
+
+                db.Count<Poco>(q => q.Name.Contains("b"));
+                Assert.That(normalizedSql(),
+                    Is.StringContaining("WHERE name like '%b%'"));
+
+                OrmLiteConfig.StripUpperInLike = false;
+            }
+        }
     }
 
     public class Submission
