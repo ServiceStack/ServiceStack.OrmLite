@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using NUnit.Framework;
+using ServiceStack.Common.Tests.Models;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Text;
 
@@ -144,26 +145,26 @@ namespace ServiceStack.OrmLite.Tests.Expression
         {
             using (var db = OpenDbConnection())
             {
-                db.DropAndCreateTable<Shipper>();
+                db.DropAndCreateTable<Poco>();
 
-                db.Insert(new Shipper { CompanyName = "a" });
-                db.Insert(new Shipper { CompanyName = "ab" });
-                db.Insert(new Shipper { CompanyName = "a_c" });
-                db.Insert(new Shipper { CompanyName = "a_cd" });
-                db.Insert(new Shipper { CompanyName = "abcd" });
-                db.Insert(new Shipper { CompanyName = "a%" });
-                db.Insert(new Shipper { CompanyName = "a%b" });
-                db.Insert(new Shipper { CompanyName = "a%bc" });
-                db.Insert(new Shipper { CompanyName = "a\\" });
-                db.Insert(new Shipper { CompanyName = "a\\b" });
-                db.Insert(new Shipper { CompanyName = "a\\bc" });
+                db.Insert(new Poco { Name = "a" });
+                db.Insert(new Poco { Name = "ab" });
+                db.Insert(new Poco { Name = "a_c" });
+                db.Insert(new Poco { Name = "a_cd" });
+                db.Insert(new Poco { Name = "abcd" });
+                db.Insert(new Poco { Name = "a%" });
+                db.Insert(new Poco { Name = "a%b" });
+                db.Insert(new Poco { Name = "a%bc" });
+                db.Insert(new Poco { Name = "a\\" });
+                db.Insert(new Poco { Name = "a\\b" });
+                db.Insert(new Poco { Name = "a\\bc" });
 
-                Assert.That(db.Count<Shipper>(q => q.CompanyName == "a_"), Is.EqualTo(0));
-                Assert.That(db.Count<Shipper>(q => q.CompanyName.StartsWith("a_")), Is.EqualTo(2));
-                Assert.That(db.Count<Shipper>(q => q.CompanyName.StartsWith("a%")), Is.EqualTo(3));
-                Assert.That(db.Count<Shipper>(q => q.CompanyName.StartsWith("a_c")), Is.EqualTo(2));
-                Assert.That(db.Count<Shipper>(q => q.CompanyName.StartsWith(@"a\")), Is.EqualTo(3));
-                Assert.That(db.Count<Shipper>(q => q.CompanyName.StartsWith(@"a\b")), Is.EqualTo(2));
+                Assert.That(db.Count<Poco>(q => q.Name == "a_"), Is.EqualTo(0));
+                Assert.That(db.Count<Poco>(q => q.Name.StartsWith("a_")), Is.EqualTo(2));
+                Assert.That(db.Count<Poco>(q => q.Name.StartsWith("a%")), Is.EqualTo(3));
+                Assert.That(db.Count<Poco>(q => q.Name.StartsWith("a_c")), Is.EqualTo(2));
+                Assert.That(db.Count<Poco>(q => q.Name.StartsWith(@"a\")), Is.EqualTo(3));
+                Assert.That(db.Count<Poco>(q => q.Name.StartsWith(@"a\b")), Is.EqualTo(2));
             }
         }
     }
