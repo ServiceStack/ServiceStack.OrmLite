@@ -137,25 +137,11 @@ namespace ServiceStack.OrmLite
             var to = new List<T>();
             using (dataReader)
             {
+               var indexCache = dataReader.GetIndexFieldsCache(ModelDefinition<T>.Definition);
                 while (dataReader.Read())
                 {
                     var row = OrmLiteUtilExtensions.CreateInstance<T>();
-
-                    var namingStrategy = dialectProvider.NamingStrategy;
-
-                    for (int i = 0; i < dataReader.FieldCount; i++)
-                    {
-                        FieldDefinition fieldDef;
-                        if (!fieldDefCache.TryGetValue(i, out fieldDef))
-                        {
-                            fieldDef = fieldDefs.FirstOrDefault(x =>
-                                namingStrategy.GetColumnName(x.FieldName).ToUpper() == dataReader.GetName(i).ToUpper());
-
-                            fieldDefCache[i] = fieldDef;
-                        }
-
-                        dialectProvider.SetDbValue(fieldDef, dataReader, i, row);
-                    }
+                    row.PopulateWithSqlReader(dataReader, fieldDefs, indexCache);
                     to.Add(row);
                 }
             }
