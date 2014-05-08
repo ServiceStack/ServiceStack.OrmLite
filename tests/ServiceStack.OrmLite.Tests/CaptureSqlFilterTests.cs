@@ -11,6 +11,31 @@ namespace ServiceStack.OrmLite.Tests
         : OrmLiteTestBase
     {
         [Test]
+        public void Can_capture_each_type_of_API()
+        {
+            using (var captured = new CaptureSqlFilter())
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTable<Person>();
+                db.Select<Person>(x => x.Age > 40);
+                db.Single<Person>(x => x.Age == 42);
+                db.Count<Person>(x => x.Age < 50);
+                db.Insert(new Person { Id = 7, FirstName = "Amy", LastName = "Winehouse" });
+                db.Update(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix" });
+                db.Delete<Person>(new { FirstName = "Jimi", Age = 27 });
+                db.SqlColumn<string>("SELECT LastName FROM Person WHERE Age < @age", 
+                    new { age = 50 });
+                db.SqlList<Person>("exec sp_name @firstName, @age", 
+                    new { firstName = "aName", age = 1 });
+                db.ExecuteNonQuery("UPDATE Person SET LastName={0} WHERE Id={1}"
+                    .SqlFmt("WaterHouse", 7));
+
+                var sql = string.Join(";\n\n", captured.SqlStatements.ToArray());
+                sql.Print();
+            }
+        }
+
+        [Test]
         public void Can_capture_CreateTable_APIs()
         {
             using (var captured = new CaptureSqlFilter())
