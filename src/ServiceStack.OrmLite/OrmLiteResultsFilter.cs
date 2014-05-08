@@ -245,7 +245,7 @@ namespace ServiceStack.OrmLite
         public List<T> GetColumn<T>(IDbCommand dbCmd)
         {
             Filter(dbCmd);
-            return (from object result in GetColumnResults<T>(dbCmd) select (T)result).ToList();
+            return (from object result in (GetColumnResults<T>(dbCmd) ?? new T[0]) select (T)result).ToList();
         }
 
         public HashSet<T> GetColumnDistinct<T>(IDbCommand dbCmd)
@@ -309,5 +309,21 @@ namespace ServiceStack.OrmLite
         {
             OrmLiteConfig.ResultsFilter = previousFilter;
         }
+    }
+
+    public class CaptureSqlFilter : OrmLiteResultsFilter
+    {
+        public CaptureSqlFilter()
+        {
+            SqlFilter = CaptureSql;
+            SqlStatements = new List<string>();
+        }
+
+        private void CaptureSql(string sql)
+        {
+            SqlStatements.Add(sql);
+        }
+
+        public List<string> SqlStatements { get; set; }
     }
 }
