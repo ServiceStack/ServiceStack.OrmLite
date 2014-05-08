@@ -3,6 +3,7 @@ using System.Data;
 using System.IO;
 using NUnit.Framework;
 using ServiceStack.Logging;
+using ServiceStack.OrmLite.Oracle;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -86,8 +87,12 @@ namespace ServiceStack.OrmLite.Tests
                     ConnectionString = "Server=localhost;Port=5432;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200";
                     return;
                 case Dialect.SqlServerMdf:
+                    OrmLiteConfig.DialectProvider = SqlServerDialect.Provider;
                     ConnectionString = "~/App_Data/Database1.mdf".MapAbsolutePath();			
                     ConnectionString = Config.GetDefaultConnection();
+                    return;
+                case Dialect.Oracle:
+                    OrmLiteConfig.DialectProvider = OracleDialect.Provider;
                     return;
             }
 		}
