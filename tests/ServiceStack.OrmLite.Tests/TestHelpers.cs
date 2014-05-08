@@ -14,7 +14,11 @@ namespace ServiceStack.OrmLite.Tests
     {
         public static string NormalizeSql(this string sql)
         {
-            return sql.ToLower().Replace("\"", "").Replace("`", "").Replace("_","");
+            return sql.ToLower()
+                .Replace("\"", "")
+                .Replace("`", "")
+                .Replace("_","")
+                .Replace("\n", " ");
         }
     }
 }
