@@ -28,6 +28,7 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Create a new SqlExpression builder allowing typed LINQ-like queries.
         /// </summary>
+        [Obsolete("Use From<T>")]
         public static SqlExpression<T> SqlExpression<T>(this IDbConnection dbConn)
         {
             return OrmLiteConfig.ExecFilter.SqlExpression<T>(dbConn);
