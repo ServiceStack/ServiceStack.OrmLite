@@ -39,7 +39,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
             {
                 InitLetters(db);
 
-                var query = db.SqlExpression<LetterFrequency>()
+                var query = db.From<LetterFrequency>()
                   .Select(x => new { x.Letter, count = Sql.Count("*") })
                   .Where(q => q.Letter != "D")
                   .GroupBy(x => x.Letter);
@@ -60,7 +60,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
             {
                 InitLetters(db);
 
-                var query = db.SqlExpression<LetterFrequency>()
+                var query = db.From<LetterFrequency>()
                   .Where(q => q.Letter != "D")
                   .Select(x => x.Letter);
 

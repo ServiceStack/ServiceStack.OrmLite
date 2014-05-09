@@ -70,7 +70,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
         {
             db.Insert(People);
 
-            var visitor = db.SqlExpression<Person>();
+            var visitor = db.From<Person>();
 
             visitor.Where(x => x.FirstName.StartsWith("Jim")).And(x => x.LastName.StartsWith("Hen"));
             var results = db.Select<Person>(visitor);
@@ -89,7 +89,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
         {
             db.Insert(People);
 
-            var visitor = db.SqlExpression<Person>();
+            var visitor = db.From<Person>();
 
             visitor.Where(x => x.FirstName.StartsWith("Jim")).Or(x => x.LastName.StartsWith("Cob"));
             
@@ -109,7 +109,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
         {
             db.Insert(People);
 
-            var visitor = db.SqlExpression<Person>();
+            var visitor = db.From<Person>();
 
             visitor.Where(x => x.FirstName.StartsWith("Jim"));
             visitor.Where(x => x.LastName.StartsWith("Hen"));
@@ -133,7 +133,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
         {
             db.Insert(People);
 
-            var visitor = db.SqlExpression<Person>();
+            var visitor = db.From<Person>();
             visitor.OrderBy(x => x.Age);
             visitor.ThenBy(x => x.FirstName);
 
@@ -193,7 +193,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
         {
             db.Insert(People);
 
-            var query = db.SqlExpression<Person>()
+            var query = db.From<Person>()
                 .Where(x => x.FirstName.StartsWith("Jim"));
 
             Assert.That(db.Select(query).Count, Is.EqualTo(2));
@@ -211,7 +211,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
         {
             db.Insert(People);
 
-            var query = db.SqlExpression<Person>();
+            var query = db.From<Person>();
 
             query.OrderBy("Age DESC");
 
