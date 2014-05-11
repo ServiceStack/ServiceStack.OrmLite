@@ -657,9 +657,11 @@ namespace ServiceStack.OrmLite
             p.ParameterName = this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName));
 
             DbType dbType;
-            p.DbType = DbTypeMap.ColumnDbTypeMap.TryGetValue(fieldDef.ColumnType, out dbType)
-                ? dbType
+            var sqlDbType = DbTypeMap.ColumnDbTypeMap.TryGetValue(fieldDef.ColumnType, out dbType) 
+                ? dbType 
                 : DbType.String;
+
+            p.DbType = sqlDbType;
         }
 
         public virtual void SetParameterValues<T>(IDbCommand dbCmd, object obj)

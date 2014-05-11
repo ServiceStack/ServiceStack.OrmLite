@@ -43,6 +43,12 @@ namespace ServiceStack.OrmLite.PostgreSQL
             DbTypeMap.Set<DateTimeOffset>(DbType.DateTimeOffset, DateTimeOffsetColumnDefinition);
             DbTypeMap.Set<DateTimeOffset?>(DbType.DateTimeOffset, DateTimeOffsetColumnDefinition);
 
+            //throws unknown type exceptions in parameterized queries, e.g: p.DbType = DbType.SByte
+            DbTypeMap.Set<sbyte>(DbType.Byte, IntColumnDefinition);
+            DbTypeMap.Set<ushort>(DbType.Int16, IntColumnDefinition);
+            DbTypeMap.Set<uint>(DbType.Int32, IntColumnDefinition);
+            DbTypeMap.Set<ulong>(DbType.Int64, LongColumnDefinition);
+
             base.OnAfterInitColumnTypeMap();
         }
 

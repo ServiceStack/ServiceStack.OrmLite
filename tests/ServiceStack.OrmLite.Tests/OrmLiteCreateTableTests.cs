@@ -1,6 +1,7 @@
 using System;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
+using ServiceStack.OrmLite.Tests.Shared;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
@@ -240,6 +241,26 @@ namespace ServiceStack.OrmLite.Tests
                 var row = db.Single<ModelAliasWithSpace>(q => q.Field == "The Value");
 
                 Assert.That(row.Field, Is.EqualTo("The Value"));
+            }
+        }
+
+        [Test]
+        public void Can_create_table_with_all_number_types()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<ModelWithNumerics>();
+                db.GetLastSql().Print();
+
+                var defaultValues = new ModelWithNumerics {
+                    Id = 1, Byte = 0, Short = 0, UShort = 0, 
+                    Int = 0, UInt = 0, Long = 0, ULong = 0, 
+                    Float = 0, Double = 0, Decimal = 0,
+                };
+                db.Insert(defaultValues);
+
+                var fromDb = db.SingleById<ModelWithNumerics>(defaultValues.Id);
+                Assert.That(ModelWithNumerics.ModelWithNumericsComparer.Equals(fromDb, defaultValues));
             }
         }
     }

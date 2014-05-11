@@ -39,6 +39,12 @@ namespace ServiceStack.OrmLite.SqlServer
 
             DbTypeMap.Set<TimeSpan>(DbType.DateTime, TimeColumnDefinition);
             DbTypeMap.Set<TimeSpan?>(DbType.DateTime, TimeColumnDefinition);
+
+            //throws unknown type exceptions in parameterized queries, e.g: p.DbType = DbType.SByte
+            DbTypeMap.Set<sbyte>(DbType.Byte, IntColumnDefinition);
+            DbTypeMap.Set<ushort>(DbType.Int16, IntColumnDefinition);
+            DbTypeMap.Set<uint>(DbType.Int32, IntColumnDefinition);
+            DbTypeMap.Set<ulong>(DbType.Int64, LongColumnDefinition);
         }
 
         public override string GetQuotedValue(string paramValue)
