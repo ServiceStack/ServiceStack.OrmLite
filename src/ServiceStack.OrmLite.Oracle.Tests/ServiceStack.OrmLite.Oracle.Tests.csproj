@@ -261,6 +261,9 @@
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelWithNamedCompositeIndex.cs">
       <Link>Shared\ModelWithNamedCompositeIndex.cs</Link>
     </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelWithNumerics.cs">
+      <Link>Shared\ModelWithNumerics.cs</Link>
+    </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelWithOnlyStringFields.cs">
       <Link>Shared\ModelWithOnlyStringFields.cs</Link>
     </Compile>
