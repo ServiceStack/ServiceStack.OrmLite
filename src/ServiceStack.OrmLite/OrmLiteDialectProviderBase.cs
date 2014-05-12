@@ -705,6 +705,13 @@ namespace ServiceStack.OrmLite
                     }
                     return OrmLiteConfig.DialectProvider.StringSerializer.SerializeToString(value);
                 }
+                if (fieldDef.FieldType.IsEnum)
+                {
+                    var enumValue = OrmLiteConfig.DialectProvider.StringSerializer.SerializeToString(value);
+                    return enumValue != null
+                        ? enumValue.Trim('"')
+                        : null;
+                }
                 if (fieldDef.FieldType == typeof(TimeSpan))
                 {
                     var timespan = (TimeSpan)value;

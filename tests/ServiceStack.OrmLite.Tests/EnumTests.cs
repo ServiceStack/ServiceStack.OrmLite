@@ -28,12 +28,13 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void CanGetEnumValue()
         {
-            using (var con = OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
-                con.CreateTable<TypeWithEnum>(true);
+                db.DropAndCreateTable<TypeWithEnum>();
+
                 var obj = new TypeWithEnum { Id = 1, EnumValue = SomeEnum.Value1 };
-                con.Save(obj);
-                var target = con.SingleById<TypeWithEnum>(obj.Id);
+                db.Save(obj);
+                var target = db.SingleById<TypeWithEnum>(obj.Id);
                 Assert.AreEqual(obj.Id, target.Id);
                 Assert.AreEqual(obj.EnumValue, target.EnumValue);
             }
@@ -42,16 +43,16 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void CanQueryByEnumValue_using_select_with_expression()
         {
-            using (var con = OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
-                con.CreateTable<TypeWithEnum>(true);
-                con.Save(new TypeWithEnum { Id = 1, EnumValue = SomeEnum.Value1 });
-                con.Save(new TypeWithEnum { Id = 2, EnumValue = SomeEnum.Value1 });
-                con.Save(new TypeWithEnum { Id = 3, EnumValue = SomeEnum.Value2 });
+                db.DropAndCreateTable<TypeWithEnum>();
+                db.Save(new TypeWithEnum { Id = 1, EnumValue = SomeEnum.Value1 });
+                db.Save(new TypeWithEnum { Id = 2, EnumValue = SomeEnum.Value1 });
+                db.Save(new TypeWithEnum { Id = 3, EnumValue = SomeEnum.Value2 });
 
-                var results = con.Select<TypeWithEnum>(q => q.EnumValue == SomeEnum.Value1);
+                var results = db.Select<TypeWithEnum>(q => q.EnumValue == SomeEnum.Value1);
                 Assert.That(results.Count, Is.EqualTo(2));
-                results = con.Select<TypeWithEnum>(q => q.EnumValue == SomeEnum.Value2);
+                results = db.Select<TypeWithEnum>(q => q.EnumValue == SomeEnum.Value2);
                 Assert.That(results.Count, Is.EqualTo(1));
             }
         }
@@ -59,14 +60,14 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void CanQueryByEnumValue_using_select_with_string()
         {
-            using (var con = OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
-                con.CreateTable<TypeWithEnum>(true);
-                con.Save(new TypeWithEnum { Id = 1, EnumValue = SomeEnum.Value1 });
-                con.Save(new TypeWithEnum { Id = 2, EnumValue = SomeEnum.Value1 });
-                con.Save(new TypeWithEnum { Id = 3, EnumValue = SomeEnum.Value2 });
+                db.DropAndCreateTable<TypeWithEnum>();
+                db.Save(new TypeWithEnum { Id = 1, EnumValue = SomeEnum.Value1 });
+                db.Save(new TypeWithEnum { Id = 2, EnumValue = SomeEnum.Value1 });
+                db.Save(new TypeWithEnum { Id = 3, EnumValue = SomeEnum.Value2 });
 
-                var target = con.SelectFmt<TypeWithEnum>(
+                var target = db.SelectFmt<TypeWithEnum>(
                     "EnumValue".SqlColumn() + " = {0}", SomeEnum.Value1);
 
                 Assert.AreEqual(2, target.Count());
@@ -76,14 +77,14 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void CanQueryByEnumValue_using_where_with_AnonType()
         {
-            using (var con = OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
-                con.CreateTable<TypeWithEnum>(true);
-                con.Save(new TypeWithEnum { Id = 1, EnumValue = SomeEnum.Value1 });
-                con.Save(new TypeWithEnum { Id = 2, EnumValue = SomeEnum.Value1 });
-                con.Save(new TypeWithEnum { Id = 3, EnumValue = SomeEnum.Value2 });
+                db.DropAndCreateTable<TypeWithEnum>();
+                db.Save(new TypeWithEnum { Id = 1, EnumValue = SomeEnum.Value1 });
+                db.Save(new TypeWithEnum { Id = 2, EnumValue = SomeEnum.Value1 });
+                db.Save(new TypeWithEnum { Id = 3, EnumValue = SomeEnum.Value2 });
 
-                var target = con.Where<TypeWithEnum>(new { EnumValue = SomeEnum.Value1 });
+                var target = db.Where<TypeWithEnum>(new { EnumValue = SomeEnum.Value1 });
 
                 Assert.AreEqual(2, target.Count());
             }
@@ -161,6 +162,40 @@ namespace ServiceStack.OrmLite.Tests
             }
         }
 
+        [Test]
+        public void Does_save_Enum_with_label_by_default()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<TypeWithEnum>();
+
+                db.Insert(new TypeWithEnum { Id = 1, EnumValue = SomeEnum.Value1 });
+                db.Insert(new TypeWithEnum { Id = 2, EnumValue = SomeEnum.Value2 });
+
+                var row = db.SingleFmt<TypeWithEnum>(
+                    "EnumValue".SqlColumn() + " = {0}", "Value2");
+
+                Assert.That(row.Id, Is.EqualTo(2));
+            }
+        }
+
+        [Test]
+        public void Can_save_Enum_as_Integers()
+        {
+            using (JsConfig.With(treatEnumAsInteger: true))
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<TypeWithEnumAsInt>();
+
+                db.Insert(new TypeWithEnumAsInt { Id = 1, EnumValue = SomeEnumAsInt.Value1 });
+                db.Insert(new TypeWithEnumAsInt { Id = 2, EnumValue = SomeEnumAsInt.Value2 });
+
+                var row = db.SingleFmt<TypeWithEnumAsInt>(
+                    "EnumValue".SqlColumn() + " = {0}", "2");
+
+                Assert.That(row.Id, Is.EqualTo(2));
+            }
+        }
     }
 
 
@@ -179,15 +214,28 @@ namespace ServiceStack.OrmLite.Tests
 
     public enum SomeEnum
     {
-        Value1,
-        Value2,
-        Value3
+        Value1 = 1,
+        Value2 = 2,
+        Value3 = 3
     }
 
     public class TypeWithEnum
     {
         public int Id { get; set; }
         public SomeEnum EnumValue { get; set; }
+    }
+
+    public enum SomeEnumAsInt
+    {
+        Value1 = 1,
+        Value2 = 2,
+        Value3 = 3
+    }
+
+    public class TypeWithEnumAsInt
+    {
+        public int Id { get; set; }
+        public SomeEnumAsInt EnumValue { get; set; }
     }
 
     [Flags]
