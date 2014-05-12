@@ -17,8 +17,9 @@ namespace ServiceStack.OrmLite.Tests
             return sql.ToLower()
                 .Replace("\"", "")
                 .Replace("`", "")
-                .Replace("_","")
-                .Replace("\n", " ");
+                .Replace("_", "")
+                .Replace(":", "@")   //postgresql
+                .Replace("\n", " "); 
         }
     }
 }

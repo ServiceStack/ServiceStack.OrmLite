@@ -3,6 +3,7 @@ using System.Linq;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
 using ServiceStack.DataAnnotations;
+using ServiceStack.OrmLite.Tests.Shared;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Expression
@@ -158,6 +159,9 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 db.Insert(new Poco { Name = "a\\" });
                 db.Insert(new Poco { Name = "a\\b" });
                 db.Insert(new Poco { Name = "a\\bc" });
+                db.Insert(new Poco { Name = "a^" });
+                db.Insert(new Poco { Name = "a^b" });
+                db.Insert(new Poco { Name = "a^bc" });
 
                 Assert.That(db.Count<Poco>(q => q.Name == "a_"), Is.EqualTo(0));
                 Assert.That(db.Count<Poco>(q => q.Name.StartsWith("a_")), Is.EqualTo(2));
@@ -165,6 +169,35 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 Assert.That(db.Count<Poco>(q => q.Name.StartsWith("a_c")), Is.EqualTo(2));
                 Assert.That(db.Count<Poco>(q => q.Name.StartsWith(@"a\")), Is.EqualTo(3));
                 Assert.That(db.Count<Poco>(q => q.Name.StartsWith(@"a\b")), Is.EqualTo(2));
+                Assert.That(db.Count<Poco>(q => q.Name.StartsWith(@"a^")), Is.EqualTo(3));
+                Assert.That(db.Count<Poco>(q => q.Name.StartsWith(@"a^b")), Is.EqualTo(2));
+                Assert.That(db.Count<Poco>(q => q.Name.EndsWith(@"_cd")), Is.EqualTo(1));
+                Assert.That(db.Count<Poco>(q => q.Name.Contains(@"abc")), Is.EqualTo(1));
+            }
+        }
+
+        [Test]
+        public void Can_have_multiple_escape_wildcards()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Person>();
+
+                db.Save(new Person
+                {
+                    FirstName = "First",
+                    LastName = "Last",
+                });
+
+                var someText = "ast";
+
+                var ev = db.From<Person>();
+                ev.Where(p => p.FirstName.Contains(someText)
+                    || p.LastName.Contains(someText));
+                ev.OrderBy(p => p.LastName).ThenBy(p => p.FirstName);
+                var rows = db.Select(ev);﻿
+
+                Assert.That(rows.Count, Is.EqualTo(1));
             }
         }
 

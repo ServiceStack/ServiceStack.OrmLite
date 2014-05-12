@@ -38,6 +38,11 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_capture_CreateTable_APIs()
         {
+            using (var db = OpenDbConnection())
+            {
+                db.DropTable<Person>();
+            }
+
             using (var captured = new CaptureSqlFilter())
             using (var db = OpenDbConnection())
             {

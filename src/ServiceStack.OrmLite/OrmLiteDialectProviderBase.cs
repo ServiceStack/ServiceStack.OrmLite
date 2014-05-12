@@ -1295,9 +1295,10 @@ namespace ServiceStack.OrmLite
                 return null;
 
             return value
-                .Replace(@"\", @"\\")
-                .Replace("_", @"\_")
-                .Replace("%", @"\%");
+                .Replace("^", @"^^")
+                .Replace(@"\", @"^\")
+                .Replace("_", @"^_")
+                .Replace("%", @"^%");
         }
     }
 }
