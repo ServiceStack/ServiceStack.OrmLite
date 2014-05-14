@@ -76,6 +76,16 @@ namespace ServiceStack.OrmLite.Oracle
 
             DbTypeMap.Set<bool>(DbType.Int16, BoolColumnDefinition);
             DbTypeMap.Set<bool?>(DbType.Int16, BoolColumnDefinition);
+
+            DbTypeMap.Set<sbyte>(DbType.Int16, IntColumnDefinition);
+            DbTypeMap.Set<sbyte?>(DbType.Int16, IntColumnDefinition);
+            DbTypeMap.Set<ushort>(DbType.Int32, IntColumnDefinition);
+            DbTypeMap.Set<ushort?>(DbType.Int32, IntColumnDefinition);
+            DbTypeMap.Set<uint>(DbType.Int64, LongColumnDefinition);
+            DbTypeMap.Set<uint?>(DbType.Int64, LongColumnDefinition);
+            DbTypeMap.Set<ulong>(DbType.Int64, LongColumnDefinition);
+            DbTypeMap.Set<ulong?>(DbType.Int64, LongColumnDefinition);
+
             if (CompactGuid)
             {
                 DbTypeMap.Set<Guid>(DbType.Binary, GuidColumnDefinition);
@@ -86,6 +96,7 @@ namespace ServiceStack.OrmLite.Oracle
                 DbTypeMap.Set<Guid>(DbType.String, GuidColumnDefinition);
                 DbTypeMap.Set<Guid?>(DbType.String, GuidColumnDefinition);
             }
+
             DbTypeMap.Set<DateTimeOffset>(DbType.String, DateTimeOffsetColumnDefinition);
             DbTypeMap.Set<DateTimeOffset?>(DbType.String, DateTimeOffsetColumnDefinition);
         }
@@ -361,26 +372,10 @@ namespace ServiceStack.OrmLite.Oracle
 
         protected override object GetValue<T>(FieldDefinition fieldDef, object obj)
         {
-            var value = obj is T
-               ? fieldDef.GetValue(obj)
-               : GetAnonValue<T>(fieldDef, obj);
+            var value = base.GetValue<T>(fieldDef, obj);
 
             if (value != null)
             {
-                if (fieldDef.IsRefType)
-                {
-                    //Let ADO.NET providers handle byte[]
-                    if (fieldDef.FieldType == typeof(byte[]))
-                    {
-                        return value;
-                    }
-                    return OrmLiteConfig.DialectProvider.StringSerializer.SerializeToString(value);
-                }
-                if (fieldDef.FieldType == typeof(TimeSpan))
-                {
-                    var timespan = (TimeSpan)value;
-                    return timespan.Ticks;
-                }
                 if (fieldDef.FieldType == typeof(Guid))
                 {
                     var guid = (Guid)value;
@@ -1074,6 +1069,17 @@ namespace ServiceStack.OrmLite.Oracle
                                  GetQuotedTableName(referenceMd.ModelName),
                                  GetQuotedColumnName(referenceFieldName),
                                  GetForeignKeyOnDeleteClause(new ForeignKeyConstraint(typeof(T), FkOptionToString(onDelete))));
+        }
+
+        public override string EscapeWildcards(string value)
+        {
+            if (value == null)
+                return null;
+
+            return value
+                .Replace("^", @"^^")
+                .Replace("_", @"^_")
+                .Replace("%", @"^%");
         }
     }
 }
