@@ -30,6 +30,13 @@ namespace ServiceStack.OrmLite
     {
         protected static readonly ILog Log = LogManager.GetLogger(typeof(IOrmLiteDialectProvider));
 
+        protected OrmLiteDialectProviderBase()
+        {
+            UpdateStringColumnDefinitions();
+            StringSerializer = new JsvStringSerializer();
+            ExecFilter = new OrmLiteExecFilter();
+        }
+
         [Conditional("DEBUG")]
         private static void LogDebug(string fmt, params object[] args)
         {
@@ -90,6 +97,8 @@ namespace ServiceStack.OrmLite
 		 */
         #endregion
 
+        public IOrmLiteExecFilter ExecFilter { get; set; }
+
         private static ILog log = LogManager.GetLogger(typeof(OrmLiteDialectProviderBase<>));
 
         public string StringLengthNonUnicodeColumnDefinitionFormat = "VARCHAR({0})";
@@ -117,12 +126,6 @@ namespace ServiceStack.OrmLite
         public string DateTimeColumnDefinition = "DATETIME";
         public string TimeColumnDefinition = "BIGINT";
         public string DateTimeOffsetColumnDefinition = "DATETIMEOFFSET";
-
-        protected OrmLiteDialectProviderBase()
-        {
-            UpdateStringColumnDefinitions();
-            StringSerializer = new JsvStringSerializer();
-        }
 
         private int defaultDecimalPrecision = 18;
         private int defaultDecimalScale = 12;

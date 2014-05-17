@@ -100,7 +100,17 @@ namespace ServiceStack.OrmLite
 
         public static bool StripUpperInLike { get; set; }
 
-        public static IOrmLiteExecFilter ExecFilter = new OrmLiteExecFilter();
+        private static IOrmLiteExecFilter execFilter;
+        public static IOrmLiteExecFilter ExecFilter
+        {
+            get 
+            { 
+                return dialectProvider != null 
+                    ? dialectProvider.ExecFilter ?? execFilter 
+                    : execFilter; 
+            }
+            set { execFilter = value; }
+        }
 
         public static Action<IDbCommand, object> InsertFilter { get; set; }
         public static Action<IDbCommand, object> UpdateFilter { get; set; }

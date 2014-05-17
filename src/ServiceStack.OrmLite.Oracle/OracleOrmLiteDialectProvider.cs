@@ -72,9 +72,7 @@ namespace ServiceStack.OrmLite.Oracle
             ParamString = ":";
 
             NamingStrategy = new OracleNamingStrategy(MaxNameLength);
-            // Beware, this is setting a static filter which can get used by other providers if multiple concurrent different
-            // providers. That should be harmless as the filter will no-op fairly cheaply for non-Oracle situations.
-            OrmLiteConfig.ExecFilter = new OracleExecFilter();
+            ExecFilter = new OracleExecFilter();
         }
 
         public override void OnAfterInitColumnTypeMap()

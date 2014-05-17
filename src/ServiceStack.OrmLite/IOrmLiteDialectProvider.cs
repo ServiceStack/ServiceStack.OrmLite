@@ -19,6 +19,8 @@ namespace ServiceStack.OrmLite
 {
     public interface IOrmLiteDialectProvider
     {
+        IOrmLiteExecFilter ExecFilter { get; set; }
+
         int DefaultStringLength { get; set; }
 
         string ParamString { get; set; }
