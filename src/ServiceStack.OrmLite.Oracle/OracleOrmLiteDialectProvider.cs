@@ -31,7 +31,12 @@ namespace ServiceStack.OrmLite.Oracle
         protected const int MaxNameLength = 30;
         protected const int MaxStringColumnLength = 4000;
 
-        public static OracleOrmLiteDialectProvider Instance = new OracleOrmLiteDialectProvider();
+        private static OracleOrmLiteDialectProvider _instance;
+        public static OracleOrmLiteDialectProvider Instance
+        {
+            // Constructing extras if we happen to hit this concurrently on separate threads is harmless enough
+            get { return _instance ?? (_instance = new OracleOrmLiteDialectProvider()); }
+        }
 
         internal long LastInsertId { get; set; }
         protected bool CompactGuid;
@@ -67,6 +72,8 @@ namespace ServiceStack.OrmLite.Oracle
             ParamString = ":";
 
             NamingStrategy = new OracleNamingStrategy(MaxNameLength);
+            // Beware, this is setting a static filter which can get used by other providers if multiple concurrent different
+            // providers. That should be harmless as the filter will no-op fairly cheaply for non-Oracle situations.
             OrmLiteConfig.ExecFilter = new OracleExecFilter();
         }
 

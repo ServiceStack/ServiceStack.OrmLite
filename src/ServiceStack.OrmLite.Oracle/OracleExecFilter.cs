@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Data;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -18,7 +18,7 @@ namespace ServiceStack.OrmLite.Oracle
             return command;
         }
 
-        private static readonly Dictionary<Type, Action<IDbCommand, bool>> Cache = new Dictionary<Type, Action<IDbCommand, bool>>();
+        private static readonly ConcurrentDictionary<Type, Action<IDbCommand, bool>> Cache = new ConcurrentDictionary<Type, Action<IDbCommand, bool>>();
         private static Action<IDbCommand, bool> GetBindByNameSetter(Type commandType)
         {
             if (commandType == null) return null;
@@ -41,7 +41,7 @@ namespace ServiceStack.OrmLite.Oracle
                 il.Emit(OpCodes.Ret);
                 action = (Action<IDbCommand, bool>)method.CreateDelegate(typeof(Action<IDbCommand, bool>));
             }
-            Cache.Add(commandType, action);
+            Cache.TryAdd(commandType, action);
             return action;
         }
 
