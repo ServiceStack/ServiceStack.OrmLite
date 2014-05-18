@@ -34,7 +34,6 @@ namespace ServiceStack.OrmLite
         {
             UpdateStringColumnDefinitions();
             StringSerializer = new JsvStringSerializer();
-            ExecFilter = new OrmLiteExecFilter();
         }
 
         [Conditional("DEBUG")]
