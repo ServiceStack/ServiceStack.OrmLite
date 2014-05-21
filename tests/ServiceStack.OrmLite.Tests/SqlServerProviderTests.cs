@@ -114,7 +114,7 @@ END;";
             results = db.SqlColumn<int>("EXEC DummyColumn 10");
             Assert.That(results.Sum(), Is.EqualTo(expected));
 
-            results = db.SqlColumn<int>("EXEC DummyTable @Times", new Dictionary<string, object> { { "Times", 10 } });
+            results = db.SqlColumn<int>("EXEC DummyColumn @Times", new Dictionary<string, object> { { "Times", 10 } });
             Assert.That(results.Sum(), Is.EqualTo(expected));
         }
 
