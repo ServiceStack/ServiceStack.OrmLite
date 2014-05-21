@@ -62,8 +62,8 @@ namespace ServiceStack.OrmLite.Tests
         {
             SuppressIfOracle("Can't run this with Oracle until use trigger for AutoIncrement primary key insertion");
 
-            var holdExecFilter = OrmLiteConfig.ExecFilter;
-            OrmLiteConfig.ExecFilter = new ReplayOrmLiteExecFilter { ReplayTimes = 3 };
+            var holdExecFilter = OrmLiteConfig.DialectProvider.ExecFilter;
+            OrmLiteConfig.DialectProvider.ExecFilter = new ReplayOrmLiteExecFilter { ReplayTimes = 3 };
 
             using (var db = OpenDbConnection())
             {
@@ -74,24 +74,24 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(rowsInserted, Is.EqualTo(3));
             }
 
-            OrmLiteConfig.ExecFilter = holdExecFilter;
+            OrmLiteConfig.DialectProvider.ExecFilter = holdExecFilter;
         }
 
         [Test]
         public void Can_mock_store_procedure()
         {
-            var holdExecFilter = OrmLiteConfig.ExecFilter;
-            OrmLiteConfig.ExecFilter = new MockStoredProcExecFilter();
+            var holdExecFilter = OrmLiteConfig.DialectProvider.ExecFilter;
+            OrmLiteConfig.DialectProvider.ExecFilter = new MockStoredProcExecFilter();
 
             using (var db = OpenDbConnection())
             {
                 var person = db.SqlScalar<Person>("exec sp_name @firstName, @age",
-                    new { firstName = "aName", age = 1 });
+                    new {firstName = "aName", age = 1});
 
                 Assert.That(person.FirstName, Is.EqualTo("Mocked"));
             }
 
-            OrmLiteConfig.ExecFilter = holdExecFilter;
+            OrmLiteConfig.DialectProvider.ExecFilter = holdExecFilter;
         }
 
         [Test]
