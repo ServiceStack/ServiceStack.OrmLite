@@ -769,10 +769,16 @@ namespace ServiceStack.OrmLite.Oracle
             {
                 if (!fieldDef.IsRowVersion) continue;
 
-                const string rowVersionTriggerName = "RowVersionIncrementTrigger";
+                string triggerName = Quote(
+                                     NamingStrategy.ApplyNameRestrictions(
+                                     String.Format("{0}_{1}_Update", 
+                                                   GetTableName(modelDef), 
+                                                   NamingStrategy.GetColumnName(fieldDef.FieldName))));
+
                 string triggerAction = string.Format(":NEW.{0} := :OLD.{0}+1;", GetQuotedColumnName(fieldDef.FieldName));
+
                 var rowVersionUpdateTrigger = string.Format("CREATE TRIGGER {0} BEFORE UPDATE ON {1} FOR EACH ROW BEGIN {2} END;\n",
-                                                      rowVersionTriggerName,
+                                                      triggerName,
                                                       GetQuotedTableName(modelDef),
                                                       triggerAction);
                 triggers.Add(rowVersionUpdateTrigger);

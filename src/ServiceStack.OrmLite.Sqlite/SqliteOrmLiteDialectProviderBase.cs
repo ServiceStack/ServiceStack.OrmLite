@@ -225,7 +225,10 @@ namespace ServiceStack.OrmLite.Sqlite
             {
                 if (!fieldDef.IsRowVersion) continue;
 
-                string rowVersionTriggerName = "RowVersionIncrementTrigger";
+                string triggerName = NamingStrategy.ApplyNameRestrictions(
+                    String.Format("{0}_{1}_Update", 
+                        NamingStrategy.GetTableName(modelDef.ModelName), 
+                        NamingStrategy.GetColumnName(fieldDef.FieldName)));
 
                 string tableName = GetQuotedTableName(modelDef);
                 string rowVersionColumnName = GetQuotedColumnName(fieldDef.FieldName);
@@ -235,8 +238,8 @@ namespace ServiceStack.OrmLite.Sqlite
                     rowVersionColumnName,
                     GetQuotedColumnName(modelDef.PrimaryKey.FieldName));
 
-                var rowVersionUpdateTrigger = string.Format("CREATE TRIGGER {0} AFTER UPDATE ON {1} FOR EACH ROW BEGIN {2} END;\n",
-                                                      rowVersionTriggerName, 
+                var rowVersionUpdateTrigger = string.Format("CREATE TRIGGER \"{0}\" AFTER UPDATE ON {1} FOR EACH ROW BEGIN {2} END;\n",
+                                                      triggerName, 
                                                       tableName, 
                                                       triggerAction);
 
