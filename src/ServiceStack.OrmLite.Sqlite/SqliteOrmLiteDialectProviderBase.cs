@@ -18,6 +18,7 @@ namespace ServiceStack.OrmLite.Sqlite
             base.BoolColumnDefinition = base.IntColumnDefinition;
             base.GuidColumnDefinition = "CHAR(36)";
             base.SelectIdentitySql = "SELECT last_insert_rowid()";
+            base.SetRowVersionOnInsert = true;
 
             base.InitColumnTypeMap();
         }
@@ -213,6 +214,37 @@ namespace ServiceStack.OrmLite.Sqlite
             if (isPrimaryKey)
                 return ret.Replace(" BIGINT ", " INTEGER ");
             return ret;
+        }
+
+        public override List<string> ToCreateTriggerStatements(Type tableType)
+        {
+            var triggers = new List<string>();
+            var modelDef = GetModel(tableType);
+
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+                if (!fieldDef.IsRowVersion) continue;
+
+                string rowVersionTriggerName = "RowVersionIncrementTrigger";
+
+                string tableName = GetQuotedTableName(modelDef);
+                string rowVersionColumnName = GetQuotedColumnName(fieldDef.FieldName);
+
+                string triggerAction = string.Format("UPDATE {0} SET {1} = OLD.{1} + 1 WHERE {2} = NEW.{2};", 
+                    tableName, 
+                    rowVersionColumnName,
+                    GetQuotedColumnName(modelDef.PrimaryKey.FieldName));
+
+                var rowVersionUpdateTrigger = string.Format("CREATE TRIGGER {0} AFTER UPDATE ON {1} FOR EACH ROW BEGIN {2} END;\n",
+                                                      rowVersionTriggerName, 
+                                                      tableName, 
+                                                      triggerAction);
+
+                triggers.Add(rowVersionUpdateTrigger);
+                break;
+            }
+
+            return triggers;
         }
     }
 

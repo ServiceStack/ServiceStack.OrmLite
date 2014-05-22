@@ -344,6 +344,8 @@ namespace ServiceStack.OrmLite
             return LongColumnDefinition;
         }
 
+        protected bool SetRowVersionOnInsert = false;
+
         public virtual string GetColumnDefinition(string fieldName, Type fieldType,
             bool isPrimaryKey, bool autoIncrement, bool isRowVersion, bool isNullable,
             int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
@@ -499,7 +501,7 @@ namespace ServiceStack.OrmLite
             {
                 if (fieldDef.IsComputed) continue;
                 if (fieldDef.AutoIncrement) continue;
-                if (fieldDef.IsRowVersion) continue;
+                if (fieldDef.IsRowVersion && !SetRowVersionOnInsert) continue;
                 //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
                 if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name)) continue;
 
@@ -536,7 +538,7 @@ namespace ServiceStack.OrmLite
             foreach (var fieldDef in modelDef.FieldDefinitionsArray)
             {
                 if (fieldDef.AutoIncrement || fieldDef.IsComputed) continue;
-                if (fieldDef.IsRowVersion) continue;
+                if (fieldDef.IsRowVersion && !SetRowVersionOnInsert) continue;
 
                 //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
                 if (insertFields != null && !insertFields.Contains(fieldDef.Name)) continue;

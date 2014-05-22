@@ -67,6 +67,7 @@ namespace ServiceStack.OrmLite.Oracle
             StringLengthUnicodeColumnDefinitionFormat = "NVARCHAR2({0})";
             MaxStringColumnDefinition = StringLengthNonUnicodeColumnDefinitionFormat.Fmt(MaxStringColumnLength);
             DefaultStringLength = 128;
+            SetRowVersionOnInsert = true;
 
             InitColumnTypeMap();
             ParamString = ":";
