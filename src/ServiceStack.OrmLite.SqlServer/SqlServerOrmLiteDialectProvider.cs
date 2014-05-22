@@ -102,6 +102,26 @@ namespace ServiceStack.OrmLite.SqlServer
             return string.Format("\"{0}\".\"{1}\"", escapedSchema, NamingStrategy.GetTableName(modelDef.ModelName));
         }
 
+        public override string GetColumnNames(ModelDefinition modelDef)
+        {
+            var sqlColumns = new StringBuilder();
+            foreach (var field in modelDef.FieldDefinitions)
+            {
+                if (sqlColumns.Length > 0)
+                    sqlColumns.Append(", ");
+
+                var quotedName = OrmLiteConfig.DialectProvider.GetQuotedColumnName(field.FieldName);
+
+                if (field.IsRowVersion)
+                    quotedName = String.Format("CONVERT(BIGINT, {0}) AS {0}", quotedName);
+
+                sqlColumns.Append(quotedName);
+            }
+
+            return sqlColumns.ToString();
+
+        }
+
         public override object ConvertDbValue(object value, Type type)
         {
             try
@@ -325,7 +345,7 @@ namespace ServiceStack.OrmLite.SqlServer
 
         protected override string GetRowVersionColumnDefinition(Type fieldType)
         {
-            return " RowVersion NOT NULL";
+            return " RowVersion";
         }
 
         public override string GetColumnDefinition(string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement,

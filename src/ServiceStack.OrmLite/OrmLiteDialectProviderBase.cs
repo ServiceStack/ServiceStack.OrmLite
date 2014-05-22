@@ -1017,7 +1017,16 @@ namespace ServiceStack.OrmLite
 
         public virtual string GetColumnNames(ModelDefinition modelDef)
         {
-            return modelDef.GetColumnNames();
+            var sqlColumns = new StringBuilder();
+            foreach (var field in modelDef.FieldDefinitions)
+            {
+                if (sqlColumns.Length > 0)
+                    sqlColumns.Append(", ");
+
+                sqlColumns.Append(OrmLiteConfig.DialectProvider.GetQuotedColumnName(field.FieldName));
+            }
+
+            return sqlColumns.ToString();
         }
 
         public virtual List<string> ToCreateTriggerStatements(Type tableType)
