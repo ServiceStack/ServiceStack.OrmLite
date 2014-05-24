@@ -50,19 +50,78 @@ namespace ServiceStack.OrmLite.Tests
         public decimal Cost { get; set; }
     }
 
+    /// <summary>
+    /// Test POCOs using table aliases and an alias on the foreign key reference
+    /// </summary>
+    [Alias("Q_Customer")]
+    public class AliasedCustomer
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+        public string Name { get; set; }
+
+        [Reference]
+        public AliasedCustomerAddress PrimaryAddress { get; set; }
+    }
+
+    [Alias("Q_CustomerAddress")]
+    public class AliasedCustomerAddress
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+        [Alias("Q_CustomerId")]
+        public int AliasedCustomerId { get; set; }
+        public string AddressLine1 { get; set; }
+        public string AddressLine2 { get; set; }
+        public string City { get; set; }
+        public string State { get; set; }
+        public string Country { get; set; }
+    }
+
+    /// <summary>
+    /// Test POCOs using table aliases and old form foreign key reference which was aliased name
+    /// </summary>
+    [Alias("QO_Customer")]
+    public class OldAliasedCustomer
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+        public string Name { get; set; }
+
+        [Reference]
+        public OldAliasedCustomerAddress PrimaryAddress { get; set; }
+    }
+
+    [Alias("QO_CustomerAddress")]
+    public class OldAliasedCustomerAddress
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+        public int QO_CustomerId { get; set; }
+        public string AddressLine1 { get; set; }
+        public string AddressLine2 { get; set; }
+        public string City { get; set; }
+        public string State { get; set; }
+        public string Country { get; set; }
+    }
+
     public class LoadReferencesTests 
         : OrmLiteTestBase
     {
         private IDbConnection db;
 
         [TestFixtureSetUp]
-        public void TestFixtureSetUp()
+        public new void TestFixtureSetUp()
         {
             db = base.OpenDbConnection();
             db.DropTable<OrderDetail>();
             db.DropAndCreateTable<Order>();
             db.DropAndCreateTable<Customer>();
             db.DropAndCreateTable<CustomerAddress>();
+            db.DropAndCreateTable<AliasedCustomer>();
+            db.DropAndCreateTable<AliasedCustomerAddress>();
+            db.DropAndCreateTable<OldAliasedCustomer>();
+            db.DropAndCreateTable<OldAliasedCustomerAddress>();
         }
 
         [TestFixtureTearDown]
@@ -115,6 +174,66 @@ namespace ServiceStack.OrmLite.Tests
 
             Assert.That(dbCustomer.PrimaryAddress, Is.Not.Null);
             Assert.That(dbCustomer.Orders.Count, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void Can_Save_and_Load_Aliased_References()
+        {
+            var customer = new AliasedCustomer
+            {
+                Name = "Customer 1",
+                PrimaryAddress = new AliasedCustomerAddress
+                {
+                    AddressLine1 = "1 Humpty Street",
+                    City = "Humpty Doo",
+                    State = "Northern Territory",
+                    Country = "Australia"
+                },
+            };
+
+            db.Save(customer);
+
+            Assert.That(customer.Id, Is.GreaterThan(0));
+            Assert.That(customer.PrimaryAddress.AliasedCustomerId, Is.EqualTo(0));
+
+            db.SaveReferences(customer, customer.PrimaryAddress);
+            Assert.That(customer.PrimaryAddress.AliasedCustomerId, Is.EqualTo(customer.Id));
+
+            var dbCustomer = db.LoadSingleById<AliasedCustomer>(customer.Id);
+
+            dbCustomer.PrintDump();
+
+            Assert.That(dbCustomer.PrimaryAddress, Is.Not.Null);
+        }
+
+        [Test]
+        public void Can_Save_and_Load_Old_Aliased_References()
+        {
+            var customer = new OldAliasedCustomer
+            {
+                Name = "Customer 1",
+                PrimaryAddress = new OldAliasedCustomerAddress
+                {
+                    AddressLine1 = "1 Humpty Street",
+                    City = "Humpty Doo",
+                    State = "Northern Territory",
+                    Country = "Australia"
+                },
+            };
+
+            db.Save(customer);
+
+            Assert.That(customer.Id, Is.GreaterThan(0));
+            Assert.That(customer.PrimaryAddress.QO_CustomerId, Is.EqualTo(0));
+
+            db.SaveReferences(customer, customer.PrimaryAddress);
+            Assert.That(customer.PrimaryAddress.QO_CustomerId, Is.EqualTo(customer.Id));
+
+            var dbCustomer = db.LoadSingleById<OldAliasedCustomer>(customer.Id);
+
+            dbCustomer.PrintDump();
+
+            Assert.That(dbCustomer.PrimaryAddress, Is.Not.Null);
         }
 
         [Test] 
