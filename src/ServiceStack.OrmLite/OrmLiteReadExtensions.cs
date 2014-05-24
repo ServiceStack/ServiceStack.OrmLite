@@ -842,7 +842,8 @@ namespace ServiceStack.OrmLite
         private static FieldDefinition GetRefFieldDef(ModelDefinition modelDef, ModelDefinition refModelDef, Type refType)
         {
             var refNameConvention = modelDef.ModelName + "Id";
-            var refField = refModelDef.FieldDefinitions.FirstOrDefault(x => x.FieldName == refNameConvention);
+            var refField = refModelDef.FieldDefinitions.FirstOrDefault(x => x.FieldName == refNameConvention)
+                ?? refModelDef.FieldDefinitions.FirstOrDefault(x => x.Name == modelDef.Name + "Id");
             if (refField == null)
                 throw new ArgumentException("Cant find '{0}' Property on Type '{1}'".Fmt(refNameConvention, refType.Name));
             return refField;

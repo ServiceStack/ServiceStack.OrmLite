@@ -105,6 +105,31 @@ namespace ServiceStack.OrmLite.Tests
         public string Country { get; set; }
     }
 
+    [Alias("FooCustomer")]
+    public class MismatchAliasCustomer
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+        public string Name { get; set; }
+
+        [Reference]
+        public MismatchAliasAddress PrimaryAddress { get; set; }
+    }
+
+    [Alias("BarCustomerAddress")]
+    public class MismatchAliasAddress
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+        [Alias("BarCustomerId")]
+        public int MismatchAliasCustomerId { get; set; }
+        public string AddressLine1 { get; set; }
+        public string AddressLine2 { get; set; }
+        public string City { get; set; }
+        public string State { get; set; }
+        public string Country { get; set; }
+    }
+
     public class LoadReferencesTests 
         : OrmLiteTestBase
     {
@@ -122,6 +147,8 @@ namespace ServiceStack.OrmLite.Tests
             db.DropAndCreateTable<AliasedCustomerAddress>();
             db.DropAndCreateTable<OldAliasedCustomer>();
             db.DropAndCreateTable<OldAliasedCustomerAddress>();
+            db.DropAndCreateTable<MismatchAliasCustomer>();
+            db.DropAndCreateTable<MismatchAliasAddress>();
         }
 
         [TestFixtureTearDown]
@@ -230,6 +257,36 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(customer.PrimaryAddress.QO_CustomerId, Is.EqualTo(customer.Id));
 
             var dbCustomer = db.LoadSingleById<OldAliasedCustomer>(customer.Id);
+
+            dbCustomer.PrintDump();
+
+            Assert.That(dbCustomer.PrimaryAddress, Is.Not.Null);
+        }
+
+        [Test]
+        public void Can_Save_and_Load_MismatchedAlias_References_using_code_conventions()
+        {
+            var customer = new MismatchAliasCustomer
+            {
+                Name = "Customer 1",
+                PrimaryAddress = new MismatchAliasAddress
+                {
+                    AddressLine1 = "1 Humpty Street",
+                    City = "Humpty Doo",
+                    State = "Northern Territory",
+                    Country = "Australia"
+                },
+            };
+
+            db.Save(customer);
+
+            Assert.That(customer.Id, Is.GreaterThan(0));
+            Assert.That(customer.PrimaryAddress.MismatchAliasCustomerId, Is.EqualTo(0));
+
+            db.SaveReferences(customer, customer.PrimaryAddress);
+            Assert.That(customer.PrimaryAddress.MismatchAliasCustomerId, Is.EqualTo(customer.Id));
+
+            var dbCustomer = db.LoadSingleById<MismatchAliasCustomer>(customer.Id);
 
             dbCustomer.PrintDump();
 
