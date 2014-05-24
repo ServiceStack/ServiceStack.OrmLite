@@ -325,5 +325,20 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(dbCustomer.PrimaryAddress, Is.Not.Null);
             Assert.That(dbCustomer.Orders.Count, Is.EqualTo(2));
         }
+
+        [Test]
+        public void Can_save_with_null_references()
+        {
+            var customer = new Customer
+            {
+                Name = "Customer 1",
+                PrimaryAddress = null,
+                Orders = null,
+            };
+
+            db.Save(customer, references: true);
+            
+            Assert.That(customer.Id, Is.GreaterThan(0));
+        }
     }
 }

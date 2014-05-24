@@ -761,12 +761,15 @@ namespace ServiceStack.OrmLite
                     var refField = GetRefFieldDef(modelDef, refModelDef, refType);
 
                     var results = (IEnumerable)fieldDef.GetValue(instance);
-                    foreach (var oRef in results)
+                    if (results != null)
                     {
-                        refField.SetValueFn(oRef, pkValue);
-                    }
+                        foreach (var oRef in results)
+                        {
+                            refField.SetValueFn(oRef, pkValue);
+                        }
 
-                    dbCmd.CreateTypedApi(refType).SaveAll(results);
+                        dbCmd.CreateTypedApi(refType).SaveAll(results);
+                    }
                 }
                 else
                 {
@@ -775,9 +778,11 @@ namespace ServiceStack.OrmLite
                     var refField = GetRefFieldDef(modelDef, refModelDef, fieldDef.FieldType);
 
                     var result = fieldDef.GetValue(instance);
-                    refField.SetValueFn(result, pkValue);
-
-                    dbCmd.CreateTypedApi(refType).Save(result);
+                    if (result != null)
+                    {
+                        refField.SetValueFn(result, pkValue);
+                        dbCmd.CreateTypedApi(refType).Save(result);
+                    }
                 }
             }
         }
