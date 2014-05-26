@@ -418,7 +418,7 @@ namespace ServiceStack.OrmLite
 
                 var dialectProvider = OrmLiteConfig.DialectProvider;
 
-                dialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
+                var doesConcurrencyCheck = dialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
                 if (string.IsNullOrEmpty(dbCmd.CommandText))
                     return 0;
 
@@ -429,7 +429,10 @@ namespace ServiceStack.OrmLite
 
                     dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
-                    count += dbCmd.ExecNonQuery();
+                    var rowsUpdated = dbCmd.ExecNonQuery();
+                    if (doesConcurrencyCheck && rowsUpdated == 0) throw new RowModifiedException();
+
+                    count += rowsUpdated;
                 }
 
                 if (dbTrans != null)

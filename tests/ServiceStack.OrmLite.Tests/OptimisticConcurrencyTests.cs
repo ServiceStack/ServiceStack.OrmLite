@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Linq;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 
@@ -57,6 +58,29 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        public void Can_update_multiple_with_current_rowversions()
+        {
+            var rowIds = new[]
+            {
+                db.Insert(new ModelWithRowVersion { Text = "Eleven" }, selectIdentity: true),
+                db.Insert(new ModelWithRowVersion { Text = "Twelve" }, selectIdentity: true)
+            };
+            var rows = rowIds
+                .Select(id => db.SingleById<ModelWithRowVersion>(id))
+                .ToArray();
+
+            rows[0].Text = "Thirteen";
+            rows[1].Text = "Fourteen";
+            db.UpdateAll(rows);
+
+            var actualRows = rowIds
+                .Select(id => db.SingleById<ModelWithRowVersion>(id))
+                .ToArray();
+            Assert.That(actualRows[0].Text, Is.EqualTo("Thirteen"));
+            Assert.That(actualRows[1].Text, Is.EqualTo("Fourteen"));
+        }
+
+        [Test]
         public void Can_delete_with_current_rowversion()
         {
             var rowId = db.Insert(new ModelWithRowVersion { Text = "Four" }, selectIdentity: true);
@@ -80,6 +104,30 @@ namespace ServiceStack.OrmLite.Tests
 
             var actual = db.SingleById<ModelWithRowVersion>(rowId);
             Assert.That(actual.Text, Is.Not.EqualTo("Six"));
+        }
+
+        [Test]
+        public void Update_multiple_with_single_outdated_rowversion_throws_and_all_changes_are_rejected()
+        {
+            var rowIds = new[]
+            {
+                db.Insert(new ModelWithRowVersion { Text = "Fifteen" }, selectIdentity: true),
+                db.Insert(new ModelWithRowVersion { Text = "Sixteen" }, selectIdentity: true)
+            };
+            var rows = rowIds
+                .Select(id => db.SingleById<ModelWithRowVersion>(id))
+                .ToArray();
+            TouchRow(rowIds[1]);
+
+            rows[0].Text = "Seventeen";
+            rows[1].Text = "Eighteen";
+            Assert.Throws<RowModifiedException>(() => db.UpdateAll(rows));
+
+            var actualRows = rowIds
+                .Select(id => db.SingleById<ModelWithRowVersion>(id))
+                .ToArray();
+            Assert.That(actualRows[0].Text, Is.EqualTo("Fifteen"));
+            Assert.That(actualRows[1].Text, Is.Not.EqualTo("Eighteen"));
         }
 
         [Test]
