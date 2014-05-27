@@ -13,7 +13,6 @@ namespace ServiceStack.OrmLite
         public readonly OrmLiteConnectionFactory Factory;
         public IDbTransaction Transaction { get; set; }
         private IDbConnection dbConnection;
-        private bool isOpen;
 
         public OrmLiteConnection(OrmLiteConnectionFactory factory)
         {
@@ -39,7 +38,6 @@ namespace ServiceStack.OrmLite
 
             DbConnection.Dispose();
             dbConnection = null;
-            isOpen = false;
         }
 
         public IDbTransaction BeginTransaction()
@@ -62,7 +60,6 @@ namespace ServiceStack.OrmLite
 
         public void Close()
         {
-            isOpen = false;
             DbConnection.Close();
         }
 
@@ -84,13 +81,15 @@ namespace ServiceStack.OrmLite
 
         public void Open()
         {
-            if (isOpen) 
-                return;
+            if (DbConnection.State == ConnectionState.Broken)
+                DbConnection.Close();
 
-            DbConnection.Open();
-            //so the internal connection is wrapped for example by miniprofiler
-            if (Factory.ConnectionFilter != null) { dbConnection = Factory.ConnectionFilter(dbConnection); }
-            isOpen = true;
+            if (DbConnection.State == ConnectionState.Closed)
+            {
+                DbConnection.Open();
+                //so the internal connection is wrapped for example by miniprofiler
+                if (Factory.ConnectionFilter != null) { dbConnection = Factory.ConnectionFilter(dbConnection); }
+            }
         }
 
         public string ConnectionString
