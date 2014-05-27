@@ -56,6 +56,23 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        public void Can_Save_multiple_new_rows_and_retrieve_rowversion()
+        {
+            var rows = new[]
+            {
+                new ModelWithRowVersion {Text = "Eleventh"},
+                new ModelWithRowVersion {Text = "Twelfth"}
+            };
+
+            var insertedCount = db.SaveAll(rows);
+
+            Assert.That(insertedCount, Is.EqualTo(2));
+            var actualRows = db.SelectByIds<ModelWithRowVersion>(rows.Select(x => x.Id));
+            Assert.That(rows[0].Version, Is.EqualTo(actualRows[0].Version));
+            Assert.That(rows[1].Version, Is.EqualTo(actualRows[1].Version));
+        }
+
+        [Test]
         public void Can_update_with_current_rowversion()
         {
             var rowId = db.Insert(new ModelWithRowVersion { Text = "Two" }, selectIdentity: true);
@@ -91,19 +108,36 @@ namespace ServiceStack.OrmLite.Tests
                 db.Insert(new ModelWithRowVersion { Text = "Eleven" }, selectIdentity: true),
                 db.Insert(new ModelWithRowVersion { Text = "Twelve" }, selectIdentity: true)
             };
-            var rows = rowIds
-                .Select(id => db.SingleById<ModelWithRowVersion>(id))
-                .ToArray();
+            var rows = db.SelectByIds<ModelWithRowVersion>(rowIds);
 
             rows[0].Text = "Thirteen";
             rows[1].Text = "Fourteen";
             db.UpdateAll(rows);
 
-            var actualRows = rowIds
-                .Select(id => db.SingleById<ModelWithRowVersion>(id))
-                .ToArray();
+            var actualRows = db.SelectByIds<ModelWithRowVersion>(rowIds);
             Assert.That(actualRows[0].Text, Is.EqualTo("Thirteen"));
             Assert.That(actualRows[1].Text, Is.EqualTo("Fourteen"));
+        }
+
+        [Test]
+        public void Can_Save_multiple_changed_rows_with_current_rowversion_and_retrieve_rowversion()
+        {
+            var rowIds = new[]
+            {
+                db.Insert(new ModelWithRowVersion { Text = "Thirteenth" }, selectIdentity: true),
+                db.Insert(new ModelWithRowVersion { Text = "Fourteenth" }, selectIdentity: true)
+            };
+            var rows = db.SelectByIds<ModelWithRowVersion>(rowIds);
+
+            rows[0].Text = "Fifteenth";
+            rows[1].Text = "Sixteenth";
+            var insertedCount = db.SaveAll(rows);
+
+            Assert.That(insertedCount, Is.EqualTo(0));
+            var actualRows = db.SelectByIds<ModelWithRowVersion>(rows.Select(x => x.Id));
+            Assert.That(actualRows[0].Text, Is.EqualTo("Fifteenth"));
+            Assert.That(rows[0].Version, Is.EqualTo(actualRows[0].Version));
+            Assert.That(rows[1].Version, Is.EqualTo(actualRows[1].Version));
         }
 
         [Test]
@@ -154,20 +188,36 @@ namespace ServiceStack.OrmLite.Tests
                 db.Insert(new ModelWithRowVersion { Text = "Fifteen" }, selectIdentity: true),
                 db.Insert(new ModelWithRowVersion { Text = "Sixteen" }, selectIdentity: true)
             };
-            var rows = rowIds
-                .Select(id => db.SingleById<ModelWithRowVersion>(id))
-                .ToArray();
+            var rows = db.SelectByIds<ModelWithRowVersion>(rowIds);
             TouchRow(rowIds[1]);
 
             rows[0].Text = "Seventeen";
             rows[1].Text = "Eighteen";
             Assert.Throws<RowModifiedException>(() => db.UpdateAll(rows));
 
-            var actualRows = rowIds
-                .Select(id => db.SingleById<ModelWithRowVersion>(id))
-                .ToArray();
+            var actualRows = db.SelectByIds<ModelWithRowVersion>(rowIds);
             Assert.That(actualRows[0].Text, Is.EqualTo("Fifteen"));
             Assert.That(actualRows[1].Text, Is.Not.EqualTo("Eighteen"));
+        }
+
+        [Test]
+        public void Save_multiple_with_outdated_rowversion_throws_and_all_changed_are_rejected()
+        {
+            var rowIds = new[]
+            {
+                db.Insert(new ModelWithRowVersion { Text = "Seventeenth" }, selectIdentity: true),
+                db.Insert(new ModelWithRowVersion { Text = "Eighteenth" }, selectIdentity: true)
+            };
+            var rows = db.SelectByIds<ModelWithRowVersion>(rowIds);
+            TouchRow(rowIds[1]);
+
+            rows[0].Text = "Nineteenth";
+            rows[1].Text = "Twentieth";
+            Assert.Throws<RowModifiedException>(() => db.SaveAll(rows));
+
+            var actualRows = db.SelectByIds<ModelWithRowVersion>(rows.Select(x => x.Id));
+            Assert.That(actualRows[0].Text, Is.EqualTo("Seventeenth"));
+            Assert.That(actualRows[1].Text, Is.Not.EqualTo("Twentieth"));
         }
 
         [Test]

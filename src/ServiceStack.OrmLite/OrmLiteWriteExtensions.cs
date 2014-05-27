@@ -719,6 +719,12 @@ namespace ServiceStack.OrmLite
 
                         rowsAdded++;
                     }
+
+                    if (modelDef.HasRowVersion)
+                    {
+                        var rowVersion = dbCmd.GetRowVersion(row);
+                        modelDef.RowVersion.SetValueFn(row, rowVersion);
+                    }
                 }
 
                 if (dbTrans != null)
