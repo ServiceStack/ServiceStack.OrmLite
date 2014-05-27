@@ -63,6 +63,7 @@ namespace ServiceStack.OrmLite
         public void Close()
         {
             DbConnection.Close();
+            isOpen = false;
         }
 
         public void ChangeDatabase(string databaseName)
