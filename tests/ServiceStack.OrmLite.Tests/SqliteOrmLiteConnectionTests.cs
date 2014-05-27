@@ -1,4 +1,5 @@
 using System;
+using System.Data;
 using System.IO;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
@@ -68,5 +69,17 @@ namespace ServiceStack.OrmLite.Tests
             }
 		}
 
-	}
+        [Test]
+        public void Can_open_after_close_connection()
+        {
+            using (var db = OpenDbConnection())
+            {
+                Assert.That(db.State, Is.EqualTo(ConnectionState.Open));
+                db.Close();
+                Assert.That(db.State, Is.EqualTo(ConnectionState.Closed));
+                db.Open();
+                Assert.That(db.State, Is.EqualTo(ConnectionState.Open));
+            }
+        }
+    }
 }

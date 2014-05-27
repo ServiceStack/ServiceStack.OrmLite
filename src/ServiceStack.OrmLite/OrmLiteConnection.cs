@@ -62,6 +62,7 @@ namespace ServiceStack.OrmLite
 
         public void Close()
         {
+            isOpen = false;
             DbConnection.Close();
         }
 
@@ -83,7 +84,8 @@ namespace ServiceStack.OrmLite
 
         public void Open()
         {
-            if (isOpen) return;
+            if (isOpen) 
+                return;
 
             DbConnection.Open();
             //so the internal connection is wrapped for example by miniprofiler
