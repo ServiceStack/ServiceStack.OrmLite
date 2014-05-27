@@ -79,6 +79,8 @@ namespace ServiceStack.OrmLite
 
         void PrepareParameterizedDeleteStatement<T>(IDbCommand cmd, ICollection<string> deleteFields = null);
 
+        void PrepareParameterizedSelectRowVersionStatement<T>(IDbCommand cmd);
+
         void SetParameterValues<T>(IDbCommand dbCmd, object obj);
 
         string ToUpdateRowStatement(object objWithProperties, ICollection<string> UpdateFields = null);

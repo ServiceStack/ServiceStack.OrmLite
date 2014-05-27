@@ -102,24 +102,14 @@ namespace ServiceStack.OrmLite.SqlServer
             return string.Format("\"{0}\".\"{1}\"", escapedSchema, NamingStrategy.GetTableName(modelDef.ModelName));
         }
 
-        public override string GetColumnNames(ModelDefinition modelDef)
+        protected override string GetColumnNameForSelect(FieldDefinition field)
         {
-            var sqlColumns = new StringBuilder();
-            foreach (var field in modelDef.FieldDefinitions)
-            {
-                if (sqlColumns.Length > 0)
-                    sqlColumns.Append(", ");
+            var quotedName = OrmLiteConfig.DialectProvider.GetQuotedColumnName(field.FieldName);
 
-                var quotedName = OrmLiteConfig.DialectProvider.GetQuotedColumnName(field.FieldName);
+            if (field.IsRowVersion)
+                return String.Format("CONVERT(BIGINT, {0}) AS {0}", quotedName);
 
-                if (field.IsRowVersion)
-                    quotedName = String.Format("CONVERT(BIGINT, {0}) AS {0}", quotedName);
-
-                sqlColumns.Append(quotedName);
-            }
-
-            return sqlColumns.ToString();
-
+            return quotedName;
         }
 
         public override object ConvertDbValue(object value, Type type)

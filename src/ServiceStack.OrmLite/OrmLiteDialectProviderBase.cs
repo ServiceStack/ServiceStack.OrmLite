@@ -659,6 +659,25 @@ namespace ServiceStack.OrmLite
                 GetQuotedTableName(modelDef), sqlFilter);
         }
 
+        public virtual void PrepareParameterizedSelectRowVersionStatement<T>(IDbCommand cmd)
+        {
+            var modelDef = typeof(T).GetModelDefinition();
+
+            cmd.Parameters.Clear();
+            cmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
+
+            string rowVersionColumn = GetColumnNameForSelect(modelDef.RowVersion);
+
+            var primaryKeyField = modelDef.PrimaryKey;
+            string sqlFilter = String.Format("{0}={1}", 
+                GetQuotedColumnName(primaryKeyField.FieldName), 
+                this.GetParam(SanitizeFieldNameForParamName(primaryKeyField.FieldName)));
+            AddParameter(cmd, primaryKeyField);
+
+            cmd.CommandText = string.Format("SELECT {0} FROM {1} WHERE {2}",
+                rowVersionColumn, GetQuotedTableName(modelDef), sqlFilter);
+        }
+
         protected void AddParameter(IDbCommand cmd, FieldDefinition fieldDef)
         {
             var p = cmd.CreateParameter();
@@ -1025,10 +1044,15 @@ namespace ServiceStack.OrmLite
                 if (sqlColumns.Length > 0)
                     sqlColumns.Append(", ");
 
-                sqlColumns.Append(OrmLiteConfig.DialectProvider.GetQuotedColumnName(field.FieldName));
+                sqlColumns.Append(GetColumnNameForSelect(field));
             }
 
             return sqlColumns.ToString();
+        }
+
+        protected virtual string GetColumnNameForSelect(FieldDefinition field)
+        {
+            return GetQuotedColumnName(field.FieldName);
         }
 
         public virtual List<string> ToCreateTriggerStatements(Type tableType)

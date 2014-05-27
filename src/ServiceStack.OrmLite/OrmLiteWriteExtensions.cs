@@ -627,9 +627,9 @@ namespace ServiceStack.OrmLite
         {
             var id = obj.GetId();
             var existingRow = dbCmd.SingleById<T>(id);
+            var modelDef = typeof(T).GetModelDefinition();
             if (Equals(existingRow, default(T)))
             {
-                var modelDef = typeof(T).GetModelDefinition();
                 if (modelDef.HasAutoIncrementId)
                 {
                     var newId = dbCmd.Insert(obj, selectIdentity: true);
@@ -643,6 +643,11 @@ namespace ServiceStack.OrmLite
 
                     dbCmd.Insert(obj);
                 }
+                if (modelDef.HasRowVersion)
+                {
+                    var rowVersion = dbCmd.GetRowVersion(obj);
+                    modelDef.RowVersion.SetValueFn(obj, rowVersion);
+                }
                 return true;
             }
 
@@ -650,6 +655,13 @@ namespace ServiceStack.OrmLite
                 OrmLiteConfig.UpdateFilter(dbCmd, obj);
 
             dbCmd.Update(obj);
+
+            if (modelDef.HasRowVersion)
+            {
+                var rowVersion = dbCmd.GetRowVersion(obj);
+                modelDef.RowVersion.SetValueFn(obj, rowVersion);
+            }
+
             return false;
         }
 
@@ -719,6 +731,15 @@ namespace ServiceStack.OrmLite
             }
 
             return rowsAdded;
+        }
+
+        internal static long GetRowVersion<T>(this IDbCommand dbCmd, T obj)
+        {
+            OrmLiteConfig.DialectProvider.PrepareParameterizedSelectRowVersionStatement<T>(dbCmd);
+
+            OrmLiteConfig.DialectProvider.SetParameterValues<T>(dbCmd, obj);
+
+            return dbCmd.ExecLongScalar();
         }
 
         // Procedures

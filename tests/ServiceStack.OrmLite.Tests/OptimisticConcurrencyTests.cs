@@ -44,6 +44,18 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        public void Can_Save_new_row_and_retrieve_rowversion()
+        {
+            var row = new ModelWithRowVersion { Text = "First" };
+
+            bool wasInserted = db.Save(row);
+
+            Assert.That(wasInserted, Is.True);
+            var actualRow = db.SingleById<ModelWithRowVersion>(row.Id);
+            Assert.That(row.Version, Is.EqualTo(actualRow.Version));
+        }
+
+        [Test]
         public void Can_update_with_current_rowversion()
         {
             var rowId = db.Insert(new ModelWithRowVersion { Text = "Two" }, selectIdentity: true);
@@ -55,6 +67,20 @@ namespace ServiceStack.OrmLite.Tests
             var actual = db.SingleById<ModelWithRowVersion>(rowId);
             Assert.That(actual.Text, Is.EqualTo("Three"));
             Assert.That(actual.Version, Is.Not.EqualTo(row.Version));
+        }
+
+        [Test]
+        public void Can_Save_changed_row_with_current_rowversion_and_retrieve_rowversion()
+        {
+            var rowId = db.Insert(new ModelWithRowVersion { Text = "Second" }, selectIdentity: true);
+            var row = db.SingleById<ModelWithRowVersion>(rowId);
+
+            row.Text = "Third";
+            bool wasInserted = db.Save(row);
+
+            Assert.That(wasInserted, Is.False);
+            var actualRow = db.SingleById<ModelWithRowVersion>(rowId);
+            Assert.That(row.Version, Is.EqualTo(actualRow.Version));
         }
 
         [Test]
@@ -104,6 +130,20 @@ namespace ServiceStack.OrmLite.Tests
 
             var actual = db.SingleById<ModelWithRowVersion>(rowId);
             Assert.That(actual.Text, Is.Not.EqualTo("Six"));
+        }
+
+        [Test]
+        public void Save_changed_row_with_outdated_rowversion_throws()
+        {
+            var rowId = db.Insert(new ModelWithRowVersion { Text = "Fourth" }, selectIdentity: true);
+            var row = db.SingleById<ModelWithRowVersion>(rowId); 
+            TouchRow(rowId);
+
+            row.Text = "Fifth";
+            Assert.Throws<RowModifiedException>(() => db.Save(row));
+
+            var actualRow = db.SingleById<ModelWithRowVersion>(rowId);
+            Assert.That(actualRow.Text, Is.Not.EqualTo("Fourth"));
         }
 
         [Test]
