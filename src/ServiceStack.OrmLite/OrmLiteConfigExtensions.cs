@@ -93,6 +93,9 @@ namespace ServiceStack.OrmLite
             var i = 0;
             foreach (var propertyInfo in objProperties)
             {
+                if (propertyInfo.GetIndexParameters().Length > 0)
+                    continue; //Is Indexer
+
                 var sequenceAttr = propertyInfo.FirstAttribute<SequenceAttribute>();
                 var computeAttr = propertyInfo.FirstAttribute<ComputeAttribute>();
                 var decimalAttribute = propertyInfo.FirstAttribute<DecimalLengthAttribute>();

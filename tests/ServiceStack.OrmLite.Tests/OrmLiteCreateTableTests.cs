@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
 using ServiceStack.OrmLite.Tests.Shared;
@@ -263,5 +264,46 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(ModelWithNumerics.ModelWithNumericsComparer.Equals(fromDb, defaultValues));
             }
         }
+
+        public class ModelWithIndexer
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+
+            public ModelWithIndexer()
+            {
+                Attributes = new Dictionary<string, object>();
+            }
+
+            public Object this[string attributeName]
+            {
+                get
+                {
+                    return Attributes[attributeName];
+                }
+                set
+                {
+                    Attributes[attributeName] = value;
+                }
+            }
+
+            Dictionary<string, object> Attributes { get; set; } 
+        }
+
+        [Test]
+        public void Can_create_table_ModelWithIndexer()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<ModelWithIndexer>();
+
+                db.Insert(new ModelWithIndexer { Id = 1, Name = "foo" });
+
+                var row = db.SingleById<ModelWithIndexer>(1);
+
+                Assert.That(row.Name, Is.EqualTo("foo"));
+            }
+        }
+
     }
 }
