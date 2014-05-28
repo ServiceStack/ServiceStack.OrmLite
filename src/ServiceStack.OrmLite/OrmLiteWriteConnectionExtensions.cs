@@ -171,8 +171,9 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
-        /// Updates 1 POCO. All fields are updated except for the PrimaryKey which is used as the identity selector
-        /// and any optimistic concurrency fields which are used to verify no other changes since read. E.g:
+        /// Updates 1 POCO. All fields are updated except for the PrimaryKey which is used as the identity selector.
+        /// If the type has a row version field, the method will throw if the row has been changed since the last read.
+        /// E.g: 
         /// <para>db.Update(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27 })</para>
         /// </summary>
         public static int Update<T>(this IDbConnection dbConn, T obj)
@@ -181,7 +182,9 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
-        /// Updates 1 or more POCOs in a transaction. E.g:
+        /// Updates 1 or more POCOs in a transaction. 
+        /// If the type has a row version field, the method will throw if any row has been changed since the last read.
+        /// E.g:
         /// <para>db.Update(new Person { Id = 1, FirstName = "Tupac", LastName = "Shakur", Age = 25 },</para>
         /// <para>new Person { Id = 2, FirstName = "Biggie", LastName = "Smalls", Age = 24 })</para>
         /// </summary>
@@ -191,7 +194,9 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
-        /// Updates 1 or more POCOs in a transaction. E.g:
+        /// Updates 1 or more POCOs in a transaction. 
+        /// If the type has a row version field, the method will throw if any row has been changed since the last read.
+        /// E.g:
         /// <para>db.UpdateAll(new[] { new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27 } })</para>
         /// </summary>
         public static int UpdateAll<T>(this IDbConnection dbConn, IEnumerable<T> objs)
@@ -270,9 +275,9 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Delete 1 row by the PrimaryKey where the rowVersion matches the optimistic concurrency field. 
-        /// Will throw <exception cref="RowModifiedException">RowModefiedExeption</exception> if the 
-        /// row does not exist or has a different row version.
-        /// E.g: <para>db.DeleteById&lt;Person&gt;(1)</para>
+        /// The method will throw if the row has been deleted or changed since the last read.
+        /// E.g: 
+        /// <para>db.DeleteById&lt;Person&gt;(1)</para>
         /// </summary>
         public static void DeleteById<T>(this IDbConnection dbConn, object id, long rowVersion)
         {
@@ -330,7 +335,9 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Insert a new row or update existing row. Returns true if a new row was inserted. 
-        /// Optional references param decides whether to save all related references as well. E.g:
+        /// Optional references param decides whether to save all related references as well. 
+        /// If the type has a row version field, the method will throw if the row has been changed since the last read.
+        /// E.g:
         /// <para>db.Save(customer, references:true)</para>
         /// </summary>
         /// <returns>true if a row was inserted; false if it was updated</returns>
@@ -348,7 +355,9 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
-        /// Insert new rows or update existing rows. Return number of rows added E.g:
+        /// Insert new rows or update existing rows. Return number of rows added. 
+        /// If the type has a row version field, the method will throw if any row has been changed since the last read.
+        /// E.g:
         /// <para>db.Save(new Person { Id = 10, FirstName = "Amy", LastName = "Winehouse", Age = 27 })</para>
         /// </summary>
         /// <returns>number of rows added</returns>
@@ -358,7 +367,9 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
-        /// Insert new rows or update existing rows. Return number of rows added E.g:
+        /// Insert new rows or update existing rows. Return number of rows added.
+        /// If the type has a row version field, the method will throw if any row has been changed since the last read.
+        /// E.g:
         /// <para>db.SaveAll(new [] { new Person { Id = 10, FirstName = "Amy", LastName = "Winehouse", Age = 27 } })</para>
         /// </summary>
         /// <returns>number of rows added</returns>

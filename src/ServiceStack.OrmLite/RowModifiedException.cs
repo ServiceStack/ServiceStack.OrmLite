@@ -7,7 +7,10 @@ namespace ServiceStack.OrmLite
     /// </summary>
     public class RowModifiedException : Exception
     {
+        private const string DefaultMessage = "The row was modified or deleted since the last read";
+
         public RowModifiedException()
+            : base(DefaultMessage)
         {
         }
 

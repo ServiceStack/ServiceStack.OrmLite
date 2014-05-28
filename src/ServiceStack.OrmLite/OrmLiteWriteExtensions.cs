@@ -559,7 +559,7 @@ namespace ServiceStack.OrmLite
 
             var rowsAffected = dbCmd.ExecuteSql(sql);
             if (rowsAffected == 0)
-                throw new RowModifiedException("The row was modified or deleted since the last read");
+                throw new RowModifiedException();
         }
 
         internal static int DeleteByIds<T>(this IDbCommand dbCmd, IEnumerable idValues)
