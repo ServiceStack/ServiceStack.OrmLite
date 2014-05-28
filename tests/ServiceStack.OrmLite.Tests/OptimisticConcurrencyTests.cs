@@ -21,9 +21,11 @@ namespace ServiceStack.OrmLite.Tests
             {
                 dbConn.DropAndCreateTable<ModelWithRowVersion>();
                 dbConn.DropAndCreateTable<ModelWithAliasedRowVersion>();
-                dbConn.DropAndCreateTable<ModelWithOptimisticChildren>();
-                dbConn.DropAndCreateTable<ModelWithRowVersionAndParent>();
                 dbConn.DropAndCreateTable<ModelWithIdAndName>();
+
+                dbConn.DropTable<ModelWithRowVersionAndParent>();
+                dbConn.DropAndCreateTable<ModelWithOptimisticChildren>();
+                dbConn.CreateTable<ModelWithRowVersionAndParent>();
             }
         }
 
@@ -73,19 +75,19 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        public void Can_Save_new_row_and_retrieve_rowversion()
+        public void Can_Save_new_row_and_sets_rowversion()
         {
             var row = new ModelWithRowVersion { Text = "First" };
 
             bool wasInserted = db.Save(row);
 
             Assert.That(wasInserted, Is.True);
-            var actualRow = db.SingleById<ModelWithRowVersion>(row.Id);
-            Assert.That(row.Version, Is.EqualTo(actualRow.Version));
+            var databaseRow = db.SingleById<ModelWithRowVersion>(row.Id);
+            Assert.That(row.Version, Is.EqualTo(databaseRow.Version));
         }
 
         [Test]
-        public void Can_SaveAll_new_rows_and_retrieve_rowversion()
+        public void Can_SaveAll_new_rows_sets_rowversions()
         {
             var rows = new[]
             {
@@ -96,13 +98,13 @@ namespace ServiceStack.OrmLite.Tests
             var insertedCount = db.SaveAll(rows);
 
             Assert.That(insertedCount, Is.EqualTo(2));
-            var actualRows = db.SelectByIds<ModelWithRowVersion>(rows.Select(x => x.Id));
-            Assert.That(rows[0].Version, Is.EqualTo(actualRows[0].Version));
-            Assert.That(rows[1].Version, Is.EqualTo(actualRows[1].Version));
+            var databaseRows = db.SelectByIds<ModelWithRowVersion>(rows.Select(x => x.Id));
+            Assert.That(rows[0].Version, Is.EqualTo(databaseRows[0].Version));
+            Assert.That(rows[1].Version, Is.EqualTo(databaseRows[1].Version));
         }
 
         [Test]
-        public void Can_Save_new_row_with_references_and_retrieve_child_rowversions()
+        public void Can_Save_new_row_with_references_and_sets_child_rowversion()
         {
             var row = new ModelWithOptimisticChildren
             {
@@ -115,8 +117,8 @@ namespace ServiceStack.OrmLite.Tests
 
             db.Save(row, references: true);
 
-            var actualChildRow = db.SingleById<ModelWithRowVersionAndParent>(row.Children[0].Id);
-            Assert.That(row.Children[0].Version, Is.EqualTo(actualChildRow.Version));
+            var databaseRow = db.SingleById<ModelWithRowVersionAndParent>(row.Children[0].Id);
+            Assert.That(row.Children[0].Version, Is.EqualTo(databaseRow.Version));
         }
 
         [Test]
@@ -128,13 +130,13 @@ namespace ServiceStack.OrmLite.Tests
             row.Text = "Three";
             db.Update(row);
 
-            var actual = db.SingleById<ModelWithRowVersion>(rowId);
-            Assert.That(actual.Text, Is.EqualTo("Three"));
-            Assert.That(actual.Version, Is.Not.EqualTo(row.Version));
+            var actualRow = db.SingleById<ModelWithRowVersion>(rowId);
+            Assert.That(actualRow.Text, Is.EqualTo("Three"));
+            Assert.That(actualRow.Version, Is.Not.EqualTo(row.Version));
         }
 
         [Test]
-        public void Can_Save_changed_row_with_current_rowversion_and_retrieve_rowversion()
+        public void Can_Save_changed_row_with_current_rowversion_and_sets_rowversion()
         {
             var rowId = db.Insert(new ModelWithRowVersion { Text = "Second" }, selectIdentity: true);
             var row = db.SingleById<ModelWithRowVersion>(rowId);
@@ -143,8 +145,8 @@ namespace ServiceStack.OrmLite.Tests
             bool wasInserted = db.Save(row);
 
             Assert.That(wasInserted, Is.False);
-            var actualRow = db.SingleById<ModelWithRowVersion>(rowId);
-            Assert.That(row.Version, Is.EqualTo(actualRow.Version));
+            var databaseRow = db.SingleById<ModelWithRowVersion>(rowId);
+            Assert.That(row.Version, Is.EqualTo(databaseRow.Version));
         }
 
         [Test]
@@ -167,7 +169,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        public void Can_SaveAll_changed_rows_with_current_rowversion_and_retrieve_rowversion()
+        public void Can_SaveAll_changed_rows_with_current_rowversion_and_sets_rowversion()
         {
             var rowIds = new[]
             {
@@ -181,10 +183,10 @@ namespace ServiceStack.OrmLite.Tests
             var insertedCount = db.SaveAll(rows);
 
             Assert.That(insertedCount, Is.EqualTo(0));
-            var actualRows = db.SelectByIds<ModelWithRowVersion>(rows.Select(x => x.Id));
-            Assert.That(actualRows[0].Text, Is.EqualTo("Fifteenth"));
-            Assert.That(rows[0].Version, Is.EqualTo(actualRows[0].Version));
-            Assert.That(rows[1].Version, Is.EqualTo(actualRows[1].Version));
+            var databaseRows = db.SelectByIds<ModelWithRowVersion>(rows.Select(x => x.Id));
+            Assert.That(databaseRows[0].Text, Is.EqualTo("Fifteenth"));
+            Assert.That(rows[0].Version, Is.EqualTo(databaseRows[0].Version));
+            Assert.That(rows[1].Version, Is.EqualTo(databaseRows[1].Version));
         }
 
         [Test]
@@ -220,8 +222,8 @@ namespace ServiceStack.OrmLite.Tests
             row.Text = "Six";
             Assert.Throws<RowModifiedException>(() => db.Update(row));
 
-            var actual = db.SingleById<ModelWithRowVersion>(rowId);
-            Assert.That(actual.Text, Is.Not.EqualTo("Six"));
+            var actualRow = db.SingleById<ModelWithRowVersion>(rowId);
+            Assert.That(actualRow.Text, Is.Not.EqualTo("Six"));
         }
 
         [Test]
@@ -337,7 +339,7 @@ namespace ServiceStack.OrmLite.Tests
         [AutoIncrement]
         public int Id { get; set; }
 
-        [Reference]
+        [ForeignKey(typeof(ModelWithOptimisticChildren))]
         public int ModelWithOptimisticChildrenId { get; set; }
 
         public string Text { get; set; }
