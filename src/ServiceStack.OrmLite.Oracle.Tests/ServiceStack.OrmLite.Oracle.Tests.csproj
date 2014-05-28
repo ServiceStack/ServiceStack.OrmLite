@@ -270,6 +270,9 @@
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelWithOnlyStringFields.cs">
       <Link>Shared\ModelWithOnlyStringFields.cs</Link>
     </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelWithRowVersion.cs">
+      <Link>Shared\ModelWithRowVersion.cs</Link>
+    </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\Movie.cs">
       <Link>Shared\Movie.cs</Link>
     </Compile>

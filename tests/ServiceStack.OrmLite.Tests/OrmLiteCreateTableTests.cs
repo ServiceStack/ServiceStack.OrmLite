@@ -264,6 +264,20 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(ModelWithNumerics.ModelWithNumericsComparer.Equals(fromDb, defaultValues));
             }
         }
+        [Test]
+        public void Can_create_table_with_rowversion()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<ModelWithRowVersion>();
+                db.GetLastSql().Print();
+
+                db.Insert(new ModelWithRowVersion { Text = "A" }, new ModelWithRowVersion { Text = "B" });
+
+                var rows = db.Select<ModelWithRowVersion>();
+                Assert.That(rows.Count, Is.EqualTo(2));
+            }
+        }
 
         public class ModelWithIndexer
         {

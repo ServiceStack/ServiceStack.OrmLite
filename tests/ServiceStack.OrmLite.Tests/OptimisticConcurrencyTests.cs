@@ -1,6 +1,8 @@
-﻿using System.Data;
+﻿using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using NUnit.Framework;
+using ServiceStack.Common.Tests.Models;
 using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.Tests
@@ -16,7 +18,10 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var dbConn = OpenDbConnection())
             {
-                dbConn.DropAndCreateTable<ModelWithRowVersion>();                
+                dbConn.DropAndCreateTable<ModelWithRowVersion>();
+                dbConn.DropAndCreateTable<ModelWithAliasedRowVersion>();
+                dbConn.DropAndCreateTable<ModelWithOptimisticChildren>();
+                dbConn.DropAndCreateTable<ModelWithRowVersionAndParent>();
             }
         }
 
@@ -33,7 +38,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        public void Select_retrieves_rowversion()
+        public void SingleById_retrieves_rowversion()
         {
             var rowId = db.Insert(new ModelWithRowVersion { Text = "One" }, selectIdentity:true);
             TouchRow(rowId);
@@ -41,6 +46,28 @@ namespace ServiceStack.OrmLite.Tests
             var row = db.SingleById<ModelWithRowVersion>(rowId);
 
             Assert.That(row.Version, Is.Not.EqualTo(0));
+        }
+
+        [Test]
+        public void Select_retrieves_rowversion()
+        {
+            var rowId = db.Insert(new ModelWithRowVersion { Text = "OnePointOne" }, selectIdentity: true);
+            TouchRow(rowId);
+
+            var rows = db.Select<ModelWithRowVersion>(x => x.Id == rowId);
+
+            Assert.That(rows.Single().Version, Is.Not.EqualTo(0));
+        }
+
+        [Test]
+        public void SingleById_with_aliases_retrieves_rowversion()
+        {
+            var row = new ModelWithAliasedRowVersion { Text = "TheOne" };
+            db.Save(row);
+
+            var actualRow = db.SingleById<ModelWithAliasedRowVersion>(row.Id);
+
+            Assert.That(actualRow.Version, Is.EqualTo(row.Version));
         }
 
         [Test]
@@ -56,7 +83,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        public void Can_Save_multiple_new_rows_and_retrieve_rowversion()
+        public void Can_SaveAll_new_rows_and_retrieve_rowversion()
         {
             var rows = new[]
             {
@@ -73,7 +100,25 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        public void Can_update_with_current_rowversion()
+        public void Can_Save_new_row_with_references_and_retrieve_child_rowversions()
+        {
+            var row = new ModelWithOptimisticChildren
+            {
+                Text = "Twentyfirst",
+                Children = new List<ModelWithRowVersionAndParent>
+                {
+                    new ModelWithRowVersionAndParent { Text = "Twentysecond" }
+                }
+            };
+
+            db.Save(row, references: true);
+
+            var actualChildRow = db.SingleById<ModelWithRowVersionAndParent>(row.Children[0].Id);
+            Assert.That(row.Children[0].Version, Is.EqualTo(actualChildRow.Version));
+        }
+
+        [Test]
+        public void Can_Update_with_current_rowversion()
         {
             var rowId = db.Insert(new ModelWithRowVersion { Text = "Two" }, selectIdentity: true);
             var row = db.SingleById<ModelWithRowVersion>(rowId);
@@ -101,7 +146,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        public void Can_update_multiple_with_current_rowversions()
+        public void Can_UpdateAll_with_current_rowversions()
         {
             var rowIds = new[]
             {
@@ -120,7 +165,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        public void Can_Save_multiple_changed_rows_with_current_rowversion_and_retrieve_rowversion()
+        public void Can_SaveAll_changed_rows_with_current_rowversion_and_retrieve_rowversion()
         {
             var rowIds = new[]
             {
@@ -141,7 +186,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        public void Can_delete_with_current_rowversion()
+        public void Can_Delete_with_current_rowversion()
         {
             var rowId = db.Insert(new ModelWithRowVersion { Text = "Four" }, selectIdentity: true);
             var row = db.SingleById<ModelWithRowVersion>(rowId);
@@ -181,7 +226,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        public void Update_multiple_with_single_outdated_rowversion_throws_and_all_changes_are_rejected()
+        public void UpdateAll_with_single_outdated_rowversion_throws_and_all_changes_are_rejected()
         {
             var rowIds = new[]
             {
@@ -201,7 +246,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        public void Save_multiple_with_outdated_rowversion_throws_and_all_changed_are_rejected()
+        public void SaveAll_with_outdated_rowversion_throws_and_all_changed_are_rejected()
         {
             var rowIds = new[]
             {
@@ -241,10 +286,37 @@ namespace ServiceStack.OrmLite.Tests
         }
     }
 
-    public class ModelWithRowVersion
+    [Alias("TheModelWithAliasedRowVersion")]
+    public class ModelWithAliasedRowVersion
     {
         [AutoIncrement]
         public long Id { get; set; }
+
+        public string Text { get; set; }
+
+        [RowVersion]
+        [Alias("TheVersion")]
+        public long Version { get; set; }
+    }
+
+    public class ModelWithOptimisticChildren
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+
+        public string Text { get; set; }
+
+        [Reference]
+        public List<ModelWithRowVersionAndParent> Children { get; set; }
+    }
+
+    public class ModelWithRowVersionAndParent
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+
+        [Reference]
+        public int ModelWithOptimisticChildrenId { get; set; }
 
         public string Text { get; set; }
 
