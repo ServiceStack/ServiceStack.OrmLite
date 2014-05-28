@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using NUnit.Framework;
@@ -22,6 +23,7 @@ namespace ServiceStack.OrmLite.Tests
                 dbConn.DropAndCreateTable<ModelWithAliasedRowVersion>();
                 dbConn.DropAndCreateTable<ModelWithOptimisticChildren>();
                 dbConn.DropAndCreateTable<ModelWithRowVersionAndParent>();
+                dbConn.DropAndCreateTable<ModelWithIdAndName>();
             }
         }
 
@@ -186,15 +188,26 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        public void Can_Delete_with_current_rowversion()
+        public void Can_DeleteById_from_versioned_table_without_rowversion()
+        {
+            var rowId = db.Insert(new ModelWithRowVersion { Text = "Four" }, selectIdentity: true);
+
+            // It might be better to throw in this case
+            db.DeleteById<ModelWithRowVersion>(rowId);
+
+            Assert.That(db.Exists<ModelWithRowVersion>(m => m.Id == rowId), Is.False);
+        }
+
+
+        [Test]
+        public void Can_DeleteById_with_current_rowversion()
         {
             var rowId = db.Insert(new ModelWithRowVersion { Text = "Four" }, selectIdentity: true);
             var row = db.SingleById<ModelWithRowVersion>(rowId);
 
-            db.Delete(row);
+            db.DeleteById<ModelWithRowVersion>(rowId, row.Version);
 
-            var count = db.Count<ModelWithRowVersion>(m => m.Id == rowId);
-            Assert.That(count, Is.EqualTo(0));
+            Assert.That(db.Exists<ModelWithRowVersion>(m => m.Id == rowId), Is.False);
         }
 
         [Test]
@@ -266,16 +279,25 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        public void Delete_with_outdated_rowversion_throws()
+        public void DeleteById_with_outdated_rowversion_throws()
         {
             var rowId = db.Insert(new ModelWithRowVersion { Text = "Seven" }, selectIdentity: true);
             var row = db.SingleById<ModelWithRowVersion>(rowId);
             TouchRow(rowId);
 
-            Assert.Throws<RowModifiedException>(() => db.Delete(row));
+            Assert.Throws<RowModifiedException>(() => db.DeleteById<ModelWithRowVersion>(rowId, row.Version));
 
-            var count = db.Count<ModelWithRowVersion>(m => m.Id == rowId);
-            Assert.That(count, Is.EqualTo(1));
+            Assert.That(db.Exists<ModelWithRowVersion>(m => m.Id == rowId));
+        }
+
+        [Test]
+        public void DeleteById_with_rowversion_for_model_without_rowversion_column_throws_and_row_is_not_deleted()
+        {
+            var rowId = db.Insert(new ModelWithIdAndName(1), selectIdentity: true);
+
+            Assert.Throws<InvalidOperationException>(() => db.DeleteById<ModelWithIdAndName>(rowId, 12345));
+
+            Assert.That(db.Exists<ModelWithIdAndName>(m => m.Id == rowId));
         }
 
         private void TouchRow(long rowId)

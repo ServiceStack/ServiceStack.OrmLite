@@ -530,6 +530,38 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecuteSql(sql);
         }
 
+        internal static void DeleteById<T>(this IDbCommand dbCmd, object id, long rowVersion)
+        {
+            var modelDef = ModelDefinition<T>.Definition;
+
+            dbCmd.Parameters.Clear();
+
+            var idParam = dbCmd.CreateParameter();
+            idParam.ParameterName = OrmLiteConfig.DialectProvider.GetParam();
+            idParam.Value = id;
+            dbCmd.Parameters.Add(idParam);
+
+            var rowVersionField = modelDef.RowVersion;
+            if (rowVersionField == null)
+                throw new InvalidOperationException("Cannot use DeleteById with rowVersion for model type without a row version column");
+
+            var rowVersionParam = dbCmd.CreateParameter();
+            rowVersionParam.ParameterName = OrmLiteConfig.DialectProvider.GetParam("verson");
+            rowVersionParam.Value = rowVersion;
+            dbCmd.Parameters.Add(rowVersionParam);
+
+            var sql = String.Format("DELETE FROM {0} WHERE {1} = {2} AND {3} = {4}",
+                OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef),
+                OrmLiteConfig.DialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName),
+                idParam.ParameterName,
+                OrmLiteConfig.DialectProvider.GetQuotedColumnName(rowVersionField.FieldName),
+                rowVersionParam.ParameterName);
+
+            var rowsAffected = dbCmd.ExecuteSql(sql);
+            if (rowsAffected == 0)
+                throw new RowModifiedException("The row was modified or deleted since the last read");
+        }
+
         internal static int DeleteByIds<T>(this IDbCommand dbCmd, IEnumerable idValues)
         {
             var sqlIn = idValues.GetIdsInSql();

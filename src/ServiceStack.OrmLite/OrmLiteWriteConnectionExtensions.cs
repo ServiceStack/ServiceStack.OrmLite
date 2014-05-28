@@ -269,6 +269,17 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Delete 1 row by the PrimaryKey where the rowVersion matches the optimistic concurrency field. 
+        /// Will throw <exception cref="RowModifiedException">RowModefiedExeption</exception> if the 
+        /// row does not exist or has a different row version.
+        /// E.g: <para>db.DeleteById&lt;Person&gt;(1)</para>
+        /// </summary>
+        public static void DeleteById<T>(this IDbConnection dbConn, object id, long rowVersion)
+        {
+            dbConn.Exec(dbCmd => dbCmd.DeleteById<T>(id, rowVersion));
+        }
+
+        /// <summary>
         /// Delete all rows identified by the PrimaryKeys. E.g:
         /// <para>db.DeleteById&lt;Person&gt;(new[] { 1, 2, 3 })</para>
         /// </summary>
