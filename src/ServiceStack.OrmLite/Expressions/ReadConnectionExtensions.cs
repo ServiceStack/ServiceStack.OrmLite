@@ -111,9 +111,9 @@ namespace ServiceStack.OrmLite
         /// Returns results from using an SqlExpression lambda. E.g:
         /// <para>db.Select(db.From&lt;Person&gt;().Where(x =&gt; x.Age &gt; 40))</para>
         /// </summary>
-        public static List<T> Select<T>(this IDbConnection dbConn, ISqlExpression expression)
+        public static List<T> Select<T>(this IDbConnection dbConn, ISqlExpression expression, object anonType = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(expression.ToSelectStatement()));
+            return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(expression.ToSelectStatement(), anonType));
         }
 
         /// <summary>

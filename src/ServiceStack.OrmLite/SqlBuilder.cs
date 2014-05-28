@@ -172,7 +172,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        public class Template
+        public class Template : ISqlExpression
         {
             readonly string sql;
             readonly SqlBuilder builder;
@@ -214,6 +214,11 @@ namespace ServiceStack.OrmLite
 
             public string RawSql { get { ResolveSql(); return rawSql; } }
             public object Parameters { get { ResolveSql(); return parameters; } }
+
+            public string ToSelectStatement()
+            {
+                return RawSql;
+            }
         }
 
         public Template AddTemplate(string sql, object parameters = null)

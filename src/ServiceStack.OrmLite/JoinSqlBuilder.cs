@@ -6,7 +6,7 @@ using System.Text;
 
 namespace ServiceStack.OrmLite
 {
-    public class JoinSqlBuilder<TNewPoco, TBasePoco>
+    public class JoinSqlBuilder<TNewPoco, TBasePoco> : ISqlExpression
     {
         private List<Join> joinList = new List<Join>();
         private List<KeyValuePair<string, WhereType>> whereList = new List<KeyValuePair<string, WhereType>>();
@@ -416,6 +416,11 @@ namespace ServiceStack.OrmLite
             {
                 throw new Exception("Aggregate function cannot be used with non aggregate select columns");
             }
+        }
+
+        public string ToSelectStatement()
+        {
+            return ToSql();
         }
 
         public string ToSql()

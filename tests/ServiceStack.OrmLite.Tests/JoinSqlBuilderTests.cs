@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -86,5 +87,50 @@ namespace ServiceStack.OrmLite.Tests
             var stmt = OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(User), joinQuery);
             Assert.That(Regex.Matches(stmt, @"(\b|\n)FROM(\b|\n)", RegexOptions.IgnoreCase).Count, Is.EqualTo(1));
         }
+
+	    [Test]
+	    public void Can_execute_JoinSqlBuilder_as_SqlExpression()
+	    {
+            var joinQuery = new JoinSqlBuilder<User, User>()
+                .LeftJoin<User, WithAliasAddress>(x => x.Id, x => x.UserId
+                    , sourceWhere: x => x.Age > 18
+                    , destinationWhere: x => x.Country == "Italy");
+
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<User>();
+                db.DropAndCreateTable<WithAliasAddress>();
+
+                var userId = db.Insert(new User { Age = 27, Name = "Foo" }, selectIdentity:true);
+                db.Insert(new WithAliasAddress { City = "Rome", Country = "Italy", UserId = (int)userId });
+
+                var results = db.Select<User>(joinQuery);
+                Assert.That(results.Count, Is.EqualTo(1));
+            }
+	    }
+
+	    [Test]
+	    public void Can_execute_SqlBuilder_templates_as_SqlExpression()
+	    {
+	        var sb = new SqlBuilder();
+
+            var tmpl = sb.AddTemplate("SELECT * FROM User u INNER JOIN Addresses a on a.UserId = u.Id /**where**/");
+            sb.Where("Age > @age", new { age = 18 });
+            sb.Where("Countryalias = @country", new { country = "Italy" });
+
+
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<User>();
+                db.DropAndCreateTable<WithAliasAddress>();
+
+                var userId = db.Insert(new User { Age = 27, Name = "Foo" }, selectIdentity: true);
+                db.Insert(new WithAliasAddress { City = "Rome", Country = "Italy", UserId = (int)userId });
+
+                var results = db.Select<User>(tmpl, tmpl.Parameters);
+
+                Assert.That(results.Count, Is.EqualTo(1));
+            }
+	    }
     }
 }
