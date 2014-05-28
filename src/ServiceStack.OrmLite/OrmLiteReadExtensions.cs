@@ -13,12 +13,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
 using System.Text;
 using ServiceStack.Logging;
-using ServiceStack.Text;
 using System.Linq;
 
 namespace ServiceStack.OrmLite
@@ -35,18 +33,16 @@ namespace ServiceStack.OrmLite
         private static readonly ILog Log = LogManager.GetLogger(typeof(OrmLiteReadExtensions));
         public const string UseDbConnectionExtensions = "Use IDbConnection Extensions instead";
 
-        [Conditional("DEBUG")]
-        private static void LogDebug(string fmt, params object[] args)
+        private static void LogDebug(string fmt)
         {
-            if (args.Length > 0)
-                Log.DebugFormat(fmt, args);
-            else
-                Log.Debug(fmt);
+            Log.Debug(fmt);
         }
 
         internal static IDataReader ExecReader(this IDbCommand dbCmd, string sql)
         {
-            LogDebug(sql);
+            if (Log.IsDebugEnabled)
+                LogDebug(sql);
+
             dbCmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
             dbCmd.CommandText = sql;
             return dbCmd.ExecuteReader();
@@ -54,7 +50,9 @@ namespace ServiceStack.OrmLite
 
         internal static IDataReader ExecReader(this IDbCommand dbCmd, string sql, IEnumerable<IDataParameter> parameters)
         {
-            LogDebug(sql);
+            if (Log.IsDebugEnabled)
+                LogDebug(sql);
+
             dbCmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
             dbCmd.CommandText = sql;
             dbCmd.Parameters.Clear();

@@ -13,7 +13,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using ServiceStack.Logging;
@@ -23,15 +22,10 @@ namespace ServiceStack.OrmLite
     public static class OrmLiteWriteExtensions
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(OrmLiteWriteExtensions));
-        private const string UseDbConnectionExtensions = "Use IDbConnection Extensions instead";
 
-        [Conditional("DEBUG")]
-        private static void LogDebug(string fmt, params object[] args)
+        private static void LogDebug(string fmt)
         {
-            if (args.Length > 0)
-                Log.DebugFormat(fmt, args);
-            else
-                Log.Debug(fmt);
+            Log.Debug(fmt);
         }
 
         internal static void CreateTables(this IDbCommand dbCmd, bool overwrite, params Type[] tableTypes)
@@ -212,7 +206,8 @@ namespace ServiceStack.OrmLite
 
         internal static int ExecuteSql(this IDbCommand dbCmd, string sql)
         {
-            LogDebug(sql);
+            if (Log.IsDebugEnabled)
+                LogDebug(sql);
 
             dbCmd.CommandText = sql;
 

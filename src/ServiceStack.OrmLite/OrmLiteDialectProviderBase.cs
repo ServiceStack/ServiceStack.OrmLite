@@ -36,15 +36,6 @@ namespace ServiceStack.OrmLite
             StringSerializer = new JsvStringSerializer();
         }
 
-        [Conditional("DEBUG")]
-        private static void LogDebug(string fmt, params object[] args)
-        {
-            if (args.Length > 0)
-                Log.DebugFormat(fmt, args);
-            else
-                Log.Debug(fmt);
-        }
-
         #region ADO.NET supported types
         /* ADO.NET UNDERSTOOD DATA TYPES:
 			COUNTER	DbType.Int64

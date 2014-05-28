@@ -65,7 +65,7 @@ namespace ServiceStack.OrmLite.Tests
 		[TestFixtureSetUp]
 		public void TestFixtureSetUp()
 		{
-			LogManager.LogFactory = new ConsoleLogFactory();
+			LogManager.LogFactory = new ConsoleLogFactory(debugEnabled:false);
 
 		    switch (Dialect)
 		    {
