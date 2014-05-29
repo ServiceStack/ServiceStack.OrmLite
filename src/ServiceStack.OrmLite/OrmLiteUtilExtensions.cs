@@ -106,16 +106,7 @@ namespace ServiceStack.OrmLite
 
         public static string GetColumnNames(this ModelDefinition modelDef)
         {
-            var sqlColumns = new StringBuilder();
-            foreach (var field in modelDef.FieldDefinitions)
-            {
-                if (sqlColumns.Length > 0)
-                    sqlColumns.Append(", ");
-
-                sqlColumns.Append(OrmLiteConfig.DialectProvider.GetQuotedColumnName(field.FieldName));
-            }
-
-            return sqlColumns.ToString();
+            return OrmLiteConfig.DialectProvider.GetColumnNames(modelDef);
         }
 
         internal static string GetIdsInSql(this IEnumerable idValues)

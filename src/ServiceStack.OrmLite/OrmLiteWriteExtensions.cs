@@ -133,6 +133,23 @@ namespace ServiceStack.OrmLite
                             }
                         }
                     }
+                    var triggerList = dialectProvider.ToCreateTriggerStatements(modelType);
+                    foreach (var trigger in triggerList)
+                    {
+                        try
+                        {
+                            dbCmd.ExecuteSql(trigger);
+                        }
+                        catch (Exception exTrigger)
+                        {
+                            if (IgnoreAlreadyExistsError(exTrigger))
+                            {
+                                Log.DebugFormat("Ignoring existing trigger '{0}': {1}", exTrigger, exTrigger.Message);
+                                continue;
+                            }
+                            throw;
+                        }
+                    }
                 }
             }
             catch (Exception ex)
@@ -371,13 +388,17 @@ namespace ServiceStack.OrmLite
             if (OrmLiteConfig.UpdateFilter != null)
                 OrmLiteConfig.UpdateFilter(dbCmd, obj);
 
-            OrmLiteConfig.DialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
+            var doesConcurrencyCheck = OrmLiteConfig.DialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
             if (string.IsNullOrEmpty(dbCmd.CommandText))
                 return 0;
 
             OrmLiteConfig.DialectProvider.SetParameterValues<T>(dbCmd, obj);
 
-            return dbCmd.ExecNonQuery();
+            var rowsUpdated = dbCmd.ExecNonQuery();
+
+            if (doesConcurrencyCheck && rowsUpdated == 0) throw new RowModifiedException();
+
+            return rowsUpdated;
         }
 
         internal static int Update<T>(this IDbCommand dbCmd, params T[] objs)
@@ -397,7 +418,7 @@ namespace ServiceStack.OrmLite
 
                 var dialectProvider = OrmLiteConfig.DialectProvider;
 
-                dialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
+                var doesConcurrencyCheck = dialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
                 if (string.IsNullOrEmpty(dbCmd.CommandText))
                     return 0;
 
@@ -408,7 +429,10 @@ namespace ServiceStack.OrmLite
 
                     dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
-                    count += dbCmd.ExecNonQuery();
+                    var rowsUpdated = dbCmd.ExecNonQuery();
+                    if (doesConcurrencyCheck && rowsUpdated == 0) throw new RowModifiedException();
+
+                    count += rowsUpdated;
                 }
 
                 if (dbTrans != null)
@@ -504,6 +528,38 @@ namespace ServiceStack.OrmLite
             dbCmd.Parameters.Add(idParam);
 
             return dbCmd.ExecuteSql(sql);
+        }
+
+        internal static void DeleteById<T>(this IDbCommand dbCmd, object id, long rowVersion)
+        {
+            var modelDef = ModelDefinition<T>.Definition;
+
+            dbCmd.Parameters.Clear();
+
+            var idParam = dbCmd.CreateParameter();
+            idParam.ParameterName = OrmLiteConfig.DialectProvider.GetParam();
+            idParam.Value = id;
+            dbCmd.Parameters.Add(idParam);
+
+            var rowVersionField = modelDef.RowVersion;
+            if (rowVersionField == null)
+                throw new InvalidOperationException("Cannot use DeleteById with rowVersion for model type without a row version column");
+
+            var rowVersionParam = dbCmd.CreateParameter();
+            rowVersionParam.ParameterName = OrmLiteConfig.DialectProvider.GetParam("verson");
+            rowVersionParam.Value = rowVersion;
+            dbCmd.Parameters.Add(rowVersionParam);
+
+            var sql = String.Format("DELETE FROM {0} WHERE {1} = {2} AND {3} = {4}",
+                OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef),
+                OrmLiteConfig.DialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName),
+                idParam.ParameterName,
+                OrmLiteConfig.DialectProvider.GetQuotedColumnName(rowVersionField.FieldName),
+                rowVersionParam.ParameterName);
+
+            var rowsAffected = dbCmd.ExecuteSql(sql);
+            if (rowsAffected == 0)
+                throw new RowModifiedException();
         }
 
         internal static int DeleteByIds<T>(this IDbCommand dbCmd, IEnumerable idValues)
@@ -603,9 +659,9 @@ namespace ServiceStack.OrmLite
         {
             var id = obj.GetId();
             var existingRow = dbCmd.SingleById<T>(id);
+            var modelDef = typeof(T).GetModelDefinition();
             if (Equals(existingRow, default(T)))
             {
-                var modelDef = typeof(T).GetModelDefinition();
                 if (modelDef.HasAutoIncrementId)
                 {
                     var newId = dbCmd.Insert(obj, selectIdentity: true);
@@ -619,6 +675,11 @@ namespace ServiceStack.OrmLite
 
                     dbCmd.Insert(obj);
                 }
+                if (modelDef.HasRowVersion)
+                {
+                    var rowVersion = dbCmd.GetRowVersion(obj);
+                    modelDef.RowVersion.SetValueFn(obj, rowVersion);
+                }
                 return true;
             }
 
@@ -626,6 +687,13 @@ namespace ServiceStack.OrmLite
                 OrmLiteConfig.UpdateFilter(dbCmd, obj);
 
             dbCmd.Update(obj);
+
+            if (modelDef.HasRowVersion)
+            {
+                var rowVersion = dbCmd.GetRowVersion(obj);
+                modelDef.RowVersion.SetValueFn(obj, rowVersion);
+            }
+
             return false;
         }
 
@@ -683,6 +751,12 @@ namespace ServiceStack.OrmLite
 
                         rowsAdded++;
                     }
+
+                    if (modelDef.HasRowVersion)
+                    {
+                        var rowVersion = dbCmd.GetRowVersion(row);
+                        modelDef.RowVersion.SetValueFn(row, rowVersion);
+                    }
                 }
 
                 if (dbTrans != null)
@@ -695,6 +769,15 @@ namespace ServiceStack.OrmLite
             }
 
             return rowsAdded;
+        }
+
+        internal static long GetRowVersion<T>(this IDbCommand dbCmd, T obj)
+        {
+            OrmLiteConfig.DialectProvider.PrepareParameterizedSelectRowVersionStatement<T>(dbCmd);
+
+            OrmLiteConfig.DialectProvider.SetParameterValues<T>(dbCmd, obj);
+
+            return dbCmd.ExecLongScalar();
         }
 
         // Procedures

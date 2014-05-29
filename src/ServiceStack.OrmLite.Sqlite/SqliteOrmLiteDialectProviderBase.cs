@@ -206,13 +206,49 @@ namespace ServiceStack.OrmLite.Sqlite
         }
 
         public override string GetColumnDefinition(string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement, 
-            bool isNullable, int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
+            bool isRowVersion, bool isNullable, int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
         {
+            if (isRowVersion)
+                defaultValue = "1";
             // http://www.sqlite.org/lang_createtable.html#rowid
-            var ret = base.GetColumnDefinition(fieldName, fieldType, isPrimaryKey, autoIncrement, isNullable, fieldLength, scale, defaultValue, customFieldDefinition);
+            var ret = base.GetColumnDefinition(fieldName, fieldType, isPrimaryKey, autoIncrement, isRowVersion, isNullable, fieldLength, scale, defaultValue, customFieldDefinition);
             if (isPrimaryKey)
                 return ret.Replace(" BIGINT ", " INTEGER ");
             return ret;
+        }
+
+        public override List<string> ToCreateTriggerStatements(Type tableType)
+        {
+            var triggers = new List<string>();
+            var modelDef = GetModel(tableType);
+
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+                if (!fieldDef.IsRowVersion) continue;
+
+                string triggerName = NamingStrategy.ApplyNameRestrictions(
+                    String.Format("{0}_{1}_Update", 
+                        NamingStrategy.GetTableName(modelDef.ModelName), 
+                        NamingStrategy.GetColumnName(fieldDef.FieldName)));
+
+                string tableName = GetQuotedTableName(modelDef);
+                string rowVersionColumnName = GetQuotedColumnName(fieldDef.FieldName);
+
+                string triggerAction = string.Format("UPDATE {0} SET {1} = OLD.{1} + 1 WHERE {2} = NEW.{2};", 
+                    tableName, 
+                    rowVersionColumnName,
+                    GetQuotedColumnName(modelDef.PrimaryKey.FieldName));
+
+                var rowVersionUpdateTrigger = string.Format("CREATE TRIGGER \"{0}\" AFTER UPDATE ON {1} FOR EACH ROW BEGIN {2} END;\n",
+                                                      triggerName, 
+                                                      tableName, 
+                                                      triggerAction);
+
+                triggers.Add(rowVersionUpdateTrigger);
+                break;
+            }
+
+            return triggers;
         }
     }
 

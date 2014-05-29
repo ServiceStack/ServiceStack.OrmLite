@@ -57,6 +57,7 @@ namespace ServiceStack.OrmLite.Oracle
             BoolColumnDefinition = "NUMBER(1)";
             GuidColumnDefinition = CompactGuid ? CompactGuidDefinition : StringGuidDefinition;
             LongColumnDefinition = "NUMERIC(18)";
+            RowVersionColumnDefinition = LongColumnDefinition;
             AutoIncrementDefinition = string.Empty;
             DateTimeColumnDefinition = "TIMESTAMP";
             DateTimeOffsetColumnDefinition = "TIMESTAMP WITH TIME ZONE";
@@ -290,7 +291,7 @@ namespace ServiceStack.OrmLite.Oracle
             dbCommand.CommandTimeout = OrmLiteConfig.CommandTimeout;
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
-                if (fieldDef.IsComputed) continue;
+                if (fieldDef.IsComputed || fieldDef.IsRowVersion) continue;
 
                 //insertFields contains Property "Name" of fields to insert (that's how expressions work)
                 if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name)) continue;
@@ -632,6 +633,7 @@ namespace ServiceStack.OrmLite.Oracle
                     fieldDef.ColumnType,
                     fieldDef.IsPrimaryKey,
                     fieldDef.AutoIncrement,
+                    fieldDef.IsRowVersion,
                     fieldDef.IsNullable,
                     fieldDef.FieldLength,
                     fieldDef.Scale,
@@ -712,12 +714,18 @@ namespace ServiceStack.OrmLite.Oracle
         }
 
         public override string GetColumnDefinition(string fieldName, Type fieldType,
-            bool isPrimaryKey, bool autoIncrement, bool isNullable,
+			bool isPrimaryKey, bool autoIncrement, bool isRowVersion, bool isNullable, 
             int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
         {
             string fieldDefinition;
 
-            if (customFieldDefinition != null)
+            if (isRowVersion)
+            {
+                isNullable = false;
+                defaultValue = "1";
+                fieldDefinition = RowVersionColumnDefinition;
+            }
+            else if (customFieldDefinition != null)
             {
                 fieldDefinition = customFieldDefinition;
             }
@@ -751,6 +759,33 @@ namespace ServiceStack.OrmLite.Oracle
             return sql.ToString();
         }
 
+
+        public override List<string> ToCreateTriggerStatements(Type tableType)
+        {
+            var triggers = new List<string>();
+            var modelDef = GetModel(tableType);
+
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+                if (!fieldDef.IsRowVersion) continue;
+
+                string triggerName = Quote(
+                                     NamingStrategy.ApplyNameRestrictions(
+                                     String.Format("{0}_{1}_Update", 
+                                                   GetTableName(modelDef), 
+                                                   NamingStrategy.GetColumnName(fieldDef.FieldName))));
+
+                string triggerAction = string.Format(":NEW.{0} := :OLD.{0}+1;", GetQuotedColumnName(fieldDef.FieldName));
+
+                var rowVersionUpdateTrigger = string.Format("CREATE TRIGGER {0} BEFORE UPDATE ON {1} FOR EACH ROW BEGIN {2} END;\n",
+                                                      triggerName,
+                                                      GetQuotedTableName(modelDef),
+                                                      triggerAction);
+                triggers.Add(rowVersionUpdateTrigger);
+            }
+
+            return triggers;
+        }
 
         public override List<string> ToCreateIndexStatements(Type tableType)
         {

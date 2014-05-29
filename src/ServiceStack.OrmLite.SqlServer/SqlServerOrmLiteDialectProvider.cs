@@ -29,6 +29,7 @@ namespace ServiceStack.OrmLite.SqlServer
             base.DecimalColumnDefinition = "DECIMAL(38,6)";
             base.DefaultDecimalPrecision = 38;
             base.DefaultDecimalScale = 6;
+            base.RowVersionColumnDefinition = "ROWVERSION";
 
             base.InitColumnTypeMap();
         }
@@ -51,6 +52,8 @@ namespace ServiceStack.OrmLite.SqlServer
         {
             return (UseUnicode ? "N'" : "'") + paramValue.Replace("'", "''") + "'";
         }
+
+		public static string RowVersionFieldName = "RowVersion";
 
         public override IDbConnection CreateConnection(string connectionString, Dictionary<string, string> options)
         {
@@ -98,6 +101,16 @@ namespace ServiceStack.OrmLite.SqlServer
 
             var escapedSchema = modelDef.Schema.Replace(".", "\".\"");
             return string.Format("\"{0}\".\"{1}\"", escapedSchema, NamingStrategy.GetTableName(modelDef.ModelName));
+        }
+
+        protected override string GetColumnNameForSelect(FieldDefinition field)
+        {
+            var quotedName = OrmLiteConfig.DialectProvider.GetQuotedColumnName(field.FieldName);
+
+            if (field.IsRowVersion)
+                return String.Format("CONVERT(BIGINT, {0}) AS {0}", quotedName);
+
+            return quotedName;
         }
 
         public override object ConvertDbValue(object value, Type type)
@@ -279,6 +292,7 @@ namespace ServiceStack.OrmLite.SqlServer
                                              fieldDef.ColumnType,
                                              fieldDef.IsPrimaryKey,
                                              fieldDef.AutoIncrement,
+                                             fieldDef.IsRowVersion,
                                              fieldDef.IsNullable,
                                              fieldDef.FieldLength,
                                              fieldDef.Scale,
@@ -296,6 +310,7 @@ namespace ServiceStack.OrmLite.SqlServer
                                              fieldDef.ColumnType,
                                              fieldDef.IsPrimaryKey,
                                              fieldDef.AutoIncrement,
+                                             fieldDef.IsRowVersion,
                                              fieldDef.IsNullable,
                                              fieldDef.FieldLength,
                                              fieldDef.Scale,
@@ -320,9 +335,12 @@ namespace ServiceStack.OrmLite.SqlServer
         }
 
         public override string GetColumnDefinition(string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement,
-            bool isNullable, int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
+            bool isRowVersion, bool isNullable, int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
         {
-            var definition = base.GetColumnDefinition(fieldName, fieldType, isPrimaryKey, autoIncrement,
+            if (isRowVersion)
+                defaultValue = null;
+
+            var definition = base.GetColumnDefinition(fieldName, fieldType, isPrimaryKey, autoIncrement, isRowVersion,
                 isNullable, fieldLength, scale, defaultValue, customFieldDefinition);
 
             if (fieldType == typeof(Decimal) && fieldLength != DefaultDecimalPrecision && scale != DefaultDecimalScale)

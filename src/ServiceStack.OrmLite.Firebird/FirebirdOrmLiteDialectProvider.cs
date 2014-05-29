@@ -337,6 +337,7 @@ namespace ServiceStack.OrmLite.Firebird
                     fieldDef.ColumnType,
                     fieldDef.IsPrimaryKey,
                     fieldDef.AutoIncrement,
+                    fieldDef.IsRowVersion,
                     fieldDef.IsNullable,
                     fieldDef.FieldLength,
                     fieldDef.Scale,
@@ -390,7 +391,7 @@ namespace ServiceStack.OrmLite.Firebird
         }
 
         public override string GetColumnDefinition(string fieldName, Type fieldType,
-            bool isPrimaryKey, bool autoIncrement, bool isNullable,
+			bool isPrimaryKey, bool autoIncrement, bool isRowVersion, bool isNullable, 
             int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
         {
             string fieldDefinition;
@@ -683,7 +684,8 @@ namespace ServiceStack.OrmLite.Firebird
 
         public override string GetColumnNames(ModelDefinition modelDef)
         {
-            if (QuoteNames) return modelDef.GetColumnNames();
+            if (QuoteNames) 
+                return base.GetColumnNames(modelDef);
             var sqlColumns = new StringBuilder();
             modelDef.FieldDefinitions.ForEach(x =>
                 sqlColumns.AppendFormat("{0} {1}",
@@ -766,6 +768,7 @@ namespace ServiceStack.OrmLite.Firebird
                                              fieldDef.ColumnType,
                                              fieldDef.IsPrimaryKey,
                                              fieldDef.AutoIncrement,
+                                             fieldDef.IsRowVersion,
                                              fieldDef.IsNullable,
                                              fieldDef.FieldLength,
                                              fieldDef.Scale,
@@ -783,6 +786,7 @@ namespace ServiceStack.OrmLite.Firebird
                                              fieldDef.ColumnType,
                                              fieldDef.IsPrimaryKey,
                                              fieldDef.AutoIncrement,
+                                             fieldDef.IsRowVersion,
                                              fieldDef.IsNullable,
                                              fieldDef.FieldLength,
                                              fieldDef.Scale,

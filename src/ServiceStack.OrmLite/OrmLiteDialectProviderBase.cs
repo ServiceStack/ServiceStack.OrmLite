@@ -116,6 +116,7 @@ namespace ServiceStack.OrmLite
         public string DateTimeColumnDefinition = "DATETIME";
         public string TimeColumnDefinition = "BIGINT";
         public string DateTimeOffsetColumnDefinition = "DATETIMEOFFSET";
+        public string RowVersionColumnDefinition = "BIGINT";
 
         private int defaultDecimalPrecision = 18;
         private int defaultDecimalScale = 12;
@@ -340,7 +341,7 @@ namespace ServiceStack.OrmLite
         }
 
         public virtual string GetColumnDefinition(string fieldName, Type fieldType,
-            bool isPrimaryKey, bool autoIncrement, bool isNullable,
+            bool isPrimaryKey, bool autoIncrement, bool isRowVersion, bool isNullable,
             int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
         {
             string fieldDefinition;
@@ -354,6 +355,11 @@ namespace ServiceStack.OrmLite
                 fieldDefinition = fieldLength == StringLengthAttribute.MaxText
                     ? MaxStringColumnDefinition
                     : string.Format(StringLengthColumnDefinitionFormat, fieldLength.GetValueOrDefault(DefaultStringLength));
+            }
+            else if (isRowVersion)
+            {
+                isPrimaryKey = isNullable = false;
+                fieldDefinition = RowVersionColumnDefinition;
             }
             else
             {
@@ -483,8 +489,8 @@ namespace ServiceStack.OrmLite
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
-                if (fieldDef.IsComputed) continue;
-                if (fieldDef.AutoIncrement) continue;
+                if (fieldDef.AutoIncrement || fieldDef.IsComputed || fieldDef.IsRowVersion) continue;
+
                 //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
                 if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name)) continue;
 
@@ -520,7 +526,7 @@ namespace ServiceStack.OrmLite
 
             foreach (var fieldDef in modelDef.FieldDefinitionsArray)
             {
-                if (fieldDef.AutoIncrement || fieldDef.IsComputed) continue;
+                if (fieldDef.AutoIncrement || fieldDef.IsComputed || fieldDef.IsRowVersion) continue;
 
                 //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
                 if (insertFields != null && !insertFields.Contains(fieldDef.Name)) continue;
@@ -548,8 +554,9 @@ namespace ServiceStack.OrmLite
                                             GetQuotedTableName(modelDef), sbColumnNames, sbColumnValues);
         }
 
-        public virtual void PrepareParameterizedUpdateStatement<T>(IDbCommand cmd, ICollection<string> updateFields = null)
+        public virtual bool PrepareParameterizedUpdateStatement<T>(IDbCommand cmd, ICollection<string> updateFields = null)
         {
+            var containsConcurrencyField = false;
             var sqlFilter = new StringBuilder();
             var sql = new StringBuilder();
             var modelDef = typeof(T).GetModelDefinition();
@@ -562,8 +569,9 @@ namespace ServiceStack.OrmLite
                 if (fieldDef.IsComputed) continue;
                 try
                 {
-                    if (fieldDef.IsPrimaryKey && (updateFields == null || updateFields.Count == 0))
+                    if ((fieldDef.IsPrimaryKey || fieldDef.IsRowVersion) && (updateFields == null || updateFields.Count == 0))
                     {
+                        containsConcurrencyField |= fieldDef.IsRowVersion;
                         if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
 
                         sqlFilter
@@ -595,10 +603,11 @@ namespace ServiceStack.OrmLite
             }
 
             if (sql.Length < 1)
-                return;
+                return false;
 
             cmd.CommandText = string.Format("UPDATE {0} SET {1} {2}",
                 GetQuotedTableName(modelDef), sql, (sqlFilter.Length > 0 ? "WHERE " + sqlFilter : ""));
+            return containsConcurrencyField;
         }
 
         public virtual void PrepareParameterizedDeleteStatement<T>(IDbCommand cmd, ICollection<string> deleteFields = null)
@@ -613,7 +622,7 @@ namespace ServiceStack.OrmLite
             {
                 if (fieldDef.IsComputed) continue;
 
-                if ((deleteFields != null && deleteFields.Count > 0) && !deleteFields.Contains(fieldDef.Name))
+                if (!fieldDef.IsRowVersion && (deleteFields != null && deleteFields.Count > 0) && !deleteFields.Contains(fieldDef.Name))
                     continue;
 
                 try
@@ -636,6 +645,25 @@ namespace ServiceStack.OrmLite
 
             cmd.CommandText = string.Format("DELETE FROM {0} WHERE {1}",
                 GetQuotedTableName(modelDef), sqlFilter);
+        }
+
+        public virtual void PrepareParameterizedSelectRowVersionStatement<T>(IDbCommand cmd)
+        {
+            var modelDef = typeof(T).GetModelDefinition();
+
+            cmd.Parameters.Clear();
+            cmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
+
+            string rowVersionColumn = GetColumnNameForSelect(modelDef.RowVersion);
+
+            var primaryKeyField = modelDef.PrimaryKey;
+            string sqlFilter = String.Format("{0}={1}", 
+                GetQuotedColumnName(primaryKeyField.FieldName), 
+                this.GetParam(SanitizeFieldNameForParamName(primaryKeyField.FieldName)));
+            AddParameter(cmd, primaryKeyField);
+
+            cmd.CommandText = string.Format("SELECT {0} FROM {1} WHERE {2}",
+                rowVersionColumn, GetQuotedTableName(modelDef), sqlFilter);
         }
 
         protected void AddParameter(IDbCommand cmd, FieldDefinition fieldDef)
@@ -767,6 +795,7 @@ namespace ServiceStack.OrmLite
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
                 if (fieldDef.IsComputed) continue;
+                if (fieldDef.IsRowVersion) continue;
 
                 try
                 {
@@ -867,6 +896,7 @@ namespace ServiceStack.OrmLite
                     fieldDef.ColumnType,
                     fieldDef.IsPrimaryKey,
                     fieldDef.AutoIncrement,
+                    fieldDef.IsRowVersion,
                     fieldDef.IsNullable,
                     fieldDef.FieldLength,
                     fieldDef.Scale,
@@ -996,7 +1026,26 @@ namespace ServiceStack.OrmLite
 
         public virtual string GetColumnNames(ModelDefinition modelDef)
         {
-            return modelDef.GetColumnNames();
+            var sqlColumns = new StringBuilder();
+            foreach (var field in modelDef.FieldDefinitions)
+            {
+                if (sqlColumns.Length > 0)
+                    sqlColumns.Append(", ");
+
+                sqlColumns.Append(GetColumnNameForSelect(field));
+            }
+
+            return sqlColumns.ToString();
+        }
+
+        protected virtual string GetColumnNameForSelect(FieldDefinition field)
+        {
+            return GetQuotedColumnName(field.FieldName);
+        }
+
+        public virtual List<string> ToCreateTriggerStatements(Type tableType)
+        {
+            return new List<string>();
         }
 
         public virtual List<string> ToCreateSequenceStatements(Type tableType)
@@ -1071,6 +1120,7 @@ namespace ServiceStack.OrmLite
                                              fieldDef.ColumnType,
                                              fieldDef.IsPrimaryKey,
                                              fieldDef.AutoIncrement,
+                                             fieldDef.IsRowVersion,
                                              fieldDef.IsNullable,
                                              fieldDef.FieldLength,
                                              fieldDef.Scale,
@@ -1088,6 +1138,7 @@ namespace ServiceStack.OrmLite
                                              fieldDef.ColumnType,
                                              fieldDef.IsPrimaryKey,
                                              fieldDef.AutoIncrement,
+                                             fieldDef.IsRowVersion,
                                              fieldDef.IsNullable,
                                              fieldDef.FieldLength,
                                              fieldDef.Scale,
@@ -1106,6 +1157,7 @@ namespace ServiceStack.OrmLite
                                              fieldDef.ColumnType,
                                              fieldDef.IsPrimaryKey,
                                              fieldDef.AutoIncrement,
+                                             fieldDef.IsRowVersion,
                                              fieldDef.IsNullable,
                                              fieldDef.FieldLength,
                                              fieldDef.Scale,
