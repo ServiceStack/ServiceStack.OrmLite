@@ -18,7 +18,6 @@ namespace ServiceStack.OrmLite.Sqlite
             base.BoolColumnDefinition = base.IntColumnDefinition;
             base.GuidColumnDefinition = "CHAR(36)";
             base.SelectIdentitySql = "SELECT last_insert_rowid()";
-            base.SetRowVersionOnInsert = true;
 
             base.InitColumnTypeMap();
         }
@@ -209,6 +208,8 @@ namespace ServiceStack.OrmLite.Sqlite
         public override string GetColumnDefinition(string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement, 
             bool isRowVersion, bool isNullable, int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
         {
+            if (isRowVersion)
+                defaultValue = "1";
             // http://www.sqlite.org/lang_createtable.html#rowid
             var ret = base.GetColumnDefinition(fieldName, fieldType, isPrimaryKey, autoIncrement, isRowVersion, isNullable, fieldLength, scale, defaultValue, customFieldDefinition);
             if (isPrimaryKey)

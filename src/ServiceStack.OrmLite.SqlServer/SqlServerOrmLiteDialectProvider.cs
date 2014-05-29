@@ -29,6 +29,7 @@ namespace ServiceStack.OrmLite.SqlServer
             base.DecimalColumnDefinition = "DECIMAL(38,6)";
             base.DefaultDecimalPrecision = 38;
             base.DefaultDecimalScale = 6;
+            base.RowVersionColumnDefinition = "ROWVERSION";
 
             base.InitColumnTypeMap();
         }
@@ -333,14 +334,12 @@ namespace ServiceStack.OrmLite.SqlServer
                                  GetQuotedValue("COLUMN"));
         }
 
-        protected override string GetRowVersionColumnDefinition(Type fieldType)
-        {
-            return " RowVersion";
-        }
-
         public override string GetColumnDefinition(string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement,
             bool isRowVersion, bool isNullable, int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
         {
+            if (isRowVersion)
+                defaultValue = null;
+
             var definition = base.GetColumnDefinition(fieldName, fieldType, isPrimaryKey, autoIncrement, isRowVersion,
                 isNullable, fieldLength, scale, defaultValue, customFieldDefinition);
 

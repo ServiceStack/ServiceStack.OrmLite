@@ -116,6 +116,7 @@ namespace ServiceStack.OrmLite
         public string DateTimeColumnDefinition = "DATETIME";
         public string TimeColumnDefinition = "BIGINT";
         public string DateTimeOffsetColumnDefinition = "DATETIMEOFFSET";
+        public string RowVersionColumnDefinition = "BIGINT";
 
         private int defaultDecimalPrecision = 18;
         private int defaultDecimalScale = 12;
@@ -339,13 +340,6 @@ namespace ServiceStack.OrmLite
                 : MaxStringColumnDefinition;
         }
 
-        protected virtual string GetRowVersionColumnDefinition(Type fieldType)
-        {
-            return LongColumnDefinition;
-        }
-
-        protected bool SetRowVersionOnInsert = false;
-
         public virtual string GetColumnDefinition(string fieldName, Type fieldType,
             bool isPrimaryKey, bool autoIncrement, bool isRowVersion, bool isNullable,
             int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
@@ -365,11 +359,7 @@ namespace ServiceStack.OrmLite
             else if (isRowVersion)
             {
                 isPrimaryKey = isNullable = false;
-                defaultValue = null;
-//TODO I think I want to make a call into the provider here or perhaps ??? IMO it would be nice to use a long field, but that won't work on SQLServer so we can't. If we use a byte[]
-//TODO as SQLServer requires (it uses 8 bytes), then by default we get a blob definition which is definitely not a good idea. For PostgreSQL can use xmin. For SQLite, Oracle, MySQL
-//TODO have to invent our own. For Firebird it has the equivalent of PostgreSQL xmin but so far I don't know if it is accessible.
-                fieldDefinition = GetRowVersionColumnDefinition(fieldType);
+                fieldDefinition = RowVersionColumnDefinition;
             }
             else
             {
@@ -499,9 +489,8 @@ namespace ServiceStack.OrmLite
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
-                if (fieldDef.IsComputed) continue;
-                if (fieldDef.AutoIncrement) continue;
-                if (fieldDef.IsRowVersion && !SetRowVersionOnInsert) continue;
+                if (fieldDef.AutoIncrement || fieldDef.IsComputed || fieldDef.IsRowVersion) continue;
+
                 //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
                 if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name)) continue;
 
@@ -537,8 +526,7 @@ namespace ServiceStack.OrmLite
 
             foreach (var fieldDef in modelDef.FieldDefinitionsArray)
             {
-                if (fieldDef.AutoIncrement || fieldDef.IsComputed) continue;
-                if (fieldDef.IsRowVersion && !SetRowVersionOnInsert) continue;
+                if (fieldDef.AutoIncrement || fieldDef.IsComputed || fieldDef.IsRowVersion) continue;
 
                 //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
                 if (insertFields != null && !insertFields.Contains(fieldDef.Name)) continue;

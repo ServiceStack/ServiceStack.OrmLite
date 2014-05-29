@@ -45,7 +45,6 @@ namespace ServiceStack.OrmLite.Tests
         public void SingleById_retrieves_rowversion()
         {
             var rowId = db.Insert(new ModelWithRowVersion { Text = "One" }, selectIdentity:true);
-            TouchRow(rowId);
 
             var row = db.SingleById<ModelWithRowVersion>(rowId);
 
@@ -56,7 +55,6 @@ namespace ServiceStack.OrmLite.Tests
         public void Select_retrieves_rowversion()
         {
             var rowId = db.Insert(new ModelWithRowVersion { Text = "OnePointOne" }, selectIdentity: true);
-            TouchRow(rowId);
 
             var rows = db.Select<ModelWithRowVersion>(x => x.Id == rowId);
 

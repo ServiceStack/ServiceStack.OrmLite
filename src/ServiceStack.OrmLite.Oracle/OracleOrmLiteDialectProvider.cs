@@ -57,6 +57,7 @@ namespace ServiceStack.OrmLite.Oracle
             BoolColumnDefinition = "NUMBER(1)";
             GuidColumnDefinition = CompactGuid ? CompactGuidDefinition : StringGuidDefinition;
             LongColumnDefinition = "NUMERIC(18)";
+            RowVersionColumnDefinition = LongColumnDefinition;
             AutoIncrementDefinition = string.Empty;
             DateTimeColumnDefinition = "TIMESTAMP";
             DateTimeOffsetColumnDefinition = "TIMESTAMP WITH TIME ZONE";
@@ -67,7 +68,6 @@ namespace ServiceStack.OrmLite.Oracle
             StringLengthUnicodeColumnDefinitionFormat = "NVARCHAR2({0})";
             MaxStringColumnDefinition = StringLengthNonUnicodeColumnDefinitionFormat.Fmt(MaxStringColumnLength);
             DefaultStringLength = 128;
-            SetRowVersionOnInsert = true;
 
             InitColumnTypeMap();
             ParamString = ":";
@@ -291,7 +291,7 @@ namespace ServiceStack.OrmLite.Oracle
             dbCommand.CommandTimeout = OrmLiteConfig.CommandTimeout;
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
-                if (fieldDef.IsComputed) continue;
+                if (fieldDef.IsComputed || fieldDef.IsRowVersion) continue;
 
                 //insertFields contains Property "Name" of fields to insert (that's how expressions work)
                 if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name)) continue;
@@ -632,8 +632,8 @@ namespace ServiceStack.OrmLite.Oracle
                     fieldDef.FieldName,
                     fieldDef.ColumnType,
                     fieldDef.IsPrimaryKey,
-                    fieldDef.IsRowVersion,
                     fieldDef.AutoIncrement,
+                    fieldDef.IsRowVersion,
                     fieldDef.IsNullable,
                     fieldDef.FieldLength,
                     fieldDef.Scale,
@@ -722,8 +722,8 @@ namespace ServiceStack.OrmLite.Oracle
             if (isRowVersion)
             {
                 isNullable = false;
-                defaultValue = null;
-                fieldDefinition = GetRowVersionColumnDefinition(fieldType);
+                defaultValue = "1";
+                fieldDefinition = RowVersionColumnDefinition;
             }
             else if (customFieldDefinition != null)
             {
