@@ -37,6 +37,15 @@ namespace ServiceStack.OrmLite.Tests.Shared
         public int Age { get; set; }
     }
 
+    public class PersonWithNullableAutoId
+    {
+        [AutoIncrement]
+        public int? Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public int Age { get; set; }
+    }
+
     public class EntityWithId
     {
         public int Id { get; set; }
