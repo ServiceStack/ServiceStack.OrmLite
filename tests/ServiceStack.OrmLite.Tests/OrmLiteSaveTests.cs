@@ -27,6 +27,7 @@ namespace ServiceStack.OrmLite.Tests
                 db.Save(row);
 
                 Assert.That(row.Id, Is.Not.EqualTo(0));
+                Assert.That(row.Id, Is.Not.Null);
             }
         }
 
@@ -54,6 +55,56 @@ namespace ServiceStack.OrmLite.Tests
 
                 Assert.That(rows[0].Id, Is.Not.EqualTo(0));
                 Assert.That(rows[1].Id, Is.Not.EqualTo(0));
+                Assert.That(rows[0].Id, Is.Not.EqualTo(rows[1].Id));
+            }
+        }
+
+        [Test]
+        public void Save_populates_NullableAutoIncrementId()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTable<PersonWithNullableAutoId>(overwrite: true);
+
+                var row = new PersonWithNullableAutoId
+                {
+                    FirstName = "Jimi",
+                    LastName = "Hendrix",
+                    Age = 27
+                };
+
+                db.Save(row);
+
+                Assert.That(row.Id, Is.Not.EqualTo(0));
+            }
+        }
+
+        [Test]
+        public void SaveAll_populates_NullableAutoIncrementId()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTable<PersonWithNullableAutoId>(overwrite: true);
+
+                var rows = new[] {
+                    new PersonWithNullableAutoId {
+                        FirstName = "Jimi",
+                        LastName = "Hendrix",
+                        Age = 27
+                    },
+                    new PersonWithNullableAutoId {
+                        FirstName = "Kurt",
+                        LastName = "Cobain",
+                        Age = 27
+                    },
+                };
+
+                db.Save(rows);
+
+                Assert.That(rows[0].Id, Is.Not.EqualTo(0));
+                Assert.That(rows[0].Id, Is.Not.Null);
+                Assert.That(rows[1].Id, Is.Not.EqualTo(0));
+                Assert.That(rows[1].Id, Is.Not.Null);
                 Assert.That(rows[0].Id, Is.Not.EqualTo(rows[1].Id));
             }
         }

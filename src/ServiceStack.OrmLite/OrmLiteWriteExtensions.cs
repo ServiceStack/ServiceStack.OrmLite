@@ -602,7 +602,7 @@ namespace ServiceStack.OrmLite
         internal static bool Save<T>(this IDbCommand dbCmd, T obj)
         {
             var id = obj.GetId();
-            var existingRow = dbCmd.SingleById<T>(id);
+            var existingRow = id != null ? dbCmd.SingleById<T>(id) : default(T);
             if (Equals(existingRow, default(T)))
             {
                 var modelDef = typeof(T).GetModelDefinition();
@@ -636,7 +636,8 @@ namespace ServiceStack.OrmLite
             var firstRow = saveRows.FirstOrDefault();
             if (Equals(firstRow, default(T))) return 0;
 
-            var defaultIdValue = firstRow.GetId().GetType().GetDefaultValue();
+            var firstRowId = firstRow.GetId();
+            var defaultIdValue = firstRowId != null ? firstRowId.GetType().GetDefaultValue() : null;
 
             var idMap = defaultIdValue != null
                 ? saveRows.Where(x => !defaultIdValue.Equals(x.GetId())).ToSafeDictionary(x => x.GetId())
