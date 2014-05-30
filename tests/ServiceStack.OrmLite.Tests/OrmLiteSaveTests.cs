@@ -27,7 +27,6 @@ namespace ServiceStack.OrmLite.Tests
                 db.Save(row);
 
                 Assert.That(row.Id, Is.Not.EqualTo(0));
-                Assert.That(row.Id, Is.Not.Null);
             }
         }
 
@@ -76,6 +75,7 @@ namespace ServiceStack.OrmLite.Tests
                 db.Save(row);
 
                 Assert.That(row.Id, Is.Not.EqualTo(0));
+                Assert.That(row.Id, Is.Not.Null);
             }
         }
 
