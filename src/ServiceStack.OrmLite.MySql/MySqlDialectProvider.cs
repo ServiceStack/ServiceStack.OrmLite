@@ -14,7 +14,7 @@ namespace ServiceStack.OrmLite.MySql
 
         private const string TextColumnDefinition = "TEXT";
 
-        private MySqlDialectProvider()
+        public MySqlDialectProvider()
         {
             base.AutoIncrementDefinition = "AUTO_INCREMENT";
             base.IntColumnDefinition = "int(11)";
