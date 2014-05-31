@@ -105,6 +105,9 @@ namespace ServiceStack.OrmLite
                 var isPrimaryKey = (!hasPkAttr && (propertyInfo.Name == OrmLiteConfig.IdField || (!hasIdField && isFirst)))
                     || propertyInfo.HasAttributeNamed(typeof(PrimaryKeyAttribute).Name);
 
+                var isRowVersion = propertyInfo.Name == "RowVersion"
+                    && propertyInfo.PropertyType == typeof(ulong);
+
                 var isNullableType = IsNullableType(propertyInfo.PropertyType);
 
                 var isNullable = (!propertyInfo.PropertyType.IsValueType
@@ -157,6 +160,7 @@ namespace ServiceStack.OrmLite
                     IsUnique = isUnique,
                     IsClustered = indexAttr != null && indexAttr.Clustered,
                     IsNonClustered = indexAttr != null && indexAttr.NonClustered,
+                    IsRowVersion = isRowVersion,
                     FieldLength = stringLengthAttr != null
                         ? stringLengthAttr.MaximumLength
                         : (int?)null,
@@ -185,6 +189,9 @@ namespace ServiceStack.OrmLite
                     modelDef.IgnoredFieldDefinitions.Add(fieldDefinition);
                 else
                     modelDef.FieldDefinitions.Add(fieldDefinition);
+
+                if (isRowVersion)
+                    modelDef.RowVersion = fieldDefinition;
             }
 
             modelDef.SqlSelectAllFromTable = "SELECT {0} FROM {1} "

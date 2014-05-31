@@ -340,7 +340,7 @@ namespace ServiceStack.OrmLite
         }
 
         public virtual string GetColumnDefinition(string fieldName, Type fieldType,
-            bool isPrimaryKey, bool autoIncrement, bool isNullable,
+            bool isPrimaryKey, bool autoIncrement, bool isNullable, bool isRowVersion,
             int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
         {
             string fieldDefinition;
@@ -868,6 +868,7 @@ namespace ServiceStack.OrmLite
                     fieldDef.IsPrimaryKey,
                     fieldDef.AutoIncrement,
                     fieldDef.IsNullable,
+                    fieldDef.IsRowVersion,
                     fieldDef.FieldLength,
                     fieldDef.Scale,
                     fieldDef.DefaultValue,
@@ -892,6 +893,16 @@ namespace ServiceStack.OrmLite
                 "CREATE TABLE {0} \n(\n  {1}{2} \n); \n", GetQuotedTableName(modelDef), sbColumns, sbConstraints));
 
             return sql.ToString();
+        }
+
+        public virtual string ToPostCreateTableStatement(ModelDefinition modelDef)
+        {
+            return null;
+        }
+
+        public virtual string ToPostDropTableStatement(ModelDefinition modelDef)
+        {
+            return null;
         }
 
         public virtual string GetForeignKeyOnDeleteClause(ForeignKeyConstraint foreignKey)
@@ -1072,6 +1083,7 @@ namespace ServiceStack.OrmLite
                                              fieldDef.IsPrimaryKey,
                                              fieldDef.AutoIncrement,
                                              fieldDef.IsNullable,
+                                             fieldDef.IsRowVersion,
                                              fieldDef.FieldLength,
                                              fieldDef.Scale,
                                              fieldDef.DefaultValue,
@@ -1089,6 +1101,7 @@ namespace ServiceStack.OrmLite
                                              fieldDef.IsPrimaryKey,
                                              fieldDef.AutoIncrement,
                                              fieldDef.IsNullable,
+                                             fieldDef.IsRowVersion,
                                              fieldDef.FieldLength,
                                              fieldDef.Scale,
                                              fieldDef.DefaultValue,
@@ -1107,6 +1120,7 @@ namespace ServiceStack.OrmLite
                                              fieldDef.IsPrimaryKey,
                                              fieldDef.AutoIncrement,
                                              fieldDef.IsNullable,
+                                             fieldDef.IsRowVersion,
                                              fieldDef.FieldLength,
                                              fieldDef.Scale,
                                              fieldDef.DefaultValue,

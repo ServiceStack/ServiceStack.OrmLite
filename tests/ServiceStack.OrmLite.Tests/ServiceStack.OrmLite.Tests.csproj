@@ -131,6 +131,7 @@
     <Compile Include="OrmLiteExecFilterTests.cs" />
     <Compile Include="OrmLiteFiltersTests.cs" />
     <Compile Include="PerfTests.cs" />
+    <Compile Include="RowVersionTests.cs" />
     <Compile Include="Shared\ModelWithNumerics.cs" />
     <Compile Include="StringSerializerTests.cs" />
     <Compile Include="TestHelpers.cs" />

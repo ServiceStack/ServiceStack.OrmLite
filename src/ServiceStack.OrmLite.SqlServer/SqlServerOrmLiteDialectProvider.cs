@@ -280,6 +280,7 @@ namespace ServiceStack.OrmLite.SqlServer
                                              fieldDef.IsPrimaryKey,
                                              fieldDef.AutoIncrement,
                                              fieldDef.IsNullable,
+                                             fieldDef.IsRowVersion,
                                              fieldDef.FieldLength,
                                              fieldDef.Scale,
                                              fieldDef.DefaultValue,
@@ -297,6 +298,7 @@ namespace ServiceStack.OrmLite.SqlServer
                                              fieldDef.IsPrimaryKey,
                                              fieldDef.AutoIncrement,
                                              fieldDef.IsNullable,
+                                             fieldDef.IsRowVersion,
                                              fieldDef.FieldLength,
                                              fieldDef.Scale,
                                              fieldDef.DefaultValue,
@@ -320,10 +322,10 @@ namespace ServiceStack.OrmLite.SqlServer
         }
 
         public override string GetColumnDefinition(string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement,
-            bool isNullable, int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
+            bool isNullable, bool isRowVersion, int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
         {
             var definition = base.GetColumnDefinition(fieldName, fieldType, isPrimaryKey, autoIncrement,
-                isNullable, fieldLength, scale, defaultValue, customFieldDefinition);
+                isNullable, isRowVersion, fieldLength, scale, defaultValue, customFieldDefinition);
 
             if (fieldType == typeof(Decimal) && fieldLength != DefaultDecimalPrecision && scale != DefaultDecimalScale)
             {

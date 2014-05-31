@@ -61,8 +61,11 @@ namespace ServiceStack.OrmLite
 
         string GetColumnDefinition(
             string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement,
-            bool isNullable, int? fieldLength,
-            int? scale, string defaultValue,
+            bool isNullable, 
+            bool isRowVersion,
+            int? fieldLength,
+            int? scale, 
+            string defaultValue,
             string customFieldDefinition);
 
         long GetLastInsertId(IDbCommand command);
@@ -103,6 +106,8 @@ namespace ServiceStack.OrmLite
         string ToExecuteProcedureStatement(object objWithProperties);
 
         string ToCreateTableStatement(Type tableType);
+        string ToPostCreateTableStatement(ModelDefinition modelDef);
+        string ToPostDropTableStatement(ModelDefinition modelDef);
 
         List<string> ToCreateIndexStatements(Type tableType);
         List<string> ToCreateSequenceStatements(Type tableType);

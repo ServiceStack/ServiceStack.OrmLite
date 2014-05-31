@@ -633,6 +633,7 @@ namespace ServiceStack.OrmLite.Oracle
                     fieldDef.IsPrimaryKey,
                     fieldDef.AutoIncrement,
                     fieldDef.IsNullable,
+                    fieldDef.IsRowVersion,
                     fieldDef.FieldLength,
                     fieldDef.Scale,
                     fieldDef.DefaultValue,
@@ -712,7 +713,7 @@ namespace ServiceStack.OrmLite.Oracle
         }
 
         public override string GetColumnDefinition(string fieldName, Type fieldType,
-            bool isPrimaryKey, bool autoIncrement, bool isNullable,
+            bool isPrimaryKey, bool autoIncrement, bool isNullable, bool isRowVersion,
             int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
         {
             string fieldDefinition;

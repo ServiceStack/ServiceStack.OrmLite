@@ -47,6 +47,8 @@ namespace ServiceStack.OrmLite
             get { return PrimaryKey != null && PrimaryKey.AutoIncrement; }
         }
 
+        public FieldDefinition RowVersion { get; set; }
+
         public string ModelName
         {
             get { return this.Alias ?? this.Name; }

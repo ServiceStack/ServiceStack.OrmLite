@@ -34,6 +34,38 @@ namespace ServiceStack.OrmLite.Sqlite
         public static bool UTF8Encoded { get; set; }
         public static bool ParseViaFramework { get; set; }
 
+        public static string RowVersionTriggerFormat = "{0}RowVersionUpdateTrigger";
+
+        public override string ToPostDropTableStatement(ModelDefinition modelDef)
+        {
+            if (modelDef.RowVersion != null)
+            {
+                var triggerName = RowVersionTriggerFormat.Fmt(modelDef.ModelName);
+                return "DROP TRIGGER IF EXISTS {0}".Fmt(GetQuotedTableName(triggerName));
+            }
+
+            return null;
+        }
+
+        public override string ToPostCreateTableStatement(ModelDefinition modelDef)
+        {
+            if (modelDef.RowVersion != null)
+            {
+                var triggerName = RowVersionTriggerFormat.Fmt(modelDef.ModelName);
+                var triggerBody = "UPDATE {0} SET {1} = OLD.{1} + 1 WHERE {2} = NEW.{2};".Fmt(
+                    modelDef.ModelName, 
+                    modelDef.RowVersion.FieldName.SqlColumn(), 
+                    modelDef.PrimaryKey.FieldName.SqlColumn());
+
+                var sql = "CREATE TRIGGER {0} AFTER UPDATE ON {1} FOR EACH ROW BEGIN {2} END;".Fmt(
+                    triggerName, modelDef.ModelName, triggerBody);
+
+                return sql;
+            }
+
+            return null;
+        }
+
         public static string CreateFullTextCreateTableStatement(object objectWithProperties)
         {
             var sbColumns = new StringBuilder();
@@ -205,11 +237,11 @@ namespace ServiceStack.OrmLite.Sqlite
             return result > 0;
         }
 
-        public override string GetColumnDefinition(string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement, 
-            bool isNullable, int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
+        public override string GetColumnDefinition(string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement,
+            bool isNullable, bool isRowVersion, int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
         {
             // http://www.sqlite.org/lang_createtable.html#rowid
-            var ret = base.GetColumnDefinition(fieldName, fieldType, isPrimaryKey, autoIncrement, isNullable, fieldLength, scale, defaultValue, customFieldDefinition);
+            var ret = base.GetColumnDefinition(fieldName, fieldType, isPrimaryKey, autoIncrement, isNullable, isRowVersion, fieldLength, scale, defaultValue, customFieldDefinition);
             if (isPrimaryKey)
                 return ret.Replace(" BIGINT ", " INTEGER ");
             return ret;
