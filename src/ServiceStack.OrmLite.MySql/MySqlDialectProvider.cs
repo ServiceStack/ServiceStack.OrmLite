@@ -36,6 +36,36 @@ namespace ServiceStack.OrmLite.MySql
             DbTypeMap.Set<DateTimeOffset?>(DbType.DateTimeOffset, StringColumnDefinition);
         }
 
+        public static string RowVersionTriggerFormat = "{0}RowVersionUpdateTrigger";
+
+        public override string ToPostDropTableStatement(ModelDefinition modelDef)
+        {
+            if (modelDef.RowVersion != null)
+            {
+                var triggerName = RowVersionTriggerFormat.Fmt(modelDef.ModelName);
+                return "DROP TRIGGER IF EXISTS {0}".Fmt(GetQuotedTableName(triggerName));
+            }
+
+            return null;
+        }
+
+        public override string ToPostCreateTableStatement(ModelDefinition modelDef)
+        {
+            if (modelDef.RowVersion != null)
+            {
+                var triggerName = RowVersionTriggerFormat.Fmt(modelDef.ModelName);
+                var triggerBody = "SET NEW.{0} = OLD.{0} + 1;".Fmt(
+                    modelDef.RowVersion.FieldName.SqlColumn());
+
+                var sql = "CREATE TRIGGER {0} BEFORE UPDATE ON {1} FOR EACH ROW BEGIN {2} END;".Fmt(
+                    triggerName, modelDef.ModelName, triggerBody);
+
+                return sql;
+            }
+
+            return null;
+        }
+
         public override string GetQuotedValue(string paramValue)
         {
             return "'" + paramValue.Replace("\\", "\\\\").Replace("'", @"\'") + "'";
@@ -175,7 +205,7 @@ namespace ServiceStack.OrmLite.MySql
                 return sql.ToString();
             }
 
-            return base.GetColumnDefinition(
+            var ret = base.GetColumnDefinition(
                 fieldDefinition.FieldName,
                 fieldDefinition.ColumnType,
                 fieldDefinition.IsPrimaryKey,
@@ -186,6 +216,11 @@ namespace ServiceStack.OrmLite.MySql
                 null,
                 fieldDefinition.DefaultValue,
                 fieldDefinition.CustomFieldDefinition);
+
+            if (fieldDefinition.IsRowVersion)
+                return ret + " DEFAULT 1";
+
+            return ret;
         }
     }
 }
