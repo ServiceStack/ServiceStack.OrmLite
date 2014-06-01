@@ -100,6 +100,28 @@ namespace ServiceStack.OrmLite.SqlServer
             return string.Format("\"{0}\".\"{1}\"", escapedSchema, NamingStrategy.GetTableName(modelDef.ModelName));
         }
 
+        public override void SetDbValue(FieldDefinition fieldDef, IDataReader reader, int colIndex, object instance)
+        {
+            if (fieldDef.IsRowVersion)
+            {
+                var bytes = reader.GetValue(colIndex) as byte[];
+                if (bytes != null)
+                {
+                    Array.Reverse(bytes); //Correct Endianness
+                    var ulongValue = BitConverter.ToUInt64(bytes, 0);
+                    try
+                    {
+                        fieldDef.SetValueFn(instance, ulongValue);
+                    }
+                    catch (NullReferenceException ignore) { }
+                }
+            }
+            else
+            {
+                base.SetDbValue(fieldDef, reader, colIndex, instance);
+            }
+        }
+
         public override object ConvertDbValue(object value, Type type)
         {
             try
@@ -324,6 +346,9 @@ namespace ServiceStack.OrmLite.SqlServer
         public override string GetColumnDefinition(string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement,
             bool isNullable, bool isRowVersion, int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
         {
+            if (isRowVersion)
+                return "{0} rowversion NOT NULL".Fmt(fieldName);
+
             var definition = base.GetColumnDefinition(fieldName, fieldType, isPrimaryKey, autoIncrement,
                 isNullable, isRowVersion, fieldLength, scale, defaultValue, customFieldDefinition);
 
