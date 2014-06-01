@@ -26,6 +26,8 @@ namespace ServiceStack.OrmLite
             this.CompositeIndexes = new List<CompositeIndexAttribute>();
         }
 
+        public const string RowVersionName = "RowVersion";
+
         public string Name { get; set; }
 
         public string Alias { get; set; }

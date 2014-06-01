@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System;
+using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Logging;
 
@@ -13,17 +14,11 @@ namespace ServiceStack.OrmLite.Tests
         public ulong RowVersion { get; set; }
     }
 
-    //SqlServer
-    //RowVersion NOT NULL
-
-    //Sqlite
-    //Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-
     public class RowVersionTests : OrmLiteTestBase
     {
         public RowVersionTests()
         {
-            Dialect = Dialect.Sqlite;
+            //Dialect = Dialect.Sqlite;
         }
 
         [Test]
@@ -34,18 +29,28 @@ namespace ServiceStack.OrmLite.Tests
             {
                 db.DropAndCreateTable<ModelWithRowVersion>();
 
-                db.Insert(new ModelWithRowVersion { Id = 1, Name = "Name 1" });
-                db.Insert(new ModelWithRowVersion { Id = 2, Name = "Name 2" });
+                db.Insert(new ModelWithRowVersion { Id = 1, Name = "Name" });
 
-                db.Update(new ModelWithRowVersion { Id = 1, Name = "Name 1 Updated" });
-                db.Update(new ModelWithRowVersion { Id = 2, Name = "Name 2 Updated" });
+                var row = db.SingleById<ModelWithRowVersion>(1);
 
-                var map = db.Select<ModelWithRowVersion>().ToSafeDictionary(x => x.Id);
+                row.Name += " Updated";
 
-                Assert.That(map[1].Name, Is.EqualTo("Name 1 Updated"));
-                Assert.That(map[1].RowVersion, Is.GreaterThan(0));
-                Assert.That(map[2].Name, Is.EqualTo("Name 2 Updated"));
-                Assert.That(map[2].RowVersion, Is.GreaterThan(0));
+                db.Update(row);
+
+                var updatedRow = db.SingleById<ModelWithRowVersion>(1);
+
+                Assert.That(updatedRow.Name, Is.EqualTo("Name Updated"));
+                Assert.That(updatedRow.RowVersion, Is.GreaterThan(0));
+
+                row.Name += " Again";
+
+                //Can't update old record
+                Assert.Throws<RowModifiedException>(() => 
+                    db.Update(row));
+
+                //Can update latest version
+                updatedRow.Name += " Again";
+                db.Update(updatedRow);
             }
         }
     }

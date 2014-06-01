@@ -105,7 +105,7 @@ namespace ServiceStack.OrmLite
                 var isPrimaryKey = (!hasPkAttr && (propertyInfo.Name == OrmLiteConfig.IdField || (!hasIdField && isFirst)))
                     || propertyInfo.HasAttributeNamed(typeof(PrimaryKeyAttribute).Name);
 
-                var isRowVersion = propertyInfo.Name == "RowVersion"
+                var isRowVersion = propertyInfo.Name == ModelDefinition.RowVersionName
                     && propertyInfo.PropertyType == typeof(ulong);
 
                 var isNullableType = IsNullableType(propertyInfo.PropertyType);

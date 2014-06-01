@@ -454,7 +454,7 @@ namespace ServiceStack.OrmLite
                 return sqlFilter.SqlFmt(filterParams);
 
             var modelDef = tableType.GetModelDefinition();
-            var sql = new StringBuilder("SELECT " + tableType.GetColumnNames() + " FROM " + GetQuotedTableName(modelDef));
+            var sql = new StringBuilder("SELECT " + GetColumnNames(modelDef) + " FROM " + GetQuotedTableName(modelDef));
 
             if (!string.IsNullOrEmpty(sqlFilter))
             {
@@ -471,6 +471,20 @@ namespace ServiceStack.OrmLite
             return sql.ToString();
         }
 
+        public virtual string GetColumnNames(ModelDefinition modelDef)
+        {
+            var sqlColumns = new StringBuilder();
+            foreach (var field in modelDef.FieldDefinitions)
+            {
+                if (sqlColumns.Length > 0)
+                    sqlColumns.Append(", ");
+
+                sqlColumns.Append(GetQuotedColumnName(field.FieldName));
+            }
+
+            return sqlColumns.ToString();
+        }
+
         /// Fmt
         public virtual string ToInsertRowStatement(IDbCommand command, object objWithProperties, ICollection<string> insertFields = null)
         {
@@ -483,10 +497,12 @@ namespace ServiceStack.OrmLite
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
-                if (fieldDef.IsComputed) continue;
-                if (fieldDef.AutoIncrement) continue;
+                if (fieldDef.AutoIncrement || fieldDef.IsComputed || fieldDef.IsRowVersion)
+                    continue;
+
                 //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
-                if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name)) continue;
+                if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name)) 
+                    continue;
 
                 if (sbColumnNames.Length > 0) sbColumnNames.Append(",");
                 if (sbColumnValues.Length > 0) sbColumnValues.Append(",");
@@ -520,10 +536,12 @@ namespace ServiceStack.OrmLite
 
             foreach (var fieldDef in modelDef.FieldDefinitionsArray)
             {
-                if (fieldDef.AutoIncrement || fieldDef.IsComputed) continue;
+                if (fieldDef.AutoIncrement || fieldDef.IsComputed || fieldDef.IsRowVersion) 
+                    continue;
 
                 //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
-                if (insertFields != null && !insertFields.Contains(fieldDef.Name)) continue;
+                if (insertFields != null && !insertFields.Contains(fieldDef.Name)) 
+                    continue;
 
                 if (sbColumnNames.Length > 0)
                     sbColumnNames.Append(",");
@@ -548,45 +566,44 @@ namespace ServiceStack.OrmLite
                                             GetQuotedTableName(modelDef), sbColumnNames, sbColumnValues);
         }
 
-        public virtual void PrepareParameterizedUpdateStatement<T>(IDbCommand cmd, ICollection<string> updateFields = null)
+        public virtual bool PrepareParameterizedUpdateStatement<T>(IDbCommand cmd, ICollection<string> updateFields = null)
         {
             var sqlFilter = new StringBuilder();
             var sql = new StringBuilder();
             var modelDef = typeof(T).GetModelDefinition();
+            var hadRowVesion = false;
+            var updateAllFields = updateFields == null || updateFields.Count == 0;
 
             cmd.Parameters.Clear();
             cmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
-                if (fieldDef.IsComputed) continue;
+                if (fieldDef.IsComputed) 
+                    continue;
+
                 try
                 {
-                    if (fieldDef.IsPrimaryKey && (updateFields == null || updateFields.Count == 0))
+                    if ((fieldDef.IsPrimaryKey || fieldDef.IsRowVersion) && updateAllFields)
                     {
-                        if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
+                        if (sqlFilter.Length > 0) 
+                            sqlFilter.Append(" AND ");
 
-                        sqlFilter
-                            .Append(GetQuotedColumnName(fieldDef.FieldName))
-                            .Append("=")
-                            .Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
+                        AppendFieldCondition(sqlFilter, fieldDef, cmd);
 
-                        AddParameter(cmd, fieldDef);
+                        if (fieldDef.IsRowVersion)
+                            hadRowVesion = true;
 
                         continue;
                     }
 
-                    if ((updateFields != null && updateFields.Count > 0) && !updateFields.Contains(fieldDef.Name))
+                    if (!updateAllFields && !updateFields.Contains(fieldDef.Name))
                         continue;
 
                     if (sql.Length > 0)
                         sql.Append(", ");
 
-                    sql.Append(GetQuotedColumnName(fieldDef.FieldName))
-                       .Append("=")
-                       .Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
-
-                    AddParameter(cmd, fieldDef);
+                    AppendFieldCondition(sql, fieldDef, cmd);
                 }
                 catch (Exception ex)
                 {
@@ -594,17 +611,37 @@ namespace ServiceStack.OrmLite
                 }
             }
 
-            if (sql.Length < 1)
-                return;
+            if (sql.Length > 0)
+            {
+                cmd.CommandText = string.Format("UPDATE {0} SET {1} {2}",
+                    GetQuotedTableName(modelDef), sql, (sqlFilter.Length > 0 ? "WHERE " + sqlFilter : ""));
+            }
 
-            cmd.CommandText = string.Format("UPDATE {0} SET {1} {2}",
-                GetQuotedTableName(modelDef), sql, (sqlFilter.Length > 0 ? "WHERE " + sqlFilter : ""));
+            return hadRowVesion;
+        }
+
+        public virtual void AppendFieldCondition(StringBuilder sqlFilter, FieldDefinition fieldDef, IDbCommand cmd)
+        {
+            sqlFilter
+                .Append(GetQuotedColumnName(fieldDef.FieldName))
+                .Append("=")
+                .Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
+
+            AddParameter(cmd, fieldDef);
+        }
+
+        public virtual void AppendFieldConditionFmt(StringBuilder sqlFilter, FieldDefinition fieldDef, object objWithProperties)
+        {
+            sqlFilter.AppendFormat("{0}={1}", 
+                GetQuotedColumnName(fieldDef.FieldName),
+                fieldDef.GetQuotedValue(objWithProperties));
         }
 
         public virtual void PrepareParameterizedDeleteStatement<T>(IDbCommand cmd, ICollection<string> deleteFields = null)
         {
             var sqlFilter = new StringBuilder();
             var modelDef = typeof(T).GetModelDefinition();
+            var hasSpecificFilter = deleteFields != null && deleteFields.Count > 0;
 
             cmd.Parameters.Clear();
             cmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
@@ -613,7 +650,7 @@ namespace ServiceStack.OrmLite
             {
                 if (fieldDef.IsComputed) continue;
 
-                if ((deleteFields != null && deleteFields.Count > 0) && !deleteFields.Contains(fieldDef.Name))
+                if (hasSpecificFilter && !deleteFields.Contains(fieldDef.Name))
                     continue;
 
                 try
@@ -621,12 +658,7 @@ namespace ServiceStack.OrmLite
                     if (sqlFilter.Length > 0)
                         sqlFilter.Append(" AND ");
 
-                    sqlFilter
-                        .Append(GetQuotedColumnName(fieldDef.FieldName))
-                        .Append("=")
-                        .Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
-
-                    AddParameter(cmd, fieldDef);
+                    AppendFieldCondition(sqlFilter, fieldDef, cmd);
                 }
                 catch (Exception ex)
                 {
@@ -757,12 +789,10 @@ namespace ServiceStack.OrmLite
 
         public virtual string ToUpdateRowStatement(object objWithProperties, ICollection<string> updateFields = null)
         {
-            if (updateFields == null)
-                updateFields = new List<string>();
-
             var sqlFilter = new StringBuilder();
             var sql = new StringBuilder();
             var modelDef = objWithProperties.GetType().GetModelDefinition();
+            var updateAllFields = updateFields == null || updateFields.Count == 0;
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
@@ -770,20 +800,21 @@ namespace ServiceStack.OrmLite
 
                 try
                 {
-                    if (fieldDef.IsPrimaryKey && updateFields.Count == 0)
+                    if (fieldDef.IsPrimaryKey && updateAllFields)
                     {
-                        if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
+                        if (sqlFilter.Length > 0) 
+                            sqlFilter.Append(" AND ");
 
-                        sqlFilter.AppendFormat("{0}={1}", GetQuotedColumnName(fieldDef.FieldName), fieldDef.GetQuotedValue(objWithProperties));
+                        AppendFieldConditionFmt(sqlFilter, fieldDef, objWithProperties);
 
                         continue;
                     }
 
-                    if (updateFields.Count > 0 && !updateFields.Contains(fieldDef.Name) || fieldDef.AutoIncrement) continue;
+                    if (!updateAllFields && !updateFields.Contains(fieldDef.Name) || fieldDef.AutoIncrement) continue;
                     if (sql.Length > 0)
                         sql.Append(", ");
 
-                    sql.AppendFormat("{0}={1}", GetQuotedColumnName(fieldDef.FieldName), fieldDef.GetQuotedValue(objWithProperties));
+                    AppendFieldConditionFmt(sql, fieldDef, objWithProperties);
                 }
                 catch (Exception ex)
                 {
@@ -811,9 +842,10 @@ namespace ServiceStack.OrmLite
                 {
                     if (fieldDef.IsPrimaryKey)
                     {
-                        if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
+                        if (sqlFilter.Length > 0) 
+                            sqlFilter.Append(" AND ");
 
-                        sqlFilter.AppendFormat("{0} = {1}", GetQuotedColumnName(fieldDef.FieldName), fieldDef.GetQuotedValue(objWithProperties));
+                        AppendFieldConditionFmt(sqlFilter, fieldDef, objWithProperties);
                     }
                 }
                 catch (Exception ex)
@@ -838,7 +870,8 @@ namespace ServiceStack.OrmLite
                 && sqlFilter.Length > deleteStatement.Length
                 && sqlFilter.Substring(0, deleteStatement.Length).ToUpper().Equals(deleteStatement);
 
-            if (isFullDeleteStatement) return sqlFilter.SqlFmt(filterParams);
+            if (isFullDeleteStatement) 
+                return sqlFilter.SqlFmt(filterParams);
 
             var modelDef = tableType.GetModelDefinition();
             sql.AppendFormat("DELETE FROM {0}", GetQuotedTableName(modelDef));
@@ -860,8 +893,6 @@ namespace ServiceStack.OrmLite
             var modelDef = tableType.GetModelDefinition();
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
-                if (sbColumns.Length != 0) sbColumns.Append(", \n  ");
-
                 var columnDefinition = GetColumnDefinition(
                     fieldDef.FieldName,
                     fieldDef.ColumnType,
@@ -873,6 +904,12 @@ namespace ServiceStack.OrmLite
                     fieldDef.Scale,
                     fieldDef.DefaultValue,
                     fieldDef.CustomFieldDefinition);
+
+                if (columnDefinition == null)
+                    continue;
+
+                if (sbColumns.Length != 0) 
+                    sbColumns.Append(", \n  ");
 
                 sbColumns.Append(columnDefinition);
 
@@ -1003,11 +1040,6 @@ namespace ServiceStack.OrmLite
                                  indexName,
                                  GetQuotedTableName(modelDef),
                                  (isCombined) ? fieldName : GetQuotedColumnName(fieldName));
-        }
-
-        public virtual string GetColumnNames(ModelDefinition modelDef)
-        {
-            return modelDef.GetColumnNames();
         }
 
         public virtual List<string> ToCreateSequenceStatements(Type tableType)

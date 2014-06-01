@@ -142,6 +142,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReflectionPropertyInvoker.cs" />
     <Compile Include="OrmLiteResultsFilter.cs" />
+    <Compile Include="RowModifiedException.cs" />
     <Compile Include="SqlBuilder.cs" />
     <Compile Include="SqlInValues.cs" />
     <Compile Include="Expressions\ReadExtensions.cs" />

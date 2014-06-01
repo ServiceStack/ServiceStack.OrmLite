@@ -57,7 +57,7 @@ namespace ServiceStack.OrmLite.Sqlite
                     modelDef.RowVersion.FieldName.SqlColumn(), 
                     modelDef.PrimaryKey.FieldName.SqlColumn());
 
-                var sql = "CREATE TRIGGER {0} AFTER UPDATE ON {1} FOR EACH ROW BEGIN {2} END;".Fmt(
+                var sql = "CREATE TRIGGER {0} BEFORE UPDATE ON {1} FOR EACH ROW BEGIN {2} END;".Fmt(
                     triggerName, modelDef.ModelName, triggerBody);
 
                 return sql;
@@ -244,6 +244,9 @@ namespace ServiceStack.OrmLite.Sqlite
             var ret = base.GetColumnDefinition(fieldName, fieldType, isPrimaryKey, autoIncrement, isNullable, isRowVersion, fieldLength, scale, defaultValue, customFieldDefinition);
             if (isPrimaryKey)
                 return ret.Replace(" BIGINT ", " INTEGER ");
+            if (isRowVersion)
+                return ret + " DEFAULT 1";
+
             return ret;
         }
     }
