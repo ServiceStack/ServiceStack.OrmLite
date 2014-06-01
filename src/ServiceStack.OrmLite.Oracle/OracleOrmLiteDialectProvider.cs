@@ -107,6 +107,35 @@ namespace ServiceStack.OrmLite.Oracle
         }
 
         protected string ClientProvider = OdpProvider;
+        public static string RowVersionTriggerFormat = "{0}RowVersionUpdateTrigger";
+
+        public override string ToPostDropTableStatement(ModelDefinition modelDef)
+        {
+            if (modelDef.RowVersion != null)
+            {
+                var triggerName = RowVersionTriggerFormat.Fmt(modelDef.ModelName);
+                return "DROP TRIGGER IF EXISTS {0}".Fmt(GetQuotedTableName(triggerName));
+            }
+
+            return null;
+        }
+
+        public override string ToPostCreateTableStatement(ModelDefinition modelDef)
+        {
+            if (modelDef.RowVersion != null)
+            {
+                var triggerName = RowVersionTriggerFormat.Fmt(modelDef.ModelName);
+                var triggerBody = ":NEW.{0} := :OLD.{0}+1;".Fmt(
+                    modelDef.RowVersion.FieldName.SqlColumn());
+
+                var sql = "CREATE TRIGGER {0} BEFORE UPDATE ON {1} FOR EACH ROW BEGIN {2} END;".Fmt(
+                    triggerName, modelDef.ModelName, triggerBody);
+
+                return sql;
+            }
+
+            return null;
+        }
 
         public override IDbConnection CreateConnection(string connectionString, Dictionary<string, string> options)
         {
