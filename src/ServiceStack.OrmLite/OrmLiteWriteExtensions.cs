@@ -414,7 +414,7 @@ namespace ServiceStack.OrmLite
 
                 var dialectProvider = OrmLiteConfig.DialectProvider;
 
-                dialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
+                var hadRowVersion = dialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
                 if (string.IsNullOrEmpty(dbCmd.CommandText))
                     return 0;
 
@@ -425,7 +425,11 @@ namespace ServiceStack.OrmLite
 
                     dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
-                    count += dbCmd.ExecNonQuery();
+                    var rowsUpdated = dbCmd.ExecNonQuery();
+                    if (hadRowVersion && rowsUpdated == 0) 
+                        throw new RowModifiedException();
+
+                    count += rowsUpdated;                
                 }
 
                 if (dbTrans != null)
@@ -440,22 +444,31 @@ namespace ServiceStack.OrmLite
             return count;
         }
 
+        private static int AssertRowsUpdated(IDbCommand dbCmd, bool hadRowVersion)
+        {
+            var rowsUpdated = dbCmd.ExecNonQuery();
+            if (hadRowVersion && rowsUpdated == 0)
+                throw new RowModifiedException();
+
+            return rowsUpdated;
+        }
+
         internal static int Delete<T>(this IDbCommand dbCmd, object anonType)
         {
-            OrmLiteConfig.DialectProvider.PrepareParameterizedDeleteStatement<T>(dbCmd, anonType.AllFields<T>());
+            var hadRowVersion = OrmLiteConfig.DialectProvider.PrepareParameterizedDeleteStatement<T>(dbCmd, anonType.AllFields<T>());
 
             OrmLiteConfig.DialectProvider.SetParameterValues<T>(dbCmd, anonType);
 
-            return dbCmd.ExecNonQuery();
+            return AssertRowsUpdated(dbCmd, hadRowVersion);
         }
 
         internal static int DeleteNonDefaults<T>(this IDbCommand dbCmd, T filter)
         {
-            OrmLiteConfig.DialectProvider.PrepareParameterizedDeleteStatement<T>(dbCmd, filter.NonDefaultFields<T>());
+            var hadRowVersion = OrmLiteConfig.DialectProvider.PrepareParameterizedDeleteStatement<T>(dbCmd, filter.NonDefaultFields<T>());
 
             OrmLiteConfig.DialectProvider.SetParameterValues<T>(dbCmd, filter);
 
-            return dbCmd.ExecNonQuery();
+            return AssertRowsUpdated(dbCmd, hadRowVersion);
         }
 
         internal static int Delete<T>(this IDbCommand dbCmd, params object[] objs)
@@ -521,6 +534,38 @@ namespace ServiceStack.OrmLite
             dbCmd.Parameters.Add(idParam);
 
             return dbCmd.ExecuteSql(sql);
+        }
+
+        internal static void DeleteById<T>(this IDbCommand dbCmd, object id, ulong rowVersion)
+        {
+            var modelDef = ModelDefinition<T>.Definition;
+
+            dbCmd.Parameters.Clear();
+
+            var idParam = dbCmd.CreateParameter();
+            idParam.ParameterName = OrmLiteConfig.DialectProvider.GetParam();
+            idParam.Value = id;
+            dbCmd.Parameters.Add(idParam);
+
+            var rowVersionField = modelDef.RowVersion;
+            if (rowVersionField == null)
+                throw new InvalidOperationException("Cannot use DeleteById with rowVersion for model type without a row version column");
+
+            var rowVersionParam = dbCmd.CreateParameter();
+            rowVersionParam.ParameterName = OrmLiteConfig.DialectProvider.GetParam("rowVersion");
+            rowVersionParam.Value = rowVersion;
+            dbCmd.Parameters.Add(rowVersionParam);
+
+            var sql = string.Format("DELETE FROM {0} WHERE {1} = {2} AND {3} = {4}",
+                OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef),
+                OrmLiteConfig.DialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName),
+                idParam.ParameterName,
+                OrmLiteConfig.DialectProvider.GetQuotedColumnName(rowVersionField.FieldName),
+                rowVersionParam.ParameterName);
+
+            var rowsAffected = dbCmd.ExecuteSql(sql);
+            if (rowsAffected == 0)
+                throw new RowModifiedException("The row was modified or deleted since the last read");
         }
 
         internal static int DeleteByIds<T>(this IDbCommand dbCmd, IEnumerable idValues)

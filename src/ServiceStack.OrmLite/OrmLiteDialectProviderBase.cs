@@ -637,10 +637,11 @@ namespace ServiceStack.OrmLite
                 fieldDef.GetQuotedValue(objWithProperties));
         }
 
-        public virtual void PrepareParameterizedDeleteStatement<T>(IDbCommand cmd, ICollection<string> deleteFields = null)
+        public virtual bool PrepareParameterizedDeleteStatement<T>(IDbCommand cmd, ICollection<string> deleteFields = null)
         {
             var sqlFilter = new StringBuilder();
             var modelDef = typeof(T).GetModelDefinition();
+            var hadRowVesion = false;
             var hasSpecificFilter = deleteFields != null && deleteFields.Count > 0;
 
             cmd.Parameters.Clear();
@@ -648,10 +649,14 @@ namespace ServiceStack.OrmLite
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
-                if (fieldDef.IsComputed) continue;
-
-                if (hasSpecificFilter && !deleteFields.Contains(fieldDef.Name))
+                if (fieldDef.IsComputed) 
                     continue;
+
+                if (!fieldDef.IsRowVersion && (hasSpecificFilter && !deleteFields.Contains(fieldDef.Name)))
+                    continue;
+
+                if (fieldDef.IsRowVersion)
+                    hadRowVesion = true;
 
                 try
                 {
@@ -668,6 +673,8 @@ namespace ServiceStack.OrmLite
 
             cmd.CommandText = string.Format("DELETE FROM {0} WHERE {1}",
                 GetQuotedTableName(modelDef), sqlFilter);
+
+            return hadRowVesion;
         }
 
         protected void AddParameter(IDbCommand cmd, FieldDefinition fieldDef)

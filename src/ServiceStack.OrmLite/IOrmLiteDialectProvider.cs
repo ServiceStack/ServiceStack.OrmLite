@@ -80,7 +80,7 @@ namespace ServiceStack.OrmLite
 
         bool PrepareParameterizedUpdateStatement<T>(IDbCommand cmd, ICollection<string> updateFields = null);
 
-        void PrepareParameterizedDeleteStatement<T>(IDbCommand cmd, ICollection<string> deleteFields = null);
+        bool PrepareParameterizedDeleteStatement<T>(IDbCommand cmd, ICollection<string> deleteFields = null);
 
         void SetParameterValues<T>(IDbCommand dbCmd, object obj);
 
