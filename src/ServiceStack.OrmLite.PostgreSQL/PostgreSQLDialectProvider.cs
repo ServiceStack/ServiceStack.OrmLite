@@ -64,6 +64,9 @@ namespace ServiceStack.OrmLite.PostgreSQL
             string defaultValue,
             string customFieldDefinition)
         {
+            if (isRowVersion)
+                return null;
+
             string fieldDefinition = null;
             if (customFieldDefinition != null)
             {
@@ -117,6 +120,37 @@ namespace ServiceStack.OrmLite.PostgreSQL
             }
 
             return sql.ToString();
+        }
+
+        public override string GetColumnNames(ModelDefinition modelDef)
+        {
+            var sqlColumns = new StringBuilder();
+            foreach (var field in modelDef.FieldDefinitions)
+            {
+                if (sqlColumns.Length > 0)
+                    sqlColumns.Append(", ");
+
+                if (field.IsRowVersion)
+                    sqlColumns.Append("xmin as " + GetQuotedColumnName(field.FieldName));
+                else
+                    sqlColumns.Append(GetQuotedColumnName(field.FieldName));
+            }
+
+            return sqlColumns.ToString();
+        }
+
+        public override void AppendFieldCondition(StringBuilder sqlFilter, FieldDefinition fieldDef, IDbCommand cmd)
+        {
+            var columnName = fieldDef.IsRowVersion
+                ? "int8in(xidout(xmin))" //Convert xmin into an integer so it can be used in comparisons
+                : GetQuotedColumnName(fieldDef.FieldName);
+            
+            sqlFilter
+                .Append(columnName)
+                .Append("=")
+                .Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
+
+            AddParameter(cmd, fieldDef);
         }
 
         public override string GetQuotedValue(string paramValue)
@@ -248,8 +282,8 @@ namespace ServiceStack.OrmLite.PostgreSQL
         /// <returns></returns>
         internal static String ToBinary(Object NativeData)
         {
-            Byte[] byteArray = (Byte[])NativeData;
-            StringBuilder res = new StringBuilder(byteArray.Length * 5);
+            var byteArray = (Byte[])NativeData;
+            var res = new StringBuilder(byteArray.Length * 5);
             foreach (byte b in byteArray)
                 if (b >= 0x20 && b < 0x7F && b != 0x27 && b != 0x5C)
                     res.Append((char)b);
