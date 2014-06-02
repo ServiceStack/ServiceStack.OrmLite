@@ -16,6 +16,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using ServiceStack.Data;
 using ServiceStack.Logging;
 
 namespace ServiceStack.OrmLite
@@ -393,7 +394,7 @@ namespace ServiceStack.OrmLite
             var rowsUpdated = dbCmd.ExecNonQuery();
 
             if (hadRowVersion && rowsUpdated == 0)
-                throw new RowModifiedException();
+                throw new OptimisticConcurrencyException();
 
             return rowsUpdated;
         }
@@ -428,7 +429,7 @@ namespace ServiceStack.OrmLite
 
                     var rowsUpdated = dbCmd.ExecNonQuery();
                     if (hadRowVersion && rowsUpdated == 0) 
-                        throw new RowModifiedException();
+                        throw new OptimisticConcurrencyException();
 
                     count += rowsUpdated;                
                 }
@@ -449,7 +450,7 @@ namespace ServiceStack.OrmLite
         {
             var rowsUpdated = dbCmd.ExecNonQuery();
             if (hadRowVersion && rowsUpdated == 0)
-                throw new RowModifiedException();
+                throw new OptimisticConcurrencyException();
 
             return rowsUpdated;
         }
@@ -566,7 +567,7 @@ namespace ServiceStack.OrmLite
 
             var rowsAffected = dbCmd.ExecuteSql(sql);
             if (rowsAffected == 0)
-                throw new RowModifiedException("The row was modified or deleted since the last read");
+                throw new OptimisticConcurrencyException("The row was modified or deleted since the last read");
         }
 
         internal static int DeleteByIds<T>(this IDbCommand dbCmd, IEnumerable idValues)

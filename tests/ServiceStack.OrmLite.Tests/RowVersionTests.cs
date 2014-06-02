@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using NUnit.Framework;
+using ServiceStack.Data;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Logging;
 
@@ -116,7 +117,7 @@ namespace ServiceStack.OrmLite.Tests
             row.Text += " Again";
 
             //Can't update old record
-            Assert.Throws<RowModifiedException>(() =>
+            Assert.Throws<OptimisticConcurrencyException>(() =>
                 db.Update(row));
 
             //Can update latest version
@@ -145,7 +146,7 @@ namespace ServiceStack.OrmLite.Tests
             row.Text += " Again";
 
             //Can't update old record
-            Assert.Throws<RowModifiedException>(() =>
+            Assert.Throws<OptimisticConcurrencyException>(() =>
                 db.Update(row));
 
             //Can update latest version
@@ -348,7 +349,7 @@ namespace ServiceStack.OrmLite.Tests
             TouchRow(rowId);
 
             row.Text = "Six";
-            Assert.Throws<RowModifiedException>(() => db.Update(row));
+            Assert.Throws<OptimisticConcurrencyException>(() => db.Update(row));
 
             var actual = db.SingleById<ModelWithRowVersion>(rowId);
             Assert.That(actual.Text, Is.Not.EqualTo("Six"));
@@ -369,7 +370,7 @@ namespace ServiceStack.OrmLite.Tests
 
             rows[0].Text = "Seventeen";
             rows[1].Text = "Eighteen";
-            Assert.Throws<RowModifiedException>(() => 
+            Assert.Throws<OptimisticConcurrencyException>(() => 
                 db.UpdateAll(rows));
 
             var actualRows = rowIds
@@ -388,7 +389,7 @@ namespace ServiceStack.OrmLite.Tests
             TouchRow(rowId);
 
             row.Text = "Fifth";
-            Assert.Throws<RowModifiedException>(() => db.Save(row));
+            Assert.Throws<OptimisticConcurrencyException>(() => db.Save(row));
 
             var actualRow = db.SingleById<ModelWithRowVersion>(rowId);
             Assert.That(actualRow.Text, Is.Not.EqualTo("Fourth"));
@@ -407,7 +408,7 @@ namespace ServiceStack.OrmLite.Tests
 
             rows[0].Text = "Seventeen";
             rows[1].Text = "Eighteen";
-            Assert.Throws<RowModifiedException>(() => db.UpdateAll(rows));
+            Assert.Throws<OptimisticConcurrencyException>(() => db.UpdateAll(rows));
 
             var actualRows = db.SelectByIds<ModelWithRowVersion>(rowIds);
             Assert.That(actualRows[0].Text, Is.EqualTo("Fifteen"));
@@ -427,7 +428,7 @@ namespace ServiceStack.OrmLite.Tests
 
             rows[0].Text = "Nineteenth";
             rows[1].Text = "Twentieth";
-            Assert.Throws<RowModifiedException>(() => db.SaveAll(rows));
+            Assert.Throws<OptimisticConcurrencyException>(() => db.SaveAll(rows));
 
             var actualRows = db.SelectByIds<ModelWithRowVersion>(rows.Select(x => x.Id));
             Assert.That(actualRows[0].Text, Is.EqualTo("Seventeenth"));
@@ -441,7 +442,7 @@ namespace ServiceStack.OrmLite.Tests
             var row = db.SingleById<ModelWithRowVersion>(rowId);
             TouchRow(rowId);
 
-            Assert.Throws<RowModifiedException>(() => 
+            Assert.Throws<OptimisticConcurrencyException>(() => 
                 db.Delete(row));
 
             var count = db.Count<ModelWithRowVersion>(m => m.Id == rowId);
