@@ -424,10 +424,12 @@ namespace ServiceStack.OrmLite
                 !string.IsNullOrEmpty(sqlFilter)
                 && sqlFilter.TrimStart().StartsWith(SelectStatement, StringComparison.OrdinalIgnoreCase);
 
-            if (isFullSelectStatement) return (filterParams != null ? sqlFilter.SqlFmt(filterParams) : sqlFilter);
+            if (isFullSelectStatement) 
+                return (filterParams != null ? sqlFilter.SqlFmt(filterParams) : sqlFilter);
 
             sql.AppendFormat("SELECT {0} FROM {1}", "COUNT(*)",
                              GetQuotedTableName(modelDef));
+
             if (!string.IsNullOrEmpty(sqlFilter))
             {
                 sqlFilter = filterParams != null ? sqlFilter.SqlFmt(filterParams) : sqlFilter;
@@ -487,10 +489,9 @@ namespace ServiceStack.OrmLite
                 if (sqlColumns.Length > 0)
                     sqlColumns.Append(", ");
 
-                if (field.IsRowVersion)
-                    sqlColumns.Append(GetRowVersionColumnName(field));
-                else
-                    sqlColumns.Append(GetQuotedColumnName(field.FieldName));
+                sqlColumns.Append(field.IsRowVersion
+                    ? GetRowVersionColumnName(field)
+                    : GetQuotedColumnName(field.FieldName));
             }
 
             return sqlColumns.ToString();
@@ -508,7 +509,7 @@ namespace ServiceStack.OrmLite
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
-                if (fieldDef.AutoIncrement || fieldDef.IsComputed || fieldDef.IsRowVersion)
+                if (fieldDef.ShouldSkipInsert())
                     continue;
 
                 //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
@@ -547,7 +548,7 @@ namespace ServiceStack.OrmLite
 
             foreach (var fieldDef in modelDef.FieldDefinitionsArray)
             {
-                if (fieldDef.AutoIncrement || fieldDef.IsComputed || fieldDef.IsRowVersion) 
+                if (fieldDef.ShouldSkipInsert())
                     continue;
 
                 //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
@@ -590,7 +591,7 @@ namespace ServiceStack.OrmLite
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
-                if (fieldDef.IsComputed) 
+                if (fieldDef.ShouldSkipUpdate()) 
                     continue;
 
                 try
@@ -660,7 +661,7 @@ namespace ServiceStack.OrmLite
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
-                if (fieldDef.IsComputed) 
+                if (fieldDef.ShouldSkipDelete()) 
                     continue;
 
                 if (!fieldDef.IsRowVersion && (hasSpecificFilter && !deleteFields.Contains(fieldDef.Name)))
@@ -814,7 +815,8 @@ namespace ServiceStack.OrmLite
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
-                if (fieldDef.IsComputed) continue;
+                if (fieldDef.ShouldSkipUpdate())
+                    continue;
 
                 try
                 {
@@ -856,6 +858,9 @@ namespace ServiceStack.OrmLite
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
+                if (fieldDef.ShouldSkipDelete())
+                    continue;
+
                 try
                 {
                     if (fieldDef.IsPrimaryKey)

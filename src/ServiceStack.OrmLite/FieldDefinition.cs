@@ -88,6 +88,21 @@ namespace ServiceStack.OrmLite
         public string CustomFieldDefinition { get; set; }
 
         public bool IsRefType { get; set; }
+
+        public bool ShouldSkipInsert()
+        {
+            return AutoIncrement || IsComputed || IsRowVersion;
+        }
+
+        public bool ShouldSkipUpdate()
+        {
+            return IsComputed;
+        }
+
+        public bool ShouldSkipDelete()
+        {
+            return IsComputed;
+        }
     }
 
     public class ForeignKeyConstraint
