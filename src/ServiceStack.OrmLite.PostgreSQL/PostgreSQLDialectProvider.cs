@@ -122,21 +122,9 @@ namespace ServiceStack.OrmLite.PostgreSQL
             return sql.ToString();
         }
 
-        public override string GetColumnNames(ModelDefinition modelDef)
+        public override string GetRowVersionColumnName(FieldDefinition field)
         {
-            var sqlColumns = new StringBuilder();
-            foreach (var field in modelDef.FieldDefinitions)
-            {
-                if (sqlColumns.Length > 0)
-                    sqlColumns.Append(", ");
-
-                if (field.IsRowVersion)
-                    sqlColumns.Append("xmin as " + GetQuotedColumnName(field.FieldName));
-                else
-                    sqlColumns.Append(GetQuotedColumnName(field.FieldName));
-            }
-
-            return sqlColumns.ToString();
+            return "xmin as " + GetQuotedColumnName(field.FieldName);
         }
 
         public override void AppendFieldCondition(StringBuilder sqlFilter, FieldDefinition fieldDef, IDbCommand cmd)

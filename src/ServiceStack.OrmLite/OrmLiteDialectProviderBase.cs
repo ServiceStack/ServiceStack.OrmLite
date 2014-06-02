@@ -454,7 +454,10 @@ namespace ServiceStack.OrmLite
                 return sqlFilter.SqlFmt(filterParams);
 
             var modelDef = tableType.GetModelDefinition();
-            var sql = new StringBuilder("SELECT " + GetColumnNames(modelDef) + " FROM " + GetQuotedTableName(modelDef));
+            var sql = new StringBuilder();
+            sql.AppendFormat("SELECT {0} FROM {1}",
+                GetColumnNames(modelDef),
+                GetQuotedTableName(modelDef));
 
             if (!string.IsNullOrEmpty(sqlFilter))
             {
@@ -471,6 +474,11 @@ namespace ServiceStack.OrmLite
             return sql.ToString();
         }
 
+        public virtual string GetRowVersionColumnName(FieldDefinition field)
+        {
+            return GetQuotedColumnName(field.FieldName);
+        }
+
         public virtual string GetColumnNames(ModelDefinition modelDef)
         {
             var sqlColumns = new StringBuilder();
@@ -479,7 +487,10 @@ namespace ServiceStack.OrmLite
                 if (sqlColumns.Length > 0)
                     sqlColumns.Append(", ");
 
-                sqlColumns.Append(GetQuotedColumnName(field.FieldName));
+                if (field.IsRowVersion)
+                    sqlColumns.Append(GetRowVersionColumnName(field));
+                else
+                    sqlColumns.Append(GetQuotedColumnName(field.FieldName));
             }
 
             return sqlColumns.ToString();

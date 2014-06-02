@@ -14,6 +14,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using ServiceStack.Logging;
 
@@ -665,14 +666,16 @@ namespace ServiceStack.OrmLite
         {
             var id = obj.GetId();
             var existingRow = id != null ? dbCmd.SingleById<T>(id) : default(T);
+            var modelDef = typeof(T).GetModelDefinition();
+
             if (Equals(existingRow, default(T)))
             {
-                var modelDef = typeof(T).GetModelDefinition();
                 if (modelDef.HasAutoIncrementId)
                 {
                     var newId = dbCmd.Insert(obj, selectIdentity: true);
                     var safeId = OrmLiteConfig.DialectProvider.ConvertDbValue(newId, modelDef.PrimaryKey.FieldType);
                     modelDef.PrimaryKey.SetValueFn(obj, safeId);
+                    id = newId;
                 }
                 else
                 {
@@ -681,6 +684,10 @@ namespace ServiceStack.OrmLite
 
                     dbCmd.Insert(obj);
                 }
+
+                if (modelDef.RowVersion != null)
+                    modelDef.RowVersion.SetValueFn(obj, dbCmd.GetRowVersion(modelDef, id));
+                
                 return true;
             }
 
@@ -688,6 +695,10 @@ namespace ServiceStack.OrmLite
                 OrmLiteConfig.UpdateFilter(dbCmd, obj);
 
             dbCmd.Update(obj);
+            
+            if (modelDef.RowVersion != null)
+                modelDef.RowVersion.SetValueFn(obj, dbCmd.GetRowVersion(modelDef, id));
+
             return false;
         }
 
@@ -735,6 +746,7 @@ namespace ServiceStack.OrmLite
                             var newId = dbCmd.Insert(row, selectIdentity: true);
                             var safeId = OrmLiteConfig.DialectProvider.ConvertDbValue(newId, modelDef.PrimaryKey.FieldType);
                             modelDef.PrimaryKey.SetValueFn(row, safeId);
+                            id = newId;
                         }
                         else
                         {
@@ -746,6 +758,9 @@ namespace ServiceStack.OrmLite
 
                         rowsAdded++;
                     }
+
+                    if (modelDef.RowVersion != null)
+                        modelDef.RowVersion.SetValueFn(row, dbCmd.GetRowVersion(modelDef, id));
                 }
 
                 if (dbTrans != null)
@@ -766,6 +781,24 @@ namespace ServiceStack.OrmLite
             string sql = OrmLiteConfig.DialectProvider.ToExecuteProcedureStatement(obj);
             dbCommand.CommandType = CommandType.StoredProcedure;
             dbCommand.ExecuteSql(sql);
+        }
+
+        internal static ulong GetRowVersion(this IDbCommand dbCmd, ModelDefinition modelDef, object id)
+        {
+            var idParamString = OrmLiteConfig.DialectProvider.GetParam();
+
+            var sql = string.Format("SELECT {0} FROM {1} WHERE {2} = {3}",
+                OrmLiteConfig.DialectProvider.GetRowVersionColumnName(modelDef.RowVersion),
+                OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef),
+                OrmLiteConfig.DialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName),
+                idParamString);
+
+            var idParam = dbCmd.CreateParameter();
+            idParam.ParameterName = idParamString;
+            idParam.Value = id;
+            dbCmd.Parameters.Add(idParam);
+
+            return dbCmd.Scalar<ulong>(sql);
         }
     }
 }

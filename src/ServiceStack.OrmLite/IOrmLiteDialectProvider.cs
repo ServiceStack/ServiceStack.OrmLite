@@ -120,6 +120,7 @@ namespace ServiceStack.OrmLite
 
         bool DoesSequenceExist(IDbCommand dbCmd, string sequencName);
 
+        string GetRowVersionColumnName(FieldDefinition field);
         string GetColumnNames(ModelDefinition modelDef);
 
         SqlExpression<T> SqlExpression<T>();
