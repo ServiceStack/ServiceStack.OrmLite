@@ -794,6 +794,7 @@ namespace ServiceStack.OrmLite
                 OrmLiteConfig.DialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName),
                 idParamString);
 
+            dbCmd.Parameters.Clear();
             var idParam = dbCmd.CreateParameter();
             idParam.ParameterName = idParamString;
             idParam.Value = id;

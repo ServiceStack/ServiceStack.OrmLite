@@ -109,27 +109,17 @@ namespace ServiceStack.OrmLite.Oracle
         protected string ClientProvider = OdpProvider;
         public static string RowVersionTriggerFormat = "{0}RowVersionUpdateTrigger";
 
-        public override string ToPostDropTableStatement(ModelDefinition modelDef)
-        {
-            if (modelDef.RowVersion != null)
-            {
-                var triggerName = RowVersionTriggerFormat.Fmt(modelDef.ModelName);
-                return "DROP TRIGGER IF EXISTS {0}".Fmt(GetQuotedTableName(triggerName));
-            }
-
-            return null;
-        }
-
         public override string ToPostCreateTableStatement(ModelDefinition modelDef)
         {
             if (modelDef.RowVersion != null)
             {
-                var triggerName = RowVersionTriggerFormat.Fmt(modelDef.ModelName);
+                var triggerName = NamingStrategy.ApplyNameRestrictions(
+                    RowVersionTriggerFormat.Fmt(modelDef.ModelName));
                 var triggerBody = ":NEW.{0} := :OLD.{0}+1;".Fmt(
                     modelDef.RowVersion.FieldName.SqlColumn());
 
                 var sql = "CREATE TRIGGER {0} BEFORE UPDATE ON {1} FOR EACH ROW BEGIN {2} END;".Fmt(
-                    triggerName, modelDef.ModelName, triggerBody);
+                    Quote(triggerName), modelDef.ModelName, triggerBody);
 
                 return sql;
             }
@@ -319,7 +309,7 @@ namespace ServiceStack.OrmLite.Oracle
             dbCommand.CommandTimeout = OrmLiteConfig.CommandTimeout;
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
-                if (fieldDef.IsComputed) continue;
+                if (fieldDef.IsComputed || fieldDef.IsRowVersion) continue;
 
                 //insertFields contains Property "Name" of fields to insert (that's how expressions work)
                 if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name)) continue;
@@ -771,7 +761,11 @@ namespace ServiceStack.OrmLite.Oracle
             var sql = new StringBuilder();
             sql.AppendFormat("{0} {1}", GetQuotedColumnName(fieldName), fieldDefinition);
 
-            if (!string.IsNullOrEmpty(defaultValue))
+            if (isRowVersion)
+            {
+                sql.AppendFormat(DefaultValueFormat, 1L);
+            }
+            else if (!string.IsNullOrEmpty(defaultValue))
             {
                 sql.AppendFormat(DefaultValueFormat, defaultValue);
             }
