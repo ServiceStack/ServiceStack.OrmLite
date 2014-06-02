@@ -101,15 +101,15 @@ namespace ServiceStack.OrmLite.Tests
         {
             db.DropAndCreateTable<ModelWithRowVersion>();
 
-            db.Insert(new ModelWithRowVersion { Text = "Text" });
+            var rowId = db.Insert(new ModelWithRowVersion { Text = "Text" }, selectIdentity:true);
 
-            var row = db.SingleById<ModelWithRowVersion>(1);
+            var row = db.SingleById<ModelWithRowVersion>(rowId);
 
             row.Text += " Updated";
 
             db.Update(row);
 
-            var updatedRow = db.SingleById<ModelWithRowVersion>(1);
+            var updatedRow = db.SingleById<ModelWithRowVersion>(rowId);
 
             Assert.That(updatedRow.Text, Is.EqualTo("Text Updated"));
             Assert.That(updatedRow.RowVersion, Is.GreaterThan(0));
@@ -130,15 +130,15 @@ namespace ServiceStack.OrmLite.Tests
         {
             db.DropAndCreateTable<ModelWithRowVersionAlias>();
 
-            db.Insert(new ModelWithRowVersionAlias { Text = "Text" });
+            var rowId = db.Insert(new ModelWithRowVersionAlias { Text = "Text" }, selectIdentity:true);
 
-            var row = db.SingleById<ModelWithRowVersionAlias>(1);
+            var row = db.SingleById<ModelWithRowVersionAlias>(rowId);
 
             row.Text += " Updated";
 
             db.Update(row);
 
-            var updatedRow = db.SingleById<ModelWithRowVersionAlias>(1);
+            var updatedRow = db.SingleById<ModelWithRowVersionAlias>(rowId);
 
             Assert.That(updatedRow.Text, Is.EqualTo("Text Updated"));
             Assert.That(updatedRow.RowVersion, Is.GreaterThan(0));
@@ -221,8 +221,9 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_Save_new_row_with_references_and_retrieve_child_rowversions()
         {
+            db.DropTable<ModelWithRowVersionAndParent>();
             db.DropAndCreateTable<ModelWithOptimisticChildren>();
-            db.DropAndCreateTable<ModelWithRowVersionAndParent>();
+            db.CreateTable<ModelWithRowVersionAndParent>();
 
             var row = new ModelWithOptimisticChildren
             {
