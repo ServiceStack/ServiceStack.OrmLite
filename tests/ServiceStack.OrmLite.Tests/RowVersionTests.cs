@@ -17,18 +17,26 @@ namespace ServiceStack.OrmLite.Tests
         public ulong RowVersion { get; set; }
     }
 
+    public class ModelWithRowVersionAlias
+    {
+        [AutoIncrement]
+        public long Id { get; set; }
+
+        public string Text { get; set; }
+
+        [Alias("VersionAlias")]
+        public ulong RowVersion { get; set; }
+    }
+
     public class RowVersionTests : OrmLiteTestBase
     {
-        public RowVersionTests()
-        {
-            //Dialect = Dialect.Sqlite;
-        }
-
         private IDbConnection db;
 
         [TestFixtureSetUp]
         public void FixtureSetUp()
         {
+            //Dialect = Dialect.SqlServer;
+            LogManager.LogFactory = new ConsoleLogFactory(debugEnabled: true);
             using (var dbConn = OpenDbConnection())
             {
                 dbConn.DropAndCreateTable<ModelWithRowVersion>();
@@ -61,6 +69,35 @@ namespace ServiceStack.OrmLite.Tests
             db.Update(row);
 
             var updatedRow = db.SingleById<ModelWithRowVersion>(1);
+
+            Assert.That(updatedRow.Text, Is.EqualTo("Text Updated"));
+            Assert.That(updatedRow.RowVersion, Is.GreaterThan(0));
+
+            row.Text += " Again";
+
+            //Can't update old record
+            Assert.Throws<RowModifiedException>(() =>
+                db.Update(row));
+
+            //Can update latest version
+            updatedRow.Text += " Again";
+            db.Update(updatedRow);
+        }
+
+        [Test]
+        public void Can_create_table_with_RowVersion_Alias()
+        {
+            db.DropAndCreateTable<ModelWithRowVersionAlias>();
+
+            db.Insert(new ModelWithRowVersionAlias { Text = "Text" });
+
+            var row = db.SingleById<ModelWithRowVersionAlias>(1);
+
+            row.Text += " Updated";
+
+            db.Update(row);
+
+            var updatedRow = db.SingleById<ModelWithRowVersionAlias>(1);
 
             Assert.That(updatedRow.Text, Is.EqualTo("Text Updated"));
             Assert.That(updatedRow.RowVersion, Is.GreaterThan(0));
