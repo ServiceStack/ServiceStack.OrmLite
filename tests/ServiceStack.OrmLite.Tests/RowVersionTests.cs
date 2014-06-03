@@ -76,7 +76,6 @@ namespace ServiceStack.OrmLite.Tests
         [TestFixtureSetUp]
         public void FixtureSetUp()
         {
-            //Dialect = Dialect.Sqlite;
             LogManager.LogFactory = new ConsoleLogFactory(debugEnabled: true);
             using (var dbConn = OpenDbConnection())
             {

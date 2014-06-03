@@ -107,8 +107,7 @@ namespace ServiceStack.OrmLite.SqlServer
                 var bytes = reader.GetValue(colIndex) as byte[];
                 if (bytes != null)
                 {
-                    Array.Reverse(bytes); //Correct Endianness
-                    var ulongValue = BitConverter.ToUInt64(bytes, 0);
+                    var ulongValue = ConvertToULong(bytes);
                     try
                     {
                         fieldDef.SetValueFn(instance, ulongValue);

@@ -1245,6 +1245,14 @@ namespace ServiceStack.OrmLite
             }
         }
 
+
+        public static ulong ConvertToULong(byte[] bytes)
+        {
+            Array.Reverse(bytes); //Correct Endianness
+            var ulongValue = BitConverter.ToUInt64(bytes, 0);
+            return ulongValue;
+        }
+
         public virtual object ConvertDbValue(object value, Type type)
         {
             if (value == null || value is DBNull) return null;
@@ -1289,7 +1297,12 @@ namespace ServiceStack.OrmLite
                     case TypeCode.Int64:
                         return value is long ? value : Convert.ToInt64(value);
                     case TypeCode.UInt64:
-                        return value is ulong ? value : Convert.ToUInt64(value);
+                        if (value is ulong)
+                            return value;
+                        var byteValue = value as byte[];
+                        if (byteValue != null)
+                            return ConvertToULong(byteValue);
+                        return Convert.ToUInt64(value);
                     case TypeCode.Single:
                         return value is float ? value : Convert.ToSingle(value);
                     case TypeCode.Double:
