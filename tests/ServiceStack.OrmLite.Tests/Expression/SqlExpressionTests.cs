@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
@@ -12,6 +13,12 @@ namespace ServiceStack.OrmLite.Tests.Expression
         public int Id { get; set; }
 
         public string Letter { get; set; }
+    }
+
+    public class LetterWeighting
+    {
+        public long LetterFrequencyId { get; set; }
+        public int Weighting { get; set; }
     }
 
     public class SqlExpressionTests : ExpressionsTestBase
@@ -68,6 +75,86 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
                 var uniqueLetters = db.ColumnDistinct<string>(query);
                 Assert.That(uniqueLetters.EquivalentTo(new[] { "A", "B", "C" }));
+            }
+        }
+
+        [Test]
+        public void Can_select_limit_with_SqlExpression()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<LetterFrequency>();
+                db.DropAndCreateTable<LetterWeighting>();
+
+                var letters = "A,B,C,D,E".Split(',');
+                var i = 0;
+                letters.Each(letter =>
+                {
+                    var id = db.Insert(new LetterFrequency { Letter = letter }, selectIdentity: true);
+                    db.Insert(new LetterWeighting { LetterFrequencyId = id, Weighting = ++i * 10 });
+                });
+
+                var results = db.Select(db.From<LetterFrequency>().Limit(3));
+                Assert.That(results.Count, Is.EqualTo(3));
+
+                results = db.Select(db.From<LetterFrequency>().Skip(3));
+                Assert.That(results.Count, Is.EqualTo(2));
+
+                results = db.Select(db.From<LetterFrequency>().Limit(1, 2));
+                Assert.That(results.Count, Is.EqualTo(2));
+                Assert.That(results.ConvertAll(x => x.Letter), Is.EquivalentTo(new[] { "B", "C" }));
+
+                results = db.Select(db.From<LetterFrequency>().Skip(1).Take(2));
+                Assert.That(results.ConvertAll(x => x.Letter), Is.EquivalentTo(new[] { "B", "C" }));
+
+                results = db.Select(db.From<LetterFrequency>()
+                    .OrderByDescending(x => x.Letter)
+                    .Skip(1).Take(2));
+                Assert.That(results.ConvertAll(x => x.Letter), Is.EquivalentTo(new[] { "D", "C" }));
+            }
+        }
+
+        [Test]
+        public void Can_select_limit_with_JoinSqlBuilder()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<LetterFrequency>();
+                db.DropAndCreateTable<LetterWeighting>();
+
+                var letters = "A,B,C,D,E".Split(',');
+                var i = 0;
+                letters.Each(letter =>
+                {
+                    var id = db.Insert(new LetterFrequency { Letter = letter }, selectIdentity: true);
+                    db.Insert(new LetterWeighting { LetterFrequencyId = id, Weighting = ++i * 10 });
+                });
+
+                var joinFn = new Func<JoinSqlBuilder<LetterFrequency, LetterWeighting>>(() => 
+                    new JoinSqlBuilder<LetterFrequency, LetterWeighting>()
+                        .Join<LetterFrequency, LetterWeighting>(x => x.Id, x => x.LetterFrequencyId)
+                    );
+
+                var results = db.Select<LetterFrequency>(joinFn());
+                Assert.That(results.Count, Is.EqualTo(5));
+
+                results = db.Select<LetterFrequency>(joinFn().Limit(3));
+                Assert.That(results.Count, Is.EqualTo(3));
+
+                results = db.Select<LetterFrequency>(joinFn().Skip(3));
+                Assert.That(results.Count, Is.EqualTo(2));
+
+                results = db.Select<LetterFrequency>(joinFn().Limit(1, 2));
+                Assert.That(results.Count, Is.EqualTo(2));
+                Assert.That(results.ConvertAll(x => x.Letter), Is.EquivalentTo(new[] { "B", "C" }));
+
+                results = db.Select<LetterFrequency>(joinFn().Skip(1).Take(2));
+                Assert.That(results.ConvertAll(x => x.Letter), Is.EquivalentTo(new[] { "B", "C" }));
+
+                results = db.Select<LetterFrequency>(joinFn()
+                    .OrderByDescending<LetterFrequency>(x => x.Letter)
+                    .Skip(1).Take(2));
+                Assert.That(results.ConvertAll(x => x.Letter), Is.EquivalentTo(new[] { "D", "C" }));
             }
         }
     }
