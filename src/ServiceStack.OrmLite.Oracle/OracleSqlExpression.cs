@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq.Expressions;
 
 namespace ServiceStack.OrmLite.Oracle
@@ -28,50 +27,6 @@ namespace ServiceStack.OrmLite.Oracle
                                                           startIndex));
             }
             return base.VisitColumnAccessMethod(m);
-        }
-
-        public override string LimitExpression
-        {
-            get
-            {
-                return "";
-            }
-        }
-
-        //from Simple.Data.Oracle implementation https://github.com/flq/Simple.Data.Oracle/blob/master/Simple.Data.Oracle/OraclePager.cs
-        private static string UpdateWithOrderByIfNecessary(string sql)
-        {
-            if (sql.IndexOf("order by ", StringComparison.OrdinalIgnoreCase) != -1)
-                return sql;
-            var col = GetFirstColumn(sql);
-            return sql + " ORDER BY " + col;
-        }
-
-        private static string GetFirstColumn(string sql)
-        {
-            var idx1 = sql.IndexOf("select", StringComparison.OrdinalIgnoreCase) + 7;
-            var idx2 = sql.IndexOf(",", idx1, StringComparison.Ordinal);
-            return sql.Substring(idx1, idx2 - 7).Trim();
-        }
-
-        protected override string ApplyPaging(string sql)
-        {
-            if (!Rows.HasValue)
-                return sql;
-            if (!Offset.HasValue)
-            {
-                Offset = 0;
-            }
-            sql = UpdateWithOrderByIfNecessary(sql);
-            var sb = new StringBuilder();
-            sb.AppendLine("SELECT * FROM (");
-            sb.AppendLine("SELECT \"_ss_ormlite_1_\".*, ROWNUM RNUM FROM (");
-            sb.Append(sql);
-            sb.AppendLine(") \"_ss_ormlite_1_\"");
-            sb.AppendFormat("WHERE ROWNUM <= {0} + {1}) \"_ss_ormlite_2_\" ", Offset.Value, Rows.Value);
-            sb.AppendFormat("WHERE \"_ss_ormlite_2_\".RNUM > {0}", Offset.Value);
-
-            return sb.ToString();
         }
 
         public override SqlExpression<T> Clone()

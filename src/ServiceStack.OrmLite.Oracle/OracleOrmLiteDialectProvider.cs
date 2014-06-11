@@ -1110,5 +1110,47 @@ namespace ServiceStack.OrmLite.Oracle
                 .Replace("_", @"^_")
                 .Replace("%", @"^%");
         }
+
+
+        public override string ToSelectStatement(ModelDefinition modelDef,
+            string selectExpression,
+            string bodyExpression,
+            string orderByExpression = null,
+            int? offset = null,
+            int? rows = null)
+        {
+            var sbInner = new StringBuilder(selectExpression);
+            sbInner.Append(bodyExpression);
+
+            if (!rows.HasValue)
+                return sbInner.ToString();
+
+            if (!offset.HasValue)
+            {
+                offset = 0;
+            }
+
+            if (string.IsNullOrEmpty(orderByExpression))
+            {
+                if (modelDef.PrimaryKey == null)
+                    throw new ApplicationException("Malformed model, no PrimaryKey defined");
+
+                orderByExpression = string.Format("ORDER BY {0}",
+                    OrmLiteConfig.DialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName));
+            }
+            sbInner.Append(orderByExpression);
+
+            var sql = sbInner.ToString();
+
+            var sb = new StringBuilder();
+            sb.AppendLine("SELECT * FROM (");
+            sb.AppendLine("SELECT \"_ss_ormlite_1_\".*, ROWNUM RNUM FROM (");
+            sb.Append(sql);
+            sb.AppendLine(") \"_ss_ormlite_1_\"");
+            sb.AppendFormat("WHERE ROWNUM <= {0} + {1}) \"_ss_ormlite_2_\" ", offset.Value, rows.Value);
+            sb.AppendFormat("WHERE \"_ss_ormlite_2_\".RNUM > {0}", offset.Value);
+
+            return sb.ToString();
+        }
     }
 }
