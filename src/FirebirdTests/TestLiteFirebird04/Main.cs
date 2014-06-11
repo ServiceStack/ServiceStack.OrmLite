@@ -199,13 +199,6 @@ namespace TestLiteFirebird04
 			Console.WriteLine("{0}", sql.OrderByExpression);
 			
 			
-			sql.Limit(1,5);
-			Console.WriteLine(sql.LimitExpression);
-			
-			sql.Limit(1);
-			Console.WriteLine(sql.LimitExpression);
-			
-			
 			sql.Where( cp => ( string.Concat( cp.Name, "_", cp.Employees) =="SOME COMPANY XYZ_2"));
 			Console.WriteLine(sql.WhereExpression);
 								

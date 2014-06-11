@@ -244,14 +244,6 @@ namespace TestLiteOracle04
                 Console.WriteLine("{0}", sql.OrderByExpression);
                 db.Select<Company>(sql);
 
-                sql.Limit(1, 5);
-                Console.WriteLine(sql.LimitExpression);
-                db.Select<Company>(sql);
-
-                sql.Limit(1);
-                Console.WriteLine(sql.LimitExpression);
-                db.Select<Company>(sql);
-
                 sql.Where(cp => (string.Concat(cp.Name, "_", cp.Employees) == "SOME COMPANY XYZ_2"));
                 Console.WriteLine(sql.WhereExpression);
                 db.Select<Company>(sql);
