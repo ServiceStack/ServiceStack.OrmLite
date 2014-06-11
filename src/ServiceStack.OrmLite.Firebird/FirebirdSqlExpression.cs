@@ -160,34 +160,6 @@ namespace ServiceStack.OrmLite.Firebird
         {
             return (exp.ToString() == _falseExpression);
         }
-
-        public override string LimitExpression
-        {
-            get
-            {
-                if (!Offset.HasValue) return "";
-                int fromRow = Offset.Value + 1;
-                if (fromRow <= 0)
-                    throw new ArgumentException(
-                        string.Format("Skip value:'{0}' must be>=0", Offset.Value));
-                string toRow;
-                if (Rows.HasValue)
-                {
-                    if (Rows.Value < 0)
-                    {
-                        throw new ArgumentException(
-                            string.Format("Rows value:'{0}' must be>=0", Rows.Value));
-                    }
-                    toRow = string.Format("TO {0}", fromRow + Rows.Value - 1);
-                }
-                else
-                {
-                    toRow = string.Empty;
-                }
-                return string.Format("ROWS {0} {1}", fromRow, toRow);
-            }
-        }
-
     }
 }
 

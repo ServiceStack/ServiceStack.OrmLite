@@ -806,7 +806,48 @@ namespace ServiceStack.OrmLite.Firebird
                                  GetQuotedColumnName(fieldDef.FieldName));
         }
         #endregion DDL
+
+        public override string ToSelectStatement(ModelDefinition modelDef,
+            string selectExpression,
+            string bodyExpression,
+            string orderByExpression = null,
+            int? offset = null,
+            int? rows = null)
+        {
+
+            var sb = new StringBuilder(selectExpression);
+            sb.Append(bodyExpression);
+            if (orderByExpression != null)
+            {
+                sb.Append(orderByExpression);
+            }
+
+            if (offset != null)
+            {
+                int fromRow = offset.Value + 1;
+                if (fromRow <= 0)
+                    throw new ArgumentException(
+                        string.Format("Skip value:'{0}' must be>=0", offset.Value));
+                string toRow;
+                if (rows.HasValue)
+                {
+                    if (rows.Value < 0)
+                    {
+                        throw new ArgumentException(string.Format("Rows value:'{0}' must be>=0", rows.Value));
+                    }
+                    toRow = string.Format("TO {0}", fromRow + rows.Value - 1);
+                }
+                else
+                {
+                    toRow = string.Empty;
+                }
+                sb.Append(string.Format("ROWS {0} {1}", fromRow, toRow));
+            }
+
+            return sb.ToString();
+        }
     }
+
 }
 
 /*
