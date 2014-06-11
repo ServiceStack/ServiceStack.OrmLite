@@ -521,26 +521,10 @@ namespace ServiceStack.OrmLite
 
         public virtual string ToSelectStatement()
         {
-            var sql = new StringBuilder();
+            var sql = OrmLiteConfig.DialectProvider
+                .ToSelectStatement(modelDef, SelectExpression, BodyExpression, OrderByExpression, Offset, Rows);
 
-            sql.Append(SelectExpression);
-
-            sql.Append(FromExpression);
-
-            sql.Append(string.IsNullOrEmpty(WhereExpression) ?
-                       "" :
-                       "\n" + WhereExpression);
-            sql.Append(string.IsNullOrEmpty(GroupByExpression) ?
-                       "" :
-                       "\n" + GroupByExpression);
-            sql.Append(string.IsNullOrEmpty(HavingExpression) ?
-                       "" :
-                       "\n" + HavingExpression);
-            sql.Append(string.IsNullOrEmpty(OrderByExpression) ?
-                       "" :
-                       "\n" + OrderByExpression);
-
-            return ApplyPaging(sql.ToString());
+            return sql;
         }
 
         public virtual string ToCountStatement()
@@ -571,6 +555,17 @@ namespace ServiceStack.OrmLite
                     : fromExpression;
             }
             set { fromExpression = value; }
+        }
+
+        public string BodyExpression
+        {
+            get
+            {
+                return FromExpression
+                    + (string.IsNullOrEmpty(WhereExpression) ? "" : "\n" + WhereExpression)
+                    + (string.IsNullOrEmpty(GroupByExpression) ? "" : "\n" + GroupByExpression)
+                    + (string.IsNullOrEmpty(HavingExpression) ? "" : "\n" + HavingExpression);
+            }
         }
 
         public string WhereExpression
@@ -619,19 +614,6 @@ namespace ServiceStack.OrmLite
             set
             {
                 orderBy = value;
-            }
-        }
-
-        public virtual string LimitExpression
-        {
-            get
-            {
-                if (Offset == null && Rows == null)
-                    return "";
-
-                return Offset == null
-                    ? "LIMIT " + Rows
-                    : "LIMIT " + Rows.GetValueOrDefault(int.MaxValue) + " OFFSET " + Offset;
             }
         }
 
@@ -1121,13 +1103,6 @@ namespace ServiceStack.OrmLite
         public IList<string> GetAllFields()
         {
             return modelDef.FieldDefinitions.ConvertAll(r => r.Name);
-        }
-
-        protected virtual string ApplyPaging(string sql)
-        {
-            var limitExpression = LimitExpression;
-            sql = sql + (string.IsNullOrEmpty(limitExpression) ? "" : "\n" + limitExpression);
-            return sql;
         }
 
         private bool IsStaticArrayMethod(MethodCallExpression m)

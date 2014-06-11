@@ -476,6 +476,37 @@ namespace ServiceStack.OrmLite
             return sql.ToString();
         }
 
+        public virtual string ToSelectStatement(ModelDefinition modelDef, 
+            string selectExpression, 
+            string bodyExpression,
+            string orderByExpression = null, 
+            int? offset = null, 
+            int? rows = null)
+        {
+
+            var sb = new StringBuilder(selectExpression);
+            sb.Append(bodyExpression);
+            if (orderByExpression != null)
+            {
+                sb.Append(orderByExpression);
+            }
+
+            if (offset != null || rows != null)
+            {
+                sb.Append("\nLIMIT ");
+                if (offset == null)
+                {
+                    sb.Append(rows);
+                }
+                else
+                {
+                    sb.Append(rows.GetValueOrDefault(int.MaxValue)).Append(" OFFSET ").Append(offset);
+                }
+            }
+
+            return sb.ToString();
+        }
+
         public virtual string GetRowVersionColumnName(FieldDefinition field)
         {
             return GetQuotedColumnName(field.FieldName);
