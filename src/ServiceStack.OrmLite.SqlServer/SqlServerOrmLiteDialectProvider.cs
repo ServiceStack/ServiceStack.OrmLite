@@ -361,5 +361,63 @@ namespace ServiceStack.OrmLite.SqlServer
 
             return definition;
         }
+
+        public override string ToSelectStatement(ModelDefinition modelDef,
+            string selectExpression,
+            string bodyExpression,
+            string orderByExpression = null,
+            int? offset = null,
+            int? rows = null)
+        {
+            var sb = new StringBuilder(selectExpression);
+            sb.Append(bodyExpression);
+
+            if (!offset.HasValue && !rows.HasValue)
+                return sb + orderByExpression;
+
+            if (offset.HasValue && offset.Value < 0)
+                throw new ArgumentException(string.Format("Skip value:'{0}' must be>=0", offset.Value));
+
+            if (rows.HasValue && rows.Value < 0)
+                throw new ArgumentException(string.Format("Rows value:'{0}' must be>=0", rows.Value));
+
+            var skip = offset.HasValue ? offset.Value : 0;
+            var take = rows.HasValue ? rows.Value : int.MaxValue;
+
+            var selectType = selectExpression.StartsWithIgnoreCase("SELECT DISTINCT") ? "SELECT DISTINCT" : "SELECT";
+
+            //Temporary hack till we come up with a more robust paging sln for SqlServer
+            if (skip == 0)
+            {
+                var sql = sb + orderByExpression;
+
+                if (take == int.MaxValue)
+                    return sql;
+
+                if (sql.Length < "SELECT".Length) return sql;
+                sql = selectType + " TOP " + take + sql.Substring(selectType.Length, sql.Length - selectType.Length);
+                return sql;
+            }
+
+            // Required because ordering is done by Windowing function
+            if (string.IsNullOrEmpty(orderByExpression))
+            {
+                if (modelDef.PrimaryKey == null)
+                    throw new ApplicationException("Malformed model, no PrimaryKey defined");
+
+                orderByExpression = string.Format("ORDER BY {0}",
+                    OrmLiteConfig.DialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName));
+            }
+
+            var ret = string.Format(
+                "SELECT * FROM (SELECT ROW_NUMBER() OVER ({1}) As RowNum, {0} {2}) AS RowConstrainedResult WHERE RowNum > {3} AND RowNum <= {4}",
+                selectExpression.Substring(selectType.Length),
+                orderByExpression,
+                bodyExpression,
+                skip,
+                take == int.MaxValue ? take : skip + take);
+
+            return ret;
+        }
     }
 }
