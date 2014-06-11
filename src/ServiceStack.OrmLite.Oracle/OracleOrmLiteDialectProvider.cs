@@ -1123,7 +1123,7 @@ namespace ServiceStack.OrmLite.Oracle
             sbInner.Append(bodyExpression);
 
             if (!rows.HasValue)
-                return sbInner.ToString();
+                return sbInner + orderByExpression;
 
             if (!offset.HasValue)
             {

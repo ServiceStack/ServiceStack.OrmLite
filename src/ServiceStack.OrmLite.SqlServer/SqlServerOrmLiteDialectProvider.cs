@@ -395,7 +395,7 @@ namespace ServiceStack.OrmLite.SqlServer
                     return sql;
 
                 if (sql.Length < "SELECT".Length) return sql;
-                sql = selectType + " TOP " + take + sql.Substring(selectType.Length, sql.Length - selectType.Length);
+                sql = selectType + " TOP " + take + sql.Substring(selectType.Length);
                 return sql;
             }
 
