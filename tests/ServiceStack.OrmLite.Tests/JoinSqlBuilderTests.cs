@@ -113,17 +113,18 @@ namespace ServiceStack.OrmLite.Tests
 	    [Test]
 	    public void Can_execute_SqlBuilder_templates_as_SqlExpression()
 	    {
-	        var sb = new SqlBuilder();
-
-            var tmpl = sb.AddTemplate("SELECT * FROM User u INNER JOIN Addresses a on a.UserId = u.Id /**where**/");
-            sb.Where("Age > @age", new { age = 18 });
-            sb.Where("Countryalias = @country", new { country = "Italy" });
-
-
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<User>();
                 db.DropAndCreateTable<WithAliasAddress>();
+
+                var sb = new SqlBuilder();
+
+                var tmpl = sb.AddTemplate("SELECT * FROM {0} u INNER JOIN {1} a on a.{2} = u.Id /**where**/"
+                    .Fmt("User".SqlTable(), "Addresses".SqlTable(), "UserId".SqlColumn()));
+
+                sb.Where("Age > @age", new { age = 18 });
+                sb.Where("Countryalias = @country", new { country = "Italy" });
 
                 var userId = db.Insert(new User { Age = 27, Name = "Foo" }, selectIdentity: true);
                 db.Insert(new WithAliasAddress { City = "Rome", Country = "Italy", UserId = (int)userId });
