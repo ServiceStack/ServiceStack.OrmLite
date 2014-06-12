@@ -16,14 +16,14 @@ namespace ServiceStack.OrmLite
         internal static List<T> Select<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression)
         {
             var expr = OrmLiteConfig.DialectProvider.SqlExpression<T>();
-            string sql = expression(expr).ToSelectStatement();
+            string sql = expression(expr).SelectInto<T>();
 
             return dbCmd.ExprConvertToList<T>(sql);
         }
 
         internal static List<T> Select<T>(this IDbCommand dbCmd, SqlExpression<T> expression)
         {
-            string sql = expression.ToSelectStatement();
+            string sql = expression.SelectInto<T>();
 
             return dbCmd.ExprConvertToList<T>(sql);
         }

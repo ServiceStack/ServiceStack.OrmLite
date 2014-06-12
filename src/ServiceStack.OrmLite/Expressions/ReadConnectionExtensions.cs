@@ -43,6 +43,13 @@ namespace ServiceStack.OrmLite
             return OrmLiteConfig.ExecFilter.SqlExpression<T>(dbConn);
         }
 
+        public static SqlExpression<T> From<T, JoinWith>(this IDbConnection dbConn, Expression<Func<T, JoinWith, bool>> joinExpr=null)
+        {
+            var sql = OrmLiteConfig.ExecFilter.SqlExpression<T>(dbConn);
+            sql.Join(joinExpr);
+            return sql;
+        }
+
         /// <summary>
         /// Creates a new SqlExpression builder for the specified type using a user-defined FROM sql expression.
         /// </summary>

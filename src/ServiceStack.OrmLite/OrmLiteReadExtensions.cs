@@ -842,7 +842,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        private static FieldDefinition GetRefFieldDef(ModelDefinition modelDef, ModelDefinition refModelDef, Type refType)
+        public static FieldDefinition GetRefFieldDef(ModelDefinition modelDef, ModelDefinition refModelDef, Type refType)
         {
             var refNameConvention = modelDef.ModelName + "Id";
             var refField = refModelDef.FieldDefinitions.FirstOrDefault(x => x.FieldName == refNameConvention)

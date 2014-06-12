@@ -9,7 +9,7 @@ using System.Linq.Expressions;
 
 namespace ServiceStack.OrmLite
 {
-    public abstract class SqlExpression<T> : ISqlExpression
+    public abstract partial class SqlExpression<T> : ISqlExpression
     {
         private Expression<Func<T, bool>> underlyingExpression;
         private List<string> orderByProperties = new List<string>();
@@ -846,9 +846,16 @@ namespace ServiceStack.OrmLite
                 var propertyInfo = m.Member as PropertyInfo;
 
                 if (propertyInfo.PropertyType.IsEnum)
-                    return new EnumMemberAccess((PrefixFieldWithTableName ? OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef.ModelName) + "." : "") + GetQuotedColumnName(m.Member.Name), propertyInfo.PropertyType);
+                    return new EnumMemberAccess(
+                        (PrefixFieldWithTableName
+                            ? OrmLiteConfig.DialectProvider.GetQuotedTableName(propertyInfo.DeclaringType.GetModelDefinition().ModelName) + "." 
+                            : "") 
+                            + GetQuotedColumnName(m.Member.Name), propertyInfo.PropertyType);
 
-                return new PartialSqlString((PrefixFieldWithTableName ? OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef.ModelName) + "." : "") + GetQuotedColumnName(m.Member.Name));
+                return new PartialSqlString((PrefixFieldWithTableName 
+                    ? OrmLiteConfig.DialectProvider.GetQuotedTableName(propertyInfo.DeclaringType.GetModelDefinition().ModelName) + "." 
+                    : "") 
+                    + GetQuotedColumnName(m.Member.Name));
             }
 
             var member = Expression.Convert(m, typeof(object));
@@ -1346,6 +1353,11 @@ namespace ServiceStack.OrmLite
     public interface ISqlExpression
     {
         string ToSelectStatement();
+    }
+
+    public interface ISelectableSqlExpression
+    {
+        string SelectInto<TModel>();
     }
 
     public class PartialSqlString
