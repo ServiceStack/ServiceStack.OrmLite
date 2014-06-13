@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data.SqlClient;
+using System.Data.SqlTypes;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.SqlServer;
@@ -23,8 +24,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
 				conn.CreateTable<Table_for_datetime2_tests>(true);
 
 				//normal insert
-                conn.Insert(test_object_ValidForDatetime2);
-				var insertedId = (int)conn.LastInsertId();
+                var insertedId = conn.Insert(test_object_ValidForDatetime2, selectIdentity:true);
 
 				//read back, and verify precision
                 var fromDb = conn.SingleById<Table_for_datetime2_tests>(insertedId);
@@ -56,17 +56,16 @@ namespace ServiceStack.OrmLite.SqlServerTests
 				conn.CreateTable<Table_for_datetime2_tests>(true);
 
 				//normal insert
-                conn.Insert(test_object_ValidForNormalDatetime);
-				var insertedId = conn.LastInsertId();
+                var insertedId = conn.Insert(test_object_ValidForNormalDatetime, selectIdentity:true);
 
 				//insert works, but can't regular datetime's precision is not great enough.
                 var fromDb = conn.SingleById<Table_for_datetime2_tests>(insertedId);
 				Assert.AreNotEqual(test_object_ValidForNormalDatetime.ToVerifyPrecision, fromDb.ToVerifyPrecision);
 
-				var thrown = Assert.Throws<SqlException>(() => {
+				var thrown = Assert.Throws<SqlTypeException>(() => {
                     conn.Insert(test_object_ValidForDatetime2);
 				});
-				Assert.That(thrown.Message.Contains("The conversion of a varchar data type to a datetime data type resulted in an out-of-range value."));
+                Assert.That(thrown.Message.Contains("SqlDateTime overflow"));
 
 				
 				//check InsertParam
