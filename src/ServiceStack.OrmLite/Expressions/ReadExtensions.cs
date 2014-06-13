@@ -21,6 +21,14 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExprConvertToList<T>(sql);
         }
 
+        internal static List<Into> Select<Into, From>(this IDbCommand dbCmd, Func<SqlExpression<From>, SqlExpression<From>> expression)
+        {
+            var expr = OrmLiteConfig.DialectProvider.SqlExpression<From>();
+            string sql = expression(expr).SelectInto<Into>();
+
+            return dbCmd.ExprConvertToList<Into>(sql);
+        }
+
         internal static List<T> Select<T>(this IDbCommand dbCmd, SqlExpression<T> expression)
         {
             string sql = expression.SelectInto<T>();
@@ -31,7 +39,7 @@ namespace ServiceStack.OrmLite
         internal static List<T> Select<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
         {
             var expr = OrmLiteConfig.DialectProvider.SqlExpression<T>();
-            string sql = expr.Where(predicate).ToSelectStatement();
+            string sql = expr.Where(predicate).SelectInto<T>();
 
             return dbCmd.ExprConvertToList<T>(sql);
         }
@@ -51,7 +59,7 @@ namespace ServiceStack.OrmLite
 
         internal static T Single<T>(this IDbCommand dbCmd, SqlExpression<T> expression)
         {
-            string sql = expression.Limit(1).ToSelectStatement();
+            string sql = expression.Limit(1).SelectInto<T>();
 
             return dbCmd.ExprConvertTo<T>(sql);
         }
@@ -60,7 +68,7 @@ namespace ServiceStack.OrmLite
         {
             var ev = OrmLiteConfig.DialectProvider.SqlExpression<T>();
             ev.Select(field);
-            var sql = ev.ToSelectStatement();
+            var sql = ev.SelectInto<T>();
             return dbCmd.Scalar<TKey>(sql);
         }
 
@@ -69,7 +77,7 @@ namespace ServiceStack.OrmLite
         {
             var ev = OrmLiteConfig.DialectProvider.SqlExpression<T>();
             ev.Select(field).Where(predicate);
-            string sql = ev.ToSelectStatement();
+            string sql = ev.SelectInto<T>();
             return dbCmd.Scalar<TKey>(sql);
         }
 

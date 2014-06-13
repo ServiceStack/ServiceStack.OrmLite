@@ -115,12 +115,20 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Project results from a number of joined tables into a different model
+        /// </summary>
+        public static List<Into> Select<Into, From>(this IDbConnection dbConn, Func<SqlExpression<From>, SqlExpression<From>> expression)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Select<Into, From>(expression));
+        }
+
+        /// <summary>
         /// Returns results from using an SqlExpression lambda. E.g:
         /// <para>db.Select(db.From&lt;Person&gt;().Where(x =&gt; x.Age &gt; 40))</para>
         /// </summary>
         public static List<T> Select<T>(this IDbConnection dbConn, ISqlExpression expression, object anonType = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(expression.ToSelectStatement(), anonType));
+            return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(expression.SelectInto<T>(), anonType));
         }
 
         /// <summary>

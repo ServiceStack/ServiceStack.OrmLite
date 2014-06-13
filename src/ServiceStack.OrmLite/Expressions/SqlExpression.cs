@@ -132,12 +132,6 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
-        public virtual SqlExpression<T> From<Table>()
-        {
-            FromExpression = " \nFROM " + OrmLiteConfig.DialectProvider.GetQuotedTableName(typeof(Table).GetModelDefinition());
-            return this;
-        }
-
         public virtual SqlExpression<T> Where()
         {
             if (underlyingExpression != null) underlyingExpression = null; //Where() clears the expression
@@ -1353,10 +1347,6 @@ namespace ServiceStack.OrmLite
     public interface ISqlExpression
     {
         string ToSelectStatement();
-    }
-
-    public interface ISelectableSqlExpression
-    {
         string SelectInto<TModel>();
     }
 
