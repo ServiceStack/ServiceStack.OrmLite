@@ -5,7 +5,7 @@ using System.Text;
 
 namespace ServiceStack.OrmLite
 {
-    public abstract partial class SqlExpression<T> : ISqlExpression, ISelectableSqlExpression
+    public abstract partial class SqlExpression<T> : ISqlExpression
     {
         List<ModelDefinition> tableDefs = new List<ModelDefinition>();
 
@@ -66,7 +66,8 @@ namespace ServiceStack.OrmLite
                 this.tableDefs.Add(modelDef);
 
             var sbSelect = new StringBuilder();
-            foreach (var fieldDef in modelDef.FieldDefinitions)
+            var selectDef = typeof(TModel).GetModelDefinition();
+            foreach (var fieldDef in selectDef.FieldDefinitions)
             {
                 var found = false;
 
@@ -109,6 +110,72 @@ namespace ServiceStack.OrmLite
             SelectExpression = "SELECT " + sbSelect;
 
             return ToSelectStatement();
+        }
+
+        public virtual SqlExpression<T> Where<Target>(Expression<Func<Target, bool>> predicate)
+        {
+            if (predicate == null)
+                throw new ArgumentNullException("predicate");
+
+            var newExpr = Visit(predicate).ToString();
+            whereExpression = " WHERE " + newExpr;
+
+            return this;
+        }
+
+        public virtual SqlExpression<T> Where<Source, Target>(Expression<Func<Source, Target, bool>> predicate)
+        {
+            if (predicate == null)
+                throw new ArgumentNullException("predicate");
+
+            var newExpr = Visit(predicate).ToString();
+            whereExpression = " WHERE " + newExpr;
+
+            return this;
+        }
+
+        public virtual SqlExpression<T> And<Target>(Expression<Func<Target, bool>> predicate)
+        {
+            if (predicate == null)
+                throw new ArgumentNullException("predicate");
+
+            var newExpr = Visit(predicate).ToString();
+            whereExpression += " AND " + newExpr;
+
+            return this;
+        }
+
+        public virtual SqlExpression<T> And<Source, Target>(Expression<Func<Source, Target, bool>> predicate)
+        {
+            if (predicate == null)
+                throw new ArgumentNullException("predicate");
+
+            var newExpr = Visit(predicate).ToString();
+            whereExpression += " AND " + newExpr;
+
+            return this;
+        }
+
+        public virtual SqlExpression<T> Or<Target>(Expression<Func<Target, bool>> predicate)
+        {
+            if (predicate == null)
+                throw new ArgumentNullException("predicate");
+
+            var newExpr = Visit(predicate).ToString();
+            whereExpression += " OR " + newExpr;
+
+            return this;
+        }
+
+        public virtual SqlExpression<T> Or<Source, Target>(Expression<Func<Source, Target, bool>> predicate)
+        {
+            if (predicate == null)
+                throw new ArgumentNullException("predicate");
+
+            var newExpr = Visit(predicate).ToString();
+            whereExpression += " OR " + newExpr;
+
+            return this;
         }
     }
 }

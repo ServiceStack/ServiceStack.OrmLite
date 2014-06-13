@@ -168,7 +168,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
         }
 
         [Test]
-        public void Can_join_with_SqlExpression()
+        public void Can_add_basic_joins_with_SqlExpression()
         {
             using (var db = OpenDbConnection())
             {

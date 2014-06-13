@@ -130,7 +130,7 @@ namespace ServiceStack.OrmLite.Tests
         public string Country { get; set; }
     }
 
-    public class LoadReferencesTests 
+    public class LoadReferencesTests
         : OrmLiteTestBase
     {
         private IDbConnection db;
@@ -161,7 +161,7 @@ namespace ServiceStack.OrmLite.Tests
         public void Does_not_include_complex_reference_type_in_sql()
         {
             db.Select<Customer>();
-            Assert.That(db.GetLastSql().NormalizeSql(), 
+            Assert.That(db.GetLastSql().NormalizeSql(),
                 Is.EqualTo("select id, name from customer"));
         }
 
@@ -293,8 +293,7 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(dbCustomer.PrimaryAddress, Is.Not.Null);
         }
 
-        [Test] 
-        public void Can_SaveAllReferences_then_Load_them()
+        private Customer AddCustomerWithOrders()
         {
             var customer = new Customer
             {
@@ -306,13 +305,22 @@ namespace ServiceStack.OrmLite.Tests
                     State = "Northern Territory",
                     Country = "Australia"
                 },
-                Orders = new[] { 
-                    new Order { LineItem = "Line 1", Qty = 1, Cost = 1.99m },
-                    new Order { LineItem = "Line 2", Qty = 2, Cost = 2.99m },
+                Orders = new[]
+                {
+                    new Order {LineItem = "Line 1", Qty = 1, Cost = 1.99m},
+                    new Order {LineItem = "Line 2", Qty = 2, Cost = 2.99m},
                 }.ToList(),
             };
 
-            db.Save(customer, references:true);
+            db.Save(customer, references: true);
+
+            return customer;
+        }
+
+        [Test]
+        public void Can_SaveAllReferences_then_Load_them()
+        {
+            var customer = AddCustomerWithOrders();
 
             Assert.That(customer.Id, Is.GreaterThan(0));
             Assert.That(customer.PrimaryAddress.CustomerId, Is.EqualTo(customer.Id));
@@ -337,8 +345,146 @@ namespace ServiceStack.OrmLite.Tests
             };
 
             db.Save(customer, references: true);
-            
+
             Assert.That(customer.Id, Is.GreaterThan(0));
         }
+
+
+        public class CustomerJoin
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public string AddressLine1 { get; set; }
+            public string City { get; set; }
+            public string LineItem { get; set; }
+            public decimal Cost { get; set; }
+        }
+
+        [Test]
+        public void Can_do_multiple_joins_with_SqlExpression()
+        {
+            AddCustomerWithOrders();
+
+            var results = db.Select<CustomerJoin, Customer>(q => q
+                .Join<Customer, CustomerAddress>()
+                .Join<Customer, Order>());
+
+            var costs = results.ConvertAll(x => x.Cost);
+            Assert.That(costs, Is.EquivalentTo(new[] { 1.99m, 2.99m }));
+
+            var expr = db.From<Customer>()
+                .Join<Customer, CustomerAddress>()
+                .Join<Customer, Order>();
+
+            results = db.Select<CustomerJoin>(expr);
+
+            costs = results.ConvertAll(x => x.Cost);
+            Assert.That(costs, Is.EquivalentTo(new[] { 1.99m, 2.99m }));
+        }
+
+        [Test]
+        public void Can_do_joins_with_wheres_using_SqlExpression()
+        {
+            AddCustomerWithOrders();
+
+            var results = db.Select<CustomerJoin, Customer>(q => q
+                .Join<Customer, CustomerAddress>()
+                .Join<Customer, Order>((c, o) => c.Id == o.CustomerId && o.Cost < 2));
+
+            var costs = results.ConvertAll(x => x.Cost);
+            Assert.That(costs, Is.EquivalentTo(new[] { 1.99m }));
+
+            results = db.Select<CustomerJoin, Customer>(q => q
+                .Join<Customer, CustomerAddress>()
+                .Join<Customer, Order>()
+                .Where<Order>(o => o.Cost < 2));
+
+            costs = results.ConvertAll(x => x.Cost);
+            Assert.That(costs, Is.EquivalentTo(new[] { 1.99m }));
+
+            results = db.Select<CustomerJoin, Customer>(q => q
+                .Join<Customer, CustomerAddress>()
+                .Join<Customer, Order>()
+                .Where<Order>(o => o.Cost < 2 || o.LineItem == "Line 2"));
+
+            costs = results.ConvertAll(x => x.Cost);
+            Assert.That(costs, Is.EquivalentTo(new[] { 1.99m, 2.99m }));
+
+            var expr = db.From<Customer>()
+                .Join<Customer, CustomerAddress>()
+                .Join<Customer, Order>()
+                .Where<Order>(o => o.Cost < 2 || o.LineItem == "Line 2");
+            results = db.Select<CustomerJoin>(expr);
+
+            costs = results.ConvertAll(x => x.Cost);
+            Assert.That(costs, Is.EquivalentTo(new[] { 1.99m, 2.99m }));
+        }
+
+        [Test]
+        public void Can_do_joins_with_complex_wheres_using_SqlExpression()
+        {
+            var customer1 = new Customer
+            {
+                Name = "Customer 1",
+                PrimaryAddress = new CustomerAddress
+                {
+                    AddressLine1 = "1 Humpty Street",
+                    City = "Humpty Doo",
+                    State = "Northern Territory",
+                    Country = "Australia"
+                },
+                Orders = new[]
+                {
+                    new Order {LineItem = "Line 1", Qty = 1, Cost = 1.99m},
+                    new Order {LineItem = "Line 1", Qty = 2, Cost = 3.98m},
+                    new Order {LineItem = "Line 2", Qty = 1, Cost = 1.49m},
+                    new Order {LineItem = "Line 2", Qty = 2, Cost = 2.98m},
+                    new Order {LineItem = "Australia Flag", Qty = 1, Cost = 9.99m},
+                }.ToList(),
+            };
+
+            db.Save(customer1, references: true);
+            
+            var customer2 = new Customer
+            {
+                Name = "Customer 2",
+                PrimaryAddress = new CustomerAddress
+                {
+                    AddressLine1 = "2 Prospect Park",
+                    City = "Brooklyn",
+                    State = "New York",
+                    Country = "USA"
+                },
+                Orders = new[]
+                {
+                    new Order {LineItem = "USA", Qty = 1, Cost = 20m},
+                }.ToList(),
+            };
+
+            db.Save(customer2, references: true);
+
+            var results = db.Select<CustomerJoin, Customer>(q => q
+                .Join<Customer, CustomerAddress>()
+                .Join<Customer, Order>()
+                .Where(c => c.Name == "Customer 1")
+                .And<Order>(o => o.Cost < 2)
+                .Or<Order>(o => o.LineItem == "Australia Flag"));
+
+            var costs = results.ConvertAll(x => x.Cost);
+            Assert.That(costs, Is.EquivalentTo(new[] { 1.99m, 1.49m, 9.99m }));
+
+            results = db.Select<CustomerJoin, Customer>(q => q
+                .Join<Customer, CustomerAddress>()
+                .Join<Customer, Order>()
+                .Where(c => c.Name == "Customer 2")
+                .And<CustomerAddress, Order>((a, o) => a.Country == o.LineItem));
+
+            db.GetLastSql().Print();
+
+            costs = results.ConvertAll(x => x.Cost);
+            Assert.That(costs, Is.EquivalentTo(new[] { 20m }));
+        }
+    
     }
+
 }

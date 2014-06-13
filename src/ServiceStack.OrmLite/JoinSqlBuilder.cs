@@ -494,16 +494,11 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
-        public string ToSelectStatement()
+        public string SelectInto<T>()
         {
-            return ToSql();
-        }
+            var modelDef = typeof(T).GetModelDefinition();
 
-        public string ToSql()
-        {
             CheckAggregateUsage(false);
-
-            var modelDef = typeof(TNewPoco).GetModelDefinition();
 
             var sbSelect = new StringBuilder();
             sbSelect.Append("SELECT ");
@@ -577,7 +572,7 @@ namespace ServiceStack.OrmLite
                 var sbWhere = new StringBuilder();
                 foreach (var where in whereList)
                 {
-                    sbWhere.AppendFormat("{0}{1}", sbWhere.Length > 0 
+                    sbWhere.AppendFormat("{0}{1}", sbWhere.Length > 0
                         ? (where.Value == WhereType.OR ? " OR " : " AND ") : "", where.Key);
                 }
                 sbBody.Append("WHERE " + sbWhere + " \n");
@@ -597,7 +592,17 @@ namespace ServiceStack.OrmLite
             var sql = OrmLiteConfig.DialectProvider.ToSelectStatement(
                 modelDef, sbSelect.ToString(), sbBody.ToString(), sbOrderBy.ToString(), Offset, Rows);
 
-            return sql;
+            return sql; 
+        }
+
+        public string ToSql()
+        {
+            return SelectInto<TNewPoco>();
+        }
+
+        public string ToSelectStatement()
+        {
+            return SelectInto<TNewPoco>();
         }
     }
 
