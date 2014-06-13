@@ -151,6 +151,14 @@ namespace ServiceStack.OrmLite.Tests
             db.DropAndCreateTable<MismatchAliasAddress>();
         }
 
+        [SetUp]
+        public void SetUp()
+        {
+            db.DeleteAll<Order>();
+            db.DeleteAll<CustomerAddress>();
+            db.DeleteAll<Customer>();
+        }
+
         [TestFixtureTearDown]
         public void TestFixtureTearDown()
         {
