@@ -10,6 +10,8 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixture]
     public class SchemaTests : OrmLiteTestBase
     {
+        public SchemaTests() : base(Dialect.PostgreSql){}
+
         [Alias("Users")]
         [Schema("TestSchema")]
         public class User

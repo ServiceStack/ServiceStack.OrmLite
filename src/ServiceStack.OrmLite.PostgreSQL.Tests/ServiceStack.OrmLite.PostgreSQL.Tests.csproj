@@ -101,7 +101,6 @@
     <Compile Include="OrmLiteInsertTests.cs" />
     <Compile Include="OrmLiteNorthwindTests.cs" />
     <Compile Include="OrmLiteSelectTests.cs" />
-    <Compile Include="OrmLiteTestBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="OrmLiteGetScalarTests.cs" />
     <Compile Include="SchemaTests.cs" />
