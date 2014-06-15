@@ -147,67 +147,37 @@ namespace ServiceStack.OrmLite
 
         public virtual SqlExpression<T> Where<Target>(Expression<Func<Target, bool>> predicate)
         {
-            if (predicate == null)
-                throw new ArgumentNullException("predicate");
-
-            var newExpr = Visit(predicate).ToString();
-            whereExpression = " WHERE " + newExpr;
-
+            AppendToWhere("AND", predicate);
             return this;
         }
 
         public virtual SqlExpression<T> Where<Source, Target>(Expression<Func<Source, Target, bool>> predicate)
         {
-            if (predicate == null)
-                throw new ArgumentNullException("predicate");
-
-            var newExpr = Visit(predicate).ToString();
-            whereExpression = " WHERE " + newExpr;
-
+            AppendToWhere("AND", predicate);
             return this;
         }
 
         public virtual SqlExpression<T> And<Target>(Expression<Func<Target, bool>> predicate)
         {
-            if (predicate == null)
-                throw new ArgumentNullException("predicate");
-
-            var newExpr = Visit(predicate).ToString();
-            whereExpression += " AND " + newExpr;
-
+            AppendToWhere("AND", predicate);
             return this;
         }
 
         public virtual SqlExpression<T> And<Source, Target>(Expression<Func<Source, Target, bool>> predicate)
         {
-            if (predicate == null)
-                throw new ArgumentNullException("predicate");
-
-            var newExpr = Visit(predicate).ToString();
-            whereExpression += " AND " + newExpr;
-
+            AppendToWhere("AND", predicate);
             return this;
         }
 
         public virtual SqlExpression<T> Or<Target>(Expression<Func<Target, bool>> predicate)
         {
-            if (predicate == null)
-                throw new ArgumentNullException("predicate");
-
-            var newExpr = Visit(predicate).ToString();
-            whereExpression += " OR " + newExpr;
-
+            AppendToWhere("OR", predicate);
             return this;
         }
 
         public virtual SqlExpression<T> Or<Source, Target>(Expression<Func<Source, Target, bool>> predicate)
         {
-            if (predicate == null)
-                throw new ArgumentNullException("predicate");
-
-            var newExpr = Visit(predicate).ToString();
-            whereExpression += " OR " + newExpr;
-
+            AppendToWhere("OR", predicate);
             return this;
         }
     }

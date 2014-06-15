@@ -147,53 +147,34 @@ namespace ServiceStack.OrmLite
 
         public virtual SqlExpression<T> Where(Expression<Func<T, bool>> predicate)
         {
-            if (predicate != null)
-            {
-                And(predicate);
-            }
-            else
-            {
-                underlyingExpression = null;
-                whereExpression = string.Empty;
-            }
-
+            AppendToWhere("AND", predicate);
             return this;
         }
 
         public virtual SqlExpression<T> And(Expression<Func<T, bool>> predicate)
         {
-            if (predicate != null)
-            {
-                if (underlyingExpression == null)
-                    underlyingExpression = predicate;
-                else
-                    underlyingExpression = underlyingExpression.And(predicate);
-
-                ProcessInternalExpression();
-            }
+            AppendToWhere("AND", predicate);
             return this;
         }
 
         public virtual SqlExpression<T> Or(Expression<Func<T, bool>> predicate)
         {
-            if (predicate != null)
-            {
-                if (underlyingExpression == null)
-                    underlyingExpression = predicate;
-                else
-                    underlyingExpression = underlyingExpression.Or(predicate);
-
-                ProcessInternalExpression();
-            }
+            AppendToWhere("OR", predicate);
             return this;
         }
 
-        private void ProcessInternalExpression()
+        protected void AppendToWhere(string operand, Expression predicate)
         {
+            if (predicate == null)
+                return;
+
             useFieldName = true;
             sep = " ";
-            whereExpression = Visit(underlyingExpression).ToString();
-            if (!string.IsNullOrEmpty(whereExpression)) whereExpression = (WhereStatementWithoutWhereString ? "" : "WHERE ") + whereExpression;
+            var newExpr = Visit(predicate).ToString();
+            whereExpression = string.IsNullOrEmpty(whereExpression)
+                ? (WhereStatementWithoutWhereString ? "" : "WHERE ") 
+                : whereExpression + " " + operand + " ";
+            whereExpression += newExpr;
         }
 
         public virtual SqlExpression<T> GroupBy()
@@ -1263,6 +1244,8 @@ namespace ServiceStack.OrmLite
             var quotedColName = Visit(m.Object);
             var statement = "";
 
+            var wildcardArg = args.Count > 0 ? OrmLiteConfig.DialectProvider.EscapeWildcards(args[0].ToString()) : "";
+            var escapeSuffix = wildcardArg.IndexOf('^') >= 0 ? " escape '^'" : "";
             switch (m.Method.Name)
             {
                 case "Trim":
@@ -1283,43 +1266,43 @@ namespace ServiceStack.OrmLite
                 case "StartsWith":
                     if (!OrmLiteConfig.StripUpperInLike)
                     {
-                        statement = string.Format("upper({0}) like {1} escape '^'",
+                        statement = string.Format("upper({0}) like {1}{2}",
                             quotedColName, OrmLiteConfig.DialectProvider.GetQuotedValue(
-                                OrmLiteConfig.DialectProvider.EscapeWildcards(args[0].ToString()).ToUpper() + "%"));
+                                wildcardArg.ToUpper() + "%"), escapeSuffix);
                     }
                     else
                     {
-                        statement = string.Format("{0} like {1} escape '^'",
+                        statement = string.Format("{0} like {1}{2}",
                             quotedColName, OrmLiteConfig.DialectProvider.GetQuotedValue(
-                                OrmLiteConfig.DialectProvider.EscapeWildcards(args[0].ToString()) + "%"));
+                                wildcardArg + "%"), escapeSuffix);
                     }
                     break;
                 case "EndsWith":
                     if (!OrmLiteConfig.StripUpperInLike)
                     {
-                        statement = string.Format("upper({0}) like {1} escape '^'",
+                        statement = string.Format("upper({0}) like {1}{2}",
                             quotedColName, OrmLiteConfig.DialectProvider.GetQuotedValue("%" +
-                            OrmLiteConfig.DialectProvider.EscapeWildcards(args[0].ToString()).ToUpper()));
+                            wildcardArg.ToUpper()), escapeSuffix);
                     }
                     else
                     {
-                        statement = string.Format("{0} like {1} escape '^'",
+                        statement = string.Format("{0} like {1}{2}",
                             quotedColName, OrmLiteConfig.DialectProvider.GetQuotedValue("%" +
-                            OrmLiteConfig.DialectProvider.EscapeWildcards(args[0].ToString())));
+                            wildcardArg), escapeSuffix);
                     }
                     break;
                 case "Contains":
                     if (!OrmLiteConfig.StripUpperInLike)
                     {
-                        statement = string.Format("upper({0}) like {1} escape '^'",
+                        statement = string.Format("upper({0}) like {1}{2}",
                             quotedColName, OrmLiteConfig.DialectProvider.GetQuotedValue("%" +
-                                OrmLiteConfig.DialectProvider.EscapeWildcards(args[0].ToString()).ToUpper() + "%"));
+                                wildcardArg.ToUpper() + "%"), escapeSuffix);
                     }
                     else
                     {
-                        statement = string.Format("{0} like {1} escape '^'",
+                        statement = string.Format("{0} like {1}{2}",
                             quotedColName, OrmLiteConfig.DialectProvider.GetQuotedValue("%" +
-                                OrmLiteConfig.DialectProvider.EscapeWildcards(args[0].ToString()) + "%"));
+                                wildcardArg + "%"), escapeSuffix);
                     }
                     break;
                 case "Substring":
