@@ -111,8 +111,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
             var visitor = db.From<Person>();
 
-            visitor.Where(x => x.FirstName.StartsWith("Jim"));
-            visitor.Where(x => x.LastName.StartsWith("Hen"));
+            visitor.Where(x => x.FirstName.StartsWith("Jim") && x.LastName.StartsWith("Hen"));
             //WHERE (upper("FirstName") like 'JIM%'  AND upper("LastName") like 'HEN%' )
             var results = db.Select<Person>(visitor); 
             Assert.AreEqual(1, results.Count);
@@ -126,7 +125,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
             //WHERE (((upper("FirstName") like 'JIM%'  AND upper("LastName") like 'HEN%' ) OR upper("FirstName") like 'M%' ) AND upper("FirstName") like 'M%' )
             results = db.Select(visitor);
             db.GetLastSql().Print();
-            Assert.AreEqual(1, results.Count);
+            Assert.AreEqual(2, results.Count);
         }
 
         [Test]
