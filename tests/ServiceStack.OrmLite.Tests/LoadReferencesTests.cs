@@ -50,6 +50,14 @@ namespace ServiceStack.OrmLite.Tests
         public decimal Cost { get; set; }
     }
 
+    public class Country
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+        public string CountryName { get; set; }
+        public string CountryCode { get; set; }
+    }
+
     /// <summary>
     /// Test POCOs using table aliases and an alias on the foreign key reference
     /// </summary>
@@ -143,6 +151,7 @@ namespace ServiceStack.OrmLite.Tests
             db.DropAndCreateTable<Order>();
             db.DropAndCreateTable<Customer>();
             db.DropAndCreateTable<CustomerAddress>();
+            db.DropAndCreateTable<Country>();
             db.DropAndCreateTable<AliasedCustomer>();
             db.DropAndCreateTable<AliasedCustomerAddress>();
             db.DropAndCreateTable<OldAliasedCustomer>();
@@ -366,6 +375,7 @@ namespace ServiceStack.OrmLite.Tests
             public string City { get; set; }
             public string LineItem { get; set; }
             public decimal Cost { get; set; }
+            public string CountryCode { get; set; }
         }
 
         [Test]
@@ -461,7 +471,7 @@ namespace ServiceStack.OrmLite.Tests
             };
 
             db.Save(customer1, references: true);
-            
+
             var customer2 = new Customer
             {
                 Name = "Customer 2",
@@ -480,6 +490,10 @@ namespace ServiceStack.OrmLite.Tests
 
             db.Save(customer2, references: true);
 
+            db.Insert(
+                new Country { CountryName = "Australia", CountryCode = "AU" },
+                new Country { CountryName = "USA", CountryCode = "US" });
+
             var results = db.Select<CustomerJoin, Customer>(q => q
                 .Join<Customer, CustomerAddress>()
                 .Join<Customer, Order>()
@@ -496,12 +510,23 @@ namespace ServiceStack.OrmLite.Tests
                 .Where(c => c.Name == "Customer 2")
                 .And<CustomerAddress, Order>((a, o) => a.Country == o.LineItem));
 
-            db.GetLastSql().Print();
-
             costs = results.ConvertAll(x => x.Cost);
             Assert.That(costs, Is.EquivalentTo(new[] { 20m }));
+
+            var countryResults = db.Select<CustomerJoin>(db.From<Customer>()
+                .Join<Order>((c, o) => c.Id == o.CustomerId) //explicit join condition
+                .Join<CustomerAddress>()                     //implicit join with Customer
+                .Join<CustomerAddress,Country>((ca, c) => ca.Country == c.CountryName)
+                .Where(c => c.Name == "Customer 2")          //implicit condition with Customer
+                .And<CustomerAddress, Order>((a, o) => a.Country == o.LineItem));
+
+            db.GetLastSql().Print();
+
+            costs = countryResults.ConvertAll(x => x.Cost);
+            Assert.That(costs, Is.EquivalentTo(new[] { 20m }));
+            Assert.That(countryResults.ConvertAll(x => x.CountryCode), Is.EquivalentTo(new[] { "US" }));
         }
-    
+
     }
 
 }

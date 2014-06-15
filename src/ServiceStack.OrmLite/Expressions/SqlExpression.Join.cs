@@ -9,6 +9,11 @@ namespace ServiceStack.OrmLite
     {
         List<ModelDefinition> tableDefs = new List<ModelDefinition>();
 
+        public SqlExpression<T> Join<Target>(Expression<Func<T, Target, bool>> joinExpr = null)
+        {
+            return InternalJoin("INNER JOIN", joinExpr);
+        }
+
         public SqlExpression<T> Join<Source, Target>(Expression<Func<Source, Target, bool>> joinExpr = null)
         {
             return InternalJoin("INNER JOIN", joinExpr);
@@ -123,16 +128,6 @@ namespace ServiceStack.OrmLite
 
                     if (found)
                         break;
-                }
-
-                if (!found)
-                {
-                    if (sbSelect.Length > 0)
-                        sbSelect.Append(", ");
-
-                    sbSelect.AppendFormat("{0}.{1}",
-                        modelDef.ModelName.SqlTable(),
-                        fieldDef.GetQuotedName());
                 }
             }
 
