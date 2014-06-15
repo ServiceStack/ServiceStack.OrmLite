@@ -402,6 +402,15 @@ namespace ServiceStack.OrmLite.Tests
             var costs = results.ConvertAll(x => x.Cost);
             Assert.That(costs, Is.EquivalentTo(new[] { 1.99m }));
 
+            var orders = db.Select<Order>(q => q
+                .Join<Order, Customer>()
+                .Join<Customer, CustomerAddress>()
+                .Where(o => o.Cost < 2)
+                .And<Customer>(c => c.Name == "Customer 1"));
+
+            costs = orders.ConvertAll(x => x.Cost);
+            Assert.That(costs, Is.EquivalentTo(new[] { 1.99m }));
+
             results = db.Select<CustomerJoin, Customer>(q => q
                 .Join<Customer, CustomerAddress>()
                 .Join<Customer, Order>()

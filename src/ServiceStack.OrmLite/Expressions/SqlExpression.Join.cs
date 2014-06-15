@@ -11,10 +11,31 @@ namespace ServiceStack.OrmLite
 
         public SqlExpression<T> Join<Source, Target>(Expression<Func<Source, Target, bool>> joinExpr = null)
         {
+            return InternalJoin("INNER JOIN", joinExpr);
+        }
+
+        public SqlExpression<T> LeftJoin<Source, Target>(Expression<Func<Source, Target, bool>> joinExpr = null)
+        {
+            return InternalJoin("LEFT JOIN", joinExpr);
+        }
+
+        public SqlExpression<T> RightJoin<Source, Target>(Expression<Func<Source, Target, bool>> joinExpr = null)
+        {
+            return InternalJoin("RIGHT JOIN", joinExpr);
+        }
+
+        public SqlExpression<T> FullJoin<Source, Target>(Expression<Func<Source, Target, bool>> joinExpr = null)
+        {
+            return InternalJoin("FULL JOIN", joinExpr);
+        }
+
+        private SqlExpression<T> InternalJoin<Source, Target>(string joinType,
+            Expression<Func<Source, Target, bool>> joinExpr)
+        {
             PrefixFieldWithTableName = true;
 
-            var sourceDef = typeof(Source).GetModelDefinition();
-            var targetDef = typeof(Target).GetModelDefinition();
+            var sourceDef = typeof (Source).GetModelDefinition();
+            var targetDef = typeof (Target).GetModelDefinition();
 
             if (tableDefs.Count == 0)
                 tableDefs.Add(modelDef);
@@ -34,19 +55,31 @@ namespace ServiceStack.OrmLite
             }
             else
             {
-                var refField = OrmLiteReadExtensions.GetRefFieldDef(sourceDef, targetDef, typeof(Source));
+                var parentDef = sourceDef;
+                var childDef = targetDef;
+
+                var refField = OrmLiteReadExtensions.GetRefFieldDefIfExists(parentDef, childDef);
                 if (refField == null)
+                {
+                    parentDef = targetDef;
+                    childDef = sourceDef;
+                    refField = OrmLiteReadExtensions.GetRefFieldDefIfExists(parentDef, childDef);
+                }
+
+                if (refField == null)
+                {
                     throw new ArgumentException("Could not infer relationship between {0} and {1}"
-                        .Fmt(sourceDef.ModelName, targetDef.ModelName));
+                                                    .Fmt(sourceDef.ModelName, targetDef.ModelName));
+                }
 
                 sqlExpr = "\n({0}.{1} = {2}.{3})".Fmt(
-                    sourceDef.ModelName.SqlTable(),
-                    sourceDef.PrimaryKey.FieldName.SqlColumn(),
-                    targetDef.ModelName.SqlTable(),
+                    parentDef.ModelName.SqlTable(),
+                    parentDef.PrimaryKey.FieldName.SqlColumn(),
+                    childDef.ModelName.SqlTable(),
                     refField.FieldName.SqlColumn());
             }
 
-            sbJoin.Append(" INNER JOIN {0} ".Fmt(targetDef.ModelName.SqlTable()));
+            sbJoin.Append(" {0} {1} ".Fmt(joinType, targetDef.ModelName.SqlTable()));
             sbJoin.Append(" ON ");
             sbJoin.Append(sqlExpr);
 
