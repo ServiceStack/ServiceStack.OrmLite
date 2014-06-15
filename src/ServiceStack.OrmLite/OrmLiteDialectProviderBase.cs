@@ -520,9 +520,7 @@ namespace ServiceStack.OrmLite
                 if (sqlColumns.Length > 0)
                     sqlColumns.Append(", ");
 
-                sqlColumns.Append(field.IsRowVersion
-                    ? GetRowVersionColumnName(field)
-                    : GetQuotedColumnName(field.FieldName));
+                sqlColumns.Append(field.GetQuotedName());
             }
 
             return sqlColumns.ToString();

@@ -116,9 +116,7 @@ namespace ServiceStack.OrmLite
 
                             sbSelect.AppendFormat("{0}.{1}", 
                                 tableDef.ModelName.SqlTable(),
-                                tableFieldDef.IsRowVersion 
-                                    ? OrmLiteConfig.DialectProvider.GetRowVersionColumnName(tableFieldDef)
-                                    : tableFieldDef.FieldName.SqlColumn());
+                                tableFieldDef.GetQuotedName());
                             break;
                         }
                     }
@@ -134,9 +132,7 @@ namespace ServiceStack.OrmLite
 
                     sbSelect.AppendFormat("{0}.{1}",
                         modelDef.ModelName.SqlTable(),
-                        fieldDef.IsRowVersion
-                            ? OrmLiteConfig.DialectProvider.GetRowVersionColumnName(fieldDef)
-                            : fieldDef.FieldName.SqlColumn());
+                        fieldDef.GetQuotedName());
                 }
             }
 

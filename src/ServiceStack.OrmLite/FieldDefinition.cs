@@ -69,6 +69,13 @@ namespace ServiceStack.OrmLite
             return this.GetValueFn == null ? null : this.GetValueFn(onInstance);
         }
 
+        public string GetQuotedName()
+        {
+            return IsRowVersion
+                ? OrmLiteConfig.DialectProvider.GetRowVersionColumnName(this)
+                : OrmLiteConfig.DialectProvider.GetQuotedColumnName(FieldName);
+        }
+
         public string GetQuotedValue(object fromInstance)
         {
             var value = GetValue(fromInstance);
