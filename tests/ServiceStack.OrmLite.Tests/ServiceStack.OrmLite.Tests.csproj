@@ -125,6 +125,7 @@
     <Compile Include="Expression\SelectExpressionTests.cs" />
     <Compile Include="Issues\MismatchSchemaTests.cs" />
     <Compile Include="LicenseUsageTests.cs" />
+    <Compile Include="LoadReferencesJoinTests.cs" />
     <Compile Include="LoadReferencesTests.cs" />
     <Compile Include="MockAllApiTests.cs" />
     <Compile Include="OrmLiteExecFilterTests.cs" />

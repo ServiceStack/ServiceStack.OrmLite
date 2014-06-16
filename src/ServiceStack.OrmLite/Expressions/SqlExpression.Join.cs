@@ -19,14 +19,29 @@ namespace ServiceStack.OrmLite
             return InternalJoin("INNER JOIN", joinExpr);
         }
 
+        public SqlExpression<T> LeftJoin<Target>(Expression<Func<T, Target, bool>> joinExpr = null)
+        {
+            return InternalJoin("LEFT JOIN", joinExpr);
+        }
+
         public SqlExpression<T> LeftJoin<Source, Target>(Expression<Func<Source, Target, bool>> joinExpr = null)
         {
             return InternalJoin("LEFT JOIN", joinExpr);
         }
 
+        public SqlExpression<T> RightJoin<Target>(Expression<Func<T, Target, bool>> joinExpr = null)
+        {
+            return InternalJoin("RIGHT JOIN", joinExpr);
+        }
+
         public SqlExpression<T> RightJoin<Source, Target>(Expression<Func<Source, Target, bool>> joinExpr = null)
         {
             return InternalJoin("RIGHT JOIN", joinExpr);
+        }
+
+        public SqlExpression<T> FullJoin<Target>(Expression<Func<T, Target, bool>> joinExpr = null)
+        {
+            return InternalJoin("FULL JOIN", joinExpr);
         }
 
         public SqlExpression<T> FullJoin<Source, Target>(Expression<Func<Source, Target, bool>> joinExpr = null)
@@ -42,17 +57,13 @@ namespace ServiceStack.OrmLite
             var sourceDef = typeof (Source).GetModelDefinition();
             var targetDef = typeof (Target).GetModelDefinition();
 
-            if (tableDefs.Count == 0)
-                tableDefs.Add(modelDef);
-            if (!tableDefs.Contains(sourceDef))
-                tableDefs.Add(sourceDef);
-            if (!tableDefs.Contains(targetDef))
-                tableDefs.Add(targetDef);
-
             var fromExpr = FromExpression;
             var sbJoin = new StringBuilder();
 
             string sqlExpr;
+
+            //Changes how Sql Expressions are generated.
+            useFieldName = true; sep = " ";
 
             if (joinExpr != null)
             {
@@ -84,11 +95,22 @@ namespace ServiceStack.OrmLite
                     refField.FieldName.SqlColumn());
             }
 
-            sbJoin.Append(" {0} {1} ".Fmt(joinType, targetDef.ModelName.SqlTable()));
+            var joinDef = tableDefs.Contains(targetDef) && !tableDefs.Contains(sourceDef)
+                ? sourceDef
+                : targetDef;
+
+            sbJoin.Append(" {0} {1} ".Fmt(joinType, joinDef.ModelName.SqlTable()));
             sbJoin.Append(" ON ");
             sbJoin.Append(sqlExpr);
 
             FromExpression = fromExpr + sbJoin;
+
+            if (tableDefs.Count == 0)
+                tableDefs.Add(modelDef);
+            if (!tableDefs.Contains(sourceDef))
+                tableDefs.Add(sourceDef);
+            if (!tableDefs.Contains(targetDef))
+                tableDefs.Add(targetDef);
 
             return this;
         }
