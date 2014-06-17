@@ -45,9 +45,7 @@ namespace ServiceStack.OrmLite.Tests
                 Name = "Customer 1",
                 PrimaryAddress = new CustomerAddress
                 {
-                    AddressLine1 = "1 Humpty Street",
-                    City = "Humpty Doo",
-                    State = "Northern Territory",
+                    AddressLine1 = "1 Australia Street",
                     Country = "Australia"
                 },
                 Orders = new[]
@@ -62,7 +60,7 @@ namespace ServiceStack.OrmLite.Tests
             return customer;
         }
 
-        public class CustomerJoin
+        public class FullCustomerInfo
         {
             public int Id { get; set; }
             public string Name { get; set; }
@@ -78,7 +76,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             AddCustomerWithOrders();
 
-            var results = db.Select<CustomerJoin, Customer>(q => q
+            var results = db.Select<FullCustomerInfo, Customer>(q => q
                 .Join<Customer, CustomerAddress>()
                 .Join<Customer, Order>());
 
@@ -89,7 +87,7 @@ namespace ServiceStack.OrmLite.Tests
                 .Join<Customer, CustomerAddress>()
                 .Join<Customer, Order>();
 
-            results = db.Select<CustomerJoin>(expr);
+            results = db.Select<FullCustomerInfo>(expr);
 
             costs = results.ConvertAll(x => x.Cost);
             Assert.That(costs, Is.EquivalentTo(new[] { 1.99m, 2.99m }));
@@ -100,7 +98,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             AddCustomerWithOrders();
 
-            var results = db.Select<CustomerJoin, Customer>(q => q
+            var results = db.Select<FullCustomerInfo, Customer>(q => q
                 .Join<Customer, CustomerAddress>()
                 .Join<Customer, Order>((c, o) => c.Id == o.CustomerId && o.Cost < 2));
 
@@ -116,7 +114,7 @@ namespace ServiceStack.OrmLite.Tests
             costs = orders.ConvertAll(x => x.Cost);
             Assert.That(costs, Is.EquivalentTo(new[] { 1.99m }));
 
-            results = db.Select<CustomerJoin, Customer>(q => q
+            results = db.Select<FullCustomerInfo, Customer>(q => q
                 .Join<Customer, CustomerAddress>()
                 .Join<Customer, Order>()
                 .Where<Order>(o => o.Cost < 2));
@@ -124,7 +122,7 @@ namespace ServiceStack.OrmLite.Tests
             costs = results.ConvertAll(x => x.Cost);
             Assert.That(costs, Is.EquivalentTo(new[] { 1.99m }));
 
-            results = db.Select<CustomerJoin, Customer>(q => q
+            results = db.Select<FullCustomerInfo, Customer>(q => q
                 .Join<Customer, CustomerAddress>()
                 .Join<Customer, Order>()
                 .Where<Order>(o => o.Cost < 2 || o.LineItem == "Line 2"));
@@ -136,7 +134,7 @@ namespace ServiceStack.OrmLite.Tests
                 .Join<Customer, CustomerAddress>()
                 .Join<Customer, Order>()
                 .Where<Order>(o => o.Cost < 2 || o.LineItem == "Line 2");
-            results = db.Select<CustomerJoin>(expr);
+            results = db.Select<FullCustomerInfo>(expr);
 
             costs = results.ConvertAll(x => x.Cost);
             Assert.That(costs, Is.EquivalentTo(new[] { 1.99m, 2.99m }));
@@ -145,53 +143,46 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_do_joins_with_complex_wheres_using_SqlExpression()
         {
-            var customer1 = new Customer
+            var customers = new[]
             {
-                Name = "Customer 1",
-                PrimaryAddress = new CustomerAddress
+                new Customer
                 {
-                    AddressLine1 = "1 Humpty Street",
-                    City = "Humpty Doo",
-                    State = "Northern Territory",
-                    Country = "Australia"
+                    Name = "Customer 1",
+                    PrimaryAddress = new CustomerAddress {
+                        AddressLine1 = "1 Australia Street",
+                        Country = "Australia"
+                    },
+                    Orders = new[] {
+                        new Order { LineItem = "Line 1", Qty = 1, Cost = 1.99m },
+                        new Order { LineItem = "Line 1", Qty = 2, Cost = 3.98m },
+                        new Order { LineItem = "Line 2", Qty = 1, Cost = 1.49m },
+                        new Order { LineItem = "Line 2", Qty = 2, Cost = 2.98m },
+                        new Order { LineItem = "Australia Flag", Qty = 1, Cost = 9.99m },
+                    }.ToList(),
                 },
-                Orders = new[]
+                new Customer
                 {
-                    new Order {LineItem = "Line 1", Qty = 1, Cost = 1.99m},
-                    new Order {LineItem = "Line 1", Qty = 2, Cost = 3.98m},
-                    new Order {LineItem = "Line 2", Qty = 1, Cost = 1.49m},
-                    new Order {LineItem = "Line 2", Qty = 2, Cost = 2.98m},
-                    new Order {LineItem = "Australia Flag", Qty = 1, Cost = 9.99m},
-                }.ToList(),
+                    Name = "Customer 2",
+                    PrimaryAddress = new CustomerAddress {
+                        AddressLine1 = "2 Prospect Park",
+                        Country = "USA"
+                    },
+                    Orders = new[] {
+                        new Order { LineItem = "USA", Qty = 1, Cost = 20m },
+                    }.ToList(),
+                },
             };
 
-            db.Save(customer1, references: true);
-
-            var customer2 = new Customer
-            {
-                Name = "Customer 2",
-                PrimaryAddress = new CustomerAddress
-                {
-                    AddressLine1 = "2 Prospect Park",
-                    City = "Brooklyn",
-                    State = "New York",
-                    Country = "USA"
-                },
-                Orders = new[]
-                {
-                    new Order {LineItem = "USA", Qty = 1, Cost = 20m},
-                }.ToList(),
-            };
-
-            db.Save(customer2, references: true);
+            customers.Each(c =>
+                db.Save(c, references: true));
 
             db.Insert(
                 new Country { CountryName = "Australia", CountryCode = "AU" },
                 new Country { CountryName = "USA", CountryCode = "US" });
 
-            var results = db.Select<CustomerJoin, Customer>(q => q
-                .Join<Customer, CustomerAddress>()
-                .Join<Customer, Order>()
+            var results = db.Select<FullCustomerInfo, Customer>(q => q
+                .Join<CustomerAddress>() //implicit
+                .Join<Customer, Order>() //explicit
                 .Where(c => c.Name == "Customer 1")
                 .And<Order>(o => o.Cost < 2)
                 .Or<Order>(o => o.LineItem == "Australia Flag"));
@@ -199,7 +190,18 @@ namespace ServiceStack.OrmLite.Tests
             var costs = results.ConvertAll(x => x.Cost);
             Assert.That(costs, Is.EquivalentTo(new[] { 1.99m, 1.49m, 9.99m }));
 
-            results = db.Select<CustomerJoin, Customer>(q => q
+            //Same as above using using db.From<Customer>()
+            results = db.Select<FullCustomerInfo>(db.From<Customer>()
+                .Join<CustomerAddress>() //implicit
+                .Join<Customer, Order>() //explicit
+                .Where(c => c.Name == "Customer 1")
+                .And<Order>(o => o.Cost < 2)
+                .Or<Order>(o => o.LineItem == "Australia Flag"));
+
+            costs = results.ConvertAll(x => x.Cost);
+            Assert.That(costs, Is.EquivalentTo(new[] { 1.99m, 1.49m, 9.99m }));
+
+            results = db.Select<FullCustomerInfo, Customer>(q => q
                 .Join<Customer, CustomerAddress>()
                 .Join<Customer, Order>()
                 .Where(c => c.Name == "Customer 2")
@@ -208,9 +210,9 @@ namespace ServiceStack.OrmLite.Tests
             costs = results.ConvertAll(x => x.Cost);
             Assert.That(costs, Is.EquivalentTo(new[] { 20m }));
 
-            var countryResults = db.Select<CustomerJoin>(db.From<Customer>()
-                .Join<Order>((c, o) => c.Id == o.CustomerId) //explicit join condition
+            var countryResults = db.Select<FullCustomerInfo>(db.From<Customer>()
                 .Join<CustomerAddress>()                     //implicit join with Customer
+                .Join<Order>((c, o) => c.Id == o.CustomerId) //explicit join condition
                 .Join<CustomerAddress, Country>((ca, c) => ca.Country == c.CountryName)
                 .Where(c => c.Name == "Customer 2")          //implicit condition with Customer
                 .And<CustomerAddress, Order>((a, o) => a.Country == o.LineItem));
@@ -230,33 +232,24 @@ namespace ServiceStack.OrmLite.Tests
                 new Customer
                 {
                     Name = "Customer 1",
-                    PrimaryAddress = new CustomerAddress
-                    {
-                        AddressLine1 = "1 Humpty Street",
-                        City = "Humpty Doo",
-                        State = "Northern Territory",
+                    PrimaryAddress = new CustomerAddress {
+                        AddressLine1 = "1 Australia Street",
                         Country = "Australia"
                     },
                 },
                 new Customer
                 {
                     Name = "Customer 2",
-                    PrimaryAddress = new CustomerAddress
-                    {
-                        AddressLine1 = "2 Humpty Street",
-                        City = "Humpty Doo",
-                        State = "Northern Territory",
+                    PrimaryAddress = new CustomerAddress {
+                        AddressLine1 = "2 America Street",
                         Country = "USA"
                     },
                 },
                 new Customer
                 {
                     Name = "Customer 3",
-                    PrimaryAddress = new CustomerAddress
-                    {
-                        AddressLine1 = "3 Humpty Street",
-                        City = "Humpty Doo",
-                        State = "Northern Territory",
+                    PrimaryAddress = new CustomerAddress {
+                        AddressLine1 = "3 Canada Street",
                         Country = "Canada"
                     },
                 },
@@ -264,7 +257,7 @@ namespace ServiceStack.OrmLite.Tests
 
             customers.Each(c =>
                 db.Save(c, references: true));
-            
+
             db.Insert(
                 new Country { CountryName = "Australia", CountryCode = "AU" },
                 new Country { CountryName = "USA", CountryCode = "US" },
