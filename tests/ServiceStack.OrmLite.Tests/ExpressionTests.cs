@@ -17,7 +17,7 @@ namespace ServiceStack.OrmLite.Tests
 
         public static SqliteExpression<Person> expr()
         {
-            return new SqliteExpression<Person>();
+            return (SqliteExpression<Person>) OrmLiteConfig.DialectProvider.SqlExpression<Person>();
         }
 
         [Test]

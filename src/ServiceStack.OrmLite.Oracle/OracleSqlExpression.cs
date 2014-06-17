@@ -6,6 +6,9 @@ namespace ServiceStack.OrmLite.Oracle
 {
     public class OracleSqlExpression<T> : SqlExpression<T>
     {
+        public OracleSqlExpression(IOrmLiteDialectProvider dialectProvider)
+            : base(dialectProvider) {}
+
         protected override object VisitColumnAccessMethod(MethodCallExpression m)
         {
             if (m.Method.Name == "Substring")
@@ -27,11 +30,6 @@ namespace ServiceStack.OrmLite.Oracle
                                                           startIndex));
             }
             return base.VisitColumnAccessMethod(m);
-        }
-
-        public override SqlExpression<T> Clone()
-        {
-            return CopyTo(new OracleSqlExpression<T>());
         }
     }
 }

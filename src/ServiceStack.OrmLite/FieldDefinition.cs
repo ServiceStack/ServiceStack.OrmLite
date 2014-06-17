@@ -69,17 +69,20 @@ namespace ServiceStack.OrmLite
             return this.GetValueFn == null ? null : this.GetValueFn(onInstance);
         }
 
-        public string GetQuotedName()
+        public string GetQuotedName(IOrmLiteDialectProvider dialectProvider)
         {
             return IsRowVersion
-                ? OrmLiteConfig.DialectProvider.GetRowVersionColumnName(this)
-                : OrmLiteConfig.DialectProvider.GetQuotedColumnName(FieldName);
+                ? dialectProvider.GetRowVersionColumnName(this)
+                : dialectProvider.GetQuotedColumnName(FieldName);
         }
 
-        public string GetQuotedValue(object fromInstance)
+        public string GetQuotedValue(object fromInstance, IOrmLiteDialectProvider dialectProvider = null)
         {
+            if (dialectProvider == null)
+                dialectProvider = OrmLiteConfig.DialectProvider;
+
             var value = GetValue(fromInstance);
-            return OrmLiteConfig.DialectProvider.GetQuotedValue(value, ColumnType);
+            return dialectProvider.GetQuotedValue(value, ColumnType);
         }
 
         public string Sequence { get; set; }

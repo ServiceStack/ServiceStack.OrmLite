@@ -17,8 +17,8 @@ namespace TestLiteOracle04
 
             OrmLiteConfig.DialectProvider = new OracleOrmLiteDialectProvider();
 			
-			ServiceStack.OrmLite.SqlExpression<Company> sql=
-                new OracleSqlExpression<Company>();
+			ServiceStack.OrmLite.SqlExpression<Company> sql =
+                OrmLiteConfig.DialectProvider.SqlExpression<Company>();
 			
 			List<Object> names = new List<Object>();
 			names.Add("SOME COMPANY");

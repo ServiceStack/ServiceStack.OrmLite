@@ -200,7 +200,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
 
         public override SqlExpression<T> SqlExpression<T>()
         {
-            return new PostgreSqlExpression<T>();
+            return new PostgreSqlExpression<T>(this);
         }
 
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName)

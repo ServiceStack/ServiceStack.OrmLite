@@ -5,9 +5,7 @@
     /// </summary>
     public class MySqlExpression<T> : SqlExpression<T>
     {
-        public override SqlExpression<T> Clone()
-        {
-            return CopyTo(new MySqlExpression<T>());
-        }
+        public MySqlExpression(IOrmLiteDialectProvider dialectProvider)
+            : base(dialectProvider) {}
     }
 }

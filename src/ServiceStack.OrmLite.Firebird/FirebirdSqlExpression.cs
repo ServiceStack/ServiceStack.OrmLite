@@ -9,15 +9,11 @@ namespace ServiceStack.OrmLite.Firebird
         private readonly string _trueExpression;
         private readonly string _falseExpression;
 
-        public FirebirdSqlExpression()
+        public FirebirdSqlExpression(IOrmLiteDialectProvider dialectProvider) 
+            : base(dialectProvider) 
         {
             _trueExpression = string.Format("({0}={1})", GetQuotedTrueValue(), GetQuotedTrueValue());
             _falseExpression = string.Format("({0}={1})", GetQuotedTrueValue(), GetQuotedFalseValue());
-        }
-
-        public override SqlExpression<T> Clone()
-        {
-            return CopyTo(new FirebirdSqlExpression<T>());
         }
 
         protected override object VisitBinary(BinaryExpression b)

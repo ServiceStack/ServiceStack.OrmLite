@@ -728,7 +728,7 @@ namespace ServiceStack.OrmLite.Firebird
 
         public override SqlExpression<T> SqlExpression<T>()
         {
-            return new FirebirdSqlExpression<T>();
+            return new FirebirdSqlExpression<T>(this);
         }
 
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName)

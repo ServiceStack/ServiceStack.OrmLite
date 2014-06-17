@@ -89,17 +89,17 @@ namespace ServiceStack.OrmLite
                 }
 
                 sqlExpr = "\n({0}.{1} = {2}.{3})".Fmt(
-                    parentDef.ModelName.SqlTable(),
-                    parentDef.PrimaryKey.FieldName.SqlColumn(),
-                    childDef.ModelName.SqlTable(),
-                    refField.FieldName.SqlColumn());
+                    SqlTable(parentDef.ModelName),
+                    SqlColumn(parentDef.PrimaryKey.FieldName),
+                    SqlTable(childDef.ModelName),
+                    SqlColumn(refField.FieldName));
             }
 
             var joinDef = tableDefs.Contains(targetDef) && !tableDefs.Contains(sourceDef)
                 ? sourceDef
                 : targetDef;
 
-            sbJoin.Append(" {0} {1} ".Fmt(joinType, joinDef.ModelName.SqlTable()));
+            sbJoin.Append(" {0} {1} ".Fmt(joinType, SqlTable(joinDef.ModelName)));
             sbJoin.Append(" ON ");
             sbJoin.Append(sqlExpr);
 
@@ -141,9 +141,9 @@ namespace ServiceStack.OrmLite
                             if (sbSelect.Length > 0)
                                 sbSelect.Append(", ");
 
-                            sbSelect.AppendFormat("{0}.{1}", 
-                                tableDef.ModelName.SqlTable(),
-                                tableFieldDef.GetQuotedName());
+                            sbSelect.AppendFormat("{0}.{1}",
+                                SqlTable(tableDef.ModelName),
+                                tableFieldDef.GetQuotedName(DialectProvider));
                             break;
                         }
                     }

@@ -1050,7 +1050,7 @@ namespace ServiceStack.OrmLite.Oracle
 
         public override SqlExpression<T> SqlExpression<T>()
         {
-            return new OracleSqlExpression<T>();
+            return new OracleSqlExpression<T>(this);
         }
 
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName)

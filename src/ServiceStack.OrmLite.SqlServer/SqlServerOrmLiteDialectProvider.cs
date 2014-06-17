@@ -221,7 +221,7 @@ namespace ServiceStack.OrmLite.SqlServer
 
         public override SqlExpression<T> SqlExpression<T>()
         {
-            return new SqlServerExpression<T>();
+            return new SqlServerExpression<T>(this);
         }
 
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName)

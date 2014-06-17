@@ -11,6 +11,9 @@ namespace ServiceStack.OrmLite.Sqlite
     /// </summary>
     public class SqliteExpression<T> : SqlExpression<T>
     {
+        public SqliteExpression(IOrmLiteDialectProvider dialectProvider) 
+            : base(dialectProvider) {}
+
         protected override object VisitColumnAccessMethod(MethodCallExpression m)
         {
             List<Object> args = this.VisitExpressionList(m.Arguments);
@@ -83,11 +86,6 @@ namespace ServiceStack.OrmLite.Sqlite
             }
 
             return new PartialSqlString(statement);
-        }
-
-        public override SqlExpression<T> Clone()
-        {
-            return CopyTo(new SqliteExpression<T>());
         }
     }
 }
