@@ -151,6 +151,29 @@ namespace ServiceStack.OrmLite
                     if (found)
                         break;
                 }
+
+                if (!found)
+                {
+                    // Add support for auto mapping `{Table}Id` convention
+                    foreach (var tableDef in tableDefs)
+                    {
+                        var primaryKey = tableDef.PrimaryKey;
+                        if (primaryKey == null) continue;
+                        
+                        var tableId = tableDef.Name + primaryKey.Name;
+                        if (fieldDef.Name == tableId)
+                        {
+                            if (sbSelect.Length > 0)
+                                sbSelect.Append(", ");
+
+                            sbSelect.AppendFormat("{0}.{1} as {2}",
+                                SqlTable(tableDef.ModelName),
+                                primaryKey.GetQuotedName(DialectProvider),
+                                fieldDef.Name);
+                            break;
+                        }
+                    }
+                }
             }
 
             SelectExpression = "SELECT " + sbSelect;

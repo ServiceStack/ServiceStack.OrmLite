@@ -64,8 +64,10 @@ namespace ServiceStack.OrmLite.Tests
         {
             public int Id { get; set; }
             public string Name { get; set; }
+            public int CustomerAddressId { get; set; }
             public string AddressLine1 { get; set; }
             public string City { get; set; }
+            public int OrderId { get; set; }
             public string LineItem { get; set; }
             public decimal Cost { get; set; }
             public string CountryCode { get; set; }
@@ -189,6 +191,8 @@ namespace ServiceStack.OrmLite.Tests
 
             var costs = results.ConvertAll(x => x.Cost);
             Assert.That(costs, Is.EquivalentTo(new[] { 1.99m, 1.49m, 9.99m }));
+            var orderIds = results.ConvertAll(x => x.OrderId);
+            Assert.That(orderIds, Is.EquivalentTo(new[] { 1, 3, 5 }));
 
             //Same as above using using db.From<Customer>()
             results = db.Select<FullCustomerInfo>(db.From<Customer>()
@@ -216,8 +220,6 @@ namespace ServiceStack.OrmLite.Tests
                 .Join<CustomerAddress, Country>((ca, c) => ca.Country == c.CountryName)
                 .Where(c => c.Name == "Customer 2")          //implicit condition with Customer
                 .And<CustomerAddress, Order>((a, o) => a.Country == o.LineItem));
-
-            db.GetLastSql().Print();
 
             costs = countryResults.ConvertAll(x => x.Cost);
             Assert.That(costs, Is.EquivalentTo(new[] { 20m }));
@@ -361,6 +363,40 @@ namespace ServiceStack.OrmLite.Tests
                 .LeftJoin<AliasedCustomerAddress, AliasedCustomer>());
 
             Assert.That(dbAddresses.Count, Is.EqualTo(3));
+        }
+
+        [Test]
+        public void Does_populate_PrimaryKey_ids_based_on_property_convention()
+        {
+            // Reset auto ids
+            db.DropAndCreateTable<Order>();
+            db.DropAndCreateTable<CustomerAddress>();
+            db.DropAndCreateTable<Customer>();
+
+            AddCustomerWithOrders();
+
+            var results = db.Select<FullCustomerInfo, Customer>(q => q
+                .Join<Customer, CustomerAddress>()
+                .Join<Customer, Order>());
+
+            var addressIds = results.ConvertAll(x => x.CustomerAddressId);
+            Assert.That(addressIds, Is.EquivalentTo(new[] { 1, 1 }));
+
+            var orderIds = results.ConvertAll(x => x.OrderId);
+            Assert.That(orderIds, Is.EquivalentTo(new[] { 1, 2 }));
+
+            var expr = db.From<Customer>()
+                .Join<Customer, CustomerAddress>()
+                .Join<Customer, Order>()
+                .Where<Order>(o => o.Cost > 2);
+
+            results = db.Select<FullCustomerInfo>(expr);
+
+            addressIds = results.ConvertAll(x => x.CustomerAddressId);
+            Assert.That(addressIds, Is.EquivalentTo(new[] { 1 }));
+
+            orderIds = results.ConvertAll(x => x.OrderId);
+            Assert.That(orderIds, Is.EquivalentTo(new[] { 2 }));
         }
     }
 }
