@@ -78,7 +78,7 @@ namespace ServiceStack.OrmLite.Tests
         [AutoIncrement]
         public int Id { get; set; }
         [Alias("Q_CustomerId")]
-        public int AliasedCustomerId { get; set; }
+        public int AliasedCustId { get; set; }
         public string AddressLine1 { get; set; }
         public string AddressLine2 { get; set; }
         public string City { get; set; }
@@ -239,10 +239,10 @@ namespace ServiceStack.OrmLite.Tests
             db.Save(customer);
 
             Assert.That(customer.Id, Is.GreaterThan(0));
-            Assert.That(customer.PrimaryAddress.AliasedCustomerId, Is.EqualTo(0));
+            Assert.That(customer.PrimaryAddress.AliasedCustId, Is.EqualTo(0));
 
             db.SaveReferences(customer, customer.PrimaryAddress);
-            Assert.That(customer.PrimaryAddress.AliasedCustomerId, Is.EqualTo(customer.Id));
+            Assert.That(customer.PrimaryAddress.AliasedCustId, Is.EqualTo(customer.Id));
 
             var dbCustomer = db.LoadSingleById<AliasedCustomer>(customer.Id);
 

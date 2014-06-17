@@ -292,5 +292,75 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(dbAddresses.Count, Is.EqualTo(3));
         }
 
+        [Test]
+        public void Can_Join_on_matching_Alias_convention()
+        {
+            db.DropAndCreateTable<AliasedCustomer>();
+            db.DropAndCreateTable<AliasedCustomerAddress>();
+
+            var customers = new[]
+            {
+                new AliasedCustomer
+                {
+                    Name = "Customer 1",
+                    PrimaryAddress = new AliasedCustomerAddress {
+                        AddressLine1 = "1 Australia Street",
+                        Country = "Australia"
+                    },
+                },
+                new AliasedCustomer
+                {
+                    Name = "Customer 2",
+                    PrimaryAddress = new AliasedCustomerAddress {
+                        AddressLine1 = "2 America Street",
+                        Country = "USA"
+                    },
+                },
+                new AliasedCustomer
+                {
+                    Name = "Customer 3",
+                    PrimaryAddress = new AliasedCustomerAddress {
+                        AddressLine1 = "3 Canada Street",
+                        Country = "Canada"
+                    },
+                },
+            };
+
+            customers.Each(c =>
+                db.Save(c, references: true));
+
+            db.Insert(
+                new Country { CountryName = "Australia", CountryCode = "AU" },
+                new Country { CountryName = "USA", CountryCode = "US" },
+                new Country { CountryName = "Italy", CountryCode = "IT" },
+                new Country { CountryName = "Spain", CountryCode = "ED" });
+
+            //Normal Join
+            var dbCustomers = db.Select<AliasedCustomer>(q => q
+                .Join<AliasedCustomerAddress>()
+                .Join<AliasedCustomerAddress, Country>((ca, c) => ca.Country == c.CountryName));
+
+            Assert.That(dbCustomers.Count, Is.EqualTo(2));
+
+            //Left Join
+            dbCustomers = db.Select<AliasedCustomer>(q => q
+                .Join<AliasedCustomerAddress>()
+                .LeftJoin<AliasedCustomerAddress, Country>((ca, c) => ca.Country == c.CountryName));
+
+            Assert.That(dbCustomers.Count, Is.EqualTo(3));
+
+            //Warning: Right and Full Joins are not implemented by Sqlite3. Avoid if possible.
+            var dbCountries = db.Select<Country>(q => q
+                .LeftJoin<AliasedCustomerAddress>((c, ca) => ca.Country == c.CountryName)
+                .LeftJoin<AliasedCustomerAddress, AliasedCustomer>());
+
+            Assert.That(dbCountries.Count, Is.EqualTo(4));
+
+            var dbAddresses = db.Select<AliasedCustomerAddress>(q => q
+                .LeftJoin<Country>((ca, c) => ca.Country == c.CountryName)
+                .LeftJoin<AliasedCustomerAddress, AliasedCustomer>());
+
+            Assert.That(dbAddresses.Count, Is.EqualTo(3));
+        }
     }
 }

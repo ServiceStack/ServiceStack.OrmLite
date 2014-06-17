@@ -713,7 +713,6 @@ namespace ServiceStack.OrmLite.Firebird
             return Quote(NamingStrategy.GetTableName(tableName));
         }
 
-
         public override string GetQuotedColumnName(string fieldName)
         {
             return Quote(NamingStrategy.GetColumnName(fieldName));
