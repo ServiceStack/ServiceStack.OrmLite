@@ -1,4 +1,7 @@
-﻿using NUnit.Framework;
+﻿using System.Linq;
+using NUnit.Framework;
+using ServiceStack.DataAnnotations;
+using ServiceStack.OrmLite.SqlServer;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Issues
@@ -60,6 +63,32 @@ namespace ServiceStack.OrmLite.Tests.Issues
 
                 Assert.That(row.LongMismatch, Is.EqualTo(1));
                 Assert.That(row.LongMismatch2, Is.EqualTo(2));
+            }
+        }
+
+        [Schema("Schema1")]
+        public class Poco
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+        }
+
+        [Test]
+        public void Can_change_schema_at_runtime()
+        {
+            using (var captured = new CaptureSqlFilter())
+            using (var db = OpenDbConnection())
+            {
+                var modelDef = SqlServerOrmLiteDialectProvider.GetModelDefinition(typeof(Poco));
+                db.SingleById<Poco>(1);
+
+                Assert.That(captured.SqlStatements.Last(), Is.StringContaining("Schema1"));
+
+                modelDef.Schema = "Schema2";
+
+                db.SingleById<Poco>(1);
+
+                Assert.That(captured.SqlStatements.Last(), Is.StringContaining("Schema2"));
             }
         }
     }
