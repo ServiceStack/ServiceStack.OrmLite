@@ -832,17 +832,27 @@ namespace ServiceStack.OrmLite
             if (m.Expression != null
                 && (m.Expression.NodeType == ExpressionType.Parameter || m.Expression.NodeType == ExpressionType.Convert))
             {
-                var propertyInfo = m.Member as PropertyInfo;
+                var propertyInfo = (PropertyInfo)m.Member;
+
+                var modelType = propertyInfo.DeclaringType;
+                if (m.Expression.NodeType == ExpressionType.Convert)
+                {
+                    var unaryExpr = m.Expression as UnaryExpression;
+                    if (unaryExpr != null)
+                    {
+                        modelType = unaryExpr.Operand.Type;
+                    }
+                }
 
                 if (propertyInfo.PropertyType.IsEnum)
                     return new EnumMemberAccess(
                         (PrefixFieldWithTableName
-                            ? DialectProvider.GetQuotedTableName(propertyInfo.DeclaringType.GetModelDefinition().ModelName) + "." 
+                            ? DialectProvider.GetQuotedTableName(modelType.GetModelDefinition().ModelName) + "." 
                             : "") 
                             + GetQuotedColumnName(m.Member.Name), propertyInfo.PropertyType);
 
-                return new PartialSqlString((PrefixFieldWithTableName 
-                    ? DialectProvider.GetQuotedTableName(propertyInfo.DeclaringType.GetModelDefinition().ModelName) + "." 
+                return new PartialSqlString((PrefixFieldWithTableName
+                    ? DialectProvider.GetQuotedTableName(modelType.GetModelDefinition().ModelName) + "." 
                     : "") 
                     + GetQuotedColumnName(m.Member.Name));
             }
