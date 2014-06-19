@@ -215,6 +215,7 @@
     <Compile Include="UntypedApiTests.cs" />
     <Compile Include="UseCase\AliasedFieldUseCase.cs" />
     <Compile Include="UseCase\CustomerOrdersUseCase.cs" />
+    <Compile Include="UseCase\FieldFromInterfaceImplementationUseCase.cs" />
     <Compile Include="UseCase\NestedComplexTypeUseCase.cs" />
     <Compile Include="UseCase\SchemaUseCase.cs" />
     <Compile Include="UseCase\ServiceStack_OrmLite_UseCase.cs" />
