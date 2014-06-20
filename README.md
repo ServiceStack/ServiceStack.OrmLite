@@ -42,223 +42,18 @@ _Latest v4+ on NuGet is a commercial release with [free quotas](https://services
 
 ## Copying
 
-Since September 2013, ServiceStack source code is available under GNU Affero General Public License/FOSS License Exception, see license.txt in the source. Alternative commercial licensing is also available, contact team@servicestack.net for details.
+Since September 2013, ServiceStack source code is available under GNU Affero General Public License/FOSS License Exception, see license.txt in the source. Alternative [commercial licensing](https://servicestack.net/ormlite) is also available.
 
 ## Contributing
 
-Commits should be made to the **v3-fixes** branch so they can be merged into both **v3** and **master** (v4) release branches. 
 Contributors need to approve the [Contributor License Agreement](https://docs.google.com/forms/d/16Op0fmKaqYtxGL4sg7w_g-cXXyCoWjzppgkuqzOeKyk/viewform) before any code will be reviewed, see the [Contributing wiki](https://github.com/ServiceStack/ServiceStack/wiki/Contributing) for more details. 
-
-## Download published NuGet binaries without NuGet
-
-For environments that doesn't have NuGet installed (e.g. OSX/Linux) you can still download the published binaries by 
-extracting them from the published NuGet packages. The url to download a nuget package is: 
-
-    http://packages.nuget.org/api/v1/package/{PackageName}/{Version}
-    
- So to get the OrmLite MySQL provider in OSX/Linux (or using gnu tools for Windows) you can just do:
-
-    wget -O OrmLite.MySql.zip http://packages.nuget.org/api/v1/package/ServiceStack.OrmLite.MySql/4.0.5
-    unzip OrmLite.MySql.zip 'lib/*'
-
-which will download and extract the dlls into your local local `lib/` folder.
 
 ***
 
-## Oracle Provider Notes
-The Oracle provider requires an installation of Oracle's ODP.NET. It has been tested with Oracle 11g but should work with 10g and perhaps even older versions. It has not been tested with Oracle 12c and does not support any new 12c features such as AutoIncrement keys. It also does not support the new Oracle fully-managed client.
+# Examples
 
-By default the Oracle provider stores Guids in the database as character strings and when generating SQL it quotes only table and column names that are reserved words in Oracle. That requires that you use the same quoting if you code your own SQL. Both of these options can be overridden, but overriding them will cause problems: the provider can store Guids as raw(16) but it cannot read them.
-
-The Oracle provider uses Oracle sequences to implement AutoIncrement columns and it queries the sequence to get a new value in a separate database call. You can override the automatically generated sequence name with a
-
-	[Sequence("name")]
-
-attribute on a field. The Sequence attribute implies [AutoIncrement], but you can use both on the same field.
-
-Since Oracle has a very restrictive 30 character limit on names, it is strongly suggested that you use short entity class and field names or aliases, remembering that indexes and foreign keys get compound names. If you use long names, the provider will squash them to make them compliant with the restriction. The algorithm used is to remove all vowels ("aeiouy") and if still too long then every fourth letter starting with the third one and finally if still too long to truncate the name. You must apply the same squashing algorithm if you are coding your own SQL.  
-
-The previous version of ServiceStack.OrmLite.Oracle used System.Data.OracleClient to talk to the database. Microsoft has deprecated that client, but it does still mostly work if you construct the Oracle provider like this:
-
-    OracleOrmLiteDialectProvider.Instance = new OracleOrmLiteDialectProvider(
-		compactGuid: false,
-		quoteNames: false,
-		clientProvider: OracleOrmLiteDialectProvider.MicrosoftProvider); 
-
-DateTimeOffset fields and, in locales that use a comma to separate the fractional part of a floating point number, some aspects of using floating point numbers, do not work with System.Data.OracleClient.
-
-## T4 Template Support
-
-[Guru Kathiresan](https://github.com/gkathire) continues to enhance [OrmLite's T4 Template support](https://github.com/ServiceStack/ServiceStack.OrmLite/tree/master/src/T4) which are useful when you want to automatically generate POCO's and strong-typed wrappers for executing stored procedures. OrmLite's T4 support can be added via NuGet with:
-
-    PM> Install-Package ServiceStack.OrmLite.T4
-
-## New API's to execute custom SQL
-
-Prior to v3.9.60 the ways to execute custom SQL was with `db.ExecuteSql()` which as it only returned an int code, users were using `db.Select` to read arbitrary sql returning tabular resultsets. However db.Select is only intended for SELECT statements. For this purpose we've introduced new API's for executing custom sql, e.g:
-
-```csharp
-List<Poco> results = db.SqlList<Poco>("EXEC GetAnalyticsForWeek 1");
-List<Poco> results = db.SqlList<Poco>("EXEC GetAnalyticsForWeek @weekNo", new { weekNo = 1 });
-
-List<int> results = db.SqlList<int>("EXEC GetTotalsForWeek 1");
-List<int> results = db.SqlList<int>("EXEC GetTotalsForWeek @weekNo", new { weekNo = 1 });
-
-int result = db.SqlScalar<int>("SELECT 10");
-```
-
-Some more examples can be found in [SqlServerProviderTests](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLite.Tests/SqlServerProviderTests.cs).
-
-### Using typed SqlExpression in Custom SQL APIs
-
-From v4.0.16 you can now use typed sql expressions in Custom SQL API's 
-
-```csharp
-List<Person> results = db.SqlList<Person>(db.From<Person>().Select("*").Where(q => q.Age < 50));
-List<Person> results = db.SqlList<Person>("SELECT * FROM Person WHERE Age < @age", new { age=50});
-
-List<string> results = db.SqlColumn<string>(db.From<Person>().Select(x => x.LastName));
-List<string> results = db.SqlColumn<string>("SELECT LastName FROM Person");
-
-HashSet<int> results = db.ColumnDistinct<int>(db.From<Person>().Select(x => x.Age));
-HashSet<int> results = db.ColumnDistinct<int>("SELECT Age FROM Person");
-
-int result = db.SqlScalar<int>(db.From<Person>().Select(Sql.Count("*")).Where(q => q.Age < 50));
-int result = db.SqlScalar<int>("SELCT COUNT(*) FROM Person WHERE Age < 50");
-```
-
-## New Simplified API
-We've streamlined our API, now all OrmLite extensions that used to be on `IDbCommand` now hang off `IDbConnection` 
-(just like Dapper), this reduces the boiler-plate when opening a connection to a single line, so now you can 
-create a table and insert a record with just:
-
-```csharp
-using (IDbConnection db = dbFactory.OpenDbConnection()) {
-	db.CreateTable<Employee>();
-	db.Insert(new Employee { Id = 1, Name = "Employee 1" });
-}
-```
-    
-> The methods off `IDbCommand` have now been deprecated and will one day be removed. Update your library.
-
-## New Foreign Key attribute for referential actions on Update/Deletes
-
-Creating a foreign key in OrmLite can be done by adding `[References(typeof(ForeignKeyTable))]` on the relation property,
-which will result in OrmLite creating the Foreign Key relationship when it creates the DB table with `db.CreateTable<Poco>`.
-[@brainless83](https://github.com/brainless83) has extended this support further by adding more finer-grain options 
-and behaviours with the new `[ForeignKey]` attribute which will now let you specify the desired behaviour when deleting
-or updating related rows in Foreign Key tables. 
-
-An example of a table with all the different options:
-
-```csharp
-public class TableWithAllCascadeOptions
-{
-	[AutoIncrement] public int Id { get; set; }
-	
-	[References(typeof(ForeignKeyTable1))]
-	public int SimpleForeignKey { get; set; }
-	
-	[ForeignKey(typeof(ForeignKeyTable2), OnDelete = "CASCADE", OnUpdate = "CASCADE")]
-	public int? CascadeOnUpdateOrDelete { get; set; }
-	
-	[ForeignKey(typeof(ForeignKeyTable3), OnDelete = "NO ACTION")]
-	public int? NoActionOnCascade { get; set; }
-	
-	[Default(typeof(int), "17")]
-	[ForeignKey(typeof(ForeignKeyTable4), OnDelete = "SET DEFAULT")]
-	public int SetToDefaultValueOnDelete { get; set; }
-	
-	[ForeignKey(typeof(ForeignKeyTable5), OnDelete = "SET NULL")]
-	public int? SetToNullOnDelete { get; set; }
-}
-```
-
-The [ForeignKeyTests](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLite.Tests/ForeignKeyAttributeTests.cs)
-show the resulting behaviour with each of these configurations in more detail.
-
-> Note: Only supported on RDBMS's with foreign key/referential action support, e.g. 
-[Sql Server](http://msdn.microsoft.com/en-us/library/ms174979.aspx), 
-[PostgreSQL](http://www.postgresql.org/docs/9.1/static/ddl-constraints.html),
-[MySQL](http://dev.mysql.com/doc/refman/5.5/en/innodb-foreign-key-constraints.html). Otherwise they're ignored.
-
-## Multi nested database connections
-
-We now support multiple nested database connections so you can now trivially use OrmLite to access multiple databases
-on different connections. The `OrmLiteConnectionFactory` class has been extended to support named connections which 
-allows you to conveniently define all your db connections when you register it in your IOC and access them with the 
-named property when you use them.
-
-A popular way of scaling RDBMS's is to create a Master / Shard setup where datasets for queries that span entire system
-are kept in the master database, whilst context-specific related data can be kept together in an isolated shard.
-This feature makes it trivial to maintain multiple separate db shards with a master database in a different RDBMS. 
-
-Here's an (entire source code) sample of the code needed to define, and populate a Master/Shard setup.
-Sqlite can create DB shards on the fly so only the blank SqlServer master database needed to be created out-of-band:
-
-### Sharding 1000 Robots into 10 Sqlite DB shards - referencing each in a Master SqlServer RDBMS
-
-```csharp
-public class MasterRecord {
-    public Guid Id { get; set; }
-    public int RobotId { get; set; }
-    public string RobotName { get; set; }
-    public DateTime? LastActivated { get; set; }
-}
-
-public class Robot {
-    public int Id { get; set; }
-    public string Name { get; set; }
-    public bool IsActivated { get; set; }
-    public long CellCount { get; set; }
-    public DateTime CreatedDate { get; set; }
-}
-
-const int NoOfShards = 10;
-const int NoOfRobots = 1000;
-
-var dbFactory = new OrmLiteConnectionFactory(
-    "Data Source=host;Initial Catalog=RobotsMaster;Integrated Security=SSPI",  //Connection String
-    SqlServerDialect.Provider); 
-
-dbFactory.Run(db => db.CreateTable<MasterRecord>(overwrite:false));
-
-NoOfShards.Times(i => {
-    var namedShard = "robots-shard" + i;
-    dbFactory.RegisterConnection(namedShard, 
-        "~/App_Data/{0}.sqlite".Fmt(shardId).MapAbsolutePath(),                //Connection String
-        SqliteDialect.Provider);
-	
-	dbFactory.OpenDbConnection(namedShard).Run(db => db.CreateTable<Robot>(overwrite:false));
-});
-
-var newRobots = NoOfRobots.Times(i => //Create 1000 Robots
-    new Robot { Id=i, Name="R2D"+i, CreatedDate=DateTime.UtcNow, CellCount=DateTime.Now.ToUnixTimeMs() % 100000 });
-
-foreach (var newRobot in newRobots) 
-{
-    using (IDbConnection db = dbFactory.OpenDbConnection()) //Open Connection to Master DB 
-    {
-        db.Insert(new MasterRecord { Id = Guid.NewGuid(), RobotId = newRobot.Id, RobotName = newRobot.Name });
-        using (IDbConnection robotShard = dbFactory.OpenDbConnection("robots-shard"+newRobot.Id % NoOfShards)) //Shard
-        {
-            robotShard.Insert(newRobot);
-        }
-    }
-}
-```
-
-Using the [SQLite Manager](https://addons.mozilla.org/en-US/firefox/addon/sqlite-manager/?src=search) Firefox extension
-we can peek at one of the created shards to see 100 Robots in each shard. This is the dump of `robots-shard0.sqlite`:
-
-![Data dump of Robot Shard #1](http://mono.servicestack.net/files/robots-shard0.png)
-
-As expected each shard has every 10th robot inside.
-
-## New strong-typed Sql Expression API
-
-We've now added SQL Expression support to bring you even nicer LINQ-liked querying to all our providers. 
-To give you a flavour here are some examples with their partial SQL output (done in SQL Server): 
+OrmLite's SQL Expression support lets you use LINQ-liked querying in all our providers. 
+To give you a flavour here are some examples with their partial SQL output (using SqlServer dialect): 
 
 ### Querying with SELECT
 
@@ -384,10 +179,10 @@ To see the behaviour of the different APIs, all examples uses this simple model
 ```csharp
 public class Person
 {
-	public int Id { get; set; }
-	public string FirstName { get; set; }
-	public string LastName { get; set; }
-	public int? Age { get; set; }
+  public int Id { get; set; }
+  public string FirstName { get; set; }
+  public string LastName { get; set; }
+  public int? Age { get; set; }
 }
 ```
 
@@ -512,6 +307,688 @@ db.Delete(table: "Person", where: "Age = {0}".Params(27));
 
 **DELETE FROM "Person" WHERE Age = 27**
 
+# Features
+
+OrmLite's goal is to provide a convenient, DRY, RDBMS-agnostic typed wrapper that retains a high affinity with SQL, exposing an intuitive API that generates predictable SQL and straight-forward mapping to clean disconnected POCO's. This approach makes easier to reason-about your data access as it's obvious what SQL is getting executed at what time, mitigating unexpected behavior, implicit N+1 queries and leaky data access prevalent in Heavy ORMs.
+
+Whilst OrmLite aims to provide a light-weight typed wrapper around SQL, it offers a number of convenient features that makes working with RDBMS's a clean and enjoyable experience:
+
+## Typed SqlExpression support for JOIN's
+
+Starting with the most basic example you can simply specify the table you want to join with:
+
+```csharp
+var dbCustomers = db.Select<Customer>(q => q.Join<CustomerAddress>());
+```
+
+This query rougly maps to the following SQL:
+
+```sql
+SELECT Customer.* 
+  FROM Customer 
+       INNER JOIN 
+       CustomerAddress ON (Customer.Id == CustomerAddress.Id)
+```
+
+Just like before `q` is an instance of `SqlExpression<Customer>` which is bounded to the base `Customer` type (and what any subsequent implicit API's apply to). 
+
+To better illustrate the above query, lets expand it to the equivalent explicit query:
+
+```csharp
+SqlExpression<Customer> q = db.From<Customer>();
+q.Join<Customer,CustomerAddress>((customer,address) => customer.Id == address.CustomerId);
+
+List<Customer> dbCustomers = db.Select(q);
+```
+
+### Reference Conventions
+
+The above query joins together the `Customer` and `CustomerAddress` POCO's using the same relationship convention used in [OrmLite's support for References](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLite.Tests/LoadReferencesTests.cs), i.e. using the referenced table `{ParentType}Id` property convention.
+
+An example of what this looks like can be seen the POCO's below:
+
+```csharp
+class Customer {
+    public Id { get; set; }
+    ...
+}
+class CustomerAddress {
+    public Id { get; set; }
+    public CustomerId { get; set; }  // Reference based on Property name convention
+}
+```
+
+References based on matching alias names is also supported, e.g:
+
+```csharp
+[Alias("LegacyCustomer")]
+class Customer {
+    public Id { get; set; }
+    ...
+}
+class CustomerAddress {
+    public Id { get; set; }
+
+    [Alias("LegacyCustomerId")]             // Matches `LegacyCustomer` Alias
+    public RenamedCustomerId { get; set; }  // Reference based on Alias Convention
+}
+```
+
+Going back to the above example: 
+
+```csharp
+q.Join<CustomerAddress>();
+```
+
+Uses the implicit join in the above reference convention to expand into the equivalent explicit API: 
+
+```csharp
+q.Join<Customer,CustomerAddress>((customer,address) => customer.Id == address.CustomerId);
+```
+
+### Selecting multiple columns across joined tables
+
+Another behaviour implicit when selecting from a typed SqlExpression is that results are mapped to the `Customer` POCO. To change this default we just need to explicitly specify what POCO it should map to instead:
+
+```csharp
+List<FullCustomerInfo> customers = db.Select<FullCustomerInfo>(
+    db.From<Customer>().Join<CustomerAddress>());
+```
+
+Where `FullCustomerInfo` is any POCO that contains a combination of properties matching any of the joined tables in the query. 
+
+The above example is also equivalent to the shorthand `db.Select<Into,From>()` API:
+
+```csharp
+var customers = db.Select<FullCustomerInfo,Customer>(q => q.Join<CustomerAddress>());
+```
+
+Rules for how results are mapped is simply each property on `FullCustomerInfo` is mapped to the first matching property in any of the tables in the order they were added to the SqlExpression.
+
+The mapping also includes a fallback for referencing fully-qualified names in the format: `{TableName}{FieldName}` allowing you to reference ambiguous fields, e.g:
+
+  - `CustomerId` => `Customer`.`Id`
+  - `OrderId` => `Order`.`Id`
+  - `CustomerName` => `Customer`.`Name`
+  - `OrderCost` => `Order`.`Cost`
+
+### Advanced Example
+
+Seeing how the SqlExpression is constructed, joined and mapped, we can take a look at a more advanced example to showcase more of the new API's available:
+
+```csharp
+List<FullCustomerInfo> rows = db.Select<FullCustomerInfo>( // Map results to FullCustomerInfo POCO
+  db.From<Customer>()                                      // Create typed Customer SqlExpression
+    .LeftJoin<CustomerAddress>()                           // Implict left join with base table
+    .Join<Customer, Order>((c,o) => c.Id == o.CustomerId)  // Explicit join and condition
+    .Where(c => c.Name == "Customer 1")                    // Implicit condition on base table
+    .And<Order>(o => o.Cost < 2)                           // Explicit condition on joined Table
+    .Or<Customer,Order>((c,o) => c.Name == o.LineItem));   // Explicit condition with joined Tables
+```
+
+The comments next to each line document each Type of API used. Some of the new API's introduced in this example include:
+
+  - Usage of `LeftJoin` for LEFT JOIN'S, `RightJoin` and `FullJoin` also available
+  - Usage of `And<Table>()`, to specify a condition on a Joined table 
+  - Usage of `Or<Table1,Table2>`, to specify a condition against 2 joined tables
+
+More code examples of References and Joined tables are available in:
+
+  - [LoadReferencesTests.cs](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLite.Tests/LoadReferencesTests.cs)
+  - [LoadReferencesJoinTests.cs](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLite.Tests/LoadReferencesJoinTests.cs)
+
+
+### Support for references, POCO style
+
+OrmLite's reference support lets Store and Load related entities with the `[Reference]` attribute, e.g: 
+
+```csharp
+public class Customer
+{
+    [AutoIncrement]
+    public int Id { get; set; }
+    public string Name { get; set; }
+
+    [Reference]
+    public CustomerAddress PrimaryAddress { get; set; }
+
+    [Reference]
+    public List<Order> Orders { get; set; }
+}
+
+public class CustomerAddress
+{
+    [AutoIncrement]
+    public int Id { get; set; }
+    public int CustomerId { get; set; } // `{Table}Id` convention used for parent references
+    public string AddressLine1 { get; set; }
+    public string AddressLine2 { get; set; }
+    public string City { get; set; }
+    public string State { get; set; }
+    public string Country { get; set; }
+}
+
+public class Order
+{
+    [AutoIncrement]
+    public int Id { get; set; }
+    public int CustomerId { get; set; } // `{Table}Id` convention used for parent references
+    public string LineItem { get; set; }
+    public int Qty { get; set; }
+    public decimal Cost { get; set; }
+}
+```
+
+This lets you save a POCO and all its entity references with `db.Save()`, e.g:
+
+```csharp
+var customer =  new Customer {
+    Name = "Customer 1",
+    PrimaryAddress = new CustomerAddress {
+        AddressLine1 = "1 Australia Street",
+        Country = "Australia"
+    },
+    Orders = new[] {
+        new Order { LineItem = "Line 1", Qty = 1, Cost = 1.99m },
+        new Order { LineItem = "Line 2", Qty = 2, Cost = 2.99m },
+    }.ToList(),
+};
+
+db.Save(customer, references:true);
+```
+
+This saves the parent customer POCO in the `Customer` table, the PrimaryAddress in the `CustomerAddress` table as well as 2 Orders in the `Order` table.
+
+More examples available in [LoadReferencesTests.cs](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLite.Tests/LoadReferencesTests.cs)
+
+Unlike normal complex properties, references:
+
+  - Doesn't persist as complex type blob
+  - Doesn't impact normal querying
+  - Saves and loads references independently from itself
+  - Populated references get serialized in Text serializers (only populated are visible).
+  - Data is only loaded 1-reference-level deep
+  - Reference Fields require consistent `(T)Id` naming
+ 
+Basically it provides a better story when dealing with referential data that doesn't impact the POCO's ability to be used as DTO's. 
+
+## Optimistic Concurrency
+
+Optimistic concurrency can be added to any table by adding a `ulong RowVersion { get; set; }` property, e.g:
+
+```csharp
+public class Poco
+{
+    ...
+    public ulong RowVersion { get; set; }
+}
+```
+
+RowVersion is implemented efficiently in all major RDBMS's, i.e:
+
+ - Uses `rowversion` datatype in SqlServer 
+ - Uses PostgreSql's `xmin` system column (no column on table required)
+ - Uses UPDATE triggers on MySql, Sqlite and Oracle whose lifetime is attached to Create/Drop tables APIs
+
+Despite their differing implementations each provider works the same way where the `RowVersion` property is populated when the record is selected and only updates the record if the RowVersion matches with what's in the database, e.g:
+
+```csharp
+var rowId = db.Insert(new Poco { Text = "Text" }, selectIdentity:true);
+
+var row = db.SingleById<Poco>(rowId);
+row.Text += " Updated";
+db.Update(row); //success!
+
+row.Text += "Attempting to update stale record";
+
+//Can't update stale record
+Assert.Throws<OptimisticConcurrencyException>(() =>
+    db.Update(row));
+
+//Can update latest version
+var updatedRow = db.SingleById<Poco>(rowId);  // fresh version
+updatedRow.Text += "Update Success!";
+db.Update(updatedRow);
+
+updatedRow = db.SingleById<Poco>(rowId);
+db.Delete(updatedRow);                        // can delete fresh version
+```
+
+Optimistic concurrency is only verified on API's that update or delete an entire entity, i.e. it's not enforced in partial updates. There's also an Alternative API available for DELETE's:
+
+```csharp
+db.DeleteById<Poco>(id:updatedRow.Id, rowversion:updatedRow.RowVersion)
+```
+
+### Exec, Result and String Filters
+
+OrmLite's core Exec functions makes it possible to inject a custom managed exec function where you can inject your own behavior, tracing, profiling, etc.
+
+It's useful in situations when you want to use SqlServer in production but use an `in-memory` Sqlite database in tests and you want to emulate any missing SQL Server Stored Procedures in code:
+
+```csharp
+public class MockStoredProcExecFilter : OrmLiteExecFilter
+{
+    public override T Exec<T>(IDbConnection dbConn, Func<IDbCommand, T> filter)
+    {
+        try
+        {
+            return base.Exec(dbConn, filter);
+        }
+        catch (Exception ex)
+        {
+            if (dbConn.GetLastSql() == "exec sp_name @firstName, @age")
+                return (T)(object)new Person { FirstName = "Mocked" };
+            throw;
+        }
+    }
+}
+
+OrmLiteConfig.ExecFilter = new MockStoredProcExecFilter();
+
+using (var db = OpenDbConnection())
+{
+    var person = db.SqlScalar<Person>("exec sp_name @firstName, @age",
+        new { firstName = "aName", age = 1 });
+
+    person.FirstName.Print(); //Mocked
+}
+```
+
+Results filters also makes it trivial to implement the Capture filter which allows you to capture SQL Statements without running them, e.g:
+
+```csharp
+public class CaptureSqlFilter : OrmLiteResultsFilter
+{
+    public CaptureSqlFilter()
+    {
+        SqlFilter = CaptureSql;
+        SqlStatements = new List<string>();
+    }
+
+    private void CaptureSql(string sql)
+    {
+        SqlStatements.Add(sql);
+    }
+
+    public List<string> SqlStatements { get; set; }
+}
+```
+
+That can now wrap around existing database calls to capture, defer or print generated SQL, e.g:
+
+```csharp
+using (var captured = new CaptureSqlFilter())
+using (var db = OpenDbConnection())
+{
+    db.CreateTable<Person>();
+    db.Count<Person>(x => x.Age < 50);
+    db.Insert(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix" });
+    db.Delete<Person>(new { FirstName = "Jimi", Age = 27 });
+
+    var sql = string.Join(";\n", captured.SqlStatements.ToArray());
+    sql.Print();
+}
+```
+
+## Mockable extension methods
+
+The Result Filters also lets you easily mock results return by OrmLite which it uses instead of hitting the database, typically useful in Unit Testing Services to mock OrmLite API's directly instead of using a repository, e.g:
+
+```csharp
+using (new OrmLiteResultsFilter {
+    PrintSql = true,
+    SingleResult = new Person { Id = 1, FirstName = "Mocked", LastName = "Person", Age = 100 },
+})
+{
+    db.Single<Person>(x => x.Age == 42).FirstName // Mocked
+    db.Single(db.From<Person>().Where(x => x.Age == 42)).FirstName // Mocked
+    db.Single<Person>(new { Age = 42 }).FirstName // Mocked
+    db.Single<Person>("Age = @age", new { age = 42 }).FirstName // Mocked
+}
+```
+
+More examples showing how to mock different API's including support for nesting available in [MockAllApiTests.cs](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLite.Tests/MockAllApiTests.cs)
+
+### String Filter
+
+There's also a specific filter for strings available which allows you to apply custom sanitization on String fields, e.g. you can ensure all strings are right trimmed with:
+
+```csharp
+OrmLiteConfig.StringFilter = s => s.TrimEnd();
+
+db.Insert(new Poco { Name = "Value with trailing   " });
+db.Select<Poco>().First().Name // "Value with trailing"
+```
+
+## Pluggable Complex Type Serializers
+
+Pluggable serialization lets you specify different serialization strategies of Complex Types for each available RDBMS provider, e.g:
+
+```csharp
+//ServiceStack's JSON and JSV Format
+SqliteDialect.Provider.StringSerializer = new JsvStringSerializer();       
+PostgreSqlDialect.Provider.StringSerializer = new JsonStringSerializer();
+//.NET's XML and JSON DataContract serializers
+SqlServerDialect.Provider.StringSerializer = new DataContractSerializer();
+MySqlDialect.Provider.StringSerializer = new JsonDataContractSerializer();
+//.NET XmlSerializer
+OracleDialect.Provider.StringSerializer = new XmlSerializableSerializer();
+```
+You can also provide a custom serialization strategy by implementing 
+[IStringSerializer](https://github.com/ServiceStack/ServiceStack.Text/blob/master/src/ServiceStack.Text/IStringSerializer.cs).
+
+By default all dialects use the existing `JsvStringSerializer`, except for PostgreSQL which due to its built-in support for JSON, uses the JSON format by default.  
+
+## Global Insert / Update Filters
+
+Similar to interceptors in some heavy ORM's, Insert and Update filters get fired just before any **INSERT** or **UPDATE** operation using OrmLite's typed API's (i.e. not dynamic SQL or partial updates using anon types). This functionality can be used for easily auto-maintaining Audit information for your POCO data models, e.g:
+
+```csharp
+public interface IAudit 
+{
+    DateTime CreatedDate { get; set; }
+    DateTime ModifiedDate { get; set; }
+    string ModifiedBy { get; set; }
+}
+
+OrmLiteConfig.InsertFilter = (dbCmd, row) => {
+    var auditRow = row as IAudit;
+    if (auditRow != null)
+        auditRow.CreatedDate = auditRow.ModifiedDate = DateTime.UtcNow;
+};
+
+OrmLiteConfig.UpdateFilter = (dbCmd, row) => {
+    var auditRow = row as IAudit;
+    if (auditRow != null)
+        auditRow.ModifiedDate = DateTime.UtcNow;
+};
+```
+
+Which will ensure that the `CreatedDate` and `ModifiedDate` fields are populated on every insert and update.
+
+### Validation Example
+
+The filters can also be used for validation where throwing an exception will prevent the operation and bubble the exception, e.g:
+
+```csharp
+OrmLiteConfig.InsertFilter = OrmLiteConfig.UpdateFilter = (dbCmd, row) => {
+    var auditRow = row as IAudit;
+    if (auditRow != null && auditRow.ModifiedBy == null)
+        throw new ArgumentNullException("ModifiedBy");
+};
+
+try
+{
+    db.Insert(new AuditTable());
+}
+catch (ArgumentNullException) {
+   //throws ArgumentNullException
+}
+
+db.Insert(new AuditTable { ModifiedBy = "Me!" }); //succeeds
+```
+
+## Custom SQL Customizations
+
+A number of new hooks are available to provide more flexibility when creating and dropping your RDBMS tables.
+
+### Custom Field Declarations
+
+The `[CustomField]` attribute can be used for specifying custom field declarations in the generated Create table DDL statements, e.g:
+
+```csharp
+public class PocoTable
+{
+    public int Id { get; set; }
+
+    [CustomField("CHAR(20)")]
+    public string CharColumn { get; set; }
+
+    [CustomField("DECIMAL(18,4)")]
+    public decimal? DecimalColumn { get; set; }
+}
+
+db.CreateTable<PocoTable>(); 
+```
+
+Generates and executes the following SQL:
+
+```sql
+CREATE TABLE "PocoTable" 
+(
+  "Id" INTEGER PRIMARY KEY, 
+  "CharColumn" CHAR(20) NULL, 
+  "DecimalColumn" DECIMAL(18,4) NULL 
+);  
+```
+
+#### Pre / Post Custom SQL Hooks when Creating and Dropping tables 
+
+Pre / Post Custom SQL Hooks allow you to inject custom SQL before and after tables are created or dropped, e.g:
+
+```csharp
+[PostCreateTable("INSERT INTO TableWithSeedData (Name) VALUES ('Foo');" +
+                 "INSERT INTO TableWithSeedData (Name) VALUES ('Bar');")]
+public class TableWithSeedData
+{
+    [AutoIncrement]
+    public int Id { get; set; }
+    public string Name { get; set; }
+}
+```
+
+Which like other ServiceStack attributes, can also be added dynamically, e.g:
+
+```csharp
+typeof(TableWithSeedData)
+    .AddAttributes(new PostCreateTableAttribute(
+        "INSERT INTO TableWithSeedData (Name) VALUES ('Foo');" +
+        "INSERT INTO TableWithSeedData (Name) VALUES ('Bar');"));
+```
+
+Custom SQL Hooks also allow executing custom SQL before and after a table has been created or dropped, i.e:
+
+```csharp
+[PreCreateTable(runSqlBeforeTableCreated)]
+[PostCreateTable(runSqlAfterTableCreated)]
+[PreDropTable(runSqlBeforeTableDropped)]
+[PostDropTable(runSqlAfterTableDropped)]
+public class Table {}
+```
+
+### Untyped API support
+
+The [IUntypedApi](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/src/ServiceStack.OrmLite/IUntypedApi.cs) interface is useful for when you only have access to a late-bound object runtime type which is accessible via `db.CreateTypedApi`, e.g:
+
+```csharp
+public class BaseClass
+{
+    public int Id { get; set; }
+}
+
+public class Target : BaseClass
+{
+    public string Name { get; set; }
+}
+
+var row = (BaseClass)new Target { Id = 1, Name = "Foo" };
+
+var useType = row.GetType();
+var typedApi = db.CreateTypedApi(useType);
+
+db.DropAndCreateTables(useType);
+
+typedApi.Save(row);
+
+var typedRow = db.SingleById<Target>(1);
+typedRow.Name //= Foo
+
+var updateRow = (BaseClass)new Target { Id = 1, Name = "Bar" };
+
+typedApi.Update(updateRow);
+
+typedRow = db.SingleById<Target>(1);
+typedRow.Name //= Bar
+
+typedApi.Delete(typedRow, new { Id = 1 });
+
+typedRow = db.SingleById<Target>(1); //= null
+```
+
+## T4 Template Support
+
+[Guru Kathiresan](https://github.com/gkathire) continues to enhance [OrmLite's T4 Template support](https://github.com/ServiceStack/ServiceStack.OrmLite/tree/master/src/T4) which are useful when you want to automatically generate POCO's and strong-typed wrappers for executing stored procedures. OrmLite's T4 support can be added via NuGet with:
+
+    PM> Install-Package ServiceStack.OrmLite.T4
+
+## Custom SQL API's
+
+Custom SQL API's provide a convenient way for executing custom sql and mapping to , e.g:
+
+```csharp
+List<Poco> results = db.SqlList<Poco>("EXEC GetAnalyticsForWeek 1");
+List<Poco> results = db.SqlList<Poco>("EXEC GetAnalyticsForWeek @weekNo", new { weekNo = 1 });
+
+List<int> results = db.SqlList<int>("EXEC GetTotalsForWeek 1");
+List<int> results = db.SqlList<int>("EXEC GetTotalsForWeek @weekNo", new { weekNo = 1 });
+
+int result = db.SqlScalar<int>("SELECT 10");
+```
+
+More examples can be found in [SqlServerProviderTests](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLite.Tests/SqlServerProviderTests.cs).
+
+### Using typed SqlExpression in Custom SQL APIs
+
+The Custom SQL API's also allow querying with Typed SQL Expressions:
+
+```csharp
+List<Person> results = db.SqlList<Person>(db.From<Person>().Select("*").Where(q => q.Age < 50));
+List<Person> results = db.SqlList<Person>("SELECT * FROM Person WHERE Age < @age", new { age=50});
+
+List<string> results = db.SqlColumn<string>(db.From<Person>().Select(x => x.LastName));
+List<string> results = db.SqlColumn<string>("SELECT LastName FROM Person");
+
+HashSet<int> results = db.ColumnDistinct<int>(db.From<Person>().Select(x => x.Age));
+HashSet<int> results = db.ColumnDistinct<int>("SELECT Age FROM Person");
+
+int result = db.SqlScalar<int>(db.From<Person>().Select(Sql.Count("*")).Where(q => q.Age < 50));
+int result = db.SqlScalar<int>("SELCT COUNT(*) FROM Person WHERE Age < 50");
+```
+
+## New Foreign Key attribute for referential actions on Update/Deletes
+
+Creating a foreign key in OrmLite can be done by adding `[References(typeof(ForeignKeyTable))]` on the relation property,
+which will result in OrmLite creating the Foreign Key relationship when it creates the DB table with `db.CreateTable<Poco>`.
+[@brainless83](https://github.com/brainless83) has extended this support further by adding more finer-grain options 
+and behaviours with the new `[ForeignKey]` attribute which will now let you specify the desired behaviour when deleting
+or updating related rows in Foreign Key tables. 
+
+An example of a table with all the different options:
+
+```csharp
+public class TableWithAllCascadeOptions
+{
+	[AutoIncrement] public int Id { get; set; }
+	
+	[References(typeof(ForeignKeyTable1))]
+	public int SimpleForeignKey { get; set; }
+	
+	[ForeignKey(typeof(ForeignKeyTable2), OnDelete = "CASCADE", OnUpdate = "CASCADE")]
+	public int? CascadeOnUpdateOrDelete { get; set; }
+	
+	[ForeignKey(typeof(ForeignKeyTable3), OnDelete = "NO ACTION")]
+	public int? NoActionOnCascade { get; set; }
+	
+	[Default(typeof(int), "17")]
+	[ForeignKey(typeof(ForeignKeyTable4), OnDelete = "SET DEFAULT")]
+	public int SetToDefaultValueOnDelete { get; set; }
+	
+	[ForeignKey(typeof(ForeignKeyTable5), OnDelete = "SET NULL")]
+	public int? SetToNullOnDelete { get; set; }
+}
+```
+
+The [ForeignKeyTests](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLite.Tests/ForeignKeyAttributeTests.cs)
+show the resulting behaviour with each of these configurations in more detail.
+
+> Note: Only supported on RDBMS's with foreign key/referential action support, e.g. 
+[Sql Server](http://msdn.microsoft.com/en-us/library/ms174979.aspx), 
+[PostgreSQL](http://www.postgresql.org/docs/9.1/static/ddl-constraints.html),
+[MySQL](http://dev.mysql.com/doc/refman/5.5/en/innodb-foreign-key-constraints.html). Otherwise they're ignored.
+
+## Multi nested database connections
+
+We now support multiple nested database connections so you can now trivially use OrmLite to access multiple databases
+on different connections. The `OrmLiteConnectionFactory` class has been extended to support named connections which 
+allows you to conveniently define all your db connections when you register it in your IOC and access them with the 
+named property when you use them.
+
+A popular way of scaling RDBMS's is to create a Master / Shard setup where datasets for queries that span entire system
+are kept in the master database, whilst context-specific related data can be kept together in an isolated shard.
+This feature makes it trivial to maintain multiple separate db shards with a master database in a different RDBMS. 
+
+Here's an (entire source code) sample of the code needed to define, and populate a Master/Shard setup.
+Sqlite can create DB shards on the fly so only the blank SqlServer master database needed to be created out-of-band:
+
+### Sharding 1000 Robots into 10 Sqlite DB shards - referencing each in a Master SqlServer RDBMS
+
+```csharp
+public class MasterRecord {
+    public Guid Id { get; set; }
+    public int RobotId { get; set; }
+    public string RobotName { get; set; }
+    public DateTime? LastActivated { get; set; }
+}
+
+public class Robot {
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public bool IsActivated { get; set; }
+    public long CellCount { get; set; }
+    public DateTime CreatedDate { get; set; }
+}
+
+const int NoOfShards = 10;
+const int NoOfRobots = 1000;
+
+var dbFactory = new OrmLiteConnectionFactory(
+    "Data Source=host;Initial Catalog=RobotsMaster;Integrated Security=SSPI",  //Connection String
+    SqlServerDialect.Provider); 
+
+dbFactory.Run(db => db.CreateTable<MasterRecord>(overwrite:false));
+
+NoOfShards.Times(i => {
+    var namedShard = "robots-shard" + i;
+    dbFactory.RegisterConnection(namedShard, 
+        "~/App_Data/{0}.sqlite".Fmt(shardId).MapAbsolutePath(),                //Connection String
+        SqliteDialect.Provider);
+	
+	dbFactory.OpenDbConnection(namedShard).Run(db => db.CreateTable<Robot>(overwrite:false));
+});
+
+var newRobots = NoOfRobots.Times(i => //Create 1000 Robots
+    new Robot { Id=i, Name="R2D"+i, CreatedDate=DateTime.UtcNow, CellCount=DateTime.Now.ToUnixTimeMs() % 100000 });
+
+foreach (var newRobot in newRobots) 
+{
+    using (IDbConnection db = dbFactory.OpenDbConnection()) //Open Connection to Master DB 
+    {
+        db.Insert(new MasterRecord { Id = Guid.NewGuid(), RobotId = newRobot.Id, RobotName = newRobot.Name });
+        using (IDbConnection robotShard = dbFactory.OpenDbConnection("robots-shard"+newRobot.Id % NoOfShards)) //Shard
+        {
+            robotShard.Insert(newRobot);
+        }
+    }
+}
+```
+
+Using the [SQLite Manager](https://addons.mozilla.org/en-US/firefox/addon/sqlite-manager/?src=search) Firefox extension
+we can peek at one of the created shards to see 100 Robots in each shard. This is the dump of `robots-shard0.sqlite`:
+
+![Data dump of Robot Shard #1](http://mono.servicestack.net/files/robots-shard0.png)
+
+As expected each shard has every 10th robot inside.
 
 ## Code-first Customer & Order example with complex types on POCO as text blobs
 
@@ -811,36 +1288,9 @@ var track = db.SingleById<Track>(1);
 var tracks = db.SelectByIds<Track>(new[]{ 1,2,3 });
 ```
 
-
-# Limitations 
-
-For simplicity, and to be able to have the same POCO class persisted in db4o, memcached, redis or on the filesystem 
-(i.e. providers included in ServiceStack), each model must have a single primary key, by convention OrmLite expects it
-to be `Id` although you use `[Alias("DbFieldName")]` attribute it map it to a column with a different name or use 
-the `[PrimaryKey]` attribute to tell OrmLite to use a different property for the primary key.
-
-You can still `SELECT` from these tables, you will just be unable to make use of APIs that rely on it, e.g. 
-`Update` or `Delete` where the filter is implied (i.e. not specified), all the APIs that end with `ById`, etc.
-
-### Workaround single Primary Key limitation
-A potential workaround to support tables with multiple primary keys is to create an auto generated `Id` property that 
-returns a unique value based on all the primary key fields, e.g:
-
-```csharp
-public class OrderDetail
-{
-	public string Id { get { return this.OrderId + "/" + this.ProductId; } }
-	
-	public int OrderId { get; set; }
-	public int ProductId { get; set; }
-	public decimal UnitPrice { get; set; }
-	public short Quantity { get; set; }
-	public double Discount { get; set; }
-}
-```
-
 ### Ignoring DTO Properties
-You may use the [Ignore] attribute to denote DTO properties that are not fields in the table. This will force the SQL generation to ignore that property.
+
+You may use the `[Ignore]` attribute to denote DTO properties that are not fields in the table. This will force the SQL generation to ignore that property.
 
 # More Examples 
 
@@ -1025,7 +1475,58 @@ And with access to raw sql when you need it - the database is your oyster :)
 
     Assert.That(db.Select<Shipper>(), Has.Count.EqualTo(0));
     Assert.That(db.Select<ShipperType>(), Has.Count.EqualTo(0));
-```  
+```
+
+# Limitations 
+
+For simplicity, and to be able to have the same POCO class persisted in db4o, memcached, redis or on the filesystem (i.e. providers included in ServiceStack), each model must have a single primary key, by convention OrmLite expects it
+to be `Id` although you use `[Alias("DbFieldName")]` attribute it map it to a column with a different name or use 
+the `[PrimaryKey]` attribute to tell OrmLite to use a different property for the primary key.
+
+You can still `SELECT` from these tables, you will just be unable to make use of APIs that rely on it, e.g. 
+`Update` or `Delete` where the filter is implied (i.e. not specified), all the APIs that end with `ById`, etc.
+
+### Workaround single Primary Key limitation
+
+A potential workaround to support tables with multiple primary keys is to create an auto generated `Id` property that 
+returns a unique value based on all the primary key fields, e.g:
+
+```csharp
+public class OrderDetail
+{
+  public string Id { get { return this.OrderId + "/" + this.ProductId; } }
+  
+  public int OrderId { get; set; }
+  public int ProductId { get; set; }
+  public decimal UnitPrice { get; set; }
+  public short Quantity { get; set; }
+  public double Discount { get; set; }
+}
+```
+
+## Oracle Provider Notes
+
+The Oracle provider requires an installation of Oracle's ODP.NET. It has been tested with Oracle 11g but should work with 10g and perhaps even older versions. It has not been tested with Oracle 12c and does not support any new 12c features such as AutoIncrement keys. It also does not support the new Oracle fully-managed client.
+
+By default the Oracle provider stores Guids in the database as character strings and when generating SQL it quotes only table and column names that are reserved words in Oracle. That requires that you use the same quoting if you code your own SQL. Both of these options can be overridden, but overriding them will cause problems: the provider can store Guids as raw(16) but it cannot read them.
+
+The Oracle provider uses Oracle sequences to implement AutoIncrement columns and it queries the sequence to get a new value in a separate database call. You can override the automatically generated sequence name with a
+
+  [Sequence("name")]
+
+attribute on a field. The Sequence attribute implies [AutoIncrement], but you can use both on the same field.
+
+Since Oracle has a very restrictive 30 character limit on names, it is strongly suggested that you use short entity class and field names or aliases, remembering that indexes and foreign keys get compound names. If you use long names, the provider will squash them to make them compliant with the restriction. The algorithm used is to remove all vowels ("aeiouy") and if still too long then every fourth letter starting with the third one and finally if still too long to truncate the name. You must apply the same squashing algorithm if you are coding your own SQL.  
+
+The previous version of ServiceStack.OrmLite.Oracle used System.Data.OracleClient to talk to the database. Microsoft has deprecated that client, but it does still mostly work if you construct the Oracle provider like this:
+
+    OracleOrmLiteDialectProvider.Instance = new OracleOrmLiteDialectProvider(
+    compactGuid: false,
+    quoteNames: false,
+    clientProvider: OracleOrmLiteDialectProvider.MicrosoftProvider); 
+
+DateTimeOffset fields and, in locales that use a comma to separate the fractional part of a floating point number, some aspects of using floating point numbers, do not work with System.Data.OracleClient.
+
 
 # Community Resources
 
