@@ -59,7 +59,8 @@ To give you a flavour here are some examples with their partial SQL output (usin
 
 ```csharp
 int agesAgo = DateTime.Today.AddYears(-20).Year;
-db.Select<Author>(q => q.Birthday >= new DateTime(agesAgo, 1, 1) && q.Birthday <= new DateTime(agesAgo, 12, 31));
+db.Select<Author>(q => q.Birthday >= new DateTime(agesAgo, 1, 1) 
+                    && q.Birthday <= new DateTime(agesAgo, 12, 31));
 ```
 
 **WHERE (("Birthday" >= '1992-01-01 00:00:00.000') AND ("Birthday" <= '1992-12-31 00:00:00.000'))**
@@ -126,7 +127,8 @@ int maxAgeUnder50 = db.Scalar<Person, int>(x => Sql.Max(x.Age), x => x.Age < 50)
 **SELECT Max("Age") FROM "Person" WHERE ("Age" < 50)**
 
 ```csharp
-int peopleOver40 = db.Scalar<int>(db.From<Person>().Select(Sql.Count("*")).Where(q => q.Age > 40));
+int peopleOver40 = db.Scalar<int>(
+    db.From<Person>().Select(Sql.Count("*")).Where(q => q.Age > 40));
 ```
 
 **SELECT COUNT(*) FROM "Person" WHERE ("Age" > 40)**
@@ -229,39 +231,44 @@ db.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName);
 **UPDATE "Person" SET "FirstName" = 'JJ'**
 
 ```csharp
-db.UpdateOnly(new Person { FirstName = "JJ", Age = 12 }, p => new { p.FirstName, p.Age });
+db.UpdateOnly(new Person { FirstName = "JJ", Age = 12 }, 
+    onlyFields: p => new { p.FirstName, p.Age });
 ```
 **UPDATE "Person" SET "FirstName" = 'JJ', "Age" = 12**
 
 When present, the second expression is used as the where filter:
 ```csharp
-db.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName, p => p.LastName == "Hendrix");
+db.UpdateOnly(new Person { FirstName = "JJ" }, 
+    onlyFields: p => p.FirstName, 
+    where: p => p.LastName == "Hendrix");
 ```
 **UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("LastName" = 'Hendrix')**
 
-Instead of using the expression filters above you can choose to use an ExpressionVisitor builder which provides more 
-flexibility when you want to programatically construct the update statement:
+Instead of using the expression filters above you can choose to use an ExpressionVisitor builder which provides more flexibility when you want to programatically construct the update statement:
 
 ```csharp
-db.UpdateOnly(new Person { FirstName = "JJ", LastName = "Hendo" }, ev => ev.Update(p => p.FirstName));
+db.UpdateOnly(new Person { FirstName = "JJ", LastName = "Hendo" }, 
+  onlyFields: q => q.Update(p => p.FirstName));
 ```
 **UPDATE "Person" SET "FirstName" = 'JJ'**
 
 ```csharp
-db.UpdateOnly(new Person { FirstName = "JJ" }, ev => ev.Update(p => p.FirstName).Where(x => x.FirstName == "Jimi"));
+db.UpdateOnly(new Person { FirstName = "JJ" }, 
+  onlyFields: q => 1.Update(p => p.FirstName).Where(x => x.FirstName == "Jimi"));
 ```
 **UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("LastName" = 'Hendrix')**
 
-For the ultimate flexibility we also provide un-typed, string-based expressions. Use the `.Params()` extension method
-escape parameters (inspired by [massive](https://github.com/robconery/massive)):
+For the ultimate flexibility we also provide un-typed, string-based expressions. Use the `.Params()` extension method escape parameters (inspired by [massive](https://github.com/robconery/massive)):
 
 ```csharp
-db.Update<Person>(set: "FirstName = {0}".Params("JJ"), where: "LastName = {0}".Params("Hendrix"));
+db.Update<Person>(set: "FirstName = {0}".Params("JJ"), 
+                where: "LastName = {0}".Params("Hendrix"));
 ```
 Even the Table name can be a string so you perform the same update without requiring the Person model at all:
 
 ```csharp
-db.Update(table: "Person", set: "FirstName = {0}".Params("JJ"), where: "LastName = {0}".Params("Hendrix"));
+db.Update(table: "Person", set: "FirstName = {0}".Params("JJ"), 
+          where: "LastName = {0}".Params("Hendrix"));
 ```
 **UPDATE "Person" SET FirstName = 'JJ' WHERE LastName = 'Hendrix'**
 
@@ -277,7 +284,7 @@ db.Insert(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 2
 But do provide an API that takes an Expression Visitor for the rare cases you don't want to insert every field
 
 ```csharp
-db.InsertOnly(new Person { FirstName = "Amy" }, ev => ev.Insert(p => new { p.FirstName }));
+db.InsertOnly(new Person { FirstName = "Amy" }, q => q.Insert(p => new {p.FirstName} ));
 ```
 **INSERT INTO "Person" ("FirstName") VALUES ('Amy')**
 
@@ -290,7 +297,7 @@ db.Delete<Person>(p => p.Age == 27);
 
 Or an Expression Visitor:
 ```csharp
-db.Delete<Person>(ev => ev.Where(p => p.Age == 27));
+db.Delete<Person>(q => q.Where(p => p.Age == 27));
 ```
 
 **DELETE FROM "Person" WHERE ("Age" = 27)**
@@ -309,7 +316,7 @@ db.Delete(table: "Person", where: "Age = {0}".Params(27));
 
 # Features
 
-OrmLite's goal is to provide a convenient, DRY, RDBMS-agnostic typed wrapper that retains a high affinity with SQL, exposing an intuitive API that generates predictable SQL and straight-forward mapping to clean disconnected POCO's. This approach makes easier to reason-about your data access as it's obvious what SQL is getting executed at what time, mitigating unexpected behavior, implicit N+1 queries and leaky data access prevalent in Heavy ORMs.
+OrmLite's goal is to provide a convenient, DRY, RDBMS-agnostic typed wrapper that retains a high affinity with SQL, exposing an intuitive API that generates predictable SQL and straight-forward mapping to clean, disconnected (DTO-friendly) POCO's. This approach makes easier to reason-about your data access as it's obvious what SQL is getting executed at what time, mitigating unexpected behavior, implicit N+1 queries and leaky data access prevalent in Heavy ORMs.
 
 Whilst OrmLite aims to provide a light-weight typed wrapper around SQL, it offers a number of convenient features that makes working with RDBMS's a clean and enjoyable experience:
 
