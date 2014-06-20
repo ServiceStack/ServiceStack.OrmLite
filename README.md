@@ -322,76 +322,83 @@ The API is minimal, providing basic shortcuts for the primitive SQL statements:
 
 ### Notes
 
-Extension methods hang off the implementation agnostic ADO.NET `IDbConnection`.
+OrmLite Extension methods hang off ADO.NET's `IDbConnection`.
 
 `CreateTable<T>` and `DropTable<T>` create and drop tables based on a classes type definition (only public properties used).
 
-By default Selection methods use parameterized SQL whilst any selection methods ending with **Fmt** allow you to construct Sql using C# `string.Format()` syntax.
+By default the Select API's use parameterized SQL whilst any selection methods ending with **Fmt** allow you to construct Sql using C# `string.Format()` syntax.
 
 If your SQL doesn't start with a **SELECT** statement, it is assumed a WHERE clause is being provided, e.g:
 
 ```csharp
-var tracks = db.SelectFmt<Track>("Artist = {0} AND Album = {1}", "Nirvana", "Heart Shaped Box");
+var tracks = db.SelectFmt<Track>("Artist = {0} AND Album = {1}", 
+  "Nirvana", 
+  "Heart Shaped Box");
 ```
 
-The same results could also be fetched with:
+Which is equivalent to:
 
 ```csharp
-var tracks = db.SelectFmt<Track>("select * from track WHERE Artist={0} AND Album={1}", "Nirvana", "Heart Shaped Box");
+var tracks = db.SelectFmt<Track>("SELECT * FROM track WHERE Artist={0} AND Album={1}", 
+    "Nirvana", 
+    "Heart Shaped Box");
 ```
 
-**Select** returns multiple records 
+**Select** returns multiple records: 
 
 ```csharp
 List<Track> tracks = db.Select<Track>()
 ```
 
-**Single** returns a single record. Alias: `First`  
+**Single** returns a single record:
 
 ```csharp
-Track track = db.SingleFmt<Track>("RefId = {0}", refId)
+Track track = db.Single<Track>(q => q.RefId == refId)
 ```
 
-**Dictionary** returns a Dictionary made from the first two columns. Alias: `GetDictionary`
+**Dictionary** returns a Dictionary made from the first two columns:
 
 ```csharp
-Dictionary<int, string> trackIdNamesMap = db.Dictionary<int, string>("select Id, Name from Track")
+Dictionary<int, string> trackIdNamesMap = db.Dictionary<int, string>(
+    "select Id, Name from Track")
 ```
 
-**Lookup** returns an `Dictionary<K, List<V>>` made from the first two columns. Alias: `GetLookup`
+**Lookup** returns an `Dictionary<K, List<V>>` made from the first two columns:
 
 ```csharp
-Dictionary<int, List<string>> albumTrackNames = db.Lookup<int, string>("select AlbumId, Name from Track")
+Dictionary<int, List<string>> albumTrackNames = db.Lookup<int, string>(
+    "select AlbumId, Name from Track")
 ```
 
-**List** returns a List of first column values. Alias: `GetList`
+**Column** returns a List of first column values:
 
 ```csharp
 List<string> trackNames = db.Column<string>("select Name from Track")
 ```
 
-**HashSet** returns a HashSet of distinct first column values. Alias: `GetHashSet`
+**HashSet** returns a HashSet of distinct first column values:
 
 ```csharp    
 HashSet<string> uniqueTrackNames = db.ColumnDistinct<string>("select Name from Track")
 ```
 
-**Scalar** returns a single scalar value. Alias: `GetScalar`
+**Scalar** returns a single scalar value:
 
 ```csharp
 var trackCount = db.Scalar<int>("select count(*) from Track")
 ```
 
-Anonymous types passed into **Where** are treated like an **AND** filter.
+Anonymous types passed into **Where** are treated like an **AND** filter:
 
 ```csharp
 var track3 = db.Where<Track>(new { AlbumName = "Throwing Copper", TrackNo = 3 })
 ```
 
-**Select** statements take in parameterized SQL using properties from the supplied anonymous type (if any)
+**Select** statements take in parameterized SQL using properties from the supplied anonymous type (if any):
 
 ```csharp
-var track3 = db.Select<Track>("select * from Track Where AlbumName = @album and TrackNo = @trackNo", 
+var track3 = db.Select<Track>(
+  "select * from Track Where AlbumName = @album and TrackNo = @trackNo", 
   new { album = "Throwing Copper", trackNo = 3 })
 ```
 
@@ -404,7 +411,7 @@ var tracks = db.SelectByIds<Track>(new[]{ 1,2,3 });
 
 ### Other Notes
 
- - All **Insert**, **Update**, and **Delete** methods take multiple params, while `Insert`, `UpdateAll` and `DeleteAll` take IEnumerables.
+ - All **Insert**, **Update**, and **Delete** methods take multiple params, while `InsertAll`, `UpdateAll` and `DeleteAll` take IEnumerables.
  - `Save` and `SaveAll` will Insert if no record with **Id** exists, otherwise it Updates. 
  - Methods containing the word **Each** return an IEnumerable<T> and are lazily loaded (i.e. non-buffered).
 
