@@ -64,12 +64,14 @@ namespace ServiceStack.OrmLite.Tests
         {
             public int Id { get; set; }
             public string Name { get; set; }
+            public string CustomerName { get; set; }
             public int CustomerAddressId { get; set; }
             public string AddressLine1 { get; set; }
             public string City { get; set; }
             public int OrderId { get; set; }
             public string LineItem { get; set; }
             public decimal Cost { get; set; }
+            public decimal OrderCost { get; set; }
             public string CountryCode { get; set; }
         }
 
@@ -366,7 +368,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        public void Does_populate_PrimaryKey_ids_based_on_property_convention()
+        public void Does_populate_custom_columns_based_on_property_convention()
         {
             // Reset auto ids
             db.DropAndCreateTable<Order>();
@@ -385,6 +387,12 @@ namespace ServiceStack.OrmLite.Tests
             var orderIds = results.ConvertAll(x => x.OrderId);
             Assert.That(orderIds, Is.EquivalentTo(new[] { 1, 2 }));
 
+            var customerNames = results.ConvertAll(x => x.CustomerName);
+            Assert.That(customerNames, Is.EquivalentTo(new[] { "Customer 1", "Customer 1" }));
+
+            var orderCosts = results.ConvertAll(x => x.OrderCost);
+            Assert.That(orderCosts, Is.EquivalentTo(new[] { 1.99m, 2.99m }));
+
             var expr = db.From<Customer>()
                 .Join<Customer, CustomerAddress>()
                 .Join<Customer, Order>()
@@ -397,6 +405,12 @@ namespace ServiceStack.OrmLite.Tests
 
             orderIds = results.ConvertAll(x => x.OrderId);
             Assert.That(orderIds, Is.EquivalentTo(new[] { 2 }));
+
+            customerNames = results.ConvertAll(x => x.CustomerName);
+            Assert.That(customerNames, Is.EquivalentTo(new[] { "Customer 1" }));
+
+            orderCosts = results.ConvertAll(x => x.OrderCost);
+            Assert.That(orderCosts, Is.EquivalentTo(new[] { 2.99m }));
         }
     }
 }

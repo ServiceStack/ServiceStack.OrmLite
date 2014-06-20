@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 
@@ -154,22 +155,23 @@ namespace ServiceStack.OrmLite
 
                 if (!found)
                 {
-                    // Add support for auto mapping `{Table}Id` convention
+                    // Add support for auto mapping `{Table}{Field}` convention
                     foreach (var tableDef in tableDefs)
                     {
-                        var primaryKey = tableDef.PrimaryKey;
-                        if (primaryKey == null) continue;
-                        
-                        var tableId = tableDef.Name + primaryKey.Name;
-                        if (fieldDef.Name == tableId)
+                        var tableName = tableDef.Name;
+                        var matchingField = tableDef.FieldDefinitionsArray
+                            .FirstOrDefault(x => tableName + x.FieldName == fieldDef.Name);
+
+                        if (matchingField != null)
                         {
                             if (sbSelect.Length > 0)
                                 sbSelect.Append(", ");
 
                             sbSelect.AppendFormat("{0}.{1} as {2}",
                                 SqlTable(tableDef.ModelName),
-                                primaryKey.GetQuotedName(DialectProvider),
+                                matchingField.GetQuotedName(DialectProvider),
                                 fieldDef.Name);
+                            
                             break;
                         }
                     }
