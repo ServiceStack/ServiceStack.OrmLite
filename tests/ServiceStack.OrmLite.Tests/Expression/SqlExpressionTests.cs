@@ -221,17 +221,24 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 db.DropAndCreateTable<LetterStat>();
 
                 var letterFrequency = new LetterFrequency { Letter = "A" };
-                letterFrequency.Id = (int)db.Insert<LetterFrequency>(letterFrequency, true);
+                letterFrequency.Id = (int)db.Insert(letterFrequency, true);
 
-                db.Insert<LetterStat>(new LetterStat { Letter = "A", LetterFrequencyId = letterFrequency.Id, Weighting = 1 });
+                db.Insert(new LetterStat { Letter = "A", LetterFrequencyId = letterFrequency.Id, Weighting = 1 });
 
                 var expr = db.From<LetterFrequency>()
                     .Join<LetterFrequency, LetterStat>()
                     .Where<LetterStat>(x => x.Id > 0);
 
-                var count = db.SqlScalar<int>(expr.ToCountStatement());
+                var count = db.SqlScalar<long>(expr.ToCountStatement());
 
                 Assert.That(count, Is.GreaterThan(0));
+
+                count = db.Count<LetterFrequency>(q => q.Join<LetterStat>().Where<LetterStat>(x => x.Id > 0));
+
+                Assert.That(count, Is.GreaterThan(0));
+
+                Assert.That(
+                    db.Exists<LetterFrequency>(q => q.Join<LetterStat>().Where<LetterStat>(x => x.Id > 0)));
             }
         }
     }

@@ -518,7 +518,7 @@ namespace ServiceStack.OrmLite
 
         public virtual string ToCountStatement()
         {
-            return DialectProvider.ToCountStatement(modelDef.ModelType, WhereExpression, null);
+            return "SELECT COUNT(*)" + BodyExpression;
         }
 
         public string SelectExpression

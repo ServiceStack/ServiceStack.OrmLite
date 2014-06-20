@@ -415,35 +415,6 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecLongScalar();
         }
 
-        public virtual string ToCountStatement(Type fromTableType, string sqlFilter, params object[] filterParams)
-        {
-            var sql = new StringBuilder();
-            const string SelectStatement = "SELECT ";
-            var modelDef = fromTableType.GetModelDefinition();
-            var isFullSelectStatement =
-                !string.IsNullOrEmpty(sqlFilter)
-                && sqlFilter.TrimStart().StartsWith(SelectStatement, StringComparison.OrdinalIgnoreCase);
-
-            if (isFullSelectStatement) 
-                return (filterParams != null ? sqlFilter.SqlFmt(filterParams) : sqlFilter);
-
-            sql.AppendFormat("SELECT {0} FROM {1}", "COUNT(*)",
-                             GetQuotedTableName(modelDef));
-
-            if (!string.IsNullOrEmpty(sqlFilter))
-            {
-                sqlFilter = filterParams != null ? sqlFilter.SqlFmt(filterParams) : sqlFilter;
-                if ((!sqlFilter.StartsWith("ORDER ", StringComparison.OrdinalIgnoreCase)
-                    && !sqlFilter.StartsWith("LIMIT ", StringComparison.OrdinalIgnoreCase))
-                    && (!sqlFilter.StartsWith("WHERE ", StringComparison.OrdinalIgnoreCase)))
-                {
-                    sql.Append(" WHERE ");
-                }
-                sql.Append(" " + sqlFilter);
-            }
-            return sql.ToString();
-        }
-
         // Fmt
         public virtual string ToSelectStatement(Type tableType, string sqlFilter, params object[] filterParams)
         {
