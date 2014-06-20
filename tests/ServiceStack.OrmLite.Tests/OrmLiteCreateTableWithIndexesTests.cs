@@ -18,10 +18,17 @@ namespace ServiceStack.OrmLite.Tests
 
 				var sql = OrmLiteConfig.DialectProvider.ToCreateIndexStatements(typeof(ModelWithIndexFields)).Join();
 
-                SuppressIfOracle("Assert comparisons don't work with Oracle provider because it had to squash names to satisfy length restrictions");
+			    var indexName = "idx_modelwithindexfields_name";
+			    var uniqueName = "uidx_modelwithindexfields_uniquename";
 
-                Assert.IsTrue(sql.Contains("idx_modelwithindexfields_name"));
-				Assert.IsTrue(sql.Contains("uidx_modelwithindexfields_uniquename"));
+			    if (Dialect == Dialect.Oracle)
+			    {
+			        indexName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(indexName);
+                    uniqueName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(uniqueName);
+			    }
+
+                Assert.IsTrue(sql.Contains(indexName));
+				Assert.IsTrue(sql.Contains(uniqueName));
 			}
 		}
 
@@ -36,10 +43,17 @@ namespace ServiceStack.OrmLite.Tests
 
 				var sql = OrmLiteConfig.DialectProvider.ToCreateIndexStatements(typeof(ModelWithCompositeIndexFields)).Join();
 
-                SuppressIfOracle("Assert comparisons don't work with Oracle provider because it had to squash names to satisfy length restrictions");
+                var indexName = "idx_modelwithcompositeindexfields_name";
+                var compositeName = "idx_modelwithcompositeindexfields_composite1_composite2";
 
-                Assert.IsTrue(sql.Contains("idx_modelwithcompositeindexfields_name"));
-				Assert.IsTrue(sql.Contains("idx_modelwithcompositeindexfields_composite1_composite2"));
+                if (Dialect == Dialect.Oracle)
+                {
+                    indexName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(indexName);
+                    compositeName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(compositeName);
+                }
+
+                Assert.IsTrue(sql.Contains(indexName));
+				Assert.IsTrue(sql.Contains(compositeName));
 			}
 		}
 
@@ -54,11 +68,18 @@ namespace ServiceStack.OrmLite.Tests
 
                 var sql = OrmLiteConfig.DialectProvider.ToCreateIndexStatements(typeof(ModelWithNamedCompositeIndex)).Join();
 
-                SuppressIfOracle("Assert comparisons don't work with Oracle provider because it had to squash names to satisfy length restrictions");
+                var indexName = "idx_modelwithnamedcompositeindex_name";
+                var compositeName = "uidx_modelwithnamedcompositeindexfields_composite1_composite2";
 
-                Assert.IsTrue(sql.Contains("idx_modelwithnamedcompositeindex_name"));
+                if (Dialect == Dialect.Oracle)
+                {
+                    indexName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(indexName);
+                    compositeName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(compositeName);
+                }
+
+                Assert.IsTrue(sql.Contains(indexName));
                 Assert.IsTrue(sql.Contains("custom_index_name"));
-                Assert.IsFalse(sql.Contains("uidx_modelwithnamedcompositeindexfields_composite1_composite2"));
+                Assert.IsFalse(sql.Contains(compositeName));
             }
         }
 

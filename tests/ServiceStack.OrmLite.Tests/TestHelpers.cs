@@ -19,7 +19,8 @@ namespace ServiceStack.OrmLite.Tests
                 .Replace("`", "")
                 .Replace("_", "")
                 .Replace(":", "@")   //postgresql
-                .Replace("\n", " "); 
+                .Replace("\n", " ")
+                .TrimEnd(); 
         }
     }
 }
