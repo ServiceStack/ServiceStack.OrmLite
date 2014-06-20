@@ -314,6 +314,101 @@ db.Delete(table: "Person", where: "Age = {0}".Params(27));
 
 **DELETE FROM "Person" WHERE Age = 27**
 
+# API Overview
+
+The API is minimal, providing basic shortcuts for the primitive SQL statements:
+
+[![OrmLite API](http://mono.servicestack.net/files/ormlite-api.png)](http://www.servicestack.net/files/ormlite-api.png)
+
+### Notes
+
+Extension methods hang off the implementation agnostic ADO.NET `IDbConnection`.
+
+`CreateTable<T>` and `DropTable<T>` create and drop tables based on a classes type definition (only public properties used).
+
+By default Selection methods use parameterized SQL whilst any selection methods ending with **Fmt** allow you to construct Sql using C# `string.Format()` syntax.
+
+If your SQL doesn't start with a **SELECT** statement, it is assumed a WHERE clause is being provided, e.g:
+
+```csharp
+var tracks = db.SelectFmt<Track>("Artist = {0} AND Album = {1}", "Nirvana", "Heart Shaped Box");
+```
+
+The same results could also be fetched with:
+
+```csharp
+var tracks = db.SelectFmt<Track>("select * from track WHERE Artist={0} AND Album={1}", "Nirvana", "Heart Shaped Box");
+```
+
+**Select** returns multiple records 
+
+```csharp
+List<Track> tracks = db.Select<Track>()
+```
+
+**Single** returns a single record. Alias: `First`  
+
+```csharp
+Track track = db.SingleFmt<Track>("RefId = {0}", refId)
+```
+
+**Dictionary** returns a Dictionary made from the first two columns. Alias: `GetDictionary`
+
+```csharp
+Dictionary<int, string> trackIdNamesMap = db.Dictionary<int, string>("select Id, Name from Track")
+```
+
+**Lookup** returns an `Dictionary<K, List<V>>` made from the first two columns. Alias: `GetLookup`
+
+```csharp
+Dictionary<int, List<string>> albumTrackNames = db.Lookup<int, string>("select AlbumId, Name from Track")
+```
+
+**List** returns a List of first column values. Alias: `GetList`
+
+```csharp
+List<string> trackNames = db.Column<string>("select Name from Track")
+```
+
+**HashSet** returns a HashSet of distinct first column values. Alias: `GetHashSet`
+
+```csharp    
+HashSet<string> uniqueTrackNames = db.ColumnDistinct<string>("select Name from Track")
+```
+
+**Scalar** returns a single scalar value. Alias: `GetScalar`
+
+```csharp
+var trackCount = db.Scalar<int>("select count(*) from Track")
+```
+
+Anonymous types passed into **Where** are treated like an **AND** filter.
+
+```csharp
+var track3 = db.Where<Track>(new { AlbumName = "Throwing Copper", TrackNo = 3 })
+```
+
+**Select** statements take in parameterized SQL using properties from the supplied anonymous type (if any)
+
+```csharp
+var track3 = db.Select<Track>("select * from Track Where AlbumName = @album and TrackNo = @trackNo", 
+  new { album = "Throwing Copper", trackNo = 3 })
+```
+
+SingleById(s), SelectById(s), etc provide strong-typed convenience methods to fetch by a Table's **Id** primary key field.
+
+```csharp
+var track = db.SingleById<Track>(1);
+var tracks = db.SelectByIds<Track>(new[]{ 1,2,3 });
+```
+
+### Other Notes
+
+ - All **Insert**, **Update**, and **Delete** methods take multiple params, while `Insert`, `UpdateAll` and `DeleteAll` take IEnumerables.
+ - `Save` and `SaveAll` will Insert if no record with **Id** exists, otherwise it Updates. 
+ - Methods containing the word **Each** return an IEnumerable<T> and are lazily loaded (i.e. non-buffered).
+
+
 # Features
 
 OrmLite's goal is to provide a convenient, DRY, RDBMS-agnostic typed wrapper that retains a high affinity with SQL, exposing an intuitive API that generates predictable SQL and straight-forward mapping to clean, disconnected (DTO-friendly) POCO's. This approach makes easier to reason-about your data access as it's obvious what SQL is getting executed at what time, mitigating unexpected behavior, implicit N+1 queries and leaky data access prevalent in Heavy ORMs.
@@ -418,13 +513,13 @@ The mapping also includes a fallback for referencing fully-qualified names in th
 Seeing how the SqlExpression is constructed, joined and mapped, we can take a look at a more advanced example to showcase more of the new API's available:
 
 ```csharp
-List<FullCustomerInfo> rows = db.Select<FullCustomerInfo>(   // Map results to FullCustomerInfo POCO
-  db.From<Customer>()                                        // Create typed Customer SqlExpression
-    .LeftJoin<CustomerAddress>()                             // Implict left join with base table
-    .Join<Customer, Order>((c,o) => c.Id == o.CustomerId)    // Explicit join and condition
-    .Where(c => c.Name == "Customer 1")                      // Implicit condition on base table
-    .And<Order>(o => o.Cost < 2)                             // Explicit condition on joined Table
-    .Or<Customer,Order>((c,o) => c.Name == o.LineItem));     // Explicit condition with joined Tables
+List<FullCustomerInfo> rows = db.Select<FullCustomerInfo>(  // Map results to FullCustomerInfo POCO
+  db.From<Customer>()                                       // Create typed Customer SqlExpression
+    .LeftJoin<CustomerAddress>()                            // Implict left join with base table
+    .Join<Customer, Order>((c,o) => c.Id == o.CustomerId)   // Explicit join and condition
+    .Where(c => c.Name == "Customer 1")                     // Implicit condition on base table
+    .And<Order>(o => o.Cost < 2)                            // Explicit condition on joined Table
+    .Or<Customer,Order>((c,o) => c.Name == o.LineItem));    // Explicit condition with joined Tables
 ```
 
 The comments next to each line document each Type of API used. Some of the new API's introduced in this example include:
@@ -1186,106 +1281,6 @@ Notice the POCO types are stored in the [very fast](http://mono.servicestack.net
 and [Versatile](http://mono.servicestack.net/mythz_blog/?p=314) 
 [JSV Format](https://github.com/ServiceStack/ServiceStack.Text/wiki/JSV-Format) which although hard to do - 
 is actually more compact, human and parser-friendly than JSON :)
-
-# API Overview
-
-The API is minimal, providing basic shortcuts for the primitive SQL statements:
-
-[![OrmLite API](http://mono.servicestack.net/files/ormlite-api.png)](http://www.servicestack.net/files/ormlite-api.png)
-
-Nearly all extension methods hang off the implementation agnostic `IDbCommand`.
-
-`CreateTable<T>` and `DropTable<T>` create and drop tables based on a classes type definition (only public properties used).
-
-For a one-time use of a connection, you can query straight of the `IDbConnectionFactory` with:
-
-```csharp
-var customers = db.Where<Customer>(new { Age = 30 });
-```
-
-The **Select** methods allow you to construct Sql using C# `string.Format()` syntax.
-If your SQL doesn't start with a **SELECT** statement, it is assumed a WHERE clause is being provided, e.g:
-
-```csharp
-var tracks = db.SelectFmt<Track>("Artist = {0} AND Album = {1}", "Nirvana", "Heart Shaped Box");
-```
-
-The same results could also be fetched with:
-
-```csharp
-var tracks = db.SelectFmt<Track>("select * from track WHERE Artist={0} AND Album={1}", "Nirvana", "Heart Shaped Box");
-```
-
-**Select** returns multiple records 
-
-```csharp
-List<Track> tracks = db.Select<Track>()
-```
-
-**Single** returns a single record. Alias: `First`  
-
-```csharp
-Track track = db.SingleFmt<Track>("RefId = {0}", refId)
-```
-
-**Dictionary** returns a Dictionary made from the first two columns. Alias: `GetDictionary`
-
-```csharp
-Dictionary<int, string> trackIdNamesMap = db.Dictionary<int, string>("select Id, Name from Track")
-```
-
-**Lookup** returns an `Dictionary<K, List<V>>` made from the first two columns. Alias: `GetLookup`
-
-```csharp
-Dictionary<int, List<string>> albumTrackNames = db.Lookup<int, string>("select AlbumId, Name from Track")
-```
-
-**List** returns a List of first column values. Alias: `GetList`
-
-```csharp
-List<string> trackNames = db.Column<string>("select Name from Track")
-```
-
-**HashSet** returns a HashSet of distinct first column values. Alias: `GetHashSet`
-
-```csharp    
-HashSet<string> uniqueTrackNames = db.ColumnDistinct<string>("select Name from Track")
-```
-
-**Scalar** returns a single scalar value. Alias: `GetScalar`
-
-```csharp
-var trackCount = db.Scalar<int>("select count(*) from Track")
-```
-
-All **Insert**, **Update**, and **Delete** methods take multiple params, while `Insert`, `UpdateAll` and `DeleteAll` take IEnumerables.
-**GetLastInsertId** returns the last inserted records auto incremented primary key.
-
-`Save` and `SaveAll` will Insert if no record with **Id** exists, otherwise it Updates. 
-Both take multiple items, optimized to perform a single read to check for existing records and are executed within a sinlge transaction.
-
-Methods containing the word **Each** return an IEnumerable<T> and are lazily loaded (i.e. non-buffered).
-
-By default Selection methods use parameterized SQL whilst any selection methods ending with **Fmt** do not.
-Anonymous types passed into **Where** are treated like an **AND** filter.
-
-```csharp
-var track3 = db.Where<Track>(new { AlbumName = "Throwing Copper", TrackNo = 3 })
-```
-
-**Select** statements take in parameterized SQL using properties from the supplied anonymous type (if any)
-
-```csharp
-var track3 = db.Select<Track>("select * from Track Where AlbumName = @album and TrackNo = @trackNo", 
-	new { album = "Throwing Copper", trackNo = 3 })
-```
-
-SingleById(s), SelectById(s), etc provide strong-typed convenience methods to fetch by a Table's **Id** primary key field.
-
-```csharp
-var track = db.SingleById<Track>(1);
-var tracks = db.SelectByIds<Track>(new[]{ 1,2,3 });
-```
 
 ### Ignoring DTO Properties
 
