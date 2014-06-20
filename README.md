@@ -38,13 +38,13 @@ Effectively this allows you to create a table from any POCO type and it should p
    
 _Latest v4+ on NuGet is a commercial release with [free quotas](https://servicestack.net/download#free-quotas)._
 
-### [Docs and Downloads for older v3 BSD releases](https://github.com/ServiceStackV3/ServiceStackV3)
+#### [Docs and Downloads for older v3 BSD releases](https://github.com/ServiceStackV3/ServiceStackV3)
 
-## Copying
+### Copying
 
 Since September 2013, ServiceStack source code is available under GNU Affero General Public License/FOSS License Exception, see license.txt in the source. Alternative [commercial licensing](https://servicestack.net/ormlite) is also available.
 
-## Contributing
+### Contributing
 
 Contributors need to approve the [Contributor License Agreement](https://docs.google.com/forms/d/16Op0fmKaqYtxGL4sg7w_g-cXXyCoWjzppgkuqzOeKyk/viewform) before any code will be reviewed, see the [Contributing wiki](https://github.com/ServiceStack/ServiceStack/wiki/Contributing) for more details. 
 
@@ -343,16 +343,14 @@ To better illustrate the above query, lets expand it to the equivalent explicit 
 
 ```csharp
 SqlExpression<Customer> q = db.From<Customer>();
-q.Join<Customer,CustomerAddress>((customer,address) => customer.Id == address.CustomerId);
+q.Join<Customer,CustomerAddress>((cust,address) => cust.Id == address.CustomerId);
 
 List<Customer> dbCustomers = db.Select(q);
 ```
 
 ### Reference Conventions
 
-The above query joins together the `Customer` and `CustomerAddress` POCO's using the same relationship convention used in [OrmLite's support for References](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLite.Tests/LoadReferencesTests.cs), i.e. using the referenced table `{ParentType}Id` property convention.
-
-An example of what this looks like can be seen the POCO's below:
+The above query implicitly joins together the `Customer` and `CustomerAddress` POCO's using the same `{ParentType}Id` property convention used in [OrmLite's support for References](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLite.Tests/LoadReferencesTests.cs), e.g:
 
 ```csharp
 class Customer {
@@ -381,21 +379,17 @@ class CustomerAddress {
 }
 ```
 
-Going back to the above example: 
+The implicit relationship above allows you to use any of these equilvalent APIs to JOIN tables:
 
 ```csharp
 q.Join<CustomerAddress>();
-```
-
-Uses the implicit join in the above reference convention to expand into the equivalent explicit API: 
-
-```csharp
-q.Join<Customer,CustomerAddress>((customer,address) => customer.Id == address.CustomerId);
+q.Join<Customer,CustomerAddress>();
+q.Join<Customer,CustomerAddress>((cust,address) => cust.Id == address.CustomerId);
 ```
 
 ### Selecting multiple columns across joined tables
 
-Another behaviour implicit when selecting from a typed SqlExpression is that results are mapped to the `Customer` POCO. To change this default we just need to explicitly specify what POCO it should map to instead:
+Another implicit behaviour when selecting from a typed SqlExpression is that results are mapped to the `Customer` POCO. To change this default we just need to explicitly specify what POCO it should map to instead:
 
 ```csharp
 List<FullCustomerInfo> customers = db.Select<FullCustomerInfo>(
@@ -414,40 +408,39 @@ Rules for how results are mapped is simply each property on `FullCustomerInfo` i
 
 The mapping also includes a fallback for referencing fully-qualified names in the format: `{TableName}{FieldName}` allowing you to reference ambiguous fields, e.g:
 
-  - `CustomerId` => `Customer`.`Id`
-  - `OrderId` => `Order`.`Id`
-  - `CustomerName` => `Customer`.`Name`
-  - `OrderCost` => `Order`.`Cost`
+  - `CustomerId` => "Customer"."Id"
+  - `OrderId` => "Order"."Id"
+  - `CustomerName` => "Customer"."Name"
+  - `OrderCost` => "Order"."Cost"
 
 ### Advanced Example
 
 Seeing how the SqlExpression is constructed, joined and mapped, we can take a look at a more advanced example to showcase more of the new API's available:
 
 ```csharp
-List<FullCustomerInfo> rows = db.Select<FullCustomerInfo>( // Map results to FullCustomerInfo POCO
-  db.From<Customer>()                                      // Create typed Customer SqlExpression
-    .LeftJoin<CustomerAddress>()                           // Implict left join with base table
-    .Join<Customer, Order>((c,o) => c.Id == o.CustomerId)  // Explicit join and condition
-    .Where(c => c.Name == "Customer 1")                    // Implicit condition on base table
-    .And<Order>(o => o.Cost < 2)                           // Explicit condition on joined Table
-    .Or<Customer,Order>((c,o) => c.Name == o.LineItem));   // Explicit condition with joined Tables
+List<FullCustomerInfo> rows = db.Select<FullCustomerInfo>(   // Map results to FullCustomerInfo POCO
+  db.From<Customer>()                                        // Create typed Customer SqlExpression
+    .LeftJoin<CustomerAddress>()                             // Implict left join with base table
+    .Join<Customer, Order>((c,o) => c.Id == o.CustomerId)    // Explicit join and condition
+    .Where(c => c.Name == "Customer 1")                      // Implicit condition on base table
+    .And<Order>(o => o.Cost < 2)                             // Explicit condition on joined Table
+    .Or<Customer,Order>((c,o) => c.Name == o.LineItem));     // Explicit condition with joined Tables
 ```
 
 The comments next to each line document each Type of API used. Some of the new API's introduced in this example include:
 
-  - Usage of `LeftJoin` for LEFT JOIN'S, `RightJoin` and `FullJoin` also available
-  - Usage of `And<Table>()`, to specify a condition on a Joined table 
-  - Usage of `Or<Table1,Table2>`, to specify a condition against 2 joined tables
+  - Usage of `LeftJoin` for specifying a LEFT JOIN, `RightJoin` and `FullJoin` also available
+  - Usage of `And<Table>()`, to specify an **AND** condition on a Joined table 
+  - Usage of `Or<Table1,Table2>`, to specify an **OR** condition against 2 joined tables
 
 More code examples of References and Joined tables are available in:
 
   - [LoadReferencesTests.cs](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLite.Tests/LoadReferencesTests.cs)
   - [LoadReferencesJoinTests.cs](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLite.Tests/LoadReferencesJoinTests.cs)
 
+### Reference Support, POCO style
 
-### Support for references, POCO style
-
-OrmLite's reference support lets Store and Load related entities with the `[Reference]` attribute, e.g: 
+OrmLite lets you Store and Load related entities in separate tables using `[Reference]` attributes in primary tables in conjunction with `{Parent}Id` property convention in child tables, e.g: 
 
 ```csharp
 public class Customer
@@ -456,10 +449,10 @@ public class Customer
     public int Id { get; set; }
     public string Name { get; set; }
 
-    [Reference]
+    [Reference] // Save in CustomerAddress table
     public CustomerAddress PrimaryAddress { get; set; }
 
-    [Reference]
+    [Reference] // Save in Order table
     public List<Order> Orders { get; set; }
 }
 
@@ -467,7 +460,7 @@ public class CustomerAddress
 {
     [AutoIncrement]
     public int Id { get; set; }
-    public int CustomerId { get; set; } // `{Table}Id` convention used for parent references
+    public int CustomerId { get; set; } // `{Parent}Id` convention to reference Customer
     public string AddressLine1 { get; set; }
     public string AddressLine2 { get; set; }
     public string City { get; set; }
@@ -479,14 +472,14 @@ public class Order
 {
     [AutoIncrement]
     public int Id { get; set; }
-    public int CustomerId { get; set; } // `{Table}Id` convention used for parent references
+    public int CustomerId { get; set; } // `{Parent}Id` convention to reference Customer
     public string LineItem { get; set; }
     public int Qty { get; set; }
     public decimal Cost { get; set; }
 }
 ```
 
-This lets you save a POCO and all its entity references with `db.Save()`, e.g:
+With the above structure you can save a POCO and all its entity references with `db.Save(T,references:true)`, e.g:
 
 ```csharp
 var customer =  new Customer {
@@ -504,24 +497,23 @@ var customer =  new Customer {
 db.Save(customer, references:true);
 ```
 
-This saves the parent customer POCO in the `Customer` table, the PrimaryAddress in the `CustomerAddress` table as well as 2 Orders in the `Order` table.
+This saves the root customer POCO in the `Customer` table, its related PrimaryAddress in the `CustomerAddress` table and its 2 Orders in the `Order` table.
 
 More examples available in [LoadReferencesTests.cs](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLite.Tests/LoadReferencesTests.cs)
 
 Unlike normal complex properties, references:
 
-  - Doesn't persist as complex type blob
+  - Doesn't persist as complex type blobs
   - Doesn't impact normal querying
   - Saves and loads references independently from itself
-  - Populated references get serialized in Text serializers (only populated are visible).
-  - Data is only loaded 1-reference-level deep
-  - Reference Fields require consistent `(T)Id` naming
+  - Are serializable with Text serializers (only populated are visible).
+  - Loads related data only 1-reference-level deep
  
-Basically it provides a better story when dealing with referential data that doesn't impact the POCO's ability to be used as DTO's. 
+Basically they provides a better story when dealing with referential data that doesn't impact the POCO's ability to be used as DTO's. 
 
 ## Optimistic Concurrency
 
-Optimistic concurrency can be added to any table by adding a `ulong RowVersion { get; set; }` property, e.g:
+Optimistic concurrency can be added to any table by adding the `ulong RowVersion { get; set; }` property, e.g:
 
 ```csharp
 public class Poco
@@ -569,9 +561,9 @@ db.DeleteById<Poco>(id:updatedRow.Id, rowversion:updatedRow.RowVersion)
 
 ### Exec, Result and String Filters
 
-OrmLite's core Exec functions makes it possible to inject a custom managed exec function where you can inject your own behavior, tracing, profiling, etc.
+OrmLite's core Exec filters makes it possible to inject your own behavior, tracing, profiling, etc.
 
-It's useful in situations when you want to use SqlServer in production but use an `in-memory` Sqlite database in tests and you want to emulate any missing SQL Server Stored Procedures in code:
+It's useful in situations like wanting to use SqlServer in production but use an `in-memory` Sqlite database in tests and being able to emulate any missing SQL Server Stored Procedures in code:
 
 ```csharp
 public class MockStoredProcExecFilter : OrmLiteExecFilter
@@ -602,7 +594,7 @@ using (var db = OpenDbConnection())
 }
 ```
 
-Results filters also makes it trivial to implement the Capture filter which allows you to capture SQL Statements without running them, e.g:
+Results filters makes it trivial to implement the `CaptureSqlFilter` which allows you to capture SQL Statements without running them, e.g:
 
 ```csharp
 public class CaptureSqlFilter : OrmLiteResultsFilter
@@ -622,7 +614,7 @@ public class CaptureSqlFilter : OrmLiteResultsFilter
 }
 ```
 
-That can now wrap around existing database calls to capture, defer or print generated SQL, e.g:
+Which can be used to wrap around existing database calls to capture, defer or print generated SQL, e.g:
 
 ```csharp
 using (var captured = new CaptureSqlFilter())
@@ -640,7 +632,7 @@ using (var db = OpenDbConnection())
 
 ## Mockable extension methods
 
-The Result Filters also lets you easily mock results return by OrmLite which it uses instead of hitting the database, typically useful in Unit Testing Services to mock OrmLite API's directly instead of using a repository, e.g:
+The Result Filters also lets you easily mock results and avoid hitting the database, typically useful in Unit Testing Services to mock OrmLite API's directly instead of using a repository, e.g:
 
 ```csharp
 using (new OrmLiteResultsFilter {
