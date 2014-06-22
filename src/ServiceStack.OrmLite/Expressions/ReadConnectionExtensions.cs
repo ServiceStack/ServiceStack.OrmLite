@@ -117,6 +117,14 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Project results from a number of joined tables into a different model
         /// </summary>
+        public static List<Into> Select<Into, From>(this IDbConnection dbConn, SqlExpression<From> expression)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Select<Into, From>(expression));
+        }
+
+        /// <summary>
+        /// Project results from a number of joined tables into a different model
+        /// </summary>
         public static List<Into> Select<Into, From>(this IDbConnection dbConn, Func<SqlExpression<From>, SqlExpression<From>> expression)
         {
             return dbConn.Exec(dbCmd => dbCmd.Select<Into, From>(expression));

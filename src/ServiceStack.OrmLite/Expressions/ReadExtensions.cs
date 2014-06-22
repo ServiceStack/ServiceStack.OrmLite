@@ -29,6 +29,12 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExprConvertToList<Into>(sql);
         }
 
+        internal static List<Into> Select<Into, From>(this IDbCommand dbCmd, SqlExpression<From> expression)
+        {
+            string sql = expression.SelectInto<Into>();
+            return dbCmd.ExprConvertToList<Into>(sql);
+        }
+
         internal static List<T> Select<T>(this IDbCommand dbCmd, SqlExpression<T> expression)
         {
             string sql = expression.SelectInto<T>();

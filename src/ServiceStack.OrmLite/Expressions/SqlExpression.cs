@@ -145,8 +145,13 @@ namespace ServiceStack.OrmLite
 
         public virtual SqlExpression<T> Where(string sqlFilter, params object[] filterParams)
         {
-            whereExpression = !string.IsNullOrEmpty(sqlFilter) ? sqlFilter.SqlFmt(filterParams) : string.Empty;
-            if (!string.IsNullOrEmpty(whereExpression)) whereExpression = (WhereStatementWithoutWhereString ? "" : "WHERE ") + whereExpression;
+            whereExpression = !string.IsNullOrEmpty(sqlFilter) 
+                ? sqlFilter.SqlFmt(filterParams) 
+                : string.Empty;
+            
+            if (!string.IsNullOrEmpty(whereExpression)) 
+                whereExpression = (WhereStatementWithoutWhereString ? "" : "WHERE ") + whereExpression;
+            
             return this;
         }
 
@@ -1041,17 +1046,15 @@ namespace ServiceStack.OrmLite
 
         protected virtual string GetQuotedColumnName(string memberName)
         {
-
             if (useFieldName)
             {
-                FieldDefinition fd = modelDef.FieldDefinitions.FirstOrDefault(x => x.Name == memberName);
-                string fn = fd != default(FieldDefinition) ? fd.FieldName : memberName;
+                var fd = modelDef.FieldDefinitions.FirstOrDefault(x => x.Name == memberName);
+                var fn = fd != null 
+                    ? fd.FieldName 
+                    : memberName;
                 return DialectProvider.GetQuotedColumnName(fn);
             }
-            else
-            {
-                return memberName;
-            }
+            return memberName;
         }
 
         protected string RemoveQuoteFromAlias(string exp)
