@@ -178,14 +178,19 @@ namespace ServiceStack.OrmLite
 
         public static string SqlVerifyFragment(this string sqlFragment)
         {
+            return SqlVerifyFragment(sqlFragment, IllegalSqlFragmentTokens);
+        }
+
+        public static string SqlVerifyFragment(this string sqlFragment, string[] illegalFragments)
+        {
             var fragmentToVerify = sqlFragment
                 .StripQuotedStrings('\'')
                 .StripQuotedStrings('"')
                 .ToLower();
 
-            for (int i = 0; i <= IllegalSqlFragmentTokens.Length - 1; i++)
+            for (int i = 0; i <= illegalFragments.Length - 1; i++)
             {
-                if ((fragmentToVerify.IndexOf(IllegalSqlFragmentTokens[i], StringComparison.Ordinal) >= 0))
+                if ((fragmentToVerify.IndexOf(illegalFragments[i], StringComparison.Ordinal) >= 0))
                 {
                     throw new ArgumentException("Potential illegal fragment detected: " + sqlFragment);
                 }

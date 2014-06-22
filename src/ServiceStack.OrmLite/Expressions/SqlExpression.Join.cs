@@ -20,6 +20,11 @@ namespace ServiceStack.OrmLite
             return InternalJoin("INNER JOIN", joinExpr);
         }
 
+        public SqlExpression<T> Join(Type sourceType, Type targetType, Expression joinExpr = null)
+        {
+            return InternalJoin("INNER JOIN", joinExpr, sourceType.GetModelDefinition(), targetType.GetModelDefinition());
+        }
+
         public SqlExpression<T> LeftJoin<Target>(Expression<Func<T, Target, bool>> joinExpr = null)
         {
             return InternalJoin("LEFT JOIN", joinExpr);
@@ -28,6 +33,11 @@ namespace ServiceStack.OrmLite
         public SqlExpression<T> LeftJoin<Source, Target>(Expression<Func<Source, Target, bool>> joinExpr = null)
         {
             return InternalJoin("LEFT JOIN", joinExpr);
+        }
+
+        public SqlExpression<T> LeftJoin(Type sourceType, Type targetType, Expression joinExpr = null)
+        {
+            return InternalJoin("LEFT JOIN", joinExpr, sourceType.GetModelDefinition(), targetType.GetModelDefinition());
         }
 
         public SqlExpression<T> RightJoin<Target>(Expression<Func<T, Target, bool>> joinExpr = null)
@@ -53,10 +63,16 @@ namespace ServiceStack.OrmLite
         private SqlExpression<T> InternalJoin<Source, Target>(string joinType,
             Expression<Func<Source, Target, bool>> joinExpr)
         {
-            PrefixFieldWithTableName = true;
+            var sourceDef = typeof(Source).GetModelDefinition();
+            var targetDef = typeof(Target).GetModelDefinition();
 
-            var sourceDef = typeof (Source).GetModelDefinition();
-            var targetDef = typeof (Target).GetModelDefinition();
+            return InternalJoin(joinType, joinExpr, sourceDef, targetDef);
+        }
+
+        private SqlExpression<T> InternalJoin(string joinType, 
+            Expression joinExpr, ModelDefinition sourceDef, ModelDefinition targetDef)
+        {
+            PrefixFieldWithTableName = true;
 
             var fromExpr = FromExpression;
             var sbJoin = new StringBuilder();
@@ -64,7 +80,8 @@ namespace ServiceStack.OrmLite
             string sqlExpr;
 
             //Changes how Sql Expressions are generated.
-            useFieldName = true; sep = " ";
+            useFieldName = true;
+            sep = " ";
 
             if (joinExpr != null)
             {
@@ -97,8 +114,8 @@ namespace ServiceStack.OrmLite
             }
 
             var joinDef = tableDefs.Contains(targetDef) && !tableDefs.Contains(sourceDef)
-                ? sourceDef
-                : targetDef;
+                              ? sourceDef
+                              : targetDef;
 
             sbJoin.Append(" {0} {1} ".Fmt(joinType, SqlTable(joinDef.ModelName)));
             sbJoin.Append(" ON ");

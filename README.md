@@ -5,11 +5,11 @@ follow [@servicestack](http://twitter.com/servicestack) for updates.
 
 # Introduction
 
-OrmLite is a set of light-weight C# extension methods around `System.Data.*` interfaces which is designed to persist POCO classes with a minimal amount of intrusion and configuration.
-Another Orm with similar goals is [sqlite-net](https://github.com/praeclarum/sqlite-net) by Frank Krueger.
+OrmLite's goal is to provide a convenient, DRY, config-free, RDBMS-agnostic typed wrapper that retains a high affinity with SQL, exposing intuitive APIs that generate predictable SQL and maps cleanly to (DTO-friendly) disconnected POCO's. This approach makes easier to reason-about your data access making it obvious what SQL is getting executed at what time, whilst mitigating unexpected behavior, implicit N+1 queries and leaky data access prevalent in Heavy ORMs.
 
 OrmLite was designed with a focus on the core objectives:
 
+  * Provide a set of light-weight C# extension methods around .NET's impl-agnostic `System.Data.*` interfaces
   * Map a POCO class 1:1 to an RDBMS table, cleanly by conventions, without any attributes required.
   * Create/Drop DB Table schemas using nothing but POCO class definitions (IOTW a true code-first ORM)
   * Simplicity - typed, wrist friendly API for common data access patterns.
@@ -19,12 +19,11 @@ OrmLite was designed with a focus on the core objectives:
   * Cross platform - supports multiple dbs (currently: Sql Server, Sqlite, MySql, PostgreSQL, Firebird) running on both .NET and Mono platforms.
 
 In OrmLite: **1 Class = 1 Table**. There should be no surprising or hidden behaviour.
-Any non-scalar properties (i.e. complex types) are text blobbed in a schema-less text field using [.NET's fastest Text Serializer](http://mono.servicestack.net/mythz_blog/?p=176).
-Effectively this allows you to create a table from any POCO type and it should persist as expected in a DB Table with columns for each of the classes 1st level public properties.
+Any non-scalar properties (i.e. complex types) are by default text blobbed in a schema-less text field using any of the [avilable pluggable text serializers](#pluggable-complex-type-serializers). Support for [POCO-friendly references](#reference-support-poco-style) is also available to provide a convenient API to persist related models. Effectively this allows you to create a table from any POCO type and it should persist as expected in a DB Table with columns for each of the classes 1st level public properties.
 
 # Download 
 
-[![Download on NuGet](http://mono.servicestack.net/img/nuget-servicestack.ormlite.sqlserver.png)](http://nuget.org/List/Packages/ServiceStack.OrmLite.SqlServer)
+    Install-Package ServiceStack.OrmLite.SqlServer
 
 ### 8 flavours of OrmLite is on NuGet: 
 
@@ -46,7 +45,7 @@ Since September 2013, ServiceStack source code is available under GNU Affero Gen
 
 ### Contributing
 
-Contributors need to approve the [Contributor License Agreement](https://docs.google.com/forms/d/16Op0fmKaqYtxGL4sg7w_g-cXXyCoWjzppgkuqzOeKyk/viewform) before any code will be reviewed, see the [Contributing wiki](https://github.com/ServiceStack/ServiceStack/wiki/Contributing) for more details. 
+Contributors need to approve the [Contributor License Agreement](https://docs.google.com/forms/d/16Op0fmKaqYtxGL4sg7w_g-cXXyCoWjzppgkuqzOeKyk/viewform) before submitting pull-requests, see the [Contributing wiki](https://github.com/ServiceStack/ServiceStack/wiki/Contributing) for more details. 
 
 ***
 
@@ -417,8 +416,6 @@ var tracks = db.SelectByIds<Track>(new[]{ 1,2,3 });
 
 
 # Features
-
-OrmLite's goal is to provide a convenient, DRY, RDBMS-agnostic typed wrapper that retains a high affinity with SQL, exposing an intuitive API that generates predictable SQL and straight-forward mapping to clean, disconnected (DTO-friendly) POCO's. This approach makes easier to reason-about your data access as it's obvious what SQL is getting executed at what time, mitigating unexpected behavior, implicit N+1 queries and leaky data access prevalent in Heavy ORMs.
 
 Whilst OrmLite aims to provide a light-weight typed wrapper around SQL, it offers a number of convenient features that makes working with RDBMS's a clean and enjoyable experience:
 
