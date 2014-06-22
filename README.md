@@ -23,7 +23,7 @@ Any non-scalar properties (i.e. complex types) are by default text blobbed in a 
 
 # Download 
 
-    Install-Package ServiceStack.OrmLite.SqlServer
+[![Download on NuGet](https://raw.githubusercontent.com/ServiceStack/Assets/master/img/release-notes/install-ormlite.png)](https://www.nuget.org/packages?q=servicestack+ormlite)
 
 ### 8 flavours of OrmLite is on NuGet: 
 
