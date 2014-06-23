@@ -138,9 +138,6 @@ namespace ServiceStack.OrmLite
                 return ToSelectStatement();
             }
 
-            if (this.tableDefs.Count == 0)
-                this.tableDefs.Add(modelDef);
-
             var sbSelect = new StringBuilder();
             var selectDef = typeof(TModel).GetModelDefinition();
             foreach (var fieldDef in selectDef.FieldDefinitions)
@@ -193,7 +190,8 @@ namespace ServiceStack.OrmLite
                 }
             }
 
-            SelectExpression = "SELECT " + sbSelect;
+            var columns = sbSelect.Length > 0 ? sbSelect.ToString() : "*";
+            SelectExpression = "SELECT " + columns;
 
             return ToSelectStatement();
         }
