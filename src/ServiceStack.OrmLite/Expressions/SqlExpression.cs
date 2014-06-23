@@ -869,17 +869,12 @@ namespace ServiceStack.OrmLite
                     }
                 }
 
+                var tableDef = modelType.GetModelDefinition();
                 if (propertyInfo.PropertyType.IsEnum)
                     return new EnumMemberAccess(
-                        (PrefixFieldWithTableName
-                            ? DialectProvider.GetQuotedTableName(modelType.GetModelDefinition().ModelName) + "." 
-                            : "") 
-                            + GetQuotedColumnName(m.Member.Name), propertyInfo.PropertyType);
+                        GetQuotedColumnName(tableDef, m.Member.Name), propertyInfo.PropertyType);
 
-                return new PartialSqlString((PrefixFieldWithTableName
-                    ? DialectProvider.GetQuotedTableName(modelType.GetModelDefinition().ModelName) + "." 
-                    : "") 
-                    + GetQuotedColumnName(m.Member.Name));
+                return new PartialSqlString(GetQuotedColumnName(tableDef, m.Member.Name));
             }
 
             var member = Expression.Convert(m, typeof(object));
@@ -1064,15 +1059,18 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        protected virtual string GetQuotedColumnName(string memberName)
+        protected virtual string GetQuotedColumnName(ModelDefinition tableDef, string memberName)
         {
             if (useFieldName)
             {
-                var fd = modelDef.FieldDefinitions.FirstOrDefault(x => x.Name == memberName);
-                var fn = fd != null 
+                var fd = tableDef.FieldDefinitions.FirstOrDefault(x => x.Name == memberName);
+                var fieldName = fd != null 
                     ? fd.FieldName 
                     : memberName;
-                return DialectProvider.GetQuotedColumnName(fn);
+
+                return PrefixFieldWithTableName 
+                    ? DialectProvider.GetQuotedColumnName(tableDef.ModelName, fieldName)
+                    : DialectProvider.GetQuotedColumnName(fieldName);
             }
             return memberName;
         }

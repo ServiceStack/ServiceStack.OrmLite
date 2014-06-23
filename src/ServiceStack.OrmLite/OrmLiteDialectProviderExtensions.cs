@@ -33,12 +33,20 @@ namespace ServiceStack.OrmLite
             return dialect.GetQuotedColumnName(fieldDef.FieldName);
         }
 
-        public static string GetQuotedColumnName(this IOrmLiteDialectProvider dialect, 
+        public static string GetQuotedColumnName(this IOrmLiteDialectProvider dialect,
             ModelDefinition modelDef, FieldDefinition fieldDef)
         {
             return dialect.GetQuotedTableName(modelDef.ModelName) +
                 "." +
                 dialect.GetQuotedColumnName(fieldDef.FieldName);
+        }
+
+        public static string GetQuotedColumnName(this IOrmLiteDialectProvider dialect,
+            string tableName, string fieldName)
+        {
+            return dialect.GetQuotedTableName(tableName) +
+                "." +
+                dialect.GetQuotedColumnName(fieldName);
         }
     }
 }
