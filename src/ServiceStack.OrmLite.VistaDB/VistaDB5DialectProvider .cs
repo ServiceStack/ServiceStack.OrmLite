@@ -67,9 +67,9 @@ namespace ServiceStack.OrmLite.VistaDB
             if (!isFullConnectionString)
             {
                 var filePath = connectionString;
-                var filePathWithExt = filePath.ToLower().EndsWith(".vdb4")
+                var filePathWithExt = filePath.ToLower().EndsWith(".vdb5")
                     ? filePath
-                    : filePath + ".vdb4";
+                    : filePath + ".vdb5";
 
                 var fileName = Path.GetFileName(filePathWithExt);
 
