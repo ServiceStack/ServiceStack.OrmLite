@@ -123,8 +123,6 @@ namespace ServiceStack.OrmLite
 
             FromExpression = fromExpr + sbJoin;
 
-            if (tableDefs.Count == 0)
-                tableDefs.Add(modelDef);
             if (!tableDefs.Contains(sourceDef))
                 tableDefs.Add(sourceDef);
             if (!tableDefs.Contains(targetDef))
@@ -236,25 +234,25 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
-        public string QuoteFirstField(string fieldName)
+        public Tuple<ModelDefinition,FieldDefinition> FirstMatchingField(string fieldName)
         {
             foreach (var tableDef in tableDefs)
             {
                 var firstField = tableDef.FieldDefinitions.FirstOrDefault(x => x.Name == fieldName);
                 if (firstField != null)
                 {
-                    return DialectProvider.GetQuotedColumnName(tableDef, firstField);
+                    return Tuple.Create(tableDef, firstField);
                 }
             }
-            //Fallback to {Table}{Field} property convention
+            //Fallback to fully qualified '{Table}{Field}' property convention
             foreach (var tableDef in tableDefs)
             {
-                var firstField = tableDef.FieldDefinitions.FirstOrDefault(x => 
+                var firstField = tableDef.FieldDefinitions.FirstOrDefault(x =>
                     tableDef.Name + x.Name == fieldName);
 
                 if (firstField != null)
                 {
-                    return DialectProvider.GetQuotedColumnName(tableDef, firstField) + " as " + fieldName;
+                    return Tuple.Create(tableDef, firstField);
                 }
             }
             return null;

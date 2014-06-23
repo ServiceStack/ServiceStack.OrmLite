@@ -41,6 +41,7 @@ namespace ServiceStack.OrmLite
             PrefixFieldWithTableName = false;
             WhereStatementWithoutWhereString = false;
             DialectProvider = dialectProvider;
+            tableDefs.Add(modelDef);
         }
 
         public SqlExpression<T> Clone()
