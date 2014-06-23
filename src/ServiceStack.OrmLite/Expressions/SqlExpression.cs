@@ -141,7 +141,8 @@ namespace ServiceStack.OrmLite
         public virtual SqlExpression<T> Where()
         {
             if (underlyingExpression != null) underlyingExpression = null; //Where() clears the expression
-            return Where(string.Empty);
+            whereExpression = null;
+            return this;
         }
 
         public virtual SqlExpression<T> Where(string sqlFilter, params object[] filterParams)
