@@ -145,13 +145,25 @@ namespace ServiceStack.OrmLite
 
         public virtual SqlExpression<T> Where(string sqlFilter, params object[] filterParams)
         {
-            whereExpression = !string.IsNullOrEmpty(sqlFilter) 
-                ? sqlFilter.SqlFmt(filterParams) 
-                : string.Empty;
-            
-            if (!string.IsNullOrEmpty(whereExpression)) 
-                whereExpression = (WhereStatementWithoutWhereString ? "" : "WHERE ") + whereExpression;
-            
+            AppendToWhere("AND", sqlFilter.SqlFmt(filterParams).SqlVerifyFragment());
+            return this;
+        }
+
+        public virtual SqlExpression<T> And(string sqlFilter, params object[] filterParams)
+        {
+            AppendToWhere("AND", sqlFilter.SqlFmt(filterParams).SqlVerifyFragment());
+            return this;
+        }
+
+        public virtual SqlExpression<T> Or(string sqlFilter, params object[] filterParams)
+        {
+            AppendToWhere("OR", sqlFilter.SqlFmt(filterParams).SqlVerifyFragment());
+            return this;
+        }
+
+        public virtual SqlExpression<T> AddCondition(string condition, string sqlFilter, params object[] filterParams)
+        {
+            AppendToWhere(condition, sqlFilter.SqlFmt(filterParams).SqlVerifyFragment());
             return this;
         }
 
@@ -173,7 +185,7 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
-        protected void AppendToWhere(string operand, Expression predicate)
+        protected void AppendToWhere(string condition, Expression predicate)
         {
             if (predicate == null)
                 return;
@@ -181,10 +193,16 @@ namespace ServiceStack.OrmLite
             useFieldName = true;
             sep = " ";
             var newExpr = Visit(predicate).ToString();
+            AppendToWhere(condition, newExpr);
+        }
+
+        protected void AppendToWhere(string condition, string sqlExpression)
+        {
             whereExpression = string.IsNullOrEmpty(whereExpression)
-                ? (WhereStatementWithoutWhereString ? "" : "WHERE ") 
-                : whereExpression + " " + operand + " ";
-            whereExpression += newExpr;
+                ? (WhereStatementWithoutWhereString ? "" : "WHERE ")
+                : whereExpression + " " + condition + " ";
+
+            whereExpression += sqlExpression;
         }
 
         public virtual SqlExpression<T> GroupBy()
