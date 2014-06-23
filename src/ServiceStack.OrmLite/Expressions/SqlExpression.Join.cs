@@ -235,5 +235,29 @@ namespace ServiceStack.OrmLite
             AppendToWhere("OR", predicate);
             return this;
         }
+
+        public string QuoteFirstField(string fieldName)
+        {
+            foreach (var tableDef in tableDefs)
+            {
+                var firstField = tableDef.FieldDefinitions.FirstOrDefault(x => x.Name == fieldName);
+                if (firstField != null)
+                {
+                    return DialectProvider.GetQuotedColumnName(tableDef, firstField);
+                }
+            }
+            //Fallback to {Table}{Field} property convention
+            foreach (var tableDef in tableDefs)
+            {
+                var firstField = tableDef.FieldDefinitions.FirstOrDefault(x => 
+                    tableDef.Name + x.Name == fieldName);
+
+                if (firstField != null)
+                {
+                    return DialectProvider.GetQuotedColumnName(tableDef, firstField) + " as " + fieldName;
+                }
+            }
+            return null;
+        }
     }
 }
