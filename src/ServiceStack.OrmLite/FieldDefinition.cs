@@ -11,7 +11,6 @@
 
 using System;
 using System.Reflection;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
@@ -51,6 +50,8 @@ namespace ServiceStack.OrmLite
 
         public bool IsNonClustered { get; set; }
 
+        public bool IsRowVersion { get; set; }
+
         public int? FieldLength { get; set; }  // Precision for Decimal Type
 
         public int? Scale { get; set; }  //  for decimal type
@@ -68,10 +69,20 @@ namespace ServiceStack.OrmLite
             return this.GetValueFn == null ? null : this.GetValueFn(onInstance);
         }
 
-        public string GetQuotedValue(object fromInstance)
+        public string GetQuotedName(IOrmLiteDialectProvider dialectProvider)
         {
+            return IsRowVersion
+                ? dialectProvider.GetRowVersionColumnName(this)
+                : dialectProvider.GetQuotedColumnName(FieldName);
+        }
+
+        public string GetQuotedValue(object fromInstance, IOrmLiteDialectProvider dialectProvider = null)
+        {
+            if (dialectProvider == null)
+                dialectProvider = OrmLiteConfig.DialectProvider;
+
             var value = GetValue(fromInstance);
-            return OrmLiteConfig.DialectProvider.GetQuotedValue(value, ColumnType);
+            return dialectProvider.GetQuotedValue(value, ColumnType);
         }
 
         public string Sequence { get; set; }
@@ -85,6 +96,23 @@ namespace ServiceStack.OrmLite
         public bool IsReference { get; set; }
 
         public string CustomFieldDefinition { get; set; }
+
+        public bool IsRefType { get; set; }
+
+        public bool ShouldSkipInsert()
+        {
+            return AutoIncrement || IsComputed || IsRowVersion;
+        }
+
+        public bool ShouldSkipUpdate()
+        {
+            return IsComputed;
+        }
+
+        public bool ShouldSkipDelete()
+        {
+            return IsComputed;
+        }
     }
 
     public class ForeignKeyConstraint
@@ -104,7 +132,8 @@ namespace ServiceStack.OrmLite
 
         public string GetForeignKeyName(ModelDefinition modelDef, ModelDefinition refModelDef, INamingStrategy NamingStrategy, FieldDefinition fieldDef)
         {
-            if (ForeignKeyName.IsNullOrEmpty()) {
+            if (ForeignKeyName.IsNullOrEmpty())
+            {
                 var modelName = modelDef.IsInSchema
                     ? modelDef.Schema + "_" + NamingStrategy.GetTableName(modelDef.ModelName)
                     : NamingStrategy.GetTableName(modelDef.ModelName);
@@ -112,8 +141,11 @@ namespace ServiceStack.OrmLite
                 var refModelName = refModelDef.IsInSchema
                     ? refModelDef.Schema + "_" + NamingStrategy.GetTableName(refModelDef.ModelName)
                     : NamingStrategy.GetTableName(refModelDef.ModelName);
-                return string.Format("FK_{0}_{1}_{2}", modelName, refModelName, fieldDef.FieldName);
-            } else { return ForeignKeyName; }
+
+                var fkName = string.Format("FK_{0}_{1}_{2}", modelName, refModelName, fieldDef.FieldName);
+                return NamingStrategy.ApplyNameRestrictions(fkName);
+            }
+            else { return ForeignKeyName; }
         }
     }
 }

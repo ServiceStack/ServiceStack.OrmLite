@@ -24,7 +24,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
             Console.WriteLine(text);
         }
 
-        public IDbConnection OpenDbConnection(string connString = null)
+        public virtual IDbConnection OpenDbConnection(string connString = null)
         {
             connString = connString ?? ConnectionString;
             return connString.OpenDbConnection();

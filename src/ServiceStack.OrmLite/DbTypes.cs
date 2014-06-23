@@ -4,9 +4,9 @@ using System.Data;
 
 namespace ServiceStack.OrmLite
 {
-	public class DbTypes<TDialect>
-		where TDialect : IOrmLiteDialectProvider
-	{
+    public class DbTypes<TDialect>
+        where TDialect : IOrmLiteDialectProvider
+    {
         public DbType DbType;
         public string TextDefinition;
         public bool ShouldQuoteValue;
@@ -23,7 +23,7 @@ namespace ServiceStack.OrmLite
                 && fieldDefinition != "DECIMAL"
                 && fieldDefinition != "BOOL";
 
-			ColumnTypeMap[typeof(T)] = fieldDefinition;
+            ColumnTypeMap[typeof(T)] = fieldDefinition;
             ColumnDbTypeMap[typeof(T)] = dbType;
         }
     }

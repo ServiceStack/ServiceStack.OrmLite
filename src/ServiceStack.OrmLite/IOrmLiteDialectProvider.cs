@@ -19,11 +19,15 @@ namespace ServiceStack.OrmLite
 {
     public interface IOrmLiteDialectProvider
     {
+        IOrmLiteExecFilter ExecFilter { get; set; }
+
         int DefaultStringLength { get; set; }
 
         string ParamString { get; set; }
 
         bool UseUnicode { get; set; }
+
+        string EscapeWildcards(string value);
 
         INamingStrategy NamingStrategy { get; set; }
 
@@ -37,7 +41,7 @@ namespace ServiceStack.OrmLite
         /// <returns></returns>
         string GetQuotedValue(string paramValue);
 
-        void SetDbValue(FieldDefinition fieldDef, IDataReader dataReader, int colIndex, object instance);
+        void SetDbValue(FieldDefinition fieldDef, IDataReader reader, int colIndex, object instance);
 
         object ConvertDbValue(object value, Type type);
 
@@ -53,10 +57,15 @@ namespace ServiceStack.OrmLite
 
         string GetQuotedName(string columnName);
 
+        string SanitizeFieldNameForParamName(string fieldName);
+
         string GetColumnDefinition(
             string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement,
-            bool isNullable, int? fieldLength,
-            int? scale, string defaultValue, 
+            bool isNullable, 
+            bool isRowVersion,
+            int? fieldLength,
+            int? scale, 
+            string defaultValue,
             string customFieldDefinition);
 
         long GetLastInsertId(IDbCommand command);
@@ -65,13 +74,15 @@ namespace ServiceStack.OrmLite
 
         string ToSelectStatement(Type tableType, string sqlFilter, params object[] filterParams);
 
+        string ToSelectStatement(ModelDefinition modelDef, string selectExpression, string bodyExpression, string orderByExpression = null, int? offset = null, int? rows = null);
+
         string ToInsertRowStatement(IDbCommand command, object objWithProperties, ICollection<string> InsertFields = null);
 
         void PrepareParameterizedInsertStatement<T>(IDbCommand cmd, ICollection<string> insertFields = null);
 
-        void PrepareParameterizedUpdateStatement<T>(IDbCommand cmd, ICollection<string> updateFields = null);
+        bool PrepareParameterizedUpdateStatement<T>(IDbCommand cmd, ICollection<string> updateFields = null);
 
-        void PrepareParameterizedDeleteStatement<T>(IDbCommand cmd, ICollection<string> deleteFields = null);
+        bool PrepareParameterizedDeleteStatement<T>(IDbCommand cmd, ICollection<string> deleteFields = null);
 
         void SetParameterValues<T>(IDbCommand dbCmd, object obj);
 
@@ -92,14 +103,14 @@ namespace ServiceStack.OrmLite
             string sqlFilter,
             params object[] filterParams);
 
-        string ToCountStatement(Type fromTableType, string sqlFilter, params object[] filterParams);
-
         string ToExecuteProcedureStatement(object objWithProperties);
 
         string ToCreateTableStatement(Type tableType);
+        string ToPostCreateTableStatement(ModelDefinition modelDef);
+        string ToPostDropTableStatement(ModelDefinition modelDef);
 
         List<string> ToCreateIndexStatements(Type tableType);
-        List<string> ToCreateSequenceStatements(Type tableType);        
+        List<string> ToCreateSequenceStatements(Type tableType);
         string ToCreateSequenceStatement(Type tableType, string sequenceName);
 
         List<string> SequenceList(Type tableType);
@@ -109,6 +120,7 @@ namespace ServiceStack.OrmLite
 
         bool DoesSequenceExist(IDbCommand dbCmd, string sequencName);
 
+        string GetRowVersionColumnName(FieldDefinition field);
         string GetColumnNames(ModelDefinition modelDef);
 
         SqlExpression<T> SqlExpression<T>();

@@ -42,26 +42,6 @@ namespace ServiceStack.OrmLite.MySql.Tests
             }
         }
 
-        [ExpectedException(typeof(MySqlException))]
-        [Test]
-        public void Cannot_create_unique_key_on_varchar_greater_than_255()
-        {
-            using (var db = OpenDbConnection())
-            {
-                db.CreateTable<TypeWithUniqeKeyOnVarchar_256>(true);
-            }
-        }
-
-        [ExpectedException(typeof(MySqlException))]
-        [Test]
-        public void Cannot_create_primary_key_varchar_with_string_length_greater_than_255()
-        {
-            using (var db = OpenDbConnection())
-            {
-                db.CreateTable<TypeWithStringId_256>(true);
-            }
-        }
-
         [Test]
         public void Can_store_and_retrieve_string_with_8000_characters_from_varchar_field()
         {

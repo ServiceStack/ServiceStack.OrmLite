@@ -16,8 +16,8 @@ namespace TestLiteFirebird04
 			
 			OrmLiteConfig.DialectProvider = new FirebirdOrmLiteDialectProvider();
 			
-			ServiceStack.OrmLite.SqlExpression<Company> sql= 
-				new  FirebirdSqlExpression<Company>();
+			ServiceStack.OrmLite.SqlExpression<Company> sql =
+                OrmLiteConfig.DialectProvider.SqlExpression<Company>();
 			
 			List<Object> names = new List<Object>();
 			names.Add("SOME COMPANY");
@@ -197,13 +197,6 @@ namespace TestLiteFirebird04
 			
 			sql.OrderBy(cp=> new{cp.Name, X=cp.Id.Desc() } );
 			Console.WriteLine("{0}", sql.OrderByExpression);
-			
-			
-			sql.Limit(1,5);
-			Console.WriteLine(sql.LimitExpression);
-			
-			sql.Limit(1);
-			Console.WriteLine(sql.LimitExpression);
 			
 			
 			sql.Where( cp => ( string.Concat( cp.Name, "_", cp.Employees) =="SOME COMPANY XYZ_2"));

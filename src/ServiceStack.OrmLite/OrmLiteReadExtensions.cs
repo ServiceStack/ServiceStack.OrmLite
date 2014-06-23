@@ -13,12 +13,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
 using System.Text;
 using ServiceStack.Logging;
-using ServiceStack.Text;
 using System.Linq;
 
 namespace ServiceStack.OrmLite
@@ -35,18 +33,16 @@ namespace ServiceStack.OrmLite
         private static readonly ILog Log = LogManager.GetLogger(typeof(OrmLiteReadExtensions));
         public const string UseDbConnectionExtensions = "Use IDbConnection Extensions instead";
 
-        [Conditional("DEBUG")]
-        private static void LogDebug(string fmt, params object[] args)
+        private static void LogDebug(string fmt)
         {
-            if (args.Length > 0)
-                Log.DebugFormat(fmt, args);
-            else
-                Log.Debug(fmt);
+            Log.Debug(fmt);
         }
 
         internal static IDataReader ExecReader(this IDbCommand dbCmd, string sql)
         {
-            LogDebug(sql);
+            if (Log.IsDebugEnabled)
+                LogDebug(sql);
+
             dbCmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
             dbCmd.CommandText = sql;
             return dbCmd.ExecuteReader();
@@ -54,7 +50,9 @@ namespace ServiceStack.OrmLite
 
         internal static IDataReader ExecReader(this IDbCommand dbCmd, string sql, IEnumerable<IDataParameter> parameters)
         {
-            LogDebug(sql);
+            if (Log.IsDebugEnabled)
+                LogDebug(sql);
+
             dbCmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
             dbCmd.CommandText = sql;
             dbCmd.Parameters.Clear();
@@ -65,70 +63,6 @@ namespace ServiceStack.OrmLite
             }
 
             return dbCmd.ExecuteReader();
-        }
-
-        public static GetValueDelegate GetValueFn<T>(IDataRecord reader)
-        {
-            var nullableType = Nullable.GetUnderlyingType(typeof(T));
-
-            if (nullableType == null)
-            {
-                var typeCode = Type.GetTypeCode(typeof(T));
-                switch (typeCode)
-                {
-                    case TypeCode.String:
-                        return reader.GetString;
-                    case TypeCode.Boolean:
-                        return i => reader.GetBoolean(i);
-                    case TypeCode.Int16:
-                        return i => reader.GetInt16(i);
-                    case TypeCode.Int32:
-                        return i => reader.GetInt32(i);
-                    case TypeCode.Int64:
-                        return i => reader.GetInt64(i);
-                    case TypeCode.Single:
-                        return i => reader.GetFloat(i);
-                    case TypeCode.Double:
-                        return i => reader.GetDouble(i);
-                    case TypeCode.Decimal:
-                        return i => reader.GetDecimal(i);
-                    case TypeCode.DateTime:
-                        return i => reader.GetDateTime(i);
-                }
-
-                if (typeof(T) == typeof(Guid))
-                    return i => reader.GetGuid(i);
-            }
-            else
-            {
-                var typeCode = Type.GetTypeCode(nullableType);
-                switch (typeCode)
-                {
-                    case TypeCode.String:
-                        return reader.GetString;
-                    case TypeCode.Boolean:
-                        return i => reader.IsDBNull(i) ? null : (bool?)reader.GetBoolean(i);
-                    case TypeCode.Int16:
-                        return i => reader.IsDBNull(i) ? null : (short?)reader.GetInt16(i);
-                    case TypeCode.Int32:
-                        return i => reader.IsDBNull(i) ? null : (int?)reader.GetInt32(i);
-                    case TypeCode.Int64:
-                        return i => reader.IsDBNull(i) ? null : (long?)reader.GetInt64(i);
-                    case TypeCode.Single:
-                        return i => reader.IsDBNull(i) ? null : (float?)reader.GetFloat(i);
-                    case TypeCode.Double:
-                        return i => reader.IsDBNull(i) ? null : (double?)reader.GetDouble(i);
-                    case TypeCode.Decimal:
-                        return i => reader.IsDBNull(i) ? null : (decimal?)reader.GetDecimal(i);
-                    case TypeCode.DateTime:
-                        return i => reader.IsDBNull(i) ? null : (DateTime?)reader.GetDateTime(i);
-                }
-
-                if (typeof(T) == typeof(Guid))
-                    return i => reader.IsDBNull(i) ? null : (Guid?)reader.GetGuid(i);
-            }
-
-            return reader.GetValue;
         }
 
         public static bool IsScalar<T>()
@@ -210,7 +144,11 @@ namespace ServiceStack.OrmLite
                 p.ParameterName = columnName;
                 p.DbType = OrmLiteConfig.DialectProvider.GetColumnDbType(pi.PropertyType);
                 p.Direction = ParameterDirection.Input;
-                p.Value = value ?? DBNull.Value;
+                p.Value = value == null ?
+                    DBNull.Value
+                  : p.DbType == DbType.String ?
+                    value.ToString() :
+                    value;
                 dbCmd.Parameters.Add(p);
             });
         }
@@ -636,10 +574,11 @@ namespace ServiceStack.OrmLite
         internal static List<T> Column<T>(this IDataReader reader)
         {
             var columValues = new List<T>();
-            var getValueFn = GetValueFn<T>(reader);
+
+            var dialectProvider = OrmLiteConfig.DialectProvider;
             while (reader.Read())
             {
-                var value = getValueFn(0);
+                var value = dialectProvider.ConvertDbValue(reader.GetValue(0), typeof(T));
                 if (value == DBNull.Value)
                     value = default(T);
 
@@ -662,11 +601,11 @@ namespace ServiceStack.OrmLite
 
         internal static HashSet<T> ColumnDistinct<T>(this IDataReader reader)
         {
+            var dialectProvider = OrmLiteConfig.DialectProvider;
             var columValues = new HashSet<T>();
-            var getValueFn = GetValueFn<T>(reader);
             while (reader.Read())
             {
-                var value = getValueFn(0);
+                var value = dialectProvider.ConvertDbValue(reader.GetValue(0), typeof(T));
                 if (value == DBNull.Value)
                     value = default(T);
 
@@ -691,12 +630,11 @@ namespace ServiceStack.OrmLite
         {
             var lookup = new Dictionary<K, List<V>>();
 
-            var getKeyFn = GetValueFn<K>(reader);
-            var getValueFn = GetValueFn<V>(reader);
+            var dialectProvider = OrmLiteConfig.DialectProvider;
             while (reader.Read())
             {
-                var key = (K)getKeyFn(0);
-                var value = (V)getValueFn(1);
+                var key = (K)dialectProvider.ConvertDbValue(reader.GetValue(0), typeof(K));
+                var value = (V)dialectProvider.ConvertDbValue(reader.GetValue(1), typeof(V));
 
                 List<V> values;
                 if (!lookup.TryGetValue(key, out values))
@@ -726,12 +664,11 @@ namespace ServiceStack.OrmLite
         {
             var map = new Dictionary<K, V>();
 
-            var getKeyFn = GetValueFn<K>(reader);
-            var getValueFn = GetValueFn<V>(reader);
+            var dialectProvider = OrmLiteConfig.DialectProvider;
             while (reader.Read())
             {
-                var key = (K)getKeyFn(0);
-                var value = (V)getValueFn(1);
+                var key = (K)dialectProvider.ConvertDbValue(reader.GetValue(0), typeof(K));
+                var value = (V)dialectProvider.ConvertDbValue(reader.GetValue(1), typeof(V));
 
                 map.Add(key, value);
             }
@@ -822,12 +759,15 @@ namespace ServiceStack.OrmLite
                     var refField = GetRefFieldDef(modelDef, refModelDef, refType);
 
                     var results = (IEnumerable)fieldDef.GetValue(instance);
-                    foreach (var oRef in results)
+                    if (results != null)
                     {
-                        refField.SetValueFn(oRef, pkValue);
-                    }
+                        foreach (var oRef in results)
+                        {
+                            refField.SetValueFn(oRef, pkValue);
+                        }
 
-                    dbCmd.CreateTypedApi(refType).SaveAll(results);
+                        dbCmd.CreateTypedApi(refType).SaveAll(results);
+                    }
                 }
                 else
                 {
@@ -836,9 +776,11 @@ namespace ServiceStack.OrmLite
                     var refField = GetRefFieldDef(modelDef, refModelDef, fieldDef.FieldType);
 
                     var result = fieldDef.GetValue(instance);
-                    refField.SetValueFn(result, pkValue);
-
-                    dbCmd.CreateTypedApi(refType).Save(result);
+                    if (result != null)
+                    {
+                        refField.SetValueFn(result, pkValue);
+                        dbCmd.CreateTypedApi(refType).Save(result);
+                    }
                 }
             }
         }
@@ -870,6 +812,7 @@ namespace ServiceStack.OrmLite
 
             foreach (var fieldDef in fieldDefs)
             {
+                dbCmd.Parameters.Clear();
                 var listInterface = fieldDef.FieldType.GetTypeWithGenericInterfaceOf(typeof(IList<>));
                 if (listInterface != null)
                 {
@@ -899,12 +842,19 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        private static FieldDefinition GetRefFieldDef(ModelDefinition modelDef, ModelDefinition refModelDef, Type refType)
+        public static FieldDefinition GetRefFieldDef(ModelDefinition modelDef, ModelDefinition refModelDef, Type refType)
+        {
+            var refField = GetRefFieldDefIfExists(modelDef, refModelDef);
+            if (refField == null)
+                throw new ArgumentException("Cant find '{0}' Property on Type '{1}'".Fmt(modelDef.ModelName + "Id", refType.Name));
+            return refField;
+        }
+
+        public static FieldDefinition GetRefFieldDefIfExists(ModelDefinition modelDef, ModelDefinition refModelDef)
         {
             var refNameConvention = modelDef.ModelName + "Id";
-            var refField = refModelDef.FieldDefinitions.FirstOrDefault(x => x.Name == refNameConvention);
-            if (refField == null)
-                throw new ArgumentException("Cant find '{0}' Property on Type '{1}'".Fmt(refNameConvention, refType.Name));
+            var refField = refModelDef.FieldDefinitions.FirstOrDefault(x => x.FieldName == refNameConvention)
+                           ?? refModelDef.FieldDefinitions.FirstOrDefault(x => x.Name == modelDef.Name + "Id");
             return refField;
         }
     }

@@ -15,7 +15,7 @@
 #>
 <#
 if (string.IsNullOrEmpty(SPNamespace)) SPNamespace=ConnectionStringName;
-if (string.IsNullOrEmpty(SPNamespace)) Namespace="StoredProcedures";
+if (string.IsNullOrEmpty(SPNamespace)) SPNamespace="StoredProcedures";
 #>
 using System;
 using System.Data.Common;

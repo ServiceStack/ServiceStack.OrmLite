@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Data;
 using Northwind.Common.DataModel;
 using NUnit.Framework;
 using ServiceStack.Text;
@@ -152,6 +153,22 @@ namespace ServiceStack.OrmLite.Tests
             results.PrintDump();
             var ids = results.ConvertAll(x => x.Id);
             Assert.AreEqual(new[] { 3, 4, 5, 6, 1, 2 }, ids);
+        }
+
+
+        [Test]
+        public void Can_open_after_close_connection()
+        {
+            OrmLiteConfig.DialectProvider = SqliteDialect.Provider;
+            var factory = new OrmLiteConnectionFactory(":memory:");
+            using (var db = factory.OpenDbConnection())
+            {
+                Assert.That(db.State, Is.EqualTo(ConnectionState.Open));
+                db.Close();
+                Assert.That(db.State, Is.EqualTo(ConnectionState.Closed));
+                db.Open();
+                Assert.That(db.State, Is.EqualTo(ConnectionState.Open));
+            }
         }
 
     }

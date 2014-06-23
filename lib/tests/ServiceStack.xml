@@ -101,6 +101,11 @@
             Register user-defined custom routes.
             </summary>
         </member>
+        <member name="P:ServiceStack.IAppHost.Metadata">
+            <summary>
+            Inferred Metadata available from existing services 
+            </summary>
+        </member>
         <member name="P:ServiceStack.IAppHost.ContentTypes">
             <summary>
             Register custom ContentType serializers
@@ -146,6 +151,11 @@
             Provide an exception handler for un-caught exceptions
             </summary>
         </member>
+        <member name="P:ServiceStack.IAppHost.AfterInitCallbacks">
+            <summary>
+            Provide callbacks to be fired after the AppHost has finished initializing
+            </summary>
+        </member>
         <member name="P:ServiceStack.IAppHost.RawHttpHandlers">
             <summary>
             Skip the ServiceStack Request Pipeline and process the returned IHttpHandler instead
@@ -154,6 +164,11 @@
         <member name="P:ServiceStack.IAppHost.CatchAllHandlers">
             <summary>
             Provide a catch-all handler that doesn't match any routes
+            </summary>
+        </member>
+        <member name="P:ServiceStack.IAppHost.GlobalHtmlErrorHttpHandler">
+            <summary>
+            Use a fall-back Error Handler for handling global errors
             </summary>
         </member>
         <member name="P:ServiceStack.IAppHost.CustomErrorHttpHandlers">
@@ -193,6 +208,12 @@
             registrations provided by the funqlet.
             </summary>
             <param name="container">Container to register.</param>
+        </member>
+        <member name="M:ServiceStack.ServiceStackHost.RedirectDirectory(ServiceStack.Web.IHttpRequest)">
+            <summary>
+            Retain the same behavior as ASP.NET and redirect requests to directores 
+            without a trailing '/'
+            </summary>
         </member>
         <member name="M:ServiceStack.ServiceStackHost.OnPreExecuteServiceFilter(ServiceStack.IService,System.Object,ServiceStack.Web.IRequest,ServiceStack.Web.IResponse)">
             <summary>
@@ -249,7 +270,7 @@
             <summary>
             Starts the Web Service
             </summary>
-            <param name="listeningAtUrlBase">
+            <param name="urlBase">
             A Uri that acts as the base that the server is listening on.
             Format should be: http://127.0.0.1:8080/ or http://127.0.0.1:8080/somevirtual/
             Note: the trailing slash is required! For more info see the
@@ -274,9 +295,156 @@
             </summary>
             <returns>Reserved Url if the process completes successfully</returns>
         </member>
+        <member name="M:ServiceStack.Auth.IAuthProvider.Logout(ServiceStack.IServiceBase,ServiceStack.Authenticate)">
+            <summary>
+            Remove the Users Session
+            </summary>
+            <param name="service"></param>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ServiceStack.Auth.IAuthProvider.Authenticate(ServiceStack.IServiceBase,ServiceStack.Auth.IAuthSession,ServiceStack.Authenticate)">
+            <summary>
+            The entry point for all AuthProvider providers. Runs inside the AuthService so exceptions are treated normally.
+            Overridable so you can provide your own Auth implementation.
+            </summary>
+        </member>
+        <member name="M:ServiceStack.Auth.IAuthProvider.IsAuthorized(ServiceStack.Auth.IAuthSession,ServiceStack.Auth.IAuthTokens,ServiceStack.Authenticate)">
+            <summary>
+            Determine if the current session is already authenticated with this AuthProvider
+            </summary>
+        </member>
+        <member name="M:ServiceStack.Auth.AuthProvider.FallbackConfig(System.String)">
+            <summary>
+            Allows specifying a global fallback config that if exists is formatted with the Provider as the first arg.
+            E.g. this appSetting with the TwitterAuthProvider: 
+            oauth.CallbackUrl="http://localhost:11001/auth/{0}"
+            Would result in: 
+            oauth.CallbackUrl="http://localhost:11001/auth/twitter"
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ServiceStack.Auth.AuthProvider.Logout(ServiceStack.IServiceBase,ServiceStack.Authenticate)">
+            <summary>
+            Remove the Users Session
+            </summary>
+            <param name="service"></param>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ServiceStack.Auth.AuthProvider.SaveUserAuth(ServiceStack.IServiceBase,ServiceStack.Auth.IAuthSession,ServiceStack.Auth.IAuthRepository,ServiceStack.Auth.IAuthTokens)">
+            <summary>
+            Saves the Auth Tokens for this request. Called in OnAuthenticated(). 
+            Overrideable, the default behaviour is to call IUserAuthRepository.CreateOrMergeAuthSession().
+            </summary>
+        </member>
+        <member name="P:ServiceStack.Auth.AspNetWindowsAuthProvider.AllRoles">
+            <summary>
+            Specify all roles to be used by this application
+            </summary>
+        </member>
+        <member name="P:ServiceStack.Auth.AspNetWindowsAuthProvider.LimitAccessToRoles">
+            <summary>
+            Only allow access to users in specified roles
+            </summary>
+        </member>
+        <member name="T:ServiceStack.Auth.OdnoklassnikiAuthProvider">
+            <summary>
+              Create Odnoklassniki App at: http://www.odnoklassniki.ru/devaccess
+              The Callback URL for your app should match the CallbackUrl provided.
+              
+              NB: They claim they use OAuth 2.0, but they in fact don't. 
+              http://apiok.ru/wiki/display/api/Authorization+OAuth+2.0
+            </summary>
+        </member>
+        <member name="M:ServiceStack.Auth.OAuthProvider.Authenticate(ServiceStack.IServiceBase,ServiceStack.Auth.IAuthSession,ServiceStack.Authenticate)">
+            <summary>
+            The entry point for all AuthProvider providers. Runs inside the AuthService so exceptions are treated normally.
+            Overridable so you can provide your own Auth implementation.
+            </summary>
+            <param name="authService"></param>
+            <param name="session"></param>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ServiceStack.Auth.OAuthProvider.Init(ServiceStack.IServiceBase,ServiceStack.Auth.IAuthSession@,ServiceStack.Authenticate)">
+            <summary>
+            Sets the CallbackUrl and session.ReferrerUrl if not set and initializes the session tokens for this AuthProvider
+            </summary>
+            <param name="authService"></param>
+            <param name="session"></param>
+            <param name="request"> </param>
+            <returns></returns>
+        </member>
+        <member name="T:ServiceStack.Auth.VkAuthProvider">
+            <summary>
+              Create VK App at: http://vk.com/editapp?act=create
+              The Callback URL for your app should match the CallbackUrl provided.
+            </summary>
+        </member>
+        <member name="M:ServiceStack.Auth.VkAuthProvider.EnsureLatestCode(System.String)">
+            <summary>
+            If previous attemts failes, the subsequential calls 
+            build up code value like "code1,code2,code3"
+            so we need the last one only
+            </summary>
+            <param name="code"></param>
+            <returns></returns>
+        </member>
+        <member name="T:ServiceStack.Auth.YandexAuthProvider">
+            <summary>
+              Create Yandex App at: https://oauth.yandex.ru/client/new
+              The Callback URL for your app should match the CallbackUrl provided.
+            </summary>
+        </member>
+        <member name="T:ServiceStack.Auth.GithubAuthProvider">
+            <summary>
+              Create an App at: https://github.com/settings/applications/new
+              The Callback URL for your app should match the CallbackUrl provided.
+            </summary>
+        </member>
+        <member name="M:ServiceStack.Auth.GithubAuthProvider.UserRequestFilter(System.Net.HttpWebRequest)">
+            <summary>
+              Calling to Github API without defined Useragent throws
+              exception "The server committed a protocol violation. Section=ResponseStatusLine"
+            </summary>
+        </member>
         <member name="M:ServiceStack.Auth.UserAuthRepositoryExtensions.InitSchema(ServiceStack.Auth.IAuthRepository)">
             <summary>
             Creates the required missing tables or DB schema 
+            </summary>
+        </member>
+        <member name="M:ServiceStack.Configuration.ISettings.Get(System.String)">
+            <summary>
+            Provides a common interface for Settings providers such as
+            ConfigurationManager or Azure's RoleEnvironment. The only
+            requirement is that if the implementation cannot find the
+            specified key, the return value must be null
+            </summary>
+            <param name="key">The key for the setting</param>
+            <returns>The string value of the specified key, or null if the key
+            was invalid</returns>
+        </member>
+        <member name="T:ServiceStack.Service">
+            <summary>
+            Generic + Useful IService base class
+            </summary>
+        </member>
+        <member name="M:ServiceStack.IServiceBase.ResolveService``1">
+            <summary>
+            Resolve an alternate Web Service from ServiceStack's IOC container.
+            </summary>
+            <typeparam name="T"></typeparam>
+            <returns></returns>
+        </member>
+        <member name="F:ServiceStack.Service.session">
+            <summary>
+            Dynamic Session Bag
+            </summary>
+        </member>
+        <member name="M:ServiceStack.Service.SessionAs``1">
+            <summary>
+            Typed UserSession
             </summary>
         </member>
         <member name="T:ServiceStack.EnsureHttpsAttribute">
@@ -354,6 +522,31 @@
             A convenient base class for your injected service dependencies that reduces the boilerplate
             with managed access to ServiceStack's built-in providers
             </summary>
+        </member>
+        <member name="P:ServiceStack.PostmanFeature.DefaultVerbsForAny">
+            <summary>
+            Only generate specified Verb entries for "ANY" routes
+            </summary>
+        </member>
+        <member name="F:ServiceStack.RequestContext.UseThreadStatic">
+            <summary>
+            Tell ServiceStack to use ThreadStatic Items Collection for RequestScoped items.
+            Warning: ThreadStatic Items aren't pinned to the same request in async services which callback on different threads.
+            </summary>
+        </member>
+        <member name="M:ServiceStack.RequestContext.TrackDisposable(System.IDisposable)">
+            <summary>
+            Track any IDisposable's to dispose of at the end of the request in IAppHost.OnEndRequest()
+            </summary>
+            <param name="instance"></param>
+        </member>
+        <member name="P:ServiceStack.RequestContext.Items">
+            <summary>
+            Gets a list of items for this request. 
+            </summary>
+            <remarks>This list will be cleared on every request and is specific to the original thread that is handling the request.
+            If a handler uses additional threads, this data will not be available on those threads.
+            </remarks>
         </member>
         <member name="T:Amib.Threading.Internal.CallerThreadContext">
             <summary>
@@ -2643,28 +2836,6 @@
             By default Auth and Registration requests are hidden.
             </summary>
         </member>
-        <member name="T:ServiceStack.Service">
-            <summary>
-            Generic + Useful IService base class
-            </summary>
-        </member>
-        <member name="M:ServiceStack.IServiceBase.ResolveService``1">
-            <summary>
-            Resolve an alternate Web Service from ServiceStack's IOC container.
-            </summary>
-            <typeparam name="T"></typeparam>
-            <returns></returns>
-        </member>
-        <member name="F:ServiceStack.Service.session">
-            <summary>
-            Dynamic Session Bag
-            </summary>
-        </member>
-        <member name="M:ServiceStack.Service.SessionAs``1">
-            <summary>
-            Typed UserSession
-            </summary>
-        </member>
         <member name="T:ServiceStack.AuthenticateAttribute">
             <summary>
             Indicates that the request dto, which is associated with this attribute,
@@ -2714,49 +2885,6 @@
             The specified <paramref name="session"/> may change as a side-effect of this method. If
             subsequent code relies on current <see cref="T:ServiceStack.Auth.IAuthSession"/> data be sure to reload
             the session istance via <see cref="M:ServiceStack.ServiceExtensions.GetSession(ServiceStack.IServiceBase,System.Boolean)"/>.
-            </summary>
-        </member>
-        <member name="M:ServiceStack.Auth.IAuthProvider.Logout(ServiceStack.IServiceBase,ServiceStack.Authenticate)">
-            <summary>
-            Remove the Users Session
-            </summary>
-            <param name="service"></param>
-            <param name="request"></param>
-            <returns></returns>
-        </member>
-        <member name="M:ServiceStack.Auth.IAuthProvider.Authenticate(ServiceStack.IServiceBase,ServiceStack.Auth.IAuthSession,ServiceStack.Authenticate)">
-            <summary>
-            The entry point for all AuthProvider providers. Runs inside the AuthService so exceptions are treated normally.
-            Overridable so you can provide your own Auth implementation.
-            </summary>
-        </member>
-        <member name="M:ServiceStack.Auth.IAuthProvider.IsAuthorized(ServiceStack.Auth.IAuthSession,ServiceStack.Auth.IAuthTokens,ServiceStack.Authenticate)">
-            <summary>
-            Determine if the current session is already authenticated with this AuthProvider
-            </summary>
-        </member>
-        <member name="M:ServiceStack.Auth.AuthProvider.FallbackConfig(System.String)">
-            <summary>
-            Allows specifying a global fallback config that if exists is formatted with the Provider as the first arg.
-            E.g. this appSetting with the TwitterAuthProvider: 
-            oauth.CallbackUrl="http://localhost:11001/auth/{0}"
-            Would result in: 
-            oauth.CallbackUrl="http://localhost:11001/auth/twitter"
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:ServiceStack.Auth.AuthProvider.Logout(ServiceStack.IServiceBase,ServiceStack.Authenticate)">
-            <summary>
-            Remove the Users Session
-            </summary>
-            <param name="service"></param>
-            <param name="request"></param>
-            <returns></returns>
-        </member>
-        <member name="M:ServiceStack.Auth.AuthProvider.SaveUserAuth(ServiceStack.IServiceBase,ServiceStack.Auth.IAuthSession,ServiceStack.Auth.IAuthRepository,ServiceStack.Auth.IAuthTokens)">
-            <summary>
-            Saves the Auth Tokens for this request. Called in OnAuthenticated(). 
-            Overrideable, the default behaviour is to call IUserAuthRepository.CreateOrMergeAuthSession().
             </summary>
         </member>
         <member name="T:ServiceStack.FluentValidation.AbstractValidator`1">
@@ -2914,25 +3042,6 @@
             The Callback URL for your app should match the CallbackUrl provided.
             </summary>
         </member>
-        <member name="M:ServiceStack.Auth.OAuthProvider.Authenticate(ServiceStack.IServiceBase,ServiceStack.Auth.IAuthSession,ServiceStack.Authenticate)">
-            <summary>
-            The entry point for all AuthProvider providers. Runs inside the AuthService so exceptions are treated normally.
-            Overridable so you can provide your own Auth implementation.
-            </summary>
-            <param name="authService"></param>
-            <param name="session"></param>
-            <param name="request"></param>
-            <returns></returns>
-        </member>
-        <member name="M:ServiceStack.Auth.OAuthProvider.Init(ServiceStack.IServiceBase,ServiceStack.Auth.IAuthSession@,ServiceStack.Authenticate)">
-            <summary>
-            Sets the CallbackUrl and session.ReferrerUrl if not set and initializes the session tokens for this AuthProvider
-            </summary>
-            <param name="authService"></param>
-            <param name="session"></param>
-            <param name="request"> </param>
-            <returns></returns>
-        </member>
         <member name="M:ServiceStack.Auth.AuthHttpGateway.DownloadYammerUserInfo(System.String)">
             <summary>
             Download Yammer User Info given its ID.
@@ -2968,6 +3077,11 @@
             Creates the required missing tables or DB schema 
             </summary>
         </member>
+        <member name="M:ServiceStack.Auth.RegisterService`1.Put(ServiceStack.Register)">
+            <summary>
+            Update an existing registraiton
+            </summary>
+        </member>
         <member name="M:ServiceStack.Auth.RegisterService`1.Post(ServiceStack.Register)">
             <summary>
                 Create new Registration
@@ -2975,7 +3089,7 @@
         </member>
         <member name="M:ServiceStack.Auth.RegisterService`1.UpdateUserAuth(ServiceStack.Register)">
             <summary>
-                Logic to update UserAuth from Registration info, not enabled on OnPut because of security.
+            Logic to update UserAuth from Registration info, not enabled on PUT because of security.
             </summary>
         </member>
         <member name="T:ServiceStack.Auth.SaltedHash">
@@ -3240,17 +3354,6 @@
             <param name="name"></param>
             <returns></returns>
         </member>
-        <member name="M:ServiceStack.Configuration.ISettings.Get(System.String)">
-            <summary>
-            Provides a common interface for Settings providers such as
-            ConfigurationManager or Azure's RoleEnvironment. The only
-            requirement is that if the implementation cannot find the
-            specified key, the return value must be null
-            </summary>
-            <param name="key">The key for the setting</param>
-            <returns>The string value of the specified key, or null if the key
-            was invalid</returns>
-        </member>
         <member name="M:ServiceStack.Configuration.ConfigUtils.GetNullableAppSetting(System.String)">
             <summary>
             Gets the nullable app setting.
@@ -3319,7 +3422,7 @@
             CORS allows to access resources from different domain which usually forbidden by origin policy. 
             </summary>
         </member>
-        <member name="M:ServiceStack.CorsFeature.#ctor(System.String,System.String,System.String,System.Boolean)">
+        <member name="M:ServiceStack.CorsFeature.#ctor(System.String,System.String,System.String,System.Boolean,System.String,System.Nullable{System.Int32})">
             <summary>
             Represents a default constructor with Allow Origin equals to "*", Allowed GET, POST, PUT, DELETE, OPTIONS request and allowed "Content-Type" header.
             </summary>

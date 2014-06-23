@@ -1,16 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using NUnit.Framework;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    internal class DateTimeOffsetTests : OrmLiteTestBase
+    public class DateTimeOffsetTests : OrmLiteTestBase
     {
         private IDbConnection db;
 
         [TestFixtureSetUp]
-        public void TestFixtureSetUp()
+        public new void TestFixtureSetUp()
         {
             db = base.OpenDbConnection();
         }
@@ -45,7 +46,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             var dateTime = new DateTimeOffset(2012, 1, 30, 1, 1, 1, new TimeSpan(5, 0, 0));
             var x = InsertAndSelectDateTimeOffset<DateTimeOffsetObject, DateTimeOffset>(db, dateTime);
-            Assert.AreEqual(x.Test, dateTime);
+            Assert.That(x.Test, Is.EqualTo(dateTime));
         }
 
         [Test]
@@ -53,22 +54,69 @@ namespace ServiceStack.OrmLite.Tests
         {
             DateTimeOffset? dateTime = new DateTimeOffset(2012, 1, 30, 1, 1, 1, new TimeSpan(5, 0, 0));
             var x = InsertAndSelectDateTimeOffset<NullableDateTimeOffsetObject, DateTimeOffset?>(db, dateTime);
-            Assert.AreEqual(x.Test, dateTime);
+            Assert.That(x.Test, Is.EqualTo(dateTime));
         }
 
         private class DateTimeOffsetObject : IDateTimeOffsetObject<DateTimeOffset>
         {
+            public int Id { get; set; }
             public DateTimeOffset Test { get; set; }
         }
 
         private class NullableDateTimeOffsetObject : IDateTimeOffsetObject<DateTimeOffset?>
         {
+            public int Id { get; set; }
             public DateTimeOffset? Test { get; set; }
         }
 
         private interface IDateTimeOffsetObject<T>
         {
+            int Id { get; set; }
             T Test { get; set; }
+        }
+
+
+        public class HasDateTimeOffsetMember
+        {
+            public int Id { get; set; }
+            public DateTimeOffset MomentInTime { get; set; }
+        }
+
+        public class HasNullableDateTimeOffsetMember
+        {
+            public int Id { get; set; }
+            public DateTimeOffset? MomentInTime { get; set; }
+        }
+
+        [Test]
+        public void CanPersistAndRetrieveDateTimeOffset()
+        {
+            var now = DateTimeOffset.Now;
+
+            db.DropAndCreateTable<HasDateTimeOffsetMember>();
+            db.Insert(new HasDateTimeOffsetMember { MomentInTime = now });
+
+            List<HasDateTimeOffsetMember> list = db.Select<HasDateTimeOffsetMember>();
+
+            Assert.That(list.Count == 1);
+            var actual = list.First().MomentInTime;
+            Assert.That(actual.Date, Is.EqualTo(now.Date));
+        }
+
+        [Test]
+        public void CanPersistAndRetrieveNullableDateTimeOffset()
+        {
+            var now = DateTimeOffset.Now;
+
+            db.DropAndCreateTable<HasNullableDateTimeOffsetMember>();
+            db.Insert(new HasNullableDateTimeOffsetMember { MomentInTime = now });
+
+            List<HasNullableDateTimeOffsetMember> list = db.Select<HasNullableDateTimeOffsetMember>();
+
+            Assert.That(list.Count == 1);
+            var actual = list.First().MomentInTime;
+            Assert.That(actual.HasValue);
+            Assert.That(actual.Value.Date, Is.EqualTo(now.Date));
         }
     }
 }

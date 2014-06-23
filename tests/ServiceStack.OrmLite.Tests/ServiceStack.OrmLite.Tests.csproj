@@ -83,7 +83,6 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
-    <Reference Include="System.Data.Entity" />
     <Reference Include="System.Runtime.Serialization">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
@@ -117,16 +116,25 @@
     <Compile Include="AdoNetDataAccessTests.cs" />
     <Compile Include="ApiSqlServerTests.cs" />
     <Compile Include="ApiSqliteTests.cs" />
+    <Compile Include="CaptureSqlFilterTests.cs" />
     <Compile Include="CustomSqlTests.cs" />
     <Compile Include="DateTimeOffsetTests.cs" />
+    <Compile Include="Expression\FromExpressionTests.cs" />
     <Compile Include="Expression\MethodExpressionTests.cs" />
+    <Compile Include="Expression\SqlExpressionTests.cs" />
     <Compile Include="Expression\SelectExpressionTests.cs" />
     <Compile Include="Issues\MismatchSchemaTests.cs" />
     <Compile Include="LicenseUsageTests.cs" />
+    <Compile Include="LoadReferencesJoinTests.cs" />
     <Compile Include="LoadReferencesTests.cs" />
     <Compile Include="MockAllApiTests.cs" />
+    <Compile Include="OrmLiteExecFilterTests.cs" />
     <Compile Include="OrmLiteFiltersTests.cs" />
+    <Compile Include="PerfTests.cs" />
+    <Compile Include="RowVersionTests.cs" />
+    <Compile Include="Shared\ModelWithNumerics.cs" />
     <Compile Include="StringSerializerTests.cs" />
+    <Compile Include="TestHelpers.cs" />
     <Compile Include="TypeDescriptorMetadataTests.cs" />
     <Compile Include="Shared\ApiUtilExtensions.cs" />
     <Compile Include="EnumTests.cs" />
@@ -202,14 +210,15 @@
     <Compile Include="OrmLiteTestBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SqlBuilderTests.cs" />
-    <Compile Include="SqliteOrmLiteDialectProviderTests.cs" />
     <Compile Include="SqlServerProviderTests.cs" />
     <Compile Include="TypeWithByteArrayFieldTests.cs" />
     <Compile Include="UntypedApiTests.cs" />
     <Compile Include="UseCase\AliasedFieldUseCase.cs" />
     <Compile Include="UseCase\CustomerOrdersUseCase.cs" />
+    <Compile Include="UseCase\FieldFromInterfaceImplementationUseCase.cs" />
     <Compile Include="UseCase\NestedComplexTypeUseCase.cs" />
     <Compile Include="UseCase\SchemaUseCase.cs" />
+    <Compile Include="UseCase\ServiceStack_OrmLite_UseCase.cs" />
     <Compile Include="UseCase\ShardingUseCase.cs" />
     <Compile Include="UseCase\SimpleUseCase.cs" />
     <Compile Include="OrmLiteGetScalarTests.cs" />

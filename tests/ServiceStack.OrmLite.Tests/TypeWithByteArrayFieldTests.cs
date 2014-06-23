@@ -55,6 +55,8 @@ namespace ServiceStack.OrmLite.Tests
         [Test, Explicit]
         public void Can_upload_attachment_via_sp()
         {
+            SuppressIfOracle("Oracle provider is not smart enough to replace parameter delimiter '@' with ':'");
+
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<Attachment>();
@@ -93,6 +95,8 @@ end");
         [Test, Explicit]
         public void Can_upload_attachment_via_sp_with_ADONET()
         {
+            SuppressIfOracle("Oracle provider is not smart enough to replace parameter delimiter '@' with ':'");
+
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<Attachment>();

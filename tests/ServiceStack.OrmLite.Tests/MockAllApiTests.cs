@@ -44,7 +44,7 @@ namespace ServiceStack.OrmLite.Tests
             {
                 Assert.That(db.Select<Person>(x => x.Age > 40)[0].FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.Select<Person>(q => q.Where(x => x.Age > 40))[0].FirstName, Is.EqualTo("Mocked"));
-                Assert.That(db.Select(db.SqlExpression<Person>().Where(x => x.Age > 40))[0].FirstName, Is.EqualTo("Mocked"));
+                Assert.That(db.Select(db.From<Person>().Where(x => x.Age > 40))[0].FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.Select<Person>("Age > 40")[0].FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.Select<Person>("SELECT * FROM Person WHERE Age > 40")[0].FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.Select<Person>("Age > @age", new { age = 40 })[0].FirstName, Is.EqualTo("Mocked"));
@@ -61,11 +61,9 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(db.SelectLazy<Person>().ToList()[0].FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.WhereLazy<Person>(new { Age = 27 }).ToList()[0].FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.Select<Person>()[0].FirstName, Is.EqualTo("Mocked"));
-                Assert.That(db.Select<Person>()[0].FirstName, Is.EqualTo("Mocked"));
-                Assert.That(db.Select<Person>()[0].FirstName, Is.EqualTo("Mocked"));
 
                 Assert.That(db.Single<Person>(x => x.Age == 42).FirstName, Is.EqualTo("Mocked"));
-                Assert.That(db.Single(db.SqlExpression<Person>().Where(x => x.Age == 42)).FirstName, Is.EqualTo("Mocked"));
+                Assert.That(db.Single(db.From<Person>().Where(x => x.Age == 42)).FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.Single<Person>(new { Age = 42 }).FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.Single<Person>("Age = @age", new { age = 42 }).FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.SingleFmt<Person>("Age = {0}", 42).FirstName, Is.EqualTo("Mocked"));
@@ -163,7 +161,7 @@ namespace ServiceStack.OrmLite.Tests
             })
             {
                 Assert.That(db.Single<Person>(x => x.Age == 42).FirstName, Is.EqualTo("Mocked"));
-                Assert.That(db.Single(db.SqlExpression<Person>().Where(x => x.Age == 42)).FirstName, Is.EqualTo("Mocked"));
+                Assert.That(db.Single(db.From<Person>().Where(x => x.Age == 42)).FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.Single<Person>(new { Age = 42 }).FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.Single<Person>("Age = @age", new { age = 42 }).FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.SingleFmt<Person>("Age = {0}", 42).FirstName, Is.EqualTo("Mocked"));
@@ -184,7 +182,7 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(db.Scalar<Person, int>(x => Sql.Max(x.Age)), Is.EqualTo(1000));
                 Assert.That(db.Scalar<Person, int>(x => Sql.Max(x.Age), x => x.Age < 50), Is.EqualTo(1000));
                 Assert.That(db.Count<Person>(x => x.Age < 50), Is.EqualTo(1000));
-                Assert.That(db.Count(db.SqlExpression<Person>().Where(x => x.Age < 50)), Is.EqualTo(1000));
+                Assert.That(db.Count(db.From<Person>().Where(x => x.Age < 50)), Is.EqualTo(1000));
                 Assert.That(db.Scalar<int>("SELECT COUNT(*) FROM Person WHERE Age > @age", new { age = 40 }), Is.EqualTo(1000));
                 Assert.That(db.ScalarFmt<int>("SELECT COUNT(*) FROM Person WHERE Age > {0}", 40), Is.EqualTo(1000));
 
@@ -279,7 +277,7 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(db.DeleteFmt(typeof(Person), "Age = {0}", 27), Is.EqualTo(10));
                 Assert.That(db.Delete<Person>(p => p.Age == 27), Is.EqualTo(10));
                 Assert.That(db.Delete<Person>(ev => ev.Where(p => p.Age == 27)), Is.EqualTo(10));
-                Assert.That(db.Delete(db.SqlExpression<Person>().Where(p => p.Age == 27)), Is.EqualTo(10));
+                Assert.That(db.Delete(db.From<Person>().Where(p => p.Age == 27)), Is.EqualTo(10));
                 Assert.That(db.DeleteFmt<Person>(where: "Age = {0}".SqlFmt(27)), Is.EqualTo(10));
                 Assert.That(db.DeleteFmt(table: "Person", where: "Age = {0}".SqlFmt(27)), Is.EqualTo(10));
             }
@@ -331,7 +329,7 @@ namespace ServiceStack.OrmLite.Tests
                 i++; db.InsertOnly(new PersonWithAutoId { FirstName = "Amy", Age = 27 }, ev => ev.Insert(p => new { p.FirstName, p.Age }));
                 Assert.That(sqlStatements.Count, Is.EqualTo(i));
 
-                i++; db.InsertOnly(new PersonWithAutoId { FirstName = "Amy", Age = 27 }, ev => db.SqlExpression<PersonWithAutoId>().Insert(p => new { p.FirstName, p.Age }));
+                i++; db.InsertOnly(new PersonWithAutoId { FirstName = "Amy", Age = 27 }, ev => db.From<PersonWithAutoId>().Insert(p => new { p.FirstName, p.Age }));
                 Assert.That(sqlStatements.Count, Is.EqualTo(i));
 
                 sqlStatements.Each(x => x.Print());
@@ -405,6 +403,8 @@ namespace ServiceStack.OrmLite.Tests
                 i += 2; db.Save(customer);
                 Assert.That(sqlStatements.Count, Is.EqualTo(i));
 
+                SuppressIfOracle("This seems wrong here as the save actually goes through to the database in Oracle to get the next number from the sequence");
+
                 i += 1; db.SaveReferences(customer, customer.PrimaryAddress);
                 Assert.That(sqlStatements.Count, Is.EqualTo(i));
 
@@ -418,5 +418,28 @@ namespace ServiceStack.OrmLite.Tests
             }
         }
 
+        [Test]
+        public void Can_mock_stored_procedures()
+        {
+            using (new OrmLiteResultsFilter {
+                Results = new[] {
+                    new Person { Id = 1, FirstName = "Mocked", LastName = "Person", Age = 100 }
+                },
+            })
+            {
+                Assert.That(db.SqlList<Person>("exec sp_name @firstName, @age",
+                        new { firstName = "aName", age = 1 }).First().FirstName,
+                    Is.EqualTo("Mocked"));
+            }
+
+            using (new OrmLiteResultsFilter {
+                ScalarResult = new Person { Id = 1, FirstName = "Mocked", LastName = "Person", Age = 100 },
+            })
+            {
+                Assert.That(db.SqlScalar<Person>("exec sp_name @firstName, @age",
+                        new { firstName = "aName", age = 1 }).FirstName,
+                    Is.EqualTo("Mocked"));
+            }
+        }
     }
 }

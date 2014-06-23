@@ -44,11 +44,6 @@ namespace ServiceStack.OrmLite
             typeModelDefinitionMap = new Dictionary<Type, ModelDefinition>();
         }
 
-        public static ModelDefinition Init(this Type modelType)
-        {
-            return modelType.GetModelDefinition();
-        }
-
         internal static ModelDefinition GetModelDefinition(this Type modelType)
         {
             ModelDefinition modelDef;
@@ -67,7 +62,8 @@ namespace ServiceStack.OrmLite
             var preDrop = modelType.FirstAttribute<PreDropTableAttribute>();
             var postDrop = modelType.FirstAttribute<PostDropTableAttribute>();
 
-            modelDef = new ModelDefinition {
+            modelDef = new ModelDefinition
+            {
                 ModelType = modelType,
                 Name = modelType.Name,
                 Alias = modelAliasAttr != null ? modelAliasAttr.Name : null,
@@ -92,14 +88,20 @@ namespace ServiceStack.OrmLite
             var i = 0;
             foreach (var propertyInfo in objProperties)
             {
+                if (propertyInfo.GetIndexParameters().Length > 0)
+                    continue; //Is Indexer
+
                 var sequenceAttr = propertyInfo.FirstAttribute<SequenceAttribute>();
-                var computeAttr= propertyInfo.FirstAttribute<ComputeAttribute>();
+                var computeAttr = propertyInfo.FirstAttribute<ComputeAttribute>();
                 var decimalAttribute = propertyInfo.FirstAttribute<DecimalLengthAttribute>();
                 var belongToAttribute = propertyInfo.FirstAttribute<BelongToAttribute>();
                 var isFirst = i++ == 0;
 
                 var isPrimaryKey = (!hasPkAttr && (propertyInfo.Name == OrmLiteConfig.IdField || (!hasIdField && isFirst)))
                     || propertyInfo.HasAttributeNamed(typeof(PrimaryKeyAttribute).Name);
+
+                var isRowVersion = propertyInfo.Name == ModelDefinition.RowVersionName
+                    && propertyInfo.PropertyType == typeof(ulong);
 
                 var isNullableType = IsNullableType(propertyInfo.PropertyType);
 
@@ -133,11 +135,12 @@ namespace ServiceStack.OrmLite
                 var defaultValueAttr = propertyInfo.FirstAttribute<DefaultAttribute>();
 
                 var referencesAttr = propertyInfo.FirstAttribute<ReferencesAttribute>();
-                var referenceAttr  = propertyInfo.FirstAttribute<ReferenceAttribute>();
+                var referenceAttr = propertyInfo.FirstAttribute<ReferenceAttribute>();
                 var foreignKeyAttr = propertyInfo.FirstAttribute<ForeignKeyAttribute>();
                 var customFieldAttr = propertyInfo.FirstAttribute<CustomFieldAttribute>();
 
-                var fieldDefinition = new FieldDefinition {
+                var fieldDefinition = new FieldDefinition
+                {
                     Name = propertyInfo.Name,
                     Alias = aliasAttr != null ? aliasAttr.Name : null,
                     FieldType = propertyType,
@@ -152,6 +155,7 @@ namespace ServiceStack.OrmLite
                     IsUnique = isUnique,
                     IsClustered = indexAttr != null && indexAttr.Clustered,
                     IsNonClustered = indexAttr != null && indexAttr.NonClustered,
+                    IsRowVersion = isRowVersion,
                     FieldLength = stringLengthAttr != null
                         ? stringLengthAttr.MaximumLength
                         : (int?)null,
@@ -169,16 +173,20 @@ namespace ServiceStack.OrmLite
                     IsComputed = computeAttr != null,
                     ComputeExpression = computeAttr != null ? computeAttr.Expression : string.Empty,
                     Scale = decimalAttribute != null ? decimalAttribute.Scale : (int?)null,
-                    BelongToModelName = belongToAttribute != null ? belongToAttribute.BelongToTableType.GetModelDefinition().ModelName : null, 
+                    BelongToModelName = belongToAttribute != null ? belongToAttribute.BelongToTableType.GetModelDefinition().ModelName : null,
                     CustomFieldDefinition = customFieldAttr != null ? customFieldAttr.Sql : null,
+                    IsRefType = propertyType.IsRefType(),
                 };
-
+                
                 var isIgnored = propertyInfo.HasAttributeNamed(typeof(IgnoreAttribute).Name)
                     || fieldDefinition.IsReference;
                 if (isIgnored)
-                  modelDef.IgnoredFieldDefinitions.Add(fieldDefinition);
+                    modelDef.IgnoredFieldDefinitions.Add(fieldDefinition);
                 else
-                  modelDef.FieldDefinitions.Add(fieldDefinition);
+                    modelDef.FieldDefinitions.Add(fieldDefinition);
+
+                if (isRowVersion)
+                    modelDef.RowVersion = fieldDefinition;
             }
 
             modelDef.SqlSelectAllFromTable = "SELECT {0} FROM {1} "
@@ -194,7 +202,7 @@ namespace ServiceStack.OrmLite
 
             } while (!ReferenceEquals(
                 Interlocked.CompareExchange(ref typeModelDefinitionMap, newCache, snapshot), snapshot));
-            
+
             LicenseUtils.AssertValidUsage(LicenseFeature.OrmLite, QuotaType.Tables, typeModelDefinitionMap.Count);
 
             return modelDef;
@@ -206,7 +214,7 @@ namespace ServiceStack.OrmLite
             if (attr != null) return attr;
 
             var componentAttr = propertyInfo.FirstAttribute<System.ComponentModel.DataAnnotations.StringLengthAttribute>();
-            if (componentAttr != null) 
+            if (componentAttr != null)
                 return new StringLengthAttribute(componentAttr.MaximumLength);
 
             return decimalAttribute != null ? new StringLengthAttribute(decimalAttribute.Precision) : null;

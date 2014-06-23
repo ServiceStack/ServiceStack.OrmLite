@@ -6,7 +6,7 @@ using System.Text;
 
 namespace ServiceStack.OrmLite
 {
-    public class JoinSqlBuilder<TNewPoco, TBasePoco>
+    public class JoinSqlBuilder<TNewPoco, TBasePoco> : ISqlExpression
     {
         private List<Join> joinList = new List<Join>();
         private List<KeyValuePair<string, WhereType>> whereList = new List<KeyValuePair<string, WhereType>>();
@@ -14,6 +14,9 @@ namespace ServiceStack.OrmLite
         private List<KeyValuePair<string, bool>> orderByList = new List<KeyValuePair<string, bool>>();
         private bool isDistinct = false;
         private bool isAggregateUsed = false;
+
+        private int? Rows { get; set; }
+        private int? Offset { get; set; }
 
         private string baseSchema = "";
         private string baseTableName = "";
@@ -412,105 +415,194 @@ namespace ServiceStack.OrmLite
 
         private void CheckAggregateUsage(bool ignoreCurrentItem)
         {
-            if ((columnList.Count > (ignoreCurrentItem ? 0 : 1)) && (isAggregateUsed == true))
+            if ((columnList.Count > (ignoreCurrentItem ? 0 : 1)) && isAggregateUsed)
             {
                 throw new Exception("Aggregate function cannot be used with non aggregate select columns");
             }
         }
 
-        public string ToSql()
+        /// <summary>
+        /// Offset of the first row to return. The offset of the initial row is 0
+        /// </summary>
+        public virtual JoinSqlBuilder<TNewPoco, TBasePoco> Skip(int? skip = null)
         {
+            Offset = skip;
+            return this;
+        }
+
+        /// <summary>
+        /// Number of rows returned by a SELECT statement
+        /// </summary>
+        public virtual JoinSqlBuilder<TNewPoco, TBasePoco> Take(int? take = null)
+        {
+            Rows = take;
+            return this;
+        }
+
+        /// <summary>
+        /// Set the specified offset and rows for SQL Limit clause.
+        /// </summary>
+        /// <param name='skip'>
+        /// Offset of the first row to return. The offset of the initial row is 0
+        /// </param>
+        /// <param name='rows'>
+        /// Number of rows returned by a SELECT statement
+        /// </param>	
+        public virtual JoinSqlBuilder<TNewPoco, TBasePoco> Limit(int skip, int rows)
+        {
+            Offset = skip;
+            Rows = rows;
+            return this;
+        }
+
+        /// <summary>
+        /// Set the specified offset and rows for SQL Limit clause where they exist.
+        /// </summary>
+        /// <param name='skip'>
+        /// Offset of the first row to return. The offset of the initial row is 0
+        /// </param>
+        /// <param name='rows'>
+        /// Number of rows returned by a SELECT statement
+        /// </param>	
+        public virtual JoinSqlBuilder<TNewPoco, TBasePoco> Limit(int? skip, int? rows)
+        {
+            Offset = skip;
+            Rows = rows;
+            return this;
+        }
+
+        /// <summary>
+        /// Set the specified rows for Sql Limit clause.
+        /// </summary>
+        /// <param name='rows'>
+        /// Number of rows returned by a SELECT statement
+        /// </param>
+        public virtual JoinSqlBuilder<TNewPoco, TBasePoco> Limit(int rows)
+        {
+            Offset = null;
+            Rows = rows;
+            return this;
+        }
+
+        /// <summary>
+        /// Clear Sql Limit clause
+        /// </summary>
+        public virtual JoinSqlBuilder<TNewPoco, TBasePoco> Limit()
+        {
+            Offset = null;
+            Rows = null;
+            return this;
+        }
+
+        public string SelectInto<T>()
+        {
+            var modelDef = typeof(T).GetModelDefinition();
+
             CheckAggregateUsage(false);
 
-            var sb = new StringBuilder();
-            sb.Append("SELECT ");
+            var sbSelect = new StringBuilder();
+            sbSelect.Append("SELECT ");
 
-            var colSB = new StringBuilder();
+            var dbColumns = new StringBuilder();
 
             if (columnList.Count > 0)
             {
                 if (isDistinct)
-                    sb.Append(" DISTINCT ");
+                    sbSelect.Append(" DISTINCT ");
 
                 foreach (var col in columnList)
                 {
-                    colSB.AppendFormat("{0}{1}", colSB.Length > 0 ? "," : "", col);
+                    dbColumns.AppendFormat("{0}{1}", dbColumns.Length > 0 ? "," : "", col);
                 }
             }
             else
             {
                 // improve performance avoiding multiple calls to GetModelDefinition()
-                var modelDef = typeof(TNewPoco).GetModelDefinition();
-
                 if (isDistinct && modelDef.FieldDefinitions.Count > 0)
-                    sb.Append(" DISTINCT ");
+                    sbSelect.Append(" DISTINCT ");
 
                 foreach (var fi in modelDef.FieldDefinitions)
                 {
-                    colSB.AppendFormat("{0}{1}", colSB.Length > 0 ? "," : "", (String.IsNullOrEmpty(fi.BelongToModelName) ? (OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef.ModelName)) : (OrmLiteConfig.DialectProvider.GetQuotedTableName(fi.BelongToModelName))) + "." + OrmLiteConfig.DialectProvider.GetQuotedColumnName(fi.FieldName));
+                    dbColumns.AppendFormat("{0}{1}", dbColumns.Length > 0 ? "," : "", (String.IsNullOrEmpty(fi.BelongToModelName) ? (OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef.ModelName)) : (OrmLiteConfig.DialectProvider.GetQuotedTableName(fi.BelongToModelName))) + "." + OrmLiteConfig.DialectProvider.GetQuotedColumnName(fi.FieldName));
                 }
-                if (colSB.Length == 0)
-                    colSB.AppendFormat("\"{0}{1}\".*", baseSchema, OrmLiteConfig.DialectProvider.GetQuotedTableName(baseTableName));
+                if (dbColumns.Length == 0)
+                    dbColumns.AppendFormat("\"{0}{1}\".*", baseSchema, OrmLiteConfig.DialectProvider.GetQuotedTableName(baseTableName));
             }
 
-            sb.Append(colSB.ToString() + " \n");
+            sbSelect.Append(dbColumns + " \n");
 
-            sb.AppendFormat("FROM {0}{1} \n", baseSchema, OrmLiteConfig.DialectProvider.GetQuotedTableName(baseTableName));
+            var sbBody = new StringBuilder();
+            sbBody.AppendFormat("FROM {0}{1} \n", baseSchema, OrmLiteConfig.DialectProvider.GetQuotedTableName(baseTableName));
             int i = 0;
             foreach (var join in joinList)
             {
                 i++;
                 if ((join.JoinType == JoinType.INNER) || (join.JoinType == JoinType.SELF))
-                    sb.Append(" INNER JOIN ");
+                    sbBody.Append(" INNER JOIN ");
                 else if (join.JoinType == JoinType.LEFTOUTER)
-                    sb.Append(" LEFT OUTER JOIN ");
+                    sbBody.Append(" LEFT OUTER JOIN ");
                 else if (join.JoinType == JoinType.RIGHTOUTER)
-                    sb.Append(" RIGHT OUTER JOIN ");
+                    sbBody.Append(" RIGHT OUTER JOIN ");
                 else if (join.JoinType == JoinType.FULLOUTER)
-                    sb.Append(" FULL OUTER JOIN ");
+                    sbBody.Append(" FULL OUTER JOIN ");
                 else if (join.JoinType == JoinType.CROSS)
                 {
-                    sb.Append(" CROSS JOIN ");
+                    sbBody.Append(" CROSS JOIN ");
                 }
 
                 if (join.JoinType == JoinType.CROSS)
                 {
-                    sb.AppendFormat(" {0}{1} ON {2} = {3}  \n", join.RefTypeSchema, OrmLiteConfig.DialectProvider.GetQuotedTableName(join.RefTypeTableName));
+                    sbBody.AppendFormat(" {0}{1} ON {2} = {3}  \n", join.RefTypeSchema, OrmLiteConfig.DialectProvider.GetQuotedTableName(join.RefTypeTableName));
                 }
                 else
                 {
                     if (join.JoinType != JoinType.SELF)
                     {
-                        sb.AppendFormat(" {0}{1} ON {2} = {3}  \n", join.RefTypeSchema, OrmLiteConfig.DialectProvider.GetQuotedTableName(join.RefTypeTableName), join.Class1ColumnName, join.Class2ColumnName);
+                        sbBody.AppendFormat(" {0}{1} ON {2} = {3}  \n", join.RefTypeSchema, OrmLiteConfig.DialectProvider.GetQuotedTableName(join.RefTypeTableName), join.Class1ColumnName, join.Class2ColumnName);
                     }
                     else
                     {
-                        sb.AppendFormat(" {0}{1} AS {2} ON {2}.{3} = \"{1}\".{4}  \n", join.RefTypeSchema, OrmLiteConfig.DialectProvider.GetQuotedTableName(join.RefTypeTableName), OrmLiteConfig.DialectProvider.GetQuotedTableName(join.RefTypeTableName) + "_" + i.ToString(), join.Class1ColumnName, join.Class2ColumnName);
+                        sbBody.AppendFormat(" {0}{1} AS {2} ON {2}.{3} = \"{1}\".{4}  \n", join.RefTypeSchema, OrmLiteConfig.DialectProvider.GetQuotedTableName(join.RefTypeTableName), OrmLiteConfig.DialectProvider.GetQuotedTableName(join.RefTypeTableName) + "_" + i.ToString(), join.Class1ColumnName, join.Class2ColumnName);
                     }
                 }
             }
 
             if (whereList.Count > 0)
             {
-                var whereSB = new StringBuilder();
+                var sbWhere = new StringBuilder();
                 foreach (var where in whereList)
                 {
-                    whereSB.AppendFormat("{0}{1}", whereSB.Length > 0 ? (where.Value == WhereType.OR ? " OR " : " AND ") : "", where.Key);
+                    sbWhere.AppendFormat("{0}{1}", sbWhere.Length > 0
+                        ? (where.Value == WhereType.OR ? " OR " : " AND ") : "", where.Key);
                 }
-                sb.Append("WHERE " + whereSB.ToString() + " \n");
+                sbBody.Append("WHERE " + sbWhere + " \n");
             }
 
+            var sbOrderBy = new StringBuilder();
             if (orderByList.Count > 0)
             {
-                var orderBySB = new StringBuilder();
                 foreach (var ob in orderByList)
                 {
-                    orderBySB.AppendFormat("{0}{1} {2} ", orderBySB.Length > 0 ? "," : "", ob.Key, ob.Value ? "ASC" : "DESC");
+                    sbOrderBy.AppendFormat("{0}{1} {2} ", sbOrderBy.Length > 0 ? "," : "", ob.Key, ob.Value ? "ASC" : "DESC");
                 }
-                sb.Append("ORDER BY " + orderBySB.ToString() + " \n");
+                sbOrderBy.Insert(0, "ORDER BY ");
+                sbOrderBy.Append(" \n");
             }
 
-            return sb.ToString();
+            var sql = OrmLiteConfig.DialectProvider.ToSelectStatement(
+                modelDef, sbSelect.ToString(), sbBody.ToString(), sbOrderBy.ToString(), Offset, Rows);
+
+            return sql; 
+        }
+
+        public string ToSql()
+        {
+            return SelectInto<TNewPoco>();
+        }
+
+        public string ToSelectStatement()
+        {
+            return SelectInto<TNewPoco>();
         }
     }
 

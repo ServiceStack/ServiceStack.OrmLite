@@ -14,11 +14,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
-	public static class OrmLiteUtilExtensions
-	{
+    public static class OrmLiteUtilExtensions
+    {
         public static T CreateInstance<T>()
         {
             return (T)ReflectionExtensions.CreateInstance<T>();
@@ -41,23 +42,23 @@ namespace ServiceStack.OrmLite
             }
         }
 
-		public static List<T> ConvertToList<T>(this IDataReader dataReader)
-		{
+        public static List<T> ConvertToList<T>(this IDataReader dataReader)
+        {
             var fieldDefs = ModelDefinition<T>.Definition.AllFieldDefinitionsArray;
 
-			var to = new List<T>();
-			using (dataReader)
-			{
-				var indexCache = dataReader.GetIndexFieldsCache(ModelDefinition<T>.Definition);
-				while (dataReader.Read())
-				{
+            var to = new List<T>();
+            using (dataReader)
+            {
+                var indexCache = dataReader.GetIndexFieldsCache(ModelDefinition<T>.Definition);
+                while (dataReader.Read())
+                {
                     var row = CreateInstance<T>();
-					row.PopulateWithSqlReader(dataReader, fieldDefs, indexCache);
-					to.Add(row);
-				}
-			}
-			return to;
-		}
+                    row.PopulateWithSqlReader(dataReader, fieldDefs, indexCache);
+                    to.Add(row);
+                }
+            }
+            return to;
+        }
 
         public static object ConvertTo(this IDataReader dataReader, Type type)
         {
@@ -97,63 +98,78 @@ namespace ServiceStack.OrmLite
             return to;
         }
 
-		internal static string GetColumnNames(this Type tableType)
-		{
-		    var modelDefinition = tableType.GetModelDefinition();
-		    return GetColumnNames(modelDefinition);
-		}
+        internal static string GetColumnNames(this Type tableType)
+        {
+            return GetColumnNames(tableType.GetModelDefinition());
+        }
 
-	    public static string GetColumnNames(this ModelDefinition modelDef)
-	    {
-            var sqlColumns = new StringBuilder();
-            foreach (var field in modelDef.FieldDefinitions)
+        public static string GetColumnNames(this ModelDefinition modelDef)
+        {
+            return OrmLiteConfig.DialectProvider.GetColumnNames(modelDef);
+        }
+
+        internal static string GetIdsInSql(this IEnumerable idValues)
+        {
+            var sql = new StringBuilder();
+            foreach (var idValue in idValues)
             {
-                if (sqlColumns.Length > 0)
-                    sqlColumns.Append(", ");
-
-                sqlColumns.Append(OrmLiteConfig.DialectProvider.GetQuotedColumnName(field.FieldName));
+                if (sql.Length > 0) sql.Append(",");
+                sql.AppendFormat("{0}".SqlFmt(idValue));
             }
+            return sql.Length == 0 ? null : sql.ToString();
+        }
 
-	        return sqlColumns.ToString();
-	    }
+        public static string SqlFmt(this string sqlText, params object[] sqlParams)
+        {
+            var escapedParams = new List<string>();
+            foreach (var sqlParam in sqlParams)
+            {
+                if (sqlParam == null)
+                {
+                    escapedParams.Add("NULL");
+                }
+                else
+                {
+                    var sqlInValues = sqlParam as SqlInValues;
+                    if (sqlInValues != null)
+                    {
+                        escapedParams.Add(sqlInValues.ToSqlInString());
+                    }
+                    else
+                    {
+                        escapedParams.Add(OrmLiteConfig.DialectProvider.GetQuotedValue(sqlParam, sqlParam.GetType()));
+                    }
+                }
+            }
+            return string.Format(sqlText, escapedParams.ToArray());
+        }
 
-	    internal static string GetIdsInSql(this IEnumerable idValues)
-		{
-			var sql = new StringBuilder();
-			foreach (var idValue in idValues)
-			{
-				if (sql.Length > 0) sql.Append(",");
-				sql.AppendFormat("{0}".SqlFmt(idValue));
-			}
-			return sql.Length == 0 ? null : sql.ToString();
-		}
+        public static string SqlColumn(this string columnName)
+        {
+            return OrmLiteConfig.DialectProvider.GetQuotedColumnName(columnName);
+        }
 
-		public static string SqlFmt(this string sqlText, params object[] sqlParams)
-		{
-			var escapedParams = new List<string>();
-			foreach (var sqlParam in sqlParams)
-			{
-				if (sqlParam == null)
-				{
-					escapedParams.Add("NULL");
-				}
-				else
-				{
-					var sqlInValues = sqlParam as SqlInValues;
-					if (sqlInValues != null)
-					{
-						escapedParams.Add(sqlInValues.ToSqlInString());
-					}
-					else
-					{
-						escapedParams.Add(OrmLiteConfig.DialectProvider.GetQuotedValue(sqlParam, sqlParam.GetType()));
-					}
-				}
-			}
-			return string.Format(sqlText, escapedParams.ToArray());
-		}
+        public static string SqlColumnRaw(this string columnName)
+        {
+            return OrmLiteConfig.DialectProvider.NamingStrategy.GetColumnName(columnName);
+        }
 
-	    public static string[] IllegalSqlFragmentTokens = { 
+        public static string SqlTable(this string tableName)
+        {
+            return OrmLiteConfig.DialectProvider.GetQuotedTableName(tableName);
+        }
+
+        public static string SqlTableRaw(this string tableName)
+        {
+            return OrmLiteConfig.DialectProvider.NamingStrategy.GetTableName(tableName);
+        }
+
+        public static string SqlValue(this object value)
+        {
+            return "{0}".SqlFmt(value);
+        }
+
+        public static string[] IllegalSqlFragmentTokens = { 
             "--", ";--", ";", "%", "/*", "*/", "@@", "@", 
             "char", "nchar", "varchar", "nvarchar",
             "alter", "begin", "cast", "create", "cursor", "declare", "delete",
@@ -162,19 +178,24 @@ namespace ServiceStack.OrmLite
 
         public static string SqlVerifyFragment(this string sqlFragment)
         {
+            return SqlVerifyFragment(sqlFragment, IllegalSqlFragmentTokens);
+        }
+
+        public static string SqlVerifyFragment(this string sqlFragment, string[] illegalFragments)
+        {
             var fragmentToVerify = sqlFragment
                 .StripQuotedStrings('\'')
                 .StripQuotedStrings('"')
                 .ToLower();
 
-            for (int i = 0; i <= IllegalSqlFragmentTokens.Length - 1; i++)
+            for (int i = 0; i <= illegalFragments.Length - 1; i++)
             {
-                if ((fragmentToVerify.IndexOf(IllegalSqlFragmentTokens[i], StringComparison.Ordinal) >= 0))
+                if ((fragmentToVerify.IndexOf(illegalFragments[i], StringComparison.Ordinal) >= 0))
                 {
                     throw new ArgumentException("Potential illegal fragment detected: " + sqlFragment);
                 }
             }
-            
+
             return sqlFragment;
         }
 
@@ -203,39 +224,39 @@ namespace ServiceStack.OrmLite
             return sb.ToString();
         }
 
-		public static string SqlJoin<T>(this List<T> values)
-		{
-			var sb = new StringBuilder();
-			foreach (var value in values)
-			{
-				if (sb.Length > 0) sb.Append(",");
-				sb.Append(OrmLiteConfig.DialectProvider.GetQuotedValue(value, value.GetType()));
-			}
+        public static string SqlJoin<T>(this List<T> values)
+        {
+            var sb = new StringBuilder();
+            foreach (var value in values)
+            {
+                if (sb.Length > 0) sb.Append(",");
+                sb.Append(OrmLiteConfig.DialectProvider.GetQuotedValue(value, value.GetType()));
+            }
 
-			return sb.ToString();
-		}
+            return sb.ToString();
+        }
 
-		public static string SqlJoin(IEnumerable values)
-		{
-			var sb = new StringBuilder();
-			foreach (var value in values)
-			{
-				if (sb.Length > 0) sb.Append(",");
-				sb.Append(OrmLiteConfig.DialectProvider.GetQuotedValue(value, value.GetType()));
-			}
+        public static string SqlJoin(IEnumerable values)
+        {
+            var sb = new StringBuilder();
+            foreach (var value in values)
+            {
+                if (sb.Length > 0) sb.Append(",");
+                sb.Append(OrmLiteConfig.DialectProvider.GetQuotedValue(value, value.GetType()));
+            }
 
-			return sb.ToString();
-		}
+            return sb.ToString();
+        }
 
-		public static SqlInValues SqlInValues<T>(this List<T> values)
-		{
-			return new SqlInValues(values);
-		}
+        public static SqlInValues SqlInValues<T>(this List<T> values)
+        {
+            return new SqlInValues(values);
+        }
 
-		public static SqlInValues SqlInValues<T>(this T[] values)
-		{
-			return new SqlInValues(values);
-		}
+        public static SqlInValues SqlInValues<T>(this T[] values)
+        {
+            return new SqlInValues(values);
+        }
 
         public static Dictionary<string, int> GetIndexFieldsCache(this IDataReader reader, ModelDefinition modelDefinition = null)
         {
@@ -254,5 +275,13 @@ namespace ServiceStack.OrmLite
             return cache;
         }
 
-	}
+        public static bool IsRefType(this Type fieldType)
+        {
+            return (!fieldType.UnderlyingSystemType.IsValueType
+                || JsConfig.TreatValueAsRefTypes.Contains(fieldType.IsGeneric()
+                    ? fieldType.GenericTypeDefinition()
+                    : fieldType))
+                && fieldType != typeof(string);
+        }
+    }
 }

@@ -2,14 +2,14 @@
 
 namespace ServiceStack.OrmLite.PostgreSQL
 {
-    public class PostgreSqlNamingStrategy : INamingStrategy
+    public class PostgreSqlNamingStrategy : OrmLiteNamingStrategyBase
     {
-        public string GetTableName(string name)
+        public override string GetTableName(string name)
         {
             return name.ToLowercaseUnderscore();
         }
 
-        public string GetColumnName(string name)
+        public override string GetColumnName(string name)
         {
             return name.ToLowercaseUnderscore();
         }

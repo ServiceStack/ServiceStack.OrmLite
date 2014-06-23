@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Data;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
@@ -37,13 +38,13 @@ namespace ServiceStack.OrmLite.Tests
         {
             var row = CreateModelWithFieldsOfDifferentTypes();
 
-            db.Insert(row);
+            row.Id = (int)db.Insert(row, selectIdentity: true);
 
             row.Name = "UpdatedName";
 
             db.Update(row);
 
-            var dbRow = db.SingleById<ModelWithFieldsOfDifferentTypes>(1);
+            var dbRow = db.SingleById<ModelWithFieldsOfDifferentTypes>(row.Id);
 
             ModelWithFieldsOfDifferentTypes.AssertIsEqual(dbRow, row);
         }
@@ -53,13 +54,13 @@ namespace ServiceStack.OrmLite.Tests
         {
             var row = CreateModelWithFieldsOfDifferentTypes();
 
-            db.Insert(row);
+            row.Id = (int)db.Insert(row, selectIdentity: true);
 
             row.Name = "UpdatedName";
 
             db.Update(row, x => x.LongId <= row.LongId);
 
-            var dbRow = db.SingleById<ModelWithFieldsOfDifferentTypes>(1);
+            var dbRow = db.SingleById<ModelWithFieldsOfDifferentTypes>(row.Id);
 
             ModelWithFieldsOfDifferentTypes.AssertIsEqual(dbRow, row);
         }
@@ -69,7 +70,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             var row = CreateModelWithFieldsOfDifferentTypes();
 
-            db.Insert(row);
+            row.Id = (int)db.Insert(row, selectIdentity: true);
             row.DateTime = DateTime.Now;
             row.Name = "UpdatedName";
 
@@ -86,10 +87,10 @@ namespace ServiceStack.OrmLite.Tests
         {
             var row = CreateModelWithFieldsOfDifferentTypes();
 
-            db.Insert(row);
+            row.Id = (int)db.Insert(row, selectIdentity: true);
             row.Name = "UpdatedName";
 
-            db.UpdateFmt<ModelWithFieldsOfDifferentTypes>(set: "NAME = {0}".SqlFmt(row.Name), where: "LongId <= {0}".SqlFmt(row.LongId));
+            db.UpdateFmt<ModelWithFieldsOfDifferentTypes>(set: "NAME = {0}".SqlFmt(row.Name), where: "LongId".SqlColumn() + " <= {0}".SqlFmt(row.LongId));
 
             var dbRow = db.SingleById<ModelWithFieldsOfDifferentTypes>(row.Id);
             Console.WriteLine(dbRow.Dump());
@@ -101,16 +102,39 @@ namespace ServiceStack.OrmLite.Tests
         {
             var row = CreateModelWithFieldsOfDifferentTypes();
 
-            db.Insert(row);
+            row.Id = (int)db.Insert(row, selectIdentity: true);
             row.Name = "UpdatedName";
 
-            db.UpdateFmt(table: "ModelWithFieldsOfDifferentTypes",
-                set: "NAME = {0}".SqlFmt(row.Name), where: "LongId <= {0}".SqlFmt(row.LongId));
+            db.UpdateFmt(table: "ModelWithFieldsOfDifferentTypes".SqlTableRaw(),
+                set: "NAME = {0}".SqlFmt(row.Name), where: "LongId".SqlColumn() + " <= {0}".SqlFmt(row.LongId));
 
             var dbRow = db.SingleById<ModelWithFieldsOfDifferentTypes>(row.Id);
             Console.WriteLine(dbRow.Dump());
             ModelWithFieldsOfDifferentTypes.AssertIsEqual(dbRow, row);
         }
 
+        [Test]
+        public void Can_Update_Into_Table_With_Id_Only()
+        {
+            db.CreateTable<ModelWithIdOnly>(true);
+            var row1 = new ModelWithIdOnly(1);
+            db.Insert(row1);
+
+            db.Update(row1);
+        }
+
+        [Test]
+        public void Can_Update_Many_Into_Table_With_Id_Only()
+        {
+            db.CreateTable<ModelWithIdOnly>(true);
+            var row1 = new ModelWithIdOnly(1);
+            var row2 = new ModelWithIdOnly(2);
+            db.Insert(row1, row2);
+
+            db.Update(row1, row2);
+
+            var list = new List<ModelWithIdOnly> { row1, row2 };
+            db.UpdateAll(list);
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
@@ -11,6 +12,27 @@ namespace ServiceStack.OrmLite.MySql.Tests.Expressions
         public void Setup()
         {
             OpenDbConnection().CreateTable<TestType>(true);
+        }
+
+        private IDbConnection db;
+
+        public override IDbConnection OpenDbConnection(string connString = null)
+        {
+            if (db == null || db.State != ConnectionState.Open)
+            {
+                db = base.OpenDbConnection(connString);
+            }
+            return db;
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            if (db != null)
+            {
+                db.Dispose();
+                db = null;
+            }
         }
 
         public T GetValue<T>(T item)

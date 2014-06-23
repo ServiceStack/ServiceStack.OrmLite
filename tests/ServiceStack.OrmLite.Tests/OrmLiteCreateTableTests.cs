@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
+using ServiceStack.OrmLite.Tests.Shared;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
@@ -19,13 +21,13 @@ namespace ServiceStack.OrmLite.Tests
                 db.DropTable<ModelWithIdOnly>();
 
                 Assert.That(
-                    db.TableExists(typeof(ModelWithIdOnly).Name),
+                    db.TableExists(typeof(ModelWithIdOnly).Name.SqlTableRaw()),
                     Is.False);
 
                 db.CreateTable<ModelWithIdOnly>(true);
 
                 Assert.That(
-                    db.TableExists(typeof(ModelWithIdOnly).Name),
+                    db.TableExists(typeof(ModelWithIdOnly).Name.SqlTableRaw()),
                     Is.True);
             }
         }
@@ -148,7 +150,14 @@ namespace ServiceStack.OrmLite.Tests
             var createTableSql = OrmLiteConfig.DialectProvider.ToCreateTableStatement(typeof(ModelWithIdAndName));
 
             Console.WriteLine("createTableSql: " + createTableSql);
-            Assert.That(createTableSql.Contains("VARCHAR(255)"), Is.True);
+            if (Dialect != Dialect.PostgreSql)
+            {
+                Assert.That(createTableSql, Is.StringContaining("VARCHAR(255)").Or.StringContaining("VARCHAR2(255)"));
+            }
+            else
+            {
+                Assert.That(createTableSql, Is.StringContaining("text"));
+            }
         }
 
         public class ModelWithGuid
@@ -235,5 +244,66 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(row.Field, Is.EqualTo("The Value"));
             }
         }
+
+        [Test]
+        public void Can_create_table_with_all_number_types()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<ModelWithNumerics>();
+                db.GetLastSql().Print();
+
+                var defaultValues = new ModelWithNumerics {
+                    Id = 1, Byte = 0, Short = 0, UShort = 0, 
+                    Int = 0, UInt = 0, Long = 0, ULong = 0, 
+                    Float = 0, Double = 0, Decimal = 0,
+                };
+                db.Insert(defaultValues);
+
+                var fromDb = db.SingleById<ModelWithNumerics>(defaultValues.Id);
+                Assert.That(ModelWithNumerics.ModelWithNumericsComparer.Equals(fromDb, defaultValues));
+            }
+        }
+
+        public class ModelWithIndexer
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+
+            public ModelWithIndexer()
+            {
+                Attributes = new Dictionary<string, object>();
+            }
+
+            public Object this[string attributeName]
+            {
+                get
+                {
+                    return Attributes[attributeName];
+                }
+                set
+                {
+                    Attributes[attributeName] = value;
+                }
+            }
+
+            Dictionary<string, object> Attributes { get; set; } 
+        }
+
+        [Test]
+        public void Can_create_table_ModelWithIndexer()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<ModelWithIndexer>();
+
+                db.Insert(new ModelWithIndexer { Id = 1, Name = "foo" });
+
+                var row = db.SingleById<ModelWithIndexer>(1);
+
+                Assert.That(row.Name, Is.EqualTo("foo"));
+            }
+        }
+
     }
 }

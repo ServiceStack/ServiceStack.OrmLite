@@ -49,7 +49,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static void DropAndCreateTables(this IDbConnection dbConn, params Type[] tableTypes)
         {
-            dbConn.Exec(dbCmd => dbCmd.CreateTables(overwrite:true, tableTypes:tableTypes));
+            dbConn.Exec(dbCmd => dbCmd.CreateTables(overwrite: true, tableTypes: tableTypes));
         }
 
         /// <summary>
@@ -268,6 +268,17 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Delete 1 row by the PrimaryKey where the rowVersion matches the optimistic concurrency field. 
+        /// Will throw <exception cref="RowModifiedException">RowModefiedExeption</exception> if the 
+        /// row does not exist or has a different row version.
+        /// E.g: <para>db.DeleteById&lt;Person&gt;(1)</para>
+        /// </summary>
+        public static void DeleteById<T>(this IDbConnection dbConn, object id, ulong rowVersion)
+        {
+            dbConn.Exec(dbCmd => dbCmd.DeleteById<T>(id, rowVersion));
+        }
+
+        /// <summary>
         /// Delete all rows identified by the PrimaryKeys. E.g:
         /// <para>db.DeleteById&lt;Person&gt;(new[] { 1, 2, 3 })</para>
         /// </summary>
@@ -322,12 +333,13 @@ namespace ServiceStack.OrmLite
         /// <para>db.Save(customer, references:true)</para>
         /// </summary>
         /// <returns>true if a row was inserted; false if it was updated</returns>
-        public static bool Save<T>(this IDbConnection dbConn, T obj, bool references=false)
+        public static bool Save<T>(this IDbConnection dbConn, T obj, bool references = false)
         {
             if (!references)
                 return dbConn.Exec(dbCmd => dbCmd.Save(obj));
 
-            return dbConn.Exec(dbCmd => {
+            return dbConn.Exec(dbCmd =>
+            {
                 var ret = dbCmd.Save(obj);
                 dbCmd.SaveAllReferences(obj);
                 return ret;

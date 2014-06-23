@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using NUnit.Framework;
 using ServiceStack.Common;
 using ServiceStack.Common.Tests.Models;
@@ -21,11 +23,12 @@ namespace ServiceStack.OrmLite.Tests
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
 
-				rowIds.ForEach(x => db.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
+                for (var i = 0; i < rowIds.Count; i++)
+                    rowIds[i] = (int)db.Insert(ModelWithFieldsOfDifferentTypes.Create(rowIds[i]), selectIdentity: true);
 
-                var row = db.SingleById<ModelWithFieldsOfDifferentTypes>(1);
+                var row = db.SingleById<ModelWithFieldsOfDifferentTypes>(rowIds[1]);
 
-				Assert.That(row.Id, Is.EqualTo(1));
+                Assert.That(row.Id, Is.EqualTo(rowIds[1]));
 			}
 		}
 
@@ -55,12 +58,13 @@ namespace ServiceStack.OrmLite.Tests
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
 
-				rowIds.ForEach(x => db.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
+                for (var i = 0; i < rowIds.Count; i++)
+                    rowIds[i] = (int)db.Insert(ModelWithFieldsOfDifferentTypes.Create(rowIds[i]), selectIdentity: true);
 
 				var rows = db.SelectByIds<ModelWithFieldsOfDifferentTypes>(rowIds);
 				var dbRowIds = rows.ConvertAll(x => x.Id);
 
-				Assert.That(dbRowIds, Is.EquivalentTo(rowIds));
+                Assert.That(dbRowIds, Is.EquivalentTo(rowIds));
 			}
 		}
 
@@ -98,7 +102,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				db.Insert(filterRow);
 
-				var rows = db.SelectFmt<ModelWithOnlyStringFields>("AlbumName = {0}", filterRow.AlbumName);
+				var rows = db.SelectFmt<ModelWithOnlyStringFields>("AlbumName".SqlColumn() + " = {0}", filterRow.AlbumName);
 				var dbRowIds = rows.ConvertAll(x => x.Id);
 
 				Assert.That(dbRowIds, Has.Count.EqualTo(1));
@@ -117,7 +121,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
 
-				var count = db.ScalarFmt<int>("SELECT COUNT(*) FROM ModelWithIdAndName");
+                var count = db.ScalarFmt<int>("SELECT COUNT(*) FROM {0}".Fmt("ModelWithIdAndName".SqlTable()));
 
 				Assert.That(count, Is.EqualTo(n));
 			}
@@ -161,7 +165,7 @@ namespace ServiceStack.OrmLite.Tests
 				db.Insert(filterRow);
 
 				var dbRowIds = new List<string>();
-				var rows = db.SelectLazyFmt<ModelWithOnlyStringFields>("AlbumName = {0}", filterRow.AlbumName);
+				var rows = db.SelectLazyFmt<ModelWithOnlyStringFields>("AlbumName".SqlColumn() + " = {0}", filterRow.AlbumName);
 				foreach (var row in rows)
 				{
 					dbRowIds.Add(row.Id);
@@ -183,7 +187,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
 
-				var ids = db.ColumnFmt<int>("SELECT Id FROM ModelWithIdAndName");
+                var ids = db.ColumnFmt<int>("SELECT Id FROM {0}".Fmt("ModelWithIdAndName".SqlTable()));
 
 				Assert.That(ids.Count, Is.EqualTo(n));
 			}
@@ -200,7 +204,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
 
-				var ids = db.ColumnDistinctFmt<int>("SELECT Id FROM ModelWithIdAndName");
+                var ids = db.ColumnDistinctFmt<int>("SELECT Id FROM {0}".Fmt("ModelWithIdAndName".SqlTable()));
 
 				Assert.That(ids.Count, Is.EqualTo(n));
 			}
@@ -221,7 +225,7 @@ namespace ServiceStack.OrmLite.Tests
 					db.Insert(row);
 				});
 
-				var lookup = db.LookupFmt<string, int>("SELECT Name, Id FROM ModelWithIdAndName");
+                var lookup = db.LookupFmt<string, int>("SELECT Name, Id FROM {0}".Fmt("ModelWithIdAndName".SqlTable()));
 
 				Assert.That(lookup, Has.Count.EqualTo(2));
 				Assert.That(lookup["OddGroup"], Has.Count.EqualTo(3));
@@ -240,7 +244,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
 
-				var dictionary = db.Dictionary<int, string>("SELECT Id, Name FROM ModelWithIdAndName");
+                var dictionary = db.Dictionary<int, string>("SELECT Id, Name FROM {0}".Fmt("ModelWithIdAndName".SqlTable()));
 
 				Assert.That(dictionary, Has.Count.EqualTo(5));
 
@@ -257,9 +261,12 @@ namespace ServiceStack.OrmLite.Tests
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
 
-				rowIds.ForEach(x => db.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
+                for (var i = 0; i < rowIds.Count; i++)
+                    rowIds[i] = (int)db.Insert(ModelWithFieldsOfDifferentTypes.Create(rowIds[i]), selectIdentity: true);
 
-				var rows = db.SelectFmt<ModelWithIdAndName>("SELECT Id, Name FROM ModelWithFieldsOfDifferentTypes");
+                SuppressIfOracle("Oracle provider doesn't modify user supplied SQL to conform to name length restrictions");
+
+                var rows = db.SelectFmt<ModelWithIdAndName>("SELECT Id, Name FROM {0}".Fmt("ModelWithFieldsOfDifferentTypes".SqlTable()));
 				var dbRowIds = rows.ConvertAll(x => x.Id);
 
 				Assert.That(dbRowIds, Is.EquivalentTo(rowIds));
@@ -269,18 +276,19 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Can_Select_Into_ModelWithIdAndName_from_ModelWithFieldsOfDifferentTypes_table()
 		{
-			using (var db = OpenDbConnection())
+            using (var db = OpenDbConnection())
 			{
                 db.DropAndCreateTable<ModelWithFieldsOfDifferentTypes>();
 
 				var rowIds = new List<int>(new[] { 1, 2, 3 });
 
-				rowIds.ForEach(x => db.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
-
+                for (var i = 0; i < rowIds.Count; i++)
+                    rowIds[i] = (int)db.Insert(ModelWithFieldsOfDifferentTypes.Create(rowIds[i]), selectIdentity: true);
+                
 				var rows = db.Select<ModelWithIdAndName>(typeof(ModelWithFieldsOfDifferentTypes));
 				var dbRowIds = rows.ConvertAll(x => x.Id);
 
-				Assert.That(dbRowIds, Is.EquivalentTo(rowIds));
+                Assert.That(dbRowIds, Is.EquivalentTo(rowIds));
 			}
 		}
 
@@ -355,6 +363,28 @@ namespace ServiceStack.OrmLite.Tests
                 var model = db.SingleById<TypeWithTimeSpan>(1);
 
                 Assert.That(model.TimeSpan, Is.EqualTo(timeSpan));
+            }
+        }
+
+	    [Test]
+	    public void Does_return_correct_numeric_values()
+	    {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<ModelWithDifferentNumTypes>();
+
+                var row = ModelWithDifferentNumTypes.Create(1);
+
+                db.Insert(row);
+
+                var fromDb = db.Select<ModelWithDifferentNumTypes>().First();
+
+                Assert.That(row.Short, Is.EqualTo(fromDb.Short));
+                Assert.That(row.Int, Is.EqualTo(fromDb.Int));
+                Assert.That(row.Long, Is.EqualTo(fromDb.Long));
+                Assert.That(row.Float, Is.EqualTo(fromDb.Float));
+                Assert.That(row.Double, Is.EqualTo(fromDb.Double));
+                Assert.That(row.Decimal, Is.EqualTo(fromDb.Decimal));
             }
         }
 

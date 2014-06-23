@@ -160,20 +160,6 @@
             Note that you should NOT consume the response stream as this is handled by ServiceStack
             </summary>
         </member>
-        <member name="M:ServiceStack.RequestContext.TrackDisposable(System.IDisposable)">
-            <summary>
-            Track any IDisposable's to dispose of at the end of the request in IAppHost.OnEndRequest()
-            </summary>
-            <param name="instance"></param>
-        </member>
-        <member name="P:ServiceStack.RequestContext.Items">
-            <summary>
-            Gets a list of items for this request. 
-            </summary>
-            <remarks>This list will be cleared on every request and is specific to the original thread that is handling the request.
-            If a handler uses additional threads, this data will not be available on those threads.
-            </remarks>
-        </member>
         <member name="M:ServiceStack.ResponseStatusUtils.CreateResponseStatus(System.String,System.String,System.Collections.Generic.IEnumerable{ServiceStack.Validation.ValidationErrorField})">
             <summary>
             Creates the error response from the values provided.
@@ -208,7 +194,7 @@
             Specifies if cookies should be stored
             </summary>
         </member>
-        <member name="M:ServiceStack.StreamExtensions.Compress(System.String,System.String)">
+        <member name="M:ServiceStack.StreamExt.Compress(System.String,System.String)">
             <summary>
             Compresses the specified text using the default compression method: Deflate
             </summary>
@@ -216,7 +202,7 @@
             <param name="compressionType">Type of the compression.</param>
             <returns></returns>
         </member>
-        <member name="M:ServiceStack.StreamExtensions.Decompress(System.Byte[],System.String)">
+        <member name="M:ServiceStack.StreamExt.Decompress(System.Byte[],System.String)">
             <summary>
             Decompresses the specified gz buffer using the default compression method: Inflate
             </summary>

@@ -113,12 +113,12 @@ namespace ServiceStack.OrmLite
             return ColumnDistinctResultsFn != null ? ColumnDistinctResultsFn(dbCmd, typeof(T)) : ColumnDistinctResults;
         }
 
-        private IDictionary GetDictionaryResults<K,V>(IDbCommand dbCmd)
+        private IDictionary GetDictionaryResults<K, V>(IDbCommand dbCmd)
         {
             return DictionaryResultsFn != null ? DictionaryResultsFn(dbCmd, typeof(K), typeof(V)) : DictionaryResults;
         }
 
-        private IDictionary GetLookupResults<K,V>(IDbCommand dbCmd)
+        private IDictionary GetLookupResults<K, V>(IDbCommand dbCmd)
         {
             return LookupResultsFn != null ? LookupResultsFn(dbCmd, typeof(K), typeof(V)) : LookupResults;
         }
@@ -245,7 +245,7 @@ namespace ServiceStack.OrmLite
         public List<T> GetColumn<T>(IDbCommand dbCmd)
         {
             Filter(dbCmd);
-            return (from object result in GetColumnResults<T>(dbCmd) select (T)result).ToList();
+            return (from object result in (GetColumnResults<T>(dbCmd) ?? new T[0]) select (T)result).ToList();
         }
 
         public HashSet<T> GetColumnDistinct<T>(IDbCommand dbCmd)
@@ -259,7 +259,7 @@ namespace ServiceStack.OrmLite
         {
             Filter(dbCmd);
             var to = new Dictionary<K, V>();
-            var map = GetDictionaryResults<K,V>(dbCmd);
+            var map = GetDictionaryResults<K, V>(dbCmd);
             if (map == null)
                 return to;
 
@@ -275,7 +275,7 @@ namespace ServiceStack.OrmLite
         {
             Filter(dbCmd);
             var to = new Dictionary<K, List<V>>();
-            var map = GetLookupResults<K,V>(dbCmd);
+            var map = GetLookupResults<K, V>(dbCmd);
             if (map == null)
                 return to;
 
@@ -309,5 +309,21 @@ namespace ServiceStack.OrmLite
         {
             OrmLiteConfig.ResultsFilter = previousFilter;
         }
+    }
+
+    public class CaptureSqlFilter : OrmLiteResultsFilter
+    {
+        public CaptureSqlFilter()
+        {
+            SqlFilter = CaptureSql;
+            SqlStatements = new List<string>();
+        }
+
+        private void CaptureSql(string sql)
+        {
+            SqlStatements.Add(sql);
+        }
+
+        public List<string> SqlStatements { get; set; }
     }
 }

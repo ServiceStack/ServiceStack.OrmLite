@@ -19,6 +19,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
             base.BoolColumnDefinition = "boolean";
             base.TimeColumnDefinition = "time";
             base.DateTimeColumnDefinition = "timestamp";
+            base.DateTimeOffsetColumnDefinition = "timestamp";
             base.DecimalColumnDefinition = "numeric(38,6)";
             base.GuidColumnDefinition = "uuid";
             base.ParamString = ":";
@@ -33,9 +34,22 @@ namespace ServiceStack.OrmLite.PostgreSQL
             base.SelectIdentitySql = "SELECT LASTVAL()";
             this.NamingStrategy = new PostgreSqlNamingStrategy();
             this.StringSerializer = new JsonStringSerializer();
+        }
 
-            DbTypeMap.Set<TimeSpan>(DbType.Time, "Interval");
-            DbTypeMap.Set<TimeSpan?>(DbType.Time, "Interval");
+        public override void OnAfterInitColumnTypeMap()
+        {
+            DbTypeMap.Set<TimeSpan>(DbType.Time, "interval");
+            DbTypeMap.Set<TimeSpan?>(DbType.Time, "interval");
+            DbTypeMap.Set<DateTimeOffset>(DbType.DateTimeOffset, DateTimeOffsetColumnDefinition);
+            DbTypeMap.Set<DateTimeOffset?>(DbType.DateTimeOffset, DateTimeOffsetColumnDefinition);
+
+            //throws unknown type exceptions in parameterized queries, e.g: p.DbType = DbType.SByte
+            DbTypeMap.Set<sbyte>(DbType.Byte, IntColumnDefinition);
+            DbTypeMap.Set<ushort>(DbType.Int16, IntColumnDefinition);
+            DbTypeMap.Set<uint>(DbType.Int32, IntColumnDefinition);
+            DbTypeMap.Set<ulong>(DbType.Int64, LongColumnDefinition);
+
+            base.OnAfterInitColumnTypeMap();
         }
 
         public override string GetColumnDefinition(
@@ -43,12 +57,16 @@ namespace ServiceStack.OrmLite.PostgreSQL
             Type fieldType,
             bool isPrimaryKey,
             bool autoIncrement,
-            bool isNullable,
+            bool isNullable, 
+            bool isRowVersion,
             int? fieldLength,
             int? scale,
             string defaultValue,
             string customFieldDefinition)
         {
+            if (isRowVersion)
+                return null;
+
             string fieldDefinition = null;
             if (customFieldDefinition != null)
             {
@@ -56,14 +74,11 @@ namespace ServiceStack.OrmLite.PostgreSQL
             }
             else if (fieldType == typeof(string))
             {
-                if (fieldLength != null)
-                {
-                    fieldDefinition = string.Format(base.StringLengthColumnDefinitionFormat, fieldLength);
-                }
-                else
-                {
-                    fieldDefinition = textColumnDefinition;
-                }
+                fieldDefinition = fieldLength == int.MaxValue
+                    ? MaxStringColumnDefinition
+                    : fieldLength != null ?
+                        string.Format(StringLengthColumnDefinitionFormat, fieldLength) :
+                        textColumnDefinition;
             }
             else
             {
@@ -105,6 +120,25 @@ namespace ServiceStack.OrmLite.PostgreSQL
             }
 
             return sql.ToString();
+        }
+
+        public override string GetRowVersionColumnName(FieldDefinition field)
+        {
+            return "xmin as " + GetQuotedColumnName(field.FieldName);
+        }
+
+        public override void AppendFieldCondition(StringBuilder sqlFilter, FieldDefinition fieldDef, IDbCommand cmd)
+        {
+            var columnName = fieldDef.IsRowVersion
+                ? "int8in(xidout(xmin))" //Convert xmin into an integer so it can be used in comparisons
+                : GetQuotedColumnName(fieldDef.FieldName);
+            
+            sqlFilter
+                .Append(columnName)
+                .Append("=")
+                .Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
+
+            AddParameter(cmd, fieldDef);
         }
 
         public override string GetQuotedValue(string paramValue)
@@ -166,7 +200,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
 
         public override SqlExpression<T> SqlExpression<T>()
         {
-            return new PostgreSqlExpression<T>();
+            return new PostgreSqlExpression<T>(this);
         }
 
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName)
@@ -236,8 +270,8 @@ namespace ServiceStack.OrmLite.PostgreSQL
         /// <returns></returns>
         internal static String ToBinary(Object NativeData)
         {
-            Byte[] byteArray = (Byte[])NativeData;
-            StringBuilder res = new StringBuilder(byteArray.Length * 5);
+            var byteArray = (Byte[])NativeData;
+            var res = new StringBuilder(byteArray.Length * 5);
             foreach (byte b in byteArray)
                 if (b >= 0x20 && b < 0x7F && b != 0x27 && b != 0x5C)
                     res.Append((char)b);

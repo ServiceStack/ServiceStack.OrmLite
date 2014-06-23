@@ -12,16 +12,21 @@
 
 namespace ServiceStack.OrmLite
 {
-	public class OrmLiteNamingStrategyBase : INamingStrategy
-	{
-		public virtual string GetTableName(string name)
-		{
-			return name;
-		}
- 
-		public virtual string GetColumnName(string name)
-		{
-			return name;
-		}
-	}
+    public class OrmLiteNamingStrategyBase : INamingStrategy
+    {
+        public virtual string GetTableName(string name)
+        {
+            return name;
+        }
+
+        public virtual string GetColumnName(string name)
+        {
+            return name;
+        }
+
+        public virtual string ApplyNameRestrictions(string name)
+        {
+            return name;
+        }
+    }
 }

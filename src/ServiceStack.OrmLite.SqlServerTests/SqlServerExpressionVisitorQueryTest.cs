@@ -105,14 +105,12 @@ namespace ServiceStack.OrmLite.SqlServerTests
             using(var db = OpenDbConnection())
             {
                 db.CreateTable<TestEntity>(true);
-                db.Insert(new TestEntity
+                var id = db.Insert(new TestEntity
                 {
                     Foo = this.RandomString(16),
                     Bar = this.RandomString(16),
                     Baz = this.RandomDecimal()
-                });
-
-                var id = (int)db.LastInsertId();
+                }, selectIdentity: true);
 
                 var ev = OrmLiteConfig.DialectProvider.SqlExpression<TestEntity>();
                 ev.Where(e => e.Id == id);

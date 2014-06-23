@@ -17,18 +17,20 @@ using System.Linq.Expressions;
 
 namespace ServiceStack.OrmLite
 {
-	public class ModelDefinition
-	{
-		public ModelDefinition()
-		{
-			this.FieldDefinitions = new List<FieldDefinition>();
-			this.IgnoredFieldDefinitions = new List<FieldDefinition>();
-			this.CompositeIndexes = new List<CompositeIndexAttribute>();
-		}
+    public class ModelDefinition
+    {
+        public ModelDefinition()
+        {
+            this.FieldDefinitions = new List<FieldDefinition>();
+            this.IgnoredFieldDefinitions = new List<FieldDefinition>();
+            this.CompositeIndexes = new List<CompositeIndexAttribute>();
+        }
 
-		public string Name { get; set; }
+        public const string RowVersionName = "RowVersion";
 
-		public string Alias { get; set; }
+        public string Name { get; set; }
+
+        public string Alias { get; set; }
 
         public string Schema { get; set; }
 
@@ -42,57 +44,59 @@ namespace ServiceStack.OrmLite
 
         public bool IsInSchema { get { return this.Schema != null; } }
 
-	    public bool HasAutoIncrementId
-	    {
-	        get { return PrimaryKey != null && PrimaryKey.AutoIncrement; }
-	    }
+        public bool HasAutoIncrementId
+        {
+            get { return PrimaryKey != null && PrimaryKey.AutoIncrement; }
+        }
 
-		public string ModelName
-		{
-			get { return this.Alias ?? this.Name; }
-		}
+        public FieldDefinition RowVersion { get; set; }
 
-		public Type ModelType { get; set; }
+        public string ModelName
+        {
+            get { return this.Alias ?? this.Name; }
+        }
+
+        public Type ModelType { get; set; }
 
         public string SqlSelectAllFromTable { get; set; }
 
-		public FieldDefinition PrimaryKey
-		{
-			get
-			{
-				return this.FieldDefinitions.First(x => x.IsPrimaryKey);
-			}
-		}
+        public FieldDefinition PrimaryKey
+        {
+            get
+            {
+                return this.FieldDefinitions.First(x => x.IsPrimaryKey);
+            }
+        }
 
-		public List<FieldDefinition> FieldDefinitions { get; set; }
+        public List<FieldDefinition> FieldDefinitions { get; set; }
 
-		private FieldDefinition[] fieldDefinitionsArray;
-		public FieldDefinition[] FieldDefinitionsArray
-		{
-			get
-			{
-				if (fieldDefinitionsArray == null)
-				{
-					fieldDefinitionsArray = FieldDefinitions.ToArray();
-				}
-				return fieldDefinitionsArray;
-			}
-		}
-		
-		public List<FieldDefinition> IgnoredFieldDefinitions { get; set; }
+        private FieldDefinition[] fieldDefinitionsArray;
+        public FieldDefinition[] FieldDefinitionsArray
+        {
+            get
+            {
+                if (fieldDefinitionsArray == null)
+                {
+                    fieldDefinitionsArray = FieldDefinitions.ToArray();
+                }
+                return fieldDefinitionsArray;
+            }
+        }
 
-		private FieldDefinition[] ignoredFieldDefinitionsArray;
-		public FieldDefinition[] IgnoredFieldDefinitionsArray
-		{
-			get
-			{
-				if (ignoredFieldDefinitionsArray == null)
-				{
-					ignoredFieldDefinitionsArray = IgnoredFieldDefinitions.ToArray();
-				}
-				return ignoredFieldDefinitionsArray;
-			}
-		}
+        public List<FieldDefinition> IgnoredFieldDefinitions { get; set; }
+
+        private FieldDefinition[] ignoredFieldDefinitionsArray;
+        public FieldDefinition[] IgnoredFieldDefinitionsArray
+        {
+            get
+            {
+                if (ignoredFieldDefinitionsArray == null)
+                {
+                    ignoredFieldDefinitionsArray = IgnoredFieldDefinitions.ToArray();
+                }
+                return ignoredFieldDefinitionsArray;
+            }
+        }
 
         private FieldDefinition[] allFieldDefinitionsArray;
         public FieldDefinition[] AllFieldDefinitionsArray
@@ -110,62 +114,62 @@ namespace ServiceStack.OrmLite
         }
 
         private Dictionary<string, FieldDefinition> fieldDefinitionMap;
-        public Dictionary<string, FieldDefinition> FieldDefinitionMap
+        private Func<string, string> fieldNameSanitizer;
+        public Dictionary<string, FieldDefinition> GetFieldDefinitionMap(Func<string, string> sanitizeFieldName)
         {
-            get
+            if (fieldDefinitionMap == null || fieldNameSanitizer != sanitizeFieldName)
             {
-                if (fieldDefinitionMap == null)
+                fieldNameSanitizer = sanitizeFieldName;
+                fieldDefinitionMap = new Dictionary<string, FieldDefinition>();
+                foreach (var fieldDef in FieldDefinitionsArray)
                 {
-                    fieldDefinitionMap = new Dictionary<string, FieldDefinition>();
-                    foreach (var fieldDef in FieldDefinitionsArray)
-                    {
-                        fieldDefinitionMap[fieldDef.FieldName.Replace(" ","")] = fieldDef;
-                    }
+                    fieldDefinitionMap[sanitizeFieldName(fieldDef.FieldName)] = fieldDef;
                 }
-                return fieldDefinitionMap;
+            }
+            return fieldDefinitionMap;
+        }
+
+        public List<CompositeIndexAttribute> CompositeIndexes { get; set; }
+
+
+        public FieldDefinition GetFieldDefinition<T>(Expression<Func<T, object>> field)
+        {
+            var fn = GetFieldName(field);
+            return FieldDefinitions.First(f => f.Name == fn);
+        }
+
+        string GetFieldName<T>(Expression<Func<T, object>> field)
+        {
+
+            var lambda = (field as LambdaExpression);
+            if (lambda.Body.NodeType == ExpressionType.MemberAccess)
+            {
+                var me = lambda.Body as MemberExpression;
+                return me.Member.Name;
+            }
+            else
+            {
+                var operand = (lambda.Body as UnaryExpression).Operand;
+                return (operand as MemberExpression).Member.Name;
             }
         }
-		
-		public List<CompositeIndexAttribute> CompositeIndexes { get; set; }
 
-
-		public FieldDefinition GetFieldDefinition<T>(Expression<Func<T,object>> field)
-		{
-			var fn = GetFieldName (field);
-			return  FieldDefinitions.First(f=>f.Name==fn );
-		}
-
-		string GetFieldName<T>(Expression<Func<T,object>> field){
-			
-			var lambda = (field as LambdaExpression);
-			if( lambda.Body.NodeType==ExpressionType.MemberAccess)
-			{
-				var me = lambda.Body as MemberExpression;
-				return me.Member.Name;
-			}
-			else
-			{
-				var operand = (lambda.Body as UnaryExpression).Operand ;
-				return (operand as MemberExpression).Member.Name;
-			}
-		}
-
-	}
+    }
 
 
     public static class ModelDefinition<T>
     {
         private static ModelDefinition definition;
-		public static ModelDefinition Definition
-		{
-			get { return definition ?? (definition = typeof(T).GetModelDefinition()); }
-		}
+        public static ModelDefinition Definition
+        {
+            get { return definition ?? (definition = typeof(T).GetModelDefinition()); }
+        }
 
-		private static string primaryKeyName;
-		public static string PrimaryKeyName
-		{
-			get { return primaryKeyName ?? (primaryKeyName = Definition.PrimaryKey.FieldName); }
-		}
+        private static string primaryKeyName;
+        public static string PrimaryKeyName
+        {
+            get { return primaryKeyName ?? (primaryKeyName = Definition.PrimaryKey.FieldName); }
+        }
 
-	}
+    }
 }

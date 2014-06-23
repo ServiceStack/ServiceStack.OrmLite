@@ -26,7 +26,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 db.Save(row);
 
-                Assert.That(row.Id, Is.EqualTo(1));
+                Assert.That(row.Id, Is.Not.EqualTo(0));
             }
         }
 
@@ -52,8 +52,60 @@ namespace ServiceStack.OrmLite.Tests
 
                 db.Save(rows);
 
-                Assert.That(rows[0].Id, Is.EqualTo(1));
-                Assert.That(rows[1].Id, Is.EqualTo(2));
+                Assert.That(rows[0].Id, Is.Not.EqualTo(0));
+                Assert.That(rows[1].Id, Is.Not.EqualTo(0));
+                Assert.That(rows[0].Id, Is.Not.EqualTo(rows[1].Id));
+            }
+        }
+
+        [Test]
+        public void Save_populates_NullableAutoIncrementId()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTable<PersonWithNullableAutoId>(overwrite: true);
+
+                var row = new PersonWithNullableAutoId
+                {
+                    FirstName = "Jimi",
+                    LastName = "Hendrix",
+                    Age = 27
+                };
+
+                db.Save(row);
+
+                Assert.That(row.Id, Is.Not.EqualTo(0));
+                Assert.That(row.Id, Is.Not.Null);
+            }
+        }
+
+        [Test]
+        public void SaveAll_populates_NullableAutoIncrementId()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTable<PersonWithNullableAutoId>(overwrite: true);
+
+                var rows = new[] {
+                    new PersonWithNullableAutoId {
+                        FirstName = "Jimi",
+                        LastName = "Hendrix",
+                        Age = 27
+                    },
+                    new PersonWithNullableAutoId {
+                        FirstName = "Kurt",
+                        LastName = "Cobain",
+                        Age = 27
+                    },
+                };
+
+                db.Save(rows);
+
+                Assert.That(rows[0].Id, Is.Not.EqualTo(0));
+                Assert.That(rows[0].Id, Is.Not.Null);
+                Assert.That(rows[1].Id, Is.Not.EqualTo(0));
+                Assert.That(rows[1].Id, Is.Not.Null);
+                Assert.That(rows[0].Id, Is.Not.EqualTo(rows[1].Id));
             }
         }
 
@@ -80,8 +132,9 @@ namespace ServiceStack.OrmLite.Tests
 
                 db.Save(rows);
 
-                Assert.That(rows[0].Id, Is.EqualTo(1));
-                Assert.That(rows[1].Id, Is.EqualTo(2));
+                Assert.That(rows[0].Id, Is.Not.EqualTo(0));
+                Assert.That(rows[1].Id, Is.Not.EqualTo(0));
+                Assert.That(rows[0].Id, Is.Not.EqualTo(rows[1].Id));
 
                 trans.Commit();
             }
@@ -222,5 +275,19 @@ namespace ServiceStack.OrmLite.Tests
             }
         }
 
+        [Test]
+        public void Can_Save_Update_Into_Table_With_Id_Only()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<ModelWithIdOnly>();
+
+                db.Save(new ModelWithIdOnly(1));
+
+                db.Save(new ModelWithIdOnly(1));
+
+                db.Update(new ModelWithIdOnly(1));
+            }
+        }
     }
 }

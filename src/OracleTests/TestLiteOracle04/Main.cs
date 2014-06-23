@@ -17,8 +17,8 @@ namespace TestLiteOracle04
 
             OrmLiteConfig.DialectProvider = new OracleOrmLiteDialectProvider();
 			
-			ServiceStack.OrmLite.SqlExpression<Company> sql=
-                new OracleSqlExpression<Company>();
+			ServiceStack.OrmLite.SqlExpression<Company> sql =
+                OrmLiteConfig.DialectProvider.SqlExpression<Company>();
 			
 			List<Object> names = new List<Object>();
 			names.Add("SOME COMPANY");
@@ -242,14 +242,6 @@ namespace TestLiteOracle04
 
                 sql.OrderBy(cp => new { cp.Name, X = cp.Id.Desc() });
                 Console.WriteLine("{0}", sql.OrderByExpression);
-                db.Select<Company>(sql);
-
-                sql.Limit(1, 5);
-                Console.WriteLine(sql.LimitExpression);
-                db.Select<Company>(sql);
-
-                sql.Limit(1);
-                Console.WriteLine(sql.LimitExpression);
                 db.Select<Company>(sql);
 
                 sql.Where(cp => (string.Concat(cp.Name, "_", cp.Employees) == "SOME COMPANY XYZ_2"));

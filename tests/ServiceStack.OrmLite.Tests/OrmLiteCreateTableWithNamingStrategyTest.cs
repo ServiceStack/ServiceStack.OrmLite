@@ -1,17 +1,31 @@
-using System;
+using System.Globalization;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
 
 	[TestFixture]
-	public class OrmLiteCreateTableWithNamigStrategyTests 
+	public class OrmLiteCreateTableWithNamingStrategyTests 
 		: OrmLiteTestBase
 	{
+	    private INamingStrategy PreviousNamingStrategy { get; set; }
+
+        [SetUp]
+        public void SetUp()
+        {
+            PreviousNamingStrategy = OrmLiteConfig.DialectProvider.NamingStrategy;
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            OrmLiteConfig.DialectProvider.NamingStrategy = PreviousNamingStrategy;
+        }
 
 		[Test]
-		public void Can_create_TableWithNamigStrategy_table_prefix()
+		public void Can_create_TableWithNamingStrategy_table_prefix()
 		{
 			OrmLiteConfig.DialectProvider.NamingStrategy = new PrefixNamingStrategy
 			{
@@ -23,12 +37,10 @@ namespace ServiceStack.OrmLite.Tests
 			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 			}
-			
-			OrmLiteConfig.DialectProvider.NamingStrategy= new OrmLiteNamingStrategyBase();
 		}
 
 		[Test]
-		public void Can_create_TableWithNamigStrategy_table_lowered()
+		public void Can_create_TableWithNamingStrategy_table_lowered()
 		{
 			OrmLiteConfig.DialectProvider.NamingStrategy = new LowercaseNamingStrategy();
 
@@ -36,13 +48,11 @@ namespace ServiceStack.OrmLite.Tests
 			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 			}
-			
-			OrmLiteConfig.DialectProvider.NamingStrategy= new OrmLiteNamingStrategyBase();
 		}
 
 
 		[Test]
-		public void Can_create_TableWithNamigStrategy_table_nameUnderscoreCoumpound()
+		public void Can_create_TableWithNamingStrategy_table_nameUnderscoreCoumpound()
 		{
 			OrmLiteConfig.DialectProvider.NamingStrategy = new UnderscoreSeparatedCompoundNamingStrategy();
 
@@ -50,14 +60,52 @@ namespace ServiceStack.OrmLite.Tests
 			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 			}
-			
-			OrmLiteConfig.DialectProvider.NamingStrategy= new OrmLiteNamingStrategyBase();
 		}
 
+        [Test]
+        public void Can_create_TableWithNamingStrategy_table_aliases()
+        {
+	        var aliasNamingStrategy = new AliasNamingStrategy
+	        {
+                TableAliases = { { "ModelWithOnlyStringFields", "TableAlias" } },
+                ColumnAliases = { { "Name", "ColumnAlias" } },
+            };
+	        OrmLiteConfig.DialectProvider.NamingStrategy = aliasNamingStrategy;
+
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTable<ModelWithOnlyStringFields>(true);
+
+                var sql = db.GetLastSql().NormalizeSql();
+                Assert.That(sql, Is.StringContaining("CREATE TABLE TableAlias".NormalizeSql()));
+                Assert.That(sql, Is.StringContaining("ColumnAlias".NormalizeSql()));
+
+                var result = db.SqlList<ModelWithIdAndName>(
+                    "SELECT * FROM {0} WHERE {1} = {2}"
+                        .Fmt("ModelWithOnlyStringFields".SqlTable(),
+                             "Name".SqlColumn(),
+                             "foo".SqlValue()));
+
+                Assert.That(db.GetLastSql().NormalizeSql(),
+                    Is.EqualTo("SELECT * FROM TableAlias WHERE ColumnAlias = 'foo'".NormalizeSql()));
+
+                db.DropTable<ModelWithOnlyStringFields>();
+
+                aliasNamingStrategy.UseNamingStrategy = new LowerCaseUnderscoreNamingStrategy();
+
+                db.CreateTable<ModelWithOnlyStringFields>(true);
+                sql = db.GetLastSql().NormalizeSql();
+                Assert.That(sql, Is.StringContaining("CREATE TABLE table_alias".NormalizeSql()));
+                Assert.That(sql, Is.StringContaining("column_alias".NormalizeSql()));
+            }
+
+            OrmLiteConfig.DialectProvider.NamingStrategy = new OrmLiteNamingStrategyBase();
+        }
+
 		[Test]
-		public void Can_get_data_from_TableWithNamigStrategy_with_GetById()
+		public void Can_get_data_from_TableWithNamingStrategy_with_GetById()
 		{
-			OrmLiteConfig.DialectProvider.NamingStrategy = OrmLiteConfig.DialectProvider.NamingStrategy = new PrefixNamingStrategy
+			OrmLiteConfig.DialectProvider.NamingStrategy = new PrefixNamingStrategy
 			{
 				TablePrefix = "tab_",
 				ColumnPrefix = "col_",
@@ -73,15 +121,13 @@ namespace ServiceStack.OrmLite.Tests
 
 				Assert.AreEqual(m.Name, modelFromDb.Name);
 			}
-			
-			OrmLiteConfig.DialectProvider.NamingStrategy= new OrmLiteNamingStrategyBase();
 		}
 
 
 		[Test]
-		public void Can_get_data_from_TableWithNamigStrategy_with_query_by_example()
+		public void Can_get_data_from_TableWithNamingStrategy_with_query_by_example()
 		{
-			OrmLiteConfig.DialectProvider.NamingStrategy = OrmLiteConfig.DialectProvider.NamingStrategy = new PrefixNamingStrategy
+			OrmLiteConfig.DialectProvider.NamingStrategy = new PrefixNamingStrategy
 			{
 				TablePrefix = "tab_",
 				ColumnPrefix = "col_",
@@ -97,8 +143,6 @@ namespace ServiceStack.OrmLite.Tests
 
 				Assert.AreEqual(m.Name, modelFromDb.Name);
 			}
-			
-			OrmLiteConfig.DialectProvider.NamingStrategy= new OrmLiteNamingStrategyBase();
 		}
 		
 		[Test]
@@ -120,14 +164,12 @@ namespace ServiceStack.OrmLite.Tests
                 var modelFromDb = db.Single<ModelWithOnlyStringFields>(x => x.Name == "ReadConnectionExtensionFirst");
 				Assert.AreEqual(m.AlbumName, modelFromDb.AlbumName);
 			}
-
-            OrmLiteConfig.DialectProvider.NamingStrategy = new OrmLiteNamingStrategyBase();
         }
 		
 		[Test]
-		public void Can_get_data_from_TableWithNamigStrategy_AfterChangingNamingStrategy()
+		public void Can_get_data_from_TableWithNamingStrategy_AfterChangingNamingStrategy()
 		{			
-			OrmLiteConfig.DialectProvider.NamingStrategy = OrmLiteConfig.DialectProvider.NamingStrategy = new PrefixNamingStrategy
+			OrmLiteConfig.DialectProvider.NamingStrategy = new PrefixNamingStrategy
 			{
 				TablePrefix = "tab_",
 				ColumnPrefix = "col_",
@@ -164,7 +206,7 @@ namespace ServiceStack.OrmLite.Tests
 				Assert.AreEqual(m.Name, modelFromDb.Name);	
 			}
 			
-			OrmLiteConfig.DialectProvider.NamingStrategy = OrmLiteConfig.DialectProvider.NamingStrategy = new PrefixNamingStrategy
+			OrmLiteConfig.DialectProvider.NamingStrategy = new PrefixNamingStrategy
 			{
 				TablePrefix = "tab_",
 				ColumnPrefix = "col_",
@@ -183,8 +225,6 @@ namespace ServiceStack.OrmLite.Tests
                 modelFromDb = db.SingleById<ModelWithOnlyStringFields>("998");
 				Assert.AreEqual(m.Name, modelFromDb.Name);
 			}
-			
-			OrmLiteConfig.DialectProvider.NamingStrategy = new OrmLiteNamingStrategyBase();
 		}
 
 	}
@@ -240,11 +280,10 @@ namespace ServiceStack.OrmLite.Tests
 		string toUnderscoreSeparatedCompound(string name)
 		{
 
-			string r = char.ToLower(name[0]).ToString();
+			string r = char.ToLower(name[0]).ToString(CultureInfo.InvariantCulture);
 
 			for (int i = 1; i < name.Length; i++)
 			{
-				char c = name[i];
 				if (char.IsUpper(name[i]))
 				{
 					r += "_";
@@ -260,4 +299,16 @@ namespace ServiceStack.OrmLite.Tests
 
 	}
 
+    public class LowerCaseUnderscoreNamingStrategy : OrmLiteNamingStrategyBase
+    {
+        public override string GetTableName(string name)
+        {
+            return name.ToLowercaseUnderscore();
+        }
+
+        public override string GetColumnName(string name)
+        {
+            return name.ToLowercaseUnderscore();
+        }
+    }
 }

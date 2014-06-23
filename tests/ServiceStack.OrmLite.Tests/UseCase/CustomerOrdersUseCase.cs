@@ -117,7 +117,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
     }
 
     [TestFixture]
-    public class CustomerOrdersUseCase
+    public class CustomerOrdersUseCase : OrmLiteTestBase
     {
         //Stand-alone class, No other configs, nothing but POCOs.
         [Test]
@@ -140,17 +140,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
             using (IDbConnection db = Config.OpenDbConnection())
             {
                 //Re-Create all table schemas:
-                db.DropTable<OrderDetail>();
-                db.DropTable<Order>();
-                db.DropTable<Customer>();
-                db.DropTable<Product>();
-                db.DropTable<Employee>();
-
-                db.CreateTable<Employee>();
-                db.CreateTable<Product>();
-                db.CreateTable<Customer>();
-                db.CreateTable<Order>();
-                db.CreateTable<OrderDetail>();
+                RecreateTables(db);
 
                 db.Insert(new Employee { Id = 1, Name = "Employee 1" });
                 db.Insert(new Employee { Id = 2, Name = "Employee 2" });
@@ -218,6 +208,26 @@ namespace ServiceStack.OrmLite.Tests.UseCase
                     trans.Commit();
                 }
             }
+        }
+
+        public static void RecreateTables(IDbConnection db)
+        {
+            DropTables(db);
+
+            db.CreateTable<Employee>();
+            db.CreateTable<Product>();
+            db.CreateTable<Customer>();
+            db.CreateTable<Order>();
+            db.CreateTable<OrderDetail>();
+        }
+
+        public static void DropTables(IDbConnection db)
+        {
+            db.DropTable<OrderDetail>();
+            db.DropTable<Order>();
+            db.DropTable<Customer>();
+            db.DropTable<Product>();
+            db.DropTable<Employee>();
         }
     }
 

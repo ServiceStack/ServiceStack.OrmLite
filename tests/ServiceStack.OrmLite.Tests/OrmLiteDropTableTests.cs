@@ -16,20 +16,20 @@ namespace ServiceStack.OrmLite.Tests
                 db.DropAndCreateTable<ModelWithIdAndName>();
 
                 Assert.That(
-                    db.TableExists(typeof(ModelWithIdOnly).Name),
+                    db.TableExists(typeof(ModelWithIdOnly).Name.SqlTableRaw()),
                     Is.True);
                 Assert.That(
-                    db.TableExists(typeof(ModelWithIdAndName).Name),
+                    db.TableExists(typeof(ModelWithIdAndName).Name.SqlTableRaw()),
                     Is.True);
 
                 db.DropTable<ModelWithIdOnly>();
                 db.DropTable(typeof(ModelWithIdAndName));
 
                 Assert.That(
-                    db.TableExists(typeof(ModelWithIdOnly).Name),
+                    db.TableExists(typeof(ModelWithIdOnly).Name.SqlTableRaw()),
                     Is.False);
                 Assert.That(
-                    db.TableExists(typeof(ModelWithIdAndName).Name),
+                    db.TableExists(typeof(ModelWithIdAndName).Name.SqlTableRaw()),
                     Is.False);
             }
         }
@@ -42,19 +42,19 @@ namespace ServiceStack.OrmLite.Tests
                 db.DropAndCreateTables(typeof(ModelWithIdOnly), typeof(ModelWithIdAndName));
 
                 Assert.That(
-                    db.TableExists(typeof(ModelWithIdOnly).Name),
+                    db.TableExists(typeof(ModelWithIdOnly).Name.SqlTableRaw()),
                     Is.True);
                 Assert.That(
-                    db.TableExists(typeof(ModelWithIdAndName).Name),
+                    db.TableExists(typeof(ModelWithIdAndName).Name.SqlTableRaw()),
                     Is.True);
 
                 db.DropTables(typeof(ModelWithIdOnly), typeof(ModelWithIdAndName));
 
                 Assert.That(
-                    db.TableExists(typeof(ModelWithIdOnly).Name),
+                    db.TableExists(typeof(ModelWithIdOnly).Name.SqlTableRaw()),
                     Is.False);
                 Assert.That(
-                    db.TableExists(typeof(ModelWithIdAndName).Name),
+                    db.TableExists(typeof(ModelWithIdAndName).Name.SqlTableRaw()),
                     Is.False);
             }
         }

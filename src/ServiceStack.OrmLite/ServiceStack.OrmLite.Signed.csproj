@@ -110,6 +110,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AliasNamingStrategy.cs" />
+    <Compile Include="Expressions\SqlExpression.Join.cs" />
     <Compile Include="Expressions\SqlExpressionVisitor.cs" />
     <Compile Include="Expressions\ParameterRebinder.cs" />
     <Compile Include="Expressions\PredicateBuilder.cs" />
@@ -119,6 +121,7 @@
     <Compile Include="JoinSqlBuilder.cs" />
     <Compile Include="OrmLiteConnectionWrapper.cs" />
     <Compile Include="OrmLiteDialectProviderExtensions.cs" />
+    <Compile Include="OrmLiteExecFilter.cs" />
     <Compile Include="OrmLiteReadConnectionExtensions.cs" />
     <Compile Include="OrmLiteResultsFilterExtensions.cs" />
     <Compile Include="OrmLiteSPStatement.cs" />

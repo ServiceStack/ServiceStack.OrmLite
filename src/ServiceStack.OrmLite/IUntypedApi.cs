@@ -13,7 +13,7 @@ namespace ServiceStack.OrmLite
 
         void InsertAll(IEnumerable objs);
         long Insert(object obj, bool selectIdentity = false);
-        
+
         int UpdateAll(IEnumerable objs);
         int Update(object obj);
 

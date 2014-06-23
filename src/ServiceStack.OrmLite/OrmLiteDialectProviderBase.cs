@@ -30,13 +30,10 @@ namespace ServiceStack.OrmLite
     {
         protected static readonly ILog Log = LogManager.GetLogger(typeof(IOrmLiteDialectProvider));
 
-        [Conditional("DEBUG")]
-        private static void LogDebug(string fmt, params object[] args)
+        protected OrmLiteDialectProviderBase()
         {
-            if (args.Length > 0)
-                Log.DebugFormat(fmt, args);
-            else
-                Log.Debug(fmt);
+            UpdateStringColumnDefinitions();
+            StringSerializer = new JsvStringSerializer();
         }
 
         #region ADO.NET supported types
@@ -90,6 +87,8 @@ namespace ServiceStack.OrmLite
 		 */
         #endregion
 
+        public IOrmLiteExecFilter ExecFilter { get; set; }
+
         private static ILog log = LogManager.GetLogger(typeof(OrmLiteDialectProviderBase<>));
 
         public string StringLengthNonUnicodeColumnDefinitionFormat = "VARCHAR({0})";
@@ -117,12 +116,6 @@ namespace ServiceStack.OrmLite
         public string DateTimeColumnDefinition = "DATETIME";
         public string TimeColumnDefinition = "BIGINT";
         public string DateTimeOffsetColumnDefinition = "DATETIMEOFFSET";
-
-        protected OrmLiteDialectProviderBase()
-        {
-            UpdateStringColumnDefinitions();
-            StringSerializer = new JsvStringSerializer();
-        }
 
         private int defaultDecimalPrecision = 18;
         private int defaultDecimalScale = 12;
@@ -277,124 +270,34 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Populates row fields during re-hydration of results.
         /// </summary>
-        public virtual void SetDbValue(FieldDefinition fieldDef, IDataReader dataReader, int colIndex, object instance)
+        public virtual void SetDbValue(FieldDefinition fieldDef, IDataReader reader, int colIndex, object instance)
         {
-            if (fieldDef == null || fieldDef.SetValueFn == null || colIndex == NotFound) return;
-            if (dataReader.IsDBNull(colIndex))
-            {
-                fieldDef.SetValueFn(instance, null);
-                return;
-            }
+            if (HandledDbNullValue(fieldDef, reader, colIndex, instance)) return;
 
-            object value;
-
-            if (fieldDef.FieldType == typeof(Guid))
-            {
-                value = dataReader.GetGuid(colIndex);
-            }
-            else
-            {
-                value = dataReader.GetValue(colIndex);
-            }
-
-            var convertedValue = ConvertDbValue(value, fieldDef.FieldType);
+            var convertedValue = ConvertDbValue(reader.GetValue(colIndex), fieldDef.FieldType);
             try
             {
                 fieldDef.SetValueFn(instance, convertedValue);
             }
-            catch (NullReferenceException ex)
-            {
-            }
+            catch (NullReferenceException ignore) { }
         }
 
-        public virtual object ConvertDbValue(object value, Type type)
+        public static bool HandledDbNullValue(FieldDefinition fieldDef, IDataReader dataReader, int colIndex, object instance)
         {
-            if (value == null || value is DBNull) return null;
-
-            if (value.GetType() == type)
+            if (fieldDef == null || fieldDef.SetValueFn == null || colIndex == NotFound) return true;
+            if (dataReader.IsDBNull(colIndex))
             {
-                return value;
-            }
-
-            if (!type.IsEnum)
-            {
-                var typeCode = type.GetUnderlyingTypeCode();
-                switch (typeCode)
+                if (fieldDef.IsNullable)
                 {
-                    case TypeCode.Single:
-                        return value is double ? (float)((double)value) : (float)value;
-                    case TypeCode.Double:
-                        return value is float ? (double)((float)value) : (double)value;
-                    case TypeCode.Decimal:
-                        return (decimal)value;
-                    case TypeCode.String:
-                        return value;
-                    case TypeCode.Int16:
-                        return Convert.ToInt16(value);
-                    case TypeCode.Int32:
-                        return Convert.ToInt32(value);
-                    case TypeCode.Int64:
-                        return Convert.ToInt64(value);
+                    fieldDef.SetValueFn(instance, null);
                 }
-
-                if (type == typeof(TimeSpan))
+                else
                 {
-                    var ticks = (long) value;
-                    return TimeSpan.FromTicks(ticks);
+                    fieldDef.SetValueFn(instance, fieldDef.FieldType.GetDefaultValue());
                 }
+                return true;
             }
-
-            try
-            {
-                var convertedValue = OrmLiteConfig.DialectProvider.StringSerializer.DeserializeFromString(value.ToString(), type);
-                return convertedValue;
-            }
-            catch (Exception)
-            {
-                log.ErrorFormat("Error ConvertDbValue trying to convert {0} into {1}", value, type.Name);
-                throw;
-            }
-        }
-
-        public virtual string GetQuotedValue(object value, Type fieldType)
-        {
-            if (value == null) return "NULL";
-
-            var dialectProvider = OrmLiteConfig.DialectProvider;
-            if ((!fieldType.UnderlyingSystemType.IsValueType || JsConfig.TreatValueAsRefTypes.Contains(fieldType.IsGeneric() ? fieldType.GenericTypeDefinition() : fieldType)) && fieldType != typeof(string))
-            {
-                return dialectProvider.GetQuotedValue(dialectProvider.StringSerializer.SerializeToString(value));
-            }
-
-            var typeCode = fieldType.GetTypeCode();
-            switch (typeCode)
-            {
-                case TypeCode.Single:
-                    return ((float)value).ToString(CultureInfo.InvariantCulture);
-                case TypeCode.Double:
-                    return ((double)value).ToString(CultureInfo.InvariantCulture);
-                case TypeCode.Decimal:
-                    return ((decimal)value).ToString(CultureInfo.InvariantCulture);
-
-                case TypeCode.Byte:
-                case TypeCode.Int16:
-                case TypeCode.Int32:
-                case TypeCode.Int64:
-                case TypeCode.SByte:
-                case TypeCode.UInt16:
-                case TypeCode.UInt32:
-                case TypeCode.UInt64:
-                    if (fieldType.IsNumericType())
-                        return Convert.ChangeType(value, fieldType).ToString();
-                    break;
-            }
-
-            if (fieldType == typeof(TimeSpan))
-                return ((TimeSpan)value).Ticks.ToString(CultureInfo.InvariantCulture);
-
-            return ShouldQuoteValue(fieldType)
-                    ? dialectProvider.GetQuotedValue(value.ToString())
-                    : value.ToString();
+            return false;
         }
 
         public abstract IDbConnection CreateConnection(string filePath, Dictionary<string, string> options);
@@ -424,13 +327,20 @@ namespace ServiceStack.OrmLite
             return string.Format("\"{0}\"", name);
         }
 
+        public virtual string SanitizeFieldNameForParamName(string fieldName)
+        {
+            return (fieldName ?? "").Replace(" ", "");
+        }
+
         protected virtual string GetUndefinedColumnDefinition(Type fieldType, int? fieldLength)
         {
-            return string.Format(StringLengthColumnDefinitionFormat, fieldLength.GetValueOrDefault(DefaultStringLength));
+            return fieldLength.HasValue
+                ? string.Format(StringLengthColumnDefinitionFormat, fieldLength.GetValueOrDefault(DefaultStringLength))
+                : MaxStringColumnDefinition;
         }
 
         public virtual string GetColumnDefinition(string fieldName, Type fieldType,
-            bool isPrimaryKey, bool autoIncrement, bool isNullable,
+            bool isPrimaryKey, bool autoIncrement, bool isNullable, bool isRowVersion,
             int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
         {
             string fieldDefinition;
@@ -441,7 +351,7 @@ namespace ServiceStack.OrmLite
             }
             else if (fieldType == typeof(string))
             {
-                fieldDefinition =  fieldLength == StringLengthAttribute.MaxText
+                fieldDefinition = fieldLength == StringLengthAttribute.MaxText
                     ? MaxStringColumnDefinition
                     : string.Format(StringLengthColumnDefinitionFormat, fieldLength.GetValueOrDefault(DefaultStringLength));
             }
@@ -505,52 +415,28 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecLongScalar();
         }
 
-        public virtual string ToCountStatement(Type fromTableType, string sqlFilter, params object[] filterParams)
-        {
-            var sql = new StringBuilder();
-            const string SelectStatement = "SELECT ";
-            var modelDef = fromTableType.GetModelDefinition();
-            var isFullSelectStatement =
-                !string.IsNullOrEmpty(sqlFilter)
-                && sqlFilter.TrimStart().StartsWith(SelectStatement, StringComparison.OrdinalIgnoreCase);
-
-            if (isFullSelectStatement) return (filterParams != null ? sqlFilter.SqlFmt(filterParams) : sqlFilter);
-
-            sql.AppendFormat("SELECT {0} FROM {1}", "COUNT(*)",
-                             GetQuotedTableName(modelDef));
-            if (!string.IsNullOrEmpty(sqlFilter))
-            {
-                sqlFilter = filterParams != null ? sqlFilter.SqlFmt(filterParams) : sqlFilter;
-                if ((!sqlFilter.StartsWith("ORDER ", StringComparison.InvariantCultureIgnoreCase)
-                    && !sqlFilter.StartsWith("LIMIT ", StringComparison.InvariantCultureIgnoreCase))
-                    && (!sqlFilter.StartsWith("WHERE ", StringComparison.InvariantCultureIgnoreCase)))
-                {
-                    sql.Append(" WHERE ");
-                }
-                sql.Append(" " + sqlFilter);
-            }
-            return sql.ToString();
-        }
-
         // Fmt
         public virtual string ToSelectStatement(Type tableType, string sqlFilter, params object[] filterParams)
         {
             const string SelectStatement = "SELECT";
             var isFullSelectStatement =
                 !string.IsNullOrEmpty(sqlFilter)
-                && sqlFilter.TrimStart().StartsWith(SelectStatement, StringComparison.InvariantCultureIgnoreCase);
+                && sqlFilter.TrimStart().StartsWith(SelectStatement, StringComparison.OrdinalIgnoreCase);
 
             if (isFullSelectStatement)
                 return sqlFilter.SqlFmt(filterParams);
 
             var modelDef = tableType.GetModelDefinition();
-            var sql = new StringBuilder("SELECT " + tableType.GetColumnNames() + " FROM " + GetQuotedTableName(modelDef));
+            var sql = new StringBuilder();
+            sql.AppendFormat("SELECT {0} FROM {1}",
+                GetColumnNames(modelDef),
+                GetQuotedTableName(modelDef));
 
             if (!string.IsNullOrEmpty(sqlFilter))
             {
                 sqlFilter = sqlFilter.SqlFmt(filterParams);
-                if (!sqlFilter.StartsWith("ORDER ", StringComparison.InvariantCultureIgnoreCase)
-                    && !sqlFilter.StartsWith("LIMIT ", StringComparison.InvariantCultureIgnoreCase))
+                if (!sqlFilter.StartsWith("ORDER ", StringComparison.OrdinalIgnoreCase)
+                    && !sqlFilter.StartsWith("LIMIT ", StringComparison.OrdinalIgnoreCase))
                 {
                     sql.Append(" WHERE ");
                 }
@@ -559,6 +445,56 @@ namespace ServiceStack.OrmLite
             }
 
             return sql.ToString();
+        }
+
+        public virtual string ToSelectStatement(ModelDefinition modelDef, 
+            string selectExpression, 
+            string bodyExpression,
+            string orderByExpression = null, 
+            int? offset = null, 
+            int? rows = null)
+        {
+
+            var sb = new StringBuilder(selectExpression);
+            sb.Append(bodyExpression);
+            if (orderByExpression != null)
+            {
+                sb.Append(orderByExpression);
+            }
+
+            if (offset != null || rows != null)
+            {
+                sb.Append("\nLIMIT ");
+                if (offset == null)
+                {
+                    sb.Append(rows);
+                }
+                else
+                {
+                    sb.Append(rows.GetValueOrDefault(int.MaxValue)).Append(" OFFSET ").Append(offset);
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        public virtual string GetRowVersionColumnName(FieldDefinition field)
+        {
+            return GetQuotedColumnName(field.FieldName);
+        }
+
+        public virtual string GetColumnNames(ModelDefinition modelDef)
+        {
+            var sqlColumns = new StringBuilder();
+            foreach (var field in modelDef.FieldDefinitions)
+            {
+                if (sqlColumns.Length > 0)
+                    sqlColumns.Append(", ");
+
+                sqlColumns.Append(field.GetQuotedName(this));
+            }
+
+            return sqlColumns.ToString();
         }
 
         /// Fmt
@@ -573,10 +509,12 @@ namespace ServiceStack.OrmLite
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
-                if (fieldDef.IsComputed) continue;
-                if (fieldDef.AutoIncrement) continue;
+                if (fieldDef.ShouldSkipInsert())
+                    continue;
+
                 //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
-                if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name)) continue;
+                if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name)) 
+                    continue;
 
                 if (sbColumnNames.Length > 0) sbColumnNames.Append(",");
                 if (sbColumnValues.Length > 0) sbColumnValues.Append(",");
@@ -584,7 +522,7 @@ namespace ServiceStack.OrmLite
                 try
                 {
                     sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
-                    sbColumnValues.Append(fieldDef.GetQuotedValue(objWithProperties));
+                    sbColumnValues.Append(fieldDef.GetQuotedValue(objWithProperties, this));
                 }
                 catch (Exception ex)
                 {
@@ -610,10 +548,12 @@ namespace ServiceStack.OrmLite
 
             foreach (var fieldDef in modelDef.FieldDefinitionsArray)
             {
-                if (fieldDef.AutoIncrement || fieldDef.IsComputed) continue;
+                if (fieldDef.ShouldSkipInsert())
+                    continue;
 
                 //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
-                if (insertFields != null && !insertFields.Contains(fieldDef.Name)) continue;
+                if (insertFields != null && !insertFields.Contains(fieldDef.Name)) 
+                    continue;
 
                 if (sbColumnNames.Length > 0)
                     sbColumnNames.Append(",");
@@ -623,7 +563,7 @@ namespace ServiceStack.OrmLite
                 try
                 {
                     sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
-                    sbColumnValues.Append(OrmLiteConfig.DialectProvider.GetParam(fieldDef.FieldName));
+                    sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
 
                     AddParameter(cmd, fieldDef);
                 }
@@ -638,45 +578,44 @@ namespace ServiceStack.OrmLite
                                             GetQuotedTableName(modelDef), sbColumnNames, sbColumnValues);
         }
 
-        public virtual void PrepareParameterizedUpdateStatement<T>(IDbCommand cmd, ICollection<string> updateFields = null)
+        public virtual bool PrepareParameterizedUpdateStatement<T>(IDbCommand cmd, ICollection<string> updateFields = null)
         {
             var sqlFilter = new StringBuilder();
             var sql = new StringBuilder();
             var modelDef = typeof(T).GetModelDefinition();
+            var hadRowVesion = false;
+            var updateAllFields = updateFields == null || updateFields.Count == 0;
 
             cmd.Parameters.Clear();
             cmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
-                if (fieldDef.IsComputed) continue;
+                if (fieldDef.ShouldSkipUpdate()) 
+                    continue;
+
                 try
                 {
-                    if (fieldDef.IsPrimaryKey && (updateFields == null || updateFields.Count == 0))
+                    if ((fieldDef.IsPrimaryKey || fieldDef.IsRowVersion) && updateAllFields)
                     {
-                        if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
+                        if (sqlFilter.Length > 0) 
+                            sqlFilter.Append(" AND ");
 
-                        sqlFilter
-                            .Append(GetQuotedColumnName(fieldDef.FieldName))
-                            .Append("=")
-                            .Append(this.GetParam(fieldDef.FieldName));
+                        AppendFieldCondition(sqlFilter, fieldDef, cmd);
 
-                        AddParameter(cmd, fieldDef);
+                        if (fieldDef.IsRowVersion)
+                            hadRowVesion = true;
 
                         continue;
                     }
 
-                    if ((updateFields != null && updateFields.Count > 0) && !updateFields.Contains(fieldDef.Name))
+                    if (!updateAllFields && !updateFields.Contains(fieldDef.Name))
                         continue;
 
                     if (sql.Length > 0)
                         sql.Append(", ");
 
-                    sql.Append(GetQuotedColumnName(fieldDef.FieldName))
-                       .Append("=")
-                       .Append(this.GetParam(fieldDef.FieldName));
-
-                    AddParameter(cmd, fieldDef);
+                    AppendFieldCondition(sql, fieldDef, cmd);
                 }
                 catch (Exception ex)
                 {
@@ -684,36 +623,59 @@ namespace ServiceStack.OrmLite
                 }
             }
 
-            cmd.CommandText = string.Format("UPDATE {0} SET {1} {2}",
-                GetQuotedTableName(modelDef), sql, (sqlFilter.Length > 0 ? "WHERE " + sqlFilter : ""));
+            if (sql.Length > 0)
+            {
+                cmd.CommandText = string.Format("UPDATE {0} SET {1} {2}",
+                    GetQuotedTableName(modelDef), sql, (sqlFilter.Length > 0 ? "WHERE " + sqlFilter : ""));
+            }
+
+            return hadRowVesion;
         }
 
-        public virtual void PrepareParameterizedDeleteStatement<T>(IDbCommand cmd, ICollection<string> deleteFields = null)
+        public virtual void AppendFieldCondition(StringBuilder sqlFilter, FieldDefinition fieldDef, IDbCommand cmd)
+        {
+            sqlFilter
+                .Append(GetQuotedColumnName(fieldDef.FieldName))
+                .Append("=")
+                .Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
+
+            AddParameter(cmd, fieldDef);
+        }
+
+        public virtual void AppendFieldConditionFmt(StringBuilder sqlFilter, FieldDefinition fieldDef, object objWithProperties)
+        {
+            sqlFilter.AppendFormat("{0}={1}", 
+                GetQuotedColumnName(fieldDef.FieldName),
+                fieldDef.GetQuotedValue(objWithProperties, this));
+        }
+
+        public virtual bool PrepareParameterizedDeleteStatement<T>(IDbCommand cmd, ICollection<string> deleteFields = null)
         {
             var sqlFilter = new StringBuilder();
             var modelDef = typeof(T).GetModelDefinition();
+            var hadRowVesion = false;
+            var hasSpecificFilter = deleteFields != null && deleteFields.Count > 0;
 
             cmd.Parameters.Clear();
             cmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
-                if (fieldDef.IsComputed) continue;
-
-                if ((deleteFields != null && deleteFields.Count > 0) && !deleteFields.Contains(fieldDef.Name))
+                if (fieldDef.ShouldSkipDelete()) 
                     continue;
+
+                if (!fieldDef.IsRowVersion && (hasSpecificFilter && !deleteFields.Contains(fieldDef.Name)))
+                    continue;
+
+                if (fieldDef.IsRowVersion)
+                    hadRowVesion = true;
 
                 try
                 {
                     if (sqlFilter.Length > 0)
                         sqlFilter.Append(" AND ");
 
-                    sqlFilter
-                        .Append(GetQuotedColumnName(fieldDef.FieldName))
-                        .Append("=")
-                        .Append(this.GetParam(fieldDef.FieldName));
-
-                    AddParameter(cmd, fieldDef);
+                    AppendFieldCondition(sqlFilter, fieldDef, cmd);
                 }
                 catch (Exception ex)
                 {
@@ -723,6 +685,8 @@ namespace ServiceStack.OrmLite
 
             cmd.CommandText = string.Format("DELETE FROM {0} WHERE {1}",
                 GetQuotedTableName(modelDef), sqlFilter);
+
+            return hadRowVesion;
         }
 
         protected void AddParameter(IDbCommand cmd, FieldDefinition fieldDef)
@@ -734,18 +698,20 @@ namespace ServiceStack.OrmLite
 
         public virtual void SetParameter(FieldDefinition fieldDef, IDbDataParameter p)
         {
-            p.ParameterName = OrmLiteConfig.DialectProvider.GetParam(fieldDef.FieldName);
+            p.ParameterName = this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName));
 
             DbType dbType;
-            p.DbType = DbTypeMap.ColumnDbTypeMap.TryGetValue(fieldDef.ColumnType, out dbType)
-                ? dbType
+            var sqlDbType = DbTypeMap.ColumnDbTypeMap.TryGetValue(fieldDef.ColumnType, out dbType) 
+                ? dbType 
                 : DbType.String;
+
+            p.DbType = sqlDbType;
         }
 
         public virtual void SetParameterValues<T>(IDbCommand dbCmd, object obj)
         {
             var modelDef = GetModel(typeof(T));
-            var fieldMap = modelDef.FieldDefinitionMap;
+            var fieldMap = modelDef.GetFieldDefinitionMap(SanitizeFieldNameForParamName);
 
             foreach (IDataParameter p in dbCmd.Parameters)
             {
@@ -762,11 +728,7 @@ namespace ServiceStack.OrmLite
 
         public virtual void SetParameterValue<T>(FieldDefinition fieldDef, IDataParameter p, object obj)
         {
-            var knownType = DbTypeMap.ColumnDbTypeMap.ContainsKey(fieldDef.ColumnType);
-            var value = knownType
-                ? GetValueOrDbNull<T>(fieldDef, obj)
-                : GetQuotedValueOrDbNull<T>(fieldDef, obj);
-
+            var value = GetValueOrDbNull<T>(fieldDef, obj);
             p.Value = value;
         }
 
@@ -778,9 +740,21 @@ namespace ServiceStack.OrmLite
 
             if (value != null)
             {
-                if (fieldDef.ColumnType == typeof(object))
+                if (fieldDef.IsRefType)
                 {
-                    return value.ToJsv();
+                    //Let ADO.NET providers handle byte[]
+                    if (fieldDef.FieldType == typeof(byte[]))
+                    {
+                        return value;
+                    }
+                    return OrmLiteConfig.DialectProvider.StringSerializer.SerializeToString(value);
+                }
+                if (fieldDef.FieldType.IsEnum)
+                {
+                    var enumValue = OrmLiteConfig.DialectProvider.StringSerializer.SerializeToString(value);
+                    return enumValue != null
+                        ? enumValue.Trim('"')
+                        : null;
                 }
                 if (fieldDef.FieldType == typeof(TimeSpan))
                 {
@@ -834,33 +808,33 @@ namespace ServiceStack.OrmLite
 
         public virtual string ToUpdateRowStatement(object objWithProperties, ICollection<string> updateFields = null)
         {
-            if (updateFields == null)
-                updateFields = new List<string>();
-
             var sqlFilter = new StringBuilder();
             var sql = new StringBuilder();
             var modelDef = objWithProperties.GetType().GetModelDefinition();
+            var updateAllFields = updateFields == null || updateFields.Count == 0;
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
-                if (fieldDef.IsComputed) continue;
+                if (fieldDef.ShouldSkipUpdate())
+                    continue;
 
                 try
                 {
-                    if (fieldDef.IsPrimaryKey && updateFields.Count == 0)
+                    if (fieldDef.IsPrimaryKey && updateAllFields)
                     {
-                        if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
+                        if (sqlFilter.Length > 0) 
+                            sqlFilter.Append(" AND ");
 
-                        sqlFilter.AppendFormat("{0}={1}", GetQuotedColumnName(fieldDef.FieldName), fieldDef.GetQuotedValue(objWithProperties));
+                        AppendFieldConditionFmt(sqlFilter, fieldDef, objWithProperties);
 
                         continue;
                     }
 
-                    if (updateFields.Count > 0 && !updateFields.Contains(fieldDef.Name) || fieldDef.AutoIncrement) continue;
+                    if (!updateAllFields && !updateFields.Contains(fieldDef.Name) || fieldDef.AutoIncrement) continue;
                     if (sql.Length > 0)
                         sql.Append(", ");
 
-                    sql.AppendFormat("{0}={1}", GetQuotedColumnName(fieldDef.FieldName), fieldDef.GetQuotedValue(objWithProperties));
+                    AppendFieldConditionFmt(sql, fieldDef, objWithProperties);
                 }
                 catch (Exception ex)
                 {
@@ -884,13 +858,17 @@ namespace ServiceStack.OrmLite
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
+                if (fieldDef.ShouldSkipDelete())
+                    continue;
+
                 try
                 {
                     if (fieldDef.IsPrimaryKey)
                     {
-                        if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
+                        if (sqlFilter.Length > 0) 
+                            sqlFilter.Append(" AND ");
 
-                        sqlFilter.AppendFormat("{0} = {1}", GetQuotedColumnName(fieldDef.FieldName), fieldDef.GetQuotedValue(objWithProperties));
+                        AppendFieldConditionFmt(sqlFilter, fieldDef, objWithProperties);
                     }
                 }
                 catch (Exception ex)
@@ -915,7 +893,8 @@ namespace ServiceStack.OrmLite
                 && sqlFilter.Length > deleteStatement.Length
                 && sqlFilter.Substring(0, deleteStatement.Length).ToUpper().Equals(deleteStatement);
 
-            if (isFullDeleteStatement) return sqlFilter.SqlFmt(filterParams);
+            if (isFullDeleteStatement) 
+                return sqlFilter.SqlFmt(filterParams);
 
             var modelDef = tableType.GetModelDefinition();
             sql.AppendFormat("DELETE FROM {0}", GetQuotedTableName(modelDef));
@@ -937,18 +916,23 @@ namespace ServiceStack.OrmLite
             var modelDef = tableType.GetModelDefinition();
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
-                if (sbColumns.Length != 0) sbColumns.Append(", \n  ");
-
                 var columnDefinition = GetColumnDefinition(
                     fieldDef.FieldName,
                     fieldDef.ColumnType,
                     fieldDef.IsPrimaryKey,
                     fieldDef.AutoIncrement,
                     fieldDef.IsNullable,
+                    fieldDef.IsRowVersion,
                     fieldDef.FieldLength,
                     fieldDef.Scale,
                     fieldDef.DefaultValue,
                     fieldDef.CustomFieldDefinition);
+
+                if (columnDefinition == null)
+                    continue;
+
+                if (sbColumns.Length != 0) 
+                    sbColumns.Append(", \n  ");
 
                 sbColumns.Append(columnDefinition);
 
@@ -969,6 +953,16 @@ namespace ServiceStack.OrmLite
                 "CREATE TABLE {0} \n(\n  {1}{2} \n); \n", GetQuotedTableName(modelDef), sbColumns, sbConstraints));
 
             return sql.ToString();
+        }
+
+        public virtual string ToPostCreateTableStatement(ModelDefinition modelDef)
+        {
+            return null;
+        }
+
+        public virtual string ToPostDropTableStatement(ModelDefinition modelDef)
+        {
+            return null;
         }
 
         public virtual string GetForeignKeyOnDeleteClause(ForeignKeyConstraint foreignKey)
@@ -993,15 +987,14 @@ namespace ServiceStack.OrmLite
                 var indexName = GetIndexName(fieldDef.IsUnique, modelDef.ModelName.SafeVarName(), fieldDef.FieldName);
 
                 sqlIndexes.Add(
-                    ToCreateIndexStatement(fieldDef.IsUnique, indexName, modelDef, fieldDef.FieldName, isCombined:false, fieldDef:fieldDef));
+                    ToCreateIndexStatement(fieldDef.IsUnique, indexName, modelDef, fieldDef.FieldName, isCombined: false, fieldDef: fieldDef));
             }
 
             foreach (var compositeIndex in modelDef.CompositeIndexes)
             {
                 var indexName = GetCompositeIndexName(compositeIndex, modelDef);
                 var indexNames = string.Join(" ASC, ",
-                                             compositeIndex.FieldNames.ConvertAll(
-                                                 n => GetQuotedName(n)).ToArray());
+                    compositeIndex.FieldNames.ConvertAll(GetQuotedName).ToArray());
 
                 sqlIndexes.Add(
                     ToCreateIndexStatement(compositeIndex.Unique, indexName, modelDef, indexNames, true));
@@ -1060,7 +1053,7 @@ namespace ServiceStack.OrmLite
                     string.Join("_", compositeIndex.FieldNames.ToArray()));
         }
 
-        protected virtual string ToCreateIndexStatement(bool isUnique, string indexName, ModelDefinition modelDef, string fieldName, 
+        protected virtual string ToCreateIndexStatement(bool isUnique, string indexName, ModelDefinition modelDef, string fieldName,
             bool isCombined = false, FieldDefinition fieldDef = null)
         {
             return string.Format("CREATE {0}{1}{2} INDEX {3} ON {4} ({5} ASC); \n",
@@ -1070,11 +1063,6 @@ namespace ServiceStack.OrmLite
                                  indexName,
                                  GetQuotedTableName(modelDef),
                                  (isCombined) ? fieldName : GetQuotedColumnName(fieldName));
-        }
-
-        public virtual string GetColumnNames(ModelDefinition modelDef)
-        {
-            return modelDef.GetColumnNames();
         }
 
         public virtual List<string> ToCreateSequenceStatements(Type tableType)
@@ -1142,15 +1130,15 @@ namespace ServiceStack.OrmLite
             return modelType.GetModelDefinition();
         }
 
-        #region DDL
         public virtual string ToAddColumnStatement(Type modelType, FieldDefinition fieldDef)
         {
 
             var column = GetColumnDefinition(fieldDef.FieldName,
-                                             fieldDef.FieldType,
+                                             fieldDef.ColumnType,
                                              fieldDef.IsPrimaryKey,
                                              fieldDef.AutoIncrement,
                                              fieldDef.IsNullable,
+                                             fieldDef.IsRowVersion,
                                              fieldDef.FieldLength,
                                              fieldDef.Scale,
                                              fieldDef.DefaultValue,
@@ -1164,10 +1152,11 @@ namespace ServiceStack.OrmLite
         public virtual string ToAlterColumnStatement(Type modelType, FieldDefinition fieldDef)
         {
             var column = GetColumnDefinition(fieldDef.FieldName,
-                                             fieldDef.FieldType,
+                                             fieldDef.ColumnType,
                                              fieldDef.IsPrimaryKey,
                                              fieldDef.AutoIncrement,
                                              fieldDef.IsNullable,
+                                             fieldDef.IsRowVersion,
                                              fieldDef.FieldLength,
                                              fieldDef.Scale,
                                              fieldDef.DefaultValue,
@@ -1182,10 +1171,11 @@ namespace ServiceStack.OrmLite
                                                           string oldColumnName)
         {
             var column = GetColumnDefinition(fieldDef.FieldName,
-                                             fieldDef.FieldType,
+                                             fieldDef.ColumnType,
                                              fieldDef.IsPrimaryKey,
                                              fieldDef.AutoIncrement,
                                              fieldDef.IsNullable,
+                                             fieldDef.IsRowVersion,
                                              fieldDef.FieldLength,
                                              fieldDef.Scale,
                                              fieldDef.DefaultValue,
@@ -1237,8 +1227,7 @@ namespace ServiceStack.OrmLite
                                            unique ? " UNIQUE " : " ",
                                            name,
                                            GetQuotedTableName(sourceMD.ModelName),
-                                           GetQuotedColumnName(fieldName)
-                                           );
+                                           GetQuotedColumnName(fieldName));
             return command;
         }
 
@@ -1256,7 +1245,142 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        #endregion DDL
 
+        public static ulong ConvertToULong(byte[] bytes)
+        {
+            Array.Reverse(bytes); //Correct Endianness
+            var ulongValue = BitConverter.ToUInt64(bytes, 0);
+            return ulongValue;
+        }
+
+        public virtual object ConvertDbValue(object value, Type type)
+        {
+            if (value == null || value is DBNull) return null;
+
+            var strValue = value as string;
+            if (strValue != null && OrmLiteConfig.StringFilter != null)
+            {
+                value = OrmLiteConfig.StringFilter(strValue);
+            }
+
+            if (value.GetType() == type)
+            {
+                return value;
+            }
+
+            if (type == typeof(DateTimeOffset))
+            {
+                if (strValue != null)
+                {
+                    var moment = DateTimeOffset.Parse(strValue, null, DateTimeStyles.RoundtripKind);
+                    return moment;
+                }
+                if (value is DateTime)
+                {
+                    return new DateTimeOffset((DateTime)value);
+                }
+            }
+
+            if (!type.IsEnum)
+            {
+                var typeCode = type.GetUnderlyingTypeCode();
+                switch (typeCode)
+                {
+                    case TypeCode.Int16:
+                        return value is short ? value : Convert.ToInt16(value);
+                    case TypeCode.UInt16:
+                        return value is ushort ? value : Convert.ToUInt16(value);
+                    case TypeCode.Int32:
+                        return value is int ? value : Convert.ToInt32(value);
+                    case TypeCode.UInt32:
+                        return value is uint ? value : Convert.ToUInt32(value);
+                    case TypeCode.Int64:
+                        return value is long ? value : Convert.ToInt64(value);
+                    case TypeCode.UInt64:
+                        if (value is ulong)
+                            return value;
+                        var byteValue = value as byte[];
+                        if (byteValue != null)
+                            return ConvertToULong(byteValue);
+                        return Convert.ToUInt64(value);
+                    case TypeCode.Single:
+                        return value is float ? value : Convert.ToSingle(value);
+                    case TypeCode.Double:
+                        return value is double ? value : Convert.ToDouble(value);
+                    case TypeCode.Decimal:
+                        return value is decimal ? value : Convert.ToDecimal(value);
+                }
+
+                if (type == typeof(TimeSpan))
+                {
+                    var ticks = (long)value;
+                    return TimeSpan.FromTicks(ticks);
+                }
+            }
+
+            try
+            {
+                var convertedValue = OrmLiteConfig.DialectProvider.StringSerializer.DeserializeFromString(value.ToString(), type);
+                return convertedValue;
+            }
+            catch (Exception)
+            {
+                log.ErrorFormat("Error ConvertDbValue trying to convert {0} into {1}", value, type.Name);
+                throw;
+            }
+        }
+
+        public virtual string GetQuotedValue(object value, Type fieldType)
+        {
+            if (value == null) return "NULL";
+
+            var dialectProvider = OrmLiteConfig.DialectProvider;
+            if (fieldType.IsRefType())
+            {
+                return dialectProvider.GetQuotedValue(dialectProvider.StringSerializer.SerializeToString(value));
+            }
+
+            var typeCode = fieldType.GetTypeCode();
+            switch (typeCode)
+            {
+                case TypeCode.Single:
+                    return ((float)value).ToString(CultureInfo.InvariantCulture);
+                case TypeCode.Double:
+                    return ((double)value).ToString(CultureInfo.InvariantCulture);
+                case TypeCode.Decimal:
+                    return ((decimal)value).ToString(CultureInfo.InvariantCulture);
+
+                case TypeCode.Byte:
+                case TypeCode.Int16:
+                case TypeCode.Int32:
+                case TypeCode.Int64:
+                case TypeCode.SByte:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
+                    if (fieldType.IsNumericType())
+                        return Convert.ChangeType(value, fieldType).ToString();
+                    break;
+            }
+
+            if (fieldType == typeof(TimeSpan))
+                return ((TimeSpan)value).Ticks.ToString(CultureInfo.InvariantCulture);
+
+            return ShouldQuoteValue(fieldType)
+                    ? dialectProvider.GetQuotedValue(value.ToString())
+                    : value.ToString();
+        }
+
+        public virtual string EscapeWildcards(string value)
+        {
+            if (value == null)
+                return null;
+
+            return value
+                .Replace("^", @"^^")
+                .Replace(@"\", @"^\")
+                .Replace("_", @"^_")
+                .Replace("%", @"^%");
+        }
     }
 }

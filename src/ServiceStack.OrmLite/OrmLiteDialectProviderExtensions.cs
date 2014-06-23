@@ -4,7 +4,7 @@ namespace ServiceStack.OrmLite
     {
         public static string GetParam(this IOrmLiteDialectProvider dialect, string name)
         {
-            return dialect.ParamString + (name ?? "").Replace(" ","");
+            return dialect.ParamString + name;
         }
 
         public static string GetParam(this IOrmLiteDialectProvider dialect, int indexNo = 0)
@@ -25,6 +25,28 @@ namespace ServiceStack.OrmLite
         public static string FmtColumn(this string columnName)
         {
             return OrmLiteConfig.DialectProvider.NamingStrategy.GetColumnName(columnName);
+        }
+
+        public static string GetQuotedColumnName(this IOrmLiteDialectProvider dialect, 
+            FieldDefinition fieldDef)
+        {
+            return dialect.GetQuotedColumnName(fieldDef.FieldName);
+        }
+
+        public static string GetQuotedColumnName(this IOrmLiteDialectProvider dialect,
+            ModelDefinition modelDef, FieldDefinition fieldDef)
+        {
+            return dialect.GetQuotedTableName(modelDef.ModelName) +
+                "." +
+                dialect.GetQuotedColumnName(fieldDef.FieldName);
+        }
+
+        public static string GetQuotedColumnName(this IOrmLiteDialectProvider dialect,
+            string tableName, string fieldName)
+        {
+            return dialect.GetQuotedTableName(tableName) +
+                "." +
+                dialect.GetQuotedColumnName(fieldName);
         }
     }
 }

@@ -26,6 +26,11 @@
             </summary>        
             <returns>RsaKeyPair</returns>
         </member>
+        <member name="M:ServiceStack.EnumerableExtensions.Safe``1(System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Return T[0] when enumerable is null, safe to use in enumerations like foreach
+            </summary>
+        </member>
         <member name="M:ServiceStack.EnumExtensions.ToDescription(System.Enum)">
             <summary>
             Gets the textual description of the enum if it has one. e.g.
@@ -200,6 +205,26 @@
             Otherwise logs the exception and returns false if an exception was thrown.
             </summary>
             <param name="action">The action.</param>
+            <returns></returns>
+        </member>
+        <member name="M:ServiceStack.PerfUtils.MeasureFor(System.Action,System.Int32)">
+            <summary>
+            Runs an action for a minimum of runForMs
+            </summary>
+            <param name="fn">What to run</param>
+            <param name="runForMs">Minimum ms to run for</param>
+            <returns>time elapsed in micro seconds</returns>
+        </member>
+        <member name="M:ServiceStack.PerfUtils.Measure(System.Action,System.Int32,System.Int32,System.Action,System.Action,System.Action)">
+            <summary>
+            Returns average microseconds an action takes when run for the specified runForMs
+            </summary>
+            <param name="fn">What to run</param>
+            <param name="times">How many times to run for each iteration</param>
+            <param name="runForMs">Minimum ms to run for</param>
+            <param name="setup"></param>
+            <param name="warmup"></param>
+            <param name="teardown"></param>
             <returns></returns>
         </member>
     </members>

@@ -97,6 +97,12 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void CanCreateForeignWithOnDeleteSetDefault()
         {
+            if (OrmLiteConfig.DialectProvider == MySqlDialect.Provider)
+            {
+                //ignoring Not supported in InnoDB: http://stackoverflow.com/a/1498015/85785
+                return;
+            }
+
             using (var dbConn = OpenDbConnection())
             {
                 dbConn.DropAndCreateTable<TypeWithOnDeleteSetDefault>();

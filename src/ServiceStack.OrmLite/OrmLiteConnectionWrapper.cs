@@ -77,7 +77,7 @@ namespace ServiceStack.OrmLite
                 return AlwaysReturnCommand;
 
             var cmd = DbConnection.CreateCommand();
-            if(Transaction != null) { cmd.Transaction = Transaction; }
+            if (Transaction != null) { cmd.Transaction = Transaction; }
             cmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
             return cmd;
         }
@@ -85,7 +85,7 @@ namespace ServiceStack.OrmLite
         public void Open()
         {
             if (isOpen) return;
-			
+
             DbConnection.Open();
             //so the internal connection is wrapped for example by miniprofiler
             if (ConnectionFilter != null) { DbConnection = ConnectionFilter(DbConnection); }

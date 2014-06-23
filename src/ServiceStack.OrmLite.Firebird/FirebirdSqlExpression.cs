@@ -9,15 +9,11 @@ namespace ServiceStack.OrmLite.Firebird
         private readonly string _trueExpression;
         private readonly string _falseExpression;
 
-        public FirebirdSqlExpression()
+        public FirebirdSqlExpression(IOrmLiteDialectProvider dialectProvider) 
+            : base(dialectProvider) 
         {
             _trueExpression = string.Format("({0}={1})", GetQuotedTrueValue(), GetQuotedTrueValue());
             _falseExpression = string.Format("({0}={1})", GetQuotedTrueValue(), GetQuotedFalseValue());
-        }
-
-        public override SqlExpression<T> Clone()
-        {
-            return CopyTo(new FirebirdSqlExpression<T>());
         }
 
         protected override object VisitBinary(BinaryExpression b)
@@ -160,34 +156,6 @@ namespace ServiceStack.OrmLite.Firebird
         {
             return (exp.ToString() == _falseExpression);
         }
-
-        public override string LimitExpression
-        {
-            get
-            {
-                if (!Skip.HasValue) return "";
-                int fromRow = Skip.Value + 1;
-                if (fromRow <= 0)
-                    throw new ArgumentException(
-                        string.Format("Skip value:'{0}' must be>=0", Skip.Value));
-                string toRow;
-                if (Rows.HasValue)
-                {
-                    if (Rows.Value < 0)
-                    {
-                        throw new ArgumentException(
-                            string.Format("Rows value:'{0}' must be>=0", Rows.Value));
-                    }
-                    toRow = string.Format("TO {0}", fromRow + Rows.Value - 1);
-                }
-                else
-                {
-                    toRow = string.Empty;
-                }
-                return string.Format("ROWS {0} {1}", fromRow, toRow);
-            }
-        }
-
     }
 }
 

@@ -8,7 +8,7 @@ namespace ServiceStack.OrmLite
 {
     public static class UntypedApiExtensions
     {
-        static readonly ConcurrentDictionary<Type, Type> untypedApiMap = 
+        static readonly ConcurrentDictionary<Type, Type> untypedApiMap =
             new ConcurrentDictionary<Type, Type>();
 
         public static IUntypedApi CreateTypedApi(this IDbConnection db, Type forType)

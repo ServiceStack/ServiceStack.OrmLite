@@ -13,9 +13,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
+using ServiceStack.Data;
 using ServiceStack.Logging;
 
 namespace ServiceStack.OrmLite
@@ -23,15 +24,10 @@ namespace ServiceStack.OrmLite
     public static class OrmLiteWriteExtensions
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(OrmLiteWriteExtensions));
-        private const string UseDbConnectionExtensions = "Use IDbConnection Extensions instead";
 
-        [Conditional("DEBUG")]
-        private static void LogDebug(string fmt, params object[] args)
+        private static void LogDebug(string fmt)
         {
-            if (args.Length > 0)
-                Log.DebugFormat(fmt, args);
-            else
-                Log.Debug(fmt);
+            Log.Debug(fmt);
         }
 
         internal static void CreateTables(this IDbCommand dbCmd, bool overwrite, params Type[] tableTypes)
@@ -64,6 +60,12 @@ namespace ServiceStack.OrmLite
 
                 DropTable(dbCmd, modelDef);
 
+                var postDropTableSql = dialectProvider.ToPostDropTableStatement(modelDef);
+                if (postDropTableSql != null)
+                {
+                    ExecuteSql(dbCmd, postDropTableSql);
+                }
+
                 if (modelDef.PostDropTableSql != null)
                 {
                     ExecuteSql(dbCmd, modelDef.PostDropTableSql);
@@ -75,13 +77,19 @@ namespace ServiceStack.OrmLite
             try
             {
                 if (!tableExists)
-                { 
+                {
                     if (modelDef.PreCreateTableSql != null)
                     {
                         ExecuteSql(dbCmd, modelDef.PreCreateTableSql);
                     }
 
                     ExecuteSql(dbCmd, dialectProvider.ToCreateTableStatement(modelType));
+
+                    var postCreateTableSql = dialectProvider.ToPostCreateTableStatement(modelDef);
+                    if (postCreateTableSql != null)
+                    {
+                        ExecuteSql(dbCmd, postCreateTableSql);
+                    }
 
                     if (modelDef.PostCreateTableSql != null)
                     {
@@ -212,7 +220,8 @@ namespace ServiceStack.OrmLite
 
         internal static int ExecuteSql(this IDbCommand dbCmd, string sql)
         {
-            LogDebug(sql);
+            if (Log.IsDebugEnabled)
+                LogDebug(sql);
 
             dbCmd.CommandText = sql;
 
@@ -313,7 +322,7 @@ namespace ServiceStack.OrmLite
                 // First guess: Maybe the DB field has underscores? (most common)
                 // e.g. CustomerId (C#) vs customer_id (DB)
                 var dbFieldNameWithNoUnderscores = dbFieldName.Replace("_", "");
-                if (String.Compare(fieldName, dbFieldNameWithNoUnderscores, StringComparison.InvariantCultureIgnoreCase) == 0)
+                if (String.Compare(fieldName, dbFieldNameWithNoUnderscores, StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     return i;
                 }
@@ -321,42 +330,48 @@ namespace ServiceStack.OrmLite
                 // Next guess: Maybe the DB field has special characters?
                 // e.g. Quantity (C#) vs quantity% (DB)
                 var dbFieldNameSanitized = AllowedPropertyCharsRegex.Replace(dbFieldName, String.Empty);
-                if (String.Compare(fieldName, dbFieldNameSanitized, StringComparison.InvariantCultureIgnoreCase) == 0)
+                if (String.Compare(fieldName, dbFieldNameSanitized, StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     return i;
                 }
 
                 // Next guess: Maybe the DB field has special characters *and* has underscores?
                 // e.g. Quantity (C#) vs quantity_% (DB)
-                if (String.Compare(fieldName, dbFieldNameSanitized.Replace("_", String.Empty), StringComparison.InvariantCultureIgnoreCase) == 0)
+                if (String.Compare(fieldName, dbFieldNameSanitized.Replace("_", String.Empty), StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     return i;
                 }
 
                 // Next guess: Maybe the DB field has some prefix that we don't have in our C# field?
                 // e.g. CustomerId (C#) vs t130CustomerId (DB)
-                if (dbFieldName.EndsWith(fieldName, StringComparison.InvariantCultureIgnoreCase))
+                if (dbFieldName.EndsWith(fieldName, StringComparison.OrdinalIgnoreCase))
                 {
                     return i;
                 }
 
                 // Next guess: Maybe the DB field has some prefix that we don't have in our C# field *and* has underscores?
                 // e.g. CustomerId (C#) vs t130_CustomerId (DB)
-                if (dbFieldNameWithNoUnderscores.EndsWith(fieldName, StringComparison.InvariantCultureIgnoreCase))
+                if (dbFieldNameWithNoUnderscores.EndsWith(fieldName, StringComparison.OrdinalIgnoreCase))
                 {
                     return i;
                 }
 
                 // Next guess: Maybe the DB field has some prefix that we don't have in our C# field *and* has special characters?
                 // e.g. CustomerId (C#) vs t130#CustomerId (DB)
-                if (dbFieldNameSanitized.EndsWith(fieldName, StringComparison.InvariantCultureIgnoreCase))
+                if (dbFieldNameSanitized.EndsWith(fieldName, StringComparison.OrdinalIgnoreCase))
                 {
                     return i;
                 }
 
                 // Next guess: Maybe the DB field has some prefix that we don't have in our C# field *and* has underscores *and* has special characters?
                 // e.g. CustomerId (C#) vs t130#Customer_I#d (DB)
-                if (dbFieldNameSanitized.Replace("_", "").EndsWith(fieldName, StringComparison.InvariantCultureIgnoreCase))
+                if (dbFieldNameSanitized.Replace("_", "").EndsWith(fieldName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return i;
+                }
+
+                // Cater for Naming Strategies like PostgreSQL that has lower_underscore names
+                if (dbFieldNameSanitized.Replace("_", "").EndsWith(fieldName.Replace("_", ""), StringComparison.OrdinalIgnoreCase))
                 {
                     return i;
                 }
@@ -370,11 +385,18 @@ namespace ServiceStack.OrmLite
             if (OrmLiteConfig.UpdateFilter != null)
                 OrmLiteConfig.UpdateFilter(dbCmd, obj);
 
-            OrmLiteConfig.DialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
+            var hadRowVersion = OrmLiteConfig.DialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
+            if (string.IsNullOrEmpty(dbCmd.CommandText))
+                return 0;
 
             OrmLiteConfig.DialectProvider.SetParameterValues<T>(dbCmd, obj);
 
-            return dbCmd.ExecNonQuery();
+            var rowsUpdated = dbCmd.ExecNonQuery();
+
+            if (hadRowVersion && rowsUpdated == 0)
+                throw new OptimisticConcurrencyException();
+
+            return rowsUpdated;
         }
 
         internal static int Update<T>(this IDbCommand dbCmd, params T[] objs)
@@ -394,7 +416,9 @@ namespace ServiceStack.OrmLite
 
                 var dialectProvider = OrmLiteConfig.DialectProvider;
 
-                dialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
+                var hadRowVersion = dialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
+                if (string.IsNullOrEmpty(dbCmd.CommandText))
+                    return 0;
 
                 foreach (var obj in objs)
                 {
@@ -403,7 +427,11 @@ namespace ServiceStack.OrmLite
 
                     dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
-                    count += dbCmd.ExecNonQuery();
+                    var rowsUpdated = dbCmd.ExecNonQuery();
+                    if (hadRowVersion && rowsUpdated == 0) 
+                        throw new OptimisticConcurrencyException();
+
+                    count += rowsUpdated;                
                 }
 
                 if (dbTrans != null)
@@ -418,22 +446,31 @@ namespace ServiceStack.OrmLite
             return count;
         }
 
+        private static int AssertRowsUpdated(IDbCommand dbCmd, bool hadRowVersion)
+        {
+            var rowsUpdated = dbCmd.ExecNonQuery();
+            if (hadRowVersion && rowsUpdated == 0)
+                throw new OptimisticConcurrencyException();
+
+            return rowsUpdated;
+        }
+
         internal static int Delete<T>(this IDbCommand dbCmd, object anonType)
         {
-            OrmLiteConfig.DialectProvider.PrepareParameterizedDeleteStatement<T>(dbCmd, anonType.AllFields<T>());
+            var hadRowVersion = OrmLiteConfig.DialectProvider.PrepareParameterizedDeleteStatement<T>(dbCmd, anonType.AllFields<T>());
 
             OrmLiteConfig.DialectProvider.SetParameterValues<T>(dbCmd, anonType);
 
-            return dbCmd.ExecNonQuery();
+            return AssertRowsUpdated(dbCmd, hadRowVersion);
         }
 
         internal static int DeleteNonDefaults<T>(this IDbCommand dbCmd, T filter)
         {
-            OrmLiteConfig.DialectProvider.PrepareParameterizedDeleteStatement<T>(dbCmd, filter.NonDefaultFields<T>());
+            var hadRowVersion = OrmLiteConfig.DialectProvider.PrepareParameterizedDeleteStatement<T>(dbCmd, filter.NonDefaultFields<T>());
 
             OrmLiteConfig.DialectProvider.SetParameterValues<T>(dbCmd, filter);
 
-            return dbCmd.ExecNonQuery();
+            return AssertRowsUpdated(dbCmd, hadRowVersion);
         }
 
         internal static int Delete<T>(this IDbCommand dbCmd, params object[] objs)
@@ -499,6 +536,38 @@ namespace ServiceStack.OrmLite
             dbCmd.Parameters.Add(idParam);
 
             return dbCmd.ExecuteSql(sql);
+        }
+
+        internal static void DeleteById<T>(this IDbCommand dbCmd, object id, ulong rowVersion)
+        {
+            var modelDef = ModelDefinition<T>.Definition;
+
+            dbCmd.Parameters.Clear();
+
+            var idParam = dbCmd.CreateParameter();
+            idParam.ParameterName = OrmLiteConfig.DialectProvider.GetParam();
+            idParam.Value = id;
+            dbCmd.Parameters.Add(idParam);
+
+            var rowVersionField = modelDef.RowVersion;
+            if (rowVersionField == null)
+                throw new InvalidOperationException("Cannot use DeleteById with rowVersion for model type without a row version column");
+
+            var rowVersionParam = dbCmd.CreateParameter();
+            rowVersionParam.ParameterName = OrmLiteConfig.DialectProvider.GetParam("rowVersion");
+            rowVersionParam.Value = rowVersion;
+            dbCmd.Parameters.Add(rowVersionParam);
+
+            var sql = string.Format("DELETE FROM {0} WHERE {1} = {2} AND {3} = {4}",
+                OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef),
+                OrmLiteConfig.DialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName),
+                idParam.ParameterName,
+                OrmLiteConfig.DialectProvider.GetQuotedColumnName(rowVersionField.FieldName),
+                rowVersionParam.ParameterName);
+
+            var rowsAffected = dbCmd.ExecuteSql(sql);
+            if (rowsAffected == 0)
+                throw new OptimisticConcurrencyException("The row was modified or deleted since the last read");
         }
 
         internal static int DeleteByIds<T>(this IDbCommand dbCmd, IEnumerable idValues)
@@ -597,15 +666,17 @@ namespace ServiceStack.OrmLite
         internal static bool Save<T>(this IDbCommand dbCmd, T obj)
         {
             var id = obj.GetId();
-            var existingRow = dbCmd.SingleById<T>(id);
+            var existingRow = id != null ? dbCmd.SingleById<T>(id) : default(T);
+            var modelDef = typeof(T).GetModelDefinition();
+
             if (Equals(existingRow, default(T)))
             {
-                var modelDef = typeof(T).GetModelDefinition();
                 if (modelDef.HasAutoIncrementId)
                 {
                     var newId = dbCmd.Insert(obj, selectIdentity: true);
                     var safeId = OrmLiteConfig.DialectProvider.ConvertDbValue(newId, modelDef.PrimaryKey.FieldType);
                     modelDef.PrimaryKey.SetValueFn(obj, safeId);
+                    id = newId;
                 }
                 else
                 {
@@ -614,6 +685,10 @@ namespace ServiceStack.OrmLite
 
                     dbCmd.Insert(obj);
                 }
+
+                if (modelDef.RowVersion != null)
+                    modelDef.RowVersion.SetValueFn(obj, dbCmd.GetRowVersion(modelDef, id));
+                
                 return true;
             }
 
@@ -621,6 +696,10 @@ namespace ServiceStack.OrmLite
                 OrmLiteConfig.UpdateFilter(dbCmd, obj);
 
             dbCmd.Update(obj);
+            
+            if (modelDef.RowVersion != null)
+                modelDef.RowVersion.SetValueFn(obj, dbCmd.GetRowVersion(modelDef, id));
+
             return false;
         }
 
@@ -631,7 +710,8 @@ namespace ServiceStack.OrmLite
             var firstRow = saveRows.FirstOrDefault();
             if (Equals(firstRow, default(T))) return 0;
 
-            var defaultIdValue = firstRow.GetId().GetType().GetDefaultValue();
+            var firstRowId = firstRow.GetId();
+            var defaultIdValue = firstRowId != null ? firstRowId.GetType().GetDefaultValue() : null;
 
             var idMap = defaultIdValue != null
                 ? saveRows.Where(x => !defaultIdValue.Equals(x.GetId())).ToSafeDictionary(x => x.GetId())
@@ -667,6 +747,7 @@ namespace ServiceStack.OrmLite
                             var newId = dbCmd.Insert(row, selectIdentity: true);
                             var safeId = OrmLiteConfig.DialectProvider.ConvertDbValue(newId, modelDef.PrimaryKey.FieldType);
                             modelDef.PrimaryKey.SetValueFn(row, safeId);
+                            id = newId;
                         }
                         else
                         {
@@ -678,6 +759,9 @@ namespace ServiceStack.OrmLite
 
                         rowsAdded++;
                     }
+
+                    if (modelDef.RowVersion != null)
+                        modelDef.RowVersion.SetValueFn(row, dbCmd.GetRowVersion(modelDef, id));
                 }
 
                 if (dbTrans != null)
@@ -698,6 +782,25 @@ namespace ServiceStack.OrmLite
             string sql = OrmLiteConfig.DialectProvider.ToExecuteProcedureStatement(obj);
             dbCommand.CommandType = CommandType.StoredProcedure;
             dbCommand.ExecuteSql(sql);
+        }
+
+        internal static ulong GetRowVersion(this IDbCommand dbCmd, ModelDefinition modelDef, object id)
+        {
+            var idParamString = OrmLiteConfig.DialectProvider.GetParam();
+
+            var sql = string.Format("SELECT {0} FROM {1} WHERE {2} = {3}",
+                OrmLiteConfig.DialectProvider.GetRowVersionColumnName(modelDef.RowVersion),
+                OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef),
+                OrmLiteConfig.DialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName),
+                idParamString);
+
+            dbCmd.Parameters.Clear();
+            var idParam = dbCmd.CreateParameter();
+            idParam.ParameterName = idParamString;
+            idParam.Value = id;
+            dbCmd.Parameters.Add(idParam);
+
+            return dbCmd.Scalar<ulong>(sql);
         }
     }
 }

@@ -20,7 +20,7 @@ namespace ServiceStack.OrmLite
         {
             try
             {
-                trans.Dispose();                
+                trans.Dispose();
             }
             finally
             {

@@ -63,7 +63,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        [ThreadStatic] 
+        [ThreadStatic]
         public static IOrmLiteResultsFilter ResultsFilter;
 
         public static IDbConnection ToDbConnection(this string dbConnectionStringOrFilePath)
@@ -92,13 +92,37 @@ namespace ServiceStack.OrmLite
             OrmLiteConfigExtensions.ClearCache();
         }
 
+        public static ModelDefinition GetModelMetadata(this Type modelType)
+        {
+            return modelType.GetModelDefinition();
+        }
+
         public static IDbConnection ToDbConnection(this string dbConnectionStringOrFilePath, IOrmLiteDialectProvider dialectProvider)
         {
             var dbConn = dialectProvider.CreateConnection(dbConnectionStringOrFilePath, options: null);
             return dbConn;
         }
 
+        public static bool StripUpperInLike { get; set; }
+
+        private static IOrmLiteExecFilter execFilter;
+        public static IOrmLiteExecFilter ExecFilter
+        {
+            get 
+            {
+                if (execFilter == null)
+                    execFilter = new OrmLiteExecFilter();
+
+                return dialectProvider != null 
+                    ? dialectProvider.ExecFilter ?? execFilter 
+                    : execFilter; 
+            }
+            set { execFilter = value; }
+        }
+
         public static Action<IDbCommand, object> InsertFilter { get; set; }
         public static Action<IDbCommand, object> UpdateFilter { get; set; }
+
+        public static Func<string, string> StringFilter { get; set; }
     }
 }

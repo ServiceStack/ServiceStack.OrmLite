@@ -1,24 +1,36 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Text;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 
-namespace ServiceStack.OrmLite.Oracle.Tests
+namespace ServiceStack.OrmLite.Tests
 {
     [TestFixture]
-    public class OracleParamTests : OracleTestBase
+    public class OracleParamTests : OrmLiteTestBase
     {
         private void DropAndCreateTables(IDbConnection db)
         {
             if (db.TableExists("ParamRelBO"))
-                db.DropTable<ParamRelBO>();
+                db.DropTable<ParamRelBo>();
 
-            db.CreateTable<ParamTestBO>(true);
-            db.CreateTable<ParamRelBO>(true);
-            db.CreateTable<ParamByteBO>(true);
+            db.CreateTable<ParamTestBo>(true);
+            db.CreateTable<ParamRelBo>(true);
+            db.CreateTable<ParamByteBo>(true);
+            db.CreateTable<ParamComment>(true);
+            db.CreateTable<ParamOrder>(true);
+            db.CreateTable<ParamLeft>(true);
+            db.CreateTable<ParamUser>(true);
+            db.CreateTable<ParamPassword>(true);
+            db.CreateTable<ParamActive>(true);
+            db.CreateTable<ParamDouble>(true);
+            db.CreateTable<ParamFloat>(true);
+            db.CreateTable<ParamDecimal>(true);
+            db.CreateTable<ParamString>(true);
+            db.CreateTable<ParamDate>(true);
+            db.CreateTable<ParamDateTime>(true);
+            db.CreateTable<ParamType>(true);
+            db.CreateTable<ParamTimestamp>(true);
         }
 
         [Test]
@@ -29,15 +41,15 @@ namespace ServiceStack.OrmLite.Oracle.Tests
                 DropAndCreateTables(db);
                 var dateTimeNow =new DateTime( DateTime.Now.Year,  DateTime.Now.Month,  DateTime.Now.Day);
 
-                db.Insert(new ParamTestBO() { Id = 1, Double = 0.001, Int = 100, Info = "One", NullableBool = null, DateTime = dateTimeNow });
-                db.Insert(new ParamTestBO() { Id = 2, Double = 0.002, Int = 200, Info = "Two", NullableBool = true, DateTime = dateTimeNow });
-                db.Insert(new ParamTestBO() { Id = 3, Double = 0.003, Int = 300, Info = "Three", NullableBool = false, DateTime = dateTimeNow.AddDays(23) });
-                db.Insert(new ParamTestBO() { Id = 4, Double = 0.004, Int = 400, Info = "Four", NullableBool = null });
+                db.Insert(new ParamTestBo { Id = 1, Double = 0.001, Int = 100, Info = "One", NullableBool = null, DateTime = dateTimeNow });
+                db.Insert(new ParamTestBo { Id = 2, Double = 0.002, Int = 200, Info = "Two", NullableBool = true, DateTime = dateTimeNow });
+                db.Insert(new ParamTestBo { Id = 3, Double = 0.003, Int = 300, Info = "Three", NullableBool = false, DateTime = dateTimeNow.AddDays(23) });
+                db.Insert(new ParamTestBo { Id = 4, Double = 0.004, Int = 400, Info = "Four", NullableBool = null });
 
-                var bo1 = db.Select<ParamTestBO>(q => q.Id == 1).Single();
-                var bo2 = db.Select<ParamTestBO>(q => q.Id == 2).Single();
-                var bo3 = db.Select<ParamTestBO>(q => q.Id == 3).Single();
-                var bo4 = db.Select<ParamTestBO>(q => q.Id == 4).Single();
+                var bo1 = db.Select<ParamTestBo>(q => q.Id == 1).Single();
+                var bo2 = db.Select<ParamTestBo>(q => q.Id == 2).Single();
+                var bo3 = db.Select<ParamTestBo>(q => q.Id == 3).Single();
+                var bo4 = db.Select<ParamTestBo>(q => q.Id == 4).Single();
 
                 Assert.AreEqual(1, bo1.Id);
                 Assert.AreEqual(2, bo2.Id);
@@ -78,8 +90,8 @@ namespace ServiceStack.OrmLite.Oracle.Tests
             {
                 DropAndCreateTables(db);
 
-                var bo1 = new ParamTestBO() { Id = 1, Double = 0.001, Int = 100, Info = "One", NullableBool = true };
-                var bo2 = new ParamTestBO() { Id = 2, Double = 0.002, Int = 200, Info = "Two", NullableBool = true, DateTime = DateTime.Now };
+                var bo1 = new ParamTestBo { Id = 1, Double = 0.001, Int = 100, Info = "One", NullableBool = true };
+                var bo2 = new ParamTestBo { Id = 2, Double = 0.002, Int = 200, Info = "Two", NullableBool = true, DateTime = DateTime.Now };
                 db.Insert(bo1);
                 db.Insert(bo2);
 
@@ -91,7 +103,7 @@ namespace ServiceStack.OrmLite.Oracle.Tests
 
                 db.Update(bo1);
 
-                var bo1Check = db.SingleById<ParamTestBO>(1);
+                var bo1Check = db.SingleById<ParamTestBo>(1);
 
                 Assert.AreEqual(bo1.Double, bo1Check.Double);
                 Assert.AreEqual(bo1.Int, bo1Check.Int);
@@ -108,7 +120,7 @@ namespace ServiceStack.OrmLite.Oracle.Tests
 
                 db.Update(bo2);
 
-                var bo2Check = db.SingleById<ParamTestBO>(2);
+                var bo2Check = db.SingleById<ParamTestBo>(2);
 
                 Assert.Less(DateTime.Now, bo2.DateTime);
                 Assert.AreEqual("TwoUpdated", bo2Check.Info);
@@ -124,21 +136,21 @@ namespace ServiceStack.OrmLite.Oracle.Tests
             {
                 DropAndCreateTables(db);
 
-                db.Insert(new ParamTestBO() { Id = 1 });
-                db.Insert(new ParamTestBO() { Id = 2 });
-                db.Insert(new ParamTestBO() { Id = 3 });
+                db.Insert(new ParamTestBo { Id = 1 });
+                db.Insert(new ParamTestBo { Id = 2 });
+                db.Insert(new ParamTestBo { Id = 3 });
 
-                Assert.IsNotNull(db.Select<ParamTestBO>(q => q.Id == 1).FirstOrDefault());
-                Assert.IsNotNull(db.Select<ParamTestBO>(q => q.Id == 2).FirstOrDefault());
-                Assert.IsNotNull(db.Select<ParamTestBO>(q => q.Id == 3).FirstOrDefault());
+                Assert.IsNotNull(db.Select<ParamTestBo>(q => q.Id == 1).FirstOrDefault());
+                Assert.IsNotNull(db.Select<ParamTestBo>(q => q.Id == 2).FirstOrDefault());
+                Assert.IsNotNull(db.Select<ParamTestBo>(q => q.Id == 3).FirstOrDefault());
 
-                db.DeleteById<ParamTestBO>(1);
-                db.DeleteById<ParamTestBO>(2);
-                db.DeleteById<ParamTestBO>(3);
+                db.DeleteById<ParamTestBo>(1);
+                db.DeleteById<ParamTestBo>(2);
+                db.DeleteById<ParamTestBo>(3);
 
-                Assert.IsNull(db.Select<ParamTestBO>(q => q.Id == 1).FirstOrDefault());
-                Assert.IsNull(db.Select<ParamTestBO>(q => q.Id == 2).FirstOrDefault());
-                Assert.IsNull(db.Select<ParamTestBO>(q => q.Id == 3).FirstOrDefault());
+                Assert.IsNull(db.Select<ParamTestBo>(q => q.Id == 1).FirstOrDefault());
+                Assert.IsNull(db.Select<ParamTestBo>(q => q.Id == 2).FirstOrDefault());
+                Assert.IsNull(db.Select<ParamTestBo>(q => q.Id == 3).FirstOrDefault());
             }
         }
 
@@ -149,13 +161,13 @@ namespace ServiceStack.OrmLite.Oracle.Tests
             {
                 DropAndCreateTables(db);
 
-                db.Insert(new ParamTestBO() { Id = 1, Info = "Item1" });
-                db.Insert(new ParamTestBO() { Id = 2, Info = "Item2" });
-                db.Insert(new ParamTestBO() { Id = 3, Info = "Item3" });
+                db.Insert(new ParamTestBo { Id = 1, Info = "Item1" });
+                db.Insert(new ParamTestBo { Id = 2, Info = "Item2" });
+                db.Insert(new ParamTestBo { Id = 3, Info = "Item3" });
 
-                Assert.AreEqual("Item1", db.SingleById<ParamTestBO>(1).Info);
-                Assert.AreEqual("Item2", db.SingleById<ParamTestBO>(2).Info);
-                Assert.AreEqual("Item3", db.SingleById<ParamTestBO>(3).Info);
+                Assert.AreEqual("Item1", db.SingleById<ParamTestBo>(1).Info);
+                Assert.AreEqual("Item2", db.SingleById<ParamTestBo>(2).Info);
+                Assert.AreEqual("Item3", db.SingleById<ParamTestBo>(3).Info);
             }
         }
 
@@ -166,21 +178,26 @@ namespace ServiceStack.OrmLite.Oracle.Tests
             {
                 DropAndCreateTables(db);
 
-                db.Insert(new ParamTestBO() { Id = 1, Double = 0.001, Int = 100, Info = "One", NullableBool = null });
-                db.Insert(new ParamTestBO() { Id = 2, Double = 0.002, Int = 200, Info = "Two", NullableBool = true });
-                db.Insert(new ParamTestBO() { Id = 3, Double = 0.003, Int = 300, Info = "Three", NullableBool = false });
-                db.Insert(new ParamTestBO() { Id = 4, Double = 0.004, Int = 400, Info = "Four", NullableBool = null });
+                LoadParamTestBo(db);
 
                 //select multiple items
-                Assert.AreEqual(2, db.Select<ParamTestBO>(q => q.NullableBool == null).Count);
-                Assert.AreEqual(2, db.Select<ParamTestBO>(q => q.NullableBool == null).Count);
-                Assert.AreEqual(1, db.Select<ParamTestBO>(q => q.NullableBool == true).Count);
-                Assert.AreEqual(1, db.Select<ParamTestBO>(q => q.NullableBool == false).Count);
+                Assert.AreEqual(2, db.Select<ParamTestBo>(q => q.NullableBool == null).Count);
+                Assert.AreEqual(2, db.Select<ParamTestBo>(q => q.NullableBool == null).Count);
+                Assert.AreEqual(1, db.Select<ParamTestBo>(q => q.NullableBool == true).Count);
+                Assert.AreEqual(1, db.Select<ParamTestBo>(q => q.NullableBool == false).Count);
 
-                Assert.AreEqual(1, db.Select<ParamTestBO>(q => q.Info == "Two").Count);
-                Assert.AreEqual(1, db.Select<ParamTestBO>(q => q.Int == 300).Count);
-                Assert.AreEqual(1, db.Select<ParamTestBO>(q => q.Double == 0.003).Count);
+                Assert.AreEqual(1, db.Select<ParamTestBo>(q => q.Info == "Two").Count);
+                Assert.AreEqual(1, db.Select<ParamTestBo>(q => q.Int == 300).Count);
+                Assert.AreEqual(1, db.Select<ParamTestBo>(q => q.Double == 0.003).Count);
             }
+        }
+
+        private void LoadParamTestBo(IDbConnection db)
+        {
+            db.Insert(new ParamTestBo { Id = 1, Double = 0.001, Int = 100, Info = "One", NullableBool = null });
+            db.Insert(new ParamTestBo { Id = 2, Double = 0.002, Int = 200, Info = "Two", NullableBool = true });
+            db.Insert(new ParamTestBo { Id = 3, Double = 0.003, Int = 300, Info = "Three", NullableBool = false });
+            db.Insert(new ParamTestBo { Id = 4, Double = 0.004, Int = 400, Info = "Four", NullableBool = null });
         }
 
         [Test]
@@ -190,27 +207,28 @@ namespace ServiceStack.OrmLite.Oracle.Tests
             {
                 DropAndCreateTables(db);
 
-                db.Insert(new ParamTestBO() { Id = 1, Double = 0.001, Int = 100, Info = "One", NullableBool = null });
-                db.Insert(new ParamTestBO() { Id = 2, Double = 0.002, Int = 200, Info = "Two", NullableBool = true });
-                db.Insert(new ParamTestBO() { Id = 3, Double = 0.003, Int = 300, Info = "Three", NullableBool = false });
-                db.Insert(new ParamTestBO() { Id = 4, Double = 0.004, Int = 400, Info = "Four", NullableBool = null });
+                LoadParamTestBo(db);
+                LoadParamRelBo(db);
 
-                db.Insert(new ParamRelBO() { PTId = 1, Info = "T1" });
-                db.Insert(new ParamRelBO() { PTId = 1, Info = "T1" });
-                db.Insert(new ParamRelBO() { PTId = 1, Info = "T1" });
-                db.Insert(new ParamRelBO() { PTId = 1, Info = "T1" });
-                db.Insert(new ParamRelBO() { PTId = 2, Info = "T1" });
-                db.Insert(new ParamRelBO() { PTId = 2, Info = "T1" });
-                db.Insert(new ParamRelBO() { PTId = 3, Info = "T1" });
-                db.Insert(new ParamRelBO() { PTId = 4, Info = "T1" });
-                db.Insert(new ParamRelBO() { PTId = 3, Info = "T2" });
-                db.Insert(new ParamRelBO() { PTId = 4, Info = "T2" });
-
-                Assert.AreEqual(8, db.Select<ParamRelBO>(q => q.Info == "T1").Count);
-                Assert.AreEqual(2, db.Select<ParamRelBO>(q => q.Info == "T2").Count);
+                Assert.AreEqual(8, db.Select<ParamRelBo>(q => q.Info == "T1").Count);
+                Assert.AreEqual(2, db.Select<ParamRelBo>(q => q.Info == "T2").Count);
                
-                Assert.AreEqual(3, db.Select<ParamRelBO>(q => q.Info == "T1" && (q.PTId == 2 || q.PTId == 3) ).Count);
+                Assert.AreEqual(3, db.Select<ParamRelBo>(q => q.Info == "T1" && (q.PtId == 2 || q.PtId == 3) ).Count);
             }
+        }
+
+        private void LoadParamRelBo(IDbConnection db)
+        {
+            db.Insert(new ParamRelBo { PtId = 1, Info = "T1" });
+            db.Insert(new ParamRelBo { PtId = 1, Info = "T1" });
+            db.Insert(new ParamRelBo { PtId = 1, Info = "T1" });
+            db.Insert(new ParamRelBo { PtId = 1, Info = "T1" });
+            db.Insert(new ParamRelBo { PtId = 2, Info = "T1" });
+            db.Insert(new ParamRelBo { PtId = 2, Info = "T1" });
+            db.Insert(new ParamRelBo { PtId = 3, Info = "T1" });
+            db.Insert(new ParamRelBo { PtId = 4, Info = "T1" });
+            db.Insert(new ParamRelBo { PtId = 3, Info = "T2" });
+            db.Insert(new ParamRelBo { PtId = 4, Info = "T2" });
         }
 
         [Test]
@@ -218,12 +236,15 @@ namespace ServiceStack.OrmLite.Oracle.Tests
         {
             using (var db = OpenDbConnection())
             {
-                //various special cases that still need to be addressed
+                DropAndCreateTables(db);
 
-                //Assert.AreEqual(10, db.SelectParameterized<ParamRelBO>(q => Sql.In(q.PTId, "T1", "T2")));
-                //Assert.AreEqual(10, db.SelectParameterized<ParamRelBO>(q => q.Info.StartsWith("T")));
-                //Assert.AreEqual(10, db.SelectParameterized<ParamRelBO>(q => q.Info.EndsWith("1")));
-                //Assert.AreEqual(10, db.SelectParameterized<ParamRelBO>(q => q.Info.Contains("T")));
+                LoadParamTestBo(db);
+                LoadParamRelBo(db);
+
+                Assert.AreEqual(10, db.Select<ParamRelBo>(q => Sql.In(q.Info, "T1", "T2")).Count);
+                Assert.AreEqual(10, db.Select<ParamRelBo>(q => q.Info.StartsWith("T")).Count);
+                Assert.AreEqual(8, db.Select<ParamRelBo>(q => q.Info.EndsWith("1")).Count);
+                Assert.AreEqual(10, db.Select<ParamRelBo>(q => q.Info.Contains("T")).Count);
             }
         }
 
@@ -234,22 +255,231 @@ namespace ServiceStack.OrmLite.Oracle.Tests
             {
                 DropAndCreateTables(db);
 
-                db.DeleteAll<ParamByteBO>();
-                var bo1 = new ParamByteBO() { Id = 1, Data = new byte[] { 1, 25, 43, 3, 1, 66, 82, 23, 11, 44, 66, 22, 52, 62, 76, 19, 30, 91, 4 } };
+                db.DeleteAll<ParamByteBo>();
+                var bo1 = new ParamByteBo { Id = 1, Data = new byte[] { 1, 25, 43, 3, 1, 66, 82, 23, 11, 44, 66, 22, 52, 62, 76, 19, 30, 91, 4 } };
 
                 db.Insert(bo1);
-                var bo1Check = db.Select<ParamByteBO>(s => s.Id == bo1.Id).Single();
+                var bo1Check = db.Select<ParamByteBo>(s => s.Id == bo1.Id).Single();
 
                 Assert.AreEqual(bo1.Id, bo1Check.Id);
                 Assert.AreEqual(bo1.Data, bo1Check.Data);
 
-                db.DeleteAll<ParamByteBO>();
+                db.DeleteAll<ParamByteBo>();
+            }
+        }
+
+        [Test]
+        public void ORA_ReservedNameComment_Test()
+        {
+            using (var db = OpenDbConnection())
+            {
+                DropAndCreateTables(db);
+
+                var row = new ParamComment { Comment = 1, Id = 2 };
+                db.Insert(row);
+
+                row.Comment = 454;
+                db.Update(row);
             }
         }
 
 
+        [Test]
+        public void ORA_ReservedNameLeft_Test()
+        {
+            using (var db = OpenDbConnection())
+            {
+                DropAndCreateTables(db);
 
-        public class ParamTestBO
+                var row = new ParamLeft { Id = 2, Left = 3 };
+                db.Insert(row);
+
+                row.Left = 454;
+                db.Update(row);
+            }
+        }
+
+        [Test]
+        public void ORA_ReservedNameOrder_Test()
+        {
+            using (var db = OpenDbConnection())
+            {
+                DropAndCreateTables(db);
+
+                var row = new ParamOrder { Id = 2, Order = 4 };
+                db.Insert(row);
+
+                row.Order = 67;
+                db.Update(row);
+            }
+        }
+
+        [Test]
+        public void ORA_ReservedNameUser_Test()
+        {
+            using (var db = OpenDbConnection())
+            {
+                DropAndCreateTables(db);
+
+                var row = new ParamUser { Id = 2, User = 5 };
+                db.Insert(row);
+
+                row.User = 35;
+                db.Update(row);
+            }
+        }
+
+        [Test]
+        public void ORA_ReservedNamePassword_Test()
+        {
+            using (var db = OpenDbConnection())
+            {
+                DropAndCreateTables(db);
+
+                var row = new ParamPassword { Id = 2, Password = 6 };
+                db.Insert(row);
+
+                row.Password = 335;
+                db.Update(row);
+            }
+        }
+
+        [Test]
+        public void ORA_ReservedNameActive_Test()
+        {
+            using (var db = OpenDbConnection())
+            {
+                DropAndCreateTables(db);
+
+                var row = new ParamActive { Id = 2, Active = 7 };
+                db.Insert(row);
+
+                row.Active = 454;
+                db.Update(row);
+            }
+        }
+
+        [Test]
+        public void ORA_ReservedNameDouble_Test()
+        {
+            using (var db = OpenDbConnection())
+            {
+                DropAndCreateTables(db);
+
+                var row = new ParamDouble { Id = 2, Double = 8 };
+                db.Insert(row);
+
+                row.Double = 4876554;
+                db.Update(row);
+            }
+        }
+
+        [Test]
+        public void ORA_ReservedNameFloat_Test()
+        {
+            using (var db = OpenDbConnection())
+            {
+                DropAndCreateTables(db);
+
+                var row = new ParamFloat { Id = 2, Float = 9 };
+                db.Insert(row);
+
+                row.Float = 798;
+                db.Update(row);
+            }
+        }
+
+        [Test]
+        public void ORA_ReservedNameDecimal_Test()
+        {
+            using (var db = OpenDbConnection())
+            {
+                DropAndCreateTables(db);
+
+                var row = new ParamDecimal { Id = 2, Decimal = 10 };
+                db.Insert(row);
+
+                row.Decimal = 454;
+                db.Update(row);
+            }
+        }
+
+        [Test]
+        public void ORA_ReservedNameString_Test()
+        {
+            using (var db = OpenDbConnection())
+            {
+                DropAndCreateTables(db);
+
+                var row = new ParamString { Id = 2, String = 11 };
+                db.Insert(row);
+
+                row.String = 234234;
+                db.Update(row);
+            }
+        }
+
+        [Test]
+        public void ORA_ReservedNameDate_Test()
+        {
+            using (var db = OpenDbConnection())
+            {
+                DropAndCreateTables(db);
+
+                var row = new ParamDate { Id = 2, Date = 12 };
+                db.Insert(row);
+
+                row.Date = 826;
+                db.Update(row);
+            }
+        }
+
+        [Test]
+        public void ORA_ReservedNameDateTime_Test()
+        {
+            using (var db = OpenDbConnection())
+            {
+                DropAndCreateTables(db);
+
+                var row = new ParamDateTime { Id = 2, DateTime = 13 };
+                db.Insert(row);
+
+                row.DateTime = 327895;
+                db.Update(row);
+            }
+        }
+
+        [Test]
+        public void ORA_ReservedNameType_Test()
+        {
+            using (var db = OpenDbConnection())
+            {
+                DropAndCreateTables(db);
+
+                var row = new ParamType { Id = 2, Type = 5 };
+                db.Insert(row);
+
+                row.Type = 454;
+                db.Update(row);
+            }
+        }
+
+        [Test]
+        public void ORA_ReservedNameTimestamp_Test()
+        {
+            using (var db = OpenDbConnection())
+            {
+                DropAndCreateTables(db);
+
+                var row = new ParamTimestamp { Id = 2, Timestamp = 27 };
+                db.Insert(row);
+
+                row.Timestamp = 28454;
+                db.Update(row);
+            }
+        }
+
+        public class ParamTestBo
         {
             public int Id { get; set; }
             public string Info { get; set; }
@@ -260,23 +490,107 @@ namespace ServiceStack.OrmLite.Oracle.Tests
         }
 
 
-        public class ParamRelBO
+        public class ParamRelBo
         {
             [Sequence("SEQ_PARAMTESTREL_ID")]
             [PrimaryKey]
             [Alias("ParamRel_Id")]
             public int Id { get; set; }
-            [ForeignKey(typeof(ParamTestBO))]
-            public int PTId { get; set; }
+            [ForeignKey(typeof(ParamTestBo))]
+            public int PtId { get; set; }
 
             [Alias("InfoStr")]
             public string Info { get; set; }
         }
 
-        public class ParamByteBO
+        public class ParamByteBo
         {
             public int Id { get; set; }
             public byte[] Data { get; set; }
+        }
+
+        public class ParamComment
+        {
+            public int Id { get; set; }
+            public int Comment { get; set; }
+        }
+
+        public class ParamOrder
+        {
+            public int Id { get; set; }
+            public int Order { get; set; }
+        }
+
+        public class ParamLeft
+        {
+            public int Id { get; set; }
+            public int Left { get; set; }
+        }
+
+        public class ParamUser
+        {
+            public int Id { get; set; }
+            public int User { get; set; }
+        }
+
+        public class ParamPassword
+        {
+            public int Id { get; set; }
+            public int Password { get; set; }
+        }
+
+        public class ParamActive
+        {
+            public int Id { get; set; }
+            public int Active { get; set; }
+        }
+
+        public class ParamDouble
+        {
+            public int Id { get; set; }
+            public int Double { get; set; }
+        }
+
+        public class ParamFloat
+        {
+            public int Id { get; set; }
+            public int Float { get; set; }
+        }
+
+        public class ParamDecimal
+        {
+            public int Id { get; set; }
+            public int Decimal { get; set; }
+        }
+
+        public class ParamString
+        {
+            public int Id { get; set; }
+            public int String { get; set; }
+        }
+
+        public class ParamDate
+        {
+            public int Id { get; set; }
+            public int Date { get; set; }
+        }
+
+        public class ParamDateTime
+        {
+            public int Id { get; set; }
+            public int DateTime { get; set; }
+        }
+
+        public class ParamType
+        {
+            public int Id { get; set; }
+            public int Type { get; set; }
+        }
+
+        public class ParamTimestamp
+        {
+            public int Id { get; set; }
+            public int Timestamp { get; set; }
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Linq;
 using NUnit.Framework;
 
@@ -10,6 +11,26 @@ namespace ServiceStack.OrmLite.SqlServerTests.Expressions
         public void Setup()
         {
             OpenDbConnection().CreateTable<TestType>(true);
+        }
+
+        //Avoid painful refactor to change all tests to use a using pattern
+        private IDbConnection db;
+
+        public override IDbConnection OpenDbConnection(string connString = null)
+        {
+            if (db != null && db.State != ConnectionState.Open)
+                db = null;
+
+            return db ?? (db = base.OpenDbConnection(connString));
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            if (db == null)
+                return;
+            db.Dispose();
+            db = null;
         }
 
         public T GetValue<T>(T item)

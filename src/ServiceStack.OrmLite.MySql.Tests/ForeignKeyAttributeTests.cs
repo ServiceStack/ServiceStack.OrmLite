@@ -11,7 +11,16 @@ namespace ServiceStack.OrmLite.MySql.Tests
         {
             using (var db = OpenDbConnection())
             {
-                db.CreateTable<ReferencedType>(true);
+                db.DropTable<TypeWithOnDeleteAndUpdateCascade>();
+                db.DropTable<TypeWithOnDeleteSetNull>();
+                db.DropTable<TypeWithOnDeleteSetDefault>();
+                db.DropTable<TypeWithOnDeleteRestrict>();
+                db.DropTable<TypeWithOnDeleteNoAction>();
+                db.DropTable<TypeWithOnDeleteCascade>();
+                db.DropTable<TypeWithSimpleForeignKey>();
+                db.DropTable<ReferencedType>();
+
+                db.CreateTable<ReferencedType>();
             }
         }
 
@@ -96,22 +105,6 @@ namespace ServiceStack.OrmLite.MySql.Tests
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<TypeWithOnDeleteSetNull>(true);
-            }
-        }
-
-        [TestFixtureTearDown]
-        public void TearDwon()
-        {
-            using (var db = OpenDbConnection())
-            {
-                db.DropTable<TypeWithOnDeleteAndUpdateCascade>();
-                db.DropTable<TypeWithOnDeleteSetNull>();
-                db.DropTable<TypeWithOnDeleteSetDefault>();
-                db.DropTable<TypeWithOnDeleteRestrict>();
-                db.DropTable<TypeWithOnDeleteNoAction>();
-                db.DropTable<TypeWithOnDeleteCascade>();
-                db.DropTable<TypeWithSimpleForeignKey>();
-                db.DropTable<ReferencedType>();
             }
         }
     }

@@ -1,16 +1,16 @@
-using System;
 using System.Collections.Generic;
 using NUnit.Framework;
-using ServiceStack.Common;
 using ServiceStack.Common.Tests.Models;
+using ServiceStack.OrmLite.Tests;
 using ServiceStack.Text;
 
-namespace ServiceStack.OrmLite.Tests
+namespace ServiceStack.OrmLite.PostgreSQL.Tests
 {
 	[TestFixture]
 	public class OrmLiteSelectTests
 		: OrmLiteTestBase
 	{
+        public OrmLiteSelectTests() : base(Dialect.PostgreSql) { }
 
 		[Test]
 		public void Can_GetById_int_from_ModelWithFieldsOfDifferentTypes_table()
@@ -98,7 +98,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				db.Insert(filterRow);
 
-				var rows = db.SelectFmt<ModelWithOnlyStringFields>("\"AlbumName\" = {0}", filterRow.AlbumName);
+				var rows = db.SelectFmt<ModelWithOnlyStringFields>("\"album_name\" = {0}", filterRow.AlbumName);
 				var dbRowIds = rows.ConvertAll(x => x.Id);
 
 				Assert.That(dbRowIds, Has.Count.EqualTo(1));
@@ -117,7 +117,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
 
-				var count = db.ScalarFmt<long>("SELECT COUNT(*) FROM \"ModelWithIdAndName\"");
+                var count = db.ScalarFmt<long>("SELECT COUNT(*) FROM {0}".Fmt("ModelWithIdAndName".SqlTable()));
 
 				Assert.That(count, Is.EqualTo(n));
 			}
@@ -159,9 +159,10 @@ namespace ServiceStack.OrmLite.Tests
 				filterRow.AlbumName = "FilteredName";
 
 				db.Insert(filterRow);
+			    db.GetLastSql().Print();
 
 				var dbRowIds = new List<string>();
-				var rows = db.SelectLazyFmt<ModelWithOnlyStringFields>("\"AlbumName\" = {0}", filterRow.AlbumName);
+				var rows = db.SelectLazyFmt<ModelWithOnlyStringFields>("\"album_name\" = {0}", filterRow.AlbumName);
 				foreach (var row in rows)
 				{
 					dbRowIds.Add(row.Id);
@@ -183,7 +184,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
 
-				var ids = db.ColumnFmt<int>("SELECT \"Id\" FROM \"ModelWithIdAndName\"");
+                var ids = db.ColumnFmt<int>("SELECT \"id\" FROM {0}".Fmt("ModelWithIdAndName".SqlTable()));
 
 				Assert.That(ids.Count, Is.EqualTo(n));
 			}
@@ -200,7 +201,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
 
-				var ids = db.ColumnDistinctFmt<int>("SELECT \"Id\" FROM \"ModelWithIdAndName\"");
+                var ids = db.ColumnDistinctFmt<int>("SELECT \"id\" FROM {0}".Fmt("ModelWithIdAndName".SqlTable()));
 
 				Assert.That(ids.Count, Is.EqualTo(n));
 			}
@@ -221,7 +222,7 @@ namespace ServiceStack.OrmLite.Tests
 					db.Insert(row);
 				});
 
-				var lookup = db.LookupFmt<string, int>("SELECT \"Name\", \"Id\" FROM \"ModelWithIdAndName\"");
+                var lookup = db.LookupFmt<string, int>("SELECT \"name\", \"id\" FROM {0}".Fmt("ModelWithIdAndName".SqlTable()));
 
 				Assert.That(lookup, Has.Count.EqualTo(2));
 				Assert.That(lookup["OddGroup"], Has.Count.EqualTo(3));
@@ -240,7 +241,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
 
-				var dictionary = db.Dictionary<int, string>("SELECT \"Id\", \"Name\" FROM \"ModelWithIdAndName\"");
+                var dictionary = db.Dictionary<int, string>("SELECT \"id\", \"name\" FROM {0}".Fmt("ModelWithIdAndName".SqlTable()));
 
 				Assert.That(dictionary, Has.Count.EqualTo(5));
 
@@ -259,7 +260,8 @@ namespace ServiceStack.OrmLite.Tests
 
 				rowIds.ForEach(x => db.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
 
-				var rows = db.SelectFmt<ModelWithIdAndName>("SELECT \"Id\", \"Name\" FROM \"ModelWithFieldsOfDifferentTypes\"");
+                var rows = db.SelectFmt<ModelWithIdAndName>("SELECT \"id\", \"name\" FROM {0}"
+                    .Fmt("ModelWithFieldsOfDifferentTypes".SqlTable()));
 				var dbRowIds = rows.ConvertAll(x => x.Id);
 
 				Assert.That(dbRowIds, Is.EquivalentTo(rowIds));
@@ -277,10 +279,9 @@ namespace ServiceStack.OrmLite.Tests
 
 				rowIds.ForEach(x => db.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
 
-				var rows = db.Select<ModelWithFieldsOfDifferentTypes>("SELECT * FROM \"ModelWithFieldsOfDifferentTypes\" where \"Id\" = :Id ",
-					new Dictionary<string, object> { 
-					{"Id", 3}
-					});
+                var rows = db.Select<ModelWithFieldsOfDifferentTypes>("SELECT * FROM {0} where \"id\" = :Id "
+                    .Fmt("ModelWithFieldsOfDifferentTypes".SqlTable()),
+					new Dictionary<string, object> { {"Id", 3} });
 				 
 				Assert.AreEqual(rows.Count, 1);
 				Assert.AreEqual(rows[0].Id, 3);
@@ -305,7 +306,6 @@ namespace ServiceStack.OrmLite.Tests
 			}
 		}
 
-
 		[Test]
 		public void Can_Select_In_for_string_value()
 		{
@@ -318,11 +318,34 @@ namespace ServiceStack.OrmLite.Tests
 				n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
 
 				var selectInNames = new[] {"Name1", "Name2"};
-				var rows = db.SelectFmt<ModelWithIdAndName>("\"Name\" IN ({0})", selectInNames.SqlInValues());
+				var rows = db.SelectFmt<ModelWithIdAndName>("\"name\" IN ({0})", selectInNames.SqlInValues());
 
 				Assert.That(rows.Count, Is.EqualTo(selectInNames.Length));
 			}
 		}
 
+		[Test]
+		public void Can_Select_With_Subquery()
+		{
+			const int n = 5;
+
+			using (var db = OpenDbConnection())
+			{
+				db.CreateTable<ModelWithFieldsOfDifferentTypes>();
+
+				n.Times(x => db.Insert(ModelWithFieldsOfDifferentTypes.Create(n)));
+
+				var sql = @"
+					WITH max_id AS (
+						SELECT 3 AS three)
+					SELECT *
+					FROM {0}
+					WHERE id <= (SELECT three FROM max_id)".Fmt("ModelWithFieldsOfDifferentTypes".SqlTable());
+
+				var rows = db.SqlList<ModelWithFieldsOfDifferentTypes>(sql);
+
+				Assert.That(rows.Count, Is.EqualTo((3)));
+			}
+		}
 	}
 }

@@ -50,19 +50,123 @@ namespace ServiceStack.OrmLite.Tests
         public decimal Cost { get; set; }
     }
 
-    public class LoadReferencesTests 
+    public class Country
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+        public string CountryName { get; set; }
+        public string CountryCode { get; set; }
+    }
+
+    /// <summary>
+    /// Test POCOs using table aliases and an alias on the foreign key reference
+    /// </summary>
+    [Alias("Q_Customer")]
+    public class AliasedCustomer
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+        public string Name { get; set; }
+
+        [Reference]
+        public AliasedCustomerAddress PrimaryAddress { get; set; }
+    }
+
+    [Alias("Q_CustomerAddress")]
+    public class AliasedCustomerAddress
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+        [Alias("Q_CustomerId")]
+        public int AliasedCustId { get; set; }
+        public string AddressLine1 { get; set; }
+        public string AddressLine2 { get; set; }
+        public string City { get; set; }
+        public string State { get; set; }
+        public string Country { get; set; }
+    }
+
+    /// <summary>
+    /// Test POCOs using table aliases and old form foreign key reference which was aliased name
+    /// </summary>
+    [Alias("QO_Customer")]
+    public class OldAliasedCustomer
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+        public string Name { get; set; }
+
+        [Reference]
+        public OldAliasedCustomerAddress PrimaryAddress { get; set; }
+    }
+
+    [Alias("QO_CustomerAddress")]
+    public class OldAliasedCustomerAddress
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+        public int QO_CustomerId { get; set; }
+        public string AddressLine1 { get; set; }
+        public string AddressLine2 { get; set; }
+        public string City { get; set; }
+        public string State { get; set; }
+        public string Country { get; set; }
+    }
+
+    [Alias("FooCustomer")]
+    public class MismatchAliasCustomer
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+        public string Name { get; set; }
+
+        [Reference]
+        public MismatchAliasAddress PrimaryAddress { get; set; }
+    }
+
+    [Alias("BarCustomerAddress")]
+    public class MismatchAliasAddress
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+        [Alias("BarCustomerId")]
+        public int MismatchAliasCustomerId { get; set; }
+        public string AddressLine1 { get; set; }
+        public string AddressLine2 { get; set; }
+        public string City { get; set; }
+        public string State { get; set; }
+        public string Country { get; set; }
+    }
+
+    public class LoadReferencesTests
         : OrmLiteTestBase
     {
         private IDbConnection db;
 
         [TestFixtureSetUp]
-        public void TestFixtureSetUp()
+        public new void TestFixtureSetUp()
         {
             db = base.OpenDbConnection();
-            db.DropTable<OrderDetail>();
+            CustomerOrdersUseCase.DropTables(db); //Has conflicting 'Order' table
+
             db.DropAndCreateTable<Order>();
             db.DropAndCreateTable<Customer>();
             db.DropAndCreateTable<CustomerAddress>();
+            db.DropAndCreateTable<Country>();
+            db.DropAndCreateTable<AliasedCustomer>();
+            db.DropAndCreateTable<AliasedCustomerAddress>();
+            db.DropAndCreateTable<OldAliasedCustomer>();
+            db.DropAndCreateTable<OldAliasedCustomerAddress>();
+            db.DropAndCreateTable<MismatchAliasCustomer>();
+            db.DropAndCreateTable<MismatchAliasAddress>();
+        }
+
+        [SetUp]
+        public void SetUp()
+        {
+            db.DeleteAll<Order>();
+            db.DeleteAll<CustomerAddress>();
+            db.DeleteAll<Customer>();
         }
 
         [TestFixtureTearDown]
@@ -75,7 +179,8 @@ namespace ServiceStack.OrmLite.Tests
         public void Does_not_include_complex_reference_type_in_sql()
         {
             db.Select<Customer>();
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"Name\" FROM \"Customer\""));
+            Assert.That(db.GetLastSql().NormalizeSql(),
+                Is.EqualTo("select id, name from customer"));
         }
 
         [Test]
@@ -116,8 +221,97 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(dbCustomer.Orders.Count, Is.EqualTo(2));
         }
 
-        [Test] 
-        public void Can_SaveAllReferences_then_Load_them()
+        [Test]
+        public void Can_Save_and_Load_Aliased_References()
+        {
+            var customer = new AliasedCustomer
+            {
+                Name = "Customer 1",
+                PrimaryAddress = new AliasedCustomerAddress
+                {
+                    AddressLine1 = "1 Humpty Street",
+                    City = "Humpty Doo",
+                    State = "Northern Territory",
+                    Country = "Australia"
+                },
+            };
+
+            db.Save(customer);
+
+            Assert.That(customer.Id, Is.GreaterThan(0));
+            Assert.That(customer.PrimaryAddress.AliasedCustId, Is.EqualTo(0));
+
+            db.SaveReferences(customer, customer.PrimaryAddress);
+            Assert.That(customer.PrimaryAddress.AliasedCustId, Is.EqualTo(customer.Id));
+
+            var dbCustomer = db.LoadSingleById<AliasedCustomer>(customer.Id);
+
+            dbCustomer.PrintDump();
+
+            Assert.That(dbCustomer.PrimaryAddress, Is.Not.Null);
+        }
+
+        [Test]
+        public void Can_Save_and_Load_Old_Aliased_References()
+        {
+            var customer = new OldAliasedCustomer
+            {
+                Name = "Customer 1",
+                PrimaryAddress = new OldAliasedCustomerAddress
+                {
+                    AddressLine1 = "1 Humpty Street",
+                    City = "Humpty Doo",
+                    State = "Northern Territory",
+                    Country = "Australia"
+                },
+            };
+
+            db.Save(customer);
+
+            Assert.That(customer.Id, Is.GreaterThan(0));
+            Assert.That(customer.PrimaryAddress.QO_CustomerId, Is.EqualTo(0));
+
+            db.SaveReferences(customer, customer.PrimaryAddress);
+            Assert.That(customer.PrimaryAddress.QO_CustomerId, Is.EqualTo(customer.Id));
+
+            var dbCustomer = db.LoadSingleById<OldAliasedCustomer>(customer.Id);
+
+            dbCustomer.PrintDump();
+
+            Assert.That(dbCustomer.PrimaryAddress, Is.Not.Null);
+        }
+
+        [Test]
+        public void Can_Save_and_Load_MismatchedAlias_References_using_code_conventions()
+        {
+            var customer = new MismatchAliasCustomer
+            {
+                Name = "Customer 1",
+                PrimaryAddress = new MismatchAliasAddress
+                {
+                    AddressLine1 = "1 Humpty Street",
+                    City = "Humpty Doo",
+                    State = "Northern Territory",
+                    Country = "Australia"
+                },
+            };
+
+            db.Save(customer);
+
+            Assert.That(customer.Id, Is.GreaterThan(0));
+            Assert.That(customer.PrimaryAddress.MismatchAliasCustomerId, Is.EqualTo(0));
+
+            db.SaveReferences(customer, customer.PrimaryAddress);
+            Assert.That(customer.PrimaryAddress.MismatchAliasCustomerId, Is.EqualTo(customer.Id));
+
+            var dbCustomer = db.LoadSingleById<MismatchAliasCustomer>(customer.Id);
+
+            dbCustomer.PrintDump();
+
+            Assert.That(dbCustomer.PrimaryAddress, Is.Not.Null);
+        }
+
+        private Customer AddCustomerWithOrders()
         {
             var customer = new Customer
             {
@@ -129,13 +323,22 @@ namespace ServiceStack.OrmLite.Tests
                     State = "Northern Territory",
                     Country = "Australia"
                 },
-                Orders = new[] { 
-                    new Order { LineItem = "Line 1", Qty = 1, Cost = 1.99m },
-                    new Order { LineItem = "Line 2", Qty = 2, Cost = 2.99m },
+                Orders = new[]
+                {
+                    new Order {LineItem = "Line 1", Qty = 1, Cost = 1.99m},
+                    new Order {LineItem = "Line 2", Qty = 2, Cost = 2.99m},
                 }.ToList(),
             };
 
-            db.Save(customer, references:true);
+            db.Save(customer, references: true);
+
+            return customer;
+        }
+
+        [Test]
+        public void Can_SaveAllReferences_then_Load_them()
+        {
+            var customer = AddCustomerWithOrders();
 
             Assert.That(customer.Id, Is.GreaterThan(0));
             Assert.That(customer.PrimaryAddress.CustomerId, Is.EqualTo(customer.Id));
@@ -148,5 +351,22 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(dbCustomer.PrimaryAddress, Is.Not.Null);
             Assert.That(dbCustomer.Orders.Count, Is.EqualTo(2));
         }
+
+        [Test]
+        public void Can_save_with_null_references()
+        {
+            var customer = new Customer
+            {
+                Name = "Customer 1",
+                PrimaryAddress = null,
+                Orders = null,
+            };
+
+            db.Save(customer, references: true);
+
+            Assert.That(customer.Id, Is.GreaterThan(0));
+        }
+
     }
+
 }

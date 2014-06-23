@@ -34,6 +34,38 @@ namespace ServiceStack.OrmLite.Sqlite
         public static bool UTF8Encoded { get; set; }
         public static bool ParseViaFramework { get; set; }
 
+        public static string RowVersionTriggerFormat = "{0}RowVersionUpdateTrigger";
+
+        public override string ToPostDropTableStatement(ModelDefinition modelDef)
+        {
+            if (modelDef.RowVersion != null)
+            {
+                var triggerName = RowVersionTriggerFormat.Fmt(modelDef.ModelName);
+                return "DROP TRIGGER IF EXISTS {0}".Fmt(GetQuotedTableName(triggerName));
+            }
+
+            return null;
+        }
+
+        public override string ToPostCreateTableStatement(ModelDefinition modelDef)
+        {
+            if (modelDef.RowVersion != null)
+            {
+                var triggerName = RowVersionTriggerFormat.Fmt(modelDef.ModelName);
+                var triggerBody = "UPDATE {0} SET {1} = OLD.{1} + 1 WHERE {2} = NEW.{2};".Fmt(
+                    modelDef.ModelName, 
+                    modelDef.RowVersion.FieldName.SqlColumn(), 
+                    modelDef.PrimaryKey.FieldName.SqlColumn());
+
+                var sql = "CREATE TRIGGER {0} BEFORE UPDATE ON {1} FOR EACH ROW BEGIN {2} END;".Fmt(
+                    triggerName, modelDef.ModelName, triggerBody);
+
+                return sql;
+            }
+
+            return null;
+        }
+
         public static string CreateFullTextCreateTableStatement(object objectWithProperties)
         {
             var sbColumns = new StringBuilder();
@@ -114,47 +146,17 @@ namespace ServiceStack.OrmLite.Sqlite
                 return intVal != 0; 
             }
 
-            if (type == typeof(DateTimeOffset))
-            {
-                var moment = DateTimeOffset.Parse((string)value, null, DateTimeStyles.RoundtripKind);
-                return moment;
-            }
-
-            try
-            {
-                return base.ConvertDbValue(value, type);
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
+            return base.ConvertDbValue(value, type);
         }
 
-        public override void SetParameter(FieldDefinition fieldDef, IDbDataParameter p)
+        public override void SetDbValue(FieldDefinition fieldDef, IDataReader reader, int colIndex, object instance)
         {
-            base.SetParameter(fieldDef, p);
-        }
-
-        public override void SetDbValue(FieldDefinition fieldDef, IDataReader dataReader, int colIndex, object instance)
-        {
-            if (fieldDef == null || fieldDef.SetValueFn == null || colIndex == NotFound) return;
-            if (dataReader.IsDBNull(colIndex))
-            {
-                if (fieldDef.IsNullable)
-                {
-                    fieldDef.SetValueFn(instance, null);
-                }
-                else
-                {
-                    fieldDef.SetValueFn(instance, fieldDef.FieldType.GetDefaultValue());
-                }
-                return;
-            }
+            if (HandledDbNullValue(fieldDef, reader, colIndex, instance)) return;
 
             var fieldType = Nullable.GetUnderlyingType(fieldDef.FieldType) ?? fieldDef.FieldType;
             if (fieldType == typeof(Guid))
             {
-                var guidStr = dataReader.GetString(colIndex);
+                var guidStr = reader.GetString(colIndex);
                 var guidValue = new Guid(guidStr);
 
                 fieldDef.SetValueFn(instance, guidValue);
@@ -163,20 +165,20 @@ namespace ServiceStack.OrmLite.Sqlite
             {
                 try
                 {
-                    var dbValue = dataReader.GetDateTime(colIndex);
+                    var dbValue = reader.GetDateTime(colIndex);
 
                     fieldDef.SetValueFn(instance, dbValue);
                 }
                 catch (Exception)
                 {
-                    var dateStr = dataReader.GetString(colIndex);
+                    var dateStr = reader.GetString(colIndex);
                     var dateValue = DateTimeSerializer.ParseShortestXsdDateTime(dateStr);
                     fieldDef.SetValueFn(instance, dateValue);
                 }
             }
             else
             {
-                base.SetDbValue(fieldDef, dataReader, colIndex, instance);
+                base.SetDbValue(fieldDef, reader, colIndex, instance);
             }
         }
 
@@ -210,7 +212,7 @@ namespace ServiceStack.OrmLite.Sqlite
         protected override object GetValueOrDbNull<T>(FieldDefinition fieldDef, object obj)
         {
             var value = GetValue<T>(fieldDef, obj);
-            if (fieldDef.FieldType == typeof(DateTimeOffset))
+            if (fieldDef.FieldType == typeof(DateTimeOffset) && value != null)
             {
                 var dateTimeOffsetValue = (DateTimeOffset)value;
                 return dateTimeOffsetValue.ToString("o");
@@ -221,7 +223,7 @@ namespace ServiceStack.OrmLite.Sqlite
 
         public override SqlExpression<T> SqlExpression<T>()
         {
-            return new SqliteExpression<T>();
+            return new SqliteExpression<T>(this);
         }
 
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName)
@@ -235,13 +237,16 @@ namespace ServiceStack.OrmLite.Sqlite
             return result > 0;
         }
 
-        public override string GetColumnDefinition(string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement, 
-            bool isNullable, int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
+        public override string GetColumnDefinition(string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement,
+            bool isNullable, bool isRowVersion, int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
         {
             // http://www.sqlite.org/lang_createtable.html#rowid
-            var ret = base.GetColumnDefinition(fieldName, fieldType, isPrimaryKey, autoIncrement, isNullable, fieldLength, scale, defaultValue, customFieldDefinition);
+            var ret = base.GetColumnDefinition(fieldName, fieldType, isPrimaryKey, autoIncrement, isNullable, isRowVersion, fieldLength, scale, defaultValue, customFieldDefinition);
             if (isPrimaryKey)
                 return ret.Replace(" BIGINT ", " INTEGER ");
+            if (isRowVersion)
+                return ret + " DEFAULT 1";
+
             return ret;
         }
     }

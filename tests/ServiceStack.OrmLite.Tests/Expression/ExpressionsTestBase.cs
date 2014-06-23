@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
@@ -10,7 +11,34 @@ namespace ServiceStack.OrmLite.Tests.Expression
         [SetUp]
         public void Setup()
         {
-            OpenDbConnection().DropAndCreateTable<TestType>();
+            OpenDbConnection().CreateTable<TestType>(true);
+        }
+
+        //Avoid painful refactor to change all tests to use a using pattern
+        private IDbConnection db;
+
+        public override IDbConnection OpenDbConnection(string connString = null)
+        {
+            try
+            {
+                if (db != null && db.State != ConnectionState.Open)
+                    db = null;
+            }
+            catch (ObjectDisposedException) //PostgreSQL throws when trying to inspect db.State on a disposed connection. WHY???
+            {
+                db = null;
+            }
+
+            return db ?? (db = base.OpenDbConnection(connString));
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            if (db == null)
+                return;
+            db.Dispose();
+            db = null;
         }
 
         public T GetValue<T>(T item)
@@ -58,15 +86,6 @@ namespace ServiceStack.OrmLite.Tests.Expression
                     con.Insert(o);
                 }
             }
-        }
-
-        protected override string GetFileConnectionString()
-        {
-            var connectionString = Config.SqliteFileDir + this.GetType().Name + ".sqlite";
-            if (File.Exists(connectionString))
-                File.Delete(connectionString);
-
-            return connectionString;
         }
     }
 }

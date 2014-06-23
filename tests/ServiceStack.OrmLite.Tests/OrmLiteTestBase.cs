@@ -3,6 +3,7 @@ using System.Data;
 using System.IO;
 using NUnit.Framework;
 using ServiceStack.Logging;
+using ServiceStack.OrmLite.Oracle;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -34,7 +35,15 @@ namespace ServiceStack.OrmLite.Tests
 	{
 	    protected virtual string ConnectionString { get; set; }
 
-		protected string GetConnectionString()
+	    public OrmLiteTestBase() {}
+
+	    public OrmLiteTestBase(Dialect dialect)
+	    {
+	        Dialect = dialect;
+            Init();
+        }
+
+	    protected string GetConnectionString()
 		{
 			return GetFileConnectionString();
 		}
@@ -60,40 +69,57 @@ namespace ServiceStack.OrmLite.Tests
 				ConnectionString = GetFileConnectionString();
 		}
 
-		[TestFixtureSetUp]
-		public void TestFixtureSetUp()
-		{
-			LogManager.LogFactory = new ConsoleLogFactory();
+        public Dialect Dialect = Dialect.Sqlite;
 
-            //OrmLiteConfig.DialectProvider = MySqlDialect.Provider;
-            //ConnectionString = "Server=localhost;Database=test;UID=root;Password=test";
-            //return;
+        [TestFixtureSetUp]
+        public void TestFixtureSetUp()
+        {
+            Init();
+        }
 
-		    var useSqlite = true;
-            if (useSqlite)
-            {
-                OrmLiteConfig.DialectProvider = SqliteDialect.Provider;
-                ConnectionString = GetFileConnectionString();
-                ConnectionString = ":memory:";
-            }
-            else
-            {
-                OrmLiteConfig.DialectProvider = SqlServerDialect.Provider;
-                ConnectionString = Config.SqlServerBuildDb;
-            }
-            
-            //ConnectionString = "~/App_Data/Database1.mdf".MapAbsolutePath();			
-            //ConnectionString = Config.GetDefaultConnection();
-		}
+        private void Init()
+        {
+	        LogManager.LogFactory = new ConsoleLogFactory(debugEnabled: false);
 
-		public void Log(string text)
+	        switch (Dialect)
+	        {
+	            case Dialect.Sqlite:
+	                OrmLiteConfig.DialectProvider = SqliteDialect.Provider;
+	                ConnectionString = GetFileConnectionString();
+	                ConnectionString = ":memory:";
+	                return;
+	            case Dialect.SqlServer:
+	                OrmLiteConfig.DialectProvider = SqlServerDialect.Provider;
+	                ConnectionString = Config.SqlServerBuildDb;
+	                return;
+	            case Dialect.MySql:
+	                OrmLiteConfig.DialectProvider = MySqlDialect.Provider;
+	                ConnectionString = "Server=localhost;Database=test;UID=root;Password=test";
+	                return;
+	            case Dialect.PostgreSql:
+	                OrmLiteConfig.DialectProvider = PostgreSqlDialect.Provider;
+	                ConnectionString =
+	                    "Server=localhost;Port=5432;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200";
+	                return;
+	            case Dialect.SqlServerMdf:
+	                OrmLiteConfig.DialectProvider = SqlServerDialect.Provider;
+	                ConnectionString = "~/App_Data/Database1.mdf".MapAbsolutePath();
+	                ConnectionString = Config.GetDefaultConnection();
+	                return;
+	            case Dialect.Oracle:
+	                OrmLiteConfig.DialectProvider = OracleDialect.Provider;
+	                return;
+	        }
+	    }
+
+	    public void Log(string text)
 		{
 			Console.WriteLine(text);
 		}
 
         public IDbConnection InMemoryDbConnection { get; set; }
 
-        public IDbConnection OpenDbConnection(string connString = null)
+        public virtual IDbConnection OpenDbConnection(string connString = null)
         {
             connString = connString ?? ConnectionString;
             if (connString == ":memory:")
@@ -112,6 +138,11 @@ namespace ServiceStack.OrmLite.Tests
             }
 
             return connString.OpenDbConnection();            
+        }
+
+        protected void SuppressIfOracle(string reason, params object[] args)
+        {
+            // Not Oracle if this base class used
         }
 	}
 }
