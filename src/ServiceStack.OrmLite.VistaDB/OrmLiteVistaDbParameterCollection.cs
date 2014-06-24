@@ -1,17 +1,13 @@
 ﻿using System;
-using System.Linq;
 using System.Collections;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Data;
-using System.Linq;
-using System.Text;
 
 namespace ServiceStack.OrmLite.VistaDB
 {
     public class OrmLiteVistaDbParameterCollection : IDataParameterCollection
     {
-        private OrderedDictionary _parameters;
+        private readonly OrderedDictionary parameters;
 
         public IDataParameterCollection VistaDbParameterCollection { get; private set; }
 
@@ -22,10 +18,8 @@ namespace ServiceStack.OrmLite.VistaDB
 
             this.VistaDbParameterCollection = vistaDbParameterCollection;
 
-            _parameters = new OrderedDictionary(StringComparer.InvariantCultureIgnoreCase);
+            parameters = new OrderedDictionary(StringComparer.InvariantCultureIgnoreCase);
         }
-
-        #region IDataParameterCollection Members
 
         public bool Contains(string parameterName)
         {
@@ -40,40 +34,36 @@ namespace ServiceStack.OrmLite.VistaDB
         public void RemoveAt(string parameterName)
         {
             this.VistaDbParameterCollection.RemoveAt(parameterName);
-            _parameters.Remove(parameterName);
+            parameters.Remove(parameterName);
         }
 
         public object this[string parameterName]
         {
             get
             {
-                return _parameters[parameterName];
+                return parameters[parameterName];
             }
             set
             {
                 var parameter = (OrmLiteVistaDbParameter)value;
 
                 this.VistaDbParameterCollection[parameterName] = parameter.VistaDbParameter;
-                _parameters[parameterName] = parameter;
+                parameters[parameterName] = parameter;
             }
         }
-
-        #endregion
-
-        #region IList Members
 
         public int Add(object value)
         {
             var parameter = (OrmLiteVistaDbParameter)value;
 
-            _parameters[parameter.ParameterName] = parameter;
+            parameters[parameter.ParameterName] = parameter;
 
             return this.VistaDbParameterCollection.Add(parameter.VistaDbParameter);
         }
 
         public void Clear()
         {
-            _parameters.Clear();
+            parameters.Clear();
 
             this.VistaDbParameterCollection.Clear();
         }
@@ -96,7 +86,7 @@ namespace ServiceStack.OrmLite.VistaDB
         {
             var parameter = (OrmLiteVistaDbParameter)value;
 
-            _parameters.Insert(index, parameter.ParameterName, parameter);
+            parameters.Insert(index, parameter.ParameterName, parameter);
             this.VistaDbParameterCollection.Insert(index, parameter.VistaDbParameter);
         }
 
@@ -108,13 +98,13 @@ namespace ServiceStack.OrmLite.VistaDB
         {
             var parameter = (OrmLiteVistaDbParameter)value;
 
-            _parameters.Remove(parameter);
+            parameters.Remove(parameter);
             this.VistaDbParameterCollection.Remove(parameter.VistaDbParameter);
         }
 
         public void RemoveAt(int index)
         {
-            _parameters.RemoveAt(index);
+            parameters.RemoveAt(index);
 
             this.VistaDbParameterCollection.RemoveAt(index);
         }
@@ -123,20 +113,16 @@ namespace ServiceStack.OrmLite.VistaDB
         {
             get
             {
-                return _parameters[index];
+                return parameters[index];
             }
             set
             {
                 var parameter = (OrmLiteVistaDbParameter)value;
 
-                _parameters[index] = parameter;
+                parameters[index] = parameter;
                 this.VistaDbParameterCollection[index] = parameter.VistaDbParameter;
             }
         }
-
-        #endregion
-
-        #region ICollection Members
 
         public void CopyTo(Array array, int index)
         {
@@ -149,15 +135,9 @@ namespace ServiceStack.OrmLite.VistaDB
 
         public object SyncRoot { get { return this.VistaDbParameterCollection.SyncRoot; } }
 
-        #endregion
-
-        #region IEnumerable Members
-
         public IEnumerator GetEnumerator()
         {
-            return _parameters.Values.GetEnumerator();
+            return parameters.Values.GetEnumerator();
         }
-
-        #endregion
     }
 }
