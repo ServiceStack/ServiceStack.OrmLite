@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using NUnit.Framework;
 using ServiceStack.OrmLite.Tests.UseCase;
@@ -194,7 +195,8 @@ namespace ServiceStack.OrmLite.Tests
             var costs = results.ConvertAll(x => x.Cost);
             Assert.That(costs, Is.EquivalentTo(new[] { 1.99m, 1.49m, 9.99m }));
             var orderIds = results.ConvertAll(x => x.OrderId);
-            Assert.That(orderIds, Is.EquivalentTo(new[] { 1, 3, 5 }));
+            var expectedOrderIds = new []{customers[0].Orders[0].Id, customers[0].Orders[2].Id, customers[0].Orders[4].Id};
+            Assert.That(orderIds, Is.EquivalentTo(expectedOrderIds));
 
             //Same as above using using db.From<Customer>()
             results = db.Select<FullCustomerInfo>(db.From<Customer>()
@@ -375,17 +377,19 @@ namespace ServiceStack.OrmLite.Tests
             db.DropAndCreateTable<CustomerAddress>();
             db.DropAndCreateTable<Customer>();
 
-            AddCustomerWithOrders();
+            var customer = AddCustomerWithOrders();
 
             var results = db.Select<FullCustomerInfo, Customer>(q => q
                 .Join<Customer, CustomerAddress>()
                 .Join<Customer, Order>());
 
             var addressIds = results.ConvertAll(x => x.CustomerAddressId);
-            Assert.That(addressIds, Is.EquivalentTo(new[] { 1, 1 }));
+            var expectedAddressIds = new[] { customer.PrimaryAddress.Id, customer.PrimaryAddress.Id };
+            Assert.That(addressIds, Is.EquivalentTo(expectedAddressIds));
 
             var orderIds = results.ConvertAll(x => x.OrderId);
-            Assert.That(orderIds, Is.EquivalentTo(new[] { 1, 2 }));
+            var expectedOrderIds = new[] {customer.Orders[0].Id, customer.Orders[1].Id};
+            Assert.That(orderIds, Is.EquivalentTo(expectedOrderIds));
 
             var customerNames = results.ConvertAll(x => x.CustomerName);
             Assert.That(customerNames, Is.EquivalentTo(new[] { "Customer 1", "Customer 1" }));
@@ -401,10 +405,10 @@ namespace ServiceStack.OrmLite.Tests
             results = db.Select<FullCustomerInfo>(expr);
 
             addressIds = results.ConvertAll(x => x.CustomerAddressId);
-            Assert.That(addressIds, Is.EquivalentTo(new[] { 1 }));
+            Assert.That(addressIds, Is.EquivalentTo(new[] { customer.PrimaryAddress.Id }));
 
             orderIds = results.ConvertAll(x => x.OrderId);
-            Assert.That(orderIds, Is.EquivalentTo(new[] { 2 }));
+            Assert.That(orderIds, Is.EquivalentTo(new[] { customer.Orders[1].Id }));
 
             customerNames = results.ConvertAll(x => x.CustomerName);
             Assert.That(customerNames, Is.EquivalentTo(new[] { "Customer 1" }));

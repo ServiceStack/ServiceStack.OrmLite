@@ -64,10 +64,8 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void BuilderTemplateWOComposition()
         {
-            SuppressIfOracle("Oracle provider is not smart enough to replace '@' parameter delimiter with ':'");
-
             var builder = new SqlBuilder();
-            var template = builder.AddTemplate("SELECT COUNT(*) FROM Users WHERE Age = @age", new { age = 5 });
+            var template = builder.AddTemplate("SELECT COUNT(*) FROM Users WHERE Age = {0}age".Fmt(OrmLiteConfig.DialectProvider.ParamString), new { age = 5 });
 
             if (template.RawSql == null) throw new Exception("RawSql null");
             if (template.Parameters == null) throw new Exception("Parameters null");
