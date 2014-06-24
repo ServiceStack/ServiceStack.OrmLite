@@ -10,16 +10,6 @@ namespace ServiceStack.OrmLite.VistaDB
         public VistaDbExpression(IOrmLiteDialectProvider dialectProvider) 
             : base(dialectProvider) {}
 
-        //protected virtual string GetPagingOffsetExpression(int rows)
-        //{
-        //    return String.Format("\nOFFSET {0} ROWS", rows);
-        //}
-
-        //protected virtual string GetPagingFetchExpression(int rows)
-        //{
-        //    return String.Format("\nFETCH NEXT {0} ROWS ONLY", Rows.Value);
-        //}
-
         public override string ToUpdateStatement(T item, bool excludeDefaults = false)
         {
             var setFields = new StringBuilder();
