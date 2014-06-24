@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
 
 namespace ServiceStack.OrmLite.VistaDB
 {
@@ -22,8 +19,6 @@ namespace ServiceStack.OrmLite.VistaDB
             _backgroundValue = vistaDbParameter.Value;
         }
 
-        #region IDbDataParameter Members
-
         public byte Precision
         {
             get { return this.VistaDbParameter.Precision; }
@@ -41,10 +36,6 @@ namespace ServiceStack.OrmLite.VistaDB
             get { return this.VistaDbParameter.Size; }
             set { this.VistaDbParameter.Size = value; }
         }
-
-        #endregion
-
-        #region IDataParameter Members
 
         public DbType DbType
         {
@@ -92,7 +83,5 @@ namespace ServiceStack.OrmLite.VistaDB
                 this.VistaDbParameter.Value = vistaDbValue; 
             }
         }
-
-        #endregion
     }
 }

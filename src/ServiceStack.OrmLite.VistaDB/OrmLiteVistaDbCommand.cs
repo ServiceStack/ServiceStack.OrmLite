@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
 
 namespace ServiceStack.OrmLite.VistaDB
 {
@@ -10,8 +7,8 @@ namespace ServiceStack.OrmLite.VistaDB
     {
         public IDbCommand VistaDbCommand { get; private set; }
 
-        private OrmLiteVistaDbConnection _connectionWrapper;
-        private OrmLiteVistaDbTransaction _transactionWrapper;
+        private OrmLiteVistaDbConnection connectionWrapper;
+        private OrmLiteVistaDbTransaction transactionWrapper;
 
         public OrmLiteVistaDbCommand(OrmLiteVistaDbConnection connectionWrapper, IDbCommand vistaDbCommand)
         {
@@ -21,13 +18,11 @@ namespace ServiceStack.OrmLite.VistaDB
             if (vistaDbCommand == null)
                 throw new ArgumentNullException("vistaDbCommand");
 
-            _connectionWrapper = connectionWrapper;
+            this.connectionWrapper = connectionWrapper;
 
             this.VistaDbCommand = vistaDbCommand;
             this.Parameters = new OrmLiteVistaDbParameterCollection(vistaDbCommand.Parameters);
         }
-
-        #region IDbCommand Members
 
         public void Cancel()
         {
@@ -54,11 +49,11 @@ namespace ServiceStack.OrmLite.VistaDB
 
         public IDbConnection Connection
         {
-            get { return _connectionWrapper; }
+            get { return connectionWrapper; }
             set
             {
-                _connectionWrapper = (OrmLiteVistaDbConnection)value;
-                this.VistaDbCommand.Connection = _connectionWrapper.VistaDbConnection;
+                connectionWrapper = (OrmLiteVistaDbConnection)value;
+                this.VistaDbCommand.Connection = connectionWrapper.VistaDbConnection;
             }
         }
 
@@ -100,14 +95,14 @@ namespace ServiceStack.OrmLite.VistaDB
         {
             get
             {
-                return _transactionWrapper;
+                return transactionWrapper;
             }
             set
             {
-                _transactionWrapper = (OrmLiteVistaDbTransaction)value;
+                transactionWrapper = (OrmLiteVistaDbTransaction)value;
                 
-                if (_transactionWrapper != null)
-                    this.VistaDbCommand.Transaction = _transactionWrapper.VistaDbTransaction;
+                if (transactionWrapper != null)
+                    this.VistaDbCommand.Transaction = transactionWrapper.VistaDbTransaction;
             }
         }
 
@@ -117,15 +112,9 @@ namespace ServiceStack.OrmLite.VistaDB
             set { this.VistaDbCommand.UpdatedRowSource = value; }
         }
 
-        #endregion
-
-        #region IDisposable Members
-
         public void Dispose()
         {
             this.VistaDbCommand.Dispose();
         }
-
-        #endregion
     }
 }

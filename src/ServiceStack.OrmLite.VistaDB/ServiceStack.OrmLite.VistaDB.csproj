@@ -45,9 +45,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="VistaDB5DialectProvider .cs" />
-    <Compile Include="VistaDB5Expression.cs" />
-    <Compile Include="VistaDB5Dialect.cs" />
+    <Compile Include="VistaDbDialectProvider.cs" />
+    <Compile Include="VistaDBExpression.cs" />
+    <Compile Include="VistaDbDialect.cs" />
     <Compile Include="OrmLiteVistaDbCommand.cs" />
     <Compile Include="OrmLiteVistaDbConnection.cs" />
     <Compile Include="OrmLiteVistaDbParameter.cs" />
@@ -55,9 +55,6 @@
     <Compile Include="OrmLiteVistaDbTransaction.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReflectionBasedDialectProvider.cs" />
-    <Compile Include="VistaDB4Dialect.cs" />
-    <Compile Include="VistaDB4DialectProvider .cs" />
-    <Compile Include="VistaDB4Expression.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj">

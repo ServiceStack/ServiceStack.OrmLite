@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
 
 namespace ServiceStack.OrmLite.VistaDB
 {
@@ -17,8 +14,6 @@ namespace ServiceStack.OrmLite.VistaDB
 
             VistaDbConnection = conn;
         }
-
-        #region IDbConnection Members
 
         public IDbTransaction BeginTransaction(IsolationLevel il)
         {
@@ -80,18 +75,10 @@ namespace ServiceStack.OrmLite.VistaDB
             get { return VistaDbConnection.State; }
         }
 
-        #endregion
-
-        #region IDisposable Members
-
         public void Dispose()
         {
             VistaDbConnection.Dispose();
         }
-
-        #endregion
-
-        #region ICloneable Members
 
         public object Clone()
         {
@@ -100,7 +87,5 @@ namespace ServiceStack.OrmLite.VistaDB
 
             return new OrmLiteVistaDbConnection(conn);
         }
-
-        #endregion
     }
 }
