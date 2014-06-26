@@ -236,7 +236,8 @@ namespace ServiceStack.OrmLite
         {
             foreach (var tableDef in tableDefs)
             {
-                var firstField = tableDef.FieldDefinitions.FirstOrDefault(x => x.Name == fieldName);
+                var firstField = tableDef.FieldDefinitions.FirstOrDefault(x => 
+                    string.CompareOrdinal(x.Name, fieldName) == 0);
                 if (firstField != null)
                 {
                     return Tuple.Create(tableDef, firstField);
@@ -246,7 +247,7 @@ namespace ServiceStack.OrmLite
             foreach (var tableDef in tableDefs)
             {
                 var firstField = tableDef.FieldDefinitions.FirstOrDefault(x =>
-                    tableDef.Name + x.Name == fieldName);
+                    string.CompareOrdinal(tableDef.Name + x.Name, fieldName) == 0);
 
                 if (firstField != null)
                 {
