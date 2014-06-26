@@ -859,7 +859,7 @@ namespace ServiceStack.OrmLite
             {
                 var propertyInfo = (PropertyInfo)m.Member;
 
-                var modelType = propertyInfo.DeclaringType;
+                var modelType = m.Expression.Type;
                 if (m.Expression.NodeType == ExpressionType.Convert)
                 {
                     var unaryExpr = m.Expression as UnaryExpression;
