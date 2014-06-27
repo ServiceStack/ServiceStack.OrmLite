@@ -1,5 +1,8 @@
-﻿using System.Data;
+﻿using System;
+using System.Configuration;
+using System.Data;
 using System.Data.Common;
+using System.IO;
 using NUnit.Framework;
 
 namespace ServiceStack.OrmLite.VistaDB.Tests
@@ -7,6 +10,35 @@ namespace ServiceStack.OrmLite.VistaDB.Tests
     [TestFixture]
     public class TestVistaDb
     {
+        public static string ExtractTestDatabaseFileToTempFile()
+        {
+            var dataFileName = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".vdb5");
+
+            ExtractTestDatabaseFile(dataFileName);
+
+            return dataFileName;
+        }
+
+        public static void ExtractTestDatabaseFile(string dataFileName)
+        {
+            var sourceStream = typeof(OrmLiteTestBase).Assembly
+                .GetManifestResourceStream("ServiceStack.OrmLite.VistaDB.Tests.Resources.test.vdb5");
+
+            using (sourceStream)
+            using (var destStream = File.Create(dataFileName))
+                sourceStream.CopyTo(destStream);
+        }
+
+        public static void CreateDatabase(DbProviderFactory factory)
+        {
+            using (var conn = factory.CreateConnection())
+            using (var comm = conn.CreateCommand())
+            {
+                comm.CommandText = @"CREATE DATABASE '|DataDirectory|\Database.vdb5', PAGE SIZE 4, LCID 1033, CASE SENSITIVE FALSE;";
+                comm.ExecuteNonQuery();
+            }
+        }
+
         [Test]
         public void TestVistaDB()
         {
@@ -24,8 +56,24 @@ namespace ServiceStack.OrmLite.VistaDB.Tests
                 VersionInfo = "Failed to load connectionString from config file";
                 Assert.Fail(VersionInfo);
             }
+
+            DbProviderFactory factory = null;
             // Loads the factory
-            DbProviderFactory factory = DbProviderFactories.GetFactory(connectionString.ProviderName);
+            try
+            {
+                factory = DbProviderFactories.GetFactory(connectionString.ProviderName);
+            }
+            catch
+            {
+                Assert.Fail("VistaDB library should be copied locally or installed into GAC.");
+            }
+
+            try
+            {
+                CreateDatabase(factory);
+            }
+            catch { }
+
             // After this it looks pretty normal
             using (DbConnection connection = factory.CreateConnection())
             {

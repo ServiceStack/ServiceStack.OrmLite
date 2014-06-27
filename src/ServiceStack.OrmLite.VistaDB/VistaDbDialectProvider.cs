@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.IO;
+using System.Reflection;
 using System.Text;
 
 namespace ServiceStack.OrmLite.VistaDB
@@ -15,12 +16,23 @@ namespace ServiceStack.OrmLite.VistaDB
 
         private static DateTime timeSpanOffset = new DateTime(1900, 01, 01);
 
-        public VistaDbDialectProvider()
-            : base("VistaDB.5.NET40", "VistaDB.Provider.VistaDBConnection")
+        protected override AssemblyName DefaultAssemblyGacName
         {
+            get { return new AssemblyName("VistaDB.5.NET40, Version=5.0.0.0, Culture=neutral, PublicKeyToken=dfc935afe2125461"); }
+        }
+
+        protected override AssemblyName DefaultAssemblyLocalName { get { return new AssemblyName("VistaDB.5.NET40"); } }
+
+        protected override string DefaultProviderTypeName { get { return "VistaDB.Provider.VistaDBConnection"; } }
+
+        public string RowVersionTriggerFormat { get; set; } 
+
+        public VistaDbDialectProvider()
+        {
+            this.RowVersionTriggerFormat = "{0}RowVersionUpdateTrigger";
+
             base.AutoIncrementDefinition = "IDENTITY(1,1)";
             base.SelectIdentitySql = "SELECT @@IDENTITY";
-            this.StringColumnDefinition = UseUnicode ? "NVARCHAR(4000)" : "VARCHAR(8000)";
             base.GuidColumnDefinition = "UniqueIdentifier";
             base.RealColumnDefinition = "FLOAT";
             base.BoolColumnDefinition = "BIT";
@@ -139,7 +151,7 @@ namespace ServiceStack.OrmLite.VistaDB
                 constraints);
         }
         
-        public virtual string GetColumnDefinition(string fieldName, Type fieldType,
+        public override string GetColumnDefinition(string fieldName, Type fieldType,
             bool isPrimaryKey, bool autoIncrement, bool isNullable, bool isRowVersion,
             int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
         {
@@ -311,15 +323,12 @@ namespace ServiceStack.OrmLite.VistaDB
             return dbCmd.LongScalar() > 0;
         }
 
-        public override bool UseUnicode
+        public override void UpdateStringColumnDefinitions()
         {
-            get { return this.useUnicode; }
-            set
-            {
-                this.useUnicode = value;
-                if (this.useUnicode && this.DefaultStringLength > 4000)
-                    this.DefaultStringLength = 4000;
-            }
+            if (base.useUnicode && this.DefaultStringLength > 4000)
+                this.DefaultStringLength = 4000;
+
+            base.UpdateStringColumnDefinitions();
         }
 
         public override string GetForeignKeyOnDeleteClause(ForeignKeyConstraint foreignKey)
@@ -411,20 +420,76 @@ namespace ServiceStack.OrmLite.VistaDB
         }
 
         /// Limit/Offset paging logic needs to be implemented here:
-        public override string ToSelectStatement(ModelDefinition modelDef, string selectExpression, string bodyExpression, string orderByExpression = null, int? offset = null, int? rows = null)
+        public override string ToSelectStatement(
+            ModelDefinition modelDef, string selectExpression, string bodyExpression, string orderByExpression = null, int? offset = null, int? rows = null)
         {
-            return base.ToSelectStatement(modelDef, selectExpression, bodyExpression, orderByExpression, offset, rows);
+            var sb = new StringBuilder(selectExpression);
+            sb.Append(bodyExpression);
+
+            var hasOrderBy = !String.IsNullOrWhiteSpace(orderByExpression);
+
+            var skip = offset.GetValueOrDefault();
+            if ((skip > 0 || rows.HasValue) && !hasOrderBy)
+            {
+                hasOrderBy = true;
+                //Ordering by the first column in select list
+                orderByExpression = "\nORDER BY 1";
+            }
+            
+            if (hasOrderBy)
+                sb.Append(orderByExpression);
+
+            if (skip > 0)
+                sb.Append(this.GetPagingOffsetExpression(skip));
+
+            if (rows.HasValue)
+            {
+                if (skip == 0)
+                    sb.Append(this.GetPagingOffsetExpression(0));
+
+                sb.Append(this.GetPagingFetchExpression(rows.Value));
+            }
+
+            return sb.ToString();
         }
 
-        //VistaDB-style paging:
-        //protected virtual string GetPagingOffsetExpression(int rows)
-        //{
-        //    return String.Format("\nOFFSET {0} ROWS", rows);
-        //}
+        protected virtual string GetPagingOffsetExpression(int rows)
+        {
+            return String.Format("\nOFFSET {0} ROWS", rows);
+        }
 
-        //protected virtual string GetPagingFetchExpression(int rows)
-        //{
-        //    return String.Format("\nFETCH NEXT {0} ROWS ONLY", Rows.Value);
-        //}
+        protected virtual string GetPagingFetchExpression(int rows)
+        {
+            return String.Format("\nFETCH NEXT {0} ROWS ONLY", rows);
+        }
+
+        //should create CLR-trigger assembly
+        /*public override string ToPostDropTableStatement(ModelDefinition modelDef)
+        {
+            if (modelDef.RowVersion != null)
+            {
+                var triggerName = RowVersionTriggerFormat.Fmt(modelDef.ModelName);
+                return "DROP TRIGGER IF EXISTS {0}".Fmt(GetQuotedTableName(triggerName));
+            }
+
+            return null;
+        }
+
+        public override string ToPostCreateTableStatement(ModelDefinition modelDef)
+        {
+            if (modelDef.RowVersion != null)
+            {
+                var triggerName = RowVersionTriggerFormat.Fmt(modelDef.ModelName);
+                var triggerBody = "SET NEW.{0} = OLD.{0} + 1;".Fmt(
+                    modelDef.RowVersion.FieldName.SqlColumn());
+
+                var sql = "CREATE TRIGGER {0} BEFORE UPDATE ON {1} FOR EACH ROW BEGIN {2} END;".Fmt(
+                    triggerName, modelDef.ModelName, triggerBody);
+
+                return sql;
+            }
+
+            return null;
+        }*/
     }
 }

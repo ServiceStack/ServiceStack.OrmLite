@@ -17,18 +17,12 @@ namespace ServiceStack.OrmLite.VistaDB.Tests
         {
             LogManager.LogFactory = new ConsoleLogFactory();
 
+            VistaDbDialect.Provider.UseLibraryFromGac = true;
             OrmLiteConfig.DialectProvider = VistaDbDialect.Provider;
 
-            var dataFileName = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".vdb5");
-            var sourceStream = typeof(OrmLiteTestBase).Assembly
-                .GetManifestResourceStream("ServiceStack.OrmLite.VistaDB.Tests.Resources.test.vdb5");
+            DataFileName = TestVistaDb.ExtractTestDatabaseFileToTempFile();
 
-            using (sourceStream)
-            using (var destStream = File.Create(dataFileName))
-                sourceStream.CopyTo(destStream);
-
-            DataFileName = dataFileName;
-            ConnectionString = "Data Source=" + dataFileName + ";";
+            ConnectionString = "Data Source=" + DataFileName + ";";
         }
 
         [TestFixtureTearDown]

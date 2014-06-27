@@ -8,31 +8,81 @@ namespace ServiceStack.OrmLite.VistaDB
     public abstract class ReflectionBasedDialectProvider<T> : OrmLiteDialectProviderBase<T>
         where T: IOrmLiteDialectProvider
     {
-        protected Type ConnectionType { get; private set; }
+        private Lazy<Type> _connectionType;
 
-        protected ReflectionBasedDialectProvider(Type connectionType)
+        private AssemblyName _assemblyGacName;
+        private AssemblyName _assemblyLocalName;
+        private string _providerTypeName;
+
+        protected ReflectionBasedDialectProvider()
         {
-            if (connectionType == null)
-                throw new ArgumentNullException("connectionType");
-
-            if (!typeof(IDbConnection).IsAssignableFrom(connectionType))
-                throw new ArgumentException("Invalid connectionType");
-
-            this.ConnectionType = connectionType;
+            _connectionType = new Lazy<Type>(LoadAssemblyAndGetType);
         }
 
-        protected ReflectionBasedDialectProvider(AssemblyName assemblyName, string typeName)
-            : this (LoadAssemblyAndGetType(assemblyName, typeName))
-        {}
+        protected abstract AssemblyName DefaultAssemblyGacName { get; }
 
-        protected ReflectionBasedDialectProvider(string assemblyName, string typeName)
-            : this (new AssemblyName(assemblyName), typeName)
-        {}
+        protected abstract AssemblyName DefaultAssemblyLocalName { get; }
 
-        protected static Type LoadAssemblyAndGetType(AssemblyName assemblyName, string typeName)
+        protected abstract string DefaultProviderTypeName { get; }
+
+        protected Type ConnectionType { get { return _connectionType.Value; } }
+
+        public bool UseLibraryFromGac { get; set; }
+
+        public AssemblyName AssemblyGacName 
         {
+            get
+            {
+                if (_assemblyGacName == null)
+                    _assemblyGacName = DefaultAssemblyGacName;
+
+                return _assemblyGacName;
+            }
+            set
+            {
+                SetValueSafe(value, v => _assemblyGacName = v);
+            }
+        }
+
+        public AssemblyName AssemblyLocalName 
+        {
+            get 
+            {
+                if (_assemblyLocalName == null)
+                    _assemblyLocalName = DefaultAssemblyLocalName;
+
+                return _assemblyLocalName;
+            }
+            set
+            {
+                SetValueSafe(value, v => _assemblyLocalName = v);
+            }
+        }
+
+        public string ProviderTypeName 
+        {
+            get
+            {
+                if (_providerTypeName == null)
+                    _providerTypeName = DefaultProviderTypeName;
+
+                return _providerTypeName;
+            }
+            set
+            {
+                SetValueSafe(value, v => _providerTypeName = v);
+            } 
+        }
+
+        protected Type LoadAssemblyAndGetType()
+        {
+            var assemblyName = this.UseLibraryFromGac
+                ? this.AssemblyGacName
+                : this.AssemblyLocalName;
+
             var assembly = Assembly.Load(assemblyName);
-            return assembly.GetType(typeName, true);
+
+            return assembly.GetType(this.ProviderTypeName, true);
         }
 
         protected virtual IDbConnection ActivateDbConnection(string connectionString)
@@ -46,6 +96,20 @@ namespace ServiceStack.OrmLite.VistaDB
         public override IDbConnection CreateConnection(string connectionString, Dictionary<string, string> options)
         {
             return this.ActivateDbConnection(connectionString);
+        }
+
+        private static void ThrowUnableToChangeProperty()
+        {
+            throw new InvalidOperationException("This property should only be set before the first time a connection is created");
+        }
+
+        private void SetValueSafe<TValue>(TValue value, Action<TValue> action)
+            where TValue: class
+        {
+            if (_connectionType.IsValueCreated)
+                ThrowUnableToChangeProperty();
+
+            action.Invoke(value);
         }
     }
 }
