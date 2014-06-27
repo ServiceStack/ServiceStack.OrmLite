@@ -15,7 +15,6 @@ namespace ServiceStack.OrmLite
             this.values = values;
 
             if (values != null)
-
                 foreach (var value in values)
                     ++Count;
         }
