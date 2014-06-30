@@ -272,6 +272,83 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
+        public ModelDefinition GetModelDefinition(FieldDefinition fieldDef)
+        {
+            if (modelDef.FieldDefinitions.Any(x => x == fieldDef))
+                return modelDef;
+
+            return tableDefs
+                .FirstOrDefault(tableDef => tableDef.FieldDefinitions.Any(x => x == fieldDef));
+        }
+
+        private SqlExpression<T> OrderByFields(string orderBySuffix, FieldDefinition[] fields)
+        {
+            orderByProperties.Clear();
+
+            var sbOrderBy = new StringBuilder();
+            foreach (var field in fields)
+            {
+                var tableDef = GetModelDefinition(field);
+                var qualifiedName = modelDef != null
+                    ? DialectProvider.GetQuotedColumnName(tableDef, field)
+                    : DialectProvider.GetQuotedColumnName(field);
+
+                if (sbOrderBy.Length > 0)
+                    sbOrderBy.Append(", ");
+
+                sbOrderBy.Append(qualifiedName + orderBySuffix);
+            }
+
+            this.orderBy = sbOrderBy.Length == 0
+                ? null
+                : "ORDER BY " + sbOrderBy;
+            return this;
+        }
+
+        public virtual SqlExpression<T> OrderByFields(params FieldDefinition[] fields)
+        {
+            return OrderByFields("", fields);
+        }
+
+        public virtual SqlExpression<T> OrderByFieldsDescending(params FieldDefinition[] fields)
+        {
+            return OrderByFields(" DESC", fields);
+        }
+
+        private SqlExpression<T> OrderByFields(string orderBySuffix, string[] fieldNames)
+        {
+            orderByProperties.Clear();
+
+            var sbOrderBy = new StringBuilder();
+            foreach (var fieldName in fieldNames)
+            {
+                var field = FirstMatchingField(fieldName);
+                if (field == null)
+                    throw new ArgumentException("Could not find field " + fieldName);
+                var qualifiedName = DialectProvider.GetQuotedColumnName(field.Item1, field.Item2);
+
+                if (sbOrderBy.Length > 0)
+                    sbOrderBy.Append(", ");
+
+                sbOrderBy.Append(qualifiedName + orderBySuffix);
+            }
+
+            this.orderBy = sbOrderBy.Length == 0
+                ? null
+                : "ORDER BY " + sbOrderBy;
+            return this;
+        }
+
+        public virtual SqlExpression<T> OrderByFields(params string[] fieldNames)
+        {
+            return OrderByFields("", fieldNames);
+        }
+
+        public virtual SqlExpression<T> OrderByFieldsDescending(params string[] fieldNames)
+        {
+            return OrderByFields(" DESC", fieldNames);
+        }
+
         public virtual SqlExpression<T> OrderBy<TKey>(Expression<Func<T, TKey>> keySelector)
         {
             sep = string.Empty;
@@ -279,6 +356,14 @@ namespace ServiceStack.OrmLite
             orderByProperties.Clear();
             var property = Visit(keySelector).ToString();
             orderByProperties.Add(property + " ASC");
+            BuildOrderByClauseInternal();
+            return this;
+        }
+
+        public virtual SqlExpression<T> ThenBy(string orderBy)
+        {
+            orderBy.SqlVerifyFragment();
+            orderByProperties.Add(orderBy + " ASC");
             BuildOrderByClauseInternal();
             return this;
         }
@@ -300,6 +385,14 @@ namespace ServiceStack.OrmLite
             orderByProperties.Clear();
             var property = Visit(keySelector).ToString();
             orderByProperties.Add(property + " DESC");
+            BuildOrderByClauseInternal();
+            return this;
+        }
+
+        public virtual SqlExpression<T> ThenByDescending(string orderBy)
+        {
+            orderBy.SqlVerifyFragment();
+            orderByProperties.Add(orderBy + " DESC");
             BuildOrderByClauseInternal();
             return this;
         }
