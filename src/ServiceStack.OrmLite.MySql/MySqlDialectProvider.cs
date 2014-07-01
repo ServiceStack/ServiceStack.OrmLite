@@ -141,7 +141,7 @@ namespace ServiceStack.OrmLite.MySql
 
         public override SqlExpression<T> SqlExpression<T>()
         {
-            return new MySqlExpression<T>();
+            return new MySqlExpression<T>(this);
         }
 
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName)

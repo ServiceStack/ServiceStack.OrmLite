@@ -78,11 +78,9 @@ namespace ServiceStack.OrmLite.Tests
 				Assert.That(dbRowIds, Has.Count.EqualTo(1));
 				Assert.That(dbRowIds[0], Is.EqualTo(filterRow.Id));
 
-                SuppressIfOracle("Oracle provider is not smart enough to substitute ':' for '@' parameter delimiter.");
-
                 rows = db.Select<ModelWithOnlyStringFields>(
-                    "SELECT * FROM {0} WHERE {1} = @AlbumName"
-                    .Fmt("ModelWithOnlyStringFields".SqlTable(), "AlbumName".SqlColumn()), 
+                    "SELECT * FROM {0} WHERE {1} = {2}AlbumName"
+                    .Fmt("ModelWithOnlyStringFields".SqlTable(), "AlbumName".SqlColumn(), OrmLiteConfig.DialectProvider.ParamString),
                     new { filterRow.AlbumName });
 				dbRowIds = rows.ConvertAll(x => x.Id);
 				Assert.That(dbRowIds, Has.Count.EqualTo(1));
@@ -180,13 +178,11 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(notes[0].Id, Is.EqualTo(note.Id));
                 Assert.That(notes[0].NoteText, Is.EqualTo(note.NoteText));
 
-                SuppressIfOracle("Oracle provider is not smart enough to substitute ':' for '@' parameter delimiter.");
-
-                notes = db.Select<Note>("SELECT * FROM Note WHERE {0}=@schemaUri".Fmt("SchemaUri".SqlColumn()), new { schemaUri = "tcm:0-0-0" });
+                notes = db.Select<Note>("SELECT * FROM Note WHERE {0}={1}schemaUri".Fmt("SchemaUri".SqlColumn(), OrmLiteConfig.DialectProvider.ParamString), new { schemaUri = "tcm:0-0-0" });
                 Assert.That(notes[0].Id, Is.EqualTo(note.Id));
                 Assert.That(notes[0].NoteText, Is.EqualTo(note.NoteText));
 
-                notes = db.Select<Note>("SchemaUri".SqlColumn() + "=@schemaUri", new { schemaUri = "tcm:0-0-0" });
+                notes = db.Select<Note>("SchemaUri".SqlColumn() + "={0}schemaUri".Fmt(OrmLiteConfig.DialectProvider.ParamString), new { schemaUri = "tcm:0-0-0" });
                 Assert.That(notes[0].Id, Is.EqualTo(note.Id));
                 Assert.That(notes[0].NoteText, Is.EqualTo(note.NoteText));
             }            
@@ -206,25 +202,23 @@ namespace ServiceStack.OrmLite.Tests
             {
                 db.DropAndCreateTable<Note>();
 
-                db.Insert(new Note
+                var id = db.Insert(new Note
                 {
                     SchemaUri = "tcm:0-0-0",
                     NoteText = "Hello world 5",
                     LastUpdated = new DateTime(2013, 1, 5),
                     UpdatedBy = "RC"
-                });
-
-                SuppressIfOracle("Oracle provider is not smart enough to substitute ':' for '@' parameter delimiter.");
+                }, selectIdentity: true);
 
                 var sql = @"
 SELECT
 Id, {0}, {1}
 FROM {2}
-WHERE {0}=@schemaUri
-".Fmt("SchemaUri".SqlColumn(), "NoteText".SqlColumn(), "Note".SqlTable());
+WHERE {0}={3}schemaUri
+".Fmt("SchemaUri".SqlColumn(), "NoteText".SqlColumn(), "Note".SqlTable(), OrmLiteConfig.DialectProvider.ParamString);
 
                 var notes = db.Select<NoteDto>(sql, new { schemaUri = "tcm:0-0-0" });
-                Assert.That(notes[0].Id, Is.EqualTo(1));
+                Assert.That(notes[0].Id, Is.EqualTo(id));
                 Assert.That(notes[0].NoteText, Is.EqualTo("Hello world 5"));
             }
         }

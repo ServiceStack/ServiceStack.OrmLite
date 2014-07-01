@@ -50,6 +50,14 @@ namespace ServiceStack.OrmLite.Tests
         public decimal Cost { get; set; }
     }
 
+    public class Country
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+        public string CountryName { get; set; }
+        public string CountryCode { get; set; }
+    }
+
     /// <summary>
     /// Test POCOs using table aliases and an alias on the foreign key reference
     /// </summary>
@@ -70,7 +78,7 @@ namespace ServiceStack.OrmLite.Tests
         [AutoIncrement]
         public int Id { get; set; }
         [Alias("Q_CustomerId")]
-        public int AliasedCustomerId { get; set; }
+        public int AliasedCustId { get; set; }
         public string AddressLine1 { get; set; }
         public string AddressLine2 { get; set; }
         public string City { get; set; }
@@ -139,10 +147,12 @@ namespace ServiceStack.OrmLite.Tests
         public new void TestFixtureSetUp()
         {
             db = base.OpenDbConnection();
-            db.DropTable<OrderDetail>();
+            CustomerOrdersUseCase.DropTables(db); //Has conflicting 'Order' table
+
             db.DropAndCreateTable<Order>();
             db.DropAndCreateTable<Customer>();
             db.DropAndCreateTable<CustomerAddress>();
+            db.DropAndCreateTable<Country>();
             db.DropAndCreateTable<AliasedCustomer>();
             db.DropAndCreateTable<AliasedCustomerAddress>();
             db.DropAndCreateTable<OldAliasedCustomer>();
@@ -229,10 +239,10 @@ namespace ServiceStack.OrmLite.Tests
             db.Save(customer);
 
             Assert.That(customer.Id, Is.GreaterThan(0));
-            Assert.That(customer.PrimaryAddress.AliasedCustomerId, Is.EqualTo(0));
+            Assert.That(customer.PrimaryAddress.AliasedCustId, Is.EqualTo(0));
 
             db.SaveReferences(customer, customer.PrimaryAddress);
-            Assert.That(customer.PrimaryAddress.AliasedCustomerId, Is.EqualTo(customer.Id));
+            Assert.That(customer.PrimaryAddress.AliasedCustId, Is.EqualTo(customer.Id));
 
             var dbCustomer = db.LoadSingleById<AliasedCustomer>(customer.Id);
 
@@ -357,142 +367,6 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(customer.Id, Is.GreaterThan(0));
         }
 
-
-        public class CustomerJoin
-        {
-            public int Id { get; set; }
-            public string Name { get; set; }
-            public string AddressLine1 { get; set; }
-            public string City { get; set; }
-            public string LineItem { get; set; }
-            public decimal Cost { get; set; }
-        }
-
-        [Test]
-        public void Can_do_multiple_joins_with_SqlExpression()
-        {
-            AddCustomerWithOrders();
-
-            var results = db.Select<CustomerJoin, Customer>(q => q
-                .Join<Customer, CustomerAddress>()
-                .Join<Customer, Order>());
-
-            var costs = results.ConvertAll(x => x.Cost);
-            Assert.That(costs, Is.EquivalentTo(new[] { 1.99m, 2.99m }));
-
-            var expr = db.From<Customer>()
-                .Join<Customer, CustomerAddress>()
-                .Join<Customer, Order>();
-
-            results = db.Select<CustomerJoin>(expr);
-
-            costs = results.ConvertAll(x => x.Cost);
-            Assert.That(costs, Is.EquivalentTo(new[] { 1.99m, 2.99m }));
-        }
-
-        [Test]
-        public void Can_do_joins_with_wheres_using_SqlExpression()
-        {
-            AddCustomerWithOrders();
-
-            var results = db.Select<CustomerJoin, Customer>(q => q
-                .Join<Customer, CustomerAddress>()
-                .Join<Customer, Order>((c, o) => c.Id == o.CustomerId && o.Cost < 2));
-
-            var costs = results.ConvertAll(x => x.Cost);
-            Assert.That(costs, Is.EquivalentTo(new[] { 1.99m }));
-
-            results = db.Select<CustomerJoin, Customer>(q => q
-                .Join<Customer, CustomerAddress>()
-                .Join<Customer, Order>()
-                .Where<Order>(o => o.Cost < 2));
-
-            costs = results.ConvertAll(x => x.Cost);
-            Assert.That(costs, Is.EquivalentTo(new[] { 1.99m }));
-
-            results = db.Select<CustomerJoin, Customer>(q => q
-                .Join<Customer, CustomerAddress>()
-                .Join<Customer, Order>()
-                .Where<Order>(o => o.Cost < 2 || o.LineItem == "Line 2"));
-
-            costs = results.ConvertAll(x => x.Cost);
-            Assert.That(costs, Is.EquivalentTo(new[] { 1.99m, 2.99m }));
-
-            var expr = db.From<Customer>()
-                .Join<Customer, CustomerAddress>()
-                .Join<Customer, Order>()
-                .Where<Order>(o => o.Cost < 2 || o.LineItem == "Line 2");
-            results = db.Select<CustomerJoin>(expr);
-
-            costs = results.ConvertAll(x => x.Cost);
-            Assert.That(costs, Is.EquivalentTo(new[] { 1.99m, 2.99m }));
-        }
-
-        [Test]
-        public void Can_do_joins_with_complex_wheres_using_SqlExpression()
-        {
-            var customer1 = new Customer
-            {
-                Name = "Customer 1",
-                PrimaryAddress = new CustomerAddress
-                {
-                    AddressLine1 = "1 Humpty Street",
-                    City = "Humpty Doo",
-                    State = "Northern Territory",
-                    Country = "Australia"
-                },
-                Orders = new[]
-                {
-                    new Order {LineItem = "Line 1", Qty = 1, Cost = 1.99m},
-                    new Order {LineItem = "Line 1", Qty = 2, Cost = 3.98m},
-                    new Order {LineItem = "Line 2", Qty = 1, Cost = 1.49m},
-                    new Order {LineItem = "Line 2", Qty = 2, Cost = 2.98m},
-                    new Order {LineItem = "Australia Flag", Qty = 1, Cost = 9.99m},
-                }.ToList(),
-            };
-
-            db.Save(customer1, references: true);
-            
-            var customer2 = new Customer
-            {
-                Name = "Customer 2",
-                PrimaryAddress = new CustomerAddress
-                {
-                    AddressLine1 = "2 Prospect Park",
-                    City = "Brooklyn",
-                    State = "New York",
-                    Country = "USA"
-                },
-                Orders = new[]
-                {
-                    new Order {LineItem = "USA", Qty = 1, Cost = 20m},
-                }.ToList(),
-            };
-
-            db.Save(customer2, references: true);
-
-            var results = db.Select<CustomerJoin, Customer>(q => q
-                .Join<Customer, CustomerAddress>()
-                .Join<Customer, Order>()
-                .Where(c => c.Name == "Customer 1")
-                .And<Order>(o => o.Cost < 2)
-                .Or<Order>(o => o.LineItem == "Australia Flag"));
-
-            var costs = results.ConvertAll(x => x.Cost);
-            Assert.That(costs, Is.EquivalentTo(new[] { 1.99m, 1.49m, 9.99m }));
-
-            results = db.Select<CustomerJoin, Customer>(q => q
-                .Join<Customer, CustomerAddress>()
-                .Join<Customer, Order>()
-                .Where(c => c.Name == "Customer 2")
-                .And<CustomerAddress, Order>((a, o) => a.Country == o.LineItem));
-
-            db.GetLastSql().Print();
-
-            costs = results.ConvertAll(x => x.Cost);
-            Assert.That(costs, Is.EquivalentTo(new[] { 20m }));
-        }
-    
     }
 
 }

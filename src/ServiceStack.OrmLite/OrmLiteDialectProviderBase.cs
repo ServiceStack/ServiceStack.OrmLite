@@ -415,35 +415,6 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecLongScalar();
         }
 
-        public virtual string ToCountStatement(Type fromTableType, string sqlFilter, params object[] filterParams)
-        {
-            var sql = new StringBuilder();
-            const string SelectStatement = "SELECT ";
-            var modelDef = fromTableType.GetModelDefinition();
-            var isFullSelectStatement =
-                !string.IsNullOrEmpty(sqlFilter)
-                && sqlFilter.TrimStart().StartsWith(SelectStatement, StringComparison.OrdinalIgnoreCase);
-
-            if (isFullSelectStatement) 
-                return (filterParams != null ? sqlFilter.SqlFmt(filterParams) : sqlFilter);
-
-            sql.AppendFormat("SELECT {0} FROM {1}", "COUNT(*)",
-                             GetQuotedTableName(modelDef));
-
-            if (!string.IsNullOrEmpty(sqlFilter))
-            {
-                sqlFilter = filterParams != null ? sqlFilter.SqlFmt(filterParams) : sqlFilter;
-                if ((!sqlFilter.StartsWith("ORDER ", StringComparison.OrdinalIgnoreCase)
-                    && !sqlFilter.StartsWith("LIMIT ", StringComparison.OrdinalIgnoreCase))
-                    && (!sqlFilter.StartsWith("WHERE ", StringComparison.OrdinalIgnoreCase)))
-                {
-                    sql.Append(" WHERE ");
-                }
-                sql.Append(" " + sqlFilter);
-            }
-            return sql.ToString();
-        }
-
         // Fmt
         public virtual string ToSelectStatement(Type tableType, string sqlFilter, params object[] filterParams)
         {
@@ -520,9 +491,7 @@ namespace ServiceStack.OrmLite
                 if (sqlColumns.Length > 0)
                     sqlColumns.Append(", ");
 
-                sqlColumns.Append(field.IsRowVersion
-                    ? GetRowVersionColumnName(field)
-                    : GetQuotedColumnName(field.FieldName));
+                sqlColumns.Append(field.GetQuotedName(this));
             }
 
             return sqlColumns.ToString();
@@ -553,7 +522,7 @@ namespace ServiceStack.OrmLite
                 try
                 {
                     sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
-                    sbColumnValues.Append(fieldDef.GetQuotedValue(objWithProperties));
+                    sbColumnValues.Append(fieldDef.GetQuotedValue(objWithProperties, this));
                 }
                 catch (Exception ex)
                 {
@@ -677,7 +646,7 @@ namespace ServiceStack.OrmLite
         {
             sqlFilter.AppendFormat("{0}={1}", 
                 GetQuotedColumnName(fieldDef.FieldName),
-                fieldDef.GetQuotedValue(objWithProperties));
+                fieldDef.GetQuotedValue(objWithProperties, this));
         }
 
         public virtual bool PrepareParameterizedDeleteStatement<T>(IDbCommand cmd, ICollection<string> deleteFields = null)

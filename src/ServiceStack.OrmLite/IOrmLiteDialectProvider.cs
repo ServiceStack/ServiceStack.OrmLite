@@ -103,8 +103,6 @@ namespace ServiceStack.OrmLite
             string sqlFilter,
             params object[] filterParams);
 
-        string ToCountStatement(Type fromTableType, string sqlFilter, params object[] filterParams);
-
         string ToExecuteProcedureStatement(object objWithProperties);
 
         string ToCreateTableStatement(Type tableType);

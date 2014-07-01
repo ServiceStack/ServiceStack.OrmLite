@@ -713,7 +713,6 @@ namespace ServiceStack.OrmLite.Firebird
             return Quote(NamingStrategy.GetTableName(tableName));
         }
 
-
         public override string GetQuotedColumnName(string fieldName)
         {
             return Quote(NamingStrategy.GetColumnName(fieldName));
@@ -728,7 +727,7 @@ namespace ServiceStack.OrmLite.Firebird
 
         public override SqlExpression<T> SqlExpression<T>()
         {
-            return new FirebirdSqlExpression<T>();
+            return new FirebirdSqlExpression<T>(this);
         }
 
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName)

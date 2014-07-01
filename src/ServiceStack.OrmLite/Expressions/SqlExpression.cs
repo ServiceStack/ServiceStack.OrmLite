@@ -28,20 +28,26 @@ namespace ServiceStack.OrmLite
         private ModelDefinition modelDef;
         public bool PrefixFieldWithTableName { get; set; }
         public bool WhereStatementWithoutWhereString { get; set; }
+        public IOrmLiteDialectProvider DialectProvider { get; set; }
 
         protected string Sep
         {
             get { return sep; }
         }
 
-        public SqlExpression()
+        public SqlExpression(IOrmLiteDialectProvider dialectProvider)
         {
             modelDef = typeof(T).GetModelDefinition();
             PrefixFieldWithTableName = false;
             WhereStatementWithoutWhereString = false;
+            DialectProvider = dialectProvider;
+            tableDefs.Add(modelDef);
         }
 
-        public abstract SqlExpression<T> Clone();
+        public SqlExpression<T> Clone()
+        {
+            return CopyTo(DialectProvider.SqlExpression<T>());
+        }
 
         protected virtual SqlExpression<T> CopyTo(SqlExpression<T> to)
         {
@@ -125,7 +131,7 @@ namespace ServiceStack.OrmLite
                 tables.SqlVerifyFragment();
                 var singleTable = tables.ToLower().IndexOfAny("join", ",") == -1;
                 FromExpression = singleTable
-                    ? " \nFROM " + OrmLiteConfig.DialectProvider.GetQuotedTableName(tables)
+                    ? " \nFROM " + DialectProvider.GetQuotedTableName(tables)
                     : " \nFROM " + tables;
             }
 
@@ -135,65 +141,70 @@ namespace ServiceStack.OrmLite
         public virtual SqlExpression<T> Where()
         {
             if (underlyingExpression != null) underlyingExpression = null; //Where() clears the expression
-            return Where(string.Empty);
+            whereExpression = null;
+            return this;
         }
 
         public virtual SqlExpression<T> Where(string sqlFilter, params object[] filterParams)
         {
-            whereExpression = !string.IsNullOrEmpty(sqlFilter) ? sqlFilter.SqlFmt(filterParams) : string.Empty;
-            if (!string.IsNullOrEmpty(whereExpression)) whereExpression = (WhereStatementWithoutWhereString ? "" : "WHERE ") + whereExpression;
+            AppendToWhere("AND", sqlFilter.SqlFmt(filterParams).SqlVerifyFragment());
+            return this;
+        }
+
+        public virtual SqlExpression<T> And(string sqlFilter, params object[] filterParams)
+        {
+            AppendToWhere("AND", sqlFilter.SqlFmt(filterParams).SqlVerifyFragment());
+            return this;
+        }
+
+        public virtual SqlExpression<T> Or(string sqlFilter, params object[] filterParams)
+        {
+            AppendToWhere("OR", sqlFilter.SqlFmt(filterParams).SqlVerifyFragment());
+            return this;
+        }
+
+        public virtual SqlExpression<T> AddCondition(string condition, string sqlFilter, params object[] filterParams)
+        {
+            AppendToWhere(condition, sqlFilter.SqlFmt(filterParams).SqlVerifyFragment());
             return this;
         }
 
         public virtual SqlExpression<T> Where(Expression<Func<T, bool>> predicate)
         {
-            if (predicate != null)
-            {
-                And(predicate);
-            }
-            else
-            {
-                underlyingExpression = null;
-                whereExpression = string.Empty;
-            }
-
+            AppendToWhere("AND", predicate);
             return this;
         }
 
         public virtual SqlExpression<T> And(Expression<Func<T, bool>> predicate)
         {
-            if (predicate != null)
-            {
-                if (underlyingExpression == null)
-                    underlyingExpression = predicate;
-                else
-                    underlyingExpression = underlyingExpression.And(predicate);
-
-                ProcessInternalExpression();
-            }
+            AppendToWhere("AND", predicate);
             return this;
         }
 
         public virtual SqlExpression<T> Or(Expression<Func<T, bool>> predicate)
         {
-            if (predicate != null)
-            {
-                if (underlyingExpression == null)
-                    underlyingExpression = predicate;
-                else
-                    underlyingExpression = underlyingExpression.Or(predicate);
-
-                ProcessInternalExpression();
-            }
+            AppendToWhere("OR", predicate);
             return this;
         }
 
-        private void ProcessInternalExpression()
+        protected void AppendToWhere(string condition, Expression predicate)
         {
+            if (predicate == null)
+                return;
+
             useFieldName = true;
             sep = " ";
-            whereExpression = Visit(underlyingExpression).ToString();
-            if (!string.IsNullOrEmpty(whereExpression)) whereExpression = (WhereStatementWithoutWhereString ? "" : "WHERE ") + whereExpression;
+            var newExpr = Visit(predicate).ToString();
+            AppendToWhere(condition, newExpr);
+        }
+
+        protected void AppendToWhere(string condition, string sqlExpression)
+        {
+            whereExpression = string.IsNullOrEmpty(whereExpression)
+                ? (WhereStatementWithoutWhereString ? "" : "WHERE ")
+                : whereExpression + " " + condition + " ";
+
+            whereExpression += sqlExpression;
         }
 
         public virtual SqlExpression<T> GroupBy()
@@ -261,6 +272,83 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
+        public ModelDefinition GetModelDefinition(FieldDefinition fieldDef)
+        {
+            if (modelDef.FieldDefinitions.Any(x => x == fieldDef))
+                return modelDef;
+
+            return tableDefs
+                .FirstOrDefault(tableDef => tableDef.FieldDefinitions.Any(x => x == fieldDef));
+        }
+
+        private SqlExpression<T> OrderByFields(string orderBySuffix, FieldDefinition[] fields)
+        {
+            orderByProperties.Clear();
+
+            var sbOrderBy = new StringBuilder();
+            foreach (var field in fields)
+            {
+                var tableDef = GetModelDefinition(field);
+                var qualifiedName = modelDef != null
+                    ? DialectProvider.GetQuotedColumnName(tableDef, field)
+                    : DialectProvider.GetQuotedColumnName(field);
+
+                if (sbOrderBy.Length > 0)
+                    sbOrderBy.Append(", ");
+
+                sbOrderBy.Append(qualifiedName + orderBySuffix);
+            }
+
+            this.orderBy = sbOrderBy.Length == 0
+                ? null
+                : "ORDER BY " + sbOrderBy;
+            return this;
+        }
+
+        public virtual SqlExpression<T> OrderByFields(params FieldDefinition[] fields)
+        {
+            return OrderByFields("", fields);
+        }
+
+        public virtual SqlExpression<T> OrderByFieldsDescending(params FieldDefinition[] fields)
+        {
+            return OrderByFields(" DESC", fields);
+        }
+
+        private SqlExpression<T> OrderByFields(string orderBySuffix, string[] fieldNames)
+        {
+            orderByProperties.Clear();
+
+            var sbOrderBy = new StringBuilder();
+            foreach (var fieldName in fieldNames)
+            {
+                var field = FirstMatchingField(fieldName);
+                if (field == null)
+                    throw new ArgumentException("Could not find field " + fieldName);
+                var qualifiedName = DialectProvider.GetQuotedColumnName(field.Item1, field.Item2);
+
+                if (sbOrderBy.Length > 0)
+                    sbOrderBy.Append(", ");
+
+                sbOrderBy.Append(qualifiedName + orderBySuffix);
+            }
+
+            this.orderBy = sbOrderBy.Length == 0
+                ? null
+                : "ORDER BY " + sbOrderBy;
+            return this;
+        }
+
+        public virtual SqlExpression<T> OrderByFields(params string[] fieldNames)
+        {
+            return OrderByFields("", fieldNames);
+        }
+
+        public virtual SqlExpression<T> OrderByFieldsDescending(params string[] fieldNames)
+        {
+            return OrderByFields(" DESC", fieldNames);
+        }
+
         public virtual SqlExpression<T> OrderBy<TKey>(Expression<Func<T, TKey>> keySelector)
         {
             sep = string.Empty;
@@ -268,6 +356,14 @@ namespace ServiceStack.OrmLite
             orderByProperties.Clear();
             var property = Visit(keySelector).ToString();
             orderByProperties.Add(property + " ASC");
+            BuildOrderByClauseInternal();
+            return this;
+        }
+
+        public virtual SqlExpression<T> ThenBy(string orderBy)
+        {
+            orderBy.SqlVerifyFragment();
+            orderByProperties.Add(orderBy + " ASC");
             BuildOrderByClauseInternal();
             return this;
         }
@@ -289,6 +385,14 @@ namespace ServiceStack.OrmLite
             orderByProperties.Clear();
             var property = Visit(keySelector).ToString();
             orderByProperties.Add(property + " DESC");
+            BuildOrderByClauseInternal();
+            return this;
+        }
+
+        public virtual SqlExpression<T> ThenByDescending(string orderBy)
+        {
+            orderBy.SqlVerifyFragment();
+            orderByProperties.Add(orderBy + " DESC");
             BuildOrderByClauseInternal();
             return this;
         }
@@ -481,16 +585,25 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
+        public string SqlTable(string tableName)
+        {
+            return DialectProvider.GetQuotedTableName(tableName);
+        }
+
+        public string SqlColumn(string columnName)
+        {
+            return DialectProvider.GetQuotedColumnName(columnName);
+        }
+
         public virtual string ToDeleteRowStatement()
         {
             return string.Format("DELETE FROM {0} {1}",
-                OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef), WhereExpression);
+                DialectProvider.GetQuotedTableName(modelDef), WhereExpression);
         }
 
         public virtual string ToUpdateStatement(T item, bool excludeDefaults = false)
         {
             var setFields = new StringBuilder();
-            var dialectProvider = OrmLiteConfig.DialectProvider;
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
@@ -498,24 +611,24 @@ namespace ServiceStack.OrmLite
                 var value = fieldDef.GetValue(item);
                 if (excludeDefaults && (value == null || value.Equals(value.GetType().GetDefaultValue()))) continue; //GetDefaultValue?
 
-                fieldDef.GetQuotedValue(item);
+                fieldDef.GetQuotedValue(item, DialectProvider);
 
                 if (setFields.Length > 0)
                     setFields.Append(", ");
 
                 setFields
-                    .Append(dialectProvider.GetQuotedColumnName(fieldDef.FieldName))
+                    .Append(DialectProvider.GetQuotedColumnName(fieldDef.FieldName))
                     .Append("=")
-                    .Append(dialectProvider.GetQuotedValue(value, fieldDef.FieldType));
+                    .Append(DialectProvider.GetQuotedValue(value, fieldDef.FieldType));
             }
 
             return string.Format("UPDATE {0} SET {1} {2}",
-                dialectProvider.GetQuotedTableName(modelDef), setFields, WhereExpression);
+                DialectProvider.GetQuotedTableName(modelDef), setFields, WhereExpression);
         }
 
         public virtual string ToSelectStatement()
         {
-            var sql = OrmLiteConfig.DialectProvider
+            var sql = DialectProvider
                 .ToSelectStatement(modelDef, SelectExpression, BodyExpression, OrderByExpression, Offset, Rows);
 
             return sql;
@@ -523,7 +636,7 @@ namespace ServiceStack.OrmLite
 
         public virtual string ToCountStatement()
         {
-            return OrmLiteConfig.DialectProvider.ToCountStatement(modelDef.ModelType, WhereExpression, null);
+            return "SELECT COUNT(*)" + BodyExpression;
         }
 
         public string SelectExpression
@@ -545,7 +658,7 @@ namespace ServiceStack.OrmLite
             get
             {
                 return string.IsNullOrEmpty(fromExpression)
-                    ? " \nFROM " + OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef)
+                    ? " \nFROM " + DialectProvider.GetQuotedTableName(modelDef)
                     : fromExpression;
             }
             set { fromExpression = value; }
@@ -763,7 +876,7 @@ namespace ServiceStack.OrmLite
                 if (left as PartialSqlString == null && right as PartialSqlString == null)
                 {
                     var result = Expression.Lambda(b).Compile().DynamicInvoke();
-                    return new PartialSqlString(OrmLiteConfig.DialectProvider.GetQuotedValue(result, result.GetType()));
+                    return new PartialSqlString(DialectProvider.GetQuotedValue(result, result.GetType()));
                 }
 
                 if (left as PartialSqlString == null)
@@ -803,9 +916,9 @@ namespace ServiceStack.OrmLite
                     return result;
                 }
                 else if (left as PartialSqlString == null)
-                    left = OrmLiteConfig.DialectProvider.GetQuotedValue(left, left != null ? left.GetType() : null);
+                    left = DialectProvider.GetQuotedValue(left, left != null ? left.GetType() : null);
                 else if (right as PartialSqlString == null)
-                    right = OrmLiteConfig.DialectProvider.GetQuotedValue(right, right != null ? right.GetType() : null);
+                    right = DialectProvider.GetQuotedValue(right, right != null ? right.GetType() : null);
 
             }
 
@@ -822,13 +935,13 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        private static string ConvertToEnum(Type enumType, string enumStr, object otherExpr)
+        private string ConvertToEnum(Type enumType, string enumStr, object otherExpr)
         {
             //enum value was returned by Visit(b.Right)
             long numvericVal;
             var result = Int64.TryParse(enumStr, out numvericVal)
-                ? OrmLiteConfig.DialectProvider.GetQuotedValue(Enum.ToObject(enumType, numvericVal).ToString(), typeof(string))
-                : OrmLiteConfig.DialectProvider.GetQuotedValue(otherExpr, otherExpr.GetType());
+                ? DialectProvider.GetQuotedValue(Enum.ToObject(enumType, numvericVal).ToString(), typeof(string))
+                : DialectProvider.GetQuotedValue(otherExpr, otherExpr.GetType());
             return result;
         }
 
@@ -837,19 +950,24 @@ namespace ServiceStack.OrmLite
             if (m.Expression != null
                 && (m.Expression.NodeType == ExpressionType.Parameter || m.Expression.NodeType == ExpressionType.Convert))
             {
-                var propertyInfo = m.Member as PropertyInfo;
+                var propertyInfo = (PropertyInfo)m.Member;
 
+                var modelType = m.Expression.Type;
+                if (m.Expression.NodeType == ExpressionType.Convert)
+                {
+                    var unaryExpr = m.Expression as UnaryExpression;
+                    if (unaryExpr != null)
+                    {
+                        modelType = unaryExpr.Operand.Type;
+                    }
+                }
+
+                var tableDef = modelType.GetModelDefinition();
                 if (propertyInfo.PropertyType.IsEnum)
                     return new EnumMemberAccess(
-                        (PrefixFieldWithTableName
-                            ? OrmLiteConfig.DialectProvider.GetQuotedTableName(propertyInfo.DeclaringType.GetModelDefinition().ModelName) + "." 
-                            : "") 
-                            + GetQuotedColumnName(m.Member.Name), propertyInfo.PropertyType);
+                        GetQuotedColumnName(tableDef, m.Member.Name), propertyInfo.PropertyType);
 
-                return new PartialSqlString((PrefixFieldWithTableName 
-                    ? OrmLiteConfig.DialectProvider.GetQuotedTableName(propertyInfo.DeclaringType.GetModelDefinition().ModelName) + "." 
-                    : "") 
-                    + GetQuotedColumnName(m.Member.Name));
+                return new PartialSqlString(GetQuotedColumnName(tableDef, m.Member.Name));
             }
 
             var member = Expression.Convert(m, typeof(object));
@@ -1034,19 +1152,20 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        protected virtual string GetQuotedColumnName(string memberName)
+        protected virtual string GetQuotedColumnName(ModelDefinition tableDef, string memberName)
         {
-
             if (useFieldName)
             {
-                FieldDefinition fd = modelDef.FieldDefinitions.FirstOrDefault(x => x.Name == memberName);
-                string fn = fd != default(FieldDefinition) ? fd.FieldName : memberName;
-                return OrmLiteConfig.DialectProvider.GetQuotedColumnName(fn);
+                var fd = tableDef.FieldDefinitions.FirstOrDefault(x => x.Name == memberName);
+                var fieldName = fd != null 
+                    ? fd.FieldName 
+                    : memberName;
+
+                return PrefixFieldWithTableName 
+                    ? DialectProvider.GetQuotedColumnName(tableDef.ModelName, fieldName)
+                    : DialectProvider.GetQuotedColumnName(fieldName);
             }
-            else
-            {
-                return memberName;
-            }
+            return memberName;
         }
 
         protected string RemoveQuoteFromAlias(string exp)
@@ -1067,7 +1186,7 @@ namespace ServiceStack.OrmLite
             FieldDefinition fd =
                 modelDef.FieldDefinitions.
                     FirstOrDefault(x =>
-                        OrmLiteConfig.DialectProvider.
+                        DialectProvider.
                         GetQuotedColumnName(x.FieldName) == quotedExp.ToString());
             return (fd != default(FieldDefinition));
         }
@@ -1082,14 +1201,14 @@ namespace ServiceStack.OrmLite
             return new PartialSqlString(string.Format("({0}={1})", GetQuotedTrueValue(), GetQuotedFalseValue()));
         }
 
-        protected static object GetQuotedTrueValue()
+        protected object GetQuotedTrueValue()
         {
-            return new PartialSqlString(OrmLiteConfig.DialectProvider.GetQuotedValue(true, typeof(bool)));
+            return new PartialSqlString(DialectProvider.GetQuotedValue(true, typeof(bool)));
         }
 
-        protected static object GetQuotedFalseValue()
+        protected object GetQuotedFalseValue()
         {
-            return new PartialSqlString(OrmLiteConfig.DialectProvider.GetQuotedValue(false, typeof(bool)));
+            return new PartialSqlString(DialectProvider.GetQuotedValue(false, typeof(bool)));
         }
 
         private void BuildSelectExpression(string fields, bool distinct)
@@ -1097,7 +1216,7 @@ namespace ServiceStack.OrmLite
             selectExpression = string.Format("SELECT {0}{1}",
                 (distinct ? "DISTINCT " : ""),
                 (string.IsNullOrEmpty(fields) ?
-                    OrmLiteConfig.DialectProvider.GetColumnNames(modelDef) :
+                    DialectProvider.GetColumnNames(modelDef) :
                     fields));
         }
 
@@ -1162,7 +1281,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        private static object ToInPartialString(Expression memberExpr, object quotedColName)
+        private object ToInPartialString(Expression memberExpr, object quotedColName)
         {
             var member = Expression.Convert(memberExpr, typeof(object));
             var lambda = Expression.Lambda<Func<object>>(member);
@@ -1178,7 +1297,7 @@ namespace ServiceStack.OrmLite
                     if (sIn.Length > 0)
                         sIn.Append(",");
 
-                    sIn.Append(OrmLiteConfig.DialectProvider.GetQuotedValue(e, e.GetType()));
+                    sIn.Append(DialectProvider.GetQuotedValue(e, e.GetType()));
                 }
             }
             else
@@ -1216,7 +1335,7 @@ namespace ServiceStack.OrmLite
                             if (sIn.Length > 0)
                                 sIn.Append(",");
 
-                            sIn.Append(OrmLiteConfig.DialectProvider.GetQuotedValue(e, e.GetType()));
+                            sIn.Append(DialectProvider.GetQuotedValue(e, e.GetType()));
                         }
                         else
                         {
@@ -1226,7 +1345,7 @@ namespace ServiceStack.OrmLite
                                 if (sIn.Length > 0)
                                     sIn.Append(",");
 
-                                sIn.Append(OrmLiteConfig.DialectProvider.GetQuotedValue(el, el.GetType()));
+                                sIn.Append(DialectProvider.GetQuotedValue(el, el.GetType()));
                             }
                         }
                     }
@@ -1238,7 +1357,7 @@ namespace ServiceStack.OrmLite
                     break;
                 case "As":
                     statement = string.Format("{0} As {1}", quotedColName,
-                        OrmLiteConfig.DialectProvider.GetQuotedColumnName(RemoveQuoteFromAlias(args[0].ToString())));
+                        DialectProvider.GetQuotedColumnName(RemoveQuoteFromAlias(args[0].ToString())));
                     break;
                 case "Sum":
                 case "Count":
@@ -1263,6 +1382,8 @@ namespace ServiceStack.OrmLite
             var quotedColName = Visit(m.Object);
             var statement = "";
 
+            var wildcardArg = args.Count > 0 ? DialectProvider.EscapeWildcards(args[0].ToString()) : "";
+            var escapeSuffix = wildcardArg.IndexOf('^') >= 0 ? " escape '^'" : "";
             switch (m.Method.Name)
             {
                 case "Trim":
@@ -1283,43 +1404,43 @@ namespace ServiceStack.OrmLite
                 case "StartsWith":
                     if (!OrmLiteConfig.StripUpperInLike)
                     {
-                        statement = string.Format("upper({0}) like {1} escape '^'",
-                            quotedColName, OrmLiteConfig.DialectProvider.GetQuotedValue(
-                                OrmLiteConfig.DialectProvider.EscapeWildcards(args[0].ToString()).ToUpper() + "%"));
+                        statement = string.Format("upper({0}) like {1}{2}",
+                            quotedColName, DialectProvider.GetQuotedValue(
+                                wildcardArg.ToUpper() + "%"), escapeSuffix);
                     }
                     else
                     {
-                        statement = string.Format("{0} like {1} escape '^'",
-                            quotedColName, OrmLiteConfig.DialectProvider.GetQuotedValue(
-                                OrmLiteConfig.DialectProvider.EscapeWildcards(args[0].ToString()) + "%"));
+                        statement = string.Format("{0} like {1}{2}",
+                            quotedColName, DialectProvider.GetQuotedValue(
+                                wildcardArg + "%"), escapeSuffix);
                     }
                     break;
                 case "EndsWith":
                     if (!OrmLiteConfig.StripUpperInLike)
                     {
-                        statement = string.Format("upper({0}) like {1} escape '^'",
-                            quotedColName, OrmLiteConfig.DialectProvider.GetQuotedValue("%" +
-                            OrmLiteConfig.DialectProvider.EscapeWildcards(args[0].ToString()).ToUpper()));
+                        statement = string.Format("upper({0}) like {1}{2}",
+                            quotedColName, DialectProvider.GetQuotedValue("%" +
+                            wildcardArg.ToUpper()), escapeSuffix);
                     }
                     else
                     {
-                        statement = string.Format("{0} like {1} escape '^'",
-                            quotedColName, OrmLiteConfig.DialectProvider.GetQuotedValue("%" +
-                            OrmLiteConfig.DialectProvider.EscapeWildcards(args[0].ToString())));
+                        statement = string.Format("{0} like {1}{2}",
+                            quotedColName, DialectProvider.GetQuotedValue("%" +
+                            wildcardArg), escapeSuffix);
                     }
                     break;
                 case "Contains":
                     if (!OrmLiteConfig.StripUpperInLike)
                     {
-                        statement = string.Format("upper({0}) like {1} escape '^'",
-                            quotedColName, OrmLiteConfig.DialectProvider.GetQuotedValue("%" +
-                                OrmLiteConfig.DialectProvider.EscapeWildcards(args[0].ToString()).ToUpper() + "%"));
+                        statement = string.Format("upper({0}) like {1}{2}",
+                            quotedColName, DialectProvider.GetQuotedValue("%" +
+                                wildcardArg.ToUpper() + "%"), escapeSuffix);
                     }
                     else
                     {
-                        statement = string.Format("{0} like {1} escape '^'",
-                            quotedColName, OrmLiteConfig.DialectProvider.GetQuotedValue("%" +
-                                OrmLiteConfig.DialectProvider.EscapeWildcards(args[0].ToString()) + "%"));
+                        statement = string.Format("{0} like {1}{2}",
+                            quotedColName, DialectProvider.GetQuotedValue("%" +
+                                wildcardArg + "%"), escapeSuffix);
                     }
                     break;
                 case "Substring":

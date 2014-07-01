@@ -211,5 +211,35 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 Assert.That(results.Count, Is.EqualTo(5));
             }
         }
+
+        [Test]
+        public void Can_do_ToCountStatement_with_SqlExpression_if_where_expression_refers_to_joined_table()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<LetterFrequency>();
+                db.DropAndCreateTable<LetterStat>();
+
+                var letterFrequency = new LetterFrequency { Letter = "A" };
+                letterFrequency.Id = (int)db.Insert(letterFrequency, true);
+
+                db.Insert(new LetterStat { Letter = "A", LetterFrequencyId = letterFrequency.Id, Weighting = 1 });
+
+                var expr = db.From<LetterFrequency>()
+                    .Join<LetterFrequency, LetterStat>()
+                    .Where<LetterStat>(x => x.Id > 0);
+
+                var count = db.SqlScalar<long>(expr.ToCountStatement());
+
+                Assert.That(count, Is.GreaterThan(0));
+
+                count = db.Count<LetterFrequency>(q => q.Join<LetterStat>().Where<LetterStat>(x => x.Id > 0));
+
+                Assert.That(count, Is.GreaterThan(0));
+
+                Assert.That(
+                    db.Exists<LetterFrequency>(q => q.Join<LetterStat>().Where<LetterStat>(x => x.Id > 0)));
+            }
+        }
     }
 }

@@ -844,11 +844,17 @@ namespace ServiceStack.OrmLite
 
         public static FieldDefinition GetRefFieldDef(ModelDefinition modelDef, ModelDefinition refModelDef, Type refType)
         {
+            var refField = GetRefFieldDefIfExists(modelDef, refModelDef);
+            if (refField == null)
+                throw new ArgumentException("Cant find '{0}' Property on Type '{1}'".Fmt(modelDef.ModelName + "Id", refType.Name));
+            return refField;
+        }
+
+        public static FieldDefinition GetRefFieldDefIfExists(ModelDefinition modelDef, ModelDefinition refModelDef)
+        {
             var refNameConvention = modelDef.ModelName + "Id";
             var refField = refModelDef.FieldDefinitions.FirstOrDefault(x => x.FieldName == refNameConvention)
-                ?? refModelDef.FieldDefinitions.FirstOrDefault(x => x.Name == modelDef.Name + "Id");
-            if (refField == null)
-                throw new ArgumentException("Cant find '{0}' Property on Type '{1}'".Fmt(refNameConvention, refType.Name));
+                           ?? refModelDef.FieldDefinitions.FirstOrDefault(x => x.Name == modelDef.Name + "Id");
             return refField;
         }
     }

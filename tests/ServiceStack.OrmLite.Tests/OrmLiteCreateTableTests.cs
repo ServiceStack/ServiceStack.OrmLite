@@ -305,5 +305,59 @@ namespace ServiceStack.OrmLite.Tests
             }
         }
 
+        public interface IBaseEntity
+        {
+            long Id { get; set; }
+            DateTime Created { get; set; }
+            DateTime Updated { get; set; }
+            DateTime? Deleted { get; set; }
+            bool IsDeleted { get; set; }
+        }
+
+        public class BaseEntity : IBaseEntity
+        {
+            [AutoIncrement]
+            [PrimaryKey]
+            public long Id { get; set; }
+
+            public DateTime Created { get; set; }
+
+            public DateTime Updated { get; set; }
+
+            public DateTime? Deleted { get; set; }
+
+            public bool IsDeleted { get; set; }
+        }
+
+        public class UserEntity : BaseEntity
+        {
+        }
+
+        public class AnswerEntity : BaseEntity
+        {
+            public long UserId { get; set; }
+        }
+
+        [Test]
+        public void Can_create_and_join_on_Tables_with_Base_classes()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<UserEntity>();
+                db.DropAndCreateTable<AnswerEntity>();
+
+                db.Insert(new AnswerEntity { UserId = 1, Created = DateTime.UtcNow });
+                db.Insert(new UserEntity { Id = 1, Created = DateTime.UtcNow });
+
+                var q = db.From<AnswerEntity>();
+                q.Join<AnswerEntity, UserEntity>((l, r) => l.UserId == r.Id);
+                q.Where<AnswerEntity>(x => x.IsDeleted == false);
+
+                var results = db.Select(q);
+                results.PrintDump();
+
+                Assert.That(results.Count, Is.EqualTo(1));
+            }
+        }
     }
 }

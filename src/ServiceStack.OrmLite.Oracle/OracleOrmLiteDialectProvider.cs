@@ -268,10 +268,13 @@ namespace ServiceStack.OrmLite.Oracle
             var sql = new StringBuilder();
             const string selectStatement = "SELECT ";
             var modelDef = GetModel(tableType);
-            var isFullSelectStatement =
-                !string.IsNullOrEmpty(sqlFilter)
-                && sqlFilter.Trim().Length > selectStatement.Length
-                && sqlFilter.Trim().Substring(0, selectStatement.Length).ToUpper().Equals(selectStatement);
+            var isFullSelectStatement = false;
+            if (!string.IsNullOrEmpty(sqlFilter))
+            {
+                var cleanFilter = sqlFilter.Trim().Replace('\r', ' ').Replace('\n', ' ').ToUpperInvariant();
+                isFullSelectStatement = cleanFilter.Length > selectStatement.Length
+                    && cleanFilter.Substring(0, selectStatement.Length).Equals(selectStatement);
+            }
 
             if (isFullSelectStatement)
             {
@@ -369,11 +372,11 @@ namespace ServiceStack.OrmLite.Oracle
                                               pi.GetValue(obj, new object[] { }), isInsert);
                     if (pi.PropertyType == typeof(String))
                         pi.SetProperty(obj, result.ToString());
-                    else if (pi.PropertyType == typeof(Int16))
+                    else if (pi.PropertyType == typeof(Int16) || pi.PropertyType == typeof(Int16?))
                         pi.SetProperty(obj, Convert.ToInt16(result));
-                    else if (pi.PropertyType == typeof(Int32))
+                    else if (pi.PropertyType == typeof(Int32) || pi.PropertyType == typeof(Int32?))
                         pi.SetProperty(obj, Convert.ToInt32(result));
-                    else if (pi.PropertyType == typeof(Guid))
+                    else if (pi.PropertyType == typeof(Guid) || pi.PropertyType == typeof(Guid?))
                         pi.SetProperty(obj, result);
                     else
                         pi.SetProperty(obj, Convert.ToInt64(result));
@@ -1050,7 +1053,7 @@ namespace ServiceStack.OrmLite.Oracle
 
         public override SqlExpression<T> SqlExpression<T>()
         {
-            return new OracleSqlExpression<T>();
+            return new OracleSqlExpression<T>(this);
         }
 
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName)
@@ -1122,13 +1125,11 @@ namespace ServiceStack.OrmLite.Oracle
             var sbInner = new StringBuilder(selectExpression);
             sbInner.Append(bodyExpression);
 
-            if (!rows.HasValue)
-                return sbInner + orderByExpression;
+            if (!rows.HasValue && !offset.HasValue)
+                return sbInner + " " + orderByExpression;
 
             if (!offset.HasValue)
-            {
                 offset = 0;
-            }
 
             if (string.IsNullOrEmpty(orderByExpression))
             {
@@ -1138,7 +1139,7 @@ namespace ServiceStack.OrmLite.Oracle
                 orderByExpression = string.Format("ORDER BY {0}",
                     OrmLiteConfig.DialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName));
             }
-            sbInner.Append(orderByExpression);
+            sbInner.Append(" " + orderByExpression);
 
             var sql = sbInner.ToString();
 
@@ -1147,7 +1148,10 @@ namespace ServiceStack.OrmLite.Oracle
             sb.AppendLine("SELECT \"_ss_ormlite_1_\".*, ROWNUM RNUM FROM (");
             sb.Append(sql);
             sb.AppendLine(") \"_ss_ormlite_1_\"");
-            sb.AppendFormat("WHERE ROWNUM <= {0} + {1}) \"_ss_ormlite_2_\" ", offset.Value, rows.Value);
+            if (rows.HasValue)
+                sb.AppendFormat("WHERE ROWNUM <= {0} + {1}) \"_ss_ormlite_2_\" ", offset.Value, rows.Value);
+            else
+                sb.Append(") \"_ss_ormlite_2_\" ");
             sb.AppendFormat("WHERE \"_ss_ormlite_2_\".RNUM > {0}", offset.Value);
 
             return sb.ToString();

@@ -123,6 +123,9 @@
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\SelectExpressionTests.cs">
       <Link>Expression\SelectExpressionTests.cs</Link>
     </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\SqlExpressionTests.cs">
+      <Link>Expression\SqlExpressionTests.cs</Link>
+    </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\StringFunctionTests.cs">
       <Link>Expression\StringFunctionTests.cs</Link>
     </Compile>
@@ -134,6 +137,9 @@
     </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\JoinSqlBuilderTests.cs">
       <Link>JoinSqlBuilderTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\LoadReferencesJoinTests.cs">
+      <Link>LoadReferencesJoinTests.cs</Link>
     </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\LoadReferencesTests.cs">
       <Link>LoadReferencesTests.cs</Link>
@@ -317,6 +323,9 @@
     </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\UseCase\CustomerOrdersUseCase.cs">
       <Link>UseCase\CustomerOrdersUseCase.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\UseCase\FieldFromInterfaceImplementationUseCase.cs">
+      <Link>UseCase\FieldFromInterfaceImplementationUseCase.cs</Link>
     </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\UseCase\ImageBlobDto.cs">
       <Link>UseCase\ImageBlobDto.cs</Link>

@@ -55,7 +55,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test, Explicit]
         public void Can_upload_attachment_via_sp()
         {
-            SuppressIfOracle("Oracle provider is not smart enough to replace parameter delimiter '@' with ':'");
+            SuppressIfOracle("Oracle does not like this procedure definition");
 
             using (var db = OpenDbConnection())
             {
@@ -75,8 +75,8 @@ CREATE PROCEDURE dbo.[SP_upload_file](
 AS
 begin
 INSERT INTO [Attachment]([FileName], [Type], [Data], [Description])
-VALUES (@filename, @filetype, @filecontent, @filename) 
-end");
+VALUES ({0}filename, {0}filetype, {0}filecontent, {0}filename) 
+end".Fmt(OrmLiteConfig.DialectProvider.ParamString));
                 var bytes = "https://www.google.com/images/srpr/logo11w.png".GetBytesFromUrl();
 
                 db.ExecuteNonQuery("EXEC SP_upload_file @filename, @filetype, @filecontent", 
@@ -95,7 +95,7 @@ end");
         [Test, Explicit]
         public void Can_upload_attachment_via_sp_with_ADONET()
         {
-            SuppressIfOracle("Oracle provider is not smart enough to replace parameter delimiter '@' with ':'");
+            SuppressIfOracle("Oracle does not like this procedure definition");
 
             using (var db = OpenDbConnection())
             {
@@ -115,8 +115,8 @@ CREATE PROCEDURE dbo.[SP_upload_file](
 AS
 begin
 INSERT INTO [Attachment]([FileName], [Type], [Data], [Description])
-VALUES (@filename, @filetype, @filecontent, @filename) 
-end");
+VALUES ({0}filename, {0}filetype, {0}filecontent, {0}filename) 
+end".Fmt(OrmLiteConfig.DialectProvider.ParamString));
                 var bytes = "https://www.google.com/images/srpr/logo11w.png".GetBytesFromUrl();
 
                 using (var dbCmd = db.CreateCommand())

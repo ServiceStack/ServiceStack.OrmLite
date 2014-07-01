@@ -4,12 +4,10 @@ namespace ServiceStack.OrmLite.SqlServer
 {
 	public class SqlServerExpression<T> : SqlExpression<T>
 	{
-	    public override SqlExpression<T> Clone()
-	    {
-	        return CopyTo(new SqlServerExpression<T>());
-	    }
+        public SqlServerExpression(IOrmLiteDialectProvider dialectProvider)
+            : base(dialectProvider) {}
 
-	    public override string ToUpdateStatement(T item, bool excludeDefaults = false)
+        public override string ToUpdateStatement(T item, bool excludeDefaults = false)
         {
             var setFields = new StringBuilder();
             var dialectProvider = OrmLiteConfig.DialectProvider;

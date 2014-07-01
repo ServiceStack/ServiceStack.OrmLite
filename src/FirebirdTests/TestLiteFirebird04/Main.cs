@@ -16,8 +16,8 @@ namespace TestLiteFirebird04
 			
 			OrmLiteConfig.DialectProvider = new FirebirdOrmLiteDialectProvider();
 			
-			ServiceStack.OrmLite.SqlExpression<Company> sql= 
-				new  FirebirdSqlExpression<Company>();
+			ServiceStack.OrmLite.SqlExpression<Company> sql =
+                OrmLiteConfig.DialectProvider.SqlExpression<Company>();
 			
 			List<Object> names = new List<Object>();
 			names.Add("SOME COMPANY");

@@ -15,6 +15,24 @@ namespace ServiceStack.OrmLite.Tests.UseCase
             public string Bar { get; set; }
         }
 
+        public class Bar
+        {
+            [AutoIncrement]
+            public int Id { get; set; }
+
+            public string Baz { get; set; }
+        }
+
+        public class User
+        {
+            [AutoIncrement]
+            [Alias("User ID")]
+            public int Id { get; set; }
+
+            [StringLength(100)]
+            public string UserName { get; set; }
+        }
+
         [Test]
         public void CanResolveAliasedFieldNameInAnonymousType()
         {
@@ -33,6 +51,32 @@ namespace ServiceStack.OrmLite.Tests.UseCase
 
                 // the aliased column name is used to create the anonymous type
                 foos = db.Where<Foo>(new { SOME_COLUMN_NAME = "some_value" });
+
+                Assert.That(foos, Has.Count.EqualTo(1));
+            }
+        }
+
+        [Test]
+        public void CanResolveAliasedFieldNameInJoinedTable()
+        {
+            using (IDbConnection db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Bar>();
+                db.DropAndCreateTable<User>();
+
+                db.Insert(new User { UserName = "Peter" });
+                db.Insert(new Bar { Baz = "Peter" });
+
+                var ev = db.From<Bar>()
+                    .Join<User>((x, y) => x.Id == y.Id);
+
+                var foos = db.Select<Foo>(ev);
+
+                ev = db.From<Bar>()
+                    .Join<User>((x, y) => x.Baz == y.UserName)
+                    .Where<User>(x => x.Id > 0);
+
+                foos = db.Select<Foo>(ev);
 
                 Assert.That(foos, Has.Count.EqualTo(1));
             }

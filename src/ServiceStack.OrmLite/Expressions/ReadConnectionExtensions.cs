@@ -46,7 +46,7 @@ namespace ServiceStack.OrmLite
         public static SqlExpression<T> From<T, JoinWith>(this IDbConnection dbConn, Expression<Func<T, JoinWith, bool>> joinExpr=null)
         {
             var sql = OrmLiteConfig.ExecFilter.SqlExpression<T>(dbConn);
-            sql.Join(joinExpr);
+            sql.Join<T,JoinWith>(joinExpr);
             return sql;
         }
 
@@ -112,6 +112,14 @@ namespace ServiceStack.OrmLite
         public static List<T> Select<T>(this IDbConnection dbConn, SqlExpression<T> expression)
         {
             return dbConn.Exec(dbCmd => dbCmd.Select(expression));
+        }
+
+        /// <summary>
+        /// Project results from a number of joined tables into a different model
+        /// </summary>
+        public static List<Into> Select<Into, From>(this IDbConnection dbConn, SqlExpression<From> expression)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Select<Into, From>(expression));
         }
 
         /// <summary>

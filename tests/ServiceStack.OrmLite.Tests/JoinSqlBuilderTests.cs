@@ -123,8 +123,9 @@ namespace ServiceStack.OrmLite.Tests
                 var tmpl = sb.AddTemplate("SELECT * FROM {0} u INNER JOIN {1} a on a.{2} = u.Id /**where**/"
                     .Fmt("User".SqlTable(), "Addresses".SqlTable(), "UserId".SqlColumn()));
 
-                sb.Where("Age > @age", new { age = 18 });
-                sb.Where("Countryalias = @country", new { country = "Italy" });
+                var paramString = OrmLiteConfig.DialectProvider.ParamString;
+                sb.Where("Age > " + paramString + "age", new { age = 18 });
+                sb.Where("Countryalias = " + paramString + "country", new { country = "Italy" });
 
                 var userId = db.Insert(new User { Age = 27, Name = "Foo" }, selectIdentity: true);
                 db.Insert(new WithAliasAddress { City = "Rome", Country = "Italy", UserId = (int)userId });

@@ -17,7 +17,7 @@ namespace ServiceStack.OrmLite
 
         public List<T> ConvertToList<T>()
         {
-            if ((typeof(T).IsPrimitive) || (typeof(T) == typeof(string)) || (typeof(T) == typeof(String)))
+            if (typeof(T).IsPrimitive || typeof(T) == typeof(string))
                 throw new Exception("Type " + typeof(T).Name + " is a primitive type. Use ConvertScalarToList function.");
 
             IDataReader reader = null;
@@ -55,7 +55,7 @@ namespace ServiceStack.OrmLite
 
         public T ConvertTo<T>()
         {
-            if ((typeof(T).IsPrimitive) || (typeof(T) == typeof(string)) || (typeof(T) == typeof(String)))
+            if (typeof(T).IsPrimitive || typeof(T) == typeof(string))
                 throw new Exception("Type " + typeof(T).Name + " is a primitive type. Use ConvertScalarTo function.");
 
             IDataReader reader = null;
