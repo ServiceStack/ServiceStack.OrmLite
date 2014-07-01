@@ -60,7 +60,7 @@ manager.StartNewFile(tbl.Name + ".cs");
 <# if (MakeSingular) {#>
 	[Alias("<#=tbl.Name#>")]
 <#}#>
-<# if (UseSchemaAttribute) {#>
+<# if (UseSchemaAttribute && tbl.Schema != null && tbl.Schema.Length > 0) {#>
 	[Schema("<#=tbl.Schema#>")]
 <#}#>
     public partial class <#=tbl.ClassName#><#if (tbl.HasPK() && UseIdAsPK) { #> : IHasId<<#=tbl.PK.PropertyType#>><#}#> 
