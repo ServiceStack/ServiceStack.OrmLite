@@ -42,6 +42,8 @@ COPY ..\src\ServiceStack.OrmLite.Sqlite\bin\x86\sqlite3.dll ..\..\ServiceStack\l
 COPY ..\src\ServiceStack.OrmLite.Sqlite\bin\x86\Mono.Data.Sqlite.dll ..\..\ServiceStack\lib
 COPY ..\src\ServiceStack.OrmLite.Sqlite.Windows\bin\%BUILD%\ServiceStack.OrmLite.Sqlite.Windows* ..\..\ServiceStack\lib
 COPY ..\src\ServiceStack.OrmLite.SqlServer\bin\%BUILD%\ServiceStack.OrmLite.* ..\..\ServiceStack\lib
+COPY ..\src\ServiceStack.OrmLite.MySql\bin\%BUILD%\ServiceStack.OrmLite.* ..\..\ServiceStack\lib
+COPY ..\src\ServiceStack.OrmLite.PostgreSQL\bin\%BUILD%\ServiceStack.OrmLite.* ..\..\ServiceStack\lib
 
 COPY ..\src\ServiceStack.OrmLite.Sqlite\bin\%BUILD%\ServiceStack.OrmLite.* ..\..\ServiceStack.Contrib\lib
 
