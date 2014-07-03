@@ -1,5 +1,6 @@
 using System;
 using System.Data;
+using System.Data.Common;
 using System.IO;
 using NUnit.Framework;
 using ServiceStack.Logging;
@@ -106,10 +107,27 @@ namespace ServiceStack.OrmLite.Tests
 	                ConnectionString = "~/App_Data/Database1.mdf".MapAbsolutePath();
 	                ConnectionString = Config.GetDefaultConnection();
 	                return;
-	            case Dialect.Oracle:
-	                OrmLiteConfig.DialectProvider = OracleDialect.Provider;
-	                return;
-	        }
+                case Dialect.Oracle:
+                    OrmLiteConfig.DialectProvider = OracleDialect.Provider;
+                    return;
+                case Dialect.VistaDb:
+                    OrmLiteConfig.DialectProvider = VistaDbDialect.Provider;
+                    VistaDbDialect.Provider.UseLibraryFromGac = true;
+
+                    var connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["myVDBConnection"];
+                    var factory = DbProviderFactories.GetFactory(connectionString.ProviderName);
+                    using (var db = factory.CreateConnection())
+                    using (var cmd = db.CreateCommand())
+                    {
+                        var tmpFile = Path.GetTempPath().CombineWith(Guid.NewGuid().ToString("n") + ".vb5");
+                        cmd.CommandText = @"CREATE DATABASE '|DataDirectory|{0}', PAGE SIZE 4, LCID 1033, CASE SENSITIVE FALSE;"
+                            .Fmt(tmpFile);
+                        cmd.ExecuteNonQuery();
+                        ConnectionString = "Data Source={0};".Fmt(tmpFile);
+                    }
+
+                    return;
+            }
 	    }
 
 	    public void Log(string text)

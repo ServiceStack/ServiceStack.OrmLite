@@ -316,6 +316,10 @@
       <Project>{1887DC99-9139-43E3-A7AA-6D74714B3A5D}</Project>
       <Name>ServiceStack.OrmLite.SqlServer</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.VistaDB\ServiceStack.OrmLite.VistaDB.csproj">
+      <Project>{D18D9D3C-B3B3-433C-9578-68E978587858}</Project>
+      <Name>ServiceStack.OrmLite.VistaDB</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj">
       <Project>{96179AC6-F6F1-40C3-9FDD-4F6582F54C5C}</Project>
       <Name>ServiceStack.OrmLite</Name>
