@@ -237,7 +237,19 @@
     
     <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.Firebird/servicestack.ormlite.firebird.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
             LogStandardErrorAsError="true" />
-  
+
+    <!-- VistaDB -->
+
+    <MSBuild Projects="$(SrcDir)/ServiceStack.OrmLite.VistaDb/ServiceStack.OrmLite.VistaDB.csproj"
+             Targets="Build"
+             Properties="Version=$(PackageVersion);Configuration=$(Configuration)" />
+
+    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.VistaDb/lib/net40" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.VistaDb/lib/net40')" />
+    <Copy SourceFiles="%(SqlServerFiles.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.VistaDb/lib/net40" />
+
+    <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.VistaDb/servicestack.ormlite.vistadb.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
+            LogStandardErrorAsError="true" />
+
     <!-- T4 -->
 
     <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.T4/content" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.T4/content')" />
