@@ -129,7 +129,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				//Select into another POCO class that matches sql
 				var rows = db.SqlList<ShipperTypeCount>(
-                    "SELECT {0}, COUNT(*) AS Total FROM Shippers GROUP BY {0} ORDER BY COUNT(*)".Fmt("ShipperTypeId".SqlColumn()));
+                    "SELECT {0}, COUNT(*) AS Total FROM Shippers GROUP BY {0} ORDER BY Total".Fmt("ShipperTypeId".SqlColumn()));
 
 				Assert.That(rows, Has.Count.EqualTo(2));
 				Assert.That(rows[0].ShipperTypeId, Is.EqualTo(trainsType.Id));

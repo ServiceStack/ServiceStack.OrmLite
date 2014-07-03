@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.VistaDB
 {
@@ -40,15 +41,13 @@ namespace ServiceStack.OrmLite.VistaDB
             base.IntColumnDefinition = "INT";
             base.DefaultValueFormat = " DEFAULT {0}";
             base.TimeColumnDefinition = "BIGINT"; //TIME"; //SQLSERVER 2008+
+            base.MaxStringColumnDefinition = "VARCHAR(MAX)";
 
             base.InitColumnTypeMap();           
         }
 
         public override void OnAfterInitColumnTypeMap()
         {
-            DbTypeMap.ColumnTypeMap.Remove(typeof(object));
-            DbTypeMap.ColumnDbTypeMap.Remove(typeof(object));
-            
             DbTypeMap.Set<TimeSpan>(DbType.DateTime, TimeColumnDefinition);
             DbTypeMap.Set<TimeSpan?>(DbType.DateTime, TimeColumnDefinition);
         }
@@ -156,10 +155,16 @@ namespace ServiceStack.OrmLite.VistaDB
             int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
         {
             string fieldDefinition;
-            if (fieldType == typeof(string))
-                fieldDefinition = string.Format(this.StringLengthColumnDefinitionFormat, fieldLength.GetValueOrDefault(this.DefaultStringLength));
+            if (fieldType == typeof (string))
+            {
+                fieldDefinition = fieldLength == StringLengthAttribute.MaxText
+                    ? MaxStringColumnDefinition
+                    : string.Format(StringLengthColumnDefinitionFormat, fieldLength.GetValueOrDefault(DefaultStringLength));
+            }
             else if (!this.DbTypeMap.ColumnTypeMap.TryGetValue(fieldType, out fieldDefinition))
+            {
                 fieldDefinition = this.GetUndefinedColumnDefinition(fieldType, fieldLength);
+            }
             
             var sql = new StringBuilder();
             sql.AppendFormat("{0} {1}", this.GetQuotedColumnName(fieldName), fieldDefinition);

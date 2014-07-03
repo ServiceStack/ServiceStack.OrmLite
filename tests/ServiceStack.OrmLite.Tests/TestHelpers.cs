@@ -8,6 +8,7 @@ namespace ServiceStack.OrmLite.Tests
         MySql,
         SqlServerMdf,
         Oracle,
+        VistaDb,
     }
 
     public static class TestHelpers
