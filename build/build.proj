@@ -111,7 +111,9 @@
       
       <FirebirdFiles Include="$(SrcDir)/ServiceStack.OrmLite.Firebird/bin/$(Configuration)/ServiceStack.OrmLite.Firebird.*"></FirebirdFiles>
       <FirebirdFiles Include="$(SrcDir)/ServiceStack.OrmLite.Firebird/bin/$(Configuration)/FirebirdSql.Data.FirebirdClient.dll"></FirebirdFiles>
-    
+
+      <VistaDbFiles Include="$(SrcDir)/ServiceStack.OrmLite.VistaDb/bin/$(Configuration)/ServiceStack.OrmLite.VistaDB.*"></VistaDbFiles>
+
       <T4Files Include="$(SrcDir)/T4/*.*"></T4Files>
     </ItemGroup>
 
@@ -245,7 +247,7 @@
              Properties="Version=$(PackageVersion);Configuration=$(Configuration)" />
 
     <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.VistaDb/lib/net40" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.VistaDb/lib/net40')" />
-    <Copy SourceFiles="%(SqlServerFiles.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.VistaDb/lib/net40" />
+    <Copy SourceFiles="%(VistaDbFiles.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.VistaDb/lib/net40" />
 
     <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.VistaDb/servicestack.ormlite.vistadb.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
             LogStandardErrorAsError="true" />
