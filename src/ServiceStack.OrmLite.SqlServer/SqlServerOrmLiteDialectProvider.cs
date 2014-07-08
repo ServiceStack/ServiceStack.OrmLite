@@ -389,7 +389,7 @@ namespace ServiceStack.OrmLite.SqlServer
             //Temporary hack till we come up with a more robust paging sln for SqlServer
             if (skip == 0)
             {
-                var sql = sb + orderByExpression;
+                var sql = sb + "\n" + orderByExpression;
 
                 if (take == int.MaxValue)
                     return sql;
