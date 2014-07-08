@@ -716,7 +716,7 @@ namespace ServiceStack.OrmLite
         {
             get
             {
-                return orderBy;
+                return string.IsNullOrEmpty(orderBy) ? "" : "\n" + orderBy;
             }
             set
             {
