@@ -2,7 +2,6 @@
 using System.Linq;
 using NUnit.Framework;
 using ServiceStack.OrmLite.Tests.UseCase;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -346,6 +345,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             db.DropAndCreateTable<AliasedCustomer>();
             db.DropAndCreateTable<AliasedCustomerAddress>();
+            db.DropAndCreateTable<Country>();
 
             var customers = new[]
             {
