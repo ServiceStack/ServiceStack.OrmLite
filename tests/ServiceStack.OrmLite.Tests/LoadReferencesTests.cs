@@ -367,6 +367,34 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(customer.Id, Is.GreaterThan(0));
         }
 
+        [Test]
+        public void Can_FirstMatchingField_in_JOIN_tables()
+        {
+            var q = db.From<Customer>()
+                      .Join<CustomerAddress>();
+
+            Assert.That(q.FirstMatchingField("Id"), Is.Not.Null);
+            Assert.That(q.FirstMatchingField("AddressLine1"), Is.Not.Null);
+            Assert.That(q.FirstMatchingField("CustomerId").Item1.Name, Is.EqualTo("CustomerAddress"));
+            Assert.That(q.FirstMatchingField("CustomerAddressCity"), Is.Not.Null);
+            Assert.That(q.FirstMatchingField("Unknown"), Is.Null);
+        }
+
+        [Test]
+        public void Can_FirstMatchingField_in_JOIN_tables_with_Aliases()
+        {
+            var q = db.From<AliasedCustomer>()
+                      .Join<AliasedCustomerAddress>();
+
+            Assert.That(q.FirstMatchingField("Id"), Is.Not.Null);
+            Assert.That(q.FirstMatchingField("AddressLine1"), Is.Not.Null);
+            Assert.That(q.FirstMatchingField("Q_CustomerId").Item1.Name, Is.EqualTo("AliasedCustomerAddress"));
+            Assert.That(q.FirstMatchingField("AliasedCustId").Item1.Name, Is.EqualTo("AliasedCustomerAddress"));
+            Assert.That(q.FirstMatchingField("Q_CustomerAddressCity"), Is.Not.Null);
+            Assert.That(q.FirstMatchingField("Unknown"), Is.Null);
+        }
+
+
     }
 
 }

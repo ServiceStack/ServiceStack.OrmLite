@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Data;
+﻿using System.Data;
 using System.Linq;
 using NUnit.Framework;
 using ServiceStack.OrmLite.Tests.UseCase;
@@ -74,6 +73,18 @@ namespace ServiceStack.OrmLite.Tests
             public decimal Cost { get; set; }
             public decimal OrderCost { get; set; }
             public string CountryCode { get; set; }
+        }
+
+        public class MixedCustomerInfo
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public string AliasedCustomerName { get; set; }
+            public string aliasedcustomername { get; set; }
+            public int Q_CustomerId { get; set; }
+            public int Q_CustomerAddressQ_CustomerId { get; set; }
+            public string CountryName { get; set; }
+            public int CountryId { get; set; }
         }
 
         [Test]
@@ -301,45 +312,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_Join_on_matching_Alias_convention()
         {
-            db.DropAndCreateTable<AliasedCustomer>();
-            db.DropAndCreateTable<AliasedCustomerAddress>();
-
-            var customers = new[]
-            {
-                new AliasedCustomer
-                {
-                    Name = "Customer 1",
-                    PrimaryAddress = new AliasedCustomerAddress {
-                        AddressLine1 = "1 Australia Street",
-                        Country = "Australia"
-                    },
-                },
-                new AliasedCustomer
-                {
-                    Name = "Customer 2",
-                    PrimaryAddress = new AliasedCustomerAddress {
-                        AddressLine1 = "2 America Street",
-                        Country = "USA"
-                    },
-                },
-                new AliasedCustomer
-                {
-                    Name = "Customer 3",
-                    PrimaryAddress = new AliasedCustomerAddress {
-                        AddressLine1 = "3 Canada Street",
-                        Country = "Canada"
-                    },
-                },
-            };
-
-            customers.Each(c =>
-                db.Save(c, references: true));
-
-            db.Insert(
-                new Country { CountryName = "Australia", CountryCode = "AU" },
-                new Country { CountryName = "USA", CountryCode = "US" },
-                new Country { CountryName = "Italy", CountryCode = "IT" },
-                new Country { CountryName = "Spain", CountryCode = "ED" });
+            AddAliasedCustomers();
 
             //Normal Join
             var dbCustomers = db.Select<AliasedCustomer>(q => q
@@ -367,6 +340,52 @@ namespace ServiceStack.OrmLite.Tests
                 .LeftJoin<AliasedCustomerAddress, AliasedCustomer>());
 
             Assert.That(dbAddresses.Count, Is.EqualTo(3));
+        }
+
+        private void AddAliasedCustomers()
+        {
+            db.DropAndCreateTable<AliasedCustomer>();
+            db.DropAndCreateTable<AliasedCustomerAddress>();
+
+            var customers = new[]
+            {
+                new AliasedCustomer
+                {
+                    Name = "Customer 1",
+                    PrimaryAddress = new AliasedCustomerAddress
+                    {
+                        AddressLine1 = "1 Australia Street",
+                        Country = "Australia"
+                    },
+                },
+                new AliasedCustomer
+                {
+                    Name = "Customer 2",
+                    PrimaryAddress = new AliasedCustomerAddress
+                    {
+                        AddressLine1 = "2 America Street",
+                        Country = "USA"
+                    },
+                },
+                new AliasedCustomer
+                {
+                    Name = "Customer 3",
+                    PrimaryAddress = new AliasedCustomerAddress
+                    {
+                        AddressLine1 = "3 Canada Street",
+                        Country = "Canada"
+                    },
+                },
+            };
+
+            customers.Each(c =>
+                           db.Save(c, references: true));
+
+            db.Insert(
+                new Country { CountryName = "Australia", CountryCode = "AU" },
+                new Country { CountryName = "USA", CountryCode = "US" },
+                new Country { CountryName = "Italy", CountryCode = "IT" },
+                new Country { CountryName = "Spain", CountryCode = "ED" });
         }
 
         [Test]
@@ -415,6 +434,38 @@ namespace ServiceStack.OrmLite.Tests
 
             orderCosts = results.ConvertAll(x => x.OrderCost);
             Assert.That(orderCosts, Is.EquivalentTo(new[] { 2.99m }));
+        }
+
+        [Test]
+        public void Does_populate_custom_mixed_columns()
+        {
+            AddAliasedCustomers();
+
+            //Normal Join
+            var results = db.Select<MixedCustomerInfo, AliasedCustomer>(q => q
+                .Join<AliasedCustomerAddress>()
+                .Join<AliasedCustomerAddress, Country>((ca, c) => ca.Country == c.CountryName));
+
+            var customerNames = results.Map(x => x.Name);
+            Assert.That(customerNames, Is.EquivalentTo(new[] { "Customer 1", "Customer 2" }));
+
+            customerNames = results.Map(x => x.AliasedCustomerName);
+            Assert.That(customerNames, Is.EquivalentTo(new[] { "Customer 1", "Customer 2" }));
+
+            customerNames = results.Map(x => x.aliasedcustomername);
+            Assert.That(customerNames, Is.EquivalentTo(new[] { "Customer 1", "Customer 2" }));
+
+            var customerIds = results.Map(x => x.Q_CustomerId);
+            Assert.That(customerIds, Is.EquivalentTo(new[] { 1, 2 }));
+
+            customerIds = results.Map(x => x.Q_CustomerAddressQ_CustomerId);
+            Assert.That(customerIds, Is.EquivalentTo(new[] { 1, 2 }));
+
+            var countryNames = results.Map(x => x.CountryName);
+            Assert.That(countryNames, Is.EquivalentTo(new[] { "Australia", "USA" }));
+
+            var countryIds = results.Map(x => x.CountryId);
+            Assert.That(countryIds, Is.EquivalentTo(new[] { 1, 2 }));
         }
     }
 }

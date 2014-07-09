@@ -170,18 +170,18 @@ namespace ServiceStack.OrmLite
                     // Add support for auto mapping `{Table}{Field}` convention
                     foreach (var tableDef in tableDefs)
                     {
-                        var tableName = tableDef.Name;
-                        var matchingField = tableDef.FieldDefinitionsArray
-                            .FirstOrDefault(x => tableName + x.FieldName == fieldDef.Name);
+                        var matchingField = tableDef.FieldDefinitions
+                            .FirstOrDefault(x =>
+                                string.Compare(tableDef.Name + x.Name, fieldDef.Name, StringComparison.OrdinalIgnoreCase) == 0
+                             || string.Compare(tableDef.ModelName + x.FieldName, fieldDef.Name, StringComparison.OrdinalIgnoreCase) == 0);
 
                         if (matchingField != null)
                         {
                             if (sbSelect.Length > 0)
                                 sbSelect.Append(", ");
 
-                            sbSelect.AppendFormat("{0}.{1} as {2}",
-                                SqlTable(tableDef.ModelName),
-                                matchingField.GetQuotedName(DialectProvider),
+                            sbSelect.AppendFormat("{0} as {1}",
+                                DialectProvider.GetQuotedColumnName(tableDef, matchingField),
                                 fieldDef.Name);
                             
                             break;
@@ -237,7 +237,9 @@ namespace ServiceStack.OrmLite
             foreach (var tableDef in tableDefs)
             {
                 var firstField = tableDef.FieldDefinitions.FirstOrDefault(x => 
-                    string.Compare(x.Name, fieldName, StringComparison.OrdinalIgnoreCase) == 0);
+                    string.Compare(x.Name, fieldName, StringComparison.OrdinalIgnoreCase) == 0
+                 || string.Compare(x.FieldName, fieldName, StringComparison.OrdinalIgnoreCase) == 0);
+
                 if (firstField != null)
                 {
                     return Tuple.Create(tableDef, firstField);
@@ -247,7 +249,8 @@ namespace ServiceStack.OrmLite
             foreach (var tableDef in tableDefs)
             {
                 var firstField = tableDef.FieldDefinitions.FirstOrDefault(x =>
-                    string.Compare(tableDef.Name + x.Name, fieldName, StringComparison.OrdinalIgnoreCase) == 0);
+                    string.Compare(tableDef.Name + x.Name, fieldName, StringComparison.OrdinalIgnoreCase) == 0
+                 || string.Compare(tableDef.ModelName + x.FieldName, fieldName, StringComparison.OrdinalIgnoreCase) == 0);
 
                 if (firstField != null)
                 {
