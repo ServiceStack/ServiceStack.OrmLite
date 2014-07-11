@@ -138,6 +138,29 @@ namespace ServiceStack.OrmLite.Tests
         public string Country { get; set; }
     }
 
+    public class SelfCustomer
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+        public string Name { get; set; }
+
+        public int SelfCustomerAddressId { get; set; }
+
+        [Reference]
+        public SelfCustomerAddress PrimaryAddress { get; set; }
+    }
+
+    public class SelfCustomerAddress
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+        public string AddressLine1 { get; set; }
+        public string AddressLine2 { get; set; }
+        public string City { get; set; }
+        public string State { get; set; }
+        public string Country { get; set; }
+    }
+
     public class LoadReferencesTests
         : OrmLiteTestBase
     {
@@ -159,6 +182,8 @@ namespace ServiceStack.OrmLite.Tests
             db.DropAndCreateTable<OldAliasedCustomerAddress>();
             db.DropAndCreateTable<MismatchAliasCustomer>();
             db.DropAndCreateTable<MismatchAliasAddress>();
+            db.DropAndCreateTable<SelfCustomer>();
+            db.DropAndCreateTable<SelfCustomerAddress>();
         }
 
         [SetUp]
@@ -394,6 +419,50 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(q.FirstMatchingField("Unknown"), Is.Null);
         }
 
+        [Test]
+        public void Can_Save_and_Load_Self_References()
+        {
+            var customer = new SelfCustomer
+            {
+                Name = "Customer 1",
+                PrimaryAddress = new SelfCustomerAddress
+                {
+                    AddressLine1 = "1 Humpty Street",
+                    City = "Humpty Doo",
+                    State = "Northern Territory",
+                    Country = "Australia"
+                },
+            };
+
+            db.Save(customer);
+
+            Assert.That(customer.Id, Is.GreaterThan(0));
+            Assert.That(customer.SelfCustomerAddressId, Is.EqualTo(0));
+
+            db.SaveReferences(customer, customer.PrimaryAddress);
+            Assert.That(customer.SelfCustomerAddressId, Is.EqualTo(customer.Id));
+
+            var dbCustomer = db.LoadSingleById<SelfCustomer>(customer.Id);
+            Assert.That(dbCustomer.PrimaryAddress, Is.Not.Null);
+
+            customer = new SelfCustomer
+            {
+                Name = "Customer 2",
+                PrimaryAddress = new SelfCustomerAddress
+                {
+                    AddressLine1 = "2 Humpty Street",
+                    City = "Humpty Doo",
+                    State = "Northern Territory",
+                    Country = "Australia"
+                },
+            };
+
+            db.Save(customer, references:true);
+            Assert.That(customer.SelfCustomerAddressId, Is.EqualTo(customer.Id));
+
+            dbCustomer = db.LoadSingleById<SelfCustomer>(customer.Id);
+            Assert.That(dbCustomer.PrimaryAddress, Is.Not.Null);
+        }
 
     }
 

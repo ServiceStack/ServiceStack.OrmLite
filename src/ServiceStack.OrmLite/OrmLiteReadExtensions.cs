@@ -773,13 +773,28 @@ namespace ServiceStack.OrmLite
                 {
                     var refType = fieldDef.FieldType;
                     var refModelDef = refType.GetModelDefinition();
-                    var refField = GetRefFieldDef(modelDef, refModelDef, fieldDef.FieldType);
+
+                    var refSelf = GetSelfRefFieldDefIfExists(modelDef, refModelDef);
 
                     var result = fieldDef.GetValue(instance);
+                    var refField = refSelf == null
+                        ? GetRefFieldDef(modelDef, refModelDef, refType)
+                        : GetRefFieldDefIfExists(modelDef, refModelDef);
+
                     if (result != null)
                     {
-                        refField.SetValueFn(result, pkValue);
+                        if (refField != null)
+                            refField.SetValueFn(result, pkValue);
+    
                         dbCmd.CreateTypedApi(refType).Save(result);
+
+                        //Save Self Table.RefTableId PK
+                        if (refSelf != null)
+                        {
+                            var refPkValue = refModelDef.PrimaryKey.GetValue(result);
+                            refSelf.SetValueFn(instance, refPkValue);
+                            dbCmd.Update(instance);
+                        }
                     }
                 }
             }
@@ -793,14 +808,30 @@ namespace ServiceStack.OrmLite
             var refType = typeof(TRef);
             var refModelDef = ModelDefinition<TRef>.Definition;
 
+            var refSelf = GetSelfRefFieldDefIfExists(modelDef, refModelDef);
+
             foreach (var oRef in refs)
             {
-                var refField = GetRefFieldDef(modelDef, refModelDef, refType);
+                var refField = refSelf == null 
+                    ? GetRefFieldDef(modelDef, refModelDef, refType)
+                    : GetRefFieldDefIfExists(modelDef, refModelDef);
 
-                refField.SetValueFn(oRef, pkValue);
+                if (refField != null)
+                    refField.SetValueFn(oRef, pkValue);
             }
 
             dbCmd.SaveAll(refs);
+
+            foreach (var oRef in refs)
+            {
+                //Save Self Table.RefTableId PK
+                if (refSelf != null)
+                {
+                    var refPkValue = refModelDef.PrimaryKey.GetValue(oRef);
+                    refSelf.SetValueFn(instance, refPkValue);
+                    dbCmd.Update(instance);
+                }
+            }
         }
 
         public static void LoadReferences<T>(this IDbCommand dbCmd, T instance)
@@ -831,13 +862,28 @@ namespace ServiceStack.OrmLite
                 {
                     var refType = fieldDef.FieldType;
                     var refModelDef = refType.GetModelDefinition();
-                    var refField = GetRefFieldDef(modelDef, refModelDef, fieldDef.FieldType);
 
-                    var sqlFilter = ormLiteDialectProvider.GetQuotedColumnName(refField.FieldName) + "={0}";
-                    var sql = ormLiteDialectProvider.ToSelectStatement(refType, sqlFilter, pkValue);
+                    var refSelf = GetSelfRefFieldDefIfExists(modelDef, refModelDef);
+                    var refField = refSelf == null 
+                        ? GetRefFieldDef(modelDef, refModelDef, refType)
+                        : GetRefFieldDefIfExists(modelDef, refModelDef);
 
-                    var result = dbCmd.ConvertTo(refType, sql);
-                    fieldDef.SetValueFn(instance, result);
+                    if (refField != null)
+                    {
+                        var sqlFilter = ormLiteDialectProvider.GetQuotedColumnName(refField.FieldName) + "={0}";
+                        var sql = ormLiteDialectProvider.ToSelectStatement(refType, sqlFilter, pkValue);
+                        var result = dbCmd.ConvertTo(refType, sql);
+                        fieldDef.SetValueFn(instance, result);
+                    }
+                    else if (refSelf != null)
+                    {
+                        //Load Self Table.RefTableId PK
+                        var refPkValue = refSelf.GetValue(instance);
+                        var sqlFilter = ormLiteDialectProvider.GetQuotedColumnName(refModelDef.PrimaryKey.FieldName) + "={0}";
+                        var sql = ormLiteDialectProvider.ToSelectStatement(refType, sqlFilter, refPkValue);
+                        var result = dbCmd.ConvertTo(refType, sql);
+                        fieldDef.SetValueFn(instance, result);
+                    }
                 }
             }
         }
@@ -852,9 +898,16 @@ namespace ServiceStack.OrmLite
 
         public static FieldDefinition GetRefFieldDefIfExists(ModelDefinition modelDef, ModelDefinition refModelDef)
         {
-            var refNameConvention = modelDef.ModelName + "Id";
-            var refField = refModelDef.FieldDefinitions.FirstOrDefault(x => x.FieldName == refNameConvention)
+            var refField = refModelDef.FieldDefinitions.FirstOrDefault(x => x.FieldName == modelDef.ModelName + "Id")
                            ?? refModelDef.FieldDefinitions.FirstOrDefault(x => x.Name == modelDef.Name + "Id");
+            return refField;
+        }
+
+        public static FieldDefinition GetSelfRefFieldDefIfExists(ModelDefinition modelDef, ModelDefinition refModelDef)
+        {
+            var refField = modelDef.FieldDefinitions.FirstOrDefault(x => x.FieldName == refModelDef.ModelName + "Id")
+                        ?? modelDef.FieldDefinitions.FirstOrDefault(x => x.Name == refModelDef.Name + "Id");
+
             return refField;
         }
     }
