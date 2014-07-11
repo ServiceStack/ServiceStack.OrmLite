@@ -311,7 +311,8 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_Join_on_matching_Alias_convention()
         {
-            AddAliasedCustomers();
+            Country[] countries;
+            AddAliasedCustomers(out countries);
 
             //Normal Join
             var dbCustomers = db.Select<AliasedCustomer>(q => q
@@ -341,7 +342,7 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(dbAddresses.Count, Is.EqualTo(3));
         }
 
-        private void AddAliasedCustomers()
+        private AliasedCustomer[] AddAliasedCustomers(out Country[] countries)
         {
             db.DropAndCreateTable<AliasedCustomer>();
             db.DropAndCreateTable<AliasedCustomerAddress>();
@@ -381,11 +382,16 @@ namespace ServiceStack.OrmLite.Tests
             customers.Each(c =>
                            db.Save(c, references: true));
 
-            db.Insert(
-                new Country { CountryName = "Australia", CountryCode = "AU" },
-                new Country { CountryName = "USA", CountryCode = "US" },
-                new Country { CountryName = "Italy", CountryCode = "IT" },
-                new Country { CountryName = "Spain", CountryCode = "ED" });
+            countries = new[]
+            {
+                new Country {CountryName = "Australia", CountryCode = "AU"},
+                new Country {CountryName = "USA", CountryCode = "US"},
+                new Country {CountryName = "Italy", CountryCode = "IT"},
+                new Country {CountryName = "Spain", CountryCode = "ED"}
+            };
+            db.Save(countries);
+
+            return customers;
         }
 
         [Test]
@@ -439,7 +445,8 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Does_populate_custom_mixed_columns()
         {
-            AddAliasedCustomers();
+            Country[] countries;
+            var customers = AddAliasedCustomers(out countries);
 
             //Normal Join
             var results = db.Select<MixedCustomerInfo, AliasedCustomer>(q => q
@@ -456,16 +463,16 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(customerNames, Is.EquivalentTo(new[] { "Customer 1", "Customer 2" }));
 
             var customerIds = results.Map(x => x.Q_CustomerId);
-            Assert.That(customerIds, Is.EquivalentTo(new[] { 1, 2 }));
+            Assert.That(customerIds, Is.EquivalentTo(new[] { customers[0].Id, customers[1].Id }));
 
             customerIds = results.Map(x => x.Q_CustomerAddressQ_CustomerId);
-            Assert.That(customerIds, Is.EquivalentTo(new[] { 1, 2 }));
+            Assert.That(customerIds, Is.EquivalentTo(new[] { customers[0].Id, customers[1].Id }));
 
             var countryNames = results.Map(x => x.CountryName);
             Assert.That(countryNames, Is.EquivalentTo(new[] { "Australia", "USA" }));
 
             var countryIds = results.Map(x => x.CountryId);
-            Assert.That(countryIds, Is.EquivalentTo(new[] { 1, 2 }));
+            Assert.That(countryIds, Is.EquivalentTo(new[] { countries[0].Id, countries[1].Id }));
         }
     }
 }

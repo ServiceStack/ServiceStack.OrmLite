@@ -2,13 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 
 namespace ServiceStack.OrmLite.Oracle
 {
@@ -127,6 +125,9 @@ namespace ServiceStack.OrmLite.Oracle
             return null;
         }
 
+        private OracleTimestampConverter _timestampConverter;
+        private readonly object _timestampLock = new object();
+
         public override IDbConnection CreateConnection(string connectionString, Dictionary<string, string> options)
         {
             if (options != null)
@@ -135,7 +136,11 @@ namespace ServiceStack.OrmLite.Oracle
             }
 
             var factory = DbProviderFactories.GetFactory(ClientProvider);
-            InitializeOracleTimestampSetting(factory);
+            lock (_timestampLock)
+            {
+                if (_timestampConverter == null)
+                    _timestampConverter = new OracleTimestampConverter(factory);
+            }
             IDbConnection connection = factory.CreateConnection();
             if (connection != null) connection.ConnectionString = connectionString;
             return connection;
@@ -159,8 +164,8 @@ namespace ServiceStack.OrmLite.Oracle
             object convertedValue;
             if (fieldDef.FieldType == typeof(DateTimeOffset))
             {
-                SetOracleTimestampTzFormat();
-                convertedValue = ConvertTimestampTzToDateTimeOffset(reader, colIndex);
+                _timestampConverter.SetOracleTimestampTzFormat();
+                convertedValue = _timestampConverter.ConvertTimestampTzToDateTimeOffset(reader, colIndex);
             }
             else
             {
@@ -392,7 +397,7 @@ namespace ServiceStack.OrmLite.Oracle
 
             if (fieldDef.ColumnType == typeof(DateTimeOffset) || fieldDef.ColumnType == typeof(DateTimeOffset?))
             {
-                SetOracleParameterTypeTimestampTz(p);
+                _timestampConverter.SetOracleParameterTypeTimestampTz(p);
             }
             p.Value = value;
         }
@@ -411,99 +416,12 @@ namespace ServiceStack.OrmLite.Oracle
                 }
                 if (fieldDef.FieldType == typeof(DateTimeOffset))
                 {
-                    SetOracleTimestampTzFormat();
+                    _timestampConverter.SetOracleTimestampTzFormat();
                     var timestamp = (DateTimeOffset)value;
-                    return timestamp.ToString(DateTimeOffsetOutputFormat, CultureInfo.InvariantCulture);
+                    return _timestampConverter.ConvertDateTimeOffsetToString(timestamp);
                 }
             }
             return value;
-        }
-
-        private string DateTimeOffsetOutputFormat { get; set; }
-        private string DateTimeOffsetInputFormat { get; set; }
-        private string TimestampTzFormat { get; set; }
-        private readonly Dictionary<int, bool> _threadFormatSet = new Dictionary<int, bool>();
-        private const BindingFlags InvokeStaticPublic = BindingFlags.Public | BindingFlags.Static | BindingFlags.InvokeMethod;
-        private Assembly OracleAssembly { get; set; }
-        private object ClientInfo { get; set; }
-        private MethodInfo SetThreadInfo { get; set; }
-        private MethodInfo SetOracleDbType { get; set; }
-        private object TimestampTz { get; set; }
-        private MethodInfo GetOracleValue { get; set; }
-
-        private void InitializeOracleTimestampSetting(DbProviderFactory factory)
-        {
-            OracleAssembly = factory.GetType().Assembly;
-            var globalizationType = OracleAssembly.GetType("Oracle.DataAccess.Client.OracleGlobalization");
-            if (globalizationType != null)
-            {
-                DateTimeOffsetInputFormat = DateTimeOffsetOutputFormat = "yyyy-MM-dd HH:mm:ss.ffffff zzz";
-                TimestampTzFormat = "YYYY-MM-DD HH24:MI:SS.FF6 TZH:TZM";
-
-                ClientInfo = globalizationType.InvokeMember("GetClientInfo", InvokeStaticPublic, null, null, null);
-                const BindingFlags setProperty = BindingFlags.Public | BindingFlags.SetProperty | BindingFlags.Instance;
-                globalizationType.InvokeMember("TimeStampTZFormat", setProperty, null, ClientInfo, new object[] { TimestampTzFormat });
-                SetThreadInfo = globalizationType.GetMethod("SetThreadInfo", BindingFlags.Public | BindingFlags.Static);
-
-                var parameterType = OracleAssembly.GetType("Oracle.DataAccess.Client.OracleParameter");
-                var oracleDbTypeProperty = parameterType.GetProperty("OracleDbType", BindingFlags.Public | BindingFlags.Instance);
-                SetOracleDbType = oracleDbTypeProperty.GetSetMethod();
-
-                var oracleDbType = OracleAssembly.GetType("Oracle.DataAccess.Client.OracleDbType");
-                TimestampTz = Enum.Parse(oracleDbType, "TimeStampTZ");
-
-                var readerType = OracleAssembly.GetType("Oracle.DataAccess.Client.OracleDataReader");
-                GetOracleValue = readerType.GetMethod("GetOracleValue", BindingFlags.Public | BindingFlags.Instance);
-            }
-            else
-            {
-                //TODO This is Microsoft provider support and it does not handle the offsets correctly,
-                // but I don't know how to make it work.
-
-                DateTimeOffsetOutputFormat = "dd-MMM-yy hh:mm:ss.fff tt";
-                DateTimeOffsetInputFormat = "dd-MMM-yy hh:mm:ss tt";
-                TimestampTzFormat = "DD-MON-RR HH.MI.SSXFF AM";
-
-                //                var parameterType = OracleAssembly.GetType("System.Data.OracleClient.OracleParameter");
-                //                var oracleTypeProperty = parameterType.GetProperty("OracleType", BindingFlags.Public | BindingFlags.Instance);
-                //                SetOracleDbType = oracleTypeProperty.GetSetMethod();
-
-                var oracleDbType = OracleAssembly.GetType("System.Data.OracleClient.OracleType");
-                TimestampTz = Enum.Parse(oracleDbType, "TimestampWithTZ");
-
-                //                var readerType = OracleAssembly.GetType("System.Data.OracleClient.OracleDataReader");
-                //                GetOracleValue = readerType.GetMethod("GetOracleValue", BindingFlags.Public | BindingFlags.Instance);
-            }
-        }
-
-        private void SetOracleTimestampTzFormat()
-        {
-            if (ClientInfo == null) return;
-
-            var threadId = Thread.CurrentThread.ManagedThreadId;
-            if (_threadFormatSet.ContainsKey(threadId)) return;
-
-            SetThreadInfo.Invoke(null, new[] { ClientInfo });
-            _threadFormatSet[threadId] = true;
-        }
-
-        private void SetOracleParameterTypeTimestampTz(IDataParameter p)
-        {
-            if (SetOracleDbType != null) SetOracleDbType.Invoke(p, new[] { TimestampTz });
-        }
-
-        private DateTimeOffset ConvertTimestampTzToDateTimeOffset(IDataReader dataReader, int colIndex)
-        {
-            if (GetOracleValue != null)
-            {
-                var value = GetOracleValue.Invoke(dataReader, new object[] { colIndex }).ToString();
-                return DateTimeOffset.ParseExact(value, DateTimeOffsetInputFormat, CultureInfo.InvariantCulture);
-            }
-            else
-            {
-                var value = dataReader.GetValue(colIndex);
-                return new DateTimeOffset((DateTime)value);
-            }
         }
 
         public override string ToInsertRowStatement(IDbCommand dbCommand, object objWithProperties, ICollection<string> insertFields = null)
@@ -797,7 +715,7 @@ namespace ServiceStack.OrmLite.Oracle
                 indexName = NamingStrategy.ApplyNameRestrictions(indexName);
 
                 sqlIndexes.Add(
-                    ToCreateIndexStatement(fieldDef.IsUnique, indexName, modelDef, fieldDef.FieldName, false));
+                    ToCreateIndexStatement(fieldDef.IsUnique, indexName, modelDef, fieldDef.FieldName));
             }
 
             foreach (var compositeIndex in modelDef.CompositeIndexes)
@@ -807,7 +725,7 @@ namespace ServiceStack.OrmLite.Oracle
                 var indexNames = string.Join(",", compositeIndex.FieldNames.ToArray());
 
                 sqlIndexes.Add(
-                    ToCreateIndexStatement(compositeIndex.Unique, indexName, modelDef, indexNames, false));
+                    ToCreateIndexStatement(compositeIndex.Unique, indexName, modelDef, indexNames));
             }
 
             return sqlIndexes;
