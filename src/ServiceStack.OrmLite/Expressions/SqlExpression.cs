@@ -305,14 +305,20 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
+        static class OrderBySuffix
+        {
+            public const string Asc = "";
+            public const string Desc = " DESC";
+        }
+
         public virtual SqlExpression<T> OrderByFields(params FieldDefinition[] fields)
         {
-            return OrderByFields("", fields);
+            return OrderByFields(OrderBySuffix.Asc, fields);
         }
 
         public virtual SqlExpression<T> OrderByFieldsDescending(params FieldDefinition[] fields)
         {
-            return OrderByFields(" DESC", fields);
+            return OrderByFields(OrderBySuffix.Desc, fields);
         }
 
         private SqlExpression<T> OrderByFields(string orderBySuffix, string[] fieldNames)
@@ -322,15 +328,21 @@ namespace ServiceStack.OrmLite
             var sbOrderBy = new StringBuilder();
             foreach (var fieldName in fieldNames)
             {
-                var field = FirstMatchingField(fieldName);
+                var reverse = fieldName.StartsWith("-");
+                var useSuffix = reverse 
+                    ? (orderBySuffix == OrderBySuffix.Asc ? OrderBySuffix.Desc : OrderBySuffix.Asc)
+                    : orderBySuffix;
+                var useName = reverse ? fieldName.Substring(1) : fieldName;
+
+                var field = FirstMatchingField(useName);
                 if (field == null)
-                    throw new ArgumentException("Could not find field " + fieldName);
+                    throw new ArgumentException("Could not find field " + useName);
                 var qualifiedName = DialectProvider.GetQuotedColumnName(field.Item1, field.Item2);
 
                 if (sbOrderBy.Length > 0)
                     sbOrderBy.Append(", ");
 
-                sbOrderBy.Append(qualifiedName + orderBySuffix);
+                sbOrderBy.Append(qualifiedName + useSuffix);
             }
 
             this.orderBy = sbOrderBy.Length == 0
