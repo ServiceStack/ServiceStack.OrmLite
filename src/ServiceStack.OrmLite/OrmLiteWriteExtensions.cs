@@ -680,9 +680,6 @@ namespace ServiceStack.OrmLite
                 }
                 else
                 {
-                    if (OrmLiteConfig.InsertFilter != null)
-                        OrmLiteConfig.InsertFilter(dbCmd, obj);
-
                     dbCmd.Insert(obj);
                 }
 
@@ -691,9 +688,6 @@ namespace ServiceStack.OrmLite
                 
                 return true;
             }
-
-            if (OrmLiteConfig.UpdateFilter != null)
-                OrmLiteConfig.UpdateFilter(dbCmd, obj);
 
             dbCmd.Update(obj);
             
