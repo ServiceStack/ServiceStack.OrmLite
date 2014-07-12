@@ -378,6 +378,14 @@ namespace ServiceStack.OrmLite
             return dbCmd.ConvertToList<T>();
         }
 
+        internal static List<T> SqlList<T>(this IDbCommand dbCmd, string sql, Action<IDbCommand> dbCmdFilter)
+        {
+            if (dbCmdFilter != null) dbCmdFilter(dbCmd);
+            dbCmd.CommandText = sql;
+
+            return dbCmd.ConvertToList<T>();
+        }
+
         internal static List<T> SqlColumn<T>(this IDbCommand dbCmd, string sql, object anonType = null)
         {
             if (anonType != null) dbCmd.SetParameters<T>(anonType, excludeDefaults: false);
@@ -909,6 +917,48 @@ namespace ServiceStack.OrmLite
                         ?? modelDef.FieldDefinitions.FirstOrDefault(x => x.Name == refModelDef.Name + "Id");
 
             return refField;
+        }
+
+        public static IDbDataParameter AddParam(this IDbCommand dbCmd,
+            string name,
+            object value = null,
+            ParameterDirection direction = ParameterDirection.Input,
+            DbType? dbType = null)
+        {
+            var p = dbCmd.CreateParam(name, value, direction, dbType);
+            dbCmd.Parameters.Add(p);
+            return p;
+        }
+
+        public static IDbDataParameter CreateParam(this IDbCommand dbCmd,
+            string name,
+            object value = null,
+            ParameterDirection direction = ParameterDirection.Input,
+            DbType? dbType=null)
+        {
+            var p = dbCmd.CreateParameter();
+            var dialectProvider = OrmLiteConfig.DialectProvider;
+            p.ParameterName = dialectProvider.GetParam(name);
+            p.Direction = direction;
+            if (value != null)
+            {
+                p.Value = value;
+                p.DbType = dialectProvider.GetColumnDbType(value.GetType());
+            }
+            if (dbType != null)
+                p.DbType = dbType.Value;
+            return p;
+        }
+
+        internal static IDbCommand SqlProc(this IDbCommand dbCmd, string name, object inParams = null, bool excludeDefaults = false)
+        {
+            dbCmd.CommandType = CommandType.StoredProcedure;
+            dbCmd.CommandText = name;
+            dbCmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
+
+            dbCmd.SetParameters(inParams, excludeDefaults);
+
+            return dbCmd;
         }
     }
 }

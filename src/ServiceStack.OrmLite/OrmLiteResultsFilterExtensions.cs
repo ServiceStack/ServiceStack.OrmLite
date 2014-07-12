@@ -99,7 +99,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        internal static T ConvertTo<T>(this IDbCommand dbCmd, string sql = null)
+        public static T ConvertTo<T>(this IDbCommand dbCmd, string sql = null)
         {
             if (sql != null)
                 dbCmd.CommandText = sql;
@@ -131,7 +131,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        internal static T Scalar<T>(this IDbCommand dbCmd, string sql = null)
+        public static T Scalar<T>(this IDbCommand dbCmd, string sql = null)
         {
             if (sql != null)
                 dbCmd.CommandText = sql;
@@ -147,7 +147,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        internal static object Scalar(this IDbCommand dbCmd, string sql = null)
+        public static object Scalar(this IDbCommand dbCmd, string sql = null)
         {
             if (sql != null)
                 dbCmd.CommandText = sql;

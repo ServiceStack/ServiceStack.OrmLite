@@ -420,6 +420,24 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Returns results from an arbitrary parameterized raw sql query with a dbCmd filter. E.g:
+        /// <para>db.SqlList&lt;Person&gt;("EXEC GetRockstarsAged @age", dbCmd => ...)</para>
+        /// </summary>
+        public static List<T> SqlList<T>(this IDbConnection dbConn, string sql, Action<IDbCommand> dbCmdFilter)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(sql, dbCmdFilter));
+        }
+
+        /// <summary>
+        /// Prepare Stored Procedure with Input parameters, optionally populated with Input Params. E.g:
+        /// <para>var cmd = db.SqlProc("GetRockstarsAged", new { age = 42 })</para>
+        /// </summary>
+        public static IDbCommand SqlProc(this IDbConnection dbConn, string name, object inParams = null, bool excludeDefaults = false)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SqlProc(name, inParams, excludeDefaults));
+        }
+
+        /// <summary>
         /// Returns the first column in a List using an SqlExpression. E.g:
         /// <para>db.SqlColumn&lt;string&gt;(db.From&lt;Person&gt;().Select(x => x.LastName).Where(q => q.Age < 50))</para>
         /// </summary>
