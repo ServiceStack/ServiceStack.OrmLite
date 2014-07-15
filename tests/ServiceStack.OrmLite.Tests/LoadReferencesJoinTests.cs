@@ -474,5 +474,32 @@ namespace ServiceStack.OrmLite.Tests
             var countryIds = results.Map(x => x.CountryId);
             Assert.That(countryIds, Is.EquivalentTo(new[] { countries[0].Id, countries[1].Id }));
         }
+
+        [Test]
+        public void Can_LeftJoin_and_select_empty_relation()
+        {
+            AddCustomerWithOrders();
+
+            var customer = new Customer
+            {
+                Name = "Customer 2",
+                PrimaryAddress = new CustomerAddress
+                {
+                    AddressLine1 = "2 America Street",
+                    Country = "USA"
+                },
+            };
+
+            db.Save(customer, references: true);
+
+            var q = db.From<Customer>();
+            q.LeftJoin<Order>()
+             .Where<Order>(o => o.Id == null);
+
+            var customers = db.Select(q);
+
+            Assert.That(customers.Count, Is.EqualTo(1));
+            Assert.That(customers[0].Name, Is.EqualTo("Customer 2"));
+        }
     }
 }
