@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Text;
@@ -250,22 +251,22 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 db.DropAndCreateTable<LetterFrequency>();
                 db.DropAndCreateTable<LetterStat>();
 
-                var i = 0;
+                var insertedIds = new List<long>();
                 "A,B,B,C,C,C,D,D,E".Split(',').Each(letter => {
-                    db.Insert(new LetterFrequency { Letter = letter }, selectIdentity: true);
+                    insertedIds.Add(db.Insert(new LetterFrequency { Letter = letter }, selectIdentity: true));
                 });
 
                 var rows = db.Select<LetterFrequency>(q => q.OrderByFields("Letter", "Id"));
                 Assert.That(rows.Map(x => x.Letter), Is.EquivalentTo("A,B,B,C,C,C,D,D,E".Split(',')));
-                Assert.That(rows.Map(x => x.Id), Is.EquivalentTo("1,2,3,4,5,6,7,8,9".Split(',').Map(int.Parse)));
+                Assert.That(rows.Map(x => x.Id), Is.EquivalentTo(insertedIds));
 
                 rows = db.Select<LetterFrequency>(q => q.OrderByFields("Letter", "-Id"));
                 Assert.That(rows.Map(x => x.Letter), Is.EquivalentTo("A,B,B,C,C,C,D,D,E".Split(',')));
-                Assert.That(rows.Map(x => x.Id), Is.EquivalentTo("1,3,2,6,5,4,8,7,9".Split(',').Map(int.Parse)));
+                Assert.That(rows.Map(x => x.Id), Is.EquivalentTo(insertedIds));
 
                 rows = db.Select<LetterFrequency>(q => q.OrderByFieldsDescending("Letter", "-Id"));
                 Assert.That(rows.Map(x => x.Letter), Is.EquivalentTo("E,D,D,C,C,C,B,B,A".Split(',')));
-                Assert.That(rows.Map(x => x.Id), Is.EquivalentTo("9,7,8,4,5,6,2,3,1".Split(',').Map(int.Parse)));
+                Assert.That(rows.Map(x => x.Id), Is.EquivalentTo(Enumerable.Reverse(insertedIds)));
             }
 
         }
