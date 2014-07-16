@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq.Expressions;
+using System.Text;
 
 namespace ServiceStack.OrmLite
 {
@@ -113,6 +114,24 @@ namespace ServiceStack.OrmLite
             ev.Where(predicate);
             string sql = ev.ToCountStatement();
             return dbCmd.Scalar<long>(sql);
+        }
+
+        internal static List<T> LoadSelect<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression)
+        {
+            var expr = OrmLiteConfig.DialectProvider.SqlExpression<T>();
+            expr = expression(expr);
+            return dbCmd.LoadListWithReferences(expr);
+        }
+
+        internal static List<T> LoadSelect<T>(this IDbCommand dbCmd, SqlExpression<T> expression = null)
+        {
+            return dbCmd.LoadListWithReferences(expression);
+        }
+
+        internal static List<T> LoadSelect<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
+        {
+            var expr = OrmLiteConfig.DialectProvider.SqlExpression<T>().Where(predicate);
+            return dbCmd.LoadListWithReferences(expr);
         }
 
         internal static T ExprConvertTo<T>(this IDataReader dataReader)

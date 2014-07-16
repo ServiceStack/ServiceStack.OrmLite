@@ -847,7 +847,7 @@ namespace ServiceStack.OrmLite
             var modelDef = ModelDefinition<T>.Definition;
             var fieldDefs = modelDef.AllFieldDefinitionsArray.Where(x => x.IsReference);
             var pkValue = modelDef.PrimaryKey.GetValue(instance);
-            var ormLiteDialectProvider = OrmLiteConfig.DialectProvider;
+            var dialectProvider = OrmLiteConfig.DialectProvider;
 
             foreach (var fieldDef in fieldDefs)
             {
@@ -860,8 +860,8 @@ namespace ServiceStack.OrmLite
 
                     var refField = GetRefFieldDef(modelDef, refModelDef, refType);
 
-                    var sqlFilter = ormLiteDialectProvider.GetQuotedColumnName(refField.FieldName) + "={0}";
-                    var sql = ormLiteDialectProvider.ToSelectStatement(refType, sqlFilter, pkValue);
+                    var sqlFilter = dialectProvider.GetQuotedColumnName(refField.FieldName) + "={0}";
+                    var sql = dialectProvider.ToSelectStatement(refType, sqlFilter, pkValue);
 
                     var results = dbCmd.ConvertToList(refType, sql);
                     fieldDef.SetValueFn(instance, results);
@@ -878,8 +878,8 @@ namespace ServiceStack.OrmLite
 
                     if (refField != null)
                     {
-                        var sqlFilter = ormLiteDialectProvider.GetQuotedColumnName(refField.FieldName) + "={0}";
-                        var sql = ormLiteDialectProvider.ToSelectStatement(refType, sqlFilter, pkValue);
+                        var sqlFilter = dialectProvider.GetQuotedColumnName(refField.FieldName) + "={0}";
+                        var sql = dialectProvider.ToSelectStatement(refType, sqlFilter, pkValue);
                         var result = dbCmd.ConvertTo(refType, sql);
                         fieldDef.SetValueFn(instance, result);
                     }
@@ -887,13 +887,142 @@ namespace ServiceStack.OrmLite
                     {
                         //Load Self Table.RefTableId PK
                         var refPkValue = refSelf.GetValue(instance);
-                        var sqlFilter = ormLiteDialectProvider.GetQuotedColumnName(refModelDef.PrimaryKey.FieldName) + "={0}";
-                        var sql = ormLiteDialectProvider.ToSelectStatement(refType, sqlFilter, refPkValue);
+                        var sqlFilter = dialectProvider.GetQuotedColumnName(refModelDef.PrimaryKey.FieldName) + "={0}";
+                        var sql = dialectProvider.ToSelectStatement(refType, sqlFilter, refPkValue);
                         var result = dbCmd.ConvertTo(refType, sql);
                         fieldDef.SetValueFn(instance, result);
                     }
                 }
             }
+        }
+
+        internal static List<T> LoadListWithReferences<T>(this IDbCommand dbCmd, SqlExpression<T> expr = null)
+        {
+            var dialectProvider = OrmLiteConfig.DialectProvider;
+            if (expr == null)
+                expr = dialectProvider.SqlExpression<T>();
+
+            var sql = expr.SelectInto<T>();
+            var parentResults = dbCmd.ExprConvertToList<T>(sql);
+
+            var modelDef = ModelDefinition<T>.Definition;
+            var fieldDefs = modelDef.AllFieldDefinitionsArray.Where(x => x.IsReference);
+
+            expr.Select(dialectProvider.GetQuotedColumnName(modelDef.PrimaryKey));
+            var subSql = expr.ToSelectStatement();
+
+            foreach (var fieldDef in fieldDefs)
+            {
+                var listInterface = fieldDef.FieldType.GetTypeWithGenericInterfaceOf(typeof(IList<>));
+                if (listInterface != null)
+                {
+                    var refType = listInterface.GenericTypeArguments()[0];
+                    var refModelDef = refType.GetModelDefinition();
+
+                    var refField = GetRefFieldDef(modelDef, refModelDef, refType);
+
+                    var sqlRef = "SELECT {0} FROM {1} WHERE {2} IN ({3})".Fmt(
+                        dialectProvider.GetColumnNames(refModelDef),
+                        dialectProvider.GetQuotedTableName(refModelDef),
+                        dialectProvider.GetQuotedColumnName(refField),
+                        subSql);
+                    var childResults = dbCmd.ConvertToList(refType, sqlRef);
+
+                    var map = new Dictionary<object, List<object>>();
+                    List<object> refValues;
+
+                    foreach (var result in childResults)
+                    {
+                        var refValue = refField.GetValue(result);
+                        if (!map.TryGetValue(refValue, out refValues))
+                        {
+                            map[refValue] = refValues = new List<object>();
+                        }
+                        refValues.Add(result);
+                    }
+
+                    var untypedApi = dbCmd.CreateTypedApi(refType);
+                    foreach (var result in parentResults)
+                    {
+                        var pkValue = modelDef.PrimaryKey.GetValue(result);
+                        if (map.TryGetValue(pkValue, out refValues))
+                        {
+                            var castResults = untypedApi.Cast(refValues);
+                            fieldDef.SetValueFn(result, castResults);
+                        }
+                    }
+                }
+                else
+                {
+                    var refType = fieldDef.FieldType;
+                    var refModelDef = refType.GetModelDefinition();
+
+                    var refSelf = GetSelfRefFieldDefIfExists(modelDef, refModelDef);
+                    var refField = refSelf == null
+                        ? GetRefFieldDef(modelDef, refModelDef, refType)
+                        : GetRefFieldDefIfExists(modelDef, refModelDef);
+
+                    var map = new Dictionary<object, object>();
+
+                    if (refField != null)
+                    {
+                        var sqlRef = "SELECT {0} FROM {1} WHERE {2} IN ({3})".Fmt(
+                            dialectProvider.GetColumnNames(refModelDef),
+                            dialectProvider.GetQuotedTableName(refModelDef),
+                            dialectProvider.GetQuotedColumnName(refField),
+                            subSql);
+                        var childResults = dbCmd.ConvertToList(refType, sqlRef);
+
+                        foreach (var result in childResults)
+                        {
+                            var refValue = refField.GetValue(result);
+                            map[refValue] = result;
+                        }
+
+                        foreach (var result in parentResults)
+                        {
+                            object childResult;
+                            var pkValue = modelDef.PrimaryKey.GetValue(result);
+                            if (map.TryGetValue(pkValue, out childResult))
+                            {
+                                fieldDef.SetValueFn(result, childResult);
+                            }
+                        }
+                    }
+                    else if (refSelf != null)
+                    {
+                        //Load Self Table.RefTableId PK
+                        expr.Select(dialectProvider.GetQuotedColumnName(refSelf));
+                        subSql = expr.ToSelectStatement();
+
+                        var sqlRef = "SELECT {0} FROM {1} WHERE {2} IN ({3})".Fmt(
+                            dialectProvider.GetColumnNames(refModelDef),
+                            dialectProvider.GetQuotedTableName(refModelDef),
+                            dialectProvider.GetQuotedColumnName(refModelDef.PrimaryKey),
+                            subSql);
+                        var childResults = dbCmd.ConvertToList(refType, sqlRef);
+
+                        foreach (var result in childResults)
+                        {
+                            var pkValue = refModelDef.PrimaryKey.GetValue(result);
+                            map[pkValue] = result;
+                        }
+
+                        foreach (var result in parentResults)
+                        {
+                            object childResult;
+                            var pkValue = modelDef.PrimaryKey.GetValue(result);
+                            if (map.TryGetValue(pkValue, out childResult))
+                            {
+                                fieldDef.SetValueFn(result, childResult);
+                            }
+                        }
+                    }
+                }
+
+            }
+
+            return parentResults;
         }
 
         public static FieldDefinition GetRefFieldDef(ModelDefinition modelDef, ModelDefinition refModelDef, Type refType)

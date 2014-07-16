@@ -464,6 +464,49 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(dbCustomer.PrimaryAddress, Is.Not.Null);
         }
 
+        [Test]
+        public void Can_load_list_of_self_references()
+        {
+            var customers = new[]
+            {
+                new SelfCustomer
+                {
+                    Name = "Customer 1",
+                    PrimaryAddress = new SelfCustomerAddress
+                    {
+                        AddressLine1 = "1 Australia Street",
+                        Country = "Australia"
+                    },
+                },
+                new SelfCustomer
+                {
+                    Name = "Customer 2",
+                    PrimaryAddress = new SelfCustomerAddress
+                    {
+                        AddressLine1 = "2 Prospect Park",
+                        Country = "USA"
+                    },
+                },
+            };
+
+            customers.Each(x => 
+                db.Save(x, references:true));
+
+            var results = db.LoadSelect<SelfCustomer>();
+            Assert.That(results.Count, Is.EqualTo(2));
+            Assert.That(results.All(x => x.PrimaryAddress != null));
+
+            var customer1 = results.First(x => x.Name == "Customer 1");
+            Assert.That(customer1.PrimaryAddress.Country, Is.EqualTo("Australia"));
+
+            var customer2 = results.First(x => x.Name == "Customer 2");
+            Assert.That(customer2.PrimaryAddress.Country, Is.EqualTo("USA"));
+
+            results = db.LoadSelect<SelfCustomer>(q => q.Name == "Customer 1");
+            Assert.That(results.Count, Is.EqualTo(1));
+            Assert.That(results[0].PrimaryAddress.Country, Is.EqualTo("Australia"));
+        }
+
     }
 
 }
