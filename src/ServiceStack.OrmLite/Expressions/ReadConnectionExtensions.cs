@@ -221,7 +221,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns results with references from using a LINQ Expression. E.g:
-        /// <para>db.Load&lt;Person&gt;(x =&gt; x.Age &gt; 40)</para>
+        /// <para>db.LoadSelect&lt;Person&gt;(x =&gt; x.Age &gt; 40)</para>
         /// </summary>
         public static List<T> LoadSelect<T>(this IDbConnection dbConn, Expression<Func<T, bool>> predicate)
         {
@@ -230,7 +230,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns results with references from using an SqlExpression lambda. E.g:
-        /// <para>db.Load&lt;Person&gt;(q =&gt; q.Where(x =&gt; x.Age &gt; 40))</para>
+        /// <para>db.LoadSelect&lt;Person&gt;(q =&gt; q.Where(x =&gt; x.Age &gt; 40))</para>
         /// </summary>
         public static List<T> LoadSelect<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression)
         {
@@ -239,7 +239,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns results with references from using an SqlExpression lambda. E.g:
-        /// <para>db.Load(db.From&lt;Person&gt;().Where(x =&gt; x.Age &gt; 40))</para>
+        /// <para>db.LoadSelect(db.From&lt;Person&gt;().Where(x =&gt; x.Age &gt; 40))</para>
         /// </summary>
         public static List<T> LoadSelect<T>(this IDbConnection dbConn, SqlExpression<T> expression = null)
         {
