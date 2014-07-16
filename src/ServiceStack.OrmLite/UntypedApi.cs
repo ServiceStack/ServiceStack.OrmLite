@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 
 namespace ServiceStack.OrmLite
 {
@@ -99,6 +100,11 @@ namespace ServiceStack.OrmLite
         public int DeleteByIds(IEnumerable idValues)
         {
             return Exec(dbCmd => dbCmd.DeleteByIds<T>(idValues));
+        }
+
+        public IEnumerable Cast(IEnumerable results)
+        {
+            return (from object result in results select (T)result).ToList();
         }
     }
 }

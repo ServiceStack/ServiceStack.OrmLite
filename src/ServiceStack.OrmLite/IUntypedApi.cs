@@ -22,5 +22,6 @@ namespace ServiceStack.OrmLite
         int DeleteNonDefaults(object obj, object filter);
         int DeleteById(object id);
         int DeleteByIds(IEnumerable idValues);
+        IEnumerable Cast(IEnumerable results);
     }
 }
