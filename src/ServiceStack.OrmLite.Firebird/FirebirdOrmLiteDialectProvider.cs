@@ -840,7 +840,7 @@ namespace ServiceStack.OrmLite.Firebird
                 {
                     toRow = string.Empty;
                 }
-                sb.Append(string.Format("ROWS {0} {1}", fromRow, toRow));
+                sb.Append(string.Format("\nROWS {0} {1}", fromRow, toRow));
             }
 
             return sb.ToString();
