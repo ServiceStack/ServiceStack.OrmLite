@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using NUnit.Framework;
-using ServiceStack.Common.Tests.Models;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Text;
 

@@ -314,6 +314,9 @@ namespace ServiceStack.OrmLite
 
         private static int TryGuessColumnIndex(string fieldName, IDataReader dataReader)
         {
+            if (OrmLiteConfig.DisableColumnGuessFallback)
+                return NotFound;
+
             var fieldCount = dataReader.FieldCount;
             for (var i = 0; i < fieldCount; i++)
             {

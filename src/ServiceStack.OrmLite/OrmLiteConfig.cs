@@ -103,6 +103,7 @@ namespace ServiceStack.OrmLite
             return dbConn;
         }
 
+        public static bool DisableColumnGuessFallback { get; set; }
         public static bool StripUpperInLike { get; set; }
 
         private static IOrmLiteExecFilter execFilter;
