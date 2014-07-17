@@ -125,6 +125,7 @@
     <Compile Include="Expression\SelectExpressionTests.cs" />
     <Compile Include="Issues\MismatchSchemaTests.cs" />
     <Compile Include="Issues\MultithreadingIssueTests.cs" />
+    <Compile Include="Issues\SelectIntoTests.cs" />
     <Compile Include="LicenseUsageTests.cs" />
     <Compile Include="LoadReferencesJoinTests.cs" />
     <Compile Include="LoadReferencesTests.cs" />
