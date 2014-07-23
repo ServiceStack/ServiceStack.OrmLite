@@ -7,12 +7,12 @@ namespace ServiceStack.OrmLite
 {
     public class UpperCaseNamingStrategy : OrmLiteNamingStrategyBase
     {
-        public virtual string GetTableName(string name)
+        public override string GetTableName(string name)
         {
             return name.ToUpper();
         }
 
-        public virtual string GetColumnName(string name)
+        public override string GetColumnName(string name)
         {
             return name.ToUpper();
         }
