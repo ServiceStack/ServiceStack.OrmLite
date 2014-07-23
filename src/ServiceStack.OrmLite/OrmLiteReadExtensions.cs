@@ -896,16 +896,16 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        internal static List<T> LoadListWithReferences<T>(this IDbCommand dbCmd, SqlExpression<T> expr = null)
+        internal static List<Into> LoadListWithReferences<Into, From>(this IDbCommand dbCmd, SqlExpression<From> expr = null)
         {
             var dialectProvider = OrmLiteConfig.DialectProvider;
             if (expr == null)
-                expr = dialectProvider.SqlExpression<T>();
+                expr = dialectProvider.SqlExpression<From>();
 
-            var sql = expr.SelectInto<T>();
-            var parentResults = dbCmd.ExprConvertToList<T>(sql);
+            var sql = expr.SelectInto<Into>();
+            var parentResults = dbCmd.ExprConvertToList<Into>(sql);
 
-            var modelDef = ModelDefinition<T>.Definition;
+            var modelDef = ModelDefinition<Into>.Definition;
             var fieldDefs = modelDef.AllFieldDefinitionsArray.Where(x => x.IsReference);
 
             expr.Select(dialectProvider.GetQuotedColumnName(modelDef.PrimaryKey));

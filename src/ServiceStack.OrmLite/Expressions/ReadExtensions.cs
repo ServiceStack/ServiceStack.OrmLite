@@ -120,18 +120,23 @@ namespace ServiceStack.OrmLite
         {
             var expr = OrmLiteConfig.DialectProvider.SqlExpression<T>();
             expr = expression(expr);
-            return dbCmd.LoadListWithReferences(expr);
+            return dbCmd.LoadListWithReferences<T, T>(expr);
         }
 
         internal static List<T> LoadSelect<T>(this IDbCommand dbCmd, SqlExpression<T> expression = null)
         {
-            return dbCmd.LoadListWithReferences(expression);
+            return dbCmd.LoadListWithReferences<T, T>(expression);
+        }
+
+        internal static List<Into> LoadSelect<Into, From>(this IDbCommand dbCmd, SqlExpression<From> expression)
+        {
+            return dbCmd.LoadListWithReferences<Into, From>(expression);
         }
 
         internal static List<T> LoadSelect<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
         {
             var expr = OrmLiteConfig.DialectProvider.SqlExpression<T>().Where(predicate);
-            return dbCmd.LoadListWithReferences(expr);
+            return dbCmd.LoadListWithReferences<T, T>(expr);
         }
 
         internal static T ExprConvertTo<T>(this IDataReader dataReader)
