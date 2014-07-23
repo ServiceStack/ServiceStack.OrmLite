@@ -1,6 +1,8 @@
 ﻿using System.Data;
 using System.Linq;
 using NUnit.Framework;
+using ServiceStack.DataAnnotations;
+using ServiceStack.Model;
 using ServiceStack.OrmLite.Tests.UseCase;
 
 namespace ServiceStack.OrmLite.Tests
@@ -174,7 +176,7 @@ namespace ServiceStack.OrmLite.Tests
             var costs = results.ConvertAll(x => x.Cost);
             Assert.That(costs, Is.EquivalentTo(new[] { 1.99m, 1.49m, 9.99m }));
             var orderIds = results.ConvertAll(x => x.OrderId);
-            var expectedOrderIds = new []{customers[0].Orders[0].Id, customers[0].Orders[2].Id, customers[0].Orders[4].Id};
+            var expectedOrderIds = new[] { customers[0].Orders[0].Id, customers[0].Orders[2].Id, customers[0].Orders[4].Id };
             Assert.That(orderIds, Is.EquivalentTo(expectedOrderIds));
 
             //Same as above using using db.From<Customer>()
@@ -432,7 +434,7 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(addressIds, Is.EquivalentTo(expectedAddressIds));
 
             var orderIds = results.ConvertAll(x => x.OrderId);
-            var expectedOrderIds = new[] {customer.Orders[0].Id, customer.Orders[1].Id};
+            var expectedOrderIds = new[] { customer.Orders[0].Id, customer.Orders[1].Id };
             Assert.That(orderIds, Is.EquivalentTo(expectedOrderIds));
 
             var customerNames = results.ConvertAll(x => x.CustomerName);
@@ -546,5 +548,50 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(results[0].Orders.Select(x => x.Cost),
                 Is.EquivalentTo(new[] { 1.99m, 3.98m, 1.49m, 2.98m, 9.99m }));
         }
+
+        [Test]
+        public void Can_join_on_references_attribute()
+        {
+            db.DropAndCreateTable<TABLE_1>();
+            db.DropAndCreateTable<TABLE_2>();
+
+            var id1 = db.Insert(new TABLE_1 { One = "A" }, selectIdentity: true);
+            var id2 = db.Insert(new TABLE_1 { One = "B" }, selectIdentity: true);
+
+            db.Insert(new TABLE_2 { Three = "C", TableOneKey = (int) id1 });
+
+            var q = db.From<TABLE_1>()
+                      .Join<TABLE_2>();
+            var results = db.Select(q);
+
+            Assert.That(results.Count, Is.EqualTo(1));
+            Assert.That(results[0].One, Is.EqualTo("A"));
+        }
+    }
+
+    [Alias("Tabela1")]
+    public class TABLE_1 : IHasId<int>
+    {
+        [AutoIncrement]
+        [Alias("Key")]
+        public int Id { get; set; }
+
+        [Alias("Ena")]
+        public string One { get; set; }
+    }
+
+    [Alias("Tabela2")]
+    public class TABLE_2 : IHasId<int>
+    {
+        [AutoIncrement]
+        [Alias("Key")]
+        public int Id { get; set; }
+
+        [Alias("Tri")]
+        public string Three { get; set; }
+
+        [References(typeof(TABLE_1))]
+        [Alias("Tabela1")]
+        public int TableOneKey { get; set; }
     }
 }
