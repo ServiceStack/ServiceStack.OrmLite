@@ -246,5 +246,12 @@ namespace ServiceStack.OrmLite
             return dbConn.Exec(dbCmd => dbCmd.LoadSelect(expression));
         }
 
+        /// <summary>
+        /// Project results with references from a number of joined tables into a different model
+        /// </summary>
+        public static List<Into> LoadSelect<Into, From>(this IDbConnection dbConn, SqlExpression<From> expression)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.LoadSelect<Into, From>(expression));
+        }
     }
 }
