@@ -102,6 +102,9 @@
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\ExpressionsTestBase.cs">
       <Link>Expression\ExpressionsTestBase.cs</Link>
     </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\ExpressionUsingCustomSerializedEnumTests.cs">
+      <Link>Expression\ExpressionUsingCustomSerializedEnumTests.cs</Link>
+    </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\LogicalExpressionsTest.cs">
       <Link>Expression\LogicalExpressionsTest.cs</Link>
     </Compile>

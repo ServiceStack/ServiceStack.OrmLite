@@ -552,6 +552,8 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_join_on_references_attribute()
         {
+            // Drop table 2 first because of foreign key
+            db.DropTable<TABLE_2>();
             db.DropAndCreateTable<TABLE_1>();
             db.DropAndCreateTable<TABLE_2>();
 
