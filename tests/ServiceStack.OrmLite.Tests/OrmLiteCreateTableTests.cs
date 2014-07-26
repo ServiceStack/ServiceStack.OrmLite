@@ -346,8 +346,20 @@ namespace ServiceStack.OrmLite.Tests
                 db.DropAndCreateTable<UserEntity>();
                 db.DropAndCreateTable<AnswerEntity>();
 
-                var userId = db.Insert(new UserEntity { Id = 1, Created = DateTime.UtcNow }, selectIdentity: true);
-                db.Insert(new AnswerEntity { UserId = userId, Created = DateTime.UtcNow });
+                var userId = db.Insert(new UserEntity 
+                { 
+                    Id = 1, 
+                    Created = DateTime.UtcNow,
+                    Updated = DateTime.UtcNow
+                }, 
+                selectIdentity: true);
+
+                db.Insert(new AnswerEntity
+                {
+                    UserId = userId, 
+                    Created = DateTime.UtcNow,
+                    Updated = DateTime.UtcNow,
+                });
 
                 var q = db.From<AnswerEntity>();
                 q.Join<AnswerEntity, UserEntity>((l, r) => l.UserId == r.Id);
