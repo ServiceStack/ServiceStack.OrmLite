@@ -752,11 +752,9 @@ namespace ServiceStack.OrmLite
                 if (fieldDef.FieldType.IsEnum)
                 {
                     var enumValue = OrmLiteConfig.DialectProvider.StringSerializer.SerializeToString(value);
-                    return !string.IsNullOrEmpty(enumValue)
+                    return enumValue != null
                         ? enumValue.Trim('"')
-                        : fieldDef.IsNullable 
-                            ? null 
-                            : fieldDef.FieldType.GetDefaultValue();
+                        : null;
                 }
                 if (fieldDef.FieldType == typeof(TimeSpan))
                 {
@@ -1368,6 +1366,14 @@ namespace ServiceStack.OrmLite
             if (fieldType == typeof(TimeSpan))
                 return ((TimeSpan)value).Ticks.ToString(CultureInfo.InvariantCulture);
 
+            if (fieldType.IsEnum)
+            {
+                var enumValue = dialectProvider.StringSerializer.SerializeToString(value);
+                return enumValue != null
+                    ? dialectProvider.GetQuotedValue(enumValue.Trim('"'))
+                    : null;
+            }
+ 
             return ShouldQuoteValue(fieldType)
                     ? dialectProvider.GetQuotedValue(value.ToString())
                     : value.ToString();

@@ -70,7 +70,7 @@ namespace ServiceStack.OrmLite.Tests
 				ConnectionString = GetFileConnectionString();
 		}
 
-        public Dialect Dialect = Dialect.Sqlite;
+        public Dialect Dialect = Dialect.SqlServer;
 
         [TestFixtureSetUp]
         public void TestFixtureSetUp()
