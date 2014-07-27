@@ -89,8 +89,6 @@ namespace ServiceStack.OrmLite
 
         public IOrmLiteExecFilter ExecFilter { get; set; }
 
-        private static ILog log = LogManager.GetLogger(typeof(OrmLiteDialectProviderBase<>));
-
         public string StringLengthNonUnicodeColumnDefinitionFormat = "VARCHAR({0})";
         public string StringLengthUnicodeColumnDefinitionFormat = "NVARCHAR({0})";
 
@@ -1325,7 +1323,7 @@ namespace ServiceStack.OrmLite
             }
             catch (Exception)
             {
-                log.ErrorFormat("Error ConvertDbValue trying to convert {0} into {1}", value, type.Name);
+                Log.ErrorFormat("Error ConvertDbValue trying to convert {0} into {1}", value, type.Name);
                 throw;
             }
         }
