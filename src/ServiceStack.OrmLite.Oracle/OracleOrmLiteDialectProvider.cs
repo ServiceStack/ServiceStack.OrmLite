@@ -265,6 +265,18 @@ namespace ServiceStack.OrmLite.Oracle
                 return "'" + s + "'"; // when quoted exception is more clear!
             }
 
+            if (fieldType.IsEnum)
+            {
+                var enumValue = OrmLiteConfig.DialectProvider.StringSerializer.SerializeToString(value);
+                // Oracle stores empty strings in varchar columns as null so match that behavior here
+                if (enumValue == null)
+                    return null;
+                enumValue = GetQuotedValue(enumValue.Trim('"'));
+                return enumValue == "''"
+                    ? "null"
+                    : enumValue;
+            }
+
             return base.GetQuotedValue(value, fieldType);
         }
 
