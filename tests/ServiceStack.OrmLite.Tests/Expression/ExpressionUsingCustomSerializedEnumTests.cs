@@ -38,6 +38,8 @@ namespace ServiceStack.OrmLite.Tests.Expression
         [TestCase(2)]
         public void Can_select_on_custom_default_null_serialized_enum(int index)
         {
+            if (Dialect == Dialect.Oracle) Assert.Ignore("Can't work on Oracle because Oracle does not allow empty strings in a varchar column");
+
             EnumSerializerWithNullDefaults.Configure();
 
             using (var db = OpenDbConnection())
@@ -71,6 +73,8 @@ namespace ServiceStack.OrmLite.Tests.Expression
         [TestCase(2)]
         public void Can_select_on_custom_default_empty_serialized_enum(int index)
         {
+            if (Dialect == Dialect.Oracle) Assert.Ignore("Can't work on Oracle because Oracle does not allow empty strings in a varchar column");
+
             EnumSerializerWithEmptyDefaults.Configure();
 
             using (var db = OpenDbConnection())
@@ -115,7 +119,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
             {
                 var expected = InitNullable(db, index);
 
-                var unknownActivities = db.Select<Activity>(
+                var unknownActivities = db.Select<NullableActivity>(
                     s => s.ActivityType == expected.ActivityType
                       && s.Comment == expected.Comment);
 
@@ -134,7 +138,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
             {
                 var expected = InitNullable(db, index);
 
-                var unknownActivities = db.Select<Activity>(
+                var unknownActivities = db.Select<NullableActivity>(
                     s => s.ActivityType == expected.ActivityType
                       && s.Comment == expected.Comment);
 
@@ -167,7 +171,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
             {
                 var expected = InitNullable(db, index);
 
-                var unknownActivities = db.Select<Activity>(
+                var unknownActivities = db.Select<NullableActivity>(
                     s => s.ActivityType == expected.ActivityType
                       && s.Comment == expected.Comment);
 
