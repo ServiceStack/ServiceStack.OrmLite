@@ -1011,8 +1011,8 @@ namespace ServiceStack.OrmLite
                         foreach (var result in parentResults)
                         {
                             object childResult;
-                            var pkValue = modelDef.PrimaryKey.GetValue(result);
-                            if (map.TryGetValue(pkValue, out childResult))
+                            var fkValue = refSelf.GetValue(result);
+                            if (map.TryGetValue(fkValue, out childResult))
                             {
                                 fieldDef.SetValueFn(result, childResult);
                             }

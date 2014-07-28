@@ -144,7 +144,7 @@ namespace ServiceStack.OrmLite.Tests
         public int Id { get; set; }
         public string Name { get; set; }
 
-        public int SelfCustomerAddressId { get; set; }
+        public int? SelfCustomerAddressId { get; set; }
 
         [Reference]
         public SelfCustomerAddress PrimaryAddress { get; set; }
@@ -434,13 +434,15 @@ namespace ServiceStack.OrmLite.Tests
                 },
             };
 
+            db.Save(new SelfCustomer { Name = "Dummy Incrementer" });
+
             db.Save(customer);
 
             Assert.That(customer.Id, Is.GreaterThan(0));
             Assert.That(customer.SelfCustomerAddressId, Is.EqualTo(0));
 
             db.SaveReferences(customer, customer.PrimaryAddress);
-            Assert.That(customer.SelfCustomerAddressId, Is.EqualTo(customer.Id));
+            Assert.That(customer.SelfCustomerAddressId, Is.EqualTo(customer.PrimaryAddress.Id));
 
             var dbCustomer = db.LoadSingleById<SelfCustomer>(customer.Id);
             Assert.That(dbCustomer.PrimaryAddress, Is.Not.Null);
@@ -457,8 +459,8 @@ namespace ServiceStack.OrmLite.Tests
                 },
             };
 
-            db.Save(customer, references:true);
-            Assert.That(customer.SelfCustomerAddressId, Is.EqualTo(customer.Id));
+            db.Save(customer, references: true);
+            Assert.That(customer.SelfCustomerAddressId, Is.EqualTo(customer.PrimaryAddress.Id));
 
             dbCustomer = db.LoadSingleById<SelfCustomer>(customer.Id);
             Assert.That(dbCustomer.PrimaryAddress, Is.Not.Null);
@@ -489,10 +491,12 @@ namespace ServiceStack.OrmLite.Tests
                 },
             };
 
-            customers.Each(x => 
-                db.Save(x, references:true));
+            db.Save(new SelfCustomer { Name = "Dummy Incrementer" });
 
-            var results = db.LoadSelect<SelfCustomer>();
+            customers.Each(x =>
+                db.Save(x, references: true));
+
+            var results = db.LoadSelect<SelfCustomer>(q => q.SelfCustomerAddressId != null);
             Assert.That(results.Count, Is.EqualTo(2));
             Assert.That(results.All(x => x.PrimaryAddress != null));
 
