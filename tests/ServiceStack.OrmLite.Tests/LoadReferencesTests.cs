@@ -439,7 +439,7 @@ namespace ServiceStack.OrmLite.Tests
             db.Save(customer);
 
             Assert.That(customer.Id, Is.GreaterThan(0));
-            Assert.That(customer.SelfCustomerAddressId, Is.EqualTo(0));
+            Assert.That(customer.SelfCustomerAddressId, Is.Null);
 
             db.SaveReferences(customer, customer.PrimaryAddress);
             Assert.That(customer.SelfCustomerAddressId, Is.EqualTo(customer.PrimaryAddress.Id));
