@@ -4,6 +4,7 @@ using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Model;
 using ServiceStack.OrmLite.Tests.UseCase;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -556,6 +557,7 @@ namespace ServiceStack.OrmLite.Tests
             db.DropTable<TABLE_2>();
             db.DropAndCreateTable<TABLE_1>();
             db.DropAndCreateTable<TABLE_2>();
+            db.DropAndCreateTable<TABLE_3>();
 
             var id1 = db.Insert(new TABLE_1 { One = "A" }, selectIdentity: true);
             var id2 = db.Insert(new TABLE_1 { One = "B" }, selectIdentity: true);
@@ -568,10 +570,17 @@ namespace ServiceStack.OrmLite.Tests
 
             Assert.That(results.Count, Is.EqualTo(1));
             Assert.That(results[0].One, Is.EqualTo("A"));
+
+            var row3 = new TABLE_3 { TableTwo = new TABLE_2 {Three = "3"} };
+            db.Save(row3);
+            Assert.That(row3.TableTwoKey, Is.EqualTo(row3.TableTwo.Id));
+
+            row3 = db.SingleById<TABLE_3>(row3.Id);
+            Assert.That(row3.TableTwoKey, Is.EqualTo(row3.TableTwo.Id));
         }
     }
 
-    [Alias("Tabela1")]
+    [Alias("Table1")]
     public class TABLE_1 : IHasId<int>
     {
         [AutoIncrement]
@@ -582,7 +591,7 @@ namespace ServiceStack.OrmLite.Tests
         public string One { get; set; }
     }
 
-    [Alias("Tabela2")]
+    [Alias("Table2")]
     public class TABLE_2 : IHasId<int>
     {
         [AutoIncrement]
@@ -593,7 +602,23 @@ namespace ServiceStack.OrmLite.Tests
         public string Three { get; set; }
 
         [References(typeof(TABLE_1))]
-        [Alias("Tabela1")]
+        [Alias("Table1")]
         public int TableOneKey { get; set; }
+    }
+
+    [Alias("Table3")]
+    public class TABLE_3 : IHasId<int>
+    {
+        [AutoIncrement]
+        [Alias("Key")]
+        public int Id { get; set; }
+
+        [Alias("Tri")]
+        public string Three { get; set; }
+
+        [References(typeof(TABLE_2))]
+        public int TableTwoKey { get; set; }
+
+        public TABLE_2 TableTwo { get; set; }
     }
 }
