@@ -1061,13 +1061,25 @@ namespace ServiceStack.OrmLite.Oracle
             if (!offset.HasValue)
                 offset = 0;
 
-            if (string.IsNullOrEmpty(orderByExpression))
+            if (string.IsNullOrEmpty(orderByExpression) && rows.HasValue)
             {
-                if (modelDef.PrimaryKey == null)
-                    throw new ApplicationException("Malformed model, no PrimaryKey defined");
-
-                orderByExpression = string.Format("ORDER BY {0}",
-                    OrmLiteConfig.DialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName));
+                var primaryKey = modelDef.FieldDefinitions.FirstOrDefault(x => x.IsPrimaryKey);
+                if (primaryKey == null)
+                {
+                    if (rows.Value == 1 && offset.Value == 0)
+                    {
+                        // Probably used Single<> extension method on a table with a composite key so let it through.
+                        // Lack of an orderby expression will mean it returns a random matching row, but that is OK.
+                        orderByExpression = "";
+                    }
+                    else
+                        throw new ApplicationException("Malformed model, no PrimaryKey defined");
+                }
+                else
+                {
+                    orderByExpression = string.Format("ORDER BY {0}",
+                        OrmLiteConfig.DialectProvider.GetQuotedColumnName(primaryKey.FieldName));
+                }
             }
             sbInner.Append(" " + orderByExpression);
 
