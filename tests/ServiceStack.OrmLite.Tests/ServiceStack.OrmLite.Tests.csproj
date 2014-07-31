@@ -117,6 +117,7 @@
     <Compile Include="ApiSqlServerTests.cs" />
     <Compile Include="ApiSqliteTests.cs" />
     <Compile Include="CaptureSqlFilterTests.cs" />
+    <Compile Include="CompositeKeyTests.cs" />
     <Compile Include="CustomSqlTests.cs" />
     <Compile Include="DateTimeOffsetTests.cs" />
     <Compile Include="Expression\ExpressionUsingCustomSerializedEnumTests.cs" />

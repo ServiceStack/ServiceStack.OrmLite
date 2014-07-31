@@ -75,6 +75,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\CompositeKeyTests.cs">
+      <Link>CompositeKeyTests.cs</Link>
+    </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\CustomSqlTests.cs">
       <Link>CustomSqlTests.cs</Link>
     </Compile>
