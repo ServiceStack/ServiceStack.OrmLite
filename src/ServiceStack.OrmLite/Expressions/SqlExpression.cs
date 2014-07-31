@@ -597,9 +597,9 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
-        public string SqlTable(string tableName)
+        public string SqlTable(ModelDefinition modelDef)
         {
-            return DialectProvider.GetQuotedTableName(tableName);
+            return DialectProvider.GetQuotedTableName(modelDef);
         }
 
         public string SqlColumn(string columnName)
@@ -1174,7 +1174,7 @@ namespace ServiceStack.OrmLite
                     : memberName;
 
                 return PrefixFieldWithTableName 
-                    ? DialectProvider.GetQuotedColumnName(tableDef.ModelName, fieldName)
+                    ? DialectProvider.GetQuotedColumnName(tableDef, fieldName)
                     : DialectProvider.GetQuotedColumnName(fieldName);
             }
             return memberName;

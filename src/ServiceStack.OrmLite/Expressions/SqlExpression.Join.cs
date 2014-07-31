@@ -107,9 +107,9 @@ namespace ServiceStack.OrmLite
                 }
 
                 sqlExpr = "\n({0}.{1} = {2}.{3})".Fmt(
-                    SqlTable(parentDef.ModelName),
+                    DialectProvider.GetQuotedTableName(parentDef),
                     SqlColumn(parentDef.PrimaryKey.FieldName),
-                    SqlTable(childDef.ModelName),
+                    DialectProvider.GetQuotedTableName(childDef),
                     SqlColumn(refField.FieldName));
             }
 
@@ -117,7 +117,7 @@ namespace ServiceStack.OrmLite
                               ? sourceDef
                               : targetDef;
 
-            sbJoin.Append(" {0} {1} ".Fmt(joinType, SqlTable(joinDef.ModelName)));
+            sbJoin.Append(" {0} {1} ".Fmt(joinType, SqlTable(joinDef)));
             sbJoin.Append(" ON ");
             sbJoin.Append(sqlExpr);
 
@@ -155,7 +155,7 @@ namespace ServiceStack.OrmLite
                                 sbSelect.Append(", ");
 
                             sbSelect.AppendFormat("{0}.{1}",
-                                SqlTable(tableDef.ModelName),
+                                SqlTable(tableDef),
                                 tableFieldDef.GetQuotedName(DialectProvider));
                             break;
                         }

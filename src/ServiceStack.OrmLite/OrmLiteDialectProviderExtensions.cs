@@ -42,9 +42,9 @@ namespace ServiceStack.OrmLite
         }
 
         public static string GetQuotedColumnName(this IOrmLiteDialectProvider dialect,
-            string tableName, string fieldName)
+            ModelDefinition tableDef, string fieldName)
         {
-            return dialect.GetQuotedTableName(tableName) +
+            return dialect.GetQuotedTableName(tableDef) +
                 "." +
                 dialect.GetQuotedColumnName(fieldName);
         }
