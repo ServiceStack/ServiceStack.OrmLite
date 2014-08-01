@@ -986,29 +986,18 @@ typedRow = db.SingleById<Target>(1); //= null
 
 ## T4 Template Support
 
-[Guru Kathiresan](https://github.com/gkathire) continues to enhance [OrmLite's T4 Template support](https://github.com/ServiceStack/ServiceStack.OrmLite/tree/master/src/T4) which are useful when you want to automatically generate POCO's and strong-typed wrappers for executing stored procedures. OrmLite's T4 support can be added via NuGet with:
+[OrmLite's T4 Template](https://github.com/ServiceStack/ServiceStack.OrmLite/tree/master/src/T4) 
+are useful in database-first development or when wanting to use OrmLite with an existing
+RDBMS by automatically generating POCO's and strong-typed wrappers 
+for executing stored procedures. 
+
+OrmLite's T4 support can be added via NuGet with:
 
     PM> Install-Package ServiceStack.OrmLite.T4
 
-## Custom SQL API's
+## Typed SqlExpressions with Custom SQL APIs
 
-Custom SQL API's provide a convenient way for executing custom sql and mapping to , e.g:
-
-```csharp
-List<Poco> results = db.SqlList<Poco>("EXEC GetAnalyticsForWeek 1");
-List<Poco> results = db.SqlList<Poco>("EXEC GetAnalyticsForWeek @weekNo", new { weekNo = 1 });
-
-List<int> results = db.SqlList<int>("EXEC GetTotalsForWeek 1");
-List<int> results = db.SqlList<int>("EXEC GetTotalsForWeek @weekNo", new { weekNo = 1 });
-
-int result = db.SqlScalar<int>("SELECT 10");
-```
-
-More examples can be found in [SqlServerProviderTests](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLite.Tests/SqlServerProviderTests.cs).
-
-### Using typed SqlExpression in Custom SQL APIs
-
-The Custom SQL API's also allow querying with Typed SQL Expressions:
+The Custom SQL API's allow you to map custom SqlExpressions into different responses:
 
 ```csharp
 List<Person> results = db.SqlList<Person>(db.From<Person>().Select("*").Where(q => q.Age < 50));
@@ -1023,6 +1012,59 @@ HashSet<int> results = db.ColumnDistinct<int>("SELECT Age FROM Person");
 int result = db.SqlScalar<int>(db.From<Person>().Select(Sql.Count("*")).Where(q => q.Age < 50));
 int result = db.SqlScalar<int>("SELCT COUNT(*) FROM Person WHERE Age < 50");
 ```
+
+## Stored Procedures using Custom Raw SQL API's
+
+The Raw SQL API's provide a convenient way for mapping results of any Custom SQL like
+executing Stored Procedures:
+
+```csharp
+List<Poco> results = db.SqlList<Poco>("EXEC GetAnalyticsForWeek 1");
+List<Poco> results = db.SqlList<Poco>("EXEC GetAnalyticsForWeek @weekNo", new { weekNo = 1 });
+
+List<int> results = db.SqlList<int>("EXEC GetTotalsForWeek 1");
+List<int> results = db.SqlList<int>("EXEC GetTotalsForWeek @weekNo", new { weekNo = 1 });
+
+int result = db.SqlScalar<int>("SELECT 10");
+```
+
+### Stored Procedures with output params
+
+The `SqlProc` API provides even greater customization by letting you modify the underlying
+ADO.NET Stored Procedure call by returning a prepared `IDbCommand` allowing for 
+advanced customization like setting and retriving OUT parameters, e.g:
+
+```csharp
+string spSql = @"DROP PROCEDURE IF EXISTS spSearchLetters;
+    CREATE PROCEDURE spSearchLetters (IN pLetter varchar(10), OUT pTotal int)
+    BEGIN
+        SELECT COUNT(*) FROM LetterFrequency WHERE Letter = pLetter INTO pTotal;
+        SELECT * FROM LetterFrequency WHERE Letter = pLetter;
+    END";
+
+db.ExecuteSql(spSql);
+
+var cmd = db.SqlProc("spSearchLetters", new { pLetter = "C" });
+var pTotal = cmd.AddParam("pTotal", direction: ParameterDirection.Output);
+
+var results = cmd.ConvertToList<LetterFrequency>();
+var total = pTotal.Value;
+```
+
+An alternative approach is to use `SqlList` which lets you use a filter to customize a 
+Stored Procedure or any other command type, e.g:
+
+```csharp
+IDbDataParameter pTotal = null;
+var results = db.SqlList<LetterFrequency>("spSearchLetters", cmd => {
+        cmd.CommandType = CommandType.StoredProcedure;
+        cmd.AddParam("pLetter", "C");
+        pTotal = cmd.AddParam("pTotal", direction: ParameterDirection.Output);
+    });
+var total = pTotal.Value;
+```
+
+More examples can be found in [SqlServerProviderTests](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLite.Tests/SqlServerProviderTests.cs).
 
 ## New Foreign Key attribute for referential actions on Update/Deletes
 
