@@ -553,11 +553,13 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_join_on_references_attribute()
         {
-            // Drop table 2 first because of foreign key
+            // Drop tables in order that FK allows
+            db.DropTable<TABLE_3>();
             db.DropTable<TABLE_2>();
-            db.DropAndCreateTable<TABLE_1>();
-            db.DropAndCreateTable<TABLE_2>();
-            db.DropAndCreateTable<TABLE_3>();
+            db.DropTable<TABLE_1>();
+            db.CreateTable<TABLE_1>();
+            db.CreateTable<TABLE_2>();
+            db.CreateTable<TABLE_3>();
 
             var id1 = db.Insert(new TABLE_1 { One = "A" }, selectIdentity: true);
             var id2 = db.Insert(new TABLE_1 { One = "B" }, selectIdentity: true);
@@ -571,11 +573,19 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(results.Count, Is.EqualTo(1));
             Assert.That(results[0].One, Is.EqualTo("A"));
 
-            var row3 = new TABLE_3 { TableTwo = new TABLE_2 {Three = "3"} };
-            db.Save(row3);
+            var row3 = new TABLE_3 {
+                Three = "3a",
+                TableTwo = new TABLE_2 
+                {
+                    Three = "3b",
+                    TableOneKey = (int)id1,
+                }
+            };
+            db.Save(row3, references:true);
+
             Assert.That(row3.TableTwoKey, Is.EqualTo(row3.TableTwo.Id));
 
-            row3 = db.SingleById<TABLE_3>(row3.Id);
+            row3 = db.LoadSingleById<TABLE_3>(row3.Id);
             Assert.That(row3.TableTwoKey, Is.EqualTo(row3.TableTwo.Id));
         }
     }
@@ -617,8 +627,9 @@ namespace ServiceStack.OrmLite.Tests
         public string Three { get; set; }
 
         [References(typeof(TABLE_2))]
-        public int TableTwoKey { get; set; }
+        public int? TableTwoKey { get; set; }
 
+        [Reference]
         public TABLE_2 TableTwo { get; set; }
     }
 }
