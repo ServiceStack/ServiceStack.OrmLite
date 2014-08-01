@@ -479,6 +479,41 @@ class CustomerAddress {
 }
 ```
 
+### Self References
+
+Self References are also supported for **1:1** relations where the Foreign Key can instead be on the parent table:
+
+```csharp
+public class Customer
+{
+    ...
+    public int CustomerAddressId { get; set; }
+
+    [Reference]
+    public CustomerAddress PrimaryAddress { get; set; }
+}
+```
+
+### Foreign Key and References Attributes
+
+References that don't follow the above naming conventions can be declared explicitly using
+the `[References]` and `[ForeignKey]` attributes:
+
+```csharp
+public class Customer
+{
+    [References(typeof(CustomerAddress))]
+    public int PrimaryAddressId { get; set; }
+
+    [Reference]
+    public CustomerAddress PrimaryAddress { get; set; }
+}
+```
+
+> Reference Attributes take precedence over naming conventions
+
+### Implicit Reference Conventions are applied by default
+
 The implicit relationship above allows you to use any of these equilvalent APIs to JOIN tables:
 
 ```csharp
