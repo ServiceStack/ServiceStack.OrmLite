@@ -1,7 +1,7 @@
 [Join the ServiceStack Google+ group](https://plus.google.com/u/0/communities/112445368900682590445) or
 follow [@servicestack](http://twitter.com/servicestack) for updates.
 
-# A Fast Micro ORM for .NET
+# A Fast, Simple, Typed ORM for .NET
 
 # Introduction
 
@@ -598,6 +598,20 @@ db.Save(customer, references:true);
 ```
 
 This saves the root customer POCO in the `Customer` table, its related PrimaryAddress in the `CustomerAddress` table and its 2 Orders in the `Order` table.
+
+### Querying POCO's with References
+
+The `Load*` API's are used to automatically load a POCO and all it's child references, e.g:
+
+```csharp
+var customer = db.LoadSingleById<Customer>(customerId);
+```
+
+Using Typed SqlExpressions:
+
+```csharp
+var customers = db.LoadSelect<Customer>(q => q.Name == "Customer 1");
+```
 
 More examples available in [LoadReferencesTests.cs](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLite.Tests/LoadReferencesTests.cs)
 
