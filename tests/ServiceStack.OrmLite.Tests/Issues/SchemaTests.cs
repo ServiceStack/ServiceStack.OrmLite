@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.Logging;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
@@ -35,8 +35,6 @@ namespace ServiceStack.OrmLite.Tests.Issues
         [Test]
         public void Can_join_on_table_with_schemas()
         {
-            LogManager.LogFactory = new ConsoleLogFactory(debugEnabled: true);
-
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<SchemaTable1>();
@@ -67,5 +65,71 @@ namespace ServiceStack.OrmLite.Tests.Issues
                 Assert.That(rows.Count, Is.EqualTo(1));
             }
         }
+
+        [Test]
+        public void Can_query_with_Schema_and_alias_attributes()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Section>();
+                db.DropAndCreateTable<Page>();
+
+                db.Save(new Page {
+                    ReportSectionId = 1,
+                    SectionId = 1,
+                }, references: true);
+                db.Save(new Page {
+                    ReportSectionId = 2,
+                    SectionId = 2,
+                }, references: true);
+                db.Save(new Section {
+                    Id = 1,
+                    ReportSectionId = 1,
+                    Name = "Name1",
+                    ReportId = 15,
+                }, references: true);
+
+                var query = db.From<Section>()
+                    .LeftJoin<Section, Page>((s, p) => s.Id == p.SectionId)
+                    .Where<Section>(s => s.ReportId == 15);
+
+                var results = db.Select(query);
+                db.GetLastSql().Print();
+
+                results.PrintDump();
+
+                Assert.That(results.Count, Is.EqualTo(1));
+                Assert.That(results[0].Name, Is.EqualTo("Name1"));
+            }
+        }
+    }
+
+    [Schema("Schema")]
+    [Alias("PageAlias")]
+    public class Page
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+
+        [Alias("ReportSectionIdAlias")]
+        public int ReportSectionId { get; set; }
+
+        [Alias("SectionIdAlias")]
+        public int SectionId { get; set; }
+    }
+
+    [Schema("Schema")]
+    [Alias("SectionAlias")]
+    public class Section
+    {
+        public int Id { get; set; }
+
+        [Alias("ReportSectionIdAlias")]
+        public int ReportSectionId { get; set; }
+
+        [Alias("NameAlias")]
+        public string Name { get; set; }
+        [Alias("ReportIdAlias")]
+        public int ReportId { get; set; }
     }
 }
