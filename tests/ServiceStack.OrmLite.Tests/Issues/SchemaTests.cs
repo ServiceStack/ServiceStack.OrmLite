@@ -1,5 +1,7 @@
-﻿using NUnit.Framework;
+﻿using System;
+using NUnit.Framework;
 using ServiceStack.DataAnnotations;
+using ServiceStack.Model;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Issues
@@ -75,16 +77,13 @@ namespace ServiceStack.OrmLite.Tests.Issues
                 db.DropAndCreateTable<Page>();
 
                 db.Save(new Page {
-                    ReportSectionId = 1,
                     SectionId = 1,
                 }, references: true);
                 db.Save(new Page {
-                    ReportSectionId = 2,
                     SectionId = 2,
                 }, references: true);
                 db.Save(new Section {
                     Id = 1,
-                    ReportSectionId = 1,
                     Name = "Name1",
                     ReportId = 15,
                 }, references: true);
@@ -102,34 +101,184 @@ namespace ServiceStack.OrmLite.Tests.Issues
                 Assert.That(results[0].Name, Is.EqualTo("Name1"));
             }
         }
+
+        [Test]
+        public void Does_complex_query_using_Schemas_with_LeftJoins()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Editable>();
+                db.DropAndCreateTable<EditableRevision>();
+                db.DropAndCreateTable<LogEntry>();
+                db.DropAndCreateTable<Report>();
+                db.DropAndCreateTable<Page>();
+                db.DropAndCreateTable<Section>();
+
+                var q = db.From<Section>()
+                    .Join<Section, Page>((s, p) => s.Id == p.SectionId)
+                    .Join<Page, Editable>((p, e) => p.Id == e.PageId)
+                    .Where<Section, Page>((s, p) => s.ReportId == 15 && p.Index == 24);
+
+                var result = db.Select<Editable>(q);
+
+                db.GetLastSql().Print();
+            }
+        }
     }
 
-    [Schema("Schema")]
-    [Alias("PageAlias")]
-    public class Page
+    [Alias("Editables")]
+    [Schema("MicroSite")]
+    public partial class Editable : IHasId<int>
     {
+        public string Content { get; set; }
+
+        [Alias("EditableID")]
         [AutoIncrement]
+        [PrimaryKey]
         public int Id { get; set; }
 
-        [Alias("ReportSectionIdAlias")]
-        public int ReportSectionId { get; set; }
+        [Required]
+        public int Index { get; set; }
 
-        [Alias("SectionIdAlias")]
-        public int SectionId { get; set; }
+        [Alias("ReportPageID")]
+        [Required]
+        public int PageId { get; set; }
+
+        public string Styles { get; set; }
+
+        [Alias("Type")]
+        [Required]
+        public int TypeId { get; set; }
     }
 
-    [Schema("Schema")]
-    [Alias("SectionAlias")]
-    public class Section
+    [Alias("EditableRevisions")]
+    [Schema("MicroSite")]
+    public partial class EditableRevision : IHasId<int>
     {
+        public string Content { get; set; }
+
+        [Required]
+        public DateTime Date { get; set; }
+
+        [Alias("EditableID")]
+        [Required]
+        public int EditableId { get; set; }
+
+        [Required]
+        public int EmployeeId { get; set; }
+
+        [Alias("EditableRevisionsID")]
+        [AutoIncrement]
+        [PrimaryKey]
         public int Id { get; set; }
 
-        [Alias("ReportSectionIdAlias")]
-        public int ReportSectionId { get; set; }
+        public string Reason { get; set; }
+        public string Styles { get; set; }
+    }
 
-        [Alias("NameAlias")]
+    [Alias("LogEntries")]
+    [Schema("MicroSite")]
+    public class LogEntry : IHasId<int>
+    {
+        [Required]
+        public DateTime Date { get; set; }
+
+        [Alias("LogEntriesID")]
+        [AutoIncrement]
+        [PrimaryKey]
+        public int Id { get; set; }
+
+        [Required]
+        public int KlasId { get; set; }
+
+        [Required]
+        public int PageTrackerId { get; set; }
+
+        [Alias("ReportID")]
+        [Required]
+        public int ReportId { get; set; }
+
+        [Alias("ReportPageID")]
+        [Required]
+        public int PageId { get; set; }
+
+        public string RequestUrl { get; set; }
+
+        [Alias("Type")]
+        [Required]
+        public int TypeId { get; set; }
+    }
+
+    [Alias("ReportPages")]
+    [Schema("MicroSite")]
+    public partial class Page : IHasId<int>
+    {
+        [Required]
+        public int AccessLevel { get; set; }
+
+        [Required]
+        public int AssignedEmployeeId { get; set; }
+
+        [Required]
+        public bool Cover { get; set; }
+
+        [Required]
+        public bool Deleted { get; set; }
+
+        [Required]
+        public bool Disabled { get; set; }
+
+        [Alias("ReportPageID")]
+        [AutoIncrement]
+        [PrimaryKey]
+        public int Id { get; set; }
+
+        [Required]
+        public int Index { get; set; }
+
         public string Name { get; set; }
-        [Alias("ReportIdAlias")]
+
+        [Alias("ReportSectionID")]
+        [Required]
+        public int SectionId { get; set; }
+
+        public string Template { get; set; }
+    }
+
+    [Alias("Reports")]
+    [Schema("MicroSite")]
+    public partial class Report : IHasId<int>
+    {
+        [Required]
+        public int DefaultAccessLevel { get; set; }
+
+        [Required]
+        public bool Deleted { get; set; }
+
+        public string Description { get; set; }
+
+        [Alias("ReportID")]
+        [AutoIncrement]
+        [PrimaryKey]
+        public int Id { get; set; }
+
+        public string Name { get; set; }
+    }
+
+    [Alias("ReportSections")]
+    [Schema("MicroSite")]
+    public class Section : IHasId<int>
+    {
+        [Alias("ReportSectionID")]
+        [AutoIncrement]
+        [PrimaryKey]
+        public int Id { get; set; }
+
+        public string Name { get; set; }
+
+        [Alias("ReportID")]
+        [Required]
         public int ReportId { get; set; }
     }
+
 }

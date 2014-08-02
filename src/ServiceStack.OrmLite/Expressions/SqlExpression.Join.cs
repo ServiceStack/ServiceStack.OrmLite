@@ -140,11 +140,20 @@ namespace ServiceStack.OrmLite
 
             var sbSelect = new StringBuilder();
             var selectDef = typeof(TModel).GetModelDefinition();
+
+            var orderedDefs = tableDefs;
+            if (selectDef != modelDef && tableDefs.Contains(selectDef))
+            {
+                orderedDefs = tableDefs.ToList(); //clone
+                orderedDefs.Remove(selectDef);
+                orderedDefs.Insert(0, selectDef);
+            }
+
             foreach (var fieldDef in selectDef.FieldDefinitions)
             {
                 var found = false;
 
-                foreach (var tableDef in tableDefs)
+                foreach (var tableDef in orderedDefs)
                 {
                     foreach (var tableFieldDef in tableDef.FieldDefinitions)
                     {
@@ -168,7 +177,7 @@ namespace ServiceStack.OrmLite
                 if (!found)
                 {
                     // Add support for auto mapping `{Table}{Field}` convention
-                    foreach (var tableDef in tableDefs)
+                    foreach (var tableDef in orderedDefs)
                     {
                         var matchingField = tableDef.FieldDefinitions
                             .FirstOrDefault(x =>
