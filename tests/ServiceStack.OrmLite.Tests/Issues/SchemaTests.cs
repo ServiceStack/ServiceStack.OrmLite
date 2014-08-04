@@ -46,7 +46,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
                 {
                     Id = 1,
                     Child = new SchemaTable2 { Name = "Foo" }
-                }, references:true);
+                }, references: true);
 
                 db.Save(new SchemaTable1
                 {
@@ -76,13 +76,16 @@ namespace ServiceStack.OrmLite.Tests.Issues
                 db.DropAndCreateTable<Section>();
                 db.DropAndCreateTable<Page>();
 
-                db.Save(new Page {
+                db.Save(new Page
+                {
                     SectionId = 1,
                 }, references: true);
-                db.Save(new Page {
+                db.Save(new Page
+                {
                     SectionId = 2,
                 }, references: true);
-                db.Save(new Section {
+                db.Save(new Section
+                {
                     Id = 1,
                     Name = "Name1",
                     ReportId = 15,
@@ -114,12 +117,20 @@ namespace ServiceStack.OrmLite.Tests.Issues
                 db.DropAndCreateTable<Page>();
                 db.DropAndCreateTable<Section>();
 
+                db.Insert(new Editable { Index = 1, Content = "Content", PageId = 1, Styles = "Styles", TypeId = 1 });
+                db.Insert(new EditableRevision { Content = "Content", Styles = "Styles", Date = DateTime.UtcNow, EditableId = 1, EmployeeId = 1, Reason = "Reason" });
+                db.Insert(new LogEntry { Date = DateTime.UtcNow, KlasId = 1, PageId = 1, PageTrackerId = 1, ReportId = 1, RequestUrl = "http://url.com", TypeId = 1 });
+                db.Insert(new Report { DefaultAccessLevel = 1, Description = "Description", Name = "Name" });
+                db.Insert(new Page { AccessLevel = 1, AssignedEmployeeId = 1, Index = 1, SectionId = 1, Template = "Template" });
+                db.Insert(new Section { Name = "Name", ReportId = 1 });
+
                 var q = db.From<Section>()
                     .Join<Section, Page>((s, p) => s.Id == p.SectionId)
                     .Join<Page, Editable>((p, e) => p.Id == e.PageId)
-                    .Where<Section, Page>((s, p) => s.ReportId == 15 && p.Index == 24);
+                    .Where<Section, Page>((s, p) => s.ReportId == 1 && p.Index == 1);
 
                 var result = db.Select<Editable>(q);
+                result.PrintDump();
 
                 db.GetLastSql().Print();
             }
