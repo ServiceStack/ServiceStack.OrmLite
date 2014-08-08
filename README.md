@@ -3,8 +3,6 @@ follow [@servicestack](http://twitter.com/servicestack) for updates.
 
 # A Fast, Simple, Typed ORM for .NET
 
-# Introduction
-
 OrmLite's goal is to provide a convenient, DRY, config-free, RDBMS-agnostic typed wrapper that retains a high affinity with SQL, exposing intuitive APIs that generate predictable SQL and maps cleanly to (DTO-friendly) disconnected POCO's. This approach makes easier to reason-about your data access making it obvious what SQL is getting executed at what time, whilst mitigating unexpected behavior, implicit N+1 queries and leaky data access prevalent in Heavy ORMs.
 
 OrmLite was designed with a focus on the core objectives:
