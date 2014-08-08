@@ -282,7 +282,7 @@ db.Insert(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 2
 But do provide an API that takes an Expression Visitor for the rare cases you don't want to insert every field
 
 ```csharp
-db.InsertOnly(new Person { FirstName = "Amy" }, q => q.Insert(p => new {p.FirstName} ));
+db.InsertOnly(new Person { FirstName = "Amy" }, q => q.Insert(p => new {p.FirstName}))
 ```
 **INSERT INTO "Person" ("FirstName") VALUES ('Amy')**
 
@@ -593,7 +593,7 @@ public class CustomerAddress
 {
     [AutoIncrement]
     public int Id { get; set; }
-    public int CustomerId { get; set; } // `{Parent}Id` convention to reference Customer
+    public int CustomerId { get; set; } //`{Parent}Id` convention to refer to Customer
     public string AddressLine1 { get; set; }
     public string AddressLine2 { get; set; }
     public string City { get; set; }
@@ -605,7 +605,7 @@ public class Order
 {
     [AutoIncrement]
     public int Id { get; set; }
-    public int CustomerId { get; set; } // `{Parent}Id` convention to reference Customer
+    public int CustomerId { get; set; } //`{Parent}Id` convention to refer to Customer
     public string LineItem { get; set; }
     public int Qty { get; set; }
     public decimal Cost { get; set; }
@@ -784,7 +784,9 @@ The Result Filters also lets you easily mock results and avoid hitting the datab
 ```csharp
 using (new OrmLiteResultsFilter {
     PrintSql = true,
-    SingleResult = new Person { Id = 1, FirstName = "Mocked", LastName = "Person", Age = 100 },
+    SingleResult = new Person { 
+      Id = 1, FirstName = "Mocked", LastName = "Person", Age = 100 
+    },
 })
 {
     db.Single<Person>(x => x.Age == 42).FirstName // Mocked
@@ -998,8 +1000,10 @@ OrmLite's T4 support can be added via NuGet with:
 The Custom SQL API's allow you to map custom SqlExpressions into different responses:
 
 ```csharp
-List<Person> results = db.SqlList<Person>(db.From<Person>().Select("*").Where(q => q.Age < 50));
-List<Person> results = db.SqlList<Person>("SELECT * FROM Person WHERE Age < @age", new { age=50});
+List<Person> results = db.SqlList<Person>(
+    db.From<Person>().Select("*").Where(q => q.Age < 50));
+List<Person> results = db.SqlList<Person>(
+    "SELECT * FROM Person WHERE Age < @age", new { age=50});
 
 List<string> results = db.SqlColumn<string>(db.From<Person>().Select(x => x.LastName));
 List<string> results = db.SqlColumn<string>("SELECT LastName FROM Person");
@@ -1007,7 +1011,8 @@ List<string> results = db.SqlColumn<string>("SELECT LastName FROM Person");
 HashSet<int> results = db.ColumnDistinct<int>(db.From<Person>().Select(x => x.Age));
 HashSet<int> results = db.ColumnDistinct<int>("SELECT Age FROM Person");
 
-int result = db.SqlScalar<int>(db.From<Person>().Select(Sql.Count("*")).Where(q => q.Age < 50));
+int result = db.SqlScalar<int>(
+    db.From<Person>().Select(Sql.Count("*")).Where(q => q.Age < 50));
 int result = db.SqlScalar<int>("SELCT COUNT(*) FROM Person WHERE Age < 50");
 ```
 
@@ -1018,10 +1023,12 @@ executing Stored Procedures:
 
 ```csharp
 List<Poco> results = db.SqlList<Poco>("EXEC GetAnalyticsForWeek 1");
-List<Poco> results = db.SqlList<Poco>("EXEC GetAnalyticsForWeek @weekNo", new { weekNo = 1 });
+List<Poco> results = db.SqlList<Poco>(
+    "EXEC GetAnalyticsForWeek @weekNo", new { weekNo = 1 });
 
 List<int> results = db.SqlList<int>("EXEC GetTotalsForWeek 1");
-List<int> results = db.SqlList<int>("EXEC GetTotalsForWeek @weekNo", new { weekNo = 1 });
+List<int> results = db.SqlList<int>(
+    "EXEC GetTotalsForWeek @weekNo", new { weekNo = 1 });
 
 int result = db.SqlScalar<int>("SELECT 10");
 ```
@@ -1462,30 +1469,30 @@ public class ShipperTypeCount
 Creating tables is a simple 1-liner:
 
 ```csharp
-	using (IDbConnection db = ":memory:".OpenDbConnection())
-	{
-      db.CreateTable<ShipperType>();
-      db.CreateTable<Shipper>();
-	}
+using (IDbConnection db = ":memory:".OpenDbConnection())
+{
+    db.CreateTable<ShipperType>();
+    db.CreateTable<Shipper>();
+}
 
-	/* In debug mode the line above prints:
-  DEBUG: CREATE TABLE "ShipperTypes" 
-  (
-    "ShipperTypeID" INTEGER PRIMARY KEY AUTOINCREMENT, 
-    "Name" VARCHAR(40) NOT NULL 
-  );
-  DEBUG: CREATE UNIQUE INDEX uidx_shippertypes_name ON "ShipperTypes" ("Name" ASC);
-	DEBUG: CREATE TABLE "Shippers" 
-	(
-	  "ShipperID" INTEGER PRIMARY KEY AUTOINCREMENT, 
-	  "CompanyName" VARCHAR(40) NOT NULL, 
-	  "Phone" VARCHAR(24) NULL, 
-	  "ShipperTypeId" INTEGER NOT NULL, 
+/* In debug mode the line above prints:
+DEBUG: CREATE TABLE "ShipperTypes" 
+(
+  "ShipperTypeID" INTEGER PRIMARY KEY AUTOINCREMENT, 
+  "Name" VARCHAR(40) NOT NULL 
+);
+DEBUG: CREATE UNIQUE INDEX uidx_shippertypes_name ON "ShipperTypes" ("Name" ASC);
+DEBUG: CREATE TABLE "Shippers" 
+(
+  "ShipperID" INTEGER PRIMARY KEY AUTOINCREMENT, 
+  "CompanyName" VARCHAR(40) NOT NULL, 
+  "Phone" VARCHAR(24) NULL, 
+  "ShipperTypeId" INTEGER NOT NULL, 
 
-	  CONSTRAINT "FK_Shippers_ShipperTypes" FOREIGN KEY ("ShipperTypeId") REFERENCES "ShipperTypes" ("ShipperID") 
-	);
-	DEBUG: CREATE UNIQUE INDEX uidx_shippers_companyname ON "Shippers" ("CompanyName" ASC);
-	*/
+  CONSTRAINT "FK_Shippers_ShipperTypes" FOREIGN KEY ("ShipperTypeId") REFERENCES "ShipperTypes" ("ShipperID") 
+);
+DEBUG: CREATE UNIQUE INDEX uidx_shippers_companyname ON "Shippers" ("CompanyName" ASC);
+*/
 ```
 
 ### Transaction Support
