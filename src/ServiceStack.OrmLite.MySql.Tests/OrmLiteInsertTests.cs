@@ -1,4 +1,3 @@
-using Northwind.Common.DataModel;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
 using ServiceStack.DataAnnotations;
@@ -146,36 +145,6 @@ namespace ServiceStack.OrmLite.MySql.Tests
 				row.Id = rows[0].Id;
 
 				TaskQueue.AssertIsEqual(rows[0], row);
-			}
-		}
-
-        [NUnit.Framework.Ignore("Don't know how to realize in MySql")]
-		[Test]
-		public void Can_insert_table_with_blobs()
-		{
-			using (var db = OpenDbConnection())
-			{
-				db.CreateTable<OrderBlob>(true);
-
-				var row = OrderBlob.Create(1);
-
-				db.Insert(row);
-
-				var rows = db.Select<OrderBlob>();
-
-				Assert.That(rows, Has.Count.EqualTo(1));
-
-				var newRow = rows[0];
-
-				Assert.That(newRow.Id, Is.EqualTo(row.Id));
-				Assert.That(newRow.Customer.Id, Is.EqualTo(row.Customer.Id));
-				Assert.That(newRow.Employee.Id, Is.EqualTo(row.Employee.Id));
-				Assert.That(newRow.IntIds, Is.EquivalentTo(row.IntIds));
-				Assert.That(newRow.CharMap, Is.EquivalentTo(row.CharMap));
-				Assert.That(newRow.OrderDetails.Count, Is.EqualTo(row.OrderDetails.Count));
-				Assert.That(newRow.OrderDetails[0].ProductId, Is.EqualTo(row.OrderDetails[0].ProductId));
-				Assert.That(newRow.OrderDetails[1].ProductId, Is.EqualTo(row.OrderDetails[1].ProductId));
-				Assert.That(newRow.OrderDetails[2].ProductId, Is.EqualTo(row.OrderDetails[2].ProductId));
 			}
 		}
 

@@ -156,9 +156,6 @@
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\MockAllApiTests.cs">
       <Link>MockAllApiTests.cs</Link>
     </Compile>
-    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\NorthwindPerfTests.cs">
-      <Link>NorthwindPerfTests.cs</Link>
-    </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\OrmLiteBasicPersistenceProviderTests.cs">
       <Link>OrmLiteBasicPersistenceProviderTests.cs</Link>
     </Compile>
@@ -194,9 +191,6 @@
     </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\OrmLiteInsertTests.cs">
       <Link>OrmLiteInsertTests.cs</Link>
-    </Compile>
-    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\OrmLiteNorthwindTests.cs">
-      <Link>OrmLiteNorthwindTests.cs</Link>
     </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\OrmLiteQueryTests.cs">
       <Link>OrmLiteQueryTests.cs</Link>

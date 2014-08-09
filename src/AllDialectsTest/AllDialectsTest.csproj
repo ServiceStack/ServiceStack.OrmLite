@@ -85,5 +85,10 @@
       <Link>test.mdf</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="..\SqlServerExpressionsTest\test_log.ldf">
+      <Link>test_log.ldf</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <DependentUpon>test.mdf</DependentUpon>
+    </Content>
   </ItemGroup>
 </Project>

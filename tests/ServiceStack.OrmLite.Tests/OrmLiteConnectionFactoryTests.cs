@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Data;
-using Northwind.Common.DataModel;
 using NUnit.Framework;
+using ServiceStack.Common.Tests.Models;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests

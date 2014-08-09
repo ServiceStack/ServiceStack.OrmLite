@@ -46,9 +46,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\MySql.Data.6.8.3\lib\net40\MySql.Data.dll</HintPath>
     </Reference>
-    <Reference Include="Northwind.Common">
-      <HintPath>..\..\lib\tests\Northwind.Common.dll</HintPath>
-    </Reference>
     <Reference Include="nunit.framework">
       <HintPath>..\..\lib\tests\nunit.framework.dll</HintPath>
     </Reference>
@@ -98,7 +95,6 @@
     <Compile Include="LocalizationTests.cs" />
     <Compile Include="MySqlAdminTests.cs" />
     <Compile Include="StringColumnTests.cs" />
-    <Compile Include="NorthwindPerfTests.cs" />
     <Compile Include="OrmLiteBasicPersistenceProviderTests.cs" />
     <Compile Include="OrmLiteComplexTypesTests.cs" />
     <Compile Include="OrmLiteConnectionTests.cs" />
@@ -106,7 +102,6 @@
     <Compile Include="OrmLiteCreateTableWithIndexesTests.cs" />
     <Compile Include="OrmLiteDeleteTests.cs" />
     <Compile Include="OrmLiteInsertTests.cs" />
-    <Compile Include="OrmLiteNorthwindTests.cs" />
     <Compile Include="OrmLiteQueryTests.cs" />
     <Compile Include="OrmLiteSaveStringValueTests.cs" />
     <Compile Include="OrmLiteSaveTests.cs" />
