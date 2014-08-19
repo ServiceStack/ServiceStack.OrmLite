@@ -163,6 +163,58 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        public void CanQueryByEnumValue_using_select_with_expression_enum_flags()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<TypeWithFlagsEnum>();
+                db.Save(new TypeWithFlagsEnum { Id = 1, Flags = FlagsEnum.FlagOne });
+                db.Save(new TypeWithFlagsEnum { Id = 2, Flags = FlagsEnum.FlagOne });
+                db.Save(new TypeWithFlagsEnum { Id = 3, Flags = FlagsEnum.FlagTwo });
+
+                var results = db.Select<TypeWithFlagsEnum>(q => q.Flags == FlagsEnum.FlagOne);
+                db.GetLastSql().Print();
+                Assert.That(results.Count, Is.EqualTo(2));
+                results = db.Select<TypeWithFlagsEnum>(q => q.Flags == FlagsEnum.FlagTwo);
+                db.GetLastSql().Print();
+                Assert.That(results.Count, Is.EqualTo(1));
+            }
+        }
+
+        [Test]
+        public void CanQueryByEnumValue_using_select_with_string_enum_flags()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<TypeWithFlagsEnum>();
+                db.Save(new TypeWithFlagsEnum { Id = 1, Flags = FlagsEnum.FlagOne });
+                db.Save(new TypeWithFlagsEnum { Id = 2, Flags = FlagsEnum.FlagOne });
+                db.Save(new TypeWithFlagsEnum { Id = 3, Flags = FlagsEnum.FlagTwo });
+
+                var target = db.SelectFmt<TypeWithFlagsEnum>(
+                    "Flags".SqlColumn() + " = {0}", FlagsEnum.FlagOne);
+                db.GetLastSql().Print();
+                Assert.AreEqual(2, target.Count());
+            }
+        }
+
+        [Test]
+        public void CanQueryByEnumValue_using_where_with_AnonType_enum_flags()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<TypeWithFlagsEnum>();
+                db.Save(new TypeWithFlagsEnum { Id = 1, Flags = FlagsEnum.FlagOne });
+                db.Save(new TypeWithFlagsEnum { Id = 2, Flags = FlagsEnum.FlagOne });
+                db.Save(new TypeWithFlagsEnum { Id = 3, Flags = FlagsEnum.FlagTwo });
+
+                var target = db.Where<TypeWithFlagsEnum>(new { Flags = FlagsEnum.FlagOne });
+                db.GetLastSql().Print();
+                Assert.AreEqual(2, target.Count());
+            }
+        }
+
+        [Test]
         public void Does_save_Enum_with_label_by_default()
         {
             using (var db = OpenDbConnection())
