@@ -86,6 +86,10 @@ namespace ServiceStack.OrmLite
 
         void SetParameterValues<T>(IDbCommand dbCmd, object obj);
 
+        Dictionary<string, FieldDefinition> GetFieldDefinitionMap(ModelDefinition modelDef);
+
+        object GetFieldValue(FieldDefinition fieldDef, object value);
+
         string ToUpdateRowStatement(object objWithProperties, ICollection<string> UpdateFields = null);
 
         string ToDeleteRowStatement(object objWithProperties);

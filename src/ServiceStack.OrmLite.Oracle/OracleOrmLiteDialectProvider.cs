@@ -358,7 +358,7 @@ namespace ServiceStack.OrmLite.Oracle
         public override void SetParameterValues<T>(IDbCommand dbCmd, object obj)
         {
             var modelDef = GetModel(typeof(T));
-            var fieldMap = modelDef.GetFieldDefinitionMap(SanitizeFieldNameForParamName);
+            var fieldMap = GetFieldDefinitionMap(modelDef);
 
             foreach (IDataParameter p in dbCmd.Parameters)
             {

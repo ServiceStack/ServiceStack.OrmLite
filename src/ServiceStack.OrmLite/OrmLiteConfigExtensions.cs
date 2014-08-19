@@ -114,7 +114,7 @@ namespace ServiceStack.OrmLite
                     : propertyInfo.PropertyType;
 
                 Type treatAsType = null;
-                if (propertyType.IsEnum && propertyType.HasAttribute<FlagsAttribute>())
+                if (propertyType.IsEnumFlags())
                 {
                     treatAsType = Enum.GetUnderlyingType(propertyType);
                 }

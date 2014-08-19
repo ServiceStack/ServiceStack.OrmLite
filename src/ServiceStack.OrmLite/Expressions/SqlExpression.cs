@@ -911,7 +911,7 @@ namespace ServiceStack.OrmLite
                     var rightPartialSql = right as PartialSqlString;
                     if (rightPartialSql == null)
                     {
-                        right = ConvertToEnum(leftEnum.EnumType, right.ToString(), right);
+                        right = DialectProvider.GetQuotedValue(right, leftEnum.EnumType);
                     }
                 }
                 else if (leftNeedsCoercing)
@@ -919,7 +919,7 @@ namespace ServiceStack.OrmLite
                     var leftPartialSql = left as PartialSqlString;
                     if (leftPartialSql == null)
                     {
-                        left = ConvertToEnum(rightEnum.EnumType, left.ToString(), left);
+                        left = DialectProvider.GetQuotedValue(left, rightEnum.EnumType);
                     }
                 }
                 else if (left as PartialSqlString == null && right as PartialSqlString == null)
@@ -945,16 +945,6 @@ namespace ServiceStack.OrmLite
                 default:
                     return new PartialSqlString("(" + left + sep + operand + sep + right + ")");
             }
-        }
-
-        private string ConvertToEnum(Type enumType, string enumStr, object otherExpr)
-        {
-            //enum value was returned by Visit(b.Right)
-            long numvericVal;
-            var result = Int64.TryParse(enumStr, out numvericVal)
-                ? DialectProvider.GetQuotedValue(Enum.ToObject(enumType, numvericVal).ToString(), typeof(string))
-                : DialectProvider.GetQuotedValue(otherExpr, otherExpr.GetType());
-            return result;
         }
 
         protected virtual object VisitMemberAccess(MemberExpression m)

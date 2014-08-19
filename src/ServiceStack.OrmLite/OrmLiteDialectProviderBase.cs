@@ -709,7 +709,7 @@ namespace ServiceStack.OrmLite
         public virtual void SetParameterValues<T>(IDbCommand dbCmd, object obj)
         {
             var modelDef = GetModel(typeof(T));
-            var fieldMap = modelDef.GetFieldDefinitionMap(SanitizeFieldNameForParamName);
+            var fieldMap = GetFieldDefinitionMap(modelDef);
 
             foreach (IDataParameter p in dbCmd.Parameters)
             {
@@ -724,6 +724,11 @@ namespace ServiceStack.OrmLite
             }
         }
 
+        public Dictionary<string, FieldDefinition> GetFieldDefinitionMap(ModelDefinition modelDef)
+        {
+            return modelDef.GetFieldDefinitionMap(SanitizeFieldNameForParamName);
+        }
+
         public virtual void SetParameterValue<T>(FieldDefinition fieldDef, IDataParameter p, object obj)
         {
             var value = GetValueOrDbNull<T>(fieldDef, obj);
@@ -736,12 +741,17 @@ namespace ServiceStack.OrmLite
                ? fieldDef.GetValue(obj)
                : GetAnonValue<T>(fieldDef, obj);
 
+            return GetFieldValue(fieldDef, value);
+        }
+
+        public object GetFieldValue(FieldDefinition fieldDef, object value)
+        {
             if (value != null)
             {
                 if (fieldDef.IsRefType)
                 {
                     //Let ADO.NET providers handle byte[]
-                    if (fieldDef.FieldType == typeof(byte[]))
+                    if (fieldDef.FieldType == typeof (byte[]))
                     {
                         return value;
                     }
@@ -754,9 +764,9 @@ namespace ServiceStack.OrmLite
                         ? enumValue.Trim('"')
                         : null;
                 }
-                if (fieldDef.FieldType == typeof(TimeSpan))
+                if (fieldDef.FieldType == typeof (TimeSpan))
                 {
-                    var timespan = (TimeSpan)value;
+                    var timespan = (TimeSpan) value;
                     return timespan.Ticks;
                 }
             }
@@ -1338,6 +1348,22 @@ namespace ServiceStack.OrmLite
                 return dialectProvider.GetQuotedValue(dialectProvider.StringSerializer.SerializeToString(value));
             }
 
+            if (fieldType.IsEnum)
+            {
+                var isEnumFlags = fieldType.IsEnumFlags();
+                long enumValue;
+                if (!isEnumFlags && Int64.TryParse(value.ToString(), out enumValue))
+                {
+                    value = Enum.ToObject(fieldType, enumValue).ToString();
+                }
+
+                var enumString = dialectProvider.StringSerializer.SerializeToString(value);
+
+                return !isEnumFlags
+                    ? dialectProvider.GetQuotedValue(enumString.Trim('"'))
+                    : enumString;
+            }
+
             var typeCode = fieldType.GetTypeCode();
             switch (typeCode)
             {
@@ -1363,14 +1389,6 @@ namespace ServiceStack.OrmLite
 
             if (fieldType == typeof(TimeSpan))
                 return ((TimeSpan)value).Ticks.ToString(CultureInfo.InvariantCulture);
-
-            if (fieldType.IsEnum)
-            {
-                var enumValue = dialectProvider.StringSerializer.SerializeToString(value);
-                return enumValue != null
-                    ? dialectProvider.GetQuotedValue(enumValue.Trim('"'))
-                    : null;
-            }
  
             return ShouldQuoteValue(fieldType)
                     ? dialectProvider.GetQuotedValue(value.ToString())

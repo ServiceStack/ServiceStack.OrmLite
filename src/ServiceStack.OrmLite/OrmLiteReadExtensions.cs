@@ -138,17 +138,28 @@ namespace ServiceStack.OrmLite
             dbCmd.Parameters.Clear();
             lastQueryType = null;
 
+            var dialectProvider = OrmLiteConfig.DialectProvider;
+            var fieldMap = typeof(T).IsUserType() //Ensure T != Scalar<int>()
+                ? dialectProvider.GetFieldDefinitionMap(typeof(T).GetModelDefinition())
+                : null;
+
             anonType.ForEachParam<T>(excludeDefaults, (pi, columnName, value) =>
             {
                 var p = dbCmd.CreateParameter();
                 p.ParameterName = columnName;
-                p.DbType = OrmLiteConfig.DialectProvider.GetColumnDbType(pi.PropertyType);
+                p.DbType = dialectProvider.GetColumnDbType(pi.PropertyType);
                 p.Direction = ParameterDirection.Input;
+
+                FieldDefinition fieldDef;
+                if (fieldMap != null && fieldMap.TryGetValue(columnName, out fieldDef))
+                    value = dialectProvider.GetFieldValue(fieldDef, value);
+
                 p.Value = value == null ?
                     DBNull.Value
                   : p.DbType == DbType.String ?
                     value.ToString() :
                     value;
+
                 dbCmd.Parameters.Add(p);
             });
         }
@@ -429,7 +440,7 @@ namespace ServiceStack.OrmLite
 
         internal static List<T> SelectNonDefaults<T>(this IDbCommand dbCmd, string sql, object anonType = null)
         {
-            if (anonType != null) dbCmd.SetParameters<T>(anonType, excludeDefaults: false);
+            if (anonType != null) dbCmd.SetParameters<T>(anonType, excludeDefaults:true);
 
             return dbCmd.ConvertToList<T>(OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sql));
         }

@@ -98,7 +98,7 @@ namespace ServiceStack.OrmLite
                 {
                     if (fieldDefinitionMap == null || fieldNameSanitizer != sanitizeFieldName)
                     {
-                        fieldDefinitionMap = new Dictionary<string, FieldDefinition>();
+                        fieldDefinitionMap = new Dictionary<string, FieldDefinition>(StringComparer.OrdinalIgnoreCase);
                         fieldNameSanitizer = sanitizeFieldName;
                         foreach (var fieldDef in FieldDefinitionsArray)
                         {
