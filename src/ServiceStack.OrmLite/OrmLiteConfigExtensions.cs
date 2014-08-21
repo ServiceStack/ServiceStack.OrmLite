@@ -103,6 +103,8 @@ namespace ServiceStack.OrmLite
                 var isRowVersion = propertyInfo.Name == ModelDefinition.RowVersionName
                     && propertyInfo.PropertyType == typeof(ulong);
 
+                isRowVersion = isRowVersion || propertyInfo.FirstAttribute<RowVersionAttribute>() != null;
+
                 var isNullableType = IsNullableType(propertyInfo.PropertyType);
 
                 var isNullable = (!propertyInfo.PropertyType.IsValueType

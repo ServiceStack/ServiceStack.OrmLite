@@ -102,7 +102,7 @@ namespace ServiceStack.OrmLite.SqlServer
 
         public override void SetDbValue(FieldDefinition fieldDef, IDataReader reader, int colIndex, object instance)
         {
-            if (fieldDef.IsRowVersion)
+            if (fieldDef.IsRowVersion && fieldDef.FieldType != typeof(byte[]))
             {
                 var bytes = reader.GetValue(colIndex) as byte[];
                 if (bytes != null)

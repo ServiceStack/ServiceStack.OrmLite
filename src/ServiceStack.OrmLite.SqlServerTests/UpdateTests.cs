@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using ServiceStack.Data;
 using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.SqlServerTests
@@ -140,7 +141,47 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 Assert.AreEqual(obj.Name, target.Name);
             }
         }
+            [Test]
+        public void Can_update_versioned()
+        {
+            using (var con = OpenDbConnection())
+            {
+                con.CreateTable<SqlVersionedType>(true);
+                var rowId = con.Insert(new SqlVersionedType { Text = "Text" }, selectIdentity: true);
+
+                var row = con.SingleById<SqlVersionedType>(rowId);
+
+                row.Text += " Updated";
+
+                con.Update(row);
+
+                var updatedRow = con.SingleById<SqlVersionedType>(rowId);
+
+                Assert.That(updatedRow.Text, Is.EqualTo("Text Updated"));
+              
+                row.Text += " Again";
+
+                //Can't update old record
+                Assert.Throws<OptimisticConcurrencyException>(() =>
+                    con.Update(row));
+
+                //Can update latest version
+                updatedRow.Text += " Again";
+                con.Update(updatedRow);
+            }
+        }
     }
+
+    public class SqlVersionedType
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+        [RowVersion]
+        public byte[] Timestamp { get; set; }
+        public string Text { get; set; }
+    }
+
+
 
 
     public class SimpleType
