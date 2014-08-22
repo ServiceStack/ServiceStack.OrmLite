@@ -152,7 +152,14 @@ namespace ServiceStack.OrmLite
 
                 FieldDefinition fieldDef;
                 if (fieldMap != null && fieldMap.TryGetValue(columnName, out fieldDef))
+                {
                     value = dialectProvider.GetFieldValue(fieldDef, value);
+                    var valueType = value != null ? value.GetType() : null;
+                    if (valueType != null && valueType != pi.PropertyType)
+                    {
+                        p.DbType = dialectProvider.GetColumnDbType(valueType);
+                    }
+                }
 
                 p.Value = value == null ?
                     DBNull.Value
@@ -919,7 +926,7 @@ namespace ServiceStack.OrmLite
             var modelDef = ModelDefinition<Into>.Definition;
             var fieldDefs = modelDef.AllFieldDefinitionsArray.Where(x => x.IsReference);
 
-            expr.Select(dialectProvider.GetQuotedColumnName(modelDef.PrimaryKey));
+            expr.Select(dialectProvider.GetQuotedColumnName(modelDef, modelDef.PrimaryKey));
             var subSql = expr.ToSelectStatement();
 
             foreach (var fieldDef in fieldDefs)
