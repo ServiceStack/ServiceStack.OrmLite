@@ -479,6 +479,34 @@ namespace ServiceStack.OrmLite
             }
         }
 
+        internal static IEnumerable<T> ColumnLazy<T>(this IDbCommand dbCmd, string sql, object anonType = null)
+        {
+            if (anonType != null) dbCmd.SetParameters<T>(anonType, excludeDefaults: false);
+            var dialectProvider = OrmLiteConfig.DialectProvider;
+            dbCmd.CommandText = dialectProvider.ToSelectStatement(typeof(T), sql);
+
+            if (OrmLiteConfig.ResultsFilter != null)
+            {
+                foreach (var item in OrmLiteConfig.ResultsFilter.GetColumn<T>(dbCmd))
+                {
+                    yield return item;
+                }
+                yield break;
+            }
+
+            using (var reader = dbCmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    var value = dialectProvider.ConvertDbValue(reader.GetValue(0), typeof(T));
+                    if (value == DBNull.Value)
+                        yield return default(T);
+                    else
+                        yield return (T)value;
+                }
+            }
+        }
+
         internal static IEnumerable<T> WhereLazy<T>(this IDbCommand dbCmd, object anonType)
         {
             dbCmd.SetFilters<T>(anonType);
