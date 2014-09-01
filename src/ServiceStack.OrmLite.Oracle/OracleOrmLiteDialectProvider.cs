@@ -973,11 +973,11 @@ namespace ServiceStack.OrmLite.Oracle
             return name;
         }
 
-        private string Sequence(string modelName, string fieldName, string sequence)
+        public virtual string Sequence(string modelName, string fieldName, string sequence)
         {
             //TODO used to return Quote(sequence)
             if (!sequence.IsNullOrEmpty()) return sequence;
-            var seqName = NamingStrategy.ApplyNameRestrictions(modelName + "_" + fieldName + "_GEN");
+            var seqName = NamingStrategy.GetSequenceName(modelName, fieldName);
             return seqName;
         }
 
