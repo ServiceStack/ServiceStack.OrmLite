@@ -218,6 +218,21 @@ namespace ServiceStack.OrmLite
             return dbConn.Exec(dbCmd => dbCmd.Count(expression));
         }
 
+        /// <summary>
+        /// Return the number of rows returned by the supplied expression
+        /// </summary>
+        public static long RowCount<T>(this IDbConnection dbConn, SqlExpression<T> expression)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.RowCount(expression));
+        }
+
+        /// <summary>
+        /// Return the number of rows returned by the supplied sql
+        /// </summary>
+        public static long RowCount(this IDbConnection dbConn, string sql)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.RowCount(sql));
+        }
 
         /// <summary>
         /// Returns results with references from using a LINQ Expression. E.g:
