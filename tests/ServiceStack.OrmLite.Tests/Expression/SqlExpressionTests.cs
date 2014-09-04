@@ -259,16 +259,19 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 db.Insert(new LetterFrequency { Letter = "B" });
                 db.Insert(new LetterFrequency { Letter = "B" });
 
-
                 var query = db.From<LetterFrequency>()
                     .Select(x => x.Letter)
                     .GroupBy(x => x.Letter);
 
                 var count = db.Count(query);
                 db.GetLastSql().Print();
-                Assert.That(count, Is.EqualTo(7));
+                Assert.That(count, Is.EqualTo(7)); //Sum of Counts returned [3,4]
 
-                var rowCount = db.Select(query).Count;
+                var rowCount = db.RowCount(query);
+                db.GetLastSql().Print();
+                Assert.That(rowCount, Is.EqualTo(2));
+
+                rowCount = db.Select(query).Count;
                 db.GetLastSql().Print();
                 Assert.That(rowCount, Is.EqualTo(2));
             }
