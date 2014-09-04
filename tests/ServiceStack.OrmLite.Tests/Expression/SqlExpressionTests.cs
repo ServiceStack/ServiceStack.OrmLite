@@ -264,11 +264,13 @@ namespace ServiceStack.OrmLite.Tests.Expression
                     .Select(x => x.Letter)
                     .GroupBy(x => x.Letter);
 
-                query.ToCountStatement().Print();
-
                 var count = db.Count(query);
+                db.GetLastSql().Print();
+                Assert.That(count, Is.EqualTo(7));
 
-                Assert.That(count, Is.EqualTo(2));
+                var rowCount = db.Select(query).Count;
+                db.GetLastSql().Print();
+                Assert.That(rowCount, Is.EqualTo(2));
             }
         }
 

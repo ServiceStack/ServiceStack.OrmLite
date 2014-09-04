@@ -90,30 +90,35 @@ namespace ServiceStack.OrmLite
 
         internal static long Count<T>(this IDbCommand dbCmd)
         {
-            SqlExpression<T> expression = OrmLiteConfig.DialectProvider.SqlExpression<T>();
-            string sql = expression.ToCountStatement();
-            return dbCmd.Scalar<long>(sql);
+            var expression = OrmLiteConfig.DialectProvider.SqlExpression<T>();
+            var sql = expression.ToCountStatement();
+            return GetCount(dbCmd, sql);
         }
 
         internal static long Count<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression)
         {
             var expr = OrmLiteConfig.DialectProvider.SqlExpression<T>();
-            string sql = expression(expr).ToCountStatement();
-            return dbCmd.Scalar<long>(sql);
+            var sql = expression(expr).ToCountStatement();
+            return GetCount(dbCmd, sql);
         }
 
         internal static long Count<T>(this IDbCommand dbCmd, SqlExpression<T> expression)
         {
-            string sql = expression.ToCountStatement();
-            return dbCmd.Scalar<long>(sql);
+            var sql = expression.ToCountStatement();
+            return GetCount(dbCmd, sql);
         }
 
         internal static long Count<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
         {
             var ev = OrmLiteConfig.DialectProvider.SqlExpression<T>();
             ev.Where(predicate);
-            string sql = ev.ToCountStatement();
-            return dbCmd.Scalar<long>(sql);
+            var sql = ev.ToCountStatement();
+            return GetCount(dbCmd, sql);
+        }
+
+        internal static long GetCount(this IDbCommand dbCmd, string sql)
+        {
+            return dbCmd.Column<long>(sql).Sum();
         }
 
         internal static List<T> LoadSelect<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression)
