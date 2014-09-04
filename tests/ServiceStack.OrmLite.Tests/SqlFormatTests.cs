@@ -81,12 +81,9 @@ namespace ServiceStack.OrmLite.Tests
         }
 
 	    [Test]
-	    public void Does_allow_illegal_tokens_in_MySql_table_names()
+	    public void Does_allow_illegal_tokens_in_quoted_MySql_table_names()
 	    {
-	        var sql = MySqlDialect.Provider.ToSelectStatement(typeof(ProflieExtended), "1 = 1")
-                .Replace("SELECT ","");
-            Assert.That(sql, Is.EqualTo("`Id` FROM `profile_extended` WHERE 1 = 1"));
-
+            var sql = "FROM `profile_extended`";
 	        sql.SqlVerifyFragment();
 	    }
     }
