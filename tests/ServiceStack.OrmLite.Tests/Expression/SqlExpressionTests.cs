@@ -245,6 +245,34 @@ namespace ServiceStack.OrmLite.Tests.Expression
         }
 
         [Test]
+        public void Can_do_ToCountStatement_with_SqlExpression_if_expression_has_groupby()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<LetterFrequency>();
+
+                db.Insert(new LetterFrequency { Letter = "A" });
+                db.Insert(new LetterFrequency { Letter = "A" });
+                db.Insert(new LetterFrequency { Letter = "A" });
+                db.Insert(new LetterFrequency { Letter = "B" });
+                db.Insert(new LetterFrequency { Letter = "B" });
+                db.Insert(new LetterFrequency { Letter = "B" });
+                db.Insert(new LetterFrequency { Letter = "B" });
+
+
+                var query = db.From<LetterFrequency>()
+                    .Select(x => x.Letter)
+                    .GroupBy(x => x.Letter);
+
+                query.ToCountStatement().Print();
+
+                var count = db.Count(query);
+
+                Assert.That(count, Is.EqualTo(2));
+            }
+        }
+
+        [Test]
         public void Can_OrderBy_Fields_with_different_sort_directions()
         {
             using (var db = OpenDbConnection())
