@@ -152,7 +152,14 @@ namespace ServiceStack.OrmLite
 
                 FieldDefinition fieldDef;
                 if (fieldMap != null && fieldMap.TryGetValue(columnName, out fieldDef))
+                {
                     value = dialectProvider.GetFieldValue(fieldDef, value);
+                    var valueType = value != null ? value.GetType() : null;
+                    if (valueType != null && valueType != pi.PropertyType)
+                    {
+                        p.DbType = dialectProvider.GetColumnDbType(valueType);
+                    }
+                }
 
                 p.Value = value == null ?
                     DBNull.Value
@@ -468,6 +475,34 @@ namespace ServiceStack.OrmLite
                     var row = OrmLiteUtilExtensions.CreateInstance<T>();
                     row.PopulateWithSqlReader(reader, fieldDefs, indexCache);
                     yield return row;
+                }
+            }
+        }
+
+        internal static IEnumerable<T> ColumnLazy<T>(this IDbCommand dbCmd, string sql, object anonType = null)
+        {
+            if (anonType != null) dbCmd.SetParameters<T>(anonType, excludeDefaults: false);
+            var dialectProvider = OrmLiteConfig.DialectProvider;
+            dbCmd.CommandText = dialectProvider.ToSelectStatement(typeof(T), sql);
+
+            if (OrmLiteConfig.ResultsFilter != null)
+            {
+                foreach (var item in OrmLiteConfig.ResultsFilter.GetColumn<T>(dbCmd))
+                {
+                    yield return item;
+                }
+                yield break;
+            }
+
+            using (var reader = dbCmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    var value = dialectProvider.ConvertDbValue(reader.GetValue(0), typeof(T));
+                    if (value == DBNull.Value)
+                        yield return default(T);
+                    else
+                        yield return (T)value;
                 }
             }
         }
@@ -919,7 +954,7 @@ namespace ServiceStack.OrmLite
             var modelDef = ModelDefinition<Into>.Definition;
             var fieldDefs = modelDef.AllFieldDefinitionsArray.Where(x => x.IsReference);
 
-            expr.Select(dialectProvider.GetQuotedColumnName(modelDef.PrimaryKey));
+            expr.Select(dialectProvider.GetQuotedColumnName(modelDef, modelDef.PrimaryKey));
             var subSql = expr.ToSelectStatement();
 
             foreach (var fieldDef in fieldDefs)

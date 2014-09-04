@@ -15,7 +15,7 @@ namespace TestClassWriter
 		public static void Main (string[] args)
 		{
 
-            OrmLiteConfig.DialectProvider = new OracleOrmLiteDialectProvider();
+            OrmLiteConfig.DialectProvider = new OracleOrmLiteDialectProvider { NamingStrategy = new OracleNamingStrategy()};
 			using (IDbConnection db =
                 "Data Source=x;User Id=x;Password=x;".OpenDbConnection())
 			using ( IDbCommand dbConn = db.CreateCommand())

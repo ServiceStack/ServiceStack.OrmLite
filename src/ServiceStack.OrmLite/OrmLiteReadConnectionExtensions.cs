@@ -240,6 +240,24 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns the first column in a List using a SqlFormat query. E.g:
+        /// <para>db.ColumnLazy&lt;string&gt;("SELECT LastName FROM Person WHERE Age = @age", new { age = 27 })</para>
+        /// </summary>
+        public static IEnumerable<T> ColumnLazy<T>(this IDbConnection dbConn, string sql, object anonType = null)
+        {
+            return dbConn.ExecLazy(dbCmd => dbCmd.ColumnLazy<T>(sql, anonType));
+        }
+
+        /// <summary>
+        /// Returns the distinct first column values in a HashSet using an SqlExpression. E.g:
+        /// <para>db.ColumnLazy&lt;int&gt;(db.From&lt;Persion&gt;().Select(x => x.LastName).Where(q => q.Age == 27))</para>
+        /// </summary>
+        public static IEnumerable<T> ColumnLazy<T>(this IDbConnection dbConn, ISqlExpression query)
+        {
+            return dbConn.ExecLazy(dbCmd => dbCmd.ColumnLazy<T>(query.ToSelectStatement()));
+        }
+
+        /// <summary>
+        /// Returns the first column in a List using a SqlFormat query. E.g:
         /// <para>db.Column&lt;string&gt;("SELECT LastName FROM Person WHERE Age = @age", new { age = 27 })</para>
         /// </summary>
         public static List<T> Column<T>(this IDbConnection dbConn, string sql, object anonType = null)

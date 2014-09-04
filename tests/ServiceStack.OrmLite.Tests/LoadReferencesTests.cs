@@ -338,25 +338,31 @@ namespace ServiceStack.OrmLite.Tests
 
         private Customer AddCustomerWithOrders()
         {
-            var customer = new Customer
-            {
-                Name = "Customer 1",
-                PrimaryAddress = new CustomerAddress
-                {
-                    AddressLine1 = "1 Humpty Street",
-                    City = "Humpty Doo",
-                    State = "Northern Territory",
-                    Country = "Australia"
-                },
-                Orders = new[]
-                {
-                    new Order {LineItem = "Line 1", Qty = 1, Cost = 1.99m},
-                    new Order {LineItem = "Line 2", Qty = 2, Cost = 2.99m},
-                }.ToList(),
-            };
+            var customer = GetCustomerWithOrders();
 
             db.Save(customer, references: true);
 
+            return customer;
+        }
+
+        public static Customer GetCustomerWithOrders(string id="1")
+        {
+            var customer = new Customer
+            {
+                Name = "Customer " + id,
+                PrimaryAddress = new CustomerAddress
+                    {
+                        AddressLine1 = id + " Humpty Street",
+                        City = "Humpty Doo",
+                        State = "Northern Territory",
+                        Country = "Australia"
+                    },
+                Orders = new[]
+                    {
+                        new Order {LineItem = "Line 1", Qty = 1, Cost = 1.99m},
+                        new Order {LineItem = "Line 2", Qty = 2, Cost = 2.99m},
+                    }.ToList(),
+            };
             return customer;
         }
 

@@ -26,6 +26,12 @@ namespace ServiceStack.OrmLite.Oracle
             return ApplyNameRestrictions(name);
         }
 
+        public override string GetSequenceName(string modelName, string fieldName)
+        {
+            var seqName = ApplyNameRestrictions(modelName + "_" + fieldName + "_GEN");
+            return seqName;
+        }
+
         public override string ApplyNameRestrictions(string name)
         {
             if (name.Length > MaxNameLength) name = Squash(name);

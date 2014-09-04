@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using ServiceStack.Text;
+using ServiceStack;
 
 namespace ServiceStack.OrmLite.SqlServer
 {
@@ -406,11 +407,12 @@ namespace ServiceStack.OrmLite.SqlServer
                     throw new ApplicationException("Malformed model, no PrimaryKey defined");
 
                 orderByExpression = string.Format("ORDER BY {0}",
-                    OrmLiteConfig.DialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName));
+                    OrmLiteConfig.DialectProvider.GetQuotedColumnName(modelDef, modelDef.PrimaryKey));
             }
 
             var ret = string.Format(
-                "SELECT * FROM (SELECT ROW_NUMBER() OVER ({1}) As RowNum, {0} {2}) AS RowConstrainedResult WHERE RowNum > {3} AND RowNum <= {4}",
+                "{0} FROM (SELECT ROW_NUMBER() OVER ({2}) As RowNum, {1} {3}) AS RowConstrainedResult WHERE RowNum > {4} AND RowNum <= {5}",
+                StripTablePrefixes(selectExpression), //SELECT without RowNum to be able to use in SELECT IN () Reference Queries
                 selectExpression.Substring(selectType.Length),
                 orderByExpression,
                 bodyExpression,
@@ -419,5 +421,29 @@ namespace ServiceStack.OrmLite.SqlServer
 
             return ret;
         }
+
+        string StripTablePrefixes(string selectExpression)
+        {
+            if (selectExpression.IndexOf('.') < 0)
+                return selectExpression;
+
+            var sb = new StringBuilder();
+            var tokens = selectExpression.Split(' ');
+            foreach (var token in tokens)
+            {
+                var parts = token.SplitOnLast('.');
+                if (parts.Length > 1)
+                {
+                    sb.Append(" " + parts[parts.Length - 1]);
+                }
+                else
+                {
+                    sb.Append(" " + token);
+                }
+            }
+
+            return sb.ToString();
+        }
+
     }
 }

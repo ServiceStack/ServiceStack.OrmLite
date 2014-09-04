@@ -24,6 +24,11 @@ namespace ServiceStack.OrmLite
             return name;
         }
 
+        public virtual string GetSequenceName(string modelName, string fieldName)
+        {
+            return "SEQ_" + modelName + "_" + fieldName;
+        }
+
         public virtual string ApplyNameRestrictions(string name)
         {
             return name;

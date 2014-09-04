@@ -17,6 +17,18 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Checks whether a Table Exists. E.g:
+        /// <para>db.TableExists&lt;Person&gt;()</para>
+        /// </summary>
+        public static bool TableExists<T>(this IDbConnection dbConn)
+        {
+            var dialectProvider = dbConn.GetDialectProvider();
+            var modelDef = typeof(T).GetModelDefinition();
+            var tableName = dialectProvider.NamingStrategy.GetTableName(modelDef.ModelName);
+            return dialectProvider.DoesTableExist(dbConn, tableName);
+        }
+
+        /// <summary>
         /// Create DB Tables from the schemas of runtime types. E.g:
         /// <para>db.CreateTables(typeof(Table1), typeof(Table2))</para> 
         /// </summary>

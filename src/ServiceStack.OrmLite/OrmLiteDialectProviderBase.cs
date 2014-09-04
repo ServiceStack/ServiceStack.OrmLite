@@ -760,9 +760,15 @@ namespace ServiceStack.OrmLite
                 if (fieldDef.FieldType.IsEnum)
                 {
                     var enumValue = OrmLiteConfig.DialectProvider.StringSerializer.SerializeToString(value);
-                    return enumValue != null
-                        ? enumValue.Trim('"')
-                        : null;
+                    if (enumValue == null)
+                        return null;
+
+                    enumValue = enumValue.Trim('"');
+                    long intEnum;
+                    if (Int64.TryParse(enumValue, out intEnum))
+                        return intEnum;
+                    
+                    return enumValue;
                 }
                 if (fieldDef.FieldType == typeof (TimeSpan))
                 {
