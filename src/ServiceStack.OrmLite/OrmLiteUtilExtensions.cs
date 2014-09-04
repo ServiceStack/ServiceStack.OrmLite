@@ -186,6 +186,7 @@ namespace ServiceStack.OrmLite
             var fragmentToVerify = sqlFragment
                 .StripQuotedStrings('\'')
                 .StripQuotedStrings('"')
+                .StripQuotedStrings('`')
                 .ToLower();
 
             foreach (var illegalFragment in illegalFragments)
