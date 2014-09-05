@@ -282,5 +282,28 @@ namespace ServiceStack.OrmLite
                     : fieldType))
                 && fieldType != typeof(string);
         }
+
+        public static string StripTablePrefixes(this string selectExpression)
+        {
+            if (selectExpression.IndexOf('.') < 0)
+                return selectExpression;
+
+            var sb = new StringBuilder();
+            var tokens = selectExpression.Split(' ');
+            foreach (var token in tokens)
+            {
+                var parts = token.SplitOnLast('.');
+                if (parts.Length > 1)
+                {
+                    sb.Append(" " + parts[parts.Length - 1]);
+                }
+                else
+                {
+                    sb.Append(" " + token);
+                }
+            }
+
+            return sb.ToString().Trim();
+        }
     }
 }

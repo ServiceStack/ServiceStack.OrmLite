@@ -412,7 +412,7 @@ namespace ServiceStack.OrmLite.SqlServer
 
             var ret = string.Format(
                 "{0} FROM (SELECT ROW_NUMBER() OVER ({2}) As RowNum, {1} {3}) AS RowConstrainedResult WHERE RowNum > {4} AND RowNum <= {5}",
-                StripTablePrefixes(selectExpression), //SELECT without RowNum to be able to use in SELECT IN () Reference Queries
+                selectExpression.StripTablePrefixes(), //SELECT without RowNum to be able to use in SELECT IN () Reference Queries
                 selectExpression.Substring(selectType.Length),
                 orderByExpression,
                 bodyExpression,
@@ -421,29 +421,5 @@ namespace ServiceStack.OrmLite.SqlServer
 
             return ret;
         }
-
-        string StripTablePrefixes(string selectExpression)
-        {
-            if (selectExpression.IndexOf('.') < 0)
-                return selectExpression;
-
-            var sb = new StringBuilder();
-            var tokens = selectExpression.Split(' ');
-            foreach (var token in tokens)
-            {
-                var parts = token.SplitOnLast('.');
-                if (parts.Length > 1)
-                {
-                    sb.Append(" " + parts[parts.Length - 1]);
-                }
-                else
-                {
-                    sb.Append(" " + token);
-                }
-            }
-
-            return sb.ToString();
-        }
-
     }
 }
