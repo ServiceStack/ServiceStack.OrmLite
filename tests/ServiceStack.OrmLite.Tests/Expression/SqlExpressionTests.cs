@@ -286,7 +286,8 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 db.DropAndCreateTable<LetterStat>();
 
                 var insertedIds = new List<long>();
-                "A,B,B,C,C,C,D,D,E".Split(',').Each(letter => {
+                "A,B,B,C,C,C,D,D,E".Split(',').Each(letter =>
+                {
                     insertedIds.Add(db.Insert(new LetterFrequency { Letter = letter }, selectIdentity: true));
                 });
 
@@ -342,6 +343,55 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 Assert.That(results[0].Name, Is.EqualTo("Customer 2"));
                 Assert.That(results[0].PrimaryAddress.AddressLine1, Is.EqualTo("2 Humpty Street"));
                 Assert.That(results[0].Orders.Count, Is.EqualTo(2));
+            }
+        }
+
+        public class TableA
+        {
+            public int Id { get; set; }
+            public bool Bool { get; set; }
+        }
+
+        public class TableB
+        {
+            public int Id { get; set; }
+            public int TableAId { get; set; }
+        }
+
+        [Test]
+        public void Can_query_bools()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<TableA>();
+                db.DropAndCreateTable<TableB>();
+
+                db.Insert(new TableA { Id = 1, Bool = false });
+                db.Insert(new TableB { Id = 1, TableAId = 1 });
+
+                var q = db.From<TableA>()
+                    .LeftJoin<TableB>((a, b) => a.Id == b.Id)
+                    .Where(a => !a.Bool);
+
+                var result = db.Single(q);
+                db.GetLastSql().Print();
+                Assert.That(result.Id, Is.EqualTo(1));
+
+                q = db.From<TableA>()
+                    .Where(a => !a.Bool)
+                    .LeftJoin<TableB>((a, b) => a.Id == b.Id);
+
+                result = db.Single(q);
+                db.GetLastSql().Print();
+                Assert.That(result.Id, Is.EqualTo(1));
+
+
+                q = db.From<TableA>()
+                    .Where(a => !a.Bool);
+
+                result = db.Single(q);
+                db.GetLastSql().Print();
+                Assert.That(result.Id, Is.EqualTo(1));
             }
         }
     }

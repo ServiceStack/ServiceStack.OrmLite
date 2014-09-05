@@ -1185,12 +1185,11 @@ namespace ServiceStack.OrmLite
 
         protected bool IsFieldName(object quotedExp)
         {
-            FieldDefinition fd =
-                modelDef.FieldDefinitions.
-                    FirstOrDefault(x =>
-                        DialectProvider.
-                        GetQuotedColumnName(x.FieldName) == quotedExp.ToString());
-            return (fd != default(FieldDefinition));
+            var fieldExpr = quotedExp.ToString().StripTablePrefixes();
+            var fieldNames = modelDef.FieldDefinitions.Map(x =>
+                DialectProvider.GetQuotedColumnName(x.FieldName));
+
+            return fieldNames.Any(x => x == fieldExpr);
         }
 
         protected object GetTrueExpression()
