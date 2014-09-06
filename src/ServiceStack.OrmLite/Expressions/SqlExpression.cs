@@ -361,7 +361,17 @@ namespace ServiceStack.OrmLite
             return OrderByFields(" DESC", fieldNames);
         }
 
-        public virtual SqlExpression<T> OrderBy<TKey>(Expression<Func<T, TKey>> keySelector)
+        public virtual SqlExpression<T> OrderBy(Expression<Func<T, object>> keySelector)
+        {
+            return OrderByInternal(keySelector);
+        }
+
+        public virtual SqlExpression<T> OrderBy<Table>(Expression<Func<Table, object>> keySelector)
+        {
+            return OrderByInternal(keySelector);
+        }
+
+        private SqlExpression<T> OrderByInternal(Expression keySelector)
         {
             sep = string.Empty;
             useFieldName = true;
@@ -380,7 +390,17 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
-        public virtual SqlExpression<T> ThenBy<TKey>(Expression<Func<T, TKey>> keySelector)
+        public virtual SqlExpression<T> ThenBy(Expression<Func<T, object>> keySelector)
+        {
+            return ThenByInternal(keySelector);
+        }
+
+        public virtual SqlExpression<T> ThenBy<Table>(Expression<Func<Table, object>> keySelector)
+        {
+            return ThenByInternal(keySelector);
+        }
+
+        private SqlExpression<T> ThenByInternal(Expression keySelector)
         {
             sep = string.Empty;
             useFieldName = true;
@@ -390,7 +410,17 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
-        public virtual SqlExpression<T> OrderByDescending<TKey>(Expression<Func<T, TKey>> keySelector)
+        public virtual SqlExpression<T> OrderByDescending(Expression<Func<T, object>> keySelector)
+        {
+            return OrderByDescendingInternal(keySelector);
+        }
+
+        public virtual SqlExpression<T> OrderByDescending<Table>(Expression<Func<Table, object>> keySelector)
+        {
+            return OrderByDescendingInternal(keySelector);
+        }
+
+        private SqlExpression<T> OrderByDescendingInternal(Expression keySelector)
         {
             sep = string.Empty;
             useFieldName = true;
@@ -409,7 +439,17 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
-        public virtual SqlExpression<T> ThenByDescending<TKey>(Expression<Func<T, TKey>> keySelector)
+        public virtual SqlExpression<T> ThenByDescending(Expression<Func<T, object>> keySelector)
+        {
+            return ThenByDescendingInternal(keySelector);
+        }
+
+        public virtual SqlExpression<T> ThenByDescending<Table>(Expression<Func<Table, object>> keySelector)
+        {
+            return ThenByDescendingInternal(keySelector);
+        }
+
+        private SqlExpression<T> ThenByDescendingInternal(Expression keySelector)
         {
             sep = string.Empty;
             useFieldName = true;

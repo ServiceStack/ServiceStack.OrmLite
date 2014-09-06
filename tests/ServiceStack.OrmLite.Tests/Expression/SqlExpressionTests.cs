@@ -356,6 +356,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
         {
             public int Id { get; set; }
             public int TableAId { get; set; }
+            public string Name { get; set; }
         }
 
         [Test]
@@ -392,6 +393,38 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 result = db.Single(q);
                 db.GetLastSql().Print();
                 Assert.That(result.Id, Is.EqualTo(1));
+            }
+        }
+
+        [Test]
+        public void Can_order_by_Joined_table()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<TableA>();
+                db.DropAndCreateTable<TableB>();
+
+                db.Insert(new TableA { Id = 1, Bool = false });
+                db.Insert(new TableA { Id = 2, Bool = true });
+                db.Insert(new TableB { Id = 1, TableAId = 1, Name = "Z" });
+                db.Insert(new TableB { Id = 2, TableAId = 2, Name = "A" });
+
+                var q = db.From<TableA>()
+                    .Join<TableB>()
+                    .OrderBy(x => x.Id);
+
+                var rows = db.Select(q);
+                db.GetLastSql().Print();
+                Assert.That(rows.Map(x => x.Id), Is.EqualTo(new[] {1, 2}));
+
+
+                q = db.From<TableA>()
+                    .Join<TableB>()
+                    .OrderBy<TableB>(x => x.Name);
+
+                rows = db.Select(q);
+                db.GetLastSql().Print();
+                Assert.That(rows.Map(x => x.Id), Is.EqualTo(new[] { 2, 1 }));
             }
         }
     }
