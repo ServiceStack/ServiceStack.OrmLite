@@ -117,6 +117,7 @@
     <Compile Include="CompositeKeyTests.cs" />
     <Compile Include="CustomSqlTests.cs" />
     <Compile Include="DateTimeOffsetTests.cs" />
+    <Compile Include="Expression\ComplexJoinTests.cs" />
     <Compile Include="Expression\ExpressionUsingCustomSerializedEnumTests.cs" />
     <Compile Include="Expression\FromExpressionTests.cs" />
     <Compile Include="Expression\GenericTableExpressions.cs" />
