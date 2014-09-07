@@ -415,7 +415,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
                 var rows = db.Select(q);
                 db.GetLastSql().Print();
-                Assert.That(rows.Map(x => x.Id), Is.EqualTo(new[] {1, 2}));
+                Assert.That(rows.Map(x => x.Id), Is.EqualTo(new[] { 1, 2 }));
 
 
                 q = db.From<TableA>()
