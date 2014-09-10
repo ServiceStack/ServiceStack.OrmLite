@@ -172,7 +172,7 @@ namespace ServiceStack.OrmLite.Oracle
 
         private void PurgeInsertIdCache(DateTime now)
         {
-            if (now - _insertIdCachePurgeTime > InsertIdCachePurgeInterval && Monitor.TryEnter(_insertedIdLock))
+            if (now - _insertIdCachePurgeTime >= InsertIdCachePurgeInterval && Monitor.TryEnter(_insertedIdLock))
             {
                 try
                 {
