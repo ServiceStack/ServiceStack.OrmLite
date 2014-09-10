@@ -16,7 +16,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
 
     public class DTOPoco
     {
-        public string Id { get; set; }
+        public string _Id { get; set; }
         public string Other_Id { get; set; }
     }
 
@@ -39,7 +39,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
 
                 row.PrintDump();
 
-                Assert.That(row.Id, Is.Null);
+                Assert.That(row._Id, Is.Null);
                 Assert.That(row.Other_Id, Is.EqualTo("OTHER"));
             }
 
