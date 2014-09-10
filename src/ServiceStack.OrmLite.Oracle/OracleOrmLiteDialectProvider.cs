@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
@@ -7,6 +8,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace ServiceStack.OrmLite.Oracle
 {
@@ -36,7 +38,6 @@ namespace ServiceStack.OrmLite.Oracle
             get { return _instance ?? (_instance = new OracleOrmLiteDialectProvider()); }
         }
 
-        internal long LastInsertId { get; set; }
         protected bool CompactGuid;
 
         internal const string StringGuidDefinition = "VARCHAR2(37)";
@@ -146,9 +147,68 @@ namespace ServiceStack.OrmLite.Oracle
             return connection;
         }
 
+        private class TimedId
+        {
+            public long Id;
+            public IDbConnection Connection;
+            public DateTime Time;
+        }
+        private readonly ConcurrentDictionary<IDbConnection, TimedId> _insertedIdCache = new ConcurrentDictionary<IDbConnection, TimedId>();
+        private readonly ConcurrentQueue<TimedId> _insertedIdQueue = new ConcurrentQueue<TimedId>();
+        private readonly object _insertedIdLock = new object();
+        private DateTime _insertIdCachePurgeTime = DateTime.MinValue;
+        public TimeSpan InsertIdCachePurgeInterval = new TimeSpan(0, 10, 0);
+        public TimeSpan InsertIdCacheKeepTime = new TimeSpan(1, 0, 0);
+
+        private void SaveInsertId(IDbConnection connection, long id)
+        {
+            var now = DateTime.UtcNow;
+            var newCacheEntry = new TimedId {Connection = connection, Id = id, Time = now};
+            _insertedIdCache[connection] = newCacheEntry;
+            _insertedIdQueue.Enqueue(newCacheEntry);
+
+            PurgeInsertIdCache(now);
+        }
+
+        private void PurgeInsertIdCache(DateTime now)
+        {
+            if (now - _insertIdCachePurgeTime >= InsertIdCachePurgeInterval && Monitor.TryEnter(_insertedIdLock))
+            {
+                try
+                {
+                    TimedId queuedCacheEntry;
+                    while (_insertedIdQueue.TryPeek(out queuedCacheEntry))
+                    {
+                        if (now - queuedCacheEntry.Time < InsertIdCacheKeepTime)
+                            break;
+
+                        _insertedIdQueue.TryDequeue(out queuedCacheEntry);
+
+                        TimedId currentCacheEntry;
+                        if (_insertedIdCache.TryGetValue(queuedCacheEntry.Connection, out currentCacheEntry) && ReferenceEquals(currentCacheEntry, queuedCacheEntry))
+                            RemoveInsertId(queuedCacheEntry.Connection);
+                    }
+                    _insertIdCachePurgeTime = now;
+                }
+                finally
+                {
+                    Monitor.Exit(_insertedIdLock);
+                }
+            }
+        }
+
+        private void RemoveInsertId(IDbConnection connection)
+        {
+            TimedId unused;
+            _insertedIdCache.TryRemove(connection, out unused);
+        }
+
         public override long GetLastInsertId(IDbCommand dbCmd)
         {
-            return LastInsertId;
+            TimedId lastInsertId;
+            if (_insertedIdCache.TryGetValue(dbCmd.Connection, out lastInsertId))
+                return lastInsertId.Id;
+            return 0;
         }
 
         public override long InsertAndGetLastInsertId<T>(IDbCommand dbCmd)
@@ -897,12 +957,12 @@ namespace ServiceStack.OrmLite.Oracle
                 Object retObj;
                 if (long.TryParse(value.ToString(), out nv))
                 {
-                    LastInsertId = nv;
-                    retObj = LastInsertId;
+                    SaveInsertId(connection, nv);
+                    retObj = nv;
                 }
                 else
                 {
-                    LastInsertId = 0;
+                    RemoveInsertId(connection);
                     retObj = value;
                 }
                 return retObj;
@@ -913,7 +973,7 @@ namespace ServiceStack.OrmLite.Oracle
                 dbCmd.Transaction = transaction;
                 dbCmd.CommandText = string.Format("SELECT {0}.NEXTVAL FROM dual", Quote(sequence));
                 var result = dbCmd.LongScalar();
-                LastInsertId = result;
+                SaveInsertId(connection, result);
                 return result;
             }
         }
