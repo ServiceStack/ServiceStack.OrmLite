@@ -82,6 +82,49 @@ namespace ServiceStack.OrmLite.Tests.Expression
         public string BazName { get; set; }
     }
 
+    public class Product : IHasGuidId
+    {
+        [PrimaryKey]
+        public Guid Id { get; set; }
+
+        [Required]
+        public string Name { get; set; }
+
+        public string Code { get; set; }
+
+        [Required]
+        [Alias("fkManufacturerId")]
+        [ForeignKey(typeof(Manufacturer), ForeignKeyName = "fk_Product_Manufacturer")]
+        public Guid ManufacturerId { get; set; }
+    }
+
+    public class Manufacturer : IHasGuidId
+    {
+        [PrimaryKey]
+        public Guid Id { get; set; }
+
+        public string Name { get; set; }
+    }
+
+    public class ProductWithManufacturer
+    {
+        [BelongTo(typeof(Product))]
+        public Guid ProductId { get; set; }
+
+        [BelongTo(typeof(Product))]
+        public string ProductName { get; set; }
+
+        [BelongTo(typeof(Product))]
+        public string Code { get; set; }
+
+        [BelongTo(typeof(Product))]
+        [Alias("fkManufacturerId")]
+        public Guid ManufacturerId { get; set; }
+
+        [BelongTo(typeof(Manufacturer))]
+        public string ManufacturerName { get; set; }
+    }
+
     [TestFixture]
     public class ComplexJoinTests : OrmLiteTestBase
     {
@@ -175,6 +218,56 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 Assert.That(fooBarBaz.BazId, Is.EqualTo(1));
                 fooBarBaz = results.First(x => x.FooBarBazId == 2);
                 Assert.That(fooBarBaz.BazId, Is.EqualTo(1));
+            }
+        }
+
+        [Test]
+        public void Can_limit_ComplexJoin_query()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropTable<Product>();
+                db.DropTable<Manufacturer>();
+
+                db.CreateTable<Manufacturer>();
+                db.CreateTable<Product>();
+
+                var manufacturer = new Manufacturer
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "ManName",
+                };
+                db.Insert(manufacturer);
+                db.Insert(new Product
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "SA1 ProductName",
+                    Code = "CODE A",
+                    ManufacturerId = manufacturer.Id,
+                });
+                db.Insert(new Product
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "SA2 ProductName",
+                    Code = "CODE B",
+                    ManufacturerId = manufacturer.Id,
+                });
+
+                var q = db.From<Product>()
+                    .Join<Manufacturer>((p, m) => p.ManufacturerId == m.Id)
+                    .Where<Product>(p => p.Name.Contains("SA"))
+                    .OrderBy<Product>(p => p.Name)
+                    .Limit(1, 25);
+
+                var results = db.Select<ProductWithManufacturer>(q);
+
+                db.GetLastSql().Print();
+
+                Assert.That(results[0].ManufacturerName, Is.EqualTo(manufacturer.Name));
+                Assert.That(results[0].ManufacturerId, Is.EqualTo(manufacturer.Id));
+                Assert.That(results[0].Code, Is.EqualTo("CODE B"));
+
+                results.PrintDump();
             }
         }
     }

@@ -412,7 +412,7 @@ namespace ServiceStack.OrmLite.SqlServer
 
             var ret = string.Format(
                 "{0} FROM (SELECT ROW_NUMBER() OVER ({2}) As RowNum, {1} {3}) AS RowConstrainedResult WHERE RowNum > {4} AND RowNum <= {5}",
-                selectExpression.StripTablePrefixes(), //SELECT without RowNum to be able to use in SELECT IN () Reference Queries
+                UseAliasesOrStripTablePrefixes(selectExpression), 
                 selectExpression.Substring(selectType.Length),
                 orderByExpression,
                 bodyExpression,
@@ -420,6 +420,44 @@ namespace ServiceStack.OrmLite.SqlServer
                 take == int.MaxValue ? take : skip + take);
 
             return ret;
+        }
+
+        //SELECT without RowNum and prefer aliases to be able to use in SELECT IN () Reference Queries
+        public static string UseAliasesOrStripTablePrefixes(string selectExpression)
+        {
+            if (selectExpression.IndexOf('.') < 0)
+                return selectExpression;
+
+            var sb = new StringBuilder();
+            var selectToken = selectExpression.SplitOnFirst(' ');
+            var tokens = selectToken[1].Split(',');
+            foreach (var token in tokens)
+            {
+                if (sb.Length > 0)
+                    sb.Append(", ");
+
+                var field = token.Trim();
+
+                var aliasParts = field.SplitOnLast(' ');
+                if (aliasParts.Length > 1)
+                {
+                    sb.Append(" " + aliasParts[aliasParts.Length - 1]);
+                    continue;
+                }
+
+                var parts = field.SplitOnLast('.');
+                if (parts.Length > 1)
+                {
+                    sb.Append(" " + parts[parts.Length - 1]);
+                }
+                else
+                {
+                    sb.Append(" " + field);
+                }
+            }
+
+            var sqlSelect = selectToken[0] + " " + sb.ToString().Trim();
+            return sqlSelect;
         }
     }
 }
