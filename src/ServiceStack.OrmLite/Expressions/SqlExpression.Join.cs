@@ -166,6 +166,10 @@ namespace ServiceStack.OrmLite
                             sbSelect.AppendFormat("{0}.{1}",
                                 SqlTable(tableDef),
                                 tableFieldDef.GetQuotedName(DialectProvider));
+
+                            if (tableFieldDef.Alias != null)
+                                sbSelect.Append(" AS ").Append(fieldDef.Name);
+
                             break;
                         }
                     }

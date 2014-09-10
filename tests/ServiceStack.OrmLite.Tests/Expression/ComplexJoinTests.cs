@@ -63,28 +63,24 @@ namespace ServiceStack.OrmLite.Tests.Expression
         [BelongTo(typeof(FooBar))]
         public int Id { get; set; }
 
-        [Alias("fkBazId")]
         [BelongTo(typeof(FooBarBaz))]
         public int FooBarBazId { get; set; }
 
         [BelongTo(typeof(FooBarBaz))]
         public decimal Amount { get; set; }
 
-        [Alias("fkBarId")]
         [BelongTo(typeof(Bar))]
         public Guid BarId { get; set; }
 
         [BelongTo(typeof(Bar))]
         public string BarName { get; set; }
 
-        [Alias("fkBazId")]
         [BelongTo(typeof(Baz))]
         public int BazId { get; set; }
 
         [BelongTo(typeof(Baz))]
         public string BazName { get; set; }
     }
-
 
     [TestFixture]
     public class ComplexJoinTests : OrmLiteTestBase
@@ -166,10 +162,10 @@ namespace ServiceStack.OrmLite.Tests.Expression
                     .Join<Bar>((dp, p) => dp.BarId == p.Id)
                     .Join<FooBarBaz>((dp, dpss) => dp.Id == dpss.FooBarId)
                     .Join<FooBarBaz, Baz>((dpss, ss) => dpss.BazId == ss.Id);
-                
+
                 var results = db.Select<JoinResult>(q);
 
-                db.GetLastSql().Replace("INNER","\n INNER").Print();
+                db.GetLastSql().Replace("INNER", "\n INNER").Print();
 
                 results.PrintDump();
 
