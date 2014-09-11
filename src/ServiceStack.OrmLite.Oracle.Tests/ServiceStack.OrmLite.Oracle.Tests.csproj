@@ -156,6 +156,9 @@
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\MockAllApiTests.cs">
       <Link>MockAllApiTests.cs</Link>
     </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\MultipleConnectionIdTests.cs">
+      <Link>MultipleConnectionIdTests.cs</Link>
+    </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\OrmLiteBasicPersistenceProviderTests.cs">
       <Link>OrmLiteBasicPersistenceProviderTests.cs</Link>
     </Compile>
