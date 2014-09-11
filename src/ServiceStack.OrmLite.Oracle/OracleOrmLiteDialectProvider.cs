@@ -36,7 +36,6 @@ namespace ServiceStack.OrmLite.Oracle
             get { return _instance ?? (_instance = new OracleOrmLiteDialectProvider()); }
         }
 
-        internal long LastInsertId { get; set; }
         protected bool CompactGuid;
 
         internal const string StringGuidDefinition = "VARCHAR2(37)";
@@ -148,13 +147,24 @@ namespace ServiceStack.OrmLite.Oracle
 
         public override long GetLastInsertId(IDbCommand dbCmd)
         {
-            return LastInsertId;
+            throw new NotSupportedException();
         }
 
         public override long InsertAndGetLastInsertId<T>(IDbCommand dbCmd)
         {
             dbCmd.ExecuteScalar();
-            return GetLastInsertId(dbCmd);
+
+            var modelDef = GetModel(typeof(T));
+
+            var primaryKey = modelDef.PrimaryKey;
+            if (primaryKey == null)
+                return 0;
+
+            var identityParameter = (DbParameter)dbCmd.Parameters[this.GetParam(SanitizeFieldNameForParamName(primaryKey.FieldName))];
+            if (identityParameter == null)
+                return 0;
+
+            return Convert.ToInt64(identityParameter.Value);
         }
 
         public override void SetDbValue(FieldDefinition fieldDef, IDataReader reader, int colIndex, object instance)
@@ -897,13 +907,11 @@ namespace ServiceStack.OrmLite.Oracle
                 Object retObj;
                 if (long.TryParse(value.ToString(), out nv))
                 {
-                    LastInsertId = nv;
-                    retObj = LastInsertId;
+                    retObj = nv;
                 }
                 else
                 {
-                    LastInsertId = 0;
-                    retObj = value;
+                    retObj = 0;
                 }
                 return retObj;
             }
@@ -913,7 +921,6 @@ namespace ServiceStack.OrmLite.Oracle
                 dbCmd.Transaction = transaction;
                 dbCmd.CommandText = string.Format("SELECT {0}.NEXTVAL FROM dual", Quote(sequence));
                 var result = dbCmd.LongScalar();
-                LastInsertId = result;
                 return result;
             }
         }
