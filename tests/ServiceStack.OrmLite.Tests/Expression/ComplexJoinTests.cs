@@ -8,7 +8,7 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {
-    public class Bar : IHasGuidId
+    public class BarJoin : IHasGuidId
     {
         [PrimaryKey]
         public Guid Id { get; set; }
@@ -26,7 +26,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
         // And a foreign key to the foo table as well, but that is not necessary to show the problem.
 
         [Alias("fkBarId")]
-        [ForeignKey(typeof(Bar), ForeignKeyName = "fk_FooBar_Bar")]
+        [ForeignKey(typeof(BarJoin), ForeignKeyName = "fk_FooBar_Bar")]
         public Guid BarId { get; set; }
     }
 
@@ -69,10 +69,10 @@ namespace ServiceStack.OrmLite.Tests.Expression
         [BelongTo(typeof(FooBarBaz))]
         public decimal Amount { get; set; }
 
-        [BelongTo(typeof(Bar))]
+        [BelongTo(typeof(BarJoin))]
         public Guid BarId { get; set; }
 
-        [BelongTo(typeof(Bar))]
+        [BelongTo(typeof(BarJoin))]
         public string BarName { get; set; }
 
         [BelongTo(typeof(Baz))]
@@ -132,19 +132,19 @@ namespace ServiceStack.OrmLite.Tests.Expression
         {
             db.DropTable<FooBarBaz>();
             db.DropTable<FooBar>();
-            db.DropTable<Bar>();
+            db.DropTable<BarJoin>();
             db.DropTable<Baz>();
 
             db.CreateTable<Baz>();
-            db.CreateTable<Bar>();
+            db.CreateTable<BarJoin>();
             db.CreateTable<FooBar>();
             db.CreateTable<FooBarBaz>();
 
             var bar1Id = new Guid("5bd67b84-bfdb-4057-9799-5e7a72a6eaa9");
             var bar2Id = new Guid("a8061d08-6816-4e1e-b3d7-1178abcefa0d");
 
-            db.Insert(new Bar { Id = bar1Id, Name = "Banana", });
-            db.Insert(new Bar { Id = bar2Id, Name = "Orange", });
+            db.Insert(new BarJoin { Id = bar1Id, Name = "Banana", });
+            db.Insert(new BarJoin { Id = bar2Id, Name = "Orange", });
 
             db.Insert(new Baz { Id = 1, Name = "Large" });
             db.Insert(new Baz { Id = 2, Name = "Huge" });
@@ -166,7 +166,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
                 /* This gives the expected values for BazId */
                 var jn = new JoinSqlBuilder<JoinResult, FooBar>()
-                    .Join<FooBar, Bar>(
+                    .Join<FooBar, BarJoin>(
                         sourceColumn: dp => dp.BarId,
                         destinationColumn: p => p.Id,
                         destinationTableColumnSelection: p => new { BarName = p.Name, BarId = p.Id })
@@ -202,7 +202,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 InitTables(db);
 
                 var q = db.From<FooBar>()
-                    .Join<Bar>((dp, p) => dp.BarId == p.Id)
+                    .Join<BarJoin>((dp, p) => dp.BarId == p.Id)
                     .Join<FooBarBaz>((dp, dpss) => dp.Id == dpss.FooBarId)
                     .Join<FooBarBaz, Baz>((dpss, ss) => dpss.BazId == ss.Id);
 
