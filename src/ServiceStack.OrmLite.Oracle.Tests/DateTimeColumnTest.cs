@@ -50,11 +50,10 @@ namespace ServiceStack.OrmLite.Tests
 
                 db.Save(obj);
 
-                var id = (int)db.LastInsertId();
-                var target = db.SingleById<Analyze>(id);
+                var target = db.SingleById<Analyze>(obj.Id);
 
                 Assert.IsNotNull(target);
-                Assert.AreEqual(id, target.Id);
+                Assert.AreEqual(obj.Id, target.Id);
                 Assert.AreEqual(obj.Date.ToString("yyyy-MM-dd HH:mm:ss"), target.Date.ToString("yyyy-MM-dd HH:mm:ss"));
                 Assert.AreEqual(obj.Url, target.Url);
             }
