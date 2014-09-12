@@ -76,6 +76,9 @@ namespace ServiceStack.OrmLite.Tests.Issues
         [Test]
         public void Can_change_schema_at_runtime()
         {
+            if (Dialect == Dialect.MySql)
+                return; //No custom schema support 
+
             using (var captured = new CaptureSqlFilter())
             using (var db = OpenDbConnection())
             {
