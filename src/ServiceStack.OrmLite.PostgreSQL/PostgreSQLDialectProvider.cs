@@ -122,6 +122,9 @@ namespace ServiceStack.OrmLite.PostgreSQL
             return sql.ToString();
         }
 
+        //Convert xmin into an integer so it can be used in comparisons
+        public const string RowVersionFieldComparer = "int8in(xidout(xmin))";
+
         public override string GetRowVersionColumnName(FieldDefinition field)
         {
             return "xmin as " + GetQuotedColumnName(field.FieldName);
@@ -130,7 +133,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
         public override void AppendFieldCondition(StringBuilder sqlFilter, FieldDefinition fieldDef, IDbCommand cmd)
         {
             var columnName = fieldDef.IsRowVersion
-                ? "int8in(xidout(xmin))" //Convert xmin into an integer so it can be used in comparisons
+                ? RowVersionFieldComparer
                 : GetQuotedColumnName(fieldDef.FieldName);
             
             sqlFilter

@@ -267,6 +267,27 @@ namespace ServiceStack.OrmLite
             }
         }
 
+        private static int FindColumnIndex(IDataReader dataReader, FieldDefinition fieldDef)
+        {
+            var index = NotFound;
+            index = dataReader.GetColumnIndex(fieldDef.FieldName);
+            if (index == NotFound)
+            {
+                index = TryGuessColumnIndex(fieldDef.FieldName, dataReader);
+            }
+            // Try fallback to original field name when overriden by alias
+            if (index == NotFound && fieldDef.Alias != null && !OrmLiteConfig.DisableColumnGuessFallback)
+            {
+                index = dataReader.GetColumnIndex(fieldDef.Name);
+                if (index == NotFound)
+                {
+                    index = TryGuessColumnIndex(fieldDef.Name, dataReader);
+                }
+            }
+
+            return index;
+        }
+
         private const int NotFound = -1;
         public static T PopulateWithSqlReader<T>(this T objWithProperties, IDataReader dataReader, FieldDefinition[] fieldDefs, Dictionary<string, int> indexCache)
         {
@@ -281,22 +302,14 @@ namespace ServiceStack.OrmLite
                     {
                         if (!indexCache.TryGetValue(fieldDef.Name, out index))
                         {
-                            index = dataReader.GetColumnIndex(fieldDef.FieldName);
-                            if (index == NotFound)
-                            {
-                                index = TryGuessColumnIndex(fieldDef.FieldName, dataReader);
-                            }
+                            index = FindColumnIndex(dataReader, fieldDef);
 
                             indexCache.Add(fieldDef.Name, index);
                         }
                     }
                     else
                     {
-                        index = dataReader.GetColumnIndex(fieldDef.FieldName);
-                        if (index == NotFound)
-                        {
-                            index = TryGuessColumnIndex(fieldDef.FieldName, dataReader);
-                        }
+                        index = FindColumnIndex(dataReader, fieldDef);
                     }
 
                     dialectProvider.SetDbValue(fieldDef, dataReader, index, objWithProperties);

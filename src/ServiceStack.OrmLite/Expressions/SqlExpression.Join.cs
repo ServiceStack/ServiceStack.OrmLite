@@ -168,7 +168,7 @@ namespace ServiceStack.OrmLite
                                 tableFieldDef.GetQuotedName(DialectProvider));
 
                             if (tableFieldDef.Alias != null)
-                                sbSelect.Append(" AS ").Append(fieldDef.Name);
+                                sbSelect.Append(" AS ").Append(DialectProvider.NamingStrategy.GetColumnName(fieldDef.Name));
 
                             break;
                         }
