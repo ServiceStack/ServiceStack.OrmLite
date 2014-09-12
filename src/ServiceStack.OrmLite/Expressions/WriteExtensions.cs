@@ -127,7 +127,7 @@ namespace ServiceStack.OrmLite
             {
                 var fieldDef = fields.FirstOrDefault(x =>
                     string.Equals(x.Name, setField.Name, StringComparison.OrdinalIgnoreCase));
-                if (fieldDef == null) continue;
+                if (fieldDef == null || fieldDef.ShouldSkipUpdate()) continue;
 
                 if (sql.Length > 0)
                     sql.Append(", ");

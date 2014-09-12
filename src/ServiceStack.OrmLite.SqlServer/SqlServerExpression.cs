@@ -14,7 +14,10 @@ namespace ServiceStack.OrmLite.SqlServer
 
             foreach (var fieldDef in ModelDef.FieldDefinitions)
             {
+                if (fieldDef.ShouldSkipUpdate()) continue;
+                if (fieldDef.IsRowVersion) continue;
                 if (UpdateFields.Count > 0 && !UpdateFields.Contains(fieldDef.Name) || fieldDef.AutoIncrement) continue; // added
+
                 var value = fieldDef.GetValue(item);
                 if (excludeDefaults && (value == null || value.Equals(value.GetType().GetDefaultValue()))) continue; //GetDefaultValue?
 

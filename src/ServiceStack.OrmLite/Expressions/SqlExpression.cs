@@ -24,7 +24,7 @@ namespace ServiceStack.OrmLite
         IList<string> insertFields = new List<string>();
 
         private string sep = string.Empty;
-        private bool useFieldName = false;
+        protected bool useFieldName = false;
         private ModelDefinition modelDef;
         public bool PrefixFieldWithTableName { get; set; }
         public bool WhereStatementWithoutWhereString { get; set; }
@@ -659,7 +659,10 @@ namespace ServiceStack.OrmLite
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
+                if (fieldDef.ShouldSkipUpdate()) continue;
+                if (fieldDef.IsRowVersion) continue;
                 if (updateFields.Count > 0 && !updateFields.Contains(fieldDef.Name)) continue; // added
+
                 var value = fieldDef.GetValue(item);
                 if (excludeDefaults && (value == null || value.Equals(value.GetType().GetDefaultValue()))) continue; //GetDefaultValue?
 
