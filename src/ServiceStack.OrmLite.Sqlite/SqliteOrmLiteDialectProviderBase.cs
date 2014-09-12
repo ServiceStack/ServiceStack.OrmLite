@@ -40,25 +40,31 @@ namespace ServiceStack.OrmLite.Sqlite
         {
             if (modelDef.RowVersion != null)
             {
-                var triggerName = RowVersionTriggerFormat.Fmt(modelDef.ModelName);
+                var triggerName = GetTriggerName(modelDef);
                 return "DROP TRIGGER IF EXISTS {0}".Fmt(GetQuotedTableName(triggerName));
             }
 
             return null;
         }
 
+        private string GetTriggerName(ModelDefinition modelDef)
+        {
+            return RowVersionTriggerFormat.Fmt(GetTableName(modelDef));
+        }
+
         public override string ToPostCreateTableStatement(ModelDefinition modelDef)
         {
             if (modelDef.RowVersion != null)
             {
-                var triggerName = RowVersionTriggerFormat.Fmt(modelDef.ModelName);
+                var triggerName = GetTriggerName(modelDef);
+                var tableName = GetTableName(modelDef);
                 var triggerBody = "UPDATE {0} SET {1} = OLD.{1} + 1 WHERE {2} = NEW.{2};".Fmt(
-                    modelDef.ModelName, 
+                    tableName, 
                     modelDef.RowVersion.FieldName.SqlColumn(), 
                     modelDef.PrimaryKey.FieldName.SqlColumn());
 
                 var sql = "CREATE TRIGGER {0} BEFORE UPDATE ON {1} FOR EACH ROW BEGIN {2} END;".Fmt(
-                    triggerName, modelDef.ModelName, triggerBody);
+                    triggerName, tableName, triggerBody);
 
                 return sql;
             }
@@ -127,6 +133,14 @@ namespace ServiceStack.OrmLite.Sqlite
 
 
         protected abstract IDbConnection CreateConnection(string connectionString);
+
+        public virtual string GetTableName(ModelDefinition modelDef)
+        {
+            var tableName = NamingStrategy.GetTableName(modelDef.ModelName);
+            return !modelDef.IsInSchema 
+                ? tableName
+                : string.Format("{0}_{1}", modelDef.Schema, tableName);
+        }
 
         public override string GetQuotedTableName(ModelDefinition modelDef)
         {

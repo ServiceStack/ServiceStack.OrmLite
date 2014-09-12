@@ -526,5 +526,20 @@ namespace ServiceStack.OrmLite.Tests
             row.Text = "Touched";
             db.Update(row);
         }
+
+        [Schema("Schema")]
+        public class SchemaWithRowVersion
+        {
+            [AutoIncrement]
+            public int Id { get; set; }
+            public string RandomStringProperty { get; set; }
+            public ulong RowVersion { get; set; }
+        }
+
+        [Test]
+        public void CreateNamedSchemaWithRowVersionClass()
+        {
+            db.DropAndCreateTable<SchemaWithRowVersion>();
+        }
     }
 }
