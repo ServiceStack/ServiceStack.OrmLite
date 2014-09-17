@@ -384,7 +384,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        public void Can_save_with_null_references()
+        public void Can_save_and_load_with_null_references()
         {
             var customer = new Customer
             {
@@ -396,6 +396,34 @@ namespace ServiceStack.OrmLite.Tests
             db.Save(customer, references: true);
 
             Assert.That(customer.Id, Is.GreaterThan(0));
+
+            var dbCustomer = db.LoadSingleById<Customer>(customer.Id);
+            Assert.That(dbCustomer.Name, Is.EqualTo("Customer 1"));
+
+            var dbCustomers = db.LoadSelect<Customer>(q => q.Id == customer.Id);
+            Assert.That(dbCustomers.Count, Is.EqualTo(1));
+            Assert.That(dbCustomers[0].Name, Is.EqualTo("Customer 1"));
+        }
+
+        [Test]
+        public void Can_save_and_load_self_references_with_null_references()
+        {
+            var customer = new SelfCustomer
+            {
+                Name = "Customer 1",
+                PrimaryAddress = null,
+            };
+
+            db.Save(customer, references: true);
+
+            Assert.That(customer.Id, Is.GreaterThan(0));
+
+            var dbCustomer = db.LoadSingleById<SelfCustomer>(customer.Id);
+            Assert.That(dbCustomer.Name, Is.EqualTo("Customer 1"));
+
+            var dbCustomers = db.LoadSelect<SelfCustomer>(q => q.Id == customer.Id);
+            Assert.That(dbCustomers.Count, Is.EqualTo(1));
+            Assert.That(dbCustomers[0].Name, Is.EqualTo("Customer 1"));
         }
 
         [Test]

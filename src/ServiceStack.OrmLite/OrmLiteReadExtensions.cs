@@ -1058,7 +1058,7 @@ namespace ServiceStack.OrmLite
                         {
                             object childResult;
                             var fkValue = refSelf.GetValue(result);
-                            if (map.TryGetValue(fkValue, out childResult))
+                            if (fkValue != null && map.TryGetValue(fkValue, out childResult))
                             {
                                 fieldDef.SetValueFn(result, childResult);
                             }
