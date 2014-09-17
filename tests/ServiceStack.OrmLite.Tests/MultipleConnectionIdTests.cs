@@ -26,6 +26,8 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void TwoSimultaneousInsertsGetDifferentIds()
         {
+            if (Dialect == Dialect.Sqlite) return; // Sqlite doesn't support concurrent writers
+
             var dataArray = new[]
             {
                 new MultipleConnection {Data = "one"},
@@ -83,6 +85,8 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void TwoSimultaneousSavesGetDifferentIds()
         {
+            if (Dialect == Dialect.Sqlite) return; // Sqlite doesn't support concurrent writers
+
             var dataArray = new[]
             {
                 new MultipleConnection {Data = "one"},
