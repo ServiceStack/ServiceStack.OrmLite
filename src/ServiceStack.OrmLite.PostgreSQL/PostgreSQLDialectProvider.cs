@@ -12,7 +12,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
         public static PostgreSQLDialectProvider Instance = new PostgreSQLDialectProvider();
         const string textColumnDefinition = "text";
 
-        private PostgreSQLDialectProvider()
+        public PostgreSQLDialectProvider()
         {
             base.AutoIncrementDefinition = "";
             base.IntColumnDefinition = "integer";
