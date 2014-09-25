@@ -1,3 +1,5 @@
+using System;
+using System.Globalization;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
 using ServiceStack.DataAnnotations;
@@ -170,6 +172,58 @@ namespace ServiceStack.OrmLite.Tests
         [AutoIncrement]
         public int Id { get; set; }
         public string Name { get; set; }
+    }
+
+    public class PostgreSQLUpdateTests : OrmLiteTestBase
+    {
+        public PostgreSQLUpdateTests()
+            : base(Dialect.PostgreSql)
+	    {
+	    }
+
+        [Test]
+        public void Can_insert_datetimeoffsets_regardless_of_current_culture()
+        {
+            // datetimeoffset's default .ToString depends on culture, ensure we use one with MDY
+            var previousCulture = System.Threading.Thread.CurrentThread.CurrentCulture;
+            System.Threading.Thread.CurrentThread.CurrentCulture = CultureInfo.GetCultureInfo("en-US");
+            try
+            {
+                using (var db = OpenDbConnection())
+                {
+                    // and set datestyle to DMY, crashing the insert when we're formatting it as the default on en-US
+                    db.ExecuteNonQuery("SET datestyle TO \"ISO, DMY\"");
+                    db.CreateTable<ModelWithDateTimeOffset>(true);
+
+                    var date = new DateTimeOffset(2010, 11, 29, 1, 2, 3, new TimeSpan(0));
+                    var row = new ModelWithDateTimeOffset
+                    {
+                        Id = 1,
+                        Value = date
+                    };
+
+                    db.Insert(row);
+                    db.Update<ModelWithDateTimeOffset>(new { Value = date.AddDays(30) }, r => r.Id == 1);
+
+                    var rows = db.Select<ModelWithDateTimeOffset>();
+
+                    Assert.That(rows, Has.Count.EqualTo(1));
+                    Assert.That(rows[0].Value, Is.EqualTo(date.AddDays(30)));
+                }
+            }
+            finally
+            {
+                System.Threading.Thread.CurrentThread.CurrentCulture = previousCulture;
+            }
+        }
+
+    }
+
+    class ModelWithDateTimeOffset
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+        public DateTimeOffset Value { get; set; }
     }
 
 }

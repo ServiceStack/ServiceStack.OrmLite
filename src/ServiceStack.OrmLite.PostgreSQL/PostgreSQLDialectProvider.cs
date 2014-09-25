@@ -164,6 +164,12 @@ namespace ServiceStack.OrmLite.PostgreSQL
                 const string iso8601Format = "yyyy-MM-dd HH:mm:ss.fff";
                 return base.GetQuotedValue(dateValue.ToString(iso8601Format), typeof(string));
             }
+            if (fieldType == typeof(DateTimeOffset))
+            {
+                var dateValue = (DateTimeOffset)value;
+                const string iso8601Format = "yyyy-MM-dd HH:mm:ss.fff zzz";
+                return base.GetQuotedValue(dateValue.ToString(iso8601Format), typeof(string));
+            }
             if (fieldType == typeof(Guid))
             {
                 var guidValue = (Guid)value;
