@@ -44,6 +44,7 @@ COPY ..\src\ServiceStack.OrmLite.Sqlite.Windows\bin\%BUILD%\ServiceStack.OrmLite
 COPY ..\src\ServiceStack.OrmLite.SqlServer\bin\%BUILD%\ServiceStack.OrmLite.* ..\..\ServiceStack\lib
 COPY ..\src\ServiceStack.OrmLite.MySql\bin\%BUILD%\ServiceStack.OrmLite.* ..\..\ServiceStack\lib
 COPY ..\src\ServiceStack.OrmLite.PostgreSQL\bin\%BUILD%\ServiceStack.OrmLite.* ..\..\ServiceStack\lib
+COPY ..\src\ServiceStack.OrmLite.PostgreSQL\bin\%BUILD%\Npgsql.* ..\..\ServiceStack\lib
 
 COPY ..\src\ServiceStack.OrmLite.Sqlite\bin\%BUILD%\ServiceStack.OrmLite.* ..\..\ServiceStack.Contrib\lib
 
