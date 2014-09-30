@@ -777,6 +777,48 @@ using (var db = OpenDbConnection())
 }
 ```
 
+### Replay Exec Filter
+
+Or if you want to do things like executing each operation multiple times, e.g:
+
+```csharp
+public class ReplayOrmLiteExecFilter : OrmLiteExecFilter
+{
+    public int ReplayTimes { get; set; }
+
+    public override T Exec<T>(IDbConnection dbConn, Func<IDbCommand, T> filter)
+    {
+        var holdProvider = OrmLiteConfig.DialectProvider;
+        var dbCmd = CreateCommand(dbConn);
+        try
+        {
+            var ret = default(T);
+            for (var i = 0; i < ReplayTimes; i++)
+            {
+                ret = filter(dbCmd);
+            }
+            return ret;
+        }
+        finally
+        {
+            DisposeCommand(dbCmd);
+            OrmLiteConfig.DialectProvider = holdProvider;
+        }
+    }
+}
+
+OrmLiteConfig.ExecFilter = new ReplayOrmLiteExecFilter { ReplayTimes = 3 };
+
+using (var db = OpenDbConnection())
+{
+    db.DropAndCreateTable<PocoTable>();
+    db.Insert(new PocoTable { Name = "Multiplicity" });
+
+    var rowsInserted = db.Count<PocoTable>(q => q.Name == "Multiplicity"); //3
+}
+```
+
+
 ## Mockable extension methods
 
 The Result Filters also lets you easily mock results and avoid hitting the database, typically useful in Unit Testing Services to mock OrmLite API's directly instead of using a repository, e.g:
