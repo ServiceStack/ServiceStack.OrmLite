@@ -41,9 +41,19 @@ namespace ServiceStack.OrmLite.Oracle
         internal const string StringGuidDefinition = "VARCHAR2(37)";
         internal const string CompactGuidDefinition = "RAW(16)";
 
+        private OracleDoubleConverter _doubleConverter;
+        private DbProviderFactory _factory;
+
         public OracleOrmLiteDialectProvider()
             : this(false, false)
         {
+            CreateDoubleConverter();
+        }
+
+        private void CreateDoubleConverter()
+        {
+            _factory = DbProviderFactories.GetFactory(ClientProvider);
+            _doubleConverter = new OracleDoubleConverter(_factory);
         }
 
         public OracleOrmLiteDialectProvider(bool compactGuid, bool quoteNames, string clientProvider = OdpProvider)
@@ -70,6 +80,8 @@ namespace ServiceStack.OrmLite.Oracle
 
             NamingStrategy = new OracleNamingStrategy(MaxNameLength);
             ExecFilter = new OracleExecFilter();
+
+            CreateDoubleConverter();
         }
 
         public override void OnAfterInitColumnTypeMap()
@@ -124,8 +136,8 @@ namespace ServiceStack.OrmLite.Oracle
             return null;
         }
 
-        private OracleTimestampConverter _timestampConverter;
         private readonly object _timestampLock = new object();
+        private OracleTimestampConverter _timestampConverter;
 
         public override IDbConnection CreateConnection(string connectionString, Dictionary<string, string> options)
         {
@@ -134,13 +146,12 @@ namespace ServiceStack.OrmLite.Oracle
                 connectionString = options.Aggregate(connectionString, (current, option) => current + (option.Key + "=" + option.Value + ";"));
             }
 
-            var factory = DbProviderFactories.GetFactory(ClientProvider);
             lock (_timestampLock)
             {
                 if (_timestampConverter == null)
-                    _timestampConverter = new OracleTimestampConverter(factory);
+                    _timestampConverter = new OracleTimestampConverter(_factory);
             }
-            IDbConnection connection = factory.CreateConnection();
+            IDbConnection connection = _factory.CreateConnection();
             if (connection != null) connection.ConnectionString = connectionString;
             return connection;
         }
@@ -176,6 +187,10 @@ namespace ServiceStack.OrmLite.Oracle
             {
                 _timestampConverter.SetOracleTimestampTzFormat();
                 convertedValue = _timestampConverter.ConvertTimestampTzToDateTimeOffset(reader, colIndex);
+            }
+            else if (fieldDef.FieldType == typeof(double))
+            {
+                convertedValue = _doubleConverter.ConvertToDouble(reader, colIndex);
             }
             else
             {

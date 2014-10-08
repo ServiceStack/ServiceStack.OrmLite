@@ -410,5 +410,20 @@ namespace ServiceStack.OrmLite.Tests
             }
         }
 
+	    [TestCase(1E125)]
+	    [TestCase(-1E125)]
+	    public void Does_return_large_double_values(double value)
+	    {
+	        using (var db = OpenDbConnection())
+	        {
+	            db.DropAndCreateTable<ModelWithDifferentNumTypes>();
+	            var expected = new ModelWithDifferentNumTypes {Double = value};
+
+	            var id = db.Insert(expected, true);
+	            var actual = db.SingleById<ModelWithDifferentNumTypes>(id);
+
+	            Assert.That(expected.Double, Is.EqualTo(actual.Double));
+	        }
+	    }
 	}
 }
