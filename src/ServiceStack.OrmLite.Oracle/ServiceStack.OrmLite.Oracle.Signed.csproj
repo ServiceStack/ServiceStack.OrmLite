@@ -71,6 +71,7 @@
     <Compile Include="DbSchema\PocoCreator.cs" />
     <Compile Include="DbSchema\ProcedureType.cs" />
     <Compile Include="OracleDialect.cs" />
+    <Compile Include="OracleDoubleConverter.cs" />
     <Compile Include="OracleExecFilter.cs" />
     <Compile Include="OracleNamingStrategy.cs" />
     <Compile Include="OracleTimestampConverter.cs" />
