@@ -42,6 +42,9 @@
     <Reference Include="nunit.framework">
       <HintPath>..\..\lib\tests\nunit.framework.dll</HintPath>
     </Reference>
+    <Reference Include="ServiceStack.Client">
+      <HintPath>..\..\tests\ServiceStack.OrmLite.Tests\bin\Release\ServiceStack.Client.dll</HintPath>
+    </Reference>
     <Reference Include="ServiceStack.Common">
       <HintPath>..\..\lib\ServiceStack.Common.dll</HintPath>
     </Reference>
@@ -55,6 +58,7 @@
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -69,6 +73,7 @@
     <Compile Include="DateTimeOffsetTests.cs" />
     <Compile Include="EnsureUtcTest.cs" />
     <Compile Include="InsertParam_GetLastInsertId.cs" />
+    <Compile Include="Issues\SerializationTests.cs" />
     <Compile Include="NestedTransactions.cs" />
     <Compile Include="EnumTests.cs" />
     <Compile Include="Expressions\AdditiveExpressionsTest.cs" />
