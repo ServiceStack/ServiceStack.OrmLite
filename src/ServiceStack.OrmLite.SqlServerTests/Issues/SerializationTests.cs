@@ -24,6 +24,7 @@ namespace ServiceStack.OrmLite.SqlServerTests.Issues
                     Name = "Group Name",
                     ShortName = "GN",
                     GroupTypeId = 1,
+                    BirthDay = new DateTime(1980,01,09),
                     ContactDetails = new ContactDetails {
                         Address = "Address",
                         CompanyName = "Company",
@@ -38,6 +39,9 @@ namespace ServiceStack.OrmLite.SqlServerTests.Issues
                 var result = db.SingleById<Group>(group.GroupId);
 
                 result.PrintDump();
+
+                var results = db.Select<Group>("DATEPART(d,BirthDay) < 10");
+                results.PrintDump();
             }            
         }
     }
@@ -61,6 +65,7 @@ namespace ServiceStack.OrmLite.SqlServerTests.Issues
         [Alias("ContactDetails")]
         public ContactDetails ContactDetails { get; set; }
 
+        public DateTime BirthDay { get; set; }
     }
 
     [DataContract]
