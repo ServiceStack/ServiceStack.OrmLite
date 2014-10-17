@@ -19,6 +19,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Logging;
+using ServiceStack.OrmLite.Async;
 using ServiceStack.Text;
 using System.Diagnostics;
 using System.Linq.Expressions;

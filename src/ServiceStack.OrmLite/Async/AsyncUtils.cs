@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Threading;
 using System.Threading.Tasks;
 
-namespace ServiceStack.OrmLite
+namespace ServiceStack.OrmLite.Async
 {
     public static class AsyncUtils
     {
