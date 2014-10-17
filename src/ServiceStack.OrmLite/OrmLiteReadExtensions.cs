@@ -89,6 +89,13 @@ namespace ServiceStack.OrmLite
 
         internal static List<TModel> SelectFmt<TModel>(this IDbCommand dbCmd, Type fromTableType, string sqlFilter, params object[] filterParams)
         {
+            var sql = ToSelectFmt<TModel>(fromTableType, sqlFilter, filterParams);
+
+            return dbCmd.ConvertToList<TModel>(sql.ToString());
+        }
+
+        internal static StringBuilder ToSelectFmt<TModel>(Type fromTableType, string sqlFilter, object[] filterParams)
+        {
             var sql = new StringBuilder();
             var modelDef = ModelDefinition<TModel>.Definition;
             sql.AppendFormat("SELECT {0} FROM {1}", OrmLiteConfig.DialectProvider.GetColumnNames(modelDef),
@@ -99,8 +106,7 @@ namespace ServiceStack.OrmLite
                 sql.Append(" WHERE ");
                 sql.Append(sqlFilter);
             }
-
-            return dbCmd.ConvertToList<TModel>(sql.ToString());
+            return sql;
         }
 
         internal static T SelectByIdFmt<T>(this IDbCommand dbCmd, object idValue)
@@ -115,7 +121,7 @@ namespace ServiceStack.OrmLite
 
         [ThreadStatic]
         private static Type lastQueryType;
-        private static void SetFilter<T>(IDbCommand dbCmd, string name, object value)
+        internal static void SetFilter<T>(this IDbCommand dbCmd, string name, object value)
         {
             dbCmd.Parameters.Clear();
             var p = dbCmd.CreateParameter();
@@ -582,26 +588,31 @@ namespace ServiceStack.OrmLite
             while (reader.Read())
             {
                 object oValue = reader.GetValue(0);
-                if (oValue == DBNull.Value) return default(T);
-
-                var typeCode = typeof(T).GetUnderlyingTypeCode();
-                switch (typeCode)
-                {
-                    case TypeCode.DateTime:
-                        return (T)(object)DateTime.Parse(oValue.ToString(), CultureInfo.CurrentCulture);
-                    case TypeCode.Decimal:
-                        return (T)(object)Decimal.Parse(oValue.ToString(), CultureInfo.CurrentCulture);
-                    case TypeCode.Single:
-                        return (T)(object)System.Single.Parse(oValue.ToString(), CultureInfo.CurrentCulture);
-                    case TypeCode.Double:
-                        return (T)(object)Double.Parse(oValue.ToString(), CultureInfo.CurrentCulture);
-                }
-
-                object o = OrmLiteConfig.DialectProvider.ConvertDbValue(oValue, typeof(T));
-                return o == null ? default(T) : (T)o;
+                return ToScalar<T>(oValue);
             }
 
             return default(T);
+        }
+
+        internal static T ToScalar<T>(object oValue)
+        {
+            if (oValue == DBNull.Value) return default(T);
+
+            var typeCode = typeof (T).GetUnderlyingTypeCode();
+            switch (typeCode)
+            {
+                case TypeCode.DateTime:
+                    return (T) (object) DateTime.Parse(oValue.ToString(), CultureInfo.CurrentCulture);
+                case TypeCode.Decimal:
+                    return (T) (object) Decimal.Parse(oValue.ToString(), CultureInfo.CurrentCulture);
+                case TypeCode.Single:
+                    return (T) (object) System.Single.Parse(oValue.ToString(), CultureInfo.CurrentCulture);
+                case TypeCode.Double:
+                    return (T) (object) Double.Parse(oValue.ToString(), CultureInfo.CurrentCulture);
+            }
+
+            object o = OrmLiteConfig.DialectProvider.ConvertDbValue(oValue, typeof (T));
+            return o == null ? default(T) : (T) o;
         }
 
         internal static long LastInsertId(this IDbCommand dbCmd)
@@ -779,11 +790,16 @@ namespace ServiceStack.OrmLite
         public static long LongScalar(this IDbCommand dbCmd)
         {
             var result = dbCmd.ExecuteScalar();
+            return ToLong(result);
+        }
+
+        internal static long ToLong(object result)
+        {
             if (result is DBNull) return default(long);
-            if (result is int) return (int)result;
-            if (result is decimal) return Convert.ToInt64((decimal)result);
-            if (result is ulong) return (long)Convert.ToUInt64(result);
-            return (long)result;
+            if (result is int) return (int) result;
+            if (result is decimal) return Convert.ToInt64((decimal) result);
+            if (result is ulong) return (long) Convert.ToUInt64(result);
+            return (long) result;
         }
 
         internal static T LoadSingleById<T>(this IDbCommand dbCmd, object value)

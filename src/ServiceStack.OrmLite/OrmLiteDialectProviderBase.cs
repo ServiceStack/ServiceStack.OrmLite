@@ -15,6 +15,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Logging;
 using ServiceStack.Text;
@@ -1411,6 +1413,60 @@ namespace ServiceStack.OrmLite
                 .Replace(@"\", @"^\")
                 .Replace("_", @"^_")
                 .Replace("%", @"^%");
+        }
+
+        public virtual Task OpenAsync(IDbConnection db, CancellationToken token = default(CancellationToken))
+        {
+            db.Open();
+            return AsyncUtils.FromResult(0);
+        }
+
+        public virtual Task<IDataReader> ExecuteReaderAsync(IDbCommand cmd, CancellationToken token = default(CancellationToken))
+        {
+            return AsyncUtils.FromResult(cmd.ExecuteReader());
+        }
+
+        public virtual Task<int> ExecuteNonQueryAsync(IDbCommand cmd, CancellationToken token = default(CancellationToken))
+        {
+            return AsyncUtils.FromResult(cmd.ExecuteNonQuery());
+        }
+
+        public virtual Task<object> ExecuteScalarAsync(IDbCommand cmd, CancellationToken token = default(CancellationToken))
+        {
+            return AsyncUtils.FromResult(cmd.ExecuteScalar());
+        }
+
+        public virtual Task<bool> ReadAsync(IDataReader reader, CancellationToken token = default(CancellationToken))
+        {
+            return AsyncUtils.FromResult(reader.Read());
+        }
+
+        public virtual async Task<List<T>> ReaderEach<T>(IDataReader reader, Func<T> fn, CancellationToken token = default(CancellationToken))
+        {
+            var to = new List<T>();
+            while (await ReadAsync(reader, token))
+            {
+                var row = fn();
+                to.Add(row);
+            }
+            return to;
+        }
+
+        public virtual async Task<Return> ReaderEach<Return>(IDataReader reader, Action fn, Return source, CancellationToken token = default(CancellationToken))
+        {
+            while (await ReadAsync(reader, token))
+            {
+                fn();
+            }
+            return source;
+        }
+
+        public virtual async Task<T> ReaderRead<T>(IDataReader reader, Func<T> fn, CancellationToken token = default(CancellationToken))
+        {
+            if (await ReadAsync(reader, token))
+                return fn();
+
+            return default(T);
         }
     }
 }

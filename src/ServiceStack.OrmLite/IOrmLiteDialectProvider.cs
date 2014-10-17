@@ -13,6 +13,8 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq.Expressions;
+using System.Threading;
+using System.Threading.Tasks;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
@@ -145,5 +147,15 @@ namespace ServiceStack.OrmLite
                                                      string foreignKeyName = null);
         string ToCreateIndexStatement<T>(Expression<Func<T, object>> field,
                                          string indexName = null, bool unique = false);
+
+        //Async
+        Task OpenAsync(IDbConnection db, CancellationToken token = default(CancellationToken));
+        Task<IDataReader> ExecuteReaderAsync(IDbCommand cmd, CancellationToken token = default(CancellationToken));
+        Task<int> ExecuteNonQueryAsync(IDbCommand cmd, CancellationToken token = default(CancellationToken));
+        Task<object> ExecuteScalarAsync(IDbCommand cmd, CancellationToken token = default(CancellationToken));
+        Task<bool> ReadAsync(IDataReader reader, CancellationToken token = default(CancellationToken));
+        Task<List<T>> ReaderEach<T>(IDataReader reader, Func<T> fn, CancellationToken token = default(CancellationToken));
+        Task<Return> ReaderEach<Return>(IDataReader reader, Action fn, Return source, CancellationToken token = default(CancellationToken));
+        Task<T> ReaderRead<T>(IDataReader reader, Func<T> fn, CancellationToken token = default(CancellationToken));
     }
 }
