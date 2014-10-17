@@ -1095,11 +1095,11 @@ namespace ServiceStack.OrmLite
         {
             if (m.Object != null && m.Object as MethodCallExpression != null)
                 return IsColumnAccess(m.Object as MethodCallExpression);
-
+            
             var exp = m.Object as MemberExpression;
             return exp != null
                 && exp.Expression != null
-                && exp.Expression.Type == typeof(T)
+                && IsJoinedTable(exp.Expression.Type)
                 && exp.Expression.NodeType == ExpressionType.Parameter;
         }
 

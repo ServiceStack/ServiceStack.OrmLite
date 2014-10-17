@@ -10,6 +10,11 @@ namespace ServiceStack.OrmLite
     {
         List<ModelDefinition> tableDefs = new List<ModelDefinition>();
 
+        bool IsJoinedTable(Type type)
+        {
+            return tableDefs.FirstOrDefault(x => x.ModelType == type) != null;
+        }
+
         public SqlExpression<T> Join<Target>(Expression<Func<T, Target, bool>> joinExpr = null)
         {
             return InternalJoin("INNER JOIN", joinExpr);

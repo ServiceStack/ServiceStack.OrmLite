@@ -158,6 +158,29 @@ namespace ServiceStack.OrmLite.Tests.Expression
         }
 
         [Test]
+        public void Can_query_contains_on_joined_table_column()
+        {
+            using (var db = OpenDbConnection())
+            {
+                InitTables(db);
+
+                var q = db.From<FooBar>()
+                    .Join<BarJoin>((dp, p) => dp.BarId == p.Id)
+                    .Where<BarJoin>(x => x.Name.Contains("an"));
+
+                var results = db.Select<JoinResult>(q);
+                Assert.That(results.Count, Is.EqualTo(2));
+
+                q = db.From<FooBar>()
+                    .Join<BarJoin>((dp, p) => dp.BarId == p.Id)
+                    .Where<FooBar, BarJoin>((f,x) => x.Name.Contains("an"));
+
+                results = db.Select<JoinResult>(q);
+                Assert.That(results.Count, Is.EqualTo(2));
+            }
+        }
+
+        [Test]
         public void ComplexJoin_with_JoinSqlBuilder()
         {
             using (var db = OpenDbConnection())
