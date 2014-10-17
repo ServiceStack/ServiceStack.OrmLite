@@ -5,6 +5,9 @@ using System.Data.SqlClient;
 using System.Globalization;
 using System.IO;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using ServiceStack.Data;
 using ServiceStack.Text;
 using ServiceStack;
 
@@ -459,5 +462,84 @@ namespace ServiceStack.OrmLite.SqlServer
             var sqlSelect = selectToken[0] + " " + sb.ToString().Trim();
             return sqlSelect;
         }
+
+        protected SqlConnection Unwrap(IDbConnection db)
+        {
+            var dbAsync = db as SqlConnection;
+            if (dbAsync != null)
+                return dbAsync;
+
+            var hasDb = db as IHasDbConnection;
+            if (hasDb != null)
+                return (SqlConnection)hasDb.DbConnection;
+
+            throw new ArgumentException("{0} is not an SqlConnection".Fmt(db.GetType().Name));
+        }
+
+        protected SqlCommand Unwrap(IDbCommand cmd)
+        {
+            return (SqlCommand)cmd;
+        }
+
+        protected SqlDataReader Unwrap(IDataReader reader)
+        {
+            return (SqlDataReader)reader;
+        }
+
+#if NET45
+        public override Task OpenAsync(IDbConnection db, CancellationToken token)
+        {
+            return Unwrap(db).OpenAsync(token);
+        }
+
+        public override Task<IDataReader> ExecuteReaderAsync(IDbCommand cmd, CancellationToken token)
+        {
+            return Unwrap(cmd).ExecuteReaderAsync(token).Then(x => (IDataReader)x);
+        }
+
+        public override Task<int> ExecuteNonQueryAsync(IDbCommand cmd, CancellationToken token)
+        {
+            return Unwrap(cmd).ExecuteNonQueryAsync(token);
+        }
+
+        public override Task<object> ExecuteScalarAsync(IDbCommand cmd, CancellationToken token)
+        {
+            return Unwrap(cmd).ExecuteScalarAsync(token);
+        }
+
+        public override Task<bool> ReadAsync(IDataReader reader, CancellationToken token)
+        {
+            return Unwrap(reader).ReadAsync(token);
+        }
+
+        public override async Task<List<T>> ReaderEach<T>(IDataReader reader, Func<T> fn, CancellationToken token)
+        {
+            var to = new List<T>();
+            while (await OrmLiteConfig.DialectProvider.ReadAsync(reader, token).ConfigureAwait(false))
+            {
+                var row = fn();
+                to.Add(row);
+            }
+            return to;
+        }
+
+        public override async Task<Return> ReaderEach<Return>(IDataReader reader, Action fn, Return source, CancellationToken token)
+        {
+            while (await ReadAsync(reader, token).ConfigureAwait(false))
+            {
+                fn();
+            }
+            return source;
+        }
+
+        public override async Task<T> ReaderRead<T>(IDataReader reader, Func<T> fn, CancellationToken token)
+        {
+            if (await ReadAsync(reader, token).ConfigureAwait(false))
+                return fn();
+
+            return default(T);
+        }
+#endif
+
     }
 }
