@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Service Stack LLC. All Rights Reserved.
+// License: https://raw.github.com/ServiceStack/ServiceStack/master/license.txt
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
@@ -17,7 +20,7 @@ namespace ServiceStack.OrmLite.Async
             dbCmd.CommandText = sql;
 
             if (OrmLiteConfig.ResultsFilter != null)
-                return AsyncUtils.FromResult(OrmLiteConfig.ResultsFilter.ExecuteSql(dbCmd));
+                return OrmLiteConfig.ResultsFilter.ExecuteSql(dbCmd).InTask();
 
             return OrmLiteConfig.DialectProvider.ExecuteNonQueryAsync(dbCmd, token);
         }
@@ -30,7 +33,7 @@ namespace ServiceStack.OrmLite.Async
             dbCmd.CommandText = sql;
 
             if (OrmLiteConfig.ResultsFilter != null)
-                return AsyncUtils.FromResult(OrmLiteConfig.ResultsFilter.ExecuteSql(dbCmd));
+                return OrmLiteConfig.ResultsFilter.ExecuteSql(dbCmd).InTask();
 
             return OrmLiteConfig.DialectProvider.ExecuteNonQueryAsync(dbCmd, token);
         }
@@ -38,7 +41,7 @@ namespace ServiceStack.OrmLite.Async
         internal static Task<int> ExecNonQueryAsync(this IDbCommand dbCmd, CancellationToken token)
         {
             if (OrmLiteConfig.ResultsFilter != null)
-                return AsyncUtils.FromResult(OrmLiteConfig.ResultsFilter.ExecuteSql(dbCmd));
+                return OrmLiteConfig.ResultsFilter.ExecuteSql(dbCmd).InTask();
 
             return OrmLiteConfig.DialectProvider.ExecuteNonQueryAsync(dbCmd, token);
         }
@@ -49,7 +52,7 @@ namespace ServiceStack.OrmLite.Async
                 dbCmd.CommandText = sql;
 
             if (OrmLiteConfig.ResultsFilter != null)
-                return AsyncUtils.FromResult(OrmLiteConfig.ResultsFilter.GetList<T>(dbCmd));
+                return OrmLiteConfig.ResultsFilter.GetList<T>(dbCmd).InTask();
 
             return dbCmd.ExecReaderAsync(dbCmd.CommandText, token)
                         .Then(reader => reader.ConvertToListAsync<T>(token)).Unwrap();
@@ -61,7 +64,7 @@ namespace ServiceStack.OrmLite.Async
                 dbCmd.CommandText = sql;
 
             if (OrmLiteConfig.ResultsFilter != null)
-                return AsyncUtils.FromResult(OrmLiteConfig.ResultsFilter.GetRefList(dbCmd, refType));
+                return OrmLiteConfig.ResultsFilter.GetRefList(dbCmd, refType).InTask();
 
             return dbCmd.ExecReaderAsync(dbCmd.CommandText, token)
                         .Then(reader => reader.ConvertToListAsync(refType, token)).Unwrap();
@@ -73,7 +76,7 @@ namespace ServiceStack.OrmLite.Async
                 dbCmd.CommandText = sql;
 
             if (OrmLiteConfig.ResultsFilter != null)
-                return AsyncUtils.FromResult(OrmLiteConfig.ResultsFilter.GetList<T>(dbCmd));
+                return OrmLiteConfig.ResultsFilter.GetList<T>(dbCmd).InTask();
 
             return dbCmd.ExecReaderAsync(dbCmd.CommandText, token)
                         .Then(reader => reader.ExprConvertToListAsync<T>(token)).Unwrap();
@@ -85,7 +88,7 @@ namespace ServiceStack.OrmLite.Async
                 dbCmd.CommandText = sql;
 
             if (OrmLiteConfig.ResultsFilter != null)
-                return AsyncUtils.FromResult(OrmLiteConfig.ResultsFilter.GetSingle<T>(dbCmd));
+                return OrmLiteConfig.ResultsFilter.GetSingle<T>(dbCmd).InTask();
 
             return dbCmd.ExecReaderAsync(dbCmd.CommandText, token)
                         .Then(reader => reader.ConvertToAsync<T>(token)).Unwrap();
@@ -97,7 +100,7 @@ namespace ServiceStack.OrmLite.Async
                 dbCmd.CommandText = sql;
 
             if (OrmLiteConfig.ResultsFilter != null)
-                return AsyncUtils.FromResult(OrmLiteConfig.ResultsFilter.GetRefSingle(dbCmd, refType));
+                return OrmLiteConfig.ResultsFilter.GetRefSingle(dbCmd, refType).InTask();
 
             return dbCmd.ExecReaderAsync(dbCmd.CommandText, token)
                         .Then(reader => reader.ConvertToAsync(refType, token)).Unwrap();
@@ -109,7 +112,7 @@ namespace ServiceStack.OrmLite.Async
                 dbCmd.CommandText = sql;
 
             if (OrmLiteConfig.ResultsFilter != null)
-                return AsyncUtils.FromResult(OrmLiteConfig.ResultsFilter.GetScalar<T>(dbCmd));
+                return OrmLiteConfig.ResultsFilter.GetScalar<T>(dbCmd).InTask();
 
             return dbCmd.ExecReaderAsync(dbCmd.CommandText, token)
                         .Then(reader => reader.ScalarAsync<T>(token)).Unwrap();
@@ -121,7 +124,7 @@ namespace ServiceStack.OrmLite.Async
                 dbCmd.CommandText = sql;
 
             if (OrmLiteConfig.ResultsFilter != null)
-                return AsyncUtils.FromResult(OrmLiteConfig.ResultsFilter.GetScalar(dbCmd));
+                return OrmLiteConfig.ResultsFilter.GetScalar(dbCmd).InTask();
 
             return OrmLiteConfig.DialectProvider.ExecuteScalarAsync(dbCmd, token);
         }
@@ -132,7 +135,7 @@ namespace ServiceStack.OrmLite.Async
                 dbCmd.CommandText = sql;
 
             if (OrmLiteConfig.ResultsFilter != null)
-                return AsyncUtils.FromResult(OrmLiteConfig.ResultsFilter.GetLongScalar(dbCmd));
+                return OrmLiteConfig.ResultsFilter.GetLongScalar(dbCmd).InTask();
 
             return dbCmd.LongScalarAsync(token);
         }
@@ -143,7 +146,7 @@ namespace ServiceStack.OrmLite.Async
                 dbCmd.CommandText = sql;
 
             if (OrmLiteConfig.ResultsFilter != null)
-                return AsyncUtils.FromResult(OrmLiteConfig.ResultsFilter.GetSingle<T>(dbCmd));
+                return OrmLiteConfig.ResultsFilter.GetSingle<T>(dbCmd).InTask();
 
             return dbCmd.ExecReaderAsync(dbCmd.CommandText, token)
                         .Then(reader => reader.ExprConvertToAsync<T>(token)).Unwrap();
@@ -155,7 +158,7 @@ namespace ServiceStack.OrmLite.Async
                 dbCmd.CommandText = sql;
 
             if (OrmLiteConfig.ResultsFilter != null)
-                return AsyncUtils.FromResult(OrmLiteConfig.ResultsFilter.GetColumn<T>(dbCmd));
+                return OrmLiteConfig.ResultsFilter.GetColumn<T>(dbCmd).InTask();
 
             return dbCmd.ExecReaderAsync(dbCmd.CommandText, token)
                         .Then(reader => reader.ColumnAsync<T>(token)).Unwrap();
@@ -167,7 +170,7 @@ namespace ServiceStack.OrmLite.Async
                 dbCmd.CommandText = sql;
 
             if (OrmLiteConfig.ResultsFilter != null)
-                return AsyncUtils.FromResult(OrmLiteConfig.ResultsFilter.GetColumnDistinct<T>(dbCmd));
+                return OrmLiteConfig.ResultsFilter.GetColumnDistinct<T>(dbCmd).InTask();
 
             return dbCmd.ExecReaderAsync(dbCmd.CommandText, token)
                         .Then(reader => reader.ColumnDistinctAsync<T>(token)).Unwrap();
@@ -179,7 +182,7 @@ namespace ServiceStack.OrmLite.Async
                 dbCmd.CommandText = sql;
 
             if (OrmLiteConfig.ResultsFilter != null)
-                return AsyncUtils.FromResult(OrmLiteConfig.ResultsFilter.GetDictionary<K, V>(dbCmd));
+                return OrmLiteConfig.ResultsFilter.GetDictionary<K, V>(dbCmd).InTask();
 
             return dbCmd.ExecReaderAsync(dbCmd.CommandText, token)
                          .Then(reader => reader.DictionaryAsync<K, V>(token)).Unwrap();
@@ -191,7 +194,7 @@ namespace ServiceStack.OrmLite.Async
                 dbCmd.CommandText = sql;
 
             if (OrmLiteConfig.ResultsFilter != null)
-                return AsyncUtils.FromResult(OrmLiteConfig.ResultsFilter.GetLookup<K,V>(dbCmd));
+                return OrmLiteConfig.ResultsFilter.GetLookup<K, V>(dbCmd).InTask();
 
             return dbCmd.ExecReaderAsync(dbCmd.CommandText, token)
                          .Then(reader => reader.LookupAsync<K,V>(token)).Unwrap();

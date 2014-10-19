@@ -1,8 +1,10 @@
-﻿using System;
+﻿// Copyright (c) Service Stack LLC. All Rights Reserved.
+// License: https://raw.github.com/ServiceStack/ServiceStack/master/license.txt
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using ServiceStack.Logging;
@@ -83,7 +85,7 @@ namespace ServiceStack.OrmLite.Async
         {
             var sql = idValues.GetIdsInSql();
             return sql == null
-                ? AsyncUtils.FromResult(new List<T>())
+                ? new List<T>().InTask()
                 : SelectFmtAsync<T>(dbCmd, token, OrmLiteConfig.DialectProvider.GetQuotedColumnName(ModelDefinition<T>.PrimaryKeyName) + " IN (" + sql + ")");
         }
 

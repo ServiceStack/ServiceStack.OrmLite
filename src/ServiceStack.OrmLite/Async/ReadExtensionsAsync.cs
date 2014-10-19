@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Service Stack LLC. All Rights Reserved.
+// License: https://raw.github.com/ServiceStack/ServiceStack/master/license.txt
+
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -124,29 +127,6 @@ namespace ServiceStack.OrmLite.Async
         {
             return dbCmd.ScalarAsync<long>("SELECT COUNT(*) FROM ({0}) AS COUNT".Fmt(sql), token);
         }
-
-        //internal static List<T> LoadSelectAsync<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression)
-        //{
-        //    var expr = OrmLiteConfig.DialectProvider.SqlExpression<T>();
-        //    expr = expression(expr);
-        //    return dbCmd.LoadListWithReferencesAsync<T, T>(expr);
-        //}
-
-        //internal static List<T> LoadSelectAsync<T>(this IDbCommand dbCmd, SqlExpression<T> expression, CancellationToken token)
-        //{
-        //    return dbCmd.LoadListWithReferencesAsync<T, T>(expression);
-        //}
-
-        //internal static List<Into> LoadSelectAsync<Into, From>(this IDbCommand dbCmd, SqlExpression<From> expression, CancellationToken token)
-        //{
-        //    return dbCmd.LoadListWithReferencesAsync<Into, From>(expression);
-        //}
-
-        //internal static List<T> LoadSelectAsync<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate, CancellationToken token)
-        //{
-        //    var expr = OrmLiteConfig.DialectProvider.SqlExpression<T>().Where(predicate);
-        //    return dbCmd.LoadListWithReferencesAsync<T, T>(expr);
-        //}
 
         internal static Task<T> ExprConvertToAsync<T>(this IDataReader dataReader, CancellationToken token)
         {

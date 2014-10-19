@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Data;
 
 namespace ServiceStack.OrmLite
@@ -42,9 +40,7 @@ namespace ServiceStack.OrmLite
             try
             {
                 reader = command.ExecuteReader();
-#pragma warning disable 618
                 return reader.Column<T>();
-#pragma warning restore 618
             }
             finally
             {
@@ -80,9 +76,7 @@ namespace ServiceStack.OrmLite
             try
             {
                 reader = command.ExecuteReader();
-#pragma warning disable 618
                 return reader.Scalar<T>();
-#pragma warning restore 618
             }
             finally
             {
@@ -100,9 +94,7 @@ namespace ServiceStack.OrmLite
             try
             {
                 reader = command.ExecuteReader();
-#pragma warning disable 618
                 return reader.Column<T>();
-#pragma warning restore 618
             }
             finally
             {
@@ -120,9 +112,7 @@ namespace ServiceStack.OrmLite
             try
             {
                 reader = command.ExecuteReader();
-#pragma warning disable 618
                 return reader.ColumnDistinct<T>();
-#pragma warning restore 618
             }
             finally
             {

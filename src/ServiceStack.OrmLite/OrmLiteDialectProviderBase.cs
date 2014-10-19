@@ -1416,30 +1416,33 @@ namespace ServiceStack.OrmLite
                 .Replace("%", @"^%");
         }
 
+        //Async API's, should be overrided by Dialect Providers to use .ConfigureAwait(false)
+        //Default impl below uses TaskAwaiter shim in async.cs
+
         public virtual Task OpenAsync(IDbConnection db, CancellationToken token = default(CancellationToken))
         {
             db.Open();
-            return AsyncUtils.FromResult(0);
+            return TaskResult.Finished;
         }
 
         public virtual Task<IDataReader> ExecuteReaderAsync(IDbCommand cmd, CancellationToken token = default(CancellationToken))
         {
-            return AsyncUtils.FromResult(cmd.ExecuteReader());
+            return cmd.ExecuteReader().InTask();
         }
 
         public virtual Task<int> ExecuteNonQueryAsync(IDbCommand cmd, CancellationToken token = default(CancellationToken))
         {
-            return AsyncUtils.FromResult(cmd.ExecuteNonQuery());
+            return cmd.ExecuteNonQuery().InTask();
         }
 
         public virtual Task<object> ExecuteScalarAsync(IDbCommand cmd, CancellationToken token = default(CancellationToken))
         {
-            return AsyncUtils.FromResult(cmd.ExecuteScalar());
+            return cmd.ExecuteScalar().InTask();
         }
 
         public virtual Task<bool> ReadAsync(IDataReader reader, CancellationToken token = default(CancellationToken))
         {
-            return AsyncUtils.FromResult(reader.Read());
+            return reader.Read().InTask();
         }
 
         public virtual async Task<List<T>> ReaderEach<T>(IDataReader reader, Func<T> fn, CancellationToken token = default(CancellationToken))
@@ -1468,6 +1471,17 @@ namespace ServiceStack.OrmLite
                 return fn();
 
             return default(T);
+        }
+
+        public virtual Task<long> InsertAndGetLastInsertIdAsync<T>(IDbCommand dbCmd, CancellationToken token)
+        {
+            if (SelectIdentitySql == null)
+                return new NotImplementedException("Returning last inserted identity is not implemented on this DB Provider.")
+                    .InTask<long>();
+
+            dbCmd.CommandText += "; " + SelectIdentitySql;
+
+            return dbCmd.ExecLongScalarAsync(null, token);
         }
     }
 }
