@@ -527,18 +527,51 @@
             <param name="typ">The DbType to get the size of</param>
             <returns></returns>
         </member>
-        <member name="M:System.Data.SQLite.SQLiteConvert.GetDefaultTypeName">
+        <member name="M:System.Data.SQLite.SQLiteConvert.GetDefaultTypeName(System.Data.SQLite.SQLiteConnection)">
             <summary>
             Determines the default database type name to be used when a
             per-connection value is not available.
             </summary>
+            <param name="connection">
+            The connection context for type mappings, if any.
+            </param>
             <returns>
             The default database type name to use.
             </returns>
         </member>
+        <member name="M:System.Data.SQLite.SQLiteConvert.DefaultTypeNameWarning(System.Data.DbType,System.Data.SQLite.SQLiteConnectionFlags,System.String)">
+            <summary>
+            If applicable, issues a trace log message warning about falling back to
+            the default database type name.
+            </summary>
+            <param name="dbType">
+            The database value type.
+            </param>
+            <param name="flags">
+            The flags associated with the parent connection object.
+            </param>
+            <param name="typeName">
+            The textual name of the database type.
+            </param>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteConvert.DefaultDbTypeWarning(System.String,System.Data.SQLite.SQLiteConnectionFlags,System.Nullable{System.Data.DbType})">
+            <summary>
+            If applicable, issues a trace log message warning about falling back to
+            the default database value type.
+            </summary>
+            <param name="typeName">
+            The textual name of the database type.
+            </param>
+            <param name="flags">
+            The flags associated with the parent connection object.
+            </param>
+            <param name="dbType">
+            The database value type.
+            </param>
+        </member>
         <member name="M:System.Data.SQLite.SQLiteConvert.DbTypeToTypeName(System.Data.SQLite.SQLiteConnection,System.Data.DbType,System.Data.SQLite.SQLiteConnectionFlags)">
             <summary>
-            Determines the type name for the given database value type.
+            For a given database value type, return the "closest-match" textual database type name.
             </summary>
             <param name="connection">The connection context for custom type mappings, if any.</param>
             <param name="dbType">The database value type.</param>
@@ -581,11 +614,27 @@
             otherwise.
             </returns>
         </member>
-        <member name="M:System.Data.SQLite.SQLiteConvert.GetDefaultDbType">
+        <member name="M:System.Data.SQLite.SQLiteConvert.SettingValueToString(System.Object)">
+            <summary>
+            Determines and returns the runtime configuration setting string that
+            should be used in place of the specified object value.
+            </summary>
+            <param name="value">
+            The object value to convert to a string.
+            </param>
+            <returns>
+            Either the string to use in place of the object value -OR- null if it
+            cannot be determined.
+            </returns>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteConvert.GetDefaultDbType(System.Data.SQLite.SQLiteConnection)">
             <summary>
             Determines the default <see cref="T:System.Data.DbType"/> value to be used when a
             per-connection value is not available.
             </summary>
+            <param name="connection">
+            The connection context for type mappings, if any.
+            </param>
             <returns>
             The default <see cref="T:System.Data.DbType"/> value to use.
             </returns>
@@ -648,10 +697,12 @@
         </member>
         <member name="M:System.Data.SQLite.SQLiteConvert.TypeNameToDbType(System.Data.SQLite.SQLiteConnection,System.String,System.Data.SQLite.SQLiteConnectionFlags)">
             <summary>
-            For a given type name, return a closest-match .NET type
+            For a given textual database type name, return the "closest-match" database type.
+            This method is called during query result processing; therefore, its performance
+            is critical.
             </summary>
             <param name="connection">The connection context for custom type mappings, if any.</param>
-            <param name="name">The name of the type to match</param>
+            <param name="typeName">The textual name of the database type to match.</param>
             <param name="flags">The flags associated with the parent connection object.</param>
             <returns>The .NET DBType the text evaluates to.</returns>
         </member>
@@ -1697,6 +1748,19 @@
             or <see cref="F:System.Data.SQLite.TypeAffinity.DateTime"/> types.
             </summary>
         </member>
+        <member name="F:System.Data.SQLite.SQLiteConnectionFlags.NoConvertSettings">
+            <summary>
+            Skip querying runtime configuration settings for use by the
+            <see cref="T:System.Data.SQLite.SQLiteConvert"/> class, including the default
+            <see cref="T:System.Data.DbType"/> value and default database type name.
+            <b>NOTE: If the <see cref="P:System.Data.SQLite.SQLiteConnection.DefaultDbType"/>
+            and/or <see cref="P:System.Data.SQLite.SQLiteConnection.DefaultTypeName"/>
+            properties are not set explicitly nor set via their connection
+            string properties and repeated calls to determine these runtime
+            configuration settings are seen to be a problem, this flag
+            should be set.</b>
+            </summary>
+        </member>
         <member name="F:System.Data.SQLite.SQLiteConnectionFlags.BindAndGetAllAsText">
             <summary>
             When binding parameter values or returning column values, always
@@ -2495,6 +2559,13 @@
             </list>
             </remarks>
         </member>
+        <member name="F:System.Data.SQLite.SQLiteConnection.BadDbType">
+            <summary>
+            The "invalid value" for the <see cref="T:System.Data.DbType"/> enumeration used
+            by the <see cref="P:System.Data.SQLite.SQLiteConnection.DefaultDbType"/> property.  This constant is shared
+            by this class and the SQLiteConnectionStringBuilder class.
+            </summary>
+        </member>
         <member name="F:System.Data.SQLite.SQLiteConnection.DefaultBaseSchemaName">
             <summary>
             The default "stub" (i.e. placeholder) base schema name to use when
@@ -2582,6 +2653,13 @@
             The extra behavioral flags for this connection, if any.  See the
             <see cref="T:System.Data.SQLite.SQLiteConnectionFlags"/> enumeration for a list of
             possible values.
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.SQLiteConnection._cachedSettings">
+            <summary>
+            The cached values for all settings that have been fetched on behalf
+            of this connection.  This cache may be cleared by calling the
+            <see cref="M:System.Data.SQLite.SQLiteConnection.ClearCachedSettings"/> method.
             </summary>
         </member>
         <member name="F:System.Data.SQLite.SQLiteConnection._defaultDbType">
@@ -2709,6 +2787,46 @@
             The number of milliseconds to sleep after encountering a locking error
             during the backup process.  A value less than zero means that no sleep
             should be performed.
+            </param>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteConnection.ClearCachedSettings">
+            <summary>
+            Clears the per-connection cached settings.
+            </summary>
+            <returns>
+            The total number of per-connection settings cleared.
+            </returns>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteConnection.TryGetCachedSetting(System.String,System.String,System.Object@)">
+            <summary>
+            Queries and returns the value of the specified setting, using the
+            cached setting names and values for this connection, when available.
+            </summary>
+            <param name="name">
+            The name of the setting.
+            </param>
+            <param name="default">
+            The value to be returned if the setting has not been set explicitly
+            or cannot be determined.
+            </param>
+            <param name="value">
+            The value of the cached setting is stored here if found; otherwise,
+            the value of <paramref name="default" /> is stored here.
+            </param>
+            <returns>
+            Non-zero if the cached setting was found; otherwise, zero.
+            </returns>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteConnection.SetCachedSetting(System.String,System.Object)">
+            <summary>
+            Adds or sets the cached setting specified by <paramref name="name" />
+            to the value specified by <paramref name="value" />.
+            </summary>
+            <param name="name">
+            The name of the cached setting to add or replace.
+            </param>
+            <param name="value">
+            The new value of the cached setting.
             </param>
         </member>
         <member name="M:System.Data.SQLite.SQLiteConnection.ClearTypeMappings">
@@ -3680,15 +3798,13 @@
         <member name="P:System.Data.SQLite.SQLiteConnection.DefaultDbType">
             <summary>
             Gets/sets the default database type for this connection.  This value
-            will only be used if the <see cref="F:System.Data.SQLite.SQLiteConnectionFlags.UseConnectionTypes"/>
-            flag is set.
+            will only be used when not null.
             </summary>
         </member>
         <member name="P:System.Data.SQLite.SQLiteConnection.DefaultTypeName">
             <summary>
-            Gets/sets the default database type name for this connection.  This value
-            will only be used if the <see cref="F:System.Data.SQLite.SQLiteConnectionFlags.UseConnectionTypes"/>
-            flag is set.
+            Gets/sets the default database type name for this connection.  This
+            value will only be used when not null.
             </summary>
         </member>
         <member name="P:System.Data.SQLite.SQLiteConnection.OwnHandle">
@@ -5268,6 +5384,11 @@
             Underlying command this reader is attached to
             </summary>
         </member>
+        <member name="F:System.Data.SQLite.SQLiteDataReader._flags">
+            <summary>
+            The flags pertaining to the associated connection (via the command).
+            </summary>
+        </member>
         <member name="F:System.Data.SQLite.SQLiteDataReader._activeStatementIndex">
             <summary>
             Index of the current statement in the command being processed
@@ -5378,6 +5499,12 @@
             Enumerator support
             </summary>
             <returns>Returns a DbEnumerator object.</returns>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteDataReader.RefreshFlags">
+            <summary>
+            Forces the connection flags cached by this data reader to be refreshed
+            from the underlying connection.
+            </summary>
         </member>
         <member name="M:System.Data.SQLite.SQLiteDataReader.VerifyType(System.Int32,System.Data.DbType)">
              <summary>
@@ -5588,19 +5715,6 @@
             </summary>
             <returns>
             The connection object -OR- null if it is unavailable.
-            </returns>
-        </member>
-        <member name="M:System.Data.SQLite.SQLiteDataReader.GetFlags(System.Data.SQLite.SQLiteDataReader)">
-            <summary>
-            This method attempts to query the flags associated with the database
-            connection in use.  If the database connection is disposed, the default
-            flags will be returned.
-            </summary>
-            <param name="dataReader">
-            The data reader containing the databse connection to query the flags from.
-            </param>
-            <returns>
-            The connection flags value.
             </returns>
         </member>
         <member name="M:System.Data.SQLite.SQLiteDataReader.GetSQLiteType(System.Data.SQLite.SQLiteType,System.String)">
