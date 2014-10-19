@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
 using ServiceStack.OrmLite.Async;
 using ServiceStack.Text;
 
-namespace ServiceStack.OrmLite.SqlServerV45.Tests
+namespace ServiceStack.OrmLite.Tests
 {
     [TestFixture]
     public class AsyncTests
@@ -29,5 +25,4 @@ namespace ServiceStack.OrmLite.SqlServerV45.Tests
             }
         }
     }
-
 }
