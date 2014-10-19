@@ -538,6 +538,13 @@ namespace ServiceStack.OrmLite
 
         internal static int DeleteById<T>(this IDbCommand dbCmd, object id)
         {
+            var sql = DeleteByIdSql<T>(dbCmd, id);
+
+            return dbCmd.ExecuteSql(sql);
+        }
+
+        internal static string DeleteByIdSql<T>(this IDbCommand dbCmd, object id)
+        {
             var modelDef = ModelDefinition<T>.Definition;
             var idParamString = OrmLiteConfig.DialectProvider.GetParam();
 
@@ -550,11 +557,19 @@ namespace ServiceStack.OrmLite
             idParam.ParameterName = idParamString;
             idParam.Value = id;
             dbCmd.Parameters.Add(idParam);
-
-            return dbCmd.ExecuteSql(sql);
+            return sql;
         }
 
         internal static void DeleteById<T>(this IDbCommand dbCmd, object id, ulong rowVersion)
+        {
+            var sql = DeleteByIdSql<T>(dbCmd, id, rowVersion);
+
+            var rowsAffected = dbCmd.ExecuteSql(sql);
+            if (rowsAffected == 0)
+                throw new OptimisticConcurrencyException("The row was modified or deleted since the last read");
+        }
+
+        internal static string DeleteByIdSql<T>(this IDbCommand dbCmd, object id, ulong rowVersion)
         {
             var modelDef = ModelDefinition<T>.Definition;
 
@@ -567,7 +582,8 @@ namespace ServiceStack.OrmLite
 
             var rowVersionField = modelDef.RowVersion;
             if (rowVersionField == null)
-                throw new InvalidOperationException("Cannot use DeleteById with rowVersion for model type without a row version column");
+                throw new InvalidOperationException(
+                    "Cannot use DeleteById with rowVersion for model type without a row version column");
 
             var rowVersionParam = dbCmd.CreateParameter();
             rowVersionParam.ParameterName = OrmLiteConfig.DialectProvider.GetParam("rowVersion");
@@ -581,9 +597,7 @@ namespace ServiceStack.OrmLite
                 OrmLiteConfig.DialectProvider.GetQuotedColumnName(rowVersionField.FieldName),
                 rowVersionParam.ParameterName);
 
-            var rowsAffected = dbCmd.ExecuteSql(sql);
-            if (rowsAffected == 0)
-                throw new OptimisticConcurrencyException("The row was modified or deleted since the last read");
+            return sql;
         }
 
         internal static int DeleteByIds<T>(this IDbCommand dbCmd, IEnumerable idValues)
@@ -591,14 +605,20 @@ namespace ServiceStack.OrmLite
             var sqlIn = idValues.GetIdsInSql();
             if (sqlIn == null) return 0;
 
+            var sql = GetDeleteByIdsSql<T>(sqlIn);
+
+            return dbCmd.ExecuteSql(sql);
+        }
+
+        internal static string GetDeleteByIdsSql<T>(string sqlIn)
+        {
             var modelDef = ModelDefinition<T>.Definition;
 
             var sql = String.Format("DELETE FROM {0} WHERE {1} IN ({2})",
                 OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef),
                 OrmLiteConfig.DialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName),
                 sqlIn);
-
-            return dbCmd.ExecuteSql(sql);
+            return sql;
         }
 
         internal static int DeleteAll<T>(this IDbCommand dbCmd)
@@ -796,6 +816,12 @@ namespace ServiceStack.OrmLite
 
         internal static ulong GetRowVersion(this IDbCommand dbCmd, ModelDefinition modelDef, object id)
         {
+            var sql = RowVersionSql(dbCmd, modelDef, id);
+            return dbCmd.Scalar<ulong>(sql);
+        }
+
+        internal static string RowVersionSql(this IDbCommand dbCmd, ModelDefinition modelDef, object id)
+        {
             var idParamString = OrmLiteConfig.DialectProvider.GetParam();
 
             var sql = string.Format("SELECT {0} FROM {1} WHERE {2} = {3}",
@@ -809,8 +835,7 @@ namespace ServiceStack.OrmLite
             idParam.ParameterName = idParamString;
             idParam.Value = id;
             dbCmd.Parameters.Add(idParam);
-
-            return dbCmd.Scalar<ulong>(sql);
+            return sql;
         }
     }
 }

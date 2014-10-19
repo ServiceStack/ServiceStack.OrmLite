@@ -108,9 +108,10 @@
     <Compile Include="Async\async.cs" />
     <Compile Include="Async\OrmLiteReadConnectionExtensionsAsync.cs" />
     <Compile Include="Async\OrmLiteReadExtensionsAsync.cs" />
-    <Compile Include="Async\AsyncUtils.cs" />
     <Compile Include="Async\OrmLiteResultsFilterExtensionsAsync.cs" />
     <Compile Include="Async\OrmLiteUtilExtensionsAsync.cs" />
+    <Compile Include="Async\OrmLiteWriteConnectionExtensionsAsync.cs" />
+    <Compile Include="Async\OrmLiteWriteExtensionsAsync.cs" />
     <Compile Include="Async\ReadConnectionExtensions.cs" />
     <Compile Include="Async\ReadExtensionsAsync.cs" />
     <Compile Include="Expressions\SqlExpression.Join.cs" />
