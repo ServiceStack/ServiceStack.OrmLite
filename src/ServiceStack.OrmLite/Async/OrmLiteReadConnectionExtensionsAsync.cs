@@ -8,6 +8,7 @@ using System.Data;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Async
 {
@@ -60,6 +61,10 @@ namespace ServiceStack.OrmLite.Async
         {
             return dbConn.Exec(dbCmd => dbCmd.SelectFmtAsync<T>(token, sqlFormat, filterParams));
         }
+        public static Task<List<T>> SelectFmtAsync<T>(this IDbConnection dbConn, string sqlFormat, params object[] filterParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SelectFmtAsync<T>(default(CancellationToken), sqlFormat, filterParams));
+        }
 
         /// <summary>
         /// Returns a partial subset of results from the specified tableType. E.g:
@@ -78,6 +83,10 @@ namespace ServiceStack.OrmLite.Async
         public static Task<List<TModel>> SelectFmtAsync<TModel>(this IDbConnection dbConn, CancellationToken token, Type fromTableType, string sqlFormat, params object[] filterParams)
         {
             return dbConn.Exec(dbCmd => dbCmd.SelectFmtAsync<TModel>(token, fromTableType, sqlFormat, filterParams));
+        }
+        public static Task<List<TModel>> SelectFmtAsync<TModel>(this IDbConnection dbConn, Type fromTableType, string sqlFormat, params object[] filterParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SelectFmtAsync<TModel>(default(CancellationToken), fromTableType, sqlFormat, filterParams));
         }
 
         /// <summary>
@@ -151,6 +160,10 @@ namespace ServiceStack.OrmLite.Async
         {
             return dbConn.Exec(dbCmd => dbCmd.SingleFmtAsync<T>(token, sqlFormat, filterParams));
         }
+        public static Task<T> SingleFmtAsync<T>(this IDbConnection dbConn, string sqlFormat, params object[] filterParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SingleFmtAsync<T>(default(CancellationToken), sqlFormat, filterParams));
+        }
 
         /// <summary>
         /// Returns the first result using a primary key id. E.g:
@@ -196,6 +209,10 @@ namespace ServiceStack.OrmLite.Async
         {
             return dbConn.Exec(dbCmd => dbCmd.ScalarFmtAsync<T>(token, sqlFormat, sqlParams));
         }
+        public static Task<T> ScalarFmtAsync<T>(this IDbConnection dbConn, string sqlFormat, params object[] sqlParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.ScalarFmtAsync<T>(default(CancellationToken), sqlFormat, sqlParams));
+        }
 
         /// <summary>
         /// Returns the distinct first column values in a HashSet using an SqlExpression. E.g:
@@ -222,6 +239,10 @@ namespace ServiceStack.OrmLite.Async
         public static Task<List<T>> ColumnFmtAsync<T>(this IDbConnection dbConn, CancellationToken token, string sqlFormat, params object[] sqlParams)
         {
             return dbConn.Exec(dbCmd => dbCmd.ColumnFmtAsync<T>(token, sqlFormat, sqlParams));
+        }
+        public static Task<List<T>> ColumnFmtAsync<T>(this IDbConnection dbConn, string sqlFormat, params object[] sqlParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.ColumnFmtAsync<T>(default(CancellationToken), sqlFormat, sqlParams));
         }
 
         /// <summary>
@@ -250,6 +271,10 @@ namespace ServiceStack.OrmLite.Async
         {
             return dbConn.Exec(dbCmd => dbCmd.ColumnDistinctFmtAsync<T>(token, sqlFormat, sqlParams));
         }
+        public static Task<HashSet<T>> ColumnDistinctFmtAsync<T>(this IDbConnection dbConn, string sqlFormat, params object[] sqlParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.ColumnDistinctFmtAsync<T>(default(CancellationToken), sqlFormat, sqlParams));
+        }
 
         /// <summary>
         /// Returns an Dictionary&lt;K, List&lt;V&gt;&gt; grouping made from the first two columns using an Sql Expression. E.g:
@@ -276,6 +301,10 @@ namespace ServiceStack.OrmLite.Async
         public static Task<Dictionary<K, List<V>>> LookupFmtAsync<K, V>(this IDbConnection dbConn, CancellationToken token, string sqlFormat, params object[] sqlParams)
         {
             return dbConn.Exec(dbCmd => dbCmd.LookupFmtAsync<K, V>(token, sqlFormat, sqlParams));
+        }
+        public static Task<Dictionary<K, List<V>>> LookupFmtAsync<K, V>(this IDbConnection dbConn, string sqlFormat, params object[] sqlParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.LookupFmtAsync<K, V>(default(CancellationToken), sqlFormat, sqlParams));
         }
 
         /// <summary>
@@ -304,6 +333,10 @@ namespace ServiceStack.OrmLite.Async
         {
             return dbConn.Exec(dbCmd => dbCmd.DictionaryFmtAsync<K, V>(token, sqlFormat, sqlParams));
         }
+        public static Task<Dictionary<K, V>> DictionaryFmtAsync<K, V>(this IDbConnection dbConn, string sqlFormat, params object[] sqlParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.DictionaryFmtAsync<K, V>(default(CancellationToken), sqlFormat, sqlParams));
+        }
 
         /// <summary>
         /// Returns true if the Query returns any records that match the LINQ expression, E.g:
@@ -311,7 +344,7 @@ namespace ServiceStack.OrmLite.Async
         /// </summary>
         public static Task<bool> ExistsAsync<T>(this IDbConnection dbConn, Expression<Func<T, bool>> expression, CancellationToken token = default(CancellationToken))
         {
-            return dbConn.Exec(dbCmd => dbCmd.CountAsync(expression, token)).Then(x => x > 0);
+            return dbConn.Exec(dbCmd => dbCmd.CountAsync(expression, token).Then(x => x > 0));
         }
 
         /// <summary>
@@ -320,7 +353,7 @@ namespace ServiceStack.OrmLite.Async
         /// </summary>
         public static Task<bool> ExistsAsync<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression, CancellationToken token = default(CancellationToken))
         {
-            return dbConn.Exec(dbCmd => dbCmd.CountAsync(expression, token)).Then(x => x > 0);
+            return dbConn.Exec(dbCmd => dbCmd.CountAsync(expression, token).Then(x => x > 0));
         }
 
         /// <summary>
@@ -329,7 +362,7 @@ namespace ServiceStack.OrmLite.Async
         /// </summary>
         public static Task<bool> ExistsAsync<T>(this IDbConnection dbConn, SqlExpression<T> expression, CancellationToken token = default(CancellationToken))
         {
-            return dbConn.Exec(dbCmd => dbCmd.CountAsync(expression, token)).Then(x => x > 0);
+            return dbConn.Exec(dbCmd => dbCmd.CountAsync(expression, token).Then(x => x > 0));
         }
         /// <summary>
         /// Returns true if the Query returns any records, using an SqlFormat query. E.g:
@@ -358,6 +391,10 @@ namespace ServiceStack.OrmLite.Async
         public static Task<bool> ExistsFmtAsync<T>(this IDbConnection dbConn, CancellationToken token, string sqlFormat, params object[] filterParams)
         {
             return dbConn.Exec(dbCmd => dbCmd.ExistsFmtAsync<T>(token, sqlFormat, filterParams));
+        }
+        public static Task<bool> ExistsFmtAsync<T>(this IDbConnection dbConn, string sqlFormat, params object[] filterParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.ExistsFmtAsync<T>(default(CancellationToken), sqlFormat, filterParams));
         }
 
         /// <summary>

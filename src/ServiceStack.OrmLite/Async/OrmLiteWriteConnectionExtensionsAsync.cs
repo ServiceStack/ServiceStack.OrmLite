@@ -68,9 +68,13 @@ namespace ServiceStack.OrmLite.Async
         /// <para>db.Update(new Person { Id = 1, FirstName = "Tupac", LastName = "Shakur", Age = 25 },</para>
         /// <para>new Person { Id = 2, FirstName = "Biggie", LastName = "Smalls", Age = 24 })</para>
         /// </summary>
-        public static Task<int> UpdateAsync<T>(this IDbConnection dbConn, CancellationToken token = default(CancellationToken), params T[] objs)
+        public static Task<int> UpdateAsync<T>(this IDbConnection dbConn, CancellationToken token, params T[] objs)
         {
             return dbConn.Exec(dbCmd => dbCmd.UpdateAsync(objs, token));
+        }
+        public static Task<int> UpdateAsync<T>(this IDbConnection dbConn, params T[] objs)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.UpdateAsync(default(CancellationToken), objs));
         }
 
         /// <summary>
@@ -140,9 +144,13 @@ namespace ServiceStack.OrmLite.Async
         /// new Person { FirstName = "Janis", Age = 27 })</para>
         /// </summary>
         /// <returns>number of rows deleted</returns>
-        public static Task<int> DeleteNonDefaultsAsync<T>(this IDbConnection dbConn, CancellationToken token = default(CancellationToken), params T[] nonDefaultsFilters)
+        public static Task<int> DeleteNonDefaultsAsync<T>(this IDbConnection dbConn, CancellationToken token, params T[] nonDefaultsFilters)
         {
             return dbConn.Exec(dbCmd => dbCmd.DeleteNonDefaultsAsync(token, nonDefaultsFilters));
+        }
+        public static Task<int> DeleteNonDefaultsAsync<T>(this IDbConnection dbConn, params T[] nonDefaultsFilters)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.DeleteNonDefaultsAsync(default(CancellationToken), nonDefaultsFilters));
         }
 
         /// <summary>
@@ -204,15 +212,23 @@ namespace ServiceStack.OrmLite.Async
         {
             return dbConn.Exec(dbCmd => dbCmd.DeleteFmtAsync<T>(token, sqlFilter, filterParams));
         }
+        public static Task<int> DeleteFmtAsync<T>(this IDbConnection dbConn, string sqlFilter, params object[] filterParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.DeleteFmtAsync<T>(default(CancellationToken), sqlFilter, filterParams));
+        }
 
         /// <summary>
         /// Delete rows from the runtime table type using a SqlFormat filter. E.g:
         /// </summary>
         /// <para>db.DeleteFmt(typeof(Person), "Age = {0}", 27)</para>
         /// <returns>number of rows deleted</returns>
-        public static Task<int> DeleteFmt(this IDbConnection dbConn, CancellationToken token, Type tableType, string sqlFilter, params object[] filterParams)
+        public static Task<int> DeleteFmtAsync(this IDbConnection dbConn, CancellationToken token, Type tableType, string sqlFilter, params object[] filterParams)
         {
             return dbConn.Exec(dbCmd => dbCmd.DeleteFmtAsync(token, tableType, sqlFilter, filterParams));
+        }
+        public static Task<int> DeleteFmtAsync(this IDbConnection dbConn, Type tableType, string sqlFilter, params object[] filterParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.DeleteFmtAsync(default(CancellationToken), tableType, sqlFilter, filterParams));
         }
 
         // Procedures
