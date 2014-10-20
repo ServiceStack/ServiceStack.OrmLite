@@ -515,30 +515,51 @@ namespace ServiceStack.OrmLite.SqlServer
 
         public override async Task<List<T>> ReaderEach<T>(IDataReader reader, Func<T> fn, CancellationToken token)
         {
-            var to = new List<T>();
-            while (await OrmLiteConfig.DialectProvider.ReadAsync(reader, token).ConfigureAwait(false))
+            try
             {
-                var row = fn();
-                to.Add(row);
+                var to = new List<T>();
+                while (await OrmLiteConfig.DialectProvider.ReadAsync(reader, token).ConfigureAwait(false))
+                {
+                    var row = fn();
+                    to.Add(row);
+                }
+                return to;
             }
-            return to;
+            finally
+            {
+                reader.Dispose();
+            }
         }
 
         public override async Task<Return> ReaderEach<Return>(IDataReader reader, Action fn, Return source, CancellationToken token)
         {
-            while (await ReadAsync(reader, token).ConfigureAwait(false))
+            try
             {
-                fn();
+                while (await ReadAsync(reader, token).ConfigureAwait(false))
+                {
+                    fn();
+                }
+                return source;
             }
-            return source;
+            finally
+            {
+                reader.Dispose();
+            }
         }
 
         public override async Task<T> ReaderRead<T>(IDataReader reader, Func<T> fn, CancellationToken token)
         {
-            if (await ReadAsync(reader, token).ConfigureAwait(false))
-                return fn();
+            try
+            {
+                if (await ReadAsync(reader, token).ConfigureAwait(false))
+                    return fn();
 
-            return default(T);
+                return default(T);
+            }
+            finally
+            {
+                reader.Dispose();
+            }
         }
 #endif
 

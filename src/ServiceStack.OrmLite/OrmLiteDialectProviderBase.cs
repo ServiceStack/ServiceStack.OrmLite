@@ -1447,30 +1447,51 @@ namespace ServiceStack.OrmLite
 
         public virtual async Task<List<T>> ReaderEach<T>(IDataReader reader, Func<T> fn, CancellationToken token = default(CancellationToken))
         {
-            var to = new List<T>();
-            while (await ReadAsync(reader, token))
+            try
             {
-                var row = fn();
-                to.Add(row);
+                var to = new List<T>();
+                while (await ReadAsync(reader, token))
+                {
+                    var row = fn();
+                    to.Add(row);
+                }
+                return to;
             }
-            return to;
+            finally
+            {
+                reader.Dispose();
+            }
         }
 
         public virtual async Task<Return> ReaderEach<Return>(IDataReader reader, Action fn, Return source, CancellationToken token = default(CancellationToken))
         {
-            while (await ReadAsync(reader, token))
+            try
             {
-                fn();
+                while (await ReadAsync(reader, token))
+                {
+                    fn();
+                }
+                return source;
             }
-            return source;
+            finally
+            {
+                reader.Dispose();
+            }
         }
 
         public virtual async Task<T> ReaderRead<T>(IDataReader reader, Func<T> fn, CancellationToken token = default(CancellationToken))
         {
-            if (await ReadAsync(reader, token))
-                return fn();
+            try
+            {
+                if (await ReadAsync(reader, token))
+                    return fn();
 
-            return default(T);
+                return default(T);
+            }
+            finally 
+            {
+                reader.Dispose();
+            }
         }
 
         public virtual Task<long> InsertAndGetLastInsertIdAsync<T>(IDbCommand dbCmd, CancellationToken token)
