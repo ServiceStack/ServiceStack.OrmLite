@@ -119,6 +119,7 @@
     <Compile Include="AsyncTests.cs" />
     <Compile Include="CaptureSqlFilterTests.cs" />
     <Compile Include="CompositeKeyTests.cs" />
+    <Compile Include="ApiSqlServerTestsAsync.cs" />
     <Compile Include="CustomSqlTests.cs" />
     <Compile Include="DateTimeOffsetTests.cs" />
     <Compile Include="Expression\ComplexJoinTests.cs" />
