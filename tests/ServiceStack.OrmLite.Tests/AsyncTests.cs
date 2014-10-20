@@ -54,12 +54,11 @@ namespace ServiceStack.OrmLite.Tests
                 "After Delay: {0}".Print(Thread.CurrentThread.ManagedThreadId);
                 await Task.Delay(delayMs);
             })
-            .Then(t =>
+            .Then(async t =>
             {
                 "Before SQL: {0}".Print(Thread.CurrentThread.ManagedThreadId);
-                return db.ExistsAsync<Person>(x => x.Age < 50)
-                    .Then(t1 =>
-                    {
+                await db.ExistsAsync<Person>(x => x.Age < 50)
+                    .Then(t1 => {
                         "After SQL: {0}".Print(Thread.CurrentThread.ManagedThreadId);
                         return Task.Delay(delayMs);
                     });

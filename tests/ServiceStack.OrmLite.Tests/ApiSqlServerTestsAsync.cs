@@ -7,6 +7,7 @@ using ServiceStack.OrmLite.Tests.Shared;
 
 namespace ServiceStack.OrmLite.Tests
 {
+    [Explicit("Requires SqlServer")]
     public class ApiSqlServerTestsAsync
         : OrmLiteTestBase
     {

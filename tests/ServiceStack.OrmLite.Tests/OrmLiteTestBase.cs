@@ -55,6 +55,12 @@ namespace ServiceStack.OrmLite.Tests
 	        return dbFactory;
 	    }
 
+        public static OrmLiteConnectionFactory CreateSqliteMemoryDbFactory()
+        {
+            var dbFactory = new OrmLiteConnectionFactory(Config.SqliteMemoryDb, SqliteDialect.Provider);
+            return dbFactory;
+        }
+
 	    protected virtual string GetFileConnectionString()
 		{
             var connectionString = Config.SqliteFileDb;
