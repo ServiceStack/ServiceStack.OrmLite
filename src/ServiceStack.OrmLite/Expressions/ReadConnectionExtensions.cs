@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 
 namespace ServiceStack.OrmLite
 {
@@ -18,6 +19,16 @@ namespace ServiceStack.OrmLite
         public static void Exec(this IDbConnection dbConn, Action<IDbCommand> filter)
         {
             OrmLiteConfig.ExecFilter.Exec(dbConn, filter);
+        }
+
+        public static Task<T> Exec<T>(this IDbConnection dbConn, Func<IDbCommand, Task<T>> filter)
+        {
+            return OrmLiteConfig.ExecFilter.Exec(dbConn, filter);
+        }
+
+        public static Task Exec(this IDbConnection dbConn, Func<IDbCommand, Task> filter)
+        {
+            return OrmLiteConfig.ExecFilter.Exec(dbConn, filter);
         }
 
         public static IEnumerable<T> ExecLazy<T>(this IDbConnection dbConn, Func<IDbCommand, IEnumerable<T>> filter)

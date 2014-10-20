@@ -114,6 +114,8 @@
     <Compile Include="Async\OrmLiteWriteExtensionsAsync.cs" />
     <Compile Include="Async\ReadConnectionExtensions.cs" />
     <Compile Include="Async\ReadExtensionsAsync.cs" />
+    <Compile Include="Async\WriteConnectionExtensionsAsync.cs" />
+    <Compile Include="Async\WriteExtensionsAsync.cs" />
     <Compile Include="Expressions\SqlExpression.Join.cs" />
     <Compile Include="Expressions\SqlExpressionVisitor.cs" />
     <Compile Include="Expressions\ParameterRebinder.cs" />

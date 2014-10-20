@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Threading;
+using System.Threading.Tasks;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
@@ -10,7 +13,9 @@ namespace ServiceStack.OrmLite
         IDbCommand CreateCommand(IDbConnection dbConn);
         void DisposeCommand(IDbCommand dbCmd);
         T Exec<T>(IDbConnection dbConn, Func<IDbCommand, T> filter);
+        Task<T> Exec<T>(IDbConnection dbConn, Func<IDbCommand, Task<T>> filter);
         void Exec(IDbConnection dbConn, Action<IDbCommand> filter);
+        Task Exec(IDbConnection dbConn, Func<IDbCommand, Task> filter);
         IEnumerable<T> ExecLazy<T>(IDbConnection dbConn, Func<IDbCommand, IEnumerable<T>> filter);
     }
 
@@ -70,6 +75,34 @@ namespace ServiceStack.OrmLite
                 DisposeCommand(dbCmd);
                 OrmLiteConfig.DialectProvider = holdProvider;
             }
+        }
+
+        public virtual Task<T> Exec<T>(IDbConnection dbConn, Func<IDbCommand, Task<T>> filter)
+        {
+            var holdProvider = OrmLiteConfig.DialectProvider;
+            var dbCmd = CreateCommand(dbConn);
+
+            return filter(dbCmd)
+                .Then(t =>
+                {
+                    DisposeCommand(dbCmd);
+                    OrmLiteConfig.DialectProvider = holdProvider;
+                    return t;
+                });
+        }
+
+        public virtual Task Exec(IDbConnection dbConn, Func<IDbCommand, Task> filter)
+        {
+            var holdProvider = OrmLiteConfig.DialectProvider;
+            var dbCmd = CreateCommand(dbConn);
+
+            return filter(dbCmd)
+                .Then(t =>
+                {
+                    DisposeCommand(dbCmd);
+                    OrmLiteConfig.DialectProvider = holdProvider;
+                    return t;
+                });
         }
 
         public virtual IEnumerable<T> ExecLazy<T>(IDbConnection dbConn, Func<IDbCommand, IEnumerable<T>> filter)
