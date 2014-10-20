@@ -130,24 +130,10 @@ namespace ServiceStack.OrmLite.Async
 
         internal static Task<T> ExprConvertToAsync<T>(this IDataReader dataReader, CancellationToken token)
         {
-            var fieldDefs = ModelDefinition<T>.Definition.AllFieldDefinitionsArray;
-            var dialectProvider = OrmLiteConfig.DialectProvider;
-
             using (dataReader)
             {
-                return dialectProvider.ReaderRead(dataReader, () => 
-                {
-                    var row = OrmLiteUtilExtensions.CreateInstance<T>();
-                    var namingStrategy = OrmLiteConfig.DialectProvider.NamingStrategy;
-                    for (int i = 0; i < dataReader.FieldCount; i++)
-                    {
-                        var fieldDef = fieldDefs.FirstOrDefault(x =>
-                            namingStrategy.GetColumnName(x.FieldName).ToUpper() == dataReader.GetName(i).ToUpper());
-
-                        dialectProvider.SetDbValue(fieldDef, dataReader, i, row);
-                    }
-                    return row;
-                }, token);
+                return OrmLiteConfig.DialectProvider.ReaderRead(dataReader, 
+                    dataReader.CreateInstance<T>, token);
             }
         }
 

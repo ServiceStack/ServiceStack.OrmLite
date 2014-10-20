@@ -267,7 +267,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        private static int FindColumnIndex(IDataReader dataReader, FieldDefinition fieldDef)
+        internal static int FindColumnIndex(this IDataReader dataReader, FieldDefinition fieldDef)
         {
             var index = NotFound;
             index = dataReader.GetColumnIndex(fieldDef.FieldName);

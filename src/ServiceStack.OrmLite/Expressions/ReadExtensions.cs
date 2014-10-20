@@ -157,29 +157,23 @@ namespace ServiceStack.OrmLite
 
         internal static T ExprConvertTo<T>(this IDataReader dataReader)
         {
-            var fieldDefs = ModelDefinition<T>.Definition.AllFieldDefinitionsArray;
-            var dialectProvider = OrmLiteConfig.DialectProvider;
-
             using (dataReader)
             {
-                if (dataReader.Read())
-                {
-                    var row = OrmLiteUtilExtensions.CreateInstance<T>();
-
-                    var namingStrategy = OrmLiteConfig.DialectProvider.NamingStrategy;
-
-                    for (int i = 0; i < dataReader.FieldCount; i++)
-                    {
-                        var fieldDef = fieldDefs.FirstOrDefault(x =>
-                            namingStrategy.GetColumnName(x.FieldName).ToUpper() == dataReader.GetName(i).ToUpper());
-
-                        dialectProvider.SetDbValue(fieldDef, dataReader, i, row);
-                    }
-
-                    return row;
-                }
-                return default(T);
+                return dataReader.Read() ? dataReader.CreateInstance<T>() : default(T);
             }
+        }
+
+        internal static T CreateInstance<T>(this IDataReader dataReader)
+        {
+            var dialectProvider = OrmLiteConfig.DialectProvider;
+            var row = OrmLiteUtilExtensions.CreateInstance<T>();
+            var fieldDefs = ModelDefinition<T>.Definition.AllFieldDefinitionsArray;
+            foreach (var fieldDef in fieldDefs)
+            {
+                var index = dataReader.FindColumnIndex(fieldDef);
+                dialectProvider.SetDbValue(fieldDef, dataReader, index, row);
+            }
+            return row;
         }
 
         internal static List<T> ExprConvertToList<T>(this IDataReader dataReader)
