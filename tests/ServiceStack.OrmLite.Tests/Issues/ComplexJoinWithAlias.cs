@@ -2,7 +2,6 @@
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Model;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
@@ -54,8 +53,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
                     .Where<ClassA>(a => a.Id == 1);
 
                 var results = db.Single(q);
-                db.GetLastSql().Print();
-                Assert.AreEqual("1", results.ColumnA); // this fails because column "ColumnA" could not be mapped.
+                Assert.That(results.ColumnA, Is.EqualTo("1"));
             }
         }
 

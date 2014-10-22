@@ -179,8 +179,6 @@ namespace ServiceStack.OrmLite
         internal static List<T> ExprConvertToList<T>(this IDataReader dataReader)
         {
             var fieldDefs = ModelDefinition<T>.Definition.AllFieldDefinitionsArray;
-            var fieldDefCache = new Dictionary<int, FieldDefinition>();
-            var dialectProvider = OrmLiteConfig.DialectProvider;
 
             var to = new List<T>();
             using (dataReader)

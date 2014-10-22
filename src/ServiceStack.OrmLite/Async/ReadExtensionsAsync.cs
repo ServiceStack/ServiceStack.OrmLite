@@ -130,11 +130,8 @@ namespace ServiceStack.OrmLite.Async
 
         internal static Task<T> ExprConvertToAsync<T>(this IDataReader dataReader, CancellationToken token)
         {
-            using (dataReader)
-            {
-                return OrmLiteConfig.DialectProvider.ReaderRead(dataReader, 
-                    dataReader.CreateInstance<T>, token);
-            }
+            return OrmLiteConfig.DialectProvider.ReaderRead(dataReader,
+                dataReader.CreateInstance<T>, token);
         }
 
         internal static Task<List<T>> ExprConvertToListAsync<T>(this IDataReader dataReader, CancellationToken token)
@@ -142,16 +139,14 @@ namespace ServiceStack.OrmLite.Async
             var fieldDefs = ModelDefinition<T>.Definition.AllFieldDefinitionsArray;
             var dialectProvider = OrmLiteConfig.DialectProvider;
 
-            using (dataReader)
-            {
-                var indexCache = dataReader.GetIndexFieldsCache(ModelDefinition<T>.Definition);
+            var indexCache = dataReader.GetIndexFieldsCache(ModelDefinition<T>.Definition);
 
-                return dialectProvider.ReaderEach(dataReader, () => {
-                    var row = OrmLiteUtilExtensions.CreateInstance<T>();
-                    row.PopulateWithSqlReader(dataReader, fieldDefs, indexCache);
-                    return row;
-                }, token);
-            }
+            return dialectProvider.ReaderEach(dataReader, () =>
+            {
+                var row = OrmLiteUtilExtensions.CreateInstance<T>();
+                row.PopulateWithSqlReader(dataReader, fieldDefs, indexCache);
+                return row;
+            }, token);
         }
 
         internal static Task<List<T>> Select<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate, CancellationToken token)
