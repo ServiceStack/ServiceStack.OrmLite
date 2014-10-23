@@ -7,14 +7,13 @@
     <authors>Service Stack</authors> 
     <owners>Service Stack</owners>
     <description>
-  		Common library for the Light, simple and fast convention-based code-first POCO, OrmLite.
-  		Support for Creating and Dropping Table Schemas from POCOs, Complex Property types transparently stored in schemaless text blobs.
-      OrmLite is a suite extension methods on ADO.NET's underlying IDbConnection providing DRY, typed access for common data usage patterns that map to clean, simple POCOs. Great support for testing where OrmLite methods can be mocked.
+      Light, simple and fast convention-based code-first POCO ORM for Oracle RDBMS (Unofficial).
+      Support for Creating and Dropping Table Schemas from POCOs, Complex Property types transparently 
+      stored in schemaless text blobs in Oracle.
   	</description> 
     <projectUrl>https://github.com/ServiceStack/ServiceStack.OrmLite</projectUrl>
     <licenseUrl>https://servicestack.net/terms</licenseUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
-    <iconUrl>https://servicestack.net/img/logo-32.png</iconUrl>
     <tags>OrmLite POCO Code-First Orm Schema-less Blobs</tags>
     <language>en-US</language> 
     <copyright>ServiceStack 2013 and contributors</copyright>

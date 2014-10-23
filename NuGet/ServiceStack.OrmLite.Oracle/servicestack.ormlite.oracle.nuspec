@@ -7,13 +7,13 @@
     <authors>Service Stack, Guru Kathiresan</authors> 
     <owners>Service Stack, Guru Kathiresan</owners>
     <description>
-        Light, simple and fast convention-based code-first POCO ORM for Oracle RDBMS.
-        Support for Creating and Dropping Table Schemas from POCOs, Complex Property types transparently stored in schemaless text blobs in Oracle.
+      Light, simple and fast convention-based code-first POCO ORM for Oracle RDBMS (Unofficial).
+      Support for Creating and Dropping Table Schemas from POCOs, Complex Property types transparently 
+      stored in schemaless text blobs in Oracle.
     </description> 
     <projectUrl>https://github.com/ServiceStack/ServiceStack.OrmLite</projectUrl>
     <licenseUrl>https://servicestack.net/terms</licenseUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
-    <iconUrl>https://servicestack.net/img/logo-32.png</iconUrl>
     <tags>Oracle SQL OrmLite POCO Code-First Orm Schema-less Blobs</tags>
     <language>en-US</language> 
     <copyright>ServiceStack 2013 and contributors</copyright>
