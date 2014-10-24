@@ -82,5 +82,27 @@ namespace ServiceStack.OrmLite.Tests.UseCase
             }
         }
 
+        [Test]
+        public void CanResolveAliasedFieldNameInJoinedTable2()
+        {
+            using (IDbConnection db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Foo>();
+                db.DropAndCreateTable<User>();
+
+                db.Insert(new User { UserName = "Peter" });
+                db.Insert(new Foo { Bar = "Peter" });
+
+                var ev = db.From<Foo>()
+                    .Join<User>((x, y) => x.Bar == y.UserName)
+                    .Where<User>(x => x.Id > 0);
+
+                var foo = db.Single<Foo>(ev);
+
+                Assert.That(foo, Is.Not.Null);
+                Assert.That(foo.Bar, Is.EqualTo("Peter"));
+
+            }
+        }
     }
 }
