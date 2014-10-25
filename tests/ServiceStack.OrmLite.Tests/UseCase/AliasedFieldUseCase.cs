@@ -83,9 +83,9 @@ namespace ServiceStack.OrmLite.Tests.UseCase
         }
 
         [Test]
-        public void CanResolveAliasedFieldNameInJoinedTable2()
+        public void Can_Resolve_Aliased_FieldName_in_Joined_Table()
         {
-            using (IDbConnection db = OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<Foo>();
                 db.DropAndCreateTable<User>();
@@ -93,15 +93,14 @@ namespace ServiceStack.OrmLite.Tests.UseCase
                 db.Insert(new User { UserName = "Peter" });
                 db.Insert(new Foo { Bar = "Peter" });
 
-                var ev = db.From<Foo>()
+                var q = db.From<Foo>()
                     .Join<User>((x, y) => x.Bar == y.UserName)
                     .Where<User>(x => x.Id > 0);
 
-                var foo = db.Single<Foo>(ev);
+                var foo = db.Single(q);
 
                 Assert.That(foo, Is.Not.Null);
                 Assert.That(foo.Bar, Is.EqualTo("Peter"));
-
             }
         }
     }
