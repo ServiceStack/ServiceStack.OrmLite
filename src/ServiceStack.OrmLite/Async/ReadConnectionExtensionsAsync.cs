@@ -161,38 +161,38 @@ namespace ServiceStack.OrmLite.Async
 
         /// <summary>
         /// Returns results with references from using a LINQ Expression. E.g:
-        /// <para>db.LoadSelect&lt;Person&gt;(x =&gt; x.Age &gt; 40)</para>
+        /// <para>db.LoadSelectAsync&lt;Person&gt;(x =&gt; x.Age &gt; 40)</para>
         /// </summary>
-        //public static Task<List<T>> LoadSelect<T>(this IDbConnection dbConn, Expression<Func<T, bool>> predicate, CancellationToken token)
-        //{
-        //    return dbConn.Exec(dbCmd => dbCmd.LoadSelect(predicate));
-        //}
+        public static Task<List<T>> LoadSelectAsync<T>(this IDbConnection dbConn, Expression<Func<T, bool>> predicate, CancellationToken token = default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd => dbCmd.LoadSelectAsync(predicate));
+        }
 
         /// <summary>
         /// Returns results with references from using an SqlExpression lambda. E.g:
-        /// <para>db.LoadSelect&lt;Person&gt;(q =&gt; q.Where(x =&gt; x.Age &gt; 40))</para>
+        /// <para>db.LoadSelectAsync&lt;Person&gt;(q =&gt; q.Where(x =&gt; x.Age &gt; 40))</para>
         /// </summary>
-        //public static Task<List<T>> LoadSelect<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression, CancellationToken token)
-        //{
-        //    return dbConn.Exec(dbCmd => dbCmd.LoadSelect(expression));
-        //}
+        public static Task<List<T>> LoadSelectAsync<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression, CancellationToken token = default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd => dbCmd.LoadSelectAsync(expression));
+        }
 
         /// <summary>
         /// Returns results with references from using an SqlExpression lambda. E.g:
-        /// <para>db.LoadSelect(db.From&lt;Person&gt;().Where(x =&gt; x.Age &gt; 40))</para>
+        /// <para>db.LoadSelectAsync(db.From&lt;Person&gt;().Where(x =&gt; x.Age &gt; 40))</para>
         /// </summary>
-        //public static Task<List<T>> LoadSelect<T>(this IDbConnection dbConn, SqlExpression<T> expression, CancellationToken token)
-        //{
-        //    return dbConn.Exec(dbCmd => dbCmd.LoadSelect(expression));
-        //}
+        public static Task<List<T>> LoadSelectAsync<T>(this IDbConnection dbConn, SqlExpression<T> expression, CancellationToken token = default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd => dbCmd.LoadSelectAsync(expression));
+        }
 
         /// <summary>
         /// Project results with references from a number of joined tables into a different model
         /// </summary>
-        //public static Task<List<Into>> LoadSelect<Into, From>(this IDbConnection dbConn, SqlExpression<From> expression, CancellationToken token)
-        //{
-        //    return dbConn.Exec(dbCmd => dbCmd.LoadSelect<Into, From>(expression));
-        //}
+        public static Task<List<Into>> LoadSelectAsync<Into, From>(this IDbConnection dbConn, SqlExpression<From> expression, CancellationToken token = default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd => dbCmd.LoadSelectAsync<Into, From>(expression));
+        }         
     }
 
 }
