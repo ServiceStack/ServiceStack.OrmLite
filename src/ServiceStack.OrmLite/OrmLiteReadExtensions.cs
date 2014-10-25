@@ -18,6 +18,7 @@ using System.Reflection;
 using System.Text;
 using ServiceStack.Logging;
 using System.Linq;
+using ServiceStack.OrmLite.Support;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
@@ -961,134 +962,25 @@ namespace ServiceStack.OrmLite
 
         internal static List<Into> LoadListWithReferences<Into, From>(this IDbCommand dbCmd, SqlExpression<From> expr = null)
         {
-            var dialectProvider = OrmLiteConfig.DialectProvider;
-            if (expr == null)
-                expr = dialectProvider.SqlExpression<From>();
+            var loadList = new LoadListSync<Into, From>(dbCmd, expr);
 
-            var sql = expr.SelectInto<Into>();
-            var parentResults = dbCmd.ExprConvertToList<Into>(sql);
-
-            var modelDef = ModelDefinition<Into>.Definition;
-            var fieldDefs = modelDef.AllFieldDefinitionsArray.Where(x => x.IsReference);
-
-            expr.Select(dialectProvider.GetQuotedColumnName(modelDef, modelDef.PrimaryKey));
-            var subSql = expr.ToSelectStatement();
-
-            foreach (var fieldDef in fieldDefs)
+            foreach (var fieldDef in loadList.FieldDefs)
             {
                 var listInterface = fieldDef.FieldType.GetTypeWithGenericInterfaceOf(typeof(IList<>));
                 if (listInterface != null)
                 {
-                    var refType = listInterface.GenericTypeArguments()[0];
-                    var refModelDef = refType.GetModelDefinition();
-
-                    var refField = GetRefFieldDef(modelDef, refModelDef, refType);
-
-                    var sqlRef = "SELECT {0} FROM {1} WHERE {2} IN ({3})".Fmt(
-                        dialectProvider.GetColumnNames(refModelDef),
-                        dialectProvider.GetQuotedTableName(refModelDef),
-                        dialectProvider.GetQuotedColumnName(refField),
-                        subSql);
-                    var childResults = dbCmd.ConvertToList(refType, sqlRef);
-
-                    var map = new Dictionary<object, List<object>>();
-                    List<object> refValues;
-
-                    foreach (var result in childResults)
-                    {
-                        var refValue = refField.GetValue(result);
-                        if (!map.TryGetValue(refValue, out refValues))
-                        {
-                            map[refValue] = refValues = new List<object>();
-                        }
-                        refValues.Add(result);
-                    }
-
-                    var untypedApi = dbCmd.CreateTypedApi(refType);
-                    foreach (var result in parentResults)
-                    {
-                        var pkValue = modelDef.PrimaryKey.GetValue(result);
-                        if (map.TryGetValue(pkValue, out refValues))
-                        {
-                            var castResults = untypedApi.Cast(refValues);
-                            fieldDef.SetValueFn(result, castResults);
-                        }
-                    }
+                    loadList.SetRefFieldList(fieldDef, listInterface.GenericTypeArguments()[0]);
                 }
                 else
                 {
-                    var refType = fieldDef.FieldType;
-                    var refModelDef = refType.GetModelDefinition();
-
-                    var refSelf = GetSelfRefFieldDefIfExists(modelDef, refModelDef);
-                    var refField = refSelf == null
-                        ? GetRefFieldDef(modelDef, refModelDef, refType)
-                        : GetRefFieldDefIfExists(modelDef, refModelDef);
-
-                    var map = new Dictionary<object, object>();
-
-                    if (refField != null)
-                    {
-                        var sqlRef = "SELECT {0} FROM {1} WHERE {2} IN ({3})".Fmt(
-                            dialectProvider.GetColumnNames(refModelDef),
-                            dialectProvider.GetQuotedTableName(refModelDef),
-                            dialectProvider.GetQuotedColumnName(refField),
-                            subSql);
-                        var childResults = dbCmd.ConvertToList(refType, sqlRef);
-
-                        foreach (var result in childResults)
-                        {
-                            var refValue = refField.GetValue(result);
-                            map[refValue] = result;
-                        }
-
-                        foreach (var result in parentResults)
-                        {
-                            object childResult;
-                            var pkValue = modelDef.PrimaryKey.GetValue(result);
-                            if (map.TryGetValue(pkValue, out childResult))
-                            {
-                                fieldDef.SetValueFn(result, childResult);
-                            }
-                        }
-                    }
-                    else if (refSelf != null)
-                    {
-                        //Load Self Table.RefTableId PK
-                        expr.Select(dialectProvider.GetQuotedColumnName(refSelf));
-                        subSql = expr.ToSelectStatement();
-
-                        var sqlRef = "SELECT {0} FROM {1} WHERE {2} IN ({3})".Fmt(
-                            dialectProvider.GetColumnNames(refModelDef),
-                            dialectProvider.GetQuotedTableName(refModelDef),
-                            dialectProvider.GetQuotedColumnName(refModelDef.PrimaryKey),
-                            subSql);
-                        var childResults = dbCmd.ConvertToList(refType, sqlRef);
-
-                        foreach (var result in childResults)
-                        {
-                            var pkValue = refModelDef.PrimaryKey.GetValue(result);
-                            map[pkValue] = result;
-                        }
-
-                        foreach (var result in parentResults)
-                        {
-                            object childResult;
-                            var fkValue = refSelf.GetValue(result);
-                            if (fkValue != null && map.TryGetValue(fkValue, out childResult))
-                            {
-                                fieldDef.SetValueFn(result, childResult);
-                            }
-                        }
-                    }
+                    loadList.SetRefField(fieldDef, fieldDef.FieldType);
                 }
-
             }
 
-            return parentResults;
+            return loadList.ParentResults;
         }
 
-        public static FieldDefinition GetRefFieldDef(ModelDefinition modelDef, ModelDefinition refModelDef, Type refType)
+        public static FieldDefinition GetRefFieldDef(this ModelDefinition modelDef, ModelDefinition refModelDef, Type refType)
         {
             var refField = GetRefFieldDefIfExists(modelDef, refModelDef);
             if (refField == null)
@@ -1096,7 +988,7 @@ namespace ServiceStack.OrmLite
             return refField;
         }
 
-        public static FieldDefinition GetRefFieldDefIfExists(ModelDefinition modelDef, ModelDefinition refModelDef)
+        public static FieldDefinition GetRefFieldDefIfExists(this ModelDefinition modelDef, ModelDefinition refModelDef)
         {
             var refField = refModelDef.FieldDefinitions.FirstOrDefault(x => x.ForeignKey != null && x.ForeignKey.ReferenceType == modelDef.ModelType)
                            ?? refModelDef.FieldDefinitions.FirstOrDefault(x => x.FieldName == modelDef.ModelName + "Id")
@@ -1104,7 +996,7 @@ namespace ServiceStack.OrmLite
             return refField;
         }
 
-        public static FieldDefinition GetSelfRefFieldDefIfExists(ModelDefinition modelDef, ModelDefinition refModelDef)
+        public static FieldDefinition GetSelfRefFieldDefIfExists(this ModelDefinition modelDef, ModelDefinition refModelDef)
         {
             var refField = modelDef.FieldDefinitions.FirstOrDefault(x => x.ForeignKey != null && x.ForeignKey.ReferenceType == refModelDef.ModelType)
                         ?? modelDef.FieldDefinitions.FirstOrDefault(x => x.FieldName == refModelDef.ModelName + "Id")
