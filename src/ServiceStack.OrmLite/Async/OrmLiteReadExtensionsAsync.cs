@@ -8,6 +8,7 @@ using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
 using ServiceStack.Logging;
+using ServiceStack.OrmLite.Support;
 
 namespace ServiceStack.OrmLite.Async
 {
@@ -419,6 +420,26 @@ namespace ServiceStack.OrmLite.Async
                 fromObjWithProperties, modelType, sqlFilter, filterParams);
 
             return dbCmd.ConvertToListAsync<TOutputModel>(sql, token);
+        }
+
+        internal static async Task<List<Into>> LoadListWithReferences<Into, From>(this IDbCommand dbCmd, SqlExpression<From> expr = null, CancellationToken token = default(CancellationToken))
+        {
+            var loadList = new LoadListAsync<Into, From>(dbCmd, expr);
+
+            foreach (var fieldDef in loadList.FieldDefs)
+            {
+                var listInterface = fieldDef.FieldType.GetTypeWithGenericInterfaceOf(typeof(IList<>));
+                if (listInterface != null)
+                {
+                    await loadList.SetRefFieldListAsync(fieldDef, listInterface.GenericTypeArguments()[0], token);
+                }
+                else
+                {
+                    await loadList.SetRefFieldAsync(fieldDef, fieldDef.FieldType, token);
+                }
+            }
+
+            return loadList.ParentResults;
         }
     }
 }

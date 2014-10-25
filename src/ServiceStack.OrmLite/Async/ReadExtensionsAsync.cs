@@ -128,6 +128,29 @@ namespace ServiceStack.OrmLite.Async
             return dbCmd.ScalarAsync<long>("SELECT COUNT(*) FROM ({0}) AS COUNT".Fmt(sql), token);
         }
 
+        internal static Task<List<T>> LoadSelectAsync<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression, CancellationToken token = default(CancellationToken))
+        {
+            var expr = OrmLiteConfig.DialectProvider.SqlExpression<T>();
+            expr = expression(expr);
+            return dbCmd.LoadListWithReferences<T, T>(expr);
+        }
+
+        internal static Task<List<T>> LoadSelectAsync<T>(this IDbCommand dbCmd, SqlExpression<T> expression = null, CancellationToken token = default(CancellationToken))
+        {
+            return dbCmd.LoadListWithReferences<T, T>(expression);
+        }
+
+        internal static Task<List<Into>> LoadSelectAsync<Into, From>(this IDbCommand dbCmd, SqlExpression<From> expression, CancellationToken token = default(CancellationToken))
+        {
+            return dbCmd.LoadListWithReferences<Into, From>(expression);
+        }
+
+        internal static Task<List<T>> LoadSelectAsync<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate, CancellationToken token = default(CancellationToken))
+        {
+            var expr = OrmLiteConfig.DialectProvider.SqlExpression<T>().Where(predicate);
+            return dbCmd.LoadListWithReferences<T, T>(expr);
+        }
+
         internal static Task<T> ExprConvertToAsync<T>(this IDataReader dataReader, CancellationToken token)
         {
             return OrmLiteConfig.DialectProvider.ReaderRead(dataReader,

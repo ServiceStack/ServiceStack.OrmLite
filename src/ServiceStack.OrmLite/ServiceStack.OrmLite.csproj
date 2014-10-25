@@ -112,7 +112,7 @@
     <Compile Include="Async\OrmLiteUtilExtensionsAsync.cs" />
     <Compile Include="Async\OrmLiteWriteConnectionExtensionsAsync.cs" />
     <Compile Include="Async\OrmLiteWriteExtensionsAsync.cs" />
-    <Compile Include="Async\ReadConnectionExtensions.cs" />
+    <Compile Include="Async\ReadConnectionExtensionsAsync.cs" />
     <Compile Include="Async\ReadExtensionsAsync.cs" />
     <Compile Include="Async\WriteConnectionExtensionsAsync.cs" />
     <Compile Include="Async\WriteExtensionsAsync.cs" />
@@ -162,6 +162,7 @@
     <Compile Include="Expressions\Sql.cs" />
     <Compile Include="OrmLiteDDLExtensions.cs" />
     <Compile Include="Dapper\SqlMapper.cs" />
+    <Compile Include="Support\LoadList.cs" />
     <Compile Include="UntypedApi.cs" />
     <Compile Include="UpperCaseNamingStrategy.cs" />
   </ItemGroup>
