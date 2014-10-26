@@ -528,7 +528,7 @@ namespace ServiceStack.OrmLite.Async
         /// Returns results from a Stored Procedure using an SqlFormat query. E.g:
         /// <para></para>
         /// </summary>
-        public static Task<List<TOutputModel>> SqlProcedureAsync<TOutputModel>(this IDbConnection dbConn, CancellationToken token,
+        public static Task<List<TOutputModel>> SqlProcedureFmtAsync<TOutputModel>(this IDbConnection dbConn, CancellationToken token,
             object anonType,
             string sqlFilter,
             params object[] filterParams)
@@ -544,6 +544,24 @@ namespace ServiceStack.OrmLite.Async
         public static Task<long> LongScalarAsync(this IDbConnection dbConn, CancellationToken token = default(CancellationToken))
         {
             return dbConn.Exec(dbCmd => dbCmd.ExecLongScalarAsync(null, token));
+        }
+
+        /// <summary>
+        /// Returns the first result with all its references loaded, using a primary key id. E.g:
+        /// <para>db.LoadSingleById&lt;Person&gt;(1)</para>
+        /// </summary>
+        public static Task<T> LoadSingleByIdAsync<T>(this IDbConnection dbConn, object idValue, CancellationToken token=default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd => dbCmd.LoadSingleByIdAsync<T>(idValue, token));
+        }
+
+        /// <summary>
+        /// Loads all the related references onto the instance. E.g:
+        /// <para>db.LoadReferencesAsync(customer)</para> 
+        /// </summary>
+        public static Task LoadReferencesAsync<T>(this IDbConnection dbConn, T instance, CancellationToken token = default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd => dbCmd.LoadReferencesAsync(instance, token));
         }
     }
 }

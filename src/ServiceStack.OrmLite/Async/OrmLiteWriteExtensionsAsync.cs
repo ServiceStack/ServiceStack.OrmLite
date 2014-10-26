@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ServiceStack.Data;
@@ -269,6 +270,211 @@ namespace ServiceStack.OrmLite.Async
                 if (dbTrans != null)
                     dbTrans.Dispose();
             });
+        }
+
+
+        internal static Task<int> SaveAsync<T>(this IDbCommand dbCmd, CancellationToken token, params T[] objs)
+        {
+            return SaveAllAsync(dbCmd, objs, token);
+        }
+
+        internal static async Task<bool> SaveAsync<T>(this IDbCommand dbCmd, T obj, CancellationToken token)
+        {
+            var id = obj.GetId();
+            var existingRow = id != null ? await dbCmd.SingleByIdAsync<T>(id, token) : default(T);
+            var modelDef = typeof(T).GetModelDefinition();
+
+            if (Equals(existingRow, default(T)))
+            {
+                if (modelDef.HasAutoIncrementId)
+                {
+                    var newId = await dbCmd.InsertAsync(obj, selectIdentity: true, token:token);
+                    var safeId = OrmLiteConfig.DialectProvider.ConvertDbValue(newId, modelDef.PrimaryKey.FieldType);
+                    modelDef.PrimaryKey.SetValueFn(obj, safeId);
+                    id = newId;
+                }
+                else
+                {
+                    await dbCmd.InsertAsync(token, obj);
+                }
+
+                if (modelDef.RowVersion != null)
+                    modelDef.RowVersion.SetValueFn(obj, await dbCmd.GetRowVersionAsync(modelDef, id, token));
+
+                return true;
+            }
+
+            await dbCmd.UpdateAsync(obj, token);
+
+            if (modelDef.RowVersion != null)
+                modelDef.RowVersion.SetValueFn(obj, await dbCmd.GetRowVersionAsync(modelDef, id, token));
+
+            return false;
+        }
+
+        internal static async Task<int> SaveAllAsync<T>(this IDbCommand dbCmd, IEnumerable<T> objs, CancellationToken token)
+        {
+            var saveRows = objs.ToList();
+
+            var firstRow = saveRows.FirstOrDefault();
+            if (Equals(firstRow, default(T))) return 0;
+
+            var firstRowId = firstRow.GetId();
+            var defaultIdValue = firstRowId != null ? firstRowId.GetType().GetDefaultValue() : null;
+
+            var idMap = defaultIdValue != null
+                ? saveRows.Where(x => !defaultIdValue.Equals(x.GetId())).ToSafeDictionary(x => x.GetId())
+                : saveRows.Where(x => x.GetId() != null).ToSafeDictionary(x => x.GetId());
+
+            var existingRowsMap = (await dbCmd.SelectByIdsAsync<T>(idMap.Keys, token)).ToDictionary(x => x.GetId());
+
+            var modelDef = typeof(T).GetModelDefinition();
+
+            var rowsAdded = 0;
+
+            IDbTransaction dbTrans = null;
+
+            if (dbCmd.Transaction == null)
+                dbCmd.Transaction = dbTrans = dbCmd.Connection.BeginTransaction();
+
+            try
+            {
+                foreach (var row in saveRows)
+                {
+                    var id = row.GetId();
+                    if (id != defaultIdValue && existingRowsMap.ContainsKey(id))
+                    {
+                        if (OrmLiteConfig.UpdateFilter != null)
+                            OrmLiteConfig.UpdateFilter(dbCmd, row);
+
+                        await dbCmd.UpdateAsync(row, token);
+                    }
+                    else
+                    {
+                        if (modelDef.HasAutoIncrementId)
+                        {
+                            var newId = await dbCmd.InsertAsync(row, selectIdentity: true, token:token);
+                            var safeId = OrmLiteConfig.DialectProvider.ConvertDbValue(newId, modelDef.PrimaryKey.FieldType);
+                            modelDef.PrimaryKey.SetValueFn(row, safeId);
+                            id = newId;
+                        }
+                        else
+                        {
+                            if (OrmLiteConfig.InsertFilter != null)
+                                OrmLiteConfig.InsertFilter(dbCmd, row);
+
+                            await dbCmd.InsertAsync(token, row);
+                        }
+
+                        rowsAdded++;
+                    }
+
+                    if (modelDef.RowVersion != null)
+                        modelDef.RowVersion.SetValueFn(row, await dbCmd.GetRowVersionAsync(modelDef, id, token));
+                }
+
+                if (dbTrans != null)
+                    dbTrans.Commit();
+            }
+            finally
+            {
+                if (dbTrans != null)
+                    dbTrans.Dispose();
+            }
+
+            return rowsAdded;
+        }
+
+        public static async Task SaveAllReferencesAsync<T>(this IDbCommand dbCmd, T instance, CancellationToken token)
+        {
+            var modelDef = ModelDefinition<T>.Definition;
+            var pkValue = modelDef.PrimaryKey.GetValue(instance);
+
+            var fieldDefs = modelDef.AllFieldDefinitionsArray.Where(x => x.IsReference);
+            foreach (var fieldDef in fieldDefs)
+            {
+                var listInterface = fieldDef.FieldType.GetTypeWithGenericInterfaceOf(typeof(IList<>));
+                if (listInterface != null)
+                {
+                    var refType = listInterface.GenericTypeArguments()[0];
+                    var refModelDef = refType.GetModelDefinition();
+
+                    var refField = modelDef.GetRefFieldDef(refModelDef, refType);
+
+                    var results = (IEnumerable)fieldDef.GetValue(instance);
+                    if (results != null)
+                    {
+                        foreach (var oRef in results)
+                        {
+                            refField.SetValueFn(oRef, pkValue);
+                        }
+
+                        await dbCmd.CreateTypedApi(refType).SaveAllAsync(results, token);
+                    }
+                }
+                else
+                {
+                    var refType = fieldDef.FieldType;
+                    var refModelDef = refType.GetModelDefinition();
+
+                    var refSelf = modelDef.GetSelfRefFieldDefIfExists(refModelDef);
+
+                    var result = fieldDef.GetValue(instance);
+                    var refField = refSelf == null
+                        ? modelDef.GetRefFieldDef(refModelDef, refType)
+                        : modelDef.GetRefFieldDefIfExists(refModelDef);
+
+                    if (result != null)
+                    {
+                        if (refField != null)
+                            refField.SetValueFn(result, pkValue);
+
+                        await dbCmd.CreateTypedApi(refType).SaveAsync(result, token);
+
+                        //Save Self Table.RefTableId PK
+                        if (refSelf != null)
+                        {
+                            var refPkValue = refModelDef.PrimaryKey.GetValue(result);
+                            refSelf.SetValueFn(instance, refPkValue);
+                            await dbCmd.UpdateAsync(instance, token);
+                        }
+                    }
+                }
+            }
+        }
+
+        public static async Task SaveReferencesAsync<T, TRef>(this IDbCommand dbCmd, CancellationToken token, T instance, params TRef[] refs)
+        {
+            var modelDef = ModelDefinition<T>.Definition;
+            var pkValue = modelDef.PrimaryKey.GetValue(instance);
+
+            var refType = typeof(TRef);
+            var refModelDef = ModelDefinition<TRef>.Definition;
+
+            var refSelf = modelDef.GetSelfRefFieldDefIfExists(refModelDef);
+
+            foreach (var oRef in refs)
+            {
+                var refField = refSelf == null
+                    ? modelDef.GetRefFieldDef(refModelDef, refType)
+                    : modelDef.GetRefFieldDefIfExists(refModelDef);
+
+                if (refField != null)
+                    refField.SetValueFn(oRef, pkValue);
+            }
+
+            await dbCmd.SaveAllAsync(refs, token);
+
+            foreach (var oRef in refs)
+            {
+                //Save Self Table.RefTableId PK
+                if (refSelf != null)
+                {
+                    var refPkValue = refModelDef.PrimaryKey.GetValue(oRef);
+                    refSelf.SetValueFn(instance, refPkValue);
+                    await dbCmd.UpdateAsync(instance, token);
+                }
+            }
         }
 
         // Procedures

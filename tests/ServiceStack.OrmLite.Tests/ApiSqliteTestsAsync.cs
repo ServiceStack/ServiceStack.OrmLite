@@ -343,16 +343,16 @@ namespace ServiceStack.OrmLite.Tests
             await db.DeleteFmtAsync(table: "Person", where: "Age = {0}".SqlFmt(27));
             Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM \"Person\" WHERE Age = 27"));
 
-            //db.Save(new Person { Id = 11, FirstName = "Amy", LastName = "Winehouse", Age = 27 });
-            //Assert.That(db.GetLastSql(), Is.EqualTo("INSERT INTO \"Person\" (\"Id\",\"FirstName\",\"LastName\",\"Age\") VALUES (@Id,@FirstName,@LastName,@Age)"));
-            //db.Save(new Person { Id = 11, FirstName = "Amy", LastName = "Winehouse", Age = 27 });
-            //Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\"=@FirstName, \"LastName\"=@LastName, \"Age\"=@Age WHERE \"Id\"=@Id"));
+            await db.SaveAsync(new Person { Id = 11, FirstName = "Amy", LastName = "Winehouse", Age = 27 });
+            Assert.That(db.GetLastSql(), Is.EqualTo("INSERT INTO \"Person\" (\"Id\",\"FirstName\",\"LastName\",\"Age\") VALUES (@Id,@FirstName,@LastName,@Age)"));
+            await db.SaveAsync(new Person { Id = 11, FirstName = "Amy", LastName = "Winehouse", Age = 27 });
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\"=@FirstName, \"LastName\"=@LastName, \"Age\"=@Age WHERE \"Id\"=@Id"));
 
-            //db.Save(new Person { Id = 12, FirstName = "Amy", LastName = "Winehouse", Age = 27 },
-            //        new Person { Id = 13, FirstName = "Amy", LastName = "Winehouse", Age = 27 });
+            await db.SaveAsync(new Person { Id = 12, FirstName = "Amy", LastName = "Winehouse", Age = 27 },
+                    new Person { Id = 13, FirstName = "Amy", LastName = "Winehouse", Age = 27 });
 
-            //db.SaveAll(new[]{ new Person { Id = 14, FirstName = "Amy", LastName = "Winehouse", Age = 27 },
-            //                  new Person { Id = 15, FirstName = "Amy", LastName = "Winehouse", Age = 27 } });
+            await db.SaveAllAsync(new[]{ new Person { Id = 14, FirstName = "Amy", LastName = "Winehouse", Age = 27 },
+                              new Person { Id = 15, FirstName = "Amy", LastName = "Winehouse", Age = 27 } });
         }
 
     }

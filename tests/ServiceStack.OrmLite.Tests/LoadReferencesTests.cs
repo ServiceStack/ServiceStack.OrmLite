@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
+using ServiceStack.OrmLite.Async;
 using ServiceStack.OrmLite.Tests.UseCase;
 using ServiceStack.Text;
 
@@ -239,6 +241,44 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(customer.Orders.All(x => x.CustomerId == customer.Id));
 
             var dbCustomer = db.LoadSingleById<Customer>(customer.Id);
+
+            dbCustomer.PrintDump();
+
+            Assert.That(dbCustomer.PrimaryAddress, Is.Not.Null);
+            Assert.That(dbCustomer.Orders.Count, Is.EqualTo(2));
+        }
+
+        [Test]
+        public async Task Can_Save_and_Load_References_Async()
+        {
+            var customer = new Customer
+            {
+                Name = "Customer 1",
+                PrimaryAddress = new CustomerAddress
+                {
+                    AddressLine1 = "1 Humpty Street",
+                    City = "Humpty Doo",
+                    State = "Northern Territory",
+                    Country = "Australia"
+                },
+                Orders = new[] { 
+                    new Order { LineItem = "Line 1", Qty = 1, Cost = 1.99m },
+                    new Order { LineItem = "Line 2", Qty = 2, Cost = 2.99m },
+                }.ToList(),
+            };
+
+            await db.SaveAsync(customer);
+
+            Assert.That(customer.Id, Is.GreaterThan(0));
+            Assert.That(customer.PrimaryAddress.CustomerId, Is.EqualTo(0));
+
+            await db.SaveReferencesAsync(customer, customer.PrimaryAddress);
+            Assert.That(customer.PrimaryAddress.CustomerId, Is.EqualTo(customer.Id));
+
+            await db.SaveReferencesAsync(customer, customer.Orders);
+            Assert.That(customer.Orders.All(x => x.CustomerId == customer.Id));
+
+            var dbCustomer = await db.LoadSingleByIdAsync<Customer>(customer.Id);
 
             dbCustomer.PrintDump();
 

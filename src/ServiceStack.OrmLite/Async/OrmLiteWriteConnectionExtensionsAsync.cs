@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ServiceStack.Data;
@@ -229,6 +230,87 @@ namespace ServiceStack.OrmLite.Async
         public static Task<int> DeleteFmtAsync(this IDbConnection dbConn, Type tableType, string sqlFilter, params object[] filterParams)
         {
             return dbConn.Exec(dbCmd => dbCmd.DeleteFmtAsync(default(CancellationToken), tableType, sqlFilter, filterParams));
+        }
+
+        /// <summary>
+        /// Insert a new row or update existing row. Returns true if a new row was inserted. 
+        /// Optional references param decides whether to save all related references as well. E.g:
+        /// <para>db.SaveAsync(customer, references:true)</para>
+        /// </summary>
+        /// <returns>true if a row was inserted; false if it was updated</returns>
+        public static Task<bool> SaveAsync<T>(this IDbConnection dbConn, T obj, bool references = false, CancellationToken token = default(CancellationToken))
+        {
+            if (!references)
+                return dbConn.Exec(dbCmd => dbCmd.SaveAsync(obj, token));
+
+            return dbConn.Exec(dbCmd => 
+                dbCmd.SaveAsync(obj, token).Then(ret => 
+                    dbCmd.SaveAllReferencesAsync(obj, token).Then(t => 
+                        ret))) as Task<bool>;
+        }
+
+        /// <summary>
+        /// Insert new rows or update existing rows. Return number of rows added E.g:
+        /// <para>db.SaveAsync(new Person { Id = 10, FirstName = "Amy", LastName = "Winehouse", Age = 27 })</para>
+        /// </summary>
+        /// <returns>number of rows added</returns>
+        public static Task<int> SaveAsync<T>(this IDbConnection dbConn, CancellationToken token, params T[] objs)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SaveAsync(token, objs));
+        }
+        public static Task<int> SaveAsync<T>(this IDbConnection dbConn, params T[] objs)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SaveAsync(default(CancellationToken), objs));
+        }
+
+        /// <summary>
+        /// Insert new rows or update existing rows. Return number of rows added E.g:
+        /// <para>db.SaveAllAsync(new [] { new Person { Id = 10, FirstName = "Amy", LastName = "Winehouse", Age = 27 } })</para>
+        /// </summary>
+        /// <returns>number of rows added</returns>
+        public static Task<int> SaveAllAsync<T>(this IDbConnection dbConn, IEnumerable<T> objs, CancellationToken token = default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SaveAllAsync(objs, token));
+        }
+
+        /// <summary>
+        /// Populates all related references on the instance with its primary key and saves them. Uses '(T)Id' naming convention. E.g:
+        /// <para>db.SaveAllReferences(customer)</para> 
+        /// </summary>
+        public static Task SaveAllReferencesAsync<T>(this IDbConnection dbConn, T instance, CancellationToken token=default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SaveAllReferencesAsync(instance, token));
+        }
+
+        /// <summary>
+        /// Populates the related references with the instance primary key and saves them. Uses '(T)Id' naming convention. E.g:
+        /// <para>db.SaveReference(customer, customer.Orders)</para> 
+        /// </summary>
+        public static Task SaveReferencesAsync<T, TRef>(this IDbConnection dbConn, CancellationToken token, T instance, params TRef[] refs)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SaveReferencesAsync(token, instance, refs));
+        }
+        public static Task SaveReferencesAsync<T, TRef>(this IDbConnection dbConn, T instance, params TRef[] refs)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SaveReferencesAsync(default(CancellationToken), instance, refs));
+        }
+
+        /// <summary>
+        /// Populates the related references with the instance primary key and saves them. Uses '(T)Id' naming convention. E.g:
+        /// <para>db.SaveReference(customer, customer.Orders)</para> 
+        /// </summary>
+        public static Task SaveReferencesAsync<T, TRef>(this IDbConnection dbConn, T instance, List<TRef> refs, CancellationToken token=default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SaveReferencesAsync(token, instance, refs.ToArray()));
+        }
+
+        /// <summary>
+        /// Populates the related references with the instance primary key and saves them. Uses '(T)Id' naming convention. E.g:
+        /// <para>db.SaveReferences(customer, customer.Orders)</para> 
+        /// </summary>
+        public static Task SaveReferencesAsync<T, TRef>(this IDbConnection dbConn, T instance, IEnumerable<TRef> refs, CancellationToken token)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SaveReferencesAsync(token, instance, refs.ToArray()));
         }
 
         // Procedures

@@ -163,6 +163,7 @@
     <Compile Include="OrmLiteDDLExtensions.cs" />
     <Compile Include="Dapper\SqlMapper.cs" />
     <Compile Include="Support\LoadList.cs" />
+    <Compile Include="Support\LoadReferences.cs" />
     <Compile Include="UntypedApi.cs" />
     <Compile Include="UpperCaseNamingStrategy.cs" />
   </ItemGroup>

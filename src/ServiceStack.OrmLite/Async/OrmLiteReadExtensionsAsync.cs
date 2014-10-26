@@ -422,6 +422,36 @@ namespace ServiceStack.OrmLite.Async
             return dbCmd.ConvertToListAsync<TOutputModel>(sql, token);
         }
 
+        internal static async Task<T> LoadSingleByIdAsync<T>(this IDbCommand dbCmd, object value, CancellationToken token)
+        {
+            var row = await dbCmd.SingleByIdAsync<T>(value, token);
+            if (row == null)
+                return default(T);
+
+            await dbCmd.LoadReferencesAsync(row, token);
+
+            return row;
+        }
+
+        public static async Task LoadReferencesAsync<T>(this IDbCommand dbCmd, T instance, CancellationToken token)
+        {
+            var loadRef = new LoadReferencesAsync<T>(dbCmd, instance);
+
+            foreach (var fieldDef in loadRef.FieldDefs)
+            {
+                dbCmd.Parameters.Clear();
+                var listInterface = fieldDef.FieldType.GetTypeWithGenericInterfaceOf(typeof(IList<>));
+                if (listInterface != null)
+                {
+                    await loadRef.SetRefFieldList(fieldDef, listInterface.GenericTypeArguments()[0], token);
+                }
+                else
+                {
+                    await loadRef.SetRefField(fieldDef, fieldDef.FieldType, token);
+                }
+            }
+        }
+
         internal static async Task<List<Into>> LoadListWithReferences<Into, From>(this IDbCommand dbCmd, SqlExpression<From> expr = null, CancellationToken token = default(CancellationToken))
         {
             var loadList = new LoadListAsync<Into, From>(dbCmd, expr);
