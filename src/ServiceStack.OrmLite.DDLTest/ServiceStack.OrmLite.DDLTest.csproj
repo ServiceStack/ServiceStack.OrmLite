@@ -9,6 +9,8 @@
     <OutputType>Library</OutputType>
     <RootNamespace>ServiceStack.OrmLite.DDLTest</RootNamespace>
     <AssemblyName>ServiceStack.OrmLite.DDLTest</AssemblyName>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>True</DebugSymbols>
@@ -19,6 +21,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>False</ConsolePause>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
@@ -27,6 +30,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>False</ConsolePause>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Signed|AnyCPU'">
     <OutputPath>bin\Signed\</OutputPath>
@@ -34,6 +38,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -62,6 +67,10 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
+    <ProjectReference Include="..\ServiceStack.OrmLite.MySql\ServiceStack.OrmLite.MySqlV45.csproj">
+      <Project>{1bce2206-a9f9-4381-b4f7-f617998447a1}</Project>
+      <Name>ServiceStack.OrmLite.MySqlV45</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ServiceStack.OrmLite.SqlServer\ServiceStack.OrmLite.SqlServer.csproj">
       <Project>{1887dc99-9139-43e3-a7aa-6d74714b3a5d}</Project>
       <Name>ServiceStack.OrmLite.SqlServer</Name>
@@ -73,10 +82,6 @@
     <ProjectReference Include="..\ServiceStack.OrmLite.Firebird\ServiceStack.OrmLite.Firebird.csproj">
       <Project>{317B64BA-D7A6-4A15-8719-821B38147C63}</Project>
       <Name>ServiceStack.OrmLite.Firebird</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ServiceStack.OrmLite.MySql\ServiceStack.OrmLite.MySql.csproj">
-      <Project>{FD20F088-ACC0-4979-AC0C-8C541C2E7DE5}</Project>
-      <Name>ServiceStack.OrmLite.MySql</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>

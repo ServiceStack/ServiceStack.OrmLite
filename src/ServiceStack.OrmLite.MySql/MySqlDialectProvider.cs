@@ -236,7 +236,7 @@ namespace ServiceStack.OrmLite.MySql
             if (hasDb != null)
                 return (MySqlConnection)hasDb.DbConnection;
 
-            throw new ArgumentException("{0} is not an SqlConnection".Fmt(db.GetType().Name));
+            throw new ArgumentException("{0} is not a MySqlConnection".Fmt(db.GetType().Name));
         }
 
         protected MySqlCommand Unwrap(IDbCommand cmd)
