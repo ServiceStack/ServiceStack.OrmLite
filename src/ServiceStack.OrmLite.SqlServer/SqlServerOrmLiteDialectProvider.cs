@@ -518,7 +518,7 @@ namespace ServiceStack.OrmLite.SqlServer
             try
             {
                 var to = new List<T>();
-                while (await OrmLiteConfig.DialectProvider.ReadAsync(reader, token).ConfigureAwait(false))
+                while (await ReadAsync(reader, token).ConfigureAwait(false))
                 {
                     var row = fn();
                     to.Add(row);

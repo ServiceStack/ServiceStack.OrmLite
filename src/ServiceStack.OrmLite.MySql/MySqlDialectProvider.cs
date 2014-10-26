@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
+using ServiceStack.Data;
 using ServiceStack.OrmLite.MySql.DataAnnotations;
 using ServiceStack.Text;
 
@@ -222,5 +225,105 @@ namespace ServiceStack.OrmLite.MySql
 
             return ret;
         }
+
+        protected MySqlConnection Unwrap(IDbConnection db)
+        {
+            var dbAsync = db as MySqlConnection;
+            if (dbAsync != null)
+                return dbAsync;
+
+            var hasDb = db as IHasDbConnection;
+            if (hasDb != null)
+                return (MySqlConnection)hasDb.DbConnection;
+
+            throw new ArgumentException("{0} is not an SqlConnection".Fmt(db.GetType().Name));
+        }
+
+        protected MySqlCommand Unwrap(IDbCommand cmd)
+        {
+            return (MySqlCommand)cmd;
+        }
+
+        protected MySqlDataReader Unwrap(IDataReader reader)
+        {
+            return (MySqlDataReader)reader;
+        }
+
+#if NET45
+        public override Task OpenAsync(IDbConnection db, CancellationToken token)
+        {
+            return Unwrap(db).OpenAsync(token);
+        }
+
+        public override Task<IDataReader> ExecuteReaderAsync(IDbCommand cmd, CancellationToken token)
+        {
+            return Unwrap(cmd).ExecuteReaderAsync(token).Then(x => (IDataReader)x);
+        }
+
+        public override Task<int> ExecuteNonQueryAsync(IDbCommand cmd, CancellationToken token)
+        {
+            return Unwrap(cmd).ExecuteNonQueryAsync(token);
+        }
+
+        public override Task<object> ExecuteScalarAsync(IDbCommand cmd, CancellationToken token)
+        {
+            return Unwrap(cmd).ExecuteScalarAsync(token);
+        }
+
+        public override Task<bool> ReadAsync(IDataReader reader, CancellationToken token)
+        {
+            return Unwrap(reader).ReadAsync(token);
+        }
+
+        public override async Task<List<T>> ReaderEach<T>(IDataReader reader, Func<T> fn, CancellationToken token)
+        {
+            try
+            {
+                var to = new List<T>();
+                while (await ReadAsync(reader, token).ConfigureAwait(false))
+                {
+                    var row = fn();
+                    to.Add(row);
+                }
+                return to;
+            }
+            finally
+            {
+                reader.Dispose();
+            }
+        }
+
+        public override async Task<Return> ReaderEach<Return>(IDataReader reader, Action fn, Return source, CancellationToken token)
+        {
+            try
+            {
+                while (await ReadAsync(reader, token).ConfigureAwait(false))
+                {
+                    fn();
+                }
+                return source;
+            }
+            finally
+            {
+                reader.Dispose();
+            }
+        }
+
+        public override async Task<T> ReaderRead<T>(IDataReader reader, Func<T> fn, CancellationToken token)
+        {
+            try
+            {
+                if (await ReadAsync(reader, token).ConfigureAwait(false))
+                    return fn();
+
+                return default(T);
+            }
+            finally
+            {
+                reader.Dispose();
+            }
+        }
+#endif
+
     }
 }

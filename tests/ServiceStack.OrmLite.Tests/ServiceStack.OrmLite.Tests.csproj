@@ -305,9 +305,9 @@
       <Project>{317B64BA-D7A6-4A15-8719-821B38147C63}</Project>
       <Name>ServiceStack.OrmLite.Firebird</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.MySql\ServiceStack.OrmLite.MySql.csproj">
-      <Project>{FD20F088-ACC0-4979-AC0C-8C541C2E7DE5}</Project>
-      <Name>ServiceStack.OrmLite.MySql</Name>
+    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.MySql\ServiceStack.OrmLite.MySqlV45.csproj">
+      <Project>{1bce2206-a9f9-4381-b4f7-f617998447a1}</Project>
+      <Name>ServiceStack.OrmLite.MySqlV45</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Oracle\ServiceStack.OrmLite.Oracle.csproj">
       <Project>{517B64BA-D7A6-4A15-8719-821B38147C61}</Project>
