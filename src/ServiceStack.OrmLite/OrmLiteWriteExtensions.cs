@@ -338,22 +338,22 @@ namespace ServiceStack.OrmLite
                 // First guess: Maybe the DB field has underscores? (most common)
                 // e.g. CustomerId (C#) vs customer_id (DB)
                 var dbFieldNameWithNoUnderscores = dbFieldName.Replace("_", "");
-                if (String.Compare(fieldName, dbFieldNameWithNoUnderscores, StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Compare(fieldName, dbFieldNameWithNoUnderscores, StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     return i;
                 }
 
                 // Next guess: Maybe the DB field has special characters?
                 // e.g. Quantity (C#) vs quantity% (DB)
-                var dbFieldNameSanitized = AllowedPropertyCharsRegex.Replace(dbFieldName, String.Empty);
-                if (String.Compare(fieldName, dbFieldNameSanitized, StringComparison.OrdinalIgnoreCase) == 0)
+                var dbFieldNameSanitized = AllowedPropertyCharsRegex.Replace(dbFieldName, string.Empty);
+                if (string.Compare(fieldName, dbFieldNameSanitized, StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     return i;
                 }
 
                 // Next guess: Maybe the DB field has special characters *and* has underscores?
                 // e.g. Quantity (C#) vs quantity_% (DB)
-                if (String.Compare(fieldName, dbFieldNameSanitized.Replace("_", String.Empty), StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Compare(fieldName, dbFieldNameSanitized.Replace("_", string.Empty), StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     return i;
                 }
@@ -548,7 +548,7 @@ namespace ServiceStack.OrmLite
             var modelDef = ModelDefinition<T>.Definition;
             var idParamString = OrmLiteConfig.DialectProvider.GetParam();
 
-            var sql = String.Format("DELETE FROM {0} WHERE {1} = {2}",
+            var sql = string.Format("DELETE FROM {0} WHERE {1} = {2}",
                 OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef),
                 OrmLiteConfig.DialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName),
                 idParamString);
@@ -614,7 +614,7 @@ namespace ServiceStack.OrmLite
         {
             var modelDef = ModelDefinition<T>.Definition;
 
-            var sql = String.Format("DELETE FROM {0} WHERE {1} IN ({2})",
+            var sql = string.Format("DELETE FROM {0} WHERE {1} IN ({2})",
                 OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef),
                 OrmLiteConfig.DialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName),
                 sqlIn);
@@ -804,6 +804,98 @@ namespace ServiceStack.OrmLite
             }
 
             return rowsAdded;
+        }
+
+        public static void SaveAllReferences<T>(this IDbCommand dbCmd, T instance)
+        {
+            var modelDef = ModelDefinition<T>.Definition;
+            var pkValue = modelDef.PrimaryKey.GetValue(instance);
+
+            var fieldDefs = modelDef.AllFieldDefinitionsArray.Where(x => x.IsReference);
+            foreach (var fieldDef in fieldDefs)
+            {
+                var listInterface = fieldDef.FieldType.GetTypeWithGenericInterfaceOf(typeof(IList<>));
+                if (listInterface != null)
+                {
+                    var refType = listInterface.GenericTypeArguments()[0];
+                    var refModelDef = refType.GetModelDefinition();
+
+                    var refField = modelDef.GetRefFieldDef(refModelDef, refType);
+
+                    var results = (IEnumerable)fieldDef.GetValue(instance);
+                    if (results != null)
+                    {
+                        foreach (var oRef in results)
+                        {
+                            refField.SetValueFn(oRef, pkValue);
+                        }
+
+                        dbCmd.CreateTypedApi(refType).SaveAll(results);
+                    }
+                }
+                else
+                {
+                    var refType = fieldDef.FieldType;
+                    var refModelDef = refType.GetModelDefinition();
+
+                    var refSelf = modelDef.GetSelfRefFieldDefIfExists(refModelDef);
+
+                    var result = fieldDef.GetValue(instance);
+                    var refField = refSelf == null
+                        ? modelDef.GetRefFieldDef(refModelDef, refType)
+                        : modelDef.GetRefFieldDefIfExists(refModelDef);
+
+                    if (result != null)
+                    {
+                        if (refField != null)
+                            refField.SetValueFn(result, pkValue);
+
+                        dbCmd.CreateTypedApi(refType).Save(result);
+
+                        //Save Self Table.RefTableId PK
+                        if (refSelf != null)
+                        {
+                            var refPkValue = refModelDef.PrimaryKey.GetValue(result);
+                            refSelf.SetValueFn(instance, refPkValue);
+                            dbCmd.Update(instance);
+                        }
+                    }
+                }
+            }
+        }
+
+        public static void SaveReferences<T, TRef>(this IDbCommand dbCmd, T instance, params TRef[] refs)
+        {
+            var modelDef = ModelDefinition<T>.Definition;
+            var pkValue = modelDef.PrimaryKey.GetValue(instance);
+
+            var refType = typeof(TRef);
+            var refModelDef = ModelDefinition<TRef>.Definition;
+
+            var refSelf = modelDef.GetSelfRefFieldDefIfExists(refModelDef);
+
+            foreach (var oRef in refs)
+            {
+                var refField = refSelf == null
+                    ? modelDef.GetRefFieldDef(refModelDef, refType)
+                    : modelDef.GetRefFieldDefIfExists(refModelDef);
+
+                if (refField != null)
+                    refField.SetValueFn(oRef, pkValue);
+            }
+
+            dbCmd.SaveAll(refs);
+
+            foreach (var oRef in refs)
+            {
+                //Save Self Table.RefTableId PK
+                if (refSelf != null)
+                {
+                    var refPkValue = refModelDef.PrimaryKey.GetValue(oRef);
+                    refSelf.SetValueFn(instance, refPkValue);
+                    dbCmd.Update(instance);
+                }
+            }
         }
 
         // Procedures

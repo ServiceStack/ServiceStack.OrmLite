@@ -586,42 +586,6 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
-        /// Populates all related references on the instance with its primary key and saves them. Uses '(T)Id' naming convention. E.g:
-        /// <para>db.SaveAllReferences(customer)</para> 
-        /// </summary>
-        public static void SaveAllReferences<T>(this IDbConnection dbConn, T instance)
-        {
-            dbConn.Exec(dbCmd => dbCmd.SaveAllReferences(instance));
-        }
-
-        /// <summary>
-        /// Populates the related references with the instance primary key and saves them. Uses '(T)Id' naming convention. E.g:
-        /// <para>db.SaveReference(customer, customer.Orders)</para> 
-        /// </summary>
-        public static void SaveReferences<T, TRef>(this IDbConnection dbConn, T instance, params TRef[] refs)
-        {
-            dbConn.Exec(dbCmd => dbCmd.SaveReferences(instance, refs));
-        }
-
-        /// <summary>
-        /// Populates the related references with the instance primary key and saves them. Uses '(T)Id' naming convention. E.g:
-        /// <para>db.SaveReference(customer, customer.Orders)</para> 
-        /// </summary>
-        public static void SaveReferences<T, TRef>(this IDbConnection dbConn, T instance, List<TRef> refs)
-        {
-            dbConn.Exec(dbCmd => dbCmd.SaveReferences(instance, refs.ToArray()));
-        }
-
-        /// <summary>
-        /// Populates the related references with the instance primary key and saves them. Uses '(T)Id' naming convention. E.g:
-        /// <para>db.SaveReferences(customer, customer.Orders)</para> 
-        /// </summary>
-        public static void SaveReferences<T, TRef>(this IDbConnection dbConn, T instance, IEnumerable<TRef> refs)
-        {
-            dbConn.Exec(dbCmd => dbCmd.SaveReferences(instance, refs.ToArray()));
-        }
-
-        /// <summary>
         /// Loads all the related references onto the instance. E.g:
         /// <para>db.LoadReferences(customer)</para> 
         /// </summary>
