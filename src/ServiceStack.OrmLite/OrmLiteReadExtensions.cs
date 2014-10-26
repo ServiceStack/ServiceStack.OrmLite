@@ -814,148 +814,21 @@ namespace ServiceStack.OrmLite
             return row;
         }
 
-        public static void SaveAllReferences<T>(this IDbCommand dbCmd, T instance)
-        {
-            var modelDef = ModelDefinition<T>.Definition;
-            var pkValue = modelDef.PrimaryKey.GetValue(instance);
-
-            var fieldDefs = modelDef.AllFieldDefinitionsArray.Where(x => x.IsReference);
-            foreach (var fieldDef in fieldDefs)
-            {
-                var listInterface = fieldDef.FieldType.GetTypeWithGenericInterfaceOf(typeof(IList<>));
-                if (listInterface != null)
-                {
-                    var refType = listInterface.GenericTypeArguments()[0];
-                    var refModelDef = refType.GetModelDefinition();
-
-                    var refField = GetRefFieldDef(modelDef, refModelDef, refType);
-
-                    var results = (IEnumerable)fieldDef.GetValue(instance);
-                    if (results != null)
-                    {
-                        foreach (var oRef in results)
-                        {
-                            refField.SetValueFn(oRef, pkValue);
-                        }
-
-                        dbCmd.CreateTypedApi(refType).SaveAll(results);
-                    }
-                }
-                else
-                {
-                    var refType = fieldDef.FieldType;
-                    var refModelDef = refType.GetModelDefinition();
-
-                    var refSelf = GetSelfRefFieldDefIfExists(modelDef, refModelDef);
-
-                    var result = fieldDef.GetValue(instance);
-                    var refField = refSelf == null
-                        ? GetRefFieldDef(modelDef, refModelDef, refType)
-                        : GetRefFieldDefIfExists(modelDef, refModelDef);
-
-                    if (result != null)
-                    {
-                        if (refField != null)
-                            refField.SetValueFn(result, pkValue);
-    
-                        dbCmd.CreateTypedApi(refType).Save(result);
-
-                        //Save Self Table.RefTableId PK
-                        if (refSelf != null)
-                        {
-                            var refPkValue = refModelDef.PrimaryKey.GetValue(result);
-                            refSelf.SetValueFn(instance, refPkValue);
-                            dbCmd.Update(instance);
-                        }
-                    }
-                }
-            }
-        }
-
-        public static void SaveReferences<T, TRef>(this IDbCommand dbCmd, T instance, params TRef[] refs)
-        {
-            var modelDef = ModelDefinition<T>.Definition;
-            var pkValue = modelDef.PrimaryKey.GetValue(instance);
-
-            var refType = typeof(TRef);
-            var refModelDef = ModelDefinition<TRef>.Definition;
-
-            var refSelf = GetSelfRefFieldDefIfExists(modelDef, refModelDef);
-
-            foreach (var oRef in refs)
-            {
-                var refField = refSelf == null 
-                    ? GetRefFieldDef(modelDef, refModelDef, refType)
-                    : GetRefFieldDefIfExists(modelDef, refModelDef);
-
-                if (refField != null)
-                    refField.SetValueFn(oRef, pkValue);
-            }
-
-            dbCmd.SaveAll(refs);
-
-            foreach (var oRef in refs)
-            {
-                //Save Self Table.RefTableId PK
-                if (refSelf != null)
-                {
-                    var refPkValue = refModelDef.PrimaryKey.GetValue(oRef);
-                    refSelf.SetValueFn(instance, refPkValue);
-                    dbCmd.Update(instance);
-                }
-            }
-        }
-
         public static void LoadReferences<T>(this IDbCommand dbCmd, T instance)
         {
-            var modelDef = ModelDefinition<T>.Definition;
-            var fieldDefs = modelDef.AllFieldDefinitionsArray.Where(x => x.IsReference);
-            var pkValue = modelDef.PrimaryKey.GetValue(instance);
-            var dialectProvider = OrmLiteConfig.DialectProvider;
+            var loadRef = new LoadReferencesSync<T>(dbCmd, instance);
 
-            foreach (var fieldDef in fieldDefs)
+            foreach (var fieldDef in loadRef.FieldDefs)
             {
                 dbCmd.Parameters.Clear();
                 var listInterface = fieldDef.FieldType.GetTypeWithGenericInterfaceOf(typeof(IList<>));
                 if (listInterface != null)
                 {
-                    var refType = listInterface.GenericTypeArguments()[0];
-                    var refModelDef = refType.GetModelDefinition();
-
-                    var refField = GetRefFieldDef(modelDef, refModelDef, refType);
-
-                    var sqlFilter = dialectProvider.GetQuotedColumnName(refField.FieldName) + "={0}";
-                    var sql = dialectProvider.ToSelectStatement(refType, sqlFilter, pkValue);
-
-                    var results = dbCmd.ConvertToList(refType, sql);
-                    fieldDef.SetValueFn(instance, results);
+                    loadRef.SetRefFieldList(fieldDef, listInterface.GenericTypeArguments()[0]);
                 }
                 else
                 {
-                    var refType = fieldDef.FieldType;
-                    var refModelDef = refType.GetModelDefinition();
-
-                    var refSelf = GetSelfRefFieldDefIfExists(modelDef, refModelDef);
-                    var refField = refSelf == null 
-                        ? GetRefFieldDef(modelDef, refModelDef, refType)
-                        : GetRefFieldDefIfExists(modelDef, refModelDef);
-
-                    if (refField != null)
-                    {
-                        var sqlFilter = dialectProvider.GetQuotedColumnName(refField.FieldName) + "={0}";
-                        var sql = dialectProvider.ToSelectStatement(refType, sqlFilter, pkValue);
-                        var result = dbCmd.ConvertTo(refType, sql);
-                        fieldDef.SetValueFn(instance, result);
-                    }
-                    else if (refSelf != null)
-                    {
-                        //Load Self Table.RefTableId PK
-                        var refPkValue = refSelf.GetValue(instance);
-                        var sqlFilter = dialectProvider.GetQuotedColumnName(refModelDef.PrimaryKey.FieldName) + "={0}";
-                        var sql = dialectProvider.ToSelectStatement(refType, sqlFilter, refPkValue);
-                        var result = dbCmd.ConvertTo(refType, sql);
-                        fieldDef.SetValueFn(instance, result);
-                    }
+                    loadRef.SetRefField(fieldDef, fieldDef.FieldType);
                 }
             }
         }
