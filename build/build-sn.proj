@@ -95,7 +95,7 @@
     <ItemGroup>
       <OrmLiteFiles Include="$(SrcDir)/ServiceStack.OrmLite/bin/$(Configuration)/ServiceStack.OrmLite.*"></OrmLiteFiles>
       <SqlServerFiles Include="$(SrcDir)/ServiceStack.OrmLite.SqlServer/bin/$(Configuration)/ServiceStack.OrmLite.SqlServer.*"></SqlServerFiles>
-      <SqlServerFilesV45 Include="$(SrcDir)/ServiceStack.OrmLite.SqlServer/bin/net45/ServiceStack.OrmLite.SqlServer.*"></SqlServerFilesV45>
+      <SqlServerFilesV45 Include="$(SrcDir)/ServiceStack.OrmLite.SqlServer/bin/net45_$(Configuration)/ServiceStack.OrmLite.SqlServer.*"></SqlServerFilesV45>
       <OracleFiles Include="$(SrcDir)/ServiceStack.OrmLite.Oracle/bin/$(Configuration)/ServiceStack.OrmLite.Oracle.*"></OracleFiles>
       <SqliteWindowsFiles Include="$(SrcDir)/ServiceStack.OrmLite.Sqlite.Windows/bin/$(Configuration)/ServiceStack.OrmLite.Sqlite.Windows.*"></SqliteWindowsFiles>
     </ItemGroup>
