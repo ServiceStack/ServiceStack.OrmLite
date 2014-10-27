@@ -806,7 +806,7 @@ namespace ServiceStack.OrmLite
             return rowsAdded;
         }
 
-        public static void SaveAllReferences<T>(this IDbCommand dbCmd, T instance)
+        internal static void SaveAllReferences<T>(this IDbCommand dbCmd, T instance)
         {
             var modelDef = ModelDefinition<T>.Definition;
             var pkValue = modelDef.PrimaryKey.GetValue(instance);
@@ -864,7 +864,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        public static void SaveReferences<T, TRef>(this IDbCommand dbCmd, T instance, params TRef[] refs)
+        internal static void SaveReferences<T, TRef>(this IDbCommand dbCmd, T instance, params TRef[] refs)
         {
             var modelDef = ModelDefinition<T>.Definition;
             var pkValue = modelDef.PrimaryKey.GetValue(instance);

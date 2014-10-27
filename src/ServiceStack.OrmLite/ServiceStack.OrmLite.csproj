@@ -185,6 +185,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Async\OrmLiteAsyncApi.cd" />
     <None Include="OrmLiteApi.cd" />
   </ItemGroup>
   <ItemGroup />
