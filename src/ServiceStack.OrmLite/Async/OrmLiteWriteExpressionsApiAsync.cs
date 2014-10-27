@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ServiceStack.OrmLite.Async
 {
-    public static class WriteConnectionExtensionsAsync
+    public static class OrmLiteWriteExpressionsApiAsync
     {
         /// <summary>
         /// Use an SqlExpression to select which fields to update and construct the where expression, E.g: 

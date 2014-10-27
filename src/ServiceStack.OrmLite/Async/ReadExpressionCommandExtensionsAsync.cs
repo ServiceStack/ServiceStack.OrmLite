@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace ServiceStack.OrmLite.Async
 {
-    public static class ReadExtensionsAsync
+    public static class ReadExpressionCommandExtensionsAsync
     {
         internal static Task<List<T>> SelectAsync<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression, CancellationToken token)
         {

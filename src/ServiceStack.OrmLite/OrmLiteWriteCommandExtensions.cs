@@ -21,9 +21,9 @@ using ServiceStack.Logging;
 
 namespace ServiceStack.OrmLite
 {
-    public static class OrmLiteWriteExtensions
+    public static class OrmLiteWriteCommandExtensions
     {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(OrmLiteWriteExtensions));
+        private static readonly ILog Log = LogManager.GetLogger(typeof(OrmLiteWriteCommandExtensions));
 
         private static void LogDebug(string fmt)
         {

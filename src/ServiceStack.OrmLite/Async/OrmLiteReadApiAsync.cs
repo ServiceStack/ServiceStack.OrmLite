@@ -12,7 +12,7 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Async
 {
-    public static class OrmLiteReadConnectionExtensionsAsync
+    public static class OrmLiteReadApiAsync
     {
         /// <summary>
         /// Returns results from the active connection.

@@ -7,7 +7,7 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
-    public static class WriteExtensions
+    public static class WriteExpressionCommandExtensions
     {
         public static int UpdateOnly<T>(this IDbCommand dbCmd, T model, Func<SqlExpression<T>, SqlExpression<T>> onlyFields)
         {

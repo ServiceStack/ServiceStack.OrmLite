@@ -13,7 +13,7 @@ namespace ServiceStack.OrmLite
         Restrict
     }
 
-    public static class OrmLiteDDLExtensions
+    public static class OrmLiteSchemaModifyApi
     {
         public static void AlterTable<T>(this IDbConnection dbConn, string command)
         {

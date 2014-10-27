@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace ServiceStack.OrmLite.Async
 {
-    public static class ReadConnectionExtensionsAsync
+    public static class OrmLiteReadExpressionsApiAsync
     {
         /// <summary>
         /// Returns results from using a LINQ Expression. E.g:

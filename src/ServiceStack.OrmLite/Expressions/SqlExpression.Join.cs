@@ -97,12 +97,12 @@ namespace ServiceStack.OrmLite
                 var parentDef = sourceDef;
                 var childDef = targetDef;
 
-                var refField = OrmLiteReadExtensions.GetRefFieldDefIfExists(parentDef, childDef);
+                var refField = OrmLiteReadCommandExtensions.GetRefFieldDefIfExists(parentDef, childDef);
                 if (refField == null)
                 {
                     parentDef = targetDef;
                     childDef = sourceDef;
-                    refField = OrmLiteReadExtensions.GetRefFieldDefIfExists(parentDef, childDef);
+                    refField = OrmLiteReadCommandExtensions.GetRefFieldDefIfExists(parentDef, childDef);
                 }
 
                 if (refField == null)

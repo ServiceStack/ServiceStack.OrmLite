@@ -12,7 +12,7 @@ using ServiceStack.Data;
 
 namespace ServiceStack.OrmLite.Async
 {
-    public static class OrmLiteWriteConnectionExtensionsAsync
+    public static class OrmLiteWriteApiAsync
     {
         /// <summary>
         /// Execute any arbitrary raw SQL.

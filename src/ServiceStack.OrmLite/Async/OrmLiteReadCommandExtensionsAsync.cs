@@ -12,9 +12,9 @@ using ServiceStack.OrmLite.Support;
 
 namespace ServiceStack.OrmLite.Async
 {
-    public static class OrmLiteReadExtensionsAsync
+    public static class OrmLiteReadCommandExtensionsAsync
     {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(OrmLiteReadExtensionsAsync));
+        private static readonly ILog Log = LogManager.GetLogger(typeof(OrmLiteReadCommandExtensionsAsync));
 
         private static void LogDebug(string fmt)
         {
@@ -67,7 +67,7 @@ namespace ServiceStack.OrmLite.Async
 
         internal static Task<List<TModel>> SelectFmtAsync<TModel>(this IDbCommand dbCmd, CancellationToken token, Type fromTableType, string sqlFilter, params object[] filterParams)
         {
-            var sql = OrmLiteReadExtensions.ToSelectFmt<TModel>(fromTableType, sqlFilter, filterParams);
+            var sql = OrmLiteReadCommandExtensions.ToSelectFmt<TModel>(fromTableType, sqlFilter, filterParams);
 
             return dbCmd.ConvertToListAsync<TModel>(sql.ToString(), token);
         }
@@ -119,7 +119,7 @@ namespace ServiceStack.OrmLite.Async
 
         internal static Task<T> SingleAsync<T>(this IDbCommand dbCmd, string sql, object anonType, CancellationToken token)
         {
-            if (OrmLiteReadExtensions.IsScalar<T>())
+            if (OrmLiteReadCommandExtensions.IsScalar<T>())
                 return dbCmd.ScalarAsync<T>(sql, anonType, token);
 
             dbCmd.SetParameters<T>(anonType, excludeDefaults: false);
@@ -141,7 +141,7 @@ namespace ServiceStack.OrmLite.Async
         {
             dbCmd.SetFilters<T>(anonType);
 
-            return OrmLiteReadExtensions.IsScalar<T>()
+            return OrmLiteReadCommandExtensions.IsScalar<T>()
                 ? dbCmd.ColumnAsync<T>(null, token)
                 : dbCmd.ConvertToListAsync<T>(null, token);
         }
@@ -151,7 +151,7 @@ namespace ServiceStack.OrmLite.Async
             if (anonType != null) dbCmd.SetParameters<T>(anonType, excludeDefaults: false);
             dbCmd.CommandText = OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sql);
 
-            return OrmLiteReadExtensions.IsScalar<T>()
+            return OrmLiteReadCommandExtensions.IsScalar<T>()
                 ? dbCmd.ColumnAsync<T>(null, token)
                 : dbCmd.ConvertToListAsync<T>(null, token);
         }
@@ -162,7 +162,7 @@ namespace ServiceStack.OrmLite.Async
             
             dbCmd.CommandText = OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sql);
 
-            return OrmLiteReadExtensions.IsScalar<T>()
+            return OrmLiteReadCommandExtensions.IsScalar<T>()
                 ? dbCmd.ColumnAsync<T>(null, token)
                 : dbCmd.ConvertToListAsync<T>(null, token);
         }
@@ -196,7 +196,7 @@ namespace ServiceStack.OrmLite.Async
             if (anonType != null) dbCmd.SetParameters<T>(anonType, excludeDefaults: false);
             dbCmd.CommandText = sql;
 
-            return OrmLiteReadExtensions.IsScalar<T>()
+            return OrmLiteReadCommandExtensions.IsScalar<T>()
                 ? dbCmd.ColumnAsync<T>(null, token)
                 : dbCmd.ConvertToListAsync<T>(null, token);
         }
@@ -206,7 +206,7 @@ namespace ServiceStack.OrmLite.Async
             if (dict != null) dbCmd.SetParameters(dict, false);
             dbCmd.CommandText = sql;
 
-            return OrmLiteReadExtensions.IsScalar<T>()
+            return OrmLiteReadCommandExtensions.IsScalar<T>()
                 ? dbCmd.ColumnAsync<T>(null, token)
                 : dbCmd.ConvertToListAsync<T>(null, token);
         }
@@ -254,13 +254,13 @@ namespace ServiceStack.OrmLite.Async
         internal static Task<T> ScalarAsync<T>(this IDataReader reader, CancellationToken token)
         {
             return OrmLiteConfig.DialectProvider.ReaderRead(reader, () => 
-                OrmLiteReadExtensions.ToScalar<T>(reader.GetValue(0)), token);
+                OrmLiteReadCommandExtensions.ToScalar<T>(reader.GetValue(0)), token);
         }
 
         public static Task<long> LongScalarAsync(this IDbCommand dbCmd, CancellationToken token)
         {
             return OrmLiteConfig.DialectProvider.ExecuteScalarAsync(dbCmd, token)
-                                .Then(OrmLiteReadExtensions.ToLong);
+                                .Then(OrmLiteReadCommandExtensions.ToLong);
         }
 
         internal static Task<List<T>> ColumnAsync<T>(this IDbCommand dbCmd, string sql, object anonType, CancellationToken token)

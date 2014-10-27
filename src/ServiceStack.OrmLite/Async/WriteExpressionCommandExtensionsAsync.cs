@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ServiceStack.OrmLite.Async
 {
-    internal static class WriteExtensionsAsync
+    internal static class WriteExpressionCommandExtensionsAsync
     {
         internal static Task<int> UpdateOnlyAsync<T>(this IDbCommand dbCmd, T model, Func<SqlExpression<T>, SqlExpression<T>> onlyFields, CancellationToken token)
         {
@@ -59,7 +59,7 @@ namespace ServiceStack.OrmLite.Async
 
         internal static Task<int> UpdateAsync<T>(this IDbCommand dbCmd, object updateOnly, Expression<Func<T, bool>> where, CancellationToken token)
         {
-            var updateSql = WriteExtensions.UpdateSql(updateOnly, where);
+            var updateSql = WriteExpressionCommandExtensions.UpdateSql(updateOnly, where);
             return dbCmd.ExecuteSqlAsync(updateSql, token);
         }
 
@@ -70,7 +70,7 @@ namespace ServiceStack.OrmLite.Async
 
         internal static Task<int> UpdateFmtAsync(this IDbCommand dbCmd, string table, string set, string where, CancellationToken token)
         {
-            var sql = WriteExtensions.UpdateFmtSql(table, set, @where);
+            var sql = WriteExpressionCommandExtensions.UpdateFmtSql(table, set, @where);
             return dbCmd.ExecuteSqlAsync(sql.ToString(), token);
         }
 
@@ -113,7 +113,7 @@ namespace ServiceStack.OrmLite.Async
 
         internal static Task<int> DeleteFmtAsync(this IDbCommand dbCmd, string table, string where, CancellationToken token)
         {
-            var sql = WriteExtensions.DeleteFmtSql(table, @where);
+            var sql = WriteExpressionCommandExtensions.DeleteFmtSql(table, @where);
             return dbCmd.ExecuteSqlAsync(sql.ToString(), token);
         }
     }

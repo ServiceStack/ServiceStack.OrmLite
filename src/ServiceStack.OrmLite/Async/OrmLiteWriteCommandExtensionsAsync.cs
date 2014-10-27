@@ -13,9 +13,9 @@ using ServiceStack.Logging;
 
 namespace ServiceStack.OrmLite.Async
 {
-    public static class OrmLiteWriteExtensionsAsync
+    public static class OrmLiteWriteCommandExtensionsAsync
     {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(OrmLiteWriteExtensionsAsync));
+        private static readonly ILog Log = LogManager.GetLogger(typeof(OrmLiteWriteCommandExtensionsAsync));
 
         private static void LogDebug(string fmt)
         {
@@ -198,7 +198,7 @@ namespace ServiceStack.OrmLite.Async
             if (sqlIn == null) 
                 return TaskResult.Zero;
 
-            var sql = OrmLiteWriteExtensions.GetDeleteByIdsSql<T>(sqlIn);
+            var sql = OrmLiteWriteCommandExtensions.GetDeleteByIdsSql<T>(sqlIn);
 
             return dbCmd.ExecuteSqlAsync(sql, token);
         }

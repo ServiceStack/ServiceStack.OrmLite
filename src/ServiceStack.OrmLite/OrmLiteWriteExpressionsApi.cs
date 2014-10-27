@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 
 namespace ServiceStack.OrmLite
 {
-    public static class WriteConnectionExtensions
+    public static class OrmLiteWriteExpressionsApi
     {
         /// <summary>
         /// Use an SqlExpression to select which fields to update and construct the where expression, E.g: 
