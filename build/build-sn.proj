@@ -126,7 +126,7 @@
              Targets="Build"
              Properties="Version=$(PackageVersion);Configuration=$(Configuration)" />
 
-    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.SqlServer.Signed/lib/net40" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.SqlServer.Signed/lib/net45')" />
+    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.SqlServer.Signed/lib/net45" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.SqlServer.Signed/lib/net45')" />
     <Copy SourceFiles="%(SqlServerFilesV45.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.SqlServer.Signed/lib/net45" />
 
     <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.SqlServer.Signed/servicestack.ormlite.sqlserver.signed.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
