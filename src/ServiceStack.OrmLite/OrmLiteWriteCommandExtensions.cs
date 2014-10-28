@@ -838,7 +838,7 @@ namespace ServiceStack.OrmLite
                     var refType = fieldDef.FieldType;
                     var refModelDef = refType.GetModelDefinition();
 
-                    var refSelf = modelDef.GetSelfRefFieldDefIfExists(refModelDef);
+                    var refSelf = modelDef.GetSelfRefFieldDefIfExists(refModelDef, fieldDef);
 
                     var result = fieldDef.GetValue(instance);
                     var refField = refSelf == null
@@ -847,7 +847,7 @@ namespace ServiceStack.OrmLite
 
                     if (result != null)
                     {
-                        if (refField != null)
+                        if (refField != null) 
                             refField.SetValueFn(result, pkValue);
 
                         dbCmd.CreateTypedApi(refType).Save(result);
@@ -872,7 +872,7 @@ namespace ServiceStack.OrmLite
             var refType = typeof(TRef);
             var refModelDef = ModelDefinition<TRef>.Definition;
 
-            var refSelf = modelDef.GetSelfRefFieldDefIfExists(refModelDef);
+            var refSelf = modelDef.GetSelfRefFieldDefIfExists(refModelDef, null); 
 
             foreach (var oRef in refs)
             {

@@ -163,6 +163,26 @@ namespace ServiceStack.OrmLite.Tests
         public string Country { get; set; }
     }
 
+    public class MultiSelfCustomer
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+        public string Name { get; set; }
+
+        [References(typeof(SelfCustomerAddress))]
+        public int? HomeAddressId { get; set; }
+
+        [References(typeof(SelfCustomerAddress))]
+        public int? WorkAddressId { get; set; }
+
+        [Reference]
+        public SelfCustomerAddress HomeAddress { get; set; }
+
+        [Reference]
+        public SelfCustomerAddress WorkAddress { get; set; }
+    }
+
+
     public class LoadReferencesTests
         : OrmLiteTestBase
     {
@@ -186,6 +206,7 @@ namespace ServiceStack.OrmLite.Tests
             db.DropAndCreateTable<MismatchAliasAddress>();
             db.DropAndCreateTable<SelfCustomer>();
             db.DropAndCreateTable<SelfCustomerAddress>();
+            db.DropAndCreateTable<MultiSelfCustomer>();
         }
 
         [SetUp]
@@ -583,6 +604,57 @@ namespace ServiceStack.OrmLite.Tests
             results = db.LoadSelect<SelfCustomer>(q => q.Name == "Customer 1");
             Assert.That(results.Count, Is.EqualTo(1));
             Assert.That(results[0].PrimaryAddress.Country, Is.EqualTo("Australia"));
+        }
+
+        [Test]
+        public void Can_support_multiple_self_references()
+        {
+            var customers = new[]
+            {
+                new MultiSelfCustomer
+                {
+                    Name = "Customer 1",
+                    HomeAddress = new SelfCustomerAddress
+                    {
+                        AddressLine1 = "1 Home Street",
+                        Country = "Australia"
+                    },
+                    WorkAddress = new SelfCustomerAddress
+                    {
+                        AddressLine1 = "1 Work Street",
+                        Country = "Australia"
+                    },
+                },
+                new MultiSelfCustomer
+                {
+                    Name = "Customer 2",
+                    HomeAddress = new SelfCustomerAddress
+                    {
+                        AddressLine1 = "2 Home Park",
+                        Country = "USA"
+                    },
+                    WorkAddress = new SelfCustomerAddress
+                    {
+                        AddressLine1 = "2 Work Park",
+                        Country = "USA"
+                    },
+                },
+            };
+
+            customers.Each(x =>
+                db.Save(x, references: true));
+
+            var results = db.LoadSelect<MultiSelfCustomer>(q =>
+                q.HomeAddressId != null && 
+                q.WorkAddressId != null);
+
+            results.PrintDump();
+
+            Assert.That(results.Count, Is.EqualTo(2));
+            Assert.That(results[0].HomeAddress.AddressLine1, Is.StringContaining("Home"));
+            Assert.That(results[0].WorkAddress.AddressLine1, Is.StringContaining("Work"));
+            Assert.That(results[1].HomeAddress.AddressLine1, Is.StringContaining("Home"));
+            Assert.That(results[1].WorkAddress.AddressLine1, Is.StringContaining("Work"));
         }
 
     }

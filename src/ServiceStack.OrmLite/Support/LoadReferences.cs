@@ -79,7 +79,7 @@ namespace ServiceStack.OrmLite.Support
         {
             var refModelDef = refType.GetModelDefinition();
 
-            var refSelf = modelDef.GetSelfRefFieldDefIfExists(refModelDef);
+            var refSelf = modelDef.GetSelfRefFieldDefIfExists(refModelDef, fieldDef);
             var refField = refSelf == null
                 ? modelDef.GetRefFieldDef(refModelDef, refType)
                 : modelDef.GetRefFieldDefIfExists(refModelDef);
@@ -116,7 +116,7 @@ namespace ServiceStack.OrmLite.Support
         {
             var refModelDef = refType.GetModelDefinition();
 
-            var refSelf = modelDef.GetSelfRefFieldDefIfExists(refModelDef);
+            var refSelf = modelDef.GetSelfRefFieldDefIfExists(refModelDef, fieldDef);
             var refField = refSelf == null
                 ? modelDef.GetRefFieldDef(refModelDef, refType)
                 : modelDef.GetRefFieldDefIfExists(refModelDef);
