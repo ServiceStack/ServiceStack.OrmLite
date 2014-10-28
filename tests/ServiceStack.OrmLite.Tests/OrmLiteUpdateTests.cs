@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
+using ServiceStack.OrmLite.Tests.Shared;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
@@ -135,6 +137,27 @@ namespace ServiceStack.OrmLite.Tests
 
             var list = new List<ModelWithIdOnly> { row1, row2 };
             db.UpdateAll(list);
+        }
+
+        [Test]
+        public void Can_UpdateOnly_multiple_columns()
+        {
+            db.DropAndCreateTable<Person>();
+
+            db.Insert(new Person { FirstName = "FirstName", Age = 100 });
+
+            var existingPerson = db.Select<Person>().First();
+
+            existingPerson.FirstName = "JJ";
+            existingPerson.Age = 12;
+
+            db.UpdateOnly(existingPerson,
+                onlyFields: p => new { p.FirstName, p.Age });
+
+            var person = db.Select<Person>().First();
+
+            Assert.That(person.FirstName, Is.EqualTo("JJ"));
+            Assert.That(person.Age, Is.EqualTo(12));
         }
     }
 }
