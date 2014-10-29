@@ -94,8 +94,9 @@
     
     <ItemGroup>
       <OrmLiteFiles Include="$(SrcDir)/ServiceStack.OrmLite/bin/$(Configuration)/ServiceStack.OrmLite.*"></OrmLiteFiles>
+      <OrmLiteV45Files Include="$(SrcDir)/ServiceStack.OrmLiteV45/bin/$(Configuration)/ServiceStack.OrmLite.*"></OrmLiteV45Files>
       <SqlServerFiles Include="$(SrcDir)/ServiceStack.OrmLite.SqlServer/bin/$(Configuration)/ServiceStack.OrmLite.SqlServer.*"></SqlServerFiles>
-      <SqlServerFilesV45 Include="$(SrcDir)/ServiceStack.OrmLite.SqlServer/bin/net45_$(Configuration)/ServiceStack.OrmLite.SqlServer.*"></SqlServerFilesV45>
+      <SqlServerFilesV45 Include="$(SrcDir)/ServiceStack.OrmLite.SqlServerV45/bin/$(Configuration)/ServiceStack.OrmLite.SqlServer.*"></SqlServerFilesV45>
       <OracleFiles Include="$(SrcDir)/ServiceStack.OrmLite.Oracle/bin/$(Configuration)/ServiceStack.OrmLite.Oracle.*"></OracleFiles>
       <SqliteWindowsFiles Include="$(SrcDir)/ServiceStack.OrmLite.Sqlite.Windows/bin/$(Configuration)/ServiceStack.OrmLite.Sqlite.Windows.*"></SqliteWindowsFiles>
     </ItemGroup>
@@ -108,6 +109,14 @@
 
     <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.Signed/lib/net40" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.Signed/lib/net40')" />
     <Copy SourceFiles="%(OrmLiteFiles.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.Signed/lib/net40" />
+
+    <!-- OrmLite .NET 4.5 -->
+    <MSBuild Projects="$(SrcDir)/ServiceStack.OrmLiteV45/ServiceStack.OrmLiteV45.Signed.csproj"
+             Targets="Build"
+             Properties="Version=$(PackageVersion);Configuration=$(Configuration)" />
+
+    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.Signed/lib/net45" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.Signed/lib/net45')" />
+    <Copy SourceFiles="%(OrmLiteFilesV45.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.Signed/lib/net45" />
 
     <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.Signed/servicestack.ormlite.signed.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
             LogStandardErrorAsError="true" />
@@ -122,7 +131,7 @@
     <Copy SourceFiles="%(SqlServerFiles.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.SqlServer.Signed/lib/net40" />
 
     <!-- SqlServer .NET 4.5 -->
-    <MSBuild Projects="$(SrcDir)/ServiceStack.OrmLite.SqlServer/ServiceStack.OrmLite.SqlServerV45.Signed.csproj"
+    <MSBuild Projects="$(SrcDir)/ServiceStack.OrmLite.SqlServerV45/ServiceStack.OrmLite.SqlServerV45.Signed.csproj"
              Targets="Build"
              Properties="Version=$(PackageVersion);Configuration=$(Configuration)" />
 
