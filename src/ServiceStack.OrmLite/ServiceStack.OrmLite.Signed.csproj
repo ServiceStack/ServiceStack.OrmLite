@@ -111,7 +111,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AliasNamingStrategy.cs" />
-    <Compile Include="Async\async.cs" />
+    <Compile Include="OrmLiteContext.cs" />
     <Compile Include="OrmLiteReadApiAsync.cs" />
     <Compile Include="Async\OrmLiteReadCommandExtensionsAsync.cs" />
     <Compile Include="Async\OrmLiteResultsFilterExtensionsAsync.cs" />
