@@ -106,15 +106,15 @@
   <ItemGroup>
     <Compile Include="AliasNamingStrategy.cs" />
     <Compile Include="Async\async.cs" />
-    <Compile Include="Async\OrmLiteReadApiAsync.cs" />
+    <Compile Include="OrmLiteReadApiAsync.cs" />
     <Compile Include="Async\OrmLiteReadCommandExtensionsAsync.cs" />
     <Compile Include="Async\OrmLiteResultsFilterExtensionsAsync.cs" />
     <Compile Include="Async\OrmLiteUtilExtensionsAsync.cs" />
-    <Compile Include="Async\OrmLiteWriteApiAsync.cs" />
+    <Compile Include="OrmLiteWriteApiAsync.cs" />
     <Compile Include="Async\OrmLiteWriteCommandExtensionsAsync.cs" />
-    <Compile Include="Async\OrmLiteReadExpressionsApiAsync.cs" />
+    <Compile Include="OrmLiteReadExpressionsApiAsync.cs" />
     <Compile Include="Async\ReadExpressionCommandExtensionsAsync.cs" />
-    <Compile Include="Async\OrmLiteWriteExpressionsApiAsync.cs" />
+    <Compile Include="OrmLiteWriteExpressionsApiAsync.cs" />
     <Compile Include="Async\WriteExpressionCommandExtensionsAsync.cs" />
     <Compile Include="Expressions\SqlExpression.Join.cs" />
     <Compile Include="Expressions\SqlExpressionVisitor.cs" />

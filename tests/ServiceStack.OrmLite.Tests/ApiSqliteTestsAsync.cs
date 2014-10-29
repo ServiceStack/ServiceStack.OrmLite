@@ -2,7 +2,6 @@
 using System.Data;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using ServiceStack.OrmLite.Async;
 using ServiceStack.OrmLite.Tests.Shared;
 
 namespace ServiceStack.OrmLite.Tests

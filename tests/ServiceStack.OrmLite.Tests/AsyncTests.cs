@@ -1,9 +1,7 @@
-﻿using System.Linq;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
-using ServiceStack.OrmLite.Async;
 using ServiceStack.Text;
 
 using ServiceStack.OrmLite.Tests.Shared;
