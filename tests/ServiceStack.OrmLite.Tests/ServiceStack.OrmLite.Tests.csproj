@@ -116,11 +116,8 @@
     <Compile Include="AdoNetDataAccessTests.cs" />
     <Compile Include="ApiSqlServerTests.cs" />
     <Compile Include="ApiSqliteTests.cs" />
-    <Compile Include="AsyncTests.cs" />
     <Compile Include="CaptureSqlFilterTests.cs" />
     <Compile Include="CompositeKeyTests.cs" />
-    <Compile Include="ApiSqlServerTestsAsync.cs" />
-    <Compile Include="ApiSqliteTestsAsync.cs" />
     <Compile Include="CustomSqlTests.cs" />
     <Compile Include="DateTimeOffsetTests.cs" />
     <Compile Include="Expression\ComplexJoinTests.cs" />
@@ -305,9 +302,9 @@
       <Project>{317B64BA-D7A6-4A15-8719-821B38147C63}</Project>
       <Name>ServiceStack.OrmLite.Firebird</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.MySql\ServiceStack.OrmLite.MySqlV45.csproj">
-      <Project>{1bce2206-a9f9-4381-b4f7-f617998447a1}</Project>
-      <Name>ServiceStack.OrmLite.MySqlV45</Name>
+    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.MySql\ServiceStack.OrmLite.MySql.csproj">
+      <Project>{fd20f088-acc0-4979-ac0c-8c541c2e7de5}</Project>
+      <Name>ServiceStack.OrmLite.MySql</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Oracle\ServiceStack.OrmLite.Oracle.csproj">
       <Project>{517B64BA-D7A6-4A15-8719-821B38147C61}</Project>
@@ -321,9 +318,9 @@
       <Project>{CF68A37D-D071-469D-AE04-68594CB95382}</Project>
       <Name>ServiceStack.OrmLite.Sqlite</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.SqlServer\ServiceStack.OrmLite.SqlServerV45.csproj">
-      <Project>{9a5ccb1a-d127-41d1-9f25-91848e60672b}</Project>
-      <Name>ServiceStack.OrmLite.SqlServerV45</Name>
+    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.SqlServer\ServiceStack.OrmLite.SqlServer.csproj">
+      <Project>{1887dc99-9139-43e3-a7aa-6d74714b3a5d}</Project>
+      <Name>ServiceStack.OrmLite.SqlServer</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite.VistaDB\ServiceStack.OrmLite.VistaDB.csproj">
       <Project>{D18D9D3C-B3B3-433C-9578-68E978587858}</Project>
