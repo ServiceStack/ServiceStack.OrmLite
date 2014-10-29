@@ -14,7 +14,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static string GetLastSql(this IDbConnection dbConn)
         {
-            return OrmLiteReadExpressionsApi.LastCommandText;
+            return OrmLiteContext.LastCommandText;
         }
 
         /// <summary>

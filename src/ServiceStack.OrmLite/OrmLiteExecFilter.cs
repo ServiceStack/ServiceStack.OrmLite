@@ -35,14 +35,14 @@ namespace ServiceStack.OrmLite
             var dbCmd = dbConn.CreateCommand();
             dbCmd.Transaction = (ormLiteDbConn != null) ? ormLiteDbConn.Transaction : OrmLiteConfig.TSTransaction;
             dbCmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
-            OrmLiteReadExpressionsApi.LastCommandText = null;
+            OrmLiteContext.LastCommandText = null;
             return dbCmd;
         }
 
         public virtual void DisposeCommand(IDbCommand dbCmd)
         {
             if (dbCmd == null) return;
-            OrmLiteReadExpressionsApi.LastCommandText = dbCmd.CommandText;
+            OrmLiteContext.LastCommandText = dbCmd.CommandText;
             dbCmd.Dispose();
         }
 

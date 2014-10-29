@@ -8,9 +8,6 @@ namespace ServiceStack.OrmLite
 {
     public static class OrmLiteReadExpressionsApi
     {
-        [ThreadStatic]
-        internal static string LastCommandText;
-
         public static T Exec<T>(this IDbConnection dbConn, Func<IDbCommand, T> filter)
         {
             return OrmLiteConfig.ExecFilter.Exec(dbConn, filter);
