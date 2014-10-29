@@ -98,6 +98,7 @@ namespace ServiceStack.OrmLite.Support
         }
     }
 
+#if NET45
     internal class LoadReferencesAsync<T> : LoadReferences<T>
     {
         public LoadReferencesAsync(IDbCommand dbCmd, T instance)
@@ -134,4 +135,5 @@ namespace ServiceStack.OrmLite.Support
             }
         }
     }
+#endif
 }

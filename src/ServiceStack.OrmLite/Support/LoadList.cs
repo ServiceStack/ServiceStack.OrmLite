@@ -195,6 +195,7 @@ namespace ServiceStack.OrmLite.Support
         }
     }
 
+#if NET45
     internal class LoadListAsync<Into, From> : LoadList<Into, From>
     {
         public LoadListAsync(IDbCommand dbCmd, SqlExpression<From> expr) : base(dbCmd, expr) { }
@@ -234,4 +235,5 @@ namespace ServiceStack.OrmLite.Support
             }
         }
     }
+#endif
 }

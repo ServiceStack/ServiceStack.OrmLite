@@ -20,6 +20,8 @@ namespace ServiceStack.OrmLite
 {
     public static class OrmLiteUtilExtensions
     {
+        internal const string AsyncRequiresNet45Error = "Async support is only available in .NET 4.5 builds";
+
         public static T CreateInstance<T>()
         {
             return (T)ReflectionExtensions.CreateInstance<T>();

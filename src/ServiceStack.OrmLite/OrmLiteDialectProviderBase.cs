@@ -1443,6 +1443,7 @@ namespace ServiceStack.OrmLite
             return reader.Read().InTask();
         }
 
+#if NET45
         public virtual async Task<List<T>> ReaderEach<T>(IDataReader reader, Func<T> fn, CancellationToken token = default(CancellationToken))
         {
             try
@@ -1502,5 +1503,27 @@ namespace ServiceStack.OrmLite
 
             return dbCmd.ExecLongScalarAsync(null, token);
         }
+#else
+        public Task<List<T>> ReaderEach<T>(IDataReader reader, Func<T> fn, CancellationToken token = new CancellationToken())
+        {
+            throw new NotImplementedException(OrmLiteUtilExtensions.AsyncRequiresNet45Error);
+        }
+
+        public Task<Return> ReaderEach<Return>(IDataReader reader, Action fn, Return source, CancellationToken token = new CancellationToken())
+        {
+            throw new NotImplementedException(OrmLiteUtilExtensions.AsyncRequiresNet45Error);
+        }
+
+        public Task<T> ReaderRead<T>(IDataReader reader, Func<T> fn, CancellationToken token = new CancellationToken())
+        {
+            throw new NotImplementedException(OrmLiteUtilExtensions.AsyncRequiresNet45Error);
+        }
+
+        public Task<long> InsertAndGetLastInsertIdAsync<T>(IDbCommand dbCmd, CancellationToken token)
+        {
+            throw new NotImplementedException(OrmLiteUtilExtensions.AsyncRequiresNet45Error);
+        }
+#endif
+
     }
 }

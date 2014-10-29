@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if NET45
+using System;
 using System.Data;
 using System.Linq.Expressions;
 using System.Threading;
@@ -194,3 +195,4 @@ namespace ServiceStack.OrmLite
         }
     }
 }
+#endif

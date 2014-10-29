@@ -1,4 +1,5 @@
-﻿// Copyright (c) Service Stack LLC. All Rights Reserved.
+﻿#if NET45
+// Copyright (c) Service Stack LLC. All Rights Reserved.
 // License: https://raw.github.com/ServiceStack/ServiceStack/master/license.txt
 
 using System;
@@ -201,3 +202,4 @@ namespace ServiceStack.OrmLite
         }
     }
 }
+#endif
