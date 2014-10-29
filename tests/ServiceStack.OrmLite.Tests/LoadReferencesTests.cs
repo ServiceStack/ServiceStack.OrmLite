@@ -636,7 +636,7 @@ namespace ServiceStack.OrmLite.Tests
                     WorkAddress = new SelfCustomerAddress
                     {
                         AddressLine1 = "2 Work Park",
-                        Country = "USA"
+                        Country = "UK"
                     },
                 },
             };
@@ -655,6 +655,10 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(results[0].WorkAddress.AddressLine1, Is.StringContaining("Work"));
             Assert.That(results[1].HomeAddress.AddressLine1, Is.StringContaining("Home"));
             Assert.That(results[1].WorkAddress.AddressLine1, Is.StringContaining("Work"));
+
+            var ukAddress = db.Single<SelfCustomerAddress>(q => q.Country == "UK");
+            ukAddress.PrintDump();
+            Assert.That(ukAddress.AddressLine1, Is.EqualTo("2 Work Park"));
         }
 
     }
