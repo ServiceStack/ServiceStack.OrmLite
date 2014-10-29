@@ -67,9 +67,9 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <ProjectReference Include="..\ServiceStack.OrmLite.MySql\ServiceStack.OrmLite.MySqlV45.csproj">
-      <Project>{1bce2206-a9f9-4381-b4f7-f617998447a1}</Project>
-      <Name>ServiceStack.OrmLite.MySqlV45</Name>
+    <ProjectReference Include="..\ServiceStack.OrmLite.MySql\ServiceStack.OrmLite.MySql.csproj">
+      <Project>{fd20f088-acc0-4979-ac0c-8c541c2e7de5}</Project>
+      <Name>ServiceStack.OrmLite.MySql</Name>
     </ProjectReference>
     <ProjectReference Include="..\ServiceStack.OrmLite.SqlServer\ServiceStack.OrmLite.SqlServer.csproj">
       <Project>{1887dc99-9139-43e3-a7aa-6d74714b3a5d}</Project>
