@@ -9,9 +9,9 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ServiceStack.OrmLite.Async
+namespace ServiceStack.OrmLite
 {
-    public static class ReadExpressionCommandExtensionsAsync
+    internal static class ReadExpressionCommandExtensionsAsync
     {
         internal static Task<List<T>> SelectAsync<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression, CancellationToken token)
         {
@@ -132,23 +132,23 @@ namespace ServiceStack.OrmLite.Async
         {
             var expr = OrmLiteConfig.DialectProvider.SqlExpression<T>();
             expr = expression(expr);
-            return dbCmd.LoadListWithReferences<T, T>(expr);
+            return dbCmd.LoadListWithReferences<T, T>(expr, token);
         }
 
         internal static Task<List<T>> LoadSelectAsync<T>(this IDbCommand dbCmd, SqlExpression<T> expression = null, CancellationToken token = default(CancellationToken))
         {
-            return dbCmd.LoadListWithReferences<T, T>(expression);
+            return dbCmd.LoadListWithReferences<T, T>(expression, token);
         }
 
         internal static Task<List<Into>> LoadSelectAsync<Into, From>(this IDbCommand dbCmd, SqlExpression<From> expression, CancellationToken token = default(CancellationToken))
         {
-            return dbCmd.LoadListWithReferences<Into, From>(expression);
+            return dbCmd.LoadListWithReferences<Into, From>(expression, token);
         }
 
         internal static Task<List<T>> LoadSelectAsync<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate, CancellationToken token = default(CancellationToken))
         {
             var expr = OrmLiteConfig.DialectProvider.SqlExpression<T>().Where(predicate);
-            return dbCmd.LoadListWithReferences<T, T>(expr);
+            return dbCmd.LoadListWithReferences<T, T>(expr, token);
         }
 
         internal static Task<T> ExprConvertToAsync<T>(this IDataReader dataReader, CancellationToken token)

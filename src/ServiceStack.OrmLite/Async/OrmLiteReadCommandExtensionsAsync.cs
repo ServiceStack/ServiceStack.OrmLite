@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 using ServiceStack.Logging;
 using ServiceStack.OrmLite.Support;
 
-namespace ServiceStack.OrmLite.Async
+namespace ServiceStack.OrmLite
 {
-    public static class OrmLiteReadCommandExtensionsAsync
+    internal static class OrmLiteReadCommandExtensionsAsync
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(OrmLiteReadCommandExtensionsAsync));
 

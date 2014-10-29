@@ -8,9 +8,9 @@ using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ServiceStack.OrmLite.Async
+namespace ServiceStack.OrmLite
 {
-    public static class OrmLiteUtilExtensionsAsync
+    internal static class OrmLiteUtilExtensionsAsync
     {
         public static T CreateInstance<T>()
         {

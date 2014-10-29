@@ -8,9 +8,9 @@ using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ServiceStack.OrmLite.Async
+namespace ServiceStack.OrmLite
 {
-    public static class OrmLiteResultsFilterExtensionsAsync
+    internal static class OrmLiteResultsFilterExtensionsAsync
     {
         internal static Task<int> ExecNonQueryAsync(this IDbCommand dbCmd, string sql, object anonType, CancellationToken token)
         {

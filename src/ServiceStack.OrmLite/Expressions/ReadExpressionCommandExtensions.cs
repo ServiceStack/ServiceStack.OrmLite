@@ -7,7 +7,7 @@ using System.Text;
 
 namespace ServiceStack.OrmLite
 {
-    public static class ReadExpressionCommandExtensions
+    internal static class ReadExpressionCommandExtensions
     {
         public static SqlExpression<T> SqlExpression<T>()
         {

@@ -1,12 +1,10 @@
 using System;
 using System.Data;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ServiceStack.OrmLite.Async
+namespace ServiceStack.OrmLite
 {
     internal static class WriteExpressionCommandExtensionsAsync
     {

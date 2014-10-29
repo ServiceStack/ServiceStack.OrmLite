@@ -9,7 +9,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ServiceStack.Data;
-using ServiceStack.OrmLite.Async;
 
 namespace ServiceStack.OrmLite
 {

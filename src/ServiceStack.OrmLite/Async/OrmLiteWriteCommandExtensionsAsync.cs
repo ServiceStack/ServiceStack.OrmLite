@@ -11,9 +11,9 @@ using System.Threading.Tasks;
 using ServiceStack.Data;
 using ServiceStack.Logging;
 
-namespace ServiceStack.OrmLite.Async
+namespace ServiceStack.OrmLite
 {
-    public static class OrmLiteWriteCommandExtensionsAsync
+    internal static class OrmLiteWriteCommandExtensionsAsync
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(OrmLiteWriteCommandExtensionsAsync));
 

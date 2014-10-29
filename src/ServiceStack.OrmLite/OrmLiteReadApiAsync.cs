@@ -8,7 +8,6 @@ using System.Data;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
-using ServiceStack.OrmLite.Async;
 
 namespace ServiceStack.OrmLite
 {

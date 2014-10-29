@@ -8,9 +8,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using ServiceStack.Data;
-using ServiceStack.OrmLite.Async;
-using ServiceStack.Text;
-using ServiceStack;
 
 namespace ServiceStack.OrmLite.SqlServer
 {

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.OrmLite.Async;
 using ServiceStack.OrmLite.Tests.UseCase;
 using ServiceStack.Text;
 
