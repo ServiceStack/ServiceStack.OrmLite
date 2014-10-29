@@ -32,12 +32,13 @@ namespace ServiceStack.OrmLite.Support
 
         protected LoadList(IDbCommand dbCmd, SqlExpression<From> expr)
         {
-            this.dbCmd = dbCmd;
-            this.expr = expr;
-
             dialectProvider = OrmLiteConfig.DialectProvider;
+
             if (expr == null)
                 expr = dialectProvider.SqlExpression<From>();
+
+            this.dbCmd = dbCmd;
+            this.expr = expr;
 
             var sql = expr.SelectInto<Into>();
             parentResults = dbCmd.ExprConvertToList<Into>(sql);
