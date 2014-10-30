@@ -588,6 +588,20 @@ namespace ServiceStack.OrmLite.Tests
             row3 = db.LoadSingleById<TABLE_3>(row3.Id);
             Assert.That(row3.TableTwoKey, Is.EqualTo(row3.TableTwo.Id));
         }
+
+        [Test]
+        public void Can_load_references_with_OrderBy()
+        {
+            AddCustomersWithOrders();
+
+            var customers = db.LoadSelect<Customer>(q => q.OrderBy(x => x.Name));
+            var addresses = customers.Select(x => x.PrimaryAddress).ToList();
+            var orders = customers.SelectMany(x => x.Orders).ToList();
+
+            Assert.That(customers.Count, Is.EqualTo(2));
+            Assert.That(addresses.Count, Is.EqualTo(2));
+            Assert.That(orders.Count, Is.EqualTo(6));
+        }
     }
 
     [Alias("Table1")]
