@@ -50,6 +50,12 @@ namespace ServiceStack.OrmLite.Tests
 			return GetFileConnectionString();
 		}
 
+        public static OrmLiteConnectionFactory CreateSqliteMemoryDbFactory()
+        {
+            var dbFactory = new OrmLiteConnectionFactory(Config.SqliteMemoryDb, SqliteDialect.Provider);
+            return dbFactory;
+        }
+
         public static OrmLiteConnectionFactory CreateSqlServerDbFactory()
         {
             var dbFactory = new OrmLiteConnectionFactory(Config.SqlServerBuildDb, SqlServerDialect.Provider);
