@@ -33,9 +33,6 @@
     <Reference Include="Mono.Data.Sqlite">
       <HintPath>..\..\..\ServiceStack\lib\Mono.Data.Sqlite.dll</HintPath>
     </Reference>
-    <Reference Include="ServiceStack.Common">
-      <HintPath>..\..\..\ServiceStack\lib\ServiceStack.Common.dll</HintPath>
-    </Reference>
     <Reference Include="ServiceStack.Interfaces">
       <HintPath>..\..\..\ServiceStack\lib\ServiceStack.Interfaces.dll</HintPath>
     </Reference>
@@ -44,11 +41,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\ServiceStack.OrmLite.Sqlite\Properties\AssemblyInfo.cs">
