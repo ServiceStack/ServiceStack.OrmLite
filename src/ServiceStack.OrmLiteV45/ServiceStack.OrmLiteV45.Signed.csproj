@@ -132,6 +132,9 @@
     <Compile Include="..\ServiceStack.OrmLite\ModelDefinition.cs">
       <Link>ModelDefinition.cs</Link>
     </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\OrmLiteCommand.cs">
+      <Link>OrmLiteCommand.cs</Link>
+    </Compile>
     <Compile Include="..\ServiceStack.OrmLite\OrmLiteConfig.cs">
       <Link>OrmLiteConfig.cs</Link>
     </Compile>
@@ -143,9 +146,6 @@
     </Compile>
     <Compile Include="..\ServiceStack.OrmLite\OrmLiteConnectionFactory.cs">
       <Link>OrmLiteConnectionFactory.cs</Link>
-    </Compile>
-    <Compile Include="..\ServiceStack.OrmLite\OrmLiteConnectionWrapper.cs">
-      <Link>OrmLiteConnectionWrapper.cs</Link>
     </Compile>
     <Compile Include="..\ServiceStack.OrmLite\OrmLiteContext.cs">
       <Link>OrmLiteContext.cs</Link>
