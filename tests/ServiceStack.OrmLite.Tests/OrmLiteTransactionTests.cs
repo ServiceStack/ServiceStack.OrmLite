@@ -14,7 +14,7 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Transaction_commit_persists_data_to_the_db()
 		{
-			using (var db = Config.OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.DropAndCreateTable<ModelWithIdAndName>();
 				db.Insert(new ModelWithIdAndName(1));
@@ -38,8 +38,8 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Transaction_rollsback_if_not_committed()
 		{
-            using (var db = Config.OpenDbConnection())
-			{
+            using (var db = OpenDbConnection())
+            {
                 db.DropAndCreateTable<ModelWithIdAndName>();
 				db.Insert(new ModelWithIdAndName(1));
 
@@ -60,8 +60,8 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Transaction_rollsback_transactions_to_different_tables()
 		{
-            using (var db = Config.OpenDbConnection())
-			{
+            using (var db = OpenDbConnection())
+            {
                 db.DropAndCreateTable<ModelWithIdAndName>();
                 db.DropAndCreateTable<ModelWithFieldsOfDifferentTypes>();
                 db.DropAndCreateTable<ModelWithOnlyStringFields>();
@@ -88,8 +88,8 @@ namespace ServiceStack.OrmLite.Tests
 		[Test]
 		public void Transaction_commits_inserts_to_different_tables()
 		{
-            using (var db = Config.OpenDbConnection())
-			{
+            using (var db = OpenDbConnection())
+            {
                 db.DropAndCreateTable<ModelWithIdAndName>();
                 db.DropAndCreateTable<ModelWithFieldsOfDifferentTypes>();
                 db.DropAndCreateTable<ModelWithOnlyStringFields>();

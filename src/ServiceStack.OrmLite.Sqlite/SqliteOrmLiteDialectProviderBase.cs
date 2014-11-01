@@ -60,8 +60,8 @@ namespace ServiceStack.OrmLite.Sqlite
                 var tableName = GetTableName(modelDef);
                 var triggerBody = "UPDATE {0} SET {1} = OLD.{1} + 1 WHERE {2} = NEW.{2};".Fmt(
                     tableName, 
-                    modelDef.RowVersion.FieldName.SqlColumn(), 
-                    modelDef.PrimaryKey.FieldName.SqlColumn());
+                    modelDef.RowVersion.FieldName.SqlColumn(this), 
+                    modelDef.PrimaryKey.FieldName.SqlColumn(this));
 
                 var sql = "CREATE TRIGGER {0} BEFORE UPDATE ON {1} FOR EACH ROW BEGIN {2} END;".Fmt(
                     triggerName, tableName, triggerBody);

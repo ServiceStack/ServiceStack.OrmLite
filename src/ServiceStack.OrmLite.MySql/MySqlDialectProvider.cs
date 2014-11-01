@@ -58,7 +58,7 @@ namespace ServiceStack.OrmLite.MySql
             {
                 var triggerName = RowVersionTriggerFormat.Fmt(modelDef.ModelName);
                 var triggerBody = "SET NEW.{0} = OLD.{0} + 1;".Fmt(
-                    modelDef.RowVersion.FieldName.SqlColumn());
+                    modelDef.RowVersion.FieldName.SqlColumn(this));
 
                 var sql = "CREATE TRIGGER {0} BEFORE UPDATE ON {1} FOR EACH ROW BEGIN {2} END;".Fmt(
                     triggerName, modelDef.ModelName, triggerBody);
@@ -241,7 +241,15 @@ namespace ServiceStack.OrmLite.MySql
 
         protected MySqlCommand Unwrap(IDbCommand cmd)
         {
-            return (MySqlCommand)cmd;
+            var cmdAsync = cmd as MySqlCommand;
+            if (cmdAsync != null)
+                return cmdAsync;
+
+            var hasDb = cmd as IHasDbCommand;
+            if (hasDb != null)
+                return (MySqlCommand)hasDb.DbCommand;
+
+            throw new ArgumentException("{0} is not an MySqlCommand".Fmt(cmd.GetType().Name));
         }
 
         protected MySqlDataReader Unwrap(IDataReader reader)

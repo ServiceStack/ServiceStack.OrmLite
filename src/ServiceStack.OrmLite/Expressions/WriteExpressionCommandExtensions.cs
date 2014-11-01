@@ -11,7 +11,7 @@ namespace ServiceStack.OrmLite
     {
         public static int UpdateOnly<T>(this IDbCommand dbCmd, T model, Func<SqlExpression<T>, SqlExpression<T>> onlyFields)
         {
-            return dbCmd.UpdateOnly(model, onlyFields(OrmLiteConfig.DialectProvider.SqlExpression<T>()));
+            return dbCmd.UpdateOnly(model, onlyFields(dbCmd.GetDialectProvider().SqlExpression<T>()));
         }
 
         public static int UpdateOnly<T>(this IDbCommand dbCmd, T model, SqlExpression<T> onlyFields)
@@ -29,7 +29,7 @@ namespace ServiceStack.OrmLite
                 ? onlyFields.GetAllFields()
                 : onlyFields.UpdateFields;
 
-            var sql = OrmLiteConfig.DialectProvider.ToUpdateRowStatement(model, fieldsToUpdate);
+            var sql = dbCmd.GetDialectProvider().ToUpdateRowStatement(model, fieldsToUpdate);
 
             if (!onlyFields.WhereExpression.IsNullOrEmpty()) sql += " " + onlyFields.WhereExpression;
             return sql;
@@ -42,7 +42,7 @@ namespace ServiceStack.OrmLite
             if (onlyFields == null)
                 throw new ArgumentNullException("onlyFields");
 
-            var q = OrmLiteConfig.DialectProvider.SqlExpression<T>();
+            var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Update(onlyFields);
             q.Where(where);
             return dbCmd.UpdateOnly(obj, q);
@@ -53,7 +53,7 @@ namespace ServiceStack.OrmLite
             if (OrmLiteConfig.UpdateFilter != null)
                 OrmLiteConfig.UpdateFilter(dbCmd, item);
 
-            var q = OrmLiteConfig.DialectProvider.SqlExpression<T>();
+            var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Where(obj);
             var sql = q.ToUpdateStatement(item, excludeDefaults: true);
             return dbCmd.ExecuteSql(sql);
@@ -64,7 +64,7 @@ namespace ServiceStack.OrmLite
             if (OrmLiteConfig.UpdateFilter != null)
                 OrmLiteConfig.UpdateFilter(dbCmd, item);
 
-            var q = OrmLiteConfig.DialectProvider.SqlExpression<T>();
+            var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Where(expression);
             var sql = q.ToUpdateStatement(item);
             return dbCmd.ExecuteSql(sql);
@@ -72,13 +72,12 @@ namespace ServiceStack.OrmLite
 
         public static int Update<T>(this IDbCommand dbCmd, object updateOnly, Expression<Func<T, bool>> where = null)
         {
-            var updateSql = UpdateSql(updateOnly, where);
+            var updateSql = UpdateSql(dbCmd.GetDialectProvider(), updateOnly, where);
             return dbCmd.ExecuteSql(updateSql);
         }
 
-        internal static string UpdateSql<T>(object updateOnly, Expression<Func<T, bool>> @where)
+        internal static string UpdateSql<T>(IOrmLiteDialectProvider dialectProvider, object updateOnly, Expression<Func<T, bool>> @where)
         {
-            var dialectProvider = OrmLiteConfig.DialectProvider;
             var ev = dialectProvider.SqlExpression<T>();
             var whereSql = ev.Where(@where).WhereExpression;
             var sql = new StringBuilder();
@@ -111,11 +110,11 @@ namespace ServiceStack.OrmLite
 
         public static int UpdateFmt(this IDbCommand dbCmd, string table = null, string set = null, string where = null)
         {
-            var sql = UpdateFmtSql(table, set, @where);
+            var sql = UpdateFmtSql(dbCmd.GetDialectProvider(), table, set, @where);
             return dbCmd.ExecuteSql(sql.ToString());
         }
 
-        internal static StringBuilder UpdateFmtSql(string table, string set, string @where)
+        internal static StringBuilder UpdateFmtSql(IOrmLiteDialectProvider dialectProvider, string table, string set, string @where)
         {
             if (table == null)
                 throw new ArgumentNullException("table");
@@ -123,7 +122,7 @@ namespace ServiceStack.OrmLite
                 throw new ArgumentNullException("set");
 
             var sql = new StringBuilder("UPDATE ");
-            sql.Append(OrmLiteConfig.DialectProvider.GetQuotedTableName(table));
+            sql.Append(dialectProvider.GetQuotedTableName(table));
             sql.Append(" SET ");
             sql.Append(set.SqlVerifyFragment());
             if (!string.IsNullOrEmpty(@where))
@@ -136,7 +135,7 @@ namespace ServiceStack.OrmLite
 
         public static void InsertOnly<T>(this IDbCommand dbCmd, T obj, Func<SqlExpression<T>, SqlExpression<T>> onlyFields)
         {
-            dbCmd.InsertOnly(obj, onlyFields(OrmLiteConfig.DialectProvider.SqlExpression<T>()));
+            dbCmd.InsertOnly(obj, onlyFields(dbCmd.GetDialectProvider().SqlExpression<T>()));
         }
 
         public static void InsertOnly<T>(this IDbCommand dbCmd, T obj, SqlExpression<T> onlyFields)
@@ -144,20 +143,20 @@ namespace ServiceStack.OrmLite
             if (OrmLiteConfig.InsertFilter != null)
                 OrmLiteConfig.InsertFilter(dbCmd, obj);
 
-            var sql = OrmLiteConfig.DialectProvider.ToInsertRowStatement(dbCmd, obj, onlyFields.InsertFields);
+            var sql = dbCmd.GetDialectProvider().ToInsertRowStatement(dbCmd, obj, onlyFields.InsertFields);
             dbCmd.ExecuteSql(sql);
         }
 
         public static int Delete<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> where)
         {
-            var ev = OrmLiteConfig.DialectProvider.SqlExpression<T>();
+            var ev = dbCmd.GetDialectProvider().SqlExpression<T>();
             ev.Where(where);
             return dbCmd.Delete(ev);
         }
 
         public static int Delete<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> where)
         {
-            return dbCmd.Delete(where(OrmLiteConfig.DialectProvider.SqlExpression<T>()));
+            return dbCmd.Delete(where(dbCmd.GetDialectProvider().SqlExpression<T>()));
         }
 
         public static int Delete<T>(this IDbCommand dbCmd, SqlExpression<T> where)
@@ -173,11 +172,11 @@ namespace ServiceStack.OrmLite
 
         public static int DeleteFmt(this IDbCommand dbCmd, string table = null, string where = null)
         {
-            var sql = DeleteFmtSql(table, @where);
+            var sql = DeleteFmtSql(dbCmd.GetDialectProvider(), table, @where);
             return dbCmd.ExecuteSql(sql.ToString());
         }
 
-        internal static StringBuilder DeleteFmtSql(string table, string @where)
+        internal static StringBuilder DeleteFmtSql(IOrmLiteDialectProvider dialectProvider, string table, string @where)
         {
             if (table == null)
                 throw new ArgumentNullException("table");
@@ -186,7 +185,7 @@ namespace ServiceStack.OrmLite
 
             var sql = new StringBuilder();
             sql.AppendFormat("DELETE FROM {0} WHERE {1}",
-                             OrmLiteConfig.DialectProvider.GetQuotedTableName(table),
+                             dialectProvider.GetQuotedTableName(table),
                              @where.SqlVerifyFragment());
             return sql;
         }

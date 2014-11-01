@@ -76,13 +76,10 @@ namespace ServiceStack.OrmLite
                 : dialectProvider.GetQuotedColumnName(FieldName);
         }
 
-        public string GetQuotedValue(object fromInstance, IOrmLiteDialectProvider dialectProvider = null)
+        public string GetQuotedValue(object fromInstance, IOrmLiteDialectProvider dialect = null)
         {
-            if (dialectProvider == null)
-                dialectProvider = OrmLiteConfig.DialectProvider;
-
             var value = GetValue(fromInstance);
-            return dialectProvider.GetQuotedValue(value, ColumnType);
+            return (dialect ?? OrmLiteConfig.DialectProvider).GetQuotedValue(value, ColumnType);
         }
 
         public string Sequence { get; set; }

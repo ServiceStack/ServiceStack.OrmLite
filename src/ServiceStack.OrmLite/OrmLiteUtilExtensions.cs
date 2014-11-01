@@ -27,7 +27,7 @@ namespace ServiceStack.OrmLite
             return (T)ReflectionExtensions.CreateInstance<T>();
         }
 
-        public static T ConvertTo<T>(this IDataReader dataReader)
+        public static T ConvertTo<T>(this IDataReader dataReader, IOrmLiteDialectProvider dialectProvider)
         {
             var fieldDefs = ModelDefinition<T>.Definition.AllFieldDefinitionsArray;
 
@@ -37,14 +37,14 @@ namespace ServiceStack.OrmLite
                 {
                     var row = CreateInstance<T>();
                     var indexCache = dataReader.GetIndexFieldsCache(ModelDefinition<T>.Definition);
-                    row.PopulateWithSqlReader(dataReader, fieldDefs, indexCache);
+                    row.PopulateWithSqlReader(dialectProvider, dataReader, fieldDefs, indexCache);
                     return row;
                 }
                 return default(T);
             }
         }
 
-        public static List<T> ConvertToList<T>(this IDataReader dataReader)
+        public static List<T> ConvertToList<T>(this IDataReader dataReader, IOrmLiteDialectProvider dialectProvider)
         {
             var fieldDefs = ModelDefinition<T>.Definition.AllFieldDefinitionsArray;
 
@@ -55,14 +55,14 @@ namespace ServiceStack.OrmLite
                 while (dataReader.Read())
                 {
                     var row = CreateInstance<T>();
-                    row.PopulateWithSqlReader(dataReader, fieldDefs, indexCache);
+                    row.PopulateWithSqlReader(dialectProvider, dataReader, fieldDefs, indexCache);
                     to.Add(row);
                 }
             }
             return to;
         }
 
-        public static object ConvertTo(this IDataReader dataReader, Type type)
+        public static object ConvertTo(this IDataReader dataReader, IOrmLiteDialectProvider dialectProvider, Type type)
         {
             var modelDef = type.GetModelDefinition();
             var fieldDefs = modelDef.AllFieldDefinitionsArray;
@@ -73,14 +73,14 @@ namespace ServiceStack.OrmLite
                 {
                     var row = type.CreateInstance();
                     var indexCache = dataReader.GetIndexFieldsCache(modelDef);
-                    row.PopulateWithSqlReader(dataReader, fieldDefs, indexCache);
+                    row.PopulateWithSqlReader(dialectProvider, dataReader, fieldDefs, indexCache);
                     return row;
                 }
                 return type.GetDefaultValue();
             }
         }
 
-        public static IList ConvertToList(this IDataReader dataReader, Type type)
+        public static IList ConvertToList(this IDataReader dataReader, IOrmLiteDialectProvider dialectProvider, Type type)
         {
             var modelDef = type.GetModelDefinition();
             var fieldDefs = modelDef.AllFieldDefinitionsArray;
@@ -93,21 +93,21 @@ namespace ServiceStack.OrmLite
                 while (dataReader.Read())
                 {
                     var row = type.CreateInstance();
-                    row.PopulateWithSqlReader(dataReader, fieldDefs, indexCache);
+                    row.PopulateWithSqlReader(dialectProvider, dataReader, fieldDefs, indexCache);
                     to.Add(row);
                 }
             }
             return to;
         }
 
-        internal static string GetColumnNames(this Type tableType)
+        internal static string GetColumnNames(this Type tableType, IOrmLiteDialectProvider dialect)
         {
-            return GetColumnNames(tableType.GetModelDefinition());
+            return GetColumnNames(tableType.GetModelDefinition(), dialect);
         }
 
-        public static string GetColumnNames(this ModelDefinition modelDef)
+        public static string GetColumnNames(this ModelDefinition modelDef, IOrmLiteDialectProvider dialect)
         {
-            return OrmLiteConfig.DialectProvider.GetColumnNames(modelDef);
+            return dialect.GetColumnNames(modelDef);
         }
 
         internal static string GetIdsInSql(this IEnumerable idValues)
@@ -122,6 +122,11 @@ namespace ServiceStack.OrmLite
         }
 
         public static string SqlFmt(this string sqlText, params object[] sqlParams)
+        {
+            return SqlFmt(sqlText, OrmLiteConfig.DialectProvider, sqlParams);
+        }
+
+        public static string SqlFmt(this string sqlText, IOrmLiteDialectProvider dialect, params object[] sqlParams)
         {
             var escapedParams = new List<string>();
             foreach (var sqlParam in sqlParams)
@@ -139,31 +144,31 @@ namespace ServiceStack.OrmLite
                     }
                     else
                     {
-                        escapedParams.Add(OrmLiteConfig.DialectProvider.GetQuotedValue(sqlParam, sqlParam.GetType()));
+                        escapedParams.Add(dialect.GetQuotedValue(sqlParam, sqlParam.GetType()));
                     }
                 }
             }
             return string.Format(sqlText, escapedParams.ToArray());
         }
 
-        public static string SqlColumn(this string columnName)
+        public static string SqlColumn(this string columnName, IOrmLiteDialectProvider dialect = null)
         {
-            return OrmLiteConfig.DialectProvider.GetQuotedColumnName(columnName);
+            return (dialect ?? OrmLiteConfig.DialectProvider).GetQuotedColumnName(columnName);
         }
 
-        public static string SqlColumnRaw(this string columnName)
+        public static string SqlColumnRaw(this string columnName, IOrmLiteDialectProvider dialect = null)
         {
-            return OrmLiteConfig.DialectProvider.NamingStrategy.GetColumnName(columnName);
+            return (dialect ?? OrmLiteConfig.DialectProvider).NamingStrategy.GetColumnName(columnName);
         }
 
-        public static string SqlTable(this string tableName)
+        public static string SqlTable(this string tableName, IOrmLiteDialectProvider dialect = null)
         {
-            return OrmLiteConfig.DialectProvider.GetQuotedTableName(tableName);
+            return (dialect ?? OrmLiteConfig.DialectProvider).GetQuotedTableName(tableName);
         }
 
-        public static string SqlTableRaw(this string tableName)
+        public static string SqlTableRaw(this string tableName, IOrmLiteDialectProvider dialect=null)
         {
-            return OrmLiteConfig.DialectProvider.NamingStrategy.GetTableName(tableName);
+            return (dialect ?? OrmLiteConfig.DialectProvider).NamingStrategy.GetTableName(tableName);
         }
 
         public static string SqlValue(this object value)
@@ -225,38 +230,37 @@ namespace ServiceStack.OrmLite
             return sb.ToString();
         }
 
-        public static string SqlJoin<T>(this List<T> values)
+        public static string SqlJoin<T>(this List<T> values, IOrmLiteDialectProvider dialect = null)
         {
+            dialect = (dialect ?? OrmLiteConfig.DialectProvider);
+
             var sb = new StringBuilder();
             foreach (var value in values)
             {
                 if (sb.Length > 0) sb.Append(",");
-                sb.Append(OrmLiteConfig.DialectProvider.GetQuotedValue(value, value.GetType()));
+                sb.Append(dialect.GetQuotedValue(value, value.GetType()));
             }
 
             return sb.ToString();
         }
 
-        public static string SqlJoin(IEnumerable values)
+        public static string SqlJoin(IEnumerable values, IOrmLiteDialectProvider dialect = null)
         {
+            dialect = (dialect ?? OrmLiteConfig.DialectProvider);
+
             var sb = new StringBuilder();
             foreach (var value in values)
             {
                 if (sb.Length > 0) sb.Append(",");
-                sb.Append(OrmLiteConfig.DialectProvider.GetQuotedValue(value, value.GetType()));
+                sb.Append(dialect.GetQuotedValue(value, value.GetType()));
             }
 
             return sb.ToString();
         }
 
-        public static SqlInValues SqlInValues<T>(this List<T> values)
+        public static SqlInValues SqlInValues<T>(this T[] values, IOrmLiteDialectProvider dialect=null)
         {
-            return new SqlInValues(values);
-        }
-
-        public static SqlInValues SqlInValues<T>(this T[] values)
-        {
-            return new SqlInValues(values);
+            return new SqlInValues(values, dialect);
         }
 
         public static Dictionary<string, int> GetIndexFieldsCache(this IDataReader reader, ModelDefinition modelDefinition = null)

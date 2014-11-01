@@ -11,9 +11,13 @@ namespace ServiceStack.OrmLite.Tests
     {
         public static IDbConnection OpenDbConnection()
         {
-            var testBase = new OrmLiteTestBase();
-            var connectionString = ConfigurationManager.ConnectionStrings["testDb"].ConnectionString;
-            return testBase.OpenDbConnection(connectionString);
+            var testBase = new OrmLiteTestBase
+            {
+                DbFactory = new OrmLiteConnectionFactory(
+                    ConfigurationManager.ConnectionStrings["testDb"].ConnectionString,
+                    OracleDialect.Provider)
+            };
+            return testBase.OpenDbConnection();
         }
     }
 
@@ -36,9 +40,10 @@ namespace ServiceStack.OrmLite.Tests
 		{
 			LogManager.LogFactory = new ConsoleLogFactory();
 
-            OrmLiteConfig.DialectProvider = OracleOrmLiteDialectProvider.Instance;
+            OrmLiteConfig.DialectProvider = OracleDialect.Provider;
             OrmLiteConfig.ClearCache();
 			ConnectionString = GetFileConnectionString();
+            DbFactory = new OrmLiteConnectionFactory(ConnectionString, OracleDialect.Provider);
 		}
 
 		public void Log(string text)
@@ -47,11 +52,11 @@ namespace ServiceStack.OrmLite.Tests
 		}
 
         public Dialect Dialect = Dialect.Oracle;
+        public OrmLiteConnectionFactory DbFactory;
 
-        public virtual IDbConnection OpenDbConnection(string connString = null)
+        public virtual IDbConnection OpenDbConnection()
         {
-            connString = connString ?? ConnectionString;
-            return connString.OpenDbConnection();
+            return DbFactory.OpenDbConnection();
         }
 
         protected void SuppressIfOracle(string reason, params object[] args)

@@ -23,8 +23,8 @@ namespace ServiceStack.OrmLite
         public static void AlterTable(this IDbConnection dbConn, Type modelType, string command)
         {
             string sql = string.Format("ALTER TABLE {0} {1};",
-                                       OrmLiteConfig.DialectProvider.GetQuotedTableName(modelType.GetModelDefinition()),
-                                       command);
+                dbConn.GetDialectProvider().GetQuotedTableName(modelType.GetModelDefinition()),
+                command);
             dbConn.ExecuteSql(sql);
         }
 
@@ -39,7 +39,7 @@ namespace ServiceStack.OrmLite
 
         public static void AddColumn(this IDbConnection dbConn, Type modelType, FieldDefinition fieldDef)
         {
-            var command = OrmLiteConfig.DialectProvider.ToAddColumnStatement(modelType, fieldDef);
+            var command = dbConn.GetDialectProvider().ToAddColumnStatement(modelType, fieldDef);
             dbConn.ExecuteSql(command);
         }
 
@@ -53,7 +53,7 @@ namespace ServiceStack.OrmLite
 
         public static void AlterColumn(this IDbConnection dbConn, Type modelType, FieldDefinition fieldDef)
         {
-            var command = OrmLiteConfig.DialectProvider.ToAlterColumnStatement(modelType, fieldDef);
+            var command = dbConn.GetDialectProvider().ToAlterColumnStatement(modelType, fieldDef);
             dbConn.ExecuteSql(command);
         }
 
@@ -72,7 +72,7 @@ namespace ServiceStack.OrmLite
                                             FieldDefinition fieldDef,
                                             string oldColumnName)
         {
-            var command = OrmLiteConfig.DialectProvider.ToChangeColumnNameStatement(modelType, fieldDef, oldColumnName);
+            var command = dbConn.GetDialectProvider().ToChangeColumnNameStatement(modelType, fieldDef, oldColumnName);
             dbConn.ExecuteSql(command);
         }
 
@@ -85,8 +85,8 @@ namespace ServiceStack.OrmLite
         public static void DropColumn(this IDbConnection dbConn, Type modelType, string columnName)
         {
             string command = string.Format("ALTER TABLE {0} DROP {1};",
-                                           OrmLiteConfig.DialectProvider.GetQuotedTableName(modelType.GetModelDefinition().ModelName),
-                                           OrmLiteConfig.DialectProvider.GetQuotedName(columnName));
+                                           dbConn.GetDialectProvider().GetQuotedTableName(modelType.GetModelDefinition().ModelName),
+                                           dbConn.GetDialectProvider().GetQuotedName(columnName));
 
             dbConn.ExecuteSql(command);
         }
@@ -100,7 +100,7 @@ namespace ServiceStack.OrmLite
                                                      OnFkOption onDelete,
                                                      string foreignKeyName = null)
         {
-            string command = OrmLiteConfig.DialectProvider.ToAddForeignKeyStatement(field,
+            string command = dbConn.GetDialectProvider().ToAddForeignKeyStatement(field,
                                                                                     foreignField,
                                                                                     onUpdate,
                                                                                     onDelete,
@@ -112,8 +112,8 @@ namespace ServiceStack.OrmLite
         public static void DropForeignKey<T>(this IDbConnection dbConn, string foreignKeyName)
         {
             string command = string.Format("ALTER TABLE {0} DROP FOREIGN KEY {1};",
-                                           OrmLiteConfig.DialectProvider.GetQuotedTableName(ModelDefinition<T>.Definition.ModelName),
-                                           OrmLiteConfig.DialectProvider.GetQuotedName(foreignKeyName));
+                                           dbConn.GetDialectProvider().GetQuotedTableName(ModelDefinition<T>.Definition.ModelName),
+                                           dbConn.GetDialectProvider().GetQuotedName(foreignKeyName));
             dbConn.ExecuteSql(command);
         }
 
@@ -121,7 +121,7 @@ namespace ServiceStack.OrmLite
         public static void CreateIndex<T>(this IDbConnection dbConn, Expression<Func<T, object>> field,
                                           string indexName = null, bool unique = false)
         {
-            var command = OrmLiteConfig.DialectProvider.ToCreateIndexStatement(field, indexName, unique);
+            var command = dbConn.GetDialectProvider().ToCreateIndexStatement(field, indexName, unique);
             dbConn.ExecuteSql(command);
         }
 
@@ -129,8 +129,8 @@ namespace ServiceStack.OrmLite
         public static void DropIndex<T>(this IDbConnection dbConn, string indexName)
         {
             string command = string.Format("ALTER TABLE {0} DROP INDEX  {1};",
-                                           OrmLiteConfig.DialectProvider.GetQuotedTableName(ModelDefinition<T>.Definition.ModelName),
-                                           OrmLiteConfig.DialectProvider.GetQuotedName(indexName));
+                                           dbConn.GetDialectProvider().GetQuotedTableName(ModelDefinition<T>.Definition.ModelName),
+                                           dbConn.GetDialectProvider().GetQuotedName(indexName));
             dbConn.ExecuteSql(command);
         }
 

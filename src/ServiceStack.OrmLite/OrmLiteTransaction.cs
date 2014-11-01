@@ -5,15 +5,24 @@ namespace ServiceStack.OrmLite
 {
     public class OrmLiteTransaction : IDbTransaction
     {
-        private readonly IDbTransaction prevTrans;
         private readonly IDbTransaction trans;
         private readonly IDbConnection db;
 
         public OrmLiteTransaction(IDbConnection db, IDbTransaction trans)
         {
             this.db = db;
-            prevTrans = OrmLiteConfig.TSTransaction;
-            OrmLiteConfig.TSTransaction = this.trans = trans;
+            this.trans = trans;
+
+            //If OrmLite managed connection assign to connection, otherwise use OrmLiteContext
+            var ormLiteConn = this.db as IHasDbTransaction;
+            if (ormLiteConn != null)
+            {
+                ormLiteConn.Transaction = this.trans = trans;
+            }
+            else
+            {
+                OrmLiteContext.TSTransaction = this.trans = trans;
+            }
         }
 
         public void Dispose()
@@ -24,11 +33,14 @@ namespace ServiceStack.OrmLite
             }
             finally
             {
-                OrmLiteConfig.TSTransaction = prevTrans;
-                var ormLiteDbConn = this.db as IHasDbTransaction;
-                if (ormLiteDbConn != null)
+                var ormLiteConn = this.db as IHasDbTransaction;
+                if (ormLiteConn != null)
                 {
-                    ormLiteDbConn.Transaction = prevTrans;
+                    ormLiteConn.Transaction = null;
+                }
+                else
+                {
+                    OrmLiteContext.TSTransaction = null;
                 }
             }
         }

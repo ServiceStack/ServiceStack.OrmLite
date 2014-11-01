@@ -69,6 +69,7 @@
     <Compile Include="AsyncTests.cs" />
     <Compile Include="ApiMySqlTestsAsync.cs" />
     <Compile Include="LoadReferencesTests.cs" />
+    <Compile Include="OrmLiteContextTests.cs" />
     <Compile Include="OrmLiteTestBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Shared\Person.cs">

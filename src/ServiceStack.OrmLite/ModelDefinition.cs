@@ -58,8 +58,6 @@ namespace ServiceStack.OrmLite
 
         public Type ModelType { get; set; }
 
-        public string SqlSelectAllFromTable { get; set; }
-
         public FieldDefinition PrimaryKey
         {
             get { return this.FieldDefinitions.First(x => x.IsPrimaryKey); }
@@ -140,10 +138,6 @@ namespace ServiceStack.OrmLite
             var allItems = new List<FieldDefinition>(FieldDefinitions);
             allItems.AddRange(IgnoredFieldDefinitions);
             allFieldDefinitionsArray = allItems.ToArray();
-
-            SqlSelectAllFromTable = "SELECT {0} FROM {1} "
-                .Fmt(OrmLiteConfig.DialectProvider.GetColumnNames(this),
-                     OrmLiteConfig.DialectProvider.GetQuotedTableName(this));
         }
     }
 

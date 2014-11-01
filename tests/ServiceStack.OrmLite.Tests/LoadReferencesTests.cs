@@ -203,9 +203,14 @@ namespace ServiceStack.OrmLite.Tests
             db.DropAndCreateTable<OldAliasedCustomerAddress>();
             db.DropAndCreateTable<MismatchAliasCustomer>();
             db.DropAndCreateTable<MismatchAliasAddress>();
-            db.DropAndCreateTable<SelfCustomer>();
-            db.DropAndCreateTable<SelfCustomerAddress>();
-            db.DropAndCreateTable<MultiSelfCustomer>();
+
+            db.DropTable<SelfCustomer>();
+            db.DropTable<MultiSelfCustomer>();
+            db.DropTable<SelfCustomerAddress>();
+
+            db.CreateTable<SelfCustomerAddress>();
+            db.CreateTable<MultiSelfCustomer>();
+            db.CreateTable<SelfCustomer>();
         }
 
         [SetUp]

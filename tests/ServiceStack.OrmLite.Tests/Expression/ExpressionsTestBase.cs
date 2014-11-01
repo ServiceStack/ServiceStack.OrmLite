@@ -17,7 +17,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
         //Avoid painful refactor to change all tests to use a using pattern
         private IDbConnection db;
 
-        public override IDbConnection OpenDbConnection(string connString = null)
+        public override IDbConnection OpenDbConnection()
         {
             try
             {
@@ -29,7 +29,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 db = null;
             }
 
-            return db ?? (db = base.OpenDbConnection(connString));
+            return db ?? (db = base.OpenDbConnection());
         }
 
         [TearDown]

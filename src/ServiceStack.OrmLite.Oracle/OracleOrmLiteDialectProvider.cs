@@ -125,7 +125,7 @@ namespace ServiceStack.OrmLite.Oracle
                 var triggerName = NamingStrategy.ApplyNameRestrictions(
                     RowVersionTriggerFormat.Fmt(modelDef.ModelName));
                 var triggerBody = ":NEW.{0} := :OLD.{0}+1;".Fmt(
-                    modelDef.RowVersion.FieldName.SqlColumn());
+                    modelDef.RowVersion.FieldName.SqlColumn(this));
 
                 var sql = "CREATE TRIGGER {0} BEFORE UPDATE ON {1} FOR EACH ROW BEGIN {2} END;".Fmt(
                     Quote(triggerName), modelDef.ModelName, triggerBody);

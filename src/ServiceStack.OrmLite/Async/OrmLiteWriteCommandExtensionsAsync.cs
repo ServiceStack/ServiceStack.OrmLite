@@ -41,13 +41,14 @@ namespace ServiceStack.OrmLite
             if (OrmLiteConfig.UpdateFilter != null)
                 OrmLiteConfig.UpdateFilter(dbCmd, obj);
 
-            var hadRowVersion = OrmLiteConfig.DialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
+            var dialectProvider = dbCmd.GetDialectProvider();
+            var hadRowVersion = dialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
             if (string.IsNullOrEmpty(dbCmd.CommandText))
                 return TaskResult.Zero;
 
-            OrmLiteConfig.DialectProvider.SetParameterValues<T>(dbCmd, obj);
+            dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
-            return OrmLiteConfig.DialectProvider.ExecuteNonQueryAsync(dbCmd)
+            return dialectProvider.ExecuteNonQueryAsync(dbCmd)
                 .Then(rowsUpdated =>
                 {
                     if (hadRowVersion && rowsUpdated == 0)
@@ -199,7 +200,7 @@ namespace ServiceStack.OrmLite
             if (sqlIn == null) 
                 return TaskResult.Zero;
 
-            var sql = OrmLiteWriteCommandExtensions.GetDeleteByIdsSql<T>(sqlIn);
+            var sql = OrmLiteWriteCommandExtensions.GetDeleteByIdsSql<T>(sqlIn, dbCmd.GetDialectProvider());
 
             return dbCmd.ExecuteSqlAsync(sql, token);
         }

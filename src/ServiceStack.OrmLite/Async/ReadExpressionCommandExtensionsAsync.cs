@@ -70,7 +70,7 @@ namespace ServiceStack.OrmLite
 
         public static Task<TKey> ScalarAsync<T, TKey>(this IDbCommand dbCmd, Expression<Func<T, TKey>> field, CancellationToken token)
         {
-            var ev = OrmLiteConfig.DialectProvider.SqlExpression<T>();
+            var ev = dbCmd.GetDialectProvider().SqlExpression<T>();
             ev.Select(field);
             var sql = ev.SelectInto<T>();
             return dbCmd.ScalarAsync<TKey>(sql, token);
@@ -79,7 +79,7 @@ namespace ServiceStack.OrmLite
         internal static Task<TKey> ScalarAsync<T, TKey>(this IDbCommand dbCmd,
             Expression<Func<T, TKey>> field, Expression<Func<T, bool>> predicate, CancellationToken token)
         {
-            var ev = OrmLiteConfig.DialectProvider.SqlExpression<T>();
+            var ev = dbCmd.GetDialectProvider().SqlExpression<T>();
             ev.Select(field).Where(predicate);
             string sql = ev.SelectInto<T>();
             return dbCmd.ScalarAsync<TKey>(sql, token);
@@ -87,14 +87,14 @@ namespace ServiceStack.OrmLite
 
         internal static Task<long> CountAsync<T>(this IDbCommand dbCmd, CancellationToken token)
         {
-            var expression = OrmLiteConfig.DialectProvider.SqlExpression<T>();
+            var expression = dbCmd.GetDialectProvider().SqlExpression<T>();
             var sql = expression.ToCountStatement();
             return GetCountAsync(dbCmd, sql, token);
         }
 
         internal static Task<long> CountAsync<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression, CancellationToken token)
         {
-            var expr = OrmLiteConfig.DialectProvider.SqlExpression<T>();
+            var expr = dbCmd.GetDialectProvider().SqlExpression<T>();
             var sql = expression(expr).ToCountStatement();
             return GetCountAsync(dbCmd, sql, token);
         }
@@ -107,7 +107,7 @@ namespace ServiceStack.OrmLite
 
         internal static Task<long> CountAsync<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate, CancellationToken token)
         {
-            var ev = OrmLiteConfig.DialectProvider.SqlExpression<T>();
+            var ev = dbCmd.GetDialectProvider().SqlExpression<T>();
             ev.Where(predicate);
             var sql = ev.ToCountStatement();
             return GetCountAsync(dbCmd, sql, token);
@@ -152,23 +152,22 @@ namespace ServiceStack.OrmLite
             return dbCmd.LoadListWithReferences<T, T>(expr, token);
         }
 
-        internal static Task<T> ExprConvertToAsync<T>(this IDataReader dataReader, CancellationToken token)
+        internal static Task<T> ExprConvertToAsync<T>(this IDataReader dataReader, IOrmLiteDialectProvider dialectProvider, CancellationToken token)
         {
-            return OrmLiteConfig.DialectProvider.ReaderRead(dataReader,
-                dataReader.CreateInstance<T>, token);
+            return dialectProvider.ReaderRead(dataReader,
+                () => dataReader.CreateInstance<T>(dialectProvider), token);
         }
 
-        internal static Task<List<T>> ExprConvertToListAsync<T>(this IDataReader dataReader, CancellationToken token)
+        internal static Task<List<T>> ExprConvertToListAsync<T>(this IDataReader dataReader, IOrmLiteDialectProvider dialectProvider, CancellationToken token)
         {
             var fieldDefs = ModelDefinition<T>.Definition.AllFieldDefinitionsArray;
-            var dialectProvider = OrmLiteConfig.DialectProvider;
 
             var indexCache = dataReader.GetIndexFieldsCache(ModelDefinition<T>.Definition);
 
             return dialectProvider.ReaderEach(dataReader, () =>
             {
                 var row = OrmLiteUtilExtensions.CreateInstance<T>();
-                row.PopulateWithSqlReader(dataReader, fieldDefs, indexCache);
+                row.PopulateWithSqlReader(dialectProvider, dataReader, fieldDefs, indexCache);
                 return row;
             }, token);
         }

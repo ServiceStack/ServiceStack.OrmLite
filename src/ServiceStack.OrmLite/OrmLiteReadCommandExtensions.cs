@@ -80,7 +80,7 @@ namespace ServiceStack.OrmLite
         internal static List<T> SelectFmt<T>(this IDbCommand dbCmd, string sqlFilter, params object[] filterParams)
         {
             return dbCmd.ConvertToList<T>(
-                OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sqlFilter, filterParams));
+                dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), sqlFilter, filterParams));
         }
 
         internal static List<TModel> Select<TModel>(this IDbCommand dbCmd, Type fromTableType)
@@ -90,18 +90,18 @@ namespace ServiceStack.OrmLite
 
         internal static List<TModel> SelectFmt<TModel>(this IDbCommand dbCmd, Type fromTableType, string sqlFilter, params object[] filterParams)
         {
-            var sql = ToSelectFmt<TModel>(fromTableType, sqlFilter, filterParams);
+            var sql = ToSelectFmt<TModel>(dbCmd.GetDialectProvider(), fromTableType, sqlFilter, filterParams);
 
             return dbCmd.ConvertToList<TModel>(sql.ToString());
         }
 
-        internal static StringBuilder ToSelectFmt<TModel>(Type fromTableType, string sqlFilter, object[] filterParams)
+        internal static StringBuilder ToSelectFmt<TModel>(IOrmLiteDialectProvider dialectProvider, Type fromTableType, string sqlFilter, object[] filterParams)
         {
             var sql = new StringBuilder();
             var modelDef = ModelDefinition<TModel>.Definition;
-            sql.AppendFormat("SELECT {0} FROM {1}", OrmLiteConfig.DialectProvider.GetColumnNames(modelDef),
-                             OrmLiteConfig.DialectProvider.GetQuotedTableName(fromTableType.GetModelDefinition()));
-            if (!String.IsNullOrEmpty(sqlFilter))
+            sql.AppendFormat("SELECT {0} FROM {1}", dialectProvider.GetColumnNames(modelDef),
+                             dialectProvider.GetQuotedTableName(fromTableType.GetModelDefinition()));
+            if (!string.IsNullOrEmpty(sqlFilter))
             {
                 sqlFilter = sqlFilter.SqlFmt(filterParams);
                 sql.Append(" WHERE ");
@@ -112,12 +112,12 @@ namespace ServiceStack.OrmLite
 
         internal static T SelectByIdFmt<T>(this IDbCommand dbCmd, object idValue)
         {
-            return SingleFmt<T>(dbCmd, OrmLiteConfig.DialectProvider.GetQuotedColumnName(ModelDefinition<T>.PrimaryKeyName) + " = {0}".SqlFmt(idValue));
+            return SingleFmt<T>(dbCmd, dbCmd.GetDialectProvider().GetQuotedColumnName(ModelDefinition<T>.PrimaryKeyName) + " = {0}".SqlFmt(idValue));
         }
 
         internal static T SingleFmt<T>(this IDbCommand dbCmd, string filter, params object[] filterParams)
         {
-            return dbCmd.ConvertTo<T>(OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), filter, filterParams));
+            return dbCmd.ConvertTo<T>(dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), filter, filterParams));
         }
 
         [ThreadStatic]
@@ -127,7 +127,7 @@ namespace ServiceStack.OrmLite
             dbCmd.Parameters.Clear();
             var p = dbCmd.CreateParameter();
             p.ParameterName = name;
-            p.DbType = OrmLiteConfig.DialectProvider.GetColumnDbType(value.GetType());
+            p.DbType = dbCmd.GetDialectProvider().GetColumnDbType(value.GetType());
             p.Direction = ParameterDirection.Input;
             dbCmd.Parameters.Add(p);
             dbCmd.CommandText = GetFilterSql<T>(dbCmd);
@@ -146,7 +146,7 @@ namespace ServiceStack.OrmLite
             dbCmd.Parameters.Clear();
             lastQueryType = null;
 
-            var dialectProvider = OrmLiteConfig.DialectProvider;
+            var dialectProvider = dbCmd.GetDialectProvider();
             var fieldMap = typeof(T).IsUserType() //Ensure T != Scalar<int>()
                 ? dialectProvider.GetFieldDefinitionMap(typeof(T).GetModelDefinition())
                 : null;
@@ -241,7 +241,7 @@ namespace ServiceStack.OrmLite
                 var p = dbCmd.CreateParameter();
 
                 p.ParameterName = pi.Name;
-                p.DbType = OrmLiteConfig.DialectProvider.GetColumnDbType(pi.PropertyType);
+                p.DbType = dbCmd.GetDialectProvider().GetColumnDbType(pi.PropertyType);
                 p.Direction = ParameterDirection.Input;
                 p.Value = value ?? DBNull.Value;
                 dbCmd.Parameters.Add(p);
@@ -263,7 +263,7 @@ namespace ServiceStack.OrmLite
 
                 if (value != null)
                 {
-                    p.DbType = OrmLiteConfig.DialectProvider.GetColumnDbType(value.GetType());
+                    p.DbType = dbCmd.GetDialectProvider().GetColumnDbType(value.GetType());
                 }
 
                 p.Direction = ParameterDirection.Input;
@@ -290,12 +290,12 @@ namespace ServiceStack.OrmLite
                 if (sb.Length > 0)
                     sb.Append(" AND ");
 
-                sb.Append(OrmLiteConfig.DialectProvider.GetQuotedColumnName(p.ParameterName));
+                sb.Append(dbCmd.GetDialectProvider().GetQuotedColumnName(p.ParameterName));
                 sb.Append(" = ");
-                sb.Append(OrmLiteConfig.DialectProvider.GetParam(p.ParameterName));
+                sb.Append(dbCmd.GetDialectProvider().GetParam(p.ParameterName));
             }
 
-            return OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sb.ToString());
+            return dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), sb.ToString());
         }
 
         internal static bool CanReuseParam<T>(this IDbCommand dbCmd, string paramName)
@@ -310,7 +310,7 @@ namespace ServiceStack.OrmLite
             var sql = idValues.GetIdsInSql();
             return sql == null
                 ? new List<T>()
-                : SelectFmt<T>(dbCmd, OrmLiteConfig.DialectProvider.GetQuotedColumnName(ModelDefinition<T>.PrimaryKeyName) + " IN (" + sql + ")");
+                : SelectFmt<T>(dbCmd, dbCmd.GetDialectProvider().GetQuotedColumnName(ModelDefinition<T>.PrimaryKeyName) + " IN (" + sql + ")");
         }
 
         internal static T SingleById<T>(this IDbCommand dbCmd, object value)
@@ -346,7 +346,7 @@ namespace ServiceStack.OrmLite
 
             dbCmd.SetParameters<T>(anonType, excludeDefaults: false);
 
-            return dbCmd.ConvertTo<T>(OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sql));
+            return dbCmd.ConvertTo<T>(dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), sql));
         }
 
         internal static List<T> Where<T>(this IDbCommand dbCmd, string name, object value)
@@ -371,7 +371,7 @@ namespace ServiceStack.OrmLite
         internal static List<T> Select<T>(this IDbCommand dbCmd, string sql, object anonType = null)
         {
             if (anonType != null) dbCmd.SetParameters<T>(anonType, excludeDefaults: false);
-            dbCmd.CommandText = OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sql);
+            dbCmd.CommandText = dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), sql);
 
             return IsScalar<T>()
                 ? dbCmd.Column<T>()
@@ -381,7 +381,7 @@ namespace ServiceStack.OrmLite
         internal static List<T> Select<T>(this IDbCommand dbCmd, string sql, Dictionary<string, object> dict)
         {
             if (dict != null) SetParameters(dbCmd, (IDictionary<string, object>)dict, (bool)false);
-            dbCmd.CommandText = OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sql);
+            dbCmd.CommandText = dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), sql);
 
             return IsScalar<T>()
                 ? dbCmd.Column<T>()
@@ -457,17 +457,19 @@ namespace ServiceStack.OrmLite
         {
             if (anonType != null) dbCmd.SetParameters<T>(anonType, excludeDefaults:true);
 
-            return dbCmd.ConvertToList<T>(OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sql));
+            return dbCmd.ConvertToList<T>(dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), sql));
         }
 
         internal static IEnumerable<T> SelectLazy<T>(this IDbCommand dbCmd, string sql, object anonType = null)
         {
             if (anonType != null) dbCmd.SetParameters<T>(anonType, excludeDefaults: false);
-            dbCmd.CommandText = OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sql);
+            var dialectProvider = dbCmd.GetDialectProvider();
+            dbCmd.CommandText = dialectProvider.ToSelectStatement(typeof(T), sql);
 
-            if (OrmLiteConfig.ResultsFilter != null)
+            var resultsFilter = OrmLiteConfig.ResultsFilter;
+            if (resultsFilter != null)
             {
-                foreach (var item in OrmLiteConfig.ResultsFilter.GetList<T>(dbCmd))
+                foreach (var item in resultsFilter.GetList<T>(dbCmd))
                 {
                     yield return item;
                 }
@@ -481,7 +483,7 @@ namespace ServiceStack.OrmLite
                 while (reader.Read())
                 {
                     var row = OrmLiteUtilExtensions.CreateInstance<T>();
-                    row.PopulateWithSqlReader(reader, fieldDefs, indexCache);
+                    row.PopulateWithSqlReader(dialectProvider, reader, fieldDefs, indexCache);
                     yield return row;
                 }
             }
@@ -490,7 +492,7 @@ namespace ServiceStack.OrmLite
         internal static IEnumerable<T> ColumnLazy<T>(this IDbCommand dbCmd, string sql, object anonType = null)
         {
             if (anonType != null) dbCmd.SetParameters<T>(anonType, excludeDefaults: false);
-            var dialectProvider = OrmLiteConfig.DialectProvider;
+            var dialectProvider = dbCmd.GetDialectProvider();
             dbCmd.CommandText = dialectProvider.ToSelectStatement(typeof(T), sql);
 
             if (OrmLiteConfig.ResultsFilter != null)
@@ -529,13 +531,14 @@ namespace ServiceStack.OrmLite
             }
 
             var fieldDefs = ModelDefinition<T>.Definition.FieldDefinitionsArray;
+            var dialectProvider = dbCmd.GetDialectProvider();
             using (var reader = dbCmd.ExecuteReader())
             {
                 var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition);
                 while (reader.Read())
                 {
                     var row = OrmLiteUtilExtensions.CreateInstance<T>();
-                    row.PopulateWithSqlReader(reader, fieldDefs, indexCache);
+                    row.PopulateWithSqlReader(dialectProvider, reader, fieldDefs, indexCache);
                     yield return row;
                 }
             }
@@ -548,7 +551,8 @@ namespace ServiceStack.OrmLite
 
         internal static IEnumerable<T> SelectLazyFmt<T>(this IDbCommand dbCmd, string filter, params object[] filterParams)
         {
-            dbCmd.CommandText = OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), filter, filterParams);
+            var dialectProvider = dbCmd.GetDialectProvider();
+            dbCmd.CommandText = dialectProvider.ToSelectStatement(typeof(T), filter, filterParams);
 
             if (OrmLiteConfig.ResultsFilter != null)
             {
@@ -566,7 +570,7 @@ namespace ServiceStack.OrmLite
                 while (reader.Read())
                 {
                     var row = OrmLiteUtilExtensions.CreateInstance<T>();
-                    row.PopulateWithSqlReader(reader, fieldDefs, indexCache);
+                    row.PopulateWithSqlReader(dialectProvider, reader, fieldDefs, indexCache);
                     yield return row;
                 }
             }
@@ -584,22 +588,22 @@ namespace ServiceStack.OrmLite
             return dbCmd.Scalar<T>(sql.SqlFmt(sqlParams));
         }
 
-        internal static T Scalar<T>(this IDataReader reader)
+        internal static T Scalar<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider)
         {
             while (reader.Read())
             {
                 object oValue = reader.GetValue(0);
-                return ToScalar<T>(oValue);
+                return ToScalar<T>(dialectProvider, oValue);
             }
 
             return default(T);
         }
 
-        internal static T ToScalar<T>(object oValue)
+        internal static T ToScalar<T>(IOrmLiteDialectProvider dialectProvider, object oValue)
         {
             if (oValue == DBNull.Value) return default(T);
 
-            var typeCode = typeof (T).GetUnderlyingTypeCode();
+            var typeCode = typeof(T).GetUnderlyingTypeCode();
             switch (typeCode)
             {
                 case TypeCode.DateTime:
@@ -612,7 +616,7 @@ namespace ServiceStack.OrmLite
                     return (T) (object) Double.Parse(oValue.ToString(), CultureInfo.CurrentCulture);
             }
 
-            object o = OrmLiteConfig.DialectProvider.ConvertDbValue(oValue, typeof (T));
+            object o = dialectProvider.ConvertDbValue(oValue, typeof(T));
             return o == null ? default(T) : (T) o;
         }
 
@@ -623,14 +627,14 @@ namespace ServiceStack.OrmLite
                 return OrmLiteConfig.ResultsFilter.GetLastInsertId(dbCmd);
             }
 
-            return OrmLiteConfig.DialectProvider.GetLastInsertId(dbCmd);
+            return dbCmd.GetDialectProvider().GetLastInsertId(dbCmd);
         }
 
         internal static List<T> Column<T>(this IDbCommand dbCmd, string sql, object anonType = null)
         {
             if (anonType != null) dbCmd.SetParameters<T>(anonType, excludeDefaults: false);
 
-            return dbCmd.Column<T>(OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sql));
+            return dbCmd.Column<T>(dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), sql));
         }
 
         internal static List<T> ColumnFmt<T>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
@@ -638,11 +642,10 @@ namespace ServiceStack.OrmLite
             return dbCmd.Column<T>(sql.SqlFmt(sqlParams));
         }
 
-        internal static List<T> Column<T>(this IDataReader reader)
+        internal static List<T> Column<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider)
         {
             var columValues = new List<T>();
 
-            var dialectProvider = OrmLiteConfig.DialectProvider;
             while (reader.Read())
             {
                 var value = dialectProvider.ConvertDbValue(reader.GetValue(0), typeof(T));
@@ -666,9 +669,8 @@ namespace ServiceStack.OrmLite
             return dbCmd.ColumnDistinct<T>(sql.SqlFmt(sqlParams));
         }
 
-        internal static HashSet<T> ColumnDistinct<T>(this IDataReader reader)
+        internal static HashSet<T> ColumnDistinct<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider)
         {
-            var dialectProvider = OrmLiteConfig.DialectProvider;
             var columValues = new HashSet<T>();
             while (reader.Read())
             {
@@ -693,11 +695,10 @@ namespace ServiceStack.OrmLite
             return dbCmd.Lookup<K, V>(sql.SqlFmt(sqlParams));
         }
 
-        internal static Dictionary<K, List<V>> Lookup<K, V>(this IDataReader reader)
+        internal static Dictionary<K, List<V>> Lookup<K, V>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider)
         {
             var lookup = new Dictionary<K, List<V>>();
 
-            var dialectProvider = OrmLiteConfig.DialectProvider;
             while (reader.Read())
             {
                 var key = (K)dialectProvider.ConvertDbValue(reader.GetValue(0), typeof(K));
@@ -727,11 +728,10 @@ namespace ServiceStack.OrmLite
             return dbCmd.Dictionary<K, V>(sqlFormat.SqlFmt(sqlParams));
         }
 
-        internal static Dictionary<K, V> Dictionary<K, V>(this IDataReader reader)
+        internal static Dictionary<K, V> Dictionary<K, V>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider)
         {
             var map = new Dictionary<K, V>();
 
-            var dialectProvider = OrmLiteConfig.DialectProvider;
             while (reader.Read())
             {
                 var key = (K)dialectProvider.ConvertDbValue(reader.GetValue(0), typeof(K));
@@ -747,7 +747,7 @@ namespace ServiceStack.OrmLite
         {
             if (anonType != null) SetParameters(dbCmd, anonType, excludeDefaults: true);
 
-            var sql = OrmLiteConfig.DialectProvider.ToExecuteProcedureStatement(anonType)
+            var sql = dbCmd.GetDialectProvider().ToExecuteProcedureStatement(anonType)
                 ?? GetFilterSql<T>(dbCmd);
 
             var result = dbCmd.Scalar(sql);
@@ -758,14 +758,14 @@ namespace ServiceStack.OrmLite
         {
             if (anonType != null) SetParameters(dbCmd, anonType, (bool)false);
 
-            var result = dbCmd.Scalar(OrmLiteConfig.DialectProvider.ToSelectStatement(typeof(T), sql));
+            var result = dbCmd.Scalar(dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), sql));
             return result != null;
         }
 
         internal static bool ExistsFmt<T>(this IDbCommand dbCmd, string sqlFilter, params object[] filterParams)
         {
             var fromTableType = typeof(T);
-            var result = dbCmd.Scalar(OrmLiteConfig.DialectProvider.ToSelectStatement(fromTableType, sqlFilter, filterParams));
+            var result = dbCmd.Scalar(dbCmd.GetDialectProvider().ToSelectStatement(fromTableType, sqlFilter, filterParams));
             return result != null;
         }
 
@@ -782,7 +782,7 @@ namespace ServiceStack.OrmLite
         {
             var modelType = typeof(TOutputModel);
 
-            string sql = OrmLiteConfig.DialectProvider.ToSelectFromProcedureStatement(
+            string sql = dbCmd.GetDialectProvider().ToSelectFromProcedureStatement(
                 fromObjWithProperties, modelType, sqlFilter, filterParams);
 
             return dbCmd.ConvertToList<TOutputModel>(sql);
@@ -898,7 +898,7 @@ namespace ServiceStack.OrmLite
             DbType? dbType=null)
         {
             var p = dbCmd.CreateParameter();
-            var dialectProvider = OrmLiteConfig.DialectProvider;
+            var dialectProvider = dbCmd.GetDialectProvider();
             p.ParameterName = dialectProvider.GetParam(name);
             p.Direction = direction;
             if (value != null)

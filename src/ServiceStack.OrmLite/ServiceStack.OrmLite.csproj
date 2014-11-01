@@ -105,6 +105,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AliasNamingStrategy.cs" />
+    <Compile Include="OrmLiteCommand.cs" />
     <Compile Include="OrmLiteContext.cs" />
     <Compile Include="OrmLiteReadApiAsync.cs" />
     <Compile Include="Async\OrmLiteReadCommandExtensionsAsync.cs" />
@@ -124,7 +125,6 @@
     <Compile Include="OrmLiteWriteExpressionsApi.cs" />
     <Compile Include="IUntypedApi.cs" />
     <Compile Include="JoinSqlBuilder.cs" />
-    <Compile Include="OrmLiteConnectionWrapper.cs" />
     <Compile Include="OrmLiteDialectProviderExtensions.cs" />
     <Compile Include="OrmLiteExecFilter.cs" />
     <Compile Include="OrmLiteReadApi.cs" />

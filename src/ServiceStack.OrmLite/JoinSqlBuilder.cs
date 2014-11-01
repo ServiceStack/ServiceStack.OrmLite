@@ -21,9 +21,11 @@ namespace ServiceStack.OrmLite
         private string baseSchema = "";
         private string baseTableName = "";
         private Type basePocoType;
+        private IOrmLiteDialectProvider dialectProvider;
 
-        public JoinSqlBuilder()
+        public JoinSqlBuilder(IOrmLiteDialectProvider dialectProvider=null)
         {
+            this.dialectProvider = dialectProvider ?? OrmLiteConfig.DialectProvider;
             basePocoType = typeof(TBasePoco);
             baseSchema = GetSchema(basePocoType);
             baseTableName = basePocoType.GetModelDefinition().ModelName;
@@ -54,9 +56,9 @@ namespace ServiceStack.OrmLite
             foreach (var item in pocoType.GetModelDefinition().FieldDefinitions)
             {
                 if (withTablePrefix)
-                    result.Add(string.Format("{0}.{1}", OrmLiteConfig.DialectProvider.GetQuotedTableName(tableName), OrmLiteConfig.DialectProvider.GetQuotedColumnName(item.FieldName)));
+                    result.Add(string.Format("{0}.{1}", dialectProvider.GetQuotedTableName(tableName), dialectProvider.GetQuotedColumnName(item.FieldName)));
                 else
-                    result.Add(string.Format("{0}", OrmLiteConfig.DialectProvider.GetQuotedColumnName(item.FieldName)));
+                    result.Add(string.Format("{0}", dialectProvider.GetQuotedColumnName(item.FieldName)));
             }
             return result;
         }
@@ -83,12 +85,12 @@ namespace ServiceStack.OrmLite
                 var pocoType = typeof(T);
                 var fieldName = pocoType.GetModelDefinition().FieldDefinitions.First(f => f.Name == m.Member.Name).FieldName;
 
-                alias = string.IsNullOrEmpty(alias) ? string.Empty : string.Format(" AS {0}", OrmLiteConfig.DialectProvider.GetQuotedColumnName(alias));
+                alias = string.IsNullOrEmpty(alias) ? string.Empty : string.Format(" AS {0}", dialectProvider.GetQuotedColumnName(alias));
 
                 if (withTablePrefix)
-                    lst.Add(string.Format("{0}.{1}{2}", OrmLiteConfig.DialectProvider.GetQuotedTableName(tableName), OrmLiteConfig.DialectProvider.GetQuotedColumnName(fieldName), alias));
+                    lst.Add(string.Format("{0}.{1}{2}", dialectProvider.GetQuotedTableName(tableName), dialectProvider.GetQuotedColumnName(fieldName), alias));
                 else
-                    lst.Add(string.Format("{0}{1}", OrmLiteConfig.DialectProvider.GetQuotedColumnName(fieldName), alias));
+                    lst.Add(string.Format("{0}{1}", dialectProvider.GetQuotedColumnName(fieldName), alias));
                 return;
             }
             throw new Exception("Only Members are allowed");
@@ -235,7 +237,7 @@ namespace ServiceStack.OrmLite
             {
                 throw new Exception("Either the source or destination table should be associated ");
             }
-            var ev = OrmLiteConfig.DialectProvider.SqlExpression<T>();
+            var ev = dialectProvider.SqlExpression<T>();
             ev.WhereStatementWithoutWhereString = true;
             ev.PrefixFieldWithTableName = true;
             ev.Where(where);
@@ -363,7 +365,7 @@ namespace ServiceStack.OrmLite
 
             if (sourceWhere != null)
             {
-                var ev = OrmLiteConfig.DialectProvider.SqlExpression<TSourceTable>();
+                var ev = dialectProvider.SqlExpression<TSourceTable>();
                 ev.WhereStatementWithoutWhereString = true;
                 ev.PrefixFieldWithTableName = true;
                 ev.Where(sourceWhere);
@@ -374,7 +376,7 @@ namespace ServiceStack.OrmLite
 
             if (destinationWhere != null)
             {
-                var ev = OrmLiteConfig.DialectProvider.SqlExpression<TDestinationTable>();
+                var ev = dialectProvider.SqlExpression<TDestinationTable>();
                 ev.WhereStatementWithoutWhereString = true;
                 ev.PrefixFieldWithTableName = true;
                 ev.Where(destinationWhere);
@@ -523,16 +525,16 @@ namespace ServiceStack.OrmLite
 
                 foreach (var fi in modelDef.FieldDefinitions)
                 {
-                    dbColumns.AppendFormat("{0}{1}", dbColumns.Length > 0 ? "," : "", (String.IsNullOrEmpty(fi.BelongToModelName) ? (OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef.ModelName)) : (OrmLiteConfig.DialectProvider.GetQuotedTableName(fi.BelongToModelName))) + "." + OrmLiteConfig.DialectProvider.GetQuotedColumnName(fi.FieldName));
+                    dbColumns.AppendFormat("{0}{1}", dbColumns.Length > 0 ? "," : "", (String.IsNullOrEmpty(fi.BelongToModelName) ? (dialectProvider.GetQuotedTableName(modelDef.ModelName)) : (dialectProvider.GetQuotedTableName(fi.BelongToModelName))) + "." + dialectProvider.GetQuotedColumnName(fi.FieldName));
                 }
                 if (dbColumns.Length == 0)
-                    dbColumns.AppendFormat("\"{0}{1}\".*", baseSchema, OrmLiteConfig.DialectProvider.GetQuotedTableName(baseTableName));
+                    dbColumns.AppendFormat("\"{0}{1}\".*", baseSchema, dialectProvider.GetQuotedTableName(baseTableName));
             }
 
             sbSelect.Append(dbColumns + " \n");
 
             var sbBody = new StringBuilder();
-            sbBody.AppendFormat("FROM {0}{1} \n", baseSchema, OrmLiteConfig.DialectProvider.GetQuotedTableName(baseTableName));
+            sbBody.AppendFormat("FROM {0}{1} \n", baseSchema, dialectProvider.GetQuotedTableName(baseTableName));
             int i = 0;
             foreach (var join in joinList)
             {
@@ -552,17 +554,17 @@ namespace ServiceStack.OrmLite
 
                 if (join.JoinType == JoinType.CROSS)
                 {
-                    sbBody.AppendFormat(" {0}{1} ON {2} = {3}  \n", join.RefTypeSchema, OrmLiteConfig.DialectProvider.GetQuotedTableName(join.RefTypeTableName));
+                    sbBody.AppendFormat(" {0}{1} ON {2} = {3}  \n", join.RefTypeSchema, dialectProvider.GetQuotedTableName(join.RefTypeTableName));
                 }
                 else
                 {
                     if (join.JoinType != JoinType.SELF)
                     {
-                        sbBody.AppendFormat(" {0}{1} ON {2} = {3}  \n", join.RefTypeSchema, OrmLiteConfig.DialectProvider.GetQuotedTableName(join.RefTypeTableName), join.Class1ColumnName, join.Class2ColumnName);
+                        sbBody.AppendFormat(" {0}{1} ON {2} = {3}  \n", join.RefTypeSchema, dialectProvider.GetQuotedTableName(join.RefTypeTableName), join.Class1ColumnName, join.Class2ColumnName);
                     }
                     else
                     {
-                        sbBody.AppendFormat(" {0}{1} AS {2} ON {2}.{3} = \"{1}\".{4}  \n", join.RefTypeSchema, OrmLiteConfig.DialectProvider.GetQuotedTableName(join.RefTypeTableName), OrmLiteConfig.DialectProvider.GetQuotedTableName(join.RefTypeTableName) + "_" + i.ToString(), join.Class1ColumnName, join.Class2ColumnName);
+                        sbBody.AppendFormat(" {0}{1} AS {2} ON {2}.{3} = \"{1}\".{4}  \n", join.RefTypeSchema, dialectProvider.GetQuotedTableName(join.RefTypeTableName), dialectProvider.GetQuotedTableName(join.RefTypeTableName) + "_" + i.ToString(), join.Class1ColumnName, join.Class2ColumnName);
                     }
                 }
             }
@@ -589,7 +591,7 @@ namespace ServiceStack.OrmLite
                 sbOrderBy.Append(" \n");
             }
 
-            var sql = OrmLiteConfig.DialectProvider.ToSelectStatement(
+            var sql = dialectProvider.ToSelectStatement(
                 modelDef, sbSelect.ToString(), sbBody.ToString(), sbOrderBy.ToString(), Offset, Rows);
 
             return sql; 

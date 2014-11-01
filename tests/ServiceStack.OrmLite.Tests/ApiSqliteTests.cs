@@ -15,7 +15,7 @@ namespace ServiceStack.OrmLite.Tests
         [SetUp]
         public void SetUp()
         {
-            db = Config.SqliteMemoryDb.OpenDbConnection();
+            db = CreateSqliteMemoryDbFactory().OpenDbConnection();
             db.DropAndCreateTable<Person>();
             db.DropAndCreateTable<PersonWithAutoId>();
         }

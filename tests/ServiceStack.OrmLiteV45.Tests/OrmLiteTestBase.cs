@@ -16,7 +16,7 @@ namespace ServiceStack.OrmLite.Tests
         public static string SqlServerBuildDb = "Server={0};Database=test;User Id=test;Password=test;".Fmt(Environment.GetEnvironmentVariable("CI_HOST"));
         //public static string SqlServerBuildDb = "Data Source=localhost;Initial Catalog=TestDb;Integrated Security=SSPI;Connect Timeout=120;MultipleActiveResultSets=True";
 
-        public static string MySqlBuildDb = "Server={0};Database=test;UID=root;Password=test".Fmt(Environment.GetEnvironmentVariable("CI_HOST"));
+        public static string MySqlDb = "Server={0};Database=test;UID=root;Password=test".Fmt(Environment.GetEnvironmentVariable("CI_HOST"));
 
         public static IOrmLiteDialectProvider DefaultProvider = SqlServerDialect.Provider;
         public static string DefaultConnection = SqlServerBuildDb;
@@ -64,7 +64,7 @@ namespace ServiceStack.OrmLite.Tests
 
         public static OrmLiteConnectionFactory CreateMySqlDbFactory()
         {
-            var dbFactory = new OrmLiteConnectionFactory(Config.MySqlBuildDb, MySqlDialect.Provider);
+            var dbFactory = new OrmLiteConnectionFactory(Config.MySqlDb, MySqlDialect.Provider);
             return dbFactory;
         }
 
@@ -83,7 +83,16 @@ namespace ServiceStack.OrmLite.Tests
 				ConnectionString = GetFileConnectionString();
 		}
 
-        public Dialect Dialect = Dialect.SqlServer;
+        public Dialect Dialect = Dialect.MySql;
+	    protected OrmLiteConnectionFactory DbFactory;
+
+        OrmLiteConnectionFactory Init(string connStr, IOrmLiteDialectProvider dialectProvider)
+        {
+            ConnectionString = connStr;
+            OrmLiteConfig.DialectProvider = dialectProvider;
+            DbFactory = new OrmLiteConnectionFactory(ConnectionString, dialectProvider);
+            return DbFactory;
+        }
 
         [TestFixtureSetUp]
         public void TestFixtureSetUp()
@@ -91,21 +100,23 @@ namespace ServiceStack.OrmLite.Tests
             Init();
         }
 
-        private void Init()
+        private OrmLiteConnectionFactory Init()
         {
 	        LogManager.LogFactory = new ConsoleLogFactory(debugEnabled: false);
 
 	        switch (Dialect)
 	        {
-	            case Dialect.SqlServer:
-	                OrmLiteConfig.DialectProvider = SqlServerDialect.Provider;
-	                ConnectionString = Config.SqlServerBuildDb;
-	                return;
-	            case Dialect.MySql:
-	                OrmLiteConfig.DialectProvider = MySqlDialect.Provider;
-                    ConnectionString = Config.MySqlBuildDb;
-	                return;
+                case Dialect.Sqlite:
+                    var dbFactory = Init(Config.SqliteMemoryDb, SqliteDialect.Provider);
+                    dbFactory.AutoDisposeConnection = false;
+                    return dbFactory;
+                case Dialect.SqlServer:
+                    return Init(Config.SqlServerBuildDb, SqlServerDialect.Provider);
+                case Dialect.MySql:
+                    return Init(Config.MySqlDb, MySqlDialect.Provider);
             }
+
+            throw new NotImplementedException("{0}".Fmt(Dialect));
 	    }
 
 	    public void Log(string text)
@@ -115,25 +126,19 @@ namespace ServiceStack.OrmLite.Tests
 
         public IDbConnection InMemoryDbConnection { get; set; }
 
-        public virtual IDbConnection OpenDbConnection(string connString = null)
+        public virtual IDbConnection OpenDbConnection()
         {
-            connString = connString ?? ConnectionString;
-            if (connString == ":memory:")
+            if (ConnectionString == ":memory:")
             {
-                if (InMemoryDbConnection == null)
+                if (InMemoryDbConnection == null || DbFactory.AutoDisposeConnection)
                 {
-                    var dbConn = connString.OpenDbConnection();
-                    InMemoryDbConnection = new OrmLiteConnectionWrapper(dbConn)
-                    {
-                        DialectProvider = OrmLiteConfig.DialectProvider,
-                        AutoDisposeConnection = false,
-                    };                    
+                    InMemoryDbConnection = new OrmLiteConnection(DbFactory);
+                    InMemoryDbConnection.Open();
                 }
-
                 return InMemoryDbConnection;
             }
 
-            return connString.OpenDbConnection();            
+            return DbFactory.OpenDbConnection();
         }
 
         protected void SuppressIfOracle(string reason, params object[] args)

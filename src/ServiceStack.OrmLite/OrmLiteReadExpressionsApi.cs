@@ -85,17 +85,6 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
-        /// Return the IOrmLiteDialectProvider on this connection.
-        /// </summary>
-        public static IOrmLiteDialectProvider GetDialectProvider(this IDbConnection dbConn)
-        {
-            var ormLiteDbConn = dbConn as OrmLiteConnection;
-            return ormLiteDbConn != null
-                ? ormLiteDbConn.Factory.DialectProvider
-                : OrmLiteConfig.DialectProvider;
-        }
-
-        /// <summary>
         /// Returns results from using a LINQ Expression. E.g:
         /// <para>db.Select&lt;Person&gt;(x =&gt; x.Age &gt; 40)</para>
         /// </summary>
@@ -222,7 +211,7 @@ namespace ServiceStack.OrmLite
 
         public static long Count<T>(this IDbConnection dbConn)
         {
-            var expression = OrmLiteConfig.DialectProvider.SqlExpression<T>();
+            var expression = dbConn.GetDialectProvider().SqlExpression<T>();
             return dbConn.Exec(dbCmd => dbCmd.Count(expression));
         }
 

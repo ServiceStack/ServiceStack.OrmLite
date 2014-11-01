@@ -476,7 +476,15 @@ namespace ServiceStack.OrmLite.SqlServer
 
         protected SqlCommand Unwrap(IDbCommand cmd)
         {
-            return (SqlCommand)cmd;
+            var cmdAsync = cmd as SqlCommand;
+            if (cmdAsync != null)
+                return cmdAsync;
+
+            var hasDb = cmd as IHasDbCommand;
+            if (hasDb != null)
+                return (SqlCommand)hasDb.DbCommand;
+
+            throw new ArgumentException("{0} is not an SqlCommand".Fmt(cmd.GetType().Name));
         }
 
         protected SqlDataReader Unwrap(IDataReader reader)

@@ -14,7 +14,6 @@ namespace ServiceStack.OrmLite.Tests
 
         public override T Exec<T>(IDbConnection dbConn, System.Func<IDbCommand, T> filter)
         {
-            var holdProvider = OrmLiteConfig.DialectProvider;
             var dbCmd = CreateCommand(dbConn);
             try
             {
@@ -27,8 +26,7 @@ namespace ServiceStack.OrmLite.Tests
             }
             finally
             {
-                DisposeCommand(dbCmd);
-                OrmLiteConfig.DialectProvider = holdProvider;
+                DisposeCommand(dbCmd, dbConn);
             }
         }
     }

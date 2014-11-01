@@ -9,14 +9,9 @@ namespace ServiceStack.OrmLite
 {
     internal static class ReadExpressionCommandExtensions
     {
-        public static SqlExpression<T> SqlExpression<T>()
-        {
-            return OrmLiteConfig.DialectProvider.SqlExpression<T>();
-        }
-
         internal static List<T> Select<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression)
         {
-            var expr = OrmLiteConfig.DialectProvider.SqlExpression<T>();
+            var expr = dbCmd.GetDialectProvider().SqlExpression<T>();
             string sql = expression(expr).SelectInto<T>();
 
             return dbCmd.ExprConvertToList<T>(sql);
@@ -24,7 +19,7 @@ namespace ServiceStack.OrmLite
 
         internal static List<Into> Select<Into, From>(this IDbCommand dbCmd, Func<SqlExpression<From>, SqlExpression<From>> expression)
         {
-            var expr = OrmLiteConfig.DialectProvider.SqlExpression<From>();
+            var expr = dbCmd.GetDialectProvider().SqlExpression<From>();
             string sql = expression(expr).SelectInto<Into>();
 
             return dbCmd.ExprConvertToList<Into>(sql);
@@ -45,7 +40,7 @@ namespace ServiceStack.OrmLite
 
         internal static List<T> Select<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
         {
-            var expr = OrmLiteConfig.DialectProvider.SqlExpression<T>();
+            var expr = dbCmd.GetDialectProvider().SqlExpression<T>();
             string sql = expr.Where(predicate).SelectInto<T>();
 
             return dbCmd.ExprConvertToList<T>(sql);
@@ -53,13 +48,13 @@ namespace ServiceStack.OrmLite
 
         internal static T Single<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression)
         {
-            var expr = OrmLiteConfig.DialectProvider.SqlExpression<T>();
+            var expr = dbCmd.GetDialectProvider().SqlExpression<T>();
             return dbCmd.Single(expression(expr));
         }
 
         internal static T Single<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
         {
-            var ev = OrmLiteConfig.DialectProvider.SqlExpression<T>();
+            var ev = dbCmd.GetDialectProvider().SqlExpression<T>();
 
             return Single(dbCmd, ev.Where(predicate));
         }
@@ -73,7 +68,7 @@ namespace ServiceStack.OrmLite
 
         public static TKey Scalar<T, TKey>(this IDbCommand dbCmd, Expression<Func<T, TKey>> field)
         {
-            var ev = OrmLiteConfig.DialectProvider.SqlExpression<T>();
+            var ev = dbCmd.GetDialectProvider().SqlExpression<T>();
             ev.Select(field);
             var sql = ev.SelectInto<T>();
             return dbCmd.Scalar<TKey>(sql);
@@ -82,7 +77,7 @@ namespace ServiceStack.OrmLite
         internal static TKey Scalar<T, TKey>(this IDbCommand dbCmd,
             Expression<Func<T, TKey>> field, Expression<Func<T, bool>> predicate)
         {
-            var ev = OrmLiteConfig.DialectProvider.SqlExpression<T>();
+            var ev = dbCmd.GetDialectProvider().SqlExpression<T>();
             ev.Select(field).Where(predicate);
             string sql = ev.SelectInto<T>();
             return dbCmd.Scalar<TKey>(sql);
@@ -90,14 +85,14 @@ namespace ServiceStack.OrmLite
 
         internal static long Count<T>(this IDbCommand dbCmd)
         {
-            var expression = OrmLiteConfig.DialectProvider.SqlExpression<T>();
+            var expression = dbCmd.GetDialectProvider().SqlExpression<T>();
             var sql = expression.ToCountStatement();
             return GetCount(dbCmd, sql);
         }
 
         internal static long Count<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression)
         {
-            var expr = OrmLiteConfig.DialectProvider.SqlExpression<T>();
+            var expr = dbCmd.GetDialectProvider().SqlExpression<T>();
             var sql = expression(expr).ToCountStatement();
             return GetCount(dbCmd, sql);
         }
@@ -110,7 +105,7 @@ namespace ServiceStack.OrmLite
 
         internal static long Count<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
         {
-            var ev = OrmLiteConfig.DialectProvider.SqlExpression<T>();
+            var ev = dbCmd.GetDialectProvider().SqlExpression<T>();
             ev.Where(predicate);
             var sql = ev.ToCountStatement();
             return GetCount(dbCmd, sql);
@@ -134,7 +129,7 @@ namespace ServiceStack.OrmLite
 
         internal static List<T> LoadSelect<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression)
         {
-            var expr = OrmLiteConfig.DialectProvider.SqlExpression<T>();
+            var expr = dbCmd.GetDialectProvider().SqlExpression<T>();
             expr = expression(expr);
             return dbCmd.LoadListWithReferences<T, T>(expr);
         }
@@ -151,32 +146,31 @@ namespace ServiceStack.OrmLite
 
         internal static List<T> LoadSelect<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
         {
-            var expr = OrmLiteConfig.DialectProvider.SqlExpression<T>().Where(predicate);
+            var expr = dbCmd.GetDialectProvider().SqlExpression<T>().Where(predicate);
             return dbCmd.LoadListWithReferences<T, T>(expr);
         }
 
-        internal static T ExprConvertTo<T>(this IDataReader dataReader)
+        internal static T ExprConvertTo<T>(this IDataReader dataReader, IOrmLiteDialectProvider dialectProvider)
         {
             using (dataReader)
             {
-                return dataReader.Read() ? dataReader.CreateInstance<T>() : default(T);
+                return dataReader.Read() ? dataReader.CreateInstance<T>(dialectProvider) : default(T);
             }
         }
 
-        internal static T CreateInstance<T>(this IDataReader dataReader)
+        internal static T CreateInstance<T>(this IDataReader dataReader, IOrmLiteDialectProvider dialectProvider)
         {
-            var dialectProvider = OrmLiteConfig.DialectProvider;
             var row = OrmLiteUtilExtensions.CreateInstance<T>();
             var fieldDefs = ModelDefinition<T>.Definition.AllFieldDefinitionsArray;
             foreach (var fieldDef in fieldDefs)
             {
-                var index = dataReader.FindColumnIndex(fieldDef);
+                var index = dataReader.FindColumnIndex(dialectProvider, fieldDef);
                 dialectProvider.SetDbValue(fieldDef, dataReader, index, row);
             }
             return row;
         }
 
-        internal static List<T> ExprConvertToList<T>(this IDataReader dataReader)
+        internal static List<T> ExprConvertToList<T>(this IDataReader dataReader, IOrmLiteDialectProvider dialectProvider)
         {
             var fieldDefs = ModelDefinition<T>.Definition.AllFieldDefinitionsArray;
 
@@ -187,7 +181,7 @@ namespace ServiceStack.OrmLite
                 while (dataReader.Read())
                 {
                     var row = OrmLiteUtilExtensions.CreateInstance<T>();
-                    row.PopulateWithSqlReader(dataReader, fieldDefs, indexCache);
+                    row.PopulateWithSqlReader(dialectProvider, dataReader, fieldDefs, indexCache);
                     to.Add(row);
                 }
             }

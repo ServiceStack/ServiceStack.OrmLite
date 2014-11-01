@@ -756,11 +756,11 @@ namespace ServiceStack.OrmLite
                     {
                         return value;
                     }
-                    return OrmLiteConfig.DialectProvider.StringSerializer.SerializeToString(value);
+                    return StringSerializer.SerializeToString(value);
                 }
                 if (fieldDef.FieldType.IsEnum)
                 {
-                    var enumValue = OrmLiteConfig.DialectProvider.StringSerializer.SerializeToString(value);
+                    var enumValue = StringSerializer.SerializeToString(value);
                     if (enumValue == null)
                         return null;
 
@@ -796,7 +796,7 @@ namespace ServiceStack.OrmLite
             if (value == null)
                 return DBNull.Value;
 
-            var unquotedVal = OrmLiteConfig.DialectProvider.GetQuotedValue(value, fieldDef.FieldType)
+            var unquotedVal = GetQuotedValue(value, fieldDef.FieldType)
                 .TrimStart('\'').TrimEnd('\''); ;
 
             if (string.IsNullOrEmpty(unquotedVal))
@@ -1335,7 +1335,7 @@ namespace ServiceStack.OrmLite
 
             try
             {
-                var convertedValue = OrmLiteConfig.DialectProvider.StringSerializer.DeserializeFromString(value.ToString(), type);
+                var convertedValue = StringSerializer.DeserializeFromString(value.ToString(), type);
                 return convertedValue;
             }
             catch (Exception)
@@ -1349,10 +1349,9 @@ namespace ServiceStack.OrmLite
         {
             if (value == null) return "NULL";
 
-            var dialectProvider = OrmLiteConfig.DialectProvider;
             if (fieldType.IsRefType())
             {
-                return dialectProvider.GetQuotedValue(dialectProvider.StringSerializer.SerializeToString(value));
+                return GetQuotedValue(StringSerializer.SerializeToString(value));
             }
 
             if (fieldType.IsEnum)
@@ -1364,10 +1363,10 @@ namespace ServiceStack.OrmLite
                     value = Enum.ToObject(fieldType, enumValue).ToString();
                 }
 
-                var enumString = dialectProvider.StringSerializer.SerializeToString(value);
+                var enumString = StringSerializer.SerializeToString(value);
 
                 return !isEnumFlags
-                    ? dialectProvider.GetQuotedValue(enumString.Trim('"'))
+                    ? GetQuotedValue(enumString.Trim('"'))
                     : enumString;
             }
 
@@ -1398,7 +1397,7 @@ namespace ServiceStack.OrmLite
                 return ((TimeSpan)value).Ticks.ToString(CultureInfo.InvariantCulture);
  
             return ShouldQuoteValue(fieldType)
-                    ? dialectProvider.GetQuotedValue(value.ToString())
+                    ? GetQuotedValue(value.ToString())
                     : value.ToString();
         }
 

@@ -7,10 +7,12 @@ namespace ServiceStack.OrmLite
     public class OrmLiteSPStatement
     {
         private IDbCommand command { get; set; }
+        private IOrmLiteDialectProvider dialectProvider { get; set; }
 
         public OrmLiteSPStatement(IDbCommand cmd)
         {
             command = cmd;
+            dialectProvider = cmd.GetDialectProvider();
         }
 
         public List<T> ConvertToList<T>()
@@ -22,7 +24,7 @@ namespace ServiceStack.OrmLite
             try
             {
                 reader = command.ExecuteReader();
-                return reader.ConvertToList<T>();
+                return reader.ConvertToList<T>(dialectProvider);
             }
             finally
             {
@@ -40,7 +42,7 @@ namespace ServiceStack.OrmLite
             try
             {
                 reader = command.ExecuteReader();
-                return reader.Column<T>();
+                return reader.Column<T>(dialectProvider);
             }
             finally
             {
@@ -58,7 +60,7 @@ namespace ServiceStack.OrmLite
             try
             {
                 reader = command.ExecuteReader();
-                return reader.ConvertTo<T>();
+                return reader.ConvertTo<T>(dialectProvider);
             }
             finally
             {
@@ -76,7 +78,7 @@ namespace ServiceStack.OrmLite
             try
             {
                 reader = command.ExecuteReader();
-                return reader.Scalar<T>();
+                return reader.Scalar<T>(dialectProvider);
             }
             finally
             {
@@ -94,7 +96,7 @@ namespace ServiceStack.OrmLite
             try
             {
                 reader = command.ExecuteReader();
-                return reader.Column<T>();
+                return reader.Column<T>(dialectProvider);
             }
             finally
             {
@@ -112,7 +114,7 @@ namespace ServiceStack.OrmLite
             try
             {
                 reader = command.ExecuteReader();
-                return reader.ColumnDistinct<T>();
+                return reader.ColumnDistinct<T>(dialectProvider);
             }
             finally
             {

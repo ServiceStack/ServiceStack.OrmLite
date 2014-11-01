@@ -14,7 +14,8 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static string GetLastSql(this IDbConnection dbConn)
         {
-            return OrmLiteContext.LastCommandText;
+            var ormLiteConn = dbConn as OrmLiteConnection;
+            return ormLiteConn != null ? ormLiteConn.LastCommandText : null;
         }
 
         /// <summary>

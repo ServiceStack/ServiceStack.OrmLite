@@ -138,9 +138,9 @@ namespace ServiceStack.OrmLite.Tests
                 return new PostExcuteActionCommand(innerCommand, _postExecuteAction);
             }
 
-            public void DisposeCommand(IDbCommand dbCmd)
+            public void DisposeCommand(IDbCommand dbCmd, IDbConnection dbConn)
             {
-                _inner.DisposeCommand(dbCmd);
+                _inner.DisposeCommand(dbCmd, dbConn);
             }
 
             public T Exec<T>(IDbConnection dbConn, Func<IDbCommand, T> filter)
@@ -152,7 +152,7 @@ namespace ServiceStack.OrmLite.Tests
                 }
                 finally
                 {
-                    DisposeCommand(cmd);
+                    DisposeCommand(cmd, dbConn);
                 }
             }
 
@@ -165,7 +165,7 @@ namespace ServiceStack.OrmLite.Tests
                 }
                 finally
                 {
-                    DisposeCommand(cmd);
+                    DisposeCommand(cmd, dbConn);
                 }
             }
 
@@ -178,7 +178,7 @@ namespace ServiceStack.OrmLite.Tests
                 }
                 finally
                 {
-                    DisposeCommand(cmd);
+                    DisposeCommand(cmd, dbConn);
                 }
             }
 
@@ -191,7 +191,7 @@ namespace ServiceStack.OrmLite.Tests
                 }
                 finally
                 {
-                    DisposeCommand(cmd);
+                    DisposeCommand(cmd, dbConn);
                 }
             }
 
@@ -209,7 +209,7 @@ namespace ServiceStack.OrmLite.Tests
                 }
                 finally
                 {
-                    DisposeCommand(cmd);
+                    DisposeCommand(cmd, dbConn);
                 }
             }
         }

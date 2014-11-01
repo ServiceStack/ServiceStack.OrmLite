@@ -31,7 +31,7 @@ namespace ServiceStack.OrmLite.Support
 
         protected LoadList(IDbCommand dbCmd, SqlExpression<From> expr)
         {
-            dialectProvider = OrmLiteConfig.DialectProvider;
+            dialectProvider = dbCmd.GetDialectProvider();
 
             if (expr == null)
                 expr = dialectProvider.SqlExpression<From>();

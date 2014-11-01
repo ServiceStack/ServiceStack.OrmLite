@@ -24,7 +24,7 @@ namespace ServiceStack.OrmLite.Support
             modelDef = ModelDefinition<T>.Definition;
             fieldDefs = modelDef.AllFieldDefinitionsArray.Where(x => x.IsReference).ToList();
             pkValue = modelDef.PrimaryKey.GetValue(instance);
-            dialectProvider = OrmLiteConfig.DialectProvider;
+            dialectProvider = dbCmd.GetDialectProvider();
         }
 
         public List<FieldDefinition> FieldDefs

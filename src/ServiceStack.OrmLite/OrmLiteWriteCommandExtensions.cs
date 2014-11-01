@@ -48,7 +48,7 @@ namespace ServiceStack.OrmLite
         {
             var modelDef = modelType.GetModelDefinition();
 
-            var dialectProvider = OrmLiteConfig.DialectProvider;
+            var dialectProvider = dbCmd.GetDialectProvider();
             var tableName = dialectProvider.NamingStrategy.GetTableName(modelDef.ModelName);
             var tableExists = dialectProvider.DoesTableExist(dbCmd, tableName);
             if (overwrite && tableExists)
@@ -182,23 +182,22 @@ namespace ServiceStack.OrmLite
         {
             try
             {
-
-                var dialectProvider = OrmLiteConfig.DialectProvider;
+                var dialectProvider = dbCmd.GetDialectProvider();
                 var tableName = dialectProvider.NamingStrategy.GetTableName(modelDef.ModelName);
 
-                if (OrmLiteConfig.DialectProvider.DoesTableExist(dbCmd, tableName))
+                if (dialectProvider.DoesTableExist(dbCmd, tableName))
                 {
                     if (modelDef.PreDropTableSql != null)
                     {
                         ExecuteSql(dbCmd, modelDef.PreDropTableSql);
                     }
 
-                    var dropTableFks = OrmLiteConfig.DialectProvider.GetDropForeignKeyConstraints(modelDef);
+                    var dropTableFks = dialectProvider.GetDropForeignKeyConstraints(modelDef);
                     if (!string.IsNullOrEmpty(dropTableFks))
                     {
                         dbCmd.ExecuteSql(dropTableFks);
                     }
-                    dbCmd.ExecuteSql("DROP TABLE " + OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef));
+                    dbCmd.ExecuteSql("DROP TABLE " + dialectProvider.GetQuotedTableName(modelDef));
 
                     if (modelDef.PostDropTableSql != null)
                     {
@@ -248,18 +247,18 @@ namespace ServiceStack.OrmLite
             return ex.Message.Contains(fbError);
         }
 
-        public static T PopulateWithSqlReader<T>(this T objWithProperties, IDataReader dataReader)
+        public static T PopulateWithSqlReader<T>(this T objWithProperties, IOrmLiteDialectProvider dialectProvider, IDataReader dataReader)
         {
             var fieldDefs = ModelDefinition<T>.Definition.AllFieldDefinitionsArray;
 
-            return PopulateWithSqlReader(objWithProperties, dataReader, fieldDefs, null);
+            return PopulateWithSqlReader(objWithProperties, dialectProvider, dataReader, fieldDefs, null);
         }
 
-        public static int GetColumnIndex(this IDataReader dataReader, string fieldName)
+        public static int GetColumnIndex(this IDataReader dataReader, IOrmLiteDialectProvider dialectProvider, string fieldName)
         {
             try
             {
-                return dataReader.GetOrdinal(OrmLiteConfig.DialectProvider.NamingStrategy.GetColumnName(fieldName));
+                return dataReader.GetOrdinal(dialectProvider.NamingStrategy.GetColumnName(fieldName));
             }
             catch (IndexOutOfRangeException ignoreNotFoundExInSomeProviders)
             {
@@ -267,10 +266,10 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        internal static int FindColumnIndex(this IDataReader dataReader, FieldDefinition fieldDef)
+        internal static int FindColumnIndex(this IDataReader dataReader, IOrmLiteDialectProvider dialectProvider, FieldDefinition fieldDef)
         {
             var index = NotFound;
-            index = dataReader.GetColumnIndex(fieldDef.FieldName);
+            index = dataReader.GetColumnIndex(dialectProvider, fieldDef.FieldName);
             if (index == NotFound)
             {
                 index = TryGuessColumnIndex(fieldDef.FieldName, dataReader);
@@ -278,7 +277,7 @@ namespace ServiceStack.OrmLite
             // Try fallback to original field name when overriden by alias
             if (index == NotFound && fieldDef.Alias != null && !OrmLiteConfig.DisableColumnGuessFallback)
             {
-                index = dataReader.GetColumnIndex(fieldDef.Name);
+                index = dataReader.GetColumnIndex(dialectProvider, fieldDef.Name);
                 if (index == NotFound)
                 {
                     index = TryGuessColumnIndex(fieldDef.Name, dataReader);
@@ -289,12 +288,10 @@ namespace ServiceStack.OrmLite
         }
 
         private const int NotFound = -1;
-        public static T PopulateWithSqlReader<T>(this T objWithProperties, IDataReader dataReader, FieldDefinition[] fieldDefs, Dictionary<string, int> indexCache)
+        public static T PopulateWithSqlReader<T>(this T objWithProperties, IOrmLiteDialectProvider dialectProvider, IDataReader dataReader, FieldDefinition[] fieldDefs, Dictionary<string, int> indexCache)
         {
             try
             {
-                var dialectProvider = OrmLiteConfig.DialectProvider;
-
                 foreach (var fieldDef in fieldDefs)
                 {
                     int index;
@@ -302,14 +299,14 @@ namespace ServiceStack.OrmLite
                     {
                         if (!indexCache.TryGetValue(fieldDef.Name, out index))
                         {
-                            index = FindColumnIndex(dataReader, fieldDef);
+                            index = FindColumnIndex(dataReader, dialectProvider, fieldDef);
 
                             indexCache.Add(fieldDef.Name, index);
                         }
                     }
                     else
                     {
-                        index = FindColumnIndex(dataReader, fieldDef);
+                        index = FindColumnIndex(dataReader, dialectProvider, fieldDef);
                     }
 
                     dialectProvider.SetDbValue(fieldDef, dataReader, index, objWithProperties);
@@ -401,11 +398,12 @@ namespace ServiceStack.OrmLite
             if (OrmLiteConfig.UpdateFilter != null)
                 OrmLiteConfig.UpdateFilter(dbCmd, obj);
 
-            var hadRowVersion = OrmLiteConfig.DialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
+            var dialectProvider = dbCmd.GetDialectProvider();
+            var hadRowVersion = dialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
             if (string.IsNullOrEmpty(dbCmd.CommandText))
                 return 0;
 
-            OrmLiteConfig.DialectProvider.SetParameterValues<T>(dbCmd, obj);
+            dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
             var rowsUpdated = dbCmd.ExecNonQuery();
 
@@ -430,7 +428,7 @@ namespace ServiceStack.OrmLite
                 if (dbCmd.Transaction == null)
                     dbCmd.Transaction = dbTrans = dbCmd.Connection.BeginTransaction();
 
-                var dialectProvider = OrmLiteConfig.DialectProvider;
+                var dialectProvider = dbCmd.GetDialectProvider();
 
                 var hadRowVersion = dialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
                 if (string.IsNullOrEmpty(dbCmd.CommandText))
@@ -473,18 +471,20 @@ namespace ServiceStack.OrmLite
 
         internal static int Delete<T>(this IDbCommand dbCmd, object anonType)
         {
-            var hadRowVersion = OrmLiteConfig.DialectProvider.PrepareParameterizedDeleteStatement<T>(dbCmd, anonType.AllFields<T>());
+            var dialectProvider = dbCmd.GetDialectProvider();
+            var hadRowVersion = dialectProvider.PrepareParameterizedDeleteStatement<T>(dbCmd, anonType.AllFields<T>());
 
-            OrmLiteConfig.DialectProvider.SetParameterValues<T>(dbCmd, anonType);
+            dialectProvider.SetParameterValues<T>(dbCmd, anonType);
 
             return AssertRowsUpdated(dbCmd, hadRowVersion);
         }
 
         internal static int DeleteNonDefaults<T>(this IDbCommand dbCmd, T filter)
         {
-            var hadRowVersion = OrmLiteConfig.DialectProvider.PrepareParameterizedDeleteStatement<T>(dbCmd, filter.NonDefaultFields<T>());
+            var dialectProvider = dbCmd.GetDialectProvider();
+            var hadRowVersion = dialectProvider.PrepareParameterizedDeleteStatement<T>(dbCmd, filter.NonDefaultFields<T>());
 
-            OrmLiteConfig.DialectProvider.SetParameterValues<T>(dbCmd, filter);
+            dialectProvider.SetParameterValues<T>(dbCmd, filter);
 
             return AssertRowsUpdated(dbCmd, hadRowVersion);
         }
@@ -513,7 +513,7 @@ namespace ServiceStack.OrmLite
                 if (dbCmd.Transaction == null)
                     dbCmd.Transaction = dbTrans = dbCmd.Connection.BeginTransaction();
 
-                var dialectProvider = OrmLiteConfig.DialectProvider;
+                var dialectProvider = dbCmd.GetDialectProvider();
 
                 dialectProvider.PrepareParameterizedDeleteStatement<T>(dbCmd, deleteFields);
 
@@ -546,11 +546,12 @@ namespace ServiceStack.OrmLite
         internal static string DeleteByIdSql<T>(this IDbCommand dbCmd, object id)
         {
             var modelDef = ModelDefinition<T>.Definition;
-            var idParamString = OrmLiteConfig.DialectProvider.GetParam();
+            var dialectProvider = dbCmd.GetDialectProvider();
+            var idParamString = dialectProvider.GetParam();
 
             var sql = string.Format("DELETE FROM {0} WHERE {1} = {2}",
-                OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef),
-                OrmLiteConfig.DialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName),
+                dialectProvider.GetQuotedTableName(modelDef),
+                dialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName),
                 idParamString);
 
             var idParam = dbCmd.CreateParameter();
@@ -572,11 +573,12 @@ namespace ServiceStack.OrmLite
         internal static string DeleteByIdSql<T>(this IDbCommand dbCmd, object id, ulong rowVersion)
         {
             var modelDef = ModelDefinition<T>.Definition;
+            var dialectProvider = dbCmd.GetDialectProvider();
 
             dbCmd.Parameters.Clear();
 
             var idParam = dbCmd.CreateParameter();
-            idParam.ParameterName = OrmLiteConfig.DialectProvider.GetParam();
+            idParam.ParameterName = dialectProvider.GetParam();
             idParam.Value = id;
             dbCmd.Parameters.Add(idParam);
 
@@ -586,15 +588,15 @@ namespace ServiceStack.OrmLite
                     "Cannot use DeleteById with rowVersion for model type without a row version column");
 
             var rowVersionParam = dbCmd.CreateParameter();
-            rowVersionParam.ParameterName = OrmLiteConfig.DialectProvider.GetParam("rowVersion");
+            rowVersionParam.ParameterName = dialectProvider.GetParam("rowVersion");
             rowVersionParam.Value = rowVersion;
             dbCmd.Parameters.Add(rowVersionParam);
 
             var sql = string.Format("DELETE FROM {0} WHERE {1} = {2} AND {3} = {4}",
-                OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef),
-                OrmLiteConfig.DialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName),
+                dialectProvider.GetQuotedTableName(modelDef),
+                dialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName),
                 idParam.ParameterName,
-                OrmLiteConfig.DialectProvider.GetQuotedColumnName(rowVersionField.FieldName),
+                dialectProvider.GetQuotedColumnName(rowVersionField.FieldName),
                 rowVersionParam.ParameterName);
 
             return sql;
@@ -605,18 +607,18 @@ namespace ServiceStack.OrmLite
             var sqlIn = idValues.GetIdsInSql();
             if (sqlIn == null) return 0;
 
-            var sql = GetDeleteByIdsSql<T>(sqlIn);
+            var sql = GetDeleteByIdsSql<T>(sqlIn, dbCmd.GetDialectProvider());
 
             return dbCmd.ExecuteSql(sql);
         }
 
-        internal static string GetDeleteByIdsSql<T>(string sqlIn)
+        internal static string GetDeleteByIdsSql<T>(string sqlIn, IOrmLiteDialectProvider dialectProvider)
         {
             var modelDef = ModelDefinition<T>.Definition;
 
             var sql = string.Format("DELETE FROM {0} WHERE {1} IN ({2})",
-                OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef),
-                OrmLiteConfig.DialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName),
+                dialectProvider.GetQuotedTableName(modelDef),
+                dialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName),
                 sqlIn);
             return sql;
         }
@@ -628,7 +630,7 @@ namespace ServiceStack.OrmLite
 
         internal static int DeleteAll(this IDbCommand dbCmd, Type tableType)
         {
-            return dbCmd.ExecuteSql(OrmLiteConfig.DialectProvider.ToDeleteStatement(tableType, null));
+            return dbCmd.ExecuteSql(dbCmd.GetDialectProvider().ToDeleteStatement(tableType, null));
         }
 
         internal static int DeleteFmt<T>(this IDbCommand dbCmd, string sqlFilter, params object[] filterParams)
@@ -638,7 +640,7 @@ namespace ServiceStack.OrmLite
 
         internal static int DeleteFmt(this IDbCommand dbCmd, Type tableType, string sqlFilter, params object[] filterParams)
         {
-            return dbCmd.ExecuteSql(OrmLiteConfig.DialectProvider.ToDeleteStatement(tableType, sqlFilter, filterParams));
+            return dbCmd.ExecuteSql(dbCmd.GetDialectProvider().ToDeleteStatement(tableType, sqlFilter, filterParams));
         }
 
         internal static long Insert<T>(this IDbCommand dbCmd, T obj, bool selectIdentity = false)
@@ -646,12 +648,13 @@ namespace ServiceStack.OrmLite
             if (OrmLiteConfig.InsertFilter != null)
                 OrmLiteConfig.InsertFilter(dbCmd, obj);
 
-            OrmLiteConfig.DialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd);
+            var dialectProvider = dbCmd.GetDialectProvider();
+            dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd);
 
-            OrmLiteConfig.DialectProvider.SetParameterValues<T>(dbCmd, obj);
+            dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
             if (selectIdentity)
-                return OrmLiteConfig.DialectProvider.InsertAndGetLastInsertId<T>(dbCmd);
+                return dialectProvider.InsertAndGetLastInsertId<T>(dbCmd);
 
             return dbCmd.ExecNonQuery();
         }
@@ -670,7 +673,7 @@ namespace ServiceStack.OrmLite
                 if (dbCmd.Transaction == null)
                     dbCmd.Transaction = dbTrans = dbCmd.Connection.BeginTransaction();
 
-                var dialectProvider = OrmLiteConfig.DialectProvider;
+                var dialectProvider = dbCmd.GetDialectProvider();
 
                 dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd);
 
@@ -709,8 +712,9 @@ namespace ServiceStack.OrmLite
             {
                 if (modelDef.HasAutoIncrementId)
                 {
+                    var dialectProvider = dbCmd.GetDialectProvider();
                     var newId = dbCmd.Insert(obj, selectIdentity: true);
-                    var safeId = OrmLiteConfig.DialectProvider.ConvertDbValue(newId, modelDef.PrimaryKey.FieldType);
+                    var safeId = dialectProvider.ConvertDbValue(newId, modelDef.PrimaryKey.FieldType);
                     modelDef.PrimaryKey.SetValueFn(obj, safeId);
                     id = newId;
                 }
@@ -774,8 +778,9 @@ namespace ServiceStack.OrmLite
                     {
                         if (modelDef.HasAutoIncrementId)
                         {
+                            var dialectProvider = dbCmd.GetDialectProvider();
                             var newId = dbCmd.Insert(row, selectIdentity: true);
-                            var safeId = OrmLiteConfig.DialectProvider.ConvertDbValue(newId, modelDef.PrimaryKey.FieldType);
+                            var safeId = dialectProvider.ConvertDbValue(newId, modelDef.PrimaryKey.FieldType);
                             modelDef.PrimaryKey.SetValueFn(row, safeId);
                             id = newId;
                         }
@@ -899,11 +904,12 @@ namespace ServiceStack.OrmLite
         }
 
         // Procedures
-        internal static void ExecuteProcedure<T>(this IDbCommand dbCommand, T obj)
+        internal static void ExecuteProcedure<T>(this IDbCommand dbCmd, T obj)
         {
-            string sql = OrmLiteConfig.DialectProvider.ToExecuteProcedureStatement(obj);
-            dbCommand.CommandType = CommandType.StoredProcedure;
-            dbCommand.ExecuteSql(sql);
+            var dialectProvider = dbCmd.GetDialectProvider();
+            string sql = dialectProvider.ToExecuteProcedureStatement(obj);
+            dbCmd.CommandType = CommandType.StoredProcedure;
+            dbCmd.ExecuteSql(sql);
         }
 
         internal static ulong GetRowVersion(this IDbCommand dbCmd, ModelDefinition modelDef, object id)
@@ -914,12 +920,13 @@ namespace ServiceStack.OrmLite
 
         internal static string RowVersionSql(this IDbCommand dbCmd, ModelDefinition modelDef, object id)
         {
-            var idParamString = OrmLiteConfig.DialectProvider.GetParam();
+            var dialectProvider = dbCmd.GetDialectProvider();
+            var idParamString = dialectProvider.GetParam();
 
             var sql = string.Format("SELECT {0} FROM {1} WHERE {2} = {3}",
-                OrmLiteConfig.DialectProvider.GetRowVersionColumnName(modelDef.RowVersion),
-                OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef),
-                OrmLiteConfig.DialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName),
+                dialectProvider.GetRowVersionColumnName(modelDef.RowVersion),
+                dialectProvider.GetQuotedTableName(modelDef),
+                dialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName),
                 idParamString);
 
             dbCmd.Parameters.Clear();
