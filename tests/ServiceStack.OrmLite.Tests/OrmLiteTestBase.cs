@@ -79,7 +79,7 @@ namespace ServiceStack.OrmLite.Tests
 				ConnectionString = GetFileConnectionString();
 		}
 
-        public Dialect Dialect = Dialect.MySql;
+        public Dialect Dialect = Dialect.Sqlite;
 	    protected OrmLiteConnectionFactory DbFactory;
 
         OrmLiteConnectionFactory Init(string connStr, IOrmLiteDialectProvider dialectProvider)
