@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using NUnit.Framework;
+using ServiceStack.OrmLite.Tests.UseCase;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
@@ -12,7 +13,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var db = OpenDbConnection())
             {
-                LoadReferencesTests.DropTables(db); //Has conflicting 'Order' table
+                CustomerOrdersUseCase.DropTables(db); //Has conflicting 'Order' table
                 db.DropAndCreateTable<Order>();
                 db.DropAndCreateTable<Customer>();
                 db.DropAndCreateTable<CustomerAddress>();

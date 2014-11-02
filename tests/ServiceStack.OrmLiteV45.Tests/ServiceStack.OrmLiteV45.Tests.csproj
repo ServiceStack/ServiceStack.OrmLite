@@ -80,6 +80,7 @@
     </Compile>
     <Compile Include="SqlExpressionTests.cs" />
     <Compile Include="TestHelpers.cs" />
+    <Compile Include="UseCase\CustomerOrdersUseCase.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite.MySqlV45\ServiceStack.OrmLite.MySqlV45.csproj">
@@ -100,6 +101,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

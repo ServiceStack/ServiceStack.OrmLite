@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
+using ServiceStack.OrmLite.Tests.UseCase;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
@@ -60,7 +61,7 @@ namespace ServiceStack.OrmLite.Tests
         public new void TestFixtureSetUp()
         {
             db = base.OpenDbConnection();
-            DropTables(db); //Has conflicting 'Order' table
+            CustomerOrdersUseCase.DropTables(db); //Has conflicting 'Order' table
 
             db.DropAndCreateTable<Order>();
             db.DropAndCreateTable<Customer>();
@@ -80,12 +81,6 @@ namespace ServiceStack.OrmLite.Tests
         public void TestFixtureTearDown()
         {
             db.Dispose();
-        }
-
-        public static void DropTables(IDbConnection db)
-        {
-            db.DropTable<Order>();
-            db.DropTable<Customer>();
         }
 
         public static Customer GetCustomerWithOrders(string id = "1")
