@@ -149,5 +149,21 @@ namespace ServiceStack.OrmLite
         {
             return ((OrmLiteConnectionFactory)connectionFactory).OpenDbConnection(namedConnection);
         }
+
+        public static IDbConnection ToDbConnection(this IDbConnection db)
+        {
+            var hasDb = db as IHasDbConnection;
+            return hasDb != null
+                ? hasDb.DbConnection
+                : db;
+        }
+
+        public static IDbCommand ToDbCommand(this IDbCommand dbCmd)
+        {
+            var hasDbCmd = dbCmd as IHasDbCommand;
+            return hasDbCmd != null
+                ? hasDbCmd.DbCommand
+                : dbCmd;
+        }
     }
 }

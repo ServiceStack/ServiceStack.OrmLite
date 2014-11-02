@@ -463,28 +463,12 @@ namespace ServiceStack.OrmLite.SqlServer
 
         protected SqlConnection Unwrap(IDbConnection db)
         {
-            var dbAsync = db as SqlConnection;
-            if (dbAsync != null)
-                return dbAsync;
-
-            var hasDb = db as IHasDbConnection;
-            if (hasDb != null)
-                return (SqlConnection)hasDb.DbConnection;
-
-            throw new ArgumentException("{0} is not an SqlConnection".Fmt(db.GetType().Name));
+            return (SqlConnection)db.ToDbConnection();
         }
 
         protected SqlCommand Unwrap(IDbCommand cmd)
         {
-            var cmdAsync = cmd as SqlCommand;
-            if (cmdAsync != null)
-                return cmdAsync;
-
-            var hasDb = cmd as IHasDbCommand;
-            if (hasDb != null)
-                return (SqlCommand)hasDb.DbCommand;
-
-            throw new ArgumentException("{0} is not an SqlCommand".Fmt(cmd.GetType().Name));
+            return (SqlCommand) cmd.ToDbCommand();
         }
 
         protected SqlDataReader Unwrap(IDataReader reader)

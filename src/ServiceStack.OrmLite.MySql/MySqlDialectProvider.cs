@@ -228,28 +228,12 @@ namespace ServiceStack.OrmLite.MySql
 
         protected MySqlConnection Unwrap(IDbConnection db)
         {
-            var dbAsync = db as MySqlConnection;
-            if (dbAsync != null)
-                return dbAsync;
-
-            var hasDb = db as IHasDbConnection;
-            if (hasDb != null)
-                return (MySqlConnection)hasDb.DbConnection;
-
-            throw new ArgumentException("{0} is not a MySqlConnection".Fmt(db.GetType().Name));
+            return (MySqlConnection)db.ToDbConnection();
         }
 
         protected MySqlCommand Unwrap(IDbCommand cmd)
         {
-            var cmdAsync = cmd as MySqlCommand;
-            if (cmdAsync != null)
-                return cmdAsync;
-
-            var hasDb = cmd as IHasDbCommand;
-            if (hasDb != null)
-                return (MySqlCommand)hasDb.DbCommand;
-
-            throw new ArgumentException("{0} is not an MySqlCommand".Fmt(cmd.GetType().Name));
+            return (MySqlCommand)cmd.ToDbCommand();
         }
 
         protected MySqlDataReader Unwrap(IDataReader reader)
