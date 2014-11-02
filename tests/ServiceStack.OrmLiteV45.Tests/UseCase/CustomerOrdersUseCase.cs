@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Logging;
@@ -123,7 +124,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
     public class CustomerOrdersUseCase : OrmLiteTestBase
     {
         [Test]
-        public void Can_run_Customer_Orders_UseCase()
+        public async Task Can_run_Customer_Orders_UseCase()
         {
             LogManager.LogFactory = new ConsoleLogFactory();
 
@@ -132,11 +133,11 @@ namespace ServiceStack.OrmLite.Tests.UseCase
                 //Re-Create all table schemas:
                 RecreateTables(db);
 
-                db.Insert(new Employee { Id = 1, Name = "Employee 1" });
-                db.Insert(new Employee { Id = 2, Name = "Employee 2" });
+                await db.InsertAsync(new Employee { Id = 1, Name = "Employee 1" });
+                await db.InsertAsync(new Employee { Id = 2, Name = "Employee 2" });
                 var product1 = new Product { Id = 1, Name = "Product 1", UnitPrice = 10 };
                 var product2 = new Product { Id = 2, Name = "Product 2", UnitPrice = 20 };
-                db.Save(product1, product2);
+                await db.SaveAsync(product1, product2);
 
                 var customer = new Customer {
                     FirstName = "Orm",
@@ -155,8 +156,8 @@ namespace ServiceStack.OrmLite.Tests.UseCase
                     CreatedAt = DateTime.UtcNow,
                 };
 
-                var customerId = db.Insert(customer, selectIdentity: true); //Get Auto Inserted Id
-                customer = db.Single<Customer>(new { customer.Email }); //Query
+                var customerId = await db.InsertAsync(customer, selectIdentity: true); //Get Auto Inserted Id
+                customer = await db.SingleAsync<Customer>(new { customer.Email }); //Query
                 Assert.That(customer.Id, Is.EqualTo(customerId));
 
                 //Direct access to System.Data.Transactions:
@@ -169,7 +170,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
                         Freight = 10.50m,
                         ShippingAddress = new Address { Line1 = "3 Street", Country = "US", State = "NY", City = "New York", ZipCode = "12121" },
                     };
-                    db.Save(order); //Inserts 1st time
+                    await db.SaveAsync(order); //Inserts 1st time
 
                     //order.Id populated on Save().
 
@@ -189,11 +190,11 @@ namespace ServiceStack.OrmLite.Tests.UseCase
                         }
                     };
 
-                    db.Save(orderDetails);
+                    await db.SaveAsync(orderDetails);
 
                     order.Total = orderDetails.Sum(x => x.UnitPrice * x.Quantity * x.Discount) + order.Freight;
 
-                    db.Save(order); //Updates 2nd Time
+                    await db.SaveAsync(order); //Updates 2nd Time
 
                     trans.Commit();
                 }
