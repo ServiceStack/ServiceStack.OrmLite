@@ -46,6 +46,7 @@ namespace ServiceStack.OrmLite.Support
             fieldDefs = modelDef.AllFieldDefinitionsArray.Where(x => x.IsReference).ToList();
 
             expr.Select(dialectProvider.GetQuotedColumnName(modelDef, modelDef.PrimaryKey))
+                .ClearLimits()
                 .OrderBy(""); //Invalid in Sub Selects
             subSql = expr.ToSelectStatement();
         }

@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
 using System.Linq;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
@@ -602,6 +603,51 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(addresses.Count, Is.EqualTo(2));
             Assert.That(orders.Count, Is.EqualTo(6));
         }
+
+        [Test]
+        public void Can_load_references_with_OrderBy_and_Paging()
+        {
+            db.DropTable<Parent>();
+            db.DropTable<Child>();
+            db.CreateTable<Child>();
+            db.CreateTable<Parent>();
+
+            db.Save(new Child { Id = 1, Value = "Lolz" });
+            db.Insert(new Parent { Id = 1, ChildId = null });
+            db.Insert(new Parent { Id = 2, ChildId = 1 });
+
+            // Select the Parent.Id == 2.  LoadSelect should populate the child, but doesn't.
+            var q = db.From<Parent>()
+                .Limit(0, 1)
+                .OrderByDescending<Parent>(p => p.Id);
+
+            var results = db.LoadSelect(q);
+
+            Assert.That(results.Count, Is.EqualTo(1));
+            Assert.That(results[0].Child, Is.Not.Null);
+            Assert.That(results[0].Child.Value, Is.EqualTo("Lolz"));
+
+            results.PrintDump();
+        }
+    }
+
+    public class Parent
+    {
+        [PrimaryKey]
+        public int Id { get; set; }
+
+        [References(typeof(Child))]
+        public int? ChildId { get; set; }
+
+        [Reference]
+        public Child Child { get; set; }
+    }
+
+    public class Child
+    {
+        [PrimaryKey]
+        public int Id { get; set; }
+        public string Value { get; set; }
     }
 
     [Alias("Table1")]
