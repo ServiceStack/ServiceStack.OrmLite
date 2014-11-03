@@ -45,10 +45,7 @@ namespace ServiceStack.OrmLite.Support
             modelDef = ModelDefinition<Into>.Definition;
             fieldDefs = modelDef.AllFieldDefinitionsArray.Where(x => x.IsReference).ToList();
 
-            expr.Select(dialectProvider.GetQuotedColumnName(modelDef, modelDef.PrimaryKey))
-                .ClearLimits()
-                .OrderBy(""); //Invalid in Sub Selects
-            subSql = expr.ToSelectStatement();
+            subSql = dialectProvider.GetLoadChildrenSubSelect(modelDef, expr);
         }
 
         protected string GetRefListSql(ModelDefinition refModelDef, FieldDefinition refField)

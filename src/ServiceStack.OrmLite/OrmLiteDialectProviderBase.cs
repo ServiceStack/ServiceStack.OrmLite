@@ -1413,6 +1413,15 @@ namespace ServiceStack.OrmLite
                 .Replace("%", @"^%");
         }
 
+        public virtual string GetLoadChildrenSubSelect<From>(ModelDefinition modelDef, SqlExpression<From> expr)
+        {
+            expr.Select(this.GetQuotedColumnName(modelDef, modelDef.PrimaryKey));
+
+            var subSql = expr.ToSelectStatement();
+
+            return subSql;
+        }
+
         //Async API's, should be overrided by Dialect Providers to use .ConfigureAwait(false)
         //Default impl below uses TaskAwaiter shim in async.cs
 

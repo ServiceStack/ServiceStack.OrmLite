@@ -159,5 +159,7 @@ namespace ServiceStack.OrmLite
         Task<T> ReaderRead<T>(IDataReader reader, Func<T> fn, CancellationToken token = default(CancellationToken));
 
         Task<long> InsertAndGetLastInsertIdAsync<T>(IDbCommand dbCmd, CancellationToken token);
+    
+        string GetLoadChildrenSubSelect<From>(ModelDefinition modelDef, SqlExpression<From> expr);
     }
 }

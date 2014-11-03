@@ -461,6 +461,22 @@ namespace ServiceStack.OrmLite.SqlServer
             return sqlSelect;
         }
 
+        public override string GetLoadChildrenSubSelect<From>(ModelDefinition modelDef, SqlExpression<From> expr)
+        {
+            if (!expr.OrderByExpression.IsNullOrEmpty())
+            {
+                expr.Select(this.GetQuotedColumnName(modelDef, modelDef.PrimaryKey))
+                    .ClearLimits()
+                    .OrderBy(""); //Invalid in Sub Selects
+
+                var subSql = expr.ToSelectStatement();
+
+                return subSql;
+            }
+            
+            return base.GetLoadChildrenSubSelect(modelDef, expr);
+        }
+
         protected SqlConnection Unwrap(IDbConnection db)
         {
             return (SqlConnection)db.ToDbConnection();
