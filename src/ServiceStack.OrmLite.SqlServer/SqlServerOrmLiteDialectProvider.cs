@@ -463,7 +463,7 @@ namespace ServiceStack.OrmLite.SqlServer
 
         public override string GetLoadChildrenSubSelect<From>(ModelDefinition modelDef, SqlExpression<From> expr)
         {
-            if (!expr.OrderByExpression.IsNullOrEmpty())
+            if (!expr.OrderByExpression.IsNullOrEmpty() && expr.Rows == null)
             {
                 expr.Select(this.GetQuotedColumnName(modelDef, modelDef.PrimaryKey))
                     .ClearLimits()

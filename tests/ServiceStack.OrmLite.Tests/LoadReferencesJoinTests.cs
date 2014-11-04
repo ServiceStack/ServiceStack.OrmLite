@@ -618,7 +618,7 @@ namespace ServiceStack.OrmLite.Tests
 
             // Select the Parent.Id == 2.  LoadSelect should populate the child, but doesn't.
             var q = db.From<Parent>()
-                .Limit(0, 1)
+                .Take(1)
                 .OrderByDescending<Parent>(p => p.Id);
 
             var results = db.LoadSelect(q);
@@ -627,6 +627,15 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(results[0].Child, Is.Not.Null);
             Assert.That(results[0].Child.Value, Is.EqualTo("Lolz"));
 
+            q = db.From<Parent>()
+                .Skip(1)
+                .OrderBy<Parent>(p => p.Id);
+
+            results = db.LoadSelect(q);
+
+            Assert.That(results.Count, Is.EqualTo(1));
+            Assert.That(results[0].Child, Is.Not.Null);
+            Assert.That(results[0].Child.Value, Is.EqualTo("Lolz"));
             results.PrintDump();
         }
     }
