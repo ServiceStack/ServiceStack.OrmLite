@@ -292,7 +292,7 @@ namespace ServiceStack.OrmLite.Oracle
 
             if (fieldType.IsEnum)
             {
-                var enumValue = OrmLiteConfig.DialectProvider.StringSerializer.SerializeToString(value);
+                var enumValue = StringSerializer.SerializeToString(value);
                 // Oracle stores empty strings in varchar columns as null so match that behavior here
                 if (enumValue == null)
                     return null;
@@ -526,7 +526,6 @@ namespace ServiceStack.OrmLite.Oracle
             return sql;
         }
 
-
         public override string ToUpdateRowStatement(object objWithProperties, ICollection<string> updateFields = null)
         {
             var sqlFilter = new StringBuilder();
@@ -562,7 +561,6 @@ namespace ServiceStack.OrmLite.Oracle
 
             return updateSql;
         }
-
 
         public override string ToDeleteRowStatement(object objWithProperties)
         {
@@ -1100,7 +1098,7 @@ namespace ServiceStack.OrmLite.Oracle
                 else
                 {
                     orderByExpression = string.Format("ORDER BY {0}",
-                        OrmLiteConfig.DialectProvider.GetQuotedColumnName(primaryKey.FieldName));
+                        GetQuotedColumnName(primaryKey.FieldName));
                 }
             }
             sbInner.Append(" " + orderByExpression);
