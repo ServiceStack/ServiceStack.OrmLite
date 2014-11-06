@@ -1098,7 +1098,7 @@ namespace ServiceStack.OrmLite.Oracle
                 else
                 {
                     orderByExpression = string.Format("ORDER BY {0}",
-                        GetQuotedColumnName(primaryKey.FieldName));
+                        this.GetQuotedColumnName(modelDef, primaryKey.FieldName));
                 }
             }
             sbInner.Append(" " + orderByExpression);
