@@ -428,5 +428,92 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 Assert.That(rows.Map(x => x.Id), Is.EqualTo(new[] { 2, 1 }));
             }
         }
+
+        public class CrossJoinTableA 
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+        }
+
+        public class CrossJoinTableB 
+        {
+            public int Id { get; set; }
+            public int Value { get; set; }
+        }
+
+        public class CrossJoinResult 
+        {
+            public int CrossJoinTableAId { get; set; }
+            public string Name { get; set; }
+            public int CrossJoinTableBId { get; set; }
+            public int Value { get; set; }
+
+            public override bool Equals(object obj) 
+            {
+                var other = obj as CrossJoinResult;
+                if(other == null)
+                    return false;
+
+                return CrossJoinTableAId == other.CrossJoinTableAId && string.Equals(Name, other.Name) && CrossJoinTableBId == other.CrossJoinTableBId && Value == other.Value;
+            }
+        }
+
+        [Test]
+        public void Can_perform_a_crossjoin_without_a_join_expression() 
+        {
+            using(var db = OpenDbConnection()) 
+            {
+                db.DropAndCreateTable<CrossJoinTableA>();
+                db.DropAndCreateTable<CrossJoinTableB>();
+
+                db.Insert(new CrossJoinTableA {Id = 1, Name = "Foo"});
+                db.Insert(new CrossJoinTableA {Id = 2, Name = "Bar"});
+                db.Insert(new CrossJoinTableB {Id = 5, Value = 3});
+                db.Insert(new CrossJoinTableB {Id = 6, Value = 42});
+
+                var q = db.From<CrossJoinTableA>().CrossJoin<CrossJoinTableB>().OrderBy<CrossJoinTableA>(x => x.Id).ThenBy<CrossJoinTableB>(x => x.Id);
+                var result = db.Select<CrossJoinResult>(q);
+
+                db.GetLastSql().Print();
+
+                Assert.That(result.Count, Is.EqualTo(4));
+                var expected = new List<CrossJoinResult> 
+                {
+                    new CrossJoinResult { CrossJoinTableAId = 1, Name = "Foo", CrossJoinTableBId = 5, Value = 3 },
+                    new CrossJoinResult { CrossJoinTableAId = 1, Name = "Foo", CrossJoinTableBId = 6, Value = 42 },
+                    new CrossJoinResult { CrossJoinTableAId = 2, Name = "Bar", CrossJoinTableBId = 5, Value = 3},
+                    new CrossJoinResult { CrossJoinTableAId = 2, Name = "Bar", CrossJoinTableBId = 6, Value = 42},
+                };
+                Assert.That(result, Is.EquivalentTo(expected));
+            }
+        }
+
+        [Test]
+        public void Can_perform_a_crossjoin_with_a_join_expression() 
+        {
+            using (var db = OpenDbConnection()) {
+                db.DropAndCreateTable<CrossJoinTableA>();
+                db.DropAndCreateTable<CrossJoinTableB>();
+
+                db.Insert(new CrossJoinTableA { Id = 1, Name = "Foo" });
+                db.Insert(new CrossJoinTableA { Id = 2, Name = "Bar" });
+                db.Insert(new CrossJoinTableB { Id = 5, Value = 3 });
+                db.Insert(new CrossJoinTableB { Id = 6, Value = 42 });
+                db.Insert(new CrossJoinTableB { Id = 7, Value = 56 });
+
+                var q = db.From<CrossJoinTableA>().CrossJoin<CrossJoinTableB>((a, b) => b.Id > 5 && a.Id < 2).OrderBy<CrossJoinTableA>(x => x.Id).ThenBy<CrossJoinTableB>(x => x.Id);
+                var result = db.Select<CrossJoinResult>(q);
+
+                db.GetLastSql().Print();
+
+                Assert.That(result.Count, Is.EqualTo(2));
+                var expected = new List<CrossJoinResult> 
+                {
+                    new CrossJoinResult { CrossJoinTableAId = 1, Name = "Foo", CrossJoinTableBId = 6, Value = 42 },
+                    new CrossJoinResult { CrossJoinTableAId = 1, Name = "Foo", CrossJoinTableBId = 7, Value = 56 },
+                };
+                Assert.That(result, Is.EquivalentTo(expected));
+            }
+        }
     }
 }
