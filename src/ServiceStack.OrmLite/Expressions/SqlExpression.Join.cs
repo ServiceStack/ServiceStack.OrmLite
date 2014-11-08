@@ -94,12 +94,12 @@ namespace ServiceStack.OrmLite
             var parentDef = sourceDef;
             var childDef = targetDef;
 
-            var refField = OrmLiteReadCommandExtensions.GetRefFieldDefIfExists(parentDef, childDef);
+            var refField = parentDef.GetRefFieldDefIfExists(childDef);
             if (refField == null) 
             {
                 parentDef = targetDef;
                 childDef = sourceDef;
-                refField = OrmLiteReadCommandExtensions.GetRefFieldDefIfExists(parentDef, childDef);
+                refField = parentDef.GetRefFieldDefIfExists(childDef);
             }
 
             if (refField == null) 
@@ -126,8 +126,9 @@ namespace ServiceStack.OrmLite
             useFieldName = true;
             sep = " ";
 
-            string sqlExpr = joinExpr != null ? InternalCreateSqlFromExpression(joinExpr) 
-                                              : InternalCreateSqlFromDefinitions(sourceDef, targetDef, "CROSS JOIN".Equals(joinType));
+            var sqlExpr = joinExpr != null 
+                ? InternalCreateSqlFromExpression(joinExpr) 
+                : InternalCreateSqlFromDefinitions(sourceDef, targetDef, "CROSS JOIN".Equals(joinType));
 
             var joinDef = tableDefs.Contains(targetDef) && !tableDefs.Contains(sourceDef)
                               ? sourceDef
