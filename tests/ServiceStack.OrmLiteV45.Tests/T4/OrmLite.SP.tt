@@ -1,0 +1,56 @@
+﻿<#@ include file="OrmLite.Core.ttinclude" #>
+<#
+	// Settings
+    ConnectionStringName = "";			// Uses last connection string in config if not specified
+    var SPNamespace = "StoredProcedures";
+	ClassPrefix = "";
+	ClassSuffix = "";
+
+    // Read schema
+	var sps = LoadSPs();
+
+	// Generate output
+	if (sps.Count>0)
+	{
+#>
+<#
+if (string.IsNullOrEmpty(SPNamespace)) SPNamespace=ConnectionStringName;
+if (string.IsNullOrEmpty(SPNamespace)) SPNamespace="StoredProcedures";
+#>
+using System;
+using System.Data.Common;
+using System.Data;
+using System.Collections.Generic;
+using ServiceStack.OrmLite;
+
+namespace <#=SPNamespace#>
+{
+	public static class SPList 
+	{
+		private static DbParameter CreateNewParameter(DbCommand dbCommand, string paramName, object paramValue, ParameterDirection paramDirection, DbType paramType)
+		{
+			DbParameter param = dbCommand.CreateParameter();
+			param.Direction = paramDirection;
+			param.DbType = paramType;
+			param.ParameterName = paramName;
+			param.Value = paramValue;
+			return param;
+		}
+
+<#foreach(var sp in sps){#>
+		public static OrmLiteSPStatement <#=sp.CleanName#>(this IDbConnection db<#foreach(var param in sp.Parameters){#>, <#=param.NullableSysType#> <#=Inflector.MakeInitialLowerCase(param.Name)#> = null<#}#>)
+		{
+			var dbCmd = (DbCommand)OrmLiteConfig.ExecFilter.CreateCommand(db).ToDbCommand();
+			dbCmd.CommandText = "<#=sp.Name#>";
+			dbCmd.CommandType = CommandType.StoredProcedure;
+<#if (sp.Parameters.Count > 0) { foreach(var param in sp.Parameters){#>
+			dbCmd.Parameters.Add(CreateNewParameter(dbCmd,"<#=param.Name#>",<#=Inflector.MakeInitialLowerCase(param.Name)#>,ParameterDirection.Input,<#=param.DbType#>));
+<#}#> <#}#>
+			return new OrmLiteSPStatement(db, dbCmd);
+		}
+
+<#}#>
+	}
+}
+<# } #>
+
