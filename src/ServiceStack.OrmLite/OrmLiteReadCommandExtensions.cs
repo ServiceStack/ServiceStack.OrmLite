@@ -908,6 +908,10 @@ namespace ServiceStack.OrmLite
             }
             if (dbType != null)
                 p.DbType = dbType.Value;
+
+            if (p.DbType == DbType.String)
+                p.Size = dialectProvider.DefaultStringLength;
+
             return p;
         }
 
