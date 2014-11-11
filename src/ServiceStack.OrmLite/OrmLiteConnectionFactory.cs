@@ -84,8 +84,20 @@ namespace ServiceStack.OrmLite
                 ? new OrmLiteConnection(this)
                 : OrmLiteConnection;
 
-            //moved setting up the ConnectionFilter to OrmLiteConnection.Open
-            //return ConnectionFilter(connection);
+            return connection;
+        }
+
+        public IDbConnection OpenDbConnectionString(string connectionString)
+        {
+            if (connectionString == null)
+                throw new ArgumentNullException("connectionString");
+
+            var connection = new OrmLiteConnection(this) {
+                ConnectionString = connectionString
+            };
+
+            connection.Open();
+
             return connection;
         }
 
@@ -148,6 +160,11 @@ namespace ServiceStack.OrmLite
         public static IDbConnection OpenDbConnection(this IDbConnectionFactory connectionFactory, string namedConnection)
         {
             return ((OrmLiteConnectionFactory)connectionFactory).OpenDbConnection(namedConnection);
+        }
+
+        public static IDbConnection OpenDbConnectionString(this IDbConnectionFactory connectionFactory, string connectionString)
+        {
+            return ((OrmLiteConnectionFactory)connectionFactory).OpenDbConnectionString(connectionString);
         }
 
         public static IDbConnection ToDbConnection(this IDbConnection db)

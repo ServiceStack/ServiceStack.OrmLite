@@ -30,7 +30,7 @@ namespace ServiceStack.OrmLite
             {
                 if (dbConnection == null)
                 {
-                    dbConnection = Factory.ConnectionString.ToDbConnection(Factory.DialectProvider);
+                    dbConnection = ConnectionString.ToDbConnection(Factory.DialectProvider);
                 }
                 return dbConnection;
             }
@@ -95,10 +95,11 @@ namespace ServiceStack.OrmLite
             }
         }
 
+        private string connectionString;
         public string ConnectionString
         {
-            get { return Factory.ConnectionString; }
-            set { Factory.ConnectionString = value; }
+            get { return connectionString ?? Factory.ConnectionString; }
+            set { connectionString = value; }
         }
 
         public int ConnectionTimeout

@@ -171,5 +171,23 @@ namespace ServiceStack.OrmLite.Tests
             }
         }
 
+        [Test]
+        public void Can_open_different_ConnectionString_with_DbFactory()
+        {
+            var factory = new OrmLiteConnectionFactory(":memory:", SqliteDialect.Provider);
+            using (var db = factory.OpenDbConnection())
+            {
+                Assert.That(db.State, Is.EqualTo(ConnectionState.Open));
+                Assert.That(db.ConnectionString, Is.EqualTo(":memory:"));
+
+                var dbFilePath = "~/db.sqlite".MapAbsolutePath();
+                using (var dbFile = factory.OpenDbConnectionString(dbFilePath))
+                {
+                    Assert.That(dbFile.State, Is.EqualTo(ConnectionState.Open));
+                    Assert.That(dbFile.ConnectionString, Is.EqualTo(dbFilePath));                    
+                }
+            }
+        }
+
     }
 }
