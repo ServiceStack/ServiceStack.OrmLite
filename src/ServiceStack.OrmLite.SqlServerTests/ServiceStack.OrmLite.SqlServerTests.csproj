@@ -48,7 +48,7 @@
       <HintPath>..\..\lib\tests\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="ServiceStack.Client">
-      <HintPath>..\..\..\Test\lib\ServiceStack.Client.dll</HintPath>
+      <HintPath>..\..\lib\ServiceStack.Client.dll</HintPath>
     </Reference>
     <Reference Include="ServiceStack.Common">
       <HintPath>..\..\lib\ServiceStack.Common.dll</HintPath>

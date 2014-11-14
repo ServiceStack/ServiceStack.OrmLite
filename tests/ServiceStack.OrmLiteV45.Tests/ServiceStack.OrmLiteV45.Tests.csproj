@@ -34,7 +34,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Mono.Security">
-      <HintPath>..\..\..\ServiceStack\lib\Mono.Security.dll</HintPath>
+      <HintPath>..\..\lib\Mono.Security.dll</HintPath>
     </Reference>
     <Reference Include="nunit.framework">
       <HintPath>..\..\src\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
