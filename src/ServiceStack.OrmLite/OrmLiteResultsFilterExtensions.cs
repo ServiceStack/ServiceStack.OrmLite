@@ -95,7 +95,7 @@ namespace ServiceStack.OrmLite
 
             using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
             {
-                return reader.ExprConvertToList<T>(dbCmd.GetDialectProvider());
+                return reader.ConvertToList<T>(dbCmd.GetDialectProvider());
             }
         }
 
@@ -185,7 +185,7 @@ namespace ServiceStack.OrmLite
 
             using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
             {
-                return reader.ExprConvertTo<T>(dbCmd.GetDialectProvider());
+                return reader.ConvertTo<T>(dbCmd.GetDialectProvider());
             }
         }
 

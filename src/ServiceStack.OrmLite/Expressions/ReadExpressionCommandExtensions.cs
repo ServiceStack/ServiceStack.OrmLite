@@ -149,33 +149,6 @@ namespace ServiceStack.OrmLite
             var expr = dbCmd.GetDialectProvider().SqlExpression<T>().Where(predicate);
             return dbCmd.LoadListWithReferences<T, T>(expr);
         }
-
-        internal static T ExprConvertTo<T>(this IDataReader dataReader, IOrmLiteDialectProvider dialectProvider)
-        {
-            using (dataReader)
-            {
-                return dataReader.Read() ? dataReader.ConvertTo<T>(dialectProvider) : default(T);
-            }
-        }
-
-        internal static List<T> ExprConvertToList<T>(this IDataReader dataReader, IOrmLiteDialectProvider dialectProvider)
-        {
-            var fieldDefs = ModelDefinition<T>.Definition.AllFieldDefinitionsArray;
-
-            var to = new List<T>();
-            using (dataReader)
-            {
-               var indexCache = dataReader.GetIndexFieldsCache(ModelDefinition<T>.Definition);
-                while (dataReader.Read())
-                {
-                    var row = OrmLiteUtilExtensions.CreateInstance<T>();
-                    row.PopulateWithSqlReader(dialectProvider, dataReader, fieldDefs, indexCache);
-                    to.Add(row);
-                }
-            }
-            return to;
-        }
-
     }
 }
 
