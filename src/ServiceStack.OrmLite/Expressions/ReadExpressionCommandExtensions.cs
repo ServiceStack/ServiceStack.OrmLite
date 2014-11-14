@@ -154,20 +154,8 @@ namespace ServiceStack.OrmLite
         {
             using (dataReader)
             {
-                return dataReader.Read() ? dataReader.CreateInstance<T>(dialectProvider) : default(T);
+                return dataReader.Read() ? dataReader.ConvertTo<T>(dialectProvider) : default(T);
             }
-        }
-
-        internal static T CreateInstance<T>(this IDataReader dataReader, IOrmLiteDialectProvider dialectProvider)
-        {
-            var row = OrmLiteUtilExtensions.CreateInstance<T>();
-            var fieldDefs = ModelDefinition<T>.Definition.AllFieldDefinitionsArray;
-            foreach (var fieldDef in fieldDefs)
-            {
-                var index = dataReader.FindColumnIndex(dialectProvider, fieldDef);
-                dialectProvider.SetDbValue(fieldDef, dataReader, index, row);
-            }
-            return row;
         }
 
         internal static List<T> ExprConvertToList<T>(this IDataReader dataReader, IOrmLiteDialectProvider dialectProvider)

@@ -155,7 +155,7 @@ namespace ServiceStack.OrmLite
         internal static Task<T> ExprConvertToAsync<T>(this IDataReader dataReader, IOrmLiteDialectProvider dialectProvider, CancellationToken token)
         {
             return dialectProvider.ReaderRead(dataReader,
-                () => dataReader.CreateInstance<T>(dialectProvider), token);
+                () => dataReader.ConvertTo<T>(dialectProvider), token);
         }
 
         internal static Task<List<T>> ExprConvertToListAsync<T>(this IDataReader dataReader, IOrmLiteDialectProvider dialectProvider, CancellationToken token)
