@@ -25,6 +25,7 @@ namespace ServiceStack.OrmLite
 
         private string sep = string.Empty;
         protected bool useFieldName = false;
+        protected bool selectDistinct = false;
         private ModelDefinition modelDef;
         public bool PrefixFieldWithTableName { get; set; }
         public bool WhereStatementWithoutWhereString { get; set; }
@@ -54,6 +55,7 @@ namespace ServiceStack.OrmLite
             to.underlyingExpression = underlyingExpression;
             to.orderByProperties = orderByProperties;
             to.selectExpression = selectExpression;
+            to.selectDistinct = selectDistinct;
             to.fromExpression = fromExpression;
             to.whereExpression = whereExpression;
             to.groupBy = groupBy;
@@ -1257,8 +1259,10 @@ namespace ServiceStack.OrmLite
 
         private void BuildSelectExpression(string fields, bool distinct)
         {
+            selectDistinct = distinct;
+
             selectExpression = string.Format("SELECT {0}{1}",
-                (distinct ? "DISTINCT " : ""),
+                (selectDistinct ? "DISTINCT " : ""),
                 (string.IsNullOrEmpty(fields) ?
                     DialectProvider.GetColumnNames(modelDef) :
                     fields));

@@ -217,7 +217,7 @@ namespace ServiceStack.OrmLite
             }
 
             var columns = sbSelect.Length > 0 ? sbSelect.ToString() : "*";
-            SelectExpression = "SELECT " + columns;
+            SelectExpression = "SELECT " + (selectDistinct ? "DISTINCT " : "") + columns;
 
             return ToSelectStatement();
         }

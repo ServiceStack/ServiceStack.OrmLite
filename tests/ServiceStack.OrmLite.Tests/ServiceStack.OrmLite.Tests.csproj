@@ -132,6 +132,7 @@
     <Compile Include="Issues\MismatchSchemaTests.cs" />
     <Compile Include="Issues\MultithreadingIssueTests.cs" />
     <Compile Include="Issues\SchemaTests.cs" />
+    <Compile Include="Issues\SelectDistinctTests.cs" />
     <Compile Include="Issues\SelectIntoTests.cs" />
     <Compile Include="LicenseUsageTests.cs" />
     <Compile Include="LoadReferencesJoinTests.cs" />
