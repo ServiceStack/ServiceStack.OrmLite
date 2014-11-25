@@ -85,6 +85,14 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Create a managed OrmLite IDbCommand
+        /// </summary>
+        public static IDbCommand OpenCommand(this IDbConnection dbConn)
+        {
+            return OrmLiteConfig.ExecFilter.CreateCommand(dbConn);
+        }
+
+        /// <summary>
         /// Returns results from using a LINQ Expression. E.g:
         /// <para>db.Select&lt;Person&gt;(x =&gt; x.Age &gt; 40)</para>
         /// </summary>
