@@ -160,7 +160,7 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecuteScalar();
         }
 
-        internal static long ExecLongScalar(this IDbCommand dbCmd, string sql = null)
+        public static long ExecLongScalar(this IDbCommand dbCmd, string sql = null)
         {
             if (sql != null)
                 dbCmd.CommandText = sql;

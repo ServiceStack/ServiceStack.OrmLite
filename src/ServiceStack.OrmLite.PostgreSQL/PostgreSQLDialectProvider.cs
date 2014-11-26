@@ -12,6 +12,8 @@ namespace ServiceStack.OrmLite.PostgreSQL
         public static PostgreSQLDialectProvider Instance = new PostgreSQLDialectProvider();
         const string textColumnDefinition = "text";
 
+        public bool UseReturningForLastInsertId { get; set; }
+
         public PostgreSQLDialectProvider()
         {
             base.AutoIncrementDefinition = "";
@@ -32,6 +34,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
             base.MaxStringColumnDefinition = "TEXT";
             base.InitColumnTypeMap();
             base.SelectIdentitySql = "SELECT LASTVAL()";
+            this.UseReturningForLastInsertId = true;
             this.NamingStrategy = new PostgreSqlNamingStrategy();
             this.StringSerializer = new JsonStringSerializer();
         }
@@ -301,6 +304,25 @@ namespace ServiceStack.OrmLite.PostgreSQL
                 values.Append(base.GetQuotedValue(value, typeof(T)));
             }
             return "ARRAY[" + values + "]";
+        }
+
+        public override long InsertAndGetLastInsertId<T>(IDbCommand dbCmd)
+        {
+            if (SelectIdentitySql == null)
+                throw new NotImplementedException("Returning last inserted identity is not implemented on this DB Provider.");
+
+            if (UseReturningForLastInsertId)
+            {
+                var modelDef = GetModel(typeof(T));
+                var pkName = NamingStrategy.GetColumnName(modelDef.PrimaryKey.FieldName);
+                dbCmd.CommandText += " RETURNING " + pkName;                
+            }
+            else
+            {
+                dbCmd.CommandText += "; " + SelectIdentitySql;
+            }
+
+            return dbCmd.ExecLongScalar();
         }
     }
 }
