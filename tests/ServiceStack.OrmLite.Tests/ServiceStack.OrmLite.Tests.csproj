@@ -130,6 +130,7 @@
     <Compile Include="Expression\SelectExpressionTests.cs" />
     <Compile Include="Issues\ComplexJoinWithAlias.cs" />
     <Compile Include="Issues\MismatchSchemaTests.cs" />
+    <Compile Include="Issues\MultiFieldReferenceTests.cs" />
     <Compile Include="Issues\MultithreadingIssueTests.cs" />
     <Compile Include="Issues\SchemaTests.cs" />
     <Compile Include="Issues\SelectDistinctTests.cs" />

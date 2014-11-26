@@ -863,9 +863,12 @@ namespace ServiceStack.OrmLite
 
         public static FieldDefinition GetRefFieldDefIfExists(this ModelDefinition modelDef, ModelDefinition refModelDef)
         {
-            var refField = refModelDef.FieldDefinitions.FirstOrDefault(x => x.ForeignKey != null && x.ForeignKey.ReferenceType == modelDef.ModelType)
-                           ?? refModelDef.FieldDefinitions.FirstOrDefault(x => x.FieldName == modelDef.ModelName + "Id")
-                           ?? refModelDef.FieldDefinitions.FirstOrDefault(x => x.Name == modelDef.Name + "Id");
+            var refField = 
+                   refModelDef.FieldDefinitions.FirstOrDefault(x => x.ForeignKey != null && x.ForeignKey.ReferenceType == modelDef.ModelType 
+                     && (x.FieldName == modelDef.ModelName + "Id" || x.Name == modelDef.Name + "Id"))
+                ?? refModelDef.FieldDefinitions.FirstOrDefault(x => x.ForeignKey != null && x.ForeignKey.ReferenceType == modelDef.ModelType)
+                ?? refModelDef.FieldDefinitions.FirstOrDefault(x => x.FieldName == modelDef.ModelName + "Id")
+                ?? refModelDef.FieldDefinitions.FirstOrDefault(x => x.Name == modelDef.Name + "Id");
             return refField;
         }
 
