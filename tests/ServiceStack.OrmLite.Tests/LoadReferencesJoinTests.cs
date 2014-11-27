@@ -607,6 +607,9 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_load_references_with_OrderBy_and_Paging()
         {
+            //This version of MariaDB doesn't yet support 'LIMIT & IN/ALL/ANY/SOME subquery'
+            if (Dialect == Dialect.MySql) return;
+
             db.DropTable<Parent>();
             db.DropTable<Child>();
             db.CreateTable<Child>();
