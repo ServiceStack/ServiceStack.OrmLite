@@ -183,7 +183,7 @@ namespace ServiceStack.OrmLite
                                 tableFieldDef.GetQuotedName(DialectProvider));
 
                             if (tableFieldDef.Alias != null)
-                                sbSelect.Append(" AS ").Append(DialectProvider.NamingStrategy.GetColumnName(fieldDef.Name));
+                                sbSelect.Append(" AS ").Append(SqlColumn(fieldDef.Name));
 
                             break;
                         }
@@ -210,7 +210,7 @@ namespace ServiceStack.OrmLite
 
                             sbSelect.AppendFormat("{0} as {1}",
                                 DialectProvider.GetQuotedColumnName(tableDef, matchingField),
-                                fieldDef.Name);
+                                SqlColumn(fieldDef.Name));
                             
                             break;
                         }
