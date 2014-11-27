@@ -114,12 +114,12 @@ namespace ServiceStack.OrmLite.Tests
 				Assert.That(db.Select<ModelWithOnlyStringFields>(), Has.Count.EqualTo(1));
 			}
 		}
-        
-        class MyTable
+
+	    public class MyTable
         {
             [AutoIncrement]
             public int Id { get; set; }
-            public String SomeTextField { get; set; }
+            public string SomeTextField { get; set; }
         }
 
         [Test]
@@ -210,8 +210,8 @@ namespace ServiceStack.OrmLite.Tests
                     {
                         dbCmd.Transaction = trans.ToDbTransaction();
 
-                        dbCmd.CommandText = "INSERT INTO {0} VALUES (2, 'From raw DB Command')"
-                            .Fmt("MyTable".SqlTable());
+                        dbCmd.CommandText = "INSERT INTO {0} ({1}) VALUES ('From OrmLite DB Command')"
+                            .Fmt("MyTable".SqlTable(), "SomeTextField".SqlColumn());
                         dbCmd.ExecuteNonQuery();
                     }
 
@@ -235,8 +235,8 @@ namespace ServiceStack.OrmLite.Tests
 
                     using (var dbCmd = db.OpenCommand())
                     {
-                        dbCmd.CommandText = "INSERT INTO {0} VALUES (2, 'From OrmLite DB Command')"
-                            .Fmt("MyTable".SqlTable());
+                        dbCmd.CommandText = "INSERT INTO {0} ({1}) VALUES ('From OrmLite DB Command')"
+                            .Fmt("MyTable".SqlTable(), "SomeTextField".SqlColumn());
                         dbCmd.ExecuteNonQuery();
                     }
 
