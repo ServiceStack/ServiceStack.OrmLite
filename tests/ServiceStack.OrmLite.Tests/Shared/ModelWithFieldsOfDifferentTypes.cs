@@ -98,7 +98,9 @@ namespace ServiceStack.Common.Tests.Models
 
 		public bool Bool { get; set; }
 
-		public DateTime DateTime { get; set; }
+        public DateTime DateTime { get; set; }
+
+        public TimeSpan TimeSpan { get; set; }
 
 		public double Double { get; set; }
 

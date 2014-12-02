@@ -1389,7 +1389,12 @@ namespace ServiceStack.OrmLite
                 case TypeCode.UInt32:
                 case TypeCode.UInt64:
                     if (fieldType.IsNumericType())
-                        return Convert.ChangeType(value, fieldType).ToString();
+                    {
+                        if (value is TimeSpan)
+                            return ((TimeSpan)value).Ticks.ToString(CultureInfo.InvariantCulture);
+
+                        return Convert.ChangeType(value, fieldType).ToString();                        
+                    }
                     break;
             }
 

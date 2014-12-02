@@ -3,6 +3,7 @@ using System.Globalization;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
 using ServiceStack.DataAnnotations;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -10,6 +11,7 @@ namespace ServiceStack.OrmLite.Tests
 	public class OrmLiteInsertTests
 		: OrmLiteTestBase
 	{
+        public OrmLiteInsertTests() : base(Dialect.PostgreSql) { }
 
 		[Test]
 		public void Can_insert_into_ModelWithFieldsOfDifferentTypes_table()
@@ -111,11 +113,11 @@ namespace ServiceStack.OrmLite.Tests
                 var row1 = new ModelWithIdAndName1() { Name = "A", Id = 4 };
                 var row2 = new ModelWithIdAndName1() { Name = "B", Id = 5 };
 
-				db.Insert(row1);
-				var row1LastInsertId = db.LastInsertId();
+                var row1LastInsertId = db.Insert(row1, selectIdentity: true);
+                Assert.That(db.GetLastSql(), Is.StringEnding(") RETURNING id"));
 
-				db.Insert(row2);
-				var row2LastInsertId = db.LastInsertId();
+                var row2LastInsertId = db.Insert(row2, selectIdentity: true);
+                Assert.That(db.GetLastSql(), Is.StringEnding(") RETURNING id"));
 
                 var insertedRow1 = db.SingleById<ModelWithIdAndName1>(row1LastInsertId);
                 var insertedRow2 = db.SingleById<ModelWithIdAndName1>(row2LastInsertId);
@@ -125,6 +127,31 @@ namespace ServiceStack.OrmLite.Tests
 			}
 		}
 
+        [Test]
+        public void Can_retrieve_LastInsertId_from_inserted_table_with_LastVal()
+        {
+            PostgreSQL.PostgreSQLDialectProvider.Instance.UseReturningForLastInsertId = false;
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<ModelWithIdAndName>();
+
+                var row1 = ModelWithIdAndName.Create(5);
+                var row2 = ModelWithIdAndName.Create(6);
+
+                var row1LastInsertId = db.Insert(row1, selectIdentity: true);
+                Assert.That(db.GetLastSql(), Is.StringEnding("; SELECT LASTVAL()"));
+
+                var row2LastInsertId = db.Insert(row2, selectIdentity: true);
+                Assert.That(db.GetLastSql(), Is.StringEnding("; SELECT LASTVAL()"));
+
+                var insertedRow1 = db.SingleById<ModelWithIdAndName>(row1LastInsertId);
+                var insertedRow2 = db.SingleById<ModelWithIdAndName>(row2LastInsertId);
+
+                Assert.That(insertedRow1.Name, Is.EqualTo(row1.Name));
+                Assert.That(insertedRow2.Name, Is.EqualTo(row2.Name));
+            }
+            PostgreSQL.PostgreSQLDialectProvider.Instance.UseReturningForLastInsertId = true;
+        }
 
 		[Test]
 		public void Can_insert_single_quote()

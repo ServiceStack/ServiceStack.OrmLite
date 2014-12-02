@@ -863,19 +863,22 @@ namespace ServiceStack.OrmLite
 
         public static FieldDefinition GetRefFieldDefIfExists(this ModelDefinition modelDef, ModelDefinition refModelDef)
         {
-            var refField = refModelDef.FieldDefinitions.FirstOrDefault(x => x.ForeignKey != null && x.ForeignKey.ReferenceType == modelDef.ModelType)
-                           ?? refModelDef.FieldDefinitions.FirstOrDefault(x => x.FieldName == modelDef.ModelName + "Id")
-                           ?? refModelDef.FieldDefinitions.FirstOrDefault(x => x.Name == modelDef.Name + "Id");
+            var refField = 
+                   refModelDef.FieldDefinitions.FirstOrDefault(x => x.ForeignKey != null && x.ForeignKey.ReferenceType == modelDef.ModelType 
+                       && modelDef.IsRefField(x))
+                ?? refModelDef.FieldDefinitions.FirstOrDefault(x => x.ForeignKey != null && x.ForeignKey.ReferenceType == modelDef.ModelType)
+                ?? refModelDef.FieldDefinitions.FirstOrDefault(modelDef.IsRefField);
+
             return refField;
         }
 
         public static FieldDefinition GetSelfRefFieldDefIfExists(this ModelDefinition modelDef, ModelDefinition refModelDef, FieldDefinition fieldDef)
         {
             var refField = (fieldDef == null ? null
-                 : modelDef.FieldDefinitions.FirstOrDefault(x => x.ForeignKey != null && x.ForeignKey.ReferenceType == refModelDef.ModelType && x.FieldName == fieldDef.FieldName + "Id"))
+                 : modelDef.FieldDefinitions.FirstOrDefault(x => x.ForeignKey != null && x.ForeignKey.ReferenceType == refModelDef.ModelType
+                     && fieldDef.IsSelfRefField(x)))
                 ?? modelDef.FieldDefinitions.FirstOrDefault(x => x.ForeignKey != null && x.ForeignKey.ReferenceType == refModelDef.ModelType)
-                ?? modelDef.FieldDefinitions.FirstOrDefault(x => x.FieldName == refModelDef.ModelName + "Id")
-                ?? modelDef.FieldDefinitions.FirstOrDefault(x => x.Name == refModelDef.Name + "Id");
+                ?? modelDef.FieldDefinitions.FirstOrDefault(refModelDef.IsRefField);
 
             return refField;
         }
