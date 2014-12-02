@@ -1,6 +1,5 @@
 ﻿using System.Data;
 using NUnit.Framework;
-using ServiceStack.OrmLite.PostgreSQL;
 using ServiceStack.Serialization;
 using ServiceStack.Text;
 
@@ -51,14 +50,9 @@ namespace ServiceStack.OrmLite.Tests
 
                 var str = db.SqlScalar<string>(TestSql);
 
-                if (!(OrmLiteConfig.DialectProvider is PostgreSQLDialectProvider))
-                {
-                    Assert.That(str, Is.EqualTo("{Id:2,SubType:{Name:Sub}}"));
-                }
-                else
-                {
-                    Assert.That(str, Is.EqualTo("{\"Id\":2,\"SubType\":{\"Name\":\"Sub\"}}"));
-                }
+                Assert.That(str, 
+                    Is.EqualTo("{\"Id\":2,\"SubType\":{\"Name\":\"Sub\"}}"). // PostgreSqlDialect
+                    Or.EqualTo("{Id:2,SubType:{Name:Sub}}"));
 
                 var data = db.SingleById<ModelWithComplexType>(1);
                 Assert.That(data.ComplexType.SubType.Name, Is.EqualTo("Sub"));

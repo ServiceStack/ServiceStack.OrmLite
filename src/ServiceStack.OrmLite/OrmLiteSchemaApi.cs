@@ -22,7 +22,7 @@ namespace ServiceStack.OrmLite
         {
             var dialectProvider = dbConn.GetDialectProvider();
             var modelDef = typeof(T).GetModelDefinition();
-            var tableName = dialectProvider.NamingStrategy.GetTableName(modelDef.ModelName);
+            var tableName = dialectProvider.NamingStrategy.GetTableName(modelDef);
             return dialectProvider.DoesTableExist(dbConn, tableName);
         }
 

@@ -118,13 +118,13 @@ namespace ServiceStack.OrmLite
 
         internal static long RowCount<T>(this IDbCommand dbCmd, SqlExpression<T> expression)
         {
-            var sql = "SELECT COUNT(*) FROM ({0}) AS COUNT".Fmt(expression.ToSelectStatement());
+            var sql = "SELECT COUNT(*) FROM ({0})".Fmt(expression.ToSelectStatement());
             return dbCmd.Scalar<long>(sql);
         }
 
         internal static long RowCount(this IDbCommand dbCmd, string sql)
         {
-            return dbCmd.Scalar<long>("SELECT COUNT(*) FROM ({0}) AS COUNT".Fmt(sql));
+            return dbCmd.Scalar<long>("SELECT COUNT(*) FROM ({0})".Fmt(sql));
         }
 
         internal static List<T> LoadSelect<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression)

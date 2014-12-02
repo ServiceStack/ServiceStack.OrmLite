@@ -17,6 +17,7 @@ namespace ServiceStack.OrmLite.Tests
         public static string SqlServerBuildDb = "Server={0};Database=test;User Id=test;Password=test;".Fmt(Environment.GetEnvironmentVariable("CI_HOST"));
         //public static string SqlServerBuildDb = "Data Source=localhost;Initial Catalog=TestDb;Integrated Security=SSPI;Connect Timeout=120;MultipleActiveResultSets=True";
 
+        public static string OracleDb = "Data Source=localhost:1521/ormlite;User ID=test;Password=test";
         public static string MySqlDb = "Server=localhost;Database=test;UID=root;Password=test";
         public static string PostgreSqlDb = "Server=localhost;Port=5432;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200";
 
@@ -114,8 +115,7 @@ namespace ServiceStack.OrmLite.Tests
                 case Dialect.SqlServerMdf:
                     return Init(Config.SqlServerDb, SqlServerDialect.Provider);
                 case Dialect.Oracle:
-                    OrmLiteConfig.DialectProvider = OracleDialect.Provider;
-                    return null;
+                    return Init(Config.OracleDb, OracleDialect.Provider);
                 case Dialect.VistaDb:
                     VistaDbDialect.Provider.UseLibraryFromGac = true;
                     var connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["myVDBConnection"];
