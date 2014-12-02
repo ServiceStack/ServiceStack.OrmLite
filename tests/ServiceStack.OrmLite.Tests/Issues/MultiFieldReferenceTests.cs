@@ -112,9 +112,9 @@ namespace ServiceStack.OrmLite.Tests.Issues
                 db.CreateTable<AliasedCustomerAddress>();
                 db.CreateTable<AliasedCustomer>();
 
-                var customer = new AliasedCustomer
+                var customer1 = new AliasedCustomer
                 {
-                    Name = "Name",
+                    Name = "Name 1",
                     WorkAddress = new AliasedCustomerAddress
                     {
                         AddressLine1 = "1 Work Road",
@@ -127,19 +127,44 @@ namespace ServiceStack.OrmLite.Tests.Issues
                     }
                 };
 
-                db.Save(customer, references:true);
+                var customer2 = new AliasedCustomer
+                {
+                    Name = "Name 2",
+                    WorkAddress = new AliasedCustomerAddress
+                    {
+                        AddressLine1 = "3 Work Road",
+                        Country = "AU",
+                    },
+                    HomeAddress = new AliasedCustomerAddress
+                    {
+                        AddressLine1 = "4 Home Street",
+                        Country = "NZ",
+                    }
+                };
+
+                db.Save(customer1, references: true);
+                db.Save(customer2, references: true);
 
                 db.Select<AliasedCustomer>().PrintDump();
                 db.Select<AliasedCustomerAddress>().PrintDump();
 
-                var dbCustomer = db.LoadSelect<AliasedCustomer>()[0];
-                dbCustomer.PrintDump();
+                var dbCustomers = db.LoadSelect<AliasedCustomer>();
+                dbCustomers.PrintDump();
 
-                Assert.That(dbCustomer.Name, Is.EqualTo("Name"));
-                Assert.That(dbCustomer.WorkAddress, Is.Not.Null);
-                Assert.That(dbCustomer.WorkAddress.Country, Is.EqualTo("UK"));
-                Assert.That(dbCustomer.HomeAddress, Is.Not.Null);
-                Assert.That(dbCustomer.HomeAddress.Country, Is.EqualTo("US"));
+                var dbCustomer1 = dbCustomers.First(x => x.Name == "Name 1");
+
+                Assert.That(dbCustomer1.Name, Is.EqualTo("Name 1"));
+                Assert.That(dbCustomer1.WorkAddress, Is.Not.Null);
+                Assert.That(dbCustomer1.WorkAddress.Country, Is.EqualTo("UK"));
+                Assert.That(dbCustomer1.HomeAddress, Is.Not.Null);
+                Assert.That(dbCustomer1.HomeAddress.Country, Is.EqualTo("US"));
+
+                var dbCustomer2 = db.LoadSingleById<AliasedCustomer>(customer2.Id);
+                Assert.That(dbCustomer2.Name, Is.EqualTo("Name 2"));
+                Assert.That(dbCustomer2.WorkAddress, Is.Not.Null);
+                Assert.That(dbCustomer2.WorkAddress.Country, Is.EqualTo("AU"));
+                Assert.That(dbCustomer2.HomeAddress, Is.Not.Null);
+                Assert.That(dbCustomer2.HomeAddress.Country, Is.EqualTo("NZ"));
             }
         }
 

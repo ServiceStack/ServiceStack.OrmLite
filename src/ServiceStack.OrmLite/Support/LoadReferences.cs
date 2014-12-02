@@ -83,15 +83,15 @@ namespace ServiceStack.OrmLite.Support
                 ? modelDef.GetRefFieldDef(refModelDef, refType)
                 : modelDef.GetRefFieldDefIfExists(refModelDef);
 
-            if (refField != null)
+            if (refSelf != null)
             {
-                var sql = GetRefFieldSql(refType, refField);
+                var sql = GetRefSelfSql(refType, refSelf, refModelDef);
                 var result = dbCmd.ConvertTo(refType, sql);
                 fieldDef.SetValueFn(instance, result);
             }
-            else if (refSelf != null)
+            else if (refField != null)
             {
-                var sql = GetRefSelfSql(refType, refSelf, refModelDef);
+                var sql = GetRefFieldSql(refType, refField);
                 var result = dbCmd.ConvertTo(refType, sql);
                 fieldDef.SetValueFn(instance, result);
             }
