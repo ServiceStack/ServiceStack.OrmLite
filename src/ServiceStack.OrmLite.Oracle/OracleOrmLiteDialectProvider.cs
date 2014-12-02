@@ -18,12 +18,12 @@ namespace ServiceStack.OrmLite.Oracle
         protected readonly List<string> ReservedNames = new List<string>
         {
 			"USER", "ORDER", "PASSWORD", "ACTIVE", "LEFT", "DOUBLE", "FLOAT", "DECIMAL", "STRING", "DATE",
-            "DATETIME", "TYPE","TIMESTAMP", "COMMENT", "LONG", "INDEX"
+            "DATETIME", "TYPE","TIMESTAMP", "COMMENT", "LONG"
 		};
 
         protected readonly List<string> ReservedParameterNames = new List<string>
         {
-            "COMMENT", "DATE", "DECIMAL", "FLOAT", "ORDER", "USER", "LONG", "INDEX"
+            "COMMENT", "DATE", "DECIMAL", "FLOAT", "ORDER", "USER", "LONG"
         };
 
         protected const int MaxNameLength = 30;
@@ -41,11 +41,19 @@ namespace ServiceStack.OrmLite.Oracle
         internal const string StringGuidDefinition = "VARCHAR2(37)";
         internal const string CompactGuidDefinition = "RAW(16)";
 
-        private readonly DbProviderFactory _factory;
+        private OracleDoubleConverter _doubleConverter;
+        private DbProviderFactory _factory;
 
         public OracleOrmLiteDialectProvider()
             : this(false, false)
         {
+            CreateDoubleConverter();
+        }
+
+        private void CreateDoubleConverter()
+        {
+            _factory = DbProviderFactories.GetFactory(ClientProvider);
+            _doubleConverter = new OracleDoubleConverter(_factory);
         }
 
         public OracleOrmLiteDialectProvider(bool compactGuid, bool quoteNames, string clientProvider = OdpProvider)
@@ -73,7 +81,7 @@ namespace ServiceStack.OrmLite.Oracle
             NamingStrategy = new OracleNamingStrategy(MaxNameLength);
             ExecFilter = new OracleExecFilter();
 
-            _factory = DbProviderFactories.GetFactory(ClientProvider);
+            CreateDoubleConverter();
         }
 
         public override void OnAfterInitColumnTypeMap()
@@ -120,7 +128,7 @@ namespace ServiceStack.OrmLite.Oracle
                     modelDef.RowVersion.FieldName.SqlColumn(this));
 
                 var sql = "CREATE TRIGGER {0} BEFORE UPDATE ON {1} FOR EACH ROW BEGIN {2} END;".Fmt(
-                    Quote(triggerName), NamingStrategy.GetTableName(modelDef), triggerBody);
+                    Quote(triggerName), modelDef.ModelName, triggerBody);
 
                 return sql;
             }
@@ -143,9 +151,9 @@ namespace ServiceStack.OrmLite.Oracle
                 if (_timestampConverter == null)
                     _timestampConverter = new OracleTimestampConverter(_factory);
             }
-            var connection = _factory.CreateConnection();
+            IDbConnection connection = _factory.CreateConnection();
             if (connection != null) connection.ConnectionString = connectionString;
-            return new OracleConnection(connection);
+            return connection;
         }
 
         public override long GetLastInsertId(IDbCommand dbCmd)
@@ -180,15 +188,15 @@ namespace ServiceStack.OrmLite.Oracle
                 _timestampConverter.SetOracleTimestampTzFormat();
                 convertedValue = _timestampConverter.ConvertTimestampTzToDateTimeOffset(reader, colIndex);
             }
+            else if (fieldDef.FieldType == typeof(double))
+            {
+                convertedValue = _doubleConverter.ConvertToDouble(reader, colIndex);
+            }
             else
             {
-                var value = fieldDef.FieldType == typeof(DateTime) 
-                    ? reader.GetDateTime(colIndex) 
-                    : reader.GetValue(colIndex);
-
+                var value = reader.GetValue(colIndex);
                 convertedValue = ConvertDbValue(value, fieldDef.FieldType);
             }
-
             try
             {
                 fieldDef.SetValueFn(instance, convertedValue);
@@ -204,7 +212,16 @@ namespace ServiceStack.OrmLite.Oracle
             if (value == null || value is DBNull) return null;
 
             if (type == typeof(bool))
-                return Convert.ToBoolean(value);
+            {
+                var intVal = int.Parse(value.ToString());
+                return intVal != 0;
+            }
+
+            if (type == typeof(Double))
+                return double.Parse(value.ToString());
+
+            if (type == typeof(float))
+                return float.Parse(value.ToString());
 
             if (type == typeof(Guid))
             {
@@ -275,11 +292,6 @@ namespace ServiceStack.OrmLite.Oracle
 
             if (fieldType.IsEnum)
             {
-                if (value is int && !fieldType.IsEnumFlags())
-                {
-                    value = fieldType.GetEnumName(value);
-                }
-
                 var enumValue = StringSerializer.SerializeToString(value);
                 // Oracle stores empty strings in varchar columns as null so match that behavior here
                 if (enumValue == null)
@@ -386,7 +398,7 @@ namespace ServiceStack.OrmLite.Oracle
                 {
                     if (fieldDef.AutoIncrement && string.IsNullOrEmpty(fieldDef.Sequence))
                     {
-                        fieldDef.Sequence = Sequence(NamingStrategy.GetTableName(modelDef), fieldDef.FieldName, fieldDef.Sequence);
+                        fieldDef.Sequence = Sequence(GetTableName(modelDef), fieldDef.FieldName, fieldDef.Sequence);
                     }
 
                     var pi = typeof(T).GetProperty(fieldDef.Name,
@@ -470,7 +482,7 @@ namespace ServiceStack.OrmLite.Oracle
                 {
                     if (fieldDef.AutoIncrement && string.IsNullOrEmpty(fieldDef.Sequence))
                     {
-                        fieldDef.Sequence = Sequence(NamingStrategy.GetTableName(modelDef), fieldDef.FieldName, fieldDef.Sequence);
+                        fieldDef.Sequence = Sequence(GetTableName(modelDef), fieldDef.FieldName, fieldDef.Sequence);
                     }
 
                     var pi = tableType.GetProperty(fieldDef.Name,
@@ -632,22 +644,6 @@ namespace ServiceStack.OrmLite.Oracle
             return (onDelete == "SET NULL" || onDelete == "CASCADE") ? " ON DELETE " + onDelete : string.Empty;
         }
 
-        public override string GetLoadChildrenSubSelect<From>(ModelDefinition modelDef, SqlExpression<From> expr)
-        {
-            if (!expr.OrderByExpression.IsNullOrEmpty() && expr.Rows == null)
-            {
-                expr.Select(this.GetQuotedColumnName(modelDef, modelDef.PrimaryKey))
-                    .ClearLimits()
-                    .OrderBy(""); //Invalid in Sub Selects
-
-                var subSql = expr.ToSelectStatement();
-
-                return subSql;
-            }
-
-            return base.GetLoadChildrenSubSelect(modelDef, expr);
-        }
-
         public override string ToCreateSequenceStatement(Type tableType, string sequenceName)
         {
             var result = "";
@@ -657,7 +653,7 @@ namespace ServiceStack.OrmLite.Oracle
             {
                 if (fieldDef.AutoIncrement || !fieldDef.Sequence.IsNullOrEmpty())
                 {
-                    var seqName = Sequence(NamingStrategy.GetTableName(modelDef), fieldDef.FieldName, fieldDef.Sequence);
+                    var seqName = Sequence(GetTableName(modelDef), fieldDef.FieldName, fieldDef.Sequence);
                     if (seqName.EqualsIgnoreCase(sequenceName))
                     {
                         result = "CREATE SEQUENCE " + GetQuotedName(seqName);
@@ -682,7 +678,7 @@ namespace ServiceStack.OrmLite.Oracle
             {
                 if (fieldDef.AutoIncrement || !fieldDef.Sequence.IsNullOrEmpty())
                 {
-                    var seqName = Sequence(NamingStrategy.GetTableName(modelDef), fieldDef.FieldName, fieldDef.Sequence);
+                    var seqName = Sequence(GetTableName(modelDef), fieldDef.FieldName, fieldDef.Sequence);
 
                     if (gens.IndexOf(seqName) == -1)
                         gens.Add(seqName);
@@ -921,9 +917,16 @@ namespace ServiceStack.OrmLite.Oracle
             if (!isInsert)
             {
                 long nv;
-                return long.TryParse(value.ToString(), out nv) 
-                    ? nv 
-                    : 0;
+                Object retObj;
+                if (long.TryParse(value.ToString(), out nv))
+                {
+                    retObj = nv;
+                }
+                else
+                {
+                    retObj = 0;
+                }
+                return retObj;
             }
 
             using (var dbCmd = connection.CreateCommand())
@@ -955,12 +958,20 @@ namespace ServiceStack.OrmLite.Oracle
 
         public override string GetQuotedTableName(ModelDefinition modelDef)
         {
-            return Quote(NamingStrategy.GetTableName(modelDef));
+            return Quote(GetTableName(modelDef));
         }
 
         public override string GetQuotedTableName(string tableName)
         {
             return Quote(NamingStrategy.GetTableName(tableName));
+        }
+
+        private string GetTableName(ModelDefinition modelDef)
+        {
+            return modelDef.IsInSchema
+                       ? NamingStrategy.ApplyNameRestrictions(modelDef.Schema
+                            + "_" + NamingStrategy.GetTableName(modelDef.ModelName))
+                       : NamingStrategy.GetTableName(modelDef.ModelName);
         }
 
         public override string GetQuotedColumnName(string fieldName)
@@ -1062,7 +1073,7 @@ namespace ServiceStack.OrmLite.Oracle
             int? rows = null)
         {
             var sbInner = new StringBuilder(selectExpression);
-            sbInner.Append(FixCrossJoinStatement(bodyExpression));
+            sbInner.Append(bodyExpression);
 
             if (!rows.HasValue && !offset.HasValue)
                 return sbInner + " " + orderByExpression;
@@ -1094,10 +1105,8 @@ namespace ServiceStack.OrmLite.Oracle
 
             var sql = sbInner.ToString();
 
-            var columnNames = ExtractColumnNames(selectExpression);
-
             var sb = new StringBuilder();
-            sb.AppendFormat("SELECT {0} FROM (", columnNames.Join(", "));
+            sb.AppendLine("SELECT * FROM (");
             sb.AppendLine("SELECT \"_ss_ormlite_1_\".*, ROWNUM RNUM FROM (");
             sb.Append(sql);
             sb.AppendLine(") \"_ss_ormlite_1_\"");
@@ -1108,47 +1117,6 @@ namespace ServiceStack.OrmLite.Oracle
             sb.AppendFormat("WHERE \"_ss_ormlite_2_\".RNUM > {0}", offset.Value);
 
             return sb.ToString();
-        }
-
-        private string FixCrossJoinStatement(string bodyExpression)
-        {
-            var regex = new Regex(" CROSS JOIN [\\d\\s\\w]+ ON ", RegexOptions.IgnoreCase);
-            var match = regex.Match(bodyExpression);
-
-            if (match.Success)
-            {
-                var parts = regex.Split(bodyExpression);
-                return string.Format("{0}{1}{2}", parts[0], match.Value.ToUpper().Replace(" ON ", " WHERE "), parts[1]);
-            }
-
-            return bodyExpression;
-        }
-
-        private IEnumerable<string> ExtractColumnNames(string selectExpression)
-        {
-            const string selectToken = "SELECT";
-            var expression = selectExpression.Trim();
-            if (selectExpression.StartsWith(selectToken, StringComparison.InvariantCultureIgnoreCase))
-            {
-                expression = expression.Remove(0, selectToken.Length);
-            }
-
-            var columnTokens = expression.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries);
-            return columnTokens.Select(ExtractColumnName);
-        }
-
-        private string ExtractColumnName(string columnToken)
-        {
-            var regex = new Regex("([\"][\\w\\d\\s]+[\"])\\s*$");
-            if (regex.IsMatch(columnToken))
-            {
-                var matches = regex.Match(columnToken);
-                var groupCount = matches.Groups.Count;
-                return matches.Groups[groupCount - 1].Value;
-            }
-
-            var parts = columnToken.Split(new[] { " ", "." }, StringSplitOptions.RemoveEmptyEntries);
-            return parts.Last();
         }
     }
 }

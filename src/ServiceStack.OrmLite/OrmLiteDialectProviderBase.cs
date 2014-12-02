@@ -24,43 +24,9 @@ using System.Linq.Expressions;
 
 namespace ServiceStack.OrmLite
 {
-    public abstract class OrmLiteDialectProviderBase
-    {
-        protected const int NotFound = -1;
-
-        public static ModelDefinition GetModelDefinition(Type modelType)
-        {
-            return modelType.GetModelDefinition();
-        }
-
-        public static bool HandledDbNullValue(FieldDefinition fieldDef, IDataReader dataReader, int colIndex, object instance)
-        {
-            if (fieldDef == null || fieldDef.SetValueFn == null || colIndex == NotFound) return true;
-            if (dataReader.IsDBNull(colIndex))
-            {
-                if (fieldDef.IsNullable)
-                {
-                    fieldDef.SetValueFn(instance, null);
-                }
-                else
-                {
-                    fieldDef.SetValueFn(instance, fieldDef.FieldType.GetDefaultValue());
-                }
-                return true;
-            }
-            return false;
-        }
-
-        public static ulong ConvertToULong(byte[] bytes)
-        {
-            Array.Reverse(bytes); //Correct Endianness
-            var ulongValue = BitConverter.ToUInt64(bytes, 0);
-            return ulongValue;
-        }
-    }
 
     public abstract class OrmLiteDialectProviderBase<TDialect>
-        : OrmLiteDialectProviderBase, IOrmLiteDialectProvider
+        : IOrmLiteDialectProvider
         where TDialect : IOrmLiteDialectProvider
     {
         protected static readonly ILog Log = LogManager.GetLogger(typeof(IOrmLiteDialectProvider));
@@ -298,6 +264,8 @@ namespace ServiceStack.OrmLite
                    && fieldDefinition != BoolColumnDefinition;
         }
 
+        protected const int NotFound = -1;
+
         /// <summary>
         /// Populates row fields during re-hydration of results.
         /// </summary>
@@ -313,7 +281,24 @@ namespace ServiceStack.OrmLite
             catch (NullReferenceException ignore) { }
         }
 
-  
+        public static bool HandledDbNullValue(FieldDefinition fieldDef, IDataReader dataReader, int colIndex, object instance)
+        {
+            if (fieldDef == null || fieldDef.SetValueFn == null || colIndex == NotFound) return true;
+            if (dataReader.IsDBNull(colIndex))
+            {
+                if (fieldDef.IsNullable)
+                {
+                    fieldDef.SetValueFn(instance, null);
+                }
+                else
+                {
+                    fieldDef.SetValueFn(instance, fieldDef.FieldType.GetDefaultValue());
+                }
+                return true;
+            }
+            return false;
+        }
+
         public abstract IDbConnection CreateConnection(string filePath, Dictionary<string, string> options);
 
         public virtual string GetQuotedValue(string paramValue)
@@ -1155,6 +1140,11 @@ namespace ServiceStack.OrmLite
             return null;
         }
 
+        public static ModelDefinition GetModelDefinition(Type modelType)
+        {
+            return modelType.GetModelDefinition();
+        }
+
         public virtual string ToAddColumnStatement(Type modelType, FieldDefinition fieldDef)
         {
 
@@ -1268,6 +1258,14 @@ namespace ServiceStack.OrmLite
                 case OnFkOption.Restrict:
                 default: return "RESTRICT";
             }
+        }
+
+
+        public static ulong ConvertToULong(byte[] bytes)
+        {
+            Array.Reverse(bytes); //Correct Endianness
+            var ulongValue = BitConverter.ToUInt64(bytes, 0);
+            return ulongValue;
         }
 
         public virtual object ConvertDbValue(object value, Type type)
@@ -1534,5 +1532,6 @@ namespace ServiceStack.OrmLite
             throw new NotImplementedException(OrmLiteUtilExtensions.AsyncRequiresNet45Error);
         }
 #endif
+
     }
 }

@@ -49,7 +49,7 @@ namespace ServiceStack.OrmLite
             var modelDef = modelType.GetModelDefinition();
 
             var dialectProvider = dbCmd.GetDialectProvider();
-            var tableName = dialectProvider.NamingStrategy.GetTableName(modelDef);
+            var tableName = dialectProvider.NamingStrategy.GetTableName(modelDef.ModelName);
             var tableExists = dialectProvider.DoesTableExist(dbCmd, tableName);
             if (overwrite && tableExists)
             {
@@ -183,7 +183,7 @@ namespace ServiceStack.OrmLite
             try
             {
                 var dialectProvider = dbCmd.GetDialectProvider();
-                var tableName = dialectProvider.NamingStrategy.GetTableName(modelDef);
+                var tableName = dialectProvider.NamingStrategy.GetTableName(modelDef.ModelName);
 
                 if (dialectProvider.DoesTableExist(dbCmd, tableName))
                 {

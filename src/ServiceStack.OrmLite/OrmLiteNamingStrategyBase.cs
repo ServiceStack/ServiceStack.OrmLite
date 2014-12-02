@@ -19,11 +19,6 @@ namespace ServiceStack.OrmLite
             return name;
         }
 
-        public virtual string GetTableName(ModelDefinition modelDef)
-        {
-            return GetTableName(modelDef.ModelName);
-        }
-
         public virtual string GetColumnName(string name)
         {
             return name;

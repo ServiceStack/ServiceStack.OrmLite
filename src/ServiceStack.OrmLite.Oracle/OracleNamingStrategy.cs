@@ -38,14 +38,6 @@ namespace ServiceStack.OrmLite.Oracle
             return name;
         }
 
-        public override string GetTableName(ModelDefinition modelDef)
-        {
-            return modelDef.IsInSchema
-                       ? ApplyNameRestrictions(modelDef.Schema
-                            + "_" + GetTableName(modelDef.ModelName))
-                       : GetTableName(modelDef.ModelName);
-        }
-
         private static string Squash(string name)
         {
             // First try squashing out the vowels

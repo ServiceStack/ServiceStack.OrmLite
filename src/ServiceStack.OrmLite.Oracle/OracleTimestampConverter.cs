@@ -18,6 +18,7 @@ namespace ServiceStack.OrmLite.Oracle
         private MethodInfo SetThreadInfo { get; set; }
         private MethodInfo SetOracleDbType { get; set; }
         private object[] SetOracleDbTypeArgs { get; set; }
+        private MethodInfo GetOracleValue { get; set; }
 
         public OracleTimestampConverter(DbProviderFactory factory)
         {
@@ -39,6 +40,9 @@ namespace ServiceStack.OrmLite.Oracle
 
                 var oracleDbType = OracleAssembly.GetType("Oracle.DataAccess.Client.OracleDbType");
                 SetOracleDbTypeArgs = new [] {Enum.Parse(oracleDbType, "TimeStampTZ")};
+
+                var readerType = OracleAssembly.GetType("Oracle.DataAccess.Client.OracleDataReader");
+                GetOracleValue = readerType.GetMethod("GetOracleValue", BindingFlags.Public | BindingFlags.Instance);
             }
             else
             {
@@ -75,13 +79,16 @@ namespace ServiceStack.OrmLite.Oracle
 
         public DateTimeOffset ConvertTimestampTzToDateTimeOffset(IDataReader dataReader, int colIndex)
         {
-            var value = dataReader.GetValue(colIndex);
-            if (value is DateTime)
+            if (GetOracleValue != null)
             {
-                return new DateTimeOffset((DateTime) value);
+                var value = GetOracleValue.Invoke(dataReader, new object[] { colIndex }).ToString();
+                return DateTimeOffset.ParseExact(value, DateTimeOffsetInputFormat, CultureInfo.InvariantCulture);
             }
-
-            return DateTimeOffset.ParseExact(value.ToString(), DateTimeOffsetInputFormat, CultureInfo.InvariantCulture);
+            else
+            {
+                var value = dataReader.GetValue(colIndex);
+                return new DateTimeOffset((DateTime)value);
+            }
         }
 
         public string ConvertDateTimeOffsetToString(DateTimeOffset timestamp)

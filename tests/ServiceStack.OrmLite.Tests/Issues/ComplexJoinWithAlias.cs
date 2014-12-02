@@ -28,14 +28,12 @@ namespace ServiceStack.OrmLite.Tests.Issues
     public class ComplexJoinWithAlias
         : OrmLiteTestBase
     {
-        private static long _classAColumnAId;
-
         private static void Init(IDbConnection db)
         {
             db.DropAndCreateTable<ClassA>();
             db.DropAndCreateTable<ClassB>();
 
-            _classAColumnAId = db.Insert(new ClassA { ColumnA = "1" }, true);
+            db.Insert(new ClassA { ColumnA = "1" });
             db.Insert(new ClassA { ColumnA = "2" });
             db.Insert(new ClassA { ColumnA = "3" });
 
@@ -52,7 +50,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
 
                 var q = db.From<ClassA>()
                     .Join<ClassB>((a, b) => a.ColumnA == b.ColumnB)
-                    .Where<ClassA>(a => a.Id == _classAColumnAId);
+                    .Where<ClassA>(a => a.Id == 1);
 
                 var results = db.Single(q);
                 Assert.That(results.ColumnA, Is.EqualTo("1"));
