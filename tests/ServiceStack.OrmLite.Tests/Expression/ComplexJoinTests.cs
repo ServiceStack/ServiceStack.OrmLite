@@ -128,6 +128,14 @@ namespace ServiceStack.OrmLite.Tests.Expression
     [TestFixture]
     public class ComplexJoinTests : OrmLiteTestBase
     {
+        private static int _baz1Id;
+        private static int _baz2Id;
+        private static int _fooBar1Id;
+        private static int _fooBar2Id;
+        private static int _fooBarBaz1Id;
+        private static int _fooBarBaz2Id;
+        private static int _fooBarBaz3Id;
+
         private static void InitTables(IDbConnection db)
         {
             db.DropTable<FooBarBaz>();
@@ -146,15 +154,15 @@ namespace ServiceStack.OrmLite.Tests.Expression
             db.Insert(new BarJoin { Id = bar1Id, Name = "Banana", });
             db.Insert(new BarJoin { Id = bar2Id, Name = "Orange", });
 
-            db.Insert(new Baz { Id = 1, Name = "Large" });
-            db.Insert(new Baz { Id = 2, Name = "Huge" });
+            _baz1Id = (int) db.Insert(new Baz {Name = "Large"}, true);
+            _baz2Id = (int) db.Insert(new Baz {Name = "Huge"}, true);
 
-            db.Insert(new FooBar { Id = 1, BarId = bar1Id, });
-            db.Insert(new FooBar { Id = 2, BarId = bar2Id, });
+            _fooBar1Id = (int) db.Insert(new FooBar { BarId = bar1Id, }, true);
+            _fooBar2Id = (int) db.Insert(new FooBar { BarId = bar2Id, }, true);
 
-            db.Insert(new FooBarBaz { Amount = 42, FooBarId = 1, BazId = 2 });
-            db.Insert(new FooBarBaz { Amount = 50, FooBarId = 1, BazId = 1 });
-            db.Insert(new FooBarBaz { Amount = 2, FooBarId = 2, BazId = 1 });
+            _fooBarBaz1Id = (int) db.Insert(new FooBarBaz { Amount = 42, FooBarId = _fooBar1Id, BazId = _baz2Id }, true);
+            _fooBarBaz2Id = (int)db.Insert(new FooBarBaz { Amount = 50, FooBarId = _fooBar1Id, BazId = _baz1Id }, true);
+            _fooBarBaz3Id = (int)db.Insert(new FooBarBaz { Amount = 2, FooBarId = _fooBar2Id, BazId = _baz1Id }, true);
         }
 
         [Test]
@@ -208,12 +216,12 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
                 results.PrintDump();
 
-                var fooBarBaz = results.First(x => x.FooBarBazId == 1);
-                Assert.That(fooBarBaz.BazId, Is.EqualTo(2));
-                fooBarBaz = results.First(x => x.FooBarBazId == 2);
-                Assert.That(fooBarBaz.BazId, Is.EqualTo(1));
-                fooBarBaz = results.First(x => x.FooBarBazId == 2);
-                Assert.That(fooBarBaz.BazId, Is.EqualTo(1));
+                var fooBarBaz = results.First(x => x.FooBarBazId == _fooBarBaz1Id);
+                Assert.That(fooBarBaz.BazId, Is.EqualTo(_baz2Id));
+                fooBarBaz = results.First(x => x.FooBarBazId == _fooBarBaz2Id);
+                Assert.That(fooBarBaz.BazId, Is.EqualTo(_baz1Id));
+                fooBarBaz = results.First(x => x.FooBarBazId == _fooBarBaz2Id);
+                Assert.That(fooBarBaz.BazId, Is.EqualTo(_baz1Id));
             }
         }
 
@@ -235,12 +243,12 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
                 results.PrintDump();
 
-                var fooBarBaz = results.First(x => x.FooBarBazId == 1);
-                Assert.That(fooBarBaz.BazId, Is.EqualTo(2));
-                fooBarBaz = results.First(x => x.FooBarBazId == 2);
-                Assert.That(fooBarBaz.BazId, Is.EqualTo(1));
-                fooBarBaz = results.First(x => x.FooBarBazId == 2);
-                Assert.That(fooBarBaz.BazId, Is.EqualTo(1));
+                var fooBarBaz = results.First(x => x.FooBarBazId == _fooBarBaz1Id);
+                Assert.That(fooBarBaz.BazId, Is.EqualTo(_baz2Id));
+                fooBarBaz = results.First(x => x.FooBarBazId == _fooBarBaz2Id);
+                Assert.That(fooBarBaz.BazId, Is.EqualTo(_baz1Id));
+                fooBarBaz = results.First(x => x.FooBarBazId == _fooBarBaz2Id);
+                Assert.That(fooBarBaz.BazId, Is.EqualTo(_baz1Id));
             }
         }
 

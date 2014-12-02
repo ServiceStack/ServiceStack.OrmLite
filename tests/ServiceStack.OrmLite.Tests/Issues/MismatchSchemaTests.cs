@@ -1,8 +1,6 @@
 ﻿using System.Linq;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.OrmLite.SqlServer;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
@@ -82,7 +80,8 @@ namespace ServiceStack.OrmLite.Tests.Issues
             using (var captured = new CaptureSqlFilter())
             using (var db = OpenDbConnection())
             {
-                var modelDef = SqlServerOrmLiteDialectProvider.GetModelDefinition(typeof(Poco));
+                var modelDef = OrmLiteDialectProviderBase.GetModelDefinition(typeof(Poco));
+                
                 db.SingleById<Poco>(1);
 
                 Assert.That(captured.SqlStatements.Last(), Is.StringContaining("Schema1"));

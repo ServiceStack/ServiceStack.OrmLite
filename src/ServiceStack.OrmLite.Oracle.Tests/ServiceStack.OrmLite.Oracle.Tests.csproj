@@ -22,7 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x86</PlatformTarget>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -33,13 +33,14 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Signed|AnyCPU'">
     <OutputPath>bin\Signed\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x86</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>false</Prefer32Bit>
@@ -57,6 +58,9 @@
     </Reference>
     <Reference Include="ServiceStack">
       <HintPath>..\..\lib\ServiceStack.dll</HintPath>
+    </Reference>
+    <Reference Include="ServiceStack.Client">
+      <HintPath>..\..\lib\ServiceStack.Client.dll</HintPath>
     </Reference>
     <Reference Include="ServiceStack.Common">
       <HintPath>..\..\lib\ServiceStack.Common.dll</HintPath>
@@ -78,6 +82,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\CaptureSqlFilterTests.cs">
+      <Link>CaptureSqlFilterTests.cs</Link>
+    </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\CompositeKeyTests.cs">
       <Link>CompositeKeyTests.cs</Link>
     </Compile>
@@ -96,6 +103,9 @@
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\AdditiveExpressionsTest.cs">
       <Link>Expression\AdditiveExpressionsTest.cs</Link>
     </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\ComplexJoinTests.cs">
+      <Link>Expression\ComplexJoinTests.cs</Link>
+    </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\ConditionalExpressionTest.cs">
       <Link>Expression\ConditionalExpressionTest.cs</Link>
     </Compile>
@@ -110,6 +120,12 @@
     </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\ExpressionUsingCustomSerializedEnumTests.cs">
       <Link>Expression\ExpressionUsingCustomSerializedEnumTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\FromExpressionTests.cs">
+      <Link>Expression\FromExpressionTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\GenericTableExpressions.cs">
+      <Link>Expression\GenericTableExpressions.cs</Link>
     </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\LogicalExpressionsTest.cs">
       <Link>Expression\LogicalExpressionsTest.cs</Link>
@@ -143,6 +159,21 @@
     </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\UnaryExpressionsTest.cs">
       <Link>Expression\UnaryExpressionsTest.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Issues\ComplexJoinWithAlias.cs">
+      <Link>Issues\ComplexJoinWithAlias.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Issues\MismatchSchemaTests.cs">
+      <Link>Issues\MismatchSchemaTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Issues\MultithreadingIssueTests.cs">
+      <Link>Issues\MultithreadingIssueTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Issues\SchemaTests.cs">
+      <Link>Issues\SchemaTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Issues\SelectIntoTests.cs">
+      <Link>Issues\SelectIntoTests.cs</Link>
     </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\JoinSqlBuilderTests.cs">
       <Link>JoinSqlBuilderTests.cs</Link>
@@ -311,6 +342,9 @@
     </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\SqlFormatTests.cs">
       <Link>SqlFormatTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\StringSerializerTests.cs">
+      <Link>StringSerializerTests.cs</Link>
     </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\TestHelpers.cs">
       <Link>TestHelpers.cs</Link>
