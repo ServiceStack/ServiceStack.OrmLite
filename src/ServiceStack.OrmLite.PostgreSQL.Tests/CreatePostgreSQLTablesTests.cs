@@ -10,19 +10,19 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
     public class CreatePostgreSQLTablesTests : OrmLiteTestBase
     {
 
-		
-		[Test]
-		public void DropAndCreateTable_DropsTableAndCreatesTable()
-		{
-			using (var db = OpenDbConnection())
-			{
-				db.DropTable<TestData>();
-				db.CreateTable<TestData>();
-				db.Insert<TestData>(new TestData { Id = Guid.NewGuid() });
-				db.DropAndCreateTable<TestData>();
-				db.Insert<TestData>(new TestData { Id = Guid.NewGuid() });
-			}
-		}
+        
+        [Test]
+        public void DropAndCreateTable_DropsTableAndCreatesTable()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropTable<TestData>();
+                db.CreateTable<TestData>();
+                db.Insert<TestData>(new TestData { Id = Guid.NewGuid() });
+                db.DropAndCreateTable<TestData>();
+                db.Insert<TestData>(new TestData { Id = Guid.NewGuid() });
+            }
+        }
 
 
         [Test]
@@ -91,15 +91,15 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
 
         }
 
-		public class TestData
-		{
-			[PrimaryKey]
-			public Guid Id { get; set; }
+        public class TestData
+        {
+            [PrimaryKey]
+            public Guid Id { get; set; }
 
-			public string Name { get; set; }
+            public string Name { get; set; }
 
-			public string Surname { get; set; }
-		}
+            public string Surname { get; set; }
+        }
 
         private void CreateSchemaIfNotExists(System.Data.IDbConnection db, string name)
         {
