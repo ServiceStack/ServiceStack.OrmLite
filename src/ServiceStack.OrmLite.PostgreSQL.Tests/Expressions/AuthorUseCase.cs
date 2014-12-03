@@ -10,7 +10,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
     {
         private List<Author> authors; 
 
-        public AuthorUseCase()
+        public AuthorUseCase() : base(Dialect.PostgreSql)
         {
             authors = new List<Author>();
             authors.Add(new Author() { Name = "Demis Bellot", Birthday = DateTime.Today.AddYears(-20), Active = true, Earnings = 99.9m, Comments = "CSharp books", Rate = 10, City = "London" });

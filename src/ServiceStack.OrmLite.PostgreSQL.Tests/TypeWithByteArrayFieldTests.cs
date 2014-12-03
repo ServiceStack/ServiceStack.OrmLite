@@ -5,6 +5,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
 {
     public class TypeWithByteArrayFieldTests : OrmLiteTestBase
     {
+        public TypeWithByteArrayFieldTests() : base(Dialect.PostgreSql) { }
         TypeWithByteArrayField getSampleObject()
         {
             var testByteArray = new byte[256];

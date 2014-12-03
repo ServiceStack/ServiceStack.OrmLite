@@ -7,6 +7,8 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 {
     public class ExpressionsTestBase : OrmLiteTestBase
     {
+        public ExpressionsTestBase() : base(Dialect.PostgreSql) { }
+
         [SetUp]
         public void Setup()
         {

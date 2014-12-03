@@ -7,7 +7,8 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
     public class OrmLiteDropTableWithNamingStrategyTests
         : OrmLiteTestBase
     {
-        
+        public OrmLiteDropTableWithNamingStrategyTests() : base(Dialect.PostgreSql) { }
+
         [Test]
         public void Can_drop_TableWithNamigStrategy_table_PostgreSqlNamingStrategy()
         {

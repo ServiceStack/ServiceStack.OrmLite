@@ -2,14 +2,13 @@
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.Tests;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.PostgreSQL.Tests
 {
     [TestFixture]
     public class CreatePostgreSQLTablesTests : OrmLiteTestBase
     {
-
+        public CreatePostgreSQLTablesTests() : base(Dialect.PostgreSql) { }
         
         [Test]
         public void DropAndCreateTable_DropsTableAndCreatesTable()

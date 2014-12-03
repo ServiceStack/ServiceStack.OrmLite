@@ -9,7 +9,8 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixture]
     public class OrmLiteGetScalarTests:OrmLiteTestBase
     {
-        
+        public OrmLiteGetScalarTests() : base(Dialect.PostgreSql) { }
+
         [Test]
         public void Can_get_scalar_value(){
             

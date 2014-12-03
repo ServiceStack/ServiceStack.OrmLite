@@ -9,6 +9,8 @@ namespace ServiceStack.OrmLite.Tests
     public class OrmLiteBasicPersistenceProviderTests
         : OrmLiteTestBase
     {
+        public OrmLiteBasicPersistenceProviderTests() : base(Dialect.PostgreSql) { }
+
         [SetUp]
         public void SetUp()
         {

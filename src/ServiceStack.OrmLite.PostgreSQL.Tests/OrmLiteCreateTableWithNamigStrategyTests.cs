@@ -10,6 +10,7 @@ namespace ServiceStack.OrmLite.Tests
     public class OrmLiteCreateTableWithNamigStrategyTests 
         : OrmLiteTestBase
     {
+        public OrmLiteCreateTableWithNamigStrategyTests() : base(Dialect.PostgreSql) { }
 
         [Test]
         public void Can_create_TableWithNamigStrategy_table_prefix()

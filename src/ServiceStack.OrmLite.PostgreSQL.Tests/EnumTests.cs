@@ -6,6 +6,8 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
 {
     public class EnumTests : OrmLiteTestBase
     {
+        public EnumTests() : base(Dialect.PostgreSql) { }
+
         [Test]
         public void CanCreateTable()
         {
