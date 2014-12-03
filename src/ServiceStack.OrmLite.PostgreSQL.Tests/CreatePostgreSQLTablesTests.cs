@@ -78,6 +78,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
                 dbS1.DropTable<CreatePostgreSQLTablesTests_dummy_table>();
                 dbS1.CreateTable<CreatePostgreSQLTablesTests_dummy_table>();
                 Assert.That(dbS1.Count<CreatePostgreSQLTablesTests_dummy_table>(), Is.EqualTo(0));
+                dbS1.DropTable<CreatePostgreSQLTablesTests_dummy_table>();
             }
             builder.SearchPath = schema2;
 
@@ -86,6 +87,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
                 dbS2.DropTable<CreatePostgreSQLTablesTests_dummy_table>();
                 dbS2.CreateTable<CreatePostgreSQLTablesTests_dummy_table>();
                 Assert.That(dbS2.Count<CreatePostgreSQLTablesTests_dummy_table>(), Is.EqualTo(0));
+                dbS2.DropTable<CreatePostgreSQLTablesTests_dummy_table>();
             }
 
         }
