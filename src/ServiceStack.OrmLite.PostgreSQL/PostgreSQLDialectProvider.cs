@@ -370,5 +370,25 @@ namespace ServiceStack.OrmLite.PostgreSQL
             }
             return base.GetValue<T>(fieldDef, obj);
         }
+
+        public void ExecuteFunction<T>(IDbCommand dbCommand, T obj)
+        {
+            var tableType = obj.GetType();
+            var modelDef = GetModel(tableType);
+
+            dbCommand.CommandText = GetQuotedTableName(modelDef);
+            dbCommand.CommandType = CommandType.StoredProcedure;
+
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+                var p = dbCommand.CreateParameter();
+                SetParameter(fieldDef, p);
+                dbCommand.Parameters.Add(p);
+            }
+
+            SetParameterValues<T>(dbCommand, obj);
+
+            dbCommand.ExecuteNonQuery();
+        }
     }
 }

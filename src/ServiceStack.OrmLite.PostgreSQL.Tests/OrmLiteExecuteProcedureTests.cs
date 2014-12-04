@@ -1,6 +1,7 @@
 ﻿using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.Tests;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.PostgreSQL.Tests
 {
@@ -11,8 +12,8 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
 
         private const string Create = @"
             CREATE OR REPLACE FUNCTION f_service_stack(
-                v_string_values CHARACTER VARYING[],
-                v_integer_values INTEGER[]
+                v_string_values text[],
+                v_integer_values integer[]
             ) RETURNS BOOLEAN AS
             $BODY$
             BEGIN
@@ -37,12 +38,14 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
             LANGUAGE plpgsql VOLATILE COST 100;
             ";
 
-        private const string Drop = "DROP FUNCTION f_service_stack(CHARACTER VARYING[], INTEGER[]);";
+        private const string Drop = "DROP FUNCTION f_service_stack(text[], integer[]);";
 
         [Alias("f_service_stack")]
         public class ServiceStackFunction
         {
+            [CustomField("text[]")]
             public string[] StringValues { get; set; }
+            [CustomField("integer[]")]
             public int[] IntegerValues { get; set; }
         }
 
@@ -52,12 +55,15 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
             using (var db = OpenDbConnection())
             {
                 db.ExecuteSql(Create);
+                db.GetLastSql().Print();
 
-                db.ExecuteProcedure(new ServiceStackFunction
-                                        {
-                                            StringValues = new[] { "ServiceStack", "Thoughtfully Architected" },
-                                            IntegerValues = new[] { 1, 2, 3 }
-                                        });
+                var command = db.CreateCommand();
+                var dialect = command.GetDialectProvider();
+                ((PostgreSQLDialectProvider)dialect).ExecuteFunction(command, new ServiceStackFunction
+                {
+                    StringValues = new[] { "ServiceStack", "Thoughtfully Architected" },
+                    IntegerValues = new[] { 1, 2, 3 }
+                });
                 db.ExecuteSql(Drop);
             }
         }
