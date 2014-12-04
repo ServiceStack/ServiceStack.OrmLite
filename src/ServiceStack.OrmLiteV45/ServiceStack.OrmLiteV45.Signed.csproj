@@ -198,8 +198,8 @@
     <Compile Include="..\ServiceStack.OrmLite\OrmLiteTransaction.cs">
       <Link>OrmLiteTransaction.cs</Link>
     </Compile>
-    <Compile Include="..\ServiceStack.OrmLite\OrmLiteUtilExtensions.cs">
-      <Link>OrmLiteUtilExtensions.cs</Link>
+    <Compile Include="..\ServiceStack.OrmLite\OrmLiteUtils.cs">
+      <Link>OrmLiteUtils.cs</Link>
     </Compile>
     <Compile Include="..\ServiceStack.OrmLite\OrmLiteWriteApi.cs">
       <Link>OrmLiteWriteApi.cs</Link>
