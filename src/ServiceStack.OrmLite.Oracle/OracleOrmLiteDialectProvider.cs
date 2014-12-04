@@ -1095,5 +1095,10 @@ namespace ServiceStack.OrmLite.Oracle
 
             return sb.ToString();
         }
+
+        public override string ToRowCountStatement(string innerSql)
+        {
+            return "SELECT COUNT(*) FROM ({0})".Fmt(innerSql);
+        }
     }
 }

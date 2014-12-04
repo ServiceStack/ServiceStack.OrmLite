@@ -1399,6 +1399,11 @@ namespace ServiceStack.OrmLite
             return subSql;
         }
 
+        public virtual string ToRowCountStatement(string innerSql)
+        {
+            return "SELECT COUNT(*) FROM ({0}) AS COUNT".Fmt(innerSql);
+        }
+
         //Async API's, should be overrided by Dialect Providers to use .ConfigureAwait(false)
         //Default impl below uses TaskAwaiter shim in async.cs
 
