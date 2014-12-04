@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Text;
 using Npgsql;
+using NpgsqlTypes;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.PostgreSQL
@@ -323,6 +324,16 @@ namespace ServiceStack.OrmLite.PostgreSQL
             }
 
             return dbCmd.ExecLongScalar();
+        }
+        public override void SetParameter(FieldDefinition fieldDef, IDbDataParameter p)
+        {
+            if (fieldDef.CustomFieldDefinition == "json")
+            {
+                p.ParameterName = this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName));
+                ((NpgsqlParameter) p).NpgsqlDbType = NpgsqlDbType.Json;
+                return;
+            }
+            base.SetParameter(fieldDef, p);
         }
     }
 }

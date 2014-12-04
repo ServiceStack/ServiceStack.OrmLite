@@ -55,11 +55,14 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
                 db.Insert(row);
 
                 var result = db.Select<ModelWithJsonType>(
-                    "complex_type_json->'sub_type'->>'name' = 'SubType2'");
+                    "complex_type_json->'SubType'->>'Name' = 'SubType2'");
+
+                db.GetLastSql().Print();
 
                 Assert.That(result.Count, Is.EqualTo(1));
-                Assert.That(result[0].Id, Is.EqualTo(2));
-                Assert.That(result[0].ComplexTypeJson.SubType, Is.EqualTo("SubType2"));
+                Assert.That(result[0].Id, Is.EqualTo(1));
+                Assert.That(result[0].ComplexTypeJson.Id, Is.EqualTo(2));
+                Assert.That(result[0].ComplexTypeJson.SubType.Name, Is.EqualTo("SubType2"));
             }
         }
     }
