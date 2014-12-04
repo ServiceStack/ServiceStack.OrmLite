@@ -35,7 +35,15 @@ namespace ServiceStack.OrmLite.Oracle
         public override string ApplyNameRestrictions(string name)
         {
             if (name.Length > MaxNameLength) name = Squash(name);
-            return name;
+            return name.TrimStart('_');
+        }
+
+        public override string GetTableName(ModelDefinition modelDef)
+        {
+            return modelDef.IsInSchema
+                       ? ApplyNameRestrictions(modelDef.Schema
+                            + "_" + GetTableName(modelDef.ModelName))
+                       : GetTableName(modelDef.ModelName);
         }
 
         private static string Squash(string name)

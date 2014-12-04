@@ -24,7 +24,6 @@ using System.Linq.Expressions;
 
 namespace ServiceStack.OrmLite
 {
-
     public abstract class OrmLiteDialectProviderBase<TDialect>
         : IOrmLiteDialectProvider
         where TDialect : IOrmLiteDialectProvider
@@ -264,14 +263,12 @@ namespace ServiceStack.OrmLite
                    && fieldDefinition != BoolColumnDefinition;
         }
 
-        protected const int NotFound = -1;
-
         /// <summary>
         /// Populates row fields during re-hydration of results.
         /// </summary>
         public virtual void SetDbValue(FieldDefinition fieldDef, IDataReader reader, int colIndex, object instance)
         {
-            if (HandledDbNullValue(fieldDef, reader, colIndex, instance)) return;
+            if (OrmLiteDialectProviderExtensions.HandledDbNullValue(fieldDef, reader, colIndex, instance)) return;
 
             var convertedValue = ConvertDbValue(reader.GetValue(colIndex), fieldDef.FieldType);
             try
@@ -281,24 +278,7 @@ namespace ServiceStack.OrmLite
             catch (NullReferenceException ignore) { }
         }
 
-        public static bool HandledDbNullValue(FieldDefinition fieldDef, IDataReader dataReader, int colIndex, object instance)
-        {
-            if (fieldDef == null || fieldDef.SetValueFn == null || colIndex == NotFound) return true;
-            if (dataReader.IsDBNull(colIndex))
-            {
-                if (fieldDef.IsNullable)
-                {
-                    fieldDef.SetValueFn(instance, null);
-                }
-                else
-                {
-                    fieldDef.SetValueFn(instance, fieldDef.FieldType.GetDefaultValue());
-                }
-                return true;
-            }
-            return false;
-        }
-
+  
         public abstract IDbConnection CreateConnection(string filePath, Dictionary<string, string> options);
 
         public virtual string GetQuotedValue(string paramValue)
@@ -1140,11 +1120,6 @@ namespace ServiceStack.OrmLite
             return null;
         }
 
-        public static ModelDefinition GetModelDefinition(Type modelType)
-        {
-            return modelType.GetModelDefinition();
-        }
-
         public virtual string ToAddColumnStatement(Type modelType, FieldDefinition fieldDef)
         {
 
@@ -1260,14 +1235,6 @@ namespace ServiceStack.OrmLite
             }
         }
 
-
-        public static ulong ConvertToULong(byte[] bytes)
-        {
-            Array.Reverse(bytes); //Correct Endianness
-            var ulongValue = BitConverter.ToUInt64(bytes, 0);
-            return ulongValue;
-        }
-
         public virtual object ConvertDbValue(object value, Type type)
         {
             if (value == null || value is DBNull) return null;
@@ -1316,7 +1283,7 @@ namespace ServiceStack.OrmLite
                             return value;
                         var byteValue = value as byte[];
                         if (byteValue != null)
-                            return ConvertToULong(byteValue);
+                            return OrmLiteDialectProviderExtensions.ConvertToULong(byteValue);
                         return Convert.ToUInt64(value);
                     case TypeCode.Single:
                         return value is float ? value : Convert.ToSingle(value);
@@ -1392,8 +1359,7 @@ namespace ServiceStack.OrmLite
                     {
                         if (value is TimeSpan)
                             return ((TimeSpan)value).Ticks.ToString(CultureInfo.InvariantCulture);
-
-                        return Convert.ChangeType(value, fieldType).ToString();                        
+                        return Convert.ChangeType(value, fieldType).ToString();
                     }
                     break;
             }
@@ -1537,6 +1503,5 @@ namespace ServiceStack.OrmLite
             throw new NotImplementedException(OrmLiteUtilExtensions.AsyncRequiresNet45Error);
         }
 #endif
-
     }
 }
