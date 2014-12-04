@@ -103,6 +103,7 @@
     <Compile Include="OrmLiteExecuteProcedureTests.cs" />
     <Compile Include="OrmLiteInsertTests.cs" />
     <Compile Include="OrmLiteSelectTests.cs" />
+    <Compile Include="PostgreSqlArrayTests.cs" />
     <Compile Include="PostgreSqlJsonTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="OrmLiteGetScalarTests.cs" />
