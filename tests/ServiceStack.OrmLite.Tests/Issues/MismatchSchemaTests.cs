@@ -80,7 +80,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
             using (var captured = new CaptureSqlFilter())
             using (var db = OpenDbConnection())
             {
-                var modelDef = OrmLiteDialectProviderExtensions.GetModelDefinition(typeof(Poco));
+                var modelDef = OrmLiteUtils.GetModelDefinition(typeof(Poco));
                 
                 db.SingleById<Poco>(1);
 

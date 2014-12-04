@@ -268,7 +268,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public virtual void SetDbValue(FieldDefinition fieldDef, IDataReader reader, int colIndex, object instance)
         {
-            if (OrmLiteDialectProviderExtensions.HandledDbNullValue(fieldDef, reader, colIndex, instance)) return;
+            if (OrmLiteUtils.HandledDbNullValue(fieldDef, reader, colIndex, instance)) return;
 
             var convertedValue = ConvertDbValue(reader.GetValue(colIndex), fieldDef.FieldType);
             try
@@ -1289,7 +1289,7 @@ namespace ServiceStack.OrmLite
                             return value;
                         var byteValue = value as byte[];
                         if (byteValue != null)
-                            return OrmLiteDialectProviderExtensions.ConvertToULong(byteValue);
+                            return OrmLiteUtils.ConvertToULong(byteValue);
                         return Convert.ToUInt64(value);
                     case TypeCode.Single:
                         return value is float ? value : Convert.ToSingle(value);
@@ -1491,22 +1491,22 @@ namespace ServiceStack.OrmLite
 #else
         public Task<List<T>> ReaderEach<T>(IDataReader reader, Func<T> fn, CancellationToken token = new CancellationToken())
         {
-            throw new NotImplementedException(OrmLiteUtilExtensions.AsyncRequiresNet45Error);
+            throw new NotImplementedException(OrmLiteUtils.AsyncRequiresNet45Error);
         }
 
         public Task<Return> ReaderEach<Return>(IDataReader reader, Action fn, Return source, CancellationToken token = new CancellationToken())
         {
-            throw new NotImplementedException(OrmLiteUtilExtensions.AsyncRequiresNet45Error);
+            throw new NotImplementedException(OrmLiteUtils.AsyncRequiresNet45Error);
         }
 
         public Task<T> ReaderRead<T>(IDataReader reader, Func<T> fn, CancellationToken token = new CancellationToken())
         {
-            throw new NotImplementedException(OrmLiteUtilExtensions.AsyncRequiresNet45Error);
+            throw new NotImplementedException(OrmLiteUtils.AsyncRequiresNet45Error);
         }
 
         public Task<long> InsertAndGetLastInsertIdAsync<T>(IDbCommand dbCmd, CancellationToken token)
         {
-            throw new NotImplementedException(OrmLiteUtilExtensions.AsyncRequiresNet45Error);
+            throw new NotImplementedException(OrmLiteUtils.AsyncRequiresNet45Error);
         }
 #endif
     }

@@ -109,7 +109,7 @@ namespace ServiceStack.OrmLite.SqlServer
                 var bytes = reader.GetValue(colIndex) as byte[];
                 if (bytes != null)
                 {
-                    var ulongValue = OrmLiteDialectProviderExtensions.ConvertToULong(bytes);
+                    var ulongValue = OrmLiteUtils.ConvertToULong(bytes);
                     try
                     {
                         fieldDef.SetValueFn(instance, ulongValue);
@@ -281,7 +281,7 @@ namespace ServiceStack.OrmLite.SqlServer
                 {
                     var foreignKeyName = fieldDef.ForeignKey.GetForeignKeyName(
                         modelDef,
-                        OrmLiteDialectProviderExtensions.GetModelDefinition(fieldDef.ForeignKey.ReferenceType),
+                        OrmLiteUtils.GetModelDefinition(fieldDef.ForeignKey.ReferenceType),
                         NamingStrategy,
                         fieldDef);
 

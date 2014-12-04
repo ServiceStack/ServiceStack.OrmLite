@@ -51,37 +51,5 @@ namespace ServiceStack.OrmLite
                 "." +
                 dialect.GetQuotedColumnName(fieldName);
         }
-
-        private const int NotFound = -1;
-
-        public static ModelDefinition GetModelDefinition(Type modelType)
-        {
-            return modelType.GetModelDefinition();
-        }
-
-        public static bool HandledDbNullValue(FieldDefinition fieldDef, IDataReader dataReader, int colIndex, object instance)
-        {
-            if (fieldDef == null || fieldDef.SetValueFn == null || colIndex == NotFound) return true;
-            if (dataReader.IsDBNull(colIndex))
-            {
-                if (fieldDef.IsNullable)
-                {
-                    fieldDef.SetValueFn(instance, null);
-                }
-                else
-                {
-                    fieldDef.SetValueFn(instance, fieldDef.FieldType.GetDefaultValue());
-                }
-                return true;
-            }
-            return false;
-        }
-
-        public static ulong ConvertToULong(byte[] bytes)
-        {
-            Array.Reverse(bytes); //Correct Endianness
-            var ulongValue = BitConverter.ToUInt64(bytes, 0);
-            return ulongValue;
-        }
     }
 }

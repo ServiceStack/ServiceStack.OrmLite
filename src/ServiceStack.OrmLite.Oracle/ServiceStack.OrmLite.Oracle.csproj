@@ -64,8 +64,12 @@
     <Compile Include="DbSchema\ParameterDirection.cs" />
     <Compile Include="DbSchema\PocoCreator.cs" />
     <Compile Include="DbSchema\ProcedureType.cs" />
-    <Compile Include="OracleConnection.cs" />
-    <Compile Include="OracleCommand.cs" />
+    <Compile Include="OracleConnection.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="OracleCommand.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="OracleDataReader.cs" />
     <Compile Include="OracleDialect.cs" />
     <Compile Include="OracleExecFilter.cs" />

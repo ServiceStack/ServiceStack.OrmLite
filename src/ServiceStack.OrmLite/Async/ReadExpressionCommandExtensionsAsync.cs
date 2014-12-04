@@ -166,7 +166,7 @@ namespace ServiceStack.OrmLite
 
             return dialectProvider.ReaderEach(dataReader, () =>
             {
-                var row = OrmLiteUtilExtensions.CreateInstance<T>();
+                var row = OrmLiteUtils.CreateInstance<T>();
                 row.PopulateWithSqlReader(dialectProvider, dataReader, fieldDefs, indexCache);
                 return row;
             }, token);

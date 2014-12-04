@@ -482,7 +482,7 @@ namespace ServiceStack.OrmLite
                 var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition);
                 while (reader.Read())
                 {
-                    var row = OrmLiteUtilExtensions.CreateInstance<T>();
+                    var row = OrmLiteUtils.CreateInstance<T>();
                     row.PopulateWithSqlReader(dialectProvider, reader, fieldDefs, indexCache);
                     yield return row;
                 }
@@ -537,7 +537,7 @@ namespace ServiceStack.OrmLite
                 var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition);
                 while (reader.Read())
                 {
-                    var row = OrmLiteUtilExtensions.CreateInstance<T>();
+                    var row = OrmLiteUtils.CreateInstance<T>();
                     row.PopulateWithSqlReader(dialectProvider, reader, fieldDefs, indexCache);
                     yield return row;
                 }
@@ -569,7 +569,7 @@ namespace ServiceStack.OrmLite
                 var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition);
                 while (reader.Read())
                 {
-                    var row = OrmLiteUtilExtensions.CreateInstance<T>();
+                    var row = OrmLiteUtils.CreateInstance<T>();
                     row.PopulateWithSqlReader(dialectProvider, reader, fieldDefs, indexCache);
                     yield return row;
                 }
