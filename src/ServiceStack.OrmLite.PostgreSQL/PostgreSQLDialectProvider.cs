@@ -387,8 +387,6 @@ namespace ServiceStack.OrmLite.PostgreSQL
             }
 
             SetParameterValues<T>(cmd, obj);
-
-            cmd.ExecuteNonQuery();
         }
     }
 }
