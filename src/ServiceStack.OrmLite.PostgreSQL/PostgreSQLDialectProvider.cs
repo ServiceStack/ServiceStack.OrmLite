@@ -325,6 +325,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
 
             return dbCmd.ExecLongScalar();
         }
+
         public override void SetParameter(FieldDefinition fieldDef, IDbDataParameter p)
         {
             if (fieldDef.CustomFieldDefinition == "json")
@@ -333,7 +334,31 @@ namespace ServiceStack.OrmLite.PostgreSQL
                 ((NpgsqlParameter) p).NpgsqlDbType = NpgsqlDbType.Json;
                 return;
             }
+            if (fieldDef.CustomFieldDefinition == "integer[]")
+            {
+                p.ParameterName = this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName));
+                ((NpgsqlParameter) p).NpgsqlDbType = NpgsqlDbType.Array | NpgsqlDbType.Integer;
+                return;
+            }
+            if (fieldDef.CustomFieldDefinition == "bigint[]")
+            {
+                p.ParameterName = this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName));
+                ((NpgsqlParameter) p).NpgsqlDbType = NpgsqlDbType.Array | NpgsqlDbType.Bigint;
+                return;
+            }
             base.SetParameter(fieldDef, p);
+        }
+        protected override object GetValue<T>(FieldDefinition fieldDef, object obj)
+        {
+            if (fieldDef.CustomFieldDefinition == "integer[]")
+            {
+                return fieldDef.GetValue(obj);
+            }
+            if (fieldDef.CustomFieldDefinition == "bigint[]")
+            {
+                return fieldDef.GetValue(obj);
+            }
+            return base.GetValue<T>(fieldDef, obj);
         }
     }
 }
