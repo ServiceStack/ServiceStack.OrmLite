@@ -57,13 +57,12 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
                 db.ExecuteSql(Create);
                 db.GetLastSql().Print();
 
-                var command = db.CreateCommand();
-                var dialect = command.GetDialectProvider();
-                ((PostgreSQLDialectProvider)dialect).ExecuteFunction(command, new ServiceStackFunction
+                db.ExecuteProcedure(new ServiceStackFunction
                 {
                     StringValues = new[] { "ServiceStack", "Thoughtfully Architected" },
                     IntegerValues = new[] { 1, 2, 3 }
                 });
+
                 db.ExecuteSql(Drop);
             }
         }

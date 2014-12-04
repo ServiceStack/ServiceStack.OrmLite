@@ -371,24 +371,24 @@ namespace ServiceStack.OrmLite.PostgreSQL
             return base.GetValue<T>(fieldDef, obj);
         }
 
-        public void ExecuteFunction<T>(IDbCommand dbCommand, T obj)
+        public override void PrepareStoredProcedureStatement<T>(IDbCommand cmd, T obj)
         {
             var tableType = obj.GetType();
             var modelDef = GetModel(tableType);
 
-            dbCommand.CommandText = GetQuotedTableName(modelDef);
-            dbCommand.CommandType = CommandType.StoredProcedure;
+            cmd.CommandText = GetQuotedTableName(modelDef);
+            cmd.CommandType = CommandType.StoredProcedure;
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
-                var p = dbCommand.CreateParameter();
+                var p = cmd.CreateParameter();
                 SetParameter(fieldDef, p);
-                dbCommand.Parameters.Add(p);
+                cmd.Parameters.Add(p);
             }
 
-            SetParameterValues<T>(dbCommand, obj);
+            SetParameterValues<T>(cmd, obj);
 
-            dbCommand.ExecuteNonQuery();
+            cmd.ExecuteNonQuery();
         }
     }
 }

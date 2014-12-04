@@ -907,9 +907,8 @@ namespace ServiceStack.OrmLite
         internal static void ExecuteProcedure<T>(this IDbCommand dbCmd, T obj)
         {
             var dialectProvider = dbCmd.GetDialectProvider();
-            string sql = dialectProvider.ToExecuteProcedureStatement(obj);
-            dbCmd.CommandType = CommandType.StoredProcedure;
-            dbCmd.ExecuteSql(sql);
+            dialectProvider.PrepareStoredProcedureStatement(dbCmd, obj);
+            dbCmd.ExecuteNonQuery();
         }
 
         internal static ulong GetRowVersion(this IDbCommand dbCmd, ModelDefinition modelDef, object id)
