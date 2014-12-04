@@ -24,43 +24,8 @@ using System.Linq.Expressions;
 
 namespace ServiceStack.OrmLite
 {
-    public abstract class OrmLiteDialectProviderBase
-    {
-        protected const int NotFound = -1;
-
-        public static ModelDefinition GetModelDefinition(Type modelType)
-        {
-            return modelType.GetModelDefinition();
-        }
-
-        public static bool HandledDbNullValue(FieldDefinition fieldDef, IDataReader dataReader, int colIndex, object instance)
-        {
-            if (fieldDef == null || fieldDef.SetValueFn == null || colIndex == NotFound) return true;
-            if (dataReader.IsDBNull(colIndex))
-            {
-                if (fieldDef.IsNullable)
-                {
-                    fieldDef.SetValueFn(instance, null);
-                }
-                else
-                {
-                    fieldDef.SetValueFn(instance, fieldDef.FieldType.GetDefaultValue());
-                }
-                return true;
-            }
-            return false;
-        }
-
-        public static ulong ConvertToULong(byte[] bytes)
-        {
-            Array.Reverse(bytes); //Correct Endianness
-            var ulongValue = BitConverter.ToUInt64(bytes, 0);
-            return ulongValue;
-        }
-    }
-
     public abstract class OrmLiteDialectProviderBase<TDialect>
-        : OrmLiteDialectProviderBase, IOrmLiteDialectProvider
+        : IOrmLiteDialectProvider
         where TDialect : IOrmLiteDialectProvider
     {
         protected static readonly ILog Log = LogManager.GetLogger(typeof(IOrmLiteDialectProvider));
@@ -303,7 +268,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public virtual void SetDbValue(FieldDefinition fieldDef, IDataReader reader, int colIndex, object instance)
         {
-            if (HandledDbNullValue(fieldDef, reader, colIndex, instance)) return;
+            if (OrmLiteDialectProviderExtensions.HandledDbNullValue(fieldDef, reader, colIndex, instance)) return;
 
             var convertedValue = ConvertDbValue(reader.GetValue(colIndex), fieldDef.FieldType);
             try
@@ -1318,7 +1283,7 @@ namespace ServiceStack.OrmLite
                             return value;
                         var byteValue = value as byte[];
                         if (byteValue != null)
-                            return ConvertToULong(byteValue);
+                            return OrmLiteDialectProviderExtensions.ConvertToULong(byteValue);
                         return Convert.ToUInt64(value);
                     case TypeCode.Single:
                         return value is float ? value : Convert.ToSingle(value);

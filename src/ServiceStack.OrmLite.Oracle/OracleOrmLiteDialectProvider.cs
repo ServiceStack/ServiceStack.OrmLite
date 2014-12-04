@@ -167,7 +167,7 @@ namespace ServiceStack.OrmLite.Oracle
 
         public override void SetDbValue(FieldDefinition fieldDef, IDataReader reader, int colIndex, object instance)
         {
-            if (HandledDbNullValue(fieldDef, reader, colIndex, instance)) return;
+            if (OrmLiteDialectProviderExtensions.HandledDbNullValue(fieldDef, reader, colIndex, instance)) return;
 
             var value = reader.GetValue(colIndex);
             var convertedValue = ConvertDbValue(value, fieldDef.FieldType);
