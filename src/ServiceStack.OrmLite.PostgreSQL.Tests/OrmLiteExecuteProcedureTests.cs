@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.Tests;
 
@@ -8,6 +7,8 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
     [TestFixture]
     public class OrmLiteExecuteProcedureTests : OrmLiteTestBase
     {
+        public OrmLiteExecuteProcedureTests() : base(Dialect.PostgreSql) { }
+
         private const string Create = @"
             CREATE OR REPLACE FUNCTION f_service_stack(
                 v_string_values CHARACTER VARYING[],

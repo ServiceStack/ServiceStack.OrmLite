@@ -7,6 +7,8 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
     [TestFixture]
     public class ForeignKeyAttributeTests : OrmLiteTestBase
     {
+        public ForeignKeyAttributeTests() : base(Dialect.PostgreSql) { }
+
         [TestFixtureSetUp]
         public void Setup()
         {

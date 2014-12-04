@@ -6,6 +6,8 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
 {
     public class EnumTests : OrmLiteTestBase
     {
+        public EnumTests() : base(Dialect.PostgreSql) { }
+
         [Test]
         public void CanCreateTable()
         {
@@ -62,7 +64,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
                 con.Save(new TypeWithEnum { Id = 2, EnumValue = SomeEnum.Value1 });
                 con.Save(new TypeWithEnum { Id = 3, EnumValue = SomeEnum.Value2 });
 
-                var target = con.SelectFmt<TypeWithEnum>("\"EnumValue\" = {0}", SomeEnum.Value1);
+                var target = con.SelectFmt<TypeWithEnum>("\"enum_value\" = {0}", SomeEnum.Value1);
 
                 Assert.AreEqual(2, target.Count());
             }

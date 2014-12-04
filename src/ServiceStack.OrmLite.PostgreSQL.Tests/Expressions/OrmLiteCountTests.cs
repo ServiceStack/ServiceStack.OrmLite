@@ -12,6 +12,8 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
     [TestFixture]
     public class OrmLiteCountTests : OrmLiteTestBase
     {
+        public OrmLiteCountTests() : base(Dialect.PostgreSql) { }
+
         [Test]
         public void CanDoCountWithInterface()
         {
