@@ -334,6 +334,12 @@ namespace ServiceStack.OrmLite.PostgreSQL
                 ((NpgsqlParameter) p).NpgsqlDbType = NpgsqlDbType.Json;
                 return;
             }
+            if (fieldDef.CustomFieldDefinition == "text[]")
+            {
+                p.ParameterName = this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName));
+                ((NpgsqlParameter)p).NpgsqlDbType = NpgsqlDbType.Array | NpgsqlDbType.Text;
+                return;
+            }
             if (fieldDef.CustomFieldDefinition == "integer[]")
             {
                 p.ParameterName = this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName));
@@ -350,6 +356,10 @@ namespace ServiceStack.OrmLite.PostgreSQL
         }
         protected override object GetValue<T>(FieldDefinition fieldDef, object obj)
         {
+            if (fieldDef.CustomFieldDefinition == "text[]")
+            {
+                return fieldDef.GetValue(obj);
+            }
             if (fieldDef.CustomFieldDefinition == "integer[]")
             {
                 return fieldDef.GetValue(obj);
@@ -359,6 +369,24 @@ namespace ServiceStack.OrmLite.PostgreSQL
                 return fieldDef.GetValue(obj);
             }
             return base.GetValue<T>(fieldDef, obj);
+        }
+
+        public override void PrepareStoredProcedureStatement<T>(IDbCommand cmd, T obj)
+        {
+            var tableType = obj.GetType();
+            var modelDef = GetModel(tableType);
+
+            cmd.CommandText = GetQuotedTableName(modelDef);
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+                var p = cmd.CreateParameter();
+                SetParameter(fieldDef, p);
+                cmd.Parameters.Add(p);
+            }
+
+            SetParameterValues<T>(cmd, obj);
         }
     }
 }

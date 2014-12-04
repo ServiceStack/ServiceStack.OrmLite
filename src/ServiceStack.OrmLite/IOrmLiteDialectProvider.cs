@@ -86,6 +86,8 @@ namespace ServiceStack.OrmLite
 
         bool PrepareParameterizedDeleteStatement<T>(IDbCommand cmd, ICollection<string> deleteFields = null);
 
+        void PrepareStoredProcedureStatement<T>(IDbCommand cmd, T obj);
+
         void SetParameterValues<T>(IDbCommand dbCmd, object obj);
 
         Dictionary<string, FieldDefinition> GetFieldDefinitionMap(ModelDefinition modelDef);

@@ -668,6 +668,12 @@ namespace ServiceStack.OrmLite
             return hadRowVesion;
         }
 
+        public virtual void PrepareStoredProcedureStatement<T>(IDbCommand cmd, T obj)
+        {
+            cmd.CommandText = ToExecuteProcedureStatement(obj);
+            cmd.CommandType = CommandType.StoredProcedure;
+        }
+
         protected void AddParameter(IDbCommand cmd, FieldDefinition fieldDef)
         {
             var p = cmd.CreateParameter();
