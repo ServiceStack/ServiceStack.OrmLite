@@ -67,7 +67,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        public IDbConnection OpenDbConnection()
+        public virtual IDbConnection OpenDbConnection()
         {
             var connection = CreateDbConnection();
             connection.Open();
@@ -75,7 +75,7 @@ namespace ServiceStack.OrmLite
             return connection;
         }
 
-        public IDbConnection CreateDbConnection()
+        public virtual IDbConnection CreateDbConnection()
         {
             if (this.ConnectionString == null)
                 throw new ArgumentNullException("ConnectionString", "ConnectionString must be set");
@@ -87,7 +87,7 @@ namespace ServiceStack.OrmLite
             return connection;
         }
 
-        public IDbConnection OpenDbConnectionString(string connectionString)
+        public virtual IDbConnection OpenDbConnectionString(string connectionString)
         {
             if (connectionString == null)
                 throw new ArgumentNullException("connectionString");
@@ -101,7 +101,7 @@ namespace ServiceStack.OrmLite
             return connection;
         }
 
-        public IDbConnection OpenDbConnection(string connectionKey)
+        public virtual IDbConnection OpenDbConnection(string connectionKey)
         {
             OrmLiteConnectionFactory factory;
             if (!NamedConnections.TryGetValue(connectionKey, out factory))
@@ -128,12 +128,12 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        public void RegisterConnection(string connectionKey, string connectionString, IOrmLiteDialectProvider dialectProvider)
+        public virtual void RegisterConnection(string connectionKey, string connectionString, IOrmLiteDialectProvider dialectProvider)
         {
             RegisterConnection(connectionKey, new OrmLiteConnectionFactory(connectionString, dialectProvider, setGlobalDialectProvider: false));
         }
 
-        public void RegisterConnection(string connectionKey, OrmLiteConnectionFactory connectionFactory)
+        public virtual void RegisterConnection(string connectionKey, OrmLiteConnectionFactory connectionFactory)
         {
             NamedConnections[connectionKey] = connectionFactory;
         }
