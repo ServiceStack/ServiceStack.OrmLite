@@ -498,7 +498,10 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 db.Insert(new CrossJoinTableB {Id = 5, Value = 3});
                 db.Insert(new CrossJoinTableB {Id = 6, Value = 42});
 
-                var q = db.From<CrossJoinTableA>().CrossJoin<CrossJoinTableB>().OrderBy<CrossJoinTableA>(x => x.Id).ThenBy<CrossJoinTableB>(x => x.Id);
+                var q = db.From<CrossJoinTableA>()
+                          .CrossJoin<CrossJoinTableB>()
+                          .OrderBy<CrossJoinTableA>(x => x.Id)
+                          .ThenBy<CrossJoinTableB>(x => x.Id);
                 var result = db.Select<CrossJoinResult>(q);
 
                 db.GetLastSql().Print();
