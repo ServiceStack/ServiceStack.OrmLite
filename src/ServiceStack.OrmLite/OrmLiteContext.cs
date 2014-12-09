@@ -98,13 +98,13 @@ namespace ServiceStack.OrmLite
         public static OrmLiteState CreateNewState()
         {
             var state = new OrmLiteState();
-            Instance.Items["OrmLiteState"] = state;
+            OrmLiteState = state;
             return state;
         }
 
         public static OrmLiteState GetOrCreateState()
         {
-            return (Instance.Items["OrmLiteState"] as OrmLiteState)
+            return (OrmLiteState as OrmLiteState)
                 ?? CreateNewState();
         }
 
@@ -112,7 +112,10 @@ namespace ServiceStack.OrmLite
         {
             get
             {
-                return Instance.Items["OrmLiteState"] as OrmLiteState;
+                if (Instance.Items.Contains("OrmLiteState"))
+                    return Instance.Items["OrmLiteState"] as OrmLiteState;
+                else
+                    return null;
             }
             set
             {
