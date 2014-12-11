@@ -65,7 +65,7 @@ namespace ServiceStack.OrmLite
         {
             string sql = expression.Limit(1).SelectInto<T>();
 
-            return dbCmd.ExprConvertToAsync<T>(sql, token);
+            return dbCmd.ConvertToAsync<T>(sql, token);
         }
 
         public static Task<TKey> ScalarAsync<T, TKey>(this IDbCommand dbCmd, Expression<Func<T, TKey>> field, CancellationToken token)
