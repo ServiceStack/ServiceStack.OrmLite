@@ -353,7 +353,8 @@ namespace ServiceStack.OrmLite.SqlServer
             var definition = base.GetColumnDefinition(fieldName, fieldType, isPrimaryKey, autoIncrement,
                 isNullable, isRowVersion, fieldLength, scale, defaultValue, customFieldDefinition);
 
-            if (fieldType == typeof(Decimal) && fieldLength != DefaultDecimalPrecision && scale != DefaultDecimalScale)
+            if (fieldType == typeof(Decimal) 
+                && (fieldLength != DefaultDecimalPrecision || scale != DefaultDecimalScale))
             {
                 string validDecimal = String.Format("DECIMAL({0},{1})",
                     fieldLength.GetValueOrDefault(DefaultDecimalPrecision),
