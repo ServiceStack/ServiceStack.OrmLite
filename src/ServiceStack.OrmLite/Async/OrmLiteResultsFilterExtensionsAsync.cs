@@ -157,7 +157,7 @@ namespace ServiceStack.OrmLite
 
             var dialectProvider = dbCmd.GetDialectProvider();
             return dbCmd.ExecReaderAsync(dbCmd.CommandText, token)
-                        .Then(reader => reader.ExprConvertToAsync<T>(dialectProvider, token)).Unwrap();
+                        .Then(reader => reader.ConvertToAsync<T>(dialectProvider, token)).Unwrap();
         }
 
         internal static Task<List<T>> ColumnAsync<T>(this IDbCommand dbCmd, string sql, CancellationToken token)
