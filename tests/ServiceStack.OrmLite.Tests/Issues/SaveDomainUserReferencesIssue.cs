@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Data;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Text;
@@ -78,11 +79,16 @@ namespace ServiceStack.OrmLite.Tests.Issues
                     }
                 };
 
-                //Same as below in 1 line
-                //db.Save(user, references: true);
-                db.Save(user);
-                db.SaveReferences(user, user.HomeAddress);
-                db.SaveReferences(user, user.Orders);
+                using (var trans = db.OpenTransaction(IsolationLevel.ReadCommitted))
+                {
+                    //Same as below in 1 line
+                    //db.Save(user, references: true);
+                    db.Save(user);
+                    db.SaveReferences(user, user.HomeAddress);
+                    db.SaveReferences(user, user.Orders);
+
+                    trans.Commit();
+                }
 
                 user = db.LoadSingleById<DomainUser>("UserId");
                 user.PrintDump();
@@ -97,11 +103,16 @@ namespace ServiceStack.OrmLite.Tests.Issues
                     Details = "Reese",
                 });
 
-                //Same as below in 1 line
-                //db.Save(user, references: true);
-                db.Save(user);
-                db.SaveReferences(user, user.HomeAddress);
-                db.SaveReferences(user, user.Orders);
+                using (var trans = db.OpenTransaction(IsolationLevel.ReadCommitted))
+                {
+                    //Same as below in 1 line
+                    //db.Save(user, references: true);
+                    db.Save(user);
+                    db.SaveReferences(user, user.HomeAddress);
+                    db.SaveReferences(user, user.Orders);
+
+                    trans.Commit();
+                }
 
                 user = db.LoadSingleById<DomainUser>("UserId");
                 user.PrintDump();
