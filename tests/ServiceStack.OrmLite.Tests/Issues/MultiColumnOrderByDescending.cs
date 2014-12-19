@@ -42,7 +42,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
             {
                 var q = db.From<Person>()
                     .OrderByDescending(p => p.LastName)
-                    .OrderByDescending(p => p.FirstName);
+                    .ThenByDescending(p => p.FirstName);
 
                 var result = db.Select(q);
 
