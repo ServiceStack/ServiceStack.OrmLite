@@ -378,8 +378,8 @@ namespace ServiceStack.OrmLite
             sep = string.Empty;
             useFieldName = true;
             orderByProperties.Clear();
-            var property = Visit(keySelector).ToString();
-            orderByProperties.Add(property + " ASC");
+            var fields = Visit(keySelector).ToString();
+            orderByProperties.Add(fields);
             BuildOrderByClauseInternal();
             return this;
         }
@@ -387,7 +387,7 @@ namespace ServiceStack.OrmLite
         public virtual SqlExpression<T> ThenBy(string orderBy)
         {
             orderBy.SqlVerifyFragment();
-            orderByProperties.Add(orderBy + " ASC");
+            orderByProperties.Add(orderBy);
             BuildOrderByClauseInternal();
             return this;
         }
@@ -406,8 +406,8 @@ namespace ServiceStack.OrmLite
         {
             sep = string.Empty;
             useFieldName = true;
-            var property = Visit(keySelector).ToString();
-            orderByProperties.Add(property + " ASC");
+            var fields = Visit(keySelector).ToString();
+            orderByProperties.Add(fields);
             BuildOrderByClauseInternal();
             return this;
         }
@@ -427,8 +427,11 @@ namespace ServiceStack.OrmLite
             sep = string.Empty;
             useFieldName = true;
             orderByProperties.Clear();
-            var property = Visit(keySelector).ToString();
-            orderByProperties.Add(property + " DESC");
+            var fields = Visit(keySelector).ToString().Split(',');
+            foreach (var field in fields)
+            {
+                orderByProperties.Add(field.Trim() + " DESC");
+            }
             BuildOrderByClauseInternal();
             return this;
         }
@@ -455,8 +458,11 @@ namespace ServiceStack.OrmLite
         {
             sep = string.Empty;
             useFieldName = true;
-            var property = Visit(keySelector).ToString();
-            orderByProperties.Add(property + " DESC");
+            var fields = Visit(keySelector).ToString().Split(',');
+            foreach (var field in fields)
+            {
+                orderByProperties.Add(field.Trim() + " DESC");
+            }
             BuildOrderByClauseInternal();
             return this;
         }
