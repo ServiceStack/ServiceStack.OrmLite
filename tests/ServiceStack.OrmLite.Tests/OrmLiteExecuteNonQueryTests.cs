@@ -60,6 +60,9 @@
                     Assert.That(affectedRows, Is.EqualTo(2));
                     Assert.That(rows[0].Name, Is.EqualTo(name1));
                     Assert.That(rows[1].Name, Is.EqualTo(name2));
+
+                    var ids = db.SqlColumn<int>("select Id from Person order by Id");
+                    Assert.That(ids, Is.EquivalentTo(new[] { 1, 2 }));
                 }
             }
 
@@ -183,6 +186,9 @@
                     Assert.That(affectedRows, Is.EqualTo(2));
                     Assert.That(rows[0].Name, Is.EqualTo(name1));
                     Assert.That(rows[1].Name, Is.EqualTo(name2));
+
+                    var ids = db.SqlColumn<int>("select Id from Person order by Id");
+                    Assert.That(ids, Is.EquivalentTo(new[] { 1, 2 }));
                 }
             }
 
@@ -301,6 +307,9 @@
                     Assert.That(affectedRows, Is.EqualTo(2));
                     Assert.That(rows[0].Name, Is.EqualTo(name1));
                     Assert.That(rows[1].Name, Is.EqualTo(name2));
+
+                    var ids = db.SqlColumn<int>("select Id from Person order by Id");
+                    Assert.That(ids, Is.EquivalentTo(new[] { 1, 2 }));
                 }
             }
 

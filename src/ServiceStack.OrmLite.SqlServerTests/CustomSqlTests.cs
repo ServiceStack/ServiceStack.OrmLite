@@ -82,5 +82,20 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 Assert.That(pTotal.Value, Is.EqualTo("3"));
             }
         }
+
+        [Test]
+        public void Can_execute_stored_proceduce_returning_scalars()
+        {
+            using (var db = OpenDbConnection())
+            {
+                using (var cmd = db.SqlProc(
+                    "GetUserIdsFromEmailAddresses", new { EmailAddresses = "as@if.com" }))
+                {
+                    var userIds = cmd.ConvertToList<int>();
+
+                    Assert.That(userIds.Count, Is.GreaterThan(0));
+                }
+            }
+        }
     }
 }

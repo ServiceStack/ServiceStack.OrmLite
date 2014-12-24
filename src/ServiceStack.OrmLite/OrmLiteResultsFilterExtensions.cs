@@ -63,7 +63,9 @@ namespace ServiceStack.OrmLite
 
             using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
             {
-                return reader.ConvertToList<T>(dbCmd.GetDialectProvider());
+                return OrmLiteUtils.IsScalar<T>()
+                    ? reader.Column<T>(dbCmd.GetDialectProvider())
+                    : reader.ConvertToList<T>(dbCmd.GetDialectProvider());
             }
         }
 
@@ -252,6 +254,5 @@ namespace ServiceStack.OrmLite
                 return reader.Lookup<K, V>(dbCmd.GetDialectProvider());
             }
         }
-
     }
 }

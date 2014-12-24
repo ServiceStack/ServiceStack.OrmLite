@@ -67,11 +67,6 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecuteReader();
         }
 
-        public static bool IsScalar<T>()
-        {
-            return typeof(T).IsValueType || typeof(T) == typeof(string);
-        }
-
         internal static List<T> Select<T>(this IDbCommand dbCmd)
         {
             return SelectFmt<T>(dbCmd, (string)null);
@@ -342,7 +337,7 @@ namespace ServiceStack.OrmLite
 
         internal static T Single<T>(this IDbCommand dbCmd, string sql, object anonType)
         {
-            if (IsScalar<T>()) return Scalar<T>(dbCmd, sql, anonType);
+            if (OrmLiteUtils.IsScalar<T>()) return Scalar<T>(dbCmd, sql, anonType);
 
             dbCmd.SetParameters<T>(anonType, excludeDefaults: false);
 
@@ -363,9 +358,7 @@ namespace ServiceStack.OrmLite
         {
             dbCmd.SetFilters<T>(anonType);
 
-            return IsScalar<T>()
-                ? dbCmd.Column<T>()
-                : dbCmd.ConvertToList<T>();
+            return dbCmd.ConvertToList<T>();
         }
 
         internal static List<T> Select<T>(this IDbCommand dbCmd, string sql, object anonType = null)
@@ -373,9 +366,7 @@ namespace ServiceStack.OrmLite
             if (anonType != null) dbCmd.SetParameters<T>(anonType, excludeDefaults: false);
             dbCmd.CommandText = dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), sql);
 
-            return IsScalar<T>()
-                ? dbCmd.Column<T>()
-                : dbCmd.ConvertToList<T>();
+            return dbCmd.ConvertToList<T>();
         }
 
         internal static List<T> Select<T>(this IDbCommand dbCmd, string sql, Dictionary<string, object> dict)
@@ -383,9 +374,7 @@ namespace ServiceStack.OrmLite
             if (dict != null) SetParameters(dbCmd, (IDictionary<string, object>)dict, (bool)false);
             dbCmd.CommandText = dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), sql);
 
-            return IsScalar<T>()
-                ? dbCmd.Column<T>()
-                : dbCmd.ConvertToList<T>();
+            return dbCmd.ConvertToList<T>();
         }
 
         internal static List<T> SqlList<T>(this IDbCommand dbCmd, string sql, object anonType = null)
@@ -417,9 +406,7 @@ namespace ServiceStack.OrmLite
             if (anonType != null) dbCmd.SetParameters<T>(anonType, excludeDefaults: false);
             dbCmd.CommandText = sql;
 
-            return IsScalar<T>()
-                ? dbCmd.Column<T>()
-                : dbCmd.ConvertToList<T>();
+            return dbCmd.ConvertToList<T>();
         }
 
         internal static List<T> SqlColumn<T>(this IDbCommand dbCmd, string sql, Dictionary<string, object> dict)
@@ -427,9 +414,7 @@ namespace ServiceStack.OrmLite
             if (dict != null) SetParameters(dbCmd, dict, false);
             dbCmd.CommandText = sql;
 
-            return IsScalar<T>()
-                ? dbCmd.Column<T>()
-                : dbCmd.ConvertToList<T>();
+            return dbCmd.ConvertToList<T>();
         }
 
         internal static T SqlScalar<T>(this IDbCommand dbCmd, string sql, object anonType = null)

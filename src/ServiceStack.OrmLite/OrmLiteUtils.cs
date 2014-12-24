@@ -27,6 +27,11 @@ namespace ServiceStack.OrmLite
             return (T)ReflectionExtensions.CreateInstance<T>();
         }
 
+        public static bool IsScalar<T>()
+        {
+            return typeof(T).IsValueType || typeof(T) == typeof(string);
+        }
+
         public static T ConvertTo<T>(this IDataReader dataReader, IOrmLiteDialectProvider dialectProvider)
         {
             var fieldDefs = ModelDefinition<T>.Definition.AllFieldDefinitionsArray;
