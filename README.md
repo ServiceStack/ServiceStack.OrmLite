@@ -1188,11 +1188,13 @@ string spSql = @"DROP PROCEDURE IF EXISTS spSearchLetters;
 
 db.ExecuteSql(spSql);
 
-var cmd = db.SqlProc("spSearchLetters", new { pLetter = "C" });
-var pTotal = cmd.AddParam("pTotal", direction: ParameterDirection.Output);
+using (var cmd = db.SqlProc("spSearchLetters", new { pLetter = "C" }))
+{
+    var pTotal = cmd.AddParam("pTotal", direction: ParameterDirection.Output);
 
-var results = cmd.ConvertToList<LetterFrequency>();
-var total = pTotal.Value;
+    var results = cmd.ConvertToList<LetterFrequency>();
+    var total = pTotal.Value;
+}
 ```
 
 An alternative approach is to use `SqlList` which lets you use a filter to customize a 

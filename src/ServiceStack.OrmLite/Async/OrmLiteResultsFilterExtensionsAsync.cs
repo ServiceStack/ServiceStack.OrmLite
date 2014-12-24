@@ -57,7 +57,10 @@ namespace ServiceStack.OrmLite
 
             var dialectProvider = dbCmd.GetDialectProvider();
             return dbCmd.ExecReaderAsync(dbCmd.CommandText, token)
-                        .Then(reader => reader.ConvertToListAsync<T>(dialectProvider, token)).Unwrap();
+                        .Then(reader => 
+                            OrmLiteUtils.IsScalar<T>()
+                                ? reader.ColumnAsync<T>(dialectProvider, token)
+                                : reader.ConvertToListAsync<T>(dialectProvider, token)).Unwrap();
         }
 
         public static Task<IList> ConvertToListAsync(this IDbCommand dbCmd, Type refType, string sql, CancellationToken token)

@@ -33,6 +33,17 @@ namespace ServiceStack.OrmLite
             return OrmLiteConfig.ExecFilter.ExecLazy(dbConn, filter);
         }
 
+        public static IDbCommand Exec(this IDbConnection dbConn, Func<IDbCommand, IDbCommand> filter)
+        {
+            return OrmLiteConfig.ExecFilter.Exec(dbConn, filter);
+        }
+
+        public static Task<IDbCommand> Exec(this IDbConnection dbConn, Func<IDbCommand, Task<IDbCommand>> filter)
+        {
+            return OrmLiteConfig.ExecFilter.Exec(dbConn, filter);
+        }
+
+
         /// <summary>
         /// Create a new SqlExpression builder allowing typed LINQ-like queries.
         /// </summary>

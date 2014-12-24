@@ -156,6 +156,12 @@ namespace ServiceStack.OrmLite.Tests
                 }
             }
 
+            public IDbCommand Exec(IDbConnection dbConn, Func<IDbCommand, IDbCommand> filter)
+            {
+                var cmd = CreateCommand(dbConn);
+                return filter(cmd);
+            }
+
             public async Task<T> Exec<T>(IDbConnection dbConn, Func<IDbCommand, Task<T>> filter)
             {
                 var cmd = CreateCommand(dbConn);
@@ -167,6 +173,12 @@ namespace ServiceStack.OrmLite.Tests
                 {
                     DisposeCommand(cmd, dbConn);
                 }
+            }
+
+            public async Task<IDbCommand> Exec(IDbConnection dbConn, Func<IDbCommand, Task<IDbCommand>> filter)
+            {
+                var cmd = CreateCommand(dbConn);
+                return await filter(cmd);
             }
 
             public void Exec(IDbConnection dbConn, Action<IDbCommand> filter)

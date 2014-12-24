@@ -12,6 +12,7 @@ namespace ServiceStack.OrmLite
         private OrmLiteConnection dbConn;
         private IDbCommand dbCmd;
         public IOrmLiteDialectProvider DialectProvider;
+        public bool IsDisposed { get; private set; }
 
         public OrmLiteCommand(OrmLiteConnection dbConn, IDbCommand dbCmd)
         {
@@ -22,6 +23,7 @@ namespace ServiceStack.OrmLite
 
         public void Dispose()
         {
+            IsDisposed = true;
             dbCmd.Dispose();
         }
 
