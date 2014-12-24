@@ -11,7 +11,9 @@ namespace ServiceStack.OrmLite
         IDbCommand CreateCommand(IDbConnection dbConn);
         void DisposeCommand(IDbCommand dbCmd, IDbConnection dbConn);
         T Exec<T>(IDbConnection dbConn, Func<IDbCommand, T> filter);
+        IDbCommand Exec(IDbConnection dbConn, Func<IDbCommand, IDbCommand> filter);
         Task<T> Exec<T>(IDbConnection dbConn, Func<IDbCommand, Task<T>> filter);
+        Task<IDbCommand> Exec(IDbConnection dbConn, Func<IDbCommand, Task<IDbCommand>> filter);
         void Exec(IDbConnection dbConn, Action<IDbCommand> filter);
         Task Exec(IDbConnection dbConn, Func<IDbCommand, Task> filter);
         IEnumerable<T> ExecLazy<T>(IDbConnection dbConn, Func<IDbCommand, IEnumerable<T>> filter);
@@ -65,6 +67,17 @@ namespace ServiceStack.OrmLite
             }
         }
 
+        public IDbCommand Exec(IDbConnection dbConn, Func<IDbCommand, IDbCommand> filter)
+        {
+            var dbCmd = CreateCommand(dbConn);
+            var ret = filter(dbCmd);
+            if (dbCmd != null)
+            {
+                dbConn.SetLastCommandText(dbCmd.CommandText);
+            }
+            return ret;
+        }
+
         public virtual void Exec(IDbConnection dbConn, Action<IDbCommand> filter)
         {
             var dbCmd = CreateCommand(dbConn);
@@ -88,6 +101,13 @@ namespace ServiceStack.OrmLite
                     DisposeCommand(dbCmd, dbConn);
                     return t;
                 });
+        }
+
+        public Task<IDbCommand> Exec(IDbConnection dbConn, Func<IDbCommand, Task<IDbCommand>> filter)
+        {
+            var dbCmd = CreateCommand(dbConn);
+
+            return filter(dbCmd).Then(t => t);
         }
 
         public virtual Task Exec(IDbConnection dbConn, Func<IDbCommand, Task> filter)

@@ -72,6 +72,9 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 db.ExecuteSql(CreateProcedureSql);
 
                 var cmd = db.SqlProc("spSearchLetters", new { pLetter = "C" });
+
+                Assert.That(((OrmLiteCommand)cmd).IsDisposed, Is.False);
+
                 var pTotal = cmd.AddParam("pTotal", direction: ParameterDirection.Output);
                 var results = cmd.ConvertToList<LetterFrequency>();
 
