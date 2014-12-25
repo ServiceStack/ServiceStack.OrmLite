@@ -16,14 +16,14 @@ namespace ServiceStack.OrmLite
     {
         internal static Task<List<T>> SelectAsync<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression, CancellationToken token)
         {
-            var expr = OrmLiteConfig.DialectProvider.SqlExpression<T>();
+            var expr = dbCmd.GetDialectProvider().SqlExpression<T>();
             var sql = expression(expr).SelectInto<T>();
             return dbCmd.ExprConvertToListAsync<T>(sql, token);
         }
 
         internal static Task<List<Into>> SelectAsync<Into, From>(this IDbCommand dbCmd, Func<SqlExpression<From>, SqlExpression<From>> expression, CancellationToken token)
         {
-            var expr = OrmLiteConfig.DialectProvider.SqlExpression<From>();
+            var expr = dbCmd.GetDialectProvider().SqlExpression<From>();
             string sql = expression(expr).SelectInto<Into>();
             return dbCmd.ExprConvertToListAsync<Into>(sql, token);
         }
@@ -42,7 +42,7 @@ namespace ServiceStack.OrmLite
 
         internal static Task<List<T>> SelectAsync<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate, CancellationToken token)
         {
-            var expr = OrmLiteConfig.DialectProvider.SqlExpression<T>();
+            var expr = dbCmd.GetDialectProvider().SqlExpression<T>();
             string sql = expr.Where(predicate).SelectInto<T>();
 
             return dbCmd.ExprConvertToListAsync<T>(sql, token);
@@ -50,13 +50,13 @@ namespace ServiceStack.OrmLite
 
         internal static Task<T> SingleAsync<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression, CancellationToken token)
         {
-            var expr = OrmLiteConfig.DialectProvider.SqlExpression<T>();
+            var expr = dbCmd.GetDialectProvider().SqlExpression<T>();
             return dbCmd.SingleAsync(expression(expr), token);
         }
 
         internal static Task<T> SingleAsync<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate, CancellationToken token)
         {
-            var ev = OrmLiteConfig.DialectProvider.SqlExpression<T>();
+            var ev = dbCmd.GetDialectProvider().SqlExpression<T>();
 
             return SingleAsync(dbCmd, ev.Where(predicate), token);
         }
@@ -131,7 +131,7 @@ namespace ServiceStack.OrmLite
 
         internal static Task<List<T>> LoadSelectAsync<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression, CancellationToken token = default(CancellationToken))
         {
-            var expr = OrmLiteConfig.DialectProvider.SqlExpression<T>();
+            var expr = dbCmd.GetDialectProvider().SqlExpression<T>();
             expr = expression(expr);
             return dbCmd.LoadListWithReferences<T, T>(expr, token);
         }
@@ -148,7 +148,7 @@ namespace ServiceStack.OrmLite
 
         internal static Task<List<T>> LoadSelectAsync<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate, CancellationToken token = default(CancellationToken))
         {
-            var expr = OrmLiteConfig.DialectProvider.SqlExpression<T>().Where(predicate);
+            var expr = dbCmd.GetDialectProvider().SqlExpression<T>().Where(predicate);
             return dbCmd.LoadListWithReferences<T, T>(expr, token);
         }
 
@@ -174,7 +174,7 @@ namespace ServiceStack.OrmLite
 
         internal static Task<List<T>> Select<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate, CancellationToken token)
         {
-            var expr = OrmLiteConfig.DialectProvider.SqlExpression<T>();
+            var expr = dbCmd.GetDialectProvider().SqlExpression<T>();
             string sql = expr.Where(predicate).SelectInto<T>();
 
             return dbCmd.ExprConvertToListAsync<T>(sql, token);

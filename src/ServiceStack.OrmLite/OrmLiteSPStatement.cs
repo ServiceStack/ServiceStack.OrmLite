@@ -153,7 +153,7 @@ namespace ServiceStack.OrmLite
 
         public void Dispose()
         {
-            OrmLiteConfig.ExecFilter.DisposeCommand(this.dbCmd, this.db);
+            dialectProvider.GetExecFilter().DisposeCommand(this.dbCmd, this.db);
         }
     }
 }

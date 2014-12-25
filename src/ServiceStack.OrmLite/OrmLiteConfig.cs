@@ -70,6 +70,28 @@ namespace ServiceStack.OrmLite
                 : DialectProvider;
         }
 
+        public static IOrmLiteExecFilter GetExecFilter(this IOrmLiteDialectProvider dialectProvider) {
+            return dialectProvider != null
+                    ? dialectProvider.ExecFilter ?? ExecFilter
+                    : ExecFilter;
+        }
+
+        public static IOrmLiteExecFilter GetExecFilter(this IDbCommand dbCmd) {
+            var ormLiteCmd = dbCmd as OrmLiteCommand;
+            var dialectProvider = ormLiteCmd != null
+                ? ormLiteCmd.DialectProvider
+                : DialectProvider;
+            return dialectProvider.GetExecFilter();
+        }
+
+        public static IOrmLiteExecFilter GetExecFilter(this IDbConnection db) {
+            var ormLiteConn = db as OrmLiteConnection;
+            var dialectProvider = ormLiteConn != null
+                ? ormLiteConn.DialectProvider
+                : DialectProvider;
+            return dialectProvider.GetExecFilter();
+        }
+
         public static void SetLastCommandText(this IDbConnection db, string sql)
         {
             var ormLiteConn = db as OrmLiteConnection;

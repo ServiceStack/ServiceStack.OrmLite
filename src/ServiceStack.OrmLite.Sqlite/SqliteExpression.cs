@@ -60,7 +60,7 @@ namespace ServiceStack.OrmLite.Sqlite
                     {
                         sIn.AppendFormat("{0}{1}",
                             sIn.Length > 0 ? "," : "",
-                            OrmLiteConfig.DialectProvider.GetQuotedValue(e, e.GetType()));
+                            base.DialectProvider.GetQuotedValue(e, e.GetType()));
                     }
                     statement = string.Format("{0} {1} ({2})", quotedColName, m.Method.Name, sIn);
                     break;
@@ -69,7 +69,7 @@ namespace ServiceStack.OrmLite.Sqlite
                     break;
                 case "As":
                     statement = string.Format("{0} As {1}", quotedColName,
-                        OrmLiteConfig.DialectProvider.GetQuotedColumnName(RemoveQuoteFromAlias(args[0].ToString())));
+                        base.DialectProvider.GetQuotedColumnName(RemoveQuoteFromAlias(args[0].ToString())));
                     break;
                 case "Sum":
                 case "Count":
