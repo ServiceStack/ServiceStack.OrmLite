@@ -23,7 +23,7 @@ namespace ServiceStack.OrmLite
             var fieldDefs = ModelDefinition<T>.Definition.AllFieldDefinitionsArray;
             using (dataReader)
             {
-                return OrmLiteConfig.DialectProvider.ReaderRead(dataReader, () =>
+                return dialectProvider.ReaderRead(dataReader, () =>
                 {
                     var row = CreateInstance<T>();
                     var indexCache = dataReader.GetIndexFieldsCache(ModelDefinition<T>.Definition);
@@ -39,7 +39,7 @@ namespace ServiceStack.OrmLite
             using (dataReader)
             {
                 var indexCache = dataReader.GetIndexFieldsCache(ModelDefinition<T>.Definition);
-                return OrmLiteConfig.DialectProvider.ReaderEach(dataReader, () =>
+                return dialectProvider.ReaderEach(dataReader, () =>
                 {
                     var row = CreateInstance<T>();
                     row.PopulateWithSqlReader(dialectProvider, dataReader, fieldDefs, indexCache);
@@ -55,7 +55,7 @@ namespace ServiceStack.OrmLite
 
             using (dataReader)
             {
-                return OrmLiteConfig.DialectProvider.ReaderRead(dataReader, () =>
+                return dialectProvider.ReaderRead(dataReader, () =>
                 {
                     var row = type.CreateInstance();
                     var indexCache = dataReader.GetIndexFieldsCache(modelDef);
@@ -73,7 +73,7 @@ namespace ServiceStack.OrmLite
             using (dataReader)
             {
                 var indexCache = dataReader.GetIndexFieldsCache(modelDef);
-                return OrmLiteConfig.DialectProvider.ReaderEach(dataReader, () =>
+                return dialectProvider.ReaderEach(dataReader, () =>
                 {
                     var row = type.CreateInstance();
                     row.PopulateWithSqlReader(dialectProvider, dataReader, fieldDefs, indexCache);
