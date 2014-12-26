@@ -140,7 +140,7 @@ namespace ServiceStack.OrmLite
 
         public static Task<long> CountAsync<T>(this IDbConnection dbConn, CancellationToken token = default(CancellationToken))
         {
-            var expression = OrmLiteConfig.DialectProvider.SqlExpression<T>();
+            var expression = dbConn.GetDialectProvider().SqlExpression<T>();
             return dbConn.Exec(dbCmd => dbCmd.CountAsync(expression, token));
         }
 

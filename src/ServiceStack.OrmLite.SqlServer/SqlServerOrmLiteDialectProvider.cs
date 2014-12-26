@@ -409,7 +409,7 @@ namespace ServiceStack.OrmLite.SqlServer
                     throw new ApplicationException("Malformed model, no PrimaryKey defined");
 
                 orderByExpression = string.Format("ORDER BY {0}",
-                    OrmLiteConfig.DialectProvider.GetQuotedColumnName(modelDef, modelDef.PrimaryKey));
+                    this.GetQuotedColumnName(modelDef, modelDef.PrimaryKey));
             }
 
             var ret = string.Format(

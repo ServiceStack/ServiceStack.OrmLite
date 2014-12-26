@@ -23,7 +23,7 @@ namespace ServiceStack.OrmLite
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.ExecuteSql(dbCmd).InTask();
 
-            return OrmLiteConfig.DialectProvider.ExecuteNonQueryAsync(dbCmd, token);
+            return dbCmd.GetDialectProvider().ExecuteNonQueryAsync(dbCmd, token);
         }
 
         internal static Task<int> ExecNonQueryAsync(this IDbCommand dbCmd, string sql, IDictionary<string, object> dict, CancellationToken token)
@@ -36,7 +36,7 @@ namespace ServiceStack.OrmLite
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.ExecuteSql(dbCmd).InTask();
 
-            return OrmLiteConfig.DialectProvider.ExecuteNonQueryAsync(dbCmd, token);
+            return dbCmd.GetDialectProvider().ExecuteNonQueryAsync(dbCmd, token);
         }
 
         internal static Task<int> ExecNonQueryAsync(this IDbCommand dbCmd, CancellationToken token)
@@ -44,7 +44,7 @@ namespace ServiceStack.OrmLite
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.ExecuteSql(dbCmd).InTask();
 
-            return OrmLiteConfig.DialectProvider.ExecuteNonQueryAsync(dbCmd, token);
+            return dbCmd.GetDialectProvider().ExecuteNonQueryAsync(dbCmd, token);
         }
 
         public static Task<List<T>> ConvertToListAsync<T>(this IDbCommand dbCmd, string sql, CancellationToken token)
@@ -136,7 +136,7 @@ namespace ServiceStack.OrmLite
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.GetScalar(dbCmd).InTask();
 
-            return OrmLiteConfig.DialectProvider.ExecuteScalarAsync(dbCmd, token);
+            return dbCmd.GetDialectProvider().ExecuteScalarAsync(dbCmd, token);
         }
 
         internal static Task<long> ExecLongScalarAsync(this IDbCommand dbCmd, string sql, CancellationToken token)
