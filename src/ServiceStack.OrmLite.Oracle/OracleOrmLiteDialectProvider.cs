@@ -278,6 +278,11 @@ namespace ServiceStack.OrmLite.Oracle
                     : enumValue;
             }
 
+            if (fieldType == typeof(byte[]))
+            {
+                return "hextoraw('" + BitConverter.ToString((byte[])value).Replace("-", "") + "')";
+            }
+
             return base.GetQuotedValue(value, fieldType);
         }
 
