@@ -220,6 +220,11 @@ namespace ServiceStack.OrmLite.Sqlite
                 return base.GetQuotedValue(dateTimeOffsetValue.ToString("o"), typeof (string));
             }
 
+            if (fieldType == typeof(byte[]))
+            {
+                return "x'" + BitConverter.ToString((byte[])value).Replace("-", "") + "'";
+            }
+
             return base.GetQuotedValue(value, fieldType);
         }
 
