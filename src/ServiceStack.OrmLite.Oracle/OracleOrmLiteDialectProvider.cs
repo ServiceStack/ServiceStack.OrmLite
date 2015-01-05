@@ -17,13 +17,28 @@ namespace ServiceStack.OrmLite.Oracle
 
         protected readonly List<string> ReservedNames = new List<string>
         {
-			"USER", "ORDER", "PASSWORD", "ACTIVE", "LEFT", "DOUBLE", "FLOAT", "DECIMAL", "STRING", "DATE",
-            "DATETIME", "TYPE","TIMESTAMP", "COMMENT", "LONG", "INDEX"
-		};
+            "ACCESS", "DEFAULT", "INTEGER", "ONLINE", "START", "ADD", "DELETE", "INTERSECT", "OPTION", "SUCCESSFUL", "ALL", "DESC",
+            "INTO", "OR", "SYNONYM", "ALTER", "DISTINCT", "IS", "ORDER", "SYSDATE", "AND", "DROP", "LEVEL", "PCTFREE", "TABLE", "ANY",
+            "ELSE", "LIKE", "PRIOR", "THEN", "AS", "EXCLUSIVE", "LOCK", "PRIVILEGES", "TO", "ASC", "EXISTS", "LONG", "PUBLIC", "TRIGGER",
+            "AUDIT", "FILE", "MAXEXTENTS", "RAW", "UID", "BETWEEN", "FLOAT", "MINUS", "RENAME", "UNION", "BY", "FOR", "MLSLABEL", "RESOURCE",
+            "UNIQUE", "CHAR", "FROM", "MODE", "REVOKE", "UPDATE", "CHECK", "GRANT", "MODIFY", "ROW", "USER", "CLUSTER", "GROUP", "NOAUDIT",
+            "ROWID", "VALIDATE", "COLUMN", "HAVING", "NOCOMPRESS", "ROWNUM", "VALUES", "COMMENT", "IDENTIFIED", "NOT", "ROWS", "VARCHAR",
+            "COMPRESS", "IMMEDIATE", "NOWAIT", "SELECT", "VARCHAR2", "CONNECT", "IN", "NULL", "SESSION", "VIEW", "CREATE", "INCREMENT",
+            "NUMBER", "SET", "WHENEVER", "CURRENT", "INDEX", "OF", "SHARE", "WHERE", "DATE", "INITIAL", "OFFLINE", "SIZE", "WITH", "DECIMAL",
+            "INSERT", "ON", "SMALLINT", "PASSWORD", "ACTIVE", "LEFT", "DOUBLE", "STRING", "DATETIME", "TYPE", "TIMESTAMP"
+        };
 
         protected readonly List<string> ReservedParameterNames = new List<string>
         {
-            "COMMENT", "DATE", "DECIMAL", "FLOAT", "ORDER", "USER", "LONG", "INDEX"
+            "ACCESS", "DEFAULT", "INTEGER", "ONLINE", "START", "ADD", "DELETE", "INTERSECT", "OPTION", "SUCCESSFUL", "ALL", "DESC",
+            "INTO", "OR", "SYNONYM", "ALTER", "DISTINCT", "IS", "ORDER", "SYSDATE", "AND", "DROP", "LEVEL", "PCTFREE", "TABLE", "ANY",
+            "ELSE", "LIKE", "PRIOR", "THEN", "AS", "EXCLUSIVE", "LOCK", "PRIVILEGES", "TO", "ASC", "EXISTS", "LONG", "PUBLIC", "TRIGGER",
+            "AUDIT", "FILE", "MAXEXTENTS", "RAW", "UID", "BETWEEN", "FLOAT", "MINUS", "RENAME", "UNION", "BY", "FOR", "MLSLABEL", "RESOURCE",
+            "UNIQUE", "CHAR", "FROM", "MODE", "REVOKE", "UPDATE", "CHECK", "GRANT", "MODIFY", "ROW", "USER", "CLUSTER", "GROUP", "NOAUDIT",
+            "ROWID", "VALIDATE", "COLUMN", "HAVING", "NOCOMPRESS", "ROWNUM", "VALUES", "COMMENT", "IDENTIFIED", "NOT", "ROWS", "VARCHAR",
+            "COMPRESS", "IMMEDIATE", "NOWAIT", "SELECT", "VARCHAR2", "CONNECT", "IN", "NULL", "SESSION", "VIEW", "CREATE", "INCREMENT",
+            "NUMBER", "SET", "WHENEVER", "CURRENT", "INDEX", "OF", "SHARE", "WHERE", "DATE", "INITIAL", "OFFLINE", "SIZE", "WITH", "DECIMAL",
+            "INSERT", "ON", "SMALLINT"
         };
 
         protected const int MaxNameLength = 30;
@@ -232,12 +247,26 @@ namespace ServiceStack.OrmLite.Oracle
                 var dateValue = (DateTime)value;
                 string iso8601Format = "yyyy-MM-dd";
                 string oracleFormat = "YYYY-MM-DD";
-                if (dateValue.ToString("yyyy-MM-dd HH:mm:ss.fff").EndsWith("00:00:00.000") == false)
+                if (dateValue.ToString("yyyy-MM-dd HH:mm:ss.fffffff").EndsWith("00:00:00.0000000") == false)
                 {
-                    iso8601Format = "yyyy-MM-dd HH:mm:ss.fff";
-                    oracleFormat = "YYYY-MM-DD HH24:MI:SS.FF3";
+                    iso8601Format = "yyyy-MM-dd HH:mm:ss.fffffff";
+                    oracleFormat = "YYYY-MM-DD HH24:MI:SS.FF9";
                 }
                 return "TO_TIMESTAMP(" + base.GetQuotedValue(dateValue.ToString(iso8601Format), typeof(string)) + ", " + base.GetQuotedValue(oracleFormat, typeof(string)) + ")";
+            }
+
+            if (fieldType == typeof(DateTimeOffset) || fieldType == typeof(DateTimeOffset?))
+            {
+                var dateValue = (DateTimeOffset)value;
+                string iso8601Format = "yyyy-MM-dd zzz";
+                string oracleFormat = "YYYY-MM-DD TZH:TZM";
+                if (dateValue.ToString("yyyy-MM-dd HH:mm:ss.fffffff").EndsWith("00:00:00.0000000") == false)
+                {
+                    iso8601Format = "yyyy-MM-dd HH:mm:ss.fffffff zzz";
+                    oracleFormat = "YYYY-MM-DD HH24:MI:SS.FF9 TZH:TZM";
+                }
+
+                return "TO_TIMESTAMP_TZ(" + base.GetQuotedValue(dateValue.ToString(iso8601Format), typeof(string)) + ", " + base.GetQuotedValue(oracleFormat, typeof(string)) + ")";
             }
 
             if ((value is TimeSpan) && (fieldType == typeof(Int64) || fieldType == typeof(Int64?)))

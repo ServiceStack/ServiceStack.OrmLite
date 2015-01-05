@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.Composition;
+using System.ComponentModel.Composition.Hosting;
 using System.Data;
 using System.Linq;
 using NUnit.Framework;
@@ -17,20 +20,7 @@ namespace ServiceStack.OrmLite.Tests
             db.CreateTable<ParamTestBo>(true);
             db.CreateTable<ParamRelBo>(true);
             db.CreateTable<ParamByteBo>(true);
-            db.CreateTable<ParamComment>(true);
-            db.CreateTable<ParamOrder>(true);
-            db.CreateTable<ParamLeft>(true);
-            db.CreateTable<ParamUser>(true);
-            db.CreateTable<ParamPassword>(true);
-            db.CreateTable<ParamActive>(true);
-            db.CreateTable<ParamDouble>(true);
-            db.CreateTable<ParamFloat>(true);
-            db.CreateTable<ParamDecimal>(true);
-            db.CreateTable<ParamString>(true);
-            db.CreateTable<ParamDate>(true);
-            db.CreateTable<ParamDateTime>(true);
-            db.CreateTable<ParamType>(true);
-            db.CreateTable<ParamTimestamp>(true);
+            db.CreateTable<ParamLevelAsAlias>(true);
         }
 
         [Test]
@@ -269,214 +259,885 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        public void ORA_ReservedNameComment_Test()
+        public void ORA_ReservedNameLevelAsAlias_Test()
         {
             using (var db = OpenDbConnection())
             {
                 DropAndCreateTables(db);
 
-                var row = new ParamComment { Comment = 1, Id = 2 };
+                var row = new ParamLevelAsAlias { Id = 2, ApprovalLevel = 212218 };
                 db.Insert(row);
 
-                row.Comment = 454;
+                row.ApprovalLevel = 676;
                 db.Update(row);
             }
         }
 
+        [ImportMany(typeof(IParam))]
+// ReSharper disable UnassignedField.Compiler
+        private IEnumerable<IParam> _reservedNameParams;
+// ReSharper restore UnassignedField.Compiler
 
         [Test]
-        public void ORA_ReservedNameLeft_Test()
+        public void ORA_ReservedNames_Test()
         {
+            ResolveReservedNameParameters();
             using (var db = OpenDbConnection())
             {
-                DropAndCreateTables(db);
-
-                var row = new ParamLeft { Id = 2, Left = 3 };
-                db.Insert(row);
-
-                row.Left = 454;
-                db.Update(row);
+                foreach (var param in _reservedNameParams)
+                {
+                    db.CreateTable(true, param.GetType());
+                    param.Id = 123;
+                    param.SetValue(1000);
+                    param.InsertDb(db);
+                    param.SetValue(2343);
+                    param.UpdateDb(db);
+                }
             }
         }
 
-        [Test]
-        public void ORA_ReservedNameOrder_Test()
+        private void ResolveReservedNameParameters()
         {
-            using (var db = OpenDbConnection())
-            {
-                DropAndCreateTables(db);
-
-                var row = new ParamOrder { Id = 2, Order = 4 };
-                db.Insert(row);
-
-                row.Order = 67;
-                db.Update(row);
-            }
+            var catalog = new AssemblyCatalog(typeof(IParam).Assembly);
+            var container = new CompositionContainer(catalog);
+            container.ComposeParts(this);
         }
 
-        [Test]
-        public void ORA_ReservedNameUser_Test()
+        [InheritedExport]
+        public interface IParam
         {
-            using (var db = OpenDbConnection())
-            {
-                DropAndCreateTables(db);
-
-                var row = new ParamUser { Id = 2, User = 5 };
-                db.Insert(row);
-
-                row.User = 35;
-                db.Update(row);
-            }
+            int Id { get; set; }
+            void InsertDb(IDbConnection db);
+            void UpdateDb(IDbConnection db);
+            void SetValue(int value);
         }
 
-        [Test]
-        public void ORA_ReservedNamePassword_Test()
+        public abstract class Param<T>: IParam
         {
-            using (var db = OpenDbConnection())
-            {
-                DropAndCreateTables(db);
-
-                var row = new ParamPassword { Id = 2, Password = 6 };
-                db.Insert(row);
-
-                row.Password = 335;
-                db.Update(row);
-            }
+            public int Id { get; set; }
+            public abstract void SetValue(int value);
+            public abstract T GetObject();
+            public void InsertDb(IDbConnection db) { db.Insert(GetObject()); }
+            public void UpdateDb(IDbConnection db) { db.Update(GetObject()); }
         }
 
-        [Test]
-        public void ORA_ReservedNameActive_Test()
+        public class ParamComment : Param<ParamComment>
         {
-            using (var db = OpenDbConnection())
-            {
-                DropAndCreateTables(db);
-
-                var row = new ParamActive { Id = 2, Active = 7 };
-                db.Insert(row);
-
-                row.Active = 454;
-                db.Update(row);
-            }
+            public int Comment { get; set; }
+            public override void SetValue(int value) { Comment = value; }
+            public override ParamComment GetObject() { return this; }
         }
 
-        [Test]
-        public void ORA_ReservedNameDouble_Test()
+        public class ParamOrder : Param<ParamOrder>
         {
-            using (var db = OpenDbConnection())
-            {
-                DropAndCreateTables(db);
-
-                var row = new ParamDouble { Id = 2, Double = 8 };
-                db.Insert(row);
-
-                row.Double = 4876554;
-                db.Update(row);
-            }
+            public int Order { get; set; }
+            public override void SetValue(int value) { Order = value; }
+            public override ParamOrder GetObject() { return this; }
         }
 
-        [Test]
-        public void ORA_ReservedNameFloat_Test()
+        public class ParamLeft : Param<ParamLeft>
         {
-            using (var db = OpenDbConnection())
-            {
-                DropAndCreateTables(db);
-
-                var row = new ParamFloat { Id = 2, Float = 9 };
-                db.Insert(row);
-
-                row.Float = 798;
-                db.Update(row);
-            }
+            public int Left { get; set; }
+            public override void SetValue(int value) { Left = value; }
+            public override ParamLeft GetObject() { return this; }
         }
 
-        [Test]
-        public void ORA_ReservedNameDecimal_Test()
+        public class ParamUser : Param<ParamUser>
         {
-            using (var db = OpenDbConnection())
-            {
-                DropAndCreateTables(db);
-
-                var row = new ParamDecimal { Id = 2, Decimal = 10 };
-                db.Insert(row);
-
-                row.Decimal = 454;
-                db.Update(row);
-            }
+            public int User { get; set; }
+            public override void SetValue(int value) { User = value; }
+            public override ParamUser GetObject() { return this; }
         }
 
-        [Test]
-        public void ORA_ReservedNameString_Test()
+        public class ParamPassword : Param<ParamPassword>
         {
-            using (var db = OpenDbConnection())
-            {
-                DropAndCreateTables(db);
-
-                var row = new ParamString { Id = 2, String = 11 };
-                db.Insert(row);
-
-                row.String = 234234;
-                db.Update(row);
-            }
+            public int Password { get; set; }
+            public override void SetValue(int value) { Password = value; }
+            public override ParamPassword GetObject() { return this; }
         }
 
-        [Test]
-        public void ORA_ReservedNameDate_Test()
+        public class ParamActive : Param<ParamActive>
         {
-            using (var db = OpenDbConnection())
-            {
-                DropAndCreateTables(db);
-
-                var row = new ParamDate { Id = 2, Date = 12 };
-                db.Insert(row);
-
-                row.Date = 826;
-                db.Update(row);
-            }
+            public int Active { get; set; }
+            public override void SetValue(int value) { Active = value; }
+            public override ParamActive GetObject() { return this; }
         }
 
-        [Test]
-        public void ORA_ReservedNameDateTime_Test()
+        public class ParamDouble : Param<ParamDouble>
         {
-            using (var db = OpenDbConnection())
-            {
-                DropAndCreateTables(db);
-
-                var row = new ParamDateTime { Id = 2, DateTime = 13 };
-                db.Insert(row);
-
-                row.DateTime = 327895;
-                db.Update(row);
-            }
+            public int Double { get; set; }
+            public override void SetValue(int value) { Double = value; }
+            public override ParamDouble GetObject() { return this; }
         }
 
-        [Test]
-        public void ORA_ReservedNameType_Test()
+        public class ParamFloat : Param<ParamFloat>
         {
-            using (var db = OpenDbConnection())
-            {
-                DropAndCreateTables(db);
-
-                var row = new ParamType { Id = 2, Type = 5 };
-                db.Insert(row);
-
-                row.Type = 454;
-                db.Update(row);
-            }
+            public int Float { get; set; }
+            public override void SetValue(int value) { Float = value; }
+            public override ParamFloat GetObject() { return this; }
         }
 
-        [Test]
-        public void ORA_ReservedNameTimestamp_Test()
+        public class ParamDecimal : Param<ParamDecimal>
         {
-            using (var db = OpenDbConnection())
-            {
-                DropAndCreateTables(db);
+            public int Decimal { get; set; }
+            public override void SetValue(int value) { Decimal = value; }
+            public override ParamDecimal GetObject() { return this; }
+        }
 
-                var row = new ParamTimestamp { Id = 2, Timestamp = 27 };
-                db.Insert(row);
+        public class ParamString : Param<ParamString>
+        {
+            public int String { get; set; }
+            public override void SetValue(int value) { String = value; }
+            public override ParamString GetObject() { return this; }
+        }
 
-                row.Timestamp = 28454;
-                db.Update(row);
-            }
+        public class ParamDate : Param<ParamDate>
+        {
+            public int Date { get; set; }
+            public override void SetValue(int value) { Date = value; }
+            public override ParamDate GetObject() { return this; }
+        }
+
+        public class ParamDateTime : Param<ParamDateTime>
+        {
+            public int DateTime { get; set; }
+            public override void SetValue(int value) { DateTime = value; }
+            public override ParamDateTime GetObject() { return this; }
+        }
+
+        public class ParamType : Param<ParamType>
+        {
+            public int Type { get; set; }
+            public override void SetValue(int value) { Type = value; }
+            public override ParamType GetObject() { return this; }
+        }
+
+        public class ParamTimestamp : Param<ParamTimestamp>
+        {
+            public int Timestamp { get; set; }
+            public override void SetValue(int value) { Timestamp = value; }
+            public override ParamTimestamp GetObject() { return this; }
+        }
+
+        public class ParamIndex : Param<ParamIndex>
+        {
+            public int Index { get; set; }
+            public override void SetValue(int value) { Index = value; }
+            public override ParamIndex GetObject() { return this; }
+        }
+
+        public class ParamAccess : Param<ParamAccess>
+        {
+            public int Access { get; set; }
+            public override void SetValue(int value) { Access = value; }
+            public override ParamAccess GetObject() { return this; }
+        }
+
+        public class ParamDefault : Param<ParamDefault>
+        {
+            public int Default { get; set; }
+            public override void SetValue(int value) { Default = value; }
+            public override ParamDefault GetObject() { return this; }
+        }
+
+        public class ParamInteger : Param<ParamInteger>
+        {
+            public int Integer { get; set; }
+            public override void SetValue(int value) { Integer = value; }
+            public override ParamInteger GetObject() { return this; }
+        }
+
+        public class ParamOnline : Param<ParamOnline>
+        {
+            public int Online { get; set; }
+            public override void SetValue(int value) { Online = value; }
+            public override ParamOnline GetObject() { return this; }
+        }
+
+        public class ParamStart : Param<ParamStart>
+        {
+            public int Start { get; set; }
+            public override void SetValue(int value) { Start = value; }
+            public override ParamStart GetObject() { return this; }
+        }
+
+        public class ParamAdd : Param<ParamAdd>
+        {
+            public int Add { get; set; }
+            public override void SetValue(int value) { Add = value; }
+            public override ParamAdd GetObject() { return this; }
+        }
+
+        public class ParamDelete : Param<ParamDelete>
+        {
+            public int Delete { get; set; }
+            public override void SetValue(int value) { Delete = value; }
+            public override ParamDelete GetObject() { return this; }
+        }
+
+        public class ParamIntersect : Param<ParamIntersect>
+        {
+            public int Intersect { get; set; }
+            public override void SetValue(int value) { Intersect = value; }
+            public override ParamIntersect GetObject() { return this; }
+        }
+
+        public class ParamOption : Param<ParamOption>
+        {
+            public int Option { get; set; }
+            public override void SetValue(int value) { Option = value; }
+            public override ParamOption GetObject() { return this; }
+        }
+
+        public class ParamSuccessful : Param<ParamSuccessful>
+        {
+            public int Successful { get; set; }
+            public override void SetValue(int value) { Successful = value; }
+            public override ParamSuccessful GetObject() { return this; }
+        }
+
+        public class ParamDesc : Param<ParamDesc>
+        {
+            public int Desc { get; set; }
+            public override void SetValue(int value) { Desc = value; }
+            public override ParamDesc GetObject() { return this; }
+        }
+
+        public class ParamAll : Param<ParamAll>
+        {
+            public int All { get; set; }
+            public override void SetValue(int value) { All = value; }
+            public override ParamAll GetObject() { return this; }
+        }
+
+        public class ParamInto : Param<ParamInto>
+        {
+            public int Into { get; set; }
+            public override void SetValue(int value) { Into = value; }
+            public override ParamInto GetObject() { return this; }
+        }
+
+        public class ParamLevel : Param<ParamLevel>
+        {
+            public int Level { get; set; }
+            public override void SetValue(int value) { Level = value; }
+            public override ParamLevel GetObject() { return this; }
+        }
+
+        public class ParamOr : Param<ParamOr>
+        {
+            public int Or { get; set; }
+            public override void SetValue(int value) { Or = value; }
+            public override ParamOr GetObject() { return this; }
+        }
+
+        public class ParamSynonym : Param<ParamSynonym>
+        {
+            public int Synonym { get; set; }
+            public override void SetValue(int value) { Synonym = value; }
+            public override ParamSynonym GetObject() { return this; }
+        }
+
+        public class ParamAlter : Param<ParamAlter>
+        {
+            public int Alter { get; set; }
+            public override void SetValue(int value) { Alter = value; }
+            public override ParamAlter GetObject() { return this; }
+        }
+
+        public class ParamDistinct : Param<ParamDistinct>
+        {
+            public int Distinct { get; set; }
+            public override void SetValue(int value) { Distinct = value; }
+            public override ParamDistinct GetObject() { return this; }
+        }
+
+        public class ParamIs : Param<ParamIs>
+        {
+            public int Is { get; set; }
+            public override void SetValue(int value) { Is = value; }
+            public override ParamIs GetObject() { return this; }
+        }
+
+        public class ParamSysdate : Param<ParamSysdate>
+        {
+            public int Sysdate { get; set; }
+            public override void SetValue(int value) { Sysdate = value; }
+            public override ParamSysdate GetObject() { return this; }
+        }
+
+        public class ParamAnd : Param<ParamAnd>
+        {
+            public int And { get; set; }
+            public override void SetValue(int value) { And = value; }
+            public override ParamAnd GetObject() { return this; }
+        }
+
+        public class ParamDrop : Param<ParamDrop>
+        {
+            public int Drop { get; set; }
+            public override void SetValue(int value) { Drop = value; }
+            public override ParamDrop GetObject() { return this; }
+        }
+
+        public class ParamPctFree : Param<ParamPctFree>
+        {
+            public int PctFree { get; set; }
+            public override void SetValue(int value) { PctFree = value; }
+            public override ParamPctFree GetObject() { return this; }
+        }
+
+        public class ParamTable : Param<ParamTable>
+        {
+            public int Table { get; set; }
+            public override void SetValue(int value) { Table = value; }
+            public override ParamTable GetObject() { return this; }
+        }
+
+        public class ParamAny : Param<ParamAny>
+        {
+            public int Any { get; set; }
+            public override void SetValue(int value) { Any = value; }
+            public override ParamAny GetObject() { return this; }
+        }
+
+        public class ParamElse : Param<ParamElse>
+        {
+            public int Else { get; set; }
+            public override void SetValue(int value) { Else = value; }
+            public override ParamElse GetObject() { return this; }
+        }
+
+        public class ParamLike : Param<ParamLike>
+        {
+            public int Like { get; set; }
+            public override void SetValue(int value) { Like = value; }
+            public override ParamLike GetObject() { return this; }
+        }
+
+        public class ParamPrior : Param<ParamPrior>
+        {
+            public int Prior { get; set; }
+            public override void SetValue(int value) { Prior = value; }
+            public override ParamPrior GetObject() { return this; }
+        }
+
+        public class ParamThen : Param<ParamThen>
+        {
+            public int Then { get; set; }
+            public override void SetValue(int value) { Then = value; }
+            public override ParamThen GetObject() { return this; }
+        }
+
+        public class ParamAs : Param<ParamAs>
+        {
+            public int As { get; set; }
+            public override void SetValue(int value) { As = value; }
+            public override ParamAs GetObject() { return this; }
+        }
+
+        public class ParamExclusive : Param<ParamExclusive>
+        {
+            public int Exclusive { get; set; }
+            public override void SetValue(int value) { Exclusive = value; }
+            public override ParamExclusive GetObject() { return this; }
+        }
+
+        public class ParamLock : Param<ParamLock>
+        {
+            public int Lock { get; set; }
+            public override void SetValue(int value) { Lock = value; }
+            public override ParamLock GetObject() { return this; }
+        }
+
+        public class ParamPrivileges : Param<ParamPrivileges>
+        {
+            public int Privileges { get; set; }
+            public override void SetValue(int value) { Privileges = value; }
+            public override ParamPrivileges GetObject() { return this; }
+        }
+
+        public class ParamTo : Param<ParamTo>
+        {
+            public int To { get; set; }
+            public override void SetValue(int value) { To = value; }
+            public override ParamTo GetObject() { return this; }
+        }
+
+        public class ParamAsc : Param<ParamAsc>
+        {
+            public int Asc { get; set; }
+            public override void SetValue(int value) { Asc = value; }
+            public override ParamAsc GetObject() { return this; }
+        }
+
+        public class ParamExists : Param<ParamExists>
+        {
+            public int Exists { get; set; }
+            public override void SetValue(int value) { Exists = value; }
+            public override ParamExists GetObject() { return this; }
+        }
+
+        public class ParamLong : Param<ParamLong>
+        {
+            public int Long { get; set; }
+            public override void SetValue(int value) { Long = value; }
+            public override ParamLong GetObject() { return this; }
+        }
+
+        public class ParamPublic : Param<ParamPublic>
+        {
+            public int Public { get; set; }
+            public override void SetValue(int value) { Public = value; }
+            public override ParamPublic GetObject() { return this; }
+        }
+
+        public class ParamTrigger : Param<ParamTrigger>
+        {
+            public int Trigger { get; set; }
+            public override void SetValue(int value) { Trigger = value; }
+            public override ParamTrigger GetObject() { return this; }
+        }
+
+        public class ParamAudit : Param<ParamAudit>
+        {
+            public int Audit { get; set; }
+            public override void SetValue(int value) { Audit = value; }
+            public override ParamAudit GetObject() { return this; }
+        }
+
+        public class ParamFile : Param<ParamFile>
+        {
+            public int File { get; set; }
+            public override void SetValue(int value) { File = value; }
+            public override ParamFile GetObject() { return this; }
+        }
+
+        public class ParamMaxExtents : Param<ParamMaxExtents>
+        {
+            public int MaxExtents { get; set; }
+            public override void SetValue(int value) { MaxExtents = value; }
+            public override ParamMaxExtents GetObject() { return this; }
+        }
+
+        public class ParamRaw : Param<ParamRaw>
+        {
+            public int Raw { get; set; }
+            public override void SetValue(int value) { Raw = value; }
+            public override ParamRaw GetObject() { return this; }
+        }
+
+        public class ParamUid : Param<ParamUid>
+        {
+            public int Uid { get; set; }
+            public override void SetValue(int value) { Uid = value; }
+            public override ParamUid GetObject() { return this; }
+        }
+
+        public class ParamBetween : Param<ParamBetween>
+        {
+            public int Between { get; set; }
+            public override void SetValue(int value) { Between = value; }
+            public override ParamBetween GetObject() { return this; }
+        }
+
+        public class ParamMinus : Param<ParamMinus>
+        {
+            public int Minus { get; set; }
+            public override void SetValue(int value) { Minus = value; }
+            public override ParamMinus GetObject() { return this; }
+        }
+
+        public class ParamRename : Param<ParamRename>
+        {
+            public int Rename { get; set; }
+            public override void SetValue(int value) { Rename = value; }
+            public override ParamRename GetObject() { return this; }
+        }
+
+        public class ParamUnion : Param<ParamUnion>
+        {
+            public int Union { get; set; }
+            public override void SetValue(int value) { Union = value; }
+            public override ParamUnion GetObject() { return this; }
+        }
+
+        public class ParamBy : Param<ParamBy>
+        {
+            public int By { get; set; }
+            public override void SetValue(int value) { By = value; }
+            public override ParamBy GetObject() { return this; }
+        }
+
+        public class ParamFor : Param<ParamFor>
+        {
+            public int For { get; set; }
+            public override void SetValue(int value) { For = value; }
+            public override ParamFor GetObject() { return this; }
+        }
+
+        public class ParamMlsLabel : Param<ParamMlsLabel>
+        {
+            public int MlsLabel { get; set; }
+            public override void SetValue(int value) { MlsLabel = value; }
+            public override ParamMlsLabel GetObject() { return this; }
+        }
+
+        public class ParamResource : Param<ParamResource>
+        {
+            public int Resource { get; set; }
+            public override void SetValue(int value) { Resource = value; }
+            public override ParamResource GetObject() { return this; }
+        }
+
+        public class ParamUnique : Param<ParamUnique>
+        {
+            public int Unique { get; set; }
+            public override void SetValue(int value) { Unique = value; }
+            public override ParamUnique GetObject() { return this; }
+        }
+
+        public class ParamChar : Param<ParamChar>
+        {
+            public int Char { get; set; }
+            public override void SetValue(int value) { Char = value; }
+            public override ParamChar GetObject() { return this; }
+        }
+
+        public class ParamFrom : Param<ParamFrom>
+        {
+            public int From { get; set; }
+            public override void SetValue(int value) { From = value; }
+            public override ParamFrom GetObject() { return this; }
+        }
+
+        public class ParamMode : Param<ParamMode>
+        {
+            public int Mode { get; set; }
+            public override void SetValue(int value) { Mode = value; }
+            public override ParamMode GetObject() { return this; }
+        }
+
+        public class ParamRevoke : Param<ParamRevoke>
+        {
+            public int Revoke { get; set; }
+            public override void SetValue(int value) { Revoke = value; }
+            public override ParamRevoke GetObject() { return this; }
+        }
+
+        public class ParamUpdate : Param<ParamUpdate>
+        {
+            public int Update { get; set; }
+            public override void SetValue(int value) { Update = value; }
+            public override ParamUpdate GetObject() { return this; }
+        }
+
+        public class ParamCheck : Param<ParamCheck>
+        {
+            public int Check { get; set; }
+            public override void SetValue(int value) { Check = value; }
+            public override ParamCheck GetObject() { return this; }
+        }
+
+        public class ParamGrant : Param<ParamGrant>
+        {
+            public int Grant { get; set; }
+            public override void SetValue(int value) { Grant = value; }
+            public override ParamGrant GetObject() { return this; }
+        }
+
+        public class ParamModify : Param<ParamModify>
+        {
+            public int Modify { get; set; }
+            public override void SetValue(int value) { Modify = value; }
+            public override ParamModify GetObject() { return this; }
+        }
+
+        public class ParamRow : Param<ParamRow>
+        {
+            public int Row { get; set; }
+            public override void SetValue(int value) { Row = value; }
+            public override ParamRow GetObject() { return this; }
+        }
+
+        public class ParamCluster : Param<ParamCluster>
+        {
+            public int Cluster { get; set; }
+            public override void SetValue(int value) { Cluster = value; }
+            public override ParamCluster GetObject() { return this; }
+        }
+
+        public class ParamGroup : Param<ParamGroup>
+        {
+            public int Group { get; set; }
+            public override void SetValue(int value) { Group = value; }
+            public override ParamGroup GetObject() { return this; }
+        }
+
+        public class ParamNoAudit : Param<ParamNoAudit>
+        {
+            public int NoAudit { get; set; }
+            public override void SetValue(int value) { NoAudit = value; }
+            public override ParamNoAudit GetObject() { return this; }
+        }
+
+        public class ParamRowId : Param<ParamRowId>
+        {
+            public int RowId { get; set; }
+            public override void SetValue(int value) { RowId = value; }
+            public override ParamRowId GetObject() { return this; }
+        }
+
+        public class ParamValidate : Param<ParamValidate>
+        {
+            public int Validate { get; set; }
+            public override void SetValue(int value) { Validate = value; }
+            public override ParamValidate GetObject() { return this; }
+        }
+
+        public class ParamColumn : Param<ParamColumn>
+        {
+            public int Column { get; set; }
+            public override void SetValue(int value) { Column = value; }
+            public override ParamColumn GetObject() { return this; }
+        }
+
+        public class ParamHaving : Param<ParamHaving>
+        {
+            public int Having { get; set; }
+            public override void SetValue(int value) { Having = value; }
+            public override ParamHaving GetObject() { return this; }
+        }
+
+        public class ParamNoCompress : Param<ParamNoCompress>
+        {
+            public int NoCompress { get; set; }
+            public override void SetValue(int value) { NoCompress = value; }
+            public override ParamNoCompress GetObject() { return this; }
+        }
+
+        public class ParamRowNum : Param<ParamRowNum>
+        {
+            public int RowNum { get; set; }
+            public override void SetValue(int value) { RowNum = value; }
+            public override ParamRowNum GetObject() { return this; }
+        }
+
+        public class ParamValues : Param<ParamValues>
+        {
+            public int Values { get; set; }
+            public override void SetValue(int value) { Values = value; }
+            public override ParamValues GetObject() { return this; }
+        }
+
+        public class ParamIdentified : Param<ParamIdentified>
+        {
+            public int Identified { get; set; }
+            public override void SetValue(int value) { Identified = value; }
+            public override ParamIdentified GetObject() { return this; }
+        }
+
+        public class ParamNot : Param<ParamNot>
+        {
+            public int Not { get; set; }
+            public override void SetValue(int value) { Not = value; }
+            public override ParamNot GetObject() { return this; }
+        }
+
+        public class ParamRows : Param<ParamRows>
+        {
+            public int Rows { get; set; }
+            public override void SetValue(int value) { Rows = value; }
+            public override ParamRows GetObject() { return this; }
+        }
+
+        public class ParamVarchar : Param<ParamVarchar>
+        {
+            public int Varchar { get; set; }
+            public override void SetValue(int value) { Varchar = value; }
+            public override ParamVarchar GetObject() { return this; }
+        }
+
+        public class ParamCompress : Param<ParamCompress>
+        {
+            public int Compress { get; set; }
+            public override void SetValue(int value) { Compress = value; }
+            public override ParamCompress GetObject() { return this; }
+        }
+
+        public class ParamImmediate : Param<ParamImmediate>
+        {
+            public int Immediate { get; set; }
+            public override void SetValue(int value) { Immediate = value; }
+            public override ParamImmediate GetObject() { return this; }
+        }
+
+        public class ParamNoWait : Param<ParamNoWait>
+        {
+            public int NoWait { get; set; }
+            public override void SetValue(int value) { NoWait = value; }
+            public override ParamNoWait GetObject() { return this; }
+        }
+
+        public class ParamSelect : Param<ParamSelect>
+        {
+            public int Select { get; set; }
+            public override void SetValue(int value) { Select = value; }
+            public override ParamSelect GetObject() { return this; }
+        }
+
+        public class ParamVarchar2 : Param<ParamVarchar2>
+        {
+            public int Varchar2 { get; set; }
+            public override void SetValue(int value) { Varchar2 = value; }
+            public override ParamVarchar2 GetObject() { return this; }
+        }
+
+        public class ParamConnect : Param<ParamConnect>
+        {
+            public int Connect { get; set; }
+            public override void SetValue(int value) { Connect = value; }
+            public override ParamConnect GetObject() { return this; }
+        }
+
+        public class ParamIn : Param<ParamIn>
+        {
+            public int In { get; set; }
+            public override void SetValue(int value) { In = value; }
+            public override ParamIn GetObject() { return this; }
+        }
+
+        public class ParamNull : Param<ParamNull>
+        {
+            public int Null { get; set; }
+            public override void SetValue(int value) { Null = value; }
+            public override ParamNull GetObject() { return this; }
+        }
+
+        public class ParamSession : Param<ParamSession>
+        {
+            public int Session { get; set; }
+            public override void SetValue(int value) { Session = value; }
+            public override ParamSession GetObject() { return this; }
+        }
+
+        public class ParamView : Param<ParamView>
+        {
+            public int View { get; set; }
+            public override void SetValue(int value) { View = value; }
+            public override ParamView GetObject() { return this; }
+        }
+
+        public class ParamCreate : Param<ParamCreate>
+        {
+            public int Create { get; set; }
+            public override void SetValue(int value) { Create = value; }
+            public override ParamCreate GetObject() { return this; }
+        }
+
+        public class ParamIncrement : Param<ParamIncrement>
+        {
+            public int Increment { get; set; }
+            public override void SetValue(int value) { Increment = value; }
+            public override ParamIncrement GetObject() { return this; }
+        }
+
+        public class ParamNumber : Param<ParamNumber>
+        {
+            public int Number { get; set; }
+            public override void SetValue(int value) { Number = value; }
+            public override ParamNumber GetObject() { return this; }
+        }
+
+        public class ParamSet : Param<ParamSet>
+        {
+            public int Set { get; set; }
+            public override void SetValue(int value) { Set = value; }
+            public override ParamSet GetObject() { return this; }
+        }
+
+        public class ParamWhenever : Param<ParamWhenever>
+        {
+            public int Whenever { get; set; }
+            public override void SetValue(int value) { Whenever = value; }
+            public override ParamWhenever GetObject() { return this; }
+        }
+
+        public class ParamCurrent : Param<ParamCurrent>
+        {
+            public int Current { get; set; }
+            public override void SetValue(int value) { Current = value; }
+            public override ParamCurrent GetObject() { return this; }
+        }
+
+        public class ParamOf : Param<ParamOf>
+        {
+            public int Of { get; set; }
+            public override void SetValue(int value) { Of = value; }
+            public override ParamOf GetObject() { return this; }
+        }
+
+        public class ParamShare : Param<ParamShare>
+        {
+            public int Share { get; set; }
+            public override void SetValue(int value) { Share = value; }
+            public override ParamShare GetObject() { return this; }
+        }
+
+        public class ParamWhere : Param<ParamWhere>
+        {
+            public int Where { get; set; }
+            public override void SetValue(int value) { Where = value; }
+            public override ParamWhere GetObject() { return this; }
+        }
+
+        public class ParamInitial : Param<ParamInitial>
+        {
+            public int Initial { get; set; }
+            public override void SetValue(int value) { Initial = value; }
+            public override ParamInitial GetObject() { return this; }
+        }
+
+        public class ParamOffline : Param<ParamOffline>
+        {
+            public int Offline { get; set; }
+            public override void SetValue(int value) { Offline = value; }
+            public override ParamOffline GetObject() { return this; }
+        }
+
+        public class ParamSize : Param<ParamSize>
+        {
+            public int Size { get; set; }
+            public override void SetValue(int value) { Size = value; }
+            public override ParamSize GetObject() { return this; }
+        }
+
+        public class ParamWith : Param<ParamWith>
+        {
+            public int With { get; set; }
+            public override void SetValue(int value) { With = value; }
+            public override ParamWith GetObject() { return this; }
+        }
+
+        public class ParamInsert : Param<ParamInsert>
+        {
+            public int Insert { get; set; }
+            public override void SetValue(int value) { Insert = value; }
+            public override ParamInsert GetObject() { return this; }
+        }
+
+        public class ParamOn : Param<ParamOn>
+        {
+            public int On { get; set; }
+            public override void SetValue(int value) { On = value; }
+            public override ParamOn GetObject() { return this; }
+        }
+
+        public class ParamSmallint : Param<ParamSmallint>
+        {
+            public int Smallint { get; set; }
+            public override void SetValue(int value) { Smallint = value; }
+            public override ParamSmallint GetObject() { return this; }
         }
 
         public class ParamTestBo
@@ -488,7 +1149,6 @@ namespace ServiceStack.OrmLite.Tests
             public bool? NullableBool { get; set; }
             public DateTime? DateTime { get; set; }
         }
-
 
         public class ParamRelBo
         {
@@ -509,88 +1169,12 @@ namespace ServiceStack.OrmLite.Tests
             public byte[] Data { get; set; }
         }
 
-        public class ParamComment
+        public class ParamLevelAsAlias
         {
             public int Id { get; set; }
-            public int Comment { get; set; }
-        }
 
-        public class ParamOrder
-        {
-            public int Id { get; set; }
-            public int Order { get; set; }
-        }
-
-        public class ParamLeft
-        {
-            public int Id { get; set; }
-            public int Left { get; set; }
-        }
-
-        public class ParamUser
-        {
-            public int Id { get; set; }
-            public int User { get; set; }
-        }
-
-        public class ParamPassword
-        {
-            public int Id { get; set; }
-            public int Password { get; set; }
-        }
-
-        public class ParamActive
-        {
-            public int Id { get; set; }
-            public int Active { get; set; }
-        }
-
-        public class ParamDouble
-        {
-            public int Id { get; set; }
-            public int Double { get; set; }
-        }
-
-        public class ParamFloat
-        {
-            public int Id { get; set; }
-            public int Float { get; set; }
-        }
-
-        public class ParamDecimal
-        {
-            public int Id { get; set; }
-            public int Decimal { get; set; }
-        }
-
-        public class ParamString
-        {
-            public int Id { get; set; }
-            public int String { get; set; }
-        }
-
-        public class ParamDate
-        {
-            public int Id { get; set; }
-            public int Date { get; set; }
-        }
-
-        public class ParamDateTime
-        {
-            public int Id { get; set; }
-            public int DateTime { get; set; }
-        }
-
-        public class ParamType
-        {
-            public int Id { get; set; }
-            public int Type { get; set; }
-        }
-
-        public class ParamTimestamp
-        {
-            public int Id { get; set; }
-            public int Timestamp { get; set; }
+            [Alias("Level")]
+            public int ApprovalLevel { get; set; }
         }
     }
 }
