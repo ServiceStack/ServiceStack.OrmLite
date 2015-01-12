@@ -129,6 +129,7 @@
     <Compile Include="Expression\SqlExpressionTests.cs" />
     <Compile Include="Expression\SelectExpressionTests.cs" />
     <Compile Include="Issues\ComplexJoinWithAlias.cs" />
+    <Compile Include="Issues\JoinsWithSchemas.cs" />
     <Compile Include="Issues\MismatchSchemaTests.cs" />
     <Compile Include="Issues\MultiColumnOrderByDescending.cs" />
     <Compile Include="Issues\MultiFieldReferenceTests.cs" />
