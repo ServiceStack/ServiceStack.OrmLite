@@ -207,6 +207,13 @@ namespace ServiceStack.OrmLite
             return ret;
         }
 
+        internal static Dictionary<string, object> AllFieldsMap<T>(this object anonType)
+        {
+            var ret = new Dictionary<string, object>();
+            ForEachParam<T>(anonType, excludeDefaults: false, fn: (pi, columnName, value) => ret[pi.Name] = value);
+            return ret;
+        }
+
         internal static List<string> NonDefaultFields<T>(this object anonType)
         {
             var ret = new List<string>();

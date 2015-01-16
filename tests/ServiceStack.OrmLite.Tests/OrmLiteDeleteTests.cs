@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -121,6 +122,26 @@ namespace ServiceStack.OrmLite.Tests
             var dbRow = db.SingleById<ModelWithFieldsOfDifferentTypes>(row.Id);
 
             Assert.That(dbRow, Is.Null);
+        }
+
+	    [Test]
+	    public void Can_delete_entity_with_nullable_DateTime()
+	    {
+            db.DropAndCreateTable<ModelWithFieldsOfNullableTypes>();
+
+            var row = ModelWithFieldsOfNullableTypes.Create(1);
+            row.NDateTime = null;
+
+            db.Save(row);
+
+            row = db.SingleById<ModelWithFieldsOfNullableTypes>(row.Id);
+
+            var rowsAffected = db.DeleteNonDefaults(row);
+
+            Assert.That(rowsAffected, Is.EqualTo(1));
+
+            row = db.SingleById<ModelWithFieldsOfNullableTypes>(row.Id);
+            Assert.That(row, Is.Null);
         }
 
 	}
