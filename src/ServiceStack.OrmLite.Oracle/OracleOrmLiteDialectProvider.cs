@@ -945,9 +945,13 @@ namespace ServiceStack.OrmLite.Oracle
             return Quote(NamingStrategy.GetTableName(modelDef));
         }
 
-        public override string GetQuotedTableName(string tableName)
+        public override string GetQuotedTableName(string tableName, string schema=null)
         {
-            return Quote(NamingStrategy.GetTableName(tableName));
+            return schema == null 
+                ? Quote(NamingStrategy.GetTableName(tableName))
+                : Quote(NamingStrategy.GetSchemaName(schema))
+                  + "."
+                  + Quote(NamingStrategy.GetTableName(tableName));
         }
 
         public override string GetQuotedColumnName(string fieldName)
@@ -982,11 +986,14 @@ namespace ServiceStack.OrmLite.Oracle
             return new OracleSqlExpression<T>(this);
         }
 
-        public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
+        public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema=null)
         {
             if (!WillQuote(tableName)) tableName = tableName.ToUpper();
 
             var sql = "SELECT count(*) FROM USER_TABLES WHERE TABLE_NAME = {0}".SqlFmt(tableName);
+
+            if (schema != null)
+                sql += " AND OWNER = {0}".SqlFmt(schema);
 
             dbCmd.CommandText = sql;
             var result = dbCmd.LongScalar();

@@ -286,19 +286,41 @@ namespace ServiceStack.OrmLite
             return "'" + paramValue.Replace("'", "''") + "'";
         }
 
-        public virtual string GetQuotedTableName(ModelDefinition modelDef)
+        public virtual string GetTableName(ModelDefinition modelDef)
         {
-            return GetQuotedTableName(modelDef.ModelName);
+            return GetTableName(modelDef.ModelName, modelDef.Schema);
         }
 
-        public virtual string GetQuotedTableName(string tableName)
+        public virtual string GetTableName(string table, string schema = null)
         {
-            return string.Format("\"{0}\"", namingStrategy.GetTableName(tableName));
+            return schema != null
+                ? string.Format("{0}.{1}",
+                    NamingStrategy.GetSchemaName(schema),
+                    NamingStrategy.GetTableName(table))
+                : NamingStrategy.GetTableName(table);
+        }
+
+        public virtual string GetQuotedTableName(ModelDefinition modelDef)
+        {
+            return GetQuotedTableName(modelDef.ModelName, modelDef.Schema);
+        }
+
+        public virtual string GetQuotedTableName(string tableName, string schema = null)
+        {
+            if (schema == null)
+                return GetQuotedName(NamingStrategy.GetTableName(tableName));
+
+            var escapedSchema = NamingStrategy.GetSchemaName(schema)
+                .Replace(".", "\".\"");
+
+            return GetQuotedName(escapedSchema)
+                + "." 
+                + GetQuotedName(NamingStrategy.GetTableName(tableName));
         }
 
         public virtual string GetQuotedColumnName(string columnName)
         {
-            return string.Format("\"{0}\"", namingStrategy.GetColumnName(columnName));
+            return GetQuotedName(namingStrategy.GetColumnName(columnName));
         }
 
         public virtual string GetQuotedName(string name)

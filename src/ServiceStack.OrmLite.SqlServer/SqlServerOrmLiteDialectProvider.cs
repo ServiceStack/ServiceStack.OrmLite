@@ -93,15 +93,6 @@ namespace ServiceStack.OrmLite.SqlServer
             return new SqlConnection(connectionString);
         }
 
-        public override string GetQuotedTableName(ModelDefinition modelDef)
-        {
-            if (!modelDef.IsInSchema)
-                return base.GetQuotedTableName(modelDef);
-
-            var escapedSchema = modelDef.Schema.Replace(".", "\".\"");
-            return string.Format("\"{0}\".\"{1}\"", escapedSchema, NamingStrategy.GetTableName(modelDef.ModelName));
-        }
-
         public override void SetDbValue(FieldDefinition fieldDef, IDataReader reader, int colIndex, object instance)
         {
             if (fieldDef.IsRowVersion)

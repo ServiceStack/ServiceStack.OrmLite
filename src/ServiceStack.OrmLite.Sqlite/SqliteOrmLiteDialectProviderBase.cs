@@ -41,7 +41,7 @@ namespace ServiceStack.OrmLite.Sqlite
             if (modelDef.RowVersion != null)
             {
                 var triggerName = GetTriggerName(modelDef);
-                return "DROP TRIGGER IF EXISTS {0}".Fmt(GetQuotedTableName(triggerName));
+                return "DROP TRIGGER IF EXISTS {0}".Fmt(GetQuotedName(triggerName));
             }
 
             return null;
@@ -134,7 +134,7 @@ namespace ServiceStack.OrmLite.Sqlite
 
         protected abstract IDbConnection CreateConnection(string connectionString);
 
-        public virtual string GetTableName(string table, string schema=null)
+        public override string GetTableName(string table, string schema=null)
         {
             return schema != null
                 ? string.Format("{0}_{1}", 
@@ -143,18 +143,9 @@ namespace ServiceStack.OrmLite.Sqlite
                 : NamingStrategy.GetTableName(table);
         }
 
-        public virtual string GetTableName(ModelDefinition modelDef)
+        public override string GetQuotedTableName(string tableName, string schema = null)
         {
-            return GetTableName(modelDef.ModelName, modelDef.Schema);
-        }
-
-        public override string GetQuotedTableName(ModelDefinition modelDef)
-        {
-            if (!modelDef.IsInSchema)
-                return base.GetQuotedTableName(modelDef);
-
-            return string.Format("\"{0}\"",
-                GetTableName(modelDef.ModelName, modelDef.Schema));
+            return GetQuotedName(GetTableName(tableName, schema));
         }
 
         public override object ConvertDbValue(object value, Type type)
