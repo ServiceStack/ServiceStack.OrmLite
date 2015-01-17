@@ -628,12 +628,14 @@ namespace ServiceStack.OrmLite
                 fieldDef.GetQuotedValue(objWithProperties, this));
         }
 
-        public virtual bool PrepareParameterizedDeleteStatement<T>(IDbCommand cmd, ICollection<string> deleteFields = null)
+        public virtual bool PrepareParameterizedDeleteStatement<T>(IDbCommand cmd, IDictionary<string, object> deleteFields)
         {
+            if (deleteFields == null || deleteFields.Count == 0)
+                throw new ArgumentException("DELETE's must have at least 1 criteria");
+
             var sqlFilter = new StringBuilder();
             var modelDef = typeof(T).GetModelDefinition();
             var hadRowVesion = false;
-            var hasSpecificFilter = deleteFields != null && deleteFields.Count > 0;
 
             cmd.Parameters.Clear();
             cmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
@@ -643,7 +645,9 @@ namespace ServiceStack.OrmLite
                 if (fieldDef.ShouldSkipDelete()) 
                     continue;
 
-                if (!fieldDef.IsRowVersion && (hasSpecificFilter && !deleteFields.Contains(fieldDef.Name)))
+                object fieldValue;
+
+                if (!deleteFields.TryGetValue(fieldDef.Name, out fieldValue))
                     continue;
 
                 if (fieldDef.IsRowVersion)
@@ -654,7 +658,16 @@ namespace ServiceStack.OrmLite
                     if (sqlFilter.Length > 0)
                         sqlFilter.Append(" AND ");
 
-                    AppendFieldCondition(sqlFilter, fieldDef, cmd);
+                    if (fieldValue != null)
+                    {
+                        AppendFieldCondition(sqlFilter, fieldDef, cmd);
+                    }
+                    else
+                    {
+                        sqlFilter
+                            .Append(GetQuotedColumnName(fieldDef.FieldName))
+                            .Append(" IS NULL");
+                    }
                 }
                 catch (Exception ex)
                 {

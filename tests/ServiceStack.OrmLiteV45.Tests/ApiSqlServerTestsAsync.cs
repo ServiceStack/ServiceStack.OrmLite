@@ -302,10 +302,6 @@ namespace ServiceStack.OrmLite.Tests
             await db.DeleteAsync<Person>(new { FirstName = "Jimi", Age = 27 });
             Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM \"Person\" WHERE \"FirstName\"=@FirstName AND \"Age\"=@Age"));
 
-            await db.DeleteAsync<Person>(new { FirstName = "Jimi", Age = 27 },
-                              new { FirstName = "Janis", Age = 27 });
-            Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM \"Person\" WHERE \"FirstName\"=@FirstName AND \"Age\"=@Age"));
-
             await db.DeleteAsync(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27 });
             Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM \"Person\" WHERE \"Id\"=@Id AND \"FirstName\"=@FirstName AND \"LastName\"=@LastName AND \"Age\"=@Age"));
 

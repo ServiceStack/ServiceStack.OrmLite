@@ -114,10 +114,17 @@ namespace ServiceStack.OrmLite
             });
         }
 
+        internal static Task<int> DeleteAsync<T>(this IDbCommand dbCmd, T filter, CancellationToken token)
+        {
+            return dbCmd.DeleteAsync<T>((object)filter, token);
+        }
+
         internal static Task<int> DeleteAsync<T>(this IDbCommand dbCmd, object anonType, CancellationToken token)
         {
             var dialectProvider = dbCmd.GetDialectProvider();
-            var hadRowVersion = dialectProvider.PrepareParameterizedDeleteStatement<T>(dbCmd, anonType.AllFields<T>());
+
+            var hadRowVersion = dialectProvider.PrepareParameterizedDeleteStatement<T>(
+                dbCmd, anonType.AllFieldsMap<T>());
 
             dialectProvider.SetParameterValues<T>(dbCmd, anonType);
 
@@ -127,19 +134,20 @@ namespace ServiceStack.OrmLite
         internal static Task<int> DeleteNonDefaultsAsync<T>(this IDbCommand dbCmd, T filter, CancellationToken token)
         {
             var dialectProvider = dbCmd.GetDialectProvider();
-            var hadRowVersion = dialectProvider.PrepareParameterizedDeleteStatement<T>(dbCmd, filter.NonDefaultFields<T>());
+            var hadRowVersion = dialectProvider.PrepareParameterizedDeleteStatement<T>(
+                dbCmd, filter.AllFieldsMap<T>().NonDefaultsOnly());
 
             dialectProvider.SetParameterValues<T>(dbCmd, filter);
 
             return AssertRowsUpdatedAsync(dbCmd, hadRowVersion, token);
         }
 
-        internal static Task<int> DeleteAsync<T>(this IDbCommand dbCmd, CancellationToken token, params object[] objs)
+        internal static Task<int> DeleteAsync<T>(this IDbCommand dbCmd, CancellationToken token, params T[] objs)
         {
             if (objs.Length == 0) 
                 return TaskResult.Zero;
 
-            return DeleteAllAsync<T>(dbCmd, objs[0].AllFields<T>(), objs, token);
+            return DeleteAllAsync(dbCmd, objs, fieldValuesFn:null, token: token);
         }
 
         internal static Task<int> DeleteNonDefaultsAsync<T>(this IDbCommand dbCmd, CancellationToken token, params T[] filters)
@@ -147,10 +155,10 @@ namespace ServiceStack.OrmLite
             if (filters.Length == 0)
                 return TaskResult.Zero;
 
-            return DeleteAllAsync<T>(dbCmd, filters[0].NonDefaultFields<T>(), filters.Map(x => (object)x), token);
+            return DeleteAllAsync(dbCmd, filters, o => o.AllFieldsMap<T>().NonDefaultsOnly(), token);
         }
 
-        private static Task<int> DeleteAllAsync<T>(IDbCommand dbCmd, ICollection<string> deleteFields, IEnumerable<object> objs, CancellationToken token)
+        private static Task<int> DeleteAllAsync<T>(IDbCommand dbCmd, IEnumerable<T> objs, Func<object, Dictionary<string, object>> fieldValuesFn = null, CancellationToken token=default(CancellationToken))
         {
             IDbTransaction dbTrans = null;
 
@@ -159,11 +167,17 @@ namespace ServiceStack.OrmLite
                 dbCmd.Transaction = dbTrans = dbCmd.Connection.BeginTransaction();
 
             var dialectProvider = dbCmd.GetDialectProvider();
-            dialectProvider.PrepareParameterizedDeleteStatement<T>(dbCmd, deleteFields);
 
             return objs.EachAsync((obj, i) =>
             {
+                var fieldValues = fieldValuesFn != null
+                    ? fieldValuesFn(obj)
+                    : obj.AllFieldsMap<T>();
+
+                dialectProvider.PrepareParameterizedDeleteStatement<T>(dbCmd, fieldValues);
+
                 dialectProvider.SetParameterValues<T>(dbCmd, obj);
+
                 return dbCmd.ExecNonQueryAsync(token)
                     .Then(rowsAffected => count += rowsAffected);
             })

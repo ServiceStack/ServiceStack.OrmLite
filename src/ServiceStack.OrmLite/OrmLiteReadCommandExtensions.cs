@@ -214,6 +214,23 @@ namespace ServiceStack.OrmLite
             return ret;
         }
 
+        internal static Dictionary<string, object> NonDefaultsOnly(this Dictionary<string, object> fieldValues)
+        {
+            var map = new Dictionary<string, object>();
+            foreach (var entry in fieldValues)
+            {
+                if (entry.Value != null)
+                {
+                    var type = entry.Value.GetType();
+                    if (!type.IsValueType || !entry.Value.Equals(type.GetDefaultValue()))
+                    {
+                        map[entry.Key] = entry.Value;
+                    }
+                }
+            }
+            return map;
+        }
+
         internal static List<string> NonDefaultFields<T>(this object anonType)
         {
             var ret = new List<string>();

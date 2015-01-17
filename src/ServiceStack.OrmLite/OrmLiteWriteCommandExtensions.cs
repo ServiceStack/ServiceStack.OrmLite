@@ -469,10 +469,17 @@ namespace ServiceStack.OrmLite
             return rowsUpdated;
         }
 
+        internal static int Delete<T>(this IDbCommand dbCmd, T anonType)
+        {
+            return dbCmd.Delete<T>((object)anonType);
+        }
+
         internal static int Delete<T>(this IDbCommand dbCmd, object anonType)
         {
             var dialectProvider = dbCmd.GetDialectProvider();
-            var hadRowVersion = dialectProvider.PrepareParameterizedDeleteStatement<T>(dbCmd, anonType.AllFields<T>());
+
+            var hadRowVersion = dialectProvider.PrepareParameterizedDeleteStatement<T>(
+                dbCmd, anonType.AllFieldsMap<T>());
 
             dialectProvider.SetParameterValues<T>(dbCmd, anonType);
 
@@ -482,28 +489,29 @@ namespace ServiceStack.OrmLite
         internal static int DeleteNonDefaults<T>(this IDbCommand dbCmd, T filter)
         {
             var dialectProvider = dbCmd.GetDialectProvider();
-            var hadRowVersion = dialectProvider.PrepareParameterizedDeleteStatement<T>(dbCmd, filter.NonDefaultFields<T>());
+            var hadRowVersion = dialectProvider.PrepareParameterizedDeleteStatement<T>(
+                dbCmd, filter.AllFieldsMap<T>().NonDefaultsOnly());
 
             dialectProvider.SetParameterValues<T>(dbCmd, filter);
 
             return AssertRowsUpdated(dbCmd, hadRowVersion);
         }
 
-        internal static int Delete<T>(this IDbCommand dbCmd, params object[] objs)
+        internal static int Delete<T>(this IDbCommand dbCmd, T[] objs)
         {
             if (objs.Length == 0) return 0;
 
-            return DeleteAll<T>(dbCmd, objs[0].AllFields<T>(), objs);
+            return DeleteAll(dbCmd, objs);
         }
 
-        internal static int DeleteNonDefaults<T>(this IDbCommand dbCmd, params T[] filters)
+        internal static int DeleteNonDefaults<T>(this IDbCommand dbCmd, T[] filters)
         {
             if (filters.Length == 0) return 0;
 
-            return DeleteAll<T>(dbCmd, filters[0].NonDefaultFields<T>(), filters.Map(x => (object)x));
+            return DeleteAll(dbCmd, filters, o => o.AllFieldsMap<T>().NonDefaultsOnly());
         }
 
-        private static int DeleteAll<T>(IDbCommand dbCmd, ICollection<string> deleteFields, IEnumerable<object> objs)
+        private static int DeleteAll<T>(IDbCommand dbCmd, IEnumerable<T> objs, Func<object,Dictionary<string,object>> fieldValuesFn=null)
         {
             IDbTransaction dbTrans = null;
 
@@ -515,10 +523,14 @@ namespace ServiceStack.OrmLite
 
                 var dialectProvider = dbCmd.GetDialectProvider();
 
-                dialectProvider.PrepareParameterizedDeleteStatement<T>(dbCmd, deleteFields);
-
                 foreach (var obj in objs)
                 {
+                    var fieldValues = fieldValuesFn != null
+                        ? fieldValuesFn(obj)
+                        : obj.AllFieldsMap<T>();
+
+                    dialectProvider.PrepareParameterizedDeleteStatement<T>(dbCmd, fieldValues);
+
                     dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
                     count += dbCmd.ExecNonQuery();

@@ -84,7 +84,7 @@ namespace ServiceStack.OrmLite
 
         bool PrepareParameterizedUpdateStatement<T>(IDbCommand cmd, ICollection<string> updateFields = null);
 
-        bool PrepareParameterizedDeleteStatement<T>(IDbCommand cmd, ICollection<string> deleteFields = null);
+        bool PrepareParameterizedDeleteStatement<T>(IDbCommand cmd, IDictionary<string, object> delteFieldValues);
 
         void PrepareStoredProcedureStatement<T>(IDbCommand cmd, T obj);
 

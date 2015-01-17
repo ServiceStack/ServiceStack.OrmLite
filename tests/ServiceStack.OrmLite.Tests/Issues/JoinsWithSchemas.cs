@@ -4,7 +4,7 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
-    [Schema("schema1")]
+    [Schema("Schema")]
     public class Entity1
     {
         public int Id { get; set; }
@@ -12,7 +12,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
         public int Entity2Fk { get; set; }
     }
 
-    [Schema("schema1")]
+    [Schema("Schema")]
     public class Entity2
     {
         public int Id { get; set; }
