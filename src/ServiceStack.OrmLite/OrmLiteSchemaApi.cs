@@ -9,9 +9,9 @@ namespace ServiceStack.OrmLite
         /// Checks whether a Table Exists. E.g:
         /// <para>db.TableExists("Person")</para>
         /// </summary>
-        public static bool TableExists(this IDbConnection dbConn, string tableName)
+        public static bool TableExists(this IDbConnection dbConn, string tableName, string schema=null)
         {
-            return dbConn.GetDialectProvider().DoesTableExist(dbConn, tableName);
+            return dbConn.GetDialectProvider().DoesTableExist(dbConn, tableName, schema);
         }
 
         /// <summary>
@@ -23,7 +23,7 @@ namespace ServiceStack.OrmLite
             var dialectProvider = dbConn.GetDialectProvider();
             var modelDef = typeof(T).GetModelDefinition();
             var tableName = dialectProvider.NamingStrategy.GetTableName(modelDef);
-            return dialectProvider.DoesTableExist(dbConn, tableName);
+            return dialectProvider.DoesTableExist(dbConn, tableName, modelDef.Schema);
         }
 
         /// <summary>

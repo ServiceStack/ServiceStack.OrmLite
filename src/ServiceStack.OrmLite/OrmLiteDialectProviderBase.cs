@@ -1032,12 +1032,12 @@ namespace ServiceStack.OrmLite
             return fieldDefinition ?? GetUndefinedColumnDefinition(fieldType, null);
         }
 
-        public virtual bool DoesTableExist(IDbConnection db, string tableName)
+        public virtual bool DoesTableExist(IDbConnection db, string tableName, string schema = null)
         {
-            return db.Exec(dbCmd => DoesTableExist(dbCmd, tableName));
+            return db.Exec(dbCmd => DoesTableExist(dbCmd, tableName, schema));
         }
 
-        public virtual bool DoesTableExist(IDbCommand dbCmd, string tableName)
+        public virtual bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
         {
             return false;
         }

@@ -226,13 +226,13 @@ namespace ServiceStack.OrmLite.SqlServer
             return new SqlServerExpression<T>(this);
         }
 
-        public override bool DoesTableExist(IDbCommand dbCmd, string tableName)
+        public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
         {
             var sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = {0}"
                 .SqlFmt(tableName);
 
-            //if (!string.IsNullOrEmpty(schemaName))
-            //    sql += " AND TABLE_SCHEMA = {0}".SqlFmt(schemaName);
+            if (schema != null)
+                sql += " AND TABLE_SCHEMA = {0}".SqlFmt(schema);
 
             dbCmd.CommandText = sql;
             var result = dbCmd.LongScalar();

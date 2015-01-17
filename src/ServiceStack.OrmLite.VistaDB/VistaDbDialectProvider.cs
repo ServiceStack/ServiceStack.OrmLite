@@ -320,7 +320,7 @@ namespace ServiceStack.OrmLite.VistaDB
             return new VistaDbExpression<T>(this);
         }
 
-        public override bool DoesTableExist(IDbCommand dbCmd, string tableName)
+        public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
         {
             dbCmd.CommandText = "SELECT COUNT(*) FROM [database schema] WHERE typeid = 1 AND name = {0}"
                 .SqlFmt(tableName);

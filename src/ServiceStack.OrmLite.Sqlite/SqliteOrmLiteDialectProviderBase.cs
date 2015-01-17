@@ -134,12 +134,18 @@ namespace ServiceStack.OrmLite.Sqlite
 
         protected abstract IDbConnection CreateConnection(string connectionString);
 
+        public virtual string GetTableName(string table, string schema=null)
+        {
+            return schema != null
+                ? string.Format("{0}_{1}", 
+                    NamingStrategy.GetSchemaName(schema),
+                    NamingStrategy.GetTableName(table))
+                : NamingStrategy.GetTableName(table);
+        }
+
         public virtual string GetTableName(ModelDefinition modelDef)
         {
-            var tableName = NamingStrategy.GetTableName(modelDef.ModelName);
-            return !modelDef.IsInSchema 
-                ? tableName
-                : string.Format("{0}_{1}", modelDef.Schema, tableName);
+            return GetTableName(modelDef.ModelName, modelDef.Schema);
         }
 
         public override string GetQuotedTableName(ModelDefinition modelDef)
@@ -147,7 +153,8 @@ namespace ServiceStack.OrmLite.Sqlite
             if (!modelDef.IsInSchema)
                 return base.GetQuotedTableName(modelDef);
 
-            return string.Format("\"{0}_{1}\"", modelDef.Schema, modelDef.ModelName);
+            return string.Format("\"{0}\"",
+                GetTableName(modelDef.ModelName, modelDef.Schema));
         }
 
         public override object ConvertDbValue(object value, Type type)
@@ -245,10 +252,10 @@ namespace ServiceStack.OrmLite.Sqlite
             return new SqliteExpression<T>(this);
         }
 
-        public override bool DoesTableExist(IDbCommand dbCmd, string tableName)
+        public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
         {
             var sql = "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name = {0}"
-                .SqlFmt(tableName);
+                .SqlFmt(GetTableName(tableName, schema));
 
             dbCmd.CommandText = sql;
             var result = dbCmd.LongScalar();

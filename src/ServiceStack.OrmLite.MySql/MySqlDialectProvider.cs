@@ -147,7 +147,7 @@ namespace ServiceStack.OrmLite.MySql
             return new MySqlExpression<T>(this);
         }
 
-        public override bool DoesTableExist(IDbCommand dbCmd, string tableName)
+        public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
         {
             //Same as SQL Server apparently?
             var sql = ("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES " +

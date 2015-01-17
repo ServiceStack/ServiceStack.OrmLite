@@ -216,19 +216,24 @@ namespace ServiceStack.OrmLite.PostgreSQL
             return new PostgreSqlExpression<T>(this);
         }
 
-        public override bool DoesTableExist(IDbCommand dbCmd, string tableName)
+        public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
         {
             var sql = "SELECT COUNT(*) FROM pg_class WHERE relname = {0}"
                 .SqlFmt(tableName);
+
             var conn = dbCmd.Connection;
             if (conn != null)
             {
                 var builder = new NpgsqlConnectionStringBuilder(conn.ConnectionString);
+                if (schema == null)
+                    schema = builder.SearchPath;
+                
                 // If a search path (schema) is specified, and there is only one, then assume the CREATE TABLE directive should apply to that schema.
-                if (!String.IsNullOrEmpty(builder.SearchPath) && !builder.SearchPath.Contains(","))
+                if (!string.IsNullOrEmpty(schema) && !schema.Contains(","))
                     sql = "SELECT COUNT(*) FROM pg_class JOIN pg_catalog.pg_namespace n ON n.oid = pg_class.relnamespace WHERE relname = {0} AND nspname = {1}"
-                          .SqlFmt(tableName, builder.SearchPath);
+                          .SqlFmt(tableName, schema);
             }
+
             dbCmd.CommandText = sql;
             var result = dbCmd.LongScalar();
 

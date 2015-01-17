@@ -28,6 +28,32 @@ namespace ServiceStack.OrmLite.Tests.Issues
     public class JoinsWithSchemas : OrmLiteTestBase
     {
         [Test]
+        public void Can_detect_if_table_with_schema_exists()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropTable<Entity1>();
+                db.DropTable<Entity2>();
+
+                var exists = db.TableExists<Entity1>();
+                Assert.That(exists, Is.False);
+
+                exists = db.TableExists<Entity2>();
+                Assert.That(exists, Is.False);
+
+                db.CreateTable<Entity1>();
+                db.CreateTable<Entity2>();
+
+                exists = db.TableExists<Entity1>();
+                Assert.That(exists, Is.True);
+
+                exists = db.TableExists<Entity2>();
+                Assert.That(exists, Is.True);
+
+            }
+        }
+
+        [Test]
         public void Can_join_entities_with_Schema()
         {
             using (var db = OpenDbConnection())

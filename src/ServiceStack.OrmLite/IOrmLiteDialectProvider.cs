@@ -123,8 +123,8 @@ namespace ServiceStack.OrmLite
 
         List<string> SequenceList(Type tableType);
 
-        bool DoesTableExist(IDbConnection db, string tableName);
-        bool DoesTableExist(IDbCommand dbCmd, string tableName);
+        bool DoesTableExist(IDbConnection db, string tableName, string schema = null);
+        bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null);
 
         bool DoesSequenceExist(IDbCommand dbCmd, string sequencName);
 

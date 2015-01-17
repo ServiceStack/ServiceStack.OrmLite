@@ -50,7 +50,8 @@ namespace ServiceStack.OrmLite
 
             var dialectProvider = dbCmd.GetDialectProvider();
             var tableName = dialectProvider.NamingStrategy.GetTableName(modelDef);
-            var tableExists = dialectProvider.DoesTableExist(dbCmd, tableName);
+            var schema = dialectProvider.NamingStrategy.GetSchemaName(modelDef);
+            var tableExists = dialectProvider.DoesTableExist(dbCmd, tableName, schema);
             if (overwrite && tableExists)
             {
                 if (modelDef.PreDropTableSql != null)
@@ -184,8 +185,9 @@ namespace ServiceStack.OrmLite
             {
                 var dialectProvider = dbCmd.GetDialectProvider();
                 var tableName = dialectProvider.NamingStrategy.GetTableName(modelDef);
+                var schema = dialectProvider.NamingStrategy.GetSchemaName(modelDef);
 
-                if (dialectProvider.DoesTableExist(dbCmd, tableName))
+                if (dialectProvider.DoesTableExist(dbCmd, tableName, schema))
                 {
                     if (modelDef.PreDropTableSql != null)
                     {
