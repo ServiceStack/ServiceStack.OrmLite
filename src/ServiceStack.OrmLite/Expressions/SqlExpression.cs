@@ -26,6 +26,7 @@ namespace ServiceStack.OrmLite
         private string sep = string.Empty;
         protected bool useFieldName = false;
         protected bool selectDistinct = false;
+        protected bool CustomSelect { get; set; }
         private ModelDefinition modelDef;
         public bool PrefixFieldWithTableName { get; set; }
         public bool WhereStatementWithoutWhereString { get; set; }
@@ -56,6 +57,7 @@ namespace ServiceStack.OrmLite
             to.orderByProperties = orderByProperties;
             to.selectExpression = selectExpression;
             to.selectDistinct = selectDistinct;
+            to.CustomSelect = CustomSelect;
             to.fromExpression = fromExpression;
             to.whereExpression = whereExpression;
             to.groupBy = groupBy;
@@ -93,6 +95,7 @@ namespace ServiceStack.OrmLite
             {
                 selectExpression.SqlVerifyFragment();
                 this.selectExpression = "SELECT " + selectExpression;
+                this.CustomSelect = true;
             }
             return this;
         }
@@ -245,7 +248,6 @@ namespace ServiceStack.OrmLite
 
         public virtual SqlExpression<T> Having(Expression<Func<T, bool>> predicate)
         {
-
             if (predicate != null)
             {
                 useFieldName = true;

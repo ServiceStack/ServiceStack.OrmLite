@@ -118,6 +118,13 @@ namespace ServiceStack.OrmLite
                 SqlColumn(refField.FieldName));
         }
 
+        public SqlExpression<T> CustomJoin(string joinString)
+        {
+            PrefixFieldWithTableName = true;
+            FromExpression += " " + joinString;
+            return this;
+        }
+
         private SqlExpression<T> InternalJoin(string joinType, 
             Expression joinExpr, ModelDefinition sourceDef, ModelDefinition targetDef)
         {
@@ -148,7 +155,7 @@ namespace ServiceStack.OrmLite
 
         public string SelectInto<TModel>()
         {
-            if (typeof(TModel) == typeof(T) && !PrefixFieldWithTableName)
+            if (CustomSelect || (typeof(TModel) == typeof(T) && !PrefixFieldWithTableName))
             {
                 return ToSelectStatement();
             }

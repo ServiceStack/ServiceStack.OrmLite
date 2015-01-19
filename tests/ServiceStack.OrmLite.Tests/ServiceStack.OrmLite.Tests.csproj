@@ -133,6 +133,7 @@
     <Compile Include="Issues\MismatchSchemaTests.cs" />
     <Compile Include="Issues\MultiColumnOrderByDescending.cs" />
     <Compile Include="Issues\MultiFieldReferenceTests.cs" />
+    <Compile Include="Issues\MultipleSelfJoinsWithAliases.cs" />
     <Compile Include="Issues\MultithreadingIssueTests.cs" />
     <Compile Include="Issues\SaveDomainUserReferencesIssue.cs" />
     <Compile Include="Issues\SchemaTests.cs" />
