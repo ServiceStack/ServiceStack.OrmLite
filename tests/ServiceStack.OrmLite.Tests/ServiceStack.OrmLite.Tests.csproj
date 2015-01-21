@@ -130,6 +130,7 @@
     <Compile Include="Expression\SelectExpressionTests.cs" />
     <Compile Include="Issues\ComplexJoinWithAlias.cs" />
     <Compile Include="Issues\JoinsWithSchemas.cs" />
+    <Compile Include="Issues\MappingFieldsFromStoredProcedureTests.cs" />
     <Compile Include="Issues\MismatchSchemaTests.cs" />
     <Compile Include="Issues\MultiColumnOrderByDescending.cs" />
     <Compile Include="Issues\MultiFieldReferenceTests.cs" />
