@@ -7,119 +7,119 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
-	[TestFixture]
-	public class OrmLiteTransactionTests 
-		: OrmLiteTestBase
-	{
-		[Test]
-		public void Transaction_commit_persists_data_to_the_db()
-		{
-			using (var db = OpenDbConnection())
-			{
-				db.DropAndCreateTable<ModelWithIdAndName>();
-				db.Insert(new ModelWithIdAndName(1));
+    [TestFixture]
+    public class OrmLiteTransactionTests
+        : OrmLiteTestBase
+    {
+        [Test]
+        public void Transaction_commit_persists_data_to_the_db()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<ModelWithIdAndName>();
+                db.Insert(new ModelWithIdAndName(1));
 
                 Assert.That(((OrmLiteConnection)db).Transaction, Is.Null);
 
-				using (var dbTrans = db.OpenTransaction())
-				{
+                using (var dbTrans = db.OpenTransaction())
+                {
                     Assert.That(((OrmLiteConnection)db).Transaction, Is.Not.Null);
 
-					db.Insert(new ModelWithIdAndName(2));
-					db.Insert(new ModelWithIdAndName(3));
+                    db.Insert(new ModelWithIdAndName(2));
+                    db.Insert(new ModelWithIdAndName(3));
 
-					var rowsInTrans = db.Select<ModelWithIdAndName>();
-					Assert.That(rowsInTrans, Has.Count.EqualTo(3));
+                    var rowsInTrans = db.Select<ModelWithIdAndName>();
+                    Assert.That(rowsInTrans, Has.Count.EqualTo(3));
 
-					dbTrans.Commit();
-				}
+                    dbTrans.Commit();
+                }
 
-				var rows = db.Select<ModelWithIdAndName>();
-				Assert.That(rows, Has.Count.EqualTo(3));
-			}
-		}
+                var rows = db.Select<ModelWithIdAndName>();
+                Assert.That(rows, Has.Count.EqualTo(3));
+            }
+        }
 
-		[Test]
-		public void Transaction_rollsback_if_not_committed()
-		{
+        [Test]
+        public void Transaction_rollsback_if_not_committed()
+        {
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<ModelWithIdAndName>();
-				db.Insert(new ModelWithIdAndName(1));
+                db.Insert(new ModelWithIdAndName(1));
 
                 using (var dbTrans = db.OpenTransaction())
-				{
-					db.Insert(new ModelWithIdAndName(2));
-					db.Insert(new ModelWithIdAndName(3));
+                {
+                    db.Insert(new ModelWithIdAndName(2));
+                    db.Insert(new ModelWithIdAndName(3));
 
-					var rowsInTrans = db.Select<ModelWithIdAndName>();
-					Assert.That(rowsInTrans, Has.Count.EqualTo(3));
-				}
+                    var rowsInTrans = db.Select<ModelWithIdAndName>();
+                    Assert.That(rowsInTrans, Has.Count.EqualTo(3));
+                }
 
-				var rows = db.Select<ModelWithIdAndName>();
-				Assert.That(rows, Has.Count.EqualTo(1));
-			}
-		}
+                var rows = db.Select<ModelWithIdAndName>();
+                Assert.That(rows, Has.Count.EqualTo(1));
+            }
+        }
 
-		[Test]
-		public void Transaction_rollsback_transactions_to_different_tables()
-		{
-            using (var db = OpenDbConnection())
-            {
-                db.DropAndCreateTable<ModelWithIdAndName>();
-                db.DropAndCreateTable<ModelWithFieldsOfDifferentTypes>();
-                db.DropAndCreateTable<ModelWithOnlyStringFields>();
-
-				db.Insert(new ModelWithIdAndName(1));
-
-                using (var dbTrans = db.OpenTransaction())
-				{
-					db.Insert(new ModelWithIdAndName(2));
-					db.Insert(ModelWithFieldsOfDifferentTypes.Create(3));
-					db.Insert(ModelWithOnlyStringFields.Create("id3"));
-
-					Assert.That(db.Select<ModelWithIdAndName>(), Has.Count.EqualTo(2));
-					Assert.That(db.Select<ModelWithFieldsOfDifferentTypes>(), Has.Count.EqualTo(1));
-					Assert.That(db.Select<ModelWithOnlyStringFields>(), Has.Count.EqualTo(1));
-				}
-
-				Assert.That(db.Select<ModelWithIdAndName>(), Has.Count.EqualTo(1));
-				Assert.That(db.Select<ModelWithFieldsOfDifferentTypes>(), Has.Count.EqualTo(0));
-				Assert.That(db.Select<ModelWithOnlyStringFields>(), Has.Count.EqualTo(0));
-			}
-		}
-
-		[Test]
-		public void Transaction_commits_inserts_to_different_tables()
-		{
+        [Test]
+        public void Transaction_rollsback_transactions_to_different_tables()
+        {
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<ModelWithIdAndName>();
                 db.DropAndCreateTable<ModelWithFieldsOfDifferentTypes>();
                 db.DropAndCreateTable<ModelWithOnlyStringFields>();
 
-				db.Insert(new ModelWithIdAndName(1));
+                db.Insert(new ModelWithIdAndName(1));
 
                 using (var dbTrans = db.OpenTransaction())
-				{
-					db.Insert(new ModelWithIdAndName(2));
-					db.Insert(ModelWithFieldsOfDifferentTypes.Create(3));
-					db.Insert(ModelWithOnlyStringFields.Create("id3"));
+                {
+                    db.Insert(new ModelWithIdAndName(2));
+                    db.Insert(ModelWithFieldsOfDifferentTypes.Create(3));
+                    db.Insert(ModelWithOnlyStringFields.Create("id3"));
 
-					Assert.That(db.Select<ModelWithIdAndName>(), Has.Count.EqualTo(2));
-					Assert.That(db.Select<ModelWithFieldsOfDifferentTypes>(), Has.Count.EqualTo(1));
-					Assert.That(db.Select<ModelWithOnlyStringFields>(), Has.Count.EqualTo(1));
+                    Assert.That(db.Select<ModelWithIdAndName>(), Has.Count.EqualTo(2));
+                    Assert.That(db.Select<ModelWithFieldsOfDifferentTypes>(), Has.Count.EqualTo(1));
+                    Assert.That(db.Select<ModelWithOnlyStringFields>(), Has.Count.EqualTo(1));
+                }
 
-					dbTrans.Commit();
-				}
+                Assert.That(db.Select<ModelWithIdAndName>(), Has.Count.EqualTo(1));
+                Assert.That(db.Select<ModelWithFieldsOfDifferentTypes>(), Has.Count.EqualTo(0));
+                Assert.That(db.Select<ModelWithOnlyStringFields>(), Has.Count.EqualTo(0));
+            }
+        }
 
-				Assert.That(db.Select<ModelWithIdAndName>(), Has.Count.EqualTo(2));
-				Assert.That(db.Select<ModelWithFieldsOfDifferentTypes>(), Has.Count.EqualTo(1));
-				Assert.That(db.Select<ModelWithOnlyStringFields>(), Has.Count.EqualTo(1));
-			}
-		}
+        [Test]
+        public void Transaction_commits_inserts_to_different_tables()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<ModelWithIdAndName>();
+                db.DropAndCreateTable<ModelWithFieldsOfDifferentTypes>();
+                db.DropAndCreateTable<ModelWithOnlyStringFields>();
 
-	    public class MyTable
+                db.Insert(new ModelWithIdAndName(1));
+
+                using (var dbTrans = db.OpenTransaction())
+                {
+                    db.Insert(new ModelWithIdAndName(2));
+                    db.Insert(ModelWithFieldsOfDifferentTypes.Create(3));
+                    db.Insert(ModelWithOnlyStringFields.Create("id3"));
+
+                    Assert.That(db.Select<ModelWithIdAndName>(), Has.Count.EqualTo(2));
+                    Assert.That(db.Select<ModelWithFieldsOfDifferentTypes>(), Has.Count.EqualTo(1));
+                    Assert.That(db.Select<ModelWithOnlyStringFields>(), Has.Count.EqualTo(1));
+
+                    dbTrans.Commit();
+                }
+
+                Assert.That(db.Select<ModelWithIdAndName>(), Has.Count.EqualTo(2));
+                Assert.That(db.Select<ModelWithFieldsOfDifferentTypes>(), Has.Count.EqualTo(1));
+                Assert.That(db.Select<ModelWithOnlyStringFields>(), Has.Count.EqualTo(1));
+            }
+        }
+
+        public class MyTable
         {
             [AutoIncrement]
             public int Id { get; set; }
@@ -199,9 +199,9 @@ namespace ServiceStack.OrmLite.Tests
             }
         }
 
-	    [Test]
-	    public void Does_allow_setting_transactions_on_raw_DbCommands()
-	    {
+        [Test]
+        public void Does_allow_setting_transactions_on_raw_DbCommands()
+        {
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<MyTable>();
@@ -226,9 +226,9 @@ namespace ServiceStack.OrmLite.Tests
             }
         }
 
-	    [Test]
-	    public void Can_use_OpenCommand_in_Transaction()
-	    {
+        [Test]
+        public void Can_use_OpenCommand_in_Transaction()
+        {
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<MyTable>();
@@ -250,6 +250,6 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(db.Count<MyTable>(), Is.EqualTo(2));
             }
         }
- 
-	}
+
+    }
 }
