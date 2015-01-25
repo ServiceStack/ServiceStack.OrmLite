@@ -19,8 +19,12 @@ namespace ServiceStack.OrmLite.Tests
 				db.DropAndCreateTable<ModelWithIdAndName>();
 				db.Insert(new ModelWithIdAndName(1));
 
+                Assert.That(((OrmLiteConnection)db).Transaction, Is.Null);
+
 				using (var dbTrans = db.OpenTransaction())
 				{
+                    Assert.That(((OrmLiteConnection)db).Transaction, Is.Not.Null);
+
 					db.Insert(new ModelWithIdAndName(2));
 					db.Insert(new ModelWithIdAndName(3));
 
