@@ -244,29 +244,12 @@ namespace ServiceStack.OrmLite.Oracle
 
             if (fieldType == typeof(DateTime) || fieldType == typeof(DateTime?))
             {
-                var dateValue = (DateTime)value;
-                string iso8601Format = "yyyy-MM-dd";
-                string oracleFormat = "YYYY-MM-DD";
-                if (dateValue.ToString("yyyy-MM-dd HH:mm:ss.fffffff").EndsWith("00:00:00.0000000") == false)
-                {
-                    iso8601Format = "yyyy-MM-dd HH:mm:ss.fffffff";
-                    oracleFormat = "YYYY-MM-DD HH24:MI:SS.FF9";
-                }
-                return "TO_TIMESTAMP(" + base.GetQuotedValue(dateValue.ToString(iso8601Format), typeof(string)) + ", " + base.GetQuotedValue(oracleFormat, typeof(string)) + ")";
+                return GetQuotedDateTimeValue((DateTime) value);
             }
 
             if (fieldType == typeof(DateTimeOffset) || fieldType == typeof(DateTimeOffset?))
             {
-                var dateValue = (DateTimeOffset)value;
-                string iso8601Format = "yyyy-MM-dd zzz";
-                string oracleFormat = "YYYY-MM-DD TZH:TZM";
-                if (dateValue.ToString("yyyy-MM-dd HH:mm:ss.fffffff").EndsWith("00:00:00.0000000") == false)
-                {
-                    iso8601Format = "yyyy-MM-dd HH:mm:ss.fffffff zzz";
-                    oracleFormat = "YYYY-MM-DD HH24:MI:SS.FF9 TZH:TZM";
-                }
-
-                return "TO_TIMESTAMP_TZ(" + base.GetQuotedValue(dateValue.ToString(iso8601Format), typeof(string)) + ", " + base.GetQuotedValue(oracleFormat, typeof(string)) + ")";
+                return GetQuotedDateTimeOffsetValue((DateTimeOffset) value);
             }
 
             if ((value is TimeSpan) && (fieldType == typeof(Int64) || fieldType == typeof(Int64?)))
@@ -313,6 +296,49 @@ namespace ServiceStack.OrmLite.Oracle
             }
 
             return base.GetQuotedValue(value, fieldType);
+        }
+
+        const string IsoDateFormat = "yyyy-MM-dd";
+        const string IsoTimeFormat = "HH:mm:ss";
+        const string IsoMillisecondFormat = "fffffff";
+        const string IsoTimeZoneFormat = "zzz";
+        const string OracleDateFormat = "YYYY-MM-DD";
+        const string OracleTimeFormat = "HH24:MI:SS";
+        const string OracleMillisecondFormat = "FF9";
+        const string OracleTimeZoneFormat = "TZH:TZM";
+
+        private string GetQuotedDateTimeOffsetValue(DateTimeOffset dateValue)
+        {
+            var iso8601Format = string.Format("{0} {1}", GetIsoDateTimeFormat(dateValue.TimeOfDay), IsoTimeZoneFormat);
+            var oracleFormat = string.Format("{0} {1}", GetOracleDateTimeFormat(dateValue.TimeOfDay), OracleTimeZoneFormat);
+            return string.Format("TO_TIMESTAMP_TZ({0}, {1})", base.GetQuotedValue(dateValue.ToString(iso8601Format), typeof(string)), base.GetQuotedValue(oracleFormat, typeof(string)));
+        }
+
+        private string GetQuotedDateTimeValue(DateTime dateValue)
+        {
+            var iso8601Format = GetIsoDateTimeFormat(dateValue.TimeOfDay);
+            var oracleFormat = GetOracleDateTimeFormat(dateValue.TimeOfDay);
+            return string.Format("TO_TIMESTAMP({0}, {1})", base.GetQuotedValue(dateValue.ToString(iso8601Format), typeof(string)), base.GetQuotedValue(oracleFormat, typeof(string)));
+        }
+
+        private string GetIsoDateTimeFormat(TimeSpan timeOfDay)
+        {
+            return GetTimeFormat(timeOfDay, IsoDateFormat, IsoTimeFormat, IsoMillisecondFormat);
+        }
+
+        private string GetOracleDateTimeFormat(TimeSpan timeOfDay)
+        {
+            return GetTimeFormat(timeOfDay, OracleDateFormat, OracleTimeFormat, OracleMillisecondFormat);
+        }
+
+        private string GetTimeFormat(TimeSpan timeOfDay, string dateFormat, string timeFormat, string millisecondFormat)
+        {
+            var isStartOfDay = timeOfDay.Ticks == 0;
+            if (isStartOfDay) return dateFormat;
+            var hasFractionalSeconds = (timeOfDay.Milliseconds != 0) || ((timeOfDay.Ticks % TimeSpan.TicksPerMillisecond) != 0);
+            return hasFractionalSeconds 
+                ? string.Format("{0} {1}.{2}", dateFormat, timeFormat, millisecondFormat) 
+                : string.Format("{0} {1}", dateFormat, timeFormat);
         }
 
         public override string ToSelectStatement(Type tableType, string sqlFilter, params object[] filterParams)

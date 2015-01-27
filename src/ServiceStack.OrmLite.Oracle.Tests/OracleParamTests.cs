@@ -286,12 +286,20 @@ namespace ServiceStack.OrmLite.Tests
             {
                 foreach (var param in _reservedNameParams)
                 {
-                    db.CreateTable(true, param.GetType());
-                    param.Id = 123;
-                    param.SetValue(1000);
-                    param.InsertDb(db);
-                    param.SetValue(2343);
-                    param.UpdateDb(db);
+                    try
+                    {
+                        db.CreateTable(true, param.GetType());
+                        param.Id = 123;
+                        param.SetValue(1000);
+                        param.InsertDb(db);
+                        param.SetValue(2343);
+                        param.UpdateDb(db);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception(
+                            string.Format("Unable to process Oracle parameter of type: {0}", param.GetType()), ex);
+                    }
                 }
             }
         }
