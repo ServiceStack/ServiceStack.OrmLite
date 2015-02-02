@@ -842,11 +842,25 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        internal static List<Into> LoadListWithReferences<Into, From>(this IDbCommand dbCmd, SqlExpression<From> expr = null)
+        internal static List<Into> LoadListWithReferences<Into, From>(this IDbCommand dbCmd, SqlExpression<From> expr = null, string[] include = null)
         {
             var loadList = new LoadListSync<Into, From>(dbCmd, expr);
 
-            foreach (var fieldDef in loadList.FieldDefs)
+            var fieldDefs = loadList.FieldDefs;
+            if (include.Length > 0)
+            {
+                // Check that any include values aren't reference fields of the specified From type
+                var fields = fieldDefs.Select(q => q.FieldName);
+                var invalid = include.Except<string>(fields).ToList();
+                if (invalid.Count > 0)
+                    throw new ArgumentException("Fields '{0}' are not Reference Properties of Type '{1}'".Fmt(invalid.Join("', '"), typeof(From).Name));
+
+                fieldDefs = loadList.FieldDefs.Where(fd => include.Contains(fd.FieldName)).ToList();
+            }
+
+
+
+            foreach (var fieldDef in fieldDefs)
             {
                 var listInterface = fieldDef.FieldType.GetTypeWithGenericInterfaceOf(typeof(IList<>));
                 if (listInterface != null)

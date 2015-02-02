@@ -627,6 +627,50 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(ukAddress.AddressLine1, Is.EqualTo("2 Work Park"));
         }
 
+        [Test]
+        public void Can_load_only_included_references()
+        {
+            var customer = new Customer
+            {
+                Name = "Customer 1",
+                PrimaryAddress = new CustomerAddress
+                {
+                    AddressLine1 = "1 Humpty Street",
+                    City = "Humpty Doo",
+                    State = "Northern Territory",
+                    Country = "Australia"
+                },
+                Orders = new[] { 
+                    new Order { LineItem = "Line 1", Qty = 1, Cost = 1.99m },
+                    new Order { LineItem = "Line 2", Qty = 2, Cost = 2.99m },
+                }.ToList(),
+            };
+
+            db.Save(customer, references: true);
+            Assert.That(customer.Id, Is.GreaterThan(0));
+
+            var dbCustomers = db.LoadSelect<Customer>(q => q.Id == customer.Id, "PrimaryAddress");
+            Assert.That(dbCustomers.Count, Is.EqualTo(1));
+            Assert.That(dbCustomers[0].Name, Is.EqualTo("Customer 1"));
+            
+            Assert.That(dbCustomers[0].Orders, Is.Null);
+            Assert.That(dbCustomers[0].PrimaryAddress, Is.Not.Null);
+
+
+            // Invalid field name
+            try
+            {
+                dbCustomers = db.LoadSelect<Customer>(q => q.Id == customer.Id, "InvalidOption1", "InvalidOption2");
+                Assert.Fail();
+            }
+            catch (System.ArgumentException ex)
+            {
+            }
+            catch (System.Exception ex)
+            {
+                Assert.Fail();
+            }
+        }
     }
 
 }

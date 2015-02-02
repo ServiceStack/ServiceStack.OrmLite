@@ -254,35 +254,35 @@ namespace ServiceStack.OrmLite
         /// Returns results with references from using a LINQ Expression. E.g:
         /// <para>db.LoadSelect&lt;Person&gt;(x =&gt; x.Age &gt; 40)</para>
         /// </summary>
-        public static List<T> LoadSelect<T>(this IDbConnection dbConn, Expression<Func<T, bool>> predicate)
+        public static List<T> LoadSelect<T>(this IDbConnection dbConn, Expression<Func<T, bool>> predicate, params string[] include)
         {
-            return dbConn.Exec(dbCmd => dbCmd.LoadSelect(predicate));
+            return dbConn.Exec(dbCmd => dbCmd.LoadSelect(predicate, include));
         }
 
         /// <summary>
         /// Returns results with references from using an SqlExpression lambda. E.g:
         /// <para>db.LoadSelect&lt;Person&gt;(q =&gt; q.Where(x =&gt; x.Age &gt; 40))</para>
         /// </summary>
-        public static List<T> LoadSelect<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression)
+        public static List<T> LoadSelect<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression, params string[] include)
         {
-            return dbConn.Exec(dbCmd => dbCmd.LoadSelect(expression));
+            return dbConn.Exec(dbCmd => dbCmd.LoadSelect(expression, include));
         }
 
         /// <summary>
         /// Returns results with references from using an SqlExpression lambda. E.g:
         /// <para>db.LoadSelect(db.From&lt;Person&gt;().Where(x =&gt; x.Age &gt; 40))</para>
         /// </summary>
-        public static List<T> LoadSelect<T>(this IDbConnection dbConn, SqlExpression<T> expression = null)
+        public static List<T> LoadSelect<T>(this IDbConnection dbConn, SqlExpression<T> expression = null, params string[] include)
         {
-            return dbConn.Exec(dbCmd => dbCmd.LoadSelect(expression));
+            return dbConn.Exec(dbCmd => dbCmd.LoadSelect(expression, include));
         }
 
         /// <summary>
         /// Project results with references from a number of joined tables into a different model
         /// </summary>
-        public static List<Into> LoadSelect<Into, From>(this IDbConnection dbConn, SqlExpression<From> expression)
+        public static List<Into> LoadSelect<Into, From>(this IDbConnection dbConn, SqlExpression<From> expression, params string[] include)
         {
-            return dbConn.Exec(dbCmd => dbCmd.LoadSelect<Into, From>(expression));
+            return dbConn.Exec(dbCmd => dbCmd.LoadSelect<Into, From>(expression, include));
         }
     }
 }
