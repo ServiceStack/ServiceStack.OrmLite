@@ -649,7 +649,7 @@ namespace ServiceStack.OrmLite.Tests
             db.Save(customer, references: true);
             Assert.That(customer.Id, Is.GreaterThan(0));
 
-            var dbCustomers = db.LoadSelect<Customer>(q => q.Id == customer.Id, "PrimaryAddress");
+            var dbCustomers = db.LoadSelect<Customer>(q => q.Id == customer.Id, include: new[] { "PrimaryAddress" });
             Assert.That(dbCustomers.Count, Is.EqualTo(1));
             Assert.That(dbCustomers[0].Name, Is.EqualTo("Customer 1"));
             
@@ -660,7 +660,7 @@ namespace ServiceStack.OrmLite.Tests
             // Invalid field name
             try
             {
-                dbCustomers = db.LoadSelect<Customer>(q => q.Id == customer.Id, "InvalidOption1", "InvalidOption2");
+                dbCustomers = db.LoadSelect<Customer>(q => q.Id == customer.Id, include: new[] { "InvalidOption1", "InvalidOption2" });
                 Assert.Fail();
             }
             catch (System.ArgumentException ex)

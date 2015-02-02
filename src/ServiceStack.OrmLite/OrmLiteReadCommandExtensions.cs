@@ -847,7 +847,7 @@ namespace ServiceStack.OrmLite
             var loadList = new LoadListSync<Into, From>(dbCmd, expr);
 
             var fieldDefs = loadList.FieldDefs;
-            if (include.Length > 0)
+            if (!include.IsEmpty())
             {
                 // Check that any include values aren't reference fields of the specified From type
                 var fields = fieldDefs.Select(q => q.FieldName);
@@ -857,8 +857,6 @@ namespace ServiceStack.OrmLite
 
                 fieldDefs = loadList.FieldDefs.Where(fd => include.Contains(fd.FieldName)).ToList();
             }
-
-
 
             foreach (var fieldDef in fieldDefs)
             {
