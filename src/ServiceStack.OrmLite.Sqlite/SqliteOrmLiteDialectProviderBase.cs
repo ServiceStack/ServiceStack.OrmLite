@@ -285,7 +285,10 @@ namespace ServiceStack.OrmLite.Sqlite
 
         public static string ToSqliteDateString(this DateTime dateTime)
         {
-            //Not forcing co-ercsion into UTC for Sqlite
+            //Convert UTC DateTime to LocalTime for Sqlite
+            if (dateTime.Kind == DateTimeKind.Utc)
+                dateTime = dateTime.ToLocalTime();
+
             var dateStr = DateTimeSerializer.ToLocalXsdDateTimeString(dateTime);
             dateStr = dateStr.Replace("T", " ");
             const int tzPos = 6; //"-00:00".Length;
