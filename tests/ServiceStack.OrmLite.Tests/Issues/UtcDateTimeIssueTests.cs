@@ -1,5 +1,6 @@
 ﻿using System;
 using NUnit.Framework;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
@@ -19,14 +20,24 @@ namespace ServiceStack.OrmLite.Tests.Issues
             {
                 db.DropAndCreateTable<TestDate>();
 
+                DateTime.UtcNow.ToJson().Print();
+
                 db.Insert(new TestDate {
                     Name = "Test name", 
                     ExpiryDate = DateTime.UtcNow.AddHours(1)
                 });
 
+                //db.GetLastSql().Print();
+
                 var result = db.Select<TestDate>(q => q.ExpiryDate > DateTime.UtcNow);
+                db.GetLastSql().Print();
 
                 Assert.That(result.Count, Is.EqualTo(1));
+
+                db.Select<TestDate>(q => q.ExpiryDate > DateTime.Now);
+                db.GetLastSql().Print();
+
+                //db.Select<TestDate>().PrintDump();
             }
         }         
     }

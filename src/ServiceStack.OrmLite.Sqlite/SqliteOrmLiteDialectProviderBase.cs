@@ -229,10 +229,18 @@ namespace ServiceStack.OrmLite.Sqlite
         protected override object GetValueOrDbNull<T>(FieldDefinition fieldDef, object obj)
         {
             var value = GetValue<T>(fieldDef, obj);
-            if (fieldDef.FieldType == typeof(DateTimeOffset) && value != null)
+            if (value != null)
             {
-                var dateTimeOffsetValue = (DateTimeOffset)value;
-                return dateTimeOffsetValue.ToString("o");
+                if (fieldDef.FieldType == typeof(DateTimeOffset))
+                {
+                    var dateTimeOffsetValue = (DateTimeOffset)value;
+                    return dateTimeOffsetValue.ToString("o");
+                }
+                else if (fieldDef.FieldType == typeof(DateTime) && obj is DateTime)
+                {
+                    var dateType = (DateTime)obj;
+                    return dateType.ToSqliteDateString();
+                }
             }
 
             return value ?? DBNull.Value;
