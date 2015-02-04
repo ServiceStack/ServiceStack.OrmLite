@@ -236,11 +236,6 @@ namespace ServiceStack.OrmLite.Sqlite
                     var dateTimeOffsetValue = (DateTimeOffset)value;
                     return dateTimeOffsetValue.ToString("o");
                 }
-                else if (fieldDef.FieldType == typeof(DateTime) && obj is DateTime)
-                {
-                    var dateType = (DateTime)obj;
-                    return dateType.ToSqliteDateString();
-                }
             }
 
             return value ?? DBNull.Value;
