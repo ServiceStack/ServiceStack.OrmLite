@@ -34,8 +34,8 @@ namespace ServiceStack.OrmLite.Tests.Issues
 
                 Assert.That(result.Count, Is.EqualTo(1));
 
-                db.Select<TestDate>(q => q.ExpiryDate > DateTime.Now);
-                db.GetLastSql().Print();
+                //db.Select<TestDate>(q => q.ExpiryDate > DateTime.Now);
+                //db.GetLastSql().Print();
 
                 //db.Select<TestDate>().PrintDump();
             }
