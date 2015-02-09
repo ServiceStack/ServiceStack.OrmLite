@@ -233,7 +233,7 @@ namespace ServiceStack.OrmLite.Firebird
             }
 
             var sql = string.Format("INSERT INTO {0} ({1}) VALUES ({2});",
-                                    GetQuotedTableName(modelDef), sbColumnNames, sbColumnValues);
+                GetQuotedTableName(modelDef), sbColumnNames, sbColumnValues);
 
             return sql;
         }
@@ -699,18 +699,26 @@ namespace ServiceStack.OrmLite.Firebird
             return Quote(fieldName);
         }
 
+        public virtual string GetTableName(string table, string schema = null)
+        {
+            return schema != null
+                ? string.Format("{0}_{1}",
+                    NamingStrategy.GetSchemaName(schema),
+                    NamingStrategy.GetTableName(table))
+                : NamingStrategy.GetTableName(table);
+        }
+
+        public virtual string GetTableName(ModelDefinition modelDef)
+        {
+            return GetTableName(modelDef.ModelName, modelDef.Schema);
+        }
+
         public override string GetQuotedTableName(ModelDefinition modelDef)
         {
             if (!modelDef.IsInSchema)
                 return Quote(NamingStrategy.GetTableName(modelDef.ModelName));
 
-            return Quote(string.Format("{0}_{1}", modelDef.Schema,
-                NamingStrategy.GetTableName(modelDef.ModelName)));
-        }
-
-        public override string GetQuotedTableName(string tableName)
-        {
-            return Quote(NamingStrategy.GetTableName(tableName));
+            return Quote(GetTableName(modelDef.ModelName, modelDef.Schema));
         }
 
         public override string GetQuotedColumnName(string fieldName)
@@ -730,7 +738,7 @@ namespace ServiceStack.OrmLite.Firebird
             return new FirebirdSqlExpression<T>(this);
         }
 
-        public override bool DoesTableExist(IDbCommand dbCmd, string tableName)
+        public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
         {
             if (!QuoteNames & !RESERVED.Contains(tableName.ToUpper()))
             {
@@ -773,7 +781,7 @@ namespace ServiceStack.OrmLite.Firebird
                                              fieldDef.DefaultValue,
                                              fieldDef.CustomFieldDefinition);
             return string.Format("ALTER TABLE {0} ADD {1} ;",
-                                 GetQuotedTableName(GetModel(modelType).ModelName),
+                                 GetQuotedTableName(GetModel(modelType)),
                                  column);
         }
 
@@ -791,7 +799,7 @@ namespace ServiceStack.OrmLite.Firebird
                                              fieldDef.DefaultValue,
                                              fieldDef.CustomFieldDefinition);
             return string.Format("ALTER TABLE {0} ALTER {1} ;",
-                                 GetQuotedTableName(GetModel(modelType).ModelName),
+                                 GetQuotedTableName(GetModel(modelType)),
                                  column);
         }
 
@@ -800,7 +808,7 @@ namespace ServiceStack.OrmLite.Firebird
                                                            string oldColumnName)
         {
             return string.Format("ALTER TABLE {0} ALTER {1} TO {2} ;",
-                                 GetQuotedTableName(GetModel(modelType).ModelName),
+                                 GetQuotedTableName(GetModel(modelType)),
                                  GetQuotedColumnName(oldColumnName),
                                  GetQuotedColumnName(fieldDef.FieldName));
         }

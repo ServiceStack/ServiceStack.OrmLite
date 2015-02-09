@@ -84,12 +84,12 @@ namespace ServiceStack.OrmLite
             return InternalJoin(joinType, joinExpr, sourceDef, targetDef);
         }
 
-        private string InternalCreateSqlFromExpression(Expression joinExpr) 
+        private string InternalCreateSqlFromExpression(Expression joinExpr, bool isCrossJoin) 
         {
-            return "ON {0}".Fmt(Visit(joinExpr).ToString());
+            return "{0} {1}".Fmt((isCrossJoin ? "WHERE" : "ON"), Visit(joinExpr).ToString());
         }
 
-        private string InternalCreateSqlFromDefinitions(ModelDefinition sourceDef, ModelDefinition targetDef, bool allowMissingOnClause) 
+        private string InternalCreateSqlFromDefinitions(ModelDefinition sourceDef, ModelDefinition targetDef, bool isCrossJoin) 
         {
             var parentDef = sourceDef;
             var childDef = targetDef;
@@ -104,17 +104,25 @@ namespace ServiceStack.OrmLite
 
             if (refField == null) 
             {
-                if(!allowMissingOnClause)
+                if(!isCrossJoin)
                     throw new ArgumentException("Could not infer relationship between {0} and {1}".Fmt(sourceDef.ModelName, targetDef.ModelName));
 
                 return string.Empty;
             }
 
-            return "ON\n({0}.{1} = {2}.{3})".Fmt(
+            return "{0}\n({1}.{2} = {3}.{4})".Fmt(
+                isCrossJoin ? "WHERE" : "ON",
                 DialectProvider.GetQuotedTableName(parentDef),
                 SqlColumn(parentDef.PrimaryKey.FieldName),
                 DialectProvider.GetQuotedTableName(childDef),
                 SqlColumn(refField.FieldName));
+        }
+
+        public SqlExpression<T> CustomJoin(string joinString)
+        {
+            PrefixFieldWithTableName = true;
+            FromExpression += " " + joinString;
+            return this;
         }
 
         private SqlExpression<T> InternalJoin(string joinType, 
@@ -126,9 +134,10 @@ namespace ServiceStack.OrmLite
             useFieldName = true;
             sep = " ";
 
+            var isCrossJoin = "CROSS JOIN".Equals(joinType);
             var sqlExpr = joinExpr != null 
-                ? InternalCreateSqlFromExpression(joinExpr) 
-                : InternalCreateSqlFromDefinitions(sourceDef, targetDef, "CROSS JOIN".Equals(joinType));
+                ? InternalCreateSqlFromExpression(joinExpr, isCrossJoin)
+                : InternalCreateSqlFromDefinitions(sourceDef, targetDef, isCrossJoin);
 
             var joinDef = tableDefs.Contains(targetDef) && !tableDefs.Contains(sourceDef)
                               ? sourceDef
@@ -146,7 +155,7 @@ namespace ServiceStack.OrmLite
 
         public string SelectInto<TModel>()
         {
-            if (typeof(TModel) == typeof(T) && !PrefixFieldWithTableName)
+            if (CustomSelect || (typeof(TModel) == typeof(T) && !PrefixFieldWithTableName))
             {
                 return ToSelectStatement();
             }
@@ -181,7 +190,7 @@ namespace ServiceStack.OrmLite
                                 tableFieldDef.GetQuotedName(DialectProvider));
 
                             if (tableFieldDef.Alias != null)
-                                sbSelect.Append(" AS ").Append(DialectProvider.NamingStrategy.GetColumnName(fieldDef.Name));
+                                sbSelect.Append(" AS ").Append(SqlColumn(fieldDef.Name));
 
                             break;
                         }
@@ -208,7 +217,7 @@ namespace ServiceStack.OrmLite
 
                             sbSelect.AppendFormat("{0} as {1}",
                                 DialectProvider.GetQuotedColumnName(tableDef, matchingField),
-                                fieldDef.Name);
+                                SqlColumn(fieldDef.Name));
                             
                             break;
                         }
@@ -217,7 +226,7 @@ namespace ServiceStack.OrmLite
             }
 
             var columns = sbSelect.Length > 0 ? sbSelect.ToString() : "*";
-            SelectExpression = "SELECT " + columns;
+            SelectExpression = "SELECT " + (selectDistinct ? "DISTINCT " : "") + columns;
 
             return ToSelectStatement();
         }

@@ -298,7 +298,7 @@ db.UpdateOnly(new Person { FirstName = "JJ", LastName = "Hendo" },
 
 ```csharp
 db.UpdateOnly(new Person { FirstName = "JJ" }, 
-  onlyFields: q => 1.Update(p => p.FirstName).Where(x => x.FirstName == "Jimi"));
+  onlyFields: q => q.Update(p => p.FirstName).Where(x => x.FirstName == "Jimi"));
 ```
 **UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("LastName" = 'Hendrix')**
 
@@ -498,12 +498,12 @@ The above query implicitly joins together the `Customer` and `CustomerAddress` P
 
 ```csharp
 class Customer {
-    public Id { get; set; }
+    public int Id { get; set; }
     ...
 }
 class CustomerAddress {
-    public Id { get; set; }
-    public CustomerId { get; set; }  // Reference based on Property name convention
+    public int Id { get; set; }
+    public int CustomerId { get; set; }  // Reference based on Property name convention
 }
 ```
 
@@ -512,14 +512,14 @@ References based on matching alias names is also supported, e.g:
 ```csharp
 [Alias("LegacyCustomer")]
 class Customer {
-    public Id { get; set; }
+    public int Id { get; set; }
     ...
 }
 class CustomerAddress {
-    public Id { get; set; }
+    public int Id { get; set; }
 
     [Alias("LegacyCustomerId")]             // Matches `LegacyCustomer` Alias
-    public RenamedCustomerId { get; set; }  // Reference based on Alias Convention
+    public int RenamedCustomerId { get; set; }  // Reference based on Alias Convention
 }
 ```
 
@@ -1188,11 +1188,13 @@ string spSql = @"DROP PROCEDURE IF EXISTS spSearchLetters;
 
 db.ExecuteSql(spSql);
 
-var cmd = db.SqlProc("spSearchLetters", new { pLetter = "C" });
-var pTotal = cmd.AddParam("pTotal", direction: ParameterDirection.Output);
+using (var cmd = db.SqlProc("spSearchLetters", new { pLetter = "C" }))
+{
+    var pTotal = cmd.AddParam("pTotal", direction: ParameterDirection.Output);
 
-var results = cmd.ConvertToList<LetterFrequency>();
-var total = pTotal.Value;
+    var results = cmd.ConvertToList<LetterFrequency>();
+    var total = pTotal.Value;
+}
 ```
 
 An alternative approach is to use `SqlList` which lets you use a filter to customize a 

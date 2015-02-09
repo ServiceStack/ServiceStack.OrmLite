@@ -2,27 +2,26 @@
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.Tests;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.PostgreSQL.Tests
 {
     [TestFixture]
     public class CreatePostgreSQLTablesTests : OrmLiteTestBase
     {
-
-		
-		[Test]
-		public void DropAndCreateTable_DropsTableAndCreatesTable()
-		{
-			using (var db = OpenDbConnection())
-			{
-				db.DropTable<TestData>();
-				db.CreateTable<TestData>();
-				db.Insert<TestData>(new TestData { Id = Guid.NewGuid() });
-				db.DropAndCreateTable<TestData>();
-				db.Insert<TestData>(new TestData { Id = Guid.NewGuid() });
-			}
-		}
+        public CreatePostgreSQLTablesTests() : base(Dialect.PostgreSql) { }
+        
+        [Test]
+        public void DropAndCreateTable_DropsTableAndCreatesTable()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropTable<TestData>();
+                db.CreateTable<TestData>();
+                db.Insert<TestData>(new TestData { Id = Guid.NewGuid() });
+                db.DropAndCreateTable<TestData>();
+                db.Insert<TestData>(new TestData { Id = Guid.NewGuid() });
+            }
+        }
 
 
         [Test]
@@ -79,6 +78,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
                 dbS1.DropTable<CreatePostgreSQLTablesTests_dummy_table>();
                 dbS1.CreateTable<CreatePostgreSQLTablesTests_dummy_table>();
                 Assert.That(dbS1.Count<CreatePostgreSQLTablesTests_dummy_table>(), Is.EqualTo(0));
+                dbS1.DropTable<CreatePostgreSQLTablesTests_dummy_table>();
             }
             builder.SearchPath = schema2;
 
@@ -87,19 +87,20 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
                 dbS2.DropTable<CreatePostgreSQLTablesTests_dummy_table>();
                 dbS2.CreateTable<CreatePostgreSQLTablesTests_dummy_table>();
                 Assert.That(dbS2.Count<CreatePostgreSQLTablesTests_dummy_table>(), Is.EqualTo(0));
+                dbS2.DropTable<CreatePostgreSQLTablesTests_dummy_table>();
             }
 
         }
 
-		public class TestData
-		{
-			[PrimaryKey]
-			public Guid Id { get; set; }
+        public class TestData
+        {
+            [PrimaryKey]
+            public Guid Id { get; set; }
 
-			public string Name { get; set; }
+            public string Name { get; set; }
 
-			public string Surname { get; set; }
-		}
+            public string Surname { get; set; }
+        }
 
         private void CreateSchemaIfNotExists(System.Data.IDbConnection db, string name)
         {

@@ -41,7 +41,7 @@ namespace ServiceStack.OrmLite.Sqlite
             if (modelDef.RowVersion != null)
             {
                 var triggerName = GetTriggerName(modelDef);
-                return "DROP TRIGGER IF EXISTS {0}".Fmt(GetQuotedTableName(triggerName));
+                return "DROP TRIGGER IF EXISTS {0}".Fmt(GetQuotedName(triggerName));
             }
 
             return null;
@@ -134,20 +134,18 @@ namespace ServiceStack.OrmLite.Sqlite
 
         protected abstract IDbConnection CreateConnection(string connectionString);
 
-        public virtual string GetTableName(ModelDefinition modelDef)
+        public override string GetTableName(string table, string schema=null)
         {
-            var tableName = NamingStrategy.GetTableName(modelDef.ModelName);
-            return !modelDef.IsInSchema 
-                ? tableName
-                : string.Format("{0}_{1}", modelDef.Schema, tableName);
+            return schema != null
+                ? string.Format("{0}_{1}", 
+                    NamingStrategy.GetSchemaName(schema),
+                    NamingStrategy.GetTableName(table))
+                : NamingStrategy.GetTableName(table);
         }
 
-        public override string GetQuotedTableName(ModelDefinition modelDef)
+        public override string GetQuotedTableName(string tableName, string schema = null)
         {
-            if (!modelDef.IsInSchema)
-                return base.GetQuotedTableName(modelDef);
-
-            return string.Format("\"{0}_{1}\"", modelDef.Schema, modelDef.ModelName);
+            return GetQuotedName(GetTableName(tableName, schema));
         }
 
         public override object ConvertDbValue(object value, Type type)
@@ -165,7 +163,7 @@ namespace ServiceStack.OrmLite.Sqlite
 
         public override void SetDbValue(FieldDefinition fieldDef, IDataReader reader, int colIndex, object instance)
         {
-            if (HandledDbNullValue(fieldDef, reader, colIndex, instance)) return;
+            if (OrmLiteUtils.HandledDbNullValue(fieldDef, reader, colIndex, instance)) return;
 
             var fieldType = Nullable.GetUnderlyingType(fieldDef.FieldType) ?? fieldDef.FieldType;
             if (fieldType == typeof(Guid))
@@ -220,16 +218,29 @@ namespace ServiceStack.OrmLite.Sqlite
                 return base.GetQuotedValue(dateTimeOffsetValue.ToString("o"), typeof (string));
             }
 
+            if (fieldType == typeof(byte[]))
+            {
+                return "x'" + BitConverter.ToString((byte[])value).Replace("-", "") + "'";
+            }
+
             return base.GetQuotedValue(value, fieldType);
         }
 
         protected override object GetValueOrDbNull<T>(FieldDefinition fieldDef, object obj)
         {
             var value = GetValue<T>(fieldDef, obj);
-            if (fieldDef.FieldType == typeof(DateTimeOffset) && value != null)
+            if (value != null)
             {
-                var dateTimeOffsetValue = (DateTimeOffset)value;
-                return dateTimeOffsetValue.ToString("o");
+                if (fieldDef.FieldType == typeof(DateTimeOffset))
+                {
+                    var dateTimeOffsetValue = (DateTimeOffset)value;
+                    return dateTimeOffsetValue.ToString("o");
+                }
+                else if (fieldDef.FieldType == typeof(DateTime) && value is DateTime)
+                {
+                    var dateType = (DateTime)value;
+                    return dateType.ToSqliteDateString();
+                }
             }
 
             return value ?? DBNull.Value;
@@ -240,10 +251,10 @@ namespace ServiceStack.OrmLite.Sqlite
             return new SqliteExpression<T>(this);
         }
 
-        public override bool DoesTableExist(IDbCommand dbCmd, string tableName)
+        public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
         {
             var sql = "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name = {0}"
-                .SqlFmt(tableName);
+                .SqlFmt(GetTableName(tableName, schema));
 
             dbCmd.CommandText = sql;
             var result = dbCmd.LongScalar();
@@ -282,7 +293,10 @@ namespace ServiceStack.OrmLite.Sqlite
 
         public static string ToSqliteDateString(this DateTime dateTime)
         {
-            //Not forcing co-ercsion into UTC for Sqlite
+            //Convert UTC DateTime to LocalTime for Sqlite
+            if (dateTime.Kind == DateTimeKind.Utc)
+                dateTime = dateTime.ToLocalTime();
+
             var dateStr = DateTimeSerializer.ToLocalXsdDateTimeString(dateTime);
             dateStr = dateStr.Replace("T", " ");
             const int tzPos = 6; //"-00:00".Length;

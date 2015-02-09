@@ -49,8 +49,9 @@ namespace ServiceStack.OrmLite
             var modelDef = modelType.GetModelDefinition();
 
             var dialectProvider = dbCmd.GetDialectProvider();
-            var tableName = dialectProvider.NamingStrategy.GetTableName(modelDef.ModelName);
-            var tableExists = dialectProvider.DoesTableExist(dbCmd, tableName);
+            var tableName = dialectProvider.NamingStrategy.GetTableName(modelDef);
+            var schema = dialectProvider.NamingStrategy.GetSchemaName(modelDef);
+            var tableExists = dialectProvider.DoesTableExist(dbCmd, tableName, schema);
             if (overwrite && tableExists)
             {
                 if (modelDef.PreDropTableSql != null)
@@ -183,9 +184,10 @@ namespace ServiceStack.OrmLite
             try
             {
                 var dialectProvider = dbCmd.GetDialectProvider();
-                var tableName = dialectProvider.NamingStrategy.GetTableName(modelDef.ModelName);
+                var tableName = dialectProvider.NamingStrategy.GetTableName(modelDef);
+                var schema = dialectProvider.NamingStrategy.GetSchemaName(modelDef);
 
-                if (dialectProvider.DoesTableExist(dbCmd, tableName))
+                if (dialectProvider.DoesTableExist(dbCmd, tableName, schema))
                 {
                     if (modelDef.PreDropTableSql != null)
                     {
@@ -469,10 +471,17 @@ namespace ServiceStack.OrmLite
             return rowsUpdated;
         }
 
+        internal static int Delete<T>(this IDbCommand dbCmd, T anonType)
+        {
+            return dbCmd.Delete<T>((object)anonType);
+        }
+
         internal static int Delete<T>(this IDbCommand dbCmd, object anonType)
         {
             var dialectProvider = dbCmd.GetDialectProvider();
-            var hadRowVersion = dialectProvider.PrepareParameterizedDeleteStatement<T>(dbCmd, anonType.AllFields<T>());
+
+            var hadRowVersion = dialectProvider.PrepareParameterizedDeleteStatement<T>(
+                dbCmd, anonType.AllFieldsMap<T>());
 
             dialectProvider.SetParameterValues<T>(dbCmd, anonType);
 
@@ -482,28 +491,29 @@ namespace ServiceStack.OrmLite
         internal static int DeleteNonDefaults<T>(this IDbCommand dbCmd, T filter)
         {
             var dialectProvider = dbCmd.GetDialectProvider();
-            var hadRowVersion = dialectProvider.PrepareParameterizedDeleteStatement<T>(dbCmd, filter.NonDefaultFields<T>());
+            var hadRowVersion = dialectProvider.PrepareParameterizedDeleteStatement<T>(
+                dbCmd, filter.AllFieldsMap<T>().NonDefaultsOnly());
 
             dialectProvider.SetParameterValues<T>(dbCmd, filter);
 
             return AssertRowsUpdated(dbCmd, hadRowVersion);
         }
 
-        internal static int Delete<T>(this IDbCommand dbCmd, params object[] objs)
+        internal static int Delete<T>(this IDbCommand dbCmd, T[] objs)
         {
             if (objs.Length == 0) return 0;
 
-            return DeleteAll<T>(dbCmd, objs[0].AllFields<T>(), objs);
+            return DeleteAll(dbCmd, objs);
         }
 
-        internal static int DeleteNonDefaults<T>(this IDbCommand dbCmd, params T[] filters)
+        internal static int DeleteNonDefaults<T>(this IDbCommand dbCmd, T[] filters)
         {
             if (filters.Length == 0) return 0;
 
-            return DeleteAll<T>(dbCmd, filters[0].NonDefaultFields<T>(), filters.Map(x => (object)x));
+            return DeleteAll(dbCmd, filters, o => o.AllFieldsMap<T>().NonDefaultsOnly());
         }
 
-        private static int DeleteAll<T>(IDbCommand dbCmd, ICollection<string> deleteFields, IEnumerable<object> objs)
+        private static int DeleteAll<T>(IDbCommand dbCmd, IEnumerable<T> objs, Func<object,Dictionary<string,object>> fieldValuesFn=null)
         {
             IDbTransaction dbTrans = null;
 
@@ -515,10 +525,14 @@ namespace ServiceStack.OrmLite
 
                 var dialectProvider = dbCmd.GetDialectProvider();
 
-                dialectProvider.PrepareParameterizedDeleteStatement<T>(dbCmd, deleteFields);
-
                 foreach (var obj in objs)
                 {
+                    var fieldValues = fieldValuesFn != null
+                        ? fieldValuesFn(obj)
+                        : obj.AllFieldsMap<T>();
+
+                    dialectProvider.PrepareParameterizedDeleteStatement<T>(dbCmd, fieldValues);
+
                     dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
                     count += dbCmd.ExecNonQuery();
@@ -907,9 +921,8 @@ namespace ServiceStack.OrmLite
         internal static void ExecuteProcedure<T>(this IDbCommand dbCmd, T obj)
         {
             var dialectProvider = dbCmd.GetDialectProvider();
-            string sql = dialectProvider.ToExecuteProcedureStatement(obj);
-            dbCmd.CommandType = CommandType.StoredProcedure;
-            dbCmd.ExecuteSql(sql);
+            dialectProvider.PrepareStoredProcedureStatement(dbCmd, obj);
+            dbCmd.ExecuteNonQuery();
         }
 
         internal static ulong GetRowVersion(this IDbCommand dbCmd, ModelDefinition modelDef, object id)

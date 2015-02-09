@@ -504,43 +504,6 @@
             Don't redirect if the request was a forwarded request, e.g. from a Load Balancer
             </summary>
         </member>
-        <member name="T:ServiceStack.Messaging.IMessageHandler">
-            <summary>
-            Single threaded message handler that can process all messages
-            of a particular message type.
-            </summary>
-        </member>
-        <member name="M:ServiceStack.Messaging.IMessageHandler.Process(ServiceStack.Messaging.IMessageQueueClient)">
-            <summary>
-            Process all messages pending
-            </summary>
-            <param name="mqClient"></param>
-        </member>
-        <member name="M:ServiceStack.Messaging.IMessageHandler.ProcessQueue(ServiceStack.Messaging.IMessageQueueClient,System.String,System.Func{System.Boolean})">
-            <summary>
-            Process messages from a single queue.
-            </summary>
-            <param name="mqClient"></param>
-            <param name="queueName">The queue to process</param>
-            <param name="doNext">A predicate on whether to continue processing the next message if any</param>
-            <returns></returns>
-        </member>
-        <member name="M:ServiceStack.Messaging.IMessageHandler.ProcessMessage(ServiceStack.Messaging.IMessageQueueClient,System.Object)">
-            <summary>
-            Process a single message
-            </summary>
-        </member>
-        <member name="M:ServiceStack.Messaging.IMessageHandler.GetStats">
-            <summary>
-            Get Current Stats for this Message Handler
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="P:ServiceStack.Messaging.IMessageHandler.MessageType">
-            <summary>
-            The type of the message this handler processes
-            </summary>
-        </member>
         <member name="T:ServiceStack.Messaging.IMessageHandlerFactory">
             <summary>
             Encapsulates creating a new message handler
@@ -3273,19 +3236,9 @@
             <param name="cacheClient">Cache client</param>
             <param name="regex">Regular expression pattern to search cache keys</param>
         </member>
-        <member name="M:ServiceStack.Caching.MemoryCacheClient.CacheAdd(System.String,System.Object)">
-            <summary>
-            Add value with specified key to the cache, and set the cache entry to never expire.
-            </summary>
-        </member>
-        <member name="M:ServiceStack.Caching.MemoryCacheClient.CacheAdd(System.String,System.Object,System.DateTime)">
+        <member name="M:ServiceStack.Caching.MemoryCacheClient.CacheAdd(System.String,System.Object,System.Nullable{System.DateTime})">
             <summary>
             Stores The value with key only if such key doesn't exist at the server yet. 
-            </summary>
-        </member>
-        <member name="M:ServiceStack.Caching.MemoryCacheClient.CacheSet(System.String,System.Object)">
-            <summary>
-            Adds or replaces the value with key, and sets the cache entry to never expire.
             </summary>
         </member>
         <member name="M:ServiceStack.Caching.MemoryCacheClient.CacheSet(System.String,System.Object,System.DateTime)">
@@ -3293,17 +3246,12 @@
             Adds or replaces the value with key.
             </summary>
         </member>
-        <member name="M:ServiceStack.Caching.MemoryCacheClient.CacheSet(System.String,System.Object,System.DateTime,System.Nullable{System.Int64})">
+        <member name="M:ServiceStack.Caching.MemoryCacheClient.CacheSet(System.String,System.Object,System.Nullable{System.DateTime},System.Nullable{System.Int64})">
             <summary>
             Adds or replaces the value with key. 
             </summary>
         </member>
-        <member name="M:ServiceStack.Caching.MemoryCacheClient.CacheReplace(System.String,System.Object)">
-            <summary>
-            Replace the value with specified key if it exists, and set the cache entry to never expire.
-            </summary>
-        </member>
-        <member name="M:ServiceStack.Caching.MemoryCacheClient.CacheReplace(System.String,System.Object,System.DateTime)">
+        <member name="M:ServiceStack.Caching.MemoryCacheClient.CacheReplace(System.String,System.Object,System.Nullable{System.DateTime})">
             <summary>
             Replace the value with specified key if it exists.
             </summary>
@@ -3365,7 +3313,7 @@
             Replace the value with key in the cache, set to expire after specified TimeSpan.
             </summary>
         </member>
-        <member name="M:ServiceStack.Caching.MemoryCacheClient.CacheEntry.#ctor(System.Object,System.DateTime)">
+        <member name="M:ServiceStack.Caching.MemoryCacheClient.CacheEntry.#ctor(System.Object,System.Nullable{System.DateTime})">
             <summary>
             Create new instance of CacheEntry.
             </summary>

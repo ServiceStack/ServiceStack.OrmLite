@@ -110,6 +110,18 @@ namespace ServiceStack.OrmLite
         {
             return IsComputed;
         }
+
+        public bool IsSelfRefField(FieldDefinition fieldDef)
+        {
+            return (fieldDef.Alias != null && IsSelfRefField(fieldDef.Alias))
+                    || IsSelfRefField(fieldDef.Name);
+        }
+
+        public bool IsSelfRefField(string name)
+        {
+            return (Alias != null && Alias + "Id" == name)
+                    || Name + "Id" == name;
+        }
     }
 
     public class ForeignKeyConstraint

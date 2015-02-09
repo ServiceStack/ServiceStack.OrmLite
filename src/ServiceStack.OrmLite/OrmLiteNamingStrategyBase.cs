@@ -14,9 +14,24 @@ namespace ServiceStack.OrmLite
 {
     public class OrmLiteNamingStrategyBase : INamingStrategy
     {
+        public virtual string GetSchemaName(string name)
+        {
+            return name;
+        }
+
+        public virtual string GetSchemaName(ModelDefinition modelDef)
+        {
+            return GetSchemaName(modelDef.Schema);
+        }
+
         public virtual string GetTableName(string name)
         {
             return name;
+        }
+
+        public virtual string GetTableName(ModelDefinition modelDef)
+        {
+            return GetTableName(modelDef.ModelName);
         }
 
         public virtual string GetColumnName(string name)

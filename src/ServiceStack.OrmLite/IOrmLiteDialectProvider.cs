@@ -53,7 +53,7 @@ namespace ServiceStack.OrmLite
 
         string GetQuotedTableName(ModelDefinition modelDef);
 
-        string GetQuotedTableName(string tableName);
+        string GetQuotedTableName(string tableName, string schema=null);
 
         string GetQuotedColumnName(string columnName);
 
@@ -84,7 +84,9 @@ namespace ServiceStack.OrmLite
 
         bool PrepareParameterizedUpdateStatement<T>(IDbCommand cmd, ICollection<string> updateFields = null);
 
-        bool PrepareParameterizedDeleteStatement<T>(IDbCommand cmd, ICollection<string> deleteFields = null);
+        bool PrepareParameterizedDeleteStatement<T>(IDbCommand cmd, IDictionary<string, object> delteFieldValues);
+
+        void PrepareStoredProcedureStatement<T>(IDbCommand cmd, T obj);
 
         void SetParameterValues<T>(IDbCommand dbCmd, object obj);
 
@@ -121,8 +123,8 @@ namespace ServiceStack.OrmLite
 
         List<string> SequenceList(Type tableType);
 
-        bool DoesTableExist(IDbConnection db, string tableName);
-        bool DoesTableExist(IDbCommand dbCmd, string tableName);
+        bool DoesTableExist(IDbConnection db, string tableName, string schema = null);
+        bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null);
 
         bool DoesSequenceExist(IDbCommand dbCmd, string sequencName);
 
@@ -161,5 +163,6 @@ namespace ServiceStack.OrmLite
         Task<long> InsertAndGetLastInsertIdAsync<T>(IDbCommand dbCmd, CancellationToken token);
     
         string GetLoadChildrenSubSelect<From>(ModelDefinition modelDef, SqlExpression<From> expr);
+        string ToRowCountStatement(string innerSql);
     }
 }

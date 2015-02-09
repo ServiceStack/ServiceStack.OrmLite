@@ -157,7 +157,7 @@
     <Compile Include="OrmLiteDialectProviderBase.cs" />
     <Compile Include="OrmLiteWriteCommandExtensions.cs" />
     <Compile Include="OrmLiteReadCommandExtensions.cs" />
-    <Compile Include="OrmLiteUtilExtensions.cs" />
+    <Compile Include="OrmLiteUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReflectionPropertyInvoker.cs" />
     <Compile Include="OrmLiteResultsFilter.cs" />

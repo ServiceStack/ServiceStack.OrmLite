@@ -24,7 +24,6 @@ using System.Linq.Expressions;
 
 namespace ServiceStack.OrmLite
 {
-
     public abstract class OrmLiteDialectProviderBase<TDialect>
         : IOrmLiteDialectProvider
         where TDialect : IOrmLiteDialectProvider
@@ -264,14 +263,12 @@ namespace ServiceStack.OrmLite
                    && fieldDefinition != BoolColumnDefinition;
         }
 
-        protected const int NotFound = -1;
-
         /// <summary>
         /// Populates row fields during re-hydration of results.
         /// </summary>
         public virtual void SetDbValue(FieldDefinition fieldDef, IDataReader reader, int colIndex, object instance)
         {
-            if (HandledDbNullValue(fieldDef, reader, colIndex, instance)) return;
+            if (OrmLiteUtils.HandledDbNullValue(fieldDef, reader, colIndex, instance)) return;
 
             var convertedValue = ConvertDbValue(reader.GetValue(colIndex), fieldDef.FieldType);
             try
@@ -281,24 +278,7 @@ namespace ServiceStack.OrmLite
             catch (NullReferenceException ignore) { }
         }
 
-        public static bool HandledDbNullValue(FieldDefinition fieldDef, IDataReader dataReader, int colIndex, object instance)
-        {
-            if (fieldDef == null || fieldDef.SetValueFn == null || colIndex == NotFound) return true;
-            if (dataReader.IsDBNull(colIndex))
-            {
-                if (fieldDef.IsNullable)
-                {
-                    fieldDef.SetValueFn(instance, null);
-                }
-                else
-                {
-                    fieldDef.SetValueFn(instance, fieldDef.FieldType.GetDefaultValue());
-                }
-                return true;
-            }
-            return false;
-        }
-
+  
         public abstract IDbConnection CreateConnection(string filePath, Dictionary<string, string> options);
 
         public virtual string GetQuotedValue(string paramValue)
@@ -306,19 +286,41 @@ namespace ServiceStack.OrmLite
             return "'" + paramValue.Replace("'", "''") + "'";
         }
 
-        public virtual string GetQuotedTableName(ModelDefinition modelDef)
+        public virtual string GetTableName(ModelDefinition modelDef)
         {
-            return GetQuotedTableName(modelDef.ModelName);
+            return GetTableName(modelDef.ModelName, modelDef.Schema);
         }
 
-        public virtual string GetQuotedTableName(string tableName)
+        public virtual string GetTableName(string table, string schema = null)
         {
-            return string.Format("\"{0}\"", namingStrategy.GetTableName(tableName));
+            return schema != null
+                ? string.Format("{0}.{1}",
+                    NamingStrategy.GetSchemaName(schema),
+                    NamingStrategy.GetTableName(table))
+                : NamingStrategy.GetTableName(table);
+        }
+
+        public virtual string GetQuotedTableName(ModelDefinition modelDef)
+        {
+            return GetQuotedTableName(modelDef.ModelName, modelDef.Schema);
+        }
+
+        public virtual string GetQuotedTableName(string tableName, string schema = null)
+        {
+            if (schema == null)
+                return GetQuotedName(NamingStrategy.GetTableName(tableName));
+
+            var escapedSchema = NamingStrategy.GetSchemaName(schema)
+                .Replace(".", "\".\"");
+
+            return GetQuotedName(escapedSchema)
+                + "." 
+                + GetQuotedName(NamingStrategy.GetTableName(tableName));
         }
 
         public virtual string GetQuotedColumnName(string columnName)
         {
-            return string.Format("\"{0}\"", namingStrategy.GetColumnName(columnName));
+            return GetQuotedName(namingStrategy.GetColumnName(columnName));
         }
 
         public virtual string GetQuotedName(string name)
@@ -648,12 +650,14 @@ namespace ServiceStack.OrmLite
                 fieldDef.GetQuotedValue(objWithProperties, this));
         }
 
-        public virtual bool PrepareParameterizedDeleteStatement<T>(IDbCommand cmd, ICollection<string> deleteFields = null)
+        public virtual bool PrepareParameterizedDeleteStatement<T>(IDbCommand cmd, IDictionary<string, object> deleteFields)
         {
+            if (deleteFields == null || deleteFields.Count == 0)
+                throw new ArgumentException("DELETE's must have at least 1 criteria");
+
             var sqlFilter = new StringBuilder();
             var modelDef = typeof(T).GetModelDefinition();
             var hadRowVesion = false;
-            var hasSpecificFilter = deleteFields != null && deleteFields.Count > 0;
 
             cmd.Parameters.Clear();
             cmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
@@ -663,7 +667,9 @@ namespace ServiceStack.OrmLite
                 if (fieldDef.ShouldSkipDelete()) 
                     continue;
 
-                if (!fieldDef.IsRowVersion && (hasSpecificFilter && !deleteFields.Contains(fieldDef.Name)))
+                object fieldValue;
+
+                if (!deleteFields.TryGetValue(fieldDef.Name, out fieldValue))
                     continue;
 
                 if (fieldDef.IsRowVersion)
@@ -674,7 +680,16 @@ namespace ServiceStack.OrmLite
                     if (sqlFilter.Length > 0)
                         sqlFilter.Append(" AND ");
 
-                    AppendFieldCondition(sqlFilter, fieldDef, cmd);
+                    if (fieldValue != null)
+                    {
+                        AppendFieldCondition(sqlFilter, fieldDef, cmd);
+                    }
+                    else
+                    {
+                        sqlFilter
+                            .Append(GetQuotedColumnName(fieldDef.FieldName))
+                            .Append(" IS NULL");
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -686,6 +701,12 @@ namespace ServiceStack.OrmLite
                 GetQuotedTableName(modelDef), sqlFilter);
 
             return hadRowVesion;
+        }
+
+        public virtual void PrepareStoredProcedureStatement<T>(IDbCommand cmd, T obj)
+        {
+            cmd.CommandText = ToExecuteProcedureStatement(obj);
+            cmd.CommandType = CommandType.StoredProcedure;
         }
 
         protected void AddParameter(IDbCommand cmd, FieldDefinition fieldDef)
@@ -1033,12 +1054,12 @@ namespace ServiceStack.OrmLite
             return fieldDefinition ?? GetUndefinedColumnDefinition(fieldType, null);
         }
 
-        public virtual bool DoesTableExist(IDbConnection db, string tableName)
+        public virtual bool DoesTableExist(IDbConnection db, string tableName, string schema = null)
         {
-            return db.Exec(dbCmd => DoesTableExist(dbCmd, tableName));
+            return db.Exec(dbCmd => DoesTableExist(dbCmd, tableName, schema));
         }
 
-        public virtual bool DoesTableExist(IDbCommand dbCmd, string tableName)
+        public virtual bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
         {
             return false;
         }
@@ -1138,11 +1159,6 @@ namespace ServiceStack.OrmLite
         public virtual string GetDropForeignKeyConstraints(ModelDefinition modelDef)
         {
             return null;
-        }
-
-        public static ModelDefinition GetModelDefinition(Type modelType)
-        {
-            return modelType.GetModelDefinition();
         }
 
         public virtual string ToAddColumnStatement(Type modelType, FieldDefinition fieldDef)
@@ -1260,14 +1276,6 @@ namespace ServiceStack.OrmLite
             }
         }
 
-
-        public static ulong ConvertToULong(byte[] bytes)
-        {
-            Array.Reverse(bytes); //Correct Endianness
-            var ulongValue = BitConverter.ToUInt64(bytes, 0);
-            return ulongValue;
-        }
-
         public virtual object ConvertDbValue(object value, Type type)
         {
             if (value == null || value is DBNull) return null;
@@ -1316,7 +1324,7 @@ namespace ServiceStack.OrmLite
                             return value;
                         var byteValue = value as byte[];
                         if (byteValue != null)
-                            return ConvertToULong(byteValue);
+                            return OrmLiteUtils.ConvertToULong(byteValue);
                         return Convert.ToUInt64(value);
                     case TypeCode.Single:
                         return value is float ? value : Convert.ToSingle(value);
@@ -1389,7 +1397,11 @@ namespace ServiceStack.OrmLite
                 case TypeCode.UInt32:
                 case TypeCode.UInt64:
                     if (fieldType.IsNumericType())
+                    {
+                        if (value is TimeSpan)
+                            return ((TimeSpan)value).Ticks.ToString(CultureInfo.InvariantCulture);
                         return Convert.ChangeType(value, fieldType).ToString();
+                    }
                     break;
             }
 
@@ -1420,6 +1432,11 @@ namespace ServiceStack.OrmLite
             var subSql = expr.ToSelectStatement();
 
             return subSql;
+        }
+
+        public virtual string ToRowCountStatement(string innerSql)
+        {
+            return "SELECT COUNT(*) FROM ({0}) AS COUNT".Fmt(innerSql);
         }
 
         //Async API's, should be overrided by Dialect Providers to use .ConfigureAwait(false)
@@ -1514,24 +1531,23 @@ namespace ServiceStack.OrmLite
 #else
         public Task<List<T>> ReaderEach<T>(IDataReader reader, Func<T> fn, CancellationToken token = new CancellationToken())
         {
-            throw new NotImplementedException(OrmLiteUtilExtensions.AsyncRequiresNet45Error);
+            throw new NotImplementedException(OrmLiteUtils.AsyncRequiresNet45Error);
         }
 
         public Task<Return> ReaderEach<Return>(IDataReader reader, Action fn, Return source, CancellationToken token = new CancellationToken())
         {
-            throw new NotImplementedException(OrmLiteUtilExtensions.AsyncRequiresNet45Error);
+            throw new NotImplementedException(OrmLiteUtils.AsyncRequiresNet45Error);
         }
 
         public Task<T> ReaderRead<T>(IDataReader reader, Func<T> fn, CancellationToken token = new CancellationToken())
         {
-            throw new NotImplementedException(OrmLiteUtilExtensions.AsyncRequiresNet45Error);
+            throw new NotImplementedException(OrmLiteUtils.AsyncRequiresNet45Error);
         }
 
         public Task<long> InsertAndGetLastInsertIdAsync<T>(IDbCommand dbCmd, CancellationToken token)
         {
-            throw new NotImplementedException(OrmLiteUtilExtensions.AsyncRequiresNet45Error);
+            throw new NotImplementedException(OrmLiteUtils.AsyncRequiresNet45Error);
         }
 #endif
-
     }
 }

@@ -99,26 +99,13 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
-        /// Delete 1 or more rows in a transaction using an anonymous type filter. E.g:
-        /// <para>db.Delete&lt;Person&gt;(new { FirstName = "Jimi", Age = 27 }, new { FirstName = "Janis", Age = 27 })</para>
-        /// </summary>
-        public static Task<int> DeleteAsync<T>(this IDbConnection dbConn, CancellationToken token, params object[] anonFilters)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.DeleteAsync<T>(token, anonFilters));
-        }
-        public static Task<int> DeleteAsync<T>(this IDbConnection dbConn, params object[] anonFilters)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.DeleteAsync<T>(default(CancellationToken), anonFilters));
-        }
-
-        /// <summary>
         /// Delete 1 row using all fields in the filter. E.g:
         /// <para>db.Delete(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27 })</para>
         /// </summary>
         /// <returns>number of rows deleted</returns>
         public static Task<int> DeleteAsync<T>(this IDbConnection dbConn, T allFieldsFilter, CancellationToken token = default(CancellationToken))
         {
-            return dbConn.Exec(dbCmd => dbCmd.DeleteAsync<T>(allFieldsFilter, token));
+            return dbConn.Exec(dbCmd => dbCmd.DeleteAsync(allFieldsFilter, token));
         }
 
         /// <summary>
@@ -127,7 +114,11 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static Task<int> DeleteAsync<T>(this IDbConnection dbConn, CancellationToken token = default(CancellationToken), params T[] allFieldsFilters)
         {
-            return dbConn.Exec(dbCmd => dbCmd.DeleteAsync<T>(token, allFieldsFilters));
+            return dbConn.Exec(dbCmd => dbCmd.DeleteAsync(token, allFieldsFilters));
+        }
+        public static Task<int> DeleteAsync<T>(this IDbConnection dbConn, params T[] allFieldsFilters)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.DeleteAsync(default(CancellationToken), allFieldsFilters));
         }
 
         /// <summary>
@@ -137,7 +128,7 @@ namespace ServiceStack.OrmLite
         /// <returns>number of rows deleted</returns>
         public static Task<int> DeleteNonDefaultsAsync<T>(this IDbConnection dbConn, T nonDefaultsFilter, CancellationToken token = default(CancellationToken))
         {
-            return dbConn.Exec(dbCmd => dbCmd.DeleteNonDefaultsAsync(token, nonDefaultsFilter));
+            return dbConn.Exec(dbCmd => dbCmd.DeleteNonDefaultsAsync(nonDefaultsFilter, token));
         }
 
         /// <summary>

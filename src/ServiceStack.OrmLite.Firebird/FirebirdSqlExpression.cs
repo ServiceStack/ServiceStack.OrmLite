@@ -39,7 +39,7 @@ namespace ServiceStack.OrmLite.Firebird
                 if (left as PartialSqlString == null && right as PartialSqlString == null)
                 {
                     var result = Expression.Lambda(b).Compile().DynamicInvoke();
-                    return new PartialSqlString(OrmLiteConfig.DialectProvider.GetQuotedValue(result, result.GetType()));
+                    return new PartialSqlString(base.DialectProvider.GetQuotedValue(result, result.GetType()));
                 }
 
                 if (left as PartialSqlString == null)
@@ -59,10 +59,10 @@ namespace ServiceStack.OrmLite.Firebird
                     //enum value was returned by Visit(b.Right)
                     long numvericVal;
                     if (Int64.TryParse(right.ToString(), out numvericVal))
-                        right = OrmLiteConfig.DialectProvider.GetQuotedValue(Enum.ToObject(enumType, numvericVal).ToString(),
+                        right = base.DialectProvider.GetQuotedValue(Enum.ToObject(enumType, numvericVal).ToString(),
                                                                      typeof(string));
                     else
-                        right = OrmLiteConfig.DialectProvider.GetQuotedValue(right, right.GetType());
+                        right = base.DialectProvider.GetQuotedValue(right, right.GetType());
                 }
                 else if (right as EnumMemberAccess != null)
                 {
@@ -71,10 +71,10 @@ namespace ServiceStack.OrmLite.Firebird
                     //enum value was returned by Visit(b.Left)
                     long numvericVal;
                     if (Int64.TryParse(left.ToString(), out numvericVal))
-                        left = OrmLiteConfig.DialectProvider.GetQuotedValue(Enum.ToObject(enumType, numvericVal).ToString(),
+                        left = base.DialectProvider.GetQuotedValue(Enum.ToObject(enumType, numvericVal).ToString(),
                                                                      typeof(string));
                     else
-                        left = OrmLiteConfig.DialectProvider.GetQuotedValue(left, left.GetType());
+                        left = base.DialectProvider.GetQuotedValue(left, left.GetType());
                 }
                 else if (left as PartialSqlString == null && right as PartialSqlString == null)
                 {
@@ -82,9 +82,9 @@ namespace ServiceStack.OrmLite.Firebird
                     return result;
                 }
                 else if (left as PartialSqlString == null)
-                    left = OrmLiteConfig.DialectProvider.GetQuotedValue(left, left != null ? left.GetType() : null);
+                    left = base.DialectProvider.GetQuotedValue(left, left != null ? left.GetType() : null);
                 else if (right as PartialSqlString == null)
-                    right = OrmLiteConfig.DialectProvider.GetQuotedValue(right, right != null ? right.GetType() : null);
+                    right = base.DialectProvider.GetQuotedValue(right, right != null ? right.GetType() : null);
 
             }
 
@@ -117,7 +117,7 @@ namespace ServiceStack.OrmLite.Firebird
 
             if (c.Value is bool)
             {
-                object o = OrmLiteConfig.DialectProvider.GetQuotedValue(c.Value, c.Value.GetType());
+                object o = base.DialectProvider.GetQuotedValue(c.Value, c.Value.GetType());
                 return new PartialSqlString(string.Format("({0}={1})", GetQuotedTrueValue(), o));
             }
 

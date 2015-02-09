@@ -45,9 +45,10 @@ namespace ServiceStack.OrmLite.MySql
         {
             if (modelDef.RowVersion != null)
             {
-                var triggerName = RowVersionTriggerFormat.Fmt(modelDef.ModelName);
-                return "DROP TRIGGER IF EXISTS {0}".Fmt(GetQuotedTableName(triggerName));
+                var triggerName = RowVersionTriggerFormat.Fmt(GetTableName(modelDef));
+                return "DROP TRIGGER IF EXISTS {0}".Fmt(GetQuotedName(triggerName));
             }
+
 
             return null;
         }
@@ -61,7 +62,7 @@ namespace ServiceStack.OrmLite.MySql
                     modelDef.RowVersion.FieldName.SqlColumn(this));
 
                 var sql = "CREATE TRIGGER {0} BEFORE UPDATE ON {1} FOR EACH ROW BEGIN {2} END;".Fmt(
-                    triggerName, modelDef.ModelName, triggerBody);
+                    triggerName, GetTableName(modelDef), triggerBody);
 
                 return sql;
             }
@@ -122,19 +123,18 @@ namespace ServiceStack.OrmLite.MySql
             return base.ConvertDbValue(value, type);
         }
 
-        public override string GetQuotedTableName(ModelDefinition modelDef)
+        public override string GetTableName(string table, string schema = null)
         {
-            return string.Format("`{0}`", NamingStrategy.GetTableName(modelDef.ModelName));
+            return schema != null
+                ? string.Format("{0}_{1}",
+                    NamingStrategy.GetSchemaName(schema),
+                    NamingStrategy.GetTableName(table))
+                : NamingStrategy.GetTableName(table);
         }
 
-        public override string GetQuotedTableName(string tableName)
+        public override string GetQuotedTableName(string tableName, string schema = null)
         {
-            return string.Format("`{0}`", NamingStrategy.GetTableName(tableName));
-        }
-
-        public override string GetQuotedColumnName(string columnName)
-        {
-            return string.Format("`{0}`", NamingStrategy.GetColumnName(columnName));
+            return GetQuotedName(GetTableName(tableName, schema));
         }
 
         public override string GetQuotedName(string name)
@@ -147,16 +147,13 @@ namespace ServiceStack.OrmLite.MySql
             return new MySqlExpression<T>(this);
         }
 
-        public override bool DoesTableExist(IDbCommand dbCmd, string tableName)
+        public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
         {
             //Same as SQL Server apparently?
             var sql = ("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES " +
                 "WHERE TABLE_NAME = {0} AND " +
                 "TABLE_SCHEMA = {1}")
-                .SqlFmt(tableName, dbCmd.Connection.Database);
-
-            //if (!string.IsNullOrEmpty(schemaName))
-            //    sql += " AND TABLE_SCHEMA = {0}".SqlFmt(schemaName);
+                .SqlFmt(GetTableName(tableName, schema), dbCmd.Connection.Database);
 
             dbCmd.CommandText = sql;
             var result = dbCmd.LongScalar();

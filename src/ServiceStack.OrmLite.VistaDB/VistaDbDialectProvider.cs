@@ -98,7 +98,7 @@ namespace ServiceStack.OrmLite.VistaDB
 
         public override string ToCreateTableStatement(Type tableType)
         {
-            var modelDefinition = GetModelDefinition(tableType);
+            var modelDefinition = OrmLiteUtils.GetModelDefinition(tableType);
             var quotedTableName = this.GetQuotedTableName(modelDefinition);
 
             var columns = new StringBuilder();
@@ -132,7 +132,7 @@ namespace ServiceStack.OrmLite.VistaDB
                 }
                 else if (fd.ForeignKey != null)
                 {
-                    var foreignModelDefinition = GetModelDefinition(fd.ForeignKey.ReferenceType);
+                    var foreignModelDefinition = OrmLiteUtils.GetModelDefinition(fd.ForeignKey.ReferenceType);
                     constraints.AppendFormat("ALTER TABLE {0} ADD CONSTRAINT {1} FOREIGN KEY ({2}) REFERENCES {3} ({4}){5}{6};\n",
                         quotedTableName,
 				        this.GetQuotedName(fd.ForeignKey.GetForeignKeyName(modelDefinition, foreignModelDefinition, this.NamingStrategy, fd)),
@@ -320,7 +320,7 @@ namespace ServiceStack.OrmLite.VistaDB
             return new VistaDbExpression<T>(this);
         }
 
-        public override bool DoesTableExist(IDbCommand dbCmd, string tableName)
+        public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
         {
             dbCmd.CommandText = "SELECT COUNT(*) FROM [database schema] WHERE typeid = 1 AND name = {0}"
                 .SqlFmt(tableName);
@@ -359,7 +359,7 @@ namespace ServiceStack.OrmLite.VistaDB
                 {
                     var foreignKeyName = fieldDef.ForeignKey.GetForeignKeyName(
                         modelDef,
-                        GetModelDefinition(fieldDef.ForeignKey.ReferenceType),
+                        OrmLiteUtils.GetModelDefinition(fieldDef.ForeignKey.ReferenceType),
                         NamingStrategy,
                         fieldDef);
 

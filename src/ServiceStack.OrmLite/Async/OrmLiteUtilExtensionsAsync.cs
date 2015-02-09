@@ -21,31 +21,31 @@ namespace ServiceStack.OrmLite
         public static Task<T> ConvertToAsync<T>(this IDataReader dataReader, IOrmLiteDialectProvider dialectProvider, CancellationToken token)
         {
             var fieldDefs = ModelDefinition<T>.Definition.AllFieldDefinitionsArray;
-            using (dataReader)
+            return dialectProvider.ReaderRead(dataReader, () =>
             {
-                return OrmLiteConfig.DialectProvider.ReaderRead(dataReader, () =>
-                {
-                    var row = CreateInstance<T>();
-                    var indexCache = dataReader.GetIndexFieldsCache(ModelDefinition<T>.Definition);
-                    row.PopulateWithSqlReader(dialectProvider, dataReader, fieldDefs, indexCache);
-                    return row;
-                }, token);
-            }
+                var row = CreateInstance<T>();
+                var indexCache = dataReader.GetIndexFieldsCache(ModelDefinition<T>.Definition);
+                row.PopulateWithSqlReader(dialectProvider, dataReader, fieldDefs, indexCache);
+                return row;
+            }, token).Then(t => { 
+                dataReader.Dispose();
+                return t;
+            });
         }
 
         public static Task<List<T>> ConvertToListAsync<T>(this IDataReader dataReader, IOrmLiteDialectProvider dialectProvider, CancellationToken token)
         {
             var fieldDefs = ModelDefinition<T>.Definition.AllFieldDefinitionsArray;
-            using (dataReader)
+            var indexCache = dataReader.GetIndexFieldsCache(ModelDefinition<T>.Definition);
+            return dialectProvider.ReaderEach(dataReader, () =>
             {
-                var indexCache = dataReader.GetIndexFieldsCache(ModelDefinition<T>.Definition);
-                return OrmLiteConfig.DialectProvider.ReaderEach(dataReader, () =>
-                {
-                    var row = CreateInstance<T>();
-                    row.PopulateWithSqlReader(dialectProvider, dataReader, fieldDefs, indexCache);
-                    return row;
-                }, token);
-            }
+                var row = CreateInstance<T>();
+                row.PopulateWithSqlReader(dialectProvider, dataReader, fieldDefs, indexCache);
+                return row;
+            }, token).Then(t => {
+                dataReader.Dispose();
+                return t;
+            });
         }
 
         public static Task<object> ConvertToAsync(this IDataReader dataReader, IOrmLiteDialectProvider dialectProvider, Type type, CancellationToken token)
@@ -53,16 +53,17 @@ namespace ServiceStack.OrmLite
             var modelDef = type.GetModelDefinition();
             var fieldDefs = modelDef.AllFieldDefinitionsArray;
 
-            using (dataReader)
+            return dialectProvider.ReaderRead(dataReader, () =>
             {
-                return OrmLiteConfig.DialectProvider.ReaderRead(dataReader, () =>
-                {
-                    var row = type.CreateInstance();
-                    var indexCache = dataReader.GetIndexFieldsCache(modelDef);
-                    row.PopulateWithSqlReader(dialectProvider, dataReader, fieldDefs, indexCache);
-                    return row;
-                }, token);
-            }
+                var row = type.CreateInstance();
+                var indexCache = dataReader.GetIndexFieldsCache(modelDef);
+                row.PopulateWithSqlReader(dialectProvider, dataReader, fieldDefs, indexCache);
+                return row;
+            }, token).Then(t =>
+            {
+                dataReader.Dispose();
+                return t;
+            });
         }
 
         public static Task<IList> ConvertToListAsync(this IDataReader dataReader, IOrmLiteDialectProvider dialectProvider, Type type, CancellationToken token)
@@ -70,21 +71,20 @@ namespace ServiceStack.OrmLite
             var modelDef = type.GetModelDefinition();
             var fieldDefs = modelDef.AllFieldDefinitionsArray;
 
-            using (dataReader)
+            var indexCache = dataReader.GetIndexFieldsCache(modelDef);
+            return dialectProvider.ReaderEach(dataReader, () =>
             {
-                var indexCache = dataReader.GetIndexFieldsCache(modelDef);
-                return OrmLiteConfig.DialectProvider.ReaderEach(dataReader, () =>
-                {
-                    var row = type.CreateInstance();
-                    row.PopulateWithSqlReader(dialectProvider, dataReader, fieldDefs, indexCache);
-                    return row;
-                }, token)
-                .Then(x => {
-                    var to = (IList)typeof(List<>).MakeGenericType(type).CreateInstance();
-                    x.Each(o => to.Add(o));
-                    return to;
-                });
-            }
+                var row = type.CreateInstance();
+                row.PopulateWithSqlReader(dialectProvider, dataReader, fieldDefs, indexCache);
+                return row;
+            }, token)
+            .Then(x =>
+            {
+                dataReader.Dispose();
+                var to = (IList)typeof(List<>).MakeGenericType(type).CreateInstance();
+                x.Each(o => to.Add(o));
+                return to;
+            });
         }
     }
 }

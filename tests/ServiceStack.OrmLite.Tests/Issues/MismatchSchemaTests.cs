@@ -1,8 +1,6 @@
 ﻿using System.Linq;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.OrmLite.SqlServer;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
@@ -76,13 +74,11 @@ namespace ServiceStack.OrmLite.Tests.Issues
         [Test]
         public void Can_change_schema_at_runtime()
         {
-            if (Dialect == Dialect.MySql)
-                return; //No custom schema support 
-
             using (var captured = new CaptureSqlFilter())
             using (var db = OpenDbConnection())
             {
-                var modelDef = SqlServerOrmLiteDialectProvider.GetModelDefinition(typeof(Poco));
+                var modelDef = OrmLiteUtils.GetModelDefinition(typeof(Poco));
+                
                 db.SingleById<Poco>(1);
 
                 Assert.That(captured.SqlStatements.Last(), Is.StringContaining("Schema1"));

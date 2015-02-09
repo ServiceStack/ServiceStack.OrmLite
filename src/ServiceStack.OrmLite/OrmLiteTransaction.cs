@@ -3,25 +3,25 @@ using System.Data;
 
 namespace ServiceStack.OrmLite
 {
-    public class OrmLiteTransaction : IDbTransaction
+    public class OrmLiteTransaction : IDbTransaction, IHasDbTransaction
     {
-        private readonly IDbTransaction trans;
+        public IDbTransaction Transaction { get; set; }
         private readonly IDbConnection db;
 
-        public OrmLiteTransaction(IDbConnection db, IDbTransaction trans)
+        public OrmLiteTransaction(IDbConnection db, IDbTransaction transaction)
         {
             this.db = db;
-            this.trans = trans;
+            this.Transaction = transaction;
 
             //If OrmLite managed connection assign to connection, otherwise use OrmLiteContext
             var ormLiteConn = this.db as IHasDbTransaction;
             if (ormLiteConn != null)
             {
-                ormLiteConn.Transaction = this.trans = trans;
+                ormLiteConn.Transaction = this.Transaction = transaction;
             }
             else
             {
-                OrmLiteContext.TSTransaction = this.trans = trans;
+                OrmLiteContext.TSTransaction = this.Transaction = transaction;
             }
         }
 
@@ -29,7 +29,7 @@ namespace ServiceStack.OrmLite
         {
             try
             {
-                trans.Dispose();
+                Transaction.Dispose();
             }
             finally
             {
@@ -47,22 +47,22 @@ namespace ServiceStack.OrmLite
 
         public void Commit()
         {
-            trans.Commit();
+            Transaction.Commit();
         }
 
         public void Rollback()
         {
-            trans.Rollback();
+            Transaction.Rollback();
         }
 
         public IDbConnection Connection
         {
-            get { return trans.Connection; }
+            get { return Transaction.Connection; }
         }
 
         public IsolationLevel IsolationLevel
         {
-            get { return trans.IsolationLevel; }
+            get { return Transaction.IsolationLevel; }
         }
     }
 }

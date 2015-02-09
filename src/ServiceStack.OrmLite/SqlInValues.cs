@@ -24,7 +24,7 @@ namespace ServiceStack.OrmLite
             if (Count == 0)
                 return "NULL";
 
-            return OrmLiteUtilExtensions.SqlJoin(values, dialectProvider);
+            return OrmLiteUtils.SqlJoin(values, dialectProvider);
         }
     }
 }

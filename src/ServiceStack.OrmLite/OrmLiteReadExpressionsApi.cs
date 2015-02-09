@@ -10,28 +10,39 @@ namespace ServiceStack.OrmLite
     {
         public static T Exec<T>(this IDbConnection dbConn, Func<IDbCommand, T> filter)
         {
-            return OrmLiteConfig.ExecFilter.Exec(dbConn, filter);
+            return dbConn.GetExecFilter().Exec(dbConn, filter);
         }
 
         public static void Exec(this IDbConnection dbConn, Action<IDbCommand> filter)
         {
-            OrmLiteConfig.ExecFilter.Exec(dbConn, filter);
+            dbConn.GetExecFilter().Exec(dbConn, filter);
         }
 
         public static Task<T> Exec<T>(this IDbConnection dbConn, Func<IDbCommand, Task<T>> filter)
         {
-            return OrmLiteConfig.ExecFilter.Exec(dbConn, filter);
+            return dbConn.GetExecFilter().Exec(dbConn, filter);
         }
 
         public static Task Exec(this IDbConnection dbConn, Func<IDbCommand, Task> filter)
         {
-            return OrmLiteConfig.ExecFilter.Exec(dbConn, filter);
+            return dbConn.GetExecFilter().Exec(dbConn, filter);
         }
 
         public static IEnumerable<T> ExecLazy<T>(this IDbConnection dbConn, Func<IDbCommand, IEnumerable<T>> filter)
         {
-            return OrmLiteConfig.ExecFilter.ExecLazy(dbConn, filter);
+            return dbConn.GetExecFilter().ExecLazy(dbConn, filter);
         }
+
+        public static IDbCommand Exec(this IDbConnection dbConn, Func<IDbCommand, IDbCommand> filter)
+        {
+            return dbConn.GetExecFilter().Exec(dbConn, filter);
+        }
+
+        public static Task<IDbCommand> Exec(this IDbConnection dbConn, Func<IDbCommand, Task<IDbCommand>> filter)
+        {
+            return dbConn.GetExecFilter().Exec(dbConn, filter);
+        }
+
 
         /// <summary>
         /// Create a new SqlExpression builder allowing typed LINQ-like queries.
@@ -39,7 +50,7 @@ namespace ServiceStack.OrmLite
         [Obsolete("Use From<T>")]
         public static SqlExpression<T> SqlExpression<T>(this IDbConnection dbConn)
         {
-            return OrmLiteConfig.ExecFilter.SqlExpression<T>(dbConn);
+            return dbConn.GetExecFilter().SqlExpression<T>(dbConn);
         }
 
         /// <summary>
@@ -48,12 +59,12 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static SqlExpression<T> From<T>(this IDbConnection dbConn)
         {
-            return OrmLiteConfig.ExecFilter.SqlExpression<T>(dbConn);
+            return dbConn.GetExecFilter().SqlExpression<T>(dbConn);
         }
 
         public static SqlExpression<T> From<T, JoinWith>(this IDbConnection dbConn, Expression<Func<T, JoinWith, bool>> joinExpr=null)
         {
-            var sql = OrmLiteConfig.ExecFilter.SqlExpression<T>(dbConn);
+            var sql = dbConn.GetExecFilter().SqlExpression<T>(dbConn);
             sql.Join<T,JoinWith>(joinExpr);
             return sql;
         }
@@ -63,7 +74,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static SqlExpression<T> From<T>(this IDbConnection dbConn, string fromExpression)
         {
-            var expr = OrmLiteConfig.ExecFilter.SqlExpression<T>(dbConn);
+            var expr = dbConn.GetExecFilter().SqlExpression<T>(dbConn);
             expr.From(fromExpression);
             return expr;
         }
@@ -82,6 +93,14 @@ namespace ServiceStack.OrmLite
         public static IDbTransaction OpenTransaction(this IDbConnection dbConn, IsolationLevel isolationLevel)
         {
             return new OrmLiteTransaction(dbConn, dbConn.BeginTransaction(isolationLevel));
+        }
+
+        /// <summary>
+        /// Create a managed OrmLite IDbCommand
+        /// </summary>
+        public static IDbCommand OpenCommand(this IDbConnection dbConn)
+        {
+            return dbConn.GetExecFilter().CreateCommand(dbConn);
         }
 
         /// <summary>
@@ -235,35 +254,35 @@ namespace ServiceStack.OrmLite
         /// Returns results with references from using a LINQ Expression. E.g:
         /// <para>db.LoadSelect&lt;Person&gt;(x =&gt; x.Age &gt; 40)</para>
         /// </summary>
-        public static List<T> LoadSelect<T>(this IDbConnection dbConn, Expression<Func<T, bool>> predicate)
+        public static List<T> LoadSelect<T>(this IDbConnection dbConn, Expression<Func<T, bool>> predicate, string[] include = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.LoadSelect(predicate));
+            return dbConn.Exec(dbCmd => dbCmd.LoadSelect(predicate, include));
         }
 
         /// <summary>
         /// Returns results with references from using an SqlExpression lambda. E.g:
         /// <para>db.LoadSelect&lt;Person&gt;(q =&gt; q.Where(x =&gt; x.Age &gt; 40))</para>
         /// </summary>
-        public static List<T> LoadSelect<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression)
+        public static List<T> LoadSelect<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression, string[] include = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.LoadSelect(expression));
+            return dbConn.Exec(dbCmd => dbCmd.LoadSelect(expression, include));
         }
 
         /// <summary>
         /// Returns results with references from using an SqlExpression lambda. E.g:
         /// <para>db.LoadSelect(db.From&lt;Person&gt;().Where(x =&gt; x.Age &gt; 40))</para>
         /// </summary>
-        public static List<T> LoadSelect<T>(this IDbConnection dbConn, SqlExpression<T> expression = null)
+        public static List<T> LoadSelect<T>(this IDbConnection dbConn, SqlExpression<T> expression = null, string[] include = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.LoadSelect(expression));
+            return dbConn.Exec(dbCmd => dbCmd.LoadSelect(expression, include));
         }
 
         /// <summary>
         /// Project results with references from a number of joined tables into a different model
         /// </summary>
-        public static List<Into> LoadSelect<Into, From>(this IDbConnection dbConn, SqlExpression<From> expression)
+        public static List<Into> LoadSelect<Into, From>(this IDbConnection dbConn, SqlExpression<From> expression, string[] include = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.LoadSelect<Into, From>(expression));
+            return dbConn.Exec(dbCmd => dbCmd.LoadSelect<Into, From>(expression, include));
         }
     }
 }

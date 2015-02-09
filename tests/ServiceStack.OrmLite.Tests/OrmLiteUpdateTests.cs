@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
+using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.Tests.Shared;
 using ServiceStack.Text;
 
@@ -159,5 +160,49 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(person.FirstName, Is.EqualTo("JJ"));
             Assert.That(person.Age, Is.EqualTo(12));
         }
+
+        [Test]
+        public void Can_Update_Only_Blobs()
+        {
+            db.DropAndCreateTable<SomeBlobs>();
+
+            db.Insert(new SomeBlobs {FirstName = "Bro", LastName = "Last"});
+            db.Insert(new SomeBlobs { FirstName = "Sis", LastName = "Last" });
+
+            var existing = db.Select<SomeBlobs>(p => p.FirstName == "Bro").First();
+
+            const string blob1String = "This is going into Blob1";
+            var blob1Array = blob1String.ToArray();
+            var blob1Bytes = blob1Array.Length * 2;
+            existing.Blob1 = new byte[blob1Bytes];
+            Buffer.BlockCopy(blob1Array, 0, existing.Blob1, 0, blob1Bytes);
+
+            const string blob2String = "And this is going into Blob2";
+            var blob2Array = blob2String.ToArray();
+            var blob2Bytes = blob2Array.Length * 2;
+            existing.Blob2 = new byte[blob2Bytes];
+            Buffer.BlockCopy(blob2Array, 0, existing.Blob2, 0, blob2Bytes);
+
+            db.UpdateOnly(existing, p => new {p.Blob1, p.Blob2, p.FirstName}, r => r.LastName == "Last" && r.FirstName == "Bro");
+
+            var verify = db.Select<SomeBlobs>(p => p.FirstName == "Bro").First();
+
+            var verifyBlob1 = new char[verify.Blob1.Length / 2];
+            Buffer.BlockCopy(verify.Blob1, 0, verifyBlob1, 0, verify.Blob1.Length);
+
+            Assert.That(existing.Blob1, Is.EquivalentTo(verify.Blob1));
+            Assert.That(existing.Blob2, Is.EquivalentTo(verify.Blob2));
+        }
+    }
+
+    [CompositeIndex("FirstName", "LastName")]
+    public class SomeBlobs
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public byte[] Blob1 { get; set; }
+        public byte[] Blob2 { get; set; }
     }
 }
