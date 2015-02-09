@@ -774,7 +774,12 @@ namespace ServiceStack.OrmLite.Oracle
 
             sql.Append(isNullable ? " NULL" : " NOT NULL");
 
-            return sql.ToString();
+            var definition = sql.ToString();
+
+            if (fieldType == typeof(Decimal))
+                return base.ReplaceDecimalColumnDefinition(definition, fieldLength, scale);
+
+            return definition;
         }
 
 
