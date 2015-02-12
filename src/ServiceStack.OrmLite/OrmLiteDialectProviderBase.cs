@@ -340,6 +340,23 @@ namespace ServiceStack.OrmLite
                 : MaxStringColumnDefinition;
         }
 
+        protected string ReplaceDecimalColumnDefinition(string definition, int? fieldLength, int? scale)
+        {
+            if (fieldLength == null && scale == null)
+                return definition;
+
+            if (fieldLength != DefaultDecimalPrecision || scale != DefaultDecimalScale)
+            {
+                var customDecimal = string.Format("DECIMAL({0},{1})",
+                    fieldLength.GetValueOrDefault(DefaultDecimalPrecision),
+                    scale.GetValueOrDefault(DefaultDecimalScale));
+
+                return definition.Replace(DecimalColumnDefinition, customDecimal);
+            }
+
+            return definition;
+        }
+
         public virtual string GetColumnDefinition(string fieldName, Type fieldType,
             bool isPrimaryKey, bool autoIncrement, bool isNullable, bool isRowVersion,
             int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)

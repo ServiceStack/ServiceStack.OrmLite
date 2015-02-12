@@ -195,30 +195,33 @@ namespace ServiceStack.OrmLite.MySql
             return sql.ToString();
         }
 
-        public string GetColumnDefinition(FieldDefinition fieldDefinition)
+        public string GetColumnDefinition(FieldDefinition fieldDef)
         {
-            if (fieldDefinition.PropertyInfo.FirstAttribute<TextAttribute>() != null)
+            if (fieldDef.PropertyInfo.FirstAttribute<TextAttribute>() != null)
             {
                 var sql = new StringBuilder();
-                sql.AppendFormat("{0} {1}", GetQuotedColumnName(fieldDefinition.FieldName), TextColumnDefinition);
-                sql.Append(fieldDefinition.IsNullable ? " NULL" : " NOT NULL");
+                sql.AppendFormat("{0} {1}", GetQuotedColumnName(fieldDef.FieldName), TextColumnDefinition);
+                sql.Append(fieldDef.IsNullable ? " NULL" : " NOT NULL");
                 return sql.ToString();
             }
 
             var ret = base.GetColumnDefinition(
-                fieldDefinition.FieldName,
-                fieldDefinition.ColumnType,
-                fieldDefinition.IsPrimaryKey,
-                fieldDefinition.AutoIncrement,
-                fieldDefinition.IsNullable,
-                fieldDefinition.IsRowVersion,
-                fieldDefinition.FieldLength,
+                fieldDef.FieldName,
+                fieldDef.ColumnType,
+                fieldDef.IsPrimaryKey,
+                fieldDef.AutoIncrement,
+                fieldDef.IsNullable,
+                fieldDef.IsRowVersion,
+                fieldDef.FieldLength,
                 null,
-                fieldDefinition.DefaultValue,
-                fieldDefinition.CustomFieldDefinition);
+                fieldDef.DefaultValue,
+                fieldDef.CustomFieldDefinition);
 
-            if (fieldDefinition.IsRowVersion)
+            if (fieldDef.IsRowVersion)
                 return ret + " DEFAULT 1";
+
+            if (fieldDef.ColumnType == typeof(Decimal))
+                return base.ReplaceDecimalColumnDefinition(ret, fieldDef.FieldLength, fieldDef.Scale);
 
             return ret;
         }

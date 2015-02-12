@@ -123,7 +123,12 @@ namespace ServiceStack.OrmLite.PostgreSQL
                 sql.AppendFormat(DefaultValueFormat, defaultValue);
             }
 
-            return sql.ToString();
+            var definition = sql.ToString();
+
+            if (fieldType == typeof(Decimal))
+                return base.ReplaceDecimalColumnDefinition(definition, fieldLength, scale);
+
+            return definition;
         }
 
         //Convert xmin into an integer so it can be used in comparisons

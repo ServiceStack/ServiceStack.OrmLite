@@ -272,6 +272,9 @@ namespace ServiceStack.OrmLite.Sqlite
             if (isRowVersion)
                 return ret + " DEFAULT 1";
 
+            if (fieldType == typeof(Decimal))
+                return base.ReplaceDecimalColumnDefinition(ret, fieldLength, scale);
+
             return ret;
         }
     }
