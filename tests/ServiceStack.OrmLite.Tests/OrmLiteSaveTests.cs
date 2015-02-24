@@ -162,7 +162,7 @@ namespace ServiceStack.OrmLite.Tests
                 db.DropAndCreateTable<Rockstar>();
                 db.SaveAll(Rockstar.Rockstars);
 
-                var updatedRockstars = new []
+                var updatedRockstars = new[]
                 {
                     new Rockstar(6, "Jimi", "Hendrix", 27),
                     new Rockstar(5, "Janis", "Joplin", 27),
@@ -178,13 +178,13 @@ namespace ServiceStack.OrmLite.Tests
         public class Rockstar
         {
             public static Rockstar[] Rockstars = {
-            new Rockstar(1, "Jimi", "Hendrix", 27), 
-            new Rockstar(2, "Janis", "Joplin", 27), 
-            new Rockstar(3, "Jim", "Morrisson", 27), 
-            new Rockstar(4, "Kurt", "Cobain", 27),              
-            new Rockstar(5, "Elvis", "Presley", 42), 
-            new Rockstar(6, "Michael", "Jackson", 50), 
-        };
+                new Rockstar(1, "Jimi", "Hendrix", 27), 
+                new Rockstar(2, "Janis", "Joplin", 27), 
+                new Rockstar(3, "Jim", "Morrisson", 27), 
+                new Rockstar(4, "Kurt", "Cobain", 27),              
+                new Rockstar(5, "Elvis", "Presley", 42), 
+                new Rockstar(6, "Michael", "Jackson", 50), 
+            };
 
             public long RockstarId { get; set; }
             public string FirstName { get; set; }
