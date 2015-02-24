@@ -453,6 +453,26 @@ var track = db.SingleById<Track>(1);
 var tracks = db.SelectByIds<Track>(new[]{ 1,2,3 });
 ```
 
+### Lazy API's
+
+API's ending with `Lazy` yield an IEnumerable sequence letting you stream the results without having to map the entire resultset into a disconnected List of POCO's first, e.g:
+
+```csharp
+var lazyQuery = db.SelectLazy<Person>("Age > @age", new { age = 40 });
+// Iterate over a lazy sequence 
+foreach (var person in lazyQuery) {
+   //...  
+}
+```
+
+#### Other examples
+
+```csharp
+var topVIPs = db.WhereLazy<Person>(new { Age = 27 }).Where(p => IsVip(p)).Take(5)
+
+var topVIPs = db.SelectLazyFmt<Person>("Age > {0}", 40).Where(p => IsVip(p)).Take(5)
+```
+
 ### Other Notes
 
  - All **Insert**, **Update**, and **Delete** methods take multiple params, while `InsertAll`, `UpdateAll` and `DeleteAll` take IEnumerables.
