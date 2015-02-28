@@ -24,4 +24,30 @@ namespace ServiceStack.OrmLite
                 : base.GetColumnName(ColumnAliases.TryGetValue(name, out alias) ? alias : name);
         }
     }
+
+    public class LowercaseUnderscoreNamingStrategy : OrmLiteNamingStrategyBase
+    {
+        public override string GetTableName(string name)
+        {
+            return name.ToLowercaseUnderscore();
+        }
+
+        public override string GetColumnName(string name)
+        {
+            return name.ToLowercaseUnderscore();
+        }
+    }
+
+    public class UpperCaseNamingStrategy : OrmLiteNamingStrategyBase
+    {
+        public override string GetTableName(string name)
+        {
+            return name.ToUpper();
+        }
+
+        public override string GetColumnName(string name)
+        {
+            return name.ToUpper();
+        }
+    }
 }
