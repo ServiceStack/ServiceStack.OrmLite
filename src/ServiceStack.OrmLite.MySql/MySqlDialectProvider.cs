@@ -228,19 +228,11 @@ namespace ServiceStack.OrmLite.MySql
 
         protected MySqlConnection Unwrap(IDbConnection db)
         {
-            var hasDb = db as IHasDbConnection;
-            if (hasDb != null)
-                return (MySqlConnection)hasDb.DbConnection;
-
             return (MySqlConnection)db.ToDbConnection();
         }
 
         protected MySqlCommand Unwrap(IDbCommand cmd)
         {
-            var hasCmd = cmd as IHasDbCommand;
-            if (hasCmd != null)
-                return (MySqlCommand)hasCmd.DbCommand;
-
             return (MySqlCommand)cmd.ToDbCommand();
         }
 

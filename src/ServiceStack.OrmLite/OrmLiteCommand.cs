@@ -1,12 +1,8 @@
 using System.Data;
+using ServiceStack.Data;
 
 namespace ServiceStack.OrmLite
 {
-    public interface IHasDbCommand
-    {
-        IDbCommand DbCommand { get; }
-    }
-
     public class OrmLiteCommand : IDbCommand, IHasDbCommand
     {
         private OrmLiteConnection dbConn;
