@@ -344,6 +344,18 @@ namespace ServiceStack.OrmLite.PostgreSQL
                 ((NpgsqlParameter) p).NpgsqlDbType = NpgsqlDbType.Json;
                 return;
             }
+            if (fieldDef.CustomFieldDefinition == "jsonb")
+            {
+                p.ParameterName = this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName));
+                ((NpgsqlParameter)p).NpgsqlDbType = NpgsqlDbType.Jsonb;
+                return;
+            }
+            if (fieldDef.CustomFieldDefinition == "hstore")
+            {
+                p.ParameterName = this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName));
+                ((NpgsqlParameter)p).NpgsqlDbType = NpgsqlDbType.Hstore;
+                return;
+            }
             if (fieldDef.CustomFieldDefinition == "text[]")
             {
                 p.ParameterName = this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName));
