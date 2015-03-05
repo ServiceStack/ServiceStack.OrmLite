@@ -465,11 +465,19 @@ namespace ServiceStack.OrmLite.SqlServer
 
         protected SqlConnection Unwrap(IDbConnection db)
         {
+            var hasDb = db as IHasDbConnection;
+            if (hasDb != null)
+                return (SqlConnection)hasDb.DbConnection;
+ 
             return (SqlConnection)db.ToDbConnection();
         }
 
         protected SqlCommand Unwrap(IDbCommand cmd)
         {
+            var hasCmd = cmd as IHasDbCommand;
+            if (hasCmd != null)
+                return (SqlCommand)hasCmd.DbCommand;
+
             return (SqlCommand) cmd.ToDbCommand();
         }
 
