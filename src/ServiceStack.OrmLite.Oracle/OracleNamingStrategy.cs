@@ -41,8 +41,8 @@ namespace ServiceStack.OrmLite.Oracle
         public override string GetTableName(ModelDefinition modelDef)
         {
             return modelDef.IsInSchema
-                       ? ApplyNameRestrictions(modelDef.Schema
-                            + "_" + GetTableName(modelDef.ModelName))
+                       ? ApplyNameRestrictions(modelDef.Schema)
+                            + "." + ApplyNameRestrictions(GetTableName(modelDef.ModelName))
                        : GetTableName(modelDef.ModelName);
         }
 
