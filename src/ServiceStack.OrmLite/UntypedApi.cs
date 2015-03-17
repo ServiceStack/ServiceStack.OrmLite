@@ -29,6 +29,13 @@ namespace ServiceStack.OrmLite
             unTypedApi.DbCmd = dbCmd;
             return unTypedApi;
         }
+
+        public static IUntypedApi CreateTypedApi(this Type forType)
+        {
+            var genericType = untypedApiMap.GetOrAdd(forType, key => typeof(UntypedApi<>).MakeGenericType(key));
+            var unTypedApi = genericType.CreateInstance<IUntypedApi>();
+            return unTypedApi;
+        }
     }
 
     public class UntypedApi<T> : IUntypedApi

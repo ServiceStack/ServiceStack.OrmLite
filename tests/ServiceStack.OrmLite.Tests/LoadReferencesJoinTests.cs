@@ -552,6 +552,29 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        public void Can_load_list_of_references_using_subselect()
+        {
+            AddCustomersWithOrders();
+
+            var customers = db.Select<Customer>(q =>
+                q.Join<Order>()
+                 .Where<Order>(o => o.Qty == 1)
+                 .SelectDistinct());
+
+            var orders = db.Select<Order>(o => o.Qty == 1);
+
+            customers.Merge(orders);
+
+            customers.PrintDump();
+
+            Assert.That(customers.Count, Is.EqualTo(2));
+            Assert.That(customers[0].Orders.Count, Is.EqualTo(3));
+            Assert.That(customers[0].Orders.All(x => x.Qty == 1));
+            Assert.That(customers[1].Orders.Count, Is.EqualTo(1));
+            Assert.That(customers[1].Orders.All(x => x.Qty == 1));
+        }
+
+        [Test]
         public void Can_join_on_references_attribute()
         {
             // Drop tables in order that FK allows

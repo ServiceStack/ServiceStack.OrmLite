@@ -132,6 +132,12 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
+        public virtual SqlExpression<T> SelectDistinct()
+        {
+            selectDistinct = true;
+            return this;
+        }
+
         public virtual SqlExpression<T> From(string tables)
         {
             if (tables != null)
