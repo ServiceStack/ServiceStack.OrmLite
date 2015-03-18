@@ -99,6 +99,9 @@ namespace ServiceStack.OrmLite
                 if (dbTrans != null)
                     dbTrans.Dispose();
 
+                if (t.IsFaulted)
+                    throw t.Exception;
+
                 return count;
             });
         }
@@ -291,6 +294,9 @@ namespace ServiceStack.OrmLite
 
                 if (dbTrans != null)
                     dbTrans.Dispose();
+
+                if (t.IsFaulted)
+                    throw t.Exception;
             });
         }
 
