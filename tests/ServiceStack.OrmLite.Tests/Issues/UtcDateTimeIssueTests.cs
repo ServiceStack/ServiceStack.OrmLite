@@ -39,6 +39,39 @@ namespace ServiceStack.OrmLite.Tests.Issues
 
                 //db.Select<TestDate>().PrintDump();
             }
-        }         
+        }
+
+        [Test]
+        public void Can_Select_DateTime_with_SelectFmt()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<TestDate>();
+
+                db.Insert(new TestDate
+                {
+                    Name = "1999",
+                    ExpiryDate = new DateTime(1999, 01, 01)
+                });
+                db.Insert(new TestDate
+                {
+                    Name = "2000",
+                    ExpiryDate = new DateTime(2000, 01, 01)
+                });
+                db.Insert(new TestDate
+                {
+                    Name = "Test name",
+                    ExpiryDate = DateTime.UtcNow.AddHours(1)
+                });
+
+                var result = db.SelectFmt<TestDate>("ExpiryDate > {0}", DateTime.UtcNow);
+                db.GetLastSql().Print();
+                Assert.That(result.Count, Is.EqualTo(1));
+
+                result = db.SelectFmt<TestDate>("ExpiryDate > {0}", new DateTime(1999,01,02));
+                db.GetLastSql().Print();
+                Assert.That(result.Count, Is.EqualTo(2));
+            }
+        }
     }
 }
