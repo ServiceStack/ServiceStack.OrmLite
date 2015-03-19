@@ -124,7 +124,39 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
+        public virtual SqlExpression<T> Select<Table1, Table2>(Expression<Func<Table1, Table2, object>> fields)
+        {
+            sep = string.Empty;
+            useFieldName = true;
+            BuildSelectExpression(Visit(fields).ToString(), false);
+            return this;
+        }
+
+        public virtual SqlExpression<T> Select<Table1, Table2, Table3>(Expression<Func<Table1, Table2, Table3, object>> fields)
+        {
+            sep = string.Empty;
+            useFieldName = true;
+            BuildSelectExpression(Visit(fields).ToString(), false);
+            return this;
+        }
+
         public virtual SqlExpression<T> SelectDistinct<TKey>(Expression<Func<T, TKey>> fields)
+        {
+            sep = string.Empty;
+            useFieldName = true;
+            BuildSelectExpression(Visit(fields).ToString(), true);
+            return this;
+        }
+
+        public virtual SqlExpression<T> SelectDistinct<Table1, Table2>(Expression<Func<Table1, Table2, object>> fields)
+        {
+            sep = string.Empty;
+            useFieldName = true;
+            BuildSelectExpression(Visit(fields).ToString(), true);
+            return this;
+        }
+
+        public virtual SqlExpression<T> SelectDistinct<Table1, Table2, Table3>(Expression<Func<Table1, Table2, Table3, object>> fields)
         {
             sep = string.Empty;
             useFieldName = true;
