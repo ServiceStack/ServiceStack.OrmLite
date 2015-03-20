@@ -130,6 +130,7 @@
     <Compile Include="Expression\SelectExpressionTests.cs" />
     <Compile Include="Issues\ComplexJoinWithAlias.cs" />
     <Compile Include="Issues\CustomFieldTests.cs" />
+    <Compile Include="Issues\LoadSelectIssue.cs" />
     <Compile Include="Issues\UtcDateTimeIssueTests.cs" />
     <Compile Include="Issues\JoinsWithSchemas.cs" />
     <Compile Include="Issues\MappingFieldsFromStoredProcedureTests.cs" />
