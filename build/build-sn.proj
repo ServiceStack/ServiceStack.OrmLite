@@ -182,7 +182,7 @@
             Properties="Version=$(PackageVersion);Configuration=$(Configuration)" />
 
     <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.MySql.Signed/lib/net45" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.MySql.Signed/lib/net45')" />
-    <Copy SourceFiles="%(MySqlV45Files.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.MySql.Signed/lib/net45" />
+    <Copy SourceFiles="%(MySqlFilesV45.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.MySql.Signed/lib/net45" />
 
     <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.MySql.Signed/servicestack.ormlite.mysql.signed.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
         LogStandardErrorAsError="true" />
