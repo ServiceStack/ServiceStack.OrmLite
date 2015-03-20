@@ -176,16 +176,16 @@
     <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.MySql.Signed/lib/net40" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.MySql.Signed/lib/net40')" />
     <Copy SourceFiles="%(MySqlFiles.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.MySql.Signed/lib/net40" />
 
-      <!-- MySql .NET 4.5 -->
-      <MSBuild Projects="$(SrcDir)/ServiceStack.OrmLite.MySqlV45/ServiceStack.OrmLite.MySqlV45.Signed.csproj"
-               Targets="Build"
-               Properties="Version=$(PackageVersion);Configuration=$(Configuration)" />
+    <!-- MySql .NET 4.5 -->
+    <MSBuild Projects="$(SrcDir)/ServiceStack.OrmLite.MySqlV45/ServiceStack.OrmLite.MySqlV45.Signed.csproj"
+            Targets="Build"
+            Properties="Version=$(PackageVersion);Configuration=$(Configuration)" />
 
-      <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.MySql.Signed/lib/net45" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.MySql.Signed/lib/net45')" />
-      <Copy SourceFiles="%(MySqlV45.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.MySql.Signed/lib/net45" />
+    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.MySql.Signed/lib/net45" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.MySql.Signed/lib/net45')" />
+    <Copy SourceFiles="%(MySqlV45Files.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.MySql.Signed/lib/net45" />
 
-      <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.MySql.Signed/servicestack.ormlite.mysql.signed.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
-            LogStandardErrorAsError="true" />
+    <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.MySql.Signed/servicestack.ormlite.mysql.signed.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
+        LogStandardErrorAsError="true" />
 
   </Target>
 </Project>
