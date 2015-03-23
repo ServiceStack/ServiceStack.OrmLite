@@ -546,5 +546,58 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 Assert.That(result, Is.EquivalentTo(expected));
             }
         }
+
+        class JoinTest
+        {
+            public int Id { get; set; }
+        }
+
+        class JoinTestChild
+        {
+            public int Id { get; set; }
+
+            public int ParentId { get; set; }
+
+            public bool IsActive { get; set; }
+        }
+
+        [Test]
+        public void Issue_Bool_JoinTable_Expression()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<JoinTest>();
+                db.DropAndCreateTable<JoinTestChild>();
+
+                db.InsertAll(new[] {
+                    new JoinTest { Id = 1, },
+                    new JoinTest { Id = 2, }
+                });
+
+                db.InsertAll(new[] {
+                    new JoinTestChild
+                    {
+                        Id = 1,
+                        ParentId = 1,
+                        IsActive = true
+                    },
+                    new JoinTestChild
+                    {
+                        Id = 2,
+                        ParentId = 2,
+                        IsActive = false
+                    }
+                });
+
+                var q = db.From<JoinTestChild>();
+                q.Where(x => !x.IsActive);
+                Assert.That(db.Select(q).Count, Is.EqualTo(1));
+
+                var qSub = db.From<JoinTest>();
+                qSub.Join<JoinTestChild>((x, y) => x.Id == y.ParentId);
+                qSub.Where<JoinTestChild>(x => !x.IsActive); // This line is a bug!
+                Assert.That(db.Select(qSub).Count, Is.EqualTo(1));
+            }
+        }
     }
 }

@@ -1309,10 +1309,16 @@ namespace ServiceStack.OrmLite
         protected bool IsFieldName(object quotedExp)
         {
             var fieldExpr = quotedExp.ToString().StripTablePrefixes();
-            var fieldNames = modelDef.FieldDefinitions.Map(x =>
-                DialectProvider.GetQuotedColumnName(x.FieldName));
+            var unquotedExpr = fieldExpr.StripQuotes();
 
-            return fieldNames.Any(x => x == fieldExpr);
+            var isTableField = modelDef.FieldDefinitionsArray.Any(x => x.FieldName == unquotedExpr);
+            if (isTableField)
+                return true;
+
+            var isJoinedField = tableDefs.Any(t => t.FieldDefinitionsArray
+                .Any(x => x.FieldName == unquotedExpr));
+
+            return isJoinedField;
         }
 
         protected object GetTrueExpression()

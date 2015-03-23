@@ -172,7 +172,7 @@ namespace ServiceStack.OrmLite
             return (dialect ?? OrmLiteConfig.DialectProvider).GetQuotedTableName(tableName);
         }
 
-        public static string SqlTableRaw(this string tableName, IOrmLiteDialectProvider dialect=null)
+        public static string SqlTableRaw(this string tableName, IOrmLiteDialectProvider dialect = null)
         {
             return (dialect ?? OrmLiteConfig.DialectProvider).NamingStrategy.GetTableName(tableName);
         }
@@ -264,7 +264,7 @@ namespace ServiceStack.OrmLite
             return sb.ToString();
         }
 
-        public static SqlInValues SqlInValues<T>(this T[] values, IOrmLiteDialectProvider dialect=null)
+        public static SqlInValues SqlInValues<T>(this T[] values, IOrmLiteDialectProvider dialect = null)
         {
             return new SqlInValues(values, dialect);
         }
@@ -318,6 +318,13 @@ namespace ServiceStack.OrmLite
             return sb.ToString().Trim();
         }
 
+        public static char[] QuotedChars = new[] { '"', '`', '[', ']' };
+
+        public static string StripQuotes(this string quotedExpr)
+        {
+            return quotedExpr.Trim(QuotedChars);
+        }
+
         private const int NotFound = -1;
 
         public static ModelDefinition GetModelDefinition(Type modelType)
@@ -352,9 +359,9 @@ namespace ServiceStack.OrmLite
 
         public static List<Parent> Merge<Parent, Child>(this Parent parent, List<Child> children)
         {
-            return new List<Parent>{ parent}.Merge(children);
+            return new List<Parent> { parent }.Merge(children);
         }
-    
+
         public static List<Parent> Merge<Parent, Child>(this List<Parent> parents, List<Child> children)
         {
             var modelDef = ModelDefinition<Parent>.Definition;
@@ -397,7 +404,7 @@ namespace ServiceStack.OrmLite
             return parents;
         }
 
-        internal static void SetListChildResults<Parent>(List<Parent> parents, ModelDefinition modelDef, 
+        internal static void SetListChildResults<Parent>(List<Parent> parents, ModelDefinition modelDef,
             FieldDefinition fieldDef, Type refType, IList childResults, FieldDefinition refField)
         {
             var map = new Dictionary<object, List<object>>();
@@ -466,6 +473,6 @@ namespace ServiceStack.OrmLite
                 }
             }
         }
-        
+
     }
 }
