@@ -744,7 +744,10 @@ namespace ServiceStack.OrmLite
                 if (updateFields.Count > 0 && !updateFields.Contains(fieldDef.Name)) continue; // added
 
                 var value = fieldDef.GetValue(item);
-                if (excludeDefaults && (value == null || value.Equals(value.GetType().GetDefaultValue()))) continue; //GetDefaultValue?
+                if (excludeDefaults 
+                    && (value == null || value.Equals(value.GetType().GetDefaultValue()))
+                    && !(value is bool)) 
+                    continue;
 
                 fieldDef.GetQuotedValue(item, DialectProvider);
 
