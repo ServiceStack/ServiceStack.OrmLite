@@ -213,10 +213,16 @@ namespace ServiceStack.OrmLite.Tests
             {
                 db.DropAndCreateTable<PocoWithBool>();
 
-                db.Insert(new PocoWithBool { Id = 1, Bool = true });
-                db.UpdateNonDefaults(new PocoWithBool { Bool = false }, x => x.Id == 1);
+                db.Insert(new PocoWithBool { Id = 1, Bool = false });
                 var row = db.SingleById<PocoWithBool>(1);
                 Assert.That(row.Bool, Is.False);
+
+                db.UpdateNonDefaults(new PocoWithBool { Bool = true }, x => x.Id == 1);
+                row = db.SingleById<PocoWithBool>(1);
+                Assert.That(row.Bool, Is.True);
+
+                Assert.Throws<ArgumentException>(() => 
+                    db.UpdateNonDefaults(new PocoWithBool { Bool = false }, x => x.Id == 1));
             }
         }
 
@@ -228,9 +234,35 @@ namespace ServiceStack.OrmLite.Tests
                 db.DropAndCreateTable<PocoWithNullableBool>();
 
                 db.Insert(new PocoWithNullableBool { Id = 1, Bool = true });
-                db.UpdateNonDefaults(new PocoWithNullableBool { Bool = false }, x => x.Id == 1);
                 var row = db.SingleById<PocoWithNullableBool>(1);
+                Assert.That(row.Bool, Is.True);
+
+                db.UpdateNonDefaults(new PocoWithNullableBool { Bool = false }, x => x.Id == 1);
+                row = db.SingleById<PocoWithNullableBool>(1);
                 Assert.That(row.Bool, Is.False);
+            }
+        }
+
+        public class PocoWithNullableInt
+        {
+            public int Id { get; set; }
+            public int? Int { get; set; }
+        }
+
+        [Test]
+        public void Can_UpdateOnly_nullable_int_columns()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<PocoWithNullableInt>();
+
+                db.Insert(new PocoWithNullableInt { Id = 1, Int = 1 });
+                var row = db.SingleById<PocoWithNullableInt>(1);
+                Assert.That(row.Int, Is.EqualTo(1));
+                
+                db.UpdateNonDefaults(new PocoWithNullableInt { Int = 0 }, x => x.Id == 1);
+                row = db.SingleById<PocoWithNullableInt>(1);
+                Assert.That(row.Int, Is.EqualTo(0));
             }
         }
     }

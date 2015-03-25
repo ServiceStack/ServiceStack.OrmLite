@@ -744,9 +744,8 @@ namespace ServiceStack.OrmLite
                 if (updateFields.Count > 0 && !updateFields.Contains(fieldDef.Name)) continue; // added
 
                 var value = fieldDef.GetValue(item);
-                if (excludeDefaults 
-                    && (value == null || value.Equals(value.GetType().GetDefaultValue()))
-                    && !(value is bool)) 
+                if (excludeDefaults
+                    && (value == null || (!fieldDef.IsNullable && value.Equals(value.GetType().GetDefaultValue()))))
                     continue;
 
                 fieldDef.GetQuotedValue(item, DialectProvider);
@@ -759,6 +758,9 @@ namespace ServiceStack.OrmLite
                     .Append("=")
                     .Append(DialectProvider.GetQuotedValue(value, fieldDef.FieldType));
             }
+
+            if (setFields.Length == 0)
+                throw new ArgumentException("No non-null or non-default values were provided for type: " + typeof(T).Name);
 
             return string.Format("UPDATE {0} SET {1} {2}",
                 DialectProvider.GetQuotedTableName(modelDef), setFields, WhereExpression);
