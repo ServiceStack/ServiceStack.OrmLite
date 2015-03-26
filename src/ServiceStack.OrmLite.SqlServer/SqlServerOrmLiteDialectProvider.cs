@@ -409,6 +409,16 @@ namespace ServiceStack.OrmLite.SqlServer
             return ret;
         }
 
+        public override string ToRowCountStatement(string innerSql)
+        {
+            //Remove ORDER BY because SqlServer won't allow it in the subquery
+            var orderByPos = innerSql.LastIndexOf("ORDER BY ");
+            if (orderByPos > -1)
+                innerSql = innerSql.Substring(0, orderByPos);
+
+            return base.ToRowCountStatement(innerSql);
+        }
+
         //SELECT without RowNum and prefer aliases to be able to use in SELECT IN () Reference Queries
         public static string UseAliasesOrStripTablePrefixes(string selectExpression)
         {
