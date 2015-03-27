@@ -279,6 +279,29 @@ namespace ServiceStack.OrmLite.Tests.Expression
         }
 
         [Test]
+        public void Can_get_RowCount_if_expression_has_OrderBy()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<LetterFrequency>();
+
+                db.Insert(new LetterFrequency { Letter = "A" });
+                db.Insert(new LetterFrequency { Letter = "B" });
+                db.Insert(new LetterFrequency { Letter = "B" });
+
+                var query = db.From<LetterFrequency>()
+                    .Select(x => x.Letter)
+                    .OrderBy(x => x.Id);
+
+                var rowCount = db.RowCount(query);
+                Assert.That(rowCount, Is.EqualTo(3));
+
+                rowCount = db.Select(query).Count;
+                Assert.That(rowCount, Is.EqualTo(3));
+            }
+        }
+
+        [Test]
         public void Can_OrderBy_Fields_with_different_sort_directions()
         {
             using (var db = OpenDbConnection())

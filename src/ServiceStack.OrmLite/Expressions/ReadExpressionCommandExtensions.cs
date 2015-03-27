@@ -118,7 +118,9 @@ namespace ServiceStack.OrmLite
 
         internal static long RowCount<T>(this IDbCommand dbCmd, SqlExpression<T> expression)
         {
-            return dbCmd.Scalar<long>(dbCmd.GetDialectProvider().ToRowCountStatement(expression.ToSelectStatement()));
+            //ORDER BY throws when used in subselects in SQL Server. Removing OrderBy() clause since it doesn't impact results
+            var countExpr = expression.Clone().OrderBy(); 
+            return dbCmd.Scalar<long>(dbCmd.GetDialectProvider().ToRowCountStatement(countExpr.ToSelectStatement()));
         }
 
         internal static long RowCount(this IDbCommand dbCmd, string sql)
