@@ -80,6 +80,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="SqlExpressionTests.cs" />
+    <Compile Include="SqlServerProviderTestsAsync.cs" />
     <Compile Include="T4\OrmLite.Poco.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
