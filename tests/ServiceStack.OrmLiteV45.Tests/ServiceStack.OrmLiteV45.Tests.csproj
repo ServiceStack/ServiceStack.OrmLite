@@ -68,6 +68,7 @@
     <Compile Include="ApiSqlServerTestsAsync.cs" />
     <Compile Include="AsyncTests.cs" />
     <Compile Include="ApiMySqlTestsAsync.cs" />
+    <Compile Include="CustomSqlTestsAsync.cs" />
     <Compile Include="LoadReferencesTests.cs" />
     <Compile Include="OrmLiteContextTests.cs" />
     <Compile Include="OrmLiteTestBase.cs" />
