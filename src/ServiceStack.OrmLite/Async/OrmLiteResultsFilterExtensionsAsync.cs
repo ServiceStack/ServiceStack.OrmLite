@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace ServiceStack.OrmLite
 {
-    internal static class OrmLiteResultsFilterExtensionsAsync
+    public static class OrmLiteResultsFilterExtensionsAsync
     {
         internal static Task<int> ExecNonQueryAsync(this IDbCommand dbCmd, string sql, object anonType, CancellationToken token)
         {
@@ -47,6 +47,11 @@ namespace ServiceStack.OrmLite
             return dbCmd.GetDialectProvider().ExecuteNonQueryAsync(dbCmd, token);
         }
 
+        public static Task<List<T>> ConvertToListAsync<T>(this IDbCommand dbCmd)
+        {
+            return dbCmd.ConvertToListAsync<T>(null, default(CancellationToken));
+        }
+
         public static Task<List<T>> ConvertToListAsync<T>(this IDbCommand dbCmd, string sql, CancellationToken token)
         {
             if (sql != null)
@@ -61,6 +66,11 @@ namespace ServiceStack.OrmLite
                             OrmLiteUtils.IsScalar<T>()
                                 ? reader.ColumnAsync<T>(dialectProvider, token)
                                 : reader.ConvertToListAsync<T>(dialectProvider, token)).Unwrap();
+        }
+
+        public static Task<IList> ConvertToListAsync(this IDbCommand dbCmd, Type refType)
+        {
+            return dbCmd.ConvertToListAsync(refType, null, default(CancellationToken));
         }
 
         public static Task<IList> ConvertToListAsync(this IDbCommand dbCmd, Type refType, string sql, CancellationToken token)
@@ -89,6 +99,11 @@ namespace ServiceStack.OrmLite
                         .Then(reader => reader.ExprConvertToListAsync<T>(dialectProvider, token)).Unwrap();
         }
 
+        public static Task<T> ConvertToAsync<T>(this IDbCommand dbCmd)
+        {
+            return dbCmd.ConvertToAsync<T>(null, default(CancellationToken));
+        }
+
         public static Task<T> ConvertToAsync<T>(this IDbCommand dbCmd, string sql, CancellationToken token)
         {
             if (sql != null)
@@ -115,6 +130,11 @@ namespace ServiceStack.OrmLite
                         .Then(reader => reader.ConvertToAsync(dialectProvider, refType, token)).Unwrap();
         }
 
+        public static Task<T> ScalarAsync<T>(this IDbCommand dbCmd)
+        {
+            return dbCmd.ScalarAsync<T>(null, default(CancellationToken));
+        }
+
         public static Task<T> ScalarAsync<T>(this IDbCommand dbCmd, string sql, CancellationToken token)
         {
             if (sql != null)
@@ -128,6 +148,11 @@ namespace ServiceStack.OrmLite
                         .Then(reader => reader.ScalarAsync<T>(dialectProvider, token)).Unwrap();
         }
 
+        public static Task<object> ScalarAsync(this IDbCommand dbCmd)
+        {
+            return dbCmd.ScalarAsync(null, default(CancellationToken));
+        }
+
         public static Task<object> ScalarAsync(this IDbCommand dbCmd, string sql, CancellationToken token)
         {
             if (sql != null)
@@ -139,7 +164,12 @@ namespace ServiceStack.OrmLite
             return dbCmd.GetDialectProvider().ExecuteScalarAsync(dbCmd, token);
         }
 
-        internal static Task<long> ExecLongScalarAsync(this IDbCommand dbCmd, string sql, CancellationToken token)
+        public static Task<long> ExecLongScalarAsync(this IDbCommand dbCmd)
+        {
+            return dbCmd.ExecLongScalarAsync(null, default(CancellationToken));
+        }
+
+        public static Task<long> ExecLongScalarAsync(this IDbCommand dbCmd, string sql, CancellationToken token)
         {
             if (sql != null)
                 dbCmd.CommandText = sql;
