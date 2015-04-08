@@ -238,7 +238,7 @@ namespace ServiceStack.OrmLite.Oracle
             if (fieldType == typeof(Guid))
             {
                 var guid = (Guid)value;
-                return CompactGuid ? "'" + BitConverter.ToString(guid.ToByteArray()).Replace("-", "") + "'"
+                return CompactGuid ? string.Format("CAST('{0}' AS {1})", BitConverter.ToString(guid.ToByteArray()).Replace("-", ""), CompactGuidDefinition)
                                    : string.Format("CAST('{0}' AS {1})", guid, StringGuidDefinition);
             }
 
