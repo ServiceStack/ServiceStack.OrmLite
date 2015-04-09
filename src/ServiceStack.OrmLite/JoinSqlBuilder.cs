@@ -6,6 +6,7 @@ using System.Text;
 
 namespace ServiceStack.OrmLite
 {
+    [Obsolete("Use SqlExpression")]
     public class JoinSqlBuilder<TNewPoco, TBasePoco> : ISqlExpression
     {
         private List<Join> joinList = new List<Join>();
