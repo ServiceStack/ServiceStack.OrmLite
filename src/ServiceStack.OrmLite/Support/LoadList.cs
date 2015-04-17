@@ -90,11 +90,7 @@ namespace ServiceStack.OrmLite.Support
         protected string GetRefSelfSql(FieldDefinition refSelf, ModelDefinition refModelDef)
         {
             //Load Self Table.RefTableId PK
-            StringBuilder sbSelect = new StringBuilder();
-            sbSelect.AppendFormat("{0}.{1}",
-                                dialectProvider.GetQuotedTableName(refModelDef),
-                                refSelf.GetQuotedName(dialectProvider));
-            expr.Select(sbSelect.ToString());
+            expr.Select(dialectProvider.GetQuotedColumnName(refModelDef, refSelf));
             var subSqlRef = expr.ToSelectStatement();
 
             var sqlRef = "SELECT {0} FROM {1} WHERE {2} IN ({3})".Fmt(
