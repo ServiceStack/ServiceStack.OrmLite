@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -89,7 +90,11 @@ namespace ServiceStack.OrmLite.Support
         protected string GetRefSelfSql(FieldDefinition refSelf, ModelDefinition refModelDef)
         {
             //Load Self Table.RefTableId PK
-            expr.Select(dialectProvider.GetQuotedColumnName(refSelf));
+            StringBuilder sbSelect = new StringBuilder();
+            sbSelect.AppendFormat("{0}.{1}",
+                                dialectProvider.GetQuotedTableName(refModelDef),
+                                refSelf.GetQuotedName(dialectProvider));
+            expr.Select(sbSelect.ToString());
             var subSqlRef = expr.ToSelectStatement();
 
             var sqlRef = "SELECT {0} FROM {1} WHERE {2} IN ({3})".Fmt(
