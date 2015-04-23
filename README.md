@@ -775,6 +775,27 @@ Unlike normal complex properties, references:
  
 Basically they provides a better story when dealing with referential data that doesn't impact the POCO's ability to be used as DTO's. 
 
+### Merge Disconnected POCO Result Sets
+
+The `Merge` extension method can stitch disconnected POCO collections together as per their relationships defined in OrmLite's POCO References.
+
+For example you can select a collection of Customers who've made an order with quantities of 10 or more and in a separate query select their filtered Orders and then merge the results of these 2 distinct queries together with:
+
+```csharp
+//Select Customers who've had orders with Quantities of 10 or more
+List<Customer> customers = db.Select<Customer>(q =>
+    q.Join<Order>()
+     .Where<Order>(o => o.Qty >= 10)
+     .SelectDistinct());
+
+//Select Orders with Quantities of 10 or more
+List<Order> orders = db.Select<Order>(o => o.Qty >= 10);
+
+customers.Merge(orders); // Merge disconnected Orders with their related Customers
+
+customers.PrintDump();   // Print merged customers and orders datasets
+```
+
 ## Optimistic Concurrency
 
 Optimistic concurrency can be added to any table by adding the `ulong RowVersion { get; set; }` property, e.g:
