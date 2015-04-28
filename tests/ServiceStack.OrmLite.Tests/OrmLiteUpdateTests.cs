@@ -265,6 +265,21 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(row.Int, Is.EqualTo(0));
             }
         }
+
+        [Test]
+        public void Does_Save_nullable_bool()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Shutdown>();
+
+                db.Insert(new Shutdown { IsShutdownGraceful = null });
+                var rows = db.Select<Shutdown>();
+
+                Assert.That(rows.Count, Is.EqualTo(1));
+                Assert.That(rows[0].IsShutdownGraceful, Is.Null);
+            }
+        }
     }
 
     [CompositeIndex("FirstName", "LastName")]
@@ -278,4 +293,9 @@ namespace ServiceStack.OrmLite.Tests
         public byte[] Blob2 { get; set; }
     }
 
+    public class Shutdown
+    {
+        public int Id { get; set; }
+        public bool? IsShutdownGraceful { get; set; }
+    }
 }
