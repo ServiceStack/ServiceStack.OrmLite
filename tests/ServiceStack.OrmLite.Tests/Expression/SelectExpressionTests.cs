@@ -244,6 +244,40 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 OrmLiteConfig.StripUpperInLike = false;
             }
         }
+
+        class Record
+        {
+            public int Id { get; set; }
+
+            public string Name { get; set; }
+        }
+
+        class Output
+        {
+            public int Id { get; set; }
+
+            public string Name { get; set; }
+        }
+
+        [Test]
+        public void Can_Select_Single_from_just_FROM_Expression()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Record>();
+
+                db.InsertAll(new Record[] {
+                    new Record { Id = 1, Name = "Record 1" }, 
+                });
+
+                var q = db.From<Record>();
+                var results = db.Select<Output>(q);
+                Assert.That(results.Count, Is.EqualTo(1));
+
+                var result = db.Single<Output>(q);
+                Assert.That(result, Is.Not.Null);
+            }
+        }
     }
 
     public class Submission
