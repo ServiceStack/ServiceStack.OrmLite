@@ -147,6 +147,7 @@
     <Compile Include="LicenseUsageTests.cs" />
     <Compile Include="LoadReferencesJoinTests.cs" />
     <Compile Include="LoadReferencesTests.cs" />
+    <Compile Include="MergeTests.cs" />
     <Compile Include="MockAllApiTests.cs" />
     <Compile Include="OrmLiteContextTests.cs" />
     <Compile Include="OrmLiteExecFilterTests.cs" />

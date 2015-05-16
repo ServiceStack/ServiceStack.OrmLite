@@ -365,41 +365,49 @@ namespace ServiceStack.OrmLite
         public static List<Parent> Merge<Parent, Child>(this List<Parent> parents, List<Child> children)
         {
             var modelDef = ModelDefinition<Parent>.Definition;
-            var fieldDef = modelDef.AllFieldDefinitionsArray.FirstOrDefault(
-                x => (x.FieldType == typeof(Child) || x.FieldType == typeof(List<Child>)) && x.IsReference);
 
-            if (fieldDef == null)
+            var hasChildRef = false;
+
+            foreach (var fieldDef in modelDef.AllFieldDefinitionsArray)
+            {
+                if ((fieldDef.FieldType != typeof (Child) && fieldDef.FieldType != typeof (List<Child>)) || !fieldDef.IsReference) 
+                    continue;
+                
+                hasChildRef = true;
+
+                var listInterface = fieldDef.FieldType.GetTypeWithGenericInterfaceOf(typeof(IList<>));
+                if (listInterface != null)
+                {
+                    var refType = listInterface.GenericTypeArguments()[0];
+                    var refModelDef = refType.GetModelDefinition();
+                    var refField = modelDef.GetRefFieldDef(refModelDef, refType);
+
+                    SetListChildResults(parents, modelDef, fieldDef, refType, children, refField);
+                }
+                else
+                {
+                    var refType = fieldDef.FieldType;
+
+                    var refModelDef = refType.GetModelDefinition();
+
+                    var refSelf = modelDef.GetSelfRefFieldDefIfExists(refModelDef, fieldDef);
+                    var refField = refSelf == null
+                        ? modelDef.GetRefFieldDef(refModelDef, refType)
+                        : modelDef.GetRefFieldDefIfExists(refModelDef);
+
+                    if (refSelf != null)
+                    {
+                        SetRefSelfChildResults(parents, fieldDef, refModelDef, refSelf, children);
+                    }
+                    else if (refField != null)
+                    {
+                        SetRefFieldChildResults(parents, modelDef, fieldDef, refField, children);
+                    }
+                }
+            }
+
+            if (!hasChildRef)
                 throw new Exception("Could not find Child Reference for '{0}' on Parent '{1}'".Fmt(typeof(Child).Name, typeof(Parent).Name));
-
-            var listInterface = fieldDef.FieldType.GetTypeWithGenericInterfaceOf(typeof(IList<>));
-            if (listInterface != null)
-            {
-                var refType = listInterface.GenericTypeArguments()[0];
-                var refModelDef = refType.GetModelDefinition();
-                var refField = modelDef.GetRefFieldDef(refModelDef, refType);
-
-                SetListChildResults(parents, modelDef, fieldDef, refType, children, refField);
-            }
-            else
-            {
-                var refType = fieldDef.FieldType;
-
-                var refModelDef = refType.GetModelDefinition();
-
-                var refSelf = modelDef.GetSelfRefFieldDefIfExists(refModelDef, fieldDef);
-                var refField = refSelf == null
-                    ? modelDef.GetRefFieldDef(refModelDef, refType)
-                    : modelDef.GetRefFieldDefIfExists(refModelDef);
-
-                if (refSelf != null)
-                {
-                    SetRefSelfChildResults(parents, fieldDef, refModelDef, refSelf, children);
-                }
-                else if (refField != null)
-                {
-                    SetRefFieldChildResults(parents, modelDef, fieldDef, refField, children);
-                }
-            }
 
             return parents;
         }
