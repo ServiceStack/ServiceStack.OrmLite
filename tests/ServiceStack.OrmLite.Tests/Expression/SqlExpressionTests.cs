@@ -479,29 +479,29 @@ namespace ServiceStack.OrmLite.Tests.Expression
             }
         }
 
-        public class CrossJoinTableA 
+        public class CrossJoinTableA
         {
             public int Id { get; set; }
             public string Name { get; set; }
         }
 
-        public class CrossJoinTableB 
+        public class CrossJoinTableB
         {
             public int Id { get; set; }
             public int Value { get; set; }
         }
 
-        public class CrossJoinResult 
+        public class CrossJoinResult
         {
             public int CrossJoinTableAId { get; set; }
             public string Name { get; set; }
             public int CrossJoinTableBId { get; set; }
             public int Value { get; set; }
 
-            public override bool Equals(object obj) 
+            public override bool Equals(object obj)
             {
                 var other = obj as CrossJoinResult;
-                if(other == null)
+                if (other == null)
                     return false;
 
                 return CrossJoinTableAId == other.CrossJoinTableAId && string.Equals(Name, other.Name) && CrossJoinTableBId == other.CrossJoinTableBId && Value == other.Value;
@@ -509,17 +509,17 @@ namespace ServiceStack.OrmLite.Tests.Expression
         }
 
         [Test]
-        public void Can_perform_a_crossjoin_without_a_join_expression() 
+        public void Can_perform_a_crossjoin_without_a_join_expression()
         {
-            using(var db = OpenDbConnection()) 
+            using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<CrossJoinTableA>();
                 db.DropAndCreateTable<CrossJoinTableB>();
 
-                db.Insert(new CrossJoinTableA {Id = 1, Name = "Foo"});
-                db.Insert(new CrossJoinTableA {Id = 2, Name = "Bar"});
-                db.Insert(new CrossJoinTableB {Id = 5, Value = 3});
-                db.Insert(new CrossJoinTableB {Id = 6, Value = 42});
+                db.Insert(new CrossJoinTableA { Id = 1, Name = "Foo" });
+                db.Insert(new CrossJoinTableA { Id = 2, Name = "Bar" });
+                db.Insert(new CrossJoinTableB { Id = 5, Value = 3 });
+                db.Insert(new CrossJoinTableB { Id = 6, Value = 42 });
 
                 var q = db.From<CrossJoinTableA>()
                           .CrossJoin<CrossJoinTableB>()
@@ -542,9 +542,9 @@ namespace ServiceStack.OrmLite.Tests.Expression
         }
 
         [Test]
-        public void Can_perform_a_crossjoin_with_a_join_expression() 
+        public void Can_perform_a_crossjoin_with_a_join_expression()
         {
-            using (var db = OpenDbConnection()) 
+            using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<CrossJoinTableA>();
                 db.DropAndCreateTable<CrossJoinTableB>();
@@ -620,6 +620,61 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 qSub.Join<JoinTestChild>((x, y) => x.Id == y.ParentId);
                 qSub.Where<JoinTestChild>(x => !x.IsActive); // This line is a bug!
                 Assert.That(db.Select(qSub).Count, Is.EqualTo(1));
+            }
+        }
+
+        public class Invoice
+        {
+            public int Id { get; set; }
+
+            public int WorkflowId { get; set; }
+
+            public int DocumentId { get; set; }
+
+            public int PageCount { get; set; }
+
+            public string DocumentStatus { get; set; }
+
+            public string Extra { get; set; }
+        }
+
+        public class UsagePageInvoice
+        {
+            public int Id { get; set; }
+            public int InvoiceId { get; set; }
+        }
+
+        [Test]
+        public void Can_select_individual_columns()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Invoice>();
+                db.DropAndCreateTable<UsagePageInvoice>();
+
+                db.Insert(new Invoice {
+                    Id = 1, 
+                    WorkflowId = 2, 
+                    DocumentId = 3, 
+                    PageCount = 4, 
+                    DocumentStatus = "a",
+                    Extra = "EXTRA"
+                });
+
+                var q = db.From<Invoice>()
+                    .LeftJoin<Invoice, UsagePageInvoice>((i, upi) => i.Id == upi.InvoiceId)
+                    .Where<Invoice>(i => (i.DocumentStatus == "a" || i.DocumentStatus == "b"))
+                    .And<UsagePageInvoice>(upi => upi.Id == null)
+                    .Select(c => new { c.Id, c.WorkflowId, c.DocumentId, c.DocumentStatus, c.PageCount });
+
+                var result = db.Select(q).First();
+
+                Assert.That(result.Id, Is.EqualTo(1));
+                Assert.That(result.WorkflowId, Is.EqualTo(2));
+                Assert.That(result.DocumentId, Is.EqualTo(3));
+                Assert.That(result.PageCount, Is.EqualTo(4));
+                Assert.That(result.DocumentStatus, Is.EqualTo("a"));
+                Assert.That(result.Extra, Is.Null);
             }
         }
     }

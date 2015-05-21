@@ -120,6 +120,7 @@ namespace ServiceStack.OrmLite
         {
             sep = string.Empty;
             useFieldName = true;
+            CustomSelect = true;
             BuildSelectExpression(Visit(fields).ToString(), false);
             return this;
         }
@@ -128,6 +129,7 @@ namespace ServiceStack.OrmLite
         {
             sep = string.Empty;
             useFieldName = true;
+            CustomSelect = true;
             BuildSelectExpression(Visit(fields).ToString(), false);
             return this;
         }
@@ -136,6 +138,7 @@ namespace ServiceStack.OrmLite
         {
             sep = string.Empty;
             useFieldName = true;
+            CustomSelect = true;
             BuildSelectExpression(Visit(fields).ToString(), false);
             return this;
         }
@@ -144,6 +147,7 @@ namespace ServiceStack.OrmLite
         {
             sep = string.Empty;
             useFieldName = true;
+            CustomSelect = true;
             BuildSelectExpression(Visit(fields).ToString(), true);
             return this;
         }
@@ -152,6 +156,7 @@ namespace ServiceStack.OrmLite
         {
             sep = string.Empty;
             useFieldName = true;
+            CustomSelect = true;
             BuildSelectExpression(Visit(fields).ToString(), true);
             return this;
         }
@@ -160,6 +165,7 @@ namespace ServiceStack.OrmLite
         {
             sep = string.Empty;
             useFieldName = true;
+            CustomSelect = true;
             BuildSelectExpression(Visit(fields).ToString(), true);
             return this;
         }
