@@ -897,13 +897,13 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        protected internal ModelDefinition ModelDef
+        public ModelDefinition ModelDef
         {
             get
             {
                 return modelDef;
             }
-            set
+            protected set
             {
                 modelDef = value;
             }

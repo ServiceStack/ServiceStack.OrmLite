@@ -1442,8 +1442,9 @@ namespace ServiceStack.OrmLite
                 .Replace("%", @"^%");
         }
 
-        public virtual string GetLoadChildrenSubSelect<From>(ModelDefinition modelDef, SqlExpression<From> expr)
+        public virtual string GetLoadChildrenSubSelect<From>(SqlExpression<From> expr)
         {
+            var modelDef = expr.ModelDef;
             expr.Select(this.GetQuotedColumnName(modelDef, modelDef.PrimaryKey));
 
             var subSql = expr.ToSelectStatement();

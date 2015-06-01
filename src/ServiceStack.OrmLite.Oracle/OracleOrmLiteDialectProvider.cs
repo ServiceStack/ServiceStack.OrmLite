@@ -674,10 +674,11 @@ namespace ServiceStack.OrmLite.Oracle
             return (onDelete == "SET NULL" || onDelete == "CASCADE") ? " ON DELETE " + onDelete : string.Empty;
         }
 
-        public override string GetLoadChildrenSubSelect<From>(ModelDefinition modelDef, SqlExpression<From> expr)
+        public override string GetLoadChildrenSubSelect<From>(SqlExpression<From> expr)
         {
             if (!expr.OrderByExpression.IsNullOrEmpty() && expr.Rows == null)
             {
+                var modelDef = expr.ModelDef;
                 expr.Select(this.GetQuotedColumnName(modelDef, modelDef.PrimaryKey))
                     .ClearLimits()
                     .OrderBy(""); //Invalid in Sub Selects
@@ -687,7 +688,7 @@ namespace ServiceStack.OrmLite.Oracle
                 return subSql;
             }
 
-            return base.GetLoadChildrenSubSelect(modelDef, expr);
+            return base.GetLoadChildrenSubSelect(expr);
         }
 
         public override string ToCreateSequenceStatement(Type tableType, string sequenceName)
