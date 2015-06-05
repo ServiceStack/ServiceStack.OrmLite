@@ -396,31 +396,63 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 db.DropAndCreateTable<TableB>();
 
                 db.Insert(new TableA { Id = 1, Bool = false });
+                db.Insert(new TableA { Id = 2, Bool = true });
                 db.Insert(new TableB { Id = 1, TableAId = 1 });
+                db.Insert(new TableB { Id = 2, TableAId = 2 });
 
                 var q = db.From<TableA>()
                     .LeftJoin<TableB>((a, b) => a.Id == b.Id)
                     .Where(a => !a.Bool);
 
                 var result = db.Single(q);
-                db.GetLastSql().Print();
+                var lastSql = db.GetLastSql();
+                lastSql.Print();
                 Assert.That(result.Id, Is.EqualTo(1));
+                Assert.That(lastSql, Is.Not.StringContaining("NOT"));
 
                 q = db.From<TableA>()
                     .Where(a => !a.Bool)
                     .LeftJoin<TableB>((a, b) => a.Id == b.Id);
 
                 result = db.Single(q);
-                db.GetLastSql().Print();
+                lastSql = db.GetLastSql();
+                lastSql.Print();
                 Assert.That(result.Id, Is.EqualTo(1));
+                Assert.That(lastSql, Is.Not.StringContaining("NOT"));
 
 
                 q = db.From<TableA>()
                     .Where(a => !a.Bool);
 
                 result = db.Single(q);
-                db.GetLastSql().Print();
+                lastSql = db.GetLastSql();
+                lastSql.Print();
                 Assert.That(result.Id, Is.EqualTo(1));
+                Assert.That(lastSql, Is.Not.StringContaining("NOT"));
+
+                q = db.From<TableA>()
+                    .LeftJoin<TableB>((a, b) => a.Id == b.Id)
+                    .Where(a => a.Bool);
+
+                result = db.Single(q);
+                db.GetLastSql().Print();
+                Assert.That(result.Id, Is.EqualTo(2));
+
+                q = db.From<TableA>()
+                    .Where(a => a.Bool)
+                    .LeftJoin<TableB>((a, b) => a.Id == b.Id);
+
+                result = db.Single(q);
+                db.GetLastSql().Print();
+                Assert.That(result.Id, Is.EqualTo(2));
+
+
+                q = db.From<TableA>()
+                    .Where(a => a.Bool);
+
+                result = db.Single(q);
+                db.GetLastSql().Print();
+                Assert.That(result.Id, Is.EqualTo(2));
             }
         }
 

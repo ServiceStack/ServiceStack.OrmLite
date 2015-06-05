@@ -1169,7 +1169,7 @@ namespace ServiceStack.OrmLite
                         return !((bool)o);
 
                     if (IsFieldName(o))
-                        o = o + "=" + GetQuotedTrueValue();
+                        return new PartialSqlString(o + "=" + GetQuotedFalseValue());
 
                     return new PartialSqlString("NOT (" + o + ")");
                 case ExpressionType.Convert:
