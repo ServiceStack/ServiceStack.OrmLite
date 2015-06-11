@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Data;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
@@ -128,17 +129,19 @@ namespace ServiceStack.OrmLite.Tests
 				Assert.That(partialColumns, Has.Count.EqualTo(2));
 
 				//Select into another POCO class that matches sql
-				var rows = db.SqlList<ShipperTypeCount>(
+                var rows = db.SqlList<ShipperTypeCount>(
                     "SELECT {0}, COUNT(*) AS Total FROM Shippers GROUP BY {0} ORDER BY Total".Fmt("ShipperTypeId".SqlColumn()));
 
-				Assert.That(rows, Has.Count.EqualTo(2));
-				Assert.That(rows[0].ShipperTypeId, Is.EqualTo(trainsType.Id));
-				Assert.That(rows[0].Total, Is.EqualTo(1));
-				Assert.That(rows[1].ShipperTypeId, Is.EqualTo(planesType.Id));
-				Assert.That(rows[1].Total, Is.EqualTo(2));
+                Assert.That(rows, Has.Count.EqualTo(2));
+                Assert.That(rows[0].ShipperTypeId, Is.EqualTo(trainsType.Id));
+                Assert.That(rows[0].Total, Is.EqualTo(1));
+                Assert.That(rows[1].ShipperTypeId, Is.EqualTo(planesType.Id));
+                Assert.That(rows[1].Total, Is.EqualTo(2));
+
+                TestCustomGroupBy(db, trainsType, planesType);
 
 
-				//And finally lets quickly clean up the mess we've made:
+			    //And finally lets quickly clean up the mess we've made:
 				db.DeleteAll<Shipper>();
 				db.DeleteAll<ShipperType>();
 
@@ -146,6 +149,32 @@ namespace ServiceStack.OrmLite.Tests
 				Assert.That(db.Select<ShipperType>(), Has.Count.EqualTo(0));
 			}
 		}
+
+	    private static void TestCustomGroupBy(IDbConnection db, ShipperType trainsType, ShipperType planesType)
+	    {
+	        var rows = db.SqlList<ShipperTypeCount>(
+	            db.From<Shipper>()
+	              .GroupBy(x => x.ShipperTypeId)
+	              .OrderBy("Total")
+	              .Select(x => new {x.ShipperTypeId, Total = Sql.As(Sql.Count("*"), "Total")}));
+
+	        Assert.That(rows, Has.Count.EqualTo(2));
+	        Assert.That(rows[0].ShipperTypeId, Is.EqualTo(trainsType.Id));
+	        Assert.That(rows[0].Total, Is.EqualTo(1));
+	        Assert.That(rows[1].ShipperTypeId, Is.EqualTo(planesType.Id));
+	        Assert.That(rows[1].Total, Is.EqualTo(2));
+
+	        var qGroup = db.From<Shipper>()
+	            .GroupBy(x => x.ShipperTypeId)
+	            .OrderBy("2")
+	            .Select(x => new {x.ShipperTypeId, Total = Sql.Count("*")});
+
+	        var rowsGroup = db.Dictionary<int, int>(qGroup);
+
+	        Assert.That(rowsGroup, Has.Count.EqualTo(2));
+	        Assert.That(rowsGroup[trainsType.Id], Is.EqualTo(1));
+	        Assert.That(rowsGroup[planesType.Id], Is.EqualTo(2));
+	    }
 	}
 
 
