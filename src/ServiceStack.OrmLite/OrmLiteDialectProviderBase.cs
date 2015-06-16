@@ -329,7 +329,7 @@ namespace ServiceStack.OrmLite
 
         public virtual string SanitizeFieldNameForParamName(string fieldName)
         {
-            return (fieldName ?? "").Replace(" ", "");
+            return OrmLiteConfig.SanitizeFieldNameForParamNameFn(fieldName);
         }
 
         protected virtual string GetUndefinedColumnDefinition(Type fieldType, int? fieldLength)

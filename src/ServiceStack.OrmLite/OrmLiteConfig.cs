@@ -183,5 +183,8 @@ namespace ServiceStack.OrmLite
         public static Action<IDbCommand, object> UpdateFilter { get; set; }
 
         public static Func<string, string> StringFilter { get; set; }
+
+        public static Func<string, string> SanitizeFieldNameForParamNameFn = fieldName =>
+            (fieldName ?? "").Replace(" ", "");
     }
 }
