@@ -216,7 +216,7 @@ namespace ServiceStack.OrmLite
 
         public virtual SqlExpression<T> Where(string sqlFilter, params object[] filterParams)
         {
-            AppendToWhere("AND", sqlFilter.SqlFmt(filterParams).SqlVerifyFragment());
+            AppendToWhere("AND", sqlFilter.SqlVerifyFragment().SqlFmt(filterParams));
             return this;
         }
 
@@ -228,7 +228,7 @@ namespace ServiceStack.OrmLite
 
         public virtual SqlExpression<T> And(string sqlFilter, params object[] filterParams)
         {
-            AppendToWhere("AND", sqlFilter.SqlFmt(filterParams).SqlVerifyFragment());
+            AppendToWhere("AND", sqlFilter.SqlVerifyFragment().SqlFmt(filterParams));
             return this;
         }
 
@@ -240,13 +240,13 @@ namespace ServiceStack.OrmLite
 
         public virtual SqlExpression<T> Or(string sqlFilter, params object[] filterParams)
         {
-            AppendToWhere("OR", sqlFilter.SqlFmt(filterParams).SqlVerifyFragment());
+            AppendToWhere("OR", sqlFilter.SqlVerifyFragment().SqlFmt(filterParams));
             return this;
         }
 
         public virtual SqlExpression<T> AddCondition(string condition, string sqlFilter, params object[] filterParams)
         {
-            AppendToWhere(condition, sqlFilter.SqlFmt(filterParams).SqlVerifyFragment());
+            AppendToWhere(condition, sqlFilter.SqlVerifyFragment().SqlFmt(filterParams));
             return this;
         }
 
