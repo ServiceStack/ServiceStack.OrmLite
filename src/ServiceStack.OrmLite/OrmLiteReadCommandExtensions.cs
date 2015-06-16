@@ -119,10 +119,12 @@ namespace ServiceStack.OrmLite
         private static Type lastQueryType;
         internal static void SetFilter<T>(this IDbCommand dbCmd, string name, object value)
         {
+            var dialectProvider = dbCmd.GetDialectProvider();
+
             dbCmd.Parameters.Clear();
             var p = dbCmd.CreateParameter();
             p.ParameterName = name;
-            p.DbType = dbCmd.GetDialectProvider().GetColumnDbType(value.GetType());
+            p.DbType = dialectProvider.GetColumnDbType(value.GetType());
             p.Direction = ParameterDirection.Input;
             dbCmd.Parameters.Add(p);
             dbCmd.CommandText = GetFilterSql<T>(dbCmd);
@@ -303,18 +305,24 @@ namespace ServiceStack.OrmLite
 
         internal static string GetFilterSql<T>(this IDbCommand dbCmd)
         {
+            var dialectProvider = dbCmd.GetDialectProvider();
+
             var sb = new StringBuilder();
             foreach (IDbDataParameter p in dbCmd.Parameters)
             {
                 if (sb.Length > 0)
                     sb.Append(" AND ");
 
-                sb.Append(dbCmd.GetDialectProvider().GetQuotedColumnName(p.ParameterName));
+                var fieldName = p.ParameterName;
+                sb.Append(dialectProvider.GetQuotedColumnName(fieldName));
+
+                p.ParameterName = dialectProvider.SanitizeFieldNameForParamName(fieldName);
+
                 sb.Append(" = ");
-                sb.Append(dbCmd.GetDialectProvider().GetParam(p.ParameterName));
+                sb.Append(dialectProvider.GetParam(p.ParameterName));
             }
 
-            return dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), sb.ToString());
+            return dialectProvider.ToSelectStatement(typeof(T), sb.ToString());
         }
 
         internal static bool CanReuseParam<T>(this IDbCommand dbCmd, string paramName)
