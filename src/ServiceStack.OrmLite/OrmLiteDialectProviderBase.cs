@@ -182,12 +182,11 @@ namespace ServiceStack.OrmLite
 
         public virtual void UpdateStringColumnDefinitions()
         {
-            this.StringLengthColumnDefinitionFormat = useUnicode
+            this.StringLengthColumnDefinitionFormat = UseUnicode
                 ? StringLengthUnicodeColumnDefinitionFormat
                 : StringLengthNonUnicodeColumnDefinitionFormat;
 
-            this.StringColumnDefinition = string.Format(
-                this.StringLengthColumnDefinitionFormat, DefaultStringLength);
+            this.StringColumnDefinition = string.Format(this.StringLengthColumnDefinitionFormat, DefaultStringLength);
         }
 
         protected DbTypes<TDialect> DbTypeMap = new DbTypes<TDialect>();

@@ -20,8 +20,6 @@ namespace ServiceStack.OrmLite.SqlServer
         public SqlServerOrmLiteDialectProvider()
         {
             base.AutoIncrementDefinition = "IDENTITY(1,1)";
-            StringColumnDefinition = UseUnicode ? "NVARCHAR(4000)" : "VARCHAR(8000)";
-            base.MaxStringColumnDefinition = "VARCHAR(MAX)";
             base.GuidColumnDefinition = "UniqueIdentifier";
             base.RealColumnDefinition = "FLOAT";
             base.BoolColumnDefinition = "BIT";
@@ -47,6 +45,13 @@ namespace ServiceStack.OrmLite.SqlServer
             DbTypeMap.Set<ushort>(DbType.Int16, IntColumnDefinition);
             DbTypeMap.Set<uint>(DbType.Int32, IntColumnDefinition);
             DbTypeMap.Set<ulong>(DbType.Int64, LongColumnDefinition);
+        }
+
+        public override void UpdateStringColumnDefinitions()
+        {
+            base.UpdateStringColumnDefinitions();
+
+            this.MaxStringColumnDefinition = string.Format(this.StringLengthColumnDefinitionFormat, "MAX");
         }
 
         public override string GetQuotedValue(string paramValue)

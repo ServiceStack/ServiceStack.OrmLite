@@ -6,6 +6,8 @@ using System;
 using System.Data;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
+using ServiceStack.OrmLite.SqlServer;
+using ServiceStack.OrmLite.Sqlite;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
@@ -81,13 +83,66 @@ namespace ServiceStack.OrmLite.Tests
             try
             {
                 db.DropAndCreateTable<CacheEntry>();
-
             }
             catch (Exception)
             {
                 db.DropAndCreateTable<CacheEntry>();
             }
-            db.GetLastSql().Print();
+
+            var sql = db.GetLastSql();
+            sql.Print();
+
+            if (Dialect == Dialect.Sqlite)
+            {
+                Assert.That(sql, Is.StringContaining(" VARCHAR(1000000)"));
+            }
+            else if (Dialect == Dialect.PostgreSql || Dialect == Dialect.MySql)
+            {
+                Assert.That(sql, Is.StringContaining(" TEXT"));
+            }
+            else if (Dialect == Dialect.Oracle)
+            {
+                Assert.That(sql, Is.StringContaining(" VARCHAR2(4000)"));
+            }
+            else if (Dialect == Dialect.SqlServer)
+            {
+                Assert.That(sql, Is.StringContaining(" VARCHAR(MAX)"));
+            }
+        }
+
+        [Test]
+        public void Can_Create_Table_with_MaxText_column_Unicode()
+        {
+            db.GetDialectProvider().UseUnicode = true;
+
+            try
+            {
+                db.DropAndCreateTable<CacheEntry>();
+            }
+            catch (Exception)
+            {
+                db.DropAndCreateTable<CacheEntry>();
+            }
+
+            var sql = db.GetLastSql();
+            sql.Print();
+
+            if (Dialect == Dialect.Sqlite)
+            {
+                Assert.That(sql, Is.StringContaining(" NVARCHAR(1000000)"));
+            }
+            else if (Dialect == Dialect.PostgreSql || Dialect == Dialect.MySql)
+            {
+                Assert.That(sql, Is.StringContaining(" TEXT"));
+            }
+            else if (Dialect == Dialect.Oracle)
+            {
+                Assert.That(sql, Is.StringContaining(" NVARCHAR2(4000)"));
+            }
+            else
+            {
+                Assert.That(sql, Is.StringContaining(" NVARCHAR(MAX)"));
+            }
         }
     }
 

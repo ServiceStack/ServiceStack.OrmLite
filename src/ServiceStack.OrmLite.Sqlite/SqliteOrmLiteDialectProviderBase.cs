@@ -13,7 +13,6 @@ namespace ServiceStack.OrmLite.Sqlite
     {
         protected SqliteOrmLiteDialectProviderBase()
         {
-            base.MaxStringColumnDefinition = "VARCHAR(1000000)"; //Default Max is really 1B
             base.DateTimeColumnDefinition = base.StringColumnDefinition;
             base.BoolColumnDefinition = base.IntColumnDefinition;
             base.GuidColumnDefinition = "CHAR(36)";
@@ -26,8 +25,21 @@ namespace ServiceStack.OrmLite.Sqlite
         {
             DbTypeMap.Set<Guid>(DbType.String, GuidColumnDefinition);
             DbTypeMap.Set<Guid?>(DbType.String, GuidColumnDefinition);
-            DbTypeMap.Set<DateTimeOffset>(DbType.DateTimeOffset, StringColumnDefinition);
-            DbTypeMap.Set<DateTimeOffset?>(DbType.DateTimeOffset, StringColumnDefinition);
+            DbTypeMap.Set<DateTimeOffset>(DbType.DateTimeOffset, DateTimeColumnDefinition);
+            DbTypeMap.Set<DateTimeOffset?>(DbType.DateTimeOffset, DateTimeColumnDefinition);
+        }
+
+        public override void UpdateStringColumnDefinitions()
+        {
+            base.UpdateStringColumnDefinitions();
+
+            base.DateTimeColumnDefinition = base.StringColumnDefinition;
+            DbTypeMap.Set<DateTime>(DbType.DateTimeOffset, DateTimeColumnDefinition);
+            DbTypeMap.Set<DateTime?>(DbType.DateTimeOffset, DateTimeColumnDefinition);
+            DbTypeMap.Set<DateTimeOffset>(DbType.DateTimeOffset, DateTimeColumnDefinition);
+            DbTypeMap.Set<DateTimeOffset?>(DbType.DateTimeOffset, DateTimeColumnDefinition);
+
+            this.MaxStringColumnDefinition = string.Format(this.StringLengthColumnDefinitionFormat, "1000000"); //Default Max is really 1B
         }
 
         public static string Password { get; set; }
