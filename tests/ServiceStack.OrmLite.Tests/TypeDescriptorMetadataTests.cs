@@ -6,8 +6,6 @@ using System;
 using System.Data;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.OrmLite.SqlServer;
-using ServiceStack.OrmLite.Sqlite;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
