@@ -35,7 +35,7 @@ namespace ServiceStack.OrmLite
         {
             string sql = expression.SelectInto<T>();
 
-            return dbCmd.ExprConvertToList<T>(sql);
+            return dbCmd.ExprConvertToList<T>(sql, expression.Params);
         }
 
         internal static List<T> Select<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)

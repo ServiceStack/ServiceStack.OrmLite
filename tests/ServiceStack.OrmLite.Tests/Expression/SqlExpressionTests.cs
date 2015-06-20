@@ -35,7 +35,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
     public class SqlExpressionTests : ExpressionsTestBase
     {
-        private static void InitLetters(IDbConnection db)
+        public static void InitLetters(IDbConnection db)
         {
             db.DropAndCreateTable<LetterFrequency>();
 

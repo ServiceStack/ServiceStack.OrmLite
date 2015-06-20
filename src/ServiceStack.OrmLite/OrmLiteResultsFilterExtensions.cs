@@ -89,10 +89,35 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        internal static List<T> ExprConvertToList<T>(this IDbCommand dbCmd, string sql = null)
+        public static IDbDataParameter PopulateWith(this IDbDataParameter to, IDbDataParameter from)
+        {
+            to.DbType = from.DbType;
+            to.Direction = from.Direction;
+            to.ParameterName = from.ParameterName;
+            to.SourceColumn = from.SourceColumn;
+            to.SourceVersion = from.SourceVersion;
+            to.Value = from.Value;
+            to.Precision = from.Precision;
+            to.Scale = from.Scale;
+            to.Size = from.Size;
+
+            return to;
+        }
+
+        internal static List<T> ExprConvertToList<T>(this IDbCommand dbCmd, string sql = null, IEnumerable<IDbDataParameter> sqlParams = null)
         {
             if (sql != null)
                 dbCmd.CommandText = sql;
+
+            if (sqlParams != null)
+            {
+                foreach (var sqlParam in sqlParams)
+                {
+                    var p = dbCmd.CreateParameter();
+                    p.PopulateWith(sqlParam);
+                    dbCmd.Parameters.Add(p);
+                }
+            }
 
             if (OrmLiteConfig.ResultsFilter != null)
             {

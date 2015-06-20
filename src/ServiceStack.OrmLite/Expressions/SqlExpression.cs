@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -31,6 +32,7 @@ namespace ServiceStack.OrmLite
         public bool PrefixFieldWithTableName { get; set; }
         public bool WhereStatementWithoutWhereString { get; set; }
         public IOrmLiteDialectProvider DialectProvider { get; set; }
+        public List<IDbDataParameter> Params { get; set; } 
 
         protected string Sep
         {
@@ -43,6 +45,7 @@ namespace ServiceStack.OrmLite
             PrefixFieldWithTableName = false;
             WhereStatementWithoutWhereString = false;
             DialectProvider = dialectProvider;
+            Params = new List<IDbDataParameter>();
             tableDefs.Add(modelDef);
         }
 
@@ -68,6 +71,7 @@ namespace ServiceStack.OrmLite
             to.modelDef = modelDef;
             to.PrefixFieldWithTableName = PrefixFieldWithTableName;
             to.WhereStatementWithoutWhereString = WhereStatementWithoutWhereString;
+            to.Params = new List<IDbDataParameter>(Params);
             return to;
         }
 
@@ -1148,8 +1152,6 @@ namespace ServiceStack.OrmLite
             return p.Name;
         }
 
-        public Dictionary<string, object> Params = new Dictionary<string, object>();
-
         protected virtual object VisitConstant(ConstantExpression c)
         {
             if (c.Value == null)
@@ -1606,10 +1608,36 @@ namespace ServiceStack.OrmLite
             }
             return new PartialSqlString(statement);
         }
+
+        public IDbDataParameter CreateParam(string name,
+            object value = null,
+            ParameterDirection direction = ParameterDirection.Input,
+            DbType? dbType = null)
+        {
+            var p = new OrmLiteDataParameter {
+                ParameterName = DialectProvider.GetParam(name), 
+                Direction = direction
+            };
+            if (value != null)
+            {
+                p.Value = value;
+                p.DbType = DialectProvider.GetColumnDbType(value.GetType());
+            }
+            if (dbType != null)
+                p.DbType = dbType.Value;
+
+            if (p.DbType == DbType.String)
+                p.Size = DialectProvider.DefaultStringLength;
+
+            return p;
+        }
+
     }
 
     public interface ISqlExpression
     {
+        List<IDbDataParameter> Params { get; }
+
         string ToSelectStatement();
         string SelectInto<TModel>();
     }
@@ -1640,5 +1668,18 @@ namespace ServiceStack.OrmLite
         public Type EnumType { get; private set; }
     }
 
+    public class OrmLiteDataParameter : IDbDataParameter
+    {
+        public DbType DbType { get; set; }
+        public ParameterDirection Direction { get; set; }
+        public bool IsNullable { get; set; }
+        public string ParameterName { get; set; }
+        public string SourceColumn { get; set; }
+        public DataRowVersion SourceVersion { get; set; }
+        public object Value { get; set; }
+        public byte Precision { get; set; }
+        public byte Scale { get; set; }
+        public int Size { get; set; }
+    }
 }
 

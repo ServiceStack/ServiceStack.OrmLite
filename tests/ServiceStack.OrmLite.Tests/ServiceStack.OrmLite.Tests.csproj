@@ -126,6 +126,7 @@
     <Compile Include="Expression\FromExpressionTests.cs" />
     <Compile Include="Expression\GenericTableExpressions.cs" />
     <Compile Include="Expression\MethodExpressionTests.cs" />
+    <Compile Include="Expression\SqlExpressionParamTests.cs" />
     <Compile Include="Expression\SqlExpressionTests.cs" />
     <Compile Include="Expression\SelectExpressionTests.cs" />
     <Compile Include="Issues\ComplexJoinWithAlias.cs" />
