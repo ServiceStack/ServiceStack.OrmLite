@@ -132,9 +132,11 @@ namespace ServiceStack.OrmLite.Tests
         public void Can_trace_all_generated_sql()
         {
             var sqlStatements = new List<string>();
+            var sqlCommandStatements = new List<SqlCommandDetails>();
             using (new OrmLiteResultsFilter
             {
                 SqlFilter = sql => sqlStatements.Add(sql),
+                SqlCommandFilter = sql => sqlCommandStatements.Add(new SqlCommandDetails(sql)),
                 ResultsFn = (dbCmd, type) => new[] { new Person { Id = 1, FirstName = "Mocked", LastName = "Person", Age = 100 } },
                 SingleResultFn = (dbCmd, type) => new Person { Id = 1, FirstName = "MockedSingle", LastName = "Person", Age = 100 },
                 ScalarResultFn = (dbCmd, type) => 1000,
@@ -145,9 +147,12 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(db.Single<Person>(x => x.Age == 42).FirstName, Is.EqualTo("MockedSingle"));
 
                 Assert.That(db.Scalar<Person, int>(x => Sql.Max(x.Age)), Is.EqualTo(1000));
+                
+                Assert.That(sqlStatements.Count, Is.EqualTo(3));
+                Assert.That(sqlCommandStatements.Count, Is.EqualTo(3));
 
                 sqlStatements.Each(x => x.Print());
-                Assert.That(sqlStatements.Count, Is.EqualTo(3));
+                sqlCommandStatements.Each(x => x.PrintDump());
             }
         }
 
@@ -311,26 +316,34 @@ namespace ServiceStack.OrmLite.Tests
             //we count the number of sql statements generated instead.
 
             var sqlStatements = new List<string>();
+            var sqlCommandStatements = new List<SqlCommandDetails>();
             using (new OrmLiteResultsFilter
             {
                 SqlFilter = sql => sqlStatements.Add(sql),
+                SqlCommandFilter = sql => sqlCommandStatements.Add(new SqlCommandDetails(sql)),
             })
             {
                 int i = 0;
 
                 i++; db.Insert(new Person { Id = 7, FirstName = "Amy", LastName = "Winehouse", Age = 27 });
                 Assert.That(sqlStatements.Count, Is.EqualTo(i));
+                Assert.That(sqlCommandStatements.Count, Is.EqualTo(i));
+
 
                 i++; db.InsertAll(new[] { new Person { Id = 10, FirstName = "Biggie", LastName = "Smalls", Age = 24 } });
                 Assert.That(sqlStatements.Count, Is.EqualTo(i));
+                Assert.That(sqlCommandStatements.Count, Is.EqualTo(i));
 
                 i++; db.InsertOnly(new PersonWithAutoId { FirstName = "Amy", Age = 27 }, ev => ev.Insert(p => new { p.FirstName, p.Age }));
                 Assert.That(sqlStatements.Count, Is.EqualTo(i));
+                Assert.That(sqlCommandStatements.Count, Is.EqualTo(i));
 
                 i++; db.InsertOnly(new PersonWithAutoId { FirstName = "Amy", Age = 27 }, ev => db.From<PersonWithAutoId>().Insert(p => new { p.FirstName, p.Age }));
                 Assert.That(sqlStatements.Count, Is.EqualTo(i));
+                Assert.That(sqlCommandStatements.Count, Is.EqualTo(i));
 
                 sqlStatements.Each(x => x.Print());
+                sqlCommandStatements.Each(x => x.PrintDump());
 
             }
         }
@@ -342,10 +355,12 @@ namespace ServiceStack.OrmLite.Tests
             //we count the number of sql statements generated instead.
 
             var sqlStatements = new List<string>();
+            var sqlCommandStatements = new List<SqlCommandDetails>();
             using (new OrmLiteResultsFilter
             {
                 SingleResult = new Person { Id = 1, FirstName = "Mocked", LastName = "Person", Age = 100 },
                 SqlFilter = sql => sqlStatements.Add(sql),
+                SqlCommandFilter = sql => sqlCommandStatements.Add(new SqlCommandDetails(sql)),
             })
             {
                 int i = 0;
@@ -358,12 +373,15 @@ namespace ServiceStack.OrmLite.Tests
 
                 i += 2; db.Save(new Person { Id = 11, FirstName = "Amy", LastName = "Winehouse", Age = 27 }); //1 Read + 1 Update
                 Assert.That(sqlStatements.Count, Is.EqualTo(i));
+                Assert.That(sqlCommandStatements.Count, Is.EqualTo(i));
 
                 i += 3; db.SaveAll(new[]{ new Person { Id = 14, FirstName = "Amy", LastName = "Winehouse", Age = 27 },
                                         new Person { Id = 15, FirstName = "Amy", LastName = "Winehouse", Age = 27 } }); //1 Read + 2 Update
                 Assert.That(sqlStatements.Count, Is.EqualTo(i));
+                Assert.That(sqlCommandStatements.Count, Is.EqualTo(i));
 
                 sqlStatements.Each(x => x.Print());
+                sqlCommandStatements.Each(x => x.PrintDump());
             }
         }
 
@@ -388,9 +406,11 @@ namespace ServiceStack.OrmLite.Tests
             };
 
             var sqlStatements = new List<string>();
+            var sqlCommandStatements = new List<SqlCommandDetails>();
             using (new OrmLiteResultsFilter
-                {
+            {
                     SqlFilter = sql => sqlStatements.Add(sql),
+                SqlCommandFilter = sql => sqlCommandStatements.Add(new SqlCommandDetails(sql)),
                     SingleResult = customer,
                     RefSingleResultFn = (dbCmd, refType) => customer.PrimaryAddress,
                     RefResultsFn = (dbCmd, refType) => customer.Orders,
@@ -405,14 +425,18 @@ namespace ServiceStack.OrmLite.Tests
 
                 i += 1; db.SaveReferences(customer, customer.PrimaryAddress);
                 Assert.That(sqlStatements.Count, Is.EqualTo(i));
+                Assert.That(sqlCommandStatements.Count, Is.EqualTo(i));
 
                 i += 2; db.SaveReferences(customer, customer.Orders);
                 Assert.That(sqlStatements.Count, Is.EqualTo(i));
+                Assert.That(sqlCommandStatements.Count, Is.EqualTo(i));
 
                 i += 3; var dbCustomer = db.LoadSingleById<Customer>(customer.Id);
                 Assert.That(sqlStatements.Count, Is.EqualTo(i));
+                Assert.That(sqlCommandStatements.Count, Is.EqualTo(i));
 
                 sqlStatements.Each(x => x.Print());
+                sqlCommandStatements.Each(x => x.PrintDump());
             }
         }
 
