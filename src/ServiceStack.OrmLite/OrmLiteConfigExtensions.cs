@@ -114,7 +114,7 @@ namespace ServiceStack.OrmLite
                     : propertyInfo.PropertyType;
 
                 Type treatAsType = null;
-                if (propertyType.IsEnum && propertyType.HasAttribute<FlagsAttribute>())
+                if (propertyType.IsEnumFlags())
                 {
                     treatAsType = Enum.GetUnderlyingType(propertyType);
                 }
@@ -189,9 +189,7 @@ namespace ServiceStack.OrmLite
                     modelDef.RowVersion = fieldDefinition;
             }
 
-            modelDef.SqlSelectAllFromTable = "SELECT {0} FROM {1} "
-                .Fmt(OrmLiteConfig.DialectProvider.GetColumnNames(modelDef),
-                     OrmLiteConfig.DialectProvider.GetQuotedTableName(modelDef));
+            modelDef.AfterInit();
 
             Dictionary<Type, ModelDefinition> snapshot, newCache;
             do

@@ -17,7 +17,7 @@ namespace ServiceStack.OrmLite.SqlServerTests.UseCase
         [Alias("Foo Column")]
         public String Foo { get; set; }
 
-        [Alias("Bar Column")]
+        [Alias("Bar Column °")]
         public String Bar { get; set; }
 
         //[Index]

@@ -118,5 +118,49 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(actual.HasValue);
             Assert.That(actual.Value.Date, Is.EqualTo(now.Date));
         }
+
+        [TestCase("2012-08-12 -08:00")]
+        [TestCase("2012-08-12 0:10:35 +12:00")]
+        [TestCase("2012-08-12 23:10:35.288546 -08:00")]
+        public void CanQueryDateTimeOffsetWithWhereExpression(string startTimeString)
+        {
+            var time = DateTimeOffset.Parse(startTimeString);
+            db.DropAndCreateTable<NullableDateTimeOffsetWithStartAndEndTime>();
+            db.Insert(new NullableDateTimeOffsetWithStartAndEndTime { StartTime = time.AddHours(-1), EndTime = time });
+            var expression = db.From<NullableDateTimeOffsetWithStartAndEndTime>()
+                .Where(p => p.StartTime == null || p.StartTime < time);
+
+            var result = db.LoadSelect(expression).First();
+            Assert.AreEqual(result.EndTime, time);
+        }
+
+        [TestCase("2012-08-12")]
+        [TestCase("2012-08-12 0:10:35")]
+        [TestCase("2012-08-12 23:10:35.288546")]
+        public void CanQueryDateTimeWithWhereExpression(string startTimeString)
+        {
+            var time = DateTime.Parse(startTimeString);
+            db.DropAndCreateTable<NullableDateTimeWithStartAndEndTime>();
+            db.Insert(new NullableDateTimeWithStartAndEndTime { StartTime = time.AddHours(-1), EndTime = time });
+            var expression = db.From<NullableDateTimeWithStartAndEndTime>()
+                .Where(p => p.StartTime == null || p.StartTime < time);
+
+            var result = db.LoadSelect(expression).First();
+            Assert.AreEqual(result.EndTime, time);
+        }
+
+        public class NullableDateTimeOffsetWithStartAndEndTime
+        {
+            public int Id { get; set; }
+            public DateTimeOffset? StartTime { get; set; }
+            public DateTimeOffset? EndTime { get; set; }
+        }
+
+        public class NullableDateTimeWithStartAndEndTime
+        {
+            public int Id { get; set; }
+            public DateTime? StartTime { get; set; }
+            public DateTime? EndTime { get; set; }
+        }
     }
 }

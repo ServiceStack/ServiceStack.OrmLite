@@ -71,6 +71,7 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Net" />
     <Reference Include="System.Runtime.Serialization">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
@@ -116,7 +117,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Model\SampleOrderLine.cs" />
-    <Compile Include="PerfTests\NorthwindPerfTests.cs" />
+    <Compile Include="PerfTests\NorthwindPerfTests.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="PerfTests\OrmLitePerfTests.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -125,13 +128,27 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="Scenarios\Northwind\DatabaseScenarioBase.cs" />
-    <Compile Include="Scenarios\Northwind\PerfTestBase.cs" />
-    <Compile Include="Scenarios\Northwind\ScenarioBase.cs" />
-    <Compile Include="Scenarios\Northwind\SelectNorthwindDataScenario.cs" />
-    <Compile Include="Scenarios\Northwind\InsertNorthwindDataScenario.cs" />
-    <Compile Include="Scenarios\Northwind\InsertNorthwindModelScenario.cs" />
-    <Compile Include="Scenarios\Northwind\SelectNorthwindSupplierScenario.cs" />
+    <Compile Include="Scenarios\Northwind\DatabaseScenarioBase.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Scenarios\Northwind\InsertNorthwindDataScenario.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Scenarios\Northwind\InsertNorthwindModelScenario.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Scenarios\Northwind\PerfTestBase.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Scenarios\Northwind\ScenarioBase.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Scenarios\Northwind\SelectNorthwindDataScenario.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Scenarios\Northwind\SelectNorthwindSupplierScenario.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Scenarios\OrmLite\OrmLiteScenrioConfig.cs" />
     <Compile Include="Scenarios\OrmLite\InsertModelWithFieldsOfDifferentTypesScenario.cs" />
     <Compile Include="Scenarios\OrmLite\InsertSampleOrderLineScenario.cs" />

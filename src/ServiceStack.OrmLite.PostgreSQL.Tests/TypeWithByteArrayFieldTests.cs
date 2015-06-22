@@ -5,6 +5,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
 {
     public class TypeWithByteArrayFieldTests : OrmLiteTestBase
     {
+        public TypeWithByteArrayFieldTests() : base(Dialect.PostgreSql) { }
         TypeWithByteArrayField getSampleObject()
         {
             var testByteArray = new byte[256];
@@ -110,10 +111,10 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         private static void _selectAndVerifyManually(TypeWithByteArrayField orig, System.Data.IDbConnection db)
         {
             using(var cmd = db.CreateCommand()) {
-                cmd.CommandText = @"select ""Content"" from ""TypeWithByteArrayField"" where ""Id"" = 1 --manual select";
+                cmd.CommandText = @"select ""content"" from ""type_with_byte_array_field"" where ""id"" = 1 --manual select";
                 using(var reader = cmd.ExecuteReader()) {
                     reader.Read();
-                    var ba = reader["Content"] as byte[];
+                    var ba = reader["content"] as byte[];
                     Assert.AreEqual(orig.Content.Length, ba.Length);
                     Assert.AreEqual(orig.Content, ba);
                 }
@@ -123,7 +124,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         private static void _insertManually(TypeWithByteArrayField orig, System.Data.IDbConnection db)
         {
             using(var cmd = db.CreateCommand()) {
-                cmd.CommandText = @"INSERT INTO ""TypeWithByteArrayField"" (""Id"",""Content"") VALUES (@Id, @Content) --manual parameterized insert";
+                cmd.CommandText = @"INSERT INTO ""type_with_byte_array_field"" (""id"",""content"") VALUES (@Id, @Content) --manual parameterized insert";
 
                 var p_id = cmd.CreateParameter();
                 p_id.ParameterName = "@Id";

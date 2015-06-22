@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <id>ServiceStack.OrmLite.MySql.Signed</id>
+    <title>ServiceStack.OrmLite.MySql.Signed</title>
+    <version>4.0.0</version>
+    <authors>Service Stack, Thomas Grassauer</authors> 
+    <owners>Service Stack, Thomas Grassauer</owners>
+    <description>
+        Light, simple and fast convention-based code-first POCO ORM for MySQL. 
+		Support for Creating and Dropping Table Schemas from POCOs, Complex Property types transparently stored in schemaless text blobs in MySQL.
+    </description> 
+    <projectUrl>https://github.com/ServiceStack/ServiceStack.OrmLite</projectUrl>
+    <licenseUrl>https://servicestack.net/terms</licenseUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <iconUrl>https://servicestack.net/img/logo-32.png</iconUrl>
+    <tags>MySql OrmLite POCO Code-First Orm Schema-less Blobs</tags>
+    <language>en-US</language> 
+    <copyright>ServiceStack 2013 and contributors</copyright>
+    <dependencies>
+      <dependency id="MySql.Data" version="6.9.5" />
+      <dependency id="ServiceStack.OrmLite.Signed" version="4.0" />
+    </dependencies> 
+  </metadata> 
+  <files>
+    <file src="lib\**\*.*" target="lib" />
+    <file src="..\..\src\ServiceStack.OrmLite.MySql\**\*.cs" target="src\ServiceStack.OrmLite.MySql" />
+  </files>
+</package>

@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.VistaDB
 {
@@ -40,15 +41,13 @@ namespace ServiceStack.OrmLite.VistaDB
             base.IntColumnDefinition = "INT";
             base.DefaultValueFormat = " DEFAULT {0}";
             base.TimeColumnDefinition = "BIGINT"; //TIME"; //SQLSERVER 2008+
+            base.MaxStringColumnDefinition = "VARCHAR(MAX)";
 
             base.InitColumnTypeMap();           
         }
 
         public override void OnAfterInitColumnTypeMap()
         {
-            DbTypeMap.ColumnTypeMap.Remove(typeof(object));
-            DbTypeMap.ColumnDbTypeMap.Remove(typeof(object));
-            
             DbTypeMap.Set<TimeSpan>(DbType.DateTime, TimeColumnDefinition);
             DbTypeMap.Set<TimeSpan?>(DbType.DateTime, TimeColumnDefinition);
         }
@@ -99,7 +98,7 @@ namespace ServiceStack.OrmLite.VistaDB
 
         public override string ToCreateTableStatement(Type tableType)
         {
-            var modelDefinition = GetModelDefinition(tableType);
+            var modelDefinition = OrmLiteUtils.GetModelDefinition(tableType);
             var quotedTableName = this.GetQuotedTableName(modelDefinition);
 
             var columns = new StringBuilder();
@@ -133,7 +132,7 @@ namespace ServiceStack.OrmLite.VistaDB
                 }
                 else if (fd.ForeignKey != null)
                 {
-                    var foreignModelDefinition = GetModelDefinition(fd.ForeignKey.ReferenceType);
+                    var foreignModelDefinition = OrmLiteUtils.GetModelDefinition(fd.ForeignKey.ReferenceType);
                     constraints.AppendFormat("ALTER TABLE {0} ADD CONSTRAINT {1} FOREIGN KEY ({2}) REFERENCES {3} ({4}){5}{6};\n",
                         quotedTableName,
 				        this.GetQuotedName(fd.ForeignKey.GetForeignKeyName(modelDefinition, foreignModelDefinition, this.NamingStrategy, fd)),
@@ -156,10 +155,16 @@ namespace ServiceStack.OrmLite.VistaDB
             int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
         {
             string fieldDefinition;
-            if (fieldType == typeof(string))
-                fieldDefinition = string.Format(this.StringLengthColumnDefinitionFormat, fieldLength.GetValueOrDefault(this.DefaultStringLength));
+            if (fieldType == typeof (string))
+            {
+                fieldDefinition = fieldLength == StringLengthAttribute.MaxText
+                    ? MaxStringColumnDefinition
+                    : string.Format(StringLengthColumnDefinitionFormat, fieldLength.GetValueOrDefault(DefaultStringLength));
+            }
             else if (!this.DbTypeMap.ColumnTypeMap.TryGetValue(fieldType, out fieldDefinition))
+            {
                 fieldDefinition = this.GetUndefinedColumnDefinition(fieldType, fieldLength);
+            }
             
             var sql = new StringBuilder();
             sql.AppendFormat("{0} {1}", this.GetQuotedColumnName(fieldName), fieldDefinition);
@@ -315,7 +320,7 @@ namespace ServiceStack.OrmLite.VistaDB
             return new VistaDbExpression<T>(this);
         }
 
-        public override bool DoesTableExist(IDbCommand dbCmd, string tableName)
+        public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
         {
             dbCmd.CommandText = "SELECT COUNT(*) FROM [database schema] WHERE typeid = 1 AND name = {0}"
                 .SqlFmt(tableName);
@@ -354,7 +359,7 @@ namespace ServiceStack.OrmLite.VistaDB
                 {
                     var foreignKeyName = fieldDef.ForeignKey.GetForeignKeyName(
                         modelDef,
-                        GetModelDefinition(fieldDef.ForeignKey.ReferenceType),
+                        OrmLiteUtils.GetModelDefinition(fieldDef.ForeignKey.ReferenceType),
                         NamingStrategy,
                         fieldDef);
 

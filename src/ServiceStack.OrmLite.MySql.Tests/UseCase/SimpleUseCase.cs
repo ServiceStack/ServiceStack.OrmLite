@@ -16,7 +16,7 @@ namespace ServiceStack.OrmLite.MySql.Tests.UseCase
             OrmLiteConfig.DialectProvider = MySqlDialectProvider.Instance;
 		}
 
-		public class User
+		public class UserWithIndex
 		{
 			public long Id { get; set; }
 
@@ -31,13 +31,13 @@ namespace ServiceStack.OrmLite.MySql.Tests.UseCase
 		{
             using (IDbConnection db = ConfigurationManager.ConnectionStrings["testDb"].ConnectionString.OpenDbConnection())
 			{
-				db.CreateTable<User>(true);
+				db.CreateTable<UserWithIndex>(true);
 
-				db.Insert(new User { Id = 1, Name = "A", CreatedDate = DateTime.Now });
-				db.Insert(new User { Id = 2, Name = "B", CreatedDate = DateTime.Now });
-				db.Insert(new User { Id = 3, Name = "B", CreatedDate = DateTime.Now });
+				db.Insert(new UserWithIndex { Id = 1, Name = "A", CreatedDate = DateTime.Now });
+				db.Insert(new UserWithIndex { Id = 2, Name = "B", CreatedDate = DateTime.Now });
+				db.Insert(new UserWithIndex { Id = 3, Name = "B", CreatedDate = DateTime.Now });
 
-				var rowsB = db.SelectFmt<User>("Name = {0}", "B");
+				var rowsB = db.SelectFmt<UserWithIndex>("Name = {0}", "B");
 
 				Assert.That(rowsB, Has.Count.EqualTo(2));
 
@@ -46,10 +46,10 @@ namespace ServiceStack.OrmLite.MySql.Tests.UseCase
 
 				rowsB.ForEach(x => db.Delete(x));
 
-				rowsB = db.SelectFmt<User>("Name = {0}", "B");
+				rowsB = db.SelectFmt<UserWithIndex>("Name = {0}", "B");
 				Assert.That(rowsB, Has.Count.EqualTo(0));
 
-				var rowsLeft = db.Select<User>();
+				var rowsLeft = db.Select<UserWithIndex>();
 				Assert.That(rowsLeft, Has.Count.EqualTo(1));
 
 				Assert.That(rowsLeft[0].Name, Is.EqualTo("A"));

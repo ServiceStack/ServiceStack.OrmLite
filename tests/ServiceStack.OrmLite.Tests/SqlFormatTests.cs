@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using NUnit.Framework;
+using ServiceStack.DataAnnotations;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
@@ -73,5 +74,17 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That("' or Field LIKE '%".SqlParam(), Is.EqualTo("'' or Field LIKE ''%"));
         }
         
+        [Alias("profile_extended")]
+        public class ProflieExtended
+        {
+            public int Id { get; set; }
+        }
+
+	    [Test]
+	    public void Does_allow_illegal_tokens_in_quoted_MySql_table_names()
+	    {
+            var sql = "FROM `profile_extended`";
+	        sql.SqlVerifyFragment();
+	    }
     }
 }

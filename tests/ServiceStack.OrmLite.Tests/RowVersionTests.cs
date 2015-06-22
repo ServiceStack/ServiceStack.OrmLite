@@ -19,6 +19,11 @@ namespace ServiceStack.OrmLite.Tests
         public ulong RowVersion { get; set; }
     }
 
+    public class ModelWithRowVersionBase : ModelWithRowVersion
+    {
+        public string MoreData { get; set; }
+    }
+
     public class ModelWithRowVersionAlias
     {
         [AutoIncrement]
@@ -80,6 +85,7 @@ namespace ServiceStack.OrmLite.Tests
             using (var dbConn = OpenDbConnection())
             {
                 dbConn.DropAndCreateTable<ModelWithRowVersion>();
+                dbConn.DropAndCreateTable<ModelWithRowVersionBase>();
             }
         }
 
@@ -253,6 +259,20 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        public void Can_update_with_current_rowversion_base()
+        {
+            var rowId = db.Insert(new ModelWithRowVersionBase { Text = "Two", MoreData = "Fred" }, selectIdentity: true);
+            var row = db.SingleById<ModelWithRowVersionBase>(rowId);
+
+            row.Text = "Three";
+            db.Update(row);
+
+            var actual = db.SingleById<ModelWithRowVersionBase>(rowId);
+            Assert.That(actual.Text, Is.EqualTo("Three"));
+            Assert.That(actual.RowVersion, Is.Not.EqualTo(row.RowVersion));
+        }
+
+        [Test]
         public void Can_update_multiple_with_current_rowversions()
         {
             var rowIds = new[]
@@ -356,6 +376,50 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        public void Update_with_outdated_rowversionbase_throws()
+        {
+            var rowId = db.Insert(new ModelWithRowVersionBase { Text = "Five", MoreData = "George" }, selectIdentity: true);
+            var row = db.SingleById<ModelWithRowVersionBase>(rowId);
+            TouchRowBase(rowId);
+
+            row.Text = "Six";
+            Assert.Throws<OptimisticConcurrencyException>(() => db.Update(row));
+
+            var actual = db.SingleById<ModelWithRowVersionBase>(rowId);
+            Assert.That(actual.Text, Is.Not.EqualTo("Six"));
+        }
+
+        [Test]
+        public void Update_with_outdated_rowversion_base_and_explicit_id_check_bypasses_rowversion_check()
+        {
+            var rowId = db.Insert(new ModelWithRowVersionBase { Text = "Two", MoreData = "Fred" }, selectIdentity: true);
+            var row = db.SingleById<ModelWithRowVersionBase>(rowId);
+            TouchRowBase(rowId);
+
+            row.Text = "Six";
+            db.Update(row, x => x.Id == rowId);
+
+            var actual = db.SingleById<ModelWithRowVersionBase>(rowId);
+            Assert.That(actual.Text, Is.EqualTo("Six"));
+            Assert.That(actual.RowVersion, Is.Not.EqualTo(row.RowVersion));
+        }
+
+        [Test]
+        public void Update_with_outdated_rowversion_base_and_explicit_rowversion_check_bypasses_update_with_no_throw()
+        {
+            var rowId = db.Insert(new ModelWithRowVersionBase { Text = "Two", MoreData = "Fred" }, selectIdentity: true);
+            var row = db.SingleById<ModelWithRowVersionBase>(rowId);
+            TouchRowBase(rowId);
+
+            row.Text = "Six";
+            db.Update(row, x => x.Id == rowId && x.RowVersion == row.RowVersion);
+
+            var actual = db.SingleById<ModelWithRowVersionBase>(rowId);
+            Assert.That(actual.Text, Is.EqualTo("Touched"));
+            Assert.That(actual.RowVersion, Is.Not.EqualTo(row.RowVersion));
+        }
+
+        [Test]
         public void Update_multiple_with_single_outdated_rowversion_throws_and_all_changes_are_rejected()
         {
             var rowIds = new[]
@@ -454,6 +518,28 @@ namespace ServiceStack.OrmLite.Tests
             var row = db.SingleById<ModelWithRowVersion>(rowId);
             row.Text = "Touched";
             db.Update(row);
+        }
+
+        private void TouchRowBase(long rowId)
+        {
+            var row = db.SingleById<ModelWithRowVersionBase>(rowId);
+            row.Text = "Touched";
+            db.Update(row);
+        }
+
+        [Schema("Schema")]
+        public class SchemaWithRowVersion
+        {
+            [AutoIncrement]
+            public int Id { get; set; }
+            public string RandomStringProperty { get; set; }
+            public ulong RowVersion { get; set; }
+        }
+
+        [Test]
+        public void CreateNamedSchemaWithRowVersionClass()
+        {
+            db.DropAndCreateTable<SchemaWithRowVersion>();
         }
     }
 }

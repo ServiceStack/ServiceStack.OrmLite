@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -24,11 +25,14 @@ namespace ServiceStack.OrmLite
         IList<string> insertFields = new List<string>();
 
         private string sep = string.Empty;
-        private bool useFieldName = false;
+        protected bool useFieldName = false;
+        protected bool selectDistinct = false;
+        protected bool CustomSelect { get; set; }
         private ModelDefinition modelDef;
         public bool PrefixFieldWithTableName { get; set; }
         public bool WhereStatementWithoutWhereString { get; set; }
         public IOrmLiteDialectProvider DialectProvider { get; set; }
+        public List<IDbDataParameter> Params { get; set; } 
 
         protected string Sep
         {
@@ -41,6 +45,7 @@ namespace ServiceStack.OrmLite
             PrefixFieldWithTableName = false;
             WhereStatementWithoutWhereString = false;
             DialectProvider = dialectProvider;
+            Params = new List<IDbDataParameter>();
             tableDefs.Add(modelDef);
         }
 
@@ -54,6 +59,8 @@ namespace ServiceStack.OrmLite
             to.underlyingExpression = underlyingExpression;
             to.orderByProperties = orderByProperties;
             to.selectExpression = selectExpression;
+            to.selectDistinct = selectDistinct;
+            to.CustomSelect = CustomSelect;
             to.fromExpression = fromExpression;
             to.whereExpression = whereExpression;
             to.groupBy = groupBy;
@@ -64,6 +71,7 @@ namespace ServiceStack.OrmLite
             to.modelDef = modelDef;
             to.PrefixFieldWithTableName = PrefixFieldWithTableName;
             to.WhereStatementWithoutWhereString = WhereStatementWithoutWhereString;
+            to.Params = new List<IDbDataParameter>(Params);
             return to;
         }
 
@@ -83,14 +91,22 @@ namespace ServiceStack.OrmLite
         /// </param>
         public virtual SqlExpression<T> Select(string selectExpression)
         {
-            if (string.IsNullOrEmpty(selectExpression))
+            if (selectExpression != null)
+                selectExpression.SqlVerifyFragment();
+    
+            return UnsafeSelect(selectExpression);
+        }
+
+        public virtual SqlExpression<T> UnsafeSelect(string rawSelect)
+        {
+            if (string.IsNullOrEmpty(rawSelect))
             {
                 BuildSelectExpression(string.Empty, false);
             }
             else
             {
-                selectExpression.SqlVerifyFragment();
-                this.selectExpression = "SELECT " + selectExpression;
+                this.selectExpression = "SELECT " + rawSelect;
+                this.CustomSelect = true;
             }
             return this;
         }
@@ -108,6 +124,25 @@ namespace ServiceStack.OrmLite
         {
             sep = string.Empty;
             useFieldName = true;
+            CustomSelect = true;
+            BuildSelectExpression(Visit(fields).ToString(), false);
+            return this;
+        }
+
+        public virtual SqlExpression<T> Select<Table1, Table2>(Expression<Func<Table1, Table2, object>> fields)
+        {
+            sep = string.Empty;
+            useFieldName = true;
+            CustomSelect = true;
+            BuildSelectExpression(Visit(fields).ToString(), false);
+            return this;
+        }
+
+        public virtual SqlExpression<T> Select<Table1, Table2, Table3>(Expression<Func<Table1, Table2, Table3, object>> fields)
+        {
+            sep = string.Empty;
+            useFieldName = true;
+            CustomSelect = true;
             BuildSelectExpression(Visit(fields).ToString(), false);
             return this;
         }
@@ -116,23 +151,55 @@ namespace ServiceStack.OrmLite
         {
             sep = string.Empty;
             useFieldName = true;
+            CustomSelect = true;
             BuildSelectExpression(Visit(fields).ToString(), true);
+            return this;
+        }
+
+        public virtual SqlExpression<T> SelectDistinct<Table1, Table2>(Expression<Func<Table1, Table2, object>> fields)
+        {
+            sep = string.Empty;
+            useFieldName = true;
+            CustomSelect = true;
+            BuildSelectExpression(Visit(fields).ToString(), true);
+            return this;
+        }
+
+        public virtual SqlExpression<T> SelectDistinct<Table1, Table2, Table3>(Expression<Func<Table1, Table2, Table3, object>> fields)
+        {
+            sep = string.Empty;
+            useFieldName = true;
+            CustomSelect = true;
+            BuildSelectExpression(Visit(fields).ToString(), true);
+            return this;
+        }
+
+        public virtual SqlExpression<T> SelectDistinct()
+        {
+            selectDistinct = true;
             return this;
         }
 
         public virtual SqlExpression<T> From(string tables)
         {
-            if (string.IsNullOrEmpty(tables))
+            if (tables != null)
+                tables.SqlVerifyFragment();
+
+            return UnsafeFrom(tables);
+        }
+
+        public virtual SqlExpression<T> UnsafeFrom(string rawFrom)
+        {
+            if (string.IsNullOrEmpty(rawFrom))
             {
                 FromExpression = null;
             }
             else
             {
-                tables.SqlVerifyFragment();
-                var singleTable = tables.ToLower().IndexOfAny("join", ",") == -1;
+                var singleTable = rawFrom.ToLower().IndexOfAny("join", ",") == -1;
                 FromExpression = singleTable
-                    ? " \nFROM " + DialectProvider.GetQuotedTableName(tables)
-                    : " \nFROM " + tables;
+                    ? " \nFROM " + DialectProvider.GetQuotedTableName(rawFrom)
+                    : " \nFROM " + rawFrom;
             }
 
             return this;
@@ -145,27 +212,45 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
+        public virtual SqlExpression<T> UnsafeWhere(string rawSql, params object[] filterParams)
+        {
+            AppendToWhere("AND", rawSql.SqlFmt(filterParams));
+            return this;
+        }
+
         public virtual SqlExpression<T> Where(string sqlFilter, params object[] filterParams)
         {
-            AppendToWhere("AND", sqlFilter.SqlFmt(filterParams).SqlVerifyFragment());
+            AppendToWhere("AND", sqlFilter.SqlVerifyFragment().SqlFmt(filterParams));
+            return this;
+        }
+
+        public virtual SqlExpression<T> UnsafeAnd(string rawSql, params object[] filterParams)
+        {
+            AppendToWhere("AND", rawSql.SqlFmt(filterParams));
             return this;
         }
 
         public virtual SqlExpression<T> And(string sqlFilter, params object[] filterParams)
         {
-            AppendToWhere("AND", sqlFilter.SqlFmt(filterParams).SqlVerifyFragment());
+            AppendToWhere("AND", sqlFilter.SqlVerifyFragment().SqlFmt(filterParams));
+            return this;
+        }
+
+        public virtual SqlExpression<T> UnsafeOr(string rawSql, params object[] filterParams)
+        {
+            AppendToWhere("OR", rawSql.SqlFmt(filterParams));
             return this;
         }
 
         public virtual SqlExpression<T> Or(string sqlFilter, params object[] filterParams)
         {
-            AppendToWhere("OR", sqlFilter.SqlFmt(filterParams).SqlVerifyFragment());
+            AppendToWhere("OR", sqlFilter.SqlVerifyFragment().SqlFmt(filterParams));
             return this;
         }
 
         public virtual SqlExpression<T> AddCondition(string condition, string sqlFilter, params object[] filterParams)
         {
-            AppendToWhere(condition, sqlFilter.SqlFmt(filterParams).SqlVerifyFragment());
+            AppendToWhere(condition, sqlFilter.SqlVerifyFragment().SqlFmt(filterParams));
             return this;
         }
 
@@ -243,7 +328,6 @@ namespace ServiceStack.OrmLite
 
         public virtual SqlExpression<T> Having(Expression<Func<T, bool>> predicate)
         {
-
             if (predicate != null)
             {
                 useFieldName = true;
@@ -272,44 +356,195 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
-        public virtual SqlExpression<T> OrderBy<TKey>(Expression<Func<T, TKey>> keySelector)
+        public ModelDefinition GetModelDefinition(FieldDefinition fieldDef)
+        {
+            if (modelDef.FieldDefinitions.Any(x => x == fieldDef))
+                return modelDef;
+
+            return tableDefs
+                .FirstOrDefault(tableDef => tableDef.FieldDefinitions.Any(x => x == fieldDef));
+        }
+
+        private SqlExpression<T> OrderByFields(string orderBySuffix, FieldDefinition[] fields)
+        {
+            orderByProperties.Clear();
+
+            var sbOrderBy = new StringBuilder();
+            foreach (var field in fields)
+            {
+                var tableDef = GetModelDefinition(field);
+                var qualifiedName = modelDef != null
+                    ? DialectProvider.GetQuotedColumnName(tableDef, field)
+                    : DialectProvider.GetQuotedColumnName(field);
+
+                if (sbOrderBy.Length > 0)
+                    sbOrderBy.Append(", ");
+
+                sbOrderBy.Append(qualifiedName + orderBySuffix);
+            }
+
+            this.orderBy = sbOrderBy.Length == 0
+                ? null
+                : "ORDER BY " + sbOrderBy;
+            return this;
+        }
+
+        static class OrderBySuffix
+        {
+            public const string Asc = "";
+            public const string Desc = " DESC";
+        }
+
+        public virtual SqlExpression<T> OrderByFields(params FieldDefinition[] fields)
+        {
+            return OrderByFields(OrderBySuffix.Asc, fields);
+        }
+
+        public virtual SqlExpression<T> OrderByFieldsDescending(params FieldDefinition[] fields)
+        {
+            return OrderByFields(OrderBySuffix.Desc, fields);
+        }
+
+        private SqlExpression<T> OrderByFields(string orderBySuffix, string[] fieldNames)
+        {
+            orderByProperties.Clear();
+
+            var sbOrderBy = new StringBuilder();
+            foreach (var fieldName in fieldNames)
+            {
+                var reverse = fieldName.StartsWith("-");
+                var useSuffix = reverse 
+                    ? (orderBySuffix == OrderBySuffix.Asc ? OrderBySuffix.Desc : OrderBySuffix.Asc)
+                    : orderBySuffix;
+                var useName = reverse ? fieldName.Substring(1) : fieldName;
+
+                var field = FirstMatchingField(useName);
+                if (field == null)
+                    throw new ArgumentException("Could not find field " + useName);
+                var qualifiedName = DialectProvider.GetQuotedColumnName(field.Item1, field.Item2);
+
+                if (sbOrderBy.Length > 0)
+                    sbOrderBy.Append(", ");
+
+                sbOrderBy.Append(qualifiedName + useSuffix);
+            }
+
+            this.orderBy = sbOrderBy.Length == 0
+                ? null
+                : "ORDER BY " + sbOrderBy;
+            return this;
+        }
+
+        public virtual SqlExpression<T> OrderByFields(params string[] fieldNames)
+        {
+            return OrderByFields("", fieldNames);
+        }
+
+        public virtual SqlExpression<T> OrderByFieldsDescending(params string[] fieldNames)
+        {
+            return OrderByFields(" DESC", fieldNames);
+        }
+
+        public virtual SqlExpression<T> OrderBy(Expression<Func<T, object>> keySelector)
+        {
+            return OrderByInternal(keySelector);
+        }
+
+        public virtual SqlExpression<T> OrderBy<Table>(Expression<Func<Table, object>> keySelector)
+        {
+            return OrderByInternal(keySelector);
+        }
+
+        private SqlExpression<T> OrderByInternal(Expression keySelector)
         {
             sep = string.Empty;
             useFieldName = true;
             orderByProperties.Clear();
-            var property = Visit(keySelector).ToString();
-            orderByProperties.Add(property + " ASC");
+            var fields = Visit(keySelector).ToString();
+            orderByProperties.Add(fields);
             BuildOrderByClauseInternal();
             return this;
         }
 
-        public virtual SqlExpression<T> ThenBy<TKey>(Expression<Func<T, TKey>> keySelector)
+        public virtual SqlExpression<T> ThenBy(string orderBy)
+        {
+            orderBy.SqlVerifyFragment();
+            orderByProperties.Add(orderBy);
+            BuildOrderByClauseInternal();
+            return this;
+        }
+
+        public virtual SqlExpression<T> ThenBy(Expression<Func<T, object>> keySelector)
+        {
+            return ThenByInternal(keySelector);
+        }
+
+        public virtual SqlExpression<T> ThenBy<Table>(Expression<Func<Table, object>> keySelector)
+        {
+            return ThenByInternal(keySelector);
+        }
+
+        private SqlExpression<T> ThenByInternal(Expression keySelector)
         {
             sep = string.Empty;
             useFieldName = true;
-            var property = Visit(keySelector).ToString();
-            orderByProperties.Add(property + " ASC");
+            var fields = Visit(keySelector).ToString();
+            orderByProperties.Add(fields);
             BuildOrderByClauseInternal();
             return this;
         }
 
-        public virtual SqlExpression<T> OrderByDescending<TKey>(Expression<Func<T, TKey>> keySelector)
+        public virtual SqlExpression<T> OrderByDescending(Expression<Func<T, object>> keySelector)
+        {
+            return OrderByDescendingInternal(keySelector);
+        }
+
+        public virtual SqlExpression<T> OrderByDescending<Table>(Expression<Func<Table, object>> keySelector)
+        {
+            return OrderByDescendingInternal(keySelector);
+        }
+
+        private SqlExpression<T> OrderByDescendingInternal(Expression keySelector)
         {
             sep = string.Empty;
             useFieldName = true;
             orderByProperties.Clear();
-            var property = Visit(keySelector).ToString();
-            orderByProperties.Add(property + " DESC");
+            var fields = Visit(keySelector).ToString().Split(',');
+            foreach (var field in fields)
+            {
+                orderByProperties.Add(field.Trim() + " DESC");
+            }
             BuildOrderByClauseInternal();
             return this;
         }
 
-        public virtual SqlExpression<T> ThenByDescending<TKey>(Expression<Func<T, TKey>> keySelector)
+        public virtual SqlExpression<T> ThenByDescending(string orderBy)
+        {
+            orderBy.SqlVerifyFragment();
+            orderByProperties.Add(orderBy + " DESC");
+            BuildOrderByClauseInternal();
+            return this;
+        }
+
+        public virtual SqlExpression<T> ThenByDescending(Expression<Func<T, object>> keySelector)
+        {
+            return ThenByDescendingInternal(keySelector);
+        }
+
+        public virtual SqlExpression<T> ThenByDescending<Table>(Expression<Func<Table, object>> keySelector)
+        {
+            return ThenByDescendingInternal(keySelector);
+        }
+
+        private SqlExpression<T> ThenByDescendingInternal(Expression keySelector)
         {
             sep = string.Empty;
             useFieldName = true;
-            var property = Visit(keySelector).ToString();
-            orderByProperties.Add(property + " DESC");
+            var fields = Visit(keySelector).ToString().Split(',');
+            foreach (var field in fields)
+            {
+                orderByProperties.Add(field.Trim() + " DESC");
+            }
             BuildOrderByClauseInternal();
             return this;
         }
@@ -492,9 +727,9 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
-        public string SqlTable(string tableName)
+        public string SqlTable(ModelDefinition modelDef)
         {
-            return DialectProvider.GetQuotedTableName(tableName);
+            return DialectProvider.GetQuotedTableName(modelDef);
         }
 
         public string SqlColumn(string columnName)
@@ -514,9 +749,14 @@ namespace ServiceStack.OrmLite
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
+                if (fieldDef.ShouldSkipUpdate()) continue;
+                if (fieldDef.IsRowVersion) continue;
                 if (updateFields.Count > 0 && !updateFields.Contains(fieldDef.Name)) continue; // added
+
                 var value = fieldDef.GetValue(item);
-                if (excludeDefaults && (value == null || value.Equals(value.GetType().GetDefaultValue()))) continue; //GetDefaultValue?
+                if (excludeDefaults
+                    && (value == null || (!fieldDef.IsNullable && value.Equals(value.GetType().GetDefaultValue()))))
+                    continue;
 
                 fieldDef.GetQuotedValue(item, DialectProvider);
 
@@ -528,6 +768,9 @@ namespace ServiceStack.OrmLite
                     .Append("=")
                     .Append(DialectProvider.GetQuotedValue(value, fieldDef.FieldType));
             }
+
+            if (setFields.Length == 0)
+                throw new ArgumentException("No non-null or non-default values were provided for type: " + typeof(T).Name);
 
             return string.Format("UPDATE {0} SET {1} {2}",
                 DialectProvider.GetQuotedTableName(modelDef), setFields, WhereExpression);
@@ -623,7 +866,7 @@ namespace ServiceStack.OrmLite
         {
             get
             {
-                return orderBy;
+                return string.IsNullOrEmpty(orderBy) ? "" : "\n" + orderBy;
             }
             set
             {
@@ -658,13 +901,13 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        protected internal ModelDefinition ModelDef
+        public ModelDefinition ModelDef
         {
             get
             {
                 return modelDef;
             }
-            set
+            protected set
             {
                 modelDef = value;
             }
@@ -806,7 +1049,7 @@ namespace ServiceStack.OrmLite
                     var rightPartialSql = right as PartialSqlString;
                     if (rightPartialSql == null)
                     {
-                        right = ConvertToEnum(leftEnum.EnumType, right.ToString(), right);
+                        right = DialectProvider.GetQuotedValue(right, leftEnum.EnumType);
                     }
                 }
                 else if (leftNeedsCoercing)
@@ -814,7 +1057,7 @@ namespace ServiceStack.OrmLite
                     var leftPartialSql = left as PartialSqlString;
                     if (leftPartialSql == null)
                     {
-                        left = ConvertToEnum(rightEnum.EnumType, left.ToString(), left);
+                        left = DialectProvider.GetQuotedValue(left, rightEnum.EnumType);
                     }
                 }
                 else if (left as PartialSqlString == null && right as PartialSqlString == null)
@@ -840,16 +1083,6 @@ namespace ServiceStack.OrmLite
                 default:
                     return new PartialSqlString("(" + left + sep + operand + sep + right + ")");
             }
-        }
-
-        private string ConvertToEnum(Type enumType, string enumStr, object otherExpr)
-        {
-            //enum value was returned by Visit(b.Right)
-            long numvericVal;
-            var result = Int64.TryParse(enumStr, out numvericVal)
-                ? DialectProvider.GetQuotedValue(Enum.ToObject(enumType, numvericVal).ToString(), typeof(string))
-                : DialectProvider.GetQuotedValue(otherExpr, otherExpr.GetType());
-            return result;
         }
 
         protected virtual object VisitMemberAccess(MemberExpression m)
@@ -919,8 +1152,6 @@ namespace ServiceStack.OrmLite
             return p.Name;
         }
 
-        public Dictionary<string, object> Params = new Dictionary<string, object>();
-
         protected virtual object VisitConstant(ConstantExpression c)
         {
             if (c.Value == null)
@@ -940,7 +1171,7 @@ namespace ServiceStack.OrmLite
                         return !((bool)o);
 
                     if (IsFieldName(o))
-                        o = o + "=" + GetQuotedTrueValue();
+                        return new PartialSqlString(o + "=" + GetQuotedFalseValue());
 
                     return new PartialSqlString("NOT (" + o + ")");
                 case ExpressionType.Convert:
@@ -957,11 +1188,11 @@ namespace ServiceStack.OrmLite
         {
             if (m.Object != null && m.Object as MethodCallExpression != null)
                 return IsColumnAccess(m.Object as MethodCallExpression);
-
+            
             var exp = m.Object as MemberExpression;
             return exp != null
                 && exp.Expression != null
-                && exp.Expression.Type == typeof(T)
+                && IsJoinedTable(exp.Expression.Type)
                 && exp.Expression.NodeType == ExpressionType.Parameter;
         }
 
@@ -1069,7 +1300,7 @@ namespace ServiceStack.OrmLite
                     : memberName;
 
                 return PrefixFieldWithTableName 
-                    ? DialectProvider.GetQuotedColumnName(tableDef.ModelName, fieldName)
+                    ? DialectProvider.GetQuotedColumnName(tableDef, fieldName)
                     : DialectProvider.GetQuotedColumnName(fieldName);
             }
             return memberName;
@@ -1090,12 +1321,17 @@ namespace ServiceStack.OrmLite
 
         protected bool IsFieldName(object quotedExp)
         {
-            FieldDefinition fd =
-                modelDef.FieldDefinitions.
-                    FirstOrDefault(x =>
-                        DialectProvider.
-                        GetQuotedColumnName(x.FieldName) == quotedExp.ToString());
-            return (fd != default(FieldDefinition));
+            var fieldExpr = quotedExp.ToString().StripTablePrefixes();
+            var unquotedExpr = fieldExpr.StripQuotes();
+
+            var isTableField = modelDef.FieldDefinitionsArray.Any(x => x.FieldName == unquotedExpr);
+            if (isTableField)
+                return true;
+
+            var isJoinedField = tableDefs.Any(t => t.FieldDefinitionsArray
+                .Any(x => x.FieldName == unquotedExpr));
+
+            return isJoinedField;
         }
 
         protected object GetTrueExpression()
@@ -1120,8 +1356,10 @@ namespace ServiceStack.OrmLite
 
         private void BuildSelectExpression(string fields, bool distinct)
         {
+            selectDistinct = distinct;
+
             selectExpression = string.Format("SELECT {0}{1}",
-                (distinct ? "DISTINCT " : ""),
+                (selectDistinct ? "DISTINCT " : ""),
                 (string.IsNullOrEmpty(fields) ?
                     DialectProvider.GetColumnNames(modelDef) :
                     fields));
@@ -1370,10 +1608,36 @@ namespace ServiceStack.OrmLite
             }
             return new PartialSqlString(statement);
         }
+
+        public IDbDataParameter CreateParam(string name,
+            object value = null,
+            ParameterDirection direction = ParameterDirection.Input,
+            DbType? dbType = null)
+        {
+            var p = new OrmLiteDataParameter {
+                ParameterName = DialectProvider.GetParam(name), 
+                Direction = direction
+            };
+            if (value != null)
+            {
+                p.Value = value;
+                p.DbType = DialectProvider.GetColumnDbType(value.GetType());
+            }
+            if (dbType != null)
+                p.DbType = dbType.Value;
+
+            if (p.DbType == DbType.String)
+                p.Size = DialectProvider.DefaultStringLength;
+
+            return p;
+        }
+
     }
 
     public interface ISqlExpression
     {
+        List<IDbDataParameter> Params { get; }
+
         string ToSelectStatement();
         string SelectInto<TModel>();
     }
@@ -1404,5 +1668,18 @@ namespace ServiceStack.OrmLite
         public Type EnumType { get; private set; }
     }
 
+    public class OrmLiteDataParameter : IDbDataParameter
+    {
+        public DbType DbType { get; set; }
+        public ParameterDirection Direction { get; set; }
+        public bool IsNullable { get; set; }
+        public string ParameterName { get; set; }
+        public string SourceColumn { get; set; }
+        public DataRowVersion SourceVersion { get; set; }
+        public object Value { get; set; }
+        public byte Precision { get; set; }
+        public byte Scale { get; set; }
+        public int Size { get; set; }
+    }
 }
 

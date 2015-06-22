@@ -1,3 +1,6 @@
+using System;
+using System.Data;
+
 namespace ServiceStack.OrmLite
 {
     public static class OrmLiteDialectProviderExtensions
@@ -17,14 +20,14 @@ namespace ServiceStack.OrmLite
             return paramName.Substring(dialect.ParamString.Length);
         }
 
-        public static string FmtTable(this string tableName)
+        public static string FmtTable(this string tableName, IOrmLiteDialectProvider dialect = null)
         {
-            return OrmLiteConfig.DialectProvider.NamingStrategy.GetTableName(tableName);
+            return (dialect ?? OrmLiteConfig.DialectProvider).NamingStrategy.GetTableName(tableName);
         }
 
-        public static string FmtColumn(this string columnName)
+        public static string FmtColumn(this string columnName, IOrmLiteDialectProvider dialect=null)
         {
-            return OrmLiteConfig.DialectProvider.NamingStrategy.GetColumnName(columnName);
+            return (dialect ?? OrmLiteConfig.DialectProvider).NamingStrategy.GetColumnName(columnName);
         }
 
         public static string GetQuotedColumnName(this IOrmLiteDialectProvider dialect, 
@@ -34,17 +37,17 @@ namespace ServiceStack.OrmLite
         }
 
         public static string GetQuotedColumnName(this IOrmLiteDialectProvider dialect,
-            ModelDefinition modelDef, FieldDefinition fieldDef)
+            ModelDefinition tableDef, FieldDefinition fieldDef)
         {
-            return dialect.GetQuotedTableName(modelDef.ModelName) +
+            return dialect.GetQuotedTableName(tableDef) +
                 "." +
                 dialect.GetQuotedColumnName(fieldDef.FieldName);
         }
 
         public static string GetQuotedColumnName(this IOrmLiteDialectProvider dialect,
-            string tableName, string fieldName)
+            ModelDefinition tableDef, string fieldName)
         {
-            return dialect.GetQuotedTableName(tableName) +
+            return dialect.GetQuotedTableName(tableDef) +
                 "." +
                 dialect.GetQuotedColumnName(fieldName);
         }

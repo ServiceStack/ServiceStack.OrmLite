@@ -5,7 +5,9 @@ using System.Data.SqlClient;
 using System.Globalization;
 using System.IO;
 using System.Text;
-using ServiceStack.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using ServiceStack.Data;
 
 namespace ServiceStack.OrmLite.SqlServer
 {
@@ -18,8 +20,6 @@ namespace ServiceStack.OrmLite.SqlServer
         public SqlServerOrmLiteDialectProvider()
         {
             base.AutoIncrementDefinition = "IDENTITY(1,1)";
-            StringColumnDefinition = UseUnicode ? "NVARCHAR(4000)" : "VARCHAR(8000)";
-            base.MaxStringColumnDefinition = "VARCHAR(MAX)";
             base.GuidColumnDefinition = "UniqueIdentifier";
             base.RealColumnDefinition = "FLOAT";
             base.BoolColumnDefinition = "BIT";
@@ -45,6 +45,13 @@ namespace ServiceStack.OrmLite.SqlServer
             DbTypeMap.Set<ushort>(DbType.Int16, IntColumnDefinition);
             DbTypeMap.Set<uint>(DbType.Int32, IntColumnDefinition);
             DbTypeMap.Set<ulong>(DbType.Int64, LongColumnDefinition);
+        }
+
+        public override void UpdateStringColumnDefinitions()
+        {
+            base.UpdateStringColumnDefinitions();
+
+            this.MaxStringColumnDefinition = string.Format(this.StringLengthColumnDefinitionFormat, "MAX");
         }
 
         public override string GetQuotedValue(string paramValue)
@@ -91,15 +98,6 @@ namespace ServiceStack.OrmLite.SqlServer
             return new SqlConnection(connectionString);
         }
 
-        public override string GetQuotedTableName(ModelDefinition modelDef)
-        {
-            if (!modelDef.IsInSchema)
-                return base.GetQuotedTableName(modelDef);
-
-            var escapedSchema = modelDef.Schema.Replace(".", "\".\"");
-            return string.Format("\"{0}\".\"{1}\"", escapedSchema, NamingStrategy.GetTableName(modelDef.ModelName));
-        }
-
         public override void SetDbValue(FieldDefinition fieldDef, IDataReader reader, int colIndex, object instance)
         {
             if (fieldDef.IsRowVersion)
@@ -107,7 +105,7 @@ namespace ServiceStack.OrmLite.SqlServer
                 var bytes = reader.GetValue(colIndex) as byte[];
                 if (bytes != null)
                 {
-                    var ulongValue = ConvertToULong(bytes);
+                    var ulongValue = OrmLiteUtils.ConvertToULong(bytes);
                     try
                     {
                         fieldDef.SetValueFn(instance, ulongValue);
@@ -224,13 +222,13 @@ namespace ServiceStack.OrmLite.SqlServer
             return new SqlServerExpression<T>(this);
         }
 
-        public override bool DoesTableExist(IDbCommand dbCmd, string tableName)
+        public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
         {
             var sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = {0}"
                 .SqlFmt(tableName);
 
-            //if (!string.IsNullOrEmpty(schemaName))
-            //    sql += " AND TABLE_SCHEMA = {0}".SqlFmt(schemaName);
+            if (schema != null)
+                sql += " AND TABLE_SCHEMA = {0}".SqlFmt(schema);
 
             dbCmd.CommandText = sql;
             var result = dbCmd.LongScalar();
@@ -279,7 +277,7 @@ namespace ServiceStack.OrmLite.SqlServer
                 {
                     var foreignKeyName = fieldDef.ForeignKey.GetForeignKeyName(
                         modelDef,
-                        GetModelDefinition(fieldDef.ForeignKey.ReferenceType),
+                        OrmLiteUtils.GetModelDefinition(fieldDef.ForeignKey.ReferenceType),
                         NamingStrategy,
                         fieldDef);
 
@@ -351,13 +349,8 @@ namespace ServiceStack.OrmLite.SqlServer
             var definition = base.GetColumnDefinition(fieldName, fieldType, isPrimaryKey, autoIncrement,
                 isNullable, isRowVersion, fieldLength, scale, defaultValue, customFieldDefinition);
 
-            if (fieldType == typeof(Decimal) && fieldLength != DefaultDecimalPrecision && scale != DefaultDecimalScale)
-            {
-                string validDecimal = String.Format("DECIMAL({0},{1})",
-                    fieldLength.GetValueOrDefault(DefaultDecimalPrecision),
-                    scale.GetValueOrDefault(DefaultDecimalScale));
-                definition = definition.Replace(DecimalColumnDefinition, validDecimal);
-            }
+            if (fieldType == typeof(Decimal))
+                return base.ReplaceDecimalColumnDefinition(definition, fieldLength, scale);
 
             return definition;
         }
@@ -406,11 +399,12 @@ namespace ServiceStack.OrmLite.SqlServer
                     throw new ApplicationException("Malformed model, no PrimaryKey defined");
 
                 orderByExpression = string.Format("ORDER BY {0}",
-                    OrmLiteConfig.DialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName));
+                    this.GetQuotedColumnName(modelDef, modelDef.PrimaryKey));
             }
 
             var ret = string.Format(
-                "SELECT * FROM (SELECT ROW_NUMBER() OVER ({1}) As RowNum, {0} {2}) AS RowConstrainedResult WHERE RowNum > {3} AND RowNum <= {4}",
+                "{0} FROM (SELECT ROW_NUMBER() OVER ({2}) As RowNum, {1} {3}) AS RowConstrainedResult WHERE RowNum > {4} AND RowNum <= {5}",
+                UseAliasesOrStripTablePrefixes(selectExpression), 
                 selectExpression.Substring(selectType.Length),
                 orderByExpression,
                 bodyExpression,
@@ -419,5 +413,152 @@ namespace ServiceStack.OrmLite.SqlServer
 
             return ret;
         }
+
+        //SELECT without RowNum and prefer aliases to be able to use in SELECT IN () Reference Queries
+        public static string UseAliasesOrStripTablePrefixes(string selectExpression)
+        {
+            if (selectExpression.IndexOf('.') < 0)
+                return selectExpression;
+
+            var sb = new StringBuilder();
+            var selectToken = selectExpression.SplitOnFirst(' ');
+            var tokens = selectToken[1].Split(',');
+            foreach (var token in tokens)
+            {
+                if (sb.Length > 0)
+                    sb.Append(", ");
+
+                var field = token.Trim();
+
+                var aliasParts = field.SplitOnLast(' ');
+                if (aliasParts.Length > 1)
+                {
+                    sb.Append(" " + aliasParts[aliasParts.Length - 1]);
+                    continue;
+                }
+
+                var parts = field.SplitOnLast('.');
+                if (parts.Length > 1)
+                {
+                    sb.Append(" " + parts[parts.Length - 1]);
+                }
+                else
+                {
+                    sb.Append(" " + field);
+                }
+            }
+
+            var sqlSelect = selectToken[0] + " " + sb.ToString().Trim();
+            return sqlSelect;
+        }
+
+        public override string GetLoadChildrenSubSelect<From>(SqlExpression<From> expr)
+        {
+            if (!expr.OrderByExpression.IsNullOrEmpty() && expr.Rows == null)
+            {
+                var modelDef = expr.ModelDef;
+                expr.Select(this.GetQuotedColumnName(modelDef, modelDef.PrimaryKey))
+                    .ClearLimits()
+                    .OrderBy(""); //Invalid in Sub Selects
+
+                var subSql = expr.ToSelectStatement();
+
+                return subSql;
+            }
+            
+            return base.GetLoadChildrenSubSelect(expr);
+        }
+
+        protected SqlConnection Unwrap(IDbConnection db)
+        {
+            return (SqlConnection)db.ToDbConnection();
+        }
+
+        protected SqlCommand Unwrap(IDbCommand cmd)
+        {
+            return (SqlCommand)cmd.ToDbCommand();
+        }
+
+        protected SqlDataReader Unwrap(IDataReader reader)
+        {
+            return (SqlDataReader)reader;
+        }
+
+#if NET45
+        public override Task OpenAsync(IDbConnection db, CancellationToken token)
+        {
+            return Unwrap(db).OpenAsync(token);
+        }
+
+        public override Task<IDataReader> ExecuteReaderAsync(IDbCommand cmd, CancellationToken token)
+        {
+            return Unwrap(cmd).ExecuteReaderAsync(token).Then(x => (IDataReader)x);
+        }
+
+        public override Task<int> ExecuteNonQueryAsync(IDbCommand cmd, CancellationToken token)
+        {
+            return Unwrap(cmd).ExecuteNonQueryAsync(token);
+        }
+
+        public override Task<object> ExecuteScalarAsync(IDbCommand cmd, CancellationToken token)
+        {
+            return Unwrap(cmd).ExecuteScalarAsync(token);
+        }
+
+        public override Task<bool> ReadAsync(IDataReader reader, CancellationToken token)
+        {
+            return Unwrap(reader).ReadAsync(token);
+        }
+
+        public override async Task<List<T>> ReaderEach<T>(IDataReader reader, Func<T> fn, CancellationToken token)
+        {
+            try
+            {
+                var to = new List<T>();
+                while (await ReadAsync(reader, token).ConfigureAwait(false))
+                {
+                    var row = fn();
+                    to.Add(row);
+                }
+                return to;
+            }
+            finally
+            {
+                reader.Dispose();
+            }
+        }
+
+        public override async Task<Return> ReaderEach<Return>(IDataReader reader, Action fn, Return source, CancellationToken token)
+        {
+            try
+            {
+                while (await ReadAsync(reader, token).ConfigureAwait(false))
+                {
+                    fn();
+                }
+                return source;
+            }
+            finally
+            {
+                reader.Dispose();
+            }
+        }
+
+        public override async Task<T> ReaderRead<T>(IDataReader reader, Func<T> fn, CancellationToken token)
+        {
+            try
+            {
+                if (await ReadAsync(reader, token).ConfigureAwait(false))
+                    return fn();
+
+                return default(T);
+            }
+            finally
+            {
+                reader.Dispose();
+            }
+        }
+#endif
+
     }
 }

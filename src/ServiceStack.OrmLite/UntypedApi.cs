@@ -3,6 +3,9 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ServiceStack.OrmLite
 {
@@ -24,6 +27,13 @@ namespace ServiceStack.OrmLite
             var genericType = untypedApiMap.GetOrAdd(forType, key => typeof(UntypedApi<>).MakeGenericType(key));
             var unTypedApi = genericType.CreateInstance<IUntypedApi>();
             unTypedApi.DbCmd = dbCmd;
+            return unTypedApi;
+        }
+
+        public static IUntypedApi CreateTypedApi(this Type forType)
+        {
+            var genericType = untypedApiMap.GetOrAdd(forType, key => typeof(UntypedApi<>).MakeGenericType(key));
+            var unTypedApi = genericType.CreateInstance<IUntypedApi>();
             return unTypedApi;
         }
     }
@@ -55,6 +65,28 @@ namespace ServiceStack.OrmLite
         {
             return Exec(dbCmd => dbCmd.Save((T)obj));
         }
+
+#if NET45
+        public Task<int> SaveAllAsync(IEnumerable objs, CancellationToken token)
+        {
+            return Exec(dbCmd => dbCmd.SaveAllAsync((IEnumerable<T>)objs, token));
+        }
+
+        public Task<bool> SaveAsync(object obj, CancellationToken token)
+        {
+            return Exec(dbCmd => dbCmd.SaveAsync((T)obj, token));
+        }
+#else
+        public Task<int> SaveAllAsync(IEnumerable objs, CancellationToken token)
+        {
+            throw new NotImplementedException(OrmLiteUtils.AsyncRequiresNet45Error);
+        }
+
+        public Task<bool> SaveAsync(object obj, CancellationToken token)
+        {
+            throw new NotImplementedException(OrmLiteUtils.AsyncRequiresNet45Error);
+        }
+#endif
 
         public void InsertAll(IEnumerable objs)
         {
@@ -99,6 +131,11 @@ namespace ServiceStack.OrmLite
         public int DeleteByIds(IEnumerable idValues)
         {
             return Exec(dbCmd => dbCmd.DeleteByIds<T>(idValues));
+        }
+
+        public IEnumerable Cast(IEnumerable results)
+        {
+            return (from object result in results select (T)result).ToList();
         }
     }
 }

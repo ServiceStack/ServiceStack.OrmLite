@@ -148,6 +148,28 @@ namespace ServiceStack.OrmLite.Tests
 			}
 		}
 
+        [Test]
+        public void Can_loop_each_string_from_ModelWithOnlyStringFields_table_Column()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<ModelWithOnlyStringFields>();
+
+                var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
+
+                rowIds.ForEach(x => db.Insert(ModelWithOnlyStringFields.Create(x)));
+
+                var dbRowIds = new List<string>();
+                foreach (var rowId in db.ColumnLazy<string>(
+                    db.From<ModelWithOnlyStringFields>().Select(x => x.Id)))
+                {
+                    dbRowIds.Add(rowId);
+                }
+
+                Assert.That(dbRowIds, Is.EquivalentTo(rowIds));
+            }
+        }
+
 		[Test]
 		public void Can_loop_each_with_filter_from_ModelWithOnlyStringFields_table()
 		{
@@ -388,5 +410,20 @@ namespace ServiceStack.OrmLite.Tests
             }
         }
 
+	    [TestCase(1E125)]
+	    [TestCase(-1E125)]
+	    public void Does_return_large_double_values(double value)
+	    {
+	        using (var db = OpenDbConnection())
+	        {
+	            db.DropAndCreateTable<ModelWithDifferentNumTypes>();
+	            var expected = new ModelWithDifferentNumTypes {Double = value};
+
+	            var id = db.Insert(expected, true);
+	            var actual = db.SingleById<ModelWithDifferentNumTypes>(id);
+
+	            Assert.That(expected.Double, Is.EqualTo(actual.Double));
+	        }
+	    }
 	}
 }

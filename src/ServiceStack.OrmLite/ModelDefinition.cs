@@ -58,14 +58,17 @@ namespace ServiceStack.OrmLite
 
         public Type ModelType { get; set; }
 
-        public string SqlSelectAllFromTable { get; set; }
-
         public FieldDefinition PrimaryKey
         {
-            get
-            {
-                return this.FieldDefinitions.First(x => x.IsPrimaryKey);
-            }
+            get { return this.FieldDefinitions.First(x => x.IsPrimaryKey); }
+        }
+
+        public object GetPrimaryKey(object instance)
+        {
+            var pk = PrimaryKey;
+            return pk != null
+                ? pk.GetValue(instance)
+                : instance.GetId();
         }
 
         public List<FieldDefinition> FieldDefinitions { get; set; }
@@ -73,14 +76,7 @@ namespace ServiceStack.OrmLite
         private FieldDefinition[] fieldDefinitionsArray;
         public FieldDefinition[] FieldDefinitionsArray
         {
-            get
-            {
-                if (fieldDefinitionsArray == null)
-                {
-                    fieldDefinitionsArray = FieldDefinitions.ToArray();
-                }
-                return fieldDefinitionsArray;
-            }
+            get { return fieldDefinitionsArray; }
         }
 
         public List<FieldDefinition> IgnoredFieldDefinitions { get; set; }
@@ -88,49 +84,39 @@ namespace ServiceStack.OrmLite
         private FieldDefinition[] ignoredFieldDefinitionsArray;
         public FieldDefinition[] IgnoredFieldDefinitionsArray
         {
-            get
-            {
-                if (ignoredFieldDefinitionsArray == null)
-                {
-                    ignoredFieldDefinitionsArray = IgnoredFieldDefinitions.ToArray();
-                }
-                return ignoredFieldDefinitionsArray;
-            }
+            get { return ignoredFieldDefinitionsArray; }
         }
 
         private FieldDefinition[] allFieldDefinitionsArray;
         public FieldDefinition[] AllFieldDefinitionsArray
         {
-            get
-            {
-                if (allFieldDefinitionsArray == null)
-                {
-                    List<FieldDefinition> allItems = new List<FieldDefinition>(FieldDefinitions);
-                    allItems.AddRange(IgnoredFieldDefinitions);
-                    allFieldDefinitionsArray = allItems.ToArray();
-                }
-                return allFieldDefinitionsArray;
-            }
+            get { return allFieldDefinitionsArray; }
         }
 
+        private readonly object fieldDefLock = new object();
         private Dictionary<string, FieldDefinition> fieldDefinitionMap;
         private Func<string, string> fieldNameSanitizer;
         public Dictionary<string, FieldDefinition> GetFieldDefinitionMap(Func<string, string> sanitizeFieldName)
         {
             if (fieldDefinitionMap == null || fieldNameSanitizer != sanitizeFieldName)
             {
-                fieldNameSanitizer = sanitizeFieldName;
-                fieldDefinitionMap = new Dictionary<string, FieldDefinition>();
-                foreach (var fieldDef in FieldDefinitionsArray)
+                lock (fieldDefLock)
                 {
-                    fieldDefinitionMap[sanitizeFieldName(fieldDef.FieldName)] = fieldDef;
+                    if (fieldDefinitionMap == null || fieldNameSanitizer != sanitizeFieldName)
+                    {
+                        fieldDefinitionMap = new Dictionary<string, FieldDefinition>(StringComparer.OrdinalIgnoreCase);
+                        fieldNameSanitizer = sanitizeFieldName;
+                        foreach (var fieldDef in FieldDefinitionsArray)
+                        {
+                            fieldDefinitionMap[sanitizeFieldName(fieldDef.FieldName)] = fieldDef;
+                        }
+                    }
                 }
             }
             return fieldDefinitionMap;
         }
 
         public List<CompositeIndexAttribute> CompositeIndexes { get; set; }
-
 
         public FieldDefinition GetFieldDefinition<T>(Expression<Func<T, object>> field)
         {
@@ -147,13 +133,32 @@ namespace ServiceStack.OrmLite
                 var me = lambda.Body as MemberExpression;
                 return me.Member.Name;
             }
-            else
-            {
-                var operand = (lambda.Body as UnaryExpression).Operand;
-                return (operand as MemberExpression).Member.Name;
-            }
+            
+            var operand = (lambda.Body as UnaryExpression).Operand;
+            return (operand as MemberExpression).Member.Name;
         }
 
+        public void AfterInit()
+        {
+            fieldDefinitionsArray = FieldDefinitions.ToArray();
+            ignoredFieldDefinitionsArray = IgnoredFieldDefinitions.ToArray();
+
+            var allItems = new List<FieldDefinition>(FieldDefinitions);
+            allItems.AddRange(IgnoredFieldDefinitions);
+            allFieldDefinitionsArray = allItems.ToArray();
+        }
+
+        public bool IsRefField(FieldDefinition fieldDef)
+        {
+            return (fieldDef.Alias != null && IsRefField(fieldDef.Alias))
+                    || IsRefField(fieldDef.Name);
+        }
+
+        private bool IsRefField(string name)
+        {
+            return (Alias != null && Alias + "Id" == name)
+                    || Name + "Id" == name;
+        }
     }
 
 

@@ -56,14 +56,20 @@ namespace ServiceStack.OrmLite
             if (sql != null)
                 dbCmd.CommandText = sql;
 
+            var isScalar = OrmLiteUtils.IsScalar<T>();
+
             if (OrmLiteConfig.ResultsFilter != null)
             {
-                return OrmLiteConfig.ResultsFilter.GetList<T>(dbCmd);
+                return isScalar
+                    ? OrmLiteConfig.ResultsFilter.GetColumn<T>(dbCmd)
+                    : OrmLiteConfig.ResultsFilter.GetList<T>(dbCmd);
             }
 
             using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
             {
-                return reader.ConvertToList<T>();
+                return isScalar
+                    ? reader.Column<T>(dbCmd.GetDialectProvider())
+                    : reader.ConvertToList<T>(dbCmd.GetDialectProvider());
             }
         }
 
@@ -79,14 +85,39 @@ namespace ServiceStack.OrmLite
 
             using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
             {
-                return reader.ConvertToList(refType);
+                return reader.ConvertToList(dbCmd.GetDialectProvider(), refType);
             }
         }
 
-        internal static List<T> ExprConvertToList<T>(this IDbCommand dbCmd, string sql = null)
+        public static IDbDataParameter PopulateWith(this IDbDataParameter to, IDbDataParameter from)
+        {
+            to.DbType = from.DbType;
+            to.Direction = from.Direction;
+            to.ParameterName = from.ParameterName;
+            to.SourceColumn = from.SourceColumn;
+            to.SourceVersion = from.SourceVersion;
+            to.Value = from.Value;
+            to.Precision = from.Precision;
+            to.Scale = from.Scale;
+            to.Size = from.Size;
+
+            return to;
+        }
+
+        internal static List<T> ExprConvertToList<T>(this IDbCommand dbCmd, string sql = null, IEnumerable<IDbDataParameter> sqlParams = null)
         {
             if (sql != null)
                 dbCmd.CommandText = sql;
+
+            if (sqlParams != null)
+            {
+                foreach (var sqlParam in sqlParams)
+                {
+                    var p = dbCmd.CreateParameter();
+                    p.PopulateWith(sqlParam);
+                    dbCmd.Parameters.Add(p);
+                }
+            }
 
             if (OrmLiteConfig.ResultsFilter != null)
             {
@@ -95,11 +126,11 @@ namespace ServiceStack.OrmLite
 
             using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
             {
-                return reader.ExprConvertToList<T>();
+                return reader.ConvertToList<T>(dbCmd.GetDialectProvider());
             }
         }
 
-        internal static T ConvertTo<T>(this IDbCommand dbCmd, string sql = null)
+        public static T ConvertTo<T>(this IDbCommand dbCmd, string sql = null)
         {
             if (sql != null)
                 dbCmd.CommandText = sql;
@@ -111,7 +142,7 @@ namespace ServiceStack.OrmLite
 
             using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
             {
-                return reader.ConvertTo<T>();
+                return reader.ConvertTo<T>(dbCmd.GetDialectProvider());
             }
         }
 
@@ -127,11 +158,11 @@ namespace ServiceStack.OrmLite
 
             using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
             {
-                return reader.ConvertTo(refType);
+                return reader.ConvertTo(dbCmd.GetDialectProvider(), refType);
             }
         }
 
-        internal static T Scalar<T>(this IDbCommand dbCmd, string sql = null)
+        public static T Scalar<T>(this IDbCommand dbCmd, string sql = null)
         {
             if (sql != null)
                 dbCmd.CommandText = sql;
@@ -143,11 +174,11 @@ namespace ServiceStack.OrmLite
 
             using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
             {
-                return reader.Scalar<T>();
+                return reader.Scalar<T>(dbCmd.GetDialectProvider());
             }
         }
 
-        internal static object Scalar(this IDbCommand dbCmd, string sql = null)
+        public static object Scalar(this IDbCommand dbCmd, string sql = null)
         {
             if (sql != null)
                 dbCmd.CommandText = sql;
@@ -160,7 +191,7 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecuteScalar();
         }
 
-        internal static long ExecLongScalar(this IDbCommand dbCmd, string sql = null)
+        public static long ExecLongScalar(this IDbCommand dbCmd, string sql = null)
         {
             if (sql != null)
                 dbCmd.CommandText = sql;
@@ -185,7 +216,7 @@ namespace ServiceStack.OrmLite
 
             using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
             {
-                return reader.ExprConvertTo<T>();
+                return reader.ConvertTo<T>(dbCmd.GetDialectProvider());
             }
         }
 
@@ -201,7 +232,7 @@ namespace ServiceStack.OrmLite
 
             using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
             {
-                return reader.Column<T>();
+                return reader.Column<T>(dbCmd.GetDialectProvider());
             }
         }
 
@@ -217,7 +248,7 @@ namespace ServiceStack.OrmLite
 
             using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
             {
-                return reader.ColumnDistinct<T>();
+                return reader.ColumnDistinct<T>(dbCmd.GetDialectProvider());
             }
         }
 
@@ -233,7 +264,7 @@ namespace ServiceStack.OrmLite
 
             using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
             {
-                return reader.Dictionary<K, V>();
+                return reader.Dictionary<K, V>(dbCmd.GetDialectProvider());
             }
         }
 
@@ -249,9 +280,8 @@ namespace ServiceStack.OrmLite
 
             using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
             {
-                return reader.Lookup<K, V>();
+                return reader.Lookup<K, V>(dbCmd.GetDialectProvider());
             }
         }
-
     }
 }

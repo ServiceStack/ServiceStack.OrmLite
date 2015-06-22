@@ -76,13 +76,10 @@ namespace ServiceStack.OrmLite
                 : dialectProvider.GetQuotedColumnName(FieldName);
         }
 
-        public string GetQuotedValue(object fromInstance, IOrmLiteDialectProvider dialectProvider = null)
+        public string GetQuotedValue(object fromInstance, IOrmLiteDialectProvider dialect = null)
         {
-            if (dialectProvider == null)
-                dialectProvider = OrmLiteConfig.DialectProvider;
-
             var value = GetValue(fromInstance);
-            return dialectProvider.GetQuotedValue(value, ColumnType);
+            return (dialect ?? OrmLiteConfig.DialectProvider).GetQuotedValue(value, ColumnType);
         }
 
         public string Sequence { get; set; }
@@ -112,6 +109,18 @@ namespace ServiceStack.OrmLite
         public bool ShouldSkipDelete()
         {
             return IsComputed;
+        }
+
+        public bool IsSelfRefField(FieldDefinition fieldDef)
+        {
+            return (fieldDef.Alias != null && IsSelfRefField(fieldDef.Alias))
+                    || IsSelfRefField(fieldDef.Name);
+        }
+
+        public bool IsSelfRefField(string name)
+        {
+            return (Alias != null && Alias + "Id" == name)
+                    || Name + "Id" == name;
         }
     }
 

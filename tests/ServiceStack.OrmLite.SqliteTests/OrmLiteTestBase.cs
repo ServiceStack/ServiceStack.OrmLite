@@ -18,6 +18,8 @@ namespace ServiceStack.OrmLite.Tests
 	{
 		protected virtual string ConnectionString { get; set; }
 
+        private OrmLiteConnectionFactory DbFactory;
+
 		protected virtual string GetFileConnectionString()
 		{
             var connectionString = Config.SqliteFileDb;
@@ -38,9 +40,11 @@ namespace ServiceStack.OrmLite.Tests
 		{
 			LogManager.LogFactory = new ConsoleLogFactory();
 
-			OrmLiteConfig.DialectProvider = SqliteOrmLiteDialectProvider.Instance;
+            OrmLiteConfig.DialectProvider = SqliteDialect.Provider;
 			//ConnectionString = ":memory:";
 			ConnectionString = GetFileConnectionString();
+            
+            DbFactory = new OrmLiteConnectionFactory(ConnectionString, SqliteDialect.Provider);
 
 			//OrmLiteConfig.DialectProvider = SqlServerOrmLiteDialectProvider.Instance;
 			//ConnectionString = "~/App_Data/Database1.mdf".MapAbsolutePath();			
@@ -53,25 +57,19 @@ namespace ServiceStack.OrmLite.Tests
 
         public IDbConnection InMemoryDbConnection { get; set; }
 
-        public IDbConnection OpenDbConnection(string connString = null)
+        public virtual IDbConnection OpenDbConnection()
         {
-            connString = connString ?? ConnectionString;
-            if (connString == ":memory:")
+            if (ConnectionString == ":memory:")
             {
                 if (InMemoryDbConnection == null)
                 {
-                    var dbConn = connString.OpenDbConnection();
-                    InMemoryDbConnection = new OrmLiteConnectionWrapper(dbConn)
-                    {
-                        DialectProvider = OrmLiteConfig.DialectProvider,
-                        AutoDisposeConnection = false,
-                    };
+                    InMemoryDbConnection = new OrmLiteConnection(DbFactory);
+                    InMemoryDbConnection.Open();
                 }
-
                 return InMemoryDbConnection;
             }
 
-            return connString.OpenDbConnection();
+            return DbFactory.OpenDbConnection();
         }
     }
 }

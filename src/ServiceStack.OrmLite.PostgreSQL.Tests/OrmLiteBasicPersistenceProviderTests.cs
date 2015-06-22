@@ -5,116 +5,118 @@ using ServiceStack.Common.Tests.Models;
 
 namespace ServiceStack.OrmLite.Tests
 {
-	[TestFixture]
-	public class OrmLiteBasicPersistenceProviderTests
-		: OrmLiteTestBase
-	{
-		[SetUp]
-		public void SetUp()
-		{
-			
-		}
+    [TestFixture]
+    public class OrmLiteBasicPersistenceProviderTests
+        : OrmLiteTestBase
+    {
+        public OrmLiteBasicPersistenceProviderTests() : base(Dialect.PostgreSql) { }
 
-		[Test]
-		public void Can_GetById_from_basic_persistence_provider()
-		{
-			using (var db = OpenDbConnection())
-			{
-				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+        [SetUp]
+        public void SetUp()
+        {
+            
+        }
 
-				var basicProvider = new OrmLitePersistenceProvider(db);
+        [Test]
+        public void Can_GetById_from_basic_persistence_provider()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
-				var row = ModelWithFieldsOfDifferentTypes.Create(1);
+                var basicProvider = new OrmLitePersistenceProvider(db);
 
-				db.Insert(row);
+                var row = ModelWithFieldsOfDifferentTypes.Create(1);
 
-				var providerRow = basicProvider.GetById<ModelWithFieldsOfDifferentTypes>(1);
+                db.Insert(row);
 
-				ModelWithFieldsOfDifferentTypes.AssertIsEqual(providerRow, row);
-			}
-		}
+                var providerRow = basicProvider.GetById<ModelWithFieldsOfDifferentTypes>(1);
 
-		[Test]
-		public void Can_GetByIds_from_basic_persistence_provider()
-		{
-			using (var db = OpenDbConnection())
-			{
-				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+                ModelWithFieldsOfDifferentTypes.AssertIsEqual(providerRow, row);
+            }
+        }
 
-				var basicProvider = new OrmLitePersistenceProvider(db);
+        [Test]
+        public void Can_GetByIds_from_basic_persistence_provider()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
-				var rowIds = new List<int> { 1, 2, 3, 4, 5 };
+                var basicProvider = new OrmLitePersistenceProvider(db);
 
-				var rows = rowIds.ConvertAll(x => ModelWithFieldsOfDifferentTypes.Create(x));
+                var rowIds = new List<int> { 1, 2, 3, 4, 5 };
 
-				rows.ForEach(x => db.Insert(x));
+                var rows = rowIds.ConvertAll(x => ModelWithFieldsOfDifferentTypes.Create(x));
 
-				var getRowIds = new[] { 2, 4 };
-				var providerRows = basicProvider.GetByIds<ModelWithFieldsOfDifferentTypes>(getRowIds).ToList();
-				var providerRowIds = providerRows.ConvertAll(x => x.Id);
+                rows.ForEach(x => db.Insert(x));
 
-				Assert.That(providerRowIds, Is.EquivalentTo(getRowIds));
-			}
-		}
+                var getRowIds = new[] { 2, 4 };
+                var providerRows = basicProvider.GetByIds<ModelWithFieldsOfDifferentTypes>(getRowIds).ToList();
+                var providerRowIds = providerRows.ConvertAll(x => x.Id);
 
-		[Test]
-		public void Can_Store_from_basic_persistence_provider()
-		{
-			using (var db = OpenDbConnection())
-			{
-				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+                Assert.That(providerRowIds, Is.EquivalentTo(getRowIds));
+            }
+        }
 
-				var basicProvider = new OrmLitePersistenceProvider(db);
+        [Test]
+        public void Can_Store_from_basic_persistence_provider()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
-				var rowIds = new List<int> { 1, 2, 3, 4, 5 };
+                var basicProvider = new OrmLitePersistenceProvider(db);
 
-				var rows = rowIds.ConvertAll(x => ModelWithFieldsOfDifferentTypes.Create(x));
+                var rowIds = new List<int> { 1, 2, 3, 4, 5 };
 
-				rows.ForEach(x => basicProvider.Store(x));
+                var rows = rowIds.ConvertAll(x => ModelWithFieldsOfDifferentTypes.Create(x));
 
-				var getRowIds = new[] { 2, 4 };
-				var providerRows = db.SelectByIds<ModelWithFieldsOfDifferentTypes>(getRowIds).ToList();
-				var providerRowIds = providerRows.ConvertAll(x => x.Id);
+                rows.ForEach(x => basicProvider.Store(x));
 
-				Assert.That(providerRowIds, Is.EquivalentTo(getRowIds));
-			}
-		}
+                var getRowIds = new[] { 2, 4 };
+                var providerRows = db.SelectByIds<ModelWithFieldsOfDifferentTypes>(getRowIds).ToList();
+                var providerRowIds = providerRows.ConvertAll(x => x.Id);
 
-		[Test]
-		public void Can_Delete_from_basic_persistence_provider()
-		{
-			using (var db = OpenDbConnection())
-			{
-				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+                Assert.That(providerRowIds, Is.EquivalentTo(getRowIds));
+            }
+        }
 
-				var basicProvider = new OrmLitePersistenceProvider(db);
+        [Test]
+        public void Can_Delete_from_basic_persistence_provider()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
-				var rowIds = new List<int> { 1, 2, 3, 4, 5 };
+                var basicProvider = new OrmLitePersistenceProvider(db);
 
-				var rows = rowIds.ConvertAll(x => ModelWithFieldsOfDifferentTypes.Create(x));
+                var rowIds = new List<int> { 1, 2, 3, 4, 5 };
 
-				rows.ForEach(x => db.Insert(x));
+                var rows = rowIds.ConvertAll(x => ModelWithFieldsOfDifferentTypes.Create(x));
 
-				var deleteRowIds = new List<int> { 2, 4 };
+                rows.ForEach(x => db.Insert(x));
 
-				foreach (var row in rows)
-				{
-					if (deleteRowIds.Contains(row.Id))
-					{
-						basicProvider.Delete(row);
-					}
-				}
+                var deleteRowIds = new List<int> { 2, 4 };
 
-				var providerRows = basicProvider.GetByIds<ModelWithFieldsOfDifferentTypes>(rowIds).ToList();
-				var providerRowIds = providerRows.ConvertAll(x => x.Id);
+                foreach (var row in rows)
+                {
+                    if (deleteRowIds.Contains(row.Id))
+                    {
+                        basicProvider.Delete(row);
+                    }
+                }
 
-				var remainingIds = new List<int>(rowIds);
-				deleteRowIds.ForEach(x => remainingIds.Remove(x));
+                var providerRows = basicProvider.GetByIds<ModelWithFieldsOfDifferentTypes>(rowIds).ToList();
+                var providerRowIds = providerRows.ConvertAll(x => x.Id);
 
-				Assert.That(providerRowIds, Is.EquivalentTo(remainingIds));
-			}
-		}
+                var remainingIds = new List<int>(rowIds);
+                deleteRowIds.ForEach(x => remainingIds.Remove(x));
 
-	}
+                Assert.That(providerRowIds, Is.EquivalentTo(remainingIds));
+            }
+        }
+
+    }
 
 }

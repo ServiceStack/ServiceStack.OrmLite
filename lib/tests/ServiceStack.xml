@@ -66,7 +66,7 @@
             Calls directly after services and filters are executed.
             </summary>
         </member>
-        <member name="M:ServiceStack.IAppHost.OnEndRequest">
+        <member name="M:ServiceStack.IAppHost.OnEndRequest(ServiceStack.Web.IRequest)">
             <summary>
             Called at the end of each request. Enables Request Scope.
             </summary>
@@ -91,9 +91,10 @@
             Resolve the absolute url for this request
             </summary>
         </member>
-        <member name="M:ServiceStack.IAppHost.ResolveLocalizedString(System.String)">
+        <member name="M:ServiceStack.IAppHost.ResolveLocalizedString(System.String,ServiceStack.Web.IRequest)">
             <summary>
             Resolve localized text, returns itself by default.
+            The Request is provided when exists.
             </summary>
         </member>
         <member name="P:ServiceStack.IAppHost.Routes">
@@ -156,6 +157,11 @@
             Provide callbacks to be fired after the AppHost has finished initializing
             </summary>
         </member>
+        <member name="P:ServiceStack.IAppHost.OnDisposeCallbacks">
+            <summary>
+            Provide callbacks to be fired when AppHost is being disposed
+            </summary>
+        </member>
         <member name="P:ServiceStack.IAppHost.RawHttpHandlers">
             <summary>
             Skip the ServiceStack Request Pipeline and process the returned IHttpHandler instead
@@ -184,6 +190,11 @@
         <member name="P:ServiceStack.IAppHost.Config">
             <summary>
             The AppHost config
+            </summary>
+        </member>
+        <member name="P:ServiceStack.IAppHost.AppSettings">
+            <summary>
+            The AppHost AppSettings. Defaults to App or Web.config appSettings.
             </summary>
         </member>
         <member name="P:ServiceStack.IAppHost.Plugins">
@@ -295,6 +306,236 @@
             </summary>
             <returns>Reserved Url if the process completes successfully</returns>
         </member>
+        <member name="P:ServiceStack.AspNet.ServiceStackPage.UnauthorizedRedirectUrl">
+            <summary>
+            Default redirct URL if [Authenticate] attribute doesn't permit access.
+            </summary>
+        </member>
+        <member name="P:ServiceStack.AspNet.ServiceStackPage.ForbiddenRedirectUrl">
+            <summary>
+            Default redirct URL if Required Role or Permission attributes doesn't permit access.
+            </summary>
+        </member>
+        <member name="T:ServiceStack.Service">
+            <summary>
+            Generic + Useful IService base class
+            </summary>
+        </member>
+        <member name="M:ServiceStack.IServiceBase.ResolveService``1">
+            <summary>
+            Resolve an alternate Web Service from ServiceStack's IOC container.
+            </summary>
+            <typeparam name="T"></typeparam>
+            <returns></returns>
+        </member>
+        <member name="F:ServiceStack.Service.session">
+            <summary>
+            Dynamic Session Bag
+            </summary>
+        </member>
+        <member name="M:ServiceStack.Service.SessionAs``1">
+            <summary>
+            Typed UserSession
+            </summary>
+        </member>
+        <member name="M:ServiceStack.Configuration.ISettings.Get(System.String)">
+            <summary>
+            Provides a common interface for Settings providers such as
+            ConfigurationManager or Azure's RoleEnvironment. The only
+            requirement is that if the implementation cannot find the
+            specified key, the return value must be null
+            </summary>
+            <param name="key">The key for the setting</param>
+            <returns>The string value of the specified key, or null if the key
+            was invalid</returns>
+        </member>
+        <member name="M:ServiceStack.Configuration.ISettings.GetAllKeys">
+            <summary>
+            Return all keys in this configuration source.
+            </summary>
+            <returns></returns>
+        </member>
+        <!-- Badly formed XML comment ignored for member "T:ServiceStack.Html.HtmlCompressor" -->
+        <member name="F:ServiceStack.Html.HtmlCompressor.PHP_TAG_PATTERN">
+            Predefined pattern that matches <code>&lt;?php ... ?></code> tags. 
+            Could be passed inside a list to {@link #setPreservePatterns(List) setPreservePatterns} method.
+        </member>
+        <member name="F:ServiceStack.Html.HtmlCompressor.SERVER_SCRIPT_TAG_PATTERN">
+            Predefined pattern that matches <code>&lt;% ... %></code> tags. 
+            Could be passed inside a list to {@link #setPreservePatterns(List) setPreservePatterns} method.
+        </member>
+        <member name="F:ServiceStack.Html.HtmlCompressor.SERVER_SIDE_INCLUDE_PATTERN">
+            Predefined pattern that matches <code>&lt;--# ... --></code> tags. 
+            Could be passed inside a list to {@link #setPreservePatterns(List) setPreservePatterns} method.
+        </member>
+        <member name="F:ServiceStack.Html.HtmlCompressor.BLOCK_TAGS_MIN">
+            Predefined list of tags that are very likely to be block-level. 
+            Could be passed to {@link #setRemoveSurroundingSpaces(string) setRemoveSurroundingSpaces} method.
+        </member>
+        <member name="F:ServiceStack.Html.HtmlCompressor.BLOCK_TAGS_MAX">
+            Predefined list of tags that are block-level by default, excluding <code>&lt;div></code> and <code>&lt;li></code> tags. 
+            Table tags are also included.
+            Could be passed to {@link #setRemoveSurroundingSpaces(string) setRemoveSurroundingSpaces} method.
+        </member>
+        <member name="F:ServiceStack.Html.HtmlCompressor.ALL_TAGS">
+            Could be passed to {@link #setRemoveSurroundingSpaces(string) setRemoveSurroundingSpaces} method 
+            to remove all surrounding spaces (not recommended).
+        </member>
+        <member name="F:ServiceStack.Html.HtmlCompressor.Enabled">
+            If set to <code>false</code> all compression will be bypassed. Might be useful for testing purposes. 
+            Default is <code>true</code>.
+            
+            @param enabled set <code>false</code> to bypass all compression
+        </member>
+        <member name="F:ServiceStack.Html.HtmlCompressor.JavaScriptCompressor">
+            Gets or Sets JavaScript compressor implementation that will be used 
+            to compress inline JavaScript in HTML. 
+        </member>
+        <member name="F:ServiceStack.Html.HtmlCompressor.CssCompressor">
+            Returns CSS compressor implementation that will be used 
+            to compress inline CSS in HTML.
+        </member>
+        <member name="F:ServiceStack.Html.HtmlCompressor.RemoveComments">
+            If set to <code>true</code> all HTML comments will be removed.   
+            Default is <code>true</code>.
+            
+            @param removeComments set <code>true</code> to remove all HTML comments
+        </member>
+        <member name="F:ServiceStack.Html.HtmlCompressor.RemoveMultiSpaces">
+            If set to <code>true</code> all multiple whitespace characters will be replaced with single spaces.
+            Default is <code>true</code>.
+            
+            @param removeMultiSpaces set <code>true</code> to replace all multiple whitespace characters 
+            will single spaces.
+        </member>
+        <!-- Badly formed XML comment ignored for member "F:ServiceStack.Html.HtmlCompressor.RemoveIntertagSpaces" -->
+        <!-- Badly formed XML comment ignored for member "F:ServiceStack.Html.HtmlCompressor.RemoveQuotes" -->
+        <member name="F:ServiceStack.Html.HtmlCompressor.CompressJavaScript">
+            Enables JavaScript compression within &lt;script> tags 
+            if set to <code>true</code>. Default is <code>false</code> for performance reasons.
+             
+            <p><b>Note:</b> Compressing JavaScript is not recommended if pages are 
+            compressed dynamically on-the-fly because of performance impact. 
+            You should consider putting JavaScript into a separate file and
+            compressing it using standalone YUICompressor for example.</p>
+            
+            @param compressJavaScript set <code>true</code> to enable JavaScript compression. 
+            Default is <code>false</code>
+        </member>
+        <member name="F:ServiceStack.Html.HtmlCompressor.CompressCss">
+            Enables CSS compression within &lt;style> tags using 
+            <a href="http://developer.yahoo.com/yui/compressor/">Yahoo YUI ICompressor</a> 
+            if set to <code>true</code>. Default is <code>false</code> for performance reasons.
+             
+            <p><b>Note:</b> Compressing CSS is not recommended if pages are 
+            compressed dynamically on-the-fly because of performance impact. 
+            You should consider putting CSS into a separate file and
+            compressing it using standalone YUICompressor for example.</p>
+            
+            @param compressCss set <code>true</code> to enable CSS compression. 
+            Default is <code>false</code>
+        </member>
+        <member name="F:ServiceStack.Html.HtmlCompressor.SimpleDoctype">
+            If set to <code>true</code>, existing DOCTYPE declaration will be replaced with simple <code>&lt;!DOCTYPE html></code> declaration.
+            Default is <code>false</code>.
+            
+            @param simpleDoctype set <code>true</code> to replace existing DOCTYPE declaration with <code>&lt;!DOCTYPE html></code>
+        </member>
+        <!-- Badly formed XML comment ignored for member "F:ServiceStack.Html.HtmlCompressor.RemoveScriptAttributes" -->
+        <member name="F:ServiceStack.Html.HtmlCompressor.RemoveStyleAttributes">
+            If set to <code>true</code>, <code>type="text/style"</code> attributes will be removed from <code>&lt;style></code> tags. Default is <code>false</code>.
+            
+            @param removeStyleAttributes set <code>true</code> to remove <code>type="text/style"</code> attributes from <code>&lt;style></code> tags
+        </member>
+        <!-- Badly formed XML comment ignored for member "F:ServiceStack.Html.HtmlCompressor.RemoveLinkAttributes" -->
+        <member name="F:ServiceStack.Html.HtmlCompressor.RemoveFormAttributes">
+            If set to <code>true</code>, <code>method="get"</code> attributes will be removed from <code>&lt;form></code> tags. Default is <code>false</code>.
+            
+            @param removeFormAttributes set <code>true</code> to remove <code>method="get"</code> attributes from <code>&lt;form></code> tags
+        </member>
+        <member name="F:ServiceStack.Html.HtmlCompressor.RemoveInputAttributes">
+            If set to <code>true</code>, <code>type="text"</code> attributes will be removed from <code>&lt;input></code> tags. Default is <code>false</code>.
+            
+            @param removeInputAttributes set <code>true</code> to remove <code>type="text"</code> attributes from <code>&lt;input></code> tags
+        </member>
+        <!-- Badly formed XML comment ignored for member "F:ServiceStack.Html.HtmlCompressor.SimpleBooleanAttributes" -->
+        <!-- Badly formed XML comment ignored for member "F:ServiceStack.Html.HtmlCompressor.RemoveJavaScriptProtocol" -->
+        <!-- Badly formed XML comment ignored for member "F:ServiceStack.Html.HtmlCompressor.RemoveHttpProtocol" -->
+        <!-- Badly formed XML comment ignored for member "F:ServiceStack.Html.HtmlCompressor.RemoveHttpsProtocol" -->
+        <!-- Badly formed XML comment ignored for member "F:ServiceStack.Html.HtmlCompressor.RemoveSurroundingSpaces" -->
+        <!-- Badly formed XML comment ignored for member "F:ServiceStack.Html.HtmlCompressor.PreservePatterns" -->
+        <!-- Badly formed XML comment ignored for member "F:ServiceStack.Html.HtmlCompressor.GenerateStatistics" -->
+        <member name="F:ServiceStack.Html.HtmlCompressor.Statistics">
+            Returns {@link HtmlCompressorStatistics} object containing statistics of the last HTML compression, if enabled. 
+            Should be called after {@link #compress(string)}
+            
+            @return {@link HtmlCompressorStatistics} object containing last HTML compression statistics
+            
+            @see HtmlCompressorStatistics
+            @see #setGenerateStatistics(bool)
+        </member>
+        <member name="M:ServiceStack.Html.HtmlCompressor.Compress(System.String)">
+            The main method that compresses given HTML source and returns compressed
+            result.
+            
+            @param html HTML content to compress
+            @return compressed content.
+        </member>
+        <member name="F:ServiceStack.Html.HtmlCompressorStatistics.OriginalMetrics">
+            Returns metrics of an uncompressed document
+            
+            @return metrics of an uncompressed document
+            @see HtmlMetrics
+        </member>
+        <member name="F:ServiceStack.Html.HtmlCompressorStatistics.CompressedMetrics">
+            Returns metrics of a compressed document
+            
+            @return metrics of a compressed document
+            @see HtmlMetrics
+        </member>
+        <!-- Badly formed XML comment ignored for member "F:ServiceStack.Html.HtmlCompressorStatistics.Time" -->
+        <member name="F:ServiceStack.Html.HtmlCompressorStatistics.PreservedSize">
+            Returns total size of blocks that were skipped by the compressor 
+            (for example content inside <code>&lt;pre></code> tags or inside   
+            <code>&lt;script></code> tags with disabled javascript compression)
+            
+            @return the total size of blocks that were skipped by the compressor, in bytes
+        </member>
+        <member name="F:ServiceStack.Html.HtmlMetrics.Filesize">
+            Returns total filesize of a document
+            
+            @return total filesize of a document, in bytes
+        </member>
+        <member name="F:ServiceStack.Html.HtmlMetrics.EmptyChars">
+            Returns number of empty characters (spaces, tabs, end of lines) in a document
+            
+            @return number of empty characters in a document
+        </member>
+        <member name="F:ServiceStack.Html.HtmlMetrics.InlineScriptSize">
+            Returns total size of inline <code>&lt;script></code> tags
+            
+            @return total size of inline <code>&lt;script></code> tags, in bytes
+        </member>
+        <member name="F:ServiceStack.Html.HtmlMetrics.InlineStyleSize">
+            Returns total size of inline <code>&lt;style></code> tags
+            
+            @return total size of inline <code>&lt;style></code> tags, in bytes
+        </member>
+        <member name="F:ServiceStack.Html.HtmlMetrics.InlineEventSize">
+            Returns total size of inline event handlers (<code>onclick</code>, etc)
+            
+            @return total size of inline event handlers, in bytes
+        </member>
+        <member name="M:ServiceStack.ServiceStackProvider.SessionAs``1">
+            <summary>
+            Typed UserSession
+            </summary>
+        </member>
+        <member name="F:ServiceStack.ServiceStackProvider.session">
+            <summary>
+            Dynamic Session Bag
+            </summary>
+        </member>
         <member name="M:ServiceStack.Auth.IAuthProvider.Logout(ServiceStack.IServiceBase,ServiceStack.Authenticate)">
             <summary>
             Remove the Users Session
@@ -346,6 +587,11 @@
         <member name="P:ServiceStack.Auth.AspNetWindowsAuthProvider.LimitAccessToRoles">
             <summary>
             Only allow access to users in specified roles
+            </summary>
+        </member>
+        <member name="T:ServiceStack.Auth.AuthEvents">
+            <summary>
+            Conveneint base class with empty virtual methods so subclasses only need to override the hooks they need.
             </summary>
         </member>
         <member name="T:ServiceStack.Auth.OdnoklassnikiAuthProvider">
@@ -414,39 +660,6 @@
             Creates the required missing tables or DB schema 
             </summary>
         </member>
-        <member name="M:ServiceStack.Configuration.ISettings.Get(System.String)">
-            <summary>
-            Provides a common interface for Settings providers such as
-            ConfigurationManager or Azure's RoleEnvironment. The only
-            requirement is that if the implementation cannot find the
-            specified key, the return value must be null
-            </summary>
-            <param name="key">The key for the setting</param>
-            <returns>The string value of the specified key, or null if the key
-            was invalid</returns>
-        </member>
-        <member name="T:ServiceStack.Service">
-            <summary>
-            Generic + Useful IService base class
-            </summary>
-        </member>
-        <member name="M:ServiceStack.IServiceBase.ResolveService``1">
-            <summary>
-            Resolve an alternate Web Service from ServiceStack's IOC container.
-            </summary>
-            <typeparam name="T"></typeparam>
-            <returns></returns>
-        </member>
-        <member name="F:ServiceStack.Service.session">
-            <summary>
-            Dynamic Session Bag
-            </summary>
-        </member>
-        <member name="M:ServiceStack.Service.SessionAs``1">
-            <summary>
-            Typed UserSession
-            </summary>
-        </member>
         <member name="T:ServiceStack.EnsureHttpsAttribute">
             <summary>
             Redirect to the https:// version of this url if not already.
@@ -460,43 +673,6 @@
         <member name="P:ServiceStack.EnsureHttpsAttribute.SkipIfXForwardedFor">
             <summary>
             Don't redirect if the request was a forwarded request, e.g. from a Load Balancer
-            </summary>
-        </member>
-        <member name="T:ServiceStack.Messaging.IMessageHandler">
-            <summary>
-            Single threaded message handler that can process all messages
-            of a particular message type.
-            </summary>
-        </member>
-        <member name="M:ServiceStack.Messaging.IMessageHandler.Process(ServiceStack.Messaging.IMessageQueueClient)">
-            <summary>
-            Process all messages pending
-            </summary>
-            <param name="mqClient"></param>
-        </member>
-        <member name="M:ServiceStack.Messaging.IMessageHandler.ProcessQueue(ServiceStack.Messaging.IMessageQueueClient,System.String,System.Func{System.Boolean})">
-            <summary>
-            Process messages from a single queue.
-            </summary>
-            <param name="mqClient"></param>
-            <param name="queueName">The queue to process</param>
-            <param name="doNext">A predicate on whether to continue processing the next message if any</param>
-            <returns></returns>
-        </member>
-        <member name="M:ServiceStack.Messaging.IMessageHandler.ProcessMessage(ServiceStack.Messaging.IMessageQueueClient,System.Object)">
-            <summary>
-            Process a single message
-            </summary>
-        </member>
-        <member name="M:ServiceStack.Messaging.IMessageHandler.GetStats">
-            <summary>
-            Get Current Stats for this Message Handler
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="P:ServiceStack.Messaging.IMessageHandler.MessageType">
-            <summary>
-            The type of the message this handler processes
             </summary>
         </member>
         <member name="T:ServiceStack.Messaging.IMessageHandlerFactory">
@@ -539,6 +715,12 @@
             Track any IDisposable's to dispose of at the end of the request in IAppHost.OnEndRequest()
             </summary>
             <param name="instance"></param>
+        </member>
+        <member name="M:ServiceStack.RequestContext.ReleaseDisposables">
+            <summary>
+            Release currently registered dependencies for this request
+            </summary>
+            <returns>true if any dependencies were released</returns>
         </member>
         <member name="P:ServiceStack.RequestContext.Items">
             <summary>
@@ -2731,46 +2913,46 @@
             smart clients (e.g. ajax) with hints to transparently invoke client-side functionality
             </summary>
         </member>
-        <member name="M:ServiceStack.HttpResultExtensions.GetDto(System.Object)">
+        <member name="M:ServiceStack.HttpResultUtils.GetDto(System.Object)">
             <summary>
             Shortcut to get the ResponseDTO whether it's bare or inside a IHttpResult
             </summary>
             <param name="response"></param>
             <returns></returns>
         </member>
-        <member name="M:ServiceStack.HttpResultExtensions.GetResponseDto(System.Object)">
+        <member name="M:ServiceStack.HttpResultUtils.GetResponseDto(System.Object)">
             <summary>
             Alias of AsDto
             </summary>
         </member>
-        <member name="M:ServiceStack.HttpResultExtensions.GetDto``1(System.Object)">
+        <member name="M:ServiceStack.HttpResultUtils.GetDto``1(System.Object)">
             <summary>
             Shortcut to get the ResponseDTO whether it's bare or inside a IHttpResult
             </summary>
             <param name="response"></param>
             <returns>TResponse if found; otherwise null</returns>
         </member>
-        <member name="M:ServiceStack.HttpResultExtensions.GetResponseDto``1(System.Object)">
+        <member name="M:ServiceStack.HttpResultUtils.GetResponseDto``1(System.Object)">
             <summary>
             Alias of AsDto
             </summary>
         </member>
-        <member name="M:ServiceStack.HttpResultExtensions.IsErrorResponse(System.Object)">
+        <member name="M:ServiceStack.HttpResultUtils.IsErrorResponse(System.Object)">
             <summary>
             Whether the response is an IHttpError or Exception
             </summary>
         </member>
-        <member name="M:ServiceStack.HttpResultExtensions.ExtractHttpRanges(System.String,System.Int64,System.Int64@,System.Int64@)">
+        <member name="M:ServiceStack.HttpResultUtils.ExtractHttpRanges(System.String,System.Int64,System.Int64@,System.Int64@)">
             <summary>
             rangeHeader should be of the format "bytes=0-" or "bytes=0-12345" or "bytes=123-456"
             </summary>
         </member>
-        <member name="M:ServiceStack.HttpResultExtensions.AddHttpRangeResponseHeaders(ServiceStack.Web.IResponse,System.Int64,System.Int64,System.Int64)">
+        <member name="M:ServiceStack.HttpResultUtils.AddHttpRangeResponseHeaders(ServiceStack.Web.IResponse,System.Int64,System.Int64,System.Int64)">
             <summary>
             Adds 206 PartialContent Status, Content-Range and Content-Length headers
             </summary>
         </member>
-        <member name="M:ServiceStack.HttpResultExtensions.WritePartialTo(System.IO.Stream,System.IO.Stream,System.Int64,System.Int64)">
+        <member name="M:ServiceStack.HttpResultUtils.WritePartialTo(System.IO.Stream,System.IO.Stream,System.Int64,System.Int64)">
             <summary>
             Writes partial range as specified by start-end, from fromStream to toStream.
             </summary>
@@ -3231,19 +3413,9 @@
             <param name="cacheClient">Cache client</param>
             <param name="regex">Regular expression pattern to search cache keys</param>
         </member>
-        <member name="M:ServiceStack.Caching.MemoryCacheClient.CacheAdd(System.String,System.Object)">
-            <summary>
-            Add value with specified key to the cache, and set the cache entry to never expire.
-            </summary>
-        </member>
-        <member name="M:ServiceStack.Caching.MemoryCacheClient.CacheAdd(System.String,System.Object,System.DateTime)">
+        <member name="M:ServiceStack.Caching.MemoryCacheClient.CacheAdd(System.String,System.Object,System.Nullable{System.DateTime})">
             <summary>
             Stores The value with key only if such key doesn't exist at the server yet. 
-            </summary>
-        </member>
-        <member name="M:ServiceStack.Caching.MemoryCacheClient.CacheSet(System.String,System.Object)">
-            <summary>
-            Adds or replaces the value with key, and sets the cache entry to never expire.
             </summary>
         </member>
         <member name="M:ServiceStack.Caching.MemoryCacheClient.CacheSet(System.String,System.Object,System.DateTime)">
@@ -3251,17 +3423,12 @@
             Adds or replaces the value with key.
             </summary>
         </member>
-        <member name="M:ServiceStack.Caching.MemoryCacheClient.CacheSet(System.String,System.Object,System.DateTime,System.Nullable{System.Int64})">
+        <member name="M:ServiceStack.Caching.MemoryCacheClient.CacheSet(System.String,System.Object,System.Nullable{System.DateTime},System.Nullable{System.Int64})">
             <summary>
             Adds or replaces the value with key. 
             </summary>
         </member>
-        <member name="M:ServiceStack.Caching.MemoryCacheClient.CacheReplace(System.String,System.Object)">
-            <summary>
-            Replace the value with specified key if it exists, and set the cache entry to never expire.
-            </summary>
-        </member>
-        <member name="M:ServiceStack.Caching.MemoryCacheClient.CacheReplace(System.String,System.Object,System.DateTime)">
+        <member name="M:ServiceStack.Caching.MemoryCacheClient.CacheReplace(System.String,System.Object,System.Nullable{System.DateTime})">
             <summary>
             Replace the value with specified key if it exists.
             </summary>
@@ -3323,7 +3490,7 @@
             Replace the value with key in the cache, set to expire after specified TimeSpan.
             </summary>
         </member>
-        <member name="M:ServiceStack.Caching.MemoryCacheClient.CacheEntry.#ctor(System.Object,System.DateTime)">
+        <member name="M:ServiceStack.Caching.MemoryCacheClient.CacheEntry.#ctor(System.Object,System.Nullable{System.DateTime})">
             <summary>
             Create new instance of CacheEntry.
             </summary>
@@ -7494,6 +7661,11 @@
             <param name="container">The IoC container</param>
             <param name="assemblies">The assemblies to scan for a validator</param>
         </member>
+        <member name="M:ServiceStack.VirtualFileExtensions.Refresh(ServiceStack.IO.IVirtualFile)">
+            <summary>
+            Refresh file stats for this node if supported
+            </summary>
+        </member>
         <member name="T:ServiceStack.VirtualPath.InMemoryVirtualPathProvider">
             <summary>
             In Memory repository for files. Useful for testing.
@@ -8253,7 +8425,7 @@
             </summary>
             <param name="defaultFilePath"></param>
         </member>
-        <member name="M:ServiceStack.HostContext.CompleteRequest">
+        <member name="M:ServiceStack.HostContext.CompleteRequest(ServiceStack.Web.IRequest)">
             <summary>
             Call to signal the completion of a ServiceStack-handled Request
             </summary>

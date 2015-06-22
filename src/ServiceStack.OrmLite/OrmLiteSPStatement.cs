@@ -1,18 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Data;
 
 namespace ServiceStack.OrmLite
 {
-    public class OrmLiteSPStatement
+    public class OrmLiteSPStatement : IDisposable
     {
-        private IDbCommand command { get; set; }
+        private readonly IDbConnection db;
+        private readonly IDbCommand dbCmd;
+        private readonly IOrmLiteDialectProvider dialectProvider;
 
-        public OrmLiteSPStatement(IDbCommand cmd)
+        public OrmLiteSPStatement(IDbCommand dbCmd)
+            : this(null, dbCmd) {}
+
+        public OrmLiteSPStatement(IDbConnection db, IDbCommand dbCmd)
         {
-            command = cmd;
+            this.db = db;
+            this.dbCmd = dbCmd;
+            dialectProvider = dbCmd.GetDialectProvider();
         }
 
         public List<T> ConvertToList<T>()
@@ -23,8 +28,8 @@ namespace ServiceStack.OrmLite
             IDataReader reader = null;
             try
             {
-                reader = command.ExecuteReader();
-                return reader.ConvertToList<T>();
+                reader = dbCmd.ExecuteReader();
+                return reader.ConvertToList<T>(dialectProvider);
             }
             finally
             {
@@ -41,10 +46,8 @@ namespace ServiceStack.OrmLite
             IDataReader reader = null;
             try
             {
-                reader = command.ExecuteReader();
-#pragma warning disable 618
-                return reader.Column<T>();
-#pragma warning restore 618
+                reader = dbCmd.ExecuteReader();
+                return reader.Column<T>(dialectProvider);
             }
             finally
             {
@@ -61,8 +64,8 @@ namespace ServiceStack.OrmLite
             IDataReader reader = null;
             try
             {
-                reader = command.ExecuteReader();
-                return reader.ConvertTo<T>();
+                reader = dbCmd.ExecuteReader();
+                return reader.ConvertTo<T>(dialectProvider);
             }
             finally
             {
@@ -79,10 +82,8 @@ namespace ServiceStack.OrmLite
             IDataReader reader = null;
             try
             {
-                reader = command.ExecuteReader();
-#pragma warning disable 618
-                return reader.Scalar<T>();
-#pragma warning restore 618
+                reader = dbCmd.ExecuteReader();
+                return reader.Scalar<T>(dialectProvider);
             }
             finally
             {
@@ -99,10 +100,8 @@ namespace ServiceStack.OrmLite
             IDataReader reader = null;
             try
             {
-                reader = command.ExecuteReader();
-#pragma warning disable 618
-                return reader.Column<T>();
-#pragma warning restore 618
+                reader = dbCmd.ExecuteReader();
+                return reader.Column<T>(dialectProvider);
             }
             finally
             {
@@ -119,10 +118,8 @@ namespace ServiceStack.OrmLite
             IDataReader reader = null;
             try
             {
-                reader = command.ExecuteReader();
-#pragma warning disable 618
-                return reader.ColumnDistinct<T>();
-#pragma warning restore 618
+                reader = dbCmd.ExecuteReader();
+                return reader.ColumnDistinct<T>(dialectProvider);
             }
             finally
             {
@@ -133,7 +130,7 @@ namespace ServiceStack.OrmLite
 
         public int ExecuteNonQuery()
         {
-            return command.ExecuteNonQuery();
+            return dbCmd.ExecuteNonQuery();
         }
 
         public bool HasResult()
@@ -141,7 +138,7 @@ namespace ServiceStack.OrmLite
             IDataReader reader = null;
             try
             {
-                reader = command.ExecuteReader();
+                reader = dbCmd.ExecuteReader();
                 if (reader.Read())
                     return true;
                 else
@@ -152,6 +149,11 @@ namespace ServiceStack.OrmLite
                 if (reader != null)
                     reader.Close();
             }
+        }
+
+        public void Dispose()
+        {
+            dialectProvider.GetExecFilter().DisposeCommand(this.dbCmd, this.db);
         }
     }
 }

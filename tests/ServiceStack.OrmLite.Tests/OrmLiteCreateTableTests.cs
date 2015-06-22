@@ -189,6 +189,12 @@ namespace ServiceStack.OrmLite.Tests
                 newModel = db.Single<ModelWithGuid>(q => q.Guid == models[0].Guid);
 
                 Assert.That(newModel.Guid, Is.EqualTo(models[0].Guid));
+
+                var newGuid = Guid.NewGuid();
+                db.Update(new ModelWithGuid {Id = models[0].Id, Guid = newGuid});
+                db.GetLastSql().Print();
+                newModel = db.Single<ModelWithGuid>(q => q.Id == models[0].Id);
+                Assert.That(newModel.Guid, Is.EqualTo(newGuid));
             }
         }
 
@@ -210,12 +216,16 @@ namespace ServiceStack.OrmLite.Tests
 
                 db.GetLastSql().Print();
 
-                db.Insert(new ModelWithOddIds { Id = 1, Guid = Guid.NewGuid() });
+                var guid1 = Guid.NewGuid();
+                db.Insert(new ModelWithOddIds { Id = 1, Guid = guid1 });
                 db.Insert(new ModelWithOddIds { Id = 1, Guid = Guid.NewGuid() });
 
                 var rows = db.Select<ModelWithOddIds>(q => q.Id == 1);
 
                 Assert.That(rows.Count, Is.EqualTo(2));
+
+                rows = db.Select<ModelWithOddIds>(q => q.Guid == guid1);
+                Assert.That(rows, Has.Count.EqualTo(1));
             }
         }
 
@@ -346,8 +356,20 @@ namespace ServiceStack.OrmLite.Tests
                 db.DropAndCreateTable<UserEntity>();
                 db.DropAndCreateTable<AnswerEntity>();
 
-                db.Insert(new AnswerEntity { UserId = 1, Created = DateTime.UtcNow });
-                db.Insert(new UserEntity { Id = 1, Created = DateTime.UtcNow });
+                var userId = db.Insert(new UserEntity 
+                { 
+                    Id = 1, 
+                    Created = DateTime.UtcNow,
+                    Updated = DateTime.UtcNow
+                }, 
+                selectIdentity: true);
+
+                db.Insert(new AnswerEntity
+                {
+                    UserId = userId, 
+                    Created = DateTime.UtcNow,
+                    Updated = DateTime.UtcNow,
+                });
 
                 var q = db.From<AnswerEntity>();
                 q.Join<AnswerEntity, UserEntity>((l, r) => l.UserId == r.Id);

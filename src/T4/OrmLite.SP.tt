@@ -38,16 +38,15 @@ namespace <#=SPNamespace#>
 		}
 
 <#foreach(var sp in sps){#>
-		public static OrmLiteSPStatement <#=sp.CleanName#>(this IDbConnection dbConnection <#foreach(var param in sp.Parameters){#> , <#=param.NullableSysType#> <#=Inflector.MakeInitialLowerCase(param.Name)#>  = null <#}#>)
+		public static OrmLiteSPStatement <#=sp.CleanName#>(this IDbConnection db<#foreach(var param in sp.Parameters){#>, <#=param.NullableSysType#> <#=Inflector.MakeInitialLowerCase(param.Name)#> = null<#}#>)
 		{
-			DbCommand dbCommand = (DbCommand)dbConnection.CreateCommand();
-			dbCommand.CommandText = "<#=sp.Name#>";
-			dbCommand.CommandType = CommandType.StoredProcedure;
-			dbCommand.Transaction = OrmLiteConfig.TSTransaction!= null ? (DbTransaction)OrmLiteConfig.TSTransaction : null;
+			var dbCmd = (DbCommand)OrmLiteConfig.ExecFilter.CreateCommand(db).ToDbCommand();
+			dbCmd.CommandText = "<#=sp.Name#>";
+			dbCmd.CommandType = CommandType.StoredProcedure;
 <#if (sp.Parameters.Count > 0) { foreach(var param in sp.Parameters){#>
-			dbCommand.Parameters.Add(CreateNewParameter(dbCommand,"<#=param.Name#>",<#=Inflector.MakeInitialLowerCase(param.Name)#>,ParameterDirection.Input,<#=param.DbType#>));
+			dbCmd.Parameters.Add(CreateNewParameter(dbCmd,"<#=param.Name#>",<#=Inflector.MakeInitialLowerCase(param.Name)#>,ParameterDirection.Input,<#=param.DbType#>));
 <#}#> <#}#>
-			return new OrmLiteSPStatement(dbCommand);
+			return new OrmLiteSPStatement(db, dbCmd);
 		}
 
 <#}#>

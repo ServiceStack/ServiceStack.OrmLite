@@ -13,6 +13,8 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq.Expressions;
+using System.Threading;
+using System.Threading.Tasks;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
@@ -51,7 +53,7 @@ namespace ServiceStack.OrmLite
 
         string GetQuotedTableName(ModelDefinition modelDef);
 
-        string GetQuotedTableName(string tableName);
+        string GetQuotedTableName(string tableName, string schema=null);
 
         string GetQuotedColumnName(string columnName);
 
@@ -82,9 +84,15 @@ namespace ServiceStack.OrmLite
 
         bool PrepareParameterizedUpdateStatement<T>(IDbCommand cmd, ICollection<string> updateFields = null);
 
-        bool PrepareParameterizedDeleteStatement<T>(IDbCommand cmd, ICollection<string> deleteFields = null);
+        bool PrepareParameterizedDeleteStatement<T>(IDbCommand cmd, IDictionary<string, object> delteFieldValues);
+
+        void PrepareStoredProcedureStatement<T>(IDbCommand cmd, T obj);
 
         void SetParameterValues<T>(IDbCommand dbCmd, object obj);
+
+        Dictionary<string, FieldDefinition> GetFieldDefinitionMap(ModelDefinition modelDef);
+
+        object GetFieldValue(FieldDefinition fieldDef, object value);
 
         string ToUpdateRowStatement(object objWithProperties, ICollection<string> UpdateFields = null);
 
@@ -115,8 +123,8 @@ namespace ServiceStack.OrmLite
 
         List<string> SequenceList(Type tableType);
 
-        bool DoesTableExist(IDbConnection db, string tableName);
-        bool DoesTableExist(IDbCommand dbCmd, string tableName);
+        bool DoesTableExist(IDbConnection db, string tableName, string schema = null);
+        bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null);
 
         bool DoesSequenceExist(IDbCommand dbCmd, string sequencName);
 
@@ -141,5 +149,20 @@ namespace ServiceStack.OrmLite
                                                      string foreignKeyName = null);
         string ToCreateIndexStatement<T>(Expression<Func<T, object>> field,
                                          string indexName = null, bool unique = false);
+
+        //Async
+        Task OpenAsync(IDbConnection db, CancellationToken token = default(CancellationToken));
+        Task<IDataReader> ExecuteReaderAsync(IDbCommand cmd, CancellationToken token = default(CancellationToken));
+        Task<int> ExecuteNonQueryAsync(IDbCommand cmd, CancellationToken token = default(CancellationToken));
+        Task<object> ExecuteScalarAsync(IDbCommand cmd, CancellationToken token = default(CancellationToken));
+        Task<bool> ReadAsync(IDataReader reader, CancellationToken token = default(CancellationToken));
+        Task<List<T>> ReaderEach<T>(IDataReader reader, Func<T> fn, CancellationToken token = default(CancellationToken));
+        Task<Return> ReaderEach<Return>(IDataReader reader, Action fn, Return source, CancellationToken token = default(CancellationToken));
+        Task<T> ReaderRead<T>(IDataReader reader, Func<T> fn, CancellationToken token = default(CancellationToken));
+
+        Task<long> InsertAndGetLastInsertIdAsync<T>(IDbCommand dbCmd, CancellationToken token);
+    
+        string GetLoadChildrenSubSelect<From>(SqlExpression<From> expr);
+        string ToRowCountStatement(string innerSql);
     }
 }

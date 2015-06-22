@@ -8,7 +8,8 @@
 	bool SplitIntoMultipleFiles = false;		// if true: Generates one file for every class
 	bool MakeSingular = true;			// if true: Changes the classname to singular if tablename is not singular
 	bool UseIdAsPK = true;				// if true: Changes the primary key property name to Id
-	bool GenerateConstructor = false;		// if true: Generates the default empty constructor 
+	bool GenerateConstructor = false;		// if true: Generates the default empty constructor
+	bool UseSchemaAttribute = true;		// if true: Adds explicit '[Schema]' attribute
 
     // Read schema
 	var tables = LoadTables(MakeSingular);
@@ -58,6 +59,9 @@ manager.StartNewFile(tbl.Name + ".cs");
 #>
 <# if (MakeSingular) {#>
 	[Alias("<#=tbl.Name#>")]
+<#}#>
+<# if (UseSchemaAttribute && !string.IsNullOrEmpty(tbl.Schema)) {#>
+	[Schema("<#=tbl.Schema#>")]
 <#}#>
     public partial class <#=tbl.ClassName#><#if (tbl.HasPK() && UseIdAsPK) { #> : IHasId<<#=tbl.PK.PropertyType#>><#}#> 
     {

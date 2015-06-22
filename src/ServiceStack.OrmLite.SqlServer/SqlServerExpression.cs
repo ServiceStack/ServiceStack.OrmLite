@@ -10,11 +10,13 @@ namespace ServiceStack.OrmLite.SqlServer
         public override string ToUpdateStatement(T item, bool excludeDefaults = false)
         {
             var setFields = new StringBuilder();
-            var dialectProvider = OrmLiteConfig.DialectProvider;
 
             foreach (var fieldDef in ModelDef.FieldDefinitions)
             {
+                if (fieldDef.ShouldSkipUpdate()) continue;
+                if (fieldDef.IsRowVersion) continue;
                 if (UpdateFields.Count > 0 && !UpdateFields.Contains(fieldDef.Name) || fieldDef.AutoIncrement) continue; // added
+
                 var value = fieldDef.GetValue(item);
                 if (excludeDefaults && (value == null || value.Equals(value.GetType().GetDefaultValue()))) continue; //GetDefaultValue?
 
@@ -24,12 +26,12 @@ namespace ServiceStack.OrmLite.SqlServer
                     setFields.Append(", ");
 
                 setFields.AppendFormat("{0}={1}",
-                    dialectProvider.GetQuotedColumnName(fieldDef.FieldName),
-                    dialectProvider.GetQuotedValue(value, fieldDef.FieldType));
+                    base.DialectProvider.GetQuotedColumnName(fieldDef.FieldName),
+                    base.DialectProvider.GetQuotedValue(value, fieldDef.FieldType));
             }
 
             return string.Format("UPDATE {0} SET {1} {2}",
-                dialectProvider.GetQuotedTableName(ModelDef), setFields, WhereExpression);
+                base.DialectProvider.GetQuotedTableName(ModelDef), setFields, WhereExpression);
         }
 	}
 }

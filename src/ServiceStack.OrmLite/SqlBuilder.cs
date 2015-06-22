@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Text.RegularExpressions;
 using System.Threading;
 using ServiceStack.Text;
+using PropertyAttributes = System.Reflection.PropertyAttributes;
 
 namespace ServiceStack.OrmLite
 {
@@ -214,6 +216,8 @@ namespace ServiceStack.OrmLite
 
             public string RawSql { get { ResolveSql(); return rawSql; } }
             public object Parameters { get { ResolveSql(); return parameters; } }
+
+            public List<IDbDataParameter> Params { get; private set; }
 
             public string ToSelectStatement()
             {

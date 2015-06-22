@@ -14,9 +14,14 @@ namespace ServiceStack.OrmLite
         public IDbTransaction Transaction { get; set; }
         private IDbConnection dbConnection;
 
+        public IOrmLiteDialectProvider DialectProvider { get; set; }
+        public string LastCommandText { get; set; }
+        public int? CommandTimeout { get; set; }
+
         public OrmLiteConnection(OrmLiteConnectionFactory factory)
         {
             this.Factory = factory;
+            this.DialectProvider = factory.DialectProvider;
         }
 
         public IDbConnection DbConnection
@@ -25,7 +30,7 @@ namespace ServiceStack.OrmLite
             {
                 if (dbConnection == null)
                 {
-                    dbConnection = Factory.ConnectionString.ToDbConnection(Factory.DialectProvider);
+                    dbConnection = ConnectionString.ToDbConnection(Factory.DialectProvider);
                 }
                 return dbConnection;
             }
@@ -45,8 +50,7 @@ namespace ServiceStack.OrmLite
             if (Factory.AlwaysReturnTransaction != null)
                 return Factory.AlwaysReturnTransaction;
 
-            Transaction = DbConnection.BeginTransaction();
-            return Transaction;
+            return DbConnection.BeginTransaction();
         }
 
         public IDbTransaction BeginTransaction(IsolationLevel isolationLevel)
@@ -54,8 +58,7 @@ namespace ServiceStack.OrmLite
             if (Factory.AlwaysReturnTransaction != null)
                 return Factory.AlwaysReturnTransaction;
 
-            Transaction = DbConnection.BeginTransaction(isolationLevel);
-            return Transaction;
+            return DbConnection.BeginTransaction(isolationLevel);
         }
 
         public void Close()
@@ -74,8 +77,7 @@ namespace ServiceStack.OrmLite
                 return Factory.AlwaysReturnCommand;
 
             var cmd = DbConnection.CreateCommand();
-            if (Transaction != null) { cmd.Transaction = Transaction; }
-            cmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
+
             return cmd;
         }
 
@@ -88,14 +90,16 @@ namespace ServiceStack.OrmLite
             {
                 DbConnection.Open();
                 //so the internal connection is wrapped for example by miniprofiler
-                if (Factory.ConnectionFilter != null) { dbConnection = Factory.ConnectionFilter(dbConnection); }
+                if (Factory.ConnectionFilter != null)
+                    dbConnection = Factory.ConnectionFilter(dbConnection);
             }
         }
 
+        private string connectionString;
         public string ConnectionString
         {
-            get { return Factory.ConnectionString; }
-            set { Factory.ConnectionString = value; }
+            get { return connectionString ?? Factory.ConnectionString; }
+            set { connectionString = value; }
         }
 
         public int ConnectionTimeout
@@ -113,9 +117,16 @@ namespace ServiceStack.OrmLite
             get { return DbConnection.State; }
         }
 
+        public bool AutoDisposeConnection { get; set; }
+
         public static explicit operator DbConnection(OrmLiteConnection dbConn)
         {
             return (DbConnection)dbConn.DbConnection;
         }
+    }
+
+    internal interface IHasDbTransaction
+    {
+        IDbTransaction Transaction { get; set; }
     }
 }

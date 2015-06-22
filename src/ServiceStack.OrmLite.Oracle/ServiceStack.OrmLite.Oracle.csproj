@@ -64,9 +64,18 @@
     <Compile Include="DbSchema\ParameterDirection.cs" />
     <Compile Include="DbSchema\PocoCreator.cs" />
     <Compile Include="DbSchema\ProcedureType.cs" />
+    <Compile Include="OracleConnection.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="OracleCommand.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="OracleDataReader.cs" />
     <Compile Include="OracleDialect.cs" />
     <Compile Include="OracleExecFilter.cs" />
     <Compile Include="OracleNamingStrategy.cs" />
+    <Compile Include="OracleTimestampConverter.cs" />
+    <Compile Include="OracleValue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="OracleOrmLiteDialectProvider.cs" />
     <Compile Include="OraSchema\ClassWriter.cs" />
