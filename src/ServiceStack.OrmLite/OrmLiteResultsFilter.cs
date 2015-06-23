@@ -68,6 +68,8 @@ namespace ServiceStack.OrmLite
         public Func<IDbCommand, long> LastInsertIdFn { get; set; }
 
         public Action<string> SqlFilter { get; set; }
+        public Action<IDbCommand> SqlCommandFilter { get; set; }
+
         public bool PrintSql { get; set; }
 
         private readonly IOrmLiteResultsFilter previousFilter;
@@ -85,6 +87,11 @@ namespace ServiceStack.OrmLite
             if (SqlFilter != null)
             {
                 SqlFilter(dbCmd.CommandText);
+            }
+
+            if (SqlCommandFilter != null)
+            {
+                SqlCommandFilter(dbCmd);
             }
 
             if (PrintSql)
@@ -325,5 +332,43 @@ namespace ServiceStack.OrmLite
         }
 
         public List<string> SqlStatements { get; set; }
+    }
+
+    public class CaptureSqlCommandFilter : OrmLiteResultsFilter
+    {
+        public CaptureSqlCommandFilter()
+        {
+            SqlCommandFilter = CaptureSqlCommand;
+            SqlCommandHistory = new List<SqlCommandDetails>();
+        }
+
+        private void CaptureSqlCommand(IDbCommand command)
+        {
+            SqlCommandHistory.Add(new SqlCommandDetails(command));
+        }
+
+        public List<SqlCommandDetails> SqlCommandHistory { get; set; }
+    }
+
+    public class SqlCommandDetails
+    {
+        public SqlCommandDetails(IDbCommand command)
+        {
+            if (command != null)
+            {
+                Sql = command.CommandText;
+                if(command.Parameters.Count > 0)
+                {
+                    Parameters = new Dictionary<string, object>();
+
+                    foreach (IDataParameter parameter in command.Parameters)
+                        if (!Parameters.ContainsKey(parameter.ParameterName))
+                            Parameters.Add(parameter.ParameterName, parameter.Value);
+                }
+            }
+        }
+
+        public string Sql { get; set; }
+        public Dictionary<string, object> Parameters { get; set; }
     }
 }
