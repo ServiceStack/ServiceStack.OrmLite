@@ -1,5 +1,5 @@
 
-<#@ template language="C#" hostspecific="True" debug="True" #>
+<#@ template language="C#" hostspecific="True" #>
 <#@ assembly name="EnvDTE" #>
 <#@ assembly name="System.Core.dll" #>
 <#@ assembly name="System.Data" #>
