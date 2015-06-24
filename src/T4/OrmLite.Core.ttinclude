@@ -1,4 +1,5 @@
-<#@ template language="C#" hostspecific="True" #>
+
+<#@ template language="C#" hostspecific="True" debug="True" #>
 <#@ assembly name="EnvDTE" #>
 <#@ assembly name="System.Core.dll" #>
 <#@ assembly name="System.Data" #>
@@ -86,6 +87,7 @@ string ClassPrefix = "";
 string ClassSuffix = "";
 string SchemaName = null;
 bool IncludeViews = false;
+bool IncludeFunctions = false;
 
 public class Table
 {
@@ -95,6 +97,7 @@ public class Table
     public string Name;
 	public string Schema;
 	public bool IsView;
+	public bool IsFunction;
     public string CleanName;
     public string ClassName;
 	public string SequenceName;
@@ -534,11 +537,11 @@ Tables LoadTables(bool makeSingular)
 					result.RemoveAt(i);
 					continue;
 				}
-				if (!IncludeViews && result[i].IsView)
+				if ((!IncludeViews && result[i].IsView) ||(!IncludeFunctions && result[i].IsFunction))
 				{
 					result.RemoveAt(i);
 					continue;
-				}
+				}				
 			}
         }
 
@@ -781,9 +784,12 @@ static int GetDatatypeSize(string type)
 		return -1;
 }
 
+// Edit here to get a method to read the proc
 class SqlServerSchemaReader : SchemaReader
 {
 	// SchemaReader.ReadSchema
+
+
 	public override Tables ReadSchema(DbConnection connection, DbProviderFactory factory)
 	{
 		var result=new Tables();
@@ -807,6 +813,7 @@ class SqlServerSchemaReader : SchemaReader
 					tbl.Name=rdr["TABLE_NAME"].ToString();
 					tbl.Schema=rdr["TABLE_SCHEMA"].ToString();
 					tbl.IsView=string.Compare(rdr["TABLE_TYPE"].ToString(), "View", true)==0;
+					tbl.IsFunction=string.Compare(rdr["TABLE_TYPE"].ToString(), "TVF", true)==0;
 					tbl.CleanName=CleanUp(tbl.Name);
 					tbl.ClassName=Inflector.MakeSingular(tbl.CleanName);
 
@@ -1156,25 +1163,53 @@ class SqlServerSchemaReader : SchemaReader
 	}
 
 
-    const string TABLE_SQL=@"SELECT *
-        FROM  INFORMATION_SCHEMA.TABLES
-        WHERE TABLE_TYPE='BASE TABLE' OR TABLE_TYPE='VIEW'";
+    const string TABLE_SQL=@"SELECT * FROM  INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE='BASE TABLE' OR TABLE_TYPE='VIEW'
+								UNION
+							SELECT SPECIFIC_CATALOG, SPECIFIC_SCHEMA, SPECIFIC_NAME, 'TVF' FROM INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_TYPE = 'FUNCTION' AND DATA_TYPE = 'TABLE'";
 
-    const string COLUMN_SQL=@"SELECT
-            TABLE_CATALOG AS [Database],
-            TABLE_SCHEMA AS Owner,
-            TABLE_NAME AS TableName,
-            COLUMN_NAME AS ColumnName,
-            ORDINAL_POSITION AS OrdinalPosition,
-            COLUMN_DEFAULT AS DefaultSetting,
-            IS_NULLABLE AS IsNullable, DATA_TYPE AS DataType,
-            CHARACTER_MAXIMUM_LENGTH AS MaxLength,
-            DATETIME_PRECISION AS DatePrecision,
-            COLUMNPROPERTY(object_id('[' + TABLE_SCHEMA + '].[' + TABLE_NAME + ']'), COLUMN_NAME, 'IsIdentity') AS IsIdentity,
-            COLUMNPROPERTY(object_id('[' + TABLE_SCHEMA + '].[' + TABLE_NAME + ']'), COLUMN_NAME, 'IsComputed') as IsComputed
-        FROM  INFORMATION_SCHEMA.COLUMNS
-        WHERE TABLE_NAME=@tableName AND TABLE_SCHEMA=@schemaName
-        ORDER BY OrdinalPosition ASC";
+    const string COLUMN_SQL=@"SELECT T.[Database] ,
+									   T.Owner ,
+									   T.TableName ,
+									   T.ColumnName ,
+									   T.OrdinalPosition ,
+									   T.DefaultSetting ,
+									   T.IsNullable ,
+									   T.DataType ,
+									   T.MaxLength ,
+									   T.DatePrecision ,
+									   T.IsIdentity ,
+									   T.IsComputed FROM (
+								SELECT
+											TABLE_CATALOG AS [Database],
+											TABLE_SCHEMA AS Owner,
+											TABLE_NAME AS TableName,
+											COLUMN_NAME AS ColumnName,
+											ORDINAL_POSITION AS OrdinalPosition,
+											COLUMN_DEFAULT AS DefaultSetting,
+											IS_NULLABLE AS IsNullable, DATA_TYPE AS DataType,
+											CHARACTER_MAXIMUM_LENGTH AS MaxLength,
+											DATETIME_PRECISION AS DatePrecision,
+											COLUMNPROPERTY(object_id('[' + TABLE_SCHEMA + '].[' + TABLE_NAME + ']'), COLUMN_NAME, 'IsIdentity') AS IsIdentity,
+											COLUMNPROPERTY(object_id('[' + TABLE_SCHEMA + '].[' + TABLE_NAME + ']'), COLUMN_NAME, 'IsComputed') as IsComputed
+										FROM  INFORMATION_SCHEMA.COLUMNS
+										WHERE TABLE_NAME=@tableName AND TABLE_SCHEMA=@schemaName
+										--ORDER BY OrdinalPosition ASC
+								UNION
+								SELECT TABLE_CATALOG AS [Database],
+											TABLE_SCHEMA AS Owner,
+											TABLE_NAME AS TableName,
+											COLUMN_NAME AS ColumnName,
+											ORDINAL_POSITION AS OrdinalPosition,
+											COLUMN_DEFAULT AS DefaultSetting,
+											IS_NULLABLE AS IsNullable, DATA_TYPE AS DataType,
+											CHARACTER_MAXIMUM_LENGTH AS MaxLength,
+											DATETIME_PRECISION AS DatePrecision,
+											COLUMNPROPERTY(object_id('[' + TABLE_SCHEMA + '].[' + TABLE_NAME + ']'), COLUMN_NAME, 'IsIdentity') AS IsIdentity,
+											COLUMNPROPERTY(object_id('[' + TABLE_SCHEMA + '].[' + TABLE_NAME + ']'), COLUMN_NAME, 'IsComputed') as IsComputed  
+								FROM INFORMATION_SCHEMA.ROUTINE_COLUMNS
+								WHERE TABLE_NAME=@tableName AND TABLE_SCHEMA=@schemaName
+								) T
+								ORDER BY T.OrdinalPosition ASC";
 
     const string SP_NAMES_SQL=@"SELECT  o.name AS sp_name, s.name AS schema_name
 FROM    sys.objects o
