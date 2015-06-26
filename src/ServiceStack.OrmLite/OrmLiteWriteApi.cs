@@ -175,6 +175,16 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Delete all rows provided. E.g:
+        /// <para>db.DeleteAll&lt;Person&gt;(people)</para>
+        /// </summary>
+        /// <returns>number of rows deleted</returns>
+        public static int DeleteAll<T>(this IDbConnection dbConn, IEnumerable<T> rows)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.DeleteAll(rows));
+        }
+
+        /// <summary>
         /// Delete all rows in the runtime table type. E.g:
         /// <para>db.DeleteAll(typeof(Person))</para>
         /// </summary>

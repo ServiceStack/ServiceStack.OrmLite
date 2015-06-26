@@ -642,6 +642,12 @@ namespace ServiceStack.OrmLite
             return DeleteAll(dbCmd, typeof(T));
         }
 
+        internal static int DeleteAll<T>(this IDbCommand dbCmd, IEnumerable<T> rows)
+        {
+            var ids = rows.Map(x => x.GetId());
+            return dbCmd.DeleteByIds<T>(ids);
+        }
+
         internal static int DeleteAll(this IDbCommand dbCmd, Type tableType)
         {
             return dbCmd.ExecuteSql(dbCmd.GetDialectProvider().ToDeleteStatement(tableType, null));
