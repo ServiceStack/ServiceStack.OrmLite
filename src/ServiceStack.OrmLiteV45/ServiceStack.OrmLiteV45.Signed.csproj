@@ -84,6 +84,9 @@
     <Compile Include="..\ServiceStack.OrmLite\DbTypes.cs">
       <Link>DbTypes.cs</Link>
     </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Expressions\IUntypedSqlExpression.cs">
+      <Link>Expressions\IUntypedSqlExpression.cs</Link>
+    </Compile>
     <Compile Include="..\ServiceStack.OrmLite\Expressions\ParameterRebinder.cs">
       <Link>Expressions\ParameterRebinder.cs</Link>
     </Compile>
