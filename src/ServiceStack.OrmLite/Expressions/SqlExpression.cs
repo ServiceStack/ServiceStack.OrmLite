@@ -10,7 +10,7 @@ using System.Linq.Expressions;
 
 namespace ServiceStack.OrmLite
 {
-    public abstract partial class SqlExpression<T> : ISqlExpression
+    public abstract partial class SqlExpression<T> : ISqlExpression, IHasUntypedSqlExpression
     {
         private Expression<Func<T, bool>> underlyingExpression;
         private List<string> orderByProperties = new List<string>();
@@ -1632,6 +1632,10 @@ namespace ServiceStack.OrmLite
             return p;
         }
 
+        public IUntypedSqlExpression GetUntyped()
+        {
+            return new UntypedSqlExpressionProxy<T>(this);
+        }
     }
 
     public interface ISqlExpression
