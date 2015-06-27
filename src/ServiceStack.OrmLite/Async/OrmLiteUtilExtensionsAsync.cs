@@ -37,11 +37,35 @@ namespace ServiceStack.OrmLite
         {
             var fieldDefs = ModelDefinition<T>.Definition.AllFieldDefinitionsArray;
             var indexCache = dataReader.GetIndexFieldsCache(ModelDefinition<T>.Definition);
+            var isObjectList = typeof(T) == typeof(List<object>);
+            var isObjectDict = typeof(T) == typeof(Dictionary<string,object>);
+
             return dialectProvider.ReaderEach(dataReader, () =>
             {
-                var row = CreateInstance<T>();
-                row.PopulateWithSqlReader(dialectProvider, dataReader, fieldDefs, indexCache);
-                return row;
+                if (isObjectList)
+                {
+                    var row = new List<object>();
+                    for (var i = 0; i < dataReader.FieldCount; i++)
+                    {
+                        row.Add(dataReader.GetValue(i));
+                    }
+                    return (T)(object)row;
+                }
+                else if (isObjectDict)
+                {
+                    var row = new Dictionary<string,object>();
+                    for (var i = 0; i < dataReader.FieldCount; i++)
+                    {
+                        row[dataReader.GetName(i)] = dataReader.GetValue(i);
+                    }
+                    return (T)(object)row;
+                }
+                else
+                {
+                    var row = CreateInstance<T>();
+                    row.PopulateWithSqlReader(dialectProvider, dataReader, fieldDefs, indexCache);
+                    return row;
+                }
             }, token).Then(t => {
                 dataReader.Dispose();
                 return t;

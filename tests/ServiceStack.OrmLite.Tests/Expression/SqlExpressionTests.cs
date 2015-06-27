@@ -91,6 +91,58 @@ namespace ServiceStack.OrmLite.Tests.Expression
         }
 
         [Test]
+        public void Can_Select_as_List_Object()
+        {
+            using (var db = OpenDbConnection())
+            {
+                InitLetters(db);
+
+                var query = db.From<LetterFrequency>()
+                  .Select("COUNT(*), MAX(Id), MIN(Id), Sum(Id)");
+
+                query.ToSelectStatement().Print();
+
+                var results = db.Select<List<object>>(query);
+
+                Assert.That(results.Count, Is.EqualTo(1));
+
+                var result = results[0];
+                Assert.That(result[0], Is.EqualTo(10));
+                Assert.That(result[1], Is.EqualTo(10));
+                Assert.That(result[2], Is.EqualTo(1));
+                Assert.That(result[3], Is.EqualTo(55));
+
+                results.PrintDump();
+            }
+        }
+
+        [Test]
+        public void Can_Select_as_Dictionary_Object()
+        {
+            using (var db = OpenDbConnection())
+            {
+                InitLetters(db);
+
+                var query = db.From<LetterFrequency>()
+                  .Select("COUNT(*) Count, MAX(Id) Max, MIN(Id) Min, Sum(Id) Sum");
+
+                query.ToSelectStatement().Print();
+
+                var results = db.Select<Dictionary<string,object>>(query);
+
+                Assert.That(results.Count, Is.EqualTo(1));
+
+                var result = results[0];
+                Assert.That(result["Count"], Is.EqualTo(10));
+                Assert.That(result["Max"], Is.EqualTo(10));
+                Assert.That(result["Min"], Is.EqualTo(1));
+                Assert.That(result["Sum"], Is.EqualTo(55));
+
+                results.PrintDump();
+            }
+        }
+
+        [Test]
         public void Can_select_limit_with_SqlExpression()
         {
             using (var db = OpenDbConnection())

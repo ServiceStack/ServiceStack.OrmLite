@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Data;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.OrmLite.Tests.UseCase;
 using ServiceStack.Text;
@@ -8,6 +10,73 @@ namespace ServiceStack.OrmLite.Tests
     public class SqlExpressionTests
         : OrmLiteTestBase
     {
+        public static void InitLetters(IDbConnection db)
+        {
+            db.DropAndCreateTable<LetterFrequency>();
+
+            db.Insert(new LetterFrequency { Letter = "A" });
+            db.Insert(new LetterFrequency { Letter = "B" });
+            db.Insert(new LetterFrequency { Letter = "B" });
+            db.Insert(new LetterFrequency { Letter = "C" });
+            db.Insert(new LetterFrequency { Letter = "C" });
+            db.Insert(new LetterFrequency { Letter = "C" });
+            db.Insert(new LetterFrequency { Letter = "D" });
+            db.Insert(new LetterFrequency { Letter = "D" });
+            db.Insert(new LetterFrequency { Letter = "D" });
+            db.Insert(new LetterFrequency { Letter = "D" });
+        }
+
+        [Test]
+        public async Task Can_Select_as_List_Object_Async()
+        {
+            using (var db = OpenDbConnection())
+            {
+                InitLetters(db);
+
+                var query = db.From<LetterFrequency>()
+                  .Select("COUNT(*), MAX(Id), MIN(Id), Sum(Id)");
+
+                query.ToSelectStatement().Print();
+
+                var results = await db.SelectAsync<List<object>>(query);
+
+                Assert.That(results.Count, Is.EqualTo(1));
+
+                var result = results[0];
+                Assert.That(result[0], Is.EqualTo(10));
+                Assert.That(result[1], Is.EqualTo(10));
+                Assert.That(result[2], Is.EqualTo(1));
+                Assert.That(result[3], Is.EqualTo(55));
+
+                results.PrintDump();
+            }
+        }
+
+        [Test]
+        public async Task Can_Select_as_Dictionary_Object_Async()
+        {
+            using (var db = OpenDbConnection())
+            {
+                InitLetters(db);
+
+                var query = db.From<LetterFrequency>()
+                  .Select("COUNT(*) Count, MAX(Id) Max, MIN(Id) Min, Sum(Id) Sum");
+
+                query.ToSelectStatement().Print();
+
+                var results = await db.SelectAsync<Dictionary<string, object>>(query);
+
+                Assert.That(results.Count, Is.EqualTo(1));
+
+                var result = results[0];
+                Assert.That(result["Count"], Is.EqualTo(10));
+                Assert.That(result["Max"], Is.EqualTo(10));
+                Assert.That(result["Min"], Is.EqualTo(1));
+                Assert.That(result["Sum"], Is.EqualTo(55));
+
+                results.PrintDump();
+            }
+        }
         [Test]
         public async Task Can_select_limit_on_Table_with_References_Async()
         {
@@ -48,6 +117,5 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(results[0].Orders.Count, Is.EqualTo(2));
             }
         }
-         
     }
 }

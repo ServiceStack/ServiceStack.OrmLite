@@ -54,18 +54,55 @@ namespace ServiceStack.OrmLite
         {
             var fieldDefs = ModelDefinition<T>.Definition.AllFieldDefinitionsArray;
 
-            var to = new List<T>();
-            using (dataReader)
+            if (typeof(T) == typeof(List<object>))
             {
-                var indexCache = dataReader.GetIndexFieldsCache(ModelDefinition<T>.Definition);
-                while (dataReader.Read())
+                var to = new List<List<object>>();
+                using (dataReader)
                 {
-                    var row = CreateInstance<T>();
-                    row.PopulateWithSqlReader(dialectProvider, dataReader, fieldDefs, indexCache);
+                    var row = new List<object>();
+                    while (dataReader.Read())
+                    {
+                        for (var i = 0; i < dataReader.FieldCount; i++)
+                        {
+                            row.Add(dataReader.GetValue(i));
+                        }
+                    }
                     to.Add(row);
                 }
+                return (List<T>)(object)to;
             }
-            return to;
+            else if (typeof(T) == typeof(Dictionary<string, object>))
+            {
+                var to = new List<Dictionary<string,object>>();
+                using (dataReader)
+                {
+                    var row = new Dictionary<string,object>();
+                    while (dataReader.Read())
+                    {
+                        for (var i = 0; i < dataReader.FieldCount; i++)
+                        {
+                            row[dataReader.GetName(i)] = dataReader.GetValue(i);
+                        }
+                    }
+                    to.Add(row);
+                }
+                return (List<T>)(object)to;
+            }
+            else
+            {
+                var to = new List<T>();
+                using (dataReader)
+                {
+                    var indexCache = dataReader.GetIndexFieldsCache(ModelDefinition<T>.Definition);
+                    while (dataReader.Read())
+                    {
+                        var row = CreateInstance<T>();
+                        row.PopulateWithSqlReader(dialectProvider, dataReader, fieldDefs, indexCache);
+                        to.Add(row);
+                    }
+                }
+                return to;
+            }
         }
 
         public static object ConvertTo(this IDataReader dataReader, IOrmLiteDialectProvider dialectProvider, Type type)
