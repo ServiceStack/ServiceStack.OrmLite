@@ -374,14 +374,15 @@ namespace ServiceStack.OrmLite
             if (fieldDef == null || fieldDef.SetValueFn == null || colIndex == NotFound) return true;
             if (dataReader.IsDBNull(colIndex))
             {
-                if (fieldDef.IsNullable)
+                var value = fieldDef.IsNullable ? null : fieldDef.FieldTypeDefaultValue;
+                if (OrmLiteConfig.OnDbNullFilter != null)
                 {
-                    fieldDef.SetValueFn(instance, null);
+                    var useValue = OrmLiteConfig.OnDbNullFilter(fieldDef);
+                    if (useValue != null)
+                        value = useValue;
                 }
-                else
-                {
-                    fieldDef.SetValueFn(instance, fieldDef.FieldType.GetDefaultValue());
-                }
+
+                fieldDef.SetValueFn(instance, value);
                 return true;
             }
             return false;

@@ -144,6 +144,7 @@ namespace ServiceStack.OrmLite
                     Name = propertyInfo.Name,
                     Alias = aliasAttr != null ? aliasAttr.Name : null,
                     FieldType = propertyType,
+                    FieldTypeDefaultValue = propertyType.GetDefaultValue(),
                     TreatAsType = treatAsType,
                     PropertyInfo = propertyInfo,
                     IsNullable = isNullable,
