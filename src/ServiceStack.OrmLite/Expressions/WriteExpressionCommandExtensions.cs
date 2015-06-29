@@ -17,7 +17,7 @@ namespace ServiceStack.OrmLite
         public static int UpdateOnly<T>(this IDbCommand dbCmd, T model, SqlExpression<T> onlyFields)
         {
             var sql = UpdateOnlySql(dbCmd, model, onlyFields);
-            return dbCmd.ExecuteSql(sql);
+            return dbCmd.ExecuteSql(sql, onlyFields.Params);
         }
 
         internal static string UpdateOnlySql<T>(this IDbCommand dbCmd, T model, SqlExpression<T> onlyFields)
@@ -56,7 +56,7 @@ namespace ServiceStack.OrmLite
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Where(obj);
             var sql = q.ToUpdateStatement(item, excludeDefaults: true);
-            return dbCmd.ExecuteSql(sql);
+            return dbCmd.ExecuteSql(sql, q.Params);
         }
 
         public static int Update<T>(this IDbCommand dbCmd, T item, Expression<Func<T, bool>> expression)
@@ -67,19 +67,20 @@ namespace ServiceStack.OrmLite
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Where(expression);
             var sql = q.ToUpdateStatement(item);
-            return dbCmd.ExecuteSql(sql);
+            return dbCmd.ExecuteSql(sql, q.Params);
         }
 
         public static int Update<T>(this IDbCommand dbCmd, object updateOnly, Expression<Func<T, bool>> where = null)
         {
-            var updateSql = UpdateSql(dbCmd.GetDialectProvider(), updateOnly, where);
-            return dbCmd.ExecuteSql(updateSql);
+            var ev = dbCmd.GetDialectProvider().SqlExpression<T>();
+            var whereSql = ev.Where(where).WhereExpression;
+            var updateSql = UpdateSql<T>(dbCmd.GetDialectProvider(), updateOnly, whereSql);
+
+            return dbCmd.ExecuteSql(updateSql, ev.Params);
         }
 
-        internal static string UpdateSql<T>(IOrmLiteDialectProvider dialectProvider, object updateOnly, Expression<Func<T, bool>> @where)
+        internal static string UpdateSql<T>(IOrmLiteDialectProvider dialectProvider, object updateOnly, string whereSql)
         {
-            var ev = dialectProvider.SqlExpression<T>();
-            var whereSql = ev.Where(@where).WhereExpression;
             var sql = new StringBuilder();
             var modelDef = typeof(T).GetModelDefinition();
             var fields = modelDef.FieldDefinitionsArray;
@@ -101,6 +102,14 @@ namespace ServiceStack.OrmLite
             var updateSql = string.Format("UPDATE {0} SET {1} {2}",
                 dialectProvider.GetQuotedTableName(modelDef), sql, whereSql);
             return updateSql;
+        }
+
+        internal static string UpdateSql<T>(IOrmLiteDialectProvider dialectProvider, object updateOnly, Expression<Func<T, bool>> @where)
+        {
+            var ev = dialectProvider.SqlExpression<T>();
+            var whereSql = ev.Where(@where).WhereExpression;
+
+            return UpdateSql<T>(dialectProvider, updateOnly, whereSql);
         }
 
         public static int UpdateFmt<T>(this IDbCommand dbCmd, string set = null, string where = null)
@@ -162,7 +171,7 @@ namespace ServiceStack.OrmLite
         public static int Delete<T>(this IDbCommand dbCmd, SqlExpression<T> where)
         {
             var sql = where.ToDeleteRowStatement();
-            return dbCmd.ExecuteSql(sql);
+            return dbCmd.ExecuteSql(sql, where.Params);
         }
 
         public static int DeleteFmt<T>(this IDbCommand dbCmd, string where = null)

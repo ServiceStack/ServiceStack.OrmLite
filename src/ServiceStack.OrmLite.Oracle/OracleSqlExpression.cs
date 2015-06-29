@@ -31,6 +31,20 @@ namespace ServiceStack.OrmLite.Oracle
             }
             return base.VisitColumnAccessMethod(m);
         }
+
+        protected override void ConvertToPlaceholderAndParameter(ref object right, Expression rightExpression)
+        {
+            if (!((OracleOrmLiteDialectProvider)DialectProvider).ParameterizeStatement)
+                return;
+
+            var paramName = Params.Count.ToString();
+            var paramValue = right;
+
+            var parameter = CreateParam(paramName, paramValue);
+            Params.Add(parameter);
+
+            right = parameter.ParameterName;
+        }
     }
 }
 

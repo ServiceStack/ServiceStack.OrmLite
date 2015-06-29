@@ -59,15 +59,18 @@ namespace ServiceStack.OrmLite.Oracle
         private readonly DbProviderFactory _factory;
         private readonly OracleTimestampConverter _timestampConverter;
 
+        public bool ParameterizeStatement;
+
         public OracleOrmLiteDialectProvider()
             : this(false, false)
         {
         }
 
-        public OracleOrmLiteDialectProvider(bool compactGuid, bool quoteNames, string clientProvider = OdpProvider)
+        public OracleOrmLiteDialectProvider(bool compactGuid, bool quoteNames, string clientProvider = OdpProvider, bool parameterizeStatement = false)
         {
             ClientProvider = clientProvider;
             CompactGuid = compactGuid;
+            ParameterizeStatement = parameterizeStatement;
             QuoteNames = quoteNames;
             BoolColumnDefinition = "NUMBER(1)";
             GuidColumnDefinition = CompactGuid ? CompactGuidDefinition : StringGuidDefinition;
@@ -296,6 +299,73 @@ namespace ServiceStack.OrmLite.Oracle
             }
 
             return base.GetQuotedValue(value, fieldType);
+        }
+
+        public override object GetValue(object value, Type fieldType)
+        {
+            if (!ParameterizeStatement)
+                return GetQuotedValue(value, fieldType);
+
+            if (value == null) return DBNull.Value;
+
+            if (fieldType == typeof(Guid))
+            {
+                var guid = (Guid)value;
+
+                if (CompactGuid)
+                    return guid.ToByteArray();
+
+                return guid.ToString();
+            }
+
+            if (fieldType == typeof(DateTimeOffset) || fieldType == typeof(DateTimeOffset?))
+            {
+                return GetQuotedDateTimeOffsetValue((DateTimeOffset)value);
+            }
+
+            if ((value is TimeSpan) && (fieldType == typeof(Int64) || fieldType == typeof(Int64?)))
+            {
+                var longValue = ((TimeSpan)value).Ticks;
+                return base.GetQuotedValue(longValue, fieldType);
+            }
+
+            if (fieldType == typeof(TimeSpan))
+                return ((TimeSpan)value).Ticks;
+
+            if (fieldType == typeof(bool?) || fieldType == typeof(bool))
+            {
+                var boolValue = (bool)value;
+                return boolValue ? 1 : 0;
+            }
+
+            if (fieldType.IsEnum)
+            {
+                if (value is int && !fieldType.IsEnumFlags())
+                {
+                    value = fieldType.GetEnumName(value);
+                }
+
+                var enumValue = StringSerializer.SerializeToString(value);
+                // Oracle stores empty strings in varchar columns as null so match that behavior here
+                if (enumValue == null)
+                    return null;
+                enumValue = enumValue.Trim('"');
+                return enumValue == ""
+                    ? "null"
+                    : enumValue;
+            }
+
+            if (fieldType == typeof(byte[]))
+            {
+                return "hextoraw('" + BitConverter.ToString((byte[])value).Replace("-", "") + "')";
+            }
+
+            if (fieldType.IsRefType())
+            {
+                return StringSerializer.SerializeToString(value);
+            }
+
+            return value;
         }
 
         const string IsoDateFormat = "yyyy-MM-dd";

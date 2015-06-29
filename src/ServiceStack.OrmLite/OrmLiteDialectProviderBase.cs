@@ -1429,6 +1429,11 @@ namespace ServiceStack.OrmLite
                     : value.ToString();
         }
 
+        public virtual object GetValue(object value, Type fieldType)
+        {
+            return GetQuotedValue(value, fieldType);
+        }
+
         public virtual string EscapeWildcards(string value)
         {
             if (value == null)

@@ -284,7 +284,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                     .Join<LetterFrequency, LetterStat>()
                     .Where<LetterStat>(x => x.Id > 0);
 
-                var count = db.SqlScalar<long>(expr.ToCountStatement());
+                var count = db.SqlScalar<long>(expr.ToCountStatement(), expr.Params.ToDictionary(param => param.ParameterName, param => param.Value));
 
                 Assert.That(count, Is.GreaterThan(0));
 

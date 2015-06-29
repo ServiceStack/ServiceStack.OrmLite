@@ -219,12 +219,24 @@ namespace ServiceStack.OrmLite
             return dbCmd.CommandText;
         }
 
-        internal static int ExecuteSql(this IDbCommand dbCmd, string sql)
+        internal static int ExecuteSql(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams = null)
         {
             if (Log.IsDebugEnabled)
                 LogDebug(sql);
 
             dbCmd.CommandText = sql;
+
+            if (sqlParams != null)
+            {
+                dbCmd.Parameters.Clear();
+
+                foreach (var sqlParam in sqlParams)
+                {
+                    var p = dbCmd.CreateParameter();
+                    p.PopulateWith(sqlParam);
+                    dbCmd.Parameters.Add(p);
+                }
+            }
 
             if (OrmLiteConfig.ResultsFilter != null)
             {

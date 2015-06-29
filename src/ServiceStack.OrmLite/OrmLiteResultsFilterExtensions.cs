@@ -109,15 +109,7 @@ namespace ServiceStack.OrmLite
             if (sql != null)
                 dbCmd.CommandText = sql;
 
-            if (sqlParams != null)
-            {
-                foreach (var sqlParam in sqlParams)
-                {
-                    var p = dbCmd.CreateParameter();
-                    p.PopulateWith(sqlParam);
-                    dbCmd.Parameters.Add(p);
-                }
-            }
+            SetParameters(dbCmd, sqlParams);
 
             if (OrmLiteConfig.ResultsFilter != null)
             {
@@ -127,6 +119,21 @@ namespace ServiceStack.OrmLite
             using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
             {
                 return reader.ConvertToList<T>(dbCmd.GetDialectProvider());
+            }
+        }
+
+        private static void SetParameters(IDbCommand dbCmd, IEnumerable<IDbDataParameter> sqlParams)
+        {
+            if (sqlParams != null)
+            {
+                dbCmd.Parameters.Clear();
+
+                foreach (var sqlParam in sqlParams)
+                {
+                    var p = dbCmd.CreateParameter();
+                    p.PopulateWith(sqlParam);
+                    dbCmd.Parameters.Add(p);
+                }
             }
         }
 
@@ -191,6 +198,13 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecuteScalar();
         }
 
+        public static T Scalar<T>(this IDbCommand dbCmd, IEnumerable<IDbDataParameter> sqlParams, string sql = null)
+        {
+            SetParameters(dbCmd, sqlParams);
+
+            return Scalar<T>(dbCmd, sql);
+        }
+
         public static long ExecLongScalar(this IDbCommand dbCmd, string sql = null)
         {
             if (sql != null)
@@ -204,10 +218,12 @@ namespace ServiceStack.OrmLite
             return dbCmd.LongScalar();
         }
 
-        internal static T ExprConvertTo<T>(this IDbCommand dbCmd, string sql = null)
+        internal static T ExprConvertTo<T>(this IDbCommand dbCmd, string sql = null, IEnumerable<IDbDataParameter> sqlParams = null)
         {
             if (sql != null)
                 dbCmd.CommandText = sql;
+
+            SetParameters(dbCmd, sqlParams);
 
             if (OrmLiteConfig.ResultsFilter != null)
             {
@@ -236,6 +252,13 @@ namespace ServiceStack.OrmLite
             }
         }
 
+        internal static List<T> Column<T>(this IDbCommand dbCmd, IEnumerable<IDbDataParameter> sqlParams, string sql = null)
+        {
+            SetParameters(dbCmd, sqlParams);
+
+            return Column<T>(dbCmd, sql);
+        }
+
         internal static HashSet<T> ColumnDistinct<T>(this IDbCommand dbCmd, string sql = null)
         {
             if (sql != null)
@@ -252,10 +275,44 @@ namespace ServiceStack.OrmLite
             }
         }
 
+        internal static HashSet<T> ColumnDistinct<T>(this IDbCommand dbCmd, ISqlExpression expression)
+        {
+            dbCmd.CommandText = expression.ToSelectStatement();
+
+            SetParameters(dbCmd, expression.Params);
+
+            if (OrmLiteConfig.ResultsFilter != null)
+            {
+                return OrmLiteConfig.ResultsFilter.GetColumnDistinct<T>(dbCmd);
+            }
+
+            using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
+            {
+                return reader.ColumnDistinct<T>(dbCmd.GetDialectProvider());
+            }
+        }
+
         internal static Dictionary<K, V> Dictionary<K, V>(this IDbCommand dbCmd, string sql = null)
         {
             if (sql != null)
                 dbCmd.CommandText = sql;
+
+            if (OrmLiteConfig.ResultsFilter != null)
+            {
+                return OrmLiteConfig.ResultsFilter.GetDictionary<K, V>(dbCmd);
+            }
+
+            using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
+            {
+                return reader.Dictionary<K, V>(dbCmd.GetDialectProvider());
+            }
+        }
+
+        internal static Dictionary<K, V> Dictionary<K, V>(this IDbCommand dbCmd, ISqlExpression expression)
+        {
+            dbCmd.CommandText = expression.ToSelectStatement();
+
+            SetParameters(dbCmd, expression.Params);
 
             if (OrmLiteConfig.ResultsFilter != null)
             {

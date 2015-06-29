@@ -43,6 +43,8 @@ namespace ServiceStack.OrmLite
         /// <returns></returns>
         string GetQuotedValue(string paramValue);
 
+        object GetValue(object value, Type fieldType);
+
         void SetDbValue(FieldDefinition fieldDef, IDataReader reader, int colIndex, object instance);
 
         object ConvertDbValue(object value, Type type);
