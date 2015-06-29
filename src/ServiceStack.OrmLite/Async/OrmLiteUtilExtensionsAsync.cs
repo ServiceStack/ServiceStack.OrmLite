@@ -56,7 +56,7 @@ namespace ServiceStack.OrmLite
                     var row = new Dictionary<string,object>();
                     for (var i = 0; i < dataReader.FieldCount; i++)
                     {
-                        row[dataReader.GetName(i)] = dataReader.GetValue(i);
+                        row[dataReader.GetName(i).Trim()] = dataReader.GetValue(i);
                     }
                     return (T)(object)row;
                 }

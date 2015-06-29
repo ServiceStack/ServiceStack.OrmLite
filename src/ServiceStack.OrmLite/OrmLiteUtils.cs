@@ -81,7 +81,7 @@ namespace ServiceStack.OrmLite
                     {
                         for (var i = 0; i < dataReader.FieldCount; i++)
                         {
-                            row[dataReader.GetName(i)] = dataReader.GetValue(i);
+                            row[dataReader.GetName(i).Trim()] = dataReader.GetValue(i);
                         }
                     }
                     to.Add(row);
