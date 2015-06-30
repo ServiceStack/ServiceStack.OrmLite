@@ -735,11 +735,9 @@ namespace ServiceStack.OrmLite
         public virtual void SetParameter(FieldDefinition fieldDef, IDbDataParameter p)
         {
             p.ParameterName = this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName));
+            var columnType = fieldDef.ColumnType;
 
-            DbType dbType;
-            var sqlDbType = DbTypeMap.ColumnDbTypeMap.TryGetValue(fieldDef.ColumnType, out dbType) 
-                ? dbType 
-                : DbType.String;
+            var sqlDbType = GetColumnDbType(columnType);
 
             p.DbType = sqlDbType;
         }
@@ -1055,12 +1053,16 @@ namespace ServiceStack.OrmLite
             return sqlIndexes;
         }
 
-        public virtual DbType GetColumnDbType(Type valueType)
+        public virtual DbType GetColumnDbType(Type columnType)
         {
-            if (valueType.IsEnum)
+            if (columnType.IsEnum)
                 return DbTypeMap.ColumnDbTypeMap[typeof(string)];
 
-            return DbTypeMap.ColumnDbTypeMap[valueType];
+            DbType dbType;
+            var sqlDbType = DbTypeMap.ColumnDbTypeMap.TryGetValue(columnType, out dbType)
+                ? dbType
+                : DbType.String;
+            return sqlDbType;
         }
 
         public virtual string GetColumnTypeDefinition(Type fieldType)

@@ -135,7 +135,7 @@ namespace ServiceStack.OrmLite
 
         SqlExpression<T> SqlExpression<T>();
 
-        DbType GetColumnDbType(Type valueType);
+        DbType GetColumnDbType(Type columnType);
         string GetColumnTypeDefinition(Type fieldType);
 
         //DDL
