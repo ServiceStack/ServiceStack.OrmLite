@@ -148,6 +148,9 @@
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\SelectExpressionTests.cs">
       <Link>Expression\SelectExpressionTests.cs</Link>
     </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\SqlExpressionParamTests.cs">
+      <Link>Expression\SqlExpressionParamTests.cs</Link>
+    </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\SqlExpressionTests.cs">
       <Link>Expression\SqlExpressionTests.cs</Link>
     </Compile>

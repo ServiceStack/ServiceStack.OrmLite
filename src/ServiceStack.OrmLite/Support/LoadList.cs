@@ -41,7 +41,7 @@ namespace ServiceStack.OrmLite.Support
             this.expr = expr;
 
             var sql = expr.SelectInto<Into>();
-            parentResults = dbCmd.ExprConvertToList<Into>(sql);
+            parentResults = dbCmd.ExprConvertToList<Into>(sql, expr.Params);
 
             modelDef = ModelDefinition<Into>.Definition;
             fieldDefs = modelDef.AllFieldDefinitionsArray.Where(x => x.IsReference).ToList();

@@ -280,7 +280,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static HashSet<T> ColumnDistinct<T>(this IDbConnection dbConn, ISqlExpression query)
         {
-            return dbConn.Exec(dbCmd => dbCmd.ColumnDistinct<T>(query.ToSelectStatement()));
+            return dbConn.Exec(dbCmd => dbCmd.ColumnDistinct<T>(query));
         }
 
         /// <summary>
@@ -334,7 +334,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static Dictionary<K, V> Dictionary<K, V>(this IDbConnection dbConn, ISqlExpression query)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Dictionary<K, V>(query.ToSelectStatement()));
+            return dbConn.Exec(dbCmd => dbCmd.Dictionary<K, V>(query));
         }
 
         /// <summary>
