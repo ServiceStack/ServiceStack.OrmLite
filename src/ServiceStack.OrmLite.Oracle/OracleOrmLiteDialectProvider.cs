@@ -301,7 +301,7 @@ namespace ServiceStack.OrmLite.Oracle
             return base.GetQuotedValue(value, fieldType);
         }
 
-        public override object GetValue(object value, Type fieldType)
+        public override object GetParamValue(object value, Type fieldType)
         {
             if (!ParameterizeStatement)
                 return GetQuotedValue(value, fieldType);

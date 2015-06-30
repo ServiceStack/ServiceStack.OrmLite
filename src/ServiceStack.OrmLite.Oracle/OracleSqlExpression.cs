@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 
 namespace ServiceStack.OrmLite.Oracle
 {
-    public class OracleSqlExpression<T> : SqlExpression<T>
+    public class OracleSqlExpression<T> : ParameterizedSqlExpression<T>
     {
         public OracleSqlExpression(IOrmLiteDialectProvider dialectProvider)
             : base(dialectProvider) {}
@@ -19,15 +19,12 @@ namespace ServiceStack.OrmLite.Oracle
                 if (args.Count == 2)
                 {
                     var length = Int32.Parse(args[1].ToString());
-                    return new PartialSqlString(string.Format("subStr({0},{1},{2})",
-                                                              quotedColName,
-                                                              startIndex,
-                                                              length));
+                    return new PartialSqlString(string.Format(
+                        "subStr({0},{1},{2})", quotedColName, startIndex, length));
                 }
 
-                return new PartialSqlString(string.Format("subStr({0},{1})",
-                                                          quotedColName,
-                                                          startIndex));
+                return new PartialSqlString(string.Format(
+                    "subStr({0},{1})", quotedColName, startIndex));
             }
             return base.VisitColumnAccessMethod(m);
         }

@@ -1429,7 +1429,7 @@ namespace ServiceStack.OrmLite
                     : value.ToString();
         }
 
-        public virtual object GetValue(object value, Type fieldType)
+        public virtual object GetParamValue(object value, Type fieldType)
         {
             return GetQuotedValue(value, fieldType);
         }

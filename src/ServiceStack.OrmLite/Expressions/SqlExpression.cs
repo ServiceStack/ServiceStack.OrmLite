@@ -28,8 +28,6 @@ namespace ServiceStack.OrmLite
         protected bool useFieldName = false;
         protected bool selectDistinct = false;
         protected bool CustomSelect { get; set; }
-        protected bool SkipParameterizationForThisExpression { get; set; }
-        private bool visitedExpressionIsTableColumn = false;
         private ModelDefinition modelDef;
         public bool PrefixFieldWithTableName { get; set; }
         public bool WhereStatementWithoutWhereString { get; set; }
@@ -46,7 +44,6 @@ namespace ServiceStack.OrmLite
             modelDef = typeof(T).GetModelDefinition();
             PrefixFieldWithTableName = false;
             WhereStatementWithoutWhereString = false;
-            SkipParameterizationForThisExpression = false;
             DialectProvider = dialectProvider;
             Params = new List<IDbDataParameter>();
             tableDefs.Add(modelDef);
@@ -930,8 +927,6 @@ namespace ServiceStack.OrmLite
 
         protected internal virtual object Visit(Expression exp)
         {
-            visitedExpressionIsTableColumn = false;
-
             if (exp == null) return string.Empty;
             switch (exp.NodeType)
             {
@@ -993,10 +988,7 @@ namespace ServiceStack.OrmLite
 
         protected internal virtual object VisitJoin(Expression exp)
         {
-            SkipParameterizationForThisExpression = true;
-            var visitedExpression = Visit(exp);
-            SkipParameterizationForThisExpression = false;
-            return visitedExpression;
+            return Visit(exp);
         }
 
         protected virtual object VisitLambda(LambdaExpression lambda)
@@ -1015,11 +1007,14 @@ namespace ServiceStack.OrmLite
             return Visit(lambda.Body);
         }
 
+        public virtual object GetValue(object value, Type type)
+        {
+            return DialectProvider.GetQuotedValue(value, type);
+        }
+
         protected virtual object VisitBinary(BinaryExpression b)
         {
-            var skipParameterizationForThisVisit = false;
-
-            object left, right;
+            object originalLeft = null, originalRight = null, left, right;
             var operand = BindOperant(b.NodeType);   //sep= " " ??
             if (operand == "AND" || operand == "OR")
             {
@@ -1050,17 +1045,11 @@ namespace ServiceStack.OrmLite
             }
             else
             {
-                left = Visit(b.Left);
-                right = Visit(b.Right);
-
-                if (visitedExpressionIsTableColumn || (right is DateTimeOffset))
-                    skipParameterizationForThisVisit = true;
+                originalLeft = left = Visit(b.Left);
+                originalRight = right = Visit(b.Right);
 
                 var leftEnum = left as EnumMemberAccess;
                 var rightEnum = right as EnumMemberAccess;
-
-                if (leftEnum != null && rightEnum != null)
-                    skipParameterizationForThisVisit = true;
 
                 var rightNeedsCoercing = leftEnum != null && rightEnum == null;
                 var leftNeedsCoercing = rightEnum != null && leftEnum == null;
@@ -1070,9 +1059,7 @@ namespace ServiceStack.OrmLite
                     var rightPartialSql = right as PartialSqlString;
                     if (rightPartialSql == null)
                     {
-                        right = SkipParameterizationForThisExpression
-                            ? DialectProvider.GetQuotedValue(right, leftEnum.EnumType)
-                            : DialectProvider.GetValue(right, leftEnum.EnumType);
+                        right = GetValue(right, leftEnum.EnumType);
                     }
                 }
                 else if (leftNeedsCoercing)
@@ -1092,19 +1079,14 @@ namespace ServiceStack.OrmLite
                     left = DialectProvider.GetQuotedValue(left, left != null ? left.GetType() : null);
                 else if (right as PartialSqlString == null)
                 {
-                    right = SkipParameterizationForThisExpression
-                        ? DialectProvider.GetQuotedValue(right, right != null ? right.GetType() : null)
-                        : DialectProvider.GetValue(right, right != null ? right.GetType() : null);
+                    right = GetValue(right, right != null ? right.GetType() : null);
                 }
             }
 
             if (operand == "=" && right.ToString().Equals("null", StringComparison.OrdinalIgnoreCase)) operand = "is";
             else if (operand == "<>" && right.ToString().Equals("null", StringComparison.OrdinalIgnoreCase)) operand = "is not";
 
-            if (operand == "AND" || operand == "OR" || operand == "is" || operand == "is not")
-                skipParameterizationForThisVisit = true;
-
-            DoParameterization(skipParameterizationForThisVisit, ref right);
+            VisitFilter(operand, originalLeft, originalRight, ref left, ref right);
 
             switch (operand)
             {
@@ -1116,16 +1098,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        private void DoParameterization(bool skipParameterizationForThisVisit, ref object right)
-        {
-            if (skipParameterizationForThisVisit)
-                return;
-
-            if (SkipParameterizationForThisExpression)
-                return;
-
-            ConvertToPlaceholderAndParameter(ref right);
-        }
+        protected virtual void VisitFilter(string operand, object originalLeft, object originalRight, ref object left, ref object right) {}
 
         protected virtual object VisitMemberAccess(MemberExpression m)
         {
@@ -1144,9 +1117,9 @@ namespace ServiceStack.OrmLite
                     }
                 }
 
+                OnVisitMemberType(modelType);
+
                 var tableDef = modelType.GetModelDefinition();
-                if (tableDef != null)
-                    visitedExpressionIsTableColumn = true;
 
                 if (propertyInfo.PropertyType.IsEnum)
                     return new EnumMemberAccess(
@@ -1160,6 +1133,8 @@ namespace ServiceStack.OrmLite
             var getter = lambda.Compile();
             return getter();
         }
+
+        protected virtual void OnVisitMemberType(Type modelType) {}
 
         protected virtual object VisitMemberInit(MemberInitExpression exp)
         {
@@ -1189,7 +1164,6 @@ namespace ServiceStack.OrmLite
                 }
                 return r.ToString();
             }
-
         }
 
         protected virtual object VisitParameter(ParameterExpression p)
@@ -1652,10 +1626,6 @@ namespace ServiceStack.OrmLite
                     throw new NotSupportedException();
             }
             return new PartialSqlString(statement);
-        }
-
-        protected virtual void ConvertToPlaceholderAndParameter(ref object right)
-        {
         }
 
         public IDbDataParameter CreateParam(string name,
