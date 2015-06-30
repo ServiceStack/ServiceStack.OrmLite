@@ -1705,5 +1705,41 @@ namespace ServiceStack.OrmLite
         public byte Scale { get; set; }
         public int Size { get; set; }
     }
+
+    public static class DbDataParameterExtensions
+    {
+        public static IDbDataParameter CreateParam(this IDbConnection db,
+            string name,
+            object value=null,
+            DbType? dbType=null,
+            bool? isNullable=null,
+            byte? precision=null,
+            byte? scale=null,
+            int? size=null)
+        {
+            var dialectProvider = db.GetDialectProvider();
+
+            var to = new OrmLiteDataParameter
+            {
+                ParameterName = dialectProvider.GetParam(name),
+                Value = value,
+            };
+
+            var valueType = value != null ? value.GetType() : typeof(string);
+            if (dbType != null)
+                to.DbType = dbType.GetValueOrDefault(dialectProvider.GetColumnDbType(valueType));
+
+            to.IsNullable = isNullable.GetValueOrDefault(value == null || !valueType.IsNullableType());
+
+            if (precision != null)
+                to.Precision = precision.Value;
+            if (scale != null)
+                to.Scale = scale.Value;
+            if (size != null)
+                to.Size = size.Value;
+
+            return to;
+        }
+    }
 }
 

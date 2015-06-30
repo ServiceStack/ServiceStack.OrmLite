@@ -183,6 +183,14 @@ namespace ServiceStack.OrmLite
             return dbConn.Exec(dbCmd => dbCmd.SingleWhereAsync<T>(name, value, token));
         }
 
+        public static T ScalarAsync<T>(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams)
+        {
+            if (sqlParams != null)
+                dbCmd.SetParameters(sqlParams);
+
+            return dbCmd.Scalar<T>(sql);
+        }
+
         /// <summary>
         /// Returns a single scalar value using an SqlExpression. E.g:
         /// <para>db.Column&lt;int&gt;(db.From&lt;Persion&gt;().Select(x => Sql.Count("*")).Where(q => q.Age > 40))</para>
