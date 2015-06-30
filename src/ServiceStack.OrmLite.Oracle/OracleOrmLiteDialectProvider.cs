@@ -59,18 +59,15 @@ namespace ServiceStack.OrmLite.Oracle
         private readonly DbProviderFactory _factory;
         private readonly OracleTimestampConverter _timestampConverter;
 
-        public bool ParameterizeStatement;
-
         public OracleOrmLiteDialectProvider()
             : this(false, false)
         {
         }
 
-        public OracleOrmLiteDialectProvider(bool compactGuid, bool quoteNames, string clientProvider = OdpProvider, bool parameterizeStatement = false)
+        public OracleOrmLiteDialectProvider(bool compactGuid, bool quoteNames, string clientProvider = OdpProvider)
         {
             ClientProvider = clientProvider;
             CompactGuid = compactGuid;
-            ParameterizeStatement = parameterizeStatement;
             QuoteNames = quoteNames;
             BoolColumnDefinition = "NUMBER(1)";
             GuidColumnDefinition = CompactGuid ? CompactGuidDefinition : StringGuidDefinition;
@@ -303,7 +300,7 @@ namespace ServiceStack.OrmLite.Oracle
 
         public override object GetParamValue(object value, Type fieldType)
         {
-            if (!ParameterizeStatement)
+            if (!OrmLiteConfig.UseParameterizeSqlExpressions)
                 return GetQuotedValue(value, fieldType);
 
             if (value == null) return DBNull.Value;

@@ -31,7 +31,7 @@ namespace ServiceStack.OrmLite.Oracle
 
         protected override void ConvertToPlaceholderAndParameter(ref object right)
         {
-            if (!((OracleOrmLiteDialectProvider)DialectProvider).ParameterizeStatement)
+            if (!OrmLiteConfig.UseParameterizeSqlExpressions)
                 return;
 
             var paramName = Params.Count.ToString();
