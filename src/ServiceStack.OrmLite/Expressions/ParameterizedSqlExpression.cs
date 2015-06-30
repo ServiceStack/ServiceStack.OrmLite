@@ -59,7 +59,7 @@ namespace ServiceStack.OrmLite
             ConvertToPlaceholderAndParameter(ref right);
         }
 
-        protected virtual void OnVisitMemberType(Type modelType)
+        protected override void OnVisitMemberType(Type modelType)
         {
             var tableDef = modelType.GetModelDefinition();
             if (tableDef != null)

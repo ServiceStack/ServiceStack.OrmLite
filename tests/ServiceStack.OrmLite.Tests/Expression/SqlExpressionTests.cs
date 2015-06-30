@@ -35,6 +35,17 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
     public class SqlExpressionTests : ExpressionsTestBase
     {
+        private int letterFrequenceMaxId;
+        private int letterFrequencyMinId;
+        private int letterFrequencySumId;
+
+        private void GetIdStats(IDbConnection db)
+        {
+            letterFrequenceMaxId = db.Scalar<int>(db.From<LetterFrequency>().Select(Sql.Max("Id")));
+            letterFrequencyMinId = db.Scalar<int>(db.From<LetterFrequency>().Select(Sql.Min("Id")));
+            letterFrequencySumId = db.Scalar<int>(db.From<LetterFrequency>().Select(Sql.Sum("Id")));
+        }
+
         public static void InitLetters(IDbConnection db)
         {
             db.DropAndCreateTable<LetterFrequency>();
@@ -96,6 +107,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
             using (var db = OpenDbConnection())
             {
                 InitLetters(db);
+                GetIdStats(db);
 
                 var query = db.From<LetterFrequency>()
                   .Select("COUNT(*), MAX(Id), MIN(Id), Sum(Id)");
@@ -107,10 +119,10 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 Assert.That(results.Count, Is.EqualTo(1));
 
                 var result = results[0];
-                Assert.That(result[0], Is.EqualTo(10));
-                Assert.That(result[1], Is.EqualTo(10));
-                Assert.That(result[2], Is.EqualTo(1));
-                Assert.That(result[3], Is.EqualTo(55));
+                Assert.That(Convert.ToInt64(result[0]), Is.EqualTo(10));
+                Assert.That(Convert.ToInt64(result[1]), Is.EqualTo(letterFrequenceMaxId));
+                Assert.That(Convert.ToInt64(result[2]), Is.EqualTo(letterFrequencyMinId));
+                Assert.That(Convert.ToInt64(result[3]), Is.EqualTo(letterFrequencySumId));
 
                 results.PrintDump();
             }
@@ -122,9 +134,10 @@ namespace ServiceStack.OrmLite.Tests.Expression
             using (var db = OpenDbConnection())
             {
                 InitLetters(db);
+                GetIdStats(db);
 
                 var query = db.From<LetterFrequency>()
-                  .Select("COUNT(*) Count, MAX(Id) Max, MIN(Id) Min, Sum(Id) Sum");
+                  .Select("COUNT(*) \"Count\", MAX(Id) \"Max\", MIN(Id) \"Min\", Sum(Id) \"Sum\"");
 
                 query.ToSelectStatement().Print();
 
@@ -133,10 +146,10 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 Assert.That(results.Count, Is.EqualTo(1));
 
                 var result = results[0];
-                Assert.That(result["Count"], Is.EqualTo(10));
-                Assert.That(result["Max"], Is.EqualTo(10));
-                Assert.That(result["Min"], Is.EqualTo(1));
-                Assert.That(result["Sum"], Is.EqualTo(55));
+                Assert.That(Convert.ToInt64(result["Count"]), Is.EqualTo(10));
+                Assert.That(Convert.ToInt64(result["Max"]), Is.EqualTo(letterFrequenceMaxId));
+                Assert.That(Convert.ToInt64(result["Min"]), Is.EqualTo(letterFrequencyMinId));
+                Assert.That(Convert.ToInt64(result["Sum"]), Is.EqualTo(letterFrequencySumId));
 
                 results.PrintDump();
             }
