@@ -138,8 +138,11 @@ namespace ServiceStack.OrmLite
             dbCmd.CommandText = dbCmd.GetFilterSql<T>();
         }
 
-        internal static void SetParameters<T>(this IDbCommand dbCmd, object anonType, bool excludeDefaults)
+        internal static IDbCommand SetParameters<T>(this IDbCommand dbCmd, object anonType, bool excludeDefaults)
         {
+            if (anonType == null)
+                return dbCmd;
+
             dbCmd.Parameters.Clear();
             lastQueryType = null;
 
@@ -174,6 +177,8 @@ namespace ServiceStack.OrmLite
 
                 dbCmd.Parameters.Add(p);
             });
+
+            return dbCmd;
         }
 
         internal delegate void ParamIterDelegate(PropertyInfo pi, string columnName, object value);
@@ -240,13 +245,13 @@ namespace ServiceStack.OrmLite
             return ret;
         }
 
-        internal static void SetParameters(this IDbCommand dbCmd, object anonType, bool excludeDefaults)
+        internal static IDbCommand SetParameters(this IDbCommand dbCmd, object anonType, bool excludeDefaults)
         {
+            if (anonType == null)
+                return dbCmd;
+
             dbCmd.Parameters.Clear();
             lastQueryType = null;
-            if (anonType == null)
-                return;
-
             var pis = anonType.GetType().GetSerializableProperties();
 
             foreach (var pi in pis)
@@ -267,13 +272,16 @@ namespace ServiceStack.OrmLite
                 p.Value = value ?? DBNull.Value;
                 dbCmd.Parameters.Add(p);
             }
+            return dbCmd;
         }
 
-        internal static void SetParameters(this IDbCommand dbCmd, IDictionary<string, object> dict, bool excludeDefaults)
+        internal static IDbCommand SetParameters(this IDbCommand dbCmd, IDictionary<string, object> dict, bool excludeDefaults)
         {
+            if (dict == null) 
+                return dbCmd;
+
             dbCmd.Parameters.Clear();
             lastQueryType = null;
-            if (dict == null) return;
 
             foreach (var kvp in dict)
             {
@@ -291,6 +299,7 @@ namespace ServiceStack.OrmLite
                 p.Value = value ?? DBNull.Value;
                 dbCmd.Parameters.Add(p);
             }
+            return dbCmd;
         }
 
         public static void SetFilters<T>(this IDbCommand dbCmd, object anonType)
@@ -367,13 +376,22 @@ namespace ServiceStack.OrmLite
             return dbCmd.ConvertTo<T>();
         }
 
+        internal static T Single<T>(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams)
+        {
+            dbCmd.SetParameters(sqlParams);
+
+            return OrmLiteUtils.IsScalar<T>() 
+                ? dbCmd.Scalar<T>(sql) 
+                : dbCmd.ConvertTo<T>(dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), sql));
+        }
+
         internal static T Single<T>(this IDbCommand dbCmd, string sql, object anonType)
         {
-            if (OrmLiteUtils.IsScalar<T>()) return Scalar<T>(dbCmd, sql, anonType);
-
             dbCmd.SetParameters<T>(anonType, excludeDefaults: false);
 
-            return dbCmd.ConvertTo<T>(dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), sql));
+            return OrmLiteUtils.IsScalar<T>() 
+                ? dbCmd.Scalar<T>(sql) 
+                : dbCmd.ConvertTo<T>(dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), sql));
         }
 
         internal static List<T> Where<T>(this IDbCommand dbCmd, string name, object value)
@@ -393,6 +411,12 @@ namespace ServiceStack.OrmLite
             return dbCmd.ConvertToList<T>();
         }
 
+        internal static List<T> Select<T>(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams)
+        {
+            dbCmd.SetParameters(sqlParams).CommandText = dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), sql);
+            return dbCmd.ConvertToList<T>();
+        }
+
         internal static List<T> Select<T>(this IDbCommand dbCmd, string sql, object anonType = null)
         {
             if (anonType != null) dbCmd.SetParameters<T>(anonType, excludeDefaults: false);
@@ -407,6 +431,13 @@ namespace ServiceStack.OrmLite
             dbCmd.CommandText = dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), sql);
 
             return dbCmd.ConvertToList<T>();
+        }
+
+        internal static List<T> SqlList<T>(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams)
+        {
+            dbCmd.CommandText = sql;
+
+            return dbCmd.SetParameters(sqlParams).ConvertToList<T>();
         }
 
         internal static List<T> SqlList<T>(this IDbCommand dbCmd, string sql, object anonType = null)
@@ -433,11 +464,15 @@ namespace ServiceStack.OrmLite
             return dbCmd.ConvertToList<T>();
         }
 
+        internal static List<T> SqlColumn<T>(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams)
+        {
+            dbCmd.SetParameters(sqlParams).CommandText = sql;
+            return dbCmd.ConvertToList<T>();
+        }
+
         internal static List<T> SqlColumn<T>(this IDbCommand dbCmd, string sql, object anonType = null)
         {
-            if (anonType != null) dbCmd.SetParameters<T>(anonType, excludeDefaults: false);
-            dbCmd.CommandText = sql;
-
+            dbCmd.SetParameters<T>(anonType, excludeDefaults: false).CommandText = sql;
             return dbCmd.ConvertToList<T>();
         }
 
@@ -447,6 +482,11 @@ namespace ServiceStack.OrmLite
             dbCmd.CommandText = sql;
 
             return dbCmd.ConvertToList<T>();
+        }
+
+        internal static T SqlScalar<T>(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams)
+        {
+            return dbCmd.SetParameters(sqlParams).Scalar<T>(sql);
         }
 
         internal static T SqlScalar<T>(this IDbCommand dbCmd, string sql, object anonType = null)
@@ -674,11 +714,14 @@ namespace ServiceStack.OrmLite
             return columValues;
         }
 
+        internal static HashSet<T> ColumnDistinct<T>(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams)
+        {
+            return dbCmd.SetParameters(sqlParams).ColumnDistinct<T>(sql);
+        }
+
         internal static HashSet<T> ColumnDistinct<T>(this IDbCommand dbCmd, string sql, object anonType = null)
         {
-            if (anonType != null) dbCmd.SetParameters<T>(anonType, excludeDefaults: false);
-
-            return dbCmd.ColumnDistinct<T>(sql);
+            return dbCmd.SetParameters<T>(anonType, excludeDefaults: false).ColumnDistinct<T>(sql);
         }
 
         internal static HashSet<T> ColumnDistinctFmt<T>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
@@ -702,9 +745,7 @@ namespace ServiceStack.OrmLite
 
         internal static Dictionary<K, List<V>> Lookup<K, V>(this IDbCommand dbCmd, string sql, object anonType = null)
         {
-            if (anonType != null) SetParameters(dbCmd, anonType, (bool)false);
-
-            return dbCmd.Lookup<K, V>(sql);
+            return dbCmd.SetParameters(anonType, false).Lookup<K, V>(sql);
         }
 
         internal static Dictionary<K, List<V>> LookupFmt<K, V>(this IDbCommand dbCmd, string sql, params object[] sqlParams)

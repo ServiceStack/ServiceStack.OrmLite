@@ -111,7 +111,12 @@ namespace ServiceStack.OrmLite
             return GetCount(dbCmd, sql, ev.Params);
         }
 
-        internal static long GetCount(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams = null)
+        internal static long GetCount(this IDbCommand dbCmd, string sql)
+        {
+            return dbCmd.Column<long>(sql).Sum();
+        }
+
+        internal static long GetCount(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams)
         {
             return dbCmd.Column<long>(sql, sqlParams).Sum();
         }

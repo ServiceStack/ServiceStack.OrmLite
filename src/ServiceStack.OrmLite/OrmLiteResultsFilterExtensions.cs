@@ -91,15 +91,16 @@ namespace ServiceStack.OrmLite
 
         public static IDbDataParameter PopulateWith(this IDbDataParameter to, IDbDataParameter from)
         {
-            to.DbType = from.DbType;
-            to.Direction = from.Direction;
             to.ParameterName = from.ParameterName;
-            to.SourceColumn = from.SourceColumn;
-            to.SourceVersion = from.SourceVersion;
             to.Value = from.Value;
-            to.Precision = from.Precision;
-            to.Scale = from.Scale;
-            to.Size = from.Size;
+            to.DbType = from.DbType;
+
+            if (from.Precision != default(byte))
+                to.Precision = from.Precision;
+            if (from.Scale != default(byte))
+                to.Scale = from.Scale;
+            if (from.Scale != default(int))
+                to.Size = from.Size;
 
             return to;
         }
@@ -122,19 +123,21 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        private static void SetParameters(IDbCommand dbCmd, IEnumerable<IDbDataParameter> sqlParams)
+        internal static IDbCommand SetParameters(this IDbCommand dbCmd, IEnumerable<IDbDataParameter> sqlParams)
         {
-            if (sqlParams != null)
-            {
-                dbCmd.Parameters.Clear();
+            if (sqlParams == null) 
+                return dbCmd;
+            
+            dbCmd.Parameters.Clear();
 
-                foreach (var sqlParam in sqlParams)
-                {
-                    var p = dbCmd.CreateParameter();
-                    p.PopulateWith(sqlParam);
-                    dbCmd.Parameters.Add(p);
-                }
+            foreach (var sqlParam in sqlParams)
+            {
+                var p = dbCmd.CreateParameter();
+                p.PopulateWith(sqlParam);
+                dbCmd.Parameters.Add(p);
             }
+
+            return dbCmd;
         }
 
         public static T ConvertTo<T>(this IDbCommand dbCmd, string sql = null)
@@ -169,15 +172,12 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        public static T Scalar<T>(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams)
+        internal static T Scalar<T>(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams)
         {
-            if (sqlParams != null)
-                SetParameters(dbCmd, sqlParams);
-
-            return dbCmd.Scalar<T>(sql);
+            return dbCmd.SetParameters(sqlParams).Scalar<T>(sql);
         }
 
-        public static T Scalar<T>(this IDbCommand dbCmd, string sql = null)
+        internal static T Scalar<T>(this IDbCommand dbCmd, string sql = null)
         {
             if (sql != null)
                 dbCmd.CommandText = sql;
@@ -255,9 +255,7 @@ namespace ServiceStack.OrmLite
 
         internal static List<T> Column<T>(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams)
         {
-            SetParameters(dbCmd, sqlParams);
-
-            return Column<T>(dbCmd, sql);
+            return dbCmd.SetParameters(sqlParams).Column<T>(sql);
         }
 
         internal static HashSet<T> ColumnDistinct<T>(this IDbCommand dbCmd, string sql = null)
@@ -311,9 +309,7 @@ namespace ServiceStack.OrmLite
 
         internal static Dictionary<K, V> Dictionary<K, V>(this IDbCommand dbCmd, ISqlExpression expression)
         {
-            dbCmd.CommandText = expression.ToSelectStatement();
-
-            SetParameters(dbCmd, expression.Params);
+            dbCmd.SetParameters(expression.Params).CommandText = expression.ToSelectStatement();
 
             if (OrmLiteConfig.ResultsFilter != null)
             {
