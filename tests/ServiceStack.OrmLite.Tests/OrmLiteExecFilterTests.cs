@@ -3,6 +3,7 @@ using System.Data;
 using System.Linq;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
+using ServiceStack.OrmLite.Tests.Expression;
 using ServiceStack.OrmLite.Tests.Shared;
 using ServiceStack.Text;
 
@@ -120,11 +121,11 @@ namespace ServiceStack.OrmLite.Tests
 
             using (var db = OpenDbConnection())
             {
-                db.DropAndCreateTable<Poco>();
+                db.DropAndCreateTable<ModelWithIdAndName>();
 
-                db.Insert(new Poco { Name = null });
-                var row = db.Select<Poco>().First();
-                
+                db.Insert(new ModelWithIdAndName { Name = null });
+                var row = db.Select<ModelWithIdAndName>().First();
+
                 Assert.That(row.Name, Is.EqualTo("NULL"));
             }
 

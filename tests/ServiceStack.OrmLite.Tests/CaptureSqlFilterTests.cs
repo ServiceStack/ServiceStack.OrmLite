@@ -69,7 +69,8 @@ namespace ServiceStack.OrmLite.Tests
                 i++; db.Select<Person>(x => x.Age > 40);
 
                 Assert.That(captured.SqlStatements.Last().NormalizeSql(),
-                    Is.EqualTo("select id, firstname, lastname, age  from person where (age > 40)"));
+                    Is.EqualTo("select id, firstname, lastname, age  from person where (age > 40)").
+                    Or.EqualTo("select id, firstname, lastname, age  from person where (age > @0)"));
 
                 i++; db.Select<Person>(q => q.Where(x => x.Age > 40));
                 i++; db.Select(db.From<Person>().Where(x => x.Age > 40));
@@ -120,7 +121,9 @@ namespace ServiceStack.OrmLite.Tests
                     Is.EqualTo("select id, firstname, lastname, age  from person where (age = 42) limit 1").
                     Or.EqualTo("select top 1 id, firstname, lastname, age  from person where (age = 42)").
                     Or.EqualTo("select id, firstname, lastname, age  from person where (age = 42) order by 1 offset 0 rows fetch next 1 rows only"). //VistaDB
-                    Or.EqualTo("select * from (\r select ssormlite1.*, rownum rnum from (\r select id, firstname, lastname, age  from person where (age = 42) order by person.id) ssormlite1\r where rownum <= 0 + 1) ssormlite2 where ssormlite2.rnum > 0")); //Oracle
+                    Or.EqualTo("select * from (\r select ssormlite1.*, rownum rnum from (\r select id, firstname, lastname, age  from person where (age = 42) order by person.id) ssormlite1\r where rownum <= 0 + 1) ssormlite2 where ssormlite2.rnum > 0").  //Oracle
+                    Or.EqualTo("select * from (\r select ssormlite1.*, rownum rnum from (\r select id, firstname, lastname, age  from person where (age = @0) order by person.id) ssormlite1\r where rownum <= 0 + 1) ssormlite2 where ssormlite2.rnum > 0")   //Oracle with UseParameterizeSqlExpressions
+                    );
 
                 i++; db.ExistsFmt<Person>("Age = {0}", 42);
                 i++; db.Single(db.From<Person>().Where(x => x.Age == 42));
