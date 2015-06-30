@@ -546,9 +546,18 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        internal static IEnumerable<T> ColumnLazy<T>(this IDbCommand dbCmd, string sql, object anonType = null)
+        internal static IEnumerable<T> ColumnLazy<T>(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams)
         {
-            if (anonType != null) dbCmd.SetParameters<T>(anonType, excludeDefaults: false);
+            foreach (var p in dbCmd.SetParameters(sqlParams).ColumnLazy<T>(sql)) yield return p;
+        }
+
+        internal static IEnumerable<T> ColumnLazy<T>(this IDbCommand dbCmd, string sql, object anonType)
+        {
+            foreach (var p in dbCmd.SetParameters<T>(anonType, excludeDefaults: false).ColumnLazy<T>(sql)) yield return p;
+        }
+
+        private static IEnumerable<T> ColumnLazy<T>(this IDbCommand dbCmd, string sql)
+        {
             var dialectProvider = dbCmd.GetDialectProvider();
             dbCmd.CommandText = dialectProvider.ToSelectStatement(typeof(T), sql);
 
@@ -565,11 +574,11 @@ namespace ServiceStack.OrmLite
             {
                 while (reader.Read())
                 {
-                    var value = dialectProvider.ConvertDbValue(reader.GetValue(0), typeof(T));
+                    var value = dialectProvider.ConvertDbValue(reader.GetValue(0), typeof (T));
                     if (value == DBNull.Value)
                         yield return default(T);
                     else
-                        yield return (T)value;
+                        yield return (T) value;
                 }
             }
         }

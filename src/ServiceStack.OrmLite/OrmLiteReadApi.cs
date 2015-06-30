@@ -268,11 +268,11 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns the first column in a List using a SqlFormat query. E.g:
-        /// <para>db.ColumnLazy&lt;string&gt;("SELECT LastName FROM Person WHERE Age = @age", new { age = 27 })</para>
+        /// <para>db.Column&lt;string&gt;("SELECT LastName FROM Person WHERE Age = @age", new[] { db.CreateParam("age",27) })</para>
         /// </summary>
-        public static IEnumerable<T> ColumnLazy<T>(this IDbConnection dbConn, string sql, object anonType = null)
+        public static List<T> Column<T>(this IDbConnection dbConn, string sql, IEnumerable<IDbDataParameter> sqlParams)
         {
-            return dbConn.ExecLazy(dbCmd => dbCmd.ColumnLazy<T>(sql, anonType));
+            return dbConn.Exec(dbCmd => dbCmd.Column<T>(sql, sqlParams));
         }
 
         /// <summary>
@@ -281,7 +281,25 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static IEnumerable<T> ColumnLazy<T>(this IDbConnection dbConn, ISqlExpression query)
         {
-            return dbConn.ExecLazy(dbCmd => dbCmd.ColumnLazy<T>(query.ToSelectStatement()));
+            return dbConn.ExecLazy(dbCmd => dbCmd.ColumnLazy<T>(query.ToSelectStatement(), query.Params));
+        }
+
+        /// <summary>
+        /// Returns the first column in a List using a SqlFormat query. E.g:
+        /// <para>db.ColumnLazy&lt;string&gt;("SELECT LastName FROM Person WHERE Age = @age", new[] { db.CreateParam("age",27) })</para>
+        /// </summary>
+        public static IEnumerable<T> ColumnLazy<T>(this IDbConnection dbConn, string sql, IEnumerable<IDbDataParameter> sqlParams)
+        {
+            return dbConn.ExecLazy(dbCmd => dbCmd.ColumnLazy<T>(sql, sqlParams));
+        }
+
+        /// <summary>
+        /// Returns the first column in a List using a SqlFormat query. E.g:
+        /// <para>db.ColumnLazy&lt;string&gt;("SELECT LastName FROM Person WHERE Age = @age", new { age = 27 })</para>
+        /// </summary>
+        public static IEnumerable<T> ColumnLazy<T>(this IDbConnection dbConn, string sql, object anonType = null)
+        {
+            return dbConn.ExecLazy(dbCmd => dbCmd.ColumnLazy<T>(sql, anonType));
         }
 
         /// <summary>
@@ -291,15 +309,6 @@ namespace ServiceStack.OrmLite
         public static List<T> Column<T>(this IDbConnection dbConn, string sql, object anonType = null)
         {
             return dbConn.Exec(dbCmd => dbCmd.Column<T>(sql, anonType));
-        }
-
-        /// <summary>
-        /// Returns the first column in a List using a SqlFormat query. E.g:
-        /// <para>db.Column&lt;string&gt;("SELECT LastName FROM Person WHERE Age = @age", new[] { db.CreateParam("age",27) })</para>
-        /// </summary>
-        public static List<T> Column<T>(this IDbConnection dbConn, string sql, IEnumerable<IDbDataParameter> sqlParams)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.Column<T>(sql, sqlParams));
         }
 
         /// <summary>
@@ -353,7 +362,16 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static Dictionary<K, List<V>> Lookup<K, V>(this IDbConnection dbConn, ISqlExpression sqlExpression)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Lookup<K, V>(sqlExpression.ToSelectStatement()));
+            return dbConn.Exec(dbCmd => dbCmd.Lookup<K, V>(sqlExpression.ToSelectStatement(), sqlExpression.Params));
+        }
+
+        /// <summary>
+        /// Returns an Dictionary&lt;K, List&lt;V&gt;&gt; grouping made from the first two columns using an parameterized query. E.g:
+        /// <para>db.Lookup&lt;int, string&gt;("SELECT Age, LastName FROM Person WHERE Age &lt; @age", new[] { db.CreateParam("age",50) })</para>
+        /// </summary>
+        public static Dictionary<K, List<V>> Lookup<K, V>(this IDbConnection dbConn, string sql, IEnumerable<IDbDataParameter> sqlParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Lookup<K, V>(sql, sqlParams));
         }
 
         /// <summary>
@@ -467,20 +485,20 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns results from an arbitrary parameterized raw sql query. E.g:
-        /// <para>db.SqlList&lt;Person&gt;("EXEC GetRockstarsAged @age", new { age = 50 })</para>
-        /// </summary>
-        public static List<T> SqlList<T>(this IDbConnection dbConn, string sql, object anonType = null)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(sql, anonType));
-        }
-
-        /// <summary>
-        /// Returns results from an arbitrary parameterized raw sql query. E.g:
         /// <para>db.SqlList&lt;Person&gt;("EXEC GetRockstarsAged @age", new[] { db.CreateParam("age",50) })</para>
         /// </summary>
         public static List<T> SqlList<T>(this IDbConnection dbConn, string sql, IEnumerable<IDbDataParameter> sqlParams)
         {
             return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(sql, sqlParams));
+        }
+
+        /// <summary>
+        /// Returns results from an arbitrary parameterized raw sql query. E.g:
+        /// <para>db.SqlList&lt;Person&gt;("EXEC GetRockstarsAged @age", new { age = 50 })</para>
+        /// </summary>
+        public static List<T> SqlList<T>(this IDbConnection dbConn, string sql, object anonType = null)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(sql, anonType));
         }
 
         /// <summary>
@@ -521,20 +539,20 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns the first column in a List using a parameterized query. E.g:
-        /// <para>db.SqlColumn&lt;string&gt;("SELECT LastName FROM Person WHERE Age &lt; @age", new { age = 50 })</para>
-        /// </summary>
-        public static List<T> SqlColumn<T>(this IDbConnection dbConn, string sql, object anonType = null)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.SqlColumn<T>(sql, anonType));
-        }
-
-        /// <summary>
-        /// Returns the first column in a List using a parameterized query. E.g:
         /// <para>db.SqlColumn&lt;string&gt;("SELECT LastName FROM Person WHERE Age &lt; @age", new[] { db.CreateParam("age",50) })</para>
         /// </summary>
         public static List<T> SqlColumn<T>(this IDbConnection dbConn, string sql, IEnumerable<IDbDataParameter> sqlParams)
         {
             return dbConn.Exec(dbCmd => dbCmd.SqlColumn<T>(sql, sqlParams));
+        }
+
+        /// <summary>
+        /// Returns the first column in a List using a parameterized query. E.g:
+        /// <para>db.SqlColumn&lt;string&gt;("SELECT LastName FROM Person WHERE Age &lt; @age", new { age = 50 })</para>
+        /// </summary>
+        public static List<T> SqlColumn<T>(this IDbConnection dbConn, string sql, object anonType = null)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SqlColumn<T>(sql, anonType));
         }
 
         /// <summary>

@@ -322,6 +322,11 @@ namespace ServiceStack.OrmLite
             }
         }
 
+        internal static Dictionary<K, List<V>> Lookup<K, V>(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams)
+        {
+            return dbCmd.SetParameters(sqlParams).Lookup<K, V>(sql);
+        }
+
         internal static Dictionary<K, List<V>> Lookup<K, V>(this IDbCommand dbCmd, string sql = null)
         {
             if (sql != null)
