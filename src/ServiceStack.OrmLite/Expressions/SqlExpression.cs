@@ -1104,7 +1104,7 @@ namespace ServiceStack.OrmLite
             if (operand == "AND" || operand == "OR" || operand == "is" || operand == "is not")
                 skipParameterizationForThisVisit = true;
 
-            DoParameterization(skipParameterizationForThisVisit, ref right, b.Right);
+            DoParameterization(skipParameterizationForThisVisit, ref right);
 
             switch (operand)
             {
@@ -1116,7 +1116,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        private void DoParameterization(bool skipParameterizationForThisVisit, ref object right, Expression rightExpression)
+        private void DoParameterization(bool skipParameterizationForThisVisit, ref object right)
         {
             if (skipParameterizationForThisVisit)
                 return;
@@ -1124,7 +1124,7 @@ namespace ServiceStack.OrmLite
             if (SkipParameterizationForThisExpression)
                 return;
 
-            ConvertToPlaceholderAndParameter(ref right, rightExpression);
+            ConvertToPlaceholderAndParameter(ref right);
         }
 
         protected virtual object VisitMemberAccess(MemberExpression m)
@@ -1654,7 +1654,7 @@ namespace ServiceStack.OrmLite
             return new PartialSqlString(statement);
         }
 
-        protected virtual void ConvertToPlaceholderAndParameter(ref object right, Expression rightExpression)
+        protected virtual void ConvertToPlaceholderAndParameter(ref object right)
         {
         }
 

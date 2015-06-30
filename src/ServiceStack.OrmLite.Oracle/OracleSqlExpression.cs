@@ -32,7 +32,7 @@ namespace ServiceStack.OrmLite.Oracle
             return base.VisitColumnAccessMethod(m);
         }
 
-        protected override void ConvertToPlaceholderAndParameter(ref object right, Expression rightExpression)
+        protected override void ConvertToPlaceholderAndParameter(ref object right)
         {
             if (!((OracleOrmLiteDialectProvider)DialectProvider).ParameterizeStatement)
                 return;
