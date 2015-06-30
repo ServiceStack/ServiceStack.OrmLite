@@ -169,6 +169,14 @@ namespace ServiceStack.OrmLite
             }
         }
 
+        public static T Scalar<T>(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams)
+        {
+            if (sqlParams != null)
+                SetParameters(dbCmd, sqlParams);
+
+            return dbCmd.Scalar<T>(sql);
+        }
+
         public static T Scalar<T>(this IDbCommand dbCmd, string sql = null)
         {
             if (sql != null)
@@ -196,13 +204,6 @@ namespace ServiceStack.OrmLite
             }
 
             return dbCmd.ExecuteScalar();
-        }
-
-        public static T Scalar<T>(this IDbCommand dbCmd, IEnumerable<IDbDataParameter> sqlParams, string sql = null)
-        {
-            SetParameters(dbCmd, sqlParams);
-
-            return Scalar<T>(dbCmd, sql);
         }
 
         public static long ExecLongScalar(this IDbCommand dbCmd, string sql = null)
@@ -252,7 +253,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        internal static List<T> Column<T>(this IDbCommand dbCmd, IEnumerable<IDbDataParameter> sqlParams, string sql = null)
+        internal static List<T> Column<T>(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams)
         {
             SetParameters(dbCmd, sqlParams);
 

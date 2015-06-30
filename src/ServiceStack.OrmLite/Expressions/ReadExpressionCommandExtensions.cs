@@ -80,7 +80,7 @@ namespace ServiceStack.OrmLite
             var ev = dbCmd.GetDialectProvider().SqlExpression<T>();
             ev.Select(field).Where(predicate);
             string sql = ev.SelectInto<T>();
-            return dbCmd.Scalar<TKey>(ev.Params, sql);
+            return dbCmd.Scalar<TKey>(sql, ev.Params);
         }
 
         internal static long Count<T>(this IDbCommand dbCmd)
@@ -113,7 +113,7 @@ namespace ServiceStack.OrmLite
 
         internal static long GetCount(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams = null)
         {
-            return dbCmd.Column<long>(sqlParams, sql).Sum();
+            return dbCmd.Column<long>(sql, sqlParams).Sum();
         }
 
         internal static long RowCount<T>(this IDbCommand dbCmd, SqlExpression<T> expression)
