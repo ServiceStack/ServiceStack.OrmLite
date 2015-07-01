@@ -124,7 +124,10 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 Assert.That(Convert.ToInt64(result[2]), Is.EqualTo(letterFrequencyMinId));
                 Assert.That(Convert.ToInt64(result[3]), Is.EqualTo(letterFrequencySumId));
 
-                results.PrintDump();
+                var single = db.Single<List<object>>(query);
+                Assert.That(single, Is.EquivalentTo(result));
+
+                result.PrintDump();
             }
         }
 
@@ -151,7 +154,26 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 Assert.That(Convert.ToInt64(result["Min"]), Is.EqualTo(letterFrequencyMinId));
                 Assert.That(Convert.ToInt64(result["Sum"]), Is.EqualTo(letterFrequencySumId));
 
+                var single = db.Single<Dictionary<string, object>>(query);
+                Assert.That(single, Is.EquivalentTo(result));
+
                 results.PrintDump();
+            }
+        }
+
+        [Test]
+        public void Can_select_Object()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<LetterFrequency>();
+                db.Insert(new LetterFrequency { Id = 1, Letter = "A" });
+
+                var result = db.Scalar<object>(db.From<LetterFrequency>().Select(x => x.Letter));
+                Assert.That(result, Is.EqualTo("A"));
+
+                result = db.Scalar<object>(db.From<LetterFrequency>().Select(x => x.Id));
+                Assert.That(result, Is.EqualTo(1));
             }
         }
 

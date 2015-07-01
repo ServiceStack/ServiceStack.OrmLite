@@ -41,6 +41,12 @@ namespace ServiceStack.OrmLite
             {
                 if (dataReader.Read())
                 {
+                    if (typeof(T) == typeof (List<object>))
+                        return (T)(object)dataReader.ConvertToListObjects();
+
+                    if (typeof(T) == typeof(Dictionary<string, object>))
+                        return (T)(object)dataReader.ConvertToDictionaryObjects();
+                    
                     var row = CreateInstance<T>();
                     var indexCache = dataReader.GetIndexFieldsCache(ModelDefinition<T>.Definition);
                     row.PopulateWithSqlReader(dialectProvider, dataReader, fieldDefs, indexCache);
@@ -48,6 +54,26 @@ namespace ServiceStack.OrmLite
                 }
                 return default(T);
             }
+        }
+
+        public static List<object> ConvertToListObjects(this IDataReader dataReader)
+        {
+            var row = new List<object>();
+            for (var i = 0; i < dataReader.FieldCount; i++)
+            {
+                row.Add(dataReader.GetValue(i));
+            }
+            return row;
+        }
+
+        public static Dictionary<string, object> ConvertToDictionaryObjects(this IDataReader dataReader)
+        {
+            var row = new Dictionary<string, object>();
+            for (var i = 0; i < dataReader.FieldCount; i++)
+            {
+                row[dataReader.GetName(i).Trim()] = dataReader.GetValue(i);
+            }
+            return row;
         }
 
         public static List<T> ConvertToList<T>(this IDataReader dataReader, IOrmLiteDialectProvider dialectProvider)
@@ -59,32 +85,24 @@ namespace ServiceStack.OrmLite
                 var to = new List<List<object>>();
                 using (dataReader)
                 {
-                    var row = new List<object>();
                     while (dataReader.Read())
                     {
-                        for (var i = 0; i < dataReader.FieldCount; i++)
-                        {
-                            row.Add(dataReader.GetValue(i));
-                        }
+                        var row = dataReader.ConvertToListObjects();
+                        to.Add(row);
                     }
-                    to.Add(row);
                 }
                 return (List<T>)(object)to;
             }
-            else if (typeof(T) == typeof(Dictionary<string, object>))
+            if (typeof(T) == typeof(Dictionary<string, object>))
             {
                 var to = new List<Dictionary<string,object>>();
                 using (dataReader)
                 {
-                    var row = new Dictionary<string,object>();
                     while (dataReader.Read())
                     {
-                        for (var i = 0; i < dataReader.FieldCount; i++)
-                        {
-                            row[dataReader.GetName(i).Trim()] = dataReader.GetValue(i);
-                        }
+                        var row = dataReader.ConvertToDictionaryObjects();
+                        to.Add(row);
                     }
-                    to.Add(row);
                 }
                 return (List<T>)(object)to;
             }

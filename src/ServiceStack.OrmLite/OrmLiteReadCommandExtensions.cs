@@ -659,7 +659,9 @@ namespace ServiceStack.OrmLite
             while (reader.Read())
             {
                 object oValue = reader.GetValue(0);
-                return ToScalar<T>(dialectProvider, oValue);
+                return typeof(T) == typeof (object) 
+                    ? (T)oValue 
+                    : ToScalar<T>(dialectProvider, oValue);
             }
 
             return default(T);
