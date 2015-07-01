@@ -131,11 +131,11 @@ namespace ServiceStack.OrmLite
             lastQueryType = typeof(T);
         }
 
-        internal static void SetFilters<T>(this IDbCommand dbCmd, object anonType, bool excludeDefaults)
+        internal static IDbCommand SetFilters<T>(this IDbCommand dbCmd, object anonType, bool excludeDefaults)
         {
-            dbCmd.SetParameters<T>(anonType, excludeDefaults);
-
+            dbCmd.SetParameters<T>(anonType, excludeDefaults); //needs to be called first
             dbCmd.CommandText = dbCmd.GetFilterSql<T>();
+            return dbCmd;
         }
 
         internal static IDbCommand SetParameters<T>(this IDbCommand dbCmd, object anonType, bool excludeDefaults)
@@ -302,9 +302,9 @@ namespace ServiceStack.OrmLite
             return dbCmd;
         }
 
-        public static void SetFilters<T>(this IDbCommand dbCmd, object anonType)
+        public static IDbCommand SetFilters<T>(this IDbCommand dbCmd, object anonType)
         {
-            dbCmd.SetFilters<T>(anonType, excludeDefaults: false);
+            return dbCmd.SetFilters<T>(anonType, excludeDefaults: false);
         }
 
         public static void ClearFilters(this IDbCommand dbCmd)

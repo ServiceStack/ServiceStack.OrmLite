@@ -28,8 +28,6 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns results from using sql. E.g:
-        /// <para>db.Select&lt;Person&gt;("Age &gt; 40")</para>
-
         /// <para>db.Select&lt;Person&gt;("SELECT * FROM Person WHERE Age &gt; @age", new[] { db.CreateParam("age", 40) })</para>
         /// </summary>
         public static List<T> Select<T>(this IDbConnection dbConn, string sql, IEnumerable<IDbDataParameter> sqlParams)

@@ -29,7 +29,17 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static Task<List<T>> SelectAsync<T>(this IDbConnection dbConn, string sql, CancellationToken token = default(CancellationToken))
         {
-            return dbConn.Exec(dbCmd => dbCmd.SelectAsync<T>(sql, null, token));
+            return dbConn.Exec(dbCmd => dbCmd.SelectAsync<T>(sql, (object)null, token));
+        }
+
+        /// <summary>
+        /// Returns results from using a parameterized query. E.g:
+        /// <para>db.Select&lt;Person&gt;("Age &gt; @age", new { age = 40})</para>
+        /// <para>db.Select&lt;Person&gt;("SELECT * FROM Person WHERE Age &gt; @age", new[] { db.CreateParam("age",40) })</para>
+        /// </summary>
+        public static Task<List<T>> SelectAsync<T>(this IDbConnection dbConn, string sql, IEnumerable<IDbDataParameter> sqlParams, CancellationToken token = default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SelectAsync<T>(sql, sqlParams, token));
         }
 
         /// <summary>
@@ -145,6 +155,15 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns results from using a single name, value filter. E.g:
+        /// <para>db.Single&lt;Person&gt;("Age = @age", new[] { db.CreateParam("age",42) })</para>
+        /// </summary>
+        public static Task<T> SingleAsync<T>(this IDbConnection dbConn, string sql, IEnumerable<IDbDataParameter> sqlParams, CancellationToken token = default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SingleAsync<T>(sql, sqlParams, token));
+        }
+
+        /// <summary>
+        /// Returns results from using a single name, value filter. E.g:
         /// <para>db.Single&lt;Person&gt;("Age = @age", new { age = 42 })</para>
         /// </summary>
         public static Task<T> SingleAsync<T>(this IDbConnection dbConn, string sql, object anonType = null, CancellationToken token = default(CancellationToken))
@@ -197,7 +216,16 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static Task<T> ScalarAsync<T>(this IDbConnection dbConn, ISqlExpression sqlExpression, CancellationToken token = default(CancellationToken))
         {
-            return dbConn.Exec(dbCmd => dbCmd.ScalarAsync<T>(sqlExpression.ToSelectStatement(), token));
+            return dbConn.Exec(dbCmd => dbCmd.ScalarAsync<T>(sqlExpression.ToSelectStatement(), sqlExpression.Params, token));
+        }
+
+        /// <summary>
+        /// Returns a single scalar value using a parameterized query. E.g:
+        /// <para>db.Scalar&lt;int&gt;("SELECT COUNT(*) FROM Person WHERE Age &gt; @age", new[] { db.CreateParam("age",40) })</para>
+        /// </summary>
+        public static Task<T> ScalarAsync<T>(this IDbConnection dbConn, string sql, IEnumerable<IDbDataParameter> sqlParams, CancellationToken token = default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd => dbCmd.ScalarAsync<T>(sql, sqlParams, token));
         }
 
         /// <summary>
@@ -228,7 +256,16 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static Task<List<T>> ColumnAsync<T>(this IDbConnection dbConn, ISqlExpression query, CancellationToken token = default(CancellationToken))
         {
-            return dbConn.Exec(dbCmd => dbCmd.ColumnAsync<T>(query.ToSelectStatement(), token));
+            return dbConn.Exec(dbCmd => dbCmd.ColumnAsync<T>(query.ToSelectStatement(), query.Params, token));
+        }
+
+        /// <summary>
+        /// Returns the first column in a List using a SqlFormat query. E.g:
+        /// <para>db.Column&lt;string&gt;("SELECT LastName FROM Person WHERE Age = @age", new[] { db.CreateParam("age",27) })</para>
+        /// </summary>
+        public static Task<List<T>> ColumnAsync<T>(this IDbConnection dbConn, string sql, IEnumerable<IDbDataParameter> sqlParams, CancellationToken token = default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd => dbCmd.ColumnAsync<T>(sql, sqlParams, token));
         }
 
         /// <summary>
@@ -259,7 +296,16 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static Task<HashSet<T>> ColumnDistinctAsync<T>(this IDbConnection dbConn, ISqlExpression query, CancellationToken token = default(CancellationToken))
         {
-            return dbConn.Exec(dbCmd => dbCmd.ColumnDistinctAsync<T>(query.ToSelectStatement(), token));
+            return dbConn.Exec(dbCmd => dbCmd.ColumnDistinctAsync<T>(query.ToSelectStatement(), query.Params, token));
+        }
+
+        /// <summary>
+        /// Returns the distinct first column values in a HashSet using an SqlFormat query. E.g:
+        /// <para>db.ColumnDistinct&lt;int&gt;("SELECT Age FROM Person WHERE Age &lt; @age", new[] { db.CreateParam("age",50) })</para>
+        /// </summary>
+        public static Task<HashSet<T>> ColumnDistinctAsync<T>(this IDbConnection dbConn, string sql, IEnumerable<IDbDataParameter> sqlParams, CancellationToken token = default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd => dbCmd.ColumnDistinctAsync<T>(sql, sqlParams, token));
         }
 
         /// <summary>
@@ -290,7 +336,16 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static Task<Dictionary<K, List<V>>> LookupAsync<K, V>(this IDbConnection dbConn, ISqlExpression sqlExpression, CancellationToken token = default(CancellationToken))
         {
-            return dbConn.Exec(dbCmd => dbCmd.LookupAsync<K, V>(sqlExpression.ToSelectStatement(), token));
+            return dbConn.Exec(dbCmd => dbCmd.LookupAsync<K, V>(sqlExpression.ToSelectStatement(), sqlExpression.Params, token));
+        }
+
+        /// <summary>
+        /// Returns an Dictionary&lt;K, List&lt;V&gt;&gt; grouping made from the first two columns using an parameterized query. E.g:
+        /// <para>db.Lookup&lt;int, string&gt;("SELECT Age, LastName FROM Person WHERE Age &lt; @age", new[] { db.CreateParam("age",50) })</para>
+        /// </summary>
+        public static Task<Dictionary<K, List<V>>> LookupAsync<K, V>(this IDbConnection dbConn, string sql, IEnumerable<IDbDataParameter> sqlParams, CancellationToken token = default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd => dbCmd.LookupAsync<K, V>(sql, sqlParams, token));
         }
 
         /// <summary>
@@ -321,7 +376,16 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static Task<Dictionary<K, V>> DictionaryAsync<K, V>(this IDbConnection dbConn, ISqlExpression query, CancellationToken token = default(CancellationToken))
         {
-            return dbConn.Exec(dbCmd => dbCmd.DictionaryAsync<K, V>(query.ToSelectStatement(), token));
+            return dbConn.Exec(dbCmd => dbCmd.DictionaryAsync<K, V>(query.ToSelectStatement(), query.Params, token));
+        }
+
+        /// <summary>
+        /// Returns a Dictionary from the first 2 columns: Column 1 (Keys), Column 2 (Values) using sql. E.g:
+        /// <para>db.Dictionary&lt;int, string&gt;("SELECT Id, LastName FROM Person WHERE Age &lt; @age", new[] { db.CreateParam("age",50) })</para>
+        /// </summary>
+        public static Task<Dictionary<K, V>> DictionaryAsync<K, V>(this IDbConnection dbConn, string sql, IEnumerable<IDbDataParameter> sqlParams, CancellationToken token = default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd => dbCmd.DictionaryAsync<K, V>(sql, sqlParams, token));
         }
 
         /// <summary>
@@ -411,7 +475,16 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static Task<List<T>> SqlListAsync<T>(this IDbConnection dbConn, ISqlExpression sqlExpression, CancellationToken token = default(CancellationToken))
         {
-            return dbConn.Exec(dbCmd => dbCmd.SqlListAsync<T>(sqlExpression.ToSelectStatement(), (object)null, token));
+            return dbConn.Exec(dbCmd => dbCmd.SqlListAsync<T>(sqlExpression.ToSelectStatement(), sqlExpression.Params, token));
+        }
+
+        /// <summary>
+        /// Returns results from an arbitrary parameterized raw sql query. E.g:
+        /// <para>db.SqlList&lt;Person&gt;("EXEC GetRockstarsAged @age", new { age = 50 })</para>
+        /// </summary>
+        public static Task<List<T>> SqlListAsync<T>(this IDbConnection dbConn, string sql, IEnumerable<IDbDataParameter> sqlParams, CancellationToken token = default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SqlListAsync<T>(sql, sqlParams, token));
         }
 
         /// <summary>
@@ -447,7 +520,16 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static Task<List<T>> SqlColumnAsync<T>(this IDbConnection dbConn, ISqlExpression sqlExpression, CancellationToken token = default(CancellationToken))
         {
-            return dbConn.Exec(dbCmd => dbCmd.SqlColumnAsync<T>(sqlExpression.ToSelectStatement(), null, token));
+            return dbConn.Exec(dbCmd => dbCmd.SqlColumnAsync<T>(sqlExpression.ToSelectStatement(), sqlExpression.Params, token));
+        }
+
+        /// <summary>
+        /// Returns the first column in a List using a parameterized query. E.g:
+        /// <para>db.SqlColumn&lt;string&gt;("SELECT LastName FROM Person WHERE Age &lt; @age", new[] { db.CreateParam("age",50) })</para>
+        /// </summary>
+        public static Task<List<T>> SqlColumnAsync<T>(this IDbConnection dbConn, string sql, IEnumerable<IDbDataParameter> sqlParams, CancellationToken token = default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SqlColumnAsync<T>(sql, sqlParams, token));
         }
 
         /// <summary>
@@ -474,7 +556,16 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static Task<T> SqlScalarAsync<T>(this IDbConnection dbConn, ISqlExpression sqlExpression, CancellationToken token = default(CancellationToken))
         {
-            return dbConn.Exec(dbCmd => dbCmd.SqlScalarAsync<T>(sqlExpression.ToSelectStatement(), null, token));
+            return dbConn.Exec(dbCmd => dbCmd.SqlScalarAsync<T>(sqlExpression.ToSelectStatement(), sqlExpression.Params, token));
+        }
+
+        /// <summary>
+        /// Returns a single Scalar value using a parameterized query. E.g:
+        /// <para>db.SqlScalar&lt;int&gt;("SELECT COUNT(*) FROM Person WHERE Age &lt; @age", new[] { db.CreateParam("age",50) })</para>
+        /// </summary>
+        public static Task<T> SqlScalarAsync<T>(this IDbConnection dbConn, string sql, IEnumerable<IDbDataParameter> sqlParams, CancellationToken token = default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SqlScalarAsync<T>(sql, sqlParams, token));
         }
 
         /// <summary>
