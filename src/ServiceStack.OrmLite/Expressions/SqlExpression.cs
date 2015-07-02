@@ -1043,6 +1043,15 @@ namespace ServiceStack.OrmLite
                 if (right as PartialSqlString == null)
                     right = ((bool)right) ? GetTrueExpression() : GetFalseExpression();
             }
+            else if (operand == "=" && b.Left is MethodCallExpression && ((MethodCallExpression)b.Left).Method.Name == "CompareString")
+            {
+                //Handle VB.NET converting (x => x.Name == "Foo") into (x => CompareString(x.Name, "Foo", False)
+                var methodExpr = (MethodCallExpression)b.Left;
+                var args = this.VisitExpressionList(methodExpr.Arguments);
+                object quotedColName = args[0];
+                object value = GetValue(args[1], typeof(string));
+                return new PartialSqlString("(" + quotedColName + " = " + value + ")");
+            }
             else
             {
                 originalLeft = left = Visit(b.Left);
@@ -1076,7 +1085,9 @@ namespace ServiceStack.OrmLite
                     return result;
                 }
                 else if (left as PartialSqlString == null)
+                {
                     left = DialectProvider.GetQuotedValue(left, left != null ? left.GetType() : null);
+                }
                 else if (right as PartialSqlString == null)
                 {
                     right = GetValue(right, right != null ? right.GetType() : null);
