@@ -117,6 +117,16 @@
             Add Request Filters, to be applied before the dto is deserialized
             </summary>
         </member>
+        <member name="P:ServiceStack.IAppHost.RequestConverters">
+            <summary>
+            Add Request Converter to convert Request DTO's
+            </summary>
+        </member>
+        <member name="P:ServiceStack.IAppHost.ResponseConverters">
+            <summary>
+            Add Response Converter to convert Response DTO's
+            </summary>
+        </member>
         <member name="P:ServiceStack.IAppHost.GlobalRequestFilters">
             <summary>
             Add Request Filters for HTTP Requests
