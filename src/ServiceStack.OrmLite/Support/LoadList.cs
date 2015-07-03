@@ -113,9 +113,42 @@ namespace ServiceStack.OrmLite.Support
             return sqlRef;
         }
 
+        protected Dictionary<object, object> CreateRefMap()
+        {
+            return OrmLiteConfig.IsCaseInsensitive
+                ? new Dictionary<object, object>(CaseInsensitiveObjectComparer.Instance)
+                : new Dictionary<object, object>(); 
+        }
+
+        public class CaseInsensitiveObjectComparer : IEqualityComparer<object>
+        {
+            public static CaseInsensitiveObjectComparer Instance = new CaseInsensitiveObjectComparer();
+
+            public bool Equals(object x, object y)
+            {
+                if (x == null && y == null) return true;
+                if (x == null || y == null) return false;
+
+                var xStr = x as string;
+                var yStr = y as string;
+
+                return xStr != null && yStr != null
+                    ? xStr.Equals(yStr, StringComparison.OrdinalIgnoreCase)
+                    : x.Equals(y);
+            }
+
+            public int GetHashCode(object obj)
+            {
+                var str = obj as string;
+                return str != null
+                    ? str.ToUpper().GetHashCode()
+                    : obj.GetHashCode();
+            }
+        }
+
         protected void SetRefSelfChildResults(FieldDefinition fieldDef, ModelDefinition refModelDef, FieldDefinition refSelf, IList childResults)
         {
-            var map = new Dictionary<object, object>();
+            var map = CreateRefMap();
 
             foreach (var result in childResults)
             {
@@ -136,7 +169,7 @@ namespace ServiceStack.OrmLite.Support
 
         protected void SetRefFieldChildResults(FieldDefinition fieldDef, FieldDefinition refField, IList childResults)
         {
-            var map = new Dictionary<object, object>();
+            var map = CreateRefMap();
 
             foreach (var result in childResults)
             {

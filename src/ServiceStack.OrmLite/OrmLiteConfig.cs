@@ -193,5 +193,7 @@ namespace ServiceStack.OrmLite
         /// Only supported in Oracle DialectProvider
         /// </summary>
         public static bool UseParameterizeSqlExpressions { get; set; }
+
+        public static bool IsCaseInsensitive { get; set; }
     }
 }
