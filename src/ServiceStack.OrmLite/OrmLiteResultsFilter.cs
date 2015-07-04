@@ -322,22 +322,6 @@ namespace ServiceStack.OrmLite
     {
         public CaptureSqlFilter()
         {
-            SqlFilter = CaptureSql;
-            SqlStatements = new List<string>();
-        }
-
-        private void CaptureSql(string sql)
-        {
-            SqlStatements.Add(sql);
-        }
-
-        public List<string> SqlStatements { get; set; }
-    }
-
-    public class CaptureSqlCommandFilter : OrmLiteResultsFilter
-    {
-        public CaptureSqlCommandFilter()
-        {
             SqlCommandFilter = CaptureSqlCommand;
             SqlCommandHistory = new List<SqlCommandDetails>();
         }
@@ -348,6 +332,11 @@ namespace ServiceStack.OrmLite
         }
 
         public List<SqlCommandDetails> SqlCommandHistory { get; set; }
+
+        public List<string> SqlStatements
+        {
+            get { return SqlCommandHistory.Map(x => x.Sql); }
+        }
     }
 
     public class SqlCommandDetails

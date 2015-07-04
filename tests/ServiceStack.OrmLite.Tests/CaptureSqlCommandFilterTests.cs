@@ -13,7 +13,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_capture_command_each_type_of_API()
         {
-            using (var captured = new CaptureSqlCommandFilter())
+            using (var captured = new CaptureSqlFilter())
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<Person>();
@@ -42,7 +42,7 @@ namespace ServiceStack.OrmLite.Tests
                 db.DropTable<Person>();
             }
 
-            using (var captured = new CaptureSqlCommandFilter())
+            using (var captured = new CaptureSqlFilter())
             using (var db = OpenDbConnection())
             {
                 int i = 0;
@@ -61,7 +61,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_capture_command_Select_APIs()
         {
-            using (var captured = new CaptureSqlCommandFilter())
+            using (var captured = new CaptureSqlFilter())
             using (var db = OpenDbConnection())
             {
                 int i = 0;
@@ -109,7 +109,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_capture_command_all_Single_Apis()
         {
-            using (var captured = new CaptureSqlCommandFilter())
+            using (var captured = new CaptureSqlFilter())
             using (var db = OpenDbConnection())
             {
                 int i = 0;
@@ -138,7 +138,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_capture_command_all_Scalar_Apis()
         {
-            using (var captured = new CaptureSqlCommandFilter())
+            using (var captured = new CaptureSqlFilter())
             using (var db = OpenDbConnection())
             {
                 int i = 0;
@@ -168,7 +168,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_capture_command_Update_Apis()
         {
-            using (var captured = new CaptureSqlCommandFilter())
+            using (var captured = new CaptureSqlFilter())
             using (var db = OpenDbConnection())
             {
                 int i = 0;
@@ -199,7 +199,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_capture_command_Delete_Apis()
         {
-            using (var captured = new CaptureSqlCommandFilter())
+            using (var captured = new CaptureSqlFilter())
             using (var db = OpenDbConnection())
             {
                 int i = 0;
@@ -231,7 +231,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_capture_command_CustomSql_Apis()
         {
-            using (var captured = new CaptureSqlCommandFilter())
+            using (var captured = new CaptureSqlFilter())
             using (var db = OpenDbConnection())
             {
                 int i = 0;
@@ -261,7 +261,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_capture_command_Insert_Apis()
         {
-            using (var captured = new CaptureSqlCommandFilter())
+            using (var captured = new CaptureSqlFilter())
             using (var db = OpenDbConnection())
             {
                 int i = 0;
@@ -282,5 +282,16 @@ namespace ServiceStack.OrmLite.Tests
             }
         }
 
+        [Test]
+        public void Can_capture_basic_Query()
+        {
+            using (var captured = new CaptureSqlFilter())
+            using (var db = OpenDbConnection())
+            {
+                db.Where<Person>(new { Age = 27 });
+
+                captured.SqlCommandHistory[0].PrintDump();
+            }
+        }
     }
 }
