@@ -96,24 +96,22 @@ namespace ServiceStack.OrmLite
         private readonly object fieldDefLock = new object();
         private Dictionary<string, FieldDefinition> fieldDefinitionMap;
         private Func<string, string> fieldNameSanitizer;
+
         public Dictionary<string, FieldDefinition> GetFieldDefinitionMap(Func<string, string> sanitizeFieldName)
         {
-            if (fieldDefinitionMap == null || fieldNameSanitizer != sanitizeFieldName)
+            lock (fieldDefLock)
             {
-                lock (fieldDefLock)
+                if (fieldDefinitionMap != null && fieldNameSanitizer == sanitizeFieldName) 
+                    return fieldDefinitionMap;
+                
+                fieldDefinitionMap = new Dictionary<string, FieldDefinition>(StringComparer.OrdinalIgnoreCase);
+                fieldNameSanitizer = sanitizeFieldName;
+                foreach (var fieldDef in FieldDefinitionsArray)
                 {
-                    if (fieldDefinitionMap == null || fieldNameSanitizer != sanitizeFieldName)
-                    {
-                        fieldDefinitionMap = new Dictionary<string, FieldDefinition>(StringComparer.OrdinalIgnoreCase);
-                        fieldNameSanitizer = sanitizeFieldName;
-                        foreach (var fieldDef in FieldDefinitionsArray)
-                        {
-                            fieldDefinitionMap[sanitizeFieldName(fieldDef.FieldName)] = fieldDef;
-                        }
-                    }
+                    fieldDefinitionMap[sanitizeFieldName(fieldDef.FieldName)] = fieldDef;
                 }
+                return fieldDefinitionMap;
             }
-            return fieldDefinitionMap;
         }
 
         public List<CompositeIndexAttribute> CompositeIndexes { get; set; }
