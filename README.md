@@ -48,6 +48,90 @@ Contributors need to approve the [Contributor License Agreement](https://docs.go
 
 ***
 
+## Dynamic Result Sets
+
+There's new support for returning unstructured resultsets letting you Select `List<object>` instead of having results mapped to a concrete Poco class, e.g:
+
+```csharp
+db.Select<List<object>>(db.From<Poco>()
+  .Select("COUNT(*), MIN(Id), MAX(Id)"))[0].PrintDump();
+```
+
+Output of objects in the returned `List<object>`:
+
+    [
+        10,
+        1,
+        10
+    ]
+
+You can also Select `Dictionary<string,object>` to return a dictionary of column names mapped with their values, e.g:
+
+```csharp
+db.Select<Dictionary<string,object>>(db.From<Poco>()
+  .Select("COUNT(*) Total, MIN(Id) MinId, MAX(Id) MaxId"))[0].PrintDump();
+```
+
+Output of objects in the returned `Dictionary<string,object>`:
+
+    {
+        Total: 10,
+        MinId: 1,
+        MaxId: 10
+    }
+
+and can be used for API's returning a **Single** row result:
+
+```csharp
+db.Single<List<object>>(db.From<Poco>()
+  .Select("COUNT(*) Total, MIN(Id) MinId, MAX(Id) MaxId")).PrintDump();
+```
+
+or use `object` to fetch an unknown **Scalar** value:
+
+```csharp
+object result = db.Scalar<object>(db.From<Poco>().Select(x => x.Id));
+```
+
+### New DB Parameters API's
+
+To enable even finer-grained control of parameterized queries we've added new overloads that take a collection of IDbDataParameter's:
+
+```csharp
+List<T> Select<T>(string sql, IEnumerable<IDbDataParameter> sqlParams)
+T Single<T>(string sql, IEnumerable<IDbDataParameter> sqlParams)
+T Scalar<T>(string sql, IEnumerable<IDbDataParameter> sqlParams)
+List<T> Column<T>(string sql, IEnumerable<IDbDataParameter> sqlParams)
+IEnumerable<T> ColumnLazy<T>(string sql, IEnumerable<IDbDataParameter> sqlParams)
+HashSet<T> ColumnDistinct<T>(string sql, IEnumerable<IDbDataParameter> sqlParams)
+Dictionary<K, List<V>> Lookup<K, V>(string sql, IEnumerable<IDbDataParameter> sqlParams)
+List<T> SqlList<T>(string sql, IEnumerable<IDbDataParameter> sqlParams)
+List<T> SqlColumn<T>(string sql, IEnumerable<IDbDataParameter> sqlParams)
+T SqlScalar<T>(string sql, IEnumerable<IDbDataParameter> sqlParams)
+```
+
+> Including Async equivalents for each of the above Sync API's.
+
+The new API's let you execute parameterized SQL with finer-grained control over the `IDbDataParameter` used, e.g:
+
+```csharp
+IDbDataParameter pAge = db.CreateParam("age", 40, dbType:DbType.Int16);
+db.Select<Person>("SELECT * FROM Person WHERE Age > @pAge", new[] { pAge });
+```
+
+The new `CreateParam()` extension method above is a useful helper for creating custom IDbDataParameter's.
+
+### Customize null values
+
+The new `OrmLiteConfig.OnDbNullFilter` lets you to replace DBNull values with a custom value, so you could convert all `null` strings to be populated with `"NULL"` using:
+
+```csharp
+OrmLiteConfig.OnDbNullFilter = fieldDef => 
+    fieldDef.FieldType == typeof(string)
+        ? "NULL"
+        : null;
+```
+
 # Async API Overview
 
 A quick overview of Async API's can be seen in the class diagram below:
@@ -881,39 +965,29 @@ using (var db = OpenDbConnection())
 
 Results filters makes it trivial to implement the `CaptureSqlFilter` which allows you to capture SQL Statements without running them, e.g:
 
-```csharp
-public class CaptureSqlFilter : OrmLiteResultsFilter
-{
-    public CaptureSqlFilter()
-    {
-        SqlFilter = CaptureSql;
-        SqlStatements = new List<string>();
-    }
+### CaptureSqlFilter
 
-    private void CaptureSql(string sql)
-    {
-        SqlStatements.Add(sql);
-    }
-
-    public List<string> SqlStatements { get; set; }
-}
-```
-
-Which can be used to wrap around existing database calls to capture, defer or print generated SQL, e.g:
+[CaptureSqlFilter](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/4c56bde197d07cfc78a80be06dd557732ecf68fa/src/ServiceStack.OrmLite/OrmLiteResultsFilter.cs#L321) is an simple Results Filter which can be used to quickly found out what SQL your DB calls generate by surrounding DB access in a using scope like:
 
 ```csharp
 using (var captured = new CaptureSqlFilter())
 using (var db = OpenDbConnection())
 {
-    db.CreateTable<Person>();
-    db.Count<Person>(x => x.Age < 50);
-    db.Insert(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix" });
-    db.Delete<Person>(new { FirstName = "Jimi", Age = 27 });
+    db.Where<Person>(new { Age = 27 });
 
-    var sql = string.Join(";\n", captured.SqlStatements.ToArray());
-    sql.Print();
+    captured.SqlCommandHistory[0].PrintDump();
 }
 ```
+
+Emits the Executed SQL along with any DB Parameters: 
+
+    {
+        Sql: "SELECT ""Id"", ""FirstName"", ""LastName"", ""Age"" FROM ""Person"" WHERE ""Age"" = @Age",
+        Parameters: 
+        {
+            Age: 27
+        }
+    }
 
 ### Replay Exec Filter
 
