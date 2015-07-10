@@ -381,5 +381,26 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(results.Count, Is.EqualTo(1));
             }
         }
+
+        [Test]
+        public void Does_CreateTableIfNotExists()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropTable<ModelWithIdOnly>();
+
+                if (db.CreateTableIfNotExists<ModelWithIdOnly>())
+                {
+                    db.Insert(new ModelWithIdOnly(1));
+                }
+                if (db.CreateTableIfNotExists<ModelWithIdOnly>())
+                {
+                    db.Insert(new ModelWithIdOnly(2));
+                }
+                var rows = db.Select<ModelWithIdOnly>();
+                Assert.That(rows.Count, Is.EqualTo(1));
+                Assert.That(rows[0].Id, Is.EqualTo(1));
+            }
+        }
     }
 }

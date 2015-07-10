@@ -38,13 +38,13 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        internal static void CreateTable<T>(this IDbCommand dbCmd, bool overwrite = false)
+        internal static bool CreateTable<T>(this IDbCommand dbCmd, bool overwrite = false)
         {
             var tableType = typeof(T);
-            CreateTable(dbCmd, overwrite, tableType);
+            return CreateTable(dbCmd, overwrite, tableType);
         }
 
-        internal static void CreateTable(this IDbCommand dbCmd, bool overwrite, Type modelType)
+        internal static bool CreateTable(this IDbCommand dbCmd, bool overwrite, Type modelType)
         {
             var modelDef = modelType.GetModelDefinition();
 
@@ -148,6 +148,7 @@ namespace ServiceStack.OrmLite
                             }
                         }
                     }
+                    return true;
                 }
             }
             catch (Exception ex)
@@ -155,10 +156,11 @@ namespace ServiceStack.OrmLite
                 if (IgnoreAlreadyExistsError(ex))
                 {
                     Log.DebugFormat("Ignoring existing table '{0}': {1}", modelDef.ModelName, ex.Message);
-                    return;
+                    return false;
                 }
                 throw;
             }
+            return false;
         }
 
         internal static void DropTable<T>(this IDbCommand dbCmd)
