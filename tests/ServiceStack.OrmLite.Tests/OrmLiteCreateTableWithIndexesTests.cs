@@ -32,16 +32,16 @@ namespace ServiceStack.OrmLite.Tests
 			}
 		}
 
-		[Test]
-		public void Can_create_ModelWithCompositeIndexFields_table()
-		{
+        [Test]
+        public void Can_create_ModelWithCompositeIndexFields_table()
+        {
             if (Dialect == Dialect.PostgreSql) return; //Incompatible ColumnName in Attribute
 
             using (var db = OpenDbConnection())
-			{
-				db.CreateTable<ModelWithCompositeIndexFields>(true);
+            {
+                db.CreateTable<ModelWithCompositeIndexFields>(true);
 
-				var sql = OrmLiteConfig.DialectProvider.ToCreateIndexStatements(typeof(ModelWithCompositeIndexFields)).Join();
+                var sql = OrmLiteConfig.DialectProvider.ToCreateIndexStatements(typeof(ModelWithCompositeIndexFields)).Join();
 
                 var indexName = "idx_modelwithcompositeindexfields_name";
                 var compositeName = "idx_modelwithcompositeindexfields_composite1_composite2";
@@ -53,9 +53,35 @@ namespace ServiceStack.OrmLite.Tests
                 }
 
                 Assert.IsTrue(sql.Contains(indexName));
-				Assert.IsTrue(sql.Contains(compositeName));
-			}
-		}
+                Assert.IsTrue(sql.Contains(compositeName));
+            }
+        }
+
+        [Test]
+        public void Can_create_ModelWithCompositeIndexFieldsDesc_table()
+        {
+            if (Dialect == Dialect.PostgreSql) return; //Incompatible ColumnName in Attribute
+
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTable<ModelWithCompositeIndexFieldsDesc>(true);
+                db.GetLastSql().Print();
+
+                var sql = OrmLiteConfig.DialectProvider.ToCreateIndexStatements(typeof(ModelWithCompositeIndexFieldsDesc)).Join();
+
+                var indexName = "idx_modelwithcompositeindexfieldsdesc_name";
+                var compositeName = "idx_modelwithcompositeindexfieldsdesc_composite1_composite2";
+
+                if (Dialect == Dialect.Oracle)
+                {
+                    indexName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(indexName);
+                    compositeName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(compositeName);
+                }
+
+                Assert.IsTrue(sql.Contains(indexName));
+                Assert.IsTrue(sql.Contains(compositeName));
+            }
+        }
 
         [Test]
         public void Can_create_ModelWithNamedCompositeIndex_table()

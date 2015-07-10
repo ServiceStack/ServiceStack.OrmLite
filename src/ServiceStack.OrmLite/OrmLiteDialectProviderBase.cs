@@ -1043,11 +1043,21 @@ namespace ServiceStack.OrmLite
             foreach (var compositeIndex in modelDef.CompositeIndexes)
             {
                 var indexName = GetCompositeIndexName(compositeIndex, modelDef);
-                var indexNames = string.Join(" ASC, ",
-                    compositeIndex.FieldNames.ConvertAll(GetQuotedName).ToArray());
+
+                var sb = new StringBuilder();
+                foreach (var fieldName in compositeIndex.FieldNames)
+                {
+                    if (sb.Length > 0)
+                        sb.Append(", ");
+                    
+                    var parts = fieldName.SplitOnFirst(' ');
+                    sb.Append(GetQuotedName(parts[0]))
+                      .Append(' ')
+                      .Append(parts.Length > 1 ? parts[1] : "ASC");
+                }
 
                 sqlIndexes.Add(
-                    ToCreateIndexStatement(compositeIndex.Unique, indexName, modelDef, indexNames, true));
+                    ToCreateIndexStatement(compositeIndex.Unique, indexName, modelDef, sb.ToString(), isCombined: true));
             }
 
             return sqlIndexes;
@@ -1095,7 +1105,7 @@ namespace ServiceStack.OrmLite
         protected virtual string GetCompositeIndexName(CompositeIndexAttribute compositeIndex, ModelDefinition modelDef)
         {
             return compositeIndex.Name ?? GetIndexName(compositeIndex.Unique, modelDef.ModelName.SafeVarName(),
-                                                       string.Join("_", compositeIndex.FieldNames.ToArray()));
+                                                       string.Join("_", compositeIndex.FieldNames.Map(x => x.SplitOnFirst(' ')[0]).ToArray()));
         }
 
         protected virtual string GetCompositeIndexNameWithSchema(CompositeIndexAttribute compositeIndex, ModelDefinition modelDef)
@@ -1110,7 +1120,7 @@ namespace ServiceStack.OrmLite
         protected virtual string ToCreateIndexStatement(bool isUnique, string indexName, ModelDefinition modelDef, string fieldName,
             bool isCombined = false, FieldDefinition fieldDef = null)
         {
-            return string.Format("CREATE {0}{1}{2} INDEX {3} ON {4} ({5} ASC); \n",
+            return string.Format("CREATE {0}{1}{2} INDEX {3} ON {4} ({5}); \n",
                                  isUnique ? "UNIQUE" : "",
                                  fieldDef != null && fieldDef.IsClustered ? " CLUSTERED" : "",
                                  fieldDef != null && fieldDef.IsNonClustered ? " NONCLUSTERED" : "",

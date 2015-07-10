@@ -19,4 +19,22 @@ namespace ServiceStack.Common.Tests.Models
 
 		public string Composite2 { get; set; }
 	}
+
+    [CompositeIndex("Composite1", "Composite2 DESC")]
+    public class ModelWithCompositeIndexFieldsDesc
+    {
+        public string Id { get; set; }
+
+        [Index]
+        public string Name { get; set; }
+
+        public string AlbumId { get; set; }
+
+        [Index(true)]
+        public string UniqueName { get; set; }
+
+        public string Composite1 { get; set; }
+
+        public string Composite2 { get; set; }
+    }
 }
