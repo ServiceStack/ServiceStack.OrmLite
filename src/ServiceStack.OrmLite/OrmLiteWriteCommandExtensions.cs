@@ -25,11 +25,6 @@ namespace ServiceStack.OrmLite
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(OrmLiteWriteCommandExtensions));
 
-        private static void LogDebug(string fmt)
-        {
-            Log.Debug(fmt);
-        }
-
         internal static void CreateTables(this IDbCommand dbCmd, bool overwrite, params Type[] tableTypes)
         {
             foreach (var tableType in tableTypes)
@@ -223,9 +218,6 @@ namespace ServiceStack.OrmLite
 
         internal static int ExecuteSql(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams = null)
         {
-            if (Log.IsDebugEnabled)
-                LogDebug(sql);
-
             dbCmd.CommandText = sql;
 
             if (sqlParams != null)
@@ -239,6 +231,9 @@ namespace ServiceStack.OrmLite
                     dbCmd.Parameters.Add(p);
                 }
             }
+
+            if (Log.IsDebugEnabled)
+                Log.DebugCommand(dbCmd);
 
             if (OrmLiteConfig.ResultsFilter != null)
             {

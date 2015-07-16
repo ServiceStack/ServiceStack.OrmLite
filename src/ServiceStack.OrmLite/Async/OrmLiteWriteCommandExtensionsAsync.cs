@@ -18,20 +18,15 @@ namespace ServiceStack.OrmLite
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(OrmLiteWriteCommandExtensionsAsync));
 
-        private static void LogDebug(string fmt)
-        {
-            Log.Debug(fmt);
-        }
-
         internal static Task<int> ExecuteSqlAsync(this IDbCommand dbCmd, string sql, CancellationToken token)
         {
-            if (Log.IsDebugEnabled)
-                LogDebug(sql);
-
             dbCmd.CommandText = sql;
 
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.ExecuteSql(dbCmd).InTask();
+
+            if (Log.IsDebugEnabled)
+                Log.DebugCommand(dbCmd);
 
             return dbCmd.GetDialectProvider().ExecuteNonQueryAsync(dbCmd);
         }

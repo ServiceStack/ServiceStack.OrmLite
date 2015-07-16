@@ -13,8 +13,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using System.Text;
+using ServiceStack.Logging;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
@@ -22,6 +22,29 @@ namespace ServiceStack.OrmLite
     public static class OrmLiteUtils
     {
         internal const string AsyncRequiresNet45Error = "Async support is only available in .NET 4.5 builds";
+
+        public static void DebugCommand(this ILog log, IDbCommand cmd)
+        {
+            var sb = new StringBuilder();
+
+            sb.Append("SQL: ").Append(cmd.CommandText);
+
+            if (cmd.Parameters.Count > 0)
+            {
+                sb.AppendLine()
+                  .Append("PARAMS: ");
+
+                for (int i = 0; i < cmd.Parameters.Count; i++)
+                {
+                    var p = (IDataParameter)cmd.Parameters[i];
+                    if (i > 0)
+                        sb.Append(", ");
+                    sb.AppendFormat("{0}={1}", p.ParameterName, p.Value);
+                }
+            }
+
+            log.Debug(sb.ToString());
+        }
 
         public static T CreateInstance<T>()
         {

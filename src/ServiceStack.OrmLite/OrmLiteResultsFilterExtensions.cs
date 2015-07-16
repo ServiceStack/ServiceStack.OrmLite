@@ -6,17 +6,23 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using ServiceStack.Logging;
 
 namespace ServiceStack.OrmLite
 {
     public static class OrmLiteResultsFilterExtensions
     {
+        private static readonly ILog Log = LogManager.GetLogger(typeof(OrmLiteResultsFilterExtensions));
+
         internal static int ExecNonQuery(this IDbCommand dbCmd, string sql, object anonType = null)
         {
             if (anonType != null)
                 dbCmd.SetParameters(anonType, (bool)false);
 
             dbCmd.CommandText = sql;
+
+            if (Log.IsDebugEnabled)
+                Log.DebugCommand(dbCmd);
 
             if (OrmLiteConfig.ResultsFilter != null)
             {
@@ -28,10 +34,14 @@ namespace ServiceStack.OrmLite
 
         internal static int ExecNonQuery(this IDbCommand dbCmd, string sql, IDictionary<string, object> dict)
         {
+
             if (dict != null)
                 dbCmd.SetParameters(dict, (bool)false);
 
             dbCmd.CommandText = sql;
+
+            if (Log.IsDebugEnabled)
+                Log.DebugCommand(dbCmd);
 
             if (OrmLiteConfig.ResultsFilter != null)
             {
@@ -43,10 +53,11 @@ namespace ServiceStack.OrmLite
 
         internal static int ExecNonQuery(this IDbCommand dbCmd)
         {
+            if (Log.IsDebugEnabled)
+                Log.DebugCommand(dbCmd);
+
             if (OrmLiteConfig.ResultsFilter != null)
-            {
                 return OrmLiteConfig.ResultsFilter.ExecuteSql(dbCmd);
-            }
 
             return dbCmd.ExecuteNonQuery();
         }

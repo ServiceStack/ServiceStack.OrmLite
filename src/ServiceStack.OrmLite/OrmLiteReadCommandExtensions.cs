@@ -35,26 +35,19 @@ namespace ServiceStack.OrmLite
         private static readonly ILog Log = LogManager.GetLogger(typeof(OrmLiteReadCommandExtensions));
         public const string UseDbConnectionExtensions = "Use IDbConnection Extensions instead";
 
-        private static void LogDebug(string fmt)
-        {
-            Log.Debug(fmt);
-        }
-
         internal static IDataReader ExecReader(this IDbCommand dbCmd, string sql)
         {
-            if (Log.IsDebugEnabled)
-                LogDebug(sql);
-
             dbCmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
             dbCmd.CommandText = sql;
+            
+            if (Log.IsDebugEnabled)
+                Log.DebugCommand(dbCmd);
+
             return dbCmd.ExecuteReader();
         }
 
         internal static IDataReader ExecReader(this IDbCommand dbCmd, string sql, IEnumerable<IDataParameter> parameters)
         {
-            if (Log.IsDebugEnabled)
-                LogDebug(sql);
-
             dbCmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
             dbCmd.CommandText = sql;
             dbCmd.Parameters.Clear();
@@ -63,6 +56,9 @@ namespace ServiceStack.OrmLite
             {
                 dbCmd.Parameters.Add(param);
             }
+
+            if (Log.IsDebugEnabled)
+                Log.DebugCommand(dbCmd);
 
             return dbCmd.ExecuteReader();
         }

@@ -17,27 +17,19 @@ namespace ServiceStack.OrmLite
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(OrmLiteReadCommandExtensionsAsync));
 
-        private static void LogDebug(string fmt)
-        {
-            Log.Debug(fmt);
-        }
-
         internal static Task<IDataReader> ExecReaderAsync(this IDbCommand dbCmd, string sql, CancellationToken token)
         {
-            if (Log.IsDebugEnabled)
-                LogDebug(sql);
-
             dbCmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
             dbCmd.CommandText = sql;
+
+            if (Log.IsDebugEnabled)
+                Log.DebugCommand(dbCmd);
 
             return dbCmd.GetDialectProvider().ExecuteReaderAsync(dbCmd, token);
         }
 
         internal static Task<IDataReader> ExecReaderAsync(this IDbCommand dbCmd, string sql, IEnumerable<IDataParameter> parameters, CancellationToken token)
         {
-            if (Log.IsDebugEnabled)
-                LogDebug(sql);
-
             dbCmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
             dbCmd.CommandText = sql;
             dbCmd.Parameters.Clear();
@@ -46,6 +38,9 @@ namespace ServiceStack.OrmLite
             {
                 dbCmd.Parameters.Add(param);
             }
+
+            if (Log.IsDebugEnabled)
+                Log.DebugCommand(dbCmd);
 
             return dbCmd.GetDialectProvider().ExecuteReaderAsync(dbCmd, token);
         }
