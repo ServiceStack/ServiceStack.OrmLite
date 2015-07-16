@@ -1492,13 +1492,10 @@ namespace ServiceStack.OrmLite
 
             string statement;
 
-            var member = Expression.Convert(m.Arguments[1], typeof(object));
-            var lambda = Expression.Lambda<Func<object>>(member);
-            var getter = lambda.Compile();
-
             switch (m.Method.Name)
             {
                 case "In":
+                    var getter = CreateInExprGetterFn(m);
                     var inArgs = Sql.Flatten(getter() as IEnumerable);
 
                     var sIn = new StringBuilder();
@@ -1528,7 +1525,8 @@ namespace ServiceStack.OrmLite
                     break;
 
                 case "InExpression":
-                    var sqlExpression = getter() as ISqlExpression;
+                    var fn = CreateInExprGetterFn(m);
+                    var sqlExpression = fn() as ISqlExpression;
                     var subSelect = sqlExpression.ToSelectStatement();
 
                     statement = string.Format("{0} {1} ({2})", quotedColName, "IN", subSelect);
@@ -1556,6 +1554,14 @@ namespace ServiceStack.OrmLite
             }
 
             return new PartialSqlString(statement);
+        }
+
+        protected internal static Func<object> CreateInExprGetterFn(MethodCallExpression m)
+        {
+            var member = Expression.Convert(m.Arguments[1], typeof (object));
+            var lambda = Expression.Lambda<Func<object>>(member);
+            var getter = lambda.Compile();
+            return getter;
         }
 
         protected virtual object VisitColumnAccessMethod(MethodCallExpression m)
