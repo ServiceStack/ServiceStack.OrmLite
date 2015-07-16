@@ -694,17 +694,15 @@ namespace ServiceStack.OrmLite.Tests
             db.Save(customer, references: true);
 
             var customersSubFilter = db.From<Customer>().Select(c => c.Id);
-            var orderQuery = db.From<Order>().Where(q => Sql.InExpression(q.CustomerId, customersSubFilter));
+            var orderQuery = db.From<Order>().Where(q => Sql.In(q.CustomerId, customersSubFilter));
             var dbOrders = db.Select(orderQuery);
             Assert.That(dbOrders.Count, Is.EqualTo(2));
 
             // Negative case
             customersSubFilter = db.From<Customer>().Select(c => c.Id).Where(c => c.Id == -1);
-            orderQuery = db.From<Order>().Where(q => Sql.InExpression(q.CustomerId, customersSubFilter));
+            orderQuery = db.From<Order>().Where(q => Sql.In(q.CustomerId, customersSubFilter));
             dbOrders = db.Select(orderQuery);
             Assert.That(dbOrders.Count, Is.EqualTo(0));
-
-
         }
     }
 

@@ -49,24 +49,7 @@ namespace ServiceStack.OrmLite.Sqlite
             switch (m.Method.Name)
             {
                 case "In":
-                    var getter = CreateInExprGetterFn(m);
-                    var inArgs = Sql.Flatten(getter() as IEnumerable);
-
-                    var sIn = new StringBuilder();
-                    foreach (var e in inArgs)
-                    {
-                        sIn.AppendFormat("{0}{1}",
-                            sIn.Length > 0 ? "," : "",
-                            base.DialectProvider.GetQuotedValue(e, e.GetType()));
-                    }
-                    statement = string.Format("{0} {1} ({2})", quotedColName, m.Method.Name, sIn);
-                    break;
-                case "InExpression":
-                    var fn = CreateInExprGetterFn(m);
-                    var sqlExpression = fn() as ISqlExpression;
-                    var subSelect = sqlExpression.ToSelectStatement();
-
-                    statement = string.Format("{0} {1} ({2})", quotedColName, "IN", subSelect);
+                    statement = ConvertInExpressionToSql(m, quotedColName);
                     break;
                 case "Desc":
                     statement = string.Format("{0} DESC", quotedColName);

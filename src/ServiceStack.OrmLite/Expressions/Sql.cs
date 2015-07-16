@@ -11,7 +11,7 @@ namespace ServiceStack.OrmLite
             return value != null && Flatten(list).Any(obj => obj.ToString() == value.ToString());
         }
 
-        public static bool InExpression<T, TItem>(T value, SqlExpression<TItem> query)
+        public static bool In<T, TItem>(T value, SqlExpression<TItem> query)
         {
             return value != null && query != null;
         }

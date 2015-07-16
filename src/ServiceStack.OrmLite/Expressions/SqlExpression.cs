@@ -1495,41 +1495,7 @@ namespace ServiceStack.OrmLite
             switch (m.Method.Name)
             {
                 case "In":
-                    var getter = CreateInExprGetterFn(m);
-                    var inArgs = Sql.Flatten(getter() as IEnumerable);
-
-                    var sIn = new StringBuilder();
-                    foreach (object e in inArgs)
-                    {
-                        if (!(e is ICollection))
-                        {
-                            if (sIn.Length > 0)
-                                sIn.Append(",");
-
-                            sIn.Append(DialectProvider.GetQuotedValue(e, e.GetType()));
-                        }
-                        else
-                        {
-                            var listArgs = e as ICollection;
-                            foreach (object el in listArgs)
-                            {
-                                if (sIn.Length > 0)
-                                    sIn.Append(",");
-
-                                sIn.Append(DialectProvider.GetQuotedValue(el, el.GetType()));
-                            }
-                        }
-                    }
-
-                    statement = string.Format("{0} {1} ({2})", quotedColName, m.Method.Name, sIn.ToString());
-                    break;
-
-                case "InExpression":
-                    var fn = CreateInExprGetterFn(m);
-                    var sqlExpression = fn() as ISqlExpression;
-                    var subSelect = sqlExpression.ToSelectStatement();
-
-                    statement = string.Format("{0} {1} ({2})", quotedColName, "IN", subSelect);
+                    statement = ConvertInExpressionToSql(m, quotedColName);
                     break;
 
                 case "Desc":
@@ -1556,12 +1522,36 @@ namespace ServiceStack.OrmLite
             return new PartialSqlString(statement);
         }
 
-        protected internal static Func<object> CreateInExprGetterFn(MethodCallExpression m)
+        protected string ConvertInExpressionToSql(MethodCallExpression m, object quotedColName)
         {
             var member = Expression.Convert(m.Arguments[1], typeof (object));
             var lambda = Expression.Lambda<Func<object>>(member);
             var getter = lambda.Compile();
-            return getter;
+            var argValue = getter();
+            var enumerableArg = argValue as IEnumerable;
+            if (enumerableArg != null)
+            {
+                var inArgs = Sql.Flatten(getter() as IEnumerable);
+
+                var sIn = new StringBuilder();
+                foreach (var e in inArgs)
+                {
+                    if (sIn.Length > 0)
+                        sIn.Append(",");
+
+                    sIn.Append(DialectProvider.GetQuotedValue(e, e.GetType()));
+                }
+                return string.Format("{0} {1} ({2})", quotedColName, m.Method.Name, sIn);
+            }
+            
+            var exprArg = argValue as ISqlExpression;
+            if (exprArg != null)
+            {
+                var subSelect = exprArg.ToSelectStatement();
+                return string.Format("{0} {1} ({2})", quotedColName, "IN", subSelect);
+            }
+
+            throw new NotSupportedException("In({0})".Fmt(argValue.GetType()));
         }
 
         protected virtual object VisitColumnAccessMethod(MethodCallExpression m)
