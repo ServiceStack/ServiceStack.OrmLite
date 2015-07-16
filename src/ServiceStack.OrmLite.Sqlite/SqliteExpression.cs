@@ -45,14 +45,13 @@ namespace ServiceStack.OrmLite.Sqlite
             args.RemoveAt(0);
 
             var statement = "";
+            var member = Expression.Convert(m.Arguments[1], typeof(object));
+            var lambda = Expression.Lambda<Func<object>>(member);
+            var getter = lambda.Compile();
 
             switch (m.Method.Name)
             {
                 case "In":
-                    var member = Expression.Convert(m.Arguments[1], typeof(object));
-                    var lambda = Expression.Lambda<Func<object>>(member);
-                    var getter = lambda.Compile();
-
                     var inArgs = Sql.Flatten(getter() as IEnumerable);
 
                     var sIn = new StringBuilder();
@@ -63,6 +62,12 @@ namespace ServiceStack.OrmLite.Sqlite
                             base.DialectProvider.GetQuotedValue(e, e.GetType()));
                     }
                     statement = string.Format("{0} {1} ({2})", quotedColName, m.Method.Name, sIn);
+                    break;
+                case "InExpression":
+                    var sqlExpression = getter() as ISqlExpression;
+                    var subSelect = sqlExpression.ToSelectStatement();
+
+                    statement = string.Format("{0} {1} ({2})", quotedColName, "IN", subSelect);
                     break;
                 case "Desc":
                     statement = string.Format("{0} DESC", quotedColName);
