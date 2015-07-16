@@ -403,8 +403,7 @@ namespace ServiceStack.OrmLite.SqlServer
             }
 
             var ret = string.Format(
-                "{0} FROM (SELECT ROW_NUMBER() OVER ({2}) As RowNum, {1} {3}) AS RowConstrainedResult WHERE RowNum > {4} AND RowNum <= {5}",
-                UseAliasesOrStripTablePrefixes(selectExpression), 
+                "SELECT * FROM (SELECT {0}, ROW_NUMBER() OVER ({1}) As RowNum {2}) AS RowConstrainedResult WHERE RowNum > {3} AND RowNum <= {4}",
                 selectExpression.Substring(selectType.Length),
                 orderByExpression,
                 bodyExpression,
