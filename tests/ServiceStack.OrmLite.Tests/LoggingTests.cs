@@ -1,5 +1,4 @@
 ﻿using NUnit.Framework;
-using ServiceStack.Common.Tests.Models;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Logging;
 using ServiceStack.Text;
@@ -16,6 +15,7 @@ namespace ServiceStack.OrmLite.Tests
         public string Name { get; set; }
     }
 
+    [NUnit.Framework.Ignore("Initializing LogFactory needs to run stand-alone")]
     [TestFixture]
     public class LoggingTests
         : OrmLiteTestBase
