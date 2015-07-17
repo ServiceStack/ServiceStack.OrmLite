@@ -93,45 +93,6 @@ or use `object` to fetch an unknown **Scalar** value:
 object result = db.Scalar<object>(db.From<Poco>().Select(x => x.Id));
 ```
 
-### New DB Parameters API's
-
-To enable even finer-grained control of parameterized queries we've added new overloads that take a collection of IDbDataParameter's:
-
-```csharp
-List<T> Select<T>(string sql, IEnumerable<IDbDataParameter> sqlParams)
-T Single<T>(string sql, IEnumerable<IDbDataParameter> sqlParams)
-T Scalar<T>(string sql, IEnumerable<IDbDataParameter> sqlParams)
-List<T> Column<T>(string sql, IEnumerable<IDbDataParameter> sqlParams)
-IEnumerable<T> ColumnLazy<T>(string sql, IEnumerable<IDbDataParameter> sqlParams)
-HashSet<T> ColumnDistinct<T>(string sql, IEnumerable<IDbDataParameter> sqlParams)
-Dictionary<K, List<V>> Lookup<K, V>(string sql, IEnumerable<IDbDataParameter> sqlParams)
-List<T> SqlList<T>(string sql, IEnumerable<IDbDataParameter> sqlParams)
-List<T> SqlColumn<T>(string sql, IEnumerable<IDbDataParameter> sqlParams)
-T SqlScalar<T>(string sql, IEnumerable<IDbDataParameter> sqlParams)
-```
-
-> Including Async equivalents for each of the above Sync API's.
-
-The new API's let you execute parameterized SQL with finer-grained control over the `IDbDataParameter` used, e.g:
-
-```csharp
-IDbDataParameter pAge = db.CreateParam("age", 40, dbType:DbType.Int16);
-db.Select<Person>("SELECT * FROM Person WHERE Age > @pAge", new[] { pAge });
-```
-
-The new `CreateParam()` extension method above is a useful helper for creating custom IDbDataParameter's.
-
-### Customize null values
-
-The new `OrmLiteConfig.OnDbNullFilter` lets you to replace DBNull values with a custom value, so you could convert all `null` strings to be populated with `"NULL"` using:
-
-```csharp
-OrmLiteConfig.OnDbNullFilter = fieldDef => 
-    fieldDef.FieldType == typeof(string)
-        ? "NULL"
-        : null;
-```
-
 # Async API Overview
 
 A quick overview of Async API's can be seen in the class diagram below:
@@ -926,6 +887,45 @@ Optimistic concurrency is only verified on API's that update or delete an entire
 
 ```csharp
 db.DeleteById<Poco>(id:updatedRow.Id, rowversion:updatedRow.RowVersion)
+```
+
+### New DB Parameters API's
+
+To enable even finer-grained control of parameterized queries we've added new overloads that take a collection of IDbDataParameter's:
+
+```csharp
+List<T> Select<T>(string sql, IEnumerable<IDbDataParameter> sqlParams)
+T Single<T>(string sql, IEnumerable<IDbDataParameter> sqlParams)
+T Scalar<T>(string sql, IEnumerable<IDbDataParameter> sqlParams)
+List<T> Column<T>(string sql, IEnumerable<IDbDataParameter> sqlParams)
+IEnumerable<T> ColumnLazy<T>(string sql, IEnumerable<IDbDataParameter> sqlParams)
+HashSet<T> ColumnDistinct<T>(string sql, IEnumerable<IDbDataParameter> sqlParams)
+Dictionary<K, List<V>> Lookup<K, V>(string sql, IEnumerable<IDbDataParameter> sqlParams)
+List<T> SqlList<T>(string sql, IEnumerable<IDbDataParameter> sqlParams)
+List<T> SqlColumn<T>(string sql, IEnumerable<IDbDataParameter> sqlParams)
+T SqlScalar<T>(string sql, IEnumerable<IDbDataParameter> sqlParams)
+```
+
+> Including Async equivalents for each of the above Sync API's.
+
+The new API's let you execute parameterized SQL with finer-grained control over the `IDbDataParameter` used, e.g:
+
+```csharp
+IDbDataParameter pAge = db.CreateParam("age", 40, dbType:DbType.Int16);
+db.Select<Person>("SELECT * FROM Person WHERE Age > @pAge", new[] { pAge });
+```
+
+The new `CreateParam()` extension method above is a useful helper for creating custom IDbDataParameter's.
+
+### Customize null values
+
+The new `OrmLiteConfig.OnDbNullFilter` lets you to replace DBNull values with a custom value, so you could convert all `null` strings to be populated with `"NULL"` using:
+
+```csharp
+OrmLiteConfig.OnDbNullFilter = fieldDef => 
+    fieldDef.FieldType == typeof(string)
+        ? "NULL"
+        : null;
 ```
 
 ### Exec, Result and String Filters
