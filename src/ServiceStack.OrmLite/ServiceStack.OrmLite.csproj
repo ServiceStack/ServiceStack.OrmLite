@@ -189,6 +189,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Async\OrmLiteAsyncApi.cd" />
+    <Compile Include="Dapper\SqlMapper.Async.cs" />
     <None Include="OrmLiteApi.cd" />
   </ItemGroup>
   <ItemGroup />

@@ -1,4 +1,8 @@
-﻿/*
+﻿#if NET45
+#define ASYNC
+#endif
+
+/*
  License: http://www.apache.org/licenses/LICENSE-2.0 
  Home page: http://code.google.com/p/dapper-dot-net/
 

@@ -79,6 +79,9 @@
     <Compile Include="..\ServiceStack.OrmLite\Async\WriteExpressionCommandExtensionsAsync.cs">
       <Link>Async\WriteExpressionCommandExtensionsAsync.cs</Link>
     </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\SqlMapper.Async.cs">
+      <Link>Dapper\SqlMapper.Async.cs</Link>
+    </Compile>
     <Compile Include="..\ServiceStack.OrmLite\Dapper\SqlMapper.cs">
       <Link>Dapper\SqlMapper.cs</Link>
     </Compile>
