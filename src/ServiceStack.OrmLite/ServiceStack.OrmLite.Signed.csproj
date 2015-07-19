@@ -108,6 +108,7 @@
     <Reference Include="ServiceStack.Text">
       <HintPath>..\..\lib\signed\ServiceStack.Text.dll</HintPath>
     </Reference>
+    <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Expressions\IUntypedSqlExpression.cs" />
