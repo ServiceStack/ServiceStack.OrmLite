@@ -1655,7 +1655,7 @@ namespace ServiceStack.OrmLite
             };
             if (value != null)
             {
-                p.Value = value;
+                p.Value = DialectProvider.GetParamValue(value, value.GetType());
                 p.DbType = DialectProvider.GetColumnDbType(value.GetType());
             }
             if (dbType != null)
