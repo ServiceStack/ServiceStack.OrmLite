@@ -362,6 +362,14 @@ namespace ServiceStack.OrmLite.Oracle
                 return StringSerializer.SerializeToString(value);
             }
 
+            switch (fieldType.GetTypeCode())
+            {
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
+                    return Convert.ToDecimal(value);
+            }
+
             return value;
         }
 
