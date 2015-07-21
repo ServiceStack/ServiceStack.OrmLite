@@ -300,9 +300,6 @@ namespace ServiceStack.OrmLite.Oracle
 
         public override object GetParamValue(object value, Type fieldType)
         {
-            if (!OrmLiteConfig.UseParameterizeSqlExpressions)
-                return GetQuotedValue(value, fieldType);
-
             if (value == null) return DBNull.Value;
 
             if (fieldType == typeof(Guid))
