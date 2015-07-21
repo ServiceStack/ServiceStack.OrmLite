@@ -19,7 +19,7 @@ namespace ServiceStack.OrmLite.Tests
     }
 
     [TestFixture]
-    public class TypeDescriptorMetadataTests
+    public class _TypeDescriptorMetadataTests //Needs to be run first
         : OrmLiteTestBase
     {
         private IDbConnection db;

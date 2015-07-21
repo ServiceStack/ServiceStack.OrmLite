@@ -1443,7 +1443,7 @@ namespace ServiceStack.OrmLite
 
         public virtual object GetParamValue(object value, Type fieldType)
         {
-            return GetQuotedValue(value, fieldType);
+            return ConvertDbValue(value, fieldType);
         }
 
         public virtual string EscapeWildcards(string value)

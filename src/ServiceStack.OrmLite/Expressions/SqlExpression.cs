@@ -1114,7 +1114,8 @@ namespace ServiceStack.OrmLite
         protected virtual object VisitMemberAccess(MemberExpression m)
         {
             if (m.Expression != null
-                && (m.Expression.NodeType == ExpressionType.Parameter || m.Expression.NodeType == ExpressionType.Convert))
+                && (m.Expression.NodeType == ExpressionType.Parameter 
+                    || m.Expression.NodeType == ExpressionType.Convert))
             {
                 var propertyInfo = (PropertyInfo)m.Member;
 
