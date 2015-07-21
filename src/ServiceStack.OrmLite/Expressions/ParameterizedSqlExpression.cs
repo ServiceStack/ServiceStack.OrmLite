@@ -34,7 +34,7 @@ namespace ServiceStack.OrmLite
 
         public override object GetValue(object value, Type type)
         {
-            return SkipParameterizationForThisExpression
+            return ((!OrmLiteConfig.UseParameterizeSqlExpressions) || SkipParameterizationForThisExpression)
                 ? DialectProvider.GetQuotedValue(value, type)
                 : DialectProvider.GetParamValue(value, type);
         }
