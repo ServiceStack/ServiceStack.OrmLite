@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
+using ServiceStack.Html;
 using ServiceStack.OrmLite.Tests.UseCase;
 using ServiceStack.Text;
 
@@ -119,16 +120,21 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 Assert.That(results.Count, Is.EqualTo(1));
 
                 var result = results[0];
-                Assert.That(Convert.ToInt64(result[0]), Is.EqualTo(10));
-                Assert.That(Convert.ToInt64(result[1]), Is.EqualTo(letterFrequenceMaxId));
-                Assert.That(Convert.ToInt64(result[2]), Is.EqualTo(letterFrequencyMinId));
-                Assert.That(Convert.ToInt64(result[3]), Is.EqualTo(letterFrequencySumId));
+                CheckDbTypeInsensitiveEquivalency(result);
 
                 var single = db.Single<List<object>>(query);
-                Assert.That(single, Is.EquivalentTo(result));
+                CheckDbTypeInsensitiveEquivalency(single);
 
                 result.PrintDump();
             }
+        }
+
+        private void CheckDbTypeInsensitiveEquivalency(List<object> result)
+        {
+            Assert.That(Convert.ToInt64(result[0]), Is.EqualTo(10));
+            Assert.That(Convert.ToInt64(result[1]), Is.EqualTo(letterFrequenceMaxId));
+            Assert.That(Convert.ToInt64(result[2]), Is.EqualTo(letterFrequencyMinId));
+            Assert.That(Convert.ToInt64(result[3]), Is.EqualTo(letterFrequencySumId));
         }
 
         [Test]
@@ -149,16 +155,21 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 Assert.That(results.Count, Is.EqualTo(1));
 
                 var result = results[0];
-                Assert.That(Convert.ToInt64(result["Count"]), Is.EqualTo(10));
-                Assert.That(Convert.ToInt64(result["Max"]), Is.EqualTo(letterFrequenceMaxId));
-                Assert.That(Convert.ToInt64(result["Min"]), Is.EqualTo(letterFrequencyMinId));
-                Assert.That(Convert.ToInt64(result["Sum"]), Is.EqualTo(letterFrequencySumId));
+                CheckDbTypeInsensitiveEquivalency(result);
 
                 var single = db.Single<Dictionary<string, object>>(query);
-                Assert.That(single, Is.EquivalentTo(result));
+                CheckDbTypeInsensitiveEquivalency(single);
 
                 results.PrintDump();
             }
+        }
+
+        private void CheckDbTypeInsensitiveEquivalency(Dictionary<string, object> result)
+        {
+            Assert.That(Convert.ToInt64(result["Count"]), Is.EqualTo(10));
+            Assert.That(Convert.ToInt64(result["Max"]), Is.EqualTo(letterFrequenceMaxId));
+            Assert.That(Convert.ToInt64(result["Min"]), Is.EqualTo(letterFrequencyMinId));
+            Assert.That(Convert.ToInt64(result["Sum"]), Is.EqualTo(letterFrequencySumId));
         }
 
         [Test]
@@ -167,13 +178,13 @@ namespace ServiceStack.OrmLite.Tests.Expression
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<LetterFrequency>();
-                db.Insert(new LetterFrequency { Id = 1, Letter = "A" });
+                var id = db.Insert(new LetterFrequency {Id = 1, Letter = "A"}, selectIdentity: true);
 
                 var result = db.Scalar<object>(db.From<LetterFrequency>().Select(x => x.Letter));
                 Assert.That(result, Is.EqualTo("A"));
 
                 result = db.Scalar<object>(db.From<LetterFrequency>().Select(x => x.Id));
-                Assert.That(result, Is.EqualTo(1));
+                Assert.That(Convert.ToInt64(result), Is.EqualTo(id));
             }
         }
 
