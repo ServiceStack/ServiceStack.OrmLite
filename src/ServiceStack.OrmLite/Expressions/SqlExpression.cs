@@ -1113,37 +1113,42 @@ namespace ServiceStack.OrmLite
 
         protected virtual object VisitMemberAccess(MemberExpression m)
         {
-            if (m.Expression != null
-                && (m.Expression.NodeType == ExpressionType.Parameter 
-                    || m.Expression.NodeType == ExpressionType.Convert))
+            if (m.Expression != null && 
+                 (m.Expression.NodeType == ExpressionType.Parameter || 
+                  m.Expression.NodeType == ExpressionType.Convert))
             {
-                var propertyInfo = (PropertyInfo)m.Member;
-
-                var modelType = m.Expression.Type;
-                if (m.Expression.NodeType == ExpressionType.Convert)
-                {
-                    var unaryExpr = m.Expression as UnaryExpression;
-                    if (unaryExpr != null)
-                    {
-                        modelType = unaryExpr.Operand.Type;
-                    }
-                }
-
-                OnVisitMemberType(modelType);
-
-                var tableDef = modelType.GetModelDefinition();
-
-                if (propertyInfo.PropertyType.IsEnum)
-                    return new EnumMemberAccess(
-                        GetQuotedColumnName(tableDef, m.Member.Name), propertyInfo.PropertyType);
-
-                return new PartialSqlString(GetQuotedColumnName(tableDef, m.Member.Name));
+                return GetMemberExpression(m);
             }
 
             var member = Expression.Convert(m, typeof(object));
             var lambda = Expression.Lambda<Func<object>>(member);
             var getter = lambda.Compile();
             return getter();
+        }
+
+        private object GetMemberExpression(MemberExpression m)
+        {
+            var propertyInfo = m.Member as PropertyInfo;
+
+            var modelType = m.Expression.Type;
+            if (m.Expression.NodeType == ExpressionType.Convert)
+            {
+                var unaryExpr = m.Expression as UnaryExpression;
+                if (unaryExpr != null)
+                {
+                    modelType = unaryExpr.Operand.Type;
+                }
+            }
+
+            OnVisitMemberType(modelType);
+
+            var tableDef = modelType.GetModelDefinition();
+
+            if (propertyInfo != null && propertyInfo.PropertyType.IsEnum)
+                return new EnumMemberAccess(
+                    GetQuotedColumnName(tableDef, m.Member.Name), propertyInfo.PropertyType);
+
+            return new PartialSqlString(GetQuotedColumnName(tableDef, m.Member.Name));
         }
 
         protected virtual void OnVisitMemberType(Type modelType) {}
@@ -1210,9 +1215,7 @@ namespace ServiceStack.OrmLite
                         return Expression.Lambda(u).Compile().DynamicInvoke();
                     break;
             }
-
             return Visit(u.Operand);
-
         }
 
         private bool IsColumnAccess(MethodCallExpression m)
@@ -1244,48 +1247,67 @@ namespace ServiceStack.OrmLite
             return Expression.Lambda(m).Compile().DynamicInvoke();
         }
 
-        protected virtual List<Object> VisitExpressionList(ReadOnlyCollection<Expression> original)
+        protected virtual List<object> VisitExpressionList(ReadOnlyCollection<Expression> original)
         {
-            List<Object> list = new List<Object>();
+            var list = new List<object>();
             for (int i = 0, n = original.Count; i < n; i++)
             {
-                if (original[i].NodeType == ExpressionType.NewArrayInit ||
-                 original[i].NodeType == ExpressionType.NewArrayBounds)
+                var e = original[i];
+                if (e.NodeType == ExpressionType.NewArrayInit ||
+                    e.NodeType == ExpressionType.NewArrayBounds)
                 {
-
-                    list.AddRange(VisitNewArrayFromExpressionList(original[i] as NewArrayExpression));
+                    list.AddRange(VisitNewArrayFromExpressionList(e as NewArrayExpression));
                 }
                 else
-                    list.Add(Visit(original[i]));
+                {
+                    list.Add(Visit(e));
+                }
+            }
+            return list;
+        }
 
+        protected virtual List<object> VisitInSqlExpressionList(ReadOnlyCollection<Expression> original)
+        {
+            var list = new List<object>();
+            for (int i = 0, n = original.Count; i < n; i++)
+            {
+                var e = original[i];
+                if (e.NodeType == ExpressionType.NewArrayInit ||
+                    e.NodeType == ExpressionType.NewArrayBounds)
+                {
+                    list.AddRange(VisitNewArrayFromExpressionList(e as NewArrayExpression));
+                }
+                else if (e.NodeType == ExpressionType.MemberAccess)
+                {
+                    list.Add(GetMemberExpression(e as MemberExpression));
+                }
+                else
+                {
+                    list.Add(Visit(e));
+                }
             }
             return list;
         }
 
         protected virtual object VisitNewArray(NewArrayExpression na)
         {
-
-            List<Object> exprs = VisitExpressionList(na.Expressions);
-            StringBuilder r = new StringBuilder();
-            foreach (Object e in exprs)
+            var exprs = VisitExpressionList(na.Expressions);
+            var sb = new StringBuilder();
+            foreach (var e in exprs)
             {
-                r.Append(r.Length > 0 ? "," + e : e);
+                sb.Append(sb.Length > 0 ? "," + e : e);
             }
-
-            return r.ToString();
+            return sb.ToString();
         }
 
         protected virtual List<Object> VisitNewArrayFromExpressionList(NewArrayExpression na)
         {
-
-            List<Object> exprs = VisitExpressionList(na.Expressions);
+            var exprs = VisitExpressionList(na.Expressions);
             return exprs;
         }
 
-
         protected virtual string BindOperant(ExpressionType e)
         {
-
             switch (e)
             {
                 case ExpressionType.Equal:
@@ -1339,7 +1361,6 @@ namespace ServiceStack.OrmLite
 
         protected string RemoveQuoteFromAlias(string exp)
         {
-
             if ((exp.StartsWith("\"") || exp.StartsWith("`") || exp.StartsWith("'"))
                 &&
                 (exp.EndsWith("\"") || exp.EndsWith("`") || exp.EndsWith("'")))
@@ -1487,7 +1508,7 @@ namespace ServiceStack.OrmLite
 
         protected virtual object VisitSqlMethodCall(MethodCallExpression m)
         {
-            List<Object> args = this.VisitExpressionList(m.Arguments);
+            List<object> args = this.VisitInSqlExpressionList(m.Arguments);
             object quotedColName = args[0];
             args.RemoveAt(0);
 
@@ -1512,9 +1533,9 @@ namespace ServiceStack.OrmLite
                 case "Max":
                 case "Avg":
                     statement = string.Format("{0}({1}{2})",
-                                         m.Method.Name,
-                                         quotedColName,
-                                         args.Count == 1 ? string.Format(",{0}", args[0]) : "");
+                        m.Method.Name,
+                        quotedColName,
+                        args.Count == 1 ? string.Format(",{0}", args[0]) : "");
                     break;
                 default:
                     throw new NotSupportedException();

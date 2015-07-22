@@ -29,10 +29,9 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
                 Assert.That(count, Is.EqualTo(1));
 
-                //TODO: Fix
-                //count = CountByColumn<CountTestTable>(db);
+                count = CountByColumn<CountTestTable>(db);
 
-                //Assert.That(count, Is.EqualTo(0));
+                Assert.That(count, Is.EqualTo(0));
             }
         }
 

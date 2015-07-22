@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {
@@ -129,11 +130,17 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
             EstablishContext(10, expected);
 
-            var actual = OpenDbConnection().Select<TestType>(q => q.BoolColumn && q.StringColumn == model.StringValue);
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => 
+                    q.BoolColumn && q.StringColumn == model.StringValue);
 
-            Assert.IsNotNull(actual);
-            Assert.Greater(actual.Count, 0);
-            CollectionAssert.Contains(actual, expected);
+                db.GetLastSql().Print();
+
+                Assert.IsNotNull(actual);
+                Assert.Greater(actual.Count, 0);
+                CollectionAssert.Contains(actual, expected);
+            }
         }
     }
 }

@@ -40,7 +40,7 @@ namespace ServiceStack.OrmLite.Sqlite
 
         protected override object VisitSqlMethodCall(MethodCallExpression m)
         {
-            List<Object> args = this.VisitExpressionList(m.Arguments);
+            List<object> args = this.VisitInSqlExpressionList(m.Arguments);
             object quotedColName = args[0];
             args.RemoveAt(0);
 
