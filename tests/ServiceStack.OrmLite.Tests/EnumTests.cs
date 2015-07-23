@@ -248,6 +248,36 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(row.Id, Is.EqualTo(2));
             }
         }
+
+        [Test]
+        public void Can_Select_Type_with_Nullable_Enum()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<TypeWithNullableEnum>();
+
+                db.Insert(new TypeWithNullableEnum { Id = 1, EnumValue = SomeEnum.Value1, NullableEnumValue = SomeEnum.Value2 });
+                db.Insert(new TypeWithNullableEnum { Id = 2, EnumValue = SomeEnum.Value1 });
+
+                var rows = db.Select<TypeWithNullableEnum>();
+                Assert.That(rows.Count, Is.EqualTo(2));
+
+                var row = rows.First(x => x.NullableEnumValue == null);
+                Assert.That(row.Id, Is.EqualTo(2));
+
+                rows = db.SqlList<TypeWithNullableEnum>("SELECT * FROM {0}"
+                    .Fmt(typeof(TypeWithNullableEnum).Name.SqlTable()));
+
+                row = rows.First(x => x.NullableEnumValue == null);
+                Assert.That(row.Id, Is.EqualTo(2));
+
+                rows = db.SqlList<TypeWithNullableEnum>("SELECT * FROM {0}"
+                    .Fmt(typeof(TypeWithNullableEnum).Name.SqlTable()), new { Id = 2 });
+
+                row = rows.First(x => x.NullableEnumValue == null);
+                Assert.That(row.Id, Is.EqualTo(2));
+            }
+        }
     }
 
 
@@ -302,5 +332,12 @@ namespace ServiceStack.OrmLite.Tests
     {
         public int Id { get; set; }
         public FlagsEnum Flags { get; set; }
+    }
+
+    public class TypeWithNullableEnum
+    {
+        public int Id { get; set; }
+        public SomeEnum EnumValue { get; set; }
+        public SomeEnum? NullableEnumValue { get; set; }
     }
 }
