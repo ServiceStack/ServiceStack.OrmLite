@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using NUnit.Framework;
 using ServiceStack.OrmLite.Tests;
 
@@ -17,10 +18,10 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         [Test]
         public void CanStoreEnumValue()
         {
-            using(var con = OpenDbConnection())
+            using (var con = OpenDbConnection())
             {
                 con.CreateTable<TypeWithEnum>(true);
-                con.Save(new TypeWithEnum {Id = 1, EnumValue = SomeEnum.Value1});
+                con.Save(new TypeWithEnum { Id = 1, EnumValue = SomeEnum.Value1 });
             }
         }
 
@@ -86,6 +87,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
                 Assert.AreEqual(2, target.Count());
             }
         }
+
     }
 
     public enum SomeEnum
@@ -98,6 +100,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
     public class TypeWithEnum
     {
         public int Id { get; set; }
-        public SomeEnum EnumValue { get; set; } 
+        public SomeEnum EnumValue { get; set; }
     }
+
 }

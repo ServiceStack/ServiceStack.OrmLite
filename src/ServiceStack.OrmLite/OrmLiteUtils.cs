@@ -232,7 +232,7 @@ namespace ServiceStack.OrmLite
                     }
                 }
             }
-            return String.Format(sqlText, escapedParams.ToArray());
+            return string.Format(sqlText, escapedParams.ToArray());
         }
 
         public static string SqlColumn(this string columnName, IOrmLiteDialectProvider dialect = null)
