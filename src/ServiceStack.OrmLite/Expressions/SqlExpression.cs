@@ -1644,24 +1644,28 @@ namespace ServiceStack.OrmLite
                     }
                     break;
                 case "Substring":
-                    var startIndex = Int32.Parse(args[0].ToString()) + 1;
+                    var startIndex = int.Parse(args[0].ToString()) + 1;
                     if (args.Count == 2)
                     {
-                        var length = Int32.Parse(args[1].ToString());
-                        statement = string.Format("substring({0} from {1} for {2})",
-                                                  quotedColName,
-                                                  startIndex,
-                                                  length);
+                        var length = int.Parse(args[1].ToString());
+                        statement = GetSubstringSql(quotedColName, startIndex, length);
                     }
                     else
-                        statement = string.Format("substring({0} from {1})",
-                                         quotedColName,
-                                         startIndex);
+                    {
+                        statement = GetSubstringSql(quotedColName, startIndex);
+                    }
                     break;
                 default:
                     throw new NotSupportedException();
             }
             return new PartialSqlString(statement);
+        }
+
+        public virtual string GetSubstringSql(object quotedColumn, int startIndex, int? length = null)
+        {
+            return length != null
+                ? string.Format("substring({0} from {1} for {2})", quotedColumn, startIndex, length.Value)
+                : string.Format("substring({0} from {1})", quotedColumn, startIndex);
         }
 
         public IDbDataParameter CreateParam(string name,
