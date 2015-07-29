@@ -11,7 +11,8 @@ namespace ServiceStack.OrmLite.Tests.Expression
         [SetUp]
         public void Setup()
         {
-            OpenDbConnection().CreateTable<TestType>(true);
+            using (var db = OpenDbConnection())
+                db.CreateTable<TestType>(true);
         }
 
         //Avoid painful refactor to change all tests to use a using pattern
