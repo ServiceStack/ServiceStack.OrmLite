@@ -19,18 +19,21 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 var dateTime = new DateTime(2012, 1, 1, 1, 1, 1, DateTimeKind.Local);
                 var x = InsertAndSelectDateTime(db, dateTime);
                 Assert.AreEqual(DateTimeKind.Utc, x.Test.Kind);
+                Assert.AreEqual(DateTimeKind.Utc, x.TestNullable.Value.Kind);
                 Assert.AreEqual(x.Test.ToUniversalTime(), dateTime.ToUniversalTime());
                 Assert.AreEqual(x.Test.ToLocalTime(), dateTime.ToLocalTime());
 
                 dateTime = new DateTime(2012, 1, 1, 1, 1, 1, DateTimeKind.Utc);
                 x = InsertAndSelectDateTime(db, dateTime);
                 Assert.AreEqual(DateTimeKind.Utc, x.Test.Kind);
+                Assert.AreEqual(DateTimeKind.Utc, x.TestNullable.Value.Kind);
                 Assert.AreEqual(x.Test.ToUniversalTime(), dateTime.ToUniversalTime());
                 Assert.AreEqual(x.Test.ToLocalTime(), dateTime.ToLocalTime());
 
                 dateTime = new DateTime(2012, 1, 1, 1, 1, 1, DateTimeKind.Unspecified);
                 x = InsertAndSelectDateTime(db, dateTime);
                 Assert.AreEqual(DateTimeKind.Utc, x.Test.Kind);
+                Assert.AreEqual(DateTimeKind.Utc, x.TestNullable.Value.Kind);
                 Assert.AreEqual(x.Test.ToUniversalTime(), dateTime);
                 Assert.AreEqual(x.Test.ToLocalTime(), dateTime.ToLocalTime());
             }
@@ -39,7 +42,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
         private static DateTimeObject InsertAndSelectDateTime(IDbConnection db, DateTime dateTime)
         {
             db.DropAndCreateTable<DateTimeObject>();
-            db.Insert(new DateTimeObject { Test = dateTime });
+            db.Insert(new DateTimeObject { Test = dateTime, TestNullable = dateTime });
             var x = db.Select<DateTimeObject>().First();
             return x;
         }
@@ -47,6 +50,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
         private class DateTimeObject
         {
             public DateTime Test { get; set; }
+            public DateTime? TestNullable { get; set; }
         }
     }
 }

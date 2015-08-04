@@ -197,6 +197,21 @@ namespace ServiceStack.OrmLite.SqlServer
             return base.GetQuotedValue(value, fieldType);
         }
 
+        protected override object GetValueOrDbNull<T>(FieldDefinition fieldDef, object obj)
+        {
+            var value = base.GetValueOrDbNull<T>(fieldDef, obj);
+
+            if (_ensureUtc && value is DateTime)
+            {
+                var dateTime = ((DateTime) value);
+                value = dateTime.Kind == DateTimeKind.Unspecified
+                    ? DateTime.SpecifyKind(dateTime, DateTimeKind.Utc)
+                    : dateTime.ToUniversalTime();
+            }
+
+            return value;
+        }
+
         protected override string GetUndefinedColumnDefinition(Type fieldType, int? fieldLength)
         {
             return string.Format(StringLengthColumnDefinitionFormat, fieldLength.HasValue ? fieldLength.Value.ToString() : "MAX");
@@ -464,7 +479,7 @@ namespace ServiceStack.OrmLite.SqlServer
 
                 return subSql;
             }
-            
+
             return base.GetLoadChildrenSubSelect(expr);
         }
 
