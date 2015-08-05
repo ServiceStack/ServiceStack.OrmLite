@@ -144,8 +144,42 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        public void Can_change_schema_definitions()
+        {
+            using (var db = OpenDbConnection())
+            {
+                var insertDate = new DateTime(2014, 1, 1);
+
+                db.DropAndCreateTable<AuditTableA>();
+                var before = db.GetLastSql();
+
+                var idA = db.Insert(new AuditTableA { CreatedDate = insertDate }, selectIdentity: true);
+                var insertRowA = db.SingleById<AuditTableA>(idA);
+                Assert.That(insertRowA.CreatedDate, Is.EqualTo(insertDate));
+
+                var hold = OrmLiteConfig.DialectProvider.DefaultStringLength;
+                OrmLiteConfig.DialectProvider.DefaultStringLength = 255;
+
+                db.DropAndCreateTable<AuditTableA>();
+                db.GetLastSql().Print();
+
+                OrmLiteConfig.DialectProvider.DefaultStringLength = hold;
+
+                db.DropAndCreateTable<AuditTableA>();
+                var after = db.GetLastSql();
+
+                Assert.That(after, Is.EqualTo(before));
+
+                idA = db.Insert(new AuditTableA { CreatedDate = insertDate }, selectIdentity: true);
+                insertRowA = db.SingleById<AuditTableA>(idA);
+                Assert.That(insertRowA.CreatedDate, Is.EqualTo(insertDate));
+            }
+        }
+
+        [Test]
         public void Can_create_ModelWithIdAndName_table_with_specified_DefaultStringLength()
         {
+            var hold = OrmLiteConfig.DialectProvider.DefaultStringLength;
             OrmLiteConfig.DialectProvider.DefaultStringLength = 255;
             var createTableSql = OrmLiteConfig.DialectProvider.ToCreateTableStatement(typeof(ModelWithIdAndName));
 
@@ -158,6 +192,7 @@ namespace ServiceStack.OrmLite.Tests
             {
                 Assert.That(createTableSql, Is.StringContaining("text"));
             }
+            OrmLiteConfig.DialectProvider.DefaultStringLength = hold;
         }
 
         public class ModelWithGuid

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using System.Globalization;
+using ServiceStack.Logging;
 using ServiceStack.Text;
 using ServiceStack.Text.Common;
 
@@ -50,10 +51,11 @@ namespace ServiceStack.OrmLite.Converters
             {
                 dateTime = reader.GetDateTime(columnIndex);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 var dateStr = reader.GetString(columnIndex);
-                dateTime = DateTimeSerializer.ParseShortestXsdDateTime(dateStr);
+                Log.Warn("Error reading string as DateTime in Sqlite: " + dateStr, ex);
+                dateTime = DateTime.Parse(dateStr);
             }
 
             if (DateStyle == DateTimeKind.Unspecified)
@@ -97,6 +99,8 @@ namespace ServiceStack.OrmLite.Converters
 
     public class DateTimeConverter : IOrmLiteConverter
     {
+        protected static ILog Log = LogManager.GetLogger(typeof(DateTimeConverter));
+
         public IOrmLiteDialectProvider DialectProvider { get; set; }
 
         public DateTimeKind DateStyle
