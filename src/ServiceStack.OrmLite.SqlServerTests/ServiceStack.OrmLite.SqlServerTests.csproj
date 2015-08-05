@@ -77,7 +77,6 @@
     <Compile Include="CustomSqlTests.cs" />
     <Compile Include="Datetime2Tests.cs" />
     <Compile Include="DateTimeOffsetTests.cs" />
-    <Compile Include="EnsureUtcTest.cs" />
     <Compile Include="InsertParam_GetLastInsertId.cs" />
     <Compile Include="Issues\CustomSelectWithPagingIssue.cs" />
     <Compile Include="Issues\SerializationTests.cs" />

@@ -6,7 +6,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 using ServiceStack.Data;
+using ServiceStack.OrmLite.Converters;
 using ServiceStack.OrmLite.MySql.DataAnnotations;
+using ServiceStack.OrmLite.Support;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.MySql
@@ -29,6 +31,7 @@ namespace ServiceStack.OrmLite.MySql
             base.InitColumnTypeMap();
             base.DefaultValueFormat = " DEFAULT '{0}'";
             base.SelectIdentitySql = "SELECT LAST_INSERT_ID()";
+            base.Converters[typeof(DateTime)] = new MySqlDateTimeConverter(this);
         }
 
         public override void OnAfterInitColumnTypeMap()
@@ -84,23 +87,8 @@ namespace ServiceStack.OrmLite.MySql
         {
             if (value == null) return "NULL";
 
-            if (fieldType == typeof(DateTime))
-            {
-                var dateValue = (DateTime)value;
-                /*
-                 * ms not contained in format. MySql ignores ms part anyway
-                 * 
-                 * for more details see: http://dev.mysql.com/doc/refman/5.1/en/datetime.html
-                 */
-                const string dateTimeFormat = "yyyy-MM-dd HH:mm:ss";
-
-                return base.GetQuotedValue(dateValue.ToString(dateTimeFormat), typeof(string));
-            }
-
             if (fieldType == typeof(byte[]))
-            {
                 return "0x" + BitConverter.ToString((byte[])value).Replace("-", "");
-            }
 
             return base.GetQuotedValue(value, fieldType);
         }

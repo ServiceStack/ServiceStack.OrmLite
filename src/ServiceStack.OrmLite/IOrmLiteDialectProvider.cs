@@ -29,6 +29,8 @@ namespace ServiceStack.OrmLite
 
         bool UseUnicode { get; set; }
 
+        DateTimeKind DateStyle { get; set; }
+
         string EscapeWildcards(string value);
 
         INamingStrategy NamingStrategy { get; set; }

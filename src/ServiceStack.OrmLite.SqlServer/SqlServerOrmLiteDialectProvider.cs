@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using ServiceStack.Data;
+using ServiceStack.OrmLite.Converters;
 
 namespace ServiceStack.OrmLite.SqlServer
 {
@@ -29,6 +30,7 @@ namespace ServiceStack.OrmLite.SqlServer
             base.DecimalColumnDefinition = "DECIMAL(38,6)";
             base.DefaultDecimalPrecision = 38;
             base.DefaultDecimalScale = 6;
+            base.Converters[typeof(DateTime)] = new SqlServerDateTimeConverter(this);
 
             base.InitColumnTypeMap();
         }
@@ -137,14 +139,6 @@ namespace ServiceStack.OrmLite.SqlServer
                     return dateTimeValue - timeSpanOffset;
                 }
 
-                if (_ensureUtc && type == typeof(DateTime))
-                {
-                    var result = base.ConvertDbValue(value, type);
-                    if (result is DateTime)
-                        return DateTime.SpecifyKind((DateTime)result, DateTimeKind.Utc);
-                    return result;
-                }
-
                 if (type == typeof(byte[]))
                     return value;
 
@@ -164,14 +158,6 @@ namespace ServiceStack.OrmLite.SqlServer
             {
                 var guidValue = (Guid)value;
                 return string.Format("CAST('{0}' AS UNIQUEIDENTIFIER)", guidValue);
-            }
-            if (fieldType == typeof(DateTime))
-            {
-                var dateValue = (DateTime)value;
-                if (_ensureUtc && dateValue.Kind == DateTimeKind.Local)
-                    dateValue = dateValue.ToUniversalTime();
-                const string iso8601Format = "yyyyMMdd HH:mm:ss.fff";
-                return base.GetQuotedValue(dateValue.ToString(iso8601Format, CultureInfo.InvariantCulture), typeof(string));
             }
             if (fieldType == typeof(DateTimeOffset))
             {
@@ -197,21 +183,6 @@ namespace ServiceStack.OrmLite.SqlServer
             return base.GetQuotedValue(value, fieldType);
         }
 
-        protected override object GetValueOrDbNull<T>(FieldDefinition fieldDef, object obj)
-        {
-            var value = base.GetValueOrDbNull<T>(fieldDef, obj);
-
-            if (_ensureUtc && value is DateTime)
-            {
-                var dateTime = ((DateTime) value);
-                value = dateTime.Kind == DateTimeKind.Unspecified
-                    ? DateTime.SpecifyKind(dateTime, DateTimeKind.Utc)
-                    : dateTime.ToUniversalTime();
-            }
-
-            return value;
-        }
-
         protected override string GetUndefinedColumnDefinition(Type fieldType, int? fieldLength)
         {
             return string.Format(StringLengthColumnDefinitionFormat, fieldLength.HasValue ? fieldLength.Value.ToString() : "MAX");
@@ -226,10 +197,10 @@ namespace ServiceStack.OrmLite.SqlServer
             base.DbTypeMap.Set<DateTime?>(shouldUseDatetime2 ? DbType.DateTime2 : DbType.DateTime, DateTimeColumnDefinition);
         }
 
-        protected bool _ensureUtc;
+        [Obsolete("Use DialectProvider.UseUtc")]
         public void EnsureUtc(bool shouldEnsureUtc)
         {
-            _ensureUtc = shouldEnsureUtc;
+            DateStyle = DateTimeKind.Utc;
         }
 
         public override SqlExpression<T> SqlExpression<T>()

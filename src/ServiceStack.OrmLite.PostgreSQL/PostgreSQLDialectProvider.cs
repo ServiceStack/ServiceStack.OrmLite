@@ -4,6 +4,8 @@ using System.Data;
 using System.Text;
 using Npgsql;
 using NpgsqlTypes;
+using ServiceStack.OrmLite.Converters;
+using ServiceStack.OrmLite.Support;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.PostgreSQL
@@ -38,6 +40,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
             this.UseReturningForLastInsertId = true;
             this.NamingStrategy = new PostgreSqlNamingStrategy();
             this.StringSerializer = new JsonStringSerializer();
+            base.Converters[typeof(DateTime)] = new PostgreSqlDateTimeConverter(this);
         }
 
         public override void OnAfterInitColumnTypeMap()
@@ -167,12 +170,6 @@ namespace ServiceStack.OrmLite.PostgreSQL
         {
             if (value == null) return "NULL";
 
-            if (fieldType == typeof(DateTime))
-            {
-                var dateValue = (DateTime)value;
-                const string iso8601Format = "yyyy-MM-dd HH:mm:ss.fff";
-                return base.GetQuotedValue(dateValue.ToString(iso8601Format), typeof(string));
-            }
             if (fieldType == typeof(DateTimeOffset))
             {
                 var dateValue = (DateTimeOffset)value;
@@ -376,6 +373,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
             }
             base.SetParameter(fieldDef, p);
         }
+
         protected override object GetValue<T>(FieldDefinition fieldDef, object obj)
         {
             if (fieldDef.CustomFieldDefinition == "text[]")

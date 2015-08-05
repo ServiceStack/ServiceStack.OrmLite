@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using ServiceStack.Text.Common;
+using ServiceStack.OrmLite.Converters;
 
 namespace ServiceStack.OrmLite.Sqlite
 {
@@ -17,7 +16,7 @@ namespace ServiceStack.OrmLite.Sqlite
             base.BoolColumnDefinition = base.IntColumnDefinition;
             base.GuidColumnDefinition = "CHAR(36)";
             base.SelectIdentitySql = "SELECT last_insert_rowid()";
-
+            base.Converters[typeof(DateTime)] = new SqliteDateTimeConverter(this);
             base.InitColumnTypeMap();
         }
 
@@ -117,7 +116,6 @@ namespace ServiceStack.OrmLite.Sqlite
                     }
                 }
                 connString.AppendFormat(@"Data Source={0};Version=3;New=True;Compress=True;", connectionString.Trim());
-
             }
             else
             {
@@ -185,21 +183,6 @@ namespace ServiceStack.OrmLite.Sqlite
 
                 fieldDef.SetValueFn(instance, guidValue);
             }
-            else if (fieldType == typeof(DateTime))
-            {
-                try
-                {
-                    var dbValue = reader.GetDateTime(colIndex);
-
-                    fieldDef.SetValueFn(instance, dbValue);
-                }
-                catch (Exception)
-                {
-                    var dateStr = reader.GetString(colIndex);
-                    var dateValue = DateTimeSerializer.ParseShortestXsdDateTime(dateStr);
-                    fieldDef.SetValueFn(instance, dateValue);
-                }
-            }
             else
             {
                 base.SetDbValue(fieldDef, reader, colIndex, instance);
@@ -209,13 +192,6 @@ namespace ServiceStack.OrmLite.Sqlite
         public override string GetQuotedValue(object value, Type fieldType)
         {
             if (value == null) return "NULL";
-
-            if (fieldType == typeof(DateTime))
-            {
-                var dateValue = (DateTime)value;
-                var dateStr = dateValue.ToSqliteDateString();
-                return base.GetQuotedValue(dateStr, typeof(string));
-            }
 
             if (fieldType == typeof(bool))
             {
@@ -247,11 +223,6 @@ namespace ServiceStack.OrmLite.Sqlite
                 {
                     var dateTimeOffsetValue = (DateTimeOffset)value;
                     return dateTimeOffsetValue.ToString("o");
-                }
-                else if (fieldDef.FieldType == typeof(DateTime) && value is DateTime)
-                {
-                    var dateType = (DateTime)value;
-                    return dateType.ToSqliteDateString();
                 }
             }
 
@@ -304,24 +275,6 @@ namespace ServiceStack.OrmLite.Sqlite
                 SqliteOrmLiteDialectProviderBase.UTF8Encoded = true;
 
             return provider;
-        }
-
-        public static string ToSqliteDateString(this DateTime dateTime)
-        {
-            //Convert UTC DateTime to LocalTime for Sqlite
-            if (dateTime.Kind == DateTimeKind.Utc)
-                dateTime = dateTime.ToLocalTime();
-
-            var dateStr = DateTimeSerializer.ToLocalXsdDateTimeString(dateTime);
-            dateStr = dateStr.Replace("T", " ");
-            const int tzPos = 6; //"-00:00".Length;
-            var timeZoneMod = dateStr.Substring(dateStr.Length - tzPos, 1);
-            if (timeZoneMod == "+" || timeZoneMod == "-")
-            {
-                dateStr = dateStr.Substring(0, dateStr.Length - tzPos);
-            }
-
-            return dateStr;
         }
     }
 }

@@ -107,6 +107,7 @@
   <ItemGroup>
     <Compile Include="Expressions\IUntypedSqlExpression.cs" />
     <Compile Include="Expressions\ParameterizedSqlExpression.cs" />
+    <Compile Include="IOrmLiteConverter.cs" />
     <Compile Include="NamingStrategy.cs" />
     <Compile Include="OrmLiteCommand.cs" />
     <Compile Include="OrmLiteContext.cs" />
@@ -166,6 +167,7 @@
     <Compile Include="Expressions\Sql.cs" />
     <Compile Include="OrmLiteSchemaModifyApi.cs" />
     <Compile Include="Dapper\SqlMapper.cs" />
+    <Compile Include="Converters\DateTimeConverter.cs" />
     <Compile Include="Support\LoadList.cs" />
     <Compile Include="Support\LoadReferences.cs" />
     <Compile Include="UntypedApi.cs" />

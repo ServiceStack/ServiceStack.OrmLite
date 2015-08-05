@@ -21,6 +21,7 @@ using ServiceStack.DataAnnotations;
 using ServiceStack.Logging;
 using ServiceStack.Text;
 using System.Linq.Expressions;
+using ServiceStack.OrmLite.Support;
 
 namespace ServiceStack.OrmLite
 {
@@ -88,6 +89,8 @@ namespace ServiceStack.OrmLite
         #endregion
 
         public IOrmLiteExecFilter ExecFilter { get; set; }
+
+        public Dictionary<Type, IOrmLiteConverter> Converters = new Dictionary<Type, IOrmLiteConverter>(); 
 
         public string StringLengthNonUnicodeColumnDefinitionFormat = "VARCHAR({0})";
         public string StringLengthUnicodeColumnDefinitionFormat = "NVARCHAR({0})";
@@ -164,6 +167,8 @@ namespace ServiceStack.OrmLite
                 UpdateStringColumnDefinitions();
             }
         }
+
+        public DateTimeKind DateStyle { get; set; }
 
         private INamingStrategy namingStrategy = new OrmLiteNamingStrategyBase();
         public INamingStrategy NamingStrategy
@@ -269,6 +274,16 @@ namespace ServiceStack.OrmLite
         {
             if (OrmLiteUtils.HandledDbNullValue(fieldDef, reader, colIndex, instance)) return;
 
+            var fieldType = Nullable.GetUnderlyingType(fieldDef.FieldType) ?? fieldDef.FieldType;
+
+            IOrmLiteConverter converter;
+            if (Converters.TryGetValue(fieldType, out converter))
+            {
+                var value = converter.FromDbValue(fieldDef, reader, colIndex);
+                fieldDef.SetValueFn(instance, value);
+                return;
+            }
+
             var convertedValue = ConvertDbValue(reader.GetValue(colIndex), fieldDef.FieldType);
             try
             {
@@ -277,7 +292,6 @@ namespace ServiceStack.OrmLite
             catch (NullReferenceException ignore) { }
         }
 
-  
         public abstract IDbConnection CreateConnection(string filePath, Dictionary<string, string> options);
 
         public virtual string GetQuotedValue(string paramValue)
@@ -784,6 +798,10 @@ namespace ServiceStack.OrmLite
         {
             if (value != null)
             {
+                IOrmLiteConverter converter;
+                if (Converters.TryGetValue(fieldDef.FieldType, out converter))
+                    return converter.ToDbValue(fieldDef, value);
+
                 if (fieldDef.IsRefType)
                 {
                     //Let ADO.NET providers handle byte[]
@@ -819,7 +837,10 @@ namespace ServiceStack.OrmLite
         protected virtual object GetValueOrDbNull<T>(FieldDefinition fieldDef, object obj)
         {
             var value = GetValue<T>(fieldDef, obj);
-            return value ?? DBNull.Value;
+            if (value == null)
+                return DBNull.Value;
+
+            return value;
         }
 
         protected virtual object GetQuotedValueOrDbNull<T>(FieldDefinition fieldDef, object obj)
@@ -1385,16 +1406,18 @@ namespace ServiceStack.OrmLite
         {
             if (value == null) return "NULL";
 
+            IOrmLiteConverter converter;
+            if (Converters.TryGetValue(fieldType, out converter))
+                return converter.ToQuotedString(value);
+
             if (fieldType.IsRefType())
-            {
                 return GetQuotedValue(StringSerializer.SerializeToString(value));
-            }
 
             if (fieldType.IsEnum)
             {
                 var isEnumFlags = fieldType.IsEnumFlags();
                 long enumValue;
-                if (!isEnumFlags && Int64.TryParse(value.ToString(), out enumValue))
+                if (!isEnumFlags && long.TryParse(value.ToString(), out enumValue))
                 {
                     value = Enum.ToObject(fieldType, enumValue).ToString();
                 }
