@@ -131,7 +131,7 @@ namespace ServiceStack.OrmLite.Tests
                 .Where(p => p.StartTime == null || p.StartTime < time);
 
             var result = db.LoadSelect(expression).First();
-            Assert.AreEqual(result.EndTime, time);
+            Assert.That(result.EndTime, Is.EqualTo(time).Within(TimeSpan.FromSeconds(1)));
         }
 
         [TestCase("2012-08-12")]
@@ -146,7 +146,7 @@ namespace ServiceStack.OrmLite.Tests
                 .Where(p => p.StartTime == null || p.StartTime < time);
 
             var result = db.LoadSelect(expression).First();
-            Assert.AreEqual(result.EndTime, time);
+            Assert.That(result.EndTime, Is.EqualTo(time).Within(TimeSpan.FromSeconds(1)));
         }
 
         public class NullableDateTimeOffsetWithStartAndEndTime
