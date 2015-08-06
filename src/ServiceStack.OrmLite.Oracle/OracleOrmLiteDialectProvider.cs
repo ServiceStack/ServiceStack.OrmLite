@@ -300,7 +300,7 @@ namespace ServiceStack.OrmLite.Oracle
 
         public override object GetParamValue(object value, Type fieldType)
         {
-            if (value == null) return DBNull.Value;
+            if (value == null) return "NULL";
 
             if (fieldType == typeof(Guid))
             {
