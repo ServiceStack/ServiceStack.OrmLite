@@ -272,8 +272,8 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 results.PrintDump();
 
                 Assert.That(results, Is.EquivalentTo(new Dictionary<int, string> {
-                    {1,"Banana"},
-                    {2,"Orange"},
+                    {_fooBar1Id,"Banana"},
+                    {_fooBar2Id,"Orange"},
                 }));
             }
         }

@@ -884,7 +884,7 @@ namespace ServiceStack.OrmLite.Oracle
                 var indexNames = string.Join(",", compositeIndex.FieldNames.ToArray());
 
                 sqlIndexes.Add(
-                    ToCreateIndexStatement(compositeIndex.Unique, indexName, modelDef, indexNames));
+                    ToCreateIndexStatement(compositeIndex.Unique, indexName, modelDef, indexNames, isCombined:true));
             }
 
             return sqlIndexes;
@@ -897,7 +897,7 @@ namespace ServiceStack.OrmLite.Oracle
                 isUnique ? "UNIQUE" : "",
                 indexName,
                 GetQuotedTableName(modelDef),
-                GetQuotedColumnName(fieldName));
+                (isCombined) ? fieldName : GetQuotedColumnName(fieldName));
         }
 
 
