@@ -127,6 +127,7 @@
     <Compile Include="Expression\ExpressionUsingCustomSerializedEnumTests.cs" />
     <Compile Include="Expression\FromExpressionTests.cs" />
     <Compile Include="Expression\GenericTableExpressions.cs" />
+    <Compile Include="Expression\LimitExpressionTests.cs" />
     <Compile Include="Expression\MethodExpressionTests.cs" />
     <Compile Include="Expression\SelectFieldExpressionTests.cs" />
     <Compile Include="Expression\SqlExpressionParamTests.cs" />

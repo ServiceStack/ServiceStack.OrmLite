@@ -148,32 +148,7 @@ namespace ServiceStack.OrmLite.Tests
 			}
 		}
 
-		public class UserAuth
-		{
-			public UserAuth()
-			{
-				this.Roles = new List<string>();
-				this.Permissions = new List<string>();
-			}
-
-			[AutoIncrement]
-			public virtual int Id { get; set; }
-			public virtual string UserName { get; set; }
-			public virtual string Email { get; set; }
-			public virtual string PrimaryEmail { get; set; }
-			public virtual string FirstName { get; set; }
-			public virtual string LastName { get; set; }
-			public virtual string DisplayName { get; set; }
-			public virtual string Salt { get; set; }
-			public virtual string PasswordHash { get; set; }
-			public virtual List<string> Roles { get; set; }
-			public virtual List<string> Permissions { get; set; }
-			public virtual DateTime CreatedDate { get; set; }
-			public virtual DateTime ModifiedDate { get; set; }
-			public virtual Dictionary<string, string> Meta { get; set; }
-		}
-
-		[Test]
+        [Test]
 		public void Can_insert_table_with_UserAuth()
 		{
 			using (var db = OpenDbConnection())
@@ -239,5 +214,46 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.Greater(lastInsertId, 0, "with InsertParam");
             }
         }
+    }
+
+    public class UserAuth
+    {
+        public UserAuth()
+        {
+            this.Roles = new List<string>();
+            this.Permissions = new List<string>();
+        }
+
+        [AutoIncrement]
+        public virtual int Id { get; set; }
+        public virtual string UserName { get; set; }
+        public virtual string Email { get; set; }
+        public virtual string PrimaryEmail { get; set; }
+        public virtual string FirstName { get; set; }
+        public virtual string LastName { get; set; }
+        public virtual string DisplayName { get; set; }
+        public virtual string Salt { get; set; }
+        public virtual string PasswordHash { get; set; }
+        public virtual List<string> Roles { get; set; }
+        public virtual List<string> Permissions { get; set; }
+        public virtual DateTime CreatedDate { get; set; }
+        public virtual DateTime ModifiedDate { get; set; }
+        public virtual Dictionary<string, string> Meta { get; set; }
+    }
+
+    public class UserAuthRole
+    {
+        [AutoIncrement]
+        public virtual int Id { get; set; }
+        public virtual int UserAuthId { get; set; }
+        public virtual string Role { get; set; }
+        public virtual string Permission { get; set; }
+        public virtual DateTime CreatedDate { get; set; }
+        public virtual DateTime ModifiedDate { get; set; }
+
+        //Custom Reference Data
+        public virtual int? RefId { get; set; }
+        public virtual string RefIdStr { get; set; }
+        public virtual Dictionary<string, string> Meta { get; set; }
     }
 }
