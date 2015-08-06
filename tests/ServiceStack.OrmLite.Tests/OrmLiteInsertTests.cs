@@ -216,31 +216,57 @@ namespace ServiceStack.OrmLite.Tests
         }
     }
 
-    public class UserAuth
+    public class UserAuth 
     {
         public UserAuth()
         {
-            this.Roles = new List<string>();
-            this.Permissions = new List<string>();
+            Roles = new List<string>();
+            Permissions = new List<string>();
         }
 
         [AutoIncrement]
         public virtual int Id { get; set; }
+
         public virtual string UserName { get; set; }
         public virtual string Email { get; set; }
         public virtual string PrimaryEmail { get; set; }
+        public virtual string PhoneNumber { get; set; }
         public virtual string FirstName { get; set; }
         public virtual string LastName { get; set; }
         public virtual string DisplayName { get; set; }
+        public virtual string Company { get; set; }
+        public virtual DateTime? BirthDate { get; set; }
+        public virtual string BirthDateRaw { get; set; }
+        public virtual string Address { get; set; }
+        public virtual string Address2 { get; set; }
+        public virtual string City { get; set; }
+        public virtual string State { get; set; }
+        public virtual string Country { get; set; }
+        public virtual string Culture { get; set; }
+        public virtual string FullName { get; set; }
+        public virtual string Gender { get; set; }
+        public virtual string Language { get; set; }
+        public virtual string MailAddress { get; set; }
+        public virtual string Nickname { get; set; }
+        public virtual string PostalCode { get; set; }
+        public virtual string TimeZone { get; set; }
         public virtual string Salt { get; set; }
         public virtual string PasswordHash { get; set; }
+        public virtual string DigestHa1Hash { get; set; }
         public virtual List<string> Roles { get; set; }
         public virtual List<string> Permissions { get; set; }
         public virtual DateTime CreatedDate { get; set; }
         public virtual DateTime ModifiedDate { get; set; }
+        public virtual int InvalidLoginAttempts { get; set; }
+        public virtual DateTime? LastLoginAttempt { get; set; }
+        public virtual DateTime? LockedDate { get; set; }
+        public virtual string RecoveryToken { get; set; }
+
+        //Custom Reference Data
+        public virtual int? RefId { get; set; }
+        public virtual string RefIdStr { get; set; }
         public virtual Dictionary<string, string> Meta { get; set; }
     }
-
     public class UserAuthRole
     {
         [AutoIncrement]
