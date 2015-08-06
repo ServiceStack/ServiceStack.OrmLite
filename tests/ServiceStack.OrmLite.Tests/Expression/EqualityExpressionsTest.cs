@@ -257,6 +257,28 @@ namespace ServiceStack.OrmLite.Tests.Expression
         }
 
         // Assume not equal works ;-)
+
+        [Test]
+        public void Can_select_equals_variable_null_expression()
+        {
+            object columnValue = null;
+
+            var expected = new TestType()
+            {
+                IntColumn = 12,
+                BoolColumn = false,
+                StringColumn = "test",
+                NullableCol = new TestType { StringColumn = "sometext" }
+            };
+
+            EstablishContext(10, expected);
+
+            var actual = OpenDbConnection().Select<TestType>(q => q.NullableCol == columnValue);
+
+            Assert.IsNotNull(actual);
+            Assert.AreEqual(actual.Count, 10);
+            CollectionAssert.DoesNotContain(actual, expected);
+        }
         #endregion
     }
 }
