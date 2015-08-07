@@ -45,6 +45,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
 
             RegisterConverter<DateTime>(new PostgreSqlDateTimeConverter());
             RegisterConverter<DateTimeOffset>(new PostgreSqlDateTimeOffsetConverter());
+            RegisterConverter<char>(new PostgreSqlCharConverter());
         }
 
         public override void OnAfterInitColumnTypeMap()
