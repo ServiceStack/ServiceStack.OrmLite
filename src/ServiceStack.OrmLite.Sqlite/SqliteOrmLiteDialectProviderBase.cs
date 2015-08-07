@@ -16,7 +16,9 @@ namespace ServiceStack.OrmLite.Sqlite
             base.BoolColumnDefinition = base.IntColumnDefinition;
             base.GuidColumnDefinition = "CHAR(36)";
             base.SelectIdentitySql = "SELECT last_insert_rowid()";
-            base.Converters[typeof(DateTime)] = new SqliteDateTimeConverter(this);
+
+            base.RegisterConverter<DateTime>(new SqliteDateTimeConverter());
+
             base.InitColumnTypeMap();
         }
 

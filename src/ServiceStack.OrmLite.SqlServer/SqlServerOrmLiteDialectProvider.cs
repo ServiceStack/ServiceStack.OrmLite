@@ -30,7 +30,8 @@ namespace ServiceStack.OrmLite.SqlServer
             base.DecimalColumnDefinition = "DECIMAL(38,6)";
             base.DefaultDecimalPrecision = 38;
             base.DefaultDecimalScale = 6;
-            base.Converters[typeof(DateTime)] = new SqlServerDateTimeConverter(this);
+
+            base.RegisterConverter<DateTime>(new SqlServerDateTimeConverter());
 
             base.InitColumnTypeMap();
         }

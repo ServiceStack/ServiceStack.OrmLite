@@ -195,6 +195,8 @@ namespace ServiceStack.OrmLite
         }
 
         protected DbTypes<TDialect> DbTypeMap = new DbTypes<TDialect>();
+        protected bool hasInitalized = false;
+
         protected void InitColumnTypeMap()
         {
             DbTypeMap.Set<string>(DbType.String, StringColumnDefinition);
@@ -244,6 +246,22 @@ namespace ServiceStack.OrmLite
             DbTypeMap.Set<object>(DbType.String, StringColumnDefinition);
 
             OnAfterInitColumnTypeMap();
+            hasInitalized = true;
+        }
+
+        public void RegisterConverter<T>(OrmLiteConverter converter)
+        {
+            converter.DialectProvider = this;
+            Converters[typeof(T)] = converter;
+
+            if (converter.ColumnDefinition != null)
+            {
+                DbTypeMap.Set<T>(converter.DbType, converter.ColumnDefinition);
+
+                //Calls OnAfterInit when it is initialized
+                if (!hasInitalized)
+                    OnAfterInitColumnTypeMap();
+            }
         }
 
         public virtual void OnAfterInitColumnTypeMap()
@@ -1072,7 +1090,7 @@ namespace ServiceStack.OrmLite
                         sb.Append(", ");
                     
                     var parts = fieldName.SplitOnFirst(' ');
-                    sb.Append(GetQuotedName(parts[0]))
+                    sb.Append(GetQuotedColumnName(parts[0]))
                       .Append(' ')
                       .Append(parts.Length > 1 ? parts[1] : "ASC");
                 }

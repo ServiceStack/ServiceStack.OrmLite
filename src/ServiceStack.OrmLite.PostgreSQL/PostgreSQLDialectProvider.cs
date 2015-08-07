@@ -35,12 +35,14 @@ namespace ServiceStack.OrmLite.PostgreSQL
             base.StringLengthUnicodeColumnDefinitionFormat = "character varying({0})";
             base.StringLengthNonUnicodeColumnDefinitionFormat = "character varying({0})";
             base.MaxStringColumnDefinition = "TEXT";
-            base.InitColumnTypeMap();
             base.SelectIdentitySql = "SELECT LASTVAL()";
             this.UseReturningForLastInsertId = true;
             this.NamingStrategy = new PostgreSqlNamingStrategy();
             this.StringSerializer = new JsonStringSerializer();
-            base.Converters[typeof(DateTime)] = new PostgreSqlDateTimeConverter(this);
+
+            base.RegisterConverter<DateTime>(new PostgreSqlDateTimeConverter());
+
+            base.InitColumnTypeMap();
         }
 
         public override void OnAfterInitColumnTypeMap()

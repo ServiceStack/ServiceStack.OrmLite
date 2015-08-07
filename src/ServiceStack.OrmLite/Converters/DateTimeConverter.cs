@@ -2,16 +2,12 @@
 using System.Data;
 using System.Globalization;
 using ServiceStack.Logging;
-using ServiceStack.Text;
 using ServiceStack.Text.Common;
 
 namespace ServiceStack.OrmLite.Converters
 {
     public class SqliteDateTimeConverter : DateTimeConverter
     {
-        public SqliteDateTimeConverter(IOrmLiteDialectProvider dialectProvider) : base(dialectProvider)
-        { }
-
         public override string ToQuotedString(object value)
         {
             var dateTime = (DateTime)value;
@@ -66,9 +62,6 @@ namespace ServiceStack.OrmLite.Converters
 
     public class SqlServerDateTimeConverter : DateTimeConverter
     {
-        public SqlServerDateTimeConverter(IOrmLiteDialectProvider dialectProvider) : base(dialectProvider)
-        { }
-
         public override string ToQuotedString(object value)
         {
             return DateTimeFmt((DateTime)value, "yyyyMMdd HH:mm:ss.fff");
@@ -77,9 +70,6 @@ namespace ServiceStack.OrmLite.Converters
 
     public class MySqlDateTimeConverter : DateTimeConverter
     {
-        public MySqlDateTimeConverter(IOrmLiteDialectProvider dialectProvider) : base(dialectProvider)
-        { }
-
         public override string ToQuotedString(object value)
         {
             /*
@@ -91,29 +81,18 @@ namespace ServiceStack.OrmLite.Converters
         }
     }
 
-    public class PostgreSqlDateTimeConverter : DateTimeConverter
-    {
-        public PostgreSqlDateTimeConverter(IOrmLiteDialectProvider dialectProvider) : base(dialectProvider)
-        { }
-    }
+    public class PostgreSqlDateTimeConverter : DateTimeConverter {}
 
-    public class DateTimeConverter : IOrmLiteConverter
+    public class DateTimeConverter : OrmLiteConverter
     {
         protected static ILog Log = LogManager.GetLogger(typeof(DateTimeConverter));
-
-        public IOrmLiteDialectProvider DialectProvider { get; set; }
 
         public DateTimeKind DateStyle
         {
             get { return DialectProvider.DateStyle; }
         }
 
-        public DateTimeConverter(IOrmLiteDialectProvider dialectProvider)
-        {
-            DialectProvider = dialectProvider;
-        }
-
-        public virtual string ToQuotedString(object value)
+        public override string ToQuotedString(object value)
         {
             var dateTime = (DateTime)value;
             return DateTimeFmt(dateTime, "yyyy-MM-dd HH:mm:ss.fff");
@@ -130,7 +109,7 @@ namespace ServiceStack.OrmLite.Converters
             return DialectProvider.GetQuotedValue(dateTime.ToString(dateTimeFormat, CultureInfo.InvariantCulture), typeof(string));
         }
 
-        public virtual object ToDbValue(FieldDefinition fieldDef, object value)
+        public override object ToDbValue(FieldDefinition fieldDef, object value)
         {
             var dateTime = (DateTime)value;
             if (DateStyle == DateTimeKind.Utc && dateTime.Kind == DateTimeKind.Local)
@@ -147,7 +126,7 @@ namespace ServiceStack.OrmLite.Converters
             return dateTime;
         }
 
-        public virtual object FromDbValue(FieldDefinition fieldDef, IDataReader reader, int columnIndex)
+        public override object FromDbValue(FieldDefinition fieldDef, IDataReader reader, int columnIndex)
         {
             var value = reader.GetValue(columnIndex);
             var strValue = value as string;
