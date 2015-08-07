@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{6CEB3EDE-9F02-4F4F-BD8A-1B2939C1AE6E}"
 	ProjectSection(SolutionItems) = preProject
 		..\build\appsettings.license.txt = ..\build\appsettings.license.txt
@@ -17,8 +19,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{6CEB3EDE
 		..\NuGet\ServiceStack.OrmLite.PostgreSQL\servicestack.ormlite.postgresql.nuspec = ..\NuGet\ServiceStack.OrmLite.PostgreSQL\servicestack.ormlite.postgresql.nuspec
 		..\NuGet\ServiceStack.OrmLite.Sqlite.Mono\servicestack.ormlite.sqlite.mono.nuspec = ..\NuGet\ServiceStack.OrmLite.Sqlite.Mono\servicestack.ormlite.sqlite.mono.nuspec
 		..\NuGet\ServiceStack.OrmLite.Sqlite.Windows\servicestack.ormlite.sqlite.windows.nuspec = ..\NuGet\ServiceStack.OrmLite.Sqlite.Windows\servicestack.ormlite.sqlite.windows.nuspec
-		..\NuGet\ServiceStack.OrmLite.Sqlite32\servicestack.ormlite.sqlite32.nuspec = ..\NuGet\ServiceStack.OrmLite.Sqlite32\servicestack.ormlite.sqlite32.nuspec
-		..\NuGet\ServiceStack.OrmLite.Sqlite64\servicestack.ormlite.sqlite64.nuspec = ..\NuGet\ServiceStack.OrmLite.Sqlite64\servicestack.ormlite.sqlite64.nuspec
 		..\NuGet\ServiceStack.OrmLite.SqlServer\servicestack.ormlite.sqlserver.nuspec = ..\NuGet\ServiceStack.OrmLite.SqlServer\servicestack.ormlite.sqlserver.nuspec
 		..\NuGet\ServiceStack.OrmLite.T4\servicestack.ormlite.t4.nuspec = ..\NuGet\ServiceStack.OrmLite.T4\servicestack.ormlite.t4.nuspec
 	EndProjectSection
@@ -846,7 +846,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{4A755D3C-CE48-4DB1-BF29-90A696ACD71B} = {6CEB3EDE-9F02-4F4F-BD8A-1B2939C1AE6E}
 		{79F42E0D-EC0B-4591-BEE9-3A1BE3F0C57D} = {E2CAD578-0966-401B-83C2-792F8861FF5D}
 		{7CF9CE3E-F5FE-4C73-843F-57A64B202743} = {E2CAD578-0966-401B-83C2-792F8861FF5D}
 		{348E82EE-7D30-4D60-90E5-CA60C290C589} = {E2CAD578-0966-401B-83C2-792F8861FF5D}
@@ -857,6 +856,7 @@ Global
 		{619CF480-0DFB-429E-8FC1-B039E8C47AD9} = {86A84A8B-29B8-4C4D-839B-76836AD59D28}
 		{81280460-2358-40D2-94AA-85951612EA04} = {86A84A8B-29B8-4C4D-839B-76836AD59D28}
 		{583D79EF-27D8-4725-B706-BFE041F096A4} = {86A84A8B-29B8-4C4D-839B-76836AD59D28}
+		{4A755D3C-CE48-4DB1-BF29-90A696ACD71B} = {6CEB3EDE-9F02-4F4F-BD8A-1B2939C1AE6E}
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = ServiceStack.OrmLite.Sqlite\ServiceStack.OrmLite.Sqlite.csproj
