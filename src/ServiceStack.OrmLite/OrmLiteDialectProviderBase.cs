@@ -14,83 +14,22 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Logging;
 using ServiceStack.Text;
-using System.Linq.Expressions;
-using ServiceStack.OrmLite.Support;
 
 namespace ServiceStack.OrmLite
 {
-    public abstract class OrmLiteDialectProviderBase<TDialect>
-        : IOrmLiteDialectProvider
-        where TDialect : IOrmLiteDialectProvider
+    //Use non-generic base class so public properties are easier to access without a generic type
+    public abstract class OrmLiteDialectProviderBase
     {
-        protected static readonly ILog Log = LogManager.GetLogger(typeof(IOrmLiteDialectProvider));
-
-        protected OrmLiteDialectProviderBase()
-        {
-            UpdateStringColumnDefinitions();
-            StringSerializer = new JsvStringSerializer();
-        }
-
-        #region ADO.NET supported types
-        /* ADO.NET UNDERSTOOD DATA TYPES:
-			COUNTER	DbType.Int64
-			AUTOINCREMENT	DbType.Int64
-			IDENTITY	DbType.Int64
-			LONG	DbType.Int64
-			TINYINT	DbType.Byte
-			INTEGER	DbType.Int64
-			INT	DbType.Int32
-			VARCHAR	DbType.String
-			NVARCHAR	DbType.String
-			CHAR	DbType.String
-			NCHAR	DbType.String
-			TEXT	DbType.String
-			NTEXT	DbType.String
-			STRING	DbType.String
-			DOUBLE	DbType.Double
-			FLOAT	DbType.Double
-			REAL	DbType.Single
-			BIT	DbType.Boolean
-			YESNO	DbType.Boolean
-			LOGICAL	DbType.Boolean
-			BOOL	DbType.Boolean
-			NUMERIC	DbType.Decimal
-			DECIMAL	DbType.Decimal
-			MONEY	DbType.Decimal
-			CURRENCY	DbType.Decimal
-			TIME	DbType.DateTime
-			DATE	DbType.DateTime
-			TIMESTAMP	DbType.DateTime
-			DATETIME	DbType.DateTime
-			BLOB	DbType.Binary
-			BINARY	DbType.Binary
-			VARBINARY	DbType.Binary
-			IMAGE	DbType.Binary
-			GENERAL	DbType.Binary
-			OLEOBJECT	DbType.Binary
-			GUID	DbType.Guid
-			UNIQUEIDENTIFIER	DbType.Guid
-			MEMO	DbType.String
-			NOTE	DbType.String
-			LONGTEXT	DbType.String
-			LONGCHAR	DbType.String
-			SMALLINT	DbType.Int16
-			BIGINT	DbType.Int64
-			LONGVARCHAR	DbType.String
-			SMALLDATE	DbType.DateTime
-			SMALLDATETIME	DbType.DateTime
-		 */
-        #endregion
-
         public IOrmLiteExecFilter ExecFilter { get; set; }
 
-        public Dictionary<Type, IOrmLiteConverter> Converters = new Dictionary<Type, IOrmLiteConverter>(); 
+        public Dictionary<Type, IOrmLiteConverter> Converters = new Dictionary<Type, IOrmLiteConverter>();
 
         public string StringLengthNonUnicodeColumnDefinitionFormat = "VARCHAR({0})";
         public string StringLengthUnicodeColumnDefinitionFormat = "NVARCHAR({0})";
@@ -114,9 +53,11 @@ namespace ServiceStack.OrmLite
         public string RealColumnDefinition = "DOUBLE";
         public string DecimalColumnDefinition = "DECIMAL";
         public string BlobColumnDefinition = "BLOB";
-        public string DateTimeColumnDefinition = "DATETIME";
         public string TimeColumnDefinition = "BIGINT";
         public string DateTimeOffsetColumnDefinition = "DATETIMEOFFSET";
+
+        [Obsolete("Use a DateTimeConverter")]
+        public string DateTimeColumnDefinition = "DATETIME";
 
         private int defaultDecimalPrecision = 18;
         private int defaultDecimalScale = 12;
@@ -194,8 +135,72 @@ namespace ServiceStack.OrmLite
             this.StringColumnDefinition = string.Format(this.StringLengthColumnDefinitionFormat, DefaultStringLength);
         }
 
+        public string DefaultValueFormat = " DEFAULT ({0})";
+    }
+
+    public abstract class OrmLiteDialectProviderBase<TDialect>
+        : OrmLiteDialectProviderBase, IOrmLiteDialectProvider
+        where TDialect : IOrmLiteDialectProvider
+    {
+        protected static readonly ILog Log = LogManager.GetLogger(typeof(IOrmLiteDialectProvider));
+
+        protected OrmLiteDialectProviderBase()
+        {
+            UpdateStringColumnDefinitions();
+            StringSerializer = new JsvStringSerializer();
+        }
+
+        #region ADO.NET supported types
+        /* ADO.NET UNDERSTOOD DATA TYPES:
+			COUNTER	DbType.Int64
+			AUTOINCREMENT	DbType.Int64
+			IDENTITY	DbType.Int64
+			LONG	DbType.Int64
+			TINYINT	DbType.Byte
+			INTEGER	DbType.Int64
+			INT	DbType.Int32
+			VARCHAR	DbType.String
+			NVARCHAR	DbType.String
+			CHAR	DbType.String
+			NCHAR	DbType.String
+			TEXT	DbType.String
+			NTEXT	DbType.String
+			STRING	DbType.String
+			DOUBLE	DbType.Double
+			FLOAT	DbType.Double
+			REAL	DbType.Single
+			BIT	DbType.Boolean
+			YESNO	DbType.Boolean
+			LOGICAL	DbType.Boolean
+			BOOL	DbType.Boolean
+			NUMERIC	DbType.Decimal
+			DECIMAL	DbType.Decimal
+			MONEY	DbType.Decimal
+			CURRENCY	DbType.Decimal
+			TIME	DbType.DateTime
+			DATE	DbType.DateTime
+			TIMESTAMP	DbType.DateTime
+			DATETIME	DbType.DateTime
+			BLOB	DbType.Binary
+			BINARY	DbType.Binary
+			VARBINARY	DbType.Binary
+			IMAGE	DbType.Binary
+			GENERAL	DbType.Binary
+			OLEOBJECT	DbType.Binary
+			GUID	DbType.Guid
+			UNIQUEIDENTIFIER	DbType.Guid
+			MEMO	DbType.String
+			NOTE	DbType.String
+			LONGTEXT	DbType.String
+			LONGCHAR	DbType.String
+			SMALLINT	DbType.Int16
+			BIGINT	DbType.Int64
+			LONGVARCHAR	DbType.String
+			SMALLDATE	DbType.DateTime
+			SMALLDATETIME	DbType.DateTime
+		 */
+        #endregion
         protected DbTypes<TDialect> DbTypeMap = new DbTypes<TDialect>();
-        protected bool hasInitalized = false;
 
         protected void InitColumnTypeMap()
         {
@@ -207,6 +212,8 @@ namespace ServiceStack.OrmLite
             DbTypeMap.Set<bool?>(DbType.Boolean, BoolColumnDefinition);
             DbTypeMap.Set<Guid>(DbType.Guid, GuidColumnDefinition);
             DbTypeMap.Set<Guid?>(DbType.Guid, GuidColumnDefinition);
+
+            //Overriden by DateTimeConverter
             DbTypeMap.Set<DateTime>(DbType.DateTime, DateTimeColumnDefinition);
             DbTypeMap.Set<DateTime?>(DbType.DateTime, DateTimeColumnDefinition);
 
@@ -246,7 +253,10 @@ namespace ServiceStack.OrmLite
             DbTypeMap.Set<object>(DbType.String, StringColumnDefinition);
 
             OnAfterInitColumnTypeMap();
-            hasInitalized = true;
+        }
+
+        public virtual void OnAfterInitColumnTypeMap()
+        {
         }
 
         public void RegisterConverter<T>(OrmLiteConverter converter)
@@ -254,21 +264,10 @@ namespace ServiceStack.OrmLite
             converter.DialectProvider = this;
             Converters[typeof(T)] = converter;
 
-            if (converter.ColumnDefinition != null)
-            {
-                DbTypeMap.Set<T>(converter.DbType, converter.ColumnDefinition);
+            DbTypeMap.Set<T>(converter.DbType, converter.ColumnDefinition ?? StringColumnDefinition);
 
-                //Calls OnAfterInit when it is initialized
-                if (!hasInitalized)
-                    OnAfterInitColumnTypeMap();
-            }
+            OnAfterInitColumnTypeMap();
         }
-
-        public virtual void OnAfterInitColumnTypeMap()
-        {
-        }
-
-        public string DefaultValueFormat = " DEFAULT ({0})";
 
         public virtual bool ShouldQuoteValue(Type fieldType)
         {
@@ -345,13 +344,13 @@ namespace ServiceStack.OrmLite
                 .Replace(".", "\".\"");
 
             return GetQuotedName(escapedSchema)
-                + "." 
+                + "."
                 + GetQuotedName(NamingStrategy.GetTableName(tableName));
         }
 
         public virtual string GetQuotedColumnName(string columnName)
         {
-            return GetQuotedName(namingStrategy.GetColumnName(columnName));
+            return GetQuotedName(NamingStrategy.GetColumnName(columnName));
         }
 
         public virtual string GetQuotedName(string name)
@@ -496,11 +495,11 @@ namespace ServiceStack.OrmLite
             return sql.ToString();
         }
 
-        public virtual string ToSelectStatement(ModelDefinition modelDef, 
-            string selectExpression, 
+        public virtual string ToSelectStatement(ModelDefinition modelDef,
+            string selectExpression,
             string bodyExpression,
-            string orderByExpression = null, 
-            int? offset = null, 
+            string orderByExpression = null,
+            int? offset = null,
             int? rows = null)
         {
 
@@ -562,7 +561,7 @@ namespace ServiceStack.OrmLite
                     continue;
 
                 //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
-                if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name)) 
+                if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name))
                     continue;
 
                 if (sbColumnNames.Length > 0) sbColumnNames.Append(",");
@@ -601,7 +600,7 @@ namespace ServiceStack.OrmLite
                     continue;
 
                 //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
-                if (insertFields != null && !insertFields.Contains(fieldDef.Name)) 
+                if (insertFields != null && !insertFields.Contains(fieldDef.Name))
                     continue;
 
                 if (sbColumnNames.Length > 0)
@@ -640,14 +639,14 @@ namespace ServiceStack.OrmLite
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
-                if (fieldDef.ShouldSkipUpdate()) 
+                if (fieldDef.ShouldSkipUpdate())
                     continue;
 
                 try
                 {
                     if ((fieldDef.IsPrimaryKey || fieldDef.IsRowVersion) && updateAllFields)
                     {
-                        if (sqlFilter.Length > 0) 
+                        if (sqlFilter.Length > 0)
                             sqlFilter.Append(" AND ");
 
                         AppendFieldCondition(sqlFilter, fieldDef, cmd);
@@ -693,7 +692,7 @@ namespace ServiceStack.OrmLite
 
         public virtual void AppendFieldConditionFmt(StringBuilder sqlFilter, FieldDefinition fieldDef, object objWithProperties)
         {
-            sqlFilter.AppendFormat("{0}={1}", 
+            sqlFilter.AppendFormat("{0}={1}",
                 GetQuotedColumnName(fieldDef.FieldName),
                 fieldDef.GetQuotedValue(objWithProperties, this));
         }
@@ -712,7 +711,7 @@ namespace ServiceStack.OrmLite
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
-                if (fieldDef.ShouldSkipDelete()) 
+                if (fieldDef.ShouldSkipDelete())
                     continue;
 
                 object fieldValue;
@@ -823,7 +822,7 @@ namespace ServiceStack.OrmLite
                 if (fieldDef.IsRefType)
                 {
                     //Let ADO.NET providers handle byte[]
-                    if (fieldDef.FieldType == typeof (byte[]))
+                    if (fieldDef.FieldType == typeof(byte[]))
                     {
                         return value;
                     }
@@ -839,12 +838,12 @@ namespace ServiceStack.OrmLite
                     long intEnum;
                     if (Int64.TryParse(enumValue, out intEnum))
                         return intEnum;
-                    
+
                     return enumValue;
                 }
-                if (fieldDef.FieldType == typeof (TimeSpan))
+                if (fieldDef.FieldType == typeof(TimeSpan))
                 {
-                    var timespan = (TimeSpan) value;
+                    var timespan = (TimeSpan)value;
                     return timespan.Ticks;
                 }
             }
@@ -911,7 +910,7 @@ namespace ServiceStack.OrmLite
                 {
                     if (fieldDef.IsPrimaryKey && updateAllFields)
                     {
-                        if (sqlFilter.Length > 0) 
+                        if (sqlFilter.Length > 0)
                             sqlFilter.Append(" AND ");
 
                         AppendFieldConditionFmt(sqlFilter, fieldDef, objWithProperties);
@@ -954,7 +953,7 @@ namespace ServiceStack.OrmLite
                 {
                     if (fieldDef.IsPrimaryKey)
                     {
-                        if (sqlFilter.Length > 0) 
+                        if (sqlFilter.Length > 0)
                             sqlFilter.Append(" AND ");
 
                         AppendFieldConditionFmt(sqlFilter, fieldDef, objWithProperties);
@@ -982,7 +981,7 @@ namespace ServiceStack.OrmLite
                 && sqlFilter.Length > deleteStatement.Length
                 && sqlFilter.Substring(0, deleteStatement.Length).ToUpper().Equals(deleteStatement);
 
-            if (isFullDeleteStatement) 
+            if (isFullDeleteStatement)
                 return sqlFilter.SqlFmt(filterParams);
 
             var modelDef = tableType.GetModelDefinition();
@@ -1020,7 +1019,7 @@ namespace ServiceStack.OrmLite
                 if (columnDefinition == null)
                     continue;
 
-                if (sbColumns.Length != 0) 
+                if (sbColumns.Length != 0)
                     sbColumns.Append(", \n  ");
 
                 sbColumns.Append(columnDefinition);
@@ -1088,7 +1087,7 @@ namespace ServiceStack.OrmLite
                 {
                     if (sb.Length > 0)
                         sb.Append(", ");
-                    
+
                     var parts = fieldName.SplitOnFirst(' ');
                     sb.Append(GetQuotedColumnName(parts[0]))
                       .Append(' ')
@@ -1476,7 +1475,7 @@ namespace ServiceStack.OrmLite
 
             if (fieldType == typeof(TimeSpan))
                 return ((TimeSpan)value).Ticks.ToString(CultureInfo.InvariantCulture);
- 
+
             return ShouldQuoteValue(fieldType)
                     ? GetQuotedValue(value.ToString())
                     : value.ToString();
