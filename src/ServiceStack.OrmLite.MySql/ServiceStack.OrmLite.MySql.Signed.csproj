@@ -62,6 +62,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Converters\MySqlDateTimeConverter.cs" />
     <Compile Include="MySqlDialect.cs" />
     <Compile Include="MySqlDialectProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

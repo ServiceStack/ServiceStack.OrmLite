@@ -5,6 +5,7 @@ using System.Text;
 using Npgsql;
 using NpgsqlTypes;
 using ServiceStack.OrmLite.Converters;
+using ServiceStack.OrmLite.PostgreSQL.Converters;
 using ServiceStack.OrmLite.Support;
 using ServiceStack.Text;
 

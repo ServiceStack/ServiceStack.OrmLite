@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 using ServiceStack.Data;
 using ServiceStack.OrmLite.Converters;
+using ServiceStack.OrmLite.MySql.Converters;
 using ServiceStack.OrmLite.MySql.DataAnnotations;
 using ServiceStack.OrmLite.Support;
 using ServiceStack.Text;

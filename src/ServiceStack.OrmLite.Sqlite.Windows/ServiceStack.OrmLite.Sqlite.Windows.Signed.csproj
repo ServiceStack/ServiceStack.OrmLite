@@ -61,6 +61,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\ServiceStack.OrmLite.Sqlite\Converters\SqliteDateTimeConverter.cs">
+      <Link>Converters\SqliteDateTimeConverter.cs</Link>
+    </Compile>
     <Compile Include="..\ServiceStack.OrmLite.Sqlite\SqliteExpression.cs">
       <Link>SqliteExpression.cs</Link>
     </Compile>

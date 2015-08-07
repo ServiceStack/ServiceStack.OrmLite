@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using ServiceStack.Data;
 using ServiceStack.OrmLite.Converters;
+using ServiceStack.OrmLite.SqlServer.Converters;
 
 namespace ServiceStack.OrmLite.SqlServer
 {

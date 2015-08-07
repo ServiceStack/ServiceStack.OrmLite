@@ -95,6 +95,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Converters\SqlServerDateTimeConverter.cs" />
     <Compile Include="SqlServerDialect.cs" />
     <Compile Include="SqlServerExpression.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

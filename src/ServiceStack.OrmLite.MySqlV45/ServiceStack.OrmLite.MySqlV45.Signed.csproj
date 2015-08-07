@@ -63,6 +63,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\ServiceStack.OrmLite.MySql\Converters\MySqlDateTimeConverter.cs">
+      <Link>Converters\MySqlDateTimeConverter.cs</Link>
+    </Compile>
     <Compile Include="..\ServiceStack.OrmLite.MySql\DataAnnotations\TextAttribute.cs">
       <Link>DataAnnotations\TextAttribute.cs</Link>
     </Compile>

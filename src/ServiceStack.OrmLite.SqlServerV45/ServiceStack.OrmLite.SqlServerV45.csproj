@@ -57,6 +57,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\ServiceStack.OrmLite.SqlServer\Converters\SqlServerDateTimeConverter.cs">
+      <Link>Converters\SqlServerDateTimeConverter.cs</Link>
+    </Compile>
     <Compile Include="..\ServiceStack.OrmLite.SqlServer\Properties\AssemblyInfo.cs">
       <Link>AssemblyInfo.cs</Link>
     </Compile>

@@ -5,6 +5,7 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using ServiceStack.OrmLite.Converters;
+using ServiceStack.OrmLite.Sqlite.Converters;
 
 namespace ServiceStack.OrmLite.Sqlite
 {

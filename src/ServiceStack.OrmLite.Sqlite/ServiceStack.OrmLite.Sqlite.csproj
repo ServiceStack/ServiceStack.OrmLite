@@ -103,6 +103,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Converters\SqliteDateTimeConverter.cs" />
     <Compile Include="SqliteDialect.cs" />
     <Compile Include="SqliteOrmLiteDialectProviderBase.cs" />
     <Compile Include="SqliteOrmLiteDialectProvider.cs" />

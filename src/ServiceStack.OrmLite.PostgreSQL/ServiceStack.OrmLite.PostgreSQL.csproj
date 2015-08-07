@@ -65,6 +65,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Converters\PostgreSqlDateTimeConverter.cs" />
+    <Compile Include="Converters\PostgreSqlDateTimeOffsetConverter.cs" />
     <Compile Include="PostgreSqlDialect.cs" />
     <Compile Include="PostgreSQLDialectProvider.cs" />
     <Compile Include="PostgreSqlNamingStrategy.cs" />
