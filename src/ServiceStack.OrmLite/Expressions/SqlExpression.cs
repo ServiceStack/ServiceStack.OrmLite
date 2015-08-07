@@ -751,7 +751,8 @@ namespace ServiceStack.OrmLite
             {
                 if (fieldDef.ShouldSkipUpdate()) continue;
                 if (fieldDef.IsRowVersion) continue;
-                if (updateFields.Count > 0 && !updateFields.Contains(fieldDef.Name)) continue; // added
+                if (updateFields.Count > 0 
+                    && !updateFields.Contains(fieldDef.Name)) continue; // added
 
                 var value = fieldDef.GetValue(item);
                 if (excludeDefaults
@@ -1376,7 +1377,8 @@ namespace ServiceStack.OrmLite
             var fieldExpr = quotedExp.ToString().StripTablePrefixes();
             var unquotedExpr = fieldExpr.StripQuotes();
 
-            var isTableField = modelDef.FieldDefinitionsArray.Any(x => x.FieldName == unquotedExpr);
+            var isTableField = modelDef.FieldDefinitionsArray
+                .Any(x => GetColumnName(x.FieldName) == unquotedExpr);
             if (isTableField)
                 return true;
 
@@ -1384,6 +1386,11 @@ namespace ServiceStack.OrmLite
                 .Any(x => x.FieldName == unquotedExpr));
 
             return isJoinedField;
+        }
+
+        protected string GetColumnName(string fieldName)
+        {
+            return DialectProvider.NamingStrategy.GetColumnName(fieldName);
         }
 
         protected object GetTrueExpression()

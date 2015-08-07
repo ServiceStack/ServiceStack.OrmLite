@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using NUnit.Framework;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -131,7 +132,12 @@ namespace ServiceStack.OrmLite.Tests
                 .Where(p => p.StartTime == null || p.StartTime < time);
 
             var result = db.LoadSelect(expression).First();
-            Assert.That(result.EndTime, Is.EqualTo(time).Within(TimeSpan.FromSeconds(1)));
+            var diff = time - result.EndTime;
+
+            //MySql doesn't support ms, SqlServer has +/- .03 precision
+            Assert.That(diff.Value, 
+                Is.LessThan(TimeSpan.FromSeconds(1)).Or
+                  .GreaterThanOrEqualTo(0));
         }
 
         [TestCase("2012-08-12")]

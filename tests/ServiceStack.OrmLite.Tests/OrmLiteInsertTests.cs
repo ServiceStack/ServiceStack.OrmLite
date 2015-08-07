@@ -188,18 +188,25 @@ namespace ServiceStack.OrmLite.Tests
             SuppressIfOracle("Need trigger for autoincrement keys to work in Oracle with caller supplied SQL");
 
             var date = new DateTime(2000, 1, 1);
-            var testObject = new UserAuth { UserName = "test", CreatedDate = date, ModifiedDate = date };
+            var testObject = new UserAuth
+            {
+                UserName = "test",
+                CreatedDate = date,
+                ModifiedDate = date,
+                InvalidLoginAttempts = 0,
+            };
 
             //verify that "normal" Insert works as expected
             using (var db = OpenDbConnection())
             {
-                db.CreateTable<UserAuth>(true);
+                db.DropAndCreateTable<UserAuth>();
 
-                db.ExecuteSql("INSERT INTO {0} ({1},{2},{3}) VALUES ({4},'2000-01-01','2000-01-01')"
+                db.ExecuteSql("INSERT INTO {0} ({1},{2},{3},{4}) VALUES ({5},'2000-01-01','2000-01-01',0)"
                     .Fmt("UserAuth".SqlTable(),
                          "UserName".SqlColumn(),
                          "CreatedDate".SqlColumn(),
                          "ModifiedDate".SqlColumn(),
+                         "InvalidLoginAttempts".SqlColumn(),
                          testObject.UserName.SqlValue()));
                 var normalLastInsertedId = db.LastInsertId();
                 Assert.Greater(normalLastInsertedId, 0, "normal Insert");

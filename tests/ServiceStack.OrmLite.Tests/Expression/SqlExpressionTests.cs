@@ -433,6 +433,9 @@ namespace ServiceStack.OrmLite.Tests.Expression
             //This version of MariaDB doesn't yet support 'LIMIT & IN/ALL/ANY/SOME subquery'
             if (Dialect == Dialect.MySql) return;
 
+            //Only one expression can be specified in the select list when the subquery is not introduced with EXISTS.
+            if (Dialect == Dialect.SqlServer) return;
+
             using (var db = OpenDbConnection())
             {
                 CustomerOrdersUseCase.DropTables(db); //Has conflicting 'Order' table

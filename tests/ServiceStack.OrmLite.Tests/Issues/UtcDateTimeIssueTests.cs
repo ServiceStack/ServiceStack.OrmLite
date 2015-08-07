@@ -64,11 +64,13 @@ namespace ServiceStack.OrmLite.Tests.Issues
                     ExpiryDate = DateTime.UtcNow.AddHours(1)
                 });
 
-                var result = db.SelectFmt<TestDate>("ExpiryDate > {0}", DateTime.UtcNow);
+                var result = db.SelectFmt<TestDate>("ExpiryDate".SqlColumn() + " > {0}",
+                    DateTime.UtcNow);
                 db.GetLastSql().Print();
                 Assert.That(result.Count, Is.EqualTo(1));
 
-                result = db.SelectFmt<TestDate>("ExpiryDate > {0}", new DateTime(1999,01,02));
+                result = db.SelectFmt<TestDate>("ExpiryDate".SqlColumn() + " > {0}",
+                    new DateTime(1999,01,02));
                 db.GetLastSql().Print();
                 Assert.That(result.Count, Is.EqualTo(2));
             }

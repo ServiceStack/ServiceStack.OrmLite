@@ -89,8 +89,10 @@ namespace ServiceStack.OrmLite.Tests.Issues
                 db.Insert(sale);
 
                 var q = db.From<Sale>()
-                    .CustomJoin("LEFT JOIN ContactIssue seller on (Sale.{0} = seller.Id)".Fmt("SellerId".SqlColumn()))
-                    .CustomJoin("LEFT JOIN ContactIssue buyer on (Sale.{0} = buyer.Id)".Fmt("BuyerId".SqlColumn()))
+                    .CustomJoin("LEFT JOIN {0} seller on (Sale.{1} = seller.Id)"
+                        .Fmt("ContactIssue".SqlTable(), "SellerId".SqlColumn()))
+                    .CustomJoin("LEFT JOIN {0} buyer on (Sale.{1} = buyer.Id)"
+                        .Fmt("ContactIssue".SqlTable(), "BuyerId".SqlColumn()))
                     .Select(@"Sale.*
                         , buyer.{0} AS BuyerFirstName
                         , buyer.{1} AS BuyerLastName

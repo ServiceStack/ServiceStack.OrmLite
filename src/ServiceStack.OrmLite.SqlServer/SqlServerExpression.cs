@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 
 namespace ServiceStack.OrmLite.SqlServer
@@ -15,20 +16,28 @@ namespace ServiceStack.OrmLite.SqlServer
             {
                 if (fieldDef.ShouldSkipUpdate()) continue;
                 if (fieldDef.IsRowVersion) continue;
-                if (UpdateFields.Count > 0 && !UpdateFields.Contains(fieldDef.Name) || fieldDef.AutoIncrement) continue; // added
+                if (UpdateFields.Count > 0 
+                    && !UpdateFields.Contains(fieldDef.Name) 
+                    || fieldDef.AutoIncrement) continue; // added
 
                 var value = fieldDef.GetValue(item);
-                if (excludeDefaults && (value == null || value.Equals(value.GetType().GetDefaultValue()))) continue; //GetDefaultValue?
+                if (excludeDefaults
+                    && (value == null || (!fieldDef.IsNullable && value.Equals(value.GetType().GetDefaultValue()))))
+                    continue;
 
-                fieldDef.GetQuotedValue(item);
+                fieldDef.GetQuotedValue(item, DialectProvider);
 
                 if (setFields.Length > 0) 
                     setFields.Append(", ");
 
-                setFields.AppendFormat("{0}={1}",
-                    base.DialectProvider.GetQuotedColumnName(fieldDef.FieldName),
-                    base.DialectProvider.GetQuotedValue(value, fieldDef.FieldType));
+                setFields
+                    .Append(DialectProvider.GetQuotedColumnName(fieldDef.FieldName))
+                    .Append("=")
+                    .Append(DialectProvider.GetQuotedValue(value, fieldDef.FieldType));
             }
+
+            if (setFields.Length == 0)
+                throw new ArgumentException("No non-null or non-default values were provided for type: " + typeof(T).Name);
 
             return string.Format("UPDATE {0} SET {1} {2}",
                 base.DialectProvider.GetQuotedTableName(ModelDef), setFields, WhereExpression);
