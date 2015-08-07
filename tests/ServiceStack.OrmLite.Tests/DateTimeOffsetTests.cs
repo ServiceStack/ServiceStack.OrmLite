@@ -131,7 +131,7 @@ namespace ServiceStack.OrmLite.Tests
             var expression = db.From<NullableDateTimeOffsetWithStartAndEndTime>()
                 .Where(p => p.StartTime == null || p.StartTime < time);
 
-            var result = db.LoadSelect(expression).First();
+            var result = db.LoadSelect(expression).FirstOrDefault();
             var diff = time - result.EndTime;
 
             //MySql doesn't support ms, SqlServer has +/- .03 precision
