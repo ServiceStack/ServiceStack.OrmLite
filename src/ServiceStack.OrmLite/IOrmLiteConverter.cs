@@ -30,7 +30,7 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// SQL Column Definiton used in CREATE Table
         /// </summary>
-        public string ColumnDefinition { get; }
+        public string ColumnDefinition { get; protected set; }
 
         /// <summary>
         /// Used in DB Params. Defaults to DbType.String
