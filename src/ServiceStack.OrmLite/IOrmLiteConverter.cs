@@ -28,9 +28,13 @@ namespace ServiceStack.OrmLite
         public IOrmLiteDialectProvider DialectProvider { get; set; }
 
         /// <summary>
-        /// SQL Column Definiton used in CREATE Table
+        /// SQL Column Definiton used in CREATE Table. 
+        /// return null to use default String Column definition
         /// </summary>
-        public string ColumnDefinition { get; protected set; }
+        public virtual string ColumnDefinition
+        {
+            get { return null; }
+        }
 
         /// <summary>
         /// Used in DB Params. Defaults to DbType.String
@@ -46,7 +50,7 @@ namespace ServiceStack.OrmLite
         public abstract string ToQuotedString(object value);
 
         /// <summary>
-        /// Used in Parameterized Value. Defaults to ToDbValue()
+        /// Used in Parameterized Value. Optional, Defaults to ToDbValue()
         /// </summary>
         public virtual object ToDbParamValue(FieldDefinition fieldDef, object value)
         {
@@ -54,7 +58,7 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
-        /// Value to Save in DB as
+        /// Value to Save in DB
         /// </summary>
         public abstract object ToDbValue(FieldDefinition fieldDef, object value);
 

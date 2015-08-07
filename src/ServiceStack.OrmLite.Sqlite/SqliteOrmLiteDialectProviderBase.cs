@@ -12,14 +12,13 @@ namespace ServiceStack.OrmLite.Sqlite
     {
         protected SqliteOrmLiteDialectProviderBase()
         {
-            base.DateTimeColumnDefinition = base.StringColumnDefinition;
             base.BoolColumnDefinition = base.IntColumnDefinition;
             base.GuidColumnDefinition = "CHAR(36)";
             base.SelectIdentitySql = "SELECT last_insert_rowid()";
 
-            base.RegisterConverter<DateTime>(new SqliteDateTimeConverter());
-
             base.InitColumnTypeMap();
+
+            base.RegisterConverter<DateTime>(new SqliteDateTimeConverter());
         }
 
         public override void OnAfterInitColumnTypeMap()
@@ -35,8 +34,6 @@ namespace ServiceStack.OrmLite.Sqlite
             base.UpdateStringColumnDefinitions();
 
             base.DateTimeColumnDefinition = base.StringColumnDefinition;
-            DbTypeMap.Set<DateTime>(DbType.DateTimeOffset, DateTimeColumnDefinition);
-            DbTypeMap.Set<DateTime?>(DbType.DateTimeOffset, DateTimeColumnDefinition);
             DbTypeMap.Set<DateTimeOffset>(DbType.DateTimeOffset, DateTimeColumnDefinition);
             DbTypeMap.Set<DateTimeOffset?>(DbType.DateTimeOffset, DateTimeColumnDefinition);
 

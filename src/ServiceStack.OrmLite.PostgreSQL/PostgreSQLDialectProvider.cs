@@ -23,7 +23,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
             base.IntColumnDefinition = "integer";
             base.BoolColumnDefinition = "boolean";
             base.TimeColumnDefinition = "time";
-            base.DateTimeColumnDefinition = "timestamp";
+            //base.DateTimeColumnDefinition = "timestamp";
             base.DateTimeOffsetColumnDefinition = "timestamp";
             base.DecimalColumnDefinition = "numeric(38,6)";
             base.GuidColumnDefinition = "uuid";
@@ -40,17 +40,16 @@ namespace ServiceStack.OrmLite.PostgreSQL
             this.NamingStrategy = new PostgreSqlNamingStrategy();
             this.StringSerializer = new JsonStringSerializer();
 
-            base.RegisterConverter<DateTime>(new PostgreSqlDateTimeConverter());
+            InitColumnTypeMap();
 
-            base.InitColumnTypeMap();
+            RegisterConverter<DateTime>(new PostgreSqlDateTimeConverter());
+            RegisterConverter<DateTimeOffset>(new PostgreSqlDateTimeOffsetConverter());
         }
 
         public override void OnAfterInitColumnTypeMap()
         {
             DbTypeMap.Set<TimeSpan>(DbType.Time, "interval");
             DbTypeMap.Set<TimeSpan?>(DbType.Time, "interval");
-            DbTypeMap.Set<DateTimeOffset>(DbType.DateTimeOffset, DateTimeOffsetColumnDefinition);
-            DbTypeMap.Set<DateTimeOffset?>(DbType.DateTimeOffset, DateTimeOffsetColumnDefinition);
 
             //throws unknown type exceptions in parameterized queries, e.g: p.DbType = DbType.SByte
             DbTypeMap.Set<sbyte>(DbType.Byte, IntColumnDefinition);
@@ -172,12 +171,6 @@ namespace ServiceStack.OrmLite.PostgreSQL
         {
             if (value == null) return "NULL";
 
-            if (fieldType == typeof(DateTimeOffset))
-            {
-                var dateValue = (DateTimeOffset)value;
-                const string iso8601Format = "yyyy-MM-dd HH:mm:ss.fff zzz";
-                return base.GetQuotedValue(dateValue.ToString(iso8601Format), typeof(string));
-            }
             if (fieldType == typeof(Guid))
             {
                 var guidValue = (Guid)value;

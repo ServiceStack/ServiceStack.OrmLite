@@ -8,6 +8,16 @@ namespace ServiceStack.OrmLite.Converters
 {
     public class SqliteDateTimeConverter : DateTimeConverter
     {
+        public override string ColumnDefinition
+        {
+            get { return "VARCHAR(8000)"; }
+        }
+
+        public override DbType DbType
+        {
+            get { return DbType.DateTime; }
+        }
+
         public override string ToQuotedString(object value)
         {
             var dateTime = (DateTime)value;
@@ -81,11 +91,27 @@ namespace ServiceStack.OrmLite.Converters
         }
     }
 
-    public class PostgreSqlDateTimeConverter : DateTimeConverter {}
+    public class PostgreSqlDateTimeConverter : DateTimeConverter
+    {
+        public override string ColumnDefinition
+        {
+            get { return "timestamp"; }
+        }
+    }
 
     public class DateTimeConverter : OrmLiteConverter
     {
         protected static ILog Log = LogManager.GetLogger(typeof(DateTimeConverter));
+
+        public override string ColumnDefinition
+        {
+            get { return "DATETIME"; }
+        }
+
+        public override DbType DbType
+        {
+            get { return DbType.DateTime; }
+        }
 
         public DateTimeKind DateStyle
         {
