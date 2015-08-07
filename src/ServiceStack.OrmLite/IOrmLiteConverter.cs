@@ -47,7 +47,10 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Quoted Value in SQL Statement
         /// </summary>
-        public abstract string ToQuotedString(object value);
+        public virtual string ToQuotedString(object value)
+        {
+            return DialectProvider.GetQuotedValue(value.ToString());
+        }
 
         /// <summary>
         /// Used in Parameterized Value. Optional, Defaults to ToDbValue()
@@ -60,11 +63,17 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Value to Save in DB
         /// </summary>
-        public abstract object ToDbValue(FieldDefinition fieldDef, object value);
+        public virtual object ToDbValue(FieldDefinition fieldDef, object value)
+        {
+            return value;
+        }
 
         /// <summary>
         /// Value from DB to Populate on POCO Data Model
         /// </summary>
-        public abstract object FromDbValue(FieldDefinition fieldDef, IDataReader reader, int columnIndex);
+        public virtual object FromDbValue(FieldDefinition fieldDef, IDataReader reader, int columnIndex)
+        {
+            return reader.GetValue(columnIndex);
+        }
     }
 }

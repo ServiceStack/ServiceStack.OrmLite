@@ -11,11 +11,6 @@ namespace ServiceStack.OrmLite.PostgreSQL.Converters
             get { return "timestamp with time zone"; }
         }
 
-        public override DbType DbType
-        {
-            get { return DbType.DateTimeOffset; }
-        }
-
         public override string ToQuotedString(object value)
         {
             var dateValue = (DateTimeOffset)value;

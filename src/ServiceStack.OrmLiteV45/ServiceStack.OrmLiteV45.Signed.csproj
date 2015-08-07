@@ -79,8 +79,14 @@
     <Compile Include="..\ServiceStack.OrmLite\Async\WriteExpressionCommandExtensionsAsync.cs">
       <Link>Async\WriteExpressionCommandExtensionsAsync.cs</Link>
     </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Converters\ByteArrayConverter.cs">
+      <Link>Converters\ByteArrayConverter.cs</Link>
+    </Compile>
     <Compile Include="..\ServiceStack.OrmLite\Converters\DateTimeConverter.cs">
       <Link>Converters\DateTimeConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Converters\DateTimeOffsetConverter.cs">
+      <Link>Converters\DateTimeOffsetConverter.cs</Link>
     </Compile>
     <Compile Include="..\ServiceStack.OrmLite\Dapper\SqlMapper.Async.cs">
       <Link>Dapper\SqlMapper.Async.cs</Link>

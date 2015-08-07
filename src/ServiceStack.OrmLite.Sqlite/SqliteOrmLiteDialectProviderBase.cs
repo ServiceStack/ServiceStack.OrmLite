@@ -4,7 +4,6 @@ using System.Data;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using ServiceStack.OrmLite.Converters;
 using ServiceStack.OrmLite.Sqlite.Converters;
 
 namespace ServiceStack.OrmLite.Sqlite
@@ -13,30 +12,20 @@ namespace ServiceStack.OrmLite.Sqlite
     {
         protected SqliteOrmLiteDialectProviderBase()
         {
-            base.BoolColumnDefinition = base.IntColumnDefinition;
-            base.GuidColumnDefinition = "CHAR(36)";
             base.SelectIdentitySql = "SELECT last_insert_rowid()";
 
             base.InitColumnTypeMap();
 
             base.RegisterConverter<DateTime>(new SqliteDateTimeConverter());
-        }
-
-        public override void OnAfterInitColumnTypeMap()
-        {
-            DbTypeMap.Set<Guid>(DbType.String, GuidColumnDefinition);
-            DbTypeMap.Set<Guid?>(DbType.String, GuidColumnDefinition);
-            DbTypeMap.Set<DateTimeOffset>(DbType.DateTimeOffset, DateTimeColumnDefinition);
-            DbTypeMap.Set<DateTimeOffset?>(DbType.DateTimeOffset, DateTimeColumnDefinition);
+            base.RegisterConverter<DateTimeOffset>(new SqliteDateTimeOffsetConverter());
+            base.RegisterConverter<Guid>(new SqliteGuidConverter());
+            base.RegisterConverter<bool>(new SqliteBoolConverter());
+            base.RegisterConverter<byte[]>(new SqliteByteArrayConverter());
         }
 
         public override void UpdateStringColumnDefinitions()
         {
             base.UpdateStringColumnDefinitions();
-
-            base.DateTimeColumnDefinition = base.StringColumnDefinition;
-            DbTypeMap.Set<DateTimeOffset>(DbType.DateTimeOffset, DateTimeColumnDefinition);
-            DbTypeMap.Set<DateTimeOffset?>(DbType.DateTimeOffset, DateTimeColumnDefinition);
 
             this.MaxStringColumnDefinition = string.Format(this.StringLengthColumnDefinitionFormat, "1000000"); //Default Max is really 1B
         }
@@ -156,77 +145,6 @@ namespace ServiceStack.OrmLite.Sqlite
         public override string GetQuotedTableName(string tableName, string schema = null)
         {
             return GetQuotedName(GetTableName(tableName, schema));
-        }
-
-        public override object ConvertDbValue(object value, Type type)
-        {
-            if (value == null || value is DBNull) return null;
-
-            if (type == typeof(bool) && !(value is bool))
-            {
-                var intVal = int.Parse(value.ToString());
-                return intVal != 0; 
-            }
-
-            return base.ConvertDbValue(value, type);
-        }
-
-        public override void SetDbValue(FieldDefinition fieldDef, IDataReader reader, int colIndex, object instance)
-        {
-            if (OrmLiteUtils.HandledDbNullValue(fieldDef, reader, colIndex, instance)) return;
-
-            var fieldType = Nullable.GetUnderlyingType(fieldDef.FieldType) ?? fieldDef.FieldType;
-            if (fieldType == typeof(Guid))
-            {
-                var guidStr = reader.GetString(colIndex);
-                var guidValue = new Guid(guidStr);
-
-                fieldDef.SetValueFn(instance, guidValue);
-            }
-            else
-            {
-                base.SetDbValue(fieldDef, reader, colIndex, instance);
-            }
-        }
-
-        public override string GetQuotedValue(object value, Type fieldType)
-        {
-            if (value == null) return "NULL";
-
-            if (fieldType == typeof(bool))
-            {
-                var boolValue = (bool)value;
-                return base.GetQuotedValue(boolValue ? 1 : 0, typeof(int));
-            }
-
-            // output datetimeoffset as a string formatted for roundtripping.
-            if (fieldType == typeof (DateTimeOffset))
-            {
-                var dateTimeOffsetValue = (DateTimeOffset) value;
-                return base.GetQuotedValue(dateTimeOffsetValue.ToString("o"), typeof (string));
-            }
-
-            if (fieldType == typeof(byte[]))
-            {
-                return "x'" + BitConverter.ToString((byte[])value).Replace("-", "") + "'";
-            }
-
-            return base.GetQuotedValue(value, fieldType);
-        }
-
-        protected override object GetValueOrDbNull<T>(FieldDefinition fieldDef, object obj)
-        {
-            var value = GetValue<T>(fieldDef, obj);
-            if (value != null)
-            {
-                if (fieldDef.FieldType == typeof(DateTimeOffset))
-                {
-                    var dateTimeOffsetValue = (DateTimeOffset)value;
-                    return dateTimeOffsetValue.ToString("o");
-                }
-            }
-
-            return value ?? DBNull.Value;
         }
 
         public override SqlExpression<T> SqlExpression<T>()
