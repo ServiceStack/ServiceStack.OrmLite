@@ -96,6 +96,9 @@
     <Compile Include="..\ServiceStack.OrmLite.SqlServer\Properties\AssemblyInfo.cs">
       <Link>AssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.SqlServer\SqlServer2012OrmLiteDialectProvider.cs">
+      <Link>SqlServer2012OrmLiteDialectProvider.cs</Link>
+    </Compile>
     <Compile Include="..\ServiceStack.OrmLite.SqlServer\SqlServerDialect.cs">
       <Link>SqlServerDialect.cs</Link>
     </Compile>
