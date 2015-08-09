@@ -98,6 +98,12 @@ namespace ServiceStack.OrmLite.Tests
             Init();
         }
 
+	    [TestFixtureTearDown]
+	    public void TestFixtureTearDown()
+	    {
+            OrmLiteContext.Instance.ClearItems();
+        }
+
         private OrmLiteConnectionFactory Init()
         {
 	        LogManager.LogFactory = new ConsoleLogFactory(debugEnabled: false);
