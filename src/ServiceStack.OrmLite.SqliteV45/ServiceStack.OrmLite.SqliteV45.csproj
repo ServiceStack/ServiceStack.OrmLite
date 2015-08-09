@@ -62,6 +62,9 @@
     <Compile Include="..\ServiceStack.OrmLite.Sqlite\Converters\SqliteGuidConverter.cs">
       <Link>Converters\SqliteGuidConverter.cs</Link>
     </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.Sqlite\Converters\SqliteStringConverters.cs">
+      <Link>Converters\SqliteStringConverters.cs</Link>
+    </Compile>
     <Compile Include="..\ServiceStack.OrmLite.Sqlite\Properties\AssemblyInfo.cs">
       <Link>AssemblyInfo.cs</Link>
     </Compile>

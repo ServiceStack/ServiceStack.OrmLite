@@ -7,8 +7,6 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using ServiceStack.Data;
-using ServiceStack.OrmLite.Converters;
 using ServiceStack.OrmLite.SqlServer.Converters;
 
 namespace ServiceStack.OrmLite.SqlServer
@@ -17,45 +15,33 @@ namespace ServiceStack.OrmLite.SqlServer
     {
         public static SqlServerOrmLiteDialectProvider Instance = new SqlServerOrmLiteDialectProvider();
 
-        private static readonly DateTime timeSpanOffset = new DateTime(1900, 01, 01);
-
         public SqlServerOrmLiteDialectProvider()
         {
             base.AutoIncrementDefinition = "IDENTITY(1,1)";
-            base.GuidColumnDefinition = "UniqueIdentifier";
-            base.RealColumnDefinition = "FLOAT";
-            base.BoolColumnDefinition = "BIT";
-            base.TimeColumnDefinition = "TIME"; //SQLSERVER 2008+
-            base.BlobColumnDefinition = "VARBINARY(MAX)";
             base.SelectIdentitySql = "SELECT SCOPE_IDENTITY()";
-            base.DecimalColumnDefinition = "DECIMAL(38,6)";
-            base.DefaultDecimalPrecision = 38;
-            base.DefaultDecimalScale = 6;
-
-            base.RegisterConverter<DateTime>(new SqlServerDateTimeConverter());
 
             base.InitColumnTypeMap();
-        }
 
-        public override void OnAfterInitColumnTypeMap()
-        {
-            base.OnAfterInitColumnTypeMap();
+            RowVersionConverter = new SqlServerRowVersionConverter();
 
-            DbTypeMap.Set<TimeSpan>(DbType.DateTime, TimeColumnDefinition);
-            DbTypeMap.Set<TimeSpan?>(DbType.DateTime, TimeColumnDefinition);
+            base.RegisterConverter<string>(new SqlServerStringConverter());
+            base.RegisterConverter<bool>(new SqlServerBoolConverter());
 
-            //throws unknown type exceptions in parameterized queries, e.g: p.DbType = DbType.SByte
-            DbTypeMap.Set<sbyte>(DbType.Byte, IntColumnDefinition);
-            DbTypeMap.Set<ushort>(DbType.Int16, IntColumnDefinition);
-            DbTypeMap.Set<uint>(DbType.Int32, IntColumnDefinition);
-            DbTypeMap.Set<ulong>(DbType.Int64, LongColumnDefinition);
-        }
+            base.RegisterConverter<sbyte>(new SqlServerSByteConverter());
+            base.RegisterConverter<ushort>(new SqlServerUInt16Converter());
+            base.RegisterConverter<uint>(new SqlServerUInt32Converter());
+            base.RegisterConverter<ulong>(new SqlServerUInt64Converter());
 
-        public override void UpdateStringColumnDefinitions()
-        {
-            base.UpdateStringColumnDefinitions();
+            base.RegisterConverter<float>(new SqlServerFloatConverter());
+            base.RegisterConverter<double>(new SqlServerDoubleConverter());
+            base.RegisterConverter<decimal>(new SqlServerDecimalConverter());
 
-            this.MaxStringColumnDefinition = string.Format(this.StringLengthColumnDefinitionFormat, "MAX");
+            base.RegisterConverter<DateTime>(new SqlServerDateTimeConverter());
+            base.RegisterConverter<TimeSpan>(new SqlServerTimeSpanConverter());
+
+            base.RegisterConverter<Guid>(new SqlServerGuidConverter());
+
+            base.RegisterConverter<byte[]>(new SqlServerByteArrayConverter());
         }
 
         public override string GetQuotedValue(string paramValue)
@@ -102,107 +88,23 @@ namespace ServiceStack.OrmLite.SqlServer
             return new SqlConnection(connectionString);
         }
 
-        public override void SetDbValue(FieldDefinition fieldDef, IDataReader reader, int colIndex, object instance)
-        {
-            if (fieldDef.IsRowVersion)
-            {
-                var bytes = reader.GetValue(colIndex) as byte[];
-                if (bytes != null)
-                {
-                    var ulongValue = OrmLiteUtils.ConvertToULong(bytes);
-                    try
-                    {
-                        fieldDef.SetValueFn(instance, ulongValue);
-                    }
-                    catch (NullReferenceException ignore) { }
-                }
-            }
-            else
-            {
-                base.SetDbValue(fieldDef, reader, colIndex, instance);
-            }
-        }
-
-        public override object ConvertDbValue(object value, Type type)
-        {
-            try
-            {
-                if (value == null || value is DBNull) return null;
-
-                if (type == typeof(bool) && !(value is bool))
-                {
-                    var intVal = Convert.ToInt32(value.ToString());
-                    return intVal != 0;
-                }
-
-                if (type == typeof(TimeSpan) && value is DateTime)
-                {
-                    var dateTimeValue = (DateTime)value;
-                    return dateTimeValue - timeSpanOffset;
-                }
-
-                if (type == typeof(byte[]))
-                    return value;
-
-                return base.ConvertDbValue(value, type);
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
-
-        public override string GetQuotedValue(object value, Type fieldType)
-        {
-            if (value == null) return "NULL";
-
-            if (fieldType == typeof(Guid))
-            {
-                var guidValue = (Guid)value;
-                return string.Format("CAST('{0}' AS UNIQUEIDENTIFIER)", guidValue);
-            }
-            if (fieldType == typeof(DateTimeOffset))
-            {
-                var dateValue = (DateTimeOffset)value;
-                const string iso8601Format = "yyyyMMdd HH:mm:ss.fff zzz";
-                return base.GetQuotedValue(dateValue.ToString(iso8601Format, CultureInfo.InvariantCulture), typeof(string));
-            }
-            if (fieldType == typeof(bool))
-            {
-                var boolValue = (bool)value;
-                return base.GetQuotedValue(boolValue ? 1 : 0, typeof(int));
-            }
-            if (fieldType == typeof(string))
-            {
-                return GetQuotedValue(value.ToString());
-            }
-
-            if (fieldType == typeof(byte[]))
-            {
-                return "0x" + BitConverter.ToString((byte[])value).Replace("-", "");
-            }
-
-            return base.GetQuotedValue(value, fieldType);
-        }
-
         protected override string GetUndefinedColumnDefinition(Type fieldType, int? fieldLength)
         {
-            return string.Format(StringLengthColumnDefinitionFormat, fieldLength.HasValue ? fieldLength.Value.ToString() : "MAX");
+            return string.Format(StringConverter.ColumnDefinition, fieldLength.HasValue ? fieldLength.Value.ToString() : "MAX");
         }
 
-        protected bool _useDateTime2;
+        [Obsolete("Use SqlServerDialect.Provider.RegisterConverter<DateTime>(new SqlServerDateTime2Converter());")]
         public void UseDatetime2(bool shouldUseDatetime2)
         {
-            _useDateTime2 = shouldUseDatetime2;
-            DateTimeColumnDefinition = shouldUseDatetime2 ? "datetime2" : "datetime";
-            base.DbTypeMap.Set<DateTime>(shouldUseDatetime2 ? DbType.DateTime2 : DbType.DateTime, DateTimeColumnDefinition);
-            base.DbTypeMap.Set<DateTime?>(shouldUseDatetime2 ? DbType.DateTime2 : DbType.DateTime, DateTimeColumnDefinition);
+            RegisterConverter<DateTime>(shouldUseDatetime2
+                ? new SqlServerDateTime2Converter()
+                : new SqlServerDateTimeConverter());
         }
 
-        [Obsolete("Use DialectProvider.UseUtc")]
+        [Obsolete("Use GetDateTimeConverter().DateStyle = DateTimeKind.Utc")]
         public void EnsureUtc(bool shouldEnsureUtc)
         {
-            DateStyle = DateTimeKind.Utc;
+            this.GetDateTimeConverter().DateStyle = DateTimeKind.Utc;
         }
 
         public override SqlExpression<T> SqlExpression<T>()
@@ -222,22 +124,6 @@ namespace ServiceStack.OrmLite.SqlServer
             var result = dbCmd.LongScalar();
 
             return result > 0;
-        }
-
-        public override bool UseUnicode
-        {
-            get
-            {
-                return useUnicode;
-            }
-            set
-            {
-                useUnicode = value;
-                if (useUnicode && this.DefaultStringLength > 4000)
-                {
-                    this.DefaultStringLength = 4000;
-                }
-            }
         }
 
         public override string GetForeignKeyOnDeleteClause(ForeignKeyConstraint foreignKey)

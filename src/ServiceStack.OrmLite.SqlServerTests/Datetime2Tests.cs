@@ -4,6 +4,7 @@ using System.Data.SqlTypes;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.SqlServer;
+using ServiceStack.OrmLite.SqlServer.Converters;
 
 namespace ServiceStack.OrmLite.SqlServerTests
 {
@@ -14,10 +15,11 @@ namespace ServiceStack.OrmLite.SqlServerTests
 		{
 			var dbFactory = new OrmLiteConnectionFactory(base.ConnectionString, SqlServerOrmLiteDialectProvider.Instance);
 
-			//change to datetime2 - check for higher range and precision
-			SqlServerOrmLiteDialectProvider.Instance.UseDatetime2(true);
+            //change to datetime2 - check for higher range and precision
+            //SqlServerOrmLiteDialectProvider.Instance.UseDatetime2(true);
+            SqlServerDialect.Provider.RegisterConverter<DateTime>(new SqlServerDateTime2Converter());
 
-			using(var conn = dbFactory.OpenDbConnection()) {
+            using (var conn = dbFactory.OpenDbConnection()) {
 				var test_object_ValidForDatetime2 = Table_for_datetime2_tests.get_test_object_ValidForDatetime2();
 				var test_object_ValidForNormalDatetime = Table_for_datetime2_tests.get_test_object_ValidForNormalDatetime();
 
@@ -46,10 +48,11 @@ namespace ServiceStack.OrmLite.SqlServerTests
 		{
 			var dbFactory = new OrmLiteConnectionFactory(base.ConnectionString, SqlServerOrmLiteDialectProvider.Instance);
 
-			//default behaviour: normal datetime can't hold DateTime values of year 1.
-			(SqlServerOrmLiteDialectProvider.Instance as SqlServerOrmLiteDialectProvider).UseDatetime2(false);
+            //default behaviour: normal datetime can't hold DateTime values of year 1.
+            //(SqlServerOrmLiteDialectProvider.Instance as SqlServerOrmLiteDialectProvider).UseDatetime2(false);
+            SqlServerDialect.Provider.RegisterConverter<DateTime>(new SqlServerDateTimeConverter());
 
-			using(var conn = dbFactory.OpenDbConnection()) {
+            using (var conn = dbFactory.OpenDbConnection()) {
 				var test_object_ValidForDatetime2 = Table_for_datetime2_tests.get_test_object_ValidForDatetime2();
 				var test_object_ValidForNormalDatetime = Table_for_datetime2_tests.get_test_object_ValidForNormalDatetime();
 

@@ -5,7 +5,7 @@ namespace ServiceStack.OrmLite.SqlServer.Converters
 {
     public class SqlServerDateTimeConverter : DateTimeConverter
     {
-        public override string ToQuotedString(object value)
+        public override string ToQuotedString(Type fieldType, object value)
         {
             return DateTimeFmt((DateTime)value, "yyyyMMdd HH:mm:ss.fff");
         }
