@@ -169,7 +169,7 @@ namespace ServiceStack.Common.Tests.Models
 			catch (Exception ex)
 			{
 				Log.Error("Trouble with DateTime precisions, trying Assert again with rounding to seconds", ex);
-				Assert.That(actual.DateTime.RoundToSecond(), Is.EqualTo(expected.DateTime.RoundToSecond()));
+				Assert.That(actual.DateTime, Is.EqualTo(expected.DateTime).Within(TimeSpan.FromSeconds(1)));
 			}
 			try
 			{
