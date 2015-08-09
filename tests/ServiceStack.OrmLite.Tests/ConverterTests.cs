@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -14,6 +15,7 @@ namespace ServiceStack.OrmLite.Tests
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<AllTypes>();
+                db.GetLastSql().Print();
 
                 var rows = 3.Times(i => AllTypes.Create(i));
 
@@ -43,7 +45,10 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(db.Single<AllTypes>(x => x.NullableDateTime == lastRow.NullableDateTime), Is.EqualTo(lastRow));
                 Assert.That(db.Single<AllTypes>(x => x.NullableTimeSpan == lastRow.NullableTimeSpan), Is.EqualTo(lastRow));
 
-                var updatedRows = 3.Times(i => {
+                Assert.That(db.Single<AllTypes>(q => q.Where(x => x.Bool == lastRow.Bool).OrderByDescending(x => x.Id)), Is.EqualTo(lastRow));
+
+                var updatedRows = 3.Times(i =>
+                {
                     var updated = AllTypes.Create(i + 3);
                     updated.Id = i;
                     db.Update(updated);
@@ -76,14 +81,20 @@ namespace ServiceStack.OrmLite.Tests
         public TimeSpan TimeSpan { get; set; }
         public DateTimeOffset DateTimeOffset { get; set; }
         public Guid Guid { get; set; }
+        public bool Bool { get; set; }
         public char Char { get; set; }
         public DateTime? NullableDateTime { get; set; }
         public TimeSpan? NullableTimeSpan { get; set; }
-        public List<string> StringList { get; set; }
+        public byte[] ByteArray { get; set; }
+        public char[] CharArray { get; set; }
+        public int[] IntArray { get; set; }
+        public long[] LongArray { get; set; }
         public string[] StringArray { get; set; }
+        public List<string> StringList { get; set; }
         public Dictionary<string, string> StringMap { get; set; }
         public Dictionary<int, string> IntStringMap { get; set; }
         public SubType SubType { get; set; }
+        public List<SubType> SubTypes { get; set; }
 
         protected bool Equals(AllTypes other)
         {
@@ -104,14 +115,20 @@ namespace ServiceStack.OrmLite.Tests
                 TimeSpan.Equals(other.TimeSpan) &&
                 DateTimeOffset.Equals(other.DateTimeOffset) &&
                 Guid.Equals(other.Guid) &&
+                Bool == other.Bool &&
                 Char == other.Char &&
                 NullableDateTime.Equals(other.NullableDateTime) &&
                 NullableTimeSpan.Equals(other.NullableTimeSpan) &&
-                StringList.SequenceEqual(other.StringList) &&
+                ByteArray.SequenceEqual(other.ByteArray) &&
+                CharArray.SequenceEqual(other.CharArray) &&
+                IntArray.SequenceEqual(other.IntArray) &&
+                LongArray.SequenceEqual(other.LongArray) &&
                 StringArray.SequenceEqual(other.StringArray) &&
+                StringList.SequenceEqual(other.StringList) &&
                 StringMap.SequenceEqual(other.StringMap) &&
                 IntStringMap.SequenceEqual(other.IntStringMap) &&
-                SubType.Equals(other.SubType);
+                SubType.Equals(other.SubType) &&
+                SubTypes.SequenceEqual(other.SubTypes);
         }
 
         public override bool Equals(object obj)
@@ -143,14 +160,20 @@ namespace ServiceStack.OrmLite.Tests
                 hashCode = (hashCode * 397) ^ TimeSpan.GetHashCode();
                 hashCode = (hashCode * 397) ^ DateTimeOffset.GetHashCode();
                 hashCode = (hashCode * 397) ^ Guid.GetHashCode();
+                hashCode = (hashCode * 397) ^ Bool.GetHashCode();
                 hashCode = (hashCode * 397) ^ Char.GetHashCode();
                 hashCode = (hashCode * 397) ^ NullableDateTime.GetHashCode();
                 hashCode = (hashCode * 397) ^ NullableTimeSpan.GetHashCode();
-                hashCode = (hashCode * 397) ^ (StringList != null ? StringList.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (ByteArray != null ? ByteArray.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (CharArray != null ? CharArray.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ (StringArray != null ? StringArray.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (IntArray != null ? IntArray.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (LongArray != null ? LongArray.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (StringList != null ? StringList.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ (StringMap != null ? StringMap.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ (IntStringMap != null ? IntStringMap.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ (SubType != null ? SubType.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (SubTypes != null ? SubTypes.GetHashCode() : 0);
                 return hashCode;
             }
         }
@@ -176,21 +199,38 @@ namespace ServiceStack.OrmLite.Tests
                 TimeSpan = new TimeSpan(i, i, i, i, i),
                 DateTimeOffset = new DateTimeOffset(new DateTime(2000 + i, (i + 1) % 12, (i + 1) % 28)),
                 Guid = Guid.NewGuid(),
-                Char = (char)i,
+                Bool = i % 2 == 0,
+                Char = (char)(i + 1), //TODO: NPGSQL fails on \0
                 NullableDateTime = new DateTime(2000 + i, (i + 1) % 12, (i + 1) % 28),
                 NullableTimeSpan = new TimeSpan(i, i, i, i, i),
-                StringList = new List<string> { i.ToString() },
+                ByteArray = new[] { (byte)i, (byte)(i + 1) },
+                CharArray = new[] { (char)('A' + i), (char)('A' + i + 1) }, //TODO: NPGSQL fails on \u0001
+                IntArray = new[] { i, i + 1 },
+                LongArray = new[] { (long)i, i + 1 },
                 StringArray = new[] { i.ToString() },
+                StringList = new List<string> { i.ToString() },
                 StringMap = new Dictionary<string, string> { { "Key" + i, "Value" + i } },
                 IntStringMap = new Dictionary<int, string> { { i, "Value" + i } },
                 SubType = new SubType
                 {
                     Id = i,
                     Name = "Name" + i,
+                },
+                SubTypes = new List<SubType>
+                {
+                    new SubType
+                    {
+                        Id = i,
+                        Name = "Name" + i,
+                    },
+                    new SubType
+                    {
+                        Id = i + 1,
+                        Name = "Name" + i + 1,
+                    },
                 }
             };
         }
-
     }
 
     public class SubType

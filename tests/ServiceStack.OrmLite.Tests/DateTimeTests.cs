@@ -44,8 +44,8 @@ namespace ServiceStack.OrmLite.Tests
             using (var db = OpenDbConnection())
             {
                 var dialectProvider = db.GetDialectProvider();
-                var hold = dialectProvider.DateStyle;
-                dialectProvider.DateStyle = DateTimeKind.Local;
+                var hold = dialectProvider.GetDateTimeConverter().DateStyle;
+                dialectProvider.GetDateTimeConverter().DateStyle = DateTimeKind.Local;
 
                 db.DropAndCreateTable<DateTimeObject>();
 
@@ -83,7 +83,7 @@ namespace ServiceStack.OrmLite.Tests
                 db.GetLastSql().Print();
                 Assert.IsNotNull(x);
 
-                dialectProvider.DateStyle = hold;
+                dialectProvider.GetDateTimeConverter().DateStyle = hold;
             }
         }
 
@@ -93,8 +93,8 @@ namespace ServiceStack.OrmLite.Tests
             using (var db = OpenDbConnection())
             {
                 var dialectProvider = db.GetDialectProvider();
-                var hold = dialectProvider.DateStyle;
-                dialectProvider.DateStyle = DateTimeKind.Utc;
+                var hold = dialectProvider.GetDateTimeConverter().DateStyle;
+                dialectProvider.GetDateTimeConverter().DateStyle = DateTimeKind.Utc;
 
                 db.DropAndCreateTable<DateTimeObject>();
 
@@ -131,7 +131,7 @@ namespace ServiceStack.OrmLite.Tests
                 x = db.Select<DateTimeObject>(d => d.Test == dateTime).FirstOrDefault();
                 Assert.IsNotNull(x);
 
-                dialectProvider.DateStyle = hold;
+                dialectProvider.GetDateTimeConverter().DateStyle = hold;
             }
         }
 

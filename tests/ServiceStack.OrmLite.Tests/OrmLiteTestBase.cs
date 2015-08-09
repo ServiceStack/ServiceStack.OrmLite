@@ -20,6 +20,7 @@ namespace ServiceStack.OrmLite.Tests
         public static string OracleDb = "Data Source=localhost:1521/ormlite;User ID=test;Password=test";
         public static string MySqlDb = "Server=localhost;Database=test;UID=root;Password=test";
         public static string PostgreSqlDb = "Server=localhost;Port=5432;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200";
+        public static string FirebirdDb = "User=SYSDBA;Password=masterkey;Database=ormlite-tests.fdb;DataSource=localhost;Dialect=3;charset=ISO8859_1;";
 
         public static IOrmLiteDialectProvider DefaultProvider = SqlServerDialect.Provider;
         public static string DefaultConnection = SqlServerBuildDb;
@@ -80,7 +81,7 @@ namespace ServiceStack.OrmLite.Tests
 				ConnectionString = GetFileConnectionString();
 		}
 
-        public Dialect Dialect = Dialect.Sqlite;
+        public Dialect Dialect = Dialect.Firebird;
 	    protected OrmLiteConnectionFactory DbFactory;
 
         OrmLiteConnectionFactory Init(string connStr, IOrmLiteDialectProvider dialectProvider)
@@ -116,6 +117,8 @@ namespace ServiceStack.OrmLite.Tests
                     return Init(Config.SqlServerDb, SqlServerDialect.Provider);
                 case Dialect.Oracle:
                     return Init(Config.OracleDb, OracleDialect.Provider);
+                case Dialect.Firebird:
+                    return Init(Config.FirebirdDb, FirebirdDialect.Provider);
                 case Dialect.VistaDb:
                     VistaDbDialect.Provider.UseLibraryFromGac = true;
                     var connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["myVDBConnection"];

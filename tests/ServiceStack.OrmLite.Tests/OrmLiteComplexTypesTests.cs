@@ -3,6 +3,7 @@ using System.Linq;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
 using ServiceStack.DataAnnotations;
+using ServiceStack.Logging;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
@@ -65,6 +66,7 @@ namespace ServiceStack.OrmLite.Tests
 	    [Test]
 	    public void Lists_Of_Guids_Are_Formatted_Correctly()
 	    {
+            LogManager.LogFactory = new ConsoleLogFactory();
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<WithAListOfGuids>();

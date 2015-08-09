@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
+using ServiceStack.OrmLite.Converters;
 using ServiceStack.OrmLite.Tests.Shared;
 using ServiceStack.Text;
 
@@ -157,13 +158,13 @@ namespace ServiceStack.OrmLite.Tests
                 var insertRowA = db.SingleById<AuditTableA>(idA);
                 Assert.That(insertRowA.CreatedDate, Is.EqualTo(insertDate));
 
-                var hold = OrmLiteConfig.DialectProvider.DefaultStringLength;
-                OrmLiteConfig.DialectProvider.DefaultStringLength = 255;
+                var hold = OrmLiteConfig.DialectProvider.GetStringConverter().UseUnicode;
+                OrmLiteConfig.DialectProvider.GetStringConverter().UseUnicode = true;
 
                 db.DropAndCreateTable<AuditTableA>();
                 db.GetLastSql().Print();
 
-                OrmLiteConfig.DialectProvider.DefaultStringLength = hold;
+                OrmLiteConfig.DialectProvider.GetStringConverter().UseUnicode = hold;
 
                 db.DropAndCreateTable<AuditTableA>();
                 var after = db.GetLastSql();
@@ -179,20 +180,22 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_create_ModelWithIdAndName_table_with_specified_DefaultStringLength()
         {
-            var hold = OrmLiteConfig.DialectProvider.DefaultStringLength;
-            OrmLiteConfig.DialectProvider.DefaultStringLength = 255;
+            var converter = OrmLiteConfig.DialectProvider.GetStringConverter();
+            var hold = converter.StringLength;
+            converter.StringLength = 255;
             var createTableSql = OrmLiteConfig.DialectProvider.ToCreateTableStatement(typeof(ModelWithIdAndName));
 
             Console.WriteLine("createTableSql: " + createTableSql);
             if (Dialect != Dialect.PostgreSql)
             {
-                Assert.That(createTableSql, Is.StringContaining("VARCHAR(255)").Or.StringContaining("VARCHAR2(255)"));
+                Assert.That(createTableSql, Is.StringContaining("VARCHAR(255)").
+                                            Or.StringContaining("VARCHAR2(255)"));
             }
             else
             {
-                Assert.That(createTableSql, Is.StringContaining("text"));
+                Assert.That(createTableSql, Is.StringContaining("TEXT"));
             }
-            OrmLiteConfig.DialectProvider.DefaultStringLength = hold;
+            converter.StringLength = hold;
         }
 
         public class ModelWithGuid

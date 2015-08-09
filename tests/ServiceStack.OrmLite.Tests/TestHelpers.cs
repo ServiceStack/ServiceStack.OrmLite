@@ -8,6 +8,7 @@ namespace ServiceStack.OrmLite.Tests
         MySql,
         SqlServerMdf,
         Oracle,
+        Firebird,
         VistaDb,
     }
 

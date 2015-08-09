@@ -172,11 +172,11 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		{
             using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
 			{
-				var dsl= OrmLiteConfig.DialectProvider.DefaultStringLength;
-				OrmLiteConfig.DialectProvider.DefaultStringLength=1024;
+				var hold = OrmLiteConfig.DialectProvider.GetStringConverter().StringLength;
+				OrmLiteConfig.DialectProvider.GetStringConverter().StringLength = 1024;
 				
 				db.CreateTable<OrderBlob>(true);
-				OrmLiteConfig.DialectProvider.DefaultStringLength=dsl;
+				OrmLiteConfig.DialectProvider.GetStringConverter().StringLength = hold;
 
 				var row = OrderBlob.Create(1);
 
