@@ -10,7 +10,7 @@ namespace ServiceStack.OrmLite.Sqlite.Converters
             get { return "INTEGER"; }
         }
 
-        public override string ToQuotedString(object value)
+        public override string ToQuotedString(Type fieldType, object value)
         {
             var boolValue = (bool)value;
             return base.DialectProvider.GetQuotedValue(boolValue ? 1 : 0, typeof(int));
@@ -21,9 +21,8 @@ namespace ServiceStack.OrmLite.Sqlite.Converters
             return (bool)value ? 1 : 0;
         }
 
-        public override object FromDbValue(FieldDefinition fieldDef, IDataReader reader, int columnIndex)
+        public override object FromDbValue(FieldDefinition fieldDef, object value)
         {
-            var value = reader.GetValue(columnIndex);
             var intVal = int.Parse(value.ToString());
             return intVal != 0;
         }

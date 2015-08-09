@@ -16,6 +16,7 @@ namespace ServiceStack.OrmLite.Sqlite
 
             base.InitColumnTypeMap();
 
+            base.RegisterConverter<string>(new SqliteStringConverter());
             base.RegisterConverter<DateTime>(new SqliteDateTimeConverter());
             base.RegisterConverter<DateTimeOffset>(new SqliteDateTimeOffsetConverter());
             base.RegisterConverter<Guid>(new SqliteGuidConverter());
@@ -23,12 +24,12 @@ namespace ServiceStack.OrmLite.Sqlite
             base.RegisterConverter<byte[]>(new SqliteByteArrayConverter());
         }
 
-        public override void UpdateStringColumnDefinitions()
-        {
-            base.UpdateStringColumnDefinitions();
+        //public override void UpdateStringColumnDefinitions()
+        //{
+        //    base.UpdateStringColumnDefinitions();
 
-            this.MaxStringColumnDefinition = string.Format(this.StringLengthColumnDefinitionFormat, "1000000"); //Default Max is really 1B
-        }
+        //    this.MaxStringColumnDefinition = string.Format(this.StringLengthColumnDefinitionFormat, "1000000"); //Default Max is really 1B
+        //}
 
         public static string Password { get; set; }
         public static bool UTF8Encoded { get; set; }

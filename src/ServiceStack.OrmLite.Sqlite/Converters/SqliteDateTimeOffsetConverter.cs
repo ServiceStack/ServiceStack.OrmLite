@@ -11,7 +11,7 @@ namespace ServiceStack.OrmLite.Sqlite.Converters
             get { return "VARCHAR(8000)"; }
         }
 
-        public override string ToQuotedString(object value)
+        public override string ToQuotedString(Type fieldType, object value)
         {
             var dateTimeOffsetValue = (DateTimeOffset)value;
             return base.DialectProvider.GetQuotedValue(dateTimeOffsetValue.ToString("o"), typeof(string));

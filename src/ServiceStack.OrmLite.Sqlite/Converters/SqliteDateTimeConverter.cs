@@ -18,7 +18,7 @@ namespace ServiceStack.OrmLite.Sqlite.Converters
             get { return DbType.DateTime; }
         }
 
-        public override string ToQuotedString(object value)
+        public override string ToQuotedString(Type fieldType, object value)
         {
             var dateTime = (DateTime)value;
             if (DateStyle == DateTimeKind.Unspecified)
@@ -50,23 +50,27 @@ namespace ServiceStack.OrmLite.Sqlite.Converters
             return DialectProvider.GetQuotedValue(dateStr, typeof(string));
         }
 
-        public override object FromDbValue(FieldDefinition fieldDef, IDataReader reader, int columnIndex)
+        public override object FromDbValue(FieldDefinition fieldDef, object value)
         {
-            DateTime dateTime;
+            var dateTime = (DateTime)value;
+
+            if (DateStyle == DateTimeKind.Unspecified)
+                dateTime = DateTime.SpecifyKind(dateTime, DateTimeKind.Local);
+            return base.FromDbValue(dateTime);
+        }
+
+        public override object GetValue(IDataReader reader, int columnIndex)
+        {
             try
             {
-                dateTime = reader.GetDateTime(columnIndex);
+                return reader.GetDateTime(columnIndex);
             }
             catch (Exception ex)
             {
                 var dateStr = reader.GetString(columnIndex);
                 Log.Warn("Error reading string as DateTime in Sqlite: " + dateStr, ex);
-                dateTime = DateTime.Parse(dateStr);
+                return DateTime.Parse(dateStr);
             }
-
-            if (DateStyle == DateTimeKind.Unspecified)
-                dateTime = DateTime.SpecifyKind(dateTime, DateTimeKind.Local);
-            return base.FromDbValue(dateTime);
         }
     }
 }

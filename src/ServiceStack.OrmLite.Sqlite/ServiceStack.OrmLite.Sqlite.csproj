@@ -108,6 +108,7 @@
     <Compile Include="Converters\SqliteDateTimeConverter.cs" />
     <Compile Include="Converters\SqliteDateTimeOffsetConverter.cs" />
     <Compile Include="Converters\SqliteGuidConverter.cs" />
+    <Compile Include="Converters\SqliteStringConverters.cs" />
     <Compile Include="SqliteDialect.cs" />
     <Compile Include="SqliteOrmLiteDialectProviderBase.cs" />
     <Compile Include="SqliteOrmLiteDialectProvider.cs" />
