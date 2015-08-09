@@ -54,6 +54,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Converters\FirebirdBoolConverter.cs" />
+    <Compile Include="Converters\FirebirdDateTimeConverter.cs" />
+    <Compile Include="Converters\FirebirdFloatConverters.cs" />
+    <Compile Include="Converters\FirebirdGuidConverter.cs" />
+    <Compile Include="Converters\FirebirdStringConverters.cs" />
     <Compile Include="DbSchema\IColumn.cs" />
     <Compile Include="DbSchema\IParameter.cs" />
     <Compile Include="DbSchema\IProcedure.cs" />

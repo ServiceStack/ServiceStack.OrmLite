@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Reflection;
-using ServiceStack.Text;
 using System.Text;
 using FirebirdSql.Data.FirebirdClient;
+using ServiceStack.OrmLite.Firebird.Converters;
 
 namespace ServiceStack.OrmLite.Firebird
 {
@@ -18,31 +18,30 @@ namespace ServiceStack.OrmLite.Firebird
         public static FirebirdOrmLiteDialectProvider Instance = new FirebirdOrmLiteDialectProvider();
 
         internal long LastInsertId { get; set; }
-        protected bool CompactGuid;
 
-        internal const string DefaultGuidDefinition = "VARCHAR(37)";
-        internal const string CompactGuidDefinition = "CHAR(16) CHARACTER SET OCTETS";
-
-        public FirebirdOrmLiteDialectProvider()
-            : this(false)
-        {
-        }
+        public FirebirdOrmLiteDialectProvider() : this(false) {}
 
         public FirebirdOrmLiteDialectProvider(bool compactGuid)
         {
-            CompactGuid = compactGuid;
-            base.BoolColumnDefinition = base.IntColumnDefinition;
-            base.GuidColumnDefinition = CompactGuid ? CompactGuidDefinition : DefaultGuidDefinition;
             base.AutoIncrementDefinition = string.Empty;
-            base.DateTimeColumnDefinition = "TIMESTAMP";
-            base.TimeColumnDefinition = "TIME";
-            base.RealColumnDefinition = "FLOAT";
-            base.DefaultStringLength = 128;
-            base.MaxStringColumnDefinition = "VARCHAR(32767)";
-            base.InitColumnTypeMap();
             DefaultValueFormat = " DEFAULT '{0}'";
-
             NamingStrategy = new UpperCaseNamingStrategy();
+
+            base.InitColumnTypeMap();
+
+            if (compactGuid)
+                base.RegisterConverter<Guid>(new FirebirdCompactGuidConverter());
+            else
+                base.RegisterConverter<Guid>(new FirebirdGuidConverter());
+
+            base.RegisterConverter<DateTime>(new FirebirdDateTimeConverter());
+
+            base.RegisterConverter<string>(new FirebirdStringConverter());
+            base.RegisterConverter<bool>(new FirebirdBoolConverter());
+
+            base.RegisterConverter<float>(new FirebirdFloatConverter());
+            base.RegisterConverter<double>(new FirebirdDoubleConverter());
+            base.RegisterConverter<decimal>(new FirebirdDecimalConverter());
         }
 
         public override IDbConnection CreateConnection(string connectionString, Dictionary<string, string> options)
@@ -61,83 +60,6 @@ namespace ServiceStack.OrmLite.Firebird
         public override long GetLastInsertId(IDbCommand dbCmd)
         {
             return LastInsertId;
-        }
-
-        public override object ConvertDbValue(object value, Type type)
-        {
-            if (value == null || value is DBNull) return null;
-
-            if (type == typeof(bool))
-            {
-                var intVal = int.Parse(value.ToString());
-                return intVal != 0;
-            }
-
-            if (type == typeof(System.Double))
-                return double.Parse(value.ToString());
-
-            if (type == typeof(Guid) && BitConverter.IsLittleEndian) // TODO: check big endian
-            {
-                if (CompactGuid)
-                {
-                    byte[] raw = ((Guid)value).ToByteArray();
-                    return new Guid(System.Net.IPAddress.NetworkToHostOrder(BitConverter.ToInt32(raw, 0)),
-                        System.Net.IPAddress.NetworkToHostOrder(BitConverter.ToInt16(raw, 4)),
-                        System.Net.IPAddress.NetworkToHostOrder(BitConverter.ToInt16(raw, 6)),
-                        raw[8], raw[9], raw[10], raw[11], raw[12], raw[13], raw[14], raw[15]);
-                }
-                return new Guid(value.ToString());
-            }
-
-            if (type == typeof(byte[]) && value.GetType() == typeof(byte[]))
-                return value;
-
-            try
-            {
-                return base.ConvertDbValue(value, type);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public override string GetQuotedValue(object value, Type fieldType)
-        {
-
-            if (value == null) return "NULL";
-
-            if (fieldType == typeof(Guid))
-            {
-                if (CompactGuid)
-                    return "X'" + ((Guid)value).ToString("N") + "'";
-                else
-                    return string.Format("CAST('{0}' AS {1})", (Guid)value, DefaultGuidDefinition);  // TODO : check this !!!
-            }
-            if (fieldType == typeof(DateTime) || fieldType == typeof(DateTime?))
-            {
-                var dateValue = (DateTime)value;
-                string iso8601Format = dateValue.ToString("yyyy-MM-dd HH:mm:ss.fff").EndsWith("00:00:00.000") ?
-                        "yyyy-MM-dd"
-                        : "yyyy-MM-dd HH:mm:ss.fff";
-                return base.GetQuotedValue(dateValue.ToString(iso8601Format), typeof(string));
-            }
-            if (fieldType == typeof(bool?) || fieldType == typeof(bool))
-            {
-                var boolValue = (bool)value;
-                return base.GetQuotedValue(boolValue ? "1" : "0", typeof(string));
-            }
-
-            if (fieldType == typeof(decimal?) || fieldType == typeof(decimal) ||
-                fieldType == typeof(double?) || fieldType == typeof(double) ||
-                fieldType == typeof(float?) || fieldType == typeof(float))
-            {
-                var s = base.GetQuotedValue(value, fieldType);
-                if (s.Length > 20) s = s.Substring(0, 20);
-                return "'" + s + "'"; // when quoted exception is more clear!
-            }
-
-            return base.GetQuotedValue(value, fieldType);
         }
 
         public override string ToSelectStatement(Type tableType, string sqlFilter, params object[] filterParams)
@@ -237,7 +159,6 @@ namespace ServiceStack.OrmLite.Firebird
 
             return sql;
         }
-
 
         public override string ToUpdateRowStatement(object objWithProperties, ICollection<string> updateFields = null)
         {
@@ -394,27 +315,8 @@ namespace ServiceStack.OrmLite.Firebird
             bool isPrimaryKey, bool autoIncrement, bool isNullable, bool isRowVersion,
             int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
         {
-            string fieldDefinition;
-
-            if (customFieldDefinition != null)
-            {
-                fieldDefinition = customFieldDefinition;
-            }
-            else if (fieldType == typeof(string))
-            {
-                fieldDefinition = string.Format(StringLengthColumnDefinitionFormat,
-                                                fieldLength.GetValueOrDefault(DefaultStringLength));
-            }
-            else if (fieldType == typeof(Decimal))
-            {
-                fieldDefinition = string.Format("{0} ({1},{2})", DecimalColumnDefinition,
-                    fieldLength.GetValueOrDefault(DefaultDecimalPrecision),
-                    scale.GetValueOrDefault(DefaultDecimalScale));
-            }
-            else
-            {
-                fieldDefinition = GetColumnTypeDefinition(fieldType);
-            }
+            var fieldDefinition = customFieldDefinition 
+                ?? GetColumnTypeDefinition(fieldType, fieldLength);
 
             var sql = new StringBuilder();
             sql.AppendFormat("{0} {1}", GetQuotedColumnName(fieldName), fieldDefinition);

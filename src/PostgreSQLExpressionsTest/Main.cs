@@ -38,7 +38,7 @@ namespace PostgreSQLExpressionsTest
 		{
 			Console.WriteLine ("Hello World!");
 			
-			OrmLiteConfig.DialectProvider = PostgreSQLDialectProvider.Instance;
+			OrmLiteConfig.DialectProvider = PostgreSqlDialectProvider.Instance;
 			SqlExpression<Author> ev = OrmLiteConfig.DialectProvider.SqlExpression<Author>();
 									
 			using (IDbConnection db =
