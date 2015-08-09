@@ -46,7 +46,7 @@ namespace ServiceStack.OrmLite.SqlServer
 
         public override string GetQuotedValue(string paramValue)
         {
-            return (UseUnicode ? "N'" : "'") + paramValue.Replace("'", "''") + "'";
+            return (StringConverter.UseUnicode ? "N'" : "'") + paramValue.Replace("'", "''") + "'";
         }
 
         public override IDbConnection CreateConnection(string connectionString, Dictionary<string, string> options)

@@ -63,7 +63,7 @@ namespace ServiceStack.OrmLite.VistaDB
 
         public override string GetQuotedValue(string paramValue)
         {
-            return (this.UseUnicode ? "N'" : "'") + paramValue.Replace("'", "''") + "'";
+            return (this.StringConverter.UseUnicode ? "N'" : "'") + paramValue.Replace("'", "''") + "'";
         }
 
         public override void SetParameterValues<T>(IDbCommand dbCmd, object obj)

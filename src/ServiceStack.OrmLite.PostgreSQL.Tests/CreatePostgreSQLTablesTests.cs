@@ -1,6 +1,7 @@
 ﻿using System;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
+using ServiceStack.OrmLite.Converters;
 using ServiceStack.OrmLite.Tests;
 
 namespace ServiceStack.OrmLite.PostgreSQL.Tests
@@ -31,13 +32,14 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
             _reCreateTheTable();
 
             //all of these pass now:
-            OrmLiteConfig.DialectProvider.UseUnicode = true;
+            var stringConverter = OrmLiteConfig.DialectProvider.GetStringConverter();
+            stringConverter.UseUnicode = true;
             _reCreateTheTable();
 
-            OrmLiteConfig.DialectProvider.UseUnicode = false;
+            stringConverter.UseUnicode = false;
             _reCreateTheTable();
 
-            OrmLiteConfig.DialectProvider.GetStringConverter().StringLength = 98765;
+            stringConverter.StringLength = 98765;
 
             _reCreateTheTable();
         }
