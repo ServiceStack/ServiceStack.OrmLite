@@ -303,7 +303,7 @@ namespace ServiceStack.OrmLite
 
         public virtual object ConvertDbValue(object value, Type type)
         {
-            if (value == null)
+            if (value == null || value is DBNull)
                 return null;
 
             if (value.GetType() == type)
