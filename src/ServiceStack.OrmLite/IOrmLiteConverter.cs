@@ -13,7 +13,7 @@ namespace ServiceStack.OrmLite
 
         string ToQuotedString(Type fieldType, object value);
 
-        object ToDbParamValue(Type fieldType, object value);
+        object ToDbValue(Type fieldType, object value);
 
         object ToDbValue(FieldDefinition fieldDef, object value);
 
@@ -51,19 +51,19 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
-        /// Used in Parameterized Value. Optional, Defaults to ToDbValue()
+        /// Parameterized value to Save in DB
         /// </summary>
-        public virtual object ToDbParamValue(Type fieldType, object value)
+        public virtual object ToDbValue(Type fieldType, object value)
         {
             return value;
         }
 
         /// <summary>
-        /// Value to Save in DB
+        /// Parameterized Value with FieldDefinition. Optional, Defaults to ToDbValue(Type,object)
         /// </summary>
         public virtual object ToDbValue(FieldDefinition fieldDef, object value)
         {
-            return value;
+            return ToDbValue(fieldDef.FieldType, value);
         }
 
         /// <summary>

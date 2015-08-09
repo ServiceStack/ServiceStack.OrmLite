@@ -25,7 +25,7 @@ namespace ServiceStack.OrmLite.Converters
             return enumString;
         }
 
-        public override object ToDbValue(FieldDefinition fieldDef, object value)
+        public override object ToDbValue(Type fieldType, object value)
         {
             var enumValue = DialectProvider.StringSerializer.SerializeToString(value);
             if (enumValue == null)
@@ -67,10 +67,10 @@ namespace ServiceStack.OrmLite.Converters
             return DialectProvider.GetQuotedValue(DialectProvider.StringSerializer.SerializeToString(value));
         }
 
-        public override object ToDbValue(FieldDefinition fieldDef, object value)
+        public override object ToDbValue(Type fieldType, object value)
         {
             //Let ADO.NET providers handle byte[]
-            if (fieldDef.FieldType == typeof(byte[]))
+            if (fieldType == typeof(byte[]))
                 return value;
 
             return DialectProvider.StringSerializer.SerializeToString(value);
@@ -90,9 +90,9 @@ namespace ServiceStack.OrmLite.Converters
             return DialectProvider.GetQuotedValue(DialectProvider.StringSerializer.SerializeToString(value));
         }
 
-        public override object ToDbValue(FieldDefinition fieldDef, object value)
+        public override object ToDbValue(Type fieldType, object value)
         {
-            return DialectProvider.ConvertDbValue(value, fieldDef.FieldType);
+            return DialectProvider.ConvertDbValue(value, fieldType);
         }
 
         public override object FromDbValue(FieldDefinition fieldDef, object value)

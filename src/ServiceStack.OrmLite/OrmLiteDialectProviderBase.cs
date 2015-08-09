@@ -313,7 +313,7 @@ namespace ServiceStack.OrmLite
             try
             {
                 if (Converters.TryGetValue(type, out converter))
-                    return converter.ToDbParamValue(type, value);
+                    return converter.ToDbValue(type, value);
             }
             catch (Exception ex)
             {

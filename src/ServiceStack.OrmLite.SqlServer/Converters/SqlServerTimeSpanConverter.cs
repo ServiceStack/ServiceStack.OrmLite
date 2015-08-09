@@ -18,14 +18,14 @@ namespace ServiceStack.OrmLite.SqlServer.Converters
             get { return DbType.DateTime; }
         }
 
-        public override object ToDbValue(FieldDefinition fieldDef, object value)
+        public override object ToDbValue(Type fieldType, object value)
         {
             if (value is DateTime)
             {
                 var dateTimeValue = (DateTime)value;
                 return dateTimeValue - timeSpanOffset;
             }
-            return base.ToDbValue(fieldDef, value);
+            return base.ToDbValue(fieldType, value);
         }
     }
 }

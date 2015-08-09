@@ -22,7 +22,7 @@ namespace ServiceStack.OrmLite.Oracle.Converters
                 : enumValue;
         }
 
-        public override object ToDbParamValue(Type fieldType, object value)
+        public override object ToDbValue(Type fieldType, object value)
         {
             if (value is int && !fieldType.IsEnumFlags())
             {

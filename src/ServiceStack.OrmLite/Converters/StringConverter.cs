@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
 
 namespace ServiceStack.OrmLite.Converters
 {
@@ -73,7 +74,7 @@ namespace ServiceStack.OrmLite.Converters
         public CharArrayConverter() {}
         public CharArrayConverter(int stringLength) : base(stringLength) {}
 
-        public override object ToDbValue(FieldDefinition fieldDef, object value)
+        public override object ToDbValue(Type fieldType, object value)
         {
             var chars = (char[]) value;
             return new string(chars);

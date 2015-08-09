@@ -39,7 +39,7 @@ namespace ServiceStack.OrmLite.Converters
             return DialectProvider.GetQuotedValue(dateTime.ToString(dateTimeFormat, CultureInfo.InvariantCulture), typeof(string));
         }
 
-        public override object ToDbValue(FieldDefinition fieldDef, object value)
+        public override object ToDbValue(Type fieldType, object value)
         {
             var dateTime = (DateTime)value;
             if (DateStyle == DateTimeKind.Utc && dateTime.Kind == DateTimeKind.Local)

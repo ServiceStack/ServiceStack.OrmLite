@@ -16,7 +16,7 @@ namespace ServiceStack.OrmLite.Sqlite.Converters
             return base.DialectProvider.GetQuotedValue(boolValue ? 1 : 0, typeof(int));
         }
 
-        public override object ToDbValue(FieldDefinition fieldDef, object value)
+        public override object ToDbValue(Type fieldType, object value)
         {
             return (bool)value ? 1 : 0;
         }

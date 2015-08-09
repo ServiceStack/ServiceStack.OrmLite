@@ -22,7 +22,7 @@ namespace ServiceStack.OrmLite.Oracle.Converters
             return string.Format("CAST('{0}' AS {1})", guid, ColumnDefinition);
         }
 
-        public override object ToDbParamValue(Type fieldType, object value)
+        public override object ToDbValue(Type fieldType, object value)
         {
             return ((Guid)value).ToString();
         }
@@ -57,7 +57,7 @@ namespace ServiceStack.OrmLite.Oracle.Converters
             return string.Format("CAST('{0}' AS {1})", BitConverter.ToString(guid.ToByteArray()).Replace("-", ""), ColumnDefinition);
         }
 
-        public override object ToDbParamValue(Type fieldType, object value)
+        public override object ToDbValue(Type fieldType, object value)
         {
             return ((Guid)value).ToByteArray();
         }

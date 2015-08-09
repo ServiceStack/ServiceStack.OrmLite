@@ -16,7 +16,7 @@ namespace ServiceStack.OrmLite.Converters
             get { return DbType.Single; }
         }
 
-        public override object ToDbParamValue(Type fieldType, object value)
+        public override object ToDbValue(Type fieldType, object value)
         {
             return this.ConvertNumber(fieldType, value);
         }

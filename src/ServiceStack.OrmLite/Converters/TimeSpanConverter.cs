@@ -21,7 +21,7 @@ namespace ServiceStack.OrmLite.Converters
             return ((TimeSpan)value).Ticks.ToString(CultureInfo.InvariantCulture);
         }
 
-        public override object ToDbValue(FieldDefinition fieldDef, object value)
+        public override object ToDbValue(Type fieldType, object value)
         {
             var timespan = (TimeSpan)value;
             return timespan.Ticks;

@@ -17,7 +17,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Converters
             return base.DialectProvider.GetQuotedValue(dateValue.ToString(iso8601Format), typeof (string));
         }
 
-        public override object ToDbValue(FieldDefinition fieldDef, object value)
+        public override object ToDbValue(Type fieldType, object value)
         {
             return value;
         }

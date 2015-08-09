@@ -17,7 +17,7 @@ namespace ServiceStack.OrmLite.Sqlite.Converters
             return base.DialectProvider.GetQuotedValue(dateTimeOffsetValue.ToString("o"), typeof(string));
         }
 
-        public override object ToDbValue(FieldDefinition fieldDef, object value)
+        public override object ToDbValue(Type fieldType, object value)
         {
             var dateTimeOffsetValue = (DateTimeOffset)value;
             return dateTimeOffsetValue.ToString("o");

@@ -5,7 +5,7 @@ namespace ServiceStack.OrmLite.Oracle.Converters
 {
     public class OracleByteArrayConverter : ByteArrayConverter
     {
-        public override object ToDbParamValue(Type fieldType, object value)
+        public override object ToDbValue(Type fieldType, object value)
         {
             return "hextoraw('" + BitConverter.ToString((byte[])value).Replace("-", "") + "')";
         }

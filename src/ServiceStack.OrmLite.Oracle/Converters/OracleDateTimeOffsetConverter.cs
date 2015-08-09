@@ -28,12 +28,7 @@ namespace ServiceStack.OrmLite.Oracle.Converters
             return OracleDialect.GetQuotedDateTimeOffsetValue((DateTimeOffset)value);
         }
 
-        public override object ToDbParamValue(Type fieldType, object value)
-        {
-            return OracleDialect.GetQuotedDateTimeOffsetValue((DateTimeOffset)value);
-        }
-
-        public override object ToDbValue(FieldDefinition fieldDef, object value)
+        public override object ToDbValue(Type fieldType, object value)
         {
             var timestamp = (DateTimeOffset)value;
             return _timestampConverter.ConvertToOracleTimeStampTz(timestamp);
