@@ -14,7 +14,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
                 var fd = tableDef.FieldDefinitions.FirstOrDefault(x => x.Name == memberName);
                 if (fd != null && fd.IsRowVersion && !PrefixFieldWithTableName)
                 {
-                    return PostgreSQLDialectProvider.RowVersionFieldComparer;
+                    return PostgreSqlDialectProvider.RowVersionFieldComparer;
                 }
 
                 return base.GetQuotedColumnName(tableDef, memberName);

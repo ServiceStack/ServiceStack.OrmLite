@@ -11,55 +11,65 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.PostgreSQL
 {
-    public class PostgreSQLDialectProvider : OrmLiteDialectProviderBase<PostgreSQLDialectProvider>
+    [Obsolete("Use PostgreSqlDialectProvider")]
+    public class PostgreSQLDialectProvider : PostgreSqlDialectProvider { }
+
+    public class PostgreSqlDialectProvider : OrmLiteDialectProviderBase<PostgreSqlDialectProvider>
     {
-        public static PostgreSQLDialectProvider Instance = new PostgreSQLDialectProvider();
-        const string textColumnDefinition = "text";
+        public static PostgreSqlDialectProvider Instance = new PostgreSqlDialectProvider();
+        //const string textColumnDefinition = "text";
 
         public bool UseReturningForLastInsertId { get; set; }
 
-        public PostgreSQLDialectProvider()
+        public PostgreSqlDialectProvider()
         {
             base.AutoIncrementDefinition = "";
-            base.IntColumnDefinition = "integer";
-            base.BoolColumnDefinition = "boolean";
-            base.TimeColumnDefinition = "time";
-            //base.DateTimeColumnDefinition = "timestamp";
-            base.DateTimeOffsetColumnDefinition = "timestamp";
-            base.DecimalColumnDefinition = "numeric(38,6)";
-            base.GuidColumnDefinition = "uuid";
+            //base.IntColumnDefinition = "integer";
+            //base.BoolColumnDefinition = "boolean";
+            //base.DateTimeOffsetColumnDefinition = "timestamp";
+            //base.GuidColumnDefinition = "uuid";
             base.ParamString = ":";
-            base.BlobColumnDefinition = "bytea";
-            base.RealColumnDefinition = "double precision";
-            base.StringLengthColumnDefinitionFormat = textColumnDefinition;
+            //base.BlobColumnDefinition = "bytea";
+            //base.RealColumnDefinition = "double precision";
+            //base.StringLengthColumnDefinitionFormat = textColumnDefinition;
             //there is no "n"varchar in postgres. All strings are either unicode or non-unicode, inherited from the database.
-            base.StringLengthUnicodeColumnDefinitionFormat = "character varying({0})";
-            base.StringLengthNonUnicodeColumnDefinitionFormat = "character varying({0})";
-            base.MaxStringColumnDefinition = "TEXT";
+            //base.StringLengthUnicodeColumnDefinitionFormat = "character varying({0})";
+            //base.StringLengthNonUnicodeColumnDefinitionFormat = "character varying({0})";
+            //base.MaxStringColumnDefinition = "TEXT";
             base.SelectIdentitySql = "SELECT LASTVAL()";
             this.UseReturningForLastInsertId = true;
             this.NamingStrategy = new PostgreSqlNamingStrategy();
             this.StringSerializer = new JsonStringSerializer();
 
-            InitColumnTypeMap();
+            base.InitColumnTypeMap();
 
+            RegisterConverter<string>(new PostgreSqlStringConverter());
+            RegisterConverter<char>(new PostgreSqlCharConverter());
+            RegisterConverter<char[]>(new PostgreSqlCharArrayConverter());
+
+            RegisterConverter<bool>(new PostgreSqlBoolConverter());
+            RegisterConverter<Guid>(new PostgreSqlGuidConverter());
+
+            RegisterConverter<TimeSpan>(new PostgreSqlTimeSpanConverter());
             RegisterConverter<DateTime>(new PostgreSqlDateTimeConverter());
             RegisterConverter<DateTimeOffset>(new PostgreSqlDateTimeOffsetConverter());
-            RegisterConverter<char>(new PostgreSqlCharConverter());
-        }
 
-        public override void OnAfterInitColumnTypeMap()
-        {
-            DbTypeMap.Set<TimeSpan>(DbType.Time, "interval");
-            DbTypeMap.Set<TimeSpan?>(DbType.Time, "interval");
 
-            //throws unknown type exceptions in parameterized queries, e.g: p.DbType = DbType.SByte
-            DbTypeMap.Set<sbyte>(DbType.Byte, IntColumnDefinition);
-            DbTypeMap.Set<ushort>(DbType.Int16, IntColumnDefinition);
-            DbTypeMap.Set<uint>(DbType.Int32, IntColumnDefinition);
-            DbTypeMap.Set<ulong>(DbType.Int64, LongColumnDefinition);
+            RegisterConverter<sbyte>(new PostrgreSqlSByteConverter());
+            RegisterConverter<ushort>(new PostrgreSqlUInt16Converter());
+            RegisterConverter<uint>(new PostrgreSqlUInt32Converter());
+            RegisterConverter<ulong>(new PostrgreSqlUInt64Converter());
 
-            base.OnAfterInitColumnTypeMap();
+            RegisterConverter<float>(new PostrgreSqlFloatConverter());
+            RegisterConverter<double>(new PostrgreSqlDoubleConverter());
+            RegisterConverter<decimal>(new PostrgreSqlDecimalConverter());
+
+            RegisterConverter<byte[]>(new PostrgreSqlByteArrayConverter());
+
+            //TODO provide support for pgsql native datastructures:
+            //RegisterConverter<string[]>(new PostgreSqlStringArrayConverter());
+            //RegisterConverter<int[]>(new PostgreSqlIntArrayConverter());
+            //RegisterConverter<long[]>(new PostgreSqlLongArrayConverter());
         }
 
         public override string GetColumnDefinition(
@@ -85,10 +95,10 @@ namespace ServiceStack.OrmLite.PostgreSQL
             else if (fieldType == typeof(string))
             {
                 fieldDefinition = fieldLength == int.MaxValue
-                    ? MaxStringColumnDefinition
+                    ? StringConverter.MaxColumnDefinition
                     : fieldLength != null ?
-                        string.Format(StringLengthColumnDefinitionFormat, fieldLength) :
-                        textColumnDefinition;
+                        string.Format(StringConverter.ColumnDefinition, fieldLength) :
+                        StringConverter.ColumnDefinition;
             }
             else
             {
@@ -101,7 +111,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
                 }
                 else
                 {
-                    fieldDefinition = GetColumnTypeDefinition(fieldType);
+                    fieldDefinition = GetColumnTypeDefinition(fieldType, fieldLength);
                 }
             }
 
@@ -167,47 +177,6 @@ namespace ServiceStack.OrmLite.PostgreSQL
         public override IDbConnection CreateConnection(string connectionString, Dictionary<string, string> options)
         {
             return new NpgsqlConnection(connectionString);
-        }
-
-        public override string GetQuotedValue(object value, Type fieldType)
-        {
-            if (value == null) return "NULL";
-
-            if (fieldType == typeof(Guid))
-            {
-                var guidValue = (Guid)value;
-                return base.GetQuotedValue(guidValue.ToString("N"), typeof(string));
-            }
-            if (fieldType == typeof(byte[]))
-            {
-                return "E'" + ToBinary(value) + "'";
-            }
-            if (fieldType.IsArray && typeof(string).IsAssignableFrom(fieldType.GetElementType()))
-            {
-                var stringArray = (string[])value;
-                return ToArray(stringArray);
-            }
-            if (fieldType.IsArray && typeof(int).IsAssignableFrom(fieldType.GetElementType()))
-            {
-                var integerArray = (int[])value;
-                return ToArray(integerArray);
-            }
-            if (fieldType.IsArray && typeof(long).IsAssignableFrom(fieldType.GetElementType()))
-            {
-                var longArray = (long[])value;
-                return ToArray(longArray);
-            }
-
-            return base.GetQuotedValue(value, fieldType);
-        }
-
-        public override object ConvertDbValue(object value, Type type)
-        {
-            if (value == null || value is DBNull) return null;
-
-            if (type == typeof(byte[])) { return value; }
-
-            return base.ConvertDbValue(value, type);
         }
 
         public override SqlExpression<T> SqlExpression<T>()
@@ -276,39 +245,6 @@ namespace ServiceStack.OrmLite.PostgreSQL
             }
             string escapedSchema = modelDef.Schema.Replace(".", "\".\"");
             return string.Format("\"{0}\".\"{1}\"", escapedSchema, base.NamingStrategy.GetTableName(modelDef.ModelName));
-        }
-
-        /// <summary>
-        /// based on Npgsql2's source: Npgsql2\src\NpgsqlTypes\NpgsqlTypeConverters.cs
-        /// </summary>
-        /// <param name="TypeInfo"></param>
-        /// <param name="NativeData"></param>
-        /// <param name="ForExtendedQuery"></param>
-        /// <returns></returns>
-        internal static String ToBinary(Object NativeData)
-        {
-            var byteArray = (Byte[])NativeData;
-            var res = new StringBuilder(byteArray.Length * 5);
-            foreach (byte b in byteArray)
-                if (b >= 0x20 && b < 0x7F && b != 0x27 && b != 0x5C)
-                    res.Append((char)b);
-                else
-                    res.Append("\\\\")
-                        .Append((char)('0' + (7 & (b >> 6))))
-                        .Append((char)('0' + (7 & (b >> 3))))
-                        .Append((char)('0' + (7 & b)));
-            return res.ToString();
-        }
-
-        internal string ToArray<T>(T[] source)
-        {
-            var values = new StringBuilder();
-            foreach (var value in source)
-            {
-                if (values.Length > 0) values.Append(",");
-                values.Append(base.GetQuotedValue(value, typeof(T)));
-            }
-            return "ARRAY[" + values + "]";
         }
 
         public override long InsertAndGetLastInsertId<T>(IDbCommand dbCmd)

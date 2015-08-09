@@ -37,7 +37,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
             OrmLiteConfig.DialectProvider.UseUnicode = false;
             _reCreateTheTable();
 
-            OrmLiteConfig.DialectProvider.DefaultStringLength = 98765;
+            OrmLiteConfig.DialectProvider.GetStringConverter().StringLength = 98765;
 
             _reCreateTheTable();
         }

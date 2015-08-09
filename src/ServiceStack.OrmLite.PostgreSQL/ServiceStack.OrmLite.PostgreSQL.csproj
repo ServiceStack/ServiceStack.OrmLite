@@ -65,11 +65,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Converters\PostgreSqlCharConverter.cs" />
+    <Compile Include="Converters\PostgreSqlArrayConverters.cs" />
+    <Compile Include="Converters\PostgreSqlBoolConverter.cs" />
     <Compile Include="Converters\PostgreSqlDateTimeConverter.cs" />
     <Compile Include="Converters\PostgreSqlDateTimeOffsetConverter.cs" />
+    <Compile Include="Converters\PostgreSqlDecimalConverter.cs" />
+    <Compile Include="Converters\PostgreSqlGuidConverter.cs" />
+    <Compile Include="Converters\PostgreSqlIntegerConverters.cs" />
+    <Compile Include="Converters\PostgreSqlStringConverters.cs" />
+    <Compile Include="Converters\PostgreSqlTimeSpanConverter.cs" />
+    <Compile Include="Converters\PostrgreSqlFloatConverters.cs" />
     <Compile Include="PostgreSqlDialect.cs" />
-    <Compile Include="PostgreSQLDialectProvider.cs" />
+    <Compile Include="PostgreSqlDialectProvider.cs" />
     <Compile Include="PostgreSqlNamingStrategy.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PostgreSqlExpression.cs" />

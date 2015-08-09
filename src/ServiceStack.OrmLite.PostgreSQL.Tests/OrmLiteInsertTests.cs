@@ -129,7 +129,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_retrieve_LastInsertId_from_inserted_table_with_LastVal()
         {
-            PostgreSQL.PostgreSQLDialectProvider.Instance.UseReturningForLastInsertId = false;
+            PostgreSQL.PostgreSqlDialectProvider.Instance.UseReturningForLastInsertId = false;
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<ModelWithIdAndName>();
@@ -149,7 +149,7 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(insertedRow1.Name, Is.EqualTo(row1.Name));
                 Assert.That(insertedRow2.Name, Is.EqualTo(row2.Name));
             }
-            PostgreSQL.PostgreSQLDialectProvider.Instance.UseReturningForLastInsertId = true;
+            PostgreSQL.PostgreSqlDialectProvider.Instance.UseReturningForLastInsertId = true;
         }
 
         [Test]
