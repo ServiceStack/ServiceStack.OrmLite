@@ -7,6 +7,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using ServiceStack.OrmLite.Oracle.Converters;
 
 namespace ServiceStack.OrmLite.Oracle
 {
@@ -51,10 +52,10 @@ namespace ServiceStack.OrmLite.Oracle
             get { return _instance ?? (_instance = new OracleOrmLiteDialectProvider()); }
         }
 
-        protected bool CompactGuid;
+        //protected bool CompactGuid;
 
-        internal const string StringGuidDefinition = "VARCHAR2(37)";
-        internal const string CompactGuidDefinition = "RAW(16)";
+        //internal const string StringGuidDefinition = "VARCHAR2(37)";
+        //internal const string CompactGuidDefinition = "RAW(16)";
 
         private readonly DbProviderFactory _factory;
         private readonly OracleTimestampConverter _timestampConverter;
@@ -67,23 +68,22 @@ namespace ServiceStack.OrmLite.Oracle
         public OracleOrmLiteDialectProvider(bool compactGuid, bool quoteNames, string clientProvider = OdpProvider)
         {
             ClientProvider = clientProvider;
-            CompactGuid = compactGuid;
+            //CompactGuid = compactGuid;
             QuoteNames = quoteNames;
-            BoolColumnDefinition = "NUMBER(1)";
-            GuidColumnDefinition = CompactGuid ? CompactGuidDefinition : StringGuidDefinition;
-            LongColumnDefinition = "NUMERIC(18)";
+            //BoolColumnDefinition = "NUMBER(1)";
+            //GuidColumnDefinition = CompactGuid ? CompactGuidDefinition : StringGuidDefinition;
+            //LongColumnDefinition = "NUMERIC(18)";
             AutoIncrementDefinition = string.Empty;
-            DateTimeColumnDefinition = "TIMESTAMP";
-            DateTimeOffsetColumnDefinition = "TIMESTAMP WITH TIME ZONE";
-            TimeColumnDefinition = LongColumnDefinition;
-            RealColumnDefinition = "FLOAT";
+            //DateTimeColumnDefinition = "TIMESTAMP";
+            //DateTimeOffsetColumnDefinition = "TIMESTAMP WITH TIME ZONE";
+            //TimeColumnDefinition = LongColumnDefinition;
+            //RealColumnDefinition = "FLOAT";
             // Order-dependency here: must set following values before setting DefaultStringLength
-            StringLengthNonUnicodeColumnDefinitionFormat = "VARCHAR2({0})";
-            StringLengthUnicodeColumnDefinitionFormat = "NVARCHAR2({0})";
-            MaxStringColumnDefinition = StringLengthNonUnicodeColumnDefinitionFormat.Fmt(MaxStringColumnLength);
-            DefaultStringLength = 128;
+            //StringLengthNonUnicodeColumnDefinitionFormat = "VARCHAR2({0})";
+            //StringLengthUnicodeColumnDefinitionFormat = "NVARCHAR2({0})";
+            //MaxStringColumnDefinition = StringLengthNonUnicodeColumnDefinitionFormat.Fmt(MaxStringColumnLength);
+            //DefaultStringLength = 128;
 
-            InitColumnTypeMap();
             ParamString = ":";
 
             NamingStrategy = new OracleNamingStrategy(MaxNameLength);
@@ -91,38 +91,64 @@ namespace ServiceStack.OrmLite.Oracle
 
             _factory = DbProviderFactories.GetFactory(ClientProvider);
             _timestampConverter = new OracleTimestampConverter(_factory.GetType());
-        }
 
-        public override void OnAfterInitColumnTypeMap()
-        {
-            base.OnAfterInitColumnTypeMap();
+            InitColumnTypeMap();
 
-            DbTypeMap.Set<bool>(DbType.Int16, BoolColumnDefinition);
-            DbTypeMap.Set<bool?>(DbType.Int16, BoolColumnDefinition);
+            //Special Converters if you need to override default behavior
+            base.EnumConverter = new OracleEnumConverter();
 
-            DbTypeMap.Set<sbyte>(DbType.Int16, IntColumnDefinition);
-            DbTypeMap.Set<sbyte?>(DbType.Int16, IntColumnDefinition);
-            DbTypeMap.Set<ushort>(DbType.Int32, IntColumnDefinition);
-            DbTypeMap.Set<ushort?>(DbType.Int32, IntColumnDefinition);
-            DbTypeMap.Set<uint>(DbType.Int64, LongColumnDefinition);
-            DbTypeMap.Set<uint?>(DbType.Int64, LongColumnDefinition);
-            DbTypeMap.Set<ulong>(DbType.Int64, LongColumnDefinition);
-            DbTypeMap.Set<ulong?>(DbType.Int64, LongColumnDefinition);
-
-            if (CompactGuid)
-            {
-                DbTypeMap.Set<Guid>(DbType.Binary, GuidColumnDefinition);
-                DbTypeMap.Set<Guid?>(DbType.Binary, GuidColumnDefinition);
-            }
+            if (compactGuid)
+                RegisterConverter<Guid>(new OracleCompactGuidConverter());
             else
-            {
-                DbTypeMap.Set<Guid>(DbType.String, GuidColumnDefinition);
-                DbTypeMap.Set<Guid?>(DbType.String, GuidColumnDefinition);
-            }
+                RegisterConverter<Guid>(new OracleGuidConverter());
 
-            DbTypeMap.Set<DateTimeOffset>(DbType.String, DateTimeOffsetColumnDefinition);
-            DbTypeMap.Set<DateTimeOffset?>(DbType.String, DateTimeOffsetColumnDefinition);
+            RegisterConverter<TimeSpan>(new OracleTimeSpanConverter());
+            RegisterConverter<string>(new OracleStringConverter());
+
+            RegisterConverter<long>(new OracleInt64Converter());
+            RegisterConverter<sbyte>(new OracleSByteConverter());
+            RegisterConverter<ushort>(new OracleUInt16Converter());
+            RegisterConverter<uint>(new OracleUInt32Converter());
+            RegisterConverter<ulong>(new OracleUInt64Converter());
+
+            RegisterConverter<float>(new OracleFloatConverter());
+            RegisterConverter<double>(new OracleDoubleConverter());
+            RegisterConverter<decimal>(new OracleDecimalConverter());
+
+            RegisterConverter<DateTime>(new OracleDateTimeConverter());
+            RegisterConverter<DateTimeOffset>(new OracleDateTimeOffsetConverter(_timestampConverter));
         }
+
+        //public override void OnAfterInitColumnTypeMap()
+        //{
+        //    base.OnAfterInitColumnTypeMap();
+
+        //    DbTypeMap.Set<bool>(DbType.Int16, BoolColumnDefinition);
+        //    DbTypeMap.Set<bool?>(DbType.Int16, BoolColumnDefinition);
+
+        //    DbTypeMap.Set<sbyte>(DbType.Int16, IntColumnDefinition);
+        //    DbTypeMap.Set<sbyte?>(DbType.Int16, IntColumnDefinition);
+        //    DbTypeMap.Set<ushort>(DbType.Int32, IntColumnDefinition);
+        //    DbTypeMap.Set<ushort?>(DbType.Int32, IntColumnDefinition);
+        //    DbTypeMap.Set<uint>(DbType.Int64, LongColumnDefinition);
+        //    DbTypeMap.Set<uint?>(DbType.Int64, LongColumnDefinition);
+        //    DbTypeMap.Set<ulong>(DbType.Int64, LongColumnDefinition);
+        //    DbTypeMap.Set<ulong?>(DbType.Int64, LongColumnDefinition);
+
+        //    if (CompactGuid)
+        //    {
+        //        DbTypeMap.Set<Guid>(DbType.Binary, GuidColumnDefinition);
+        //        DbTypeMap.Set<Guid?>(DbType.Binary, GuidColumnDefinition);
+        //    }
+        //    else
+        //    {
+        //        DbTypeMap.Set<Guid>(DbType.String, GuidColumnDefinition);
+        //        DbTypeMap.Set<Guid?>(DbType.String, GuidColumnDefinition);
+        //    }
+
+        //    DbTypeMap.Set<DateTimeOffset>(DbType.String, DateTimeOffsetColumnDefinition);
+        //    DbTypeMap.Set<DateTimeOffset?>(DbType.String, DateTimeOffsetColumnDefinition);
+        //}
 
         protected string ClientProvider = OdpProvider;
         public static string RowVersionTriggerFormat = "{0}RowVersionUpdateTrigger";
@@ -180,195 +206,202 @@ namespace ServiceStack.OrmLite.Oracle
             return Convert.ToInt64(identityParameter.Value);
         }
 
-        public override void SetDbValue(FieldDefinition fieldDef, IDataReader reader, int colIndex, object instance)
-        {
-            if (OrmLiteUtils.HandledDbNullValue(fieldDef, reader, colIndex, instance)) return;
+        //Moved to converters.FromDbValue()
+        //public override void SetDbValue(FieldDefinition fieldDef, IDataReader reader, int colIndex, object instance)
+        //{
+        //    if (OrmLiteUtils.HandledDbNullValue(fieldDef, reader, colIndex, instance)) return;
 
-            var value = reader.GetValue(colIndex);
-            var convertedValue = ConvertDbValue(value, fieldDef.FieldType);
+        //    var value = reader.GetValue(colIndex);
+        //    var convertedValue = ConvertDbValue(value, fieldDef.FieldType);
 
-            try
-            {
-                fieldDef.SetValueFn(instance, convertedValue);
-            }
-            catch (NullReferenceException ex)
-            {
-                Log.Warn("Unexpected NullReferenceException", ex);
-            }
-        }
+        //    try
+        //    {
+        //        fieldDef.SetValueFn(instance, convertedValue);
+        //    }
+        //    catch (NullReferenceException ex)
+        //    {
+        //        Log.Warn("Unexpected NullReferenceException", ex);
+        //    }
+        //}
 
-        public override object ConvertDbValue(object value, Type type)
-        {
-            if (value == null || value is DBNull) return null;
+        //Moved to converters.FromDbValue()
+        //public override object ConvertDbValue(object value, Type type)
+        //{
+        //    if (value == null || value is DBNull) return null;
 
-            if (type == typeof (DateTimeOffset))
-            {
-                return Convert.ChangeType(value, type);
-            }
+        //    if (type == typeof (DateTimeOffset))
+        //    {
+        //        return Convert.ChangeType(value, type);
+        //    }
 
-            if (type == typeof(bool))
-                return Convert.ToBoolean(value);
+        //    if (type == typeof(bool))
+        //        return Convert.ToBoolean(value);
 
-            if (type == typeof(Guid))
-            {
-                if (CompactGuid)
-                {
-                    var raw = (byte[])value;
-                    return new Guid(raw);
-                }
-                return new Guid(value.ToString());
-            }
+        //    if (type == typeof(Guid))
+        //    {
+        //        if (CompactGuid)
+        //        {
+        //            var raw = (byte[])value;
+        //            return new Guid(raw);
+        //        }
+        //        return new Guid(value.ToString());
+        //    }
 
-            if (type == typeof(byte[]))
-                return value;
+        //    if (type == typeof(byte[]))
+        //        return value;
 
-            if (type == typeof(TimeSpan))
-            {
-                var ticks = long.Parse(value.ToString());
-                return TimeSpan.FromTicks(ticks);
-            }
+        //    if (type == typeof(TimeSpan))
+        //    {
+        //        var ticks = long.Parse(value.ToString());
+        //        return TimeSpan.FromTicks(ticks);
+        //    }
 
-            return base.ConvertDbValue(value, type);
-        }
+        //    return base.ConvertDbValue(value, type);
+        //}
 
-        public override string GetQuotedValue(object value, Type fieldType)
-        {
-            if (value == null) return "NULL";
+        //Moved to Converters.ToQuotedString()
+        //public override string GetQuotedValue(object value, Type fieldType)
+        //{
+        //    if (value == null) return "NULL";
 
-            if (fieldType == typeof(Guid))
-            {
-                var guid = (Guid)value;
-                return CompactGuid ? string.Format("CAST('{0}' AS {1})", BitConverter.ToString(guid.ToByteArray()).Replace("-", ""), CompactGuidDefinition)
-                                   : string.Format("CAST('{0}' AS {1})", guid, StringGuidDefinition);
-            }
+        //    if (fieldType == typeof(Guid))
+        //    {
+        //        var guid = (Guid)value;
+        //        return CompactGuid ? string.Format("CAST('{0}' AS {1})", BitConverter.ToString(guid.ToByteArray()).Replace("-", ""), CompactGuidDefinition)
+        //                           : string.Format("CAST('{0}' AS {1})", guid, StringGuidDefinition);
+        //    }
 
-            if (fieldType == typeof(DateTime) || fieldType == typeof(DateTime?))
-            {
-                return GetQuotedDateTimeValue((DateTime) value);
-            }
+        //    if (fieldType == typeof(DateTime) || fieldType == typeof(DateTime?))
+        //    {
+        //        return GetQuotedDateTimeValue((DateTime)value);
+        //    }
 
-            if (fieldType == typeof(DateTimeOffset) || fieldType == typeof(DateTimeOffset?))
-            {
-                return GetQuotedDateTimeOffsetValue((DateTimeOffset) value);
-            }
+        //    if (fieldType == typeof(DateTimeOffset) || fieldType == typeof(DateTimeOffset?))
+        //    {
+        //        return GetQuotedDateTimeOffsetValue((DateTimeOffset)value);
+        //    }
 
-            if ((value is TimeSpan) && (fieldType == typeof(Int64) || fieldType == typeof(Int64?)))
-            {
-                var longValue = ((TimeSpan)value).Ticks;
-                return base.GetQuotedValue(longValue, fieldType);
-            }
+        //    if ((value is TimeSpan) && (fieldType == typeof(Int64) || fieldType == typeof(Int64?)))
+        //    {
+        //        var longValue = ((TimeSpan)value).Ticks;
+        //        return base.GetQuotedValue(longValue, fieldType);
+        //    }
 
-            if (fieldType == typeof(bool?) || fieldType == typeof(bool))
-            {
-                var boolValue = (bool)value;
-                return base.GetQuotedValue(boolValue ? "1" : "0", typeof(string));
-            }
+        //    if (fieldType == typeof(bool?) || fieldType == typeof(bool))
+        //    {
+        //        var boolValue = (bool)value;
+        //        return base.GetQuotedValue(boolValue ? "1" : "0", typeof(string));
+        //    }
 
-            if (fieldType == typeof(decimal?) || fieldType == typeof(decimal) ||
-                fieldType == typeof(double?) || fieldType == typeof(double) ||
-                fieldType == typeof(float?) || fieldType == typeof(float))
-            {
-                var s = base.GetQuotedValue(value, fieldType);
-                if (s.Length > 20) s = s.Substring(0, 20);
-                return "'" + s + "'"; // when quoted exception is more clear!
-            }
+        //    if (fieldType == typeof(decimal?) || fieldType == typeof(decimal) ||
+        //        fieldType == typeof(double?) || fieldType == typeof(double) ||
+        //        fieldType == typeof(float?) || fieldType == typeof(float))
+        //    {
+        //        var s = base.GetQuotedValue(value, fieldType);
+        //        if (s.Length > 20) s = s.Substring(0, 20);
+        //        return "'" + s + "'"; // when quoted exception is more clear!
+        //    }
 
-            if (fieldType.IsEnum)
-            {
-                if (value is int && !fieldType.IsEnumFlags())
-                {
-                    value = fieldType.GetEnumName(value);
-                }
+        //    //Moved to OracleEnumConverter.ToQuotedString()
+        //    if (fieldType.IsEnum)
+        //    {
+        //        if (value is int && !fieldType.IsEnumFlags())
+        //        {
+        //            value = fieldType.GetEnumName(value);
+        //        }
 
-                var enumValue = StringSerializer.SerializeToString(value);
-                // Oracle stores empty strings in varchar columns as null so match that behavior here
-                if (enumValue == null)
-                    return null;
-                enumValue = GetQuotedValue(enumValue.Trim('"'));
-                return enumValue == "''"
-                    ? "null"
-                    : enumValue;
-            }
+        //        var enumValue = StringSerializer.SerializeToString(value);
+        //        // Oracle stores empty strings in varchar columns as null so match that behavior here
+        //        if (enumValue == null)
+        //            return null;
+        //        enumValue = GetQuotedValue(enumValue.Trim('"'));
+        //        return enumValue == "''"
+        //            ? "null"
+        //            : enumValue;
+        //    }
 
-            if (fieldType == typeof(byte[]))
-            {
-                return "hextoraw('" + BitConverter.ToString((byte[])value).Replace("-", "") + "')";
-            }
+        //    if (fieldType == typeof(byte[]))
+        //    {
+        //        return "hextoraw('" + BitConverter.ToString((byte[])value).Replace("-", "") + "')";
+        //    }
 
-            return base.GetQuotedValue(value, fieldType);
-        }
+        //    return base.GetQuotedValue(value, fieldType);
+        //}
 
-        public override object GetParamValue(object value, Type fieldType)
-        {
-            if (value == null) return "NULL";
+        //Moved to Converters.ToDbParamValue()
+        //public override object GetParamValue(object value, Type fieldType)
+        //{
+        //    if (value == null) return "NULL";
 
-            if (fieldType == typeof(Guid))
-            {
-                var guid = (Guid)value;
+        //    if (fieldType == typeof(Guid))
+        //    {
+        //        var guid = (Guid)value;
 
-                if (CompactGuid)
-                    return guid.ToByteArray();
+        //        if (CompactGuid)
+        //            return guid.ToByteArray();
 
-                return guid.ToString();
-            }
+        //        return guid.ToString();
+        //    }
 
-            if (fieldType == typeof(DateTimeOffset) || fieldType == typeof(DateTimeOffset?))
-            {
-                return GetQuotedDateTimeOffsetValue((DateTimeOffset)value);
-            }
+        //    if (fieldType == typeof(DateTimeOffset) || fieldType == typeof(DateTimeOffset?))
+        //    {
+        //        return GetQuotedDateTimeOffsetValue((DateTimeOffset)value);
+        //    }
 
-            if ((value is TimeSpan) && (fieldType == typeof(Int64) || fieldType == typeof(Int64?)))
-            {
-                var longValue = ((TimeSpan)value).Ticks;
-                return base.GetQuotedValue(longValue, fieldType);
-            }
+        //    if ((value is TimeSpan) && (fieldType == typeof(Int64) || fieldType == typeof(Int64?)))
+        //    {
+        //        var longValue = ((TimeSpan)value).Ticks;
+        //        return base.GetQuotedValue(longValue, fieldType);
+        //    }
 
-            if (fieldType == typeof(TimeSpan))
-                return ((TimeSpan)value).Ticks;
+        //    if (fieldType == typeof(TimeSpan))
+        //        return ((TimeSpan)value).Ticks;
 
-            if (fieldType == typeof(bool?) || fieldType == typeof(bool))
-            {
-                var boolValue = (bool)value;
-                return boolValue ? 1 : 0;
-            }
+        //    if (fieldType == typeof(bool?) || fieldType == typeof(bool))
+        //    {
+        //        var boolValue = (bool)value;
+        //        return boolValue ? 1 : 0;
+        //    }
 
-            if (fieldType.IsEnum)
-            {
-                if (value is int && !fieldType.IsEnumFlags())
-                {
-                    value = fieldType.GetEnumName(value);
-                }
+        //    //Moved to OracleEnumConverter.ToDbParamValue()
+        //    if (fieldType.IsEnum)
+        //    {
+        //        if (value is int && !fieldType.IsEnumFlags())
+        //        {
+        //            value = fieldType.GetEnumName(value);
+        //        }
 
-                var enumValue = StringSerializer.SerializeToString(value);
-                // Oracle stores empty strings in varchar columns as null so match that behavior here
-                if (enumValue == null)
-                    return null;
-                enumValue = enumValue.Trim('"');
-                return enumValue == ""
-                    ? "null"
-                    : enumValue;
-            }
+        //        var enumValue = StringSerializer.SerializeToString(value);
+        //        // Oracle stores empty strings in varchar columns as null so match that behavior here
+        //        if (enumValue == null)
+        //            return null;
+        //        enumValue = enumValue.Trim('"');
+        //        return enumValue == ""
+        //            ? "null"
+        //            : enumValue;
+        //    }
 
-            if (fieldType == typeof(byte[]))
-            {
-                return "hextoraw('" + BitConverter.ToString((byte[])value).Replace("-", "") + "')";
-            }
+        //    if (fieldType == typeof(byte[]))
+        //    {
+        //        return "hextoraw('" + BitConverter.ToString((byte[])value).Replace("-", "") + "')";
+        //    }
 
-            if (fieldType.IsRefType())
-            {
-                return StringSerializer.SerializeToString(value);
-            }
+        //    //override default by setting base.ReferenceTypeConverter
+        //    if (fieldType.IsRefType())
+        //    {
+        //        return StringSerializer.SerializeToString(value);
+        //    }
 
-            switch (fieldType.GetTypeCode())
-            {
-                case TypeCode.UInt16:
-                case TypeCode.UInt32:
-                case TypeCode.UInt64:
-                    return Convert.ToDecimal(value);
-            }
+        //    switch (fieldType.GetTypeCode())
+        //    {
+        //        case TypeCode.UInt16:
+        //        case TypeCode.UInt32:
+        //        case TypeCode.UInt64:
+        //            return Convert.ToDecimal(value);
+        //    }
 
-            return value;
-        }
+        //    return value;
+        //}
 
         const string IsoDateFormat = "yyyy-MM-dd";
         const string IsoTimeFormat = "HH:mm:ss";
@@ -379,14 +412,14 @@ namespace ServiceStack.OrmLite.Oracle
         const string OracleMillisecondFormat = "FF9";
         const string OracleTimeZoneFormat = "TZH:TZM";
 
-        private string GetQuotedDateTimeOffsetValue(DateTimeOffset dateValue)
+        internal string GetQuotedDateTimeOffsetValue(DateTimeOffset dateValue)
         {
             var iso8601Format = string.Format("{0} {1}", GetIsoDateTimeFormat(dateValue.TimeOfDay), IsoTimeZoneFormat);
             var oracleFormat = string.Format("{0} {1}", GetOracleDateTimeFormat(dateValue.TimeOfDay), OracleTimeZoneFormat);
             return string.Format("TO_TIMESTAMP_TZ({0}, {1})", base.GetQuotedValue(dateValue.ToString(iso8601Format), typeof(string)), base.GetQuotedValue(oracleFormat, typeof(string)));
         }
 
-        private string GetQuotedDateTimeValue(DateTime dateValue)
+        internal string GetQuotedDateTimeValue(DateTime dateValue)
         {
             var iso8601Format = GetIsoDateTimeFormat(dateValue.TimeOfDay);
             var oracleFormat = GetOracleDateTimeFormat(dateValue.TimeOfDay);
@@ -536,32 +569,34 @@ namespace ServiceStack.OrmLite.Oracle
             }
         }
 
+        // TODO: do we need this?
         public override void SetParameterValue<T>(FieldDefinition fieldDef, IDataParameter p, object obj)
         {
             p.Value = GetValueOrDbNull<T>(fieldDef, obj);
         }
 
-        protected override object GetValue<T>(FieldDefinition fieldDef, object obj)
-        {
-            var value = base.GetValue<T>(fieldDef, obj);
+        //Moved to Converters.ToDbValue()
+        //protected override object GetValue<T>(FieldDefinition fieldDef, object obj)
+        //{
+        //    var value = base.GetValue<T>(fieldDef, obj);
 
-            if (value != null)
-            {
-                if (fieldDef.FieldType == typeof(Guid))
-                {
-                    var guid = (Guid)value;
-                    if (CompactGuid) return guid.ToByteArray();
-                    return guid.ToString();
-                }
+        //    if (value != null)
+        //    {
+        //        if (fieldDef.FieldType == typeof(Guid))
+        //        {
+        //            var guid = (Guid)value;
+        //            if (CompactGuid) return guid.ToByteArray();
+        //            return guid.ToString();
+        //        }
 
-                if (fieldDef.FieldType == typeof(DateTimeOffset))
-                {
-                    var timestamp = (DateTimeOffset)value;
-                    return _timestampConverter.ConvertToOracleTimeStampTz(timestamp);
-                }
-            }
-            return value;
-        }
+        //        if (fieldDef.FieldType == typeof(DateTimeOffset))
+        //        {
+        //            var timestamp = (DateTimeOffset)value;
+        //            return _timestampConverter.ConvertToOracleTimeStampTz(timestamp);
+        //        }
+        //    }
+        //    return value;
+        //}
 
         public override string ToInsertRowStatement(IDbCommand dbCommand, object objWithProperties, ICollection<string> insertFields = null)
         {
@@ -810,28 +845,8 @@ namespace ServiceStack.OrmLite.Oracle
             bool isPrimaryKey, bool autoIncrement, bool isNullable, bool isRowVersion,
             int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
         {
-            string fieldDefinition;
-
-            if (customFieldDefinition != null)
-            {
-                fieldDefinition = customFieldDefinition;
-            }
-            else if (fieldType == typeof(string))
-            {
-                var length = fieldLength.GetValueOrDefault(DefaultStringLength);
-                length = Math.Min(length, MaxStringColumnLength);
-                fieldDefinition = string.Format(StringLengthColumnDefinitionFormat, length);
-            }
-            else if (fieldType == typeof(Decimal))
-            {
-                fieldDefinition = string.Format("{0} ({1},{2})", DecimalColumnDefinition,
-                    fieldLength.GetValueOrDefault(DefaultDecimalPrecision),
-                    scale.GetValueOrDefault(DefaultDecimalScale));
-            }
-            else
-            {
-                fieldDefinition = GetColumnTypeDefinition(fieldType);
-            }
+            var fieldDefinition = customFieldDefinition
+                ?? GetColumnTypeDefinition(fieldType, fieldLength);
 
             var sql = new StringBuilder();
             sql.AppendFormat("{0} {1}", GetQuotedColumnName(fieldName), fieldDefinition);
