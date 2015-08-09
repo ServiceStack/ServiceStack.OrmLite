@@ -24,13 +24,6 @@ namespace ServiceStack.OrmLite.Sqlite
             base.RegisterConverter<byte[]>(new SqliteByteArrayConverter());
         }
 
-        //public override void UpdateStringColumnDefinitions()
-        //{
-        //    base.UpdateStringColumnDefinitions();
-
-        //    this.MaxStringColumnDefinition = string.Format(this.StringLengthColumnDefinitionFormat, "1000000"); //Default Max is really 1B
-        //}
-
         public static string Password { get; set; }
         public static bool UTF8Encoded { get; set; }
         public static bool ParseViaFramework { get; set; }

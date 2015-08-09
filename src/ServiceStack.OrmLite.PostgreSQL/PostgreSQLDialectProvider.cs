@@ -17,25 +17,13 @@ namespace ServiceStack.OrmLite.PostgreSQL
     public class PostgreSqlDialectProvider : OrmLiteDialectProviderBase<PostgreSqlDialectProvider>
     {
         public static PostgreSqlDialectProvider Instance = new PostgreSqlDialectProvider();
-        //const string textColumnDefinition = "text";
 
         public bool UseReturningForLastInsertId { get; set; }
 
         public PostgreSqlDialectProvider()
         {
             base.AutoIncrementDefinition = "";
-            //base.IntColumnDefinition = "integer";
-            //base.BoolColumnDefinition = "boolean";
-            //base.DateTimeOffsetColumnDefinition = "timestamp";
-            //base.GuidColumnDefinition = "uuid";
             base.ParamString = ":";
-            //base.BlobColumnDefinition = "bytea";
-            //base.RealColumnDefinition = "double precision";
-            //base.StringLengthColumnDefinitionFormat = textColumnDefinition;
-            //there is no "n"varchar in postgres. All strings are either unicode or non-unicode, inherited from the database.
-            //base.StringLengthUnicodeColumnDefinitionFormat = "character varying({0})";
-            //base.StringLengthNonUnicodeColumnDefinitionFormat = "character varying({0})";
-            //base.MaxStringColumnDefinition = "TEXT";
             base.SelectIdentitySql = "SELECT LASTVAL()";
             this.UseReturningForLastInsertId = true;
             this.NamingStrategy = new PostgreSqlNamingStrategy();

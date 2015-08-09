@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data;
 using ServiceStack.OrmLite.Converters;
 
 namespace ServiceStack.OrmLite.PostgreSQL.Converters
@@ -8,7 +7,6 @@ namespace ServiceStack.OrmLite.PostgreSQL.Converters
     {
         public override string ColumnDefinition
         {
-            //get { return "timestamp"; }
             get { return "timestamp with time zone"; }
         }
 
@@ -23,17 +21,5 @@ namespace ServiceStack.OrmLite.PostgreSQL.Converters
         {
             return value;
         }
-
-        //public override object FromDbValue(FieldDefinition fieldDef, object value)
-        //{
-        //    var dateTime = (DateTime)value;
-        //    var dateTimeOffset = new DateTimeOffset(dateTime);
-        //    return dateTimeOffset;
-        //}
-
-        //public override object GetValue(IDataReader reader, int columnIndex)
-        //{
-        //    return reader.GetDateTime(columnIndex);
-        //}
     }
 }
