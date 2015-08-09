@@ -2,6 +2,7 @@
 using System.Data;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
+using ServiceStack.OrmLite.Converters;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
@@ -95,12 +96,12 @@ namespace ServiceStack.OrmLite.Tests
             }
         }
 
-        [NUnit.Framework.Ignore("TODO fix leak breaking other tests")]
         [Test]
         public void Can_Create_Table_with_MaxText_column_Unicode()
         {
-            var hold = db.GetDialectProvider().UseUnicode;
-            db.GetDialectProvider().UseUnicode = true;
+            var stringConverter = db.GetDialectProvider().GetStringConverter();
+            var hold = stringConverter.UseUnicode;
+            stringConverter.UseUnicode = true;
 
             try
             {
@@ -112,7 +113,7 @@ namespace ServiceStack.OrmLite.Tests
             }
             finally
             {
-                db.GetDialectProvider().UseUnicode = hold;
+                stringConverter.UseUnicode = hold;
             }
 
             var sql = db.GetLastSql();
