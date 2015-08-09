@@ -5,7 +5,7 @@ namespace ServiceStack.OrmLite.MySql.Converters
 {
     public class MySqlDateTimeConverter : DateTimeConverter
     {
-        public override string ToQuotedString(object value)
+        public override string ToQuotedString(Type fieldType, object value)
         {
             /*
              * ms not contained in format. MySql ignores ms part anyway

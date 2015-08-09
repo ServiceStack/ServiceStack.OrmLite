@@ -62,7 +62,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Converters\MySqlBoolConverter.cs" />
     <Compile Include="Converters\MySqlDateTimeConverter.cs" />
+    <Compile Include="Converters\MySqlDateTimeOffsetConverter.cs" />
+    <Compile Include="Converters\MySqlFloatConverters.cs" />
+    <Compile Include="Converters\MySqlGuidConverter.cs" />
+    <Compile Include="Converters\MySqlIntegerConverters.cs" />
+    <Compile Include="Converters\MySqlStringConverters.cs" />
     <Compile Include="MySqlDialect.cs" />
     <Compile Include="MySqlDialectProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
