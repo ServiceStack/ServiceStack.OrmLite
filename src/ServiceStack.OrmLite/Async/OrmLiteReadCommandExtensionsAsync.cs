@@ -264,7 +264,7 @@ namespace ServiceStack.OrmLite
         {
             return dialectProvider.ReaderEach(reader, () =>
             {
-                var value = dialectProvider.ConvertDbValue(reader.GetValue(0), typeof(T));
+                var value = dialectProvider.ConvertDbValue(reader, 0, typeof(T));
                 return value == DBNull.Value ? default(T) : value;
             }, token)
             .Then(x =>
@@ -291,7 +291,7 @@ namespace ServiceStack.OrmLite
         {
             return dialectProvider.ReaderEach(reader, () =>
             {
-                var value = dialectProvider.ConvertDbValue(reader.GetValue(0), typeof(T));
+                var value = dialectProvider.ConvertDbValue(reader, 0, typeof(T));
                 return value == DBNull.Value ? default(T) : value;
             }, token)
             .Then(x =>
@@ -321,8 +321,8 @@ namespace ServiceStack.OrmLite
 
             return dialectProvider.ReaderEach(reader, () =>
             {
-                var key = (K)dialectProvider.ConvertDbValue(reader.GetValue(0), typeof(K));
-                var value = (V)dialectProvider.ConvertDbValue(reader.GetValue(1), typeof(V));
+                var key = (K)dialectProvider.ConvertDbValue(reader, 0, typeof(K));
+                var value = (V)dialectProvider.ConvertDbValue(reader, 1, typeof(V));
 
                 List<V> values;
                 if (!lookup.TryGetValue(key, out values))
@@ -353,8 +353,8 @@ namespace ServiceStack.OrmLite
 
             return dialectProvider.ReaderEach(reader, () =>
             {
-                var key = (K)dialectProvider.ConvertDbValue(reader.GetValue(0), typeof(K));
-                var value = (V)dialectProvider.ConvertDbValue(reader.GetValue(1), typeof(V));
+                var key = (K)dialectProvider.ConvertDbValue(reader, 0, typeof(K));
+                var value = (V)dialectProvider.ConvertDbValue(reader, 1, typeof(V));
                 map.Add(key, value);
             }, map, token);
         }

@@ -63,8 +63,26 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\ServiceStack.OrmLite.MySql\Converters\MySqlBoolConverter.cs">
+      <Link>Converters\MySqlBoolConverter.cs</Link>
+    </Compile>
     <Compile Include="..\ServiceStack.OrmLite.MySql\Converters\MySqlDateTimeConverter.cs">
       <Link>Converters\MySqlDateTimeConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.MySql\Converters\MySqlDateTimeOffsetConverter.cs">
+      <Link>Converters\MySqlDateTimeOffsetConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.MySql\Converters\MySqlFloatConverters.cs">
+      <Link>Converters\MySqlFloatConverters.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.MySql\Converters\MySqlGuidConverter.cs">
+      <Link>Converters\MySqlGuidConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.MySql\Converters\MySqlIntegerConverters.cs">
+      <Link>Converters\MySqlIntegerConverters.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.MySql\Converters\MySqlStringConverters.cs">
+      <Link>Converters\MySqlStringConverters.cs</Link>
     </Compile>
     <Compile Include="..\ServiceStack.OrmLite.MySql\DataAnnotations\TextAttribute.cs">
       <Link>DataAnnotations\TextAttribute.cs</Link>

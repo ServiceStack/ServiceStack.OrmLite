@@ -95,7 +95,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Converters\SqlServerBoolConverter.cs" />
+    <Compile Include="Converters\SqlServerByteArrayConverter.cs" />
+    <Compile Include="Converters\SqlServerDateTime2Converter.cs" />
     <Compile Include="Converters\SqlServerDateTimeConverter.cs" />
+    <Compile Include="Converters\SqlServerFloatConverters.cs" />
+    <Compile Include="Converters\SqlServerGuidConverter.cs" />
+    <Compile Include="Converters\SqlServerIntegerConverters.cs" />
+    <Compile Include="Converters\SqlServerSpecialConverters.cs" />
+    <Compile Include="Converters\SqlServerStringConverters.cs" />
+    <Compile Include="Converters\SqlServerTimeSpanConverter.cs" />
     <Compile Include="SqlServerDialect.cs" />
     <Compile Include="SqlServerExpression.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

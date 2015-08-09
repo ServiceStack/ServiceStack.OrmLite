@@ -63,8 +63,35 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\ServiceStack.OrmLite.SqlServer\Converters\SqlServerBoolConverter.cs">
+      <Link>Converters\SqlServerBoolConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.SqlServer\Converters\SqlServerByteArrayConverter.cs">
+      <Link>Converters\SqlServerByteArrayConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.SqlServer\Converters\SqlServerDateTime2Converter.cs">
+      <Link>Converters\SqlServerDateTime2Converter.cs</Link>
+    </Compile>
     <Compile Include="..\ServiceStack.OrmLite.SqlServer\Converters\SqlServerDateTimeConverter.cs">
       <Link>Converters\SqlServerDateTimeConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.SqlServer\Converters\SqlServerFloatConverters.cs">
+      <Link>Converters\SqlServerFloatConverters.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.SqlServer\Converters\SqlServerGuidConverter.cs">
+      <Link>Converters\SqlServerGuidConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.SqlServer\Converters\SqlServerIntegerConverters.cs">
+      <Link>Converters\SqlServerIntegerConverters.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.SqlServer\Converters\SqlServerSpecialConverters.cs">
+      <Link>Converters\SqlServerSpecialConverters.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.SqlServer\Converters\SqlServerStringConverters.cs">
+      <Link>Converters\SqlServerStringConverters.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.SqlServer\Converters\SqlServerTimeSpanConverter.cs">
+      <Link>Converters\SqlServerTimeSpanConverter.cs</Link>
     </Compile>
     <Compile Include="..\ServiceStack.OrmLite.SqlServer\Properties\AssemblyInfo.cs">
       <Link>AssemblyInfo.cs</Link>

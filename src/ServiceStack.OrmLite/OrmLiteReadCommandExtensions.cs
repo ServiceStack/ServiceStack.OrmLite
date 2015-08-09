@@ -570,7 +570,7 @@ namespace ServiceStack.OrmLite
             {
                 while (reader.Read())
                 {
-                    var value = dialectProvider.ConvertDbValue(reader.GetValue(0), typeof (T));
+                    var value = dialectProvider.ConvertDbValue(reader, 0, typeof(T));
                     if (value == DBNull.Value)
                         yield return default(T);
                     else
@@ -712,7 +712,7 @@ namespace ServiceStack.OrmLite
 
             while (reader.Read())
             {
-                var value = dialectProvider.ConvertDbValue(reader.GetValue(0), typeof(T));
+                var value = dialectProvider.ConvertDbValue(reader, 0, typeof(T));
                 if (value == DBNull.Value)
                     value = default(T);
 
@@ -741,7 +741,7 @@ namespace ServiceStack.OrmLite
             var columValues = new HashSet<T>();
             while (reader.Read())
             {
-                var value = dialectProvider.ConvertDbValue(reader.GetValue(0), typeof(T));
+                var value = dialectProvider.ConvertDbValue(reader, 0, typeof(T));
                 if (value == DBNull.Value)
                     value = default(T);
 
@@ -766,8 +766,8 @@ namespace ServiceStack.OrmLite
 
             while (reader.Read())
             {
-                var key = (K)dialectProvider.ConvertDbValue(reader.GetValue(0), typeof(K));
-                var value = (V)dialectProvider.ConvertDbValue(reader.GetValue(1), typeof(V));
+                var key = (K)dialectProvider.ConvertDbValue(reader, 0, typeof(K));
+                var value = (V)dialectProvider.ConvertDbValue(reader, 1, typeof(V));
 
                 List<V> values;
                 if (!lookup.TryGetValue(key, out values))
@@ -799,8 +799,8 @@ namespace ServiceStack.OrmLite
 
             while (reader.Read())
             {
-                var key = (K)dialectProvider.ConvertDbValue(reader.GetValue(0), typeof(K));
-                var value = (V)dialectProvider.ConvertDbValue(reader.GetValue(1), typeof(V));
+                var key = (K)dialectProvider.ConvertDbValue(reader, 0, typeof(K));
+                var value = (V)dialectProvider.ConvertDbValue(reader, 1, typeof(V));
 
                 map.Add(key, value);
             }
@@ -990,7 +990,7 @@ namespace ServiceStack.OrmLite
                 p.DbType = dbType.Value;
 
             if (p.DbType == DbType.String)
-                p.Size = dialectProvider.DefaultStringLength;
+                p.Size = dialectProvider.GetStringConverter().StringLength;
 
             return p;
         }

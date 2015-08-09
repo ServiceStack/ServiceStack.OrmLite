@@ -18,6 +18,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using ServiceStack.Data;
 using ServiceStack.Logging;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
@@ -713,7 +714,15 @@ namespace ServiceStack.OrmLite
 
                     dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
-                    dbCmd.ExecNonQuery();
+                    try
+                    {
+                        dbCmd.ExecNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error("SQL ERROR: {0}".Fmt(dbCmd.GetLastSqlAndParams()), ex);
+                        throw;
+                    }
                 }
 
                 if (dbTrans != null)
@@ -943,7 +952,7 @@ namespace ServiceStack.OrmLite
         internal static ulong GetRowVersion(this IDbCommand dbCmd, ModelDefinition modelDef, object id)
         {
             var sql = RowVersionSql(dbCmd, modelDef, id);
-            return dbCmd.Scalar<ulong>(sql);
+            return dbCmd.GetDialectProvider().FromDbRowVersion(dbCmd.Scalar<object>(sql));
         }
 
         internal static string RowVersionSql(this IDbCommand dbCmd, ModelDefinition modelDef, object id)

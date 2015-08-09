@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text;
 using ServiceStack.Data;
 
 namespace ServiceStack.OrmLite
@@ -16,6 +17,22 @@ namespace ServiceStack.OrmLite
         {
             var ormLiteConn = dbConn as OrmLiteConnection;
             return ormLiteConn != null ? ormLiteConn.LastCommandText : null;
+        }
+
+        public static string GetLastSqlAndParams(this IDbCommand dbCmd)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine(dbCmd.CommandText)
+              .AppendLine("PARAMS: ");
+
+            foreach (IDataParameter parameter in dbCmd.Parameters)
+            {
+                sb.Append(parameter.ParameterName).Append(": ")
+                    .Append(parameter.Value.ToJsv())
+                    .Append(" : ").AppendLine((parameter.Value ?? DBNull.Value).GetType().Name);
+            }
+
+            return sb.AppendLine().ToString();
         }
 
         /// <summary>

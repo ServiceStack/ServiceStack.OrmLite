@@ -111,8 +111,15 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Converters\BoolConverter.cs" />
     <Compile Include="Converters\ByteArrayConverter.cs" />
     <Compile Include="Converters\DateTimeOffsetConverter.cs" />
+    <Compile Include="Converters\FloatConverters.cs" />
+    <Compile Include="Converters\GuidConverter.cs" />
+    <Compile Include="Converters\IntegerConverters.cs" />
+    <Compile Include="Converters\SpecialConverters.cs" />
+    <Compile Include="Converters\StringConverter.cs" />
+    <Compile Include="Converters\TimeSpanConverter.cs" />
     <Compile Include="Expressions\IUntypedSqlExpression.cs" />
     <Compile Include="Expressions\ParameterizedSqlExpression.cs" />
     <Compile Include="IOrmLiteConverter.cs" />

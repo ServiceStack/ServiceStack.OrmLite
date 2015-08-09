@@ -15,21 +15,26 @@ using System.Data;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+using ServiceStack.OrmLite.Converters;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
     public interface IOrmLiteDialectProvider
     {
+        void RegisterConverter<T>(IOrmLiteConverter converter);
+
         IOrmLiteExecFilter ExecFilter { get; set; }
 
-        int DefaultStringLength { get; set; }
+        IOrmLiteConverter GetConverter(Type forType);
 
         string ParamString { get; set; }
 
+        [Obsolete("Use GetStringConverter().UseUnicode")]
         bool UseUnicode { get; set; }
 
-        DateTimeKind DateStyle { get; set; }
+        [Obsolete("Use GetStringConverter().StringLength")]
+        int DefaultStringLength { get; set; }
 
         string EscapeWildcards(string value);
 
@@ -45,13 +50,15 @@ namespace ServiceStack.OrmLite
         /// <returns></returns>
         string GetQuotedValue(string paramValue);
 
+        string GetQuotedValue(object value, Type fieldType);
+
         object GetParamValue(object value, Type fieldType);
 
         void SetDbValue(FieldDefinition fieldDef, IDataReader reader, int colIndex, object instance);
 
         object ConvertDbValue(object value, Type type);
 
-        string GetQuotedValue(object value, Type fieldType);
+        object GetValue(IDataReader reader, int columnIndex, Type type);
 
         IDbConnection CreateConnection(string filePath, Dictionary<string, string> options);
 
@@ -132,13 +139,16 @@ namespace ServiceStack.OrmLite
 
         bool DoesSequenceExist(IDbCommand dbCmd, string sequencName);
 
+        ulong FromDbRowVersion(object value);
         string GetRowVersionColumnName(FieldDefinition field);
+
         string GetColumnNames(ModelDefinition modelDef);
 
         SqlExpression<T> SqlExpression<T>();
 
         DbType GetColumnDbType(Type columnType);
-        string GetColumnTypeDefinition(Type fieldType);
+
+        string GetColumnTypeDefinition(Type columnType, int? fieldLength = null);
 
         //DDL
         string GetDropForeignKeyConstraints(ModelDefinition modelDef);

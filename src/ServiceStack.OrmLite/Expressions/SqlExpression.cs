@@ -1695,7 +1695,7 @@ namespace ServiceStack.OrmLite
                 p.DbType = dbType.Value;
 
             if (p.DbType == DbType.String)
-                p.Size = DialectProvider.DefaultStringLength;
+                p.Size = DialectProvider.GetStringConverter().StringLength;
 
             return p;
         }

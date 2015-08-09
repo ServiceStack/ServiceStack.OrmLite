@@ -62,6 +62,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Converters\OracleBoolConverter.cs" />
+    <Compile Include="Converters\OracleByteArrayConverter.cs" />
+    <Compile Include="Converters\OracleDateTimeConverter.cs" />
+    <Compile Include="Converters\OracleDateTimeOffsetConverter.cs" />
+    <Compile Include="Converters\OracleEnumConverter.cs" />
+    <Compile Include="Converters\OracleFloatConverters.cs" />
+    <Compile Include="Converters\OracleGuidConverter.cs" />
+    <Compile Include="Converters\OracleIntegerConverters.cs" />
+    <Compile Include="Converters\OracleStringConverters.cs" />
+    <Compile Include="Converters\OracleTimeSpanConverter.cs" />
     <Compile Include="DbSchema\IColumn.cs" />
     <Compile Include="DbSchema\IParameter.cs" />
     <Compile Include="DbSchema\IProcedure.cs" />

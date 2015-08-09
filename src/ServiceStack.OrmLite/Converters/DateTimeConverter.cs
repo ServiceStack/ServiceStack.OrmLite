@@ -20,12 +20,9 @@ namespace ServiceStack.OrmLite.Converters
             get { return DbType.DateTime; }
         }
 
-        public DateTimeKind DateStyle
-        {
-            get { return DialectProvider.DateStyle; }
-        }
+        public DateTimeKind DateStyle { get; set; }
 
-        public override string ToQuotedString(object value)
+        public override string ToQuotedString(Type fieldType, object value)
         {
             var dateTime = (DateTime)value;
             return DateTimeFmt(dateTime, "yyyy-MM-dd HH:mm:ss.fff");
@@ -59,9 +56,8 @@ namespace ServiceStack.OrmLite.Converters
             return dateTime;
         }
 
-        public override object FromDbValue(FieldDefinition fieldDef, IDataReader reader, int columnIndex)
+        public override object FromDbValue(FieldDefinition fieldDef, object value)
         {
-            var value = reader.GetValue(columnIndex);
             var strValue = value as string;
             if (strValue != null)
             {

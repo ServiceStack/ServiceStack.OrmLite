@@ -515,7 +515,8 @@ namespace ServiceStack.OrmLite
         internal static Task<ulong> GetRowVersionAsync(this IDbCommand dbCmd, ModelDefinition modelDef, object id, CancellationToken token)
         {
             var sql = dbCmd.RowVersionSql(modelDef, id);
-            return dbCmd.ScalarAsync<ulong>(sql, token);
+            return dbCmd.ScalarAsync<ulong>(sql, token)
+                .Success(x => dbCmd.GetDialectProvider().FromDbRowVersion(x));
         }
     }
 }

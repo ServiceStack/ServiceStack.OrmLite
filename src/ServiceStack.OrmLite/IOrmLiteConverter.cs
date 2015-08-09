@@ -11,13 +11,15 @@ namespace ServiceStack.OrmLite
 
         string ColumnDefinition { get; }
 
-        string ToQuotedString(object value);
+        string ToQuotedString(Type fieldType, object value);
 
-        object ToDbParamValue(FieldDefinition fieldDef, object value);
+        object ToDbParamValue(Type fieldType, object value);
 
         object ToDbValue(FieldDefinition fieldDef, object value);
 
-        object FromDbValue(FieldDefinition fieldDef, IDataReader reader, int columnIndex);
+        object FromDbValue(FieldDefinition fieldDef, object value);
+
+        object GetValue(IDataReader reader, int columnIndex);
     }
 
     public abstract class OrmLiteConverter : IOrmLiteConverter
@@ -29,12 +31,8 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// SQL Column Definiton used in CREATE Table. 
-        /// return null to use default String Column definition
         /// </summary>
-        public virtual string ColumnDefinition
-        {
-            get { return null; }
-        }
+        public abstract string ColumnDefinition { get; }
 
         /// <summary>
         /// Used in DB Params. Defaults to DbType.String
@@ -47,7 +45,7 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Quoted Value in SQL Statement
         /// </summary>
-        public virtual string ToQuotedString(object value)
+        public virtual string ToQuotedString(Type fieldType, object value)
         {
             return DialectProvider.GetQuotedValue(value.ToString());
         }
@@ -55,9 +53,9 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Used in Parameterized Value. Optional, Defaults to ToDbValue()
         /// </summary>
-        public virtual object ToDbParamValue(FieldDefinition fieldDef, object value)
+        public virtual object ToDbParamValue(Type fieldType, object value)
         {
-            return ToDbValue(fieldDef, value);
+            return value;
         }
 
         /// <summary>
@@ -71,9 +69,62 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Value from DB to Populate on POCO Data Model
         /// </summary>
-        public virtual object FromDbValue(FieldDefinition fieldDef, IDataReader reader, int columnIndex)
+        public virtual object FromDbValue(FieldDefinition fieldDef, object value)
+        {
+            return value;
+        }
+
+        public virtual object GetValue(IDataReader reader, int columnIndex)
         {
             return reader.GetValue(columnIndex);
+        }
+    }
+
+    /// <summary>
+    /// For Types that are natively supported by RDBMS's and shouldn't be quoted
+    /// </summary>
+    public abstract class NativeValueOrmLiteConverter : OrmLiteConverter
+    {
+        public override string ToQuotedString(Type fieldType, object value)
+        {
+            return value.ToString();
+        }
+    }
+
+    public static class OrmLiteConverterExtensions
+    {
+        public static object ConvertNumber(this IOrmLiteConverter converter, Type toIntegerType, object value)
+        {
+            var typeCode = toIntegerType.GetUnderlyingTypeCode();
+            switch (typeCode)
+            {
+                case TypeCode.Int16:
+                    return value is short ? value : Convert.ToInt16(value);
+                case TypeCode.UInt16:
+                    return value is ushort ? value : Convert.ToUInt16(value);
+                case TypeCode.Int32:
+                    return value is int ? value : Convert.ToInt32(value);
+                case TypeCode.UInt32:
+                    return value is uint ? value : Convert.ToUInt32(value);
+                case TypeCode.Int64:
+                    return value is long ? value : Convert.ToInt64(value);
+                case TypeCode.UInt64:
+                    if (value is ulong)
+                        return value;
+                    var byteValue = value as byte[];
+                    if (byteValue != null)
+                        return OrmLiteUtils.ConvertToULong(byteValue);
+                    return Convert.ToUInt64(value);
+                case TypeCode.Single:
+                    return value is float ? value : Convert.ToSingle(value);
+                case TypeCode.Double:
+                    return value is double ? value : Convert.ToDouble(value);
+                case TypeCode.Decimal:
+                    return value is decimal ? value : Convert.ToDecimal(value);
+            }
+
+            var convertedValue = converter.DialectProvider.StringSerializer.DeserializeFromString(value.ToString(), toIntegerType);
+            return convertedValue;
         }
     }
 }

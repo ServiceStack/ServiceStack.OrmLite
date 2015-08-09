@@ -79,6 +79,9 @@
     <Compile Include="..\ServiceStack.OrmLite\Async\WriteExpressionCommandExtensionsAsync.cs">
       <Link>Async\WriteExpressionCommandExtensionsAsync.cs</Link>
     </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Converters\BoolConverter.cs">
+      <Link>Converters\BoolConverter.cs</Link>
+    </Compile>
     <Compile Include="..\ServiceStack.OrmLite\Converters\ByteArrayConverter.cs">
       <Link>Converters\ByteArrayConverter.cs</Link>
     </Compile>
@@ -87,6 +90,24 @@
     </Compile>
     <Compile Include="..\ServiceStack.OrmLite\Converters\DateTimeOffsetConverter.cs">
       <Link>Converters\DateTimeOffsetConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Converters\FloatConverters.cs">
+      <Link>Converters\FloatConverters.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Converters\GuidConverter.cs">
+      <Link>Converters\GuidConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Converters\IntegerConverters.cs">
+      <Link>Converters\IntegerConverters.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Converters\SpecialConverters.cs">
+      <Link>Converters\SpecialConverters.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Converters\StringConverter.cs">
+      <Link>Converters\StringConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Converters\TimeSpanConverter.cs">
+      <Link>Converters\TimeSpanConverter.cs</Link>
     </Compile>
     <Compile Include="..\ServiceStack.OrmLite\Dapper\SqlMapper.Async.cs">
       <Link>Dapper\SqlMapper.Async.cs</Link>

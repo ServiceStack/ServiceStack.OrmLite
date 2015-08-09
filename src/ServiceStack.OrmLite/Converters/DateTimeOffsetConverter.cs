@@ -4,7 +4,7 @@ using System.Globalization;
 
 namespace ServiceStack.OrmLite.Converters
 {
-    public abstract class DateTimeOffsetConverter : OrmLiteConverter
+    public class DateTimeOffsetConverter : OrmLiteConverter
     {
         public override string ColumnDefinition
         {
@@ -17,9 +17,8 @@ namespace ServiceStack.OrmLite.Converters
         }
 
         //From OrmLiteDialectProviderBase:
-        public override object FromDbValue(FieldDefinition fieldDef, IDataReader reader, int columnIndex)
+        public override object FromDbValue(FieldDefinition fieldDef, object value)
         {
-            var value = reader.GetValue(columnIndex);
             var strValue = value as string;
             if (strValue != null)
             {

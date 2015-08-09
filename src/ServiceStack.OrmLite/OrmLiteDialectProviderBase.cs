@@ -13,140 +13,25 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
-using System.Globalization;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Logging;
+using ServiceStack.OrmLite.Converters;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
-    //Use non-generic base class so public properties are easier to access without a generic type
-    public abstract class OrmLiteDialectProviderBase
-    {
-        public IOrmLiteExecFilter ExecFilter { get; set; }
-
-        public Dictionary<Type, IOrmLiteConverter> Converters = new Dictionary<Type, IOrmLiteConverter>();
-
-        public string StringLengthNonUnicodeColumnDefinitionFormat = "VARCHAR({0})";
-        public string StringLengthUnicodeColumnDefinitionFormat = "NVARCHAR({0})";
-
-        //Set by Constructor and UpdateStringColumnDefinitions()
-        public string StringColumnDefinition;
-        public string StringLengthColumnDefinitionFormat;
-
-        private string maxStringColumnDefinition;
-        public string MaxStringColumnDefinition
-        {
-            get { return maxStringColumnDefinition ?? StringColumnDefinition; }
-            set { maxStringColumnDefinition = value; }
-        }
-
-        public string AutoIncrementDefinition = "AUTOINCREMENT"; //SqlServer express limit
-        public string IntColumnDefinition = "INTEGER";
-        public string LongColumnDefinition = "BIGINT";
-        public string GuidColumnDefinition = "GUID";
-        public string BoolColumnDefinition = "BOOL";
-        public string RealColumnDefinition = "DOUBLE";
-        public string DecimalColumnDefinition = "DECIMAL";
-        public string BlobColumnDefinition = "BLOB";
-        public string TimeColumnDefinition = "BIGINT";
-        public string DateTimeOffsetColumnDefinition = "DATETIMEOFFSET";
-
-        [Obsolete("Use a DateTimeConverter")]
-        public string DateTimeColumnDefinition = "DATETIME";
-
-        private int defaultDecimalPrecision = 18;
-        private int defaultDecimalScale = 12;
-
-        public int DefaultDecimalPrecision
-        {
-            get { return defaultDecimalPrecision; }
-            set { defaultDecimalPrecision = value; }
-        }
-
-        public int DefaultDecimalScale
-        {
-            get { return defaultDecimalScale; }
-            set { defaultDecimalScale = value; }
-        }
-
-        private int defaultStringLength = 8000; //SqlServer express limit
-        public int DefaultStringLength
-        {
-            get
-            {
-                return defaultStringLength;
-            }
-            set
-            {
-                defaultStringLength = value;
-                UpdateStringColumnDefinitions();
-            }
-        }
-
-        private string paramString = "@";
-        public string ParamString
-        {
-            get { return paramString; }
-            set { paramString = value; }
-        }
-
-        protected bool useUnicode;
-        public virtual bool UseUnicode
-        {
-            get
-            {
-                return useUnicode;
-            }
-            set
-            {
-                useUnicode = value;
-                UpdateStringColumnDefinitions();
-            }
-        }
-
-        public DateTimeKind DateStyle { get; set; }
-
-        private INamingStrategy namingStrategy = new OrmLiteNamingStrategyBase();
-        public INamingStrategy NamingStrategy
-        {
-            get
-            {
-                return namingStrategy;
-            }
-            set
-            {
-                namingStrategy = value;
-            }
-        }
-
-        public IStringSerializer StringSerializer { get; set; }
-
-        public virtual void UpdateStringColumnDefinitions()
-        {
-            this.StringLengthColumnDefinitionFormat = UseUnicode
-                ? StringLengthUnicodeColumnDefinitionFormat
-                : StringLengthNonUnicodeColumnDefinitionFormat;
-
-            this.StringColumnDefinition = string.Format(this.StringLengthColumnDefinitionFormat, DefaultStringLength);
-        }
-
-        public string DefaultValueFormat = " DEFAULT ({0})";
-    }
-
     public abstract class OrmLiteDialectProviderBase<TDialect>
-        : OrmLiteDialectProviderBase, IOrmLiteDialectProvider
+        : IOrmLiteDialectProvider
         where TDialect : IOrmLiteDialectProvider
     {
         protected static readonly ILog Log = LogManager.GetLogger(typeof(IOrmLiteDialectProvider));
 
         protected OrmLiteDialectProviderBase()
         {
-            UpdateStringColumnDefinitions();
             StringSerializer = new JsvStringSerializer();
         }
 
@@ -200,88 +85,177 @@ namespace ServiceStack.OrmLite
 			SMALLDATETIME	DbType.DateTime
 		 */
         #endregion
-        protected DbTypes<TDialect> DbTypeMap = new DbTypes<TDialect>();
 
         protected void InitColumnTypeMap()
         {
-            DbTypeMap.Set<string>(DbType.String, StringColumnDefinition);
-            DbTypeMap.Set<char>(DbType.StringFixedLength, StringColumnDefinition);
-            DbTypeMap.Set<char?>(DbType.StringFixedLength, StringColumnDefinition);
-            DbTypeMap.Set<char[]>(DbType.String, StringColumnDefinition);
-            DbTypeMap.Set<bool>(DbType.Boolean, BoolColumnDefinition);
-            DbTypeMap.Set<bool?>(DbType.Boolean, BoolColumnDefinition);
-            DbTypeMap.Set<Guid>(DbType.Guid, GuidColumnDefinition);
-            DbTypeMap.Set<Guid?>(DbType.Guid, GuidColumnDefinition);
+            EnumConverter = new EnumConverter();
+            RowVersionConverter = new RowVersionConverter();
+            ReferenceTypeConverter = new ReferenceTypeConverter();
+            ValueTypeConverter = new ValueTypeConverter();
 
-            //Overriden by DateTimeConverter
-            DbTypeMap.Set<DateTime>(DbType.DateTime, DateTimeColumnDefinition);
-            DbTypeMap.Set<DateTime?>(DbType.DateTime, DateTimeColumnDefinition);
+            RegisterConverter<string>(new StringConverter());
+            RegisterConverter<char>(new CharConverter());
+            RegisterConverter<char[]>(new CharArrayConverter());
+            RegisterConverter<byte[]>(new ByteArrayConverter());
 
-            DbTypeMap.Set<TimeSpan>(DbType.Int64, TimeColumnDefinition); //using ticks
-            DbTypeMap.Set<TimeSpan?>(DbType.Int64, TimeColumnDefinition);
-            DbTypeMap.Set<DateTimeOffset>(DbType.DateTimeOffset, DateTimeOffsetColumnDefinition);
-            DbTypeMap.Set<DateTimeOffset?>(DbType.DateTimeOffset, DateTimeOffsetColumnDefinition);
+            RegisterConverter<byte>(new ByteConverter());
+            RegisterConverter<sbyte>(new SByteConverter());
+            RegisterConverter<short>(new Int16Converter());
+            RegisterConverter<ushort>(new UInt16Converter());
+            RegisterConverter<int>(new Int32Converter());
+            RegisterConverter<uint>(new UInt32Converter());
+            RegisterConverter<long>(new Int64Converter());
+            RegisterConverter<ulong>(new UInt64Converter());
 
-            DbTypeMap.Set<byte>(DbType.Byte, IntColumnDefinition);
-            DbTypeMap.Set<byte?>(DbType.Byte, IntColumnDefinition);
-            DbTypeMap.Set<sbyte>(DbType.SByte, IntColumnDefinition);
-            DbTypeMap.Set<sbyte?>(DbType.SByte, IntColumnDefinition);
-            DbTypeMap.Set<short>(DbType.Int16, IntColumnDefinition);
-            DbTypeMap.Set<short?>(DbType.Int16, IntColumnDefinition);
-            DbTypeMap.Set<ushort>(DbType.UInt16, IntColumnDefinition);
-            DbTypeMap.Set<ushort?>(DbType.UInt16, IntColumnDefinition);
-            DbTypeMap.Set<int>(DbType.Int32, IntColumnDefinition);
-            DbTypeMap.Set<int?>(DbType.Int32, IntColumnDefinition);
-            DbTypeMap.Set<uint>(DbType.UInt32, IntColumnDefinition);
-            DbTypeMap.Set<uint?>(DbType.UInt32, IntColumnDefinition);
+            RegisterConverter<ulong>(new UInt64Converter());
 
-            DbTypeMap.Set<long>(DbType.Int64, LongColumnDefinition);
-            DbTypeMap.Set<long?>(DbType.Int64, LongColumnDefinition);
-            DbTypeMap.Set<ulong>(DbType.UInt64, LongColumnDefinition);
-            DbTypeMap.Set<ulong?>(DbType.UInt64, LongColumnDefinition);
+            RegisterConverter<float>(new FloatConverter());
+            RegisterConverter<double>(new DoubleConverter());
+            RegisterConverter<decimal>(new DecimalConverter());
 
-            DbTypeMap.Set<float>(DbType.Single, RealColumnDefinition);
-            DbTypeMap.Set<float?>(DbType.Single, RealColumnDefinition);
-            DbTypeMap.Set<double>(DbType.Double, RealColumnDefinition);
-            DbTypeMap.Set<double?>(DbType.Double, RealColumnDefinition);
-
-            DbTypeMap.Set<decimal>(DbType.Decimal, DecimalColumnDefinition);
-            DbTypeMap.Set<decimal?>(DbType.Decimal, DecimalColumnDefinition);
-
-            DbTypeMap.Set<byte[]>(DbType.Binary, BlobColumnDefinition);
-
-            DbTypeMap.Set<object>(DbType.String, StringColumnDefinition);
-
-            OnAfterInitColumnTypeMap();
+            RegisterConverter<Guid>(new GuidConverter());
+            RegisterConverter<TimeSpan>(new TimeSpanConverter());
+            RegisterConverter<DateTime>(new DateTimeConverter());
+            RegisterConverter<DateTimeOffset>(new DateTimeOffsetConverter());
         }
 
-        public virtual void OnAfterInitColumnTypeMap()
+        public string GetColumnTypeDefinition(Type columnType, int? fieldLength = null)
         {
+            var converter = GetConverter(columnType);
+            return converter != null
+                ? converter.ColumnDefinition
+                : GetUndefinedColumnDefinition(columnType, fieldLength);
         }
 
-        public void RegisterConverter<T>(OrmLiteConverter converter)
+        public virtual DbType GetColumnDbType(Type columnType)
         {
+            if (columnType.IsEnum)
+                return EnumConverter.DbType;
+
+            var converter = GetConverter(columnType) ?? StringConverter;
+            return converter.DbType;
+        }
+
+        public IOrmLiteExecFilter ExecFilter { get; set; }
+
+        public Dictionary<Type, IOrmLiteConverter> Converters = new Dictionary<Type, IOrmLiteConverter>();
+
+        public string AutoIncrementDefinition = "AUTOINCREMENT"; //SqlServer express limit
+
+        public DecimalConverter DecimalConverter
+        {
+            get { return (DecimalConverter)Converters[typeof(decimal)]; }
+        }
+
+        public StringConverter StringConverter
+        {
+            get { return (StringConverter)Converters[typeof(string)]; }
+        }
+
+        [Obsolete("Use GetStringConverter().UseUnicode")]
+        public virtual bool UseUnicode
+        {
+            get { return StringConverter.UseUnicode; }
+            set { StringConverter.UseUnicode = true; }
+        }
+
+        [Obsolete("Use GetStringConverter().StringLength")]
+        public int DefaultStringLength
+        {
+            get { return StringConverter.StringLength; }
+            set { StringConverter.StringLength = value; }
+        }
+
+        private string paramString = "@";
+        public string ParamString
+        {
+            get { return paramString; }
+            set { paramString = value; }
+        }
+
+        private INamingStrategy namingStrategy = new OrmLiteNamingStrategyBase();
+        public INamingStrategy NamingStrategy
+        {
+            get { return namingStrategy; }
+            set { namingStrategy = value; }
+        }
+
+        public IStringSerializer StringSerializer { get; set; }
+
+        public string DefaultValueFormat = " DEFAULT ({0})";
+
+        private EnumConverter enumConverter;
+        public EnumConverter EnumConverter
+        {
+            get { return enumConverter; }
+            set
+            {
+                value.DialectProvider = this;
+                enumConverter = value;
+            }
+        }
+
+        private RowVersionConverter rowVersionConverter;
+        public RowVersionConverter RowVersionConverter
+        {
+            get { return rowVersionConverter; }
+            set
+            {
+                value.DialectProvider = this;
+                rowVersionConverter = value;
+            }
+        }
+
+        private ReferenceTypeConverter referenceTypeConverter;
+        public ReferenceTypeConverter ReferenceTypeConverter
+        {
+            get { return referenceTypeConverter; }
+            set
+            {
+                value.DialectProvider = this;
+                referenceTypeConverter = value;
+            }
+        }
+
+        private ValueTypeConverter valueTypeConverter;
+        public ValueTypeConverter ValueTypeConverter
+        {
+            get { return valueTypeConverter; }
+            set
+            {
+                value.DialectProvider = this;
+                valueTypeConverter = value;
+            }
+        }
+
+        public void RegisterConverter<T>(IOrmLiteConverter converter)
+        {
+            if (converter == null)
+                throw new ArgumentNullException("converter");
+            if (converter.ColumnDefinition == null)
+                throw new ArgumentNullException(converter.GetType().Name + ".ColumnDefinition");
+
             converter.DialectProvider = this;
             Converters[typeof(T)] = converter;
+        }
 
-            DbTypeMap.Set<T>(converter.DbType, converter.ColumnDefinition ?? StringColumnDefinition);
-
-            OnAfterInitColumnTypeMap();
+        public IOrmLiteConverter GetConverter(Type type)
+        {
+            IOrmLiteConverter converter;
+            return Converters.TryGetValue(type, out converter) 
+                ? converter 
+                : null;
         }
 
         public virtual bool ShouldQuoteValue(Type fieldType)
         {
-            string fieldDefinition;
-            if (!DbTypeMap.ColumnTypeMap.TryGetValue(fieldType, out fieldDefinition))
-            {
-                fieldDefinition = this.GetUndefinedColumnDefinition(fieldType, null);
-            }
+            var converter = GetConverter(fieldType);
+            return converter == null || converter is NativeValueOrmLiteConverter;
+        }
 
-            return fieldDefinition != IntColumnDefinition
-                   && fieldDefinition != LongColumnDefinition
-                   && fieldDefinition != RealColumnDefinition
-                   && fieldDefinition != DecimalColumnDefinition
-                   && fieldDefinition != BoolColumnDefinition;
+        public virtual ulong FromDbRowVersion(object value)
+        {
+            return RowVersionConverter.FromDbRowVersion(value);
         }
 
         /// <summary>
@@ -293,20 +267,80 @@ namespace ServiceStack.OrmLite
 
             var fieldType = Nullable.GetUnderlyingType(fieldDef.FieldType) ?? fieldDef.FieldType;
 
-            IOrmLiteConverter converter;
-            if (Converters.TryGetValue(fieldType, out converter))
-            {
-                var value = converter.FromDbValue(fieldDef, reader, colIndex);
-                fieldDef.SetValueFn(instance, value);
-                return;
-            }
-
-            var convertedValue = ConvertDbValue(reader.GetValue(colIndex), fieldDef.FieldType);
+            IOrmLiteConverter converter = null;
+            object value = null;
             try
             {
-                fieldDef.SetValueFn(instance, convertedValue);
+                if (fieldDef.IsRowVersion)
+                {
+                    converter = RowVersionConverter;
+                    value = converter.FromDbValue(fieldDef, converter.GetValue(reader, colIndex));
+                    if (value != null)
+                        fieldDef.SetValueFn(instance, value);
+                    return;
+                }
+
+                if (Converters.TryGetValue(fieldType, out converter))
+                {
+                    value = converter.FromDbValue(fieldDef, converter.GetValue(reader, colIndex));
+                    fieldDef.SetValueFn(instance, value);
+                    return;
+                }
+
+                converter = fieldType.IsRefType()
+                    ? (IOrmLiteConverter)ReferenceTypeConverter
+                    : ValueTypeConverter;
+                value = converter.FromDbValue(fieldDef, converter.GetValue(reader, colIndex));
+                fieldDef.SetValueFn(instance, value);
             }
-            catch (NullReferenceException ignore) { }
+            catch (Exception ex)
+            {
+                Log.Error("Error in {0}.FromDbValue() on field '{1}' converting from '{2}' to '{3}'"
+                    .Fmt(converter.GetType().Name, fieldDef.Name, value != null ? value.GetType().Name : "undefined", fieldDef.FieldType.Name), ex);
+                throw;
+            }
+        }
+
+        public virtual object ConvertDbValue(object value, Type type)
+        {
+            if (value == null)
+                return null;
+
+            if (value.GetType() == type)
+                return value;
+
+            IOrmLiteConverter converter = null;
+            try
+            {
+                if (Converters.TryGetValue(type, out converter))
+                    return converter.ToDbParamValue(type, value);
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Error in {0}.ToDbParamValue() value '{1}' and Type '{2}'"
+                    .Fmt(converter.GetType().Name, value != null ? value.GetType().Name : "undefined", type.Name), ex);
+                throw;
+            }
+
+            try
+            {
+                var convertedValue = StringSerializer.DeserializeFromString(value.ToString(), type);
+                return convertedValue;
+            }
+            catch (Exception)
+            {
+                Log.ErrorFormat("Error ConvertDbValue trying to convert {0} into {1}", value, type.Name);
+                throw;
+            }
+        }
+
+        public object GetValue(IDataReader reader, int columnIndex, Type type)
+        {
+            IOrmLiteConverter converter;
+            if (Converters.TryGetValue(type, out converter))
+                return converter.GetValue(reader, columnIndex);
+
+            return reader.GetValue(columnIndex);
         }
 
         public abstract IDbConnection CreateConnection(string filePath, Dictionary<string, string> options);
@@ -366,8 +400,8 @@ namespace ServiceStack.OrmLite
         protected virtual string GetUndefinedColumnDefinition(Type fieldType, int? fieldLength)
         {
             return fieldLength.HasValue
-                ? string.Format(StringLengthColumnDefinitionFormat, fieldLength.GetValueOrDefault(DefaultStringLength))
-                : MaxStringColumnDefinition;
+                ? StringConverter.GetColumnDefinition(fieldLength.Value)
+                : StringConverter.MaxColumnDefinition;
         }
 
         protected string ReplaceDecimalColumnDefinition(string definition, int? fieldLength, int? scale)
@@ -375,13 +409,14 @@ namespace ServiceStack.OrmLite
             if (fieldLength == null && scale == null)
                 return definition;
 
-            if (fieldLength != DefaultDecimalPrecision || scale != DefaultDecimalScale)
+            var existingDefinition = DecimalConverter;
+            if (fieldLength != existingDefinition.Precision || scale != existingDefinition.Scale)
             {
                 var customDecimal = string.Format("DECIMAL({0},{1})",
-                    fieldLength.GetValueOrDefault(DefaultDecimalPrecision),
-                    scale.GetValueOrDefault(DefaultDecimalScale));
+                    fieldLength.GetValueOrDefault(existingDefinition.Precision),
+                    scale.GetValueOrDefault(existingDefinition.Scale));
 
-                return definition.Replace(DecimalColumnDefinition, customDecimal);
+                return definition.Replace(existingDefinition.ColumnDefinition, customDecimal);
             }
 
             return definition;
@@ -400,15 +435,12 @@ namespace ServiceStack.OrmLite
             else if (fieldType == typeof(string))
             {
                 fieldDefinition = fieldLength == StringLengthAttribute.MaxText
-                    ? MaxStringColumnDefinition
-                    : string.Format(StringLengthColumnDefinitionFormat, fieldLength.GetValueOrDefault(DefaultStringLength));
+                    ? StringConverter.MaxColumnDefinition
+                    : StringConverter.GetColumnDefinition(fieldLength);
             }
             else
             {
-                if (!DbTypeMap.ColumnTypeMap.TryGetValue(fieldType, out fieldDefinition))
-                {
-                    fieldDefinition = this.GetUndefinedColumnDefinition(fieldType, fieldLength);
-                }
+                fieldDefinition = GetColumnTypeDefinition(fieldType, fieldLength);
             }
 
             var sql = new StringBuilder();
@@ -813,42 +845,34 @@ namespace ServiceStack.OrmLite
 
         public object GetFieldValue(FieldDefinition fieldDef, object value)
         {
-            if (value != null)
+            if (value == null)
+                return null;
+
+            IOrmLiteConverter converter = null;
+            try
             {
-                IOrmLiteConverter converter;
+                var isEnum = value.GetType().IsEnum || fieldDef.FieldType.IsEnum;
+                if (isEnum)
+                {
+                    converter = EnumConverter;
+                    return converter.ToDbValue(fieldDef, value);
+                }
+
                 if (Converters.TryGetValue(fieldDef.FieldType, out converter))
                     return converter.ToDbValue(fieldDef, value);
 
-                if (fieldDef.IsRefType)
-                {
-                    //Let ADO.NET providers handle byte[]
-                    if (fieldDef.FieldType == typeof(byte[]))
-                    {
-                        return value;
-                    }
-                    return StringSerializer.SerializeToString(value);
-                }
-                if (fieldDef.FieldType.IsEnum)
-                {
-                    var enumValue = StringSerializer.SerializeToString(value);
-                    if (enumValue == null)
-                        return null;
+                converter = fieldDef.IsRefType
+                    ? (IOrmLiteConverter)ReferenceTypeConverter
+                    : ValueTypeConverter;
 
-                    enumValue = enumValue.Trim('"');
-                    long intEnum;
-                    if (Int64.TryParse(enumValue, out intEnum))
-                        return intEnum;
-
-                    return enumValue;
-                }
-                if (fieldDef.FieldType == typeof(TimeSpan))
-                {
-                    var timespan = (TimeSpan)value;
-                    return timespan.Ticks;
-                }
+                return converter.ToDbValue(fieldDef, value);
             }
-
-            return value;
+            catch (Exception ex)
+            {
+                Log.Error("Error in {0}.ToDbValue() for field '{1}' of Type '{2}' with value '{3}'"
+                    .Fmt(converter.GetType().Name, fieldDef.Name, fieldDef.FieldType, value != null ? value.GetType().Name : "undefined"), ex);
+                throw;
+            }
         }
 
         protected virtual object GetValueOrDbNull<T>(FieldDefinition fieldDef, object obj)
@@ -1101,25 +1125,6 @@ namespace ServiceStack.OrmLite
             return sqlIndexes;
         }
 
-        public virtual DbType GetColumnDbType(Type columnType)
-        {
-            if (columnType.IsEnum)
-                return DbTypeMap.ColumnDbTypeMap[typeof(string)];
-
-            DbType dbType;
-            var sqlDbType = DbTypeMap.ColumnDbTypeMap.TryGetValue(columnType, out dbType)
-                ? dbType
-                : DbType.String;
-            return sqlDbType;
-        }
-
-        public virtual string GetColumnTypeDefinition(Type fieldType)
-        {
-            string fieldDefinition;
-            DbTypeMap.ColumnTypeMap.TryGetValue(fieldType, out fieldDefinition);
-            return fieldDefinition ?? GetUndefinedColumnDefinition(fieldType, null);
-        }
-
         public virtual bool DoesTableExist(IDbConnection db, string tableName, string schema = null)
         {
             return db.Exec(dbCmd => DoesTableExist(dbCmd, tableName, schema));
@@ -1342,139 +1347,32 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        public virtual object ConvertDbValue(object value, Type type)
-        {
-            if (value == null || value is DBNull) return null;
-
-            var strValue = value as string;
-            if (strValue != null && OrmLiteConfig.StringFilter != null)
-            {
-                value = OrmLiteConfig.StringFilter(strValue);
-            }
-
-            if (value.GetType() == type)
-            {
-                return value;
-            }
-
-            if (type == typeof(DateTimeOffset))
-            {
-                if (strValue != null)
-                {
-                    var moment = DateTimeOffset.Parse(strValue, null, DateTimeStyles.RoundtripKind);
-                    return moment;
-                }
-                if (value is DateTime)
-                {
-                    return new DateTimeOffset((DateTime)value);
-                }
-            }
-
-            if (!type.IsEnum)
-            {
-                var typeCode = type.GetUnderlyingTypeCode();
-                switch (typeCode)
-                {
-                    case TypeCode.Int16:
-                        return value is short ? value : Convert.ToInt16(value);
-                    case TypeCode.UInt16:
-                        return value is ushort ? value : Convert.ToUInt16(value);
-                    case TypeCode.Int32:
-                        return value is int ? value : Convert.ToInt32(value);
-                    case TypeCode.UInt32:
-                        return value is uint ? value : Convert.ToUInt32(value);
-                    case TypeCode.Int64:
-                        return value is long ? value : Convert.ToInt64(value);
-                    case TypeCode.UInt64:
-                        if (value is ulong)
-                            return value;
-                        var byteValue = value as byte[];
-                        if (byteValue != null)
-                            return OrmLiteUtils.ConvertToULong(byteValue);
-                        return Convert.ToUInt64(value);
-                    case TypeCode.Single:
-                        return value is float ? value : Convert.ToSingle(value);
-                    case TypeCode.Double:
-                        return value is double ? value : Convert.ToDouble(value);
-                    case TypeCode.Decimal:
-                        return value is decimal ? value : Convert.ToDecimal(value);
-                }
-
-                if (type == typeof(TimeSpan))
-                {
-                    var ticks = (long)value;
-                    return TimeSpan.FromTicks(ticks);
-                }
-            }
-
-            try
-            {
-                var convertedValue = StringSerializer.DeserializeFromString(value.ToString(), type);
-                return convertedValue;
-            }
-            catch (Exception)
-            {
-                Log.ErrorFormat("Error ConvertDbValue trying to convert {0} into {1}", value, type.Name);
-                throw;
-            }
-        }
-
         public virtual string GetQuotedValue(object value, Type fieldType)
         {
             if (value == null) return "NULL";
 
-            IOrmLiteConverter converter;
-            if (Converters.TryGetValue(fieldType, out converter))
-                return converter.ToQuotedString(value);
-
-            if (fieldType.IsRefType())
-                return GetQuotedValue(StringSerializer.SerializeToString(value));
-
-            if (fieldType.IsEnum)
+            IOrmLiteConverter converter = null;
+            try
             {
-                var isEnumFlags = fieldType.IsEnumFlags();
-                long enumValue;
-                if (!isEnumFlags && long.TryParse(value.ToString(), out enumValue))
-                {
-                    value = Enum.ToObject(fieldType, enumValue).ToString();
-                }
+                var isEnum = fieldType.IsEnum || value.GetType().IsEnum;
+                if (isEnum)
+                    return EnumConverter.ToQuotedString(fieldType, value);
 
-                var enumString = StringSerializer.SerializeToString(value);
+                if (Converters.TryGetValue(fieldType, out converter))
+                    return converter.ToQuotedString(fieldType, value);
 
-                return !isEnumFlags
-                    ? GetQuotedValue(enumString.Trim('"'))
-                    : enumString;
+                if (fieldType.IsRefType())
+                    return ReferenceTypeConverter.ToQuotedString(fieldType, value);
+
+                if (fieldType.IsValueType())
+                    return ValueTypeConverter.ToQuotedString(fieldType, value);
             }
-
-            var typeCode = fieldType.GetTypeCode();
-            switch (typeCode)
+            catch (Exception ex)
             {
-                case TypeCode.Single:
-                    return ((float)value).ToString(CultureInfo.InvariantCulture);
-                case TypeCode.Double:
-                    return ((double)value).ToString(CultureInfo.InvariantCulture);
-                case TypeCode.Decimal:
-                    return ((decimal)value).ToString(CultureInfo.InvariantCulture);
-
-                case TypeCode.Byte:
-                case TypeCode.Int16:
-                case TypeCode.Int32:
-                case TypeCode.Int64:
-                case TypeCode.SByte:
-                case TypeCode.UInt16:
-                case TypeCode.UInt32:
-                case TypeCode.UInt64:
-                    if (fieldType.IsNumericType())
-                    {
-                        if (value is TimeSpan)
-                            return ((TimeSpan)value).Ticks.ToString(CultureInfo.InvariantCulture);
-                        return Convert.ChangeType(value, fieldType).ToString();
-                    }
-                    break;
+                Log.Error("Error in {0}.ToQuotedString() value '{0}' and Type '{1}'"
+                    .Fmt(converter.GetType().Name, value != null ? value.GetType().Name : "undefined", fieldType.Name), ex);
+                throw;
             }
-
-            if (fieldType == typeof(TimeSpan))
-                return ((TimeSpan)value).Ticks.ToString(CultureInfo.InvariantCulture);
 
             return ShouldQuoteValue(fieldType)
                     ? GetQuotedValue(value.ToString())
