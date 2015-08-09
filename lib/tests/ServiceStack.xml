@@ -518,7 +518,7 @@
               exception "The server committed a protocol violation. Section=ResponseStatusLine"
             </summary>
         </member>
-        <member name="M:ServiceStack.Auth.UserAuthRepositoryExtensions.InitSchema(ServiceStack.Auth.IAuthRepository)">
+        <member name="M:ServiceStack.Auth.UserAuthRepositoryExtensions.AssignRoles(ServiceStack.Auth.IAuthRepository,ServiceStack.Auth.IUserAuth,System.Collections.Generic.ICollection{System.String},System.Collections.Generic.ICollection{System.String})">
             <summary>
             Creates the required missing tables or DB schema 
             </summary>
@@ -626,11 +626,6 @@
         <member name="T:ServiceStack.Auth.InMemoryAuthRepository">
             <summary>
             Thread-safe In memory UserAuth data store so it can be used without a dependency on Redis.
-            </summary>
-        </member>
-        <member name="M:ServiceStack.Auth.IRequiresSchema.InitSchema">
-            <summary>
-            Creates the required missing tables or DB schema 
             </summary>
         </member>
         <member name="M:ServiceStack.Auth.OAuthProvider.Authenticate(ServiceStack.IServiceBase,ServiceStack.Auth.IAuthSession,ServiceStack.Authenticate)">
@@ -2888,6 +2883,11 @@
             Custom state associated with the failure.
             </summary>
         </member>
+        <member name="P:ServiceStack.FluentValidation.Results.ValidationFailure.PlaceholderValues">
+            <summary>
+            Placeholder values used for string substitution when building ErrorMessage
+            </summary>
+        </member>
         <member name="M:ServiceStack.FluentValidation.Results.ValidationFailure.ToString">
             <summary>
             Creates a textual representation of the failure.
@@ -2961,7 +2961,7 @@
             End a ServiceStack Request
             </summary>
         </member>
-        <member name="M:ServiceStack.HttpExtensions.EndHttpHandlerRequest(System.Web.HttpResponseBase,System.Boolean,System.Boolean,System.Boolean,System.Action{System.Web.HttpResponseBase})">
+        <member name="M:ServiceStack.HttpExtensions.EndHttpHandlerRequest(System.Web.HttpContextBase,System.Boolean,System.Boolean,System.Boolean,System.Action{System.Web.HttpResponseBase})">
             <summary>
             End a HttpHandler Request
             </summary>
