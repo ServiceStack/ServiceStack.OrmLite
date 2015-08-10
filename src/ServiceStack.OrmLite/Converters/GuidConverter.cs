@@ -14,10 +14,5 @@ namespace ServiceStack.OrmLite.Converters
         {
             get { return DbType.Guid; }
         }
-
-        public override object GetValue(IDataReader reader, int columnIndex)
-        {
-            return reader.GetGuid(columnIndex);
-        }
     }
 }

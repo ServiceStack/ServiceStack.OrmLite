@@ -19,5 +19,10 @@ namespace ServiceStack.OrmLite.Sqlite.Converters
             var fmt = "x'" + BitConverter.ToString(bytes).Replace("-", "") + "'";
             return fmt;
         }
+
+        public override object GetValue(IDataReader reader, int columnIndex)
+        {
+            return reader.GetGuid(columnIndex);
+        }
     }
 }
