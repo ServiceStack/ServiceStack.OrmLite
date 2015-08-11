@@ -20,18 +20,21 @@ namespace ServiceStack.OrmLite.Tests
 
                 dateTime = new DateTime(2012, 1, 1, 1, 1, 1, DateTimeKind.Local);
                 x = InsertAndSelectDateTime(db, dateTime);
+                Assert.AreEqual(x.Test, dateTime);
                 Assert.AreEqual(x.Test, x.TestNullable.Value);
                 x = db.Select<DateTimeObject>(d => d.Test == dateTime).FirstOrDefault();
                 Assert.IsNotNull(x);
 
                 dateTime = new DateTime(2012, 1, 1, 1, 1, 1, DateTimeKind.Utc);
                 x = InsertAndSelectDateTime(db, dateTime);
+                Assert.AreEqual(x.Test, dateTime);
                 Assert.AreEqual(x.Test, x.TestNullable.Value);
                 x = db.Select<DateTimeObject>(d => d.Test == dateTime).FirstOrDefault();
                 Assert.IsNotNull(x);
 
                 dateTime = new DateTime(2012, 1, 1, 1, 1, 1, DateTimeKind.Unspecified);
                 x = InsertAndSelectDateTime(db, dateTime);
+                Assert.AreEqual(x.Test, dateTime);
                 Assert.AreEqual(x.Test, x.TestNullable.Value);
                 x = db.Select<DateTimeObject>(d => d.Test == dateTime).FirstOrDefault();
                 Assert.IsNotNull(x);
