@@ -60,7 +60,7 @@ manager.StartNewFile(tbl.Name + ".cs");
 <# if (MakeSingular) {#>
 	[Alias("<#=tbl.Name#>")]
 <#}#>
-<# if (UseSchemaAttribute && !string.IsNullOrEmpty(tbl.Schema)) {#>
+<# if (UseSchemaAttribute && !string.IsNullOrEmpty(tbl.Schema) && tbl.Schema != "dbo") {#>
 	[Schema("<#=tbl.Schema#>")]
 <#}#>
     public partial class <#=tbl.ClassName#><#if (tbl.HasPK() && UseIdAsPK) { #> : IHasId<<#=tbl.PK.PropertyType#>><#}#> 
