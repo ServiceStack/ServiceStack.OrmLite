@@ -20,9 +20,9 @@ namespace ServiceStack.OrmLite.Converters
             return this.ConvertNumber(fieldType, value);
         }
 
-        public override object FromDbValue(FieldDefinition fieldDef, object value)
+        public override object FromDbValue(Type fieldType, object value)
         {
-            return this.ConvertNumber(fieldDef.FieldType, value);
+            return this.ConvertNumber(fieldType, value);
         }
     }
 

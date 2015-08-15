@@ -21,7 +21,7 @@ namespace ServiceStack.OrmLite.Sqlite.Converters
             return (bool)value ? 1 : 0;
         }
 
-        public override object FromDbValue(FieldDefinition fieldDef, object value)
+        public override object FromDbValue(Type fieldType, object value)
         {
             var intVal = int.Parse(value.ToString());
             return intVal != 0;

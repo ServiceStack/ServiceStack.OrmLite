@@ -56,7 +56,7 @@ namespace ServiceStack.OrmLite.Converters
             return dateTime;
         }
 
-        public override object FromDbValue(FieldDefinition fieldDef, object value)
+        public override object FromDbValue(Type fieldType, object value)
         {
             var strValue = value as string;
             if (strValue != null)

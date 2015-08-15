@@ -16,7 +16,7 @@ namespace ServiceStack.OrmLite.Converters
         }
 
         //Also support coercing 0 != int as Bool
-        public override object FromDbValue(FieldDefinition fieldDef, object value)
+        public override object FromDbValue(Type fieldType, object value)
         {
             if (value is bool)
                 return value;

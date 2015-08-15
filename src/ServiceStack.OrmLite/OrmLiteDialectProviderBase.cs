@@ -274,7 +274,7 @@ namespace ServiceStack.OrmLite
                 if (fieldDef.IsRowVersion)
                 {
                     converter = RowVersionConverter;
-                    value = converter.FromDbValue(fieldDef, converter.GetValue(reader, colIndex));
+                    value = converter.FromDbValue(fieldDef.FieldType, converter.GetValue(reader, colIndex));
                     if (value != null)
                         fieldDef.SetValueFn(instance, value);
                     return;
@@ -282,7 +282,7 @@ namespace ServiceStack.OrmLite
 
                 if (Converters.TryGetValue(fieldType, out converter))
                 {
-                    value = converter.FromDbValue(fieldDef, converter.GetValue(reader, colIndex));
+                    value = converter.FromDbValue(fieldDef.FieldType, converter.GetValue(reader, colIndex));
                     fieldDef.SetValueFn(instance, value);
                     return;
                 }
@@ -290,7 +290,7 @@ namespace ServiceStack.OrmLite
                 converter = fieldType.IsRefType()
                     ? (IOrmLiteConverter)ReferenceTypeConverter
                     : ValueTypeConverter;
-                value = converter.FromDbValue(fieldDef, converter.GetValue(reader, colIndex));
+                value = converter.FromDbValue(fieldDef.FieldType, converter.GetValue(reader, colIndex));
                 fieldDef.SetValueFn(instance, value);
             }
             catch (Exception ex)
@@ -855,17 +855,17 @@ namespace ServiceStack.OrmLite
                 if (isEnum)
                 {
                     converter = EnumConverter;
-                    return converter.ToDbValue(fieldDef, value);
+                    return converter.ToDbValue(fieldDef.FieldType, value);
                 }
 
                 if (Converters.TryGetValue(fieldDef.FieldType, out converter))
-                    return converter.ToDbValue(fieldDef, value);
+                    return converter.ToDbValue(fieldDef.FieldType, value);
 
                 converter = fieldDef.IsRefType
                     ? (IOrmLiteConverter)ReferenceTypeConverter
                     : ValueTypeConverter;
 
-                return converter.ToDbValue(fieldDef, value);
+                return converter.ToDbValue(fieldDef.FieldType, value);
             }
             catch (Exception ex)
             {

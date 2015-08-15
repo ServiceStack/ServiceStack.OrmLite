@@ -15,9 +15,7 @@ namespace ServiceStack.OrmLite
 
         object ToDbValue(Type fieldType, object value);
 
-        object ToDbValue(FieldDefinition fieldDef, object value);
-
-        object FromDbValue(FieldDefinition fieldDef, object value);
+        object FromDbValue(Type fieldType, object value);
 
         object GetValue(IDataReader reader, int columnIndex);
     }
@@ -51,7 +49,7 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
-        /// Parameterized value to Save in DB
+        /// Parameterized value in parameterized queries
         /// </summary>
         public virtual object ToDbValue(Type fieldType, object value)
         {
@@ -59,21 +57,16 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
-        /// Parameterized Value with FieldDefinition. Optional, Defaults to ToDbValue(Type,object)
+        /// Value from DB to Populate on POCO Data Model with
         /// </summary>
-        public virtual object ToDbValue(FieldDefinition fieldDef, object value)
-        {
-            return ToDbValue(fieldDef.FieldType, value);
-        }
-
-        /// <summary>
-        /// Value from DB to Populate on POCO Data Model
-        /// </summary>
-        public virtual object FromDbValue(FieldDefinition fieldDef, object value)
+        public virtual object FromDbValue(Type fieldType, object value)
         {
             return value;
         }
 
+        /// <summary>
+        /// Retrieve Value from ADO.NET IDataReader. Defaults to reader.GetValue()
+        /// </summary>
         public virtual object GetValue(IDataReader reader, int columnIndex)
         {
             return reader.GetValue(columnIndex);

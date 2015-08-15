@@ -30,7 +30,7 @@ namespace ServiceStack.OrmLite.SqlServer.Converters
             return base.DialectProvider.GetQuotedValue(boolValue ? 1 : 0, typeof(int));
         }
 
-        public override object FromDbValue(FieldDefinition fieldDef, object value)
+        public override object FromDbValue(Type fieldType, object value)
         {
             if (value is bool)
                 return value;

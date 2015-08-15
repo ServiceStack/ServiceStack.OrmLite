@@ -9,10 +9,5 @@ namespace ServiceStack.OrmLite.PostgreSQL.Converters
         {
             get { return "BOOLEAN"; }
         }
-
-        public override object FromDbValue(FieldDefinition fieldDef, object value)
-        {
-            return base.FromDbValue(fieldDef, value);
-        }
     }
 }

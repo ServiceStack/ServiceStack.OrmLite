@@ -34,7 +34,7 @@ namespace ServiceStack.OrmLite.Oracle.Converters
             return _timestampConverter.ConvertToOracleTimeStampTz(timestamp);
         }
 
-        public override object FromDbValue(FieldDefinition fieldDef, object value)
+        public override object FromDbValue(Type fieldType, object value)
         {
             return Convert.ChangeType(value, typeof(DateTimeOffset));
         }

@@ -27,13 +27,7 @@ namespace ServiceStack.OrmLite.Oracle.Converters
             return ((Guid)value).ToString();
         }
 
-        public virtual object ToDbValue(FieldDefinition fieldDef, object value)
-        {
-            var guid = (Guid)value;
-            return guid.ToString();
-        }
-
-        public override object FromDbValue(FieldDefinition fieldDef, object value)
+        public override object FromDbValue(Type fieldType, object value)
         {
             return new Guid(value.ToString());
         }
@@ -62,13 +56,7 @@ namespace ServiceStack.OrmLite.Oracle.Converters
             return ((Guid)value).ToByteArray();
         }
 
-        public virtual object ToDbValue(FieldDefinition fieldDef, object value)
-        {
-            var guid = (Guid)value;
-            return guid.ToByteArray();
-        }
-
-        public override object FromDbValue(FieldDefinition fieldDef, object value)
+        public override object FromDbValue(Type fieldType, object value)
         {
             var raw = (byte[])value;
             return new Guid(raw);

@@ -33,7 +33,7 @@ namespace ServiceStack.OrmLite.Converters
                 : "VARCHAR({0})".Fmt(stringLength.GetValueOrDefault(StringLength));
         }
 
-        public override object FromDbValue(FieldDefinition fieldDef, object value)
+        public override object FromDbValue(Type fieldType, object value)
         {
             var strValue = value as string;
             if (strValue != null)
@@ -53,7 +53,7 @@ namespace ServiceStack.OrmLite.Converters
             get { return DbType.StringFixedLength; }
         }
 
-        public override object FromDbValue(FieldDefinition fieldDef, object value)
+        public override object FromDbValue(Type fieldType, object value)
         {
             if (value is char)
                 return value;
@@ -80,7 +80,7 @@ namespace ServiceStack.OrmLite.Converters
             return new string(chars);
         }
 
-        public override object FromDbValue(FieldDefinition fieldDef, object value)
+        public override object FromDbValue(Type fieldType, object value)
         {
             if (value is char[])
                 return value;

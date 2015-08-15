@@ -135,6 +135,7 @@
     <Compile Include="Expression\SqlExpressionTests.cs" />
     <Compile Include="Expression\SelectExpressionTests.cs" />
     <Compile Include="Issues\ComplexJoinWithAlias.cs" />
+    <Compile Include="Issues\CreateTableAliasTest.cs" />
     <Compile Include="Issues\CustomFieldTests.cs" />
     <Compile Include="Issues\LoadReferencesCaseSensitiveTest.cs" />
     <Compile Include="Issues\LoadSelectIssue.cs" />

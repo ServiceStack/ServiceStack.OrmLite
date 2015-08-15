@@ -11,7 +11,7 @@ namespace ServiceStack.OrmLite.SqlServer.Converters
             get { return "rowversion"; }
         }
 
-        public override object FromDbValue(FieldDefinition fieldDef, object value)
+        public override object FromDbValue(Type fieldType, object value)
         {
             var bytes = value as byte[];
             if (bytes != null)

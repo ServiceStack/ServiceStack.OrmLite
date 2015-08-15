@@ -50,7 +50,7 @@ namespace ServiceStack.OrmLite.Sqlite.Converters
             return DialectProvider.GetQuotedValue(dateStr, typeof(string));
         }
 
-        public override object FromDbValue(FieldDefinition fieldDef, object value)
+        public override object FromDbValue(Type fieldType, object value)
         {
             var dateTime = (DateTime)value;
 

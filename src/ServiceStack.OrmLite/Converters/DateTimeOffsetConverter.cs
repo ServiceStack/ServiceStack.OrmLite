@@ -17,7 +17,7 @@ namespace ServiceStack.OrmLite.Converters
         }
 
         //From OrmLiteDialectProviderBase:
-        public override object FromDbValue(FieldDefinition fieldDef, object value)
+        public override object FromDbValue(Type fieldType, object value)
         {
             var strValue = value as string;
             if (strValue != null)
@@ -29,7 +29,7 @@ namespace ServiceStack.OrmLite.Converters
             {
                 return new DateTimeOffset((DateTime)value);
             }
-            var convertedValue = DialectProvider.StringSerializer.DeserializeFromString(value.ToString(), fieldDef.FieldType);
+            var convertedValue = DialectProvider.StringSerializer.DeserializeFromString(value.ToString(), fieldType);
             return convertedValue;
         }
     }

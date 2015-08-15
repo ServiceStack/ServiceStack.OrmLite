@@ -52,7 +52,7 @@ namespace ServiceStack.OrmLite.Converters
             return (ulong)this.ConvertNumber(typeof(ulong), value);
         }
 
-        public override object FromDbValue(FieldDefinition fieldDef, object value)
+        public override object FromDbValue(Type fieldType, object value)
         {
             return value != null
                 ? this.ConvertNumber(typeof(ulong), value)
@@ -76,9 +76,9 @@ namespace ServiceStack.OrmLite.Converters
             return DialectProvider.StringSerializer.SerializeToString(value);
         }
 
-        public override object FromDbValue(FieldDefinition fieldDef, object value)
+        public override object FromDbValue(Type fieldType, object value)
         {
-            var convertedValue = DialectProvider.StringSerializer.DeserializeFromString(value.ToString(), fieldDef.FieldType);
+            var convertedValue = DialectProvider.StringSerializer.DeserializeFromString(value.ToString(), fieldType);
             return convertedValue;
         }
     }
@@ -95,9 +95,9 @@ namespace ServiceStack.OrmLite.Converters
             return DialectProvider.ConvertDbValue(value, fieldType);
         }
 
-        public override object FromDbValue(FieldDefinition fieldDef, object value)
+        public override object FromDbValue(Type fieldType, object value)
         {
-            return DialectProvider.ConvertDbValue(value, fieldDef.FieldType);
+            return DialectProvider.ConvertDbValue(value, fieldType);
         }
     }
 }

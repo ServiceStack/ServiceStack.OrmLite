@@ -15,7 +15,7 @@ namespace ServiceStack.OrmLite.Firebird.Converters
             return string.Format("CAST('{0}' AS {1})", (Guid)value, ColumnDefinition);  // TODO : check this !!!
         }
 
-        public override object FromDbValue(FieldDefinition fieldDef, object value)
+        public override object FromDbValue(Type fieldType, object value)
         {
             return new Guid(value.ToString());
         }
@@ -33,7 +33,7 @@ namespace ServiceStack.OrmLite.Firebird.Converters
             return "X'" + ((Guid)value).ToString("N") + "'";
         }
 
-        public override object FromDbValue(FieldDefinition fieldDef, object value)
+        public override object FromDbValue(Type fieldType, object value)
         {
             //BitConverter.IsLittleEndian // TODO: check big endian
 

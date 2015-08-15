@@ -27,7 +27,7 @@ namespace ServiceStack.OrmLite.Converters
             return timespan.Ticks;
         }
 
-        public override object FromDbValue(FieldDefinition fieldDef, object value)
+        public override object FromDbValue(Type fieldType, object value)
         {
             var ticks = (long)this.ConvertNumber(typeof(long), value);
             return TimeSpan.FromTicks(ticks);
