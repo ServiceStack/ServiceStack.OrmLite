@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
+using ServiceStack.DataAnnotations;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
@@ -44,6 +45,9 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(db.Single<AllTypes>(x => x.Char == lastRow.Char), Is.EqualTo(lastRow));
                 Assert.That(db.Single<AllTypes>(x => x.NullableDateTime == lastRow.NullableDateTime), Is.EqualTo(lastRow));
                 Assert.That(db.Single<AllTypes>(x => x.NullableTimeSpan == lastRow.NullableTimeSpan), Is.EqualTo(lastRow));
+                Assert.That(db.Single<AllTypes>(x => x.CustomText == lastRow.CustomText), Is.EqualTo(lastRow));
+                Assert.That(db.Single<AllTypes>(x => x.MaxText == lastRow.MaxText), Is.EqualTo(lastRow));
+                Assert.That(db.Single<AllTypes>(x => x.CustomDecimal == lastRow.CustomDecimal), Is.EqualTo(lastRow));
 
                 Assert.That(db.Single<AllTypes>(q => q.Where(x => x.Bool == lastRow.Bool).OrderByDescending(x => x.Id)), Is.EqualTo(lastRow));
 
@@ -96,6 +100,15 @@ namespace ServiceStack.OrmLite.Tests
         public SubType SubType { get; set; }
         public List<SubType> SubTypes { get; set; }
 
+        [StringLength(100)]
+        public string CustomText { get; set; }
+
+        [StringLength(StringLengthAttribute.MaxText)]
+        public string MaxText { get; set; }
+
+        [DecimalLength(10,2)]
+        public decimal CustomDecimal { get; set; }
+
         protected bool Equals(AllTypes other)
         {
             return Id == other.Id &&
@@ -128,7 +141,10 @@ namespace ServiceStack.OrmLite.Tests
                 StringMap.SequenceEqual(other.StringMap) &&
                 IntStringMap.SequenceEqual(other.IntStringMap) &&
                 SubType.Equals(other.SubType) &&
-                SubTypes.SequenceEqual(other.SubTypes);
+                SubTypes.SequenceEqual(other.SubTypes) &&
+                CustomText == other.CustomText &&
+                MaxText == other.MaxText &&
+                CustomDecimal.Equals(other.CustomDecimal);
         }
 
         public override bool Equals(object obj)
@@ -174,6 +190,9 @@ namespace ServiceStack.OrmLite.Tests
                 hashCode = (hashCode * 397) ^ (IntStringMap != null ? IntStringMap.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ (SubType != null ? SubType.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ (SubTypes != null ? SubTypes.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (CustomText != null ? CustomText.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (MaxText != null ? MaxText.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ CustomDecimal.GetHashCode();
                 return hashCode;
             }
         }
@@ -228,7 +247,10 @@ namespace ServiceStack.OrmLite.Tests
                         Id = i + 1,
                         Name = "Name" + i + 1,
                     },
-                }
+                },
+                CustomText = "CustomText" + i,
+                MaxText = "MaxText" + i,
+                CustomDecimal = i + 13.13M,
             };
         }
     }
