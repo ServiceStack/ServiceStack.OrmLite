@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.Converters;
 
 namespace ServiceStack.OrmLite.PostgreSQL.Converters
@@ -14,7 +15,10 @@ namespace ServiceStack.OrmLite.PostgreSQL.Converters
         public override string GetColumnDefinition(int? stringLength)
         {
             //PostgreSQL doesn't support NVARCHAR when UseUnicode = true so just use TEXT
-            return ColumnDefinition;
+            if (stringLength == null || stringLength == StringLengthAttribute.MaxText)
+                return ColumnDefinition;
+
+            return "VARCHAR({0})".Fmt(stringLength.Value);
         }
     }
 
