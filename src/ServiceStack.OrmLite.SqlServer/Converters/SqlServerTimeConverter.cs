@@ -7,9 +7,16 @@ namespace ServiceStack.OrmLite.SqlServer.Converters
     {
         private static readonly DateTime timeSpanOffset = new DateTime(1900, 01, 01);
 
+        public int? Precision { get; set; }
+
         public override string ColumnDefinition
         {
-            get { return "TIME"; }
+            get
+            {
+                return Precision != null
+                    ? "TIME({0})".Fmt(Precision.Value)
+                    : "TIME";
+            }
         }
 
         public override DbType DbType
