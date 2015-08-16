@@ -37,7 +37,6 @@ namespace ServiceStack.OrmLite.SqlServer
             base.RegisterConverter<decimal>(new SqlServerDecimalConverter());
 
             base.RegisterConverter<DateTime>(new SqlServerDateTimeConverter());
-            base.RegisterConverter<TimeSpan>(new SqlServerTimeSpanAsIntConverter());
 
             base.RegisterConverter<Guid>(new SqlServerGuidConverter());
 
