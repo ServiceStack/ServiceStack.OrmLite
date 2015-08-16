@@ -37,7 +37,6 @@ namespace ServiceStack.OrmLite.PostgreSQL
             RegisterConverter<bool>(new PostgreSqlBoolConverter());
             RegisterConverter<Guid>(new PostgreSqlGuidConverter());
 
-            RegisterConverter<TimeSpan>(new PostgreSqlTimeSpanAsIntConverter());
             RegisterConverter<DateTime>(new PostgreSqlDateTimeConverter());
             RegisterConverter<DateTimeOffset>(new PostgreSqlDateTimeOffsetConverter());
 
