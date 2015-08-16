@@ -84,8 +84,8 @@
     <Compile Include="..\ServiceStack.OrmLite.SqlServer\Converters\SqlServerStringConverters.cs">
       <Link>Converters\SqlServerStringConverters.cs</Link>
     </Compile>
-    <Compile Include="..\ServiceStack.OrmLite.SqlServer\Converters\SqlServerTimeConverters.cs">
-      <Link>Converters\SqlServerTimeConverters.cs</Link>
+    <Compile Include="..\ServiceStack.OrmLite.SqlServer\Converters\SqlServerTimeConverter.cs">
+      <Link>Converters\SqlServerTimeConverter.cs</Link>
     </Compile>
     <Compile Include="..\ServiceStack.OrmLite.SqlServer\Properties\AssemblyInfo.cs">
       <Link>AssemblyInfo.cs</Link>
