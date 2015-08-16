@@ -1,4 +1,5 @@
 ﻿using System;
+using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.Converters;
 
 namespace ServiceStack.OrmLite.SqlServer.Converters
@@ -12,6 +13,9 @@ namespace ServiceStack.OrmLite.SqlServer.Converters
 
         public override string GetColumnDefinition(int? stringLength)
         {
+            if (stringLength.GetValueOrDefault() == StringLengthAttribute.MaxText)
+                return MaxColumnDefinition;
+
             var safeLength = Math.Min(
                 stringLength.GetValueOrDefault(StringLength), 
                 UseUnicode ? 4000 : 8000);

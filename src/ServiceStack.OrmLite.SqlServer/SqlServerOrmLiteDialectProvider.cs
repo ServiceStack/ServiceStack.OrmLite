@@ -37,7 +37,7 @@ namespace ServiceStack.OrmLite.SqlServer
             base.RegisterConverter<decimal>(new SqlServerDecimalConverter());
 
             base.RegisterConverter<DateTime>(new SqlServerDateTimeConverter());
-            base.RegisterConverter<TimeSpan>(new SqlServerTimeSpanConverter());
+            base.RegisterConverter<TimeSpan>(new SqlServerTimeSpanAsIntConverter());
 
             base.RegisterConverter<Guid>(new SqlServerGuidConverter());
 
@@ -86,11 +86,6 @@ namespace ServiceStack.OrmLite.SqlServer
             }
 
             return new SqlConnection(connectionString);
-        }
-
-        protected override string GetUndefinedColumnDefinition(Type fieldType, int? fieldLength)
-        {
-            return string.Format(StringConverter.ColumnDefinition, fieldLength.HasValue ? fieldLength.Value.ToString() : "MAX");
         }
 
         [Obsolete("Use SqlServerDialect.Provider.RegisterConverter<DateTime>(new SqlServerDateTime2Converter());")]

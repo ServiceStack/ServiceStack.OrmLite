@@ -62,6 +62,23 @@ namespace ServiceStack.OrmLite.Converters
 
     public class ReferenceTypeConverter : StringConverter
     {
+        public override string ColumnDefinition
+        {
+            get { return DialectProvider.GetStringConverter().MaxColumnDefinition; }
+        }
+
+        public override string MaxColumnDefinition
+        {
+            get { return DialectProvider.GetStringConverter().MaxColumnDefinition; }
+        }
+
+        public override string GetColumnDefinition(int? stringLength)
+        {
+            return stringLength != null
+                ? base.GetColumnDefinition(stringLength)
+                : MaxColumnDefinition;
+        }
+
         public override string ToQuotedString(Type fieldType, object value)
         {
             return DialectProvider.GetQuotedValue(DialectProvider.StringSerializer.SerializeToString(value));
@@ -85,6 +102,23 @@ namespace ServiceStack.OrmLite.Converters
 
     public class ValueTypeConverter : StringConverter
     {
+        public override string ColumnDefinition
+        {
+            get { return DialectProvider.GetStringConverter().MaxColumnDefinition; }
+        }
+
+        public override string MaxColumnDefinition
+        {
+            get { return DialectProvider.GetStringConverter().MaxColumnDefinition; }
+        }
+
+        public override string GetColumnDefinition(int? stringLength)
+        {
+            return stringLength != null
+                ? base.GetColumnDefinition(stringLength)
+                : MaxColumnDefinition;
+        }
+
         public override string ToQuotedString(Type fieldType, object value)
         {
             return DialectProvider.GetQuotedValue(DialectProvider.StringSerializer.SerializeToString(value));

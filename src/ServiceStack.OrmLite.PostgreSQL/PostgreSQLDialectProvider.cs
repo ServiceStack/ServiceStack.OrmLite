@@ -32,13 +32,12 @@ namespace ServiceStack.OrmLite.PostgreSQL
             base.InitColumnTypeMap();
 
             RegisterConverter<string>(new PostgreSqlStringConverter());
-            RegisterConverter<char>(new PostgreSqlCharConverter());
             RegisterConverter<char[]>(new PostgreSqlCharArrayConverter());
 
             RegisterConverter<bool>(new PostgreSqlBoolConverter());
             RegisterConverter<Guid>(new PostgreSqlGuidConverter());
 
-            RegisterConverter<TimeSpan>(new PostgreSqlTimeSpanConverter());
+            RegisterConverter<TimeSpan>(new PostgreSqlTimeSpanAsIntConverter());
             RegisterConverter<DateTime>(new PostgreSqlDateTimeConverter());
             RegisterConverter<DateTimeOffset>(new PostgreSqlDateTimeOffsetConverter());
 
@@ -79,14 +78,6 @@ namespace ServiceStack.OrmLite.PostgreSQL
             if (customFieldDefinition != null)
             {
                 fieldDefinition = customFieldDefinition;
-            }
-            else if (fieldType == typeof(string))
-            {
-                fieldDefinition = fieldLength == int.MaxValue
-                    ? StringConverter.MaxColumnDefinition
-                    : fieldLength != null ?
-                        string.Format(StringConverter.ColumnDefinition, fieldLength) :
-                        StringConverter.ColumnDefinition;
             }
             else
             {

@@ -58,7 +58,7 @@ namespace ServiceStack.OrmLite.VistaDB
             base.RegisterConverter<int>(new VistaDbInt32Converter());
             base.RegisterConverter<uint>(new VistaDbUInt32Converter());
 
-            base.RegisterConverter<TimeSpan>(new VistaDbTimeSpanConverter());
+            base.RegisterConverter<TimeSpan>(new VistaDbTimeSpanAsIntConverter());
         }
 
         public override string GetQuotedValue(string paramValue)
@@ -163,17 +163,7 @@ namespace ServiceStack.OrmLite.VistaDB
             bool isPrimaryKey, bool autoIncrement, bool isNullable, bool isRowVersion,
             int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
         {
-            string fieldDefinition;
-            if (fieldType == typeof(string))
-            {
-                fieldDefinition = fieldLength == StringLengthAttribute.MaxText
-                    ? StringConverter.MaxColumnDefinition
-                    : StringConverter.GetColumnDefinition(fieldLength);
-            }
-            else
-            {
-                fieldDefinition = GetColumnTypeDefinition(fieldType, fieldLength);
-            }
+            var fieldDefinition = customFieldDefinition ?? GetColumnTypeDefinition(fieldType, fieldLength);
 
             var sql = new StringBuilder();
             sql.AppendFormat("{0} {1}", this.GetQuotedColumnName(fieldName), fieldDefinition);

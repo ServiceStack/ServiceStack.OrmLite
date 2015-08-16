@@ -158,13 +158,14 @@ namespace ServiceStack.OrmLite.Tests
                 var insertRowA = db.SingleById<AuditTableA>(idA);
                 Assert.That(insertRowA.CreatedDate, Is.EqualTo(insertDate));
 
-                var hold = OrmLiteConfig.DialectProvider.GetStringConverter().UseUnicode;
-                OrmLiteConfig.DialectProvider.GetStringConverter().UseUnicode = true;
+                var stringConverter = OrmLiteConfig.DialectProvider.GetStringConverter();
+                var hold = stringConverter.UseUnicode;
+                stringConverter.UseUnicode = true;
 
                 db.DropAndCreateTable<AuditTableA>();
                 db.GetLastSql().Print();
 
-                OrmLiteConfig.DialectProvider.GetStringConverter().UseUnicode = hold;
+                stringConverter.UseUnicode = hold;
 
                 db.DropAndCreateTable<AuditTableA>();
                 var after = db.GetLastSql();

@@ -315,8 +315,7 @@ namespace ServiceStack.OrmLite.Firebird
             bool isPrimaryKey, bool autoIncrement, bool isNullable, bool isRowVersion,
             int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
         {
-            var fieldDefinition = customFieldDefinition 
-                ?? GetColumnTypeDefinition(fieldType, fieldLength);
+            var fieldDefinition = customFieldDefinition ?? GetColumnTypeDefinition(fieldType, fieldLength);
 
             var sql = new StringBuilder();
             sql.AppendFormat("{0} {1}", GetQuotedColumnName(fieldName), fieldDefinition);
@@ -333,7 +332,6 @@ namespace ServiceStack.OrmLite.Firebird
 
             return sql.ToString();
         }
-
 
         public override List<string> ToCreateIndexStatements(Type tableType)
         {

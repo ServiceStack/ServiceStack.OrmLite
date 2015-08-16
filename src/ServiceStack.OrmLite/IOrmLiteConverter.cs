@@ -20,6 +20,11 @@ namespace ServiceStack.OrmLite
         object GetValue(IDataReader reader, int columnIndex);
     }
 
+    public interface IHasCustomColumnDefinition
+    {
+        string GetColumnDefinition(int? length);
+    }
+
     public abstract class OrmLiteConverter : IOrmLiteConverter
     {
         /// <summary>

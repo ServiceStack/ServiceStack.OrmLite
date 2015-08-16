@@ -114,7 +114,7 @@ namespace ServiceStack.OrmLite
             RegisterConverter<decimal>(new DecimalConverter());
 
             RegisterConverter<Guid>(new GuidConverter());
-            RegisterConverter<TimeSpan>(new TimeSpanConverter());
+            RegisterConverter<TimeSpan>(new TimeSpanAsIntConverter());
             RegisterConverter<DateTime>(new DateTimeConverter());
             RegisterConverter<DateTimeOffset>(new DateTimeOffsetConverter());
         }
@@ -122,9 +122,24 @@ namespace ServiceStack.OrmLite
         public string GetColumnTypeDefinition(Type columnType, int? fieldLength = null)
         {
             var converter = GetConverter(columnType);
-            return converter != null
-                ? converter.ColumnDefinition
-                : GetUndefinedColumnDefinition(columnType, fieldLength);
+            if (converter != null)
+            {
+                var customConverter = converter as IHasCustomColumnDefinition;
+                var columnDefinition = customConverter != null 
+                    ? customConverter.GetColumnDefinition(fieldLength)
+                    : converter.ColumnDefinition;
+
+                if (string.IsNullOrEmpty(columnDefinition))
+                    throw new ArgumentException("{0} requires a ColumnDefinition".Fmt(converter.GetType().Name));
+
+                return columnDefinition;
+            }
+
+            var stringConverter = columnType.IsRefType()
+                ? (IHasCustomColumnDefinition)ReferenceTypeConverter
+                : ValueTypeConverter;
+
+            return stringConverter.GetColumnDefinition(fieldLength);
         }
 
         public virtual DbType GetColumnDbType(Type columnType)
@@ -232,8 +247,6 @@ namespace ServiceStack.OrmLite
         {
             if (converter == null)
                 throw new ArgumentNullException("converter");
-            if (converter.ColumnDefinition == null)
-                throw new ArgumentNullException(converter.GetType().Name + ".ColumnDefinition");
 
             converter.DialectProvider = this;
             Converters[typeof(T)] = converter;
@@ -397,13 +410,6 @@ namespace ServiceStack.OrmLite
             return OrmLiteConfig.SanitizeFieldNameForParamNameFn(fieldName);
         }
 
-        protected virtual string GetUndefinedColumnDefinition(Type fieldType, int? fieldLength)
-        {
-            return fieldLength.HasValue
-                ? StringConverter.GetColumnDefinition(fieldLength.Value)
-                : StringConverter.MaxColumnDefinition;
-        }
-
         protected string ReplaceDecimalColumnDefinition(string definition, int? fieldLength, int? scale)
         {
             if (fieldLength == null && scale == null)
@@ -426,22 +432,7 @@ namespace ServiceStack.OrmLite
             bool isPrimaryKey, bool autoIncrement, bool isNullable, bool isRowVersion,
             int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
         {
-            string fieldDefinition;
-
-            if (customFieldDefinition != null)
-            {
-                fieldDefinition = customFieldDefinition;
-            }
-            else if (fieldType == typeof(string))
-            {
-                fieldDefinition = fieldLength == StringLengthAttribute.MaxText
-                    ? StringConverter.MaxColumnDefinition
-                    : StringConverter.GetColumnDefinition(fieldLength);
-            }
-            else
-            {
-                fieldDefinition = GetColumnTypeDefinition(fieldType, fieldLength);
-            }
+            var fieldDefinition = customFieldDefinition ?? GetColumnTypeDefinition(fieldType, fieldLength);
 
             var sql = new StringBuilder();
             sql.AppendFormat("{0} {1}", GetQuotedColumnName(fieldName), fieldDefinition);

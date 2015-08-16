@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Data;
+using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.Converters
 {
-    public class StringConverter : OrmLiteConverter
+    public class StringConverter : OrmLiteConverter, IHasCustomColumnDefinition
     {
         public StringConverter() : this(8000) {}
 
@@ -28,6 +29,9 @@ namespace ServiceStack.OrmLite.Converters
 
         public virtual string GetColumnDefinition(int? stringLength)
         {
+            if (stringLength.GetValueOrDefault() == StringLengthAttribute.MaxText)
+                return MaxColumnDefinition;
+
             return UseUnicode
                 ? "NVARCHAR({0})".Fmt(stringLength.GetValueOrDefault(StringLength))
                 : "VARCHAR({0})".Fmt(stringLength.GetValueOrDefault(StringLength));
@@ -48,9 +52,19 @@ namespace ServiceStack.OrmLite.Converters
 
     public class CharConverter : StringConverter
     {
+        public override string ColumnDefinition
+        {
+            get { return "CHAR(1)"; }
+        }
+
         public override DbType DbType
         {
             get { return DbType.StringFixedLength; }
+        }
+
+        public override string GetColumnDefinition(int? stringLength)
+        {
+            return ColumnDefinition;
         }
 
         public override object FromDbValue(Type fieldType, object value)
