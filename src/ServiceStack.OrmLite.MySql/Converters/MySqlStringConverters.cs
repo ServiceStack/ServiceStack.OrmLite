@@ -13,14 +13,6 @@ namespace ServiceStack.OrmLite.MySql.Converters
         }
     }
 
-    public class MySqlCharConverter : CharConverter
-    {
-        public override string ColumnDefinition
-        {
-            get { return "CHAR(1)"; }
-        }
-    }
-
     public class MySqlCharArrayConverter : CharArrayConverter
     {
         public MySqlCharArrayConverter() : base(255) { }

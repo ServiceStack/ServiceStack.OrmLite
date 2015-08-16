@@ -10,13 +10,11 @@ namespace ServiceStack.OrmLite.PostgreSQL.Converters
         {
             get { return "TEXT"; }
         }
-    }
 
-    public class PostgreSqlCharConverter : CharConverter
-    {
-        public override string ColumnDefinition
+        public override string GetColumnDefinition(int? stringLength)
         {
-            get { return "CHAR(1)"; }
+            //PostgreSQL doesn't support NVARCHAR when UseUnicode = true so just use TEXT
+            return ColumnDefinition;
         }
     }
 
@@ -25,6 +23,11 @@ namespace ServiceStack.OrmLite.PostgreSQL.Converters
         public override string ColumnDefinition
         {
             get { return "TEXT"; }
+        }
+
+        public override string GetColumnDefinition(int? stringLength)
+        {
+            return ColumnDefinition;
         }
     }
 }

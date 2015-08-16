@@ -29,7 +29,6 @@ namespace ServiceStack.OrmLite.MySql
             base.InitColumnTypeMap();
 
             base.RegisterConverter<string>(new MySqlStringConverter());
-            base.RegisterConverter<char>(new MySqlCharConverter());
             base.RegisterConverter<char[]>(new MySqlCharArrayConverter());
             base.RegisterConverter<bool>(new MySqlBoolConverter());
 
