@@ -104,7 +104,7 @@
     <Compile Include="Converters\SqlServerIntegerConverters.cs" />
     <Compile Include="Converters\SqlServerSpecialConverters.cs" />
     <Compile Include="Converters\SqlServerStringConverters.cs" />
-    <Compile Include="Converters\SqlServerTimeSpanConverter.cs" />
+    <Compile Include="Converters\SqlServerTimeSpanAsIntConverter.cs" />
     <Compile Include="SqlServer2012OrmLiteDialectProvider.cs" />
     <Compile Include="SqlServerDialect.cs" />
     <Compile Include="SqlServerExpression.cs" />

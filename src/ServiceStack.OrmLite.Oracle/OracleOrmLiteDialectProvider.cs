@@ -102,7 +102,7 @@ namespace ServiceStack.OrmLite.Oracle
             else
                 RegisterConverter<Guid>(new OracleGuidConverter());
 
-            RegisterConverter<TimeSpan>(new OracleTimeSpanConverter());
+            RegisterConverter<TimeSpan>(new OracleTimeSpanAsIntConverter());
             RegisterConverter<string>(new OracleStringConverter());
 
             RegisterConverter<long>(new OracleInt64Converter());
@@ -845,8 +845,7 @@ namespace ServiceStack.OrmLite.Oracle
             bool isPrimaryKey, bool autoIncrement, bool isNullable, bool isRowVersion,
             int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
         {
-            var fieldDefinition = customFieldDefinition
-                ?? GetColumnTypeDefinition(fieldType, fieldLength);
+            var fieldDefinition = customFieldDefinition ?? GetColumnTypeDefinition(fieldType, fieldLength);
 
             var sql = new StringBuilder();
             sql.AppendFormat("{0} {1}", GetQuotedColumnName(fieldName), fieldDefinition);

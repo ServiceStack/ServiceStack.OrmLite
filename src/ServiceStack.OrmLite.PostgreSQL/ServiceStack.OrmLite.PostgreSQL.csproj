@@ -73,7 +73,7 @@
     <Compile Include="Converters\PostgreSqlGuidConverter.cs" />
     <Compile Include="Converters\PostgreSqlIntegerConverters.cs" />
     <Compile Include="Converters\PostgreSqlStringConverters.cs" />
-    <Compile Include="Converters\PostgreSqlTimeSpanConverter.cs" />
+    <Compile Include="Converters\PostgreSqlTimeSpanAsIntConverter.cs" />
     <Compile Include="Converters\PostrgreSqlFloatConverters.cs" />
     <Compile Include="PostgreSqlDialect.cs" />
     <Compile Include="PostgreSqlDialectProvider.cs" />

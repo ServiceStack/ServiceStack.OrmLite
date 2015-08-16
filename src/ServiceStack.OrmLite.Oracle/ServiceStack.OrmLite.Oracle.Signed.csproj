@@ -71,7 +71,7 @@
     <Compile Include="Converters\OracleGuidConverter.cs" />
     <Compile Include="Converters\OracleIntegerConverters.cs" />
     <Compile Include="Converters\OracleStringConverters.cs" />
-    <Compile Include="Converters\OracleTimeSpanConverter.cs" />
+    <Compile Include="Converters\OracleTimeSpanAsIntConverter.cs" />
     <Compile Include="DbSchema\IColumn.cs" />
     <Compile Include="DbSchema\IParameter.cs" />
     <Compile Include="DbSchema\IProcedure.cs" />

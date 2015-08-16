@@ -4,7 +4,7 @@ using System.Globalization;
 
 namespace ServiceStack.OrmLite.Converters
 {
-    public class TimeSpanConverter : OrmLiteConverter
+    public class TimeSpanAsIntConverter : OrmLiteConverter
     {
         public override string ColumnDefinition
         {

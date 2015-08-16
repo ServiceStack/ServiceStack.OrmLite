@@ -100,8 +100,8 @@
     <Compile Include="..\ServiceStack.OrmLite\Converters\StringConverter.cs">
       <Link>Converters\StringConverter.cs</Link>
     </Compile>
-    <Compile Include="..\ServiceStack.OrmLite\Converters\TimeSpanConverter.cs">
-      <Link>Converters\TimeSpanConverter.cs</Link>
+    <Compile Include="..\ServiceStack.OrmLite\Converters\TimeSpanAsIntConverter.cs">
+      <Link>Converters\TimeSpanAsIntConverter.cs</Link>
     </Compile>
     <Compile Include="..\ServiceStack.OrmLite\Dapper\SqlMapper.Async.cs">
       <Link>Dapper\SqlMapper.Async.cs</Link>

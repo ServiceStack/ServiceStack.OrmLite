@@ -119,7 +119,7 @@
     <Compile Include="Converters\IntegerConverters.cs" />
     <Compile Include="Converters\SpecialConverters.cs" />
     <Compile Include="Converters\StringConverter.cs" />
-    <Compile Include="Converters\TimeSpanConverter.cs" />
+    <Compile Include="Converters\TimeSpanAsIntConverter.cs" />
     <Compile Include="Expressions\IUntypedSqlExpression.cs" />
     <Compile Include="Expressions\ParameterizedSqlExpression.cs" />
     <Compile Include="IOrmLiteConverter.cs" />

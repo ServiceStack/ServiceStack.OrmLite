@@ -3,7 +3,7 @@ using ServiceStack.OrmLite.Converters;
 
 namespace ServiceStack.OrmLite.PostgreSQL.Converters
 {
-    public class PostgreSqlTimeSpanConverter : TimeSpanConverter
+    public class PostgreSqlTimeSpanAsIntConverter : TimeSpanAsIntConverter
     {
         public override string ColumnDefinition
         {

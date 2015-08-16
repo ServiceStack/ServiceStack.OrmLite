@@ -2,15 +2,15 @@
 using System.Data;
 using ServiceStack.OrmLite.Converters;
 
-namespace ServiceStack.OrmLite.VistaDB.Converters
+namespace ServiceStack.OrmLite.SqlServer.Converters
 {
-    public class VistaDbTimeSpanConverter : TimeSpanConverter
+    public class SqlServerTimeSpanAsIntConverter : TimeSpanAsIntConverter
     {
         private static readonly DateTime timeSpanOffset = new DateTime(1900, 01, 01);
 
         public override string ColumnDefinition
         {
-            get { return "BIGINT"; }
+            get { return "BIGINTEGER"; }
         }
 
         public override DbType DbType

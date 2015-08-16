@@ -2,7 +2,7 @@
 
 namespace ServiceStack.OrmLite.Oracle.Converters
 {
-    public class OracleTimeSpanConverter : TimeSpanConverter
+    public class OracleTimeSpanAsIntConverter : TimeSpanAsIntConverter
     {
         public override string ColumnDefinition
         {

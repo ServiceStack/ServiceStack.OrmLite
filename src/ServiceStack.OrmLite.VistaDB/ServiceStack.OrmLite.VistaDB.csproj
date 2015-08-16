@@ -51,7 +51,7 @@
     <Compile Include="Converters\VistaDbGuidConverter.cs" />
     <Compile Include="Converters\VistaDbIntegerConverters.cs" />
     <Compile Include="Converters\VistaDbStringConverters.cs" />
-    <Compile Include="Converters\VistaDbTimeSpanConverter.cs" />
+    <Compile Include="Converters\VistaDbTimeSpanAsIntConverter.cs" />
     <Compile Include="VistaDbDialectProvider.cs" />
     <Compile Include="VistaDBExpression.cs" />
     <Compile Include="VistaDbDialect.cs" />
