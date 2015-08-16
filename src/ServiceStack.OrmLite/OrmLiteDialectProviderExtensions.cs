@@ -59,9 +59,9 @@ namespace ServiceStack.OrmLite
             return dialect.ConvertDbValue(dialect.GetValue(reader, columnIndex, type), type);
         }
 
-        public static IOrmLiteConverter ConverterFor<T>(this IOrmLiteDialectProvider dialect)
+        public static IOrmLiteConverter GetConverter<T>(this IOrmLiteDialectProvider dialect)
         {
-            return dialect.GetConverter(typeof (T));
+            return dialect.GetConverter(typeof(T));
         }
 
         public static bool HasConverter(this IOrmLiteDialectProvider dialect, Type type)
