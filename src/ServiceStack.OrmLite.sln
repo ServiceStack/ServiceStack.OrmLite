@@ -113,6 +113,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceStack.OrmLite.Sqlite
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "ServiceStack.OrmLite.VbNetTests", "..\tests\ServiceStack.OrmLite.VbNetTests\ServiceStack.OrmLite.VbNetTests.vbproj", "{CC385BE2-B49D-46AF-8F1B-BC9943E106E6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceStack.OrmLite.SqlServerTests.Spatials", "ServiceStack.OrmLite.SqlServerSpatialsTest\ServiceStack.OrmLite.SqlServerTests.Spatials.csproj", "{2B366503-ECFC-4783-AFB6-900F1364EA7B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -841,6 +843,26 @@ Global
 		{CC385BE2-B49D-46AF-8F1B-BC9943E106E6}.Signed|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{CC385BE2-B49D-46AF-8F1B-BC9943E106E6}.Signed|Mixed Platforms.Build.0 = Release|Any CPU
 		{CC385BE2-B49D-46AF-8F1B-BC9943E106E6}.Signed|x86.ActiveCfg = Release|Any CPU
+		{2B366503-ECFC-4783-AFB6-900F1364EA7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B366503-ECFC-4783-AFB6-900F1364EA7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B366503-ECFC-4783-AFB6-900F1364EA7B}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{2B366503-ECFC-4783-AFB6-900F1364EA7B}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{2B366503-ECFC-4783-AFB6-900F1364EA7B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2B366503-ECFC-4783-AFB6-900F1364EA7B}.Default|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B366503-ECFC-4783-AFB6-900F1364EA7B}.Default|Any CPU.Build.0 = Debug|Any CPU
+		{2B366503-ECFC-4783-AFB6-900F1364EA7B}.Default|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{2B366503-ECFC-4783-AFB6-900F1364EA7B}.Default|Mixed Platforms.Build.0 = Debug|Any CPU
+		{2B366503-ECFC-4783-AFB6-900F1364EA7B}.Default|x86.ActiveCfg = Debug|Any CPU
+		{2B366503-ECFC-4783-AFB6-900F1364EA7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B366503-ECFC-4783-AFB6-900F1364EA7B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B366503-ECFC-4783-AFB6-900F1364EA7B}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{2B366503-ECFC-4783-AFB6-900F1364EA7B}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{2B366503-ECFC-4783-AFB6-900F1364EA7B}.Release|x86.ActiveCfg = Release|Any CPU
+		{2B366503-ECFC-4783-AFB6-900F1364EA7B}.Signed|Any CPU.ActiveCfg = Signed|Any CPU
+		{2B366503-ECFC-4783-AFB6-900F1364EA7B}.Signed|Any CPU.Build.0 = Signed|Any CPU
+		{2B366503-ECFC-4783-AFB6-900F1364EA7B}.Signed|Mixed Platforms.ActiveCfg = Signed|Any CPU
+		{2B366503-ECFC-4783-AFB6-900F1364EA7B}.Signed|Mixed Platforms.Build.0 = Signed|Any CPU
+		{2B366503-ECFC-4783-AFB6-900F1364EA7B}.Signed|x86.ActiveCfg = Signed|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
