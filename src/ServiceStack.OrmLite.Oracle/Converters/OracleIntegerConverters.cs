@@ -41,5 +41,10 @@ namespace ServiceStack.OrmLite.Oracle.Converters
         {
             get { return DbType.Int64; }
         }
+
+        public override string ColumnDefinition
+        {
+            get { return "NUMERIC(18)"; }
+        }
     }
 }
