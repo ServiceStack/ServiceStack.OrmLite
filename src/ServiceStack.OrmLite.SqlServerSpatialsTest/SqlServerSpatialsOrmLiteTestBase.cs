@@ -54,7 +54,7 @@ namespace ServiceStack.OrmLite.SqlServerTests.Spatials
                 // https://msdn.microsoft.com/en-us/library/system.data.sqlclient.sqlconnection.connectionstring.aspx
                 ConnectionString = ConfigurationManager.ConnectionStrings["testDb"].ConnectionString + ";Type System Version=SQL Server 2012;";
 
-                var dialectProvider = new SqlServer2012SpatialsDialectProvider();
+                var dialectProvider = SqlServer2012Dialect.Provider;
                 dialectProvider.RegisterConverter<SqlGeography>(new SqlServerGeographyTypeConverter());
                 dialectProvider.RegisterConverter<SqlGeometry>(new SqlServerGeometryTypeConverter());
 
@@ -91,31 +91,6 @@ namespace ServiceStack.OrmLite.SqlServerTests.Spatials
                     assemblyName,
                     Marshal.GetLastWin32Error()));
             }
-        }
-
-    }
-
-    public class SqlServer2012SpatialsDialectProvider : SqlServer2012OrmLiteDialectProvider
-    {
-        public override void SetParameter(FieldDefinition fieldDef, IDbDataParameter p)
-        {
-            base.SetParameter(fieldDef, p);
-
-            if (fieldDef.ColumnType == typeof(SqlGeography) || fieldDef.ColumnType == typeof(SqlGeometry))
-            {
-                var geogParam = (SqlParameter)p;
-                geogParam.SqlDbType = SqlDbType.Udt;
-                geogParam.UdtTypeName = fieldDef.CustomFieldDefinition ?? Converters[fieldDef.ColumnType].ColumnDefinition;
-            }
-            else
-            {
-                ((SqlParameter)p).SqlDbType = GetSqlDbType(p.DbType);
-            }            
-        }
-
-        public SqlDbType GetSqlDbType(DbType dbType)
-        {
-            return (SqlDbType)Enum.Parse(typeof(DbType), dbType.ToString());
         }
     }
 }

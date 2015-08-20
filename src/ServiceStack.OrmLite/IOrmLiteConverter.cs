@@ -13,7 +13,7 @@ namespace ServiceStack.OrmLite
 
         string ToQuotedString(Type fieldType, object value);
 
-        void InitDbParam(IDbDataParameter dbParam, Type fieldType);
+        void InitDbParam(IDbDataParameter p, Type fieldType);
 
         object ToDbValue(Type fieldType, object value);
 
@@ -55,9 +55,9 @@ namespace ServiceStack.OrmLite
             return DialectProvider.GetQuotedValue(value.ToString());
         }
 
-        public virtual void InitDbParam(IDbDataParameter dbParam, Type fieldType)
+        public virtual void InitDbParam(IDbDataParameter p, Type fieldType)
         {
-            dbParam.DbType = DbType;
+            p.DbType = DbType;
         }
 
         /// <summary>
