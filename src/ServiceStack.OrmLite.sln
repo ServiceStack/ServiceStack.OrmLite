@@ -89,6 +89,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Signed", "Signed", "{4A755D
 	ProjectSection(SolutionItems) = preProject
 		..\NuGet.Signed\ServiceStack.OrmLite.Oracle.Signed\servicestack.ormlite.oracle.signed.nuspec = ..\NuGet.Signed\ServiceStack.OrmLite.Oracle.Signed\servicestack.ormlite.oracle.signed.nuspec
 		..\NuGet.Signed\ServiceStack.OrmLite.Signed\servicestack.ormlite.signed.nuspec = ..\NuGet.Signed\ServiceStack.OrmLite.Signed\servicestack.ormlite.signed.nuspec
+		..\NuGet.Signed\ServiceStack.OrmLite.SqlServer.Converters.Signed\servicestack.ormlite.sqlserver.converters.signed.nuspec = ..\NuGet.Signed\ServiceStack.OrmLite.SqlServer.Converters.Signed\servicestack.ormlite.sqlserver.converters.signed.nuspec
 		..\NuGet.Signed\ServiceStack.OrmLite.SqlServer.Signed\servicestack.ormlite.sqlserver.signed.nuspec = ..\NuGet.Signed\ServiceStack.OrmLite.SqlServer.Signed\servicestack.ormlite.sqlserver.signed.nuspec
 	EndProjectSection
 EndProject
