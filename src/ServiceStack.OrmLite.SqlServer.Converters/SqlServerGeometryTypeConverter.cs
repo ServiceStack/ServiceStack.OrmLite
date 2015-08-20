@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data.SqlTypes;
 using Microsoft.SqlServer.Types;
 
 namespace ServiceStack.OrmLite.SqlServer.Converters
