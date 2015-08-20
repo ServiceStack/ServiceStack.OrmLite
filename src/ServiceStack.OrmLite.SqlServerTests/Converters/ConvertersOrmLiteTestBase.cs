@@ -11,7 +11,7 @@ using ServiceStack.OrmLite.SqlServer.Converters;
 
 namespace ServiceStack.OrmLite.SqlServerTests.Spatials
 {
-    public class SqlServerSpatialsOrmLiteTestBase
+    public class SqlServerConvertersOrmLiteTestBase
     {
         protected virtual string ConnectionString { get; set; }
 

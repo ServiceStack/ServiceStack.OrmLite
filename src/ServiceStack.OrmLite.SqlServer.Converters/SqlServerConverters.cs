@@ -8,6 +8,7 @@ namespace ServiceStack.OrmLite.SqlServer.Converters
         {
             dialectProvider.RegisterConverter<SqlGeography>(new SqlServerGeographyTypeConverter());
             dialectProvider.RegisterConverter<SqlGeometry>(new SqlServerGeometryTypeConverter());
+            dialectProvider.RegisterConverter<SqlHierarchyId>(new SqlServerHierarchyIdTypeConverter());
             return dialectProvider;
         }
     }
