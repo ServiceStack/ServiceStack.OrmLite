@@ -120,8 +120,9 @@ namespace ServiceStack.OrmLite
             dbCmd.Parameters.Clear();
             var p = dbCmd.CreateParameter();
             p.ParameterName = name;
-            p.DbType = dialectProvider.GetColumnDbType(value.GetType());
             p.Direction = ParameterDirection.Input;
+            dialectProvider.InitDbParam(p, value.GetType());
+
             dbCmd.Parameters.Add(p);
             dbCmd.CommandText = GetFilterSql<T>(dbCmd);
             lastQueryType = typeof(T);
@@ -151,8 +152,8 @@ namespace ServiceStack.OrmLite
             {
                 var p = dbCmd.CreateParameter();
                 p.ParameterName = columnName;
-                p.DbType = dialectProvider.GetColumnDbType(pi.PropertyType);
                 p.Direction = ParameterDirection.Input;
+                dialectProvider.InitDbParam(p, pi.PropertyType);
 
                 FieldDefinition fieldDef;
                 if (fieldMap != null && fieldMap.TryGetValue(columnName, out fieldDef))
@@ -161,7 +162,7 @@ namespace ServiceStack.OrmLite
                     var valueType = value != null ? value.GetType() : null;
                     if (valueType != null && valueType != pi.PropertyType)
                     {
-                        p.DbType = dialectProvider.GetColumnDbType(valueType);
+                        dialectProvider.InitDbParam(p, valueType);
                     }
                 }
 
@@ -249,6 +250,7 @@ namespace ServiceStack.OrmLite
             dbCmd.Parameters.Clear();
             lastQueryType = null;
             var pis = anonType.GetType().GetSerializableProperties();
+            var dialectProvider = dbCmd.GetDialectProvider();
 
             foreach (var pi in pis)
             {
@@ -263,9 +265,10 @@ namespace ServiceStack.OrmLite
                 var p = dbCmd.CreateParameter();
 
                 p.ParameterName = pi.Name;
-                p.DbType = dbCmd.GetDialectProvider().GetColumnDbType(pi.PropertyType);
                 p.Direction = ParameterDirection.Input;
                 p.Value = value ?? DBNull.Value;
+                dialectProvider.InitDbParam(p, pi.PropertyType);
+
                 dbCmd.Parameters.Add(p);
             }
             return dbCmd;
@@ -278,6 +281,7 @@ namespace ServiceStack.OrmLite
 
             dbCmd.Parameters.Clear();
             lastQueryType = null;
+            var dialectProvider = dbCmd.GetDialectProvider();
 
             foreach (var kvp in dict)
             {
@@ -286,15 +290,14 @@ namespace ServiceStack.OrmLite
                 var p = dbCmd.CreateParameter();
                 p.ParameterName = kvp.Key;
 
-                if (value != null)
-                {
-                    p.DbType = dbCmd.GetDialectProvider().GetColumnDbType(value.GetType());
-                }
-
                 p.Direction = ParameterDirection.Input;
                 p.Value = value ?? DBNull.Value;
+                if (value != null)
+                    dialectProvider.InitDbParam(p, value.GetType());
+
                 dbCmd.Parameters.Add(p);
             }
+
             return dbCmd;
         }
 
@@ -981,16 +984,18 @@ namespace ServiceStack.OrmLite
             var dialectProvider = dbCmd.GetDialectProvider();
             p.ParameterName = dialectProvider.GetParam(name);
             p.Direction = direction;
-            if (value != null)
-            {
-                p.Value = value;
-                p.DbType = dialectProvider.GetColumnDbType(value.GetType());
-            }
-            if (dbType != null)
-                p.DbType = dbType.Value;
 
             if (p.DbType == DbType.String)
                 p.Size = dialectProvider.GetStringConverter().StringLength;
+
+            if (value != null)
+            {
+                p.Value = value;
+                dialectProvider.InitDbParam(p, value.GetType());
+            }
+
+            if (dbType != null)
+                p.DbType = dbType.Value;
 
             return p;
         }

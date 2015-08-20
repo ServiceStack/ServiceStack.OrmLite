@@ -144,11 +144,14 @@ namespace ServiceStack.OrmLite
 
         public virtual DbType GetColumnDbType(Type columnType)
         {
-            if (columnType.IsEnum)
-                return EnumConverter.DbType;
-
-            var converter = GetConverter(columnType) ?? StringConverter;
+            var converter = GetConverterForType(columnType);
             return converter.DbType;
+        }
+
+        public virtual void InitDbParam(IDbDataParameter dbParam, Type columnType)
+        {
+            var converter = GetConverterForType(columnType);
+            converter.InitDbParam(dbParam, columnType);
         }
 
         public IOrmLiteExecFilter ExecFilter { get; set; }
@@ -258,6 +261,22 @@ namespace ServiceStack.OrmLite
             return Converters.TryGetValue(type, out converter) 
                 ? converter 
                 : null;
+        }
+
+        public IOrmLiteConverter GetConverterForType(Type type)
+        {
+            var converter = type.IsEnum
+                ? EnumConverter
+                : GetConverter(type);
+
+            if (converter == null)
+            {
+                converter = type.IsValueType
+                    ? (IOrmLiteConverter)ValueTypeConverter
+                    : ReferenceTypeConverter;
+            }
+
+            return converter;
         }
 
         public virtual bool ShouldQuoteValue(Type fieldType)
@@ -789,11 +808,7 @@ namespace ServiceStack.OrmLite
         public virtual void SetParameter(FieldDefinition fieldDef, IDbDataParameter p)
         {
             p.ParameterName = this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName));
-            var columnType = fieldDef.ColumnType;
-
-            var sqlDbType = GetColumnDbType(columnType);
-
-            p.DbType = sqlDbType;
+            InitDbParam(p, fieldDef.ColumnType);
         }
 
         public virtual void SetParameterValues<T>(IDbCommand dbCmd, object obj)

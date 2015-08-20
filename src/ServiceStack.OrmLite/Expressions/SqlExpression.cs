@@ -1686,16 +1686,18 @@ namespace ServiceStack.OrmLite
                 Direction = direction,
                 SourceVersion = sourceVersion
             };
-            if (value != null)
-            {
-                p.Value = DialectProvider.GetParamValue(value, value.GetType());
-                p.DbType = DialectProvider.GetColumnDbType(value.GetType());
-            }
-            if (dbType != null)
-                p.DbType = dbType.Value;
 
             if (p.DbType == DbType.String)
                 p.Size = DialectProvider.GetStringConverter().StringLength;
+
+            if (value != null)
+            {
+                p.Value = DialectProvider.GetParamValue(value, value.GetType());
+                DialectProvider.InitDbParam(p, value.GetType());
+            }
+
+            if (dbType != null)
+                p.DbType = dbType.Value;
 
             return p;
         }
@@ -1773,9 +1775,6 @@ namespace ServiceStack.OrmLite
             };
 
             var valueType = value != null ? value.GetType() : typeof(string);
-            if (dbType != null)
-                to.DbType = dbType.GetValueOrDefault(dialectProvider.GetColumnDbType(valueType));
-
             to.IsNullable = isNullable.GetValueOrDefault(value == null || !valueType.IsNullableType());
 
             if (precision != null)
@@ -1784,6 +1783,11 @@ namespace ServiceStack.OrmLite
                 to.Scale = scale.Value;
             if (size != null)
                 to.Size = size.Value;
+
+            dialectProvider.InitDbParam(to, valueType);
+
+            if (dbType != null)
+                to.DbType = dbType.Value;
 
             return to;
         }

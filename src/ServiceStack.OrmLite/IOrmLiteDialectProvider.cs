@@ -146,7 +146,10 @@ namespace ServiceStack.OrmLite
 
         SqlExpression<T> SqlExpression<T>();
 
+        [Obsolete("Use InitDbParam")]
         DbType GetColumnDbType(Type columnType);
+
+        void InitDbParam(IDbDataParameter dbParam, Type columnType);
 
         string GetColumnTypeDefinition(Type columnType, int? fieldLength = null);
 
