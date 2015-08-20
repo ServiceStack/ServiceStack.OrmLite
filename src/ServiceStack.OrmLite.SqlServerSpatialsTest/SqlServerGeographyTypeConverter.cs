@@ -1,27 +1,17 @@
 ﻿using System;
-using System.Data;
-using System.Data.SqlClient;
-using ServiceStack.OrmLite;
 
 namespace ServiceStack.OrmLite.SqlServer.Converters
 {
-    public class SqlServerGeographyTypeConverter : OrmLiteConverter
+    public class SqlServerGeographyTypeConverter : SqlServerTypeConverter
     {
+        public SqlServerGeographyTypeConverter(string libraryPath = null, string msvcrFileName = "msvcr100.dll", string sqlSpatialFileName = "SqlServerSpatial110.dll") 
+            : base(libraryPath, msvcrFileName, sqlSpatialFileName) 
+        { 
+        }
+
         public override string ColumnDefinition
         {
             get { return "GEOGRAPHY"; }
-        }
-
-        public override DbType DbType
-        {
-            get { return DbType.Object; }
-        }
-
-        public override void InitDbParam(IDbDataParameter p, Type fieldType)
-        {
-            var geogParam = (SqlParameter)p;
-            geogParam.SqlDbType = SqlDbType.Udt;
-            geogParam.UdtTypeName = ColumnDefinition;
         }
     }
 }
