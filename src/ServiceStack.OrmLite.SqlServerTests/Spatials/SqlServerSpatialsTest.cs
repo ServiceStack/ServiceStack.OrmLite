@@ -37,8 +37,6 @@ namespace ServiceStack.OrmLite.SqlServerTests.Spatials
             db.Dispose();
             db = null;
         }
-
-
         [Test]
         public void Can_insert_and_retrieve_SqlGeography()
         {
@@ -87,8 +85,8 @@ namespace ServiceStack.OrmLite.SqlServerTests.Spatials
 
     public class GeoTestTable
     {
-        [AutoIncrement()]
-        public long ID { get; set; }
+        [AutoIncrement]
+        public long Id { get; set; }
 
         public SqlGeography Location { get; set; }
 

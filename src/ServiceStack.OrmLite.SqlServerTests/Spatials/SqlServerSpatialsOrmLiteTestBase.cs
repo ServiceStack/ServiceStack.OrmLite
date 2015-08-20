@@ -29,9 +29,7 @@ namespace ServiceStack.OrmLite.SqlServerTests.Spatials
                 // https://msdn.microsoft.com/en-us/library/system.data.sqlclient.sqlconnection.connectionstring.aspx
                 ConnectionString = ConfigurationManager.ConnectionStrings["testDb"].ConnectionString + ";Type System Version=SQL Server 2012;";
 
-                var dialectProvider = SqlServer2012Dialect.Provider;
-                dialectProvider.RegisterConverter<SqlGeography>(new SqlServerGeographyTypeConverter());
-                dialectProvider.RegisterConverter<SqlGeometry>(new SqlServerGeometryTypeConverter());
+                var dialectProvider = SqlServerConverters.Configure(SqlServer2012Dialect.Provider);
 
                 Db = new OrmLiteConnection(new OrmLiteConnectionFactory(ConnectionString, dialectProvider));                
             }

@@ -47,8 +47,6 @@ namespace ServiceStack.OrmLite.SqlServer.Converters
             sqlParam.UdtTypeName = ColumnDefinition;
         }
 
-
-
         protected static void LoadUnmanagedAssembly(string libraryPath, string fileName)
         {
             var path = Path.Combine(libraryPath, fileName);
@@ -73,7 +71,6 @@ namespace ServiceStack.OrmLite.SqlServer.Converters
             }
         }
 
-
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern IntPtr LoadLibrary(string libname);
 
@@ -82,7 +79,5 @@ namespace ServiceStack.OrmLite.SqlServer.Converters
 
         [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
         private static extern bool GetModuleHandleExA(int dwFlags, string moduleName, IntPtr phModule);
-
-
     }
 }
