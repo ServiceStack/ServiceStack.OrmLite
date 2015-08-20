@@ -8,7 +8,6 @@ namespace ServiceStack.OrmLite.Tests
 	public class OrmLiteCreateTableWithIndexesTests 
 		: OrmLiteTestBase
 	{
-
 		[Test]
 		public void Can_create_ModelWithIndexFields_table()
 		{
@@ -35,8 +34,6 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_create_ModelWithCompositeIndexFields_table()
         {
-            if (Dialect == Dialect.PostgreSql) return; //Incompatible ColumnName in Attribute
-
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithCompositeIndexFields>(true);
@@ -60,8 +57,6 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_create_ModelWithCompositeIndexFieldsDesc_table()
         {
-            if (Dialect == Dialect.PostgreSql) return; //Incompatible ColumnName in Attribute
-
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithCompositeIndexFieldsDesc>(true);
@@ -86,8 +81,6 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_create_ModelWithNamedCompositeIndex_table()
         {
-            if (Dialect == Dialect.PostgreSql) return; //Incompatible ColumnName in Attribute
-
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithNamedCompositeIndex>(true);
