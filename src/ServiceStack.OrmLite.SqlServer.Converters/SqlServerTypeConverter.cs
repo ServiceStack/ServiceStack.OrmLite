@@ -7,9 +7,9 @@ using ServiceStack.OrmLite;
 
 namespace ServiceStack.OrmLite.SqlServer.Converters
 {
-    public abstract class SqlServerTypeConverter : OrmLiteConverter
+    public abstract class SqlServerSpatialTypeConverter : OrmLiteConverter
     {
-        public SqlServerTypeConverter(string libraryPath = null, string msvcrFileName = "msvcr100.dll", string sqlSpatialFileName = "SqlServerSpatial110.dll")
+        public SqlServerSpatialTypeConverter(string libraryPath = null, string msvcrFileName = "msvcr100.dll", string sqlSpatialFileName = "SqlServerSpatial110.dll")
         {
             // default libraryPath to Windows System
             if (String.IsNullOrEmpty(libraryPath))
@@ -44,6 +44,7 @@ namespace ServiceStack.OrmLite.SqlServer.Converters
         {
             var sqlParam = (SqlParameter)p;
             sqlParam.SqlDbType = SqlDbType.Udt;
+            sqlParam.IsNullable = (fieldType.IsGenericType && fieldType.GetGenericTypeDefinition() == typeof(Nullable<>));
             sqlParam.UdtTypeName = ColumnDefinition;
         }
 

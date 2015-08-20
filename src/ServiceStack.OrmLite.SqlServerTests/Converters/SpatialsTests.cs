@@ -10,7 +10,7 @@ using ServiceStack.OrmLite.SqlServer;
 namespace ServiceStack.OrmLite.SqlServerTests.Spatials
 {
     [TestFixture]
-    public class SqlServerSpatialTests : SqlServerSpatialsOrmLiteTestBase
+    public class SpatialTests : SqlServerConvertersOrmLiteTestBase
     {
         [SetUp]
         public void Setup()
@@ -37,6 +37,7 @@ namespace ServiceStack.OrmLite.SqlServerTests.Spatials
             db.Dispose();
             db = null;
         }
+
         [Test]
         public void Can_insert_and_retrieve_SqlGeography()
         {
@@ -45,13 +46,16 @@ namespace ServiceStack.OrmLite.SqlServerTests.Spatials
                 // Statue of Liberty
                 var geo = SqlGeography.Point(40.6898329,-74.0452177, 4326);
 
-                db.Insert(new GeoTestTable() { Location = geo });
+                db.Insert(new GeoTestTable() { Location = geo, NullLocation = SqlGeography.Null });
 
-                var result = db.Select(db.From<GeoTestTable>()).First().Location;
+                var result = db.Select(db.From<GeoTestTable>()).First();
 
-                Assert.AreEqual(geo.Lat, result.Lat);
-                Assert.AreEqual(geo.Long, result.Long);
-                Assert.AreEqual(geo.STSrid, result.STSrid);
+                Assert.AreEqual(geo.Lat, result.Location.Lat);
+                Assert.AreEqual(geo.Long, result.Location.Long);
+                Assert.AreEqual(geo.STSrid, result.Location.STSrid);
+
+                // Converter always resolves to null even when Null property inserted into database
+                Assert.AreEqual(null, result.NullLocation);  
             }
         }
 
@@ -89,6 +93,8 @@ namespace ServiceStack.OrmLite.SqlServerTests.Spatials
         public long Id { get; set; }
 
         public SqlGeography Location { get; set; }
+
+        public SqlGeography NullLocation { get; set; }
 
         public SqlGeometry Shape { get; set; }
     }
