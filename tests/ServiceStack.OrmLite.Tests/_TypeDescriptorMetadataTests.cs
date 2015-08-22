@@ -131,6 +131,10 @@ namespace ServiceStack.OrmLite.Tests
             {
                 Assert.That(sql, Is.StringContaining(" NVARCHAR2(4000)"));
             }
+            else if (Dialect == Dialect.Firebird)
+            {
+                Assert.That(sql, Is.StringContaining(" VARCHAR(10000)"));
+            }
             else
             {
                 Assert.That(sql, Is.StringContaining(" NVARCHAR(MAX)"));

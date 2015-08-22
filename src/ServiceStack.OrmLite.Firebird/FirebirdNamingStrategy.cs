@@ -38,7 +38,10 @@ namespace ServiceStack.OrmLite.Firebird
 
         public override string ApplyNameRestrictions(string name)
         {
-            if (name.Length > MaxNameLength) name = Squash(name);
+            name = name.Replace(" ", "_");
+            if (name.Length > MaxNameLength)
+                name = Squash(name);
+
             return name.TrimStart('_');
         }
 
@@ -50,8 +53,15 @@ namespace ServiceStack.OrmLite.Firebird
         private static string Squash(string name)
         {
             // First try squashing out the vowels
-            var squashed = name.Replace("a", "").Replace("e", "").Replace("i", "").Replace("o", "").Replace("u", "").Replace("y", "");
-            squashed = squashed.Replace("A", "").Replace("E", "").Replace("I", "").Replace("O", "").Replace("U", "").Replace("Y", "");
+            var removeVowels = new[] {"a", "e", "i", "o", "u", "y", "A", "E", "I", "O", "U", "Y"};
+            var squashed = name;
+            foreach (var removeVowel in removeVowels)
+            {
+                squashed = squashed.Replace(removeVowel, "");
+                if (squashed.Length <= MaxNameLength)
+                    return squashed;
+            }
+
             if (squashed.Length > MaxNameLength)
             {   // Still too long, squash out every 4th letter, starting at the 3rd
                 for (var i = 2; i < squashed.Length - 1; i += 4)

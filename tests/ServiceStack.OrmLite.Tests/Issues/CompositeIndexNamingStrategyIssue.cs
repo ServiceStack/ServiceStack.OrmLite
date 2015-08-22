@@ -11,7 +11,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
         public int Id { get; set; }
 
         [References(typeof(Company))]
-        public long CompanyId { get; set; }
+        public int CompanyId { get; set; }
 
         public string UserName { get; set; }
 

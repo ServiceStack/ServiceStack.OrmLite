@@ -127,7 +127,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             var time = DateTimeOffset.Parse(startTimeString);
             db.DropAndCreateTable<NullableDateTimeOffsetWithStartAndEndTime>();
-            db.Insert(new NullableDateTimeOffsetWithStartAndEndTime { StartTime = time.AddHours(-1), EndTime = time });
+            db.Insert(new NullableDateTimeOffsetWithStartAndEndTime { Id = 1, StartTime = time.AddHours(-1), EndTime = time });
             var expression = db.From<NullableDateTimeOffsetWithStartAndEndTime>()
                 .Where(p => p.StartTime == null || p.StartTime < time);
 
@@ -137,7 +137,7 @@ namespace ServiceStack.OrmLite.Tests
             //MySql doesn't support ms, SqlServer has +/- .03 precision
             Assert.That(diff.Value, 
                 Is.LessThan(TimeSpan.FromSeconds(1)).Or
-                  .GreaterThanOrEqualTo(0));
+                  .GreaterThanOrEqualTo(TimeSpan.FromSeconds(0)));
         }
 
         [TestCase("2012-08-12")]
@@ -147,7 +147,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             var time = DateTime.Parse(startTimeString);
             db.DropAndCreateTable<NullableDateTimeWithStartAndEndTime>();
-            db.Insert(new NullableDateTimeWithStartAndEndTime { StartTime = time.AddHours(-1), EndTime = time });
+            db.Insert(new NullableDateTimeWithStartAndEndTime { Id = 1, StartTime = time.AddHours(-1), EndTime = time });
             var expression = db.From<NullableDateTimeWithStartAndEndTime>()
                 .Where(p => p.StartTime == null || p.StartTime < time);
 

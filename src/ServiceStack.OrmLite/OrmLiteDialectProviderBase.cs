@@ -1390,7 +1390,7 @@ namespace ServiceStack.OrmLite
         public virtual string GetLoadChildrenSubSelect<From>(SqlExpression<From> expr)
         {
             var modelDef = expr.ModelDef;
-            expr.Select(this.GetQuotedColumnName(modelDef, modelDef.PrimaryKey));
+            expr.UnsafeSelect(this.GetQuotedColumnName(modelDef, modelDef.PrimaryKey));
 
             var subSql = expr.ToSelectStatement();
 

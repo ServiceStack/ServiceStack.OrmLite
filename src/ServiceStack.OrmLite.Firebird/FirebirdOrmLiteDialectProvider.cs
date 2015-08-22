@@ -90,7 +90,7 @@ namespace ServiceStack.OrmLite.Firebird
             if (isFullSelectStatement)
                 return sqlFilter.SqlFmt(filterParams);
 
-            sql.AppendFormat("SELECT {0} \nFROM {1}",
+            sql.AppendFormat("SELECT {0} FROM {1}",
                 GetColumnNames(modelDef),
                 GetQuotedTableName(modelDef));
 
@@ -249,7 +249,7 @@ namespace ServiceStack.OrmLite.Firebird
                 {
                     if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
 
-                    sqlFilter.AppendFormat("{0} = {1}",
+                    sqlFilter.AppendFormat("{0}={1}",
                         GetQuotedColumnName(fieldDef.FieldName),
                         fieldDef.GetQuotedValue(objWithProperties));
 
@@ -257,7 +257,7 @@ namespace ServiceStack.OrmLite.Firebird
                 }
                 if (updateFields.Count > 0 && !updateFields.Contains(fieldDef.Name)) continue;
                 if (sql.Length > 0) sql.Append(",");
-                sql.AppendFormat("{0} = {1}",
+                sql.AppendFormat("{0}={1}",
                     GetQuotedColumnName(fieldDef.FieldName),
                     fieldDef.GetQuotedValue(objWithProperties));
             }
@@ -399,11 +399,7 @@ namespace ServiceStack.OrmLite.Firebird
                 if (!fieldDef.IsIndexed) continue;
 
                 var indexName = GetIndexName(
-                    fieldDef.IsUnique,
-                    (modelDef.IsInSchema
-                        ? modelDef.Schema + "_" + modelDef.ModelName
-                        : modelDef.ModelName).SafeVarName(),
-                    fieldDef.FieldName);
+                    fieldDef.IsUnique, modelDef.ModelName, fieldDef.FieldName);
 
                 sqlIndexes.Add(
                     ToCreateIndexStatement(fieldDef.IsUnique, indexName, modelDef, fieldDef.FieldName, false));
