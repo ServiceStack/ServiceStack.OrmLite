@@ -128,7 +128,6 @@ namespace ServiceStack.OrmLite
                         var sequences = dialectProvider.ToCreateSequenceStatements(modelType);
                         foreach (var seq in sequences)
                         {
-
                             try
                             {
                                 dbCmd.ExecuteSql(seq);
@@ -256,7 +255,8 @@ namespace ServiceStack.OrmLite
         private static bool IgnoreAlreadyExistsGeneratorError(Exception ex)
         {
             const string fbError = "attempt to store duplicate value";
-            return ex.Message.Contains(fbError);
+            const string fbAlreadyExistsError = "already exists";
+            return ex.Message.Contains(fbError) || ex.Message.Contains(fbAlreadyExistsError);
         }
 
         public static T PopulateWithSqlReader<T>(this T objWithProperties, IOrmLiteDialectProvider dialectProvider, IDataReader dataReader)

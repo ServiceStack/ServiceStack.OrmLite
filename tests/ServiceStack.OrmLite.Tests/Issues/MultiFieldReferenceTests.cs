@@ -34,11 +34,11 @@ namespace ServiceStack.OrmLite.Tests.Issues
         public int Id { get; set; }
         public string Name { get; set; }
 
-        [Alias("_id_home_address")]
+        [Alias("id_home_address")]
         [ForeignKey(typeof(AliasedCustomerAddress))]
         public int? HomeAddressId { get; set; }
 
-        [Alias("_id_work_address")]
+        [Alias("id_work_address")]
         [ForeignKey(typeof(AliasedCustomerAddress))]
         public int? WorkAddressId { get; set; }
 

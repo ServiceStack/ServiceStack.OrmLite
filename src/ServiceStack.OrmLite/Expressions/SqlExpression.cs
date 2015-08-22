@@ -1383,7 +1383,7 @@ namespace ServiceStack.OrmLite
                 return true;
 
             var isJoinedField = tableDefs.Any(t => t.FieldDefinitionsArray
-                .Any(x => x.FieldName == unquotedExpr));
+                .Any(x => GetColumnName(x.FieldName) == unquotedExpr));
 
             return isJoinedField;
         }

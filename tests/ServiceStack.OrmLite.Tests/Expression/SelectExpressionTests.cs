@@ -213,7 +213,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 db.Insert(new Poco { Name = "abc" });
 
                 Func<string> normalizedSql = () =>
-                    db.GetLastSql().Replace("\"", "").Replace("`", "").Replace("Name", "name");
+                    db.GetLastSql().Replace("\"", "").Replace("`", "").Replace("Name", "name").Replace("NAME", "name");
 
                 db.Count<Poco>(q => q.Name.StartsWith("A"));
                 Assert.That(normalizedSql(),

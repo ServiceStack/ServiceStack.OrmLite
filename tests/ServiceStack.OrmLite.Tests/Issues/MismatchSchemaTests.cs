@@ -64,7 +64,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
             }
         }
 
-        [Schema("Schema1")]
+        [Schema("schema1")]
         public class Poco
         {
             public int Id { get; set; }
@@ -81,13 +81,13 @@ namespace ServiceStack.OrmLite.Tests.Issues
                 
                 db.SingleById<Poco>(1);
 
-                Assert.That(captured.SqlStatements.Last(), Is.StringContaining("Schema1"));
+                Assert.That(captured.SqlStatements.Last().ToLower(), Is.StringContaining("schema1"));
 
-                modelDef.Schema = "Schema2";
+                modelDef.Schema = "schema2";
 
                 db.SingleById<Poco>(1);
 
-                Assert.That(captured.SqlStatements.Last(), Is.StringContaining("Schema2"));
+                Assert.That(captured.SqlStatements.Last().ToLower(), Is.StringContaining("schema2"));
             }
         }
     }
