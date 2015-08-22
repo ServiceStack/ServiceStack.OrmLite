@@ -118,9 +118,10 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(captured.SqlCommandHistory.Last().Sql.NormalizeSql(),
                     Is.EqualTo("select id, firstname, lastname, age  from person where (age = 42) limit 1").
                     Or.EqualTo("select top 1 id, firstname, lastname, age  from person where (age = 42)"). //SQLServer < 2012
-                    Or.EqualTo("select id, firstname, lastname, age  from person where (age = 42) order by 1 offset 0 rows fetch next 1 rows only")); //SQLServer >= 2012
+                    Or.EqualTo("select id, firstname, lastname, age  from person where (age = 42) order by 1 offset 0 rows fetch next 1 rows only"). //SQLServer >= 2012
+                    Or.EqualTo("select first 1 id, firstname, lastname, age  from person where (age = 42)")); //Firebird
 
-                i++; db.ExistsFmt<Person>("Age = {0}", 42);
+            i++; db.ExistsFmt<Person>("Age = {0}", 42);
                 i++; db.Single(db.From<Person>().Where(x => x.Age == 42));
                 i++; db.Single<Person>(new { Age = 42 });
                 i++; db.Single<Person>("Age = @age", new { age = 42 });

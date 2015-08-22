@@ -88,8 +88,10 @@ namespace ServiceStack.OrmLite.Firebird
 
             }
 
-            if (operand == "=" && right.ToString() == "null") operand = "is";
-            else if (operand == "<>" && right.ToString() == "null") operand = "is not";
+            if (operand == "=" && right.ToString().EqualsIgnoreCase("null"))
+                operand = "is";
+            else if (operand == "<>" && right.ToString().EqualsIgnoreCase("null"))
+                operand = "is not";
             else if (operand == "=" || operand == "<>")
             {
                 if (IsTrueExpression(right)) right = GetQuotedTrueValue();

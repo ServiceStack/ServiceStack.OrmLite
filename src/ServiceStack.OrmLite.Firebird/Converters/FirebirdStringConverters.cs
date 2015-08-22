@@ -9,7 +9,11 @@ namespace ServiceStack.OrmLite.Firebird.Converters
 
         public override string MaxColumnDefinition
         {
-            get { return maxColumnDefinition ?? GetColumnDefinition(32767); }
+            get
+            {
+                //Max field is 32767 but using lower limit to avoid 64kb max row limit
+                return maxColumnDefinition ?? GetColumnDefinition(10000); 
+            } 
         }
 
         public override string GetColumnDefinition(int? stringLength)

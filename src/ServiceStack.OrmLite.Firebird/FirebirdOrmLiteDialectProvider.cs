@@ -4,6 +4,7 @@ using System.Data;
 using System.Reflection;
 using System.Text;
 using FirebirdSql.Data.FirebirdClient;
+using ServiceStack.OrmLite;
 using ServiceStack.OrmLite.Firebird.Converters;
 
 namespace ServiceStack.OrmLite.Firebird
@@ -25,7 +26,7 @@ namespace ServiceStack.OrmLite.Firebird
         {
             base.AutoIncrementDefinition = string.Empty;
             DefaultValueFormat = " DEFAULT '{0}'";
-            NamingStrategy = new UpperCaseNamingStrategy();
+            NamingStrategy = new FirebirdNamingStrategy();
 
             base.InitColumnTypeMap();
 
@@ -64,6 +65,13 @@ namespace ServiceStack.OrmLite.Firebird
             return LastInsertId;
         }
 
+        public override long InsertAndGetLastInsertId<T>(IDbCommand dbCmd)
+        {
+            dbCmd.CommandText += " returning {0};".Fmt(typeof(T).GetModelMetadata().PrimaryKey.FieldName);
+
+            return dbCmd.ExecLongScalar();
+        }
+
         public override string ToSelectStatement(Type tableType, string sqlFilter, params object[] filterParams)
         {
             var sql = new StringBuilder();
@@ -92,7 +100,7 @@ namespace ServiceStack.OrmLite.Firebird
             return sql.ToString();
         }
 
-        public override string ToInsertRowStatement(IDbCommand dbCommand, object objWithProperties, ICollection<string> insertFields = null)
+        public override string ToInsertRowStatement(IDbCommand cmd, object objWithProperties, ICollection<string> insertFields = null)
         {
             if (insertFields == null)
                 insertFields = new List<string>();
@@ -111,22 +119,17 @@ namespace ServiceStack.OrmLite.Firebird
 
                 if ((fieldDef.AutoIncrement || !string.IsNullOrEmpty(fieldDef.Sequence)
                     || fieldDef.Name == OrmLiteConfig.IdField)
-                    && dbCommand != null)
+                    && cmd != null)
                 {
+                    EnsureAutoIncrementSequence(modelDef, fieldDef);
 
-                    if (fieldDef.AutoIncrement && string.IsNullOrEmpty(fieldDef.Sequence))
-                    {
-                        fieldDef.Sequence = Sequence(
-                            (modelDef.IsInSchema
-                                ? modelDef.Schema + "_" + NamingStrategy.GetTableName(modelDef.ModelName)
-                                : NamingStrategy.GetTableName(modelDef.ModelName)),
-                            fieldDef.FieldName, fieldDef.Sequence);
-                    }
+                    var result = GetNextValue(cmd, fieldDef.Sequence, fieldDef.GetValue(objWithProperties));
+
+                    fieldDef.SetValueFn(objWithProperties, result);
 
                     PropertyInfo pi = tableType.GetProperty(fieldDef.Name,
                         BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy);
 
-                    var result = GetNextValue(dbCommand, fieldDef.Sequence, pi.GetValue(objWithProperties, new object[] { }));
                     if (pi.PropertyType == typeof(String))
                         pi.SetProperty(objWithProperties, result.ToString());
                     else if (pi.PropertyType == typeof(Int16))
@@ -145,7 +148,7 @@ namespace ServiceStack.OrmLite.Firebird
                 try
                 {
                     sbColumnNames.Append(string.Format("{0}", GetQuotedColumnName(fieldDef.FieldName)));
-                    if (!string.IsNullOrEmpty(fieldDef.Sequence) && dbCommand == null)
+                    if (!string.IsNullOrEmpty(fieldDef.Sequence) && cmd == null)
                         sbColumnValues.Append(string.Format("@{0}", fieldDef.Name));
                     else
                         sbColumnValues.Append(fieldDef.GetQuotedValue(objWithProperties));
@@ -160,6 +163,67 @@ namespace ServiceStack.OrmLite.Firebird
                 GetQuotedTableName(modelDef), sbColumnNames, sbColumnValues);
 
             return sql;
+        }
+
+        private void EnsureAutoIncrementSequence(ModelDefinition modelDef, FieldDefinition fieldDef)
+        {
+            if (fieldDef.AutoIncrement && string.IsNullOrEmpty(fieldDef.Sequence))
+            {
+                fieldDef.Sequence = Sequence(
+                    (modelDef.IsInSchema
+                        ? modelDef.Schema + "_" + NamingStrategy.GetTableName(modelDef.ModelName)
+                        : NamingStrategy.GetTableName(modelDef.ModelName)),
+                    fieldDef.FieldName, fieldDef.Sequence);
+            }
+        }
+
+        public override void PrepareParameterizedInsertStatement<T>(IDbCommand cmd, ICollection<string> insertFields = null)
+        {
+            var sbColumnNames = new StringBuilder();
+            var sbColumnValues = new StringBuilder();
+            var modelDef = OrmLiteUtils.GetModelDefinition(typeof(T));
+
+            cmd.Parameters.Clear();
+            cmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
+
+            foreach (var fieldDef in modelDef.FieldDefinitionsArray)
+            {
+                if (fieldDef.ShouldSkipInsert() && !fieldDef.AutoIncrement)
+                    continue;
+
+                //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
+                if (insertFields != null && !insertFields.Contains(fieldDef.Name))
+                    continue;
+
+                if (sbColumnNames.Length > 0)
+                    sbColumnNames.Append(",");
+                if (sbColumnValues.Length > 0)
+                    sbColumnValues.Append(",");
+
+                try
+                {
+                    sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
+
+                    if (!fieldDef.AutoIncrement)
+                    {
+                        sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
+                        AddParameter(cmd, fieldDef);
+                    }
+                    else
+                    {
+                        EnsureAutoIncrementSequence(modelDef, fieldDef);
+                        sbColumnValues.Append("NEXT VALUE FOR " + fieldDef.Sequence);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("ERROR in PrepareParameterizedInsertStatement(): " + ex.Message, ex);
+                    throw;
+                }
+            }
+
+            cmd.CommandText = string.Format("INSERT INTO {0} ({1}) VALUES ({2})",
+                GetQuotedTableName(modelDef), sbColumnNames, sbColumnValues);
         }
 
         public override string ToUpdateRowStatement(object objWithProperties, ICollection<string> updateFields = null)
@@ -586,12 +650,17 @@ namespace ServiceStack.OrmLite.Firebird
 
         public override string GetColumnNames(ModelDefinition modelDef)
         {
-            if (QuoteNames) return modelDef.GetColumnNames(this);
+            if (QuoteNames)
+                return modelDef.GetColumnNames(this);
+
             var sqlColumns = new StringBuilder();
-            modelDef.FieldDefinitions.ForEach(x =>
-                sqlColumns.AppendFormat("{0} {1}",
-                sqlColumns.Length > 0 ? "," : "",
-                GetQuotedColumnName(x.FieldName)));
+            foreach (var field in modelDef.FieldDefinitions)
+            {
+                if (sqlColumns.Length > 0)
+                    sqlColumns.Append(", ");
+
+                sqlColumns.Append(field.GetQuotedName(this));
+            }
 
             return sqlColumns.ToString();
         }
@@ -631,7 +700,7 @@ namespace ServiceStack.OrmLite.Firebird
         private string Sequence(string modelName, string fieldName, string sequence)
         {
             return sequence.IsNullOrEmpty()
-                ? Quote(modelName + "_" + fieldName + "_GEN")
+                ? Quote(NamingStrategy.GetTableName(modelName + "_" + fieldName + "_GEN"))
                 : Quote(sequence);
         }
 
@@ -751,6 +820,13 @@ namespace ServiceStack.OrmLite.Firebird
                     toRow = string.Empty;
                 }
                 sb.Append(string.Format("\nROWS {0} {1}", fromRow, toRow));
+            }
+            else if (rows != null)
+            {
+                var selectType = selectExpression.StartsWithIgnoreCase("SELECT DISTINCT") ? "SELECT DISTINCT" : "SELECT";
+                var sql = sb.ToString();
+                sql = selectType + " FIRST " + rows + sql.Substring(selectType.Length);
+                return sql;
             }
 
             return sb.ToString();
