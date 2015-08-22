@@ -6,6 +6,7 @@ namespace ServiceStack.OrmLite.Oracle.Converters
     public class OracleStringConverter : StringConverter
     {
         public OracleStringConverter() : base(128) {}
+        public OracleStringConverter(int stringLength) : base(stringLength) {}
 
         public override string MaxColumnDefinition
         {

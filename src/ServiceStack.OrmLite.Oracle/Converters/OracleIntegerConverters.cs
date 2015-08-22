@@ -33,6 +33,11 @@ namespace ServiceStack.OrmLite.Oracle.Converters
         {
             get { return DbType.Int32; }
         }
+
+        public override string ColumnDefinition
+        {
+            get { return "NUMERIC(18)"; }
+        }
     }
 
     public class OracleUInt64Converter : UInt64Converter
