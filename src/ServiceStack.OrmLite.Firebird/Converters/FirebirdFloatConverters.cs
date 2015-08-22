@@ -12,7 +12,7 @@ namespace ServiceStack.OrmLite.Firebird.Converters
 
         public override string ToQuotedString(Type fieldType, object value)
         {
-            var s = base.DialectProvider.GetQuotedValue(value, fieldType);
+            var s = value.ToString();
             if (s.Length > 20) s = s.Substring(0, 20);
             return "'" + s + "'"; // when quoted exception is more clear!
         }

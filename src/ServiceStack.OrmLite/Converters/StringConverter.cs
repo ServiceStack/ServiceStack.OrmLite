@@ -17,9 +17,11 @@ namespace ServiceStack.OrmLite.Converters
 
         public int StringLength { get; set; }
 
+        protected string maxColumnDefinition;
         public virtual string MaxColumnDefinition
         {
-            get { return ColumnDefinition; }
+            get { return maxColumnDefinition ?? ColumnDefinition; }
+            set { maxColumnDefinition = value; }
         }
 
         public override string ColumnDefinition

@@ -12,7 +12,7 @@ namespace ServiceStack.OrmLite.Firebird
     {
         public static List<string> RESERVED = new List<string>(new[] {
 			"USER","ORDER","PASSWORD", "ACTIVE","LEFT","DOUBLE", "FLOAT", "DECIMAL","STRING", "DATE","DATETIME", "TYPE","TIMESTAMP",
-			"INDEX","UNIQUE", "PRIMARY", "KEY", "ALTER", "DROP", "CREATE", "DELETE", "VALUES", "FUNCTION"
+			"INDEX","UNIQUE", "PRIMARY", "KEY", "ALTER", "DROP", "CREATE", "DELETE", "VALUES", "FUNCTION", "INT", "LONG", "CHAR"
 		});
 
         public static FirebirdOrmLiteDialectProvider Instance = new FirebirdOrmLiteDialectProvider();
@@ -35,8 +35,10 @@ namespace ServiceStack.OrmLite.Firebird
                 base.RegisterConverter<Guid>(new FirebirdGuidConverter());
 
             base.RegisterConverter<DateTime>(new FirebirdDateTimeConverter());
+            base.RegisterConverter<DateTimeOffset>(new FirebirdDateTimeOffsetConverter());
 
             base.RegisterConverter<string>(new FirebirdStringConverter());
+            base.RegisterConverter<char[]>(new FirebirdCharArrayConverter());
             base.RegisterConverter<bool>(new FirebirdBoolConverter());
 
             base.RegisterConverter<float>(new FirebirdFloatConverter());

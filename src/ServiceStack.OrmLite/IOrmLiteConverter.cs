@@ -55,6 +55,9 @@ namespace ServiceStack.OrmLite
             return DialectProvider.GetQuotedValue(value.ToString());
         }
 
+        /// <summary>
+        /// Customize how DB Param is initialized. Useful for supporting RDBMS-specific Types.
+        /// </summary>
         public virtual void InitDbParam(IDbDataParameter p, Type fieldType)
         {
             p.DbType = DbType;

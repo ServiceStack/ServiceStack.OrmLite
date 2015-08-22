@@ -15,6 +15,9 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var db = OpenDbConnection())
             {
+                if (Dialect == Dialect.Firebird) //Exceeds row limit
+                    db.GetDialectProvider().GetStringConverter().MaxColumnDefinition = "VARCHAR(4000)";
+
                 db.DropAndCreateTable<AllTypes>();
                 db.GetLastSql().Print();
 
@@ -62,6 +65,9 @@ namespace ServiceStack.OrmLite.Tests
                 var lastUpdatedRow = updatedRows.Last();
                 var dbUpdatedRow = db.SingleById<AllTypes>(lastUpdatedRow.Id);
                 Assert.That(dbUpdatedRow, Is.EqualTo(lastUpdatedRow));
+
+                if (Dialect == Dialect.Firebird)
+                    db.GetDialectProvider().GetStringConverter().MaxColumnDefinition = null;
             }
         }
     }
@@ -211,7 +217,7 @@ namespace ServiceStack.OrmLite.Tests
                 UInt = (uint)(i + 8),
                 ULong = (ulong)(i + 9),
                 Float = (float)(i + 10.1),
-                Double = i + 11.1,
+                Double = i + 11.5,
                 Decimal = (decimal)(i + 12.1),
                 String = "String" + i,
                 DateTime = new DateTime(2000 + i, (i + 1) % 12, (i + 1) % 28),
