@@ -104,6 +104,7 @@ namespace ServiceStack.OrmLite.Oracle
 
             RegisterConverter<TimeSpan>(new OracleTimeSpanAsIntConverter());
             RegisterConverter<string>(new OracleStringConverter());
+            RegisterConverter<char[]>(new OracleCharArrayConverter());
 
             RegisterConverter<long>(new OracleInt64Converter());
             RegisterConverter<sbyte>(new OracleSByteConverter());
