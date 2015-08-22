@@ -126,12 +126,12 @@ namespace ServiceStack.OrmLite.Converters
 
         public override object ToDbValue(Type fieldType, object value)
         {
-            return DialectProvider.ConvertDbValue(value, fieldType);
+            return DialectProvider.ToDbValue(value, fieldType);
         }
 
         public override object FromDbValue(Type fieldType, object value)
         {
-            return DialectProvider.ConvertDbValue(value, fieldType);
+            return DialectProvider.FromDbValue(value, fieldType);
         }
     }
 }

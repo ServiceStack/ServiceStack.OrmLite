@@ -56,7 +56,9 @@ namespace ServiceStack.OrmLite
 
         void SetDbValue(FieldDefinition fieldDef, IDataReader reader, int colIndex, object instance);
 
-        object ConvertDbValue(object value, Type type);
+        object ToDbValue(object value, Type type);
+
+        object FromDbValue(object value, Type type);
 
         object GetValue(IDataReader reader, int columnIndex, Type type);
 

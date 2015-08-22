@@ -752,7 +752,7 @@ namespace ServiceStack.OrmLite
                 {
                     var dialectProvider = dbCmd.GetDialectProvider();
                     var newId = dbCmd.Insert(obj, selectIdentity: true);
-                    var safeId = dialectProvider.ConvertDbValue(newId, modelDef.PrimaryKey.FieldType);
+                    var safeId = dialectProvider.FromDbValue(newId, modelDef.PrimaryKey.FieldType);
                     modelDef.PrimaryKey.SetValueFn(obj, safeId);
                     id = newId;
                 }
@@ -818,7 +818,7 @@ namespace ServiceStack.OrmLite
                         {
                             var dialectProvider = dbCmd.GetDialectProvider();
                             var newId = dbCmd.Insert(row, selectIdentity: true);
-                            var safeId = dialectProvider.ConvertDbValue(newId, modelDef.PrimaryKey.FieldType);
+                            var safeId = dialectProvider.FromDbValue(newId, modelDef.PrimaryKey.FieldType);
                             modelDef.PrimaryKey.SetValueFn(row, safeId);
                             id = newId;
                         }

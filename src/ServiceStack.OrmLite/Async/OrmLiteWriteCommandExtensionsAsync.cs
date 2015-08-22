@@ -313,7 +313,7 @@ namespace ServiceStack.OrmLite
                 {
 
                     var newId = await dbCmd.InsertAsync(obj, selectIdentity: true, token:token);
-                    var safeId = dbCmd.GetDialectProvider().ConvertDbValue(newId, modelDef.PrimaryKey.FieldType);
+                    var safeId = dbCmd.GetDialectProvider().FromDbValue(newId, modelDef.PrimaryKey.FieldType);
                     modelDef.PrimaryKey.SetValueFn(obj, safeId);
                     id = newId;
                 }
@@ -380,7 +380,7 @@ namespace ServiceStack.OrmLite
                         if (modelDef.HasAutoIncrementId)
                         {
                             var newId = await dbCmd.InsertAsync(row, selectIdentity: true, token:token);
-                            var safeId = dialectProvider.ConvertDbValue(newId, modelDef.PrimaryKey.FieldType);
+                            var safeId = dialectProvider.FromDbValue(newId, modelDef.PrimaryKey.FieldType);
                             modelDef.PrimaryKey.SetValueFn(row, safeId);
                             id = newId;
                         }

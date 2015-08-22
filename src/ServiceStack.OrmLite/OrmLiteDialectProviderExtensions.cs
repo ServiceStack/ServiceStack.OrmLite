@@ -53,10 +53,10 @@ namespace ServiceStack.OrmLite
                 dialect.GetQuotedColumnName(fieldName);
         }
 
-        public static object ConvertDbValue(this IOrmLiteDialectProvider dialect, 
+        public static object FromDbValue(this IOrmLiteDialectProvider dialect, 
             IDataReader reader, int columnIndex, Type type)
         {
-            return dialect.ConvertDbValue(dialect.GetValue(reader, columnIndex, type), type);
+            return dialect.FromDbValue(dialect.GetValue(reader, columnIndex, type), type);
         }
 
         public static IOrmLiteConverter GetConverter<T>(this IOrmLiteDialectProvider dialect)
