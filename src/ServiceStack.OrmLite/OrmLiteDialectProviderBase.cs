@@ -119,24 +119,27 @@ namespace ServiceStack.OrmLite
             RegisterConverter<DateTimeOffset>(new DateTimeOffsetConverter());
         }
 
-        public string GetColumnTypeDefinition(Type columnType, int? fieldLength = null)
+        public string GetColumnTypeDefinition(Type columnType, int? fieldLength, int? scale)
         {
             var converter = GetConverter(columnType);
             if (converter != null)
             {
-                var customConverter = converter as IHasCustomColumnDefinition;
-                var columnDefinition = customConverter != null 
-                    ? customConverter.GetColumnDefinition(fieldLength)
-                    : converter.ColumnDefinition;
+                var customPrecisionConverter = converter as IHasColumnDefinitionPrecision;
+                if (customPrecisionConverter != null)
+                    return customPrecisionConverter.GetColumnDefinition(fieldLength, scale);
 
-                if (string.IsNullOrEmpty(columnDefinition))
+                var customLengthConverter = converter as IHasColumnDefinitionLength;
+                if (customLengthConverter != null)
+                    return customLengthConverter.GetColumnDefinition(fieldLength);
+
+                if (string.IsNullOrEmpty(converter.ColumnDefinition))
                     throw new ArgumentException("{0} requires a ColumnDefinition".Fmt(converter.GetType().Name));
 
-                return columnDefinition;
+                return converter.ColumnDefinition;
             }
 
             var stringConverter = columnType.IsRefType()
-                ? (IHasCustomColumnDefinition)ReferenceTypeConverter
+                ? (IHasColumnDefinitionLength)ReferenceTypeConverter
                 : ValueTypeConverter;
 
             return stringConverter.GetColumnDefinition(fieldLength);
@@ -429,29 +432,11 @@ namespace ServiceStack.OrmLite
             return OrmLiteConfig.SanitizeFieldNameForParamNameFn(fieldName);
         }
 
-        protected string ReplaceDecimalColumnDefinition(string definition, int? fieldLength, int? scale)
-        {
-            if (fieldLength == null && scale == null)
-                return definition;
-
-            var existingDefinition = DecimalConverter;
-            if (fieldLength != existingDefinition.Precision || scale != existingDefinition.Scale)
-            {
-                var customDecimal = string.Format("DECIMAL({0},{1})",
-                    fieldLength.GetValueOrDefault(existingDefinition.Precision),
-                    scale.GetValueOrDefault(existingDefinition.Scale));
-
-                return definition.Replace(existingDefinition.ColumnDefinition, customDecimal);
-            }
-
-            return definition;
-        }
-
         public virtual string GetColumnDefinition(string fieldName, Type fieldType,
             bool isPrimaryKey, bool autoIncrement, bool isNullable, bool isRowVersion,
             int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
         {
-            var fieldDefinition = customFieldDefinition ?? GetColumnTypeDefinition(fieldType, fieldLength);
+            var fieldDefinition = customFieldDefinition ?? GetColumnTypeDefinition(fieldType, fieldLength, scale);
 
             var sql = new StringBuilder();
             sql.AppendFormat("{0} {1}", GetQuotedColumnName(fieldName), fieldDefinition);

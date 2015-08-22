@@ -51,7 +51,7 @@ namespace ServiceStack.OrmLite.Converters
         }
     }
 
-    public class DecimalConverter : FloatConverter
+    public class DecimalConverter : FloatConverter, IHasColumnDefinitionPrecision
     {
         public int Precision { get; set; }
         public int Scale { get; set; }

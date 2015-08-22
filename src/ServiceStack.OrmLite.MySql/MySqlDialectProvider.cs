@@ -185,15 +185,12 @@ namespace ServiceStack.OrmLite.MySql
                 fieldDef.IsNullable,
                 fieldDef.IsRowVersion,
                 fieldDef.FieldLength,
-                null,
+                fieldDef.Scale,
                 fieldDef.DefaultValue,
                 fieldDef.CustomFieldDefinition);
 
             if (fieldDef.IsRowVersion)
                 return ret + " DEFAULT 1";
-
-            if (fieldDef.ColumnType == typeof(Decimal))
-                return base.ReplaceDecimalColumnDefinition(ret, fieldDef.FieldLength, fieldDef.Scale);
 
             return ret;
         }

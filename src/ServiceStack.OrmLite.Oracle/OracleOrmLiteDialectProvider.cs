@@ -847,7 +847,7 @@ namespace ServiceStack.OrmLite.Oracle
             bool isPrimaryKey, bool autoIncrement, bool isNullable, bool isRowVersion,
             int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
         {
-            var fieldDefinition = customFieldDefinition ?? GetColumnTypeDefinition(fieldType, fieldLength);
+            var fieldDefinition = customFieldDefinition ?? GetColumnTypeDefinition(fieldType, fieldLength, scale);
 
             var sql = new StringBuilder();
             sql.AppendFormat("{0} {1}", GetQuotedColumnName(fieldName), fieldDefinition);
@@ -864,9 +864,6 @@ namespace ServiceStack.OrmLite.Oracle
             sql.Append(isNullable ? " NULL" : " NOT NULL");
 
             var definition = sql.ToString();
-
-            if (fieldType == typeof(Decimal))
-                return base.ReplaceDecimalColumnDefinition(definition, fieldLength, scale);
 
             return definition;
         }

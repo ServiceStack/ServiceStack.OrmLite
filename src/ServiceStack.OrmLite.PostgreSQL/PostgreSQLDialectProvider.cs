@@ -89,7 +89,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
                 }
                 else
                 {
-                    fieldDefinition = GetColumnTypeDefinition(fieldType, fieldLength);
+                    fieldDefinition = GetColumnTypeDefinition(fieldType, fieldLength, scale);
                 }
             }
 
@@ -118,9 +118,6 @@ namespace ServiceStack.OrmLite.PostgreSQL
             }
 
             var definition = sql.ToString();
-
-            if (fieldType == typeof(Decimal))
-                return base.ReplaceDecimalColumnDefinition(definition, fieldLength, scale);
 
             return definition;
         }

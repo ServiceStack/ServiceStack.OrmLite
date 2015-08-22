@@ -64,6 +64,7 @@
   <ItemGroup>
     <Compile Include="Converters\OracleBoolConverter.cs" />
     <Compile Include="Converters\OracleByteArrayConverter.cs" />
+    <Compile Include="Converters\OracleCharArrayConverter.cs" />
     <Compile Include="Converters\OracleDateTimeConverter.cs" />
     <Compile Include="Converters\OracleDateTimeOffsetConverter.cs" />
     <Compile Include="Converters\OracleEnumConverter.cs" />

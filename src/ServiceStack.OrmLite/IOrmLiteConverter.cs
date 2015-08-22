@@ -22,9 +22,14 @@ namespace ServiceStack.OrmLite
         object GetValue(IDataReader reader, int columnIndex);
     }
 
-    public interface IHasCustomColumnDefinition
+    public interface IHasColumnDefinitionLength
     {
         string GetColumnDefinition(int? length);
+    }
+
+    public interface IHasColumnDefinitionPrecision
+    {
+        string GetColumnDefinition(int? precision, int? scale);
     }
 
     public abstract class OrmLiteConverter : IOrmLiteConverter

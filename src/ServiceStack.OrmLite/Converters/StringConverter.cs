@@ -4,7 +4,7 @@ using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.Converters
 {
-    public class StringConverter : OrmLiteConverter, IHasCustomColumnDefinition
+    public class StringConverter : OrmLiteConverter, IHasColumnDefinitionLength
     {
         public StringConverter() : this(8000) {}
 
