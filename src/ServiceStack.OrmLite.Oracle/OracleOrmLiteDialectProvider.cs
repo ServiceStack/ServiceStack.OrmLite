@@ -26,7 +26,8 @@ namespace ServiceStack.OrmLite.Oracle
             "ROWID", "VALIDATE", "COLUMN", "HAVING", "NOCOMPRESS", "ROWNUM", "VALUES", "COMMENT", "IDENTIFIED", "NOT", "ROWS", "VARCHAR",
             "COMPRESS", "IMMEDIATE", "NOWAIT", "SELECT", "VARCHAR2", "CONNECT", "IN", "NULL", "SESSION", "VIEW", "CREATE", "INCREMENT",
             "NUMBER", "SET", "WHENEVER", "CURRENT", "INDEX", "OF", "SHARE", "WHERE", "DATE", "INITIAL", "OFFLINE", "SIZE", "WITH", "DECIMAL",
-            "INSERT", "ON", "SMALLINT", "PASSWORD", "ACTIVE", "LEFT", "DOUBLE", "STRING", "DATETIME", "TYPE", "TIMESTAMP"
+            "INSERT", "ON", "SMALLINT", "PASSWORD", "ACTIVE", "LEFT", "DOUBLE", "STRING", "DATETIME", "TYPE", "TIMESTAMP",
+            "BYTE", "SHORT", "INT", "SUBTYPE"
         };
 
         protected readonly List<string> ReservedParameterNames = new List<string>
@@ -39,7 +40,8 @@ namespace ServiceStack.OrmLite.Oracle
             "ROWID", "VALIDATE", "COLUMN", "HAVING", "NOCOMPRESS", "ROWNUM", "VALUES", "COMMENT", "IDENTIFIED", "NOT", "ROWS", "VARCHAR",
             "COMPRESS", "IMMEDIATE", "NOWAIT", "SELECT", "VARCHAR2", "CONNECT", "IN", "NULL", "SESSION", "VIEW", "CREATE", "INCREMENT",
             "NUMBER", "SET", "WHENEVER", "CURRENT", "INDEX", "OF", "SHARE", "WHERE", "DATE", "INITIAL", "OFFLINE", "SIZE", "WITH", "DECIMAL",
-            "INSERT", "ON", "SMALLINT"
+            "INSERT", "ON", "SMALLINT",
+            "BYTE", "SHORT", "INT", "SUBTYPE"
         };
 
         protected const int MaxNameLength = 30;
