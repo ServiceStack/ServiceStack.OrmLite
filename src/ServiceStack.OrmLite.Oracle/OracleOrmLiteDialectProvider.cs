@@ -117,6 +117,7 @@ namespace ServiceStack.OrmLite.Oracle
 
             RegisterConverter<DateTime>(new OracleDateTimeConverter());
             RegisterConverter<DateTimeOffset>(new OracleDateTimeOffsetConverter(_timestampConverter));
+            RegisterConverter<bool>(new OracleBoolConverter());
         }
 
         //public override void OnAfterInitColumnTypeMap()
