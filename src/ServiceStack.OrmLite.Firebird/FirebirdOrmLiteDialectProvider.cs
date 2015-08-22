@@ -11,15 +11,15 @@ namespace ServiceStack.OrmLite.Firebird
     public class FirebirdOrmLiteDialectProvider : OrmLiteDialectProviderBase<FirebirdOrmLiteDialectProvider>
     {
         public static List<string> RESERVED = new List<string>(new[] {
-			"USER","ORDER","PASSWORD", "ACTIVE","LEFT","DOUBLE", "FLOAT", "DECIMAL","STRING", "DATE","DATETIME", "TYPE","TIMESTAMP",
-			"INDEX","UNIQUE", "PRIMARY", "KEY", "ALTER", "DROP", "CREATE", "DELETE", "VALUES", "FUNCTION", "INT", "LONG", "CHAR"
-		});
+            "USER","ORDER","PASSWORD", "ACTIVE","LEFT","DOUBLE", "FLOAT", "DECIMAL","STRING", "DATE","DATETIME", "TYPE","TIMESTAMP",
+            "INDEX","UNIQUE", "PRIMARY", "KEY", "ALTER", "DROP", "CREATE", "DELETE", "VALUES", "FUNCTION", "INT", "LONG", "CHAR"
+        });
 
         public static FirebirdOrmLiteDialectProvider Instance = new FirebirdOrmLiteDialectProvider();
 
         internal long LastInsertId { get; set; }
 
-        public FirebirdOrmLiteDialectProvider() : this(false) {}
+        public FirebirdOrmLiteDialectProvider() : this(false) { }
 
         public FirebirdOrmLiteDialectProvider(bool compactGuid)
         {
@@ -756,7 +756,6 @@ namespace ServiceStack.OrmLite.Firebird
             return sb.ToString();
         }
     }
-
 }
 
 /*
@@ -764,4 +763,3 @@ DEBUG: Ignoring existing generator 'CREATE GENERATOR ModelWFDT_Id_GEN;': unsucce
 DEFINE GENERATOR failed
 attempt to store duplicate value (visible to active transactions) in unique index "RDB$INDEX_11" 
 */
-
