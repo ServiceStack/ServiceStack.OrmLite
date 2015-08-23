@@ -56,6 +56,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Converters\FirebirdBoolConverter.cs" />
+    <Compile Include="Converters\FirebirdByteArrayConverter.cs" />
     <Compile Include="Converters\FirebirdDateTimeConverter.cs" />
     <Compile Include="Converters\FirebirdDateTimeOffsetConverter.cs" />
     <Compile Include="Converters\FirebirdFloatConverters.cs" />

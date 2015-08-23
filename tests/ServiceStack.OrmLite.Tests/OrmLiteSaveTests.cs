@@ -113,30 +113,32 @@ namespace ServiceStack.OrmLite.Tests
         public void Save_works_within_a_transaction()
         {
             using (var db = OpenDbConnection())
-            using (var trans = db.OpenTransaction())
             {
-                db.CreateTable<PersonWithAutoId>(overwrite: true);
+                db.DropAndCreateTable<PersonWithAutoId>();
 
-                var rows = new[] {
-                    new PersonWithAutoId {
-                        FirstName = "Jimi",
-                        LastName = "Hendrix",
-                        Age = 27
-                    },
-                    new PersonWithAutoId {
-                        FirstName = "Kurt",
-                        LastName = "Cobain",
-                        Age = 27
-                    },
-                };
+                using (var trans = db.OpenTransaction())
+                {
+                    var rows = new[] {
+                        new PersonWithAutoId {
+                            FirstName = "Jimi",
+                            LastName = "Hendrix",
+                            Age = 27
+                        },
+                        new PersonWithAutoId {
+                            FirstName = "Kurt",
+                            LastName = "Cobain",
+                            Age = 27
+                        },
+                    };
 
-                db.Save(rows);
+                    db.Save(rows);
 
-                Assert.That(rows[0].Id, Is.Not.EqualTo(0));
-                Assert.That(rows[1].Id, Is.Not.EqualTo(0));
-                Assert.That(rows[0].Id, Is.Not.EqualTo(rows[1].Id));
+                    Assert.That(rows[0].Id, Is.Not.EqualTo(0));
+                    Assert.That(rows[1].Id, Is.Not.EqualTo(0));
+                    Assert.That(rows[0].Id, Is.Not.EqualTo(rows[1].Id));
 
-                trans.Commit();
+                    trans.Commit();
+                }
             }
         }
 

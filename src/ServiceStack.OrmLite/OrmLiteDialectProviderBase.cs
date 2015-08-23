@@ -1172,15 +1172,15 @@ namespace ServiceStack.OrmLite
         protected virtual string GetCompositeIndexName(CompositeIndexAttribute compositeIndex, ModelDefinition modelDef)
         {
             return compositeIndex.Name ?? GetIndexName(compositeIndex.Unique, modelDef.ModelName.SafeVarName(),
-                                                       string.Join("_", compositeIndex.FieldNames.Map(x => x.SplitOnFirst(' ')[0]).ToArray()));
+                string.Join("_", compositeIndex.FieldNames.Map(x => x.SplitOnFirst(' ')[0]).ToArray()));
         }
 
         protected virtual string GetCompositeIndexNameWithSchema(CompositeIndexAttribute compositeIndex, ModelDefinition modelDef)
         {
             return compositeIndex.Name ?? GetIndexName(compositeIndex.Unique,
-                    (modelDef.IsInSchema ?
-                        modelDef.Schema + "_" + GetQuotedTableName(modelDef) :
-                        GetQuotedTableName(modelDef)).SafeVarName(),
+                    (modelDef.IsInSchema 
+                        ? modelDef.Schema + "_" + GetQuotedTableName(modelDef) 
+                        : GetQuotedTableName(modelDef)).SafeVarName(),
                     string.Join("_", compositeIndex.FieldNames.ToArray()));
         }
 

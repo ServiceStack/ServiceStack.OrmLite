@@ -214,8 +214,9 @@ namespace ServiceStack.OrmLite.Tests
 SELECT
 Id, {0}, {1}
 FROM {2}
-WHERE {0}={3}schemaUri
-".Fmt("SchemaUri".SqlColumn(), "NoteText".SqlColumn(), "Note".SqlTable(), OrmLiteConfig.DialectProvider.ParamString);
+WHERE {0}={3}
+".Fmt("SchemaUri".SqlColumn(), "NoteText".SqlColumn(), "Note".SqlTable(), 
+OrmLiteConfig.DialectProvider.GetParam("schemaUri"));
 
                 var notes = db.Select<NoteDto>(sql, new { schemaUri = "tcm:0-0-0" });
                 Assert.That(notes[0].Id, Is.EqualTo(id));
@@ -241,6 +242,7 @@ WHERE {0}={3}schemaUri
         public void Can_query_CustomerDto_and_map_db_fields_not_identical_by_guessing_the_mapping(string field1Name, string field2Name, string field3Name)
         {
             SuppressIfOracle("Oracle provider is not smart enough to insert 'from dual' everywhere required in user supplied SQL");
+            if (Dialect == Dialect.Firebird) return; //Requires Generator
 
             using (var db = OpenDbConnection())
             {

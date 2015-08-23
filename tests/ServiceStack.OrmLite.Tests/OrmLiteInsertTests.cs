@@ -186,6 +186,7 @@ namespace ServiceStack.OrmLite.Tests
         public void Can_GetLastInsertedId_using_Insert()
         {
             SuppressIfOracle("Need trigger for autoincrement keys to work in Oracle with caller supplied SQL");
+            if (Dialect == Dialect.Firebird) return; //Requires Generator
 
             var date = new DateTime(2000, 1, 1);
             var testObject = new UserAuth

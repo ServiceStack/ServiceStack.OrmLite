@@ -20,16 +20,16 @@ namespace ServiceStack.OrmLite.Tests
 			    var indexName = "idx_modelwithindexfields_name";
 			    var uniqueName = "uidx_modelwithindexfields_uniquename";
 
-			    if (Dialect == Dialect.Oracle)
-			    {
-			        indexName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(indexName);
+                if (Dialect == Dialect.Oracle || Dialect == Dialect.Firebird)
+                {
+                    indexName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(indexName);
                     uniqueName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(uniqueName);
 			    }
 
-                Assert.IsTrue(sql.Contains(indexName));
-				Assert.IsTrue(sql.Contains(uniqueName));
-			}
-		}
+                Assert.That(sql, Is.StringContaining(indexName));
+                Assert.That(sql, Is.StringContaining(uniqueName));
+            }
+        }
 
         [Test]
         public void Can_create_ModelWithCompositeIndexFields_table()
@@ -43,14 +43,14 @@ namespace ServiceStack.OrmLite.Tests
                 var indexName = "idx_modelwithcompositeindexfields_name";
                 var compositeName = "idx_modelwithcompositeindexfields_composite1_composite2";
 
-                if (Dialect == Dialect.Oracle)
+                if (Dialect == Dialect.Oracle || Dialect == Dialect.Firebird)
                 {
                     indexName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(indexName);
                     compositeName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(compositeName);
                 }
 
-                Assert.IsTrue(sql.Contains(indexName));
-                Assert.IsTrue(sql.Contains(compositeName));
+                Assert.That(sql, Is.StringContaining(indexName));
+                Assert.That(sql, Is.StringContaining(compositeName));
             }
         }
 
@@ -67,14 +67,14 @@ namespace ServiceStack.OrmLite.Tests
                 var indexName = "idx_modelwithcompositeindexfieldsdesc_name";
                 var compositeName = "idx_modelwithcompositeindexfieldsdesc_composite1_composite2";
 
-                if (Dialect == Dialect.Oracle)
+                if (Dialect == Dialect.Oracle || Dialect == Dialect.Firebird)
                 {
-                    indexName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(indexName);
-                    compositeName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(compositeName);
+                    indexName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(indexName).ToLower();
+                    compositeName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(compositeName).ToLower();
                 }
 
-                Assert.IsTrue(sql.Contains(indexName));
-                Assert.IsTrue(sql.Contains(compositeName));
+                Assert.That(sql, Is.StringContaining(indexName));
+                Assert.That(sql, Is.StringContaining(compositeName));
             }
         }
 
@@ -90,15 +90,15 @@ namespace ServiceStack.OrmLite.Tests
                 var indexName = "idx_modelwithnamedcompositeindex_name";
                 var compositeName = "uidx_modelwithnamedcompositeindexfields_composite1_composite2";
 
-                if (Dialect == Dialect.Oracle)
+                if (Dialect == Dialect.Oracle || Dialect == Dialect.Firebird)
                 {
                     indexName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(indexName);
                     compositeName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(compositeName);
                 }
 
-                Assert.IsTrue(sql.Contains(indexName));
-                Assert.IsTrue(sql.Contains("custom_index_name"));
-                Assert.IsFalse(sql.Contains(compositeName));
+                Assert.That(sql, Is.StringContaining(indexName));
+                Assert.That(sql, Is.StringContaining("custom_index_name"));
+                Assert.That(sql, Is.Not.StringContaining(compositeName));
             }
         }
 

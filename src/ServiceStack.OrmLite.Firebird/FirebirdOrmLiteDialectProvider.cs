@@ -4,6 +4,7 @@ using System.Data;
 using System.Reflection;
 using System.Text;
 using FirebirdSql.Data.FirebirdClient;
+using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite;
 using ServiceStack.OrmLite.Firebird.Converters;
 
@@ -38,9 +39,10 @@ namespace ServiceStack.OrmLite.Firebird
             base.RegisterConverter<DateTime>(new FirebirdDateTimeConverter());
             base.RegisterConverter<DateTimeOffset>(new FirebirdDateTimeOffsetConverter());
 
+            base.RegisterConverter<bool>(new FirebirdBoolConverter());
             base.RegisterConverter<string>(new FirebirdStringConverter());
             base.RegisterConverter<char[]>(new FirebirdCharArrayConverter());
-            base.RegisterConverter<bool>(new FirebirdBoolConverter());
+            base.RegisterConverter<byte[]>(new FirebirdByteArrayConverter());
 
             base.RegisterConverter<float>(new FirebirdFloatConverter());
             base.RegisterConverter<double>(new FirebirdDoubleConverter());
@@ -79,17 +81,18 @@ namespace ServiceStack.OrmLite.Firebird
 
         public override string ToSelectStatement(Type tableType, string sqlFilter, params object[] filterParams)
         {
-            var sql = new StringBuilder();
-            const string SelectStatement = "SELECT ";
+            const string SelectStatement = "SELECT";
             var modelDef = GetModel(tableType);
+            sqlFilter = (sqlFilter ?? "").TrimStart();
             var isFullSelectStatement =
                 !string.IsNullOrEmpty(sqlFilter)
                 && sqlFilter.Length > SelectStatement.Length
-                && sqlFilter.Substring(0, SelectStatement.Length).ToUpper().Equals(SelectStatement);
+                && sqlFilter.StartsWithIgnoreCase(SelectStatement);
 
             if (isFullSelectStatement)
                 return sqlFilter.SqlFmt(filterParams);
 
+            var sql = new StringBuilder();
             sql.AppendFormat("SELECT {0} FROM {1}",
                 GetColumnNames(modelDef),
                 GetQuotedTableName(modelDef));
@@ -327,7 +330,7 @@ namespace ServiceStack.OrmLite.Firebird
 
                 var refModelDef = GetModel(fieldDef.ForeignKey.ReferenceType);
 
-                var fkName = NamingStrategy.GetTableName(fieldDef.ForeignKey.GetForeignKeyName(modelDef, refModelDef, NamingStrategy, fieldDef)).ToLower();
+                var fkName = NamingStrategy.ApplyNameRestrictions(fieldDef.ForeignKey.GetForeignKeyName(modelDef, refModelDef, NamingStrategy, fieldDef)).ToLower();
                 sbConstraints.AppendFormat(", \n\n  CONSTRAINT {0} FOREIGN KEY ({1}) REFERENCES {2} ({3})",
                     GetQuotedName(fkName),
                     GetQuotedColumnName(fieldDef.FieldName),
@@ -376,7 +379,11 @@ namespace ServiceStack.OrmLite.Firebird
             var sql = new StringBuilder();
             sql.AppendFormat("{0} {1}", GetQuotedColumnName(fieldName), fieldDefinition);
 
-            if (!string.IsNullOrEmpty(defaultValue))
+            if (isRowVersion)
+            {
+                sql.AppendFormat(DefaultValueFormat, 1L);
+            }
+            else if (!string.IsNullOrEmpty(defaultValue))
             {
                 sql.AppendFormat(DefaultValueFormat, defaultValue);
             }
@@ -407,7 +414,7 @@ namespace ServiceStack.OrmLite.Firebird
 
             foreach (var compositeIndex in modelDef.CompositeIndexes)
             {
-                var indexName = GetCompositeIndexNameWithSchema(compositeIndex, modelDef);
+                var indexName = GetCompositeIndexName(compositeIndex, modelDef);
                 var indexNames = string.Join(",", compositeIndex.FieldNames.ToArray());
 
                 sqlIndexes.Add(
@@ -419,22 +426,43 @@ namespace ServiceStack.OrmLite.Firebird
 
         protected override string GetIndexName(bool isUnique, string modelName, string fieldName)
         {
-            return NamingStrategy.GetTableName(
-                string.Format("{0}idx_{1}_{2}", isUnique ? "u" : "", modelName, fieldName)).ToLower();
+            return NamingStrategy.ApplyNameRestrictions(
+                string.Format("{0}idx_{1}_{2}", isUnique ? "u" : "", modelName, fieldName).ToLower());
         }
 
         protected override string ToCreateIndexStatement(bool isUnique, string indexName, ModelDefinition modelDef, string fieldName,
             bool isCombined = false, FieldDefinition fieldDef = null)
         {
-            var fieldNames = fieldName.Split(',');
+            var fieldNames = fieldName.Split(',')
+                .Map(x => NamingStrategy.GetColumnName(x.SplitOnFirst(' ')[0]));
 
             return string.Format("CREATE {0} INDEX {1} ON {2} ({3}); \n",
                 isUnique ? "UNIQUE" : "",
                 indexName,
                 GetQuotedTableName(modelDef),
-                GetQuotedColumnName(fieldName));
+                string.Join(",", fieldNames.ToArray()));
         }
 
+        public static string RowVersionTriggerFormat = "{0}RowVersionUpdateTrigger";
+        public override string ToPostCreateTableStatement(ModelDefinition modelDef)
+        {
+            if (modelDef.RowVersion != null)
+            {
+                var triggerName = NamingStrategy.ApplyNameRestrictions(
+                    RowVersionTriggerFormat.Fmt(modelDef.ModelName));
+                var triggerBody = "new.{0} = old.{0}+1;".Fmt(
+                    modelDef.RowVersion.FieldName.SqlColumn(this));
+
+                var sql = "CREATE OR ALTER TRIGGER {0} BEFORE UPDATE ON {1} AS BEGIN {2} END;".Fmt(
+                    Quote(triggerName), 
+                    GetTableName(modelDef.ModelName, modelDef.Schema), 
+                    triggerBody);
+
+                return sql;
+            }
+
+            return null;
+        }
 
         public override string ToExistStatement(Type fromTableType,
             object objWithProperties,

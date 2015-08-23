@@ -1,4 +1,5 @@
 ﻿using System;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Firebird
 {
@@ -52,8 +53,10 @@ namespace ServiceStack.OrmLite.Firebird
 
         private static string Squash(string name)
         {
+            name.Print();
+
             // First try squashing out the vowels
-            var removeVowels = new[] {"a", "e", "i", "o", "u", "y", "A", "E", "I", "O", "U", "Y"};
+            var removeVowels = new[] {"a", "A", "e", "E", "i", "I", "o", "O", "u", "U", "y", "Y"};
             var squashed = name;
             foreach (var removeVowel in removeVowels)
             {

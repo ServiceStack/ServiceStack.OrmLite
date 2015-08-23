@@ -42,6 +42,8 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Transaction_rollsback_if_not_committed()
         {
+            if (Dialect == Dialect.Firebird) return; //Keeps Table locked
+
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<ModelWithIdAndName>();
@@ -64,6 +66,8 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Transaction_rollsback_transactions_to_different_tables()
         {
+            if (Dialect == Dialect.Firebird) return; //Keeps Table locked
+
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<ModelWithIdAndName>();
@@ -214,8 +218,17 @@ namespace ServiceStack.OrmLite.Tests
                     {
                         dbCmd.Transaction = trans.ToDbTransaction();
 
-                        dbCmd.CommandText = "INSERT INTO {0} ({1}) VALUES ('From OrmLite DB Command')"
-                            .Fmt("MyTable".SqlTable(), "SomeTextField".SqlColumn());
+                        if (Dialect != Dialect.Firebird)
+                        {
+                            dbCmd.CommandText = "INSERT INTO {0} ({1}) VALUES ('From OrmLite DB Command')"
+                                .Fmt("MyTable".SqlTable(), "SomeTextField".SqlColumn());
+                        }
+                        else
+                        {
+                            dbCmd.CommandText = "INSERT INTO {0} ({1},{2}) VALUES (2,'From OrmLite DB Command')"
+                                .Fmt("MyTable".SqlTable(), "Id".SqlColumn(), "SomeTextField".SqlColumn());
+                        }
+
                         dbCmd.ExecuteNonQuery();
                     }
 
@@ -239,8 +252,17 @@ namespace ServiceStack.OrmLite.Tests
 
                     using (var dbCmd = db.OpenCommand())
                     {
-                        dbCmd.CommandText = "INSERT INTO {0} ({1}) VALUES ('From OrmLite DB Command')"
-                            .Fmt("MyTable".SqlTable(), "SomeTextField".SqlColumn());
+                        if (Dialect != Dialect.Firebird)
+                        {
+                            dbCmd.CommandText = "INSERT INTO {0} ({1}) VALUES ('From OrmLite DB Command')"
+                                .Fmt("MyTable".SqlTable(), "SomeTextField".SqlColumn());
+                        }
+                        else
+                        {
+                            dbCmd.CommandText = "INSERT INTO {0} ({1},{2}) VALUES (2,'From OrmLite DB Command')"
+                                .Fmt("MyTable".SqlTable(), "Id".SqlColumn(), "SomeTextField".SqlColumn());
+                        }
+
                         dbCmd.ExecuteNonQuery();
                     }
 
