@@ -52,29 +52,27 @@ namespace ServiceStack.OrmLite.Firebird
                 left = Visit(b.Left);
                 right = Visit(b.Right);
 
-                if (left as EnumMemberAccess != null)
-                {
-                    var enumType = ((EnumMemberAccess)left).EnumType;
+                var leftEnum = left as EnumMemberAccess;
+                var rightEnum = right as EnumMemberAccess;
 
-                    //enum value was returned by Visit(b.Right)
-                    long numvericVal;
-                    if (Int64.TryParse(right.ToString(), out numvericVal))
-                        right = base.DialectProvider.GetQuotedValue(Enum.ToObject(enumType, numvericVal).ToString(),
-                                                                     typeof(string));
-                    else
-                        right = base.DialectProvider.GetQuotedValue(right, right.GetType());
+                var rightNeedsCoercing = leftEnum != null && rightEnum == null;
+                var leftNeedsCoercing = rightEnum != null && leftEnum == null;
+
+                if (rightNeedsCoercing)
+                {
+                    var rightPartialSql = right as PartialSqlString;
+                    if (rightPartialSql == null)
+                    {
+                        right = GetValue(right, leftEnum.EnumType);
+                    }
                 }
-                else if (right as EnumMemberAccess != null)
+                else if (leftNeedsCoercing)
                 {
-                    var enumType = ((EnumMemberAccess)right).EnumType;
-
-                    //enum value was returned by Visit(b.Left)
-                    long numvericVal;
-                    if (Int64.TryParse(left.ToString(), out numvericVal))
-                        left = base.DialectProvider.GetQuotedValue(Enum.ToObject(enumType, numvericVal).ToString(),
-                                                                     typeof(string));
-                    else
-                        left = base.DialectProvider.GetQuotedValue(left, left.GetType());
+                    var leftPartialSql = left as PartialSqlString;
+                    if (leftPartialSql == null)
+                    {
+                        left = DialectProvider.GetQuotedValue(left, rightEnum.EnumType);
+                    }
                 }
                 else if (left as PartialSqlString == null && right as PartialSqlString == null)
                 {
@@ -82,10 +80,13 @@ namespace ServiceStack.OrmLite.Firebird
                     return result;
                 }
                 else if (left as PartialSqlString == null)
-                    left = base.DialectProvider.GetQuotedValue(left, left != null ? left.GetType() : null);
+                {
+                    left = DialectProvider.GetQuotedValue(left, left != null ? left.GetType() : null);
+                }
                 else if (right as PartialSqlString == null)
-                    right = base.DialectProvider.GetQuotedValue(right, right != null ? right.GetType() : null);
-
+                {
+                    right = GetValue(right, right != null ? right.GetType() : null);
+                }
             }
 
             if (operand == "=" && right.ToString().EqualsIgnoreCase("null"))

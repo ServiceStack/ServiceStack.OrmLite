@@ -19,6 +19,11 @@ namespace ServiceStack.OrmLite.Firebird.Converters
         {
             return new Guid(value.ToString());
         }
+
+        public override object ToDbValue(Type fieldType, object value)
+        {
+            return base.ToDbValue(fieldType, value);
+        }
     }
 
     public class FirebirdCompactGuidConverter : GuidConverter

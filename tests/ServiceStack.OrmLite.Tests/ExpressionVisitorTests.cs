@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Linq;
 using NUnit.Framework;
 
@@ -7,51 +8,60 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixture]
     public class ExpressionVisitorTests : OrmLiteTestBase
     {
+        private IDbConnection Db;
+
         [SetUp]
         public void Setup()
         {
-            using (var con = OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
-                con.DropAndCreateTable<TestType>();
-                con.Insert(new TestType { Id = 1, BoolCol = true, DateCol = new DateTime(2012, 1, 1), TextCol = "asdf", EnumCol = TestEnum.Val0 });
-                con.Insert(new TestType { Id = 2, BoolCol = true, DateCol = new DateTime(2012, 2, 1), TextCol = "asdf123", EnumCol = TestEnum.Val1 });
-                con.Insert(new TestType { Id = 3, BoolCol = false, DateCol = new DateTime(2012, 3, 1), TextCol = "qwer", EnumCol = TestEnum.Val2 });
-                con.Insert(new TestType { Id = 4, BoolCol = false, DateCol = new DateTime(2012, 4, 1), TextCol = "qwer123", EnumCol = TestEnum.Val3 });
+                db.DropAndCreateTable<TestType>();
+                db.Insert(new TestType { Id = 1, BoolCol = true, DateCol = new DateTime(2012, 1, 1), TextCol = "asdf", EnumCol = TestEnum.Val0 });
+                db.Insert(new TestType { Id = 2, BoolCol = true, DateCol = new DateTime(2012, 2, 1), TextCol = "asdf123", EnumCol = TestEnum.Val1 });
+                db.Insert(new TestType { Id = 3, BoolCol = false, DateCol = new DateTime(2012, 3, 1), TextCol = "qwer", EnumCol = TestEnum.Val2 });
+                db.Insert(new TestType { Id = 4, BoolCol = false, DateCol = new DateTime(2012, 4, 1), TextCol = "qwer123", EnumCol = TestEnum.Val3 });
             }
+            Db = OpenDbConnection();
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            Db.Dispose();
         }
 
         [Test]
         public void Can_Select_by_const_int()
         {
-            var target = OpenDbConnection().Select<TestType>(q => q.Id == 1);
+            var target = Db.Select<TestType>(q => q.Id == 1);
             Assert.AreEqual(1, target.Count);
         }
 
         [Test]
         public void Can_Select_by_value_returned_by_method_without_params()
         {
-            var target = OpenDbConnection().Select<TestType>(q => q.Id == MethodReturningInt());
+            var target = Db.Select<TestType>(q => q.Id == MethodReturningInt());
             Assert.AreEqual(1, target.Count);
         }
 
         [Test]
         public void Can_Select_by_value_returned_by_method_with_param()
         {
-            var target = OpenDbConnection().Select<TestType>(q => q.Id == MethodReturningInt(1));
+            var target = Db.Select<TestType>(q => q.Id == MethodReturningInt(1));
             Assert.AreEqual(1, target.Count);
         }
 
         [Test]
         public void Can_Select_by_const_enum()
         {
-            var target = OpenDbConnection().Select<TestType>(q => q.EnumCol == TestEnum.Val0);
+            var target = Db.Select<TestType>(q => q.EnumCol == TestEnum.Val0);
             Assert.AreEqual(1, target.Count);
         }
 
         [Test]
         public void Can_Select_by_enum_returned_by_method()
         {
-            var target = OpenDbConnection().Select<TestType>(q => q.EnumCol == MethodReturningEnum());
+            var target = Db.Select<TestType>(q => q.EnumCol == MethodReturningEnum());
             Assert.AreEqual(1, target.Count);
         }
 
@@ -59,7 +69,7 @@ namespace ServiceStack.OrmLite.Tests
         public void Can_Select_using_ToUpper_on_string_property_of_T()
         {
             var target =
-                OpenDbConnection().Select<TestType>(q => q.TextCol.ToUpper() == "ASDF");
+                Db.Select<TestType>(q => q.TextCol.ToUpper() == "ASDF");
             Assert.AreEqual(1, target.Count);
         }
 
@@ -69,7 +79,7 @@ namespace ServiceStack.OrmLite.Tests
             var obj = new TestType {TextCol = "ASDF"};
 
             var target =
-                OpenDbConnection().Select<TestType>(q => q.TextCol == obj.TextCol.ToLower());
+                Db.Select<TestType>(q => q.TextCol == obj.TextCol.ToLower());
             Assert.AreEqual(1, target.Count);
         }
 
@@ -77,85 +87,82 @@ namespace ServiceStack.OrmLite.Tests
         public void Can_Select_using_Constant_Bool_Value()
         {
             var target =
-                OpenDbConnection().Select<TestType>(q => q.BoolCol == true);
+                Db.Select<TestType>(q => q.BoolCol == true);
             Assert.AreEqual(2, target.Count);
         }
 
         [Test]
         public void Can_Select_using_new()
         {
-            using (var con = OpenDbConnection())
+            Db.Insert(new TestType
             {
-                con.Insert(new TestType
-                {
-                    Id = 5,
-                    BoolCol = false,
-                    DateCol = new DateTime(2012, 5, 1),
-                    TextCol = "uiop",
-                    EnumCol = TestEnum.Val3,
-                    ComplexObjCol = new TestType { TextCol = "poiu" }
-                });
+                Id = 5,
+                BoolCol = false,
+                DateCol = new DateTime(2012, 5, 1),
+                TextCol = "uiop",
+                EnumCol = TestEnum.Val3,
+                ComplexObjCol = new TestType { TextCol = "poiu" }
+            });
 
-                var target = OpenDbConnection().Select<TestType>(
-                        q => q.ComplexObjCol == new TestType { TextCol = "poiu"});
-                Assert.AreEqual(1, target.Count);
-            }
+            var target = Db.Select<TestType>(
+                    q => q.ComplexObjCol == new TestType { TextCol = "poiu" });
+            Assert.AreEqual(1, target.Count);
         }
 
         [Test]
         public void Can_Select_using_IN()
         {
-            var visitor = OrmLiteConfig.DialectProvider.SqlExpression<TestType>();
-            visitor.Where(q => Sql.In(q.TextCol, "asdf", "qwer"));
-            var target = OpenDbConnection().Select(visitor);
+            var q = Db.From<TestType>();
+            q.Where(x => Sql.In(x.TextCol, "asdf", "qwer"));
+            var target = Db.Select(q);
             Assert.AreEqual(2, target.Count);
         }
 
         [Test]
         public void Can_Select_using_IN_using_params()
         {
-            var visitor = OrmLiteConfig.DialectProvider.SqlExpression<TestType>();
-            visitor.Where(q => Sql.In(q.Id, 1, 2, 3));
-            var target = OpenDbConnection().Select(visitor);
+            var q = Db.From<TestType>();
+            q.Where(x => Sql.In(x.Id, 1, 2, 3));
+            var target = Db.Select(q);
             Assert.AreEqual(3, target.Count);
         }
 
         [Test]
         public void Can_Select_using_IN_using_int_array()
         {
-            var visitor = OrmLiteConfig.DialectProvider.SqlExpression<TestType>();
-            visitor.Where(q => Sql.In(q.Id, new[] {1, 2, 3}));
-            var target = OpenDbConnection().Select(visitor);
+            var q = Db.From<TestType>();
+            q.Where(x => Sql.In(x.Id, new[] {1, 2, 3}));
+            var target = Db.Select(q);
             Assert.AreEqual(3, target.Count);
         }
 
         [Test]
         public void Can_Select_using_IN_using_object_array()
         {
-            var visitor = OrmLiteConfig.DialectProvider.SqlExpression<TestType>();
-            visitor.Where(q => Sql.In(q.Id, new object[] { 1, 2, 3 }));
-            var target = OpenDbConnection().Select(visitor);
+            var q = Db.From<TestType>();
+            q.Where(x => Sql.In(x.Id, new object[] { 1, 2, 3 }));
+            var target = Db.Select(q);
             Assert.AreEqual(3, target.Count);
         }
 
         [Test]
         public void Can_Select_using_Startswith()
         {
-            var target = OpenDbConnection().Select<TestType>(q => q.TextCol.StartsWith("asdf"));
+            var target = Db.Select<TestType>(q => q.TextCol.StartsWith("asdf"));
             Assert.AreEqual(2, target.Count);
         }
 
         [Test]
         public void Can_Select_using_Endswith()
         {
-            var target = OpenDbConnection().Select<TestType>(q => q.TextCol.EndsWith("123"));
+            var target = Db.Select<TestType>(q => q.TextCol.EndsWith("123"));
             Assert.AreEqual(2, target.Count);
         }
 
         [Test]
         public void Can_Select_using_Contains()
         {
-            var target = OpenDbConnection().Select<TestType>(q => q.TextCol.Contains("df"));
+            var target = Db.Select<TestType>(q => q.TextCol.Contains("df"));
             Assert.AreEqual(2, target.Count);
         }
 
@@ -163,9 +170,9 @@ namespace ServiceStack.OrmLite.Tests
         public void Can_Selelct_using_chained_string_operations()
         {
             var value = "ASDF";
-            var visitor = OrmLiteConfig.DialectProvider.SqlExpression<TestType>();
-            visitor.Where(q => q.TextCol.ToUpper().StartsWith(value));
-            var target = OpenDbConnection().Select(visitor);
+            var q = Db.From<TestType>();
+            q.Where(x => x.TextCol.ToUpper().StartsWith(value));
+            var target = Db.Select(q);
             Assert.AreEqual(2, target.Count);
         }
 
@@ -174,13 +181,13 @@ namespace ServiceStack.OrmLite.Tests
         {
             var vals = new object[]{ TestEnum.Val0, TestEnum.Val1 };
 
-            var visitor1 = OrmLiteConfig.DialectProvider.SqlExpression<TestType>();
-            visitor1.Where(q => vals.Contains(q.EnumCol) || vals.Contains(q.EnumCol));
-            var sql1 = visitor1.ToSelectStatement();
+            var q1 = Db.From<TestType>();
+            q1.Where(q => vals.Contains(q.EnumCol) || vals.Contains(q.EnumCol));
+            var sql1 = q1.ToSelectStatement();
 
-            var visitor2 = OrmLiteConfig.DialectProvider.SqlExpression<TestType>();
-            visitor2.Where(q => Sql.In(q.EnumCol, vals) || Sql.In(q.EnumCol, vals));
-            var sql2 = visitor2.ToSelectStatement();
+            var q2 = Db.From<TestType>();
+            q2.Where(q => Sql.In(q.EnumCol, vals) || Sql.In(q.EnumCol, vals));
+            var sql2 = q2.ToSelectStatement();
 
             Assert.AreEqual(sql1, sql2);
         }
@@ -190,13 +197,13 @@ namespace ServiceStack.OrmLite.Tests
         {
             var vals = new int[] { (int)TestEnum.Val0, (int)TestEnum.Val1 };
 
-            var visitor1 = OrmLiteConfig.DialectProvider.SqlExpression<TestType>();
-            visitor1.Where(q => vals.Contains((int)q.EnumCol) || vals.Contains((int)q.EnumCol));
-            var sql1 = visitor1.ToSelectStatement();
+            var q1 = Db.From<TestType>();
+            q1.Where(q => vals.Contains((int)q.EnumCol) || vals.Contains((int)q.EnumCol));
+            var sql1 = q1.ToSelectStatement();
 
-            var visitor2 = OrmLiteConfig.DialectProvider.SqlExpression<TestType>();
-            visitor2.Where(q => Sql.In(q.EnumCol, vals) || Sql.In(q.EnumCol, vals));
-            var sql2 = visitor2.ToSelectStatement();
+            var q2 = Db.From<TestType>();
+            q2.Where(q => Sql.In(q.EnumCol, vals) || Sql.In(q.EnumCol, vals));
+            var sql2 = q2.ToSelectStatement();
 
             Assert.AreEqual(sql1, sql2);
         }

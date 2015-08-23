@@ -55,8 +55,8 @@ namespace ServiceStack.OrmLite.Tests
 
 				Assert.That(points[0].Width, Is.EqualTo(4));
 				Assert.That(points[0].Height, Is.EqualTo(1.123f));
-				Assert.That(points[0].Top, Is.EqualTo(3.456d));
-				Assert.That(points[0].Left, Is.EqualTo(2.345m));
+				Assert.That(points[0].Top, Is.EqualTo(3.456d).Within(1d));
+				Assert.That(points[0].Left, Is.EqualTo(2.345m).Within(1m));
 			}
 		}
 
