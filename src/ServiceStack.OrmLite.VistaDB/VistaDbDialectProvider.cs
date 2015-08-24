@@ -59,6 +59,7 @@ namespace ServiceStack.OrmLite.VistaDB
             base.RegisterConverter<uint>(new VistaDbUInt32Converter());
 
             base.RegisterConverter<TimeSpan>(new VistaDbTimeSpanAsIntConverter());
+            base.RegisterConverter<Guid>(new VistaDbGuidConverter()); 
         }
 
         public override string GetQuotedValue(string paramValue)
@@ -126,7 +127,7 @@ namespace ServiceStack.OrmLite.VistaDB
                     fd.IsNullable,
                     fd.IsRowVersion,
                     fd.FieldLength,
-                    null,
+                    fd.Scale,
                     fd.DefaultValue,
                     fd.CustomFieldDefinition);
 

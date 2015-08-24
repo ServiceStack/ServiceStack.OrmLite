@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data;
 using ServiceStack.OrmLite.Converters;
 
 namespace ServiceStack.OrmLite.VistaDB.Converters
@@ -11,11 +10,6 @@ namespace ServiceStack.OrmLite.VistaDB.Converters
         public override string ColumnDefinition
         {
             get { return "BIGINT"; }
-        }
-
-        public override DbType DbType
-        {
-            get { return DbType.DateTime; }
         }
 
         public override object ToDbValue(Type fieldType, object value)
