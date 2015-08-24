@@ -16,7 +16,7 @@ namespace ServiceStack.OrmLite.VistaDB
 
         protected override AssemblyName DefaultAssemblyGacName
         {
-            get { return new AssemblyName("VistaDB.5.NET40, Version=5.0.0.0, Culture=neutral, PublicKeyToken=dfc935afe2125461"); }
+            get { return new AssemblyName("VistaDB.5.NET40, Version=5.1.0.0, Culture=neutral, PublicKeyToken=dfc935afe2125461"); }
         }
 
         protected override AssemblyName DefaultAssemblyLocalName { get { return new AssemblyName("VistaDB.5.NET40"); } }
