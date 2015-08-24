@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System.Data;
+using NUnit.Framework;
 
 namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
 {
@@ -7,45 +8,51 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
         [Test]
         public void Can_select_constant_multiply_expression()
         {
-            var expected = new TestType()
-                               {
-                                   IntColumn = 12,
-                                   BoolColumn = true,
-                                   StringColumn = "test"
-                               };
+            var expected = new TestType
+            {
+                IntColumn = 12,
+                BoolColumn = true,
+                StringColumn = "test"
+            };
 
             EstablishContext(10, expected);
 
-            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn == 4 * 3);
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => q.IntColumn == 4 * 3);
 
-            Assert.IsNotNull(actual);
-            Assert.AreEqual(1, actual.Count);
-            CollectionAssert.Contains(actual, expected);
+                Assert.IsNotNull(actual);
+                Assert.AreEqual(1, actual.Count);
+                CollectionAssert.Contains(actual, expected);
+            }
         }
 
         [Test]
         public void Can_select_constant_divide_expression()
         {
-            var expected = new TestType()
-                               {
-                                   IntColumn = 12,
-                                   BoolColumn = true,
-                                   StringColumn = "test"
-                               };
+            var expected = new TestType
+            {
+                IntColumn = 12,
+                BoolColumn = true,
+                StringColumn = "test"
+            };
 
             EstablishContext(10, expected);
 
-            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn == 36 / 3);
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => q.IntColumn == 36 / 3);
 
-            Assert.IsNotNull(actual);
-            Assert.AreEqual(1, actual.Count);
-            CollectionAssert.Contains(actual, expected);
+                Assert.IsNotNull(actual);
+                Assert.AreEqual(1, actual.Count);
+                CollectionAssert.Contains(actual, expected);
+            }
         }
 
         [Test]
         public void Can_select_constant_modulo_expression()
         {
-            var expected = new TestType()
+            var expected = new TestType
             {
                 IntColumn = 7,
                 BoolColumn = true,
@@ -54,11 +61,14 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn == 37 % 10);
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => q.IntColumn == 37 % 10);
 
-            Assert.IsNotNull(actual);
-            Assert.AreEqual(1, actual.Count);
-            CollectionAssert.Contains(actual, expected);
+                Assert.IsNotNull(actual);
+                Assert.AreEqual(1, actual.Count);
+                CollectionAssert.Contains(actual, expected);
+            }
         }
 
         [Test]
@@ -69,20 +79,23 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
             var b = 3;
             // ReSharper restore ConvertToConstant.Local
 
-            var expected = new TestType()
-                               {
-                                   IntColumn = 12,
-                                   BoolColumn = true,
-                                   StringColumn = "test"
-                               };
+            var expected = new TestType
+            {
+                IntColumn = 12,
+                BoolColumn = true,
+                StringColumn = "test"
+            };
 
             EstablishContext(10, expected);
 
-            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn == a * b);
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => q.IntColumn == a * b);
 
-            Assert.IsNotNull(actual);
-            Assert.AreEqual(1, actual.Count);
-            CollectionAssert.Contains(actual, expected);
+                Assert.IsNotNull(actual);
+                Assert.AreEqual(1, actual.Count);
+                CollectionAssert.Contains(actual, expected);
+            }
         }
 
         [Test]
@@ -93,20 +106,23 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
             var b = 3;
             // ReSharper restore ConvertToConstant.Local
 
-            var expected = new TestType()
-                               {
-                                   IntColumn = 12,
-                                   BoolColumn = true,
-                                   StringColumn = "test"
-                               };
+            var expected = new TestType
+            {
+                IntColumn = 12,
+                BoolColumn = true,
+                StringColumn = "test"
+            };
 
             EstablishContext(10, expected);
 
-            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn == a / b);
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => q.IntColumn == a / b);
 
-            Assert.IsNotNull(actual);
-            Assert.AreEqual(1, actual.Count);
-            CollectionAssert.Contains(actual, expected);
+                Assert.IsNotNull(actual);
+                Assert.AreEqual(1, actual.Count);
+                CollectionAssert.Contains(actual, expected);
+            }
         }
 
         [Test]
@@ -117,7 +133,7 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
             var b = 10;
             // ReSharper restore ConvertToConstant.Local
 
-            var expected = new TestType()
+            var expected = new TestType
             {
                 IntColumn = 7,
                 BoolColumn = true,
@@ -126,55 +142,64 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn == a % b);
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => q.IntColumn == a % b);
 
-            Assert.IsNotNull(actual);
-            Assert.AreEqual(1, actual.Count);
-            CollectionAssert.Contains(actual, expected);
+                Assert.IsNotNull(actual);
+                Assert.AreEqual(1, actual.Count);
+                CollectionAssert.Contains(actual, expected);
+            }
         }
 
         [Test]
         public void Can_select_method_multiply_expression()
         {
-            var expected = new TestType()
-                               {
-                                   IntColumn = 12,
-                                   BoolColumn = true,
-                                   StringColumn = "test"
-                               };
+            var expected = new TestType
+            {
+                IntColumn = 12,
+                BoolColumn = true,
+                StringColumn = "test"
+            };
 
             EstablishContext(10, expected);
 
-            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn == GetValue(4) * GetValue(3));
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => q.IntColumn == GetValue(4) * GetValue(3));
 
-            Assert.IsNotNull(actual);
-            Assert.AreEqual(1, actual.Count);
-            CollectionAssert.Contains(actual, expected);
+                Assert.IsNotNull(actual);
+                Assert.AreEqual(1, actual.Count);
+                CollectionAssert.Contains(actual, expected);
+            }
         }
 
         [Test]
         public void Can_select_method_divide_expression()
         {
-            var expected = new TestType()
-                               {
-                                   IntColumn = 12,
-                                   BoolColumn = true,
-                                   StringColumn = "test"
-                               };
+            var expected = new TestType
+            {
+                IntColumn = 12,
+                BoolColumn = true,
+                StringColumn = "test"
+            };
 
             EstablishContext(10, expected);
 
-            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn == GetValue(36) / GetValue(3));
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => q.IntColumn == GetValue(36) / GetValue(3));
 
-            Assert.IsNotNull(actual);
-            Assert.AreEqual(1, actual.Count);
-            CollectionAssert.Contains(actual, expected);
+                Assert.IsNotNull(actual);
+                Assert.AreEqual(1, actual.Count);
+                CollectionAssert.Contains(actual, expected);
+            }
         }
 
         [Test]
         public void Can_select_method_modulo_expression()
         {
-            var expected = new TestType()
+            var expected = new TestType
             {
                 IntColumn = 7,
                 BoolColumn = true,
@@ -183,11 +208,14 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn == GetValue(37) % GetValue(10));
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => q.IntColumn == GetValue(37) % GetValue(10));
 
-            Assert.IsNotNull(actual);
-            Assert.AreEqual(1, actual.Count);
-            CollectionAssert.Contains(actual, expected);
+                Assert.IsNotNull(actual);
+                Assert.AreEqual(1, actual.Count);
+                CollectionAssert.Contains(actual, expected);
+            }
         }
     }
 }
