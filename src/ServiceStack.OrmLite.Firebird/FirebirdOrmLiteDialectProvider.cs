@@ -682,18 +682,18 @@ namespace ServiceStack.OrmLite.Firebird
             return Quote(fieldName);
         }
 
-        public virtual string GetTableName(string table, string schema = null)
+        public virtual string GetTableName(ModelDefinition modelDef)
+        {
+            return GetTableName(modelDef.ModelName, modelDef.Schema);
+        }
+
+        public override string GetTableName(string table, string schema = null)
         {
             return schema != null
                 ? string.Format("{0}_{1}",
                     NamingStrategy.GetSchemaName(schema),
                     NamingStrategy.GetTableName(table))
                 : NamingStrategy.GetTableName(table);
-        }
-
-        public virtual string GetTableName(ModelDefinition modelDef)
-        {
-            return GetTableName(modelDef.ModelName, modelDef.Schema);
         }
 
         public override string GetQuotedTableName(ModelDefinition modelDef)

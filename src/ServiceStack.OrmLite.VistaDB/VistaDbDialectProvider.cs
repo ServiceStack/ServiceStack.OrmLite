@@ -121,7 +121,7 @@ namespace ServiceStack.OrmLite.VistaDB
 
                 var columnDefinition = this.GetColumnDefinition(
                     fd.FieldName,
-                    fd.FieldType,
+                    fd.ColumnType,
                     false,
                     fd.AutoIncrement,
                     fd.IsNullable,
@@ -275,10 +275,30 @@ namespace ServiceStack.OrmLite.VistaDB
             return new VistaDbExpression<T>(this);
         }
 
+        public override string GetTableName(string table, string schema = null)
+        {
+            return schema != null
+                ? string.Format("{0}_{1}",
+                    NamingStrategy.GetSchemaName(schema),
+                    NamingStrategy.GetTableName(table))
+                : NamingStrategy.GetTableName(table);
+        }
+
+        public override string GetQuotedTableName(ModelDefinition modelDef)
+        {
+            if (!modelDef.IsInSchema)
+                return GetQuotedName(NamingStrategy.GetTableName(modelDef.ModelName));
+
+            return GetQuotedName(GetTableName(modelDef.ModelName, modelDef.Schema));
+        }
+
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
         {
+            var schemaTableName = schema != null
+                ? "{0}_{1}".Fmt(schema, tableName)
+                : tableName;
             dbCmd.CommandText = "SELECT COUNT(*) FROM [database schema] WHERE typeid = 1 AND name = {0}"
-                .SqlFmt(tableName);
+                .SqlFmt(schemaTableName);
 
             return dbCmd.LongScalar() > 0;
         }

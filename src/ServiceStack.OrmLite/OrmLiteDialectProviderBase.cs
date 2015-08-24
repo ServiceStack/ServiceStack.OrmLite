@@ -145,6 +145,7 @@ namespace ServiceStack.OrmLite
             return stringConverter.GetColumnDefinition(fieldLength);
         }
 
+        [Obsolete("Use GetConverter().DbType")]
         public virtual DbType GetColumnDbType(Type columnType)
         {
             var converter = GetConverterForType(columnType);

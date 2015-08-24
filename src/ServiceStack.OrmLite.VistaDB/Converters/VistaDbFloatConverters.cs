@@ -20,9 +20,5 @@ namespace ServiceStack.OrmLite.VistaDB.Converters
 
     public class VistaDbDecimalConverter : DecimalConverter
     {
-        public override string GetColumnDefinition(int? precision, int? scale)
-        {
-            return "DECIMAL";
-        }
     }
 }
