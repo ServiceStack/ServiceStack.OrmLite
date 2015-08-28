@@ -141,40 +141,45 @@ namespace ServiceStack.OrmLite.Tests.Expression
             }
         }
 
+        public class Text
+        {
+             public string Name { get; set; }
+        }
+
         [Test]
         public void Can_escape_wildcards()
         {
             using (var db = OpenDbConnection())
             {
-                db.DropAndCreateTable<Poco>();
+                db.DropAndCreateTable<Text>();
 
-                db.Insert(new Poco { Name = "a" });
-                db.Insert(new Poco { Name = "ab" });
-                db.Insert(new Poco { Name = "a_c" });
-                db.Insert(new Poco { Name = "a_cd" });
-                db.Insert(new Poco { Name = "abcd" });
-                db.Insert(new Poco { Name = "a%" });
-                db.Insert(new Poco { Name = "a%b" });
-                db.Insert(new Poco { Name = "a%bc" });
-                db.Insert(new Poco { Name = "a\\" });
-                db.Insert(new Poco { Name = "a\\b" });
-                db.Insert(new Poco { Name = "a\\bc" });
-                db.Insert(new Poco { Name = "a^" });
-                db.Insert(new Poco { Name = "a^b" });
-                db.Insert(new Poco { Name = "a^bc" });
+                db.Insert(new Text { Name = "a" });
+                db.Insert(new Text { Name = "ab" });
+                db.Insert(new Text { Name = "a_c" });
+                db.Insert(new Text { Name = "a_cd" });
+                db.Insert(new Text { Name = "abcd" });
+                db.Insert(new Text { Name = "a%" });
+                db.Insert(new Text { Name = "a%b" });
+                db.Insert(new Text { Name = "a%bc" });
+                db.Insert(new Text { Name = "a\\" });
+                db.Insert(new Text { Name = "a\\b" });
+                db.Insert(new Text { Name = "a\\bc" });
+                db.Insert(new Text { Name = "a^" });
+                db.Insert(new Text { Name = "a^b" });
+                db.Insert(new Text { Name = "a^bc" });
 
-                Assert.That(db.Count<Poco>(q => q.Name == "a_"), Is.EqualTo(0));
-                Assert.That(db.Count<Poco>(q => q.Name.StartsWith("a_")), Is.EqualTo(2));
-                Assert.That(db.Count<Poco>(q => q.Name.StartsWith("a%")), Is.EqualTo(3));
-                Assert.That(db.Count<Poco>(q => q.Name.StartsWith("a_c")), Is.EqualTo(2));
-                Assert.That(db.Count<Poco>(q => q.Name.StartsWith(@"a\")), Is.EqualTo(3));
-                Assert.That(db.Count<Poco>(q => q.Name.StartsWith(@"a\b")), Is.EqualTo(2));
-                Assert.That(db.Count<Poco>(q => q.Name.StartsWith(@"a^b")), Is.EqualTo(2));
-                Assert.That(db.Count<Poco>(q => q.Name.EndsWith(@"_cd")), Is.EqualTo(1));
-                Assert.That(db.Count<Poco>(q => q.Name.Contains(@"abc")), Is.EqualTo(1));
+                Assert.That(db.Count<Text>(q => q.Name == "a_"), Is.EqualTo(0));
+                Assert.That(db.Count<Text>(q => q.Name.StartsWith("a_")), Is.EqualTo(2));
+                Assert.That(db.Count<Text>(q => q.Name.StartsWith("a%")), Is.EqualTo(3));
+                Assert.That(db.Count<Text>(q => q.Name.StartsWith("a_c")), Is.EqualTo(2));
+                Assert.That(db.Count<Text>(q => q.Name.StartsWith(@"a\")), Is.EqualTo(3));
+                Assert.That(db.Count<Text>(q => q.Name.StartsWith(@"a\b")), Is.EqualTo(2));
+                Assert.That(db.Count<Text>(q => q.Name.StartsWith(@"a^b")), Is.EqualTo(2));
+                Assert.That(db.Count<Text>(q => q.Name.EndsWith(@"_cd")), Is.EqualTo(1));
+                Assert.That(db.Count<Text>(q => q.Name.Contains(@"abc")), Is.EqualTo(1));
 
                 if (Dialect != Dialect.VistaDb)
-                    Assert.That(db.Count<Poco>(q => q.Name.StartsWith(@"a^")), Is.EqualTo(3));
+                    Assert.That(db.Count<Text>(q => q.Name.StartsWith(@"a^")), Is.EqualTo(3));
             }
         }
 
@@ -208,38 +213,38 @@ namespace ServiceStack.OrmLite.Tests.Expression
         {
             using (var db = OpenDbConnection())
             {
-                db.DropAndCreateTable<Poco>();
+                db.DropAndCreateTable<Text>();
 
-                db.Insert(new Poco { Name = "Apple" });
-                db.Insert(new Poco { Name = "ABCDE" });
-                db.Insert(new Poco { Name = "abc" });
+                db.Insert(new Text { Name = "Apple" });
+                db.Insert(new Text { Name = "ABCDE" });
+                db.Insert(new Text { Name = "abc" });
 
                 Func<string> normalizedSql = () =>
                     db.GetLastSql().Replace("\"", "").Replace("`", "").Replace("Name", "name").Replace("NAME", "name");
 
-                db.Count<Poco>(q => q.Name.StartsWith("A"));
+                db.Count<Text>(q => q.Name.StartsWith("A"));
                 Assert.That(normalizedSql(),
                     Is.StringContaining("WHERE upper(name) like 'A%'"));
 
-                db.Count<Poco>(q => q.Name.EndsWith("e"));
+                db.Count<Text>(q => q.Name.EndsWith("e"));
                 Assert.That(normalizedSql(),
                     Is.StringContaining("WHERE upper(name) like '%E'"));
 
-                db.Count<Poco>(q => q.Name.Contains("b"));
+                db.Count<Text>(q => q.Name.Contains("b"));
                 Assert.That(normalizedSql(),
                     Is.StringContaining("WHERE upper(name) like '%B%'"));
 
                 OrmLiteConfig.StripUpperInLike = true;
 
-                db.Count<Poco>(q => q.Name.StartsWith("A"));
+                db.Count<Text>(q => q.Name.StartsWith("A"));
                 Assert.That(normalizedSql(),
                     Is.StringContaining("WHERE name like 'A%'"));
 
-                db.Count<Poco>(q => q.Name.EndsWith("e"));
+                db.Count<Text>(q => q.Name.EndsWith("e"));
                 Assert.That(normalizedSql(),
                     Is.StringContaining("WHERE name like '%e'"));
 
-                db.Count<Poco>(q => q.Name.Contains("b"));
+                db.Count<Text>(q => q.Name.Contains("b"));
                 Assert.That(normalizedSql(),
                     Is.StringContaining("WHERE name like '%b%'"));
 

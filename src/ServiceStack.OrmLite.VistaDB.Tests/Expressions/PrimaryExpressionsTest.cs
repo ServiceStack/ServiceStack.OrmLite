@@ -8,7 +8,7 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
         private static class TestClass
         {
             public static int StaticProperty { get { return 12; } }
-            public static int _staticField = 12;
+            public static int staticField = 12;
         }
 
         private class TestClass<T>
@@ -20,34 +20,34 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
 
             public T Property { get; set; }
 
-            public T _field;
+            public T field;
 
             public T Mehtod()
             {
-                return _field;
+                return field;
             }
 
             public TestClass(T value)
             {
                 Property = value;
-                _field = value;
+                field = value;
             }
         }
 
         private struct TestStruct<T>
         {
-            public T Property { get { return _field; } }
+            public T Property { get { return field; } }
 
-            public T _field;
+            public T field;
 
             public T Mehtod()
             {
-                return _field;
+                return field;
             }
 
             public TestStruct(T value)
             {
-                _field = value;
+                field = value;
             }
         }
 
@@ -93,7 +93,7 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
 
             using (var db = OpenDbConnection())
             {
-                var actual = db.Select<TestType>(q => q.IntColumn == tmp._field);
+                var actual = db.Select<TestType>(q => q.IntColumn == tmp.field);
 
                 Assert.IsNotNull(actual);
                 Assert.AreEqual(1, actual.Count);
@@ -161,7 +161,7 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
 
             using (var db = OpenDbConnection())
             {
-                var actual = db.Select<TestType>(q => q.IntColumn == TestClass._staticField);
+                var actual = db.Select<TestType>(q => q.IntColumn == TestClass.staticField);
 
                 Assert.IsNotNull(actual);
                 Assert.AreEqual(1, actual.Count);
@@ -229,7 +229,7 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
 
             using (var db = OpenDbConnection())
             {
-                var actual = db.Select<TestType>(q => q.IntColumn == tmp._field);
+                var actual = db.Select<TestType>(q => q.IntColumn == tmp.field);
 
                 Assert.IsNotNull(actual);
                 Assert.AreEqual(1, actual.Count);
@@ -330,7 +330,7 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
 
             using (var db = OpenDbConnection())
             {
-                var actual = db.Select<TestType>(q => q.BoolColumn == tmp._field);
+                var actual = db.Select<TestType>(q => q.BoolColumn == tmp.field);
 
                 Assert.IsNotNull(actual);
                 Assert.Greater(actual.Count, 1);
