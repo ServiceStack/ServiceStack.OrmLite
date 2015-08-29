@@ -151,7 +151,7 @@ namespace ServiceStack.OrmLite.Dapper
 #if ASYNC
             , CancellationToken cancellationToken = default(CancellationToken)
 #endif
-)
+            )
 #endif
         {
             this.commandText = commandText;
@@ -165,8 +165,7 @@ namespace ServiceStack.OrmLite.Dapper
 #endif
         }
 
-        private CommandDefinition(object parameters)
-            : this()
+        private CommandDefinition(object parameters) : this()
         {
             this.parameters = parameters;
         }
@@ -188,7 +187,13 @@ namespace ServiceStack.OrmLite.Dapper
                 cmd.Transaction = transaction;
             cmd.CommandText = commandText;
             if (commandTimeout.HasValue)
+            {
                 cmd.CommandTimeout = commandTimeout.Value;
+            }
+            else if (SqlMapper.Settings.CommandTimeout.HasValue)
+            {
+                cmd.CommandTimeout = SqlMapper.Settings.CommandTimeout.Value;
+            }
             if (commandType.HasValue)
                 cmd.CommandType = commandType.Value;
             if (paramReader != null)
@@ -257,6 +262,30 @@ namespace ServiceStack.OrmLite.Dapper
     /// </summary>
     static partial class SqlMapper
     {
+        /// <summary>
+        /// Permits specifying certain SqlMapper values globally.
+        /// </summary>
+        public static class Settings
+        {
+            static Settings()
+            {
+                SetDefaults();
+            }
+
+            /// <summary>
+            /// Resets all Settings to their default values
+            /// </summary>
+            public static void SetDefaults()
+            {
+                CommandTimeout = null;
+            }
+
+            /// <summary>
+            /// Specifies the default Command Timeout for all Queries
+            /// </summary>
+            public static int? CommandTimeout { get; set; }
+        }
+
         /// <summary>
         /// Implement this interface to pass an arbitrary db specific set of parameters to Dapper
         /// </summary>
@@ -1497,7 +1526,7 @@ this IDbConnection cnn, Type type, string sql, object param, IDbTransaction tran
 #else
 this IDbConnection cnn, Type type, string sql, object param = null, IDbTransaction transaction = null, bool buffered = true, int? commandTimeout = null, CommandType? commandType = null
 #endif
-)
+        )
         {
             if (type == null) throw new ArgumentNullException("type");
             var command = new CommandDefinition(sql, (object)param, transaction, commandTimeout, commandType, buffered ? CommandFlags.Buffered : CommandFlags.None);
@@ -1526,7 +1555,7 @@ this IDbConnection cnn, Type type, string sql, object param = null, IDbTransacti
 #if CSHARP30
 this IDbConnection cnn, string sql, object param, IDbTransaction transaction, int? commandTimeout, CommandType? commandType
 #else
-this IDbConnection cnn, string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null
+            this IDbConnection cnn, string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null
 #endif
 )
         {
@@ -1567,7 +1596,8 @@ this IDbConnection cnn, string sql, object param = null, IDbTransaction transact
             {
                 if (reader != null)
                 {
-                    if (!reader.IsClosed) try { cmd.Cancel(); }
+                    if (!reader.IsClosed)
+                        try { cmd.Cancel(); }
                         catch { /* don't spoil the existing exception */ }
                     reader.Dispose();
                 }
@@ -1633,7 +1663,8 @@ this IDbConnection cnn, string sql, object param = null, IDbTransaction transact
             {
                 if (reader != null)
                 {
-                    if (!reader.IsClosed) try { cmd.Cancel(); }
+                    if (!reader.IsClosed)
+                        try { cmd.Cancel(); }
                         catch { /* don't spoil the existing exception */ }
                     reader.Dispose();
                 }
@@ -4302,8 +4333,8 @@ Type type, IDataReader reader, int startBound = 0, int length = -1, bool returnN
 
             private IEnumerable<TReturn> MultiReadInternal<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(Delegate func, string splitOn)
             {
-                var identity = this.identity.ForGrid(typeof(TReturn), new Type[] { 
-                    typeof(TFirst), 
+                var identity = this.identity.ForGrid(typeof(TReturn), new Type[] {
+                    typeof(TFirst),
                     typeof(TSecond),
                     typeof(TThird),
                     typeof(TFourth),
@@ -4495,9 +4526,9 @@ Type type, IDataReader reader, int startBound = 0, int length = -1, bool returnN
         /// </summary>
         public static ICustomQueryParameter AsTableValuedParameter(this DataTable table, string typeName
 #if !CSHARP30
- = null
+            = null
 #endif
-)
+            )
         {
             return new TableValuedParameter(table, typeName);
         }
@@ -5026,7 +5057,7 @@ string name, object value = null, DbType? dbType = null, ParameterDirection? dir
             }
 
             // Queue the preparation to be fired off when adding parameters to the DbCommand
-        MAKECALLBACK:
+            MAKECALLBACK:
             (outputCallbacks ?? (outputCallbacks = new List<Action>())).Add(() =>
             {
                 // Finally, prep the parameter and attach the callback to it
