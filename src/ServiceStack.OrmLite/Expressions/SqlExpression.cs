@@ -356,6 +356,11 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
+        public virtual SqlExpression<T> OrderByRandom()
+        {
+            return OrderBy("RAND()");
+        }
+
         public ModelDefinition GetModelDefinition(FieldDefinition fieldDef)
         {
             if (modelDef.FieldDefinitions.Any(x => x == fieldDef))

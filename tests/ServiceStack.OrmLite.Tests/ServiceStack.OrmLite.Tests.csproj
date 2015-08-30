@@ -161,6 +161,7 @@
     <Compile Include="LoggingTests.cs" />
     <Compile Include="MergeTests.cs" />
     <Compile Include="MockAllApiTests.cs" />
+    <Compile Include="OrderByTests.cs" />
     <Compile Include="OrmLiteContextTests.cs" />
     <Compile Include="OrmLiteExecFilterTests.cs" />
     <Compile Include="OrmLiteFiltersTests.cs" />

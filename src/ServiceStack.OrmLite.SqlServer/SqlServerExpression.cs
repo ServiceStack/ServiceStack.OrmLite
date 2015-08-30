@@ -49,5 +49,10 @@ namespace ServiceStack.OrmLite.SqlServer
                 ? string.Format("substring({0}, {1}, {2})", quotedColumn, startIndex, length.Value)
                 : string.Format("substring({0}, {1}, LEN({0}) - {1} + 1)", quotedColumn, startIndex );
         }
-    }
+
+	    public override SqlExpression<T> OrderByRandom()
+	    {
+	        return base.OrderBy("NEWID()");
+	    }
+	}
 }

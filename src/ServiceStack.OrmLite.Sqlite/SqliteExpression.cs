@@ -74,5 +74,10 @@ namespace ServiceStack.OrmLite.Sqlite
 
             return new PartialSqlString(statement);
         }
+
+        public override SqlExpression<T> OrderByRandom()
+        {
+            return base.OrderBy("random()");
+        }
     }
 }

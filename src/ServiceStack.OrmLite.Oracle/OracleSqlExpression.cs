@@ -42,6 +42,11 @@ namespace ServiceStack.OrmLite.Oracle
 
             right = parameter.ParameterName;
         }
+
+        public override SqlExpression<T> OrderByRandom()
+        {
+            return base.OrderBy("dbms_random.value");
+        }
     }
 }
 
