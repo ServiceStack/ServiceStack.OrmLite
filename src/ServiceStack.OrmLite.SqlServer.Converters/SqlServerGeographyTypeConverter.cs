@@ -9,10 +9,6 @@ namespace ServiceStack.OrmLite.SqlServer.Converters
     /// </summary>
     public class SqlServerGeographyTypeConverter : SqlServerSpatialTypeConverter
     {
-        public SqlServerGeographyTypeConverter(string libraryPath = null, string msvcrFileName = "msvcr100.dll", string sqlSpatialFileName = "SqlServerSpatial110.dll") 
-            : base(libraryPath, msvcrFileName, sqlSpatialFileName) 
-        { }
-
         public override string ColumnDefinition
         {
             get { return "GEOGRAPHY"; }

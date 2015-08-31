@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Configuration;
 using System.Data;
-using System.Data.SqlClient;
-using System.Runtime.InteropServices;
 using NUnit.Framework;
-using Microsoft.SqlServer.Types;
 using ServiceStack.Logging;
-using ServiceStack.OrmLite.SqlServer;
 using ServiceStack.OrmLite.SqlServer.Converters;
 
-namespace ServiceStack.OrmLite.SqlServerTests.Spatials
+namespace ServiceStack.OrmLite.SqlServerTests.Converters
 {
     public class SqlServerConvertersOrmLiteTestBase
     {

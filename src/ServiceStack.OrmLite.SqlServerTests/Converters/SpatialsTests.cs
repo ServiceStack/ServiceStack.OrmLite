@@ -1,48 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using NUnit.Framework;
+﻿using System.Linq;
 using Microsoft.SqlServer.Types;
+using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.OrmLite.SqlServer;
 
-namespace ServiceStack.OrmLite.SqlServerTests.Spatials
+namespace ServiceStack.OrmLite.SqlServerTests.Converters
 {
     [TestFixture]
     public class SpatialTests : SqlServerConvertersOrmLiteTestBase
     {
-        [SetUp]
-        public void Setup()
-        {
-            OpenDbConnection().CreateTable<GeoTestTable>(true);
-        }
-
-        // Avoid painful refactor to change all tests to use a using pattern
-        private IDbConnection db;
-
-        public override IDbConnection OpenDbConnection(string connString = null)
-        {
-            if (db != null && db.State != ConnectionState.Open)
-                db = null;
-
-            return db ?? (db = base.OpenDbConnection(connString));
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            if (db == null)
-                return;
-            db.Dispose();
-            db = null;
-        }
-
         [Test]
         public void Can_insert_and_retrieve_SqlGeography()
         {
             using (var db = OpenDbConnection())
             {
+                db.DropAndCreateTable<GeoTestTable>();
+
                 // Statue of Liberty
                 var geo = SqlGeography.Point(40.6898329,-74.0452177, 4326);
 
@@ -64,11 +36,13 @@ namespace ServiceStack.OrmLite.SqlServerTests.Spatials
         {
             using (var db = OpenDbConnection())
             {
+                db.DropAndCreateTable<GeoTestTable>();
+
                 // A simple line from (0,0) to (4,4)  Length = SQRT(2 * 4^2)
                 var wkt = new System.Data.SqlTypes.SqlChars("LINESTRING(0 0, 4 4)".ToCharArray());
                 var shape = SqlGeometry.STLineFromText(wkt, 0);
 
-                db.Insert(new GeoTestTable() { Shape = shape });
+                db.Insert(new GeoTestTable { Shape = shape });
 
                 var result = db.Select(db.From<GeoTestTable>()).First().Shape;
 
