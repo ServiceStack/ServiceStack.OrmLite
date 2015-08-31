@@ -81,11 +81,11 @@ namespace ServiceStack.OrmLite.SqlServerTests.Converters
 
                 db.Insert(new GeoTest { Id = 1, Location = geo, Shape = shape });
 
-                var result = db.SingleById<GeoTest>(1);
+                shape = db.SingleById<GeoTest>(1).Shape;
 
-                Assert.That(result, Is.Not.Null);
+                Assert.That(shape, Is.Not.Null);
 
-                result.PrintDump();
+                new { shape.STEndPoint().STX, shape.STEndPoint().STY }.PrintDump();
             }
         }
     }
