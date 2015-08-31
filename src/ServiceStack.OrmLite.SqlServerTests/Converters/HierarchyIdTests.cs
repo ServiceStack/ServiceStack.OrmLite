@@ -26,7 +26,8 @@ namespace ServiceStack.OrmLite.SqlServerTests.Converters
                 Assert.AreEqual(null, result[0].NullTreeId);
                 Assert.AreEqual(treeId, result[0].TreeId);
 
-                var parent = db.Column<SqlHierarchyId>("SELECT TreeId.GetAncestor(1) from HierarchyTestTable").First();
+                var parent = db.Scalar<SqlHierarchyId>(
+                    db.From<HierarchyTestTable>().Select("TreeId.GetAncestor(1)"));
                 var str = parent.ToString();
                 Assert.AreEqual("/1/1/", str);
             }
