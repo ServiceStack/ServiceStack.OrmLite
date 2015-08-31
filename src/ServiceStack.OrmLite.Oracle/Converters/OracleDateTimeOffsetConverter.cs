@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using ServiceStack.OrmLite.Converters;
 
 namespace ServiceStack.OrmLite.Oracle.Converters
@@ -37,6 +38,11 @@ namespace ServiceStack.OrmLite.Oracle.Converters
         public override object FromDbValue(Type fieldType, object value)
         {
             return Convert.ChangeType(value, typeof(DateTimeOffset));
+        }
+
+        public override void InitDbParam(IDbDataParameter p, Type fieldType)
+        {
+            p.DbType = DbType.String;
         }
     }
 }
