@@ -103,8 +103,8 @@ namespace ServiceStack.OrmLite
         public static IDbDataParameter PopulateWith(this IDbDataParameter to, IDbDataParameter from)
         {
             to.ParameterName = from.ParameterName;
-            to.Value = from.Value;
             to.DbType = from.DbType;
+            to.Value = from.Value;
 
             if (from.Precision != default(byte))
                 to.Precision = from.Precision;
