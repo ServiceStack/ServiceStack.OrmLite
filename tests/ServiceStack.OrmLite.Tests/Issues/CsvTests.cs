@@ -19,13 +19,13 @@ namespace ServiceStack.OrmLite.Tests.Issues
                 db.Insert(new Poco { Id = 1, Name = "Foo" });
                 db.Insert(new Poco { Id = 2, Name = "Bar" });
 
-                var results = db.Query("select * from Poco");
+                var results = db.Query("select * from Poco Order By Id");
 
                 var json = JsonSerializer.SerializeToString(results);
-                Assert.That(json, Is.EqualTo("[{\"Id\":1,\"Name\":\"Foo\"},{\"Id\":2,\"Name\":\"Bar\"}]"));
+                Assert.That(json.ToLower(), Is.EqualTo("[{\"Id\":1,\"Name\":\"Foo\"},{\"Id\":2,\"Name\":\"Bar\"}]".ToLower()));
 
                 var csv = CsvSerializer.SerializeToCsv(results);
-                Assert.That(csv.NormalizeNewLines(), Is.EqualTo("Id,Name\n1,Foo\n2,Bar\n"));
+                Assert.That(csv.NormalizeNewLines().ToLower(), Is.EqualTo("Id,Name\n1,Foo\n2,Bar\n".ToLower()));
             }
         }
 
@@ -42,14 +42,14 @@ namespace ServiceStack.OrmLite.Tests.Issues
                 var results = db.Select<Poco>();
 
                 var json = JsonSerializer.SerializeToString(results);
-                Assert.That(json, Is.EqualTo("[{\"Id\":1,\"Name\":\"Foo\"},{\"Id\":2,\"Name\":\"Bar\"}]"));
+                Assert.That(json.ToLower(), Is.EqualTo("[{\"Id\":1,\"Name\":\"Foo\"},{\"Id\":2,\"Name\":\"Bar\"}]".ToLower()));
 
                 var csv = results.ToCsv();
-                Assert.That(csv.NormalizeNewLines(), Is.EqualTo("Id,Name\n1,Foo\n2,Bar\n"));
+                Assert.That(csv.NormalizeNewLines().ToLower(), Is.EqualTo("Id,Name\n1,Foo\n2,Bar\n".ToLower()));
 
-                var rows = db.Select<Dictionary<string,object>>("select * from Poco");
+                var rows = db.Select<Dictionary<string,object>>("select * from Poco Order By Id");
                 csv = rows.ToCsv();
-                Assert.That(csv.NormalizeNewLines(), Is.EqualTo("Id,Name\n1,Foo\n2,Bar\n"));
+                Assert.That(csv.NormalizeNewLines().ToLower(), Is.EqualTo("Id,Name\n1,Foo\n2,Bar\n".ToLower()));
             }
         }
     }
