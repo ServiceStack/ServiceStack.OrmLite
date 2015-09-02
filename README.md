@@ -88,7 +88,7 @@ If you're using an IOC you can register `OrmLiteConnectionFactory` as a **single
 
 ```csharp
 container.Register<IDbConnectionFactory>(c => 
-    OrmLiteConnectionFactory(":memory:", SqliteDialect.Provider)); //E.g of In Memory Sqlite DB
+    OrmLiteConnectionFactory(":memory:", SqliteDialect.Provider)); //In Memory Sqlite DB
 ```
 
 Use the `dbFactory` to open an ADO.NET DB Connection to your database. 
@@ -114,8 +114,8 @@ using (var db = dbFactory.Open())
 You can customize, enhance or replace how OrmLite handles different .NET Types with 
 [OrmLite Type Converters](https://github.com/ServiceStack/ServiceStack.OrmLite/wiki/OrmLite-Type-Converters).
 
-See the [[SQL Server Types]] wiki for how to enable support for SQL Server-specific 
-`SqlGeography`, `SqlGeometry` and `SqlHierarchyId` Types.
+See the [docs on SQL Server Types](https://github.com/ServiceStack/ServiceStack.OrmLite/wiki/SQL-Server-Types) 
+for how to enable support for SQL Server-specific `SqlGeography`, `SqlGeometry` and `SqlHierarchyId` Types.
 
 ## Dynamic Result Sets
 
