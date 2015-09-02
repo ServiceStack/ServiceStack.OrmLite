@@ -16,8 +16,17 @@ OrmLite was designed with a focus on the core objectives:
   * Expressive power and flexibility - with access to IDbCommand and raw SQL
   * Cross platform - supports multiple dbs (currently: Sql Server, Sqlite, MySql, PostgreSQL, Firebird) running on both .NET and Mono platforms.
 
-In OrmLite: **1 Class = 1 Table**. There should be no surprising or hidden behaviour.
-Any non-scalar properties (i.e. complex types) are by default text blobbed in a schema-less text field using any of the [avilable pluggable text serializers](#pluggable-complex-type-serializers). Support for [POCO-friendly references](#reference-support-poco-style) is also available to provide a convenient API to persist related models. Effectively this allows you to create a table from any POCO type and it should persist as expected in a DB Table with columns for each of the classes 1st level public properties.
+In OrmLite: **1 Class = 1 Table**. There should be no surprising or hidden behaviour, the Typed API
+that produces the Query doesn't impact how results get intuitvely mapped to the returned POCO's which
+could be different to the POCO used to create the query, e.g. containing only a subset of the fields 
+you want populated.
+
+Any non-scalar properties (i.e. complex types) are text blobbed by default in a schema-less text field 
+using any of the [avilable pluggable text serializers](#pluggable-complex-type-serializers). 
+Support for [POCO-friendly references](#reference-support-poco-style) is also available to provide 
+a convenient API to persist related models. Effectively this allows you to create a table from any 
+POCO type and it should persist as expected in a DB Table with columns for each of the classes 1st 
+level public properties.
 
 # Download 
 
@@ -47,6 +56,66 @@ Since September 2013, ServiceStack source code is available under GNU Affero Gen
 Contributors need to approve the [Contributor License Agreement](https://docs.google.com/forms/d/16Op0fmKaqYtxGL4sg7w_g-cXXyCoWjzppgkuqzOeKyk/viewform) before submitting pull-requests, see the [Contributing wiki](https://github.com/ServiceStack/ServiceStack/wiki/Contributing) for more details. 
 
 ***
+
+## Usage
+
+First Install the NuGet package of the RDBMS you want to use, e.g:
+
+    PM> Install-Package ServiceStack.OrmLite.SqlServer
+
+Each RDBMS includes a specialized dialect provider that encapsulated the differences in each RDBMS 
+to support OrmLite features. The available Dialect Providers for each RDBMS is listed below:
+
+    SqlServerDialect.Provider      // Any SQL Server
+    SqliteDialect.Provider         // Sqlite
+    SqlServer2012Dialect.Provider  // SQL Server 2012+
+    PostgreSqlDialect.Provider     // PostgreSQL 
+    MySqlDialect.Provider          // MySql
+    OracleDialect.Provider         // Oracle
+    VistaDbDialect.Provider        // Vista DB
+    FirebirdDialect.Provider       // Firebird
+
+To configure OrmLite you need the DB Connection string along the Dialect Provider of the RDBMS you're
+connecting to, e.g: 
+
+```csharp
+var dbFactory = new OrmLiteConnectionFactory(
+    connectionString,  
+    SqlServerDialect.Provider);
+```
+
+If you're using an IOC you can register `OrmLiteConnectionFactory` as a **singleton**, e.g:
+
+```csharp
+container.Register<IDbConnectionFactory>(c => 
+    OrmLiteConnectionFactory(":memory:", SqliteDialect.Provider)); //E.g of In Memory Sqlite DB
+```
+
+Use the `dbFactory` to open an ADO.NET DB Connection to your database. 
+If connecting to an empty database you can use OrmLite's Create Table API's to create any tables
+you need based on the Schema definition of your POCO and populate it with any initial seed data 
+you need, e.g:
+
+```csharp
+using (var db = dbFactory.Open())
+{
+    if (db.CreateTableIfNotExists<Poco>())
+    {
+        db.Insert(new Poco { Id = 1, Name = "Seed Data"});
+    }
+
+    var result = db.SingleById<Poco>(1);
+    result.PrintDump(); //= {Id: 1, Name:Seed Data}
+}
+```
+
+## [Type Converters](https://github.com/ServiceStack/ServiceStack.OrmLite/wiki/OrmLite-Type-Converters)
+
+You can customize, enhance or replace how OrmLite handles different .NET Types with 
+[OrmLite Type Converters](https://github.com/ServiceStack/ServiceStack.OrmLite/wiki/OrmLite-Type-Converters).
+
+See the [[SQL Server Types]] wiki for how to enable support for SQL Server-specific 
+`SqlGeography`, `SqlGeometry` and `SqlHierarchyId` Types.
 
 ## Dynamic Result Sets
 
@@ -92,6 +161,17 @@ or use `object` to fetch an unknown **Scalar** value:
 ```csharp
 object result = db.Scalar<object>(db.From<Poco>().Select(x => x.Id));
 ```
+
+## Nested Typed Sub SqlExpressions
+
+The `Sql.In()` API supports nesting and combining of multiple Typed SQL Expressions together 
+in a single SQL Query, e.g:
+  
+```csharp
+var usaCustomerIds = db.From<Customer>(c => c.Country == "USA").Select(c => c.Id);
+var usaCustomerOrders = db.Select(db.From<Order>()
+    .Where(q => Sql.In(q.CustomerId, usaCustomerIds)));
+``` 
 
 # Async API Overview
 
