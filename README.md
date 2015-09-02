@@ -66,14 +66,14 @@ First Install the NuGet package of the RDBMS you want to use, e.g:
 Each RDBMS includes a specialized dialect provider that encapsulated the differences in each RDBMS 
 to support OrmLite features. The available Dialect Providers for each RDBMS is listed below:
 
-    SqlServerDialect.Provider      // Any SQL Server
-    SqliteDialect.Provider         // Sqlite
+    SqlServerDialect.Provider      // Any SQL Server Version
     SqlServer2012Dialect.Provider  // SQL Server 2012+
+    SqliteDialect.Provider         // Sqlite
     PostgreSqlDialect.Provider     // PostgreSQL 
     MySqlDialect.Provider          // MySql
     OracleDialect.Provider         // Oracle
-    VistaDbDialect.Provider        // Vista DB
     FirebirdDialect.Provider       // Firebird
+    VistaDbDialect.Provider        // Vista DB
 
 To configure OrmLite you need the DB Connection string along the Dialect Provider of the RDBMS you're
 connecting to, e.g: 
@@ -88,13 +88,13 @@ If you're using an IOC you can register `OrmLiteConnectionFactory` as a **single
 
 ```csharp
 container.Register<IDbConnectionFactory>(c => 
-    OrmLiteConnectionFactory(":memory:", SqliteDialect.Provider)); //In Memory Sqlite DB
+    OrmLiteConnectionFactory(":memory:", SqliteDialect.Provider)); //InMemory Sqlite DB
 ```
 
-Use the `dbFactory` to open an ADO.NET DB Connection to your database. 
+You can then use the `dbFactory` to open ADO.NET DB Connections to your database. 
 If connecting to an empty database you can use OrmLite's Create Table API's to create any tables
-you need based on the Schema definition of your POCO and populate it with any initial seed data 
-you need, e.g:
+you need based solely on the Schema definition of your POCO and populate it with any initial 
+seed data you need, e.g:
 
 ```csharp
 using (var db = dbFactory.Open())
@@ -111,11 +111,12 @@ using (var db = dbFactory.Open())
 
 ## [Type Converters](https://github.com/ServiceStack/ServiceStack.OrmLite/wiki/OrmLite-Type-Converters)
 
-You can customize, enhance or replace how OrmLite handles different .NET Types with 
+You can customize, enhance or replace how OrmLite handles specific .NET Types with the new 
 [OrmLite Type Converters](https://github.com/ServiceStack/ServiceStack.OrmLite/wiki/OrmLite-Type-Converters).
 
-See the [docs on SQL Server Types](https://github.com/ServiceStack/ServiceStack.OrmLite/wiki/SQL-Server-Types) 
-for how to enable support for SQL Server-specific `SqlGeography`, `SqlGeometry` and `SqlHierarchyId` Types.
+There's also support for SQL Server-specific `SqlGeography`, `SqlGeometry` and `SqlHierarchyId` Types,
+See [docs on SQL Server Types](https://github.com/ServiceStack/ServiceStack.OrmLite/wiki/SQL-Server-Types) 
+for instructions on how to enable them.
 
 ## Dynamic Result Sets
 
