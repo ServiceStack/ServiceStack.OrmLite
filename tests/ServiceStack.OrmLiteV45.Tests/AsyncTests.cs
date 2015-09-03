@@ -1,7 +1,9 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
+using ServiceStack.DataAnnotations;
 using ServiceStack.Text;
 
 using ServiceStack.OrmLite.Tests.Shared;
@@ -33,6 +35,70 @@ namespace ServiceStack.OrmLite.Tests
                 results = (await db.SelectAsync<Poco>(q => q.Where(x => x.Name == "A"))).Map(x => x.Name);
                 Assert.That(results, Is.EqualTo(new[] { "A" }));
             }
+        }
+
+        [Test]
+        public async Task Does_throw_async_errors()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Poco>();
+
+                try
+                {
+                    var results = await db.SelectAsync<Poco>(q => q.Where("NotExists = 1"));
+                    Assert.Fail("Should throw");
+                }
+                catch (Exception ex)
+                {
+                    Assert.That(ex.Message, Is.StringContaining("Id").Or.StringContaining("NotExists"));
+                }
+
+                try
+                {
+                    await db.InsertAsync(new DifferentPoco { NotExists = "Foo" });
+                    Assert.Fail("Should throw");
+                }
+                catch (Exception ex)
+                {
+                    Assert.That(ex.Message, Is.StringContaining("Id").Or.StringContaining("NotExists"));
+                }
+
+                try
+                {
+                    await db.InsertAllAsync(new[] {
+                        new DifferentPoco { NotExists = "Foo" },
+                        new DifferentPoco { NotExists = "Bar" }
+                    });
+                    Assert.Fail("Should throw");
+                }
+                catch (Exception ex)
+                {
+                    var innerEx = ex.UnwrapIfSingleException();
+                    Assert.That(innerEx.Message, Is.StringContaining("Id").Or.StringContaining("NotExists"));
+                }
+
+                try
+                {
+                    await db.UpdateAllAsync(new[] {
+                        new DifferentPoco { NotExists = "Foo" },
+                        new DifferentPoco { NotExists = "Bar" }
+                    });
+                    Assert.Fail("Should throw");
+                }
+                catch (Exception ex)
+                {
+                    var innerEx = ex.UnwrapIfSingleException();
+                    Assert.That(innerEx.Message, Is.StringContaining("Id").Or.StringContaining("NotExists"));
+                }
+            }
+        }
+
+        [Alias("Poco")]
+        public class DifferentPoco
+        {
+            public int Id { get; set; }
+            public string NotExists { get; set; }
         }
 
         [Test]

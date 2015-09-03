@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -86,10 +87,11 @@ namespace ServiceStack.OrmLite.Support
             }
         }
 
-        protected string GetRefSelfSql(FieldDefinition refSelf, ModelDefinition refModelDef)
+        protected string GetRefSelfSql(ModelDefinition modelDef, FieldDefinition refSelf, ModelDefinition refModelDef)
         {
             //Load Self Table.RefTableId PK
-            expr.Select(dialectProvider.GetQuotedColumnName(refSelf));
+            expr.Select(dialectProvider.GetQuotedColumnName(modelDef, refSelf));
+
             var subSqlRef = expr.ToSelectStatement();
 
             var sqlRef = "SELECT {0} FROM {1} WHERE {2} IN ({3})".Fmt(
@@ -181,7 +183,7 @@ namespace ServiceStack.OrmLite.Support
 
             if (refSelf != null)
             {
-                var sqlRef = GetRefSelfSql(refSelf, refModelDef);
+                var sqlRef = GetRefSelfSql(modelDef, refSelf, refModelDef);
                 var childResults = dbCmd.ConvertToList(refType, sqlRef);
                 SetRefSelfChildResults(fieldDef, refModelDef, refSelf, childResults);
             }
@@ -228,7 +230,7 @@ namespace ServiceStack.OrmLite.Support
             }
             else if (refSelf != null)
             {
-                var sqlRef = GetRefSelfSql(refSelf, refModelDef);
+                var sqlRef = GetRefSelfSql(modelDef, refSelf, refModelDef);
                 var childResults = await dbCmd.ConvertToListAsync(refType, sqlRef, token);
                 SetRefSelfChildResults(fieldDef, refModelDef, refSelf, childResults);
             }

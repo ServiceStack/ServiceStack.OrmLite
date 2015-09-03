@@ -229,10 +229,18 @@ namespace ServiceStack.OrmLite.Sqlite
         protected override object GetValueOrDbNull<T>(FieldDefinition fieldDef, object obj)
         {
             var value = GetValue<T>(fieldDef, obj);
-            if (fieldDef.FieldType == typeof(DateTimeOffset) && value != null)
+            if (value != null)
             {
-                var dateTimeOffsetValue = (DateTimeOffset)value;
-                return dateTimeOffsetValue.ToString("o");
+                if (fieldDef.FieldType == typeof(DateTimeOffset))
+                {
+                    var dateTimeOffsetValue = (DateTimeOffset)value;
+                    return dateTimeOffsetValue.ToString("o");
+                }
+                else if (fieldDef.FieldType == typeof(DateTime) && value is DateTime)
+                {
+                    var dateType = (DateTime)value;
+                    return dateType.ToSqliteDateString();
+                }
             }
 
             return value ?? DBNull.Value;
@@ -264,6 +272,9 @@ namespace ServiceStack.OrmLite.Sqlite
             if (isRowVersion)
                 return ret + " DEFAULT 1";
 
+            if (fieldType == typeof(Decimal))
+                return base.ReplaceDecimalColumnDefinition(ret, fieldLength, scale);
+
             return ret;
         }
     }
@@ -285,7 +296,10 @@ namespace ServiceStack.OrmLite.Sqlite
 
         public static string ToSqliteDateString(this DateTime dateTime)
         {
-            //Not forcing co-ercsion into UTC for Sqlite
+            //Convert UTC DateTime to LocalTime for Sqlite
+            if (dateTime.Kind == DateTimeKind.Utc)
+                dateTime = dateTime.ToLocalTime();
+
             var dateStr = DateTimeSerializer.ToLocalXsdDateTimeString(dateTime);
             dateStr = dateStr.Replace("T", " ");
             const int tzPos = 6; //"-00:00".Length;

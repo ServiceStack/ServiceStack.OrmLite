@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using NUnit.Framework;
@@ -154,13 +155,13 @@ namespace ServiceStack.OrmLite.Tests.Expression
             db.Insert(new BarJoin { Id = bar1Id, Name = "Banana", });
             db.Insert(new BarJoin { Id = bar2Id, Name = "Orange", });
 
-            _baz1Id = (int) db.Insert(new Baz {Name = "Large"}, true);
-            _baz2Id = (int) db.Insert(new Baz {Name = "Huge"}, true);
+            _baz1Id = (int)db.Insert(new Baz { Name = "Large" }, true);
+            _baz2Id = (int)db.Insert(new Baz { Name = "Huge" }, true);
 
-            _fooBar1Id = (int) db.Insert(new FooBar { BarId = bar1Id, }, true);
-            _fooBar2Id = (int) db.Insert(new FooBar { BarId = bar2Id, }, true);
+            _fooBar1Id = (int)db.Insert(new FooBar { BarId = bar1Id, }, true);
+            _fooBar2Id = (int)db.Insert(new FooBar { BarId = bar2Id, }, true);
 
-            _fooBarBaz1Id = (int) db.Insert(new FooBarBaz { Amount = 42, FooBarId = _fooBar1Id, BazId = _baz2Id }, true);
+            _fooBarBaz1Id = (int)db.Insert(new FooBarBaz { Amount = 42, FooBarId = _fooBar1Id, BazId = _baz2Id }, true);
             _fooBarBaz2Id = (int)db.Insert(new FooBarBaz { Amount = 50, FooBarId = _fooBar1Id, BazId = _baz1Id }, true);
             _fooBarBaz3Id = (int)db.Insert(new FooBarBaz { Amount = 2, FooBarId = _fooBar2Id, BazId = _baz1Id }, true);
         }
@@ -181,7 +182,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
                 q = db.From<FooBar>()
                     .Join<BarJoin>((dp, p) => dp.BarId == p.Id)
-                    .Where<FooBar, BarJoin>((f,x) => x.Name.Contains("an"));
+                    .Where<FooBar, BarJoin>((f, x) => x.Name.Contains("an"));
 
                 results = db.Select<JoinResult>(q);
                 Assert.That(results.Count, Is.EqualTo(2));
@@ -249,6 +250,31 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 Assert.That(fooBarBaz.BazId, Is.EqualTo(_baz1Id));
                 fooBarBaz = results.First(x => x.FooBarBazId == _fooBarBaz2Id);
                 Assert.That(fooBarBaz.BazId, Is.EqualTo(_baz1Id));
+            }
+        }
+
+        [Test]
+        public void Can_select_dictionary_from_multiple_tables()
+        {
+            using (var db = OpenDbConnection())
+            {
+                InitTables(db);
+
+                var q = db.From<FooBar>()
+                    .Join<BarJoin>()
+                    .Select<FooBar, BarJoin>((f, b) => new { f.Id, b.Name });
+
+                var results = db.Dictionary<int, string>(q);
+
+                var sql = db.GetLastSql();
+                sql.Print();
+
+                results.PrintDump();
+
+                Assert.That(results, Is.EquivalentTo(new Dictionary<int, string> {
+                    {1,"Banana"},
+                    {2,"Orange"},
+                }));
             }
         }
 

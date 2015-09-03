@@ -155,6 +155,53 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        public void Can_SaveAll_As_An_Update_Into_Table_Without_Autoincrement_Key()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Rockstar>();
+                db.SaveAll(Rockstar.Rockstars);
+
+                var updatedRockstars = new[]
+                {
+                    new Rockstar(6, "Jimi", "Hendrix", 27),
+                    new Rockstar(5, "Janis", "Joplin", 27),
+                    new Rockstar(4, "Jim", "Morrisson", 27),
+                    new Rockstar(3, "Kurt", "Cobain", 27),
+                    new Rockstar(2, "Elvis", "Presley", 42),
+                    new Rockstar(1, "Michael", "Jackson", 50),
+                };
+                db.SaveAll(updatedRockstars);
+            }
+        }
+
+        public class Rockstar
+        {
+            public static Rockstar[] Rockstars = {
+                new Rockstar(1, "Jimi", "Hendrix", 27), 
+                new Rockstar(2, "Janis", "Joplin", 27), 
+                new Rockstar(3, "Jim", "Morrisson", 27), 
+                new Rockstar(4, "Kurt", "Cobain", 27),              
+                new Rockstar(5, "Elvis", "Presley", 42), 
+                new Rockstar(6, "Michael", "Jackson", 50), 
+            };
+
+            public long RockstarId { get; set; }
+            public string FirstName { get; set; }
+            public string LastName { get; set; }
+            public int Age { get; set; }
+
+            public Rockstar() { }
+            public Rockstar(int id, string firstName, string lastName, int age)
+            {
+                RockstarId = id;
+                FirstName = firstName;
+                LastName = lastName;
+                Age = age;
+            }
+        }
+
+        [Test]
         public void Can_Save_and_select_from_ModelWithFieldsOfDifferentTypes_table()
         {
             using (var db = OpenDbConnection())

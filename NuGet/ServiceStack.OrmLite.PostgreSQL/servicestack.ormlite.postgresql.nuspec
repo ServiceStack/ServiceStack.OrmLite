@@ -18,7 +18,7 @@
     <language>en-US</language> 
     <copyright>ServiceStack 2013 and contributors</copyright>
     <dependencies>
-      <dependency id="Npgsql" version="2.2.3" />
+      <dependency id="Npgsql" version="2.2.4.3" />
       <dependency id="ServiceStack.OrmLite" version="4.0" />
     </dependencies> 
   </metadata> 

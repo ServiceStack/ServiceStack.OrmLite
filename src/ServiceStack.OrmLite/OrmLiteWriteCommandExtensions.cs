@@ -718,9 +718,9 @@ namespace ServiceStack.OrmLite
 
         internal static bool Save<T>(this IDbCommand dbCmd, T obj)
         {
-            var id = obj.GetId();
-            var existingRow = id != null ? dbCmd.SingleById<T>(id) : default(T);
             var modelDef = typeof(T).GetModelDefinition();
+            var id = modelDef.GetPrimaryKey(obj);
+            var existingRow = id != null ? dbCmd.SingleById<T>(id) : default(T);
 
             if (Equals(existingRow, default(T)))
             {
@@ -758,16 +758,16 @@ namespace ServiceStack.OrmLite
             var firstRow = saveRows.FirstOrDefault();
             if (Equals(firstRow, default(T))) return 0;
 
-            var firstRowId = firstRow.GetId();
+            var modelDef = typeof(T).GetModelDefinition();
+
+            var firstRowId = modelDef.GetPrimaryKey(firstRow);
             var defaultIdValue = firstRowId != null ? firstRowId.GetType().GetDefaultValue() : null;
 
             var idMap = defaultIdValue != null
-                ? saveRows.Where(x => !defaultIdValue.Equals(x.GetId())).ToSafeDictionary(x => x.GetId())
-                : saveRows.Where(x => x.GetId() != null).ToSafeDictionary(x => x.GetId());
+                ? saveRows.Where(x => !defaultIdValue.Equals(modelDef.GetPrimaryKey(x))).ToSafeDictionary(x => modelDef.GetPrimaryKey(x))
+                : saveRows.Where(x => modelDef.GetPrimaryKey(x) != null).ToSafeDictionary(x => modelDef.GetPrimaryKey(x));
 
-            var existingRowsMap = dbCmd.SelectByIds<T>(idMap.Keys).ToDictionary(x => x.GetId());
-
-            var modelDef = typeof(T).GetModelDefinition();
+            var existingRowsMap = dbCmd.SelectByIds<T>(idMap.Keys).ToDictionary(x => modelDef.GetPrimaryKey(x));
 
             var rowsAdded = 0;
 
@@ -780,7 +780,7 @@ namespace ServiceStack.OrmLite
             {
                 foreach (var row in saveRows)
                 {
-                    var id = row.GetId();
+                    var id = modelDef.GetPrimaryKey(row);
                     if (id != defaultIdValue && existingRowsMap.ContainsKey(id))
                     {
                         if (OrmLiteConfig.UpdateFilter != null)

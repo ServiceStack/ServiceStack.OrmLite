@@ -68,6 +68,8 @@
     <Compile Include="ApiSqlServerTestsAsync.cs" />
     <Compile Include="AsyncTests.cs" />
     <Compile Include="ApiMySqlTestsAsync.cs" />
+    <Compile Include="CustomSqlTestsAsync.cs" />
+    <Compile Include="Issues\LoadSelectAmbiguousColumnIssue.cs" />
     <Compile Include="LoadReferencesTests.cs" />
     <Compile Include="OrmLiteContextTests.cs" />
     <Compile Include="OrmLiteTestBase.cs" />
@@ -80,6 +82,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="SqlExpressionTests.cs" />
+    <Compile Include="SqlServerProviderTestsAsync.cs" />
     <Compile Include="T4\OrmLite.Poco.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

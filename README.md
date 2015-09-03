@@ -453,6 +453,26 @@ var track = db.SingleById<Track>(1);
 var tracks = db.SelectByIds<Track>(new[]{ 1,2,3 });
 ```
 
+### Lazy Queries
+
+API's ending with `Lazy` yield an IEnumerable sequence letting you stream the results without having to map the entire resultset into a disconnected List of POCO's first, e.g:
+
+```csharp
+var lazyQuery = db.SelectLazy<Person>("Age > @age", new { age = 40 });
+// Iterate over a lazy sequence 
+foreach (var person in lazyQuery) {
+   //...  
+}
+```
+
+#### Other examples
+
+```csharp
+var topVIPs = db.WhereLazy<Person>(new { Age = 27 }).Where(p => IsVip(p)).Take(5)
+
+var topVIPs = db.SelectLazyFmt<Person>("Age > {0}", 40).Where(p => IsVip(p)).Take(5)
+```
+
 ### Other Notes
 
  - All **Insert**, **Update**, and **Delete** methods take multiple params, while `InsertAll`, `UpdateAll` and `DeleteAll` take IEnumerables.
@@ -754,6 +774,27 @@ Unlike normal complex properties, references:
   - Loads related data only 1-reference-level deep
  
 Basically they provides a better story when dealing with referential data that doesn't impact the POCO's ability to be used as DTO's. 
+
+### Merge Disconnected POCO Result Sets
+
+The `Merge` extension method can stitch disconnected POCO collections together as per their relationships defined in OrmLite's POCO References.
+
+For example you can select a collection of Customers who've made an order with quantities of 10 or more and in a separate query select their filtered Orders and then merge the results of these 2 distinct queries together with:
+
+```csharp
+//Select Customers who've had orders with Quantities of 10 or more
+List<Customer> customers = db.Select<Customer>(q =>
+    q.Join<Order>()
+     .Where<Order>(o => o.Qty >= 10)
+     .SelectDistinct());
+
+//Select Orders with Quantities of 10 or more
+List<Order> orders = db.Select<Order>(o => o.Qty >= 10);
+
+customers.Merge(orders); // Merge disconnected Orders with their related Customers
+
+customers.PrintDump();   // Print merged customers and orders datasets
+```
 
 ## Optimistic Concurrency
 

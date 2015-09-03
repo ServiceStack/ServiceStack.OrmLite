@@ -123,7 +123,12 @@ namespace ServiceStack.OrmLite.PostgreSQL
                 sql.AppendFormat(DefaultValueFormat, defaultValue);
             }
 
-            return sql.ToString();
+            var definition = sql.ToString();
+
+            if (fieldType == typeof(Decimal))
+                return base.ReplaceDecimalColumnDefinition(definition, fieldLength, scale);
+
+            return definition;
         }
 
         //Convert xmin into an integer so it can be used in comparisons
@@ -337,6 +342,18 @@ namespace ServiceStack.OrmLite.PostgreSQL
             {
                 p.ParameterName = this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName));
                 ((NpgsqlParameter) p).NpgsqlDbType = NpgsqlDbType.Json;
+                return;
+            }
+            if (fieldDef.CustomFieldDefinition == "jsonb")
+            {
+                p.ParameterName = this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName));
+                ((NpgsqlParameter)p).NpgsqlDbType = NpgsqlDbType.Jsonb;
+                return;
+            }
+            if (fieldDef.CustomFieldDefinition == "hstore")
+            {
+                p.ParameterName = this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName));
+                ((NpgsqlParameter)p).NpgsqlDbType = NpgsqlDbType.Hstore;
                 return;
             }
             if (fieldDef.CustomFieldDefinition == "text[]")

@@ -87,14 +87,21 @@ namespace ServiceStack.OrmLite
         /// </param>
         public virtual SqlExpression<T> Select(string selectExpression)
         {
-            if (string.IsNullOrEmpty(selectExpression))
+            if (selectExpression != null)
+                selectExpression.SqlVerifyFragment();
+    
+            return UnsafeSelect(selectExpression);
+        }
+
+        public virtual SqlExpression<T> UnsafeSelect(string rawSelect)
+        {
+            if (string.IsNullOrEmpty(rawSelect))
             {
                 BuildSelectExpression(string.Empty, false);
             }
             else
             {
-                selectExpression.SqlVerifyFragment();
-                this.selectExpression = "SELECT " + selectExpression;
+                this.selectExpression = "SELECT " + rawSelect;
                 this.CustomSelect = true;
             }
             return this;
@@ -117,6 +124,22 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
+        public virtual SqlExpression<T> Select<Table1, Table2>(Expression<Func<Table1, Table2, object>> fields)
+        {
+            sep = string.Empty;
+            useFieldName = true;
+            BuildSelectExpression(Visit(fields).ToString(), false);
+            return this;
+        }
+
+        public virtual SqlExpression<T> Select<Table1, Table2, Table3>(Expression<Func<Table1, Table2, Table3, object>> fields)
+        {
+            sep = string.Empty;
+            useFieldName = true;
+            BuildSelectExpression(Visit(fields).ToString(), false);
+            return this;
+        }
+
         public virtual SqlExpression<T> SelectDistinct<TKey>(Expression<Func<T, TKey>> fields)
         {
             sep = string.Empty;
@@ -125,19 +148,48 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
+        public virtual SqlExpression<T> SelectDistinct<Table1, Table2>(Expression<Func<Table1, Table2, object>> fields)
+        {
+            sep = string.Empty;
+            useFieldName = true;
+            BuildSelectExpression(Visit(fields).ToString(), true);
+            return this;
+        }
+
+        public virtual SqlExpression<T> SelectDistinct<Table1, Table2, Table3>(Expression<Func<Table1, Table2, Table3, object>> fields)
+        {
+            sep = string.Empty;
+            useFieldName = true;
+            BuildSelectExpression(Visit(fields).ToString(), true);
+            return this;
+        }
+
+        public virtual SqlExpression<T> SelectDistinct()
+        {
+            selectDistinct = true;
+            return this;
+        }
+
         public virtual SqlExpression<T> From(string tables)
         {
-            if (string.IsNullOrEmpty(tables))
+            if (tables != null)
+                tables.SqlVerifyFragment();
+
+            return UnsafeFrom(tables);
+        }
+
+        public virtual SqlExpression<T> UnsafeFrom(string rawFrom)
+        {
+            if (string.IsNullOrEmpty(rawFrom))
             {
                 FromExpression = null;
             }
             else
             {
-                tables.SqlVerifyFragment();
-                var singleTable = tables.ToLower().IndexOfAny("join", ",") == -1;
+                var singleTable = rawFrom.ToLower().IndexOfAny("join", ",") == -1;
                 FromExpression = singleTable
-                    ? " \nFROM " + DialectProvider.GetQuotedTableName(tables)
-                    : " \nFROM " + tables;
+                    ? " \nFROM " + DialectProvider.GetQuotedTableName(rawFrom)
+                    : " \nFROM " + rawFrom;
             }
 
             return this;
@@ -150,15 +202,33 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
+        public virtual SqlExpression<T> UnsafeWhere(string rawSql, params object[] filterParams)
+        {
+            AppendToWhere("AND", rawSql.SqlFmt(filterParams));
+            return this;
+        }
+
         public virtual SqlExpression<T> Where(string sqlFilter, params object[] filterParams)
         {
             AppendToWhere("AND", sqlFilter.SqlFmt(filterParams).SqlVerifyFragment());
             return this;
         }
 
+        public virtual SqlExpression<T> UnsafeAnd(string rawSql, params object[] filterParams)
+        {
+            AppendToWhere("AND", rawSql.SqlFmt(filterParams));
+            return this;
+        }
+
         public virtual SqlExpression<T> And(string sqlFilter, params object[] filterParams)
         {
             AppendToWhere("AND", sqlFilter.SqlFmt(filterParams).SqlVerifyFragment());
+            return this;
+        }
+
+        public virtual SqlExpression<T> UnsafeOr(string rawSql, params object[] filterParams)
+        {
+            AppendToWhere("OR", rawSql.SqlFmt(filterParams));
             return this;
         }
 
@@ -674,7 +744,9 @@ namespace ServiceStack.OrmLite
                 if (updateFields.Count > 0 && !updateFields.Contains(fieldDef.Name)) continue; // added
 
                 var value = fieldDef.GetValue(item);
-                if (excludeDefaults && (value == null || value.Equals(value.GetType().GetDefaultValue()))) continue; //GetDefaultValue?
+                if (excludeDefaults
+                    && (value == null || (!fieldDef.IsNullable && value.Equals(value.GetType().GetDefaultValue()))))
+                    continue;
 
                 fieldDef.GetQuotedValue(item, DialectProvider);
 
@@ -686,6 +758,9 @@ namespace ServiceStack.OrmLite
                     .Append("=")
                     .Append(DialectProvider.GetQuotedValue(value, fieldDef.FieldType));
             }
+
+            if (setFields.Length == 0)
+                throw new ArgumentException("No non-null or non-default values were provided for type: " + typeof(T).Name);
 
             return string.Format("UPDATE {0} SET {1} {2}",
                 DialectProvider.GetQuotedTableName(modelDef), setFields, WhereExpression);
@@ -1239,10 +1314,16 @@ namespace ServiceStack.OrmLite
         protected bool IsFieldName(object quotedExp)
         {
             var fieldExpr = quotedExp.ToString().StripTablePrefixes();
-            var fieldNames = modelDef.FieldDefinitions.Map(x =>
-                DialectProvider.GetQuotedColumnName(x.FieldName));
+            var unquotedExpr = fieldExpr.StripQuotes();
 
-            return fieldNames.Any(x => x == fieldExpr);
+            var isTableField = modelDef.FieldDefinitionsArray.Any(x => x.FieldName == unquotedExpr);
+            if (isTableField)
+                return true;
+
+            var isJoinedField = tableDefs.Any(t => t.FieldDefinitionsArray
+                .Any(x => x.FieldName == unquotedExpr));
+
+            return isJoinedField;
         }
 
         protected object GetTrueExpression()

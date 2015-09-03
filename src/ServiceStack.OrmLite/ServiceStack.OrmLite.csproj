@@ -104,7 +104,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AliasNamingStrategy.cs" />
+    <Compile Include="NamingStrategy.cs" />
     <Compile Include="OrmLiteCommand.cs" />
     <Compile Include="OrmLiteContext.cs" />
     <Compile Include="OrmLiteReadApiAsync.cs" />
@@ -166,7 +166,6 @@
     <Compile Include="Support\LoadList.cs" />
     <Compile Include="Support\LoadReferences.cs" />
     <Compile Include="UntypedApi.cs" />
-    <Compile Include="UpperCaseNamingStrategy.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

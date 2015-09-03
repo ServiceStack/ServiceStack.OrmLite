@@ -552,6 +552,29 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        public void Can_load_list_of_references_using_subselect()
+        {
+            AddCustomersWithOrders();
+
+            var customers = db.Select<Customer>(q =>
+                q.Join<Order>()
+                 .Where<Order>(o => o.Qty == 1)
+                 .SelectDistinct());
+
+            var orders = db.Select<Order>(o => o.Qty == 1);
+
+            customers.Merge(orders);
+
+            customers.PrintDump();
+
+            Assert.That(customers.Count, Is.EqualTo(2));
+            Assert.That(customers[0].Orders.Count, Is.EqualTo(3));
+            Assert.That(customers[0].Orders.All(x => x.Qty == 1));
+            Assert.That(customers[1].Orders.Count, Is.EqualTo(1));
+            Assert.That(customers[1].Orders.All(x => x.Qty == 1));
+        }
+
+        [Test]
         public void Can_join_on_references_attribute()
         {
             // Drop tables in order that FK allows
@@ -602,6 +625,69 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(customers.Count, Is.EqualTo(2));
             Assert.That(addresses.Count, Is.EqualTo(2));
             Assert.That(orders.Count, Is.EqualTo(6));
+        }
+
+        [Test]
+        public void Can_load_select_with_join()
+        {
+            // Drop tables in order that FK allows
+            db.DropTable<TABLE_3>();
+            db.DropTable<TABLE_2>();
+            db.DropTable<TABLE_1>();
+            db.CreateTable<TABLE_1>();
+            db.CreateTable<TABLE_2>();
+            db.CreateTable<TABLE_3>();
+
+            var id1 = db.Insert(new TABLE_1 { One = "A" }, selectIdentity: true);
+            var id2 = db.Insert(new TABLE_1 { One = "B" }, selectIdentity: true);
+
+            db.Insert(new TABLE_2 { Three = "C", TableOneKey = (int)id1 });
+
+            var q = db.From<TABLE_1>()
+                      .Join<TABLE_2>();
+            var results = db.LoadSelect(q);
+
+            Assert.That(results.Count, Is.EqualTo(1));
+            Assert.That(results[0].One, Is.EqualTo("A"));
+
+            var row3 = new TABLE_3
+            {
+                Three = "3a",
+                TableTwo = new TABLE_2
+                {
+                    Three = "3b",
+                    TableOneKey = (int)id1,
+                }
+            };
+            db.Save(row3, references: true);
+
+            Assert.That(row3.TableTwoKey, Is.EqualTo(row3.TableTwo.Id));
+
+            row3 = db.LoadSingleById<TABLE_3>(row3.Id);
+            Assert.That(row3.TableTwoKey, Is.EqualTo(row3.TableTwo.Id));
+        }
+
+        [Test]
+        public void Can_load_select_with_join_and_same_name_columns()
+        {
+            // Drop tables in order that FK allows
+            db.DropTable<ProjectTask>();
+            db.DropTable<Project>();
+            db.CreateTable<Project>();
+            db.CreateTable<ProjectTask>();
+
+            db.Insert(new Project {Val = "test"});
+            db.Insert(new ProjectTask {Val = "testTask", ProjectId = 1});
+
+            var query = db.From<ProjectTask>()
+                .Join<ProjectTask, Project>((pt, p) => pt.ProjectId == p.Id);
+
+            var selectResults = db.Select(query);
+
+            var results = db.LoadSelect(query);
+
+            Assert.That(results.Count, Is.EqualTo(1));
+            Assert.That(results[0].Val, Is.EqualTo("testTask"));
         }
 
         [Test]
@@ -703,5 +789,36 @@ namespace ServiceStack.OrmLite.Tests
 
         [Reference]
         public TABLE_2 TableTwo { get; set; }
+    }
+
+    [Schema("dbo")]
+    [Alias("ProjectTask")]
+    public class ProjectTask : IHasId<int>
+    {
+        [Alias("ProjectTaskId")]
+        [Index(Unique = true)]
+        [AutoIncrement]
+        public int Id { get; set; }
+
+        [References(typeof (Project))]
+        public int ProjectId { get; set; }
+
+        [Reference]
+        public Project Project { get; set; }
+
+        public string Val { get; set; }
+    }
+
+    [Schema("dbo")]
+    [Alias("Project")]
+    public class Project : IHasId<int>
+    {
+        [Alias("ProjectId")]
+        [Index(Unique = true)]
+        [AutoIncrement]
+        public int Id { get; set; }
+
+        public string Val { get; set; }
+
     }
 }

@@ -13,6 +13,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Text;
 using ServiceStack.Text;
 
@@ -171,7 +172,7 @@ namespace ServiceStack.OrmLite
             return (dialect ?? OrmLiteConfig.DialectProvider).GetQuotedTableName(tableName);
         }
 
-        public static string SqlTableRaw(this string tableName, IOrmLiteDialectProvider dialect=null)
+        public static string SqlTableRaw(this string tableName, IOrmLiteDialectProvider dialect = null)
         {
             return (dialect ?? OrmLiteConfig.DialectProvider).NamingStrategy.GetTableName(tableName);
         }
@@ -263,7 +264,7 @@ namespace ServiceStack.OrmLite
             return sb.ToString();
         }
 
-        public static SqlInValues SqlInValues<T>(this T[] values, IOrmLiteDialectProvider dialect=null)
+        public static SqlInValues SqlInValues<T>(this T[] values, IOrmLiteDialectProvider dialect = null)
         {
             return new SqlInValues(values, dialect);
         }
@@ -317,6 +318,13 @@ namespace ServiceStack.OrmLite
             return sb.ToString().Trim();
         }
 
+        public static char[] QuotedChars = new[] { '"', '`', '[', ']' };
+
+        public static string StripQuotes(this string quotedExpr)
+        {
+            return quotedExpr.Trim(QuotedChars);
+        }
+
         private const int NotFound = -1;
 
         public static ModelDefinition GetModelDefinition(Type modelType)
@@ -348,5 +356,123 @@ namespace ServiceStack.OrmLite
             var ulongValue = BitConverter.ToUInt64(bytes, 0);
             return ulongValue;
         }
+
+        public static List<Parent> Merge<Parent, Child>(this Parent parent, List<Child> children)
+        {
+            return new List<Parent> { parent }.Merge(children);
+        }
+
+        public static List<Parent> Merge<Parent, Child>(this List<Parent> parents, List<Child> children)
+        {
+            var modelDef = ModelDefinition<Parent>.Definition;
+            var fieldDef = modelDef.AllFieldDefinitionsArray.FirstOrDefault(
+                x => (x.FieldType == typeof(Child) || x.FieldType == typeof(List<Child>)) && x.IsReference);
+
+            if (fieldDef == null)
+                throw new Exception("Could not find Child Reference for '{0}' on Parent '{1}'".Fmt(typeof(Child).Name, typeof(Parent).Name));
+
+            var listInterface = fieldDef.FieldType.GetTypeWithGenericInterfaceOf(typeof(IList<>));
+            if (listInterface != null)
+            {
+                var refType = listInterface.GenericTypeArguments()[0];
+                var refModelDef = refType.GetModelDefinition();
+                var refField = modelDef.GetRefFieldDef(refModelDef, refType);
+
+                SetListChildResults(parents, modelDef, fieldDef, refType, children, refField);
+            }
+            else
+            {
+                var refType = fieldDef.FieldType;
+
+                var refModelDef = refType.GetModelDefinition();
+
+                var refSelf = modelDef.GetSelfRefFieldDefIfExists(refModelDef, fieldDef);
+                var refField = refSelf == null
+                    ? modelDef.GetRefFieldDef(refModelDef, refType)
+                    : modelDef.GetRefFieldDefIfExists(refModelDef);
+
+                if (refSelf != null)
+                {
+                    SetRefSelfChildResults(parents, fieldDef, refModelDef, refSelf, children);
+                }
+                else if (refField != null)
+                {
+                    SetRefFieldChildResults(parents, modelDef, fieldDef, refField, children);
+                }
+            }
+
+            return parents;
+        }
+
+        internal static void SetListChildResults<Parent>(List<Parent> parents, ModelDefinition modelDef,
+            FieldDefinition fieldDef, Type refType, IList childResults, FieldDefinition refField)
+        {
+            var map = new Dictionary<object, List<object>>();
+            List<object> refValues;
+
+            foreach (var result in childResults)
+            {
+                var refValue = refField.GetValue(result);
+                if (!map.TryGetValue(refValue, out refValues))
+                {
+                    map[refValue] = refValues = new List<object>();
+                }
+                refValues.Add(result);
+            }
+
+            var untypedApi = refType.CreateTypedApi();
+            foreach (var result in parents)
+            {
+                var pkValue = modelDef.PrimaryKey.GetValue(result);
+                if (map.TryGetValue(pkValue, out refValues))
+                {
+                    var castResults = untypedApi.Cast(refValues);
+                    fieldDef.SetValueFn(result, castResults);
+                }
+            }
+        }
+
+        internal static void SetRefSelfChildResults<Parent>(List<Parent> parents, FieldDefinition fieldDef, ModelDefinition refModelDef, FieldDefinition refSelf, IList childResults)
+        {
+            var map = new Dictionary<object, object>();
+            foreach (var result in childResults)
+            {
+                var pkValue = refModelDef.PrimaryKey.GetValue(result);
+                map[pkValue] = result;
+            }
+
+            foreach (var result in parents)
+            {
+                object childResult;
+                var fkValue = refSelf.GetValue(result);
+                if (fkValue != null && map.TryGetValue(fkValue, out childResult))
+                {
+                    fieldDef.SetValueFn(result, childResult);
+                }
+            }
+        }
+
+        internal static void SetRefFieldChildResults<Parent>(List<Parent> parents, ModelDefinition modelDef,
+            FieldDefinition fieldDef, FieldDefinition refField, IList childResults)
+        {
+            var map = new Dictionary<object, object>();
+
+            foreach (var result in childResults)
+            {
+                var refValue = refField.GetValue(result);
+                map[refValue] = result;
+            }
+
+            foreach (var result in parents)
+            {
+                object childResult;
+                var pkValue = modelDef.PrimaryKey.GetValue(result);
+                if (map.TryGetValue(pkValue, out childResult))
+                {
+                    fieldDef.SetValueFn(result, childResult);
+                }
+            }
+        }
+
     }
 }

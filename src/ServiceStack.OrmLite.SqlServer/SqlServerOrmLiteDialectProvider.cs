@@ -344,14 +344,8 @@ namespace ServiceStack.OrmLite.SqlServer
             var definition = base.GetColumnDefinition(fieldName, fieldType, isPrimaryKey, autoIncrement,
                 isNullable, isRowVersion, fieldLength, scale, defaultValue, customFieldDefinition);
 
-            if (fieldType == typeof(Decimal) 
-                && (fieldLength != DefaultDecimalPrecision || scale != DefaultDecimalScale))
-            {
-                string validDecimal = String.Format("DECIMAL({0},{1})",
-                    fieldLength.GetValueOrDefault(DefaultDecimalPrecision),
-                    scale.GetValueOrDefault(DefaultDecimalScale));
-                definition = definition.Replace(DecimalColumnDefinition, validDecimal);
-            }
+            if (fieldType == typeof(Decimal))
+                return base.ReplaceDecimalColumnDefinition(definition, fieldLength, scale);
 
             return definition;
         }
@@ -476,7 +470,7 @@ namespace ServiceStack.OrmLite.SqlServer
 
         protected SqlCommand Unwrap(IDbCommand cmd)
         {
-            return (SqlCommand) cmd.ToDbCommand();
+            return (SqlCommand)cmd.ToDbCommand();
         }
 
         protected SqlDataReader Unwrap(IDataReader reader)

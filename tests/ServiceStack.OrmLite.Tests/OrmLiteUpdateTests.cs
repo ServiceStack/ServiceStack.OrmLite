@@ -166,7 +166,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             db.DropAndCreateTable<SomeBlobs>();
 
-            db.Insert(new SomeBlobs {FirstName = "Bro", LastName = "Last"});
+            db.Insert(new SomeBlobs { FirstName = "Bro", LastName = "Last" });
             db.Insert(new SomeBlobs { FirstName = "Sis", LastName = "Last" });
 
             var existing = db.Select<SomeBlobs>(p => p.FirstName == "Bro").First();
@@ -183,7 +183,7 @@ namespace ServiceStack.OrmLite.Tests
             existing.Blob2 = new byte[blob2Bytes];
             Buffer.BlockCopy(blob2Array, 0, existing.Blob2, 0, blob2Bytes);
 
-            db.UpdateOnly(existing, p => new {p.Blob1, p.Blob2, p.FirstName}, r => r.LastName == "Last" && r.FirstName == "Bro");
+            db.UpdateOnly(existing, p => new { p.Blob1, p.Blob2, p.FirstName }, r => r.LastName == "Last" && r.FirstName == "Bro");
 
             var verify = db.Select<SomeBlobs>(p => p.FirstName == "Bro").First();
 
@@ -192,6 +192,93 @@ namespace ServiceStack.OrmLite.Tests
 
             Assert.That(existing.Blob1, Is.EquivalentTo(verify.Blob1));
             Assert.That(existing.Blob2, Is.EquivalentTo(verify.Blob2));
+        }
+
+        public class PocoWithBool
+        {
+            public int Id { get; set; }
+            public bool Bool { get; set; }
+        }
+
+        public class PocoWithNullableBool
+        {
+            public int Id { get; set; }
+            public bool? Bool { get; set; }
+        }
+
+        [Test]
+        public void Can_UpdateOnly_bool_columns()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<PocoWithBool>();
+
+                db.Insert(new PocoWithBool { Id = 1, Bool = false });
+                var row = db.SingleById<PocoWithBool>(1);
+                Assert.That(row.Bool, Is.False);
+
+                db.UpdateNonDefaults(new PocoWithBool { Bool = true }, x => x.Id == 1);
+                row = db.SingleById<PocoWithBool>(1);
+                Assert.That(row.Bool, Is.True);
+
+                Assert.Throws<ArgumentException>(() => 
+                    db.UpdateNonDefaults(new PocoWithBool { Bool = false }, x => x.Id == 1));
+            }
+        }
+
+        [Test]
+        public void Can_UpdateOnly_nullable_bool_columns()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<PocoWithNullableBool>();
+
+                db.Insert(new PocoWithNullableBool { Id = 1, Bool = true });
+                var row = db.SingleById<PocoWithNullableBool>(1);
+                Assert.That(row.Bool, Is.True);
+
+                db.UpdateNonDefaults(new PocoWithNullableBool { Bool = false }, x => x.Id == 1);
+                row = db.SingleById<PocoWithNullableBool>(1);
+                Assert.That(row.Bool, Is.False);
+            }
+        }
+
+        public class PocoWithNullableInt
+        {
+            public int Id { get; set; }
+            public int? Int { get; set; }
+        }
+
+        [Test]
+        public void Can_UpdateOnly_nullable_int_columns()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<PocoWithNullableInt>();
+
+                db.Insert(new PocoWithNullableInt { Id = 1, Int = 1 });
+                var row = db.SingleById<PocoWithNullableInt>(1);
+                Assert.That(row.Int, Is.EqualTo(1));
+                
+                db.UpdateNonDefaults(new PocoWithNullableInt { Int = 0 }, x => x.Id == 1);
+                row = db.SingleById<PocoWithNullableInt>(1);
+                Assert.That(row.Int, Is.EqualTo(0));
+            }
+        }
+
+        [Test]
+        public void Does_Save_nullable_bool()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Shutdown>();
+
+                db.Insert(new Shutdown { IsShutdownGraceful = null });
+                var rows = db.Select<Shutdown>();
+
+                Assert.That(rows.Count, Is.EqualTo(1));
+                Assert.That(rows[0].IsShutdownGraceful, Is.Null);
+            }
         }
     }
 
@@ -204,5 +291,11 @@ namespace ServiceStack.OrmLite.Tests
         public string LastName { get; set; }
         public byte[] Blob1 { get; set; }
         public byte[] Blob2 { get; set; }
+    }
+
+    public class Shutdown
+    {
+        public int Id { get; set; }
+        public bool? IsShutdownGraceful { get; set; }
     }
 }

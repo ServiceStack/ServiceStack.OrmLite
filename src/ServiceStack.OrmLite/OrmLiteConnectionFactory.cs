@@ -171,7 +171,7 @@ namespace ServiceStack.OrmLite
         {
             var hasDb = db as IHasDbConnection;
             return hasDb != null
-                ? hasDb.DbConnection
+                ? hasDb.DbConnection.ToDbConnection()
                 : db;
         }
 
@@ -179,7 +179,7 @@ namespace ServiceStack.OrmLite
         {
             var hasDbCmd = dbCmd as IHasDbCommand;
             return hasDbCmd != null
-                ? hasDbCmd.DbCommand
+                ? hasDbCmd.DbCommand.ToDbCommand()
                 : dbCmd;
         }
 

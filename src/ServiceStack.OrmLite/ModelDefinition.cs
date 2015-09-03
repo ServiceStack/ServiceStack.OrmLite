@@ -63,6 +63,14 @@ namespace ServiceStack.OrmLite
             get { return this.FieldDefinitions.First(x => x.IsPrimaryKey); }
         }
 
+        public object GetPrimaryKey(object instance)
+        {
+            var pk = PrimaryKey;
+            return pk != null
+                ? pk.GetValue(instance)
+                : instance.GetId();
+        }
+
         public List<FieldDefinition> FieldDefinitions { get; set; }
 
         private FieldDefinition[] fieldDefinitionsArray;
