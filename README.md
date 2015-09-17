@@ -1056,7 +1056,7 @@ using (var db = OpenDbConnection())
 {
     db.Where<Person>(new { Age = 27 });
 
-    captured.SqlCommandHistory[0].PrintDump();
+    captured.SqlStatements[0].PrintDump();
 }
 ```
 
