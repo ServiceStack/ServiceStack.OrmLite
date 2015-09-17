@@ -28,7 +28,7 @@ Module Module1
 
         Dim q As SqlExpression(Of Poco) = db.From(Of Poco)()
 
-        q.Where(Function(x) x.Name = "Foo")
+        q.Where(Function(x) x.Name <> "Bar")
 
         Dim rows As List(Of Poco) = db.Select(q)
 
