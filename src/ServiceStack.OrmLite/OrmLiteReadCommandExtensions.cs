@@ -37,7 +37,7 @@ namespace ServiceStack.OrmLite
         {
             dbCmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
             dbCmd.CommandText = sql;
-            
+
             if (Log.IsDebugEnabled)
                 Log.DebugCommand(dbCmd);
 
@@ -274,7 +274,7 @@ namespace ServiceStack.OrmLite
 
         internal static IDbCommand SetParameters(this IDbCommand dbCmd, IDictionary<string, object> dict, bool excludeDefaults)
         {
-            if (dict == null) 
+            if (dict == null)
                 return dbCmd;
 
             dbCmd.Parameters.Clear();
@@ -377,8 +377,8 @@ namespace ServiceStack.OrmLite
         {
             dbCmd.SetParameters(sqlParams);
 
-            return OrmLiteUtils.IsScalar<T>() 
-                ? dbCmd.Scalar<T>(sql) 
+            return OrmLiteUtils.IsScalar<T>()
+                ? dbCmd.Scalar<T>(sql)
                 : dbCmd.ConvertTo<T>(dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), sql));
         }
 
@@ -386,8 +386,8 @@ namespace ServiceStack.OrmLite
         {
             dbCmd.SetParameters<T>(anonType, excludeDefaults: false);
 
-            return OrmLiteUtils.IsScalar<T>() 
-                ? dbCmd.Scalar<T>(sql) 
+            return OrmLiteUtils.IsScalar<T>()
+                ? dbCmd.Scalar<T>(sql)
                 : dbCmd.ConvertTo<T>(dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), sql));
         }
 
@@ -509,7 +509,7 @@ namespace ServiceStack.OrmLite
 
         internal static List<T> SelectNonDefaults<T>(this IDbCommand dbCmd, string sql, object anonType = null)
         {
-            if (anonType != null) dbCmd.SetParameters<T>(anonType, excludeDefaults:true);
+            if (anonType != null) dbCmd.SetParameters<T>(anonType, excludeDefaults: true);
 
             return dbCmd.ConvertToList<T>(dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), sql));
         }
@@ -575,7 +575,7 @@ namespace ServiceStack.OrmLite
                     if (value == DBNull.Value)
                         yield return default(T);
                     else
-                        yield return (T) value;
+                        yield return (T)value;
                 }
             }
         }
@@ -655,34 +655,38 @@ namespace ServiceStack.OrmLite
         {
             while (reader.Read())
             {
-                object oValue = reader.GetValue(0);
-                return typeof(T) == typeof (object) 
-                    ? (T)oValue 
-                    : ToScalar<T>(dialectProvider, oValue);
+                return ToScalar<T>(dialectProvider, reader);
             }
 
             return default(T);
         }
 
-        internal static T ToScalar<T>(IOrmLiteDialectProvider dialectProvider, object oValue)
+        internal static T ToScalar<T>(IOrmLiteDialectProvider dialectProvider, IDataReader reader, int columnIndex = 0)
         {
-            if (oValue == DBNull.Value) return default(T);
-
-            var typeCode = typeof(T).GetUnderlyingTypeCode();
-            switch (typeCode)
+            var nullableType = Nullable.GetUnderlyingType(typeof(T));
+            if (nullableType != null)
             {
-                case TypeCode.DateTime:
-                    return (T) (object) DateTime.Parse(oValue.ToString(), CultureInfo.CurrentCulture);
-                case TypeCode.Decimal:
-                    return (T) (object) Decimal.Parse(oValue.ToString(), CultureInfo.CurrentCulture);
-                case TypeCode.Single:
-                    return (T) (object) System.Single.Parse(oValue.ToString(), CultureInfo.CurrentCulture);
-                case TypeCode.Double:
-                    return (T) (object) Double.Parse(oValue.ToString(), CultureInfo.CurrentCulture);
+                object oValue = reader.GetValue(columnIndex);
+                if (oValue == DBNull.Value)
+                    return default(T);
             }
 
-            object o = dialectProvider.FromDbValue(oValue, typeof(T));
-            return o == null ? default(T) : (T) o;
+            var underlyingType = nullableType ?? typeof(T);
+            if (underlyingType == typeof(object))
+                return (T)reader.GetValue(0);
+
+            var converter = dialectProvider.GetConverter(underlyingType);
+            if (converter != null)
+            {
+                object oValue = converter.GetValue(reader, columnIndex);
+                if (oValue == null || oValue == DBNull.Value)
+                    return default(T);
+
+                var convertedValue = converter.FromDbValue(underlyingType, oValue);
+                return convertedValue == null ? default(T) : (T)convertedValue;
+            }
+
+            return (T)reader.GetValue(0);
         }
 
         internal static long LastInsertId(this IDbCommand dbCmd)
@@ -863,10 +867,10 @@ namespace ServiceStack.OrmLite
         internal static long ToLong(object result)
         {
             if (result is DBNull) return default(long);
-            if (result is int) return (int) result;
-            if (result is decimal) return Convert.ToInt64((decimal) result);
-            if (result is ulong) return (long) Convert.ToUInt64(result);
-            return (long) result;
+            if (result is int) return (int)result;
+            if (result is decimal) return Convert.ToInt64((decimal)result);
+            if (result is ulong) return (long)Convert.ToUInt64(result);
+            return (long)result;
         }
 
         internal static T LoadSingleById<T>(this IDbCommand dbCmd, object value)
@@ -941,8 +945,8 @@ namespace ServiceStack.OrmLite
 
         public static FieldDefinition GetRefFieldDefIfExists(this ModelDefinition modelDef, ModelDefinition refModelDef)
         {
-            var refField = 
-                   refModelDef.FieldDefinitions.FirstOrDefault(x => x.ForeignKey != null && x.ForeignKey.ReferenceType == modelDef.ModelType 
+            var refField =
+                   refModelDef.FieldDefinitions.FirstOrDefault(x => x.ForeignKey != null && x.ForeignKey.ReferenceType == modelDef.ModelType
                        && modelDef.IsRefField(x))
                 ?? refModelDef.FieldDefinitions.FirstOrDefault(x => x.ForeignKey != null && x.ForeignKey.ReferenceType == modelDef.ModelType)
                 ?? refModelDef.FieldDefinitions.FirstOrDefault(modelDef.IsRefField);
@@ -976,7 +980,7 @@ namespace ServiceStack.OrmLite
             string name,
             object value = null,
             ParameterDirection direction = ParameterDirection.Input,
-            DbType? dbType=null)
+            DbType? dbType = null)
         {
             var p = dbCmd.CreateParameter();
             var dialectProvider = dbCmd.GetDialectProvider();

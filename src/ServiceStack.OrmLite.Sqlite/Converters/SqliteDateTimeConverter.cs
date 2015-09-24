@@ -67,7 +67,14 @@ namespace ServiceStack.OrmLite.Sqlite.Converters
             }
             catch (Exception ex)
             {
-                var dateStr = reader.GetString(columnIndex);
+                var value = reader.GetValue(columnIndex);
+                if (value == DBNull.Value)
+                    return null;
+
+                var dateStr = value as string;
+                if (dateStr == null)
+                    throw new Exception("Converting from {0} to DateTime is not supported".Fmt(value.GetType().Name));
+
                 Log.Warn("Error reading string as DateTime in Sqlite: " + dateStr, ex);
                 return DateTime.Parse(dateStr);
             }

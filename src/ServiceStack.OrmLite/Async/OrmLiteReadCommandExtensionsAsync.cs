@@ -239,7 +239,7 @@ namespace ServiceStack.OrmLite
         internal static Task<T> ScalarAsync<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, CancellationToken token)
         {
             return dialectProvider.ReaderRead(reader, () => 
-                OrmLiteReadCommandExtensions.ToScalar<T>(dialectProvider, reader.GetValue(0)), token);
+                OrmLiteReadCommandExtensions.ToScalar<T>(dialectProvider, reader), token);
         }
 
         public static Task<long> LongScalarAsync(this IDbCommand dbCmd, CancellationToken token)

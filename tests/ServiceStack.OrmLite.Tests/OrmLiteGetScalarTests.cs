@@ -71,7 +71,7 @@ namespace ServiceStack.OrmLite.Tests
                 r2 = db.Scalar<Author, DateTime?>(
                     e => Sql.Max(e.LastActivity),
                     e => e.City == "Bogota");
-                Assert.That(expectedNullableDate, Is.EqualTo(r2));
+                Assert.That(r2, Is.EqualTo(expectedNullableDate));
 
                 r2 = db.Scalar<Author, DateTime?>(e => Sql.Max(e.LastActivity), e => e.City == "SinCity");
                 Assert.That(default(DateTime?), Is.EqualTo(r2));
