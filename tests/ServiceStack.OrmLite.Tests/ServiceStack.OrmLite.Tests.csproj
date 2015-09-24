@@ -141,6 +141,7 @@
     <Compile Include="Issues\CsvTests.cs" />
     <Compile Include="Issues\CustomFieldTests.cs" />
     <Compile Include="Issues\LoadReferencesCaseSensitiveTest.cs" />
+    <Compile Include="Issues\LoadReferencesForeignKeyTests.cs" />
     <Compile Include="Issues\LoadSelectIssue.cs" />
     <Compile Include="Issues\MultipleSelfJoinsWithNullableInts.cs" />
     <Compile Include="Issues\SelectScalarTests.cs" />
