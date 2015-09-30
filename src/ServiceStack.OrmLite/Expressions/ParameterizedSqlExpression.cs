@@ -34,9 +34,11 @@ namespace ServiceStack.OrmLite
 
         public override object GetValue(object value, Type type)
         {
-            return ((!OrmLiteConfig.UseParameterizeSqlExpressions) || SkipParameterizationForThisExpression)
-                ? DialectProvider.GetQuotedValue(value, type)
-                : DialectProvider.GetParamValue(value, type);
+            if ((!OrmLiteConfig.UseParameterizeSqlExpressions) || SkipParameterizationForThisExpression)
+                return DialectProvider.GetQuotedValue(value, type);
+
+            var paramValue = DialectProvider.GetParamValue(value, type);
+            return paramValue ?? "null";
         }
 
         protected override void VisitFilter(string operand, object originalLeft, object originalRight, ref object left, ref object right)

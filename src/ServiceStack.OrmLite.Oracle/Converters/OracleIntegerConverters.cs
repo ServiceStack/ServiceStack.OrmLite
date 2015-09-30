@@ -23,7 +23,7 @@ namespace ServiceStack.OrmLite.Oracle.Converters
     {
         public override DbType DbType
         {
-            get { return DbType.Int16; }
+            get { return DbType.Decimal; }
         }
     }
 
@@ -31,7 +31,7 @@ namespace ServiceStack.OrmLite.Oracle.Converters
     {
         public override DbType DbType
         {
-            get { return DbType.Int32; }
+            get { return DbType.Decimal; }
         }
 
         public override string ColumnDefinition
@@ -44,7 +44,7 @@ namespace ServiceStack.OrmLite.Oracle.Converters
     {
         public override DbType DbType
         {
-            get { return DbType.Int64; }
+            get { return DbType.Decimal; }
         }
 
         public override string ColumnDefinition

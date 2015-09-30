@@ -39,7 +39,7 @@ namespace ServiceStack.OrmLite.Oracle.Converters
                 return null;
             enumValue = enumValue.Trim('"');
             return enumValue == ""
-                ? "null"
+                ? null
                 : enumValue;
         }
     }

@@ -35,41 +35,55 @@ namespace ServiceStack.OrmLite.Tests
                 db.Insert(new ParamTestBo { Id = 2, Double = 0.002, Int = 200, Info = "Two", NullableBool = true, DateTime = dateTimeNow });
                 db.Insert(new ParamTestBo { Id = 3, Double = 0.003, Int = 300, Info = "Three", NullableBool = false, DateTime = dateTimeNow.AddDays(23) });
                 db.Insert(new ParamTestBo { Id = 4, Double = 0.004, Int = 400, Info = "Four", NullableBool = null });
+                db.Insert(new ParamTestBo { Id = 5, Double = 0.005, Int = 500, Info = "Five", NullableBool = null, UInt = uint.MaxValue});
 
                 var bo1 = db.Select<ParamTestBo>(q => q.Id == 1).Single();
                 var bo2 = db.Select<ParamTestBo>(q => q.Id == 2).Single();
                 var bo3 = db.Select<ParamTestBo>(q => q.Id == 3).Single();
                 var bo4 = db.Select<ParamTestBo>(q => q.Id == 4).Single();
+                var bo5 = db.Select<ParamTestBo>(q => q.Id == 5).Single();
 
                 Assert.AreEqual(1, bo1.Id);
                 Assert.AreEqual(2, bo2.Id);
                 Assert.AreEqual(3, bo3.Id);
                 Assert.AreEqual(4, bo4.Id);
+                Assert.AreEqual(5, bo5.Id);
 
                 Assert.AreEqual(0.001, bo1.Double);
                 Assert.AreEqual(0.002, bo2.Double);
                 Assert.AreEqual(0.003, bo3.Double);
                 Assert.AreEqual(0.004, bo4.Double);
+                Assert.AreEqual(0.005, bo5.Double);
 
                 Assert.AreEqual(100, bo1.Int);
                 Assert.AreEqual(200, bo2.Int);
                 Assert.AreEqual(300, bo3.Int);
                 Assert.AreEqual(400, bo4.Int);
+                Assert.AreEqual(500, bo5.Int);
 
                 Assert.AreEqual("One", bo1.Info);
                 Assert.AreEqual("Two", bo2.Info);
                 Assert.AreEqual("Three", bo3.Info);
                 Assert.AreEqual("Four", bo4.Info);
+                Assert.AreEqual("Five", bo5.Info);
 
                 Assert.AreEqual(null, bo1.NullableBool);
                 Assert.AreEqual(true, bo2.NullableBool);
                 Assert.AreEqual(false, bo3.NullableBool);
                 Assert.AreEqual(null, bo4.NullableBool);
+                Assert.AreEqual(null, bo5.NullableBool);
 
                 Assert.AreEqual(dateTimeNow, bo1.DateTime);
                 Assert.AreEqual(dateTimeNow, bo2.DateTime);
                 Assert.AreEqual(dateTimeNow.AddDays(23), bo3.DateTime);
                 Assert.AreEqual(null, bo4.DateTime);
+                Assert.AreEqual(null, bo5.DateTime);
+
+                Assert.AreEqual(null, bo1.UInt);
+                Assert.AreEqual(null, bo2.UInt);
+                Assert.AreEqual(null, bo3.UInt);
+                Assert.AreEqual(null, bo4.UInt);
+                Assert.AreEqual(uint.MaxValue, bo5.UInt);
             }
         }
 
@@ -171,10 +185,11 @@ namespace ServiceStack.OrmLite.Tests
                 LoadParamTestBo(db);
 
                 //select multiple items
-                Assert.AreEqual(2, db.Select<ParamTestBo>(q => q.NullableBool == null).Count);
-                Assert.AreEqual(2, db.Select<ParamTestBo>(q => q.NullableBool == null).Count);
+                Assert.AreEqual(3, db.Select<ParamTestBo>(q => q.NullableBool == null).Count);
                 Assert.AreEqual(1, db.Select<ParamTestBo>(q => q.NullableBool == true).Count);
                 Assert.AreEqual(1, db.Select<ParamTestBo>(q => q.NullableBool == false).Count);
+                Assert.AreEqual(1, db.Select<ParamTestBo>(q => q.UInt == uint.MaxValue).Count);
+                Assert.AreEqual(4, db.Select<ParamTestBo>(q => q.UInt == null).Count);
 
                 Assert.AreEqual(1, db.Select<ParamTestBo>(q => q.Info == "Two").Count);
                 Assert.AreEqual(1, db.Select<ParamTestBo>(q => q.Int == 300).Count);
@@ -188,6 +203,7 @@ namespace ServiceStack.OrmLite.Tests
             db.Insert(new ParamTestBo { Id = 2, Double = 0.002, Int = 200, Info = "Two", NullableBool = true });
             db.Insert(new ParamTestBo { Id = 3, Double = 0.003, Int = 300, Info = "Three", NullableBool = false });
             db.Insert(new ParamTestBo { Id = 4, Double = 0.004, Int = 400, Info = "Four", NullableBool = null });
+            db.Insert(new ParamTestBo { Id = 5, Double = 0.005, Int = 500, Info = "Five", NullableBool = null, UInt = uint.MaxValue});
         }
 
         [Test]
@@ -1156,6 +1172,7 @@ namespace ServiceStack.OrmLite.Tests
             public double Double { get; set; }
             public bool? NullableBool { get; set; }
             public DateTime? DateTime { get; set; }
+            public uint? UInt { get; set; }
         }
 
         public class ParamRelBo
