@@ -25,6 +25,10 @@ namespace ServiceStack.OrmLite.Converters
                 var moment = DateTimeOffset.Parse(strValue, null, DateTimeStyles.RoundtripKind);
                 return moment;
             }
+            if (value.GetType() == fieldType)
+            {
+                return value;
+            }
             if (value is DateTime)
             {
                 return new DateTimeOffset((DateTime)value);
