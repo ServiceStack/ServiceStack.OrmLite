@@ -7,6 +7,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using ServiceStack.OrmLite.Converters;
 using ServiceStack.OrmLite.Oracle.Converters;
 
 namespace ServiceStack.OrmLite.Oracle
@@ -413,6 +414,40 @@ namespace ServiceStack.OrmLite.Oracle
 
         //    return value;
         //}
+
+        public override object ToDbValue(object value, Type type)
+        {
+            if (value == null || value is DBNull)
+                return null;
+
+            if (type.IsEnum)
+                return EnumConverter.ToDbValue(type, value);
+
+            if (type.IsRefType())
+                return ReferenceTypeConverter.ToDbValue(type, value);
+
+            IOrmLiteConverter converter = null;
+            try
+            {
+                if (Converters.TryGetValue(type, out converter))
+                {
+                    if (type == typeof(DateTimeOffset))
+                    {
+                        return converter.ToQuotedString(type, value);
+                    }
+
+                    return converter.ToDbValue(type, value);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Error in {0}.ToDbValue() value '{1}' and Type '{2}'"
+                    .Fmt(converter.GetType().Name, value != null ? value.GetType().Name : "undefined", type.Name), ex);
+                throw;
+            }
+
+            return base.ToDbValue(value, type);
+        }
 
         const string IsoDateFormat = "yyyy-MM-dd";
         const string IsoTimeFormat = "HH:mm:ss";

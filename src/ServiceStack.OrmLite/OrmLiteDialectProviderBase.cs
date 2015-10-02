@@ -356,7 +356,7 @@ namespace ServiceStack.OrmLite
             }
             catch (Exception ex)
             {
-                Log.Error("Error in {0}.FromDbValue() value '{1}' and Type '{2}'"
+                Log.Error("Error in {0}.ToDbValue() value '{1}' and Type '{2}'"
                     .Fmt(converter.GetType().Name, value != null ? value.GetType().Name : "undefined", type.Name), ex);
                 throw;
             }
@@ -368,7 +368,7 @@ namespace ServiceStack.OrmLite
             }
             catch (Exception)
             {
-                Log.ErrorFormat("Error FromDbValue trying to convert {0} into {1}", value, type.Name);
+                Log.ErrorFormat("Error ToDbValue trying to convert {0} into {1}", value, type.Name);
                 throw;
             }
         }
@@ -1424,7 +1424,7 @@ namespace ServiceStack.OrmLite
 
         public virtual object GetParamValue(object value, Type fieldType)
         {
-            return FromDbValue(value, fieldType);
+            return ToDbValue(value, fieldType);
         }
 
         public virtual string EscapeWildcards(string value)
