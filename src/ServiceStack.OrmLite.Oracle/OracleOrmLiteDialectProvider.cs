@@ -123,6 +123,11 @@ namespace ServiceStack.OrmLite.Oracle
             RegisterConverter<DateTime>(new OracleDateTimeConverter());
             RegisterConverter<DateTimeOffset>(new OracleDateTimeOffsetConverter(_timestampConverter));
             RegisterConverter<bool>(new OracleBoolConverter());
+
+            this.Variables = new Dictionary<string, string>
+            {
+                { OrmLiteVariables.SystemUtc, "sys_extract_utc(systimestamp)" },
+            };
         }
 
         //public override void OnAfterInitColumnTypeMap()
@@ -754,7 +759,7 @@ namespace ServiceStack.OrmLite.Oracle
                     fieldDef.IsRowVersion,
                     fieldDef.FieldLength,
                     fieldDef.Scale,
-                    fieldDef.DefaultValue,
+                    GetDefaultValue(fieldDef),
                     fieldDef.CustomFieldDefinition);
 
                 sbColumns.Append(columnDefinition);

@@ -125,6 +125,7 @@
     <Compile Include="CustomSqlTests.cs" />
     <Compile Include="DateTimeOffsetTests.cs" />
     <Compile Include="DateTimeTests.cs" />
+    <Compile Include="DefaultValueTests.cs" />
     <Compile Include="Expression\ComplexJoinTests.cs" />
     <Compile Include="Expression\ExpressionUsingCustomSerializedEnumTests.cs" />
     <Compile Include="Expression\FromExpressionTests.cs" />

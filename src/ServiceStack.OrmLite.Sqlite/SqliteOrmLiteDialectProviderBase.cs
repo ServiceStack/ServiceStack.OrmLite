@@ -22,6 +22,11 @@ namespace ServiceStack.OrmLite.Sqlite
             base.RegisterConverter<Guid>(new SqliteGuidConverter());
             base.RegisterConverter<bool>(new SqliteBoolConverter());
             base.RegisterConverter<byte[]>(new SqliteByteArrayConverter());
+
+            this.Variables = new Dictionary<string, string>
+            {
+                { OrmLiteVariables.SystemUtc, "CURRENT_TIMESTAMP" },
+            };
         }
 
         public static string Password { get; set; }

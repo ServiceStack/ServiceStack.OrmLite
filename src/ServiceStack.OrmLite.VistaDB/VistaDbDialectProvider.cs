@@ -59,7 +59,12 @@ namespace ServiceStack.OrmLite.VistaDB
             base.RegisterConverter<uint>(new VistaDbUInt32Converter());
 
             base.RegisterConverter<TimeSpan>(new VistaDbTimeSpanAsIntConverter());
-            base.RegisterConverter<Guid>(new VistaDbGuidConverter()); 
+            base.RegisterConverter<Guid>(new VistaDbGuidConverter());
+
+            this.Variables = new Dictionary<string, string>
+            {
+                { OrmLiteVariables.SystemUtc, "GetDate()" },
+            };
         }
 
         public override string GetQuotedValue(string paramValue)
@@ -114,43 +119,43 @@ namespace ServiceStack.OrmLite.VistaDB
             var columns = new StringBuilder();
             var constraints = new StringBuilder();
 
-            foreach (var fd in modelDefinition.FieldDefinitions)
+            foreach (var fieldDef in modelDefinition.FieldDefinitions)
             {
                 if (columns.Length != 0)
                     columns.Append(", \n  ");
 
                 var columnDefinition = this.GetColumnDefinition(
-                    fd.FieldName,
-                    fd.ColumnType,
+                    fieldDef.FieldName,
+                    fieldDef.ColumnType,
                     false,
-                    fd.AutoIncrement,
-                    fd.IsNullable,
-                    fd.IsRowVersion,
-                    fd.FieldLength,
-                    fd.Scale,
-                    fd.DefaultValue,
-                    fd.CustomFieldDefinition);
+                    fieldDef.AutoIncrement,
+                    fieldDef.IsNullable,
+                    fieldDef.IsRowVersion,
+                    fieldDef.FieldLength,
+                    fieldDef.Scale,
+                    GetDefaultValue(fieldDef),
+                    fieldDef.CustomFieldDefinition);
 
                 columns.Append(columnDefinition);
 
-                if (fd.IsPrimaryKey)
+                if (fieldDef.IsPrimaryKey)
                 {
                     constraints.AppendFormat("ALTER TABLE {0} ADD CONSTRAINT {1} PRIMARY KEY ({2});\n",
                         quotedTableName,
                         this.GetQuotedName("PK_" + modelDefinition.ModelName),
-                        this.GetQuotedColumnName(fd.FieldName));
+                        this.GetQuotedColumnName(fieldDef.FieldName));
                 }
-                else if (fd.ForeignKey != null)
+                else if (fieldDef.ForeignKey != null)
                 {
-                    var foreignModelDefinition = OrmLiteUtils.GetModelDefinition(fd.ForeignKey.ReferenceType);
+                    var foreignModelDefinition = OrmLiteUtils.GetModelDefinition(fieldDef.ForeignKey.ReferenceType);
                     constraints.AppendFormat("ALTER TABLE {0} ADD CONSTRAINT {1} FOREIGN KEY ({2}) REFERENCES {3} ({4}){5}{6};\n",
                         quotedTableName,
-                        this.GetQuotedName(fd.ForeignKey.GetForeignKeyName(modelDefinition, foreignModelDefinition, this.NamingStrategy, fd)),
-                        this.GetQuotedColumnName(fd.FieldName),
+                        this.GetQuotedName(fieldDef.ForeignKey.GetForeignKeyName(modelDefinition, foreignModelDefinition, this.NamingStrategy, fieldDef)),
+                        this.GetQuotedColumnName(fieldDef.FieldName),
                         this.GetQuotedTableName(foreignModelDefinition),
                         this.GetQuotedColumnName(foreignModelDefinition.PrimaryKey.FieldName),
-                        this.GetForeignKeyOnDeleteClause(fd.ForeignKey),
-                        this.GetForeignKeyOnUpdateClause(fd.ForeignKey));
+                        this.GetForeignKeyOnDeleteClause(fieldDef.ForeignKey),
+                        this.GetForeignKeyOnUpdateClause(fieldDef.ForeignKey));
                 }
             }
 

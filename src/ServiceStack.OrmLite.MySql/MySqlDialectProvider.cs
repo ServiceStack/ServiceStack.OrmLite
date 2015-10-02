@@ -23,7 +23,7 @@ namespace ServiceStack.OrmLite.MySql
         public MySqlDialectProvider()
         {
             base.AutoIncrementDefinition = "AUTO_INCREMENT";
-            base.DefaultValueFormat = " DEFAULT '{0}'";
+            base.DefaultValueFormat = " DEFAULT {0}";
             base.SelectIdentitySql = "SELECT LAST_INSERT_ID()";
 
             base.InitColumnTypeMap();
@@ -44,6 +44,11 @@ namespace ServiceStack.OrmLite.MySql
             base.RegisterConverter<Guid>(new MySqlGuidConverter());
             base.RegisterConverter<DateTime>(new MySqlDateTimeConverter());
             base.RegisterConverter<DateTimeOffset>(new MySqlDateTimeOffsetConverter());
+
+            this.Variables = new Dictionary<string, string>
+            {
+                { OrmLiteVariables.SystemUtc, "CURRENT_TIMESTAMP" },
+            };
         }
 
         public static string RowVersionTriggerFormat = "{0}RowVersionUpdateTrigger";
@@ -186,7 +191,7 @@ namespace ServiceStack.OrmLite.MySql
                 fieldDef.IsRowVersion,
                 fieldDef.FieldLength,
                 fieldDef.Scale,
-                fieldDef.DefaultValue,
+                GetDefaultValue(fieldDef),
                 fieldDef.CustomFieldDefinition);
 
             if (fieldDef.IsRowVersion)

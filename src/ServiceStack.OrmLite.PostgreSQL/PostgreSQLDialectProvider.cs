@@ -56,6 +56,11 @@ namespace ServiceStack.OrmLite.PostgreSQL
             //RegisterConverter<string[]>(new PostgreSqlStringArrayConverter());
             //RegisterConverter<int[]>(new PostgreSqlIntArrayConverter());
             //RegisterConverter<long[]>(new PostgreSqlLongArrayConverter());
+
+            this.Variables = new Dictionary<string, string>
+            {
+                { OrmLiteVariables.SystemUtc, "now() at time zone 'utc'" },
+            };
         }
 
         public override string GetColumnDefinition(

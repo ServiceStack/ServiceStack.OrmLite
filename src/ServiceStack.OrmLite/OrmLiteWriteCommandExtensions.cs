@@ -679,7 +679,8 @@ namespace ServiceStack.OrmLite
                 OrmLiteConfig.InsertFilter(dbCmd, obj);
 
             var dialectProvider = dbCmd.GetDialectProvider();
-            dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd);
+            dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd, 
+                insertFields: OrmLiteUtils.GetNonDefaultValueInsertFields(obj));
 
             dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
@@ -688,6 +689,7 @@ namespace ServiceStack.OrmLite
 
             return dbCmd.ExecNonQuery();
         }
+
 
         internal static void Insert<T>(this IDbCommand dbCmd, params T[] objs)
         {

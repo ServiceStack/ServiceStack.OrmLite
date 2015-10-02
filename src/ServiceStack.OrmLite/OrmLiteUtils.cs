@@ -561,5 +561,24 @@ namespace ServiceStack.OrmLite
             }
         }
 
+        public static List<string> GetNonDefaultValueInsertFields<T>(T obj)
+        {
+            var insertFields = new List<string>();
+            var modelDef = typeof(T).GetModelDefinition();
+            foreach (var fieldDef in modelDef.FieldDefinitionsArray)
+            {
+                if (!string.IsNullOrEmpty(fieldDef.DefaultValue))
+                {
+                    var value = fieldDef.GetValue(obj);
+                    if (value == null || value.Equals(fieldDef.FieldTypeDefaultValue))
+                        continue;
+                }
+                insertFields.Add(fieldDef.Name);
+            }
+
+            return insertFields.Count == modelDef.FieldDefinitionsArray.Length 
+                ? null 
+                : insertFields;
+        }
     }
 }

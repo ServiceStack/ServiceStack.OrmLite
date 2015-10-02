@@ -32,6 +32,7 @@ namespace ServiceStack.OrmLite
 
         protected OrmLiteDialectProviderBase()
         {
+            Variables = new Dictionary<string, string>();
             StringSerializer = new JsvStringSerializer();
         }
 
@@ -158,6 +159,8 @@ namespace ServiceStack.OrmLite
             converter.InitDbParam(dbParam, columnType);
         }
 
+        public Dictionary<string, string> Variables { get; set; }
+
         public IOrmLiteExecFilter ExecFilter { get; set; }
 
         public Dictionary<Type, IOrmLiteConverter> Converters = new Dictionary<Type, IOrmLiteConverter>();
@@ -262,8 +265,8 @@ namespace ServiceStack.OrmLite
         public IOrmLiteConverter GetConverter(Type type)
         {
             IOrmLiteConverter converter;
-            return Converters.TryGetValue(type, out converter) 
-                ? converter 
+            return Converters.TryGetValue(type, out converter)
+                ? converter
                 : null;
         }
 
@@ -1045,6 +1048,21 @@ namespace ServiceStack.OrmLite
             return sql.ToString();
         }
 
+        public virtual string GetDefaultValue(FieldDefinition fieldDef)
+        {
+            var defaultValue = fieldDef.DefaultValue;
+            if (string.IsNullOrEmpty(defaultValue))
+                return null;
+
+            if (!defaultValue.StartsWith("{"))
+                return defaultValue;
+
+            string variable;
+            return Variables.TryGetValue(defaultValue, out variable) 
+                ? variable 
+                : null;
+        }
+
         public virtual string ToCreateTableStatement(Type tableType)
         {
             var sbColumns = new StringBuilder();
@@ -1062,7 +1080,7 @@ namespace ServiceStack.OrmLite
                     fieldDef.IsRowVersion,
                     fieldDef.FieldLength,
                     fieldDef.Scale,
-                    fieldDef.DefaultValue,
+                    GetDefaultValue(fieldDef),
                     fieldDef.CustomFieldDefinition);
 
                 if (columnDefinition == null)
@@ -1179,8 +1197,8 @@ namespace ServiceStack.OrmLite
         protected virtual string GetCompositeIndexNameWithSchema(CompositeIndexAttribute compositeIndex, ModelDefinition modelDef)
         {
             return compositeIndex.Name ?? GetIndexName(compositeIndex.Unique,
-                    (modelDef.IsInSchema 
-                        ? modelDef.Schema + "_" + GetQuotedTableName(modelDef) 
+                    (modelDef.IsInSchema
+                        ? modelDef.Schema + "_" + GetQuotedTableName(modelDef)
                         : GetQuotedTableName(modelDef)).SafeVarName(),
                     string.Join("_", compositeIndex.FieldNames.ToArray()));
         }

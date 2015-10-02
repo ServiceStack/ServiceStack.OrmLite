@@ -41,6 +41,11 @@ namespace ServiceStack.OrmLite.SqlServer
             base.RegisterConverter<Guid>(new SqlServerGuidConverter());
 
             base.RegisterConverter<byte[]>(new SqlServerByteArrayConverter());
+
+            this.Variables = new Dictionary<string, string>
+            {
+                { OrmLiteVariables.SystemUtc, "SYSUTCDATETIME()" },
+            };
         }
 
         public override string GetQuotedValue(string paramValue)

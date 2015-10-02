@@ -47,6 +47,11 @@ namespace ServiceStack.OrmLite.Firebird
             base.RegisterConverter<float>(new FirebirdFloatConverter());
             base.RegisterConverter<double>(new FirebirdDoubleConverter());
             base.RegisterConverter<decimal>(new FirebirdDecimalConverter());
+
+            this.Variables = new Dictionary<string, string>
+            {
+                { OrmLiteVariables.SystemUtc, "CURRENT_TIMESTAMP" },
+            };
         }
 
         public override IDbConnection CreateConnection(string connectionString, Dictionary<string, string> options)
@@ -320,7 +325,7 @@ namespace ServiceStack.OrmLite.Firebird
                     fieldDef.IsRowVersion,
                     fieldDef.FieldLength,
                     fieldDef.Scale,
-                    fieldDef.DefaultValue,
+                    GetDefaultValue(fieldDef),
                     fieldDef.CustomFieldDefinition);
 
                 sbColumns.Append(columnDefinition);
