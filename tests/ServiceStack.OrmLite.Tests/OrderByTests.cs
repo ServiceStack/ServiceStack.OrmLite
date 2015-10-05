@@ -1,6 +1,7 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using NUnit.Framework;
-using ServiceStack.Common.Tests.Models;
+using ServiceStack.Logging;
 using ServiceStack.OrmLite.Tests.Expression;
 using ServiceStack.Text;
 

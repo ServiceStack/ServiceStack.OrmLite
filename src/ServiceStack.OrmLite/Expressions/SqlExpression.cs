@@ -518,11 +518,9 @@ namespace ServiceStack.OrmLite
             sep = string.Empty;
             useFieldName = true;
             orderByProperties.Clear();
-            var fields = Visit(keySelector).ToString().Split(',');
-            foreach (var field in fields)
-            {
-                orderByProperties.Add(field.Trim() + " DESC");
-            }
+            var orderBySql = Visit(keySelector).ToString();
+            orderBySql.ParseTokens()
+                .Each(x => orderByProperties.Add(x + " DESC"));
             BuildOrderByClauseInternal();
             return this;
         }
@@ -549,11 +547,9 @@ namespace ServiceStack.OrmLite
         {
             sep = string.Empty;
             useFieldName = true;
-            var fields = Visit(keySelector).ToString().Split(',');
-            foreach (var field in fields)
-            {
-                orderByProperties.Add(field.Trim() + " DESC");
-            }
+            var orderBySql = Visit(keySelector).ToString();
+            orderBySql.ParseTokens()
+                .Each(x => orderByProperties.Add(x + " DESC"));
             BuildOrderByClauseInternal();
             return this;
         }

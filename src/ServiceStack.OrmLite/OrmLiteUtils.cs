@@ -580,5 +580,84 @@ namespace ServiceStack.OrmLite
                 ? null 
                 : insertFields;
         }
+
+        public static List<string> ParseTokens(this string expr)
+        {
+            var to = new List<string>();
+
+            if (string.IsNullOrEmpty(expr))
+                return to;
+
+            var inDoubleQuotes = false;
+            var inSingleQuotes = false;
+            var inBraces = false;
+
+            var pos = 0;
+
+            for (var i = 0; i < expr.Length; i++)
+            {
+                var c = expr[i];
+                if (inDoubleQuotes)
+                {
+                    if (c == '"')
+                        inDoubleQuotes = false;
+                    continue;
+                }
+                if (inSingleQuotes)
+                {
+                    if (c == '\'')
+                        inSingleQuotes = false;
+                    continue;
+                }
+                if (c == '"')
+                {
+                    inDoubleQuotes = true;
+                    continue;
+                }
+                if (c == '\'')
+                {
+                    inSingleQuotes = true;
+                    continue;
+                }
+                if (c == '(')
+                {
+                    inBraces = true;
+                    continue;
+                }
+                if (c == ')')
+                {
+                    inBraces = false;
+
+                    var endPos = expr.IndexOf(',', i);
+                    if (endPos == -1)
+                        endPos = expr.Length;
+
+                    to.Add(expr.Substring(pos, endPos - pos).Trim());
+
+                    pos = endPos;
+                    continue;
+                }
+
+                if (c == ',')
+                {
+                    if (!inBraces)
+                    {
+                        var arg = expr.Substring(pos, i - pos).Trim();
+                        if (!string.IsNullOrEmpty(arg))
+                            to.Add(arg);
+                        pos = i + 1;
+                    }
+                }
+            }
+
+            var remaining = expr.Substring(pos, expr.Length - pos);
+            if (!string.IsNullOrEmpty(remaining))
+                remaining = remaining.Trim();
+
+            if (!string.IsNullOrEmpty(remaining))
+                to.Add(remaining);
+
+            return to;
+        }
     }
 }
