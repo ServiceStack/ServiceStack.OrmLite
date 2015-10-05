@@ -110,7 +110,7 @@ namespace ServiceStack.OrmLite
                 to.Precision = from.Precision;
             if (from.Scale != default(byte))
                 to.Scale = from.Scale;
-            if (from.Scale != default(int))
+            if (from.Size != default(int))
                 to.Size = from.Size;
 
             return to;
