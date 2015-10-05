@@ -3,7 +3,7 @@ using System.Text;
 
 namespace ServiceStack.OrmLite.SqlServer
 {
-	public class SqlServerExpression<T> : SqlExpression<T>
+	public class SqlServerExpression<T> : ParameterizedSqlExpression<T>
 	{
         public SqlServerExpression(IOrmLiteDialectProvider dialectProvider)
             : base(dialectProvider) {}
@@ -50,7 +50,25 @@ namespace ServiceStack.OrmLite.SqlServer
                 : string.Format("substring({0}, {1}, LEN({0}) - {1} + 1)", quotedColumn, startIndex );
         }
 
-	    public override SqlExpression<T> OrderByRandom()
+        protected override void ConvertToPlaceholderAndParameter(ref object right)
+        {
+            if (!OrmLiteConfig.UseParameterizeSqlExpressions)
+                return;
+
+            var paramName = Params.Count.ToString();
+            var paramValue = right;
+
+            var parameter = CreateParam(paramName, paramValue);
+            
+            // Prevents a new plan cache for each different string length. Every string is parameterized as NVARCHAR(max) 
+            if (parameter.DbType == System.Data.DbType.String)
+                parameter.Size = -1;
+
+            Params.Add(parameter);
+
+            right = parameter.ParameterName;
+        }
+        public override SqlExpression<T> OrderByRandom()
 	    {
 	        return base.OrderBy("NEWID()");
 	    }
