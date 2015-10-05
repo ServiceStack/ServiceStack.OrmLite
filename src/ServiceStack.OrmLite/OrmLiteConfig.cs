@@ -190,7 +190,7 @@ namespace ServiceStack.OrmLite
             (fieldName ?? "").Replace(" ", "");
 
         /// <summary>
-        /// Only supported in Oracle DialectProvider
+        /// Only used in Oracle or SqlServer DialectProvider
         /// </summary>
         public static bool UseParameterizeSqlExpressions { get; set; }
 

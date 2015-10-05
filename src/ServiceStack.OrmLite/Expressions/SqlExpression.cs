@@ -1310,7 +1310,7 @@ namespace ServiceStack.OrmLite
             return sb.ToString();
         }
 
-        protected virtual List<Object> VisitNewArrayFromExpressionList(NewArrayExpression na)
+        protected virtual List<object> VisitNewArrayFromExpressionList(NewArrayExpression na)
         {
             var exprs = VisitExpressionList(na.Expressions);
             return exprs;
