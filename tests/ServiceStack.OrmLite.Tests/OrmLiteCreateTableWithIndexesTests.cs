@@ -79,6 +79,25 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        public void Can_create_ModelWithCompositeIndexOnFieldSpacesDesc_table()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTable<ModelWithCompositeIndexOnFieldSpacesDesc>(true);
+                db.GetLastSql().Print();
+
+                var sql = OrmLiteConfig.DialectProvider.ToCreateIndexStatements(typeof(ModelWithCompositeIndexOnFieldSpacesDesc)).Join();
+
+                var compositeName = "idx_modelwithcompositeindexonfieldspacesdesc_field_field";
+
+                if (Dialect == Dialect.Oracle || Dialect == Dialect.Firebird)
+                    compositeName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(compositeName).ToLower();
+
+                Assert.That(sql, Is.StringContaining(compositeName));
+            }
+        }
+
+        [Test]
         public void Can_create_ModelWithNamedCompositeIndex_table()
         {
             using (var db = OpenDbConnection())

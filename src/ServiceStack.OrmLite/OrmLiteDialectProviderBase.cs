@@ -1155,10 +1155,17 @@ namespace ServiceStack.OrmLite
                     if (sb.Length > 0)
                         sb.Append(", ");
 
-                    var parts = fieldName.SplitOnFirst(' ');
-                    sb.Append(GetQuotedColumnName(parts[0]))
-                      .Append(' ')
-                      .Append(parts.Length > 1 ? parts[1] : "ASC");
+                    var parts = fieldName.SplitOnLast(' ');
+                    if (parts.Length == 2 && (parts[1].ToLower().StartsWith("desc") || parts[1].ToLower().StartsWith("asc")))
+                    {
+                        sb.Append(GetQuotedColumnName(parts[0]))
+                          .Append(' ')
+                          .Append(parts[1]);
+                    }
+                    else
+                    {
+                        sb.Append(GetQuotedColumnName(fieldName));
+                    }
                 }
 
                 sqlIndexes.Add(

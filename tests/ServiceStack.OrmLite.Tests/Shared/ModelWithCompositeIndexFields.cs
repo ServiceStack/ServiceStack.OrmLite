@@ -37,4 +37,16 @@ namespace ServiceStack.Common.Tests.Models
 
         public string Composite2 { get; set; }
     }
+
+    [CompositeIndex("Field WithSpace1", "Field WithSpace2 DESC")]
+    public class ModelWithCompositeIndexOnFieldSpacesDesc
+    {
+        public string Id { get; set; }
+
+        [Alias("Field WithSpace1")]
+        public string FieldWithSpace1 { get; set; }
+
+        [Alias("Field WithSpace2")]
+        public string FieldWithSpace2 { get; set; }
+    }
 }
