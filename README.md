@@ -3,7 +3,11 @@ follow [@servicestack](http://twitter.com/servicestack) for updates.
 
 # Fast, Simple, Typed ORM for .NET
 
-OrmLite's goal is to provide a convenient, DRY, config-free, RDBMS-agnostic typed wrapper that retains a high affinity with SQL, exposing intuitive APIs that generate predictable SQL and maps cleanly to (DTO-friendly) disconnected POCO's. This approach makes easier to reason-about your data access making it obvious what SQL is getting executed at what time, whilst mitigating unexpected behavior, implicit N+1 queries and leaky data access prevalent in Heavy ORMs.
+OrmLite's goal is to provide a convenient, DRY, config-free, RDBMS-agnostic typed wrapper that retains 
+a high affinity with SQL, exposing intuitive APIs that generate predictable SQL and maps cleanly to 
+(DTO-friendly) disconnected POCO's. This approach makes easier to reason-about your data access making 
+it obvious what SQL is getting executed at what time, whilst mitigating unexpected behavior, 
+implicit N+1 queries and leaky data access prevalent in Heavy ORMs.
 
 OrmLite was designed with a focus on the core objectives:
 
@@ -35,25 +39,28 @@ level public properties.
 ### 8 flavours of OrmLite is on NuGet: 
 
   - [ServiceStack.OrmLite.SqlServer](http://nuget.org/List/Packages/ServiceStack.OrmLite.SqlServer)
-  - [ServiceStack.OrmLite.MySql](http://nuget.org/List/Packages/ServiceStack.OrmLite.MySql)
   - [ServiceStack.OrmLite.PostgreSQL](http://nuget.org/List/Packages/ServiceStack.OrmLite.PostgreSQL)
+  - [ServiceStack.OrmLite.MySql](http://nuget.org/List/Packages/ServiceStack.OrmLite.MySql)
   - [ServiceStack.OrmLite.Sqlite.Mono](http://nuget.org/packages/ServiceStack.OrmLite.Sqlite.Mono) - Compatible with Mono / Windows (x86) 
   - [ServiceStack.OrmLite.Sqlite.Windows](http://nuget.org/List/Packages/ServiceStack.OrmLite.Sqlite.Windows) - 32/64bit Mixed mode .NET for WIndows only 
   - [ServiceStack.OrmLite.Oracle](http://nuget.org/packages/ServiceStack.OrmLite.Oracle) (unofficial)
   - [ServiceStack.OrmLite.Firebird](http://nuget.org/List/Packages/ServiceStack.OrmLite.Firebird)  (unofficial)
   - [ServiceStack.OrmLite.VistaDb](http://nuget.org/List/Packages/ServiceStack.OrmLite.VistaDb)  (unofficial)
    
-_Latest v4+ on NuGet is a commercial release with [free quotas](https://servicestack.net/download#free-quotas)._
+_Latest v4+ on NuGet is a [commercial release](https://servicestack.net/ormlite) with [free quotas](https://servicestack.net/download#free-quotas)._
 
 #### [Docs and Downloads for older v3 BSD releases](https://github.com/ServiceStackV3/ServiceStackV3)
 
 ### Copying
 
-Since September 2013, ServiceStack source code is available under GNU Affero General Public License/FOSS License Exception, see license.txt in the source. Alternative [commercial licensing](https://servicestack.net/ormlite) is also available.
+Since September 2013, ServiceStack source code is available under GNU Affero General Public 
+License/FOSS License Exception, see license.txt in the source. 
+Alternative [commercial licensing](https://servicestack.net/ormlite) is also available.
 
 ### Contributing
 
-Contributors need to approve the [Contributor License Agreement](https://docs.google.com/forms/d/16Op0fmKaqYtxGL4sg7w_g-cXXyCoWjzppgkuqzOeKyk/viewform) before submitting pull-requests, see the [Contributing wiki](https://github.com/ServiceStack/ServiceStack/wiki/Contributing) for more details. 
+Contributors need to approve the [Contributor License Agreement](https://docs.google.com/forms/d/16Op0fmKaqYtxGL4sg7w_g-cXXyCoWjzppgkuqzOeKyk/viewform) 
+before submitting pull-requests, see the [Contributing wiki](https://github.com/ServiceStack/ServiceStack/wiki/Contributing) for more details. 
 
 ***
 
