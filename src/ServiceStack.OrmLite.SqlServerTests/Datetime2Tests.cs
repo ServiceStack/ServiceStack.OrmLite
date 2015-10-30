@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data.SqlClient;
 using System.Data.SqlTypes;
+using System.Linq;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.SqlServer;
@@ -21,7 +22,6 @@ namespace ServiceStack.OrmLite.SqlServerTests
 
             using (var conn = dbFactory.OpenDbConnection()) {
 				var test_object_ValidForDatetime2 = Table_for_datetime2_tests.get_test_object_ValidForDatetime2();
-				var test_object_ValidForNormalDatetime = Table_for_datetime2_tests.get_test_object_ValidForNormalDatetime();
 
 				conn.CreateTable<Table_for_datetime2_tests>(true);
 
@@ -38,10 +38,13 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 var fromDb2 = conn.SingleById<Table_for_datetime2_tests>(insertedId);
 				Assert.AreEqual(test_object_ValidForDatetime2.ToVerifyPrecision.Value.AddYears(1), fromDb2.ToVerifyPrecision);
 
-
 				//check InsertParam
 				conn.Insert(test_object_ValidForDatetime2);
-			}
+
+                //check select on datetime2 value
+                var result = conn.Select<Table_for_datetime2_tests>(t => t.ToVerifyPrecision == test_object_ValidForDatetime2.ToVerifyPrecision);
+                Assert.AreEqual(result.Single().ToVerifyPrecision, test_object_ValidForDatetime2.ToVerifyPrecision);
+            }
 		}
 		[Test]
 		public void datetime_tests__check_default_behaviour()
@@ -89,10 +92,10 @@ namespace ServiceStack.OrmLite.SqlServerTests
 			public DateTime? ToVerifyPrecision { get; set; }
 			public DateTime? NullableDateTimeLeaveItNull { get; set; }
 
-			/// <summary>
-			/// to check datetime(2)'s precision. A regular 'datetime' is not precise enough
-			/// </summary>
-			public static readonly DateTime regular_datetime_field_cant_hold_this_exact_moment = new DateTime(2013, 3, 17, 21, 29, 1, 678);
+		    /// <summary>
+		    /// to check datetime(2)'s precision. A regular 'datetime' is not precise enough
+		    /// </summary>
+		    public static readonly DateTime regular_datetime_field_cant_hold_this_exact_moment = new DateTime(2013, 3, 17, 21, 29, 1, 678).AddTicks(1);
 
 			public static Table_for_datetime2_tests get_test_object_ValidForDatetime2() { return new Table_for_datetime2_tests { SomeDateTime = new DateTime(1, 1, 1), ToVerifyPrecision = regular_datetime_field_cant_hold_this_exact_moment }; }
 
