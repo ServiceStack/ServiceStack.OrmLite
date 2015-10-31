@@ -15,7 +15,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var db = OpenDbConnection())
             {
-                db.CreateTable<PersonWithAutoId>(overwrite: true);
+                db.DropAndCreateTable<PersonWithAutoId>();
 
                 var row = new PersonWithAutoId
                 {
@@ -27,6 +27,33 @@ namespace ServiceStack.OrmLite.Tests
                 db.Save(row);
 
                 Assert.That(row.Id, Is.Not.EqualTo(0));
+            }
+        }
+
+        [Test]
+        public void Can_disable_AutoIncrement_field()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<PersonWithAutoId>();
+
+                typeof(PersonWithAutoId)
+                    .GetModelMetadata()
+                    .PrimaryKey.AutoIncrement = false;
+
+                var row = new PersonWithAutoId
+                {
+                    Id = 100,
+                    FirstName = "Jimi",
+                    LastName = "Hendrix",
+                    Age = 27
+                };
+
+                db.Insert(row);
+
+                row = db.SingleById<PersonWithAutoId>(100);
+
+                Assert.That(row.Id, Is.EqualTo(100));
             }
         }
 
