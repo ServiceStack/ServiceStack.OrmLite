@@ -223,6 +223,12 @@ namespace ServiceStack.OrmLite.Tests
 
                 Assert.Throws<ArgumentException>(() => 
                     db.UpdateNonDefaults(new PocoWithBool { Bool = false }, x => x.Id == 1));
+
+                db.UpdateOnly(new PocoWithBool { Bool = false },
+                    onlyFields: x => x.Bool,
+                    where: x => x.Id == 1);
+                row = db.SingleById<PocoWithBool>(1);
+                Assert.That(row.Bool, Is.False);
             }
         }
 
