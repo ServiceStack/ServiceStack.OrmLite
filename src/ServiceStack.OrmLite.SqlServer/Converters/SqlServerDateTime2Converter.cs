@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
 
 namespace ServiceStack.OrmLite.SqlServer.Converters
 {
@@ -12,6 +13,11 @@ namespace ServiceStack.OrmLite.SqlServer.Converters
         public override DbType DbType
         {
             get { return DbType.DateTime2; }
+        }
+
+        public override string ToQuotedString(Type fieldType, object value)
+        {
+            return DateTimeFmt((DateTime)value, "yyyyMMdd HH:mm:ss.fffffff");
         }
     }
 }
