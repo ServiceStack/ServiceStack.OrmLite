@@ -54,6 +54,10 @@ namespace ServiceStack.OrmLite.Tests
                 row = db.SingleById<PersonWithAutoId>(100);
 
                 Assert.That(row.Id, Is.EqualTo(100));
+
+                typeof(PersonWithAutoId)
+                    .GetModelMetadata()
+                    .PrimaryKey.AutoIncrement = true;
             }
         }
 
