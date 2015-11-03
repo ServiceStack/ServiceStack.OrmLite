@@ -10,7 +10,7 @@ namespace ServiceStack.OrmLite
     {
         List<ModelDefinition> tableDefs = new List<ModelDefinition>();
 
-        bool IsJoinedTable(Type type)
+        public bool IsJoinedTable(Type type)
         {
             return tableDefs.FirstOrDefault(x => x.ModelType == type) != null;
         }
