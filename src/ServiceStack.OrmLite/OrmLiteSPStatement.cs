@@ -10,6 +10,20 @@ namespace ServiceStack.OrmLite
         private readonly IDbCommand dbCmd;
         private readonly IOrmLiteDialectProvider dialectProvider;
 
+        public bool TryGetParameterValue(string parameterName, out object value)
+        {
+            try
+            {
+                value = ((IDataParameter)dbCmd.Parameters[parameterName]).Value;
+                return true;
+            }
+            catch(Exception)
+            {
+                value = null;
+                return false;
+            }
+        }
+
         public OrmLiteSPStatement(IDbCommand dbCmd)
             : this(null, dbCmd) {}
 
