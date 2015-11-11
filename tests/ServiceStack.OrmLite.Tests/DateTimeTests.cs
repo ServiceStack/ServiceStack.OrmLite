@@ -202,6 +202,25 @@ namespace ServiceStack.OrmLite.Tests
             }
         }
 
+        [Test]
+        public void Can_Select_Date_with_SqlList()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<DateTimeObject>();
+
+                var dateTime = new DateTime(2001, 1, 1, 1, 1, 1);
+                db.DeleteAll<DateTimeObject>();
+                db.Insert(new DateTimeObject { Test = dateTime, TestNullable = dateTime });
+
+                var row = db.SqlList<DateTimeObject>(
+                    "SELECT * FROM {0} WHERE Test = @dateTime".Fmt("DateTimeObject".SqlTable()), new { dateTime });
+
+                row.PrintDump();
+                Assert.That(dateTime, Is.EqualTo(row[0].Test));
+            }
+        }
+
         private static DateTimeObject InsertAndSelectDateTime(IDbConnection db, DateTime dateTime)
         {
             db.DeleteAll<DateTimeObject>();
