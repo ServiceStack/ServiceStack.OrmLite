@@ -592,6 +592,21 @@ List<SP> SPsNotSupported(string providerName)
 	return new List<SP>();
 }
 
+string GetParamDirection(SPParamDir direction)
+{
+	switch(direction)
+	{
+		case SPParamDir.InAndOutDirection:
+			return "ParameterDirection.InputOutput";
+		case SPParamDir.OutDirection:
+			return "ParameterDirection.Output";
+		case SPParamDir.InDirection:
+        default:
+			return "ParameterDirection.Input";
+	}
+}
+ 
+
 List<SP> LoadSPs()
 {
 	InitConnectionString();
