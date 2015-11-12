@@ -106,6 +106,7 @@ namespace ServiceStack.OrmLite
         Dictionary<string, FieldDefinition> GetFieldDefinitionMap(ModelDefinition modelDef);
 
         object GetFieldValue(FieldDefinition fieldDef, object value);
+        object GetFieldValue(Type fieldType, object value);
 
         string ToUpdateRowStatement(object objWithProperties, ICollection<string> UpdateFields = null);
 
