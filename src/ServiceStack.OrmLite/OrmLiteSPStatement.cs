@@ -54,7 +54,7 @@ namespace ServiceStack.OrmLite
 
         public List<T> ConvertToScalarList<T>()
         {
-            if (!((typeof(T).IsPrimitive) || (typeof(T) == typeof(string)) || (typeof(T) == typeof(String))))
+            if (!((typeof(T).IsPrimitive) || typeof(T).IsValueType || (typeof(T) == typeof(string)) || (typeof(T) == typeof(String))))
                 throw new Exception("Type " + typeof(T).Name + " is a non primitive type. Use ConvertToList function.");
 
             IDataReader reader = null;
@@ -90,7 +90,7 @@ namespace ServiceStack.OrmLite
 
         public T ConvertToScalar<T>()
         {
-            if (!((typeof(T).IsPrimitive) || (typeof(T) == typeof(string)) || (typeof(T) == typeof(String))))
+            if (!((typeof(T).IsPrimitive) || typeof(T).IsValueType || (typeof(T) == typeof(string)) || (typeof(T) == typeof(String))))
                 throw new Exception("Type " + typeof(T).Name + " is a non primitive type. Use ConvertTo function.");
 
             IDataReader reader = null;
@@ -108,7 +108,7 @@ namespace ServiceStack.OrmLite
 
         public List<T> ConvertFirstColumnToList<T>()
         {
-            if (!((typeof(T).IsPrimitive) || (typeof(T) == typeof(string)) || (typeof(T) == typeof(String))))
+            if (!((typeof(T).IsPrimitive) || typeof(T).IsValueType || (typeof(T) == typeof(string)) || (typeof(T) == typeof(String))))
                 throw new Exception("Type " + typeof(T).Name + " is a non primitive type. Only primitive type can be used.");
 
             IDataReader reader = null;
@@ -126,7 +126,7 @@ namespace ServiceStack.OrmLite
 
         public HashSet<T> ConvertFirstColumnToListDistinct<T>()
         {
-            if (!((typeof(T).IsPrimitive) || (typeof(T) == typeof(string)) || (typeof(T) == typeof(String))))
+            if (!((typeof(T).IsPrimitive) || typeof(T).IsValueType || (typeof(T) == typeof(string)) || (typeof(T) == typeof(String))))
                 throw new Exception("Type " + typeof(T).Name + " is a non primitive type. Only primitive type can be used.");
 
             IDataReader reader = null;
