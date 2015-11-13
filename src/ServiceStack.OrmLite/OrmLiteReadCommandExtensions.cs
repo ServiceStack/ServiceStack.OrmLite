@@ -159,9 +159,14 @@ namespace ServiceStack.OrmLite
                     value = dialectProvider.GetFieldValue(fieldDef, value);
                     var valueType = value != null ? value.GetType() : null;
                     if (valueType != null && valueType != pi.PropertyType)
-                    {
                         dialectProvider.InitDbParam(p, valueType);
-                    }
+                }
+                else
+                {
+                    value = dialectProvider.GetFieldValue(pi.PropertyType, value);
+                    var valueType = value != null ? value.GetType() : null;
+                    if (valueType != null && valueType != pi.PropertyType)
+                        dialectProvider.InitDbParam(p, valueType);
                 }
 
                 p.Value = value == null ?

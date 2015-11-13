@@ -903,6 +903,38 @@ namespace ServiceStack.OrmLite
             }
         }
 
+        public object GetFieldValue(Type fieldType, object value)
+        {
+            if (value == null)
+                return null;
+
+            IOrmLiteConverter converter = null;
+            try
+            {
+                var isEnum = value.GetType().IsEnum || fieldType.IsEnum;
+                if (isEnum)
+                {
+                    converter = EnumConverter;
+                    return converter.ToDbValue(fieldType, value);
+                }
+
+                if (Converters.TryGetValue(fieldType, out converter))
+                    return converter.ToDbValue(fieldType, value);
+
+                converter = !fieldType.IsValueType
+                    ? (IOrmLiteConverter)ReferenceTypeConverter
+                    : ValueTypeConverter;
+
+                return converter.ToDbValue(fieldType, value);
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Error in {0}.ToDbValue() for field of Type '{1}' with value '{2}'"
+                    .Fmt(converter.GetType().Name, fieldType, value != null ? value.GetType().Name : "undefined"), ex);
+                throw;
+            }
+        }
+
         protected virtual object GetValueOrDbNull<T>(FieldDefinition fieldDef, object obj)
         {
             var value = GetValue<T>(fieldDef, obj);
