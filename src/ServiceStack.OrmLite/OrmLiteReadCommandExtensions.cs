@@ -878,22 +878,34 @@ namespace ServiceStack.OrmLite
             return (long)result;
         }
 
-        internal static T LoadSingleById<T>(this IDbCommand dbCmd, object value)
+        internal static T LoadSingleById<T>(this IDbCommand dbCmd, object value, string[] include = null)
         {
             var row = dbCmd.SingleById<T>(value);
             if (row == null)
                 return default(T);
 
-            dbCmd.LoadReferences(row);
+            dbCmd.LoadReferences(row, include);
 
             return row;
         }
 
-        public static void LoadReferences<T>(this IDbCommand dbCmd, T instance)
+        public static void LoadReferences<T>(this IDbCommand dbCmd, T instance, string[] include = null)
         {
             var loadRef = new LoadReferencesSync<T>(dbCmd, instance);
+            var fieldDefs = loadRef.FieldDefs;
 
-            foreach (var fieldDef in loadRef.FieldDefs)
+            if (!include.IsEmpty())
+            {
+                // Check that any include values aren't reference fields of the specified type
+                var fields = fieldDefs.Select(q => q.FieldName);
+                var invalid = include.Except<string>(fields).ToList();
+                if (invalid.Count > 0)
+                    throw new ArgumentException("Fields '{0}' are not Reference Properties of Type '{1}'".Fmt(invalid.Join("', '"), typeof(T).Name));
+
+                fieldDefs = fieldDefs.Where(fd => include.Contains(fd.FieldName)).ToList();
+            }
+
+            foreach (var fieldDef in fieldDefs)
             {
                 dbCmd.Parameters.Clear();
                 var listInterface = fieldDef.FieldType.GetTypeWithGenericInterfaceOf(typeof(IList<>));
