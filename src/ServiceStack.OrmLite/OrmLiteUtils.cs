@@ -13,6 +13,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Text;
 using ServiceStack.Logging;
 using ServiceStack.Text;
@@ -658,6 +659,11 @@ namespace ServiceStack.OrmLite
                 to.Add(remaining);
 
             return to;
+        }
+
+        public static string[] AllAnonFields(this Type type)
+        {
+            return type.GetPublicProperties().Select(x => x.Name).ToArray();
         }
     }
 }

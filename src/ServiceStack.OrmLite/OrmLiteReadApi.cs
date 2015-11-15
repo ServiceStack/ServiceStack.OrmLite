@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace ServiceStack.OrmLite
@@ -667,11 +668,20 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns the first result with all its references loaded, using a primary key id. E.g:
-        /// <para>db.LoadSingleById&lt;Person&gt;(1)</para>
+        /// <para>db.LoadSingleById&lt;Person&gt;(1, include = new[]{ "Address" })</para>
         /// </summary>
         public static T LoadSingleById<T>(this IDbConnection dbConn, object idValue, string[] include = null)
         {
             return dbConn.Exec(dbCmd => dbCmd.LoadSingleById<T>(idValue, include));
+        }
+
+        /// <summary>
+        /// Returns the first result with all its references loaded, using a primary key id. E.g:
+        /// <para>db.LoadSingleById&lt;Person&gt;(1, include = x => new{ x.Address })</para>
+        /// </summary>
+        public static T LoadSingleById<T>(this IDbConnection dbConn, object idValue, Func<T,object> include)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.LoadSingleById<T>(idValue, include(typeof(T).CreateInstance<T>()).GetType().AllAnonFields() ));
         }
 
         /// <summary>
