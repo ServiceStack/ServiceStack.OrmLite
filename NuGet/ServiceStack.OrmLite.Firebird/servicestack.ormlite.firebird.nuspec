@@ -19,7 +19,7 @@
     <copyright>Copyright 2015 Service Stack</copyright>
     <dependencies>
       <dependency id="ServiceStack.OrmLite" version="4.0" />
-      <dependency id="FirebirdSql.Data.FirebirdClient" version="4.8.0.0" />
+      <dependency id="FirebirdSql.Data.FirebirdClient" version="4.8.1.1" />
     </dependencies> 
   </metadata> 
   <files>
