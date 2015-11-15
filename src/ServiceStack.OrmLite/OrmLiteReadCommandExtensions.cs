@@ -884,7 +884,7 @@ namespace ServiceStack.OrmLite
             if (row == null)
                 return default(T);
 
-            dbCmd.LoadReferences(row);
+            dbCmd.LoadReferences(row, include);
 
             return row;
         }
@@ -905,7 +905,7 @@ namespace ServiceStack.OrmLite
                 fieldDefs = fieldDefs.Where(fd => include.Contains(fd.FieldName)).ToList();
             }
 
-            foreach (var fieldDef in loadRef.FieldDefs)
+            foreach (var fieldDef in fieldDefs)
             {
                 dbCmd.Parameters.Clear();
                 var listInterface = fieldDef.FieldType.GetTypeWithGenericInterfaceOf(typeof(IList<>));
