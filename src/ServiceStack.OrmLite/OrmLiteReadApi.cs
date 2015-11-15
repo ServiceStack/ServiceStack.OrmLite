@@ -669,9 +669,9 @@ namespace ServiceStack.OrmLite
         /// Returns the first result with all its references loaded, using a primary key id. E.g:
         /// <para>db.LoadSingleById&lt;Person&gt;(1)</para>
         /// </summary>
-        public static T LoadSingleById<T>(this IDbConnection dbConn, object idValue)
+        public static T LoadSingleById<T>(this IDbConnection dbConn, object idValue, string[] include = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.LoadSingleById<T>(idValue));
+            return dbConn.Exec(dbCmd => dbCmd.LoadSingleById<T>(idValue, include));
         }
 
         /// <summary>
