@@ -17,12 +17,12 @@
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Text.RegularExpressions" #>
 <#@ import namespace="System.Configuration" #>
-<#@ import namespace="System.Windows.Forms" #>
+<#@ import namespace="System.Windows.Forms" #> 
 <#@ import namespace="Microsoft.VisualStudio.TextTemplating" #>
 <#+
 
 /*
- This is code is based on the T4 template from the PetaPoco project which in turn is based on the subsonic project.
+ This code is based on the T4 template from the PetaPoco project which in turn is based on the subsonic project.
 
  -----------------------------------------------------------------------------------------
 
@@ -88,6 +88,7 @@ string ClassSuffix = "";
 string SchemaName = null;
 bool IncludeViews = false;
 bool IncludeFunctions = false;
+bool IncludeSPReturnTypes = false; //Will create {StoredProcName}_Result classes for any SPs with output results 
 
 public class Table
 {
@@ -211,9 +212,11 @@ public class SP
     public string Schema;
     public string SchemaQualifiedName {get{return Schema+"."+Name;}}
     public List<SPParam> Parameters;
+	public List<SPOutputColumn> SPOutputColumns;
     public SP()
 	{
         Parameters=new List<SPParam>();
+		SPOutputColumns = new List<SPOutputColumn>();
     }
     public string ArgList
 	{
@@ -231,6 +234,12 @@ public class SP
             return sb.ToString();
         }
 	}
+}
+
+public class SPOutputColumn
+{
+	public string Name ;
+	public string DotNetType ;
 }
 
 public enum SPParamDir
@@ -285,6 +294,8 @@ static string CheckNullable(Column col)
         result="?";
     return result;
 }
+
+
 
 string GetConnectionString(ref string connectionStringName, out string providerName)
 {
@@ -523,7 +534,7 @@ Tables LoadTables(bool makeSingular)
 			else
 			{
 				// Assume SQL Server
-				reader=new SqlServerSchemaReader();
+				reader=new SqlServerSchemaReader(IncludeSPReturnTypes);
 			}
 
 			reader.outer=this;
@@ -593,19 +604,19 @@ List<SP> SPsNotSupported(string providerName)
 }
 
 string GetParamDirection(SPParamDir direction)
-{
-	switch(direction)
-	{
-		case SPParamDir.InAndOutDirection:
-			return "ParameterDirection.InputOutput";
-		case SPParamDir.OutDirection:
-			return "ParameterDirection.Output";
-		case SPParamDir.InDirection:
-        default:
-			return "ParameterDirection.Input";
-	}
-}
- 
+		{ 
+		switch(direction)
+		{			
+			case SPParamDir.InAndOutDirection:
+				return "ParameterDirection.InputOutput";
+			case SPParamDir.OutDirection:
+				return "ParameterDirection.Output";
+			case SPParamDir.InDirection:
+			default:
+				return "ParameterDirection.Input";
+		} 
+		}
+
 
 List<SP> LoadSPs()
 {
@@ -684,7 +695,7 @@ List<SP> LoadSPs()
 			else
 			{
 				// Assume SQL Server
-				reader=new SqlServerSchemaReader();
+				reader=new SqlServerSchemaReader(IncludeSPReturnTypes);
 			}
 
             reader.outer=this;
@@ -802,6 +813,11 @@ static int GetDatatypeSize(string type)
 // Edit here to get a method to read the proc
 class SqlServerSchemaReader : SchemaReader
 {
+	private bool IncludeSPReturnTypes;
+	public SqlServerSchemaReader(bool includeSPReturnTypes)
+	{
+		IncludeSPReturnTypes = includeSPReturnTypes;
+	}
 	// SchemaReader.ReadSchema
 
 
@@ -884,6 +900,7 @@ class SqlServerSchemaReader : SchemaReader
         foreach (var sp in result)
         {
             sp.Parameters=LoadSPParams(sp);
+			if (IncludeSPReturnTypes) sp.SPOutputColumns = LoadSPOutputColumns(sp);
         }
         return result;
     }
@@ -967,6 +984,37 @@ class SqlServerSchemaReader : SchemaReader
 			}
 			return result;
 		}
+	}
+
+	List<SPOutputColumn> LoadSPOutputColumns(SP sp)
+	{ 
+		var result=new List<SPOutputColumn>();
+		using (var cmd=_factory.CreateCommand())
+		{
+			cmd.Connection=_connection;
+			cmd.CommandText=string.Format(@"SELECT name,CAST(is_nullable as VARCHAR(1)) is_nullable,system_type_name FROM sys.dm_exec_describe_first_result_set_for_object(OBJECT_ID('{0}'), 1)",sp.SchemaQualifiedName);
+			using (IDataReader rdr=cmd.ExecuteReader())
+			{
+				while(rdr.Read())
+				{   
+					if (!rdr.IsDBNull(0))
+					{
+						SPOutputColumn param=new SPOutputColumn();
+						param.Name = rdr["name"].ToString();
+						if (rdr["is_nullable"] == "0")
+						{
+							param.DotNetType = GetPropertyType(rdr["system_type_name"].ToString());
+						}
+						else
+						{ 
+							param.DotNetType = GetNullablePropertyType(rdr["system_type_name"].ToString());
+						}
+					result.Add(param);
+					}   
+				}
+			}				
+		} 
+		return result;
 	}
 
 
@@ -2647,6 +2695,8 @@ class Manager {
             if (sc != null && sc.IsItemUnderSCC(fileName) && !sc.IsItemCheckedOut(fileName))
                 checkOutAction.EndInvoke(checkOutAction.BeginInvoke(fileName, null, null));
         }
+
+		
     }
 }
 

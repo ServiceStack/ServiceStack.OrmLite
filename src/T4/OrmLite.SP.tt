@@ -5,7 +5,7 @@
     var SPNamespace = "StoredProcedures";
 	ClassPrefix = "";
 	ClassSuffix = "";
-
+	
     // Read schema
 	var sps = LoadSPs();
 
@@ -51,6 +51,17 @@ namespace <#=SPNamespace#>
 
 <#}#>
 	}
-}
-<# } #>
 
+	<#if (IncludeSPReturnTypes) foreach(var sp in sps)
+	{
+	if (!sp.SPOutputColumns.Any()) continue; #>
+		public class <#=sp.CleanName#>_Result
+		{ 
+		<#foreach(var prop in sp.SPOutputColumns){#>
+			public <#=prop.DotNetType#> <#=prop.Name#> { get; set; }			
+		<#}#>
+		}
+<#}#>
+
+}
+<#}#> 
