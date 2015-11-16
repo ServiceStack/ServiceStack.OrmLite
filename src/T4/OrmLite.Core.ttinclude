@@ -992,7 +992,7 @@ class SqlServerSchemaReader : SchemaReader
 		using (var cmd=_factory.CreateCommand())
 		{
 			cmd.Connection=_connection;
-			cmd.CommandText=string.Format(@"SELECT name,CAST(is_nullable as VARCHAR(1)) is_nullable,system_type_name FROM sys.dm_exec_describe_first_result_set_for_object(OBJECT_ID('{0}'), 1)",sp.SchemaQualifiedName);
+			cmd.CommandText=string.Format(@"SELECT name,CAST(is_nullable as VARCHAR(1)) is_nullable,system_type_name FROM sys.dm_exec_describe_first_result_set_for_object(OBJECT_ID('{0}'), 1)  WHERE is_hidden = 1",sp.SchemaQualifiedName);
 			using (IDataReader rdr=cmd.ExecuteReader())
 			{
 				while(rdr.Read())
