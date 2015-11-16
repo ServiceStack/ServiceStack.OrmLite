@@ -34,7 +34,7 @@ namespace <#=SPNamespace#>
 			param.Direction = paramDirection;
 			param.DbType = paramType;
 			param.ParameterName = paramName;
-			param.Value = paramValue;
+			param.Value = paramValue ?? DBNull.Value;
 			return param;
 		}
 
@@ -47,6 +47,7 @@ namespace <#=SPNamespace#>
 <#if (sp.Parameters.Count > 0) { foreach(var param in sp.Parameters){#>
 			dbCmd.Parameters.Add(CreateNewParameter(dbCmd,"<#=param.Name#>",@<#=Inflector.MakeInitialLowerCase(param.Name)#>,<#=GetParamDirection(param.Direction)#>,<#=param.DbType#>));
 <#}#> <#}#>
+dbCmd.Parameters.Add(CreateNewParameter(dbCmd,"__ReturnValue",0,ParameterDirection.ReturnValue,DbType.Int32));
 			return new OrmLiteSPStatement(db, dbCmd);
 		}
 

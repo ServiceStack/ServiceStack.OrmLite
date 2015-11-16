@@ -24,6 +24,15 @@ namespace ServiceStack.OrmLite
             }
         }
 
+        public int ReturnValue
+        {
+            get
+            {
+                var returnValue = ((IDataParameter)dbCmd.Parameters["__ReturnValue"]).Value;
+                return (int)returnValue;
+            }
+        }
+
         public OrmLiteSPStatement(IDbCommand dbCmd)
             : this(null, dbCmd) {}
 
