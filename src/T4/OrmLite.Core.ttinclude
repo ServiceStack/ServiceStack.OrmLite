@@ -276,8 +276,14 @@ static Func<string, string> CleanUp = (str) =>
 {
 	str = rxCleanUp.Replace(str, "_");
 
-	if (char.IsDigit(str[0]) || cs_keywords.Contains(str))
+	if (char.IsDigit(str[0]))
+	{
+		str = "_" + str;
+	}
+	else if (cs_keywords.Contains(str))
+	{
 		str = "@" + str;
+	}
 
     return str;
 };
