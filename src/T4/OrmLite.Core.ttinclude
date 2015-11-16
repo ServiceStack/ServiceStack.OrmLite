@@ -1007,17 +1007,14 @@ class SqlServerSchemaReader : SchemaReader
 					{
 						SPOutputColumn param=new SPOutputColumn();
 						param.Name = rdr["name"].ToString();
-						var sqlType = rdr["system_type_name"].ToString();
-						var index = sqlType.IndexOf('('); //Trim off size data
-						if (index > 0) sqlType = sqlType.Substring(0,index);
-						
-						if (rdr["is_nullable"] == "0")
-						{
-							param.DotNetType = GetPropertyType(sqlType);
+						var nullable = rdr["is_nullable"].ToString() ; 
+						if (nullable == "0")
+						{ 
+							param.DotNetType = GetPropertyType(rdr["system_type_name"].ToString());
 						}
 						else
 						{ 
-							param.DotNetType = GetNullablePropertyType(sqlType);
+							param.DotNetType = GetNullablePropertyType(rdr["system_type_name"].ToString());
 						}
 					if (!result.Any(t=>t.Name == param.Name)) result.Add(param);
 					}   
