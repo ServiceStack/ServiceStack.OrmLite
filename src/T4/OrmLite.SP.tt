@@ -59,7 +59,7 @@ namespace <#=SPNamespace#>
 	if (!sp.SPOutputColumns.Any()) continue; #>
 		public class <#=sp.CleanName#>_Result
 		{ 
-		<# foreach(var prop in sp.SPOutputColumns) { var alias = false; var propName = prop.Name; if (char.IsDigit(prop.Name[0])) { propName = "_" + prop.Name[0]; alias = true; }; if (propName.Contains(' ') || propName.Contains('$') || propName.Contains('+')) { propName = propName.Replace(' ','_').Replace('$','_').Replace('+','_'); alias = true; };
+		<# foreach(var prop in sp.SPOutputColumns) { var alias = false; var propName = prop.Name; if (char.IsDigit(prop.Name[0])) { propName = "_" + prop.Name; alias = true; }; if (propName.Contains(' ') || propName.Contains('$') || propName.Contains('+')) { propName = propName.Replace(' ','_').Replace('$','_').Replace('+','_'); alias = true; };
 			
 		if (alias) {#>		[Alias("<#=prop.Name#>")]
 		<#}#>
