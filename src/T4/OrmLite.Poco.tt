@@ -71,8 +71,14 @@ manager.StartNewFile(tbl.Name + ".cs");
 		}
 
 <# }
+var priorProperyNames = new List<string>();
 foreach(Column col in from c in tbl.Columns where !c.Ignore select c)
 {
+if (priorProperyNames.Contains(col.PropertyName)) //Change duplicate style names
+{
+	col.PropertyName = "_" + col.PropertyName;
+}
+priorProperyNames.Add(col.PropertyName);
  if ((col.Name!=col.PropertyName) || (col.IsPK && UseIdAsPK)) { #>
         [Alias("<#=col.Name#>")]
 <# }  if (col.PropertyType == "string" && col.Size > 0) { #>
@@ -101,5 +107,3 @@ foreach(Column col in from c in tbl.Columns where !c.Ignore select c)
 <#manager.EndBlock(); #>
 <#manager.Process(SplitIntoMultipleFiles); #>
 <#  }   #>
-
-
