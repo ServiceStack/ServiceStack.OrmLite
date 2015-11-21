@@ -929,6 +929,17 @@ customers.Merge(orders); // Merge disconnected Orders with their related Custome
 customers.PrintDump();   // Print merged customers and orders datasets
 ```
 
+### Custom Load References
+
+You can selectively specifying which references you want to load using the `include` parameter, e.g:
+
+```csharp
+var customerWithAddress = db.LoadSingleById<Customer>(customer.Id, include: new[] { "PrimaryAddress" });
+
+//Alternative
+var customerWithAddress = db.LoadSingleById<Customer>(customer.Id, include: x => new { x.PrimaryAddress });
+```
+
 ## Optimistic Concurrency
 
 Optimistic concurrency can be added to any table by adding the `ulong RowVersion { get; set; }` property, e.g:
@@ -1447,6 +1458,23 @@ public class TableWithAllCascadeOptions
 	public int? SetToNullOnDelete { get; set; }
 }
 ```
+
+### System Variables and Default Values
+
+To provide richer support for non-standard default values, each RDBMS Dialect Provider contains a 
+`OrmLiteDialectProvider.Variables` placeholder dictionary for storing common, but non-standard RDBMS functionality. 
+We can use this to declaratively define non-standard default values that works across all supported RDBMS's 
+like automatically populating a column with the RDBMS UTC Date when Inserted with a `default(T)` Value: 
+
+```csharp
+public class Poco
+{
+    [Default(OrmLiteVariables.SystemUtc)]  //= {SYSTEM_UTC}
+    public DateTime CreatedTimeUtc { get; set; }
+}
+```
+
+OrmLite variables need to be surrounded with `{}` braces to identify that it's a placeholder variable, e.g `{SYSTEM_UTC}`.
 
 The [ForeignKeyTests](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLite.Tests/ForeignKeyAttributeTests.cs)
 show the resulting behaviour with each of these configurations in more detail.
