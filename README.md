@@ -51,7 +51,7 @@ _Latest v4+ on NuGet is a [commercial release](https://servicestack.net/ormlite)
 
 ### [Getting Started with OrmLite and AWS RDS](https://github.com/ServiceStackApps/AwsGettingStarted)
 
-OrmLite has great support for a number of managed Databases on AWS RDS. These getting started guides will help you get up and running quickly:
+OrmLite has great support AWS's managed RDS Databases, follow these getting started guides to help getting up and running quickly:
 
 - [PostgreSQL](https://github.com/ServiceStackApps/AwsGettingStarted#getting-started-with-aws-rds-postgresql-and-ormlite)
 - [Aurora](https://github.com/ServiceStackApps/AwsGettingStarted#getting-started-with-aws-rds-aurora-and-ormlite)
