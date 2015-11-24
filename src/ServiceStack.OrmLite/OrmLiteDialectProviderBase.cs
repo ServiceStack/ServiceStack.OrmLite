@@ -149,13 +149,13 @@ namespace ServiceStack.OrmLite
         [Obsolete("Use GetConverter().DbType")]
         public virtual DbType GetColumnDbType(Type columnType)
         {
-            var converter = GetConverterForType(columnType);
+            var converter = GetConverterBestMatch(columnType);
             return converter.DbType;
         }
 
         public virtual void InitDbParam(IDbDataParameter dbParam, Type columnType)
         {
-            var converter = GetConverterForType(columnType);
+            var converter = GetConverterBestMatch(columnType);
             converter.InitDbParam(dbParam, columnType);
         }
 
@@ -270,20 +270,18 @@ namespace ServiceStack.OrmLite
                 : null;
         }
 
-        public IOrmLiteConverter GetConverterForType(Type type)
+        public IOrmLiteConverter GetConverterBestMatch(Type type)
         {
-            var converter = type.IsEnum
-                ? EnumConverter
-                : GetConverter(type);
+            var converter = GetConverter(type);
+            if (converter != null)
+                return converter;
 
-            if (converter == null)
-            {
-                converter = type.IsValueType
-                    ? (IOrmLiteConverter)ValueTypeConverter
-                    : ReferenceTypeConverter;
-            }
+            if (type.IsEnum)
+                return EnumConverter;
 
-            return converter;
+            return type.IsValueType
+                ? (IOrmLiteConverter)ValueTypeConverter
+                : ReferenceTypeConverter;
         }
 
         public virtual bool ShouldQuoteValue(Type fieldType)

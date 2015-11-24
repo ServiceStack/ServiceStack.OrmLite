@@ -26,7 +26,15 @@ namespace ServiceStack.OrmLite
 
         IOrmLiteExecFilter ExecFilter { get; set; }
 
-        IOrmLiteConverter GetConverter(Type forType);
+        /// <summary>
+        /// Gets the explicit Converter registered for a specific type
+        /// </summary>
+        IOrmLiteConverter GetConverter(Type type);
+
+        /// <summary>
+        /// Return best matching converter, falling back to Enum, Value or Ref Type Converters
+        /// </summary>
+        IOrmLiteConverter GetConverterBestMatch(Type type);
 
         string ParamString { get; set; }
 
