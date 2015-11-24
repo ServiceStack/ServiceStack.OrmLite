@@ -38,6 +38,15 @@ namespace ServiceStack.OrmLite.Converters
 
             return enumValue;
         }
+
+        public override object FromDbValue(Type fieldType, object value)
+        {
+            var strVal = value as string;
+            if (strVal != null)
+                return Enum.Parse(fieldType, strVal, ignoreCase:true);
+
+            return Convert.ChangeType(value, fieldType.GetTypeCode());
+        }
     }
 
     public class RowVersionConverter : OrmLiteConverter

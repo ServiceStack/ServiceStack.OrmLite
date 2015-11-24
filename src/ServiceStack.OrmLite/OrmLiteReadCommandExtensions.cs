@@ -680,7 +680,7 @@ namespace ServiceStack.OrmLite
             if (underlyingType == typeof(object))
                 return (T)reader.GetValue(0);
 
-            var converter = dialectProvider.GetConverter(underlyingType);
+            var converter = dialectProvider.GetConverterBestMatch(underlyingType);
             if (converter != null)
             {
                 object oValue = converter.GetValue(reader, columnIndex);

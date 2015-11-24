@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
+using ServiceStack.DataAnnotations;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
@@ -276,6 +277,44 @@ namespace ServiceStack.OrmLite.Tests
 
                 row = rows.First(x => x.NullableEnumValue == null);
                 Assert.That(row.Id, Is.EqualTo(2));
+            }
+        }
+
+        [Test]
+        public void Can_get_Scalar_Enum()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<TypeWithEnum>();
+
+                var row = new TypeWithEnum { Id = 1, EnumValue = SomeEnum.Value2 };
+                db.Insert(row);
+
+                var someEnum = db.Scalar<SomeEnum>(db.From<TypeWithEnum>()
+                    .Where(o => o.Id == row.Id)
+                    .Select(o => o.EnumValue));
+
+                Assert.That(someEnum, Is.EqualTo(SomeEnum.Value2));
+            }
+        }
+
+        [Test]
+        public void Can_get_Scalar_Enum_Flag()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<TypeWithFlagsEnum>();
+
+                var row = new TypeWithFlagsEnum { Id = 1, Flags = FlagsEnum.FlagTwo };
+                db.Insert(row);
+
+                row.PrintDump();
+
+                var flagsEnum = db.Scalar<FlagsEnum>(db.From<TypeWithFlagsEnum>()
+                    .Where(o => o.Id == row.Id)
+                    .Select(o => o.Flags));
+
+                Assert.That(flagsEnum, Is.EqualTo(FlagsEnum.FlagTwo));
             }
         }
     }
