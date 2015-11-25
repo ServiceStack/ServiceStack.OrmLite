@@ -255,6 +255,7 @@
     <Compile Include="UseCase\FieldFromInterfaceImplementationUseCase.cs" />
     <Compile Include="UseCase\NestedComplexTypeUseCase.cs" />
     <Compile Include="UseCase\ParentChildCyclicalExample.cs" />
+    <Compile Include="UseCase\PostPerfTests.cs" />
     <Compile Include="UseCase\SchemaUseCase.cs" />
     <Compile Include="UseCase\ServiceStack_OrmLite_UseCase.cs" />
     <Compile Include="UseCase\ShardingUseCase.cs" />
