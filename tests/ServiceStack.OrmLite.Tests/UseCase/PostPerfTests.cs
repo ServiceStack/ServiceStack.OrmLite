@@ -26,6 +26,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
 
     }
 
+    [Ignore, Explicit("Integration Test")]
     public class PostPerfTests : OrmLiteTestBase
     {
         public PostPerfTests()
@@ -141,7 +142,7 @@ end
         }
 
         [Test]
-        public void Run_single_select()
+        public void Run_single_select_OrmLite()
         {
             var tester = new Tester();
 
