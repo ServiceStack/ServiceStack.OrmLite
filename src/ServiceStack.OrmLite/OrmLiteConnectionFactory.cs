@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using ServiceStack.Data;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
@@ -32,6 +33,8 @@ namespace ServiceStack.OrmLite
             }
 
             this.ConnectionFilter = x => x;
+
+            JsConfig.InitStatics();
         }
 
         public IOrmLiteDialectProvider DialectProvider { get; set; }
