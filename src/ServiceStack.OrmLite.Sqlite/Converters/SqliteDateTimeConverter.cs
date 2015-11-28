@@ -59,16 +59,19 @@ namespace ServiceStack.OrmLite.Sqlite.Converters
             return base.FromDbValue(dateTime);
         }
 
-        public override object GetValue(IDataReader reader, int columnIndex)
+        public override object GetValue(IDataReader reader, int columnIndex, object[] values)
         {
             try
             {
+                if (values != null && values[columnIndex] == DBNull.Value)
+                    return null;
+
                 return reader.GetDateTime(columnIndex);
             }
             catch (Exception ex)
             {
-                var value = reader.GetValue(columnIndex);
-                if (value == DBNull.Value)
+                var value = base.GetValue(reader, columnIndex, values);
+                if (value == null)
                     return null;
 
                 var dateStr = value as string;

@@ -19,7 +19,7 @@ namespace ServiceStack.OrmLite
 
         object FromDbValue(Type fieldType, object value);
 
-        object GetValue(IDataReader reader, int columnIndex);
+        object GetValue(IDataReader reader, int columnIndex, object[] values);
     }
 
     public interface IHasColumnDefinitionLength
@@ -87,9 +87,13 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Retrieve Value from ADO.NET IDataReader. Defaults to reader.GetValue()
         /// </summary>
-        public virtual object GetValue(IDataReader reader, int columnIndex)
+        public virtual object GetValue(IDataReader reader, int columnIndex, object[] values)
         {
-            return reader.GetValue(columnIndex);
+            var value = values != null 
+                ? values[columnIndex]
+                : reader.GetValue(columnIndex);
+
+            return value == DBNull.Value ? null : value;
         }
     }
 
