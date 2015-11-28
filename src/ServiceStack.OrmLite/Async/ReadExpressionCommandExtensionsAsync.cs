@@ -158,16 +158,15 @@ namespace ServiceStack.OrmLite
                 () => dataReader.ConvertTo<T>(dialectProvider), token);
         }
 
-        internal static Task<List<T>> ExprConvertToListAsync<T>(this IDataReader dataReader, IOrmLiteDialectProvider dialectProvider, CancellationToken token)
+        internal static Task<List<T>> ExprConvertToListAsync<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, CancellationToken token)
         {
-            var fieldDefs = ModelDefinition<T>.Definition.AllFieldDefinitionsArray;
+            var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition, dialectProvider);
+            var values = new object[reader.FieldCount];
 
-            var indexCache = dataReader.GetIndexFieldsCache(ModelDefinition<T>.Definition);
-
-            return dialectProvider.ReaderEach(dataReader, () =>
+            return dialectProvider.ReaderEach(reader, () =>
             {
                 var row = OrmLiteUtils.CreateInstance<T>();
-                row.PopulateWithSqlReader(dialectProvider, dataReader, fieldDefs, indexCache);
+                row.PopulateWithSqlReader(dialectProvider, reader, indexCache, values);
                 return row;
             }, token);
         }

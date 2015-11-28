@@ -36,6 +36,8 @@ namespace ServiceStack.OrmLite
         /// </summary>
         IOrmLiteConverter GetConverterBestMatch(Type type);
 
+        IOrmLiteConverter GetConverterBestMatch(FieldDefinition fieldDef);
+
         string ParamString { get; set; }
 
         [Obsolete("Use GetStringConverter().UseUnicode")]
@@ -61,8 +63,6 @@ namespace ServiceStack.OrmLite
         string GetQuotedValue(object value, Type fieldType);
 
         object GetParamValue(object value, Type fieldType);
-
-        void SetDbValue(FieldDefinition fieldDef, IDataReader reader, int colIndex, object instance);
 
         object ToDbValue(object value, Type type);
 

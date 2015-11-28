@@ -295,47 +295,19 @@ namespace ServiceStack.OrmLite
             return RowVersionConverter.FromDbRowVersion(value);
         }
 
-        /// <summary>
-        /// Populates row fields during re-hydration of results.
-        /// </summary>
-        public virtual void SetDbValue(FieldDefinition fieldDef, IDataReader reader, int colIndex, object instance)
+        public virtual IOrmLiteConverter GetConverterBestMatch(FieldDefinition fieldDef)
         {
-            if (OrmLiteUtils.HandledDbNullValue(fieldDef, reader, colIndex, instance)) return;
-
             var fieldType = Nullable.GetUnderlyingType(fieldDef.FieldType) ?? fieldDef.FieldType;
+            if (fieldDef.IsRowVersion)
+                return RowVersionConverter;
 
-            IOrmLiteConverter converter = null;
-            object value = null;
-            try
-            {
-                if (fieldDef.IsRowVersion)
-                {
-                    converter = RowVersionConverter;
-                    value = converter.FromDbValue(fieldDef.FieldType, converter.GetValue(reader, colIndex));
-                    if (value != null)
-                        fieldDef.SetValueFn(instance, value);
-                    return;
-                }
+            IOrmLiteConverter converter;
+            if (Converters.TryGetValue(fieldType, out converter))
+                return converter;
 
-                if (Converters.TryGetValue(fieldType, out converter))
-                {
-                    value = converter.FromDbValue(fieldDef.FieldType, converter.GetValue(reader, colIndex));
-                    fieldDef.SetValueFn(instance, value);
-                    return;
-                }
-
-                converter = fieldType.IsRefType()
-                    ? (IOrmLiteConverter)ReferenceTypeConverter
-                    : ValueTypeConverter;
-                value = converter.FromDbValue(fieldDef.FieldType, converter.GetValue(reader, colIndex));
-                fieldDef.SetValueFn(instance, value);
-            }
-            catch (Exception ex)
-            {
-                Log.Error("Error in {0}.FromDbValue() on field '{1}' converting from '{2}' to '{3}'"
-                    .Fmt(converter.GetType().Name, fieldDef.Name, value != null ? value.GetType().Name : "undefined", fieldDef.FieldType.Name), ex);
-                throw;
-            }
+            return fieldType.IsRefType()
+                ? (IOrmLiteConverter)ReferenceTypeConverter
+                : ValueTypeConverter;
         }
 
         public virtual object ToDbValue(object value, Type type)
@@ -408,7 +380,7 @@ namespace ServiceStack.OrmLite
         {
             IOrmLiteConverter converter;
             if (Converters.TryGetValue(type, out converter))
-                return converter.GetValue(reader, columnIndex);
+                return converter.GetValue(reader, columnIndex, null);
 
             return reader.GetValue(columnIndex);
         }
