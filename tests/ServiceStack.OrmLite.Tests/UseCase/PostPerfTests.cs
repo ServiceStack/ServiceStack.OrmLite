@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
+using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.Dapper;
 
 namespace ServiceStack.OrmLite.Tests.UseCase
@@ -26,7 +28,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
 
     }
 
-    [Ignore, Explicit("Integration Test")]
+    [NUnit.Framework.Ignore, Explicit("Integration Test")]
     public class PostPerfTests : OrmLiteTestBase
     {
         public PostPerfTests()
@@ -82,54 +84,6 @@ end
                 cmd.ExecuteNonQuery();
             }
         }
-
-        class Test
-        {
-            public static Test Create(Action<int> iteration, string name)
-            {
-                return new Test { Iteration = iteration, Name = name };
-            }
-
-            public Action<int> Iteration { get; set; }
-            public string Name { get; set; }
-            public Stopwatch Watch { get; set; }
-        }
-
-        class Tester : List<Test>
-        {
-            public void Add(Action<int> iteration, string name)
-            {
-                Add(Test.Create(iteration, name));
-            }
-
-            public void Run(int iterations)
-            {
-                // warmup 
-                foreach (var test in this)
-                {
-                    test.Iteration(iterations + 1);
-                    test.Watch = new Stopwatch();
-                    test.Watch.Reset();
-                }
-
-                var rand = new Random();
-                for (int i = 1; i <= iterations; i++)
-                {
-                    foreach (var test in this.OrderBy(ignore => rand.Next()))
-                    {
-                        test.Watch.Start();
-                        test.Iteration(i);
-                        test.Watch.Stop();
-                    }
-                }
-
-                foreach (var test in this.OrderBy(t => t.Watch.ElapsedMilliseconds))
-                {
-                    Console.WriteLine(test.Name + " took " + test.Watch.ElapsedMilliseconds + "ms");
-                }
-            }
-        }
-
         [Test]
         public void Run_single_select_Dapper()
         {
@@ -185,4 +139,129 @@ end
             tester.Run(50);
         }
     }
+
+    [NUnit.Framework.Ignore, Explicit("Integration Test")]
+    public class AdventureWorksPerfTests : OrmLiteTestBase
+    {
+        private IDbConnection db;
+
+        public AdventureWorksPerfTests()
+        {
+            var dbFactory = new OrmLiteConnectionFactory(
+                "data source=localhost;initial catalog=AdventureWorks;integrated security=SSPI;persist security info=False;packet size=4096",
+                SqlServer2012Dialect.Provider);
+
+            db = dbFactory.Open();
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            db.Dispose();
+        }
+
+        private static string SqlSelectCommandText = @"SELECT [SalesOrderID],[RevisionNumber],[OrderDate],[DueDate],[ShipDate],[Status],[OnlineOrderFlag],[SalesOrderNumber],[PurchaseOrderNumber],[AccountNumber],[CustomerID],[SalesPersonID],[TerritoryID],[BillToAddressID],[ShipToAddressID],[ShipMethodID],[CreditCardID],[CreditCardApprovalCode],[CurrencyRateID],[SubTotal],[TaxAmt],[Freight],[TotalDue],[Comment],[rowguid],[ModifiedDate]	FROM [Sales].[SalesOrderHeader]";
+
+        [Test]
+        public void Select_all_SalesOrderHeader_Dapper()
+        {
+            db.Query<SalesOrderHeader>(SqlSelectCommandText).AsList();
+
+            var tester = new Tester();
+
+            tester.Add(id => db.Query<SalesOrderHeader>(SqlSelectCommandText).AsList(), "Dapper Query");
+
+            tester.Run(10);
+        }
+
+        [Test]
+        public void Select_all_SalesOrderHeader_OrmLite()
+        {
+            var tester = new Tester();
+
+            tester.Add(id => db.SqlList<SalesOrderHeader>(SqlSelectCommandText), "OrmLite Query");
+
+            tester.Run(10);
+        }
+    }
+
+    [Schema("Sales")]
+    public class SalesOrderHeader
+    {
+        public string AccountNumber { get; set; }
+        public string Comment { get; set; }
+        public string CreditCardApprovalCode { get; set; }
+        public DateTime DueDate { get; set; }
+        public decimal Freight { get; set; }
+        public DateTime ModifiedDate { get; set; }
+        public bool OnlineOrderFlag { get; set; }
+        public DateTime OrderDate { get; set; }
+        public string PurchaseOrderNumber { get; set; }
+        public byte RevisionNumber { get; set; }
+        public Guid Rowguid { get; set; }
+        public int SalesOrderId { get; set; }
+        public string SalesOrderNumber { get; set; }
+        public DateTime? ShipDate { get; set; }
+        public byte Status { get; set; }
+        public decimal SubTotal { get; set; }
+        public decimal TaxAmt { get; set; }
+        public decimal TotalDue { get; set; }
+
+        public int CustomerID { get; set; }
+        public int? SalesPersonID { get; set; }
+        public int? TerritoryID { get; set; }
+        public int BillToAddressID { get; set; }
+        public int ShipToAddressID { get; set; }
+        public int ShipMethodID { get; set; }
+        public int? CreditCardID { get; set; }
+        public int? CurrencyRateID { get; set; }
+    }
+
+    class Test
+    {
+        public static Test Create(Action<int> iteration, string name)
+        {
+            return new Test { Iteration = iteration, Name = name };
+        }
+
+        public Action<int> Iteration { get; set; }
+        public string Name { get; set; }
+        public Stopwatch Watch { get; set; }
+    }
+
+    class Tester : List<Test>
+    {
+        public void Add(Action<int> iteration, string name)
+        {
+            Add(Test.Create(iteration, name));
+        }
+
+        public void Run(int iterations)
+        {
+            // warmup 
+            foreach (var test in this)
+            {
+                test.Iteration(iterations + 1);
+                test.Watch = new Stopwatch();
+                test.Watch.Reset();
+            }
+
+            var rand = new Random();
+            for (int i = 1; i <= iterations; i++)
+            {
+                foreach (var test in this.OrderBy(ignore => rand.Next()))
+                {
+                    test.Watch.Start();
+                    test.Iteration(i);
+                    test.Watch.Stop();
+                }
+            }
+
+            foreach (var test in this.OrderBy(t => t.Watch.ElapsedMilliseconds))
+            {
+                Console.WriteLine(test.Name + " took " + test.Watch.ElapsedMilliseconds + "ms");
+            }
+        }
+    }
+
 }
