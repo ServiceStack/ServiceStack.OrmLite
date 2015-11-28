@@ -296,9 +296,6 @@ namespace ServiceStack.OrmLite
                     var index = fieldCache.Item2;
                     var converter = fieldCache.Item3;
 
-                    if (fieldDef.SetValueFn == null || index == NotFound)
-                        continue;
-
                     if (values[index] == DBNull.Value)
                     {
                         var value = fieldDef.IsNullable ? null : fieldDef.FieldTypeDefaultValue;

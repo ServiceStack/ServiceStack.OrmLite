@@ -112,32 +112,35 @@ namespace ServiceStack.OrmLite
     {
         public static object ConvertNumber(this IOrmLiteConverter converter, Type toIntegerType, object value)
         {
+            if (value.GetType() == toIntegerType)
+                return value;
+
             var typeCode = toIntegerType.GetUnderlyingTypeCode();
             switch (typeCode)
             {
+                case TypeCode.Byte:
+                    return Convert.ToByte(value);
                 case TypeCode.Int16:
-                    return value is short ? value : Convert.ToInt16(value);
+                    return Convert.ToInt16(value);
                 case TypeCode.UInt16:
-                    return value is ushort ? value : Convert.ToUInt16(value);
+                    return Convert.ToUInt16(value);
                 case TypeCode.Int32:
-                    return value is int ? value : Convert.ToInt32(value);
+                    return Convert.ToInt32(value);
                 case TypeCode.UInt32:
-                    return value is uint ? value : Convert.ToUInt32(value);
+                    return Convert.ToUInt32(value);
                 case TypeCode.Int64:
-                    return value is long ? value : Convert.ToInt64(value);
+                    return Convert.ToInt64(value);
                 case TypeCode.UInt64:
-                    if (value is ulong)
-                        return value;
                     var byteValue = value as byte[];
                     if (byteValue != null)
                         return OrmLiteUtils.ConvertToULong(byteValue);
                     return Convert.ToUInt64(value);
                 case TypeCode.Single:
-                    return value is float ? value : Convert.ToSingle(value);
+                    return Convert.ToSingle(value);
                 case TypeCode.Double:
-                    return value is double ? value : Convert.ToDouble(value);
+                    return Convert.ToDouble(value);
                 case TypeCode.Decimal:
-                    return value is decimal ? value : Convert.ToDecimal(value);
+                    return Convert.ToDecimal(value);
             }
 
             var convertedValue = converter.DialectProvider.StringSerializer.DeserializeFromString(value.ToString(), toIntegerType);

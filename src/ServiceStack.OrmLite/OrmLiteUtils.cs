@@ -350,14 +350,14 @@ namespace ServiceStack.OrmLite
             var cache = new List<Tuple<FieldDefinition, int, IOrmLiteConverter>>();
             var ignoredFields = modelDefinition.IgnoredFieldDefinitions;
             var remainingFieldDefs = modelDefinition.FieldDefinitionsArray
-                .Where(x => !ignoredFields.Contains(x)).ToList();
+                .Where(x => !ignoredFields.Contains(x) && x.SetValueFn != null).ToList();
 
             for (var i = 0; i < reader.FieldCount; i++)
             {
                 var columnName = reader.GetName(i);                
                 var fieldDef = modelDefinition.GetFieldDefinition(columnName);
 
-                if (fieldDef != null && !ignoredFields.Contains(fieldDef))
+                if (fieldDef != null && !ignoredFields.Contains(fieldDef) && fieldDef.SetValueFn != null)
                 {
                     remainingFieldDefs.Remove(fieldDef);
                     cache.Add(Tuple.Create(fieldDef, i, dialect.GetConverterBestMatch(fieldDef)));
