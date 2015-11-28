@@ -33,6 +33,10 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_disable_AutoIncrement_field()
         {
+            //Can't insert in identity column
+            if (Dialect == Dialect.SqlServer || Dialect == Dialect.SqlServer2012)
+                return;
+
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<PersonWithAutoId>();
