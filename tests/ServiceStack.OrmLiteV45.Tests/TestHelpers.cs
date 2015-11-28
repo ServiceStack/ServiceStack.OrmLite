@@ -4,6 +4,7 @@ namespace ServiceStack.OrmLite.Tests
     {
         Sqlite,
         SqlServer,
+        SqlServer2012,
         PostgreSql,
         MySql,
         SqlServerMdf,
