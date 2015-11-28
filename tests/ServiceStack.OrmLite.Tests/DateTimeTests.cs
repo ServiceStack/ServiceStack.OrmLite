@@ -218,12 +218,12 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(dateTime, Is.EqualTo(row[0].Test));
 
                 row = db.SqlList<DateTimeObject>(
-                    "SELECT * FROM {0} WHERE TestNullable = @dateTime".Fmt("DateTimeObject".SqlTable()), new { dateTime });
+                    "SELECT * FROM {0} WHERE {1} = @dateTime".Fmt("DateTimeObject".SqlTable(), "TestNullable".SqlColumn()), new { dateTime });
                 Assert.That(dateTime, Is.EqualTo(row[0].TestNullable));
 
                 DateTime? nullableDate = dateTime;
                 row = db.SqlList<DateTimeObject>(
-                    "SELECT * FROM {0} WHERE TestNullable = @nullableDate".Fmt("DateTimeObject".SqlTable()), new { nullableDate });
+                    "SELECT * FROM {0} WHERE {1} = @nullableDate".Fmt("DateTimeObject".SqlTable(), "TestNullable".SqlColumn()), new { nullableDate });
                 Assert.That(dateTime, Is.EqualTo(row[0].TestNullable));
             }
         }
