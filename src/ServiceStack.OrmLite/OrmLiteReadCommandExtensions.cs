@@ -294,9 +294,9 @@ namespace ServiceStack.OrmLite
                 p.ParameterName = kvp.Key;
 
                 p.Direction = ParameterDirection.Input;
-                p.Value = value ?? DBNull.Value;
                 if (value != null)
                     dialectProvider.InitDbParam(p, value.GetType());
+                p.Value = value ?? DBNull.Value;
 
                 dbCmd.Parameters.Add(p);
             }
