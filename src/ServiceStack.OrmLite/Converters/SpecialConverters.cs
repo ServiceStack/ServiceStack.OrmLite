@@ -14,7 +14,7 @@ namespace ServiceStack.OrmLite.Converters
             long enumValue;
             if (!isEnumFlags && long.TryParse(value.ToString(), out enumValue))
             {
-                value = Enum.ToObject(fieldType, enumValue).ToString();
+                value = Enum.ToObject(fieldType, enumValue);
             }
 
             var enumString = DialectProvider.StringSerializer.SerializeToString(value);
