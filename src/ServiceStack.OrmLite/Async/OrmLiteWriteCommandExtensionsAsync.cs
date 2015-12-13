@@ -31,6 +31,22 @@ namespace ServiceStack.OrmLite
             return dbCmd.GetDialectProvider().ExecuteNonQueryAsync(dbCmd, token);
         }
 
+        internal static Task<int> ExecuteSqlAsync(this IDbCommand dbCmd, string sql, object anonType, CancellationToken token)
+        {
+            if (anonType != null)
+                dbCmd.SetParameters(anonType, excludeDefaults: false);
+
+            dbCmd.CommandText = sql;
+
+            if (Log.IsDebugEnabled)
+                Log.DebugCommand(dbCmd);
+
+            if (OrmLiteConfig.ResultsFilter != null)
+                return OrmLiteConfig.ResultsFilter.ExecuteSql(dbCmd).InTask();
+
+            return dbCmd.GetDialectProvider().ExecuteNonQueryAsync(dbCmd, token);
+        }
+
         internal static Task<int> UpdateAsync<T>(this IDbCommand dbCmd, T obj, CancellationToken token)
         {
             if (OrmLiteConfig.UpdateFilter != null)

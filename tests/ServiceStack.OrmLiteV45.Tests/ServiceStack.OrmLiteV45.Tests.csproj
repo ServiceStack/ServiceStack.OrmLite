@@ -96,6 +96,7 @@
     </Compile>
     <Compile Include="T4\OrmLiteT4Tests.cs" />
     <Compile Include="TestHelpers.cs" />
+    <Compile Include="UpdateAsyncTests.cs" />
     <Compile Include="UseCase\CustomerOrdersUseCase.cs" />
   </ItemGroup>
   <ItemGroup>
