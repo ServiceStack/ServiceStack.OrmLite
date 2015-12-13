@@ -28,7 +28,7 @@ namespace ServiceStack.OrmLite
             if (Log.IsDebugEnabled)
                 Log.DebugCommand(dbCmd);
 
-            return dbCmd.GetDialectProvider().ExecuteNonQueryAsync(dbCmd);
+            return dbCmd.GetDialectProvider().ExecuteNonQueryAsync(dbCmd, token);
         }
 
         internal static Task<int> UpdateAsync<T>(this IDbCommand dbCmd, T obj, CancellationToken token)
@@ -43,7 +43,7 @@ namespace ServiceStack.OrmLite
 
             dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
-            return dialectProvider.ExecuteNonQueryAsync(dbCmd)
+            return dialectProvider.ExecuteNonQueryAsync(dbCmd, token)
                 .Then(rowsUpdated =>
                 {
                     if (hadRowVersion && rowsUpdated == 0)
@@ -98,7 +98,7 @@ namespace ServiceStack.OrmLite
                     throw t.Exception;
 
                 return count;
-            });
+            }, token);
         }
 
         private static Task<int> AssertRowsUpdatedAsync(IDbCommand dbCmd, bool hadRowVersion, CancellationToken token)
@@ -187,7 +187,7 @@ namespace ServiceStack.OrmLite
                     dbTrans.Dispose();
 
                 return count;
-            });
+            }, token);
         }
 
         internal static Task<int> DeleteByIdAsync<T>(this IDbCommand dbCmd, object id, CancellationToken token)
@@ -294,7 +294,7 @@ namespace ServiceStack.OrmLite
 
                 if (t.IsFaulted)
                     throw t.Exception;
-            });
+            }, token);
         }
 
 
