@@ -221,7 +221,7 @@ namespace ServiceStack.OrmLite.Tests
                 row = db.SingleById<PocoWithBool>(1);
                 Assert.That(row.Bool, Is.True);
 
-                Assert.Throws<ArgumentException>(() => 
+                Assert.Throws<ArgumentException>(() =>
                     db.UpdateNonDefaults(new PocoWithBool { Bool = false }, x => x.Id == 1));
 
                 db.UpdateOnly(new PocoWithBool { Bool = false },
@@ -265,7 +265,7 @@ namespace ServiceStack.OrmLite.Tests
                 db.Insert(new PocoWithNullableInt { Id = 1, Int = 1 });
                 var row = db.SingleById<PocoWithNullableInt>(1);
                 Assert.That(row.Int, Is.EqualTo(1));
-                
+
                 db.UpdateNonDefaults(new PocoWithNullableInt { Int = 0 }, x => x.Id == 1);
                 row = db.SingleById<PocoWithNullableInt>(1);
                 Assert.That(row.Int, Is.EqualTo(0));
@@ -284,6 +284,24 @@ namespace ServiceStack.OrmLite.Tests
 
                 Assert.That(rows.Count, Is.EqualTo(1));
                 Assert.That(rows[0].IsShutdownGraceful, Is.Null);
+            }
+        }
+
+        [Test]
+        public void Can_updated_with_ExecuteSql_and_db_params()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Poco>();
+
+                db.Insert(new Poco { Id = 1, Name = "A" });
+                db.Insert(new Poco { Id = 2, Name = "B" });
+
+                var result = db.ExecuteSql("UPDATE poco SET name = @name WHERE id = @id", new { id = 2, name = "UPDATED" });
+                Assert.That(result, Is.EqualTo(1));
+
+                var row = db.SingleById<Poco>(2);
+                Assert.That(row.Name, Is.EqualTo("UPDATED"));
             }
         }
     }

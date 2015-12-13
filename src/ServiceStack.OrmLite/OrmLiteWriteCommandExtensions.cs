@@ -243,6 +243,22 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecuteNonQuery();
         }
 
+        internal static int ExecuteSql(this IDbCommand dbCmd, string sql, object anonType)
+        {
+            if (anonType != null)
+                dbCmd.SetParameters(anonType, excludeDefaults: false);
+
+            dbCmd.CommandText = sql;
+
+            if (Log.IsDebugEnabled)
+                Log.DebugCommand(dbCmd);
+
+            if (OrmLiteConfig.ResultsFilter != null)
+                return OrmLiteConfig.ResultsFilter.ExecuteSql(dbCmd);
+
+            return dbCmd.ExecuteNonQuery();
+        }
+
         private static bool IgnoreAlreadyExistsError(Exception ex)
         {
             //ignore Sqlite table already exists error
