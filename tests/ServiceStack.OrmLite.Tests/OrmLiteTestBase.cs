@@ -106,6 +106,7 @@ namespace ServiceStack.OrmLite.Tests
 
         private OrmLiteConnectionFactory Init()
         {
+            //OrmLiteConfig.DeoptimizeReader = true;
             LogManager.LogFactory = new ConsoleLogFactory(debugEnabled: false);
             switch (Dialect)
             {

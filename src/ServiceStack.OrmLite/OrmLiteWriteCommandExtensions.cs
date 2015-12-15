@@ -336,8 +336,23 @@ namespace ServiceStack.OrmLite
                     else
                     {
                         var value = converter.GetValue(reader, index, values);
-                        var fieldValue = converter.FromDbValue(fieldDef.FieldType, value);
-                        fieldDef.SetValueFn(objWithProperties, fieldValue);
+                        if (value == null)
+                        {
+                            if (!fieldDef.IsNullable)
+                                value = fieldDef.FieldTypeDefaultValue;
+                            if (OrmLiteConfig.OnDbNullFilter != null)
+                            {
+                                var useValue = OrmLiteConfig.OnDbNullFilter(fieldDef);
+                                if (useValue != null)
+                                    value = useValue;
+                            }
+                            fieldDef.SetValueFn(objWithProperties, value);
+                        }
+                        else
+                        {
+                            var fieldValue = converter.FromDbValue(fieldDef.FieldType, value);
+                            fieldDef.SetValueFn(objWithProperties, fieldValue);
+                        }
                     }
                 }
             }
