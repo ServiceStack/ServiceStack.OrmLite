@@ -21,7 +21,7 @@ namespace ServiceStack.OrmLite.Tests
                 db.DropAndCreateTable<AllTypes>();
                 db.GetLastSql().Print();
 
-                var rows = 3.Times(AllTypes.Create);
+                var rows = 3.Times(i => AllTypes.Create(i));
 
                 db.InsertAll(rows);
 
