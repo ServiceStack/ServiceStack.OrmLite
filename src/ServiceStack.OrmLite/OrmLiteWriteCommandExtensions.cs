@@ -301,10 +301,19 @@ namespace ServiceStack.OrmLite
         {
             try
             {
-                if (values == null)
-                    values = new object[reader.FieldCount];
+                if (!OrmLiteConfig.DeoptimizeReader)
+                {
+                    if (values == null)
+                        values = new object[reader.FieldCount];
 
-                reader.GetValues(values);
+                    reader.GetValues(values);
+                }
+                else
+                {
+                    //Calling GetValues() on System.Data.SQLite.Core ADO.NET Provider changes behavior of reader.GetGuid()
+                    //So allow providers to by-pass reader.GetValues() optimization.
+                    values = null;
+                }
 
                 foreach (var fieldCache in indexCache)
                 {
@@ -312,7 +321,7 @@ namespace ServiceStack.OrmLite
                     var index = fieldCache.Item2;
                     var converter = fieldCache.Item3;
 
-                    if (values[index] == DBNull.Value)
+                    if (values != null && values[index] == DBNull.Value)
                     {
                         var value = fieldDef.IsNullable ? null : fieldDef.FieldTypeDefaultValue;
                         if (OrmLiteConfig.OnDbNullFilter != null)

@@ -195,5 +195,7 @@ namespace ServiceStack.OrmLite
         public static bool UseParameterizeSqlExpressions { get; set; }
 
         public static bool IsCaseInsensitive { get; set; }
+
+        public static bool DeoptimizeReader { get; set; }
     }
 }
