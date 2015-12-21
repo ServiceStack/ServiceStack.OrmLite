@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{6CEB3EDE-9F02-4F4F-BD8A-1B2939C1AE6E}"
 	ProjectSection(SolutionItems) = preProject
@@ -116,6 +116,8 @@ EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "ServiceStack.OrmLite.VbNetTests", "..\tests\ServiceStack.OrmLite.VbNetTests\ServiceStack.OrmLite.VbNetTests.vbproj", "{CC385BE2-B49D-46AF-8F1B-BC9943E106E6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceStack.OrmLite.SqlServer.Converters", "ServiceStack.OrmLite.SqlServer.Converters\ServiceStack.OrmLite.SqlServer.Converters.csproj", "{7E9BB57B-53E3-425E-9882-B6E078C5C9BA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceStack.OrmLite.PostgreSQLV45", "ServiceStack.OrmLite.PostgreSqlV45\ServiceStack.OrmLite.PostgreSQLV45.csproj", "{BFEAFA30-E59E-4DE7-AF0E-B3F1C49289EB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -869,6 +871,30 @@ Global
 		{7E9BB57B-53E3-425E-9882-B6E078C5C9BA}.Signed|Mixed Platforms.Build.0 = Release|Any CPU
 		{7E9BB57B-53E3-425E-9882-B6E078C5C9BA}.Signed|x86.ActiveCfg = Release|Any CPU
 		{7E9BB57B-53E3-425E-9882-B6E078C5C9BA}.Signed|x86.Build.0 = Release|Any CPU
+		{BFEAFA30-E59E-4DE7-AF0E-B3F1C49289EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFEAFA30-E59E-4DE7-AF0E-B3F1C49289EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFEAFA30-E59E-4DE7-AF0E-B3F1C49289EB}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{BFEAFA30-E59E-4DE7-AF0E-B3F1C49289EB}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{BFEAFA30-E59E-4DE7-AF0E-B3F1C49289EB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{BFEAFA30-E59E-4DE7-AF0E-B3F1C49289EB}.Debug|x86.Build.0 = Debug|Any CPU
+		{BFEAFA30-E59E-4DE7-AF0E-B3F1C49289EB}.Default|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFEAFA30-E59E-4DE7-AF0E-B3F1C49289EB}.Default|Any CPU.Build.0 = Debug|Any CPU
+		{BFEAFA30-E59E-4DE7-AF0E-B3F1C49289EB}.Default|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{BFEAFA30-E59E-4DE7-AF0E-B3F1C49289EB}.Default|Mixed Platforms.Build.0 = Debug|Any CPU
+		{BFEAFA30-E59E-4DE7-AF0E-B3F1C49289EB}.Default|x86.ActiveCfg = Debug|Any CPU
+		{BFEAFA30-E59E-4DE7-AF0E-B3F1C49289EB}.Default|x86.Build.0 = Debug|Any CPU
+		{BFEAFA30-E59E-4DE7-AF0E-B3F1C49289EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFEAFA30-E59E-4DE7-AF0E-B3F1C49289EB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BFEAFA30-E59E-4DE7-AF0E-B3F1C49289EB}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{BFEAFA30-E59E-4DE7-AF0E-B3F1C49289EB}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{BFEAFA30-E59E-4DE7-AF0E-B3F1C49289EB}.Release|x86.ActiveCfg = Release|Any CPU
+		{BFEAFA30-E59E-4DE7-AF0E-B3F1C49289EB}.Release|x86.Build.0 = Release|Any CPU
+		{BFEAFA30-E59E-4DE7-AF0E-B3F1C49289EB}.Signed|Any CPU.ActiveCfg = Release|Any CPU
+		{BFEAFA30-E59E-4DE7-AF0E-B3F1C49289EB}.Signed|Any CPU.Build.0 = Release|Any CPU
+		{BFEAFA30-E59E-4DE7-AF0E-B3F1C49289EB}.Signed|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{BFEAFA30-E59E-4DE7-AF0E-B3F1C49289EB}.Signed|Mixed Platforms.Build.0 = Release|Any CPU
+		{BFEAFA30-E59E-4DE7-AF0E-B3F1C49289EB}.Signed|x86.ActiveCfg = Release|Any CPU
+		{BFEAFA30-E59E-4DE7-AF0E-B3F1C49289EB}.Signed|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
