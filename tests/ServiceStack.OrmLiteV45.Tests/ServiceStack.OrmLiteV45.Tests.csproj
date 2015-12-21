@@ -66,6 +66,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApiSqliteTestsAsync.cs" />
+    <Compile Include="ApiPostgreSqlTestsAsync.cs" />
     <Compile Include="ApiSqlServerTestsAsync.cs" />
     <Compile Include="AsyncTests.cs" />
     <Compile Include="ApiMySqlTestsAsync.cs" />
