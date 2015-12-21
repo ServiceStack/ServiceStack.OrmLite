@@ -822,8 +822,7 @@ namespace ServiceStack.OrmLite
         {
             if (anonType != null) SetParameters(dbCmd, anonType, excludeDefaults: true);
 
-            var sql = dbCmd.GetDialectProvider().ToExecuteProcedureStatement(anonType)
-                ?? GetFilterSql<T>(dbCmd);
+            var sql = GetFilterSql<T>(dbCmd);
 
             var result = dbCmd.Scalar(sql);
             return result != null;

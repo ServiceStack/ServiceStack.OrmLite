@@ -363,8 +363,7 @@ namespace ServiceStack.OrmLite
         {
             if (anonType != null) dbCmd.SetParameters(anonType, excludeDefaults: true);
 
-            var sql = dbCmd.GetDialectProvider().ToExecuteProcedureStatement(anonType)
-                ?? dbCmd.GetFilterSql<T>();
+            var sql = dbCmd.GetFilterSql<T>();
 
             return dbCmd.ScalarAsync(sql, token).Then(x => x != null);
         }
