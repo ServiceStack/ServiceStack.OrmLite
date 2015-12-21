@@ -42,7 +42,7 @@ namespace PostgreSQLExpressionsTest
 			SqlExpression<Author> ev = OrmLiteConfig.DialectProvider.SqlExpression<Author>();
 									
 			using (IDbConnection db =
-			       "Server=localhost;Port=5432;User Id=postgres; Password=postgres; Database=ormlite".OpenDbConnection())
+                   "Server=localhost;Port=5432;User Id=test; Password=test; Database=test".OpenDbConnection())
 			{
 				db.DropTable<Author>();
 				db.CreateTable<Author>();
