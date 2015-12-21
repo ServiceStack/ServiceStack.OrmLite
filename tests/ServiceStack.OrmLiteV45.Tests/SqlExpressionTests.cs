@@ -60,21 +60,20 @@ namespace ServiceStack.OrmLite.Tests
                 InitLetters(db);
 
                 var query = db.From<LetterFrequency>()
-                  .Select("COUNT(*) Count, MAX(Id) Max, MIN(Id) Min, Sum(Id) Sum");
+                  .Select("COUNT(*) count, MAX(Id) max, MIN(Id) min, Sum(Id) sum");
 
                 query.ToSelectStatement().Print();
 
                 var results = await db.SelectAsync<Dictionary<string, object>>(query);
 
                 Assert.That(results.Count, Is.EqualTo(1));
+                //results.PrintDump();
 
                 var result = results[0];
-                Assert.That(result["Count"], Is.EqualTo(10));
-                Assert.That(result["Max"], Is.EqualTo(10));
-                Assert.That(result["Min"], Is.EqualTo(1));
-                Assert.That(result["Sum"], Is.EqualTo(55));
-
-                results.PrintDump();
+                Assert.That(result["count"], Is.EqualTo(10));
+                Assert.That(result["max"], Is.EqualTo(10));
+                Assert.That(result["min"], Is.EqualTo(1));
+                Assert.That(result["sum"], Is.EqualTo(55));
             }
         }
         [Test]

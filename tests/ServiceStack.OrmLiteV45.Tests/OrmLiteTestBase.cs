@@ -17,6 +17,7 @@ namespace ServiceStack.OrmLite.Tests
         //public static string SqlServerBuildDb = "Data Source=localhost;Initial Catalog=TestDb;Integrated Security=SSPI;Connect Timeout=120;MultipleActiveResultSets=True";
 
         public static string MySqlDb = "Server=localhost;Database=test;UID=root;Password=test";
+        public static string PostgreSqlDb = "Server=localhost;Port=5432;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200";
 
         public static IOrmLiteDialectProvider DefaultProvider = SqlServerDialect.Provider;
         public static string DefaultConnection = SqlServerBuildDb;
@@ -68,7 +69,13 @@ namespace ServiceStack.OrmLite.Tests
             return dbFactory;
         }
 
-	    protected virtual string GetFileConnectionString()
+        public static OrmLiteConnectionFactory CreatePostgreSqlDbFactory()
+        {
+            var dbFactory = new OrmLiteConnectionFactory(Config.PostgreSqlDb, PostgreSqlDialect.Provider);
+            return dbFactory;
+        }
+
+        protected virtual string GetFileConnectionString()
 		{
             var connectionString = Config.SqliteFileDb;
 			if (File.Exists(connectionString))
@@ -111,9 +118,11 @@ namespace ServiceStack.OrmLite.Tests
                     dbFactory.AutoDisposeConnection = false;
                     return dbFactory;
                 case Dialect.SqlServer:
-                    return Init(Config.SqlServerBuildDb, SqlServerDialect.Provider);
+                    return Init(Config.SqlServerBuildDb, SqlServer2012Dialect.Provider);
                 case Dialect.MySql:
                     return Init(Config.MySqlDb, MySqlDialect.Provider);
+                case Dialect.PostgreSql:
+                    return Init(Config.PostgreSqlDb, PostgreSqlDialect.Provider);
             }
 
             throw new NotImplementedException("{0}".Fmt(Dialect));

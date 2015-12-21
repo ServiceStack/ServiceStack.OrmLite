@@ -104,6 +104,10 @@
       <Project>{d1858737-fc4f-4432-8725-e5b79a13d5f6}</Project>
       <Name>ServiceStack.OrmLite.MySqlV45</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.PostgreSqlV45\ServiceStack.OrmLite.PostgreSQLV45.csproj">
+      <Project>{bfeafa30-e59e-4de7-af0e-b3f1c49289eb}</Project>
+      <Name>ServiceStack.OrmLite.PostgreSQLV45</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite.SqliteV45\ServiceStack.OrmLite.SqliteV45.csproj">
       <Project>{30c0c876-abcb-441b-bfd4-aa9f688d9e54}</Project>
       <Name>ServiceStack.OrmLite.SqliteV45</Name>
