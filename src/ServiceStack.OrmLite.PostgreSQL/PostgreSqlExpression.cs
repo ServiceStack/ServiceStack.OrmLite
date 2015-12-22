@@ -11,11 +11,9 @@ namespace ServiceStack.OrmLite.PostgreSQL
         {
             if (useFieldName)
             {
-                var fd = tableDef.FieldDefinitions.FirstOrDefault(x => x.Name == memberName);
-                if (fd != null && fd.IsRowVersion && !PrefixFieldWithTableName)
-                {
+                var fieldDef = tableDef.FieldDefinitions.FirstOrDefault(x => x.Name == memberName);
+                if (fieldDef != null && fieldDef.IsRowVersion && !PrefixFieldWithTableName)
                     return PostgreSqlDialectProvider.RowVersionFieldComparer;
-                }
 
                 return base.GetQuotedColumnName(tableDef, memberName);
             }
@@ -27,4 +25,43 @@ namespace ServiceStack.OrmLite.PostgreSQL
             return base.OrderBy("RANDOM()");
         }
     }
+
+    public class PostgreSqlParameterizedSqlExpression<T> : ParameterizedSqlExpression<T>
+    {
+        public PostgreSqlParameterizedSqlExpression(IOrmLiteDialectProvider dialectProvider)
+            : base(dialectProvider) {}
+
+        protected override string GetQuotedColumnName(ModelDefinition tableDef, string memberName)
+        {
+            if (useFieldName)
+            {
+                var fieldDef = tableDef.FieldDefinitions.FirstOrDefault(x => x.Name == memberName);
+                if (fieldDef != null && fieldDef.IsRowVersion && !PrefixFieldWithTableName)
+                    return PostgreSqlDialectProvider.RowVersionFieldComparer;
+
+                return base.GetQuotedColumnName(tableDef, memberName);
+            }
+            return memberName;
+        }
+
+        public override SqlExpression<T> OrderByRandom()
+        {
+            return base.OrderBy("RANDOM()");
+        }
+
+        protected override void ConvertToPlaceholderAndParameter(ref object right)
+        {
+            if (!OrmLiteConfig.UseParameterizeSqlExpressions)
+                return;
+
+            var paramName = Params.Count.ToString();
+            var paramValue = right;
+
+            var parameter = CreateParam(paramName, paramValue);
+            Params.Add(parameter);
+
+            right = parameter.ParameterName;
+        }
+    }
+
 }

@@ -163,7 +163,9 @@ namespace ServiceStack.OrmLite.PostgreSQL
 
         public override SqlExpression<T> SqlExpression<T>()
         {
-            return new PostgreSqlExpression<T>(this);
+            return !OrmLiteConfig.UseParameterizeSqlExpressions
+                ? new PostgreSqlExpression<T>(this)
+                : (SqlExpression<T>)new PostgreSqlParameterizedSqlExpression<T>(this);
         }
 
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
