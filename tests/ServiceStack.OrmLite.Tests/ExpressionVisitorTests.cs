@@ -92,7 +92,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        public void Can_Select_using_new()
+        public void Can_Select_using_new_ComplexType()
         {
             Db.Insert(new TestType
             {
