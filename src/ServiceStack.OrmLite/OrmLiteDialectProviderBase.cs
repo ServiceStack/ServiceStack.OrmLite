@@ -279,9 +279,9 @@ namespace ServiceStack.OrmLite
             if (type.IsEnum)
                 return EnumConverter;
 
-            return type.IsValueType
-                ? (IOrmLiteConverter)ValueTypeConverter
-                : ReferenceTypeConverter;
+            return type.IsRefType()
+                ? (IOrmLiteConverter)ReferenceTypeConverter
+                : ValueTypeConverter;
         }
 
         public virtual bool ShouldQuoteValue(Type fieldType)
@@ -315,30 +315,15 @@ namespace ServiceStack.OrmLite
             if (value == null || value is DBNull)
                 return null;
 
-            if (value.GetType() == type)
-                return value;
-
-            IOrmLiteConverter converter = null;
+            var converter = GetConverterBestMatch(type);
             try
             {
-                if (Converters.TryGetValue(type, out converter))
-                    return converter.ToDbValue(type, value);
+                return converter.ToDbValue(type, value);
             }
             catch (Exception ex)
             {
                 Log.Error("Error in {0}.ToDbValue() value '{1}' and Type '{2}'"
                     .Fmt(converter.GetType().Name, value != null ? value.GetType().Name : "undefined", type.Name), ex);
-                throw;
-            }
-
-            try
-            {
-                var convertedValue = StringSerializer.DeserializeFromString(value.ToString(), type);
-                return convertedValue;
-            }
-            catch (Exception)
-            {
-                Log.ErrorFormat("Error ToDbValue trying to convert {0} into {1}", value, type.Name);
                 throw;
             }
         }
@@ -348,30 +333,15 @@ namespace ServiceStack.OrmLite
             if (value == null || value is DBNull)
                 return null;
 
-            if (value.GetType() == type)
-                return value;
-
-            IOrmLiteConverter converter = null;
+            var converter = GetConverterBestMatch(type);
             try
             {
-                if (Converters.TryGetValue(type, out converter))
-                    return converter.FromDbValue(type, value);
+                return converter.FromDbValue(type, value);
             }
             catch (Exception ex)
             {
                 Log.Error("Error in {0}.FromDbValue() value '{1}' and Type '{2}'"
                     .Fmt(converter.GetType().Name, value != null ? value.GetType().Name : "undefined", type.Name), ex);
-                throw;
-            }
-
-            try
-            {
-                var convertedValue = StringSerializer.DeserializeFromString(value.ToString(), type);
-                return convertedValue;
-            }
-            catch (Exception)
-            {
-                Log.ErrorFormat("Error FromDbValue trying to convert {0} into {1}", value, type.Name);
                 throw;
             }
         }
@@ -846,23 +816,11 @@ namespace ServiceStack.OrmLite
             if (value == null)
                 return null;
 
-            IOrmLiteConverter converter = null;
+            var converter = fieldDef.FieldType.IsEnum
+                ? EnumConverter 
+                : GetConverterBestMatch(fieldDef.FieldType);
             try
             {
-                var isEnum = value.GetType().IsEnum || fieldDef.FieldType.IsEnum;
-                if (isEnum)
-                {
-                    converter = EnumConverter;
-                    return converter.ToDbValue(fieldDef.FieldType, value);
-                }
-
-                if (Converters.TryGetValue(fieldDef.FieldType, out converter))
-                    return converter.ToDbValue(fieldDef.FieldType, value);
-
-                converter = fieldDef.IsRefType
-                    ? (IOrmLiteConverter)ReferenceTypeConverter
-                    : ValueTypeConverter;
-
                 return converter.ToDbValue(fieldDef.FieldType, value);
             }
             catch (Exception ex)
@@ -878,23 +836,9 @@ namespace ServiceStack.OrmLite
             if (value == null)
                 return null;
 
-            IOrmLiteConverter converter = null;
+            var converter = GetConverterBestMatch(fieldType);
             try
             {
-                var isEnum = value.GetType().IsEnum || fieldType.IsEnum;
-                if (isEnum)
-                {
-                    converter = EnumConverter;
-                    return converter.ToDbValue(fieldType, value);
-                }
-
-                if (Converters.TryGetValue(fieldType, out converter))
-                    return converter.ToDbValue(fieldType, value);
-
-                converter = !fieldType.IsValueType
-                    ? (IOrmLiteConverter)ReferenceTypeConverter
-                    : ValueTypeConverter;
-
                 return converter.ToDbValue(fieldType, value);
             }
             catch (Exception ex)

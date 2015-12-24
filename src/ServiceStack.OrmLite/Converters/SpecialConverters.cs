@@ -135,7 +135,8 @@ namespace ServiceStack.OrmLite.Converters
 
         public override object ToDbValue(Type fieldType, object value)
         {
-            return DialectProvider.ToDbValue(value, fieldType);
+            var convertedValue = DialectProvider.StringSerializer.DeserializeFromString(value.ToString(), fieldType);
+            return convertedValue;
         }
 
         public override object FromDbValue(Type fieldType, object value)
