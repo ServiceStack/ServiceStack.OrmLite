@@ -148,7 +148,9 @@ namespace ServiceStack.OrmLite.Sqlite
 
         public override SqlExpression<T> SqlExpression<T>()
         {
-            return new SqliteExpression<T>(this);
+            return !OrmLiteConfig.UseParameterizeSqlExpressions
+                ? new SqliteExpression<T>(this)
+                : (SqlExpression<T>)new SqliteParameterizedSqlExpression<T>(this);
         }
 
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
