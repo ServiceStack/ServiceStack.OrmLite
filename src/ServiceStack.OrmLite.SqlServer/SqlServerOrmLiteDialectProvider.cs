@@ -113,6 +113,11 @@ namespace ServiceStack.OrmLite.SqlServer
                 : (SqlExpression<T>)new SqlServerParameterizedSqlExpression<T>(this);
         }
 
+        public override IDbDataParameter CreateParam()
+        {
+            return new SqlParameter();
+        }
+
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
         {
             var sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = {0}"

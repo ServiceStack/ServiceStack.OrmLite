@@ -1,5 +1,6 @@
 using System;
 using System.Text;
+using ServiceStack.OrmLite.SqlServer.Converters;
 
 namespace ServiceStack.OrmLite.SqlServer
 {
@@ -61,6 +62,16 @@ namespace ServiceStack.OrmLite.SqlServer
             Params.Add(parameter);
 
             right = parameter.ParameterName;
+        }
+
+        protected override void VisitFilter(string operand, object originalLeft, object originalRight, ref object left, ref object right)
+        {
+            base.VisitFilter(operand, originalLeft, originalRight, ref left, ref right);
+
+            if (originalRight is TimeSpan && DialectProvider.GetConverter<TimeSpan>() is SqlServerTimeConverter)
+            {
+                right = "CAST({0} AS TIME)".Fmt(right);
+            }
         }
     }
 
