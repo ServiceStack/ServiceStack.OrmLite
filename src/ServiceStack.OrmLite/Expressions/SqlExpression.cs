@@ -1582,6 +1582,22 @@ namespace ServiceStack.OrmLite
             if (exprArg != null)
             {
                 var subSelect = exprArg.ToSelectStatement();
+                foreach (var p in exprArg.Params)
+                {
+                    var oldName = p.ParameterName;
+                    var newName = DialectProvider.GetParam(Params.Count.ToString());
+                    if (oldName != newName)
+                    {
+                        var pClone = p.Populate(DialectProvider.CreateParam());
+                        subSelect = subSelect.Replace(oldName, newName);
+                        pClone.ParameterName = newName;
+                        Params.Add(pClone);
+                    }
+                    else
+                    {
+                        Params.Add(p);
+                    }
+                }
                 return string.Format("{0} {1} ({2})", quotedColName, "IN", subSelect);
             }
 
@@ -1793,6 +1809,19 @@ namespace ServiceStack.OrmLite
 
             if (dbType != null)
                 to.DbType = dbType.Value;
+
+            return to;
+        }
+
+        public static IDbDataParameter Populate(this IDbDataParameter p, IDbDataParameter to)
+        {
+            to.DbType = p.DbType;
+            to.ParameterName = p.ParameterName;
+            to.Value = p.Value;
+            to.Direction = p.Direction;
+            to.Precision = p.Precision;
+            to.Scale = p.Scale;
+            to.Size = p.Size;
 
             return to;
         }
