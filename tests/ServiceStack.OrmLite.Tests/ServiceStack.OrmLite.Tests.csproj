@@ -115,8 +115,10 @@
   <ItemGroup>
     <Compile Include="AdminTasks.cs" />
     <Compile Include="AdoNetDataAccessTests.cs" />
-    <Compile Include="ApiSqlServerTests.cs" />
+    <Compile Include="ApiSqliteTests.Parameterized.cs" />
+    <Compile Include="ApiSqlServerTests.Parameterized.cs" />
     <Compile Include="ApiSqliteTests.cs" />
+    <Compile Include="ApiSqlServerTests.cs" />
     <Compile Include="CaptureSqlCommandFilterTests.cs" />
     <Compile Include="CaptureSqlFilterTests.cs" />
     <Compile Include="CompositeKeyTests.cs" />
