@@ -117,13 +117,16 @@ namespace ServiceStack.OrmLite.Tests
                 int i = 0;
                 i++; db.Single<Person>(x => x.Age == 42);
 
+                var p = OrmLiteConfig.UseParameterizeSqlExpressions
+                    ? db.GetDialectProvider().GetParam("0")
+                    : "42";
+
                 Assert.That(captured.SqlStatements.Last().NormalizeSql(),
-                    Is.EqualTo("select id, firstname, lastname, age  from person where (age = 42) limit 1").
-                    Or.EqualTo("select top 1 id, firstname, lastname, age  from person where (age = 42)"). //SqlServer
-                    Or.EqualTo("select first 1 id, firstname, lastname, age  from person where (age = 42)"). //Firebird
-                    Or.EqualTo("select id, firstname, lastname, age  from person where (age = 42) order by 1 offset 0 rows fetch next 1 rows only"). //VistaDB
-                    Or.EqualTo("select * from (\r select ssormlite1.*, rownum rnum from (\r select id, firstname, lastname, age  from person where (age = 42) order by person.id) ssormlite1\r where rownum <= 0 + 1) ssormlite2 where ssormlite2.rnum > 0").  //Oracle
-                    Or.EqualTo("select * from (\r select ssormlite1.*, rownum rnum from (\r select id, firstname, lastname, age  from person where (age = @0) order by person.id) ssormlite1\r where rownum <= 0 + 1) ssormlite2 where ssormlite2.rnum > 0")   //Oracle with UseParameterizeSqlExpressions
+                    Is.EqualTo("select id, firstname, lastname, age  from person where (age = {0}) limit 1".Fmt(p)). //sqlite
+                    Or.EqualTo("select top 1 id, firstname, lastname, age  from person where (age = {0})".Fmt(p)).   //SqlServer
+                    Or.EqualTo("select first 1 id, firstname, lastname, age  from person where (age = {0})".Fmt(p)).  //Firebird
+                    Or.EqualTo("select id, firstname, lastname, age  from person where (age = {0}) order by 1 offset 0 rows fetch next 1 rows only".Fmt(p)). //VistaDB
+                    Or.EqualTo("select * from (\r select ssormlite1.*, rownum rnum from (\r select id, firstname, lastname, age  from person where (age = {0}) order by person.id) ssormlite1\r where rownum <= 0 + 1) ssormlite2 where ssormlite2.rnum > 0".Fmt(p))  //Oracle
                     );
 
                 i++; db.ExistsFmt<Person>("Age = {0}", 42);

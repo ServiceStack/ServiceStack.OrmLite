@@ -136,8 +136,8 @@ namespace ServiceStack.OrmLite.Tests
 
             //MySql doesn't support ms, SqlServer has +/- .03 precision
             Assert.That(diff.Value, 
-                Is.LessThan(TimeSpan.FromSeconds(1)).Or
-                  .GreaterThanOrEqualTo(TimeSpan.FromSeconds(0)));
+                Is.LessThan(TimeSpan.FromSeconds(1)).
+                Or.GreaterThanOrEqualTo(TimeSpan.FromSeconds(0)));
         }
 
         [TestCase("2012-08-12")]

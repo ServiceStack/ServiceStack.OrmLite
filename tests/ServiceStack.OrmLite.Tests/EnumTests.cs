@@ -116,8 +116,8 @@ namespace ServiceStack.OrmLite.Tests
                 try
                 {
                     var expectedFlags = (int)(FlagsEnum.FlagOne | FlagsEnum.FlagTwo | FlagsEnum.FlagThree);
-                    Assert.AreEqual(db.Scalar<int>("SELECT Flags FROM {0} WHERE Id = 1"
-                        .Fmt("TypeWithFlagsEnum".SqlColumn())), expectedFlags);
+                    Assert.That(db.Scalar<int>("SELECT Flags FROM {0} WHERE Id = 1"
+                        .Fmt("TypeWithFlagsEnum".SqlTable())), Is.EqualTo(expectedFlags));
                 }
                 catch (FormatException)
                 {
@@ -211,7 +211,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 var target = db.Where<TypeWithFlagsEnum>(new { Flags = FlagsEnum.FlagOne });
                 db.GetLastSql().Print();
-                Assert.AreEqual(2, target.Count());
+                Assert.AreEqual(2, target.Count);
             }
         }
 

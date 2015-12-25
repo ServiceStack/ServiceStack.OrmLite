@@ -67,8 +67,12 @@ namespace ServiceStack.OrmLite.Tests
                 int i = 0;
                 i++; db.Select<Person>(x => x.Age > 40);
 
+                var p = OrmLiteConfig.UseParameterizeSqlExpressions
+                    ? db.GetDialectProvider().GetParam("0")
+                    : "40";
+
                 Assert.That(captured.SqlCommandHistory.Last().Sql.NormalizeSql(),
-                    Is.EqualTo("select id, firstname, lastname, age  from person where (age > 40)"));
+                    Is.EqualTo("select id, firstname, lastname, age  from person where (age > {0})".Fmt(p)));
 
                 i++; db.Select<Person>(q => q.Where(x => x.Age > 40));
                 i++; db.Select(db.From<Person>().Where(x => x.Age > 40));
@@ -115,11 +119,15 @@ namespace ServiceStack.OrmLite.Tests
                 int i = 0;
                 i++; db.Single<Person>(x => x.Age == 42);
 
+                var p = OrmLiteConfig.UseParameterizeSqlExpressions
+                    ? db.GetDialectProvider().GetParam("0")
+                    : "42";
+
                 Assert.That(captured.SqlCommandHistory.Last().Sql.NormalizeSql(),
-                    Is.EqualTo("select id, firstname, lastname, age  from person where (age = 42) limit 1").
-                    Or.EqualTo("select top 1 id, firstname, lastname, age  from person where (age = 42)"). //SQLServer < 2012
-                    Or.EqualTo("select id, firstname, lastname, age  from person where (age = 42) order by 1 offset 0 rows fetch next 1 rows only"). //SQLServer >= 2012
-                    Or.EqualTo("select first 1 id, firstname, lastname, age  from person where (age = 42)")); //Firebird
+                    Is.EqualTo("select id, firstname, lastname, age  from person where (age = {0}) limit 1".Fmt(p)).  //Sqlite
+                    Or.EqualTo("select top 1 id, firstname, lastname, age  from person where (age = {0})".Fmt(p)).    //SQLServer < 2012
+                    Or.EqualTo("select id, firstname, lastname, age  from person where (age = {0}) order by 1 offset 0 rows fetch next 1 rows only".Fmt(p)). //SQLServer >= 2012
+                    Or.EqualTo("select first 1 id, firstname, lastname, age  from person where (age = {0})".Fmt(p))); //Firebird
 
             i++; db.ExistsFmt<Person>("Age = {0}", 42);
                 i++; db.Single(db.From<Person>().Where(x => x.Age == 42));
