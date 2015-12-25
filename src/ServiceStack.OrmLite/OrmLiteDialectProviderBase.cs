@@ -1347,21 +1347,12 @@ namespace ServiceStack.OrmLite
         {
             if (value == null) return "NULL";
 
-            IOrmLiteConverter converter = null;
+            var converter = value.GetType().IsEnum
+                ? EnumConverter
+                : GetConverterBestMatch(fieldType);
             try
             {
-                var isEnum = fieldType.IsEnum || value.GetType().IsEnum;
-                if (isEnum)
-                    return EnumConverter.ToQuotedString(fieldType, value);
-
-                if (Converters.TryGetValue(fieldType, out converter))
-                    return converter.ToQuotedString(fieldType, value);
-
-                if (fieldType.IsRefType())
-                    return ReferenceTypeConverter.ToQuotedString(fieldType, value);
-
-                if (fieldType.IsValueType())
-                    return ValueTypeConverter.ToQuotedString(fieldType, value);
+                return converter.ToQuotedString(fieldType, value);
             }
             catch (Exception ex)
             {
@@ -1369,10 +1360,6 @@ namespace ServiceStack.OrmLite
                     .Fmt(converter.GetType().Name, value != null ? value.GetType().Name : "undefined", fieldType.Name), ex);
                 throw;
             }
-
-            return ShouldQuoteValue(fieldType)
-                    ? GetQuotedValue(value.ToString())
-                    : value.ToString();
         }
 
         public virtual object GetParamValue(object value, Type fieldType)

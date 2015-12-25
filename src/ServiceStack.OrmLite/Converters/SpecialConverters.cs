@@ -13,30 +13,31 @@ namespace ServiceStack.OrmLite.Converters
 
             long enumValue;
             if (!isEnumFlags && long.TryParse(value.ToString(), out enumValue))
-            {
                 value = Enum.ToObject(fieldType, enumValue);
-            }
 
-            var enumString = DialectProvider.StringSerializer.SerializeToString(value);
+            var enumString = DialectProvider.StringSerializer.SerializeToString(value).Trim('"');
 
-            if (!isEnumFlags)
-                return DialectProvider.GetQuotedValue(enumString.Trim('"'));
-
-            return enumString;
+            return !isEnumFlags ? DialectProvider.GetQuotedValue(enumString) : enumString;
         }
 
         public override object ToDbValue(Type fieldType, object value)
         {
-            var enumValue = DialectProvider.StringSerializer.SerializeToString(value);
-            if (enumValue == null)
-                return null;
+            var isEnumFlags = fieldType.IsEnumFlags() ||
+                (!fieldType.IsEnum && fieldType.IsNumericType()); //i.e. is real int && not Enum
 
-            enumValue = enumValue.Trim('"');
-            long intEnum;
-            if (long.TryParse(enumValue, out intEnum))
-                return intEnum;
+            long enumValue;
+            if (long.TryParse(value.ToString(), out enumValue))
+            {
+                if (isEnumFlags)
+                    return enumValue;
 
-            return enumValue;
+                value = Enum.ToObject(fieldType, enumValue);
+            }
+
+            var enumString = DialectProvider.StringSerializer.SerializeToString(value);
+            return enumString != null ? 
+                enumString.Trim('"') 
+                : null;
         }
 
         public override object FromDbValue(Type fieldType, object value)
