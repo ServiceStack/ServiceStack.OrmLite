@@ -6,7 +6,6 @@ using ServiceStack.OrmLite.Tests.Shared;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [Explicit]
     public class ApiSqliteTests
         : OrmLiteTestBase
     {
@@ -29,6 +28,9 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void API_Sqlite_Examples()
         {
+            var hold = OrmLiteConfig.UseParameterizeSqlExpressions;
+            OrmLiteConfig.UseParameterizeSqlExpressions = false;
+
             db.Insert(Person.Rockstars);
 
             db.Select<Person>(x => x.Age > 40);
@@ -379,6 +381,8 @@ namespace ServiceStack.OrmLite.Tests
 
             db.SaveAll(new[]{ new Person { Id = 14, FirstName = "Amy", LastName = "Winehouse", Age = 27 },
                               new Person { Id = 15, FirstName = "Amy", LastName = "Winehouse", Age = 27 } });
+
+            OrmLiteConfig.UseParameterizeSqlExpressions = hold;
         }
 
     }

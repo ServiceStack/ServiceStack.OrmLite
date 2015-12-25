@@ -30,6 +30,9 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void API_SqlServer_Examples()
         {
+            var hold = OrmLiteConfig.UseParameterizeSqlExpressions;
+            OrmLiteConfig.UseParameterizeSqlExpressions = false;
+
             db.Insert(Person.Rockstars);
 
             db.Select<Person>(x => x.Age > 40);
@@ -135,7 +138,7 @@ namespace ServiceStack.OrmLite.Tests
             db.Single<Person>("Age = @age", new { age = 42 });
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"FirstName\", \"LastName\", \"Age\" FROM \"Person\" WHERE Age = @age"));
 
-            db.Single<Person>("Age = @age", new[]{ db.CreateParam("age", 42)});
+            db.Single<Person>("Age = @age", new[] { db.CreateParam("age", 42) });
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"FirstName\", \"LastName\", \"Age\" FROM \"Person\" WHERE Age = @age"));
 
             db.SingleFmt<Person>("Age = {0}", 42);
@@ -374,6 +377,8 @@ namespace ServiceStack.OrmLite.Tests
 
             db.SaveAll(new[]{ new Person { Id = 14, FirstName = "Amy", LastName = "Winehouse", Age = 27 },
                               new Person { Id = 15, FirstName = "Amy", LastName = "Winehouse", Age = 27 } });
+
+            OrmLiteConfig.UseParameterizeSqlExpressions = hold;
         }
 
     }
