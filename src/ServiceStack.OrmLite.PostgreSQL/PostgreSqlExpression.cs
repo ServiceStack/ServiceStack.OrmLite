@@ -48,20 +48,6 @@ namespace ServiceStack.OrmLite.PostgreSQL
         {
             return base.OrderBy("RANDOM()");
         }
-
-        protected override void ConvertToPlaceholderAndParameter(ref object right)
-        {
-            if (!OrmLiteConfig.UseParameterizeSqlExpressions)
-                return;
-
-            var paramName = Params.Count.ToString();
-            var paramValue = right;
-
-            var parameter = CreateParam(paramName, paramValue);
-            Params.Add(parameter);
-
-            right = parameter.ParameterName;
-        }
     }
 
 }

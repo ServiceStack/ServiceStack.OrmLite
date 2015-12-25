@@ -168,6 +168,11 @@ namespace ServiceStack.OrmLite.PostgreSQL
                 : (SqlExpression<T>)new PostgreSqlParameterizedSqlExpression<T>(this);
         }
 
+        public override IDbDataParameter CreateParam()
+        {
+            return new NpgsqlParameter();
+        }
+
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
         {
             var sql = "SELECT COUNT(*) FROM pg_class WHERE relname = {0}"
