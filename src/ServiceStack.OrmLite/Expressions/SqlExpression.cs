@@ -1686,11 +1686,10 @@ namespace ServiceStack.OrmLite
             DbType? dbType = null,
             DataRowVersion sourceVersion = DataRowVersion.Default)
         {
-            var p = new OrmLiteDataParameter {
-                ParameterName = DialectProvider.GetParam(name), 
-                Direction = direction,
-                SourceVersion = sourceVersion
-            };
+            var p = DialectProvider.CreateParam();
+            p.ParameterName = DialectProvider.GetParam(name);
+            p.Direction = direction;
+            p.SourceVersion = sourceVersion;
 
             if (p.DbType == DbType.String)
                 p.Size = DialectProvider.GetStringConverter().StringLength;
@@ -1706,6 +1705,7 @@ namespace ServiceStack.OrmLite
 
             return p;
         }
+
         public IUntypedSqlExpression GetUntyped()
         {
             return new UntypedSqlExpressionProxy<T>(this);

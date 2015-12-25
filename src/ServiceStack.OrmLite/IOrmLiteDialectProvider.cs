@@ -160,6 +160,8 @@ namespace ServiceStack.OrmLite
         [Obsolete("Use InitDbParam")]
         DbType GetColumnDbType(Type columnType);
 
+        IDbDataParameter CreateParam();
+
         void InitDbParam(IDbDataParameter dbParam, Type columnType);
 
         //DDL

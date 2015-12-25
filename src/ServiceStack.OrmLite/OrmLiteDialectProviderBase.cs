@@ -13,6 +13,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading;
@@ -158,6 +159,8 @@ namespace ServiceStack.OrmLite
             var converter = GetConverterBestMatch(columnType);
             converter.InitDbParam(dbParam, columnType);
         }
+
+        public abstract IDbDataParameter CreateParam();
 
         public Dictionary<string, string> Variables { get; set; }
 
