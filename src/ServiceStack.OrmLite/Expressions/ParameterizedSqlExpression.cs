@@ -30,6 +30,16 @@ namespace ServiceStack.OrmLite
 
         protected virtual void ConvertToPlaceholderAndParameter(ref object right)
         {
+            if (!OrmLiteConfig.UseParameterizeSqlExpressions)
+                return;
+
+            var paramName = Params.Count.ToString();
+            var paramValue = right;
+
+            var parameter = CreateParam(paramName, paramValue);
+            Params.Add(parameter);
+
+            right = parameter.ParameterName;
         }
 
         public override object GetValue(object value, Type type)
@@ -43,16 +53,10 @@ namespace ServiceStack.OrmLite
 
         protected override void VisitFilter(string operand, object originalLeft, object originalRight, ref object left, ref object right)
         {
-            if (SkipParameterizationForThisExpression)
+            if (SkipParameterizationForThisExpression || visitedExpressionIsTableColumn)
                 return;
 
-            if (visitedExpressionIsTableColumn || (originalRight is DateTimeOffset))
-                return;
-
-            var leftEnum = originalLeft as EnumMemberAccess;
-            var rightEnum = originalRight as EnumMemberAccess;
-
-            if (leftEnum != null && rightEnum != null)
+            if (originalLeft is EnumMemberAccess && originalRight is EnumMemberAccess)
                 return;
 
             if (operand == "AND" || operand == "OR" || operand == "is" || operand == "is not")
