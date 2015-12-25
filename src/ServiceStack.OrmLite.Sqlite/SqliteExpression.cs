@@ -151,19 +151,5 @@ namespace ServiceStack.OrmLite.Sqlite
         {
             return base.OrderBy("random()");
         }
-
-        protected override void ConvertToPlaceholderAndParameter(ref object right)
-        {
-            if (!OrmLiteConfig.UseParameterizeSqlExpressions)
-                return;
-
-            var paramName = Params.Count.ToString();
-            var paramValue = right;
-
-            var parameter = CreateParam(paramName, paramValue);
-            Params.Add(parameter);
-
-            right = parameter.ParameterName;
-        }
     }
 }

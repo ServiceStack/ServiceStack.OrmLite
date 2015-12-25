@@ -17,5 +17,10 @@ namespace ServiceStack.OrmLite.Sqlite
         {
             return new SQLiteConnection(connectionString, parseViaFramework: ParseViaFramework);
         }
+
+        public override IDbDataParameter CreateParam()
+        {
+            return new SQLiteParameter();
+        }
     }
 }
