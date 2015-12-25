@@ -29,6 +29,14 @@ namespace ServiceStack.OrmLite.Oracle
             return base.VisitColumnAccessMethod(m);
         }
 
+        protected override void VisitFilter(string operand, object originalLeft, object originalRight, ref object left, ref object right)
+        {
+            if (originalRight is DateTimeOffset)
+                return;
+
+            base.VisitFilter(operand, originalLeft, originalRight, ref left, ref right);
+        }
+
         protected override void ConvertToPlaceholderAndParameter(ref object right)
         {
             if (!OrmLiteConfig.UseParameterizeSqlExpressions)

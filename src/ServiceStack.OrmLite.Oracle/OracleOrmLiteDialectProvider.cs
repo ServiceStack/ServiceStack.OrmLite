@@ -1176,6 +1176,11 @@ namespace ServiceStack.OrmLite.Oracle
             return new OracleSqlExpression<T>(this);
         }
 
+        public override IDbDataParameter CreateParam()
+        {
+            return new OrmLiteDataParameter();
+        }
+
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema=null)
         {
             if (!WillQuote(tableName)) tableName = tableName.ToUpper();
