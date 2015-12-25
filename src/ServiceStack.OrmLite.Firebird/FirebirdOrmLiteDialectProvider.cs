@@ -726,6 +726,11 @@ namespace ServiceStack.OrmLite.Firebird
             return new FirebirdSqlExpression<T>(this);
         }
 
+        public override IDbDataParameter CreateParam()
+        {
+            return new FbParameter();
+        }
+
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
         {
             tableName = GetTableName(tableName, schema);

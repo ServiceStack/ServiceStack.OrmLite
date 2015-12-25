@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 
 namespace ServiceStack.OrmLite.Firebird
 {
-    public class FirebirdSqlExpression<T> : SqlExpression<T>
+    public class FirebirdSqlExpression<T> : ParameterizedSqlExpression<T>
     {
         private readonly string _trueExpression;
         private readonly string _falseExpression;
@@ -129,7 +129,7 @@ namespace ServiceStack.OrmLite.Firebird
 
         protected override object VisitColumnAccessMethod(MethodCallExpression m)
         {
-            List<Object> args = this.VisitExpressionList(m.Arguments);
+            var args = this.VisitExpressionList(m.Arguments);
             var quotedColName = Visit(m.Object);
             var statement = "";
 
