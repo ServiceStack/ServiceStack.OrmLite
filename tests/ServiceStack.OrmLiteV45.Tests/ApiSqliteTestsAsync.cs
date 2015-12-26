@@ -28,6 +28,9 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public async Task API_Sqlite_Examples_Async()
         {
+            var hold = OrmLiteConfig.UseParameterizeSqlExpressions;
+            OrmLiteConfig.UseParameterizeSqlExpressions = false;
+
             await db.InsertAsync(Person.Rockstars);
 
             await db.SelectAsync<Person>(x => x.Age > 40);
@@ -378,6 +381,8 @@ namespace ServiceStack.OrmLite.Tests
 
             await db.SaveAllAsync(new[]{ new Person { Id = 14, FirstName = "Amy", LastName = "Winehouse", Age = 27 },
                               new Person { Id = 15, FirstName = "Amy", LastName = "Winehouse", Age = 27 } });
+
+            OrmLiteConfig.UseParameterizeSqlExpressions = hold;
         }
 
     }
