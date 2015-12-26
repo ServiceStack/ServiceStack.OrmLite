@@ -18,6 +18,11 @@ namespace ServiceStack.OrmLite
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(OrmLiteWriteCommandExtensionsAsync));
 
+        internal static Task<int> ExecuteSqlAsync(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams, CancellationToken token)
+        {
+            return dbCmd.SetParameters(sqlParams).ExecuteSqlAsync(sql, token);
+        }
+
         internal static Task<int> ExecuteSqlAsync(this IDbCommand dbCmd, string sql, CancellationToken token)
         {
             dbCmd.CommandText = sql;

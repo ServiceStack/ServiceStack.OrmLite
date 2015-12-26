@@ -72,11 +72,11 @@ namespace ServiceStack.OrmLite
 
         public static int Update<T>(this IDbCommand dbCmd, object updateOnly, Expression<Func<T, bool>> where = null)
         {
-            var ev = dbCmd.GetDialectProvider().SqlExpression<T>();
-            var whereSql = ev.Where(where).WhereExpression;
+            var q = dbCmd.GetDialectProvider().SqlExpression<T>();
+            var whereSql = q.Where(where).WhereExpression;
             var updateSql = UpdateSql<T>(dbCmd.GetDialectProvider(), updateOnly, whereSql);
 
-            return dbCmd.ExecuteSql(updateSql, ev.Params);
+            return dbCmd.ExecuteSql(updateSql, q.Params);
         }
 
         internal static string UpdateSql<T>(IOrmLiteDialectProvider dialectProvider, object updateOnly, string whereSql)
@@ -102,14 +102,6 @@ namespace ServiceStack.OrmLite
             var updateSql = string.Format("UPDATE {0} SET {1} {2}",
                 dialectProvider.GetQuotedTableName(modelDef), sql, whereSql);
             return updateSql;
-        }
-
-        internal static string UpdateSql<T>(IOrmLiteDialectProvider dialectProvider, object updateOnly, Expression<Func<T, bool>> @where)
-        {
-            var ev = dialectProvider.SqlExpression<T>();
-            var whereSql = ev.Where(@where).WhereExpression;
-
-            return UpdateSql<T>(dialectProvider, updateOnly, whereSql);
         }
 
         public static int UpdateFmt<T>(this IDbCommand dbCmd, string set = null, string where = null)

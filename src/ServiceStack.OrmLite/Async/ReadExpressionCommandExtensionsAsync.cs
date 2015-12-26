@@ -70,52 +70,52 @@ namespace ServiceStack.OrmLite
 
         public static Task<TKey> ScalarAsync<T, TKey>(this IDbCommand dbCmd, Expression<Func<T, TKey>> field, CancellationToken token)
         {
-            var ev = dbCmd.GetDialectProvider().SqlExpression<T>();
-            ev.Select(field);
-            var sql = ev.SelectInto<T>();
-            return dbCmd.ScalarAsync<TKey>(sql, token);
+            var q = dbCmd.GetDialectProvider().SqlExpression<T>();
+            q.Select(field);
+            var sql = q.SelectInto<T>();
+            return dbCmd.ScalarAsync<TKey>(sql, q.Params, token);
         }
 
         internal static Task<TKey> ScalarAsync<T, TKey>(this IDbCommand dbCmd,
             Expression<Func<T, TKey>> field, Expression<Func<T, bool>> predicate, CancellationToken token)
         {
-            var ev = dbCmd.GetDialectProvider().SqlExpression<T>();
-            ev.Select(field).Where(predicate);
-            string sql = ev.SelectInto<T>();
-            return dbCmd.ScalarAsync<TKey>(sql, token);
+            var q = dbCmd.GetDialectProvider().SqlExpression<T>();
+            q.Select(field).Where(predicate);
+            string sql = q.SelectInto<T>();
+            return dbCmd.ScalarAsync<TKey>(sql, q.Params, token);
         }
 
         internal static Task<long> CountAsync<T>(this IDbCommand dbCmd, CancellationToken token)
         {
-            var expression = dbCmd.GetDialectProvider().SqlExpression<T>();
-            var sql = expression.ToCountStatement();
-            return GetCountAsync(dbCmd, sql, token);
+            var q = dbCmd.GetDialectProvider().SqlExpression<T>();
+            var sql = q.ToCountStatement();
+            return GetCountAsync(dbCmd, sql, q.Params, token);
         }
 
         internal static Task<long> CountAsync<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression, CancellationToken token)
         {
-            var expr = dbCmd.GetDialectProvider().SqlExpression<T>();
-            var sql = expression(expr).ToCountStatement();
-            return GetCountAsync(dbCmd, sql, token);
+            var q = dbCmd.GetDialectProvider().SqlExpression<T>();
+            var sql = expression(q).ToCountStatement();
+            return GetCountAsync(dbCmd, sql, q.Params, token);
         }
 
-        internal static Task<long> CountAsync<T>(this IDbCommand dbCmd, SqlExpression<T> expression, CancellationToken token)
+        internal static Task<long> CountAsync<T>(this IDbCommand dbCmd, SqlExpression<T> q, CancellationToken token)
         {
-            var sql = expression.ToCountStatement();
-            return GetCountAsync(dbCmd, sql, token);
+            var sql = q.ToCountStatement();
+            return GetCountAsync(dbCmd, sql, q.Params, token);
         }
 
         internal static Task<long> CountAsync<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate, CancellationToken token)
         {
-            var ev = dbCmd.GetDialectProvider().SqlExpression<T>();
-            ev.Where(predicate);
-            var sql = ev.ToCountStatement();
-            return GetCountAsync(dbCmd, sql, token);
+            var q = dbCmd.GetDialectProvider().SqlExpression<T>();
+            q.Where(predicate);
+            var sql = q.ToCountStatement();
+            return GetCountAsync(dbCmd, sql, q.Params, token);
         }
 
-        internal static Task<long> GetCountAsync(this IDbCommand dbCmd, string sql, CancellationToken token)
+        internal static Task<long> GetCountAsync(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams, CancellationToken token)
         {
-            return dbCmd.ColumnAsync<long>(sql, token).Then(x => x.Sum());
+            return dbCmd.ColumnAsync<long>(sql, sqlParams, token).Then(x => x.Sum());
         }
 
         internal static Task<long> RowCountAsync<T>(this IDbCommand dbCmd, SqlExpression<T> expression, CancellationToken token)
