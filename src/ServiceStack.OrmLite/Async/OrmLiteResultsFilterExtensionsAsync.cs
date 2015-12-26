@@ -86,10 +86,12 @@ namespace ServiceStack.OrmLite
                         .Then(reader => reader.ConvertToListAsync(dialectProvider, refType, token)).Unwrap();
         }
 
-        internal static Task<List<T>> ExprConvertToListAsync<T>(this IDbCommand dbCmd, string sql, CancellationToken token)
+        internal static Task<List<T>> ExprConvertToListAsync<T>(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams, CancellationToken token)
         {
             if (sql != null)
                 dbCmd.CommandText = sql;
+
+            dbCmd.SetParameters(sqlParams);
 
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.GetList<T>(dbCmd).InTask();
@@ -185,10 +187,12 @@ namespace ServiceStack.OrmLite
             return dbCmd.LongScalarAsync(token);
         }
 
-        internal static Task<T> ExprConvertToAsync<T>(this IDbCommand dbCmd, string sql, CancellationToken token)
+        internal static Task<T> ExprConvertToAsync<T>(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams, CancellationToken token)
         {
             if (sql != null)
                 dbCmd.CommandText = sql;
+
+            dbCmd.SetParameters(sqlParams);
 
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.GetSingle<T>(dbCmd).InTask();

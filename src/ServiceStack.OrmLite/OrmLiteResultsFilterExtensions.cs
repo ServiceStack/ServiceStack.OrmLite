@@ -121,7 +121,7 @@ namespace ServiceStack.OrmLite
             if (sql != null)
                 dbCmd.CommandText = sql;
 
-            SetParameters(dbCmd, sqlParams);
+            dbCmd.SetParameters(sqlParams);
 
             if (OrmLiteConfig.ResultsFilter != null)
             {
@@ -235,7 +235,7 @@ namespace ServiceStack.OrmLite
             if (sql != null)
                 dbCmd.CommandText = sql;
 
-            SetParameters(dbCmd, sqlParams);
+            dbCmd.SetParameters(sqlParams);
 
             if (OrmLiteConfig.ResultsFilter != null)
             {
