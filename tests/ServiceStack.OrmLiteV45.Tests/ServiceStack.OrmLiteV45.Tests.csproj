@@ -67,6 +67,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApiMySqlTestsAsync.Parameterized.cs" />
+    <Compile Include="ApiPostgreSqlTestsAsync.Parameterized.cs" />
     <Compile Include="ApiSqliteTestsAsync.Parameterized.cs" />
     <Compile Include="ApiSqliteTestsAsync.cs" />
     <Compile Include="ApiPostgreSqlTestsAsync.cs" />
