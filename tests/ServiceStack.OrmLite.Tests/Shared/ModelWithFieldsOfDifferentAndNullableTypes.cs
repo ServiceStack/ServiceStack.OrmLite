@@ -79,38 +79,11 @@ namespace ServiceStack.Common.Tests.Models
 			Assert.That(actual.LongId, Is.EqualTo(expected.LongId));
 			Assert.That(actual.Bool, Is.EqualTo(expected.Bool));
 			Assert.That(actual.TimeSpan, Is.EqualTo(expected.TimeSpan));
+            Assert.That(actual.DateTime, Is.EqualTo(expected.DateTime).Within(System.TimeSpan.FromSeconds(1)));
+            Assert.That(actual.Float, Is.EqualTo(expected.Float).Within(1f));
+            Assert.That(actual.Double, Is.EqualTo(expected.Double).Within(1d));
 
-			try
-			{
-				Assert.That(actual.DateTime, Is.EqualTo(expected.DateTime));
-			}
-			catch (Exception ex)
-			{
-				Log.Error("Trouble with DateTime precisions, trying Assert again with rounding to seconds", ex);
-				Assert.That(actual.DateTime.RoundToSecond(), Is.EqualTo(expected.DateTime.RoundToSecond()));
-			}
-
-			try
-			{
-				Assert.That(actual.Float, Is.EqualTo(expected.Float));
-			}
-			catch (Exception ex)
-			{
-				Log.Error("Trouble with float precisions, trying Assert again with rounding to 10 decimals", ex);
-				Assert.That(Math.Round(actual.Float, 10), Is.EqualTo(Math.Round(actual.Float, 10)));
-			}
-
-			try
-			{
-				Assert.That(actual.Double, Is.EqualTo(expected.Double));
-			}
-			catch (Exception ex)
-			{
-				Log.Error("Trouble with double precisions, trying Assert again with rounding to 10 decimals", ex);
-				Assert.That(Math.Round(actual.Double, 10), Is.EqualTo(Math.Round(actual.Double, 10)));
-			}
-
-			Assert.That(actual.NBool, Is.EqualTo(expected.NBool));
+            Assert.That(actual.NBool, Is.EqualTo(expected.NBool));
 			Assert.That(actual.NDateTime, Is.EqualTo(expected.NDateTime));
 			Assert.That(actual.NDecimal, Is.EqualTo(expected.NDecimal));
 			Assert.That(actual.NDouble, Is.EqualTo(expected.NDouble));
