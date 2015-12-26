@@ -29,9 +29,9 @@ namespace ServiceStack.OrmLite.Tests.Shared
 
         protected bool Equals(Person other)
         {
-            return Id == other.Id && 
-                string.Equals(FirstName, other.FirstName) && 
-                string.Equals(LastName, other.LastName) && 
+            return Id == other.Id &&
+                string.Equals(FirstName, other.FirstName) &&
+                string.Equals(LastName, other.LastName) &&
                 Age == other.Age;
         }
 
