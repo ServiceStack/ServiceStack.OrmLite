@@ -1588,7 +1588,7 @@ namespace ServiceStack.OrmLite
                     var newName = DialectProvider.GetParam(Params.Count.ToString());
                     if (oldName != newName)
                     {
-                        var pClone = p.Populate(DialectProvider.CreateParam());
+                        var pClone = DialectProvider.CreateParam().PopulateWith(p);
                         subSelect = subSelect.Replace(oldName, newName);
                         pClone.ParameterName = newName;
                         Params.Add(pClone);
@@ -1809,19 +1809,6 @@ namespace ServiceStack.OrmLite
 
             if (dbType != null)
                 to.DbType = dbType.Value;
-
-            return to;
-        }
-
-        public static IDbDataParameter Populate(this IDbDataParameter p, IDbDataParameter to)
-        {
-            to.DbType = p.DbType;
-            to.ParameterName = p.ParameterName;
-            to.Value = p.Value;
-            to.Direction = p.Direction;
-            to.Precision = p.Precision;
-            to.Scale = p.Scale;
-            to.Size = p.Size;
 
             return to;
         }

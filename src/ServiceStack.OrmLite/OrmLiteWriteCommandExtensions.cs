@@ -220,17 +220,7 @@ namespace ServiceStack.OrmLite
         {
             dbCmd.CommandText = sql;
 
-            if (sqlParams != null)
-            {
-                dbCmd.Parameters.Clear();
-
-                foreach (var sqlParam in sqlParams)
-                {
-                    var p = dbCmd.CreateParameter();
-                    p.PopulateWith(sqlParam);
-                    dbCmd.Parameters.Add(p);
-                }
-            }
+            dbCmd.SetParameters(sqlParams);
 
             if (Log.IsDebugEnabled)
                 Log.DebugCommand(dbCmd);
