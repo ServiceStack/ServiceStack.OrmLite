@@ -273,6 +273,17 @@ namespace ServiceStack.OrmLite
                 : null;
         }
 
+        public virtual bool ShouldQuoteValue(Type fieldType)
+        {
+            var converter = GetConverter(fieldType);
+            return converter == null || converter is NativeValueOrmLiteConverter;
+        }
+
+        public virtual ulong FromDbRowVersion(object value)
+        {
+            return RowVersionConverter.FromDbRowVersion(value);
+        }
+
         public IOrmLiteConverter GetConverterBestMatch(Type type)
         {
             var converter = GetConverter(type);
@@ -287,17 +298,6 @@ namespace ServiceStack.OrmLite
                 : ValueTypeConverter;
         }
 
-        public virtual bool ShouldQuoteValue(Type fieldType)
-        {
-            var converter = GetConverter(fieldType);
-            return converter == null || converter is NativeValueOrmLiteConverter;
-        }
-
-        public virtual ulong FromDbRowVersion(object value)
-        {
-            return RowVersionConverter.FromDbRowVersion(value);
-        }
-
         public virtual IOrmLiteConverter GetConverterBestMatch(FieldDefinition fieldDef)
         {
             var fieldType = Nullable.GetUnderlyingType(fieldDef.FieldType) ?? fieldDef.FieldType;
@@ -307,6 +307,9 @@ namespace ServiceStack.OrmLite
             IOrmLiteConverter converter;
             if (Converters.TryGetValue(fieldType, out converter))
                 return converter;
+
+            if (fieldType.IsEnum)
+                return EnumConverter;
 
             return fieldType.IsRefType()
                 ? (IOrmLiteConverter)ReferenceTypeConverter
@@ -819,9 +822,7 @@ namespace ServiceStack.OrmLite
             if (value == null)
                 return null;
 
-            var converter = fieldDef.FieldType.IsEnum
-                ? EnumConverter 
-                : GetConverterBestMatch(fieldDef.FieldType);
+            var converter = GetConverterBestMatch(fieldDef);
             try
             {
                 return converter.ToDbValue(fieldDef.FieldType, value);

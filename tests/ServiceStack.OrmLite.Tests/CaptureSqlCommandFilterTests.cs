@@ -68,7 +68,7 @@ namespace ServiceStack.OrmLite.Tests
                 i++; db.Select<Person>(x => x.Age > 40);
 
                 var p = OrmLiteConfig.UseParameterizeSqlExpressions
-                    ? db.GetDialectProvider().GetParam("0")
+                    ? "@0"  //Normalized
                     : "40";
 
                 Assert.That(captured.SqlCommandHistory.Last().Sql.NormalizeSql(),
@@ -120,7 +120,7 @@ namespace ServiceStack.OrmLite.Tests
                 i++; db.Single<Person>(x => x.Age == 42);
 
                 var p = OrmLiteConfig.UseParameterizeSqlExpressions
-                    ? db.GetDialectProvider().GetParam("0")
+                    ? "@0"  //Normalized
                     : "42";
 
                 Assert.That(captured.SqlCommandHistory.Last().Sql.NormalizeSql(),

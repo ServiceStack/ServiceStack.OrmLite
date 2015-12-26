@@ -118,7 +118,7 @@ namespace ServiceStack.OrmLite.Tests
                 i++; db.Single<Person>(x => x.Age == 42);
 
                 var p = OrmLiteConfig.UseParameterizeSqlExpressions
-                    ? db.GetDialectProvider().GetParam("0")
+                    ? "@0"  //Normalized
                     : "42";
 
                 Assert.That(captured.SqlStatements.Last().NormalizeSql(),

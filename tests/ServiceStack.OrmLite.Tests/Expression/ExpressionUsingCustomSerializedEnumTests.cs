@@ -38,7 +38,8 @@ namespace ServiceStack.OrmLite.Tests.Expression
         [TestCase(2)]
         public void Can_select_on_custom_default_null_serialized_enum(int index)
         {
-            if (Dialect == Dialect.Oracle) Assert.Ignore("Can't work on Oracle because Oracle does not allow empty strings in a varchar column");
+            if (Dialect == Dialect.Oracle)
+                Assert.Ignore("Can't work on Oracle because Oracle does not allow empty strings in a varchar column");
 
             EnumSerializerWithNullDefaults.Configure();
 
@@ -59,11 +60,11 @@ namespace ServiceStack.OrmLite.Tests.Expression
             db.DropAndCreateTable<Activity>();
 
             var activities = new []
-                {
-                    new Activity {ActivityType = ActivityType.Unknown, Comment = "know nothing about this"},
-                    new Activity {ActivityType = ActivityType.Unspecified, Comment = "know we don't know about this"},
-                    new Activity {ActivityType = ActivityType.HavingFun, Comment = "want to be doing this"}
-                };
+            {
+                new Activity { ActivityType = ActivityType.Unknown, Comment = "know nothing about this" },
+                new Activity { ActivityType = ActivityType.Unspecified, Comment = "know we don't know about this" },
+                new Activity { ActivityType = ActivityType.HavingFun, Comment = "want to be doing this" }
+            };
             db.InsertAll(activities);
             return activities[index];
         }

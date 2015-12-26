@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
 using ServiceStack.OrmLite.Converters;
 
 namespace ServiceStack.OrmLite.PostgreSQL.Converters
@@ -18,6 +19,11 @@ namespace ServiceStack.OrmLite.PostgreSQL.Converters
         {
             get { return DbType.Int16; }
         }
+
+        public override object ToDbValue(Type fieldType, object value)
+        {
+            return this.ConvertNumber(typeof(short), value);
+        }
     }
 
     public class PostrgreSqlUInt32Converter : UInt32Converter
@@ -26,6 +32,11 @@ namespace ServiceStack.OrmLite.PostgreSQL.Converters
         {
             get { return DbType.Int32; }
         }
+
+        public override object ToDbValue(Type fieldType, object value)
+        {
+            return this.ConvertNumber(typeof(int), value);
+        }
     }
 
     public class PostrgreSqlUInt64Converter : UInt64Converter
@@ -33,6 +44,11 @@ namespace ServiceStack.OrmLite.PostgreSQL.Converters
         public override DbType DbType
         {
             get { return DbType.Int64; }
+        }
+
+        public override object ToDbValue(Type fieldType, object value)
+        {
+            return this.ConvertNumber(typeof(long), value);
         }
     }
 }
