@@ -1,4 +1,5 @@
 using System;
+using System.Data;
 using System.Linq.Expressions;
 
 namespace ServiceStack.OrmLite
@@ -33,11 +34,7 @@ namespace ServiceStack.OrmLite
             if (!OrmLiteConfig.UseParameterizeSqlExpressions)
                 return;
 
-            var paramName = Params.Count.ToString();
-            var paramValue = right;
-
-            var parameter = CreateParam(paramName, paramValue);
-            Params.Add(parameter);
+            var parameter = AddParam(right);
 
             right = parameter.ParameterName;
         }

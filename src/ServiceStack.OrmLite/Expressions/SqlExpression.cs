@@ -742,29 +742,47 @@ namespace ServiceStack.OrmLite
             return DialectProvider.GetQuotedColumnName(columnName);
         }
 
+        public virtual IDbDataParameter AddParam(object value)
+        {
+            var paramName = Params.Count.ToString();
+            var paramValue = value;
+
+            var parameter = CreateParam(paramName, paramValue);
+            Params.Add(parameter);
+            return parameter;
+        }
+
+        public virtual void CopyParamsTo(IDbCommand dbCmd)
+        {
+            foreach (var sqlParam in Params)
+            {
+                dbCmd.Parameters.Add(sqlParam);
+            }
+        }
+
         public virtual string ToDeleteRowStatement()
         {
             return string.Format("DELETE FROM {0} {1}",
                 DialectProvider.GetQuotedTableName(modelDef), WhereExpression);
         }
 
-        public virtual string ToUpdateStatement(T item, bool excludeDefaults = false)
+        public virtual void PrepareUpdateStatement(IDbCommand dbCmd, T item, bool excludeDefaults = false)
         {
+            CopyParamsTo(dbCmd);
+
             var setFields = new StringBuilder();
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
                 if (fieldDef.ShouldSkipUpdate()) continue;
                 if (fieldDef.IsRowVersion) continue;
-                if (updateFields.Count > 0 
-                    && !updateFields.Contains(fieldDef.Name)) continue; // added
+                if (UpdateFields.Count > 0 
+                    && !UpdateFields.Contains(fieldDef.Name)) continue; // added
 
                 var value = fieldDef.GetValue(item);
                 if (excludeDefaults
                     && (value == null || (!fieldDef.IsNullable && value.Equals(value.GetType().GetDefaultValue()))))
                     continue;
-
-                fieldDef.GetQuotedValue(item, DialectProvider);
 
                 if (setFields.Length > 0)
                     setFields.Append(", ");
@@ -772,13 +790,13 @@ namespace ServiceStack.OrmLite
                 setFields
                     .Append(DialectProvider.GetQuotedColumnName(fieldDef.FieldName))
                     .Append("=")
-                    .Append(DialectProvider.GetQuotedValue(value, fieldDef.FieldType));
+                    .Append(DialectProvider.AddParam(dbCmd, value).ParameterName);
             }
 
             if (setFields.Length == 0)
                 throw new ArgumentException("No non-null or non-default values were provided for type: " + typeof(T).Name);
 
-            return string.Format("UPDATE {0} SET {1} {2}",
+            dbCmd.CommandText = string.Format("UPDATE {0} SET {1} {2}",
                 DialectProvider.GetQuotedTableName(modelDef), setFields, WhereExpression);
         }
 
