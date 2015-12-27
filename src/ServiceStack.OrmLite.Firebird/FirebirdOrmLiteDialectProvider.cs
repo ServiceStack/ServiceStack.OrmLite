@@ -237,7 +237,7 @@ namespace ServiceStack.OrmLite.Firebird
                 GetQuotedTableName(modelDef), sbColumnNames, sbColumnValues);
         }
 
-        public override string ToUpdateRowStatement(object objWithProperties, ICollection<string> updateFields = null)
+        public override void PrepareUpdateRowStatement(IDbCommand dbCmd, object objWithProperties, ICollection<string> updateFields = null)
         {
             if (updateFields == null)
                 updateFields = new List<string>();
@@ -255,50 +255,31 @@ namespace ServiceStack.OrmLite.Firebird
                 if ((fieldDef.IsPrimaryKey || fieldDef.Name == OrmLiteConfig.IdField)
                     && updateFields.Count == 0)
                 {
-                    if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
+                    if (sqlFilter.Length > 0)
+                        sqlFilter.Append(" AND ");
 
-                    sqlFilter.AppendFormat("{0}={1}",
-                        GetQuotedColumnName(fieldDef.FieldName),
-                        fieldDef.GetQuotedValue(objWithProperties));
+                    sqlFilter
+                        .Append(GetQuotedColumnName(fieldDef.FieldName))
+                        .Append("=")
+                        .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties)).ParameterName);
 
                     continue;
                 }
-                if (updateFields.Count > 0 && !updateFields.Contains(fieldDef.Name)) continue;
-                if (sql.Length > 0) sql.Append(",");
-                sql.AppendFormat("{0}={1}",
-                    GetQuotedColumnName(fieldDef.FieldName),
-                    fieldDef.GetQuotedValue(objWithProperties));
+
+                if (updateFields.Count > 0 && !updateFields.Contains(fieldDef.Name))
+                    continue;
+
+                if (sql.Length > 0)
+                    sql.Append(",");
+
+                sql
+                    .Append(GetQuotedColumnName(fieldDef.FieldName))
+                    .Append("=")
+                    .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties)).ParameterName);
             }
 
-            var updateSql = string.Format("UPDATE {0} \nSET {1} {2}",
+            dbCmd.CommandText = string.Format("UPDATE {0} \nSET {1} {2}",
                 GetQuotedTableName(modelDef), sql, (sqlFilter.Length > 0 ? "\nWHERE " + sqlFilter : ""));
-
-            return updateSql;
-        }
-
-
-        public override string ToDeleteRowStatement(object objWithProperties)
-        {
-            var tableType = objWithProperties.GetType();
-            var modelDef = GetModel(tableType);
-
-            var sqlFilter = new StringBuilder();
-
-            foreach (var fieldDef in modelDef.FieldDefinitions)
-            {
-                if (fieldDef.IsPrimaryKey || fieldDef.Name == OrmLiteConfig.IdField)
-                {
-                    if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
-                    sqlFilter.AppendFormat("{0} = {1}",
-                        GetQuotedColumnName(fieldDef.FieldName),
-                        fieldDef.GetQuotedValue(objWithProperties));
-                }
-            }
-
-            var deleteSql = string.Format("DELETE FROM {0} WHERE {1}",
-                GetQuotedTableName(modelDef), sqlFilter);
-
-            return deleteSql;
         }
 
         public override string ToCreateTableStatement(Type tableType)

@@ -700,13 +700,6 @@ namespace ServiceStack.OrmLite
             AddParameter(cmd, fieldDef);
         }
 
-        public virtual void AppendFieldConditionFmt(StringBuilder sqlFilter, FieldDefinition fieldDef, object objWithProperties)
-        {
-            sqlFilter.AppendFormat("{0}={1}",
-                GetQuotedColumnName(fieldDef.FieldName),
-                fieldDef.GetQuotedValue(objWithProperties, this));
-        }
-
         public virtual bool PrepareParameterizedDeleteStatement<T>(IDbCommand cmd, IDictionary<string, object> deleteFields)
         {
             if (deleteFields == null || deleteFields.Count == 0)
@@ -896,7 +889,7 @@ namespace ServiceStack.OrmLite
             return getterFn(obj);
         }
 
-        public virtual string ToUpdateRowStatement(object objWithProperties, ICollection<string> updateFields = null)
+        public virtual void PrepareUpdateRowStatement(IDbCommand dbCmd, object objWithProperties, ICollection<string> updateFields = null)
         {
             var sqlFilter = new StringBuilder();
             var sql = new StringBuilder();
@@ -915,16 +908,24 @@ namespace ServiceStack.OrmLite
                         if (sqlFilter.Length > 0)
                             sqlFilter.Append(" AND ");
 
-                        AppendFieldConditionFmt(sqlFilter, fieldDef, objWithProperties);
+                        sqlFilter
+                            .Append(GetQuotedColumnName(fieldDef.FieldName))
+                            .Append("=")
+                            .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties)).ParameterName);
 
                         continue;
                     }
 
-                    if (!updateAllFields && !updateFields.Contains(fieldDef.Name) || fieldDef.AutoIncrement) continue;
+                    if (!updateAllFields && !updateFields.Contains(fieldDef.Name) || fieldDef.AutoIncrement)
+                        continue;
+
                     if (sql.Length > 0)
                         sql.Append(", ");
 
-                    AppendFieldConditionFmt(sql, fieldDef, objWithProperties);
+                    sql
+                        .Append(GetQuotedColumnName(fieldDef.FieldName))
+                        .Append("=")
+                        .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties)).ParameterName);
                 }
                 catch (Exception ex)
                 {
@@ -932,45 +933,11 @@ namespace ServiceStack.OrmLite
                 }
             }
 
-            var updateSql = string.Format("UPDATE {0} SET {1}{2}",
+            dbCmd.CommandText = string.Format("UPDATE {0} SET {1}{2}",
                 GetQuotedTableName(modelDef), sql, (sqlFilter.Length > 0 ? " WHERE " + sqlFilter : ""));
 
             if (sql.Length == 0)
-                throw new Exception("No valid update properties provided (e.g. p => p.FirstName): " + updateSql);
-
-            return updateSql;
-        }
-
-        public virtual string ToDeleteRowStatement(object objWithProperties)
-        {
-            var sqlFilter = new StringBuilder();
-            var modelDef = objWithProperties.GetType().GetModelDefinition();
-
-            foreach (var fieldDef in modelDef.FieldDefinitions)
-            {
-                if (fieldDef.ShouldSkipDelete())
-                    continue;
-
-                try
-                {
-                    if (fieldDef.IsPrimaryKey)
-                    {
-                        if (sqlFilter.Length > 0)
-                            sqlFilter.Append(" AND ");
-
-                        AppendFieldConditionFmt(sqlFilter, fieldDef, objWithProperties);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Log.Error("ERROR in ToDeleteRowStatement(): " + ex.Message, ex);
-                }
-            }
-
-            var deleteSql = string.Format("DELETE FROM {0} WHERE {1}",
-                GetQuotedTableName(modelDef), sqlFilter);
-
-            return deleteSql;
+                throw new Exception("No valid update properties provided (e.g. p => p.FirstName): " + dbCmd.CommandText);
         }
 
         public virtual string ToDeleteStatement(Type tableType, string sqlFilter, params object[] filterParams)

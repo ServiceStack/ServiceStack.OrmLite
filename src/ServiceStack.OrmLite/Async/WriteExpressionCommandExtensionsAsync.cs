@@ -16,8 +16,8 @@ namespace ServiceStack.OrmLite
 
         internal static Task<int> UpdateOnlyAsync<T>(this IDbCommand dbCmd, T model, SqlExpression<T> onlyFields, CancellationToken token)
         {
-            var sql = dbCmd.UpdateOnlySql(model, onlyFields);
-            return dbCmd.ExecuteSqlAsync(sql, onlyFields.Params, token);
+            dbCmd.UpdateOnlySql(model, onlyFields);
+            return dbCmd.ExecNonQueryAsync(token);
         }
 
         internal static Task<int> UpdateOnlyAsync<T, TKey>(this IDbCommand dbCmd, T obj,
@@ -41,8 +41,8 @@ namespace ServiceStack.OrmLite
 
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Where(obj);
-            var sql = q.ToUpdateStatement(item, excludeDefaults: true);
-            return dbCmd.ExecuteSqlAsync(sql, q.Params, token);
+            q.PrepareUpdateStatement(dbCmd, item, excludeDefaults: true);
+            return dbCmd.ExecNonQueryAsync(token);
         }
 
         internal static Task<int> UpdateAsync<T>(this IDbCommand dbCmd, T item, Expression<Func<T, bool>> expression, CancellationToken token)
@@ -52,17 +52,18 @@ namespace ServiceStack.OrmLite
 
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Where(expression);
-            var sql = q.ToUpdateStatement(item);
-            return dbCmd.ExecuteSqlAsync(sql, q.Params, token);
+            q.PrepareUpdateStatement(dbCmd, item);
+            return dbCmd.ExecNonQueryAsync(token);
         }
 
         internal static Task<int> UpdateAsync<T>(this IDbCommand dbCmd, object updateOnly, Expression<Func<T, bool>> where, CancellationToken token)
         {
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             var whereSql = q.Where(@where).WhereExpression;
-            var updateSql = WriteExpressionCommandExtensions.UpdateSql<T>(dbCmd.GetDialectProvider(), updateOnly, whereSql);
+            q.CopyParamsTo(dbCmd);
+            dbCmd.PrepareUpdateAnonSql<T>(dbCmd.GetDialectProvider(), updateOnly, whereSql);
 
-            return dbCmd.ExecuteSqlAsync(updateSql, q.Params, token);
+            return dbCmd.ExecNonQueryAsync(token);
         }
 
         internal static Task<int> UpdateFmtAsync<T>(this IDbCommand dbCmd, string set, string where, CancellationToken token)

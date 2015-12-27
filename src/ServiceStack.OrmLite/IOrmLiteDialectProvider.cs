@@ -116,9 +116,9 @@ namespace ServiceStack.OrmLite
         object GetFieldValue(FieldDefinition fieldDef, object value);
         object GetFieldValue(Type fieldType, object value);
 
-        string ToUpdateRowStatement(object objWithProperties, ICollection<string> UpdateFields = null);
 
-        string ToDeleteRowStatement(object objWithProperties);
+        void PrepareUpdateRowStatement(IDbCommand dbCmd, object objWithProperties, ICollection<string> UpdateFields = null);
+
         string ToDeleteStatement(Type tableType, string sqlFilter, params object[] filterParams);
 
         IDbCommand CreateParameterizedDeleteStatement(IDbConnection connection, object objWithProperties);

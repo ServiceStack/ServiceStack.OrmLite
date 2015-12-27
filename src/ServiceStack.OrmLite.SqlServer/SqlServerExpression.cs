@@ -1,4 +1,5 @@
 using System;
+using System.Data;
 using System.Text;
 using ServiceStack.OrmLite.SqlServer.Converters;
 
@@ -9,9 +10,9 @@ namespace ServiceStack.OrmLite.SqlServer
         public SqlServerExpression(IOrmLiteDialectProvider dialectProvider)
             : base(dialectProvider) {}
 
-        public override string ToUpdateStatement(T item, bool excludeDefaults = false)
+        public override void PrepareUpdateStatement(IDbCommand dbCmd, T item, bool excludeDefaults = false)
         {
-            return SqlServerExpressionUtils.ToSqlServerUpdateStatement(this, item, excludeDefaults);
+            SqlServerExpressionUtils.PrepareSqlServerUpdateStatement(dbCmd, this, item, excludeDefaults);
         }
 
         public override string GetSubstringSql(object quotedColumn, int startIndex, int? length = null)
@@ -32,9 +33,9 @@ namespace ServiceStack.OrmLite.SqlServer
         public SqlServerParameterizedSqlExpression(IOrmLiteDialectProvider dialectProvider)
             : base(dialectProvider) {}
 
-        public override string ToUpdateStatement(T item, bool excludeDefaults = false)
+        public override void PrepareUpdateStatement(IDbCommand dbCmd, T item, bool excludeDefaults = false)
         {
-            return SqlServerExpressionUtils.ToSqlServerUpdateStatement(this, item, excludeDefaults);
+            SqlServerExpressionUtils.PrepareSqlServerUpdateStatement(dbCmd, this, item, excludeDefaults);
         }
 
         public override string GetSubstringSql(object quotedColumn, int startIndex, int? length = null)
@@ -77,10 +78,12 @@ namespace ServiceStack.OrmLite.SqlServer
 
     internal class SqlServerExpressionUtils
     {
-        internal static string ToSqlServerUpdateStatement<T>(SqlExpression<T> q, T item, bool excludeDefaults = false)
+        internal static void PrepareSqlServerUpdateStatement<T>(IDbCommand dbCmd, SqlExpression<T> q, T item, bool excludeDefaults = false)
         {
+            q.CopyParamsTo(dbCmd);
+
             var modelDef = q.ModelDef;
-            var dialectProvider = q.DialectProvider;
+            var DialectProvider = q.DialectProvider;
 
             var setFields = new StringBuilder();
 
@@ -98,22 +101,21 @@ namespace ServiceStack.OrmLite.SqlServer
                     && (value == null || (!fieldDef.IsNullable && value.Equals(value.GetType().GetDefaultValue()))))
                     continue;
 
-                fieldDef.GetQuotedValue(item, dialectProvider);
-
                 if (setFields.Length > 0)
                     setFields.Append(", ");
 
+                var param = DialectProvider.AddParam(dbCmd, value);
                 setFields
-                    .Append(dialectProvider.GetQuotedColumnName(fieldDef.FieldName))
+                    .Append(DialectProvider.GetQuotedColumnName(fieldDef.FieldName))
                     .Append("=")
-                    .Append(dialectProvider.GetQuotedValue(value, fieldDef.FieldType));
+                    .Append(param.ParameterName);
             }
 
             if (setFields.Length == 0)
                 throw new ArgumentException("No non-null or non-default values were provided for type: " + typeof(T).Name);
 
-            return string.Format("UPDATE {0} SET {1} {2}",
-                dialectProvider.GetQuotedTableName(modelDef), setFields, q.WhereExpression);
+            dbCmd.CommandText = string.Format("UPDATE {0} SET {1} {2}",
+                DialectProvider.GetQuotedTableName(modelDef), setFields, q.WhereExpression);
         }
     }
 }

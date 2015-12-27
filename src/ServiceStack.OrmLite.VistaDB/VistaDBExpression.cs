@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Linq.Expressions;
@@ -10,8 +11,10 @@ namespace ServiceStack.OrmLite.VistaDB
         public VistaDbExpression(IOrmLiteDialectProvider dialectProvider) 
             : base(dialectProvider) {}
 
-        public override string ToUpdateStatement(T item, bool excludeDefaults = false)
+        public override void PrepareUpdateStatement(IDbCommand dbCmd, T item, bool excludeDefaults = false)
         {
+            CopyParamsTo(dbCmd);
+
             var setFields = new StringBuilder();
 
             foreach (var fieldDef in ModelDef.FieldDefinitions)
@@ -24,18 +27,20 @@ namespace ServiceStack.OrmLite.VistaDB
                     && (value == null || (!fieldDef.IsNullable && value.Equals(value.GetType().GetDefaultValue()))))
                     continue;
 
-                fieldDef.GetQuotedValue(item);
+                if (setFields.Length > 0)
+                    setFields.Append(", ");
 
-                if (setFields.Length > 0) setFields.Append(",");
-                setFields.AppendFormat("{0} = {1}",
-                    DialectProvider.GetQuotedColumnName(fieldDef.FieldName),
-                    DialectProvider.GetQuotedValue(value, fieldDef.FieldType));
+                var param = DialectProvider.AddParam(dbCmd, value);
+                setFields
+                    .Append(DialectProvider.GetQuotedColumnName(fieldDef.FieldName))
+                    .Append("=")
+                    .Append(param.ParameterName);
             }
 
             if (setFields.Length == 0)
                 throw new ArgumentException("No non-null or non-default values were provided for type: " + typeof(T).Name);
 
-            return string.Format("UPDATE {0} SET {1} {2}",
+            dbCmd.CommandText = string.Format("UPDATE {0} SET {1} {2}",
                 DialectProvider.GetQuotedTableName(ModelDef), setFields, WhereExpression);
         }
 
