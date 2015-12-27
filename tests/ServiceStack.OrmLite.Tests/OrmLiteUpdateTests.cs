@@ -304,6 +304,103 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(row.Name, Is.EqualTo("UPDATED"));
             }
         }
+
+        [Test]
+        public void Does_Update_using_db_params()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Person>();
+                db.InsertAll(Person.Rockstars);
+
+                db.Update(new Person { Id = 1, FirstName = "JJ", Age = 27 }, p => p.LastName == "Hendrix");
+
+                var sql = db.GetLastSql().NormalizeSql();
+                Assert.That(sql, Is.StringContaining("where (lastname = @0)"));
+                Assert.That(sql, Is.StringContaining("id=@1"));
+                Assert.That(sql, Is.StringContaining("firstname=@2"));
+
+                var row = db.SingleById<Person>(1);
+                Assert.That(row.FirstName, Is.EqualTo("JJ"));
+            }
+        }
+
+        [Test]
+        public void Does_Update_anonymous_using_db_params()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Person>();
+                db.InsertAll(Person.Rockstars);
+
+                db.Update<Person>(new { FirstName = "JJ" }, p => p.LastName == "Hendrix");
+
+                var sql = db.GetLastSql().NormalizeSql();
+                Assert.That(sql, Is.StringContaining("where (lastname = @0)"));
+                Assert.That(sql, Is.StringContaining("firstname=@1"));
+
+                var row = db.SingleById<Person>(1);
+                Assert.That(row.FirstName, Is.EqualTo("JJ"));
+            }
+        }
+
+        [Test]
+        public void Does_UpdateNonDefaults_using_db_params()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Person>();
+                db.InsertAll(Person.Rockstars);
+
+                db.UpdateNonDefaults(new Person { FirstName = "JJ" }, p => p.LastName == "Hendrix");
+
+                var sql = db.GetLastSql().NormalizeSql();
+                Assert.That(sql, Is.StringContaining("where (lastname = @0)"));
+                Assert.That(sql, Is.StringContaining("firstname=@1"));
+
+                var row = db.SingleById<Person>(1);
+                Assert.That(row.FirstName, Is.EqualTo("JJ"));
+            }
+        }
+
+        [Test]
+        public void Does_UpdateOnly_using_db_params()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Person>();
+                db.InsertAll(Person.Rockstars);
+
+                db.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName, p => p.LastName == "Hendrix");
+
+                var sql = db.GetLastSql().NormalizeSql();
+                Assert.That(sql, Is.StringContaining("where (lastname = @0)"));
+                Assert.That(sql, Is.StringContaining("firstname=@1"));
+
+                var row = db.SingleById<Person>(1);
+                Assert.That(row.FirstName, Is.EqualTo("JJ"));
+            }
+        }
+
+        [Test]
+        public void Does_UpdateOnly_with_SqlExpression_using_db_params()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Person>();
+                db.InsertAll(Person.Rockstars);
+
+                db.UpdateOnly(new Person { FirstName = "JJ" }, q => q.Update(p => p.FirstName).Where(x => x.FirstName == "Jimi"));
+
+                var sql = db.GetLastSql().NormalizeSql();
+                Assert.That(sql, Is.StringContaining("where (firstname = @0)"));
+                Assert.That(sql, Is.StringContaining("firstname=@1"));
+
+                var row = db.SingleById<Person>(1);
+                Assert.That(row.FirstName, Is.EqualTo("JJ"));
+            }
+        }
+
     }
 
     [CompositeIndex("FirstName", "LastName")]

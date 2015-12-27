@@ -157,9 +157,11 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(db.GetLastSql(), Is.StringContaining("=@Flags").Or.StringContaining("=:Flags"));
                 db.GetLastSql().Print();
 
-                db.UpdateOnly(new TypeWithFlagsEnum { Id = 1, Flags = FlagsEnum.FlagThree }, q => q.Flags);
-                Assert.That(db.GetLastSql(), Is.StringContaining("=" + (int)FlagsEnum.FlagThree));
-                db.GetLastSql().Print();
+                db.UpdateOnly(new TypeWithFlagsEnum { Id = 1, Flags = FlagsEnum.FlagThree }, onlyFields:q => q.Flags);
+                Assert.That(db.GetLastSql().NormalizeSql(), Is.StringContaining("=@0"));
+
+                var row = db.SingleById<TypeWithFlagsEnum>(1);
+                Assert.That(row.Flags, Is.EqualTo(FlagsEnum.FlagThree));
             }
         }
 
