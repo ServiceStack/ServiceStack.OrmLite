@@ -139,13 +139,27 @@ namespace ServiceStack.OrmLite
             if (sqlParams == null) 
                 return dbCmd;
             
-            dbCmd.Parameters.Clear();
-
-            foreach (var sqlParam in sqlParams)
+            try
             {
-                var p = dbCmd.CreateParameter();
-                p.PopulateWith(sqlParam);
-                dbCmd.Parameters.Add(p);
+                dbCmd.Parameters.Clear();
+                foreach (var sqlParam in sqlParams)
+                {
+                    dbCmd.Parameters.Add(sqlParam);
+                }
+            }
+            catch (Exception ex)
+            {
+                //SQL Server + PostgreSql doesn't allow re-using db params in multiple queries
+                if (Log.IsDebugEnabled)
+                    Log.Debug("Exception trying to reuse db params, executing with cloned params instead", ex);
+
+                dbCmd.Parameters.Clear();
+                foreach (var sqlParam in sqlParams)
+                {
+                    var p = dbCmd.CreateParameter();
+                    p.PopulateWith(sqlParam);
+                    dbCmd.Parameters.Add(p);
+                }
             }
 
             return dbCmd;

@@ -1789,14 +1789,12 @@ namespace ServiceStack.OrmLite
         {
             var dialectProvider = db.GetDialectProvider();
 
-            var to = new OrmLiteDataParameter
-            {
-                ParameterName = dialectProvider.GetParam(name),
-                Value = value,
-            };
+            var to = dialectProvider.CreateParam();
+
+            to.ParameterName = dialectProvider.GetParam(name);
+            to.Value = value;
 
             var valueType = value != null ? value.GetType() : typeof(string);
-            to.IsNullable = isNullable.GetValueOrDefault(value == null || !valueType.IsNullableType());
 
             if (precision != null)
                 to.Precision = precision.Value;
