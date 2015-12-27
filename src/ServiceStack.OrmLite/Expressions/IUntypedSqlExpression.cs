@@ -25,8 +25,8 @@ namespace ServiceStack.OrmLite
         string OrderByExpression { get; set; }
         int? Rows { get; set; }
         int? Offset { get; set; }
-        IList<string> UpdateFields { get; set; }
-        IList<string> InsertFields { get; set; }
+        List<string> UpdateFields { get; set; }
+        List<string> InsertFields { get; set; }
         ModelDefinition ModelDef { get; }
         IUntypedSqlExpression Clone();
 
@@ -74,9 +74,9 @@ namespace ServiceStack.OrmLite
         IUntypedSqlExpression Limit(int rows);
         IUntypedSqlExpression Limit();
         IUntypedSqlExpression ClearLimits();
-        IUntypedSqlExpression Update(IList<string> updateFields);
+        IUntypedSqlExpression Update(List<string> updateFields);
         IUntypedSqlExpression Update();
-        IUntypedSqlExpression Insert(IList<string> insertFields);
+        IUntypedSqlExpression Insert(List<string> insertFields);
         IUntypedSqlExpression Insert();
 
         IDbDataParameter CreateParam(string name, object value = null, ParameterDirection direction = ParameterDirection.Input, DbType? dbType = null);
@@ -190,13 +190,13 @@ namespace ServiceStack.OrmLite
             set { q.Offset = value; }
         }
 
-        public IList<string> UpdateFields
+        public List<string> UpdateFields
         {
             get { return q.UpdateFields; }
             set { q.UpdateFields = value; }
         }
 
-        public IList<string> InsertFields
+        public List<string> InsertFields
         {
             get { return q.InsertFields; }
             set { q.InsertFields = value; }
@@ -465,7 +465,7 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
-        public IUntypedSqlExpression Update(IList<string> updateFields)
+        public IUntypedSqlExpression Update(List<string> updateFields)
         {
             q.Update(updateFields);
             return this;
@@ -477,7 +477,7 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
-        public IUntypedSqlExpression Insert(IList<string> insertFields)
+        public IUntypedSqlExpression Insert(List<string> insertFields)
         {
             q.Insert(insertFields);
             return this;

@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Collections.ObjectModel;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 
 namespace ServiceStack.OrmLite
 {
@@ -21,8 +22,8 @@ namespace ServiceStack.OrmLite
         private string havingExpression;
         private string orderBy = string.Empty;
 
-        IList<string> updateFields = new List<string>();
-        IList<string> insertFields = new List<string>();
+        public List<string> UpdateFields { get; set; }
+        public List<string> InsertFields { get; set; }
 
         private string sep = string.Empty;
         protected bool useFieldName = false;
@@ -41,9 +42,13 @@ namespace ServiceStack.OrmLite
 
         public SqlExpression(IOrmLiteDialectProvider dialectProvider)
         {
+            UpdateFields = new List<string>();
+            InsertFields = new List<string>();
+
             modelDef = typeof(T).GetModelDefinition();
             PrefixFieldWithTableName = false;
             WhereStatementWithoutWhereString = false;
+
             DialectProvider = dialectProvider;
             Params = new List<IDbDataParameter>();
             tableDefs.Add(modelDef);
@@ -66,8 +71,8 @@ namespace ServiceStack.OrmLite
             to.groupBy = groupBy;
             to.havingExpression = havingExpression;
             to.orderBy = orderBy;
-            to.updateFields = updateFields;
-            to.insertFields = insertFields;
+            to.UpdateFields = UpdateFields;
+            to.InsertFields = InsertFields;
             to.modelDef = modelDef;
             to.PrefixFieldWithTableName = PrefixFieldWithTableName;
             to.WhereStatementWithoutWhereString = WhereStatementWithoutWhereString;
@@ -662,9 +667,9 @@ namespace ServiceStack.OrmLite
         /// <param name='updatefields'>
         /// IList<string> containing Names of properties to be updated
         /// </param>
-        public virtual SqlExpression<T> Update(IList<string> updateFields)
+        public virtual SqlExpression<T> Update(List<string> updateFields)
         {
-            this.updateFields = updateFields;
+            this.UpdateFields = updateFields;
             return this;
         }
 
@@ -681,7 +686,7 @@ namespace ServiceStack.OrmLite
         {
             sep = string.Empty;
             useFieldName = false;
-            updateFields = Visit(fields).ToString().Split(',').ToList();
+            UpdateFields = Visit(fields).ToString().Split(',').ToList();
             return this;
         }
 
@@ -690,7 +695,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public virtual SqlExpression<T> Update()
         {
-            this.updateFields = new List<string>();
+            this.UpdateFields = new List<string>();
             return this;
         }
 
@@ -707,7 +712,7 @@ namespace ServiceStack.OrmLite
         {
             sep = string.Empty;
             useFieldName = false;
-            insertFields = Visit(fields).ToString().Split(',').ToList();
+            InsertFields = Visit(fields).ToString().Split(',').ToList();
             return this;
         }
 
@@ -717,9 +722,9 @@ namespace ServiceStack.OrmLite
         /// <param name='insertFields'>
         /// IList&lt;string&gt; containing Names of properties to be inserted
         /// </param>
-        public virtual SqlExpression<T> Insert(IList<string> insertFields)
+        public virtual SqlExpression<T> Insert(List<string> insertFields)
         {
-            this.insertFields = insertFields;
+            this.InsertFields = insertFields;
             return this;
         }
 
@@ -728,7 +733,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public virtual SqlExpression<T> Insert()
         {
-            this.insertFields = new List<string>();
+            this.InsertFields = new List<string>();
             return this;
         }
 
@@ -900,30 +905,6 @@ namespace ServiceStack.OrmLite
 
         public int? Rows { get; set; }
         public int? Offset { get; set; }
-
-        public IList<string> UpdateFields
-        {
-            get
-            {
-                return updateFields;
-            }
-            set
-            {
-                updateFields = value;
-            }
-        }
-
-        public IList<string> InsertFields
-        {
-            get
-            {
-                return insertFields;
-            }
-            set
-            {
-                insertFields = value;
-            }
-        }
 
         public ModelDefinition ModelDef
         {
@@ -1733,6 +1714,10 @@ namespace ServiceStack.OrmLite
                 p.Value = DialectProvider.GetParamValue(value, value.GetType());
                 DialectProvider.InitDbParam(p, value.GetType());
             }
+            else
+            {
+                p.Value = DBNull.Value;
+            }
 
             if (dbType != null)
                 p.DbType = dbType.Value;
@@ -1800,17 +1785,34 @@ namespace ServiceStack.OrmLite
             string name,
             object value=null,
             DbType? dbType=null,
-            bool? isNullable=null,
             byte? precision=null,
             byte? scale=null,
             int? size=null)
         {
-            var dialectProvider = db.GetDialectProvider();
+            return db.GetDialectProvider().CreateParam(name, value, dbType, precision, scale, size);
+        }
 
+        public static IDbDataParameter CreateParam(this IOrmLiteDialectProvider dialectProvider,
+            string name,
+            object value = null,
+            DbType? dbType = null,
+            byte? precision = null,
+            byte? scale = null,
+            int? size = null)
+        {
             var to = dialectProvider.CreateParam();
 
             to.ParameterName = dialectProvider.GetParam(name);
-            to.Value = value;
+
+            if (value != null)
+            {
+                to.Value = dialectProvider.GetParamValue(value, value.GetType());
+                dialectProvider.InitDbParam(to, value.GetType());
+            }
+            else
+            {
+                to.Value = DBNull.Value;
+            }
 
             var valueType = value != null ? value.GetType() : typeof(string);
 
@@ -1827,6 +1829,15 @@ namespace ServiceStack.OrmLite
                 to.DbType = dbType.Value;
 
             return to;
+        }
+
+        public static IDbDataParameter AddParam(this IOrmLiteDialectProvider dialectProvider, IDbCommand dbCmd, object value)
+        {
+            var paramName = dbCmd.Parameters.Count.ToString();
+
+            var parameter = dialectProvider.CreateParam(paramName, value);
+            dbCmd.Parameters.Add(parameter);
+            return parameter;
         }
     }
 }
