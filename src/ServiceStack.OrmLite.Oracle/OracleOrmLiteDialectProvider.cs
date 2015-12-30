@@ -730,7 +730,7 @@ namespace ServiceStack.OrmLite.Oracle
                     sqlFilter
                         .Append(GetQuotedColumnName(fieldDef.FieldName))
                         .Append("=")
-                        .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties)).ParameterName);
+                        .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef.ColumnType).ParameterName);
 
                     continue;
                 }

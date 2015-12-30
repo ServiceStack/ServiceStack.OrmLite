@@ -911,7 +911,7 @@ namespace ServiceStack.OrmLite
                         sqlFilter
                             .Append(GetQuotedColumnName(fieldDef.FieldName))
                             .Append("=")
-                            .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties)).ParameterName);
+                            .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef.ColumnType).ParameterName);
 
                         continue;
                     }
@@ -925,7 +925,7 @@ namespace ServiceStack.OrmLite
                     sql
                         .Append(GetQuotedColumnName(fieldDef.FieldName))
                         .Append("=")
-                        .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties)).ParameterName);
+                        .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef.ColumnType).ParameterName);
                 }
                 catch (Exception ex)
                 {

@@ -100,7 +100,7 @@ namespace ServiceStack.OrmLite
                 sql
                     .Append(dialectProvider.GetQuotedColumnName(fieldDef.FieldName))
                     .Append("=")
-                    .Append(dialectProvider.AddParam(dbCmd, value).ParameterName);
+                    .Append(dialectProvider.AddParam(dbCmd, value, fieldDef.ColumnType).ParameterName);
             }
 
             dbCmd.CommandText = string.Format("UPDATE {0} SET {1} {2}",

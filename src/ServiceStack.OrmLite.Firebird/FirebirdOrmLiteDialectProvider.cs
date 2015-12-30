@@ -261,7 +261,7 @@ namespace ServiceStack.OrmLite.Firebird
                     sqlFilter
                         .Append(GetQuotedColumnName(fieldDef.FieldName))
                         .Append("=")
-                        .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties)).ParameterName);
+                        .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef.ColumnType).ParameterName);
 
                     continue;
                 }
@@ -275,7 +275,7 @@ namespace ServiceStack.OrmLite.Firebird
                 sql
                     .Append(GetQuotedColumnName(fieldDef.FieldName))
                     .Append("=")
-                    .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties)).ParameterName);
+                    .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef.ColumnType).ParameterName);
             }
 
             dbCmd.CommandText = string.Format("UPDATE {0} \nSET {1} {2}",

@@ -808,7 +808,7 @@ namespace ServiceStack.OrmLite
                 setFields
                     .Append(DialectProvider.GetQuotedColumnName(fieldDef.FieldName))
                     .Append("=")
-                    .Append(DialectProvider.AddParam(dbCmd, value).ParameterName);
+                    .Append(DialectProvider.AddParam(dbCmd, value, fieldDef.ColumnType).ParameterName);
             }
 
             if (setFields.Length == 0)
@@ -1797,17 +1797,19 @@ namespace ServiceStack.OrmLite
         public static IDbDataParameter CreateParam(this IDbConnection db,
             string name,
             object value=null,
+            Type fieldType = null,
             DbType? dbType=null,
             byte? precision=null,
             byte? scale=null,
             int? size=null)
         {
-            return db.GetDialectProvider().CreateParam(name, value, dbType, precision, scale, size);
+            return db.GetDialectProvider().CreateParam(name, value, fieldType, dbType, precision, scale, size);
         }
 
         public static IDbDataParameter CreateParam(this IOrmLiteDialectProvider dialectProvider,
             string name,
             object value = null,
+            Type fieldType = null,
             DbType? dbType = null,
             byte? precision = null,
             byte? scale = null,
@@ -1817,17 +1819,17 @@ namespace ServiceStack.OrmLite
 
             to.ParameterName = dialectProvider.GetParam(name);
 
+            var valueType = fieldType ?? (value != null ? value.GetType() : typeof(string));
+
             if (value != null)
             {
-                to.Value = dialectProvider.GetParamValue(value, value.GetType());
-                dialectProvider.InitDbParam(to, value.GetType());
+                to.Value = dialectProvider.GetParamValue(value, valueType);
+                dialectProvider.InitDbParam(to, valueType);
             }
             else
             {
                 to.Value = DBNull.Value;
             }
-
-            var valueType = value != null ? value.GetType() : typeof(string);
 
             if (precision != null)
                 to.Precision = precision.Value;
@@ -1844,11 +1846,11 @@ namespace ServiceStack.OrmLite
             return to;
         }
 
-        public static IDbDataParameter AddParam(this IOrmLiteDialectProvider dialectProvider, IDbCommand dbCmd, object value)
+        public static IDbDataParameter AddParam(this IOrmLiteDialectProvider dialectProvider, IDbCommand dbCmd, object value, Type fieldType = null)
         {
             var paramName = dbCmd.Parameters.Count.ToString();
 
-            var parameter = dialectProvider.CreateParam(paramName, value);
+            var parameter = dialectProvider.CreateParam(paramName, value, fieldType);
             dbCmd.Parameters.Add(parameter);
             return parameter;
         }
