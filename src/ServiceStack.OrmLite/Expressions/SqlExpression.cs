@@ -759,9 +759,22 @@ namespace ServiceStack.OrmLite
 
         public virtual void CopyParamsTo(IDbCommand dbCmd)
         {
-            foreach (var sqlParam in Params)
+            try
             {
-                dbCmd.Parameters.Add(sqlParam);
+                foreach (var sqlParam in Params)
+                {
+                    dbCmd.Parameters.Add(sqlParam);
+                }
+            }
+            catch (Exception)
+            {
+                //SQL Server + PostgreSql doesn't allow re-using db params in multiple queries
+                foreach (var sqlParam in Params)
+                {
+                    var p = dbCmd.CreateParameter();
+                    p.PopulateWith(sqlParam);
+                    dbCmd.Parameters.Add(p);
+                }
             }
         }
 
