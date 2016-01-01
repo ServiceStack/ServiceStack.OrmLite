@@ -306,25 +306,25 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE `Person` SET `FirstName`=@FirstName, `LastName`=@LastName, `Age`=@Age WHERE `Id`=@Id"));
 
             await db.UpdateAsync(new Person { Id = 1, FirstName = "JJ", Age = 27 }, p => p.LastName == "Hendrix");
-            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE `Person` SET `Id`=1, `FirstName`='JJ', `LastName`=NULL, `Age`=27 WHERE (`LastName` = 'Hendrix')"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE `Person` SET `Id`=@0, `FirstName`=@1, `LastName`=@2, `Age`=@3 WHERE (`LastName` = 'Hendrix')"));
 
             await db.UpdateAsync<Person>(new { FirstName = "JJ" }, p => p.LastName == "Hendrix");
-            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE `Person` SET `FirstName`='JJ' WHERE (`LastName` = 'Hendrix')"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE `Person` SET `FirstName`=@0 WHERE (`LastName` = 'Hendrix')"));
 
             await db.UpdateNonDefaultsAsync(new Person { FirstName = "JJ" }, p => p.LastName == "Hendrix");
-            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE `Person` SET `FirstName`='JJ' WHERE (`LastName` = 'Hendrix')"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE `Person` SET `FirstName`=@0 WHERE (`LastName` = 'Hendrix')"));
 
             await db.UpdateOnlyAsync(new Person { FirstName = "JJ" }, p => p.FirstName);
-            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE `Person` SET `FirstName`='JJ'"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE `Person` SET `FirstName`=@0"));
 
             await db.UpdateOnlyAsync(new Person { FirstName = "JJ" }, p => p.FirstName, p => p.LastName == "Hendrix");
-            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE `Person` SET `FirstName`='JJ' WHERE (`LastName` = 'Hendrix')"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE `Person` SET `FirstName`=@0 WHERE (`LastName` = 'Hendrix')"));
 
             await db.UpdateOnlyAsync(new Person { FirstName = "JJ", LastName = "Hendo" }, q => q.Update(p => p.FirstName));
-            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE `Person` SET `FirstName`='JJ'"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE `Person` SET `FirstName`=@0"));
 
             await db.UpdateOnlyAsync(new Person { FirstName = "JJ" }, q => q.Update(p => p.FirstName).Where(x => x.FirstName == "Jimi"));
-            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE `Person` SET `FirstName`='JJ' WHERE (`FirstName` = 'Jimi')"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE `Person` SET `FirstName`=@0 WHERE (`FirstName` = 'Jimi')"));
 
             await db.UpdateFmtAsync<Person>(set: "FirstName = {0}".SqlFmt("JJ"), where: "LastName = {0}".SqlFmt("Hendrix"));
             Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE `Person` SET FirstName = 'JJ' WHERE LastName = 'Hendrix'"));
