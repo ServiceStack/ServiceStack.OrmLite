@@ -1112,8 +1112,10 @@ namespace ServiceStack.OrmLite
                 }
             }
 
-            if (operand == "=" && right.ToString().Equals("null", StringComparison.OrdinalIgnoreCase)) operand = "is";
-            else if (operand == "<>" && right.ToString().Equals("null", StringComparison.OrdinalIgnoreCase)) operand = "is not";
+            if (operand == "=" && right.ToString().Equals("null", StringComparison.OrdinalIgnoreCase))
+                operand = "is";
+            else if (operand == "<>" && right.ToString().Equals("null", StringComparison.OrdinalIgnoreCase))
+                operand = "is not";
 
             VisitFilter(operand, originalLeft, originalRight, ref left, ref right);
 

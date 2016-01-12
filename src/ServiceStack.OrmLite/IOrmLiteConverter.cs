@@ -112,6 +112,11 @@ namespace ServiceStack.OrmLite
     {
         public static object ConvertNumber(this IOrmLiteConverter converter, Type toIntegerType, object value)
         {
+            return converter.DialectProvider.ConvertNumber(toIntegerType, value);
+        }
+
+        public static object ConvertNumber(this IOrmLiteDialectProvider dialectProvider, Type toIntegerType, object value)
+        {
             if (value.GetType() == toIntegerType)
                 return value;
 
@@ -143,7 +148,7 @@ namespace ServiceStack.OrmLite
                     return Convert.ToDecimal(value);
             }
 
-            var convertedValue = converter.DialectProvider.StringSerializer.DeserializeFromString(value.ToString(), toIntegerType);
+            var convertedValue = dialectProvider.StringSerializer.DeserializeFromString(value.ToString(), toIntegerType);
             return convertedValue;
         }
     }

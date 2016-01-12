@@ -81,6 +81,8 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_create_ModelWithCompositeIndexOnFieldSpacesDesc_table()
         {
+            if (Dialect == Dialect.Firebird) return; //Too long, not supported
+
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithCompositeIndexOnFieldSpacesDesc>(true);

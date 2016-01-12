@@ -14,7 +14,7 @@ namespace ServiceStack.OrmLite.Firebird
     {
         public static List<string> RESERVED = new List<string>(new[] {
             "USER","ORDER","PASSWORD", "ACTIVE","LEFT","DOUBLE", "FLOAT", "DECIMAL","STRING", "DATE","DATETIME", "TYPE","TIMESTAMP",
-            "INDEX","UNIQUE", "PRIMARY", "KEY", "ALTER", "DROP", "CREATE", "DELETE", "VALUES", "FUNCTION", "INT", "LONG", "CHAR", "VALUE"
+            "INDEX","UNIQUE", "PRIMARY", "KEY", "ALTER", "DROP", "CREATE", "DELETE", "VALUES", "FUNCTION", "INT", "LONG", "CHAR", "VALUE", "TIME"
         });
 
         public static FirebirdOrmLiteDialectProvider Instance = new FirebirdOrmLiteDialectProvider();
@@ -26,7 +26,7 @@ namespace ServiceStack.OrmLite.Firebird
         public FirebirdOrmLiteDialectProvider(bool compactGuid)
         {
             base.AutoIncrementDefinition = string.Empty;
-            DefaultValueFormat = " DEFAULT '{0}'";
+            DefaultValueFormat = " DEFAULT {0}";
             NamingStrategy = new FirebirdNamingStrategy();
 
             base.InitColumnTypeMap();
@@ -140,38 +140,18 @@ namespace ServiceStack.OrmLite.Firebird
 
                     var result = GetNextValue(cmd, fieldDef.Sequence, fieldDef.GetValue(objWithProperties));
 
-                    fieldDef.SetValueFn(objWithProperties, result);
-
-                    PropertyInfo pi = tableType.GetProperty(fieldDef.Name,
-                        BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy);
-
-                    if (pi.PropertyType == typeof(String))
-                        pi.SetProperty(objWithProperties, result.ToString());
-                    else if (pi.PropertyType == typeof(Int16))
-                        pi.SetProperty(objWithProperties, Convert.ToInt16(result));
-                    else if (pi.PropertyType == typeof(Int32))
-                        pi.SetProperty(objWithProperties, Convert.ToInt32(result));
-                    else if (pi.PropertyType == typeof(Guid))
-                        pi.SetProperty(objWithProperties, result);
-                    else
-                        pi.SetProperty(objWithProperties, Convert.ToInt64(result));
+                    var fieldValue = this.ConvertNumber(fieldDef.FieldType, result);
+                    fieldDef.SetValueFn(objWithProperties, fieldValue);
                 }
 
                 if (sbColumnNames.Length > 0) sbColumnNames.Append(",");
                 if (sbColumnValues.Length > 0) sbColumnValues.Append(",");
 
-                try
-                {
-                    sbColumnNames.Append(string.Format("{0}", GetQuotedColumnName(fieldDef.FieldName)));
-                    if (!string.IsNullOrEmpty(fieldDef.Sequence) && cmd == null)
-                        sbColumnValues.Append(string.Format("@{0}", fieldDef.Name));
-                    else
-                        sbColumnValues.Append(fieldDef.GetQuotedValue(objWithProperties));
-                }
-                catch (Exception)
-                {
-                    throw;
-                }
+                sbColumnNames.Append(string.Format("{0}", GetQuotedColumnName(fieldDef.FieldName)));
+                if (!string.IsNullOrEmpty(fieldDef.Sequence) && cmd == null)
+                    sbColumnValues.Append(string.Format("@{0}", fieldDef.Name));
+                else
+                    sbColumnValues.Append(fieldDef.GetQuotedValue(objWithProperties));
             }
 
             var sql = string.Format("INSERT INTO {0} ({1}) VALUES ({2});",

@@ -37,7 +37,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
                 Assert.That(db.Scalar<Guid>(q.Select(x => x.Id)), Is.EqualTo(row.Id));
                 Assert.That(db.Scalar<long>(q.Select(x => x.Long)), Is.EqualTo(row.Long));
                 Assert.That(db.Scalar<decimal>(q.Select(x => x.Decimal)), Is.EqualTo(row.Decimal));
-                Assert.That(db.Scalar<double>(q.Select(x => x.Double)), Is.EqualTo(row.Double));
+                Assert.That(db.Scalar<double>(q.Select(x => x.Double)), Is.EqualTo(row.Double).Within(.1d));
                 Assert.That(db.Scalar<float>(q.Select(x => x.Float)), Is.EqualTo(row.Float));
             }
         }
