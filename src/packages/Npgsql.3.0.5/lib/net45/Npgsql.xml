@@ -1860,7 +1860,7 @@
         </member>
         <member name="P:Npgsql.NpgsqlConnection.DataSource">
             <summary>
-            Gets the database server name.
+            Gets the string identifying the database server (host and port)
             </summary>
         </member>
         <member name="P:Npgsql.NpgsqlConnection.ContinuousProcessing">
@@ -2778,6 +2778,18 @@
             <summary>
             Called when an unexpected message has been received during an action. Breaks the
             connector and returns the appropriate message.
+            </summary>
+        </member>
+        <member name="M:Npgsql.NpgsqlConnector.Break">
+            <summary>
+            Called when a connector becomes completely unusable, e.g. when an unexpected I/O exception is raised or when
+            we lose protocol sync.
+            Note that fatal errors during the Open phase do *not* pass through here.
+            </summary>
+        </member>
+        <member name="M:Npgsql.NpgsqlConnector.BreakFromOpen">
+            <summary>
+            Called when an open attempt fails (e.g. I/O error, timeout).
             </summary>
         </member>
         <member name="M:Npgsql.NpgsqlConnector.Cleanup">
