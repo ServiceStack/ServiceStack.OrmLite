@@ -1,5 +1,6 @@
 using System;
 using ServiceStack.OrmLite.Converters;
+using MySql.Data.Types;
 
 namespace ServiceStack.OrmLite.MySql.Converters
 {
@@ -13,6 +14,15 @@ namespace ServiceStack.OrmLite.MySql.Converters
              */
             var dateTime = (DateTime)value;
             return DateTimeFmt(dateTime, "yyyy-MM-dd HH:mm:ss");
+        }
+        public override object FromDbValue(object value)
+        {
+            if (value is MySqlDateTime)
+            {
+                var time = (MySqlDateTime)value;
+                return time.GetDateTime();
+            }
+            return base.FromDbValue(value);
         }
     }
 }
