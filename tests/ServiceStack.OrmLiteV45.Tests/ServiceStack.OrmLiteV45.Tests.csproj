@@ -66,15 +66,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ApiMySqlTestsAsync.Parameterized.cs" />
-    <Compile Include="ApiPostgreSqlTestsAsync.Parameterized.cs" />
-    <Compile Include="ApiSqliteTestsAsync.Parameterized.cs" />
-    <Compile Include="ApiSqliteTestsAsync.cs" />
-    <Compile Include="ApiPostgreSqlTestsAsync.cs" />
-    <Compile Include="ApiSqlServerTestsAsync.Parameterized.cs" />
-    <Compile Include="ApiSqlServerTestsAsync.cs" />
-    <Compile Include="AsyncTests.cs" />
     <Compile Include="ApiMySqlTestsAsync.cs" />
+    <Compile Include="ApiPostgreSqlTestsAsync.cs" />
+    <Compile Include="ApiSqliteTestsAsync.cs" />
+    <Compile Include="ApiSqliteTestsAsync.NonParam.cs" />
+    <Compile Include="ApiPostgreSqlTestsAsync.NonParam.cs" />
+    <Compile Include="ApiSqlServerTestsAsync.cs" />
+    <Compile Include="ApiSqlServerTestsAsync.NonParam.cs" />
+    <Compile Include="AsyncTests.cs" />
+    <Compile Include="ApiMySqlTestsAsync.NonParam.cs" />
     <Compile Include="CustomSqlTestsAsync.cs" />
     <Compile Include="Issues\LoadSelectAmbiguousColumnIssue.cs" />
     <Compile Include="LoadReferencesTests.cs" />
