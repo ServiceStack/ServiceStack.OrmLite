@@ -245,7 +245,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
             {
                 var modelDef = GetModel(typeof(T));
                 var pkName = NamingStrategy.GetColumnName(modelDef.PrimaryKey.FieldName);
-                dbCmd.CommandText += " RETURNING " + pkName;                
+                dbCmd.CommandText += " RETURNING \"{0}\"".Fmt(pkName);                
             }
             else
             {
