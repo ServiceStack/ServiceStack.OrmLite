@@ -174,13 +174,13 @@ For a quick preview of many of the new Async API's in action, checkout
 Currently only a limited number of RDBMS providers offer async API's which are only available in their **.NET 4.5** builds, which at this time are only:
 
   - [SQL Server .NET 4.5+](https://www.nuget.org/packages/ServiceStack.OrmLite.SqlServer)
+  - [PostgreSQL .NET 4.5+](https://www.nuget.org/packages/ServiceStack.OrmLite.PostgreSQL)
   - [MySQL .NET 4.5+](https://www.nuget.org/packages/ServiceStack.OrmLite.MySql)
 
 We've also added a 
 [.NET 4.5 build for Sqlite](https://www.nuget.org/packages/ServiceStack.OrmLite.Sqlite.Mono) 
 as it's a common use-case to swapout to use Sqlite's in-memory provider for faster tests. 
 But as Sqlite doesn't provide async API's under-the-hood we fallback to *pseudo async* support where we just wrap its synchronous responses in `Task` results. 
-
 
 ## Dynamic Result Sets
 
@@ -1378,6 +1378,16 @@ HashSet<int> results = db.ColumnDistinct<int>("SELECT Age FROM Person");
 int result = db.SqlScalar<int>(
     db.From<Person>().Select(Sql.Count("*")).Where(q => q.Age < 50));
 int result = db.SqlScalar<int>("SELCT COUNT(*) FROM Person WHERE Age < 50");
+```
+
+### Custom Insert and Updates
+
+```csharp
+Db.ExecuteSql("INSERT INTO page_stats (ref_id, fav_count) VALUES (@refId, @favCount)",
+              new { refId, favCount })
+
+//Async:
+Db.ExecuteSqlAsync("UPDATE page_stats SET view_count = view_count + 1 WHERE id = @id", new { id })
 ```
 
 ## Stored Procedures using Custom Raw SQL API's
