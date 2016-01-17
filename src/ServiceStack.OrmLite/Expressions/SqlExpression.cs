@@ -217,45 +217,83 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
+        private string FormatFilter(string sqlFilter, params object[] filterParams)
+        {
+            if (string.IsNullOrEmpty(sqlFilter))
+                return null;
+
+            if (!OrmLiteConfig.UseParameterizeSqlExpressions)
+                return sqlFilter.SqlFmt(filterParams);
+
+            for (var i = 0; i < filterParams.Length; i++)
+            {
+                var pLiteral = "{" + i + "}";
+                var filterParam = filterParams[i];
+                var sqlParams = filterParam as SqlInValues;
+
+                if (sqlParams != null)
+                {
+                    var sbParams = new StringBuilder();
+                    foreach (var item in sqlParams.GetValues())
+                    {
+                        var p = AddParam(item);
+
+                        if (sbParams.Length > 0)
+                            sbParams.Append(",");
+
+                        sbParams.Append(p.ParameterName);
+                    }
+
+                    sqlFilter = sqlFilter.Replace(pLiteral, sbParams.ToString());
+                }
+                else
+                {
+                    var p = AddParam(filterParam);
+                    sqlFilter = sqlFilter.Replace(pLiteral, p.ParameterName);
+                }
+            }
+            return sqlFilter;
+        }
+
         public virtual SqlExpression<T> UnsafeWhere(string rawSql, params object[] filterParams)
         {
-            AppendToWhere("AND", rawSql.SqlFmt(filterParams));
+            AppendToWhere("AND", FormatFilter(rawSql, filterParams));
             return this;
         }
 
         public virtual SqlExpression<T> Where(string sqlFilter, params object[] filterParams)
         {
-            AppendToWhere("AND", sqlFilter.SqlVerifyFragment().SqlFmt(filterParams));
+            AppendToWhere("AND", FormatFilter(sqlFilter.SqlVerifyFragment(), filterParams));
             return this;
         }
 
         public virtual SqlExpression<T> UnsafeAnd(string rawSql, params object[] filterParams)
         {
-            AppendToWhere("AND", rawSql.SqlFmt(filterParams));
+            AppendToWhere("AND", FormatFilter(rawSql, filterParams));
             return this;
         }
 
         public virtual SqlExpression<T> And(string sqlFilter, params object[] filterParams)
         {
-            AppendToWhere("AND", sqlFilter.SqlVerifyFragment().SqlFmt(filterParams));
+            AppendToWhere("AND", FormatFilter(sqlFilter.SqlVerifyFragment(), filterParams));
             return this;
         }
 
         public virtual SqlExpression<T> UnsafeOr(string rawSql, params object[] filterParams)
         {
-            AppendToWhere("OR", rawSql.SqlFmt(filterParams));
+            AppendToWhere("OR", FormatFilter(rawSql, filterParams));
             return this;
         }
 
         public virtual SqlExpression<T> Or(string sqlFilter, params object[] filterParams)
         {
-            AppendToWhere("OR", sqlFilter.SqlVerifyFragment().SqlFmt(filterParams));
+            AppendToWhere("OR", FormatFilter(sqlFilter.SqlVerifyFragment(), filterParams));
             return this;
         }
 
         public virtual SqlExpression<T> AddCondition(string condition, string sqlFilter, params object[] filterParams)
         {
-            AppendToWhere(condition, sqlFilter.SqlVerifyFragment().SqlFmt(filterParams));
+            AppendToWhere(condition, FormatFilter(sqlFilter.SqlVerifyFragment(), filterParams));
             return this;
         }
 
@@ -326,8 +364,11 @@ namespace ServiceStack.OrmLite
 
         public virtual SqlExpression<T> Having(string sqlFilter, params object[] filterParams)
         {
-            havingExpression = !string.IsNullOrEmpty(sqlFilter) ? sqlFilter.SqlFmt(filterParams) : string.Empty;
-            if (!string.IsNullOrEmpty(havingExpression)) havingExpression = "HAVING " + havingExpression;
+            havingExpression = FormatFilter(sqlFilter.SqlVerifyFragment(), filterParams);
+
+            if (havingExpression != null)
+                havingExpression = "HAVING " + havingExpression;
+
             return this;
         }
 
@@ -338,7 +379,8 @@ namespace ServiceStack.OrmLite
                 useFieldName = true;
                 sep = " ";
                 havingExpression = Visit(predicate).ToString();
-                if (!string.IsNullOrEmpty(havingExpression)) havingExpression = "HAVING " + havingExpression;
+                if (!string.IsNullOrEmpty(havingExpression))
+                    havingExpression = "HAVING " + havingExpression;
             }
             else
                 havingExpression = string.Empty;

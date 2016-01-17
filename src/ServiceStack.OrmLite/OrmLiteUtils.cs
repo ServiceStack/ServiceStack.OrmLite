@@ -272,6 +272,9 @@ namespace ServiceStack.OrmLite
 
         public static string SqlVerifyFragment(this string sqlFragment, IEnumerable<string> illegalFragments)
         {
+            if (sqlFragment == null)
+                return null;
+
             var fragmentToVerify = sqlFragment
                 .StripQuotedStrings('\'')
                 .StripQuotedStrings('"')
