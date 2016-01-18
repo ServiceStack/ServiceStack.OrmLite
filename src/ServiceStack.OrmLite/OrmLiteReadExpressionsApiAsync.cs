@@ -60,9 +60,9 @@ namespace ServiceStack.OrmLite
         /// Returns results from using an SqlExpression lambda. E.g:
         /// <para>db.SelectAsync(db.From&lt;Person&gt;().Where(x =&gt; x.Age &gt; 40))</para>
         /// </summary>
-        public static Task<List<T>> SelectAsync<T>(this IDbConnection dbConn, ISqlExpression expression, object anonType = null, CancellationToken token = default(CancellationToken))
+        public static Task<List<T>> SelectAsync<T>(this IDbConnection dbConn, ISqlExpression expression, CancellationToken token = default(CancellationToken))
         {
-            return dbConn.Exec(dbCmd => dbCmd.SqlListAsync<T>(expression.SelectInto<T>(), anonType, token));
+            return dbConn.Exec(dbCmd => dbCmd.SqlListAsync<T>(expression.SelectInto<T>(), expression.Params, token));
         }
 
         /// <summary>
@@ -96,9 +96,9 @@ namespace ServiceStack.OrmLite
         /// Returns results from using an SqlExpression lambda. E.g:
         /// <para>db.SingleAsync(db.From&lt;Person&gt;().Where(x =&gt; x.Age &gt; 40))</para>
         /// </summary>
-        public static Task<T> SingleAsync<T>(this IDbConnection dbConn, ISqlExpression expression, object anonType = null, CancellationToken token = default(CancellationToken))
+        public static Task<T> SingleAsync<T>(this IDbConnection dbConn, ISqlExpression expression, CancellationToken token = default(CancellationToken))
         {
-            return dbConn.Exec(dbCmd => dbCmd.SingleAsync<T>(expression.SelectInto<T>(), anonType, token));
+            return dbConn.Exec(dbCmd => dbCmd.SingleAsync<T>(expression.SelectInto<T>(), expression.Params, token));
         }
 
         /// <summary>

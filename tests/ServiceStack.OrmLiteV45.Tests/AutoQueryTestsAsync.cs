@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.Text;
 
@@ -29,7 +30,7 @@ namespace ServiceStack.OrmLite.Tests
         Dead
     }
 
-    public class AutoQueryTests : OrmLiteTestBase
+    public class AutoQueryTestsAsync : OrmLiteTestBase
     {
         public static Rockstar[] SeedRockstars = new[] {
             new Rockstar { Id = 1, FirstName = "Jimi", LastName = "Hendrix", LivingStatus = LivingStatus.Dead, Age = 27, DateOfBirth = new DateTime(1942, 11, 27), DateDied = new DateTime(1970, 09, 18), },
@@ -42,17 +43,17 @@ namespace ServiceStack.OrmLite.Tests
         };
 
         [Test]
-        public void Can_query_Rockstars()
+        public async Task Can_query_Rockstars_Async()
         {
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<Rockstar>();
-                db.InsertAll(SeedRockstars);
+                await db.InsertAllAsync(SeedRockstars);
 
                 var q = db.From<Rockstar>()
                     .Where("Id < {0} AND Age = {1}", 3, 27);
 
-                var results = db.Select(q);
+                var results = await db.SelectAsync(q);
                 db.GetLastSql().Print();
                 Assert.That(results.Count, Is.EqualTo(2));
                 Assert.That(q.Params.Count, Is.EqualTo(2));
@@ -60,12 +61,12 @@ namespace ServiceStack.OrmLite.Tests
                 q = db.From<Rockstar>()
                     .Where("Id < {0}", 3)
                     .Or("Age = {0}", 27);
-                results = db.Select(q);
+                results = await db.SelectAsync(q);
                 Assert.That(results.Count, Is.EqualTo(3));
                 Assert.That(q.Params.Count, Is.EqualTo(2));
 
                 q = db.From<Rockstar>().Where("FirstName = {0}", "Kurt");
-                results = db.Select(q);
+                results = await db.SelectAsync(q);
                 Assert.That(results.Count, Is.EqualTo(1));
                 Assert.That(q.Params.Count, Is.EqualTo(1));
                 Assert.That(results[0].LastName, Is.EqualTo("Cobain"));
@@ -73,17 +74,17 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        public void Can_query_Rockstars_with_ValueFormat()
+        public async Task Can_query_Rockstars_with_ValueFormat()
         {
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<Rockstar>();
-                db.InsertAll(SeedRockstars);
+                await db.InsertAllAsync(SeedRockstars);
 
                 var q = db.From<Rockstar>()
                     .Where("FirstName LIKE {0}", "Jim%");
 
-                var results = db.Select(q);
+                var results = await db.SelectAsync(q);
                 db.GetLastSql().Print();
                 Assert.That(results.Count, Is.EqualTo(2));
                 Assert.That(q.Params.Count, Is.EqualTo(1));
@@ -91,17 +92,17 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        public void Can_query_Rockstars_with_IN_Query()
+        public async Task Can_query_Rockstars_with_IN_Query()
         {
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<Rockstar>();
-                db.InsertAll(SeedRockstars);
+                await db.InsertAllAsync(SeedRockstars);
 
                 var q = db.From<Rockstar>()
                     .Where("FirstName IN ({0})", new SqlInValues(new[] { "Jimi", "Kurt", "Jim" }));
 
-                var results = db.Select(q);
+                var results = await db.SelectAsync(q);
                 db.GetLastSql().Print();
                 Assert.That(results.Count, Is.EqualTo(3));
                 Assert.That(q.Params.Count, Is.EqualTo(3));
@@ -109,22 +110,22 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        public void Does_query_Rockstars_Single_with_anon_SelectInto()
+        public async Task Does_query_Rockstars_Single_with_anon_SelectInto()
         {
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<Rockstar>();
-                db.InsertAll(SeedRockstars);
+                await db.InsertAllAsync(SeedRockstars);
 
                 var q = db.From<Rockstar>()
                     .Where(x => x.FirstName == "Kurt")
                     .Select(x => new { x.Id, x.LastName });
 
-                var result = db.Single<RockstarAlt>(q);
+                var result = await db.SingleAsync<RockstarAlt>(q);
                 Assert.That(result.LastName, Is.EqualTo("Cobain"));
                 Assert.That(q.Params.Count, Is.EqualTo(1));
 
-                var results = db.Select<RockstarAlt>(q);
+                var results = await db.SelectAsync<RockstarAlt>(q);
                 Assert.That(results[0].LastName, Is.EqualTo("Cobain"));
                 Assert.That(q.Params.Count, Is.EqualTo(1));
             }

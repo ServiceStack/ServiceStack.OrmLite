@@ -75,6 +75,7 @@
     <Compile Include="ApiSqlServerTestsAsync.NonParam.cs" />
     <Compile Include="AsyncTests.cs" />
     <Compile Include="ApiMySqlTestsAsync.NonParam.cs" />
+    <Compile Include="AutoQueryTestsAsync.cs" />
     <Compile Include="CustomSqlTestsAsync.cs" />
     <Compile Include="Issues\LoadSelectAmbiguousColumnIssue.cs" />
     <Compile Include="LoadReferencesTests.cs" />
