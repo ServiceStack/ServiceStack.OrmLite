@@ -125,6 +125,8 @@ namespace ServiceStack.OrmLite
             {
                 case TypeCode.Byte:
                     return Convert.ToByte(value);
+                case TypeCode.SByte:
+                    return Convert.ToSByte(value);
                 case TypeCode.Int16:
                     return Convert.ToInt16(value);
                 case TypeCode.UInt16:
