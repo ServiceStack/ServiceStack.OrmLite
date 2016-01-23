@@ -96,6 +96,7 @@
     <Compile Include="Expressions\TestType.cs" />
     <Compile Include="Expressions\UnaryExpressionsTest.cs" />
     <Compile Include="ForeignKeyAttributeTests.cs" />
+    <Compile Include="Issues\CustomMappingIssue.cs" />
     <Compile Include="Issues\SelectExpressionIssues.cs" />
     <Compile Include="LocalizationTests.cs" />
     <Compile Include="MySqlAdminTests.cs" />
