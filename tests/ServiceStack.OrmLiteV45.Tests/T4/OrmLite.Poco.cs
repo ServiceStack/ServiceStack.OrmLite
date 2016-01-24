@@ -2042,7 +2042,7 @@ namespace AppDb
         public string Country { get; set;}
     }
 	[Alias("Poco")]
-	[Schema("dbo")]
+	//[Schema("dbo")]
     public partial class Poco : IHasId<string> 
     {
         [Alias("Name")]

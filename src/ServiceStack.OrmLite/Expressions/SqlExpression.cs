@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Collections.ObjectModel;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 
 namespace ServiceStack.OrmLite
 {
@@ -21,8 +22,8 @@ namespace ServiceStack.OrmLite
         private string havingExpression;
         private string orderBy = string.Empty;
 
-        IList<string> updateFields = new List<string>();
-        IList<string> insertFields = new List<string>();
+        public List<string> UpdateFields { get; set; }
+        public List<string> InsertFields { get; set; }
 
         private string sep = string.Empty;
         protected bool useFieldName = false;
@@ -41,9 +42,13 @@ namespace ServiceStack.OrmLite
 
         public SqlExpression(IOrmLiteDialectProvider dialectProvider)
         {
+            UpdateFields = new List<string>();
+            InsertFields = new List<string>();
+
             modelDef = typeof(T).GetModelDefinition();
             PrefixFieldWithTableName = false;
             WhereStatementWithoutWhereString = false;
+
             DialectProvider = dialectProvider;
             Params = new List<IDbDataParameter>();
             tableDefs.Add(modelDef);
@@ -66,8 +71,8 @@ namespace ServiceStack.OrmLite
             to.groupBy = groupBy;
             to.havingExpression = havingExpression;
             to.orderBy = orderBy;
-            to.updateFields = updateFields;
-            to.insertFields = insertFields;
+            to.UpdateFields = UpdateFields;
+            to.InsertFields = InsertFields;
             to.modelDef = modelDef;
             to.PrefixFieldWithTableName = PrefixFieldWithTableName;
             to.WhereStatementWithoutWhereString = WhereStatementWithoutWhereString;
@@ -212,45 +217,83 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
+        private string FormatFilter(string sqlFilter, params object[] filterParams)
+        {
+            if (string.IsNullOrEmpty(sqlFilter))
+                return null;
+
+            if (!OrmLiteConfig.UseParameterizeSqlExpressions)
+                return sqlFilter.SqlFmt(filterParams);
+
+            for (var i = 0; i < filterParams.Length; i++)
+            {
+                var pLiteral = "{" + i + "}";
+                var filterParam = filterParams[i];
+                var sqlParams = filterParam as SqlInValues;
+
+                if (sqlParams != null)
+                {
+                    var sbParams = new StringBuilder();
+                    foreach (var item in sqlParams.GetValues())
+                    {
+                        var p = AddParam(item);
+
+                        if (sbParams.Length > 0)
+                            sbParams.Append(",");
+
+                        sbParams.Append(p.ParameterName);
+                    }
+
+                    sqlFilter = sqlFilter.Replace(pLiteral, sbParams.ToString());
+                }
+                else
+                {
+                    var p = AddParam(filterParam);
+                    sqlFilter = sqlFilter.Replace(pLiteral, p.ParameterName);
+                }
+            }
+            return sqlFilter;
+        }
+
         public virtual SqlExpression<T> UnsafeWhere(string rawSql, params object[] filterParams)
         {
-            AppendToWhere("AND", rawSql.SqlFmt(filterParams));
+            AppendToWhere("AND", FormatFilter(rawSql, filterParams));
             return this;
         }
 
         public virtual SqlExpression<T> Where(string sqlFilter, params object[] filterParams)
         {
-            AppendToWhere("AND", sqlFilter.SqlVerifyFragment().SqlFmt(filterParams));
+            AppendToWhere("AND", FormatFilter(sqlFilter.SqlVerifyFragment(), filterParams));
             return this;
         }
 
         public virtual SqlExpression<T> UnsafeAnd(string rawSql, params object[] filterParams)
         {
-            AppendToWhere("AND", rawSql.SqlFmt(filterParams));
+            AppendToWhere("AND", FormatFilter(rawSql, filterParams));
             return this;
         }
 
         public virtual SqlExpression<T> And(string sqlFilter, params object[] filterParams)
         {
-            AppendToWhere("AND", sqlFilter.SqlVerifyFragment().SqlFmt(filterParams));
+            AppendToWhere("AND", FormatFilter(sqlFilter.SqlVerifyFragment(), filterParams));
             return this;
         }
 
         public virtual SqlExpression<T> UnsafeOr(string rawSql, params object[] filterParams)
         {
-            AppendToWhere("OR", rawSql.SqlFmt(filterParams));
+            AppendToWhere("OR", FormatFilter(rawSql, filterParams));
             return this;
         }
 
         public virtual SqlExpression<T> Or(string sqlFilter, params object[] filterParams)
         {
-            AppendToWhere("OR", sqlFilter.SqlVerifyFragment().SqlFmt(filterParams));
+            AppendToWhere("OR", FormatFilter(sqlFilter.SqlVerifyFragment(), filterParams));
             return this;
         }
 
         public virtual SqlExpression<T> AddCondition(string condition, string sqlFilter, params object[] filterParams)
         {
-            AppendToWhere(condition, sqlFilter.SqlVerifyFragment().SqlFmt(filterParams));
+            AppendToWhere(condition, FormatFilter(sqlFilter.SqlVerifyFragment(), filterParams));
             return this;
         }
 
@@ -321,8 +364,11 @@ namespace ServiceStack.OrmLite
 
         public virtual SqlExpression<T> Having(string sqlFilter, params object[] filterParams)
         {
-            havingExpression = !string.IsNullOrEmpty(sqlFilter) ? sqlFilter.SqlFmt(filterParams) : string.Empty;
-            if (!string.IsNullOrEmpty(havingExpression)) havingExpression = "HAVING " + havingExpression;
+            havingExpression = FormatFilter(sqlFilter.SqlVerifyFragment(), filterParams);
+
+            if (havingExpression != null)
+                havingExpression = "HAVING " + havingExpression;
+
             return this;
         }
 
@@ -333,7 +379,8 @@ namespace ServiceStack.OrmLite
                 useFieldName = true;
                 sep = " ";
                 havingExpression = Visit(predicate).ToString();
-                if (!string.IsNullOrEmpty(havingExpression)) havingExpression = "HAVING " + havingExpression;
+                if (!string.IsNullOrEmpty(havingExpression))
+                    havingExpression = "HAVING " + havingExpression;
             }
             else
                 havingExpression = string.Empty;
@@ -662,9 +709,9 @@ namespace ServiceStack.OrmLite
         /// <param name='updatefields'>
         /// IList<string> containing Names of properties to be updated
         /// </param>
-        public virtual SqlExpression<T> Update(IList<string> updateFields)
+        public virtual SqlExpression<T> Update(List<string> updateFields)
         {
-            this.updateFields = updateFields;
+            this.UpdateFields = updateFields;
             return this;
         }
 
@@ -681,7 +728,7 @@ namespace ServiceStack.OrmLite
         {
             sep = string.Empty;
             useFieldName = false;
-            updateFields = Visit(fields).ToString().Split(',').ToList();
+            UpdateFields = Visit(fields).ToString().Split(',').ToList();
             return this;
         }
 
@@ -690,7 +737,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public virtual SqlExpression<T> Update()
         {
-            this.updateFields = new List<string>();
+            this.UpdateFields = new List<string>();
             return this;
         }
 
@@ -707,7 +754,7 @@ namespace ServiceStack.OrmLite
         {
             sep = string.Empty;
             useFieldName = false;
-            insertFields = Visit(fields).ToString().Split(',').ToList();
+            InsertFields = Visit(fields).ToString().Split(',').ToList();
             return this;
         }
 
@@ -717,9 +764,9 @@ namespace ServiceStack.OrmLite
         /// <param name='insertFields'>
         /// IList&lt;string&gt; containing Names of properties to be inserted
         /// </param>
-        public virtual SqlExpression<T> Insert(IList<string> insertFields)
+        public virtual SqlExpression<T> Insert(List<string> insertFields)
         {
-            this.insertFields = insertFields;
+            this.InsertFields = insertFields;
             return this;
         }
 
@@ -728,7 +775,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public virtual SqlExpression<T> Insert()
         {
-            this.insertFields = new List<string>();
+            this.InsertFields = new List<string>();
             return this;
         }
 
@@ -742,29 +789,60 @@ namespace ServiceStack.OrmLite
             return DialectProvider.GetQuotedColumnName(columnName);
         }
 
+        public virtual IDbDataParameter AddParam(object value)
+        {
+            var paramName = Params.Count.ToString();
+            var paramValue = value;
+
+            var parameter = CreateParam(paramName, paramValue);
+            Params.Add(parameter);
+            return parameter;
+        }
+
+        public virtual void CopyParamsTo(IDbCommand dbCmd)
+        {
+            try
+            {
+                foreach (var sqlParam in Params)
+                {
+                    dbCmd.Parameters.Add(sqlParam);
+                }
+            }
+            catch (Exception)
+            {
+                //SQL Server + PostgreSql doesn't allow re-using db params in multiple queries
+                foreach (var sqlParam in Params)
+                {
+                    var p = dbCmd.CreateParameter();
+                    p.PopulateWith(sqlParam);
+                    dbCmd.Parameters.Add(p);
+                }
+            }
+        }
+
         public virtual string ToDeleteRowStatement()
         {
             return string.Format("DELETE FROM {0} {1}",
                 DialectProvider.GetQuotedTableName(modelDef), WhereExpression);
         }
 
-        public virtual string ToUpdateStatement(T item, bool excludeDefaults = false)
+        public virtual void PrepareUpdateStatement(IDbCommand dbCmd, T item, bool excludeDefaults = false)
         {
+            CopyParamsTo(dbCmd);
+
             var setFields = new StringBuilder();
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
                 if (fieldDef.ShouldSkipUpdate()) continue;
                 if (fieldDef.IsRowVersion) continue;
-                if (updateFields.Count > 0 
-                    && !updateFields.Contains(fieldDef.Name)) continue; // added
+                if (UpdateFields.Count > 0 
+                    && !UpdateFields.Contains(fieldDef.Name)) continue; // added
 
                 var value = fieldDef.GetValue(item);
                 if (excludeDefaults
                     && (value == null || (!fieldDef.IsNullable && value.Equals(value.GetType().GetDefaultValue()))))
                     continue;
-
-                fieldDef.GetQuotedValue(item, DialectProvider);
 
                 if (setFields.Length > 0)
                     setFields.Append(", ");
@@ -772,13 +850,13 @@ namespace ServiceStack.OrmLite
                 setFields
                     .Append(DialectProvider.GetQuotedColumnName(fieldDef.FieldName))
                     .Append("=")
-                    .Append(DialectProvider.GetQuotedValue(value, fieldDef.FieldType));
+                    .Append(DialectProvider.AddParam(dbCmd, value, fieldDef.ColumnType).ParameterName);
             }
 
             if (setFields.Length == 0)
                 throw new ArgumentException("No non-null or non-default values were provided for type: " + typeof(T).Name);
 
-            return string.Format("UPDATE {0} SET {1} {2}",
+            dbCmd.CommandText = string.Format("UPDATE {0} SET {1} {2}",
                 DialectProvider.GetQuotedTableName(modelDef), setFields, WhereExpression);
         }
 
@@ -882,30 +960,6 @@ namespace ServiceStack.OrmLite
 
         public int? Rows { get; set; }
         public int? Offset { get; set; }
-
-        public IList<string> UpdateFields
-        {
-            get
-            {
-                return updateFields;
-            }
-            set
-            {
-                updateFields = value;
-            }
-        }
-
-        public IList<string> InsertFields
-        {
-            get
-            {
-                return insertFields;
-            }
-            set
-            {
-                insertFields = value;
-            }
-        }
 
         public ModelDefinition ModelDef
         {
@@ -1100,8 +1154,10 @@ namespace ServiceStack.OrmLite
                 }
             }
 
-            if (operand == "=" && right.ToString().Equals("null", StringComparison.OrdinalIgnoreCase)) operand = "is";
-            else if (operand == "<>" && right.ToString().Equals("null", StringComparison.OrdinalIgnoreCase)) operand = "is not";
+            if (operand == "=" && right.ToString().Equals("null", StringComparison.OrdinalIgnoreCase))
+                operand = "is";
+            else if (operand == "<>" && right.ToString().Equals("null", StringComparison.OrdinalIgnoreCase))
+                operand = "is not";
 
             VisitFilter(operand, originalLeft, originalRight, ref left, ref right);
 
@@ -1582,6 +1638,22 @@ namespace ServiceStack.OrmLite
             if (exprArg != null)
             {
                 var subSelect = exprArg.ToSelectStatement();
+                foreach (var p in exprArg.Params)
+                {
+                    var oldName = p.ParameterName;
+                    var newName = DialectProvider.GetParam(Params.Count.ToString());
+                    if (oldName != newName)
+                    {
+                        var pClone = DialectProvider.CreateParam().PopulateWith(p);
+                        subSelect = subSelect.Replace(oldName, newName);
+                        pClone.ParameterName = newName;
+                        Params.Add(pClone);
+                    }
+                    else
+                    {
+                        Params.Add(p);
+                    }
+                }
                 return string.Format("{0} {1} ({2})", quotedColName, "IN", subSelect);
             }
 
@@ -1686,11 +1758,10 @@ namespace ServiceStack.OrmLite
             DbType? dbType = null,
             DataRowVersion sourceVersion = DataRowVersion.Default)
         {
-            var p = new OrmLiteDataParameter {
-                ParameterName = DialectProvider.GetParam(name), 
-                Direction = direction,
-                SourceVersion = sourceVersion
-            };
+            var p = DialectProvider.CreateParam();
+            p.ParameterName = DialectProvider.GetParam(name);
+            p.Direction = direction;
+            p.SourceVersion = sourceVersion;
 
             if (p.DbType == DbType.String)
                 p.Size = DialectProvider.GetStringConverter().StringLength;
@@ -1700,12 +1771,17 @@ namespace ServiceStack.OrmLite
                 p.Value = DialectProvider.GetParamValue(value, value.GetType());
                 DialectProvider.InitDbParam(p, value.GetType());
             }
+            else
+            {
+                p.Value = DBNull.Value;
+            }
 
             if (dbType != null)
                 p.DbType = dbType.Value;
 
             return p;
         }
+
         public IUntypedSqlExpression GetUntyped()
         {
             return new UntypedSqlExpressionProxy<T>(this);
@@ -1765,22 +1841,39 @@ namespace ServiceStack.OrmLite
         public static IDbDataParameter CreateParam(this IDbConnection db,
             string name,
             object value=null,
+            Type fieldType = null,
             DbType? dbType=null,
-            bool? isNullable=null,
             byte? precision=null,
             byte? scale=null,
             int? size=null)
         {
-            var dialectProvider = db.GetDialectProvider();
+            return db.GetDialectProvider().CreateParam(name, value, fieldType, dbType, precision, scale, size);
+        }
 
-            var to = new OrmLiteDataParameter
+        public static IDbDataParameter CreateParam(this IOrmLiteDialectProvider dialectProvider,
+            string name,
+            object value = null,
+            Type fieldType = null,
+            DbType? dbType = null,
+            byte? precision = null,
+            byte? scale = null,
+            int? size = null)
+        {
+            var to = dialectProvider.CreateParam();
+
+            to.ParameterName = dialectProvider.GetParam(name);
+
+            var valueType = fieldType ?? (value != null ? value.GetType() : typeof(string));
+
+            if (value != null)
             {
-                ParameterName = dialectProvider.GetParam(name),
-                Value = value,
-            };
-
-            var valueType = value != null ? value.GetType() : typeof(string);
-            to.IsNullable = isNullable.GetValueOrDefault(value == null || !valueType.IsNullableType());
+                to.Value = dialectProvider.GetParamValue(value, valueType);
+                dialectProvider.InitDbParam(to, valueType);
+            }
+            else
+            {
+                to.Value = DBNull.Value;
+            }
 
             if (precision != null)
                 to.Precision = precision.Value;
@@ -1795,6 +1888,15 @@ namespace ServiceStack.OrmLite
                 to.DbType = dbType.Value;
 
             return to;
+        }
+
+        public static IDbDataParameter AddParam(this IOrmLiteDialectProvider dialectProvider, IDbCommand dbCmd, object value, Type fieldType = null)
+        {
+            var paramName = dbCmd.Parameters.Count.ToString();
+
+            var parameter = dialectProvider.CreateParam(paramName, value, fieldType);
+            dbCmd.Parameters.Add(parameter);
+            return parameter;
         }
     }
 }

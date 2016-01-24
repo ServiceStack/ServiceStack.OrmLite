@@ -220,17 +220,7 @@ namespace ServiceStack.OrmLite
         {
             dbCmd.CommandText = sql;
 
-            if (sqlParams != null)
-            {
-                dbCmd.Parameters.Clear();
-
-                foreach (var sqlParam in sqlParams)
-                {
-                    var p = dbCmd.CreateParameter();
-                    p.PopulateWith(sqlParam);
-                    dbCmd.Parameters.Add(p);
-                }
-            }
+            dbCmd.SetParameters(sqlParams);
 
             if (Log.IsDebugEnabled)
                 Log.DebugCommand(dbCmd);
@@ -239,6 +229,22 @@ namespace ServiceStack.OrmLite
             {
                 return OrmLiteConfig.ResultsFilter.ExecuteSql(dbCmd);
             }
+
+            return dbCmd.ExecuteNonQuery();
+        }
+
+        internal static int ExecuteSql(this IDbCommand dbCmd, string sql, object anonType)
+        {
+            if (anonType != null)
+                dbCmd.SetParameters(anonType, excludeDefaults: false);
+
+            dbCmd.CommandText = sql;
+
+            if (Log.IsDebugEnabled)
+                Log.DebugCommand(dbCmd);
+
+            if (OrmLiteConfig.ResultsFilter != null)
+                return OrmLiteConfig.ResultsFilter.ExecuteSql(dbCmd);
 
             return dbCmd.ExecuteNonQuery();
         }
@@ -259,18 +265,18 @@ namespace ServiceStack.OrmLite
             return ex.Message.Contains(fbError) || ex.Message.Contains(fbAlreadyExistsError);
         }
 
-        public static T PopulateWithSqlReader<T>(this T objWithProperties, IOrmLiteDialectProvider dialectProvider, IDataReader dataReader)
+        public static T PopulateWithSqlReader<T>(this T objWithProperties, IOrmLiteDialectProvider dialectProvider, IDataReader reader)
         {
-            var fieldDefs = ModelDefinition<T>.Definition.AllFieldDefinitionsArray;
-
-            return PopulateWithSqlReader(objWithProperties, dialectProvider, dataReader, fieldDefs, null);
+            var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition, dialectProvider);
+            var values = new object[reader.FieldCount];
+            return PopulateWithSqlReader(objWithProperties, dialectProvider, reader, indexCache, values);
         }
 
-        public static int GetColumnIndex(this IDataReader dataReader, IOrmLiteDialectProvider dialectProvider, string fieldName)
+        public static int GetColumnIndex(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, string fieldName)
         {
             try
             {
-                return dataReader.GetOrdinal(dialectProvider.NamingStrategy.GetColumnName(fieldName));
+                return reader.GetOrdinal(dialectProvider.NamingStrategy.GetColumnName(fieldName));
             }
             catch (IndexOutOfRangeException ignoreNotFoundExInSomeProviders)
             {
@@ -278,50 +284,66 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        internal static int FindColumnIndex(this IDataReader dataReader, IOrmLiteDialectProvider dialectProvider, FieldDefinition fieldDef)
-        {
-            var index = NotFound;
-            index = dataReader.GetColumnIndex(dialectProvider, fieldDef.FieldName);
-            if (index == NotFound)
-            {
-                index = TryGuessColumnIndex(fieldDef.FieldName, dataReader);
-            }
-            // Try fallback to original field name when overriden by alias
-            if (index == NotFound && fieldDef.Alias != null && !OrmLiteConfig.DisableColumnGuessFallback)
-            {
-                index = dataReader.GetColumnIndex(dialectProvider, fieldDef.Name);
-                if (index == NotFound)
-                {
-                    index = TryGuessColumnIndex(fieldDef.Name, dataReader);
-                }
-            }
-
-            return index;
-        }
-
         private const int NotFound = -1;
-        public static T PopulateWithSqlReader<T>(this T objWithProperties, IOrmLiteDialectProvider dialectProvider, IDataReader dataReader, FieldDefinition[] fieldDefs, Dictionary<string, int> indexCache)
+        public static T PopulateWithSqlReader<T>(this T objWithProperties, 
+            IOrmLiteDialectProvider dialectProvider, IDataReader reader, 
+            Tuple<FieldDefinition, int, IOrmLiteConverter>[] indexCache, object[] values)
         {
             try
             {
-                foreach (var fieldDef in fieldDefs)
+                if (!OrmLiteConfig.DeoptimizeReader)
                 {
-                    int index;
-                    if (indexCache != null)
-                    {
-                        if (!indexCache.TryGetValue(fieldDef.Name, out index))
-                        {
-                            index = FindColumnIndex(dataReader, dialectProvider, fieldDef);
+                    if (values == null)
+                        values = new object[reader.FieldCount];
 
-                            indexCache.Add(fieldDef.Name, index);
+                    reader.GetValues(values);
+                }
+                else
+                {
+                    //Calling GetValues() on System.Data.SQLite.Core ADO.NET Provider changes behavior of reader.GetGuid()
+                    //So allow providers to by-pass reader.GetValues() optimization.
+                    values = null;
+                }
+
+                foreach (var fieldCache in indexCache)
+                {
+                    var fieldDef = fieldCache.Item1;
+                    var index = fieldCache.Item2;
+                    var converter = fieldCache.Item3;
+
+                    if (values != null && values[index] == DBNull.Value)
+                    {
+                        var value = fieldDef.IsNullable ? null : fieldDef.FieldTypeDefaultValue;
+                        if (OrmLiteConfig.OnDbNullFilter != null)
+                        {
+                            var useValue = OrmLiteConfig.OnDbNullFilter(fieldDef);
+                            if (useValue != null)
+                                value = useValue;
                         }
+
+                        fieldDef.SetValueFn(objWithProperties, value);
                     }
                     else
                     {
-                        index = FindColumnIndex(dataReader, dialectProvider, fieldDef);
+                        var value = converter.GetValue(reader, index, values);
+                        if (value == null)
+                        {
+                            if (!fieldDef.IsNullable)
+                                value = fieldDef.FieldTypeDefaultValue;
+                            if (OrmLiteConfig.OnDbNullFilter != null)
+                            {
+                                var useValue = OrmLiteConfig.OnDbNullFilter(fieldDef);
+                                if (useValue != null)
+                                    value = useValue;
+                            }
+                            fieldDef.SetValueFn(objWithProperties, value);
+                        }
+                        else
+                        {
+                            var fieldValue = converter.FromDbValue(fieldDef.FieldType, value);
+                            fieldDef.SetValueFn(objWithProperties, fieldValue);
+                        }
                     }
-
-                    dialectProvider.SetDbValue(fieldDef, dataReader, index, objWithProperties);
                 }
             }
             catch (Exception ex)
@@ -329,80 +351,6 @@ namespace ServiceStack.OrmLite
                 Log.Error(ex);
             }
             return objWithProperties;
-        }
-
-        private static readonly Regex AllowedPropertyCharsRegex = new Regex(@"[^0-9a-zA-Z_]",
-            RegexOptions.Compiled | RegexOptions.CultureInvariant);
-
-        private static int TryGuessColumnIndex(string fieldName, IDataReader dataReader)
-        {
-            if (OrmLiteConfig.DisableColumnGuessFallback)
-                return NotFound;
-
-            var fieldCount = dataReader.FieldCount;
-            for (var i = 0; i < fieldCount; i++)
-            {
-                var dbFieldName = dataReader.GetName(i);
-
-                // First guess: Maybe the DB field has underscores? (most common)
-                // e.g. CustomerId (C#) vs customer_id (DB)
-                var dbFieldNameWithNoUnderscores = dbFieldName.Replace("_", "");
-                if (string.Compare(fieldName, dbFieldNameWithNoUnderscores, StringComparison.OrdinalIgnoreCase) == 0)
-                {
-                    return i;
-                }
-
-                // Next guess: Maybe the DB field has special characters?
-                // e.g. Quantity (C#) vs quantity% (DB)
-                var dbFieldNameSanitized = AllowedPropertyCharsRegex.Replace(dbFieldName, string.Empty);
-                if (string.Compare(fieldName, dbFieldNameSanitized, StringComparison.OrdinalIgnoreCase) == 0)
-                {
-                    return i;
-                }
-
-                // Next guess: Maybe the DB field has special characters *and* has underscores?
-                // e.g. Quantity (C#) vs quantity_% (DB)
-                if (string.Compare(fieldName, dbFieldNameSanitized.Replace("_", string.Empty), StringComparison.OrdinalIgnoreCase) == 0)
-                {
-                    return i;
-                }
-
-                // Next guess: Maybe the DB field has some prefix that we don't have in our C# field?
-                // e.g. CustomerId (C#) vs t130CustomerId (DB)
-                if (dbFieldName.EndsWith(fieldName, StringComparison.OrdinalIgnoreCase))
-                {
-                    return i;
-                }
-
-                // Next guess: Maybe the DB field has some prefix that we don't have in our C# field *and* has underscores?
-                // e.g. CustomerId (C#) vs t130_CustomerId (DB)
-                if (dbFieldNameWithNoUnderscores.EndsWith(fieldName, StringComparison.OrdinalIgnoreCase))
-                {
-                    return i;
-                }
-
-                // Next guess: Maybe the DB field has some prefix that we don't have in our C# field *and* has special characters?
-                // e.g. CustomerId (C#) vs t130#CustomerId (DB)
-                if (dbFieldNameSanitized.EndsWith(fieldName, StringComparison.OrdinalIgnoreCase))
-                {
-                    return i;
-                }
-
-                // Next guess: Maybe the DB field has some prefix that we don't have in our C# field *and* has underscores *and* has special characters?
-                // e.g. CustomerId (C#) vs t130#Customer_I#d (DB)
-                if (dbFieldNameSanitized.Replace("_", "").EndsWith(fieldName, StringComparison.OrdinalIgnoreCase))
-                {
-                    return i;
-                }
-
-                // Cater for Naming Strategies like PostgreSQL that has lower_underscore names
-                if (dbFieldNameSanitized.Replace("_", "").EndsWith(fieldName.Replace("_", ""), StringComparison.OrdinalIgnoreCase))
-                {
-                    return i;
-                }
-            }
-
-            return NotFound;
         }
 
         internal static int Update<T>(this IDbCommand dbCmd, T obj)

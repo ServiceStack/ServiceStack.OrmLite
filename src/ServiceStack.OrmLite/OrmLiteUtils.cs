@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using ServiceStack.Logging;
 using ServiceStack.Text;
 
@@ -57,23 +58,22 @@ namespace ServiceStack.OrmLite
             return typeof(T).IsValueType || typeof(T) == typeof(string);
         }
 
-        public static T ConvertTo<T>(this IDataReader dataReader, IOrmLiteDialectProvider dialectProvider)
+        public static T ConvertTo<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider)
         {
-            var fieldDefs = ModelDefinition<T>.Definition.AllFieldDefinitionsArray;
-
-            using (dataReader)
+            using (reader)
             {
-                if (dataReader.Read())
+                if (reader.Read())
                 {
                     if (typeof(T) == typeof (List<object>))
-                        return (T)(object)dataReader.ConvertToListObjects();
+                        return (T)(object)reader.ConvertToListObjects();
 
                     if (typeof(T) == typeof(Dictionary<string, object>))
-                        return (T)(object)dataReader.ConvertToDictionaryObjects();
+                        return (T)(object)reader.ConvertToDictionaryObjects();
                     
                     var row = CreateInstance<T>();
-                    var indexCache = dataReader.GetIndexFieldsCache(ModelDefinition<T>.Definition);
-                    row.PopulateWithSqlReader(dialectProvider, dataReader, fieldDefs, indexCache);
+                    var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition, dialectProvider);
+                    var values = new object[reader.FieldCount];
+                    row.PopulateWithSqlReader(dialectProvider, reader, indexCache, values);
                     return row;
                 }
                 return default(T);
@@ -100,18 +100,16 @@ namespace ServiceStack.OrmLite
             return row;
         }
 
-        public static List<T> ConvertToList<T>(this IDataReader dataReader, IOrmLiteDialectProvider dialectProvider)
+        public static List<T> ConvertToList<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider)
         {
-            var fieldDefs = ModelDefinition<T>.Definition.AllFieldDefinitionsArray;
-
             if (typeof(T) == typeof(List<object>))
             {
                 var to = new List<List<object>>();
-                using (dataReader)
+                using (reader)
                 {
-                    while (dataReader.Read())
+                    while (reader.Read())
                     {
-                        var row = dataReader.ConvertToListObjects();
+                        var row = reader.ConvertToListObjects();
                         to.Add(row);
                     }
                 }
@@ -120,11 +118,11 @@ namespace ServiceStack.OrmLite
             if (typeof(T) == typeof(Dictionary<string, object>))
             {
                 var to = new List<Dictionary<string,object>>();
-                using (dataReader)
+                using (reader)
                 {
-                    while (dataReader.Read())
+                    while (reader.Read())
                     {
-                        var row = dataReader.ConvertToDictionaryObjects();
+                        var row = reader.ConvertToDictionaryObjects();
                         to.Add(row);
                     }
                 }
@@ -133,13 +131,14 @@ namespace ServiceStack.OrmLite
             else
             {
                 var to = new List<T>();
-                using (dataReader)
+                using (reader)
                 {
-                    var indexCache = dataReader.GetIndexFieldsCache(ModelDefinition<T>.Definition);
-                    while (dataReader.Read())
+                    var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition, dialectProvider);
+                    var values = new object[reader.FieldCount];
+                    while (reader.Read())
                     {
                         var row = CreateInstance<T>();
-                        row.PopulateWithSqlReader(dialectProvider, dataReader, fieldDefs, indexCache);
+                        row.PopulateWithSqlReader(dialectProvider, reader, indexCache, values);
                         to.Add(row);
                     }
                 }
@@ -147,38 +146,36 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        public static object ConvertTo(this IDataReader dataReader, IOrmLiteDialectProvider dialectProvider, Type type)
+        public static object ConvertTo(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, Type type)
         {
             var modelDef = type.GetModelDefinition();
-            var fieldDefs = modelDef.AllFieldDefinitionsArray;
-
-            using (dataReader)
+            using (reader)
             {
-                if (dataReader.Read())
+                if (reader.Read())
                 {
                     var row = type.CreateInstance();
-                    var indexCache = dataReader.GetIndexFieldsCache(modelDef);
-                    row.PopulateWithSqlReader(dialectProvider, dataReader, fieldDefs, indexCache);
+                    var indexCache = reader.GetIndexFieldsCache(modelDef, dialectProvider);
+                    var values = new object[reader.FieldCount];
+                    row.PopulateWithSqlReader(dialectProvider, reader, indexCache, values);
                     return row;
                 }
                 return type.GetDefaultValue();
             }
         }
 
-        public static IList ConvertToList(this IDataReader dataReader, IOrmLiteDialectProvider dialectProvider, Type type)
+        public static IList ConvertToList(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, Type type)
         {
             var modelDef = type.GetModelDefinition();
-            var fieldDefs = modelDef.AllFieldDefinitionsArray;
-
             var listInstance = typeof(List<>).MakeGenericType(type).CreateInstance();
             var to = (IList)listInstance;
-            using (dataReader)
+            using (reader)
             {
-                var indexCache = dataReader.GetIndexFieldsCache(modelDef);
-                while (dataReader.Read())
+                var indexCache = reader.GetIndexFieldsCache(modelDef, dialectProvider);
+                var values = new object[reader.FieldCount];
+                while (reader.Read())
                 {
                     var row = type.CreateInstance();
-                    row.PopulateWithSqlReader(dialectProvider, dataReader, fieldDefs, indexCache);
+                    row.PopulateWithSqlReader(dialectProvider, reader, indexCache, values);
                     to.Add(row);
                 }
             }
@@ -275,6 +272,9 @@ namespace ServiceStack.OrmLite
 
         public static string SqlVerifyFragment(this string sqlFragment, IEnumerable<string> illegalFragments)
         {
+            if (sqlFragment == null)
+                return null;
+
             var fragmentToVerify = sqlFragment
                 .StripQuotedStrings('\'')
                 .StripQuotedStrings('"')
@@ -348,21 +348,131 @@ namespace ServiceStack.OrmLite
             return new SqlInValues(values, dialect);
         }
 
-        public static Dictionary<string, int> GetIndexFieldsCache(this IDataReader reader, ModelDefinition modelDefinition = null)
+        public static Tuple<FieldDefinition, int, IOrmLiteConverter>[] GetIndexFieldsCache(this IDataReader reader, ModelDefinition modelDefinition, IOrmLiteDialectProvider dialect)
         {
-            var cache = new Dictionary<string, int>();
-            if (modelDefinition != null)
-            {
-                foreach (var field in modelDefinition.IgnoredFieldDefinitions)
-                {
-                    cache[field.FieldName] = -1;
-                }
-            }
+            var cache = new List<Tuple<FieldDefinition, int, IOrmLiteConverter>>();
+            var ignoredFields = modelDefinition.IgnoredFieldDefinitions;
+            var remainingFieldDefs = modelDefinition.FieldDefinitionsArray
+                .Where(x => !ignoredFields.Contains(x) && x.SetValueFn != null).ToList();
+
             for (var i = 0; i < reader.FieldCount; i++)
             {
-                cache[reader.GetName(i)] = i;
+                var columnName = reader.GetName(i);                
+                var fieldDef = modelDefinition.GetFieldDefinition(columnName);
+
+                if (fieldDef != null && !ignoredFields.Contains(fieldDef) && fieldDef.SetValueFn != null)
+                {
+                    remainingFieldDefs.Remove(fieldDef);
+                    cache.Add(Tuple.Create(fieldDef, i, dialect.GetConverterBestMatch(fieldDef)));
+                }
             }
-            return cache;
+
+            foreach (var fieldDef in remainingFieldDefs)
+            {
+                var index = FindColumnIndex(reader, dialect, fieldDef);
+                if (index != NotFound)
+                {
+                    cache.Add(Tuple.Create(fieldDef, index, dialect.GetConverterBestMatch(fieldDef)));
+                }
+            }
+
+            return cache.ToArray();
+        }
+
+        private const int NotFound = -1;
+        internal static int FindColumnIndex(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, FieldDefinition fieldDef)
+        {
+            var index = NotFound;
+            index = reader.GetColumnIndex(dialectProvider, fieldDef.FieldName);
+            if (index == NotFound)
+            {
+                index = TryGuessColumnIndex(fieldDef.FieldName, reader);
+            }
+            // Try fallback to original field name when overriden by alias
+            if (index == NotFound && fieldDef.Alias != null && !OrmLiteConfig.DisableColumnGuessFallback)
+            {
+                index = reader.GetColumnIndex(dialectProvider, fieldDef.Name);
+                if (index == NotFound)
+                {
+                    index = TryGuessColumnIndex(fieldDef.Name, reader);
+                }
+            }
+
+            return index;
+        }
+
+        private static readonly Regex AllowedPropertyCharsRegex = new Regex(@"[^0-9a-zA-Z_]",
+            RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+        private static int TryGuessColumnIndex(string fieldName, IDataReader dataReader)
+        {
+            if (OrmLiteConfig.DisableColumnGuessFallback)
+                return NotFound;
+
+            var fieldCount = dataReader.FieldCount;
+            for (var i = 0; i < fieldCount; i++)
+            {
+                var dbFieldName = dataReader.GetName(i);
+
+                // First guess: Maybe the DB field has underscores? (most common)
+                // e.g. CustomerId (C#) vs customer_id (DB)
+                var dbFieldNameWithNoUnderscores = dbFieldName.Replace("_", "");
+                if (string.Compare(fieldName, dbFieldNameWithNoUnderscores, StringComparison.OrdinalIgnoreCase) == 0)
+                {
+                    return i;
+                }
+
+                // Next guess: Maybe the DB field has special characters?
+                // e.g. Quantity (C#) vs quantity% (DB)
+                var dbFieldNameSanitized = AllowedPropertyCharsRegex.Replace(dbFieldName, string.Empty);
+                if (string.Compare(fieldName, dbFieldNameSanitized, StringComparison.OrdinalIgnoreCase) == 0)
+                {
+                    return i;
+                }
+
+                // Next guess: Maybe the DB field has special characters *and* has underscores?
+                // e.g. Quantity (C#) vs quantity_% (DB)
+                if (string.Compare(fieldName, dbFieldNameSanitized.Replace("_", string.Empty), StringComparison.OrdinalIgnoreCase) == 0)
+                {
+                    return i;
+                }
+
+                // Next guess: Maybe the DB field has some prefix that we don't have in our C# field?
+                // e.g. CustomerId (C#) vs t130CustomerId (DB)
+                if (dbFieldName.EndsWith(fieldName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return i;
+                }
+
+                // Next guess: Maybe the DB field has some prefix that we don't have in our C# field *and* has underscores?
+                // e.g. CustomerId (C#) vs t130_CustomerId (DB)
+                if (dbFieldNameWithNoUnderscores.EndsWith(fieldName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return i;
+                }
+
+                // Next guess: Maybe the DB field has some prefix that we don't have in our C# field *and* has special characters?
+                // e.g. CustomerId (C#) vs t130#CustomerId (DB)
+                if (dbFieldNameSanitized.EndsWith(fieldName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return i;
+                }
+
+                // Next guess: Maybe the DB field has some prefix that we don't have in our C# field *and* has underscores *and* has special characters?
+                // e.g. CustomerId (C#) vs t130#Customer_I#d (DB)
+                if (dbFieldNameSanitized.Replace("_", "").EndsWith(fieldName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return i;
+                }
+
+                // Cater for Naming Strategies like PostgreSQL that has lower_underscore names
+                if (dbFieldNameSanitized.Replace("_", "").EndsWith(fieldName.Replace("_", ""), StringComparison.OrdinalIgnoreCase))
+                {
+                    return i;
+                }
+            }
+
+            return NotFound;
         }
 
         public static bool IsRefType(this Type fieldType)
@@ -404,30 +514,10 @@ namespace ServiceStack.OrmLite
             return quotedExpr.Trim(QuotedChars);
         }
 
-        private const int NotFound = -1;
 
         public static ModelDefinition GetModelDefinition(Type modelType)
         {
             return modelType.GetModelDefinition();
-        }
-
-        public static bool HandledDbNullValue(FieldDefinition fieldDef, IDataReader dataReader, int colIndex, object instance)
-        {
-            if (fieldDef == null || fieldDef.SetValueFn == null || colIndex == NotFound) return true;
-            if (dataReader.IsDBNull(colIndex))
-            {
-                var value = fieldDef.IsNullable ? null : fieldDef.FieldTypeDefaultValue;
-                if (OrmLiteConfig.OnDbNullFilter != null)
-                {
-                    var useValue = OrmLiteConfig.OnDbNullFilter(fieldDef);
-                    if (useValue != null)
-                        value = useValue;
-                }
-
-                fieldDef.SetValueFn(instance, value);
-                return true;
-            }
-            return false;
         }
 
         public static ulong ConvertToULong(byte[] bytes)

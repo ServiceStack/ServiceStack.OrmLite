@@ -294,9 +294,9 @@ namespace ServiceStack.OrmLite
                 p.ParameterName = kvp.Key;
 
                 p.Direction = ParameterDirection.Input;
-                p.Value = value ?? DBNull.Value;
                 if (value != null)
                     dialectProvider.InitDbParam(p, value.GetType());
+                p.Value = value ?? DBNull.Value;
 
                 dbCmd.Parameters.Add(p);
             }
@@ -535,14 +535,14 @@ namespace ServiceStack.OrmLite
                 yield break;
             }
 
-            var fieldDefs = ModelDefinition<T>.Definition.FieldDefinitionsArray;
             using (var reader = dbCmd.ExecuteReader())
             {
-                var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition);
+                var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition, dialectProvider);
+                var values = new object[reader.FieldCount];
                 while (reader.Read())
                 {
                     var row = OrmLiteUtils.CreateInstance<T>();
-                    row.PopulateWithSqlReader(dialectProvider, reader, fieldDefs, indexCache);
+                    row.PopulateWithSqlReader(dialectProvider, reader, indexCache, values);
                     yield return row;
                 }
             }
@@ -598,15 +598,15 @@ namespace ServiceStack.OrmLite
                 yield break;
             }
 
-            var fieldDefs = ModelDefinition<T>.Definition.FieldDefinitionsArray;
             var dialectProvider = dbCmd.GetDialectProvider();
             using (var reader = dbCmd.ExecuteReader())
             {
-                var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition);
+                var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition, dialectProvider);
+                var values = new object[reader.FieldCount];
                 while (reader.Read())
                 {
                     var row = OrmLiteUtils.CreateInstance<T>();
-                    row.PopulateWithSqlReader(dialectProvider, reader, fieldDefs, indexCache);
+                    row.PopulateWithSqlReader(dialectProvider, reader, indexCache, values);
                     yield return row;
                 }
             }
@@ -631,14 +631,14 @@ namespace ServiceStack.OrmLite
                 yield break;
             }
 
-            var fieldDefs = ModelDefinition<T>.Definition.FieldDefinitionsArray;
             using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
             {
-                var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition);
+                var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition, dialectProvider);
+                var values = new object[reader.FieldCount];
                 while (reader.Read())
                 {
                     var row = OrmLiteUtils.CreateInstance<T>();
-                    row.PopulateWithSqlReader(dialectProvider, reader, fieldDefs, indexCache);
+                    row.PopulateWithSqlReader(dialectProvider, reader, indexCache, values);
                     yield return row;
                 }
             }
@@ -680,11 +680,11 @@ namespace ServiceStack.OrmLite
             if (underlyingType == typeof(object))
                 return (T)reader.GetValue(0);
 
-            var converter = dialectProvider.GetConverter(underlyingType);
+            var converter = dialectProvider.GetConverterBestMatch(underlyingType);
             if (converter != null)
             {
-                object oValue = converter.GetValue(reader, columnIndex);
-                if (oValue == null || oValue == DBNull.Value)
+                object oValue = converter.GetValue(reader, columnIndex, null);
+                if (oValue == null)
                     return default(T);
 
                 var convertedValue = converter.FromDbValue(underlyingType, oValue);
@@ -822,8 +822,7 @@ namespace ServiceStack.OrmLite
         {
             if (anonType != null) SetParameters(dbCmd, anonType, excludeDefaults: true);
 
-            var sql = dbCmd.GetDialectProvider().ToExecuteProcedureStatement(anonType)
-                ?? GetFilterSql<T>(dbCmd);
+            var sql = GetFilterSql<T>(dbCmd);
 
             var result = dbCmd.Scalar(sql);
             return result != null;

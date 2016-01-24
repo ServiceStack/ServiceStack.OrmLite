@@ -115,8 +115,11 @@
   <ItemGroup>
     <Compile Include="AdminTasks.cs" />
     <Compile Include="AdoNetDataAccessTests.cs" />
-    <Compile Include="ApiSqlServerTests.cs" />
     <Compile Include="ApiSqliteTests.cs" />
+    <Compile Include="ApiSqlServerTests.cs" />
+    <Compile Include="ApiSqliteTests.NonParam.cs" />
+    <Compile Include="ApiSqlServerTests.NonParam.cs" />
+    <Compile Include="AutoQueryTests.cs" />
     <Compile Include="CaptureSqlCommandFilterTests.cs" />
     <Compile Include="CaptureSqlFilterTests.cs" />
     <Compile Include="CompositeKeyTests.cs" />
@@ -126,6 +129,7 @@
     <Compile Include="DateTimeOffsetTests.cs" />
     <Compile Include="DateTimeTests.cs" />
     <Compile Include="DefaultValueTests.cs" />
+    <Compile Include="UseCase\ExpressionsAuthorTests.cs" />
     <Compile Include="Expression\ComplexJoinTests.cs" />
     <Compile Include="Expression\ExpressionUsingCustomSerializedEnumTests.cs" />
     <Compile Include="Expression\FromExpressionTests.cs" />
@@ -141,6 +145,7 @@
     <Compile Include="Issues\CreateTableAliasTest.cs" />
     <Compile Include="Issues\CsvTests.cs" />
     <Compile Include="Issues\CustomFieldTests.cs" />
+    <Compile Include="Issues\CustomTypeTests.cs" />
     <Compile Include="Issues\LoadReferencesCaseSensitiveTest.cs" />
     <Compile Include="Issues\LoadReferencesForeignKeyTests.cs" />
     <Compile Include="Issues\LoadSelectIssue.cs" />
@@ -254,6 +259,8 @@
     <Compile Include="UseCase\CustomerOrdersUseCase.cs" />
     <Compile Include="UseCase\FieldFromInterfaceImplementationUseCase.cs" />
     <Compile Include="UseCase\NestedComplexTypeUseCase.cs" />
+    <Compile Include="UseCase\ParentChildCyclicalExample.cs" />
+    <Compile Include="UseCase\PostPerfTests.cs" />
     <Compile Include="UseCase\SchemaUseCase.cs" />
     <Compile Include="UseCase\ServiceStack_OrmLite_UseCase.cs" />
     <Compile Include="UseCase\ShardingUseCase.cs" />

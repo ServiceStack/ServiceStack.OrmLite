@@ -26,5 +26,10 @@ namespace ServiceStack.OrmLite
 
             return OrmLiteUtils.SqlJoin(values, dialectProvider);
         }
+
+        public IEnumerable GetValues()
+        {
+            return values;
+        }
     }
 }

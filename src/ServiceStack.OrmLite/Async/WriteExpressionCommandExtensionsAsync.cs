@@ -16,8 +16,8 @@ namespace ServiceStack.OrmLite
 
         internal static Task<int> UpdateOnlyAsync<T>(this IDbCommand dbCmd, T model, SqlExpression<T> onlyFields, CancellationToken token)
         {
-            var sql = dbCmd.UpdateOnlySql(model, onlyFields);
-            return dbCmd.ExecuteSqlAsync(sql, token);
+            dbCmd.UpdateOnlySql(model, onlyFields);
+            return dbCmd.ExecNonQueryAsync(token);
         }
 
         internal static Task<int> UpdateOnlyAsync<T, TKey>(this IDbCommand dbCmd, T obj,
@@ -41,8 +41,8 @@ namespace ServiceStack.OrmLite
 
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Where(obj);
-            var sql = q.ToUpdateStatement(item, excludeDefaults: true);
-            return dbCmd.ExecuteSqlAsync(sql, token);
+            q.PrepareUpdateStatement(dbCmd, item, excludeDefaults: true);
+            return dbCmd.ExecNonQueryAsync(token);
         }
 
         internal static Task<int> UpdateAsync<T>(this IDbCommand dbCmd, T item, Expression<Func<T, bool>> expression, CancellationToken token)
@@ -52,14 +52,18 @@ namespace ServiceStack.OrmLite
 
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Where(expression);
-            var sql = q.ToUpdateStatement(item);
-            return dbCmd.ExecuteSqlAsync(sql, token);
+            q.PrepareUpdateStatement(dbCmd, item);
+            return dbCmd.ExecNonQueryAsync(token);
         }
 
         internal static Task<int> UpdateAsync<T>(this IDbCommand dbCmd, object updateOnly, Expression<Func<T, bool>> where, CancellationToken token)
         {
-            var updateSql = WriteExpressionCommandExtensions.UpdateSql(dbCmd.GetDialectProvider(), updateOnly, where);
-            return dbCmd.ExecuteSqlAsync(updateSql, token);
+            var q = dbCmd.GetDialectProvider().SqlExpression<T>();
+            var whereSql = q.Where(@where).WhereExpression;
+            q.CopyParamsTo(dbCmd);
+            dbCmd.PrepareUpdateAnonSql<T>(dbCmd.GetDialectProvider(), updateOnly, whereSql);
+
+            return dbCmd.ExecNonQueryAsync(token);
         }
 
         internal static Task<int> UpdateFmtAsync<T>(this IDbCommand dbCmd, string set, string where, CancellationToken token)
@@ -89,9 +93,9 @@ namespace ServiceStack.OrmLite
 
         internal static Task<int> DeleteAsync<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> where, CancellationToken token)
         {
-            var ev = dbCmd.GetDialectProvider().SqlExpression<T>();
-            ev.Where(where);
-            return dbCmd.DeleteAsync(ev, token);
+            var q = dbCmd.GetDialectProvider().SqlExpression<T>();
+            q.Where(where);
+            return dbCmd.DeleteAsync(q, token);
         }
 
         internal static Task<int> DeleteAsync<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> where, CancellationToken token)
@@ -99,10 +103,10 @@ namespace ServiceStack.OrmLite
             return dbCmd.DeleteAsync(where(dbCmd.GetDialectProvider().SqlExpression<T>()), token);
         }
 
-        internal static Task<int> DeleteAsync<T>(this IDbCommand dbCmd, SqlExpression<T> where, CancellationToken token)
+        internal static Task<int> DeleteAsync<T>(this IDbCommand dbCmd, SqlExpression<T> q, CancellationToken token)
         {
-            var sql = where.ToDeleteRowStatement();
-            return dbCmd.ExecuteSqlAsync(sql, token);
+            var sql = q.ToDeleteRowStatement();
+            return dbCmd.ExecuteSqlAsync(sql, q.Params, token);
         }
 
         internal static Task<int> DeleteFmtAsync<T>(this IDbCommand dbCmd, string where, CancellationToken token)

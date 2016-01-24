@@ -50,11 +50,16 @@ namespace ServiceStack.OrmLite.Tests
                 row.PrintDump();
                 Assert.That(row.DefaultInt, Is.EqualTo(1));
                 Assert.That(row.NDefaultInt, Is.EqualTo(1));
-                Assert.That(row.DefaultDouble, Is.EqualTo(1.1));
-                Assert.That(row.NDefaultDouble, Is.EqualTo(1.1));
+                Assert.That(row.DefaultDouble, Is.EqualTo(1.1).Within(.1d));
+                Assert.That(row.NDefaultDouble, Is.EqualTo(1.1).Within(.1d));
                 Assert.That(row.DefaultString, Is.EqualTo("String"));
-                Assert.That(row.CreatedDateUtc, Is.GreaterThan(DateTime.UtcNow.Date));
-                Assert.That(row.NCreatedDateUtc, Is.GreaterThan(DateTime.UtcNow.Date));
+
+                var expectedDate = Dialect != Dialect.MySql && Dialect != Dialect.Firebird
+                    ? DateTime.UtcNow.Date
+                    : DateTime.Now.Date; //MySql CURRENT_TIMESTAMP == LOCAL_TIME
+
+                Assert.That(row.CreatedDateUtc, Is.GreaterThan(expectedDate));
+                Assert.That(row.NCreatedDateUtc, Is.GreaterThan(expectedDate));
             }
         }
     }

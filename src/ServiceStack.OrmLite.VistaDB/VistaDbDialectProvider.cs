@@ -280,6 +280,11 @@ namespace ServiceStack.OrmLite.VistaDB
             return new VistaDbExpression<T>(this);
         }
 
+        public override IDbDataParameter CreateParam()
+        {
+            return new OrmLiteVistaDbParameter(new OrmLiteDataParameter());
+        }
+
         public override string GetTableName(string table, string schema = null)
         {
             return schema != null

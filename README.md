@@ -42,12 +42,22 @@ level public properties.
   - [ServiceStack.OrmLite.PostgreSQL](http://nuget.org/List/Packages/ServiceStack.OrmLite.PostgreSQL)
   - [ServiceStack.OrmLite.MySql](http://nuget.org/List/Packages/ServiceStack.OrmLite.MySql)
   - [ServiceStack.OrmLite.Sqlite.Mono](http://nuget.org/packages/ServiceStack.OrmLite.Sqlite.Mono) - Compatible with Mono / Windows (x86) 
-  - [ServiceStack.OrmLite.Sqlite.Windows](http://nuget.org/List/Packages/ServiceStack.OrmLite.Sqlite.Windows) - 32/64bit Mixed mode .NET for WIndows only 
+  - [ServiceStack.OrmLite.Sqlite.Windows](http://nuget.org/List/Packages/ServiceStack.OrmLite.Sqlite.Windows) - 32/64bit Mixed mode .NET for Windows only 
   - [ServiceStack.OrmLite.Oracle](http://nuget.org/packages/ServiceStack.OrmLite.Oracle) (unofficial)
   - [ServiceStack.OrmLite.Firebird](http://nuget.org/List/Packages/ServiceStack.OrmLite.Firebird)  (unofficial)
   - [ServiceStack.OrmLite.VistaDb](http://nuget.org/List/Packages/ServiceStack.OrmLite.VistaDb)  (unofficial)
    
 _Latest v4+ on NuGet is a [commercial release](https://servicestack.net/ormlite) with [free quotas](https://servicestack.net/download#free-quotas)._
+
+### [Getting Started with OrmLite and AWS RDS](https://github.com/ServiceStackApps/AwsGettingStarted)
+
+OrmLite has great support AWS's managed RDS Databases, follow these getting started guides to help getting up and running quickly:
+
+- [PostgreSQL](https://github.com/ServiceStackApps/AwsGettingStarted#getting-started-with-aws-rds-postgresql-and-ormlite)
+- [Aurora](https://github.com/ServiceStackApps/AwsGettingStarted#getting-started-with-aws-rds-aurora-and-ormlite)
+- [MySQL](https://github.com/ServiceStackApps/AwsGettingStarted#getting-started-with-aws-rds-mysql-and-ormlite)
+- [MariaDB](https://github.com/ServiceStackApps/AwsGettingStarted#getting-started-with-aws-rds-mariadb-and-ormlite)
+- [SQL Server](https://github.com/ServiceStackApps/AwsGettingStarted#getting-started-with-aws-rds-sql-server-and-ormlite)
 
 #### [Docs and Downloads for older v3 BSD releases](https://github.com/ServiceStackV3/ServiceStackV3)
 
@@ -125,6 +135,53 @@ There's also support for SQL Server-specific `SqlGeography`, `SqlGeometry` and `
 See [docs on SQL Server Types](https://github.com/ServiceStack/ServiceStack.OrmLite/wiki/SQL-Server-Types) 
 for instructions on how to enable them.
 
+# Async API Overview
+
+A quick overview of Async API's can be seen in the class diagram below:
+
+![OrmLite Async APIs](https://raw.githubusercontent.com/ServiceStack/Assets/master/img/ormlite/OrmLiteApiAsync.png) 
+
+Essentially most of OrmLite public API's now have async equivalents of the same name and an additional conventional `*Async` suffix. 
+The Async API's also take an optional `CancellationToken` making converting sync code trivial, where you just need to
+add the `Async` suffix and **await** keyword, as can be seen in the 
+[Customer Orders UseCase upgrade to Async diff](https://github.com/ServiceStack/ServiceStack.OrmLite/commit/c1ce6f0eac99133fc232b263c26c42379d4c5f48)
+, e.g:
+
+Sync:
+
+```csharp
+db.Insert(new Employee { Id = 1, Name = "Employee 1" });
+db.Save(product1, product2);
+var customer = db.Single<Customer>(new { customer.Email }); 
+```
+
+Async:
+
+```csharp
+await db.InsertAsync(new Employee { Id = 1, Name = "Employee 1" });
+await db.SaveAsync(product1, product2);
+var customer = await db.SingleAsync<Customer>(new { customer.Email });
+```
+
+> Effectively the only Data Access API's that doesn't have async equivalents are `*Lazy` APIs yielding a lazy 
+> sequence (incompatible with async) as well as **Schema** DDL API's which are typically not used at runtime.
+
+For a quick preview of many of the new Async API's in action, checkout 
+[ApiSqlServerTestsAsync.cs](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLiteV45.Tests/ApiSqlServerTestsAsync.cs).
+
+### Async RDBMS Providers
+
+Currently only a limited number of RDBMS providers offer async API's which are only available in their **.NET 4.5** builds, which at this time are only:
+
+  - [SQL Server .NET 4.5+](https://www.nuget.org/packages/ServiceStack.OrmLite.SqlServer)
+  - [PostgreSQL .NET 4.5+](https://www.nuget.org/packages/ServiceStack.OrmLite.PostgreSQL)
+  - [MySQL .NET 4.5+](https://www.nuget.org/packages/ServiceStack.OrmLite.MySql)
+
+We've also added a 
+[.NET 4.5 build for Sqlite](https://www.nuget.org/packages/ServiceStack.OrmLite.Sqlite.Mono) 
+as it's a common use-case to swapout to use Sqlite's in-memory provider for faster tests. 
+But as Sqlite doesn't provide async API's under-the-hood we fallback to *pseudo async* support where we just wrap its synchronous responses in `Task` results. 
+
 ## Dynamic Result Sets
 
 There's new support for returning unstructured resultsets letting you Select `List<object>` instead of having results mapped to a concrete Poco class, e.g:
@@ -180,52 +237,6 @@ var usaCustomerIds = db.From<Customer>(c => c.Country == "USA").Select(c => c.Id
 var usaCustomerOrders = db.Select(db.From<Order>()
     .Where(q => Sql.In(q.CustomerId, usaCustomerIds)));
 ``` 
-
-# Async API Overview
-
-A quick overview of Async API's can be seen in the class diagram below:
-
-![OrmLite Async APIs](https://raw.githubusercontent.com/ServiceStack/Assets/master/img/ormlite/OrmLiteApiAsync.png) 
-
-Essentially most of OrmLite public API's now have async equivalents of the same name and an additional conventional `*Async` suffix. 
-The Async API's also take an optional `CancellationToken` making converting sync code trivial, where you just need to
-add the `Async` suffix and **await** keyword, as can be seen in the 
-[Customer Orders UseCase upgrade to Async diff](https://github.com/ServiceStack/ServiceStack.OrmLite/commit/c1ce6f0eac99133fc232b263c26c42379d4c5f48)
-, e.g:
-
-Sync:
-
-```csharp
-db.Insert(new Employee { Id = 1, Name = "Employee 1" });
-db.Save(product1, product2);
-var customer = db.Single<Customer>(new { customer.Email }); 
-```
-
-Async:
-
-```csharp
-await db.InsertAsync(new Employee { Id = 1, Name = "Employee 1" });
-await db.SaveAsync(product1, product2);
-var customer = await db.SingleAsync<Customer>(new { customer.Email });
-```
-
-> Effectively the only Data Access API's that doesn't have async equivalents are `*Lazy` APIs yielding a lazy 
-> sequence (incompatible with async) as well as **Schema** DDL API's which are typically not used at runtime.
-
-For a quick preview of many of the new Async API's in action, checkout 
-[ApiSqlServerTestsAsync.cs](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLiteV45.Tests/ApiSqlServerTestsAsync.cs).
-
-### Async RDBMS Providers
-
-Currently only a limited number of RDBMS providers offer async API's which are only available in their **.NET 4.5** builds, which at this time are only:
-
-  - [SQL Server .NET 4.5+](https://www.nuget.org/packages/ServiceStack.OrmLite.SqlServer)
-  - [MySQL .NET 4.5+](https://www.nuget.org/packages/ServiceStack.OrmLite.MySql)
-
-We've also added a 
-[.NET 4.5 build for Sqlite](https://www.nuget.org/packages/ServiceStack.OrmLite.Sqlite.Mono) 
-as it's a common use-case to swapout to use Sqlite's in-memory provider for faster tests. 
-But as Sqlite doesn't provide async API's under-the-hood we fallback to *pseudo async* support where we just wrap its synchronous responses in `Task` results. 
 
 # API Examples
 
@@ -929,6 +940,17 @@ customers.Merge(orders); // Merge disconnected Orders with their related Custome
 customers.PrintDump();   // Print merged customers and orders datasets
 ```
 
+### Custom Load References
+
+You can selectively specifying which references you want to load using the `include` parameter, e.g:
+
+```csharp
+var customerWithAddress = db.LoadSingleById<Customer>(customer.Id, include: new[] { "PrimaryAddress" });
+
+//Alternative
+var customerWithAddress = db.LoadSingleById<Customer>(customer.Id, include: x => new { x.PrimaryAddress });
+```
+
 ## Optimistic Concurrency
 
 Optimistic concurrency can be added to any table by adding the `ulong RowVersion { get; set; }` property, e.g:
@@ -1358,6 +1380,16 @@ int result = db.SqlScalar<int>(
 int result = db.SqlScalar<int>("SELCT COUNT(*) FROM Person WHERE Age < 50");
 ```
 
+### Custom Insert and Updates
+
+```csharp
+Db.ExecuteSql("INSERT INTO page_stats (ref_id, fav_count) VALUES (@refId, @favCount)",
+              new { refId, favCount })
+
+//Async:
+Db.ExecuteSqlAsync("UPDATE page_stats SET view_count = view_count + 1 WHERE id = @id", new { id })
+```
+
 ## Stored Procedures using Custom Raw SQL API's
 
 The Raw SQL API's provide a convenient way for mapping results of any Custom SQL like
@@ -1447,6 +1479,23 @@ public class TableWithAllCascadeOptions
 	public int? SetToNullOnDelete { get; set; }
 }
 ```
+
+### System Variables and Default Values
+
+To provide richer support for non-standard default values, each RDBMS Dialect Provider contains a 
+`OrmLiteDialectProvider.Variables` placeholder dictionary for storing common, but non-standard RDBMS functionality. 
+We can use this to declaratively define non-standard default values that works across all supported RDBMS's 
+like automatically populating a column with the RDBMS UTC Date when Inserted with a `default(T)` Value: 
+
+```csharp
+public class Poco
+{
+    [Default(OrmLiteVariables.SystemUtc)]  //= {SYSTEM_UTC}
+    public DateTime CreatedTimeUtc { get; set; }
+}
+```
+
+OrmLite variables need to be surrounded with `{}` braces to identify that it's a placeholder variable, e.g `{SYSTEM_UTC}`.
 
 The [ForeignKeyTests](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLite.Tests/ForeignKeyAttributeTests.cs)
 show the resulting behaviour with each of these configurations in more detail.

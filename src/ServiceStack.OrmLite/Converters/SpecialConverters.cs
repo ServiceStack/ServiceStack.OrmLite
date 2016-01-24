@@ -13,30 +13,47 @@ namespace ServiceStack.OrmLite.Converters
 
             long enumValue;
             if (!isEnumFlags && long.TryParse(value.ToString(), out enumValue))
-            {
-                value = Enum.ToObject(fieldType, enumValue).ToString();
-            }
+                value = Enum.ToObject(fieldType, enumValue);
 
             var enumString = DialectProvider.StringSerializer.SerializeToString(value);
+            if (enumString == null || enumString == "null")
+                enumString = value.ToString();
 
-            if (!isEnumFlags)
-                return DialectProvider.GetQuotedValue(enumString.Trim('"'));
-
-            return enumString;
+            return !isEnumFlags 
+                ? DialectProvider.GetQuotedValue(enumString.Trim('"')) 
+                : enumString;
         }
 
         public override object ToDbValue(Type fieldType, object value)
         {
-            var enumValue = DialectProvider.StringSerializer.SerializeToString(value);
-            if (enumValue == null)
-                return null;
+            var isEnumFlags = fieldType.IsEnumFlags() ||
+                (!fieldType.IsEnum && fieldType.IsNumericType()); //i.e. is real int && not Enum
 
-            enumValue = enumValue.Trim('"');
-            long intEnum;
-            if (long.TryParse(enumValue, out intEnum))
-                return intEnum;
+            if (isEnumFlags && value.GetType().IsEnum)
+                return Convert.ChangeType(value, fieldType.GetTypeCode());
 
-            return enumValue;
+            long enumValue;
+            if (long.TryParse(value.ToString(), out enumValue))
+            {
+                if (isEnumFlags)
+                    return enumValue;
+
+                value = Enum.ToObject(fieldType, enumValue);
+            }
+
+            var enumString = DialectProvider.StringSerializer.SerializeToString(value);
+            return enumString != null && enumString != "null"
+                ? enumString.Trim('"') 
+                : value.ToString();
+        }
+
+        public override object FromDbValue(Type fieldType, object value)
+        {
+            var strVal = value as string;
+            if (strVal != null)
+                return Enum.Parse(fieldType, strVal, ignoreCase:true);
+
+            return Convert.ChangeType(value, fieldType.GetTypeCode());
         }
     }
 
@@ -126,7 +143,8 @@ namespace ServiceStack.OrmLite.Converters
 
         public override object ToDbValue(Type fieldType, object value)
         {
-            return DialectProvider.ToDbValue(value, fieldType);
+            var convertedValue = DialectProvider.StringSerializer.DeserializeFromString(value.ToString(), fieldType);
+            return convertedValue;
         }
 
         public override object FromDbValue(Type fieldType, object value)

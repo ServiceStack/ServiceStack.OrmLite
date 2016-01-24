@@ -14,7 +14,7 @@ namespace ServiceStack.OrmLite.Tests
         public static string SqliteFileDir = "~/App_Data/".MapAbsolutePath();
         public static string SqliteFileDb = "~/App_Data/db.sqlite".MapAbsolutePath();
         public static string SqlServerDb = "~/App_Data/Database1.mdf".MapAbsolutePath();
-        public static string SqlServerBuildDb = "Server={0};Database=test;User Id=test;Password=test;".Fmt(Environment.GetEnvironmentVariable("CI_HOST"));
+        public static string SqlServerBuildDb = "Server=localhost;Database=test;User Id=test;Password=test;";
         //public static string SqlServerBuildDb = "Data Source=localhost;Initial Catalog=TestDb;Integrated Security=SSPI;Connect Timeout=120;MultipleActiveResultSets=True";
 
         public static string OracleDb = "Data Source=localhost:1521/ormlite;User ID=test;Password=test";
@@ -106,6 +106,9 @@ namespace ServiceStack.OrmLite.Tests
 
         private OrmLiteConnectionFactory Init()
         {
+            //OrmLiteConfig.UseParameterizeSqlExpressions = false;
+
+            //OrmLiteConfig.DeoptimizeReader = true;
             LogManager.LogFactory = new ConsoleLogFactory(debugEnabled: false);
             switch (Dialect)
             {
@@ -115,6 +118,8 @@ namespace ServiceStack.OrmLite.Tests
                     return dbFactory;
                 case Dialect.SqlServer:
                     return Init(Config.SqlServerBuildDb, SqlServerDialect.Provider);
+                case Dialect.SqlServer2012:
+                    return Init(Config.SqlServerBuildDb, SqlServer2012Dialect.Provider);
                 case Dialect.MySql:
                     return Init(Config.MySqlDb, MySqlDialect.Provider);
                 case Dialect.PostgreSql:

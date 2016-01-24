@@ -45,7 +45,8 @@ namespace ServiceStack.OrmLite.Tests
                 sql = db.GetLastSql();
                 sql.Print();
 
-                Assert.That(sql, Is.StringContaining("\"TimeSpan\" = '01:01:01.0030000'"));
+                Assert.That(sql, Is.StringContaining("\"TimeSpan\" = '01:01:01.0030000'").
+                                 Or.StringContaining("\"TimeSpan\" = CAST(@0 AS TIME))"));
 
                 db.GetDialectProvider().RegisterConverter<TimeSpan>(hold);
             }

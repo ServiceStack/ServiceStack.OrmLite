@@ -51,10 +51,11 @@ namespace ServiceStack.OrmLite.Tests
 			public string Country { get; set; }
 		}
 
-
 		[Test]
-		public void FieldNameLeftJoinTest ()
+		public void FieldNameLeftJoinTest()
 		{
+            if (OrmLiteConfig.UseParameterizeSqlExpressions) return;
+
 			var joinQuery = new JoinSqlBuilder<User, User> ().LeftJoin<User, Address> (x => x.Id, x => x.UserId).ToSql ();
             var expected = "SELECT \"User\".\"Id\",\"User\".\"Name\",\"User\".\"Age\" \nFROM \"User\" \n LEFT OUTER JOIN  \"Address\" ON \"User\".\"Id\" = \"Address\".\"UserId\"  \n".NormalizeSql();
             var expectedNq = "SELECT \"User\".Id,\"User\".Name,\"User\".Age \nFROM \"User\" \n LEFT OUTER JOIN  Address ON \"User\".Id = Address.UserId  \n".NormalizeSql();
@@ -75,8 +76,10 @@ namespace ServiceStack.OrmLite.Tests
         }
 
 		[Test]
-		public void DoubleWhereLeftJoinTest ()
+		public void DoubleWhereLeftJoinTest()
 		{
+            if (OrmLiteConfig.UseParameterizeSqlExpressions) return;
+
             var joinQuery = new JoinSqlBuilder<User, User>().LeftJoin<User, WithAliasAddress>(x => x.Id, x => x.UserId
 			                                                                                    , sourceWhere: x => x.Age > 18
 			                                                                                    , destinationWhere: x => x.Country == "Italy").ToSql ();
@@ -92,6 +95,8 @@ namespace ServiceStack.OrmLite.Tests
 	    [Test]
 	    public void Can_execute_JoinSqlBuilder_as_SqlExpression()
 	    {
+            if (OrmLiteConfig.UseParameterizeSqlExpressions) return;
+
             var joinQuery = new JoinSqlBuilder<User, User>()
                 .LeftJoin<User, WithAliasAddress>(x => x.Id, x => x.UserId
                     , sourceWhere: x => x.Age > 18
@@ -113,6 +118,8 @@ namespace ServiceStack.OrmLite.Tests
 	    [Test]
 	    public void Can_execute_SqlBuilder_templates_as_SqlExpression()
 	    {
+            if (OrmLiteConfig.UseParameterizeSqlExpressions) return;
+
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<User>();

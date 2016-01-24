@@ -122,6 +122,11 @@ namespace ServiceStack.OrmLite
             return FieldDefinitions.First(f => f.Name == fn);
         }
 
+        public FieldDefinition GetFieldDefinition(string fieldName)
+        {
+            return FieldDefinitions.FirstOrDefault(f => f.Name == fieldName);
+        }
+
         string GetFieldName<T>(Expression<Func<T, object>> field)
         {
 

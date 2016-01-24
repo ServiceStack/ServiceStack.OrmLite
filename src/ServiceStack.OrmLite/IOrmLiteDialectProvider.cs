@@ -26,7 +26,17 @@ namespace ServiceStack.OrmLite
 
         IOrmLiteExecFilter ExecFilter { get; set; }
 
-        IOrmLiteConverter GetConverter(Type forType);
+        /// <summary>
+        /// Gets the explicit Converter registered for a specific type
+        /// </summary>
+        IOrmLiteConverter GetConverter(Type type);
+
+        /// <summary>
+        /// Return best matching converter, falling back to Enum, Value or Ref Type Converters
+        /// </summary>
+        IOrmLiteConverter GetConverterBestMatch(Type type);
+
+        IOrmLiteConverter GetConverterBestMatch(FieldDefinition fieldDef);
 
         string ParamString { get; set; }
 
@@ -53,8 +63,6 @@ namespace ServiceStack.OrmLite
         string GetQuotedValue(object value, Type fieldType);
 
         object GetParamValue(object value, Type fieldType);
-
-        void SetDbValue(FieldDefinition fieldDef, IDataReader reader, int colIndex, object instance);
 
         object ToDbValue(object value, Type type);
 
@@ -108,9 +116,9 @@ namespace ServiceStack.OrmLite
         object GetFieldValue(FieldDefinition fieldDef, object value);
         object GetFieldValue(Type fieldType, object value);
 
-        string ToUpdateRowStatement(object objWithProperties, ICollection<string> UpdateFields = null);
 
-        string ToDeleteRowStatement(object objWithProperties);
+        void PrepareUpdateRowStatement(IDbCommand dbCmd, object objWithProperties, ICollection<string> UpdateFields = null);
+
         string ToDeleteStatement(Type tableType, string sqlFilter, params object[] filterParams);
 
         IDbCommand CreateParameterizedDeleteStatement(IDbConnection connection, object objWithProperties);
@@ -151,6 +159,8 @@ namespace ServiceStack.OrmLite
 
         [Obsolete("Use InitDbParam")]
         DbType GetColumnDbType(Type columnType);
+
+        IDbDataParameter CreateParam();
 
         void InitDbParam(IDbDataParameter dbParam, Type columnType);
 

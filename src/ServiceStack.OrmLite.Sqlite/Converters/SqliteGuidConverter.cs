@@ -20,8 +20,19 @@ namespace ServiceStack.OrmLite.Sqlite.Converters
             return fmt;
         }
 
-        public override object GetValue(IDataReader reader, int columnIndex)
+        public override object GetValue(IDataReader reader, int columnIndex, object[] values)
         {
+            if (values != null)
+            {
+                if (values[columnIndex] == DBNull.Value)
+                    return null;
+            }
+            else
+            {
+                if (reader.IsDBNull(columnIndex))
+                    return null;
+            }
+
             return reader.GetGuid(columnIndex);
         }
     }

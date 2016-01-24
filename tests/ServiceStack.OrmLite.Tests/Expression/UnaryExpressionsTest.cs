@@ -1,11 +1,10 @@
 ﻿using NUnit.Framework;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {
     public class UnaryExpressionsTest : ExpressionsTestBase
     {
-        #region constants
-
         [Test]
         public void Can_select_unary_plus_constant_expression()
         {
@@ -93,10 +92,6 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 CollectionAssert.Contains(actual, expected);
             }
         }
-
-        #endregion
-
-        #region variables
 
         [Test]
         public void Can_select_unary_plus_variable_expression()
@@ -202,10 +197,6 @@ namespace ServiceStack.OrmLite.Tests.Expression
             }
         }
 
-        #endregion
-
-        #region method
-
         [Test]
         public void Can_select_unary_not_method_expression()
         {
@@ -250,6 +241,5 @@ namespace ServiceStack.OrmLite.Tests.Expression
             }
         }
 
-        #endregion
     }
 }

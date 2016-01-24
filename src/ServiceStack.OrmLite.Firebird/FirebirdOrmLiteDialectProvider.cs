@@ -14,7 +14,7 @@ namespace ServiceStack.OrmLite.Firebird
     {
         public static List<string> RESERVED = new List<string>(new[] {
             "USER","ORDER","PASSWORD", "ACTIVE","LEFT","DOUBLE", "FLOAT", "DECIMAL","STRING", "DATE","DATETIME", "TYPE","TIMESTAMP",
-            "INDEX","UNIQUE", "PRIMARY", "KEY", "ALTER", "DROP", "CREATE", "DELETE", "VALUES", "FUNCTION", "INT", "LONG", "CHAR", "VALUE"
+            "INDEX","UNIQUE", "PRIMARY", "KEY", "ALTER", "DROP", "CREATE", "DELETE", "VALUES", "FUNCTION", "INT", "LONG", "CHAR", "VALUE", "TIME"
         });
 
         public static FirebirdOrmLiteDialectProvider Instance = new FirebirdOrmLiteDialectProvider();
@@ -26,7 +26,7 @@ namespace ServiceStack.OrmLite.Firebird
         public FirebirdOrmLiteDialectProvider(bool compactGuid)
         {
             base.AutoIncrementDefinition = string.Empty;
-            DefaultValueFormat = " DEFAULT '{0}'";
+            DefaultValueFormat = " DEFAULT {0}";
             NamingStrategy = new FirebirdNamingStrategy();
 
             base.InitColumnTypeMap();
@@ -140,38 +140,18 @@ namespace ServiceStack.OrmLite.Firebird
 
                     var result = GetNextValue(cmd, fieldDef.Sequence, fieldDef.GetValue(objWithProperties));
 
-                    fieldDef.SetValueFn(objWithProperties, result);
-
-                    PropertyInfo pi = tableType.GetProperty(fieldDef.Name,
-                        BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy);
-
-                    if (pi.PropertyType == typeof(String))
-                        pi.SetProperty(objWithProperties, result.ToString());
-                    else if (pi.PropertyType == typeof(Int16))
-                        pi.SetProperty(objWithProperties, Convert.ToInt16(result));
-                    else if (pi.PropertyType == typeof(Int32))
-                        pi.SetProperty(objWithProperties, Convert.ToInt32(result));
-                    else if (pi.PropertyType == typeof(Guid))
-                        pi.SetProperty(objWithProperties, result);
-                    else
-                        pi.SetProperty(objWithProperties, Convert.ToInt64(result));
+                    var fieldValue = this.ConvertNumber(fieldDef.FieldType, result);
+                    fieldDef.SetValueFn(objWithProperties, fieldValue);
                 }
 
                 if (sbColumnNames.Length > 0) sbColumnNames.Append(",");
                 if (sbColumnValues.Length > 0) sbColumnValues.Append(",");
 
-                try
-                {
-                    sbColumnNames.Append(string.Format("{0}", GetQuotedColumnName(fieldDef.FieldName)));
-                    if (!string.IsNullOrEmpty(fieldDef.Sequence) && cmd == null)
-                        sbColumnValues.Append(string.Format("@{0}", fieldDef.Name));
-                    else
-                        sbColumnValues.Append(fieldDef.GetQuotedValue(objWithProperties));
-                }
-                catch (Exception)
-                {
-                    throw;
-                }
+                sbColumnNames.Append(string.Format("{0}", GetQuotedColumnName(fieldDef.FieldName)));
+                if (!string.IsNullOrEmpty(fieldDef.Sequence) && cmd == null)
+                    sbColumnValues.Append(string.Format("@{0}", fieldDef.Name));
+                else
+                    sbColumnValues.Append(fieldDef.GetQuotedValue(objWithProperties));
             }
 
             var sql = string.Format("INSERT INTO {0} ({1}) VALUES ({2});",
@@ -237,7 +217,7 @@ namespace ServiceStack.OrmLite.Firebird
                 GetQuotedTableName(modelDef), sbColumnNames, sbColumnValues);
         }
 
-        public override string ToUpdateRowStatement(object objWithProperties, ICollection<string> updateFields = null)
+        public override void PrepareUpdateRowStatement(IDbCommand dbCmd, object objWithProperties, ICollection<string> updateFields = null)
         {
             if (updateFields == null)
                 updateFields = new List<string>();
@@ -255,50 +235,31 @@ namespace ServiceStack.OrmLite.Firebird
                 if ((fieldDef.IsPrimaryKey || fieldDef.Name == OrmLiteConfig.IdField)
                     && updateFields.Count == 0)
                 {
-                    if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
+                    if (sqlFilter.Length > 0)
+                        sqlFilter.Append(" AND ");
 
-                    sqlFilter.AppendFormat("{0}={1}",
-                        GetQuotedColumnName(fieldDef.FieldName),
-                        fieldDef.GetQuotedValue(objWithProperties));
+                    sqlFilter
+                        .Append(GetQuotedColumnName(fieldDef.FieldName))
+                        .Append("=")
+                        .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef.ColumnType).ParameterName);
 
                     continue;
                 }
-                if (updateFields.Count > 0 && !updateFields.Contains(fieldDef.Name)) continue;
-                if (sql.Length > 0) sql.Append(",");
-                sql.AppendFormat("{0}={1}",
-                    GetQuotedColumnName(fieldDef.FieldName),
-                    fieldDef.GetQuotedValue(objWithProperties));
+
+                if (updateFields.Count > 0 && !updateFields.Contains(fieldDef.Name))
+                    continue;
+
+                if (sql.Length > 0)
+                    sql.Append(",");
+
+                sql
+                    .Append(GetQuotedColumnName(fieldDef.FieldName))
+                    .Append("=")
+                    .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef.ColumnType).ParameterName);
             }
 
-            var updateSql = string.Format("UPDATE {0} \nSET {1} {2}",
+            dbCmd.CommandText = string.Format("UPDATE {0} \nSET {1} {2}",
                 GetQuotedTableName(modelDef), sql, (sqlFilter.Length > 0 ? "\nWHERE " + sqlFilter : ""));
-
-            return updateSql;
-        }
-
-
-        public override string ToDeleteRowStatement(object objWithProperties)
-        {
-            var tableType = objWithProperties.GetType();
-            var modelDef = GetModel(tableType);
-
-            var sqlFilter = new StringBuilder();
-
-            foreach (var fieldDef in modelDef.FieldDefinitions)
-            {
-                if (fieldDef.IsPrimaryKey || fieldDef.Name == OrmLiteConfig.IdField)
-                {
-                    if (sqlFilter.Length > 0) sqlFilter.Append(" AND ");
-                    sqlFilter.AppendFormat("{0} = {1}",
-                        GetQuotedColumnName(fieldDef.FieldName),
-                        fieldDef.GetQuotedValue(objWithProperties));
-                }
-            }
-
-            var deleteSql = string.Format("DELETE FROM {0} WHERE {1}",
-                GetQuotedTableName(modelDef), sqlFilter);
-
-            return deleteSql;
         }
 
         public override string ToCreateTableStatement(Type tableType)
@@ -724,6 +685,11 @@ namespace ServiceStack.OrmLite.Firebird
         public override SqlExpression<T> SqlExpression<T>()
         {
             return new FirebirdSqlExpression<T>(this);
+        }
+
+        public override IDbDataParameter CreateParam()
+        {
+            return new FbParameter();
         }
 
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)

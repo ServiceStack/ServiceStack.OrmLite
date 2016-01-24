@@ -147,7 +147,7 @@ namespace ServiceStack.OrmLite
                     AutoIncrement =
                         isPrimaryKey &&
                         propertyInfo.HasAttributeNamed(typeof(AutoIncrementAttribute).Name),
-                    IsIndexed = isIndex,
+                    IsIndexed = !isPrimaryKey && isIndex,
                     IsUnique = isUnique,
                     IsClustered = indexAttr != null && indexAttr.Clustered,
                     IsNonClustered = indexAttr != null && indexAttr.NonClustered,
