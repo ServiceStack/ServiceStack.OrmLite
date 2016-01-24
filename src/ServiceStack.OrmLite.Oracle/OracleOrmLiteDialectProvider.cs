@@ -1160,7 +1160,7 @@ namespace ServiceStack.OrmLite.Oracle
 
         public override IDbDataParameter CreateParam()
         {
-            return new OrmLiteDataParameter();
+            return _factory.CreateParameter();
         }
 
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema=null)
