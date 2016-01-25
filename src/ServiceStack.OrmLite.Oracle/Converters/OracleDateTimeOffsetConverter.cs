@@ -42,7 +42,7 @@ namespace ServiceStack.OrmLite.Oracle.Converters
 
         public override void InitDbParam(IDbDataParameter p, Type fieldType)
         {
-            p.DbType = DbType.String;
+            _timestampConverter.SetParameterTimeStampTzType(p);
         }
     }
 }
