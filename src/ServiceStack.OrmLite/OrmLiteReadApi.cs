@@ -424,7 +424,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static bool Exists<T>(this IDbConnection dbConn, Expression<Func<T, bool>> expression)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Count(expression)) > 0;
+            return dbConn.Exec(dbCmd => dbCmd.Single<T>(dbConn.From<T>().Where(expression).Limit(1))) != null;
         }
 
         /// <summary>
@@ -433,7 +433,12 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static bool Exists<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Count(expression)) > 0;
+            return dbConn.Exec(dbCmd =>
+            {
+                var q = dbCmd.GetDialectProvider().SqlExpression<T>();
+                var sql = expression(q).Limit(1).ToSelectStatement();
+                return dbCmd.Single<T>(sql) != null;
+            });
         }
 
         /// <summary>
@@ -442,7 +447,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static bool Exists<T>(this IDbConnection dbConn, SqlExpression<T> expression)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Count(expression)) > 0;
+            return dbConn.Exec(dbCmd => dbCmd.Single<T>(expression.Limit(1).ToSelectStatement())) != null;
         }
         /// <summary>
         /// Returns true if the Query returns any records, using an SqlFormat query. E.g:
