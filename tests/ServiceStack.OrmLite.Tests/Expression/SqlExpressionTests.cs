@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
+using ServiceStack.Html;
 using ServiceStack.OrmLite.Tests.UseCase;
 using ServiceStack.Text;
 
@@ -35,7 +36,18 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
     public class SqlExpressionTests : ExpressionsTestBase
     {
-        private static void InitLetters(IDbConnection db)
+        private int letterFrequenceMaxId;
+        private int letterFrequencyMinId;
+        private int letterFrequencySumId;
+
+        private void GetIdStats(IDbConnection db)
+        {
+            letterFrequenceMaxId = db.Scalar<int>(db.From<LetterFrequency>().Select(Sql.Max("Id")));
+            letterFrequencyMinId = db.Scalar<int>(db.From<LetterFrequency>().Select(Sql.Min("Id")));
+            letterFrequencySumId = db.Scalar<int>(db.From<LetterFrequency>().Select(Sql.Sum("Id")));
+        }
+
+        public static void InitLetters(IDbConnection db)
         {
             db.DropAndCreateTable<LetterFrequency>();
 
@@ -87,6 +99,92 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
                 var uniqueLetters = db.ColumnDistinct<string>(query);
                 Assert.That(uniqueLetters.EquivalentTo(new[] { "A", "B", "C" }));
+            }
+        }
+
+        [Test]
+        public void Can_Select_as_List_Object()
+        {
+            using (var db = OpenDbConnection())
+            {
+                InitLetters(db);
+                GetIdStats(db);
+
+                var query = db.From<LetterFrequency>()
+                  .Select("COUNT(*), MAX(Id), MIN(Id), Sum(Id)");
+
+                query.ToSelectStatement().Print();
+
+                var results = db.Select<List<object>>(query);
+
+                Assert.That(results.Count, Is.EqualTo(1));
+
+                var result = results[0];
+                CheckDbTypeInsensitiveEquivalency(result);
+
+                var single = db.Single<List<object>>(query);
+                CheckDbTypeInsensitiveEquivalency(single);
+
+                result.PrintDump();
+            }
+        }
+
+        private void CheckDbTypeInsensitiveEquivalency(List<object> result)
+        {
+            Assert.That(Convert.ToInt64(result[0]), Is.EqualTo(10));
+            Assert.That(Convert.ToInt64(result[1]), Is.EqualTo(letterFrequenceMaxId));
+            Assert.That(Convert.ToInt64(result[2]), Is.EqualTo(letterFrequencyMinId));
+            Assert.That(Convert.ToInt64(result[3]), Is.EqualTo(letterFrequencySumId));
+        }
+
+        [Test]
+        public void Can_Select_as_Dictionary_Object()
+        {
+            using (var db = OpenDbConnection())
+            {
+                InitLetters(db);
+                GetIdStats(db);
+
+                var query = db.From<LetterFrequency>()
+                  .Select("COUNT(*) \"Count\", MAX(Id) \"Max\", MIN(Id) \"Min\", Sum(Id) \"Sum\"");
+
+                query.ToSelectStatement().Print();
+
+                var results = db.Select<Dictionary<string,object>>(query);
+
+                Assert.That(results.Count, Is.EqualTo(1));
+
+                var result = results[0];
+                CheckDbTypeInsensitiveEquivalency(result);
+
+                var single = db.Single<Dictionary<string, object>>(query);
+                CheckDbTypeInsensitiveEquivalency(single);
+
+                results.PrintDump();
+            }
+        }
+
+        private void CheckDbTypeInsensitiveEquivalency(Dictionary<string, object> result)
+        {
+            Assert.That(Convert.ToInt64(result["Count"]), Is.EqualTo(10));
+            Assert.That(Convert.ToInt64(result["Max"]), Is.EqualTo(letterFrequenceMaxId));
+            Assert.That(Convert.ToInt64(result["Min"]), Is.EqualTo(letterFrequencyMinId));
+            Assert.That(Convert.ToInt64(result["Sum"]), Is.EqualTo(letterFrequencySumId));
+        }
+
+        [Test]
+        public void Can_select_Object()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<LetterFrequency>();
+                var id = db.Insert(new LetterFrequency {Id = 1, Letter = "A"}, selectIdentity: true);
+
+                var result = db.Scalar<object>(db.From<LetterFrequency>().Select(x => x.Letter));
+                Assert.That(result, Is.EqualTo("A"));
+
+                result = db.Scalar<object>(db.From<LetterFrequency>().Select(x => x.Id));
+                Assert.That(Convert.ToInt64(result), Is.EqualTo(id));
             }
         }
 
@@ -232,7 +330,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                     .Join<LetterFrequency, LetterStat>()
                     .Where<LetterStat>(x => x.Id > 0);
 
-                var count = db.SqlScalar<long>(expr.ToCountStatement());
+                var count = db.SqlScalar<long>(expr.ToCountStatement(), expr.Params.ToDictionary(param => param.ParameterName, param => param.Value));
 
                 Assert.That(count, Is.GreaterThan(0));
 
@@ -335,6 +433,9 @@ namespace ServiceStack.OrmLite.Tests.Expression
             //This version of MariaDB doesn't yet support 'LIMIT & IN/ALL/ANY/SOME subquery'
             if (Dialect == Dialect.MySql) return;
 
+            //Only one expression can be specified in the select list when the subquery is not introduced with EXISTS.
+            if (Dialect == Dialect.SqlServer) return;
+
             using (var db = OpenDbConnection())
             {
                 CustomerOrdersUseCase.DropTables(db); //Has conflicting 'Order' table
@@ -396,31 +497,63 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 db.DropAndCreateTable<TableB>();
 
                 db.Insert(new TableA { Id = 1, Bool = false });
+                db.Insert(new TableA { Id = 2, Bool = true });
                 db.Insert(new TableB { Id = 1, TableAId = 1 });
+                db.Insert(new TableB { Id = 2, TableAId = 2 });
 
                 var q = db.From<TableA>()
                     .LeftJoin<TableB>((a, b) => a.Id == b.Id)
                     .Where(a => !a.Bool);
 
                 var result = db.Single(q);
-                db.GetLastSql().Print();
+                var lastSql = db.GetLastSql();
+                lastSql.Print();
                 Assert.That(result.Id, Is.EqualTo(1));
+                Assert.That(lastSql, Is.Not.StringContaining("NOT"));
 
                 q = db.From<TableA>()
                     .Where(a => !a.Bool)
                     .LeftJoin<TableB>((a, b) => a.Id == b.Id);
 
                 result = db.Single(q);
-                db.GetLastSql().Print();
+                lastSql = db.GetLastSql();
+                lastSql.Print();
                 Assert.That(result.Id, Is.EqualTo(1));
+                Assert.That(lastSql, Is.Not.StringContaining("NOT"));
 
 
                 q = db.From<TableA>()
                     .Where(a => !a.Bool);
 
                 result = db.Single(q);
-                db.GetLastSql().Print();
+                lastSql = db.GetLastSql();
+                lastSql.Print();
                 Assert.That(result.Id, Is.EqualTo(1));
+                Assert.That(lastSql, Is.Not.StringContaining("NOT"));
+
+                q = db.From<TableA>()
+                    .LeftJoin<TableB>((a, b) => a.Id == b.Id)
+                    .Where(a => a.Bool);
+
+                result = db.Single(q);
+                db.GetLastSql().Print();
+                Assert.That(result.Id, Is.EqualTo(2));
+
+                q = db.From<TableA>()
+                    .Where(a => a.Bool)
+                    .LeftJoin<TableB>((a, b) => a.Id == b.Id);
+
+                result = db.Single(q);
+                db.GetLastSql().Print();
+                Assert.That(result.Id, Is.EqualTo(2));
+
+
+                q = db.From<TableA>()
+                    .Where(a => a.Bool);
+
+                result = db.Single(q);
+                db.GetLastSql().Print();
+                Assert.That(result.Id, Is.EqualTo(2));
             }
         }
 
@@ -479,29 +612,29 @@ namespace ServiceStack.OrmLite.Tests.Expression
             }
         }
 
-        public class CrossJoinTableA 
+        public class CrossJoinTableA
         {
             public int Id { get; set; }
             public string Name { get; set; }
         }
 
-        public class CrossJoinTableB 
+        public class CrossJoinTableB
         {
             public int Id { get; set; }
             public int Value { get; set; }
         }
 
-        public class CrossJoinResult 
+        public class CrossJoinResult
         {
             public int CrossJoinTableAId { get; set; }
             public string Name { get; set; }
             public int CrossJoinTableBId { get; set; }
             public int Value { get; set; }
 
-            public override bool Equals(object obj) 
+            public override bool Equals(object obj)
             {
                 var other = obj as CrossJoinResult;
-                if(other == null)
+                if (other == null)
                     return false;
 
                 return CrossJoinTableAId == other.CrossJoinTableAId && string.Equals(Name, other.Name) && CrossJoinTableBId == other.CrossJoinTableBId && Value == other.Value;
@@ -509,17 +642,17 @@ namespace ServiceStack.OrmLite.Tests.Expression
         }
 
         [Test]
-        public void Can_perform_a_crossjoin_without_a_join_expression() 
+        public void Can_perform_a_crossjoin_without_a_join_expression()
         {
-            using(var db = OpenDbConnection()) 
+            using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<CrossJoinTableA>();
                 db.DropAndCreateTable<CrossJoinTableB>();
 
-                db.Insert(new CrossJoinTableA {Id = 1, Name = "Foo"});
-                db.Insert(new CrossJoinTableA {Id = 2, Name = "Bar"});
-                db.Insert(new CrossJoinTableB {Id = 5, Value = 3});
-                db.Insert(new CrossJoinTableB {Id = 6, Value = 42});
+                db.Insert(new CrossJoinTableA { Id = 1, Name = "Foo" });
+                db.Insert(new CrossJoinTableA { Id = 2, Name = "Bar" });
+                db.Insert(new CrossJoinTableB { Id = 5, Value = 3 });
+                db.Insert(new CrossJoinTableB { Id = 6, Value = 42 });
 
                 var q = db.From<CrossJoinTableA>()
                           .CrossJoin<CrossJoinTableB>()
@@ -542,9 +675,9 @@ namespace ServiceStack.OrmLite.Tests.Expression
         }
 
         [Test]
-        public void Can_perform_a_crossjoin_with_a_join_expression() 
+        public void Can_perform_a_crossjoin_with_a_join_expression()
         {
-            using (var db = OpenDbConnection()) 
+            using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<CrossJoinTableA>();
                 db.DropAndCreateTable<CrossJoinTableB>();
@@ -620,6 +753,61 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 qSub.Join<JoinTestChild>((x, y) => x.Id == y.ParentId);
                 qSub.Where<JoinTestChild>(x => !x.IsActive); // This line is a bug!
                 Assert.That(db.Select(qSub).Count, Is.EqualTo(1));
+            }
+        }
+
+        public class Invoice
+        {
+            public int Id { get; set; }
+
+            public int WorkflowId { get; set; }
+
+            public int DocumentId { get; set; }
+
+            public int PageCount { get; set; }
+
+            public string DocumentStatus { get; set; }
+
+            public string Extra { get; set; }
+        }
+
+        public class UsagePageInvoice
+        {
+            public int Id { get; set; }
+            public int InvoiceId { get; set; }
+        }
+
+        [Test]
+        public void Can_select_individual_columns()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Invoice>();
+                db.DropAndCreateTable<UsagePageInvoice>();
+
+                db.Insert(new Invoice {
+                    Id = 1, 
+                    WorkflowId = 2, 
+                    DocumentId = 3, 
+                    PageCount = 4, 
+                    DocumentStatus = "a",
+                    Extra = "EXTRA"
+                });
+
+                var q = db.From<Invoice>()
+                    .LeftJoin<Invoice, UsagePageInvoice>((i, upi) => i.Id == upi.InvoiceId)
+                    .Where<Invoice>(i => (i.DocumentStatus == "a" || i.DocumentStatus == "b"))
+                    .And<UsagePageInvoice>(upi => upi.Id == null)
+                    .Select(c => new { c.Id, c.WorkflowId, c.DocumentId, c.DocumentStatus, c.PageCount });
+
+                var result = db.Select(q).First();
+
+                Assert.That(result.Id, Is.EqualTo(1));
+                Assert.That(result.WorkflowId, Is.EqualTo(2));
+                Assert.That(result.DocumentId, Is.EqualTo(3));
+                Assert.That(result.PageCount, Is.EqualTo(4));
+                Assert.That(result.DocumentStatus, Is.EqualTo("a"));
+                Assert.That(result.Extra, Is.Null);
             }
         }
     }

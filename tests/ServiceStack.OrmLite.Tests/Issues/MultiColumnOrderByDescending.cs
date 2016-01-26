@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using NUnit.Framework;
+using ServiceStack.Logging;
 using ServiceStack.OrmLite.Tests.Shared;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
@@ -81,6 +84,38 @@ namespace ServiceStack.OrmLite.Tests.Issues
 
                 Assert.That(result.Count, Is.EqualTo(2));
                 Assert.That(result[0].Id, Is.EqualTo(2));
+            }
+        }
+
+        public class Record
+        {
+            public int Id { get; set; }
+            public double Value { get; set; }
+            public DateTime? Time { get; set; }
+        }
+
+        [Test]
+        public void Can_OrderBy_DateTime()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Record>();
+
+                db.InsertAll(new[] {
+                    new Record
+                    {
+                        Id = 1,
+                        Value = 50,
+                        Time = DateTime.Now,
+                    },
+                });
+
+                var q = db.From<Record>();
+                q.OrderByDescending(x => x.Time ?? DateTime.UtcNow);
+
+                var results = db.Select(q);
+
+                results.PrintDump();
             }
         }
     }

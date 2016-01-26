@@ -71,7 +71,7 @@ namespace ServiceStack.OrmLite.Tests
                 r2 = db.Scalar<Author, DateTime?>(
                     e => Sql.Max(e.LastActivity),
                     e => e.City == "Bogota");
-                Assert.That(expectedNullableDate, Is.EqualTo(r2));
+                Assert.That(r2, Is.EqualTo(expectedNullableDate));
 
                 r2 = db.Scalar<Author, DateTime?>(e => Sql.Max(e.LastActivity), e => e.City == "SinCity");
                 Assert.That(default(DateTime?), Is.EqualTo(r2));
@@ -103,11 +103,11 @@ namespace ServiceStack.OrmLite.Tests
 
                 var expectedDouble = authors.Max(e => e.DoubleProperty);
                 double r5 = db.Scalar<Author, double>(e => Sql.Max(e.DoubleProperty));
-                Assert.That(expectedDouble, Is.EqualTo(r5));
+                Assert.That(expectedDouble, Is.EqualTo(r5).Within(.1d));
 
                 expectedDouble = authors.Where(e => e.City == "London").Max(e => e.DoubleProperty);
                 r5 = db.Scalar<Author, double>(e => Sql.Max(e.DoubleProperty), e => e.City == "London");
-                Assert.That(expectedDouble, Is.EqualTo(r5));
+                Assert.That(expectedDouble, Is.EqualTo(r5).Within(.1d));
 
                 r5 = db.Scalar<Author, double>(e => Sql.Max(e.DoubleProperty), e => e.City == "SinCity");
                 Assert.That(default(double), Is.EqualTo(r5));

@@ -28,7 +28,7 @@ namespace ServiceStack.OrmLite.Tests
                 db.DropAndCreateTable<Poco>();
                 db.Exec(cmd => Assert.That(cmd.CommandTimeout, Is.EqualTo(100)));
 
-                db.SetCommandTimeout(666);
+                db.SetCommandTimeout(200);
 
                 "{0}:{1}".Print(OrmLiteContext.OrmLiteState, Thread.CurrentThread.ManagedThreadId);
 
@@ -45,7 +45,7 @@ namespace ServiceStack.OrmLite.Tests
                 "{0}:{1}".Print(OrmLiteContext.OrmLiteState, Thread.CurrentThread.ManagedThreadId);
 
                 db.Insert(new Poco { Name = "Foo" });
-                db.Exec(cmd => Assert.That(cmd.CommandTimeout, Is.EqualTo(666)));
+                db.Exec(cmd => Assert.That(cmd.CommandTimeout, Is.EqualTo(200)));
             }
 
             using (var db = OpenDbConnection())

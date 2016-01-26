@@ -75,6 +75,18 @@ namespace ServiceStack.OrmLite
             return items;
         }
 
+        public void ClearItems()
+        {
+            if (UseThreadStatic)
+            {
+                ContextItems = new Dictionary<object, object>();
+            }
+            else
+            {
+                CallContext.FreeNamedDataSlot(_key);
+            }
+        }
+
         public T GetOrCreate<T>(Func<T> createFn)
         {
             if (Items.Contains(typeof(T).Name))

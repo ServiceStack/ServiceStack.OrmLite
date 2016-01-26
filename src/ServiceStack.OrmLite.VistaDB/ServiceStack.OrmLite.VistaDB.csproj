@@ -45,6 +45,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Converters\VistaDbBoolConverter.cs" />
+    <Compile Include="Converters\VistaDbByteArrayConverter.cs" />
+    <Compile Include="Converters\VistaDbFloatConverters.cs" />
+    <Compile Include="Converters\VistaDbGuidConverter.cs" />
+    <Compile Include="Converters\VistaDbIntegerConverters.cs" />
+    <Compile Include="Converters\VistaDbStringConverters.cs" />
+    <Compile Include="Converters\VistaDbTimeSpanAsIntConverter.cs" />
     <Compile Include="VistaDbDialectProvider.cs" />
     <Compile Include="VistaDBExpression.cs" />
     <Compile Include="VistaDbDialect.cs" />

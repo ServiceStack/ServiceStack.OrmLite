@@ -10,7 +10,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
         Guid TenantId { get; }
     }
 
-    public class Contact : IHaveTenantId
+    public class ContactIssue : IHaveTenantId
     {
         public Guid Id { get; set; }
 
@@ -27,10 +27,10 @@ namespace ServiceStack.OrmLite.Tests.Issues
 
         public Guid TenantId { get; set; }
 
-        [ForeignKey(typeof(Contact), OnDelete = "NO ACTION")]
+        [ForeignKey(typeof(ContactIssue), OnDelete = "NO ACTION")]
         public Guid BuyerId { get; set; }
 
-        [ForeignKey(typeof(Contact), OnDelete = "NO ACTION")]
+        [ForeignKey(typeof(ContactIssue), OnDelete = "NO ACTION")]
         public Guid SellerId { get; set; }
 
         public int AmountCents { get; set; }
@@ -55,21 +55,21 @@ namespace ServiceStack.OrmLite.Tests.Issues
             using (var db = OpenDbConnection())
             {
                 db.DropTable<Sale>();
-                db.DropTable<Contact>();
+                db.DropTable<ContactIssue>();
 
-                db.CreateTable<Contact>();
+                db.CreateTable<ContactIssue>();
                 db.CreateTable<Sale>();
 
                 var tenantId = Guid.NewGuid();
 
-                var buyer = new Contact {
+                var buyer = new ContactIssue {
                     Id = Guid.NewGuid(),
                     TenantId = tenantId,
                     FirstName = "Buyer",
                     LastName = "LastBuyer"
                 };
 
-                var seller = new Contact {
+                var seller = new ContactIssue {
                     Id = Guid.NewGuid(),
                     TenantId = tenantId,
                     FirstName = "Seller",
@@ -89,8 +89,10 @@ namespace ServiceStack.OrmLite.Tests.Issues
                 db.Insert(sale);
 
                 var q = db.From<Sale>()
-                    .CustomJoin("LEFT JOIN Contact seller on (Sale.{0} = seller.Id)".Fmt("SellerId".SqlColumn()))
-                    .CustomJoin("LEFT JOIN Contact buyer on (Sale.{0} = buyer.Id)".Fmt("BuyerId".SqlColumn()))
+                    .CustomJoin("LEFT JOIN {0} seller on (Sale.{1} = seller.Id)"
+                        .Fmt("ContactIssue".SqlTable(), "SellerId".SqlColumn()))
+                    .CustomJoin("LEFT JOIN {0} buyer on (Sale.{1} = buyer.Id)"
+                        .Fmt("ContactIssue".SqlTable(), "BuyerId".SqlColumn()))
                     .Select(@"Sale.*
                         , buyer.{0} AS BuyerFirstName
                         , buyer.{1} AS BuyerLastName

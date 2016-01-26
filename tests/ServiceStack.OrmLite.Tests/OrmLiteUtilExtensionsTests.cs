@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using NUnit.Framework;
-using ServiceStack.OrmLite;
+﻿using NUnit.Framework;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -35,6 +32,20 @@ namespace ServiceStack.OrmLite.Tests
             var sql = "IN ({0})".SqlFmt(list.SqlInValues());
 
             Assert.AreEqual("IN (NULL)", sql);
+        }
+
+        [Test]
+        public void Can_parse_field_Tokens()
+        {
+            Assert.That("FirstName".ParseTokens(), Is.EquivalentTo(new[] { "FirstName" }));
+            Assert.That("FirstName, LastName".ParseTokens(), Is.EquivalentTo(new[] { "FirstName", "LastName" }));
+            Assert.That("\"FirstName\"".ParseTokens(), Is.EquivalentTo(new[] { "\"FirstName\"" }));
+            Assert.That("\"FirstName\",\"LastName\"".ParseTokens(), Is.EquivalentTo(new[] { "\"FirstName\"", "\"LastName\"" }));
+            Assert.That("COALESCE(\"Time\", '2015-10-05')".ParseTokens(), Is.EquivalentTo(new[] { "COALESCE(\"Time\", '2015-10-05')" }));
+            Assert.That("\"FirstName\",COALESCE(\"Time\", '2015-10-05'),\"LastName\"".ParseTokens(), Is.EquivalentTo(
+                new[] { "\"FirstName\"", "COALESCE(\"Time\", '2015-10-05')", "\"LastName\"" }));
+            Assert.That(" \"FirstName\" , COALESCE(\"Time\", '2015-10-05') , \"LastName\" ".ParseTokens(), Is.EquivalentTo(
+                new[] { "\"FirstName\"", "COALESCE(\"Time\", '2015-10-05')", "\"LastName\"" }));
         }
     }
 }

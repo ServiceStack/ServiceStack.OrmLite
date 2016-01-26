@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Microsoft")]
 [assembly: AssemblyProduct("ServiceStack.OrmLite.SqlServer")]
-[assembly: AssemblyCopyright("Copyright © ServiceStack 2013")]
+[assembly: AssemblyCopyright("Copyright © ServiceStack 2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

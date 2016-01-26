@@ -86,10 +86,12 @@ namespace ServiceStack.OrmLite
                         .Then(reader => reader.ConvertToListAsync(dialectProvider, refType, token)).Unwrap();
         }
 
-        internal static Task<List<T>> ExprConvertToListAsync<T>(this IDbCommand dbCmd, string sql, CancellationToken token)
+        internal static Task<List<T>> ExprConvertToListAsync<T>(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams, CancellationToken token)
         {
             if (sql != null)
                 dbCmd.CommandText = sql;
+
+            dbCmd.SetParameters(sqlParams);
 
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.GetList<T>(dbCmd).InTask();
@@ -133,6 +135,11 @@ namespace ServiceStack.OrmLite
         public static Task<T> ScalarAsync<T>(this IDbCommand dbCmd)
         {
             return dbCmd.ScalarAsync<T>(null, default(CancellationToken));
+        }
+
+        public static Task<T> ScalarAsync<T>(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams, CancellationToken token)
+        {
+            return dbCmd.SetParameters(sqlParams).ScalarAsync<T>(sql, token);
         }
 
         public static Task<T> ScalarAsync<T>(this IDbCommand dbCmd, string sql, CancellationToken token)
@@ -180,10 +187,12 @@ namespace ServiceStack.OrmLite
             return dbCmd.LongScalarAsync(token);
         }
 
-        internal static Task<T> ExprConvertToAsync<T>(this IDbCommand dbCmd, string sql, CancellationToken token)
+        internal static Task<T> ExprConvertToAsync<T>(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams, CancellationToken token)
         {
             if (sql != null)
                 dbCmd.CommandText = sql;
+
+            dbCmd.SetParameters(sqlParams);
 
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.GetSingle<T>(dbCmd).InTask();
@@ -191,6 +200,11 @@ namespace ServiceStack.OrmLite
             var dialectProvider = dbCmd.GetDialectProvider();
             return dbCmd.ExecReaderAsync(dbCmd.CommandText, token)
                         .Then(reader => reader.ConvertToAsync<T>(dialectProvider, token)).Unwrap();
+        }
+
+        internal static Task<List<T>> ColumnAsync<T>(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams, CancellationToken token)
+        {
+            return dbCmd.SetParameters(sqlParams).ColumnAsync<T>(sql, token);
         }
 
         internal static Task<List<T>> ColumnAsync<T>(this IDbCommand dbCmd, string sql, CancellationToken token)
@@ -206,6 +220,11 @@ namespace ServiceStack.OrmLite
                         .Then(reader => reader.ColumnAsync<T>(dialectProvider, token)).Unwrap();
         }
 
+        internal static Task<HashSet<T>> ColumnDistinctAsync<T>(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams, CancellationToken token)
+        {
+            return dbCmd.SetParameters(sqlParams).ColumnDistinctAsync<T>(sql, token);
+        }
+
         internal static Task<HashSet<T>> ColumnDistinctAsync<T>(this IDbCommand dbCmd, string sql, CancellationToken token)
         {
             if (sql != null)
@@ -219,6 +238,11 @@ namespace ServiceStack.OrmLite
                         .Then(reader => reader.ColumnDistinctAsync<T>(dialectProvider, token)).Unwrap();
         }
 
+        internal static Task<Dictionary<K, V>> DictionaryAsync<K, V>(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams, CancellationToken token)
+        {
+            return dbCmd.SetParameters(sqlParams).DictionaryAsync<K, V>(sql, token);
+        }
+
         internal static Task<Dictionary<K, V>> DictionaryAsync<K, V>(this IDbCommand dbCmd, string sql, CancellationToken token)
         {
             if (sql != null)
@@ -230,6 +254,11 @@ namespace ServiceStack.OrmLite
             var dialectProvider = dbCmd.GetDialectProvider();
             return dbCmd.ExecReaderAsync(dbCmd.CommandText, token)
                          .Then(reader => reader.DictionaryAsync<K, V>(dialectProvider, token)).Unwrap();
+        }
+
+        internal static Task<Dictionary<K, List<V>>> LookupAsync<K, V>(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams, CancellationToken token)
+        {
+            return dbCmd.SetParameters(sqlParams).LookupAsync<K, V>(sql, token);
         }
 
         internal static Task<Dictionary<K, List<V>>> LookupAsync<K, V>(this IDbCommand dbCmd, string sql, CancellationToken token)

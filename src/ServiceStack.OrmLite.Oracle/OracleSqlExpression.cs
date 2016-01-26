@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 
 namespace ServiceStack.OrmLite.Oracle
 {
-    public class OracleSqlExpression<T> : SqlExpression<T>
+    public class OracleSqlExpression<T> : ParameterizedSqlExpression<T>
     {
         public OracleSqlExpression(IOrmLiteDialectProvider dialectProvider)
             : base(dialectProvider) {}
@@ -19,17 +19,41 @@ namespace ServiceStack.OrmLite.Oracle
                 if (args.Count == 2)
                 {
                     var length = Int32.Parse(args[1].ToString());
-                    return new PartialSqlString(string.Format("subStr({0},{1},{2})",
-                                                              quotedColName,
-                                                              startIndex,
-                                                              length));
+                    return new PartialSqlString(string.Format(
+                        "subStr({0},{1},{2})", quotedColName, startIndex, length));
                 }
 
-                return new PartialSqlString(string.Format("subStr({0},{1})",
-                                                          quotedColName,
-                                                          startIndex));
+                return new PartialSqlString(string.Format(
+                    "subStr({0},{1})", quotedColName, startIndex));
             }
             return base.VisitColumnAccessMethod(m);
+        }
+
+        protected override void VisitFilter(string operand, object originalLeft, object originalRight, ref object left, ref object right)
+        {
+            if (originalRight is DateTimeOffset)
+                return;
+
+            base.VisitFilter(operand, originalLeft, originalRight, ref left, ref right);
+        }
+
+        protected override void ConvertToPlaceholderAndParameter(ref object right)
+        {
+            if (!OrmLiteConfig.UseParameterizeSqlExpressions)
+                return;
+
+            var paramName = Params.Count.ToString();
+            var paramValue = right;
+
+            var parameter = CreateParam(paramName, paramValue);
+            Params.Add(parameter);
+
+            right = parameter.ParameterName;
+        }
+
+        public override SqlExpression<T> OrderByRandom()
+        {
+            return base.OrderBy("dbms_random.value");
         }
     }
 }

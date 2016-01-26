@@ -58,12 +58,12 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns results from using an SqlExpression lambda. E.g:
-        /// <para>db.Select(db.From&lt;Person&gt;().Where(x =&gt; x.Age &gt; 40))</para>
+        /// <para>db.SelectAsync(db.From&lt;Person&gt;().Where(x =&gt; x.Age &gt; 40))</para>
         /// </summary>
-        //public static Task<List<T>> SelectAsync<T>(this IDbConnection dbConn, ISqlExpression expression, object anonType, CancellationToken token)
-        //{
-        //    return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(expression.SelectInto<T>(), anonType));
-        //}
+        public static Task<List<T>> SelectAsync<T>(this IDbConnection dbConn, ISqlExpression expression, CancellationToken token = default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SqlListAsync<T>(expression.SelectInto<T>(), expression.Params, token));
+        }
 
         /// <summary>
         /// Returns a single result from using a LINQ Expression. E.g:
@@ -85,11 +85,20 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns results from using an SqlExpression lambda. E.g:
-        /// <para>db.Select&lt;Person&gt;(x =&gt; x.Age &gt; 40)</para>
+        /// <para>db.SingleAsync&lt;Person&gt;(x =&gt; x.Age &gt; 40)</para>
         /// </summary>
         public static Task<T> SingleAsync<T>(this IDbConnection dbConn, SqlExpression<T> expression, CancellationToken token = default(CancellationToken))
         {
             return dbConn.Exec(dbCmd => dbCmd.SingleAsync(expression, token));
+        }
+
+        /// <summary>
+        /// Returns results from using an SqlExpression lambda. E.g:
+        /// <para>db.SingleAsync(db.From&lt;Person&gt;().Where(x =&gt; x.Age &gt; 40))</para>
+        /// </summary>
+        public static Task<T> SingleAsync<T>(this IDbConnection dbConn, ISqlExpression expression, CancellationToken token = default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SingleAsync<T>(expression.SelectInto<T>(), expression.Params, token));
         }
 
         /// <summary>

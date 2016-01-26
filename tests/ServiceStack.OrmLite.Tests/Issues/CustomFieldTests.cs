@@ -8,7 +8,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     {
         public int Id { get; set; }
 
-        [DecimalLength(12,2)]
+        [DecimalLength(12,3)]
         public decimal? Decimal { get; set; }
     }
 
@@ -26,7 +26,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
 
                 sql.Print();
 
-                Assert.That(sql, Is.StringContaining("DECIMAL(12,2)"));
+                Assert.That(sql, Is.StringContaining("DECIMAL(12,3)"));
             }
         }
     }

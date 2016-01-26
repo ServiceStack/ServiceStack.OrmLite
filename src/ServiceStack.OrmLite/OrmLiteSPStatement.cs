@@ -10,6 +10,29 @@ namespace ServiceStack.OrmLite
         private readonly IDbCommand dbCmd;
         private readonly IOrmLiteDialectProvider dialectProvider;
 
+        public bool TryGetParameterValue(string parameterName, out object value)
+        {
+            try
+            {
+                value = ((IDataParameter)dbCmd.Parameters[parameterName]).Value;
+                return true;
+            }
+            catch(Exception)
+            {
+                value = null;
+                return false;
+            }
+        }
+
+        public int ReturnValue
+        {
+            get
+            {
+                var returnValue = ((IDataParameter)dbCmd.Parameters["__ReturnValue"]).Value;
+                return (int)returnValue;
+            }
+        }
+
         public OrmLiteSPStatement(IDbCommand dbCmd)
             : this(null, dbCmd) {}
 
@@ -40,7 +63,7 @@ namespace ServiceStack.OrmLite
 
         public List<T> ConvertToScalarList<T>()
         {
-            if (!((typeof(T).IsPrimitive) || (typeof(T) == typeof(string)) || (typeof(T) == typeof(String))))
+            if (!((typeof(T).IsPrimitive) || typeof(T).IsValueType || (typeof(T) == typeof(string)) || (typeof(T) == typeof(String))))
                 throw new Exception("Type " + typeof(T).Name + " is a non primitive type. Use ConvertToList function.");
 
             IDataReader reader = null;
@@ -76,7 +99,7 @@ namespace ServiceStack.OrmLite
 
         public T ConvertToScalar<T>()
         {
-            if (!((typeof(T).IsPrimitive) || (typeof(T) == typeof(string)) || (typeof(T) == typeof(String))))
+            if (!((typeof(T).IsPrimitive) || typeof(T).IsValueType || (typeof(T) == typeof(string)) || (typeof(T) == typeof(String))))
                 throw new Exception("Type " + typeof(T).Name + " is a non primitive type. Use ConvertTo function.");
 
             IDataReader reader = null;
@@ -94,7 +117,7 @@ namespace ServiceStack.OrmLite
 
         public List<T> ConvertFirstColumnToList<T>()
         {
-            if (!((typeof(T).IsPrimitive) || (typeof(T) == typeof(string)) || (typeof(T) == typeof(String))))
+            if (!((typeof(T).IsPrimitive) || typeof(T).IsValueType || (typeof(T) == typeof(string)) || (typeof(T) == typeof(String))))
                 throw new Exception("Type " + typeof(T).Name + " is a non primitive type. Only primitive type can be used.");
 
             IDataReader reader = null;
@@ -112,7 +135,7 @@ namespace ServiceStack.OrmLite
 
         public HashSet<T> ConvertFirstColumnToListDistinct<T>()
         {
-            if (!((typeof(T).IsPrimitive) || (typeof(T) == typeof(string)) || (typeof(T) == typeof(String))))
+            if (!((typeof(T).IsPrimitive) || typeof(T).IsValueType || (typeof(T) == typeof(string)) || (typeof(T) == typeof(String))))
                 throw new Exception("Type " + typeof(T).Name + " is a non primitive type. Only primitive type can be used.");
 
             IDataReader reader = null;

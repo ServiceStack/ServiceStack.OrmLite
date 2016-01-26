@@ -14,10 +14,10 @@ namespace ServiceStack.OrmLite.Tests
     public class ComplexType
     {
         public int Id { get; set; }
-        public SubType SubType { get; set; }
+        public ComplexSubType SubType { get; set; }
     }
 
-    public class SubType
+    public class ComplexSubType
     {
         public string Name { get; set; }
     }
@@ -32,7 +32,7 @@ namespace ServiceStack.OrmLite.Tests
 
             db.Insert(new ModelWithComplexType {
                 Id = 1,
-                ComplexType = new ComplexType { Id = 2, SubType = new SubType { Name = "Sub" } }
+                ComplexType = new ComplexType { Id = 2, SubType = new ComplexSubType { Name = "Sub" } }
             });
         }
 

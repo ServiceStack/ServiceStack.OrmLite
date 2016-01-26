@@ -28,6 +28,15 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Returns results from using sql. E.g:
+        /// <para>db.Select&lt;Person&gt;("SELECT * FROM Person WHERE Age &gt; @age", new[] { db.CreateParam("age", 40) })</para>
+        /// </summary>
+        public static List<T> Select<T>(this IDbConnection dbConn, string sql, IEnumerable<IDbDataParameter> sqlParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Select<T>(sql, sqlParams));
+        }
+
+        /// <summary>
         /// Returns results from using a parameterized query. E.g:
         /// <para>db.Select&lt;Person&gt;("Age &gt; @age", new { age = 40})</para>
         /// <para>db.Select&lt;Person&gt;("SELECT * FROM Person WHERE Age &gt; @age", new { age = 40})</para>
@@ -168,6 +177,15 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns results from using a single name, value filter. E.g:
+        /// <para>db.Single&lt;Person&gt;("Age = @age", new[] { db.CreateParam("age",40) })</para>
+        /// </summary>
+        public static T Single<T>(this IDbConnection dbConn, string sql, IEnumerable<IDbDataParameter> sqlParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Single<T>(sql, sqlParams));
+        }
+
+        /// <summary>
+        /// Returns results from using a single name, value filter. E.g:
         /// <para>db.Single&lt;Person&gt;("Age = @age", new { age = 42 })</para>
         /// </summary>
         public static T Single<T>(this IDbConnection dbConn, string sql, object anonType = null)
@@ -208,7 +226,16 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static T Scalar<T>(this IDbConnection dbConn, ISqlExpression sqlExpression)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Scalar<T>(sqlExpression.ToSelectStatement()));
+            return dbConn.Exec(dbCmd => dbCmd.Scalar<T>(sqlExpression.ToSelectStatement(), sqlExpression.Params));
+        }
+
+        /// <summary>
+        /// Returns a single scalar value using a parameterized query. E.g:
+        /// <para>db.Scalar&lt;int&gt;("SELECT COUNT(*) FROM Person WHERE Age &gt; @age", new[] { db.CreateParam("age",40) })</para>
+        /// </summary>
+        public static T Scalar<T>(this IDbConnection dbConn, string sql, IEnumerable<IDbDataParameter> sqlParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Scalar<T>(sql, sqlParams));
         }
 
         /// <summary>
@@ -235,7 +262,34 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static List<T> Column<T>(this IDbConnection dbConn, ISqlExpression query)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Column<T>(query.ToSelectStatement()));
+            return dbConn.Exec(dbCmd => dbCmd.Column<T>(query.ToSelectStatement(), query.Params));
+        }
+
+        /// <summary>
+        /// Returns the first column in a List using a SqlFormat query. E.g:
+        /// <para>db.Column&lt;string&gt;("SELECT LastName FROM Person WHERE Age = @age", new[] { db.CreateParam("age",27) })</para>
+        /// </summary>
+        public static List<T> Column<T>(this IDbConnection dbConn, string sql, IEnumerable<IDbDataParameter> sqlParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Column<T>(sql, sqlParams));
+        }
+
+        /// <summary>
+        /// Returns the distinct first column values in a HashSet using an SqlExpression. E.g:
+        /// <para>db.ColumnLazy&lt;int&gt;(db.From&lt;Persion&gt;().Select(x => x.LastName).Where(q => q.Age == 27))</para>
+        /// </summary>
+        public static IEnumerable<T> ColumnLazy<T>(this IDbConnection dbConn, ISqlExpression query)
+        {
+            return dbConn.ExecLazy(dbCmd => dbCmd.ColumnLazy<T>(query.ToSelectStatement(), query.Params));
+        }
+
+        /// <summary>
+        /// Returns the first column in a List using a SqlFormat query. E.g:
+        /// <para>db.ColumnLazy&lt;string&gt;("SELECT LastName FROM Person WHERE Age = @age", new[] { db.CreateParam("age",27) })</para>
+        /// </summary>
+        public static IEnumerable<T> ColumnLazy<T>(this IDbConnection dbConn, string sql, IEnumerable<IDbDataParameter> sqlParams)
+        {
+            return dbConn.ExecLazy(dbCmd => dbCmd.ColumnLazy<T>(sql, sqlParams));
         }
 
         /// <summary>
@@ -245,15 +299,6 @@ namespace ServiceStack.OrmLite
         public static IEnumerable<T> ColumnLazy<T>(this IDbConnection dbConn, string sql, object anonType = null)
         {
             return dbConn.ExecLazy(dbCmd => dbCmd.ColumnLazy<T>(sql, anonType));
-        }
-
-        /// <summary>
-        /// Returns the distinct first column values in a HashSet using an SqlExpression. E.g:
-        /// <para>db.ColumnLazy&lt;int&gt;(db.From&lt;Persion&gt;().Select(x => x.LastName).Where(q => q.Age == 27))</para>
-        /// </summary>
-        public static IEnumerable<T> ColumnLazy<T>(this IDbConnection dbConn, ISqlExpression query)
-        {
-            return dbConn.ExecLazy(dbCmd => dbCmd.ColumnLazy<T>(query.ToSelectStatement()));
         }
 
         /// <summary>
@@ -280,7 +325,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static HashSet<T> ColumnDistinct<T>(this IDbConnection dbConn, ISqlExpression query)
         {
-            return dbConn.Exec(dbCmd => dbCmd.ColumnDistinct<T>(query.ToSelectStatement()));
+            return dbConn.Exec(dbCmd => dbCmd.ColumnDistinct<T>(query));
         }
 
         /// <summary>
@@ -290,6 +335,15 @@ namespace ServiceStack.OrmLite
         public static HashSet<T> ColumnDistinct<T>(this IDbConnection dbConn, string sql, object anonType = null)
         {
             return dbConn.Exec(dbCmd => dbCmd.ColumnDistinct<T>(sql, anonType));
+        }
+
+        /// <summary>
+        /// Returns the distinct first column values in a HashSet using an SqlFormat query. E.g:
+        /// <para>db.ColumnDistinct&lt;int&gt;("SELECT Age FROM Person WHERE Age &lt; @age", new[] { db.CreateParam("age",50) })</para>
+        /// </summary>
+        public static HashSet<T> ColumnDistinct<T>(this IDbConnection dbConn, string sql, IEnumerable<IDbDataParameter> sqlParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.ColumnDistinct<T>(sql, sqlParams));
         }
 
         /// <summary>
@@ -307,7 +361,16 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static Dictionary<K, List<V>> Lookup<K, V>(this IDbConnection dbConn, ISqlExpression sqlExpression)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Lookup<K, V>(sqlExpression.ToSelectStatement()));
+            return dbConn.Exec(dbCmd => dbCmd.Lookup<K, V>(sqlExpression.ToSelectStatement(), sqlExpression.Params));
+        }
+
+        /// <summary>
+        /// Returns an Dictionary&lt;K, List&lt;V&gt;&gt; grouping made from the first two columns using an parameterized query. E.g:
+        /// <para>db.Lookup&lt;int, string&gt;("SELECT Age, LastName FROM Person WHERE Age &lt; @age", new[] { db.CreateParam("age",50) })</para>
+        /// </summary>
+        public static Dictionary<K, List<V>> Lookup<K, V>(this IDbConnection dbConn, string sql, IEnumerable<IDbDataParameter> sqlParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Lookup<K, V>(sql, sqlParams));
         }
 
         /// <summary>
@@ -334,7 +397,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static Dictionary<K, V> Dictionary<K, V>(this IDbConnection dbConn, ISqlExpression query)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Dictionary<K, V>(query.ToSelectStatement()));
+            return dbConn.Exec(dbCmd => dbCmd.Dictionary<K, V>(query));
         }
 
         /// <summary>
@@ -416,7 +479,16 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static List<T> SqlList<T>(this IDbConnection dbConn, ISqlExpression sqlExpression)
         {
-            return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(sqlExpression.ToSelectStatement()));
+            return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(sqlExpression.ToSelectStatement(), sqlExpression.Params));
+        }
+
+        /// <summary>
+        /// Returns results from an arbitrary parameterized raw sql query. E.g:
+        /// <para>db.SqlList&lt;Person&gt;("EXEC GetRockstarsAged @age", new[] { db.CreateParam("age",50) })</para>
+        /// </summary>
+        public static List<T> SqlList<T>(this IDbConnection dbConn, string sql, IEnumerable<IDbDataParameter> sqlParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(sql, sqlParams));
         }
 
         /// <summary>
@@ -461,7 +533,16 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static List<T> SqlColumn<T>(this IDbConnection dbConn, ISqlExpression sqlExpression)
         {
-            return dbConn.Exec(dbCmd => dbCmd.SqlColumn<T>(sqlExpression.ToSelectStatement()));
+            return dbConn.Exec(dbCmd => dbCmd.SqlColumn<T>(sqlExpression.ToSelectStatement(), sqlExpression.Params));
+        }
+
+        /// <summary>
+        /// Returns the first column in a List using a parameterized query. E.g:
+        /// <para>db.SqlColumn&lt;string&gt;("SELECT LastName FROM Person WHERE Age &lt; @age", new[] { db.CreateParam("age",50) })</para>
+        /// </summary>
+        public static List<T> SqlColumn<T>(this IDbConnection dbConn, string sql, IEnumerable<IDbDataParameter> sqlParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SqlColumn<T>(sql, sqlParams));
         }
 
         /// <summary>
@@ -488,7 +569,16 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static T SqlScalar<T>(this IDbConnection dbConn, ISqlExpression sqlExpression)
         {
-            return dbConn.Exec(dbCmd => dbCmd.SqlScalar<T>(sqlExpression.ToSelectStatement()));
+            return dbConn.Exec(dbCmd => dbCmd.SqlScalar<T>(sqlExpression.ToSelectStatement(), sqlExpression.Params));
+        }
+
+        /// <summary>
+        /// Returns a single Scalar value using a parameterized query. E.g:
+        /// <para>db.SqlScalar&lt;int&gt;("SELECT COUNT(*) FROM Person WHERE Age &lt; @age", new[]{ db.CreateParam("age",50) })</para>
+        /// </summary>
+        public static T SqlScalar<T>(this IDbConnection dbConn, string sql, IEnumerable<IDbDataParameter> sqlParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SqlScalar<T>(sql, sqlParams));
         }
 
         /// <summary>
@@ -578,11 +668,20 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns the first result with all its references loaded, using a primary key id. E.g:
-        /// <para>db.LoadSingleById&lt;Person&gt;(1)</para>
+        /// <para>db.LoadSingleById&lt;Person&gt;(1, include = new[]{ "Address" })</para>
         /// </summary>
-        public static T LoadSingleById<T>(this IDbConnection dbConn, object idValue)
+        public static T LoadSingleById<T>(this IDbConnection dbConn, object idValue, string[] include = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.LoadSingleById<T>(idValue));
+            return dbConn.Exec(dbCmd => dbCmd.LoadSingleById<T>(idValue, include));
+        }
+
+        /// <summary>
+        /// Returns the first result with all its references loaded, using a primary key id. E.g:
+        /// <para>db.LoadSingleById&lt;Person&gt;(1, include = x => new{ x.Address })</para>
+        /// </summary>
+        public static T LoadSingleById<T>(this IDbConnection dbConn, object idValue, Func<T,object> include)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.LoadSingleById<T>(idValue, include(typeof(T).CreateInstance<T>()).GetType().AllAnonFields() ));
         }
 
         /// <summary>

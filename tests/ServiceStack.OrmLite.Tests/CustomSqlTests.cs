@@ -76,8 +76,16 @@ namespace ServiceStack.OrmLite.Tests
 
                 createTableSql.Print();
 
-                Assert.That(createTableSql, Is.StringContaining("charcolumn char(20) null"));
-                Assert.That(createTableSql, Is.StringContaining("decimalcolumn decimal(18,4) null"));
+                if (Dialect != Dialect.Firebird)
+                {
+                    Assert.That(createTableSql, Is.StringContaining("charcolumn char(20) null"));
+                    Assert.That(createTableSql, Is.StringContaining("decimalcolumn decimal(18,4) null"));
+                }
+                else
+                {
+                    Assert.That(createTableSql, Is.StringContaining("charcolumn char(20)"));
+                    Assert.That(createTableSql, Is.StringContaining("decimalcolumn decimal(18,4)"));
+                }
             }
         }
 
@@ -102,7 +110,7 @@ namespace ServiceStack.OrmLite.Tests
         public void Does_execute_CustomSql_after_table_created()
         {
             SuppressIfOracle("For Oracle need wrap multiple SQL statements in an anonymous block");
-            if (Dialect == Dialect.PostgreSql || Dialect == Dialect.Oracle) return;
+            if (Dialect == Dialect.PostgreSql || Dialect == Dialect.Oracle || Dialect == Dialect.Firebird) return;
 
             using (var db = OpenDbConnection())
             {
@@ -118,6 +126,7 @@ namespace ServiceStack.OrmLite.Tests
         public void Does_execute_CustomSql_after_table_created_using_dynamic_attribute()
         {
             SuppressIfOracle("For Oracle need wrap multiple SQL statements in an anonymous block");
+            if (Dialect == Dialect.Oracle || Dialect == Dialect.Firebird) return;
 
             typeof(DynamicAttributeSeedData)
                 .AddAttributes(new PostCreateTableAttribute(

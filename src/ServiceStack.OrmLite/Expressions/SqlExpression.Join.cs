@@ -10,7 +10,7 @@ namespace ServiceStack.OrmLite
     {
         List<ModelDefinition> tableDefs = new List<ModelDefinition>();
 
-        bool IsJoinedTable(Type type)
+        public bool IsJoinedTable(Type type)
         {
             return tableDefs.FirstOrDefault(x => x.ModelType == type) != null;
         }
@@ -86,7 +86,7 @@ namespace ServiceStack.OrmLite
 
         private string InternalCreateSqlFromExpression(Expression joinExpr, bool isCrossJoin) 
         {
-            return "{0} {1}".Fmt((isCrossJoin ? "WHERE" : "ON"), Visit(joinExpr).ToString());
+            return "{0} {1}".Fmt((isCrossJoin ? "WHERE" : "ON"), VisitJoin(joinExpr).ToString());
         }
 
         private string InternalCreateSqlFromDefinitions(ModelDefinition sourceDef, ModelDefinition targetDef, bool isCrossJoin) 

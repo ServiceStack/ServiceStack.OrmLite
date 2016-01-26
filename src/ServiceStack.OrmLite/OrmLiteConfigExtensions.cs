@@ -119,11 +119,6 @@ namespace ServiceStack.OrmLite
                     treatAsType = Enum.GetUnderlyingType(propertyType);
                 }
 
-                if (propertyType == typeof(TimeSpan))
-                {
-                    treatAsType = typeof(long);
-                }
-
                 var aliasAttr = propertyInfo.FirstAttribute<AliasAttribute>();
 
                 var indexAttr = propertyInfo.FirstAttribute<IndexAttribute>();
@@ -144,6 +139,7 @@ namespace ServiceStack.OrmLite
                     Name = propertyInfo.Name,
                     Alias = aliasAttr != null ? aliasAttr.Name : null,
                     FieldType = propertyType,
+                    FieldTypeDefaultValue = propertyType.GetDefaultValue(),
                     TreatAsType = treatAsType,
                     PropertyInfo = propertyInfo,
                     IsNullable = isNullable,
@@ -151,7 +147,7 @@ namespace ServiceStack.OrmLite
                     AutoIncrement =
                         isPrimaryKey &&
                         propertyInfo.HasAttributeNamed(typeof(AutoIncrementAttribute).Name),
-                    IsIndexed = isIndex,
+                    IsIndexed = !isPrimaryKey && isIndex,
                     IsUnique = isUnique,
                     IsClustered = indexAttr != null && indexAttr.Clustered,
                     IsNonClustered = indexAttr != null && indexAttr.NonClustered,

@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System.Data;
+using NUnit.Framework;
 
 namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
 {
@@ -7,7 +8,7 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
         [Test]
         public void Can_select_conditional_and_expression()
         {
-            var expected = new TestType()
+            var expected = new TestType
             {
                 IntColumn = 3,
                 BoolColumn = true,
@@ -16,17 +17,20 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn > 2 && q.IntColumn < 4);
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => q.IntColumn > 2 && q.IntColumn < 4);
 
-            Assert.IsNotNull(actual);
-            Assert.AreEqual(1, actual.Count);
-            CollectionAssert.Contains(actual, expected);
+                Assert.IsNotNull(actual);
+                Assert.AreEqual(1, actual.Count);
+                CollectionAssert.Contains(actual, expected);
+            }
         }
 
         [Test]
         public void Can_select_conditional_or_expression()
         {
-            var expected = new TestType()
+            var expected = new TestType
             {
                 IntColumn = 3,
                 BoolColumn = true,
@@ -35,11 +39,14 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn == 3 || q.IntColumn < 0);
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => q.IntColumn == 3 || q.IntColumn < 0);
 
-            Assert.IsNotNull(actual);
-            Assert.AreEqual(1, actual.Count);
-            CollectionAssert.Contains(actual, expected);
+                Assert.IsNotNull(actual);
+                Assert.AreEqual(1, actual.Count);
+                CollectionAssert.Contains(actual, expected);
+            }
         }
 
         [Test]
@@ -50,7 +57,7 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
             var b = 5;
             // ReSharper restore ConvertToConstant.Local
 
-            var expected = new TestType()
+            var expected = new TestType
             {
                 IntColumn = 3,
                 BoolColumn = true,
@@ -59,11 +66,14 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = OpenDbConnection().Select<TestType>(q => q.BoolColumn == (a >= b && a > 0));
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => q.BoolColumn == (a >= b && a > 0));
 
-            Assert.IsNotNull(actual);
-            Assert.Greater(actual.Count, 0);
-            CollectionAssert.Contains(actual, expected);
+                Assert.IsNotNull(actual);
+                Assert.Greater(actual.Count, 0);
+                CollectionAssert.Contains(actual, expected);
+            }
         }
 
         [Test]
@@ -74,7 +84,7 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
             var b = 5;
             // ReSharper restore ConvertToConstant.Local
 
-            var expected = new TestType()
+            var expected = new TestType
             {
                 IntColumn = 3,
                 BoolColumn = true,
@@ -83,11 +93,14 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn == 3 || a > b);
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => q.IntColumn == 3 || a > b);
 
-            Assert.IsNotNull(actual);
-            Assert.AreEqual(11, actual.Count);
-            CollectionAssert.Contains(actual, expected);
+                Assert.IsNotNull(actual);
+                Assert.AreEqual(11, actual.Count);
+                CollectionAssert.Contains(actual, expected);
+            }
         }
 
         [Test]
@@ -97,7 +110,7 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
             var a = true;
             // ReSharper restore ConvertToConstant.Local
 
-            var expected = new TestType()
+            var expected = new TestType
             {
                 IntColumn = 3,
                 BoolColumn = true,
@@ -106,12 +119,16 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = OpenDbConnection().Select<TestType>(q => !q.BoolColumn || a);
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => !q.BoolColumn || a);
 
-            Assert.IsNotNull(actual);
-            Assert.Greater(actual.Count, 0);
-            CollectionAssert.Contains(actual, expected);
+                Assert.IsNotNull(actual);
+                Assert.Greater(actual.Count, 0);
+                CollectionAssert.Contains(actual, expected);
+            }
         }
+
         [Test]
         public void Can_select_evaluated_conditional_and_valid_expression()
         {
@@ -120,7 +137,7 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
                 StringValue = "4"
             };
 
-            var expected = new TestType()
+            var expected = new TestType
             {
                 IntColumn = 3,
                 BoolColumn = true,
@@ -129,11 +146,14 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = OpenDbConnection().Select<TestType>(q => q.BoolColumn && q.StringColumn == model.StringValue);
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => q.BoolColumn && q.StringColumn == model.StringValue);
 
-            Assert.IsNotNull(actual);
-            Assert.Greater(actual.Count, 0);
-            CollectionAssert.Contains(actual, expected);
+                Assert.IsNotNull(actual);
+                Assert.Greater(actual.Count, 0);
+                CollectionAssert.Contains(actual, expected);
+            }
         }
     }
 }

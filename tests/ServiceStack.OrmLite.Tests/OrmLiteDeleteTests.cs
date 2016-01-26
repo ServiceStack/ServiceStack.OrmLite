@@ -28,6 +28,25 @@ namespace ServiceStack.OrmLite.Tests
             db.Dispose();
         }
 
+	    [Test]
+	    public void Can_delete_all_rows()
+	    {
+            var row1 = ModelWithFieldsOfDifferentTypes.Create(1);
+            var row2 = ModelWithFieldsOfDifferentTypes.Create(2);
+            var row3 = ModelWithFieldsOfDifferentTypes.Create(3);
+
+            db.Save(row1);
+            db.Save(row2);
+            db.Save(row3);
+
+	        db.DeleteAll(new[] {row1, row3});
+
+	        var remaining = db.Select<ModelWithFieldsOfDifferentTypes>();
+
+            Assert.That(remaining.Count, Is.EqualTo(1));
+            Assert.That(remaining[0].Id, Is.EqualTo(row2.Id));
+        }
+
 		[Test]
 		public void Can_Delete_from_ModelWithFieldsOfDifferentTypes_table()
 		{

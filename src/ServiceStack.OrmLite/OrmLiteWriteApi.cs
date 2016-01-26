@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text;
 using ServiceStack.Data;
 
 namespace ServiceStack.OrmLite
@@ -18,6 +19,22 @@ namespace ServiceStack.OrmLite
             return ormLiteConn != null ? ormLiteConn.LastCommandText : null;
         }
 
+        public static string GetLastSqlAndParams(this IDbCommand dbCmd)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine(dbCmd.CommandText)
+              .AppendLine("PARAMS: ");
+
+            foreach (IDataParameter parameter in dbCmd.Parameters)
+            {
+                sb.Append(parameter.ParameterName).Append(": ")
+                    .Append(parameter.Value.ToJsv())
+                    .Append(" : ").AppendLine((parameter.Value ?? DBNull.Value).GetType().Name);
+            }
+
+            return sb.AppendLine().ToString();
+        }
+
         /// <summary>
         /// Execute any arbitrary raw SQL.
         /// </summary>
@@ -25,6 +42,15 @@ namespace ServiceStack.OrmLite
         public static int ExecuteSql(this IDbConnection dbConn, string sql)
         {
             return dbConn.Exec(dbCmd => dbCmd.ExecuteSql(sql));
+        }
+
+        /// <summary>
+        /// Execute any arbitrary raw SQL with db params.
+        /// </summary>
+        /// <returns>number of rows affected</returns>
+        public static int ExecuteSql(this IDbConnection dbConn, string sql, object dbParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.ExecuteSql(sql, dbParams));
         }
 
         /// <summary>
@@ -172,6 +198,16 @@ namespace ServiceStack.OrmLite
         public static int DeleteAll<T>(this IDbConnection dbConn)
         {
             return dbConn.Exec(dbCmd => dbCmd.DeleteAll<T>());
+        }
+
+        /// <summary>
+        /// Delete all rows provided. E.g:
+        /// <para>db.DeleteAll&lt;Person&gt;(people)</para>
+        /// </summary>
+        /// <returns>number of rows deleted</returns>
+        public static int DeleteAll<T>(this IDbConnection dbConn, IEnumerable<T> rows)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.DeleteAll(rows));
         }
 
         /// <summary>

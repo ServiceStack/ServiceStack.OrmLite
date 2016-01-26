@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
+using ServiceStack.OrmLite.Converters;
 using ServiceStack.OrmLite.Tests.Shared;
 using ServiceStack.Text;
 
@@ -144,20 +145,58 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        public void Can_change_schema_definitions()
+        {
+            using (var db = OpenDbConnection())
+            {
+                var insertDate = new DateTime(2014, 1, 1);
+
+                db.DropAndCreateTable<AuditTableA>();
+                var before = db.GetLastSql();
+
+                var idA = db.Insert(new AuditTableA { CreatedDate = insertDate }, selectIdentity: true);
+                var insertRowA = db.SingleById<AuditTableA>(idA);
+                Assert.That(insertRowA.CreatedDate, Is.EqualTo(insertDate));
+
+                var stringConverter = OrmLiteConfig.DialectProvider.GetStringConverter();
+                var hold = stringConverter.UseUnicode;
+                stringConverter.UseUnicode = true;
+
+                db.DropAndCreateTable<AuditTableA>();
+                db.GetLastSql().Print();
+
+                stringConverter.UseUnicode = hold;
+
+                db.DropAndCreateTable<AuditTableA>();
+                var after = db.GetLastSql();
+
+                Assert.That(after, Is.EqualTo(before));
+
+                idA = db.Insert(new AuditTableA { CreatedDate = insertDate }, selectIdentity: true);
+                insertRowA = db.SingleById<AuditTableA>(idA);
+                Assert.That(insertRowA.CreatedDate, Is.EqualTo(insertDate));
+            }
+        }
+
+        [Test]
         public void Can_create_ModelWithIdAndName_table_with_specified_DefaultStringLength()
         {
-            OrmLiteConfig.DialectProvider.DefaultStringLength = 255;
+            var converter = OrmLiteConfig.DialectProvider.GetStringConverter();
+            var hold = converter.StringLength;
+            converter.StringLength = 255;
             var createTableSql = OrmLiteConfig.DialectProvider.ToCreateTableStatement(typeof(ModelWithIdAndName));
 
             Console.WriteLine("createTableSql: " + createTableSql);
             if (Dialect != Dialect.PostgreSql)
             {
-                Assert.That(createTableSql, Is.StringContaining("VARCHAR(255)").Or.StringContaining("VARCHAR2(255)"));
+                Assert.That(createTableSql, Is.StringContaining("VARCHAR(255)").
+                                            Or.StringContaining("VARCHAR2(255)"));
             }
             else
             {
-                Assert.That(createTableSql, Is.StringContaining("text"));
+                Assert.That(createTableSql, Is.StringContaining("TEXT"));
             }
+            converter.StringLength = hold;
         }
 
         public class ModelWithGuid
@@ -379,6 +418,27 @@ namespace ServiceStack.OrmLite.Tests
                 results.PrintDump();
 
                 Assert.That(results.Count, Is.EqualTo(1));
+            }
+        }
+
+        [Test]
+        public void Does_CreateTableIfNotExists()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropTable<ModelWithIdOnly>();
+
+                if (db.CreateTableIfNotExists<ModelWithIdOnly>())
+                {
+                    db.Insert(new ModelWithIdOnly(1));
+                }
+                if (db.CreateTableIfNotExists<ModelWithIdOnly>())
+                {
+                    db.Insert(new ModelWithIdOnly(2));
+                }
+                var rows = db.Select<ModelWithIdOnly>();
+                Assert.That(rows.Count, Is.EqualTo(1));
+                Assert.That(rows[0].Id, Is.EqualTo(1));
             }
         }
     }

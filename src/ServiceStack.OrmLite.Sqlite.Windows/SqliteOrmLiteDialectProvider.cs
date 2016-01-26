@@ -8,9 +8,19 @@ namespace ServiceStack.OrmLite.Sqlite
         // what's the purpose of this Instance field? (It's like a pseudo-wanna-be singleton?)
         public static SqliteOrmLiteDialectProvider Instance = new SqliteOrmLiteDialectProvider();
 
+        public SqliteOrmLiteDialectProvider()
+        {
+            OrmLiteConfig.DeoptimizeReader = true;
+        }
+
         protected override IDbConnection CreateConnection(string connectionString)
         {
             return new SQLiteConnection(connectionString, parseViaFramework: ParseViaFramework);
+        }
+
+        public override IDbDataParameter CreateParam()
+        {
+            return new SQLiteParameter();
         }
     }
 }

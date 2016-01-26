@@ -15,9 +15,9 @@
     <iconUrl>https://servicestack.net/img/logo-32.png</iconUrl>
     <tags>Sqlite Windows 32bit 64bit OrmLite POCO Code-First Orm Schema-less Blobs</tags>
     <language>en-US</language> 
-    <copyright>ServiceStack 2013 and contributors</copyright>
+    <copyright>Copyright 2015 Service Stack</copyright>
     <dependencies>
-      <dependency id="System.Data.SQLite.Core" version="1.0.94.0" />
+      <dependency id="System.Data.SQLite.Core" version="1.0.99" />
       <dependency id="ServiceStack.OrmLite" version="4.0" />
     </dependencies> 
   </metadata> 

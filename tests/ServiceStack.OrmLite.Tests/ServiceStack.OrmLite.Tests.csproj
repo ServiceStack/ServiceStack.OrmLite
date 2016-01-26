@@ -115,22 +115,42 @@
   <ItemGroup>
     <Compile Include="AdminTasks.cs" />
     <Compile Include="AdoNetDataAccessTests.cs" />
-    <Compile Include="ApiSqlServerTests.cs" />
     <Compile Include="ApiSqliteTests.cs" />
+    <Compile Include="ApiSqlServerTests.cs" />
+    <Compile Include="ApiSqliteTests.NonParam.cs" />
+    <Compile Include="ApiSqlServerTests.NonParam.cs" />
+    <Compile Include="AutoQueryTests.cs" />
+    <Compile Include="CaptureSqlCommandFilterTests.cs" />
     <Compile Include="CaptureSqlFilterTests.cs" />
     <Compile Include="CompositeKeyTests.cs" />
+    <Compile Include="ConverterTests.cs" />
+    <Compile Include="CustomConverterTests.cs" />
     <Compile Include="CustomSqlTests.cs" />
     <Compile Include="DateTimeOffsetTests.cs" />
+    <Compile Include="DateTimeTests.cs" />
+    <Compile Include="DefaultValueTests.cs" />
+    <Compile Include="UseCase\ExpressionsAuthorTests.cs" />
     <Compile Include="Expression\ComplexJoinTests.cs" />
     <Compile Include="Expression\ExpressionUsingCustomSerializedEnumTests.cs" />
     <Compile Include="Expression\FromExpressionTests.cs" />
     <Compile Include="Expression\GenericTableExpressions.cs" />
+    <Compile Include="Expression\LimitExpressionTests.cs" />
     <Compile Include="Expression\MethodExpressionTests.cs" />
+    <Compile Include="Expression\SelectFieldExpressionTests.cs" />
+    <Compile Include="Expression\SqlExpressionParamTests.cs" />
     <Compile Include="Expression\SqlExpressionTests.cs" />
     <Compile Include="Expression\SelectExpressionTests.cs" />
     <Compile Include="Issues\ComplexJoinWithAlias.cs" />
+    <Compile Include="Issues\CompositeIndexNamingStrategyIssue.cs" />
+    <Compile Include="Issues\CreateTableAliasTest.cs" />
+    <Compile Include="Issues\CsvTests.cs" />
     <Compile Include="Issues\CustomFieldTests.cs" />
+    <Compile Include="Issues\CustomTypeTests.cs" />
+    <Compile Include="Issues\LoadReferencesCaseSensitiveTest.cs" />
+    <Compile Include="Issues\LoadReferencesForeignKeyTests.cs" />
     <Compile Include="Issues\LoadSelectIssue.cs" />
+    <Compile Include="Issues\MultipleSelfJoinsWithNullableInts.cs" />
+    <Compile Include="Issues\SelectScalarTests.cs" />
     <Compile Include="Issues\UtcDateTimeIssueTests.cs" />
     <Compile Include="Issues\JoinsWithSchemas.cs" />
     <Compile Include="Issues\MappingFieldsFromStoredProcedureTests.cs" />
@@ -146,7 +166,10 @@
     <Compile Include="LicenseUsageTests.cs" />
     <Compile Include="LoadReferencesJoinTests.cs" />
     <Compile Include="LoadReferencesTests.cs" />
+    <Compile Include="LoggingTests.cs" />
+    <Compile Include="MergeTests.cs" />
     <Compile Include="MockAllApiTests.cs" />
+    <Compile Include="OrderByTests.cs" />
     <Compile Include="OrmLiteContextTests.cs" />
     <Compile Include="OrmLiteExecFilterTests.cs" />
     <Compile Include="OrmLiteFiltersTests.cs" />
@@ -236,6 +259,8 @@
     <Compile Include="UseCase\CustomerOrdersUseCase.cs" />
     <Compile Include="UseCase\FieldFromInterfaceImplementationUseCase.cs" />
     <Compile Include="UseCase\NestedComplexTypeUseCase.cs" />
+    <Compile Include="UseCase\ParentChildCyclicalExample.cs" />
+    <Compile Include="UseCase\PostPerfTests.cs" />
     <Compile Include="UseCase\SchemaUseCase.cs" />
     <Compile Include="UseCase\ServiceStack_OrmLite_UseCase.cs" />
     <Compile Include="UseCase\ShardingUseCase.cs" />
@@ -243,6 +268,7 @@
     <Compile Include="OrmLiteGetScalarTests.cs" />
     <Compile Include="OrmLiteCreateTableWithNamingStrategyTest.cs" />
     <Compile Include="JoinSqlBuilderTests.cs" />
+    <Compile Include="_TypeDescriptorMetadataTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\..\lib\sqlite3.dll">

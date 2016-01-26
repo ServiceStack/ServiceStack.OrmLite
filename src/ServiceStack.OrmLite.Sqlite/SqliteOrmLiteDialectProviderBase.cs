@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using ServiceStack.Text.Common;
+using ServiceStack.OrmLite.Sqlite.Converters;
 
 namespace ServiceStack.OrmLite.Sqlite
 {
@@ -13,21 +12,21 @@ namespace ServiceStack.OrmLite.Sqlite
     {
         protected SqliteOrmLiteDialectProviderBase()
         {
-            base.MaxStringColumnDefinition = "VARCHAR(1000000)"; //Default Max is really 1B
-            base.DateTimeColumnDefinition = base.StringColumnDefinition;
-            base.BoolColumnDefinition = base.IntColumnDefinition;
-            base.GuidColumnDefinition = "CHAR(36)";
             base.SelectIdentitySql = "SELECT last_insert_rowid()";
 
             base.InitColumnTypeMap();
-        }
 
-        public override void OnAfterInitColumnTypeMap()
-        {
-            DbTypeMap.Set<Guid>(DbType.String, GuidColumnDefinition);
-            DbTypeMap.Set<Guid?>(DbType.String, GuidColumnDefinition);
-            DbTypeMap.Set<DateTimeOffset>(DbType.DateTimeOffset, StringColumnDefinition);
-            DbTypeMap.Set<DateTimeOffset?>(DbType.DateTimeOffset, StringColumnDefinition);
+            base.RegisterConverter<string>(new SqliteStringConverter());
+            base.RegisterConverter<DateTime>(new SqliteDateTimeConverter());
+            base.RegisterConverter<DateTimeOffset>(new SqliteDateTimeOffsetConverter());
+            base.RegisterConverter<Guid>(new SqliteGuidConverter());
+            base.RegisterConverter<bool>(new SqliteBoolConverter());
+            base.RegisterConverter<byte[]>(new SqliteByteArrayConverter());
+
+            this.Variables = new Dictionary<string, string>
+            {
+                { OrmLiteVariables.SystemUtc, "CURRENT_TIMESTAMP" },
+            };
         }
 
         public static string Password { get; set; }
@@ -105,7 +104,6 @@ namespace ServiceStack.OrmLite.Sqlite
                     }
                 }
                 connString.AppendFormat(@"Data Source={0};Version=3;New=True;Compress=True;", connectionString.Trim());
-
             }
             else
             {
@@ -131,7 +129,6 @@ namespace ServiceStack.OrmLite.Sqlite
             return CreateConnection(connString.ToString());
         }
 
-
         protected abstract IDbConnection CreateConnection(string connectionString);
 
         public override string GetTableName(string table, string schema=null)
@@ -148,107 +145,11 @@ namespace ServiceStack.OrmLite.Sqlite
             return GetQuotedName(GetTableName(tableName, schema));
         }
 
-        public override object ConvertDbValue(object value, Type type)
-        {
-            if (value == null || value is DBNull) return null;
-
-            if (type == typeof(bool) && !(value is bool))
-            {
-                var intVal = int.Parse(value.ToString());
-                return intVal != 0; 
-            }
-
-            return base.ConvertDbValue(value, type);
-        }
-
-        public override void SetDbValue(FieldDefinition fieldDef, IDataReader reader, int colIndex, object instance)
-        {
-            if (OrmLiteUtils.HandledDbNullValue(fieldDef, reader, colIndex, instance)) return;
-
-            var fieldType = Nullable.GetUnderlyingType(fieldDef.FieldType) ?? fieldDef.FieldType;
-            if (fieldType == typeof(Guid))
-            {
-                var guidStr = reader.GetString(colIndex);
-                var guidValue = new Guid(guidStr);
-
-                fieldDef.SetValueFn(instance, guidValue);
-            }
-            else if (fieldType == typeof(DateTime))
-            {
-                try
-                {
-                    var dbValue = reader.GetDateTime(colIndex);
-
-                    fieldDef.SetValueFn(instance, dbValue);
-                }
-                catch (Exception)
-                {
-                    var dateStr = reader.GetString(colIndex);
-                    var dateValue = DateTimeSerializer.ParseShortestXsdDateTime(dateStr);
-                    fieldDef.SetValueFn(instance, dateValue);
-                }
-            }
-            else
-            {
-                base.SetDbValue(fieldDef, reader, colIndex, instance);
-            }
-        }
-
-        public override string GetQuotedValue(object value, Type fieldType)
-        {
-            if (value == null) return "NULL";
-
-            if (fieldType == typeof(DateTime))
-            {
-                var dateValue = (DateTime)value;
-                var dateStr = dateValue.ToSqliteDateString();
-                return base.GetQuotedValue(dateStr, typeof(string));
-            }
-
-            if (fieldType == typeof(bool))
-            {
-                var boolValue = (bool)value;
-                return base.GetQuotedValue(boolValue ? 1 : 0, typeof(int));
-            }
-
-            // output datetimeoffset as a string formatted for roundtripping.
-            if (fieldType == typeof (DateTimeOffset))
-            {
-                var dateTimeOffsetValue = (DateTimeOffset) value;
-                return base.GetQuotedValue(dateTimeOffsetValue.ToString("o"), typeof (string));
-            }
-
-            if (fieldType == typeof(byte[]))
-            {
-                return "x'" + BitConverter.ToString((byte[])value).Replace("-", "") + "'";
-            }
-
-            return base.GetQuotedValue(value, fieldType);
-        }
-
-        protected override object GetValueOrDbNull<T>(FieldDefinition fieldDef, object obj)
-        {
-            var value = GetValue<T>(fieldDef, obj);
-            if (value != null)
-            {
-                if (fieldDef.FieldType == typeof(DateTimeOffset))
-                {
-                    var dateTimeOffsetValue = (DateTimeOffset)value;
-                    return dateTimeOffsetValue.ToString("o");
-                }
-                else if (fieldDef.FieldType == typeof(DateTime) && value is DateTime)
-                {
-                    var dateType = (DateTime)value;
-                    return dateType.ToSqliteDateString();
-                }
-            }
-
-            return value ?? DBNull.Value;
-        }
-
         public override SqlExpression<T> SqlExpression<T>()
         {
-            return new SqliteExpression<T>(this);
+            return !OrmLiteConfig.UseParameterizeSqlExpressions
+                ? new SqliteExpression<T>(this)
+                : (SqlExpression<T>)new SqliteParameterizedSqlExpression<T>(this);
         }
 
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
@@ -272,9 +173,6 @@ namespace ServiceStack.OrmLite.Sqlite
             if (isRowVersion)
                 return ret + " DEFAULT 1";
 
-            if (fieldType == typeof(Decimal))
-                return base.ReplaceDecimalColumnDefinition(ret, fieldLength, scale);
-
             return ret;
         }
     }
@@ -292,24 +190,6 @@ namespace ServiceStack.OrmLite.Sqlite
                 SqliteOrmLiteDialectProviderBase.UTF8Encoded = true;
 
             return provider;
-        }
-
-        public static string ToSqliteDateString(this DateTime dateTime)
-        {
-            //Convert UTC DateTime to LocalTime for Sqlite
-            if (dateTime.Kind == DateTimeKind.Utc)
-                dateTime = dateTime.ToLocalTime();
-
-            var dateStr = DateTimeSerializer.ToLocalXsdDateTimeString(dateTime);
-            dateStr = dateStr.Replace("T", " ");
-            const int tzPos = 6; //"-00:00".Length;
-            var timeZoneMod = dateStr.Substring(dateStr.Length - tzPos, 1);
-            if (timeZoneMod == "+" || timeZoneMod == "-")
-            {
-                dateStr = dateStr.Substring(0, dateStr.Length - tzPos);
-            }
-
-            return dateStr;
         }
     }
 }

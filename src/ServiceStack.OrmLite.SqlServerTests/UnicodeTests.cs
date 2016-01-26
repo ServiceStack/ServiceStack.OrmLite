@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
+using ServiceStack.OrmLite.Converters;
 
 namespace ServiceStack.OrmLite.SqlServerTests
 {
@@ -16,9 +17,10 @@ namespace ServiceStack.OrmLite.SqlServerTests
         public void can_insert_and_retrieve_unicode_values()
         {
             //save and restore state, so it doesn't mess with other tests
-            bool prevUnicodestate = OrmLiteConfig.DialectProvider.UseUnicode;
+            var stringConverter = OrmLiteConfig.DialectProvider.GetStringConverter();
+            bool prevUnicodestate = stringConverter.UseUnicode;
             try {
-                OrmLiteConfig.DialectProvider.UseUnicode = true;
+                stringConverter.UseUnicode = true;
 
                 var testData = new[]{
                 "árvíztűrő tükörfúrógép",
@@ -67,7 +69,7 @@ Ancient	Modern
                     CollectionAssert.AreEquivalent(testData, fromDb);
                 }
             }
-            finally { OrmLiteConfig.DialectProvider.UseUnicode = prevUnicodestate; }
+            finally { stringConverter.UseUnicode = prevUnicodestate; }
         }
 
 

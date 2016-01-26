@@ -41,9 +41,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MySql.Data, Version=6.9.5.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\MySql.Data.6.9.5\lib\net45\MySql.Data.dll</HintPath>
+    <Reference Include="MySql.Data, Version=6.9.8.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
+      <HintPath>..\packages\MySql.Data.6.9.8\lib\net45\MySql.Data.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="ServiceStack.Common">
       <HintPath>..\..\lib\ServiceStack.Common.dll</HintPath>
@@ -63,6 +63,27 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\ServiceStack.OrmLite.MySql\Converters\MySqlBoolConverter.cs">
+      <Link>Converters\MySqlBoolConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.MySql\Converters\MySqlDateTimeConverter.cs">
+      <Link>Converters\MySqlDateTimeConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.MySql\Converters\MySqlDateTimeOffsetConverter.cs">
+      <Link>Converters\MySqlDateTimeOffsetConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.MySql\Converters\MySqlFloatConverters.cs">
+      <Link>Converters\MySqlFloatConverters.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.MySql\Converters\MySqlGuidConverter.cs">
+      <Link>Converters\MySqlGuidConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.MySql\Converters\MySqlIntegerConverters.cs">
+      <Link>Converters\MySqlIntegerConverters.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.MySql\Converters\MySqlStringConverters.cs">
+      <Link>Converters\MySqlStringConverters.cs</Link>
+    </Compile>
     <Compile Include="..\ServiceStack.OrmLite.MySql\DataAnnotations\TextAttribute.cs">
       <Link>DataAnnotations\TextAttribute.cs</Link>
     </Compile>

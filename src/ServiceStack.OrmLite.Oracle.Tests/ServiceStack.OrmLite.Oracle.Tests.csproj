@@ -94,6 +94,9 @@
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\DateTimeOffsetTests.cs">
       <Link>DateTimeOffsetTests.cs</Link>
     </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\DefaultValueTests.cs">
+      <Link>DefaultValueTests.cs</Link>
+    </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\EnumTests.cs">
       <Link>EnumTests.cs</Link>
     </Compile>
@@ -147,6 +150,9 @@
     </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\SelectExpressionTests.cs">
       <Link>Expression\SelectExpressionTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\SqlExpressionParamTests.cs">
+      <Link>Expression\SqlExpressionParamTests.cs</Link>
     </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\SqlExpressionTests.cs">
       <Link>Expression\SqlExpressionTests.cs</Link>
@@ -388,9 +394,7 @@
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="WrappedCommandTests.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="WrappedCommandTests.cs" />
     <Compile Include="DateTimeColumnTest.cs" />
     <Compile Include="ForeignKeyAttributeTests.cs" />
     <Compile Include="OracleParamTests.cs">

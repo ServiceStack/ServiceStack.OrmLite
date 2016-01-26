@@ -27,6 +27,8 @@ namespace ServiceStack.OrmLite
 
         public Type FieldType { get; set; }
 
+        public object FieldTypeDefaultValue { get; set; }
+
         public Type TreatAsType { get; set; }
 
         public Type ColumnType

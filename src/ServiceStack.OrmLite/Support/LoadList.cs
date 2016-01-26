@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -40,12 +41,12 @@ namespace ServiceStack.OrmLite.Support
             this.expr = expr;
 
             var sql = expr.SelectInto<Into>();
-            parentResults = dbCmd.ExprConvertToList<Into>(sql);
+            parentResults = dbCmd.ExprConvertToList<Into>(sql, expr.Params);
 
             modelDef = ModelDefinition<Into>.Definition;
             fieldDefs = modelDef.AllFieldDefinitionsArray.Where(x => x.IsReference).ToList();
 
-            subSql = dialectProvider.GetLoadChildrenSubSelect(modelDef, expr);
+            subSql = dialectProvider.GetLoadChildrenSubSelect(expr);
         }
 
         protected string GetRefListSql(ModelDefinition refModelDef, FieldDefinition refField)
@@ -86,10 +87,11 @@ namespace ServiceStack.OrmLite.Support
             }
         }
 
-        protected string GetRefSelfSql(FieldDefinition refSelf, ModelDefinition refModelDef)
+        protected string GetRefSelfSql(ModelDefinition modelDef, FieldDefinition refSelf, ModelDefinition refModelDef)
         {
             //Load Self Table.RefTableId PK
-            expr.Select(dialectProvider.GetQuotedColumnName(refSelf));
+            expr.Select(dialectProvider.GetQuotedColumnName(modelDef, refSelf));
+
             var subSqlRef = expr.ToSelectStatement();
 
             var sqlRef = "SELECT {0} FROM {1} WHERE {2} IN ({3})".Fmt(
@@ -111,9 +113,42 @@ namespace ServiceStack.OrmLite.Support
             return sqlRef;
         }
 
+        protected Dictionary<object, object> CreateRefMap()
+        {
+            return OrmLiteConfig.IsCaseInsensitive
+                ? new Dictionary<object, object>(CaseInsensitiveObjectComparer.Instance)
+                : new Dictionary<object, object>(); 
+        }
+
+        public class CaseInsensitiveObjectComparer : IEqualityComparer<object>
+        {
+            public static CaseInsensitiveObjectComparer Instance = new CaseInsensitiveObjectComparer();
+
+            public bool Equals(object x, object y)
+            {
+                if (x == null && y == null) return true;
+                if (x == null || y == null) return false;
+
+                var xStr = x as string;
+                var yStr = y as string;
+
+                return xStr != null && yStr != null
+                    ? xStr.Equals(yStr, StringComparison.OrdinalIgnoreCase)
+                    : x.Equals(y);
+            }
+
+            public int GetHashCode(object obj)
+            {
+                var str = obj as string;
+                return str != null
+                    ? str.ToUpper().GetHashCode()
+                    : obj.GetHashCode();
+            }
+        }
+
         protected void SetRefSelfChildResults(FieldDefinition fieldDef, ModelDefinition refModelDef, FieldDefinition refSelf, IList childResults)
         {
-            var map = new Dictionary<object, object>();
+            var map = CreateRefMap();
 
             foreach (var result in childResults)
             {
@@ -134,7 +169,7 @@ namespace ServiceStack.OrmLite.Support
 
         protected void SetRefFieldChildResults(FieldDefinition fieldDef, FieldDefinition refField, IList childResults)
         {
-            var map = new Dictionary<object, object>();
+            var map = CreateRefMap();
 
             foreach (var result in childResults)
             {
@@ -181,7 +216,7 @@ namespace ServiceStack.OrmLite.Support
 
             if (refSelf != null)
             {
-                var sqlRef = GetRefSelfSql(refSelf, refModelDef);
+                var sqlRef = GetRefSelfSql(modelDef, refSelf, refModelDef);
                 var childResults = dbCmd.ConvertToList(refType, sqlRef);
                 SetRefSelfChildResults(fieldDef, refModelDef, refSelf, childResults);
             }
@@ -228,7 +263,7 @@ namespace ServiceStack.OrmLite.Support
             }
             else if (refSelf != null)
             {
-                var sqlRef = GetRefSelfSql(refSelf, refModelDef);
+                var sqlRef = GetRefSelfSql(modelDef, refSelf, refModelDef);
                 var childResults = await dbCmd.ConvertToListAsync(refType, sqlRef, token);
                 SetRefSelfChildResults(fieldDef, refModelDef, refSelf, childResults);
             }

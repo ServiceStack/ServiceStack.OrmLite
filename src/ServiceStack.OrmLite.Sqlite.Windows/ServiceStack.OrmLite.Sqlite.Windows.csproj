@@ -14,6 +14,8 @@
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
     <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -50,9 +52,9 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Data.SQLite, Version=1.0.94.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\System.Data.SQLite.Core.1.0.94.0\lib\net40\System.Data.SQLite.dll</HintPath>
+    <Reference Include="System.Data.SQLite, Version=1.0.99.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Data.SQLite.Core.1.0.99.0\lib\net40\System.Data.SQLite.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -61,6 +63,24 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\ServiceStack.OrmLite.Sqlite\Converters\SqliteBoolConverter.cs">
+      <Link>Converters\SqliteBoolConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.Sqlite\Converters\SqliteByteArrayConverter.cs">
+      <Link>Converters\SqliteByteArrayConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.Sqlite\Converters\SqliteDateTimeConverter.cs">
+      <Link>Converters\SqliteDateTimeConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.Sqlite\Converters\SqliteDateTimeOffsetConverter.cs">
+      <Link>Converters\SqliteDateTimeOffsetConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.Sqlite\Converters\SqliteGuidConverter.cs">
+      <Link>Converters\SqliteGuidConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.Sqlite\Converters\SqliteStringConverters.cs">
+      <Link>Converters\SqliteStringConverters.cs</Link>
+    </Compile>
     <Compile Include="..\ServiceStack.OrmLite.Sqlite\SqliteExpression.cs">
       <Link>SqliteExpression.cs</Link>
     </Compile>
@@ -87,9 +107,9 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
-    <Error Condition="!Exists('..\packages\System.Data.SQLite.Core.1.0.94.0\build\net40\System.Data.SQLite.Core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\System.Data.SQLite.Core.1.0.94.0\build\net40\System.Data.SQLite.Core.targets'))" />
+    <Error Condition="!Exists('..\packages\System.Data.SQLite.Core.1.0.99.0\build\net40\System.Data.SQLite.Core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\System.Data.SQLite.Core.1.0.99.0\build\net40\System.Data.SQLite.Core.targets'))" />
   </Target>
-  <Import Project="..\packages\System.Data.SQLite.Core.1.0.94.0\build\net40\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.94.0\build\net40\System.Data.SQLite.Core.targets')" />
+  <Import Project="..\packages\System.Data.SQLite.Core.1.0.99.0\build\net40\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.99.0\build\net40\System.Data.SQLite.Core.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

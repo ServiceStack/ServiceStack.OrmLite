@@ -13,7 +13,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_create_ModelWithIndexFields_table()
 		{
-			OrmLiteConfig.DialectProvider.DefaultStringLength=128;
+			OrmLiteConfig.DialectProvider.GetStringConverter().StringLength = 128;
             using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
 			{
 				db.CreateTable<ModelWithIndexFields>(true);
@@ -28,7 +28,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_create_ModelWithCompositeIndexFields_table()
 		{
-			OrmLiteConfig.DialectProvider.DefaultStringLength=128;
+			OrmLiteConfig.DialectProvider.GetStringConverter().StringLength = 128;
             using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
 			{
 				db.CreateTable<ModelWithCompositeIndexFields>(true);
@@ -39,7 +39,5 @@ namespace ServiceStack.OrmLite.FirebirdTests
 				Assert.IsTrue(sql.Contains("idx_modelwcif_comp1_comp2"));
 			}
 		}
-
-
 	}
 }
