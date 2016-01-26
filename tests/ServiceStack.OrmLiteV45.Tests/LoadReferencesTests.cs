@@ -143,6 +143,96 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(dbCustomer.Orders.Count, Is.EqualTo(2));
         }
 
+        [Test]
+        public async Task Can_load_only_included_references_async()
+        {
+            var customer = new Customer
+            {
+                Name = "Customer 1",
+                PrimaryAddress = new CustomerAddress
+                {
+                    AddressLine1 = "1 Humpty Street",
+                    City = "Humpty Doo",
+                    State = "Northern Territory",
+                    Country = "Australia"
+                },
+                Orders = new[] {
+                    new Order { LineItem = "Line 1", Qty = 1, Cost = 1.99m },
+                    new Order { LineItem = "Line 2", Qty = 2, Cost = 2.99m },
+                }.ToList(),
+            };
+
+            await db.SaveAsync(customer);
+            Assert.That(customer.Id, Is.GreaterThan(0));
+
+            await db.SaveReferencesAsync(customer, customer.PrimaryAddress);
+            Assert.That(customer.PrimaryAddress.CustomerId, Is.EqualTo(customer.Id));
+
+            await db.SaveReferencesAsync(customer, customer.Orders);
+            Assert.That(customer.Orders.All(x => x.CustomerId == customer.Id));
+
+            // LoadSelectAsync overload 1
+            var dbCustomers = await db.LoadSelectAsync<Customer>(db.From<Customer>().Where(q => q.Id == customer.Id), include: new[] { "PrimaryAddress" });
+            Assert.That(dbCustomers.Count, Is.EqualTo(1));
+            Assert.That(dbCustomers[0].Name, Is.EqualTo("Customer 1"));
+            Assert.That(dbCustomers[0].Orders, Is.Null);
+            Assert.That(dbCustomers[0].PrimaryAddress, Is.Not.Null);
+
+            // LoadSelectAsync overload 2
+            dbCustomers = await db.LoadSelectAsync<Customer>(q => q.Id == customer.Id, include: new[] { "PrimaryAddress" });
+            Assert.That(dbCustomers.Count, Is.EqualTo(1));
+            Assert.That(dbCustomers[0].Name, Is.EqualTo("Customer 1"));
+            Assert.That(dbCustomers[0].Orders, Is.Null);
+            Assert.That(dbCustomers[0].PrimaryAddress, Is.Not.Null);
+
+            // LoadSelectAsync overload 3
+            dbCustomers = await db.LoadSelectAsync<Customer>(q => q.Where(x => x.Id == customer.Id), include: new[] { "PrimaryAddress" });
+            Assert.That(dbCustomers.Count, Is.EqualTo(1));
+            Assert.That(dbCustomers[0].Name, Is.EqualTo("Customer 1"));
+            Assert.That(dbCustomers[0].Orders, Is.Null);
+            Assert.That(dbCustomers[0].PrimaryAddress, Is.Not.Null);
+
+            // LoadSingleById overload 1
+            var dbCustomer = await db.LoadSingleByIdAsync<Customer>(customer.Id, include: new[] { "PrimaryAddress" });
+            Assert.That(dbCustomer.Name, Is.EqualTo("Customer 1"));
+            Assert.That(dbCustomer.Orders, Is.Null);
+            Assert.That(dbCustomer.PrimaryAddress, Is.Not.Null);
+
+            // LoadSingleById overload 2
+            dbCustomer = await db.LoadSingleByIdAsync<Customer>(customer.Id, include: x => new { x.PrimaryAddress });
+            Assert.That(dbCustomer.Name, Is.EqualTo("Customer 1"));
+            Assert.That(dbCustomer.Orders, Is.Null);
+            Assert.That(dbCustomer.PrimaryAddress, Is.Not.Null);
+
+
+            // Invalid field name
+            try
+            {
+                dbCustomers = await db.LoadSelectAsync<Customer>(q => q.Id == customer.Id, include: new[] { "InvalidOption1", "InvalidOption2" });
+                Assert.Fail();
+            }
+            catch (System.ArgumentException ex)
+            {
+            }
+            catch (System.Exception ex)
+            {
+                Assert.Fail();
+            }
+
+
+            try
+            {
+                dbCustomer = await db.LoadSingleByIdAsync<Customer>(customer.Id, include: new[] { "InvalidOption1", "InvalidOption2" });
+                Assert.Fail();
+            }
+            catch (System.ArgumentException ex)
+            {
+            }
+            catch (System.Exception ex)
+            {
+                Assert.Fail();
+            }
+        }
 
         [Test]
         public async Task Can_Save_References_Async()
@@ -173,6 +263,5 @@ namespace ServiceStack.OrmLite.Tests
                 throw ex;
             }
         }
-
     }
 }
