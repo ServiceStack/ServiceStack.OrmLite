@@ -129,27 +129,27 @@ namespace ServiceStack.OrmLite
             return dbCmd.ScalarAsync<long>("SELECT COUNT(*) FROM ({0}) AS COUNT".Fmt(sql), token);
         }
 
-        internal static Task<List<T>> LoadSelectAsync<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression, CancellationToken token = default(CancellationToken))
+        internal static Task<List<T>> LoadSelectAsync<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression, string[] include = null, CancellationToken token = default(CancellationToken))
         {
             var expr = dbCmd.GetDialectProvider().SqlExpression<T>();
             expr = expression(expr);
-            return dbCmd.LoadListWithReferences<T, T>(expr, token);
+            return dbCmd.LoadListWithReferences<T, T>(expr, include, token);
         }
 
-        internal static Task<List<T>> LoadSelectAsync<T>(this IDbCommand dbCmd, SqlExpression<T> expression = null, CancellationToken token = default(CancellationToken))
+        internal static Task<List<T>> LoadSelectAsync<T>(this IDbCommand dbCmd, SqlExpression<T> expression = null, string[] include = null, CancellationToken token = default(CancellationToken))
         {
-            return dbCmd.LoadListWithReferences<T, T>(expression, token);
+            return dbCmd.LoadListWithReferences<T, T>(expression, include, token);
         }
 
-        internal static Task<List<Into>> LoadSelectAsync<Into, From>(this IDbCommand dbCmd, SqlExpression<From> expression, CancellationToken token = default(CancellationToken))
+        internal static Task<List<Into>> LoadSelectAsync<Into, From>(this IDbCommand dbCmd, SqlExpression<From> expression, string[] include = null, CancellationToken token = default(CancellationToken))
         {
-            return dbCmd.LoadListWithReferences<Into, From>(expression, token);
+            return dbCmd.LoadListWithReferences<Into, From>(expression, include, token);
         }
 
-        internal static Task<List<T>> LoadSelectAsync<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate, CancellationToken token = default(CancellationToken))
+        internal static Task<List<T>> LoadSelectAsync<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate, string[] include = null, CancellationToken token = default(CancellationToken))
         {
             var expr = dbCmd.GetDialectProvider().SqlExpression<T>().Where(predicate);
-            return dbCmd.LoadListWithReferences<T, T>(expr, token);
+            return dbCmd.LoadListWithReferences<T, T>(expr, include, token);
         }
 
         internal static Task<T> ExprConvertToAsync<T>(this IDataReader dataReader, IOrmLiteDialectProvider dialectProvider, CancellationToken token)
