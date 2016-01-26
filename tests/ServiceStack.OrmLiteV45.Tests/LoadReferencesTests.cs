@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
@@ -117,7 +118,7 @@ namespace ServiceStack.OrmLite.Tests
                     State = "Northern Territory",
                     Country = "Australia"
                 },
-                Orders = new[] { 
+                Orders = new[] {
                     new Order { LineItem = "Line 1", Qty = 1, Cost = 1.99m },
                     new Order { LineItem = "Line 2", Qty = 2, Cost = 2.99m },
                 }.ToList(),
@@ -141,5 +142,37 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(dbCustomer.PrimaryAddress, Is.Not.Null);
             Assert.That(dbCustomer.Orders.Count, Is.EqualTo(2));
         }
+
+
+        [Test]
+        public async Task Can_Save_References_Async()
+        {
+            var customer = new Customer
+            {
+                Name = "Customer 1",
+                PrimaryAddress = new CustomerAddress
+                {
+                    AddressLine1 = "1 Humpty Street",
+                    City = "Humpty Doo",
+                    State = "Northern Territory",
+                    Country = "Australia"
+                },
+                Orders = new[] {
+                    new Order { LineItem = "Line 1", Qty = 1, Cost = 1.99m },
+                    new Order { LineItem = "Line 2", Qty = 2, Cost = 2.99m },
+                }.ToList(),
+            };
+
+            try
+            {
+                await db.SaveAsync(customer, references:true);
+                Assert.That(customer.Id, Is.GreaterThan(0));
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
     }
 }
