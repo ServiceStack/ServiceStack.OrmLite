@@ -218,6 +218,19 @@ namespace ServiceStack.OrmLite
             }
         }
 
+        public static object Scalar(this IDbCommand dbCmd, ISqlExpression sqlExpression)
+        {
+            dbCmd.CommandText = sqlExpression.ToSelectStatement();
+            dbCmd.SetParameters(sqlExpression.Params);
+
+            if (OrmLiteConfig.ResultsFilter != null)
+            {
+                return OrmLiteConfig.ResultsFilter.GetScalar(dbCmd);
+            }
+
+            return dbCmd.ExecuteScalar();
+        }
+
         public static object Scalar(this IDbCommand dbCmd, string sql = null)
         {
             if (sql != null)
