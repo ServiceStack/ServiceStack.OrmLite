@@ -447,7 +447,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static bool Exists<T>(this IDbConnection dbConn, SqlExpression<T> expression)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Single<T>(expression.Limit(1).ToSelectStatement())) != null;
+            return dbConn.Exec(dbCmd => dbCmd.Single<T>(expression.Limit(1))) != null;
         }
         /// <summary>
         /// Returns true if the Query returns any records, using an SqlFormat query. E.g:
