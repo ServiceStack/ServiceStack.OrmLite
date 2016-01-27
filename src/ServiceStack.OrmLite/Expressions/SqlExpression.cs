@@ -572,6 +572,15 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
+        public virtual SqlExpression<T> OrderByDescending(string orderBy)
+        {
+            orderByProperties.Clear();
+            orderBy.SqlVerifyFragment();
+            orderByProperties.Add(orderBy + " DESC");
+            BuildOrderByClauseInternal();
+            return this;
+        }
+
         public virtual SqlExpression<T> ThenByDescending(string orderBy)
         {
             orderBy.SqlVerifyFragment();
