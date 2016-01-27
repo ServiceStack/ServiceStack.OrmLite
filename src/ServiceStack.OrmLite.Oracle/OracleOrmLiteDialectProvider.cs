@@ -15,6 +15,7 @@ namespace ServiceStack.OrmLite.Oracle
     public class OracleOrmLiteDialectProvider : OrmLiteDialectProviderBase<OracleOrmLiteDialectProvider>
     {
         public const string OdpProvider = "Oracle.DataAccess.Client";
+        public const string ManagedProvider = "Oracle.ManagedDataAccess.Client";
         public const string MicrosoftProvider = "System.Data.OracleClient";
 
         protected readonly List<string> ReservedNames = new List<string>
@@ -70,6 +71,7 @@ namespace ServiceStack.OrmLite.Oracle
 
         public OracleOrmLiteDialectProvider(bool compactGuid, bool quoteNames, string clientProvider = OdpProvider)
         {
+            OrmLiteConfig.DeoptimizeReader = true;
             ClientProvider = clientProvider;
             //CompactGuid = compactGuid;
             QuoteNames = quoteNames;
@@ -94,7 +96,7 @@ namespace ServiceStack.OrmLite.Oracle
             ExecFilter = new OracleExecFilter();
 
             _factory = DbProviderFactories.GetFactory(ClientProvider);
-            _timestampConverter = new OracleTimestampConverter(_factory.GetType());
+            _timestampConverter = new OracleTimestampConverter(_factory.GetType(), ClientProvider);
 
             InitColumnTypeMap();
 
