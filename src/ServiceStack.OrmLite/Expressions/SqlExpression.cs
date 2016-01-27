@@ -1768,8 +1768,8 @@ namespace ServiceStack.OrmLite
 
             if (value != null)
             {
-                p.Value = DialectProvider.GetParamValue(value, value.GetType());
                 DialectProvider.InitDbParam(p, value.GetType());
+                p.Value = DialectProvider.GetParamValue(value, value.GetType());
             }
             else
             {
@@ -1867,8 +1867,8 @@ namespace ServiceStack.OrmLite
 
             if (value != null)
             {
-                to.Value = dialectProvider.GetParamValue(value, valueType);
                 dialectProvider.InitDbParam(to, valueType);
+                to.Value = dialectProvider.GetParamValue(value, valueType);
             }
             else
             {

@@ -66,6 +66,12 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExprConvertTo<T>(sql, expression.Params);
         }
 
+        public static TKey Scalar<T, TKey>(this IDbCommand dbCmd, SqlExpression<T> expression)
+        {
+            var sql = expression.SelectInto<T>();
+            return dbCmd.Scalar<TKey>(sql, expression.Params);
+        }
+
         public static TKey Scalar<T, TKey>(this IDbCommand dbCmd, Expression<Func<T, TKey>> field)
         {
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();

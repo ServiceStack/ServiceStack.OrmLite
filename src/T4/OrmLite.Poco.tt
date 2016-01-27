@@ -132,7 +132,7 @@ else if (!isArray && !isBool) { if (!isGuid) {#>
 	    public <#=nullablePropType#> <#=ormName#>GreaterThanOrEqualTo { get; set;}
 		public <#=nullablePropType#> <#=ormName#>GreaterThan { get; set;}
 		public <#=nullablePropType#> <#=ormName#>LessThan { get; set;}
-		public <#=nullablePropType#> <#=ormName#>LessThanEqualTo { get; set;}
+		public <#=nullablePropType#> <#=ormName#>LessThanOrEqualTo { get; set;}
 		public <#=nullablePropType#> <#=ormName#>NotEqualTo { get; set;}
 		public <#=col.ProperPropertyType#>[] <#=ormName#>Between { get; set;}
 <#}#>

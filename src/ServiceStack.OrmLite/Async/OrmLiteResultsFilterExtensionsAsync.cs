@@ -157,7 +157,18 @@ namespace ServiceStack.OrmLite
 
         public static Task<object> ScalarAsync(this IDbCommand dbCmd)
         {
-            return dbCmd.ScalarAsync(null, default(CancellationToken));
+            return dbCmd.ScalarAsync((string)null, default(CancellationToken));
+        }
+
+        public static Task<object> ScalarAsync(this IDbCommand dbCmd, ISqlExpression expression, CancellationToken token)
+        {
+            dbCmd.CommandText = expression.ToSelectStatement();
+            dbCmd.SetParameters(expression.Params);
+
+            if (OrmLiteConfig.ResultsFilter != null)
+                return OrmLiteConfig.ResultsFilter.GetScalar(dbCmd).InTask();
+
+            return dbCmd.GetDialectProvider().ExecuteScalarAsync(dbCmd, token);
         }
 
         public static Task<object> ScalarAsync(this IDbCommand dbCmd, string sql, CancellationToken token)
