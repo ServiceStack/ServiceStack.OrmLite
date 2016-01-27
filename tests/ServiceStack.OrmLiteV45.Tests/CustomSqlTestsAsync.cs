@@ -20,6 +20,10 @@ namespace ServiceStack.OrmLite.Tests
             IF OBJECT_ID('spSearchLetters') IS NOT NULL
                     DROP PROCEDURE spSearchLetters";
 
+        private const string DropInsertProcedureSql = @"
+            IF OBJECT_ID('spInsertLetter') IS NOT NULL
+                    DROP PROCEDURE spInsertLetter";
+
         private const string CreateProcedureSql = @"
             CREATE PROCEDURE spSearchLetters 
             (
@@ -30,6 +34,20 @@ namespace ServiceStack.OrmLite.Tests
             BEGIN
                 SELECT @pTotal = COUNT(*) FROM LetterFrequency WHERE Letter = @pLetter
                 SELECT * FROM LetterFrequency WHERE Letter = @pLetter
+            END";
+
+        private const string CreateInsertProcedureSql = @"
+            CREATE PROCEDURE spInsertLetter
+            (
+                @pLetter varchar(10),
+                @pTotal int OUT
+            )
+            AS
+            BEGIN
+                INSERT INTO LetterFrequency (Letter)
+                VALUES (@pLetter)
+
+                SELECT @pTotal = COUNT(*) FROM LetterFrequency WHERE Letter = @pLetter
             END";
 
         [Test]
@@ -84,6 +102,32 @@ namespace ServiceStack.OrmLite.Tests
 
                 Assert.That(results.Count, Is.EqualTo(3));
                 Assert.That(pTotal.Value, Is.EqualTo("3"));
+            }
+        }
+
+        [Test]
+        public async Task Can_execute_stored_procedure_using_SqlProc_with_out_params_NonQueryAsync()
+        {
+            if (Dialect != Dialect.SqlServer) return;
+
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<LetterFrequency>();
+
+                var rows = "A,B,B,C,C,C,D,D,E".Split(',').Map(x => new LetterFrequency { Letter = x });
+                await db.InsertAllAsync(rows);
+
+                await db.ExecuteSqlAsync(DropInsertProcedureSql);
+                await db.ExecuteSqlAsync(CreateInsertProcedureSql);
+
+                var cmd = db.SqlProc("spInsertLetter", new { pLetter = "C" });
+
+                Assert.That(((OrmLiteCommand)cmd).IsDisposed, Is.False);
+
+                var pTotal = cmd.AddParam("pTotal", direction: ParameterDirection.Output);
+                await cmd.ExecNonQueryAsync();
+
+                Assert.That(pTotal.Value, Is.EqualTo("4"));
             }
         }
 
