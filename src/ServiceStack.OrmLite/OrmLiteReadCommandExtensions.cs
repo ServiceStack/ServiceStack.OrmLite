@@ -519,6 +519,11 @@ namespace ServiceStack.OrmLite
             return dbCmd.ConvertToList<T>(dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), sql));
         }
 
+        internal static IEnumerable<T> SelectLazy<T>(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams)
+        {
+            foreach (var p in dbCmd.SetParameters(sqlParams).SelectLazy<T>(sql)) yield return p;
+        }
+
         internal static IEnumerable<T> SelectLazy<T>(this IDbCommand dbCmd, string sql, object anonType = null)
         {
             if (anonType != null) dbCmd.SetParameters<T>(anonType, excludeDefaults: false);

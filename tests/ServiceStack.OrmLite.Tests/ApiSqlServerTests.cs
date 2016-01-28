@@ -120,6 +120,9 @@ namespace ServiceStack.OrmLite.Tests
             db.SelectLazy<Person>().ToList();
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"FirstName\", \"LastName\", \"Age\" FROM \"Person\""));
 
+            db.SelectLazy(db.From<Person>().Where(x => x.Age > 40)).ToList();
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"FirstName\", \"LastName\", \"Age\" \nFROM \"Person\"\nWHERE (\"Age\" > @0)"));
+
             db.SelectLazy<Person>("Age > @age", new { age = 40 }).ToList();
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"FirstName\", \"LastName\", \"Age\" FROM \"Person\" WHERE Age > @age"));
 
