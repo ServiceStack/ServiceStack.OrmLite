@@ -71,6 +71,9 @@ namespace ServiceStack.OrmLite.Oracle
 
         public OracleOrmLiteDialectProvider(bool compactGuid, bool quoteNames, string clientProvider = OdpProvider)
         {
+            // Make managed provider work with CaptureSqlFilter, safe since Oracle providers don't support async
+            OrmLiteContext.UseThreadStatic = true;
+            // Not nice to slow down, but need to read some types via Oracle-specific read methods so can't read all fields in single call
             OrmLiteConfig.DeoptimizeReader = true;
             ClientProvider = clientProvider;
             //CompactGuid = compactGuid;
