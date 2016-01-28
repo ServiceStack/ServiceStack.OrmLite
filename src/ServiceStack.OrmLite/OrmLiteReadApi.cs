@@ -150,7 +150,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns a lazyily loaded stream of results using a parameterized query. E.g:
-        /// <para>db.SelectLazy(db."Age &gt; @age", new { age = 40 })</para>
+        /// <para>db.SelectLazy(db.From&lt;Person&gt;().Where(x =&gt; x == 40))</para>
         /// </summary>
         public static IEnumerable<T> SelectLazy<T>(this IDbConnection dbConn, SqlExpression<T> expression)
         {
