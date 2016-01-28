@@ -13,7 +13,7 @@ namespace ServiceStack.OrmLite
 {
     public static class OrmLiteResultsFilterExtensionsAsync
     {
-        internal static Task<int> ExecNonQueryAsync(this IDbCommand dbCmd, string sql, object anonType, CancellationToken token)
+        public static Task<int> ExecNonQueryAsync(this IDbCommand dbCmd, string sql, object anonType, CancellationToken token = default(CancellationToken))
         {
             if (anonType != null)
                 dbCmd.SetParameters(anonType, (bool)false);
@@ -26,7 +26,7 @@ namespace ServiceStack.OrmLite
             return dbCmd.GetDialectProvider().ExecuteNonQueryAsync(dbCmd, token);
         }
 
-        internal static Task<int> ExecNonQueryAsync(this IDbCommand dbCmd, string sql, IDictionary<string, object> dict, CancellationToken token)
+        public static Task<int> ExecNonQueryAsync(this IDbCommand dbCmd, string sql, IDictionary<string, object> dict, CancellationToken token = default(CancellationToken))
         {
             if (dict != null)
                 dbCmd.SetParameters(dict, (bool)false);
@@ -39,7 +39,7 @@ namespace ServiceStack.OrmLite
             return dbCmd.GetDialectProvider().ExecuteNonQueryAsync(dbCmd, token);
         }
 
-        internal static Task<int> ExecNonQueryAsync(this IDbCommand dbCmd, CancellationToken token)
+        public static Task<int> ExecNonQueryAsync(this IDbCommand dbCmd, CancellationToken token = default(CancellationToken))
         {
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.ExecuteSql(dbCmd).InTask();
