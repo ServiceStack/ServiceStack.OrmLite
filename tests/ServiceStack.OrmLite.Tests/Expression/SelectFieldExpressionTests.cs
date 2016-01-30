@@ -33,5 +33,28 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 Assert.That(results, Is.EquivalentTo(expected));
             }
         }
+
+        [Test]
+        public void Can_select_value_as_null()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Person>();
+                db.InsertAll(Person.Rockstars);
+
+                var firstName = "Kurt";
+                string lastName = null;
+
+                var results = db.Select<Person>(q =>
+                    q.Where(x => firstName == null || x.FirstName == firstName)
+                        .And(x => lastName == null || x.LastName == lastName));
+
+                db.GetLastSql().Print();
+
+                results.PrintDump();
+
+                Assert.That(results[0].LastName, Is.EqualTo("Cobain"));
+            }
+        }
     }
 }
