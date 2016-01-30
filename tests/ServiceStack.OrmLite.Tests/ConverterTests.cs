@@ -57,7 +57,7 @@ namespace ServiceStack.OrmLite.Tests
                 var updatedRows = 3.Times(i =>
                 {
                     var updated = AllTypes.Create(i + 3);
-                    updated.Id = i;
+                    updated.Id = i + 1;
                     db.Update(updated);
                     return updated;
                 });
