@@ -1,13 +1,38 @@
 using System;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
+using ServiceStack.DataAnnotations;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.MySql.Tests
 {
+    public class MaxStringTest
+    {
+        public int Id { get; set; }
+
+        [StringLength(int.MaxValue)]
+        public string MaxText { get; set; }
+
+        [CustomField("MEDIUMTEXT")]
+        public string MediumText { get; set; }
+    }
+
 	[TestFixture]
 	public class OrmLiteCreateTableTests 
 		: OrmLiteTestBase
 	{
+	    [Test]
+	    public void Can_create_table_with_MaxString_and_Custom_MediumText()
+	    {
+	        using (var db = OpenDbConnection())
+	        {
+                db.DropAndCreateTable<MaxStringTest>();
+
+                //var sql = db.GetLastSql();
+                //Assert.That(sql, Is.StringContaining("`MaxText` LONGTEXT NULL"));
+                //Assert.That(sql, Is.StringContaining("`MediumText` MEDIUMTEXT NULL"));
+	        }
+	    }
 
 		[Test]
 		public void Can_create_ModelWithIdOnly_table()
