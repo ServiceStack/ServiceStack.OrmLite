@@ -1,5 +1,7 @@
+using System;
 using System.Data;
 using System.Data.SQLite;
+using ServiceStack.OrmLite.Sqlite.Converters;
 
 namespace ServiceStack.OrmLite.Sqlite
 {
@@ -8,9 +10,10 @@ namespace ServiceStack.OrmLite.Sqlite
         // what's the purpose of this Instance field? (It's like a pseudo-wanna-be singleton?)
         public static SqliteOrmLiteDialectProvider Instance = new SqliteOrmLiteDialectProvider();
 
-        public SqliteOrmLiteDialectProvider()
+        public SqliteOrmLiteDialectProvider() : base()
         {
             OrmLiteConfig.DeoptimizeReader = true;
+            base.RegisterConverter<DateTime>(new SqliteWindowsDateTimeConverter());
         }
 
         protected override IDbConnection CreateConnection(string connectionString)
