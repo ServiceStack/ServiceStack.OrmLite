@@ -1,4 +1,5 @@
 ﻿using System;
+using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.Converters
 {
@@ -8,6 +9,10 @@ namespace ServiceStack.OrmLite.Converters
 
         public override string ToQuotedString(Type fieldType, object value)
         {
+            var isEnumAsInt = fieldType.HasAttribute<EnumAsIntAttribute>();
+            if (isEnumAsInt)
+                return this.ConvertNumber(fieldType.GetEnumUnderlyingType(), value).ToString();
+
             var isEnumFlags = fieldType.IsEnumFlags() ||
                 (!fieldType.IsEnum && fieldType.IsNumericType()); //i.e. is real int && not Enum
 
@@ -26,16 +31,17 @@ namespace ServiceStack.OrmLite.Converters
 
         public override object ToDbValue(Type fieldType, object value)
         {
-            var isEnumFlags = fieldType.IsEnumFlags() ||
+            var isIntEnum = fieldType.IsEnumFlags() || 
+                fieldType.HasAttribute<EnumAsIntAttribute>() ||
                 (!fieldType.IsEnum && fieldType.IsNumericType()); //i.e. is real int && not Enum
 
-            if (isEnumFlags && value.GetType().IsEnum)
+            if (isIntEnum && value.GetType().IsEnum)
                 return Convert.ChangeType(value, fieldType.GetTypeCode());
 
             long enumValue;
             if (long.TryParse(value.ToString(), out enumValue))
             {
-                if (isEnumFlags)
+                if (isIntEnum)
                     return enumValue;
 
                 value = Enum.ToObject(fieldType, enumValue);
