@@ -113,13 +113,9 @@ namespace ServiceStack.OrmLite
                     ? Nullable.GetUnderlyingType(propertyInfo.PropertyType)
                     : propertyInfo.PropertyType;
 
-                var isEnumAsInt = propertyInfo.HasAttribute<EnumAsIntAttribute>();
-
                 Type treatAsType = null;
-                if (isEnumAsInt || propertyType.IsEnumFlags())
-                {
+                if (propertyType.IsEnumFlags())
                     treatAsType = Enum.GetUnderlyingType(propertyType);
-                }
 
                 var aliasAttr = propertyInfo.FirstAttribute<AliasAttribute>();
 
