@@ -300,8 +300,7 @@ namespace ServiceStack.OrmLite
 
         public virtual IOrmLiteConverter GetConverterBestMatch(FieldDefinition fieldDef)
         {
-            //var fieldType = Nullable.GetUnderlyingType(fieldDef.FieldType) ?? fieldDef.FieldType;
-            var fieldType = Nullable.GetUnderlyingType(fieldDef.ColumnType) ?? fieldDef.ColumnType;
+            var fieldType = Nullable.GetUnderlyingType(fieldDef.FieldType) ?? fieldDef.FieldType;
 
             if (fieldDef.IsRowVersion)
                 return RowVersionConverter;
