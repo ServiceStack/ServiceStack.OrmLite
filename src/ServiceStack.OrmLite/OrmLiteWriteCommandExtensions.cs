@@ -341,6 +341,7 @@ namespace ServiceStack.OrmLite
                         else
                         {
                             var fieldValue = converter.FromDbValue(fieldDef.FieldType, value);
+                            //var fieldValue = converter.FromDbValue(fieldDef.ColumnType, value);
                             fieldDef.SetValueFn(objWithProperties, fieldValue);
                         }
                     }

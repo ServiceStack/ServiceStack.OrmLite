@@ -6,7 +6,7 @@ namespace ServiceStack.OrmLite
     public interface IOrmLiteConverter
     {
         IOrmLiteDialectProvider DialectProvider { get; set; }
-        
+
         DbType DbType { get; }
 
         string ColumnDefinition { get; }
@@ -89,7 +89,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public virtual object GetValue(IDataReader reader, int columnIndex, object[] values)
         {
-            var value = values != null 
+            var value = values != null
                 ? values[columnIndex]
                 : reader.GetValue(columnIndex);
 
@@ -119,6 +119,10 @@ namespace ServiceStack.OrmLite
         {
             if (value.GetType() == toIntegerType)
                 return value;
+
+            // this is used for a field / property with EnumAsInt attribute
+            if (toIntegerType.IsEnum)
+                return Enum.Parse(toIntegerType, value.ToString());
 
             var typeCode = toIntegerType.GetUnderlyingTypeCode();
             switch (typeCode)

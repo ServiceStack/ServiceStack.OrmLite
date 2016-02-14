@@ -120,7 +120,7 @@
     <Compile Include="NamingStrategy.cs" />
     <Compile Include="OrmLiteCommand.cs" />
     <Compile Include="OrmLiteContext.cs" />
-    <Compile Include="OrmLiteEnumAsIntAttribute.cs" />
+    <Compile Include="EnumAsIntAttribute.cs" />
     <Compile Include="OrmLiteReadApiAsync.cs" />
     <Compile Include="Async\OrmLiteReadCommandExtensionsAsync.cs" />
     <Compile Include="Async\OrmLiteResultsFilterExtensionsAsync.cs" />

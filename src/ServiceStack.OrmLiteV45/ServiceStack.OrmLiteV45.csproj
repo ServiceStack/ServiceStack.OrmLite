@@ -193,9 +193,6 @@
     <Compile Include="..\ServiceStack.OrmLite\OrmLiteDialectProviderExtensions.cs">
       <Link>OrmLiteDialectProviderExtensions.cs</Link>
     </Compile>
-    <Compile Include="..\ServiceStack.OrmLite\OrmLiteEnumAsIntAttribute.cs">
-      <Link>OrmLiteEnumAsIntAttribute.cs</Link>
-    </Compile>
     <Compile Include="..\ServiceStack.OrmLite\OrmLiteExecFilter.cs">
       <Link>OrmLiteExecFilter.cs</Link>
     </Compile>
@@ -280,6 +277,7 @@
     <Compile Include="..\ServiceStack.OrmLite\UntypedApi.cs">
       <Link>UntypedApi.cs</Link>
     </Compile>
+    <Compile Include="EnumAsIntAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />

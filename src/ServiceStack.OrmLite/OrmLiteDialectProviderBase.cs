@@ -300,6 +300,7 @@ namespace ServiceStack.OrmLite
 
         public virtual IOrmLiteConverter GetConverterBestMatch(FieldDefinition fieldDef)
         {
+            // use ColumnType rather than FieldType for EnumAsInt
             //var fieldType = Nullable.GetUnderlyingType(fieldDef.FieldType) ?? fieldDef.FieldType;
             var fieldType = Nullable.GetUnderlyingType(fieldDef.ColumnType) ?? fieldDef.ColumnType;
 
@@ -821,7 +822,8 @@ namespace ServiceStack.OrmLite
             var converter = GetConverterBestMatch(fieldDef);
             try
             {
-                return converter.ToDbValue(fieldDef.FieldType, value);
+                //return converter.ToDbValue(fieldDef.FieldType, value);
+                return converter.ToDbValue(fieldDef.ColumnType, value);
             }
             catch (Exception ex)
             {

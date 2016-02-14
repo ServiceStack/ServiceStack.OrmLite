@@ -15,6 +15,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using ServiceStack.DataAnnotations;
+using ServiceStack.Interfaces;
 
 namespace ServiceStack.OrmLite
 {

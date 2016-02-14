@@ -8,6 +8,7 @@ using System.Text;
 using System.Collections.ObjectModel;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
+using ServiceStack.Interfaces;
 
 namespace ServiceStack.OrmLite
 {
@@ -1135,6 +1136,12 @@ namespace ServiceStack.OrmLite
                 if (rightNeedsCoercing)
                 {
                     var rightPartialSql = right as PartialSqlString;
+
+                    // if property has EnumAsInt attribute, just return the int value as a string
+                    // rather than trying to parse it to an enum value
+                    if (leftEnum.IsEnumAsInt && rightPartialSql == null && right is int)
+                        rightPartialSql = new PartialSqlString(right.ToString());
+
                     if (rightPartialSql == null)
                     {
                         right = GetValue(right, leftEnum.EnumType);
@@ -1143,6 +1150,10 @@ namespace ServiceStack.OrmLite
                 else if (leftNeedsCoercing)
                 {
                     var leftPartialSql = left as PartialSqlString;
+
+                    if (rightEnum.IsEnumAsInt && leftPartialSql == null && left is int)
+                        leftPartialSql = new PartialSqlString(left.ToString());
+
                     if (leftPartialSql == null)
                     {
                         left = DialectProvider.GetQuotedValue(left, rightEnum.EnumType);
@@ -1200,6 +1211,9 @@ namespace ServiceStack.OrmLite
         private object GetMemberExpression(MemberExpression m)
         {
             var propertyInfo = m.Member as PropertyInfo;
+            var isEnumAsInt = propertyInfo == null
+                ? false
+                : propertyInfo.GetCustomAttributes(true).Any(attribute => attribute is EnumAsIntAttribute);
 
             var modelType = m.Expression.Type;
             if (m.Expression.NodeType == ExpressionType.Convert)
@@ -1216,8 +1230,9 @@ namespace ServiceStack.OrmLite
             var tableDef = modelType.GetModelDefinition();
 
             if (propertyInfo != null && propertyInfo.PropertyType.IsEnum)
-                return new EnumMemberAccess(
-                    GetQuotedColumnName(tableDef, m.Member.Name), propertyInfo.PropertyType);
+                return new EnumMemberAccess(GetQuotedColumnName(tableDef, m.Member.Name), 
+                    propertyInfo.PropertyType,
+                    isEnumAsInt);
 
             return new PartialSqlString(GetQuotedColumnName(tableDef, m.Member.Name));
         }
@@ -1820,15 +1835,17 @@ namespace ServiceStack.OrmLite
 
     public class EnumMemberAccess : PartialSqlString
     {
-        public EnumMemberAccess(string text, Type enumType)
+        public EnumMemberAccess(string text, Type enumType, bool isEnumAsInt = false)
             : base(text)
         {
             if (!enumType.IsEnum) throw new ArgumentException("Type not valid", "enumType");
 
             EnumType = enumType;
+            IsEnumAsInt = isEnumAsInt;
         }
 
         public Type EnumType { get; private set; }
+        public bool IsEnumAsInt { get; private set; }
     }
 
     public class OrmLiteDataParameter : IDbDataParameter
