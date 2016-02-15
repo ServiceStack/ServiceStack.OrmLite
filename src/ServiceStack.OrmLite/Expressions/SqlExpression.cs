@@ -117,6 +117,35 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Set the specified selectExpression using matching fields.
+        /// </summary>
+        /// <param name='fields'>
+        /// Matching Fields: "SomeField1, SomeField2"
+        /// </param>
+        public virtual SqlExpression<T> Select(string[] fields)
+        {
+            if (fields == null || fields.Length == 0)
+                return Select(string.Empty);
+
+            var sb = new StringBuilder();
+            foreach (var field in fields)
+            {
+                var match = FirstMatchingField(field);
+                if (match == null)
+                    continue;
+
+                var qualifiedName = DialectProvider.GetQuotedColumnName(match.Item1, match.Item2);
+
+                if (sb.Length > 0)
+                    sb.Append(", ");
+
+                sb.Append(qualifiedName);
+            }
+
+            return UnsafeSelect(sb.ToString());
+        }
+
+        /// <summary>
         /// Fields to be selected.
         /// </summary>
         /// <param name='fields'>

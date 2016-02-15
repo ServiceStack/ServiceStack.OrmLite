@@ -79,4 +79,28 @@ namespace ServiceStack.OrmLite.Tests.Shared
         public int Id { get; set; }
     }
 
+    public class RockstarAlbum
+    {
+        public static RockstarAlbum[] SeedAlbums = new[] {
+            new RockstarAlbum { RockstarId = 1, Name = "Electric Ladyland" },
+            new RockstarAlbum { RockstarId = 4, Name = "Nevermind" },
+            new RockstarAlbum { RockstarId = 6, Name = "Thriller" },
+        };
+
+        [AutoIncrement]
+        public int Id { get; set; }
+        public int RockstarId { get; set; }
+        public string Name { get; set; }
+    }
+
+    public class PersonWithAlbum
+    {
+        public int Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public int Age { get; set; }
+        public int RockstarId { get; set; }
+        public string RockstarAlbumName { get; set; }
+    }
+
 }

@@ -56,5 +56,68 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 Assert.That(results[0].LastName, Is.EqualTo("Cobain"));
             }
         }
+
+        [Test]
+        public void Can_select_partial_list_of_fields()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Person>();
+                db.InsertAll(Person.Rockstars);
+
+                var results = db.Select(db.From<Person>().Select(new[] { "Id", "FirstName", "Age" }));
+
+                db.GetLastSql().Print();
+
+                Assert.That(results.All(x => x.Id > 0));
+                Assert.That(results.All(x => x.FirstName != null));
+                Assert.That(results.All(x => x.LastName == null));
+                Assert.That(results.Any(x => x.Age > 0));
+            }
+        }
+
+        [Test]
+        public void Does_ignore_invalid_fields()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Person>();
+                db.InsertAll(Person.Rockstars);
+
+                var results = db.Select(db.From<Person>().Select(new[] { null, "Id", "unknown", "FirstName", "Age" }));
+
+                db.GetLastSql().Print();
+
+                Assert.That(results.All(x => x.Id > 0));
+                Assert.That(results.All(x => x.FirstName != null));
+                Assert.That(results.All(x => x.LastName == null));
+                Assert.That(results.Any(x => x.Age > 0));
+            }
+        }
+
+        [Test]
+        public void Can_select_fields_from_joined_table()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Person>();
+                db.InsertAll(Person.Rockstars);
+                db.DropAndCreateTable<RockstarAlbum>();
+                db.InsertAll(RockstarAlbum.SeedAlbums);
+
+                var q = db.From<Person>()
+                    .Join<RockstarAlbum>((p,a) => p.Id == a.RockstarId)
+                    .Select(new[] { "Id", "FirstName", "Age", "RockstarAlbumName" });
+
+                var results = db.Select<PersonWithAlbum>(q);
+
+                db.GetLastSql().Print();
+
+                Assert.That(results.All(x => x.Id > 0));
+                Assert.That(results.All(x => x.FirstName != null));
+                Assert.That(results.All(x => x.LastName == null));
+                Assert.That(results.Any(x => x.Age > 0));
+            }
+        }
     }
 }
