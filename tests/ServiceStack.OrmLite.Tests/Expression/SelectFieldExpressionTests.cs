@@ -116,7 +116,9 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 Assert.That(results.All(x => x.Id > 0));
                 Assert.That(results.All(x => x.FirstName != null));
                 Assert.That(results.All(x => x.LastName == null));
-                Assert.That(results.Any(x => x.Age > 0));
+                Assert.That(results.All(x => x.Age > 0));
+                Assert.That(results.All(x => x.RockstarId == 0));
+                Assert.That(results.All(x => x.RockstarAlbumName != null));
             }
         }
     }

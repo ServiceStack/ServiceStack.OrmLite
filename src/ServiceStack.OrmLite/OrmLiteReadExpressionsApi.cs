@@ -159,7 +159,7 @@ namespace ServiceStack.OrmLite
             if (expression.Params != null && expression.Params.Any())
                 return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(expression.SelectInto<T>(), expression.Params.ToDictionary(param => param.ParameterName, param => param.Value)));
 
-            return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(expression.SelectInto<T>()));
+            return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(expression.SelectInto<T>(), expression.Params));
         }
 
         /// <summary>
