@@ -267,6 +267,8 @@ namespace ServiceStack.OrmLite
 
         public IOrmLiteConverter GetConverter(Type type)
         {
+            type = Nullable.GetUnderlyingType(type) ?? type;
+
             IOrmLiteConverter converter;
             return Converters.TryGetValue(type, out converter)
                 ? converter
