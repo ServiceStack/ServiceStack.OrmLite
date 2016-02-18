@@ -374,6 +374,14 @@ namespace ServiceStack.OrmLite.SqlServerTests.Expressions
                 expected = db.Select<Author>(x => x.Active == false).Count;
                 rows = db.Delete<Author>(x => x.Active == false);
                 Assert.AreEqual(expected, rows);
+
+                // Sql.In(empty array) and Sql.In(null) should evaluate to false rather than failing
+
+                expected = 0;
+                result = db.Select<Author>(rn => Sql.In(rn.City, new string[0]));
+                Assert.AreEqual(expected, result.Count);
+                result = db.Select<Author>(rn => Sql.In(rn.City, (string[])null));
+                Assert.AreEqual(expected, result.Count);
             }
         }
     }
