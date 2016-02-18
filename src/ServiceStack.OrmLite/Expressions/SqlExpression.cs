@@ -1663,10 +1663,16 @@ namespace ServiceStack.OrmLite
             var lambda = Expression.Lambda<Func<object>>(member);
             var getter = lambda.Compile();
             var argValue = getter();
+
+            if (argValue == null)
+                return "(1=0)"; // "column IN (NULL)" is always false
+
             var enumerableArg = argValue as IEnumerable;
             if (enumerableArg != null)
             {
                 var inArgs = Sql.Flatten(getter() as IEnumerable);
+                if (inArgs.Count == 0)
+                    return "(1=0)"; // "column IN ([])" is always false
 
                 var sIn = new StringBuilder();
                 foreach (var e in inArgs)
