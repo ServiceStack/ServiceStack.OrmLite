@@ -16,7 +16,7 @@
     <iconUrl>https://servicestack.net/img/logo-32.png</iconUrl>
     <tags>PostgreSQL Postgres OrmLite POCO Code-First Orm Schema-less Blobs</tags>
     <language>en-US</language> 
-    <copyright>Copyright 2015 Service Stack</copyright>
+    <copyright>Copyright 2016 Service Stack</copyright>
     <dependencies>
       <dependency id="Npgsql" version="3.0.5" />
       <dependency id="ServiceStack.OrmLite" version="4.0" />
