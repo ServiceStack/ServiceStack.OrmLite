@@ -210,6 +210,9 @@ namespace ServiceStack.OrmLite
 
         public static string SqlFmt(this string sqlText, IOrmLiteDialectProvider dialect, params object[] sqlParams)
         {
+            if (sqlParams.Length == 0)
+                return sqlText;
+
             var escapedParams = new List<string>();
             foreach (var sqlParam in sqlParams)
             {
