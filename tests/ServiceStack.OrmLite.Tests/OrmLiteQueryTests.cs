@@ -185,7 +185,11 @@ namespace ServiceStack.OrmLite.Tests
                 notes = db.Select<Note>("SchemaUri".SqlColumn() + "={0}schemaUri".Fmt(OrmLiteConfig.DialectProvider.ParamString), new { schemaUri = "tcm:0-0-0" });
                 Assert.That(notes[0].Id, Is.EqualTo(note.Id));
                 Assert.That(notes[0].NoteText, Is.EqualTo(note.NoteText));
-            }            
+
+                notes = db.Select<Note>(x => x.SchemaUri == "tcm:0-0-0");
+                Assert.That(notes[0].Id, Is.EqualTo(note.Id));
+                Assert.That(notes[0].NoteText, Is.EqualTo(note.NoteText));
+            }
         }
 
         class NoteDto
@@ -265,6 +269,30 @@ OrmLiteConfig.DialectProvider.GetParam("schemaUri"));
                 Assert.That(customers[1].CustomerId, Is.EqualTo(2));
                 Assert.That(customers[1].CustomerName, Is.EqualTo("Jane"));
                 Assert.That(customers[1].Customer_Birth_Date, Is.EqualTo(new DateTime(1980, 01, 01)));
+            }
+        }
+
+        [Test]
+        public void Can_query_column_as_nullable()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Note>();
+
+                var id = db.Insert(new Note
+                {
+                    SchemaUri = "tcm:0-0-0",
+                    NoteText = "Hello world 5",
+                    LastUpdated = new DateTime(2013, 1, 5),
+                    UpdatedBy = "RC"
+                }, selectIdentity: true);
+
+                var result = db.Column<long?>(db
+                    .From<Note>()
+                    .Where(x => x.NoteText != null)
+                    .Select(x => x.Id));
+                Assert.That(result, Has.Count.EqualTo(1));
+                Assert.That(result[0], Is.EqualTo(id));
             }
         }
     }
