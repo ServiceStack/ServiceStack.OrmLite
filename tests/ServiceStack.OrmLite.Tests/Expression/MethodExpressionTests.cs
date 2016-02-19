@@ -18,7 +18,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
             {
                 db.Select<TestType>(x => ints.Contains(x.Id));
 
-                Assert.That(db.GetLastSql(), Is.StringContaining("(1,2,3)"));
+                Assert.That(db.GetLastSql(), Is.StringContaining("(@0,@1,@2)"));
             }
         }
 
@@ -31,7 +31,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
             {
                 db.Select<TestType>(x => ints.Contains(x.Id));
 
-                Assert.That(db.GetLastSql(), Is.StringContaining("(1,2,3)"));
+                Assert.That(db.GetLastSql(), Is.StringContaining("(@0,@1,@2)"));
             }
         }
 

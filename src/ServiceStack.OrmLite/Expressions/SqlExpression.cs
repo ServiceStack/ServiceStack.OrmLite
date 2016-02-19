@@ -268,18 +268,8 @@ namespace ServiceStack.OrmLite
 
                 if (sqlParams != null)
                 {
-                    var sbParams = new StringBuilder();
-                    foreach (var item in sqlParams.GetValues())
-                    {
-                        var p = AddParam(item);
-
-                        if (sbParams.Length > 0)
-                            sbParams.Append(",");
-
-                        sbParams.Append(p.ParameterName);
-                    }
-
-                    sqlFilter = sqlFilter.Replace(pLiteral, sbParams.ToString());
+                    var sqlIn = CreateInParamSql(sqlParams.GetValues());
+                    sqlFilter = sqlFilter.Replace(pLiteral, sqlIn);
                 }
                 else
                 {
@@ -288,6 +278,22 @@ namespace ServiceStack.OrmLite
                 }
             }
             return sqlFilter;
+        }
+
+        private string CreateInParamSql(IEnumerable values)
+        {
+            var sbParams = new StringBuilder();
+            foreach (var item in values)
+            {
+                var p = AddParam(item);
+
+                if (sbParams.Length > 0)
+                    sbParams.Append(",");
+
+                sbParams.Append(p.ParameterName);
+            }
+            var sqlIn = sbParams.ToString();
+            return sqlIn;
         }
 
         public virtual SqlExpression<T> UnsafeWhere(string rawSql, params object[] filterParams)
@@ -1599,23 +1605,28 @@ namespace ServiceStack.OrmLite
 
             var inArgs = Sql.Flatten(getter() as IEnumerable);
 
-            var sIn = new StringBuilder();
+            string sqlIn = "NULL";
             if (inArgs.Count > 0)
             {
-                foreach (object e in inArgs)
+                var sIn = new StringBuilder();
+                if (OrmLiteConfig.UseParameterizeSqlExpressions)
                 {
-                    if (sIn.Length > 0)
-                        sIn.Append(",");
+                    sqlIn = CreateInParamSql(inArgs);
+                }
+                else
+                {
+                    foreach (object e in inArgs)
+                    {
+                        if (sIn.Length > 0)
+                            sIn.Append(",");
 
-                    sIn.Append(DialectProvider.GetQuotedValue(e, e.GetType()));
+                        sIn.Append(DialectProvider.GetQuotedValue(e, e.GetType()));
+                    }
+                    sqlIn = sIn.ToString();
                 }
             }
-            else
-            {
-                sIn.Append("NULL");
-            }
 
-            var statement = string.Format("{0} {1} ({2})", quotedColName, "In", sIn);
+            var statement = string.Format("{0} {1} ({2})", quotedColName, "In", sqlIn);
             return new PartialSqlString(statement);
         }
 
@@ -1674,15 +1685,25 @@ namespace ServiceStack.OrmLite
                 if (inArgs.Count == 0)
                     return "(1=0)"; // "column IN ([])" is always false
 
-                var sIn = new StringBuilder();
-                foreach (var e in inArgs)
+                string sqlIn;
+                if (OrmLiteConfig.UseParameterizeSqlExpressions)
                 {
-                    if (sIn.Length > 0)
-                        sIn.Append(",");
-
-                    sIn.Append(DialectProvider.GetQuotedValue(e, e.GetType()));
+                    sqlIn = CreateInParamSql(inArgs);
                 }
-                return string.Format("{0} {1} ({2})", quotedColName, m.Method.Name, sIn);
+                else
+                {
+                    var sIn = new StringBuilder();
+                    foreach (var e in inArgs)
+                    {
+                        if (sIn.Length > 0)
+                            sIn.Append(",");
+
+                        sIn.Append(DialectProvider.GetQuotedValue(e, e.GetType()));
+                    }
+                    sqlIn = sIn.ToString();
+                }
+
+                return string.Format("{0} {1} ({2})", quotedColName, m.Method.Name, sqlIn);
             }
             
             var exprArg = argValue as ISqlExpression;
