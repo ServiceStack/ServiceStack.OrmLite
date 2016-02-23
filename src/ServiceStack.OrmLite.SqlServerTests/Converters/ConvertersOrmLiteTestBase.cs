@@ -27,7 +27,7 @@ namespace ServiceStack.OrmLite.SqlServerTests.Converters
 
                 var dialectProvider = SqlServerConverters.Configure(SqlServer2012Dialect.Provider);
 
-                Db = new OrmLiteConnection(new OrmLiteConnectionFactory(ConnectionString, dialectProvider));                
+                Db = new OrmLiteConnectionFactory(ConnectionString, dialectProvider).OpenDbConnection();                
             }
             catch (Exception ex)
             {
