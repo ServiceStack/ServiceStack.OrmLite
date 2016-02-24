@@ -296,7 +296,7 @@ namespace ServiceStack.OrmLite
                     if (values == null)
                         values = new object[reader.FieldCount];
 
-                    reader.GetValues(values);
+                    dialectProvider.GetValues(reader, values);
                 }
                 else
                 {
