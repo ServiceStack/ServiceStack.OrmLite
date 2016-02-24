@@ -365,6 +365,11 @@ namespace ServiceStack.OrmLite
             return reader.GetValue(columnIndex);
         }
 
+        public virtual int GetValues(IDataReader reader, object[] values)
+        {
+            return reader.GetValues(values);
+        }
+
         public abstract IDbConnection CreateConnection(string filePath, Dictionary<string, string> options);
 
         public virtual string GetQuotedValue(string paramValue)

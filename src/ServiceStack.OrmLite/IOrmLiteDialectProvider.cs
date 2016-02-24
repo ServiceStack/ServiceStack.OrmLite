@@ -70,6 +70,8 @@ namespace ServiceStack.OrmLite
 
         object GetValue(IDataReader reader, int columnIndex, Type type);
 
+        int GetValues(IDataReader reader, object[] values);
+
         IDbConnection CreateConnection(string filePath, Dictionary<string, string> options);
 
         string GetQuotedTableName(ModelDefinition modelDef);
