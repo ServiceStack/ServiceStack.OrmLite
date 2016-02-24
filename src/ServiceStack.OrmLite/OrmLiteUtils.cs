@@ -370,12 +370,21 @@ namespace ServiceStack.OrmLite
                 }
             }
 
-            foreach (var fieldDef in remainingFieldDefs)
+            if (remainingFieldDefs.Count > 0)
             {
-                var index = FindColumnIndex(reader, dialect, fieldDef);
-                if (index != NotFound)
+                var dbFieldMap = new Dictionary<string, int>();
+                for (var i = 0; i < reader.FieldCount; i++)
                 {
-                    cache.Add(Tuple.Create(fieldDef, index, dialect.GetConverterBestMatch(fieldDef)));
+                    dbFieldMap[reader.GetName(i)] = i;
+                }
+
+                foreach (var fieldDef in remainingFieldDefs)
+                {
+                    var index = FindColumnIndex(reader, dialect, fieldDef, dbFieldMap);
+                    if (index != NotFound)
+                    {
+                        cache.Add(Tuple.Create(fieldDef, index, dialect.GetConverterBestMatch(fieldDef)));
+                    }
                 }
             }
 
@@ -383,19 +392,18 @@ namespace ServiceStack.OrmLite
         }
 
         private const int NotFound = -1;
-        internal static int FindColumnIndex(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, FieldDefinition fieldDef)
+        internal static int FindColumnIndex(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, FieldDefinition fieldDef, Dictionary<string, int> dbFieldMap)
         {
             var index = NotFound;
-            index = reader.GetColumnIndex(dialectProvider, fieldDef.FieldName);
-            if (index == NotFound)
+            if (!dbFieldMap.TryGetValue(fieldDef.FieldName, out index))
             {
                 index = TryGuessColumnIndex(fieldDef.FieldName, reader);
             }
+
             // Try fallback to original field name when overriden by alias
             if (index == NotFound && fieldDef.Alias != null && !OrmLiteConfig.DisableColumnGuessFallback)
             {
-                index = reader.GetColumnIndex(dialectProvider, fieldDef.Name);
-                if (index == NotFound)
+                if (!dbFieldMap.TryGetValue(fieldDef.Name, out index))
                 {
                     index = TryGuessColumnIndex(fieldDef.Name, reader);
                 }
@@ -407,15 +415,15 @@ namespace ServiceStack.OrmLite
         private static readonly Regex AllowedPropertyCharsRegex = new Regex(@"[^0-9a-zA-Z_]",
             RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
-        private static int TryGuessColumnIndex(string fieldName, IDataReader dataReader)
+        private static int TryGuessColumnIndex(string fieldName, Dictionary<string, int> dbFieldMap)
         {
             if (OrmLiteConfig.DisableColumnGuessFallback)
                 return NotFound;
 
-            var fieldCount = dataReader.FieldCount;
-            for (var i = 0; i < fieldCount; i++)
+            foreach (var entry in dbFieldMap)
             {
-                var dbFieldName = dataReader.GetName(i);
+                var dbFieldName = entry.Key;
+                var i = entry.Value;
 
                 // First guess: Maybe the DB field has underscores? (most common)
                 // e.g. CustomerId (C#) vs customer_id (DB)
