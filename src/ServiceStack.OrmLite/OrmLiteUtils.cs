@@ -380,7 +380,7 @@ namespace ServiceStack.OrmLite
 
                 foreach (var fieldDef in remainingFieldDefs)
                 {
-                    var index = FindColumnIndex(reader, dialect, fieldDef, dbFieldMap);
+                    var index = FindColumnIndex(dialect, fieldDef, dbFieldMap);
                     if (index != NotFound)
                     {
                         cache.Add(Tuple.Create(fieldDef, index, dialect.GetConverterBestMatch(fieldDef)));
@@ -392,12 +392,12 @@ namespace ServiceStack.OrmLite
         }
 
         private const int NotFound = -1;
-        internal static int FindColumnIndex(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, FieldDefinition fieldDef, Dictionary<string, int> dbFieldMap)
+        internal static int FindColumnIndex(IOrmLiteDialectProvider dialectProvider, FieldDefinition fieldDef, Dictionary<string, int> dbFieldMap)
         {
             var index = NotFound;
             if (!dbFieldMap.TryGetValue(fieldDef.FieldName, out index))
             {
-                index = TryGuessColumnIndex(fieldDef.FieldName, reader);
+                index = TryGuessColumnIndex(fieldDef.FieldName, dbFieldMap);
             }
 
             // Try fallback to original field name when overriden by alias
@@ -405,7 +405,7 @@ namespace ServiceStack.OrmLite
             {
                 if (!dbFieldMap.TryGetValue(fieldDef.Name, out index))
                 {
-                    index = TryGuessColumnIndex(fieldDef.Name, reader);
+                    index = TryGuessColumnIndex(fieldDef.Name, dbFieldMap);
                 }
             }
 
