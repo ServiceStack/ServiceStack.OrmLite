@@ -394,22 +394,28 @@ namespace ServiceStack.OrmLite
         private const int NotFound = -1;
         internal static int FindColumnIndex(IOrmLiteDialectProvider dialectProvider, FieldDefinition fieldDef, Dictionary<string, int> dbFieldMap)
         {
-            var index = NotFound;
-            if (!dbFieldMap.TryGetValue(fieldDef.FieldName, out index))
-            {
-                index = TryGuessColumnIndex(fieldDef.FieldName, dbFieldMap);
-            }
+            int index;
+            var fieldName = dialectProvider.NamingStrategy.GetColumnName(fieldDef.FieldName);
+            if (dbFieldMap.TryGetValue(fieldName, out index))
+                return index;
+
+            index = TryGuessColumnIndex(fieldName, dbFieldMap);
+            if (index != NotFound)
+                return index;
 
             // Try fallback to original field name when overriden by alias
-            if (index == NotFound && fieldDef.Alias != null && !OrmLiteConfig.DisableColumnGuessFallback)
+            if (fieldDef.Alias != null && !OrmLiteConfig.DisableColumnGuessFallback)
             {
-                if (!dbFieldMap.TryGetValue(fieldDef.Name, out index))
-                {
-                    index = TryGuessColumnIndex(fieldDef.Name, dbFieldMap);
-                }
+                var alias = dialectProvider.NamingStrategy.GetColumnName(fieldDef.Name);
+                if (dbFieldMap.TryGetValue(alias, out index))
+                    return index;
+
+                index = TryGuessColumnIndex(alias, dbFieldMap);
+                if (index != NotFound)
+                    return index;
             }
 
-            return index;
+            return NotFound;
         }
 
         private static readonly Regex AllowedPropertyCharsRegex = new Regex(@"[^0-9a-zA-Z_]",
