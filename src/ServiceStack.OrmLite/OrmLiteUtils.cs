@@ -372,7 +372,7 @@ namespace ServiceStack.OrmLite
 
             if (remainingFieldDefs.Count > 0)
             {
-                var dbFieldMap = new Dictionary<string, int>();
+                var dbFieldMap = new Dictionary<string, int>(StringComparer.InvariantCultureIgnoreCase);
                 for (var i = 0; i < reader.FieldCount; i++)
                 {
                     dbFieldMap[reader.GetName(i)] = i;
