@@ -82,9 +82,13 @@ namespace ServiceStack.OrmLite.Tests
             {
                 Assert.That(sql, Is.StringContaining(" VARCHAR(1000000)"));
             }
-            else if (Dialect == Dialect.PostgreSql || Dialect == Dialect.MySql)
+            else if (Dialect == Dialect.PostgreSql)
             {
                 Assert.That(sql, Is.StringContaining(" TEXT"));
+            }
+            else if (Dialect == Dialect.MySql)
+            {
+                Assert.That(sql, Is.StringContaining(" LONGTEXT"));
             }
             else if (Dialect == Dialect.Oracle)
             {
@@ -123,9 +127,13 @@ namespace ServiceStack.OrmLite.Tests
             {
                 Assert.That(sql, Is.StringContaining(" NVARCHAR(1000000)"));
             }
-            else if (Dialect == Dialect.PostgreSql || Dialect == Dialect.MySql)
+            else if (Dialect == Dialect.PostgreSql)
             {
                 Assert.That(sql, Is.StringContaining(" TEXT"));
+            }
+            else if (Dialect == Dialect.MySql)
+            {
+                Assert.That(sql, Is.StringContaining(" LONGTEXT"));
             }
             else if (Dialect == Dialect.Oracle)
             {
