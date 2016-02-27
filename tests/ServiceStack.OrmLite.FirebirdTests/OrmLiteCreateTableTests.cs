@@ -144,7 +144,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_create_ModelWithIdAndName_table_with_specified_DefaultStringLength()
 		{
-			OrmLiteConfig.DialectProvider.DefaultStringLength = 255;
+			OrmLiteConfig.DialectProvider.GetStringConverter().StringLength = 255;
 			var createTableSql = OrmLiteConfig.DialectProvider.ToCreateTableStatement(typeof(ModelWithIdAndName));
 
 			Console.WriteLine("createTableSql: " + createTableSql);

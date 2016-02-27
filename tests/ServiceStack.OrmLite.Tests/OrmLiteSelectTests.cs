@@ -344,7 +344,11 @@ namespace ServiceStack.OrmLite.Tests
 		{
 			using (var db = OpenDbConnection())
 			{
-				var rows = db.SelectFmt<PocoFlag>("SELECT 1 as Flag");
+			    var fromDual = "";
+			    if (Dialect == Dialect.Firebird)
+			        fromDual = " FROM RDB$DATABASE";
+
+				var rows = db.SelectFmt<PocoFlag>("SELECT 1 as Flag" + fromDual);
 				Assert.That(rows[0].Flag);
 			}
 		}
@@ -360,8 +364,13 @@ namespace ServiceStack.OrmLite.Tests
 		{
 			using (var db = OpenDbConnection())
 			{
-				var rows = db.SelectFmt<PocoFlagWithId>("SELECT 1 as Id, 1 as Flag");
-				Assert.That(rows[0].Id, Is.EqualTo(1));
+                var fromDual = "";
+                if (Dialect == Dialect.Firebird)
+                    fromDual = " FROM RDB$DATABASE";
+
+                var rows = db.SelectFmt<PocoFlagWithId>("SELECT 1 as Id, 1 as Flag" + fromDual);
+
+                Assert.That(rows[0].Id, Is.EqualTo(1));
 				Assert.That(rows[0].Flag);
 			}
 		}
@@ -405,12 +414,27 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(row.Int, Is.EqualTo(fromDb.Int));
                 Assert.That(row.Long, Is.EqualTo(fromDb.Long));
                 Assert.That(row.Float, Is.EqualTo(fromDb.Float));
-                Assert.That(row.Double, Is.EqualTo(fromDb.Double));
+                Assert.That(row.Double, Is.EqualTo(fromDb.Double).Within(1d));
                 Assert.That(row.Decimal, Is.EqualTo(fromDb.Decimal));
             }
         }
 
-	    [TestCase(1E125)]
+        [Test]
+        public void Does_not_evaluate_SqlFmt_when_no_params()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<ModelWithIdAndName>();
+
+                db.Insert(new ModelWithIdAndName(1) { Name = "{test}" });
+
+                var rows = db.Select<ModelWithIdAndName>("Name = '{test}'");
+
+                Assert.That(rows.Count, Is.EqualTo(1));
+            }
+        }
+
+        [TestCase(1E125)]
 	    [TestCase(-1E125)]
 	    public void Does_return_large_double_values(double value)
 	    {
@@ -422,7 +446,9 @@ namespace ServiceStack.OrmLite.Tests
 	            var id = db.Insert(expected, true);
 	            var actual = db.SingleById<ModelWithDifferentNumTypes>(id);
 
-	            Assert.That(expected.Double, Is.EqualTo(actual.Double));
+	            Assert.That(expected.Double, Is.EqualTo(actual.Double).
+                                             Or.EqualTo(-9.9999999999999992E+124d).
+                                             Or.EqualTo(9.9999999999999992E+124d)); //Firebird
 	        }
 	    }
 	}

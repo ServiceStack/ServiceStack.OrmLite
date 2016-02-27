@@ -559,6 +559,7 @@ namespace ServiceStack.OrmLite.Tests
             var customers = db.Select<Customer>(q =>
                 q.Join<Order>()
                  .Where<Order>(o => o.Qty == 1)
+                 .OrderBy(x => x.Id)
                  .SelectDistinct());
 
             var orders = db.Select<Order>(o => o.Qty == 1);
@@ -588,7 +589,7 @@ namespace ServiceStack.OrmLite.Tests
             var id1 = db.Insert(new TABLE_1 { One = "A" }, selectIdentity: true);
             var id2 = db.Insert(new TABLE_1 { One = "B" }, selectIdentity: true);
 
-            db.Insert(new TABLE_2 { Three = "C", TableOneKey = (int) id1 });
+            db.Insert(new TABLE_2 { Three = "C", TableOneKey = (int)id1 });
 
             var q = db.From<TABLE_1>()
                       .Join<TABLE_2>();
@@ -597,15 +598,16 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(results.Count, Is.EqualTo(1));
             Assert.That(results[0].One, Is.EqualTo("A"));
 
-            var row3 = new TABLE_3 {
+            var row3 = new TABLE_3
+            {
                 Three = "3a",
-                TableTwo = new TABLE_2 
+                TableTwo = new TABLE_2
                 {
                     Three = "3b",
                     TableOneKey = (int)id1,
                 }
             };
-            db.Save(row3, references:true);
+            db.Save(row3, references: true);
 
             Assert.That(row3.TableTwoKey, Is.EqualTo(row3.TableTwo.Id));
 
@@ -670,14 +672,17 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_load_select_with_join_and_same_name_columns()
         {
+            //Doesn't have Schema dbo.
+            if (Dialect == Dialect.PostgreSql) return;
+
             // Drop tables in order that FK allows
             db.DropTable<ProjectTask>();
             db.DropTable<Project>();
             db.CreateTable<Project>();
             db.CreateTable<ProjectTask>();
 
-            db.Insert(new Project {Val = "test"});
-            db.Insert(new ProjectTask {Val = "testTask", ProjectId = 1});
+            db.Insert(new Project { Val = "test" });
+            db.Insert(new ProjectTask { Val = "testTask", ProjectId = 1 });
 
             var query = db.From<ProjectTask>()
                 .Join<ProjectTask, Project>((pt, p) => pt.ProjectId == p.Id);
@@ -800,7 +805,7 @@ namespace ServiceStack.OrmLite.Tests
         [AutoIncrement]
         public int Id { get; set; }
 
-        [References(typeof (Project))]
+        [References(typeof(Project))]
         public int ProjectId { get; set; }
 
         [Reference]

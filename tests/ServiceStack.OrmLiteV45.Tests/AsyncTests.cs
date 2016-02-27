@@ -51,7 +51,7 @@ namespace ServiceStack.OrmLite.Tests
                 }
                 catch (Exception ex)
                 {
-                    Assert.That(ex.Message, Is.StringContaining("Id").Or.StringContaining("NotExists"));
+                    Assert.That(ex.Message.ToLower(), Is.StringContaining("id").Or.StringContaining("notexists"));
                 }
 
                 try
@@ -61,7 +61,7 @@ namespace ServiceStack.OrmLite.Tests
                 }
                 catch (Exception ex)
                 {
-                    Assert.That(ex.Message, Is.StringContaining("Id").Or.StringContaining("NotExists"));
+                    Assert.That(ex.Message.ToLower(), Is.StringContaining("id").Or.StringContaining("notexists"));
                 }
 
                 try
@@ -75,7 +75,7 @@ namespace ServiceStack.OrmLite.Tests
                 catch (Exception ex)
                 {
                     var innerEx = ex.UnwrapIfSingleException();
-                    Assert.That(innerEx.Message, Is.StringContaining("Id").Or.StringContaining("NotExists"));
+                    Assert.That(innerEx.Message.ToLower(), Is.StringContaining("id").Or.StringContaining("notexists"));
                 }
 
                 try
@@ -89,7 +89,7 @@ namespace ServiceStack.OrmLite.Tests
                 catch (Exception ex)
                 {
                     var innerEx = ex.UnwrapIfSingleException();
-                    Assert.That(innerEx.Message, Is.StringContaining("Id").Or.StringContaining("NotExists"));
+                    Assert.That(innerEx.Message.ToLower(), Is.StringContaining("id").Or.StringContaining("notexists"));
                 }
             }
         }

@@ -52,6 +52,7 @@
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
+    <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\ServiceStack.OrmLite\Async\OrmLiteReadCommandExtensionsAsync.cs">
@@ -72,11 +73,50 @@
     <Compile Include="..\ServiceStack.OrmLite\Async\WriteExpressionCommandExtensionsAsync.cs">
       <Link>Async\WriteExpressionCommandExtensionsAsync.cs</Link>
     </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Converters\BoolConverter.cs">
+      <Link>Converters\BoolConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Converters\ByteArrayConverter.cs">
+      <Link>Converters\ByteArrayConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Converters\DateTimeConverter.cs">
+      <Link>Converters\DateTimeConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Converters\DateTimeOffsetConverter.cs">
+      <Link>Converters\DateTimeOffsetConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Converters\FloatConverters.cs">
+      <Link>Converters\FloatConverters.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Converters\GuidConverter.cs">
+      <Link>Converters\GuidConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Converters\IntegerConverters.cs">
+      <Link>Converters\IntegerConverters.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Converters\SpecialConverters.cs">
+      <Link>Converters\SpecialConverters.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Converters\StringConverter.cs">
+      <Link>Converters\StringConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Converters\TimeSpanAsIntConverter.cs">
+      <Link>Converters\TimeSpanAsIntConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\SqlMapper.Async.cs">
+      <Link>Dapper\SqlMapper.Async.cs</Link>
+    </Compile>
     <Compile Include="..\ServiceStack.OrmLite\Dapper\SqlMapper.cs">
       <Link>Dapper\SqlMapper.cs</Link>
     </Compile>
     <Compile Include="..\ServiceStack.OrmLite\DbTypes.cs">
       <Link>DbTypes.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Expressions\IUntypedSqlExpression.cs">
+      <Link>Expressions\IUntypedSqlExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Expressions\ParameterizedSqlExpression.cs">
+      <Link>Expressions\ParameterizedSqlExpression.cs</Link>
     </Compile>
     <Compile Include="..\ServiceStack.OrmLite\Expressions\ParameterRebinder.cs">
       <Link>Expressions\ParameterRebinder.cs</Link>
@@ -107,6 +147,9 @@
     </Compile>
     <Compile Include="..\ServiceStack.OrmLite\INamingStrategy.cs">
       <Link>INamingStrategy.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\IOrmLiteConverter.cs">
+      <Link>IOrmLiteConverter.cs</Link>
     </Compile>
     <Compile Include="..\ServiceStack.OrmLite\IOrmLiteDialectProvider.cs">
       <Link>IOrmLiteDialectProvider.cs</Link>
@@ -194,6 +237,9 @@
     </Compile>
     <Compile Include="..\ServiceStack.OrmLite\OrmLiteUtils.cs">
       <Link>OrmLiteUtils.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\OrmLiteVariables.cs">
+      <Link>OrmLiteVariables.cs</Link>
     </Compile>
     <Compile Include="..\ServiceStack.OrmLite\OrmLiteWriteApi.cs">
       <Link>OrmLiteWriteApi.cs</Link>

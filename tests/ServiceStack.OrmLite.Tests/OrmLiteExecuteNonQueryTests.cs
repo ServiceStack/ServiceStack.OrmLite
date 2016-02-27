@@ -22,9 +22,9 @@
 
                     var name = "Jane Doe";
 
-                    var affectedRows = db.ExecuteNonQuery("insert into Person (Name) Values (@name);", new {
-                        name
-                    });
+                    var affectedRows = db.ExecuteNonQuery(Dialect != Dialect.Firebird 
+                        ? "insert into Person (Name) Values (@name);" 
+                        : "insert into Person (Id, Name) Values (1, @name);", new { name });
 
                     var personId = db.Single<Person>(q => q.Name == name).Id;
 
@@ -45,15 +45,23 @@
                     var name1 = "Jane Doe";
                     var name2 = "john Smith";
 
-                    var affectedRows = db.ExecuteNonQuery(@"
-                                                insert into Person (Name)
-                                                Select @name1
-                                                Union
-                                                Select @name2", new
+                    int affectedRows = 0;
+                    if (Dialect != Dialect.Firebird)
                     {
-                        name1,
-                        name2
-                    });
+                        affectedRows = db.ExecuteNonQuery(@"
+                        INSERT INTO Person (Name)
+                        SELECT @name1
+                        UNION
+                        SELECT @name2", new { name1, name2 });
+                    }
+                    else
+                    {
+                        affectedRows = db.ExecuteNonQuery(@"
+                        INSERT INTO Person (Id, Name)
+                        SELECT 1, CAST(@name1 as VARCHAR(128)) FROM RDB$DATABASE
+                        UNION
+                        SELECT 2, CAST(@name2 as VARCHAR(128)) FROM RDB$DATABASE", new { name1, name2 });
+                    }
 
                     var rows = db.SqlColumn<Person>("select * from Person order by name");
 
@@ -147,10 +155,11 @@
 
                     var name = "Jane Doe";
 
-                    var affectedRows = db.ExecuteNonQuery("insert into Person (Name) Values (@name);", new Dictionary<string, object>
-                    {
-                        { "name", name }
-                    });
+                    var affectedRows = db.ExecuteNonQuery(Dialect != Dialect.Firebird
+                        ? "insert into Person (Name) Values (@name);"
+                        : "insert into Person (Id, Name) Values (1, @name);", new Dictionary<string, object> {
+                            { "name", name }
+                        });
 
                     var personId = db.Single<Person>(q => q.Name == name).Id;
 
@@ -171,15 +180,30 @@
                     var name1 = "Jane Doe";
                     var name2 = "john Smith";
 
-                    var affectedRows = db.ExecuteNonQuery(@"
-                                                insert into Person (Name)
-                                                Select @name1
-                                                Union
-                                                Select @name2", new Dictionary<string, object>
+                    int affectedRows;
+                    if (Dialect != Dialect.Firebird)
                     {
-                        { "name1", name1 },
-                        { "name2", name2 }
-                    });
+                        affectedRows = db.ExecuteNonQuery(@"
+                        INSERT INTO Person (Name)
+                        SELECT @name1
+                        UNION
+                        SELECT @name2", new Dictionary<string, object> {
+                            { "name1", name1 },
+                            { "name2", name2 }
+                        });
+                    }
+                    else
+                    {
+                        affectedRows = db.ExecuteNonQuery(@"
+                        INSERT INTO Person (Id, Name)
+                        SELECT 1, CAST(@name1 as VARCHAR(128)) FROM RDB$DATABASE
+                        UNION
+                        SELECT 2, CAST(@name2 as VARCHAR(128)) FROM RDB$DATABASE",
+                        new Dictionary<string, object> {
+                            { "name1", name1 },
+                            { "name2", name2 }
+                        });
+                    }
 
                     var rows = db.SqlColumn<Person>("select * from Person order by name");
 
@@ -275,11 +299,13 @@
 
                     var name = "Jane Doe";
 
-                    var sql = string.Format("insert into Person (Name) Values ('{0}');", name);
+                    var affectedRows = db.ExecuteNonQuery(Dialect != Dialect.Firebird
+                        ? "insert into Person (Name) Values ('{0}');".Fmt(name)
+                        : "insert into Person (Id, Name) Values (1, '{0}');".Fmt(name));
 
-                    var affectedRows = db.ExecuteNonQuery(sql);
-
-                    var personId = db.LastInsertId();
+                    var personId = Dialect != Dialect.Firebird
+                        ? db.LastInsertId()
+                        : 1;
 
                     var insertedRow = db.SingleById<Person>(personId);
 
@@ -298,14 +324,17 @@
                     var name1 = "Jane Doe";
                     var name2 = "john Smith";
 
-                    var sql = string.Format(@"insert into Person (Name) Select '{0}' Union Select '{1}'", name1, name2);
+                    var sql = Dialect != Dialect.Firebird
+                        ? "insert into Person (Name) Select '{0}' Union Select '{1}'".Fmt(name1, name2)
+                        : "insert into Person (Id, Name) Select 1, '{0}' FROM RDB$DATABASE Union Select 2, '{1}' FROM RDB$DATABASE"
+                            .Fmt(name1, name2);
 
                     var affectedRows = db.ExecuteNonQuery(sql);
 
                     var rows = db.SqlColumn<Person>("select * from Person order by name");
 
                     Assert.That(affectedRows, Is.EqualTo(2));
-                    Assert.That(rows[0].Name, Is.EqualTo(name1));
+                    Assert.That(rows[0].Name.TrimEnd(), Is.EqualTo(name1));
                     Assert.That(rows[1].Name, Is.EqualTo(name2));
 
                     var ids = db.SqlColumn<int>("select Id from Person order by Id");

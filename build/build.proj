@@ -93,11 +93,6 @@
       <OrmLiteFiles Include="$(SrcDir)/ServiceStack.OrmLite/bin/$(Configuration)/ServiceStack.OrmLite.*"></OrmLiteFiles>
       <OrmLiteFilesV45 Include="$(SrcDir)/ServiceStack.OrmLiteV45/bin/$(Configuration)/ServiceStack.OrmLite.*"></OrmLiteFilesV45>
 
-      <Sqlite32Files Include="$(SrcDir)/ServiceStack.OrmLite.Sqlite32/bin/$(Configuration)/ServiceStack.OrmLite.SqliteNET.*"></Sqlite32Files>
-      <Sqlite32Files Include="$(SrcDir)/ServiceStack.OrmLite.Sqlite32/bin/$(Configuration)/System.Data.SQLite.*"></Sqlite32Files>
-      <Sqlite64Files Include="$(SrcDir)/ServiceStack.OrmLite.Sqlite64/bin/$(Configuration)/ServiceStack.OrmLite.SqliteNET.*"></Sqlite64Files>
-      <Sqlite64Files Include="$(SrcDir)/ServiceStack.OrmLite.Sqlite64/bin/$(Configuration)/System.Data.SQLite.*"></Sqlite64Files>
-
       <SqliteWindowsFiles Include="$(SrcDir)/ServiceStack.OrmLite.Sqlite.Windows/bin/$(Configuration)/ServiceStack.OrmLite.Sqlite.Windows.*"></SqliteWindowsFiles>
 
       <SqliteMonoFiles Include="$(SrcDir)/ServiceStack.OrmLite.Sqlite/bin/$(Configuration)/ServiceStack.OrmLite.Sqlite.*"></SqliteMonoFiles>
@@ -108,15 +103,17 @@
 
       <SqlServerFiles Include="$(SrcDir)/ServiceStack.OrmLite.SqlServer/bin/$(Configuration)/ServiceStack.OrmLite.SqlServer.*"></SqlServerFiles>
       <SqlServerFilesV45 Include="$(SrcDir)/ServiceStack.OrmLite.SqlServerV45/bin/$(Configuration)/ServiceStack.OrmLite.SqlServer.*"></SqlServerFilesV45>
+      <SqlServerConverterFiles Include="$(SrcDir)/ServiceStack.OrmLite.SqlServer.Converters/bin/$(Configuration)/ServiceStack.OrmLite.SqlServer.Converters.*"></SqlServerConverterFiles>
 
       <MySqlFiles Include="$(SrcDir)/ServiceStack.OrmLite.MySql/bin/$(Configuration)/ServiceStack.OrmLite.MySql.*"></MySqlFiles>
       <MySqlFilesV45 Include="$(SrcDir)/ServiceStack.OrmLite.MySqlV45/bin/$(Configuration)/ServiceStack.OrmLite.MySql.*"></MySqlFilesV45>
 
       <PostgreSqlFiles Include="$(SrcDir)/ServiceStack.OrmLite.PostgreSQL/bin/$(Configuration)/ServiceStack.OrmLite.PostgreSQL.*"></PostgreSqlFiles>
+      <PostgreSqlFilesV45 Include="$(SrcDir)/ServiceStack.OrmLite.PostgreSQLV45/bin/$(Configuration)/ServiceStack.OrmLite.PostgreSQL.*"></PostgreSqlFilesV45>
+
       <OracleFiles Include="$(SrcDir)/ServiceStack.OrmLite.Oracle/bin/$(Configuration)/ServiceStack.OrmLite.Oracle.*"></OracleFiles>
       
       <FirebirdFiles Include="$(SrcDir)/ServiceStack.OrmLite.Firebird/bin/$(Configuration)/ServiceStack.OrmLite.Firebird.*"></FirebirdFiles>
-      <FirebirdFiles Include="$(SrcDir)/ServiceStack.OrmLite.Firebird/bin/$(Configuration)/FirebirdSql.Data.FirebirdClient.dll"></FirebirdFiles>
 
       <VistaDbFiles Include="$(SrcDir)/ServiceStack.OrmLite.VistaDb/bin/$(Configuration)/ServiceStack.OrmLite.VistaDB.*"></VistaDbFiles>
 
@@ -141,30 +138,6 @@
     <Copy SourceFiles="%(OrmLiteFilesV45.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite/lib/net45" />
 
     <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite/servicestack.ormlite.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
-            LogStandardErrorAsError="true" />
-
-    <!-- Sqlite32.NET -->
-
-    <MSBuild Projects="$(SrcDir)/ServiceStack.OrmLite.Sqlite32/ServiceStack.OrmLite.Sqlite32.csproj"
-             Targets="Build"
-             Properties="Version=$(PackageVersion);Configuration=$(Configuration)" />
-
-    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite32/lib/net40" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite32/lib/net40')" />
-    <Copy SourceFiles="%(Sqlite32Files.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite32/lib/net40" />
-    
-    <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite32/servicestack.ormlite.sqlite32.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
-            LogStandardErrorAsError="true" />
-
-    <!-- Sqlite64.NET -->
-
-    <MSBuild Projects="$(SrcDir)/ServiceStack.OrmLite.Sqlite64/ServiceStack.OrmLite.Sqlite64.csproj"
-             Targets="Build"
-             Properties="Version=$(PackageVersion);Configuration=$(Configuration)" />
-
-    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite64/lib/net40" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite64/lib/net40')" />
-    <Copy SourceFiles="%(Sqlite64Files.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite64/lib/net40" />
-
-    <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite64/servicestack.ormlite.sqlite64.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
             LogStandardErrorAsError="true" />
 
     <!-- Sqlite.Windows -->
@@ -223,6 +196,18 @@
     <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.SqlServer/servicestack.ormlite.sqlserver.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
             LogStandardErrorAsError="true" />
 
+    <!-- SqlServer.Converters -->
+
+    <MSBuild Projects="$(SrcDir)/ServiceStack.OrmLite.SqlServer.Converters/ServiceStack.OrmLite.SqlServer.Converters.csproj"
+            Targets="Build"
+            Properties="Version=$(PackageVersion);Configuration=$(Configuration)" />
+
+    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.SqlServer.Converters/lib/net40" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.SqlServer.Converters/lib/net40')" />
+    <Copy SourceFiles="%(SqlServerConverterFiles.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.SqlServer.Converters/lib/net40" />
+
+    <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.SqlServer.Converters/servicestack.ormlite.sqlserver.converters.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
+            LogStandardErrorAsError="true" />
+
     <!-- MySql -->
 
     <MSBuild Projects="$(SrcDir)/ServiceStack.OrmLite.MySql/ServiceStack.OrmLite.MySql.csproj"
@@ -251,9 +236,17 @@
 
     <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.PostgreSQL/lib/net40" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.PostgreSQL/lib/net40')" />
     <Copy SourceFiles="%(PostgreSqlFiles.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.PostgreSQL/lib/net40" />
-    
+
+    <!-- PostgreSQL .NET 4.5 -->
+    <MSBuild Projects="$(SrcDir)/ServiceStack.OrmLite.PostgreSQLV45/ServiceStack.OrmLite.PostgreSQLV45.csproj"
+            Targets="Build"
+            Properties="Version=$(PackageVersion);Configuration=$(Configuration)" />
+
+    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.PostgreSQL/lib/net45" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.PostgreSQL/lib/net45')" />
+    <Copy SourceFiles="%(PostgreSqlFilesV45.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.PostgreSQL/lib/net45" />
+
     <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.PostgreSQL/servicestack.ormlite.postgresql.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
-            LogStandardErrorAsError="true" />
+        LogStandardErrorAsError="true" />
 
     <!-- Oracle -->
 

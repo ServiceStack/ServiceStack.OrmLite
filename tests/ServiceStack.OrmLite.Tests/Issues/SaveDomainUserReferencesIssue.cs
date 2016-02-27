@@ -16,7 +16,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
         public Address HomeAddress { get; set; }
 
         [Reference]
-        public List<Order> Orders { get; set; }
+        public List<ProOrder> Orders { get; set; }
 
         [DataAnnotations.Ignore]
         public UserType UserTypeEnum
@@ -40,7 +40,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
         Domain = 2
     }
 
-    public class Order
+    public class ProOrder
     {
         [AutoIncrement]
         public int Id { get; set; }
@@ -60,9 +60,13 @@ namespace ServiceStack.OrmLite.Tests.Issues
         {
             using (var db = OpenDbConnection())
             {
-                db.DropAndCreateTable<DomainUser>();
-                db.DropAndCreateTable<Order>();
-                db.DropAndCreateTable<Address>();
+                db.DropTable<ProOrder>();
+                db.DropTable<Address>();
+                db.DropTable<DomainUser>();
+
+                db.CreateTable<DomainUser>();
+                db.CreateTable<ProOrder>();
+                db.CreateTable<Address>();
 
                 var user = new DomainUser
                 {
@@ -72,10 +76,10 @@ namespace ServiceStack.OrmLite.Tests.Issues
                     {
                         StreetName = "1 Street"
                     },
-                    Orders = new List<Order>
+                    Orders = new List<ProOrder>
                     {
-                        new Order { Details = "Order1 Details" },
-                        new Order { Details = "Order2 Details" },
+                        new ProOrder { Details = "Order1 Details" },
+                        new ProOrder { Details = "Order2 Details" },
                     }
                 };
 
@@ -97,7 +101,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
                 user.UserTypeEnum = UserType.Domain;
                 user.HomeAddress.StreetName = "Some new street";
                 user.Orders[1].Details = "Nestle Chocolates";
-                user.Orders.Add(new Order
+                user.Orders.Add(new ProOrder
                 {
                     ProUserId = user.Id,
                     Details = "Reese",

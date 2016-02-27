@@ -18,11 +18,14 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
             EstablishContext(10, expected);
 
-            var actual = OpenDbConnection().Select<TestType>(q => q.StringColumn.Contains(stringVal));
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => q.StringColumn.Contains(stringVal));
 
-            Assert.IsNotNull(actual);
-            Assert.AreEqual(1, actual.Count);
-            CollectionAssert.Contains(actual, expected);
+                Assert.IsNotNull(actual);
+                Assert.AreEqual(1, actual.Count);
+                CollectionAssert.Contains(actual, expected);
+            }
         }
 
         [Test]
@@ -39,11 +42,14 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
             EstablishContext(10, expected);
 
-            var actual = OpenDbConnection().Select<TestType>(q => q.StringColumn.Contains(stringVal));
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => q.StringColumn.Contains(stringVal));
 
-            Assert.IsNotNull(actual);
-            Assert.AreEqual(1, actual.Count);
-            CollectionAssert.Contains(actual, expected);
+                Assert.IsNotNull(actual);
+                Assert.AreEqual(1, actual.Count);
+                CollectionAssert.Contains(actual, expected);
+            }
         }
 
         [Test]
@@ -60,11 +66,14 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
             EstablishContext(10, expected);
 
-            var actual = OpenDbConnection().Select<TestType>(q => q.StringColumn.Contains(stringVal));
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => q.StringColumn.Contains(stringVal));
 
-            Assert.IsNotNull(actual);
-            Assert.AreEqual(1, actual.Count);
-            CollectionAssert.Contains(actual, expected);
+                Assert.IsNotNull(actual);
+                Assert.AreEqual(1, actual.Count);
+                CollectionAssert.Contains(actual, expected);
+            }
         }
 
         [Test]
@@ -81,11 +90,14 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
             EstablishContext(10, expected);
 
-            var actual = OpenDbConnection().Select<TestType>(q => q.StringColumn.Contains(stringVal));
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => q.StringColumn.Contains(stringVal));
 
-            Assert.IsNotNull(actual);
-            Assert.AreEqual(1, actual.Count);
-            CollectionAssert.Contains(actual, expected);
+                Assert.IsNotNull(actual);
+                Assert.AreEqual(1, actual.Count);
+                CollectionAssert.Contains(actual, expected);
+            }
         }
 
         [Test]
@@ -102,11 +114,14 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
             EstablishContext(10, expected);
 
-            var actual = OpenDbConnection().Select<TestType>(q => q.StringColumn.StartsWith(prefix));
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => q.StringColumn.StartsWith(prefix));
 
-            Assert.IsNotNull(actual);
-            Assert.AreEqual(1, actual.Count);
-            CollectionAssert.Contains(actual, expected);
+                Assert.IsNotNull(actual);
+                Assert.AreEqual(1, actual.Count);
+                CollectionAssert.Contains(actual, expected);
+            }
         }
 
         [Test]
@@ -123,11 +138,14 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
             EstablishContext(10, expected);
 
-            var actual = OpenDbConnection().Select<TestType>(q => q.StringColumn.StartsWith(prefix));
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => q.StringColumn.StartsWith(prefix));
 
-            Assert.IsNotNull(actual);
-            Assert.AreEqual(1, actual.Count);
-            CollectionAssert.Contains(actual, expected);
+                Assert.IsNotNull(actual);
+                Assert.AreEqual(1, actual.Count);
+                CollectionAssert.Contains(actual, expected);
+            }
         }
 
         [Test]
@@ -144,11 +162,14 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
             EstablishContext(10, expected);
 
-            var actual = OpenDbConnection().Select<TestType>(q => q.StringColumn.StartsWith(prefix));
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => q.StringColumn.StartsWith(prefix));
 
-            Assert.IsNotNull(actual);
-            Assert.AreEqual(1, actual.Count);
-            CollectionAssert.Contains(actual, expected);
+                Assert.IsNotNull(actual);
+                Assert.AreEqual(1, actual.Count);
+                CollectionAssert.Contains(actual, expected);
+            }
         }
 
         [Test]
@@ -165,11 +186,14 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
             EstablishContext(10, expected);
 
-            var actual = OpenDbConnection().Select<TestType>(q => q.StringColumn.StartsWith(prefix));
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => q.StringColumn.StartsWith(prefix));
 
-            Assert.IsNotNull(actual);
-            Assert.AreEqual(1, actual.Count);
-            CollectionAssert.Contains(actual, expected);
+                Assert.IsNotNull(actual);
+                Assert.AreEqual(1, actual.Count);
+                CollectionAssert.Contains(actual, expected);
+            }
         }
 
         [Test]
@@ -186,11 +210,14 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
             EstablishContext(10, expected);
 
-            var actual = OpenDbConnection().Select<TestType>(q => q.StringColumn.EndsWith(postfix));
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => q.StringColumn.EndsWith(postfix));
 
-            Assert.IsNotNull(actual);
-            Assert.AreEqual(1, actual.Count);
-            CollectionAssert.Contains(actual, expected);
+                Assert.IsNotNull(actual);
+                Assert.AreEqual(1, actual.Count);
+                CollectionAssert.Contains(actual, expected);
+            }
         }
 
         [Test]
@@ -207,11 +234,14 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
             EstablishContext(10, expected);
 
-            var actual = OpenDbConnection().Select<TestType>(q => q.StringColumn.EndsWith(postfix));
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => q.StringColumn.EndsWith(postfix));
 
-            Assert.IsNotNull(actual);
-            Assert.AreEqual(1, actual.Count);
-            CollectionAssert.Contains(actual, expected);
+                Assert.IsNotNull(actual);
+                Assert.AreEqual(1, actual.Count);
+                CollectionAssert.Contains(actual, expected);
+            }
         }
 
         [Test]
@@ -228,11 +258,14 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
             EstablishContext(10, expected);
 
-            var actual = OpenDbConnection().Select<TestType>(q => q.StringColumn.EndsWith(postfix));
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => q.StringColumn.EndsWith(postfix));
 
-            Assert.IsNotNull(actual);
-            Assert.AreEqual(1, actual.Count);
-            CollectionAssert.Contains(actual, expected);
+                Assert.IsNotNull(actual);
+                Assert.AreEqual(1, actual.Count);
+                CollectionAssert.Contains(actual, expected);
+            }
         }
 
         [Test]
@@ -249,11 +282,14 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
             EstablishContext(10, expected);
 
-            var actual = OpenDbConnection().Select<TestType>(q => q.StringColumn.EndsWith(postfix));
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => q.StringColumn.EndsWith(postfix));
 
-            Assert.IsNotNull(actual);
-            Assert.AreEqual(1, actual.Count);
-            CollectionAssert.Contains(actual, expected);
+                Assert.IsNotNull(actual);
+                Assert.AreEqual(1, actual.Count);
+                CollectionAssert.Contains(actual, expected);
+            }
         }
     }
 }

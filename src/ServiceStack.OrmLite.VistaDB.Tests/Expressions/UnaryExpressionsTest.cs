@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System.Data;
+using NUnit.Framework;
 
 namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
 {
@@ -9,7 +10,7 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
         [Test]
         public void Can_select_unary_plus_constant_expression()
         {
-            var expected = new TestType()
+            var expected = new TestType
             {
                 IntColumn = 12,
                 BoolColumn = true,
@@ -18,17 +19,20 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn == +12);
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => q.IntColumn == +12);
 
-            Assert.IsNotNull(actual);
-            Assert.AreEqual(1, actual.Count);
-            CollectionAssert.Contains(actual, expected);
+                Assert.IsNotNull(actual);
+                Assert.AreEqual(1, actual.Count);
+                CollectionAssert.Contains(actual, expected);
+            }
         }
 
         [Test]
         public void Can_select_unary_minus_constant_expression()
         {
-            var expected = new TestType()
+            var expected = new TestType
             {
                 IntColumn = -12,
                 BoolColumn = true,
@@ -37,17 +41,20 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn == -12);
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => q.IntColumn == -12);
 
-            Assert.IsNotNull(actual);
-            Assert.AreEqual(1, actual.Count);
-            CollectionAssert.Contains(actual, expected);
+                Assert.IsNotNull(actual);
+                Assert.AreEqual(1, actual.Count);
+                CollectionAssert.Contains(actual, expected);
+            }
         }
 
         [Test]
         public void Can_select_unary_not_constant_expression()
         {
-            var expected = new TestType()
+            var expected = new TestType
             {
                 IntColumn = 12,
                 BoolColumn = false,
@@ -56,17 +63,20 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = OpenDbConnection().Select<TestType>(q => q.BoolColumn == !true);
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => q.BoolColumn == !true);
 
-            Assert.IsNotNull(actual);
-            Assert.Greater(actual.Count, 0);
-            CollectionAssert.Contains(actual, expected);
+                Assert.IsNotNull(actual);
+                Assert.Greater(actual.Count, 0);
+                CollectionAssert.Contains(actual, expected);
+            }
         }
 
         [Test]
         public void Can_select_unary_not_constant_expression2()
         {
-            var expected = new TestType()
+            var expected = new TestType
             {
                 IntColumn = 12,
                 BoolColumn = false,
@@ -75,11 +85,14 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = OpenDbConnection().Select<TestType>(q => !q.BoolColumn);
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => !q.BoolColumn);
 
-            Assert.IsNotNull(actual);
-            Assert.Greater(actual.Count, 0);
-            CollectionAssert.Contains(actual, expected);
+                Assert.IsNotNull(actual);
+                Assert.Greater(actual.Count, 0);
+                CollectionAssert.Contains(actual, expected);
+            }
         }
 
         #endregion
@@ -93,7 +106,7 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
             var intVal = +12;
             // ReSharper restore ConvertToConstant.Local
 
-            var expected = new TestType()
+            var expected = new TestType
             {
                 IntColumn = 12,
                 BoolColumn = true,
@@ -102,11 +115,14 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn == intVal);
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => q.IntColumn == intVal);
 
-            Assert.IsNotNull(actual);
-            Assert.AreEqual(1, actual.Count);
-            CollectionAssert.Contains(actual, expected);
+                Assert.IsNotNull(actual);
+                Assert.AreEqual(1, actual.Count);
+                CollectionAssert.Contains(actual, expected);
+            }
         }
 
         [Test]
@@ -116,7 +132,7 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
             var intVal = -12;
             // ReSharper restore ConvertToConstant.Local
 
-            var expected = new TestType()
+            var expected = new TestType
             {
                 IntColumn = -12,
                 BoolColumn = true,
@@ -125,11 +141,14 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn == intVal);
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => q.IntColumn == intVal);
 
-            Assert.IsNotNull(actual);
-            Assert.AreEqual(1, actual.Count);
-            CollectionAssert.Contains(actual, expected);
+                Assert.IsNotNull(actual);
+                Assert.AreEqual(1, actual.Count);
+                CollectionAssert.Contains(actual, expected);
+            }
         }
 
         [Test]
@@ -139,7 +158,7 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
             var boolVal = true;
             // ReSharper restore ConvertToConstant.Local
 
-            var expected = new TestType()
+            var expected = new TestType
             {
                 IntColumn = 12,
                 BoolColumn = false,
@@ -148,11 +167,14 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = OpenDbConnection().Select<TestType>(q => q.BoolColumn == !boolVal);
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => q.BoolColumn == !boolVal);
 
-            Assert.IsNotNull(actual);
-            Assert.Greater(actual.Count, 0);
-            CollectionAssert.Contains(actual, expected);
+                Assert.IsNotNull(actual);
+                Assert.Greater(actual.Count, 0);
+                CollectionAssert.Contains(actual, expected);
+            }
         }
 
         [Test]
@@ -162,7 +184,7 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
             object intVal = 12;
             // ReSharper restore ConvertToConstant.Local
 
-            var expected = new TestType()
+            var expected = new TestType
             {
                 IntColumn = 12,
                 BoolColumn = true,
@@ -171,11 +193,14 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn == (int)intVal);
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => q.IntColumn == (int)intVal);
 
-            Assert.IsNotNull(actual);
-            Assert.AreEqual(1, actual.Count);
-            CollectionAssert.Contains(actual, expected);
+                Assert.IsNotNull(actual);
+                Assert.AreEqual(1, actual.Count);
+                CollectionAssert.Contains(actual, expected);
+            }
         }
 
         #endregion
@@ -185,7 +210,7 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
         [Test]
         public void Can_select_unary_not_method_expression()
         {
-            var expected = new TestType()
+            var expected = new TestType
             {
                 IntColumn = 12,
                 BoolColumn = false,
@@ -194,17 +219,20 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = OpenDbConnection().Select<TestType>(q => q.BoolColumn == !GetValue(true));
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => q.BoolColumn == !GetValue(true));
 
-            Assert.IsNotNull(actual);
-            Assert.Greater(actual.Count, 0);
-            CollectionAssert.Contains(actual, expected);
+                Assert.IsNotNull(actual);
+                Assert.Greater(actual.Count, 0);
+                CollectionAssert.Contains(actual, expected);
+            }
         }
 
         [Test]
         public void Can_select_unary_cast_method_expression()
         {
-            var expected = new TestType()
+            var expected = new TestType
             {
                 IntColumn = 12,
                 BoolColumn = true,
@@ -213,11 +241,14 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
 
             EstablishContext(10, expected);
 
-            var actual = OpenDbConnection().Select<TestType>(q => q.IntColumn == (int)GetValue((object)12));
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => q.IntColumn == (int)GetValue((object)12));
 
-            Assert.IsNotNull(actual);
-            Assert.AreEqual(1, actual.Count);
-            CollectionAssert.Contains(actual, expected);
+                Assert.IsNotNull(actual);
+                Assert.AreEqual(1, actual.Count);
+                CollectionAssert.Contains(actual, expected);
+            }
         }
 
         #endregion

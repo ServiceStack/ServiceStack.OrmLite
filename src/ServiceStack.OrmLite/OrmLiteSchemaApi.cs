@@ -76,18 +76,18 @@ namespace ServiceStack.OrmLite
         /// Only create a DB Table from the generic type if it doesn't already exist. E.g:
         /// <para>db.CreateTableIfNotExists&lt;Person&gt;()</para> 
         /// </summary>
-        public static void CreateTableIfNotExists<T>(this IDbConnection dbConn)
+        public static bool CreateTableIfNotExists<T>(this IDbConnection dbConn)
         {
-            dbConn.Exec(dbCmd => dbCmd.CreateTable<T>(false));
+            return dbConn.Exec(dbCmd => dbCmd.CreateTable<T>(overwrite:false));
         }
 
         /// <summary>
         /// Only create a DB Table from the runtime type if it doesn't already exist. E.g:
         /// <para>db.CreateTableIfNotExists(typeof(Person))</para> 
         /// </summary>
-        public static void CreateTableIfNotExists(this IDbConnection dbConn, Type modelType)
+        public static bool CreateTableIfNotExists(this IDbConnection dbConn, Type modelType)
         {
-            dbConn.Exec(dbCmd => dbCmd.CreateTable(false, modelType));
+            return dbConn.Exec(dbCmd => dbCmd.CreateTable(false, modelType));
         }
 
         /// <summary>

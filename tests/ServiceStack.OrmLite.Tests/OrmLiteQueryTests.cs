@@ -185,7 +185,11 @@ namespace ServiceStack.OrmLite.Tests
                 notes = db.Select<Note>("SchemaUri".SqlColumn() + "={0}schemaUri".Fmt(OrmLiteConfig.DialectProvider.ParamString), new { schemaUri = "tcm:0-0-0" });
                 Assert.That(notes[0].Id, Is.EqualTo(note.Id));
                 Assert.That(notes[0].NoteText, Is.EqualTo(note.NoteText));
-            }            
+
+                notes = db.Select<Note>(x => x.SchemaUri == "tcm:0-0-0");
+                Assert.That(notes[0].Id, Is.EqualTo(note.Id));
+                Assert.That(notes[0].NoteText, Is.EqualTo(note.NoteText));
+            }
         }
 
         class NoteDto
@@ -214,8 +218,9 @@ namespace ServiceStack.OrmLite.Tests
 SELECT
 Id, {0}, {1}
 FROM {2}
-WHERE {0}={3}schemaUri
-".Fmt("SchemaUri".SqlColumn(), "NoteText".SqlColumn(), "Note".SqlTable(), OrmLiteConfig.DialectProvider.ParamString);
+WHERE {0}={3}
+".Fmt("SchemaUri".SqlColumn(), "NoteText".SqlColumn(), "Note".SqlTable(), 
+OrmLiteConfig.DialectProvider.GetParam("schemaUri"));
 
                 var notes = db.Select<NoteDto>(sql, new { schemaUri = "tcm:0-0-0" });
                 Assert.That(notes[0].Id, Is.EqualTo(id));
@@ -241,6 +246,7 @@ WHERE {0}={3}schemaUri
         public void Can_query_CustomerDto_and_map_db_fields_not_identical_by_guessing_the_mapping(string field1Name, string field2Name, string field3Name)
         {
             SuppressIfOracle("Oracle provider is not smart enough to insert 'from dual' everywhere required in user supplied SQL");
+            if (Dialect == Dialect.Firebird) return; //Requires Generator
 
             using (var db = OpenDbConnection())
             {
@@ -263,6 +269,30 @@ WHERE {0}={3}schemaUri
                 Assert.That(customers[1].CustomerId, Is.EqualTo(2));
                 Assert.That(customers[1].CustomerName, Is.EqualTo("Jane"));
                 Assert.That(customers[1].Customer_Birth_Date, Is.EqualTo(new DateTime(1980, 01, 01)));
+            }
+        }
+
+        [Test]
+        public void Can_query_column_as_nullable()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Note>();
+
+                var id = db.Insert(new Note
+                {
+                    SchemaUri = "tcm:0-0-0",
+                    NoteText = "Hello world 5",
+                    LastUpdated = new DateTime(2013, 1, 5),
+                    UpdatedBy = "RC"
+                }, selectIdentity: true);
+
+                var result = db.Column<long?>(db
+                    .From<Note>()
+                    .Where(x => x.NoteText != null)
+                    .Select(x => x.Id));
+                Assert.That(result, Has.Count.EqualTo(1));
+                Assert.That(result[0], Is.EqualTo(id));
             }
         }
     }

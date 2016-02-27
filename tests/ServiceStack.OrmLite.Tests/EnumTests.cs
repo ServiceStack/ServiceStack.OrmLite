@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
+using ServiceStack.DataAnnotations;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
@@ -115,8 +116,8 @@ namespace ServiceStack.OrmLite.Tests
                 try
                 {
                     var expectedFlags = (int)(FlagsEnum.FlagOne | FlagsEnum.FlagTwo | FlagsEnum.FlagThree);
-                    Assert.AreEqual(db.Scalar<int>("SELECT Flags FROM {0} WHERE Id = 1"
-                        .Fmt("TypeWithFlagsEnum".SqlColumn())), expectedFlags);
+                    Assert.That(db.Scalar<int>("SELECT Flags FROM {0} WHERE Id = 1"
+                        .Fmt("TypeWithFlagsEnum".SqlTable())), Is.EqualTo(expectedFlags));
                 }
                 catch (FormatException)
                 {
@@ -142,6 +143,20 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        public void Creates_int_field_for_EnumAsInt()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<TypeWithEnumAsInt>();
+
+                var createTableSql = db.GetLastSql().NormalizeSql();
+                createTableSql.Print();
+
+                Assert.That(createTableSql, Is.StringContaining("enumvalue int"));
+            }
+        }
+
+        [Test]
         public void Updates_enum_flags_with_int_value()
         {
             using (var db = OpenDbConnection())
@@ -156,9 +171,35 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(db.GetLastSql(), Is.StringContaining("=@Flags").Or.StringContaining("=:Flags"));
                 db.GetLastSql().Print();
 
-                db.UpdateOnly(new TypeWithFlagsEnum { Id = 1, Flags = FlagsEnum.FlagThree }, q => q.Flags);
-                Assert.That(db.GetLastSql(), Is.StringContaining("=" + (int)FlagsEnum.FlagThree));
+                db.UpdateOnly(new TypeWithFlagsEnum { Id = 1, Flags = FlagsEnum.FlagThree }, onlyFields: q => q.Flags);
+                Assert.That(db.GetLastSql().NormalizeSql(), Is.StringContaining("=@0"));
+
+                var row = db.SingleById<TypeWithFlagsEnum>(1);
+                Assert.That(row.Flags, Is.EqualTo(FlagsEnum.FlagThree));
+            }
+        }
+
+        [Test]
+        public void Updates_EnumAsInt_with_int_value()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<TypeWithEnumAsInt>();
+
+                db.Insert(new TypeWithEnumAsInt { Id = 1, EnumValue = SomeEnumAsInt.Value1 });
+                db.Insert(new TypeWithEnumAsInt { Id = 2, EnumValue = SomeEnumAsInt.Value2 });
+                db.Insert(new TypeWithEnumAsInt { Id = 3, EnumValue = SomeEnumAsInt.Value3 });
+
+                db.Update(new TypeWithEnumAsInt { Id = 1, EnumValue = SomeEnumAsInt.Value1 });
+                Assert.That(db.GetLastSql(), Is.StringContaining("=@EnumValue").Or.StringContaining("=:EnumValue"));
                 db.GetLastSql().Print();
+
+                db.UpdateOnly(new TypeWithEnumAsInt { Id = 1, EnumValue = SomeEnumAsInt.Value3 }, 
+                    onlyFields: q => q.EnumValue);
+                Assert.That(db.GetLastSql().NormalizeSql(), Is.StringContaining("=@0"));
+
+                var row = db.SingleById<TypeWithEnumAsInt>(1);
+                Assert.That(row.EnumValue, Is.EqualTo(SomeEnumAsInt.Value3));
             }
         }
 
@@ -182,6 +223,25 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        public void CanQueryByEnumValue_using_select_with_expression_EnumAsInt()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<TypeWithEnumAsInt>();
+                db.Save(new TypeWithEnumAsInt { Id = 1, EnumValue = SomeEnumAsInt.Value1 });
+                db.Save(new TypeWithEnumAsInt { Id = 2, EnumValue = SomeEnumAsInt.Value1 });
+                db.Save(new TypeWithEnumAsInt { Id = 3, EnumValue = SomeEnumAsInt.Value2 });
+
+                var results = db.Select<TypeWithEnumAsInt>(q => q.EnumValue == SomeEnumAsInt.Value1);
+                db.GetLastSql().Print();
+                Assert.That(results.Count, Is.EqualTo(2));
+                results = db.Select<TypeWithEnumAsInt>(q => q.EnumValue == SomeEnumAsInt.Value2);
+                db.GetLastSql().Print();
+                Assert.That(results.Count, Is.EqualTo(1));
+            }
+        }
+
+        [Test]
         public void CanQueryByEnumValue_using_select_with_string_enum_flags()
         {
             using (var db = OpenDbConnection())
@@ -194,7 +254,24 @@ namespace ServiceStack.OrmLite.Tests
                 var target = db.SelectFmt<TypeWithFlagsEnum>(
                     "Flags".SqlColumn() + " = {0}", FlagsEnum.FlagOne);
                 db.GetLastSql().Print();
-                Assert.AreEqual(2, target.Count());
+                Assert.That(target.Count, Is.EqualTo(2));
+            }
+        }
+
+        [Test]
+        public void CanQueryByEnumValue_using_select_with_string_EnumAsInt()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<TypeWithEnumAsInt>();
+                db.Save(new TypeWithEnumAsInt { Id = 1, EnumValue = SomeEnumAsInt.Value1 });
+                db.Save(new TypeWithEnumAsInt { Id = 2, EnumValue = SomeEnumAsInt.Value1 });
+                db.Save(new TypeWithEnumAsInt { Id = 3, EnumValue = SomeEnumAsInt.Value2 });
+
+                var target = db.SelectFmt<TypeWithEnumAsInt>(
+                    "EnumValue".SqlColumn() + " = {0}", SomeEnumAsInt.Value1);
+                db.GetLastSql().Print();
+                Assert.That(target.Count, Is.EqualTo(2));
             }
         }
 
@@ -210,7 +287,23 @@ namespace ServiceStack.OrmLite.Tests
 
                 var target = db.Where<TypeWithFlagsEnum>(new { Flags = FlagsEnum.FlagOne });
                 db.GetLastSql().Print();
-                Assert.AreEqual(2, target.Count());
+                Assert.That(target.Count, Is.EqualTo(2));
+            }
+        }
+
+        [Test]
+        public void CanQueryByEnumValue_using_where_with_AnonType_EnumAsInt()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<TypeWithEnumAsInt>();
+                db.Save(new TypeWithEnumAsInt { Id = 1, EnumValue = SomeEnumAsInt.Value1 });
+                db.Save(new TypeWithEnumAsInt { Id = 2, EnumValue = SomeEnumAsInt.Value1 });
+                db.Save(new TypeWithEnumAsInt { Id = 3, EnumValue = SomeEnumAsInt.Value2 });
+
+                var target = db.Where<TypeWithEnumAsInt>(new { EnumValue = SomeEnumAsInt.Value1 });
+                db.GetLastSql().Print();
+                Assert.That(target.Count, Is.EqualTo(2));
             }
         }
 
@@ -237,15 +330,83 @@ namespace ServiceStack.OrmLite.Tests
             using (JsConfig.With(treatEnumAsInteger: true))
             using (var db = OpenDbConnection())
             {
-                db.DropAndCreateTable<TypeWithEnumAsInt>();
+                db.DropAndCreateTable<TypeWithTreatEnumAsInt>();
 
-                db.Insert(new TypeWithEnumAsInt { Id = 1, EnumValue = SomeEnumAsInt.Value1 });
-                db.Insert(new TypeWithEnumAsInt { Id = 2, EnumValue = SomeEnumAsInt.Value2 });
+                db.Insert(new TypeWithTreatEnumAsInt { Id = 1, EnumValue = SomeEnumTreatAsInt.Value1 });
+                db.Insert(new TypeWithTreatEnumAsInt { Id = 2, EnumValue = SomeEnumTreatAsInt.Value2 });
 
-                var row = db.SingleFmt<TypeWithEnumAsInt>(
+                var row = db.SingleFmt<TypeWithTreatEnumAsInt>(
                     "EnumValue".SqlColumn() + " = {0}", "2");
 
                 Assert.That(row.Id, Is.EqualTo(2));
+            }
+        }
+
+        [Test]
+        public void Can_Select_Type_with_Nullable_Enum()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<TypeWithNullableEnum>();
+
+                db.Insert(new TypeWithNullableEnum { Id = 1, EnumValue = SomeEnum.Value1, NullableEnumValue = SomeEnum.Value2 });
+                db.Insert(new TypeWithNullableEnum { Id = 2, EnumValue = SomeEnum.Value1 });
+
+                var rows = db.Select<TypeWithNullableEnum>();
+                Assert.That(rows.Count, Is.EqualTo(2));
+
+                var row = rows.First(x => x.NullableEnumValue == null);
+                Assert.That(row.Id, Is.EqualTo(2));
+
+                rows = db.SqlList<TypeWithNullableEnum>("SELECT * FROM {0}"
+                    .Fmt(typeof(TypeWithNullableEnum).Name.SqlTable()));
+
+                row = rows.First(x => x.NullableEnumValue == null);
+                Assert.That(row.Id, Is.EqualTo(2));
+
+                rows = db.SqlList<TypeWithNullableEnum>("SELECT * FROM {0}"
+                    .Fmt(typeof(TypeWithNullableEnum).Name.SqlTable()), new { Id = 2 });
+
+                row = rows.First(x => x.NullableEnumValue == null);
+                Assert.That(row.Id, Is.EqualTo(2));
+            }
+        }
+
+        [Test]
+        public void Can_get_Scalar_Enum()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<TypeWithEnum>();
+
+                var row = new TypeWithEnum { Id = 1, EnumValue = SomeEnum.Value2 };
+                db.Insert(row);
+
+                var someEnum = db.Scalar<SomeEnum>(db.From<TypeWithEnum>()
+                    .Where(o => o.Id == row.Id)
+                    .Select(o => o.EnumValue));
+
+                Assert.That(someEnum, Is.EqualTo(SomeEnum.Value2));
+            }
+        }
+
+        [Test]
+        public void Can_get_Scalar_Enum_Flag()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<TypeWithFlagsEnum>();
+
+                var row = new TypeWithFlagsEnum { Id = 1, Flags = FlagsEnum.FlagTwo };
+                db.Insert(row);
+
+                row.PrintDump();
+
+                var flagsEnum = db.Scalar<FlagsEnum>(db.From<TypeWithFlagsEnum>()
+                    .Where(o => o.Id == row.Id)
+                    .Select(o => o.Flags));
+
+                Assert.That(flagsEnum, Is.EqualTo(FlagsEnum.FlagTwo));
             }
         }
     }
@@ -277,17 +438,17 @@ namespace ServiceStack.OrmLite.Tests
         public SomeEnum EnumValue { get; set; }
     }
 
-    public enum SomeEnumAsInt
+    public enum SomeEnumTreatAsInt
     {
         Value1 = 1,
         Value2 = 2,
         Value3 = 3
     }
 
-    public class TypeWithEnumAsInt
+    public class TypeWithTreatEnumAsInt
     {
         public int Id { get; set; }
-        public SomeEnumAsInt EnumValue { get; set; }
+        public SomeEnumTreatAsInt EnumValue { get; set; }
     }
 
     [Flags]
@@ -302,5 +463,27 @@ namespace ServiceStack.OrmLite.Tests
     {
         public int Id { get; set; }
         public FlagsEnum Flags { get; set; }
+    }
+
+    [EnumAsInt]
+    public enum SomeEnumAsInt
+    {
+        Value1 = 1,
+        Value2 = 2,
+        Value3 = 3,
+    }
+
+    public class TypeWithEnumAsInt
+    {
+        public int Id { get; set; }
+
+        public SomeEnumAsInt EnumValue { get; set; }
+    }
+
+    public class TypeWithNullableEnum
+    {
+        public int Id { get; set; }
+        public SomeEnum EnumValue { get; set; }
+        public SomeEnum? NullableEnumValue { get; set; }
     }
 }

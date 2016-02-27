@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Linq;
 using NUnit.Framework;
 
@@ -9,7 +10,10 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
         [SetUp]
         public void Setup()
         {
-            OpenDbConnection().CreateTable<TestType>(true);
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTable<TestType>(true);
+            }
         }
 
         public T GetValue<T>(T item)
@@ -27,11 +31,11 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
             if (obj == null)
                 obj = new TestType[0];
 
-            using (var con = OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 foreach (var t in obj)
                 {
-                    con.Insert(t);
+                    db.Insert(t);
                 }
 
                 var random = new Random((int)(DateTime.UtcNow.Ticks ^ (DateTime.UtcNow.Ticks >> 4)));
@@ -54,7 +58,7 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.Expressions
                             o = null;
                     }
 
-                    con.Insert(o);
+                    db.Insert(o);
                 }
             }
         }

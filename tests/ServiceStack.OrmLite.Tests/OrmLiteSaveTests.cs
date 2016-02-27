@@ -15,7 +15,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var db = OpenDbConnection())
             {
-                db.CreateTable<PersonWithAutoId>(overwrite: true);
+                db.DropAndCreateTable<PersonWithAutoId>();
 
                 var row = new PersonWithAutoId
                 {
@@ -27,6 +27,41 @@ namespace ServiceStack.OrmLite.Tests
                 db.Save(row);
 
                 Assert.That(row.Id, Is.Not.EqualTo(0));
+            }
+        }
+
+        [Test]
+        public void Can_disable_AutoIncrement_field()
+        {
+            //Can't insert in identity column
+            if (Dialect == Dialect.SqlServer || Dialect == Dialect.SqlServer2012)
+                return;
+
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<PersonWithAutoId>();
+
+                typeof(PersonWithAutoId)
+                    .GetModelMetadata()
+                    .PrimaryKey.AutoIncrement = false;
+
+                var row = new PersonWithAutoId
+                {
+                    Id = 100,
+                    FirstName = "Jimi",
+                    LastName = "Hendrix",
+                    Age = 27
+                };
+
+                db.Insert(row);
+
+                row = db.SingleById<PersonWithAutoId>(100);
+
+                Assert.That(row.Id, Is.EqualTo(100));
+
+                typeof(PersonWithAutoId)
+                    .GetModelMetadata()
+                    .PrimaryKey.AutoIncrement = true;
             }
         }
 
@@ -113,30 +148,32 @@ namespace ServiceStack.OrmLite.Tests
         public void Save_works_within_a_transaction()
         {
             using (var db = OpenDbConnection())
-            using (var trans = db.OpenTransaction())
             {
-                db.CreateTable<PersonWithAutoId>(overwrite: true);
+                db.DropAndCreateTable<PersonWithAutoId>();
 
-                var rows = new[] {
-                    new PersonWithAutoId {
-                        FirstName = "Jimi",
-                        LastName = "Hendrix",
-                        Age = 27
-                    },
-                    new PersonWithAutoId {
-                        FirstName = "Kurt",
-                        LastName = "Cobain",
-                        Age = 27
-                    },
-                };
+                using (var trans = db.OpenTransaction())
+                {
+                    var rows = new[] {
+                        new PersonWithAutoId {
+                            FirstName = "Jimi",
+                            LastName = "Hendrix",
+                            Age = 27
+                        },
+                        new PersonWithAutoId {
+                            FirstName = "Kurt",
+                            LastName = "Cobain",
+                            Age = 27
+                        },
+                    };
 
-                db.Save(rows);
+                    db.Save(rows);
 
-                Assert.That(rows[0].Id, Is.Not.EqualTo(0));
-                Assert.That(rows[1].Id, Is.Not.EqualTo(0));
-                Assert.That(rows[0].Id, Is.Not.EqualTo(rows[1].Id));
+                    Assert.That(rows[0].Id, Is.Not.EqualTo(0));
+                    Assert.That(rows[1].Id, Is.Not.EqualTo(0));
+                    Assert.That(rows[0].Id, Is.Not.EqualTo(rows[1].Id));
 
-                trans.Commit();
+                    trans.Commit();
+                }
             }
         }
 

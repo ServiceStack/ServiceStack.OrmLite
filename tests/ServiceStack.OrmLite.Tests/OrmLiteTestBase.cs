@@ -14,12 +14,13 @@ namespace ServiceStack.OrmLite.Tests
         public static string SqliteFileDir = "~/App_Data/".MapAbsolutePath();
         public static string SqliteFileDb = "~/App_Data/db.sqlite".MapAbsolutePath();
         public static string SqlServerDb = "~/App_Data/Database1.mdf".MapAbsolutePath();
-        public static string SqlServerBuildDb = "Server={0};Database=test;User Id=test;Password=test;".Fmt(Environment.GetEnvironmentVariable("CI_HOST"));
+        public static string SqlServerBuildDb = "Server=localhost;Database=test;User Id=test;Password=test;";
         //public static string SqlServerBuildDb = "Data Source=localhost;Initial Catalog=TestDb;Integrated Security=SSPI;Connect Timeout=120;MultipleActiveResultSets=True";
 
         public static string OracleDb = "Data Source=localhost:1521/ormlite;User ID=test;Password=test";
         public static string MySqlDb = "Server=localhost;Database=test;UID=root;Password=test";
         public static string PostgreSqlDb = "Server=localhost;Port=5432;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200";
+        public static string FirebirdDb = @"User=SYSDBA;Password=masterkey;Database=C:\src\ServiceStack.OrmLite\tests\ServiceStack.OrmLite.Tests\App_Data\TEST.FDB;DataSource=localhost;Dialect=3;charset=ISO8859_1;";
 
         public static IOrmLiteDialectProvider DefaultProvider = SqlServerDialect.Provider;
         public static string DefaultConnection = SqlServerBuildDb;
@@ -36,28 +37,28 @@ namespace ServiceStack.OrmLite.Tests
         }
     }
 
-	public class OrmLiteTestBase
-	{
-	    protected virtual string ConnectionString { get; set; }
+    public class OrmLiteTestBase
+    {
+        protected virtual string ConnectionString { get; set; }
 
-	    public OrmLiteTestBase() {}
+        public OrmLiteTestBase() { }
 
-	    public OrmLiteTestBase(Dialect dialect)
-	    {
-	        Dialect = dialect;
+        public OrmLiteTestBase(Dialect dialect)
+        {
+            Dialect = dialect;
             Init();
         }
 
-	    protected string GetConnectionString()
-		{
-			return GetFileConnectionString();
-		}
+        protected string GetConnectionString()
+        {
+            return GetFileConnectionString();
+        }
 
-	    public static OrmLiteConnectionFactory CreateSqlServerDbFactory()
-	    {
+        public static OrmLiteConnectionFactory CreateSqlServerDbFactory()
+        {
             var dbFactory = new OrmLiteConnectionFactory(Config.SqlServerBuildDb, SqlServerDialect.Provider);
-	        return dbFactory;
-	    }
+            return dbFactory;
+        }
 
         public static OrmLiteConnectionFactory CreateSqliteMemoryDbFactory()
         {
@@ -65,23 +66,23 @@ namespace ServiceStack.OrmLite.Tests
             return dbFactory;
         }
 
-	    protected virtual string GetFileConnectionString()
-		{
+        protected virtual string GetFileConnectionString()
+        {
             var connectionString = Config.SqliteFileDb;
-			if (File.Exists(connectionString))
-				File.Delete(connectionString);
+            if (File.Exists(connectionString))
+                File.Delete(connectionString);
 
-			return connectionString;
-		}
+            return connectionString;
+        }
 
-		protected void CreateNewDatabase()
-		{
-			if (ConnectionString.Contains(".sqlite"))
-				ConnectionString = GetFileConnectionString();
-		}
+        protected void CreateNewDatabase()
+        {
+            if (ConnectionString.Contains(".sqlite"))
+                ConnectionString = GetFileConnectionString();
+        }
 
         public Dialect Dialect = Dialect.Sqlite;
-	    protected OrmLiteConnectionFactory DbFactory;
+        protected OrmLiteConnectionFactory DbFactory;
 
         OrmLiteConnectionFactory Init(string connStr, IOrmLiteDialectProvider dialectProvider)
         {
@@ -97,25 +98,38 @@ namespace ServiceStack.OrmLite.Tests
             Init();
         }
 
+        [TestFixtureTearDown]
+        public void TestFixtureTearDown()
+        {
+            OrmLiteContext.Instance.ClearItems();
+        }
+
         private OrmLiteConnectionFactory Init()
         {
-	        LogManager.LogFactory = new ConsoleLogFactory(debugEnabled: false);
-	        switch (Dialect)
-	        {
-	            case Dialect.Sqlite:
+            //OrmLiteConfig.UseParameterizeSqlExpressions = false;
+
+            //OrmLiteConfig.DeoptimizeReader = true;
+            LogManager.LogFactory = new ConsoleLogFactory(debugEnabled: false);
+            switch (Dialect)
+            {
+                case Dialect.Sqlite:
                     var dbFactory = Init(Config.SqliteMemoryDb, SqliteDialect.Provider);
-	                dbFactory.AutoDisposeConnection = false;
-	                return dbFactory;
-	            case Dialect.SqlServer:
+                    dbFactory.AutoDisposeConnection = false;
+                    return dbFactory;
+                case Dialect.SqlServer:
                     return Init(Config.SqlServerBuildDb, SqlServerDialect.Provider);
-	            case Dialect.MySql:
+                case Dialect.SqlServer2012:
+                    return Init(Config.SqlServerBuildDb, SqlServer2012Dialect.Provider);
+                case Dialect.MySql:
                     return Init(Config.MySqlDb, MySqlDialect.Provider);
-	            case Dialect.PostgreSql:
+                case Dialect.PostgreSql:
                     return Init(Config.PostgreSqlDb, PostgreSqlDialect.Provider);
                 case Dialect.SqlServerMdf:
                     return Init(Config.SqlServerDb, SqlServerDialect.Provider);
                 case Dialect.Oracle:
                     return Init(Config.OracleDb, OracleDialect.Provider);
+                case Dialect.Firebird:
+                    return Init(Config.FirebirdDb, FirebirdDialect.Provider);
                 case Dialect.VistaDb:
                     VistaDbDialect.Provider.UseLibraryFromGac = true;
                     var connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["myVDBConnection"];
@@ -132,12 +146,12 @@ namespace ServiceStack.OrmLite.Tests
             }
 
             throw new NotImplementedException("{0}".Fmt(Dialect));
-	    }
+        }
 
-	    public void Log(string text)
-		{
-			Console.WriteLine(text);
-		}
+        public void Log(string text)
+        {
+            Console.WriteLine(text);
+        }
 
         public IDbConnection InMemoryDbConnection { get; set; }
 
@@ -160,5 +174,5 @@ namespace ServiceStack.OrmLite.Tests
         {
             // Not Oracle if this base class used
         }
-	}
+    }
 }

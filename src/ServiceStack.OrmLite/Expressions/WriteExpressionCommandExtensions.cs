@@ -16,11 +16,11 @@ namespace ServiceStack.OrmLite
 
         public static int UpdateOnly<T>(this IDbCommand dbCmd, T model, SqlExpression<T> onlyFields)
         {
-            var sql = UpdateOnlySql(dbCmd, model, onlyFields);
-            return dbCmd.ExecuteSql(sql);
+            UpdateOnlySql(dbCmd, model, onlyFields);
+            return dbCmd.ExecNonQuery();
         }
 
-        internal static string UpdateOnlySql<T>(this IDbCommand dbCmd, T model, SqlExpression<T> onlyFields)
+        internal static void UpdateOnlySql<T>(this IDbCommand dbCmd, T model, SqlExpression<T> onlyFields)
         {
             if (OrmLiteConfig.UpdateFilter != null)
                 OrmLiteConfig.UpdateFilter(dbCmd, model);
@@ -29,10 +29,12 @@ namespace ServiceStack.OrmLite
                 ? onlyFields.GetAllFields()
                 : onlyFields.UpdateFields;
 
-            var sql = dbCmd.GetDialectProvider().ToUpdateRowStatement(model, fieldsToUpdate);
+            onlyFields.CopyParamsTo(dbCmd);
 
-            if (!onlyFields.WhereExpression.IsNullOrEmpty()) sql += " " + onlyFields.WhereExpression;
-            return sql;
+            dbCmd.GetDialectProvider().PrepareUpdateRowStatement(dbCmd, model, fieldsToUpdate);
+
+            if (!onlyFields.WhereExpression.IsNullOrEmpty())
+                dbCmd.CommandText += " " + onlyFields.WhereExpression;
         }
 
         public static int UpdateOnly<T, TKey>(this IDbCommand dbCmd, T obj,
@@ -55,8 +57,8 @@ namespace ServiceStack.OrmLite
 
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Where(obj);
-            var sql = q.ToUpdateStatement(item, excludeDefaults: true);
-            return dbCmd.ExecuteSql(sql);
+            q.PrepareUpdateStatement(dbCmd, item, excludeDefaults: true);
+            return dbCmd.ExecNonQuery();
         }
 
         public static int Update<T>(this IDbCommand dbCmd, T item, Expression<Func<T, bool>> expression)
@@ -66,41 +68,43 @@ namespace ServiceStack.OrmLite
 
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Where(expression);
-            var sql = q.ToUpdateStatement(item);
-            return dbCmd.ExecuteSql(sql);
+            q.PrepareUpdateStatement(dbCmd, item);
+            return dbCmd.ExecNonQuery();
         }
 
         public static int Update<T>(this IDbCommand dbCmd, object updateOnly, Expression<Func<T, bool>> where = null)
         {
-            var updateSql = UpdateSql(dbCmd.GetDialectProvider(), updateOnly, where);
-            return dbCmd.ExecuteSql(updateSql);
+            var q = dbCmd.GetDialectProvider().SqlExpression<T>();
+            var whereSql = q.Where(where).WhereExpression;
+            q.CopyParamsTo(dbCmd);
+            dbCmd.PrepareUpdateAnonSql<T>(dbCmd.GetDialectProvider(), updateOnly, whereSql);
+
+            return dbCmd.ExecNonQuery();
         }
 
-        internal static string UpdateSql<T>(IOrmLiteDialectProvider dialectProvider, object updateOnly, Expression<Func<T, bool>> @where)
+        internal static void PrepareUpdateAnonSql<T>(this IDbCommand dbCmd, IOrmLiteDialectProvider dialectProvider, object updateOnly, string whereSql)
         {
-            var ev = dialectProvider.SqlExpression<T>();
-            var whereSql = ev.Where(@where).WhereExpression;
             var sql = new StringBuilder();
             var modelDef = typeof(T).GetModelDefinition();
             var fields = modelDef.FieldDefinitionsArray;
 
             foreach (var setField in updateOnly.GetType().GetPublicProperties())
             {
-                var fieldDef = fields.FirstOrDefault(x =>
-                                                     string.Equals(x.Name, setField.Name, StringComparison.OrdinalIgnoreCase));
+                var fieldDef = fields.FirstOrDefault(x => string.Equals(x.Name, setField.Name, StringComparison.OrdinalIgnoreCase));
                 if (fieldDef == null || fieldDef.ShouldSkipUpdate()) continue;
 
                 if (sql.Length > 0)
                     sql.Append(", ");
 
-                sql.AppendFormat("{0}={1}",
-                    dialectProvider.GetQuotedColumnName(fieldDef.FieldName),
-                    dialectProvider.GetQuotedValue(setField.GetPropertyGetterFn()(updateOnly), fieldDef.FieldType));
+                var value = setField.GetPropertyGetterFn()(updateOnly);
+                sql
+                    .Append(dialectProvider.GetQuotedColumnName(fieldDef.FieldName))
+                    .Append("=")
+                    .Append(dialectProvider.AddParam(dbCmd, value, fieldDef.ColumnType).ParameterName);
             }
 
-            var updateSql = string.Format("UPDATE {0} SET {1} {2}",
+            dbCmd.CommandText = string.Format("UPDATE {0} SET {1} {2}",
                 dialectProvider.GetQuotedTableName(modelDef), sql, whereSql);
-            return updateSql;
         }
 
         public static int UpdateFmt<T>(this IDbCommand dbCmd, string set = null, string where = null)
@@ -162,7 +166,7 @@ namespace ServiceStack.OrmLite
         public static int Delete<T>(this IDbCommand dbCmd, SqlExpression<T> where)
         {
             var sql = where.ToDeleteRowStatement();
-            return dbCmd.ExecuteSql(sql);
+            return dbCmd.ExecuteSql(sql, where.Params);
         }
 
         public static int DeleteFmt<T>(this IDbCommand dbCmd, string where = null)

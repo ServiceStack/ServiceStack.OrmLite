@@ -78,6 +78,7 @@
     <Compile Include="Expressions\StringFunctionTests.cs" />
     <Compile Include="Expressions\TestType.cs" />
     <Compile Include="Expressions\UnaryExpressionsTest.cs" />
+    <Compile Include="Issues\UtcDateTests.cs" />
     <Compile Include="OrmLiteTestBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UseCase\PasswordUseCase.cs" />

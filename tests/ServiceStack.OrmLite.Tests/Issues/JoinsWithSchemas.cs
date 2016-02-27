@@ -49,7 +49,6 @@ namespace ServiceStack.OrmLite.Tests.Issues
 
                 exists = db.TableExists<Entity2>();
                 Assert.That(exists, Is.True);
-
             }
         }
 

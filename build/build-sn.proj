@@ -97,6 +97,7 @@
       <OrmLiteFilesV45 Include="$(SrcDir)/ServiceStack.OrmLiteV45/bin/$(Configuration)/ServiceStack.OrmLite.*"></OrmLiteFilesV45>
       <SqlServerFiles Include="$(SrcDir)/ServiceStack.OrmLite.SqlServer/bin/$(Configuration)/ServiceStack.OrmLite.SqlServer.*"></SqlServerFiles>
       <SqlServerFilesV45 Include="$(SrcDir)/ServiceStack.OrmLite.SqlServerV45/bin/$(Configuration)/ServiceStack.OrmLite.SqlServer.*"></SqlServerFilesV45>
+      <SqlServerConverterFiles Include="$(SrcDir)/ServiceStack.OrmLite.SqlServer.Converters/bin/$(Configuration)/ServiceStack.OrmLite.SqlServer.Converters.*"></SqlServerConverterFiles>
       <OracleFiles Include="$(SrcDir)/ServiceStack.OrmLite.Oracle/bin/$(Configuration)/ServiceStack.OrmLite.Oracle.*"></OracleFiles>
       <SqliteWindowsFiles Include="$(SrcDir)/ServiceStack.OrmLite.Sqlite.Windows/bin/$(Configuration)/ServiceStack.OrmLite.Sqlite.Windows.*"></SqliteWindowsFiles>
       <MySqlFiles Include="$(SrcDir)/ServiceStack.OrmLite.MySql/bin/$(Configuration)/ServiceStack.OrmLite.MySql.*"></MySqlFiles>
@@ -141,6 +142,18 @@
     <Copy SourceFiles="%(SqlServerFilesV45.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.SqlServer.Signed/lib/net45" />
 
     <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.SqlServer.Signed/servicestack.ormlite.sqlserver.signed.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
+            LogStandardErrorAsError="true" />
+
+    <!-- SqlServer.Converters -->
+
+    <MSBuild Projects="$(SrcDir)/ServiceStack.OrmLite.SqlServer.Converters/ServiceStack.OrmLite.SqlServer.Converters.Signed.csproj"
+            Targets="Build"
+            Properties="Version=$(PackageVersion);Configuration=$(Configuration)" />
+
+    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.SqlServer.Converters.Signed/lib/net40" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.SqlServer.Converters.Signed/lib/net40')" />
+    <Copy SourceFiles="%(SqlServerConverterFiles.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.SqlServer.Converters.Signed/lib/net40" />
+
+    <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.SqlServer.Converters.Signed/servicestack.ormlite.sqlserver.converters.signed.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
             LogStandardErrorAsError="true" />
 
     <!-- Oracle -->

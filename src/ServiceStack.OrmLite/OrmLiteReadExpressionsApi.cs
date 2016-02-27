@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
@@ -152,7 +153,13 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static List<T> Select<T>(this IDbConnection dbConn, ISqlExpression expression, object anonType = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(expression.SelectInto<T>(), anonType));
+            if (anonType != null)
+                return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(expression.SelectInto<T>(), anonType));
+
+            if (expression.Params != null && expression.Params.Any())
+                return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(expression.SelectInto<T>(), expression.Params.ToDictionary(param => param.ParameterName, param => param.Value)));
+
+            return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(expression.SelectInto<T>(), expression.Params));
         }
 
         /// <summary>
@@ -180,6 +187,15 @@ namespace ServiceStack.OrmLite
         public static T Single<T>(this IDbConnection dbConn, SqlExpression<T> expression)
         {
             return dbConn.Exec(dbCmd => dbCmd.Single(expression));
+        }
+
+        /// <summary>
+        /// Returns results from using an SqlExpression lambda. E.g:
+        /// <para>db.Single(db.From&lt;Person&gt;().Where(x =&gt; x.Age &gt; 40))</para>
+        /// </summary>
+        public static T Single<T>(this IDbConnection dbConn, ISqlExpression expression)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Single<T>(expression.SelectInto<T>(), expression.Params));
         }
 
         /// <summary>
@@ -260,12 +276,30 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Returns results with references from using a LINQ Expression. E.g:
+        /// <para>db.LoadSelect&lt;Person&gt;(x =&gt; x.Age &gt; 40, include: x => new { x.PrimaryAddress })</para>
+        /// </summary>
+        public static List<T> LoadSelect<T>(this IDbConnection dbConn, Expression<Func<T, bool>> predicate, Func<T, object> include)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.LoadSelect(predicate, include(typeof(T).CreateInstance<T>()).GetType().AllAnonFields()));
+        }
+
+        /// <summary>
         /// Returns results with references from using an SqlExpression lambda. E.g:
         /// <para>db.LoadSelect&lt;Person&gt;(q =&gt; q.Where(x =&gt; x.Age &gt; 40))</para>
         /// </summary>
         public static List<T> LoadSelect<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression, string[] include = null)
         {
             return dbConn.Exec(dbCmd => dbCmd.LoadSelect(expression, include));
+        }
+
+        /// <summary>
+        /// Returns results with references from using an SqlExpression lambda. E.g:
+        /// <para>db.LoadSelect&lt;Person&gt;(q =&gt; q.Where(x =&gt; x.Age &gt; 40), include: x => new { x.PrimaryAddress })</para>
+        /// </summary>
+        public static List<T> LoadSelect<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression, Func<T, object> include)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.LoadSelect(expression, include(typeof(T).CreateInstance<T>()).GetType().AllAnonFields()));
         }
 
         /// <summary>
@@ -278,11 +312,28 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Returns results with references from using an SqlExpression lambda. E.g:
+        /// <para>db.LoadSelect(db.From&lt;Person&gt;().Where(x =&gt; x.Age &gt; 40), include: x => new { x.PrimaryAddress })</para>
+        /// </summary>
+        public static List<T> LoadSelect<T>(this IDbConnection dbConn, SqlExpression<T> expression, Func<T, object> include)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.LoadSelect(expression, include(typeof(T).CreateInstance<T>()).GetType().AllAnonFields()));
+        }
+
+        /// <summary>
         /// Project results with references from a number of joined tables into a different model
         /// </summary>
         public static List<Into> LoadSelect<Into, From>(this IDbConnection dbConn, SqlExpression<From> expression, string[] include = null)
         {
             return dbConn.Exec(dbCmd => dbCmd.LoadSelect<Into, From>(expression, include));
+        }
+
+        /// <summary>
+        /// Project results with references from a number of joined tables into a different model
+        /// </summary>
+        public static List<Into> LoadSelect<Into, From>(this IDbConnection dbConn, SqlExpression<From> expression, Func<Into, object> include)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.LoadSelect<Into, From>(expression, include(typeof(Into).CreateInstance<Into>()).GetType().AllAnonFields()));
         }
     }
 }

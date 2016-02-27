@@ -148,32 +148,7 @@ namespace ServiceStack.OrmLite.Tests
 			}
 		}
 
-		public class UserAuth
-		{
-			public UserAuth()
-			{
-				this.Roles = new List<string>();
-				this.Permissions = new List<string>();
-			}
-
-			[AutoIncrement]
-			public virtual int Id { get; set; }
-			public virtual string UserName { get; set; }
-			public virtual string Email { get; set; }
-			public virtual string PrimaryEmail { get; set; }
-			public virtual string FirstName { get; set; }
-			public virtual string LastName { get; set; }
-			public virtual string DisplayName { get; set; }
-			public virtual string Salt { get; set; }
-			public virtual string PasswordHash { get; set; }
-			public virtual List<string> Roles { get; set; }
-			public virtual List<string> Permissions { get; set; }
-			public virtual DateTime CreatedDate { get; set; }
-			public virtual DateTime ModifiedDate { get; set; }
-			public virtual Dictionary<string, string> Meta { get; set; }
-		}
-
-		[Test]
+        [Test]
 		public void Can_insert_table_with_UserAuth()
 		{
 			using (var db = OpenDbConnection())
@@ -211,20 +186,28 @@ namespace ServiceStack.OrmLite.Tests
         public void Can_GetLastInsertedId_using_Insert()
         {
             SuppressIfOracle("Need trigger for autoincrement keys to work in Oracle with caller supplied SQL");
+            if (Dialect == Dialect.Firebird) return; //Requires Generator
 
             var date = new DateTime(2000, 1, 1);
-            var testObject = new UserAuth { UserName = "test", CreatedDate = date, ModifiedDate = date };
+            var testObject = new UserAuth
+            {
+                UserName = "test",
+                CreatedDate = date,
+                ModifiedDate = date,
+                InvalidLoginAttempts = 0,
+            };
 
             //verify that "normal" Insert works as expected
             using (var db = OpenDbConnection())
             {
-                db.CreateTable<UserAuth>(true);
+                db.DropAndCreateTable<UserAuth>();
 
-                db.ExecuteSql("INSERT INTO {0} ({1},{2},{3}) VALUES ({4},'2000-01-01','2000-01-01')"
+                db.ExecuteSql("INSERT INTO {0} ({1},{2},{3},{4}) VALUES ({5},'2000-01-01','2000-01-01',0)"
                     .Fmt("UserAuth".SqlTable(),
                          "UserName".SqlColumn(),
                          "CreatedDate".SqlColumn(),
                          "ModifiedDate".SqlColumn(),
+                         "InvalidLoginAttempts".SqlColumn(),
                          testObject.UserName.SqlValue()));
                 var normalLastInsertedId = db.LastInsertId();
                 Assert.Greater(normalLastInsertedId, 0, "normal Insert");
@@ -239,5 +222,72 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.Greater(lastInsertId, 0, "with InsertParam");
             }
         }
+    }
+
+    public class UserAuth 
+    {
+        public UserAuth()
+        {
+            Roles = new List<string>();
+            Permissions = new List<string>();
+        }
+
+        [AutoIncrement]
+        public virtual int Id { get; set; }
+
+        public virtual string UserName { get; set; }
+        public virtual string Email { get; set; }
+        public virtual string PrimaryEmail { get; set; }
+        public virtual string PhoneNumber { get; set; }
+        public virtual string FirstName { get; set; }
+        public virtual string LastName { get; set; }
+        public virtual string DisplayName { get; set; }
+        public virtual string Company { get; set; }
+        public virtual DateTime? BirthDate { get; set; }
+        public virtual string BirthDateRaw { get; set; }
+        public virtual string Address { get; set; }
+        public virtual string Address2 { get; set; }
+        public virtual string City { get; set; }
+        public virtual string State { get; set; }
+        public virtual string Country { get; set; }
+        public virtual string Culture { get; set; }
+        public virtual string FullName { get; set; }
+        public virtual string Gender { get; set; }
+        public virtual string Language { get; set; }
+        public virtual string MailAddress { get; set; }
+        public virtual string Nickname { get; set; }
+        public virtual string PostalCode { get; set; }
+        public virtual string TimeZone { get; set; }
+        public virtual string Salt { get; set; }
+        public virtual string PasswordHash { get; set; }
+        public virtual string DigestHa1Hash { get; set; }
+        public virtual List<string> Roles { get; set; }
+        public virtual List<string> Permissions { get; set; }
+        public virtual DateTime CreatedDate { get; set; }
+        public virtual DateTime ModifiedDate { get; set; }
+        public virtual int InvalidLoginAttempts { get; set; }
+        public virtual DateTime? LastLoginAttempt { get; set; }
+        public virtual DateTime? LockedDate { get; set; }
+        public virtual string RecoveryToken { get; set; }
+
+        //Custom Reference Data
+        public virtual int? RefId { get; set; }
+        public virtual string RefIdStr { get; set; }
+        public virtual Dictionary<string, string> Meta { get; set; }
+    }
+    public class UserAuthRole
+    {
+        [AutoIncrement]
+        public virtual int Id { get; set; }
+        public virtual int UserAuthId { get; set; }
+        public virtual string Role { get; set; }
+        public virtual string Permission { get; set; }
+        public virtual DateTime CreatedDate { get; set; }
+        public virtual DateTime ModifiedDate { get; set; }
+
+        //Custom Reference Data
+        public virtual int? RefId { get; set; }
+        public virtual string RefIdStr { get; set; }
+        public virtual Dictionary<string, string> Meta { get; set; }
     }
 }

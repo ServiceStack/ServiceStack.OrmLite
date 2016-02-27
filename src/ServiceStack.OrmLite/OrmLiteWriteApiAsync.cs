@@ -25,6 +25,15 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Execute any arbitrary raw SQL with db params.
+        /// </summary>
+        /// <returns>number of rows affected</returns>
+        public static Task<int> ExecuteSqlAsync(this IDbConnection dbConn, string sql, object dbParams, CancellationToken token = default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd => dbCmd.ExecuteSqlAsync(sql, dbParams, token));
+        }
+
+        /// <summary>
         /// Insert 1 POCO, use selectIdentity to retrieve the last insert AutoIncrement id (if any). E.g:
         /// <para>var id = db.Insert(new Person { Id = 1, FirstName = "Jimi }, selectIdentity:true)</para>
         /// </summary>
@@ -230,15 +239,17 @@ namespace ServiceStack.OrmLite
         /// <para>db.SaveAsync(customer, references:true)</para>
         /// </summary>
         /// <returns>true if a row was inserted; false if it was updated</returns>
-        public static Task<bool> SaveAsync<T>(this IDbConnection dbConn, T obj, bool references = false, CancellationToken token = default(CancellationToken))
+        public static async Task<bool> SaveAsync<T>(this IDbConnection dbConn, T obj, bool references = false, CancellationToken token = default(CancellationToken))
         {
             if (!references)
-                return dbConn.Exec(dbCmd => dbCmd.SaveAsync(obj, token));
+                return await dbConn.Exec(dbCmd => dbCmd.SaveAsync(obj, token));
 
-            return dbConn.Exec(dbCmd => 
-                dbCmd.SaveAsync(obj, token).Then(ret => 
-                    dbCmd.SaveAllReferencesAsync(obj, token).Then(t => 
-                        ret))) as Task<bool>;
+            return await dbConn.Exec(async dbCmd =>
+            {
+                var ret = await dbCmd.SaveAsync(obj, token);
+                await dbCmd.SaveAllReferencesAsync(obj, token);
+                return ret;
+            });
         }
 
         /// <summary>

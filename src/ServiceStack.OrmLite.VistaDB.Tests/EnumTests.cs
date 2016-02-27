@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Data;
+using System.Linq;
 using NUnit.Framework;
 
 namespace ServiceStack.OrmLite.VistaDB.Tests
@@ -8,28 +9,31 @@ namespace ServiceStack.OrmLite.VistaDB.Tests
         [Test]
         public void CanCreateTable()
         {
-            OpenDbConnection().CreateTable<TypeWithEnum>(true);
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTable<TypeWithEnum>(true);
+            }
         }
 
         [Test]
         public void CanStoreEnumValue()
         {
-            using(var con = OpenDbConnection())
+            using(var db = OpenDbConnection())
             {
-                con.CreateTable<TypeWithEnum>(true);
-                con.Save(new TypeWithEnum {Id = 1, EnumValue = SomeEnum.Value1});
+                db.CreateTable<TypeWithEnum>(true);
+                db.Save(new TypeWithEnum {Id = 1, EnumValue = SomeEnum.Value1});
             }
         }
 
         [Test]
         public void CanGetEnumValue()
         {
-            using (var con = OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
-                con.CreateTable<TypeWithEnum>(true);
+                db.CreateTable<TypeWithEnum>(true);
                 var obj = new TypeWithEnum { Id = 1, EnumValue = SomeEnum.Value1 };
-                con.Save(obj);
-                var target = con.SingleById<TypeWithEnum>(obj.Id);
+                db.Save(obj);
+                var target = db.SingleById<TypeWithEnum>(obj.Id);
                 Assert.AreEqual(obj.Id, target.Id);
                 Assert.AreEqual(obj.EnumValue, target.EnumValue);
             }
@@ -38,14 +42,14 @@ namespace ServiceStack.OrmLite.VistaDB.Tests
         [Test]
         public void CanQueryByEnumValue_using_select_with_expression()
         {
-            using (var con = OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
-                con.CreateTable<TypeWithEnum>(true);
-                con.Save(new TypeWithEnum { Id = 1, EnumValue = SomeEnum.Value1 });
-                con.Save(new TypeWithEnum { Id = 2, EnumValue = SomeEnum.Value1 });
-                con.Save(new TypeWithEnum { Id = 3, EnumValue = SomeEnum.Value2 });
+                db.CreateTable<TypeWithEnum>(true);
+                db.Save(new TypeWithEnum { Id = 1, EnumValue = SomeEnum.Value1 });
+                db.Save(new TypeWithEnum { Id = 2, EnumValue = SomeEnum.Value1 });
+                db.Save(new TypeWithEnum { Id = 3, EnumValue = SomeEnum.Value2 });
 
-                var target = con.Select<TypeWithEnum>(q => q.EnumValue == SomeEnum.Value1);
+                var target = db.Select<TypeWithEnum>(q => q.EnumValue == SomeEnum.Value1);
 
                 Assert.AreEqual(2, target.Count());
             }
@@ -54,14 +58,14 @@ namespace ServiceStack.OrmLite.VistaDB.Tests
         [Test]
         public void CanQueryByEnumValue_using_select_with_string()
         {
-            using (var con = OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
-                con.CreateTable<TypeWithEnum>(true);
-                con.Save(new TypeWithEnum { Id = 1, EnumValue = SomeEnum.Value1 });
-                con.Save(new TypeWithEnum { Id = 2, EnumValue = SomeEnum.Value1 });
-                con.Save(new TypeWithEnum { Id = 3, EnumValue = SomeEnum.Value2 });
+                db.CreateTable<TypeWithEnum>(true);
+                db.Save(new TypeWithEnum { Id = 1, EnumValue = SomeEnum.Value1 });
+                db.Save(new TypeWithEnum { Id = 2, EnumValue = SomeEnum.Value1 });
+                db.Save(new TypeWithEnum { Id = 3, EnumValue = SomeEnum.Value2 });
 
-                var target = con.SelectFmt<TypeWithEnum>("EnumValue = {0}", SomeEnum.Value1);
+                var target = db.SelectFmt<TypeWithEnum>("EnumValue = {0}", SomeEnum.Value1);
 
                 Assert.AreEqual(2, target.Count());
             }
@@ -70,14 +74,14 @@ namespace ServiceStack.OrmLite.VistaDB.Tests
         [Test]
         public void CanQueryByEnumValue_using_where_with_AnonType()
         {
-            using (var con = OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
-                con.CreateTable<TypeWithEnum>(true);
-                con.Save(new TypeWithEnum { Id = 1, EnumValue = SomeEnum.Value1 });
-                con.Save(new TypeWithEnum { Id = 2, EnumValue = SomeEnum.Value1 });
-                con.Save(new TypeWithEnum { Id = 3, EnumValue = SomeEnum.Value2 });
+                db.CreateTable<TypeWithEnum>(true);
+                db.Save(new TypeWithEnum { Id = 1, EnumValue = SomeEnum.Value1 });
+                db.Save(new TypeWithEnum { Id = 2, EnumValue = SomeEnum.Value1 });
+                db.Save(new TypeWithEnum { Id = 3, EnumValue = SomeEnum.Value2 });
 
-                var target = con.Where<TypeWithEnum>(new { EnumValue = SomeEnum.Value1 });
+                var target = db.Where<TypeWithEnum>(new { EnumValue = SomeEnum.Value1 });
 
                 Assert.AreEqual(2, target.Count());
             }

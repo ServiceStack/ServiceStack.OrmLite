@@ -28,14 +28,14 @@ namespace ServiceStack.OrmLite.Tests.Shared
                 if (x.GetType() != y.GetType()) return false;
                 return x.Byte == y.Byte
                     && x.SByte == y.SByte
-                    && x.Short == y.Short 
-                    && x.UShort == y.UShort 
-                    && x.Int == y.Int 
-                    && x.UInt == y.UInt 
-                    && x.Long == y.Long 
-                    && x.ULong == y.ULong 
-                    && x.Float.Equals(y.Float) 
-                    && x.Double.Equals(y.Double) 
+                    && x.Short == y.Short
+                    && x.UShort == y.UShort
+                    && x.Int == y.Int
+                    && x.UInt == y.UInt
+                    && x.Long == y.Long
+                    && x.ULong == y.ULong
+                    && x.Float.Equals(y.Float)
+                    && x.Double.Equals(y.Double)
                     && x.Decimal == y.Decimal;
             }
 
@@ -44,16 +44,16 @@ namespace ServiceStack.OrmLite.Tests.Shared
                 unchecked
                 {
                     var hashCode = obj.Byte.GetHashCode();
-                    hashCode = (hashCode*397) ^ obj.SByte.GetHashCode();
-                    hashCode = (hashCode*397) ^ obj.Short.GetHashCode();
-                    hashCode = (hashCode*397) ^ obj.UShort.GetHashCode();
-                    hashCode = (hashCode*397) ^ obj.Int;
-                    hashCode = (hashCode*397) ^ (int) obj.UInt;
-                    hashCode = (hashCode*397) ^ obj.Long.GetHashCode();
-                    hashCode = (hashCode*397) ^ obj.ULong.GetHashCode();
-                    hashCode = (hashCode*397) ^ obj.Float.GetHashCode();
-                    hashCode = (hashCode*397) ^ obj.Double.GetHashCode();
-                    hashCode = (hashCode*397) ^ obj.Decimal.GetHashCode();
+                    hashCode = (hashCode * 397) ^ obj.SByte.GetHashCode();
+                    hashCode = (hashCode * 397) ^ obj.Short.GetHashCode();
+                    hashCode = (hashCode * 397) ^ obj.UShort.GetHashCode();
+                    hashCode = (hashCode * 397) ^ obj.Int;
+                    hashCode = (hashCode * 397) ^ (int)obj.UInt;
+                    hashCode = (hashCode * 397) ^ obj.Long.GetHashCode();
+                    hashCode = (hashCode * 397) ^ obj.ULong.GetHashCode();
+                    hashCode = (hashCode * 397) ^ obj.Float.GetHashCode();
+                    hashCode = (hashCode * 397) ^ obj.Double.GetHashCode();
+                    hashCode = (hashCode * 397) ^ obj.Decimal.GetHashCode();
                     return hashCode;
                 }
             }

@@ -10,7 +10,7 @@ namespace ServiceStack.OrmLite
     {
         List<ModelDefinition> tableDefs = new List<ModelDefinition>();
 
-        bool IsJoinedTable(Type type)
+        public bool IsJoinedTable(Type type)
         {
             return tableDefs.FirstOrDefault(x => x.ModelType == type) != null;
         }
@@ -86,7 +86,7 @@ namespace ServiceStack.OrmLite
 
         private string InternalCreateSqlFromExpression(Expression joinExpr, bool isCrossJoin) 
         {
-            return "{0} {1}".Fmt((isCrossJoin ? "WHERE" : "ON"), Visit(joinExpr).ToString());
+            return "{0} {1}".Fmt((isCrossJoin ? "WHERE" : "ON"), VisitJoin(joinExpr).ToString());
         }
 
         private string InternalCreateSqlFromDefinitions(ModelDefinition sourceDef, ModelDefinition targetDef, bool isCrossJoin) 
@@ -155,7 +155,7 @@ namespace ServiceStack.OrmLite
 
         public string SelectInto<TModel>()
         {
-            if (CustomSelect || (typeof(TModel) == typeof(T) && !PrefixFieldWithTableName))
+            if ((CustomSelect && onlyFields  == null) || (typeof(TModel) == typeof(T) && !PrefixFieldWithTableName))
             {
                 return ToSelectStatement();
             }
@@ -181,6 +181,9 @@ namespace ServiceStack.OrmLite
                     {
                         if (tableFieldDef.Name == fieldDef.Name)
                         {
+                            if (onlyFields != null && !onlyFields.Contains(fieldDef.Name))
+                                continue;
+
                             found = true;
                             if (sbSelect.Length > 0)
                                 sbSelect.Append(", ");
@@ -212,6 +215,9 @@ namespace ServiceStack.OrmLite
 
                         if (matchingField != null)
                         {
+                            if (onlyFields != null && !onlyFields.Contains(fieldDef.Name))
+                                continue;
+
                             if (sbSelect.Length > 0)
                                 sbSelect.Append(", ");
 

@@ -14,7 +14,7 @@ namespace ServiceStack.OrmLite
             var expr = dbCmd.GetDialectProvider().SqlExpression<T>();
             string sql = expression(expr).SelectInto<T>();
 
-            return dbCmd.ExprConvertToList<T>(sql);
+            return dbCmd.ExprConvertToList<T>(sql, expr.Params);
         }
 
         internal static List<Into> Select<Into, From>(this IDbCommand dbCmd, Func<SqlExpression<From>, SqlExpression<From>> expression)
@@ -22,20 +22,20 @@ namespace ServiceStack.OrmLite
             var expr = dbCmd.GetDialectProvider().SqlExpression<From>();
             string sql = expression(expr).SelectInto<Into>();
 
-            return dbCmd.ExprConvertToList<Into>(sql);
+            return dbCmd.ExprConvertToList<Into>(sql, expr.Params);
         }
 
         internal static List<Into> Select<Into, From>(this IDbCommand dbCmd, SqlExpression<From> expression)
         {
             string sql = expression.SelectInto<Into>();
-            return dbCmd.ExprConvertToList<Into>(sql);
+            return dbCmd.ExprConvertToList<Into>(sql, expression.Params);
         }
 
         internal static List<T> Select<T>(this IDbCommand dbCmd, SqlExpression<T> expression)
         {
             string sql = expression.SelectInto<T>();
 
-            return dbCmd.ExprConvertToList<T>(sql);
+            return dbCmd.ExprConvertToList<T>(sql, expression.Params);
         }
 
         internal static List<T> Select<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
@@ -43,7 +43,7 @@ namespace ServiceStack.OrmLite
             var expr = dbCmd.GetDialectProvider().SqlExpression<T>();
             string sql = expr.Where(predicate).SelectInto<T>();
 
-            return dbCmd.ExprConvertToList<T>(sql);
+            return dbCmd.ExprConvertToList<T>(sql, expr.Params);
         }
 
         internal static T Single<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression)
@@ -63,57 +63,68 @@ namespace ServiceStack.OrmLite
         {
             string sql = expression.Limit(1).SelectInto<T>();
 
-            return dbCmd.ExprConvertTo<T>(sql);
+            return dbCmd.ExprConvertTo<T>(sql, expression.Params);
+        }
+
+        public static TKey Scalar<T, TKey>(this IDbCommand dbCmd, SqlExpression<T> expression)
+        {
+            var sql = expression.SelectInto<T>();
+            return dbCmd.Scalar<TKey>(sql, expression.Params);
         }
 
         public static TKey Scalar<T, TKey>(this IDbCommand dbCmd, Expression<Func<T, TKey>> field)
         {
-            var ev = dbCmd.GetDialectProvider().SqlExpression<T>();
-            ev.Select(field);
-            var sql = ev.SelectInto<T>();
-            return dbCmd.Scalar<TKey>(sql);
+            var q = dbCmd.GetDialectProvider().SqlExpression<T>();
+            q.Select(field);
+            var sql = q.SelectInto<T>();
+            return dbCmd.Scalar<TKey>(sql, q.Params);
         }
 
         internal static TKey Scalar<T, TKey>(this IDbCommand dbCmd,
             Expression<Func<T, TKey>> field, Expression<Func<T, bool>> predicate)
         {
-            var ev = dbCmd.GetDialectProvider().SqlExpression<T>();
-            ev.Select(field).Where(predicate);
-            string sql = ev.SelectInto<T>();
-            return dbCmd.Scalar<TKey>(sql);
+            var q = dbCmd.GetDialectProvider().SqlExpression<T>();
+            q.Select(field).Where(predicate);
+            string sql = q.SelectInto<T>();
+            return dbCmd.Scalar<TKey>(sql, q.Params);
         }
 
         internal static long Count<T>(this IDbCommand dbCmd)
         {
-            var expression = dbCmd.GetDialectProvider().SqlExpression<T>();
-            var sql = expression.ToCountStatement();
-            return GetCount(dbCmd, sql);
+            var q = dbCmd.GetDialectProvider().SqlExpression<T>();
+            var sql = q.ToCountStatement();
+            return GetCount(dbCmd, sql, q.Params);
         }
 
         internal static long Count<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression)
         {
-            var expr = dbCmd.GetDialectProvider().SqlExpression<T>();
-            var sql = expression(expr).ToCountStatement();
-            return GetCount(dbCmd, sql);
+            var q = dbCmd.GetDialectProvider().SqlExpression<T>();
+            var sql = expression(q).ToCountStatement();
+            return GetCount(dbCmd, sql, q.Params);
         }
 
         internal static long Count<T>(this IDbCommand dbCmd, SqlExpression<T> expression)
         {
             var sql = expression.ToCountStatement();
-            return GetCount(dbCmd, sql);
+            return GetCount(dbCmd, sql, expression.Params);
         }
 
         internal static long Count<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
         {
-            var ev = dbCmd.GetDialectProvider().SqlExpression<T>();
-            ev.Where(predicate);
-            var sql = ev.ToCountStatement();
-            return GetCount(dbCmd, sql);
+            var q = dbCmd.GetDialectProvider().SqlExpression<T>();
+            q.Where(predicate);
+            var sql = q.ToCountStatement();
+            return GetCount(dbCmd, sql, q.Params);
         }
 
         internal static long GetCount(this IDbCommand dbCmd, string sql)
         {
             return dbCmd.Column<long>(sql).Sum();
+        }
+
+        internal static long GetCount(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams)
+        {
+            return dbCmd.Column<long>(sql, sqlParams).Sum();
         }
 
         internal static long RowCount<T>(this IDbCommand dbCmd, SqlExpression<T> expression)

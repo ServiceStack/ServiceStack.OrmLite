@@ -6,7 +6,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 using ServiceStack.Data;
+using ServiceStack.OrmLite.Converters;
+using ServiceStack.OrmLite.MySql.Converters;
 using ServiceStack.OrmLite.MySql.DataAnnotations;
+using ServiceStack.OrmLite.Support;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.MySql
@@ -20,23 +23,32 @@ namespace ServiceStack.OrmLite.MySql
         public MySqlDialectProvider()
         {
             base.AutoIncrementDefinition = "AUTO_INCREMENT";
-            base.IntColumnDefinition = "int(11)";
-            base.BoolColumnDefinition = "tinyint(1)";
-            base.DecimalColumnDefinition = "decimal(38,6)";
-            base.GuidColumnDefinition = "char(36)";
-            base.DefaultStringLength = 255;
-            base.MaxStringColumnDefinition = "TEXT";
-            base.InitColumnTypeMap();
-            base.DefaultValueFormat = " DEFAULT '{0}'";
+            base.DefaultValueFormat = " DEFAULT {0}";
             base.SelectIdentitySql = "SELECT LAST_INSERT_ID()";
-        }
 
-        public override void OnAfterInitColumnTypeMap()
-        {
-            DbTypeMap.Set<Guid>(DbType.String, GuidColumnDefinition);
-            DbTypeMap.Set<Guid?>(DbType.String, GuidColumnDefinition);
-            DbTypeMap.Set<DateTimeOffset>(DbType.DateTimeOffset, StringColumnDefinition);
-            DbTypeMap.Set<DateTimeOffset?>(DbType.DateTimeOffset, StringColumnDefinition);
+            base.InitColumnTypeMap();
+
+            base.RegisterConverter<string>(new MySqlStringConverter());
+            base.RegisterConverter<char[]>(new MySqlCharArrayConverter());
+            base.RegisterConverter<bool>(new MySqlBoolConverter());
+
+            base.RegisterConverter<byte>(new MySqlByteConverter());
+            base.RegisterConverter<sbyte>(new MySqlSByteConverter());
+            base.RegisterConverter<short>(new MySqlInt16Converter());
+            base.RegisterConverter<ushort>(new MySqlUInt16Converter());
+            base.RegisterConverter<int>(new MySqlInt32Converter());
+            base.RegisterConverter<uint>(new MySqlUInt32Converter());
+
+            base.RegisterConverter<decimal>(new MySqlDecimalConverter());
+
+            base.RegisterConverter<Guid>(new MySqlGuidConverter());
+            base.RegisterConverter<DateTime>(new MySqlDateTimeConverter());
+            base.RegisterConverter<DateTimeOffset>(new MySqlDateTimeOffsetConverter());
+
+            this.Variables = new Dictionary<string, string>
+            {
+                { OrmLiteVariables.SystemUtc, "CURRENT_TIMESTAMP" },
+            };
         }
 
         public static string RowVersionTriggerFormat = "{0}RowVersionUpdateTrigger";
@@ -48,8 +60,6 @@ namespace ServiceStack.OrmLite.MySql
                 var triggerName = RowVersionTriggerFormat.Fmt(GetTableName(modelDef));
                 return "DROP TRIGGER IF EXISTS {0}".Fmt(GetQuotedName(triggerName));
             }
-
-
             return null;
         }
 
@@ -84,43 +94,10 @@ namespace ServiceStack.OrmLite.MySql
         {
             if (value == null) return "NULL";
 
-            if (fieldType == typeof(DateTime))
-            {
-                var dateValue = (DateTime)value;
-                /*
-                 * ms not contained in format. MySql ignores ms part anyway
-                 * 
-                 * for more details see: http://dev.mysql.com/doc/refman/5.1/en/datetime.html
-                 */
-                const string dateTimeFormat = "yyyy-MM-dd HH:mm:ss";
-
-                return base.GetQuotedValue(dateValue.ToString(dateTimeFormat), typeof(string));
-            }
-
             if (fieldType == typeof(byte[]))
-            {
                 return "0x" + BitConverter.ToString((byte[])value).Replace("-", "");
-            }
 
             return base.GetQuotedValue(value, fieldType);
-        }
-
-        public override object ConvertDbValue(object value, Type type)
-        {
-            if (value == null || value is DBNull) return null;
-
-            if (type == typeof(bool))
-            {
-                return
-                    value is bool
-                        ? value
-                        : (int.Parse(value.ToString()) != 0); //backward compatibility (prev version mapped bool as bit(1))
-            }
-
-            if (type == typeof(byte[]))
-                return value;
-
-            return base.ConvertDbValue(value, type);
         }
 
         public override string GetTableName(string table, string schema = null)
@@ -144,7 +121,14 @@ namespace ServiceStack.OrmLite.MySql
 
         public override SqlExpression<T> SqlExpression<T>()
         {
-            return new MySqlExpression<T>(this);
+            return !OrmLiteConfig.UseParameterizeSqlExpressions
+                ? new MySqlExpression<T>(this)
+                : (SqlExpression<T>)new MySqlParameterizedExpression<T>(this);
+        }
+
+        public override IDbDataParameter CreateParam()
+        {
+            return new MySqlParameter();
         }
 
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
@@ -213,15 +197,12 @@ namespace ServiceStack.OrmLite.MySql
                 fieldDef.IsNullable,
                 fieldDef.IsRowVersion,
                 fieldDef.FieldLength,
-                null,
-                fieldDef.DefaultValue,
+                fieldDef.Scale,
+                GetDefaultValue(fieldDef),
                 fieldDef.CustomFieldDefinition);
 
             if (fieldDef.IsRowVersion)
                 return ret + " DEFAULT 1";
-
-            if (fieldDef.ColumnType == typeof(Decimal))
-                return base.ReplaceDecimalColumnDefinition(ret, fieldDef.FieldLength, fieldDef.Scale);
 
             return ret;
         }

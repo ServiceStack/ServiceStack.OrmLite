@@ -15,19 +15,36 @@ using System.Data;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+using ServiceStack.OrmLite.Converters;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
     public interface IOrmLiteDialectProvider
     {
+        void RegisterConverter<T>(IOrmLiteConverter converter);
+
         IOrmLiteExecFilter ExecFilter { get; set; }
 
-        int DefaultStringLength { get; set; }
+        /// <summary>
+        /// Gets the explicit Converter registered for a specific type
+        /// </summary>
+        IOrmLiteConverter GetConverter(Type type);
+
+        /// <summary>
+        /// Return best matching converter, falling back to Enum, Value or Ref Type Converters
+        /// </summary>
+        IOrmLiteConverter GetConverterBestMatch(Type type);
+
+        IOrmLiteConverter GetConverterBestMatch(FieldDefinition fieldDef);
 
         string ParamString { get; set; }
 
+        [Obsolete("Use GetStringConverter().UseUnicode")]
         bool UseUnicode { get; set; }
+
+        [Obsolete("Use GetStringConverter().StringLength")]
+        int DefaultStringLength { get; set; }
 
         string EscapeWildcards(string value);
 
@@ -43,11 +60,17 @@ namespace ServiceStack.OrmLite
         /// <returns></returns>
         string GetQuotedValue(string paramValue);
 
-        void SetDbValue(FieldDefinition fieldDef, IDataReader reader, int colIndex, object instance);
-
-        object ConvertDbValue(object value, Type type);
-
         string GetQuotedValue(object value, Type fieldType);
+
+        object GetParamValue(object value, Type fieldType);
+
+        object ToDbValue(object value, Type type);
+
+        object FromDbValue(object value, Type type);
+
+        object GetValue(IDataReader reader, int columnIndex, Type type);
+
+        int GetValues(IDataReader reader, object[] values);
 
         IDbConnection CreateConnection(string filePath, Dictionary<string, string> options);
 
@@ -93,10 +116,11 @@ namespace ServiceStack.OrmLite
         Dictionary<string, FieldDefinition> GetFieldDefinitionMap(ModelDefinition modelDef);
 
         object GetFieldValue(FieldDefinition fieldDef, object value);
+        object GetFieldValue(Type fieldType, object value);
 
-        string ToUpdateRowStatement(object objWithProperties, ICollection<string> UpdateFields = null);
 
-        string ToDeleteRowStatement(object objWithProperties);
+        void PrepareUpdateRowStatement(IDbCommand dbCmd, object objWithProperties, ICollection<string> UpdateFields = null);
+
         string ToDeleteStatement(Type tableType, string sqlFilter, params object[] filterParams);
 
         IDbCommand CreateParameterizedDeleteStatement(IDbConnection connection, object objWithProperties);
@@ -128,13 +152,19 @@ namespace ServiceStack.OrmLite
 
         bool DoesSequenceExist(IDbCommand dbCmd, string sequencName);
 
+        ulong FromDbRowVersion(object value);
         string GetRowVersionColumnName(FieldDefinition field);
+
         string GetColumnNames(ModelDefinition modelDef);
 
         SqlExpression<T> SqlExpression<T>();
 
-        DbType GetColumnDbType(Type valueType);
-        string GetColumnTypeDefinition(Type fieldType);
+        [Obsolete("Use InitDbParam")]
+        DbType GetColumnDbType(Type columnType);
+
+        IDbDataParameter CreateParam();
+
+        void InitDbParam(IDbDataParameter dbParam, Type columnType);
 
         //DDL
         string GetDropForeignKeyConstraints(ModelDefinition modelDef);
@@ -162,7 +192,7 @@ namespace ServiceStack.OrmLite
 
         Task<long> InsertAndGetLastInsertIdAsync<T>(IDbCommand dbCmd, CancellationToken token);
     
-        string GetLoadChildrenSubSelect<From>(ModelDefinition modelDef, SqlExpression<From> expr);
+        string GetLoadChildrenSubSelect<From>(SqlExpression<From> expr);
         string ToRowCountStatement(string innerSql);
     }
 }

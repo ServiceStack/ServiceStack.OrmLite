@@ -5,12 +5,12 @@ namespace ServiceStack.OrmLite.Tests.Shared
     public class Person
     {
         public static Person[] Rockstars = new[] {
-            new Person(1, "Jimi", "Hendrix", 27), 
-            new Person(2, "Janis", "Joplin", 27), 
-            new Person(3, "Jim", "Morrisson", 27), 
-            new Person(4, "Kurt", "Cobain", 27),              
-            new Person(5, "Elvis", "Presley", 42), 
-            new Person(6, "Michael", "Jackson", 50), 
+            new Person(1, "Jimi", "Hendrix", 27),
+            new Person(2, "Janis", "Joplin", 27),
+            new Person(3, "Jim", "Morrisson", 27),
+            new Person(4, "Kurt", "Cobain", 27),
+            new Person(5, "Elvis", "Presley", 42),
+            new Person(6, "Michael", "Jackson", 50),
         };
 
         public int Id { get; set; }
@@ -25,6 +25,34 @@ namespace ServiceStack.OrmLite.Tests.Shared
             FirstName = firstName;
             LastName = lastName;
             Age = age;
+        }
+
+        protected bool Equals(Person other)
+        {
+            return Id == other.Id &&
+                string.Equals(FirstName, other.FirstName) &&
+                string.Equals(LastName, other.LastName) &&
+                Age == other.Age;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((Person)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = Id;
+                hashCode = (hashCode * 397) ^ (FirstName != null ? FirstName.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (LastName != null ? LastName.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ Age;
+                return hashCode;
+            }
         }
     }
 
@@ -49,6 +77,30 @@ namespace ServiceStack.OrmLite.Tests.Shared
     public class EntityWithId
     {
         public int Id { get; set; }
+    }
+
+    public class RockstarAlbum
+    {
+        public static RockstarAlbum[] SeedAlbums = new[] {
+            new RockstarAlbum { RockstarId = 1, Name = "Electric Ladyland" },
+            new RockstarAlbum { RockstarId = 4, Name = "Nevermind" },
+            new RockstarAlbum { RockstarId = 6, Name = "Thriller" },
+        };
+
+        [AutoIncrement]
+        public int Id { get; set; }
+        public int RockstarId { get; set; }
+        public string Name { get; set; }
+    }
+
+    public class PersonWithAlbum
+    {
+        public int Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public int Age { get; set; }
+        public int RockstarId { get; set; }
+        public string RockstarAlbumName { get; set; }
     }
 
 }

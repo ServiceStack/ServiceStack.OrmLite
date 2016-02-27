@@ -27,42 +27,45 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        public async Task API_SqlServer_Examples_Async()
+        public async Task API_SqlServer_Parameterized_Examples_Async()
         {
+            var hold = OrmLiteConfig.UseParameterizeSqlExpressions;
+            OrmLiteConfig.UseParameterizeSqlExpressions = true;
+
             await db.InsertAsync(Person.Rockstars);
 
             await db.SelectAsync<Person>(x => x.Age > 40);
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"FirstName\", \"LastName\", \"Age\" \nFROM \"Person\"\nWHERE (\"Age\" > 40)"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"FirstName\", \"LastName\", \"Age\" \nFROM \"Person\"\nWHERE (\"Age\" > @0)"));
 
             await db.SelectAsync<Person>(q => q.Where(x => x.Age > 40).OrderBy(x => x.Id));
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"FirstName\", \"LastName\", \"Age\" \nFROM \"Person\"\nWHERE (\"Age\" > 40)\nORDER BY \"Id\""));
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"FirstName\", \"LastName\", \"Age\" \nFROM \"Person\"\nWHERE (\"Age\" > @0)\nORDER BY \"Id\""));
 
             await db.SelectAsync<Person>(q => q.Where(x => x.Age > 40));
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"FirstName\", \"LastName\", \"Age\" \nFROM \"Person\"\nWHERE (\"Age\" > 40)"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"FirstName\", \"LastName\", \"Age\" \nFROM \"Person\"\nWHERE (\"Age\" > @0)"));
 
             await db.SelectAsync(db.From<Person>().Where(x => x.Age > 40));
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"FirstName\", \"LastName\", \"Age\" \nFROM \"Person\"\nWHERE (\"Age\" > 40)"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"FirstName\", \"LastName\", \"Age\" \nFROM \"Person\"\nWHERE (\"Age\" > @0)"));
 
             await db.SingleAsync<Person>(x => x.Age == 42);
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT TOP 1 \"Id\", \"FirstName\", \"LastName\", \"Age\" \nFROM \"Person\"\nWHERE (\"Age\" = 42)"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT TOP 1 \"Id\", \"FirstName\", \"LastName\", \"Age\" \nFROM \"Person\"\nWHERE (\"Age\" = @0)"));
 
             await db.SingleAsync<Person>(q => q.Where(x => x.Age == 42));
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT TOP 1 \"Id\", \"FirstName\", \"LastName\", \"Age\" \nFROM \"Person\"\nWHERE (\"Age\" = 42)"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT TOP 1 \"Id\", \"FirstName\", \"LastName\", \"Age\" \nFROM \"Person\"\nWHERE (\"Age\" = @0)"));
 
             await db.SingleAsync(db.From<Person>().Where(x => x.Age == 42));
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT TOP 1 \"Id\", \"FirstName\", \"LastName\", \"Age\" \nFROM \"Person\"\nWHERE (\"Age\" = 42)"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT TOP 1 \"Id\", \"FirstName\", \"LastName\", \"Age\" \nFROM \"Person\"\nWHERE (\"Age\" = @0)"));
 
             await db.ScalarAsync<Person, int>(x => Sql.Max(x.Age));
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT Max(\"Age\") \nFROM \"Person\""));
 
             await db.ScalarAsync<Person, int>(x => Sql.Max(x.Age), x => x.Age < 50);
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT Max(\"Age\") \nFROM \"Person\"\nWHERE (\"Age\" < 50)"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT Max(\"Age\") \nFROM \"Person\"\nWHERE (\"Age\" < @0)"));
 
             await db.CountAsync<Person>(x => x.Age < 50);
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT COUNT(*) \nFROM \"Person\"\nWHERE (\"Age\" < 50)"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT COUNT(*) \nFROM \"Person\"\nWHERE (\"Age\" < @0)"));
 
             await db.CountAsync(db.From<Person>().Where(x => x.Age < 50));
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT COUNT(*) \nFROM \"Person\"\nWHERE (\"Age\" < 50)"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT COUNT(*) \nFROM \"Person\"\nWHERE (\"Age\" < @0)"));
 
 
             await db.SelectAsync<Person>("Age > 40");
@@ -75,6 +78,9 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"FirstName\", \"LastName\", \"Age\" FROM \"Person\" WHERE Age > @age"));
 
             await db.SelectAsync<Person>("SELECT * FROM Person WHERE Age > @age", new { age = 40 });
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT * FROM Person WHERE Age > @age"));
+
+            await db.SelectAsync<Person>("SELECT * FROM Person WHERE Age > @age", new[] { db.CreateParam("age", 40) });
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT * FROM Person WHERE Age > @age"));
 
             await db.SelectAsync<Person>("Age > @age", new Dictionary<string, object> { { "age", 40 } });
@@ -131,7 +137,10 @@ namespace ServiceStack.OrmLite.Tests
             await db.SingleAsync<Person>("Age = @age", new { age = 42 });
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"FirstName\", \"LastName\", \"Age\" FROM \"Person\" WHERE Age = @age"));
 
-            await db.SingleFmtAsync<Person>("Age = {0}", 42);
+            await db.SingleAsync<Person>("Age = @age", new[] { db.CreateParam("age", 42) });
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"FirstName\", \"LastName\", \"Age\" FROM \"Person\" WHERE Age = @age"));
+
+            await db.SingleFmtAsync<Person>("Age = {0}", 42); 
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"FirstName\", \"LastName\", \"Age\" FROM \"Person\" WHERE Age = 42"));
 
             await db.SingleByIdAsync<Person>(1);
@@ -141,57 +150,72 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"FirstName\", \"LastName\", \"Age\" FROM \"Person\" WHERE \"Age\" = @Age"));
 
             await db.ScalarAsync<int>(db.From<Person>().Select(Sql.Count("*")).Where(q => q.Age > 40));
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT COUNT(*) \nFROM \"Person\"\nWHERE (\"Age\" > 40)"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT COUNT(*) \nFROM \"Person\"\nWHERE (\"Age\" > @0)"));
             await db.ScalarAsync<int>(db.From<Person>().Select(x => Sql.Count("*")).Where(q => q.Age > 40));
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT Count(*) \nFROM \"Person\"\nWHERE (\"Age\" > 40)"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT Count(*) \nFROM \"Person\"\nWHERE (\"Age\" > @0)"));
 
             await db.ScalarAsync<int>("SELECT COUNT(*) FROM Person WHERE Age > @age", new { age = 40 });
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT COUNT(*) FROM Person WHERE Age > @age"));
+
+            await db.ScalarAsync<int>("SELECT COUNT(*) FROM Person WHERE Age > @age", new[] { db.CreateParam("age", 40) });
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT COUNT(*) FROM Person WHERE Age > @age"));
 
             await db.ScalarFmtAsync<int>("SELECT COUNT(*) FROM Person WHERE Age > {0}", 40);
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT COUNT(*) FROM Person WHERE Age > 40"));
 
             await db.ColumnAsync<string>(db.From<Person>().Select(x => x.LastName).Where(q => q.Age == 27));
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"LastName\" \nFROM \"Person\"\nWHERE (\"Age\" = 27)"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"LastName\" \nFROM \"Person\"\nWHERE (\"Age\" = @0)"));
 
             await db.ColumnAsync<string>("SELECT LastName FROM Person WHERE Age = @age", new { age = 27 });
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT LastName FROM Person WHERE Age = @age"));
+
+            await db.ColumnAsync<string>("SELECT LastName FROM Person WHERE Age = @age", new[] { db.CreateParam("age", 27) });
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT LastName FROM Person WHERE Age = @age"));
 
             await db.ColumnFmtAsync<string>("SELECT LastName FROM Person WHERE Age = {0}", 27);
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT LastName FROM Person WHERE Age = 27"));
 
             await db.ColumnDistinctAsync<int>(db.From<Person>().Select(x => x.Age).Where(q => q.Age < 50));
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Age\" \nFROM \"Person\"\nWHERE (\"Age\" < 50)"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Age\" \nFROM \"Person\"\nWHERE (\"Age\" < @0)"));
 
             await db.ColumnDistinctAsync<int>("SELECT Age FROM Person WHERE Age < @age", new { age = 50 });
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT Age FROM Person WHERE Age < @age"));
+
+            await db.ColumnDistinctAsync<int>("SELECT Age FROM Person WHERE Age < @age", new[] { db.CreateParam("age", 50) });
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT Age FROM Person WHERE Age < @age"));
 
             await db.ColumnDistinctFmtAsync<int>("SELECT Age FROM Person WHERE Age < {0}", 50);
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT Age FROM Person WHERE Age < 50"));
 
             await db.LookupAsync<int, string>(db.From<Person>().Select(x => new { x.Age, x.LastName }).Where(q => q.Age < 50));
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Age\",\"LastName\" \nFROM \"Person\"\nWHERE (\"Age\" < 50)"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Age\",\"LastName\" \nFROM \"Person\"\nWHERE (\"Age\" < @0)"));
 
             await db.LookupAsync<int, string>("SELECT Age, LastName FROM Person WHERE Age < @age", new { age = 50 });
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT Age, LastName FROM Person WHERE Age < @age"));
+
+            await db.LookupAsync<int, string>("SELECT Age, LastName FROM Person WHERE Age < @age", new[] { db.CreateParam("age", 50) });
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT Age, LastName FROM Person WHERE Age < @age"));
 
             await db.LookupFmtAsync<int, string>("SELECT Age, LastName FROM Person WHERE Age < {0}", 50);
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT Age, LastName FROM Person WHERE Age < 50"));
 
             await db.DictionaryAsync<int, string>(db.From<Person>().Select(x => new { x.Id, x.LastName }).Where(x => x.Age < 50));
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\",\"LastName\" \nFROM \"Person\"\nWHERE (\"Age\" < 50)"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\",\"LastName\" \nFROM \"Person\"\nWHERE (\"Age\" < @0)"));
 
             await db.DictionaryAsync<int, string>("SELECT Id, LastName FROM Person WHERE Age < @age", new { age = 50 });
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT Id, LastName FROM Person WHERE Age < @age"));
+
+            await db.DictionaryAsync<int, string>("SELECT Id, LastName FROM Person WHERE Age < @age", new[] { db.CreateParam("age", 50) });
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT Id, LastName FROM Person WHERE Age < @age"));
 
             await db.DictionaryFmtAsync<int, string>("SELECT Id, LastName FROM Person WHERE Age < {0}", 50);
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT Id, LastName FROM Person WHERE Age < 50"));
 
             await db.ExistsAsync<Person>(x => x.Age < 50);
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT COUNT(*) \nFROM \"Person\"\nWHERE (\"Age\" < 50)"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT TOP 1 'exists' \nFROM \"Person\"\nWHERE (\"Age\" < @0)"));
 
             await db.ExistsAsync(db.From<Person>().Where(x => x.Age < 50));
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT COUNT(*) \nFROM \"Person\"\nWHERE (\"Age\" < 50)"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT TOP 1 'exists' \nFROM \"Person\"\nWHERE (\"Age\" < @0)"));
 
             await db.ExistsAsync<Person>(new { Age = 42 });
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"FirstName\", \"LastName\", \"Age\" FROM \"Person\" WHERE \"Age\" = @Age"));
@@ -207,27 +231,36 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT * FROM Person WHERE Age = 42"));
 
             await db.SqlListAsync<Person>(db.From<Person>().Select("*").Where(q => q.Age < 50));
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT * \nFROM \"Person\"\nWHERE (\"Age\" < 50)"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT * \nFROM \"Person\"\nWHERE (\"Age\" < @0)"));
 
             await db.SqlListAsync<Person>("SELECT * FROM Person WHERE Age < @age", new { age = 50 });
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT * FROM Person WHERE Age < @age"));
+
+            await db.SqlListAsync<Person>("SELECT * FROM Person WHERE Age < @age", new[] { db.CreateParam("age", 50) });
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT * FROM Person WHERE Age < @age"));
 
             await db.SqlListAsync<Person>("SELECT * FROM Person WHERE Age < @age", new Dictionary<string, object> { { "age", 50 } });
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT * FROM Person WHERE Age < @age"));
 
             await db.SqlColumnAsync<string>(db.From<Person>().Select(x => x.LastName).Where(q => q.Age < 50));
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"LastName\" \nFROM \"Person\"\nWHERE (\"Age\" < 50)"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"LastName\" \nFROM \"Person\"\nWHERE (\"Age\" < @0)"));
 
             await db.SqlColumnAsync<string>("SELECT LastName FROM Person WHERE Age < @age", new { age = 50 });
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT LastName FROM Person WHERE Age < @age"));
+
+            await db.SqlColumnAsync<string>("SELECT LastName FROM Person WHERE Age < @age", new[] { db.CreateParam("age", 50) });
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT LastName FROM Person WHERE Age < @age"));
 
             await db.SqlColumnAsync<string>("SELECT LastName FROM Person WHERE Age < @age", new Dictionary<string, object> { { "age", 50 } });
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT LastName FROM Person WHERE Age < @age"));
 
             await db.SqlScalarAsync<int>(db.From<Person>().Select(Sql.Count("*")).Where(q => q.Age < 50));
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT COUNT(*) \nFROM \"Person\"\nWHERE (\"Age\" < 50)"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT COUNT(*) \nFROM \"Person\"\nWHERE (\"Age\" < @0)"));
 
             await db.SqlScalarAsync<int>("SELECT COUNT(*) FROM Person WHERE Age < @age", new { age = 50 });
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT COUNT(*) FROM Person WHERE Age < @age"));
+
+            await db.SqlScalarAsync<int>("SELECT COUNT(*) FROM Person WHERE Age < @age", new[] { db.CreateParam("age", 50) });
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT COUNT(*) FROM Person WHERE Age < @age"));
 
             await db.SqlScalarAsync<int>("SELECT COUNT(*) FROM Person WHERE Age < @age", new Dictionary<string, object> { { "age", 50 } });
@@ -273,25 +306,25 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\"=@FirstName, \"LastName\"=@LastName, \"Age\"=@Age WHERE \"Id\"=@Id"));
 
             await db.UpdateAsync(new Person { Id = 1, FirstName = "JJ", Age = 27 }, p => p.LastName == "Hendrix");
-            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"Id\"=1, \"FirstName\"='JJ', \"LastName\"=NULL, \"Age\"=27 WHERE (\"LastName\" = 'Hendrix')"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"Id\"=@1, \"FirstName\"=@2, \"LastName\"=@3, \"Age\"=@4 WHERE (\"LastName\" = @0)"));
 
             await db.UpdateAsync<Person>(new { FirstName = "JJ" }, p => p.LastName == "Hendrix");
-            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\"='JJ' WHERE (\"LastName\" = 'Hendrix')"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\"=@1 WHERE (\"LastName\" = @0)"));
 
             await db.UpdateNonDefaultsAsync(new Person { FirstName = "JJ" }, p => p.LastName == "Hendrix");
-            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\"='JJ' WHERE (\"LastName\" = 'Hendrix')"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\"=@1 WHERE (\"LastName\" = @0)"));
 
             await db.UpdateOnlyAsync(new Person { FirstName = "JJ" }, p => p.FirstName);
-            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\"='JJ'"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\"=@0"));
 
             await db.UpdateOnlyAsync(new Person { FirstName = "JJ" }, p => p.FirstName, p => p.LastName == "Hendrix");
-            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\"='JJ' WHERE (\"LastName\" = 'Hendrix')"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\"=@1 WHERE (\"LastName\" = @0)"));
 
             await db.UpdateOnlyAsync(new Person { FirstName = "JJ", LastName = "Hendo" }, q => q.Update(p => p.FirstName));
-            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\"='JJ'"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\"=@0"));
 
             await db.UpdateOnlyAsync(new Person { FirstName = "JJ" }, q => q.Update(p => p.FirstName).Where(x => x.FirstName == "Jimi"));
-            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\"='JJ' WHERE (\"FirstName\" = 'Jimi')"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\"=@1 WHERE (\"FirstName\" = @0)"));
 
             await db.UpdateFmtAsync<Person>(set: "FirstName = {0}".SqlFmt("JJ"), where: "LastName = {0}".SqlFmt("Hendrix"));
             Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET FirstName = 'JJ' WHERE LastName = 'Hendrix'"));
@@ -325,13 +358,13 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM \"Person\" WHERE Age = 27"));
 
             await db.DeleteAsync<Person>(p => p.Age == 27);
-            Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM \"Person\" WHERE (\"Age\" = 27)"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM \"Person\" WHERE (\"Age\" = @0)"));
 
             await db.DeleteAsync<Person>(q => q.Where(p => p.Age == 27));
-            Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM \"Person\" WHERE (\"Age\" = 27)"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM \"Person\" WHERE (\"Age\" = @0)"));
 
             await db.DeleteAsync(db.From<Person>().Where(p => p.Age == 27));
-            Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM \"Person\" WHERE (\"Age\" = 27)"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM \"Person\" WHERE (\"Age\" = @0)"));
 
             await db.DeleteFmtAsync<Person>(where: "Age = {0}".SqlFmt(27));
             Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM \"Person\" WHERE Age = 27"));
@@ -349,6 +382,8 @@ namespace ServiceStack.OrmLite.Tests
 
             await db.SaveAllAsync(new[]{ new Person { Id = 14, FirstName = "Amy", LastName = "Winehouse", Age = 27 },
                               new Person { Id = 15, FirstName = "Amy", LastName = "Winehouse", Age = 27 } });
+
+            OrmLiteConfig.UseParameterizeSqlExpressions = hold;
         }
 
     }

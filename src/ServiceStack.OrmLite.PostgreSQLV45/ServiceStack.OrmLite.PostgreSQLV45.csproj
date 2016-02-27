@@ -1,0 +1,111 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{BFEAFA30-E59E-4DE7-AF0E-B3F1C49289EB}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ServiceStack.OrmLite.PostgreSQL</RootNamespace>
+    <AssemblyName>ServiceStack.OrmLite.PostgreSQL</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;NET45</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;NET45</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Npgsql, Version=3.0.5.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
+      <HintPath>..\packages\Npgsql.3.0.5\lib\net45\Npgsql.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ServiceStack.Interfaces">
+      <HintPath>..\..\lib\ServiceStack.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="ServiceStack.Text">
+      <HintPath>..\..\lib\ServiceStack.Text.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\ServiceStack.OrmLite.PostgreSQL\Converters\PostgreSqlArrayConverters.cs">
+      <Link>Converters\PostgreSqlArrayConverters.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.PostgreSQL\Converters\PostgreSqlBoolConverter.cs">
+      <Link>Converters\PostgreSqlBoolConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.PostgreSQL\Converters\PostgreSqlDateTimeConverter.cs">
+      <Link>Converters\PostgreSqlDateTimeConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.PostgreSQL\Converters\PostgreSqlDateTimeOffsetConverter.cs">
+      <Link>Converters\PostgreSqlDateTimeOffsetConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.PostgreSQL\Converters\PostgreSqlDecimalConverter.cs">
+      <Link>Converters\PostgreSqlDecimalConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.PostgreSQL\Converters\PostgreSqlGuidConverter.cs">
+      <Link>Converters\PostgreSqlGuidConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.PostgreSQL\Converters\PostgreSqlIntegerConverters.cs">
+      <Link>Converters\PostgreSqlIntegerConverters.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.PostgreSQL\Converters\PostgreSqlStringConverters.cs">
+      <Link>Converters\PostgreSqlStringConverters.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.PostgreSQL\Converters\PostrgreSqlFloatConverters.cs">
+      <Link>Converters\PostrgreSqlFloatConverters.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.PostgreSQL\PostgreSqlDialect.cs">
+      <Link>PostgreSqlDialect.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.PostgreSQL\PostgreSqlDialectProvider.cs">
+      <Link>PostgreSqlDialectProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.PostgreSQL\PostgreSqlExpression.cs">
+      <Link>PostgreSqlExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.PostgreSQL\PostgreSqlNamingStrategy.cs">
+      <Link>PostgreSqlNamingStrategy.cs</Link>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ServiceStack.OrmLiteV45\ServiceStack.OrmLiteV45.csproj">
+      <Project>{fdc37335-9ecc-413b-bec5-16b466b0e689}</Project>
+      <Name>ServiceStack.OrmLiteV45</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

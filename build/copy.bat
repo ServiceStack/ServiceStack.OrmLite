@@ -2,9 +2,6 @@ REM SET BUILD=Debug
 SET BUILD=Release
 SET MSBUILD=C:\Windows\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe 
 
-MD ..\..\ServiceStack.OrmLite\NuGet\ServiceStack.OrmLite.Sqlite32\lib\
-MD ..\..\ServiceStack.OrmLite\NuGet\ServiceStack.OrmLite.Sqlite32\lib\net40
-MD ..\..\ServiceStack.OrmLite\NuGet\ServiceStack.OrmLite.Sqlite64\lib\net40
 MD ..\..\ServiceStack.OrmLite\NuGet\ServiceStack.OrmLite.SqlServer\lib
 MD ..\..\ServiceStack.OrmLite\NuGet\ServiceStack.OrmLite.Sqlite.Mono\lib
 MD ..\..\ServiceStack.OrmLite\NuGet\ServiceStack.OrmLite.Sqlite.Mono\lib\net40
@@ -14,10 +11,6 @@ MD ..\..\ServiceStack.OrmLite\NuGet\ServiceStack.OrmLite.Oracle\lib
 MD ..\..\ServiceStack.OrmLite\NuGet\ServiceStack.OrmLite.Firebird\lib
 MD ..\..\ServiceStack.OrmLite\NuGet\ServiceStack.OrmLite.T4\content
 
-COPY ..\src\ServiceStack.OrmLite.Sqlite32\bin\%BUILD%\ServiceStack.OrmLite.*  ..\..\ServiceStack.OrmLite\NuGet\ServiceStack.OrmLite.Sqlite32\lib\net35
-COPY ..\src\ServiceStack.OrmLite.Sqlite32\bin\x86\ServiceStack.OrmLite.*  ..\..\ServiceStack.OrmLite\NuGet\ServiceStack.OrmLite.Sqlite32\lib\net40
-COPY ..\src\ServiceStack.OrmLite.Sqlite64\bin\%BUILD%\ServiceStack.OrmLite.*  ..\..\ServiceStack.OrmLite\NuGet\ServiceStack.OrmLite.Sqlite64\lib\net35
-COPY ..\src\ServiceStack.OrmLite.Sqlite64\bin\x64\ServiceStack.OrmLite.*  ..\..\ServiceStack.OrmLite\NuGet\ServiceStack.OrmLite.Sqlite64\lib\net40
 COPY ..\src\ServiceStack.OrmLite.SqlServer\bin\%BUILD%\ServiceStack.OrmLite.* ..\..\ServiceStack.OrmLite\NuGet\ServiceStack.OrmLite.SqlServer\lib
 
 COPY ..\lib\Mono.Data.Sqlite.dll  ..\..\ServiceStack.OrmLite\NuGet\ServiceStack.OrmLite.Sqlite.Mono\lib\net35

@@ -22,6 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -36,8 +37,9 @@
     <Reference Include="Mono.Security">
       <HintPath>..\..\lib\Mono.Security.dll</HintPath>
     </Reference>
-    <Reference Include="nunit.framework">
-      <HintPath>..\..\src\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
+    <Reference Include="nunit.framework, Version=2.6.4.14350, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+      <HintPath>..\..\src\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="ServiceStack">
       <HintPath>..\..\lib\ServiceStack.dll</HintPath>
@@ -64,10 +66,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ApiSqliteTestsAsync.cs" />
-    <Compile Include="ApiSqlServerTestsAsync.cs" />
-    <Compile Include="AsyncTests.cs" />
     <Compile Include="ApiMySqlTestsAsync.cs" />
+    <Compile Include="ApiPostgreSqlTestsAsync.cs" />
+    <Compile Include="ApiSqliteTestsAsync.cs" />
+    <Compile Include="ApiSqliteTestsAsync.NonParam.cs" />
+    <Compile Include="ApiPostgreSqlTestsAsync.NonParam.cs" />
+    <Compile Include="ApiSqlServerTestsAsync.cs" />
+    <Compile Include="ApiSqlServerTestsAsync.NonParam.cs" />
+    <Compile Include="AsyncTests.cs" />
+    <Compile Include="ApiMySqlTestsAsync.NonParam.cs" />
+    <Compile Include="AutoQueryTestsAsync.cs" />
     <Compile Include="CustomSqlTestsAsync.cs" />
     <Compile Include="Issues\LoadSelectAmbiguousColumnIssue.cs" />
     <Compile Include="LoadReferencesTests.cs" />
@@ -95,12 +103,17 @@
     </Compile>
     <Compile Include="T4\OrmLiteT4Tests.cs" />
     <Compile Include="TestHelpers.cs" />
+    <Compile Include="UpdateAsyncTests.cs" />
     <Compile Include="UseCase\CustomerOrdersUseCase.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite.MySqlV45\ServiceStack.OrmLite.MySqlV45.csproj">
       <Project>{d1858737-fc4f-4432-8725-e5b79a13d5f6}</Project>
       <Name>ServiceStack.OrmLite.MySqlV45</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.PostgreSqlV45\ServiceStack.OrmLite.PostgreSQLV45.csproj">
+      <Project>{bfeafa30-e59e-4de7-af0e-b3f1c49289eb}</Project>
+      <Name>ServiceStack.OrmLite.PostgreSQLV45</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite.SqliteV45\ServiceStack.OrmLite.SqliteV45.csproj">
       <Project>{30c0c876-abcb-441b-bfd4-aa9f688d9e54}</Project>
