@@ -449,13 +449,13 @@ db.UpdateOnly(new Person { FirstName = "JJ" },
 For the ultimate flexibility we also provide un-typed, string-based expressions. Use the `.Params()` extension method escape parameters (inspired by [massive](https://github.com/robconery/massive)):
 
 ```csharp
-db.Update<Person>(set: "FirstName = {0}".Params("JJ"), 
+db.UpdateFmt<Person>(set: "FirstName = {0}".Params("JJ"), 
                 where: "LastName = {0}".Params("Hendrix"));
 ```
 Even the Table name can be a string so you perform the same update without requiring the Person model at all:
 
 ```csharp
-db.Update(table: "Person", set: "FirstName = {0}".Params("JJ"), 
+db.UpdateFmt(table: "Person", set: "FirstName = {0}".Params("JJ"), 
           where: "LastName = {0}".Params("Hendrix"));
 ```
 **UPDATE "Person" SET FirstName = 'JJ' WHERE LastName = 'Hendrix'**
