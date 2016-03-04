@@ -446,17 +446,17 @@ db.UpdateOnly(new Person { FirstName = "JJ" },
 ```
 **UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("LastName" = 'Hendrix')**
 
-For the ultimate flexibility we also provide un-typed, string-based expressions. Use the `.Params()` extension method escape parameters (inspired by [massive](https://github.com/robconery/massive)):
+For the ultimate flexibility we also provide un-typed, string-based expressions. Use the `.SqlFmt()` extension method escape parameters (inspired by [massive](https://github.com/robconery/massive)):
 
 ```csharp
-db.UpdateFmt<Person>(set: "FirstName = {0}".Params("JJ"), 
-                where: "LastName = {0}".Params("Hendrix"));
+db.UpdateFmt<Person>(set: "FirstName = {0}".SqlFmt("JJ"), 
+                where: "LastName = {0}".SqlFmt("Hendrix"));
 ```
 Even the Table name can be a string so you perform the same update without requiring the Person model at all:
 
 ```csharp
-db.UpdateFmt(table: "Person", set: "FirstName = {0}".Params("JJ"), 
-          where: "LastName = {0}".Params("Hendrix"));
+db.UpdateFmt(table: "Person", set: "FirstName = {0}".SqlFmt("JJ"), 
+          where: "LastName = {0}".SqlFmt("Hendrix"));
 ```
 **UPDATE "Person" SET FirstName = 'JJ' WHERE LastName = 'Hendrix'**
 
@@ -492,12 +492,12 @@ db.Delete<Person>(q => q.Where(p => p.Age == 27));
 
 As well as un-typed, string-based expressions:
 ```csharp
-db.Delete<Person>(where: "Age = {0}".Params(27));
+db.Delete<Person>(where: "Age = {0}".SqlFmt(27));
 ```
 
 Which also can take a table name so works without requiring a typed **Person** model
 ```csharp
-db.Delete(table: "Person", where: "Age = {0}".Params(27));
+db.Delete(table: "Person", where: "Age = {0}".SqlFmt(27));
 ```
 
 **DELETE FROM "Person" WHERE Age = 27**
