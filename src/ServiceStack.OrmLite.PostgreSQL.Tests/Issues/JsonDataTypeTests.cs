@@ -38,7 +38,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Issues
                     {
                         foreach (var itemHistory in licenseCheck.Body.List)
                         {
-                            Console.WriteLine($"{itemHistory.AddedOn} :  Note {itemHistory.Note}");
+                            $"{itemHistory.AddedOn} :  Note {itemHistory.Note}".Print();
                         }
                     }
                 }
