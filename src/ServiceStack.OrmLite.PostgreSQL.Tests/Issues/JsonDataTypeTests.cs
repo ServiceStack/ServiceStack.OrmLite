@@ -16,9 +16,15 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Issues
         {
             OrmLiteConfig.DialectProvider.NamingStrategy = new OrmLiteNamingStrategyBase();
 
-            var item = new LicenseCheckTemp();
-            item.Body = new CheckHistory();
-            item.Body.List.Add(new ItemHistory { AddedOn = DateTime.MaxValue, Note = "Test" });
+            var item = new LicenseCheckTemp
+            {
+                Body = new CheckHistory
+                {
+                    List = {
+                        new ItemHistory { AddedOn = DateTime.MaxValue, Note = "Test" }
+                    }
+                }
+            };
 
             using (var db = OpenDbConnection())
             {
@@ -38,7 +44,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Issues
                     {
                         foreach (var itemHistory in licenseCheck.Body.List)
                         {
-                            $"{itemHistory.AddedOn} :  Note {itemHistory.Note}".Print();
+                            "{0} : Note {1}".Print(itemHistory.AddedOn, itemHistory.Note);
                         }
                     }
                 }
@@ -57,7 +63,12 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Issues
 
     public class CheckHistory
     {
-        public List<ItemHistory> List { get; set; } = new List<ItemHistory>();
+        public CheckHistory()
+        {
+            this.List = new List<ItemHistory>();
+        }
+
+        public List<ItemHistory> List { get; set; }
     }
 
     public class ItemHistory
@@ -67,5 +78,4 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Issues
         public DateTime AddedOn { get; set; }
 
     }
-
 }
