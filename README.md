@@ -251,43 +251,29 @@ db.Select<Author>(q => q.Birthday >= new DateTime(agesAgo, 1, 1)
                     && q.Birthday <= new DateTime(agesAgo, 12, 31));
 ```
 
-**WHERE (("Birthday" >= '1992-01-01 00:00:00.000') AND ("Birthday" <= '1992-12-31 00:00:00.000'))**
-
 ```csharp
 db.Select<Author>(q => Sql.In(q.City, "London", "Madrid", "Berlin"));
 ```
-
-**WHERE "JobCity" In ('London', 'Madrid', 'Berlin')**
 
 ```csharp
 db.Select<Author>(q => q.Earnings <= 50);
 ```
 
-**WHERE ("Earnings" <= 50)**
-
 ```csharp
 db.Select<Author>(q => q.Name.StartsWith("A"));
 ```
-
-**WHERE upper("Name") like 'A%'**
 
 ```csharp
 db.Select<Author>(q => q.Name.EndsWith("garzon"));
 ```
 
-**WHERE upper("Name") like '%GARZON'**
-
 ```csharp
 db.Select<Author>(q => q.Name.Contains("Benedict"));
 ```
 
-**WHERE upper("Name") like '%BENEDICT%'**
-
 ```csharp
 db.Select<Author>(q => q.Rate == 10 && q.City == "Mexico");
 ```
-
-**WHERE (("Rate" = 10) AND ("JobCity" = 'Mexico'))**
 
 Right now the Expression support can satisfy most simple queries with a strong-typed API. 
 For anything more complex (e.g. queries with table joins) you can still easily fall back to raw SQL queries as seen below. 
@@ -300,67 +286,46 @@ OrmLite also includes a number of convenient API's providing DRY, typed data acc
 Person personById = db.SingleById<Person>(1);
 ```
 
-**SELECT "Id", "FirstName", "LastName", "Age" FROM "Person" WHERE "Id" = @Id**
-
 ```csharp
 Person personByAge = db.Single<Person>(x => x.Age == 42);
 ```
 
-**SELECT TOP 1 "Id", "FirstName", "LastName", "Age"  FROM "Person" WHERE ("Age" = 42)**
-
 ```csharp
 int maxAgeUnder50 = db.Scalar<Person, int>(x => Sql.Max(x.Age), x => x.Age < 50);
 ```
-
-**SELECT Max("Age") FROM "Person" WHERE ("Age" < 50)**
 
 ```csharp
 int peopleOver40 = db.Scalar<int>(
     db.From<Person>().Select(Sql.Count("*")).Where(q => q.Age > 40));
 ```
 
-**SELECT COUNT(*) FROM "Person" WHERE ("Age" > 40)**
-
 ```csharp
 int peopleUnder50 = db.Count<Person>(x => x.Age < 50);
 ```
 
-**SELECT COUNT(*) FROM "Person" WHERE ("Age" < 50)**
-
 ```csharp
 bool has42YearOlds = db.Exists<Person>(new { Age = 42 });
 ```
-
-**WHERE "Age" = @Age**
 
 ```csharp
 List<string> results = db.Column<string>(db.From<Person>().Select(x => x.LastName)
                          .Where(q => q.Age == 27));
 ```
 
-**SELECT "LastName" FROM "Person" WHERE ("Age" = 27)**
-
 ```csharp
 HashSet<int> results = db.ColumnDistinct<int>(db.From<Person>().Select(x => x.Age)
                          .Where(q => q.Age < 50));
 ```
-
-**SELECT "Age" FROM "Person" WHERE ("Age" < 50)**
 
 ```csharp
 Dictionary<int,string> results = db.Dictionary<int, string>(
     db.From<Person>().Select(x => new { x.Id, x.LastName }).Where(x => x.Age < 50));
 ```
 
-**SELECT "Id","LastName" FROM "Person" WHERE ("Age" < 50)**
-
-
 ```csharp
 Dictionary<int, List<string>> results = db.Lookup<int, string>(
     db.From<Person>().Select(x => new { x.Age, x.LastName }).Where(q => q.Age < 50));
 ```
-
-**SELECT "Age","LastName" FROM "Person" WHERE ("Age" < 50)**
 
 ### INSERT, UPDATE and DELETEs
 
@@ -384,15 +349,11 @@ is used to filter the update to this specific record:
 ```csharp
 db.Update(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27});
 ```
-**UPDATE "Person" SET "FirstName" = 'Jimi',"LastName" = 'Hendrix',"Age" = 27 WHERE "Id" = 1**
-
 If you supply your own where expression, it updates every field (inc. Id) but uses your filter instead:
 
 ```csharp
 db.Update(new Person { Id = 1, FirstName = "JJ" }, p => p.LastName == "Hendrix");
 ```
-**UPDATE "Person" SET "Id" = 1,"FirstName" = 'JJ',"LastName" = NULL,"Age" = NULL WHERE ("LastName" = 'Hendrix')**
-
 One way to limit the fields which gets updated is to use an **Anonymous Type**:
 
 ```csharp
@@ -405,8 +366,6 @@ Or by using `UpdateNonDefaults` which only updates the non-default values in you
 db.UpdateNonDefaults(new Person { FirstName = "JJ" }, p => p.LastName == "Hendrix");
 ```
 
-**UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("LastName" = 'Hendrix')**
-
 #### UpdateOnly
 
 As updating a partial row is a common use-case in Db's, we've added a number of methods for just 
@@ -416,35 +375,29 @@ The first expression in an `UpdateOnly` statement is used to specify which field
 ```csharp
 db.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName);
 ```
-**UPDATE "Person" SET "FirstName" = 'JJ'**
-
 ```csharp
 db.UpdateOnly(new Person { FirstName = "JJ", Age = 12 }, 
     onlyFields: p => new { p.FirstName, p.Age });
 ```
-**UPDATE "Person" SET "FirstName" = 'JJ', "Age" = 12**
-
 When present, the second expression is used as the where filter:
 ```csharp
 db.UpdateOnly(new Person { FirstName = "JJ" }, 
     onlyFields: p => p.FirstName, 
     where: p => p.LastName == "Hendrix");
 ```
-**UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("LastName" = 'Hendrix')**
-
 Instead of using the expression filters above you can choose to use an ExpressionVisitor builder which provides more flexibility when you want to programatically construct the update statement:
 
 ```csharp
 db.UpdateOnly(new Person { FirstName = "JJ", LastName = "Hendo" }, 
   onlyFields: q => q.Update(p => p.FirstName));
 ```
-**UPDATE "Person" SET "FirstName" = 'JJ'**
+
+Using a typed SQL Expression:
 
 ```csharp
 db.UpdateOnly(new Person { FirstName = "JJ" }, 
   onlyFields: q => q.Update(p => p.FirstName).Where(x => x.FirstName == "Jimi"));
 ```
-**UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("LastName" = 'Hendrix')**
 
 For the ultimate flexibility we also provide un-typed, string-based expressions. Use the `.SqlFmt()` extension method escape parameters (inspired by [massive](https://github.com/robconery/massive)):
 
@@ -458,8 +411,6 @@ Even the Table name can be a string so you perform the same update without requi
 db.UpdateFmt(table: "Person", set: "FirstName = {0}".SqlFmt("JJ"), 
           where: "LastName = {0}".SqlFmt("Hendrix"));
 ```
-**UPDATE "Person" SET FirstName = 'JJ' WHERE LastName = 'Hendrix'**
-
 ### INSERT
 
 Insert's are pretty straight forward since in most cases you want to insert every field:
@@ -467,14 +418,11 @@ Insert's are pretty straight forward since in most cases you want to insert ever
 ```csharp
 db.Insert(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27 });
 ```
-**INSERT INTO "Person" ("Id","FirstName","LastName","Age") VALUES (1,'Jimi','Hendrix',27)**
-
 But do provide an API that takes an Expression Visitor for the rare cases you don't want to insert every field
 
 ```csharp
 db.InsertOnly(new Person { FirstName = "Amy" }, q => q.Insert(p => new {p.FirstName}))
 ```
-**INSERT INTO "Person" ("FirstName") VALUES ('Amy')**
 
 ### DELETE
 
@@ -488,8 +436,6 @@ Or an Expression Visitor:
 db.Delete<Person>(q => q.Where(p => p.Age == 27));
 ```
 
-**DELETE FROM "Person" WHERE ("Age" = 27)**
-
 As well as un-typed, string-based expressions:
 ```csharp
 db.Delete<Person>(where: "Age = {0}".SqlFmt(27));
@@ -499,8 +445,6 @@ Which also can take a table name so works without requiring a typed **Person** m
 ```csharp
 db.Delete(table: "Person", where: "Age = {0}".SqlFmt(27));
 ```
-
-**DELETE FROM "Person" WHERE Age = 27**
 
 # API Overview
 
