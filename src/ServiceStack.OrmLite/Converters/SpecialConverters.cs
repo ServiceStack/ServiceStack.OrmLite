@@ -59,7 +59,7 @@ namespace ServiceStack.OrmLite.Converters
             if (strVal != null)
                 return Enum.Parse(fieldType, strVal, ignoreCase:true);
 
-            return Convert.ChangeType(value, fieldType.GetTypeCode());
+            return Enum.ToObject(fieldType, value);
         }
     }
 

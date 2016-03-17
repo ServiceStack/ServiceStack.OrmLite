@@ -135,15 +135,15 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void CanSaveNullableEnum_with_specific_id_select_with_anon_type()
         {
-            using (var con = OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
-                con.CreateTableIfNotExists<MyObj>();
+                db.DropAndCreateTable<MyObj>();
                 var myObj = new MyObj();
                 myObj.Id = 1;
                 myObj.Test = MyEnum.One;
-                con.Insert(myObj);
+                db.Insert(myObj);
 
-                myObj = con.Single<MyObj>(new {Id = 1});
+                myObj = db.Single<MyObj>(new {Id = 1});
 
                 Assert.That(myObj.Id, Is.EqualTo(1));
                 Assert.That(myObj.Test, Is.Not.EqualTo(null));
@@ -154,13 +154,13 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void CanSaveNullableEnum_with_specific_id_select_with_type()
         {
-            using (var existsCon = OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
-                existsCon.CreateTableIfNotExists<MyObj>();
-                var exists = existsCon.SingleById<MyObj>(1);
+                db.DropAndCreateTable<MyObj>();
+                var exists = db.SingleById<MyObj>(1);
                 if (exists != null)
                 {
-                    existsCon.DeleteById<MyObj>(1);
+                    db.DeleteById<MyObj>(1);
                 }
             }
 
