@@ -341,7 +341,16 @@ namespace ServiceStack.OrmLite
                         else
                         {
                             var fieldValue = converter.FromDbValue(fieldDef.FieldType, value);
-                            fieldDef.SetValueFn(objWithProperties, fieldValue);
+                            if (fieldDef.FieldType.IsEnum && fieldDef.IsNullable)
+                            {
+                                var enumType = Nullable.GetUnderlyingType(fieldDef.PropertyInfo.PropertyType);
+                                var enumValue = Enum.ToObject(enumType, value);
+                                fieldDef.PropertyInfo.SetProperty(objWithProperties, enumValue);
+                            }
+                            else
+                            {
+                                fieldDef.SetValueFn(objWithProperties, fieldValue);
+                            }
                         }
                     }
                 }
