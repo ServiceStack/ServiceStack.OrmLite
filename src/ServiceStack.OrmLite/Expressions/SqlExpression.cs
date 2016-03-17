@@ -21,7 +21,7 @@ namespace ServiceStack.OrmLite
         private string groupBy = string.Empty;
         private string havingExpression;
         private string orderBy = string.Empty;
-        private string[] onlyFields = null;
+        private HashSet<string> onlyFields = null;
 
         public List<string> UpdateFields { get; set; }
         public List<string> InsertFields { get; set; }
@@ -72,7 +72,7 @@ namespace ServiceStack.OrmLite
             to.groupBy = groupBy;
             to.havingExpression = havingExpression;
             to.orderBy = orderBy;
-            to.onlyFields = onlyFields != null ? (string[])onlyFields.Clone() : null;
+            to.onlyFields = onlyFields != null ? new HashSet<string>(onlyFields) : null;
             to.UpdateFields = UpdateFields;
             to.InsertFields = InsertFields;
             to.modelDef = modelDef;
@@ -146,7 +146,7 @@ namespace ServiceStack.OrmLite
             }
 
             UnsafeSelect(sb.ToString());
-            onlyFields = fields;
+            onlyFields = new HashSet<string>(fields, StringComparer.OrdinalIgnoreCase);
 
             return this;
         }
