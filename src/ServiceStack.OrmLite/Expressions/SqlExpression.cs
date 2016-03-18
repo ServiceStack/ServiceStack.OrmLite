@@ -21,7 +21,7 @@ namespace ServiceStack.OrmLite
         private string groupBy = string.Empty;
         private string havingExpression;
         private string orderBy = string.Empty;
-        private HashSet<string> onlyFields = null;
+        protected internal HashSet<string> OnlyFields { get; set; }
 
         public List<string> UpdateFields { get; set; }
         public List<string> InsertFields { get; set; }
@@ -72,7 +72,7 @@ namespace ServiceStack.OrmLite
             to.groupBy = groupBy;
             to.havingExpression = havingExpression;
             to.orderBy = orderBy;
-            to.onlyFields = onlyFields != null ? new HashSet<string>(onlyFields) : null;
+            to.OnlyFields = OnlyFields != null ? new HashSet<string>(OnlyFields) : null;
             to.UpdateFields = UpdateFields;
             to.InsertFields = InsertFields;
             to.modelDef = modelDef;
@@ -114,7 +114,7 @@ namespace ServiceStack.OrmLite
             {
                 this.selectExpression = "SELECT " + rawSelect;
                 this.CustomSelect = true;
-                onlyFields = null;
+                OnlyFields = null;
             }
             return this;
         }
@@ -146,7 +146,7 @@ namespace ServiceStack.OrmLite
             }
 
             UnsafeSelect(sb.ToString());
-            onlyFields = new HashSet<string>(fields, StringComparer.OrdinalIgnoreCase);
+            OnlyFields = new HashSet<string>(fields, StringComparer.OrdinalIgnoreCase);
 
             return this;
         }
@@ -1526,7 +1526,7 @@ namespace ServiceStack.OrmLite
 
         private void BuildSelectExpression(string fields, bool distinct)
         {
-            onlyFields = null;
+            OnlyFields = null;
             selectDistinct = distinct;
 
             selectExpression = string.Format("SELECT {0}{1}",

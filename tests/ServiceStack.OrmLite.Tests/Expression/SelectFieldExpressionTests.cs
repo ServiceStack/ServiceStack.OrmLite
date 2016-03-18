@@ -122,13 +122,13 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 db.DropAndCreateTable<Person>();
                 db.InsertAll(Person.Rockstars);
                 db.DropAndCreateTable<RockstarAlbum>();
-                db.InsertAll(RockstarAlbum.SeedAlbums);
+                db.InsertAll(AutoQueryTests.SeedAlbums);
 
                 var q = db.From<Person>()
                     .Join<RockstarAlbum>((p, a) => p.Id == a.RockstarId)
                     .Select(new[] { "Id", "FirstName", "Age", "RockstarAlbumName" });
 
-                var results = db.Select<PersonWithAlbum>(q);
+                var results = db.Select<RockstarWithAlbum>(q);
 
                 db.GetLastSql().Print();
 
@@ -146,16 +146,18 @@ namespace ServiceStack.OrmLite.Tests.Expression
         {
             using (var db = OpenDbConnection())
             {
-                db.DropAndCreateTable<Person>();
-                db.InsertAll(Person.Rockstars);
+                db.DropAndCreateTable<Rockstar>();
+                db.InsertAll(AutoQueryTests.SeedRockstars);
                 db.DropAndCreateTable<RockstarAlbum>();
-                db.InsertAll(RockstarAlbum.SeedAlbums);
+                db.InsertAll(AutoQueryTests.SeedAlbums);
 
-                var q = db.From<Person>()
-                    .Join<RockstarAlbum>((p, a) => p.Id == a.RockstarId)
-                    .Select(new[] { "id", "firstname", "age", "rockstaralbumname" });
+                var q = db.From<Rockstar>()
+                    .Join<RockstarAlbum>()
+                    .Select(new[] { "id", "firstname", "age", "rockstaralbumname", "rockstaralbumid" });
 
-                var results = db.Select<PersonWithAlbum>(q);
+                var results = db.Select<RockstarWithAlbum>(q);
+
+                results.PrintDump();
 
                 db.GetLastSql().Print();
 
@@ -165,6 +167,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 Assert.That(results.All(x => x.Age > 0));
                 Assert.That(results.All(x => x.RockstarId == 0));
                 Assert.That(results.All(x => x.RockstarAlbumName != null));
+                Assert.That(results.All(x => x.RockstarAlbumId >= 10));
             }
         }
     }

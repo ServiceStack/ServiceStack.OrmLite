@@ -12,7 +12,7 @@ namespace ServiceStack.OrmLite.Support
     internal abstract class LoadList<Into, From>
     {
         protected IDbCommand dbCmd;
-        protected SqlExpression<From> expr;
+        protected SqlExpression<From> q;
 
         protected IOrmLiteDialectProvider dialectProvider;
         protected List<Into> parentResults;
@@ -30,23 +30,23 @@ namespace ServiceStack.OrmLite.Support
             get { return parentResults; }
         }
 
-        protected LoadList(IDbCommand dbCmd, SqlExpression<From> expr)
+        protected LoadList(IDbCommand dbCmd, SqlExpression<From> q)
         {
             dialectProvider = dbCmd.GetDialectProvider();
 
-            if (expr == null)
-                expr = dialectProvider.SqlExpression<From>();
+            if (q == null)
+                q = dialectProvider.SqlExpression<From>();
 
             this.dbCmd = dbCmd;
-            this.expr = expr;
+            this.q = q;
 
-            var sql = expr.SelectInto<Into>();
-            parentResults = dbCmd.ExprConvertToList<Into>(sql, expr.Params);
+            var sql = q.SelectInto<Into>();
+            parentResults = dbCmd.ExprConvertToList<Into>(sql, q.Params, onlyFields:q.OnlyFields);
 
             modelDef = ModelDefinition<Into>.Definition;
             fieldDefs = modelDef.AllFieldDefinitionsArray.Where(x => x.IsReference).ToList();
 
-            subSql = dialectProvider.GetLoadChildrenSubSelect(expr);
+            subSql = dialectProvider.GetLoadChildrenSubSelect(q);
         }
 
         protected string GetRefListSql(ModelDefinition refModelDef, FieldDefinition refField)
@@ -90,9 +90,9 @@ namespace ServiceStack.OrmLite.Support
         protected string GetRefSelfSql(ModelDefinition modelDef, FieldDefinition refSelf, ModelDefinition refModelDef)
         {
             //Load Self Table.RefTableId PK
-            expr.Select(dialectProvider.GetQuotedColumnName(modelDef, refSelf));
+            q.Select(dialectProvider.GetQuotedColumnName(modelDef, refSelf));
 
-            var subSqlRef = expr.ToSelectStatement();
+            var subSqlRef = q.ToSelectStatement();
 
             var sqlRef = "SELECT {0} FROM {1} WHERE {2} IN ({3})".Fmt(
                 dialectProvider.GetColumnNames(refModelDef),
@@ -191,7 +191,7 @@ namespace ServiceStack.OrmLite.Support
 
     internal class LoadListSync<Into, From> : LoadList<Into, From>
     {
-        public LoadListSync(IDbCommand dbCmd, SqlExpression<From> expr) : base(dbCmd, expr) {}
+        public LoadListSync(IDbCommand dbCmd, SqlExpression<From> q) : base(dbCmd, q) {}
 
         public void SetRefFieldList(FieldDefinition fieldDef, Type refType)
         {

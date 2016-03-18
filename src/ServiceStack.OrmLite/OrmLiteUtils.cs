@@ -58,7 +58,7 @@ namespace ServiceStack.OrmLite
             return typeof(T).IsValueType || typeof(T) == typeof(string);
         }
 
-        public static T ConvertTo<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider)
+        public static T ConvertTo<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, HashSet<string> onlyFields=null)
         {
             using (reader)
             {
@@ -71,7 +71,7 @@ namespace ServiceStack.OrmLite
                         return (T)(object)reader.ConvertToDictionaryObjects();
                     
                     var row = CreateInstance<T>();
-                    var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition, dialectProvider);
+                    var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition, dialectProvider, onlyFields: onlyFields);
                     var values = new object[reader.FieldCount];
                     row.PopulateWithSqlReader(dialectProvider, reader, indexCache, values);
                     return row;
@@ -100,7 +100,7 @@ namespace ServiceStack.OrmLite
             return row;
         }
 
-        public static List<T> ConvertToList<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider)
+        public static List<T> ConvertToList<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, HashSet<string> onlyFields=null)
         {
             if (typeof(T) == typeof(List<object>))
             {
@@ -133,7 +133,7 @@ namespace ServiceStack.OrmLite
                 var to = new List<T>();
                 using (reader)
                 {
-                    var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition, dialectProvider);
+                    var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition, dialectProvider, onlyFields:onlyFields);
                     var values = new object[reader.FieldCount];
                     while (reader.Read())
                     {
@@ -351,7 +351,10 @@ namespace ServiceStack.OrmLite
             return new SqlInValues(values, dialect);
         }
 
-        public static Tuple<FieldDefinition, int, IOrmLiteConverter>[] GetIndexFieldsCache(this IDataReader reader, ModelDefinition modelDefinition, IOrmLiteDialectProvider dialect)
+        public static Tuple<FieldDefinition, int, IOrmLiteConverter>[] GetIndexFieldsCache(this IDataReader reader, 
+            ModelDefinition modelDefinition, 
+            IOrmLiteDialectProvider dialect, 
+            HashSet<string> onlyFields = null)
         {
             var cache = new List<Tuple<FieldDefinition, int, IOrmLiteConverter>>();
             var ignoredFields = modelDefinition.IgnoredFieldDefinitions;
@@ -370,12 +373,13 @@ namespace ServiceStack.OrmLite
                 }
             }
 
-            if (remainingFieldDefs.Count > 0)
+            if (remainingFieldDefs.Count > 0 && onlyFields == null)
             {
                 var dbFieldMap = new Dictionary<string, int>(StringComparer.InvariantCultureIgnoreCase);
                 for (var i = 0; i < reader.FieldCount; i++)
                 {
-                    dbFieldMap[reader.GetName(i)] = i;
+                    var fieldName = reader.GetName(i);
+                    dbFieldMap[fieldName] = i;
                 }
 
                 foreach (var fieldDef in remainingFieldDefs)

@@ -116,7 +116,7 @@ namespace ServiceStack.OrmLite
             return to;
         }
 
-        internal static List<T> ExprConvertToList<T>(this IDbCommand dbCmd, string sql = null, IEnumerable<IDbDataParameter> sqlParams = null)
+        internal static List<T> ExprConvertToList<T>(this IDbCommand dbCmd, string sql = null, IEnumerable<IDbDataParameter> sqlParams = null, HashSet<string> onlyFields=null)
         {
             if (sql != null)
                 dbCmd.CommandText = sql;
@@ -130,7 +130,7 @@ namespace ServiceStack.OrmLite
 
             using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
             {
-                return reader.ConvertToList<T>(dbCmd.GetDialectProvider());
+                return reader.ConvertToList<T>(dbCmd.GetDialectProvider(), onlyFields:onlyFields);
             }
         }
 
@@ -257,7 +257,7 @@ namespace ServiceStack.OrmLite
             return dbCmd.LongScalar();
         }
 
-        internal static T ExprConvertTo<T>(this IDbCommand dbCmd, string sql = null, IEnumerable<IDbDataParameter> sqlParams = null)
+        internal static T ExprConvertTo<T>(this IDbCommand dbCmd, string sql = null, IEnumerable<IDbDataParameter> sqlParams = null, HashSet<string> onlyFields = null)
         {
             if (sql != null)
                 dbCmd.CommandText = sql;
@@ -271,7 +271,7 @@ namespace ServiceStack.OrmLite
 
             using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
             {
-                return reader.ConvertTo<T>(dbCmd.GetDialectProvider());
+                return reader.ConvertTo<T>(dbCmd.GetDialectProvider(), onlyFields: onlyFields);
             }
         }
 

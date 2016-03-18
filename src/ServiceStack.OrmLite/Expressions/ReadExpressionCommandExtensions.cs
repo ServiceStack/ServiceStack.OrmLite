@@ -11,59 +11,59 @@ namespace ServiceStack.OrmLite
     {
         internal static List<T> Select<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression)
         {
-            var expr = dbCmd.GetDialectProvider().SqlExpression<T>();
-            string sql = expression(expr).SelectInto<T>();
+            var q = dbCmd.GetDialectProvider().SqlExpression<T>();
+            string sql = expression(q).SelectInto<T>();
 
-            return dbCmd.ExprConvertToList<T>(sql, expr.Params);
+            return dbCmd.ExprConvertToList<T>(sql, q.Params, onlyFields: q.OnlyFields);
         }
 
         internal static List<Into> Select<Into, From>(this IDbCommand dbCmd, Func<SqlExpression<From>, SqlExpression<From>> expression)
         {
-            var expr = dbCmd.GetDialectProvider().SqlExpression<From>();
-            string sql = expression(expr).SelectInto<Into>();
+            var q = dbCmd.GetDialectProvider().SqlExpression<From>();
+            string sql = expression(q).SelectInto<Into>();
 
-            return dbCmd.ExprConvertToList<Into>(sql, expr.Params);
+            return dbCmd.ExprConvertToList<Into>(sql, q.Params, onlyFields: q.OnlyFields);
         }
 
-        internal static List<Into> Select<Into, From>(this IDbCommand dbCmd, SqlExpression<From> expression)
+        internal static List<Into> Select<Into, From>(this IDbCommand dbCmd, SqlExpression<From> q)
         {
-            string sql = expression.SelectInto<Into>();
-            return dbCmd.ExprConvertToList<Into>(sql, expression.Params);
+            string sql = q.SelectInto<Into>();
+            return dbCmd.ExprConvertToList<Into>(sql, q.Params, onlyFields: q.OnlyFields);
         }
 
-        internal static List<T> Select<T>(this IDbCommand dbCmd, SqlExpression<T> expression)
+        internal static List<T> Select<T>(this IDbCommand dbCmd, SqlExpression<T> q)
         {
-            string sql = expression.SelectInto<T>();
+            string sql = q.SelectInto<T>();
 
-            return dbCmd.ExprConvertToList<T>(sql, expression.Params);
+            return dbCmd.ExprConvertToList<T>(sql, q.Params, onlyFields: q.OnlyFields);
         }
 
         internal static List<T> Select<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
         {
-            var expr = dbCmd.GetDialectProvider().SqlExpression<T>();
-            string sql = expr.Where(predicate).SelectInto<T>();
+            var q = dbCmd.GetDialectProvider().SqlExpression<T>();
+            string sql = q.Where(predicate).SelectInto<T>();
 
-            return dbCmd.ExprConvertToList<T>(sql, expr.Params);
+            return dbCmd.ExprConvertToList<T>(sql, q.Params);
         }
 
         internal static T Single<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression)
         {
-            var expr = dbCmd.GetDialectProvider().SqlExpression<T>();
-            return dbCmd.Single(expression(expr));
+            var q = dbCmd.GetDialectProvider().SqlExpression<T>();
+            return dbCmd.Single(expression(q));
         }
 
         internal static T Single<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
         {
-            var ev = dbCmd.GetDialectProvider().SqlExpression<T>();
+            var q = dbCmd.GetDialectProvider().SqlExpression<T>();
 
-            return Single(dbCmd, ev.Where(predicate));
+            return Single(dbCmd, q.Where(predicate));
         }
 
-        internal static T Single<T>(this IDbCommand dbCmd, SqlExpression<T> expression)
+        internal static T Single<T>(this IDbCommand dbCmd, SqlExpression<T> q)
         {
-            string sql = expression.Limit(1).SelectInto<T>();
+            string sql = q.Limit(1).SelectInto<T>();
 
-            return dbCmd.ExprConvertTo<T>(sql, expression.Params);
+            return dbCmd.ExprConvertTo<T>(sql, q.Params, onlyFields:q.OnlyFields);
         }
 
         public static TKey Scalar<T, TKey>(this IDbCommand dbCmd, SqlExpression<T> expression)

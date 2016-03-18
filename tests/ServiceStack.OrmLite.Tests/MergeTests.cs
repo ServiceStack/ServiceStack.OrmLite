@@ -10,17 +10,17 @@ namespace ServiceStack.OrmLite.Tests
         [AutoIncrement]
         public int Id { get; set; }
 
-        [Required, References(typeof(Employee))]
+        [Required, References(typeof(UseCase.Employee))]
         public int EmployeeId { get; set; }
         [Reference]
-        public Employee Employee { get; set; }
+        public UseCase.Employee Employee { get; set; }
 
         public bool? IsApproved { get; set; }
 
-        [References(typeof(Employee))]
+        [References(typeof(UseCase.Employee))]
         public int? ApprovedById { get; set; }
         [Reference]
-        public Employee ApprovedBy { get; set; }
+        public UseCase.Employee ApprovedBy { get; set; }
     }
 
     public class MergeTests : OrmLiteTestBase
@@ -35,7 +35,7 @@ namespace ServiceStack.OrmLite.Tests
                 ApprovedById = 3
             };
 
-            var employees = 4.Times(i => new Employee { Id = i, Name = "Employee " + i });
+            var employees = 4.Times(i => new UseCase.Employee { Id = i, Name = "Employee " + i });
 
             timesheet.Merge(employees);
 

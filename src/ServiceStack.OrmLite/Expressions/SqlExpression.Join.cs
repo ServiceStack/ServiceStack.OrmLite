@@ -155,7 +155,7 @@ namespace ServiceStack.OrmLite
 
         public string SelectInto<TModel>()
         {
-            if ((CustomSelect && onlyFields  == null) || (typeof(TModel) == typeof(T) && !PrefixFieldWithTableName))
+            if ((CustomSelect && OnlyFields  == null) || (typeof(TModel) == typeof(T) && !PrefixFieldWithTableName))
             {
                 return ToSelectStatement();
             }
@@ -181,7 +181,7 @@ namespace ServiceStack.OrmLite
                     {
                         if (tableFieldDef.Name == fieldDef.Name)
                         {
-                            if (onlyFields != null && !onlyFields.Contains(fieldDef.Name))
+                            if (OnlyFields != null && !OnlyFields.Contains(fieldDef.Name))
                                 continue;
 
                             found = true;
@@ -215,7 +215,7 @@ namespace ServiceStack.OrmLite
 
                         if (matchingField != null)
                         {
-                            if (onlyFields != null && !onlyFields.Contains(fieldDef.Name))
+                            if (OnlyFields != null && !OnlyFields.Contains(fieldDef.Name))
                                 continue;
 
                             if (sbSelect.Length > 0)
