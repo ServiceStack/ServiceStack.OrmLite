@@ -652,12 +652,22 @@ namespace ServiceStack.OrmLite.Tests
             var dbCustomers = db.LoadSelect<Customer>(q => q.Id == customer.Id, include: new[] { "PrimaryAddress" });
             Assert.That(dbCustomers.Count, Is.EqualTo(1));
             Assert.That(dbCustomers[0].Name, Is.EqualTo("Customer 1"));
+            Assert.That(dbCustomers[0].Orders, Is.Null);
+            Assert.That(dbCustomers[0].PrimaryAddress, Is.Not.Null);
 
+            dbCustomers = db.LoadSelect<Customer>(q => q.Id == customer.Id, include: new[] { "primaryaddress" });
+            Assert.That(dbCustomers.Count, Is.EqualTo(1));
+            Assert.That(dbCustomers[0].Name, Is.EqualTo("Customer 1"));
             Assert.That(dbCustomers[0].Orders, Is.Null);
             Assert.That(dbCustomers[0].PrimaryAddress, Is.Not.Null);
 
             // Test LoadSingleById
             var dbCustomer = db.LoadSingleById<Customer>(customer.Id, include: new[] { "PrimaryAddress" });
+            Assert.That(dbCustomer.Name, Is.EqualTo("Customer 1"));
+            Assert.That(dbCustomer.Orders, Is.Null);
+            Assert.That(dbCustomer.PrimaryAddress, Is.Not.Null);
+
+            dbCustomer = db.LoadSingleById<Customer>(customer.Id, include: new[] { "primaryaddress" });
             Assert.That(dbCustomer.Name, Is.EqualTo("Customer 1"));
             Assert.That(dbCustomer.Orders, Is.Null);
             Assert.That(dbCustomer.PrimaryAddress, Is.Not.Null);

@@ -901,12 +901,13 @@ namespace ServiceStack.OrmLite
             if (include != null)
             {
                 // Check that any include values aren't reference fields of the specified type
-                var fields = fieldDefs.Select(q => q.FieldName);
-                var invalid = include.Except(fields).ToList();
+                var includeLower = include.Map(x => x.ToLower());
+                var fieldNames = fieldDefs.ConvertAll(q => q.FieldName.ToLower());
+                var invalid = includeLower.Except(fieldNames).ToList();
                 if (invalid.Count > 0)
                     throw new ArgumentException("Fields '{0}' are not Reference Properties of Type '{1}'".Fmt(invalid.Join("', '"), typeof(T).Name));
 
-                fieldDefs = fieldDefs.Where(f => include.Contains(f.FieldName)).ToList();
+                fieldDefs = fieldDefs.Where(f => includeLower.Contains(f.FieldName.ToLower())).ToList();
             }
 
             foreach (var fieldDef in fieldDefs)
@@ -932,12 +933,13 @@ namespace ServiceStack.OrmLite
             if (include != null)
             {
                 // Check that any include values aren't reference fields of the specified From type
-                var fields = fieldDefs.Select(q => q.FieldName);
-                var invalid = include.Except(fields).ToList();
+                var includeLower = include.Map(x => x.ToLower());
+                var fieldNames = fieldDefs.ConvertAll(q => q.FieldName.ToLower());
+                var invalid = includeLower.Except(fieldNames).ToList();
                 if (invalid.Count > 0)
-                    throw new ArgumentException("Fields '{0}' are not Reference Properties of Type '{1}'".Fmt(invalid.Join("', '"), typeof(From).Name));
+                    throw new ArgumentException("Fields '{0}' are not Reference Properties of Type '{1}'".Fmt(invalid.Join("', '"), typeof(T).Name));
 
-                fieldDefs = loadList.FieldDefs.Where(f => include.Contains(f.FieldName)).ToList();
+                fieldDefs = fieldDefs.Where(f => includeLower.Contains(f.FieldName.ToLower())).ToList();
             }
 
             foreach (var fieldDef in fieldDefs)
