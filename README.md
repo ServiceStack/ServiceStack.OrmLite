@@ -240,8 +240,9 @@ var usaCustomerOrders = db.Select(db.From<Order>()
 
 # API Examples
 
-OrmLite's SQL Expression support lets you use LINQ-liked querying in all our providers. 
-To give you a flavour here are some examples with their partial SQL output (using SqlServer dialect): 
+OrmLite provides terse and intuitive typed API's for database querying from simple
+lambda expressions to more complex LINQ-Like Typed SQL Expressions which you can use to
+construct more complex queries. To give you a flavour here are some examples: 
 
 ### Querying with SELECT
 
@@ -274,9 +275,6 @@ db.Select<Author>(q => q.Name.Contains("Benedict"));
 ```csharp
 db.Select<Author>(q => q.Rate == 10 && q.City == "Mexico");
 ```
-
-Right now the Expression support can satisfy most simple queries with a strong-typed API. 
-For anything more complex (e.g. queries with table joins) you can still easily fall back to raw SQL queries as seen below. 
 
 ### Convenient common usage data access patterns 
 
@@ -1305,7 +1303,9 @@ OrmLite's T4 support can be added via NuGet with:
 
 ## Typed SqlExpressions with Custom SQL APIs
 
-The Custom SQL API's allow you to map custom SqlExpressions into different responses:
+OrmLite's Expression support satisfies the most common RDBMS queries with a strong-typed API. 
+For more complex queries you can easily fall back to raw SQL where the Custom SQL API's 
+let you to map custom SqlExpressions into different responses:
 
 ```csharp
 List<Person> results = db.SqlList<Person>(
