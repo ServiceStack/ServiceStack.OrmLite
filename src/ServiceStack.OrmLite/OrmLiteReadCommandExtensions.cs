@@ -937,7 +937,7 @@ namespace ServiceStack.OrmLite
                 var fieldNames = fieldDefs.ConvertAll(q => q.FieldName.ToLower());
                 var invalid = includeLower.Except(fieldNames).ToList();
                 if (invalid.Count > 0)
-                    throw new ArgumentException("Fields '{0}' are not Reference Properties of Type '{1}'".Fmt(invalid.Join("', '"), typeof(T).Name));
+                    throw new ArgumentException("Fields '{0}' are not Reference Properties of Type '{1}'".Fmt(invalid.Join("', '"), typeof(From).Name));
 
                 fieldDefs = fieldDefs.Where(f => includeLower.Contains(f.FieldName.ToLower())).ToList();
             }
