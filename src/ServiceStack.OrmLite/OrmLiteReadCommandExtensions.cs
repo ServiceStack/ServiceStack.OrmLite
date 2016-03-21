@@ -898,15 +898,15 @@ namespace ServiceStack.OrmLite
             var loadRef = new LoadReferencesSync<T>(dbCmd, instance);
             var fieldDefs = loadRef.FieldDefs;
 
-            if (!include.IsEmpty())
+            if (include != null)
             {
                 // Check that any include values aren't reference fields of the specified type
                 var fields = fieldDefs.Select(q => q.FieldName);
-                var invalid = include.Except<string>(fields).ToList();
+                var invalid = include.Except(fields).ToList();
                 if (invalid.Count > 0)
                     throw new ArgumentException("Fields '{0}' are not Reference Properties of Type '{1}'".Fmt(invalid.Join("', '"), typeof(T).Name));
 
-                fieldDefs = fieldDefs.Where(fd => include.Contains(fd.FieldName)).ToList();
+                fieldDefs = fieldDefs.Where(f => include.Contains(f.FieldName)).ToList();
             }
 
             foreach (var fieldDef in fieldDefs)
@@ -929,15 +929,15 @@ namespace ServiceStack.OrmLite
             var loadList = new LoadListSync<Into, From>(dbCmd, expr);
 
             var fieldDefs = loadList.FieldDefs;
-            if (!include.IsEmpty())
+            if (include != null)
             {
                 // Check that any include values aren't reference fields of the specified From type
                 var fields = fieldDefs.Select(q => q.FieldName);
-                var invalid = include.Except<string>(fields).ToList();
+                var invalid = include.Except(fields).ToList();
                 if (invalid.Count > 0)
                     throw new ArgumentException("Fields '{0}' are not Reference Properties of Type '{1}'".Fmt(invalid.Join("', '"), typeof(From).Name));
 
-                fieldDefs = loadList.FieldDefs.Where(fd => include.Contains(fd.FieldName)).ToList();
+                fieldDefs = loadList.FieldDefs.Where(f => include.Contains(f.FieldName)).ToList();
             }
 
             foreach (var fieldDef in fieldDefs)

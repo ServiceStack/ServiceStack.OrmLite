@@ -667,6 +667,14 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(dbCustomer.Orders, Is.Null);
             Assert.That(dbCustomer.PrimaryAddress, Is.Not.Null);
 
+            dbCustomers = db.LoadSelect<Customer>(q => q.Id == customer.Id, include: new string[0]);
+            Assert.That(dbCustomers.All(x => x.Orders == null));
+            Assert.That(dbCustomers.All(x => x.PrimaryAddress == null));
+
+            dbCustomer = db.LoadSingleById<Customer>(customer.Id, include: new string[0]);
+            Assert.That(dbCustomer.Name, Is.EqualTo("Customer 1"));
+            Assert.That(dbCustomer.Orders, Is.Null);
+            Assert.That(dbCustomer.PrimaryAddress, Is.Null);
 
             // Invalid field name
             try
