@@ -687,32 +687,13 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(dbCustomer.PrimaryAddress, Is.Null);
 
             // Invalid field name
-            try
-            {
-                dbCustomers = db.LoadSelect<Customer>(q => q.Id == customer.Id, include: new[] { "InvalidOption1", "InvalidOption2" });
-                Assert.Fail();
-            }
-            catch (System.ArgumentException ex)
-            {
-            }
-            catch (System.Exception ex)
-            {
-                Assert.Fail();
-            }
+            dbCustomers = db.LoadSelect<Customer>(q => q.Id == customer.Id, include: new[] { "InvalidOption1", "InvalidOption2" });
+            Assert.That(dbCustomers.All(x => x.Orders == null));
+            Assert.That(dbCustomers.All(x => x.PrimaryAddress == null));
 
-
-            try
-            {
-                dbCustomer = db.LoadSingleById<Customer>(customer.Id, include: new[] { "InvalidOption1", "InvalidOption2" });
-                Assert.Fail();
-            }
-            catch (System.ArgumentException ex)
-            {
-            }
-            catch (System.Exception ex)
-            {
-                Assert.Fail();
-            }
+            dbCustomer = db.LoadSingleById<Customer>(customer.Id, include: new[] { "InvalidOption1", "InvalidOption2" });
+            Assert.That(dbCustomer.Orders, Is.Null);
+            Assert.That(dbCustomer.PrimaryAddress, Is.Null);
         }
 
         [Test]

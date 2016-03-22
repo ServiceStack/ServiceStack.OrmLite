@@ -893,25 +893,20 @@ namespace ServiceStack.OrmLite
             return row;
         }
 
-        public static void LoadReferences<T>(this IDbCommand dbCmd, T instance, string[] include = null)
+        public static void LoadReferences<T>(this IDbCommand dbCmd, T instance, IEnumerable<string> include = null)
         {
             var loadRef = new LoadReferencesSync<T>(dbCmd, instance);
             var fieldDefs = loadRef.FieldDefs;
 
-            if (include != null)
-            {
-                // Check that any include values aren't reference fields of the specified type
-                var includeLower = include.Map(x => x.ToLower());
-                var fieldNames = fieldDefs.ConvertAll(q => q.FieldName.ToLower());
-                var invalid = includeLower.Except(fieldNames).ToList();
-                if (invalid.Count > 0)
-                    throw new ArgumentException("Fields '{0}' are not Reference Properties of Type '{1}'".Fmt(invalid.Join("', '"), typeof(T).Name));
-
-                fieldDefs = fieldDefs.Where(f => includeLower.Contains(f.FieldName.ToLower())).ToList();
-            }
+            var includeSet = include != null
+                ? new HashSet<string>(include, StringComparer.OrdinalIgnoreCase)
+                : null;
 
             foreach (var fieldDef in fieldDefs)
             {
+                if (includeSet != null && !includeSet.Contains(fieldDef.Name))
+                    continue;
+
                 dbCmd.Parameters.Clear();
                 var listInterface = fieldDef.FieldType.GetTypeWithGenericInterfaceOf(typeof(IList<>));
                 if (listInterface != null)
@@ -925,25 +920,20 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        internal static List<Into> LoadListWithReferences<Into, From>(this IDbCommand dbCmd, SqlExpression<From> expr = null, string[] include = null)
+        internal static List<Into> LoadListWithReferences<Into, From>(this IDbCommand dbCmd, SqlExpression<From> expr = null, IEnumerable<string> include = null)
         {
             var loadList = new LoadListSync<Into, From>(dbCmd, expr);
-
             var fieldDefs = loadList.FieldDefs;
-            if (include != null)
-            {
-                // Check that any include values aren't reference fields of the specified From type
-                var includeLower = include.Map(x => x.ToLower());
-                var fieldNames = fieldDefs.ConvertAll(q => q.FieldName.ToLower());
-                var invalid = includeLower.Except(fieldNames).ToList();
-                if (invalid.Count > 0)
-                    throw new ArgumentException("Fields '{0}' are not Reference Properties of Type '{1}'".Fmt(invalid.Join("', '"), typeof(From).Name));
 
-                fieldDefs = fieldDefs.Where(f => includeLower.Contains(f.FieldName.ToLower())).ToList();
-            }
+            var includeSet = include != null 
+                ? new HashSet<string>(include, StringComparer.OrdinalIgnoreCase)
+                : null;
 
             foreach (var fieldDef in fieldDefs)
             {
+                if (includeSet != null && !includeSet.Contains(fieldDef.Name))
+                    continue;
+
                 var listInterface = fieldDef.FieldType.GetTypeWithGenericInterfaceOf(typeof(IList<>));
                 if (listInterface != null)
                 {
