@@ -14,6 +14,7 @@ namespace ServiceStack.OrmLite
 {
     internal static class ReadExpressionCommandExtensionsAsync
     {
+        [Obsolete("Use db.SelectAsync(db.From<T>())")]
         internal static Task<List<T>> SelectAsync<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression, CancellationToken token)
         {
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
@@ -21,6 +22,7 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExprConvertToListAsync<T>(sql, q.Params, token);
         }
 
+        [Obsolete("Use db.SelectAsync(db.From<T>())")]
         internal static Task<List<Into>> SelectAsync<Into, From>(this IDbCommand dbCmd, Func<SqlExpression<From>, SqlExpression<From>> expression, CancellationToken token)
         {
             var q = dbCmd.GetDialectProvider().SqlExpression<From>();
@@ -48,6 +50,7 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExprConvertToListAsync<T>(sql, q.Params, token);
         }
 
+        [Obsolete("Use db.SingleAsync(db.From<T>())")]
         internal static Task<T> SingleAsync<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression, CancellationToken token)
         {
             var expr = dbCmd.GetDialectProvider().SqlExpression<T>();
@@ -92,6 +95,7 @@ namespace ServiceStack.OrmLite
             return GetCountAsync(dbCmd, sql, q.Params, token);
         }
 
+        [Obsolete("Use db.CountAsync(db.From<T>())")]
         internal static Task<long> CountAsync<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression, CancellationToken token)
         {
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
@@ -129,6 +133,7 @@ namespace ServiceStack.OrmLite
             return dbCmd.ScalarAsync<long>("SELECT COUNT(*) FROM ({0}) AS COUNT".Fmt(sql), token);
         }
 
+        [Obsolete("Use db.LoadSelectAsync(db.From<T>())")]
         internal static Task<List<T>> LoadSelectAsync<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression, string[] include = null, CancellationToken token = default(CancellationToken))
         {
             var expr = dbCmd.GetDialectProvider().SqlExpression<T>();

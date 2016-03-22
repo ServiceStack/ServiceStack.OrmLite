@@ -80,6 +80,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
             return (long)ExecWithAlias<T>(table, () => db.Insert(obj, selectIdentity));
         }
 
+        [Obsolete("Use db.Select(table, db.From<T>())")]
         public static List<T> Select<T>(this IDbConnection db, string table, Func<SqlExpression<T>, SqlExpression<T>> expression)
         {
             return (List<T>)ExecWithAlias<T>(table, () => db.Select(expression));
