@@ -161,8 +161,8 @@ namespace ServiceStack.OrmLite
             }
 
             var sbSelect = new StringBuilder();
-            var selectDef = typeof(TModel).GetModelDefinition();
 
+            var selectDef = typeof(TModel).GetModelDefinition();
             var orderedDefs = tableDefs;
             if (selectDef != modelDef && tableDefs.Contains(selectDef))
             {

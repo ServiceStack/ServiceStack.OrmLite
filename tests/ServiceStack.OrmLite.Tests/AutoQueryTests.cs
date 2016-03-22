@@ -59,7 +59,7 @@ namespace ServiceStack.OrmLite.Tests
         [References(typeof(Department))]
         public int DepartmentId { get; set; }
 
-        [DataAnnotations.Ignore]
+        [Reference]
         public Department Department { get; set; }
     }
 
@@ -224,6 +224,50 @@ namespace ServiceStack.OrmLite.Tests
 
                 Assert.That(results.All(x => x.Id > 0 && x.Id < 10));
                 Assert.That(results.All(x => x.DepartmentId >= 10));
+            }
+        }
+
+        [Test]
+        public void Does_only_populate_Select_fields_wildcard()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropTable<Employee>();
+                db.DropTable<Department>();
+                db.CreateTable<Department>();
+                db.CreateTable<Employee>();
+
+                db.InsertAll(SeedDepartments);
+                db.InsertAll(SeedEmployees);
+
+                var q = db.From<Employee>()
+                    .Join<Department>()
+                    .Select(new[] { "departmentid", "employee.*" });
+
+                Assert.That(q.OnlyFields, Is.EquivalentTo(new[] {
+                    "departmentid", "Id", "FirstName", "LastName"
+                }));
+
+                var results = db.Select(q);
+                Assert.That(results.All(x => x.Id >= 0));
+                Assert.That(results.All(x => x.DepartmentId >= 10));
+                Assert.That(results.All(x => x.FirstName != null));
+                Assert.That(results.All(x => x.LastName != null));
+
+                q = db.From<Employee>()
+                    .Join<Department>()
+                    .Select(new[] { "departmentid", "department", "department.*" });
+
+                Assert.That(q.OnlyFields, Is.EquivalentTo(new[] {
+                    "departmentid", "department", "Id", "Name"
+                }));
+
+                results = db.LoadSelect(q, include:q.OnlyFields);
+
+                Assert.That(results.All(x => x.Id > 0 && x.Id < 10));
+                Assert.That(results.All(x => x.DepartmentId >= 10));
+                Assert.That(results.All(x => x.Department.Id >= 10));
+                Assert.That(results.All(x => x.Department.Name != null));
             }
         }
 

@@ -130,9 +130,38 @@ namespace ServiceStack.OrmLite
             if (fields == null || fields.Length == 0)
                 return Select(string.Empty);
 
+            var allTableDefs = new List<ModelDefinition> { modelDef };
+            allTableDefs.AddRange(tableDefs);
+
+            var fieldsList = new List<string>();
             var sb = new StringBuilder();
             foreach (var field in fields)
             {
+                if (string.IsNullOrEmpty(field))
+                    continue;
+
+                if (field.EndsWith(".*"))
+                {
+                    var tableName = field.Substring(0, field.Length - 2);
+                    var tableDef = allTableDefs.FirstOrDefault(x => string.Equals(x.Name, tableName, StringComparison.OrdinalIgnoreCase));
+                    if (tableDef != null)
+                    {
+                        foreach (var fieldDef in tableDef.FieldDefinitionsArray)
+                        {
+                            var qualifiedField = DialectProvider.GetQuotedColumnName(tableDef, fieldDef);
+
+                            if (sb.Length > 0)
+                                sb.Append(", ");
+
+                            sb.Append(qualifiedField);
+                            fieldsList.Add(fieldDef.Name);
+                        }
+                    }
+                    continue;
+                }
+
+                fieldsList.Add(field); //Could be non-matching referenced property
+
                 var match = FirstMatchingField(field);
                 if (match == null)
                     continue;
@@ -146,7 +175,7 @@ namespace ServiceStack.OrmLite
             }
 
             UnsafeSelect(sb.ToString());
-            OnlyFields = new HashSet<string>(fields, StringComparer.OrdinalIgnoreCase);
+            OnlyFields = new HashSet<string>(fieldsList, StringComparer.OrdinalIgnoreCase);
 
             return this;
         }
