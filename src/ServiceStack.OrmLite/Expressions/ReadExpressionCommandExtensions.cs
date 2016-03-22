@@ -139,24 +139,24 @@ namespace ServiceStack.OrmLite
             return dbCmd.Scalar<long>(dbCmd.GetDialectProvider().ToRowCountStatement(sql));
         }
 
-        internal static List<T> LoadSelect<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression, string[] include = null)
+        internal static List<T> LoadSelect<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression, IEnumerable<string> include = null)
         {
             var expr = dbCmd.GetDialectProvider().SqlExpression<T>();
             expr = expression(expr);
             return dbCmd.LoadListWithReferences<T, T>(expr, include);
         }
 
-        internal static List<T> LoadSelect<T>(this IDbCommand dbCmd, SqlExpression<T> expression = null, string[] include = null)
+        internal static List<T> LoadSelect<T>(this IDbCommand dbCmd, SqlExpression<T> expression = null, IEnumerable<string> include = null)
         {
             return dbCmd.LoadListWithReferences<T, T>(expression, include);
         }
 
-        internal static List<Into> LoadSelect<Into, From>(this IDbCommand dbCmd, SqlExpression<From> expression, string[] include = null)
+        internal static List<Into> LoadSelect<Into, From>(this IDbCommand dbCmd, SqlExpression<From> expression, IEnumerable<string> include = null)
         {
             return dbCmd.LoadListWithReferences<Into, From>(expression, include);
         }
 
-        internal static List<T> LoadSelect<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate, string[] include = null)
+        internal static List<T> LoadSelect<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate, IEnumerable<string> include = null)
         {
             var expr = dbCmd.GetDialectProvider().SqlExpression<T>().Where(predicate);
             return dbCmd.LoadListWithReferences<T, T>(expr, include);

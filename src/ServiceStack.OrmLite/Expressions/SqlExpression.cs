@@ -21,7 +21,7 @@ namespace ServiceStack.OrmLite
         private string groupBy = string.Empty;
         private string havingExpression;
         private string orderBy = string.Empty;
-        protected internal HashSet<string> OnlyFields { get; set; }
+        public HashSet<string> OnlyFields { get; protected set; }
 
         public List<string> UpdateFields { get; set; }
         public List<string> InsertFields { get; set; }
