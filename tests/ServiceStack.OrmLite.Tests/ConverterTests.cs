@@ -10,6 +10,18 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixture]
     public class ConverterTests : OrmLiteTestBase
     {
+        private struct TestStruct
+        {
+        }
+
+        [Test, Explicit]
+        public void FromDbValue_StackOverflowException()
+        {
+            var dialectProvider = OrmLiteConfig.DialectProvider;
+            var convertedValue = dialectProvider.FromDbValue(12345, typeof(TestStruct)); // StackOverflowException in v4.0.54
+            Assert.That(convertedValue, Is.Null);
+        }
+
         [Test]
         public void Can_insert_update_and_select_AllTypes()
         {
