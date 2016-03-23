@@ -440,6 +440,7 @@ namespace ServiceStack.OrmLite
         /// Returns true if the Query returns any records that match the SqlExpression lambda, E.g:
         /// <para>db.Exists&lt;Person&gt;(q =&gt; q.Where(x =&gt; x.Age &lt; 50))</para>
         /// </summary>
+        [Obsolete("Use db.Exists(db.From<T>())")]
         public static bool Exists<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression)
         {
             return dbConn.Exec(dbCmd =>

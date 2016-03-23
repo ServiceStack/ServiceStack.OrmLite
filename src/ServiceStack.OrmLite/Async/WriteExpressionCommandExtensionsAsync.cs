@@ -9,6 +9,7 @@ namespace ServiceStack.OrmLite
 {
     internal static class WriteExpressionCommandExtensionsAsync
     {
+        [Obsolete("Use db.UpdateOnlyAsync(model, db.From<T>())")]
         internal static Task<int> UpdateOnlyAsync<T>(this IDbCommand dbCmd, T model, Func<SqlExpression<T>, SqlExpression<T>> onlyFields, CancellationToken token)
         {
             return dbCmd.UpdateOnlyAsync(model, onlyFields(dbCmd.GetDialectProvider().SqlExpression<T>()), token);
@@ -77,6 +78,7 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecuteSqlAsync(sql.ToString(), token);
         }
 
+        [Obsolete("Use db.InsertOnlyAsync(obj, db.From<T>())")]
         internal static Task InsertOnlyAsync<T>(this IDbCommand dbCmd, T obj, Func<SqlExpression<T>, SqlExpression<T>> onlyFields, CancellationToken token)
         {
             return dbCmd.InsertOnlyAsync(obj, onlyFields(dbCmd.GetDialectProvider().SqlExpression<T>()), token);
@@ -98,6 +100,7 @@ namespace ServiceStack.OrmLite
             return dbCmd.DeleteAsync(q, token);
         }
 
+        [Obsolete("Use db.DeleteAsync(db.From<T>())")]
         internal static Task<int> DeleteAsync<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> where, CancellationToken token)
         {
             return dbCmd.DeleteAsync(where(dbCmd.GetDialectProvider().SqlExpression<T>()), token);

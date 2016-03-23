@@ -423,6 +423,7 @@ namespace ServiceStack.OrmLite
         /// Returns true if the Query returns any records that match the SqlExpression lambda, E.g:
         /// <para>db.Exists&lt;Person&gt;(q =&gt; q.Where(x =&gt; x.Age &lt; 50))</para>
         /// </summary>
+        [Obsolete("Use db.ExistsAsync(db.From<T>())")]
         public static Task<bool> ExistsAsync<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression, CancellationToken token = default(CancellationToken))
         {
             return dbConn.Exec(dbCmd =>

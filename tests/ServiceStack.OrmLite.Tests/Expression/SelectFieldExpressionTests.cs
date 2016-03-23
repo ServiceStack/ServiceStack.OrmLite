@@ -77,6 +77,25 @@ namespace ServiceStack.OrmLite.Tests.Expression
         }
 
         [Test]
+        public void Can_select_partial_list_of_fields_case_insensitive()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Person>();
+                db.InsertAll(Person.Rockstars);
+
+                var results = db.Select(db.From<Person>().Select(new[] { "id", "firstname", "age" }));
+
+                db.GetLastSql().Print();
+
+                Assert.That(results.All(x => x.Id > 0));
+                Assert.That(results.All(x => x.FirstName != null));
+                Assert.That(results.All(x => x.LastName == null));
+                Assert.That(results.Any(x => x.Age > 0));
+            }
+        }
+
+        [Test]
         public void Does_ignore_invalid_fields()
         {
             using (var db = OpenDbConnection())
@@ -103,13 +122,13 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 db.DropAndCreateTable<Person>();
                 db.InsertAll(Person.Rockstars);
                 db.DropAndCreateTable<RockstarAlbum>();
-                db.InsertAll(RockstarAlbum.SeedAlbums);
+                db.InsertAll(AutoQueryTests.SeedAlbums);
 
                 var q = db.From<Person>()
-                    .Join<RockstarAlbum>((p,a) => p.Id == a.RockstarId)
+                    .Join<RockstarAlbum>((p, a) => p.Id == a.RockstarId)
                     .Select(new[] { "Id", "FirstName", "Age", "RockstarAlbumName" });
 
-                var results = db.Select<PersonWithAlbum>(q);
+                var results = db.Select<RockstarWithAlbum>(q);
 
                 db.GetLastSql().Print();
 
@@ -119,6 +138,36 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 Assert.That(results.All(x => x.Age > 0));
                 Assert.That(results.All(x => x.RockstarId == 0));
                 Assert.That(results.All(x => x.RockstarAlbumName != null));
+            }
+        }
+
+        [Test]
+        public void Can_select_fields_from_joined_table_case_insensitive()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Rockstar>();
+                db.InsertAll(AutoQueryTests.SeedRockstars);
+                db.DropAndCreateTable<RockstarAlbum>();
+                db.InsertAll(AutoQueryTests.SeedAlbums);
+
+                var q = db.From<Rockstar>()
+                    .Join<RockstarAlbum>()
+                    .Select(new[] { "id", "firstname", "age", "rockstaralbumname", "rockstaralbumid" });
+
+                var results = db.Select<RockstarWithAlbum>(q);
+
+                results.PrintDump();
+
+                db.GetLastSql().Print();
+
+                Assert.That(results.All(x => x.Id > 0));
+                Assert.That(results.All(x => x.FirstName != null));
+                Assert.That(results.All(x => x.LastName == null));
+                Assert.That(results.All(x => x.Age > 0));
+                Assert.That(results.All(x => x.RockstarId == 0));
+                Assert.That(results.All(x => x.RockstarAlbumName != null));
+                Assert.That(results.All(x => x.RockstarAlbumId >= 10));
             }
         }
     }

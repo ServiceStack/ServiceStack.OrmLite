@@ -652,7 +652,12 @@ namespace ServiceStack.OrmLite.Tests
             var dbCustomers = db.LoadSelect<Customer>(q => q.Id == customer.Id, include: new[] { "PrimaryAddress" });
             Assert.That(dbCustomers.Count, Is.EqualTo(1));
             Assert.That(dbCustomers[0].Name, Is.EqualTo("Customer 1"));
+            Assert.That(dbCustomers[0].Orders, Is.Null);
+            Assert.That(dbCustomers[0].PrimaryAddress, Is.Not.Null);
 
+            dbCustomers = db.LoadSelect<Customer>(q => q.Id == customer.Id, include: new[] { "primaryaddress" });
+            Assert.That(dbCustomers.Count, Is.EqualTo(1));
+            Assert.That(dbCustomers[0].Name, Is.EqualTo("Customer 1"));
             Assert.That(dbCustomers[0].Orders, Is.Null);
             Assert.That(dbCustomers[0].PrimaryAddress, Is.Not.Null);
 
@@ -662,39 +667,33 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(dbCustomer.Orders, Is.Null);
             Assert.That(dbCustomer.PrimaryAddress, Is.Not.Null);
 
+            dbCustomer = db.LoadSingleById<Customer>(customer.Id, include: new[] { "primaryaddress" });
+            Assert.That(dbCustomer.Name, Is.EqualTo("Customer 1"));
+            Assert.That(dbCustomer.Orders, Is.Null);
+            Assert.That(dbCustomer.PrimaryAddress, Is.Not.Null);
+
             dbCustomer = db.LoadSingleById<Customer>(customer.Id, include: x => new { x.PrimaryAddress });
             Assert.That(dbCustomer.Name, Is.EqualTo("Customer 1"));
             Assert.That(dbCustomer.Orders, Is.Null);
             Assert.That(dbCustomer.PrimaryAddress, Is.Not.Null);
 
+            dbCustomers = db.LoadSelect<Customer>(q => q.Id == customer.Id, include: new string[0]);
+            Assert.That(dbCustomers.All(x => x.Orders == null));
+            Assert.That(dbCustomers.All(x => x.PrimaryAddress == null));
+
+            dbCustomer = db.LoadSingleById<Customer>(customer.Id, include: new string[0]);
+            Assert.That(dbCustomer.Name, Is.EqualTo("Customer 1"));
+            Assert.That(dbCustomer.Orders, Is.Null);
+            Assert.That(dbCustomer.PrimaryAddress, Is.Null);
 
             // Invalid field name
-            try
-            {
-                dbCustomers = db.LoadSelect<Customer>(q => q.Id == customer.Id, include: new[] { "InvalidOption1", "InvalidOption2" });
-                Assert.Fail();
-            }
-            catch (System.ArgumentException ex)
-            {
-            }
-            catch (System.Exception ex)
-            {
-                Assert.Fail();
-            }
+            dbCustomers = db.LoadSelect<Customer>(q => q.Id == customer.Id, include: new[] { "InvalidOption1", "InvalidOption2" });
+            Assert.That(dbCustomers.All(x => x.Orders == null));
+            Assert.That(dbCustomers.All(x => x.PrimaryAddress == null));
 
-
-            try
-            {
-                dbCustomer = db.LoadSingleById<Customer>(customer.Id, include: new[] { "InvalidOption1", "InvalidOption2" });
-                Assert.Fail();
-            }
-            catch (System.ArgumentException ex)
-            {
-            }
-            catch (System.Exception ex)
-            {
-                Assert.Fail();
-            }
+            dbCustomer = db.LoadSingleById<Customer>(customer.Id, include: new[] { "InvalidOption1", "InvalidOption2" });
+            Assert.That(dbCustomer.Orders, Is.Null);
+            Assert.That(dbCustomer.PrimaryAddress, Is.Null);
         }
 
         [Test]

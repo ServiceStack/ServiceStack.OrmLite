@@ -17,6 +17,7 @@ namespace ServiceStack.OrmLite
         ///   db.UpdateOnly(new Person { FirstName = "JJ", LastName = "Hendo" }, ev => ev.Update(p => p.FirstName));
         ///   UPDATE "Person" SET "FirstName" = 'JJ'
         /// </summary>
+        [Obsolete("Use db.UpdateOnly(model, db.From<T>())")]
         public static int UpdateOnly<T>(this IDbConnection dbConn, T model, Func<SqlExpression<T>, SqlExpression<T>> onlyFields)
         {
             return dbConn.Exec(dbCmd => dbCmd.UpdateOnly(model, onlyFields));
@@ -114,6 +115,7 @@ namespace ServiceStack.OrmLite
         /// Insert only fields in POCO specified by the SqlExpression lambda. E.g:
         /// <para>db.InsertOnly(new Person { FirstName = "Amy", Age = 27 }, q =&gt; q.Insert(p =&gt; new { p.FirstName, p.Age }))</para>
         /// </summary>
+        [Obsolete("Use db.InsertOnly(obj, db.From<T>())")]
         public static void InsertOnly<T>(this IDbConnection dbConn, T obj, Func<SqlExpression<T>, SqlExpression<T>> onlyFields)
         {
             dbConn.Exec(dbCmd => dbCmd.InsertOnly(obj, onlyFields));
@@ -147,6 +149,7 @@ namespace ServiceStack.OrmLite
         ///   db.Delete&lt;Person&gt;(ev => ev.Where(p => p.Age == 27));
         ///   DELETE FROM "Person" WHERE ("Age" = 27)
         /// </summary>
+        [Obsolete("Use db.Delete(db.From<T>())")]
         public static int Delete<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> where)
         {
             return dbConn.Exec(dbCmd => dbCmd.Delete(where));

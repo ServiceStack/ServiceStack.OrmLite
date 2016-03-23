@@ -118,19 +118,25 @@ namespace ServiceStack.OrmLite
 
         public FieldDefinition GetFieldDefinition<T>(Expression<Func<T, object>> field)
         {
-            var fn = GetFieldName(field);
-            return FieldDefinitions.First(f => f.Name == fn);
+            return GetFieldDefinition(GetFieldName(field));
         }
 
         public FieldDefinition GetFieldDefinition(string fieldName)
         {
-            return FieldDefinitions.FirstOrDefault(f => f.Name == fieldName);
+            if (fieldName != null)
+            {
+                foreach (var f in FieldDefinitionsArray)
+                {
+                    if (string.Equals(f.Name, fieldName, StringComparison.OrdinalIgnoreCase))
+                        return f;
+                }
+            }
+            return null;
         }
 
         string GetFieldName<T>(Expression<Func<T, object>> field)
         {
-
-            var lambda = (field as LambdaExpression);
+            var lambda = field as LambdaExpression;
             if (lambda.Body.NodeType == ExpressionType.MemberAccess)
             {
                 var me = lambda.Body as MemberExpression;

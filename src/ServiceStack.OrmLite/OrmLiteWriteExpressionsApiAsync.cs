@@ -20,6 +20,7 @@ namespace ServiceStack.OrmLite
         ///   db.UpdateOnly(new Person { FirstName = "JJ", LastName = "Hendo" }, ev => ev.Update(p => p.FirstName));
         ///   UPDATE "Person" SET "FirstName" = 'JJ'
         /// </summary>
+        [Obsolete("Use db.UpdateOnlyAsync(model, db.From<T>())")]
         public static Task<int> UpdateOnlyAsync<T>(this IDbConnection dbConn, T model, Func<SqlExpression<T>, SqlExpression<T>> onlyFields, CancellationToken token = default(CancellationToken))
         {
             return dbConn.Exec(dbCmd => dbCmd.UpdateOnlyAsync(model, onlyFields, token));
@@ -118,6 +119,7 @@ namespace ServiceStack.OrmLite
         /// Insert only fields in POCO specified by the SqlExpression lambda. E.g:
         /// <para>db.InsertOnly(new Person { FirstName = "Amy", Age = 27 }, q =&gt; q.Insert(p =&gt; new { p.FirstName, p.Age }))</para>
         /// </summary>
+        [Obsolete("Use db.InsertOnlyAsync(obj, db.From<T>())")]
         public static Task InsertOnlyAsync<T>(this IDbConnection dbConn, T obj, Func<SqlExpression<T>, SqlExpression<T>> onlyFields, CancellationToken token = default(CancellationToken))
         {
             return dbConn.Exec(dbCmd => dbCmd.InsertOnlyAsync(obj, onlyFields, token));
@@ -151,6 +153,7 @@ namespace ServiceStack.OrmLite
         ///   db.Delete&lt;Person&gt;(ev => ev.Where(p => p.Age == 27));
         ///   DELETE FROM "Person" WHERE ("Age" = 27)
         /// </summary>
+        [Obsolete("Use db.DeleteAsync(db.From<T>())")]
         public static Task<int> DeleteAsync<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> where, CancellationToken token = default(CancellationToken))
         {
             return dbConn.Exec(dbCmd => dbCmd.DeleteAsync(where, token));

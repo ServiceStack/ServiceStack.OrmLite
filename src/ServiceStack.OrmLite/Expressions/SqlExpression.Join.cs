@@ -155,7 +155,7 @@ namespace ServiceStack.OrmLite
 
         public string SelectInto<TModel>()
         {
-            if ((CustomSelect && onlyFields  == null) || (typeof(TModel) == typeof(T) && !PrefixFieldWithTableName))
+            if ((CustomSelect && OnlyFields  == null) || (typeof(TModel) == typeof(T) && !PrefixFieldWithTableName))
             {
                 return ToSelectStatement();
             }
@@ -175,16 +175,38 @@ namespace ServiceStack.OrmLite
             {
                 var found = false;
 
+                if (fieldDef.BelongToModelName != null)
+                {
+                    var tableDef = orderedDefs.FirstOrDefault(x => x.Name == fieldDef.BelongToModelName);
+                    if (tableDef != null)
+                    {
+                        var matchingField = FindWeakMatch(tableDef, fieldDef);
+                        if (matchingField != null)
+                        {
+                            if (OnlyFields == null || OnlyFields.Contains(fieldDef.Name))
+                            {
+                                if (sbSelect.Length > 0)
+                                    sbSelect.Append(", ");
+
+                                sbSelect.AppendFormat("{0} as {1}",
+                                    DialectProvider.GetQuotedColumnName(tableDef, matchingField),
+                                    SqlColumn(fieldDef.Name));
+
+                                continue;
+                            }
+                        }
+                    }
+                }
+
                 foreach (var tableDef in orderedDefs)
                 {
                     foreach (var tableFieldDef in tableDef.FieldDefinitions)
                     {
                         if (tableFieldDef.Name == fieldDef.Name)
                         {
-                            if (onlyFields != null && !onlyFields.Contains(fieldDef.Name))
+                            if (OnlyFields != null && !OnlyFields.Contains(fieldDef.Name))
                                 continue;
 
-                            found = true;
                             if (sbSelect.Length > 0)
                                 sbSelect.Append(", ");
 
@@ -195,6 +217,7 @@ namespace ServiceStack.OrmLite
                             if (tableFieldDef.Alias != null)
                                 sbSelect.Append(" AS ").Append(SqlColumn(fieldDef.Name));
 
+                            found = true;
                             break;
                         }
                     }
@@ -208,14 +231,10 @@ namespace ServiceStack.OrmLite
                     // Add support for auto mapping `{Table}{Field}` convention
                     foreach (var tableDef in orderedDefs)
                     {
-                        var matchingField = tableDef.FieldDefinitions
-                            .FirstOrDefault(x =>
-                                string.Compare(tableDef.Name + x.Name, fieldDef.Name, StringComparison.OrdinalIgnoreCase) == 0
-                             || string.Compare(tableDef.ModelName + x.FieldName, fieldDef.Name, StringComparison.OrdinalIgnoreCase) == 0);
-
+                        var matchingField = FindWeakMatch(tableDef, fieldDef);
                         if (matchingField != null)
                         {
-                            if (onlyFields != null && !onlyFields.Contains(fieldDef.Name))
+                            if (OnlyFields != null && !OnlyFields.Contains(fieldDef.Name))
                                 continue;
 
                             if (sbSelect.Length > 0)
@@ -235,6 +254,14 @@ namespace ServiceStack.OrmLite
             SelectExpression = "SELECT " + (selectDistinct ? "DISTINCT " : "") + columns;
 
             return ToSelectStatement();
+        }
+
+        private static FieldDefinition FindWeakMatch(ModelDefinition tableDef, FieldDefinition fieldDef)
+        {
+            return tableDef.FieldDefinitions
+                .FirstOrDefault(x =>
+                    string.Compare(tableDef.Name + x.Name, fieldDef.Name, StringComparison.OrdinalIgnoreCase) == 0
+                    || string.Compare(tableDef.ModelName + x.FieldName, fieldDef.Name, StringComparison.OrdinalIgnoreCase) == 0);
         }
 
         public virtual SqlExpression<T> Where<Target>(Expression<Func<Target, bool>> predicate)
