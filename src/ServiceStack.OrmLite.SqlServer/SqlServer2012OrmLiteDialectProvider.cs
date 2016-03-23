@@ -22,7 +22,13 @@ namespace ServiceStack.OrmLite.SqlServer
             if (offset != null || rows != null)
             {
                 if (orderByExpression.IsEmpty())
-                    sb.Append(" ORDER BY 1");
+                {
+                    var orderBy = offset == null && rows == 1 //Avoid for Single requests
+                        ? "1"
+                        : this.GetQuotedColumnName(modelDef, modelDef.PrimaryKey);
+
+                    sb.Append(" ORDER BY " + orderBy);
+                }
 
                 sb.Append(" OFFSET ").Append(offset.GetValueOrDefault()).Append(" ROWS");
 
