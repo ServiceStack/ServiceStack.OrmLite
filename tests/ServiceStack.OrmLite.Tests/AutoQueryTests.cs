@@ -50,7 +50,7 @@ namespace ServiceStack.OrmLite.Tests
         Dead
     }
 
-    public class Employee
+    public class DeptEmployee
     {
         [PrimaryKey]
         public int Id { get; set; }
@@ -96,11 +96,11 @@ namespace ServiceStack.OrmLite.Tests
             new Department { Id = 30, Name = "Dept 3" },
         };
 
-        public static Employee[] SeedEmployees = new[]
+        public static DeptEmployee[] SeedEmployees = new[]
         {
-            new Employee { Id = 1, DepartmentId = 10, FirstName = "First 1", LastName = "Last 1" },
-            new Employee { Id = 2, DepartmentId = 20, FirstName = "First 2", LastName = "Last 2" },
-            new Employee { Id = 3, DepartmentId = 30, FirstName = "First 3", LastName = "Last 3" },
+            new DeptEmployee { Id = 1, DepartmentId = 10, FirstName = "First 1", LastName = "Last 1" },
+            new DeptEmployee { Id = 2, DepartmentId = 20, FirstName = "First 2", LastName = "Last 2" },
+            new DeptEmployee { Id = 3, DepartmentId = 30, FirstName = "First 3", LastName = "Last 3" },
         };
 
         [Test]
@@ -197,15 +197,15 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var db = OpenDbConnection())
             {
-                db.DropTable<Employee>();
+                db.DropTable<DeptEmployee>();
                 db.DropTable<Department>();
                 db.CreateTable<Department>();
-                db.CreateTable<Employee>();
+                db.CreateTable<DeptEmployee>();
 
                 db.InsertAll(SeedDepartments);
                 db.InsertAll(SeedEmployees);
 
-                var q = db.From<Employee>()
+                var q = db.From<DeptEmployee>()
                     .Join<Department>()
                     .Select(new[] { "departmentid" });
 
@@ -214,7 +214,7 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(results.All(x => x.Id == 0));
                 Assert.That(results.All(x => x.DepartmentId >= 10));
 
-                q = db.From<Employee>()
+                q = db.From<DeptEmployee>()
                     .Join<Department>()
                     .Select(new[] { "id", "departmentid" });
 
@@ -232,17 +232,17 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var db = OpenDbConnection())
             {
-                db.DropTable<Employee>();
+                db.DropTable<DeptEmployee>();
                 db.DropTable<Department>();
                 db.CreateTable<Department>();
-                db.CreateTable<Employee>();
+                db.CreateTable<DeptEmployee>();
 
                 db.InsertAll(SeedDepartments);
                 db.InsertAll(SeedEmployees);
 
-                var q = db.From<Employee>()
+                var q = db.From<DeptEmployee>()
                     .Join<Department>()
-                    .Select(new[] { "departmentid", "employee.*" });
+                    .Select(new[] { "departmentid", "deptemployee.*" });
 
                 Assert.That(q.OnlyFields, Is.EquivalentTo(new[] {
                     "departmentid", "Id", "FirstName", "LastName"
@@ -254,7 +254,7 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(results.All(x => x.FirstName != null));
                 Assert.That(results.All(x => x.LastName != null));
 
-                q = db.From<Employee>()
+                q = db.From<DeptEmployee>()
                     .Join<Department>()
                     .Select(new[] { "departmentid", "department", "department.*" });
 
@@ -276,15 +276,15 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var db = OpenDbConnection())
             {
-                db.DropTable<Employee>();
+                db.DropTable<DeptEmployee>();
                 db.DropTable<Department>();
                 db.CreateTable<Department>();
-                db.CreateTable<Employee>();
+                db.CreateTable<DeptEmployee>();
 
                 db.InsertAll(SeedDepartments);
                 db.InsertAll(SeedEmployees);
 
-                var q = db.From<Employee>()
+                var q = db.From<DeptEmployee>()
                     .Join<Department>()
                     .Select(new[] { "departmentid" });
 
@@ -294,7 +294,7 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(results.All(x => x.Id == 0));
                 Assert.That(results.All(x => x.DepartmentId >= 10));
 
-                q = db.From<Employee>()
+                q = db.From<DeptEmployee>()
                     .Join<Department>()
                     .Select(new[] { "id", "departmentid" });
 
