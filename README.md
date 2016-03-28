@@ -281,20 +281,19 @@ db.Select<Author>(q => q.Rate == 10 && q.City == "Mexico");
 OrmLite also includes a number of convenient API's providing DRY, typed data access for common queries:
 
 ```csharp
-Person personById = db.SingleById<Person>(1);
+Person person = db.SingleById<Person>(1);
 ```
 
 ```csharp
-Person personByAge = db.Single<Person>(x => x.Age == 42);
+Person person = db.Single<Person>(x => x.Age == 42);
 ```
 
 ```csharp
-int maxAgeUnder50 = db.Scalar<Person, int>(x => Sql.Max(x.Age), x => x.Age < 50);
-```
+var q = db.From<Person>()
+          .Where(q => q.Age > 40)
+          .Select(Sql.Count("*"));
 
-```csharp
-int peopleOver40 = db.Scalar<int>(
-    db.From<Person>().Select(Sql.Count("*")).Where(q => q.Age > 40));
+int peopleOver40 = db.Scalar<int>(q);
 ```
 
 ```csharp
@@ -306,23 +305,39 @@ bool has42YearOlds = db.Exists<Person>(new { Age = 42 });
 ```
 
 ```csharp
-List<string> results = db.Column<string>(db.From<Person>().Select(x => x.LastName)
-                         .Where(q => q.Age == 27));
+int maxAgeUnder50 = db.Scalar<Person, int>(x => Sql.Max(x.Age), x => x.Age < 50);
 ```
 
 ```csharp
-HashSet<int> results = db.ColumnDistinct<int>(db.From<Person>().Select(x => x.Age)
-                         .Where(q => q.Age < 50));
+var q = db.From<Person>()
+    .Where(q => q.Age == 27)
+    .Select(x => x.LastName);
+    
+List<string> results = db.Column<string>(q);
 ```
 
 ```csharp
-Dictionary<int,string> results = db.Dictionary<int, string>(
-    db.From<Person>().Select(x => new { x.Id, x.LastName }).Where(x => x.Age < 50));
+var q = db.From<Person>()
+          .Where(q => q.Age < 50)
+          .Select(x => x.Age);
+
+HashSet<int> results = db.ColumnDistinct<int>(q);
 ```
 
 ```csharp
-Dictionary<int, List<string>> results = db.Lookup<int, string>(
-    db.From<Person>().Select(x => new { x.Age, x.LastName }).Where(q => q.Age < 50));
+var q = db.From<Person>()
+          .Where(x => x.Age < 50)
+          .Select(x => new { x.Id, x.LastName });
+
+Dictionary<int,string> results = db.Dictionary<int, string>(q);
+```
+
+```csharp
+var q = db.From<Person>()
+          .Where(q => q.Age < 50)
+          .Select(x => new { x.Age, x.LastName });
+
+Dictionary<int, List<string>> results = db.Lookup<int, string>(q);
 ```
 
 ### INSERT, UPDATE and DELETEs
@@ -332,10 +347,10 @@ To see the behaviour of the different APIs, all examples uses this simple model
 ```csharp
 public class Person
 {
-  public int Id { get; set; }
-  public string FirstName { get; set; }
-  public string LastName { get; set; }
-  public int? Age { get; set; }
+    public int Id { get; set; }
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+    public int? Age { get; set; }
 }
 ```
 
@@ -393,21 +408,21 @@ db.UpdateOnly(new Person { FirstName = "JJ", LastName = "Hendo" },
 Using a typed SQL Expression:
 
 ```csharp
-db.UpdateOnly(new Person { FirstName = "JJ" }, 
-  onlyFields: q => q.Update(p => p.FirstName).Where(x => x.FirstName == "Jimi"));
+var q = db.From<Person>().Update(p => p.FirstName).Where(x => x.FirstName == "Jimi");
+db.UpdateOnly(new Person { FirstName = "JJ" }, onlyFields: q);
 ```
 
 For the ultimate flexibility we also provide un-typed, string-based expressions. Use the `.SqlFmt()` extension method escape parameters (inspired by [massive](https://github.com/robconery/massive)):
 
 ```csharp
 db.UpdateFmt<Person>(set: "FirstName = {0}".SqlFmt("JJ"), 
-                where: "LastName = {0}".SqlFmt("Hendrix"));
+                   where: "LastName = {0}".SqlFmt("Hendrix"));
 ```
 Even the Table name can be a string so you perform the same update without requiring the Person model at all:
 
 ```csharp
 db.UpdateFmt(table: "Person", set: "FirstName = {0}".SqlFmt("JJ"), 
-          where: "LastName = {0}".SqlFmt("Hendrix"));
+             where: "LastName = {0}".SqlFmt("Hendrix"));
 ```
 ### INSERT
 
@@ -431,7 +446,8 @@ db.Delete<Person>(p => p.Age == 27);
 
 Or an Expression Visitor:
 ```csharp
-db.Delete<Person>(q => q.Where(p => p.Age == 27));
+var q = db.From<Person>().Where(p => p.Age == 27);
+db.Delete<Person>(q);
 ```
 
 As well as un-typed, string-based expressions:
@@ -564,7 +580,6 @@ var topVIPs = db.SelectLazyFmt<Person>("Age > {0}", 40).Where(p => IsVip(p)).Tak
  - All **Insert**, **Update**, and **Delete** methods take multiple params, while `InsertAll`, `UpdateAll` and `DeleteAll` take IEnumerables.
  - `Save` and `SaveAll` will Insert if no record with **Id** exists, otherwise it Updates. 
  - Methods containing the word **Each** return an IEnumerable<T> and are lazily loaded (i.e. non-buffered).
-
 
 # Features
 
