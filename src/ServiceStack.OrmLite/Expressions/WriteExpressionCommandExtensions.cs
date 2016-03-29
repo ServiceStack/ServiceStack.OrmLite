@@ -51,6 +51,38 @@ namespace ServiceStack.OrmLite
             return dbCmd.UpdateOnly(obj, q);
         }
 
+        public static int UpdateIncrement<T>(this IDbCommand dbCmd, T model, SqlExpression<T> fields)
+        {
+            UpdateIncrementSql(dbCmd, model, fields);
+            return dbCmd.ExecNonQuery();
+        }
+
+        internal static void UpdateIncrementSql<T>(this IDbCommand dbCmd, T model, SqlExpression<T> fields)
+        {
+            if (OrmLiteConfig.UpdateFilter != null)
+                OrmLiteConfig.UpdateFilter(dbCmd, model);
+
+            fields.CopyParamsTo(dbCmd);
+
+            dbCmd.GetDialectProvider().PrepareUpdateRowIncrementStatement(dbCmd, model, fields.UpdateFields);
+
+            if (!fields.WhereExpression.IsNullOrEmpty())
+                dbCmd.CommandText += " " + fields.WhereExpression;
+        }
+
+        public static int UpdateIncrement<T, TKey>(this IDbCommand dbCmd, T obj,
+            Expression<Func<T, TKey>> fields = null,
+            Expression<Func<T, bool>> where = null)
+        {
+            if (fields == null)
+                throw new ArgumentNullException("fields");
+
+            var q = dbCmd.GetDialectProvider().SqlExpression<T>();
+            q.Update(fields);
+            q.Where(where);
+            return dbCmd.UpdateIncrement(obj, q);
+        }
+
         public static int UpdateNonDefaults<T>(this IDbCommand dbCmd, T item, Expression<Func<T, bool>> obj)
         {
             if (OrmLiteConfig.UpdateFilter != null)

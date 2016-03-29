@@ -57,6 +57,43 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Use an SqlExpression to select which fields to update and construct the where expression, E.g: 
+        /// Numeric fields generates an increment sql which is usefull to increment counters, etc...
+        /// avoiding concurrency conflicts
+        /// 
+        ///   var q = db.From&gt;Person&lt;());
+        ///   db.UpdateIncrement(new Person { Age = 5 }, db.From<Person>().Update(p => p.Age).Where(x => x.FirstName == "Jimi"));
+        ///   UPDATE "Person" SET "Age" = "Age" + 5 WHERE ("FirstName" = 'Jimi')
+        /// 
+        ///   What's not in the update expression doesn't get updated. No where expression updates all rows. E.g:
+        /// 
+        ///   db.UpdateIncrement(new Person { Age = 5, FirstName = "JJ", LastName = "Hendo" }, ev.Update(p => p.Age));
+        ///   UPDATE "Person" SET "Age" = "Age" + 5
+        /// </summary>
+        public static int UpdateIncrement<T>(this IDbConnection dbConn, T model, SqlExpression<T> fields)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.UpdateIncrement(model, fields));
+        }
+
+        /// <summary>
+        /// Update record, updating only fields specified in updateOnly that matches the where condition (if any), E.g:
+        /// Numeric fields generates an increment sql which is usefull to increment counters, etc...
+        /// avoiding concurrency conflicts
+        /// 
+        ///   db.UpdateIncrement(new Person { Age = 5 }, p => p.Age, p => p.LastName == "Hendrix");
+        ///   UPDATE "Person" SET "Age" = "Age" + 5 WHERE ("LastName" = 'Hendrix')
+        ///
+        ///   db.UpdateIncrement(new Person { Age = 5 }, p => p.FirstName);
+        ///   UPDATE "Person" SET "Age" = "Age" + 5
+        /// </summary>
+        public static int UpdateIncrement<T, TKey>(this IDbConnection dbConn, T obj,
+            Expression<Func<T, TKey>> fields = null,
+            Expression<Func<T, bool>> where = null)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.UpdateIncrement(obj, fields, where));
+        }
+
+        /// <summary>
         /// Updates all non-default values set on item matching the where condition (if any). E.g
         /// 
         ///   db.UpdateNonDefaults(new Person { FirstName = "JJ" }, p => p.FirstName == "Jimi");

@@ -949,6 +949,59 @@ namespace ServiceStack.OrmLite
                 throw new Exception("No valid update properties provided (e.g. p => p.FirstName): " + dbCmd.CommandText);
         }
 
+        public virtual void PrepareUpdateRowIncrementStatement(IDbCommand dbCmd, object objWithProperties, ICollection<string> updateFields)
+        {
+            if (updateFields.Count == 0)
+                throw new Exception("No valid update properties provided (e.g. p => p.FirstName): " + dbCmd.CommandText);
+
+            var sqlFilter = new StringBuilder();
+            var sql = new StringBuilder();
+            var modelDef = objWithProperties.GetType().GetModelDefinition();
+            var quotedFieldName = string.Empty;
+
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+                if (!updateFields.Contains(fieldDef.FieldName))
+                    continue;
+
+                if (fieldDef.AutoIncrement || fieldDef.IsComputed || fieldDef.IsPrimaryKey ||
+                    fieldDef.IsRowVersion || fieldDef.Name == OrmLiteConfig.IdField)
+                    continue;
+
+                try
+                {
+                    if (sql.Length > 0)
+                        sql.Append(", ");
+
+                    quotedFieldName = GetQuotedColumnName(fieldDef.FieldName);
+
+                    if (fieldDef.FieldType.IsNumericType())
+                    {
+                        sql
+                            .Append(quotedFieldName)
+                            .Append("=")
+                            .Append(quotedFieldName)
+                            .Append("+")
+                            .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef.ColumnType).ParameterName);
+                    }
+                    else
+                    {
+                        sql
+                            .Append(quotedFieldName)
+                            .Append("=")
+                            .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef.ColumnType).ParameterName);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("ERROR in ToUpdateIncrementRowStatement(): " + ex.Message, ex);
+                }
+            }
+
+            dbCmd.CommandText = string.Format("UPDATE {0} SET {1}{2}",
+                GetQuotedTableName(modelDef), sql, (sqlFilter.Length > 0 ? " WHERE " + sqlFilter : ""));
+        }
+
         public virtual string ToDeleteStatement(Type tableType, string sqlFilter, params object[] filterParams)
         {
             var sql = new StringBuilder();
