@@ -324,6 +324,18 @@ namespace ServiceStack.OrmLite.Tests
             db.UpdateOnly(new Person { FirstName = "JJ" }, q => q.Update(x => x.FirstName).Where(x => x.FirstName == "Jimi"));
             Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\"=@1 WHERE (\"FirstName\" = @0)"));
 
+            db.UpdateIncrement(new Person { Age = 3 }, x => x.Age);
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"Age\"=\"Age\"+@0"));
+
+            db.UpdateIncrement(new Person { Age = 5 }, x => x.Age, x => x.LastName == "Presley");
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"Age\"=\"Age\"+@1 WHERE (\"LastName\" = @0)"));
+
+            db.UpdateIncrement(new Person { Age = -2, LastName = "Hendo" }, db.From<Person>().Update(x => new { x.Age, x.LastName }));
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"LastName\"=@0, \"Age\"=\"Age\"+@1"));
+
+            db.UpdateIncrement(new Person { Age = 10}, db.From<Person>().Update(x => x.Age).Where(x => x.FirstName == "JJ"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"Age\"=\"Age\"+@1 WHERE (\"FirstName\" = @0)"));
+
             db.UpdateFmt<Person>(set: "FirstName = {0}".SqlFmt("JJ"), where: "LastName = {0}".SqlFmt("Hendrix"));
             Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET FirstName = 'JJ' WHERE LastName = 'Hendrix'"));
 
