@@ -99,6 +99,7 @@ namespace ServiceStack.OrmLite
         ///   db.Update&lt;Person&gt;(set:"FirstName = {0}".Params("JJ"), where:"LastName = {0}".Params("Hendrix"));
         ///   UPDATE "Person" SET FirstName = 'JJ' WHERE LastName = 'Hendrix'
         /// </summary>
+        [Obsolete(Messages.LegacyApi)]
         public static Task<int> UpdateFmtAsync<T>(this IDbConnection dbConn, string set = null, string where = null, CancellationToken token = default(CancellationToken))
         {
             return dbConn.Exec(dbCmd => dbCmd.UpdateFmtAsync<T>(set, where, token));
@@ -110,6 +111,7 @@ namespace ServiceStack.OrmLite
         ///   db.Update(table:"Person", set: "FirstName = {0}".Params("JJ"), where: "LastName = {0}".Params("Hendrix"));
         ///   UPDATE "Person" SET FirstName = 'JJ' WHERE LastName = 'Hendrix'
         /// </summary>
+        [Obsolete(Messages.LegacyApi)]
         public static Task<int> UpdateFmtAsync(this IDbConnection dbConn, string table = null, string set = null, string where = null, CancellationToken token = default(CancellationToken))
         {
             return dbConn.Exec(dbCmd => dbCmd.UpdateFmtAsync(table, set, where, token));
@@ -177,10 +179,12 @@ namespace ServiceStack.OrmLite
         ///   db.Delete&lt;Person&gt;(where:"Age = {0}".Params(27));
         ///   DELETE FROM "Person" WHERE Age = 27
         /// </summary>
+        [Obsolete(Messages.LegacyApi)]
         public static Task<int> DeleteFmtAsync<T>(this IDbConnection dbConn, string where, CancellationToken token = default(CancellationToken))
         {
             return dbConn.Exec(dbCmd => dbCmd.DeleteFmtAsync<T>(where, token));
         }
+        [Obsolete(Messages.LegacyApi)]
         public static Task<int> DeleteFmtAsync<T>(this IDbConnection dbConn, string where = null)
         {
             return dbConn.Exec(dbCmd => dbCmd.DeleteFmtAsync<T>(where, default(CancellationToken)));
@@ -192,6 +196,7 @@ namespace ServiceStack.OrmLite
         ///   db.Delete(table:"Person", where: "Age = {0}".Params(27));
         ///   DELETE FROM "Person" WHERE Age = 27
         /// </summary>
+        [Obsolete(Messages.LegacyApi)]
         public static Task<int> DeleteFmtAsync(this IDbConnection dbConn, string table = null, string where = null, CancellationToken token = default(CancellationToken))
         {
             return dbConn.Exec(dbCmd => dbCmd.DeleteFmtAsync(table, where, token));

@@ -61,6 +61,7 @@ namespace ServiceStack.OrmLite
         /// <para>db.SelectFmt&lt;Person&gt;("Age &gt; {0}", 40)</para>
         /// <para>db.SelectFmt&lt;Person&gt;("SELECT * FROM Person WHERE Age &gt; {0}", 40)</para>
         /// </summary>
+        [Obsolete(Messages.LegacyApi)]
         public static List<T> SelectFmt<T>(this IDbConnection dbConn, string sqlFormat, params object[] filterParams)
         {
             return dbConn.Exec(dbCmd => dbCmd.SelectFmt<T>(sqlFormat, filterParams));
@@ -80,6 +81,7 @@ namespace ServiceStack.OrmLite
         /// Returns a partial subset of results from the specified tableType using a SqlFormat query. E.g:
         /// <para>db.SelectFmt&lt;EntityWithId&gt;(typeof(Person), "Age &gt; {0}", 40)</para>
         /// </summary>
+        [Obsolete(Messages.LegacyApi)]
         public static List<TModel> SelectFmt<TModel>(this IDbConnection dbConn, Type fromTableType, string sqlFormat, params object[] filterParams)
         {
             return dbConn.Exec(dbCmd => dbCmd.SelectFmt<TModel>(fromTableType, sqlFormat, filterParams));
@@ -206,6 +208,7 @@ namespace ServiceStack.OrmLite
         /// Returns the first result using a SqlFormat query. E.g:
         /// <para>db.SingleFmt&lt;Person&gt;("Age = {0}", 42)</para>
         /// </summary>
+        [Obsolete(Messages.LegacyApi)]
         public static T SingleFmt<T>(this IDbConnection dbConn, string sqlFormat, params object[] filterParams)
         {
             return dbConn.Exec(dbCmd => dbCmd.SingleFmt<T>(sqlFormat, filterParams));
@@ -260,6 +263,7 @@ namespace ServiceStack.OrmLite
         /// Returns a single scalar value using an SqlFormat query. E.g:
         /// <para>db.ScalarFmt&lt;int&gt;("SELECT COUNT(*) FROM Person WHERE Age &gt; {0}", 40)</para>
         /// </summary>
+        [Obsolete(Messages.LegacyApi)]
         public static T ScalarFmt<T>(this IDbConnection dbConn, string sqlFormat, params object[] sqlParams)
         {
             return dbConn.Exec(dbCmd => dbCmd.ScalarFmt<T>(sqlFormat, sqlParams));
@@ -323,6 +327,7 @@ namespace ServiceStack.OrmLite
         /// Returns the first column in a List using a SqlFormat query. E.g:
         /// <para>db.ColumnFmt&lt;string&gt;("SELECT LastName FROM Person WHERE Age = {0}", 27)</para>
         /// </summary>
+        [Obsolete(Messages.LegacyApi)]
         public static List<T> ColumnFmt<T>(this IDbConnection dbConn, string sqlFormat, params object[] sqlParams)
         {
             return dbConn.Exec(dbCmd => dbCmd.ColumnFmt<T>(sqlFormat, sqlParams));
@@ -359,6 +364,7 @@ namespace ServiceStack.OrmLite
         /// Returns the distinct first column values in a HashSet using an SqlFormat query. E.g:
         /// <para>db.ColumnDistinctFmt&lt;int&gt;("SELECT Age FROM Person WHERE Age &lt; {0}", 50)</para>
         /// </summary>
+        [Obsolete(Messages.LegacyApi)]
         public static HashSet<T> ColumnDistinctFmt<T>(this IDbConnection dbConn, string sqlFormat, params object[] sqlParams)
         {
             return dbConn.Exec(dbCmd => dbCmd.ColumnDistinctFmt<T>(sqlFormat, sqlParams));
@@ -395,6 +401,7 @@ namespace ServiceStack.OrmLite
         /// Returns an Dictionary&lt;K, List&lt;V&gt;&gt; grouping made from the first two columns using an SqlFormat query. E.g:
         /// <para>db.LookupFmt&lt;int, string&gt;("SELECT Age, LastName FROM Person WHERE Age &lt; {0}", 50)</para>
         /// </summary>
+        [Obsolete(Messages.LegacyApi)]
         public static Dictionary<K, List<V>> LookupFmt<K, V>(this IDbConnection dbConn, string sqlFormat, params object[] sqlParams)
         {
             return dbConn.Exec(dbCmd => dbCmd.LookupFmt<K, V>(sqlFormat, sqlParams));
@@ -482,6 +489,7 @@ namespace ServiceStack.OrmLite
         /// <para>db.ExistsFmt&lt;Person&gt;("Age = {0}", 42)</para>
         /// <para>db.ExistsFmt&lt;Person&gt;("SELECT * FROM Person WHERE Age = {0}", 50)</para>
         /// </summary>
+        [Obsolete(Messages.LegacyApi)]
         public static bool ExistsFmt<T>(this IDbConnection dbConn, string sqlFormat, params object[] filterParams)
         {
             return dbConn.Exec(dbCmd => dbCmd.ExistsFmt<T>(sqlFormat, filterParams));
