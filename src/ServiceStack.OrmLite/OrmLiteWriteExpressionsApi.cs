@@ -62,17 +62,17 @@ namespace ServiceStack.OrmLite
         /// avoiding concurrency conflicts
         /// 
         ///   var q = db.From&gt;Person&lt;());
-        ///   db.UpdateIncrement(new Person { Age = 5 }, db.From<Person>().Update(p => p.Age).Where(x => x.FirstName == "Jimi"));
+        ///   db.UpdateAdd(new Person { Age = 5 }, db.From<Person>().Update(p => p.Age).Where(x => x.FirstName == "Jimi"));
         ///   UPDATE "Person" SET "Age" = "Age" + 5 WHERE ("FirstName" = 'Jimi')
         /// 
         ///   What's not in the update expression doesn't get updated. No where expression updates all rows. E.g:
         /// 
-        ///   db.UpdateIncrement(new Person { Age = 5, FirstName = "JJ", LastName = "Hendo" }, ev.Update(p => p.Age));
+        ///   db.UpdateAdd(new Person { Age = 5, FirstName = "JJ", LastName = "Hendo" }, ev.Update(p => p.Age));
         ///   UPDATE "Person" SET "Age" = "Age" + 5
         /// </summary>
-        public static int UpdateIncrement<T>(this IDbConnection dbConn, T model, SqlExpression<T> fields)
+        public static int UpdateAdd<T>(this IDbConnection dbConn, T model, SqlExpression<T> fields)
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateIncrement(model, fields));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateAdd(model, fields));
         }
 
         /// <summary>
@@ -80,17 +80,17 @@ namespace ServiceStack.OrmLite
         /// Numeric fields generates an increment sql which is usefull to increment counters, etc...
         /// avoiding concurrency conflicts
         /// 
-        ///   db.UpdateIncrement(new Person { Age = 5 }, p => p.Age, p => p.LastName == "Hendrix");
+        ///   db.UpdateAdd(new Person { Age = 5 }, p => p.Age, p => p.LastName == "Hendrix");
         ///   UPDATE "Person" SET "Age" = "Age" + 5 WHERE ("LastName" = 'Hendrix')
         ///
-        ///   db.UpdateIncrement(new Person { Age = 5 }, p => p.FirstName);
+        ///   db.UpdateAdd(new Person { Age = 5 }, p => p.FirstName);
         ///   UPDATE "Person" SET "Age" = "Age" + 5
         /// </summary>
-        public static int UpdateIncrement<T, TKey>(this IDbConnection dbConn, T obj,
+        public static int UpdateAdd<T, TKey>(this IDbConnection dbConn, T obj,
             Expression<Func<T, TKey>> fields = null,
             Expression<Func<T, bool>> where = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateIncrement(obj, fields, where));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateAdd(obj, fields, where));
         }
 
         /// <summary>

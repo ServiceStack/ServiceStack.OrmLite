@@ -121,7 +121,7 @@ namespace ServiceStack.OrmLite
 
         void PrepareUpdateRowStatement(IDbCommand dbCmd, object objWithProperties, ICollection<string> UpdateFields = null);
 
-        void PrepareUpdateRowIncrementStatement(IDbCommand dbCmd, object objWithProperties, ICollection<string> UpdateFields);
+        void PrepareUpdateRowAddStatement(IDbCommand dbCmd, object objWithProperties, ICollection<string> UpdateFields);
 
         string ToDeleteStatement(Type tableType, string sqlFilter, params object[] filterParams);
 

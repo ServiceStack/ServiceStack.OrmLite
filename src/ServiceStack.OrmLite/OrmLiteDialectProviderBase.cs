@@ -949,7 +949,7 @@ namespace ServiceStack.OrmLite
                 throw new Exception("No valid update properties provided (e.g. p => p.FirstName): " + dbCmd.CommandText);
         }
 
-        public virtual void PrepareUpdateRowIncrementStatement(IDbCommand dbCmd, object objWithProperties, ICollection<string> updateFields)
+        public virtual void PrepareUpdateRowAddStatement(IDbCommand dbCmd, object objWithProperties, ICollection<string> updateFields)
         {
             if (updateFields.Count == 0)
                 throw new Exception("No valid update properties provided (e.g. p => p.FirstName): " + dbCmd.CommandText);
@@ -994,7 +994,7 @@ namespace ServiceStack.OrmLite
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("ERROR in ToUpdateIncrementRowStatement(): " + ex.Message, ex);
+                    Log.Error("ERROR in PrepareUpdateRowAddStatement(): " + ex.Message, ex);
                 }
             }
 
