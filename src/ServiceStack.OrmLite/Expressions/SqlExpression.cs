@@ -1739,6 +1739,7 @@ namespace ServiceStack.OrmLite
             if (exprArg != null)
             {
                 var subSelect = exprArg.ToSelectStatement();
+                var renameParams = new List<Tuple<string,string>>();
                 foreach (var p in exprArg.Params)
                 {
                     var oldName = p.ParameterName;
@@ -1746,7 +1747,7 @@ namespace ServiceStack.OrmLite
                     if (oldName != newName)
                     {
                         var pClone = DialectProvider.CreateParam().PopulateWith(p);
-                        subSelect = subSelect.Replace(oldName, newName);
+                        renameParams.Add(Tuple.Create(oldName, newName));
                         pClone.ParameterName = newName;
                         Params.Add(pClone);
                     }
@@ -1755,6 +1756,12 @@ namespace ServiceStack.OrmLite
                         Params.Add(p);
                     }
                 }
+
+                for (var i = renameParams.Count - 1; i >= 0; i--)
+                {
+                    subSelect = subSelect.Replace(renameParams[i].Item1, renameParams[i].Item2);
+                }
+
                 return string.Format("{0} {1} ({2})", quotedColName, "IN", subSelect);
             }
 
