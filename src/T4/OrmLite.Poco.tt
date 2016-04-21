@@ -103,7 +103,7 @@ priorProperyNames.Add(col.PropertyName);
     }
 
 <#if (CreateAutoQueryTypes) {#>
-	public partial class <#=tbl.ClassName#>Query: QueryBase<<#=tbl.ClassName#>> 
+	public partial class <#=tbl.ClassName#>Query: QueryDb<<#=tbl.ClassName#>> 
 	{
 <#foreach(Column col in from c in tbl.Columns where !c.Ignore select c)
 {
