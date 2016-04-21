@@ -56,6 +56,7 @@ namespace ServiceStack.OrmLite.Sqlite.Converters
 
             if (DateStyle == DateTimeKind.Unspecified)
                 dateTime = DateTime.SpecifyKind(dateTime, DateTimeKind.Local);
+
             return base.FromDbValue(dateTime);
         }
 
@@ -81,6 +82,26 @@ namespace ServiceStack.OrmLite.Sqlite.Converters
                 Log.Warn("Error reading string as DateTime in Sqlite: " + dateStr, ex);
                 return DateTime.Parse(dateStr);
             }
+        }
+    }
+
+    public class SqliteWindowsDateTimeConverter : SqliteDateTimeConverter
+    {
+        public override object FromDbValue(Type fieldType, object value)
+        {
+            var dateTime = (DateTime)value;
+
+            if (DateStyle == DateTimeKind.Utc)
+                dateTime = dateTime.ToUniversalTime();
+
+            if (DateStyle == DateTimeKind.Local && dateTime.Kind != DateTimeKind.Local)
+            {
+                dateTime = dateTime.Kind == DateTimeKind.Utc
+                    ? dateTime.ToLocalTime()
+                    : DateTime.SpecifyKind(dateTime, DateTimeKind.Local);
+            }
+
+            return dateTime;
         }
     }
 }

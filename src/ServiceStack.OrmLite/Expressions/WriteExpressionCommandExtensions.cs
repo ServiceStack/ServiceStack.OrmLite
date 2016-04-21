@@ -9,6 +9,7 @@ namespace ServiceStack.OrmLite
 {
     internal static class WriteExpressionCommandExtensions
     {
+        [Obsolete("Use db.UpdateOnly(model, db.From<T>())")]
         public static int UpdateOnly<T>(this IDbCommand dbCmd, T model, Func<SqlExpression<T>, SqlExpression<T>> onlyFields)
         {
             return dbCmd.UpdateOnly(model, onlyFields(dbCmd.GetDialectProvider().SqlExpression<T>()));
@@ -48,6 +49,38 @@ namespace ServiceStack.OrmLite
             q.Update(onlyFields);
             q.Where(where);
             return dbCmd.UpdateOnly(obj, q);
+        }
+
+        public static int UpdateAdd<T>(this IDbCommand dbCmd, T model, SqlExpression<T> fields)
+        {
+            UpdateAddSql(dbCmd, model, fields);
+            return dbCmd.ExecNonQuery();
+        }
+
+        internal static void UpdateAddSql<T>(this IDbCommand dbCmd, T model, SqlExpression<T> fields)
+        {
+            if (OrmLiteConfig.UpdateFilter != null)
+                OrmLiteConfig.UpdateFilter(dbCmd, model);
+
+            fields.CopyParamsTo(dbCmd);
+
+            dbCmd.GetDialectProvider().PrepareUpdateRowAddStatement(dbCmd, model, fields.UpdateFields);
+
+            if (!fields.WhereExpression.IsNullOrEmpty())
+                dbCmd.CommandText += " " + fields.WhereExpression;
+        }
+
+        public static int UpdateAdd<T, TKey>(this IDbCommand dbCmd, T obj,
+            Expression<Func<T, TKey>> fields = null,
+            Expression<Func<T, bool>> where = null)
+        {
+            if (fields == null)
+                throw new ArgumentNullException("fields");
+
+            var q = dbCmd.GetDialectProvider().SqlExpression<T>();
+            q.Update(fields);
+            q.Where(where);
+            return dbCmd.UpdateAdd(obj, q);
         }
 
         public static int UpdateNonDefaults<T>(this IDbCommand dbCmd, T item, Expression<Func<T, bool>> obj)
@@ -137,6 +170,7 @@ namespace ServiceStack.OrmLite
             return sql;
         }
 
+        [Obsolete("Use db.InsertOnly(obj, db.From<T>())")]
         public static void InsertOnly<T>(this IDbCommand dbCmd, T obj, Func<SqlExpression<T>, SqlExpression<T>> onlyFields)
         {
             dbCmd.InsertOnly(obj, onlyFields(dbCmd.GetDialectProvider().SqlExpression<T>()));
@@ -158,6 +192,7 @@ namespace ServiceStack.OrmLite
             return dbCmd.Delete(ev);
         }
 
+        [Obsolete("Use db.Delete(db.From<T>())")]
         public static int Delete<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> where)
         {
             return dbCmd.Delete(where(dbCmd.GetDialectProvider().SqlExpression<T>()));

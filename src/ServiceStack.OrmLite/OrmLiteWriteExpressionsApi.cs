@@ -17,6 +17,7 @@ namespace ServiceStack.OrmLite
         ///   db.UpdateOnly(new Person { FirstName = "JJ", LastName = "Hendo" }, ev => ev.Update(p => p.FirstName));
         ///   UPDATE "Person" SET "FirstName" = 'JJ'
         /// </summary>
+        [Obsolete("Use db.UpdateOnly(model, db.From<T>())")]
         public static int UpdateOnly<T>(this IDbConnection dbConn, T model, Func<SqlExpression<T>, SqlExpression<T>> onlyFields)
         {
             return dbConn.Exec(dbCmd => dbCmd.UpdateOnly(model, onlyFields));
@@ -53,6 +54,43 @@ namespace ServiceStack.OrmLite
             Expression<Func<T, bool>> where = null)
         {
             return dbConn.Exec(dbCmd => dbCmd.UpdateOnly(obj, onlyFields, where));
+        }
+
+        /// <summary>
+        /// Use an SqlExpression to select which fields to update and construct the where expression, E.g: 
+        /// Numeric fields generates an increment sql which is usefull to increment counters, etc...
+        /// avoiding concurrency conflicts
+        /// 
+        ///   var q = db.From&gt;Person&lt;());
+        ///   db.UpdateAdd(new Person { Age = 5 }, db.From<Person>().Update(p => p.Age).Where(x => x.FirstName == "Jimi"));
+        ///   UPDATE "Person" SET "Age" = "Age" + 5 WHERE ("FirstName" = 'Jimi')
+        /// 
+        ///   What's not in the update expression doesn't get updated. No where expression updates all rows. E.g:
+        /// 
+        ///   db.UpdateAdd(new Person { Age = 5, FirstName = "JJ", LastName = "Hendo" }, ev.Update(p => p.Age));
+        ///   UPDATE "Person" SET "Age" = "Age" + 5
+        /// </summary>
+        public static int UpdateAdd<T>(this IDbConnection dbConn, T model, SqlExpression<T> fields)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.UpdateAdd(model, fields));
+        }
+
+        /// <summary>
+        /// Update record, updating only fields specified in updateOnly that matches the where condition (if any), E.g:
+        /// Numeric fields generates an increment sql which is usefull to increment counters, etc...
+        /// avoiding concurrency conflicts
+        /// 
+        ///   db.UpdateAdd(new Person { Age = 5 }, p => p.Age, p => p.LastName == "Hendrix");
+        ///   UPDATE "Person" SET "Age" = "Age" + 5 WHERE ("LastName" = 'Hendrix')
+        ///
+        ///   db.UpdateAdd(new Person { Age = 5 }, p => p.FirstName);
+        ///   UPDATE "Person" SET "Age" = "Age" + 5
+        /// </summary>
+        public static int UpdateAdd<T, TKey>(this IDbConnection dbConn, T obj,
+            Expression<Func<T, TKey>> fields = null,
+            Expression<Func<T, bool>> where = null)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.UpdateAdd(obj, fields, where));
         }
 
         /// <summary>
@@ -94,6 +132,7 @@ namespace ServiceStack.OrmLite
         ///   db.Update&lt;Person&gt;(set:"FirstName = {0}".Params("JJ"), where:"LastName = {0}".Params("Hendrix"));
         ///   UPDATE "Person" SET FirstName = 'JJ' WHERE LastName = 'Hendrix'
         /// </summary>
+        [Obsolete(Messages.LegacyApi)]
         public static int UpdateFmt<T>(this IDbConnection dbConn, string set = null, string where = null)
         {
             return dbConn.Exec(dbCmd => dbCmd.UpdateFmt<T>(set, where));
@@ -105,6 +144,7 @@ namespace ServiceStack.OrmLite
         ///   db.Update(table:"Person", set: "FirstName = {0}".Params("JJ"), where: "LastName = {0}".Params("Hendrix"));
         ///   UPDATE "Person" SET FirstName = 'JJ' WHERE LastName = 'Hendrix'
         /// </summary>
+        [Obsolete(Messages.LegacyApi)]
         public static int UpdateFmt(this IDbConnection dbConn, string table = null, string set = null, string where = null)
         {
             return dbConn.Exec(dbCmd => dbCmd.UpdateFmt(table, set, where));
@@ -114,6 +154,7 @@ namespace ServiceStack.OrmLite
         /// Insert only fields in POCO specified by the SqlExpression lambda. E.g:
         /// <para>db.InsertOnly(new Person { FirstName = "Amy", Age = 27 }, q =&gt; q.Insert(p =&gt; new { p.FirstName, p.Age }))</para>
         /// </summary>
+        [Obsolete("Use db.InsertOnly(obj, db.From<T>())")]
         public static void InsertOnly<T>(this IDbConnection dbConn, T obj, Func<SqlExpression<T>, SqlExpression<T>> onlyFields)
         {
             dbConn.Exec(dbCmd => dbCmd.InsertOnly(obj, onlyFields));
@@ -147,6 +188,7 @@ namespace ServiceStack.OrmLite
         ///   db.Delete&lt;Person&gt;(ev => ev.Where(p => p.Age == 27));
         ///   DELETE FROM "Person" WHERE ("Age" = 27)
         /// </summary>
+        [Obsolete("Use db.Delete(db.From<T>())")]
         public static int Delete<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> where)
         {
             return dbConn.Exec(dbCmd => dbCmd.Delete(where));
@@ -170,6 +212,7 @@ namespace ServiceStack.OrmLite
         ///   db.Delete&lt;Person&gt;(where:"Age = {0}".Params(27));
         ///   DELETE FROM "Person" WHERE Age = 27
         /// </summary>
+        [Obsolete(Messages.LegacyApi)]
         public static int DeleteFmt<T>(this IDbConnection dbConn, string where = null)
         {
             return dbConn.Exec(dbCmd => dbCmd.DeleteFmt<T>(where));
@@ -181,6 +224,7 @@ namespace ServiceStack.OrmLite
         ///   db.Delete(table:"Person", where: "Age = {0}".Params(27));
         ///   DELETE FROM "Person" WHERE Age = 27
         /// </summary>
+        [Obsolete(Messages.LegacyApi)]
         public static int DeleteFmt(this IDbConnection dbConn, string table = null, string where = null)
         {
             return dbConn.Exec(dbCmd => dbCmd.DeleteFmt(table, where));

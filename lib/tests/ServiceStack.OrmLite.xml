@@ -73,6 +73,14 @@
             raw Select expression: "Select SomeField1, SomeField2 from SomeTable"
             </param>
         </member>
+        <member name="M:ServiceStack.OrmLite.SqlExpression`1.Select(System.String[])">
+            <summary>
+            Set the specified selectExpression using matching fields.
+            </summary>
+            <param name='fields'>
+            Matching Fields: "SomeField1, SomeField2"
+            </param>
+        </member>
         <member name="M:ServiceStack.OrmLite.SqlExpression`1.Select``1(System.Linq.Expressions.Expression{System.Func{`0,``0}})">
             <summary>
             Fields to be selected.
@@ -299,7 +307,7 @@
             <para>db.Select&lt;Person&gt;(x =&gt; x.Age &gt; 40)</para>
             </summary>
         </member>
-        <member name="M:ServiceStack.OrmLite.OrmLiteReadExpressionsApi.Single``1(System.Data.IDbConnection,ServiceStack.OrmLite.ISqlExpression,System.Object)">
+        <member name="M:ServiceStack.OrmLite.OrmLiteReadExpressionsApi.Single``1(System.Data.IDbConnection,ServiceStack.OrmLite.ISqlExpression)">
             <summary>
             Returns results from using an SqlExpression lambda. E.g:
             <para>db.Single(db.From&lt;Person&gt;().Where(x =&gt; x.Age &gt; 40))</para>
@@ -345,7 +353,7 @@
             Return the number of rows returned by the supplied sql
             </summary>
         </member>
-        <member name="M:ServiceStack.OrmLite.OrmLiteReadExpressionsApi.LoadSelect``1(System.Data.IDbConnection,System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}},System.String[])">
+        <member name="M:ServiceStack.OrmLite.OrmLiteReadExpressionsApi.LoadSelect``1(System.Data.IDbConnection,System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}},System.Collections.Generic.IEnumerable{System.String})">
             <summary>
             Returns results with references from using a LINQ Expression. E.g:
             <para>db.LoadSelect&lt;Person&gt;(x =&gt; x.Age &gt; 40)</para>
@@ -357,7 +365,7 @@
             <para>db.LoadSelect&lt;Person&gt;(x =&gt; x.Age &gt; 40, include: x => new { x.PrimaryAddress })</para>
             </summary>
         </member>
-        <member name="M:ServiceStack.OrmLite.OrmLiteReadExpressionsApi.LoadSelect``1(System.Data.IDbConnection,System.Func{ServiceStack.OrmLite.SqlExpression{``0},ServiceStack.OrmLite.SqlExpression{``0}},System.String[])">
+        <member name="M:ServiceStack.OrmLite.OrmLiteReadExpressionsApi.LoadSelect``1(System.Data.IDbConnection,System.Func{ServiceStack.OrmLite.SqlExpression{``0},ServiceStack.OrmLite.SqlExpression{``0}},System.Collections.Generic.IEnumerable{System.String})">
             <summary>
             Returns results with references from using an SqlExpression lambda. E.g:
             <para>db.LoadSelect&lt;Person&gt;(q =&gt; q.Where(x =&gt; x.Age &gt; 40))</para>
@@ -369,7 +377,7 @@
             <para>db.LoadSelect&lt;Person&gt;(q =&gt; q.Where(x =&gt; x.Age &gt; 40), include: x => new { x.PrimaryAddress })</para>
             </summary>
         </member>
-        <member name="M:ServiceStack.OrmLite.OrmLiteReadExpressionsApi.LoadSelect``1(System.Data.IDbConnection,ServiceStack.OrmLite.SqlExpression{``0},System.String[])">
+        <member name="M:ServiceStack.OrmLite.OrmLiteReadExpressionsApi.LoadSelect``1(System.Data.IDbConnection,ServiceStack.OrmLite.SqlExpression{``0},System.Collections.Generic.IEnumerable{System.String})">
             <summary>
             Returns results with references from using an SqlExpression lambda. E.g:
             <para>db.LoadSelect(db.From&lt;Person&gt;().Where(x =&gt; x.Age &gt; 40))</para>
@@ -381,7 +389,7 @@
             <para>db.LoadSelect(db.From&lt;Person&gt;().Where(x =&gt; x.Age &gt; 40), include: x => new { x.PrimaryAddress })</para>
             </summary>
         </member>
-        <member name="M:ServiceStack.OrmLite.OrmLiteReadExpressionsApi.LoadSelect``2(System.Data.IDbConnection,ServiceStack.OrmLite.SqlExpression{``1},System.String[])">
+        <member name="M:ServiceStack.OrmLite.OrmLiteReadExpressionsApi.LoadSelect``2(System.Data.IDbConnection,ServiceStack.OrmLite.SqlExpression{``1},System.Collections.Generic.IEnumerable{System.String})">
             <summary>
             Project results with references from a number of joined tables into a different model
             </summary>
@@ -427,6 +435,20 @@
             
                db.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName);
                UPDATE "Person" SET "FirstName" = 'JJ'
+             </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:ServiceStack.OrmLite.OrmLiteWriteExpressionsApi.UpdateIncrement``1(System.Data.IDbConnection,``0,ServiceStack.OrmLite.SqlExpression{``0})" -->
+        <member name="M:ServiceStack.OrmLite.OrmLiteWriteExpressionsApi.UpdateIncrement``2(System.Data.IDbConnection,``0,System.Linq.Expressions.Expression{System.Func{``0,``1}},System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}})">
+             <summary>
+             Update record, updating only fields specified in updateOnly that matches the where condition (if any), E.g:
+             Numeric fields generates an increment sql which is usefull to increment counters, etc...
+             avoiding concurrency conflicts
+             
+               db.UpdateIncrement(new Person { Age = 5 }, p => p.Age, p => p.LastName == "Hendrix");
+               UPDATE "Person" SET "Age" = "Age" + 5 WHERE ("LastName" = 'Hendrix')
+            
+               db.UpdateIncrement(new Person { Age = 5 }, p => p.FirstName);
+               UPDATE "Person" SET "Age" = "Age" + 5
              </summary>
         </member>
         <member name="M:ServiceStack.OrmLite.OrmLiteWriteExpressionsApi.UpdateNonDefaults``1(System.Data.IDbConnection,``0,System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}})">
@@ -661,6 +683,12 @@
             <summary>
             Returns a lazyily loaded stream of results using a parameterized query. E.g:
             <para>db.SelectLazy&lt;Person&gt;("Age &gt; @age", new { age = 40 })</para>
+            </summary>
+        </member>
+        <member name="M:ServiceStack.OrmLite.OrmLiteReadApi.SelectLazy``1(System.Data.IDbConnection,ServiceStack.OrmLite.SqlExpression{``0})">
+            <summary>
+            Returns a lazyily loaded stream of results using a parameterized query. E.g:
+            <para>db.SelectLazy(db.From&lt;Person&gt;().Where(x =&gt; x == 40))</para>
             </summary>
         </member>
         <member name="M:ServiceStack.OrmLite.OrmLiteReadApi.SelectLazyFmt``1(System.Data.IDbConnection,System.String,System.Object[])">

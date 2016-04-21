@@ -31,7 +31,7 @@
         </member>
         <member name="M:ServiceStack.Text.Common.DateTimeSerializer.Prepare(System.DateTime,System.Boolean)">
             <summary>
-            If AlwaysUseUtc is set to true then convert all DateTime to UTC.
+            If AlwaysUseUtc is set to true then convert all DateTime to UTC. If PreserveUtc is set to true then UTC dates will not convert to local
             </summary>
             <param name="dateTime"></param>
             <returns></returns>
@@ -156,6 +156,15 @@
             Gets or sets a value indicating if the framework should always convert <see cref="T:System.DateTime"/> to UTC format instead of local time. 
             </summary>
         </member>
+        <member name="F:ServiceStack.Text.JsConfig.sSkipDateTimeConversion">
+            <summary>
+            Gets or sets a value indicating if the framework should skip automatic <see cref="T:System.DateTime"/> conversions.
+            Dates will be handled literally, any included timezone encoding will be lost and the date will be treaded as DateTimeKind.Local
+            Utc formatted input will result in DateTimeKind.Utc output. Any input without TZ data will be set DateTimeKind.Unspecified
+            This will take precedence over other flags like AlwaysUseUtc 
+            JsConfig.DateHandler = DateHandler.ISO8601 should be used when set true for consistent de/serialization.
+            </summary>
+        </member>
         <member name="F:ServiceStack.Text.JsConfig.sAssumeUtc">
             <summary>
             Gets or sets a value indicating if the framework should always assume <see cref="T:System.DateTime"/> is in UTC format if Kind is Unspecified. 
@@ -187,12 +196,6 @@
         <member name="F:ServiceStack.Text.JsConfig.sIncludePublicFields">
             <summary>
             If set to true, Interface types will be prefered over concrete types when serializing.
-            </summary>
-        </member>
-        <member name="F:ServiceStack.Text.JsConfig.sReuseStringBuffer">
-            <summary>
-            For extra serialization performance you can re-use a ThreadStatic StringBuilder
-            when serializing to a JSON String.
             </summary>
         </member>
         <member name="F:ServiceStack.Text.JsConfig.sMaxDepth">
@@ -446,6 +449,131 @@
         <member name="P:ServiceStack.Text.FastMember.TypeAccessor.Item(System.Object,System.String)">
             <summary>
             Get or set the value of a named member on the target instance
+            </summary>
+        </member>
+        <member name="T:ServiceStack.Text.Pools.ObjectPool`1">
+            <summary>
+            Generic implementation of object pooling pattern with predefined pool size limit. The main
+            purpose is that limited number of frequently used objects can be kept in the pool for
+            further recycling.
+            
+            Notes: 
+            1) it is not the goal to keep all returned objects. Pool is not meant for storage. If there
+               is no space in the pool, extra returned objects will be dropped.
+            
+            2) it is implied that if object was obtained from a pool, the caller will return it back in
+               a relatively short time. Keeping checked out objects for long durations is ok, but 
+               reduces usefulness of pooling. Just new up your own.
+            
+            Not returning objects to the pool in not detrimental to the pool's work, but is a bad practice. 
+            Rationale: 
+               If there is no intent for reusing the object, do not use pool - just use "new". 
+            </summary>
+        </member>
+        <member name="T:ServiceStack.Text.Pools.ObjectPool`1.Factory">
+            <remarks>
+            Not using System.Func{T} because this file is linked into the (debugger) Formatter,
+            which does not have that type (since it compiles against .NET 2.0).
+            </remarks>
+        </member>
+        <member name="M:ServiceStack.Text.Pools.ObjectPool`1.Allocate">
+            <summary>
+            Produces an instance.
+            </summary>
+            <remarks>
+            Search strategy is a simple linear probing which is chosen for it cache-friendliness.
+            Note that Free will try to store recycled objects close to the start thus statistically 
+            reducing how far we will typically search.
+            </remarks>
+        </member>
+        <member name="M:ServiceStack.Text.Pools.ObjectPool`1.Free(`0)">
+            <summary>
+            Returns objects to the pool.
+            </summary>
+            <remarks>
+            Search strategy is a simple linear probing which is chosen for it cache-friendliness.
+            Note that Free will try to store recycled objects close to the start thus statistically 
+            reducing how far we will typically search in Allocate.
+            </remarks>
+        </member>
+        <member name="M:ServiceStack.Text.Pools.ObjectPool`1.ForgetTrackedObject(`0,`0)">
+            <summary>
+            Removes an object from leak tracking.  
+            
+            This is called when an object is returned to the pool.  It may also be explicitly 
+            called if an object allocated from the pool is intentionally not being returned
+            to the pool.  This can be of use with pooled arrays if the consumer wants to 
+            return a larger array to the pool than was originally allocated.
+            </summary>
+        </member>
+        <member name="T:ServiceStack.Text.Pools.PooledObject`1">
+            <summary>
+            this is RAII object to automatically release pooled object when its owning pool
+            </summary>
+        </member>
+        <member name="T:ServiceStack.Text.Pools.SharedPools">
+            <summary>
+            Shared object pool for roslyn
+            
+            Use this shared pool if only concern is reducing object allocations.
+            if perf of an object pool itself is also a concern, use ObjectPool directly.
+            
+            For example, if you want to create a million of small objects within a second, 
+            use the ObjectPool directly. it should have much less overhead than using this.
+            </summary>
+        </member>
+        <member name="M:ServiceStack.Text.Pools.SharedPools.BigDefault``1">
+            <summary>
+            pool that uses default constructor with 100 elements pooled
+            </summary>
+        </member>
+        <member name="M:ServiceStack.Text.Pools.SharedPools.Default``1">
+            <summary>
+            pool that uses default constructor with 20 elements pooled
+            </summary>
+        </member>
+        <member name="M:ServiceStack.Text.Pools.SharedPools.StringIgnoreCaseDictionary``1">
+            <summary>
+            pool that uses string as key with StringComparer.OrdinalIgnoreCase as key comparer
+            </summary>
+        </member>
+        <member name="F:ServiceStack.Text.Pools.SharedPools.StringIgnoreCaseHashSet">
+            <summary>
+            pool that uses string as element with StringComparer.OrdinalIgnoreCase as element comparer
+            </summary>
+        </member>
+        <member name="F:ServiceStack.Text.Pools.SharedPools.StringHashSet">
+            <summary>
+            pool that uses string as element with StringComparer.Ordinal as element comparer
+            </summary>
+        </member>
+        <member name="F:ServiceStack.Text.Pools.SharedPools.ByteArray">
+            <summary>
+            Used to reduce the # of temporary byte[]s created to satisfy serialization and
+            other I/O requests
+            </summary>
+        </member>
+        <member name="F:ServiceStack.Text.Pools.SharedPools.ByteBufferSize">
+            pooled memory : 4K * 512 = 4MB
+        </member>
+        <member name="T:ServiceStack.Text.StringBuilderCache">
+            <summary>
+            Reusable StringBuilder ThreadStatic Cache
+            </summary>
+        </member>
+        <member name="T:ServiceStack.Text.StringBuilderCacheAlt">
+            <summary>
+            Alternative Reusable StringBuilder ThreadStatic Cache
+            </summary>
+        </member>
+        <member name="T:ServiceStack.Text.StringWriterCache">
+            <summary>
+            Reusable StringWriter ThreadStatic Cache
+            </summary>
+        </member>
+        <member name="T:ServiceStack.Text.StringWriterCacheAlt">
+            <summary>
+            Alternative Reusable StringWriter ThreadStatic Cache
             </summary>
         </member>
         <member name="T:ServiceStack.Text.RecyclableMemoryStreamManager">

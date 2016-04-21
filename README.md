@@ -235,132 +235,110 @@ in a single SQL Query, e.g:
 ```csharp
 var usaCustomerIds = db.From<Customer>(c => c.Country == "USA").Select(c => c.Id);
 var usaCustomerOrders = db.Select(db.From<Order>()
-    .Where(q => Sql.In(q.CustomerId, usaCustomerIds)));
+    .Where(x => Sql.In(x.CustomerId, usaCustomerIds)));
 ``` 
 
 # API Examples
 
-OrmLite's SQL Expression support lets you use LINQ-liked querying in all our providers. 
-To give you a flavour here are some examples with their partial SQL output (using SqlServer dialect): 
+OrmLite provides terse and intuitive typed API's for database querying from simple
+lambda expressions to more complex LINQ-Like Typed SQL Expressions which you can use to
+construct more complex queries. To give you a flavour here are some examples: 
 
 ### Querying with SELECT
 
 ```csharp
 int agesAgo = DateTime.Today.AddYears(-20).Year;
-db.Select<Author>(q => q.Birthday >= new DateTime(agesAgo, 1, 1) 
-                    && q.Birthday <= new DateTime(agesAgo, 12, 31));
+db.Select<Author>(x => x.Birthday >= new DateTime(agesAgo, 1, 1) 
+                    && x.Birthday <= new DateTime(agesAgo, 12, 31));
 ```
-
-**WHERE (("Birthday" >= '1992-01-01 00:00:00.000') AND ("Birthday" <= '1992-12-31 00:00:00.000'))**
 
 ```csharp
-db.Select<Author>(q => Sql.In(q.City, "London", "Madrid", "Berlin"));
+db.Select<Author>(x => Sql.In(x.City, "London", "Madrid", "Berlin"));
 ```
-
-**WHERE "JobCity" In ('London', 'Madrid', 'Berlin')**
 
 ```csharp
-db.Select<Author>(q => q.Earnings <= 50);
+db.Select<Author>(x => x.Earnings <= 50);
 ```
-
-**WHERE ("Earnings" <= 50)**
 
 ```csharp
-db.Select<Author>(q => q.Name.StartsWith("A"));
+db.Select<Author>(x => x.Name.StartsWith("A"));
 ```
-
-**WHERE upper("Name") like 'A%'**
 
 ```csharp
-db.Select<Author>(q => q.Name.EndsWith("garzon"));
+db.Select<Author>(x => x.Name.EndsWith("garzon"));
 ```
-
-**WHERE upper("Name") like '%GARZON'**
 
 ```csharp
-db.Select<Author>(q => q.Name.Contains("Benedict"));
+db.Select<Author>(x => x.Name.Contains("Benedict"));
 ```
-
-**WHERE upper("Name") like '%BENEDICT%'**
 
 ```csharp
-db.Select<Author>(q => q.Rate == 10 && q.City == "Mexico");
+db.Select<Author>(x => x.Rate == 10 && x.City == "Mexico");
 ```
-
-**WHERE (("Rate" = 10) AND ("JobCity" = 'Mexico'))**
-
-Right now the Expression support can satisfy most simple queries with a strong-typed API. 
-For anything more complex (e.g. queries with table joins) you can still easily fall back to raw SQL queries as seen below. 
 
 ### Convenient common usage data access patterns 
 
 OrmLite also includes a number of convenient API's providing DRY, typed data access for common queries:
 
 ```csharp
-Person personById = db.SingleById<Person>(1);
+Person person = db.SingleById<Person>(1);
 ```
-
-**SELECT "Id", "FirstName", "LastName", "Age" FROM "Person" WHERE "Id" = @Id**
 
 ```csharp
-Person personByAge = db.Single<Person>(x => x.Age == 42);
+Person person = db.Single<Person>(x => x.Age == 42);
 ```
-
-**SELECT TOP 1 "Id", "FirstName", "LastName", "Age"  FROM "Person" WHERE ("Age" = 42)**
 
 ```csharp
-int maxAgeUnder50 = db.Scalar<Person, int>(x => Sql.Max(x.Age), x => x.Age < 50);
+var q = db.From<Person>()
+          .Where(x => x.Age > 40)
+          .Select(Sql.Count("*"));
+
+int peopleOver40 = db.Scalar<int>(q);
 ```
-
-**SELECT Max("Age") FROM "Person" WHERE ("Age" < 50)**
-
-```csharp
-int peopleOver40 = db.Scalar<int>(
-    db.From<Person>().Select(Sql.Count("*")).Where(q => q.Age > 40));
-```
-
-**SELECT COUNT(*) FROM "Person" WHERE ("Age" > 40)**
 
 ```csharp
 int peopleUnder50 = db.Count<Person>(x => x.Age < 50);
 ```
 
-**SELECT COUNT(*) FROM "Person" WHERE ("Age" < 50)**
-
 ```csharp
 bool has42YearOlds = db.Exists<Person>(new { Age = 42 });
 ```
 
-**WHERE "Age" = @Age**
-
 ```csharp
-List<string> results = db.Column<string>(db.From<Person>().Select(x => x.LastName)
-                         .Where(q => q.Age == 27));
+int maxAgeUnder50 = db.Scalar<Person, int>(x => Sql.Max(x.Age), x => x.Age < 50);
 ```
 
-**SELECT "LastName" FROM "Person" WHERE ("Age" = 27)**
-
 ```csharp
-HashSet<int> results = db.ColumnDistinct<int>(db.From<Person>().Select(x => x.Age)
-                         .Where(q => q.Age < 50));
+var q = db.From<Person>()
+    .Where(x => x.Age == 27)
+    .Select(x => x.LastName);
+    
+List<string> results = db.Column<string>(q);
 ```
 
-**SELECT "Age" FROM "Person" WHERE ("Age" < 50)**
-
 ```csharp
-Dictionary<int,string> results = db.Dictionary<int, string>(
-    db.From<Person>().Select(x => new { x.Id, x.LastName }).Where(x => x.Age < 50));
+var q = db.From<Person>()
+          .Where(x => x.Age < 50)
+          .Select(x => x.Age);
+
+HashSet<int> results = db.ColumnDistinct<int>(q);
 ```
 
-**SELECT "Id","LastName" FROM "Person" WHERE ("Age" < 50)**
-
-
 ```csharp
-Dictionary<int, List<string>> results = db.Lookup<int, string>(
-    db.From<Person>().Select(x => new { x.Age, x.LastName }).Where(q => q.Age < 50));
+var q = db.From<Person>()
+          .Where(x => x.Age < 50)
+          .Select(x => new { x.Id, x.LastName });
+
+Dictionary<int,string> results = db.Dictionary<int, string>(q);
 ```
 
-**SELECT "Age","LastName" FROM "Person" WHERE ("Age" < 50)**
+```csharp
+var q = db.From<Person>()
+          .Where(x => x.Age < 50)
+          .Select(x => new { x.Age, x.LastName });
+
+Dictionary<int, List<string>> results = db.Lookup<int, string>(q);
+```
 
 ### INSERT, UPDATE and DELETEs
 
@@ -369,10 +347,10 @@ To see the behaviour of the different APIs, all examples uses this simple model
 ```csharp
 public class Person
 {
-  public int Id { get; set; }
-  public string FirstName { get; set; }
-  public string LastName { get; set; }
-  public int? Age { get; set; }
+    public int Id { get; set; }
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+    public int? Age { get; set; }
 }
 ```
 
@@ -384,15 +362,11 @@ is used to filter the update to this specific record:
 ```csharp
 db.Update(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27});
 ```
-**UPDATE "Person" SET "FirstName" = 'Jimi',"LastName" = 'Hendrix',"Age" = 27 WHERE "Id" = 1**
-
 If you supply your own where expression, it updates every field (inc. Id) but uses your filter instead:
 
 ```csharp
 db.Update(new Person { Id = 1, FirstName = "JJ" }, p => p.LastName == "Hendrix");
 ```
-**UPDATE "Person" SET "Id" = 1,"FirstName" = 'JJ',"LastName" = NULL,"Age" = NULL WHERE ("LastName" = 'Hendrix')**
-
 One way to limit the fields which gets updated is to use an **Anonymous Type**:
 
 ```csharp
@@ -405,8 +379,6 @@ Or by using `UpdateNonDefaults` which only updates the non-default values in you
 db.UpdateNonDefaults(new Person { FirstName = "JJ" }, p => p.LastName == "Hendrix");
 ```
 
-**UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("LastName" = 'Hendrix')**
-
 #### UpdateOnly
 
 As updating a partial row is a common use-case in Db's, we've added a number of methods for just 
@@ -416,50 +388,47 @@ The first expression in an `UpdateOnly` statement is used to specify which field
 ```csharp
 db.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName);
 ```
-**UPDATE "Person" SET "FirstName" = 'JJ'**
-
 ```csharp
 db.UpdateOnly(new Person { FirstName = "JJ", Age = 12 }, 
     onlyFields: p => new { p.FirstName, p.Age });
 ```
-**UPDATE "Person" SET "FirstName" = 'JJ', "Age" = 12**
-
 When present, the second expression is used as the where filter:
 ```csharp
 db.UpdateOnly(new Person { FirstName = "JJ" }, 
     onlyFields: p => p.FirstName, 
     where: p => p.LastName == "Hendrix");
 ```
-**UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("LastName" = 'Hendrix')**
-
 Instead of using the expression filters above you can choose to use an ExpressionVisitor builder which provides more flexibility when you want to programatically construct the update statement:
 
 ```csharp
-db.UpdateOnly(new Person { FirstName = "JJ", LastName = "Hendo" }, 
-  onlyFields: q => q.Update(p => p.FirstName));
+var q = db.From<Person>()
+          .Update(p => p.FirstName);
+
+db.UpdateOnly(new Person { FirstName = "JJ", LastName = "Hendo" }, onlyFields: q);
 ```
-**UPDATE "Person" SET "FirstName" = 'JJ'**
+
+Using a typed SQL Expression:
 
 ```csharp
-db.UpdateOnly(new Person { FirstName = "JJ" }, 
-  onlyFields: q => q.Update(p => p.FirstName).Where(x => x.FirstName == "Jimi"));
+var q = db.From<Person>()
+          .Where(x => x.FirstName == "Jimi")
+          .Update(p => p.FirstName);
+          
+db.UpdateOnly(new Person { FirstName = "JJ" }, onlyFields: q);
 ```
-**UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("LastName" = 'Hendrix')**
 
-For the ultimate flexibility we also provide un-typed, string-based expressions. Use the `.Params()` extension method escape parameters (inspired by [massive](https://github.com/robconery/massive)):
+For the ultimate flexibility we also provide un-typed, string-based expressions. Use the `.SqlFmt()` extension method escape parameters (inspired by [massive](https://github.com/robconery/massive)):
 
 ```csharp
-db.Update<Person>(set: "FirstName = {0}".Params("JJ"), 
-                where: "LastName = {0}".Params("Hendrix"));
+db.UpdateFmt<Person>(set: "FirstName = {0}".SqlFmt("JJ"), 
+                   where: "LastName = {0}".SqlFmt("Hendrix"));
 ```
 Even the Table name can be a string so you perform the same update without requiring the Person model at all:
 
 ```csharp
-db.Update(table: "Person", set: "FirstName = {0}".Params("JJ"), 
-          where: "LastName = {0}".Params("Hendrix"));
+db.UpdateFmt(table: "Person", set: "FirstName = {0}".SqlFmt("JJ"), 
+             where: "LastName = {0}".SqlFmt("Hendrix"));
 ```
-**UPDATE "Person" SET FirstName = 'JJ' WHERE LastName = 'Hendrix'**
-
 ### INSERT
 
 Insert's are pretty straight forward since in most cases you want to insert every field:
@@ -467,14 +436,14 @@ Insert's are pretty straight forward since in most cases you want to insert ever
 ```csharp
 db.Insert(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27 });
 ```
-**INSERT INTO "Person" ("Id","FirstName","LastName","Age") VALUES (1,'Jimi','Hendrix',27)**
-
 But do provide an API that takes an Expression Visitor for the rare cases you don't want to insert every field
 
 ```csharp
-db.InsertOnly(new Person { FirstName = "Amy" }, q => q.Insert(p => new {p.FirstName}))
+var q = db.From<Person>()
+          .Insert(p => new { p.FirstName });
+
+db.InsertOnly(new Person { FirstName = "Amy" }, onlyFields: q)
 ```
-**INSERT INTO "Person" ("FirstName") VALUES ('Amy')**
 
 ### DELETE
 
@@ -485,22 +454,21 @@ db.Delete<Person>(p => p.Age == 27);
 
 Or an Expression Visitor:
 ```csharp
-db.Delete<Person>(q => q.Where(p => p.Age == 27));
-```
+var q = db.From<Person>()
+          .Where(p => p.Age == 27);
 
-**DELETE FROM "Person" WHERE ("Age" = 27)**
+db.Delete<Person>(q);
+```
 
 As well as un-typed, string-based expressions:
 ```csharp
-db.Delete<Person>(where: "Age = {0}".Params(27));
+db.Delete<Person>(where: "Age = {0}".SqlFmt(27));
 ```
 
 Which also can take a table name so works without requiring a typed **Person** model
 ```csharp
-db.Delete(table: "Person", where: "Age = {0}".Params(27));
+db.Delete(table: "Person", where: "Age = {0}".SqlFmt(27));
 ```
-
-**DELETE FROM "Person" WHERE Age = 27**
 
 # API Overview
 
@@ -541,7 +509,7 @@ List<Track> tracks = db.Select<Track>()
 **Single** returns a single record:
 
 ```csharp
-Track track = db.Single<Track>(q => q.RefId == refId)
+Track track = db.Single<Track>(x => x.RefId == refId)
 ```
 
 **Dictionary** returns a Dictionary made from the first two columns:
@@ -623,7 +591,6 @@ var topVIPs = db.SelectLazyFmt<Person>("Age > {0}", 40).Where(p => IsVip(p)).Tak
  - `Save` and `SaveAll` will Insert if no record with **Id** exists, otherwise it Updates. 
  - Methods containing the word **Each** return an IEnumerable<T> and are lazily loaded (i.e. non-buffered).
 
-
 # Features
 
 Whilst OrmLite aims to provide a light-weight typed wrapper around SQL, it offers a number of convenient features that makes working with RDBMS's a clean and enjoyable experience:
@@ -633,7 +600,10 @@ Whilst OrmLite aims to provide a light-weight typed wrapper around SQL, it offer
 Starting with the most basic example you can simply specify the table you want to join with:
 
 ```csharp
-var dbCustomers = db.Select<Customer>(q => q.Join<CustomerAddress>());
+var q = db.From<Customer>()
+          .Join<CustomerAddress>();
+
+var dbCustomers = db.Select<Customer>(q);
 ```
 
 This query rougly maps to the following SQL:
@@ -764,10 +734,10 @@ var customer = new Customer
 
 db.Save(customer, references:true);
 
-var c = db.LoadSelect<Customer>(q => q.Name == "The Customer");
+var c = db.LoadSelect<Customer>(x => x.Name == "The Customer");
 c.WorkAddress.Address.Print(); // 2 Work Road
 
-var ukAddress = db.Single<CustomerAddress>(q => q.Country == "UK");
+var ukAddress = db.Single<CustomerAddress>(x => x.Country == "UK");
 ukAddress.Address.Print();     // 2 Work Road
 ```
 
@@ -795,7 +765,10 @@ Where `FullCustomerInfo` is any POCO that contains a combination of properties m
 The above example is also equivalent to the shorthand `db.Select<Into,From>()` API:
 
 ```csharp
-var customers = db.Select<FullCustomerInfo,Customer>(q => q.Join<CustomerAddress>());
+var q = db.From<Customer>()
+          .Join<CustomerAddress>();
+
+var customers = db.Select<FullCustomerInfo,Customer>(q);
 ```
 
 Rules for how results are mapped is simply each property on `FullCustomerInfo` is mapped to the first matching property in any of the tables in the order they were added to the SqlExpression.
@@ -904,7 +877,7 @@ var customer = db.LoadSingleById<Customer>(customerId);
 Using Typed SqlExpressions:
 
 ```csharp
-var customers = db.LoadSelect<Customer>(q => q.Name == "Customer 1");
+var customers = db.LoadSelect<Customer>(x => x.Name == "Customer 1");
 ```
 
 More examples available in [LoadReferencesTests.cs](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLite.Tests/LoadReferencesTests.cs)
@@ -927,10 +900,12 @@ For example you can select a collection of Customers who've made an order with q
 
 ```csharp
 //Select Customers who've had orders with Quantities of 10 or more
-List<Customer> customers = db.Select<Customer>(q =>
-    q.Join<Order>()
-     .Where<Order>(o => o.Qty >= 10)
-     .SelectDistinct());
+var q = db.From<Customer>()
+          .Join<Order>()
+          .Where<Order>(o => o.Qty >= 10)
+          .SelectDistinct();
+
+List<Customer> customers = db.Select<Customer>(q);
 
 //Select Orders with Quantities of 10 or more
 List<Order> orders = db.Select<Order>(o => o.Qty >= 10);
@@ -1136,7 +1111,7 @@ using (var db = OpenDbConnection())
     db.DropAndCreateTable<PocoTable>();
     db.Insert(new PocoTable { Name = "Multiplicity" });
 
-    var rowsInserted = db.Count<PocoTable>(q => q.Name == "Multiplicity"); //3
+    var rowsInserted = db.Count<PocoTable>(x => x.Name == "Multiplicity"); //3
 }
 ```
 
@@ -1361,11 +1336,16 @@ OrmLite's T4 support can be added via NuGet with:
 
 ## Typed SqlExpressions with Custom SQL APIs
 
-The Custom SQL API's allow you to map custom SqlExpressions into different responses:
+OrmLite's Expression support satisfies the most common RDBMS queries with a strong-typed API. 
+For more complex queries you can easily fall back to raw SQL where the Custom SQL API's 
+let you to map custom SqlExpressions into different responses:
 
 ```csharp
-List<Person> results = db.SqlList<Person>(
-    db.From<Person>().Select("*").Where(q => q.Age < 50));
+var q = db.From<Person>()
+          .Where(x => x.Age < 50)
+          .Select("*");
+List<Person> results = db.SqlList<Person>(q);
+
 List<Person> results = db.SqlList<Person>(
     "SELECT * FROM Person WHERE Age < @age", new { age=50});
 
@@ -1375,8 +1355,10 @@ List<string> results = db.SqlColumn<string>("SELECT LastName FROM Person");
 HashSet<int> results = db.ColumnDistinct<int>(db.From<Person>().Select(x => x.Age));
 HashSet<int> results = db.ColumnDistinct<int>("SELECT Age FROM Person");
 
-int result = db.SqlScalar<int>(
-    db.From<Person>().Select(Sql.Count("*")).Where(q => q.Age < 50));
+var q = db.From<Person>()
+          .Where(x => x.Age < 50)
+          .Select(Sql.Count("*"));
+int result = db.SqlScalar<int>(q);
 int result = db.SqlScalar<int>("SELCT COUNT(*) FROM Person WHERE Age < 50");
 ```
 

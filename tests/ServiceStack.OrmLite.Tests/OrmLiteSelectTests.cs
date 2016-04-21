@@ -419,7 +419,22 @@ namespace ServiceStack.OrmLite.Tests
             }
         }
 
-	    [TestCase(1E125)]
+        [Test]
+        public void Does_not_evaluate_SqlFmt_when_no_params()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<ModelWithIdAndName>();
+
+                db.Insert(new ModelWithIdAndName(1) { Name = "{test}" });
+
+                var rows = db.Select<ModelWithIdAndName>("Name = '{test}'");
+
+                Assert.That(rows.Count, Is.EqualTo(1));
+            }
+        }
+
+        [TestCase(1E125)]
 	    [TestCase(-1E125)]
 	    public void Does_return_large_double_values(double value)
 	    {

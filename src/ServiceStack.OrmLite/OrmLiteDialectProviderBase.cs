@@ -267,6 +267,8 @@ namespace ServiceStack.OrmLite
 
         public IOrmLiteConverter GetConverter(Type type)
         {
+            type = Nullable.GetUnderlyingType(type) ?? type;
+
             IOrmLiteConverter converter;
             return Converters.TryGetValue(type, out converter)
                 ? converter
@@ -301,10 +303,12 @@ namespace ServiceStack.OrmLite
         public virtual IOrmLiteConverter GetConverterBestMatch(FieldDefinition fieldDef)
         {
             var fieldType = Nullable.GetUnderlyingType(fieldDef.FieldType) ?? fieldDef.FieldType;
+
             if (fieldDef.IsRowVersion)
                 return RowVersionConverter;
 
             IOrmLiteConverter converter;
+
             if (Converters.TryGetValue(fieldType, out converter))
                 return converter;
 
@@ -359,6 +363,11 @@ namespace ServiceStack.OrmLite
                 return converter.GetValue(reader, columnIndex, null);
 
             return reader.GetValue(columnIndex);
+        }
+
+        public virtual int GetValues(IDataReader reader, object[] values)
+        {
+            return reader.GetValues(values);
         }
 
         public abstract IDbConnection CreateConnection(string filePath, Dictionary<string, string> options);
@@ -938,6 +947,59 @@ namespace ServiceStack.OrmLite
 
             if (sql.Length == 0)
                 throw new Exception("No valid update properties provided (e.g. p => p.FirstName): " + dbCmd.CommandText);
+        }
+
+        public virtual void PrepareUpdateRowAddStatement(IDbCommand dbCmd, object objWithProperties, ICollection<string> updateFields)
+        {
+            if (updateFields.Count == 0)
+                throw new Exception("No valid update properties provided (e.g. p => p.FirstName): " + dbCmd.CommandText);
+
+            var sqlFilter = new StringBuilder();
+            var sql = new StringBuilder();
+            var modelDef = objWithProperties.GetType().GetModelDefinition();
+            var quotedFieldName = string.Empty;
+
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+                if (!updateFields.Contains(fieldDef.FieldName))
+                    continue;
+
+                if (fieldDef.AutoIncrement || fieldDef.IsComputed || fieldDef.IsPrimaryKey ||
+                    fieldDef.IsRowVersion || fieldDef.Name == OrmLiteConfig.IdField)
+                    continue;
+
+                try
+                {
+                    if (sql.Length > 0)
+                        sql.Append(", ");
+
+                    quotedFieldName = GetQuotedColumnName(fieldDef.FieldName);
+
+                    if (fieldDef.FieldType.IsNumericType())
+                    {
+                        sql
+                            .Append(quotedFieldName)
+                            .Append("=")
+                            .Append(quotedFieldName)
+                            .Append("+")
+                            .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef.ColumnType).ParameterName);
+                    }
+                    else
+                    {
+                        sql
+                            .Append(quotedFieldName)
+                            .Append("=")
+                            .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef.ColumnType).ParameterName);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("ERROR in PrepareUpdateRowAddStatement(): " + ex.Message, ex);
+                }
+            }
+
+            dbCmd.CommandText = string.Format("UPDATE {0} SET {1}{2}",
+                GetQuotedTableName(modelDef), sql, (sqlFilter.Length > 0 ? " WHERE " + sqlFilter : ""));
         }
 
         public virtual string ToDeleteStatement(Type tableType, string sqlFilter, params object[] filterParams)

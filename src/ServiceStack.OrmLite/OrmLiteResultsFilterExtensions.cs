@@ -116,7 +116,7 @@ namespace ServiceStack.OrmLite
             return to;
         }
 
-        internal static List<T> ExprConvertToList<T>(this IDbCommand dbCmd, string sql = null, IEnumerable<IDbDataParameter> sqlParams = null)
+        internal static List<T> ExprConvertToList<T>(this IDbCommand dbCmd, string sql = null, IEnumerable<IDbDataParameter> sqlParams = null, HashSet<string> onlyFields=null)
         {
             if (sql != null)
                 dbCmd.CommandText = sql;
@@ -130,7 +130,7 @@ namespace ServiceStack.OrmLite
 
             using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
             {
-                return reader.ConvertToList<T>(dbCmd.GetDialectProvider());
+                return reader.ConvertToList<T>(dbCmd.GetDialectProvider(), onlyFields:onlyFields);
             }
         }
 
@@ -218,6 +218,19 @@ namespace ServiceStack.OrmLite
             }
         }
 
+        public static object Scalar(this IDbCommand dbCmd, ISqlExpression sqlExpression)
+        {
+            dbCmd.CommandText = sqlExpression.ToSelectStatement();
+            dbCmd.SetParameters(sqlExpression.Params);
+
+            if (OrmLiteConfig.ResultsFilter != null)
+            {
+                return OrmLiteConfig.ResultsFilter.GetScalar(dbCmd);
+            }
+
+            return dbCmd.ExecuteScalar();
+        }
+
         public static object Scalar(this IDbCommand dbCmd, string sql = null)
         {
             if (sql != null)
@@ -244,7 +257,7 @@ namespace ServiceStack.OrmLite
             return dbCmd.LongScalar();
         }
 
-        internal static T ExprConvertTo<T>(this IDbCommand dbCmd, string sql = null, IEnumerable<IDbDataParameter> sqlParams = null)
+        internal static T ExprConvertTo<T>(this IDbCommand dbCmd, string sql = null, IEnumerable<IDbDataParameter> sqlParams = null, HashSet<string> onlyFields = null)
         {
             if (sql != null)
                 dbCmd.CommandText = sql;
@@ -258,7 +271,7 @@ namespace ServiceStack.OrmLite
 
             using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
             {
-                return reader.ConvertTo<T>(dbCmd.GetDialectProvider());
+                return reader.ConvertTo<T>(dbCmd.GetDialectProvider(), onlyFields: onlyFields);
             }
         }
 

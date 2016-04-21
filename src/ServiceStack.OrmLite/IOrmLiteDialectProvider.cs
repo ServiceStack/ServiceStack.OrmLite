@@ -70,6 +70,8 @@ namespace ServiceStack.OrmLite
 
         object GetValue(IDataReader reader, int columnIndex, Type type);
 
+        int GetValues(IDataReader reader, object[] values);
+
         IDbConnection CreateConnection(string filePath, Dictionary<string, string> options);
 
         string GetQuotedTableName(ModelDefinition modelDef);
@@ -118,6 +120,8 @@ namespace ServiceStack.OrmLite
 
 
         void PrepareUpdateRowStatement(IDbCommand dbCmd, object objWithProperties, ICollection<string> UpdateFields = null);
+
+        void PrepareUpdateRowAddStatement(IDbCommand dbCmd, object objWithProperties, ICollection<string> UpdateFields);
 
         string ToDeleteStatement(Type tableType, string sqlFilter, params object[] filterParams);
 

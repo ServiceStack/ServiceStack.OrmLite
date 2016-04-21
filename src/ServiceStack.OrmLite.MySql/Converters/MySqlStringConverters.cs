@@ -9,7 +9,7 @@ namespace ServiceStack.OrmLite.MySql.Converters
 
         public override string MaxColumnDefinition
         {
-            get { return "TEXT"; }
+            get { return "LONGTEXT"; }
         }
     }
 
@@ -19,7 +19,7 @@ namespace ServiceStack.OrmLite.MySql.Converters
 
         public override string MaxColumnDefinition
         {
-            get { return "TEXT"; }
+            get { return "LONGTEXT"; }
         }
     }
 }

@@ -14,7 +14,7 @@ using System.Runtime.InteropServices;
 #elif NET40
 [assembly: AssemblyProduct("ServiceStack.OrmLite.Sqlite CLI 4.0")]
 #endif
-[assembly: AssemblyCopyright("Copyright © ServiceStack 2013")]
+[assembly: AssemblyCopyright("Copyright (c) ServiceStack 2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

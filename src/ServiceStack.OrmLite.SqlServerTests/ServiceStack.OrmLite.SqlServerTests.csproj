@@ -85,6 +85,8 @@
     <Compile Include="DateTimeOffsetTests.cs" />
     <Compile Include="InsertParam_GetLastInsertId.cs" />
     <Compile Include="Issues\CustomSelectWithPagingIssue.cs" />
+    <Compile Include="Converters\InheritanceTest.cs" />
+    <Compile Include="Issues\JamesGeoIssue.cs" />
     <Compile Include="Issues\SerializationTests.cs" />
     <Compile Include="NestedTransactions.cs" />
     <Compile Include="EnumTests.cs" />

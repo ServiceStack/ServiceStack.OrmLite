@@ -129,6 +129,8 @@
     <Compile Include="DateTimeOffsetTests.cs" />
     <Compile Include="DateTimeTests.cs" />
     <Compile Include="DefaultValueTests.cs" />
+    <Compile Include="Issues\BelongsToIssue.cs" />
+    <Compile Include="Issues\MergingNestedSqlExpressionIssue.cs" />
     <Compile Include="UseCase\ExpressionsAuthorTests.cs" />
     <Compile Include="Expression\ComplexJoinTests.cs" />
     <Compile Include="Expression\ExpressionUsingCustomSerializedEnumTests.cs" />

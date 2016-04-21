@@ -13,7 +13,7 @@ namespace ServiceStack.OrmLite
 {
     public static class OrmLiteResultsFilterExtensionsAsync
     {
-        internal static Task<int> ExecNonQueryAsync(this IDbCommand dbCmd, string sql, object anonType, CancellationToken token)
+        public static Task<int> ExecNonQueryAsync(this IDbCommand dbCmd, string sql, object anonType, CancellationToken token = default(CancellationToken))
         {
             if (anonType != null)
                 dbCmd.SetParameters(anonType, (bool)false);
@@ -26,7 +26,7 @@ namespace ServiceStack.OrmLite
             return dbCmd.GetDialectProvider().ExecuteNonQueryAsync(dbCmd, token);
         }
 
-        internal static Task<int> ExecNonQueryAsync(this IDbCommand dbCmd, string sql, IDictionary<string, object> dict, CancellationToken token)
+        public static Task<int> ExecNonQueryAsync(this IDbCommand dbCmd, string sql, IDictionary<string, object> dict, CancellationToken token = default(CancellationToken))
         {
             if (dict != null)
                 dbCmd.SetParameters(dict, (bool)false);
@@ -39,7 +39,7 @@ namespace ServiceStack.OrmLite
             return dbCmd.GetDialectProvider().ExecuteNonQueryAsync(dbCmd, token);
         }
 
-        internal static Task<int> ExecNonQueryAsync(this IDbCommand dbCmd, CancellationToken token)
+        public static Task<int> ExecNonQueryAsync(this IDbCommand dbCmd, CancellationToken token = default(CancellationToken))
         {
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.ExecuteSql(dbCmd).InTask();
@@ -157,7 +157,18 @@ namespace ServiceStack.OrmLite
 
         public static Task<object> ScalarAsync(this IDbCommand dbCmd)
         {
-            return dbCmd.ScalarAsync(null, default(CancellationToken));
+            return dbCmd.ScalarAsync((string)null, default(CancellationToken));
+        }
+
+        public static Task<object> ScalarAsync(this IDbCommand dbCmd, ISqlExpression expression, CancellationToken token)
+        {
+            dbCmd.CommandText = expression.ToSelectStatement();
+            dbCmd.SetParameters(expression.Params);
+
+            if (OrmLiteConfig.ResultsFilter != null)
+                return OrmLiteConfig.ResultsFilter.GetScalar(dbCmd).InTask();
+
+            return dbCmd.GetDialectProvider().ExecuteScalarAsync(dbCmd, token);
         }
 
         public static Task<object> ScalarAsync(this IDbCommand dbCmd, string sql, CancellationToken token)

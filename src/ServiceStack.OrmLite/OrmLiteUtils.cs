@@ -58,7 +58,7 @@ namespace ServiceStack.OrmLite
             return typeof(T).IsValueType || typeof(T) == typeof(string);
         }
 
-        public static T ConvertTo<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider)
+        public static T ConvertTo<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, HashSet<string> onlyFields=null)
         {
             using (reader)
             {
@@ -71,7 +71,7 @@ namespace ServiceStack.OrmLite
                         return (T)(object)reader.ConvertToDictionaryObjects();
                     
                     var row = CreateInstance<T>();
-                    var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition, dialectProvider);
+                    var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition, dialectProvider, onlyFields: onlyFields);
                     var values = new object[reader.FieldCount];
                     row.PopulateWithSqlReader(dialectProvider, reader, indexCache, values);
                     return row;
@@ -100,7 +100,7 @@ namespace ServiceStack.OrmLite
             return row;
         }
 
-        public static List<T> ConvertToList<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider)
+        public static List<T> ConvertToList<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, HashSet<string> onlyFields=null)
         {
             if (typeof(T) == typeof(List<object>))
             {
@@ -133,7 +133,7 @@ namespace ServiceStack.OrmLite
                 var to = new List<T>();
                 using (reader)
                 {
-                    var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition, dialectProvider);
+                    var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition, dialectProvider, onlyFields:onlyFields);
                     var values = new object[reader.FieldCount];
                     while (reader.Read())
                     {
@@ -210,6 +210,9 @@ namespace ServiceStack.OrmLite
 
         public static string SqlFmt(this string sqlText, IOrmLiteDialectProvider dialect, params object[] sqlParams)
         {
+            if (sqlParams.Length == 0)
+                return sqlText;
+
             var escapedParams = new List<string>();
             foreach (var sqlParam in sqlParams)
             {
@@ -348,7 +351,10 @@ namespace ServiceStack.OrmLite
             return new SqlInValues(values, dialect);
         }
 
-        public static Tuple<FieldDefinition, int, IOrmLiteConverter>[] GetIndexFieldsCache(this IDataReader reader, ModelDefinition modelDefinition, IOrmLiteDialectProvider dialect)
+        public static Tuple<FieldDefinition, int, IOrmLiteConverter>[] GetIndexFieldsCache(this IDataReader reader, 
+            ModelDefinition modelDefinition, 
+            IOrmLiteDialectProvider dialect, 
+            HashSet<string> onlyFields = null)
         {
             var cache = new List<Tuple<FieldDefinition, int, IOrmLiteConverter>>();
             var ignoredFields = modelDefinition.IgnoredFieldDefinitions;
@@ -367,12 +373,22 @@ namespace ServiceStack.OrmLite
                 }
             }
 
-            foreach (var fieldDef in remainingFieldDefs)
+            if (remainingFieldDefs.Count > 0 && onlyFields == null)
             {
-                var index = FindColumnIndex(reader, dialect, fieldDef);
-                if (index != NotFound)
+                var dbFieldMap = new Dictionary<string, int>(StringComparer.InvariantCultureIgnoreCase);
+                for (var i = 0; i < reader.FieldCount; i++)
                 {
-                    cache.Add(Tuple.Create(fieldDef, index, dialect.GetConverterBestMatch(fieldDef)));
+                    var fieldName = reader.GetName(i);
+                    dbFieldMap[fieldName] = i;
+                }
+
+                foreach (var fieldDef in remainingFieldDefs)
+                {
+                    var index = FindColumnIndex(dialect, fieldDef, dbFieldMap);
+                    if (index != NotFound)
+                    {
+                        cache.Add(Tuple.Create(fieldDef, index, dialect.GetConverterBestMatch(fieldDef)));
+                    }
                 }
             }
 
@@ -380,39 +396,44 @@ namespace ServiceStack.OrmLite
         }
 
         private const int NotFound = -1;
-        internal static int FindColumnIndex(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, FieldDefinition fieldDef)
+        internal static int FindColumnIndex(IOrmLiteDialectProvider dialectProvider, FieldDefinition fieldDef, Dictionary<string, int> dbFieldMap)
         {
-            var index = NotFound;
-            index = reader.GetColumnIndex(dialectProvider, fieldDef.FieldName);
-            if (index == NotFound)
-            {
-                index = TryGuessColumnIndex(fieldDef.FieldName, reader);
-            }
+            int index;
+            var fieldName = dialectProvider.NamingStrategy.GetColumnName(fieldDef.FieldName);
+            if (dbFieldMap.TryGetValue(fieldName, out index))
+                return index;
+
+            index = TryGuessColumnIndex(fieldName, dbFieldMap);
+            if (index != NotFound)
+                return index;
+
             // Try fallback to original field name when overriden by alias
-            if (index == NotFound && fieldDef.Alias != null && !OrmLiteConfig.DisableColumnGuessFallback)
+            if (fieldDef.Alias != null && !OrmLiteConfig.DisableColumnGuessFallback)
             {
-                index = reader.GetColumnIndex(dialectProvider, fieldDef.Name);
-                if (index == NotFound)
-                {
-                    index = TryGuessColumnIndex(fieldDef.Name, reader);
-                }
+                var alias = dialectProvider.NamingStrategy.GetColumnName(fieldDef.Name);
+                if (dbFieldMap.TryGetValue(alias, out index))
+                    return index;
+
+                index = TryGuessColumnIndex(alias, dbFieldMap);
+                if (index != NotFound)
+                    return index;
             }
 
-            return index;
+            return NotFound;
         }
 
         private static readonly Regex AllowedPropertyCharsRegex = new Regex(@"[^0-9a-zA-Z_]",
             RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
-        private static int TryGuessColumnIndex(string fieldName, IDataReader dataReader)
+        private static int TryGuessColumnIndex(string fieldName, Dictionary<string, int> dbFieldMap)
         {
             if (OrmLiteConfig.DisableColumnGuessFallback)
                 return NotFound;
 
-            var fieldCount = dataReader.FieldCount;
-            for (var i = 0; i < fieldCount; i++)
+            foreach (var entry in dbFieldMap)
             {
-                var dbFieldName = dataReader.GetName(i);
+                var dbFieldName = entry.Key;
+                var i = entry.Value;
 
                 // First guess: Maybe the DB field has underscores? (most common)
                 // e.g. CustomerId (C#) vs customer_id (DB)

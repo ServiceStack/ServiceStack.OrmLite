@@ -117,6 +117,7 @@ namespace ServiceStack.OrmLite
         /// Returns results from using an SqlExpression lambda. E.g:
         /// <para>db.Select&lt;Person&gt;(q =&gt; q.Where(x =&gt; x.Age &gt; 40))</para>
         /// </summary>
+        [Obsolete("Use db.Select(db.From<T>())")]
         public static List<T> Select<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression)
         {
             return dbConn.Exec(dbCmd => dbCmd.Select(expression));
@@ -142,6 +143,7 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Project results from a number of joined tables into a different model
         /// </summary>
+        [Obsolete("Use db.Select<Into, From>(db.From<T>())")]
         public static List<Into> Select<Into, From>(this IDbConnection dbConn, Func<SqlExpression<From>, SqlExpression<From>> expression)
         {
             return dbConn.Exec(dbCmd => dbCmd.Select<Into, From>(expression));
@@ -159,7 +161,7 @@ namespace ServiceStack.OrmLite
             if (expression.Params != null && expression.Params.Any())
                 return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(expression.SelectInto<T>(), expression.Params.ToDictionary(param => param.ParameterName, param => param.Value)));
 
-            return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(expression.SelectInto<T>()));
+            return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(expression.SelectInto<T>(), expression.Params));
         }
 
         /// <summary>
@@ -175,6 +177,7 @@ namespace ServiceStack.OrmLite
         /// Returns a single result from using an SqlExpression lambda. E.g:
         /// <para>db.Single&lt;Person&gt;(q =&gt; q.Where(x =&gt; x.Age == 42))</para>
         /// </summary>
+        [Obsolete("Use db.Single(db.From<T>())")]
         public static T Single<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression)
         {
             return dbConn.Exec(dbCmd => dbCmd.Single(expression));
@@ -230,6 +233,7 @@ namespace ServiceStack.OrmLite
         /// Returns the count of rows that match the SqlExpression lambda, E.g:
         /// <para>db.Count&lt;Person&gt;(q =&gt; q.Where(x =&gt; x.Age &lt; 50))</para>
         /// </summary>
+        [Obsolete("Use db.Count(db.From<T>())")]
         public static long Count<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression)
         {
             return dbConn.Exec(dbCmd => dbCmd.Count(expression));
@@ -270,7 +274,7 @@ namespace ServiceStack.OrmLite
         /// Returns results with references from using a LINQ Expression. E.g:
         /// <para>db.LoadSelect&lt;Person&gt;(x =&gt; x.Age &gt; 40)</para>
         /// </summary>
-        public static List<T> LoadSelect<T>(this IDbConnection dbConn, Expression<Func<T, bool>> predicate, string[] include = null)
+        public static List<T> LoadSelect<T>(this IDbConnection dbConn, Expression<Func<T, bool>> predicate, IEnumerable<string> include = null)
         {
             return dbConn.Exec(dbCmd => dbCmd.LoadSelect(predicate, include));
         }
@@ -288,7 +292,8 @@ namespace ServiceStack.OrmLite
         /// Returns results with references from using an SqlExpression lambda. E.g:
         /// <para>db.LoadSelect&lt;Person&gt;(q =&gt; q.Where(x =&gt; x.Age &gt; 40))</para>
         /// </summary>
-        public static List<T> LoadSelect<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression, string[] include = null)
+        [Obsolete("Use db.LoadSelect(db.From<T>())")]
+        public static List<T> LoadSelect<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression, IEnumerable<string> include = null)
         {
             return dbConn.Exec(dbCmd => dbCmd.LoadSelect(expression, include));
         }
@@ -297,6 +302,7 @@ namespace ServiceStack.OrmLite
         /// Returns results with references from using an SqlExpression lambda. E.g:
         /// <para>db.LoadSelect&lt;Person&gt;(q =&gt; q.Where(x =&gt; x.Age &gt; 40), include: x => new { x.PrimaryAddress })</para>
         /// </summary>
+        [Obsolete("Use db.LoadSelect(db.From<T>())")]
         public static List<T> LoadSelect<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression, Func<T, object> include)
         {
             return dbConn.Exec(dbCmd => dbCmd.LoadSelect(expression, include(typeof(T).CreateInstance<T>()).GetType().AllAnonFields()));
@@ -306,7 +312,7 @@ namespace ServiceStack.OrmLite
         /// Returns results with references from using an SqlExpression lambda. E.g:
         /// <para>db.LoadSelect(db.From&lt;Person&gt;().Where(x =&gt; x.Age &gt; 40))</para>
         /// </summary>
-        public static List<T> LoadSelect<T>(this IDbConnection dbConn, SqlExpression<T> expression = null, string[] include = null)
+        public static List<T> LoadSelect<T>(this IDbConnection dbConn, SqlExpression<T> expression = null, IEnumerable<string> include = null)
         {
             return dbConn.Exec(dbCmd => dbCmd.LoadSelect(expression, include));
         }
@@ -323,7 +329,7 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Project results with references from a number of joined tables into a different model
         /// </summary>
-        public static List<Into> LoadSelect<Into, From>(this IDbConnection dbConn, SqlExpression<From> expression, string[] include = null)
+        public static List<Into> LoadSelect<Into, From>(this IDbConnection dbConn, SqlExpression<From> expression, IEnumerable<string> include = null)
         {
             return dbConn.Exec(dbCmd => dbCmd.LoadSelect<Into, From>(expression, include));
         }

@@ -310,7 +310,8 @@ namespace ServiceStack.OrmLite.Tests
                 db.Insert(new Poco { Id = 1, Name = "A" });
                 db.Insert(new Poco { Id = 2, Name = "B" });
 
-                var result = db.ExecuteSql("UPDATE poco SET name = @name WHERE id = @id", new { id = 2, name = "UPDATED" });
+                var sql = "UPDATE poco SET name = {0}name WHERE id = {0}id".Fmt(OrmLiteConfig.DialectProvider.ParamString);
+                var result = db.ExecuteSql(sql, new { id = 2, name = "UPDATED" });
                 Assert.That(result, Is.EqualTo(1));
 
                 var row = db.SingleById<Poco>(2);

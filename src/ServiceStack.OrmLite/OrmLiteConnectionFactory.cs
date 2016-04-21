@@ -10,7 +10,7 @@ namespace ServiceStack.OrmLite
     /// Allow for mocking and unit testing by providing non-disposing 
     /// connection factory with injectable IDbCommand and IDbTransaction proxies
     /// </summary>
-    public class OrmLiteConnectionFactory : IDbConnectionFactory
+    public class OrmLiteConnectionFactory : IDbConnectionFactoryExtended
     {
         public OrmLiteConnectionFactory()
             : this(null, null, true) { }
@@ -95,7 +95,8 @@ namespace ServiceStack.OrmLite
             if (connectionString == null)
                 throw new ArgumentNullException("connectionString");
 
-            var connection = new OrmLiteConnection(this) {
+            var connection = new OrmLiteConnection(this)
+            {
                 ConnectionString = connectionString
             };
 
@@ -104,11 +105,27 @@ namespace ServiceStack.OrmLite
             return connection;
         }
 
-        public virtual IDbConnection OpenDbConnection(string connectionKey)
+        public virtual IDbConnection OpenDbConnectionString(string connectionString, string providerName)
+        {
+            if (connectionString == null)
+                throw new ArgumentNullException("connectionString");
+            if (providerName == null)
+                throw new ArgumentNullException("providerName");
+
+            IOrmLiteDialectProvider dialectProvider;
+            if (!DialectProviders.TryGetValue(providerName, out dialectProvider))
+                throw new ArgumentException("{0} is not a registered DialectProvider".Fmt(providerName));
+
+            var dbFactory = new OrmLiteConnectionFactory(connectionString, dialectProvider, setGlobalDialectProvider:false);
+
+            return dbFactory.OpenDbConnection();
+        }
+
+        public virtual IDbConnection OpenDbConnection(string namedConnection)
         {
             OrmLiteConnectionFactory factory;
-            if (!NamedConnections.TryGetValue(connectionKey, out factory))
-                throw new KeyNotFoundException("No factory registered is named " + connectionKey);
+            if (!NamedConnections.TryGetValue(namedConnection, out factory))
+                throw new KeyNotFoundException("No factory registered is named " + namedConnection);
 
             IDbConnection connection = factory.AutoDisposeConnection
                 ? new OrmLiteConnection(factory)
@@ -121,24 +138,37 @@ namespace ServiceStack.OrmLite
             return connection;
         }
 
+        private static Dictionary<string, IOrmLiteDialectProvider> dialectProviders;
+        public static Dictionary<string, IOrmLiteDialectProvider> DialectProviders
+        {
+            get
+            {
+                return dialectProviders ?? (dialectProviders = new Dictionary<string, IOrmLiteDialectProvider>());
+            }
+        }
+
+        public virtual void RegisterDialectProvider(string providerName, IOrmLiteDialectProvider dialectProvider)
+        {
+            DialectProviders[providerName] = dialectProvider;
+        }
+
         private static Dictionary<string, OrmLiteConnectionFactory> namedConnections;
         public static Dictionary<string, OrmLiteConnectionFactory> NamedConnections
         {
             get
             {
-                return namedConnections = namedConnections
-                    ?? (namedConnections = new Dictionary<string, OrmLiteConnectionFactory>());
+                return namedConnections ?? (namedConnections = new Dictionary<string, OrmLiteConnectionFactory>());
             }
         }
 
-        public virtual void RegisterConnection(string connectionKey, string connectionString, IOrmLiteDialectProvider dialectProvider)
+        public virtual void RegisterConnection(string namedConnection, string connectionString, IOrmLiteDialectProvider dialectProvider)
         {
-            RegisterConnection(connectionKey, new OrmLiteConnectionFactory(connectionString, dialectProvider, setGlobalDialectProvider: false));
+            RegisterConnection(namedConnection, new OrmLiteConnectionFactory(connectionString, dialectProvider, setGlobalDialectProvider: false));
         }
 
-        public virtual void RegisterConnection(string connectionKey, OrmLiteConnectionFactory connectionFactory)
+        public virtual void RegisterConnection(string namedConnection, OrmLiteConnectionFactory connectionFactory)
         {
-            NamedConnections[connectionKey] = connectionFactory;
+            NamedConnections[namedConnection] = connectionFactory;
         }
     }
 

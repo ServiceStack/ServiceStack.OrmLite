@@ -63,6 +63,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\ServiceStack.OrmLite.SqliteTests\Issues\UtcDateTests.cs">
+      <Link>Issues\UtcDateTests.cs</Link>
+    </Compile>
     <Compile Include="..\ServiceStack.OrmLite.SqliteTests\OrmLiteTestBase.cs">
       <Link>OrmLiteTestBase.cs</Link>
     </Compile>

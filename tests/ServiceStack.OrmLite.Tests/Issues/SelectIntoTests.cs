@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Model;
@@ -29,21 +30,26 @@ namespace ServiceStack.OrmLite.Tests.Issues
         {
             OrmLiteConfig.DisableColumnGuessFallback = true;
 
-            using (var db = OpenDbConnection())
+            try
             {
-                db.DropAndCreateTable<DbPoco>();
+                using (var db = OpenDbConnection())
+                {
+                    db.DropAndCreateTable<DbPoco>();
 
-                db.Insert(new DbPoco { Id = "1", Other_Id = "OTHER" });
+                    db.Insert(new DbPoco { Id = "1", Other_Id = "OTHER" });
 
-                var row = db.Select<DTOPoco>(db.From<DbPoco>()).First();
+                    var row = db.Select<DTOPoco>(db.From<DbPoco>()).First();
 
-                row.PrintDump();
+                    row.PrintDump();
 
-                Assert.That(row._Id, Is.Null);
-                Assert.That(row.Other_Id, Is.EqualTo("OTHER"));
+                    Assert.That(row._Id, Is.Null);
+                    Assert.That(row.Other_Id, Is.EqualTo("OTHER"));
+                }
             }
-
-            OrmLiteConfig.DisableColumnGuessFallback = false;
+            finally
+            {
+                OrmLiteConfig.DisableColumnGuessFallback = false;
+            }
         }
     }
 }

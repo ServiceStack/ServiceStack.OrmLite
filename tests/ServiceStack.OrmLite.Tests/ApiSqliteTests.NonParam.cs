@@ -211,10 +211,10 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT Id, LastName FROM Person WHERE Age < 50"));
 
             db.Exists<Person>(x => x.Age < 50);
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT COUNT(*) \nFROM \"Person\"\nWHERE (\"Age\" < 50)"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT 'exists' \nFROM \"Person\"\nWHERE (\"Age\" < 50)\nLIMIT 1"));
 
             db.Exists(db.From<Person>().Where(x => x.Age < 50));
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT COUNT(*) \nFROM \"Person\"\nWHERE (\"Age\" < 50)"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT 'exists' \nFROM \"Person\"\nWHERE (\"Age\" < 50)\nLIMIT 1"));
 
             db.Exists<Person>(new { Age = 42 });
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"FirstName\", \"LastName\", \"Age\" FROM \"Person\" WHERE \"Age\" = @Age"));

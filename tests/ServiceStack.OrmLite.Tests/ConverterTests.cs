@@ -10,6 +10,16 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixture]
     public class ConverterTests : OrmLiteTestBase
     {
+        private struct TestStruct {}
+
+        [Test]
+        public void FromDbValue_does_not_throw_Exception()
+        {
+            var dialectProvider = OrmLiteConfig.DialectProvider;
+            var convertedValue = dialectProvider.FromDbValue(12345, typeof(TestStruct));
+            Assert.That(convertedValue, Is.Null);
+        }
+
         [Test]
         public void Can_insert_update_and_select_AllTypes()
         {
@@ -57,7 +67,7 @@ namespace ServiceStack.OrmLite.Tests
                 var updatedRows = 3.Times(i =>
                 {
                     var updated = AllTypes.Create(i + 3);
-                    updated.Id = i;
+                    updated.Id = i + 1;
                     db.Update(updated);
                     return updated;
                 });

@@ -118,6 +118,9 @@ namespace ServiceStack.OrmLite.Tests
             db.SelectLazy<Person>().ToList();
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"FirstName\", \"LastName\", \"Age\" FROM \"Person\""));
 
+            db.SelectLazy(db.From<Person>().Where(x => x.Age > 40)).ToList();
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"FirstName\", \"LastName\", \"Age\" \nFROM \"Person\"\nWHERE (\"Age\" > @0)"));
+
             db.SelectLazy<Person>("Age > @age", new { age = 40 }).ToList();
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"FirstName\", \"LastName\", \"Age\" FROM \"Person\" WHERE Age > @age"));
 
@@ -211,10 +214,10 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT Id, LastName FROM Person WHERE Age < 50"));
 
             db.Exists<Person>(x => x.Age < 50);
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT COUNT(*) \nFROM \"Person\"\nWHERE (\"Age\" < @0)"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT 'exists' \nFROM \"Person\"\nWHERE (\"Age\" < @0)\nLIMIT 1"));
 
             db.Exists(db.From<Person>().Where(x => x.Age < 50));
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT COUNT(*) \nFROM \"Person\"\nWHERE (\"Age\" < @0)"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT 'exists' \nFROM \"Person\"\nWHERE (\"Age\" < @0)\nLIMIT 1"));
 
             db.Exists<Person>(new { Age = 42 });
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"FirstName\", \"LastName\", \"Age\" FROM \"Person\" WHERE \"Age\" = @Age"));
@@ -324,6 +327,18 @@ namespace ServiceStack.OrmLite.Tests
 
             db.UpdateOnly(new Person { FirstName = "JJ" }, q => q.Update(p => p.FirstName).Where(x => x.FirstName == "Jimi"));
             Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\"=@1 WHERE (\"FirstName\" = @0)"));
+
+            db.UpdateAdd(new Person { Age = 3 }, x => x.Age);
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"Age\"=\"Age\"+@0"));
+
+            db.UpdateAdd(new Person { Age = 5 }, x => x.Age, x => x.LastName == "Presley");
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"Age\"=\"Age\"+@1 WHERE (\"LastName\" = @0)"));
+
+            db.UpdateAdd(new Person { Age = -2, LastName = "Hendo" }, db.From<Person>().Update(x => new { x.Age, x.LastName }));
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"LastName\"=@0, \"Age\"=\"Age\"+@1"));
+
+            db.UpdateAdd(new Person { Age = 10 }, db.From<Person>().Update(x => x.Age).Where(x => x.FirstName == "JJ"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"Age\"=\"Age\"+@1 WHERE (\"FirstName\" = @0)"));
 
             db.UpdateFmt<Person>(set: "FirstName = {0}".SqlFmt("JJ"), where: "LastName = {0}".SqlFmt("Hendrix"));
             Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET FirstName = 'JJ' WHERE LastName = 'Hendrix'"));
