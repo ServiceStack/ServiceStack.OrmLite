@@ -429,6 +429,33 @@ Even the Table name can be a string so you perform the same update without requi
 db.UpdateFmt(table: "Person", set: "FirstName = {0}".SqlFmt("JJ"), 
              where: "LastName = {0}".SqlFmt("Hendrix"));
 ```
+
+## [OrmLite](https://github.com/ServiceStack/ServiceStack.OrmLite)
+
+### Updating existing values
+
+The `UpdateAdd` API provides several Typed API's for updating existing values:
+
+```csharp
+//Increase everyone's Score by 3 points
+db.UpdateAdd(new Person { Score = 3 }, fields: x => x.Score); 
+
+//Remove 5 points from Jackson Score
+db.UpdateAdd(new Person { Score = -5 }, x => x.Score, x => where: x.LastName == "Jackson");
+
+//Graduate everyone and increase everyone's Score by 2 points 
+var q = db.From<Person>().Update(x => new { x.Points, x.Graduated });
+db.UpdateAdd(new Person { Points = 2, Graduated = true }, q);
+
+//Add 10 points to Michael's score
+var q = db.From<Person>()
+    .Where(x => x.FirstName == "Michael")
+    .Update(x => x.Points);
+db.UpdateAdd(new Person { Points = 10 }, q);
+```
+
+> Note: Any non-numeric values in an `UpdateAdd` statement (e.g. strings) are replaced as normal.
+
 ### INSERT
 
 Insert's are pretty straight forward since in most cases you want to insert every field:
@@ -779,6 +806,36 @@ The mapping also includes a fallback for referencing fully-qualified names in th
   - `OrderId` => "Order"."Id"
   - `CustomerName` => "Customer"."Name"
   - `OrderCost` => "Order"."Cost"
+
+
+### BelongsTo Attribute
+
+The `[BelongTo]` attribute can be used for specifying how Custom POCO results are mapped when the resultset is ambiguous, e.g:
+
+```csharp
+class A { 
+    public int Id { get; set; }
+}
+class B {
+    public int Id { get; set; }
+    public int AId { get; set; }
+}
+class C {
+    public int Id { get; set; }
+    public int BId { get; set; }
+}
+class Combined {
+    public int Id { get; set; }
+    [BelongTo(typeof(B))]
+    public int BId { get; set; }
+}
+
+var q = db.From<A>()
+    .Join<B>()
+    .LeftJoin<B,C>();
+
+var results = db.Select<Combined>(q); //Combined.BId = B.Id
+```
 
 ### Advanced Example
 
