@@ -430,8 +430,6 @@ db.UpdateFmt(table: "Person", set: "FirstName = {0}".SqlFmt("JJ"),
              where: "LastName = {0}".SqlFmt("Hendrix"));
 ```
 
-## [OrmLite](https://github.com/ServiceStack/ServiceStack.OrmLite)
-
 ### Updating existing values
 
 The `UpdateAdd` API provides several Typed API's for updating existing values:
