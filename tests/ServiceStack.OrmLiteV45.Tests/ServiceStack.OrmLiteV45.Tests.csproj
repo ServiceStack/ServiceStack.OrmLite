@@ -78,6 +78,7 @@
     <Compile Include="AutoQueryTestsAsync.cs" />
     <Compile Include="CustomSqlTestsAsync.cs" />
     <Compile Include="Issues\LoadSelectAmbiguousColumnIssue.cs" />
+    <Compile Include="Issues\PredicateBuilderIssue.cs" />
     <Compile Include="LoadReferencesTests.cs" />
     <Compile Include="OrmLiteContextTests.cs" />
     <Compile Include="OrmLiteTestBase.cs" />
