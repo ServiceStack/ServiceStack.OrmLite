@@ -105,7 +105,7 @@ If you're using an IOC you can register `OrmLiteConnectionFactory` as a **single
 
 ```csharp
 container.Register<IDbConnectionFactory>(c => 
-    OrmLiteConnectionFactory(":memory:", SqliteDialect.Provider)); //InMemory Sqlite DB
+    new OrmLiteConnectionFactory(":memory:", SqliteDialect.Provider)); //InMemory Sqlite DB
 ```
 
 You can then use the `dbFactory` to open ADO.NET DB Connections to your database. 
