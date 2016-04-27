@@ -829,12 +829,12 @@ class SqlServerSchemaReader : SchemaReader
 
 	public override Tables ReadSchema(DbConnection connection, DbProviderFactory factory)
 	{
-		var result=new Tables();
+		var result = new Tables();
 
 		_connection=connection;
 		_factory=factory;
 
-		var cmd=_factory.CreateCommand();
+		var cmd = _factory.CreateCommand();
 		cmd.Connection=connection;
 		cmd.CommandText=TABLE_SQL;
 
@@ -853,8 +853,34 @@ class SqlServerSchemaReader : SchemaReader
 					tbl.IsFunction=string.Compare(rdr["TABLE_TYPE"].ToString(), "TVF", true)==0;
 					tbl.CleanName=CleanUp(tbl.Name);
 					tbl.ClassName=Inflector.MakeSingular(tbl.CleanName);
-
+					
 					result.Add(tbl);
+				}
+			}
+		}
+		
+		var cmdFks = _factory.CreateCommand();
+		cmdFks.Connection=connection;
+		cmdFks.CommandText=FOREIGN_KEYS_SQL;
+		//get all the foreign keys and add them to the tables.
+		using(cmdFks)
+		{
+			using (var rdr=cmdFks.ExecuteReader())
+			{
+				while(rdr.Read())
+				{
+					var tableName = rdr["TableWithForeignKey"].ToString();
+					var table = result.FirstOrDefault(x => x.Name == tableName);
+					if (table != null) {
+						if (table.FKeys == null) {
+							table.FKeys = new List<FKey>(); 
+						}
+						var newForeignKey = new FKey();
+						newForeignKey.ToTable = rdr["TargetTable"].ToString();
+						newForeignKey.FromColumn = rdr["ForeignKeyColumn"].ToString();
+						newForeignKey.ToColumn = rdr["TargetTableKey"].ToString();
+						table.FKeys.Add(newForeignKey);
+                    }
 				}
 			}
 		}
@@ -1285,6 +1311,20 @@ class SqlServerSchemaReader : SchemaReader
 								WHERE TABLE_NAME=@tableName AND TABLE_SCHEMA=@schemaName
 								) T
 								ORDER BY T.OrdinalPosition ASC";
+
+	const string FOREIGN_KEYS_SQL=
+@"SELECT DISTINCT
+	tableWithForeignKey.name AS TableWithForeignKey,
+	columnWithForeignKey.name AS ForeignKeyColumn,
+	referencedTable.name AS TargetTable,
+	referencedColumn.name AS TargetTableKey
+FROM sys.foreign_key_columns foreignKeyColumn
+INNER JOIN sys.tables tableWithForeignKey ON tableWithForeignKey.object_id = foreignKeyColumn.parent_object_id
+INNER JOIN sys.columns columnWithForeignKey ON columnWithForeignKey.object_id = foreignKeyColumn.parent_object_id 
+	AND columnWithForeignKey.column_id = foreignKeyColumn.parent_column_id
+INNER JOIN sys.tables referencedTable ON referencedTable.object_id = foreignKeyColumn.referenced_object_id
+INNER JOIN sys.columns referencedColumn ON referencedColumn.object_id = foreignKeyColumn.referenced_object_id 
+	AND referencedColumn.column_id = foreignKeyColumn.referenced_column_id";
 
     const string SP_NAMES_SQL=@"SELECT  o.name AS sp_name, s.name AS schema_name
 FROM    sys.objects o
