@@ -190,9 +190,6 @@
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Issues\SelectIntoTests.cs">
       <Link>Issues\SelectIntoTests.cs</Link>
     </Compile>
-    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\JoinSqlBuilderTests.cs">
-      <Link>JoinSqlBuilderTests.cs</Link>
-    </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\LoadReferencesJoinTests.cs">
       <Link>LoadReferencesJoinTests.cs</Link>
     </Compile>

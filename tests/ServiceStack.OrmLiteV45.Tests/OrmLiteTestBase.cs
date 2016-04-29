@@ -34,22 +34,22 @@ namespace ServiceStack.OrmLite.Tests
         }
     }
 
-	public class OrmLiteTestBase
-	{
-	    protected virtual string ConnectionString { get; set; }
+    public class OrmLiteTestBase
+    {
+        protected virtual string ConnectionString { get; set; }
 
-	    public OrmLiteTestBase() {}
+        public OrmLiteTestBase() { }
 
-	    public OrmLiteTestBase(Dialect dialect)
-	    {
-	        Dialect = dialect;
+        public OrmLiteTestBase(Dialect dialect)
+        {
+            Dialect = dialect;
             Init();
         }
 
-	    protected string GetConnectionString()
-		{
-			return GetFileConnectionString();
-		}
+        protected string GetConnectionString()
+        {
+            return GetFileConnectionString();
+        }
 
         public static OrmLiteConnectionFactory CreateSqliteMemoryDbFactory()
         {
@@ -76,22 +76,22 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         protected virtual string GetFileConnectionString()
-		{
+        {
             var connectionString = Config.SqliteFileDb;
-			if (File.Exists(connectionString))
-				File.Delete(connectionString);
+            if (File.Exists(connectionString))
+                File.Delete(connectionString);
 
-			return connectionString;
-		}
+            return connectionString;
+        }
 
-		protected void CreateNewDatabase()
-		{
-			if (ConnectionString.Contains(".sqlite"))
-				ConnectionString = GetFileConnectionString();
-		}
+        protected void CreateNewDatabase()
+        {
+            if (ConnectionString.Contains(".sqlite"))
+                ConnectionString = GetFileConnectionString();
+        }
 
         public Dialect Dialect = Dialect.Sqlite;
-	    protected OrmLiteConnectionFactory DbFactory;
+        protected OrmLiteConnectionFactory DbFactory;
 
         OrmLiteConnectionFactory Init(string connStr, IOrmLiteDialectProvider dialectProvider)
         {
@@ -109,10 +109,10 @@ namespace ServiceStack.OrmLite.Tests
 
         private OrmLiteConnectionFactory Init()
         {
-	        LogManager.LogFactory = new ConsoleLogFactory(debugEnabled: false);
+            LogManager.LogFactory = new ConsoleLogFactory(debugEnabled: false);
 
-	        switch (Dialect)
-	        {
+            switch (Dialect)
+            {
                 case Dialect.Sqlite:
                     var dbFactory = Init(Config.SqliteMemoryDb, SqliteDialect.Provider);
                     dbFactory.AutoDisposeConnection = false;
@@ -126,12 +126,12 @@ namespace ServiceStack.OrmLite.Tests
             }
 
             throw new NotImplementedException("{0}".Fmt(Dialect));
-	    }
+        }
 
-	    public void Log(string text)
-		{
-			Console.WriteLine(text);
-		}
+        public void Log(string text)
+        {
+            Console.WriteLine(text);
+        }
 
         public IDbConnection InMemoryDbConnection { get; set; }
 
@@ -154,5 +154,5 @@ namespace ServiceStack.OrmLite.Tests
         {
             // Not Oracle if this base class used
         }
-	}
+    }
 }

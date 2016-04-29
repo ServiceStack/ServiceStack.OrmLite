@@ -39,9 +39,6 @@ namespace ServiceStack.OrmLite.Oracle
 
         protected override void ConvertToPlaceholderAndParameter(ref object right)
         {
-            if (!OrmLiteConfig.UseParameterizeSqlExpressions)
-                return;
-
             var paramName = Params.Count.ToString();
             var paramValue = right;
 

@@ -67,9 +67,7 @@ namespace ServiceStack.OrmLite.Tests
                 int i = 0;
                 i++; db.Select<Person>(x => x.Age > 40);
 
-                var p = OrmLiteConfig.UseParameterizeSqlExpressions
-                    ? "@0"  //Normalized
-                    : "40";
+                var p = "@0";  //Normalized
 
                 Assert.That(captured.SqlCommandHistory.Last().Sql.NormalizeSql(),
                     Is.EqualTo("select id, firstname, lastname, age  from person where (age > {0})".Fmt(p)));
@@ -119,9 +117,7 @@ namespace ServiceStack.OrmLite.Tests
                 int i = 0;
                 i++; db.Single<Person>(x => x.Age == 42);
 
-                var p = OrmLiteConfig.UseParameterizeSqlExpressions
-                    ? "@0"  //Normalized
-                    : "42";
+                var p = "@0";  //Normalized
 
                 Assert.That(captured.SqlCommandHistory.Last().Sql.NormalizeSql(),
                     Is.EqualTo("select id, firstname, lastname, age  from person where (age = {0}) limit 1".Fmt(p)).  //Sqlite

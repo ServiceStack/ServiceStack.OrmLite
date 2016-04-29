@@ -287,9 +287,6 @@ namespace ServiceStack.OrmLite
             if (string.IsNullOrEmpty(sqlFilter))
                 return null;
 
-            if (!OrmLiteConfig.UseParameterizeSqlExpressions)
-                return sqlFilter.SqlFmt(filterParams);
-
             for (var i = 0; i < filterParams.Length; i++)
             {
                 var pLiteral = "{" + i + "}";
@@ -1643,26 +1640,9 @@ namespace ServiceStack.OrmLite
 
             var inArgs = Sql.Flatten(getter() as IEnumerable);
 
-            string sqlIn = "NULL";
-            if (inArgs.Count > 0)
-            {
-                if (OrmLiteConfig.UseParameterizeSqlExpressions)
-                {
-                    sqlIn = CreateInParamSql(inArgs);
-                }
-                else
-                {
-                    var sIn = StringBuilderCache.Allocate();
-                    foreach (object e in inArgs)
-                    {
-                        if (sIn.Length > 0)
-                            sIn.Append(",");
-
-                        sIn.Append(DialectProvider.GetQuotedValue(e, e.GetType()));
-                    }
-                    sqlIn = StringBuilderCache.ReturnAndFree(sIn);
-                }
-            }
+            var sqlIn = inArgs.Count > 0
+                ? CreateInParamSql(inArgs)
+                : "NULL";
 
             var statement = string.Format("{0} {1} ({2})", quotedColName, "In", sqlIn);
             return new PartialSqlString(statement);
@@ -1723,24 +1703,7 @@ namespace ServiceStack.OrmLite
                 if (inArgs.Count == 0)
                     return "(1=0)"; // "column IN ([])" is always false
 
-                string sqlIn;
-                if (OrmLiteConfig.UseParameterizeSqlExpressions)
-                {
-                    sqlIn = CreateInParamSql(inArgs);
-                }
-                else
-                {
-                    var sIn = StringBuilderCache.Allocate();
-                    foreach (var e in inArgs)
-                    {
-                        if (sIn.Length > 0)
-                            sIn.Append(",");
-
-                        sIn.Append(DialectProvider.GetQuotedValue(e, e.GetType()));
-                    }
-                    sqlIn = StringBuilderCache.ReturnAndFree(sIn);
-                }
-
+                string sqlIn = CreateInParamSql(inArgs);
                 return string.Format("{0} {1} ({2})", quotedColName, m.Method.Name, sqlIn);
             }
             

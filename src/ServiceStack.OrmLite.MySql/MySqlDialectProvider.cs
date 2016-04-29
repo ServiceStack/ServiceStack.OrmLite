@@ -121,9 +121,7 @@ namespace ServiceStack.OrmLite.MySql
 
         public override SqlExpression<T> SqlExpression<T>()
         {
-            return !OrmLiteConfig.UseParameterizeSqlExpressions
-                ? new MySqlExpression<T>(this)
-                : (SqlExpression<T>)new MySqlParameterizedExpression<T>(this);
+            return new MySqlParameterizedExpression<T>(this);
         }
 
         public override IDbDataParameter CreateParam()

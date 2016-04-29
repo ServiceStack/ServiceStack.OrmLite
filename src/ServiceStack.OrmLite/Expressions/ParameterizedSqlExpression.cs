@@ -31,9 +31,6 @@ namespace ServiceStack.OrmLite
 
         protected virtual void ConvertToPlaceholderAndParameter(ref object right)
         {
-            if (!OrmLiteConfig.UseParameterizeSqlExpressions)
-                return;
-
             var parameter = AddParam(right);
 
             right = parameter.ParameterName;
@@ -41,7 +38,7 @@ namespace ServiceStack.OrmLite
 
         public override object GetValue(object value, Type type)
         {
-            if ((!OrmLiteConfig.UseParameterizeSqlExpressions) || SkipParameterizationForThisExpression)
+            if (SkipParameterizationForThisExpression)
                 return DialectProvider.GetQuotedValue(value, type);
 
             var paramValue = DialectProvider.GetParamValue(value, type);
