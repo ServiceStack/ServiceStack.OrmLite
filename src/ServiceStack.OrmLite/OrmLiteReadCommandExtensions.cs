@@ -81,12 +81,12 @@ namespace ServiceStack.OrmLite
         {
             var sql = ToSelectFmt<TModel>(dbCmd.GetDialectProvider(), fromTableType, sqlFilter, filterParams);
 
-            return dbCmd.ConvertToList<TModel>(sql.ToString());
+            return dbCmd.ConvertToList<TModel>(sql);
         }
 
-        internal static StringBuilder ToSelectFmt<TModel>(IOrmLiteDialectProvider dialectProvider, Type fromTableType, string sqlFilter, object[] filterParams)
+        internal static string ToSelectFmt<TModel>(IOrmLiteDialectProvider dialectProvider, Type fromTableType, string sqlFilter, object[] filterParams)
         {
-            var sql = new StringBuilder();
+            var sql = StringBuilderCache.Allocate();
             var modelDef = ModelDefinition<TModel>.Definition;
             sql.AppendFormat("SELECT {0} FROM {1}", dialectProvider.GetColumnNames(modelDef),
                              dialectProvider.GetQuotedTableName(fromTableType.GetModelDefinition()));
@@ -96,7 +96,7 @@ namespace ServiceStack.OrmLite
                 sql.Append(" WHERE ");
                 sql.Append(sqlFilter);
             }
-            return sql;
+            return StringBuilderCache.ReturnAndFree(sql);
         }
 
         internal static T SelectByIdFmt<T>(this IDbCommand dbCmd, object idValue)
@@ -318,7 +318,7 @@ namespace ServiceStack.OrmLite
         {
             var dialectProvider = dbCmd.GetDialectProvider();
 
-            var sb = new StringBuilder();
+            var sb = StringBuilderCache.Allocate();
             foreach (IDbDataParameter p in dbCmd.Parameters)
             {
                 if (sb.Length > 0)
@@ -333,7 +333,7 @@ namespace ServiceStack.OrmLite
                 sb.Append(dialectProvider.GetParam(p.ParameterName));
             }
 
-            return dialectProvider.ToSelectStatement(typeof(T), sb.ToString());
+            return dialectProvider.ToSelectStatement(typeof(T), StringBuilderCache.ReturnAndFree(sb));
         }
 
         internal static bool CanReuseParam<T>(this IDbCommand dbCmd, string paramName)

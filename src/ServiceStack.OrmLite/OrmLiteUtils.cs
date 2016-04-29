@@ -27,7 +27,7 @@ namespace ServiceStack.OrmLite
 
         public static void DebugCommand(this ILog log, IDbCommand cmd)
         {
-            var sb = new StringBuilder();
+            var sb = StringBuilderCache.Allocate();
 
             sb.Append("SQL: ").Append(cmd.CommandText);
 
@@ -45,7 +45,7 @@ namespace ServiceStack.OrmLite
                 }
             }
 
-            log.Debug(sb.ToString());
+            log.Debug(StringBuilderCache.ReturnAndFree(sb));
         }
 
         public static T CreateInstance<T>()
@@ -194,13 +194,15 @@ namespace ServiceStack.OrmLite
 
         internal static string GetIdsInSql(this IEnumerable idValues)
         {
-            var sql = new StringBuilder();
+            var sql = StringBuilderCache.Allocate();
             foreach (var idValue in idValues)
             {
-                if (sql.Length > 0) sql.Append(",");
+                if (sql.Length > 0)
+                    sql.Append(",");
                 sql.AppendFormat("{0}".SqlFmt(idValue));
             }
-            return sql.Length == 0 ? null : sql.ToString();
+            var str = StringBuilderCache.ReturnAndFree(sql);
+            return str.Length == 0 ? null : str;
         }
 
         public static string SqlFmt(this string sqlText, params object[] sqlParams)
@@ -300,7 +302,7 @@ namespace ServiceStack.OrmLite
 
         public static string StripQuotedStrings(this string text, char quote = '\'')
         {
-            var sb = new StringBuilder();
+            var sb = StringBuilderCache.Allocate();
             bool inQuotes = false;
             for (int i = 0; i < text.Length; i++)
             {
@@ -315,35 +317,35 @@ namespace ServiceStack.OrmLite
                     sb.Append(c);
             }
 
-            return sb.ToString();
+            return StringBuilderCache.ReturnAndFree(sb);
         }
 
         public static string SqlJoin<T>(this List<T> values, IOrmLiteDialectProvider dialect = null)
         {
-            dialect = (dialect ?? OrmLiteConfig.DialectProvider);
+            dialect = dialect ?? OrmLiteConfig.DialectProvider;
 
-            var sb = new StringBuilder();
+            var sb = StringBuilderCache.Allocate();
             foreach (var value in values)
             {
                 if (sb.Length > 0) sb.Append(",");
                 sb.Append(dialect.GetQuotedValue(value, value.GetType()));
             }
 
-            return sb.ToString();
+            return StringBuilderCache.ReturnAndFree(sb);
         }
 
         public static string SqlJoin(IEnumerable values, IOrmLiteDialectProvider dialect = null)
         {
             dialect = (dialect ?? OrmLiteConfig.DialectProvider);
 
-            var sb = new StringBuilder();
+            var sb = StringBuilderCache.Allocate();
             foreach (var value in values)
             {
                 if (sb.Length > 0) sb.Append(",");
                 sb.Append(dialect.GetQuotedValue(value, value.GetType()));
             }
 
-            return sb.ToString();
+            return StringBuilderCache.ReturnAndFree(sb);
         }
 
         public static SqlInValues SqlInValues<T>(this T[] values, IOrmLiteDialectProvider dialect = null)
@@ -510,7 +512,7 @@ namespace ServiceStack.OrmLite
             if (selectExpression.IndexOf('.') < 0)
                 return selectExpression;
 
-            var sb = new StringBuilder();
+            var sb = StringBuilderCache.Allocate();
             var tokens = selectExpression.Split(' ');
             foreach (var token in tokens)
             {
@@ -525,7 +527,7 @@ namespace ServiceStack.OrmLite
                 }
             }
 
-            return sb.ToString().Trim();
+            return StringBuilderCache.ReturnAndFree(sb).Trim();
         }
 
         public static char[] QuotedChars = new[] { '"', '`', '[', ']' };

@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using ServiceStack.OrmLite.SqlServer.Converters;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.SqlServer
 {
@@ -150,7 +151,7 @@ namespace ServiceStack.OrmLite.SqlServer
         {
             //TODO: find out if this should go in base class?
 
-            var sb = new StringBuilder();
+            var sb = StringBuilderCache.Allocate();
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
                 if (fieldDef.ForeignKey != null)
@@ -169,7 +170,7 @@ namespace ServiceStack.OrmLite.SqlServer
                 }
             }
 
-            return sb.ToString();
+            return StringBuilderCache.ReturnAndFree(sb);
         }
 
         public override string ToAddColumnStatement(Type modelType, FieldDefinition fieldDef)
@@ -239,11 +240,12 @@ namespace ServiceStack.OrmLite.SqlServer
             int? offset = null,
             int? rows = null)
         {
-            var sb = new StringBuilder(selectExpression);
-            sb.Append(bodyExpression);
+            var sb = StringBuilderCache.Allocate()
+                .Append(selectExpression)
+                .Append(bodyExpression);
 
             if (!offset.HasValue && !rows.HasValue)
-                return sb + orderByExpression;
+                return StringBuilderCache.ReturnAndFree(sb) + orderByExpression;
 
             if (offset.HasValue && offset.Value < 0)
                 throw new ArgumentException(string.Format("Skip value:'{0}' must be>=0", offset.Value));
@@ -259,7 +261,7 @@ namespace ServiceStack.OrmLite.SqlServer
             //Temporary hack till we come up with a more robust paging sln for SqlServer
             if (skip == 0)
             {
-                var sql = sb + orderByExpression;
+                var sql = StringBuilderCache.ReturnAndFree(sb) + orderByExpression;
 
                 if (take == int.MaxValue)
                     return sql;
@@ -296,7 +298,7 @@ namespace ServiceStack.OrmLite.SqlServer
             if (selectExpression.IndexOf('.') < 0)
                 return selectExpression;
 
-            var sb = new StringBuilder();
+            var sb = StringBuilderCache.Allocate();
             var selectToken = selectExpression.SplitOnFirst(' ');
             var tokens = selectToken[1].Split(',');
             foreach (var token in tokens)
@@ -324,7 +326,7 @@ namespace ServiceStack.OrmLite.SqlServer
                 }
             }
 
-            var sqlSelect = selectToken[0] + " " + sb.ToString().Trim();
+            var sqlSelect = selectToken[0] + " " + StringBuilderCache.ReturnAndFree(sb).Trim();
             return sqlSelect;
         }
 

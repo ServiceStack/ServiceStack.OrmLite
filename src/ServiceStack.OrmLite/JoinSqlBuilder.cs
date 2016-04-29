@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
@@ -504,10 +505,10 @@ namespace ServiceStack.OrmLite
 
             CheckAggregateUsage(false);
 
-            var sbSelect = new StringBuilder();
+            var sbSelect = StringBuilderCache.Allocate();
             sbSelect.Append("SELECT ");
 
-            var dbColumns = new StringBuilder();
+            var dbColumns = StringBuilderCache.Allocate();
 
             if (columnList.Count > 0)
             {
@@ -533,9 +534,9 @@ namespace ServiceStack.OrmLite
                     dbColumns.AppendFormat("\"{0}{1}\".*", baseSchema, dialectProvider.GetQuotedTableName(baseTableName));
             }
 
-            sbSelect.Append(dbColumns + " \n");
+            sbSelect.Append(StringBuilderCache.ReturnAndFree(dbColumns) + " \n");
 
-            var sbBody = new StringBuilder();
+            var sbBody = StringBuilderCacheAlt.Allocate();
             sbBody.AppendFormat("FROM {0}{1} \n", baseSchema, dialectProvider.GetQuotedTableName(baseTableName));
             int i = 0;
             foreach (var join in joinList)
@@ -594,7 +595,7 @@ namespace ServiceStack.OrmLite
             }
 
             var sql = dialectProvider.ToSelectStatement(
-                modelDef, sbSelect.ToString(), sbBody.ToString(), sbOrderBy.ToString(), Offset, Rows);
+                modelDef, StringBuilderCache.ReturnAndFree(sbSelect), StringBuilderCacheAlt.ReturnAndFree(sbBody), sbOrderBy.ToString(), Offset, Rows);
 
             return sql; 
         }

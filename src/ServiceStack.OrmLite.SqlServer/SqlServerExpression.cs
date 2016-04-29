@@ -2,6 +2,7 @@ using System;
 using System.Data;
 using System.Text;
 using ServiceStack.OrmLite.SqlServer.Converters;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.SqlServer
 {
@@ -83,9 +84,9 @@ namespace ServiceStack.OrmLite.SqlServer
             q.CopyParamsTo(dbCmd);
 
             var modelDef = q.ModelDef;
-            var DialectProvider = q.DialectProvider;
+            var dialectProvider = q.DialectProvider;
 
-            var setFields = new StringBuilder();
+            var setFields = StringBuilderCache.Allocate();
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
@@ -104,18 +105,19 @@ namespace ServiceStack.OrmLite.SqlServer
                 if (setFields.Length > 0)
                     setFields.Append(", ");
 
-                var param = DialectProvider.AddParam(dbCmd, value, fieldDef.ColumnType);
+                var param = dialectProvider.AddParam(dbCmd, value, fieldDef.ColumnType);
                 setFields
-                    .Append(DialectProvider.GetQuotedColumnName(fieldDef.FieldName))
+                    .Append(dialectProvider.GetQuotedColumnName(fieldDef.FieldName))
                     .Append("=")
                     .Append(param.ParameterName);
             }
 
-            if (setFields.Length == 0)
+            var strFields = StringBuilderCache.ReturnAndFree(setFields);
+            if (strFields.Length == 0)
                 throw new ArgumentException("No non-null or non-default values were provided for type: " + typeof(T).Name);
 
             dbCmd.CommandText = string.Format("UPDATE {0} SET {1} {2}",
-                DialectProvider.GetQuotedTableName(modelDef), setFields, q.WhereExpression);
+                dialectProvider.GetQuotedTableName(modelDef), strFields, q.WhereExpression);
         }
     }
 }

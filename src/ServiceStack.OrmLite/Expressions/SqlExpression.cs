@@ -8,6 +8,7 @@ using System.Text;
 using System.Collections.ObjectModel;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
@@ -134,7 +135,7 @@ namespace ServiceStack.OrmLite
             allTableDefs.AddRange(tableDefs);
 
             var fieldsList = new List<string>();
-            var sb = new StringBuilder();
+            var sb = StringBuilderCache.Allocate();
             foreach (var field in fields)
             {
                 if (string.IsNullOrEmpty(field))
@@ -174,7 +175,7 @@ namespace ServiceStack.OrmLite
                 sb.Append(qualifiedName);
             }
 
-            UnsafeSelect(sb.ToString());
+            UnsafeSelect(StringBuilderCache.ReturnAndFree(sb));
             OnlyFields = new HashSet<string>(fieldsList, StringComparer.OrdinalIgnoreCase);
 
             return this;
@@ -311,7 +312,7 @@ namespace ServiceStack.OrmLite
 
         private string CreateInParamSql(IEnumerable values)
         {
-            var sbParams = new StringBuilder();
+            var sbParams = StringBuilderCache.Allocate();
             foreach (var item in values)
             {
                 var p = AddParam(item);
@@ -321,7 +322,7 @@ namespace ServiceStack.OrmLite
 
                 sbParams.Append(p.ParameterName);
             }
-            var sqlIn = sbParams.ToString();
+            var sqlIn = StringBuilderCache.ReturnAndFree(sbParams);
             return sqlIn;
         }
 
@@ -495,7 +496,13 @@ namespace ServiceStack.OrmLite
         {
             orderByProperties.Clear();
 
-            var sbOrderBy = new StringBuilder();
+            if (fields.Length == 0)
+            {
+                this.orderBy = null;
+                return this;
+            }
+
+            var sbOrderBy = StringBuilderCache.Allocate();
             foreach (var field in fields)
             {
                 var tableDef = GetModelDefinition(field);
@@ -509,9 +516,7 @@ namespace ServiceStack.OrmLite
                 sbOrderBy.Append(qualifiedName + orderBySuffix);
             }
 
-            this.orderBy = sbOrderBy.Length == 0
-                ? null
-                : "ORDER BY " + sbOrderBy;
+            this.orderBy = "ORDER BY " + StringBuilderCache.ReturnAndFree(sbOrderBy);
             return this;
         }
 
@@ -535,7 +540,13 @@ namespace ServiceStack.OrmLite
         {
             orderByProperties.Clear();
 
-            var sbOrderBy = new StringBuilder();
+            if (fieldNames.Length == 0)
+            {
+                this.orderBy = null;
+                return this;
+            }
+
+            var sbOrderBy = StringBuilderCache.Allocate();
             foreach (var fieldName in fieldNames)
             {
                 var reverse = fieldName.StartsWith("-");
@@ -555,9 +566,7 @@ namespace ServiceStack.OrmLite
                 sbOrderBy.Append(qualifiedName + useSuffix);
             }
 
-            this.orderBy = sbOrderBy.Length == 0
-                ? null
-                : "ORDER BY " + sbOrderBy;
+            this.orderBy = "ORDER BY " + StringBuilderCache.ReturnAndFree(sbOrderBy);
             return this;
         }
 
@@ -684,7 +693,7 @@ namespace ServiceStack.OrmLite
         {
             if (orderByProperties.Count > 0)
             {
-                var sb = new StringBuilder();
+                var sb = StringBuilderCache.Allocate();
                 foreach (var prop in orderByProperties)
                 {
                     if (sb.Length > 0)
@@ -692,7 +701,7 @@ namespace ServiceStack.OrmLite
 
                     sb.Append(prop);
                 }
-                orderBy = "ORDER BY " + sb;
+                orderBy = "ORDER BY " + StringBuilderCache.ReturnAndFree(sb);
             }
             else
             {
@@ -909,7 +918,7 @@ namespace ServiceStack.OrmLite
         {
             CopyParamsTo(dbCmd);
 
-            var setFields = new StringBuilder();
+            var setFields = StringBuilderCache.Allocate();
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
@@ -936,7 +945,7 @@ namespace ServiceStack.OrmLite
                 throw new ArgumentException("No non-null or non-default values were provided for type: " + typeof(T).Name);
 
             dbCmd.CommandText = string.Format("UPDATE {0} SET {1} {2}",
-                DialectProvider.GetQuotedTableName(modelDef), setFields, WhereExpression);
+                DialectProvider.GetQuotedTableName(modelDef), StringBuilderCache.ReturnAndFree(setFields), WhereExpression);
         }
 
         public virtual string ToSelectStatement()
@@ -1312,7 +1321,7 @@ namespace ServiceStack.OrmLite
             catch (InvalidOperationException)
             { // FieldName ?
                 var exprs = VisitExpressionList(nex.Arguments);
-                var r = new StringBuilder();
+                var r = StringBuilderCache.Allocate();
                 foreach (object e in exprs)
                 {
                     if (r.Length > 0)
@@ -1320,7 +1329,7 @@ namespace ServiceStack.OrmLite
 
                     r.Append(e);
                 }
-                return r.ToString();
+                return StringBuilderCache.ReturnAndFree(r);
             }
         }
 
@@ -1433,12 +1442,12 @@ namespace ServiceStack.OrmLite
         protected virtual object VisitNewArray(NewArrayExpression na)
         {
             var exprs = VisitExpressionList(na.Expressions);
-            var sb = new StringBuilder();
+            var sb = StringBuilderCache.Allocate();
             foreach (var e in exprs)
             {
                 sb.Append(sb.Length > 0 ? "," + e : e);
             }
-            return sb.ToString();
+            return StringBuilderCache.ReturnAndFree(sb);
         }
 
         protected virtual List<object> VisitNewArrayFromExpressionList(NewArrayExpression na)
@@ -1637,13 +1646,13 @@ namespace ServiceStack.OrmLite
             string sqlIn = "NULL";
             if (inArgs.Count > 0)
             {
-                var sIn = new StringBuilder();
                 if (OrmLiteConfig.UseParameterizeSqlExpressions)
                 {
                     sqlIn = CreateInParamSql(inArgs);
                 }
                 else
                 {
+                    var sIn = StringBuilderCache.Allocate();
                     foreach (object e in inArgs)
                     {
                         if (sIn.Length > 0)
@@ -1651,7 +1660,7 @@ namespace ServiceStack.OrmLite
 
                         sIn.Append(DialectProvider.GetQuotedValue(e, e.GetType()));
                     }
-                    sqlIn = sIn.ToString();
+                    sqlIn = StringBuilderCache.ReturnAndFree(sIn);
                 }
             }
 
@@ -1721,7 +1730,7 @@ namespace ServiceStack.OrmLite
                 }
                 else
                 {
-                    var sIn = new StringBuilder();
+                    var sIn = StringBuilderCache.Allocate();
                     foreach (var e in inArgs)
                     {
                         if (sIn.Length > 0)
@@ -1729,7 +1738,7 @@ namespace ServiceStack.OrmLite
 
                         sIn.Append(DialectProvider.GetQuotedValue(e, e.GetType()));
                     }
-                    sqlIn = sIn.ToString();
+                    sqlIn = StringBuilderCache.ReturnAndFree(sIn);
                 }
 
                 return string.Format("{0} {1} ({2})", quotedColName, m.Method.Name, sqlIn);

@@ -147,8 +147,8 @@ namespace ServiceStack.OrmLite.MySql
 
         public override string ToCreateTableStatement(Type tableType)
         {
-            var sbColumns = new StringBuilder();
-            var sbConstraints = new StringBuilder();
+            var sbColumns = StringBuilderCache.Allocate();
+            var sbConstraints = StringBuilderCache.Allocate();
 
             var modelDef = GetModel(tableType);
             foreach (var fieldDef in modelDef.FieldDefinitions)
@@ -173,20 +173,22 @@ namespace ServiceStack.OrmLite.MySql
                 if (!string.IsNullOrEmpty(fieldDef.ForeignKey.OnUpdate))
                     sbConstraints.AppendFormat(" ON UPDATE {0}", fieldDef.ForeignKey.OnUpdate);
             }
-            var sql = new StringBuilder(string.Format(
-                "CREATE TABLE {0} \n(\n  {1}{2} \n); \n", GetQuotedTableName(modelDef), sbColumns, sbConstraints));
+            var sql = string.Format(
+                "CREATE TABLE {0} \n(\n  {1}{2} \n); \n", GetQuotedTableName(modelDef), 
+                StringBuilderCache.ReturnAndFree(sbColumns), 
+                StringBuilderCacheAlt.ReturnAndFree(sbConstraints));
 
-            return sql.ToString();
+            return sql;
         }
 
         public string GetColumnDefinition(FieldDefinition fieldDef)
         {
             if (fieldDef.PropertyInfo.FirstAttribute<TextAttribute>() != null)
             {
-                var sql = new StringBuilder();
+                var sql = StringBuilderCache.Allocate();
                 sql.AppendFormat("{0} {1}", GetQuotedColumnName(fieldDef.FieldName), TextColumnDefinition);
                 sql.Append(fieldDef.IsNullable ? " NULL" : " NOT NULL");
-                return sql.ToString();
+                return StringBuilderCache.ReturnAndFree(sql);
             }
 
             var ret = base.GetColumnDefinition(

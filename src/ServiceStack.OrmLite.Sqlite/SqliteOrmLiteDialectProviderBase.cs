@@ -5,6 +5,7 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using ServiceStack.OrmLite.Sqlite.Converters;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Sqlite
 {
@@ -73,7 +74,7 @@ namespace ServiceStack.OrmLite.Sqlite
 
         public static string CreateFullTextCreateTableStatement(object objectWithProperties)
         {
-            var sbColumns = new StringBuilder();
+            var sbColumns = StringBuilderCache.Allocate();
             foreach (var propertyInfo in objectWithProperties.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
                 var columnDefinition = (sbColumns.Length == 0)
@@ -84,7 +85,7 @@ namespace ServiceStack.OrmLite.Sqlite
             }
 
             var tableName = objectWithProperties.GetType().Name;
-            var sql = string.Format("CREATE VIRTUAL TABLE \"{0}\" USING FTS3 ({1});", tableName, sbColumns);
+            var sql = string.Format("CREATE VIRTUAL TABLE \"{0}\" USING FTS3 ({1});", tableName, StringBuilderCache.ReturnAndFree(sbColumns));
 
             return sql;
         }
@@ -92,7 +93,7 @@ namespace ServiceStack.OrmLite.Sqlite
         public override IDbConnection CreateConnection(string connectionString, Dictionary<string, string> options)
         {
             var isFullConnectionString = connectionString.Contains(";");
-            var connString = new StringBuilder();
+            var connString = StringBuilderCache.Allocate();
             if (!isFullConnectionString)
             {
                 if (connectionString != ":memory:")
@@ -126,7 +127,7 @@ namespace ServiceStack.OrmLite.Sqlite
                 }
             }
 
-            return CreateConnection(connString.ToString());
+            return CreateConnection(StringBuilderCache.ReturnAndFree(connString));
         }
 
         protected abstract IDbConnection CreateConnection(string connectionString);

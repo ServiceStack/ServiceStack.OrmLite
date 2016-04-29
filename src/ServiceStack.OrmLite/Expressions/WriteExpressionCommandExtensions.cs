@@ -117,7 +117,7 @@ namespace ServiceStack.OrmLite
 
         internal static void PrepareUpdateAnonSql<T>(this IDbCommand dbCmd, IOrmLiteDialectProvider dialectProvider, object updateOnly, string whereSql)
         {
-            var sql = new StringBuilder();
+            var sql = StringBuilderCache.Allocate();
             var modelDef = typeof(T).GetModelDefinition();
             var fields = modelDef.FieldDefinitionsArray;
 
@@ -137,7 +137,7 @@ namespace ServiceStack.OrmLite
             }
 
             dbCmd.CommandText = string.Format("UPDATE {0} SET {1} {2}",
-                dialectProvider.GetQuotedTableName(modelDef), sql, whereSql);
+                dialectProvider.GetQuotedTableName(modelDef), StringBuilderCache.ReturnAndFree(sql), whereSql);
         }
 
         public static int UpdateFmt<T>(this IDbCommand dbCmd, string set = null, string where = null)
@@ -148,17 +148,18 @@ namespace ServiceStack.OrmLite
         public static int UpdateFmt(this IDbCommand dbCmd, string table = null, string set = null, string where = null)
         {
             var sql = UpdateFmtSql(dbCmd.GetDialectProvider(), table, set, @where);
-            return dbCmd.ExecuteSql(sql.ToString());
+            return dbCmd.ExecuteSql(sql);
         }
 
-        internal static StringBuilder UpdateFmtSql(IOrmLiteDialectProvider dialectProvider, string table, string set, string @where)
+        internal static string UpdateFmtSql(IOrmLiteDialectProvider dialectProvider, string table, string set, string @where)
         {
             if (table == null)
                 throw new ArgumentNullException("table");
             if (set == null)
                 throw new ArgumentNullException("set");
 
-            var sql = new StringBuilder("UPDATE ");
+            var sql = StringBuilderCache.Allocate();
+            sql.Append("UPDATE ");
             sql.Append(dialectProvider.GetQuotedTableName(table));
             sql.Append(" SET ");
             sql.Append(set.SqlVerifyFragment());
@@ -167,7 +168,7 @@ namespace ServiceStack.OrmLite
                 sql.Append(" WHERE ");
                 sql.Append(@where.SqlVerifyFragment());
             }
-            return sql;
+            return StringBuilderCache.ReturnAndFree(sql);
         }
 
         [Obsolete("Use db.InsertOnly(obj, db.From<T>())")]
@@ -212,21 +213,21 @@ namespace ServiceStack.OrmLite
         public static int DeleteFmt(this IDbCommand dbCmd, string table = null, string where = null)
         {
             var sql = DeleteFmtSql(dbCmd.GetDialectProvider(), table, @where);
-            return dbCmd.ExecuteSql(sql.ToString());
+            return dbCmd.ExecuteSql(sql);
         }
 
-        internal static StringBuilder DeleteFmtSql(IOrmLiteDialectProvider dialectProvider, string table, string @where)
+        internal static string DeleteFmtSql(IOrmLiteDialectProvider dialectProvider, string table, string @where)
         {
             if (table == null)
                 throw new ArgumentNullException("table");
             if (@where == null)
                 throw new ArgumentNullException("where");
 
-            var sql = new StringBuilder();
+            var sql = StringBuilderCache.Allocate();
             sql.AppendFormat("DELETE FROM {0} WHERE {1}",
                              dialectProvider.GetQuotedTableName(table),
                              @where.SqlVerifyFragment());
-            return sql;
+            return StringBuilderCache.ReturnAndFree(sql);
         }
     }
 }

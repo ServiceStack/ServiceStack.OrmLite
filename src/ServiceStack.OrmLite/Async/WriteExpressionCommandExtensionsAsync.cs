@@ -75,7 +75,7 @@ namespace ServiceStack.OrmLite
         internal static Task<int> UpdateFmtAsync(this IDbCommand dbCmd, string table, string set, string where, CancellationToken token)
         {
             var sql = WriteExpressionCommandExtensions.UpdateFmtSql(dbCmd.GetDialectProvider(), table, set, @where);
-            return dbCmd.ExecuteSqlAsync(sql.ToString(), token);
+            return dbCmd.ExecuteSqlAsync(sql, token);
         }
 
         [Obsolete("Use db.InsertOnlyAsync(obj, db.From<T>())")]
@@ -120,7 +120,7 @@ namespace ServiceStack.OrmLite
         internal static Task<int> DeleteFmtAsync(this IDbCommand dbCmd, string table, string where, CancellationToken token)
         {
             var sql = WriteExpressionCommandExtensions.DeleteFmtSql(dbCmd.GetDialectProvider(), table, @where);
-            return dbCmd.ExecuteSqlAsync(sql.ToString(), token);
+            return dbCmd.ExecuteSqlAsync(sql, token);
         }
     }
 }

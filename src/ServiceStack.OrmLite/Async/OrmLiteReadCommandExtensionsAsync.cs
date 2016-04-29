@@ -65,7 +65,7 @@ namespace ServiceStack.OrmLite
         internal static Task<List<TModel>> SelectFmtAsync<TModel>(this IDbCommand dbCmd, CancellationToken token, Type fromTableType, string sqlFilter, params object[] filterParams)
         {
             var sql = OrmLiteReadCommandExtensions.ToSelectFmt<TModel>(dbCmd.GetDialectProvider(), fromTableType, sqlFilter, filterParams);
-            return dbCmd.ConvertToListAsync<TModel>(sql.ToString(), token);
+            return dbCmd.ConvertToListAsync<TModel>(sql, token);
         }
 
         internal static Task<T> SelectByIdFmtAsync<T>(this IDbCommand dbCmd, object idValue, CancellationToken token)

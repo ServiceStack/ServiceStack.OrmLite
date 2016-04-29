@@ -5,6 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using ServiceStack.Data;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
@@ -21,7 +22,7 @@ namespace ServiceStack.OrmLite
 
         public static string GetLastSqlAndParams(this IDbCommand dbCmd)
         {
-            var sb = new StringBuilder();
+            var sb = StringBuilderCache.Allocate();
             sb.AppendLine(dbCmd.CommandText)
               .AppendLine("PARAMS: ");
 
@@ -31,8 +32,9 @@ namespace ServiceStack.OrmLite
                     .Append(parameter.Value.ToJsv())
                     .Append(" : ").AppendLine((parameter.Value ?? DBNull.Value).GetType().Name);
             }
+            sb.AppendLine();
 
-            return sb.AppendLine().ToString();
+            return StringBuilderCache.ReturnAndFree(sb);
         }
 
         /// <summary>
