@@ -26,28 +26,4 @@ namespace ServiceStack.OrmLite.PostgreSQL
         }
     }
 
-    public class PostgreSqlParameterizedSqlExpression<T> : ParameterizedSqlExpression<T>
-    {
-        public PostgreSqlParameterizedSqlExpression(IOrmLiteDialectProvider dialectProvider)
-            : base(dialectProvider) {}
-
-        protected override string GetQuotedColumnName(ModelDefinition tableDef, string memberName)
-        {
-            if (useFieldName)
-            {
-                var fieldDef = tableDef.FieldDefinitions.FirstOrDefault(x => x.Name == memberName);
-                if (fieldDef != null && fieldDef.IsRowVersion && !PrefixFieldWithTableName)
-                    return PostgreSqlDialectProvider.RowVersionFieldComparer;
-
-                return base.GetQuotedColumnName(tableDef, memberName);
-            }
-            return memberName;
-        }
-
-        public override SqlExpression<T> OrderByRandom()
-        {
-            return base.OrderBy("RANDOM()");
-        }
-    }
-
 }

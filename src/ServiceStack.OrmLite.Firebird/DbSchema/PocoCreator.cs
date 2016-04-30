@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Text;
 using System.Collections.Generic;
 using System.Globalization;
@@ -220,7 +220,7 @@ namespace {0}
 }}";
 		
 		private string serviceTemplate =@"using System;
-﻿using ServiceStack.CacheAccess;
+ using ServiceStack.CacheAccess;
 using ServiceStack.Common;
 using ServiceStack.ServiceHost;
 using ServiceStack.ServiceInterface;

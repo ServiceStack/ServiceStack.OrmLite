@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 
 namespace ServiceStack.OrmLite.Oracle
 {
-    public class OracleSqlExpression<T> : ParameterizedSqlExpression<T>
+    public class OracleSqlExpression<T> : SqlExpression<T>
     {
         public OracleSqlExpression(IOrmLiteDialectProvider dialectProvider)
             : base(dialectProvider) {}

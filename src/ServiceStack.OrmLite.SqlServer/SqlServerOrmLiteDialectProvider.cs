@@ -109,7 +109,7 @@ namespace ServiceStack.OrmLite.SqlServer
 
         public override SqlExpression<T> SqlExpression<T>()
         {
-            return new SqlServerParameterizedSqlExpression<T>(this);
+            return new SqlServerExpression<T>(this);
         }
 
         public override IDbDataParameter CreateParam()

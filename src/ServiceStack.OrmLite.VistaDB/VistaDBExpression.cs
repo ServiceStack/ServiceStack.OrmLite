@@ -7,7 +7,7 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.VistaDB
 {
-    public class VistaDbExpression<T> : ParameterizedSqlExpression<T>
+    public class VistaDbExpression<T> : SqlExpression<T>
     {
         public VistaDbExpression(IOrmLiteDialectProvider dialectProvider) 
             : base(dialectProvider) {}

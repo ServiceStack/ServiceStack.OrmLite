@@ -14,6 +14,9 @@ namespace ServiceStack.OrmLite
 {
     public abstract partial class SqlExpression<T> : ISqlExpression, IHasUntypedSqlExpression
     {
+        protected bool visitedExpressionIsTableColumn = false;
+        protected bool skipParameterizationForThisExpression = false;
+
         private Expression<Func<T, bool>> underlyingExpression;
         private List<string> orderByProperties = new List<string>();
         private string selectExpression = string.Empty;
@@ -1072,7 +1075,11 @@ namespace ServiceStack.OrmLite
 
         protected internal virtual object Visit(Expression exp)
         {
-            if (exp == null) return string.Empty;
+            visitedExpressionIsTableColumn = false;
+
+            if (exp == null)
+                return string.Empty;
+
             switch (exp.NodeType)
             {
                 case ExpressionType.Lambda:
@@ -1133,7 +1140,10 @@ namespace ServiceStack.OrmLite
 
         protected internal virtual object VisitJoin(Expression exp)
         {
-            return Visit(exp);
+            skipParameterizationForThisExpression = true;
+            var visitedExpression = Visit(exp);
+            skipParameterizationForThisExpression = false;
+            return visitedExpression;
         }
 
         protected virtual object VisitLambda(LambdaExpression lambda)
@@ -1154,7 +1164,11 @@ namespace ServiceStack.OrmLite
 
         public virtual object GetValue(object value, Type type)
         {
-            return DialectProvider.GetQuotedValue(value, type);
+            if (skipParameterizationForThisExpression)
+                return DialectProvider.GetQuotedValue(value, type);
+
+            var paramValue = DialectProvider.GetParamValue(value, type);
+            return paramValue ?? "null";
         }
 
         protected virtual object VisitBinary(BinaryExpression b)
@@ -1256,7 +1270,26 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        protected virtual void VisitFilter(string operand, object originalLeft, object originalRight, ref object left, ref object right) {}
+        protected virtual void VisitFilter(string operand, object originalLeft, object originalRight, ref object left, ref object right)
+        {
+            if (skipParameterizationForThisExpression || visitedExpressionIsTableColumn)
+                return;
+
+            if (originalLeft is EnumMemberAccess && originalRight is EnumMemberAccess)
+                return;
+
+            if (operand == "AND" || operand == "OR" || operand == "is" || operand == "is not")
+                return;
+
+            ConvertToPlaceholderAndParameter(ref right);
+        }
+
+        protected virtual void ConvertToPlaceholderAndParameter(ref object right)
+        {
+            var parameter = AddParam(right);
+
+            right = parameter.ParameterName;
+        }
 
         protected virtual object VisitMemberAccess(MemberExpression m)
         {
@@ -1298,7 +1331,12 @@ namespace ServiceStack.OrmLite
             return new PartialSqlString(GetQuotedColumnName(tableDef, m.Member.Name));
         }
 
-        protected virtual void OnVisitMemberType(Type modelType) {}
+        protected virtual void OnVisitMemberType(Type modelType)
+        {
+            var tableDef = modelType.GetModelDefinition();
+            if (tableDef != null)
+                visitedExpressionIsTableColumn = true;
+        }
 
         protected virtual object VisitMemberInit(MemberInitExpression exp)
         {

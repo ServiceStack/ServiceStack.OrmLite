@@ -121,7 +121,6 @@
     <Compile Include="Converters\StringConverter.cs" />
     <Compile Include="Converters\TimeSpanAsIntConverter.cs" />
     <Compile Include="Expressions\IUntypedSqlExpression.cs" />
-    <Compile Include="Expressions\ParameterizedSqlExpression.cs" />
     <Compile Include="IOrmLiteConverter.cs" />
     <Compile Include="NamingStrategy.cs" />
     <Compile Include="OrmLiteCommand.cs" />

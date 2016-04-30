@@ -9,7 +9,6 @@ using ServiceStack.OrmLite.SqlServer;
 using SqlMapper.Linq2Sql;
 using System.Data.Linq;
 using System.Diagnostics;
-using Massive;
 
 namespace SqlMapper
 {
@@ -97,15 +96,15 @@ namespace SqlMapper
 			//var mapperConnection2 = Program.GetOpenConnection();
 			//tests.Add(id => mapperConnection2.Query("select * from Posts where Id = @Id", new { Id = id }).ToList(), "Dynamic Mapper Query");
 
-            var massiveModel = new DynamicModel(Program.connectionString);
-            var massiveConnection = Program.GetOpenConnection();
-            tests.Add(id => massiveModel.Query("select * from Posts where Id = @0", massiveConnection, id).ToList(), "Dynamic Massive ORM Query");
+            //var massiveModel = new DynamicModel(Program.connectionString);
+            //var massiveConnection = Program.GetOpenConnection();
+            //tests.Add(id => massiveModel.Query("select * from Posts where Id = @0", massiveConnection, id).ToList(), "Dynamic Massive ORM Query");
         	
 
 			//ServiceStack.OrmLite Provider:
 			OrmLiteConfig.DialectProvider = SqlServerOrmLiteDialectProvider.Instance; //Using SQL Server
 			IDbConnection ormLiteConn = Program.GetOpenConnection();
-			tests.Add(id => ormLiteConn.SelectFmt<Post>("select * from Posts where Id = {0}", id), "OrmLite Query");
+			tests.Add(id => ormLiteConn.Select<Post>("select * from Posts where Id = @id", new { id }), "OrmLite Query");
 
             // HAND CODED 
             var connection = Program.GetOpenConnection();

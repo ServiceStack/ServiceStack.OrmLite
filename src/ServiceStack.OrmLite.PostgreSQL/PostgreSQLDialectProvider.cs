@@ -162,7 +162,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
 
         public override SqlExpression<T> SqlExpression<T>()
         {
-            return new PostgreSqlParameterizedSqlExpression<T>(this);
+            return new PostgreSqlExpression<T>(this);
         }
 
         public override IDbDataParameter CreateParam()

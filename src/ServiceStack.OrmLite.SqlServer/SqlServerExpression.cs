@@ -27,29 +27,6 @@ namespace ServiceStack.OrmLite.SqlServer
         {
             return base.OrderBy("NEWID()");
         }
-    }
-
-    public class SqlServerParameterizedSqlExpression<T> : ParameterizedSqlExpression<T>
-    {
-        public SqlServerParameterizedSqlExpression(IOrmLiteDialectProvider dialectProvider)
-            : base(dialectProvider) {}
-
-        public override void PrepareUpdateStatement(IDbCommand dbCmd, T item, bool excludeDefaults = false)
-        {
-            SqlServerExpressionUtils.PrepareSqlServerUpdateStatement(dbCmd, this, item, excludeDefaults);
-        }
-
-        public override string GetSubstringSql(object quotedColumn, int startIndex, int? length = null)
-        {
-            return length != null
-                ? string.Format("substring({0}, {1}, {2})", quotedColumn, startIndex, length.Value)
-                : string.Format("substring({0}, {1}, LEN({0}) - {1} + 1)", quotedColumn, startIndex);
-        }
-
-        public override SqlExpression<T> OrderByRandom()
-        {
-            return base.OrderBy("NEWID()");
-        }
 
         protected override void ConvertToPlaceholderAndParameter(ref object right)
         {
