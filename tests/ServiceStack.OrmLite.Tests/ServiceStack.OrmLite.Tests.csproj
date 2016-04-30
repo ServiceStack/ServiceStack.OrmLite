@@ -129,6 +129,7 @@
     <Compile Include="DefaultValueTests.cs" />
     <Compile Include="Issues\BelongsToIssue.cs" />
     <Compile Include="Issues\MergingNestedSqlExpressionIssue.cs" />
+    <Compile Include="Support\JoinSqlBuilder.cs" />
     <Compile Include="UseCase\ExpressionsAuthorTests.cs" />
     <Compile Include="Expression\ComplexJoinTests.cs" />
     <Compile Include="Expression\ExpressionUsingCustomSerializedEnumTests.cs" />

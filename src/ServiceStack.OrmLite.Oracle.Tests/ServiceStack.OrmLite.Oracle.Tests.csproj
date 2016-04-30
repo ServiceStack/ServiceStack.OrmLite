@@ -358,6 +358,9 @@
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\StringSerializerTests.cs">
       <Link>StringSerializerTests.cs</Link>
     </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Support\JoinSqlBuilder.cs">
+      <Link>Support\JoinSqlBuilder.cs</Link>
+    </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\TestHelpers.cs">
       <Link>TestHelpers.cs</Link>
     </Compile>
