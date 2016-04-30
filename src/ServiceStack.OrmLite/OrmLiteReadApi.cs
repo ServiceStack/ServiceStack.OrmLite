@@ -72,6 +72,16 @@ namespace ServiceStack.OrmLite
         /// <para>db.Select&lt;EntityWithId&gt;(typeof(Person))</para>
         /// <para></para>
         /// </summary>
+        public static List<TModel> Select<TModel>(this IDbConnection dbConn, Type fromTableType, string sql, object anonType)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Select<TModel>(fromTableType, sql, anonType));
+        }
+
+        /// <summary>
+        /// Returns a partial subset of results from the specified tableType. E.g:
+        /// <para>db.Select&lt;EntityWithId&gt;(typeof(Person))</para>
+        /// <para></para>
+        /// </summary>
         public static List<TModel> Select<TModel>(this IDbConnection dbConn, Type fromTableType)
         {
             return dbConn.Exec(dbCmd => dbCmd.Select<TModel>(fromTableType));
@@ -163,6 +173,7 @@ namespace ServiceStack.OrmLite
         /// Returns a lazyily loaded stream of results using an SqlFilter query. E.g:
         /// <para>db.SelectLazyFmt&lt;Person&gt;("Age &gt; {0}", 40)</para>
         /// </summary>
+        [Obsolete(Messages.LegacyApi)]
         public static IEnumerable<T> SelectLazyFmt<T>(this IDbConnection dbConn, string sqlFormat, params object[] filterParams)
         {
             return dbConn.ExecLazy(dbCmd => dbCmd.SelectLazyFmt<T>(sqlFormat, filterParams));
@@ -429,6 +440,7 @@ namespace ServiceStack.OrmLite
         /// Returns a Dictionary from the first 2 columns: Column 1 (Keys), Column 2 (Values) using an SqlFormat query. E.g:
         /// <para>db.DictionaryFmt&lt;int, string&gt;("SELECT Id, LastName FROM Person WHERE Age &lt; {0}", 50)</para>
         /// </summary>
+        [Obsolete(Messages.LegacyApi)]
         public static Dictionary<K, V> DictionaryFmt<K, V>(this IDbConnection dbConn, string sqlFormat, params object[] sqlParams)
         {
             return dbConn.Exec(dbCmd => dbCmd.DictionaryFmt<K, V>(sqlFormat, sqlParams));

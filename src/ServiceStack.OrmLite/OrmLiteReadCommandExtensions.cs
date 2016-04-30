@@ -72,11 +72,6 @@ namespace ServiceStack.OrmLite
                 dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), sqlFilter, filterParams));
         }
 
-        internal static List<TModel> Select<TModel>(this IDbCommand dbCmd, Type fromTableType)
-        {
-            return SelectFmt<TModel>(dbCmd, fromTableType, null);
-        }
-
         internal static List<TModel> SelectFmt<TModel>(this IDbCommand dbCmd, Type fromTableType, string sqlFilter, params object[] filterParams)
         {
             var sql = ToSelectFmt<TModel>(dbCmd.GetDialectProvider(), fromTableType, sqlFilter, filterParams);
@@ -135,6 +130,11 @@ namespace ServiceStack.OrmLite
 
         internal static IDbCommand SetParameters<T>(this IDbCommand dbCmd, object anonType, bool excludeDefaults)
         {
+            return dbCmd.SetParameters(typeof(T), anonType, excludeDefaults);
+        }
+
+        internal static IDbCommand SetParameters(this IDbCommand dbCmd, Type type, object anonType, bool excludeDefaults)
+        {
             if (anonType == null)
                 return dbCmd;
 
@@ -142,11 +142,11 @@ namespace ServiceStack.OrmLite
             lastQueryType = null;
 
             var dialectProvider = dbCmd.GetDialectProvider();
-            var fieldMap = typeof(T).IsUserType() //Ensure T != Scalar<int>()
-                ? dialectProvider.GetFieldDefinitionMap(typeof(T).GetModelDefinition())
+            var fieldMap = type.IsUserType() //Ensure T != Scalar<int>()
+                ? dialectProvider.GetFieldDefinitionMap(type.GetModelDefinition())
                 : null;
 
-            anonType.ForEachParam<T>(excludeDefaults, (pi, columnName, value) =>
+            anonType.ForEachParam(type.GetModelDefinition(), excludeDefaults, (pi, columnName, value) =>
             {
                 var p = dbCmd.CreateParameter();
                 p.ParameterName = columnName;
@@ -183,12 +183,11 @@ namespace ServiceStack.OrmLite
 
         internal delegate void ParamIterDelegate(PropertyInfo pi, string columnName, object value);
 
-        internal static void ForEachParam<T>(this object anonType, bool excludeDefaults, ParamIterDelegate fn)
+        internal static void ForEachParam(this object anonType, ModelDefinition modelDef, bool excludeDefaults, ParamIterDelegate fn)
         {
             if (anonType == null) return;
 
             var pis = anonType.GetType().GetSerializableProperties();
-            var model = ModelDefinition<T>.Definition;
 
             foreach (var pi in pis)
             {
@@ -198,8 +197,8 @@ namespace ServiceStack.OrmLite
                 var value = mi.Invoke(anonType, new object[0]);
                 if (excludeDefaults && (value == null || value.Equals(pi.PropertyType.GetDefaultValue()))) continue;
 
-                var targetField = model != null ? model.FieldDefinitions.FirstOrDefault(f => String.Equals(f.Name, pi.Name)) : null;
-                var columnName = targetField != null && !String.IsNullOrEmpty(targetField.Alias)
+                var targetField = modelDef != null ? modelDef.FieldDefinitions.FirstOrDefault(f => string.Equals(f.Name, pi.Name)) : null;
+                var columnName = targetField != null && !string.IsNullOrEmpty(targetField.Alias)
                     ? targetField.Alias
                     : pi.Name;
 
@@ -210,14 +209,14 @@ namespace ServiceStack.OrmLite
         internal static List<string> AllFields<T>(this object anonType)
         {
             var ret = new List<string>();
-            ForEachParam<T>(anonType, excludeDefaults: false, fn: (pi, columnName, value) => ret.Add(pi.Name));
+            anonType.ForEachParam(typeof(T).GetModelDefinition(), excludeDefaults: false, fn: (pi, columnName, value) => ret.Add(pi.Name));
             return ret;
         }
 
         internal static Dictionary<string, object> AllFieldsMap<T>(this object anonType)
         {
             var ret = new Dictionary<string, object>();
-            ForEachParam<T>(anonType, excludeDefaults: false, fn: (pi, columnName, value) => ret[pi.Name] = value);
+            anonType.ForEachParam(typeof(T).GetModelDefinition(), excludeDefaults: false, fn: (pi, columnName, value) => ret[pi.Name] = value);
             return ret;
         }
 
@@ -241,7 +240,7 @@ namespace ServiceStack.OrmLite
         internal static List<string> NonDefaultFields<T>(this object anonType)
         {
             var ret = new List<string>();
-            ForEachParam<T>(anonType, excludeDefaults: true, fn: (pi, columnName, value) => ret.Add(pi.Name));
+            anonType.ForEachParam(typeof(T).GetModelDefinition(), excludeDefaults: true, fn: (pi, columnName, value) => ret.Add(pi.Name));
             return ret;
         }
 
@@ -433,6 +432,33 @@ namespace ServiceStack.OrmLite
             dbCmd.CommandText = dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), sql);
 
             return dbCmd.ConvertToList<T>();
+        }
+
+        internal static List<TModel> Select<TModel>(this IDbCommand dbCmd, Type fromTableType)
+        {
+            return Select<TModel>(dbCmd, fromTableType, null);
+        }
+
+        internal static List<T> Select<T>(this IDbCommand dbCmd, Type fromTableType, string sql, object anonType = null)
+        {
+            if (anonType != null) dbCmd.SetParameters(fromTableType, anonType, excludeDefaults: false);
+            dbCmd.CommandText = ToSelect<T>(dbCmd.GetDialectProvider(), fromTableType, sql);
+
+            return dbCmd.ConvertToList<T>();
+        }
+
+        internal static string ToSelect<TModel>(IOrmLiteDialectProvider dialectProvider, Type fromTableType, string sqlFilter)
+        {
+            var sql = StringBuilderCache.Allocate();
+            var modelDef = ModelDefinition<TModel>.Definition;
+            sql.AppendFormat("SELECT {0} FROM {1}", dialectProvider.GetColumnNames(modelDef),
+                             dialectProvider.GetQuotedTableName(fromTableType.GetModelDefinition()));
+            if (!string.IsNullOrEmpty(sqlFilter))
+            {
+                sql.Append(" WHERE ");
+                sql.Append(sqlFilter);
+            }
+            return StringBuilderCache.ReturnAndFree(sql);
         }
 
         internal static List<T> SqlList<T>(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams)

@@ -224,6 +224,27 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Delete rows using a SqlFormat filter. E.g:
+        /// <para>db.Delete&lt;Person&gt;("Age > @age", new { age = 42 })</para>
+        /// </summary>
+        /// <returns>number of rows deleted</returns>
+        public static int Delete<T>(this IDbConnection dbConn, string sqlFilter, object anonType)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Delete<T>(sqlFilter, anonType));
+        }
+
+        /// <summary>
+        /// Delete rows using a SqlFormat filter. E.g:
+        /// <para>db.Delete&lt;Person&gt;("Age > @age", new { age = 42 })</para>
+        /// </summary>
+        /// <returns>number of rows deleted</returns>
+        public static int Delete(this IDbConnection dbConn, Type tableType, string sqlFilter, object anonType)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Delete(tableType, sqlFilter, anonType));
+        }
+
+        /// <summary>
+        /// Delete rows using a SqlFormat filter. E.g:
+        /// <para>db.Delete&lt;Person&gt;("Age > {0}", 42)</para>
         /// </summary>
         /// <returns>number of rows deleted</returns>
         [Obsolete(Messages.LegacyApi)]
