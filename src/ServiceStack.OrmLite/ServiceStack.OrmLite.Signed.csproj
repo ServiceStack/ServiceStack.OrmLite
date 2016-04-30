@@ -144,7 +144,6 @@
     <Compile Include="OrmLiteReadExpressionsApi.cs" />
     <Compile Include="OrmLiteWriteExpressionsApi.cs" />
     <Compile Include="IUntypedApi.cs" />
-    <Compile Include="JoinSqlBuilder.cs" />
     <Compile Include="OrmLiteDialectProviderExtensions.cs" />
     <Compile Include="OrmLiteExecFilter.cs" />
     <Compile Include="OrmLiteReadApi.cs" />

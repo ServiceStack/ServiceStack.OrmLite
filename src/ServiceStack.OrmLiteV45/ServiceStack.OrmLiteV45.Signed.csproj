@@ -166,9 +166,6 @@
     <Compile Include="..\ServiceStack.OrmLite\IUntypedApi.cs">
       <Link>IUntypedApi.cs</Link>
     </Compile>
-    <Compile Include="..\ServiceStack.OrmLite\JoinSqlBuilder.cs">
-      <Link>JoinSqlBuilder.cs</Link>
-    </Compile>
     <Compile Include="..\ServiceStack.OrmLite\ModelDefinition.cs">
       <Link>ModelDefinition.cs</Link>
     </Compile>
