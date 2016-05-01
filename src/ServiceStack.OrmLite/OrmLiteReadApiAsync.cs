@@ -186,21 +186,6 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
-        /// Returns the first result using a SqlFormat query. E.g:
-        /// <para>db.SingleFmt&lt;Person&gt;("Age = {0}", 42)</para>
-        /// </summary>
-        [Obsolete(Messages.LegacyApi)]
-        public static Task<T> SingleFmtAsync<T>(this IDbConnection dbConn, CancellationToken token, string sqlFormat, params object[] filterParams)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.SingleFmtAsync<T>(token, sqlFormat, filterParams));
-        }
-        [Obsolete(Messages.LegacyApi)]
-        public static Task<T> SingleFmtAsync<T>(this IDbConnection dbConn, string sqlFormat, params object[] filterParams)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.SingleFmtAsync<T>(default(CancellationToken), sqlFormat, filterParams));
-        }
-
-        /// <summary>
         /// Returns the first result using a primary key id. E.g:
         /// <para>db.SingleById&lt;Person&gt;(1)</para>
         /// </summary>

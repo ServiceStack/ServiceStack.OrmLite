@@ -29,6 +29,12 @@ namespace ServiceStack.OrmLite.Legacy
             return dbCmd.ExprConvertToListAsync<Into>(sql, q.Params, token);
         }
 
+        [Obsolete("Use db.SingleAsync(db.From<T>())")]
+        internal static Task<T> SingleAsync<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression, CancellationToken token)
+        {
+            var expr = dbCmd.GetDialectProvider().SqlExpression<T>();
+            return dbCmd.SingleAsync(expression(expr), token);
+        }
     }
 }
 

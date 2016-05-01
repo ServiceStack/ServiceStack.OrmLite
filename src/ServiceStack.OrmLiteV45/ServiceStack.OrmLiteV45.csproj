@@ -160,6 +160,9 @@
     <Compile Include="..\ServiceStack.OrmLite\Legacy\OrmLiteReadApiLegacy.cs">
       <Link>Legacy\OrmLiteReadApiLegacy.cs</Link>
     </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Legacy\OrmLiteReadCommandExtensionsAsyncLegacy.cs">
+      <Link>Legacy\OrmLiteReadCommandExtensionsAsyncLegacy.cs</Link>
+    </Compile>
     <Compile Include="..\ServiceStack.OrmLite\Legacy\OrmLiteReadCommandExtensionsLegacy.cs">
       <Link>Legacy\OrmLiteReadCommandExtensionsLegacy.cs</Link>
     </Compile>

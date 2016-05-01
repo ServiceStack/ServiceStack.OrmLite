@@ -58,16 +58,6 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
-        /// Returns a single result from using an SqlExpression lambda. E.g:
-        /// <para>db.Single&lt;Person&gt;(q =&gt; q.Where(x =&gt; x.Age == 42))</para>
-        /// </summary>
-        [Obsolete("Use db.SingleAsync(db.From<T>())")]
-        public static Task<T> SingleAsync<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression, CancellationToken token = default(CancellationToken))
-        {
-            return dbConn.Exec(dbCmd => dbCmd.SingleAsync(expression, token));
-        }
-
-        /// <summary>
         /// Returns results from using an SqlExpression lambda. E.g:
         /// <para>db.SingleAsync&lt;Person&gt;(x =&gt; x.Age &gt; 40)</para>
         /// </summary>

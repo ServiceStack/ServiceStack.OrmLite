@@ -117,6 +117,7 @@
     <Compile Include="Expressions\IUntypedSqlExpression.cs" />
     <Compile Include="IOrmLiteConverter.cs" />
     <Compile Include="Legacy\OrmLiteReadApiLegacy.cs" />
+    <Compile Include="Legacy\OrmLiteReadCommandExtensionsAsyncLegacy.cs" />
     <Compile Include="Legacy\OrmLiteReadCommandExtensionsLegacy.cs" />
     <Compile Include="Legacy\OrmLiteReadExpressionsApiAsyncLegacy.cs" />
     <Compile Include="Legacy\OrmLiteReadExpressionsApiLegacy.cs" />

@@ -75,16 +75,6 @@ namespace ServiceStack.OrmLite
             return dbCmd.ConvertToListAsync<TModel>(sql, token);
         }
 
-        internal static Task<T> SelectByIdFmtAsync<T>(this IDbCommand dbCmd, object idValue, CancellationToken token)
-        {
-            return dbCmd.SingleFmtAsync<T>(token, dbCmd.GetDialectProvider().GetQuotedColumnName(ModelDefinition<T>.PrimaryKeyName) + " = {0}".SqlFmt(idValue));
-        }
-
-        internal static Task<T> SingleFmtAsync<T>(this IDbCommand dbCmd, CancellationToken token, string filter, params object[] filterParams)
-        {
-            return dbCmd.ConvertToAsync<T>(dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), filter, filterParams), token);
-        }
-
         internal static Task<List<T>> SelectByIdsAsync<T>(this IDbCommand dbCmd, IEnumerable idValues, CancellationToken token)
         {
             var sql = idValues.GetIdsInSql();
