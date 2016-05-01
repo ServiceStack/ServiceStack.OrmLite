@@ -111,7 +111,6 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Async\OrmLiteWriteExpressionsApiLegacy.cs" />
     <Compile Include="Converters\BoolConverter.cs" />
     <Compile Include="Converters\ByteArrayConverter.cs" />
     <Compile Include="Converters\DateTimeOffsetConverter.cs" />
@@ -126,6 +125,7 @@
     <Compile Include="Legacy\OrmLiteReadApiLegacy.cs" />
     <Compile Include="Legacy\OrmLiteReadCommandExtensionsLegacy.cs" />
     <Compile Include="Legacy\OrmLiteReadExpressionsApiLegacy.cs" />
+    <Compile Include="Legacy\OrmLiteWriteCommandExtensionsLegacy.cs" />
     <Compile Include="Legacy\OrmLiteWriteExpressionsApiLegacy.cs" />
     <Compile Include="Legacy\ReadExpressionCommandExtensionsLegacy.cs" />
     <Compile Include="Legacy\WriteExpressionCommandExtensionsLegacy.cs" />

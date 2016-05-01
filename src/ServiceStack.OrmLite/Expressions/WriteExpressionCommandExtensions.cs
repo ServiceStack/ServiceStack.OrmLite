@@ -150,12 +150,6 @@ namespace ServiceStack.OrmLite
             return dbCmd.Delete(ev);
         }
 
-        [Obsolete("Use db.Delete(db.From<T>())")]
-        public static int Delete<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> where)
-        {
-            return dbCmd.Delete(where(dbCmd.GetDialectProvider().SqlExpression<T>()));
-        }
-
         public static int Delete<T>(this IDbCommand dbCmd, SqlExpression<T> where)
         {
             var sql = where.ToDeleteRowStatement();

@@ -79,5 +79,17 @@ namespace ServiceStack.OrmLite.Legacy
         {
             return dbConn.Exec(dbCmd => dbCmd.DeleteFmt(table, where));
         }
+
+        /// <summary>
+        /// Delete the rows that matches the where expression, e.g:
+        /// 
+        ///   db.Delete&lt;Person&gt;(ev => ev.Where(p => p.Age == 27));
+        ///   DELETE FROM "Person" WHERE ("Age" = 27)
+        /// </summary>
+        [Obsolete("Use db.Delete(db.From<T>())")]
+        public static int Delete<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> where)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Delete(where));
+        }
     }
 }

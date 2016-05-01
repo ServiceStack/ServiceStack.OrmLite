@@ -213,7 +213,6 @@ namespace ServiceStack.OrmLite.Tests
                 i++; db.Delete<Person>("Age = @age", new { age = 27 });
                 i++; db.Delete(typeof(Person), "Age = @age", new { age = 27 });
                 i++; db.Delete<Person>(p => p.Age == 27);
-                i++; db.Delete<Person>(ev => ev.Where(p => p.Age == 27));
                 i++; db.Delete(db.From<Person>().Where(p => p.Age == 27));
                 i++; db.Delete<Person>("Age = @age", new { age = 27 });
 

@@ -84,5 +84,11 @@ namespace ServiceStack.OrmLite.Legacy
                              @where.SqlVerifyFragment());
             return StringBuilderCache.ReturnAndFree(sql);
         }
+
+        [Obsolete("Use db.Delete(db.From<T>())")]
+        internal static int Delete<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> where)
+        {
+            return dbCmd.Delete(where(dbCmd.GetDialectProvider().SqlExpression<T>()));
+        }
     }
 }
