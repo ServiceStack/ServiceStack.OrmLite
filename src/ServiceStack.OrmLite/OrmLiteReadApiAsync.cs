@@ -72,6 +72,7 @@ namespace ServiceStack.OrmLite
         {
             return dbConn.Exec(dbCmd => dbCmd.SelectFmtAsync<T>(token, sqlFormat, filterParams));
         }
+        [Obsolete(Messages.LegacyApi)]
         public static Task<List<T>> SelectFmtAsync<T>(this IDbConnection dbConn, string sqlFormat, params object[] filterParams)
         {
             return dbConn.Exec(dbCmd => dbCmd.SelectFmtAsync<T>(default(CancellationToken), sqlFormat, filterParams));
@@ -85,6 +86,16 @@ namespace ServiceStack.OrmLite
         public static Task<List<TModel>> SelectAsync<TModel>(this IDbConnection dbConn, Type fromTableType, CancellationToken token = default(CancellationToken))
         {
             return dbConn.Exec(dbCmd => dbCmd.SelectAsync<TModel>(fromTableType, token));
+        }
+
+        /// <summary>
+        /// Returns a partial subset of results from the specified tableType. E.g:
+        /// <para>db.Select&lt;EntityWithId&gt;(typeof(Person), "Age = @age", new { age = 27 })</para>
+        /// <para></para>
+        /// </summary>
+        public static Task<List<TModel>> SelectAsync<TModel>(this IDbConnection dbConn, Type fromTableType, string sqlFilter, object anonType = null, CancellationToken token = default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SelectAsync<TModel>(fromTableType, sqlFilter, anonType, token));
         }
 
         /// <summary>
