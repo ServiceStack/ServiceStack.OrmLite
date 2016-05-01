@@ -120,12 +120,12 @@ namespace ServiceStack.OrmLite.Tests
                     Or.EqualTo("select id, firstname, lastname, age  from person where (age = {0}) order by person.id offset 0 rows fetch next 1 rows only".Fmt(p)). //SQLServer >= 2012
                     Or.EqualTo("select first 1 id, firstname, lastname, age  from person where (age = {0})".Fmt(p))); //Firebird
 
-            i++; db.ExistsFmt<Person>("Age = {0}", 42);
+                i++; db.Exists<Person>("Age = @age", new { age = 42 });
                 i++; db.Single(db.From<Person>().Where(x => x.Age == 42));
                 i++; db.Single<Person>(new { Age = 42 });
                 i++; db.Single<Person>("Age = @age", new { age = 42 });
                 i++; db.SingleById<Person>(1);
-                i++; db.ExistsFmt<Person>("Age = {0}", 42);
+                i++; db.Exists<Person>("Age = @age", new { age = 42 });
                 i++; db.SingleWhere<Person>("Age", 42);
 
                 Assert.That(captured.SqlCommandHistory.Count, Is.EqualTo(i));

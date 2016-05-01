@@ -92,5 +92,12 @@ namespace ServiceStack.OrmLite.Legacy
         {
             return dbCmd.Dictionary<K, V>(sqlFormat.SqlFmt(sqlParams));
         }
+
+        internal static bool ExistsFmt<T>(this IDbCommand dbCmd, string sqlFilter, params object[] filterParams)
+        {
+            var fromTableType = typeof(T);
+            var result = dbCmd.Scalar(dbCmd.GetDialectProvider().ToSelectStatement(fromTableType, sqlFilter, filterParams));
+            return result != null;
+        }
     }
 }

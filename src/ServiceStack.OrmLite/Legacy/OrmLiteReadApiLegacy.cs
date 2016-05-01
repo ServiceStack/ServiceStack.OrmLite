@@ -97,5 +97,16 @@ namespace ServiceStack.OrmLite.Legacy
         {
             return dbConn.Exec(dbCmd => dbCmd.DictionaryFmt<K, V>(sqlFormat, sqlParams));
         }
+
+        /// <summary>
+        /// Returns true if the Query returns any records, using an SqlFormat query. E.g:
+        /// <para>db.ExistsFmt&lt;Person&gt;("Age = {0}", 42)</para>
+        /// <para>db.ExistsFmt&lt;Person&gt;("SELECT * FROM Person WHERE Age = {0}", 50)</para>
+        /// </summary>
+        [Obsolete(Messages.LegacyApi)]
+        public static bool ExistsFmt<T>(this IDbConnection dbConn, string sqlFormat, params object[] filterParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.ExistsFmt<T>(sqlFormat, filterParams));
+        }
     }
 }

@@ -122,12 +122,12 @@ namespace ServiceStack.OrmLite.Tests
                     Or.EqualTo("select * from (\r select ssormlite1.*, rownum rnum from (\r select id, firstname, lastname, age  from person where (age = {0}) order by person.id) ssormlite1\r where rownum <= 0 + 1) ssormlite2 where ssormlite2.rnum > 0".Fmt(p))  //Oracle
                     );
 
-                i++; db.ExistsFmt<Person>("Age = {0}", 42);
+                i++; db.Exists<Person>("Age = @age", new { age = 42 });
                 i++; db.Single(db.From<Person>().Where(x => x.Age == 42));
                 i++; db.Single<Person>(new { Age = 42 });
                 i++; db.Single<Person>("Age = @age", new { age = 42 });
                 i++; db.SingleById<Person>(1);
-                i++; db.ExistsFmt<Person>("Age = {0}", 42);
+                i++; db.Exists<Person>("Age = @age", new { age = 42 });
                 i++; db.SingleWhere<Person>("Age", 42);
 
                 Assert.That(captured.SqlStatements.Count, Is.EqualTo(i));

@@ -806,13 +806,6 @@ namespace ServiceStack.OrmLite
             return result != null;
         }
 
-        internal static bool ExistsFmt<T>(this IDbCommand dbCmd, string sqlFilter, params object[] filterParams)
-        {
-            var fromTableType = typeof(T);
-            var result = dbCmd.Scalar(dbCmd.GetDialectProvider().ToSelectStatement(fromTableType, sqlFilter, filterParams));
-            return result != null;
-        }
-
         // procedures ...		
         internal static List<TOutputModel> SqlProcedure<TOutputModel>(this IDbCommand dbCommand, object fromObjWithProperties)
         {
