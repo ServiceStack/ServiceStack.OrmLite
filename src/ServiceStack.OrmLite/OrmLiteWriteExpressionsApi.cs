@@ -151,16 +151,6 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
-        /// Insert only fields in POCO specified by the SqlExpression lambda. E.g:
-        /// <para>db.InsertOnly(new Person { FirstName = "Amy", Age = 27 }, q =&gt; q.Insert(p =&gt; new { p.FirstName, p.Age }))</para>
-        /// </summary>
-        [Obsolete("Use db.InsertOnly(obj, db.From<T>())")]
-        public static void InsertOnly<T>(this IDbConnection dbConn, T obj, Func<SqlExpression<T>, SqlExpression<T>> onlyFields)
-        {
-            dbConn.Exec(dbCmd => dbCmd.InsertOnly(obj, onlyFields));
-        }
-
-        /// <summary>
         /// Using an SqlExpression to only Insert the fields specified, e.g:
         /// 
         ///   db.InsertOnly(new Person { FirstName = "Amy" }, q => q.Insert(p => new { p.FirstName }));

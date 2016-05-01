@@ -323,11 +323,7 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(sqlStatements.Count, Is.EqualTo(i));
                 Assert.That(sqlCommandStatements.Count, Is.EqualTo(i));
 
-                i++; db.InsertOnly(new PersonWithAutoId { FirstName = "Amy", Age = 27 }, ev => ev.Insert(p => new { p.FirstName, p.Age }));
-                Assert.That(sqlStatements.Count, Is.EqualTo(i));
-                Assert.That(sqlCommandStatements.Count, Is.EqualTo(i));
-
-                i++; db.InsertOnly(new PersonWithAutoId { FirstName = "Amy", Age = 27 }, ev => db.From<PersonWithAutoId>().Insert(p => new { p.FirstName, p.Age }));
+                i++; db.InsertOnly(new PersonWithAutoId { FirstName = "Amy", Age = 27 }, db.From<PersonWithAutoId>().Insert(p => new { p.FirstName, p.Age }));
                 Assert.That(sqlStatements.Count, Is.EqualTo(i));
                 Assert.That(sqlCommandStatements.Count, Is.EqualTo(i));
 
