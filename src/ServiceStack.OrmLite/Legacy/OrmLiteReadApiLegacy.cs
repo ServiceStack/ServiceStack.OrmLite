@@ -27,5 +27,15 @@ namespace ServiceStack.OrmLite.Legacy
         {
             return dbConn.Exec(dbCmd => dbCmd.SelectFmt<TModel>(fromTableType, sqlFormat, filterParams));
         }
+
+        /// <summary>
+        /// Returns a lazyily loaded stream of results using an SqlFilter query. E.g:
+        /// <para>db.SelectLazyFmt&lt;Person&gt;("Age &gt; {0}", 40)</para>
+        /// </summary>
+        [Obsolete(Messages.LegacyApi)]
+        public static IEnumerable<T> SelectLazyFmt<T>(this IDbConnection dbConn, string sqlFormat, params object[] filterParams)
+        {
+            return dbConn.ExecLazy(dbCmd => dbCmd.SelectLazyFmt<T>(sqlFormat, filterParams));
+        }
     }
 }

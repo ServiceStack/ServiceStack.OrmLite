@@ -162,7 +162,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
                 db.GetLastSql().Print();
 
                 var dbRowIds = new List<string>();
-                var rows = db.SelectLazyFmt<ModelWithOnlyStringFields>("\"album_name\" = {0}", filterRow.AlbumName);
+                var rows = db.SelectLazy<ModelWithOnlyStringFields>("\"album_name\" = @AlbumName", new { filterRow.AlbumName });
                 foreach (var row in rows)
                 {
                     dbRowIds.Add(row.Id);

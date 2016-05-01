@@ -646,34 +646,7 @@ namespace ServiceStack.OrmLite
 
         internal static IEnumerable<T> SelectLazy<T>(this IDbCommand dbCmd)
         {
-            return SelectLazyFmt<T>(dbCmd, null);
-        }
-
-        internal static IEnumerable<T> SelectLazyFmt<T>(this IDbCommand dbCmd, string filter, params object[] filterParams)
-        {
-            var dialectProvider = dbCmd.GetDialectProvider();
-            dbCmd.CommandText = dialectProvider.ToSelectStatement(typeof(T), filter, filterParams);
-
-            if (OrmLiteConfig.ResultsFilter != null)
-            {
-                foreach (var item in OrmLiteConfig.ResultsFilter.GetList<T>(dbCmd))
-                {
-                    yield return item;
-                }
-                yield break;
-            }
-
-            using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
-            {
-                var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition, dialectProvider);
-                var values = new object[reader.FieldCount];
-                while (reader.Read())
-                {
-                    var row = OrmLiteUtils.CreateInstance<T>();
-                    row.PopulateWithSqlReader(dialectProvider, reader, indexCache, values);
-                    yield return row;
-                }
-            }
+            return SelectLazy<T>(dbCmd, null);
         }
 
         internal static T Scalar<T>(this IDbCommand dbCmd, string sql, object anonType = null)

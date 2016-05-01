@@ -187,7 +187,7 @@ namespace ServiceStack.OrmLite.Tests
 				db.Insert(filterRow);
 
 				var dbRowIds = new List<string>();
-				var rows = db.SelectLazyFmt<ModelWithOnlyStringFields>("AlbumName".SqlColumn() + " = {0}", filterRow.AlbumName);
+				var rows = db.SelectLazy<ModelWithOnlyStringFields>("AlbumName".SqlColumn() + " = @AlbumName", new { filterRow.AlbumName });
 				foreach (var row in rows)
 				{
 					dbRowIds.Add(row.Id);
