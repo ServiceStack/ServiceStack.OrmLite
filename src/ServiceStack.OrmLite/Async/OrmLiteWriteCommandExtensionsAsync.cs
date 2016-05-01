@@ -263,17 +263,6 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecuteSqlAsync(dbCmd.GetDialectProvider().ToDeleteStatement(tableType, sql), token);
         }
 
-        internal static Task<int> DeleteFmtAsync<T>(this IDbCommand dbCmd, CancellationToken token, string sqlFilter, params object[] filterParams)
-        {
-            return DeleteFmtAsync(dbCmd, token, typeof(T), sqlFilter, filterParams);
-        }
-
-        internal static Task<int> DeleteFmtAsync(this IDbCommand dbCmd, CancellationToken token, Type tableType, string sqlFilter, params object[] filterParams)
-        {
-            var dialectProvider = dbCmd.GetDialectProvider();
-            return dbCmd.ExecuteSqlAsync(dialectProvider.ToDeleteStatement(tableType, sqlFilter, filterParams), token);
-        }
-
         internal static Task<long> InsertAsync<T>(this IDbCommand dbCmd, T obj, bool selectIdentity, CancellationToken token)
         {
             if (OrmLiteConfig.InsertFilter != null)

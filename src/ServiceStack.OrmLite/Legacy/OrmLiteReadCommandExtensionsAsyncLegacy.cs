@@ -62,6 +62,17 @@ namespace ServiceStack.OrmLite.Legacy
             return dbCmd.ScalarAsync(dbCmd.GetDialectProvider().ToSelectStatement(fromTableType, sqlFilter, filterParams), token)
                 .Then(x => x != null);
         }
+
+        internal static Task<int> DeleteFmtAsync<T>(this IDbCommand dbCmd, CancellationToken token, string sqlFilter, params object[] filterParams)
+        {
+            return DeleteFmtAsync(dbCmd, token, typeof(T), sqlFilter, filterParams);
+        }
+
+        internal static Task<int> DeleteFmtAsync(this IDbCommand dbCmd, CancellationToken token, Type tableType, string sqlFilter, params object[] filterParams)
+        {
+            var dialectProvider = dbCmd.GetDialectProvider();
+            return dbCmd.ExecuteSqlAsync(dialectProvider.ToDeleteStatement(tableType, sqlFilter, filterParams), token);
+        }
     }
 }
 
