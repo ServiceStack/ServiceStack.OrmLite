@@ -246,8 +246,6 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(db.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName, p => p.LastName == "Hendrix"), Is.EqualTo(10));
                 Assert.That(db.UpdateOnly(new Person { FirstName = "JJ", LastName = "Hendo" }, db.From<Person>().Update(p => p.FirstName)), Is.EqualTo(10));
                 Assert.That(db.UpdateOnly(new Person { FirstName = "JJ" }, db.From<Person>().Update(p => p.FirstName).Where(x => x.FirstName == "Jimi")), Is.EqualTo(10));
-                Assert.That(db.UpdateFmt<Person>(set: "FirstName = {0}".SqlFmt("JJ"), where: "LastName = {0}".SqlFmt("Hendrix")), Is.EqualTo(10));
-                Assert.That(db.UpdateFmt(table: "Person", set: "FirstName = {0}".SqlFmt("JJ"), where: "LastName = {0}".SqlFmt("Hendrix")), Is.EqualTo(10));
             }
         }
 

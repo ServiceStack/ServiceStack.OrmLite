@@ -31,5 +31,29 @@ namespace ServiceStack.OrmLite.Legacy
         {
             return dbConn.Exec(dbCmd => dbCmd.UpdateOnly(model, onlyFields));
         }
+
+        /// <summary>
+        /// Flexible Update method to succinctly execute a free-text update statement using optional params. E.g:
+        /// 
+        ///   db.Update&lt;Person&gt;(set:"FirstName = {0}".Params("JJ"), where:"LastName = {0}".Params("Hendrix"));
+        ///   UPDATE "Person" SET FirstName = 'JJ' WHERE LastName = 'Hendrix'
+        /// </summary>
+        [Obsolete(Messages.LegacyApi)]
+        public static int UpdateFmt<T>(this IDbConnection dbConn, string set = null, string where = null)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.UpdateFmt<T>(set, where));
+        }
+
+        /// <summary>
+        /// Flexible Update method to succinctly execute a free-text update statement using optional params. E.g.
+        /// 
+        ///   db.Update(table:"Person", set: "FirstName = {0}".Params("JJ"), where: "LastName = {0}".Params("Hendrix"));
+        ///   UPDATE "Person" SET FirstName = 'JJ' WHERE LastName = 'Hendrix'
+        /// </summary>
+        [Obsolete(Messages.LegacyApi)]
+        public static int UpdateFmt(this IDbConnection dbConn, string table = null, string set = null, string where = null)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.UpdateFmt(table, set, where));
+        }
     }
 }

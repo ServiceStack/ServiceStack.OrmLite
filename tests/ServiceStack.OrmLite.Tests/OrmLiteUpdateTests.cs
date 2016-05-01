@@ -81,43 +81,6 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        public void Can_update_with_optional_string_params()
-        {
-            using (var db = OpenDbConnection())
-            {
-                var row = CreateModelWithFieldsOfDifferentTypes(db);
-
-                row.Id = (int)db.Insert(row, selectIdentity: true);
-                row.Name = "UpdatedName";
-
-                db.UpdateFmt<ModelWithFieldsOfDifferentTypes>(set: "NAME = {0}".SqlFmt(row.Name), where: "LongId".SqlColumn() + " <= {0}".SqlFmt(row.LongId));
-
-                var dbRow = db.SingleById<ModelWithFieldsOfDifferentTypes>(row.Id);
-                Console.WriteLine(dbRow.Dump());
-                ModelWithFieldsOfDifferentTypes.AssertIsEqual(dbRow, row);
-            }
-        }
-
-        [Test]
-        public void Can_update_with_tableName_and_optional_string_params()
-        {
-            using (var db = OpenDbConnection())
-            {
-                var row = CreateModelWithFieldsOfDifferentTypes(db);
-
-                row.Id = (int)db.Insert(row, selectIdentity: true);
-                row.Name = "UpdatedName";
-
-                db.UpdateFmt(table: "ModelWithFieldsOfDifferentTypes".SqlTableRaw(),
-                    set: "NAME = {0}".SqlFmt(row.Name), where: "LongId".SqlColumn() + " <= {0}".SqlFmt(row.LongId));
-
-                var dbRow = db.SingleById<ModelWithFieldsOfDifferentTypes>(row.Id);
-                Console.WriteLine(dbRow.Dump());
-                ModelWithFieldsOfDifferentTypes.AssertIsEqual(dbRow, row);
-            }
-        }
-
-        [Test]
         public void Can_Update_Into_Table_With_Id_Only()
         {
             using (var db = OpenDbConnection())

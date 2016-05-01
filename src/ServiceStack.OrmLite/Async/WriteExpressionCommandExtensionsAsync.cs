@@ -74,7 +74,7 @@ namespace ServiceStack.OrmLite
 
         internal static Task<int> UpdateFmtAsync(this IDbCommand dbCmd, string table, string set, string where, CancellationToken token)
         {
-            var sql = WriteExpressionCommandExtensions.UpdateFmtSql(dbCmd.GetDialectProvider(), table, set, @where);
+            var sql = Legacy.WriteExpressionCommandExtensionsLegacy.UpdateFmtSql(dbCmd.GetDialectProvider(), table, set, @where);
             return dbCmd.ExecuteSqlAsync(sql, token);
         }
 

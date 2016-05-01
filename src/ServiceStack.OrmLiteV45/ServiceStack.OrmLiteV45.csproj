@@ -166,8 +166,14 @@
     <Compile Include="..\ServiceStack.OrmLite\Legacy\OrmLiteReadExpressionsApiLegacy.cs">
       <Link>Legacy\OrmLiteReadExpressionsApiLegacy.cs</Link>
     </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Legacy\OrmLiteWriteExpressionsApiLegacy.cs">
+      <Link>Legacy\OrmLiteWriteExpressionsApiLegacy.cs</Link>
+    </Compile>
     <Compile Include="..\ServiceStack.OrmLite\Legacy\ReadExpressionCommandExtensionsLegacy.cs">
       <Link>Legacy\ReadExpressionCommandExtensionsLegacy.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Legacy\WriteExpressionCommandExtensionsLegacy.cs">
+      <Link>Legacy\WriteExpressionCommandExtensionsLegacy.cs</Link>
     </Compile>
     <Compile Include="..\ServiceStack.OrmLite\ModelDefinition.cs">
       <Link>ModelDefinition.cs</Link>
