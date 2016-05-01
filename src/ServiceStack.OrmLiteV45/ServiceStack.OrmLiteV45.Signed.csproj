@@ -163,6 +163,18 @@
     <Compile Include="..\ServiceStack.OrmLite\IUntypedApi.cs">
       <Link>IUntypedApi.cs</Link>
     </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Legacy\OrmLiteReadApiLegacy.cs">
+      <Link>Legacy\OrmLiteReadApiLegacy.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Legacy\OrmLiteReadCommandExtensionsLegacy.cs">
+      <Link>Legacy\OrmLiteReadCommandExtensionsLegacy.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Legacy\OrmLiteReadExpressionsApiLegacy.cs">
+      <Link>Legacy\OrmLiteReadExpressionsApiLegacy.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Legacy\ReadExpressionCommandExtensionsLegacy.cs">
+      <Link>Legacy\ReadExpressionCommandExtensionsLegacy.cs</Link>
+    </Compile>
     <Compile Include="..\ServiceStack.OrmLite\ModelDefinition.cs">
       <Link>ModelDefinition.cs</Link>
     </Compile>
