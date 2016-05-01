@@ -56,6 +56,26 @@ namespace ServiceStack.OrmLite.Legacy
         {
             return dbConn.Exec(dbCmd => dbCmd.SingleFmtAsync<T>(default(CancellationToken), sqlFormat, filterParams));
         }
+
+        /// <summary>
+        /// Returns the count of rows that match the SqlExpression lambda, E.g:
+        /// <para>db.Count&lt;Person&gt;(q =&gt; q.Where(x =&gt; x.Age &lt; 50))</para>
+        /// </summary>
+        [Obsolete("Use db.CountAsync(db.From<T>())")]
+        public static Task<long> CountAsync<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression, CancellationToken token = default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd => dbCmd.CountAsync(expression, token));
+        }
+
+        /// <summary>
+        /// Returns results with references from using an SqlExpression lambda. E.g:
+        /// <para>db.LoadSelectAsync&lt;Person&gt;(q =&gt; q.Where(x =&gt; x.Age &gt; 40))</para>
+        /// </summary>
+        [Obsolete("Use db.LoadSelectAsync(db.From<T>())")]
+        public static Task<List<T>> LoadSelectAsync<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression, string[] include = null, CancellationToken token = default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd => dbCmd.LoadSelectAsync(expression, include, token));
+        }
     }
 }
 

@@ -92,7 +92,7 @@ namespace ServiceStack.OrmLite.Tests
                 var customer2 = LoadReferencesTests.GetCustomerWithOrders("2");
                 db.Save(customer2, references: true);
 
-                var results = await db.LoadSelectAsync<Customer>(q => q
+                var results = await db.LoadSelectAsync(db.From<Customer>()
                     .OrderBy(x => x.Id)
                     .Limit(1, 1));
 
@@ -103,7 +103,7 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(results[0].PrimaryAddress.AddressLine1, Is.EqualTo("2 Humpty Street"));
                 Assert.That(results[0].Orders.Count, Is.EqualTo(2));
 
-                results = await db.LoadSelectAsync<Customer>(q => q
+                results = await db.LoadSelectAsync(db.From<Customer>()
                     .Join<CustomerAddress>()
                     .OrderBy(x => x.Id)
                     .Limit(1, 1));

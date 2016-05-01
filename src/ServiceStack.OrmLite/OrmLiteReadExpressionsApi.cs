@@ -183,16 +183,6 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
-        /// Returns the count of rows that match the SqlExpression lambda, E.g:
-        /// <para>db.Count&lt;Person&gt;(q =&gt; q.Where(x =&gt; x.Age &lt; 50))</para>
-        /// </summary>
-        [Obsolete("Use db.Count(db.From<T>())")]
-        public static long Count<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.Count(expression));
-        }
-
-        /// <summary>
         /// Returns the count of rows that match the supplied SqlExpression, E.g:
         /// <para>db.Count(db.From&lt;Person&gt;().Where(x =&gt; x.Age &lt; 50))</para>
         /// </summary>
@@ -239,26 +229,6 @@ namespace ServiceStack.OrmLite
         public static List<T> LoadSelect<T>(this IDbConnection dbConn, Expression<Func<T, bool>> predicate, Func<T, object> include)
         {
             return dbConn.Exec(dbCmd => dbCmd.LoadSelect(predicate, include(typeof(T).CreateInstance<T>()).GetType().AllAnonFields()));
-        }
-
-        /// <summary>
-        /// Returns results with references from using an SqlExpression lambda. E.g:
-        /// <para>db.LoadSelect&lt;Person&gt;(q =&gt; q.Where(x =&gt; x.Age &gt; 40))</para>
-        /// </summary>
-        [Obsolete("Use db.LoadSelect(db.From<T>())")]
-        public static List<T> LoadSelect<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression, IEnumerable<string> include = null)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.LoadSelect(expression, include));
-        }
-
-        /// <summary>
-        /// Returns results with references from using an SqlExpression lambda. E.g:
-        /// <para>db.LoadSelect&lt;Person&gt;(q =&gt; q.Where(x =&gt; x.Age &gt; 40), include: x => new { x.PrimaryAddress })</para>
-        /// </summary>
-        [Obsolete("Use db.LoadSelect(db.From<T>())")]
-        public static List<T> LoadSelect<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression, Func<T, object> include)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.LoadSelect(expression, include(typeof(T).CreateInstance<T>()).GetType().AllAnonFields()));
         }
 
         /// <summary>

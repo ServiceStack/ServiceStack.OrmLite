@@ -329,12 +329,12 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
                 Assert.That(count, Is.GreaterThan(0));
 
-                count = db.Count<LetterFrequency>(q => q.Join<LetterStat>().Where<LetterStat>(x => x.Id > 0));
+                count = db.Count(db.From<LetterFrequency>().Join<LetterStat>().Where<LetterStat>(x => x.Id > 0));
 
                 Assert.That(count, Is.GreaterThan(0));
 
                 Assert.That(
-                    db.Exists<LetterFrequency>(q => q.Join<LetterStat>().Where<LetterStat>(x => x.Id > 0)));
+                    db.Exists(db.From<LetterFrequency>().Join<LetterStat>().Where<LetterStat>(x => x.Id > 0)));
             }
         }
 

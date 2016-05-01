@@ -24,13 +24,6 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExprConvertToList<T>(sql, q.Params);
         }
 
-        [Obsolete("Use db.Single(db.From<T>())")]
-        internal static T Single<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression)
-        {
-            var q = dbCmd.GetDialectProvider().SqlExpression<T>();
-            return dbCmd.Single(expression(q));
-        }
-
         internal static T Single<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
         {
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
@@ -75,14 +68,6 @@ namespace ServiceStack.OrmLite
             return GetCount(dbCmd, sql, q.Params);
         }
 
-        [Obsolete("Use db.Count(db.From<T>())")]
-        internal static long Count<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression)
-        {
-            var q = dbCmd.GetDialectProvider().SqlExpression<T>();
-            var sql = expression(q).ToCountStatement();
-            return GetCount(dbCmd, sql, q.Params);
-        }
-
         internal static long Count<T>(this IDbCommand dbCmd, SqlExpression<T> expression)
         {
             var sql = expression.ToCountStatement();
@@ -117,14 +102,6 @@ namespace ServiceStack.OrmLite
         internal static long RowCount(this IDbCommand dbCmd, string sql)
         {
             return dbCmd.Scalar<long>(dbCmd.GetDialectProvider().ToRowCountStatement(sql));
-        }
-
-        [Obsolete("Use db.LoadSelect(db.From<T>())")]
-        internal static List<T> LoadSelect<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression, IEnumerable<string> include = null)
-        {
-            var expr = dbCmd.GetDialectProvider().SqlExpression<T>();
-            expr = expression(expr);
-            return dbCmd.LoadListWithReferences<T, T>(expr, include);
         }
 
         internal static List<T> LoadSelect<T>(this IDbCommand dbCmd, SqlExpression<T> expression = null, IEnumerable<string> include = null)

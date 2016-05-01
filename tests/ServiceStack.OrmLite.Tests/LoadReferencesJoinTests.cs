@@ -620,7 +620,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             AddCustomersWithOrders();
 
-            var customers = db.LoadSelect<Customer>(q => q.OrderBy(x => x.Name));
+            var customers = db.LoadSelect(db.From<Customer>().OrderBy(x => x.Name));
             var addresses = customers.Select(x => x.PrimaryAddress).ToList();
             var orders = customers.SelectMany(x => x.Orders).ToList();
 

@@ -30,5 +30,28 @@ namespace ServiceStack.OrmLite.Legacy
             string sql = q.SelectInto<Into>();
             return dbCmd.ExprConvertToList<Into>(sql, q.Params, onlyFields: q.OnlyFields);
         }
+
+        [Obsolete("Use db.Single(db.From<T>())")]
+        internal static T Single<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression)
+        {
+            var q = dbCmd.GetDialectProvider().SqlExpression<T>();
+            return dbCmd.Single(expression(q));
+        }
+
+        [Obsolete("Use db.Count(db.From<T>())")]
+        internal static long Count<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression)
+        {
+            var q = dbCmd.GetDialectProvider().SqlExpression<T>();
+            var sql = expression(q).ToCountStatement();
+            return dbCmd.GetCount(sql, q.Params);
+        }
+
+        [Obsolete("Use db.LoadSelect(db.From<T>())")]
+        internal static List<T> LoadSelect<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression, IEnumerable<string> include = null)
+        {
+            var expr = dbCmd.GetDialectProvider().SqlExpression<T>();
+            expr = expression(expr);
+            return dbCmd.LoadListWithReferences<T, T>(expr, include);
+        }
     }
 }

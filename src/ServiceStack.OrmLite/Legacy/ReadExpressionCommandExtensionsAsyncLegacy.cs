@@ -35,6 +35,22 @@ namespace ServiceStack.OrmLite.Legacy
             var expr = dbCmd.GetDialectProvider().SqlExpression<T>();
             return dbCmd.SingleAsync(expression(expr), token);
         }
+
+        [Obsolete("Use db.CountAsync(db.From<T>())")]
+        internal static Task<long> CountAsync<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression, CancellationToken token)
+        {
+            var q = dbCmd.GetDialectProvider().SqlExpression<T>();
+            var sql = expression(q).ToCountStatement();
+            return dbCmd.GetCountAsync(sql, q.Params, token);
+        }
+
+        [Obsolete("Use db.LoadSelectAsync(db.From<T>())")]
+        internal static Task<List<T>> LoadSelectAsync<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression, string[] include = null, CancellationToken token = default(CancellationToken))
+        {
+            var expr = dbCmd.GetDialectProvider().SqlExpression<T>();
+            expr = expression(expr);
+            return dbCmd.LoadListWithReferences<T, T>(expr, include, token);
+        }
     }
 }
 

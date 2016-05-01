@@ -135,6 +135,36 @@ namespace ServiceStack.OrmLite.Legacy
         {
             return dbConn.Exec(dbCmd => dbCmd.ExistsFmtAsync<T>(default(CancellationToken), sqlFormat, filterParams));
         }
+
+        /// <summary>
+        /// Returns true if the Query returns any records that match the SqlExpression lambda, E.g:
+        /// <para>db.Exists&lt;Person&gt;(q =&gt; q.Where(x =&gt; x.Age &lt; 50))</para>
+        /// </summary>
+        [Obsolete("Use db.ExistsAsync(db.From<T>())")]
+        public static Task<bool> ExistsAsync<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression, CancellationToken token = default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd =>
+            {
+                var q = dbCmd.GetDialectProvider().SqlExpression<T>();
+                var sql = expression(q).Limit(1);
+                return dbCmd.SingleAsync<T>(sql, token).Then(x => x != null);
+            });
+        }
+
+        /// <summary>
+        /// Returns results from a Stored Procedure using an SqlFormat query. E.g:
+        /// <para></para>
+        /// </summary>
+        [Obsolete(Messages.LegacyApi)]
+        public static Task<List<TOutputModel>> SqlProcedureFmtAsync<TOutputModel>(this IDbConnection dbConn, CancellationToken token,
+            object anonType,
+            string sqlFilter,
+            params object[] filterParams)
+            where TOutputModel : new()
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SqlProcedureFmtAsync<TOutputModel>(token,
+                anonType, sqlFilter, filterParams));
+        }
     }
 }
 
