@@ -623,16 +623,6 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecuteSql(dbCmd.GetDialectProvider().ToDeleteStatement(tableType, sql));
         }
 
-        internal static int DeleteFmt<T>(this IDbCommand dbCmd, string sqlFilter, params object[] filterParams)
-        {
-            return DeleteFmt(dbCmd, typeof(T), sqlFilter, filterParams);
-        }
-
-        internal static int DeleteFmt(this IDbCommand dbCmd, Type tableType, string sqlFilter, params object[] filterParams)
-        {
-            return dbCmd.ExecuteSql(dbCmd.GetDialectProvider().ToDeleteStatement(tableType, sqlFilter, filterParams));
-        }
-
         internal static long Insert<T>(this IDbCommand dbCmd, T obj, bool selectIdentity = false)
         {
             if (OrmLiteConfig.InsertFilter != null)

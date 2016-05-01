@@ -111,6 +111,7 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Async\OrmLiteWriteExpressionsApiLegacy.cs" />
     <Compile Include="Converters\BoolConverter.cs" />
     <Compile Include="Converters\ByteArrayConverter.cs" />
     <Compile Include="Converters\DateTimeOffsetConverter.cs" />

@@ -55,5 +55,29 @@ namespace ServiceStack.OrmLite.Legacy
         {
             return dbConn.Exec(dbCmd => dbCmd.UpdateFmt(table, set, where));
         }
+
+        /// <summary>
+        /// Flexible Delete method to succinctly execute a delete statement using free-text where expression. E.g.
+        /// 
+        ///   db.Delete&lt;Person&gt;(where:"Age = {0}".Params(27));
+        ///   DELETE FROM "Person" WHERE Age = 27
+        /// </summary>
+        [Obsolete(Messages.LegacyApi)]
+        public static int DeleteFmt<T>(this IDbConnection dbConn, string where = null)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.DeleteFmt<T>(where));
+        }
+
+        /// <summary>
+        /// Flexible Delete method to succinctly execute a delete statement using free-text where expression. E.g.
+        /// 
+        ///   db.Delete(table:"Person", where: "Age = {0}".Params(27));
+        ///   DELETE FROM "Person" WHERE Age = 27
+        /// </summary>
+        [Obsolete(Messages.LegacyApi)]
+        public static int DeleteFmt(this IDbConnection dbConn, string table = null, string where = null)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.DeleteFmt(table, where));
+        }
     }
 }

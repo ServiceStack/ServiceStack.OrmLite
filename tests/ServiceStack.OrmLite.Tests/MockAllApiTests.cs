@@ -263,13 +263,11 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(db.DeleteNonDefaults(new Person { FirstName = "Jimi", Age = 27 }), Is.EqualTo(10));
                 Assert.That(db.DeleteById<Person>(1), Is.EqualTo(10));
                 Assert.That(db.DeleteByIds<Person>(new[] { 1, 2, 3 }), Is.EqualTo(10));
-                Assert.That(db.DeleteFmt<Person>("Age = {0}", 27), Is.EqualTo(10));
-                Assert.That(db.DeleteFmt(typeof(Person), "Age = {0}", 27), Is.EqualTo(10));
+                Assert.That(db.Delete<Person>("Age = @age", new { age = 27 }), Is.EqualTo(10));
+                Assert.That(db.Delete(typeof(Person), "Age = @age", new { age = 27 }), Is.EqualTo(10));
                 Assert.That(db.Delete<Person>(p => p.Age == 27), Is.EqualTo(10));
                 Assert.That(db.Delete<Person>(ev => ev.Where(p => p.Age == 27)), Is.EqualTo(10));
                 Assert.That(db.Delete(db.From<Person>().Where(p => p.Age == 27)), Is.EqualTo(10));
-                Assert.That(db.DeleteFmt<Person>(where: "Age = {0}".SqlFmt(27)), Is.EqualTo(10));
-                Assert.That(db.DeleteFmt(table: "Person", where: "Age = {0}".SqlFmt(27)), Is.EqualTo(10));
             }
         }
 

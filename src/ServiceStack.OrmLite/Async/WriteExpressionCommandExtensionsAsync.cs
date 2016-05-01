@@ -119,7 +119,7 @@ namespace ServiceStack.OrmLite
 
         internal static Task<int> DeleteFmtAsync(this IDbCommand dbCmd, string table, string where, CancellationToken token)
         {
-            var sql = WriteExpressionCommandExtensions.DeleteFmtSql(dbCmd.GetDialectProvider(), table, @where);
+            var sql = Legacy.WriteExpressionCommandExtensionsLegacy.DeleteFmtSql(dbCmd.GetDialectProvider(), table, @where);
             return dbCmd.ExecuteSqlAsync(sql, token);
         }
     }

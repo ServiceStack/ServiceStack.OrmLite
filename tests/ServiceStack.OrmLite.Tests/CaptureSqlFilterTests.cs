@@ -212,13 +212,11 @@ namespace ServiceStack.OrmLite.Tests
                 i++; db.DeleteNonDefaults(new Person { FirstName = "Jimi", Age = 27 });
                 i++; db.DeleteById<Person>(1);
                 i++; db.DeleteByIds<Person>(new[] { 1, 2, 3 });
-                i++; db.DeleteFmt<Person>("Age = {0}", 27);
-                i++; db.DeleteFmt(typeof(Person), "Age = {0}", 27);
+                i++; db.Delete<Person>("Age = @age", new { age = 27 });
+                i++; db.Delete(typeof(Person), "Age = @age", new { age = 27 });
                 i++; db.Delete<Person>(p => p.Age == 27);
                 i++; db.Delete<Person>(ev => ev.Where(p => p.Age == 27));
                 i++; db.Delete(db.From<Person>().Where(p => p.Age == 27));
-                i++; db.DeleteFmt<Person>(where: "Age = {0}".SqlFmt(27));
-                i++; db.DeleteFmt(table: "Person", where: "Age = {0}".SqlFmt(27));
 
                 Assert.That(captured.SqlStatements.Count, Is.EqualTo(i));
 
