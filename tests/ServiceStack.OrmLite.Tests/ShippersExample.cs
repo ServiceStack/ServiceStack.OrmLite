@@ -97,7 +97,7 @@ namespace ServiceStack.OrmLite.Tests
                 var trainsAreUs = db.Single<Shipper>(q => q.ShipperTypeId == trainsType.Id);
                 Assert.That(trainsAreUs.CompanyName, Is.EqualTo("Trains R Us"));
 
-                trainsAreUs = db.SingleFmt<Shipper>("ShipperTypeId".SqlColumn() + " = {0}", trainsType.Id);
+                trainsAreUs = db.Single<Shipper>("ShipperTypeId".SqlColumn() + " = @Id", new { trainsType.Id });
 				Assert.That(trainsAreUs.CompanyName, Is.EqualTo("Trains R Us"));
 
 

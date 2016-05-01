@@ -37,5 +37,15 @@ namespace ServiceStack.OrmLite.Legacy
         {
             return dbConn.ExecLazy(dbCmd => dbCmd.SelectLazyFmt<T>(sqlFormat, filterParams));
         }
+
+        /// <summary>
+        /// Returns the first result using a SqlFormat query. E.g:
+        /// <para>db.SingleFmt&lt;Person&gt;("Age = {0}", 42)</para>
+        /// </summary>
+        [Obsolete(Messages.LegacyApi)]
+        public static T SingleFmt<T>(this IDbConnection dbConn, string sqlFormat, params object[] filterParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SingleFmt<T>(sqlFormat, filterParams));
+        }
     }
 }

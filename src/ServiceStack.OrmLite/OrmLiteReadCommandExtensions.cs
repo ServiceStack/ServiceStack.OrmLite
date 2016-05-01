@@ -66,16 +66,6 @@ namespace ServiceStack.OrmLite
             return Select<T>(dbCmd, (string)null);
         }
 
-        internal static T SelectByIdFmt<T>(this IDbCommand dbCmd, object idValue)
-        {
-            return SingleFmt<T>(dbCmd, dbCmd.GetDialectProvider().GetQuotedColumnName(ModelDefinition<T>.PrimaryKeyName) + " = {0}".SqlFmt(idValue));
-        }
-
-        internal static T SingleFmt<T>(this IDbCommand dbCmd, string filter, params object[] filterParams)
-        {
-            return dbCmd.ConvertTo<T>(dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), filter, filterParams));
-        }
-
         [ThreadStatic]
         private static Type lastQueryType;
         internal static void SetFilter<T>(this IDbCommand dbCmd, string name, object value)

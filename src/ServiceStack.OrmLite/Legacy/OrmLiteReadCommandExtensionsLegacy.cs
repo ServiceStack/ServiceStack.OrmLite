@@ -62,5 +62,10 @@ namespace ServiceStack.OrmLite.Legacy
                 }
             }
         }
+
+        internal static T SingleFmt<T>(this IDbCommand dbCmd, string filter, params object[] filterParams)
+        {
+            return dbCmd.ConvertTo<T>(dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), filter, filterParams));
+        }
     }
 }

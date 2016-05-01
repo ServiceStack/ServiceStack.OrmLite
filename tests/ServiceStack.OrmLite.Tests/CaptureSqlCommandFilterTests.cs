@@ -124,7 +124,6 @@ namespace ServiceStack.OrmLite.Tests
                 i++; db.Single(db.From<Person>().Where(x => x.Age == 42));
                 i++; db.Single<Person>(new { Age = 42 });
                 i++; db.Single<Person>("Age = @age", new { age = 42 });
-                i++; db.SingleFmt<Person>("Age = {0}", 42);
                 i++; db.SingleById<Person>(1);
                 i++; db.ExistsFmt<Person>("Age = {0}", 42);
                 i++; db.SingleWhere<Person>("Age", 42);

@@ -317,8 +317,8 @@ namespace ServiceStack.OrmLite.Tests
                 db.Insert(new TypeWithEnum { Id = 1, EnumValue = SomeEnum.Value1 });
                 db.Insert(new TypeWithEnum { Id = 2, EnumValue = SomeEnum.Value2 });
 
-                var row = db.SingleFmt<TypeWithEnum>(
-                    "EnumValue".SqlColumn() + " = {0}", "Value2");
+                var row = db.Single<TypeWithEnum>(
+                    "EnumValue".SqlColumn() + " = @value", new { value = "Value2" });
 
                 Assert.That(row.Id, Is.EqualTo(2));
             }
@@ -335,8 +335,8 @@ namespace ServiceStack.OrmLite.Tests
                 db.Insert(new TypeWithTreatEnumAsInt { Id = 1, EnumValue = SomeEnumTreatAsInt.Value1 });
                 db.Insert(new TypeWithTreatEnumAsInt { Id = 2, EnumValue = SomeEnumTreatAsInt.Value2 });
 
-                var row = db.SingleFmt<TypeWithTreatEnumAsInt>(
-                    "EnumValue".SqlColumn() + " = {0}", "2");
+                var row = db.Single<TypeWithTreatEnumAsInt>(
+                    "EnumValue".SqlColumn() + " = @value", new { value = "2" });
 
                 Assert.That(row.Id, Is.EqualTo(2));
             }

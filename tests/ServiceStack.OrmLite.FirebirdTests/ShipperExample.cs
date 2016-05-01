@@ -102,7 +102,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 				db.Insert(new Shipper { CompanyName = "Planes R Us", Phone = "555-PLANES", ShipperTypeId = planesTypeId });
 				db.Insert(new Shipper { CompanyName = "We do everything!", Phone = "555-UNICORNS", ShipperTypeId = planesTypeId });
 
-				var trainsAreUs = db.SingleFmt<Shipper>("\"Type\" = {0}", trainsTypeId);
+				var trainsAreUs = db.Single<Shipper>("\"Type\" = @id", new { id = trainsTypeId });
 				Assert.That(trainsAreUs.CompanyName, Is.EqualTo("Trains R Us"));
 				Assert.That(db.Select<Shipper>("CompanyName = @company OR Phone = @phone", 
                     new { company = "Trains R Us", phone = "555-UNICORNS" }), Has.Count.EqualTo(2));

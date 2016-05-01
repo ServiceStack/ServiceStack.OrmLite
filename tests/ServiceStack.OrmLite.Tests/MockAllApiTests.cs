@@ -163,7 +163,6 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(db.Single(db.From<Person>().Where(x => x.Age == 42)).FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.Single<Person>(new { Age = 42 }).FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.Single<Person>("Age = @age", new { age = 42 }).FirstName, Is.EqualTo("Mocked"));
-                Assert.That(db.SingleFmt<Person>("Age = {0}", 42).FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.SingleById<Person>(1).FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.SingleWhere<Person>("Age", 42).FirstName, Is.EqualTo("Mocked"));
             }
