@@ -119,7 +119,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 				n.Times(x => db.Insert(ModelWithIdAndName.Create(0)));
 
-				var count = db.ScalarFmt<int>("SELECT COUNT(*) FROM ModelWIN");
+				var count = db.Scalar<int>("SELECT COUNT(*) FROM ModelWIN");
 
 				Assert.That(count, Is.EqualTo(n));
 			}

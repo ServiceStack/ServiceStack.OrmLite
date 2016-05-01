@@ -67,5 +67,10 @@ namespace ServiceStack.OrmLite.Legacy
         {
             return dbCmd.ConvertTo<T>(dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), filter, filterParams));
         }
+
+        internal static T ScalarFmt<T>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
+        {
+            return dbCmd.Scalar<T>(sql.SqlFmt(sqlParams));
+        }
     }
 }

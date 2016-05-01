@@ -646,11 +646,6 @@ namespace ServiceStack.OrmLite
             return dbCmd.Scalar<T>(sql);
         }
 
-        internal static T ScalarFmt<T>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
-        {
-            return dbCmd.Scalar<T>(sql.SqlFmt(sqlParams));
-        }
-
         internal static T Scalar<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider)
         {
             while (reader.Read())

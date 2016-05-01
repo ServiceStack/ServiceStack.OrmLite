@@ -152,7 +152,6 @@ namespace ServiceStack.OrmLite.Tests
                 i++; db.Count<Person>(x => x.Age < 50);
                 i++; db.Count(db.From<Person>().Where(x => x.Age < 50));
                 i++; db.Scalar<int>("SELECT COUNT(*) FROM Person WHERE Age > @age", new { age = 40 });
-                i++; db.ScalarFmt<int>("SELECT COUNT(*) FROM Person WHERE Age > {0}", 40);
 
                 i++; db.SqlScalar<int>("SELECT COUNT(*) FROM Person WHERE Age < @age", new { age = 50 });
                 i++; db.SqlScalar<int>("SELECT COUNT(*) FROM Person WHERE Age < @age", new Dictionary<string, object> { { "age", 50 } });

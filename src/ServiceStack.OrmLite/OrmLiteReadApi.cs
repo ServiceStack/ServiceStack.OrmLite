@@ -230,16 +230,6 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
-        /// Returns a single scalar value using an SqlFormat query. E.g:
-        /// <para>db.ScalarFmt&lt;int&gt;("SELECT COUNT(*) FROM Person WHERE Age &gt; {0}", 40)</para>
-        /// </summary>
-        [Obsolete(Messages.LegacyApi)]
-        public static T ScalarFmt<T>(this IDbConnection dbConn, string sqlFormat, params object[] sqlParams)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.ScalarFmt<T>(sqlFormat, sqlParams));
-        }
-
-        /// <summary>
         /// Returns the distinct first column values in a HashSet using an SqlExpression. E.g:
         /// <para>db.Column&lt;int&gt;(db.From&lt;Persion&gt;().Select(x => x.LastName).Where(q => q.Age == 27))</para>
         /// </summary>

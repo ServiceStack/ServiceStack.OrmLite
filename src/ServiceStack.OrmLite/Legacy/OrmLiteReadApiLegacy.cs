@@ -47,5 +47,15 @@ namespace ServiceStack.OrmLite.Legacy
         {
             return dbConn.Exec(dbCmd => dbCmd.SingleFmt<T>(sqlFormat, filterParams));
         }
+
+        /// <summary>
+        /// Returns a single scalar value using an SqlFormat query. E.g:
+        /// <para>db.ScalarFmt&lt;int&gt;("SELECT COUNT(*) FROM Person WHERE Age &gt; {0}", 40)</para>
+        /// </summary>
+        [Obsolete(Messages.LegacyApi)]
+        public static T ScalarFmt<T>(this IDbConnection dbConn, string sqlFormat, params object[] sqlParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.ScalarFmt<T>(sqlFormat, sqlParams));
+        }
     }
 }

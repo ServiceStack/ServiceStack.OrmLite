@@ -115,7 +115,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 
 				n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
 
-				var count = db.ScalarFmt<int>("SELECT COUNT(*) FROM ModelWithIdAndName");
+				var count = db.Scalar<int>("SELECT COUNT(*) FROM ModelWithIdAndName");
 
 				Assert.That(count, Is.EqualTo(n));
 			}

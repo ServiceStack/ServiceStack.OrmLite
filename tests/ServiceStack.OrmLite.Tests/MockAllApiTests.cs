@@ -180,7 +180,6 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(db.Scalar<Person, int>(x => Sql.Max(x.Age)), Is.EqualTo(1000));
                 Assert.That(db.Scalar<Person, int>(x => Sql.Max(x.Age), x => x.Age < 50), Is.EqualTo(1000));
                 Assert.That(db.Scalar<int>("SELECT COUNT(*) FROM Person WHERE Age > @age", new { age = 40 }), Is.EqualTo(1000));
-                Assert.That(db.ScalarFmt<int>("SELECT COUNT(*) FROM Person WHERE Age > {0}", 40), Is.EqualTo(1000));
 
                 Assert.That(db.SqlScalar<int>("SELECT COUNT(*) FROM Person WHERE Age < @age", new { age = 50 }), Is.EqualTo(1000));
                 Assert.That(db.SqlScalar<int>("SELECT COUNT(*) FROM Person WHERE Age < @age", new Dictionary<string, object> { { "age", 50 } }), Is.EqualTo(1000));
