@@ -157,6 +157,9 @@
     <Compile Include="..\ServiceStack.OrmLite\IUntypedApi.cs">
       <Link>IUntypedApi.cs</Link>
     </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Legacy\OrmLiteReadApiAsyncLegacy.cs">
+      <Link>Legacy\OrmLiteReadApiAsyncLegacy.cs</Link>
+    </Compile>
     <Compile Include="..\ServiceStack.OrmLite\Legacy\OrmLiteReadApiLegacy.cs">
       <Link>Legacy\OrmLiteReadApiLegacy.cs</Link>
     </Compile>

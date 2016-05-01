@@ -48,13 +48,7 @@ namespace ServiceStack.OrmLite
 
         internal static Task<List<T>> SelectAsync<T>(this IDbCommand dbCmd, CancellationToken token)
         {
-            return SelectFmtAsync<T>(dbCmd, token, (string)null);
-        }
-
-        internal static Task<List<T>> SelectFmtAsync<T>(this IDbCommand dbCmd, CancellationToken token, string sqlFilter, params object[] filterParams)
-        {
-            return dbCmd.ConvertToListAsync<T>(
-                dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), sqlFilter, filterParams), token);
+            return SelectAsync<T>(dbCmd, (string)null, (object)null, token);
         }
 
         internal static Task<List<TModel>> SelectAsync<TModel>(this IDbCommand dbCmd, Type fromTableType, CancellationToken token)
@@ -69,18 +63,12 @@ namespace ServiceStack.OrmLite
             return dbCmd.ConvertToListAsync<TModel>(sql, token);
         }
 
-        internal static Task<List<TModel>> SelectFmtAsync<TModel>(this IDbCommand dbCmd, CancellationToken token, Type fromTableType, string sqlFilter, params object[] filterParams)
-        {
-            var sql = Legacy.OrmLiteReadCommandExtensionsLegacy.ToSelectFmt<TModel>(dbCmd.GetDialectProvider(), fromTableType, sqlFilter, filterParams);
-            return dbCmd.ConvertToListAsync<TModel>(sql, token);
-        }
-
         internal static Task<List<T>> SelectByIdsAsync<T>(this IDbCommand dbCmd, IEnumerable idValues, CancellationToken token)
         {
             var sql = idValues.GetIdsInSql();
             return sql == null
                 ? new List<T>().InTask()
-                : SelectFmtAsync<T>(dbCmd, token, dbCmd.GetDialectProvider().GetQuotedColumnName(ModelDefinition<T>.PrimaryKeyName) + " IN (" + sql + ")");
+                : SelectAsync<T>(dbCmd, dbCmd.GetDialectProvider().GetQuotedColumnName(ModelDefinition<T>.PrimaryKeyName) + " IN (" + sql + ")", (object)null, token);
         }
 
         internal static Task<T> SingleByIdAsync<T>(this IDbCommand dbCmd, object value, CancellationToken token)
