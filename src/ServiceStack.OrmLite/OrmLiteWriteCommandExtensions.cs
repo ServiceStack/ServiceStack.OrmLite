@@ -614,16 +614,12 @@ namespace ServiceStack.OrmLite
         internal static int Delete<T>(this IDbCommand dbCmd, string sql, object anonType = null)
         {
             if (anonType != null) dbCmd.SetParameters<T>(anonType, excludeDefaults: false);
-            dbCmd.CommandText = dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), sql);
-
             return dbCmd.ExecuteSql(dbCmd.GetDialectProvider().ToDeleteStatement(typeof(T), sql));
         }
 
         internal static int Delete(this IDbCommand dbCmd, Type tableType, string sql, object anonType = null)
         {
             if (anonType != null) dbCmd.SetParameters(tableType, anonType, excludeDefaults: false);
-            dbCmd.CommandText = dbCmd.GetDialectProvider().ToSelectStatement(tableType, sql);
-
             return dbCmd.ExecuteSql(dbCmd.GetDialectProvider().ToDeleteStatement(tableType, sql));
         }
 
