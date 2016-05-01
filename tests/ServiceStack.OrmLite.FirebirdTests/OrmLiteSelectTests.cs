@@ -226,7 +226,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 					db.Insert(row);
 				});
 
-				var lookup = db.LookupFmt<string, int>("SELECT Name, Id FROM ModelWIN");
+				var lookup = db.Lookup<string, int>("SELECT Name, Id FROM ModelWIN");
 
 				Assert.That(lookup, Has.Count.EqualTo(2));
 				Assert.That(lookup["OddGroup"], Has.Count.EqualTo(3));

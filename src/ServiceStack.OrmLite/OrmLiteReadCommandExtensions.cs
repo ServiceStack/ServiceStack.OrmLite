@@ -745,11 +745,6 @@ namespace ServiceStack.OrmLite
             return dbCmd.SetParameters(anonType, false).Lookup<K, V>(sql);
         }
 
-        internal static Dictionary<K, List<V>> LookupFmt<K, V>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
-        {
-            return dbCmd.Lookup<K, V>(sql.SqlFmt(sqlParams));
-        }
-
         internal static Dictionary<K, List<V>> Lookup<K, V>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider)
         {
             var lookup = new Dictionary<K, List<V>>();
@@ -776,11 +771,6 @@ namespace ServiceStack.OrmLite
             if (anonType != null) SetParameters(dbCmd, anonType, excludeDefaults: false);
 
             return dbCmd.Dictionary<K, V>(sql);
-        }
-
-        internal static Dictionary<K, V> DictionaryFmt<K, V>(this IDbCommand dbCmd, string sqlFormat, params object[] sqlParams)
-        {
-            return dbCmd.Dictionary<K, V>(sqlFormat.SqlFmt(sqlParams));
         }
 
         internal static Dictionary<K, V> Dictionary<K, V>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider)

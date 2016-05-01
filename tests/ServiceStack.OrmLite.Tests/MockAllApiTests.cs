@@ -224,7 +224,6 @@ namespace ServiceStack.OrmLite.Tests
             })
             {
                 Assert.That(db.Dictionary<int, string>("SELECT Id, LastName FROM Person WHERE Age < @age", new { age = 50 })[1], Is.EqualTo("MockValue"));
-                Assert.That(db.DictionaryFmt<int, string>("SELECT Id, LastName FROM Person WHERE Age < {0}", 50)[1], Is.EqualTo("MockValue"));
             }
         }
 

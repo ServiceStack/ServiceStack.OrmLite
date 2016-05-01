@@ -219,7 +219,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 					db.Insert(row);
 				});
 
-				var lookup = db.LookupFmt<string, int>("SELECT Name, Id FROM ModelWithIdAndName");
+				var lookup = db.Lookup<string, int>("SELECT Name, Id FROM ModelWithIdAndName");
 
 				Assert.That(lookup, Has.Count.EqualTo(2));
 				Assert.That(lookup["OddGroup"], Has.Count.EqualTo(3));

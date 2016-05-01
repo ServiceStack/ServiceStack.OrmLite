@@ -247,7 +247,7 @@ namespace ServiceStack.OrmLite.Tests
 					db.Insert(row);
 				});
 
-                var lookup = db.LookupFmt<string, int>("SELECT Name, Id FROM {0}".Fmt("ModelWithIdAndName".SqlTable()));
+                var lookup = db.Lookup<string, int>("SELECT Name, Id FROM " + "ModelWithIdAndName".SqlTable());
 
 				Assert.That(lookup, Has.Count.EqualTo(2));
 				Assert.That(lookup["OddGroup"], Has.Count.EqualTo(3));

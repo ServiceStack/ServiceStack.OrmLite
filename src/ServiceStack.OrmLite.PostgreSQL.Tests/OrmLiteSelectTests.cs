@@ -222,7 +222,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
                     db.Insert(row);
                 });
 
-                var lookup = db.LookupFmt<string, int>("SELECT \"name\", \"id\" FROM {0}".Fmt("ModelWithIdAndName".SqlTable()));
+                var lookup = db.Lookup<string, int>("SELECT \"name\", \"id\" FROM " + "ModelWithIdAndName".SqlTable());
 
                 Assert.That(lookup, Has.Count.EqualTo(2));
                 Assert.That(lookup["OddGroup"], Has.Count.EqualTo(3));
@@ -241,7 +241,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
 
                 n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
 
-                var dictionary = db.Dictionary<int, string>("SELECT \"id\", \"name\" FROM {0}".Fmt("ModelWithIdAndName".SqlTable()));
+                var dictionary = db.Dictionary<int, string>("SELECT \"id\", \"name\" FROM " + "ModelWithIdAndName".SqlTable());
 
                 Assert.That(dictionary, Has.Count.EqualTo(5));
 
