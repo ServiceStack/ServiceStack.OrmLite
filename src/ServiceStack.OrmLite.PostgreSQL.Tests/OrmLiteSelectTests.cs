@@ -184,7 +184,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
 
                 n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
 
-                var ids = db.ColumnFmt<int>("SELECT \"id\" FROM {0}".Fmt("ModelWithIdAndName".SqlTable()));
+                var ids = db.Column<int>("SELECT \"id\" FROM " + "ModelWithIdAndName".SqlTable());
 
                 Assert.That(ids.Count, Is.EqualTo(n));
             }
@@ -201,7 +201,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
 
                 n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
 
-                var ids = db.ColumnDistinctFmt<int>("SELECT \"id\" FROM {0}".Fmt("ModelWithIdAndName".SqlTable()));
+                var ids = db.ColumnDistinct<int>("SELECT \"id\" FROM " + "ModelWithIdAndName".SqlTable());
 
                 Assert.That(ids.Count, Is.EqualTo(n));
             }

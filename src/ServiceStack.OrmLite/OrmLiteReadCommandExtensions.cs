@@ -701,11 +701,6 @@ namespace ServiceStack.OrmLite
             return dbCmd.Column<T>(dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), sql));
         }
 
-        internal static List<T> ColumnFmt<T>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
-        {
-            return dbCmd.Column<T>(sql.SqlFmt(sqlParams));
-        }
-
         internal static List<T> Column<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider)
         {
             var columValues = new List<T>();
@@ -729,11 +724,6 @@ namespace ServiceStack.OrmLite
         internal static HashSet<T> ColumnDistinct<T>(this IDbCommand dbCmd, string sql, object anonType = null)
         {
             return dbCmd.SetParameters<T>(anonType, excludeDefaults: false).ColumnDistinct<T>(sql);
-        }
-
-        internal static HashSet<T> ColumnDistinctFmt<T>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
-        {
-            return dbCmd.ColumnDistinct<T>(sql.SqlFmt(sqlParams));
         }
 
         internal static HashSet<T> ColumnDistinct<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider)

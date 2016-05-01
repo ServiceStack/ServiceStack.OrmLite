@@ -181,7 +181,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 
 				n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
 
-				var ids = db.ColumnFmt<int>("SELECT Id FROM ModelWithIdAndName");
+				var ids = db.Column<int>("SELECT Id FROM ModelWithIdAndName");
 
 				Assert.That(ids.Count, Is.EqualTo(n));
 			}
@@ -198,7 +198,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 
 				n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
 
-				var ids = db.ColumnDistinctFmt<int>("SELECT Id FROM ModelWithIdAndName");
+				var ids = db.ColumnDistinct<int>("SELECT Id FROM ModelWithIdAndName");
 
 				Assert.That(ids.Count, Is.EqualTo(n));
 			}

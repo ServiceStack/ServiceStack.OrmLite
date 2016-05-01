@@ -196,7 +196,6 @@ namespace ServiceStack.OrmLite.Tests
             })
             {
                 Assert.That(db.Column<string>("SELECT LastName FROM Person WHERE Age = @age", new { age = 27 })[0], Is.EqualTo("Mock1"));
-                Assert.That(db.ColumnFmt<string>("SELECT LastName FROM Person WHERE Age = {0}", 27)[0], Is.EqualTo("Mock1"));
                 Assert.That(db.SqlColumn<string>("SELECT LastName FROM Person WHERE Age < @age", new { age = 50 })[0], Is.EqualTo("Mock1"));
                 Assert.That(db.SqlColumn<string>("SELECT LastName FROM Person WHERE Age < @age", new Dictionary<string, object> { { "age", 50 } })[0], Is.EqualTo("Mock1"));
             }
@@ -212,7 +211,6 @@ namespace ServiceStack.OrmLite.Tests
             })
             {
                 Assert.That(db.ColumnDistinct<int>("SELECT Age FROM Person WHERE Age < @age", new { age = 50 }).Count, Is.EqualTo(3));
-                Assert.That(db.ColumnDistinctFmt<int>("SELECT Age FROM Person WHERE Age < {0}", 50).Count, Is.EqualTo(3));
             }
         }
 

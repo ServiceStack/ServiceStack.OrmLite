@@ -209,7 +209,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
 
-                var ids = db.ColumnFmt<int>("SELECT Id FROM {0}".Fmt("ModelWithIdAndName".SqlTable()));
+                var ids = db.Column<int>("SELECT Id FROM " + "ModelWithIdAndName".SqlTable());
 
 				Assert.That(ids.Count, Is.EqualTo(n));
 			}
@@ -226,7 +226,7 @@ namespace ServiceStack.OrmLite.Tests
 
 				n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
 
-                var ids = db.ColumnDistinctFmt<int>("SELECT Id FROM {0}".Fmt("ModelWithIdAndName".SqlTable()));
+                var ids = db.ColumnDistinct<int>("SELECT Id FROM " + "ModelWithIdAndName".SqlTable());
 
 				Assert.That(ids.Count, Is.EqualTo(n));
 			}

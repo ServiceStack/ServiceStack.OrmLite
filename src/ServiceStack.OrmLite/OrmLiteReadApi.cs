@@ -284,16 +284,6 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
-        /// Returns the first column in a List using a SqlFormat query. E.g:
-        /// <para>db.ColumnFmt&lt;string&gt;("SELECT LastName FROM Person WHERE Age = {0}", 27)</para>
-        /// </summary>
-        [Obsolete(Messages.LegacyApi)]
-        public static List<T> ColumnFmt<T>(this IDbConnection dbConn, string sqlFormat, params object[] sqlParams)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.ColumnFmt<T>(sqlFormat, sqlParams));
-        }
-
-        /// <summary>
         /// Returns the distinct first column values in a HashSet using an SqlExpression. E.g:
         /// <para>db.ColumnDistinct&lt;int&gt;(db.From&lt;Persion&gt;().Select(x => x.Age).Where(q => q.Age < 50))</para>
         /// </summary>
@@ -318,16 +308,6 @@ namespace ServiceStack.OrmLite
         public static HashSet<T> ColumnDistinct<T>(this IDbConnection dbConn, string sql, IEnumerable<IDbDataParameter> sqlParams)
         {
             return dbConn.Exec(dbCmd => dbCmd.ColumnDistinct<T>(sql, sqlParams));
-        }
-
-        /// <summary>
-        /// Returns the distinct first column values in a HashSet using an SqlFormat query. E.g:
-        /// <para>db.ColumnDistinctFmt&lt;int&gt;("SELECT Age FROM Person WHERE Age &lt; {0}", 50)</para>
-        /// </summary>
-        [Obsolete(Messages.LegacyApi)]
-        public static HashSet<T> ColumnDistinctFmt<T>(this IDbConnection dbConn, string sqlFormat, params object[] sqlParams)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.ColumnDistinctFmt<T>(sqlFormat, sqlParams));
         }
 
         /// <summary>

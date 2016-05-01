@@ -186,7 +186,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 				n.Times(x => db.Insert(ModelWithIdAndName.Create(0)));
 
-				var ids = db.ColumnFmt<int>("SELECT Id FROM ModelWIN");
+				var ids = db.Column<int>("SELECT Id FROM ModelWIN");
 
 				Assert.That(ids.Count, Is.EqualTo(n));
 			}
@@ -204,7 +204,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 				n.Times(x => db.Insert(ModelWithIdAndName.Create(0)));
 
-				var ids = db.ColumnDistinctFmt<int>("SELECT Id FROM ModelWIN");
+				var ids = db.ColumnDistinct<int>("SELECT Id FROM ModelWIN");
 
 				Assert.That(ids.Count, Is.EqualTo(n));
 			}

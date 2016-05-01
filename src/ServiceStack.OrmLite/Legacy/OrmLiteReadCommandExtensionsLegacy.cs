@@ -72,5 +72,15 @@ namespace ServiceStack.OrmLite.Legacy
         {
             return dbCmd.Scalar<T>(sql.SqlFmt(sqlParams));
         }
+
+        internal static List<T> ColumnFmt<T>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
+        {
+            return dbCmd.Column<T>(sql.SqlFmt(sqlParams));
+        }
+
+        internal static HashSet<T> ColumnDistinctFmt<T>(this IDbCommand dbCmd, string sql, params object[] sqlParams)
+        {
+            return dbCmd.ColumnDistinct<T>(sql.SqlFmt(sqlParams));
+        }
     }
 }
