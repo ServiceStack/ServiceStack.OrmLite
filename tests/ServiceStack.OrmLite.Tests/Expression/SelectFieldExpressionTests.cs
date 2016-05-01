@@ -45,9 +45,9 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 var firstName = "Kurt";
                 string lastName = null;
 
-                var results = db.Select<Person>(q =>
-                    q.Where(x => firstName == null || x.FirstName == firstName)
-                        .And(x => lastName == null || x.LastName == lastName));
+                var results = db.Select(db.From<Person>()
+                    .Where(x => firstName == null || x.FirstName == firstName)
+                    .And(x => lastName == null || x.LastName == lastName));
 
                 db.GetLastSql().Print();
 

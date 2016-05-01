@@ -72,15 +72,12 @@ namespace ServiceStack.OrmLite.Tests
                     Is.EqualTo("select id, firstname, lastname, age  from person where (age > 40)").
                     Or.EqualTo("select id, firstname, lastname, age  from person where (age > @0)"));
 
-                i++; db.Select<Person>(q => q.Where(x => x.Age > 40));
                 i++; db.Select(db.From<Person>().Where(x => x.Age > 40));
                 i++; db.Select<Person>("Age > 40");
                 i++; db.Select<Person>("SELECT * FROM Person WHERE Age > 40");
                 i++; db.Select<Person>("Age > @age", new { age = 40 });
                 i++; db.Select<Person>("SELECT * FROM Person WHERE Age > @age", new { age = 40 });
                 i++; db.Select<Person>("Age > @age", new Dictionary<string, object> { { "age", 40 } });
-                i++; db.SelectFmt<Person>("Age > {0}", 40);
-                i++; db.SelectFmt<Person>("SELECT * FROM Person WHERE Age > {0}", 40);
                 i++; db.Where<Person>("Age", 27);
                 i++; db.Where<Person>(new { Age = 27 });
                 i++; db.SelectByIds<Person>(new[] { 1, 2, 3 });
@@ -98,8 +95,6 @@ namespace ServiceStack.OrmLite.Tests
                 i++; db.SingleWhere<Person>("Age", 42);
                 i++; db.Exists<Person>(new { Age = 42 });
                 i++; db.Exists<Person>("SELECT * FROM Person WHERE Age = @age", new { age = 42 });
-                i++; db.ExistsFmt<Person>("Age = {0}", 42);
-                i++; db.ExistsFmt<Person>("SELECT * FROM Person WHERE Age = {0}", 42);
 
                 Assert.That(captured.SqlStatements.Count, Is.EqualTo(i));
 

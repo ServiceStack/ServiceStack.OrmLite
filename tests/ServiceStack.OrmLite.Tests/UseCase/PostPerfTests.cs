@@ -134,7 +134,7 @@ end
             var tester = new Tester();
 
             var db = OpenDbConnection();
-            tester.Add(id => db.Select<Post>(q => q.Limit(1000)), "OrmLite Query Expression");
+            tester.Add(id => db.Select(db.From<Post>().Limit(1000)), "OrmLite Query Expression");
 
             tester.Run(50);
         }

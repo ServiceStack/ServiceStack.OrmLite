@@ -2,6 +2,7 @@
 using System.Linq;
 using NUnit.Framework;
 using ServiceStack.OrmLite.Tests.Shared;
+using ServiceStack.OrmLite.Legacy;
 
 namespace ServiceStack.OrmLite.Tests.Legacy
 {

@@ -13,7 +13,7 @@ namespace ServiceStack.OrmLite.Tests
             using(var db = OpenDbConnection()) {
                 db.CreateTable<FirstColMustBeQuoted>(true);
 
-                var noRows = db.Select<FirstColMustBeQuoted>(ev => ev.Limit(100));
+                var noRows = db.Select(db.From<FirstColMustBeQuoted>().Limit(100));
 
                 Assert.AreEqual(0, noRows.Count());
 
@@ -21,7 +21,7 @@ namespace ServiceStack.OrmLite.Tests
                     db.Insert(new FirstColMustBeQuoted { COMMENT = "row #" + i });
                 }
 
-                var hundredRows = db.Select<FirstColMustBeQuoted>(ev => ev.Limit(100));
+                var hundredRows = db.Select(db.From<FirstColMustBeQuoted>().Limit(100));
                 Assert.AreEqual(100, hundredRows.Count());
             }
         }
@@ -32,7 +32,7 @@ namespace ServiceStack.OrmLite.Tests
             using(var db = OpenDbConnection()) {
                 db.CreateTable<FirstColNoQuotes>(true);
 
-                var noRows = db.Select<FirstColNoQuotes>(ev => ev.Limit(100));
+                var noRows = db.Select(db.From<FirstColNoQuotes>().Limit(100));
 
                 Assert.AreEqual(0, noRows.Count());
 
@@ -40,7 +40,7 @@ namespace ServiceStack.OrmLite.Tests
                     db.Insert(new FirstColNoQuotes { COMMENT = "row #" + i });
                 }
 
-                var hundredRows = db.Select<FirstColNoQuotes>(ev => ev.Limit(100));
+                var hundredRows = db.Select(db.From<FirstColNoQuotes>().Limit(100));
                 Assert.AreEqual(100, hundredRows.Count());
             }
         }
@@ -51,7 +51,7 @@ namespace ServiceStack.OrmLite.Tests
             using(var db = OpenDbConnection()) {
                 db.CreateTable<COMMENT_first>(true);
 
-                var noRows = db.Select<COMMENT_first>(ev => ev.Limit(100));
+                var noRows = db.Select(db.From<COMMENT_first>().Limit(100));
 
                 Assert.AreEqual(0, noRows.Count());
 
@@ -59,7 +59,7 @@ namespace ServiceStack.OrmLite.Tests
                     db.Insert(new COMMENT_first { COMMENT = "COMMENT row #" + i });
                 }
 
-                var hundredRows = db.Select<COMMENT_first>(ev => ev.Limit(100));
+                var hundredRows = db.Select(db.From<COMMENT_first>().Limit(100));
                 Assert.AreEqual(100, hundredRows.Count());
             }
         }
@@ -70,7 +70,7 @@ namespace ServiceStack.OrmLite.Tests
             using(var db = OpenDbConnection()) {
                 db.CreateTable<COMMENT_other>(true);
 
-                var noRows = db.Select<COMMENT_other>(ev => ev.Limit(100));
+                var noRows = db.Select(db.From<COMMENT_other>().Limit(100));
 
                 Assert.AreEqual(0, noRows.Count());
 
@@ -78,7 +78,7 @@ namespace ServiceStack.OrmLite.Tests
                     db.Insert(new COMMENT_other { COMMENT = "COMMENT row #" + i });
                 }
 
-                var hundredRows = db.Select<COMMENT_other>(ev => ev.Limit(100));
+                var hundredRows = db.Select(db.From<COMMENT_other>().Limit(100));
                 Assert.AreEqual(100, hundredRows.Count());
             }
         }

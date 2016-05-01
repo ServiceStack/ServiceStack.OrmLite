@@ -70,7 +70,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
                 q.WhereExpression.Print();
                 Assert.That(result.Count, Is.EqualTo(expected));
 
-                result = db.Select<Author>(qry => qry.Where(rn => rn.Birthday >= new DateTime(year, 1, 1) && rn.Birthday <= lastDay));
+                result = db.Select(db.From<Author>().Where(rn => rn.Birthday >= new DateTime(year, 1, 1) && rn.Birthday <= lastDay));
                 Assert.That(result.Count, Is.EqualTo(expected));
                 result = db.Select<Author>(rn => rn.Birthday >= new DateTime(year, 1, 1) && rn.Birthday <= lastDay);
                 Assert.That(result.Count, Is.EqualTo(expected));

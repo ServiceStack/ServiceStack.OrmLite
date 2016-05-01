@@ -31,16 +31,16 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
                 db.Insert(tableName, new GenericEntity { Id = 1, ColumnA = "A" });
 
-                var rows = db.Select<GenericEntity>(tableName, q =>
-                    q.Where(x => x.ColumnA == "A"));
+                var rows = db.Select(tableName, db.From<GenericEntity>()
+                    .Where(x => x.ColumnA == "A"));
 
                 Assert.That(rows.Count, Is.EqualTo(1));
 
                 db.Update(tableName, new GenericEntity { ColumnA = "B" },
                     where: q => q.ColumnA == "A");
 
-                rows = db.Select<GenericEntity>(tableName, q => 
-                    q.Where(x => x.ColumnA == "B"));
+                rows = db.Select(tableName, db.From<GenericEntity>()
+                    .Where(x => x.ColumnA == "B"));
 
                 Assert.That(rows.Count, Is.EqualTo(1));
             }
@@ -80,8 +80,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
             return (long)ExecWithAlias<T>(table, () => db.Insert(obj, selectIdentity));
         }
 
-        [Obsolete("Use db.Select(table, db.From<T>())")]
-        public static List<T> Select<T>(this IDbConnection db, string table, Func<SqlExpression<T>, SqlExpression<T>> expression)
+        public static List<T> Select<T>(this IDbConnection db, string table, SqlExpression<T> expression)
         {
             return (List<T>)ExecWithAlias<T>(table, () => db.Select(expression));
         }

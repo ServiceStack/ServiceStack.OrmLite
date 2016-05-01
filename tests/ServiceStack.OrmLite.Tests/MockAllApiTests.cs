@@ -43,7 +43,6 @@ namespace ServiceStack.OrmLite.Tests
             })
             {
                 Assert.That(db.Select<Person>(x => x.Age > 40)[0].FirstName, Is.EqualTo("Mocked"));
-                Assert.That(db.Select<Person>(q => q.Where(x => x.Age > 40))[0].FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.Select(db.From<Person>().Where(x => x.Age > 40))[0].FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.Select<Person>("Age > 40")[0].FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.Select<Person>("SELECT * FROM Person WHERE Age > 40")[0].FirstName, Is.EqualTo("Mocked"));
@@ -51,8 +50,6 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(db.Select<Person>("SELECT * FROM Person WHERE Age > @age", new { age = 40 })[0].FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.Select<Person>("Age > @age", new Dictionary<string, object> { { "age", 40 } })[0].FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.Select<Person>("SELECT * FROM Person WHERE Age > @age", new Dictionary<string, object> { { "age", 40 } })[0].FirstName, Is.EqualTo("Mocked"));
-                Assert.That(db.SelectFmt<Person>("Age > {0}", 40)[0].FirstName, Is.EqualTo("Mocked"));
-                Assert.That(db.SelectFmt<Person>("SELECT * FROM Person WHERE Age > {0}", 40)[0].FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.Where<Person>("Age", 27)[0].FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.Where<Person>(new { Age = 27 })[0].FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.SelectByIds<Person>(new[] { 1, 2, 3 })[0].FirstName, Is.EqualTo("Mocked"));
@@ -66,14 +63,11 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(db.Single(db.From<Person>().Where(x => x.Age == 42)).FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.Single<Person>(new { Age = 42 }).FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.Single<Person>("Age = @age", new { age = 42 }).FirstName, Is.EqualTo("Mocked"));
-                Assert.That(db.SingleFmt<Person>("Age = {0}", 42).FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.SingleById<Person>(1).FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.SingleWhere<Person>("Age", 42).FirstName, Is.EqualTo("Mocked"));
 
                 Assert.That(db.Exists<Person>(new { Age = 42 }), Is.True);
                 Assert.That(db.Exists<Person>("SELECT * FROM Person WHERE Age = @age", new { age = 42 }), Is.True);
-                Assert.That(db.ExistsFmt<Person>("Age = {0}", 42), Is.True);
-                Assert.That(db.ExistsFmt<Person>("SELECT * FROM Person WHERE Age = {0}", 42), Is.True);
             }
         }
 

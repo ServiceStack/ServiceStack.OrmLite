@@ -305,11 +305,6 @@ namespace ServiceStack.OrmLite.Tests.Expression
                     .Join<LetterFrequency, LetterStat>((x, y) => x.Id == y.LetterFrequencyId));
                 db.GetLastSql().Print();
                 Assert.That(results.Count, Is.EqualTo(5));
-
-                results = db.Select<LetterFrequency>(q =>
-                    q.Join<LetterFrequency, LetterStat>((x, y) => x.Id == y.LetterFrequencyId));
-                db.GetLastSql().Print();
-                Assert.That(results.Count, Is.EqualTo(5));
             }
         }
 
@@ -408,20 +403,19 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 db.DropAndCreateTable<LetterStat>();
 
                 var insertedIds = new List<long>();
-                "A,B,B,C,C,C,D,D,E".Split(',').Each(letter =>
-                {
+                "A,B,B,C,C,C,D,D,E".Split(',').Each(letter => {
                     insertedIds.Add(db.Insert(new LetterFrequency { Letter = letter }, selectIdentity: true));
                 });
 
-                var rows = db.Select<LetterFrequency>(q => q.OrderByFields("Letter", "Id"));
+                var rows = db.Select(db.From<LetterFrequency>().OrderByFields("Letter", "Id"));
                 Assert.That(rows.Map(x => x.Letter), Is.EquivalentTo("A,B,B,C,C,C,D,D,E".Split(',')));
                 Assert.That(rows.Map(x => x.Id), Is.EquivalentTo(insertedIds));
 
-                rows = db.Select<LetterFrequency>(q => q.OrderByFields("Letter", "-Id"));
+                rows = db.Select(db.From<LetterFrequency>().OrderByFields("Letter", "-Id"));
                 Assert.That(rows.Map(x => x.Letter), Is.EquivalentTo("A,B,B,C,C,C,D,D,E".Split(',')));
                 Assert.That(rows.Map(x => x.Id), Is.EquivalentTo(insertedIds));
 
-                rows = db.Select<LetterFrequency>(q => q.OrderByFieldsDescending("Letter", "-Id"));
+                rows = db.Select(db.From<LetterFrequency>().OrderByFieldsDescending("Letter", "-Id"));
                 Assert.That(rows.Map(x => x.Letter), Is.EquivalentTo("E,D,D,C,C,C,B,B,A".Split(',')));
                 Assert.That(rows.Map(x => x.Id), Is.EquivalentTo(Enumerable.Reverse(insertedIds)));
             }
@@ -449,7 +443,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 var customer2 = LoadReferencesTests.GetCustomerWithOrders("2");
                 db.Save(customer2, references: true);
 
-                var results = db.LoadSelect<Customer>(q => q
+                var results = db.LoadSelect(db.From<Customer>()
                     .OrderBy(x => x.Id)
                     .Limit(1, 1));
 
@@ -460,7 +454,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 Assert.That(results[0].PrimaryAddress.AddressLine1, Is.EqualTo("2 Humpty Street"));
                 Assert.That(results[0].Orders.Count, Is.EqualTo(2));
 
-                results = db.LoadSelect<Customer>(q => q
+                results = db.LoadSelect(db.From<Customer>()
                     .Join<CustomerAddress>()
                     .OrderBy(x => x.Id)
                     .Limit(1, 1));
