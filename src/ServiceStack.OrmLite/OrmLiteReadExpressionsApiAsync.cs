@@ -24,16 +24,6 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns results from using an SqlExpression lambda. E.g:
-        /// <para>db.Select&lt;Person&gt;(q =&gt; q.Where(x =&gt; x.Age &gt; 40))</para>
-        /// </summary>
-        [Obsolete("Use db.SelectAsync(db.From<T>())")]
-        public static Task<List<T>> SelectAsync<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression, CancellationToken token = default(CancellationToken))
-        {
-            return dbConn.Exec(dbCmd => dbCmd.SelectAsync(expression, token));
-        }
-
-        /// <summary>
-        /// Returns results from using an SqlExpression lambda. E.g:
         /// <para>db.Select(db.From&lt;Person&gt;().Where(x =&gt; x.Age &gt; 40))</para>
         /// </summary>
         public static Task<List<T>> SelectAsync<T>(this IDbConnection dbConn, SqlExpression<T> expression, CancellationToken token = default(CancellationToken))
@@ -45,15 +35,6 @@ namespace ServiceStack.OrmLite
         /// Project results from a number of joined tables into a different model
         /// </summary>
         public static Task<List<Into>> SelectAsync<Into, From>(this IDbConnection dbConn, SqlExpression<From> expression, CancellationToken token = default(CancellationToken))
-        {
-            return dbConn.Exec(dbCmd => dbCmd.SelectAsync<Into, From>(expression, token));
-        }
-
-        /// <summary>
-        /// Project results from a number of joined tables into a different model
-        /// </summary>
-        [Obsolete("Use db.SelectAsync<Into, From>(db.From<T>())")]
-        public static Task<List<Into>> SelectAsync<Into, From>(this IDbConnection dbConn, Func<SqlExpression<From>, SqlExpression<From>> expression, CancellationToken token = default(CancellationToken))
         {
             return dbConn.Exec(dbCmd => dbCmd.SelectAsync<Into, From>(expression, token));
         }

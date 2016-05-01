@@ -118,9 +118,11 @@
     <Compile Include="IOrmLiteConverter.cs" />
     <Compile Include="Legacy\OrmLiteReadApiLegacy.cs" />
     <Compile Include="Legacy\OrmLiteReadCommandExtensionsLegacy.cs" />
+    <Compile Include="Legacy\OrmLiteReadExpressionsApiAsyncLegacy.cs" />
     <Compile Include="Legacy\OrmLiteReadExpressionsApiLegacy.cs" />
     <Compile Include="Legacy\OrmLiteWriteCommandExtensionsLegacy.cs" />
     <Compile Include="Legacy\OrmLiteWriteExpressionsApiLegacy.cs" />
+    <Compile Include="Legacy\ReadExpressionCommandExtensionsAsyncLegacy.cs" />
     <Compile Include="Legacy\ReadExpressionCommandExtensionsLegacy.cs" />
     <Compile Include="Legacy\WriteExpressionCommandExtensionsLegacy.cs" />
     <Compile Include="NamingStrategy.cs" />
