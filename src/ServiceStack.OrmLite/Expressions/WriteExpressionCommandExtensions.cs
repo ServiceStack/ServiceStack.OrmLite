@@ -9,12 +9,6 @@ namespace ServiceStack.OrmLite
 {
     internal static class WriteExpressionCommandExtensions
     {
-        [Obsolete("Use db.UpdateOnly(model, db.From<T>())")]
-        public static int UpdateOnly<T>(this IDbCommand dbCmd, T model, Func<SqlExpression<T>, SqlExpression<T>> onlyFields)
-        {
-            return dbCmd.UpdateOnly(model, onlyFields(dbCmd.GetDialectProvider().SqlExpression<T>()));
-        }
-
         public static int UpdateOnly<T>(this IDbCommand dbCmd, T model, SqlExpression<T> onlyFields)
         {
             UpdateOnlySql(dbCmd, model, onlyFields);

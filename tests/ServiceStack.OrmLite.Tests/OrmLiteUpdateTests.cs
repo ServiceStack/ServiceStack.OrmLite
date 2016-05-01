@@ -404,7 +404,7 @@ namespace ServiceStack.OrmLite.Tests
                 db.DropAndCreateTable<Person>();
                 db.InsertAll(Person.Rockstars);
 
-                db.UpdateOnly(new Person { FirstName = "JJ" }, q => q.Update(p => p.FirstName).Where(x => x.FirstName == "Jimi"));
+                db.UpdateOnly(new Person { FirstName = "JJ" }, db.From<Person>().Update(p => p.FirstName).Where(x => x.FirstName == "Jimi"));
 
                 var sql = db.GetLastSql().NormalizeSql();
                 Assert.That(sql, Is.StringContaining("where (firstname = @0)"));

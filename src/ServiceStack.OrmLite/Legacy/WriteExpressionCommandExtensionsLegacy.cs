@@ -11,5 +11,11 @@ namespace ServiceStack.OrmLite.Legacy
         {
             dbCmd.InsertOnly(obj, onlyFields(dbCmd.GetDialectProvider().SqlExpression<T>()));
         }
+
+        [Obsolete("Use db.UpdateOnly(model, db.From<T>())")]
+        public static int UpdateOnly<T>(this IDbCommand dbCmd, T model, Func<SqlExpression<T>, SqlExpression<T>> onlyFields)
+        {
+            return dbCmd.UpdateOnly(model, onlyFields(dbCmd.GetDialectProvider().SqlExpression<T>()));
+        }
     }
 }

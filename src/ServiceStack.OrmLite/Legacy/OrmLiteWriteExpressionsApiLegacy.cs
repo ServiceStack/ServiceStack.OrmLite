@@ -14,5 +14,22 @@ namespace ServiceStack.OrmLite.Legacy
         {
             dbConn.Exec(dbCmd => dbCmd.InsertOnly(obj, onlyFields));
         }
+
+        /// <summary>
+        /// Use an SqlExpression to select which fields to update and construct the where expression, E.g: 
+        /// 
+        ///   db.UpdateOnly(new Person { FirstName = "JJ" }, ev => ev.Update(p => p.FirstName).Where(x => x.FirstName == "Jimi"));
+        ///   UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("FirstName" = 'Jimi')
+        /// 
+        ///   What's not in the update expression doesn't get updated. No where expression updates all rows. E.g:
+        /// 
+        ///   db.UpdateOnly(new Person { FirstName = "JJ", LastName = "Hendo" }, ev => ev.Update(p => p.FirstName));
+        ///   UPDATE "Person" SET "FirstName" = 'JJ'
+        /// </summary>
+        [Obsolete("Use db.UpdateOnly(model, db.From<T>())")]
+        public static int UpdateOnly<T>(this IDbConnection dbConn, T model, Func<SqlExpression<T>, SqlExpression<T>> onlyFields)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.UpdateOnly(model, onlyFields));
+        }
     }
 }
