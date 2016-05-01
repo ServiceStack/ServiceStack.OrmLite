@@ -96,7 +96,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 
 				db.Insert(filterRow);
 
-				var rows = db.SelectFmt<ModelWithOnlyStringFields>("AlbumName = {0}", filterRow.AlbumName);
+				var rows = db.Select<ModelWithOnlyStringFields>("AlbumName = @AlbumName", new { filterRow.AlbumName });
 				var dbRowIds = rows.ConvertAll(x => x.Id);
 
 				Assert.That(dbRowIds, Has.Count.EqualTo(1));
@@ -257,7 +257,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 
 				rowIds.ForEach(x => db.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
 
-				var rows = db.SelectFmt<ModelWithIdAndName>("SELECT Id, Name FROM ModelWithFieldsOfDifferentTypes");
+				var rows = db.Select<ModelWithIdAndName>("SELECT Id, Name FROM ModelWithFieldsOfDifferentTypes");
 				var dbRowIds = rows.ConvertAll(x => x.Id);
 
 				Assert.That(dbRowIds, Is.EquivalentTo(rowIds));
@@ -293,12 +293,15 @@ namespace ServiceStack.OrmLite.MySql.Tests
 
 				n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
 
-				var selectInNames = new[] {"Name1", "Name2"};
-				var rows = db.SelectFmt<ModelWithIdAndName>("Name IN ({0})", selectInNames.SqlInValues());
+                var selectInNames = new[] { "Name1", "Name2" };
+                var rows = db.Select<ModelWithIdAndName>("Name IN ({0})".Fmt(selectInNames.SqlInParams()),
+                    new { values = selectInNames.SqlInValues() });
+                Assert.That(rows.Count, Is.EqualTo(selectInNames.Length));
 
-				Assert.That(rows.Count, Is.EqualTo(selectInNames.Length));
-			}
-		}
+                rows = db.Select<ModelWithIdAndName>("Name IN (@p1, @p2)", new { p1 = "Name1", p2 = "Name2" });
+                Assert.That(rows.Count, Is.EqualTo(selectInNames.Length));
+            }
+        }
 
 	}
 }

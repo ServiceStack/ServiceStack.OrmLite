@@ -116,6 +116,8 @@
     <Compile Include="Converters\TimeSpanAsIntConverter.cs" />
     <Compile Include="Expressions\IUntypedSqlExpression.cs" />
     <Compile Include="IOrmLiteConverter.cs" />
+    <Compile Include="Legacy\OrmLiteReadApiLegacy.cs" />
+    <Compile Include="Legacy\OrmLiteReadCommandExtensionsLegacy.cs" />
     <Compile Include="Legacy\OrmLiteReadExpressionsApiLegacy.cs" />
     <Compile Include="Legacy\ReadExpressionCommandExtensionsLegacy.cs" />
     <Compile Include="NamingStrategy.cs" />

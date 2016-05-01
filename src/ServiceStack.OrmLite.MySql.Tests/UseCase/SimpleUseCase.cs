@@ -37,7 +37,7 @@ namespace ServiceStack.OrmLite.MySql.Tests.UseCase
 				db.Insert(new UserWithIndex { Id = 2, Name = "B", CreatedDate = DateTime.Now });
 				db.Insert(new UserWithIndex { Id = 3, Name = "B", CreatedDate = DateTime.Now });
 
-				var rowsB = db.SelectFmt<UserWithIndex>("Name = {0}", "B");
+				var rowsB = db.Select<UserWithIndex>("Name = @name", new { name = "B" });
 
 				Assert.That(rowsB, Has.Count.EqualTo(2));
 
@@ -46,7 +46,7 @@ namespace ServiceStack.OrmLite.MySql.Tests.UseCase
 
 				rowsB.ForEach(x => db.Delete(x));
 
-				rowsB = db.SelectFmt<UserWithIndex>("Name = {0}", "B");
+				rowsB = db.Select<UserWithIndex>("Name = @name", new { name = "B" });
 				Assert.That(rowsB, Has.Count.EqualTo(0));
 
 				var rowsLeft = db.Select<UserWithIndex>();

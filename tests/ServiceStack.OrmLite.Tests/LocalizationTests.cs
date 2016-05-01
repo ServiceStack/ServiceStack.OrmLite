@@ -10,22 +10,22 @@ namespace ServiceStack.OrmLite.Tests
 	[TestFixture]
 	public class LocalizationTests : OrmLiteTestBase
 	{
-		private readonly CultureInfo CurrentCulture = Thread.CurrentThread.CurrentCulture;
-		private readonly CultureInfo CurrentUICulture = Thread.CurrentThread.CurrentUICulture;
+		//private readonly CultureInfo CurrentCulture = Thread.CurrentThread.CurrentCulture;
+		//private readonly CultureInfo CurrentUICulture = Thread.CurrentThread.CurrentUICulture;
 
-		[SetUp]
-		public void TestSetUp()
-		{
-			Thread.CurrentThread.CurrentCulture = new CultureInfo("vi-VN");
-			Thread.CurrentThread.CurrentUICulture = new CultureInfo("vi-VN");
-		}
+		//[SetUp]
+		//public void TestSetUp()
+		//{
+		//	Thread.CurrentThread.CurrentCulture = new CultureInfo("vi-VN");
+		//	Thread.CurrentThread.CurrentUICulture = new CultureInfo("vi-VN");
+		//}
 
-		[TearDown]
-		public void TestFixtureTearDown()
-		{
-			Thread.CurrentThread.CurrentCulture = CurrentCulture;
-			Thread.CurrentThread.CurrentUICulture = CurrentUICulture;
-		}
+		//[TearDown]
+		//public void TestFixtureTearDown()
+		//{
+		//	Thread.CurrentThread.CurrentCulture = CurrentCulture;
+		//	Thread.CurrentThread.CurrentUICulture = CurrentUICulture;
+		//}
 
 		public class Point
 		{
@@ -47,10 +47,8 @@ namespace ServiceStack.OrmLite.Tests
 				db.Insert(new Point { Width = 4, Height = 1.123f, Top = 3.456d, Left = 2.345m});
                 db.GetLastSql().Print();
 
-                var sql = Dialect == Dialect.PostgreSql
-                    ? "round(cast(Height as numeric),3)={0}"
-                    : "round(Height,3)={0}";
-                var points = db.SelectFmt<Point>(sql, 1.123);
+                var sql = "Height = @height".NormalizeSql();
+                var points = db.Select<Point>(sql, new { height = 1.123 });
 			    db.GetLastSql().Print();
 
 				Assert.That(points[0].Width, Is.EqualTo(4));

@@ -353,6 +353,23 @@ namespace ServiceStack.OrmLite
             return new SqlInValues(values, dialect);
         }
 
+        public static string SqlInParams<T>(this T[] values, IOrmLiteDialectProvider dialect = null)
+        {
+            var sb = StringBuilderCache.Allocate();
+            if (dialect == null)
+                dialect = OrmLiteConfig.DialectProvider;
+
+            for (var i = 0; i < values.Length; i++)
+            {
+                if (sb.Length > 0)
+                    sb.Append(',');
+                var paramName = dialect.ParamString + "v" + i;
+                sb.Append(paramName);
+            }
+
+            return StringBuilderCache.ReturnAndFree(sb);
+        }
+
         public static Tuple<FieldDefinition, int, IOrmLiteConverter>[] GetIndexFieldsCache(this IDataReader reader, 
             ModelDefinition modelDefinition, 
             IOrmLiteDialectProvider dialect, 

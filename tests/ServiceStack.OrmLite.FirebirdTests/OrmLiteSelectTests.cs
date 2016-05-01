@@ -99,7 +99,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 				db.Insert(filterRow);
 
-				var rows = db.SelectFmt<ModelWithOnlyStringFields>("AlbumName = {0}", filterRow.AlbumName);
+				var rows = db.Select<ModelWithOnlyStringFields>("AlbumName = @AlbumName", new { filterRow.AlbumName });
 				var dbRowIds = rows.ConvertAll(x => x.Id);
 
 				Assert.That(dbRowIds, Has.Count.EqualTo(1));
@@ -264,7 +264,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 				rowIds.ForEach(x => db.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
 
-				var rows = db.SelectFmt<ModelWithIdAndName>("SELECT Id, Name FROM ModelWFDT");
+				var rows = db.Select<ModelWithIdAndName>("SELECT Id, Name FROM ModelWFDT");
 				var dbRowIds = rows.ConvertAll(x => x.Id);
 
 				Assert.That(dbRowIds, Is.EquivalentTo(rowIds));
@@ -306,13 +306,16 @@ namespace ServiceStack.OrmLite.FirebirdTests
 					};
 					db.Insert(m);
 				}
-				
-				var selectInNames = new[] {"Name1", "Name2"};
-				var rows = db.SelectFmt<ModelWithIdAndName>("Name IN ({0})", selectInNames.SqlInValues());
 
-				Assert.That(rows.Count, Is.EqualTo(selectInNames.Length));
-			}
-		}
+                var selectInNames = new[] { "Name1", "Name2" };
+                var rows = db.Select<ModelWithIdAndName>("Name IN ({0})".Fmt(selectInNames.SqlInParams()),
+                    new { values = selectInNames.SqlInValues() });
+                Assert.That(rows.Count, Is.EqualTo(selectInNames.Length));
+
+                rows = db.Select<ModelWithIdAndName>("Name IN (@p1, @p2)", new { p1 = "Name1", p2 = "Name2" });
+                Assert.That(rows.Count, Is.EqualTo(selectInNames.Length));
+            }
+        }
 		
 		//[Alias("RDB$DATABASE")]
 		public class PocoFlag
@@ -326,7 +329,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		{
             using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
 			{
-				var rows = db.SelectFmt<PocoFlag>("SELECT 1 as Flag FROM RDB$DATABASE");
+				var rows = db.Select<PocoFlag>("SELECT 1 as Flag FROM RDB$DATABASE");
 				Assert.That(rows[0].Flag);
 			}
 		}
@@ -342,7 +345,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		{
             using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
 			{
-				var rows = db.SelectFmt<PocoFlagWithId>("SELECT 1 as Id, 1 as Flag FROM RDB$DATABASE");
+				var rows = db.Select<PocoFlagWithId>("SELECT 1 as Id, 1 as Flag FROM RDB$DATABASE");
 				Assert.That(rows[0].Id, Is.EqualTo(1));
 				Assert.That(rows[0].Flag);
 			}

@@ -44,16 +44,6 @@ namespace ServiceStack.OrmLite
             return dbConn.GetExecFilter().Exec(dbConn, filter);
         }
 
-
-        /// <summary>
-        /// Create a new SqlExpression builder allowing typed LINQ-like queries.
-        /// </summary>
-        [Obsolete("Use From<T>")]
-        public static SqlExpression<T> SqlExpression<T>(this IDbConnection dbConn)
-        {
-            return dbConn.GetExecFilter().SqlExpression<T>(dbConn);
-        }
-
         /// <summary>
         /// Creates a new SqlExpression builder allowing typed LINQ-like queries.
         /// Alias for SqlExpression.
@@ -144,16 +134,6 @@ namespace ServiceStack.OrmLite
         public static T Single<T>(this IDbConnection dbConn, Expression<Func<T, bool>> predicate)
         {
             return dbConn.Exec(dbCmd => dbCmd.Single(predicate));
-        }
-
-        /// <summary>
-        /// Returns a single result from using an SqlExpression lambda. E.g:
-        /// <para>db.Single&lt;Person&gt;(q =&gt; q.Where(x =&gt; x.Age == 42))</para>
-        /// </summary>
-        [Obsolete("Use db.Single(db.From<T>())")]
-        public static T Single<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.Single(expression));
         }
 
         /// <summary>

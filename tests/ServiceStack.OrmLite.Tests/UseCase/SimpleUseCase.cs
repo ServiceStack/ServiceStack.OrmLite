@@ -29,7 +29,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
 				db.Insert(new User { Id = 2, Name = "B", CreatedDate = DateTime.Now });
 				db.Insert(new User { Id = 3, Name = "B", CreatedDate = DateTime.Now });
 
-				var rowsB = db.SelectFmt<User>("Name = {0}", "B");
+				var rowsB = db.Select<User>("Name = @name", new { name = "B" });
 
 				Assert.That(rowsB, Has.Count.EqualTo(2));
 
@@ -38,7 +38,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
 
 				rowsB.ForEach(x => db.Delete(x));
 
-				rowsB = db.SelectFmt<User>("Name = {0}", "B");
+				rowsB = db.Select<User>("Name = @name", new { name = "B" });
 				Assert.That(rowsB, Has.Count.EqualTo(0));
 
 				var rowsLeft = db.Select<User>();

@@ -84,7 +84,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
 
                 Assert.That(user.Id, Is.GreaterThan(0));
 
-                var rowsB = db.SelectFmt<User>("Name = {0}", "B");
+                var rowsB = db.Select<User>("Name = @name", new { name = "B" });
                 Assert.That(rowsB, Has.Count.EqualTo(2));
 
                 var rowIds = rowsB.ConvertAll(x => x.Id);
@@ -92,7 +92,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
 
                 rowsB.ForEach(x => db.Delete(x));
 
-                rowsB = db.SelectFmt<User>("Name = {0}", "B");
+                rowsB = db.Select<User>("Name = @name", new { name = "B" });
                 Assert.That(rowsB, Has.Count.EqualTo(0));
 
                 var rowsLeft = db.Select<User>();

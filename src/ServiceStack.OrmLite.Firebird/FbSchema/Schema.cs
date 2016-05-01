@@ -30,7 +30,7 @@ namespace ServiceStack.OrmLite.Firebird
 		{
 			get
 			{
-                return Connection.SelectFmt<Table>(sqlTables);
+                return Connection.Select<Table>(sqlTables);
             }
 		}
 
@@ -40,7 +40,7 @@ namespace ServiceStack.OrmLite.Firebird
 			string sql = sqlTables +
 						string.Format("    AND a.rdb$relation_name ='{0}' ", name);
 
-            var query = Connection.SelectFmt<Table>(sql);
+            var query = Connection.Select<Table>(sql);
             return query.FirstOrDefault();
         }
 		
@@ -53,15 +53,15 @@ namespace ServiceStack.OrmLite.Firebird
 									   string.IsNullOrEmpty(tableName) ? "r.rdb$relation_name" :
 									   string.Format("'{0}'", tableName));
 
-            List<Column> columns =Connection.SelectFmt<Column>(sql);
+            List<Column> columns =Connection.Select<Column>(sql);
 
-            List<Generador> gens = Connection.SelectFmt<Generador>(sqlGenerator.ToString());
+            List<Generador> gens = Connection.Select<Generador>(sqlGenerator.ToString());
 
             sql = string.Format(sqlFieldGenerator.ToString(),
                                 string.IsNullOrEmpty(tableName) ? "TRIGGERS.RDB$RELATION_NAME" :
                                    string.Format("'{0}'", tableName));
 
-            List<FieldGenerator> fg = Connection.SelectFmt<FieldGenerator>(sql);
+            List<FieldGenerator> fg = Connection.Select<FieldGenerator>(sql);
 
             foreach (var record in columns)
             {
@@ -95,7 +95,7 @@ namespace ServiceStack.OrmLite.Firebird
 			string sql= sqlProcedures.ToString() +
 						string.Format("WHERE  b.rdb$procedure_name ='{0}'", name);
 
-            var query = Connection.SelectFmt<Procedure>(sql);
+            var query = Connection.Select<Procedure>(sql);
             return query.FirstOrDefault();
         }
 
@@ -103,7 +103,7 @@ namespace ServiceStack.OrmLite.Firebird
 		{
 			get
 			{
-                return Connection.SelectFmt<Procedure>(sqlProcedures.ToString());
+                return Connection.Select<Procedure>(sqlProcedures.ToString());
             }
 		}
 
@@ -119,7 +119,7 @@ namespace ServiceStack.OrmLite.Firebird
 									   string.IsNullOrEmpty(procedureName) ? "a.rdb$procedure_name" :
 									   string.Format("'{0}'", procedureName));
 
-            return Connection.SelectFmt<Parameter>(sql);
+            return Connection.Select<Parameter>(sql);
         }
 		
 		private void Init()

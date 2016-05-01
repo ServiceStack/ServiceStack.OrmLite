@@ -98,7 +98,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
 
                 db.Insert(filterRow);
 
-                var rows = db.SelectFmt<ModelWithOnlyStringFields>("\"album_name\" = {0}", filterRow.AlbumName);
+                var rows = db.Select<ModelWithOnlyStringFields>("\"album_name\" = @AlbumName", new { filterRow.AlbumName });
                 var dbRowIds = rows.ConvertAll(x => x.Id);
 
                 Assert.That(dbRowIds, Has.Count.EqualTo(1));
@@ -117,7 +117,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
 
                 n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
 
-                var count = db.ScalarFmt<long>("SELECT COUNT(*) FROM {0}".Fmt("ModelWithIdAndName".SqlTable()));
+                var count = db.Scalar<long>("SELECT COUNT(*) FROM " + "ModelWithIdAndName".SqlTable());
 
                 Assert.That(count, Is.EqualTo(n));
             }
@@ -260,8 +260,8 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
 
                 rowIds.ForEach(x => db.Insert(ModelWithFieldsOfDifferentTypes.Create(x)));
 
-                var rows = db.SelectFmt<ModelWithIdAndName>("SELECT \"id\", \"name\" FROM {0}"
-                    .Fmt("ModelWithFieldsOfDifferentTypes".SqlTable()));
+                var rows = db.Select<ModelWithIdAndName>("SELECT \"id\", \"name\" FROM "
+                    + "ModelWithFieldsOfDifferentTypes".SqlTable());
                 var dbRowIds = rows.ConvertAll(x => x.Id);
 
                 Assert.That(dbRowIds, Is.EquivalentTo(rowIds));
@@ -317,9 +317,12 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
 
                 n.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
 
-                var selectInNames = new[] {"Name1", "Name2"};
-                var rows = db.SelectFmt<ModelWithIdAndName>("\"name\" IN ({0})", selectInNames.SqlInValues());
+                var selectInNames = new[] { "Name1", "Name2" };
+                var rows = db.Select<ModelWithIdAndName>("Name IN ({0})".Fmt(selectInNames.SqlInParams()),
+                    new { values = selectInNames.SqlInValues() });
+                Assert.That(rows.Count, Is.EqualTo(selectInNames.Length));
 
+                rows = db.Select<ModelWithIdAndName>("Name IN (@p1, @p2)", new { p1 = "Name1", p2 = "Name2" });
                 Assert.That(rows.Count, Is.EqualTo(selectInNames.Length));
             }
         }

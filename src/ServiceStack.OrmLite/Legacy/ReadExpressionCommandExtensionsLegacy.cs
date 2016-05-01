@@ -4,6 +4,7 @@ using System.Data;
 
 namespace ServiceStack.OrmLite.Legacy
 {
+    [Obsolete(Messages.LegacyApi)]
     internal static class ReadExpressionCommandExtensionsLegacy
     {
         [Obsolete("Use db.Select(db.From<T>())")]
