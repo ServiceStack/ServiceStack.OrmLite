@@ -208,21 +208,6 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
-        /// Returns a single scalar value using an SqlFormat query. E.g:
-        /// <para>db.ScalarFmt&lt;int&gt;("SELECT COUNT(*) FROM Person WHERE Age &gt; {0}", 40)</para>
-        /// </summary>
-        [Obsolete(Messages.LegacyApi)]
-        public static Task<T> ScalarFmtAsync<T>(this IDbConnection dbConn, CancellationToken token, string sqlFormat, params object[] sqlParams)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.ScalarFmtAsync<T>(token, sqlFormat, sqlParams));
-        }
-        [Obsolete(Messages.LegacyApi)]
-        public static Task<T> ScalarFmtAsync<T>(this IDbConnection dbConn, string sqlFormat, params object[] sqlParams)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.ScalarFmtAsync<T>(default(CancellationToken), sqlFormat, sqlParams));
-        }
-
-        /// <summary>
         /// Returns the distinct first column values in a HashSet using an SqlExpression. E.g:
         /// <para>db.Column&lt;int&gt;(db.From&lt;Persion&gt;().Select(x => x.LastName).Where(q => q.Age == 27))</para>
         /// </summary>
@@ -247,21 +232,6 @@ namespace ServiceStack.OrmLite
         public static Task<List<T>> ColumnAsync<T>(this IDbConnection dbConn, string sql, object anonType = null, CancellationToken token = default(CancellationToken))
         {
             return dbConn.Exec(dbCmd => dbCmd.ColumnAsync<T>(sql, anonType, token));
-        }
-
-        /// <summary>
-        /// Returns the first column in a List using a SqlFormat query. E.g:
-        /// <para>db.ColumnFmt&lt;string&gt;("SELECT LastName FROM Person WHERE Age = {0}", 27)</para>
-        /// </summary>
-        [Obsolete(Messages.LegacyApi)]
-        public static Task<List<T>> ColumnFmtAsync<T>(this IDbConnection dbConn, CancellationToken token, string sqlFormat, params object[] sqlParams)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.ColumnFmtAsync<T>(token, sqlFormat, sqlParams));
-        }
-        [Obsolete(Messages.LegacyApi)]
-        public static Task<List<T>> ColumnFmtAsync<T>(this IDbConnection dbConn, string sqlFormat, params object[] sqlParams)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.ColumnFmtAsync<T>(default(CancellationToken), sqlFormat, sqlParams));
         }
 
         /// <summary>
@@ -292,21 +262,6 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
-        /// Returns the distinct first column values in a HashSet using an SqlFormat query. E.g:
-        /// <para>db.ColumnDistinctFmt&lt;int&gt;("SELECT Age FROM Person WHERE Age &lt; {0}", 50)</para>
-        /// </summary>
-        [Obsolete(Messages.LegacyApi)]
-        public static Task<HashSet<T>> ColumnDistinctFmtAsync<T>(this IDbConnection dbConn, CancellationToken token, string sqlFormat, params object[] sqlParams)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.ColumnDistinctFmtAsync<T>(token, sqlFormat, sqlParams));
-        }
-        [Obsolete(Messages.LegacyApi)]
-        public static Task<HashSet<T>> ColumnDistinctFmtAsync<T>(this IDbConnection dbConn, string sqlFormat, params object[] sqlParams)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.ColumnDistinctFmtAsync<T>(default(CancellationToken), sqlFormat, sqlParams));
-        }
-
-        /// <summary>
         /// Returns an Dictionary&lt;K, List&lt;V&gt;&gt; grouping made from the first two columns using an Sql Expression. E.g:
         /// <para>db.Lookup&lt;int, string&gt;(db.From&lt;Person&gt;().Select(x => new { x.Age, x.LastName }).Where(q => q.Age < 50))</para>
         /// </summary>
@@ -334,21 +289,6 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
-        /// Returns an Dictionary&lt;K, List&lt;V&gt;&gt; grouping made from the first two columns using an SqlFormat query. E.g:
-        /// <para>db.LookupFmt&lt;int, string&gt;("SELECT Age, LastName FROM Person WHERE Age &lt; {0}", 50)</para>
-        /// </summary>
-        [Obsolete(Messages.LegacyApi)]
-        public static Task<Dictionary<K, List<V>>> LookupFmtAsync<K, V>(this IDbConnection dbConn, CancellationToken token, string sqlFormat, params object[] sqlParams)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.LookupFmtAsync<K, V>(token, sqlFormat, sqlParams));
-        }
-        [Obsolete(Messages.LegacyApi)]
-        public static Task<Dictionary<K, List<V>>> LookupFmtAsync<K, V>(this IDbConnection dbConn, string sqlFormat, params object[] sqlParams)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.LookupFmtAsync<K, V>(default(CancellationToken), sqlFormat, sqlParams));
-        }
-
-        /// <summary>
         /// Returns a Dictionary from the first 2 columns: Column 1 (Keys), Column 2 (Values) using an SqlExpression. E.g:
         /// <para>db.Dictionary&lt;int, string&gt;(db.From&lt;Person&gt;().Select(x => new { x.Id, x.LastName }).Where(x => x.Age < 50))</para>
         /// </summary>
@@ -373,21 +313,6 @@ namespace ServiceStack.OrmLite
         public static Task<Dictionary<K, V>> DictionaryAsync<K, V>(this IDbConnection dbConn, string sql, object anonType = null, CancellationToken token = default(CancellationToken))
         {
             return dbConn.Exec(dbCmd => dbCmd.DictionaryAsync<K, V>(sql, anonType, token));
-        }
-
-        /// <summary>
-        /// Returns a Dictionary from the first 2 columns: Column 1 (Keys), Column 2 (Values) using an SqlFormat query. E.g:
-        /// <para>db.DictionaryFmt&lt;int, string&gt;("SELECT Id, LastName FROM Person WHERE Age &lt; {0}", 50)</para>
-        /// </summary>
-        [Obsolete(Messages.LegacyApi)]
-        public static Task<Dictionary<K, V>> DictionaryFmtAsync<K, V>(this IDbConnection dbConn, CancellationToken token, string sqlFormat, params object[] sqlParams)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.DictionaryFmtAsync<K, V>(token, sqlFormat, sqlParams));
-        }
-        [Obsolete(Messages.LegacyApi)]
-        public static Task<Dictionary<K, V>> DictionaryFmtAsync<K, V>(this IDbConnection dbConn, string sqlFormat, params object[] sqlParams)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.DictionaryFmtAsync<K, V>(default(CancellationToken), sqlFormat, sqlParams));
         }
 
         /// <summary>
@@ -439,22 +364,6 @@ namespace ServiceStack.OrmLite
         public static Task<bool> ExistsAsync<T>(this IDbConnection dbConn, string sql, object anonType = null, CancellationToken token = default(CancellationToken))
         {
             return dbConn.Exec(dbCmd => dbCmd.ExistsAsync<T>(sql, anonType, token));
-        }
-
-        /// <summary>
-        /// Returns true if the Query returns any records, using an SqlFormat query. E.g:
-        /// <para>db.ExistsFmt&lt;Person&gt;("Age = {0}", 42)</para>
-        /// <para>db.ExistsFmt&lt;Person&gt;("SELECT * FROM Person WHERE Age = {0}", 50)</para>
-        /// </summary>
-        [Obsolete(Messages.LegacyApi)]
-        public static Task<bool> ExistsFmtAsync<T>(this IDbConnection dbConn, CancellationToken token, string sqlFormat, params object[] filterParams)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.ExistsFmtAsync<T>(token, sqlFormat, filterParams));
-        }
-        [Obsolete(Messages.LegacyApi)]
-        public static Task<bool> ExistsFmtAsync<T>(this IDbConnection dbConn, string sqlFormat, params object[] filterParams)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.ExistsFmtAsync<T>(default(CancellationToken), sqlFormat, filterParams));
         }
 
         /// <summary>

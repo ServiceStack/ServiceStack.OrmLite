@@ -30,6 +30,38 @@ namespace ServiceStack.OrmLite.Legacy
             var sql = OrmLiteReadCommandExtensionsLegacy.ToSelectFmt<TModel>(dbCmd.GetDialectProvider(), fromTableType, sqlFilter, filterParams);
             return dbCmd.ConvertToListAsync<TModel>(sql, token);
         }
+
+        internal static Task<T> ScalarFmtAsync<T>(this IDbCommand dbCmd, CancellationToken token, string sql, params object[] sqlParams)
+        {
+            return dbCmd.ScalarAsync<T>(sql.SqlFmt(sqlParams), token);
+        }
+
+        internal static Task<List<T>> ColumnFmtAsync<T>(this IDbCommand dbCmd, CancellationToken token, string sql, params object[] sqlParams)
+        {
+            return dbCmd.ColumnAsync<T>(sql.SqlFmt(sqlParams), token);
+        }
+
+        internal static Task<HashSet<T>> ColumnDistinctFmtAsync<T>(this IDbCommand dbCmd, CancellationToken token, string sql, params object[] sqlParams)
+        {
+            return dbCmd.ColumnDistinctAsync<T>(sql.SqlFmt(sqlParams), token);
+        }
+
+        internal static Task<Dictionary<K, List<V>>> LookupFmtAsync<K, V>(this IDbCommand dbCmd, CancellationToken token, string sql, params object[] sqlParams)
+        {
+            return dbCmd.LookupAsync<K, V>(sql.SqlFmt(sqlParams), token);
+        }
+
+        internal static Task<Dictionary<K, V>> DictionaryFmtAsync<K, V>(this IDbCommand dbCmd, CancellationToken token, string sqlFormat, params object[] sqlParams)
+        {
+            return dbCmd.DictionaryAsync<K, V>(sqlFormat.SqlFmt(sqlParams), token);
+        }
+
+        internal static Task<bool> ExistsFmtAsync<T>(this IDbCommand dbCmd, CancellationToken token, string sqlFilter, params object[] filterParams)
+        {
+            var fromTableType = typeof(T);
+            return dbCmd.ScalarAsync(dbCmd.GetDialectProvider().ToSelectStatement(fromTableType, sqlFilter, filterParams), token)
+                .Then(x => x != null);
+        }
     }
 }
 
