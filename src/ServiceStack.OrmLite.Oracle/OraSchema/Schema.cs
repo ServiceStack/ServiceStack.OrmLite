@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Data;
 using ServiceStack.DataAnnotations;
+using ServiceStack.OrmLite.Legacy;
 using ServiceStack.OrmLite.Oracle.DbSchema;
 
 namespace ServiceStack.OrmLite.Oracle
@@ -31,7 +32,7 @@ namespace ServiceStack.OrmLite.Oracle
 		{
 			get
 			{
-                return Connection.Select<Table>(sqlTables);
+                return Connection.SelectFmt<Table>(sqlTables);
 			}
 		}
 
@@ -39,7 +40,7 @@ namespace ServiceStack.OrmLite.Oracle
 		{
 			string sql = sqlTables + string.Format("    WHERE TABLE_NAME ='{0}' ", name);
 
-            var query = Connection.Select<Table>(sql);
+            var query = Connection.SelectFmt<Table>(sql);
             return query.FirstOrDefault();
 		}
 		
@@ -48,9 +49,9 @@ namespace ServiceStack.OrmLite.Oracle
 
 			string sql = string.Format(sqlColumns.ToString(),string.IsNullOrEmpty(tableName) ? "\'\'" : string.Format("\'{0}\'", tableName));
 
-            List<Column> columns = Connection.Select<Column>(sql);
+            List<Column> columns = Connection.SelectFmt<Column>(sql);
 
-            List<Generador> gens = Connection.Select<Generador>(sqlGenerator.ToString());
+            List<Generador> gens = Connection.SelectFmt<Generador>(sqlGenerator.ToString());
 
             foreach (var record in columns)
             {
@@ -74,7 +75,7 @@ namespace ServiceStack.OrmLite.Oracle
 		public Procedure GetProcedure(string name)
 		{
 			string sql=  string.Format(" sqlProcedures.ToString() ", name);
-            var query = Connection.Select<Procedure>(sql);
+            var query = Connection.SelectFmt<Procedure>(sql);
             return query.FirstOrDefault();
         }
 
@@ -82,7 +83,7 @@ namespace ServiceStack.OrmLite.Oracle
 		{
 			get
 			{
-                return Connection.Select<Procedure>(sqlProcedures.ToString());
+                return Connection.SelectFmt<Procedure>(sqlProcedures.ToString());
 			}
 		}
 
@@ -94,7 +95,7 @@ namespace ServiceStack.OrmLite.Oracle
 		public List<Parameter> GetParameters(string procedureName)
 		{
 			string sql = string.Format(sqlParameters.ToString(), string.IsNullOrEmpty(procedureName) ? "" :procedureName);
-            return Connection.Select<Parameter>(sql);
+            return Connection.SelectFmt<Parameter>(sql);
 		}
 		
 		private void Init()
