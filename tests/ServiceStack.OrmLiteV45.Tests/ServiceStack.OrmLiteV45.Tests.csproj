@@ -77,6 +77,7 @@
     <Compile Include="Issues\PredicateBuilderIssue.cs" />
     <Compile Include="Legacy\ApiMySqlLegacyTestsAsync.cs" />
     <Compile Include="Legacy\ApiPostgreSqlLegacyTestsAsync.cs" />
+    <Compile Include="Legacy\ApiSqliteLegacyTestsAsync.cs" />
     <Compile Include="LoadReferencesTests.cs" />
     <Compile Include="OrmLiteContextTests.cs" />
     <Compile Include="OrmLiteTestBase.cs" />
