@@ -43,7 +43,6 @@ namespace ServiceStack.OrmLite.Tests
             })
             {
                 Assert.That(db.Select<Person>(x => x.Age > 40)[0].FirstName, Is.EqualTo("Mocked"));
-                Assert.That(db.Select<Person>(q => q.Where(x => x.Age > 40))[0].FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.Select(db.From<Person>().Where(x => x.Age > 40))[0].FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.Select<Person>("Age > 40")[0].FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.Select<Person>("SELECT * FROM Person WHERE Age > 40")[0].FirstName, Is.EqualTo("Mocked"));
@@ -51,8 +50,6 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(db.Select<Person>("SELECT * FROM Person WHERE Age > @age", new { age = 40 })[0].FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.Select<Person>("Age > @age", new Dictionary<string, object> { { "age", 40 } })[0].FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.Select<Person>("SELECT * FROM Person WHERE Age > @age", new Dictionary<string, object> { { "age", 40 } })[0].FirstName, Is.EqualTo("Mocked"));
-                Assert.That(db.SelectFmt<Person>("Age > {0}", 40)[0].FirstName, Is.EqualTo("Mocked"));
-                Assert.That(db.SelectFmt<Person>("SELECT * FROM Person WHERE Age > {0}", 40)[0].FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.Where<Person>("Age", 27)[0].FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.Where<Person>(new { Age = 27 })[0].FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.SelectByIds<Person>(new[] { 1, 2, 3 })[0].FirstName, Is.EqualTo("Mocked"));
@@ -66,14 +63,11 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(db.Single(db.From<Person>().Where(x => x.Age == 42)).FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.Single<Person>(new { Age = 42 }).FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.Single<Person>("Age = @age", new { age = 42 }).FirstName, Is.EqualTo("Mocked"));
-                Assert.That(db.SingleFmt<Person>("Age = {0}", 42).FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.SingleById<Person>(1).FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.SingleWhere<Person>("Age", 42).FirstName, Is.EqualTo("Mocked"));
 
                 Assert.That(db.Exists<Person>(new { Age = 42 }), Is.True);
                 Assert.That(db.Exists<Person>("SELECT * FROM Person WHERE Age = @age", new { age = 42 }), Is.True);
-                Assert.That(db.ExistsFmt<Person>("Age = {0}", 42), Is.True);
-                Assert.That(db.ExistsFmt<Person>("SELECT * FROM Person WHERE Age = {0}", 42), Is.True);
             }
         }
 
@@ -169,7 +163,6 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(db.Single(db.From<Person>().Where(x => x.Age == 42)).FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.Single<Person>(new { Age = 42 }).FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.Single<Person>("Age = @age", new { age = 42 }).FirstName, Is.EqualTo("Mocked"));
-                Assert.That(db.SingleFmt<Person>("Age = {0}", 42).FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.SingleById<Person>(1).FirstName, Is.EqualTo("Mocked"));
                 Assert.That(db.SingleWhere<Person>("Age", 42).FirstName, Is.EqualTo("Mocked"));
             }
@@ -187,7 +180,6 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(db.Scalar<Person, int>(x => Sql.Max(x.Age)), Is.EqualTo(1000));
                 Assert.That(db.Scalar<Person, int>(x => Sql.Max(x.Age), x => x.Age < 50), Is.EqualTo(1000));
                 Assert.That(db.Scalar<int>("SELECT COUNT(*) FROM Person WHERE Age > @age", new { age = 40 }), Is.EqualTo(1000));
-                Assert.That(db.ScalarFmt<int>("SELECT COUNT(*) FROM Person WHERE Age > {0}", 40), Is.EqualTo(1000));
 
                 Assert.That(db.SqlScalar<int>("SELECT COUNT(*) FROM Person WHERE Age < @age", new { age = 50 }), Is.EqualTo(1000));
                 Assert.That(db.SqlScalar<int>("SELECT COUNT(*) FROM Person WHERE Age < @age", new Dictionary<string, object> { { "age", 50 } }), Is.EqualTo(1000));
@@ -204,7 +196,6 @@ namespace ServiceStack.OrmLite.Tests
             })
             {
                 Assert.That(db.Column<string>("SELECT LastName FROM Person WHERE Age = @age", new { age = 27 })[0], Is.EqualTo("Mock1"));
-                Assert.That(db.ColumnFmt<string>("SELECT LastName FROM Person WHERE Age = {0}", 27)[0], Is.EqualTo("Mock1"));
                 Assert.That(db.SqlColumn<string>("SELECT LastName FROM Person WHERE Age < @age", new { age = 50 })[0], Is.EqualTo("Mock1"));
                 Assert.That(db.SqlColumn<string>("SELECT LastName FROM Person WHERE Age < @age", new Dictionary<string, object> { { "age", 50 } })[0], Is.EqualTo("Mock1"));
             }
@@ -220,7 +211,6 @@ namespace ServiceStack.OrmLite.Tests
             })
             {
                 Assert.That(db.ColumnDistinct<int>("SELECT Age FROM Person WHERE Age < @age", new { age = 50 }).Count, Is.EqualTo(3));
-                Assert.That(db.ColumnDistinctFmt<int>("SELECT Age FROM Person WHERE Age < {0}", 50).Count, Is.EqualTo(3));
             }
         }
 
@@ -234,7 +224,6 @@ namespace ServiceStack.OrmLite.Tests
             })
             {
                 Assert.That(db.Dictionary<int, string>("SELECT Id, LastName FROM Person WHERE Age < @age", new { age = 50 })[1], Is.EqualTo("MockValue"));
-                Assert.That(db.DictionaryFmt<int, string>("SELECT Id, LastName FROM Person WHERE Age < {0}", 50)[1], Is.EqualTo("MockValue"));
             }
         }
 
@@ -255,10 +244,8 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(db.UpdateNonDefaults(new Person { FirstName = "JJ" }, p => p.LastName == "Hendrix"), Is.EqualTo(10));
                 Assert.That(db.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName), Is.EqualTo(10));
                 Assert.That(db.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName, p => p.LastName == "Hendrix"), Is.EqualTo(10));
-                Assert.That(db.UpdateOnly(new Person { FirstName = "JJ", LastName = "Hendo" }, ev => ev.Update(p => p.FirstName)), Is.EqualTo(10));
-                Assert.That(db.UpdateOnly(new Person { FirstName = "JJ" }, ev => ev.Update(p => p.FirstName).Where(x => x.FirstName == "Jimi")), Is.EqualTo(10));
-                Assert.That(db.UpdateFmt<Person>(set: "FirstName = {0}".SqlFmt("JJ"), where: "LastName = {0}".SqlFmt("Hendrix")), Is.EqualTo(10));
-                Assert.That(db.UpdateFmt(table: "Person", set: "FirstName = {0}".SqlFmt("JJ"), where: "LastName = {0}".SqlFmt("Hendrix")), Is.EqualTo(10));
+                Assert.That(db.UpdateOnly(new Person { FirstName = "JJ", LastName = "Hendo" }, db.From<Person>().Update(p => p.FirstName)), Is.EqualTo(10));
+                Assert.That(db.UpdateOnly(new Person { FirstName = "JJ" }, db.From<Person>().Update(p => p.FirstName).Where(x => x.FirstName == "Jimi")), Is.EqualTo(10));
             }
         }
 
@@ -276,13 +263,10 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(db.DeleteNonDefaults(new Person { FirstName = "Jimi", Age = 27 }), Is.EqualTo(10));
                 Assert.That(db.DeleteById<Person>(1), Is.EqualTo(10));
                 Assert.That(db.DeleteByIds<Person>(new[] { 1, 2, 3 }), Is.EqualTo(10));
-                Assert.That(db.DeleteFmt<Person>("Age = {0}", 27), Is.EqualTo(10));
-                Assert.That(db.DeleteFmt(typeof(Person), "Age = {0}", 27), Is.EqualTo(10));
+                Assert.That(db.Delete<Person>("Age = @age", new { age = 27 }), Is.EqualTo(10));
+                Assert.That(db.Delete(typeof(Person), "Age = @age", new { age = 27 }), Is.EqualTo(10));
                 Assert.That(db.Delete<Person>(p => p.Age == 27), Is.EqualTo(10));
-                Assert.That(db.Delete<Person>(ev => ev.Where(p => p.Age == 27)), Is.EqualTo(10));
                 Assert.That(db.Delete(db.From<Person>().Where(p => p.Age == 27)), Is.EqualTo(10));
-                Assert.That(db.DeleteFmt<Person>(where: "Age = {0}".SqlFmt(27)), Is.EqualTo(10));
-                Assert.That(db.DeleteFmt(table: "Person", where: "Age = {0}".SqlFmt(27)), Is.EqualTo(10));
             }
         }
 
@@ -334,11 +318,7 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(sqlStatements.Count, Is.EqualTo(i));
                 Assert.That(sqlCommandStatements.Count, Is.EqualTo(i));
 
-                i++; db.InsertOnly(new PersonWithAutoId { FirstName = "Amy", Age = 27 }, ev => ev.Insert(p => new { p.FirstName, p.Age }));
-                Assert.That(sqlStatements.Count, Is.EqualTo(i));
-                Assert.That(sqlCommandStatements.Count, Is.EqualTo(i));
-
-                i++; db.InsertOnly(new PersonWithAutoId { FirstName = "Amy", Age = 27 }, ev => db.From<PersonWithAutoId>().Insert(p => new { p.FirstName, p.Age }));
+                i++; db.InsertOnly(new PersonWithAutoId { FirstName = "Amy", Age = 27 }, db.From<PersonWithAutoId>().Insert(p => new { p.FirstName, p.Age }));
                 Assert.That(sqlStatements.Count, Is.EqualTo(i));
                 Assert.That(sqlCommandStatements.Count, Is.EqualTo(i));
 

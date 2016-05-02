@@ -14,22 +14,6 @@ namespace ServiceStack.OrmLite
 {
     internal static class ReadExpressionCommandExtensionsAsync
     {
-        [Obsolete("Use db.SelectAsync(db.From<T>())")]
-        internal static Task<List<T>> SelectAsync<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression, CancellationToken token)
-        {
-            var q = dbCmd.GetDialectProvider().SqlExpression<T>();
-            var sql = expression(q).SelectInto<T>();
-            return dbCmd.ExprConvertToListAsync<T>(sql, q.Params, token);
-        }
-
-        [Obsolete("Use db.SelectAsync(db.From<T>())")]
-        internal static Task<List<Into>> SelectAsync<Into, From>(this IDbCommand dbCmd, Func<SqlExpression<From>, SqlExpression<From>> expression, CancellationToken token)
-        {
-            var q = dbCmd.GetDialectProvider().SqlExpression<From>();
-            string sql = expression(q).SelectInto<Into>();
-            return dbCmd.ExprConvertToListAsync<Into>(sql, q.Params, token);
-        }
-
         internal static Task<List<Into>> SelectAsync<Into, From>(this IDbCommand dbCmd, SqlExpression<From> q, CancellationToken token)
         {
             string sql = q.SelectInto<Into>();
@@ -48,13 +32,6 @@ namespace ServiceStack.OrmLite
             string sql = q.Where(predicate).SelectInto<T>();
 
             return dbCmd.ExprConvertToListAsync<T>(sql, q.Params, token);
-        }
-
-        [Obsolete("Use db.SingleAsync(db.From<T>())")]
-        internal static Task<T> SingleAsync<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression, CancellationToken token)
-        {
-            var expr = dbCmd.GetDialectProvider().SqlExpression<T>();
-            return dbCmd.SingleAsync(expression(expr), token);
         }
 
         internal static Task<T> SingleAsync<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate, CancellationToken token)
@@ -95,14 +72,6 @@ namespace ServiceStack.OrmLite
             return GetCountAsync(dbCmd, sql, q.Params, token);
         }
 
-        [Obsolete("Use db.CountAsync(db.From<T>())")]
-        internal static Task<long> CountAsync<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression, CancellationToken token)
-        {
-            var q = dbCmd.GetDialectProvider().SqlExpression<T>();
-            var sql = expression(q).ToCountStatement();
-            return GetCountAsync(dbCmd, sql, q.Params, token);
-        }
-
         internal static Task<long> CountAsync<T>(this IDbCommand dbCmd, SqlExpression<T> q, CancellationToken token)
         {
             var sql = q.ToCountStatement();
@@ -131,14 +100,6 @@ namespace ServiceStack.OrmLite
         internal static Task<long> RowCountAsync(this IDbCommand dbCmd, string sql, CancellationToken token)
         {
             return dbCmd.ScalarAsync<long>("SELECT COUNT(*) FROM ({0}) AS COUNT".Fmt(sql), token);
-        }
-
-        [Obsolete("Use db.LoadSelectAsync(db.From<T>())")]
-        internal static Task<List<T>> LoadSelectAsync<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression, string[] include = null, CancellationToken token = default(CancellationToken))
-        {
-            var expr = dbCmd.GetDialectProvider().SqlExpression<T>();
-            expr = expression(expr);
-            return dbCmd.LoadListWithReferences<T, T>(expr, include, token);
         }
 
         internal static Task<List<T>> LoadSelectAsync<T>(this IDbCommand dbCmd, SqlExpression<T> expression = null, string[] include = null, CancellationToken token = default(CancellationToken))

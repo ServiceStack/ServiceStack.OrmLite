@@ -17,7 +17,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
             using (var db = OpenDbConnection())
             {
-                var rows = db.Select<TestType>(q => q.Where(x => x.BoolColumn).Limit(5));
+                var rows = db.Select(db.From<TestType>().Where(x => x.BoolColumn).Limit(5));
                 db.GetLastSql().Print();
 
                 Assert.That(rows.Count, Is.EqualTo(5));
@@ -120,9 +120,9 @@ namespace ServiceStack.OrmLite.Tests.Expression
                     Is.EquivalentTo(new[] { "Planes R Us", "We do everything!" }));
 
 
-                var partialDto = db.Select<Shipper>(q =>
-                    q.Select(x => new { x.Phone, x.CompanyName })
-                     .Where(x => x.ShipperTypeId == 2));
+                var partialDto = db.Select(db.From<Shipper>()
+                    .Select(x => new { x.Phone, x.CompanyName })
+                    .Where(x => x.ShipperTypeId == 2));
 
                 Assert.That(partialDto.Map(x => x.Phone),
                     Is.EquivalentTo(new[] { "555-UNICORNS", "555-PLANES" }));
@@ -130,9 +130,9 @@ namespace ServiceStack.OrmLite.Tests.Expression
                     Is.EquivalentTo(new[] { "Planes R Us", "We do everything!" }));
 
 
-                partialDto = db.Select<Shipper>(q =>
-                    q.Select("Phone, " + "CompanyName".SqlColumn())
-                     .Where(x => x.ShipperTypeId == 2));
+                partialDto = db.Select(db.From<Shipper>()
+                    .Select("Phone, " + "CompanyName".SqlColumn())
+                    .Where(x => x.ShipperTypeId == 2));
 
                 Assert.That(partialDto.Map(x => x.Phone),
                     Is.EquivalentTo(new[] { "555-UNICORNS", "555-PLANES" }));

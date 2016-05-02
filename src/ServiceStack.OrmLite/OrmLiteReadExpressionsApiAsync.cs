@@ -24,16 +24,6 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns results from using an SqlExpression lambda. E.g:
-        /// <para>db.Select&lt;Person&gt;(q =&gt; q.Where(x =&gt; x.Age &gt; 40))</para>
-        /// </summary>
-        [Obsolete("Use db.SelectAsync(db.From<T>())")]
-        public static Task<List<T>> SelectAsync<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression, CancellationToken token = default(CancellationToken))
-        {
-            return dbConn.Exec(dbCmd => dbCmd.SelectAsync(expression, token));
-        }
-
-        /// <summary>
-        /// Returns results from using an SqlExpression lambda. E.g:
         /// <para>db.Select(db.From&lt;Person&gt;().Where(x =&gt; x.Age &gt; 40))</para>
         /// </summary>
         public static Task<List<T>> SelectAsync<T>(this IDbConnection dbConn, SqlExpression<T> expression, CancellationToken token = default(CancellationToken))
@@ -45,15 +35,6 @@ namespace ServiceStack.OrmLite
         /// Project results from a number of joined tables into a different model
         /// </summary>
         public static Task<List<Into>> SelectAsync<Into, From>(this IDbConnection dbConn, SqlExpression<From> expression, CancellationToken token = default(CancellationToken))
-        {
-            return dbConn.Exec(dbCmd => dbCmd.SelectAsync<Into, From>(expression, token));
-        }
-
-        /// <summary>
-        /// Project results from a number of joined tables into a different model
-        /// </summary>
-        [Obsolete("Use db.SelectAsync<Into, From>(db.From<T>())")]
-        public static Task<List<Into>> SelectAsync<Into, From>(this IDbConnection dbConn, Func<SqlExpression<From>, SqlExpression<From>> expression, CancellationToken token = default(CancellationToken))
         {
             return dbConn.Exec(dbCmd => dbCmd.SelectAsync<Into, From>(expression, token));
         }
@@ -74,16 +55,6 @@ namespace ServiceStack.OrmLite
         public static Task<T> SingleAsync<T>(this IDbConnection dbConn, Expression<Func<T, bool>> predicate, CancellationToken token = default(CancellationToken))
         {
             return dbConn.Exec(dbCmd => dbCmd.SingleAsync(predicate, token));
-        }
-
-        /// <summary>
-        /// Returns a single result from using an SqlExpression lambda. E.g:
-        /// <para>db.Single&lt;Person&gt;(q =&gt; q.Where(x =&gt; x.Age == 42))</para>
-        /// </summary>
-        [Obsolete("Use db.SingleAsync(db.From<T>())")]
-        public static Task<T> SingleAsync<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression, CancellationToken token = default(CancellationToken))
-        {
-            return dbConn.Exec(dbCmd => dbCmd.SingleAsync(expression, token));
         }
 
         /// <summary>
@@ -133,16 +104,6 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
-        /// Returns the count of rows that match the SqlExpression lambda, E.g:
-        /// <para>db.Count&lt;Person&gt;(q =&gt; q.Where(x =&gt; x.Age &lt; 50))</para>
-        /// </summary>
-        [Obsolete("Use db.CountAsync(db.From<T>())")]
-        public static Task<long> CountAsync<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression, CancellationToken token = default(CancellationToken))
-        {
-            return dbConn.Exec(dbCmd => dbCmd.CountAsync(expression, token));
-        }
-
-        /// <summary>
         /// Returns the count of rows that match the supplied SqlExpression, E.g:
         /// <para>db.Count(db.From&lt;Person&gt;().Where(x =&gt; x.Age &lt; 50))</para>
         /// </summary>
@@ -180,16 +141,6 @@ namespace ServiceStack.OrmLite
         public static Task<List<T>> LoadSelectAsync<T>(this IDbConnection dbConn, Expression<Func<T, bool>> predicate, string[] include = null, CancellationToken token = default(CancellationToken))
         {
             return dbConn.Exec(dbCmd => dbCmd.LoadSelectAsync(predicate, include, token));
-        }
-
-        /// <summary>
-        /// Returns results with references from using an SqlExpression lambda. E.g:
-        /// <para>db.LoadSelectAsync&lt;Person&gt;(q =&gt; q.Where(x =&gt; x.Age &gt; 40))</para>
-        /// </summary>
-        [Obsolete("Use db.LoadSelectAsync(db.From<T>())")]
-        public static Task<List<T>> LoadSelectAsync<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression, string[] include = null, CancellationToken token = default(CancellationToken))
-        {
-            return dbConn.Exec(dbCmd => dbCmd.LoadSelectAsync(expression, include, token));
         }
 
         /// <summary>

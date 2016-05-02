@@ -8,11 +8,15 @@ using System.Text;
 using System.Collections.ObjectModel;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
     public abstract partial class SqlExpression<T> : ISqlExpression, IHasUntypedSqlExpression
     {
+        protected bool visitedExpressionIsTableColumn = false;
+        protected bool skipParameterizationForThisExpression = false;
+
         private Expression<Func<T, bool>> underlyingExpression;
         private List<string> orderByProperties = new List<string>();
         private string selectExpression = string.Empty;
@@ -134,7 +138,7 @@ namespace ServiceStack.OrmLite
             allTableDefs.AddRange(tableDefs);
 
             var fieldsList = new List<string>();
-            var sb = new StringBuilder();
+            var sb = StringBuilderCache.Allocate();
             foreach (var field in fields)
             {
                 if (string.IsNullOrEmpty(field))
@@ -174,7 +178,7 @@ namespace ServiceStack.OrmLite
                 sb.Append(qualifiedName);
             }
 
-            UnsafeSelect(sb.ToString());
+            UnsafeSelect(StringBuilderCache.ReturnAndFree(sb));
             OnlyFields = new HashSet<string>(fieldsList, StringComparer.OrdinalIgnoreCase);
 
             return this;
@@ -286,9 +290,6 @@ namespace ServiceStack.OrmLite
             if (string.IsNullOrEmpty(sqlFilter))
                 return null;
 
-            if (!OrmLiteConfig.UseParameterizeSqlExpressions)
-                return sqlFilter.SqlFmt(filterParams);
-
             for (var i = 0; i < filterParams.Length; i++)
             {
                 var pLiteral = "{" + i + "}";
@@ -311,7 +312,7 @@ namespace ServiceStack.OrmLite
 
         private string CreateInParamSql(IEnumerable values)
         {
-            var sbParams = new StringBuilder();
+            var sbParams = StringBuilderCache.Allocate();
             foreach (var item in values)
             {
                 var p = AddParam(item);
@@ -321,7 +322,7 @@ namespace ServiceStack.OrmLite
 
                 sbParams.Append(p.ParameterName);
             }
-            var sqlIn = sbParams.ToString();
+            var sqlIn = StringBuilderCache.ReturnAndFree(sbParams);
             return sqlIn;
         }
 
@@ -495,7 +496,13 @@ namespace ServiceStack.OrmLite
         {
             orderByProperties.Clear();
 
-            var sbOrderBy = new StringBuilder();
+            if (fields.Length == 0)
+            {
+                this.orderBy = null;
+                return this;
+            }
+
+            var sbOrderBy = StringBuilderCache.Allocate();
             foreach (var field in fields)
             {
                 var tableDef = GetModelDefinition(field);
@@ -509,9 +516,7 @@ namespace ServiceStack.OrmLite
                 sbOrderBy.Append(qualifiedName + orderBySuffix);
             }
 
-            this.orderBy = sbOrderBy.Length == 0
-                ? null
-                : "ORDER BY " + sbOrderBy;
+            this.orderBy = "ORDER BY " + StringBuilderCache.ReturnAndFree(sbOrderBy);
             return this;
         }
 
@@ -535,7 +540,13 @@ namespace ServiceStack.OrmLite
         {
             orderByProperties.Clear();
 
-            var sbOrderBy = new StringBuilder();
+            if (fieldNames.Length == 0)
+            {
+                this.orderBy = null;
+                return this;
+            }
+
+            var sbOrderBy = StringBuilderCache.Allocate();
             foreach (var fieldName in fieldNames)
             {
                 var reverse = fieldName.StartsWith("-");
@@ -555,9 +566,7 @@ namespace ServiceStack.OrmLite
                 sbOrderBy.Append(qualifiedName + useSuffix);
             }
 
-            this.orderBy = sbOrderBy.Length == 0
-                ? null
-                : "ORDER BY " + sbOrderBy;
+            this.orderBy = "ORDER BY " + StringBuilderCache.ReturnAndFree(sbOrderBy);
             return this;
         }
 
@@ -684,7 +693,7 @@ namespace ServiceStack.OrmLite
         {
             if (orderByProperties.Count > 0)
             {
-                var sb = new StringBuilder();
+                var sb = StringBuilderCache.Allocate();
                 foreach (var prop in orderByProperties)
                 {
                     if (sb.Length > 0)
@@ -692,7 +701,7 @@ namespace ServiceStack.OrmLite
 
                     sb.Append(prop);
                 }
-                orderBy = "ORDER BY " + sb;
+                orderBy = "ORDER BY " + StringBuilderCache.ReturnAndFree(sb);
             }
             else
             {
@@ -909,7 +918,7 @@ namespace ServiceStack.OrmLite
         {
             CopyParamsTo(dbCmd);
 
-            var setFields = new StringBuilder();
+            var setFields = StringBuilderCache.Allocate();
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
@@ -936,7 +945,7 @@ namespace ServiceStack.OrmLite
                 throw new ArgumentException("No non-null or non-default values were provided for type: " + typeof(T).Name);
 
             dbCmd.CommandText = string.Format("UPDATE {0} SET {1} {2}",
-                DialectProvider.GetQuotedTableName(modelDef), setFields, WhereExpression);
+                DialectProvider.GetQuotedTableName(modelDef), StringBuilderCache.ReturnAndFree(setFields), WhereExpression);
         }
 
         public virtual string ToSelectStatement()
@@ -1066,7 +1075,11 @@ namespace ServiceStack.OrmLite
 
         protected internal virtual object Visit(Expression exp)
         {
-            if (exp == null) return string.Empty;
+            visitedExpressionIsTableColumn = false;
+
+            if (exp == null)
+                return string.Empty;
+
             switch (exp.NodeType)
             {
                 case ExpressionType.Lambda:
@@ -1127,7 +1140,10 @@ namespace ServiceStack.OrmLite
 
         protected internal virtual object VisitJoin(Expression exp)
         {
-            return Visit(exp);
+            skipParameterizationForThisExpression = true;
+            var visitedExpression = Visit(exp);
+            skipParameterizationForThisExpression = false;
+            return visitedExpression;
         }
 
         protected virtual object VisitLambda(LambdaExpression lambda)
@@ -1148,7 +1164,11 @@ namespace ServiceStack.OrmLite
 
         public virtual object GetValue(object value, Type type)
         {
-            return DialectProvider.GetQuotedValue(value, type);
+            if (skipParameterizationForThisExpression)
+                return DialectProvider.GetQuotedValue(value, type);
+
+            var paramValue = DialectProvider.GetParamValue(value, type);
+            return paramValue ?? "null";
         }
 
         protected virtual object VisitBinary(BinaryExpression b)
@@ -1250,7 +1270,26 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        protected virtual void VisitFilter(string operand, object originalLeft, object originalRight, ref object left, ref object right) {}
+        protected virtual void VisitFilter(string operand, object originalLeft, object originalRight, ref object left, ref object right)
+        {
+            if (skipParameterizationForThisExpression || visitedExpressionIsTableColumn)
+                return;
+
+            if (originalLeft is EnumMemberAccess && originalRight is EnumMemberAccess)
+                return;
+
+            if (operand == "AND" || operand == "OR" || operand == "is" || operand == "is not")
+                return;
+
+            ConvertToPlaceholderAndParameter(ref right);
+        }
+
+        protected virtual void ConvertToPlaceholderAndParameter(ref object right)
+        {
+            var parameter = AddParam(right);
+
+            right = parameter.ParameterName;
+        }
 
         protected virtual object VisitMemberAccess(MemberExpression m)
         {
@@ -1292,7 +1331,12 @@ namespace ServiceStack.OrmLite
             return new PartialSqlString(GetQuotedColumnName(tableDef, m.Member.Name));
         }
 
-        protected virtual void OnVisitMemberType(Type modelType) {}
+        protected virtual void OnVisitMemberType(Type modelType)
+        {
+            var tableDef = modelType.GetModelDefinition();
+            if (tableDef != null)
+                visitedExpressionIsTableColumn = true;
+        }
 
         protected virtual object VisitMemberInit(MemberInitExpression exp)
         {
@@ -1312,7 +1356,7 @@ namespace ServiceStack.OrmLite
             catch (InvalidOperationException)
             { // FieldName ?
                 var exprs = VisitExpressionList(nex.Arguments);
-                var r = new StringBuilder();
+                var r = StringBuilderCache.Allocate();
                 foreach (object e in exprs)
                 {
                     if (r.Length > 0)
@@ -1320,7 +1364,7 @@ namespace ServiceStack.OrmLite
 
                     r.Append(e);
                 }
-                return r.ToString();
+                return StringBuilderCache.ReturnAndFree(r);
             }
         }
 
@@ -1433,12 +1477,12 @@ namespace ServiceStack.OrmLite
         protected virtual object VisitNewArray(NewArrayExpression na)
         {
             var exprs = VisitExpressionList(na.Expressions);
-            var sb = new StringBuilder();
+            var sb = StringBuilderCache.Allocate();
             foreach (var e in exprs)
             {
                 sb.Append(sb.Length > 0 ? "," + e : e);
             }
-            return sb.ToString();
+            return StringBuilderCache.ReturnAndFree(sb);
         }
 
         protected virtual List<object> VisitNewArrayFromExpressionList(NewArrayExpression na)
@@ -1634,26 +1678,9 @@ namespace ServiceStack.OrmLite
 
             var inArgs = Sql.Flatten(getter() as IEnumerable);
 
-            string sqlIn = "NULL";
-            if (inArgs.Count > 0)
-            {
-                var sIn = new StringBuilder();
-                if (OrmLiteConfig.UseParameterizeSqlExpressions)
-                {
-                    sqlIn = CreateInParamSql(inArgs);
-                }
-                else
-                {
-                    foreach (object e in inArgs)
-                    {
-                        if (sIn.Length > 0)
-                            sIn.Append(",");
-
-                        sIn.Append(DialectProvider.GetQuotedValue(e, e.GetType()));
-                    }
-                    sqlIn = sIn.ToString();
-                }
-            }
+            var sqlIn = inArgs.Count > 0
+                ? CreateInParamSql(inArgs)
+                : "NULL";
 
             var statement = string.Format("{0} {1} ({2})", quotedColName, "In", sqlIn);
             return new PartialSqlString(statement);
@@ -1714,24 +1741,7 @@ namespace ServiceStack.OrmLite
                 if (inArgs.Count == 0)
                     return "(1=0)"; // "column IN ([])" is always false
 
-                string sqlIn;
-                if (OrmLiteConfig.UseParameterizeSqlExpressions)
-                {
-                    sqlIn = CreateInParamSql(inArgs);
-                }
-                else
-                {
-                    var sIn = new StringBuilder();
-                    foreach (var e in inArgs)
-                    {
-                        if (sIn.Length > 0)
-                            sIn.Append(",");
-
-                        sIn.Append(DialectProvider.GetQuotedValue(e, e.GetType()));
-                    }
-                    sqlIn = sIn.ToString();
-                }
-
+                string sqlIn = CreateInParamSql(inArgs);
                 return string.Format("{0} {1} ({2})", quotedColName, m.Method.Name, sqlIn);
             }
             

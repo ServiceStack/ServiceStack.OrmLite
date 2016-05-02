@@ -162,19 +162,15 @@ namespace ServiceStack.OrmLite.Tests
                 db.DropAndCreateTable<Note>();
 
                 var note = new Note
-                        {
-                            SchemaUri = "tcm:0-0-0",
-                            NoteText = "Hello world 5",
-                            LastUpdated = new DateTime(2013, 1, 5),
-                            UpdatedBy = "RC"
-                        };
+                {
+                    SchemaUri = "tcm:0-0-0",
+                    NoteText = "Hello world 5",
+                    LastUpdated = new DateTime(2013, 1, 5),
+                    UpdatedBy = "RC"
+                };
                 note.Id = (int)db.Insert(note, selectIdentity: true);
 
                 var notes = db.Where<Note>(new { SchemaUri = "tcm:0-0-0" });
-                Assert.That(notes[0].Id, Is.EqualTo(note.Id));
-                Assert.That(notes[0].NoteText, Is.EqualTo(note.NoteText));
-
-                notes = db.SelectFmt<Note>("SchemaUri".SqlColumn() + "={0}", "tcm:0-0-0");
                 Assert.That(notes[0].Id, Is.EqualTo(note.Id));
                 Assert.That(notes[0].NoteText, Is.EqualTo(note.NoteText));
 

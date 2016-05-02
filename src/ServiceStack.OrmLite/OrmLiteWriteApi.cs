@@ -5,6 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using ServiceStack.Data;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
@@ -21,7 +22,7 @@ namespace ServiceStack.OrmLite
 
         public static string GetLastSqlAndParams(this IDbCommand dbCmd)
         {
-            var sb = new StringBuilder();
+            var sb = StringBuilderCache.Allocate();
             sb.AppendLine(dbCmd.CommandText)
               .AppendLine("PARAMS: ");
 
@@ -31,8 +32,9 @@ namespace ServiceStack.OrmLite
                     .Append(parameter.Value.ToJsv())
                     .Append(" : ").AppendLine((parameter.Value ?? DBNull.Value).GetType().Name);
             }
+            sb.AppendLine();
 
-            return sb.AppendLine().ToString();
+            return StringBuilderCache.ReturnAndFree(sb);
         }
 
         /// <summary>
@@ -222,23 +224,22 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Delete rows using a SqlFormat filter. E.g:
+        /// <para>db.Delete&lt;Person&gt;("Age > @age", new { age = 42 })</para>
         /// </summary>
         /// <returns>number of rows deleted</returns>
-        [Obsolete(Messages.LegacyApi)]
-        public static int DeleteFmt<T>(this IDbConnection dbConn, string sqlFilter, params object[] filterParams)
+        public static int Delete<T>(this IDbConnection dbConn, string sqlFilter, object anonType)
         {
-            return dbConn.Exec(dbCmd => dbCmd.DeleteFmt<T>(sqlFilter, filterParams));
+            return dbConn.Exec(dbCmd => dbCmd.Delete<T>(sqlFilter, anonType));
         }
 
         /// <summary>
-        /// Delete rows from the runtime table type using a SqlFormat filter. E.g:
+        /// Delete rows using a SqlFormat filter. E.g:
+        /// <para>db.Delete&lt;Person&gt;("Age > @age", new { age = 42 })</para>
         /// </summary>
-        /// <para>db.DeleteFmt(typeof(Person), "Age = {0}", 27)</para>
         /// <returns>number of rows deleted</returns>
-        [Obsolete(Messages.LegacyApi)]
-        public static int DeleteFmt(this IDbConnection dbConn, Type tableType, string sqlFilter, params object[] filterParams)
+        public static int Delete(this IDbConnection dbConn, Type tableType, string sqlFilter, object anonType)
         {
-            return dbConn.Exec(dbCmd => dbCmd.DeleteFmt(tableType, sqlFilter, filterParams));
+            return dbConn.Exec(dbCmd => dbCmd.Delete(tableType, sqlFilter, anonType));
         }
 
         /// <summary>

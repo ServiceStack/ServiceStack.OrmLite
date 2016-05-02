@@ -121,9 +121,6 @@
     <Compile Include="..\ServiceStack.OrmLite\Expressions\IUntypedSqlExpression.cs">
       <Link>Expressions\IUntypedSqlExpression.cs</Link>
     </Compile>
-    <Compile Include="..\ServiceStack.OrmLite\Expressions\ParameterizedSqlExpression.cs">
-      <Link>Expressions\ParameterizedSqlExpression.cs</Link>
-    </Compile>
     <Compile Include="..\ServiceStack.OrmLite\Expressions\ParameterRebinder.cs">
       <Link>Expressions\ParameterRebinder.cs</Link>
     </Compile>
@@ -166,8 +163,44 @@
     <Compile Include="..\ServiceStack.OrmLite\IUntypedApi.cs">
       <Link>IUntypedApi.cs</Link>
     </Compile>
-    <Compile Include="..\ServiceStack.OrmLite\JoinSqlBuilder.cs">
-      <Link>JoinSqlBuilder.cs</Link>
+    <Compile Include="..\ServiceStack.OrmLite\Legacy\OrmLiteReadApiAsyncLegacy.cs">
+      <Link>Legacy\OrmLiteReadApiAsyncLegacy.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Legacy\OrmLiteReadApiLegacy.cs">
+      <Link>Legacy\OrmLiteReadApiLegacy.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Legacy\OrmLiteReadCommandExtensionsAsyncLegacy.cs">
+      <Link>Legacy\OrmLiteReadCommandExtensionsAsyncLegacy.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Legacy\OrmLiteReadCommandExtensionsLegacy.cs">
+      <Link>Legacy\OrmLiteReadCommandExtensionsLegacy.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Legacy\OrmLiteReadExpressionsApiAsyncLegacy.cs">
+      <Link>Legacy\OrmLiteReadExpressionsApiAsyncLegacy.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Legacy\OrmLiteReadExpressionsApiLegacy.cs">
+      <Link>Legacy\OrmLiteReadExpressionsApiLegacy.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Legacy\OrmLiteWriteApiAsyncLegacy.cs">
+      <Link>Legacy\OrmLiteWriteApiAsyncLegacy.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Legacy\OrmLiteWriteExpressionsApiAsyncLegacy.cs">
+      <Link>Legacy\OrmLiteWriteExpressionsApiAsyncLegacy.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Legacy\OrmLiteWriteExpressionsApiLegacy.cs">
+      <Link>Legacy\OrmLiteWriteExpressionsApiLegacy.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Legacy\ReadExpressionCommandExtensionsAsyncLegacy.cs">
+      <Link>Legacy\ReadExpressionCommandExtensionsAsyncLegacy.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Legacy\ReadExpressionCommandExtensionsLegacy.cs">
+      <Link>Legacy\ReadExpressionCommandExtensionsLegacy.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Legacy\WriteExpressionCommandExtensionsAsyncLegacy.cs">
+      <Link>Legacy\WriteExpressionCommandExtensionsAsyncLegacy.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Legacy\WriteExpressionCommandExtensionsLegacy.cs">
+      <Link>Legacy\WriteExpressionCommandExtensionsLegacy.cs</Link>
     </Compile>
     <Compile Include="..\ServiceStack.OrmLite\ModelDefinition.cs">
       <Link>ModelDefinition.cs</Link>

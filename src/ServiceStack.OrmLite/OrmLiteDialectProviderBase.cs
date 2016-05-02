@@ -430,7 +430,7 @@ namespace ServiceStack.OrmLite
         {
             var fieldDefinition = customFieldDefinition ?? GetColumnTypeDefinition(fieldType, fieldLength, scale);
 
-            var sql = new StringBuilder();
+            var sql = StringBuilderCache.Allocate();
             sql.AppendFormat("{0} {1}", GetQuotedColumnName(fieldName), fieldDefinition);
 
             if (isPrimaryKey)
@@ -458,7 +458,7 @@ namespace ServiceStack.OrmLite
                 sql.AppendFormat(DefaultValueFormat, defaultValue);
             }
 
-            return sql.ToString();
+            return StringBuilderCache.ReturnAndFree(sql);
         }
 
         public virtual string SelectIdentitySql { get; set; }
@@ -494,7 +494,7 @@ namespace ServiceStack.OrmLite
                 return sqlFilter.SqlFmt(filterParams);
 
             var modelDef = tableType.GetModelDefinition();
-            var sql = new StringBuilder();
+            var sql = StringBuilderCache.Allocate();
             sql.AppendFormat("SELECT {0} FROM {1}",
                 GetColumnNames(modelDef),
                 GetQuotedTableName(modelDef));
@@ -511,7 +511,7 @@ namespace ServiceStack.OrmLite
                 sql.Append(sqlFilter);
             }
 
-            return sql.ToString();
+            return StringBuilderCache.ReturnAndFree(sql);
         }
 
         public virtual string ToSelectStatement(ModelDefinition modelDef,
@@ -522,7 +522,8 @@ namespace ServiceStack.OrmLite
             int? rows = null)
         {
 
-            var sb = new StringBuilder(selectExpression);
+            var sb = StringBuilderCache.Allocate();
+            sb.Append(selectExpression);
             sb.Append(bodyExpression);
             if (orderByExpression != null)
             {
@@ -542,7 +543,7 @@ namespace ServiceStack.OrmLite
                 }
             }
 
-            return sb.ToString();
+            return StringBuilderCache.ReturnAndFree(sb);
         }
 
         public virtual string GetRowVersionColumnName(FieldDefinition field)
@@ -552,7 +553,7 @@ namespace ServiceStack.OrmLite
 
         public virtual string GetColumnNames(ModelDefinition modelDef)
         {
-            var sqlColumns = new StringBuilder();
+            var sqlColumns = StringBuilderCache.Allocate();
             foreach (var field in modelDef.FieldDefinitions)
             {
                 if (sqlColumns.Length > 0)
@@ -561,7 +562,7 @@ namespace ServiceStack.OrmLite
                 sqlColumns.Append(field.GetQuotedName(this));
             }
 
-            return sqlColumns.ToString();
+            return StringBuilderCache.ReturnAndFree(sqlColumns);
         }
 
         /// Fmt
@@ -570,8 +571,8 @@ namespace ServiceStack.OrmLite
             if (insertFields == null)
                 insertFields = new List<string>();
 
-            var sbColumnNames = new StringBuilder();
-            var sbColumnValues = new StringBuilder();
+            var sbColumnNames = StringBuilderCache.Allocate();
+            var sbColumnValues = StringBuilderCacheAlt.Allocate();
             var modelDef = objWithProperties.GetType().GetModelDefinition();
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
@@ -599,15 +600,17 @@ namespace ServiceStack.OrmLite
             }
 
             var sql = string.Format("INSERT INTO {0} ({1}) VALUES ({2})",
-                                    GetQuotedTableName(modelDef), sbColumnNames, sbColumnValues);
+                GetQuotedTableName(modelDef), 
+                StringBuilderCache.ReturnAndFree(sbColumnNames), 
+                StringBuilderCacheAlt.ReturnAndFree(sbColumnValues));
 
             return sql;
         }
 
         public virtual void PrepareParameterizedInsertStatement<T>(IDbCommand cmd, ICollection<string> insertFields = null)
         {
-            var sbColumnNames = new StringBuilder();
-            var sbColumnValues = new StringBuilder();
+            var sbColumnNames = StringBuilderCache.Allocate();
+            var sbColumnValues = StringBuilderCacheAlt.Allocate();
             var modelDef = typeof(T).GetModelDefinition();
 
             cmd.Parameters.Clear();
@@ -642,13 +645,15 @@ namespace ServiceStack.OrmLite
             }
 
             cmd.CommandText = string.Format("INSERT INTO {0} ({1}) VALUES ({2})",
-                                            GetQuotedTableName(modelDef), sbColumnNames, sbColumnValues);
+                GetQuotedTableName(modelDef),
+                StringBuilderCache.ReturnAndFree(sbColumnNames),
+                StringBuilderCacheAlt.ReturnAndFree(sbColumnValues));
         }
 
         public virtual bool PrepareParameterizedUpdateStatement<T>(IDbCommand cmd, ICollection<string> updateFields = null)
         {
-            var sqlFilter = new StringBuilder();
-            var sql = new StringBuilder();
+            var sql = StringBuilderCache.Allocate();
+            var sqlFilter = StringBuilderCacheAlt.Allocate();
             var modelDef = typeof(T).GetModelDefinition();
             var hadRowVesion = false;
             var updateAllFields = updateFields == null || updateFields.Count == 0;
@@ -692,8 +697,11 @@ namespace ServiceStack.OrmLite
 
             if (sql.Length > 0)
             {
+                var strFilter = StringBuilderCacheAlt.ReturnAndFree(sqlFilter);
                 cmd.CommandText = string.Format("UPDATE {0} SET {1} {2}",
-                    GetQuotedTableName(modelDef), sql, (sqlFilter.Length > 0 ? "WHERE " + sqlFilter : ""));
+                    GetQuotedTableName(modelDef), 
+                    StringBuilderCache.ReturnAndFree(sql),
+                    strFilter.Length > 0 ? "WHERE " + strFilter : "");
             }
 
             return hadRowVesion;
@@ -714,7 +722,7 @@ namespace ServiceStack.OrmLite
             if (deleteFields == null || deleteFields.Count == 0)
                 throw new ArgumentException("DELETE's must have at least 1 criteria");
 
-            var sqlFilter = new StringBuilder();
+            var sqlFilter = StringBuilderCache.Allocate();
             var modelDef = typeof(T).GetModelDefinition();
             var hadRowVesion = false;
 
@@ -757,7 +765,8 @@ namespace ServiceStack.OrmLite
             }
 
             cmd.CommandText = string.Format("DELETE FROM {0} WHERE {1}",
-                GetQuotedTableName(modelDef), sqlFilter);
+                GetQuotedTableName(modelDef), 
+                StringBuilderCache.ReturnAndFree(sqlFilter));
 
             return hadRowVesion;
         }
@@ -900,8 +909,8 @@ namespace ServiceStack.OrmLite
 
         public virtual void PrepareUpdateRowStatement(IDbCommand dbCmd, object objWithProperties, ICollection<string> updateFields = null)
         {
-            var sqlFilter = new StringBuilder();
-            var sql = new StringBuilder();
+            var sql = StringBuilderCache.Allocate();
+            var sqlFilter = StringBuilderCacheAlt.Allocate();
             var modelDef = objWithProperties.GetType().GetModelDefinition();
             var updateAllFields = updateFields == null || updateFields.Count == 0;
 
@@ -942,8 +951,11 @@ namespace ServiceStack.OrmLite
                 }
             }
 
+            var strFilter = StringBuilderCacheAlt.ReturnAndFree(sqlFilter);
             dbCmd.CommandText = string.Format("UPDATE {0} SET {1}{2}",
-                GetQuotedTableName(modelDef), sql, (sqlFilter.Length > 0 ? " WHERE " + sqlFilter : ""));
+                GetQuotedTableName(modelDef), 
+                StringBuilderCache.ReturnAndFree(sql),
+                strFilter.Length > 0 ? " WHERE " + strFilter : "");
 
             if (sql.Length == 0)
                 throw new Exception("No valid update properties provided (e.g. p => p.FirstName): " + dbCmd.CommandText);
@@ -954,8 +966,8 @@ namespace ServiceStack.OrmLite
             if (updateFields.Count == 0)
                 throw new Exception("No valid update properties provided (e.g. p => p.FirstName): " + dbCmd.CommandText);
 
-            var sqlFilter = new StringBuilder();
-            var sql = new StringBuilder();
+            var sql = StringBuilderCache.Allocate();
+            var sqlFilter = StringBuilderCacheAlt.Allocate();
             var modelDef = objWithProperties.GetType().GetModelDefinition();
             var quotedFieldName = string.Empty;
 
@@ -998,13 +1010,16 @@ namespace ServiceStack.OrmLite
                 }
             }
 
+            var strFilter = StringBuilderCacheAlt.ReturnAndFree(sqlFilter);
             dbCmd.CommandText = string.Format("UPDATE {0} SET {1}{2}",
-                GetQuotedTableName(modelDef), sql, (sqlFilter.Length > 0 ? " WHERE " + sqlFilter : ""));
+                GetQuotedTableName(modelDef), 
+                StringBuilderCache.ReturnAndFree(sql), 
+                strFilter.Length > 0 ? " WHERE " + strFilter : "");
         }
 
         public virtual string ToDeleteStatement(Type tableType, string sqlFilter, params object[] filterParams)
         {
-            var sql = new StringBuilder();
+            var sql = StringBuilderCache.Allocate();
             const string deleteStatement = "DELETE ";
 
             var isFullDeleteStatement =
@@ -1024,7 +1039,7 @@ namespace ServiceStack.OrmLite
                 sql.Append(sqlFilter);
             }
 
-            return sql.ToString();
+            return StringBuilderCache.ReturnAndFree(sql);
         }
 
         public virtual string GetDefaultValue(FieldDefinition fieldDef)
@@ -1044,8 +1059,8 @@ namespace ServiceStack.OrmLite
 
         public virtual string ToCreateTableStatement(Type tableType)
         {
-            var sbColumns = new StringBuilder();
-            var sbConstraints = new StringBuilder();
+            var sbColumns = StringBuilderCache.Allocate();
+            var sbConstraints = StringBuilderCacheAlt.Allocate();
 
             var modelDef = tableType.GetModelDefinition();
             foreach (var fieldDef in modelDef.FieldDefinitions)
@@ -1083,10 +1098,12 @@ namespace ServiceStack.OrmLite
                 sbConstraints.Append(GetForeignKeyOnDeleteClause(fieldDef.ForeignKey));
                 sbConstraints.Append(GetForeignKeyOnUpdateClause(fieldDef.ForeignKey));
             }
-            var sql = new StringBuilder(string.Format(
-                "CREATE TABLE {0} \n(\n  {1}{2} \n); \n", GetQuotedTableName(modelDef), sbColumns, sbConstraints));
+            var sql = string.Format(
+                "CREATE TABLE {0} \n(\n  {1}{2} \n); \n", GetQuotedTableName(modelDef),
+                StringBuilderCache.ReturnAndFree(sbColumns), 
+                StringBuilderCacheAlt.ReturnAndFree(sbConstraints));
 
-            return sql.ToString();
+            return sql;
         }
 
         public virtual string ToPostCreateTableStatement(ModelDefinition modelDef)
@@ -1128,7 +1145,7 @@ namespace ServiceStack.OrmLite
             {
                 var indexName = GetCompositeIndexName(compositeIndex, modelDef);
 
-                var sb = new StringBuilder();
+                var sb = StringBuilderCache.Allocate();
                 foreach (var fieldName in compositeIndex.FieldNames)
                 {
                     if (sb.Length > 0)
@@ -1148,7 +1165,9 @@ namespace ServiceStack.OrmLite
                 }
 
                 sqlIndexes.Add(
-                    ToCreateIndexStatement(compositeIndex.Unique, indexName, modelDef, sb.ToString(), isCombined: true));
+                    ToCreateIndexStatement(compositeIndex.Unique, indexName, modelDef, 
+                    StringBuilderCache.ReturnAndFree(sb), 
+                    isCombined: true));
             }
 
             return sqlIndexes;

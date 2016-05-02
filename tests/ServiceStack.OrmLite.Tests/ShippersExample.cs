@@ -97,15 +97,16 @@ namespace ServiceStack.OrmLite.Tests
                 var trainsAreUs = db.Single<Shipper>(q => q.ShipperTypeId == trainsType.Id);
                 Assert.That(trainsAreUs.CompanyName, Is.EqualTo("Trains R Us"));
 
-                trainsAreUs = db.SingleFmt<Shipper>("ShipperTypeId".SqlColumn() + " = {0}", trainsType.Id);
+                trainsAreUs = db.Single<Shipper>("ShipperTypeId".SqlColumn() + " = @Id", new { trainsType.Id });
 				Assert.That(trainsAreUs.CompanyName, Is.EqualTo("Trains R Us"));
 
 
                 Assert.That(db.Select<Shipper>(q => q.CompanyName == "Trains R Us" || q.Phone == "555-UNICORNS"), Has.Count.EqualTo(2));
-                Assert.That(db.SelectFmt<Shipper>("CompanyName".SqlColumn() + " = {0} OR Phone = {1}", "Trains R Us", "555-UNICORNS"), Has.Count.EqualTo(2));
+                Assert.That(db.Select<Shipper>("CompanyName".SqlColumn() + " = @company OR Phone = @phone", 
+                    new { company = "Trains R Us", phone = "555-UNICORNS" }), Has.Count.EqualTo(2));
 
                 Assert.That(db.Select<Shipper>(q => q.ShipperTypeId == planesType.Id), Has.Count.EqualTo(2));
-                Assert.That(db.SelectFmt<Shipper>("ShipperTypeId".SqlColumn() + " = {0}", planesType.Id), Has.Count.EqualTo(2));
+                Assert.That(db.Select<Shipper>("ShipperTypeId".SqlColumn() + " = @Id", new { planesType.Id }), Has.Count.EqualTo(2));
 
 				//Lets update a record
 				trainsAreUs.Phone = "666-TRAINS";
@@ -125,7 +126,7 @@ namespace ServiceStack.OrmLite.Tests
                 var partialColumns = db.Select<SubsetOfShipper>(db.From<Shipper>().Where(q => q.ShipperTypeId == planesType.Id));
                 Assert.That(partialColumns, Has.Count.EqualTo(2));
 
-                partialColumns = db.SelectFmt<SubsetOfShipper>(typeof(Shipper), "ShipperTypeId".SqlColumn() + " = {0}", planesType.Id);
+                partialColumns = db.Select<SubsetOfShipper>(typeof(Shipper), "ShipperTypeId".SqlColumn() + " = @Id", new { planesType.Id });
 				Assert.That(partialColumns, Has.Count.EqualTo(2));
 
 				//Select into another POCO class that matches sql

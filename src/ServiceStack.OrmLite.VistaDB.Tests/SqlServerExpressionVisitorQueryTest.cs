@@ -19,7 +19,7 @@ namespace ServiceStack.OrmLite.VistaDB.Tests
             {
                 FillTestEntityTableWithTestData(db);
                 
-                var result = db.Select<TestEntity>(q => q.Limit(10, 100));
+                var result = db.Select(db.From<TestEntity>().Limit(10, 100));
                 
                 Assert.NotNull(result);
                 Assert.AreEqual(100, result.Count);

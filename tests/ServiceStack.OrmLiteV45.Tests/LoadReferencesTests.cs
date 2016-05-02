@@ -186,7 +186,7 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(dbCustomers[0].PrimaryAddress, Is.Not.Null);
 
             // LoadSelectAsync overload 3
-            dbCustomers = await db.LoadSelectAsync<Customer>(q => q.Where(x => x.Id == customer.Id), include: new[] { "PrimaryAddress" });
+            dbCustomers = await db.LoadSelectAsync(db.From<Customer>().Where(x => x.Id == customer.Id), include: new[] { "PrimaryAddress" });
             Assert.That(dbCustomers.Count, Is.EqualTo(1));
             Assert.That(dbCustomers[0].Name, Is.EqualTo("Customer 1"));
             Assert.That(dbCustomers[0].Orders, Is.Null);

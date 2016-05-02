@@ -117,8 +117,6 @@
     <Compile Include="AdoNetDataAccessTests.cs" />
     <Compile Include="ApiSqliteTests.cs" />
     <Compile Include="ApiSqlServerTests.cs" />
-    <Compile Include="ApiSqliteTests.NonParam.cs" />
-    <Compile Include="ApiSqlServerTests.NonParam.cs" />
     <Compile Include="AutoQueryTests.cs" />
     <Compile Include="CaptureSqlCommandFilterTests.cs" />
     <Compile Include="CaptureSqlFilterTests.cs" />
@@ -131,6 +129,9 @@
     <Compile Include="DefaultValueTests.cs" />
     <Compile Include="Issues\BelongsToIssue.cs" />
     <Compile Include="Issues\MergingNestedSqlExpressionIssue.cs" />
+    <Compile Include="Legacy\ApiSqliteLegacyTests.cs" />
+    <Compile Include="Legacy\ApiSqlServerLegacyTests.cs" />
+    <Compile Include="Support\JoinSqlBuilder.cs" />
     <Compile Include="UseCase\ExpressionsAuthorTests.cs" />
     <Compile Include="Expression\ComplexJoinTests.cs" />
     <Compile Include="Expression\ExpressionUsingCustomSerializedEnumTests.cs" />
@@ -269,7 +270,6 @@
     <Compile Include="UseCase\SimpleUseCase.cs" />
     <Compile Include="OrmLiteGetScalarTests.cs" />
     <Compile Include="OrmLiteCreateTableWithNamingStrategyTest.cs" />
-    <Compile Include="JoinSqlBuilderTests.cs" />
     <Compile Include="_TypeDescriptorMetadataTests.cs" />
   </ItemGroup>
   <ItemGroup>

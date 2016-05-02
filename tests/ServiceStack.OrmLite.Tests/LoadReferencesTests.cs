@@ -730,19 +730,16 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(dbOrders.Count, Is.EqualTo(0));
 
             //Test merge subselect params
-            if (OrmLiteConfig.UseParameterizeSqlExpressions)
-            {
-                orderQuery = db.From<Order>().Where(q => q.CustomerId >= 1 && Sql.In(q.CustomerId, customersSubFilter));
+            orderQuery = db.From<Order>().Where(q => q.CustomerId >= 1 && Sql.In(q.CustomerId, customersSubFilter));
 
-                Assert.That(orderQuery.Params.Count, Is.EqualTo(2));
-                Assert.That(orderQuery.Params[0].Value, Is.EqualTo(1));
-                Assert.That(orderQuery.Params[0].ParameterName, Is.StringEnding("0"));
-                Assert.That(orderQuery.Params[1].Value, Is.EqualTo(-1));
-                Assert.That(orderQuery.Params[1].ParameterName, Is.StringEnding("1"));
+            Assert.That(orderQuery.Params.Count, Is.EqualTo(2));
+            Assert.That(orderQuery.Params[0].Value, Is.EqualTo(1));
+            Assert.That(orderQuery.Params[0].ParameterName, Is.StringEnding("0"));
+            Assert.That(orderQuery.Params[1].Value, Is.EqualTo(-1));
+            Assert.That(orderQuery.Params[1].ParameterName, Is.StringEnding("1"));
 
-                dbOrders = db.Select(orderQuery);
-                Assert.That(dbOrders.Count, Is.EqualTo(0));
-            }
+            dbOrders = db.Select(orderQuery);
+            Assert.That(dbOrders.Count, Is.EqualTo(0));
         }
     }
 

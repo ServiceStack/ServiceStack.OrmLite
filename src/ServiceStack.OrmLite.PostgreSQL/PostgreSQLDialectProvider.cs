@@ -100,7 +100,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
                 }
             }
 
-            var sql = new StringBuilder();
+            var sql = StringBuilderCache.Allocate();
             sql.AppendFormat("{0} {1}", GetQuotedColumnName(fieldName), fieldDefinition);
 
             if (isPrimaryKey)
@@ -124,8 +124,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
                 sql.AppendFormat(DefaultValueFormat, defaultValue);
             }
 
-            var definition = sql.ToString();
-
+            var definition = StringBuilderCache.ReturnAndFree(sql);
             return definition;
         }
 
@@ -163,9 +162,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
 
         public override SqlExpression<T> SqlExpression<T>()
         {
-            return !OrmLiteConfig.UseParameterizeSqlExpressions
-                ? new PostgreSqlExpression<T>(this)
-                : (SqlExpression<T>)new PostgreSqlParameterizedSqlExpression<T>(this);
+            return new PostgreSqlExpression<T>(this);
         }
 
         public override IDbDataParameter CreateParam()
@@ -199,7 +196,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
 
         public override string ToExecuteProcedureStatement(object objWithProperties)
         {
-            var sbColumnValues = new StringBuilder();
+            var sbColumnValues = StringBuilderCache.Allocate();
 
             var tableType = objWithProperties.GetType();
             var modelDef = GetModel(tableType);
@@ -207,21 +204,15 @@ namespace ServiceStack.OrmLite.PostgreSQL
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
                 if (sbColumnValues.Length > 0) sbColumnValues.Append(",");
-                try
-                {
-                    sbColumnValues.Append(fieldDef.GetQuotedValue(objWithProperties));
-                }
-                catch (Exception)
-                {
-                    throw;
-                }
+                sbColumnValues.Append(fieldDef.GetQuotedValue(objWithProperties));
             }
 
+            var colValues = StringBuilderCache.ReturnAndFree(sbColumnValues);
             var sql = string.Format("{0} {1}{2}{3};",
                 GetQuotedTableName(modelDef),
-                sbColumnValues.Length > 0 ? "(" : "",
-                sbColumnValues,
-                sbColumnValues.Length > 0 ? ")" : "");
+                colValues.Length > 0 ? "(" : "",
+                colValues,
+                colValues.Length > 0 ? ")" : "");
 
             return sql;
         }

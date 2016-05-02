@@ -62,7 +62,7 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(db.Single<AllTypes>(x => x.MaxText == lastRow.MaxText), Is.EqualTo(lastRow));
                 Assert.That(db.Single<AllTypes>(x => x.CustomDecimal == lastRow.CustomDecimal), Is.EqualTo(lastRow));
 
-                Assert.That(db.Single<AllTypes>(q => q.Where(x => x.Bool == lastRow.Bool).OrderByDescending(x => x.Id)), Is.EqualTo(lastRow));
+                Assert.That(db.Single(db.From<AllTypes>().Where(x => x.Bool == lastRow.Bool).OrderByDescending(x => x.Id)), Is.EqualTo(lastRow));
 
                 var updatedRows = 3.Times(i =>
                 {

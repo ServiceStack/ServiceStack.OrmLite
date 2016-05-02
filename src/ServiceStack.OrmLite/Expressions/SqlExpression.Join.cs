@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
@@ -160,7 +161,7 @@ namespace ServiceStack.OrmLite
                 return ToSelectStatement();
             }
 
-            var sbSelect = new StringBuilder();
+            var sbSelect = StringBuilderCache.Allocate();
 
             var selectDef = typeof(TModel).GetModelDefinition();
             var orderedDefs = tableDefs;
@@ -250,7 +251,9 @@ namespace ServiceStack.OrmLite
                 }
             }
 
-            var columns = sbSelect.Length > 0 ? sbSelect.ToString() : "*";
+            var select = StringBuilderCache.ReturnAndFree(sbSelect);
+
+            var columns = select.Length > 0 ? select : "*";
             SelectExpression = "SELECT " + (selectDistinct ? "DISTINCT " : "") + columns;
 
             return ToSelectStatement();

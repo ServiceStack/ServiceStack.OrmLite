@@ -72,15 +72,12 @@ namespace ServiceStack.OrmLite.Tests
                     Is.EqualTo("select id, firstname, lastname, age  from person where (age > 40)").
                     Or.EqualTo("select id, firstname, lastname, age  from person where (age > @0)"));
 
-                i++; db.Select<Person>(q => q.Where(x => x.Age > 40));
                 i++; db.Select(db.From<Person>().Where(x => x.Age > 40));
                 i++; db.Select<Person>("Age > 40");
                 i++; db.Select<Person>("SELECT * FROM Person WHERE Age > 40");
                 i++; db.Select<Person>("Age > @age", new { age = 40 });
                 i++; db.Select<Person>("SELECT * FROM Person WHERE Age > @age", new { age = 40 });
                 i++; db.Select<Person>("Age > @age", new Dictionary<string, object> { { "age", 40 } });
-                i++; db.SelectFmt<Person>("Age > {0}", 40);
-                i++; db.SelectFmt<Person>("SELECT * FROM Person WHERE Age > {0}", 40);
                 i++; db.Where<Person>("Age", 27);
                 i++; db.Where<Person>(new { Age = 27 });
                 i++; db.SelectByIds<Person>(new[] { 1, 2, 3 });
@@ -98,8 +95,6 @@ namespace ServiceStack.OrmLite.Tests
                 i++; db.SingleWhere<Person>("Age", 42);
                 i++; db.Exists<Person>(new { Age = 42 });
                 i++; db.Exists<Person>("SELECT * FROM Person WHERE Age = @age", new { age = 42 });
-                i++; db.ExistsFmt<Person>("Age = {0}", 42);
-                i++; db.ExistsFmt<Person>("SELECT * FROM Person WHERE Age = {0}", 42);
 
                 Assert.That(captured.SqlStatements.Count, Is.EqualTo(i));
 
@@ -117,9 +112,7 @@ namespace ServiceStack.OrmLite.Tests
                 int i = 0;
                 i++; db.Single<Person>(x => x.Age == 42);
 
-                var p = OrmLiteConfig.UseParameterizeSqlExpressions
-                    ? "@0"  //Normalized
-                    : "42";
+                var p = "@0";  //Normalized
 
                 Assert.That(captured.SqlStatements.Last().NormalizeSql(),
                     Is.EqualTo("select id, firstname, lastname, age  from person where (age = {0}) limit 1".Fmt(p)). //sqlite
@@ -129,13 +122,12 @@ namespace ServiceStack.OrmLite.Tests
                     Or.EqualTo("select * from (\r select ssormlite1.*, rownum rnum from (\r select id, firstname, lastname, age  from person where (age = {0}) order by person.id) ssormlite1\r where rownum <= 0 + 1) ssormlite2 where ssormlite2.rnum > 0".Fmt(p))  //Oracle
                     );
 
-                i++; db.ExistsFmt<Person>("Age = {0}", 42);
+                i++; db.Exists<Person>("Age = @age", new { age = 42 });
                 i++; db.Single(db.From<Person>().Where(x => x.Age == 42));
                 i++; db.Single<Person>(new { Age = 42 });
                 i++; db.Single<Person>("Age = @age", new { age = 42 });
-                i++; db.SingleFmt<Person>("Age = {0}", 42);
                 i++; db.SingleById<Person>(1);
-                i++; db.ExistsFmt<Person>("Age = {0}", 42);
+                i++; db.Exists<Person>("Age = @age", new { age = 42 });
                 i++; db.SingleWhere<Person>("Age", 42);
 
                 Assert.That(captured.SqlStatements.Count, Is.EqualTo(i));
@@ -162,7 +154,6 @@ namespace ServiceStack.OrmLite.Tests
                 i++; db.Count<Person>(x => x.Age < 50);
                 i++; db.Count(db.From<Person>().Where(x => x.Age < 50));
                 i++; db.Scalar<int>("SELECT COUNT(*) FROM Person WHERE Age > @age", new { age = 40 });
-                i++; db.ScalarFmt<int>("SELECT COUNT(*) FROM Person WHERE Age > {0}", 40);
 
                 i++; db.SqlScalar<int>("SELECT COUNT(*) FROM Person WHERE Age < @age", new { age = 50 });
                 i++; db.SqlScalar<int>("SELECT COUNT(*) FROM Person WHERE Age < @age", new Dictionary<string, object> { { "age", 50 } });
@@ -194,10 +185,8 @@ namespace ServiceStack.OrmLite.Tests
                 i++; db.UpdateNonDefaults(new Person { FirstName = "JJ" }, p => p.LastName == "Hendrix");
                 i++; db.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName);
                 i++; db.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName, p => p.LastName == "Hendrix");
-                i++; db.UpdateOnly(new Person { FirstName = "JJ", LastName = "Hendo" }, ev => ev.Update(p => p.FirstName));
-                i++; db.UpdateOnly(new Person { FirstName = "JJ" }, ev => ev.Update(p => p.FirstName).Where(x => x.FirstName == "Jimi"));
-                i++; db.UpdateFmt<Person>(set: "FirstName = {0}".SqlFmt("JJ"), where: "LastName = {0}".SqlFmt("Hendrix"));
-                i++; db.UpdateFmt(table: "Person", set: "FirstName = {0}".SqlFmt("JJ"), where: "LastName = {0}".SqlFmt("Hendrix"));
+                i++; db.UpdateOnly(new Person { FirstName = "JJ", LastName = "Hendo" }, db.From<Person>().Update(p => p.FirstName));
+                i++; db.UpdateOnly(new Person { FirstName = "JJ" }, db.From<Person>().Update(p => p.FirstName).Where(x => x.FirstName == "Jimi"));
 
                 Assert.That(captured.SqlStatements.Count, Is.EqualTo(i));
 
@@ -223,13 +212,10 @@ namespace ServiceStack.OrmLite.Tests
                 i++; db.DeleteNonDefaults(new Person { FirstName = "Jimi", Age = 27 });
                 i++; db.DeleteById<Person>(1);
                 i++; db.DeleteByIds<Person>(new[] { 1, 2, 3 });
-                i++; db.DeleteFmt<Person>("Age = {0}", 27);
-                i++; db.DeleteFmt(typeof(Person), "Age = {0}", 27);
+                i++; db.Delete<Person>("Age = @age", new { age = 27 });
+                i++; db.Delete(typeof(Person), "Age = @age", new { age = 27 });
                 i++; db.Delete<Person>(p => p.Age == 27);
-                i++; db.Delete<Person>(ev => ev.Where(p => p.Age == 27));
                 i++; db.Delete(db.From<Person>().Where(p => p.Age == 27));
-                i++; db.DeleteFmt<Person>(where: "Age = {0}".SqlFmt(27));
-                i++; db.DeleteFmt(table: "Person", where: "Age = {0}".SqlFmt(27));
 
                 Assert.That(captured.SqlStatements.Count, Is.EqualTo(i));
 
@@ -282,8 +268,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 i++; db.Insert(new Person { Id = 7, FirstName = "Amy", LastName = "Winehouse", Age = 27 });
                 i++; db.InsertAll(new[] { new Person { Id = 10, FirstName = "Biggie", LastName = "Smalls", Age = 24 } });
-                i++; db.InsertOnly(new PersonWithAutoId { FirstName = "Amy", Age = 27 }, ev => ev.Insert(p => new { p.FirstName, p.Age }));
-                i++; db.InsertOnly(new PersonWithAutoId { FirstName = "Amy", Age = 27 }, ev => db.From<PersonWithAutoId>().Insert(p => new { p.FirstName, p.Age }));
+                i++; db.InsertOnly(new PersonWithAutoId { FirstName = "Amy", Age = 27 }, db.From<PersonWithAutoId>().Insert(p => new { p.FirstName, p.Age }));
 
                 Assert.That(captured.SqlStatements.Count, Is.EqualTo(i));
 

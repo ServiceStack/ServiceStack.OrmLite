@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.SqlServer
 {
@@ -13,7 +14,8 @@ namespace ServiceStack.OrmLite.SqlServer
             int? offset = null,
             int? rows = null)
         {
-            var sb = new StringBuilder(selectExpression)
+            var sb = StringBuilderCache.Allocate()
+                .Append(selectExpression)
                 .Append(bodyExpression);
 
             if (orderByExpression != null)
@@ -36,7 +38,7 @@ namespace ServiceStack.OrmLite.SqlServer
                     sb.Append(" FETCH NEXT ").Append(rows.Value).Append(" ROWS ONLY");
             }
 
-            return sb.ToString();
+            return StringBuilderCache.ReturnAndFree(sb);
         }
     }
 }

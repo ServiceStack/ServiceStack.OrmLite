@@ -2,7 +2,7 @@ using System.Linq.Expressions;
 
 namespace ServiceStack.OrmLite.Firebird
 {
-    public class FirebirdSqlExpression<T> : ParameterizedSqlExpression<T>
+    public class FirebirdSqlExpression<T> : SqlExpression<T>
     {
         public FirebirdSqlExpression(IOrmLiteDialectProvider dialectProvider) 
             : base(dialectProvider) {}

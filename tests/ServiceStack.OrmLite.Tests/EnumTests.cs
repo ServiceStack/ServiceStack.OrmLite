@@ -68,8 +68,8 @@ namespace ServiceStack.OrmLite.Tests
                 db.Save(new TypeWithEnum { Id = 2, EnumValue = SomeEnum.Value1 });
                 db.Save(new TypeWithEnum { Id = 3, EnumValue = SomeEnum.Value2 });
 
-                var target = db.SelectFmt<TypeWithEnum>(
-                    "EnumValue".SqlColumn() + " = {0}", SomeEnum.Value1);
+                var target = db.Select<TypeWithEnum>(
+                    "EnumValue".SqlColumn() + " = @value", new { value = SomeEnum.Value1 });
 
                 Assert.AreEqual(2, target.Count());
             }
@@ -251,8 +251,8 @@ namespace ServiceStack.OrmLite.Tests
                 db.Save(new TypeWithFlagsEnum { Id = 2, Flags = FlagsEnum.FlagOne });
                 db.Save(new TypeWithFlagsEnum { Id = 3, Flags = FlagsEnum.FlagTwo });
 
-                var target = db.SelectFmt<TypeWithFlagsEnum>(
-                    "Flags".SqlColumn() + " = {0}", FlagsEnum.FlagOne);
+                var target = db.Select<TypeWithFlagsEnum>(
+                    "Flags".SqlColumn() + " = @value", new { value = FlagsEnum.FlagOne });
                 db.GetLastSql().Print();
                 Assert.That(target.Count, Is.EqualTo(2));
             }
@@ -268,8 +268,8 @@ namespace ServiceStack.OrmLite.Tests
                 db.Save(new TypeWithEnumAsInt { Id = 2, EnumValue = SomeEnumAsInt.Value1 });
                 db.Save(new TypeWithEnumAsInt { Id = 3, EnumValue = SomeEnumAsInt.Value2 });
 
-                var target = db.SelectFmt<TypeWithEnumAsInt>(
-                    "EnumValue".SqlColumn() + " = {0}", SomeEnumAsInt.Value1);
+                var target = db.Select<TypeWithEnumAsInt>(
+                    "EnumValue".SqlColumn() + " = @value", new { value = SomeEnumAsInt.Value1 });
                 db.GetLastSql().Print();
                 Assert.That(target.Count, Is.EqualTo(2));
             }
@@ -317,8 +317,8 @@ namespace ServiceStack.OrmLite.Tests
                 db.Insert(new TypeWithEnum { Id = 1, EnumValue = SomeEnum.Value1 });
                 db.Insert(new TypeWithEnum { Id = 2, EnumValue = SomeEnum.Value2 });
 
-                var row = db.SingleFmt<TypeWithEnum>(
-                    "EnumValue".SqlColumn() + " = {0}", "Value2");
+                var row = db.Single<TypeWithEnum>(
+                    "EnumValue".SqlColumn() + " = @value", new { value = "Value2" });
 
                 Assert.That(row.Id, Is.EqualTo(2));
             }
@@ -335,8 +335,8 @@ namespace ServiceStack.OrmLite.Tests
                 db.Insert(new TypeWithTreatEnumAsInt { Id = 1, EnumValue = SomeEnumTreatAsInt.Value1 });
                 db.Insert(new TypeWithTreatEnumAsInt { Id = 2, EnumValue = SomeEnumTreatAsInt.Value2 });
 
-                var row = db.SingleFmt<TypeWithTreatEnumAsInt>(
-                    "EnumValue".SqlColumn() + " = {0}", "2");
+                var row = db.Single<TypeWithTreatEnumAsInt>(
+                    "EnumValue".SqlColumn() + " = @value", new { value = "2" });
 
                 Assert.That(row.Id, Is.EqualTo(2));
             }

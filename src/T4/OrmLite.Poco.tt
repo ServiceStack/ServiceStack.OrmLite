@@ -89,6 +89,9 @@ priorProperyNames.Add(col.PropertyName);
         [AutoIncrement]
 <# }  if (col.IsComputed) { #>
         [Compute]        
+<# }  if (tbl.FKeys != null && tbl.FKeys.Any(x => x.FromColumn ==  col.PropertyName)) { 
+	   var toTable = tbl.FKeys.First(x => x.FromColumn == col.PropertyName).ToTable;#>
+        [References(typeof(<#=toTable#>))]  
 <# }  if (col.IsNullable != true && col.IsAutoIncrement != true) { #>
         [Required]
 <# } if (!col.IsPK){#>

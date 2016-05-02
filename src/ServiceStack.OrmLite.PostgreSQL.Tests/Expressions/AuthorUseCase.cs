@@ -53,7 +53,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
                 ev.Where(rn => rn.Birthday >= new DateTime(year, 1, 1) && rn.Birthday <= lastDay);
                 List<Author> result = db.Select(ev);
                 Assert.AreEqual(expected, result.Count);
-                result = db.Select<Author>(qry => qry.Where(rn => rn.Birthday >= new DateTime(year, 1, 1) && rn.Birthday <= lastDay));
+                result = db.Select(db.From<Author>().Where(rn => rn.Birthday >= new DateTime(year, 1, 1) && rn.Birthday <= lastDay));
                 Assert.AreEqual(expected, result.Count);
                 result = db.Select<Author>(rn => rn.Birthday >= new DateTime(year, 1, 1) && rn.Birthday <= lastDay);
                 Assert.AreEqual(expected, result.Count);

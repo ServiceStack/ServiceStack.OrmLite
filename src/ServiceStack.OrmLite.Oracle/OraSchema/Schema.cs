@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Data;
 using ServiceStack.DataAnnotations;
+using ServiceStack.OrmLite.Legacy;
 using ServiceStack.OrmLite.Oracle.DbSchema;
 
 namespace ServiceStack.OrmLite.Oracle

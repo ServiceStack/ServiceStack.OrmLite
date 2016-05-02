@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using ServiceStack.OrmLite.Converters;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.PostgreSQL.Converters
 {
@@ -53,7 +54,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Converters
         public static string ToBinary(this IOrmLiteConverter converter, object NativeData)
         {
             var byteArray = (byte[])NativeData;
-            var res = new StringBuilder(byteArray.Length * 5);
+            var res = StringBuilderCache.Allocate();
             foreach (byte b in byteArray)
                 if (b >= 0x20 && b < 0x7F && b != 0x27 && b != 0x5C)
                     res.Append((char)b);
@@ -62,18 +63,18 @@ namespace ServiceStack.OrmLite.PostgreSQL.Converters
                         .Append((char)('0' + (7 & (b >> 6))))
                         .Append((char)('0' + (7 & (b >> 3))))
                         .Append((char)('0' + (7 & b)));
-            return res.ToString();
+            return StringBuilderCache.ReturnAndFree(res);
         }
 
         public static string ToArray<T>(this IOrmLiteConverter converter, T[] source)
         {
-            var values = new StringBuilder();
+            var values = StringBuilderCache.Allocate();
             foreach (var value in source)
             {
                 if (values.Length > 0) values.Append(",");
                 values.Append(converter.DialectProvider.GetQuotedValue(value, typeof(T)));
             }
-            return "ARRAY[" + values + "]";
+            return "ARRAY[" + StringBuilderCache.ReturnAndFree(values) + "]";
         }
     }
 }

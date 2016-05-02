@@ -116,34 +116,6 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        public void Can_delete_with_optional_string_params()
-        {
-            var row = ModelWithFieldsOfDifferentTypes.Create(1);
-
-            db.Insert(row);
-
-            db.DeleteFmt<ModelWithFieldsOfDifferentTypes>(where: "LongId".SqlColumn() + " <= {0}".SqlFmt(row.LongId));
-
-            var dbRow = db.SingleById<ModelWithFieldsOfDifferentTypes>(row.Id);
-
-            Assert.That(dbRow, Is.Null);
-        }
-
-        [Test]
-        public void Can_delete_with_tableName_and_optional_string_params()
-        {
-            var row = ModelWithFieldsOfDifferentTypes.Create(1);
-
-            db.Insert(row);
-
-            db.DeleteFmt(table: "ModelWithFieldsOfDifferentTypes", where: "LongId".SqlColumn() + " <= {0}".SqlFmt(row.LongId));
-
-            var dbRow = db.SingleById<ModelWithFieldsOfDifferentTypes>(row.Id);
-
-            Assert.That(dbRow, Is.Null);
-        }
-
-        [Test]
         public void Can_Delete_entity_with_nullable_DateTime()
         {
             db.DropAndCreateTable<ModelWithFieldsOfNullableTypes>();

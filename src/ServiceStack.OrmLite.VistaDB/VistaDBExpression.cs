@@ -3,10 +3,11 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Linq.Expressions;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.VistaDB
 {
-    public class VistaDbExpression<T> : ParameterizedSqlExpression<T>
+    public class VistaDbExpression<T> : SqlExpression<T>
     {
         public VistaDbExpression(IOrmLiteDialectProvider dialectProvider) 
             : base(dialectProvider) {}
@@ -15,7 +16,7 @@ namespace ServiceStack.OrmLite.VistaDB
         {
             CopyParamsTo(dbCmd);
 
-            var setFields = new StringBuilder();
+            var setFields = StringBuilderCache.Allocate();
 
             foreach (var fieldDef in ModelDef.FieldDefinitions)
             {
@@ -37,11 +38,12 @@ namespace ServiceStack.OrmLite.VistaDB
                     .Append(param.ParameterName);
             }
 
-            if (setFields.Length == 0)
+            var strFields = StringBuilderCache.ReturnAndFree(setFields);
+            if (strFields.Length == 0)
                 throw new ArgumentException("No non-null or non-default values were provided for type: " + typeof(T).Name);
 
             dbCmd.CommandText = string.Format("UPDATE {0} SET {1} {2}",
-                DialectProvider.GetQuotedTableName(ModelDef), setFields, WhereExpression);
+                DialectProvider.GetQuotedTableName(ModelDef), strFields, WhereExpression);
         }
 
         protected override object VisitColumnAccessMethod(MethodCallExpression m)

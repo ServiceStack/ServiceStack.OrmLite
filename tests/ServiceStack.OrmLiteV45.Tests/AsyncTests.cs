@@ -32,7 +32,7 @@ namespace ServiceStack.OrmLite.Tests
                 results = (await db.SelectAsync<Poco>(x => x.Name == "A")).Map(x => x.Name);
                 Assert.That(results, Is.EqualTo(new[] { "A" }));
 
-                results = (await db.SelectAsync<Poco>(q => q.Where(x => x.Name == "A"))).Map(x => x.Name);
+                results = (await db.SelectAsync(db.From<Poco>().Where(x => x.Name == "A"))).Map(x => x.Name);
                 Assert.That(results, Is.EqualTo(new[] { "A" }));
             }
         }
@@ -46,7 +46,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 try
                 {
-                    var results = await db.SelectAsync<Poco>(q => q.Where("NotExists = 1"));
+                    var results = await db.SelectAsync(db.From<Poco>().Where("NotExists = 1"));
                     Assert.Fail("Should throw");
                 }
                 catch (Exception ex)

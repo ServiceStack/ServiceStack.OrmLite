@@ -95,7 +95,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             AddCustomerWithOrders();
 
-            var results = db.Select<FullCustomerInfo, Customer>(q => q
+            var results = db.Select<FullCustomerInfo>(db.From<Customer>()
                 .Join<Customer, CustomerAddress>()
                 .Join<Customer, Order>());
 
@@ -117,14 +117,14 @@ namespace ServiceStack.OrmLite.Tests
         {
             AddCustomerWithOrders();
 
-            var results = db.Select<FullCustomerInfo, Customer>(q => q
+            var results = db.Select<FullCustomerInfo>(db.From<Customer>()
                 .Join<Customer, CustomerAddress>()
                 .Join<Customer, Order>((c, o) => c.Id == o.CustomerId && o.Cost < 2));
 
             var costs = results.ConvertAll(x => x.Cost);
             Assert.That(costs, Is.EquivalentTo(new[] { 1.99m }));
 
-            var orders = db.Select<Order>(q => q
+            var orders = db.Select(db.From<Order>()
                 .Join<Order, Customer>()
                 .Join<Customer, CustomerAddress>()
                 .Where(o => o.Cost < 2)
@@ -133,7 +133,7 @@ namespace ServiceStack.OrmLite.Tests
             costs = orders.ConvertAll(x => x.Cost);
             Assert.That(costs, Is.EquivalentTo(new[] { 1.99m }));
 
-            results = db.Select<FullCustomerInfo, Customer>(q => q
+            results = db.Select<FullCustomerInfo>(db.From<Customer>()
                 .Join<Customer, CustomerAddress>()
                 .Join<Customer, Order>()
                 .Where<Order>(o => o.Cost < 2));
@@ -141,7 +141,7 @@ namespace ServiceStack.OrmLite.Tests
             costs = results.ConvertAll(x => x.Cost);
             Assert.That(costs, Is.EquivalentTo(new[] { 1.99m }));
 
-            results = db.Select<FullCustomerInfo, Customer>(q => q
+            results = db.Select<FullCustomerInfo>(db.From<Customer>()
                 .Join<Customer, CustomerAddress>()
                 .Join<Customer, Order>()
                 .Where<Order>(o => o.Cost < 2 || o.LineItem == "Line 2"));
@@ -168,7 +168,7 @@ namespace ServiceStack.OrmLite.Tests
                 new Country { CountryName = "Australia", CountryCode = "AU" },
                 new Country { CountryName = "USA", CountryCode = "US" });
 
-            var results = db.Select<FullCustomerInfo, Customer>(q => q
+            var results = db.Select<FullCustomerInfo>(db.From<Customer>()
                 .Join<CustomerAddress>() //implicit
                 .Join<Customer, Order>() //explicit
                 .Where(c => c.Name == "Customer 1")
@@ -192,7 +192,7 @@ namespace ServiceStack.OrmLite.Tests
             costs = results.ConvertAll(x => x.Cost);
             Assert.That(costs, Is.EquivalentTo(new[] { 1.99m, 1.49m, 9.99m }));
 
-            results = db.Select<FullCustomerInfo, Customer>(q => q
+            results = db.Select<FullCustomerInfo>(db.From<Customer>()
                 .Join<Customer, CustomerAddress>()
                 .Join<Customer, Order>()
                 .Where(c => c.Name == "Customer 2")
@@ -267,27 +267,27 @@ namespace ServiceStack.OrmLite.Tests
                 new Country { CountryName = "Spain", CountryCode = "ED" });
 
             //Normal Join
-            var dbCustomers = db.Select<Customer>(q => q
+            var dbCustomers = db.Select(db.From<Customer>()
                 .Join<CustomerAddress>()
                 .Join<CustomerAddress, Country>((ca, c) => ca.Country == c.CountryName));
 
             Assert.That(dbCustomers.Count, Is.EqualTo(2));
 
             //Left Join
-            dbCustomers = db.Select<Customer>(q => q
+            dbCustomers = db.Select(db.From<Customer>()
                 .Join<CustomerAddress>()
                 .LeftJoin<CustomerAddress, Country>((ca, c) => ca.Country == c.CountryName));
 
             Assert.That(dbCustomers.Count, Is.EqualTo(3));
 
             //Warning: Right and Full Joins are not implemented by Sqlite3. Avoid if possible.
-            var dbCountries = db.Select<Country>(q => q
+            var dbCountries = db.Select(db.From<Country>()
                 .LeftJoin<CustomerAddress>((c, ca) => ca.Country == c.CountryName)
                 .LeftJoin<CustomerAddress, Customer>());
 
             Assert.That(dbCountries.Count, Is.EqualTo(4));
 
-            var dbAddresses = db.Select<CustomerAddress>(q => q
+            var dbAddresses = db.Select(db.From<CustomerAddress>()
                 .LeftJoin<Country>((ca, c) => ca.Country == c.CountryName)
                 .LeftJoin<CustomerAddress, Customer>());
 
@@ -338,27 +338,27 @@ namespace ServiceStack.OrmLite.Tests
             AddAliasedCustomers(out countries);
 
             //Normal Join
-            var dbCustomers = db.Select<AliasedCustomer>(q => q
+            var dbCustomers = db.Select(db.From<AliasedCustomer>()
                 .Join<AliasedCustomerAddress>()
                 .Join<AliasedCustomerAddress, Country>((ca, c) => ca.Country == c.CountryName));
 
             Assert.That(dbCustomers.Count, Is.EqualTo(2));
 
             //Left Join
-            dbCustomers = db.Select<AliasedCustomer>(q => q
+            dbCustomers = db.Select(db.From<AliasedCustomer>()
                 .Join<AliasedCustomerAddress>()
                 .LeftJoin<AliasedCustomerAddress, Country>((ca, c) => ca.Country == c.CountryName));
 
             Assert.That(dbCustomers.Count, Is.EqualTo(3));
 
             //Warning: Right and Full Joins are not implemented by Sqlite3. Avoid if possible.
-            var dbCountries = db.Select<Country>(q => q
+            var dbCountries = db.Select(db.From<Country>()
                 .LeftJoin<AliasedCustomerAddress>((c, ca) => ca.Country == c.CountryName)
                 .LeftJoin<AliasedCustomerAddress, AliasedCustomer>());
 
             Assert.That(dbCountries.Count, Is.EqualTo(4));
 
-            var dbAddresses = db.Select<AliasedCustomerAddress>(q => q
+            var dbAddresses = db.Select(db.From<AliasedCustomerAddress>()
                 .LeftJoin<Country>((ca, c) => ca.Country == c.CountryName)
                 .LeftJoin<AliasedCustomerAddress, AliasedCustomer>());
 
@@ -427,7 +427,7 @@ namespace ServiceStack.OrmLite.Tests
 
             var customer = AddCustomerWithOrders();
 
-            var results = db.Select<FullCustomerInfo, Customer>(q => q
+            var results = db.Select<FullCustomerInfo>(db.From<Customer>()
                 .Join<Customer, CustomerAddress>()
                 .Join<Customer, Order>());
 
@@ -472,7 +472,7 @@ namespace ServiceStack.OrmLite.Tests
             var customers = AddAliasedCustomers(out countries);
 
             //Normal Join
-            var results = db.Select<MixedCustomerInfo, AliasedCustomer>(q => q
+            var results = db.Select<MixedCustomerInfo>(db.From<AliasedCustomer>()
                 .Join<AliasedCustomerAddress>()
                 .Join<AliasedCustomerAddress, Country>((ca, c) => ca.Country == c.CountryName));
 
@@ -556,11 +556,11 @@ namespace ServiceStack.OrmLite.Tests
         {
             AddCustomersWithOrders();
 
-            var customers = db.Select<Customer>(q =>
-                q.Join<Order>()
-                 .Where<Order>(o => o.Qty == 1)
-                 .OrderBy(x => x.Id)
-                 .SelectDistinct());
+            var customers = db.Select(db.From<Customer>()
+                .Join<Order>()
+                .Where<Order>(o => o.Qty == 1)
+                .OrderBy(x => x.Id)
+                .SelectDistinct());
 
             var orders = db.Select<Order>(o => o.Qty == 1);
 
@@ -620,7 +620,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             AddCustomersWithOrders();
 
-            var customers = db.LoadSelect<Customer>(q => q.OrderBy(x => x.Name));
+            var customers = db.LoadSelect(db.From<Customer>().OrderBy(x => x.Name));
             var addresses = customers.Select(x => x.PrimaryAddress).ToList();
             var orders = customers.SelectMany(x => x.Orders).ToList();
 

@@ -54,15 +54,15 @@ namespace ServiceStack.OrmLite.Tests.Issues
                     Child = new SchemaTable2 { Name = "Bar" }
                 }, references: true);
 
-                var rows = db.Select<SchemaTable1>(q => q.Join<SchemaTable2>());
+                var rows = db.Select(db.From<SchemaTable1>().Join<SchemaTable2>());
                 Assert.That(rows.Count, Is.EqualTo(2));
-                rows = db.Select<SchemaTable1>(q => q.Join<SchemaTable2>()
+                rows = db.Select(db.From<SchemaTable1>().Join<SchemaTable2>()
                     .Where<SchemaTable2>(x => x.Name == "Foo"));
                 Assert.That(rows.Count, Is.EqualTo(1));
 
-                rows = db.Select<SchemaTable1>(q => q.LeftJoin<SchemaTable2>());
+                rows = db.Select(db.From<SchemaTable1>().LeftJoin<SchemaTable2>());
                 Assert.That(rows.Count, Is.EqualTo(2));
-                rows = db.Select<SchemaTable1>(q => q.LeftJoin<SchemaTable2>()
+                rows = db.Select(db.From<SchemaTable1>().LeftJoin<SchemaTable2>()
                     .Where<SchemaTable2>(x => x.Name == "Foo"));
                 Assert.That(rows.Count, Is.EqualTo(1));
             }

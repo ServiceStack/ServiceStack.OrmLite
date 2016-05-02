@@ -189,9 +189,6 @@ namespace ServiceStack.OrmLite
         public static Func<string, string> SanitizeFieldNameForParamNameFn = fieldName =>
             (fieldName ?? "").Replace(" ", "");
 
-        [Obsolete("Will only support Parameterized SqlExpressions in future, please report any issues using parameterized queries")]
-        public static bool UseParameterizeSqlExpressions = true;
-
         public static bool IsCaseInsensitive { get; set; }
 
         public static bool DeoptimizeReader { get; set; }

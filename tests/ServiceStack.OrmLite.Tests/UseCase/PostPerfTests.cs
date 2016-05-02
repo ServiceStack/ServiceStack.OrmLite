@@ -101,7 +101,7 @@ end
             var tester = new Tester();
 
             var db = OpenDbConnection();
-            tester.Add(id => db.SelectFmt<Post>("select * from Post where Id = {0}", id), "OrmLite Query");
+            tester.Add(id => db.Select<Post>("select * from Post where Id = @id", new { id = id }), "OrmLite Query");
 
             tester.Run(500);
         }
@@ -123,7 +123,7 @@ end
             var tester = new Tester();
 
             var db = OpenDbConnection();
-            tester.Add(id => db.SelectFmt<Post>("select top 1000 * from Post"), "OrmLite Query");
+            tester.Add(id => db.Select<Post>("select top 1000 * from Post"), "OrmLite Query");
 
             tester.Run(50);
         }
@@ -134,7 +134,7 @@ end
             var tester = new Tester();
 
             var db = OpenDbConnection();
-            tester.Add(id => db.Select<Post>(q => q.Limit(1000)), "OrmLite Query Expression");
+            tester.Add(id => db.Select(db.From<Post>().Limit(1000)), "OrmLite Query Expression");
 
             tester.Run(50);
         }
