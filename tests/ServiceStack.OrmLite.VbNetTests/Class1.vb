@@ -26,12 +26,14 @@ Module Module1
 
         db.Insert(row)
 
-        Dim q As SqlExpression(Of Poco) = db.From(Of Poco)()
-
-        q.Where(Function(x) x.Name <> "Bar")
-
+        Dim q As SqlExpression(Of Poco) = db.From(Of Poco)().Where(Function(x) x.Name <> "Bar")
         Dim rows As List(Of Poco) = db.Select(q)
+        rows.PrintDump()
 
+        Console.WriteLine("<> ''")
+
+        q = db.From(Of Poco)().Where(Function(x) x.Name <> "")
+        rows = db.Select(q)
         rows.PrintDump()
 
         Console.ReadLine()
