@@ -200,6 +200,7 @@ public class TableIndex
 public class FKey
 {
     public string ToTable;
+	public string ToTableSingular;
 	public string FromColumn;
 	public string ToColumn;
 }
@@ -877,6 +878,7 @@ class SqlServerSchemaReader : SchemaReader
 						}
 						var newForeignKey = new FKey();
 						newForeignKey.ToTable = rdr["TargetTable"].ToString();
+						newForeignKey.ToTableSingular = Inflector.MakeSingular(CleanUp(newForeignKey.ToTable));
 						newForeignKey.FromColumn = rdr["ForeignKeyColumn"].ToString();
 						newForeignKey.ToColumn = rdr["TargetTableKey"].ToString();
 						table.FKeys.Add(newForeignKey);
