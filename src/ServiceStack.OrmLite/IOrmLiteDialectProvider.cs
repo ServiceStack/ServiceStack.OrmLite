@@ -151,7 +151,7 @@ namespace ServiceStack.OrmLite
 
         bool DoesTableExist(IDbConnection db, string tableName, string schema = null);
         bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null);
-
+        bool DoesColumnExist(IDbConnection db, string columnName, string tableName, string schema = null);
         bool DoesSequenceExist(IDbCommand dbCmd, string sequencName);
 
         ulong FromDbRowVersion(object value);

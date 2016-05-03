@@ -131,6 +131,7 @@
     <Compile Include="Issues\MergingNestedSqlExpressionIssue.cs" />
     <Compile Include="Legacy\ApiSqliteLegacyTests.cs" />
     <Compile Include="Legacy\ApiSqlServerLegacyTests.cs" />
+    <Compile Include="SchemaTests.cs" />
     <Compile Include="Support\JoinSqlBuilder.cs" />
     <Compile Include="UseCase\ExpressionsAuthorTests.cs" />
     <Compile Include="Expression\ComplexJoinTests.cs" />

@@ -307,13 +307,20 @@ namespace ServiceStack.OrmLite.VistaDB
 
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
         {
-            var schemaTableName = schema != null
-                ? "{0}_{1}".Fmt(schema, tableName)
-                : tableName;
+            var schemaTableName = GetTableName(tableName, schema);
             dbCmd.CommandText = "SELECT COUNT(*) FROM [database schema] WHERE typeid = 1 AND name = {0}"
                 .SqlFmt(schemaTableName);
 
             return dbCmd.LongScalar() > 0;
+        }
+
+        public override bool DoesColumnExist(IDbConnection db, string columnName, string tableName, string schema = null)
+        {
+            var table = GetTableName(tableName, schema);
+            var sql = "SELECT COUNT(*) FROM [database schema] WHERE typeid = 1 AND name = @columnName"
+                    + "   AND foreignReference = (SELECT objectId FROM [database schema] WHERE  typeid = 1 AND name = @table)";
+
+            return db.SqlScalar<long>(sql, new { table, columnName }) > 0;
         }
 
         public override string GetForeignKeyOnDeleteClause(ForeignKeyConstraint foreignKey)

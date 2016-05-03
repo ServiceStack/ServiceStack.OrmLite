@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Linq.Expressions;
 
 namespace ServiceStack.OrmLite
 {
@@ -9,7 +10,7 @@ namespace ServiceStack.OrmLite
         /// Checks whether a Table Exists. E.g:
         /// <para>db.TableExists("Person")</para>
         /// </summary>
-        public static bool TableExists(this IDbConnection dbConn, string tableName, string schema=null)
+        public static bool TableExists(this IDbConnection dbConn, string tableName, string schema = null)
         {
             return dbConn.GetDialectProvider().DoesTableExist(dbConn, tableName, schema);
         }
@@ -24,6 +25,29 @@ namespace ServiceStack.OrmLite
             var modelDef = typeof(T).GetModelDefinition();
             var tableName = dialectProvider.NamingStrategy.GetTableName(modelDef);
             return dialectProvider.DoesTableExist(dbConn, tableName, modelDef.Schema);
+        }
+
+        /// <summary>
+        /// Checks whether a Table Column Exists. E.g:
+        /// <para>db.ColumnExists("Age", "Person")</para>
+        /// </summary>
+        public static bool ColumnExists(this IDbConnection dbConn, string columnName, string tableName, string schema = null)
+        {
+            return dbConn.GetDialectProvider().DoesColumnExist(dbConn, columnName, tableName, schema);
+        }
+
+        /// <summary>
+        /// Checks whether a Table Column Exists. E.g:
+        /// <para>db.ColumnExists&lt;Person&gt;(x =&gt; x.Age)</para>
+        /// </summary>
+        public static bool ColumnExists<T>(this IDbConnection dbConn, Expression<Func<T, object>> field)
+        {
+            var dialectProvider = dbConn.GetDialectProvider();
+            var modelDef = typeof(T).GetModelDefinition();
+            var tableName = dialectProvider.NamingStrategy.GetTableName(modelDef);
+            var fieldDef = modelDef.GetFieldDefinition(field);
+            var fieldName = dialectProvider.NamingStrategy.GetColumnName(fieldDef.FieldName);
+            return dialectProvider.DoesColumnExist(dbConn, fieldName, tableName, modelDef.Schema);
         }
 
         /// <summary>

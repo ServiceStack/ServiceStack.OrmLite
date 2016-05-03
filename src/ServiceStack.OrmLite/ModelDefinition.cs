@@ -118,7 +118,7 @@ namespace ServiceStack.OrmLite
 
         public FieldDefinition GetFieldDefinition<T>(Expression<Func<T, object>> field)
         {
-            return GetFieldDefinition(GetFieldName(field));
+            return GetFieldDefinition(ExpressionUtils.GetMemberName(field));
         }
 
         public FieldDefinition GetFieldDefinition(string fieldName)
@@ -132,19 +132,6 @@ namespace ServiceStack.OrmLite
                 }
             }
             return null;
-        }
-
-        string GetFieldName<T>(Expression<Func<T, object>> field)
-        {
-            var lambda = field as LambdaExpression;
-            if (lambda.Body.NodeType == ExpressionType.MemberAccess)
-            {
-                var me = lambda.Body as MemberExpression;
-                return me.Member.Name;
-            }
-            
-            var operand = (lambda.Body as UnaryExpression).Operand;
-            return (operand as MemberExpression).Member.Name;
         }
 
         public void AfterInit()

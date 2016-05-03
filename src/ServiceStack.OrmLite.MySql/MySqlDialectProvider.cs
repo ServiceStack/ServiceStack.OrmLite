@@ -131,14 +131,21 @@ namespace ServiceStack.OrmLite.MySql
 
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
         {
-            //Same as SQL Server apparently?
-            var sql = ("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES " +
-                "WHERE TABLE_NAME = {0} AND " +
-                "TABLE_SCHEMA = {1}")
-                .SqlFmt(GetTableName(tableName, schema), dbCmd.Connection.Database);
+            var sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = {0}"
+                .SqlFmt(GetTableName(tableName, schema));
 
-            dbCmd.CommandText = sql;
-            var result = dbCmd.LongScalar();
+            var result = dbCmd.ExecLongScalar(sql);
+
+            return result > 0;
+        }
+
+        public override bool DoesColumnExist(IDbConnection db, string columnName, string tableName, string schema = null)
+        {
+            tableName = GetTableName(tableName, schema);
+            var sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @tableName AND COLUMN_NAME = @columnName"
+                .SqlFmt(tableName, columnName);
+
+            var result = db.SqlScalar<long>(sql, new { tableName, columnName });
 
             return result > 0;
         }

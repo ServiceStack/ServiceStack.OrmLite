@@ -28,11 +28,10 @@ namespace ServiceStack.OrmLite
             dbConn.ExecuteSql(sql);
         }
 
-        public static void AddColumn<T>(this IDbConnection dbConn,
-                                        Expression<Func<T, object>> field)
+        public static void AddColumn<T>(this IDbConnection dbConn, Expression<Func<T, object>> field)
         {
             var modelDef = ModelDefinition<T>.Definition;
-            var fieldDef = modelDef.GetFieldDefinition<T>(field);
+            var fieldDef = modelDef.GetFieldDefinition(field);
             dbConn.AddColumn(typeof(T), fieldDef);
         }
 

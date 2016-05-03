@@ -162,6 +162,21 @@ namespace ServiceStack.OrmLite.Sqlite
             return result > 0;
         }
 
+        public override bool DoesColumnExist(IDbConnection db, string columnName, string tableName, string schema = null)
+        {
+            var sql = "PRAGMA table_info({0})"
+                .SqlFmt(GetTableName(tableName, schema));
+
+            var columns = db.SqlList<Dictionary<string, object>>(sql);
+            foreach (var column in columns)
+            {
+                object name;
+                if (column.TryGetValue("name", out name) && name.ToString().EqualsIgnoreCase(columnName))
+                    return true;
+            }
+            return false;
+        }
+
         public override string GetColumnDefinition(string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement,
             bool isNullable, bool isRowVersion, int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
         {

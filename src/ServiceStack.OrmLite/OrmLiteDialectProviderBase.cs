@@ -1180,12 +1180,17 @@ namespace ServiceStack.OrmLite
 
         public virtual bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
         {
-            return false;
+            throw new NotImplementedException();
+        }
+
+        public virtual bool DoesColumnExist(IDbConnection db, string columnName, string tableName, string schema = null)
+        {
+            throw new NotImplementedException();
         }
 
         public virtual bool DoesSequenceExist(IDbCommand dbCmd, string sequenceName)
         {
-            return true;
+            throw new NotImplementedException();
         }
 
         protected virtual string GetIndexName(bool isUnique, string modelName, string fieldName)

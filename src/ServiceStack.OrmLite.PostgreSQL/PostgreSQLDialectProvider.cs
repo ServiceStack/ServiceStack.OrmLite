@@ -13,9 +13,6 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.PostgreSQL
 {
-    [Obsolete("Use PostgreSqlDialectProvider")]
-    public class PostgreSQLDialectProvider : PostgreSqlDialectProvider { }
-
     public class PostgreSqlDialectProvider : OrmLiteDialectProviderBase<PostgreSqlDialectProvider>
     {
         public static PostgreSqlDialectProvider Instance = new PostgreSqlDialectProvider();
@@ -188,8 +185,20 @@ namespace ServiceStack.OrmLite.PostgreSQL
                           .SqlFmt(tableName, schema);
             }
 
-            dbCmd.CommandText = sql;
-            var result = dbCmd.LongScalar();
+            var result = dbCmd.ExecLongScalar(sql);
+
+            return result > 0;
+        }
+
+        public override bool DoesColumnExist(IDbConnection db, string columnName, string tableName, string schema = null)
+        {
+            var sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @tableName AND COLUMN_NAME = @columnName"
+                .SqlFmt(tableName, columnName);
+
+            if (schema != null)
+                sql += " AND TABLE_SCHEMA = @schema";
+
+            var result = db.SqlScalar<long>(sql, new { tableName, columnName, schema });
 
             return result > 0;
         }

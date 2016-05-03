@@ -724,12 +724,24 @@ namespace ServiceStack.OrmLite.Firebird
                 "WHERE rdb$system_flag = 0 AND rdb$view_blr IS NULL AND rdb$relation_name ={0}"
                 .SqlFmt(tableName);
 
-            dbCmd.CommandText = sql;
-            var result = dbCmd.LongScalar();
-
+            var result = dbCmd.ExecLongScalar(sql);
             return result > 0;
         }
 
+        public override bool DoesColumnExist(IDbConnection db, string columnName, string tableName, string schema = null)
+        {
+            var table = GetTableName(tableName, schema);
+
+            if (!QuoteNames & !RESERVED.Contains(tableName.ToUpper()))
+                table = tableName.ToUpper();
+
+            var sql = "SELECT COUNT(*) FROM RDB$RELATION_FIELDS "
+                    + " WHERE RDB$RELATION_FIELDS.RDB$RELATION_NAME = UPPER(@table)"
+                    + "   AND RDB$RELATION_FIELDS.RDB$FIELD_NAME = UPPER(@columnName)";
+
+            var result = db.SqlScalar<long>(sql, new { table, columnName });
+            return result > 0;
+        }
 
         public override string GetForeignKeyOnDeleteClause(ForeignKeyConstraint foreignKey)
         {

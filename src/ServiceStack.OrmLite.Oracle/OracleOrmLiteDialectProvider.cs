@@ -1200,6 +1200,23 @@ namespace ServiceStack.OrmLite.Oracle
             return result > 0;
         }
 
+        public override bool DoesColumnExist(IDbConnection db, string columnName, string tableName, string schema = null)
+        {
+            if (!WillQuote(tableName))
+                tableName = tableName.ToUpper();
+
+            var sql = "SELECT count(*) from user_tab_cols"
+                    + " WHERE table_name = @tableName"
+                    + "   AND column_name = @columnName";
+
+            if (schema != null)
+                sql += " AND OWNER = @schema";
+
+            var result = db.SqlScalar<long>(sql, new { tableName, columnName, schema });
+
+            return result > 0;
+        }
+
         public override bool DoesSequenceExist(IDbCommand dbCmd, string sequenceName)
         {
             if (!WillQuote(sequenceName)) sequenceName = sequenceName.ToUpper();
