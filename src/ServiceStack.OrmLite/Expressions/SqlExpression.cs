@@ -1207,9 +1207,9 @@ namespace ServiceStack.OrmLite
                 //Handle VB.NET converting (x => x.Name == "Foo") into (x => CompareString(x.Name, "Foo", False)
                 var methodExpr = (MethodCallExpression)b.Left;
                 var args = this.VisitExpressionList(methodExpr.Arguments);
-                object quotedColName = args[0];
-                object value = GetValue(args[1], typeof(string));
-                return new PartialSqlString("({0} {1} {2})".Fmt(quotedColName, operand, value));
+                right = GetValue(args[1], typeof(string));
+                ConvertToPlaceholderAndParameter(ref right);
+                return new PartialSqlString("({0} {1} {2})".Fmt(args[0], operand, right));
             }
             else
             {
