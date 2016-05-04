@@ -887,6 +887,12 @@ namespace ServiceStack.OrmLite
             return parameter;
         }
 
+        public string ConvertToParam(object value)
+        {
+            var p = AddParam(value);
+            return p.ParameterName;
+        }
+
         public virtual void CopyParamsTo(IDbCommand dbCmd)
         {
             try
@@ -1780,7 +1786,7 @@ namespace ServiceStack.OrmLite
 
         protected virtual object VisitColumnAccessMethod(MethodCallExpression m)
         {
-            List<Object> args = this.VisitExpressionList(m.Arguments);
+            List<object> args = this.VisitExpressionList(m.Arguments);
             var quotedColName = Visit(m.Object);
             var statement = "";
 
@@ -1807,42 +1813,48 @@ namespace ServiceStack.OrmLite
                     if (!OrmLiteConfig.StripUpperInLike)
                     {
                         statement = string.Format("upper({0}) like {1}{2}",
-                            quotedColName, DialectProvider.GetQuotedValue(
-                                wildcardArg.ToUpper() + "%"), escapeSuffix);
+                            quotedColName,
+                            ConvertToParam(wildcardArg.ToUpper() + "%"),
+                            escapeSuffix);
                     }
                     else
                     {
                         statement = string.Format("{0} like {1}{2}",
-                            quotedColName, DialectProvider.GetQuotedValue(
-                                wildcardArg + "%"), escapeSuffix);
+                            quotedColName,
+                            ConvertToParam(wildcardArg + "%"),
+                            escapeSuffix);
                     }
                     break;
                 case "EndsWith":
                     if (!OrmLiteConfig.StripUpperInLike)
                     {
                         statement = string.Format("upper({0}) like {1}{2}",
-                            quotedColName, DialectProvider.GetQuotedValue("%" +
-                            wildcardArg.ToUpper()), escapeSuffix);
+                            quotedColName,
+                            ConvertToParam("%" + wildcardArg.ToUpper()),
+                            escapeSuffix);
                     }
                     else
                     {
                         statement = string.Format("{0} like {1}{2}",
-                            quotedColName, DialectProvider.GetQuotedValue("%" +
-                            wildcardArg), escapeSuffix);
+                            quotedColName,
+                            ConvertToParam("%" + wildcardArg),
+                            escapeSuffix);
                     }
                     break;
                 case "Contains":
                     if (!OrmLiteConfig.StripUpperInLike)
                     {
                         statement = string.Format("upper({0}) like {1}{2}",
-                            quotedColName, DialectProvider.GetQuotedValue("%" +
-                                wildcardArg.ToUpper() + "%"), escapeSuffix);
+                            quotedColName,
+                            ConvertToParam("%" + wildcardArg.ToUpper() + "%"),
+                            escapeSuffix);
                     }
                     else
                     {
                         statement = string.Format("{0} like {1}{2}",
-                            quotedColName, DialectProvider.GetQuotedValue("%" +
-                                wildcardArg + "%"), escapeSuffix);
+                            quotedColName,
+                            ConvertToParam("%" + wildcardArg + "%"),
+                            escapeSuffix);
                     }
                     break;
                 case "Substring":

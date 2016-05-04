@@ -2,6 +2,7 @@
 using System.Data;
 using System.Linq;
 using NUnit.Framework;
+using ServiceStack.Logging;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Expression
@@ -9,11 +10,11 @@ namespace ServiceStack.OrmLite.Tests.Expression
     [TestFixture]
     public class ExpressionChainingUseCase: OrmLiteTestBase
     {
-        #region Setup/Teardown
-
         [SetUp]
         public void SetUp()
         {
+            LogManager.LogFactory = new ConsoleLogFactory();
+
             db = OpenDbConnection();
             db.CreateTable<Person>(overwrite: true);
 
@@ -25,8 +26,6 @@ namespace ServiceStack.OrmLite.Tests.Expression
         {
             db.Dispose();
         }
-
-        #endregion
 
         public class Person
         {
@@ -56,31 +55,32 @@ namespace ServiceStack.OrmLite.Tests.Expression
         private IDbConnection db;
 
         public Person[] People = new[]
-                                     {
-                                         new Person(1, "Jimi", "Hendrix", 27),
-                                         new Person(2, "Janis", "Joplin", 27),
-                                         new Person(3, "Jim", "Morrisson", 27),
-                                         new Person(4, "Kurt", "Cobain", 27),
-                                         new Person(5, "Elvis", "Presley", 42),
-                                         new Person(6, "Michael", "Jackson", 50)
-                                     };
+        {
+            new Person(1, "Jimi", "Hendrix", 27),
+            new Person(2, "Janis", "Joplin", 27),
+            new Person(3, "Jim", "Morrisson", 27),
+            new Person(4, "Kurt", "Cobain", 27),
+            new Person(5, "Elvis", "Presley", 42),
+            new Person(6, "Michael", "Jackson", 50)
+        };
 
         [Test]
         public void Can_Chain_Expressions_Using_And()
         {
             db.Insert(People);
 
-            var visitor = db.From<Person>();
+            var q = db.From<Person>();
 
-            visitor.Where(x => x.FirstName.StartsWith("Jim")).And(x => x.LastName.StartsWith("Hen"));
-            var results = db.Select<Person>(visitor);
+            q.Where(x => x.FirstName.StartsWith("Jim"))
+             .And(x => x.LastName.StartsWith("Hen"));
+            var results = db.Select(q);
 
             Assert.AreEqual(1,results.Count);
 
-            visitor.Where(); //clears underlying expression
+            q.Where(); //clears underlying expression
 
-            visitor.Where(x => x.LastName.StartsWith("J")).And(x => x.Age > 40);
-            results = db.Select(visitor);
+            q.Where(x => x.LastName.StartsWith("J")).And(x => x.Age > 40);
+            results = db.Select(q);
             Assert.AreEqual(results[0].FirstName,"Michael");
         }
 
