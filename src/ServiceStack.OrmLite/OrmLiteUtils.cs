@@ -384,6 +384,18 @@ namespace ServiceStack.OrmLite
             {
                 var columnName = reader.GetName(i);                
                 var fieldDef = modelDefinition.GetFieldDefinition(columnName);
+                if (fieldDef == null)
+                {
+                    foreach (var def in modelDefinition.FieldDefinitionsArray)
+                    {
+                        if (string.Equals(dialect.NamingStrategy.GetColumnName(def.FieldName), columnName, 
+                            StringComparison.OrdinalIgnoreCase))
+                        {
+                            fieldDef = def;
+                            break;
+                        }
+                    }
+                }
 
                 if (fieldDef != null && !ignoredFields.Contains(fieldDef) && fieldDef.SetValueFn != null)
                 {
