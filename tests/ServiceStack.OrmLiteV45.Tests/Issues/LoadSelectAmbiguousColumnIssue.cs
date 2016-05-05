@@ -97,11 +97,20 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixture]
     public class LoadSelectAmbiguousColumnIssue : OrmLiteTestBase
     {
+        public class DeptEmployee //Ref of External Table
+        {
+            [PrimaryKey]
+            public int Id { get; set; }
+        }
+
+
         [Test]
         public async Task Can_select_columns_with_LoadSelectAsync()
         {
             using (var db = OpenDbConnection())
             {
+                db.DropTable<DeptEmployee>();
+
                 db.DropTable<ProjectTask>();
                 db.DropTable<Project>();
                 db.DropTable<ProjectTaskStatus>();

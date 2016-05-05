@@ -43,7 +43,7 @@ namespace ServiceStack.OrmLite.Tests
             {
                 db.DropAndCreateTable<PocoWithBytes>();
 
-                var bar = new PocoWithBytes { Id = Guid.NewGuid(), Image = new byte[1024 * 1024], ContentType = "image/jpeg" };
+                var bar = new PocoWithBytes { Id = Guid.NewGuid(), Image = new byte[1024 * 10], ContentType = "image/jpeg" };
                 await db.InsertAsync(bar);
 
                 var blah = await db.SingleAsync(db.From<PocoWithBytes>().Where(x => x.Id == bar.Id));

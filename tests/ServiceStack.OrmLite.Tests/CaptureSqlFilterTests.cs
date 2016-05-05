@@ -52,7 +52,8 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(captured.SqlStatements.Last().NormalizeSql(),
                             Is.StringStarting("create table person"));
 
-                Assert.That(captured.SqlStatements.Count, Is.EqualTo(i));
+                Assert.That(captured.SqlCommandHistory.Count, Is.EqualTo(i)
+                    .Or.EqualTo(i + 1)); //Check table if exists
 
                 var sql = string.Join(";\n", captured.SqlStatements.ToArray());
                 sql.Print();

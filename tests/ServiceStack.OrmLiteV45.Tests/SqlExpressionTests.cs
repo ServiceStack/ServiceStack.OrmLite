@@ -79,6 +79,9 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public async Task Can_select_limit_on_Table_with_References_Async()
         {
+            if (Dialect == Dialect.MySql)
+                return; //= This version of MySQL doesn't yet support 'LIMIT & IN/ALL/ANY/SOME subquery'
+
             using (var db = OpenDbConnection())
             {
                 CustomerOrdersUseCase.DropTables(db); //Has conflicting 'Order' table
