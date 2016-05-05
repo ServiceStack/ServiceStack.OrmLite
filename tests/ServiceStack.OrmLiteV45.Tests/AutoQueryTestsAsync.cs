@@ -65,7 +65,7 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(results.Count, Is.EqualTo(3));
                 Assert.That(q.Params.Count, Is.EqualTo(2));
 
-                q = db.From<Rockstar>().Where("FirstName = {0}", "Kurt");
+                q = db.From<Rockstar>().Where("FirstName".SqlColumn() + " = {0}", "Kurt");
                 results = await db.SelectAsync(q);
                 Assert.That(results.Count, Is.EqualTo(1));
                 Assert.That(q.Params.Count, Is.EqualTo(1));
@@ -82,7 +82,7 @@ namespace ServiceStack.OrmLite.Tests
                 await db.InsertAllAsync(SeedRockstars);
 
                 var q = db.From<Rockstar>()
-                    .Where("FirstName LIKE {0}", "Jim%");
+                    .Where("FirstName".SqlColumn() + " LIKE {0}", "Jim%");
 
                 var results = await db.SelectAsync(q);
                 db.GetLastSql().Print();
@@ -100,7 +100,7 @@ namespace ServiceStack.OrmLite.Tests
                 await db.InsertAllAsync(SeedRockstars);
 
                 var q = db.From<Rockstar>()
-                    .Where("FirstName IN ({0})", new SqlInValues(new[] { "Jimi", "Kurt", "Jim" }));
+                    .Where("FirstName".SqlColumn() + " IN ({0})", new SqlInValues(new[] { "Jimi", "Kurt", "Jim" }));
 
                 var results = await db.SelectAsync(q);
                 db.GetLastSql().Print();

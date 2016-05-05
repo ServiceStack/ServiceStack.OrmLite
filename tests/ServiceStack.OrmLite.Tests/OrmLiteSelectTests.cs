@@ -330,7 +330,6 @@ namespace ServiceStack.OrmLite.Tests
                 var rows = db.Select<ModelWithIdAndName>("Name IN ({0})".Fmt(selectInNames.SqlInParams()), 
                     new { values = selectInNames.SqlInValues() });
                 Assert.That(rows.Count, Is.EqualTo(selectInNames.Length));
-
                 rows = db.Select<ModelWithIdAndName>("Name IN (@p1, @p2)", new { p1 = "Name1", p2 = "Name2" });
                 Assert.That(rows.Count, Is.EqualTo(selectInNames.Length));
             }

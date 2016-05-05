@@ -122,7 +122,7 @@ namespace ServiceStack.OrmLite
                         p.Direction = ParameterDirection.Input;
                         dialectProvider.InitDbParam(p, item.GetType());
 
-                        var pValue = dialectProvider.GetFieldValue(pi.PropertyType, item);
+                        var pValue = dialectProvider.GetFieldValue(item.GetType(), item);
                         var valueType = pValue != null ? pValue.GetType() : null;
                         if (valueType != null && valueType != pi.PropertyType)
                             dialectProvider.InitDbParam(p, valueType);
