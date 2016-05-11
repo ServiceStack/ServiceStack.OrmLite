@@ -119,5 +119,28 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(results[0].Orders.Count, Is.EqualTo(2));
             }
         }
+
+        [Test]
+        public void Can_select_custom_GroupBy()
+        {
+            using (var db = OpenDbConnection())
+            {
+                InitLetters(db);
+
+                var q = db.From<LetterFrequency>()
+                    .GroupBy("Letter")
+                    .Select(x => new { x.Letter, Count = Sql.Count("*") });
+
+                var results = db.Dictionary<string, int>(q);
+
+                Assert.That(results, Is.EquivalentTo(new Dictionary<string,int>
+                {
+                    { "A", 1 },
+                    { "B", 2 },
+                    { "C", 3 },
+                    { "D", 4 },
+                }));
+            }
+        }
     }
 }

@@ -414,7 +414,8 @@ namespace ServiceStack.OrmLite
         public virtual SqlExpression<T> GroupBy(string groupBy)
         {
             groupBy.SqlVerifyFragment();
-            this.groupBy = groupBy;
+            if (!string.IsNullOrEmpty(groupBy))
+                this.groupBy = "GROUP BY " + groupBy;
             return this;
         }
 
@@ -422,9 +423,7 @@ namespace ServiceStack.OrmLite
         {
             sep = string.Empty;
             useFieldName = true;
-            groupBy = Visit(keySelector).ToString();
-            if (!string.IsNullOrEmpty(groupBy)) groupBy = string.Format("GROUP BY {0}", groupBy);
-            return this;
+            return GroupBy(Visit(keySelector).ToString());
         }
 
 
