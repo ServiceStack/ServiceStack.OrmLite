@@ -236,7 +236,7 @@ namespace ServiceStack.OrmLite
         internal static int ExecuteSql(this IDbCommand dbCmd, string sql, object anonType)
         {
             if (anonType != null)
-                dbCmd.SetParameters(anonType, excludeDefaults: false);
+                dbCmd.SetParameters(anonType.ToObjectDictionary(), excludeDefaults: false);
 
             dbCmd.CommandText = sql;
 

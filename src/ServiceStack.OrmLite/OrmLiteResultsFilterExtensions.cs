@@ -17,7 +17,7 @@ namespace ServiceStack.OrmLite
         internal static int ExecNonQuery(this IDbCommand dbCmd, string sql, object anonType = null)
         {
             if (anonType != null)
-                dbCmd.SetParameters(anonType, (bool)false);
+                dbCmd.SetParameters(anonType.ToObjectDictionary(), (bool)false);
 
             dbCmd.CommandText = sql;
 

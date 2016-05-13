@@ -16,7 +16,7 @@ namespace ServiceStack.OrmLite
         public static Task<int> ExecNonQueryAsync(this IDbCommand dbCmd, string sql, object anonType, CancellationToken token = default(CancellationToken))
         {
             if (anonType != null)
-                dbCmd.SetParameters(anonType, (bool)false);
+                dbCmd.SetParameters(anonType.ToObjectDictionary(), (bool)false);
 
             dbCmd.CommandText = sql;
 

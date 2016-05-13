@@ -177,7 +177,7 @@ namespace ServiceStack.OrmLite
 
         internal static Task<List<T>> SqlColumnAsync<T>(this IDbCommand dbCmd, string sql, object anonType, CancellationToken token)
         {
-            dbCmd.SetParameters(anonType, excludeDefaults: false).CommandText = sql;
+            dbCmd.SetParameters(anonType.ToObjectDictionary(), excludeDefaults: false).CommandText = sql;
             return dbCmd.ConvertToListAsync<T>(null, token);
         }
 
@@ -276,7 +276,7 @@ namespace ServiceStack.OrmLite
         internal static Task<Dictionary<K, List<V>>> LookupAsync<K, V>(this IDbCommand dbCmd, string sql, object anonType, CancellationToken token)
         {
             if (anonType != null) 
-                dbCmd.SetParameters(anonType, (bool)false);
+                dbCmd.SetParameters(anonType.ToObjectDictionary(), (bool)false);
 
             return dbCmd.LookupAsync<K, V>(sql, token);
         }
@@ -303,7 +303,7 @@ namespace ServiceStack.OrmLite
         internal static Task<Dictionary<K, V>> DictionaryAsync<K, V>(this IDbCommand dbCmd, string sql, object anonType, CancellationToken token)
         {
             if (anonType != null) 
-                dbCmd.SetParameters(anonType, excludeDefaults: false);
+                dbCmd.SetParameters(anonType.ToObjectDictionary(), excludeDefaults: false);
 
             return dbCmd.DictionaryAsync<K, V>(sql, token);
         }
@@ -322,7 +322,7 @@ namespace ServiceStack.OrmLite
 
         internal static Task<bool> ExistsAsync<T>(this IDbCommand dbCmd, object anonType, CancellationToken token)
         {
-            if (anonType != null) dbCmd.SetParameters(anonType, excludeDefaults: true);
+            if (anonType != null) dbCmd.SetParameters(anonType.ToObjectDictionary(), excludeDefaults: true);
 
             var sql = dbCmd.GetFilterSql<T>();
 
@@ -331,7 +331,7 @@ namespace ServiceStack.OrmLite
 
         internal static Task<bool> ExistsAsync<T>(this IDbCommand dbCmd, string sql, object anonType, CancellationToken token)
         {
-            if (anonType != null) dbCmd.SetParameters(anonType, (bool)false);
+            if (anonType != null) dbCmd.SetParameters(anonType.ToObjectDictionary(), (bool)false);
 
             return dbCmd.ScalarAsync(dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), sql), token)
                 .Then(x => x != null);
