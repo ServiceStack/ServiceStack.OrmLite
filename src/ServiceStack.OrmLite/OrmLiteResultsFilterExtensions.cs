@@ -32,7 +32,7 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecuteNonQuery();
         }
 
-        internal static int ExecNonQuery(this IDbCommand dbCmd, string sql, IDictionary<string, object> dict)
+        internal static int ExecNonQuery(this IDbCommand dbCmd, string sql, Dictionary<string, object> dict)
         {
 
             if (dict != null)

@@ -260,7 +260,7 @@ namespace ServiceStack.OrmLite
             return dbCmd;
         }
 
-        internal static IDbCommand SetParameters(this IDbCommand dbCmd, IDictionary<string, object> dict, bool excludeDefaults)
+        internal static IDbCommand SetParameters(this IDbCommand dbCmd, Dictionary<string, object> dict, bool excludeDefaults)
         {
             if (dict == null)
                 return dbCmd;
@@ -419,7 +419,7 @@ namespace ServiceStack.OrmLite
 
         internal static List<T> Select<T>(this IDbCommand dbCmd, string sql, Dictionary<string, object> dict)
         {
-            if (dict != null) SetParameters(dbCmd, (IDictionary<string, object>)dict, (bool)false);
+            if (dict != null) SetParameters(dbCmd, dict, (bool)false);
             dbCmd.CommandText = dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), sql);
 
             return dbCmd.ConvertToList<T>();

@@ -26,7 +26,7 @@ namespace ServiceStack.OrmLite
             return dbCmd.GetDialectProvider().ExecuteNonQueryAsync(dbCmd, token);
         }
 
-        public static Task<int> ExecNonQueryAsync(this IDbCommand dbCmd, string sql, IDictionary<string, object> dict, CancellationToken token = default(CancellationToken))
+        public static Task<int> ExecNonQueryAsync(this IDbCommand dbCmd, string sql, Dictionary<string, object> dict, CancellationToken token = default(CancellationToken))
         {
             if (dict != null)
                 dbCmd.SetParameters(dict, (bool)false);
