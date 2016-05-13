@@ -6,115 +6,115 @@ using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.Tests
 {
-	[TestFixture]
-	public class OrmLiteQueryTests
-		: OrmLiteTestBase
-	{
+    [TestFixture]
+    public class OrmLiteQueryTests
+        : OrmLiteTestBase
+    {
 
-		[Test]
-		public void Can_GetById_int_from_ModelWithFieldsOfDifferentTypes_table()
-		{
+        [Test]
+        public void Can_GetById_int_from_ModelWithFieldsOfDifferentTypes_table()
+        {
             using (var db = OpenDbConnection())
-			{
+            {
                 db.DropAndCreateTable<ModelWithFieldsOfDifferentTypes>();
 
-				var rowIds = new List<int>(new[] { 1, 2, 3 });
+                var rowIds = new List<int>(new[] { 1, 2, 3 });
 
                 for (var i = 0; i < rowIds.Count; i++)
                     rowIds[i] = (int)db.Insert(ModelWithFieldsOfDifferentTypes.Create(rowIds[i]), selectIdentity: true);
 
                 var row = db.SingleById<ModelWithFieldsOfDifferentTypes>(rowIds[0]);
 
-				Assert.That(row.Id, Is.EqualTo(rowIds[0]));
-			}
-		}
+                Assert.That(row.Id, Is.EqualTo(rowIds[0]));
+            }
+        }
 
-		[Test]
-		public void Can_GetById_string_from_ModelWithOnlyStringFields_table()
-		{
-			using (var db = OpenDbConnection())
-			{
+        [Test]
+        public void Can_GetById_string_from_ModelWithOnlyStringFields_table()
+        {
+            using (var db = OpenDbConnection())
+            {
                 db.DropAndCreateTable<ModelWithOnlyStringFields>();
 
-				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
+                var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
 
-				rowIds.ForEach(x => db.Insert(ModelWithOnlyStringFields.Create(x)));
+                rowIds.ForEach(x => db.Insert(ModelWithOnlyStringFields.Create(x)));
 
-				var row = db.SingleById<ModelWithOnlyStringFields>("id-1");
+                var row = db.SingleById<ModelWithOnlyStringFields>("id-1");
 
-				Assert.That(row.Id, Is.EqualTo("id-1"));
-			}
-		}
-		
-		[Test]
-		public void Can_select_with_filter_from_ModelWithOnlyStringFields_table()
-		{
-			using (var db = OpenDbConnection())
-			{
+                Assert.That(row.Id, Is.EqualTo("id-1"));
+            }
+        }
+
+        [Test]
+        public void Can_select_with_filter_from_ModelWithOnlyStringFields_table()
+        {
+            using (var db = OpenDbConnection())
+            {
                 db.DropAndCreateTable<ModelWithOnlyStringFields>();
 
-				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
+                var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
 
-				rowIds.ForEach(x => db.Insert(ModelWithOnlyStringFields.Create(x)));
+                rowIds.ForEach(x => db.Insert(ModelWithOnlyStringFields.Create(x)));
 
-				var filterRow = ModelWithOnlyStringFields.Create("id-4");
-				filterRow.AlbumName = "FilteredName";
+                var filterRow = ModelWithOnlyStringFields.Create("id-4");
+                filterRow.AlbumName = "FilteredName";
 
-				db.Insert(filterRow);
+                db.Insert(filterRow);
 
-				var rows = db.Where<ModelWithOnlyStringFields>(new { filterRow.AlbumName });
-				var dbRowIds = rows.ConvertAll(x => x.Id);
-				Assert.That(dbRowIds, Has.Count.EqualTo(1));
-				Assert.That(dbRowIds[0], Is.EqualTo(filterRow.Id));
+                var rows = db.Where<ModelWithOnlyStringFields>(new { filterRow.AlbumName });
+                var dbRowIds = rows.ConvertAll(x => x.Id);
+                Assert.That(dbRowIds, Has.Count.EqualTo(1));
+                Assert.That(dbRowIds[0], Is.EqualTo(filterRow.Id));
 
-				rows = db.Where<ModelWithOnlyStringFields>(new { filterRow.AlbumName });
-				dbRowIds = rows.ConvertAll(x => x.Id);
-				Assert.That(dbRowIds, Has.Count.EqualTo(1));
-				Assert.That(dbRowIds[0], Is.EqualTo(filterRow.Id));
+                rows = db.Where<ModelWithOnlyStringFields>(new { filterRow.AlbumName });
+                dbRowIds = rows.ConvertAll(x => x.Id);
+                Assert.That(dbRowIds, Has.Count.EqualTo(1));
+                Assert.That(dbRowIds[0], Is.EqualTo(filterRow.Id));
 
-				var queryByExample = new ModelWithOnlyStringFields { AlbumName = filterRow.AlbumName };
-				rows = db.SelectNonDefaults(queryByExample);
-				dbRowIds = rows.ConvertAll(x => x.Id);
-				Assert.That(dbRowIds, Has.Count.EqualTo(1));
-				Assert.That(dbRowIds[0], Is.EqualTo(filterRow.Id));
+                var queryByExample = new ModelWithOnlyStringFields { AlbumName = filterRow.AlbumName };
+                rows = db.SelectNonDefaults(queryByExample);
+                dbRowIds = rows.ConvertAll(x => x.Id);
+                Assert.That(dbRowIds, Has.Count.EqualTo(1));
+                Assert.That(dbRowIds[0], Is.EqualTo(filterRow.Id));
 
                 rows = db.Select<ModelWithOnlyStringFields>(
                     "SELECT * FROM {0} WHERE {1} = {2}AlbumName"
                     .Fmt("ModelWithOnlyStringFields".SqlTable(), "AlbumName".SqlColumn(), OrmLiteConfig.DialectProvider.ParamString),
                     new { filterRow.AlbumName });
-				dbRowIds = rows.ConvertAll(x => x.Id);
-				Assert.That(dbRowIds, Has.Count.EqualTo(1));
-				Assert.That(dbRowIds[0], Is.EqualTo(filterRow.Id));
-			}
-		}
+                dbRowIds = rows.ConvertAll(x => x.Id);
+                Assert.That(dbRowIds, Has.Count.EqualTo(1));
+                Assert.That(dbRowIds[0], Is.EqualTo(filterRow.Id));
+            }
+        }
 
-		[Test]
-		public void Can_loop_each_with_filter_from_ModelWithOnlyStringFields_table()
-		{
-			using (var db = OpenDbConnection())
-			{
+        [Test]
+        public void Can_loop_each_with_filter_from_ModelWithOnlyStringFields_table()
+        {
+            using (var db = OpenDbConnection())
+            {
                 db.DropAndCreateTable<ModelWithOnlyStringFields>();
 
-				var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
+                var rowIds = new List<string>(new[] { "id-1", "id-2", "id-3" });
 
-				rowIds.ForEach(x => db.Insert(ModelWithOnlyStringFields.Create(x)));
+                rowIds.ForEach(x => db.Insert(ModelWithOnlyStringFields.Create(x)));
 
-				var filterRow = ModelWithOnlyStringFields.Create("id-4");
-				filterRow.AlbumName = "FilteredName";
+                var filterRow = ModelWithOnlyStringFields.Create("id-4");
+                filterRow.AlbumName = "FilteredName";
 
-				db.Insert(filterRow);
+                db.Insert(filterRow);
 
-				var dbRowIds = new List<string>();
-				var rows = db.WhereLazy<ModelWithOnlyStringFields>(new { filterRow.AlbumName });
-				foreach (var row in rows)
-				{
-					dbRowIds.Add(row.Id);
-				}
+                var dbRowIds = new List<string>();
+                var rows = db.WhereLazy<ModelWithOnlyStringFields>(new { filterRow.AlbumName });
+                foreach (var row in rows)
+                {
+                    dbRowIds.Add(row.Id);
+                }
 
-				Assert.That(dbRowIds, Has.Count.EqualTo(1));
-				Assert.That(dbRowIds[0], Is.EqualTo(filterRow.Id));
-			}
-		}
+                Assert.That(dbRowIds, Has.Count.EqualTo(1));
+                Assert.That(dbRowIds[0], Is.EqualTo(filterRow.Id));
+            }
+        }
 
         [Test]
         public void Can_GetSingle_with_filter_from_ModelWithOnlyStringFields_table()
@@ -215,7 +215,7 @@ SELECT
 Id, {0}, {1}
 FROM {2}
 WHERE {0}={3}
-".Fmt("SchemaUri".SqlColumn(), "NoteText".SqlColumn(), "Note".SqlTable(), 
+".Fmt("SchemaUri".SqlColumn(), "NoteText".SqlColumn(), "Note".SqlTable(),
 OrmLiteConfig.DialectProvider.GetParam("schemaUri"));
 
                 var notes = db.Select<NoteDto>(sql, new { schemaUri = "tcm:0-0-0" });

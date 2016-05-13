@@ -7,180 +7,180 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
-	[TestFixture]
-	public class OrmLiteInsertTests
-		: OrmLiteTestBase
-	{
+    [TestFixture]
+    public class OrmLiteInsertTests
+        : OrmLiteTestBase
+    {
 
-		[Test]
-		public void Can_insert_into_ModelWithFieldsOfDifferentTypes_table()
-		{
-			using (var db = OpenDbConnection())
-			{
-				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+        [Test]
+        public void Can_insert_into_ModelWithFieldsOfDifferentTypes_table()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
-				var row = ModelWithFieldsOfDifferentTypes.Create(1);
+                var row = ModelWithFieldsOfDifferentTypes.Create(1);
 
-				db.Insert(row);
-			}
-		}
+                db.Insert(row);
+            }
+        }
 
-		[Test]
-		public void Can_insert_and_select_from_ModelWithFieldsOfDifferentTypes_table()
-		{
-			using (var db = OpenDbConnection())
-			{
-				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+        [Test]
+        public void Can_insert_and_select_from_ModelWithFieldsOfDifferentTypes_table()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
-				var row = ModelWithFieldsOfDifferentTypes.Create(1);
+                var row = ModelWithFieldsOfDifferentTypes.Create(1);
 
-				db.Insert(row);
+                db.Insert(row);
 
-				var rows = db.Select<ModelWithFieldsOfDifferentTypes>();
+                var rows = db.Select<ModelWithFieldsOfDifferentTypes>();
 
-				Assert.That(rows, Has.Count.EqualTo(1));
+                Assert.That(rows, Has.Count.EqualTo(1));
 
-				ModelWithFieldsOfDifferentTypes.AssertIsEqual(rows[0], row);
-			}
-		}
+                ModelWithFieldsOfDifferentTypes.AssertIsEqual(rows[0], row);
+            }
+        }
 
-		[Test]
-		public void Can_insert_and_select_from_ModelWithFieldsOfNullableTypes_table()
-		{
-			using (var db = OpenDbConnection())
-			{
-				db.CreateTable<ModelWithFieldsOfNullableTypes>(true);
+        [Test]
+        public void Can_insert_and_select_from_ModelWithFieldsOfNullableTypes_table()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTable<ModelWithFieldsOfNullableTypes>(true);
 
-				var row = ModelWithFieldsOfNullableTypes.Create(1);
+                var row = ModelWithFieldsOfNullableTypes.Create(1);
 
-				db.Insert(row);
+                db.Insert(row);
 
-				var rows = db.Select<ModelWithFieldsOfNullableTypes>();
+                var rows = db.Select<ModelWithFieldsOfNullableTypes>();
 
-				Assert.That(rows, Has.Count.EqualTo(1));
+                Assert.That(rows, Has.Count.EqualTo(1));
 
-				ModelWithFieldsOfNullableTypes.AssertIsEqual(rows[0], row);
-			}
-		}
+                ModelWithFieldsOfNullableTypes.AssertIsEqual(rows[0], row);
+            }
+        }
 
-		[Test]
-		public void Can_insert_and_select_from_ModelWithFieldsOfDifferentAndNullableTypes_table()
-		{
-			using (var db = OpenDbConnection())
-			{
-				db.CreateTable<ModelWithFieldsOfDifferentAndNullableTypes>(true);
+        [Test]
+        public void Can_insert_and_select_from_ModelWithFieldsOfDifferentAndNullableTypes_table()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTable<ModelWithFieldsOfDifferentAndNullableTypes>(true);
 
-				var row = ModelWithFieldsOfDifferentAndNullableTypes.Create(1);
+                var row = ModelWithFieldsOfDifferentAndNullableTypes.Create(1);
 
-				db.Insert(row);
+                db.Insert(row);
 
-				var rows = db.Select<ModelWithFieldsOfDifferentAndNullableTypes>();
+                var rows = db.Select<ModelWithFieldsOfDifferentAndNullableTypes>();
 
                 rows.PrintDump();
 
-				Assert.That(rows, Has.Count.EqualTo(1));
+                Assert.That(rows, Has.Count.EqualTo(1));
 
-				ModelWithFieldsOfDifferentAndNullableTypes.AssertIsEqual(rows[0], row);
-			}
-		}
+                ModelWithFieldsOfDifferentAndNullableTypes.AssertIsEqual(rows[0], row);
+            }
+        }
 
-		[Test]
-		public void Can_insert_table_with_null_fields()
-		{
-			using (var db = OpenDbConnection())
-			{
-				db.CreateTable<ModelWithIdAndName>(true);
+        [Test]
+        public void Can_insert_table_with_null_fields()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTable<ModelWithIdAndName>(true);
 
-				var row = ModelWithIdAndName.Create(1);
-				row.Name = null;
+                var row = ModelWithIdAndName.Create(1);
+                row.Name = null;
 
-				db.Insert(row);
+                db.Insert(row);
 
-				var rows = db.Select<ModelWithIdAndName>();
+                var rows = db.Select<ModelWithIdAndName>();
 
-				Assert.That(rows, Has.Count.EqualTo(1));
+                Assert.That(rows, Has.Count.EqualTo(1));
 
-				ModelWithIdAndName.AssertIsEqual(rows[0], row);
-			}
-		}
+                ModelWithIdAndName.AssertIsEqual(rows[0], row);
+            }
+        }
 
-		[Test]
-		public void Can_retrieve_LastInsertId_from_inserted_table()
-		{
-			using (var db = OpenDbConnection())
-			{
+        [Test]
+        public void Can_retrieve_LastInsertId_from_inserted_table()
+        {
+            using (var db = OpenDbConnection())
+            {
                 db.DropAndCreateTable<ModelWithIdAndName>();
 
-				var row1 = ModelWithIdAndName.Create(5);
-				var row2 = ModelWithIdAndName.Create(6);
+                var row1 = ModelWithIdAndName.Create(5);
+                var row2 = ModelWithIdAndName.Create(6);
 
-                var row1LastInsertId = db.Insert(row1, selectIdentity:true);
+                var row1LastInsertId = db.Insert(row1, selectIdentity: true);
 
-                var row2LastInsertId = db.Insert(row2, selectIdentity:true);
+                var row2LastInsertId = db.Insert(row2, selectIdentity: true);
 
                 var insertedRow1 = db.SingleById<ModelWithIdAndName>(row1LastInsertId);
                 var insertedRow2 = db.SingleById<ModelWithIdAndName>(row2LastInsertId);
 
-				Assert.That(insertedRow1.Name, Is.EqualTo(row1.Name));
-				Assert.That(insertedRow2.Name, Is.EqualTo(row2.Name));
-			}
-		}
-
-		[Test]
-		public void Can_insert_TaskQueue_table()
-		{
-			using (var db = OpenDbConnection())
-			{
-				db.CreateTable<TaskQueue>(true);
-
-				var row = TaskQueue.Create(1);
-
-				db.Insert(row);
-
-				var rows = db.Select<TaskQueue>();
-
-				Assert.That(rows, Has.Count.EqualTo(1));
-
-				//Update the auto-increment id
-				row.Id = rows[0].Id;
-
-				TaskQueue.AssertIsEqual(rows[0], row);
-			}
-		}
+                Assert.That(insertedRow1.Name, Is.EqualTo(row1.Name));
+                Assert.That(insertedRow2.Name, Is.EqualTo(row2.Name));
+            }
+        }
 
         [Test]
-		public void Can_insert_table_with_UserAuth()
-		{
-			using (var db = OpenDbConnection())
-			{
-				db.CreateTable<UserAuth>(true);
+        public void Can_insert_TaskQueue_table()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTable<TaskQueue>(true);
 
-				//var userAuth = new UserAuth {
-				//    Id = 1,
-				//    UserName = "UserName",
-				//    Email = "a@b.com",
-				//    PrimaryEmail = "c@d.com",
-				//    FirstName = "FirstName",
-				//    LastName = "LastName",
-				//    DisplayName = "DisplayName",
-				//    Salt = "Salt",
-				//    PasswordHash = "PasswordHash",
-				//    CreatedDate = DateTime.Now,
-				//    ModifiedDate = DateTime.UtcNow,
-				//};
+                var row = TaskQueue.Create(1);
 
-				var jsv = "{Id:0,UserName:UserName,Email:as@if.com,PrimaryEmail:as@if.com,FirstName:FirstName,LastName:LastName,DisplayName:DisplayName,Salt:WMQi/g==,PasswordHash:oGdE40yKOprIgbXQzEMSYZe3vRCRlKGuqX2i045vx50=,Roles:[],Permissions:[],CreatedDate:2012-03-20T07:53:48.8720739Z,ModifiedDate:2012-03-20T07:53:48.8720739Z}";
-				var userAuth = jsv.To<UserAuth>();
+                db.Insert(row);
 
-				db.Insert(userAuth);
+                var rows = db.Select<TaskQueue>();
 
-				var rows = db.Select<UserAuth>(q => q.UserName == "UserName");
+                Assert.That(rows, Has.Count.EqualTo(1));
 
-				Console.WriteLine(rows[0].Dump());
+                //Update the auto-increment id
+                row.Id = rows[0].Id;
 
-				Assert.That(rows[0].UserName, Is.EqualTo(userAuth.UserName));
-			}
-		}
+                TaskQueue.AssertIsEqual(rows[0], row);
+            }
+        }
+
+        [Test]
+        public void Can_insert_table_with_UserAuth()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTable<UserAuth>(true);
+
+                //var userAuth = new UserAuth {
+                //    Id = 1,
+                //    UserName = "UserName",
+                //    Email = "a@b.com",
+                //    PrimaryEmail = "c@d.com",
+                //    FirstName = "FirstName",
+                //    LastName = "LastName",
+                //    DisplayName = "DisplayName",
+                //    Salt = "Salt",
+                //    PasswordHash = "PasswordHash",
+                //    CreatedDate = DateTime.Now,
+                //    ModifiedDate = DateTime.UtcNow,
+                //};
+
+                var jsv = "{Id:0,UserName:UserName,Email:as@if.com,PrimaryEmail:as@if.com,FirstName:FirstName,LastName:LastName,DisplayName:DisplayName,Salt:WMQi/g==,PasswordHash:oGdE40yKOprIgbXQzEMSYZe3vRCRlKGuqX2i045vx50=,Roles:[],Permissions:[],CreatedDate:2012-03-20T07:53:48.8720739Z,ModifiedDate:2012-03-20T07:53:48.8720739Z}";
+                var userAuth = jsv.To<UserAuth>();
+
+                db.Insert(userAuth);
+
+                var rows = db.Select<UserAuth>(q => q.UserName == "UserName");
+
+                Console.WriteLine(rows[0].Dump());
+
+                Assert.That(rows[0].UserName, Is.EqualTo(userAuth.UserName));
+            }
+        }
 
         [Test]
         public void Can_GetLastInsertedId_using_Insert()
@@ -224,7 +224,7 @@ namespace ServiceStack.OrmLite.Tests
         }
     }
 
-    public class UserAuth 
+    public class UserAuth
     {
         public UserAuth()
         {

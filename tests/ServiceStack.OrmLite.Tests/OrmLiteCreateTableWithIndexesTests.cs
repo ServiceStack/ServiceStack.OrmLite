@@ -4,27 +4,27 @@ using ServiceStack.Common.Tests.Models;
 
 namespace ServiceStack.OrmLite.Tests
 {
-	[TestFixture]
-	public class OrmLiteCreateTableWithIndexesTests 
-		: OrmLiteTestBase
-	{
-		[Test]
-		public void Can_create_ModelWithIndexFields_table()
-		{
+    [TestFixture]
+    public class OrmLiteCreateTableWithIndexesTests
+        : OrmLiteTestBase
+    {
+        [Test]
+        public void Can_create_ModelWithIndexFields_table()
+        {
             using (var db = OpenDbConnection())
-			{
-				db.CreateTable<ModelWithIndexFields>(true);
+            {
+                db.CreateTable<ModelWithIndexFields>(true);
 
-				var sql = OrmLiteConfig.DialectProvider.ToCreateIndexStatements(typeof(ModelWithIndexFields)).Join();
+                var sql = OrmLiteConfig.DialectProvider.ToCreateIndexStatements(typeof(ModelWithIndexFields)).Join();
 
-			    var indexName = "idx_modelwithindexfields_name";
-			    var uniqueName = "uidx_modelwithindexfields_uniquename";
+                var indexName = "idx_modelwithindexfields_name";
+                var uniqueName = "uidx_modelwithindexfields_uniquename";
 
                 if (Dialect == Dialect.Oracle || Dialect == Dialect.Firebird)
                 {
                     indexName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(indexName);
                     uniqueName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(uniqueName);
-			    }
+                }
 
                 Assert.That(sql, Is.StringContaining(indexName));
                 Assert.That(sql, Is.StringContaining(uniqueName));
@@ -123,5 +123,5 @@ namespace ServiceStack.OrmLite.Tests
             }
         }
 
-	}
+    }
 }

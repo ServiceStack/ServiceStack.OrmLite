@@ -12,11 +12,11 @@ namespace ServiceStack.OrmLite.Tests
 
         /*
         CREATE TABLE [dbo].[MigrateSqlServerTypes](
-	        [Id] [int] IDENTITY(1,1) NOT NULL,
-	        [SqlServerTime] [time](7) NULL,
-	        [OrmLiteTimeSpan] [bigint] NULL,
+            [Id] [int] IDENTITY(1,1) NOT NULL,
+            [SqlServerTime] [time](7) NULL,
+            [OrmLiteTimeSpan] [bigint] NULL,
         )
-         */
+        */
 
         public class MigrateSqlServerTypes
         {
