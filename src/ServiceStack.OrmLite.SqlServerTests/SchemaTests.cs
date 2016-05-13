@@ -22,12 +22,12 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 Assert.That(db.ColumnExists<SchemaTest>(x => x.Id));
                 Assert.That(db.ColumnExists<SchemaTest>(x => x.Name));
 
-                db.DropColumn<SchemaTest>(nameof(SchemaTest.Name));
+                db.DropColumn<SchemaTest>(x => x.Name);
                 Assert.That(!db.ColumnExists<SchemaTest>(x => x.Name));
 
                 try
                 {
-                    db.DropColumn<SchemaTest>(nameof(SchemaTest.Name));
+                    db.DropColumn<SchemaTest>(x => x.Name);
                     Assert.Fail("Should throw");
                 }
                 catch (Exception) { }
