@@ -35,13 +35,11 @@ namespace ServiceStack.OrmLite
             dbConn.AddColumn(typeof(T), fieldDef);
         }
 
-
         public static void AddColumn(this IDbConnection dbConn, Type modelType, FieldDefinition fieldDef)
         {
             var command = dbConn.GetDialectProvider().ToAddColumnStatement(modelType, fieldDef);
             dbConn.ExecuteSql(command);
         }
-
 
         public static void AlterColumn<T>(this IDbConnection dbConn, Expression<Func<T, object>> field)
         {
@@ -55,7 +53,6 @@ namespace ServiceStack.OrmLite
             var command = dbConn.GetDialectProvider().ToAlterColumnStatement(modelType, fieldDef);
             dbConn.ExecuteSql(command);
         }
-
 
         public static void ChangeColumnName<T>(this IDbConnection dbConn,
                                                Expression<Func<T, object>> field,
@@ -75,6 +72,13 @@ namespace ServiceStack.OrmLite
             dbConn.ExecuteSql(command);
         }
 
+        public static void DropColumn<T>(this IDbConnection dbConn, Expression<Func<T, object>> field)
+        {
+            var modelDef = ModelDefinition<T>.Definition;
+            var fieldDef = modelDef.GetFieldDefinition(field);
+            dbConn.DropColumn(typeof(T), fieldDef.FieldName);
+        }
+
         public static void DropColumn<T>(this IDbConnection dbConn, string columnName)
         {
             dbConn.DropColumn(typeof(T), columnName);
@@ -84,14 +88,12 @@ namespace ServiceStack.OrmLite
         public static void DropColumn(this IDbConnection dbConn, Type modelType, string columnName)
         {
             var provider = dbConn.GetDialectProvider();
-            var command = string.Format("ALTER TABLE {0} DROP {1};",
-                                           provider.GetQuotedTableName(modelType.GetModelDefinition().ModelName),
-                                           provider.GetQuotedName(columnName));
+            var command = string.Format("ALTER TABLE {0} DROP COLUMN {1};",
+                provider.GetQuotedTableName(modelType.GetModelDefinition().ModelName),
+                provider.GetQuotedColumnName(columnName));
 
             dbConn.ExecuteSql(command);
         }
-
-
 
         public static void AddForeignKey<T, TForeign>(this IDbConnection dbConn,
                                                      Expression<Func<T, object>> field,

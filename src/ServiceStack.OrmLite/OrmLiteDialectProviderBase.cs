@@ -1303,7 +1303,6 @@ namespace ServiceStack.OrmLite
                                  column);
         }
 
-
         public virtual string ToAlterColumnStatement(Type modelType, FieldDefinition fieldDef)
         {
             var column = GetColumnDefinition(fieldDef.FieldName,

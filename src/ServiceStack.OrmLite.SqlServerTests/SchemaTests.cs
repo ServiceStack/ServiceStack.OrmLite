@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System;
+using NUnit.Framework;
 
 namespace ServiceStack.OrmLite.SqlServerTests
 {
@@ -12,22 +13,34 @@ namespace ServiceStack.OrmLite.SqlServerTests
         }
 
         [Test]
-        public void Drop_add_column()
+        public void Can_drop_and_add_column()
         {
             using (var db = OpenDbConnection())
             {
-                db.CreateTable<SchemaTest>();
+                db.DropAndCreateTable<SchemaTest>();
 
                 Assert.That(db.ColumnExists<SchemaTest>(x => x.Id));
                 Assert.That(db.ColumnExists<SchemaTest>(x => x.Name));
 
                 db.DropColumn<SchemaTest>(nameof(SchemaTest.Name));
                 Assert.That(!db.ColumnExists<SchemaTest>(x => x.Name));
-                db.DropColumn<SchemaTest>(nameof(SchemaTest.Name)); // Doesn't throw, even though column doesn't exist
+
+                try
+                {
+                    db.DropColumn<SchemaTest>(nameof(SchemaTest.Name));
+                    Assert.Fail("Should throw");
+                }
+                catch (Exception) { }
 
                 db.AddColumn<SchemaTest>(x => x.Name);
                 Assert.That(db.ColumnExists<SchemaTest>(x => x.Name));
-                db.AddColumn<SchemaTest>(x => x.Name); // Doesn't throw, even though column already exists
+
+                try
+                {
+                    db.AddColumn<SchemaTest>(x => x.Name);
+                    Assert.Fail("Should throw");
+                }
+                catch (Exception) {}
             }
         }
     }

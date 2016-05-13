@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
 using ServiceStack.DataAnnotations;
@@ -85,6 +86,40 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(!db.ColumnExists<TestWithSchema>(x => x.Id));
                 db.CreateTable<TestWithSchema>();
                 Assert.That(db.ColumnExists<TestWithSchema>(x => x.Id));
+            }
+        }
+
+        [Test]
+        public void Can_drop_and_add_column()
+        {
+            if (Dialect == Dialect.Sqlite) return; //DROP COLUMN Not supported
+
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<SchemaTest>();
+
+                Assert.That(db.ColumnExists<SchemaTest>(x => x.Id));
+                Assert.That(db.ColumnExists<SchemaTest>(x => x.Name));
+
+                db.DropColumn<SchemaTest>(x => x.Name);
+                Assert.That(!db.ColumnExists<SchemaTest>(x => x.Name));
+
+                try
+                {
+                    db.DropColumn<SchemaTest>(x => x.Name);
+                    Assert.Fail("Should throw");
+                }
+                catch (Exception) { }
+
+                db.AddColumn<SchemaTest>(x => x.Name);
+                Assert.That(db.ColumnExists<SchemaTest>(x => x.Name));
+
+                try
+                {
+                    db.AddColumn<SchemaTest>(x => x.Name);
+                    Assert.Fail("Should throw");
+                }
+                catch (Exception) { }
             }
         }
     }
