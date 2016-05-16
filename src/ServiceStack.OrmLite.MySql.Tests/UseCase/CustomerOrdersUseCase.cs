@@ -174,7 +174,7 @@ namespace ServiceStack.OrmLite.MySql.Tests.UseCase
             Assert.That(customer.Id, Is.EqualTo(customerId));
 
             //Direct access to System.Data.Transactions:
-            using (var trans = db.BeginTransaction(IsolationLevel.ReadCommitted))
+            using (var trans = db.OpenTransaction(IsolationLevel.ReadCommitted))
             {
                 var order = new Order
                 {
