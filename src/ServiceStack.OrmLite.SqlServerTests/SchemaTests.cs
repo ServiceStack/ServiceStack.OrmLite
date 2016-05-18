@@ -1,5 +1,7 @@
 ﻿using System;
 using NUnit.Framework;
+using ServiceStack.OrmLite.SqlServer.Converters;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.SqlServerTests
 {
@@ -43,5 +45,28 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 catch (Exception) {}
             }
         }
+
+        public class TestDecimalConverter
+        {
+            public int Id { get; set; }
+            public decimal Decimal { get; set; }
+        }
+
+        [Test]
+        public void Can_replace_decimal_column()
+        {
+            SqlServerDialect.Provider.RegisterConverter<decimal>(new SqlServerFloatConverter());
+
+            //Requires OrmLiteConnection Wrapper to capture last SQL executed
+            var dbFactory = new OrmLiteConnectionFactory(ConnectionString, SqlServerDialect.Provider);
+
+            using (var db = dbFactory.OpenDbConnection())
+            {
+                db.DropAndCreateTable<TestDecimalConverter>();
+
+                Assert.That(db.GetLastSql(), Is.StringContaining("FLOAT"));
+            }
+        }
     }
+
 }
