@@ -412,7 +412,7 @@ namespace ServiceStack.OrmLite.Firebird
             bool isCombined = false, FieldDefinition fieldDef = null)
         {
             var fieldNames = fieldName.Split(',')
-                .Map(x => NamingStrategy.GetColumnName(x.SplitOnFirst(' ')[0]));
+                .Map(x => NamingStrategy.GetColumnName(x.LeftPart(' ')));
 
             return string.Format("CREATE {0} INDEX {1} ON {2} ({3}); \n",
                 isUnique ? "UNIQUE" : "",

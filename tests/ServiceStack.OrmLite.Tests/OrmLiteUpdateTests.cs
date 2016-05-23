@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
 using ServiceStack.DataAnnotations;
@@ -389,6 +390,33 @@ namespace ServiceStack.OrmLite.Tests
 
                 var row = db.SingleById<Person>(1);
                 Assert.That(row.FirstName, Is.EqualTo("JJ"));
+            }
+        }
+
+        [Test]
+        public void Does_UpdateAdd_using_AssignmentExpression()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Person>();
+                db.InsertAll(Person.Rockstars);
+
+                var count = db.UpdateAdd(() => new Person { FirstName = "JJ", Age = 1 }, where: p => p.LastName == "Hendrix");
+                Assert.That(count, Is.EqualTo(1));
+
+                var hendrix = Person.Rockstars.First(x => x.LastName == "Hendrix");
+                var kurt = Person.Rockstars.First(x => x.LastName == "Cobain");
+
+                var row = db.Single<Person>(p => p.LastName == "Hendrix");
+                Assert.That(row.FirstName, Is.EqualTo("JJ"));
+                Assert.That(row.Age, Is.EqualTo(hendrix.Age + 1));
+
+                count = db.UpdateAdd(() => new Person { FirstName = "KC", Age = hendrix.Age + 1 }, where: p => p.LastName == "Cobain");
+                Assert.That(count, Is.EqualTo(1));
+
+                row = db.Single<Person>(p => p.LastName == "Cobain");
+                Assert.That(row.FirstName, Is.EqualTo("KC"));
+                Assert.That(row.Age, Is.EqualTo(kurt.Age + hendrix.Age + 1));
             }
         }
 

@@ -1000,31 +1000,26 @@ namespace ServiceStack.OrmLite
                 throw new Exception("No valid update properties provided (e.g. () => new Person { Age = 27 }): " + dbCmd.CommandText);
         }
 
-        public virtual void PrepareUpdateRowAddStatement(IDbCommand dbCmd, object objWithProperties, ICollection<string> updateFields)
+        public virtual void PrepareUpdateRowAddStatement<T>(IDbCommand dbCmd, Dictionary<string, object> args, string sqlFilter)
         {
-            if (updateFields.Count == 0)
-                throw new Exception("No valid update properties provided (e.g. p => p.FirstName): " + dbCmd.CommandText);
-
             var sql = StringBuilderCache.Allocate();
-            var sqlFilter = StringBuilderCacheAlt.Allocate();
-            var modelDef = objWithProperties.GetType().GetModelDefinition();
-            var quotedFieldName = string.Empty;
+            var modelDef = typeof(T).GetModelDefinition();
 
-            foreach (var fieldDef in modelDef.FieldDefinitions)
+            foreach (var entry in args)
             {
-                if (!updateFields.Contains(fieldDef.FieldName))
-                    continue;
-
-                if (fieldDef.AutoIncrement || fieldDef.IsComputed || fieldDef.IsPrimaryKey ||
+                var fieldDef = modelDef.GetFieldDefinition(entry.Key);
+                if (fieldDef.ShouldSkipUpdate() || fieldDef.AutoIncrement || fieldDef.IsPrimaryKey || 
                     fieldDef.IsRowVersion || fieldDef.Name == OrmLiteConfig.IdField)
                     continue;
+
+                var value = entry.Value;
 
                 try
                 {
                     if (sql.Length > 0)
                         sql.Append(", ");
 
-                    quotedFieldName = GetQuotedColumnName(fieldDef.FieldName);
+                    var quotedFieldName = GetQuotedColumnName(fieldDef.FieldName);
 
                     if (fieldDef.FieldType.IsNumericType())
                     {
@@ -1033,14 +1028,14 @@ namespace ServiceStack.OrmLite
                             .Append("=")
                             .Append(quotedFieldName)
                             .Append("+")
-                            .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef.ColumnType).ParameterName);
+                            .Append(this.AddParam(dbCmd, value, fieldDef.ColumnType).ParameterName);
                     }
                     else
                     {
                         sql
                             .Append(quotedFieldName)
                             .Append("=")
-                            .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef.ColumnType).ParameterName);
+                            .Append(this.AddParam(dbCmd, value, fieldDef.ColumnType).ParameterName);
                     }
                 }
                 catch (Exception ex)
@@ -1049,11 +1044,14 @@ namespace ServiceStack.OrmLite
                 }
             }
 
-            var strFilter = StringBuilderCacheAlt.ReturnAndFree(sqlFilter);
-            dbCmd.CommandText = string.Format("UPDATE {0} SET {1}{2}",
-                GetQuotedTableName(modelDef), 
-                StringBuilderCache.ReturnAndFree(sql), 
-                strFilter.Length > 0 ? " WHERE " + strFilter : "");
+            dbCmd.CommandText = string.Format("UPDATE {0} SET {1}{2}{3}",
+                GetQuotedTableName(modelDef),
+                StringBuilderCache.ReturnAndFree(sql),
+                string.IsNullOrEmpty(sqlFilter) ? "" : " ",
+                sqlFilter);
+
+            if (sql.Length == 0)
+                throw new Exception("No valid update properties provided (e.g. () => new Person { Age = 27 }): " + dbCmd.CommandText);
         }
 
         public virtual string ToDeleteStatement(Type tableType, string sqlFilter, params object[] filterParams)
@@ -1240,7 +1238,7 @@ namespace ServiceStack.OrmLite
         protected virtual string GetCompositeIndexName(CompositeIndexAttribute compositeIndex, ModelDefinition modelDef)
         {
             return compositeIndex.Name ?? GetIndexName(compositeIndex.Unique, modelDef.ModelName.SafeVarName(),
-                string.Join("_", compositeIndex.FieldNames.Map(x => x.SplitOnFirst(' ')[0]).ToArray()));
+                string.Join("_", compositeIndex.FieldNames.Map(x => x.LeftPart(' ')).ToArray()));
         }
 
         protected virtual string GetCompositeIndexNameWithSchema(CompositeIndexAttribute compositeIndex, ModelDefinition modelDef)

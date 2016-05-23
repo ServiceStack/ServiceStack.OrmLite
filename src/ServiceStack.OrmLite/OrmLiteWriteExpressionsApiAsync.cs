@@ -61,6 +61,25 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Update record, updating only fields specified in updateOnly that matches the where condition (if any), E.g:
+        /// Numeric fields generates an increment sql which is usefull to increment counters, etc...
+        /// avoiding concurrency conflicts
+        /// 
+        ///   db.UpdateAddAsync(() => new Person { Age = 5 }, where: p => p.LastName == "Hendrix");
+        ///   UPDATE "Person" SET "Age" = "Age" + 5 WHERE ("LastName" = 'Hendrix')
+        ///
+        ///   db.UpdateAddAsync(() => new Person { Age = 5 });
+        ///   UPDATE "Person" SET "Age" = "Age" + 5
+        /// </summary>
+        public static Task<int> UpdateAddAsync<T>(this IDbConnection dbConn,
+            Expression<Func<T>> updateFields,
+            Expression<Func<T, bool>> where = null,
+            CancellationToken token = default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd => dbCmd.UpdateAddAsync(updateFields, where));
+        }
+
+        /// <summary>
         /// Updates all non-default values set on item matching the where condition (if any). E.g
         /// 
         ///   db.UpdateNonDefaults(new Person { FirstName = "JJ" }, p => p.FirstName == "Jimi");

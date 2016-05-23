@@ -276,6 +276,18 @@ namespace ServiceStack.OrmLite.Tests
             await db.UpdateOnlyAsync(new Person { FirstName = "JJ" }, db.From<Person>().Update(p => p.FirstName).Where(x => x.FirstName == "Jimi"));
             Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\"=@1 WHERE (\"FirstName\" = @0)"));
 
+            await db.UpdateAddAsync(() => new Person { Age = 3 });
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"Age\"=\"Age\"+@0"));
+
+            await db.UpdateAddAsync(() => new Person { Age = 5 }, where: x => x.LastName == "Presley");
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"Age\"=\"Age\"+@1 WHERE (\"LastName\" = @0)"));
+
+            await db.UpdateAddAsync(() => new Person { Age = 3 });
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"Age\"=\"Age\"+@0"));
+
+            await db.UpdateAddAsync(() => new Person { Age = 5 }, where: x => x.LastName == "Presley");
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"Age\"=\"Age\"+@1 WHERE (\"LastName\" = @0)"));
+
             await db.DeleteAsync<Person>(new { FirstName = "Jimi", Age = 27 });
             Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM \"Person\" WHERE \"FirstName\"=@FirstName AND \"Age\"=@Age"));
 

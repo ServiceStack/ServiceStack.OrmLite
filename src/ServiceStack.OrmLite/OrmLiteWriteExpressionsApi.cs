@@ -32,7 +32,8 @@ namespace ServiceStack.OrmLite
         ///   db.UpdateOnly(() => new Person { FirstName = "JJ" });
         ///   UPDATE "Person" SET "FirstName" = 'JJ'
         /// </summary>
-        public static int UpdateOnly<T>(this IDbConnection dbConn, Expression<Func<T>> updateFields,
+        public static int UpdateOnly<T>(this IDbConnection dbConn, 
+            Expression<Func<T>> updateFields,
             Expression<Func<T, bool>> where = null)
         {
             return dbConn.Exec(dbCmd => dbCmd.UpdateOnly(updateFields, where));
@@ -55,40 +56,21 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
-        /// Use an SqlExpression to select which fields to update and construct the where expression, E.g: 
-        /// Numeric fields generates an increment sql which is usefull to increment counters, etc...
-        /// avoiding concurrency conflicts
-        /// 
-        ///   var q = db.From&gt;Person&lt;());
-        ///   db.UpdateAdd(new Person { Age = 5 }, db.From<Person>().Update(p => p.Age).Where(x => x.FirstName == "Jimi"));
-        ///   UPDATE "Person" SET "Age" = "Age" + 5 WHERE ("FirstName" = 'Jimi')
-        /// 
-        ///   What's not in the update expression doesn't get updated. No where expression updates all rows. E.g:
-        /// 
-        ///   db.UpdateAdd(new Person { Age = 5, FirstName = "JJ", LastName = "Hendo" }, ev.Update(p => p.Age));
-        ///   UPDATE "Person" SET "Age" = "Age" + 5
-        /// </summary>
-        public static int UpdateAdd<T>(this IDbConnection dbConn, T model, SqlExpression<T> fields)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateAdd(model, fields));
-        }
-
-        /// <summary>
         /// Update record, updating only fields specified in updateOnly that matches the where condition (if any), E.g:
         /// Numeric fields generates an increment sql which is usefull to increment counters, etc...
         /// avoiding concurrency conflicts
         /// 
-        ///   db.UpdateAdd(new Person { Age = 5 }, p => p.Age, p => p.LastName == "Hendrix");
+        ///   db.UpdateAdd(() => new Person { Age = 5 }, where: p => p.LastName == "Hendrix");
         ///   UPDATE "Person" SET "Age" = "Age" + 5 WHERE ("LastName" = 'Hendrix')
         ///
-        ///   db.UpdateAdd(new Person { Age = 5 }, p => p.FirstName);
+        ///   db.UpdateAdd(() => new Person { Age = 5 });
         ///   UPDATE "Person" SET "Age" = "Age" + 5
         /// </summary>
-        public static int UpdateAdd<T, TKey>(this IDbConnection dbConn, T obj,
-            Expression<Func<T, TKey>> fields = null,
+        public static int UpdateAdd<T>(this IDbConnection dbConn,
+            Expression<Func<T>> updateFields,
             Expression<Func<T, bool>> where = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateAdd(obj, fields, where));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateAdd(updateFields, where));
         }
 
         /// <summary>

@@ -274,6 +274,12 @@ namespace ServiceStack.OrmLite.Tests
             await db.UpdateOnlyAsync(new Person { FirstName = "JJ" }, db.From<Person>().Update(p => p.FirstName).Where(x => x.FirstName == "Jimi"));
             Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"person\" SET \"first_name\"=:1 WHERE (\"first_name\" = :0)"));
 
+            await db.UpdateAddAsync(() => new Person { Age = 3 });
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"person\" SET \"age\"=\"age\"+:0"));
+
+            await db.UpdateAddAsync(() => new Person { Age = 5 }, where: x => x.LastName == "Presley");
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"person\" SET \"age\"=\"age\"+:1 WHERE (\"last_name\" = :0)"));
+
             await db.DeleteAsync<Person>(new { FirstName = "Jimi", Age = 27 });
             Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM \"person\" WHERE \"first_name\"=:FirstName AND \"age\"=:Age"));
 

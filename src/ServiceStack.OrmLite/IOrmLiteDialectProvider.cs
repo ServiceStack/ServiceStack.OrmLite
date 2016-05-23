@@ -123,7 +123,7 @@ namespace ServiceStack.OrmLite
 
         void PrepareUpdateRowStatement<T>(IDbCommand dbCmd, Dictionary<string, object> args, string sqlFilter);
 
-        void PrepareUpdateRowAddStatement(IDbCommand dbCmd, object objWithProperties, ICollection<string> UpdateFields);
+        void PrepareUpdateRowAddStatement<T>(IDbCommand dbCmd, Dictionary<string, object> args, string sqlFilter);
 
         string ToDeleteStatement(Type tableType, string sqlFilter, params object[] filterParams);
 
