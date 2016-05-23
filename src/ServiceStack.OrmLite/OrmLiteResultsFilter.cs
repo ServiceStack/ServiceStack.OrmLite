@@ -252,7 +252,7 @@ namespace ServiceStack.OrmLite
         public List<T> GetColumn<T>(IDbCommand dbCmd)
         {
             Filter(dbCmd);
-            return (from object result in (GetColumnResults<T>(dbCmd) ?? new T[0]) select (T)result).ToList();
+            return (from object result in GetColumnResults<T>(dbCmd).Safe() select (T)result).ToList();
         }
 
         public HashSet<T> GetColumnDistinct<T>(IDbCommand dbCmd)

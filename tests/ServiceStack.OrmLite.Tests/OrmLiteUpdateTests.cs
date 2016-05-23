@@ -205,6 +205,11 @@ namespace ServiceStack.OrmLite.Tests
                     where: x => x.Id == 1);
                 row = db.SingleById<PocoWithBool>(1);
                 Assert.That(row.Bool, Is.False);
+
+                db.UpdateOnly(() => new PocoWithBool { Bool = true },
+                    where: x => x.Id == 1);
+                row = db.SingleById<PocoWithBool>(1);
+                Assert.That(row.Bool, Is.True);
             }
         }
 
@@ -222,6 +227,10 @@ namespace ServiceStack.OrmLite.Tests
                 db.UpdateNonDefaults(new PocoWithNullableBool { Bool = false }, x => x.Id == 1);
                 row = db.SingleById<PocoWithNullableBool>(1);
                 Assert.That(row.Bool, Is.False);
+
+                db.UpdateOnly(() => new PocoWithNullableBool { Bool = true }, x => x.Id == 1);
+                row = db.SingleById<PocoWithNullableBool>(1);
+                Assert.That(row.Bool, Is.True);
             }
         }
 
@@ -245,6 +254,11 @@ namespace ServiceStack.OrmLite.Tests
                 db.UpdateNonDefaults(new PocoWithNullableInt { Int = 0 }, x => x.Id == 1);
                 row = db.SingleById<PocoWithNullableInt>(1);
                 Assert.That(row.Int, Is.EqualTo(0));
+
+                db.UpdateOnly(() => new PocoWithNullableInt { Int = 1 }, x => x.Id == 1);
+                Assert.That(db.SingleById<PocoWithNullableInt>(1).Int, Is.EqualTo(1));
+                db.UpdateOnly(() => new PocoWithNullableInt { Int = 0 }, x => x.Id == 1);
+                Assert.That(db.SingleById<PocoWithNullableInt>(1).Int, Is.EqualTo(0));
             }
         }
 
@@ -349,6 +363,25 @@ namespace ServiceStack.OrmLite.Tests
                 db.InsertAll(Person.Rockstars);
 
                 db.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName, p => p.LastName == "Hendrix");
+
+                var sql = db.GetLastSql().NormalizeSql();
+                Assert.That(sql, Is.StringContaining("where (lastname = @0)"));
+                Assert.That(sql, Is.StringContaining("firstname=@1"));
+
+                var row = db.SingleById<Person>(1);
+                Assert.That(row.FirstName, Is.EqualTo("JJ"));
+            }
+        }
+
+        [Test]
+        public void Does_UpdateOnly_using_AssignmentExpression()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Person>();
+                db.InsertAll(Person.Rockstars);
+
+                db.UpdateOnly(() => new Person { FirstName = "JJ" }, p => p.LastName == "Hendrix");
 
                 var sql = db.GetLastSql().NormalizeSql();
                 Assert.That(sql, Is.StringContaining("where (lastname = @0)"));

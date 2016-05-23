@@ -32,7 +32,7 @@ namespace ServiceStack.OrmLite
                 dbCmd.CommandText += " " + onlyFields.WhereExpression;
         }
 
-        public static int UpdateOnly<T, TKey>(this IDbCommand dbCmd, T obj,
+        internal static int UpdateOnly<T, TKey>(this IDbCommand dbCmd, T obj,
             Expression<Func<T, TKey>> onlyFields = null,
             Expression<Func<T, bool>> where = null)
         {
@@ -43,6 +43,27 @@ namespace ServiceStack.OrmLite
             q.Update(onlyFields);
             q.Where(where);
             return dbCmd.UpdateOnly(obj, q);
+        }
+
+        internal static int UpdateOnly<T>(this IDbCommand dbCmd,
+            Expression<Func<T>> updateFields,
+            Expression<Func<T, bool>> where = null)
+        {
+            if (updateFields == null)
+                throw new ArgumentNullException("updateFields");
+
+            var q = dbCmd.GetDialectProvider().SqlExpression<T>()
+                .Where(where);
+
+            if (OrmLiteConfig.UpdateFilter != null)
+                OrmLiteConfig.UpdateFilter(dbCmd, CachedExpressionCompiler.Evaluate(updateFields));
+
+            q.CopyParamsTo(dbCmd);
+
+            var updateFieldValues = updateFields.AssignedValues();
+            dbCmd.GetDialectProvider().PrepareUpdateRowStatement<T>(dbCmd, updateFieldValues, q.WhereExpression);
+
+            return dbCmd.ExecNonQuery();
         }
 
         public static int UpdateAdd<T>(this IDbCommand dbCmd, T model, SqlExpression<T> fields)

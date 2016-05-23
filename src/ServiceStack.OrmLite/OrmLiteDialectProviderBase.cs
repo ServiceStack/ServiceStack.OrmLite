@@ -961,6 +961,45 @@ namespace ServiceStack.OrmLite
                 throw new Exception("No valid update properties provided (e.g. p => p.FirstName): " + dbCmd.CommandText);
         }
 
+        public virtual void PrepareUpdateRowStatement<T>(IDbCommand dbCmd, Dictionary<string, object> args, string sqlFilter)
+        {
+            var sql = StringBuilderCache.Allocate();
+            var modelDef = typeof(T).GetModelDefinition();
+
+            foreach (var entry in args)
+            {
+                var fieldDef = modelDef.GetFieldDefinition(entry.Key);
+                if (fieldDef.ShouldSkipUpdate() || fieldDef.AutoIncrement)
+                    continue;
+
+                var value = entry.Value;
+
+                try
+                {
+                    if (sql.Length > 0)
+                        sql.Append(", ");
+
+                    sql
+                        .Append(GetQuotedColumnName(fieldDef.FieldName))
+                        .Append("=")
+                        .Append(this.AddParam(dbCmd, value, fieldDef.ColumnType).ParameterName);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("ERROR in PrepareUpdateRowStatement(cmd,args): " + ex.Message, ex);
+                }
+            }
+
+            dbCmd.CommandText = string.Format("UPDATE {0} SET {1}{2}{3}",
+                GetQuotedTableName(modelDef),
+                StringBuilderCache.ReturnAndFree(sql),
+                string.IsNullOrEmpty(sqlFilter) ? "" : " ",
+                sqlFilter);
+
+            if (sql.Length == 0)
+                throw new Exception("No valid update properties provided (e.g. () => new Person { Age = 27 }): " + dbCmd.CommandText);
+        }
+
         public virtual void PrepareUpdateRowAddStatement(IDbCommand dbCmd, object objWithProperties, ICollection<string> updateFields)
         {
             if (updateFields.Count == 0)

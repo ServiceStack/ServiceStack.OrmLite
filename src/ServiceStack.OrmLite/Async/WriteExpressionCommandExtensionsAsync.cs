@@ -29,6 +29,28 @@ namespace ServiceStack.OrmLite
             return dbCmd.UpdateOnlyAsync(obj, q, token);
         }
 
+        internal static Task<int> UpdateOnlyAsync<T>(this IDbCommand dbCmd,
+            Expression<Func<T>> updateFields,
+            Expression<Func<T, bool>> where,
+            CancellationToken token)
+        {
+            if (updateFields == null)
+                throw new ArgumentNullException("updateFields");
+
+            var q = dbCmd.GetDialectProvider().SqlExpression<T>()
+                .Where(where);
+
+            if (OrmLiteConfig.UpdateFilter != null)
+                OrmLiteConfig.UpdateFilter(dbCmd, CachedExpressionCompiler.Evaluate(updateFields));
+
+            q.CopyParamsTo(dbCmd);
+
+            var updateFieldValues = updateFields.AssignedValues();
+            dbCmd.GetDialectProvider().PrepareUpdateRowStatement<T>(dbCmd, updateFieldValues, q.WhereExpression);
+
+            return dbCmd.ExecNonQueryAsync(token);
+        }
+
         internal static Task<int> UpdateNonDefaultsAsync<T>(this IDbCommand dbCmd, T item, Expression<Func<T, bool>> obj, CancellationToken token)
         {
             if (OrmLiteConfig.UpdateFilter != null)
