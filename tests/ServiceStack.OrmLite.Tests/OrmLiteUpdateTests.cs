@@ -264,6 +264,24 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        public void Can_UpdateAdd_nullable_int_columns()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<PocoWithNullableInt>();
+
+                db.Insert(new PocoWithNullableInt { Id = 1, Int = 0 });
+                var row = db.SingleById<PocoWithNullableInt>(1);
+                Assert.That(row.Int, Is.EqualTo(0));
+
+                db.UpdateAdd(() => new PocoWithNullableInt { Int = 1 }, x => x.Id == 1);
+                Assert.That(db.SingleById<PocoWithNullableInt>(1).Int, Is.EqualTo(1));
+                db.UpdateAdd(() => new PocoWithNullableInt { Int =-1 }, x => x.Id == 1);
+                Assert.That(db.SingleById<PocoWithNullableInt>(1).Int, Is.EqualTo(0));
+            }
+        }
+
+        [Test]
         public void Does_Save_nullable_bool()
         {
             using (var db = OpenDbConnection())

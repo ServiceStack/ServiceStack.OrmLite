@@ -61,7 +61,7 @@ namespace ServiceStack.OrmLite
             q.CopyParamsTo(dbCmd);
 
             var updateFieldValues = updateFields.AssignedValues();
-            dbCmd.GetDialectProvider().PrepareUpdateRowAddStatement<T>(dbCmd, updateFieldValues, q.WhereExpression);
+            dbCmd.GetDialectProvider().PrepareUpdateRowStatement<T>(dbCmd, updateFieldValues, q.WhereExpression);
 
             return dbCmd.ExecNonQuery();
         }
