@@ -31,14 +31,11 @@ namespace ServiceStack.OrmLite
 
         internal static Task<int> UpdateOnlyAsync<T>(this IDbCommand dbCmd,
             Expression<Func<T>> updateFields,
-            Expression<Func<T, bool>> where,
+            SqlExpression<T> q,
             CancellationToken token)
         {
             if (updateFields == null)
                 throw new ArgumentNullException("updateFields");
-
-            var q = dbCmd.GetDialectProvider().SqlExpression<T>()
-                .Where(where);
 
             if (OrmLiteConfig.UpdateFilter != null)
                 OrmLiteConfig.UpdateFilter(dbCmd, CachedExpressionCompiler.Evaluate(updateFields));
@@ -53,13 +50,10 @@ namespace ServiceStack.OrmLite
 
         public static Task<int> UpdateAddAsync<T>(this IDbCommand dbCmd,
             Expression<Func<T>> updateFields,
-            Expression<Func<T, bool>> where = null)
+            SqlExpression<T> q)
         {
             if (updateFields == null)
                 throw new ArgumentNullException("updateFields");
-
-            var q = dbCmd.GetDialectProvider().SqlExpression<T>()
-                .Where(where);
 
             if (OrmLiteConfig.UpdateFilter != null)
                 OrmLiteConfig.UpdateFilter(dbCmd, CachedExpressionCompiler.Evaluate(updateFields));

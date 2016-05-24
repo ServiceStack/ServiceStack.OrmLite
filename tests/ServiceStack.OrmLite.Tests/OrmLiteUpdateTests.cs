@@ -211,6 +211,11 @@ namespace ServiceStack.OrmLite.Tests
                     where: x => x.Id == 1);
                 row = db.SingleById<PocoWithBool>(1);
                 Assert.That(row.Bool, Is.True);
+
+                db.UpdateOnly(() => new PocoWithBool { Bool = false },
+                    db.From<PocoWithBool>().Where(x => x.Id == 1));
+                row = db.SingleById<PocoWithBool>(1);
+                Assert.That(row.Bool, Is.False);
             }
         }
 
@@ -232,6 +237,11 @@ namespace ServiceStack.OrmLite.Tests
                 db.UpdateOnly(() => new PocoWithNullableBool { Bool = true }, x => x.Id == 1);
                 row = db.SingleById<PocoWithNullableBool>(1);
                 Assert.That(row.Bool, Is.True);
+
+                db.UpdateOnly(() => new PocoWithNullableBool { Bool = false }, 
+                    db.From<PocoWithNullableBool>().Where(x => x.Id == 1));
+                row = db.SingleById<PocoWithNullableBool>(1);
+                Assert.That(row.Bool, Is.False);
             }
         }
 
@@ -408,6 +418,11 @@ namespace ServiceStack.OrmLite.Tests
 
                 var row = db.SingleById<Person>(1);
                 Assert.That(row.FirstName, Is.EqualTo("JJ"));
+
+                db.UpdateOnly(() => new Person { FirstName = "HH" }, 
+                    db.From<Person>().Where(p => p.LastName == "Hendrix"));
+                row = db.SingleById<Person>(1);
+                Assert.That(row.FirstName, Is.EqualTo("HH"));
             }
         }
 

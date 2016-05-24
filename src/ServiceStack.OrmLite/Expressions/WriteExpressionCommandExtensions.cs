@@ -47,13 +47,10 @@ namespace ServiceStack.OrmLite
 
         internal static int UpdateOnly<T>(this IDbCommand dbCmd,
             Expression<Func<T>> updateFields,
-            Expression<Func<T, bool>> where = null)
+            SqlExpression<T> q)
         {
             if (updateFields == null)
                 throw new ArgumentNullException("updateFields");
-
-            var q = dbCmd.GetDialectProvider().SqlExpression<T>()
-                .Where(where);
 
             if (OrmLiteConfig.UpdateFilter != null)
                 OrmLiteConfig.UpdateFilter(dbCmd, CachedExpressionCompiler.Evaluate(updateFields));
@@ -68,13 +65,10 @@ namespace ServiceStack.OrmLite
 
         public static int UpdateAdd<T>(this IDbCommand dbCmd,
             Expression<Func<T>> updateFields,
-            Expression<Func<T, bool>> where = null)
+            SqlExpression<T> q)
         {
             if (updateFields == null)
                 throw new ArgumentNullException("updateFields");
-
-            var q = dbCmd.GetDialectProvider().SqlExpression<T>()
-                .Where(where);
 
             if (OrmLiteConfig.UpdateFilter != null)
                 OrmLiteConfig.UpdateFilter(dbCmd, CachedExpressionCompiler.Evaluate(updateFields));

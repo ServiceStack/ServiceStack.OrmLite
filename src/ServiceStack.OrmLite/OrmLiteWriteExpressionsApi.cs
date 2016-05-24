@@ -36,7 +36,20 @@ namespace ServiceStack.OrmLite
             Expression<Func<T>> updateFields,
             Expression<Func<T, bool>> where = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateOnly(updateFields, where));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateOnly(updateFields, dbCmd.GetDialectProvider().SqlExpression<T>().Where(where)));
+        }
+
+        /// <summary>
+        /// Update only fields in the specified expression that matches the where condition (if any), E.g:
+        /// 
+        ///   db.UpdateOnly(() => new Person { FirstName = "JJ" }, db.From&gt;Person&lt;().Where(p => p.LastName == "Hendrix"));
+        ///   UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("LastName" = 'Hendrix')
+        /// </summary>
+        public static int UpdateOnly<T>(this IDbConnection dbConn,
+            Expression<Func<T>> updateFields,
+            SqlExpression<T> q)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.UpdateOnly(updateFields, q));
         }
 
         /// <summary>
@@ -70,7 +83,22 @@ namespace ServiceStack.OrmLite
             Expression<Func<T>> updateFields,
             Expression<Func<T, bool>> where = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateAdd(updateFields, where));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateAdd(updateFields, dbCmd.GetDialectProvider().SqlExpression<T>().Where(where)));
+        }
+
+        /// <summary>
+        /// Update record, updating only fields specified in updateOnly that matches the where condition (if any), E.g:
+        /// Numeric fields generates an increment sql which is usefull to increment counters, etc...
+        /// avoiding concurrency conflicts
+        /// 
+        ///   db.UpdateAdd(() => new Person { Age = 5 }, db.From&lt;Person&gt;().Where(p => p.LastName == "Hendrix"));
+        ///   UPDATE "Person" SET "Age" = "Age" + 5 WHERE ("LastName" = 'Hendrix')
+        /// </summary>
+        public static int UpdateAdd<T>(this IDbConnection dbConn,
+            Expression<Func<T>> updateFields,
+            SqlExpression<T> q)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.UpdateAdd(updateFields, q));
         }
 
         /// <summary>
@@ -131,7 +159,7 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Delete the rows that matches the where expression, e.g:
         /// 
-        ///   var q = db.From&gt;Person&lt;());
+        ///   var q = db.From&lt;Person&gt;());
         ///   db.Delete&lt;Person&gt;(q.Where(p => p.Age == 27));
         ///   DELETE FROM "Person" WHERE ("Age" = 27)
         /// </summary>

@@ -40,7 +40,21 @@ namespace ServiceStack.OrmLite
             Expression<Func<T, bool>> where = null,
             CancellationToken token = default(CancellationToken))
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateOnlyAsync(updateFields, where, token));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateOnlyAsync(updateFields, dbCmd.GetDialectProvider().SqlExpression<T>().Where(where), token));
+        }
+
+        /// <summary>
+        /// Update record, updating only fields specified in updateOnly that matches the where condition (if any), E.g:
+        /// 
+        ///   db.UpdateOnlyAsync(() => new Person { FirstName = "JJ" }, db.From&lt;Person&gt;().Where(p => p.LastName == "Hendrix"));
+        ///   UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("LastName" = 'Hendrix')
+        /// </summary>
+        public static Task<int> UpdateOnlyAsync<T>(this IDbConnection dbConn,
+            Expression<Func<T>> updateFields,
+            SqlExpression<T> q,
+            CancellationToken token = default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd => dbCmd.UpdateOnlyAsync(updateFields, q, token));
         }
 
         /// <summary>
@@ -76,7 +90,23 @@ namespace ServiceStack.OrmLite
             Expression<Func<T, bool>> where = null,
             CancellationToken token = default(CancellationToken))
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateAddAsync(updateFields, where));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateAddAsync(updateFields, dbCmd.GetDialectProvider().SqlExpression<T>().Where(where)));
+        }
+
+        /// <summary>
+        /// Update record, updating only fields specified in updateOnly that matches the where condition (if any), E.g:
+        /// Numeric fields generates an increment sql which is usefull to increment counters, etc...
+        /// avoiding concurrency conflicts
+        /// 
+        ///   db.UpdateAddAsync(() => new Person { Age = 5 }, db.From&lt;Person&gt;().Where(p => p.LastName == "Hendrix"));
+        ///   UPDATE "Person" SET "Age" = "Age" + 5 WHERE ("LastName" = 'Hendrix')
+        /// </summary>
+        public static Task<int> UpdateAddAsync<T>(this IDbConnection dbConn,
+            Expression<Func<T>> updateFields,
+            SqlExpression<T> q,
+            CancellationToken token = default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd => dbCmd.UpdateAddAsync(updateFields, q));
         }
 
         /// <summary>
