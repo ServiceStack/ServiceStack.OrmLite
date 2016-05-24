@@ -85,7 +85,8 @@ namespace ServiceStack.OrmLite
             var row = new List<object>();
             for (var i = 0; i < dataReader.FieldCount; i++)
             {
-                row.Add(dataReader.GetValue(i));
+                var dbValue = dataReader.GetValue(i);
+                row.Add(dbValue is DBNull ? null : dbValue);
             }
             return row;
         }
@@ -95,7 +96,8 @@ namespace ServiceStack.OrmLite
             var row = new Dictionary<string, object>();
             for (var i = 0; i < dataReader.FieldCount; i++)
             {
-                row[dataReader.GetName(i).Trim()] = dataReader.GetValue(i);
+                var dbValue = dataReader.GetValue(i);
+                row[dataReader.GetName(i).Trim()] = dbValue is DBNull ? null : dbValue;
             }
             return row;
         }

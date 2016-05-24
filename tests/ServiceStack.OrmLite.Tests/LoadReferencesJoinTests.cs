@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Model;
+using ServiceStack.OrmLite.Dapper;
 using ServiceStack.OrmLite.Tests.UseCase;
 using ServiceStack.Text;
 
@@ -731,6 +734,76 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(results[0].Child, Is.Not.Null);
             Assert.That(results[0].Child.Value, Is.EqualTo("Lolz"));
             results.PrintDump();
+        }
+
+        [Test]
+        public void Can_populate_multiple_POCOs_using_Dappers_QueryMultiple()
+        {
+            AddCustomerWithOrders();
+
+            var q = db.From<Customer>()
+                .Join<Customer, CustomerAddress>()
+                .Join<Customer, Order>()
+                .Select("*");
+
+            using (var multi = db.QueryMultiple(q.ToSelectStatement()))
+            {
+                var tuples = multi.Read<Customer, CustomerAddress, Order, Tuple<Customer, CustomerAddress, Order>>(
+                    Tuple.Create).ToList();
+
+                var sb = new StringBuilder();
+                foreach (var tuple in tuples)
+                {
+                    sb.AppendLine("Customer:");
+                    sb.AppendLine(tuple.Item1.Dump());
+                    sb.AppendLine("Customer Address:");
+                    sb.AppendLine(tuple.Item2.Dump());
+                    sb.AppendLine("Order:");
+                    sb.AppendLine(tuple.Item3.Dump());
+                }
+
+                Assert.That(sb.ToString().Replace("\r", "").Trim(), Is.EqualTo(
+@"Customer:
+{
+	Id: 1,
+	Name: Customer 1
+}
+Customer Address:
+{
+	Id: 1,
+	CustomerId: 1,
+	AddressLine1: 1 Australia Street,
+	Country: Australia
+}
+Order:
+{
+	Id: 1,
+	CustomerId: 1,
+	LineItem: Line 1,
+	Qty: 1,
+	Cost: 1.99
+}
+Customer:
+{
+	Id: 1,
+	Name: Customer 1
+}
+Customer Address:
+{
+	Id: 1,
+	CustomerId: 1,
+	AddressLine1: 1 Australia Street,
+	Country: Australia
+}
+Order:
+{
+	Id: 2,
+	CustomerId: 1,
+	LineItem: Line 2,
+	Qty: 2,
+	Cost: 2.99
+}"));
+            }
         }
     }
 
