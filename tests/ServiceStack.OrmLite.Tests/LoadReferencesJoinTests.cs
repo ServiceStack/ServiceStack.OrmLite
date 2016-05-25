@@ -768,8 +768,75 @@ namespace ServiceStack.OrmLite.Tests
                     sb.AppendLine(tuple.Item3.Dump());
                 }
 
-                Assert.That(sb.ToString().Replace("\r", "").Trim(), Is.EqualTo(
+                AssertMultiCustomerOrderResults(sb);
+            }
+        }
+
+        [Test]
+        public void Can_populate_multiple_POCOs_using_SelectMulti2()
+        {
+            ResetTables();
+            AddCustomerWithOrders();
+
+            var q = db.From<Customer>()
+                .Join<Customer, CustomerAddress>();
+
+            var tuples = db.SelectMulti<Customer, CustomerAddress>(q);
+
+            var sb = new StringBuilder();
+            foreach (var tuple in tuples)
+            {
+                sb.AppendLine("Customer:");
+                sb.AppendLine(tuple.Item1.Dump());
+                sb.AppendLine("Customer Address:");
+                sb.AppendLine(tuple.Item2.Dump());
+            }
+
+            Assert.That(sb.ToString().Replace("\r", "").Trim(), Is.EqualTo(
 @"Customer:
+{
+	Id: 1,
+	Name: Customer 1
+}
+Customer Address:
+{
+	Id: 1,
+	CustomerId: 1,
+	AddressLine1: 1 Australia Street,
+	Country: Australia
+}"));
+        }
+
+        [Test]
+        public void Can_populate_multiple_POCOs_using_SelectMulti3()
+        {
+            ResetTables();
+            AddCustomerWithOrders();
+
+            var q = db.From<Customer>()
+                .Join<Customer, CustomerAddress>()
+                .Join<Customer, Order>();
+
+            var tuples = db.SelectMulti<Customer, CustomerAddress, Order>(q);
+
+            var sb = new StringBuilder();
+            foreach (var tuple in tuples)
+            {
+                sb.AppendLine("Customer:");
+                sb.AppendLine(tuple.Item1.Dump());
+                sb.AppendLine("Customer Address:");
+                sb.AppendLine(tuple.Item2.Dump());
+                sb.AppendLine("Order:");
+                sb.AppendLine(tuple.Item3.Dump());
+            }
+
+            AssertMultiCustomerOrderResults(sb);
+        }
+
+        private static void AssertMultiCustomerOrderResults(StringBuilder sb)
+        {
+            Assert.That(sb.ToString().Replace("\r", "").Trim(), Is.EqualTo(
+                @"Customer:
 {
 	Id: 1,
 	Name: Customer 1
@@ -809,7 +876,6 @@ Order:
 	Qty: 2,
 	Cost: 2.99
 }"));
-            }
         }
     }
 

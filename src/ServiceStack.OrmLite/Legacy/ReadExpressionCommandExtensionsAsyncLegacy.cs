@@ -18,7 +18,7 @@ namespace ServiceStack.OrmLite.Legacy
         {
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             var sql = expression(q).SelectInto<T>();
-            return dbCmd.ExprConvertToListAsync<T>(sql, q.Params, token);
+            return dbCmd.ExprConvertToListAsync<T>(sql, q.Params, q.OnlyFields, token);
         }
 
         [Obsolete("Use db.SelectAsync(db.From<T>())")]
@@ -26,7 +26,7 @@ namespace ServiceStack.OrmLite.Legacy
         {
             var q = dbCmd.GetDialectProvider().SqlExpression<From>();
             string sql = expression(q).SelectInto<Into>();
-            return dbCmd.ExprConvertToListAsync<Into>(sql, q.Params, token);
+            return dbCmd.ExprConvertToListAsync<Into>(sql, q.Params, q.OnlyFields, token);
         }
 
         [Obsolete("Use db.SingleAsync(db.From<T>())")]

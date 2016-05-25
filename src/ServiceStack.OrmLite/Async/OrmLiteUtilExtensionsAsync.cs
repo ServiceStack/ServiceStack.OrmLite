@@ -33,12 +33,20 @@ namespace ServiceStack.OrmLite
             });
         }
 
-        public static Task<List<T>> ConvertToListAsync<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, CancellationToken token)
+        public static Task<List<T>> ConvertToListAsync<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, HashSet<string> onlyFields, CancellationToken token)
         {
-            var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition, dialectProvider);
             var values = new object[reader.FieldCount];
             var isObjectList = typeof(T) == typeof(List<object>);
             var isObjectDict = typeof(T) == typeof(Dictionary<string,object>);
+            var isTuple = typeof(T).Name.StartsWith("Tuple`");
+            var indexCache = isObjectDict || isObjectDict || isTuple
+                ? null
+                : reader.GetIndexFieldsCache(ModelDefinition<T>.Definition, dialectProvider, onlyFields);
+
+            var genericArgs = isTuple ? typeof(T).GetGenericArguments() : null;
+            var modelIndexCaches = isTuple ? reader.GetMultiIndexCaches(dialectProvider, onlyFields, genericArgs) : null;
+            var genericTupleMi = isTuple ? typeof(T).GetGenericTypeDefinition().MakeGenericType(genericArgs) : null;
+            var ci = isTuple ? genericTupleMi.GetConstructor(genericArgs) : null;
 
             return dialectProvider.ReaderEach(reader, () =>
             {
@@ -59,6 +67,12 @@ namespace ServiceStack.OrmLite
                         row[reader.GetName(i).Trim()] = reader.GetValue(i);
                     }
                     return (T)(object)row;
+                }
+                else if (isTuple)
+                {
+                    var tupleArgs = reader.ToMultiTuple(dialectProvider, modelIndexCaches, genericArgs, values);
+                    var tuple = ci.Invoke(tupleArgs.ToArray());
+                    return (T)tuple;
                 }
                 else
                 {

@@ -21,6 +21,8 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
+    internal class EOT {}
+
     public static class OrmLiteUtils
     {
         internal const string AsyncRequiresNet45Error = "Async support is only available in .NET 4.5 builds";
@@ -130,6 +132,27 @@ namespace ServiceStack.OrmLite
                 }
                 return (List<T>)(object)to;
             }
+            if (typeof(T).Name.StartsWith("Tuple`"))
+            {
+                var to = new List<T>();
+                using (reader)
+                {
+                    var genericArgs = typeof(T).GetGenericArguments();
+                    var modelIndexCaches = reader.GetMultiIndexCaches(dialectProvider, onlyFields, genericArgs);
+
+                    var values = new object[reader.FieldCount];
+                    var genericTupleMi = typeof(T).GetGenericTypeDefinition().MakeGenericType(genericArgs);
+                    var ci = genericTupleMi.GetConstructor(genericArgs);
+
+                    while (reader.Read())
+                    {
+                        var tupleArgs = reader.ToMultiTuple(dialectProvider, modelIndexCaches, genericArgs, values);
+                        var tuple = ci.Invoke(tupleArgs.ToArray());
+                        to.Add((T)tuple);
+                    }
+                }
+                return to;
+            }
             else
             {
                 var to = new List<T>();
@@ -146,6 +169,52 @@ namespace ServiceStack.OrmLite
                 }
                 return to;
             }
+        }
+
+        internal static List<object> ToMultiTuple(this IDataReader reader, 
+            IOrmLiteDialectProvider dialectProvider, 
+            List<Tuple<FieldDefinition, int, IOrmLiteConverter>[]> modelIndexCaches, 
+            Type[] genericArgs, 
+            object[] values)
+        {
+            var tupleArgs = new List<object>();
+            for (var i = 0; i < modelIndexCaches.Count; i++)
+            {
+                var indexCache = modelIndexCaches[i];
+                var partialRow = genericArgs[i].CreateInstance();
+                partialRow.PopulateWithSqlReader(dialectProvider, reader, indexCache, values);
+                tupleArgs.Add(partialRow);
+            }
+            return tupleArgs;
+        }
+
+        internal static List<Tuple<FieldDefinition, int, IOrmLiteConverter>[]> GetMultiIndexCaches(
+            this IDataReader reader, 
+            IOrmLiteDialectProvider dialectProvider,
+            HashSet<string> onlyFields, 
+            Type[] genericArgs)
+        {
+            var modelIndexCaches = new List<Tuple<FieldDefinition, int, IOrmLiteConverter>[]>();
+            var startPos = 0;
+
+            foreach (var modelType in genericArgs)
+            {
+                var modelDef = modelType.GetModelDefinition();
+                var endPos = startPos;
+                for (; endPos < reader.FieldCount; endPos++)
+                {
+                    if (reader.GetName(endPos) == "EOT")
+                        break;
+                }
+
+                var indexCache = reader.GetIndexFieldsCache(modelDef, dialectProvider, onlyFields,
+                    startPos: startPos, endPos: endPos);
+
+                modelIndexCaches.Add(indexCache);
+
+                startPos = endPos + 1;
+            }
+            return modelIndexCaches;
         }
 
         public static object ConvertTo(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, Type type)
@@ -375,14 +444,18 @@ namespace ServiceStack.OrmLite
         public static Tuple<FieldDefinition, int, IOrmLiteConverter>[] GetIndexFieldsCache(this IDataReader reader, 
             ModelDefinition modelDefinition, 
             IOrmLiteDialectProvider dialect, 
-            HashSet<string> onlyFields = null)
+            HashSet<string> onlyFields = null,
+            int startPos=0,
+            int? endPos = null)
         {
             var cache = new List<Tuple<FieldDefinition, int, IOrmLiteConverter>>();
             var ignoredFields = modelDefinition.IgnoredFieldDefinitions;
             var remainingFieldDefs = modelDefinition.FieldDefinitionsArray
                 .Where(x => !ignoredFields.Contains(x) && x.SetValueFn != null).ToList();
 
-            for (var i = 0; i < reader.FieldCount; i++)
+            var end = endPos.GetValueOrDefault(reader.FieldCount);
+
+            for (var i = startPos; i < end; i++)
             {
                 var columnName = reader.GetName(i);                
                 var fieldDef = modelDefinition.GetFieldDefinition(columnName);
@@ -409,7 +482,7 @@ namespace ServiceStack.OrmLite
             if (remainingFieldDefs.Count > 0 && onlyFields == null)
             {
                 var dbFieldMap = new Dictionary<string, int>(StringComparer.InvariantCultureIgnoreCase);
-                for (var i = 0; i < reader.FieldCount; i++)
+                for (var i = startPos; i < end; i++)
                 {
                     var fieldName = reader.GetName(i);
                     dbFieldMap[fieldName] = i;

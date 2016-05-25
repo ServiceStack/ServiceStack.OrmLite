@@ -79,6 +79,7 @@
     <Compile Include="Legacy\ApiPostgreSqlLegacyTestsAsync.cs" />
     <Compile Include="Legacy\ApiSqliteLegacyTestsAsync.cs" />
     <Compile Include="Legacy\ApiSqlServerLegacyTestsAsync.cs" />
+    <Compile Include="LoadReferenceJoinTests.cs" />
     <Compile Include="LoadReferencesTests.cs" />
     <Compile Include="OrmLiteContextTests.cs" />
     <Compile Include="OrmLiteTestBase.cs" />

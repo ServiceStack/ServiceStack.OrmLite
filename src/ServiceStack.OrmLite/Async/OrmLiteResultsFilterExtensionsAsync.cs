@@ -65,7 +65,7 @@ namespace ServiceStack.OrmLite
                         .Then(reader => 
                             OrmLiteUtils.IsScalar<T>()
                                 ? reader.ColumnAsync<T>(dialectProvider, token)
-                                : reader.ConvertToListAsync<T>(dialectProvider, token)).Unwrap();
+                                : reader.ConvertToListAsync<T>(dialectProvider, null, token)).Unwrap();
         }
 
         public static Task<IList> ConvertToListAsync(this IDbCommand dbCmd, Type refType)
@@ -86,7 +86,7 @@ namespace ServiceStack.OrmLite
                         .Then(reader => reader.ConvertToListAsync(dialectProvider, refType, token)).Unwrap();
         }
 
-        internal static Task<List<T>> ExprConvertToListAsync<T>(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams, CancellationToken token)
+        internal static Task<List<T>> ExprConvertToListAsync<T>(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams, HashSet<string> onlyFields, CancellationToken token)
         {
             if (sql != null)
                 dbCmd.CommandText = sql;
@@ -98,7 +98,7 @@ namespace ServiceStack.OrmLite
 
             var dialectProvider = dbCmd.GetDialectProvider();
             return dbCmd.ExecReaderAsync(dbCmd.CommandText, token)
-                        .Then(reader => reader.ExprConvertToListAsync<T>(dialectProvider, token)).Unwrap();
+                        .Then(reader => reader.ConvertToListAsync<T>(dialectProvider, onlyFields, token)).Unwrap();
         }
 
         public static Task<T> ConvertToAsync<T>(this IDbCommand dbCmd)

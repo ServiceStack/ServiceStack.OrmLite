@@ -127,6 +127,36 @@ namespace ServiceStack.OrmLite
             return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(expression.SelectInto<T>(), expression.Params));
         }
 
+        public static List<Tuple<T, T2>> SelectMulti<T, T2>(this IDbConnection dbConn, SqlExpression<T> expression)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SelectMulti<T, T2>(expression));
+        }
+
+        public static List<Tuple<T, T2, T3>> SelectMulti<T, T2, T3>(this IDbConnection dbConn, SqlExpression<T> expression)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SelectMulti<T, T2, T3>(expression));
+        }
+
+        public static List<Tuple<T, T2, T3, T4>> SelectMulti<T, T2, T3, T4>(this IDbConnection dbConn, SqlExpression<T> expression)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SelectMulti<T, T2, T3, T4>(expression));
+        }
+
+        public static List<Tuple<T, T2, T3, T4, T5>> SelectMulti<T, T2, T3, T4, T5>(this IDbConnection dbConn, SqlExpression<T> expression)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SelectMulti<T, T2, T3, T4, T5>(expression));
+        }
+
+        public static List<Tuple<T, T2, T3, T4, T5, T6>> SelectMulti<T, T2, T3, T4, T5, T6>(this IDbConnection dbConn, SqlExpression<T> expression)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SelectMulti<T, T2, T3, T4, T5, T6>(expression));
+        }
+
+        public static List<Tuple<T, T2, T3, T4, T5, T6, T7>> SelectMulti<T, T2, T3, T4, T5, T6, T7>(this IDbConnection dbConn, SqlExpression<T> expression)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SelectMulti<T, T2, T3, T4, T5, T6, T7>(expression));
+        }
+
         /// <summary>
         /// Returns a single result from using a LINQ Expression. E.g:
         /// <para>db.Single&lt;Person&gt;(x =&gt; x.Age == 42)</para>

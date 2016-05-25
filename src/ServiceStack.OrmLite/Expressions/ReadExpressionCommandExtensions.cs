@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq.Expressions;
 using System.Text;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
@@ -22,6 +23,63 @@ namespace ServiceStack.OrmLite
             string sql = q.Where(predicate).SelectInto<T>();
 
             return dbCmd.ExprConvertToList<T>(sql, q.Params);
+        }
+
+        internal static List<Tuple<T, T2>> SelectMulti<T, T2>(this IDbCommand dbCmd, SqlExpression<T> q)
+        {
+            q.Select(q.CreateMultiSelect<T, T2, EOT, EOT, EOT, EOT, EOT>(dbCmd.GetDialectProvider()));
+            return dbCmd.ExprConvertToList<Tuple<T, T2>>(q.ToSelectStatement(), q.Params, onlyFields: q.OnlyFields);
+        }
+
+        internal static List<Tuple<T, T2, T3>> SelectMulti<T, T2, T3>(this IDbCommand dbCmd, SqlExpression<T> q)
+        {
+            q.Select(q.CreateMultiSelect<T, T2, T3, EOT, EOT, EOT, EOT>(dbCmd.GetDialectProvider()));
+            return dbCmd.ExprConvertToList<Tuple<T, T2, T3>>(q.ToSelectStatement(), q.Params, onlyFields: q.OnlyFields);
+        }
+
+        internal static List<Tuple<T, T2, T3, T4>> SelectMulti<T, T2, T3, T4>(this IDbCommand dbCmd, SqlExpression<T> q)
+        {
+            q.Select(q.CreateMultiSelect<T, T2, T3, T4, EOT, EOT, EOT>(dbCmd.GetDialectProvider()));
+            return dbCmd.ExprConvertToList<Tuple<T, T2, T3, T4>>(q.ToSelectStatement(), q.Params, onlyFields: q.OnlyFields);
+        }
+
+        internal static List<Tuple<T, T2, T3, T4, T5>> SelectMulti<T, T2, T3, T4, T5>(this IDbCommand dbCmd, SqlExpression<T> q)
+        {
+            q.Select(q.CreateMultiSelect<T, T2, T3, T4, T5, EOT, EOT>(dbCmd.GetDialectProvider()));
+            return dbCmd.ExprConvertToList<Tuple<T, T2, T3, T4, T5>>(q.ToSelectStatement(), q.Params, onlyFields: q.OnlyFields);
+        }
+
+        internal static List<Tuple<T, T2, T3, T4, T5, T6>> SelectMulti<T, T2, T3, T4, T5, T6>(this IDbCommand dbCmd, SqlExpression<T> q)
+        {
+            q.Select(q.CreateMultiSelect<T, T2, T3, T4, T5, T6, EOT>(dbCmd.GetDialectProvider()));
+            return dbCmd.ExprConvertToList<Tuple<T, T2, T3, T4, T5, T6>>(q.ToSelectStatement(), q.Params, onlyFields: q.OnlyFields);
+        }
+
+        internal static List<Tuple<T, T2, T3, T4, T5, T6, T7>> SelectMulti<T, T2, T3, T4, T5, T6, T7>(this IDbCommand dbCmd, SqlExpression<T> q)
+        {
+            q.Select(q.CreateMultiSelect<T, T2, T3, T4, T5, T6, T7>(dbCmd.GetDialectProvider()));
+            return dbCmd.ExprConvertToList<Tuple<T, T2, T3, T4, T5, T6, T7>>(q.ToSelectStatement(), q.Params, onlyFields: q.OnlyFields);
+        }
+
+        internal static string CreateMultiSelect<T, T2, T3, T4, T5, T6, T7>(this SqlExpression<T> q, IOrmLiteDialectProvider dialectProvider)
+        {
+            var sb = StringBuilderCache.Allocate()
+                .AppendFormat("{0}.*, 0 EOT", dialectProvider.GetQuotedTableName(typeof(T).GetModelDefinition()));
+
+            if (typeof(T2) != typeof(EOT))
+                sb.AppendFormat(", {0}.*, 0 EOT", dialectProvider.GetQuotedTableName(typeof(T2).GetModelDefinition()));
+            if (typeof(T3) != typeof(EOT))
+                sb.AppendFormat(", {0}.*, 0 EOT", dialectProvider.GetQuotedTableName(typeof(T3).GetModelDefinition()));
+            if (typeof(T4) != typeof(EOT))
+                sb.AppendFormat(", {0}.*, 0 EOT", dialectProvider.GetQuotedTableName(typeof(T4).GetModelDefinition()));
+            if (typeof(T5) != typeof(EOT))
+                sb.AppendFormat(", {0}.*, 0 EOT", dialectProvider.GetQuotedTableName(typeof(T5).GetModelDefinition()));
+            if (typeof(T6) != typeof(EOT))
+                sb.AppendFormat(", {0}.*, 0 EOT", dialectProvider.GetQuotedTableName(typeof(T6).GetModelDefinition()));
+            if (typeof(T7) != typeof(EOT))
+                sb.AppendFormat(", {0}.*, 0 EOT", dialectProvider.GetQuotedTableName(typeof(T7).GetModelDefinition()));
+
+            return StringBuilderCache.ReturnAndFree(sb);
         }
 
         internal static T Single<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
