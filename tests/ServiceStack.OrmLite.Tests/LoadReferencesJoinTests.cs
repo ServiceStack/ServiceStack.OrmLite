@@ -21,6 +21,11 @@ namespace ServiceStack.OrmLite.Tests
         public new void TestFixtureSetUp()
         {
             db = base.OpenDbConnection();
+            ResetTables();
+        }
+
+        private void ResetTables()
+        {
             CustomerOrdersUseCase.DropTables(db); //Has conflicting 'Order' table
 
             db.DropAndCreateTable<Order>();
@@ -739,6 +744,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_populate_multiple_POCOs_using_Dappers_QueryMultiple()
         {
+            ResetTables();
             AddCustomerWithOrders();
 
             var q = db.From<Customer>()
