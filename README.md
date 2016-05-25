@@ -20,9 +20,10 @@ OrmLite was designed with a focus on the core objectives:
   * Cross platform - supports multiple dbs (currently: Sql Server, Sqlite, MySql, PostgreSQL, Firebird) running on both .NET and Mono platforms.
 
 In OrmLite: **1 Class = 1 Table**. There should be no surprising or hidden behaviour, the Typed API
-that produces the Query doesn't impact how results get intuitvely mapped to the returned POCO's which
-could be different to the POCO used to create the query, e.g. containing only a subset of the fields 
-you want populated.
+that produces the Query 
+[doesn't impact how results get intuitvely mapped](http://stackoverflow.com/a/37443162/85785)
+to the returned POCO's which could be different to the POCO used to create the query, e.g. containing only 
+a subset of the fields you want populated.
 
 Any non-scalar properties (i.e. complex types) are text blobbed by default in a schema-less text field 
 using any of the [avilable pluggable text serializers](#pluggable-complex-type-serializers). 
