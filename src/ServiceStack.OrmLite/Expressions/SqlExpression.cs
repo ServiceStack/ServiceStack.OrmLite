@@ -1198,7 +1198,7 @@ namespace ServiceStack.OrmLite
 
                 if (left as PartialSqlString == null && right as PartialSqlString == null)
                 {
-                    var result = Expression.Lambda(b).Compile().DynamicInvoke();
+                    var result = CachedExpressionCompiler.Evaluate(b);
                     return result;
                 }
 
@@ -1245,7 +1245,7 @@ namespace ServiceStack.OrmLite
                 }
                 else if (left as PartialSqlString == null && right as PartialSqlString == null)
                 {
-                    var result = Expression.Lambda(b).Compile().DynamicInvoke();
+                    var result = CachedExpressionCompiler.Evaluate(b);
                     return result;
                 }
                 else if (left as PartialSqlString == null)
@@ -1305,10 +1305,7 @@ namespace ServiceStack.OrmLite
                 return GetMemberExpression(m);
             }
 
-            var member = Expression.Convert(m, typeof(object));
-            var lambda = Expression.Lambda<Func<object>>(member);
-            var getter = lambda.Compile();
-            return getter();
+            return CachedExpressionCompiler.Evaluate(m);
         }
 
         private object GetMemberExpression(MemberExpression m)
@@ -1345,21 +1342,14 @@ namespace ServiceStack.OrmLite
 
         protected virtual object VisitMemberInit(MemberInitExpression exp)
         {
-            return Expression.Lambda(exp).Compile().DynamicInvoke();
+            return CachedExpressionCompiler.Evaluate(exp);
         }
 
         protected virtual object VisitNew(NewExpression nex)
         {
-            // TODO : check !
-            var member = Expression.Convert(nex, typeof(object));
-            var lambda = Expression.Lambda<Func<object>>(member);
-            try
+            var isAnonType = nex.Type.Name.StartsWith("<>");
+            if (isAnonType)
             {
-                var getter = lambda.Compile();
-                return getter();
-            }
-            catch (InvalidOperationException)
-            { // FieldName ?
                 var exprs = VisitExpressionList(nex.Arguments);
                 var r = StringBuilderCache.Allocate();
                 foreach (object e in exprs)
@@ -1371,6 +1361,8 @@ namespace ServiceStack.OrmLite
                 }
                 return StringBuilderCache.ReturnAndFree(r);
             }
+
+            return CachedExpressionCompiler.Evaluate(nex);
         }
 
         protected virtual object VisitParameter(ParameterExpression p)
@@ -1402,7 +1394,9 @@ namespace ServiceStack.OrmLite
                     return new PartialSqlString("NOT (" + o + ")");
                 case ExpressionType.Convert:
                     if (u.Method != null)
-                        return Expression.Lambda(u).Compile().DynamicInvoke();
+                    {
+                        return CachedExpressionCompiler.Evaluate(u);
+                    }
                     break;
             }
             return Visit(u.Operand);
@@ -1434,7 +1428,7 @@ namespace ServiceStack.OrmLite
             if (IsColumnAccess(m))
                 return VisitColumnAccessMethod(m);
 
-            return Expression.Lambda(m).Compile().DynamicInvoke();
+            return CachedExpressionCompiler.Evaluate(m);
         }
 
         protected virtual List<object> VisitExpressionList(ReadOnlyCollection<Expression> original)
@@ -1677,11 +1671,9 @@ namespace ServiceStack.OrmLite
 
         private object ToInPartialString(Expression memberExpr, object quotedColName)
         {
-            var member = Expression.Convert(memberExpr, typeof(object));
-            var lambda = Expression.Lambda<Func<object>>(member);
-            var getter = lambda.Compile();
+            var result = CachedExpressionCompiler.Evaluate(memberExpr);
 
-            var inArgs = Sql.Flatten(getter() as IEnumerable);
+            var inArgs = Sql.Flatten(result as IEnumerable);
 
             var sqlIn = inArgs.Count > 0
                 ? CreateInParamSql(inArgs)
@@ -1731,10 +1723,7 @@ namespace ServiceStack.OrmLite
 
         protected string ConvertInExpressionToSql(MethodCallExpression m, object quotedColName)
         {
-            var member = Expression.Convert(m.Arguments[1], typeof (object));
-            var lambda = Expression.Lambda<Func<object>>(member);
-            var getter = lambda.Compile();
-            var argValue = getter();
+            var argValue = CachedExpressionCompiler.Evaluate(m.Arguments[1]);
 
             if (argValue == null)
                 return "(1=0)"; // "column IN (NULL)" is always false
@@ -1742,7 +1731,7 @@ namespace ServiceStack.OrmLite
             var enumerableArg = argValue as IEnumerable;
             if (enumerableArg != null)
             {
-                var inArgs = Sql.Flatten(getter() as IEnumerable);
+                var inArgs = Sql.Flatten(enumerableArg);
                 if (inArgs.Count == 0)
                     return "(1=0)"; // "column IN ([])" is always false
 
