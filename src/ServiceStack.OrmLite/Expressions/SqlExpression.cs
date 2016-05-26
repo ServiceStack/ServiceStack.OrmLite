@@ -202,6 +202,15 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
+        public virtual SqlExpression<T> Select<Table1>(Expression<Func<Table1, object>> fields)
+        {
+            sep = string.Empty;
+            useFieldName = true;
+            CustomSelect = true;
+            BuildSelectExpression(Visit(fields).ToString(), false);
+            return this;
+        }
+
         public virtual SqlExpression<T> Select<Table1, Table2>(Expression<Func<Table1, Table2, object>> fields)
         {
             sep = string.Empty;
@@ -212,6 +221,15 @@ namespace ServiceStack.OrmLite
         }
 
         public virtual SqlExpression<T> Select<Table1, Table2, Table3>(Expression<Func<Table1, Table2, Table3, object>> fields)
+        {
+            sep = string.Empty;
+            useFieldName = true;
+            CustomSelect = true;
+            BuildSelectExpression(Visit(fields).ToString(), false);
+            return this;
+        }
+
+        public virtual SqlExpression<T> Select<Table1, Table2, Table3, Table4>(Expression<Func<Table1, Table2, Table3, Table4, object>> fields)
         {
             sep = string.Empty;
             useFieldName = true;

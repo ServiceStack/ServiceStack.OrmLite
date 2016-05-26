@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Text;
@@ -327,12 +328,28 @@ namespace ServiceStack.OrmLite.Tests
 
                 var results = db.Select<dynamic>(q);
 
+                var sb = new StringBuilder();
                 foreach (var result in results)
                 {
-                    Console.WriteLine(result.FirstName);
-                    Console.WriteLine(result.LastName);
-                    Console.WriteLine(result.Name);
+                    sb.AppendLine(result.FirstName + "," + result.LastName + "," + result.Name);
                 }
+
+                Assert.That(sb.ToString().NormalizeNewLines(), Is.EqualTo(
+                    "First 1,Last 1,Dept 1\nFirst 2,Last 2,Dept 2\nFirst 3,Last 3,Dept 3\n"));
+
+                q = db.From<DeptEmployee>()
+                    .Join<Department2>()
+                    .Select<Department2>(d2 => new { d2.Name });
+
+                results = db.Select<dynamic>(q);
+
+                sb.Length = 0;
+                foreach (var result in results)
+                {
+                    sb.AppendLine(result.Name);
+                }
+
+                Assert.That(sb.ToString().NormalizeNewLines(), Is.EqualTo("Dept 1\nDept 2\nDept 3\n"));
             }
         }
     }
