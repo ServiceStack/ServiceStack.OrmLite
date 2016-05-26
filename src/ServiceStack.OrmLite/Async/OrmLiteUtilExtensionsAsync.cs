@@ -45,8 +45,8 @@ namespace ServiceStack.OrmLite
 
             var genericArgs = isTuple ? typeof(T).GetGenericArguments() : null;
             var modelIndexCaches = isTuple ? reader.GetMultiIndexCaches(dialectProvider, onlyFields, genericArgs) : null;
-            var genericTupleMi = isTuple ? typeof(T).GetGenericTypeDefinition().MakeGenericType(genericArgs) : null;
-            var ci = isTuple ? genericTupleMi.GetConstructor(genericArgs) : null;
+            var genericTupleMi = isTuple ? typeof(T).GetGenericTypeDefinition().GetCachedGenericType(genericArgs) : null;
+            var activator = isTuple ? genericTupleMi.GetConstructor(genericArgs).GetActivator() : null;
 
             return dialectProvider.ReaderEach(reader, () =>
             {
@@ -71,7 +71,7 @@ namespace ServiceStack.OrmLite
                 else if (isTuple)
                 {
                     var tupleArgs = reader.ToMultiTuple(dialectProvider, modelIndexCaches, genericArgs, values);
-                    var tuple = ci.Invoke(tupleArgs.ToArray());
+                    var tuple = activator(tupleArgs.ToArray());
                     return (T)tuple;
                 }
                 else

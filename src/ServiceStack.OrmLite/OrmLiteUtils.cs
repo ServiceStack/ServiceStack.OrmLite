@@ -14,6 +14,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using ServiceStack.Logging;
@@ -141,13 +142,13 @@ namespace ServiceStack.OrmLite
                     var modelIndexCaches = reader.GetMultiIndexCaches(dialectProvider, onlyFields, genericArgs);
 
                     var values = new object[reader.FieldCount];
-                    var genericTupleMi = typeof(T).GetGenericTypeDefinition().MakeGenericType(genericArgs);
-                    var ci = genericTupleMi.GetConstructor(genericArgs);
+                    var genericTupleMi = typeof(T).GetGenericTypeDefinition().GetCachedGenericType(genericArgs);
+                    var activator = genericTupleMi.GetConstructor(genericArgs).GetActivator();                    
 
                     while (reader.Read())
                     {
                         var tupleArgs = reader.ToMultiTuple(dialectProvider, modelIndexCaches, genericArgs, values);
-                        var tuple = ci.Invoke(tupleArgs.ToArray());
+                        var tuple = activator(tupleArgs.ToArray());
                         to.Add((T)tuple);
                     }
                 }
