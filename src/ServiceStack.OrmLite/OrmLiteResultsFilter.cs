@@ -164,7 +164,7 @@ namespace ServiceStack.OrmLite
         public IList GetRefList(IDbCommand dbCmd, Type refType)
         {
             Filter(dbCmd);
-            var list = (IList)typeof(List<>).MakeGenericType(refType).CreateInstance();
+            var list = (IList)typeof(List<>).GetCachedGenericType(refType).CreateInstance();
             foreach (object result in GetRefResults(dbCmd, refType))
             {
                 list.Add(result);

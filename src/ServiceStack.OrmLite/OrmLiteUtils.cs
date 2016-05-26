@@ -238,7 +238,7 @@ namespace ServiceStack.OrmLite
         public static IList ConvertToList(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, Type type)
         {
             var modelDef = type.GetModelDefinition();
-            var listInstance = typeof(List<>).MakeGenericType(type).CreateInstance();
+            var listInstance = typeof(List<>).GetCachedGenericType(type).CreateInstance();
             var to = (IList)listInstance;
             using (reader)
             {

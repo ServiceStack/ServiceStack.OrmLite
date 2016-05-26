@@ -117,7 +117,7 @@ namespace ServiceStack.OrmLite
             .Then(x =>
             {
                 reader.Dispose();
-                var to = (IList)typeof(List<>).MakeGenericType(type).CreateInstance();
+                var to = (IList)typeof(List<>).GetCachedGenericType(type).CreateInstance();
                 x.Each(o => to.Add(o));
                 return to;
             });
