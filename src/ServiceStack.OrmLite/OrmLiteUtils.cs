@@ -106,6 +106,17 @@ namespace ServiceStack.OrmLite
             return row;
         }
 
+        public static IDictionary<string, object> ConvertToExpandoObject(this IDataReader dataReader)
+        {
+            var row = (IDictionary<string,object>)new ExpandoObject();
+            for (var i = 0; i < dataReader.FieldCount; i++)
+            {
+                var dbValue = dataReader.GetValue(i);
+                row[dataReader.GetName(i).Trim()] = dbValue is DBNull ? null : dbValue;
+            }
+            return row;
+        }
+
         public static List<T> ConvertToList<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, HashSet<string> onlyFields=null)
         {
             if (typeof(T) == typeof(List<object>))
@@ -141,8 +152,8 @@ namespace ServiceStack.OrmLite
                 {
                     while (reader.Read())
                     {
-                        var row = reader.ConvertToDictionaryObjects();
-                        to.Add(row.ToExpando());
+                        var row = reader.ConvertToExpandoObject();
+                        to.Add(row);
                     }
                 }
                 return (List<T>)(object)to.ToList();
