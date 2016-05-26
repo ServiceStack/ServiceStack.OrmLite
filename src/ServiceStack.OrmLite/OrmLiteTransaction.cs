@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Data;
+using ServiceStack.Data;
 
 namespace ServiceStack.OrmLite
 {
-    public class OrmLiteTransaction : IDbTransaction, IHasDbTransaction
+    public class OrmLiteTransaction : IDbTransaction, IHasDbTransaction, ICanSetDbTransaction
     {
         public IDbTransaction Transaction { get; set; }
         private readonly IDbConnection db;
@@ -14,7 +15,7 @@ namespace ServiceStack.OrmLite
             this.Transaction = transaction;
 
             //If OrmLite managed connection assign to connection, otherwise use OrmLiteContext
-            var ormLiteConn = this.db as IHasDbTransaction;
+            var ormLiteConn = this.db as ICanSetDbTransaction;
             if (ormLiteConn != null)
             {
                 ormLiteConn.Transaction = this.Transaction = transaction;
@@ -25,6 +26,11 @@ namespace ServiceStack.OrmLite
             }
         }
 
+        IDbTransaction IHasDbTransaction.DbTransaction
+        {
+            get { return Transaction; }
+        }
+
         public void Dispose()
         {
             try
@@ -33,7 +39,7 @@ namespace ServiceStack.OrmLite
             }
             finally
             {
-                var ormLiteConn = this.db as IHasDbTransaction;
+                var ormLiteConn = this.db as ICanSetDbTransaction;
                 if (ormLiteConn != null)
                 {
                     ormLiteConn.Transaction = null;

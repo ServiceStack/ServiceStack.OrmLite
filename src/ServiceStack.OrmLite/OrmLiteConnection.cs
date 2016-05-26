@@ -8,7 +8,7 @@ namespace ServiceStack.OrmLite
     /// Wrapper IDbConnection class to allow for connection sharing, mocking, etc.
     /// </summary>
     public class OrmLiteConnection
-        : IDbConnection, IHasDbConnection, IHasDbTransaction
+        : IDbConnection, IHasDbConnection, IHasDbTransaction, ICanSetDbTransaction
     {
         public readonly OrmLiteConnectionFactory Factory;
         public IDbTransaction Transaction { get; set; }
@@ -34,6 +34,11 @@ namespace ServiceStack.OrmLite
                 }
                 return dbConnection;
             }
+        }
+
+        IDbTransaction IHasDbTransaction.DbTransaction
+        {
+            get { return Transaction; }
         }
 
         public void Dispose()
@@ -125,7 +130,7 @@ namespace ServiceStack.OrmLite
         }
     }
 
-    internal interface IHasDbTransaction
+    internal interface ICanSetDbTransaction
     {
         IDbTransaction Transaction { get; set; }
     }
