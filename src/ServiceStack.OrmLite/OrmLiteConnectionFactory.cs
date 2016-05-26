@@ -220,7 +220,7 @@ namespace ServiceStack.OrmLite
         {
             var hasDbTrans = dbTrans as IHasDbTransaction;
             return hasDbTrans != null
-                ? hasDbTrans.Transaction
+                ? hasDbTrans.DbTransaction
                 : dbTrans;
         }
     }

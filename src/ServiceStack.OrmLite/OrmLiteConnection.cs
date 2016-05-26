@@ -8,10 +8,11 @@ namespace ServiceStack.OrmLite
     /// Wrapper IDbConnection class to allow for connection sharing, mocking, etc.
     /// </summary>
     public class OrmLiteConnection
-        : IDbConnection, IHasDbConnection, IHasDbTransaction
+        : IDbConnection, IHasDbConnection, IHasDbTransaction, ISetDbTransaction
     {
         public readonly OrmLiteConnectionFactory Factory;
         public IDbTransaction Transaction { get; set; }
+        public IDbTransaction DbTransaction { get { return Transaction; } }
         private IDbConnection dbConnection;
 
         public IOrmLiteDialectProvider DialectProvider { get; set; }
@@ -125,7 +126,7 @@ namespace ServiceStack.OrmLite
         }
     }
 
-    internal interface IHasDbTransaction
+    internal interface ISetDbTransaction
     {
         IDbTransaction Transaction { get; set; }
     }
