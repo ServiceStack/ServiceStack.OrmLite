@@ -218,7 +218,7 @@ namespace ServiceStack.OrmLite
 
         public static IDbTransaction ToDbTransaction(this IDbTransaction dbTrans)
         {
-            var hasDbTrans = dbTrans as IHasDbTransaction;
+            var hasDbTrans = dbTrans as ICanSetDbTransaction;
             return hasDbTrans != null
                 ? hasDbTrans.Transaction
                 : dbTrans;
