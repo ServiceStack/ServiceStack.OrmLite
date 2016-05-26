@@ -6,6 +6,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Dynamic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -38,6 +40,7 @@ namespace ServiceStack.OrmLite
             var values = new object[reader.FieldCount];
             var isObjectList = typeof(T) == typeof(List<object>);
             var isObjectDict = typeof(T) == typeof(Dictionary<string,object>);
+            var isDynamic = typeof(T) == typeof(object);
             var isTuple = typeof(T).Name.StartsWith("Tuple`");
             var indexCache = isObjectDict || isObjectDict || isTuple
                 ? null
@@ -62,6 +65,15 @@ namespace ServiceStack.OrmLite
                 else if (isObjectDict)
                 {
                     var row = new Dictionary<string,object>();
+                    for (var i = 0; i < reader.FieldCount; i++)
+                    {
+                        row[reader.GetName(i).Trim()] = reader.GetValue(i);
+                    }
+                    return (T)(object)row;
+                }
+                else if (isDynamic)
+                {
+                    var row = (IDictionary<string, object>) new ExpandoObject();
                     for (var i = 0; i < reader.FieldCount; i++)
                     {
                         row[reader.GetName(i).Trim()] = reader.GetValue(i);

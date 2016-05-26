@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
@@ -262,7 +263,7 @@ namespace ServiceStack.OrmLite.Tests
                     "departmentid", "department", "Id", "Name"
                 }));
 
-                results = db.LoadSelect(q, include:q.OnlyFields);
+                results = db.LoadSelect(q, include: q.OnlyFields);
 
                 Assert.That(results.All(x => x.Id > 0 && x.Id < 10));
                 Assert.That(results.All(x => x.DepartmentId >= 10));
@@ -303,6 +304,35 @@ namespace ServiceStack.OrmLite.Tests
 
                 Assert.That(results.All(x => x.Id > 0 && x.Id < 10));
                 Assert.That(results.All(x => x.DepartmentId >= 10));
+            }
+        }
+
+        [Test]
+        public void Can_Select_custom_fields_using_dynamic()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropTable<DeptEmployee>();
+                db.DropTable<Department2>();
+                db.CreateTable<Department2>();
+                db.CreateTable<DeptEmployee>();
+
+                db.InsertAll(SeedDepartments);
+                db.InsertAll(SeedEmployees);
+
+                var q = db.From<DeptEmployee>()
+                    .Join<Department2>()
+                    .Select<DeptEmployee, Department2>(
+                        (de, d2) => new { de.FirstName, de.LastName, d2.Name });
+
+                var results = db.Select<dynamic>(q);
+
+                foreach (var result in results)
+                {
+                    Console.WriteLine(result.FirstName);
+                    Console.WriteLine(result.LastName);
+                    Console.WriteLine(result.Name);
+                }
             }
         }
     }

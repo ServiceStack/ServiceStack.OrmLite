@@ -13,6 +13,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Dynamic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -132,6 +133,19 @@ namespace ServiceStack.OrmLite
                     }
                 }
                 return (List<T>)(object)to;
+            }
+            if (typeof(T) == typeof(object))
+            {
+                var to = new List<object>();
+                using (reader)
+                {
+                    while (reader.Read())
+                    {
+                        var row = reader.ConvertToDictionaryObjects();
+                        to.Add(row.ToExpando());
+                    }
+                }
+                return (List<T>)(object)to.ToList();
             }
             if (typeof(T).Name.StartsWith("Tuple`"))
             {
