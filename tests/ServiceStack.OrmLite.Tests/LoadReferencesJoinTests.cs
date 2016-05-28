@@ -815,7 +815,9 @@ Customer Address:
 
             var q = db.From<Customer>()
                 .Join<Customer, CustomerAddress>()
-                .Join<Customer, Order>();
+                .Join<Customer, Order>()
+                .Where(x => x.Id == 1)
+                .And<CustomerAddress>(x => x.Country == "Australia");
 
             var tuples = db.SelectMulti<Customer, CustomerAddress, Order>(q);
 
