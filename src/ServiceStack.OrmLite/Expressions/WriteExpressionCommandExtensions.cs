@@ -32,8 +32,8 @@ namespace ServiceStack.OrmLite
                 dbCmd.CommandText += " " + onlyFields.WhereExpression;
         }
 
-        internal static int UpdateOnly<T, TKey>(this IDbCommand dbCmd, T obj,
-            Expression<Func<T, TKey>> onlyFields = null,
+        internal static int UpdateOnly<T>(this IDbCommand dbCmd, T obj,
+            Expression<Func<T, object>> onlyFields = null,
             Expression<Func<T, bool>> where = null)
         {
             if (onlyFields == null)

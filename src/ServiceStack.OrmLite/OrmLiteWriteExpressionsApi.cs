@@ -61,8 +61,8 @@ namespace ServiceStack.OrmLite
         ///   db.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName);
         ///   UPDATE "Person" SET "FirstName" = 'JJ'
         /// </summary>
-        public static int UpdateOnly<T, TKey>(this IDbConnection dbConn, T obj,
-            Expression<Func<T, TKey>> onlyFields = null,
+        public static int UpdateOnly<T>(this IDbConnection dbConn, T obj,
+            Expression<Func<T, object>> onlyFields = null,
             Expression<Func<T, bool>> where = null)
         {
             return dbConn.Exec(dbCmd => dbCmd.UpdateOnly(obj, onlyFields, where));
