@@ -398,7 +398,7 @@ db.UpdateOnly(new Person { FirstName = "JJ" },
     onlyFields: p => p.FirstName, 
     where: p => p.LastName == "Hendrix");
 ```
-Instead of using the expression filters above you can choose to use an ExpressionVisitor builder which provides more flexibility when you want to programatically construct the update statement:
+Instead of using the expression filters above you can choose to use an SqlExpression builder which provides more flexibility when you want to programatically construct the update statement:
 
 ```csharp
 var q = db.From<Person>()
@@ -461,7 +461,7 @@ Insert's are pretty straight forward since in most cases you want to insert ever
 ```csharp
 db.Insert(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27 });
 ```
-But do provide an API that takes an Expression Visitor for the rare cases you don't want to insert every field
+But do provide an API that takes an SqlExpression for the rare cases you don't want to insert every field
 
 ```csharp
 var q = db.From<Person>()
@@ -477,7 +477,7 @@ Like updates for DELETE's we also provide APIs that take a where Expression:
 db.Delete<Person>(p => p.Age == 27);
 ```
 
-Or an Expression Visitor:
+Or an SqlExpression:
 ```csharp
 var q = db.From<Person>()
           .Where(p => p.Age == 27);
