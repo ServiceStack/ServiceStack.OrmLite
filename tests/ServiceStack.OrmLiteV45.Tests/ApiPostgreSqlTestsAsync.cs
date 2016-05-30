@@ -232,7 +232,7 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(db.GetLastSql(), Is.EqualTo("INSERT INTO \"person\" (\"id\",\"first_name\",\"last_name\",\"age\") VALUES (:Id,:FirstName,:LastName,:Age)"));
 
             await db.InsertOnlyAsync(new PersonWithAutoId { FirstName = "Amy", Age = 27 }, p => new { p.FirstName, p.Age });
-            Assert.That(db.GetLastSql(), Is.EqualTo("INSERT INTO \"person_with_auto_id\" (\"first_name\",\"age\") VALUES ('Amy',27)"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("INSERT INTO \"person_with_auto_id\" (\"first_name\",\"age\") VALUES (:FirstName,:Age)"));
 
             await db.InsertOnlyAsync(() => new PersonWithAutoId { FirstName = "Amy", Age = 27 });
             Assert.That(db.GetLastSql(), Is.EqualTo("INSERT INTO \"person_with_auto_id\" (\"first_name\",\"age\") VALUES (:FirstName,:Age)"));

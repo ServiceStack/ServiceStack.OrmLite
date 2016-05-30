@@ -128,11 +128,13 @@ namespace ServiceStack.OrmLite.Firebird
             var tableType = objWithProperties.GetType();
             var modelDef = GetModel(tableType);
 
-            foreach (var fieldDef in modelDef.FieldDefinitions)
+            foreach (var fieldDef in modelDef.FieldDefinitionsArray)
             {
 
-                if (fieldDef.IsComputed) continue;
-                if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name)) continue;
+                if (fieldDef.IsComputed)
+                    continue;
+                if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name))
+                    continue;
 
                 if ((fieldDef.AutoIncrement || !string.IsNullOrEmpty(fieldDef.Sequence)
                     || fieldDef.Name == OrmLiteConfig.IdField)
@@ -151,11 +153,19 @@ namespace ServiceStack.OrmLite.Firebird
                 if (sbColumnValues.Length > 0)
                     sbColumnValues.Append(",");
 
-                sbColumnNames.Append(string.Format("{0}", GetQuotedColumnName(fieldDef.FieldName)));
-                if (!string.IsNullOrEmpty(fieldDef.Sequence) && cmd == null)
-                    sbColumnValues.Append(string.Format("@{0}", fieldDef.Name));
-                else
-                    sbColumnValues.Append(fieldDef.GetQuotedValue(objWithProperties));
+                try
+                {
+                    sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
+                    sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
+
+                    var p = AddParameter(cmd, fieldDef);
+                    p.Value = fieldDef.GetValue(objWithProperties) ?? DBNull.Value;
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("ERROR in ToInsertRowStatement(): " + ex.Message, ex);
+                    throw;
+                }
             }
 
             var sql = string.Format("INSERT INTO {0} ({1}) VALUES ({2});",

@@ -145,10 +145,24 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Using an SqlExpression to only Insert the fields specified, e.g:
         /// 
-        ///   db.InsertOnly(new Person { FirstName = "Amy" }, p => new { p.FirstName });
+        ///   db.InsertOnlyAsync(new Person { FirstName = "Amy" }, p => p.FirstName));
         ///   INSERT INTO "Person" ("FirstName") VALUES ('Amy');
+        /// 
+        ///   db.InsertOnlyAsync(new Person { Id =1 , FirstName="Amy" }, p => new { p.Id, p.FirstName }));
+        ///   INSERT INTO "Person" ("Id", "FirstName") VALUES (1, 'Amy');
         /// </summary>
         public static Task InsertOnlyAsync<T>(this IDbConnection dbConn, T obj, Expression<Func<T, object>> onlyFields, CancellationToken token = default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd => dbCmd.InsertOnlyAsync(obj, onlyFields.GetFieldNames(), token));
+        }
+
+        /// <summary>
+        /// Using an SqlExpression to only Insert the fields specified, e.g:
+        /// 
+        ///   db.InsertOnly(new Person { FirstName = "Amy" }, new[]{ "FirstName" }));
+        ///   INSERT INTO "Person" ("FirstName") VALUES ('Amy');
+        /// </summary>
+        public static Task InsertOnlyAsync<T>(this IDbConnection dbConn, T obj, string[] onlyFields, CancellationToken token = default(CancellationToken))
         {
             return dbConn.Exec(dbCmd => dbCmd.InsertOnlyAsync(obj, onlyFields, token));
         }

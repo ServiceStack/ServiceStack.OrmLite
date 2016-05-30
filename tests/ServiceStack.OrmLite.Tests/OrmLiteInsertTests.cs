@@ -231,10 +231,24 @@ namespace ServiceStack.OrmLite.Tests
             {
                 db.DropAndCreateTable<PersonWithAutoId>();
 
-                db.InsertOnly(new PersonWithAutoId { FirstName = "Amy", Age = 27 }, x => new { x.FirstName, x.Age });
-                Assert.That(db.GetLastSql(), Is.EqualTo("INSERT INTO \"PersonWithAutoId\" (\"FirstName\",\"Age\") VALUES ('Amy',27)"));
-
+                db.InsertOnly(new PersonWithAutoId { Age = 27 }, x => x.Age);
                 var row = db.Select<PersonWithAutoId>()[0];
+                Assert.That(row.Age, Is.EqualTo(27));
+                Assert.That(row.FirstName, Is.Null);
+                Assert.That(row.LastName, Is.Null);
+
+                db.DeleteAll<PersonWithAutoId>();
+
+                db.InsertOnly(new PersonWithAutoId { FirstName = "Amy", Age = 27 }, x => new { x.FirstName, x.Age });
+                row = db.Select<PersonWithAutoId>()[0];
+                Assert.That(row.FirstName, Is.EqualTo("Amy"));
+                Assert.That(row.Age, Is.EqualTo(27));
+                Assert.That(row.LastName, Is.Null);
+
+                db.DeleteAll<PersonWithAutoId>();
+
+                db.InsertOnly(new PersonWithAutoId { FirstName = "Amy", Age = 27 }, new[] { "FirstName", "Age" });
+                row = db.Select<PersonWithAutoId>()[0];
                 Assert.That(row.FirstName, Is.EqualTo("Amy"));
                 Assert.That(row.Age, Is.EqualTo(27));
                 Assert.That(row.LastName, Is.Null);

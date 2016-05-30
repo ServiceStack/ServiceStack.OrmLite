@@ -565,8 +565,7 @@ namespace ServiceStack.OrmLite
             return StringBuilderCache.ReturnAndFree(sqlColumns);
         }
 
-        /// Fmt
-        public virtual string ToInsertRowStatement(IDbCommand command, object objWithProperties, ICollection<string> insertFields = null)
+        public virtual string ToInsertRowStatement(IDbCommand cmd, object objWithProperties, ICollection<string> insertFields = null)
         {
             if (insertFields == null)
                 insertFields = new List<string>();
@@ -575,22 +574,26 @@ namespace ServiceStack.OrmLite
             var sbColumnValues = StringBuilderCacheAlt.Allocate();
             var modelDef = objWithProperties.GetType().GetModelDefinition();
 
-            foreach (var fieldDef in modelDef.FieldDefinitions)
+            foreach (var fieldDef in modelDef.FieldDefinitionsArray)
             {
                 if (fieldDef.ShouldSkipInsert())
                     continue;
 
-                //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
                 if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name))
                     continue;
 
-                if (sbColumnNames.Length > 0) sbColumnNames.Append(",");
-                if (sbColumnValues.Length > 0) sbColumnValues.Append(",");
+                if (sbColumnNames.Length > 0)
+                    sbColumnNames.Append(",");
+                if (sbColumnValues.Length > 0)
+                    sbColumnValues.Append(",");
 
                 try
                 {
                     sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
-                    sbColumnValues.Append(fieldDef.GetQuotedValue(objWithProperties, this));
+                    sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
+
+                    var p = AddParameter(cmd, fieldDef);
+                    p.Value = fieldDef.GetValue(objWithProperties) ?? DBNull.Value;
                 }
                 catch (Exception ex)
                 {
@@ -777,11 +780,12 @@ namespace ServiceStack.OrmLite
             cmd.CommandType = CommandType.StoredProcedure;
         }
 
-        protected void AddParameter(IDbCommand cmd, FieldDefinition fieldDef)
+        protected IDbDataParameter AddParameter(IDbCommand cmd, FieldDefinition fieldDef)
         {
             var p = cmd.CreateParameter();
             SetParameter(fieldDef, p);
             cmd.Parameters.Add(p);
+            return p;
         }
 
         public virtual void SetParameter(FieldDefinition fieldDef, IDbDataParameter p)
@@ -823,7 +827,7 @@ namespace ServiceStack.OrmLite
         {
             var value = obj is T
                ? fieldDef.GetValue(obj)
-               : GetAnonValue<T>(fieldDef, obj);
+               : GetAnonValue(fieldDef, obj);
 
             return GetFieldValue(fieldDef, value);
         }
@@ -877,7 +881,7 @@ namespace ServiceStack.OrmLite
         {
             var value = obj is T
                 ? fieldDef.GetValue(obj)
-                : GetAnonValue<T>(fieldDef, obj);
+                : GetAnonValue(fieldDef, obj);
 
             if (value == null)
                 return DBNull.Value;
@@ -894,7 +898,7 @@ namespace ServiceStack.OrmLite
         static readonly ConcurrentDictionary<string, PropertyGetterDelegate> anonValueFnMap =
             new ConcurrentDictionary<string, PropertyGetterDelegate>();
 
-        protected virtual object GetAnonValue<T>(FieldDefinition fieldDef, object obj)
+        protected virtual object GetAnonValue(FieldDefinition fieldDef, object obj)
         {
             var anonType = obj.GetType();
             var key = anonType.Name + "." + fieldDef.Name;

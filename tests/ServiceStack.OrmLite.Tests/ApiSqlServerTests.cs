@@ -240,7 +240,7 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(db.GetLastSql(), Is.EqualTo("INSERT INTO \"Person\" (\"Id\",\"FirstName\",\"LastName\",\"Age\") VALUES (@Id,@FirstName,@LastName,@Age)"));
 
             db.InsertOnly(new PersonWithAutoId { FirstName = "Amy", Age = 27 }, x => new { x.FirstName, x.Age });
-            Assert.That(db.GetLastSql(), Is.EqualTo("INSERT INTO \"PersonWithAutoId\" (\"FirstName\",\"Age\") VALUES ('Amy',27)"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("INSERT INTO \"PersonWithAutoId\" (\"FirstName\",\"Age\") VALUES (@FirstName,@Age)"));
 
             db.InsertOnly(() => new PersonWithAutoId { FirstName = "Amy", Age = 27 });
             Assert.That(db.GetLastSql(), Is.EqualTo("INSERT INTO \"PersonWithAutoId\" (\"FirstName\",\"Age\") VALUES (@FirstName,@Age)"));

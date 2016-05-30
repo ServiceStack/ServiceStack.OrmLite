@@ -652,6 +652,7 @@ namespace ServiceStack.OrmLite.Oracle
         //    return value;
         //}
 
+        //TODO: Change to parameterized query to match all other ToInsertRowStatement() impls
         public override string ToInsertRowStatement(IDbCommand dbCommand, object objWithProperties, ICollection<string> insertFields = null)
         {
             if (insertFields == null)
@@ -665,8 +666,10 @@ namespace ServiceStack.OrmLite.Oracle
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
-                if (fieldDef.IsComputed) continue;
-                if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name)) continue;
+                if (fieldDef.IsComputed)
+                    continue;
+                if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name))
+                    continue;
 
                 if ((fieldDef.AutoIncrement || !string.IsNullOrEmpty(fieldDef.Sequence))
                     && dbCommand != null)
