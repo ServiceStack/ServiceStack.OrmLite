@@ -138,12 +138,15 @@ namespace ServiceStack.OrmLite
                 dialectProvider.GetQuotedTableName(modelDef), StringBuilderCache.ReturnAndFree(sql), whereSql);
         }
 
-        public static void InsertOnly<T>(this IDbCommand dbCmd, T obj, SqlExpression<T> onlyFields)
+        public static void InsertOnly<T>(this IDbCommand dbCmd, T obj, Expression<Func<T, object>> onlyFields)
         {
             if (OrmLiteConfig.InsertFilter != null)
                 OrmLiteConfig.InsertFilter(dbCmd, obj);
 
-            var sql = dbCmd.GetDialectProvider().ToInsertRowStatement(dbCmd, obj, onlyFields.InsertFields);
+            var q = dbCmd.GetDialectProvider().SqlExpression<T>();
+            q.Insert(onlyFields);
+
+            var sql = dbCmd.GetDialectProvider().ToInsertRowStatement(dbCmd, obj, q.InsertFields);
             dbCmd.ExecuteSql(sql);
         }
 

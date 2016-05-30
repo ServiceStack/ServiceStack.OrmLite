@@ -269,7 +269,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 i++; db.Insert(new Person { Id = 7, FirstName = "Amy", LastName = "Winehouse", Age = 27 });
                 i++; db.InsertAll(new[] { new Person { Id = 10, FirstName = "Biggie", LastName = "Smalls", Age = 24 } });
-                i++; db.InsertOnly(new PersonWithAutoId { FirstName = "Amy", Age = 27 }, db.From<PersonWithAutoId>().Insert(p => new { p.FirstName, p.Age }));
+                i++; db.InsertOnly(new PersonWithAutoId { FirstName = "Amy", Age = 27 }, p => new { p.FirstName, p.Age });
 
                 Assert.That(captured.SqlStatements.Count, Is.EqualTo(i));
 

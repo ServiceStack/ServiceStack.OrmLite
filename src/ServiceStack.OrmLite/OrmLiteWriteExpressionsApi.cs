@@ -137,10 +137,10 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Using an SqlExpression to only Insert the fields specified, e.g:
         /// 
-        ///   db.InsertOnly(new Person { FirstName = "Amy" }, q => q.Insert(p => new { p.FirstName }));
+        ///   db.InsertOnly(new Person { FirstName = "Amy" }, p => new { p.FirstName }));
         ///   INSERT INTO "Person" ("FirstName") VALUES ('Amy');
         /// </summary>
-        public static void InsertOnly<T>(this IDbConnection dbConn, T obj, SqlExpression<T> onlyFields)
+        public static void InsertOnly<T>(this IDbConnection dbConn, T obj, Expression<Func<T, object>> onlyFields)
         {
             dbConn.Exec(dbCmd => dbCmd.InsertOnly(obj, onlyFields));
         }
