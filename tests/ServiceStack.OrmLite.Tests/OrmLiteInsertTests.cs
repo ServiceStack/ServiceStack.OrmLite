@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
 using ServiceStack.DataAnnotations;
+using ServiceStack.OrmLite.Tests.Shared;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
@@ -220,6 +221,40 @@ namespace ServiceStack.OrmLite.Tests
 
                 var lastInsertId = db.Insert(testObject, selectIdentity: true);
                 Assert.Greater(lastInsertId, 0, "with InsertParam");
+            }
+        }
+
+        [Test]
+        public void Can_InsertOnly_selected_fields()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<PersonWithAutoId>();
+
+                db.InsertOnly(new PersonWithAutoId { FirstName = "Amy", Age = 27 }, x => new { x.FirstName, x.Age });
+                Assert.That(db.GetLastSql(), Is.EqualTo("INSERT INTO \"PersonWithAutoId\" (\"FirstName\",\"Age\") VALUES ('Amy',27)"));
+
+                var row = db.Select<PersonWithAutoId>()[0];
+                Assert.That(row.FirstName, Is.EqualTo("Amy"));
+                Assert.That(row.Age, Is.EqualTo(27));
+                Assert.That(row.LastName, Is.Null);
+            }
+        }
+
+        [Test]
+        public void Can_InsertOnly_selected_fields_using_AssignmentExpression()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<PersonWithAutoId>();
+
+                db.InsertOnly(() => new PersonWithAutoId { FirstName = "Amy", Age = 27 });
+                Assert.That(db.GetLastSql(), Is.EqualTo("INSERT INTO \"PersonWithAutoId\" (\"FirstName\",\"Age\") VALUES (@FirstName,@Age)"));
+
+                var row = db.Select<PersonWithAutoId>()[0];
+                Assert.That(row.FirstName, Is.EqualTo("Amy"));
+                Assert.That(row.Age, Is.EqualTo(27));
+                Assert.That(row.LastName, Is.Null);
             }
         }
     }

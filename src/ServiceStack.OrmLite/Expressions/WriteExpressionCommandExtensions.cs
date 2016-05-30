@@ -150,6 +150,22 @@ namespace ServiceStack.OrmLite
             dbCmd.ExecuteSql(sql);
         }
 
+        public static int InsertOnly<T>(this IDbCommand dbCmd, Expression<Func<T>> insertFields)
+        {
+            if (insertFields == null)
+                throw new ArgumentNullException("insertFields");
+
+            if (OrmLiteConfig.InsertFilter != null)
+                OrmLiteConfig.InsertFilter(dbCmd, CachedExpressionCompiler.Evaluate(insertFields));
+
+            var insertFieldsValues = insertFields.AssignedValues();
+            dbCmd.GetDialectProvider().PrepareParameterizedInsertStatement<T>(dbCmd, insertFieldsValues.Keys);
+
+            dbCmd.SetParameters(insertFieldsValues, excludeDefaults:false);
+
+            return dbCmd.ExecNonQuery();
+        }
+
         public static int Delete<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> where)
         {
             var ev = dbCmd.GetDialectProvider().SqlExpression<T>();

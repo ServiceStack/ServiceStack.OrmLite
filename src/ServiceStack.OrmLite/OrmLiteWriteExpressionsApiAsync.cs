@@ -154,6 +154,17 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Using an SqlExpression to only Insert the fields specified, e.g:
+        /// 
+        ///   db.InsertOnlyAsync(() => new Person { FirstName = "Amy" }));
+        ///   INSERT INTO "Person" ("FirstName") VALUES (@FirstName);
+        /// </summary>
+        public static Task<int> InsertOnlyAsync<T>(this IDbConnection dbConn, Expression<Func<T>> insertFields, CancellationToken token = default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd => dbCmd.InsertOnlyAsync(insertFields, token));
+        }
+
+        /// <summary>
         /// Delete the rows that matches the where expression, e.g:
         /// 
         ///   db.Delete&lt;Person&gt;(p => p.Age == 27);
