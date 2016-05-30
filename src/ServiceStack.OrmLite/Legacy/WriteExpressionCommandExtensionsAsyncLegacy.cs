@@ -49,6 +49,15 @@ namespace ServiceStack.OrmLite.Legacy
             var sql = WriteExpressionCommandExtensionsLegacy.DeleteFmtSql(dbCmd.GetDialectProvider(), table, @where);
             return dbCmd.ExecuteSqlAsync(sql, token);
         }
+
+        internal static Task InsertOnlyAsync<T>(this IDbCommand dbCmd, T obj, SqlExpression<T> onlyFields, CancellationToken token)
+        {
+            if (OrmLiteConfig.InsertFilter != null)
+                OrmLiteConfig.InsertFilter(dbCmd, obj);
+
+            var sql = dbCmd.GetDialectProvider().ToInsertRowStatement(dbCmd, obj, onlyFields.InsertFields);
+            return dbCmd.ExecuteSqlAsync(sql, token);
+        }
     }
 }
 

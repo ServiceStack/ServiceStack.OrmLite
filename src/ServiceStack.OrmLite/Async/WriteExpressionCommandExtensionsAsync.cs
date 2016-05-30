@@ -98,12 +98,14 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecNonQueryAsync(token);
         }
 
-        internal static Task InsertOnlyAsync<T>(this IDbCommand dbCmd, T obj, SqlExpression<T> onlyFields, CancellationToken token)
+        internal static Task InsertOnlyAsync<T>(this IDbCommand dbCmd, T obj, Expression<Func<T, object>> onlyFields, CancellationToken token)
         {
             if (OrmLiteConfig.InsertFilter != null)
                 OrmLiteConfig.InsertFilter(dbCmd, obj);
 
-            var sql = dbCmd.GetDialectProvider().ToInsertRowStatement(dbCmd, obj, onlyFields.InsertFields);
+            var q = dbCmd.GetDialectProvider().SqlExpression<T>().Insert(onlyFields);
+
+            var sql = dbCmd.GetDialectProvider().ToInsertRowStatement(dbCmd, obj, q.InsertFields);
             return dbCmd.ExecuteSqlAsync(sql, token);
         }
 

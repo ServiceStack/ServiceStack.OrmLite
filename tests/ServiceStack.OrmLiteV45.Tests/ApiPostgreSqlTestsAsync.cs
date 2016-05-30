@@ -231,7 +231,7 @@ namespace ServiceStack.OrmLite.Tests
             await db.InsertAllAsync(new[] { new Person { Id = 10, FirstName = "Biggie", LastName = "Smalls", Age = 24 } });
             Assert.That(db.GetLastSql(), Is.EqualTo("INSERT INTO \"person\" (\"id\",\"first_name\",\"last_name\",\"age\") VALUES (:Id,:FirstName,:LastName,:Age)"));
 
-            await db.InsertOnlyAsync(new PersonWithAutoId { FirstName = "Amy", Age = 27 }, db.From<PersonWithAutoId>().Insert(p => new { p.FirstName, p.Age }));
+            await db.InsertOnlyAsync(new PersonWithAutoId { FirstName = "Amy", Age = 27 }, p => new { p.FirstName, p.Age });
             Assert.That(db.GetLastSql(), Is.EqualTo("INSERT INTO \"person_with_auto_id\" (\"first_name\",\"age\") VALUES ('Amy',27)"));
 
             await db.UpdateAsync(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27 });
