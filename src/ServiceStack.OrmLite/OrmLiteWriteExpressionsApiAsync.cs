@@ -66,8 +66,8 @@ namespace ServiceStack.OrmLite
         ///   db.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName);
         ///   UPDATE "Person" SET "FirstName" = 'JJ'
         /// </summary>
-        public static Task<int> UpdateOnlyAsync<T, TKey>(this IDbConnection dbConn, T obj,
-            Expression<Func<T, TKey>> onlyFields = null,
+        public static Task<int> UpdateOnlyAsync<T>(this IDbConnection dbConn, T obj,
+            Expression<Func<T, object>> onlyFields = null,
             Expression<Func<T, bool>> where = null,
             CancellationToken token = default(CancellationToken))
         {
@@ -91,6 +91,20 @@ namespace ServiceStack.OrmLite
             CancellationToken token = default(CancellationToken))
         {
             return dbConn.Exec(dbCmd => dbCmd.UpdateAddAsync(updateFields, dbCmd.GetDialectProvider().SqlExpression<T>().Where(where)));
+        }
+
+        /// <summary>
+        /// Update record, updating only fields specified in updateOnly that matches the where condition (if any), E.g:
+        /// 
+        ///   db.UpdateOnly(new Person { FirstName = "JJ" }, new[]{ "FirstName" }, p => p.LastName == "Hendrix");
+        ///   UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("LastName" = 'Hendrix')
+        /// </summary>
+        public static Task<int> UpdateOnlyAsync<T>(this IDbConnection dbConn, T obj,
+            string[] onlyFields,
+            Expression<Func<T, bool>> where = null,
+            CancellationToken token = default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd => dbCmd.UpdateOnlyAsync(obj, onlyFields, where, token));
         }
 
         /// <summary>

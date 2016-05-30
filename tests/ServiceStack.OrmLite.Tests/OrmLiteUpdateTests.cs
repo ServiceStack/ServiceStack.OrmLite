@@ -68,11 +68,11 @@ namespace ServiceStack.OrmLite.Tests
             {
                 var row = CreateModelWithFieldsOfDifferentTypes(db);
 
-                row.Id = (int) db.Insert(row, selectIdentity: true);
+                row.Id = (int)db.Insert(row, selectIdentity: true);
                 row.DateTime = DateTime.Now;
                 row.Name = "UpdatedName";
 
-                db.Update<ModelWithFieldsOfDifferentTypes>(new {row.Name, row.DateTime},
+                db.Update<ModelWithFieldsOfDifferentTypes>(new { row.Name, row.DateTime },
                     x => x.LongId >= row.LongId && x.LongId <= row.LongId);
 
                 var dbRow = db.SingleById<ModelWithFieldsOfDifferentTypes>(row.Id);
@@ -118,10 +118,11 @@ namespace ServiceStack.OrmLite.Tests
             {
                 db.DropAndCreateTable<Person>();
 
-                db.Insert(new Person { FirstName = "FirstName", Age = 100 });
+                db.Insert(new Person { FirstName = "FirstName", Age = 100, LastName = "Original" });
 
                 var existingPerson = db.Select<Person>().First();
 
+                existingPerson.LastName = "Updated";
                 existingPerson.FirstName = "JJ";
                 existingPerson.Age = 12;
 
@@ -132,6 +133,42 @@ namespace ServiceStack.OrmLite.Tests
 
                 Assert.That(person.FirstName, Is.EqualTo("JJ"));
                 Assert.That(person.Age, Is.EqualTo(12));
+                Assert.That(person.LastName, Is.EqualTo("Original"));
+            }
+        }
+
+        [Test]
+        public void Supports_different_ways_to_UpdateOnly()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Person>();
+                db.Insert(new Person { Id = 1, FirstName = "OriginalFirst", LastName = "OriginalLast", Age = 100 });
+
+                db.UpdateOnly(() => new Person { FirstName = "UpdatedFirst", Age = 27 });
+                var row = db.Select<Person>().First();
+                Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 27)));
+
+                db.DeleteAll<Person>();
+                db.Insert(new Person { Id = 1, FirstName = "OriginalFirst", LastName = "OriginalLast", Age = 100 });
+
+                db.UpdateOnly(new Person { FirstName = "UpdatedFirst", Age = 27 }, p => p.FirstName);
+                row = db.Select<Person>().First();
+                Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 100)));
+
+                db.DeleteAll<Person>();
+                db.Insert(new Person { Id = 1, FirstName = "OriginalFirst", LastName = "OriginalLast", Age = 100 });
+
+                db.UpdateOnly(new Person { FirstName = "UpdatedFirst", Age = 27 }, p => new { p.FirstName, p.Age });
+                row = db.Select<Person>().First();
+                Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 27)));
+
+                db.DeleteAll<Person>();
+                db.Insert(new Person { Id = 1, FirstName = "OriginalFirst", LastName = "OriginalLast", Age = 100 });
+
+                db.UpdateOnly(new Person { FirstName = "UpdatedFirst", Age = 27 }, new[] { "FirstName", "Age" });
+                row = db.Select<Person>().First();
+                Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 27)));
             }
         }
 
@@ -238,7 +275,7 @@ namespace ServiceStack.OrmLite.Tests
                 row = db.SingleById<PocoWithNullableBool>(1);
                 Assert.That(row.Bool, Is.True);
 
-                db.UpdateOnly(() => new PocoWithNullableBool { Bool = false }, 
+                db.UpdateOnly(() => new PocoWithNullableBool { Bool = false },
                     db.From<PocoWithNullableBool>().Where(x => x.Id == 1));
                 row = db.SingleById<PocoWithNullableBool>(1);
                 Assert.That(row.Bool, Is.False);
@@ -286,7 +323,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 db.UpdateAdd(() => new PocoWithNullableInt { Int = 1 }, x => x.Id == 1);
                 Assert.That(db.SingleById<PocoWithNullableInt>(1).Int, Is.EqualTo(1));
-                db.UpdateAdd(() => new PocoWithNullableInt { Int =-1 }, x => x.Id == 1);
+                db.UpdateAdd(() => new PocoWithNullableInt { Int = -1 }, x => x.Id == 1);
                 Assert.That(db.SingleById<PocoWithNullableInt>(1).Int, Is.EqualTo(0));
             }
         }
@@ -419,7 +456,7 @@ namespace ServiceStack.OrmLite.Tests
                 var row = db.SingleById<Person>(1);
                 Assert.That(row.FirstName, Is.EqualTo("JJ"));
 
-                db.UpdateOnly(() => new Person { FirstName = "HH" }, 
+                db.UpdateOnly(() => new Person { FirstName = "HH" },
                     db.From<Person>().Where(p => p.LastName == "Hendrix"));
                 row = db.SingleById<Person>(1);
                 Assert.That(row.FirstName, Is.EqualTo("HH"));

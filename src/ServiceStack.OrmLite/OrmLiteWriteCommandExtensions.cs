@@ -459,7 +459,8 @@ namespace ServiceStack.OrmLite
 
         internal static int Delete<T>(this IDbCommand dbCmd, T[] objs)
         {
-            if (objs.Length == 0) return 0;
+            if (objs.Length == 0)
+                return 0;
 
             return DeleteAll(dbCmd, objs);
         }

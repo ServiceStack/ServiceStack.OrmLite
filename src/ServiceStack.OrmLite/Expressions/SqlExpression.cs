@@ -810,7 +810,7 @@ namespace ServiceStack.OrmLite
         /// Fields to be updated.
         /// </summary>
         /// <param name='updatefields'>
-        /// IList<string> containing Names of properties to be updated
+        /// List&lt;string&gt; containing Names of properties to be updated
         /// </param>
         public virtual SqlExpression<T> Update(List<string> updateFields)
         {
@@ -821,17 +821,26 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Fields to be updated.
         /// </summary>
-        /// <param name='fields'>
-        /// x=> x.SomeProperty1 or x=> new{ x.SomeProperty1, x.SomeProperty2}
+        /// <param name='updatefields'>
+        /// IEnumerable&lt;string&gt; containing Names of properties to be updated
         /// </param>
-        /// <typeparam name='TKey'>
-        /// objectWithProperties
-        /// </typeparam>
-        public virtual SqlExpression<T> Update<TKey>(Expression<Func<T, TKey>> fields)
+        public virtual SqlExpression<T> Update(IEnumerable<string> updateFields)
+        {
+            this.UpdateFields = new List<string>(updateFields);
+            return this;
+        }
+
+        /// <summary>
+        /// Fields to be updated.
+        /// </summary>
+        /// <param name='fields'>
+        /// x=> x.SomeProperty1 or x=> new { x.SomeProperty1, x.SomeProperty2 }
+        /// </param>
+        public virtual SqlExpression<T> Update(Expression<Func<T, object>> fields)
         {
             sep = string.Empty;
             useFieldName = false;
-            UpdateFields = Visit(fields).ToString().Split(',').ToList();
+            this.UpdateFields = fields.GetFieldNames().ToList();
             return this;
         }
 

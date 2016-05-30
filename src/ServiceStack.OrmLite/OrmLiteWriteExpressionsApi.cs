@@ -60,9 +60,25 @@ namespace ServiceStack.OrmLite
         ///
         ///   db.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName);
         ///   UPDATE "Person" SET "FirstName" = 'JJ'
+        ///
+        ///   db.UpdateOnly(new Person { FirstName = "JJ", Age = 27 }, p => new { p.FirstName, p.Age );
+        ///   UPDATE "Person" SET "FirstName" = 'JJ', "Age" = 27
         /// </summary>
         public static int UpdateOnly<T>(this IDbConnection dbConn, T obj,
             Expression<Func<T, object>> onlyFields = null,
+            Expression<Func<T, bool>> where = null)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.UpdateOnly(obj, onlyFields, where));
+        }
+
+        /// <summary>
+        /// Update record, updating only fields specified in updateOnly that matches the where condition (if any), E.g:
+        /// 
+        ///   db.UpdateOnly(new Person { FirstName = "JJ" }, new[]{ "FirstName" }, p => p.LastName == "Hendrix");
+        ///   UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("LastName" = 'Hendrix')
+        /// </summary>
+        public static int UpdateOnly<T>(this IDbConnection dbConn, T obj,
+            string[] onlyFields,
             Expression<Func<T, bool>> where = null)
         {
             return dbConn.Exec(dbCmd => dbCmd.UpdateOnly(obj, onlyFields, where));

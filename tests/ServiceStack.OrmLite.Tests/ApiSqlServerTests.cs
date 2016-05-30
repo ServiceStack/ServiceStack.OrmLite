@@ -259,20 +259,26 @@ namespace ServiceStack.OrmLite.Tests
             db.UpdateAll(new[] { new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27 } });
             Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\"=@FirstName, \"LastName\"=@LastName, \"Age\"=@Age WHERE \"Id\"=@Id"));
 
-            db.Update(new Person { Id = 1, FirstName = "JJ", Age = 27 }, x => x.LastName == "Hendrix");
+            db.Update(new Person { Id = 1, FirstName = "JJ", Age = 27 }, where: x => x.LastName == "Hendrix");
             Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"Id\"=@1, \"FirstName\"=@2, \"LastName\"=@3, \"Age\"=@4 WHERE (\"LastName\" = @0)"));
 
-            db.Update<Person>(new { FirstName = "JJ" }, x => x.LastName == "Hendrix");
+            db.Update<Person>(new { FirstName = "JJ" }, where: x => x.LastName == "Hendrix");
             Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\"=@1 WHERE (\"LastName\" = @0)"));
 
             db.UpdateNonDefaults(new Person { FirstName = "JJ" }, x => x.LastName == "Hendrix");
             Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\"=@1 WHERE (\"LastName\" = @0)"));
 
+            db.UpdateOnly(() => new Person { FirstName = "JJ" });
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\"=@0"));
+
             db.UpdateOnly(new Person { FirstName = "JJ" }, x => x.FirstName);
             Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\"=@0"));
 
-            db.UpdateOnly(() => new Person { FirstName = "JJ" });
-            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\"=@0"));
+            db.UpdateOnly(new Person { FirstName = "JJ", Age = 27 }, p => new { p.FirstName, p.Age });
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\"=@0, \"Age\"=@1"));
+
+            db.UpdateOnly(new Person { FirstName = "JJ", Age = 27 }, new[] { "FirstName", "Age" });
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\"=@0, \"Age\"=@1"));
 
             db.UpdateOnly(new Person { FirstName = "JJ" }, x => x.FirstName, x => x.LastName == "Hendrix");
             Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\"=@1 WHERE (\"LastName\" = @0)"));
@@ -282,9 +288,6 @@ namespace ServiceStack.OrmLite.Tests
 
             db.UpdateOnly(() => new Person { FirstName = "JJ" }, db.From<Person>().Where(p => p.LastName == "Hendrix"));
             Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\"=@1 WHERE (\"LastName\" = @0)"));
-
-            db.UpdateOnly(new Person { FirstName = "JJ", LastName = "Hendo" }, db.From<Person>().Update(x => x.FirstName));
-            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\"=@0"));
 
             db.UpdateOnly(new Person { FirstName = "JJ" }, db.From<Person>().Update(x => x.FirstName).Where(x => x.FirstName == "Jimi"));
             Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\"=@1 WHERE (\"FirstName\" = @0)"));

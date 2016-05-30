@@ -15,9 +15,23 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecNonQueryAsync(token);
         }
 
-        internal static Task<int> UpdateOnlyAsync<T, TKey>(this IDbCommand dbCmd, T obj,
-            Expression<Func<T, TKey>> onlyFields,
-            Expression<Func<T, bool>> where, 
+        internal static Task<int> UpdateOnlyAsync<T>(this IDbCommand dbCmd, T obj,
+            Expression<Func<T, object>> onlyFields,
+            Expression<Func<T, bool>> where,
+            CancellationToken token)
+        {
+            if (onlyFields == null)
+                throw new ArgumentNullException("onlyFields");
+
+            var q = dbCmd.GetDialectProvider().SqlExpression<T>();
+            q.Update(onlyFields);
+            q.Where(where);
+            return dbCmd.UpdateOnlyAsync(obj, q, token);
+        }
+
+        internal static Task<int> UpdateOnlyAsync<T>(this IDbCommand dbCmd, T obj,
+            string[] onlyFields,
+            Expression<Func<T, bool>> where,
             CancellationToken token)
         {
             if (onlyFields == null)

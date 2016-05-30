@@ -45,6 +45,19 @@ namespace ServiceStack.OrmLite
             return dbCmd.UpdateOnly(obj, q);
         }
 
+        internal static int UpdateOnly<T>(this IDbCommand dbCmd, T obj,
+            string[] onlyFields = null,
+            Expression<Func<T, bool>> where = null)
+        {
+            if (onlyFields == null)
+                throw new ArgumentNullException("onlyFields");
+
+            var q = dbCmd.GetDialectProvider().SqlExpression<T>();
+            q.Update(onlyFields);
+            q.Where(where);
+            return dbCmd.UpdateOnly(obj, q);
+        }
+
         internal static int UpdateOnly<T>(this IDbCommand dbCmd,
             Expression<Func<T>> updateFields,
             SqlExpression<T> q)

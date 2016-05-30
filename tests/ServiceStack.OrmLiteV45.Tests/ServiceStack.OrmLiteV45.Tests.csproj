@@ -83,6 +83,7 @@
     <Compile Include="LoadReferencesTests.cs" />
     <Compile Include="OrmLiteContextTests.cs" />
     <Compile Include="OrmLiteTestBase.cs" />
+    <Compile Include="OrmLiteUpdateTestsAsync.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SelectAsyncTests.cs" />
     <Compile Include="Shared\Person.cs">
