@@ -109,9 +109,9 @@ namespace ServiceStack.OrmLite
         /// Returns a scalar result from using an SqlExpression lambda. E.g:
         /// <para>db.Scalar&lt;Person, int&gt;(x =&gt; Sql.Max(x.Age))</para>
         /// </summary>
-        public static Task<TKey> ScalarAsync<T, TKey>(this IDbConnection dbConn, Expression<Func<T, TKey>> field, CancellationToken token = default(CancellationToken))
+        public static Task<TKey> ScalarAsync<T, TKey>(this IDbConnection dbConn, Expression<Func<T, object>> field, CancellationToken token = default(CancellationToken))
         {
-            return dbConn.Exec(dbCmd => dbCmd.ScalarAsync(field, token));
+            return dbConn.Exec(dbCmd => dbCmd.ScalarAsync<T, TKey>(field, token));
         }
 
         /// <summary>
@@ -119,9 +119,9 @@ namespace ServiceStack.OrmLite
         /// <para>db.Scalar&lt;Person, int&gt;(x =&gt; Sql.Max(x.Age), , x =&gt; x.Age &lt; 50)</para>
         /// </summary>        
         public static Task<TKey> ScalarAsync<T, TKey>(this IDbConnection dbConn,
-            Expression<Func<T, TKey>> field, Expression<Func<T, bool>> predicate, CancellationToken token = default(CancellationToken))
+            Expression<Func<T, object>> field, Expression<Func<T, bool>> predicate, CancellationToken token = default(CancellationToken))
         {
-            return dbConn.Exec(dbCmd => dbCmd.ScalarAsync(field, predicate, token));
+            return dbConn.Exec(dbCmd => dbCmd.ScalarAsync<T, TKey>(field, predicate, token));
         }
 
         /// <summary>

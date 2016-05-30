@@ -102,7 +102,7 @@ namespace ServiceStack.OrmLite
             return dbCmd.Scalar<TKey>(sql, expression.Params);
         }
 
-        public static TKey Scalar<T, TKey>(this IDbCommand dbCmd, Expression<Func<T, TKey>> field)
+        public static TKey Scalar<T, TKey>(this IDbCommand dbCmd, Expression<Func<T, object>> field)
         {
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Select(field);
@@ -111,7 +111,7 @@ namespace ServiceStack.OrmLite
         }
 
         internal static TKey Scalar<T, TKey>(this IDbCommand dbCmd,
-            Expression<Func<T, TKey>> field, Expression<Func<T, bool>> predicate)
+            Expression<Func<T, object>> field, Expression<Func<T, bool>> predicate)
         {
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Select(field).Where(predicate);

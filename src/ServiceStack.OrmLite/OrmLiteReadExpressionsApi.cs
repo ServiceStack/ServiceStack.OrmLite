@@ -188,9 +188,9 @@ namespace ServiceStack.OrmLite
         /// Returns a scalar result from using an SqlExpression lambda. E.g:
         /// <para>db.Scalar&lt;Person, int&gt;(x =&gt; Sql.Max(x.Age))</para>
         /// </summary>
-        public static TKey Scalar<T, TKey>(this IDbConnection dbConn, Expression<Func<T, TKey>> field)
+        public static TKey Scalar<T, TKey>(this IDbConnection dbConn, Expression<Func<T, object>> field)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Scalar(field));
+            return dbConn.Exec(dbCmd => dbCmd.Scalar<T, TKey>(field));
         }
 
         /// <summary>
@@ -198,9 +198,9 @@ namespace ServiceStack.OrmLite
         /// <para>db.Scalar&lt;Person, int&gt;(x =&gt; Sql.Max(x.Age), , x =&gt; x.Age &lt; 50)</para>
         /// </summary>        
         public static TKey Scalar<T, TKey>(this IDbConnection dbConn,
-            Expression<Func<T, TKey>> field, Expression<Func<T, bool>> predicate)
+            Expression<Func<T, object>> field, Expression<Func<T, bool>> predicate)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Scalar(field, predicate));
+            return dbConn.Exec(dbCmd => dbCmd.Scalar<T, TKey>(field, predicate));
         }
 
         /// <summary>

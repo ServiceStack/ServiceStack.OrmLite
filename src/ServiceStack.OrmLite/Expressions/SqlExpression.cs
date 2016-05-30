@@ -190,10 +190,8 @@ namespace ServiceStack.OrmLite
         /// <param name='fields'>
         /// x=> x.SomeProperty1 or x=> new{ x.SomeProperty1, x.SomeProperty2}
         /// </param>
-        /// <typeparam name='TKey'>
-        /// objectWithProperties
         /// </typeparam>
-        public virtual SqlExpression<T> Select<TKey>(Expression<Func<T, TKey>> fields)
+        public virtual SqlExpression<T> Select(Expression<Func<T, object>> fields)
         {
             sep = string.Empty;
             useFieldName = true;

@@ -84,7 +84,7 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExprConvertToAsync<T>(sql, expression.Params, token);
         }
 
-        public static Task<TKey> ScalarAsync<T, TKey>(this IDbCommand dbCmd, Expression<Func<T, TKey>> field, CancellationToken token)
+        public static Task<TKey> ScalarAsync<T, TKey>(this IDbCommand dbCmd, Expression<Func<T, object>> field, CancellationToken token)
         {
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Select(field);
@@ -93,7 +93,7 @@ namespace ServiceStack.OrmLite
         }
 
         internal static Task<TKey> ScalarAsync<T, TKey>(this IDbCommand dbCmd,
-            Expression<Func<T, TKey>> field, Expression<Func<T, bool>> predicate, CancellationToken token)
+            Expression<Func<T, object>> field, Expression<Func<T, bool>> predicate, CancellationToken token)
         {
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Select(field).Where(predicate);
