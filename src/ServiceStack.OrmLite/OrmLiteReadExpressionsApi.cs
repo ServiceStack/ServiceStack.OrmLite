@@ -256,9 +256,9 @@ namespace ServiceStack.OrmLite
         /// Returns results with references from using a LINQ Expression. E.g:
         /// <para>db.LoadSelect&lt;Person&gt;(x =&gt; x.Age &gt; 40, include: x => new { x.PrimaryAddress })</para>
         /// </summary>
-        public static List<T> LoadSelect<T>(this IDbConnection dbConn, Expression<Func<T, bool>> predicate, Func<T, object> include)
+        public static List<T> LoadSelect<T>(this IDbConnection dbConn, Expression<Func<T, bool>> predicate, Expression<Func<T, object>> include)
         {
-            return dbConn.Exec(dbCmd => dbCmd.LoadSelect(predicate, include(typeof(T).CreateInstance<T>()).GetType().AllAnonFields()));
+            return dbConn.Exec(dbCmd => dbCmd.LoadSelect(predicate, include.GetFieldNames()));
         }
 
         /// <summary>
@@ -274,9 +274,9 @@ namespace ServiceStack.OrmLite
         /// Returns results with references from using an SqlExpression lambda. E.g:
         /// <para>db.LoadSelect(db.From&lt;Person&gt;().Where(x =&gt; x.Age &gt; 40), include: x => new { x.PrimaryAddress })</para>
         /// </summary>
-        public static List<T> LoadSelect<T>(this IDbConnection dbConn, SqlExpression<T> expression, Func<T, object> include)
+        public static List<T> LoadSelect<T>(this IDbConnection dbConn, SqlExpression<T> expression, Expression<Func<T, object>> include)
         {
-            return dbConn.Exec(dbCmd => dbCmd.LoadSelect(expression, include(typeof(T).CreateInstance<T>()).GetType().AllAnonFields()));
+            return dbConn.Exec(dbCmd => dbCmd.LoadSelect(expression, include.GetFieldNames()));
         }
 
         /// <summary>
@@ -290,9 +290,9 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Project results with references from a number of joined tables into a different model
         /// </summary>
-        public static List<Into> LoadSelect<Into, From>(this IDbConnection dbConn, SqlExpression<From> expression, Func<Into, object> include)
+        public static List<Into> LoadSelect<Into, From>(this IDbConnection dbConn, SqlExpression<From> expression, Expression<Func<Into, object>> include)
         {
-            return dbConn.Exec(dbCmd => dbCmd.LoadSelect<Into, From>(expression, include(typeof(Into).CreateInstance<Into>()).GetType().AllAnonFields()));
+            return dbConn.Exec(dbCmd => dbCmd.LoadSelect<Into, From>(expression, include.GetFieldNames()));
         }
     }
 }

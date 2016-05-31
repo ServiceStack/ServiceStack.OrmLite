@@ -524,11 +524,11 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns the first result with all its references loaded, using a primary key id. E.g:
-        /// <para>db.LoadSingleById&lt;Person&gt;(1, include = x => new{ x.Address })</para>
+        /// <para>db.LoadSingleById&lt;Person&gt;(1, include = x => new { x.Address })</para>
         /// </summary>
-        public static Task<T> LoadSingleByIdAsync<T>(this IDbConnection dbConn, object idValue, Func<T, object> include, CancellationToken token = default(CancellationToken))
+        public static Task<T> LoadSingleByIdAsync<T>(this IDbConnection dbConn, object idValue, Expression<Func<T, object>> include, CancellationToken token = default(CancellationToken))
         {
-            return dbConn.Exec(dbCmd => dbCmd.LoadSingleByIdAsync<T>(idValue, include(typeof(T).CreateInstance<T>()).GetType().AllAnonFields(), token));
+            return dbConn.Exec(dbCmd => dbCmd.LoadSingleByIdAsync<T>(idValue, include.GetFieldNames(), token));
         }
 
         /// <summary>
