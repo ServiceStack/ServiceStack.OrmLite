@@ -92,7 +92,7 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"id\", \"first_name\", \"last_name\", \"age\" FROM \"person\" WHERE \"age\" = :Age"));
 
             await db.SelectByIdsAsync<Person>(new[] { 1, 2, 3 });
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"id\", \"first_name\", \"last_name\", \"age\" FROM \"person\" WHERE \"id\" IN (1,2,3)"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"id\", \"first_name\", \"last_name\", \"age\" FROM \"person\" WHERE \"id\" IN (:0,:1,:2)"));
 
             await db.SelectNonDefaultsAsync(new Person { Id = 1 });
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"id\", \"first_name\", \"last_name\", \"age\" FROM \"person\" WHERE \"id\" = :Id"));
@@ -300,7 +300,7 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM \"person\" WHERE \"id\" = :0"));
 
             await db.DeleteByIdsAsync<Person>(new[] { 1, 2, 3 });
-            Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM \"person\" WHERE \"id\" IN (1,2,3)"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM \"person\" WHERE \"id\" IN (:0,:1,:2)"));
 
             await db.DeleteAsync<Person>("age = @age", new { age = 27 });
             Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM \"person\" WHERE age = @age"));

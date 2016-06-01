@@ -231,8 +231,8 @@ namespace ServiceStack.OrmLite
 
         internal static Task<int> DeleteByIdsAsync<T>(this IDbCommand dbCmd, IEnumerable idValues, CancellationToken token)
         {
-            var sqlIn = idValues.GetIdsInSql();
-            if (sqlIn == null) 
+            var sqlIn = dbCmd.SetIdsInSqlParams(idValues);
+            if (string.IsNullOrEmpty(sqlIn))
                 return TaskResult.Zero;
 
             var sql = OrmLiteWriteCommandExtensions.GetDeleteByIdsSql<T>(sqlIn, dbCmd.GetDialectProvider());

@@ -65,10 +65,10 @@ namespace ServiceStack.OrmLite
 
         internal static Task<List<T>> SelectByIdsAsync<T>(this IDbCommand dbCmd, IEnumerable idValues, CancellationToken token)
         {
-            var sql = idValues.GetIdsInSql();
-            return sql == null
+            var sqlIn = dbCmd.SetIdsInSqlParams(idValues);
+            return string.IsNullOrEmpty(sqlIn)
                 ? new List<T>().InTask()
-                : SelectAsync<T>(dbCmd, dbCmd.GetDialectProvider().GetQuotedColumnName(ModelDefinition<T>.PrimaryKeyName) + " IN (" + sql + ")", (object)null, token);
+                : SelectAsync<T>(dbCmd, dbCmd.GetDialectProvider().GetQuotedColumnName(ModelDefinition<T>.PrimaryKeyName) + " IN (" + sqlIn + ")", (object)null, token);
         }
 
         internal static Task<T> SingleByIdAsync<T>(this IDbCommand dbCmd, object value, CancellationToken token)

@@ -577,8 +577,9 @@ namespace ServiceStack.OrmLite
 
         internal static int DeleteByIds<T>(this IDbCommand dbCmd, IEnumerable idValues)
         {
-            var sqlIn = idValues.GetIdsInSql();
-            if (sqlIn == null) return 0;
+            var sqlIn = dbCmd.SetIdsInSqlParams(idValues);
+            if (string.IsNullOrEmpty(sqlIn))
+                return 0;
 
             var sql = GetDeleteByIdsSql<T>(sqlIn, dbCmd.GetDialectProvider());
 

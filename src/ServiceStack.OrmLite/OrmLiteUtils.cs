@@ -289,17 +289,19 @@ namespace ServiceStack.OrmLite
             return dialect.GetColumnNames(modelDef);
         }
 
-        internal static string GetIdsInSql(this IEnumerable idValues)
+        internal static string SetIdsInSqlParams(this IDbCommand dbCmd, IEnumerable idValues)
         {
-            var sql = StringBuilderCache.Allocate();
-            foreach (var idValue in idValues)
+            var inArgs = Sql.Flatten(idValues);
+            var sbParams = StringBuilderCache.Allocate();
+            foreach (var item in inArgs)
             {
-                if (sql.Length > 0)
-                    sql.Append(",");
-                sql.AppendFormat("{0}".SqlFmt(idValue));
+                if (sbParams.Length > 0)
+                    sbParams.Append(",");
+
+                sbParams.Append(dbCmd.AddParam(dbCmd.Parameters.Count.ToString(), item).ParameterName);
             }
-            var str = StringBuilderCache.ReturnAndFree(sql);
-            return str.Length == 0 ? null : str;
+            var sqlIn = StringBuilderCache.ReturnAndFree(sbParams);
+            return sqlIn;
         }
 
         public static string SqlFmt(this string sqlText, params object[] sqlParams)

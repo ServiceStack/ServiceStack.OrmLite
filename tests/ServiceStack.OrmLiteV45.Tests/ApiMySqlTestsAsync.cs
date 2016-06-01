@@ -93,7 +93,7 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT `Id`, `FirstName`, `LastName`, `Age` FROM `Person` WHERE `Age` = @Age"));
 
             await db.SelectByIdsAsync<Person>(new[] { 1, 2, 3 });
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT `Id`, `FirstName`, `LastName`, `Age` FROM `Person` WHERE `Id` IN (1,2,3)"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT `Id`, `FirstName`, `LastName`, `Age` FROM `Person` WHERE `Id` IN (@0,@1,@2)"));
 
             await db.SelectNonDefaultsAsync(new Person { Id = 1 });
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT `Id`, `FirstName`, `LastName`, `Age` FROM `Person` WHERE `Id` = @Id"));
@@ -301,7 +301,7 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM `Person` WHERE `Id` = @0"));
 
             await db.DeleteByIdsAsync<Person>(new[] { 1, 2, 3 });
-            Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM `Person` WHERE `Id` IN (1,2,3)"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM `Person` WHERE `Id` IN (@0,@1,@2)"));
 
             await db.DeleteAsync<Person>("Age = @age", new { age = 27 });
             Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM `Person` WHERE Age = @age"));

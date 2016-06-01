@@ -300,10 +300,10 @@ namespace ServiceStack.OrmLite
 
         internal static List<T> SelectByIds<T>(this IDbCommand dbCmd, IEnumerable idValues)
         {
-            var sql = idValues.GetIdsInSql();
-            return sql == null
+            var sqlIn = dbCmd.SetIdsInSqlParams(idValues);
+            return string.IsNullOrEmpty(sqlIn)
                 ? new List<T>()
-                : Select<T>(dbCmd, dbCmd.GetDialectProvider().GetQuotedColumnName(ModelDefinition<T>.PrimaryKeyName) + " IN (" + sql + ")");
+                : Select<T>(dbCmd, dbCmd.GetDialectProvider().GetQuotedColumnName(ModelDefinition<T>.PrimaryKeyName) + " IN (" + sqlIn + ")");
         }
 
         internal static T SingleById<T>(this IDbCommand dbCmd, object value)
