@@ -184,6 +184,15 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
+        private SqlExpression<T> InternalSelect(Expression fields, bool distinct=false)
+        {
+            sep = string.Empty;
+            useFieldName = true;
+            CustomSelect = true;
+            BuildSelectExpression(Visit(fields).ToString(), distinct: distinct);
+            return this;
+        }
+
         /// <summary>
         /// Fields to be selected.
         /// </summary>
@@ -193,74 +202,77 @@ namespace ServiceStack.OrmLite
         /// </typeparam>
         public virtual SqlExpression<T> Select(Expression<Func<T, object>> fields)
         {
-            sep = string.Empty;
-            useFieldName = true;
-            CustomSelect = true;
-            BuildSelectExpression(Visit(fields).ToString(), false);
-            return this;
+            return InternalSelect(fields);
         }
 
         public virtual SqlExpression<T> Select<Table1>(Expression<Func<Table1, object>> fields)
         {
-            sep = string.Empty;
-            useFieldName = true;
-            CustomSelect = true;
-            BuildSelectExpression(Visit(fields).ToString(), false);
-            return this;
+            return InternalSelect(fields);
         }
 
         public virtual SqlExpression<T> Select<Table1, Table2>(Expression<Func<Table1, Table2, object>> fields)
         {
-            sep = string.Empty;
-            useFieldName = true;
-            CustomSelect = true;
-            BuildSelectExpression(Visit(fields).ToString(), false);
-            return this;
+            return InternalSelect(fields);
         }
 
         public virtual SqlExpression<T> Select<Table1, Table2, Table3>(Expression<Func<Table1, Table2, Table3, object>> fields)
         {
-            sep = string.Empty;
-            useFieldName = true;
-            CustomSelect = true;
-            BuildSelectExpression(Visit(fields).ToString(), false);
-            return this;
+            return InternalSelect(fields);
         }
 
         public virtual SqlExpression<T> Select<Table1, Table2, Table3, Table4>(Expression<Func<Table1, Table2, Table3, Table4, object>> fields)
         {
-            sep = string.Empty;
-            useFieldName = true;
-            CustomSelect = true;
-            BuildSelectExpression(Visit(fields).ToString(), false);
-            return this;
+            return InternalSelect(fields);
         }
 
-        public virtual SqlExpression<T> SelectDistinct<TKey>(Expression<Func<T, TKey>> fields)
+        public virtual SqlExpression<T> Select<Table1, Table2, Table3, Table4, Table5>(Expression<Func<Table1, Table2, Table3, Table4, Table5, object>> fields)
         {
-            sep = string.Empty;
-            useFieldName = true;
-            CustomSelect = true;
-            BuildSelectExpression(Visit(fields).ToString(), true);
-            return this;
+            return InternalSelect(fields);
+        }
+
+        public virtual SqlExpression<T> Select<Table1, Table2, Table3, Table4, Table5, Table6>(Expression<Func<Table1, Table2, Table3, Table4, Table5, Table6, object>> fields)
+        {
+            return InternalSelect(fields);
+        }
+
+        public virtual SqlExpression<T> Select<Table1, Table2, Table3, Table4, Table5, Table6, Table7>(Expression<Func<Table1, Table2, Table3, Table4, Table5, Table6, Table7, object>> fields)
+        {
+            return InternalSelect(fields);
+        }
+
+        public virtual SqlExpression<T> SelectDistinct(Expression<Func<T, object>> fields)
+        {
+            return InternalSelect(fields, distinct:true);
         }
 
         public virtual SqlExpression<T> SelectDistinct<Table1, Table2>(Expression<Func<Table1, Table2, object>> fields)
         {
-            sep = string.Empty;
-            useFieldName = true;
-            CustomSelect = true;
-            BuildSelectExpression(Visit(fields).ToString(), true);
-            return this;
+            return InternalSelect(fields, distinct: true);
         }
 
         public virtual SqlExpression<T> SelectDistinct<Table1, Table2, Table3>(Expression<Func<Table1, Table2, Table3, object>> fields)
         {
-            sep = string.Empty;
-            useFieldName = true;
-            CustomSelect = true;
-            BuildSelectExpression(Visit(fields).ToString(), true);
-            return this;
+            return InternalSelect(fields, distinct: true);
+        }
+
+        public virtual SqlExpression<T> SelectDistinct<Table1, Table2, Table3, Table4>(Expression<Func<Table1, Table2, Table3, Table4, object>> fields)
+        {
+            return InternalSelect(fields, distinct: true);
+        }
+
+        public virtual SqlExpression<T> SelectDistinct<Table1, Table2, Table3, Table4, Table5>(Expression<Func<Table1, Table2, Table3, Table4, Table5, object>> fields)
+        {
+            return InternalSelect(fields, distinct: true);
+        }
+
+        public virtual SqlExpression<T> SelectDistinct<Table1, Table2, Table3, Table4, Table5, Table6>(Expression<Func<Table1, Table2, Table3, Table4, Table5, Table6, object>> fields)
+        {
+            return InternalSelect(fields, distinct: true);
+        }
+
+        public virtual SqlExpression<T> SelectDistinct<Table1, Table2, Table3, Table4, Table5, Table6, Table7>(Expression<Func<Table1, Table2, Table3, Table4, Table5, Table6, Table7, object>> fields)
+        {
+            return InternalSelect(fields, distinct: true);
         }
 
         public virtual SqlExpression<T> SelectDistinct()
