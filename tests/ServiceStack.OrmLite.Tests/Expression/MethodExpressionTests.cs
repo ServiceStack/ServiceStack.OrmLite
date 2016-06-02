@@ -12,11 +12,22 @@ namespace ServiceStack.OrmLite.Tests.Expression
         [Test]
         public void Can_select_ints_using_array_contains()
         {
-            var ints = new[] { 1, 2, 3 };
+            var ints = new[] { 1, 20, 30 };
+            var nullableInts = new int?[] { 5, 30, null, 20 };
 
             using (var db = OpenDbConnection())
             {
-                db.Select<TestType>(x => ints.Contains(x.Id));
+                var int10 = new TestType { IntColumn = 10 };
+                var int20 = new TestType { IntColumn = 20 };
+                var int30 = new TestType { IntColumn = 30 };
+
+                EstablishContext(0, int10, int20, int30);
+
+                var results = db.Select<TestType>(x => ints.Contains(x.IntColumn));
+                var resultsNullable = db.Select<TestType>(x => nullableInts.Contains(x.IntColumn));
+
+                CollectionAssert.AreEquivalent(new[] { int20, int30 }, results);
+                CollectionAssert.AreEquivalent(new[] { int20, int30 }, resultsNullable);
 
                 Assert.That(db.GetLastSql(), Is.StringContaining("(@0,@1,@2)").
                                              Or.StringContaining("(:0,:1,:2)"));
@@ -26,11 +37,22 @@ namespace ServiceStack.OrmLite.Tests.Expression
         [Test]
         public void Can_select_ints_using_list_contains()
         {
-            var ints = new[] { 1, 2, 3 }.ToList();
+            var ints = new[] { 1, 20, 30 }.ToList();
+            var nullableInts = new int?[] { 5, 30, null, 20 }.ToList();
 
             using (var db = OpenDbConnection())
             {
-                db.Select<TestType>(x => ints.Contains(x.Id));
+                var int10 = new TestType { IntColumn = 10 };
+                var int20 = new TestType { IntColumn = 20 };
+                var int30 = new TestType { IntColumn = 30 };
+
+                EstablishContext(0, int10, int20, int30);
+
+                var results = db.Select<TestType>(x => ints.Contains(x.IntColumn));
+                var resultsNullable = db.Select<TestType>(x => nullableInts.Contains(x.IntColumn));
+
+                CollectionAssert.AreEquivalent(new[] { int20, int30 }, results);
+                CollectionAssert.AreEquivalent(new[] { int20, int30 }, resultsNullable);
 
                 Assert.That(db.GetLastSql(), Is.StringContaining("(@0,@1,@2)").
                                              Or.StringContaining("(:0,:1,:2)"));
@@ -44,8 +66,11 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
             using (var db = OpenDbConnection())
             {
-                db.Select<TestType>(x => ints.Contains(x.Id));
-                
+                EstablishContext(5);
+
+                var results = db.Select<TestType>(x => ints.Contains(x.Id));
+
+                CollectionAssert.IsEmpty(results);
                 Assert.That(db.GetLastSql(), Is.StringContaining("(NULL)"));
             }
         }
