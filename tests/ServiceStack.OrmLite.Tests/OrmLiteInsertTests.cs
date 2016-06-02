@@ -271,6 +271,46 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(row.LastName, Is.Null);
             }
         }
+
+        [Test]
+        public void Can_insert_record_with_Computed_column()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Market>();
+                var market = new Market
+                {
+                    Available = 10,
+                    AvailableTotal = 0,
+                    AvailableSalesEvent = 2,
+                    MinCustomerBuy = 10
+                };
+
+                var fieldDef = typeof(Market).GetModelMetadata()
+                    .GetFieldDefinition<Market>(x => x.AvailableTotal);
+
+                fieldDef.IsComputed = false;
+
+                db.Insert(market);
+
+                fieldDef.IsComputed = true;
+            }
+        }
+    }
+
+    public class Market
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+        [Required]
+        public int Available { get; set; }
+        [Required]
+        public int AvailableSalesEvent { get; set; }
+        [Compute]
+        [Required]
+        public int AvailableTotal { get; set; }
+        [Required]
+        public int? MinCustomerBuy { get; set; }
     }
 
     public class UserAuth
