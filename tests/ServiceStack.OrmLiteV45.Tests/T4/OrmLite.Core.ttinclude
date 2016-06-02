@@ -1187,7 +1187,7 @@ WHERE   o.type = 'P'
                             'sysdiagrams' )";
 
 
-    const string SP_PARAMETERS_SQL=@"SELECT * from information_schema.PARAMETERS
+    const string SP_PARAMETERS_SQL=@"SELECT * from INFORMATION_SCHEMA.PARAMETERS
                                 where SPECIFIC_NAME = @spname
                                 order by ORDINAL_POSITION";
 
@@ -1491,12 +1491,12 @@ class PostGreSqlSchemaReader : SchemaReader
 
 	string GetPK(string table){
 
-		string sql=@"SELECT kcu.column_name
-			FROM information_schema.key_column_usage kcu
-			JOIN information_schema.table_constraints tc
-			ON kcu.constraint_name=tc.constraint_name
-			WHERE lower(tc.constraint_type)='primary key'
-			AND kcu.table_name=@tablename";
+		string sql=@"SELECT kcu.COLUMN_NAME
+			FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE kcu
+			JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc
+			ON kcu.CONSTRAINT_NAME=tc.CONSTRAINT_NAME
+			WHERE lower(tc.CONSTRAINT_TYPE)='primary key'
+			AND kcu.TABLE_NAME=@tablename";
 
 		using (var cmd=_factory.CreateCommand())
 		{
@@ -1578,15 +1578,15 @@ class PostGreSqlSchemaReader : SchemaReader
 
 
 	const string TABLE_SQL=@"
-			SELECT table_name, table_schema, table_type
-			FROM information_schema.tables
-			WHERE (table_type='BASE TABLE' OR table_type='VIEW')
-				AND table_schema NOT IN ('pg_catalog', 'information_schema');
+			SELECT TABLE_NAME, TABLE_SCHEMA, TABLE_TYPE
+			FROM INFORMATION_SCHEMA.TABLES
+			WHERE (TABLE_TYPE='BASE TABLE' OR TABLE_TYPE='VIEW')
+				AND TABLE_SCHEMA NOT IN ('pg_catalog', 'INFORMATION_SCHEMA');
 			";
 
 	const string COLUMN_SQL=@"
 			SELECT column_name, is_nullable, udt_name, column_default
-			FROM information_schema.columns
+			FROM INFORMATION_SCHEMA.COLUMNS
 			WHERE table_name=@tableName;
 			";
 
@@ -1717,8 +1717,8 @@ class MySqlSchemaReader : SchemaReader
 
 	const string TABLE_SQL=@"
 			SELECT *
-			FROM information_schema.tables
-			WHERE (table_type='BASE TABLE' OR table_type='VIEW')
+			FROM INFORMATION_SCHEMA.TABLES
+			WHERE (TABLE_TYPE='BASE TABLE' OR TABLE_TYPE='VIEW')
 			";
 
 }

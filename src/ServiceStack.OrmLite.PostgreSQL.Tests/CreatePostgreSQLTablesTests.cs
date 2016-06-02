@@ -110,9 +110,9 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
 BEGIN
 
     IF NOT EXISTS(
-        SELECT schema_name
-          FROM information_schema.schemata
-          WHERE schema_name = '{0}'
+        SELECT 1
+          FROM INFORMATION_SCHEMA.SCHEMATA
+          WHERE SCHEMA_NAME = '{0}'
       )
     THEN
       EXECUTE 'CREATE SCHEMA ""{0}""';

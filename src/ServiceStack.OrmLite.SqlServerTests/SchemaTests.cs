@@ -86,7 +86,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
             then '(' + convert(varchar(10), character_maximum_length) + ')'
         else ''
     end as COLUMN_DEFINITION
-FROM information_schema.columns";
+FROM INFORMATION_SCHEMA.COLUMNS";
 
             using (var db = OpenDbConnection())
             {

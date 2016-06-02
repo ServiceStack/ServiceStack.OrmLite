@@ -11,7 +11,7 @@ namespace ServiceStack.OrmLite.SqlServer.Converters
     {
         public override string ColumnDefinition
         {
-            get { return "GEOMETRY"; }
+            get { return "geometry"; }
         }
 
         public override object FromDbValue(Type fieldType, object value)

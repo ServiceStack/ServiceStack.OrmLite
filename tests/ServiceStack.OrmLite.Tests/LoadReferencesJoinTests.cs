@@ -792,7 +792,7 @@ namespace ServiceStack.OrmLite.Tests
                 sb.AppendLine(tuple.Item2.Dump());
             }
 
-            Assert.That(sb.ToString().Replace("\r", "").Trim(), Is.EqualTo(
+            Assert.That(sb.ToString().NormalizeNewLines().Trim(), Is.EqualTo(
 @"Customer:
 {
 	Id: 1,
@@ -804,7 +804,7 @@ Customer Address:
 	CustomerId: 1,
 	AddressLine1: 1 Australia Street,
 	Country: Australia
-}"));
+}".NormalizeNewLines()));
         }
 
         [Test]
@@ -837,7 +837,7 @@ Customer Address:
 
         private static void AssertMultiCustomerOrderResults(StringBuilder sb)
         {
-            Assert.That(sb.ToString().Replace("\r", "").Trim(), Is.EqualTo(
+            Assert.That(sb.ToString().NormalizeNewLines().Trim(), Is.EqualTo(
                 @"Customer:
 {
 	Id: 1,
@@ -877,7 +877,7 @@ Order:
 	LineItem: Line 2,
 	Qty: 2,
 	Cost: 2.99
-}"));
+}".NormalizeNewLines()));
         }
     }
 
