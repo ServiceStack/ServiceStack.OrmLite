@@ -16,7 +16,7 @@ namespace ServiceStack.OrmLite.SqlServer.Converters
 
         public override string ColumnDefinition
         {
-            get { return "HIERARCHYID"; }
+            get { return "hierarchyid"; }
         }
 
         public override DbType DbType
