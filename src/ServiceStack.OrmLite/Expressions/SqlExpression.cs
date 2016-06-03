@@ -1295,6 +1295,14 @@ namespace ServiceStack.OrmLite
                 }
             }
 
+            if (left.ToString().Equals("null", StringComparison.OrdinalIgnoreCase))
+            {
+                // "null is x" will not work, so swap the operands
+                var temp = right;
+                right = left;
+                left = temp;
+            }
+
             if (operand == "=" && right.ToString().Equals("null", StringComparison.OrdinalIgnoreCase))
                 operand = "is";
             else if (operand == "<>" && right.ToString().Equals("null", StringComparison.OrdinalIgnoreCase))

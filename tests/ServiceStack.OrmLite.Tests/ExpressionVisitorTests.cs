@@ -186,6 +186,14 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        public void Can_Select_using_constant_Yoda_condition()
+        {
+            var q = Db.From<TestType>().Where(x => null != x.NullableIntCol); // "null != x.NullableIntCol" should be the same as "x.NullableIntCol != null"
+            var target = Db.Select(q);
+            CollectionAssert.AreEquivalent(new[] { 1, 3, 4 }, target.Select(t => t.Id).ToArray());
+        }
+
+        [Test]
         public void Can_Select_using_Startswith()
         {
             var target = Db.Select<TestType>(q => q.TextCol.StartsWith("asdf"));
