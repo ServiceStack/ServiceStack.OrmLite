@@ -372,6 +372,40 @@ namespace ServiceStack.OrmLite.Tests.Expression
         }
 
         [Test]
+        public void Can_select_RowCount_with_db_params()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<LetterFrequency>();
+
+                db.Insert(new LetterFrequency { Letter = "A" });
+                db.Insert(new LetterFrequency { Letter = "A" });
+                db.Insert(new LetterFrequency { Letter = "A" });
+                db.Insert(new LetterFrequency { Letter = "B" });
+                db.Insert(new LetterFrequency { Letter = "B" });
+                db.Insert(new LetterFrequency { Letter = "B" });
+                db.Insert(new LetterFrequency { Letter = "B" });
+
+                var query = db.From<LetterFrequency>()
+                    .Where(x => x.Letter == "B")
+                    .Select(x => x.Letter);
+
+                var rowCount = db.RowCount(query);
+                db.GetLastSql().Print();
+                Assert.That(rowCount, Is.EqualTo(4));
+
+                var table = typeof(LetterFrequency).Name.SqlTable();
+
+                rowCount = db.RowCount("SELECT * FROM {0} WHERE Letter = @p1".Fmt(table), new { p1 = "B" });
+                Assert.That(rowCount, Is.EqualTo(4));
+
+                rowCount = db.RowCount("SELECT * FROM {0} WHERE Letter = @p1".Fmt(table), 
+                    new[] { db.CreateParam("p1", "B") });
+                Assert.That(rowCount, Is.EqualTo(4));
+            }
+        }
+
+        [Test]
         public void Can_get_RowCount_if_expression_has_OrderBy()
         {
             using (var db = OpenDbConnection())

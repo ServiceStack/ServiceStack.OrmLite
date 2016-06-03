@@ -238,9 +238,17 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Return the number of rows returned by the supplied sql
         /// </summary>
-        public static long RowCount(this IDbConnection dbConn, string sql)
+        public static long RowCount(this IDbConnection dbConn, string sql, object anonType = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.RowCount(sql));
+            return dbConn.Exec(dbCmd => dbCmd.RowCount(sql, anonType));
+        }
+
+        /// <summary>
+        /// Return the number of rows returned by the supplied sql and db params
+        /// </summary>
+        public static long RowCount(this IDbConnection dbConn, string sql, IEnumerable<IDbDataParameter> sqlParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.RowCount(sql, sqlParams));
         }
 
         /// <summary>
