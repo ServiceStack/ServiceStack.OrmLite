@@ -1335,11 +1335,13 @@ namespace ServiceStack.OrmLite
 
         protected virtual object VisitMemberAccess(MemberExpression m)
         {
-            if (m.Expression != null && 
-                 (m.Expression.NodeType == ExpressionType.Parameter || 
-                  m.Expression.NodeType == ExpressionType.Convert))
+            if (m.Expression != null)
             {
-                return GetMemberExpression(m);
+                if (m.Member.DeclaringType.IsNullableType() && m.Member.Name == nameof(Nullable<bool>.Value))
+                    return Visit(m.Expression);
+
+                if (m.Expression.NodeType == ExpressionType.Parameter || m.Expression.NodeType == ExpressionType.Convert)
+                    return GetMemberExpression(m);
             }
 
             return CachedExpressionCompiler.Evaluate(m);

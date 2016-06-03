@@ -15,7 +15,7 @@ namespace ServiceStack.OrmLite.SqlServer.Converters
         {
             var sqlParam = (SqlParameter)p;
             sqlParam.SqlDbType = SqlDbType.Udt;
-            sqlParam.IsNullable = (fieldType.IsGenericType && fieldType.GetGenericTypeDefinition() == typeof(Nullable<>));
+            sqlParam.IsNullable = fieldType.IsNullableType();
             sqlParam.UdtTypeName = ColumnDefinition;
         }
     }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using NUnit.Framework;
@@ -16,10 +17,10 @@ namespace ServiceStack.OrmLite.Tests
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<TestType>();
-                db.Insert(new TestType { Id = 1, BoolCol = true, DateCol = new DateTime(2012, 1, 1), TextCol = "asdf", EnumCol = TestEnum.Val0 });
-                db.Insert(new TestType { Id = 2, BoolCol = true, DateCol = new DateTime(2012, 2, 1), TextCol = "asdf123", EnumCol = TestEnum.Val1 });
-                db.Insert(new TestType { Id = 3, BoolCol = false, DateCol = new DateTime(2012, 3, 1), TextCol = "qwer", EnumCol = TestEnum.Val2 });
-                db.Insert(new TestType { Id = 4, BoolCol = false, DateCol = new DateTime(2012, 4, 1), TextCol = "qwer123", EnumCol = TestEnum.Val3 });
+                db.Insert(new TestType { Id = 1, BoolCol = true, DateCol = new DateTime(2012, 1, 1), TextCol = "asdf", EnumCol = TestEnum.Val0, NullableIntCol = 10 });
+                db.Insert(new TestType { Id = 2, BoolCol = true, DateCol = new DateTime(2012, 2, 1), TextCol = "asdf123", EnumCol = TestEnum.Val1, NullableIntCol = null });
+                db.Insert(new TestType { Id = 3, BoolCol = false, DateCol = new DateTime(2012, 3, 1), TextCol = "qwer", EnumCol = TestEnum.Val2, NullableIntCol = 30 });
+                db.Insert(new TestType { Id = 4, BoolCol = false, DateCol = new DateTime(2012, 4, 1), TextCol = "qwer123", EnumCol = TestEnum.Val3, NullableIntCol = 40 });
             }
             Db = OpenDbConnection();
         }
@@ -146,6 +147,33 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        public void Can_Select_using_int_array_Contains()
+        {
+            var ids = new[] { 1, 2 };
+            var q = Db.From<TestType>().Where(x => ids.Contains(x.Id));
+            var target = Db.Select(q);
+            CollectionAssert.AreEquivalent(ids, target.Select(t => t.Id).ToArray());
+        }
+
+        [Test]
+        public void Can_Select_using_int_list_Contains()
+        {
+            var ids = new List<int> { 1, 2 };
+            var q = Db.From<TestType>().Where(x => ids.Contains(x.Id));
+            var target = Db.Select(q);
+            CollectionAssert.AreEquivalent(ids, target.Select(t => t.Id).ToArray());
+        }
+
+        [Test]
+        public void Can_Select_using_int_array_Contains_Value()
+        {
+            var ints = new[] { 10, 40 };
+            var q = Db.From<TestType>().Where(x => ints.Contains(x.NullableIntCol.Value)); // Doesn't compile without ".Value" here - "ints" is not nullable
+            var target = Db.Select(q);
+            CollectionAssert.AreEquivalent(new[] { 1, 4 }, target.Select(t => t.Id).ToArray());
+        }
+
+        [Test]
         public void Can_Select_using_Startswith()
         {
             var target = Db.Select<TestType>(q => q.TextCol.StartsWith("asdf"));
@@ -240,5 +268,6 @@ namespace ServiceStack.OrmLite.Tests
         public DateTime DateCol { get; set; }
         public TestEnum EnumCol { get; set; }
         public TestType ComplexObjCol { get; set; }
+        public int? NullableIntCol { get; set; }
     }
 }
