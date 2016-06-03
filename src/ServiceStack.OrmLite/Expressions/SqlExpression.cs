@@ -1337,8 +1337,18 @@ namespace ServiceStack.OrmLite
         {
             if (m.Expression != null)
             {
-                if (m.Member.DeclaringType.IsNullableType() && m.Member.Name == nameof(Nullable<bool>.Value))
-                    return Visit(m.Expression);
+                if (m.Member.DeclaringType.IsNullableType())
+                {
+                    if (m.Member.Name == nameof(Nullable<bool>.Value))
+                        return Visit(m.Expression);
+                    if (m.Member.Name == nameof(Nullable<bool>.HasValue))
+                    {
+                        var doesNotEqualNull = Expression.MakeBinary(ExpressionType.NotEqual, m.Expression, Expression.Constant(null));
+                        return Visit(doesNotEqualNull); // Nullable<T>.HasValue is equivalent to "!= null"
+                    }
+
+                    throw new ArgumentException(string.Format("Expression '{0}' accesses unsupported property '{1}' of Nullable<T>", m, m.Member));
+                }
 
                 if (m.Expression.NodeType == ExpressionType.Parameter || m.Expression.NodeType == ExpressionType.Convert)
                     return GetMemberExpression(m);

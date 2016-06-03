@@ -174,6 +174,18 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        public void Can_Select_using_Nullable_HasValue()
+        {
+            var q = Db.From<TestType>().Where(x => x.NullableIntCol.HasValue); // WHERE NullableIntCol IS NOT NULL
+            var target = Db.Select(q);
+            CollectionAssert.AreEquivalent(new[] { 1, 3, 4 }, target.Select(t => t.Id).ToArray());
+
+            q = Db.From<TestType>().Where(x => !x.NullableIntCol.HasValue); // WHERE NOT (NullableIntCol IS NOT NULL)
+            target = Db.Select(q);
+            CollectionAssert.AreEquivalent(new[] { 2 }, target.Select(t => t.Id).ToArray());
+        }
+
+        [Test]
         public void Can_Select_using_Startswith()
         {
             var target = Db.Select<TestType>(q => q.TextCol.StartsWith("asdf"));
