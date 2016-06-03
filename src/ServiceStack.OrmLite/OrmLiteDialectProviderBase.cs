@@ -559,7 +559,14 @@ namespace ServiceStack.OrmLite
                 if (sqlColumns.Length > 0)
                     sqlColumns.Append(", ");
 
-                sqlColumns.Append(field.GetQuotedName(this));
+                if (field.CustomSelect == null)
+                {
+                    sqlColumns.Append(field.GetQuotedName(this));
+                }
+                else
+                {
+                    sqlColumns.Append(field.CustomSelect + " AS " + field.FieldName);
+                }
             }
 
             return StringBuilderCache.ReturnAndFree(sqlColumns);
@@ -1106,6 +1113,9 @@ namespace ServiceStack.OrmLite
             var modelDef = tableType.GetModelDefinition();
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
+                if (fieldDef.CustomSelect != null)
+                    continue;
+
                 var columnDefinition = GetColumnDefinition(
                     fieldDef.FieldName,
                     fieldDef.ColumnType,
