@@ -90,6 +90,8 @@ namespace ServiceStack.OrmLite
 
         public string ComputeExpression { get; set; }
 
+        public string CustomSelect { get; set; }
+
         public string BelongToModelName { get; set; }
 
         public bool IsReference { get; set; }

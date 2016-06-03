@@ -80,6 +80,7 @@
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Converters\FileStreamTests.cs" />
     <Compile Include="CustomSqlTests.cs" />
     <Compile Include="Datetime2Tests.cs" />
     <Compile Include="DateTimeOffsetTests.cs" />

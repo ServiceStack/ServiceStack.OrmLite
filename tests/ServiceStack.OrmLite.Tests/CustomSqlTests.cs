@@ -179,5 +179,29 @@ namespace ServiceStack.OrmLite.Tests
             }
         }
 
+        public class CustomSelectTest
+        {
+            public int Id { get; set; }
+            public int Width { get; set; }
+            public int Height { get; set; }
+
+            [CustomSelect("Width * Height")]
+            public int Area { get; set; }
+        }
+
+        [Test]
+        public void Can_select_custom_field_expressions()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<CustomSelectTest>();
+
+                db.Insert(new CustomSelectTest { Id = 1, Width = 10, Height = 5 });
+
+                var row = db.SingleById<CustomSelectTest>(1);
+
+                Assert.That(row.Area, Is.EqualTo(10 * 5));
+            }
+        }
     }
 }

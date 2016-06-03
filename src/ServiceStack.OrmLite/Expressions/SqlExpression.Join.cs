@@ -189,9 +189,16 @@ namespace ServiceStack.OrmLite
                                 if (sbSelect.Length > 0)
                                     sbSelect.Append(", ");
 
-                                sbSelect.AppendFormat("{0} as {1}",
+                                if (fieldDef.CustomSelect == null)
+                                {
+                                    sbSelect.AppendFormat("{0} as {1}",
                                     DialectProvider.GetQuotedColumnName(tableDef, matchingField),
                                     SqlColumn(fieldDef.Name));
+                                }
+                                else
+                                {
+                                    sbSelect.Append(fieldDef.CustomSelect + " AS " + fieldDef.FieldName);
+                                }
 
                                 continue;
                             }
@@ -211,12 +218,19 @@ namespace ServiceStack.OrmLite
                             if (sbSelect.Length > 0)
                                 sbSelect.Append(", ");
 
-                            sbSelect.AppendFormat("{0}.{1}",
-                                SqlTable(tableDef),
-                                tableFieldDef.GetQuotedName(DialectProvider));
+                            if (fieldDef.CustomSelect == null)
+                            {
+                                sbSelect.AppendFormat("{0}.{1}",
+                                    SqlTable(tableDef),
+                                    tableFieldDef.GetQuotedName(DialectProvider));
 
-                            if (tableFieldDef.Alias != null)
-                                sbSelect.Append(" AS ").Append(SqlColumn(fieldDef.Name));
+                                if (tableFieldDef.Alias != null)
+                                    sbSelect.Append(" AS ").Append(SqlColumn(fieldDef.Name));
+                            }
+                            else
+                            {
+                                sbSelect.Append(tableFieldDef.CustomSelect + " AS " + tableFieldDef.FieldName);
+                            }
 
                             found = true;
                             break;

@@ -93,6 +93,7 @@ namespace ServiceStack.OrmLite
 
                 var sequenceAttr = propertyInfo.FirstAttribute<SequenceAttribute>();
                 var computeAttr = propertyInfo.FirstAttribute<ComputeAttribute>();
+                var customSelectAttr = propertyInfo.FirstAttribute<CustomSelectAttribute>();
                 var decimalAttribute = propertyInfo.FirstAttribute<DecimalLengthAttribute>();
                 var belongToAttribute = propertyInfo.FirstAttribute<BelongToAttribute>();
                 var isFirst = i++ == 0;
@@ -164,8 +165,9 @@ namespace ServiceStack.OrmLite
                     GetValueFn = propertyInfo.GetPropertyGetterFn(),
                     SetValueFn = propertyInfo.GetPropertySetterFn(),
                     Sequence = sequenceAttr != null ? sequenceAttr.Name : string.Empty,
-                    IsComputed = computeAttr != null,
+                    IsComputed = computeAttr != null || customSelectAttr != null,
                     ComputeExpression = computeAttr != null ? computeAttr.Expression : string.Empty,
+                    CustomSelect = customSelectAttr != null ? customSelectAttr.Sql : null,
                     Scale = decimalAttribute != null ? decimalAttribute.Scale : (int?)null,
                     BelongToModelName = belongToAttribute != null ? belongToAttribute.BelongToTableType.GetModelDefinition().ModelName : null,
                     CustomFieldDefinition = customFieldAttr != null ? customFieldAttr.Sql : null,
