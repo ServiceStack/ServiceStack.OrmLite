@@ -154,12 +154,20 @@ namespace ServiceStack.OrmLite
         {
             //ORDER BY throws when used in subselects in SQL Server. Removing OrderBy() clause since it doesn't impact results
             var countExpr = expression.Clone().OrderBy(); 
-            return dbCmd.Scalar<long>(dbCmd.GetDialectProvider().ToRowCountStatement(countExpr.ToSelectStatement()));
+            return dbCmd.Scalar<long>(dbCmd.GetDialectProvider().ToRowCountStatement(countExpr.ToSelectStatement()), expression.Params);
         }
 
-        internal static long RowCount(this IDbCommand dbCmd, string sql)
+        internal static long RowCount(this IDbCommand dbCmd, string sql, object anonType)
         {
+            if (anonType != null)
+                dbCmd.SetParameters(anonType.ToObjectDictionary(), excludeDefaults: false);
+
             return dbCmd.Scalar<long>(dbCmd.GetDialectProvider().ToRowCountStatement(sql));
+        }
+
+        internal static long RowCount(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams)
+        {
+            return dbCmd.SetParameters(sqlParams).Scalar<long>(dbCmd.GetDialectProvider().ToRowCountStatement(sql));
         }
 
         internal static List<T> LoadSelect<T>(this IDbCommand dbCmd, SqlExpression<T> expression = null, IEnumerable<string> include = null)
