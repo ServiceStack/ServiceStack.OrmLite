@@ -1347,9 +1347,9 @@ namespace ServiceStack.OrmLite
             {
                 if (m.Member.DeclaringType.IsNullableType())
                 {
-                    if (m.Member.Name == nameof(Nullable<bool>.Value))
+                    if (m.Member.Name == "Value") //Can't use C# 6 yet: nameof(Nullable<bool>.Value)
                         return Visit(m.Expression);
-                    if (m.Member.Name == nameof(Nullable<bool>.HasValue))
+                    if (m.Member.Name == "HasValue") //nameof(Nullable<bool>.HasValue)
                     {
                         var doesNotEqualNull = Expression.MakeBinary(ExpressionType.NotEqual, m.Expression, Expression.Constant(null));
                         return Visit(doesNotEqualNull); // Nullable<T>.HasValue is equivalent to "!= null"
