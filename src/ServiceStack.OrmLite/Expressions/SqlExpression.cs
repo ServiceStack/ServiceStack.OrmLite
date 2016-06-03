@@ -1686,7 +1686,7 @@ namespace ServiceStack.OrmLite
             {
                 case "Contains":
                     List<Object> args = this.VisitExpressionList(m.Arguments);
-                    object quotedColName = args[1];
+                    object quotedColName = args.Last();
 
                     Expression memberExpr = m.Arguments[0];
                     if (memberExpr.NodeType == ExpressionType.MemberAccess)

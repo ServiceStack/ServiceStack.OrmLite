@@ -194,6 +194,22 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        public void Can_Select_using_int_array_constructed_inside_Contains()
+        {
+            var q = Db.From<TestType>().Where(x => new int?[] { 10, 30 }.Contains(x.NullableIntCol));
+            var target = Db.Select(q);
+            CollectionAssert.AreEquivalent(new[] { 1, 3 }, target.Select(t => t.Id).ToArray());
+        }
+
+        [Test]
+        public void Can_Select_using_int_list_constructed_inside_Contains()
+        {
+            var q = Db.From<TestType>().Where(x => new List<int?> { 10, 30 }.Contains(x.NullableIntCol));
+            var target = Db.Select(q);
+            CollectionAssert.AreEquivalent(new[] { 1, 3 }, target.Select(t => t.Id).ToArray());
+        }
+
+        [Test]
         public void Can_Select_using_Startswith()
         {
             var target = Db.Select<TestType>(q => q.TextCol.StartsWith("asdf"));
