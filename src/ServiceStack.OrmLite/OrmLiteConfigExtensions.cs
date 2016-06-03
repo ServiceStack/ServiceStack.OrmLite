@@ -22,12 +22,6 @@ namespace ServiceStack.OrmLite
     {
         private static Dictionary<Type, ModelDefinition> typeModelDefinitionMap = new Dictionary<Type, ModelDefinition>();
 
-        private static bool IsNullableType(Type theType)
-        {
-            return (theType.IsGenericType
-                && theType.GetGenericTypeDefinition() == typeof(Nullable<>));
-        }
-
         internal static bool CheckForIdField(IEnumerable<PropertyInfo> objProperties)
         {
             // Not using Linq.Where() and manually iterating through objProperties just to avoid dependencies on System.Xml??
@@ -104,7 +98,7 @@ namespace ServiceStack.OrmLite
                 var isRowVersion = propertyInfo.Name == ModelDefinition.RowVersionName
                     && propertyInfo.PropertyType == typeof(ulong);
 
-                var isNullableType = IsNullableType(propertyInfo.PropertyType);
+                var isNullableType = propertyInfo.PropertyType.IsNullableType();
 
                 var isNullable = (!propertyInfo.PropertyType.IsValueType
                                    && !propertyInfo.HasAttributeNamed(typeof(RequiredAttribute).Name))

@@ -27,14 +27,14 @@ namespace ServiceStack.OrmLite.SqlServer.Converters
         public override void InitDbParam(IDbDataParameter p, Type fieldType)
         {
             var sqlParam = (SqlParameter)p;
-            sqlParam.IsNullable = (fieldType.IsGenericType && fieldType.GetGenericTypeDefinition() == typeof(Nullable<>));
+            sqlParam.IsNullable = fieldType.IsNullableType();
             sqlParam.SqlDbType = SqlDbType.Udt;
             sqlParam.UdtTypeName = ColumnDefinition;
         }
 
         public override object FromDbValue(Type fieldType, object value)
         {
-            if (((SqlHierarchyId)value).IsNull && fieldType.IsGenericType && fieldType.GetGenericTypeDefinition() == typeof(Nullable<>))
+            if (((SqlHierarchyId)value).IsNull && fieldType.IsNullableType())
             {
                 return null;
             }

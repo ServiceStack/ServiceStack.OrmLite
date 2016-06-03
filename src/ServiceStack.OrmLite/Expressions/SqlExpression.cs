@@ -1295,6 +1295,14 @@ namespace ServiceStack.OrmLite
                 }
             }
 
+            if (left.ToString().Equals("null", StringComparison.OrdinalIgnoreCase))
+            {
+                // "null is x" will not work, so swap the operands
+                var temp = right;
+                right = left;
+                left = temp;
+            }
+
             if (operand == "=" && right.ToString().Equals("null", StringComparison.OrdinalIgnoreCase))
                 operand = "is";
             else if (operand == "<>" && right.ToString().Equals("null", StringComparison.OrdinalIgnoreCase))
@@ -1335,11 +1343,23 @@ namespace ServiceStack.OrmLite
 
         protected virtual object VisitMemberAccess(MemberExpression m)
         {
-            if (m.Expression != null && 
-                 (m.Expression.NodeType == ExpressionType.Parameter || 
-                  m.Expression.NodeType == ExpressionType.Convert))
+            if (m.Expression != null)
             {
-                return GetMemberExpression(m);
+                if (m.Member.DeclaringType.IsNullableType())
+                {
+                    if (m.Member.Name == nameof(Nullable<bool>.Value))
+                        return Visit(m.Expression);
+                    if (m.Member.Name == nameof(Nullable<bool>.HasValue))
+                    {
+                        var doesNotEqualNull = Expression.MakeBinary(ExpressionType.NotEqual, m.Expression, Expression.Constant(null));
+                        return Visit(doesNotEqualNull); // Nullable<T>.HasValue is equivalent to "!= null"
+                    }
+
+                    throw new ArgumentException(string.Format("Expression '{0}' accesses unsupported property '{1}' of Nullable<T>", m, m.Member));
+                }
+
+                if (m.Expression.NodeType == ExpressionType.Parameter || m.Expression.NodeType == ExpressionType.Convert)
+                    return GetMemberExpression(m);
             }
 
             return CachedExpressionCompiler.Evaluate(m);
@@ -1666,7 +1686,7 @@ namespace ServiceStack.OrmLite
             {
                 case "Contains":
                     List<Object> args = this.VisitExpressionList(m.Arguments);
-                    object quotedColName = args[1];
+                    object quotedColName = args.Last();
 
                     Expression memberExpr = m.Arguments[0];
                     if (memberExpr.NodeType == ExpressionType.MemberAccess)

@@ -113,10 +113,10 @@ namespace ServiceStack.OrmLite.Tests
                 var row2 = new ModelWithIdAndName1() { Name = "B", Id = 5 };
 
                 var row1LastInsertId = db.Insert(row1, selectIdentity: true);
-                Assert.That(db.GetLastSql(), Is.StringMatching("\\) RETURNING \"?id"));
+                Assert.That(db.GetLastSql(), Is.StringMatching("\\) RETURNING \"?[Ii]d"));
 
                 var row2LastInsertId = db.Insert(row2, selectIdentity: true);
-                Assert.That(db.GetLastSql(), Is.StringMatching("\\) RETURNING \"?id"));
+                Assert.That(db.GetLastSql(), Is.StringMatching("\\) RETURNING \"?[Ii]d"));
 
                 var insertedRow1 = db.SingleById<ModelWithIdAndName1>(row1LastInsertId);
                 var insertedRow2 = db.SingleById<ModelWithIdAndName1>(row2LastInsertId);
