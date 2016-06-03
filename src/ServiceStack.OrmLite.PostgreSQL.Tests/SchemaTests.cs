@@ -31,9 +31,9 @@ namespace ServiceStack.OrmLite.Tests
 BEGIN
 
     IF NOT EXISTS(
-        SELECT schema_name
-          FROM information_schema.schemata
-          WHERE schema_name = 'TestSchema'
+        SELECT 1
+          FROM INFORMATION_SCHEMA.SCHEMATA
+          WHERE SCHEMA_NAME = 'TestSchema'
       )
     THEN
       EXECUTE 'CREATE SCHEMA ""TestSchema""';
