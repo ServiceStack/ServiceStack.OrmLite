@@ -2,6 +2,7 @@
 using Microsoft.SqlServer.Types;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
+using ServiceStack.OrmLite.SqlServer.Converters;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.SqlServerTests.Converters
@@ -13,36 +14,60 @@ namespace ServiceStack.OrmLite.SqlServerTests.Converters
         [Test]
         public void Can_select_from_FileStream()
         {
-            using (var db = OpenDbConnection())
+
+            ConnectionString = "Data Source=localhost;Initial Catalog=test2;User Id=test;Password=test;Connect Timeout=120;MultipleActiveResultSets=True;Type System Version=SQL Server 2012;";
+            var dialectProvider = SqlServerConverters.Configure(SqlServer2012Dialect.Provider);
+            var dbFactory = new OrmLiteConnectionFactory(ConnectionString, dialectProvider);
+
+            using (var db = dbFactory.OpenDbConnection())
             {
-                db.DropAndCreateTable<FileStream>();
+                db.DropTable<TestFile>();
+                db.CreateTable<TestFile>();
 
-                db.Insert(new FileStream
-                {
-                    ID = Guid.NewGuid(),
-                    Name = "file.txt",
-                    Path = SqlHierarchyId.Parse("/1/2/3/"),
-                    ParentPath = SqlHierarchyId.Parse("/1/2/"),
-                    FileContent = "contents".ToUtf8Bytes(),
-                    FileType = MimeTypes.PlainText,
-                });
+                db.Insert(new TestFile { Contents = "contents".ToUtf8Bytes() });
 
-                //db.Select<FileStream>().PrintDump();
+                db.Select<TestFile>().PrintDump();
 
-                var q = db.From<FileStream>();
-                db.Select(q);
+                //db.DropTable<FileStream>();
+                //db.CreateTable<FileStream>();
+
+                //db.Insert(new FileStream
+                //{
+                //    Name = "file.txt",
+                //    Path = SqlHierarchyId.Parse("/1/2/3/"),
+                //    ParentPath = SqlHierarchyId.Parse("/1/2/"),
+                //    FileContent = "contents".ToUtf8Bytes(),
+                //    FileType = MimeTypes.PlainText,
+                //});
+
+                //var q = db.From<FileStream>();
+                //db.Select(q);
             }
         }
     }
 
+    public class TestFile
+    {
+        [PrimaryKey]
+        [CustomField("uniqueidentifier ROWGUIDCOL NOT NULL")]
+        public Guid Id { get; set; }
+
+        [CustomField("varbinary(max) FILESTREAM")]
+        public byte[] Contents { get; set; }
+
+        public bool IsDirectory { get; set; }
+
+        [CustomSelect("Contents.GetFileNamespacePath() + (CASE WHEN is_directory = 1 THEN '\' ELSE '' END)")]
+        public string FullPath { get; set; }
+    }
 
     public class FileStream
     {
         [PrimaryKey]
-        [Alias("stream_id")]
-        public Guid ID { get; set; }
+        [CustomField("uniqueidentifier ROWGUIDCOL NOT NULL")]
+        public Guid Id { get; set; }
 
-        //[CustomField("varbinary(max) FILESTREAM")]
+        [CustomField("varbinary(max) FILESTREAM")]
         [Alias("file_stream")]
         //[DataAnnotations.Ignore]
         public byte[] FileContent { get; set; }
