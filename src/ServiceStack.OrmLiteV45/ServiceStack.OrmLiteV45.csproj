@@ -103,11 +103,140 @@
     <Compile Include="..\ServiceStack.OrmLite\Converters\TimeSpanAsIntConverter.cs">
       <Link>Converters\TimeSpanAsIntConverter.cs</Link>
     </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\CommandDefinition.cs">
+      <Link>Dapper\CommandDefinition.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\CommandFlags.cs">
+      <Link>Dapper\CommandFlags.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\CustomPropertyTypeMap.cs">
+      <Link>Dapper\CustomPropertyTypeMap.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\DataTableHandler.cs">
+      <Link>Dapper\DataTableHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\DbString.cs">
+      <Link>Dapper\DbString.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\DefaultTypeMap.cs">
+      <Link>Dapper\DefaultTypeMap.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\DynamicParameters.CachedOutputSetters.cs">
+      <Link>Dapper\DynamicParameters.CachedOutputSetters.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\DynamicParameters.cs">
+      <Link>Dapper\DynamicParameters.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\DynamicParameters.ParamInfo.cs">
+      <Link>Dapper\DynamicParameters.ParamInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\ExplicitConstructorAttribute.cs">
+      <Link>Dapper\ExplicitConstructorAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\FeatureSupport.cs">
+      <Link>Dapper\FeatureSupport.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\SimpleMemberMap.cs">
+      <Link>Dapper\SimpleMemberMap.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\SqlDataRecordHandler.cs">
+      <Link>Dapper\SqlDataRecordHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\SqlDataRecordListTVPParameter.cs">
+      <Link>Dapper\SqlDataRecordListTVPParameter.cs</Link>
+    </Compile>
     <Compile Include="..\ServiceStack.OrmLite\Dapper\SqlMapper.Async.cs">
       <Link>Dapper\SqlMapper.Async.cs</Link>
     </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\SqlMapper.CacheInfo.cs">
+      <Link>Dapper\SqlMapper.CacheInfo.cs</Link>
+    </Compile>
     <Compile Include="..\ServiceStack.OrmLite\Dapper\SqlMapper.cs">
       <Link>Dapper\SqlMapper.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\SqlMapper.DapperRow.cs">
+      <Link>Dapper\SqlMapper.DapperRow.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\SqlMapper.DapperRowMetaObject.cs">
+      <Link>Dapper\SqlMapper.DapperRowMetaObject.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\SqlMapper.DataTable.cs">
+      <Link>Dapper\SqlMapper.DataTable.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\SqlMapper.DeserializerState.cs">
+      <Link>Dapper\SqlMapper.DeserializerState.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\SqlMapper.DontMap.cs">
+      <Link>Dapper\SqlMapper.DontMap.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\SqlMapper.GridReader.Async.cs">
+      <Link>Dapper\SqlMapper.GridReader.Async.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\SqlMapper.GridReader.cs">
+      <Link>Dapper\SqlMapper.GridReader.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\SqlMapper.ICustomQueryParameter.cs">
+      <Link>Dapper\SqlMapper.ICustomQueryParameter.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\SqlMapper.IDataReader.cs">
+      <Link>Dapper\SqlMapper.IDataReader.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\SqlMapper.Identity.cs">
+      <Link>Dapper\SqlMapper.Identity.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\SqlMapper.IDynamicParameters.cs">
+      <Link>Dapper\SqlMapper.IDynamicParameters.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\SqlMapper.IMemberMap.cs">
+      <Link>Dapper\SqlMapper.IMemberMap.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\SqlMapper.IParameterCallbacks.cs">
+      <Link>Dapper\SqlMapper.IParameterCallbacks.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\SqlMapper.IParameterLookup.cs">
+      <Link>Dapper\SqlMapper.IParameterLookup.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\SqlMapper.ITypeHandler.cs">
+      <Link>Dapper\SqlMapper.ITypeHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\SqlMapper.ITypeMap.cs">
+      <Link>Dapper\SqlMapper.ITypeMap.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\SqlMapper.Link.cs">
+      <Link>Dapper\SqlMapper.Link.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\SqlMapper.LiteralToken.cs">
+      <Link>Dapper\SqlMapper.LiteralToken.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\SqlMapper.Settings.cs">
+      <Link>Dapper\SqlMapper.Settings.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\SqlMapper.TypeDeserializerCache.cs">
+      <Link>Dapper\SqlMapper.TypeDeserializerCache.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\SqlMapper.TypeHandler.cs">
+      <Link>Dapper\SqlMapper.TypeHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\SqlMapper.TypeHandlerCache.cs">
+      <Link>Dapper\SqlMapper.TypeHandlerCache.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\TableValuedParameter.cs">
+      <Link>Dapper\TableValuedParameter.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\TypeExtensions.cs">
+      <Link>Dapper\TypeExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\UdtTypeHandler.cs">
+      <Link>Dapper\UdtTypeHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\WrappedDataReader.cs">
+      <Link>Dapper\WrappedDataReader.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\WrappedReader.cs">
+      <Link>Dapper\WrappedReader.cs</Link>
+    </Compile>
+    <Compile Include="..\ServiceStack.OrmLite\Dapper\XmlHandlers.cs">
+      <Link>Dapper\XmlHandlers.cs</Link>
     </Compile>
     <Compile Include="..\ServiceStack.OrmLite\DbTypes.cs">
       <Link>DbTypes.cs</Link>
