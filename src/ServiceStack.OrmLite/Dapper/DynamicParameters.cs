@@ -274,7 +274,7 @@ namespace ServiceStack.OrmLite.Dapper
                             p.DbType = dbType.Value;
                         }
                         var s = val as string;
-                        if (s?.Length <= DbString.DefaultLength)
+                        if ((s != null ? s.Length : (int?) null) <= DbString.DefaultLength)
                         {
                             p.Size = DbString.DefaultLength;
                         }
@@ -377,11 +377,11 @@ namespace ServiceStack.OrmLite.Dapper
             {
                 // Insert the names in the right order so expression
                 // "Post.Author.Name" becomes parameter "PostAuthorName"
-                names.Insert(0, diving?.Member.Name);
+                names.Insert(0, diving != null ? diving.Member.Name : null);
                 chain.Insert(0, diving);
 
-                var constant = diving?.Expression as ParameterExpression;
-                diving = diving?.Expression as MemberExpression;
+                var constant = diving != null ? diving.Expression as ParameterExpression : null;
+                diving = diving != null ? diving.Expression as MemberExpression : null;
 
                 if (constant != null &&
                     constant.Type == typeof(T))
@@ -462,7 +462,7 @@ namespace ServiceStack.OrmLite.Dapper
             {
                 // Finally, prep the parameter and attach the callback to it
                 ParamInfo parameter;
-                var targetMemberType = lastMemberAccess?.Type;
+                var targetMemberType = lastMemberAccess != null ? lastMemberAccess.Type : null;
                 int sizeToSet = (!size.HasValue && targetMemberType == typeof(string)) ? DbString.DefaultLength : size ?? 0;
 
                 if (parameters.TryGetValue(dynamicParamName, out parameter))
@@ -479,7 +479,7 @@ namespace ServiceStack.OrmLite.Dapper
                     SqlMapper.ITypeHandler handler;
                     dbType = (!dbType.HasValue)
 #pragma warning disable 618
-                    ? SqlMapper.LookupDbType(targetMemberType, targetMemberType?.Name, true, out handler)
+                    ? SqlMapper.LookupDbType(targetMemberType, targetMemberType != null ? targetMemberType.Name : null, true, out handler)
 #pragma warning restore 618
                     : dbType;
 
@@ -502,7 +502,7 @@ namespace ServiceStack.OrmLite.Dapper
         {
             foreach (var param in (from p in parameters select p.Value))
             {
-                param.OutputCallback?.Invoke(param.OutputTarget, this);
+                if (param.OutputCallback != null) param.OutputCallback(param.OutputTarget, this);
             }
         }
     }

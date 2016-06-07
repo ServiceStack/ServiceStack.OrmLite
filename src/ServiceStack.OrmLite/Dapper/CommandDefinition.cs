@@ -30,33 +30,34 @@ namespace ServiceStack.OrmLite.Dapper
 
         internal void OnCompleted()
         {
-            (Parameters as SqlMapper.IParameterCallbacks)?.OnCompleted();
+            var p = Parameters as SqlMapper.IParameterCallbacks;
+            if (p != null) p.OnCompleted();
         }
 
         /// <summary>
         /// The command (sql or a stored-procedure name) to execute
         /// </summary>
-        public string CommandText { get; set; }
+        public string CommandText { get; private set; }
 
         /// <summary>
         /// The parameters associated with the command
         /// </summary>
-        public object Parameters { get; set; }
+        public object Parameters { get; private set; }
 
         /// <summary>
         /// The active transaction for the command
         /// </summary>
-        public IDbTransaction Transaction { get; set; }
+        public IDbTransaction Transaction { get; private set; }
 
         /// <summary>
         /// The effective timeout for the command
         /// </summary>
-        public int? CommandTimeout { get; set; }
+        public int? CommandTimeout { get; private set; }
 
         /// <summary>
         /// The type of command that the command-text represents
         /// </summary>
-        public CommandType? CommandType { get; set; }
+        public CommandType? CommandType { get; private set; }
 
         /// <summary>
         /// Should data be buffered before returning?

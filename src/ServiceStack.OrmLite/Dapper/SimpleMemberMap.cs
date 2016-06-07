@@ -17,10 +17,10 @@ namespace ServiceStack.OrmLite.Dapper
         public SimpleMemberMap(string columnName, PropertyInfo property)
         {
             if (columnName == null)
-                throw new ArgumentNullException(nameof(columnName));
+                throw new ArgumentNullException("columnName");
 
             if (property == null)
-                throw new ArgumentNullException(nameof(property));
+                throw new ArgumentNullException("property");
 
             ColumnName = columnName;
             Property = property;
@@ -34,10 +34,10 @@ namespace ServiceStack.OrmLite.Dapper
         public SimpleMemberMap(string columnName, FieldInfo field)
         {
             if (columnName == null)
-                throw new ArgumentNullException(nameof(columnName));
+                throw new ArgumentNullException("columnName");
 
             if (field == null)
-                throw new ArgumentNullException(nameof(field));
+                throw new ArgumentNullException("field");
 
             ColumnName = columnName;
             Field = field;
@@ -51,10 +51,10 @@ namespace ServiceStack.OrmLite.Dapper
         public SimpleMemberMap(string columnName, ParameterInfo parameter)
         {
             if (columnName == null)
-                throw new ArgumentNullException(nameof(columnName));
+                throw new ArgumentNullException("columnName");
 
             if (parameter == null)
-                throw new ArgumentNullException(nameof(parameter));
+                throw new ArgumentNullException("parameter");
 
             ColumnName = columnName;
             Parameter = parameter;

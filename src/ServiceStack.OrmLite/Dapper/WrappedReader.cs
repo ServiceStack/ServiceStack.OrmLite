@@ -35,7 +35,7 @@ namespace ServiceStack.OrmLite.Dapper
 
         void IDataReader.Close()
         {
-            reader?.Close();
+            if (reader != null) reader.Close();
         }
 
         int IDataReader.Depth
@@ -70,10 +70,13 @@ namespace ServiceStack.OrmLite.Dapper
 
         void IDisposable.Dispose()
         {
-            reader?.Close();
-            reader?.Dispose();
+            if (reader != null)
+            {
+                reader.Close();
+                reader.Dispose();
+            }
             reader = null;
-            cmd?.Dispose();
+            if (cmd != null) cmd.Dispose();
             cmd = null;
         }
 

@@ -21,10 +21,10 @@ namespace ServiceStack.OrmLite.Dapper
         public CustomPropertyTypeMap(Type type, Func<Type, string, PropertyInfo> propertySelector)
         {
             if (type == null)
-                throw new ArgumentNullException(nameof(type));
+                throw new ArgumentNullException("type");
 
             if (propertySelector == null)
-                throw new ArgumentNullException(nameof(propertySelector));
+                throw new ArgumentNullException("propertySelector");
 
             _type = type;
             _propertySelector = propertySelector;

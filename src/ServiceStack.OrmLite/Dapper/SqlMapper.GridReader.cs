@@ -110,7 +110,7 @@ namespace ServiceStack.OrmLite.Dapper
             /// </summary>
             public IEnumerable<object> Read(Type type, bool buffered = true)
             {
-                if (type == null) throw new ArgumentNullException(nameof(type));
+                if (type == null) throw new ArgumentNullException("type");
                 return ReadImpl<object>(type, buffered);
             }
 
@@ -119,7 +119,7 @@ namespace ServiceStack.OrmLite.Dapper
             /// </summary>
             public object ReadFirst(Type type)
             {
-                if (type == null) throw new ArgumentNullException(nameof(type));
+                if (type == null) throw new ArgumentNullException("type");
                 return ReadRow<object>(type, Row.First);
             }
             /// <summary>
@@ -127,7 +127,7 @@ namespace ServiceStack.OrmLite.Dapper
             /// </summary>
             public object ReadFirstOrDefault(Type type)
             {
-                if (type == null) throw new ArgumentNullException(nameof(type));
+                if (type == null) throw new ArgumentNullException("type");
                 return ReadRow<object>(type, Row.FirstOrDefault);
             }
             /// <summary>
@@ -135,7 +135,7 @@ namespace ServiceStack.OrmLite.Dapper
             /// </summary>
             public object ReadSingle(Type type)
             {
-                if (type == null) throw new ArgumentNullException(nameof(type));
+                if (type == null) throw new ArgumentNullException("type");
                 return ReadRow<object>(type, Row.Single);
             }
             /// <summary>
@@ -143,7 +143,7 @@ namespace ServiceStack.OrmLite.Dapper
             /// </summary>
             public object ReadSingleOrDefault(Type type)
             {
-                if (type == null) throw new ArgumentNullException(nameof(type));
+                if (type == null) throw new ArgumentNullException("type");
                 return ReadRow<object>(type, Row.SingleOrDefault);
             }
 
@@ -356,7 +356,7 @@ namespace ServiceStack.OrmLite.Dapper
                     // need for "Cancel" etc
                     reader.Dispose();
                     reader = null;
-                    callbacks?.OnCompleted();
+                    if (callbacks != null) callbacks.OnCompleted();
                     Dispose();
                 }
             }
@@ -367,7 +367,7 @@ namespace ServiceStack.OrmLite.Dapper
             {
                 if (reader != null)
                 {
-                    if (!reader.IsClosed) Command?.Cancel();
+                    if (!reader.IsClosed) if (Command != null) Command.Cancel();
                     reader.Dispose();
                     reader = null;
                 }
