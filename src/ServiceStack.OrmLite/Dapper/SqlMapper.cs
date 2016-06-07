@@ -904,7 +904,7 @@ namespace ServiceStack.OrmLite.Dapper
                         catch { /* don't spoil the existing exception */ }
                     reader.Dispose();
                 }
-                cmd?.Dispose();
+                if (cmd != null) cmd.Dispose();
                 if (wasClosed) cnn.Close();
                 throw;
             }

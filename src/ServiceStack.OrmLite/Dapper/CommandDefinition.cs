@@ -96,7 +96,7 @@ namespace ServiceStack.OrmLite.Dapper
 #if ASYNC
                                  , CancellationToken cancellationToken = default(CancellationToken)
 #endif
-            )
+            ) : this()
         {
             CommandText = commandText;
             Parameters = parameters;
@@ -126,7 +126,7 @@ namespace ServiceStack.OrmLite.Dapper
         {
             var cmd = cnn.CreateCommand();
             var init = GetInit(cmd.GetType());
-            init?.Invoke(cmd);
+            if (init != null) init(cmd);
             if (Transaction != null)
                 cmd.Transaction = Transaction;
             cmd.CommandText = CommandText;
@@ -140,7 +140,7 @@ namespace ServiceStack.OrmLite.Dapper
             }
             if (CommandType.HasValue)
                 cmd.CommandType = CommandType.Value;
-            paramReader?.Invoke(cmd, Parameters);
+            if (paramReader != null) paramReader(cmd, Parameters);
             return cmd;
         }
 

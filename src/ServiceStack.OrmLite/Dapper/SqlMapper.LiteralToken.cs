@@ -20,7 +20,7 @@ namespace ServiceStack.OrmLite.Dapper
             /// </summary>
             public string Member { get; private set; }
 
-            internal LiteralToken(string token, string member)
+            internal LiteralToken(string token, string member) : this()
             {
                 Token = token;
                 Member = member;

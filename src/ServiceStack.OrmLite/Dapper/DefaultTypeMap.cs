@@ -21,7 +21,7 @@ namespace ServiceStack.OrmLite.Dapper
         public DefaultTypeMap(Type type)
         {
             if (type == null)
-                throw new ArgumentNullException(nameof(type));
+                throw new ArgumentNullException("type");
 
             _fields = GetSettableFields(type);
             Properties = GetSettableProps(type);
