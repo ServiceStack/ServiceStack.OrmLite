@@ -72,7 +72,7 @@ namespace ServiceStack.OrmLite.Dapper
             /// </summary>
             public Task<IEnumerable<object>> ReadAsync(Type type, bool buffered = true)
             {
-                if (type == null) throw new ArgumentNullException(nameof(type));
+                if (type == null) throw new ArgumentNullException("type");
                 return ReadAsyncImpl<object>(type, buffered);
             }
 
@@ -81,7 +81,7 @@ namespace ServiceStack.OrmLite.Dapper
             /// </summary>
             public Task<object> ReadFirstAsync(Type type)
             {
-                if (type == null) throw new ArgumentNullException(nameof(type));
+                if (type == null) throw new ArgumentNullException("type");
                 return ReadRowAsyncImpl<object>(type, Row.First);
             }
             /// <summary>
@@ -89,7 +89,7 @@ namespace ServiceStack.OrmLite.Dapper
             /// </summary>
             public Task<object> ReadFirstOrDefaultAsync(Type type)
             {
-                if (type == null) throw new ArgumentNullException(nameof(type));
+                if (type == null) throw new ArgumentNullException("type");
                 return ReadRowAsyncImpl<object>(type, Row.FirstOrDefault);
             }
             /// <summary>
@@ -97,7 +97,7 @@ namespace ServiceStack.OrmLite.Dapper
             /// </summary>
             public Task<object> ReadSingleAsync(Type type)
             {
-                if (type == null) throw new ArgumentNullException(nameof(type));
+                if (type == null) throw new ArgumentNullException("type");
                 return ReadRowAsyncImpl<object>(type, Row.Single);
             }
             /// <summary>
@@ -105,7 +105,7 @@ namespace ServiceStack.OrmLite.Dapper
             /// </summary>
             public Task<object> ReadSingleOrDefaultAsync(Type type)
             {
-                if (type == null) throw new ArgumentNullException(nameof(type));
+                if (type == null) throw new ArgumentNullException("type");
                 return ReadRowAsyncImpl<object>(type, Row.SingleOrDefault);
             }
 
@@ -160,7 +160,7 @@ namespace ServiceStack.OrmLite.Dapper
                     // need for "Cancel" etc
                     reader.Dispose();
                     reader = null;
-                    callbacks?.OnCompleted();
+                    if (callbacks != null) callbacks.OnCompleted();
                     Dispose();
                 }
             }
@@ -234,8 +234,8 @@ namespace ServiceStack.OrmLite.Dapper
 
             private async Task<IEnumerable<T>> ReadBufferedAsync<T>(int index, Func<IDataReader, object> deserializer, Identity typedIdentity)
             {
-                try
-                {
+                //try
+                //{
                     var reader = (DbDataReader)this.reader;
                     List<T> buffer = new List<T>();
                     while (index == gridIndex && await reader.ReadAsync(cancel).ConfigureAwait(false))
@@ -243,14 +243,14 @@ namespace ServiceStack.OrmLite.Dapper
                         buffer.Add((T)deserializer(reader));
                     }
                     return buffer;
-                }
-                finally // finally so that First etc progresses things even when multiple rows
-                {
-                    if (index == gridIndex)
-                    {
-                        await NextResultAsync().ConfigureAwait(false);
-                    }
-                }
+                //}
+                //finally // finally so that First etc progresses things even when multiple rows
+                //{
+                //    if (index == gridIndex)
+                //    {
+                //        await NextResultAsync().ConfigureAwait(false);
+                //    }
+                //}
             }
         }
 
