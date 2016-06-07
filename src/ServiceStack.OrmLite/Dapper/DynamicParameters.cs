@@ -306,7 +306,10 @@ namespace ServiceStack.OrmLite.Dapper
         /// <summary>
         /// All the names of the param in the bag, use Get to yank them out
         /// </summary>
-        public IEnumerable<string> ParameterNames => parameters.Select(p => p.Key);
+        public IEnumerable<string> ParameterNames
+        {
+            get { return parameters.Select(p => p.Key); }
+        }
 
 
         /// <summary>
@@ -404,7 +407,7 @@ namespace ServiceStack.OrmLite.Dapper
             if (setter != null) goto MAKECALLBACK;
 
             // Come on let's build a method, let's build it, let's build it now!
-            var dm = new DynamicMethod($"ExpressionParam{Guid.NewGuid()}", null, new[] { typeof(object), GetType() }, true);
+            var dm = new DynamicMethod(String.Format("ExpressionParam{0}", Guid.NewGuid()), null, new[] { typeof(object), GetType() }, true);
             var il = dm.GetILGenerator();
 
             il.Emit(OpCodes.Ldarg_0); // [object]

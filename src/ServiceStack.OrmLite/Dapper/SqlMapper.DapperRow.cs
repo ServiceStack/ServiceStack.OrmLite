@@ -136,7 +136,11 @@ namespace ServiceStack.OrmLite.Dapper
                 return dic.Remove(item.Key);
             }
 
-            bool ICollection<KeyValuePair<string, object>>.IsReadOnly => false;
+            bool ICollection<KeyValuePair<string, object>>.IsReadOnly
+            {
+                get { return false; }
+            }
+
             #endregion
 
             #region Implementation of IDictionary<string,object>

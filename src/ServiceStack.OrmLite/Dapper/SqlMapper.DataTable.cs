@@ -11,7 +11,10 @@ namespace ServiceStack.OrmLite.Dapper
             string[] fieldNames;
             readonly Dictionary<string, int> fieldNameLookup;
 
-            internal string[] FieldNames => fieldNames;
+            internal string[] FieldNames
+            {
+                get { return fieldNames; }
+            }
 
             public DapperTable(string[] fieldNames)
             {
@@ -43,9 +46,15 @@ namespace ServiceStack.OrmLite.Dapper
                 return oldLen;
             }
             
-            internal bool FieldExists(string key) => key != null && fieldNameLookup.ContainsKey(key);
+            internal bool FieldExists(string key)
+            {
+                return key != null && fieldNameLookup.ContainsKey(key);
+            }
 
-            public int FieldCount => fieldNames.Length;
+            public int FieldCount
+            {
+                get { return fieldNames.Length; }
+            }
         }
     }
 }

@@ -20,6 +20,9 @@ namespace ServiceStack.OrmLite.Dapper
             doc.LoadXml(xml);
             return doc;
         }
-        protected override string Format(XmlDocument xml) => xml.OuterXml;
+        protected override string Format(XmlDocument xml)
+        {
+            return xml.OuterXml;
+        }
     }
 }

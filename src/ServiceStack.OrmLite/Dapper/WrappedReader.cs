@@ -38,14 +38,20 @@ namespace ServiceStack.OrmLite.Dapper
             reader?.Close();
         }
 
-        int IDataReader.Depth => Reader.Depth;
+        int IDataReader.Depth
+        {
+            get { return Reader.Depth; }
+        }
 
         DataTable IDataReader.GetSchemaTable()
         {
             return Reader.GetSchemaTable();
         }
 
-        bool IDataReader.IsClosed => reader?.IsClosed ?? true;
+        bool IDataReader.IsClosed
+        {
+            get { return reader != null ? reader.IsClosed : true; }
+        }
 
         bool IDataReader.NextResult()
         {
@@ -57,7 +63,10 @@ namespace ServiceStack.OrmLite.Dapper
             return Reader.Read();
         }
 
-        int IDataReader.RecordsAffected => Reader.RecordsAffected;
+        int IDataReader.RecordsAffected
+        {
+            get { return Reader.RecordsAffected; }
+        }
 
         void IDisposable.Dispose()
         {
@@ -68,7 +77,10 @@ namespace ServiceStack.OrmLite.Dapper
             cmd = null;
         }
 
-        int IDataRecord.FieldCount => Reader.FieldCount;
+        int IDataRecord.FieldCount
+        {
+            get { return Reader.FieldCount; }
+        }
 
         bool IDataRecord.GetBoolean(int i)
         {
@@ -180,8 +192,14 @@ namespace ServiceStack.OrmLite.Dapper
             return Reader.IsDBNull(i);
         }
 
-        object IDataRecord.this[string name] => Reader[name];
+        object IDataRecord.this[string name]
+        {
+            get { return Reader[name]; }
+        }
 
-        object IDataRecord.this[int i] => Reader[i];
+        object IDataRecord.this[int i]
+        {
+            get { return Reader[i]; }
+        }
     }
 }

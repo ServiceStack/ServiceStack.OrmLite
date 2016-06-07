@@ -61,12 +61,18 @@ namespace ServiceStack.OrmLite.Dapper
         /// <summary>
         /// Should data be buffered before returning?
         /// </summary>
-        public bool Buffered => (Flags & CommandFlags.Buffered) != 0;
+        public bool Buffered
+        {
+            get { return (Flags & CommandFlags.Buffered) != 0; }
+        }
 
         /// <summary>
         /// Should the plan for this query be cached?
         /// </summary>
-        internal bool AddToCache => (Flags & CommandFlags.NoCache) == 0;
+        internal bool AddToCache
+        {
+            get { return (Flags & CommandFlags.NoCache) == 0; }
+        }
 
         /// <summary>
         /// Additional state flags against this command
@@ -76,7 +82,10 @@ namespace ServiceStack.OrmLite.Dapper
         /// <summary>
         /// Can async queries be pipelined?
         /// </summary>
-        public bool Pipelined => (Flags & CommandFlags.Pipelined) != 0;
+        public bool Pipelined
+        {
+            get { return (Flags & CommandFlags.Pipelined) != 0; }
+        }
 
         /// <summary>
         /// Initialize the command definition

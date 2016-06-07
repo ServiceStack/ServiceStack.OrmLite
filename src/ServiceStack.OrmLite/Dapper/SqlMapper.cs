@@ -356,6 +356,7 @@ namespace ServiceStack.OrmLite.Dapper
         /// <summary>
         /// OBSOLETE: For internal usage only. Lookup the DbType and handler for a given Type and member
         /// </summary>
+        /// <exception cref="NotSupportedException"></exception>
         [Obsolete(ObsoleteInternalUsageOnly, false)]
 #if !COREFX
         [Browsable(false)]
@@ -403,7 +404,8 @@ namespace ServiceStack.OrmLite.Dapper
             }
 #endif
             if(demand)
-                throw new NotSupportedException($"The member {name} of type {type.FullName} cannot be used as a parameter value");
+                throw new NotSupportedException(
+                    String.Format("The member {0} of type {1} cannot be used as a parameter value", name, type.FullName));
             return DbType.Object;
 
         }
@@ -2152,7 +2154,7 @@ namespace ServiceStack.OrmLite.Dapper
             {
                 filterParams = !smellsLikeOleDb.IsMatch(identity.sql);
             }
-            var dm = new DynamicMethod($"ParamInfo{Guid.NewGuid()}", null, new[] { typeof(IDbCommand), typeof(object) }, type, true);
+            var dm = new DynamicMethod(String.Format("ParamInfo{0}", Guid.NewGuid()), null, new[] { typeof(IDbCommand), typeof(object) }, type, true);
 
             var il = dm.GetILGenerator();
 
@@ -2812,7 +2814,7 @@ namespace ServiceStack.OrmLite.Dapper
         )
         {
             var returnType = type.IsValueType() ? typeof(object) : type;
-            var dm = new DynamicMethod($"Deserialize{Guid.NewGuid()}", returnType, new[] { typeof(IDataReader) }, type, true);
+            var dm = new DynamicMethod(String.Format("Deserialize{0}", Guid.NewGuid()), returnType, new[] { typeof(IDataReader) }, type, true);
             var il = dm.GetILGenerator();
             il.DeclareLocal(typeof(int));
             il.DeclareLocal(type);
@@ -2886,8 +2888,12 @@ namespace ServiceStack.OrmLite.Dapper
                     var ctor = typeMap.FindConstructor(names, types);
                     if (ctor == null)
                     {
-                        string proposedTypes = $"({string.Join(", ", types.Select((t, i) => t.FullName + " " + names[i]).ToArray())})";
-                        throw new InvalidOperationException($"A parameterless default constructor or one matching signature {proposedTypes} is required for {type.FullName} materialization");
+                        string proposedTypes = String.Format("({0})",
+                            string.Join(", ", types.Select((t, i) => t.FullName + " " + names[i]).ToArray()));
+                        throw new InvalidOperationException(
+                            String.Format(
+                                "A parameterless default constructor or one matching signature {0} is required for {1} materialization",
+                                proposedTypes, type.FullName));
                     }
 
                     if (ctor.GetParameters().Length == 0)
@@ -3328,7 +3334,8 @@ namespace ServiceStack.OrmLite.Dapper
                         formattedValue = valEx.Message;
                     }
                 }
-                toThrow = new DataException($"Error parsing column {index} ({name}={formattedValue})", ex);
+                toThrow = new DataException(
+                    String.Format("Error parsing column {0} ({1}={2})", index, name, formattedValue), ex);
             }
             catch
             { // throw the **original** exception, wrapped as DataException

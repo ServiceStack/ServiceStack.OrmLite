@@ -68,7 +68,10 @@ namespace ServiceStack.OrmLite.Dapper
         /// <summary>
         /// Target member type
         /// </summary>
-        public Type MemberType => Field?.FieldType ?? Property?.PropertyType ?? Parameter?.ParameterType;
+        public Type MemberType
+        {
+            get { return Field != null ? Field.FieldType : (Property != null ? Property.PropertyType : (Parameter != null ? Parameter.ParameterType : null)); }
+        }
 
         /// <summary>
         /// Target property
