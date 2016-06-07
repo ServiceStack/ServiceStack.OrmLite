@@ -50,9 +50,9 @@ namespace ServiceStack.OrmLite.Dapper
                 Value = value;
                 Tail = tail;
             }
-            public TKey Key { get; }
-            public TValue Value { get; }
-            public Link<TKey, TValue> Tail { get; }
+            public TKey Key { get; set; }
+            public TValue Value { get; set; }
+            public Link<TKey, TValue> Tail { get; set; }
         }
     }
 }

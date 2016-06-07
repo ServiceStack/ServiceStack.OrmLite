@@ -29,6 +29,6 @@ namespace ServiceStack.OrmLite.Dapper
         /// <summary>
         /// True if the db supports array columns e.g. Postgresql
         /// </summary>
-        public bool Arrays { get; }
+        public bool Arrays { get; set; }
     }
 }

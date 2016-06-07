@@ -36,27 +36,27 @@ namespace ServiceStack.OrmLite.Dapper
         /// <summary>
         /// The command (sql or a stored-procedure name) to execute
         /// </summary>
-        public string CommandText { get; }
+        public string CommandText { get; set; }
 
         /// <summary>
         /// The parameters associated with the command
         /// </summary>
-        public object Parameters { get; }
+        public object Parameters { get; set; }
 
         /// <summary>
         /// The active transaction for the command
         /// </summary>
-        public IDbTransaction Transaction { get; }
+        public IDbTransaction Transaction { get; set; }
 
         /// <summary>
         /// The effective timeout for the command
         /// </summary>
-        public int? CommandTimeout { get; }
+        public int? CommandTimeout { get; set; }
 
         /// <summary>
         /// The type of command that the command-text represents
         /// </summary>
-        public CommandType? CommandType { get; }
+        public CommandType? CommandType { get; set; }
 
         /// <summary>
         /// Should data be buffered before returning?
@@ -77,7 +77,7 @@ namespace ServiceStack.OrmLite.Dapper
         /// <summary>
         /// Additional state flags against this command
         /// </summary>
-        public CommandFlags Flags { get; }
+        public CommandFlags Flags { get; set; }
 
         /// <summary>
         /// Can async queries be pipelined?

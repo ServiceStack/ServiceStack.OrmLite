@@ -63,7 +63,7 @@ namespace ServiceStack.OrmLite.Dapper
         /// <summary>
         /// DataReader column name
         /// </summary>
-        public string ColumnName { get; }
+        public string ColumnName { get; set; }
 
         /// <summary>
         /// Target member type
@@ -76,16 +76,16 @@ namespace ServiceStack.OrmLite.Dapper
         /// <summary>
         /// Target property
         /// </summary>
-        public PropertyInfo Property { get; }
+        public PropertyInfo Property { get; set; }
 
         /// <summary>
         /// Target field
         /// </summary>
-        public FieldInfo Field { get; }
+        public FieldInfo Field { get; set; }
 
         /// <summary>
         /// Target constructor parameter
         /// </summary>
-        public ParameterInfo Parameter { get; }
+        public ParameterInfo Parameter { get; set; }
     }
 }

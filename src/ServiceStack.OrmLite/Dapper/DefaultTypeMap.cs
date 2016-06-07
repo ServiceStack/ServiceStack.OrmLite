@@ -199,6 +199,6 @@ namespace ServiceStack.OrmLite.Dapper
         /// <summary>
         /// The settable properties for this typemap
         /// </summary>
-        public List<PropertyInfo> Properties { get; }
+        public List<PropertyInfo> Properties { get; set; }
     }
 }

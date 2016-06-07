@@ -13,12 +13,12 @@ namespace ServiceStack.OrmLite.Dapper
             /// <summary>
             /// The text in the original command that should be replaced
             /// </summary>
-            public string Token { get; }
+            public string Token { get; set; }
 
             /// <summary>
             /// The name of the member referred to by the token
             /// </summary>
-            public string Member { get; }
+            public string Member { get; set; }
 
             internal LiteralToken(string token, string member)
             {
