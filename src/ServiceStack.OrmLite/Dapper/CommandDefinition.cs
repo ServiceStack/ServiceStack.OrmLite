@@ -119,7 +119,7 @@ namespace ServiceStack.OrmLite.Dapper
         /// <summary>
         /// For asynchronous operations, the cancellation-token
         /// </summary>
-        public CancellationToken CancellationToken { get; }
+        public CancellationToken CancellationToken { get; private set; }
 #endif
 
         internal IDbCommand SetupCommand(IDbConnection cnn, Action<IDbCommand, object> paramReader)
