@@ -14,6 +14,9 @@ namespace ServiceStack.OrmLite
 {
     public abstract partial class SqlExpression<T> : ISqlExpression, IHasUntypedSqlExpression
     {
+        private const string TrueLiteral = "(1=1)";
+        private const string FalseLiteral = "(1=0)";
+
         protected bool visitedExpressionIsTableColumn = false;
         protected bool skipParameterizationForThisExpression = false;
 
@@ -421,8 +424,15 @@ namespace ServiceStack.OrmLite
 
             useFieldName = true;
             sep = " ";
-            var newExpr = Visit(predicate).ToString();
+            var newExpr = WhereExpressionToString(Visit(predicate));
             AppendToWhere(condition, newExpr);
+        }
+
+        private static string WhereExpressionToString(object expression)
+        {
+            if (expression is bool)
+                return (bool)expression ? TrueLiteral : FalseLiteral;
+            return expression.ToString();
         }
 
         protected void AppendToWhere(string condition, string sqlExpression)
@@ -1258,6 +1268,24 @@ namespace ServiceStack.OrmLite
                 originalLeft = left = Visit(b.Left);
                 originalRight = right = Visit(b.Right);
 
+                // Handle "expr = true/false", including with the constant on the left
+
+                if (operand == "=" || operand == "<>")
+                {
+                    if (left is bool)
+                    {
+                        Swap(ref left, ref right); // Should be safe to swap for equality/inequality checks
+                    }
+
+                    if (right is bool && !IsFieldName(left)) // Don't change anything when "expr" is a column name - then we really want "ColName = 1"
+                    {
+                        if (operand == "=")
+                            return (bool)right ? left : GetNotValue(left); // "expr == true" becomes "expr", "expr == false" becomes "not (expr)"
+                        if (operand == "<>")
+                            return (bool)right ? GetNotValue(left) : left; // "expr != true" becomes "not (expr)", "expr != false" becomes "expr"
+                    }
+                }
+
                 var leftEnum = left as EnumMemberAccess;
                 var rightEnum = right as EnumMemberAccess;
 
@@ -1282,7 +1310,8 @@ namespace ServiceStack.OrmLite
                 }
                 else if (left as PartialSqlString == null && right as PartialSqlString == null)
                 {
-                    var result = CachedExpressionCompiler.Evaluate(b);
+                    var evaluatedValue = CachedExpressionCompiler.Evaluate(b);
+                    var result = VisitConstant(Expression.Constant(evaluatedValue));
                     return result;
                 }
                 else if (left as PartialSqlString == null)
@@ -1297,10 +1326,7 @@ namespace ServiceStack.OrmLite
 
             if (left.ToString().Equals("null", StringComparison.OrdinalIgnoreCase))
             {
-                // "null is x" will not work, so swap the operands
-                var temp = right;
-                right = left;
-                left = temp;
+                Swap(ref left, ref right); // "null is x" will not work, so swap the operands
             }
 
             if (operand == "=" && right.ToString().Equals("null", StringComparison.OrdinalIgnoreCase))
@@ -1318,6 +1344,13 @@ namespace ServiceStack.OrmLite
                 default:
                     return new PartialSqlString("(" + left + sep + operand + sep + right + ")");
             }
+        }
+
+        private static void Swap(ref object left, ref object right)
+        {
+            var temp = right;
+            right = left;
+            left = temp;
         }
 
         protected virtual void VisitFilter(string operand, object originalLeft, object originalRight, ref object left, ref object right)
@@ -1441,14 +1474,7 @@ namespace ServiceStack.OrmLite
             {
                 case ExpressionType.Not:
                     var o = Visit(u.Operand);
-
-                    if (o as PartialSqlString == null)
-                        return !((bool)o);
-
-                    if (IsFieldName(o))
-                        return new PartialSqlString(o + "=" + GetQuotedFalseValue());
-
-                    return new PartialSqlString("NOT (" + o + ")");
+                    return GetNotValue(o);
                 case ExpressionType.Convert:
                     if (u.Method != null)
                     {
@@ -1457,6 +1483,17 @@ namespace ServiceStack.OrmLite
                     break;
             }
             return Visit(u.Operand);
+        }
+
+        private object GetNotValue(object o)
+        {
+            if (o as PartialSqlString == null)
+                return !((bool) o);
+
+            if (IsFieldName(o))
+                return new PartialSqlString(o + "=" + GetQuotedFalseValue());
+
+            return new PartialSqlString("NOT (" + o + ")");
         }
 
         private bool IsColumnAccess(MethodCallExpression m)
@@ -1783,14 +1820,14 @@ namespace ServiceStack.OrmLite
             var argValue = CachedExpressionCompiler.Evaluate(m.Arguments[1]);
 
             if (argValue == null)
-                return "(1=0)"; // "column IN (NULL)" is always false
+                return FalseLiteral; // "column IN (NULL)" is always false
 
             var enumerableArg = argValue as IEnumerable;
             if (enumerableArg != null)
             {
                 var inArgs = Sql.Flatten(enumerableArg);
                 if (inArgs.Count == 0)
-                    return "(1=0)"; // "column IN ([])" is always false
+                    return FalseLiteral; // "column IN ([])" is always false
 
                 string sqlIn = CreateInParamSql(inArgs);
                 return string.Format("{0} {1} ({2})", quotedColName, m.Method.Name, sqlIn);

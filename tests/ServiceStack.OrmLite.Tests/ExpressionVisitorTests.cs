@@ -272,6 +272,72 @@ namespace ServiceStack.OrmLite.Tests
             Assert.AreEqual(sql1, sql2);
         }
 
+        [Test]
+        public void Can_Select_using_boolean_constant()
+        {
+            var q = Db.From<TestType>().Where(x => true);
+            var target = Db.Select(q);
+            Assert.AreEqual(4, target.Count);
+
+            q = Db.From<TestType>().Where(x => false);
+            target = Db.Select(q);
+            Assert.AreEqual(0, target.Count);
+        }
+
+        [Test]
+        public void Can_Select_using_expression_evaluated_to_constant()
+        {
+            var a = 5;
+            var b = 6;
+            int? nullableInt = null;
+
+            var q = Db.From<TestType>().Where(x => a < b); // "a < b" is evaluated by SqlExpression (not at compile time!) to ConstantExpression (true)
+            var target = Db.Select(q);
+            Assert.AreEqual(4, target.Count);
+
+            q = Db.From<TestType>().Where(x => x.NullableIntCol == nullableInt); // Expression evaluated to "null" in SqlExpression
+            target = Db.Select(q);
+            CollectionAssert.AreEquivalent(new[] { 2 }, target.Select(t => t.Id).ToArray());
+
+            q = Db.From<TestType>().Where(x => nullableInt == x.NullableIntCol); // Same with the null on the left
+            target = Db.Select(q);
+            CollectionAssert.AreEquivalent(new[] { 2 }, target.Select(t => t.Id).ToArray());
+
+            // Expression = or <> true or false
+
+            q = Db.From<TestType>().Where(x => x.NullableIntCol.HasValue == 5 < 6); // Evaluated to "true" at compile time: equivalent to "x.NullableIntCol != null"
+            target = Db.Select(q);
+            CollectionAssert.AreEquivalent(new[] { 1, 3, 4 }, target.Select(t => t.Id).ToArray());
+
+            q = Db.From<TestType>().Where(x => x.NullableIntCol.HasValue == 5 > 6); // Evaluated to "false" at compile time: equivalent to "x.NullableIntCol == null"
+            target = Db.Select(q);
+            CollectionAssert.AreEquivalent(new[] { 2 }, target.Select(t => t.Id).ToArray());
+
+            q = Db.From<TestType>().Where(x => x.NullableIntCol.HasValue != 5 > 6); // != false
+            target = Db.Select(q);
+            CollectionAssert.AreEquivalent(new[] { 1, 3, 4 }, target.Select(t => t.Id).ToArray());
+
+            q = Db.From<TestType>().Where(x => x.NullableIntCol.HasValue != 5 < 6); // != true
+            target = Db.Select(q);
+            CollectionAssert.AreEquivalent(new[] { 2 }, target.Select(t => t.Id).ToArray());
+
+            // Same, but with the constant on the left
+
+            q = Db.From<TestType>().Where(x => 5 < 6 == x.NullableIntCol.HasValue);
+            target = Db.Select(q);
+            CollectionAssert.AreEquivalent(new[] { 1, 3, 4 }, target.Select(t => t.Id).ToArray());
+
+            q = Db.From<TestType>().Where(x => 5 > 6 != x.NullableIntCol.HasValue);
+            target = Db.Select(q);
+            CollectionAssert.AreEquivalent(new[] { 1, 3, 4 }, target.Select(t => t.Id).ToArray());
+
+            // Same, but with the expression evaluated inside SqlExpression (not at compile time)
+
+            q = Db.From<TestType>().Where(x => x.NullableIntCol.HasValue == a < b);
+            target = Db.Select(q);
+            CollectionAssert.AreEquivalent(new[] { 1, 3, 4 }, target.Select(t => t.Id).ToArray());
+        }
+
         private int MethodReturningInt(int val)
         {
             return val;
