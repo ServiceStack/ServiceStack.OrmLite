@@ -14,6 +14,177 @@
             Default redirct URL if Required Role or Permission attributes doesn't permit access.
             </summary>
         </member>
+        <member name="T:ServiceStack.Auth.IManageApiKeys">
+            <summary>
+            The Interface Auth Repositories need to implement to support API Keys
+            </summary>
+        </member>
+        <member name="T:ServiceStack.Auth.ApiKey">
+            <summary>
+            The POCO Table used to persist API Keys
+            </summary>
+        </member>
+        <member name="T:ServiceStack.Auth.ApiKeyAuthProvider">
+            <summary>
+            Enable access to protected Services using API Keys
+            </summary>
+        </member>
+        <member name="P:ServiceStack.Auth.ApiKeyAuthProvider.ServiceRoutes">
+            <summary>
+            Modify the registration of GetApiKeys and RegenrateApiKeys Services
+            </summary>
+        </member>
+        <member name="P:ServiceStack.Auth.ApiKeyAuthProvider.KeySizeBytes">
+            <summary>
+            How much entropy should the generated keys have. (default 24)
+            </summary>
+        </member>
+        <member name="P:ServiceStack.Auth.ApiKeyAuthProvider.Environments">
+            <summary>
+            Generate different keys for different environments. (default live,test)
+            </summary>
+        </member>
+        <member name="P:ServiceStack.Auth.ApiKeyAuthProvider.KeyTypes">
+            <summary>
+            Different types of Keys each user can have. (default secret)
+            </summary>
+        </member>
+        <member name="P:ServiceStack.Auth.ApiKeyAuthProvider.ExpireKeysAfter">
+            <summary>
+            Whether to automatically expire keys. (default no expiry)
+            </summary>
+        </member>
+        <member name="P:ServiceStack.Auth.ApiKeyAuthProvider.InitSchema">
+            <summary>
+            Automatically create the ApiKey Table for AuthRepositories which need it. (default true)
+            </summary>
+        </member>
+        <member name="P:ServiceStack.Auth.ApiKeyAuthProvider.RequireSecureConnection">
+            <summary>
+            Whether to only allow access via API Key from a secure connection. (default true)
+            </summary>
+        </member>
+        <member name="P:ServiceStack.Auth.ApiKeyAuthProvider.GenerateApiKey">
+            <summary>
+            Change how API Key is generated
+            </summary>
+        </member>
+        <member name="P:ServiceStack.Auth.ApiKeyAuthProvider.CreateApiKeyFilter">
+            <summary>
+            Run custom filter after API Key is created
+            </summary>
+        </member>
+        <member name="T:ServiceStack.Auth.JwtAuthProvider">
+            <summary>
+            Used to Issue and process JWT Tokens and registers ConvertSessionToToken Service to convert Sessions to JWT Tokens
+            </summary>
+        </member>
+        <member name="T:ServiceStack.Auth.JwtAuthProviderReader">
+            <summary>
+            Enable access to protected Services using JWT Tokens
+            </summary>
+        </member>
+        <member name="F:ServiceStack.Auth.JwtAuthProviderReader.HmacAlgorithms">
+            <summary>
+            Different HMAC Algorithms supported
+            </summary>
+        </member>
+        <member name="F:ServiceStack.Auth.JwtAuthProviderReader.RsaSignAlgorithms">
+            <summary>
+            Different RSA Signing Algorithms supported
+            </summary>
+        </member>
+        <member name="P:ServiceStack.Auth.JwtAuthProviderReader.RequireSecureConnection">
+            <summary>
+            Whether to only allow access via API Key from a secure connection. (default true)
+            </summary>
+        </member>
+        <member name="P:ServiceStack.Auth.JwtAuthProviderReader.CreateHeaderFilter">
+            <summary>
+            Run custom filter after JWT Header is created
+            </summary>
+        </member>
+        <member name="P:ServiceStack.Auth.JwtAuthProviderReader.CreatePayloadFilter">
+            <summary>
+            Run custom filter after JWT Payload is created
+            </summary>
+        </member>
+        <member name="P:ServiceStack.Auth.JwtAuthProviderReader.PopulateSessionFilter">
+            <summary>
+            Run custom filter after session is restored from a JWT Token
+            </summary>
+        </member>
+        <member name="P:ServiceStack.Auth.JwtAuthProviderReader.EncryptPayload">
+            <summary>
+            Whether to encrypt JWE Payload (default false). 
+            Uses RSA-OAEP for Key Encryption and AES/128/CBC HMAC SHA256 for Conent Encryption
+            </summary>
+        </member>
+        <member name="P:ServiceStack.Auth.JwtAuthProviderReader.HashAlgorithm">
+            <summary>
+            Which Hash Algorithm should be used to sign the JWT Token. (default HS256)
+            </summary>
+        </member>
+        <member name="P:ServiceStack.Auth.JwtAuthProviderReader.RequireHashAlgorithm">
+            <summary>
+            Whether to only allow processing of JWT Tokens using the configured HashAlgorithm. (default true)
+            </summary>
+        </member>
+        <member name="P:ServiceStack.Auth.JwtAuthProviderReader.Issuer">
+            <summary>
+            The Issuer to embed in the token. (default ssjwt)
+            </summary>
+        </member>
+        <member name="P:ServiceStack.Auth.JwtAuthProviderReader.Audience">
+            <summary>
+            The Audience to embed in the token. (default null)
+            </summary>
+        </member>
+        <member name="P:ServiceStack.Auth.JwtAuthProviderReader.KeyId">
+            <summary>
+            What Id to use to identify the Key used to sign the token. (default First 3 chars of Base64 Key)
+            </summary>
+        </member>
+        <member name="P:ServiceStack.Auth.JwtAuthProviderReader.AuthKey">
+            <summary>
+            The AuthKey used to sign the JWT Token
+            </summary>
+        </member>
+        <member name="F:ServiceStack.Auth.JwtAuthProviderReader.privateKey">
+            <summary>
+            The RSA Private Key used to Sign the JWT Token when RSA is used
+            </summary>
+        </member>
+        <member name="P:ServiceStack.Auth.JwtAuthProviderReader.PrivateKeyXml">
+            <summary>
+            Convenient overload to intialize the Private Key via exported XML
+            </summary>
+        </member>
+        <member name="P:ServiceStack.Auth.JwtAuthProviderReader.PublicKey">
+            <summary>
+            The RSA Public Key used to Verify the JWT Token when RSA is used
+            </summary>
+        </member>
+        <member name="P:ServiceStack.Auth.JwtAuthProviderReader.PublicKeyXml">
+            <summary>
+            Convenient overload to intialize the Public Key via exported XML
+            </summary>
+        </member>
+        <member name="P:ServiceStack.Auth.JwtAuthProviderReader.ExpireTokensIn">
+            <summary>
+            How long should JWT Tokens be valid for. (default 14 days)
+            </summary>
+        </member>
+        <member name="P:ServiceStack.Auth.JwtAuthProviderReader.InvalidateTokensIssuedBefore">
+            <summary>
+            Whether to invalidate all JWT Tokens issued before a specified date.
+            </summary>
+        </member>
+        <member name="P:ServiceStack.Auth.JwtAuthProviderReader.ServiceRoutes">
+            <summary>
+            Modify the registration of ConvertSessionToToken Service
+            </summary>
+        </member>
         <member name="P:ServiceStack.Auth.AspNetWindowsAuthProvider.AllRoles">
             <summary>
             Specify all roles to be used by this application
@@ -219,6 +390,9 @@
             <summary>
             Thank you Martijn
             http://www.dijksterhuis.org/creating-salted-hash-values-in-c/
+            
+            Stronger/Slower Alternative: 
+            https://github.com/defuse/password-hashing/blob/master/PasswordStorage.cs
             </summary>
         </member>
         <member name="T:ServiceStack.Auth.TwitterAuthProvider">
@@ -5203,7 +5377,7 @@
             Resolves and auto-wires a ServiceStack Service from a HttpListenerContext.
             </summary>
         </member>
-        <member name="M:ServiceStack.HostContext.ResolveService``1(ServiceStack.Web.IHttpRequest)">
+        <member name="M:ServiceStack.HostContext.ResolveService``1(ServiceStack.Web.IRequest)">
             <summary>
             Resolves and auto-wires a ServiceStack Service.
             </summary>
