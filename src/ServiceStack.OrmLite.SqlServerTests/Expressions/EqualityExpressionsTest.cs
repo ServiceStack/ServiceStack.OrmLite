@@ -4,8 +4,6 @@ namespace ServiceStack.OrmLite.SqlServerTests.Expressions
 {
     public class EqualityExpressionsTest : ExpressionsTestBase
     {
-        #region int tests
-
         [Test]
         public void Can_select_equals_constant_int_expression()
         {
@@ -128,9 +126,6 @@ namespace ServiceStack.OrmLite.SqlServerTests.Expressions
             CollectionAssert.DoesNotContain(actual, expected);
         }
 
-        #endregion
-
-        #region bool test
 
         [Test]
         public void Can_select_equals_constant_bool_expression()
@@ -306,6 +301,5 @@ namespace ServiceStack.OrmLite.SqlServerTests.Expressions
             CollectionAssert.Contains(actual, expected);       // this will fail as well
         }
 
-        #endregion
     }
 }

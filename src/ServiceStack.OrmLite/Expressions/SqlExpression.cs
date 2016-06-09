@@ -1364,7 +1364,10 @@ namespace ServiceStack.OrmLite
             if (operand == "AND" || operand == "OR" || operand == "is" || operand == "is not")
                 return;
 
-            ConvertToPlaceholderAndParameter(ref right);
+            if (!(right is PartialSqlString))
+            {
+                ConvertToPlaceholderAndParameter(ref right);
+            }
         }
 
         protected virtual void ConvertToPlaceholderAndParameter(ref object right)
