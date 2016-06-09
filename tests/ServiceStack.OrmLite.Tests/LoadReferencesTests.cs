@@ -649,7 +649,7 @@ namespace ServiceStack.OrmLite.Tests
             db.Save(customer, references: true);
             Assert.That(customer.Id, Is.GreaterThan(0));
 
-            var dbCustomers = db.LoadSelect<Customer>(q => q.Id == customer.Id, include: new[] { "PrimaryAddress" });
+            var dbCustomers = db.LoadSelect<Customer>(x => x.Id == customer.Id, include: x => x.PrimaryAddress);
             Assert.That(dbCustomers.Count, Is.EqualTo(1));
             Assert.That(dbCustomers[0].Name, Is.EqualTo("Customer 1"));
             Assert.That(dbCustomers[0].Orders, Is.Null);
