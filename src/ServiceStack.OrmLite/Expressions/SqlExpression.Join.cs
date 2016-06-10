@@ -135,7 +135,13 @@ namespace ServiceStack.OrmLite
             useFieldName = true;
             sep = " ";
 
+            if (!tableDefs.Contains(sourceDef))
+                tableDefs.Add(sourceDef);
+            if (!tableDefs.Contains(targetDef))
+                tableDefs.Add(targetDef);
+
             var isCrossJoin = "CROSS JOIN".Equals(joinType);
+
             var sqlExpr = joinExpr != null 
                 ? InternalCreateSqlFromExpression(joinExpr, isCrossJoin)
                 : InternalCreateSqlFromDefinitions(sourceDef, targetDef, isCrossJoin);
@@ -145,11 +151,6 @@ namespace ServiceStack.OrmLite
                               : targetDef;
 
             FromExpression += " {0} {1} {2}".Fmt(joinType, SqlTable(joinDef), sqlExpr);
-
-            if (!tableDefs.Contains(sourceDef))
-                tableDefs.Add(sourceDef);
-            if (!tableDefs.Contains(targetDef))
-                tableDefs.Add(targetDef);
 
             return this;
         }

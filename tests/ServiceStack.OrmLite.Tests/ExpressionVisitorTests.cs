@@ -367,6 +367,19 @@ namespace ServiceStack.OrmLite.Tests
         public int Id { get; set; }
         public string TextCol { get; set; }
         public bool BoolCol { get; set; }
+        public bool? NullableBoolCol { get; set; }
+        public DateTime DateCol { get; set; }
+        public TestEnum EnumCol { get; set; }
+        public TestType ComplexObjCol { get; set; }
+        public int? NullableIntCol { get; set; }
+    }
+
+    public class TestType2
+    {
+        public int Id { get; set; }
+        public string TextCol { get; set; }
+        public bool BoolCol { get; set; }
+        public bool? NullableBoolCol { get; set; }
         public DateTime DateCol { get; set; }
         public TestEnum EnumCol { get; set; }
         public TestType ComplexObjCol { get; set; }
