@@ -229,7 +229,7 @@ namespace ServiceStack.OrmLite
                 var endPos = startPos;
                 for (; endPos < reader.FieldCount; endPos++)
                 {
-                    if (reader.GetName(endPos) == "EOT")
+                    if (string.Equals("EOT", reader.GetName(endPos), StringComparison.OrdinalIgnoreCase))
                         break;
                 }
 

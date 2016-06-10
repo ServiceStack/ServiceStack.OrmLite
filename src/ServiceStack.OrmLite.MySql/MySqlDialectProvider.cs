@@ -159,6 +159,9 @@ namespace ServiceStack.OrmLite.MySql
             var modelDef = GetModel(tableType);
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
+                if (fieldDef.CustomSelect != null)
+                    continue;
+
                 if (sbColumns.Length != 0) sbColumns.Append(", \n  ");
 
                 sbColumns.Append(GetColumnDefinition(fieldDef));

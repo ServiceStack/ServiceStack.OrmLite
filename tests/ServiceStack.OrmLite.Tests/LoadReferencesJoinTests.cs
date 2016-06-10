@@ -744,6 +744,8 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_populate_multiple_POCOs_using_Dappers_QueryMultiple()
         {
+            if (Dialect == Dialect.PostgreSql) return; //Dapper doesn't know about pgsql naming conventions
+
             ResetTables();
             AddCustomerWithOrders();
 
