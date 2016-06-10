@@ -13,7 +13,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var db = OpenDbConnection())
             {
-                db.CreateTable<Person>();
+                db.DropAndCreateTable<Person>();
                 db.InsertAll(Person.Rockstars);
 
                 Assert.That(db.Select<Person>(x => x.Age == 27).Count, Is.EqualTo(4));

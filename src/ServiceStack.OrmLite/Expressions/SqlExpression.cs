@@ -1207,6 +1207,9 @@ namespace ServiceStack.OrmLite
                 if (m.Expression != null)
                 {
                     string r = VisitMemberAccess(m).ToString();
+                    if (m.Expression.Type.IsNullableType())
+                        return r;
+
                     return string.Format("{0}={1}", r, GetQuotedTrueValue());
                 }
 
