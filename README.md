@@ -362,11 +362,13 @@ is used to filter the update to this specific record:
 ```csharp
 db.Update(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27});
 ```
+
 If you supply your own where expression, it updates every field (inc. Id) but uses your filter instead:
 
 ```csharp
 db.Update(new Person { Id = 1, FirstName = "JJ" }, p => p.LastName == "Hendrix");
 ```
+
 One way to limit the fields which gets updated is to use an **Anonymous Type**:
 
 ```csharp
@@ -382,11 +384,24 @@ db.UpdateNonDefaults(new Person { FirstName = "JJ" }, p => p.LastName == "Hendri
 #### UpdateOnly
 
 As updating a partial row is a common use-case in Db's, we've added a number of methods for just 
-this purpose, named **UpdateOnly**.
+this purpose, named **UpdateOnly**. 
 
-The first expression in an `UpdateOnly` statement is used to specify which fields should be updated:
+The lambda syntax lets you update only the fields listed in property initializers, e.g:
+
 ```csharp
-db.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName);
+db.UpdateOnly(() => new Person { FirstName = "JJ" });
+```
+
+The second argument lets you specify a filter for updates: 
+
+```csharp
+db.UpdateOnly(() => new Person { FirstName = "JJ" }, where: p => p.LastName == "Hendrix");
+```
+
+Alternatively you can pass in a POCO directly, in which case the first expression in an `UpdateOnly` 
+statement is used to specify which fields should be updated:
+```csharp
+db.UpdateOnly(new Person { FirstName = "JJ" }, onlyFields: p => p.FirstName);
 ```
 ```csharp
 db.UpdateOnly(new Person { FirstName = "JJ", Age = 12 }, 
@@ -402,7 +417,7 @@ Instead of using the expression filters above you can choose to use an SqlExpres
 
 ```csharp
 var q = db.From<Person>()
-          .Update(p => p.FirstName);
+    .Update(p => p.FirstName);
 
 db.UpdateOnly(new Person { FirstName = "JJ", LastName = "Hendo" }, onlyFields: q);
 ```
@@ -411,23 +426,10 @@ Using a typed SQL Expression:
 
 ```csharp
 var q = db.From<Person>()
-          .Where(x => x.FirstName == "Jimi")
-          .Update(p => p.FirstName);
+    .Where(x => x.FirstName == "Jimi")
+    .Update(p => p.FirstName);
           
 db.UpdateOnly(new Person { FirstName = "JJ" }, onlyFields: q);
-```
-
-For the ultimate flexibility we also provide un-typed, string-based expressions. Use the `.SqlFmt()` extension method escape parameters (inspired by [massive](https://github.com/robconery/massive)):
-
-```csharp
-db.UpdateFmt<Person>(set: "FirstName = {0}".SqlFmt("JJ"), 
-                   where: "LastName = {0}".SqlFmt("Hendrix"));
-```
-Even the Table name can be a string so you perform the same update without requiring the Person model at all:
-
-```csharp
-db.UpdateFmt(table: "Person", set: "FirstName = {0}".SqlFmt("JJ"), 
-             where: "LastName = {0}".SqlFmt("Hendrix"));
 ```
 
 ### Updating existing values
@@ -436,9 +438,11 @@ The `UpdateAdd` API provides several Typed API's for updating existing values:
 
 ```csharp
 //Increase everyone's Score by 3 points
-db.UpdateAdd(new Person { Score = 3 }, fields: x => x.Score); 
+db.UpdateAdd(() => new Person { Score = 3 }); 
+db.UpdateAdd(new Person { Score = 3 }, updateFields: x => x.Score); 
 
 //Remove 5 points from Jackson Score
+db.UpdateAdd(() => new Person { Score = -5 }, x => where: x.LastName == "Jackson");
 db.UpdateAdd(new Person { Score = -5 }, x => x.Score, x => where: x.LastName == "Jackson");
 
 //Graduate everyone and increase everyone's Score by 2 points 
@@ -461,11 +465,20 @@ Insert's are pretty straight forward since in most cases you want to insert ever
 ```csharp
 db.Insert(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27 });
 ```
-But do provide an API that takes an SqlExpression for the rare cases you don't want to insert every field
+
+#### Partial Inserts
+
+You can use `InsertOnly` for the rare cases you don't want to insert every field
+
+```csharp
+db.InsertOnly(() => new Person { FirstName = "Amy" });
+```
+
+Alternative API using an SqlExpression
 
 ```csharp
 var q = db.From<Person>()
-          .Insert(p => new { p.FirstName });
+    .Insert(p => new { p.FirstName });
 
 db.InsertOnly(new Person { FirstName = "Amy" }, onlyFields: q)
 ```
@@ -480,19 +493,14 @@ db.Delete<Person>(p => p.Age == 27);
 Or an SqlExpression:
 ```csharp
 var q = db.From<Person>()
-          .Where(p => p.Age == 27);
+    .Where(p => p.Age == 27);
 
 db.Delete<Person>(q);
 ```
 
 As well as un-typed, string-based expressions:
 ```csharp
-db.Delete<Person>(where: "Age = {0}".SqlFmt(27));
-```
-
-Which also can take a table name so works without requiring a typed **Person** model
-```csharp
-db.Delete(table: "Person", where: "Age = {0}".SqlFmt(27));
+db.Delete<Person>(where: "Age = @age", new { age = 27 });
 ```
 
 # API Overview
@@ -507,22 +515,25 @@ OrmLite Extension methods hang off ADO.NET's `IDbConnection`.
 
 `CreateTable<T>` and `DropTable<T>` create and drop tables based on a classes type definition (only public properties used).
 
-By default the Select API's use parameterized SQL whilst any selection methods ending with **Fmt** allow you to construct Sql using C# `string.Format()` syntax.
-
 If your SQL doesn't start with a **SELECT** statement, it is assumed a WHERE clause is being provided, e.g:
 
 ```csharp
-var tracks = db.SelectFmt<Track>("Artist = {0} AND Album = {1}", 
-  "Nirvana", 
-  "Heart Shaped Box");
+var tracks = db.Select<Track>("Artist = @artist AND Album = @album",
+    new { artist = "Nirvana", album = "Heart Shaped Box" });
 ```
 
 Which is equivalent to:
 
 ```csharp
-var tracks = db.SelectFmt<Track>("SELECT * FROM track WHERE Artist={0} AND Album={1}", 
-    "Nirvana", 
-    "Heart Shaped Box");
+var tracks = db.Select<Track>("SELECT * FROM track WHERE Artist = @artist AND Album = @album", 
+    new { artist = "Nirvana", album = "Heart Shaped Box" });
+```
+
+Use `Sql*` APIs for when you want to query custom SQL that is not a SELECT statement, e.g:
+
+```csharp
+var tracks = db.SqlList<Track>("EXEC GetArtistTracks @artist, @album",
+    new { artist = "Nirvana", album = "Heart Shaped Box" });
 ```
 
 **Select** returns multiple records: 
@@ -541,6 +552,9 @@ Track track = db.Single<Track>(x => x.RefId == refId)
 
 ```csharp
 Dictionary<int, string> trackIdNamesMap = db.Dictionary<int, string>(
+    db.From<Track>().Select(x => new { x.Id, x.Name }))
+
+Dictionary<int, string> trackIdNamesMap = db.Dictionary<int, string>(
     "select Id, Name from Track")
 ```
 
@@ -548,24 +562,34 @@ Dictionary<int, string> trackIdNamesMap = db.Dictionary<int, string>(
 
 ```csharp
 Dictionary<int, List<string>> albumTrackNames = db.Lookup<int, string>(
+    db.From<Track>().Select(x => new { x.AlbumId, x.Name }))
+
+Dictionary<int, List<string>> albumTrackNames = db.Lookup<int, string>(
     "select AlbumId, Name from Track")
 ```
 
 **Column** returns a List of first column values:
 
 ```csharp
+List<string> trackNames = db.Column<string>(db.From<Track>().Select(x => x.Name))
+
 List<string> trackNames = db.Column<string>("select Name from Track")
 ```
 
 **HashSet** returns a HashSet of distinct first column values:
 
 ```csharp    
+HashSet<string> uniqueTrackNames = db.ColumnDistinct<string>(
+    db.From<Track>().Select(x => x.Name))
+
 HashSet<string> uniqueTrackNames = db.ColumnDistinct<string>("select Name from Track")
 ```
 
 **Scalar** returns a single scalar value:
 
 ```csharp
+var trackCount = db.Scalar<int>(db.From<Track>().Select(Sql.Count("*")))
+
 var trackCount = db.Scalar<int>("select count(*) from Track")
 ```
 
@@ -573,14 +597,6 @@ Anonymous types passed into **Where** are treated like an **AND** filter:
 
 ```csharp
 var track3 = db.Where<Track>(new { AlbumName = "Throwing Copper", TrackNo = 3 })
-```
-
-**Select** statements take in parameterized SQL using properties from the supplied anonymous type (if any):
-
-```csharp
-var track3 = db.Select<Track>(
-  "select * from Track Where AlbumName = @album and TrackNo = @trackNo", 
-  new { album = "Throwing Copper", trackNo = 3 })
 ```
 
 SingleById(s), SelectById(s), etc provide strong-typed convenience methods to fetch by a Table's **Id** primary key field.
@@ -606,8 +622,6 @@ foreach (var person in lazyQuery) {
 
 ```csharp
 var topVIPs = db.WhereLazy<Person>(new { Age = 27 }).Where(p => IsVip(p)).Take(5)
-
-var topVIPs = db.SelectLazyFmt<Person>("Age > {0}", 40).Where(p => IsVip(p)).Take(5)
 ```
 
 ### Other Notes
@@ -778,14 +792,60 @@ q.Join<Customer,CustomerAddress>((cust,address) => cust.Id == address.CustomerId
 
 ### Selecting multiple columns across joined tables
 
-Another implicit behaviour when selecting from a typed SqlExpression is that results are mapped to the `Customer` POCO. To change this default we just need to explicitly specify what POCO it should map to instead:
+The `SelectMulti` API lets you select from multiple joined tables into a typed tuple
+
+```csharp
+var q = db.From<Customer>()
+    .Join<Customer, CustomerAddress>()
+    .Join<Customer, Order>()
+    .Where(x => x.CreatedDate >= new DateTime(2016,01,01))
+    .And<CustomerAddress>(x => x.Country == "Australia");
+
+var results = db.SelectMulti<Customer, CustomerAddress, Order>(q);
+
+foreach (var tuple in results)
+{
+    Customer customer = tuple.Item1;
+    CustomerAddress custAddress = tuple.Item2;
+    Order custOrder = tuple.Item3;
+}
+```
+
+Thanks to Micro ORM's lightweight abstractions over ADO.NET that maps to clean POCOs, we can also use 
+OrmLite's embedded version of [Dapper's QueryMultiple](http://stackoverflow.com/a/37420341/85785):
+
+```csharp
+var q = db.From<Customer>()
+    .Join<Customer, CustomerAddress>()
+    .Join<Customer, Order>()
+    .Select("*");
+
+using (var multi = db.QueryMultiple(q.ToSelectStatement()))
+{
+    var results = multi.Read<Customer, CustomerAddress, Order, 
+        Tuple<Customer,CustomerAddress,Order>>(Tuple.Create).ToList();
+
+    foreach (var tuple in results)
+    {
+        Customer customer = tuple.Item1;
+        CustomerAddress custAddress = tuple.Item2;
+        Order custOrder = tuple.Item3;
+    }
+}
+```
+
+### Select data from multiple tables into a Custom POCO
+
+Another implicit behaviour when selecting from a typed SqlExpression is that results are mapped to the 
+`Customer` POCO. To change this default we just need to explicitly specify what POCO it should map to instead:
 
 ```csharp
 List<FullCustomerInfo> customers = db.Select<FullCustomerInfo>(
     db.From<Customer>().Join<CustomerAddress>());
 ```
 
-Where `FullCustomerInfo` is any POCO that contains a combination of properties matching any of the joined tables in the query. 
+Where `FullCustomerInfo` is any POCO that contains a combination of properties matching any of the joined 
+tables in the query. 
 
 The above example is also equivalent to the shorthand `db.Select<Into,From>()` API:
 
@@ -805,6 +865,45 @@ The mapping also includes a fallback for referencing fully-qualified names in th
   - `CustomerName` => "Customer"."Name"
   - `OrderCost` => "Order"."Cost"
 
+### Select data from multiple tables into Dynamic ResultSets
+
+You can also select data from multiple tables into 
+[dynamic result sets](https://github.com/ServiceStack/ServiceStack.OrmLite#dynamic-result-sets)
+which provide [several Convenience APIs](http://stackoverflow.com/a/37443162/85785)
+for accessing data from an unstructured queries.
+
+Using dynamic:
+
+```csharp
+var q = db.From<Employee>()
+    .Join<Department>()
+    .Select<Employee, Department>((e, d) => new { e.FirstName, d.Name });
+    
+List<dynamic> results = db.Select<dynamic>(q);
+foreach (dynamic result in results)
+{
+    string firstName = result.FirstName;
+    string deptName = result.Name;
+}
+```
+
+Dictionary of Objects:
+
+```csharp
+List<Dictionary<string,object>> rows = db.Select<Dictionary<string,object>>(q);
+```
+
+List of Objects:
+
+```csharp
+List<List<object>> rows = db.Select<Dictionary<string,object>>(q);
+```
+
+Custom Key/Value Dictionary:
+
+```csharp
+Dictionary<string,string> rows = db.Dictionary<string,string>(q);
+```
 
 ### BelongsTo Attribute
 
@@ -1029,7 +1128,50 @@ Optimistic concurrency is only verified on API's that update or delete an entire
 db.DeleteById<Poco>(id:updatedRow.Id, rowversion:updatedRow.RowVersion)
 ```
 
-### New DB Parameters API's
+### Modify Custom Schema
+
+OrmLite provides Typed APIs for modifying Table Schemas that makes it easy to inspect the state of an 
+RDBMS Table which can be used to determine what modifications you want on it, e.g:
+
+```csharp
+class Poco 
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public string Ssn { get; set; }
+}
+
+db.DropTable<Poco>();
+db.TableExists<Poco>(); //= false
+
+db.CreateTable<Poco>(); 
+db.TableExists<Poco>(); //= true
+
+db.ColumnExists<Poco>(x => x.Ssn); //= true
+db.DropColumn<Poco>(x => x.Ssn);
+db.ColumnExists<Poco>(x => x.Ssn); //= false
+```
+
+In a future version of your Table POCO you can use `ColumnExists` to detect which columns haven't been 
+added yet, then use `AddColumn` to add it, e.g:
+
+```csharp
+class Poco 
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+
+    [Default(0)]
+    public int Age { get; set; }
+}
+
+if (!db.ColumnExists<Poco>(x => x.Age)) //= false
+    db.AddColumn<Poco>(x => x.Age);
+
+db.ColumnExists<Poco>(x => x.Age); //= true
+```
+
+### DB Parameter API's
 
 To enable even finer-grained control of parameterized queries we've added new overloads that take a collection of IDbDataParameter's:
 
@@ -1274,6 +1416,37 @@ db.Insert(new AuditTable { ModifiedBy = "Me!" }); //succeeds
 ## Custom SQL Customizations
 
 A number of new hooks are available to provide more flexibility when creating and dropping your RDBMS tables.
+
+### CustomSelect Attribute
+
+The new `[CustomSelect]` can be used to define properties you want populated from a Custom SQL Function or 
+Expression instead of a normal persisted column, e.g:
+
+```csharp
+public class Block
+{
+    public int Id { get; set; }
+    public int Width { get; set; }
+    public int Height { get; set; }
+
+    [CustomSelect("Width * Height")]
+    public int Area { get; set; }
+
+    [Default(OrmLiteVariables.SystemUtc)]
+    public DateTime CreatedDate { get; set; }
+
+    [CustomSelect("FORMAT(CreatedDate, 'yyyy-MM-dd')")]
+    public string DateFormat { get; set; }
+}
+
+db.Insert(new Block { Id = 1, Width = 10, Height = 5 });
+
+var block = db.SingleById<Block>(1);
+
+block.Area.Print(); //= 50
+
+block.DateFormat.Print(); //= 2016-06-08 (SQL Server)
+```
 
 ### Custom Field Declarations
 
@@ -1958,10 +2131,11 @@ No ORM is complete without the standard crud operations:
   db.Insert(new Shipper { CompanyName = "Planes R Us", Phone = "555-PLANES", ShipperTypeId = planesType.Id });
   db.Insert(new Shipper { CompanyName = "We do everything!", Phone = "555-UNICORNS", ShipperTypeId = planesType.Id });
 
-  var trainsAreUs = db.SingleFmt<Shipper>("ShipperTypeId = {0}", trainsType.Id);
+  var trainsAreUs = db.Single<Shipper>("ShipperTypeId = @Id", new { trainsType.Id });
   Assert.That(trainsAreUs.CompanyName, Is.EqualTo("Trains R Us"));
-  Assert.That(db.SelectFmt<Shipper>("CompanyName = {0} OR Phone = {1}", "Trains R Us", "555-UNICORNS"), Has.Count.EqualTo(2));
-  Assert.That(db.SelectFmt<Shipper>("ShipperTypeId = {0}", planesType.Id), Has.Count.EqualTo(2));
+  Assert.That(db.Select<Shipper>("CompanyName = @company OR Phone = @phone", 
+        new { company = "Trains R Us", phone = "555-UNICORNS" }), Has.Count.EqualTo(2));
+  Assert.That(db.Select<Shipper>("ShipperTypeId = @Id", new { planesType.Id }), Has.Count.EqualTo(2));
 
   //Lets update a record
   trainsAreUs.Phone = "666-TRAINS";
@@ -1977,14 +2151,16 @@ No ORM is complete without the standard crud operations:
 ```
 
 ### Performing custom queries 
+
 And with access to raw sql when you need it - the database is your oyster :)
 
 ```csharp
-    var partialColumns = db.SelectFmt<SubsetOfShipper>(typeof (Shipper), "ShipperTypeId = {0}", planesType.Id);
+    var partialColumns = db.Select<SubsetOfShipper>(typeof(Shipper), 
+        "ShipperTypeId = @Id", new { planesType.Id });
     Assert.That(partialColumns, Has.Count.EqualTo(2));
 
     //Select into another POCO class that matches sql
-    var rows = db.SelectFmt<ShipperTypeCount>(
+    var rows = db.Select<ShipperTypeCount>(
       "SELECT ShipperTypeId, COUNT(*) AS Total FROM Shippers GROUP BY ShipperTypeId ORDER BY COUNT(*)");
 
     Assert.That(rows, Has.Count.EqualTo(2));
@@ -2010,24 +2186,6 @@ the `[PrimaryKey]` attribute to tell OrmLite to use a different property for the
 
 You can still `SELECT` from these tables, you will just be unable to make use of APIs that rely on it, e.g. 
 `Update` or `Delete` where the filter is implied (i.e. not specified), all the APIs that end with `ById`, etc.
-
-### Workaround single Primary Key limitation
-
-A potential workaround to support tables with multiple primary keys is to create an auto generated `Id` property that 
-returns a unique value based on all the primary key fields, e.g:
-
-```csharp
-public class OrderDetail
-{
-  public string Id { get { return this.OrderId + "/" + this.ProductId; } }
-  
-  public int OrderId { get; set; }
-  public int ProductId { get; set; }
-  public decimal UnitPrice { get; set; }
-  public short Quantity { get; set; }
-  public double Discount { get; set; }
-}
-```
 
 ## Oracle Provider Notes
 
