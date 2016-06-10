@@ -2180,12 +2180,29 @@ And with access to raw sql when you need it - the database is your oyster :)
 
 # Limitations 
 
+### Single Primary Key
+
 For simplicity, and to be able to have the same POCO class persisted in db4o, memcached, redis or on the filesystem (i.e. providers included in ServiceStack), each model must have a single primary key, by convention OrmLite expects it
 to be `Id` although you use `[Alias("DbFieldName")]` attribute it map it to a column with a different name or use 
 the `[PrimaryKey]` attribute to tell OrmLite to use a different property for the primary key.
 
 You can still `SELECT` from these tables, you will just be unable to make use of APIs that rely on it, e.g. 
 `Update` or `Delete` where the filter is implied (i.e. not specified), all the APIs that end with `ById`, etc.
+
+### Optimize LIKE Searches
+
+One of the primary goals of OrmLite is to expose and RDBMS agnostic Typed API Surface which will allow you
+to easily switch databases, or access multiple databases at the same time with the same behavior.
+
+One instance where this can have an impact is needing to use `UPPER()` in **LIKE** searches to enable 
+case-insensitive **LIKE** queries across all RDBMS. The drawback of this is that LIKE Queries are not able 
+to use any existing RDBMS indexes. We can disable this feature and return to the default RDBMS behavior with:
+
+```csharp
+OrmLiteConfig.StripUpperInLike = true;
+```
+
+Allowing all **LIKE** Searches in OrmLite or AutoQuery to use any available RDBMS Index.
 
 ## Oracle Provider Notes
 
@@ -2210,7 +2227,6 @@ The previous version of ServiceStack.OrmLite.Oracle used System.Data.OracleClien
 
 DateTimeOffset fields and, in locales that use a comma to separate the fractional part of a floating point number, some aspects of using floating point numbers, do not work with System.Data.OracleClient.
 
-
 # Community Resources
 
   - [OrmLite and Redis: New alternatives for handling db communication](http://www.abtosoftware.com/blog/servicestack-ormlite-and-redis-new-alternatives-for-handling-db-communication) by [@abtosoftware](https://twitter.com/abtosoftware)
@@ -2220,7 +2236,6 @@ DateTimeOffset fields and, in locales that use a comma to separate the fractiona
   - [Simple ServiceStack OrmLite Example](http://www.curlette.com/?p=1068) by [@robrtc](https://twitter.com/robrtc)
   - [OrmLite Blobbing done with NHibernate and Serialized JSON](http://www.philliphaydon.com/2012/03/ormlite-blobbing-done-with-nhibernate-and-serialized-json/) by [@philliphaydon](https://twitter.com/philliphaydon)
   - [Creating An ASP.NET MVC Blog With ServiceStack.OrmLite](http://www.eggheadcafe.com/tutorials/asp-net/285cbe96-9922-406a-b193-3a0b40e31c40/creating-an-aspnet-mvc-blog-with-servicestackormlite.aspx) by [@peterbromberg](https://twitter.com/peterbromberg)
-
 
 ## Other notable Micro ORMs for .NET
 Many performance problems can be mitigated and a lot of use-cases can be simplified without the use of a heavyweight ORM, and their config, mappings and infrastructure. 
