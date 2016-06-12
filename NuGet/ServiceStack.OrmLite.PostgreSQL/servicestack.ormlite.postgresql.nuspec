@@ -18,7 +18,7 @@
     <language>en-US</language> 
     <copyright>Copyright 2016 Service Stack</copyright>
     <dependencies>
-      <dependency id="Npgsql" version="3.0.5" />
+      <dependency id="Npgsql" version="3.1.2" />
       <dependency id="ServiceStack.OrmLite" version="4.0" />
     </dependencies> 
   </metadata> 
