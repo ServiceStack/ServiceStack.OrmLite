@@ -130,7 +130,7 @@ Customer Address:
 
         private static void AssertMultiCustomerOrderResults(StringBuilder sb)
         {
-            Assert.That(sb.ToString().NormalizeNewLines().Trim(), Is.EqualTo(
+            Assert.That(sb.ToString().Replace(".9900", ".99").NormalizeNewLines().Trim(), Is.EqualTo(
                 @"Customer:
 {
 	Id: 1,

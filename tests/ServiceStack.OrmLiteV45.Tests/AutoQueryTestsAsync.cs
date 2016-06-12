@@ -190,7 +190,14 @@ namespace ServiceStack.OrmLite.Tests
                 var sb = new StringBuilder();
                 foreach (var result in results)
                 {
-                    sb.AppendLine(result.FirstName + "," + result.LastName + "," + result.Name);
+                    if (Dialect != Dialect.PostgreSql)
+                    {
+                        sb.AppendLine(result.FirstName + "," + result.LastName + "," + result.Name);
+                    }
+                    else
+                    {
+                        sb.AppendLine(result.first_name + "," + result.last_name + "," + result.name);
+                    }
                 }
 
                 Assert.That(sb.ToString().NormalizeNewLines(), Is.EqualTo(
@@ -205,7 +212,14 @@ namespace ServiceStack.OrmLite.Tests
                 sb.Length = 0;
                 foreach (var result in results)
                 {
-                    sb.AppendLine(result.Name);
+                    if (Dialect != Dialect.PostgreSql)
+                    {
+                        sb.AppendLine(result.Name);
+                    }
+                    else
+                    {
+                        sb.AppendLine(result.name);
+                    }
                 }
 
                 Assert.That(sb.ToString().NormalizeNewLines(), Is.EqualTo("Dept 1\nDept 2\nDept 3\n"));

@@ -18,7 +18,7 @@ namespace ServiceStack.OrmLite.Tests
 
         public static string MySqlDb = "Server=localhost;Database=test;UID=root;Password=test";
         public static string PostgreSqlDb = "Server=localhost;Port=5432;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200";
-
+        //public static string PostgreSqlDb = "Server=localhost;Port=5433;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200";
         public static IOrmLiteDialectProvider DefaultProvider = SqlServerDialect.Provider;
         public static string DefaultConnection = SqlServerBuildDb;
 
