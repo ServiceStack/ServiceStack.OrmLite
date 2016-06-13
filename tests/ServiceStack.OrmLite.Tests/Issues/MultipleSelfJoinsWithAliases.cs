@@ -107,7 +107,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
                 Assert.That(sales.Count, Is.EqualTo(1));
                 var salesView = sales[0];
                 
-                salesView.PrintDump();
+                //salesView.PrintDump();
 
                 Assert.That(salesView.Id, Is.EqualTo(sale.Id));
                 Assert.That(salesView.TenantId, Is.EqualTo(sale.TenantId));
@@ -116,6 +116,15 @@ namespace ServiceStack.OrmLite.Tests.Issues
                 Assert.That(salesView.SellerFirstName, Is.EqualTo(seller.FirstName));
                 Assert.That(salesView.SellerLastName, Is.EqualTo(seller.LastName));
                 Assert.That(salesView.AmountCents, Is.EqualTo(sale.AmountCents));
+
+
+                q.Select("seller.*, 0 EOT, buyer.*");
+
+                var multi = db.Select<Tuple<ContactIssue, ContactIssue>>(q);
+                multi.PrintDump();
+
+                Assert.That(multi[0].Item1.FirstName, Is.EqualTo("Seller"));
+                Assert.That(multi[0].Item2.FirstName, Is.EqualTo("Buyer"));
             }
         }
     }
