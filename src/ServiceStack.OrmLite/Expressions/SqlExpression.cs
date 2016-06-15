@@ -1814,6 +1814,9 @@ namespace ServiceStack.OrmLite
                         quotedColName,
                         args.Count == 1 ? string.Format(",{0}", args[0]) : "");
                     break;
+                case "CountDistinct":
+                    statement = string.Format("COUNT(DISTINCT {0})", quotedColName);
+                    break;
                 default:
                     throw new NotSupportedException();
             }

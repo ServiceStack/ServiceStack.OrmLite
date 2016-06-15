@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Linq;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
+using ServiceStack.OrmLite.Tests.Expression;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
@@ -201,6 +203,31 @@ namespace ServiceStack.OrmLite.Tests
                 var row = db.SingleById<CustomSelectTest>(1);
 
                 Assert.That(row.Area, Is.EqualTo(10 * 5));
+            }
+        }
+
+        [Test]
+        public void Can_Count_Distinct()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<LetterFrequency>();
+
+                var rows = "A,B,B,C,C,C,D,D,E".Split(',').Map(x => new LetterFrequency { Letter = x });
+
+                db.InsertAll(rows);
+
+                var count = db.Count(db.From<LetterFrequency>().Select(x => x.Letter));
+                Assert.That(count, Is.EqualTo(rows.Count));
+
+                count = db.Scalar<long>(db.From<LetterFrequency>().Select(x => Sql.Count(x.Letter)));
+                Assert.That(count, Is.EqualTo(rows.Count));
+
+                var distinctCount = db.Scalar<long>(db.From<LetterFrequency>().Select(x => Sql.CountDistinct(x.Letter)));
+                Assert.That(distinctCount, Is.EqualTo(rows.Map(x => x.Letter).Distinct().Count()));
+
+                distinctCount = db.Scalar<long>(db.From<LetterFrequency>().Select("COUNT(DISTINCT Letter)"));
+                Assert.That(distinctCount, Is.EqualTo(rows.Map(x => x.Letter).Distinct().Count()));
             }
         }
     }

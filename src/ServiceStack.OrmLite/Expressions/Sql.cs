@@ -63,6 +63,11 @@ namespace ServiceStack.OrmLite
             return value;
         }
 
+        public static T CountDistinct<T>(T value)
+        {
+            return value;
+        }
+
         public static string Count(string value)
         {
             return "COUNT({0})".Fmt(value);
