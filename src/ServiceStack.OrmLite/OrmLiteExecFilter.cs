@@ -61,6 +61,13 @@ namespace ServiceStack.OrmLite
                 var ret = filter(dbCmd);
                 return ret;
             }
+            catch (Exception ex)
+            {
+                if (OrmLiteConfig.ExceptionFilter != null)
+                    OrmLiteConfig.ExceptionFilter(dbCmd, ex);
+
+                throw;
+            }
             finally
             {
                 DisposeCommand(dbCmd, dbConn);
@@ -84,6 +91,13 @@ namespace ServiceStack.OrmLite
             try
             {
                 filter(dbCmd);
+            }
+            catch (Exception ex)
+            {
+                if (OrmLiteConfig.ExceptionFilter != null)
+                    OrmLiteConfig.ExceptionFilter(dbCmd, ex);
+
+                throw;
             }
             finally
             {

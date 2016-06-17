@@ -186,6 +186,8 @@ namespace ServiceStack.OrmLite
 
         public static Func<FieldDefinition, object> OnDbNullFilter { get; set; }
 
+        public static Action<IDbCommand, Exception> ExceptionFilter { get; set; }
+
         public static Func<string, string> SanitizeFieldNameForParamNameFn = fieldName =>
             (fieldName ?? "").Replace(" ", "");
 
