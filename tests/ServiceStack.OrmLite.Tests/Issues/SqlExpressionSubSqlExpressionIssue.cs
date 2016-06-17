@@ -19,7 +19,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
         public string Name { get; set; }
     }
 
-    public class SqlExpressionNullConstantIssue : OrmLiteTestBase
+    public class SqlExpressionSubSqlExpressionIssue : OrmLiteTestBase
     {
         [Test]
         public void Can_compare_null_constant_in_subquery()
