@@ -1185,6 +1185,8 @@ namespace ServiceStack.OrmLite
                     return VisitNewArray(exp as NewArrayExpression);
                 case ExpressionType.MemberInit:
                     return VisitMemberInit(exp as MemberInitExpression);
+                case ExpressionType.Index:
+                    return VisitIndexExpression(exp as IndexExpression);
                 default:
                     return exp.ToString();
             }
@@ -1483,12 +1485,28 @@ namespace ServiceStack.OrmLite
                     return GetNotValue(o);
                 case ExpressionType.Convert:
                     if (u.Method != null)
-                    {
                         return CachedExpressionCompiler.Evaluate(u);
-                    }
                     break;
             }
             return Visit(u.Operand);
+        }
+
+        protected virtual object VisitIndexExpression(IndexExpression e)
+        {
+            var arg = e.Arguments[0];
+            var constant = arg as ConstantExpression;
+            var oIndex = constant != null
+                ? constant.Value
+                : CachedExpressionCompiler.Evaluate(arg);
+
+            var index = (int)Convert.ChangeType(oIndex, typeof(int));
+            var oCollection = CachedExpressionCompiler.Evaluate(e.Object);
+
+            var list = oCollection as List<object>;
+            if (list != null)
+                return list[index];
+            
+            throw new NotImplementedException("Unknown Expression: " + e);
         }
 
         private object GetNotValue(object o)

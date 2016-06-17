@@ -131,6 +131,7 @@
     <Compile Include="Issues\BelongsToIssue.cs" />
     <Compile Include="Issues\JoinBoolSqlServerIssue.cs" />
     <Compile Include="Issues\MergingNestedSqlExpressionIssue.cs" />
+    <Compile Include="Issues\SqlExpressionNullConstantIssue.cs" />
     <Compile Include="Legacy\ApiSqliteLegacyTests.cs" />
     <Compile Include="Legacy\ApiSqlServerLegacyTests.cs" />
     <Compile Include="SchemaTests.cs" />
