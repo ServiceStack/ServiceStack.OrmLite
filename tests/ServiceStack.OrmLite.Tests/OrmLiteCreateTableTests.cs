@@ -441,5 +441,54 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(rows[0].Id, Is.EqualTo(1));
             }
         }
+
+        public class TableWithIgnoredFields
+        {
+            public int Id { get; set; }
+
+            public string FirstName { get; set; }
+
+            public string LastName { get; set; }
+
+            public string DisplayName
+            {
+                get { return FirstName + " " + LastName; }
+            }
+
+            [DataAnnotations.Ignore]
+            public int IsIgnored { get; set; }
+
+            public Nested Nested { get; set; }
+        }
+
+        public class Nested
+        {
+            public string Name { get { return "Foo"; } }
+        }
+
+        [Test]
+        public void Does_not_create_table_with_ignored_field()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<TableWithIgnoredFields>();
+
+                Assert.That(db.GetLastSql(), Is.StringContaining("DisplayName"));
+                Assert.That(db.GetLastSql(), Is.Not.StringContaining("IsIgnored"));
+
+                db.Insert(new TableWithIgnoredFields
+                {
+                    Id = 1,
+                    FirstName = "Foo",
+                    LastName = "Bar",
+                    IsIgnored = 10,
+                });
+
+                var row = db.Select<TableWithIgnoredFields>()[0];
+
+                Assert.That(row.DisplayName, Is.EqualTo("Foo Bar"));
+                Assert.That(row.IsIgnored, Is.EqualTo(0));
+            }
+        }
     }
 }
