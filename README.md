@@ -182,51 +182,6 @@ We've also added a
 as it's a common use-case to swapout to use Sqlite's in-memory provider for faster tests. 
 But as Sqlite doesn't provide async API's under-the-hood we fallback to *pseudo async* support where we just wrap its synchronous responses in `Task` results. 
 
-## Dynamic Result Sets
-
-There's new support for returning unstructured resultsets letting you Select `List<object>` instead of having results mapped to a concrete Poco class, e.g:
-
-```csharp
-db.Select<List<object>>(db.From<Poco>()
-  .Select("COUNT(*), MIN(Id), MAX(Id)"))[0].PrintDump();
-```
-
-Output of objects in the returned `List<object>`:
-
-    [
-        10,
-        1,
-        10
-    ]
-
-You can also Select `Dictionary<string,object>` to return a dictionary of column names mapped with their values, e.g:
-
-```csharp
-db.Select<Dictionary<string,object>>(db.From<Poco>()
-  .Select("COUNT(*) Total, MIN(Id) MinId, MAX(Id) MaxId"))[0].PrintDump();
-```
-
-Output of objects in the returned `Dictionary<string,object>`:
-
-    {
-        Total: 10,
-        MinId: 1,
-        MaxId: 10
-    }
-
-and can be used for API's returning a **Single** row result:
-
-```csharp
-db.Single<List<object>>(db.From<Poco>()
-  .Select("COUNT(*) Total, MIN(Id) MinId, MAX(Id) MaxId")).PrintDump();
-```
-
-or use `object` to fetch an unknown **Scalar** value:
-
-```csharp
-object result = db.Scalar<object>(db.From<Poco>().Select(x => x.Id));
-```
-
 ## Nested Typed Sub SqlExpressions
 
 The `Sql.In()` API supports nesting and combining of multiple Typed SQL Expressions together 
@@ -864,6 +819,51 @@ The mapping also includes a fallback for referencing fully-qualified names in th
   - `OrderId` => "Order"."Id"
   - `CustomerName` => "Customer"."Name"
   - `OrderCost` => "Order"."Cost"
+
+## Dynamic Result Sets
+
+There's new support for returning unstructured resultsets letting you Select `List<object>` instead of having results mapped to a concrete Poco class, e.g:
+
+```csharp
+db.Select<List<object>>(db.From<Poco>()
+  .Select("COUNT(*), MIN(Id), MAX(Id)"))[0].PrintDump();
+```
+
+Output of objects in the returned `List<object>`:
+
+    [
+        10,
+        1,
+        10
+    ]
+
+You can also Select `Dictionary<string,object>` to return a dictionary of column names mapped with their values, e.g:
+
+```csharp
+db.Select<Dictionary<string,object>>(db.From<Poco>()
+  .Select("COUNT(*) Total, MIN(Id) MinId, MAX(Id) MaxId"))[0].PrintDump();
+```
+
+Output of objects in the returned `Dictionary<string,object>`:
+
+    {
+        Total: 10,
+        MinId: 1,
+        MaxId: 10
+    }
+
+and can be used for API's returning a **Single** row result:
+
+```csharp
+db.Single<List<object>>(db.From<Poco>()
+  .Select("COUNT(*) Total, MIN(Id) MinId, MAX(Id) MaxId")).PrintDump();
+```
+
+or use `object` to fetch an unknown **Scalar** value:
+
+```csharp
+object result = db.Scalar<object>(db.From<Poco>().Select(x => x.Id));
+```
 
 ### Select data from multiple tables into Dynamic ResultSets
 
