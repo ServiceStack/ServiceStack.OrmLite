@@ -163,14 +163,20 @@ namespace ServiceStack.OrmLite
             }
 
             var sbSelect = StringBuilderCache.Allocate();
-
-            var selectDef = typeof(TModel).GetModelDefinition();
+            var selectDef = modelDef;
             var orderedDefs = tableDefs;
-            if (selectDef != modelDef && tableDefs.Contains(selectDef))
+
+            if (typeof(TModel) != typeof(List<object>) && 
+                typeof(TModel) != typeof(Dictionary<string, object>) &&
+                typeof(TModel) != typeof(object)) //dynamic
             {
-                orderedDefs = tableDefs.ToList(); //clone
-                orderedDefs.Remove(selectDef);
-                orderedDefs.Insert(0, selectDef);
+                selectDef = typeof(TModel).GetModelDefinition();
+                if (selectDef != modelDef && tableDefs.Contains(selectDef))
+                {
+                    orderedDefs = tableDefs.ToList(); //clone
+                    orderedDefs.Remove(selectDef);
+                    orderedDefs.Insert(0, selectDef);
+                }
             }
 
             foreach (var fieldDef in selectDef.FieldDefinitions)

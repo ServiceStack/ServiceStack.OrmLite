@@ -195,6 +195,38 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        public void Can_use_dynamic_apis_on_Custom_Select()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropTable<DeptEmployee>();
+                db.DropTable<Department2>();
+                db.CreateTable<Department2>();
+                db.CreateTable<DeptEmployee>();
+
+                db.InsertAll(SeedDepartments);
+                db.InsertAll(SeedEmployees);
+
+                var q = db.From<DeptEmployee>().Select(new[] {"FirstName"}).Take(2);
+
+                var resultsMap = db.Select<Dictionary<string, object>>(q);
+                Assert.That(resultsMap.Count, Is.EqualTo(2));
+                Assert.That(resultsMap[0].ContainsKey("FirstName"));
+                Assert.That(!resultsMap[0].ContainsKey("Id"));
+
+                var resultsList = db.Select<List<object>>(q);
+                Assert.That(resultsList.Count, Is.EqualTo(2));
+                Assert.That(resultsList[0].Count, Is.EqualTo(1));
+
+                var resultsDynamic = db.Select<dynamic>(q);
+                Assert.That(resultsDynamic.Count, Is.EqualTo(2));
+                var map = (IDictionary<string, object>) resultsDynamic[0];
+                Assert.That(map.ContainsKey("FirstName"));
+                Assert.That(!map.ContainsKey("Id"));
+            }
+        }
+
+        [Test]
         public void Does_only_populate_Select_fields()
         {
             using (var db = OpenDbConnection())
