@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Data;
+using System.Linq;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Logging;
@@ -104,5 +106,62 @@ namespace ServiceStack.OrmLite.Tests.Issues
                 Assert.That(expr.ToSelectStatement().NormalizeSql(), Is.StringContaining("@0"));
             }
         }
+
+        public class AnyObjectClass
+        {
+            public Guid? Identity { get; set; }
+
+            public string Name { get; set; }
+
+            public IDbConnection db;
+
+            [DataAnnotations.Ignore]
+            public decimal CustomProperty
+            {
+                get
+                {
+                    return db.Select<AnyObjectClassItem>
+                        (s => Sql.In(s.Identity,
+                            db.From<AnyObjectClassItem>()
+                                .Where(b => b.AnyObjectClassId == this.Identity)
+                                .Select(b => b.Identity))
+                        ).Sum(r => r.PurchasePrice);
+                }
+            }
+        }
+
+        public class AnyObjectClassItem
+        {
+            public Guid? Identity { get; set; }
+
+            public string Name { get; set; }
+
+            public decimal PurchasePrice { get; set; }
+
+            [ForeignKey(typeof(AnyObjectClass))]
+            public Guid AnyObjectClassId { get; set; }
+
+            public AnyObjectClass AnyObjectClass { get; set; }
+        }
+
+        [Test]
+        public void Can_select_sub_expression_when_called_within_a_datamodel()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropTable<AnyObjectClassItem>();
+                db.DropTable<AnyObjectClass>();
+                db.CreateTable<AnyObjectClass>();
+                db.CreateTable<AnyObjectClassItem>();
+
+                var model = new AnyObjectClass { db = db };
+                var result = model.CustomProperty;
+
+                db.GetLastSql().Print();
+
+                result.PrintDump();
+            }
+        }
+
     }
 }
