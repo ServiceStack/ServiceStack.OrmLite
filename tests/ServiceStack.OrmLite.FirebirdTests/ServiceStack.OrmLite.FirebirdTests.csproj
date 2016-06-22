@@ -60,6 +60,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\ServiceStack.OrmLite.Tests\TemporaryNamingStrategy.cs">
+      <Link>TemporaryNamingStrategy.cs</Link>
+    </Compile>
     <Compile Include="Expressions\AdditiveExpressionsTest.cs" />
     <Compile Include="Expressions\Author.cs" />
     <Compile Include="Expressions\AuthorUseCase.cs" />

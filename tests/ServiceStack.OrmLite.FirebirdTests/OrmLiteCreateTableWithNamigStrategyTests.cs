@@ -1,6 +1,7 @@
 using System;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
+using ServiceStack.OrmLite.Tests;
 
 
 namespace ServiceStack.OrmLite.FirebirdTests
@@ -14,25 +15,17 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		[Test]
 		public void Can_create_TableWithNamigStrategy_table_nameUnderscoreCoumpound()
 		{
-			OrmLite.OrmLiteConfig.DialectProvider.NamingStrategy = new UnderscoreSeparatedCompoundNamingStrategy();
-
+            using (new TemporaryNamingStrategy(new UnderscoreSeparatedCompoundNamingStrategy()))
             using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
-			{
-				db.CreateTable<ModelWithOnlyStringFields>(true);
-			}
-			
-			OrmLite.OrmLiteConfig.DialectProvider.NamingStrategy= new OrmLiteNamingStrategyBase();
+            {
+                db.CreateTable<ModelWithOnlyStringFields>(true);
+            }
 		}
 		 
 		[Test]
 		public void Can_get_data_from_TableWithNamigStrategy_with_GetById()
 		{
-			OrmLite.OrmLiteConfig.DialectProvider.NamingStrategy = OrmLite.OrmLiteConfig.DialectProvider.NamingStrategy = new PrefixNamingStrategy
-			{
-				TablePrefix = "tab_",
-				ColumnPrefix = "col_",
-			};
-
+            using (new TemporaryNamingStrategy(new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
             using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
 			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
@@ -43,19 +36,13 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 				Assert.AreEqual(m.Name, modelFromDb.Name);
 			}
-			OrmLite.OrmLiteConfig.DialectProvider.NamingStrategy= new OrmLiteNamingStrategyBase();
 		}
 
 
 		[Test]
 		public void Can_get_data_from_TableWithNamigStrategy_with_query_by_example()
 		{			
-			OrmLite.OrmLiteConfig.DialectProvider.NamingStrategy = OrmLite.OrmLiteConfig.DialectProvider.NamingStrategy = new PrefixNamingStrategy
-			{
-				TablePrefix = "tab_",
-				ColumnPrefix = "col_",
-			};
-
+            using (new TemporaryNamingStrategy(new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
             using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
 			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
@@ -66,18 +53,27 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 				Assert.AreEqual(m.Name, modelFromDb.Name);
 			}
-			OrmLite.OrmLiteConfig.DialectProvider.NamingStrategy= new OrmLiteNamingStrategyBase();
 		}
 		
 		[Test]
 		public void Can_get_data_from_TableWithNamigStrategy_AfterChangingNamingStrategy()
-		{			
-			OrmLite.OrmLiteConfig.DialectProvider.NamingStrategy = OrmLite.OrmLiteConfig.DialectProvider.NamingStrategy = new PrefixNamingStrategy
-			{
-				TablePrefix = "tab_",
-				ColumnPrefix = "col_",
-			};
+		{
+            using (new TemporaryNamingStrategy(new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+            {
+                db.CreateTable<ModelWithOnlyStringFields>(true);
+                ModelWithOnlyStringFields m = new ModelWithOnlyStringFields() { Id = "998", AlbumId = "112", AlbumName = "ElectroShip", Name = "QueryByExample" };
 
+                db.Save<ModelWithOnlyStringFields>(m);
+                var modelFromDb = db.Where<ModelWithOnlyStringFields>(new { Name = "QueryByExample" })[0];
+
+                Assert.AreEqual(m.Name, modelFromDb.Name);
+
+                modelFromDb = db.SingleById<ModelWithOnlyStringFields>("998");
+                Assert.AreEqual(m.Name, modelFromDb.Name);
+
+            }
+			
             using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
 			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
@@ -93,8 +89,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 				
 			}
 			
-			OrmLite.OrmLiteConfig.DialectProvider.NamingStrategy= new OrmLiteNamingStrategyBase();
-			
+            using (new TemporaryNamingStrategy(new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
             using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
 			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
@@ -109,29 +104,6 @@ namespace ServiceStack.OrmLite.FirebirdTests
 				Assert.AreEqual(m.Name, modelFromDb.Name);
 				
 			}
-			
-			OrmLite.OrmLiteConfig.DialectProvider.NamingStrategy = OrmLite.OrmLiteConfig.DialectProvider.NamingStrategy = new PrefixNamingStrategy
-			{
-				TablePrefix = "tab_",
-				ColumnPrefix = "col_",
-			};
-
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
-			{
-				db.CreateTable<ModelWithOnlyStringFields>(true);
-				ModelWithOnlyStringFields m = new ModelWithOnlyStringFields() { Id = "998", AlbumId = "112", AlbumName = "ElectroShip", Name = "QueryByExample" };
-
-				db.Save<ModelWithOnlyStringFields>(m);
-				var modelFromDb = db.Where<ModelWithOnlyStringFields>(new { Name = "QueryByExample" })[0];
-
-				Assert.AreEqual(m.Name, modelFromDb.Name);
-
-                modelFromDb = db.SingleById<ModelWithOnlyStringFields>("998");
-				Assert.AreEqual(m.Name, modelFromDb.Name);
-				
-			}
-			
-			OrmLite.OrmLiteConfig.DialectProvider.NamingStrategy= new OrmLiteNamingStrategyBase();
 		}
 		
 	}

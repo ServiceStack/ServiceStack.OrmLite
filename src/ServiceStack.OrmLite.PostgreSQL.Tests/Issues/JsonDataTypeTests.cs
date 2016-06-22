@@ -14,37 +14,38 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Issues
         [Test]
         public void Can_save_and_restore_JSON_property()
         {
-            OrmLiteConfig.DialectProvider.NamingStrategy = new OrmLiteNamingStrategyBase();
-
-            var item = new LicenseCheckTemp
+            using (new TemporaryNamingStrategy(new OrmLiteNamingStrategyBase()))
             {
-                Body = new CheckHistory
+                var item = new LicenseCheckTemp
                 {
-                    List = {
+                    Body = new CheckHistory
+                    {
+                        List = {
                         new ItemHistory { AddedOn = DateTime.MaxValue, Note = "Test" }
                     }
-                }
-            };
+                    }
+                };
 
-            using (var db = OpenDbConnection())
-            {
-                db.DropAndCreateTable<LicenseCheckTemp>();
-                db.GetLastSql().Print();
-                db.Save(item);
-            }
-
-            using (var db = OpenDbConnection())
-            {
-                var items = db.Select<LicenseCheckTemp>();
-                items.PrintDump();
-
-                foreach (var licenseCheck in items.OrderBy(x => x.Id))
+                using (var db = OpenDbConnection())
                 {
-                    if (licenseCheck.Body != null && licenseCheck.Body.List.Any())
+                    db.DropAndCreateTable<LicenseCheckTemp>();
+                    db.GetLastSql().Print();
+                    db.Save(item);
+                }
+
+                using (var db = OpenDbConnection())
+                {
+                    var items = db.Select<LicenseCheckTemp>();
+                    items.PrintDump();
+
+                    foreach (var licenseCheck in items.OrderBy(x => x.Id))
                     {
-                        foreach (var itemHistory in licenseCheck.Body.List)
+                        if (licenseCheck.Body != null && licenseCheck.Body.List.Any())
                         {
-                            "{0} : Note {1}".Print(itemHistory.AddedOn, itemHistory.Note);
+                            foreach (var itemHistory in licenseCheck.Body.List)
+                            {
+                                "{0} : Note {1}".Print(itemHistory.AddedOn, itemHistory.Note);
+                            }
                         }
                     }
                 }
