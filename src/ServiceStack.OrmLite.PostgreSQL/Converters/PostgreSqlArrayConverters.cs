@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Text;
 using ServiceStack.OrmLite.Converters;
 using ServiceStack.Text;
@@ -27,8 +28,18 @@ namespace ServiceStack.OrmLite.PostgreSQL.Converters
     //    }
     //}
 
-    public class PostgreSqlIntArrayConverter : PostgreSqlStringConverter
+    public class PostgreSqlIntArrayConverter : NativeValueOrmLiteConverter
     {
+        public override string ColumnDefinition
+        {
+            get { return "integer[]"; }
+        }
+
+        public override DbType DbType
+        {
+            get { return DbType.Object; }
+        }
+
         public override string ToQuotedString(Type fieldType, object value)
         {
             var integerArray = (int[])value;
@@ -36,8 +47,18 @@ namespace ServiceStack.OrmLite.PostgreSQL.Converters
         }
     }
 
-    public class PostgreSqlLongArrayConverter : PostgreSqlStringConverter
+    public class PostgreSqlLongArrayConverter : NativeValueOrmLiteConverter
     {
+        public override string ColumnDefinition
+        {
+            get { return "bigint[]"; }
+        }
+
+        public override DbType DbType
+        {
+            get { return DbType.Object; }
+        }
+
         public override string ToQuotedString(Type fieldType, object value)
         {
             var longArray = (long[])value;
@@ -74,7 +95,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Converters
                 if (values.Length > 0) values.Append(",");
                 values.Append(converter.DialectProvider.GetQuotedValue(value, typeof(T)));
             }
-            return "ARRAY[" + StringBuilderCache.ReturnAndFree(values) + "]";
+            return "{" + StringBuilderCache.ReturnAndFree(values) + "}";
         }
     }
 }

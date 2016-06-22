@@ -10,29 +10,10 @@ namespace ServiceStack.OrmLite.Tests
     public class OrmLiteCreateTableWithNamingStrategyTests
         : OrmLiteTestBase
     {
-        private INamingStrategy PreviousNamingStrategy { get; set; }
-
-        [SetUp]
-        public void SetUp()
-        {
-            PreviousNamingStrategy = OrmLiteConfig.DialectProvider.NamingStrategy;
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            OrmLiteConfig.DialectProvider.NamingStrategy = PreviousNamingStrategy;
-        }
-
         [Test]
         public void Can_create_TableWithNamingStrategy_table_prefix()
         {
-            OrmLiteConfig.DialectProvider.NamingStrategy = new PrefixNamingStrategy
-            {
-                TablePrefix = "tab_",
-                ColumnPrefix = "col_",
-            };
-
+            using (new TemporaryNamingStrategy(new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithOnlyStringFields>(true);
@@ -42,8 +23,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_create_TableWithNamingStrategy_table_lowered()
         {
-            OrmLiteConfig.DialectProvider.NamingStrategy = new LowercaseNamingStrategy();
-
+            using (new TemporaryNamingStrategy(new LowercaseNamingStrategy()))
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithOnlyStringFields>(true);
@@ -54,8 +34,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_create_TableWithNamingStrategy_table_nameUnderscoreCoumpound()
         {
-            OrmLiteConfig.DialectProvider.NamingStrategy = new UnderscoreSeparatedCompoundNamingStrategy();
-
+            using (new TemporaryNamingStrategy(new UnderscoreSeparatedCompoundNamingStrategy()))
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithOnlyStringFields>(true);
@@ -70,8 +49,8 @@ namespace ServiceStack.OrmLite.Tests
                 TableAliases = { { "ModelWithOnlyStringFields", "TableAlias" } },
                 ColumnAliases = { { "Name", "ColumnAlias" } },
             };
-            OrmLiteConfig.DialectProvider.NamingStrategy = aliasNamingStrategy;
 
+            using (new TemporaryNamingStrategy(aliasNamingStrategy))
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithOnlyStringFields>(true);
@@ -98,19 +77,12 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(sql, Is.StringContaining("CREATE TABLE table_alias".NormalizeSql()));
                 Assert.That(sql, Is.StringContaining("column_alias".NormalizeSql()));
             }
-
-            OrmLiteConfig.DialectProvider.NamingStrategy = new OrmLiteNamingStrategyBase();
         }
 
         [Test]
         public void Can_get_data_from_TableWithNamingStrategy_with_GetById()
         {
-            OrmLiteConfig.DialectProvider.NamingStrategy = new PrefixNamingStrategy
-            {
-                TablePrefix = "tab_",
-                ColumnPrefix = "col_",
-            };
-
+            using (new TemporaryNamingStrategy(new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithOnlyStringFields>(true);
@@ -127,12 +99,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_get_data_from_TableWithNamingStrategy_with_query_by_example()
         {
-            OrmLiteConfig.DialectProvider.NamingStrategy = new PrefixNamingStrategy
-            {
-                TablePrefix = "tab_",
-                ColumnPrefix = "col_",
-            };
-
+            using (new TemporaryNamingStrategy(new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithOnlyStringFields>(true);
@@ -148,8 +115,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_get_data_from_TableWithUnderscoreSeparatedCompoundNamingStrategy_with_ReadConnectionExtension()
         {
-            OrmLiteConfig.DialectProvider.NamingStrategy = new UnderscoreSeparatedCompoundNamingStrategy();
-
+            using (new TemporaryNamingStrategy(new UnderscoreSeparatedCompoundNamingStrategy()))
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithOnlyStringFields>(true);
@@ -169,12 +135,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_get_data_from_TableWithNamingStrategy_AfterChangingNamingStrategy()
         {
-            OrmLiteConfig.DialectProvider.NamingStrategy = new PrefixNamingStrategy
-            {
-                TablePrefix = "tab_",
-                ColumnPrefix = "col_",
-            };
-
+            using (new TemporaryNamingStrategy(new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithOnlyStringFields>(true);
@@ -190,8 +151,6 @@ namespace ServiceStack.OrmLite.Tests
 
             }
 
-            OrmLiteConfig.DialectProvider.NamingStrategy = new OrmLiteNamingStrategyBase();
-
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithOnlyStringFields>(true);
@@ -206,12 +165,7 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.AreEqual(m.Name, modelFromDb.Name);
             }
 
-            OrmLiteConfig.DialectProvider.NamingStrategy = new PrefixNamingStrategy
-            {
-                TablePrefix = "tab_",
-                ColumnPrefix = "col_",
-            };
-
+            using (new TemporaryNamingStrategy(new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithOnlyStringFields>(true);
