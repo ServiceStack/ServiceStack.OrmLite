@@ -53,8 +53,8 @@ namespace ServiceStack.OrmLite.PostgreSQL
 
             //TODO provide support for pgsql native datastructures:
             //RegisterConverter<string[]>(new PostgreSqlStringArrayConverter());
-            //RegisterConverter<int[]>(new PostgreSqlIntArrayConverter());
-            //RegisterConverter<long[]>(new PostgreSqlLongArrayConverter());
+            RegisterConverter<int[]>(new PostgreSqlIntArrayConverter());
+            RegisterConverter<long[]>(new PostgreSqlLongArrayConverter());
 
             this.Variables = new Dictionary<string, string>
             {

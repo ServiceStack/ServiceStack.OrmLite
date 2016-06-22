@@ -35,22 +35,14 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
                 var row = new ModelWithArrayType
                 {
                     Id = 1,
-                    IntegerArray = new []{1,2,3}
+                    IntegerArray = new[] {1, 2, 3}
                 };
-
-                try
-                {
-                    db.Insert(row);
-                }
-                catch (Exception e)
-                {
-                    e.Message.Print();
-                }
+                db.Insert(row);
 
                 var result = db.Select<ModelWithArrayType>();
 
                 Assert.That(result.Count, Is.EqualTo(1));
-                Assert.That(result[0].IntegerArray.Count(), Is.EqualTo(3));
+                Assert.That(result[0].IntegerArray, Is.EqualTo(new[] { 1, 2, 3 }));
             }
         }
 
@@ -68,20 +60,12 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
                     Id = 2,
                     BigIntegerArray = new long[] { 1, 2, 3, 4 }
                 };
-
-                try
-                {
-                    db.Insert(row);
-                }
-                catch (Exception e)
-                {
-                    e.Message.Print();
-                }
+                db.Insert(row);
 
                 var result = db.Select<ModelWithArrayType>();
 
                 Assert.That(result.Count, Is.EqualTo(1));
-                Assert.That(result[0].BigIntegerArray.Count(), Is.EqualTo(4));
+                Assert.That(result[0].BigIntegerArray, Is.EqualTo(new[] { 1, 2, 3, 4 }));
             }
         }
     }
