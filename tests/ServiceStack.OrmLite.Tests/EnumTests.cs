@@ -153,6 +153,20 @@ namespace ServiceStack.OrmLite.Tests
                 createTableSql.Print();
 
                 Assert.That(createTableSql, Is.StringContaining("enumvalue int"));
+
+                db.DropAndCreateTable<PropertyWithEnumAsInt>();
+
+                createTableSql = db.GetLastSql().NormalizeSql();
+                createTableSql.Print();
+
+                Assert.That(createTableSql, Is.StringContaining("enumvalue int"));
+
+                db.DropAndCreateTable<PropertyWithNullableEnumAsInt>();
+
+                createTableSql = db.GetLastSql().NormalizeSql();
+                createTableSql.Print();
+
+                Assert.That(createTableSql, Is.StringContaining("nullableenumvalue int"));
             }
         }
 
@@ -204,6 +218,25 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        public void Updates_EnumAsInt_on_property_with_int_value()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<PropertyWithEnumAsInt>();
+
+                db.Insert(new PropertyWithEnumAsInt { Id = 1, EnumValue = SomeEnum.Value1 });
+                db.Insert(new PropertyWithEnumAsInt { Id = 2, EnumValue = SomeEnum.Value2 });
+                db.Insert(new PropertyWithEnumAsInt { Id = 3, EnumValue = SomeEnum.Value3 });
+
+                db.UpdateOnly(new PropertyWithEnumAsInt { Id = 1, EnumValue = SomeEnum.Value3 }, q => q.EnumValue);
+                Assert.That(db.GetLastSql().NormalizeSql(), Is.StringContaining("=@0"));
+
+                var row = db.SingleById<PropertyWithEnumAsInt>(1);
+                Assert.That(row.EnumValue, Is.EqualTo(SomeEnum.Value3));
+            }
+        }
+
+        [Test]
         public void CanQueryByEnumValue_using_select_with_expression_enum_flags()
         {
             using (var db = OpenDbConnection())
@@ -228,6 +261,7 @@ namespace ServiceStack.OrmLite.Tests
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<TypeWithEnumAsInt>();
+
                 db.Save(new TypeWithEnumAsInt { Id = 1, EnumValue = SomeEnumAsInt.Value1 });
                 db.Save(new TypeWithEnumAsInt { Id = 2, EnumValue = SomeEnumAsInt.Value1 });
                 db.Save(new TypeWithEnumAsInt { Id = 3, EnumValue = SomeEnumAsInt.Value2 });
@@ -238,6 +272,77 @@ namespace ServiceStack.OrmLite.Tests
                 results = db.Select<TypeWithEnumAsInt>(q => q.EnumValue == SomeEnumAsInt.Value2);
                 db.GetLastSql().Print();
                 Assert.That(results.Count, Is.EqualTo(1));
+            }
+        }
+
+        [Test]
+        public void CanQueryByEnumValue_using_select_with_expression_EnumAsInt_on_property()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<PropertyWithEnumAsInt>();
+
+                db.Save(new PropertyWithEnumAsInt { Id = 1, EnumValue = SomeEnum.Value1 });
+                db.Save(new PropertyWithEnumAsInt { Id = 2, EnumValue = SomeEnum.Value1 });
+                db.Save(new PropertyWithEnumAsInt { Id = 3, EnumValue = SomeEnum.Value2 });
+                db.Save(new PropertyWithEnumAsInt { Id = 4, EnumValue = SomeEnum.Value3 });
+
+                // Make sure the value as actually stored as an int
+
+                var intResults = db.Select<int?>("SELECT EnumValue FROM " + "PropertyWithEnumAsInt".SqlTable() + " ORDER BY Id");
+                CollectionAssert.AreEqual(new int?[] { 1, 1, 2, 3 }, intResults);
+
+                // Try some queries
+
+                var results = db.Select<PropertyWithEnumAsInt>(q => q.EnumValue == SomeEnum.Value1).Select(o => o.Id).ToList();
+                db.GetLastSql().Print();
+                CollectionAssert.AreEquivalent(new[] { 1, 2 }, results);
+
+                results = db.Select<PropertyWithEnumAsInt>(q => q.EnumValue == SomeEnum.Value2).Select(o => o.Id).ToList();
+                db.GetLastSql().Print();
+                CollectionAssert.AreEquivalent(new[] { 3 }, results);
+
+                results = db.Select<PropertyWithEnumAsInt>(q => q.EnumValue >= SomeEnum.Value2).Select(o => o.Id).ToList();
+                db.GetLastSql().Print();
+                CollectionAssert.AreEquivalent(new[] { 3, 4 }, results);
+            }
+        }
+
+        [Test]
+        public void CanQueryByEnumValue_using_select_with_expression_EnumAsInt_on_nullable_property()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<PropertyWithNullableEnumAsInt>();
+
+                db.Save(new PropertyWithNullableEnumAsInt { Id = 1, NullableEnumValue = SomeEnum.Value1 });
+                db.Save(new PropertyWithNullableEnumAsInt { Id = 2, NullableEnumValue = SomeEnum.Value1 });
+                db.Save(new PropertyWithNullableEnumAsInt { Id = 3, NullableEnumValue = SomeEnum.Value2 });
+                db.Save(new PropertyWithNullableEnumAsInt { Id = 4, NullableEnumValue = SomeEnum.Value3 });
+                db.Save(new PropertyWithNullableEnumAsInt { Id = 5, NullableEnumValue = null });
+
+                // Make sure the value as actually stored as an int
+
+                var intResults = db.Select<int?>("SELECT NullableEnumValue FROM " + "PropertyWithNullableEnumAsInt".SqlTable() + " ORDER BY Id");
+                CollectionAssert.AreEqual(new int?[] { 1, 1, 2, 3, null }, intResults);
+
+                // Try some queries
+
+                var results = db.Select<PropertyWithNullableEnumAsInt>(q => q.NullableEnumValue == SomeEnum.Value1).Select(o => o.Id).ToList();
+                db.GetLastSql().Print();
+                CollectionAssert.AreEquivalent(new[] { 1, 2 }, results);
+
+                results = db.Select<PropertyWithNullableEnumAsInt>(q => q.NullableEnumValue.Value == SomeEnum.Value2).Select(o => o.Id).ToList();
+                db.GetLastSql().Print();
+                CollectionAssert.AreEquivalent(new[] { 3 }, results);
+
+                results = db.Select<PropertyWithNullableEnumAsInt>(q => q.NullableEnumValue >= SomeEnum.Value2).Select(o => o.Id).ToList();
+                db.GetLastSql().Print();
+                CollectionAssert.AreEquivalent(new[] { 3, 4 }, results);
+
+                results = db.Select<PropertyWithNullableEnumAsInt>(q => q.NullableEnumValue == null).Select(o => o.Id).ToList();
+                db.GetLastSql().Print();
+                CollectionAssert.AreEquivalent(new[] { 5 }, results);
             }
         }
 
@@ -276,6 +381,60 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        public void CanQueryByEnumValue_using_select_with_string_EnumAsInt_on_property()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<PropertyWithEnumAsInt>();
+
+                db.Save(new PropertyWithEnumAsInt { Id = 1, EnumValue = SomeEnum.Value1 });
+                db.Save(new PropertyWithEnumAsInt { Id = 2, EnumValue = SomeEnum.Value1 });
+                db.Save(new PropertyWithEnumAsInt { Id = 3, EnumValue = SomeEnum.Value2 });
+
+                // This only works if the anonymous type's property name matches the model type's property name ("EnumValue" here)
+
+                var target = db.Select<PropertyWithEnumAsInt>(
+                    "EnumValue".SqlColumn() + " = @EnumValue", new { EnumValue = SomeEnum.Value1 })
+                    .Select(o => o.Id).ToList();
+                db.GetLastSql().Print();
+                CollectionAssert.AreEquivalent(new[] { 1, 2 }, target);
+
+                target = db.Select<PropertyWithEnumAsInt>(
+                    "EnumValue".SqlColumn() + " > @EnumValue", new { EnumValue = SomeEnum.Value1 })
+                    .Select(o => o.Id).ToList();
+                CollectionAssert.AreEquivalent(new[] { 3 }, target);
+            }
+        }
+
+        [Test]
+        public void CanQueryByEnumValue_using_select_with_string_EnumAsInt_on_nullable_property()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<PropertyWithNullableEnumAsInt>();
+
+                db.Save(new PropertyWithNullableEnumAsInt { Id = 1, NullableEnumValue = SomeEnum.Value1 });
+                db.Save(new PropertyWithNullableEnumAsInt { Id = 2, NullableEnumValue = SomeEnum.Value1 });
+                db.Save(new PropertyWithNullableEnumAsInt { Id = 3, NullableEnumValue = SomeEnum.Value2 });
+                db.Save(new PropertyWithNullableEnumAsInt { Id = 4, NullableEnumValue = null });
+
+                // This only works if the anonymous type's property name matches the model type's property name ("NullableEnumValue" here)
+
+                var target = db.Select<PropertyWithNullableEnumAsInt>(
+                    "NullableEnumValue".SqlColumn() + " = @NullableEnumValue", new { NullableEnumValue = SomeEnum.Value1 })
+                    .Select(o => o.Id).ToList();
+                db.GetLastSql().Print();
+                CollectionAssert.AreEquivalent(new[] { 1, 2 }, target);
+
+                target = db.Select<PropertyWithNullableEnumAsInt>(
+                    "NullableEnumValue".SqlColumn() + " > @NullableEnumValue", new { NullableEnumValue = SomeEnum.Value1 })
+                    .Select(o => o.Id).ToList();
+                db.GetLastSql().Print();
+                CollectionAssert.AreEquivalent(new[] { 3 }, target);
+            }
+        }
+
+        [Test]
         public void CanQueryByEnumValue_using_where_with_AnonType_enum_flags()
         {
             using (var db = OpenDbConnection())
@@ -304,6 +463,41 @@ namespace ServiceStack.OrmLite.Tests
                 var target = db.Where<TypeWithEnumAsInt>(new { EnumValue = SomeEnumAsInt.Value1 });
                 db.GetLastSql().Print();
                 Assert.That(target.Count, Is.EqualTo(2));
+            }
+        }
+
+        [Test]
+        public void CanQueryByEnumValue_using_where_with_AnonType_EnumAsInt_on_property()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<PropertyWithEnumAsInt>();
+
+                db.Save(new PropertyWithEnumAsInt { Id = 1, EnumValue = SomeEnum.Value1 });
+                db.Save(new PropertyWithEnumAsInt { Id = 2, EnumValue = SomeEnum.Value1 });
+                db.Save(new PropertyWithEnumAsInt { Id = 3, EnumValue = SomeEnum.Value2 });
+
+                var target = db.Where<PropertyWithEnumAsInt>(new { EnumValue = SomeEnumAsInt.Value1 }).Select(o => o.Id).ToList();
+                db.GetLastSql().Print();
+                CollectionAssert.AreEquivalent(new[] { 1, 2 }, target);
+            }
+        }
+
+        [Test]
+        public void CanQueryByEnumValue_using_where_with_AnonType_EnumAsInt_on_nullable_property()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<PropertyWithNullableEnumAsInt>();
+
+                db.Save(new PropertyWithNullableEnumAsInt { Id = 1, NullableEnumValue = SomeEnum.Value1 });
+                db.Save(new PropertyWithNullableEnumAsInt { Id = 2, NullableEnumValue = SomeEnum.Value1 });
+                db.Save(new PropertyWithNullableEnumAsInt { Id = 3, NullableEnumValue = SomeEnum.Value2 });
+                db.Save(new PropertyWithNullableEnumAsInt { Id = 4, NullableEnumValue = null });
+
+                var target = db.Where<PropertyWithNullableEnumAsInt>(new { NullableEnumValue = SomeEnum.Value1 }).Select(o => o.Id).ToList();
+                db.GetLastSql().Print();
+                CollectionAssert.AreEquivalent(new[] { 1, 2 }, target);
             }
         }
 
@@ -484,6 +678,20 @@ namespace ServiceStack.OrmLite.Tests
     {
         public int Id { get; set; }
         public SomeEnum EnumValue { get; set; }
+        public SomeEnum? NullableEnumValue { get; set; }
+    }
+
+    public class PropertyWithEnumAsInt
+    {
+        public int Id { get; set; }
+        [EnumAsInt] // SomeEnum is stored as string by default, but as int here
+        public SomeEnum EnumValue { get; set; }
+    }
+
+    public class PropertyWithNullableEnumAsInt
+    {
+        public int Id { get; set; }
+        [EnumAsInt] // SomeEnum is stored as string by default, but as int here
         public SomeEnum? NullableEnumValue { get; set; }
     }
 }

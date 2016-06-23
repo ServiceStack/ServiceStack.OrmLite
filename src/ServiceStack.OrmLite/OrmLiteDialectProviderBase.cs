@@ -847,7 +847,7 @@ namespace ServiceStack.OrmLite
             var converter = GetConverterBestMatch(fieldDef);
             try
             {
-                return converter.ToDbValue(fieldDef.FieldType, value);
+                return converter.ToDbValue(fieldDef.ColumnType, value);
             }
             catch (Exception ex)
             {

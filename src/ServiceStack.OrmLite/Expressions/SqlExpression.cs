@@ -1302,7 +1302,7 @@ namespace ServiceStack.OrmLite
                     var rightPartialSql = right as PartialSqlString;
                     if (rightPartialSql == null)
                     {
-                        right = GetValue(right, leftEnum.EnumType);
+                        right = GetValue(right, leftEnum.ColumnType);
                     }
                 }
                 else if (leftNeedsCoercing)
@@ -1310,7 +1310,7 @@ namespace ServiceStack.OrmLite
                     var leftPartialSql = left as PartialSqlString;
                     if (leftPartialSql == null)
                     {
-                        left = DialectProvider.GetQuotedValue(left, rightEnum.EnumType);
+                        left = DialectProvider.GetQuotedValue(left, rightEnum.ColumnType);
                     }
                 }
                 else if (left as PartialSqlString == null && right as PartialSqlString == null)
@@ -1423,12 +1423,30 @@ namespace ServiceStack.OrmLite
             OnVisitMemberType(modelType);
 
             var tableDef = modelType.GetModelDefinition();
+            var quotedColumnName = GetQuotedColumnName(tableDef, m.Member.Name);
 
-            if (propertyInfo != null && propertyInfo.PropertyType.IsEnum)
-                return new EnumMemberAccess(
-                    GetQuotedColumnName(tableDef, m.Member.Name), propertyInfo.PropertyType);
+            if (propertyInfo != null)
+            {
+                var propertyType = Nullable.GetUnderlyingType(propertyInfo.PropertyType) ?? propertyInfo.PropertyType;
 
-            return new PartialSqlString(GetQuotedColumnName(tableDef, m.Member.Name));
+                if (propertyType.IsEnum)
+                {
+                    var columnType = propertyType;
+
+                    if (tableDef != null)
+                    {
+                        var fieldDef = tableDef.GetFieldDefinition(m.Member.Name);
+                        if (fieldDef != null)
+                        {
+                            columnType = fieldDef.ColumnType;
+                        }
+                    }
+
+                    return new EnumMemberAccess(quotedColumnName, propertyType, columnType);
+                }
+            }
+
+            return new PartialSqlString(quotedColumnName);
         }
 
         protected virtual void OnVisitMemberType(Type modelType)
@@ -2050,15 +2068,18 @@ namespace ServiceStack.OrmLite
 
     public class EnumMemberAccess : PartialSqlString
     {
-        public EnumMemberAccess(string text, Type enumType)
+        public EnumMemberAccess(string text, Type enumType, Type columnType)
             : base(text)
         {
             if (!enumType.IsEnum) throw new ArgumentException("Type not valid", "enumType");
+            if (columnType == null) throw new ArgumentNullException("columnType");
 
             EnumType = enumType;
+            ColumnType = columnType;
         }
 
-        public Type EnumType { get; private set; }
+        public Type EnumType { get; }
+        public Type ColumnType { get; }
     }
 
     public class OrmLiteDataParameter : IDbDataParameter
