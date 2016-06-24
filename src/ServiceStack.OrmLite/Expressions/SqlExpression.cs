@@ -2119,7 +2119,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public string Alias { get; set; }
 
-        protected IOrmLiteDialectProvider DialectProvider { get; }
+        protected IOrmLiteDialectProvider DialectProvider { get; set; }
 
         public abstract override string ToString();
     }
@@ -2141,7 +2141,7 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// The SQL expression being selected, including any necessary quoting.
         /// </summary>
-        public string SelectExpression { get; }
+        public string SelectExpression { get; set; }
 
         public override string ToString()
         {
@@ -2164,11 +2164,11 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Unquoted column name being selected.
         /// </summary>
-        public string ColumnName { get; }
+        public string ColumnName { get; set; }
         /// <summary>
         /// Table name or alias used to prefix the column name, if any. Already quoted.
         /// </summary>
-        public string QuotedTableAlias { get; }
+        public string QuotedTableAlias { get; set; }
 
         public override string ToString()
         {
@@ -2198,7 +2198,7 @@ namespace ServiceStack.OrmLite
             Items = new List<SelectListItem>(items);
         }
 
-        public List<SelectListItem> Items { get; }
+        public List<SelectListItem> Items { get; set; }
 
         public override string ToString()
         {
