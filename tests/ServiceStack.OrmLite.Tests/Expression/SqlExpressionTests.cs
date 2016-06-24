@@ -838,5 +838,128 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 Assert.That(result.Extra, Is.Null);
             }
         }
+
+        private class JoinSelectResults1
+        {
+            // From TableA
+            public int Id { get; set; }
+            public bool Bool { get; set; }
+            public string Name { get; set; }
+
+            // From TableB
+            public int TableAId { get; set; }
+
+            public override bool Equals(object obj)
+            {
+                var other = (JoinSelectResults1)obj;
+                return Id == other.Id && Bool == other.Bool && Name == other.Name && TableAId == other.TableAId;
+            }
+        }
+
+        private class JoinSelectResults2
+        {
+            // From TableA
+            public int Id { get; set; }
+            public bool Bool { get; set; }
+            public string Name { get; set; }
+
+            // From TableB
+            public int TableBId { get; set; }
+            public string TableBName { get; set; }
+
+            public override bool Equals(object obj)
+            {
+                var other = (JoinSelectResults2)obj;
+                return Id == other.Id && Bool == other.Bool && Name == other.Name && TableBId == other.TableBId && TableBName == other.TableBName;
+            }
+        }
+
+        private class JoinSelectResults3
+        {
+            // From TableA
+            public int TableA_Id { get; set; }
+            public bool TableA_Bool { get; set; }
+            public string TableA_Name { get; set; }
+
+            // From TableB
+            public int Id { get; set; }
+            public string TableBName { get; set; }
+
+            public override bool Equals(object obj)
+            {
+                var other = (JoinSelectResults3)obj;
+                return TableA_Id == other.TableA_Id && TableA_Bool == other.TableA_Bool && TableA_Name == other.TableA_Name
+                    && Id == other.Id && TableBName == other.TableBName;
+            }
+        }
+
+        [Test]
+        public void Can_select_entire_tables()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<TableA>();
+                db.DropAndCreateTable<TableB>();
+
+                db.Insert(new TableA { Id = 1, Bool = false, Name = "NameA1" });
+                db.Insert(new TableA { Id = 2, Bool = true, Name = "NameA2" });
+                db.Insert(new TableB { Id = 1, TableAId = 1, Name = "NameB1" });
+                db.Insert(new TableB { Id = 2, TableAId = 2, Name = "NameB2" });
+                db.Insert(new TableB { Id = 3, TableAId = 2, Name = "NameB3" });
+
+                try
+                {
+                    // Select all columns from TableA
+
+                    var q1 = db.From<TableA>()
+                        .Join<TableB>()
+                        .Select<TableA, TableB>((a, b) => new { a, b.TableAId })
+                        .OrderBy(x => x.Id);
+
+                    var rows1 = db.Select<JoinSelectResults1>(q1);
+                    var expected1 = new[]
+                    {
+                        new JoinSelectResults1 { Id = 1, Bool = false, Name = "NameA1", TableAId = 1 },
+                        new JoinSelectResults1 { Id = 2, Bool = true, Name = "NameA2", TableAId = 2 },
+                        new JoinSelectResults1 { Id = 2, Bool = true, Name = "NameA2", TableAId = 2 },
+                    };
+                    Assert.That(rows1, Is.EqualTo(expected1));
+
+                    // Same, but use column aliases for some columns from TableB whose names would conflict otherwise
+
+                    var q2 = db.From<TableA>()
+                        .Join<TableB>()
+                        .Select<TableA, TableB>((a, b) => new { a, TableBId = b.Id, TableBName = b.Name });
+
+                    var rows2 = db.Select<JoinSelectResults2>(q2).OrderBy(r => r.Id).ThenBy(r => r.TableBId);
+                    var expected2 = new[]
+                    {
+                        new JoinSelectResults2 { Id = 1, Bool = false, Name = "NameA1", TableBId = 1, TableBName = "NameB1" },
+                        new JoinSelectResults2 { Id = 2, Bool = true, Name = "NameA2", TableBId = 2, TableBName = "NameB2" },
+                        new JoinSelectResults2 { Id = 2, Bool = true, Name = "NameA2", TableBId = 3, TableBName = "NameB3" },
+                    };
+                    Assert.That(rows2, Is.EqualTo(expected2));
+
+                    // Use column alias prefixes for all columns in TableA
+
+                    var q3 = db.From<TableA>()
+                        .Join<TableB>()
+                        .Select<TableA, TableB>((a, b) => new { TableA_ = a, b.Id, TableBName = b.Name });
+
+                    var rows3 = db.Select<JoinSelectResults3>(q3).OrderBy(r => r.TableA_Id).ThenBy(r => r.Id).ToList();
+                    var expected3 = new[]
+                    {
+                        new JoinSelectResults3 { TableA_Id = 1, TableA_Bool = false, TableA_Name = "NameA1", Id = 1, TableBName = "NameB1" },
+                        new JoinSelectResults3 { TableA_Id = 2, TableA_Bool = true, TableA_Name = "NameA2", Id = 2, TableBName = "NameB2" },
+                        new JoinSelectResults3 { TableA_Id = 2, TableA_Bool = true, TableA_Name = "NameA2", Id = 3, TableBName = "NameB3" },
+                    };
+                    Assert.That(rows3, Is.EqualTo(expected3));
+                }
+                finally
+                {
+                    db.GetLastSql().Print();
+                }
+            }
+        }
     }
 }

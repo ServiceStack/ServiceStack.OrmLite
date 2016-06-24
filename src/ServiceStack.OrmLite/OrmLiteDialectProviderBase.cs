@@ -546,30 +546,44 @@ namespace ServiceStack.OrmLite
             return StringBuilderCache.ReturnAndFree(sb);
         }
 
-        public virtual string GetRowVersionColumnName(FieldDefinition field)
+        public virtual SelectListItem GetRowVersionColumnName(FieldDefinition field)
         {
-            return GetQuotedColumnName(field.FieldName);
+            return new SelectListColumn(this, field.FieldName);
         }
 
         public virtual string GetColumnNames(ModelDefinition modelDef)
         {
-            var sqlColumns = StringBuilderCache.Allocate();
-            foreach (var field in modelDef.FieldDefinitions)
-            {
-                if (sqlColumns.Length > 0)
-                    sqlColumns.Append(", ");
+            return GetColumnNames(modelDef, false).ToString();
+        }
 
-                if (field.CustomSelect == null)
+        public virtual SelectList GetColumnNames(ModelDefinition modelDef, bool tableQualified)
+        {
+            var tablePrefix = "";
+            if (tableQualified)
+            {
+                tablePrefix = GetQuotedTableName(modelDef);
+            }
+
+            var sqlColumns = new SelectListItem[modelDef.FieldDefinitions.Count];
+            for (var i = 0; i < sqlColumns.Length; ++i)
+            {
+                var field = modelDef.FieldDefinitions[i];
+
+                if (field.CustomSelect != null)
                 {
-                    sqlColumns.Append(field.GetQuotedName(this));
+                    sqlColumns[i] = new SelectListExpression(this, field.CustomSelect, field.FieldName);
+                }
+                else if (field.IsRowVersion)
+                {
+                    sqlColumns[i] = GetRowVersionColumnName(field);
                 }
                 else
                 {
-                    sqlColumns.Append(field.CustomSelect + " AS " + field.FieldName);
+                    sqlColumns[i] = new SelectListColumn(this, field.FieldName, null, tablePrefix);
                 }
             }
 
-            return StringBuilderCache.ReturnAndFree(sqlColumns);
+            return new SelectList(sqlColumns);
         }
 
         public virtual string ToInsertRowStatement(IDbCommand cmd, object objWithProperties, ICollection<string> insertFields = null)
