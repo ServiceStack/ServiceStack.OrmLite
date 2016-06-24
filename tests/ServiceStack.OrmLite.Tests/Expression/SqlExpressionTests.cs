@@ -874,6 +874,25 @@ namespace ServiceStack.OrmLite.Tests.Expression
             }
         }
 
+        private class JoinSelectResults3
+        {
+            // From TableA
+            public int TableA_Id { get; set; }
+            public bool TableA_Bool { get; set; }
+            public string TableA_Name { get; set; }
+
+            // From TableB
+            public int Id { get; set; }
+            public string TableBName { get; set; }
+
+            public override bool Equals(object obj)
+            {
+                var other = (JoinSelectResults3)obj;
+                return TableA_Id == other.TableA_Id && TableA_Bool == other.TableA_Bool && TableA_Name == other.TableA_Name
+                    && Id == other.Id && TableBName == other.TableBName;
+            }
+        }
+
         [Test]
         public void Can_select_entire_tables()
         {
@@ -920,6 +939,21 @@ namespace ServiceStack.OrmLite.Tests.Expression
                         new JoinSelectResults2 { Id = 2, Bool = true, Name = "NameA2", TableBId = 3, TableBName = "NameB3" },
                     };
                     Assert.That(rows2, Is.EqualTo(expected2));
+
+                    // Use column alias prefixes for all columns in TableA
+
+                    var q3 = db.From<TableA>()
+                        .Join<TableB>()
+                        .Select<TableA, TableB>((a, b) => new { TableA_ = a, b.Id, TableBName = b.Name });
+
+                    var rows3 = db.Select<JoinSelectResults3>(q3).OrderBy(r => r.TableA_Id).ThenBy(r => r.Id).ToList();
+                    var expected3 = new[]
+                    {
+                        new JoinSelectResults3 { TableA_Id = 1, TableA_Bool = false, TableA_Name = "NameA1", Id = 1, TableBName = "NameB1" },
+                        new JoinSelectResults3 { TableA_Id = 2, TableA_Bool = true, TableA_Name = "NameA2", Id = 2, TableBName = "NameB2" },
+                        new JoinSelectResults3 { TableA_Id = 2, TableA_Bool = true, TableA_Name = "NameA2", Id = 3, TableBName = "NameB3" },
+                    };
+                    Assert.That(rows3, Is.EqualTo(expected3));
                 }
                 finally
                 {

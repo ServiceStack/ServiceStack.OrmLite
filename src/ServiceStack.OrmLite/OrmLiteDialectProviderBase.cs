@@ -546,41 +546,44 @@ namespace ServiceStack.OrmLite
             return StringBuilderCache.ReturnAndFree(sb);
         }
 
-        public virtual string GetRowVersionColumnName(FieldDefinition field)
+        public virtual SelectListItem GetRowVersionColumnName(FieldDefinition field)
         {
-            return GetQuotedColumnName(field.FieldName);
+            return new SelectListColumn(this, field.FieldName);
         }
 
-        public virtual string GetColumnNames(ModelDefinition modelDef, bool tableQualified = false)
+        public virtual string GetColumnNames(ModelDefinition modelDef)
+        {
+            return GetColumnNames(modelDef, false).ToString();
+        }
+
+        public virtual SelectList GetColumnNames(ModelDefinition modelDef, bool tableQualified)
         {
             var tablePrefix = "";
             if (tableQualified)
             {
-                tablePrefix = GetQuotedTableName(modelDef) + ".";
+                tablePrefix = GetQuotedTableName(modelDef);
             }
 
-            var sqlColumns = StringBuilderCache.Allocate();
-            foreach (var field in modelDef.FieldDefinitions)
+            var sqlColumns = new SelectListItem[modelDef.FieldDefinitions.Count];
+            for (var i = 0; i < sqlColumns.Length; ++i)
             {
-                if (sqlColumns.Length > 0)
-                    sqlColumns.Append(", ");
+                var field = modelDef.FieldDefinitions[i];
 
                 if (field.CustomSelect != null)
                 {
-                    sqlColumns.Append(field.CustomSelect + " AS " + field.FieldName);
+                    sqlColumns[i] = new SelectListExpression(this, field.CustomSelect, field.FieldName);
                 }
                 else if (field.IsRowVersion)
                 {
-                    sqlColumns.Append(GetRowVersionColumnName(field));
+                    sqlColumns[i] = GetRowVersionColumnName(field);
                 }
                 else
                 {
-                    sqlColumns.Append(tablePrefix);
-                    sqlColumns.Append(GetQuotedColumnName(field.FieldName));
+                    sqlColumns[i] = new SelectListColumn(this, field.FieldName, null, tablePrefix);
                 }
             }
 
-            return StringBuilderCache.ReturnAndFree(sqlColumns);
+            return new SelectList(sqlColumns);
         }
 
         public virtual string ToInsertRowStatement(IDbCommand cmd, object objWithProperties, ICollection<string> insertFields = null)

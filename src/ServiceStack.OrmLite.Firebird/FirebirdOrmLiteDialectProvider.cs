@@ -657,10 +657,10 @@ namespace ServiceStack.OrmLite.Firebird
                 .Replace("%", @"^%");
         }
 
-        public override string GetColumnNames(ModelDefinition modelDef, bool tableQualified = false)
+        public override string GetColumnNames(ModelDefinition modelDef)
         {
             if (QuoteNames)
-                return modelDef.GetColumnNames(this); // Calls this.GetColumnNames(modelDef) - infinite loop?
+                return modelDef.GetColumnNames(this);
 
             var sqlColumns = StringBuilderCache.Allocate();
             foreach (var field in modelDef.FieldDefinitions)

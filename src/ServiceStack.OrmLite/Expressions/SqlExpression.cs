@@ -1453,23 +1453,52 @@ namespace ServiceStack.OrmLite
                 var r = StringBuilderCache.Allocate();
                 for (var i = 0; i < exprs.Count; ++i)
                 {
+                    exprs[i] = SetAnonTypePropertyNamesForSelectExpression(exprs[i], nex.Arguments[i], nex.Members[i]);
+
                     if (i > 0)
                         r.Append(",");
 
                     r.Append(exprs[i]);
-
-                    // Use the anon type property name, rather than the table property name, as the returned column name
-
-                    var propertyExpr = nex.Arguments[i] as MemberExpression;
-                    if (propertyExpr != null && propertyExpr.Member.Name != nex.Members[i].Name)
-                    {
-                        r.Append(" AS " + DialectProvider.GetQuotedName(nex.Members[i].Name));
-                    }
                 }
                 return StringBuilderCache.ReturnAndFree(r);
             }
 
             return CachedExpressionCompiler.Evaluate(nex);
+        }
+
+        private object SetAnonTypePropertyNamesForSelectExpression(object expr, Expression arg, MemberInfo member)
+        {
+            // When selecting a column use the anon type property name, rather than the table property name, as the returned column name
+
+            MemberExpression propertyExpr;
+            if ((propertyExpr = arg as MemberExpression) != null && propertyExpr.Member.Name != member.Name)
+                return new SelectListExpression(DialectProvider, expr.ToString(), member.Name);
+
+            // When selecting an entire table use the anon type property name as a prefix for the returned column name
+            // to allow the caller to distinguish properties with the same names from different tables
+
+            ParameterExpression paramExpr;
+            SelectList selectList;
+            if ((paramExpr = arg as ParameterExpression) != null && paramExpr.Name != member.Name && (selectList = expr as SelectList) != null)
+            {
+                foreach (var item in selectList.Items)
+                {
+                    if (!string.IsNullOrEmpty(item.Alias))
+                    {
+                        item.Alias = member.Name + item.Alias;
+                    }
+                    else
+                    {
+                        var columnItem = item as SelectListColumn;
+                        if (columnItem != null)
+                        {
+                            columnItem.Alias = member.Name + columnItem.ColumnName;
+                        }
+                    }
+                }
+            }
+
+            return expr;
         }
 
         protected virtual object VisitParameter(ParameterExpression p)
@@ -2072,6 +2101,118 @@ namespace ServiceStack.OrmLite
         }
 
         public Type EnumType { get; private set; }
+    }
+
+    public abstract class SelectListItem
+    {
+        protected SelectListItem(IOrmLiteDialectProvider dialectProvider, string alias)
+        {
+            if (dialectProvider == null)
+                throw new ArgumentNullException("dialectProvider");
+
+            DialectProvider = dialectProvider;
+            Alias = alias;
+        }
+
+        /// <summary>
+        /// Unquoted alias for the column or expression being selected.
+        /// </summary>
+        public string Alias { get; set; }
+
+        protected IOrmLiteDialectProvider DialectProvider { get; }
+
+        public abstract override string ToString();
+    }
+
+    public class SelectListExpression : SelectListItem
+    {
+        public SelectListExpression(IOrmLiteDialectProvider dialectProvider, string selectExpression, string alias)
+            : base(dialectProvider, alias)
+        {
+            if (string.IsNullOrEmpty(selectExpression))
+                throw new ArgumentNullException("selectExpression");
+            if (string.IsNullOrEmpty(alias))
+                throw new ArgumentNullException("alias");
+
+            SelectExpression = selectExpression;
+            Alias = alias;
+        }
+
+        /// <summary>
+        /// The SQL expression being selected, including any necessary quoting.
+        /// </summary>
+        public string SelectExpression { get; }
+
+        public override string ToString()
+        {
+            return SelectExpression + " AS " + DialectProvider.GetQuotedName(Alias); // Alias is required for a non-column expression
+        }
+    }
+
+    public class SelectListColumn : SelectListItem
+    {
+        public SelectListColumn(IOrmLiteDialectProvider dialectProvider, string columnName, string columnAlias = null, string quotedTableAlias = null)
+            : base(dialectProvider, columnAlias)
+        {
+            if (string.IsNullOrEmpty(columnName))
+                throw new ArgumentNullException("columnName");
+
+            ColumnName = columnName;
+            QuotedTableAlias = quotedTableAlias;
+        }
+
+        /// <summary>
+        /// Unquoted column name being selected.
+        /// </summary>
+        public string ColumnName { get; }
+        /// <summary>
+        /// Table name or alias used to prefix the column name, if any. Already quoted.
+        /// </summary>
+        public string QuotedTableAlias { get; }
+
+        public override string ToString()
+        {
+            var text = DialectProvider.GetQuotedColumnName(ColumnName);
+
+            if (!string.IsNullOrEmpty(QuotedTableAlias))
+                text = QuotedTableAlias + "." + text;
+            if (!string.IsNullOrEmpty(Alias))
+                text += " AS " + DialectProvider.GetQuotedName(Alias);
+
+            return text;
+        }
+    }
+
+    public class SelectList
+    {
+        public SelectList()
+        {
+            Items = new List<SelectListItem>();
+        }
+
+        public SelectList(ICollection<SelectListItem> items)
+        {
+            if (items == null)
+                throw new ArgumentNullException("items");
+
+            Items = new List<SelectListItem>(items);
+        }
+
+        public List<SelectListItem> Items { get; }
+
+        public override string ToString()
+        {
+            var sb = StringBuilderCache.Allocate();
+
+            foreach (var item in Items)
+            {
+                if (sb.Length > 0)
+                    sb.Append(", ");
+                sb.Append(item);
+            }
+
+            return StringBuilderCache.ReturnAndFree(sb);
+        }
     }
 
     public class OrmLiteDataParameter : IDbDataParameter

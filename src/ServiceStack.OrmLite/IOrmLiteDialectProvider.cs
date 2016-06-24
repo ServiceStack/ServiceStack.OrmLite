@@ -157,9 +157,10 @@ namespace ServiceStack.OrmLite
         bool DoesSequenceExist(IDbCommand dbCmd, string sequencName);
 
         ulong FromDbRowVersion(object value);
-        string GetRowVersionColumnName(FieldDefinition field);
+        SelectListItem GetRowVersionColumnName(FieldDefinition field);
 
-        string GetColumnNames(ModelDefinition modelDef, bool tableQualified = false);
+        string GetColumnNames(ModelDefinition modelDef);
+        SelectList GetColumnNames(ModelDefinition modelDef, bool tableQualified);
 
         SqlExpression<T> SqlExpression<T>();
 
