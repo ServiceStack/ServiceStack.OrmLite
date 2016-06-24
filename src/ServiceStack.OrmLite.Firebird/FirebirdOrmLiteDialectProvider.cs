@@ -659,9 +659,6 @@ namespace ServiceStack.OrmLite.Firebird
 
         public override string GetColumnNames(ModelDefinition modelDef)
         {
-            if (QuoteNames)
-                return modelDef.GetColumnNames(this);
-
             var sqlColumns = StringBuilderCache.Allocate();
             foreach (var field in modelDef.FieldDefinitions)
             {
