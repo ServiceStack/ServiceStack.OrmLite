@@ -1449,13 +1449,22 @@ namespace ServiceStack.OrmLite
             if (isAnonType)
             {
                 var exprs = VisitExpressionList(nex.Arguments);
+
                 var r = StringBuilderCache.Allocate();
-                foreach (object e in exprs)
+                for (var i = 0; i < exprs.Count; ++i)
                 {
-                    if (r.Length > 0)
+                    if (i > 0)
                         r.Append(",");
 
-                    r.Append(e);
+                    r.Append(exprs[i]);
+
+                    // Use the anon type property name, rather than the table property name, as the returned column name
+
+                    var propertyExpr = nex.Arguments[i] as MemberExpression;
+                    if (propertyExpr != null && propertyExpr.Member.Name != nex.Members[i].Name)
+                    {
+                        r.Append(" AS " + DialectProvider.GetQuotedName(nex.Members[i].Name));
+                    }
                 }
                 return StringBuilderCache.ReturnAndFree(r);
             }
