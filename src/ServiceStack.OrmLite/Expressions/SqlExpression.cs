@@ -2200,38 +2200,6 @@ namespace ServiceStack.OrmLite
         }
     }
 
-    //public class SelectList
-    //{
-    //    public SelectList()
-    //    {
-    //        Items = new List<SelectItem>();
-    //    }
-
-    //    public SelectList(ICollection<SelectItem> items)
-    //    {
-    //        if (items == null)
-    //            throw new ArgumentNullException("items");
-
-    //        Items = new List<SelectItem>(items);
-    //    }
-
-    //    public List<SelectItem> Items { get; set; }
-
-    //    public override string ToString()
-    //    {
-    //        var sb = StringBuilderCache.Allocate();
-
-    //        foreach (var item in Items)
-    //        {
-    //            if (sb.Length > 0)
-    //                sb.Append(", ");
-    //            sb.Append(item);
-    //        }
-
-    //        return StringBuilderCache.ReturnAndFree(sb);
-    //    }
-    //}
-
     public class OrmLiteDataParameter : IDbDataParameter
     {
         public DbType DbType { get; set; }
