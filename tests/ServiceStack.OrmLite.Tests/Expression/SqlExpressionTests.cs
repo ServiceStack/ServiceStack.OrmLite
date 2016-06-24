@@ -838,5 +838,59 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 Assert.That(result.Extra, Is.Null);
             }
         }
+
+        private class JoinSelectResults1
+        {
+            // From TableA
+            public int Id { get; set; }
+            public bool Bool { get; set; }
+            public string Name { get; set; }
+
+            // From TableB
+            public int TableAId { get; set; }
+
+            public override bool Equals(object obj)
+            {
+                var other = (JoinSelectResults1)obj;
+                return Id == other.Id && Bool == other.Bool && Name == other.Name && TableAId == other.TableAId;
+            }
+        }
+
+        [Test]
+        public void Can_select_entire_tables()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<TableA>();
+                db.DropAndCreateTable<TableB>();
+
+                db.Insert(new TableA { Id = 1, Bool = false, Name = "NameA1" });
+                db.Insert(new TableA { Id = 2, Bool = true, Name = "NameA2" });
+                db.Insert(new TableB { Id = 1, TableAId = 1, Name = "NameB1" });
+                db.Insert(new TableB { Id = 2, TableAId = 2, Name = "NameB2" });
+                db.Insert(new TableB { Id = 3, TableAId = 2, Name = "NameB3" });
+
+                var q = db.From<TableA>()
+                    .Join<TableB>()
+                    .Select<TableA, TableB>((a, b) => new { a, b.TableAId })
+                    .OrderBy(x => x.Id);
+
+                try
+                {
+                    var rows = db.Select<JoinSelectResults1>(q);
+                    var expected = new[]
+                    {
+                        new JoinSelectResults1 { Id = 1, Bool = false, Name = "NameA1", TableAId = 1 },
+                        new JoinSelectResults1 { Id = 2, Bool = true, Name = "NameA2", TableAId = 2 },
+                        new JoinSelectResults1 { Id = 2, Bool = true, Name = "NameA2", TableAId = 2 },
+                    };
+                    Assert.That(rows, Is.EqualTo(expected));
+                }
+                finally
+                {
+                    db.GetLastSql().Print();
+                }
+            }
+        }
     }
 }

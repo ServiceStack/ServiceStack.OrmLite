@@ -159,7 +159,7 @@ namespace ServiceStack.OrmLite
         ulong FromDbRowVersion(object value);
         string GetRowVersionColumnName(FieldDefinition field);
 
-        string GetColumnNames(ModelDefinition modelDef);
+        string GetColumnNames(ModelDefinition modelDef, bool tableQualified = false);
 
         SqlExpression<T> SqlExpression<T>();
 

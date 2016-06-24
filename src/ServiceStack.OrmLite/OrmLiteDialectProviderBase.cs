@@ -551,21 +551,32 @@ namespace ServiceStack.OrmLite
             return GetQuotedColumnName(field.FieldName);
         }
 
-        public virtual string GetColumnNames(ModelDefinition modelDef)
+        public virtual string GetColumnNames(ModelDefinition modelDef, bool tableQualified = false)
         {
+            var tablePrefix = "";
+            if (tableQualified)
+            {
+                tablePrefix = GetQuotedTableName(modelDef) + ".";
+            }
+
             var sqlColumns = StringBuilderCache.Allocate();
             foreach (var field in modelDef.FieldDefinitions)
             {
                 if (sqlColumns.Length > 0)
                     sqlColumns.Append(", ");
 
-                if (field.CustomSelect == null)
+                if (field.CustomSelect != null)
                 {
-                    sqlColumns.Append(field.GetQuotedName(this));
+                    sqlColumns.Append(field.CustomSelect + " AS " + field.FieldName);
+                }
+                else if (field.IsRowVersion)
+                {
+                    sqlColumns.Append(GetRowVersionColumnName(field));
                 }
                 else
                 {
-                    sqlColumns.Append(field.CustomSelect + " AS " + field.FieldName);
+                    sqlColumns.Append(tablePrefix);
+                    sqlColumns.Append(GetQuotedColumnName(field.FieldName));
                 }
             }
 

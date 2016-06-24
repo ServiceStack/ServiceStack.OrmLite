@@ -1465,6 +1465,10 @@ namespace ServiceStack.OrmLite
 
         protected virtual object VisitParameter(ParameterExpression p)
         {
+            var paramModelDef = p.Type.GetModelDefinition();
+            if (paramModelDef != null)
+                return DialectProvider.GetColumnNames(paramModelDef, true);
+
             return p.Name;
         }
 
