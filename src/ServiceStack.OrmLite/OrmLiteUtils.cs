@@ -289,6 +289,20 @@ namespace ServiceStack.OrmLite
             return dialect.GetColumnNames(modelDef);
         }
 
+        public static string ToSelectString(this SelectItem[] items)
+        {
+            var sb = StringBuilderCache.Allocate();
+
+            foreach (var item in items)
+            {
+                if (sb.Length > 0)
+                    sb.Append(", ");
+                sb.Append(item);
+            }
+
+            return StringBuilderCache.ReturnAndFree(sb);
+        }
+
         internal static string SetIdsInSqlParams(this IDbCommand dbCmd, IEnumerable idValues)
         {
             var inArgs = Sql.Flatten(idValues);

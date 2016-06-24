@@ -128,9 +128,9 @@ namespace ServiceStack.OrmLite.PostgreSQL
         //Convert xmin into an integer so it can be used in comparisons
         public const string RowVersionFieldComparer = "int8in(xidout(xmin))";
 
-        public override SelectListItem GetRowVersionColumnName(FieldDefinition field)
+        public override SelectItem GetRowVersionColumnName(FieldDefinition field)
         {
-            return new SelectListExpression(this, "xmin", field.FieldName);
+            return new SelectItemExpression(this, "xmin", field.FieldName);
         }
 
         public override void AppendFieldCondition(StringBuilder sqlFilter, FieldDefinition fieldDef, IDbCommand cmd)

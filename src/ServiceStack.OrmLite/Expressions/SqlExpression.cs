@@ -1472,14 +1472,16 @@ namespace ServiceStack.OrmLite
 
             MemberExpression propertyExpr;
             if ((propertyExpr = arg as MemberExpression) != null && propertyExpr.Member.Name != member.Name)
-                return new SelectListExpression(DialectProvider, expr.ToString(), member.Name);
+                return new SelectItemExpression(DialectProvider, expr.ToString(), member.Name);
 
             // When selecting an entire table use the anon type property name as a prefix for the returned column name
             // to allow the caller to distinguish properties with the same names from different tables
 
-            ParameterExpression paramExpr;
-            SelectList selectList;
-            if ((paramExpr = arg as ParameterExpression) != null && paramExpr.Name != member.Name && (selectList = expr as SelectList) != null)
+            var paramExpr = arg as ParameterExpression;
+            var selectList = paramExpr != null && paramExpr.Name != member.Name 
+                ? expr as SelectList 
+                : null;
+            if (selectList != null)
             {
                 foreach (var item in selectList.Items)
                 {
@@ -1489,7 +1491,7 @@ namespace ServiceStack.OrmLite
                     }
                     else
                     {
-                        var columnItem = item as SelectListColumn;
+                        var columnItem = item as SelectItemColumn;
                         if (columnItem != null)
                         {
                             columnItem.Alias = member.Name + columnItem.ColumnName;
@@ -1501,11 +1503,26 @@ namespace ServiceStack.OrmLite
             return expr;
         }
 
+        class SelectList
+        {
+            public readonly SelectItem[] Items;
+
+            public SelectList(SelectItem[] items)
+            {
+                this.Items = items;
+            }
+
+            public override string ToString()
+            {
+                return Items.ToSelectString();
+            }
+        }
+
         protected virtual object VisitParameter(ParameterExpression p)
         {
             var paramModelDef = p.Type.GetModelDefinition();
             if (paramModelDef != null)
-                return DialectProvider.GetColumnNames(paramModelDef, true);
+                return new SelectList(DialectProvider.GetColumnNames(paramModelDef, true));
 
             return p.Name;
         }
@@ -2103,9 +2120,9 @@ namespace ServiceStack.OrmLite
         public Type EnumType { get; private set; }
     }
 
-    public abstract class SelectListItem
+    public abstract class SelectItem
     {
-        protected SelectListItem(IOrmLiteDialectProvider dialectProvider, string alias)
+        protected SelectItem(IOrmLiteDialectProvider dialectProvider, string alias)
         {
             if (dialectProvider == null)
                 throw new ArgumentNullException("dialectProvider");
@@ -2124,9 +2141,9 @@ namespace ServiceStack.OrmLite
         public abstract override string ToString();
     }
 
-    public class SelectListExpression : SelectListItem
+    public class SelectItemExpression : SelectItem
     {
-        public SelectListExpression(IOrmLiteDialectProvider dialectProvider, string selectExpression, string alias)
+        public SelectItemExpression(IOrmLiteDialectProvider dialectProvider, string selectExpression, string alias)
             : base(dialectProvider, alias)
         {
             if (string.IsNullOrEmpty(selectExpression))
@@ -2149,9 +2166,9 @@ namespace ServiceStack.OrmLite
         }
     }
 
-    public class SelectListColumn : SelectListItem
+    public class SelectItemColumn : SelectItem
     {
-        public SelectListColumn(IOrmLiteDialectProvider dialectProvider, string columnName, string columnAlias = null, string quotedTableAlias = null)
+        public SelectItemColumn(IOrmLiteDialectProvider dialectProvider, string columnName, string columnAlias = null, string quotedTableAlias = null)
             : base(dialectProvider, columnAlias)
         {
             if (string.IsNullOrEmpty(columnName))
@@ -2183,37 +2200,37 @@ namespace ServiceStack.OrmLite
         }
     }
 
-    public class SelectList
-    {
-        public SelectList()
-        {
-            Items = new List<SelectListItem>();
-        }
+    //public class SelectList
+    //{
+    //    public SelectList()
+    //    {
+    //        Items = new List<SelectItem>();
+    //    }
 
-        public SelectList(ICollection<SelectListItem> items)
-        {
-            if (items == null)
-                throw new ArgumentNullException("items");
+    //    public SelectList(ICollection<SelectItem> items)
+    //    {
+    //        if (items == null)
+    //            throw new ArgumentNullException("items");
 
-            Items = new List<SelectListItem>(items);
-        }
+    //        Items = new List<SelectItem>(items);
+    //    }
 
-        public List<SelectListItem> Items { get; set; }
+    //    public List<SelectItem> Items { get; set; }
 
-        public override string ToString()
-        {
-            var sb = StringBuilderCache.Allocate();
+    //    public override string ToString()
+    //    {
+    //        var sb = StringBuilderCache.Allocate();
 
-            foreach (var item in Items)
-            {
-                if (sb.Length > 0)
-                    sb.Append(", ");
-                sb.Append(item);
-            }
+    //        foreach (var item in Items)
+    //        {
+    //            if (sb.Length > 0)
+    //                sb.Append(", ");
+    //            sb.Append(item);
+    //        }
 
-            return StringBuilderCache.ReturnAndFree(sb);
-        }
-    }
+    //        return StringBuilderCache.ReturnAndFree(sb);
+    //    }
+    //}
 
     public class OrmLiteDataParameter : IDbDataParameter
     {

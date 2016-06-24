@@ -546,17 +546,17 @@ namespace ServiceStack.OrmLite
             return StringBuilderCache.ReturnAndFree(sb);
         }
 
-        public virtual SelectListItem GetRowVersionColumnName(FieldDefinition field)
+        public virtual SelectItem GetRowVersionColumnName(FieldDefinition field)
         {
-            return new SelectListColumn(this, field.FieldName);
+            return new SelectItemColumn(this, field.FieldName);
         }
 
         public virtual string GetColumnNames(ModelDefinition modelDef)
         {
-            return GetColumnNames(modelDef, false).ToString();
+            return GetColumnNames(modelDef, false).ToSelectString();
         }
 
-        public virtual SelectList GetColumnNames(ModelDefinition modelDef, bool tableQualified)
+        public virtual SelectItem[] GetColumnNames(ModelDefinition modelDef, bool tableQualified)
         {
             var tablePrefix = "";
             if (tableQualified)
@@ -564,14 +564,14 @@ namespace ServiceStack.OrmLite
                 tablePrefix = GetQuotedTableName(modelDef);
             }
 
-            var sqlColumns = new SelectListItem[modelDef.FieldDefinitions.Count];
+            var sqlColumns = new SelectItem[modelDef.FieldDefinitions.Count];
             for (var i = 0; i < sqlColumns.Length; ++i)
             {
                 var field = modelDef.FieldDefinitions[i];
 
                 if (field.CustomSelect != null)
                 {
-                    sqlColumns[i] = new SelectListExpression(this, field.CustomSelect, field.FieldName);
+                    sqlColumns[i] = new SelectItemExpression(this, field.CustomSelect, field.FieldName);
                 }
                 else if (field.IsRowVersion)
                 {
@@ -579,11 +579,11 @@ namespace ServiceStack.OrmLite
                 }
                 else
                 {
-                    sqlColumns[i] = new SelectListColumn(this, field.FieldName, null, tablePrefix);
+                    sqlColumns[i] = new SelectItemColumn(this, field.FieldName, null, tablePrefix);
                 }
             }
 
-            return new SelectList(sqlColumns);
+            return sqlColumns;
         }
 
         public virtual string ToInsertRowStatement(IDbCommand cmd, object objWithProperties, ICollection<string> insertFields = null)
