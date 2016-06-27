@@ -30,10 +30,9 @@ namespace ServiceStack.OrmLite.Tests.Issues
                 db.DropAndCreateTable<ProductSheet>();
                 db.Insert(new ProductSheet { Id = 23, ManufacturingMessage = "test" });
                 db.UpdateOnly(new ProductSheet { ManufacturingMessage = "toto" }, p => p.ManufacturingMessage, p => p.Id == 23);
-                var sheet = db.Select<ProductSheet>().FirstOrDefault(p => p.Id == 23);
-                Assert.AreEqual("toto", sheet.ManufacturingMessage);
+                var sheet = db.SingleById<ProductSheet>(23);
+                Assert.That(sheet.ManufacturingMessage, Is.EqualTo("toto"));
             }
         }
-
     }
 }
