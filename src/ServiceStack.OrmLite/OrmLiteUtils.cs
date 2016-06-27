@@ -289,7 +289,7 @@ namespace ServiceStack.OrmLite
             return dialect.GetColumnNames(modelDef);
         }
 
-        public static string ToSelectString(this SelectItem[] items)
+        public static string ToSelectString<TItem>(this IEnumerable<TItem> items)
         {
             var sb = StringBuilderCache.Allocate();
 

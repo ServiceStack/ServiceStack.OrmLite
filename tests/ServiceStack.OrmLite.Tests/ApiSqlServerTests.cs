@@ -165,13 +165,13 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT Age FROM Person WHERE Age < @age"));
 
             db.Lookup<int, string>(db.From<Person>().Select(x => new { x.Age, x.LastName }).Where(q => q.Age < 50));
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Age\",\"LastName\" \nFROM \"Person\"\nWHERE (\"Age\" < @0)"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Age\", \"LastName\" \nFROM \"Person\"\nWHERE (\"Age\" < @0)"));
 
             db.Lookup<int, string>("SELECT Age, LastName FROM Person WHERE Age < @age", new { age = 50 });
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT Age, LastName FROM Person WHERE Age < @age"));
 
             db.Dictionary<int, string>(db.From<Person>().Select(x => new { x.Id, x.LastName }).Where(x => x.Age < 50));
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\",\"LastName\" \nFROM \"Person\"\nWHERE (\"Age\" < @0)"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"LastName\" \nFROM \"Person\"\nWHERE (\"Age\" < @0)"));
 
             db.Dictionary<int, string>("SELECT Id, LastName FROM Person WHERE Age < @age", new { age = 50 });
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT Id, LastName FROM Person WHERE Age < @age"));
