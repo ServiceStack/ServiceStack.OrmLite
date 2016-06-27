@@ -69,6 +69,9 @@ namespace ServiceStack.OrmLite.Tests.Expression
             using (var db = OpenDbConnection())
             {
                 InitLetters(db);
+                var expected = new Dictionary<string, int> {
+                    { "A", 1 }, { "B", 2 }, { "C", 3 },
+                };
 
                 var query = db.From<LetterFrequency>()
                   .Select(x => new { x.Letter, count = Sql.Count("*") })
@@ -77,10 +80,28 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
                 query.ToSelectStatement().Print();
 
-                var map = new SortedDictionary<string, int>(db.Dictionary<string, int>(query));
-                Assert.That(map.EquivalentTo(new Dictionary<string, int> {
-                    { "A", 1 }, { "B", 2 }, { "C", 3 },
-                }));
+                var map = db.Dictionary<string, int>(query);
+                Assert.That(map.EquivalentTo(expected));
+
+                // Same, but group by an anonymous type using an alias -t his should not translate to "GROUP BY TheLetter AS Letter", which is invalid SQL
+
+                query = db.From<LetterFrequency>()
+                  .Select(x => new { x.Letter, count = Sql.Count("*") })
+                  .Where(q => q.Letter != "D")
+                  .GroupBy(x => new { TheLetter = x.Letter });
+
+                map = db.Dictionary<string, int>(query);
+                Assert.That(map.EquivalentTo(expected));
+
+                // Now group by all columns without listing them - effectively "SELECT DISTINCT *"
+
+                query = db.From<LetterFrequency>()
+                  .Select(x => new { x.Id })
+                  .Where(q => q.Letter != "D")
+                  .GroupBy(x => new { x });
+
+                var list = db.SqlList<int>(query);
+                Assert.That(list, Is.EquivalentTo(new[] { 1, 2, 3, 4, 5, 6 }));
             }
         }
 

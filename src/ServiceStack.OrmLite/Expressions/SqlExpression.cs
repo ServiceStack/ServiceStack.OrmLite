@@ -461,9 +461,12 @@ namespace ServiceStack.OrmLite
         {
             sep = string.Empty;
             useFieldName = true;
-            return GroupBy(Visit(keySelector).ToString());
-        }
 
+            var groupByKey = Visit(keySelector);
+            StripAliases(groupByKey as SelectList); // No "AS ColumnAlias" in GROUP BY, just the column names
+
+            return GroupBy(groupByKey.ToString());
+        }
 
         public virtual SqlExpression<T> Having()
         {
@@ -888,7 +891,8 @@ namespace ServiceStack.OrmLite
         {
             sep = string.Empty;
             useFieldName = false;
-            InsertFields = Visit(fields).ToString().Split(',').ToList();
+            var fieldList = Visit(fields);
+            InsertFields = fieldList.ToString().Split(',').Select(f => f.Trim()).ToList();
             return this;
         }
 
@@ -1450,17 +1454,12 @@ namespace ServiceStack.OrmLite
             {
                 var exprs = VisitExpressionList(nex.Arguments);
 
-                var r = StringBuilderCache.Allocate();
                 for (var i = 0; i < exprs.Count; ++i)
                 {
                     exprs[i] = SetAnonTypePropertyNamesForSelectExpression(exprs[i], nex.Arguments[i], nex.Members[i]);
-
-                    if (i > 0)
-                        r.Append(",");
-
-                    r.Append(exprs[i]);
                 }
-                return StringBuilderCache.ReturnAndFree(r);
+
+                return new SelectList(exprs);
             }
 
             return CachedExpressionCompiler.Evaluate(nex);
@@ -1485,16 +1484,20 @@ namespace ServiceStack.OrmLite
             {
                 foreach (var item in selectList.Items)
                 {
-                    if (!string.IsNullOrEmpty(item.Alias))
+                    var selectItem = item as SelectItem;
+                    if (selectItem != null)
                     {
-                        item.Alias = member.Name + item.Alias;
-                    }
-                    else
-                    {
-                        var columnItem = item as SelectItemColumn;
-                        if (columnItem != null)
+                        if (!string.IsNullOrEmpty(selectItem.Alias))
                         {
-                            columnItem.Alias = member.Name + columnItem.ColumnName;
+                            selectItem.Alias = member.Name + selectItem.Alias;
+                        }
+                        else
+                        {
+                            var columnItem = item as SelectItemColumn;
+                            if (columnItem != null)
+                            {
+                                columnItem.Alias = member.Name + columnItem.ColumnName;
+                            }
                         }
                     }
                 }
@@ -1503,11 +1506,26 @@ namespace ServiceStack.OrmLite
             return expr;
         }
 
-        class SelectList
+        private static void StripAliases(SelectList selectList)
         {
-            public readonly SelectItem[] Items;
+            if (selectList == null)
+                return;
 
-            public SelectList(SelectItem[] items)
+            foreach (var item in selectList.Items)
+            {
+                var selectItem = item as SelectItem;
+                if (selectItem != null)
+                {
+                    selectItem.Alias = null;
+                }
+            }
+        }
+
+        private class SelectList
+        {
+            public readonly IEnumerable<object> Items;
+
+            public SelectList(IEnumerable<object> items)
             {
                 this.Items = items;
             }
@@ -2162,7 +2180,10 @@ namespace ServiceStack.OrmLite
 
         public override string ToString()
         {
-            return SelectExpression + " AS " + DialectProvider.GetQuotedName(Alias); // Alias is required for a non-column expression
+            var text = SelectExpression;
+            if (!string.IsNullOrEmpty(Alias)) // Note that even though Alias must be non-empty in the constructor it may be set to null/empty later
+                text += " AS " + DialectProvider.GetQuotedName(Alias);
+            return text;
         }
     }
 

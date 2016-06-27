@@ -558,11 +558,7 @@ namespace ServiceStack.OrmLite
 
         public virtual SelectItem[] GetColumnNames(ModelDefinition modelDef, bool tableQualified)
         {
-            var tablePrefix = "";
-            if (tableQualified)
-            {
-                tablePrefix = GetQuotedTableName(modelDef);
-            }
+            var tablePrefix = tableQualified ? GetQuotedTableName(modelDef) : "";
 
             var sqlColumns = new SelectItem[modelDef.FieldDefinitions.Count];
             for (var i = 0; i < sqlColumns.Length; ++i)
