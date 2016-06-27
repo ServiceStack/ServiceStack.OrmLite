@@ -473,8 +473,8 @@ namespace ServiceStack.OrmLite.Tests
             {
                 db.DropAndCreateTable<TableWithIgnoredFields>();
 
-                Assert.That(db.GetLastSql(), Is.StringContaining("DisplayName"));
-                Assert.That(db.GetLastSql(), Is.Not.StringContaining("IsIgnored"));
+                Assert.That(db.GetLastSql().ToLower(), Is.StringContaining("displayname"));
+                Assert.That(db.GetLastSql().ToLower(), Is.Not.StringContaining("isignored"));
 
                 db.Insert(new TableWithIgnoredFields
                 {

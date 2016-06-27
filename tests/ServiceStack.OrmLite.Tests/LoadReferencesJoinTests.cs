@@ -752,6 +752,7 @@ namespace ServiceStack.OrmLite.Tests
             var q = db.From<Customer>()
                 .Join<Customer, CustomerAddress>()
                 .Join<Customer, Order>()
+                .OrderBy<Order>(x => x.Id)
                 .Select("*");
 
             using (var multi = db.QueryMultiple(q.ToSelectStatement()))
@@ -819,7 +820,8 @@ Customer Address:
                 .Join<Customer, CustomerAddress>()
                 .Join<Customer, Order>()
                 .Where(x => x.Id == 1)
-                .And<CustomerAddress>(x => x.Country == "Australia");
+                .And<CustomerAddress>(x => x.Country == "Australia")
+                .OrderBy<Order>(x => x.Id);
 
             var tuples = db.SelectMulti<Customer, CustomerAddress, Order>(q);
 
@@ -833,7 +835,7 @@ Customer Address:
                 sb.AppendLine("Order:");
                 sb.AppendLine(tuple.Item3.Dump());
             }
-
+            sb.ToString().Print();
             AssertMultiCustomerOrderResults(sb);
         }
 

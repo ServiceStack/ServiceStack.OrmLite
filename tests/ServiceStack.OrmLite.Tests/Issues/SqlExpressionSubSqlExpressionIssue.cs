@@ -23,6 +23,14 @@ namespace ServiceStack.OrmLite.Tests.Issues
 
     public class SqlExpressionSubSqlExpressionIssue : OrmLiteTestBase
     {
+        private static void RecreateAnyObjectTables(IDbConnection db)
+        {
+            db.DropTable<AnyObjectClassItem>();
+            db.DropTable<AnyObjectClass>();
+            db.CreateTable<AnyObjectClass>();
+            db.CreateTable<AnyObjectClassItem>();
+        }
+
         [Test]
         public void Can_compare_null_constant_in_subquery()
         {
@@ -30,7 +38,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
 
             using (var db = OpenDbConnection())
             {
-                db.DropAndCreateTable<AnyObjectClass>();
+                RecreateAnyObjectTables(db);
 
                 var inQ = db.From<AnyObjectClass>()
                     .Where(y => y.Identity != null)
@@ -51,7 +59,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
 
             using (var db = OpenDbConnection())
             {
-                db.DropAndCreateTable<AnyObjectClass>();
+                RecreateAnyObjectTables(db);
 
                 var q = db.From<AnyObjectClass>().Where(x => Sql.In(x.Identity, 
                     db.From<AnyObjectClass>()
@@ -149,10 +157,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
         {
             using (var db = OpenDbConnection())
             {
-                db.DropTable<AnyObjectClassItem>();
-                db.DropTable<AnyObjectClass>();
-                db.CreateTable<AnyObjectClass>();
-                db.CreateTable<AnyObjectClassItem>();
+                RecreateAnyObjectTables(db);
 
                 var model = new AnyObjectClass { db = db };
                 var result = model.CustomProperty;
@@ -162,6 +167,5 @@ namespace ServiceStack.OrmLite.Tests.Issues
                 result.PrintDump();
             }
         }
-
     }
 }

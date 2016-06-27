@@ -211,8 +211,9 @@ namespace ServiceStack.OrmLite.Tests
 
                 var resultsMap = db.Select<Dictionary<string, object>>(q);
                 Assert.That(resultsMap.Count, Is.EqualTo(2));
-                Assert.That(resultsMap[0].ContainsKey("FirstName"));
-                Assert.That(!resultsMap[0].ContainsKey("Id"));
+                var row = new Dictionary<string,object>(resultsMap[0], StringComparer.OrdinalIgnoreCase);
+                Assert.That(row.ContainsKey("FirstName"));
+                Assert.That(!row.ContainsKey("Id"));
 
                 var resultsList = db.Select<List<object>>(q);
                 Assert.That(resultsList.Count, Is.EqualTo(2));
@@ -221,8 +222,16 @@ namespace ServiceStack.OrmLite.Tests
                 var resultsDynamic = db.Select<dynamic>(q);
                 Assert.That(resultsDynamic.Count, Is.EqualTo(2));
                 var map = (IDictionary<string, object>) resultsDynamic[0];
-                Assert.That(map.ContainsKey("FirstName"));
-                Assert.That(!map.ContainsKey("Id"));
+                if (Dialect != Dialect.Firebird)
+                {
+                    Assert.That(map.ContainsKey("FirstName"));
+                    Assert.That(!map.ContainsKey("Id"));
+                }
+                else
+                {
+                    Assert.That(map.ContainsKey("FIRSTNAME"));
+                    Assert.That(!map.ContainsKey("ID"));
+                }
             }
         }
 
@@ -357,20 +366,18 @@ namespace ServiceStack.OrmLite.Tests
                     .Join<Department2>()
                     .Select<DeptEmployee, Department2>(
                         (de, d2) => new { de.FirstName, de.LastName, d2.Name });
-
                 var results = db.Select<dynamic>(q);
+                db.GetLastSql().Print();
 
                 var sb = new StringBuilder();
                 foreach (var result in results)
                 {
-                    if (Dialect != Dialect.PostgreSql)
-                    {
-                        sb.AppendLine(result.FirstName + "," + result.LastName + "," + result.Name);
-                    }
-                    else
-                    {
+                    if (Dialect == Dialect.PostgreSql)
                         sb.AppendLine(result.first_name + "," + result.last_name + "," + result.name);
-                    }
+                    else if (Dialect == Dialect.Firebird)
+                        sb.AppendLine(result.FIRSTNAME + "," + result.LASTNAME + "," + result.NAME);
+                    else
+                        sb.AppendLine(result.FirstName + "," + result.LastName + "," + result.Name);
                 }
 
                 Assert.That(sb.ToString().NormalizeNewLines(), Is.EqualTo(
@@ -385,14 +392,12 @@ namespace ServiceStack.OrmLite.Tests
                 sb.Length = 0;
                 foreach (var result in results)
                 {
-                    if (Dialect != Dialect.PostgreSql)
-                    {
-                        sb.AppendLine(result.Name);
-                    }
-                    else
-                    {
+                    if (Dialect == Dialect.PostgreSql)
                         sb.AppendLine(result.name);
-                    }
+                    else if (Dialect == Dialect.Firebird)
+                        sb.AppendLine(result.NAME);
+                    else
+                        sb.AppendLine(result.Name);
                 }
 
                 Assert.That(sb.ToString().NormalizeNewLines(), Is.EqualTo("Dept 1\nDept 2\nDept 3\n"));

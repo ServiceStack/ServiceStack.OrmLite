@@ -1511,6 +1511,16 @@ namespace ServiceStack.OrmLite
             return "SELECT COUNT(*) FROM ({0}) AS COUNT".Fmt(innerSql);
         }
 
+        public virtual void DropColumn(IDbConnection db, Type modelType, string columnName)
+        {
+            var provider = db.GetDialectProvider();
+            var command = string.Format("ALTER TABLE {0} DROP COLUMN {1};",
+                provider.GetQuotedTableName(modelType.GetModelDefinition().ModelName),
+                provider.GetQuotedColumnName(columnName));
+
+            db.ExecuteSql(command);
+        }
+
         //Async API's, should be overrided by Dialect Providers to use .ConfigureAwait(false)
         //Default impl below uses TaskAwaiter shim in async.cs
 

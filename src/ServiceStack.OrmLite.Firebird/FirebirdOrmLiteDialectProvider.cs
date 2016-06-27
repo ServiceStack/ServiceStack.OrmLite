@@ -293,6 +293,9 @@ namespace ServiceStack.OrmLite.Firebird
             var modelDef = GetModel(tableType);
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
+                if (fieldDef.CustomSelect != null)
+                    continue;
+
                 if (fieldDef.IsPrimaryKey)
                     sbPk.AppendFormat(sbPk.Length != 0 ? ",{0}" : "{0}", GetQuotedColumnName(fieldDef.FieldName));
 
@@ -657,20 +660,6 @@ namespace ServiceStack.OrmLite.Firebird
                 .Replace("%", @"^%");
         }
 
-        public override string GetColumnNames(ModelDefinition modelDef)
-        {
-            var sqlColumns = StringBuilderCache.Allocate();
-            foreach (var field in modelDef.FieldDefinitions)
-            {
-                if (sqlColumns.Length > 0)
-                    sqlColumns.Append(", ");
-
-                sqlColumns.Append(field.GetQuotedName(this));
-            }
-
-            return StringBuilderCache.ReturnAndFree(sqlColumns);
-        }
-
         public override string GetQuotedName(string fieldName)
         {
             return Quote(fieldName);
@@ -740,13 +729,14 @@ namespace ServiceStack.OrmLite.Firebird
             var table = GetTableName(tableName, schema);
 
             if (!QuoteNames & !RESERVED.Contains(tableName.ToUpper()))
-                table = tableName.ToUpper();
+                table = table.ToUpper();
 
             var sql = "SELECT COUNT(*) FROM RDB$RELATION_FIELDS "
                     + " WHERE RDB$RELATION_FIELDS.RDB$RELATION_NAME = UPPER(@table)"
                     + "   AND RDB$RELATION_FIELDS.RDB$FIELD_NAME = UPPER(@columnName)";
 
             var result = db.SqlScalar<long>(sql, new { table, columnName });
+
             return result > 0;
         }
 
@@ -835,6 +825,16 @@ namespace ServiceStack.OrmLite.Firebird
             }
 
             return StringBuilderCache.ReturnAndFree(sb);
+        }
+
+        public override void DropColumn(IDbConnection db, Type modelType, string columnName)
+        {
+            var provider = db.GetDialectProvider();
+            var command = string.Format("ALTER TABLE {0} DROP {1};",
+                provider.GetQuotedTableName(modelType.GetModelMetadata().ModelName),
+                provider.GetQuotedColumnName(columnName));
+
+            db.ExecuteSql(command);
         }
     }
 }

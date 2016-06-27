@@ -84,15 +84,9 @@ namespace ServiceStack.OrmLite
             dbConn.DropColumn(typeof(T), columnName);
         }
 
-
         public static void DropColumn(this IDbConnection dbConn, Type modelType, string columnName)
         {
-            var provider = dbConn.GetDialectProvider();
-            var command = string.Format("ALTER TABLE {0} DROP COLUMN {1};",
-                provider.GetQuotedTableName(modelType.GetModelDefinition().ModelName),
-                provider.GetQuotedColumnName(columnName));
-
-            dbConn.ExecuteSql(command);
+            dbConn.GetDialectProvider().DropColumn(dbConn, modelType, columnName);
         }
 
         public static void AddForeignKey<T, TForeign>(this IDbConnection dbConn,

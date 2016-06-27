@@ -156,6 +156,8 @@ namespace ServiceStack.OrmLite
         bool DoesColumnExist(IDbConnection db, string columnName, string tableName, string schema = null);
         bool DoesSequenceExist(IDbCommand dbCmd, string sequencName);
 
+        void DropColumn(IDbConnection db, Type modelType, string columnName);
+
         ulong FromDbRowVersion(object value);
         SelectItem GetRowVersionColumnName(FieldDefinition field);
 
