@@ -83,7 +83,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 var map = db.Dictionary<string, int>(query);
                 Assert.That(map.EquivalentTo(expected));
 
-                // Same, but group by an anonymous type using an alias -t his should not translate to "GROUP BY TheLetter AS Letter", which is invalid SQL
+                // Same, but group by an anonymous type using an alias - this should not translate to "GROUP BY TheLetter AS Letter", which is invalid SQL
 
                 query = db.From<LetterFrequency>()
                   .Select(x => new { x.Letter, count = Sql.Count("*") })

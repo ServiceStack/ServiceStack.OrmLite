@@ -463,7 +463,7 @@ namespace ServiceStack.OrmLite
             useFieldName = true;
 
             var groupByKey = Visit(keySelector);
-            StripAliases(groupByKey as SelectList); // No "AS ColumnAlias" in GROUP BY, just the column names
+            StripAliases(groupByKey as SelectList); // No "AS ColumnAlias" in GROUP BY, just the column names/expressions
 
             return GroupBy(groupByKey.ToString());
         }
