@@ -123,26 +123,20 @@ namespace ServiceStack.OrmLite
 
         public FieldDefinition GetFieldDefinition(string fieldName)
         {
-            if (fieldName == null)
-                return null;
-
-            var comparison = StringComparison.OrdinalIgnoreCase;
-            FieldDefinition bestMatch = null;
-
-            for (var i = 0; i < FieldDefinitionsArray.Length; ++i)
+            if (fieldName != null)
             {
-                if (string.Equals(FieldDefinitionsArray[i].Name, fieldName, comparison))
+                foreach (var f in FieldDefinitionsArray)
                 {
-                    bestMatch = FieldDefinitionsArray[i];
-                    if (comparison == StringComparison.Ordinal)
-                        return bestMatch;
-
-                    comparison = StringComparison.Ordinal; // Keep looking for a better match
-                    --i; // Check the current field again, now using case-sensitive comparison
+                    if (f.Name == fieldName)
+                        return f;
+                }
+                foreach (var f in FieldDefinitionsArray)
+                {
+                    if (string.Equals(f.Name, fieldName, StringComparison.OrdinalIgnoreCase))
+                        return f;
                 }
             }
-
-            return bestMatch;
+            return null;
         }
 
         public void AfterInit()

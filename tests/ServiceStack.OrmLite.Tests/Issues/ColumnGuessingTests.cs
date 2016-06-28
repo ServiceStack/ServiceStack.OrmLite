@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using NUnit.Framework;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
