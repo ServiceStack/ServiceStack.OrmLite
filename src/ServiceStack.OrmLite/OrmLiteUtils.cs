@@ -496,6 +496,7 @@ namespace ServiceStack.OrmLite
                 .Where(x => !ignoredFields.Contains(x) && x.SetValueFn != null).ToList();
 
             var end = endPos.GetValueOrDefault(reader.FieldCount);
+            var mappedReaderColumns = new bool[end];
 
             for (var i = startPos; i < end; i++)
             {
@@ -517,6 +518,7 @@ namespace ServiceStack.OrmLite
                 if (fieldDef != null && !ignoredFields.Contains(fieldDef) && fieldDef.SetValueFn != null)
                 {
                     remainingFieldDefs.Remove(fieldDef);
+                    mappedReaderColumns[i] = true;
                     cache.Add(Tuple.Create(fieldDef, i, dialect.GetConverterBestMatch(fieldDef)));
                 }
             }
@@ -526,16 +528,22 @@ namespace ServiceStack.OrmLite
                 var dbFieldMap = new Dictionary<string, int>(StringComparer.InvariantCultureIgnoreCase);
                 for (var i = startPos; i < end; i++)
                 {
-                    var fieldName = reader.GetName(i);
-                    dbFieldMap[fieldName] = i;
+                    if (!mappedReaderColumns[i])
+                    {
+                        var fieldName = reader.GetName(i);
+                        dbFieldMap[fieldName] = i;
+                    }
                 }
 
-                foreach (var fieldDef in remainingFieldDefs)
+                if (dbFieldMap.Count > 0)
                 {
-                    var index = FindColumnIndex(dialect, fieldDef, dbFieldMap);
-                    if (index != NotFound)
+                    foreach (var fieldDef in remainingFieldDefs)
                     {
-                        cache.Add(Tuple.Create(fieldDef, index, dialect.GetConverterBestMatch(fieldDef)));
+                        var index = FindColumnIndex(dialect, fieldDef, dbFieldMap);
+                        if (index != NotFound)
+                        {
+                            cache.Add(Tuple.Create(fieldDef, index, dialect.GetConverterBestMatch(fieldDef)));
+                        }
                     }
                 }
             }

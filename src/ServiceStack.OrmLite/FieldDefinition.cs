@@ -100,6 +100,11 @@ namespace ServiceStack.OrmLite
 
         public bool IsRefType { get; set; }
 
+        public override string ToString()
+        {
+            return Name;
+        }
+
         public bool ShouldSkipInsert()
         {
             return AutoIncrement || IsComputed || IsRowVersion;
