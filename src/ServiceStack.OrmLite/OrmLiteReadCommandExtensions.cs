@@ -907,9 +907,12 @@ namespace ServiceStack.OrmLite
             string name,
             object value = null,
             ParameterDirection direction = ParameterDirection.Input,
-            DbType? dbType = null)
+            DbType? dbType = null,
+            byte? precision = null,
+            byte? scale = null,
+            int? size=null)
         {
-            var p = dbCmd.CreateParam(name, value, direction, dbType);
+            var p = dbCmd.CreateParam(name, value, direction, dbType, precision, scale, size);
             dbCmd.Parameters.Add(p);
             return p;
         }
@@ -918,7 +921,10 @@ namespace ServiceStack.OrmLite
             string name,
             object value = null,
             ParameterDirection direction = ParameterDirection.Input,
-            DbType? dbType = null)
+            DbType? dbType = null,
+            byte? precision=null,
+            byte? scale=null,
+            int? size=null)
         {
             var p = dbCmd.CreateParameter();
             var dialectProvider = dbCmd.GetDialectProvider();
@@ -936,6 +942,15 @@ namespace ServiceStack.OrmLite
 
             if (dbType != null)
                 p.DbType = dbType.Value;
+
+            if (precision != null)
+                p.Precision = precision.Value;
+
+            if (scale != null)
+                p.Scale = scale.Value;
+
+            if (size != null)
+                p.Size = size.Value;
 
             return p;
         }
