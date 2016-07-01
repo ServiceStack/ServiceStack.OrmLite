@@ -61,7 +61,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
             {
                 RecreateAnyObjectTables(db);
 
-                var q = db.From<AnyObjectClass>().Where(x => Sql.In(x.Identity, 
+                var q = db.From<AnyObjectClass>().Where(x => Sql.In(x.Identity,
                     db.From<AnyObjectClass>()
                         .Where(y => y.Identity != null)
                         .Select(y => y.Identity.Value)));
@@ -162,10 +162,177 @@ namespace ServiceStack.OrmLite.Tests.Issues
                 var model = new AnyObjectClass { db = db };
                 var result = model.CustomProperty;
 
-                db.GetLastSql().Print();
+                result.PrintDump();
+                db.GetLastSql().PrintDump();
+                Assert.That(db.GetLastSql().NormalizeSql(), Is.StringContaining("is null"));
+                
+                model = new AnyObjectClass { db = db, Identity = Guid.Parse("104ECE6A-7117-4205-961C-126AD276565C") };
+                result = model.CustomProperty;
 
                 result.PrintDump();
+                db.GetLastSql().PrintDump();
+                Assert.That(db.GetLastSql().NormalizeSql(), Is.StringContaining("@"));
             }
+        }
+
+        [Test]
+        public void SubExpressions2()
+        {
+            int orderTypeId = 2;
+            using (var db = OpenDbConnection())
+            {
+                var subExpr = db.From<Order3>()
+                    .Where(y => y.Order2TypeId == orderTypeId)
+                    .Select(y => y.Person2Id);
+
+                Assert.That(subExpr.ToSelectStatement().NormalizeSql(), Is.StringContaining("@"));
+
+                var expr = db.From<Person2>()
+                    .Where(x => Sql.In(x.Id, subExpr));
+
+                Assert.That(subExpr.ToSelectStatement().NormalizeSql(), Is.StringContaining("@"));
+            }
+        }
+
+        [Test]
+        public void SubExpressions_TestMethod1()
+        {
+            using (var db = OpenDbConnection())
+            {
+                var w = new Waybill(db)
+                {
+                    Identity = Guid.Empty,
+                    Name = "WaybillTest"
+                };
+
+                w.TestMethod1();
+            }
+        }
+
+        [Test]
+        public void SubExpressions_TestMethod2()
+        {
+            using (var db = OpenDbConnection())
+            {
+                var w = new Waybill(db)
+                {
+                    Identity = Guid.Empty,
+                    Name = "WaybillTest"
+                };
+
+                w.TestMethod2();
+            }
+        }
+
+        [Test]
+        public void SubExpressions_TestMethod3()
+        {
+            using (var db = OpenDbConnection())
+            {
+                var w = new Waybill(db)
+                {
+                    Identity = Guid.Empty,
+                    Name = "WaybillTest"
+                };
+
+                w.TestMethod3();
+            }
+        }
+    }
+
+    public class WaybillItem : BaseObject
+    {
+        public string WbItemName { get; set; }
+
+        [ForeignKey(typeof(Waybill))]
+        public Guid WaybillId { get; set; }
+
+        [ForeignKey(typeof(MarginItem))]
+        public Guid? MarginItemId { get; set; }
+    }
+
+    public class MarginItem : BaseObject
+    {
+        public string MarginName { get; set; }
+    }
+
+
+    //-------------------------
+    public class Person3
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+
+        public string Name { get; set; }
+    }
+
+    public class Order3
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+
+        [References(typeof(Person3))]
+        public int Person2Id { get; set; }
+
+        public DateTime Order2Date { get; set; }
+
+        public int Order2TypeId { get; set; }
+    }
+
+    public class BaseObject
+    {
+        public Guid? Identity { get; set; }
+    }
+
+    public class Waybill : BaseObject
+    {
+        private readonly IDbConnection db;
+
+        public string Name { get; set; }
+
+        public Waybill(IDbConnection db)
+        {
+            this.db = db;
+        }
+
+        public void TestMethod1()
+        {
+            var localIdentity = this.Identity;
+
+            var q = this.db.From<MarginItem>()
+                .Where(s => Sql.In(s.Identity,
+                    this.db.From<WaybillItem>()
+                        .Where(b => b.WaybillId == localIdentity)
+                        .Select(b => b.MarginItemId)));
+
+            q.ToSelectStatement().PrintDump();
+            Assert.That(q.ToSelectStatement().NormalizeSql(), Is.StringContaining("@"));
+        }
+
+        public void TestMethod2()
+        {
+            var q = db.From<MarginItem>()
+                .Where(s => Sql.In(s.Identity,
+                    db.From<WaybillItem>()
+                        .Where(b => b.WaybillId == this.Identity)
+                        .Select(b => b.MarginItemId)));
+
+            q.ToSelectStatement().PrintDump();
+            Assert.That(q.ToSelectStatement().NormalizeSql(), Is.StringContaining("@"));
+        }
+
+        public void TestMethod3()
+        {
+            var q = db.From<MarginItem>()
+                .Where(s => Sql.In(s.Identity,
+                    db.From<WaybillItem>()
+                        .LeftJoin<MarginItem>((wi, mi) => wi.MarginItemId == mi.Identity)
+                        .Where(b => b.WaybillId == this.Identity)
+                        .And<MarginItem>(b => b.MarginName == this.Name)
+                        .Select(b => b.MarginItemId)));
+
+            q.ToSelectStatement().PrintDump();
+            Assert.That(q.ToSelectStatement().NormalizeSql(), Is.StringContaining("@"));
         }
     }
 }

@@ -1404,7 +1404,12 @@ namespace ServiceStack.OrmLite
                 }
 
                 if (m.Expression.NodeType == ExpressionType.Parameter || m.Expression.NodeType == ExpressionType.Convert)
-                    return GetMemberExpression(m);
+                {
+                    var isSubExprAccess = m.Expression is UnaryExpression && 
+                        ((UnaryExpression)m.Expression).Operand is IndexExpression;
+                    if (!isSubExprAccess)
+                        return GetMemberExpression(m);
+                }
             }
 
             return CachedExpressionCompiler.Evaluate(m);
