@@ -60,6 +60,8 @@ namespace ServiceStack.OrmLite.Tests
         public string LastName { get; set; }
         [References(typeof(Department2))]
         public int DepartmentId { get; set; }
+        [Alias("Primary_Addres")]
+        public string PrimaryAddress { get; set; }
 
         [Reference]
         public Department2 Department { get; set; }
@@ -222,6 +224,7 @@ namespace ServiceStack.OrmLite.Tests
                 var resultsDynamic = db.Select<dynamic>(q);
                 Assert.That(resultsDynamic.Count, Is.EqualTo(2));
                 var map = (IDictionary<string, object>) resultsDynamic[0];
+                // something must be wrong in firebird dialect provider ( missing quotes)?
                 if (Dialect != Dialect.Firebird)
                 {
                     Assert.That(map.ContainsKey("FirstName"));
@@ -234,6 +237,44 @@ namespace ServiceStack.OrmLite.Tests
                 }
             }
         }
+        
+        [Test]
+        public void Can_use_dynamic_apis_on_Custom_Select_with_alias_and_lambdas()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropTable<DeptEmployee>();
+                db.DropTable<Department2>();
+                db.CreateTable<Department2>();
+                db.CreateTable<DeptEmployee>();
+                db.InsertAll(SeedDepartments);
+                db.InsertAll(SeedEmployees);
+                var expectedPropertyName = ((Func<Type, string>)(de =>
+                {
+                    var instance = de.CreateInstance<DeptEmployee>();
+                    return nameof(instance.PrimaryAddress);
+                    
+                }))(typeof(DeptEmployee));
+                var q = db.From<DeptEmployee>().Select(f=>f.PrimaryAddress).Take(2);
+                var resultsMap = db.Select<Dictionary<string, object>>(q);
+                var row = new Dictionary<string, object>(resultsMap[0], StringComparer.OrdinalIgnoreCase);
+                Assert.That(row.ContainsKey(expectedPropertyName));
+                var resultsDynamic = db.Select<dynamic>(q);
+                var map = (IDictionary<string, object>)resultsDynamic[0];
+                Assert.That(map.ContainsKey(expectedPropertyName));
+                q = db.From<DeptEmployee>().Select(f => Sql.As(f.PrimaryAddress, f.PrimaryAddress)).Take(2);
+                
+                resultsMap = db.Select<Dictionary<string, object>>(q);
+                row = new Dictionary<string, object>(resultsMap[0], StringComparer.OrdinalIgnoreCase);
+                Assert.That(row.ContainsKey(expectedPropertyName));
+                resultsDynamic = db.Select<dynamic>(q);
+                map = (IDictionary<string, object>)resultsDynamic[0];
+                Assert.That(map.ContainsKey(expectedPropertyName));
+                
+            }
+            
+        }
+
 
         [Test]
         public void Does_only_populate_Select_fields()
@@ -372,9 +413,9 @@ namespace ServiceStack.OrmLite.Tests
                 var sb = new StringBuilder();
                 foreach (var result in results)
                 {
-                    if (Dialect == Dialect.PostgreSql)
+                    if (Dialect == Dialect.PostgreSql) // something wrong in PostreSql dialect?
                         sb.AppendLine(result.first_name + "," + result.last_name + "," + result.name);
-                    else if (Dialect == Dialect.Firebird)
+                    else if (Dialect == Dialect.Firebird) // something wrong in PostreSql dialect (miissing quotes)? 
                         sb.AppendLine(result.FIRSTNAME + "," + result.LASTNAME + "," + result.NAME);
                     else
                         sb.AppendLine(result.FirstName + "," + result.LastName + "," + result.Name);
