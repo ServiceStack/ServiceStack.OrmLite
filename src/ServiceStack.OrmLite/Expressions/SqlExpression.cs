@@ -37,7 +37,7 @@ namespace ServiceStack.OrmLite
         protected bool useFieldName = false;
         protected bool selectDistinct = false;
         protected bool CustomSelect { get; set; }
-        private ModelDefinition modelDef;
+        protected ModelDefinition modelDef;
         public bool PrefixFieldWithTableName { get; set; }
         public bool WhereStatementWithoutWhereString { get; set; }
         public IOrmLiteDialectProvider DialectProvider { get; set; }
@@ -1755,7 +1755,7 @@ namespace ServiceStack.OrmLite
             return exp;
         }
 
-        protected bool IsFieldName(object quotedExp)
+        protected virtual bool IsFieldName(object quotedExp)
         {
             var fieldExpr = quotedExp.ToString().StripTablePrefixes();
             var unquotedExpr = fieldExpr.StripQuotes();
