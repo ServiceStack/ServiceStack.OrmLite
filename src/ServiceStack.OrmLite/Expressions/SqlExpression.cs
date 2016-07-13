@@ -1238,17 +1238,13 @@ namespace ServiceStack.OrmLite
             var operand = BindOperant(b.NodeType);   //sep= " " ??
             if (operand == "AND" || operand == "OR")
             {
-                var m = b.Left as MemberExpression;
-                if (m != null && m.Expression != null
-                    && m.Expression.NodeType == ExpressionType.Parameter)
-                    left = new PartialSqlString(string.Format("{0}={1}", VisitMemberAccess(m), GetQuotedTrueValue()));
+                if (IsParameterAccess(b.Left))
+                    left = new PartialSqlString(string.Format("{0}={1}", VisitMemberAccess((MemberExpression) b.Left), GetQuotedTrueValue()));
                 else
                     left = Visit(b.Left);
 
-                m = b.Right as MemberExpression;
-                if (m != null && m.Expression != null
-                    && m.Expression.NodeType == ExpressionType.Parameter)
-                    right = new PartialSqlString(string.Format("{0}={1}", VisitMemberAccess(m), GetQuotedTrueValue()));
+                if (IsParameterAccess(b.Right))
+                    right = new PartialSqlString(string.Format("{0}={1}", VisitMemberAccess((MemberExpression) b.Right), GetQuotedTrueValue()));
                 else
                     right = Visit(b.Right);
 
@@ -1353,6 +1349,31 @@ namespace ServiceStack.OrmLite
                 default:
                     return new PartialSqlString("(" + left + sep + operand + sep + right + ")");
             }
+        }
+
+        /// <summary>
+        /// Determines whether the expression is the parameter.
+        /// </summary>
+        /// <param name="e">The specified expression.</param>
+        /// <returns>Returns true if the specified expression is parameter;
+        /// otherwise, false.</returns>
+        protected virtual bool IsParameterAccess(Expression e)
+        {
+            while (e != null)
+            {
+                if (e.NodeType == ExpressionType.Parameter)
+                {
+                    var isSubExprAccess = e is UnaryExpression &&
+                                          ((UnaryExpression) e).Operand is IndexExpression;
+
+                    if (!isSubExprAccess)
+                        return true;
+                }
+
+                e = (e as MemberExpression)?.Expression;
+            }
+
+            return false;
         }
 
         private static void Swap(ref object left, ref object right)
@@ -1608,10 +1629,8 @@ namespace ServiceStack.OrmLite
                 return IsColumnAccess(m.Object as MethodCallExpression);
             
             var exp = m.Object as MemberExpression;
-            return exp != null
-                && exp.Expression != null
-                && IsJoinedTable(exp.Expression.Type)
-                && exp.Expression.NodeType == ExpressionType.Parameter;
+            return IsParameterAccess(exp)
+                   && IsJoinedTable(exp.Expression.Type);
         }
 
         protected virtual object VisitMethodCall(MethodCallExpression m)
