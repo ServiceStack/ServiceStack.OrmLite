@@ -1359,18 +1359,20 @@ namespace ServiceStack.OrmLite
         /// otherwise, false.</returns>
         protected virtual bool IsParameterAccess(Expression e)
         {
-            while (e != null)
+            Expression m = e as MemberExpression;
+
+            while (m != null)
             {
-                if (e.NodeType == ExpressionType.Parameter)
+                if (m.NodeType == ExpressionType.Parameter)
                 {
-                    var isSubExprAccess = e is UnaryExpression &&
-                                          ((UnaryExpression) e).Operand is IndexExpression;
+                    var isSubExprAccess = m is UnaryExpression &&
+                                          ((UnaryExpression) m).Operand is IndexExpression;
 
                     if (!isSubExprAccess)
                         return true;
                 }
 
-                e = (e as MemberExpression)?.Expression;
+                m = m is MemberExpression ? ((MemberExpression) m).Expression : null;
             }
 
             return false;
