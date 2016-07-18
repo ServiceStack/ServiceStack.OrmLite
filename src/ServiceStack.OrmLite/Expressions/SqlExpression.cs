@@ -1238,12 +1238,12 @@ namespace ServiceStack.OrmLite
             var operand = BindOperant(b.NodeType);   //sep= " " ??
             if (operand == "AND" || operand == "OR")
             {
-                if (IsNeedCompareToTrue(b.Left))
+                if (IsBooleanComparison(b.Left))
                     left = new PartialSqlString(string.Format("{0}={1}", VisitMemberAccess((MemberExpression) b.Left), GetQuotedTrueValue()));
                 else
                     left = Visit(b.Left);
 
-                if (IsNeedCompareToTrue(b.Right))
+                if (IsBooleanComparison(b.Right))
                     right = new PartialSqlString(string.Format("{0}={1}", VisitMemberAccess((MemberExpression) b.Right), GetQuotedTrueValue()));
                 else
                     right = Visit(b.Right);
@@ -1354,17 +1354,16 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Determines whether the expression is the parameter inside MemberExpression which should be compared with TrueExpression.
         /// </summary>
-        /// <param name="e">The specified expression.</param>
         /// <returns>Returns true if the specified expression is the parameter inside MemberExpression which should be compared with TrueExpression;
         /// otherwise, false.</returns>
-        protected virtual bool IsNeedCompareToTrue(Expression e)
+        protected virtual bool IsBooleanComparison(Expression e)
         {
             if (!(e is MemberExpression)) return false;
 
             var m = (MemberExpression)e;
 
             if (m.Member.DeclaringType.IsNullableType() &&
-                m.Member.Name == "HasValue") //nameof(Nullable<bool>.HasValue))
+                m.Member.Name == "HasValue") //nameof(Nullable<bool>.HasValue)
                 return false;
 
             return IsParameterAccess(m);
@@ -1373,7 +1372,6 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Determines whether the expression is the parameter.
         /// </summary>
-        /// <param name="e">The specified expression.</param>
         /// <returns>Returns true if the specified expression is parameter;
         /// otherwise, false.</returns>
         protected virtual bool IsParameterAccess(Expression e)
@@ -1382,9 +1380,8 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
-        /// Determines whether the expression is the parameter or convert.
+        /// Determines whether the expression is a Parameter or Convert Expression.
         /// </summary>
-        /// <param name="e">The specified expression.</param>
         /// <returns>Returns true if the specified expression is parameter or convert;
         /// otherwise, false.</returns>
         protected virtual bool IsParameterOrConvertAccess(Expression e)
@@ -1398,38 +1395,42 @@ namespace ServiceStack.OrmLite
             {
                 if (types.Contains(e.NodeType))
                 {
-                    var isSubExprAccess = e is UnaryExpression &&
-                                          ((UnaryExpression)e).Operand is IndexExpression;
+                    var subUnaryExpr = e as UnaryExpression;
+                    var isSubExprAccess = subUnaryExpr != null && subUnaryExpr.Operand is IndexExpression;
 
                     if (!isSubExprAccess)
                         return true;
                 }
 
-                if (e is BinaryExpression)
+                var binaryExpr = e as BinaryExpression;
+                if (binaryExpr != null)
                 {
-                    if (CheckExpressionForTypes(((BinaryExpression)e).Left, types))
+                    if (CheckExpressionForTypes(binaryExpr.Left, types))
                         return true;
 
-                    if (CheckExpressionForTypes(((BinaryExpression)e).Right, types))
+                    if (CheckExpressionForTypes(binaryExpr.Right, types))
                         return true;
                 }
 
-                if (e is MethodCallExpression)
+                var methodCallExpr = e as MethodCallExpression;
+                if (methodCallExpr != null)
                 {
-                    for (int i = 0; i < ((MethodCallExpression)e).Arguments.Count; i++)
+                    for (var i = 0; i < methodCallExpr.Arguments.Count; i++)
                     {
-                        if (CheckExpressionForTypes(((MethodCallExpression)e).Arguments[0], types))
+                        if (CheckExpressionForTypes(methodCallExpr.Arguments[0], types))
                             return true;
                     }
                 }
 
-                if (e is UnaryExpression)
+                var unaryExpr = e as UnaryExpression;
+                if (unaryExpr != null)
                 {
-                    if (CheckExpressionForTypes(((UnaryExpression)e).Operand, types))
+                    if (CheckExpressionForTypes(unaryExpr.Operand, types))
                         return true;
                 }
 
-                e = e is MemberExpression ? ((MemberExpression)e).Expression : null;
+                var memberExpr = e as MemberExpression;
+                e = memberExpr != null ? memberExpr.Expression : null;
             }
 
             return false;
