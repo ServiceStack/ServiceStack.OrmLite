@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using NUnit.Framework;
+using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -17,10 +18,23 @@ namespace ServiceStack.OrmLite.Tests
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<TestType>();
-                db.Insert(new TestType { Id = 1, BoolCol = true, DateCol = new DateTime(2012, 1, 1), TextCol = "asdf", EnumCol = TestEnum.Val0, NullableIntCol = 10 });
-                db.Insert(new TestType { Id = 2, BoolCol = true, DateCol = new DateTime(2012, 2, 1), TextCol = "asdf123", EnumCol = TestEnum.Val1, NullableIntCol = null });
-                db.Insert(new TestType { Id = 3, BoolCol = false, DateCol = new DateTime(2012, 3, 1), TextCol = "qwer", EnumCol = TestEnum.Val2, NullableIntCol = 30 });
-                db.Insert(new TestType { Id = 4, BoolCol = false, DateCol = new DateTime(2012, 4, 1), TextCol = "qwer123", EnumCol = TestEnum.Val3, NullableIntCol = 40 });
+                db.Insert(new TestType { Id = 1, BoolCol = true, DateCol = new DateTime(2012, 1, 1), TextCol = "asdf", EnumCol = TestEnum.Val0, NullableIntCol = 10, TestType2ObjColId = 1 });
+                db.Insert(new TestType { Id = 2, BoolCol = true, DateCol = new DateTime(2012, 2, 1), TextCol = "asdf123", EnumCol = TestEnum.Val1, NullableIntCol = null, TestType2ObjColId = 2 });
+                db.Insert(new TestType { Id = 3, BoolCol = false, DateCol = new DateTime(2012, 3, 1), TextCol = "qwer", EnumCol = TestEnum.Val2, NullableIntCol = 30, TestType2ObjColId = 3 });
+                db.Insert(new TestType { Id = 4, BoolCol = false, DateCol = new DateTime(2012, 4, 1), TextCol = "qwer123", EnumCol = TestEnum.Val3, NullableIntCol = 40, TestType2ObjColId = 4 });
+
+                db.DropAndCreateTable<TestType2>();
+                db.Insert(new TestType2 { Id = 1, BoolCol = true, DateCol = new DateTime(2012, 4, 1), TextCol = "111", EnumCol = TestEnum.Val3, NullableIntCol = 10, TestType2Name = "2.1", TestType3ObjColId = 1});
+                db.Insert(new TestType2 { Id = 2, BoolCol = false, DateCol = new DateTime(2012, 4, 1), TextCol = "222", EnumCol = TestEnum.Val3, NullableIntCol = 20, TestType2Name = "2.2", TestType3ObjColId = 2 });
+                db.Insert(new TestType2 { Id = 3, BoolCol = true, DateCol = new DateTime(2012, 4, 1), TextCol = "333", EnumCol = TestEnum.Val3, NullableIntCol = 30, TestType2Name = "2.3", TestType3ObjColId = 3 });
+                db.Insert(new TestType2 { Id = 4, BoolCol = false, DateCol = new DateTime(2012, 4, 1), TextCol = "444", EnumCol = TestEnum.Val3, NullableIntCol = 40, TestType2Name = "2.4", TestType3ObjColId = 4 });
+
+
+                db.DropAndCreateTable<TestType3>();
+                db.Insert(new TestType3 { Id = 1, BoolCol = true, DateCol = new DateTime(2012, 4, 1), TextCol = "111", EnumCol = TestEnum.Val3, NullableIntCol = 10, TestType3Name = "3.1", CustomInt = 100});
+                db.Insert(new TestType3 { Id = 2, BoolCol = false, DateCol = new DateTime(2012, 4, 1), TextCol = "222", EnumCol = TestEnum.Val3, NullableIntCol = 20, TestType3Name = "3.2", CustomInt = 200 });
+                db.Insert(new TestType3 { Id = 3, BoolCol = false, DateCol = new DateTime(2012, 4, 1), TextCol = "222", EnumCol = TestEnum.Val3, NullableIntCol = 30, TestType3Name = "3.3", CustomInt = 300});
+                db.Insert(new TestType3 { Id = 4, BoolCol = false, DateCol = new DateTime(2012, 4, 1), TextCol = "222", EnumCol = TestEnum.Val3, NullableIntCol = 40, TestType3Name = "3.4", CustomInt = 400 });
             }
             Db = OpenDbConnection();
         }
@@ -338,6 +352,65 @@ namespace ServiceStack.OrmLite.Tests
             CollectionAssert.AreEquivalent(new[] { 1, 3, 4 }, target.Select(t => t.Id).ToArray());
         }
 
+        [Test]
+        public void Can_Where_using_filter_with_nested_properties()
+        {
+            string filterText2 = "2.1";
+            string filterText3 = "3.3";
+            bool? nullableTrue = true;
+
+            var q = Db.From<TestType>().
+                Join<TestType2>().
+                Where(x => (!x.NullableBoolCol.HasValue || x.NullableBoolCol.Value) && x.NullableIntCol.HasValue && x.TestType2ObjCol.BoolCol);
+            var target = Db.Select(q);
+            Assert.AreEqual(2, target.Count);
+
+            q = Db.From<TestType>().
+                Join<TestType2>().
+                Where(x => x.TestType2ObjCol.BoolCol && x.DateCol != DateTime.MinValue);
+            target = Db.Select(q);
+            Assert.AreEqual(2, target.Count);
+
+            q = Db.From<TestType>().
+                Join<TestType2>().
+                Where(x => x.TestType2ObjCol.BoolCol && x.TestType2ObjCol.BoolCol == nullableTrue &&
+                           x.DateCol != DateTime.MinValue && x.TestType2ObjCol.TestType2Name == filterText2);
+            target = Db.Select(q);
+            Assert.AreEqual(1, target.Count);
+
+            var intValue = 300;
+            q = Db.From<TestType>().
+                Join<TestType2>().
+                Join<TestType2, TestType3>().
+                Where(x => !x.NullableBoolCol.HasValue && x.TestType2ObjCol.BoolCol &&
+                           x.TestType2ObjCol.TestType3ObjCol.TestType3Name == filterText3 &&
+                           x.TestType2ObjCol.TestType3ObjCol.CustomInt == new CustomInt(intValue));
+            target = Db.Select(q);
+            Assert.AreEqual(1, target.Count);
+
+            q = Db.From<TestType>().
+                Join<TestType2>().
+                Join<TestType2, TestType3>().
+                Where(x => !x.NullableBoolCol.HasValue && x.TestType2ObjCol.BoolCol &&
+                           x.NullableIntCol == new CustomInt(10)).
+                GroupBy(x => x.TestType2ObjCol.TestType3ObjCol.CustomInt).
+                Having(x => (Sql.Max(x.TestType2ObjCol.TestType3ObjCol.CustomInt) ?? 0) == new CustomInt(100)).
+                Select(x => x.TestType2ObjCol.TestType3ObjCol.CustomInt);
+            target = Db.Select(q);
+            Assert.AreEqual(1, target.Count);
+
+            q = Db.From<TestType>().
+                Join<TestType2>().
+                Join<TestType2, TestType3>().
+                Where(x => !x.NullableBoolCol.HasValue && x.TestType2ObjCol.BoolCol &&
+                           x.NullableIntCol == new CustomInt(10)).
+                GroupBy(x => x.TestType2ObjCol.TestType3ObjCol.CustomInt).
+                Having(x => (Sql.Max(x.TestType2ObjCol.TestType3ObjCol.CustomInt) ?? 0) != 10).
+                Select(x => x.TestType2ObjCol.TestType3ObjCol.CustomInt);
+            target = Db.Select(q);
+            Assert.AreEqual(1, target.Count);
+        }
+
         private int MethodReturningInt(int val)
         {
             return val;
@@ -372,6 +445,10 @@ namespace ServiceStack.OrmLite.Tests
         public TestEnum EnumCol { get; set; }
         public TestType ComplexObjCol { get; set; }
         public int? NullableIntCol { get; set; }
+
+        [ForeignKey(typeof(TestType2))]
+        public int TestType2ObjColId { get; set; }
+        public TestType2 TestType2ObjCol { get; set; }
     }
 
     public class TestType2
@@ -384,5 +461,54 @@ namespace ServiceStack.OrmLite.Tests
         public TestEnum EnumCol { get; set; }
         public TestType ComplexObjCol { get; set; }
         public int? NullableIntCol { get; set; }
+        public string TestType2Name { get; set; }
+
+        [ForeignKey(typeof(TestType3))]
+        public int TestType3ObjColId { get; set; }
+        public TestType3 TestType3ObjCol { get; set; }
+    }
+
+    public class TestType3
+    {
+        public int Id { get; set; }
+        public string TextCol { get; set; }
+        public bool BoolCol { get; set; }
+        public bool? NullableBoolCol { get; set; }
+        public DateTime DateCol { get; set; }
+        public TestEnum EnumCol { get; set; }
+        public TestType3 ComplexObjCol { get; set; }
+        public int? NullableIntCol { get; set; }
+        public string TestType3Name { get; set; }
+        public CustomInt CustomInt { get; set; }
+    }
+
+    /// <summary>
+    /// For testing VisitUnary with expression "u" that: u.Method != null (implicit conversion)
+    /// </summary>
+    public class CustomInt
+    {
+        private readonly int _value;
+
+        public CustomInt(int value)
+        {
+            _value = value;
+        }
+
+        public int Value
+        {
+            get { return _value; }
+        }
+
+
+        public static implicit operator int(CustomInt s)
+        {
+            return s.Value;
+        }
+
+        public static implicit operator CustomInt(int s)
+        {
+            return new CustomInt(s);
+        }
+
     }
 }
