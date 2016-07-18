@@ -41,7 +41,7 @@ namespace ServiceStack.OrmLite
         public bool PrefixFieldWithTableName { get; set; }
         public bool WhereStatementWithoutWhereString { get; set; }
         public IOrmLiteDialectProvider DialectProvider { get; set; }
-        public List<IDbDataParameter> Params { get; set; } 
+        public List<IDbDataParameter> Params { get; set; }
 
         protected string Sep
         {
@@ -107,7 +107,7 @@ namespace ServiceStack.OrmLite
         {
             if (selectExpression != null)
                 selectExpression.SqlVerifyFragment();
-    
+
             return UnsafeSelect(selectExpression);
         }
 
@@ -590,7 +590,7 @@ namespace ServiceStack.OrmLite
             foreach (var fieldName in fieldNames)
             {
                 var reverse = fieldName.StartsWith("-");
-                var useSuffix = reverse 
+                var useSuffix = reverse
                     ? (orderBySuffix == OrderBySuffix.Asc ? OrderBySuffix.Desc : OrderBySuffix.Asc)
                     : orderBySuffix;
                 var useName = reverse ? fieldName.Substring(1) : fieldName;
@@ -980,7 +980,7 @@ namespace ServiceStack.OrmLite
             {
                 if (fieldDef.ShouldSkipUpdate()) continue;
                 if (fieldDef.IsRowVersion) continue;
-                if (UpdateFields.Count > 0 
+                if (UpdateFields.Count > 0
                     && !UpdateFields.Contains(fieldDef.Name)) continue; // added
 
                 var value = fieldDef.GetValue(item);
@@ -1238,12 +1238,12 @@ namespace ServiceStack.OrmLite
             var operand = BindOperant(b.NodeType);   //sep= " " ??
             if (operand == "AND" || operand == "OR")
             {
-                if (IsParameterAccess(b.Left))
+                if (IsNeedCompareToTrue(b.Left))
                     left = new PartialSqlString(string.Format("{0}={1}", VisitMemberAccess((MemberExpression) b.Left), GetQuotedTrueValue()));
                 else
                     left = Visit(b.Left);
 
-                if (IsParameterAccess(b.Right))
+                if (IsNeedCompareToTrue(b.Right))
                     right = new PartialSqlString(string.Format("{0}={1}", VisitMemberAccess((MemberExpression) b.Right), GetQuotedTrueValue()));
                 else
                     right = Visit(b.Right);
@@ -1352,6 +1352,25 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Determines whether the expression is the parameter inside MemberExpression which should be compared with TrueExpression.
+        /// </summary>
+        /// <param name="e">The specified expression.</param>
+        /// <returns>Returns true if the specified expression is the parameter inside MemberExpression which should be compared with TrueExpression;
+        /// otherwise, false.</returns>
+        protected virtual bool IsNeedCompareToTrue(Expression e)
+        {
+            if (!(e is MemberExpression)) return false;
+
+            var m = (MemberExpression)e;
+
+            if (m.Member.DeclaringType.IsNullableType() &&
+                m.Member.Name == "HasValue") //nameof(Nullable<bool>.HasValue))
+                return false;
+
+            return IsParameterAccess(m);
+        }
+
+        /// <summary>
         /// Determines whether the expression is the parameter.
         /// </summary>
         /// <param name="e">The specified expression.</param>
@@ -1359,20 +1378,58 @@ namespace ServiceStack.OrmLite
         /// otherwise, false.</returns>
         protected virtual bool IsParameterAccess(Expression e)
         {
-            Expression m = e as MemberExpression;
+            return CheckExpressionForTypes(e, new[] { ExpressionType.Parameter });
+        }
 
-            while (m != null)
+        /// <summary>
+        /// Determines whether the expression is the parameter or convert.
+        /// </summary>
+        /// <param name="e">The specified expression.</param>
+        /// <returns>Returns true if the specified expression is parameter or convert;
+        /// otherwise, false.</returns>
+        protected virtual bool IsParameterOrConvertAccess(Expression e)
+        {
+            return CheckExpressionForTypes(e, new[] { ExpressionType.Parameter, ExpressionType.Convert });
+        }
+
+        protected bool CheckExpressionForTypes(Expression e, ExpressionType[] types)
+        {
+            while (e != null)
             {
-                if (m.NodeType == ExpressionType.Parameter)
+                if (types.Contains(e.NodeType))
                 {
-                    var isSubExprAccess = m is UnaryExpression &&
-                                          ((UnaryExpression) m).Operand is IndexExpression;
+                    var isSubExprAccess = e is UnaryExpression &&
+                                          ((UnaryExpression)e).Operand is IndexExpression;
 
                     if (!isSubExprAccess)
                         return true;
                 }
 
-                m = m is MemberExpression ? ((MemberExpression) m).Expression : null;
+                if (e is BinaryExpression)
+                {
+                    if (CheckExpressionForTypes(((BinaryExpression)e).Left, types))
+                        return true;
+
+                    if (CheckExpressionForTypes(((BinaryExpression)e).Right, types))
+                        return true;
+                }
+
+                if (e is MethodCallExpression)
+                {
+                    for (int i = 0; i < ((MethodCallExpression)e).Arguments.Count; i++)
+                    {
+                        if (CheckExpressionForTypes(((MethodCallExpression)e).Arguments[0], types))
+                            return true;
+                    }
+                }
+
+                if (e is UnaryExpression)
+                {
+                    if (CheckExpressionForTypes(((UnaryExpression)e).Operand, types))
+                        return true;
+                }
+
+                e = e is MemberExpression ? ((MemberExpression)e).Expression : null;
             }
 
             return false;
@@ -1426,19 +1483,14 @@ namespace ServiceStack.OrmLite
                     throw new ArgumentException(string.Format("Expression '{0}' accesses unsupported property '{1}' of Nullable<T>", m, m.Member));
                 }
 
-                if (m.Expression.NodeType == ExpressionType.Parameter || m.Expression.NodeType == ExpressionType.Convert)
-                {
-                    var isSubExprAccess = m.Expression is UnaryExpression && 
-                        ((UnaryExpression)m.Expression).Operand is IndexExpression;
-                    if (!isSubExprAccess)
-                        return GetMemberExpression(m);
-                }
+                if (IsParameterOrConvertAccess(m))
+                    return GetMemberExpression(m);
             }
 
             return CachedExpressionCompiler.Evaluate(m);
         }
 
-        private object GetMemberExpression(MemberExpression m)
+        protected virtual object GetMemberExpression(MemberExpression m)
         {
             var propertyInfo = m.Member as PropertyInfo;
 
@@ -1505,8 +1557,8 @@ namespace ServiceStack.OrmLite
             // to allow the caller to distinguish properties with the same names from different tables
 
             var paramExpr = arg as ParameterExpression;
-            var selectList = paramExpr != null && paramExpr.Name != member.Name 
-                ? expr as SelectList 
+            var selectList = paramExpr != null && paramExpr.Name != member.Name
+                ? expr as SelectList
                 : null;
             if (selectList != null)
             {
@@ -1590,7 +1642,13 @@ namespace ServiceStack.OrmLite
                     return GetNotValue(o);
                 case ExpressionType.Convert:
                     if (u.Method != null)
+                    {
+                        var e = u.Operand;
+                        if (IsParameterAccess(e))
+                            return Visit(e);
+
                         return CachedExpressionCompiler.Evaluate(u);
+                    }
                     break;
             }
             return Visit(u.Operand);
@@ -1610,7 +1668,7 @@ namespace ServiceStack.OrmLite
             var list = oCollection as List<object>;
             if (list != null)
                 return list[index];
-            
+
             throw new NotImplementedException("Unknown Expression: " + e);
         }
 
@@ -1629,7 +1687,7 @@ namespace ServiceStack.OrmLite
         {
             if (m.Object != null && m.Object as MethodCallExpression != null)
                 return IsColumnAccess(m.Object as MethodCallExpression);
-            
+
             var exp = m.Object as MemberExpression;
             return IsParameterAccess(exp)
                    && IsJoinedTable(exp.Expression.Type);
@@ -1753,11 +1811,11 @@ namespace ServiceStack.OrmLite
             if (useFieldName)
             {
                 var fd = tableDef.FieldDefinitions.FirstOrDefault(x => x.Name == memberName);
-                var fieldName = fd != null 
-                    ? fd.FieldName 
+                var fieldName = fd != null
+                    ? fd.FieldName
                     : memberName;
 
-                return PrefixFieldWithTableName 
+                return PrefixFieldWithTableName
                     ? DialectProvider.GetQuotedColumnName(tableDef, fieldName)
                     : DialectProvider.GetQuotedColumnName(fieldName);
             }
@@ -1962,7 +2020,7 @@ namespace ServiceStack.OrmLite
                 string sqlIn = CreateInParamSql(inArgs);
                 return string.Format("{0} {1} ({2})", quotedColName, m.Method.Name, sqlIn);
             }
-            
+
             var exprArg = argValue as ISqlExpression;
             if (exprArg != null)
             {
