@@ -4,6 +4,8 @@ using System.Data;
 using System.Linq;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
+using ServiceStack.Logging;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -363,20 +365,20 @@ namespace ServiceStack.OrmLite.Tests
                 Join<TestType2>().
                 Where(x => (!x.NullableBoolCol.HasValue || x.NullableBoolCol.Value) && x.NullableIntCol.HasValue && x.TestType2ObjCol.BoolCol);
             var target = Db.Select(q);
-            Assert.AreEqual(2, target.Count);
+            Assert.That(target.Count, Is.EqualTo(2));
 
             q = Db.From<TestType>().
                 Join<TestType2>().
                 Where(x => x.TestType2ObjCol.BoolCol && x.DateCol != DateTime.MinValue);
             target = Db.Select(q);
-            Assert.AreEqual(2, target.Count);
+            Assert.That(target.Count, Is.EqualTo(2));
 
             q = Db.From<TestType>().
                 Join<TestType2>().
                 Where(x => x.TestType2ObjCol.BoolCol && x.TestType2ObjCol.BoolCol == nullableTrue &&
                            x.DateCol != DateTime.MinValue && x.TestType2ObjCol.TestType2Name == filterText2);
             target = Db.Select(q);
-            Assert.AreEqual(1, target.Count);
+            Assert.That(target.Count, Is.EqualTo(1));
 
             var intValue = 300;
             q = Db.From<TestType>().
@@ -386,7 +388,7 @@ namespace ServiceStack.OrmLite.Tests
                            x.TestType2ObjCol.TestType3ObjCol.TestType3Name == filterText3 &&
                            x.TestType2ObjCol.TestType3ObjCol.CustomInt == new CustomInt(intValue));
             target = Db.Select(q);
-            Assert.AreEqual(1, target.Count);
+            Assert.That(target.Count, Is.EqualTo(1));
 
             q = Db.From<TestType>().
                 Join<TestType2>().
@@ -397,7 +399,7 @@ namespace ServiceStack.OrmLite.Tests
                 Having(x => (Sql.Max(x.TestType2ObjCol.TestType3ObjCol.CustomInt) ?? 0) == new CustomInt(100)).
                 Select(x => x.TestType2ObjCol.TestType3ObjCol.CustomInt);
             target = Db.Select(q);
-            Assert.AreEqual(1, target.Count);
+            Assert.That(target.Count, Is.EqualTo(1));
 
             q = Db.From<TestType>().
                 Join<TestType2>().
@@ -408,7 +410,7 @@ namespace ServiceStack.OrmLite.Tests
                 Having(x => (Sql.Max(x.TestType2ObjCol.TestType3ObjCol.CustomInt) ?? 0) != 10).
                 Select(x => x.TestType2ObjCol.TestType3ObjCol.CustomInt);
             target = Db.Select(q);
-            Assert.AreEqual(1, target.Count);
+            Assert.That(target.Count, Is.EqualTo(1));
         }
 
         private int MethodReturningInt(int val)

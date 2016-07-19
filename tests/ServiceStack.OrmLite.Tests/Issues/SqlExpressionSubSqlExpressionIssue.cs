@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Data;
 using System.Linq;
+using System.Linq.Expressions;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Logging;
+using ServiceStack.OrmLite.SqlServer;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Issues
@@ -237,6 +239,45 @@ namespace ServiceStack.OrmLite.Tests.Issues
 
                 w.TestMethod3();
             }
+        }
+
+        [Test]
+        public void SubExpressions_with_CustomSqlExpression_and_merging_multiple_predicates()
+        {
+            var db = new OrmLiteConnection(new OrmLiteConnectionFactory("test", new CustomSqlServerDialectProvider()));
+
+            var q = db.From<MarginItem>().Where(s => Sql.In(s.Identity,
+                db.From<WaybillItem>()
+                    .Where(w => Sql.In(w.WaybillId,
+                        db.From<Waybill>()
+                            .Where(bb => bb.Identity == null)
+                            .And(bb => bb.Name == "test")
+                            .Select(ww => ww.Identity))
+                    )
+                    .Select(b => b.MarginItemId)));
+
+            Assert.That(q.ToSelectStatement().NormalizeSql(), Is.StringContaining("@"));
+        }
+    }
+
+    class CustomSqlExpression<T> : SqlServerExpression<T>
+    {
+        private Expression<Func<T, bool>> _whereExpression;
+
+        public CustomSqlExpression(IOrmLiteDialectProvider dialectProvider) : base(dialectProvider) {}
+
+        public override SqlExpression<T> And(Expression<Func<T, bool>> predicate)
+        {
+            _whereExpression = _whereExpression == null ? predicate : predicate.And(_whereExpression);
+            return base.And(predicate);
+        }
+    }
+
+    class CustomSqlServerDialectProvider : SqlServerOrmLiteDialectProvider
+    {
+        public override SqlExpression<T> SqlExpression<T>()
+        {
+            return new CustomSqlExpression<T>(this);
         }
     }
 
