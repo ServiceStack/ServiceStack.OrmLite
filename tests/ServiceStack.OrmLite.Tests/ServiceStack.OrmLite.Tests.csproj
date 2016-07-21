@@ -132,6 +132,7 @@
     <Compile Include="Issues\CanBuildExpressionWithAbstractType.cs" />
     <Compile Include="Issues\ColumnGuessingTests.cs" />
     <Compile Include="Issues\JoinBoolSqlServerIssue.cs" />
+    <Compile Include="Issues\LoadReferencesFKandSelfRefIssue.cs" />
     <Compile Include="Issues\MergingNestedSqlExpressionIssue.cs" />
     <Compile Include="Issues\SqlExpressionSubSqlExpressionIssue.cs" />
     <Compile Include="Legacy\ApiSqliteLegacyTests.cs" />
