@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
@@ -26,6 +27,14 @@ namespace ServiceStack.OrmLite.Tests.Issues
 
         [Compute]
         public string FullName { get; set; }
+    }
+
+    public class TestExpression
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+        public string AccountName { get; set; }
+        public bool IsActive { get; set; }
     }
 
     public class SqlServerComputedColumnIssue
@@ -123,6 +132,29 @@ CREATE TABLE [dbo].[ComputeTest](
 
             // returns the object inserted or updated
             return await db.LoadSingleByIdAsync<T>(id);
+        }
+
+        [Test]
+        public async Task LoadSelect_can_query_and_orderBy()
+        {
+            db.DropAndCreateTable<TestExpression>();
+
+            db.Insert(new TestExpression { AccountName = "Foo", IsActive = true });
+            db.Insert(new TestExpression { AccountName = "Bar", IsActive = false });
+
+            var rows = (await db.LoadSelectAsync<TestExpression>(x => x.IsActive))
+                .OrderBy(x => x.AccountName)
+                .ToList();
+
+            Assert.That(rows.Count, Is.EqualTo(1));
+            Assert.That(rows[0].AccountName, Is.EqualTo("Foo"));
+
+            rows = await db.LoadSelectAsync(db.From<TestExpression>()
+                .Where(x => x.IsActive)
+                .OrderBy(x => x.AccountName));
+
+            Assert.That(rows.Count, Is.EqualTo(1));
+            Assert.That(rows[0].AccountName, Is.EqualTo("Foo"));
         }
     }
 }
