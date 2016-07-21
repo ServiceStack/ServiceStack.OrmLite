@@ -1,0 +1,128 @@
+﻿using System.Data;
+using System.Threading.Tasks;
+using NUnit.Framework;
+using ServiceStack.DataAnnotations;
+using ServiceStack.Model;
+
+namespace ServiceStack.OrmLite.Tests.Issues
+{
+    public class ComputeTest : IHasId<int>
+    {
+        [PrimaryKey]
+        [Alias("EmployeeId")]
+        [AutoIncrement]
+        [Index(Unique = true)]
+        public int Id { get; set; }
+
+        [Required]
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+
+        [Required]
+        [Index(true)]
+        public string Username { get; set; }
+
+        public string Password { get; set; }
+
+        [Compute]
+        public string FullName { get; set; }
+    }
+
+    public class SqlServerComputedColumnIssue
+    {
+        private IDbConnection db;
+
+        [TestFixtureSetUp]
+        public void TestFixtureSetUp()
+        {
+            OrmLiteConfig.DialectProvider = SqlServerDialect.Provider;
+            db = Config.SqlServerBuildDb.OpenDbConnection();
+        }
+
+        [TestFixtureTearDown]
+        public void TearDown()
+        {
+            db.Dispose();
+        }
+
+        private ComputeTest CreateTableAndGetRow()
+        {
+            db.DropTable<ComputeTest>();
+            db.ExecuteSql(@"
+CREATE TABLE [dbo].[ComputeTest](
+    [EmployeeId] [int] IDENTITY(1,1) NOT NULL,
+    [FullName]  AS (concat(ltrim(rtrim([FirstName])),' ',ltrim(rtrim([LastName])))) PERSISTED NOT NULL,
+    [FirstName] [nvarchar](55) NOT NULL,
+    [LastName] [nvarchar](55) NULL,
+    [Username] [nvarchar](55) NOT NULL,
+    [Password] [nvarchar](55) NULL
+ CONSTRAINT [PK_Employee] PRIMARY KEY CLUSTERED 
+(
+    [EmployeeId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, FILLFACTOR = 80) ON [PRIMARY]
+) ON [PRIMARY]");
+
+            var item = new ComputeTest
+            {
+                FirstName = "FirstName",
+                LastName = "LastName",
+                Username = "Username",
+                Password = "Password",
+                FullName = "Should be ignored",
+            };
+            return item;
+        }
+
+        [Test]
+        public void Can_Insert_and_Update_table_with_Computed_Column()
+        {
+            var item = CreateTableAndGetRow();
+
+            var id = db.Insert(item, selectIdentity: true);
+
+            var row = db.LoadSingleById<ComputeTest>(id);
+
+            Assert.That(row.FirstName, Is.EqualTo("FirstName"));
+            Assert.That(row.FullName, Is.EqualTo("FirstName LastName"));
+
+            row.LastName = "Updated LastName";
+            db.Update(row);
+
+            row = db.LoadSingleById<ComputeTest>(id);
+
+            Assert.That(row.FirstName, Is.EqualTo("FirstName"));
+            Assert.That(row.FullName, Is.EqualTo("FirstName Updated LastName"));
+        }
+
+        [Test]
+        public async Task Can_Insert_and_Update_table_with_Computed_Column_async()
+        {
+            var item = CreateTableAndGetRow();
+
+            var row = await Create(item);
+
+            Assert.That(row.FirstName, Is.EqualTo("FirstName"));
+            Assert.That(row.FullName, Is.EqualTo("FirstName LastName"));
+
+            row.LastName = "Updated LastName";
+            row = await Create(row);
+
+            Assert.That(row.FirstName, Is.EqualTo("FirstName"));
+            Assert.That(row.FullName, Is.EqualTo("FirstName Updated LastName"));
+        }
+
+        public virtual async Task<T> Create<T>(T obj) where T : IHasId<int>
+        {
+            // if there is an id then INSERTS otherwise UPDATES
+            var id = obj.GetId().ConvertTo<long>();
+
+            if (id > 0)
+                db.Update(obj);
+            else
+                id = db.Insert(obj, true);
+
+            // returns the object inserted or updated
+            return await db.LoadSingleByIdAsync<T>(id);
+        }
+    }
+}
