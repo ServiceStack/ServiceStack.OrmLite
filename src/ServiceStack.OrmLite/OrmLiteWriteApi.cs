@@ -322,5 +322,21 @@ namespace ServiceStack.OrmLite
         {
             dbConn.Exec(dbCmd => dbCmd.ExecuteProcedure(obj));
         }
+
+        /// <summary>
+        /// Generates inline UPDATE SQL Statement
+        /// </summary>
+        public static string ToUpdateStatement<T>(this IDbConnection dbConn, T item, ICollection<string> updateFields = null)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.GetDialectProvider().ToUpdateStatement(dbCmd, item, updateFields));
+        }
+
+        /// <summary>
+        /// Generates inline INSERT SQL Statement
+        /// </summary>
+        public static string ToInsertStatement<T>(this IDbConnection dbConn, T item, ICollection<string> insertFields = null)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.GetDialectProvider().ToInsertStatement(dbCmd, item, insertFields));
+        }
     }
 }
