@@ -712,9 +712,10 @@ namespace ServiceStack.OrmLite
         {
             foreach (var dbParam in dbParams)
             {
-                var varName = dbParam.ParameterName;
-                var quotedValue = GetQuotedValue(dbParam.Value, dbParam.Value.GetType());
-                sql = sql.Replace(varName, quotedValue);
+                var quotedValue = dbParam.Value != null 
+                    ? GetQuotedValue(dbParam.Value, dbParam.Value.GetType())
+                    : "null";
+                sql = sql.Replace(dbParam.ParameterName, quotedValue);
             }
             return sql;
         }
