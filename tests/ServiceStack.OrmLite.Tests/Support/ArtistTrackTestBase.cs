@@ -11,7 +11,6 @@ namespace ServiceStack.OrmLite.Tests.Support
 
         [Reference]
         public List<Track> Tracks { get; set; }
-        public override string ToString() => Name;
     }
 
     public class Track
@@ -22,12 +21,11 @@ namespace ServiceStack.OrmLite.Tests.Support
         public int ArtistId { get; set; }
         public string Album { get; set; }
         public int Year { get; set; }
-        public override string ToString() => Name;
     }
 
     public class ArtistTrackTestBase : OrmLiteTestBase
     {
-        static readonly Artist[] Artists = {
+        static readonly Artist[] Artists = new [] {
             new Artist {
                 Id = 1, Name = "Faith No More",
                 Tracks = new List<Track> {
