@@ -139,8 +139,10 @@
     <Compile Include="Legacy\ApiSqlServerLegacyTests.cs" />
     <Compile Include="SchemaTests.cs" />
     <Compile Include="SelectParamTests.cs" />
+    <Compile Include="Support\ArtistTrackTestBase.cs" />
     <Compile Include="Support\JoinSqlBuilder.cs" />
     <Compile Include="TemporaryNamingStrategy.cs" />
+    <Compile Include="UseCase\ArtistTrackSqlExpressions.cs" />
     <Compile Include="UseCase\ExpressionsAuthorTests.cs" />
     <Compile Include="Expression\ComplexJoinTests.cs" />
     <Compile Include="Expression\ExpressionUsingCustomSerializedEnumTests.cs" />

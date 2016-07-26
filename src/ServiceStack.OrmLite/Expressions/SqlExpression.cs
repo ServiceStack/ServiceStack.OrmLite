@@ -509,6 +509,11 @@ namespace ServiceStack.OrmLite
             return UnsafeOrderBy(orderBy.SqlVerifyFragment());
         }
 
+        public virtual SqlExpression<T> OrderBy(long columnIndex)
+        {
+            return UnsafeOrderBy(columnIndex.ToString());
+        }
+
         public virtual SqlExpression<T> UnsafeOrderBy(string orderBy)
         {
             orderByProperties.Clear();
@@ -693,8 +698,17 @@ namespace ServiceStack.OrmLite
 
         public virtual SqlExpression<T> OrderByDescending(string orderBy)
         {
+            return UnsafeOrderByDescending(orderBy.SqlVerifyFragment());
+        }
+
+        public virtual SqlExpression<T> OrderByDescending(long columnIndex)
+        {
+            return UnsafeOrderByDescending(columnIndex.ToString());
+        }
+
+        private SqlExpression<T> UnsafeOrderByDescending(string orderBy)
+        {
             orderByProperties.Clear();
-            orderBy.SqlVerifyFragment();
             orderByProperties.Add(orderBy + " DESC");
             BuildOrderByClauseInternal();
             return this;
