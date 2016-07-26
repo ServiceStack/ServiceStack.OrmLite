@@ -1598,6 +1598,12 @@ namespace ServiceStack.OrmLite
                 }
             }
 
+            var methodCallExpr = arg as MethodCallExpression;
+            var mi = methodCallExpr != null ? methodCallExpr.Method : null;
+            var declareType = mi != null && mi.DeclaringType != null ? mi.DeclaringType : null;
+            if (declareType != null && declareType.Name == "Sql" && mi.Name != "Desc" && mi.Name != "Asc" && mi.Name != "As") 
+                return new PartialSqlString(expr + " AS " + member.Name); // new { Count = Sql.Count("*") }
+
             return expr;
         }
 

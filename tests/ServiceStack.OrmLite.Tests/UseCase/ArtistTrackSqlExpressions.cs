@@ -25,5 +25,24 @@ namespace ServiceStack.OrmLite.Tests.UseCase
                 Assert.That(result[1993], Is.EqualTo(2));
             }
         }
+
+        [Test]
+        public void Can_Order_by_Property_Alias()
+        {
+            using (var db = CreateArtistAndTrackTablesWithData(OpenDbConnection()))
+            {
+                var q = db.From<Track>()
+                    .Where(x => x.Year > 1991)
+                    .And(x => x.Name.Contains("A"))
+                    .GroupBy(x => x.Year)
+                    .OrderByDescending("Count")
+                    .ThenBy(x => x.Year)
+                    .Take(1)
+                    .Select(x => new { x.Year, Count = Sql.Count("*") });
+
+                var result = db.Dictionary<int, int>(q);
+                Assert.That(result[1993], Is.EqualTo(2));
+            }
+        }
     }
 }
