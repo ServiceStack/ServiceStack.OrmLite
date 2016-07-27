@@ -60,5 +60,17 @@ namespace ServiceStack.OrmLite.Tests.UseCase
                 Assert.That(tracksByYear.Map(x => x.Value).Sum(), Is.EqualTo(8));
             }
         }
+
+        [Test]
+        public void Can_Count_Distinct()
+        {
+            using (var db = CreateArtistAndTrackTablesWithData(OpenDbConnection()))
+            {
+                var differentArtistsCount = db.Scalar<int>(db.From<Track>()
+                    .Select(x => Sql.CountDistinct(x.ArtistId)));
+
+                Assert.That(differentArtistsCount, Is.EqualTo(4));
+            }
+        }
     }
 }
