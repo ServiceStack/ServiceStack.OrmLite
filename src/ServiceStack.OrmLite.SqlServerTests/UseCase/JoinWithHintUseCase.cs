@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.SqlServer;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.SqlServerTests.UseCase
 {
@@ -68,9 +69,10 @@ namespace ServiceStack.OrmLite.SqlServerTests.UseCase
                 InitTables(db);
 
                 var join = db.From<Car>()
-                    .JoinWithHint<Car, CarType>((l, r) => l.CarId == r.CarId, SqlServerTableHint.ReadUncommitted);
+                    .Join<Car, CarType>((l, r) => l.CarId == r.CarId, SqlServerTableHint.ReadUncommitted);
 
                 var selectStatement = join.ToSelectStatement();
+                selectStatement.Print();
 
                 var data = db.Select<CarTypeJoin>(join);
 

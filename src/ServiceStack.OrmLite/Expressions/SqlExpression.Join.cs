@@ -21,9 +21,22 @@ namespace ServiceStack.OrmLite
             return InternalJoin("INNER JOIN", joinExpr);
         }
 
+        public SqlExpression<T> Join<Target>(Expression<Func<T, Target, bool>> joinExpr, string joinFormat)
+        {
+            if (joinFormat == null)
+                throw new ArgumentNullException("joinFormat");
+
+            return InternalJoin("INNER JOIN", joinExpr, joinFormat);
+        }
+
         public SqlExpression<T> Join<Source, Target>(Expression<Func<Source, Target, bool>> joinExpr = null)
         {
             return InternalJoin("INNER JOIN", joinExpr);
+        }
+
+        public SqlExpression<T> Join<Source, Target>(Expression<Func<Source, Target, bool>> joinExpr, string joinFormat)
+        {
+            return InternalJoin("INNER JOIN", joinExpr, joinFormat);
         }
 
         public SqlExpression<T> Join(Type sourceType, Type targetType, Expression joinExpr = null)
@@ -36,9 +49,22 @@ namespace ServiceStack.OrmLite
             return InternalJoin("LEFT JOIN", joinExpr);
         }
 
+        public SqlExpression<T> LeftJoin<Target>(Expression<Func<T, Target, bool>> joinExpr, string joinFormat)
+        {
+            if (joinFormat == null)
+                throw new ArgumentNullException("joinFormat");
+
+            return InternalJoin("LEFT JOIN", joinExpr, joinFormat);
+        }
+
         public SqlExpression<T> LeftJoin<Source, Target>(Expression<Func<Source, Target, bool>> joinExpr = null)
         {
             return InternalJoin("LEFT JOIN", joinExpr);
+        }
+
+        public SqlExpression<T> LeftJoin<Source, Target>(Expression<Func<Source, Target, bool>> joinExpr, string joinFormat)
+        {
+            return InternalJoin("LEFT JOIN", joinExpr, joinFormat);
         }
 
         public SqlExpression<T> LeftJoin(Type sourceType, Type targetType, Expression joinExpr = null)
@@ -51,9 +77,22 @@ namespace ServiceStack.OrmLite
             return InternalJoin("RIGHT JOIN", joinExpr);
         }
 
+        public SqlExpression<T> RightJoin<Target>(Expression<Func<T, Target, bool>> joinExpr, string joinFormat)
+        {
+            if (joinFormat == null)
+                throw new ArgumentNullException("joinFormat");
+
+            return InternalJoin("RIGHT JOIN", joinExpr, joinFormat);
+        }
+
         public SqlExpression<T> RightJoin<Source, Target>(Expression<Func<Source, Target, bool>> joinExpr = null)
         {
             return InternalJoin("RIGHT JOIN", joinExpr);
+        }
+
+        public SqlExpression<T> RightJoin<Source, Target>(Expression<Func<Source, Target, bool>> joinExpr, string joinFormat)
+        {
+            return InternalJoin("RIGHT JOIN", joinExpr, joinFormat);
         }
 
         public SqlExpression<T> FullJoin<Target>(Expression<Func<T, Target, bool>> joinExpr = null)
@@ -76,12 +115,12 @@ namespace ServiceStack.OrmLite
             return InternalJoin("CROSS JOIN", joinExpr);
         }
 
-        protected SqlExpression<T> InternalJoin<Source, Target>(string joinType, Expression<Func<Source, Target, bool>> joinExpr, string customJoinModifier = null)
+        protected SqlExpression<T> InternalJoin<Source, Target>(string joinType, Expression<Func<Source, Target, bool>> joinExpr, string joinFormat = null)
         {
             var sourceDef = typeof(Source).GetModelDefinition();
             var targetDef = typeof(Target).GetModelDefinition();
 
-            return InternalJoin(joinType, joinExpr, sourceDef, targetDef, customJoinModifier);
+            return InternalJoin(joinType, joinExpr, sourceDef, targetDef, joinFormat);
         }
 
         private string InternalCreateSqlFromExpression(Expression joinExpr, bool isCrossJoin) 
@@ -125,7 +164,7 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
-        private SqlExpression<T> InternalJoin(string joinType, Expression joinExpr, ModelDefinition sourceDef, ModelDefinition targetDef, string customJoinModifier = null)
+        private SqlExpression<T> InternalJoin(string joinType, Expression joinExpr, ModelDefinition sourceDef, ModelDefinition targetDef, string joinFormat = null)
         {
             PrefixFieldWithTableName = true;
 
@@ -145,17 +184,12 @@ namespace ServiceStack.OrmLite
                 : InternalCreateSqlFromDefinitions(sourceDef, targetDef, isCrossJoin);
 
             var joinDef = tableDefs.Contains(targetDef) && !tableDefs.Contains(sourceDef)
-                              ? sourceDef
-                              : targetDef;
+                ? sourceDef
+                : targetDef;
 
-            if (customJoinModifier != null)
-            {
-                FromExpression += " {0} {1} {2} {3}".Fmt(joinType, SqlTable(joinDef), customJoinModifier, sqlExpr);
-            }
-            else
-            {
-                FromExpression += " {0} {1} {2}".Fmt(joinType, SqlTable(joinDef), sqlExpr);
-            }
+            FromExpression += joinFormat != null
+                ? " {0} {1}".Fmt(joinType, string.Format(joinFormat, SqlTable(joinDef), sqlExpr))
+                : " {0} {1} {2}".Fmt(joinType, SqlTable(joinDef), sqlExpr);
 
             return this;
         }
