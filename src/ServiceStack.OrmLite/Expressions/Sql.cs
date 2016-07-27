@@ -102,6 +102,16 @@ namespace ServiceStack.OrmLite
         {
             return "AVG({0})".Fmt(value);
         }
+
+        public static T AllFields<T>(T item)
+        {
+            return item;
+        }
+
+        public static string JoinAlias<T>(T property, string tableAlias)
+        {
+            return tableAlias;
+        }
     }
 
 }

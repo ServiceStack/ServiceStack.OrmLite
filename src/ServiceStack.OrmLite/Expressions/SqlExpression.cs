@@ -1612,7 +1612,7 @@ namespace ServiceStack.OrmLite
             var methodCallExpr = arg as MethodCallExpression;
             var mi = methodCallExpr != null ? methodCallExpr.Method : null;
             var declareType = mi != null && mi.DeclaringType != null ? mi.DeclaringType : null;
-            if (declareType != null && declareType.Name == "Sql" && mi.Name != "Desc" && mi.Name != "Asc" && mi.Name != "As") 
+            if (declareType != null && declareType.Name == "Sql" && mi.Name != "Desc" && mi.Name != "Asc" && mi.Name != "As" && mi.Name != "AllFields") 
                 return new PartialSqlString(expr + " AS " + member.Name); // new { Count = Sql.Count("*") }
 
             return expr;
@@ -2027,6 +2027,13 @@ namespace ServiceStack.OrmLite
                     break;
                 case "CountDistinct":
                     statement = string.Format("COUNT(DISTINCT {0})", quotedColName);
+                    break;
+                case "AllFields":
+                    var argDef = m.Arguments[0].Type.GetModelMetadata();
+                    statement = DialectProvider.GetQuotedTableName(argDef) + ".*";
+                    break;
+                case "JoinAlias":
+                    statement = args[0] + "." + quotedColName.ToString().RightPart('.');
                     break;
                 default:
                     throw new NotSupportedException();
