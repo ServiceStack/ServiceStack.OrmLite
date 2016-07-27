@@ -457,7 +457,18 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
-        public virtual SqlExpression<T> GroupBy<TKey>(Expression<Func<T, TKey>> keySelector)
+        public virtual SqlExpression<T> GroupBy<Table>(Expression<Func<Table, object>> keySelector)
+        {
+            sep = string.Empty;
+            useFieldName = true;
+
+            var groupByKey = Visit(keySelector);
+            StripAliases(groupByKey as SelectList); // No "AS ColumnAlias" in GROUP BY, just the column names/expressions
+
+            return GroupBy(groupByKey.ToString());
+        }
+
+        public virtual SqlExpression<T> GroupBy(Expression<Func<T, object>> keySelector)
         {
             sep = string.Empty;
             useFieldName = true;

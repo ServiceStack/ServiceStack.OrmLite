@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System.Linq;
+using NUnit.Framework;
 using ServiceStack.OrmLite.Tests.Support;
 using ServiceStack.Text;
 
@@ -42,6 +43,21 @@ namespace ServiceStack.OrmLite.Tests.UseCase
 
                 var result = db.Dictionary<int, int>(q);
                 Assert.That(result[1993], Is.EqualTo(2));
+            }
+        }
+
+        [Test]
+        public void Can_Select_joined_table_with_Alias()
+        {
+            using (var db = CreateArtistAndTrackTablesWithData(OpenDbConnection()))
+            {
+                var tracksByYear = db.Dictionary<string, int>(db.From<Track>()
+                    .Join<Artist>()
+                    .GroupBy<Artist>(x => x.Name)
+                    .Select<Artist>(x => new { x.Name, Count = Sql.Count("*") }));
+
+                Assert.That(tracksByYear.Count, Is.EqualTo(4));
+                Assert.That(tracksByYear.Map(x => x.Value).Sum(), Is.EqualTo(8));
             }
         }
     }
