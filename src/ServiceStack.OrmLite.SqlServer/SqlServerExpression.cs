@@ -1,5 +1,6 @@
 using System;
 using System.Data;
+using System.Linq.Expressions;
 using System.Text;
 using ServiceStack.OrmLite.SqlServer.Converters;
 using ServiceStack.Text;
@@ -26,6 +27,33 @@ namespace ServiceStack.OrmLite.SqlServer
         public override SqlExpression<T> OrderByRandom()
         {
             return base.OrderBy("NEWID()");
+        }
+
+        public SqlExpression<T> JoinWithHint<Target>(Expression<Func<T, Target, bool>> joinExpr, string joinTableHint)
+        {
+            if (joinTableHint == null)
+            {
+                throw new ArgumentNullException("joinTableHint");
+            }
+            return InternalJoin("INNER JOIN", joinExpr, joinTableHint);
+        }
+
+        public SqlExpression<T> LeftJoinWithHint<Target>(Expression<Func<T, Target, bool>> joinExpr, string joinTableHint)
+        {
+            if (joinTableHint == null)
+            {
+                throw new ArgumentNullException("joinTableHint");
+            }
+            return InternalJoin("LEFT JOIN", joinExpr, joinTableHint);
+        }
+
+        public SqlExpression<T> RightJoinWithHint<Target>(Expression<Func<T, Target, bool>> joinExpr, string joinTableHint)
+        {
+            if (joinTableHint == null)
+            {
+                throw new ArgumentNullException("joinTableHint");
+            }
+            return InternalJoin("RIGHT JOIN", joinExpr, joinTableHint);
         }
 
         protected override void ConvertToPlaceholderAndParameter(ref object right)
