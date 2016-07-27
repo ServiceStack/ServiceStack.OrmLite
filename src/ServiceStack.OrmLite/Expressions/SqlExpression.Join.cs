@@ -76,13 +76,12 @@ namespace ServiceStack.OrmLite
             return InternalJoin("CROSS JOIN", joinExpr);
         }
 
-        private SqlExpression<T> InternalJoin<Source, Target>(string joinType, 
-            Expression<Func<Source, Target, bool>> joinExpr)
+        protected SqlExpression<T> InternalJoin<Source, Target>(string joinType, Expression<Func<Source, Target, bool>> joinExpr, string customJoinModifier = null)
         {
             var sourceDef = typeof(Source).GetModelDefinition();
             var targetDef = typeof(Target).GetModelDefinition();
 
-            return InternalJoin(joinType, joinExpr, sourceDef, targetDef);
+            return InternalJoin(joinType, joinExpr, sourceDef, targetDef, customJoinModifier);
         }
 
         private string InternalCreateSqlFromExpression(Expression joinExpr, bool isCrossJoin) 
@@ -126,8 +125,7 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
-        private SqlExpression<T> InternalJoin(string joinType, 
-            Expression joinExpr, ModelDefinition sourceDef, ModelDefinition targetDef)
+        private SqlExpression<T> InternalJoin(string joinType, Expression joinExpr, ModelDefinition sourceDef, ModelDefinition targetDef, string customJoinModifier = null)
         {
             PrefixFieldWithTableName = true;
 
@@ -150,7 +148,14 @@ namespace ServiceStack.OrmLite
                               ? sourceDef
                               : targetDef;
 
-            FromExpression += " {0} {1} {2}".Fmt(joinType, SqlTable(joinDef), sqlExpr);
+            if (customJoinModifier != null)
+            {
+                FromExpression += " {0} {1} {2} {3}".Fmt(joinType, SqlTable(joinDef), customJoinModifier, sqlExpr);
+            }
+            else
+            {
+                FromExpression += " {0} {1} {2}".Fmt(joinType, SqlTable(joinDef), sqlExpr);
+            }
 
             return this;
         }
