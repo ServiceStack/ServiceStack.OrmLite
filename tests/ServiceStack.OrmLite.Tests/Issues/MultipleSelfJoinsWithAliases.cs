@@ -103,8 +103,28 @@ namespace ServiceStack.OrmLite.Tests.Issues
                 q.Where(x => x.TenantId == tenantId);
 
                 var sales = db.Select<SaleView>(q);
-
                 Assert.That(sales.Count, Is.EqualTo(1));
+
+                //Alternative
+                db.GetLastSql().Print();
+                q = db.From<Sale>()
+                    .LeftJoin<ContactIssue>((s,c) => s.SellerId == c.Id, db.JoinAlias<ContactIssue>("seller"))
+                    .LeftJoin<ContactIssue>((s,c) => s.BuyerId == c.Id, db.JoinAlias<ContactIssue>("buyer"))
+                    .Select(@"Sale.*
+                        , buyer.{0} AS BuyerFirstName
+                        , buyer.{1} AS BuyerLastName
+                        , seller.{0} AS SellerFirstName
+                        , seller.{1} AS SellerLastName"
+                    .Fmt("FirstName".SqlColumn(), "LastName".SqlColumn()));
+
+                q.Where(x => x.TenantId == tenantId);
+
+                q.ToSelectStatement().Print();
+
+                sales = db.Select<SaleView>(q);
+                Assert.That(sales.Count, Is.EqualTo(1));
+
+
                 var salesView = sales[0];
                 
                 //salesView.PrintDump();

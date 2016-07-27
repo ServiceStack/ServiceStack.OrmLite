@@ -21,7 +21,7 @@ namespace ServiceStack.OrmLite
             return InternalJoin("INNER JOIN", joinExpr);
         }
 
-        public SqlExpression<T> Join<Target>(Expression<Func<T, Target, bool>> joinExpr, string joinFormat)
+        public SqlExpression<T> Join<Target>(Expression<Func<T, Target, bool>> joinExpr, JoinFormatDelegate joinFormat)
         {
             if (joinFormat == null)
                 throw new ArgumentNullException("joinFormat");
@@ -34,7 +34,7 @@ namespace ServiceStack.OrmLite
             return InternalJoin("INNER JOIN", joinExpr);
         }
 
-        public SqlExpression<T> Join<Source, Target>(Expression<Func<Source, Target, bool>> joinExpr, string joinFormat)
+        public SqlExpression<T> Join<Source, Target>(Expression<Func<Source, Target, bool>> joinExpr, JoinFormatDelegate joinFormat)
         {
             return InternalJoin("INNER JOIN", joinExpr, joinFormat);
         }
@@ -49,7 +49,7 @@ namespace ServiceStack.OrmLite
             return InternalJoin("LEFT JOIN", joinExpr);
         }
 
-        public SqlExpression<T> LeftJoin<Target>(Expression<Func<T, Target, bool>> joinExpr, string joinFormat)
+        public SqlExpression<T> LeftJoin<Target>(Expression<Func<T, Target, bool>> joinExpr, JoinFormatDelegate joinFormat)
         {
             if (joinFormat == null)
                 throw new ArgumentNullException("joinFormat");
@@ -62,7 +62,7 @@ namespace ServiceStack.OrmLite
             return InternalJoin("LEFT JOIN", joinExpr);
         }
 
-        public SqlExpression<T> LeftJoin<Source, Target>(Expression<Func<Source, Target, bool>> joinExpr, string joinFormat)
+        public SqlExpression<T> LeftJoin<Source, Target>(Expression<Func<Source, Target, bool>> joinExpr, JoinFormatDelegate joinFormat)
         {
             return InternalJoin("LEFT JOIN", joinExpr, joinFormat);
         }
@@ -77,7 +77,7 @@ namespace ServiceStack.OrmLite
             return InternalJoin("RIGHT JOIN", joinExpr);
         }
 
-        public SqlExpression<T> RightJoin<Target>(Expression<Func<T, Target, bool>> joinExpr, string joinFormat)
+        public SqlExpression<T> RightJoin<Target>(Expression<Func<T, Target, bool>> joinExpr, JoinFormatDelegate joinFormat)
         {
             if (joinFormat == null)
                 throw new ArgumentNullException("joinFormat");
@@ -90,7 +90,7 @@ namespace ServiceStack.OrmLite
             return InternalJoin("RIGHT JOIN", joinExpr);
         }
 
-        public SqlExpression<T> RightJoin<Source, Target>(Expression<Func<Source, Target, bool>> joinExpr, string joinFormat)
+        public SqlExpression<T> RightJoin<Source, Target>(Expression<Func<Source, Target, bool>> joinExpr, JoinFormatDelegate joinFormat)
         {
             return InternalJoin("RIGHT JOIN", joinExpr, joinFormat);
         }
@@ -115,7 +115,7 @@ namespace ServiceStack.OrmLite
             return InternalJoin("CROSS JOIN", joinExpr);
         }
 
-        protected SqlExpression<T> InternalJoin<Source, Target>(string joinType, Expression<Func<Source, Target, bool>> joinExpr, string joinFormat = null)
+        protected SqlExpression<T> InternalJoin<Source, Target>(string joinType, Expression<Func<Source, Target, bool>> joinExpr, JoinFormatDelegate joinFormat = null)
         {
             var sourceDef = typeof(Source).GetModelDefinition();
             var targetDef = typeof(Target).GetModelDefinition();
@@ -164,7 +164,7 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
-        private SqlExpression<T> InternalJoin(string joinType, Expression joinExpr, ModelDefinition sourceDef, ModelDefinition targetDef, string joinFormat = null)
+        private SqlExpression<T> InternalJoin(string joinType, Expression joinExpr, ModelDefinition sourceDef, ModelDefinition targetDef, JoinFormatDelegate joinFormat = null)
         {
             PrefixFieldWithTableName = true;
 
@@ -188,7 +188,7 @@ namespace ServiceStack.OrmLite
                 : targetDef;
 
             FromExpression += joinFormat != null
-                ? " {0} {1}".Fmt(joinType, string.Format(joinFormat, SqlTable(joinDef), sqlExpr))
+                ? " {0} {1}".Fmt(joinType, joinFormat(SqlTable(joinDef), sqlExpr))
                 : " {0} {1} {2}".Fmt(joinType, SqlTable(joinDef), sqlExpr);
 
             return this;

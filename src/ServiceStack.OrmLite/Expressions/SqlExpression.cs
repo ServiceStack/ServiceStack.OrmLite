@@ -2228,6 +2228,8 @@ namespace ServiceStack.OrmLite
         string SelectInto<TModel>();
     }
 
+    public delegate string JoinFormatDelegate(string table, string joinExpr);
+
     public class PartialSqlString
     {
         public PartialSqlString(string text)

@@ -70,6 +70,14 @@ namespace ServiceStack.OrmLite
             return expr;
         }
 
+        public static JoinFormatDelegate JoinAlias<T>(this IDbConnection dbConn, string alias)
+        {
+            var dialectProvider = dbConn.GetDialectProvider();
+            var modelDef = typeof(T).GetModelDefinition();
+            return (table, expr) => "{0} {1} {2}".Fmt(table, alias,
+                expr.Replace(dialectProvider.GetQuotedTableName(modelDef), dialectProvider.GetQuotedTableName(alias)));
+        }
+
         /// <summary>
         /// Open a Transaction in OrmLite
         /// </summary>
