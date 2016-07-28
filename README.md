@@ -1245,11 +1245,11 @@ using (var db = OpenDbConnection())
 }
 ```
 
-Results filters makes it trivial to implement the `CaptureSqlFilter` which allows you to capture SQL Statements without running them, e.g:
-
 ### CaptureSqlFilter
 
-[CaptureSqlFilter](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/4c56bde197d07cfc78a80be06dd557732ecf68fa/src/ServiceStack.OrmLite/OrmLiteResultsFilter.cs#L321) is an simple Results Filter which can be used to quickly found out what SQL your DB calls generate by surrounding DB access in a using scope like:
+Results filters makes it trivial to implement the `CaptureSqlFilter` which allows you to capture SQL Statements without running them.
+[CaptureSqlFilter](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/4c56bde197d07cfc78a80be06dd557732ecf68fa/src/ServiceStack.OrmLite/OrmLiteResultsFilter.cs#L321) 
+is just a simple Results Filter which can be used to quickly found out what SQL your DB calls generate by surrounding DB access in a using scope, e.g:
 
 ```csharp
 using (var captured = new CaptureSqlFilter())
