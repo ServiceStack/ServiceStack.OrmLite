@@ -7,6 +7,8 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
+    public delegate string JoinFormatDelegate(IOrmLiteDialectProvider dialect, ModelDefinition tableDef, string joinExpr);
+
     public abstract partial class SqlExpression<T> : ISqlExpression
     {
         protected List<ModelDefinition> tableDefs = new List<ModelDefinition>();
@@ -188,7 +190,7 @@ namespace ServiceStack.OrmLite
                 : targetDef;
 
             FromExpression += joinFormat != null
-                ? " {0} {1}".Fmt(joinType, joinFormat(SqlTable(joinDef), sqlExpr))
+                ? " {0} {1}".Fmt(joinType, joinFormat(DialectProvider, joinDef, sqlExpr))
                 : " {0} {1} {2}".Fmt(joinType, SqlTable(joinDef), sqlExpr);
 
             return this;
