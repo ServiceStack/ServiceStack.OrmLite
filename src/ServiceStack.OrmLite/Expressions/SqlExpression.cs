@@ -1339,6 +1339,9 @@ namespace ServiceStack.OrmLite
             else if (operand == "<>" && right.ToString().Equals("null", StringComparison.OrdinalIgnoreCase))
                 operand = "is not";
 
+            if (operand == "+" && b.Left.Type == typeof(string) && b.Right.Type == typeof(string))
+                return BuildConcatExpression(new List<object>() {left, right});
+
             VisitFilter(operand, originalLeft, originalRight, ref left, ref right);
 
             switch (operand)
@@ -1708,6 +1711,9 @@ namespace ServiceStack.OrmLite
             if (IsColumnAccess(m))
                 return VisitColumnAccessMethod(m);
 
+            if (IsStaticStringMethod(m))
+                return VisitStaticStringMethodCall(m);
+
             return CachedExpressionCompiler.Evaluate(m);
         }
 
@@ -1961,6 +1967,44 @@ namespace ServiceStack.OrmLite
 
             var statement = string.Format("{0} {1} ({2})", quotedColName, "In", sqlIn);
             return new PartialSqlString(statement);
+        }
+
+        private bool IsStaticStringMethod(MethodCallExpression m)
+        {
+            if (m.Object == null && m.Method.Name == "Concat")
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        protected virtual object VisitStaticStringMethodCall(MethodCallExpression m)
+        {
+            switch (m.Method.Name)
+            {
+                case "Concat":
+                    var args = VisitExpressionList(m.Arguments);
+                    return BuildConcatExpression(args);
+
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+
+        private PartialSqlString BuildConcatExpression(List<object> args)
+        {
+            for (int i = 0; i < args.Count; i++)
+            {
+                if (args[i] as PartialSqlString == null)
+                    args[i] = ConvertToParam(args[i]);
+            }
+            return ToConcatPartialString(args);
+        }
+
+        protected virtual PartialSqlString ToConcatPartialString(List<object> args)
+        {
+            return new PartialSqlString(String.Join(" + ", args));
         }
 
         protected virtual object VisitSqlMethodCall(MethodCallExpression m)
