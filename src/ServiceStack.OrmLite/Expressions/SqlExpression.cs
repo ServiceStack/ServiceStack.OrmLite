@@ -2140,6 +2140,16 @@ namespace ServiceStack.OrmLite
                         statement = GetSubstringSql(quotedColName, startIndex);
                     }
                     break;
+                case "ToString":
+                    if (m.Object.Type == typeof(string))
+                    {
+                        statement = string.Format("({0})", quotedColName);
+                    }
+                    else
+                    {
+                        statement = string.Format("cast({0} as varchar(1000))", quotedColName);
+                    }
+                    break;
                 default:
                     throw new NotSupportedException();
             }
