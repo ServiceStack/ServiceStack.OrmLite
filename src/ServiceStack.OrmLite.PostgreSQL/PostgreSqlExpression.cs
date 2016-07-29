@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 
 namespace ServiceStack.OrmLite.PostgreSQL
@@ -23,6 +24,11 @@ namespace ServiceStack.OrmLite.PostgreSQL
         public override SqlExpression<T> OrderByRandom()
         {
             return base.OrderBy("RANDOM()");
+        }
+
+        protected override PartialSqlString ToConcatPartialString(List<object> args)
+        {
+            return new PartialSqlString(string.Join(" || ", args));
         }
     }
 

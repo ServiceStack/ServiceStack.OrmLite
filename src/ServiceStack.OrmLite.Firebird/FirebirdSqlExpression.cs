@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq.Expressions;
 
 namespace ServiceStack.OrmLite.Firebird
@@ -28,6 +29,11 @@ namespace ServiceStack.OrmLite.Firebird
                     return base.VisitColumnAccessMethod(m);
             }
             return new PartialSqlString(statement);
+        }
+
+        protected override PartialSqlString ToConcatPartialString(List<object> args)
+        {
+            return new PartialSqlString(string.Join(" || ", args));
         }
     }
 }

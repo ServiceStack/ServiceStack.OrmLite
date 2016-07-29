@@ -462,6 +462,28 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(target.Count, Is.EqualTo(3));
         }
 
+        [Test]
+        public void Can_Where_using_filter_with_Concat()
+        {
+            string filterText = "asdf";
+            int filterInt = 10;
+
+            System.Linq.Expressions.Expression<Func<TestType, bool>> filter = x => String.Concat(x.TextCol, x.NullableIntCol.ToString()) == filterText + filterInt;
+            var q = Db.From<TestType>().Where(filter);
+            var target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(1));
+
+            filter = x => String.Concat(x.TextCol, ".", x.NullableIntCol.ToString()) == filterText + "." + filterInt;
+            q = Db.From<TestType>().Where(filter);
+            target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(1));
+
+            filter = x => x.TextCol + "." + x.NullableIntCol.ToString() == filterText + "." + filterInt;
+            q = Db.From<TestType>().Where(filter);
+            target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(1));
+        }
+
         private int MethodReturningInt(int val)
         {
             return val;
