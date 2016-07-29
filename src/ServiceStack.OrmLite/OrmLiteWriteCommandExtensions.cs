@@ -844,7 +844,7 @@ namespace ServiceStack.OrmLite
 
                     if (result != null)
                     {
-                        if (refField != null) 
+                        if (refField != null && refSelf == null) 
                             refField.SetValueFn(result, pkValue);
 
                         dbCmd.CreateTypedApi(refType).Save(result);

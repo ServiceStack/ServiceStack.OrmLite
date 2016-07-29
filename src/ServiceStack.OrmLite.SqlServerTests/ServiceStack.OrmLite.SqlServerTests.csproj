@@ -119,6 +119,7 @@
     <Compile Include="UpdateTests.cs" />
     <Compile Include="UseCase\ComplexJoinWithLimitAndNoOrderByTests.cs" />
     <Compile Include="UseCase\ComplexJoinWithLimitAndSpacesInAliasesTests.cs" />
+    <Compile Include="UseCase\JoinWithHintUseCase.cs" />
     <Compile Include="UseCase\TestEntityWithAliases.cs" />
     <Compile Include="UseCase\SimpleUseCase.cs" />
     <Compile Include="UseCase\TestEntity.cs" />

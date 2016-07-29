@@ -201,5 +201,9 @@ namespace ServiceStack.OrmLite
     
         string GetLoadChildrenSubSelect<From>(SqlExpression<From> expr);
         string ToRowCountStatement(string innerSql);
+
+        string ToUpdateStatement<T>(IDbCommand dbCmd, T item, ICollection<string> updateFields = null);
+        string ToInsertStatement<T>(IDbCommand dbCmd, T item, ICollection<string> insertFields = null);
+        string MergeParamsIntoSql(string sql, IEnumerable<IDbDataParameter> dbParams);
     }
 }

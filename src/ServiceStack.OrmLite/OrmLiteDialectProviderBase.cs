@@ -627,6 +627,20 @@ namespace ServiceStack.OrmLite
             return sql;
         }
 
+        public virtual string ToInsertStatement<T>(IDbCommand dbCmd, T item, ICollection<string> insertFields = null)
+        {
+            dbCmd.Parameters.Clear();
+            var dialectProvider = dbCmd.GetDialectProvider();
+            dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd);
+
+            if (string.IsNullOrEmpty(dbCmd.CommandText))
+                return null;
+
+            dialectProvider.SetParameterValues<T>(dbCmd, item);
+
+            return MergeParamsIntoSql(dbCmd.CommandText, ToArray(dbCmd.Parameters));
+        }
+
         public virtual void PrepareParameterizedInsertStatement<T>(IDbCommand cmd, ICollection<string> insertFields = null)
         {
             var sbColumnNames = StringBuilderCache.Allocate();
@@ -668,6 +682,42 @@ namespace ServiceStack.OrmLite
                 GetQuotedTableName(modelDef),
                 StringBuilderCache.ReturnAndFree(sbColumnNames),
                 StringBuilderCacheAlt.ReturnAndFree(sbColumnValues));
+        }
+
+        public virtual string ToUpdateStatement<T>(IDbCommand dbCmd, T item, ICollection<string> updateFields = null)
+        {
+            dbCmd.Parameters.Clear();
+            var dialectProvider = dbCmd.GetDialectProvider();
+            dialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
+
+            if (string.IsNullOrEmpty(dbCmd.CommandText))
+                return null;
+
+            dialectProvider.SetParameterValues<T>(dbCmd, item);
+
+            return MergeParamsIntoSql(dbCmd.CommandText, ToArray(dbCmd.Parameters));
+        }
+
+        IDbDataParameter[] ToArray(IDataParameterCollection dbParams)
+        {
+            var to = new IDbDataParameter[dbParams.Count];
+            for (int i = 0; i < dbParams.Count; i++)
+            {
+                to[i] = (IDbDataParameter) dbParams[i];
+            }
+            return to;
+        }
+
+        public virtual string MergeParamsIntoSql(string sql, IEnumerable<IDbDataParameter> dbParams)
+        {
+            foreach (var dbParam in dbParams)
+            {
+                var quotedValue = dbParam.Value != null 
+                    ? GetQuotedValue(dbParam.Value, dbParam.Value.GetType())
+                    : "null";
+                sql = sql.Replace(dbParam.ParameterName, quotedValue);
+            }
+            return sql;
         }
 
         public virtual bool PrepareParameterizedUpdateStatement<T>(IDbCommand cmd, ICollection<string> updateFields = null)

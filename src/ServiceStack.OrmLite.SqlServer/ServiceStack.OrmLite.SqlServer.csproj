@@ -104,6 +104,7 @@
     <Compile Include="SqlServerExpression.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SqlServerOrmLiteDialectProvider.cs" />
+    <Compile Include="SqlServerTableHint.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj">

@@ -19,24 +19,27 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var db = OpenDbConnection())
             {
-                db.DropAndCreateTable<TestType>();
-                db.Insert(new TestType { Id = 1, BoolCol = true, DateCol = new DateTime(2012, 1, 1), TextCol = "asdf", EnumCol = TestEnum.Val0, NullableIntCol = 10, TestType2ObjColId = 1 });
-                db.Insert(new TestType { Id = 2, BoolCol = true, DateCol = new DateTime(2012, 2, 1), TextCol = "asdf123", EnumCol = TestEnum.Val1, NullableIntCol = null, TestType2ObjColId = 2 });
-                db.Insert(new TestType { Id = 3, BoolCol = false, DateCol = new DateTime(2012, 3, 1), TextCol = "qwer", EnumCol = TestEnum.Val2, NullableIntCol = 30, TestType2ObjColId = 3 });
-                db.Insert(new TestType { Id = 4, BoolCol = false, DateCol = new DateTime(2012, 4, 1), TextCol = "qwer123", EnumCol = TestEnum.Val3, NullableIntCol = 40, TestType2ObjColId = 4 });
+                db.DropTable<TestType>();
+                db.DropTable<TestType2>();
+                db.DropTable<TestType3>();
 
-                db.DropAndCreateTable<TestType2>();
-                db.Insert(new TestType2 { Id = 1, BoolCol = true, DateCol = new DateTime(2012, 4, 1), TextCol = "111", EnumCol = TestEnum.Val3, NullableIntCol = 10, TestType2Name = "2.1", TestType3ObjColId = 1});
+                db.CreateTable<TestType3>();
+                db.Insert(new TestType3 { Id = 1, BoolCol = true, DateCol = new DateTime(2012, 4, 1), TextCol = "111", EnumCol = TestEnum.Val3, NullableIntCol = 10, TestType3Name = "3.1", CustomInt = 100 });
+                db.Insert(new TestType3 { Id = 2, BoolCol = false, DateCol = new DateTime(2012, 4, 1), TextCol = "222", EnumCol = TestEnum.Val3, NullableIntCol = 20, TestType3Name = "3.2", CustomInt = 200 });
+                db.Insert(new TestType3 { Id = 3, BoolCol = false, DateCol = new DateTime(2012, 4, 1), TextCol = "222", EnumCol = TestEnum.Val3, NullableIntCol = 30, TestType3Name = "3.3", CustomInt = 300 });
+                db.Insert(new TestType3 { Id = 4, BoolCol = false, DateCol = new DateTime(2012, 4, 1), TextCol = "222", EnumCol = TestEnum.Val3, NullableIntCol = 40, TestType3Name = "3.4", CustomInt = 400 });
+
+                db.CreateTable<TestType2>();
+                db.Insert(new TestType2 { Id = 1, BoolCol = true, DateCol = new DateTime(2012, 4, 1), TextCol = "111", EnumCol = TestEnum.Val3, NullableIntCol = 10, TestType2Name = "2.1", TestType3ObjColId = 1 });
                 db.Insert(new TestType2 { Id = 2, BoolCol = false, DateCol = new DateTime(2012, 4, 1), TextCol = "222", EnumCol = TestEnum.Val3, NullableIntCol = 20, TestType2Name = "2.2", TestType3ObjColId = 2 });
                 db.Insert(new TestType2 { Id = 3, BoolCol = true, DateCol = new DateTime(2012, 4, 1), TextCol = "333", EnumCol = TestEnum.Val3, NullableIntCol = 30, TestType2Name = "2.3", TestType3ObjColId = 3 });
                 db.Insert(new TestType2 { Id = 4, BoolCol = false, DateCol = new DateTime(2012, 4, 1), TextCol = "444", EnumCol = TestEnum.Val3, NullableIntCol = 40, TestType2Name = "2.4", TestType3ObjColId = 4 });
 
-
-                db.DropAndCreateTable<TestType3>();
-                db.Insert(new TestType3 { Id = 1, BoolCol = true, DateCol = new DateTime(2012, 4, 1), TextCol = "111", EnumCol = TestEnum.Val3, NullableIntCol = 10, TestType3Name = "3.1", CustomInt = 100});
-                db.Insert(new TestType3 { Id = 2, BoolCol = false, DateCol = new DateTime(2012, 4, 1), TextCol = "222", EnumCol = TestEnum.Val3, NullableIntCol = 20, TestType3Name = "3.2", CustomInt = 200 });
-                db.Insert(new TestType3 { Id = 3, BoolCol = false, DateCol = new DateTime(2012, 4, 1), TextCol = "222", EnumCol = TestEnum.Val3, NullableIntCol = 30, TestType3Name = "3.3", CustomInt = 300});
-                db.Insert(new TestType3 { Id = 4, BoolCol = false, DateCol = new DateTime(2012, 4, 1), TextCol = "222", EnumCol = TestEnum.Val3, NullableIntCol = 40, TestType3Name = "3.4", CustomInt = 400 });
+                db.CreateTable<TestType>();
+                db.Insert(new TestType { Id = 1, BoolCol = true, DateCol = new DateTime(2012, 1, 1), TextCol = "asdf", EnumCol = TestEnum.Val0, NullableIntCol = 10, TestType2ObjColId = 1 });
+                db.Insert(new TestType { Id = 2, BoolCol = true, DateCol = new DateTime(2012, 2, 1), TextCol = "asdf123", EnumCol = TestEnum.Val1, NullableIntCol = null, TestType2ObjColId = 2 });
+                db.Insert(new TestType { Id = 3, BoolCol = false, DateCol = new DateTime(2012, 3, 1), TextCol = "qwer", EnumCol = TestEnum.Val2, NullableIntCol = 30, TestType2ObjColId = 3 });
+                db.Insert(new TestType { Id = 4, BoolCol = false, DateCol = new DateTime(2012, 4, 1), TextCol = "qwer123", EnumCol = TestEnum.Val3, NullableIntCol = 40, TestType2ObjColId = 4 });
             }
             Db = OpenDbConnection();
         }
@@ -118,7 +121,8 @@ namespace ServiceStack.OrmLite.Tests
                 DateCol = new DateTime(2012, 5, 1),
                 TextCol = "uiop",
                 EnumCol = TestEnum.Val3,
-                ComplexObjCol = new TestType { TextCol = "poiu" }
+                ComplexObjCol = new TestType { TextCol = "poiu" },
+                TestType2ObjColId = 1
             });
 
             var target = Db.Select<TestType>(

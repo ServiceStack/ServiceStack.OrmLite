@@ -212,8 +212,8 @@ namespace ServiceStack.OrmLite.Tests
                 var resultsMap = db.Select<Dictionary<string, object>>(q);
                 Assert.That(resultsMap.Count, Is.EqualTo(2));
                 var row = new Dictionary<string,object>(resultsMap[0], StringComparer.OrdinalIgnoreCase);
-                Assert.That(row.ContainsKey("FirstName"));
-                Assert.That(!row.ContainsKey("Id"));
+                Assert.That(row.ContainsKey("FirstName".SqlTableRaw()));
+                Assert.That(!row.ContainsKey("Id".SqlTableRaw()));
 
                 var resultsList = db.Select<List<object>>(q);
                 Assert.That(resultsList.Count, Is.EqualTo(2));
@@ -222,16 +222,9 @@ namespace ServiceStack.OrmLite.Tests
                 var resultsDynamic = db.Select<dynamic>(q);
                 Assert.That(resultsDynamic.Count, Is.EqualTo(2));
                 var map = (IDictionary<string, object>) resultsDynamic[0];
-                if (Dialect != Dialect.Firebird)
-                {
-                    Assert.That(map.ContainsKey("FirstName"));
-                    Assert.That(!map.ContainsKey("Id"));
-                }
-                else
-                {
-                    Assert.That(map.ContainsKey("FIRSTNAME"));
-                    Assert.That(!map.ContainsKey("ID"));
-                }
+
+                Assert.That(map.ContainsKey("FirstName".SqlTableRaw()));
+                Assert.That(!map.ContainsKey("Id".SqlTableRaw()));
             }
         }
 

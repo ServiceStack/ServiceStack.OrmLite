@@ -50,7 +50,7 @@ namespace ServiceStack.OrmLite.Sqlite
                     statement = string.Format("{0} DESC", quotedColName);
                     break;
                 case "As":
-                    statement = string.Format("{0} As {1}", quotedColName,
+                    statement = string.Format("{0} AS {1}", quotedColName,
                         base.DialectProvider.GetQuotedColumnName(RemoveQuoteFromAlias(args[0].ToString())));
                     break;
                 case "Sum":
@@ -67,7 +67,7 @@ namespace ServiceStack.OrmLite.Sqlite
                     statement = string.Format("COUNT(DISTINCT {0})", quotedColName);
                     break;
                 default:
-                    throw new NotSupportedException();
+                    return base.VisitSqlMethodCall(m);
             }
 
             return new PartialSqlString(statement);

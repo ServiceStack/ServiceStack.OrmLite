@@ -505,7 +505,8 @@ namespace ServiceStack.OrmLite
 
         internal static IEnumerable<T> SelectLazy<T>(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams)
         {
-            foreach (var p in dbCmd.SetParameters(sqlParams).SelectLazy<T>(sql)) yield return p;
+            foreach (var p in dbCmd.SetParameters(sqlParams).SelectLazy<T>(sql))
+                yield return p;
         }
 
         internal static IEnumerable<T> SelectLazy<T>(this IDbCommand dbCmd, string sql, object anonType = null)

@@ -457,7 +457,18 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
-        public virtual SqlExpression<T> GroupBy<TKey>(Expression<Func<T, TKey>> keySelector)
+        public virtual SqlExpression<T> GroupBy<Table>(Expression<Func<Table, object>> keySelector)
+        {
+            sep = string.Empty;
+            useFieldName = true;
+
+            var groupByKey = Visit(keySelector);
+            StripAliases(groupByKey as SelectList); // No "AS ColumnAlias" in GROUP BY, just the column names/expressions
+
+            return GroupBy(groupByKey.ToString());
+        }
+
+        public virtual SqlExpression<T> GroupBy(Expression<Func<T, object>> keySelector)
         {
             sep = string.Empty;
             useFieldName = true;
@@ -507,6 +518,11 @@ namespace ServiceStack.OrmLite
         public virtual SqlExpression<T> OrderBy(string orderBy)
         {
             return UnsafeOrderBy(orderBy.SqlVerifyFragment());
+        }
+
+        public virtual SqlExpression<T> OrderBy(long columnIndex)
+        {
+            return UnsafeOrderBy(columnIndex.ToString());
         }
 
         public virtual SqlExpression<T> UnsafeOrderBy(string orderBy)
@@ -693,8 +709,17 @@ namespace ServiceStack.OrmLite
 
         public virtual SqlExpression<T> OrderByDescending(string orderBy)
         {
+            return UnsafeOrderByDescending(orderBy.SqlVerifyFragment());
+        }
+
+        public virtual SqlExpression<T> OrderByDescending(long columnIndex)
+        {
+            return UnsafeOrderByDescending(columnIndex.ToString());
+        }
+
+        private SqlExpression<T> UnsafeOrderByDescending(string orderBy)
+        {
             orderByProperties.Clear();
-            orderBy.SqlVerifyFragment();
             orderByProperties.Add(orderBy + " DESC");
             BuildOrderByClauseInternal();
             return this;
@@ -1587,6 +1612,12 @@ namespace ServiceStack.OrmLite
                 }
             }
 
+            var methodCallExpr = arg as MethodCallExpression;
+            var mi = methodCallExpr != null ? methodCallExpr.Method : null;
+            var declareType = mi != null && mi.DeclaringType != null ? mi.DeclaringType : null;
+            if (declareType != null && declareType.Name == "Sql" && mi.Name != "Desc" && mi.Name != "Asc" && mi.Name != "As" && mi.Name != "AllFields") 
+                return new PartialSqlString(expr + " AS " + member.Name); // new { Count = Sql.Count("*") }
+
             return expr;
         }
 
@@ -2040,6 +2071,13 @@ namespace ServiceStack.OrmLite
                     break;
                 case "CountDistinct":
                     statement = string.Format("COUNT(DISTINCT {0})", quotedColName);
+                    break;
+                case "AllFields":
+                    var argDef = m.Arguments[0].Type.GetModelMetadata();
+                    statement = DialectProvider.GetQuotedTableName(argDef) + ".*";
+                    break;
+                case "JoinAlias":
+                    statement = args[0] + "." + quotedColName.ToString().RightPart('.');
                     break;
                 default:
                     throw new NotSupportedException();
