@@ -417,6 +417,51 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(target.Count, Is.EqualTo(1));
         }
 
+        [Test]
+        public void Can_Where_using_filter_with_ToString()
+        {
+            string filterText = "10";
+            int filterInt = 10;
+            
+            var q = Db.From<TestType>().Where(x => x.NullableIntCol.ToString() == filterText);
+            var target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(1));
+
+            q = Db.From<TestType>().Where(x => x.NullableIntCol.ToString() == null);
+            target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(1));
+
+            q = Db.From<TestType>().Where(x => x.NullableIntCol.ToString() == filterInt.ToString());
+            target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(1));
+            
+            q = Db.From<TestType>().Where(x => x.NullableIntCol.ToString() == "NotNumeric");
+            target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(0));
+
+            q = Db.From<TestType>().
+                Join<TestType2>().
+                Where( x => x.NullableIntCol.ToString() == filterText && x.TestType2ObjCol.NullableIntCol.ToString() == filterText);
+            target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(1));
+
+            q = Db.From<TestType>().
+                Join<TestType2>().
+                Where(x => x.NullableIntCol.ToString() == filterText && x.TestType2ObjCol.NullableIntCol.ToString() == "NotNumeric");
+            target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(0));
+
+            var filterText2 = "qwer";
+
+            q = Db.From<TestType>().Where(x => x.TextCol.ToString() == filterText2);
+            target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(1));
+
+            q = Db.From<TestType>().Where(x => x.NullableIntCol.ToString().EndsWith("0"));
+            target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(3));
+        }
+
         private int MethodReturningInt(int val)
         {
             return val;
