@@ -80,7 +80,7 @@ namespace ServiceStack.OrmLite.Sqlite
 
         protected override PartialSqlString ToConcatPartialString(List<Object> args)
         {
-            ;return new PartialSqlString(String.Join(" || ", args));
+            return new PartialSqlString(String.Join(" || ", args));
         }
     }
 }
