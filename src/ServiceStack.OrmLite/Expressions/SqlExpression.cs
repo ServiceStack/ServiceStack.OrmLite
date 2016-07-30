@@ -1720,8 +1720,12 @@ namespace ServiceStack.OrmLite
 
         private bool IsColumnAccess(MethodCallExpression m)
         {
-            if (m.Object != null && m.Object as MethodCallExpression != null)
-                return IsColumnAccess(m.Object as MethodCallExpression);
+            if (m.Object == null)
+                return false;
+            
+            var methCallExp = m.Object as MethodCallExpression;
+            if (methCallExp != null)
+                return IsColumnAccess(methCallExp);
 
             var exp = m.Object as MemberExpression;
             return IsParameterAccess(exp)
@@ -1930,14 +1934,11 @@ namespace ServiceStack.OrmLite
             return modelDef.FieldDefinitions.ConvertAll(r => r.Name);
         }
 
-        private bool IsStaticArrayMethod(MethodCallExpression m)
+        private static bool IsStaticArrayMethod(MethodCallExpression m)
         {
-            if (m.Object == null && m.Method.Name == "Contains")
-            {
-                return m.Arguments.Count == 2;
-            }
-
-            return false;
+            return (m.Object == null 
+                && m.Method.Name == "Contains"
+                && m.Arguments.Count == 2);
         }
 
         protected virtual object VisitStaticArrayMethodCall(MethodCallExpression m)
@@ -1959,17 +1960,13 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        private bool IsEnumerableMethod(MethodCallExpression m)
+        private static bool IsEnumerableMethod(MethodCallExpression m)
         {
-            if (m.Object != null
+            return (m.Object != null
                 && m.Object.Type.IsOrHasGenericInterfaceTypeOf(typeof(IEnumerable<>))
                 && m.Object.Type != typeof(string)
-                && m.Method.Name == "Contains")
-            {
-                return m.Arguments.Count == 1;
-            }
-
-            return false;
+                && m.Method.Name == "Contains"
+                && m.Arguments.Count == 1);
         }
 
         protected virtual object VisitEnumerableMethodCall(MethodCallExpression m)
@@ -2000,14 +1997,10 @@ namespace ServiceStack.OrmLite
             return new PartialSqlString(statement);
         }
 
-        private bool IsStaticStringMethod(MethodCallExpression m)
+        private static bool IsStaticStringMethod(MethodCallExpression m)
         {
-            if (m.Object == null && m.Method.Name == "Concat")
-            {
-                return true;
-            }
-
-            return false;
+            return (m.Object == null 
+                && m.Method.Name == "Concat");
         }
 
         protected virtual object VisitStaticStringMethodCall(MethodCallExpression m)
@@ -2051,7 +2044,6 @@ namespace ServiceStack.OrmLite
                 case "In":
                     statement = ConvertInExpressionToSql(m, quotedColName);
                     break;
-
                 case "Desc":
                     statement = string.Format("{0} DESC", quotedColName);
                     break;
