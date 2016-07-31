@@ -74,7 +74,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        public IDbCommand Exec(IDbConnection dbConn, Func<IDbCommand, IDbCommand> filter)
+        public virtual IDbCommand Exec(IDbConnection dbConn, Func<IDbCommand, IDbCommand> filter)
         {
             var dbCmd = CreateCommand(dbConn);
             var ret = filter(dbCmd);
@@ -117,7 +117,7 @@ namespace ServiceStack.OrmLite
                 });
         }
 
-        public Task<IDbCommand> Exec(IDbConnection dbConn, Func<IDbCommand, Task<IDbCommand>> filter)
+        public virtual Task<IDbCommand> Exec(IDbConnection dbConn, Func<IDbCommand, Task<IDbCommand>> filter)
         {
             var dbCmd = CreateCommand(dbConn);
 
