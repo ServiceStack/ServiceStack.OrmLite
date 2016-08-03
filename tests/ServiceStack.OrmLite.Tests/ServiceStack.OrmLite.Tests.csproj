@@ -131,6 +131,7 @@
     <Compile Include="Issues\BelongsToIssue.cs" />
     <Compile Include="Issues\CanBuildExpressionWithAbstractType.cs" />
     <Compile Include="Issues\ColumnGuessingTests.cs" />
+    <Compile Include="Issues\SimpleInsertSelectBenchmark.cs" />
     <Compile Include="Issues\JoinBoolSqlServerIssue.cs" />
     <Compile Include="Issues\LoadReferencesFKandSelfRefIssue.cs" />
     <Compile Include="Issues\MergingNestedSqlExpressionIssue.cs" />
