@@ -14,7 +14,7 @@ namespace ServiceStack.OrmLite
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(OrmLiteResultsFilterExtensions));
 
-        internal static int ExecNonQuery(this IDbCommand dbCmd, string sql, object anonType = null)
+        public static int ExecNonQuery(this IDbCommand dbCmd, string sql, object anonType = null)
         {
             if (anonType != null)
                 dbCmd.SetParameters(anonType.ToObjectDictionary(), (bool)false);
@@ -32,7 +32,7 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecuteNonQuery();
         }
 
-        internal static int ExecNonQuery(this IDbCommand dbCmd, string sql, Dictionary<string, object> dict)
+        public static int ExecNonQuery(this IDbCommand dbCmd, string sql, Dictionary<string, object> dict)
         {
 
             if (dict != null)
@@ -51,7 +51,7 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecuteNonQuery();
         }
 
-        internal static int ExecNonQuery(this IDbCommand dbCmd)
+        public static int ExecNonQuery(this IDbCommand dbCmd)
         {
             if (Log.IsDebugEnabled)
                 Log.DebugCommand(dbCmd);
