@@ -7,6 +7,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.Converters;
 using ServiceStack.OrmLite.Oracle.Converters;
 using ServiceStack.Text;
@@ -426,7 +427,7 @@ namespace ServiceStack.OrmLite.Oracle
             if (value == null || value is DBNull)
                 return null;
 
-            if (type.IsEnum)
+            if (type.IsEnum && !type.HasAttribute<EnumAsIntAttribute>())
                 return EnumConverter.ToDbValue(type, value);
 
             if (type.IsRefType())
