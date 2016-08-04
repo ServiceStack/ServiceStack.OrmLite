@@ -138,7 +138,7 @@ namespace ServiceStack.OrmLite
                 }
                 foreach (var f in FieldDefinitionsArray)
                 {
-                    if (f.FieldName == fieldName)
+                    if (f.Name == fieldName)
                         return f;
                 }
                 foreach (var f in FieldDefinitionsWithAliases)
@@ -148,7 +148,7 @@ namespace ServiceStack.OrmLite
                 }
                 foreach (var f in FieldDefinitionsArray)
                 {
-                    if (string.Equals(f.FieldName, fieldName, StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(f.Name, fieldName, StringComparison.OrdinalIgnoreCase))
                         return f;
                 }
             }
