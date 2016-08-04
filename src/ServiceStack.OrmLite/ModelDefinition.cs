@@ -79,6 +79,12 @@ namespace ServiceStack.OrmLite
             get { return fieldDefinitionsArray; }
         }
 
+        private FieldDefinition[] fieldDefinitionsWithAliases;
+        public FieldDefinition[] FieldDefinitionsWithAliases
+        {
+            get { return fieldDefinitionsWithAliases; }
+        }
+
         public List<FieldDefinition> IgnoredFieldDefinitions { get; set; }
 
         private FieldDefinition[] ignoredFieldDefinitionsArray;
@@ -125,14 +131,24 @@ namespace ServiceStack.OrmLite
         {
             if (fieldName != null)
             {
-                foreach (var f in FieldDefinitionsArray)
+                foreach (var f in FieldDefinitionsWithAliases)
                 {
-                    if (f.Name == fieldName)
+                    if (f.Alias == fieldName)
                         return f;
                 }
                 foreach (var f in FieldDefinitionsArray)
                 {
-                    if (string.Equals(f.Name, fieldName, StringComparison.OrdinalIgnoreCase))
+                    if (f.FieldName == fieldName)
+                        return f;
+                }
+                foreach (var f in FieldDefinitionsWithAliases)
+                {
+                    if (string.Equals(f.Alias, fieldName, StringComparison.OrdinalIgnoreCase))
+                        return f;
+                }
+                foreach (var f in FieldDefinitionsArray)
+                {
+                    if (string.Equals(f.FieldName, fieldName, StringComparison.OrdinalIgnoreCase))
                         return f;
                 }
             }
@@ -142,6 +158,8 @@ namespace ServiceStack.OrmLite
         public void AfterInit()
         {
             fieldDefinitionsArray = FieldDefinitions.ToArray();
+            fieldDefinitionsWithAliases = FieldDefinitions.Where(x => x.Alias != null).ToArray();
+
             ignoredFieldDefinitionsArray = IgnoredFieldDefinitions.ToArray();
 
             var allItems = new List<FieldDefinition>(FieldDefinitions);
