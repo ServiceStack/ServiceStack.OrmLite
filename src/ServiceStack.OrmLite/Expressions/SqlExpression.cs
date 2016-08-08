@@ -2155,79 +2155,58 @@ namespace ServiceStack.OrmLite
                     statement = string.Format("lower({0})", quotedColName);
                     break;
                 case "StartsWith":
-                    if (!OrmLiteConfig.StripUpperInLike)
-                    {
-                        statement = string.Format("upper({0}) like {1}{2}",
+                    statement = !OrmLiteConfig.StripUpperInLike
+                        ? string.Format("upper({0}) like {1}{2}",
                             quotedColName,
                             ConvertToParam(wildcardArg.ToUpper() + "%"),
-                            escapeSuffix);
-                    }
-                    else
-                    {
-                        statement = string.Format("{0} like {1}{2}",
+                            escapeSuffix)
+                        : string.Format("{0} like {1}{2}",
                             quotedColName,
                             ConvertToParam(wildcardArg + "%"),
                             escapeSuffix);
-                    }
                     break;
                 case "EndsWith":
-                    if (!OrmLiteConfig.StripUpperInLike)
-                    {
-                        statement = string.Format("upper({0}) like {1}{2}",
+                    statement = !OrmLiteConfig.StripUpperInLike
+                        ? string.Format("upper({0}) like {1}{2}",
                             quotedColName,
                             ConvertToParam("%" + wildcardArg.ToUpper()),
-                            escapeSuffix);
-                    }
-                    else
-                    {
-                        statement = string.Format("{0} like {1}{2}",
+                            escapeSuffix)
+                        : string.Format("{0} like {1}{2}",
                             quotedColName,
                             ConvertToParam("%" + wildcardArg),
                             escapeSuffix);
-                    }
                     break;
                 case "Contains":
-                    if (!OrmLiteConfig.StripUpperInLike)
-                    {
-                        statement = string.Format("upper({0}) like {1}{2}",
+                    statement = !OrmLiteConfig.StripUpperInLike
+                        ? string.Format("upper({0}) like {1}{2}",
                             quotedColName,
                             ConvertToParam("%" + wildcardArg.ToUpper() + "%"),
-                            escapeSuffix);
-                    }
-                    else
-                    {
-                        statement = string.Format("{0} like {1}{2}",
+                            escapeSuffix)
+                        : string.Format("{0} like {1}{2}",
                             quotedColName,
                             ConvertToParam("%" + wildcardArg + "%"),
                             escapeSuffix);
-                    }
                     break;
                 case "Substring":
                     var startIndex = int.Parse(args[0].ToString()) + 1;
-                    if (args.Count == 2)
-                    {
-                        var length = int.Parse(args[1].ToString());
-                        statement = GetSubstringSql(quotedColName, startIndex, length);
-                    }
-                    else
-                    {
-                        statement = GetSubstringSql(quotedColName, startIndex);
-                    }
+                    statement = args.Count == 2 
+                        ? GetSubstringSql(quotedColName, startIndex, int.Parse(args[1].ToString())) 
+                        : GetSubstringSql(quotedColName, startIndex);
                     break;
                 case "ToString":
-                    if (m.Object.Type == typeof(string))
-                    {
-                        statement = string.Format("({0})", quotedColName);
-                    }
-                    else
-                    {
-                        statement = string.Format("cast({0} as varchar(1000))", quotedColName);
-                    }
+                    statement = m.Object.Type == typeof(string) 
+                        ? string.Format("({0})", quotedColName) 
+                        : ToCast(quotedColName.ToString());
                     break;
                 default:
                     throw new NotSupportedException();
             }
             return new PartialSqlString(statement);
+        }
+
+        protected virtual string ToCast(string quotedColName)
+        {
+            return string.Format("cast({0} as varchar(1000))", quotedColName);
         }
 
         public virtual string GetSubstringSql(object quotedColumn, int startIndex, int? length = null)
