@@ -555,6 +555,15 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Executes a raw sql non-query using a parameterized query with a dbCmd filter. E.g:
+        /// </summary>
+        /// <returns>number of rows affected</returns>
+        public static int ExecuteNonQuery(this IDbConnection dbConn, string sql, Action<IDbCommand> dbCmdFilter)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.ExecNonQuery(sql, dbCmdFilter));
+        }
+
+        /// <summary>
         /// Returns results from a Stored Procedure, using a parameterized query.
         /// </summary>
         public static List<TOutputModel> SqlProcedure<TOutputModel>(this IDbConnection dbConn, object anonType)
