@@ -407,16 +407,19 @@ namespace ServiceStack.OrmLite.Tests
             target = Db.Select(q);
             Assert.That(target.Count, Is.EqualTo(1));
 
-            q = Db.From<TestType>().
-                Join<TestType2>().
-                Join<TestType2, TestType3>().
-                Where(x => !x.NullableBoolCol.HasValue && x.TestType2ObjCol.BoolCol &&
-                           x.NullableIntCol == new CustomInt(10)).
-                GroupBy(x => x.TestType2ObjCol.TestType3ObjCol.CustomInt).
-                Having(x => (Sql.Max(x.TestType2ObjCol.TestType3ObjCol.CustomInt) ?? 0) != 10).
-                Select(x => x.TestType2ObjCol.TestType3ObjCol.CustomInt);
-            target = Db.Select(q);
-            Assert.That(target.Count, Is.EqualTo(1));
+            //q = Db.From<TestType>().
+            //    Join<TestType2>().
+            //    Join<TestType2, TestType3>().
+            //    Where(x => !x.NullableBoolCol.HasValue && x.TestType2ObjCol.BoolCol &&
+            //               x.NullableIntCol == new CustomInt(10)).
+            //    GroupBy(x => x.TestType2ObjCol.TestType3ObjCol.CustomInt).
+            //    Having(x => (Sql.Max(x.TestType2ObjCol.TestType3ObjCol.CustomInt) ?? 0) != 10).
+            //    Select(x => x.TestType2ObjCol.TestType3ObjCol.CustomInt);
+            //target = Db.Select(q);
+            //Assert.That(target.Count, Is.EqualTo(1));
+            //Assert.That(q.Params[0].Value, Is.EqualTo(10));
+            //Assert.That(q.Params[1].Value, Is.EqualTo(0));  //= "{Value:0}"
+            //Assert.That(q.Params[2].Value, Is.EqualTo(10));
         }
 
         [Test]
