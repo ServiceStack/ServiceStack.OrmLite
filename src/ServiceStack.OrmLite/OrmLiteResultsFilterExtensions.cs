@@ -62,6 +62,21 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecuteNonQuery();
         }
 
+        public static int ExecNonQuery(this IDbCommand dbCmd, string sql, Action<IDbCommand> dbCmdFilter)
+        {
+            if (dbCmdFilter != null) dbCmdFilter(dbCmd);
+
+            dbCmd.CommandText = sql;
+
+            if (Log.IsDebugEnabled)
+                Log.DebugCommand(dbCmd);
+
+            if (OrmLiteConfig.ResultsFilter != null)
+                return OrmLiteConfig.ResultsFilter.ExecuteSql(dbCmd);
+
+            return dbCmd.ExecuteNonQuery();
+        }
+
         public static List<T> ConvertToList<T>(this IDbCommand dbCmd, string sql = null)
         {
             if (sql != null)
