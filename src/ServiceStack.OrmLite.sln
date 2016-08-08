@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{6CEB3EDE-9F02-4F4F-BD8A-1B2939C1AE6E}"
 	ProjectSection(SolutionItems) = preProject
@@ -63,6 +63,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "T4", "T4", "{ACB237F8-B931-
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Signed", "Signed", "{4A755D3C-CE48-4DB1-BF29-90A696ACD71B}"
 	ProjectSection(SolutionItems) = preProject
+		..\NuGet.Signed\ServiceStack.OrmLite.MySql.Signed\servicestack.ormlite.mysql.signed.nuspec = ..\NuGet.Signed\ServiceStack.OrmLite.MySql.Signed\servicestack.ormlite.mysql.signed.nuspec
 		..\NuGet.Signed\ServiceStack.OrmLite.Oracle.Signed\servicestack.ormlite.oracle.signed.nuspec = ..\NuGet.Signed\ServiceStack.OrmLite.Oracle.Signed\servicestack.ormlite.oracle.signed.nuspec
 		..\NuGet.Signed\ServiceStack.OrmLite.Signed\servicestack.ormlite.signed.nuspec = ..\NuGet.Signed\ServiceStack.OrmLite.Signed\servicestack.ormlite.signed.nuspec
 		..\NuGet.Signed\ServiceStack.OrmLite.SqlServer.Converters.Signed\servicestack.ormlite.sqlserver.converters.signed.nuspec = ..\NuGet.Signed\ServiceStack.OrmLite.SqlServer.Converters.Signed\servicestack.ormlite.sqlserver.converters.signed.nuspec
