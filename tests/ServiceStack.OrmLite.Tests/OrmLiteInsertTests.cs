@@ -227,6 +227,8 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_InsertOnly_selected_fields()
         {
+            SuppressIfOracle("Need trigger for autoincrement keys to work in Oracle");
+
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<PersonWithAutoId>();
@@ -258,6 +260,8 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_InsertOnly_selected_fields_using_AssignmentExpression()
         {
+            SuppressIfOracle("Need trigger for autoincrement keys to work in Oracle");
+
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<PersonWithAutoId>();
