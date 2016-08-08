@@ -371,16 +371,18 @@ namespace ServiceStack.OrmLite.Tests
             var target = Db.Select(q);
             Assert.That(target.Count, Is.EqualTo(2));
 
+            var minDate = new DateTime(1900, 01, 01);
+
             q = Db.From<TestType>().
                 Join<TestType2>().
-                Where(x => x.TestType2ObjCol.BoolCol && x.DateCol != DateTime.MinValue);
+                Where(x => x.TestType2ObjCol.BoolCol && x.DateCol != minDate);
             target = Db.Select(q);
             Assert.That(target.Count, Is.EqualTo(2));
 
             q = Db.From<TestType>().
                 Join<TestType2>().
                 Where(x => x.TestType2ObjCol.BoolCol && x.TestType2ObjCol.BoolCol == nullableTrue &&
-                           x.DateCol != DateTime.MinValue && x.TestType2ObjCol.TestType2Name == filterText2);
+                           x.DateCol != minDate && x.TestType2ObjCol.TestType2Name == filterText2);
             target = Db.Select(q);
             Assert.That(target.Count, Is.EqualTo(1));
 
