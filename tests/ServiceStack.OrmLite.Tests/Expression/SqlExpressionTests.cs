@@ -96,9 +96,9 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 // Now group by all columns without listing them - effectively "SELECT DISTINCT *"
 
                 query = db.From<LetterFrequency>()
-                  .Select(x => new { x.Id })
                   .Where(q => q.Letter != "D")
-                  .GroupBy(x => new { x });
+                  .GroupBy(x => new { x })
+                  .Select(x => new { x.Id });
 
                 var list = db.SqlList<int>(query);
                 Assert.That(list, Is.EquivalentTo(new[] { 1, 2, 3, 4, 5, 6 }));

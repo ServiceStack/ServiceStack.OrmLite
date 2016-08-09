@@ -110,7 +110,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
                     .LeftJoin<ContactIssue>((s,c) => s.SellerId == c.Id, db.JoinAlias("seller"))
                     .LeftJoin<ContactIssue>((s,c) => s.BuyerId == c.Id, db.JoinAlias("buyer"))
                     .Select<Sale, ContactIssue>((s,c) => new {
-                        sale = Sql.AllFields(s),
+                        s,
                         BuyerFirstName = Sql.JoinAlias(c.FirstName, "buyer"),
                         BuyerLastName = Sql.JoinAlias(c.LastName, "buyer"),
                         SellerFirstName = Sql.JoinAlias(c.FirstName, "seller"),
