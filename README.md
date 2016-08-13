@@ -182,6 +182,13 @@ We've also added a
 as it's a common use-case to swapout to use Sqlite's in-memory provider for faster tests. 
 But as Sqlite doesn't provide async API's under-the-hood we fallback to *pseudo async* support where we just wrap its synchronous responses in `Task` results. 
 
+## [OrmLite Interactive Tour](http://gistlyn.com/ormlite)
+
+The best way to learn about OrmLite is to take the [OrmLite Interactive Tour](http://gistlyn.com/ormlite)
+on Gistlyn which lets you try out and explore OrmLite features from the comfort of your own browser:
+
+[![](https://raw.githubusercontent.com/ServiceStack/Assets/master/img/livedemos/gistlyn/ormlite-screenshot.png)](http://gistlyn.com/ormlite)
+
 ## Nested Typed Sub SqlExpressions
 
 The `Sql.In()` API supports nesting and combining of multiple Typed SQL Expressions together 
@@ -229,6 +236,14 @@ db.Select<Author>(x => x.Name.Contains("Benedict"));
 
 ```csharp
 db.Select<Author>(x => x.Rate == 10 && x.City == "Mexico");
+```
+
+```csharp
+db.Select<Author>(x => x.Rate.ToString() == "10"); //impicit string casting
+```
+
+```csharp
+db.Select<Author>(x => "Rate " + x.Rate == "Rate 10"); //server string concatenation
 ```
 
 ### Convenient common usage data access patterns 
@@ -1078,6 +1093,73 @@ var customerWithAddress = db.LoadSingleById<Customer>(customer.Id, include: new[
 
 //Alternative
 var customerWithAddress = db.LoadSingleById<Customer>(customer.Id, include: x => new { x.PrimaryAddress });
+```
+
+### Custom Select with JOIN
+
+You can specify SQL Aliases for ambiguous columns using anonymous properties, e.g:
+
+```csharp
+var q = db.From<Table>()
+    .Join<JoinedTable>()
+    .Select<Table, JoinedTable>((a, b) => new { a, JoinId = b.Id, JoinName = b.Name });
+```
+
+Which is roughly equivalent to:
+
+    SELECT a.*, b.Id AS JoinId, b.Name AS JoinName
+
+Where it selects all columns from the primary `Table` as well as `Id` and `Name` columns from `JoinedTable,` 
+returning them in the `JoinId` and `JoinName` custom aliases.
+
+### Nested JOIN Table Expressions
+
+You can also query POCO References on JOIN tables, e.g:
+
+```csharp
+var q = db.From<Table>()
+    .Join<Join1>()
+    .Join<Join1, Join2>()
+    .Where(x => !x.IsValid.HasValue && 
+        x.Join1.IsValid &&
+        x.Join1.Join2.Name == theName &&
+        x.Join1.Join2.IntValue == intValue)
+    .GroupBy(x => x.Join1.Join2.IntValue)
+    .Having(x => Sql.Max(x.Join1.Join2.IntValue) != 10)
+    .Select(x => x.Join1.Join2.IntValue);
+```
+
+### JOIN aliases
+
+You can specify join aliases when joining multiple of the same table together, e.g:
+
+```csharp
+var q = db.From<Sale>()
+    .LeftJoin<ContactIssue>((s,c) => s.SellerId == c.Id, db.JoinAlias("seller"))
+    .LeftJoin<ContactIssue>((s,c) => s.BuyerId == c.Id, db.JoinAlias("buyer"))
+    .Select<Sale, ContactIssue>((s,c) => new {
+        s,
+        BuyerFirstName = Sql.JoinAlias(c.FirstName, "buyer"),
+        BuyerLastName = Sql.JoinAlias(c.LastName, "buyer"),
+        SellerFirstName = Sql.JoinAlias(c.FirstName, "seller"),
+        SellerLastName = Sql.JoinAlias(c.LastName, "seller"),
+    });
+```
+
+### SQL Server Table Hints
+
+Using the same JOIN Filter feature OrmLite also lets you add SQL Server Hints on JOIN Table expressions, e.g:
+
+```csharp
+var q = db.From<Car>()
+    .Join<Car, CarType>((c, t) => c.CarId == t.CarId, SqlServerTableHint.ReadUncommitted);
+```
+
+Which emits the appropriate SQL Server hints:
+
+```sql
+SELECT "Car"."CarId", "CarType"."CarTypeName" 
+FROM "Car" INNER JOIN "CarType" WITH (READUNCOMMITTED) ON ("Car"."CarId" = "CarType"."CarId")
 ```
 
 ## Optimistic Concurrency
