@@ -126,6 +126,14 @@ using (var db = dbFactory.Open())
 }
 ```
 
+## [OrmLite Interactive Tour](http://gistlyn.com/ormlite)
+
+The best way to learn about OrmLite is to take the [OrmLite Interactive Tour](http://gistlyn.com/ormlite)
+which lets you try out and explore different OrmLite features immediately from the comfort of your own 
+browser without needing to install anything:
+
+[![](https://raw.githubusercontent.com/ServiceStack/Assets/master/img/ormlite/ormlite-tour.png)](http://gistlyn.com/ormlite)
+
 ## [Type Converters](https://github.com/ServiceStack/ServiceStack.OrmLite/wiki/OrmLite-Type-Converters)
 
 You can customize, enhance or replace how OrmLite handles specific .NET Types with the new 
@@ -181,24 +189,6 @@ We've also added a
 [.NET 4.5 build for Sqlite](https://www.nuget.org/packages/ServiceStack.OrmLite.Sqlite.Mono) 
 as it's a common use-case to swapout to use Sqlite's in-memory provider for faster tests. 
 But as Sqlite doesn't provide async API's under-the-hood we fallback to *pseudo async* support where we just wrap its synchronous responses in `Task` results. 
-
-## [OrmLite Interactive Tour](http://gistlyn.com/ormlite)
-
-The best way to learn about OrmLite is to take the [OrmLite Interactive Tour](http://gistlyn.com/ormlite)
-on Gistlyn which lets you try out and explore OrmLite features from the comfort of your own browser:
-
-[![](https://raw.githubusercontent.com/ServiceStack/Assets/master/img/livedemos/gistlyn/ormlite-screenshot.png)](http://gistlyn.com/ormlite)
-
-## Nested Typed Sub SqlExpressions
-
-The `Sql.In()` API supports nesting and combining of multiple Typed SQL Expressions together 
-in a single SQL Query, e.g:
-  
-```csharp
-var usaCustomerIds = db.From<Customer>(c => c.Country == "USA").Select(c => c.Id);
-var usaCustomerOrders = db.Select(db.From<Order>()
-    .Where(x => Sql.In(x.CustomerId, usaCustomerIds)));
-``` 
 
 # API Examples
 
@@ -1131,7 +1121,8 @@ var q = db.From<Table>()
 
 ### JOIN aliases
 
-You can specify join aliases when joining multiple of the same table together, e.g:
+You can specify join aliases when joining same table multiple times together to differentiate from any 
+ambiguous columns, e.g:
 
 ```csharp
 var q = db.From<Sale>()
@@ -1161,6 +1152,17 @@ Which emits the appropriate SQL Server hints:
 SELECT "Car"."CarId", "CarType"."CarTypeName" 
 FROM "Car" INNER JOIN "CarType" WITH (READUNCOMMITTED) ON ("Car"."CarId" = "CarType"."CarId")
 ```
+
+## Nested Typed Sub SqlExpressions
+
+The `Sql.In()` API supports nesting and combining of multiple Typed SQL Expressions together 
+in a single SQL Query, e.g:
+  
+```csharp
+var usaCustomerIds = db.From<Customer>(c => c.Country == "USA").Select(c => c.Id);
+var usaCustomerOrders = db.Select(db.From<Order>()
+    .Where(x => Sql.In(x.CustomerId, usaCustomerIds)));
+``` 
 
 ## Optimistic Concurrency
 
