@@ -107,9 +107,9 @@
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ServiceStack.OrmLiteV45\ServiceStack.OrmLiteV45.csproj">
-      <Project>{fdc37335-9ecc-413b-bec5-16b466b0e689}</Project>
-      <Name>ServiceStack.OrmLiteV45</Name>
+    <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj">
+      <Project>{96179ac6-f6f1-40c3-9fdd-4f6582f54c5c}</Project>
+      <Name>ServiceStack.OrmLite</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

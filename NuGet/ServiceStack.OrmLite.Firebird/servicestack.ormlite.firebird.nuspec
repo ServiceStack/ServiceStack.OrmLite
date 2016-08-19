@@ -3,7 +3,7 @@
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>ServiceStack.OrmLite.Firebird</id>
     <title>OrmLite.FireBird - Fast, code-first, config-free Poco ORM</title>
-    <version>4.0.0</version>
+    <version>4.5.0</version>
     <authors>Service Stack, Angel Colmenares</authors> 
     <owners>Service Stack, Angel Colmenares</owners>
     <description>
@@ -18,7 +18,7 @@
     <language>en-US</language> 
     <copyright>Copyright 2016 Service Stack</copyright>
     <dependencies>
-      <dependency id="ServiceStack.OrmLite" version="4.0" />
+      <dependency id="ServiceStack.OrmLite" version="4.5" />
       <dependency id="FirebirdSql.Data.FirebirdClient" version="4.10.0.0" />
     </dependencies> 
   </metadata> 

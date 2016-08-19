@@ -111,25 +111,25 @@
     <Compile Include="UseCase\CustomerOrdersUseCase.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.MySqlV45\ServiceStack.OrmLite.MySqlV45.csproj">
-      <Project>{d1858737-fc4f-4432-8725-e5b79a13d5f6}</Project>
-      <Name>ServiceStack.OrmLite.MySqlV45</Name>
+    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.MySql\ServiceStack.OrmLite.MySql.csproj">
+      <Project>{fd20f088-acc0-4979-ac0c-8c541c2e7de5}</Project>
+      <Name>ServiceStack.OrmLite.MySql</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.PostgreSqlV45\ServiceStack.OrmLite.PostgreSQLV45.csproj">
-      <Project>{bfeafa30-e59e-4de7-af0e-b3f1c49289eb}</Project>
-      <Name>ServiceStack.OrmLite.PostgreSQLV45</Name>
+    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.PostgreSQL\ServiceStack.OrmLite.PostgreSQL.csproj">
+      <Project>{3220f088-bdd0-6979-ac0c-8c541c2e7de5}</Project>
+      <Name>ServiceStack.OrmLite.PostgreSQL</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.SqliteV45\ServiceStack.OrmLite.SqliteV45.csproj">
-      <Project>{30c0c876-abcb-441b-bfd4-aa9f688d9e54}</Project>
-      <Name>ServiceStack.OrmLite.SqliteV45</Name>
+    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Sqlite\ServiceStack.OrmLite.Sqlite.csproj">
+      <Project>{cf68a37d-d071-469d-ae04-68594cb95382}</Project>
+      <Name>ServiceStack.OrmLite.Sqlite</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.SqlServerV45\ServiceStack.OrmLite.SqlServerV45.csproj">
-      <Project>{6f851563-08f6-4692-89f8-f1d6c86f0069}</Project>
-      <Name>ServiceStack.OrmLite.SqlServerV45</Name>
+    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.SqlServer\ServiceStack.OrmLite.SqlServer.csproj">
+      <Project>{1887dc99-9139-43e3-a7aa-6d74714b3a5d}</Project>
+      <Name>ServiceStack.OrmLite.SqlServer</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\src\ServiceStack.OrmLiteV45\ServiceStack.OrmLiteV45.csproj">
-      <Project>{fdc37335-9ecc-413b-bec5-16b466b0e689}</Project>
-      <Name>ServiceStack.OrmLiteV45</Name>
+    <ProjectReference Include="..\..\src\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj">
+      <Project>{96179ac6-f6f1-40c3-9fdd-4f6582f54c5c}</Project>
+      <Name>ServiceStack.OrmLite</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
