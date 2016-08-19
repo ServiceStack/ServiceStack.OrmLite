@@ -347,7 +347,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
             return (NpgsqlDataReader)reader;
         }
 
-#if NET45
+#if ASYNC
         public override Task OpenAsync(IDbConnection db, CancellationToken token)
         {
             return Unwrap(db).OpenAsync(token);

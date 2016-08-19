@@ -233,7 +233,7 @@ namespace ServiceStack.OrmLite.MySql
             return (MySqlDataReader)reader;
         }
 
-#if NET45
+#if ASYNC
         public override Task OpenAsync(IDbConnection db, CancellationToken token)
         {
             return Unwrap(db).OpenAsync(token);

@@ -372,7 +372,7 @@ namespace ServiceStack.OrmLite.SqlServer
             return (SqlDataReader)reader;
         }
 
-#if NET45
+#if ASYNC
         public override Task OpenAsync(IDbConnection db, CancellationToken token)
         {
             return Unwrap(db).OpenAsync(token);

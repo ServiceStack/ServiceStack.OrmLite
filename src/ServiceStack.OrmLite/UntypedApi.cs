@@ -66,7 +66,7 @@ namespace ServiceStack.OrmLite
             return Exec(dbCmd => dbCmd.Save((T)obj));
         }
 
-#if NET45
+#if ASYNC
         public Task<int> SaveAllAsync(IEnumerable objs, CancellationToken token)
         {
             return Exec(dbCmd => dbCmd.SaveAllAsync((IEnumerable<T>)objs, token));

@@ -1600,7 +1600,7 @@ namespace ServiceStack.OrmLite
             return reader.Read().InTask();
         }
 
-#if NET45
+#if ASYNC
         public virtual async Task<List<T>> ReaderEach<T>(IDataReader reader, Func<T> fn, CancellationToken token = default(CancellationToken))
         {
             try

@@ -98,7 +98,7 @@ namespace ServiceStack.OrmLite.Support
         }
     }
 
-#if NET45
+#if ASYNC
     internal class LoadReferencesAsync<T> : LoadReferences<T>
     {
         public LoadReferencesAsync(IDbCommand dbCmd, T instance)

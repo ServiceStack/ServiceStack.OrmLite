@@ -1,4 +1,4 @@
-#if NET45
+#if ASYNC
 using System;
 using System.Data;
 using System.Linq.Expressions;
