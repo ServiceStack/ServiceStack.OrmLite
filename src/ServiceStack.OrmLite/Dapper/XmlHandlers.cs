@@ -1,7 +1,7 @@
 ﻿using System.Data;
 using System.Xml;
+//using System.Xml.Linq;
 
-//Apache 2.0 License: https://github.com/StackExchange/dapper-dot-net/blob/master/License.txt
 namespace ServiceStack.OrmLite.Dapper
 {
     internal abstract class XmlTypeHandler<T> : SqlMapper.StringTypeHandler<T>
@@ -20,9 +20,16 @@ namespace ServiceStack.OrmLite.Dapper
             doc.LoadXml(xml);
             return doc;
         }
-        protected override string Format(XmlDocument xml)
-        {
-            return xml.OuterXml;
-        }
+        protected override string Format(XmlDocument xml) => xml.OuterXml;
     }
+    //internal sealed class XDocumentHandler : XmlTypeHandler<XDocument>
+    //{
+    //    protected override XDocument Parse(string xml) => XDocument.Parse(xml);
+    //    protected override string Format(XDocument xml) => xml.ToString();
+    //}
+    //internal sealed class XElementHandler : XmlTypeHandler<XElement>
+    //{
+    //    protected override XElement Parse(string xml) => XElement.Parse(xml);
+    //    protected override string Format(XElement xml) => xml.ToString();
+    //}
 }

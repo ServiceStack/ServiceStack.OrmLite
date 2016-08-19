@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 
-//Apache 2.0 License: https://github.com/StackExchange/dapper-dot-net/blob/master/License.txt
 namespace ServiceStack.OrmLite.Dapper
 {
     partial class SqlMapper
@@ -11,14 +10,11 @@ namespace ServiceStack.OrmLite.Dapper
             string[] fieldNames;
             readonly Dictionary<string, int> fieldNameLookup;
 
-            internal string[] FieldNames
-            {
-                get { return fieldNames; }
-            }
+            internal string[] FieldNames => fieldNames;
 
             public DapperTable(string[] fieldNames)
             {
-                if (fieldNames == null) throw new ArgumentNullException("fieldNames");
+                if (fieldNames == null) throw new ArgumentNullException(nameof(fieldNames));
                 this.fieldNames = fieldNames;
 
                 fieldNameLookup = new Dictionary<string, int>(fieldNames.Length, StringComparer.Ordinal);
@@ -37,7 +33,7 @@ namespace ServiceStack.OrmLite.Dapper
             }
             internal int AddField(string name)
             {
-                if (name == null) throw new ArgumentNullException("name");
+                if (name == null) throw new ArgumentNullException(nameof(name));
                 if (fieldNameLookup.ContainsKey(name)) throw new InvalidOperationException("Field already exists: " + name);
                 int oldLen = fieldNames.Length;
                 Array.Resize(ref fieldNames, oldLen + 1); // yes, this is sub-optimal, but this is not the expected common case
@@ -46,15 +42,9 @@ namespace ServiceStack.OrmLite.Dapper
                 return oldLen;
             }
             
-            internal bool FieldExists(string key)
-            {
-                return key != null && fieldNameLookup.ContainsKey(key);
-            }
+            internal bool FieldExists(string key) => key != null && fieldNameLookup.ContainsKey(key);
 
-            public int FieldCount
-            {
-                get { return fieldNames.Length; }
-            }
+            public int FieldCount => fieldNames.Length;
         }
     }
 }

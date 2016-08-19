@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Data;
 
-//Apache 2.0 License: https://github.com/StackExchange/dapper-dot-net/blob/master/License.txt
 namespace ServiceStack.OrmLite.Dapper
 {
     /// <summary>
@@ -18,7 +17,7 @@ namespace ServiceStack.OrmLite.Dapper
         /// </summary>
         public static FeatureSupport Get(IDbConnection connection)
         {
-            string name = connection != null ? connection.GetType().Name : null;
+            string name = connection?.GetType().Name;
             if (string.Equals(name, "npgsqlconnection", StringComparison.OrdinalIgnoreCase)) return Postgres;
             return Default;
         }
@@ -29,6 +28,6 @@ namespace ServiceStack.OrmLite.Dapper
         /// <summary>
         /// True if the db supports array columns e.g. Postgresql
         /// </summary>
-        public bool Arrays { get; set; }
+        public bool Arrays { get; }
     }
 }

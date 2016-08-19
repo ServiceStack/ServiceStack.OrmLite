@@ -1,14 +1,9 @@
-﻿#if ASYNC
-#define ASYNC
-#endif
-
-using System;
+﻿using System;
 using System.Data;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
 
-//Apache 2.0 License: https://github.com/StackExchange/dapper-dot-net/blob/master/License.txt
 namespace ServiceStack.OrmLite.Dapper
 {
     /// <summary>
@@ -30,63 +25,53 @@ namespace ServiceStack.OrmLite.Dapper
 
         internal void OnCompleted()
         {
-            var p = Parameters as SqlMapper.IParameterCallbacks;
-            if (p != null) p.OnCompleted();
+            (Parameters as SqlMapper.IParameterCallbacks)?.OnCompleted();
         }
 
         /// <summary>
         /// The command (sql or a stored-procedure name) to execute
         /// </summary>
-        public string CommandText { get; private set; }
+        public string CommandText { get; }
 
         /// <summary>
         /// The parameters associated with the command
         /// </summary>
-        public object Parameters { get; private set; }
+        public object Parameters { get; }
 
         /// <summary>
         /// The active transaction for the command
         /// </summary>
-        public IDbTransaction Transaction { get; private set; }
+        public IDbTransaction Transaction { get; }
 
         /// <summary>
         /// The effective timeout for the command
         /// </summary>
-        public int? CommandTimeout { get; private set; }
+        public int? CommandTimeout { get; }
 
         /// <summary>
         /// The type of command that the command-text represents
         /// </summary>
-        public CommandType? CommandType { get; private set; }
+        public CommandType? CommandType { get; }
 
         /// <summary>
         /// Should data be buffered before returning?
         /// </summary>
-        public bool Buffered
-        {
-            get { return (Flags & CommandFlags.Buffered) != 0; }
-        }
+        public bool Buffered => (Flags & CommandFlags.Buffered) != 0;
 
         /// <summary>
         /// Should the plan for this query be cached?
         /// </summary>
-        internal bool AddToCache
-        {
-            get { return (Flags & CommandFlags.NoCache) == 0; }
-        }
+        internal bool AddToCache => (Flags & CommandFlags.NoCache) == 0;
 
         /// <summary>
         /// Additional state flags against this command
         /// </summary>
-        public CommandFlags Flags { get; set; }
+        public CommandFlags Flags { get; }
 
         /// <summary>
         /// Can async queries be pipelined?
         /// </summary>
-        public bool Pipelined
-        {
-            get { return (Flags & CommandFlags.Pipelined) != 0; }
-        }
+        public bool Pipelined => (Flags & CommandFlags.Pipelined) != 0;
 
         /// <summary>
         /// Initialize the command definition
@@ -96,7 +81,7 @@ namespace ServiceStack.OrmLite.Dapper
 #if ASYNC
                                  , CancellationToken cancellationToken = default(CancellationToken)
 #endif
-            ) : this()
+            )
         {
             CommandText = commandText;
             Parameters = parameters;
@@ -119,14 +104,14 @@ namespace ServiceStack.OrmLite.Dapper
         /// <summary>
         /// For asynchronous operations, the cancellation-token
         /// </summary>
-        public CancellationToken CancellationToken { get; private set; }
+        public CancellationToken CancellationToken { get; }
 #endif
 
         internal IDbCommand SetupCommand(IDbConnection cnn, Action<IDbCommand, object> paramReader)
         {
             var cmd = cnn.CreateCommand();
             var init = GetInit(cmd.GetType());
-            if (init != null) init(cmd);
+            init?.Invoke(cmd);
             if (Transaction != null)
                 cmd.Transaction = Transaction;
             cmd.CommandText = CommandText;
@@ -140,7 +125,7 @@ namespace ServiceStack.OrmLite.Dapper
             }
             if (CommandType.HasValue)
                 cmd.CommandType = CommandType.Value;
-            if (paramReader != null) paramReader(cmd, Parameters);
+            paramReader?.Invoke(cmd, Parameters);
             return cmd;
         }
 

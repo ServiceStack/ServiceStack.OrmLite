@@ -1,6 +1,5 @@
 ﻿using System.Threading;
 
-//Apache 2.0 License: https://github.com/StackExchange/dapper-dot-net/blob/master/License.txt
 namespace ServiceStack.OrmLite.Dapper
 {
     partial class SqlMapper
@@ -50,9 +49,9 @@ namespace ServiceStack.OrmLite.Dapper
                 Value = value;
                 Tail = tail;
             }
-            public TKey Key { get; set; }
-            public TValue Value { get; set; }
-            public Link<TKey, TValue> Tail { get; set; }
+            public TKey Key { get; }
+            public TValue Value { get; }
+            public Link<TKey, TValue> Tail { get; }
         }
     }
 }

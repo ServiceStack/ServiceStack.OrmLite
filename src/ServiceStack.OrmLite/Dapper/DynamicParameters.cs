@@ -10,7 +10,6 @@ using System.Reflection.Emit;
 using ApplicationException = System.InvalidOperationException;
 #endif
 
-//Apache 2.0 License: https://github.com/StackExchange/dapper-dot-net/blob/master/License.txt
 namespace ServiceStack.OrmLite.Dapper
 {
 
@@ -274,7 +273,7 @@ namespace ServiceStack.OrmLite.Dapper
                             p.DbType = dbType.Value;
                         }
                         var s = val as string;
-                        if ((s != null ? s.Length : (int?) null) <= DbString.DefaultLength)
+                        if (s?.Length <= DbString.DefaultLength)
                         {
                             p.Size = DbString.DefaultLength;
                         }
@@ -306,10 +305,7 @@ namespace ServiceStack.OrmLite.Dapper
         /// <summary>
         /// All the names of the param in the bag, use Get to yank them out
         /// </summary>
-        public IEnumerable<string> ParameterNames
-        {
-            get { return parameters.Select(p => p.Key); }
-        }
+        public IEnumerable<string> ParameterNames => parameters.Select(p => p.Key);
 
 
         /// <summary>
@@ -377,11 +373,11 @@ namespace ServiceStack.OrmLite.Dapper
             {
                 // Insert the names in the right order so expression
                 // "Post.Author.Name" becomes parameter "PostAuthorName"
-                names.Insert(0, diving != null ? diving.Member.Name : null);
+                names.Insert(0, diving?.Member.Name);
                 chain.Insert(0, diving);
 
-                var constant = diving != null ? diving.Expression as ParameterExpression : null;
-                diving = diving != null ? diving.Expression as MemberExpression : null;
+                var constant = diving?.Expression as ParameterExpression;
+                diving = diving?.Expression as MemberExpression;
 
                 if (constant != null &&
                     constant.Type == typeof(T))
@@ -407,7 +403,7 @@ namespace ServiceStack.OrmLite.Dapper
             if (setter != null) goto MAKECALLBACK;
 
             // Come on let's build a method, let's build it, let's build it now!
-            var dm = new DynamicMethod(String.Format("ExpressionParam{0}", Guid.NewGuid()), null, new[] { typeof(object), GetType() }, true);
+            var dm = new DynamicMethod("ExpressionParam" + Guid.NewGuid().ToString(), null, new[] { typeof(object), GetType() }, true);
             var il = dm.GetILGenerator();
 
             il.Emit(OpCodes.Ldarg_0); // [object]
@@ -462,7 +458,7 @@ namespace ServiceStack.OrmLite.Dapper
             {
                 // Finally, prep the parameter and attach the callback to it
                 ParamInfo parameter;
-                var targetMemberType = lastMemberAccess != null ? lastMemberAccess.Type : null;
+                var targetMemberType = lastMemberAccess?.Type;
                 int sizeToSet = (!size.HasValue && targetMemberType == typeof(string)) ? DbString.DefaultLength : size ?? 0;
 
                 if (parameters.TryGetValue(dynamicParamName, out parameter))
@@ -479,7 +475,7 @@ namespace ServiceStack.OrmLite.Dapper
                     SqlMapper.ITypeHandler handler;
                     dbType = (!dbType.HasValue)
 #pragma warning disable 618
-                    ? SqlMapper.LookupDbType(targetMemberType, targetMemberType != null ? targetMemberType.Name : null, true, out handler)
+                    ? SqlMapper.LookupDbType(targetMemberType, targetMemberType?.Name, true, out handler)
 #pragma warning restore 618
                     : dbType;
 
@@ -502,7 +498,7 @@ namespace ServiceStack.OrmLite.Dapper
         {
             foreach (var param in (from p in parameters select p.Value))
             {
-                if (param.OutputCallback != null) param.OutputCallback(param.OutputTarget, this);
+                param.OutputCallback?.Invoke(param.OutputTarget, this);
             }
         }
     }

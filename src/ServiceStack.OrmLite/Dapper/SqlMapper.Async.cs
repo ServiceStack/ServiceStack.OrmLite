@@ -1,8 +1,4 @@
 ﻿#if ASYNC
-#define ASYNC
-#endif
-
-#if ASYNC
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -13,7 +9,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-//Apache 2.0 License: https://github.com/StackExchange/dapper-dot-net/blob/master/License.txt
 namespace ServiceStack.OrmLite.Dapper
 {
     public static partial class SqlMapper
@@ -111,7 +106,7 @@ namespace ServiceStack.OrmLite.Dapper
         /// </summary>
         public static Task<IEnumerable<object>> QueryAsync(this IDbConnection cnn, Type type, string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
         {
-            if (type == null) throw new ArgumentNullException("type");
+            if (type == null) throw new ArgumentNullException(nameof(type));
             return QueryAsync<object>(cnn, type, new CommandDefinition(sql, param, transaction, commandTimeout, commandType, CommandFlags.Buffered, default(CancellationToken)));
         }
 
@@ -120,7 +115,7 @@ namespace ServiceStack.OrmLite.Dapper
         /// </summary>
         public static Task<object> QueryFirstAsync(this IDbConnection cnn, Type type, string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
         {
-            if (type == null) throw new ArgumentNullException("type");
+            if (type == null) throw new ArgumentNullException(nameof(type));
             return QueryRowAsync<object>(cnn, Row.First, type, new CommandDefinition(sql, param, transaction, commandTimeout, commandType, CommandFlags.None, default(CancellationToken)));
         }
         /// <summary>
@@ -128,7 +123,7 @@ namespace ServiceStack.OrmLite.Dapper
         /// </summary>
         public static Task<object> QueryFirstOrDefaultAsync(this IDbConnection cnn, Type type, string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
         {
-            if (type == null) throw new ArgumentNullException("type");
+            if (type == null) throw new ArgumentNullException(nameof(type));
             return QueryRowAsync<object>(cnn, Row.FirstOrDefault, type, new CommandDefinition(sql, param, transaction, commandTimeout, commandType, CommandFlags.None, default(CancellationToken)));
         }
         /// <summary>
@@ -136,7 +131,7 @@ namespace ServiceStack.OrmLite.Dapper
         /// </summary>
         public static Task<object> QuerySingleAsync(this IDbConnection cnn, Type type, string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
         {
-            if (type == null) throw new ArgumentNullException("type");
+            if (type == null) throw new ArgumentNullException(nameof(type));
             return QueryRowAsync<object>(cnn, Row.Single, type, new CommandDefinition(sql, param, transaction, commandTimeout, commandType, CommandFlags.None, default(CancellationToken)));
         }
         /// <summary>
@@ -144,7 +139,7 @@ namespace ServiceStack.OrmLite.Dapper
         /// </summary>
         public static Task<object> QuerySingleOrDefaultAsync(this IDbConnection cnn, Type type, string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
         {
-            if (type == null) throw new ArgumentNullException("type");
+            if (type == null) throw new ArgumentNullException(nameof(type));
             return QueryRowAsync<object>(cnn, Row.SingleOrDefault, type, new CommandDefinition(sql, param, transaction, commandTimeout, commandType, CommandFlags.None, default(CancellationToken)));
         }
 
@@ -205,7 +200,7 @@ namespace ServiceStack.OrmLite.Dapper
         private static async Task<IEnumerable<T>> QueryAsync<T>(this IDbConnection cnn, Type effectiveType, CommandDefinition command)
         {
             object param = command.Parameters;
-            var identity = new Identity(command.CommandText, command.CommandType, cnn, effectiveType, param != null ? param.GetType() : null, null);
+            var identity = new Identity(command.CommandText, command.CommandType, cnn, effectiveType, param?.GetType(), null);
             var info = GetCacheInfo(identity, param, command.AddToCache);
             bool wasClosed = cnn.State == ConnectionState.Closed;
             var cancel = command.CancellationToken;
@@ -267,7 +262,7 @@ namespace ServiceStack.OrmLite.Dapper
         private static async Task<T> QueryRowAsync<T>(this IDbConnection cnn, Row row, Type effectiveType, CommandDefinition command)
         {
             object param = command.Parameters;
-            var identity = new Identity(command.CommandText, command.CommandType, cnn, effectiveType, param != null ? param.GetType() : null, null);
+            var identity = new Identity(command.CommandText, command.CommandType, cnn, effectiveType, param?.GetType(), null);
             var info = GetCacheInfo(identity, param, command.AddToCache);
             bool wasClosed = cnn.State == ConnectionState.Closed;
             var cancel = command.CancellationToken;
@@ -452,7 +447,7 @@ namespace ServiceStack.OrmLite.Dapper
         }
         private static async Task<int> ExecuteImplAsync(IDbConnection cnn, CommandDefinition command, object param)
         {
-            var identity = new Identity(command.CommandText, command.CommandType, cnn, null, param != null ? param.GetType() : null, null);
+            var identity = new Identity(command.CommandText, command.CommandType, cnn, null, param?.GetType(), null);
             var info = GetCacheInfo(identity, param, command.AddToCache);
             bool wasClosed = cnn.State == ConnectionState.Closed;
             using (var cmd = (DbCommand)command.SetupCommand(cnn, info.ParamReader))
@@ -645,7 +640,7 @@ namespace ServiceStack.OrmLite.Dapper
         private static async Task<IEnumerable<TReturn>> MultiMapAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(this IDbConnection cnn, CommandDefinition command, Delegate map, string splitOn)
         {
             object param = command.Parameters;
-            var identity = new Identity(command.CommandText, command.CommandType, cnn, typeof(TFirst), param != null ? param.GetType() : null, new[] { typeof(TFirst), typeof(TSecond), typeof(TThird), typeof(TFourth), typeof(TFifth), typeof(TSixth), typeof(TSeventh) });
+            var identity = new Identity(command.CommandText, command.CommandType, cnn, typeof(TFirst), param?.GetType(), new[] { typeof(TFirst), typeof(TSecond), typeof(TThird), typeof(TFourth), typeof(TFifth), typeof(TSixth), typeof(TSeventh) });
             var info = GetCacheInfo(identity, param, command.AddToCache);
             bool wasClosed = cnn.State == ConnectionState.Closed;
             try
@@ -693,7 +688,7 @@ namespace ServiceStack.OrmLite.Dapper
             }
 
             object param = command.Parameters;
-            var identity = new Identity(command.CommandText, command.CommandType, cnn, types[0], param != null ? param.GetType() : null, types);
+            var identity = new Identity(command.CommandText, command.CommandType, cnn, types[0], param?.GetType(), types);
             var info = GetCacheInfo(identity, param, command.AddToCache);
             bool wasClosed = cnn.State == ConnectionState.Closed;
             try {
@@ -718,8 +713,7 @@ namespace ServiceStack.OrmLite.Dapper
                     yield return (T)func(reader);
                 }
                 while (reader.NextResult()) { }
-                var callbacks = parameters as IParameterCallbacks;
-                if (callbacks != null) callbacks.OnCompleted();
+                (parameters as IParameterCallbacks)?.OnCompleted();
             }
         }
 
@@ -740,7 +734,7 @@ namespace ServiceStack.OrmLite.Dapper
         public static async Task<GridReader> QueryMultipleAsync(this IDbConnection cnn, CommandDefinition command)
         {
             object param = command.Parameters;
-            Identity identity = new Identity(command.CommandText, command.CommandType, cnn, typeof(GridReader), param != null ? param.GetType() : null, null);
+            Identity identity = new Identity(command.CommandText, command.CommandType, cnn, typeof(GridReader), param?.GetType(), null);
             CacheInfo info = GetCacheInfo(identity, param, command.AddToCache);
 
             DbCommand cmd = null;
@@ -770,7 +764,7 @@ namespace ServiceStack.OrmLite.Dapper
                         { /* don't spoil the existing exception */ }
                     reader.Dispose();
                 }
-                if (cmd != null) cmd.Dispose();
+                cmd?.Dispose();
                 if (wasClosed) cnn.Close();
                 throw;
             }
@@ -834,7 +828,7 @@ namespace ServiceStack.OrmLite.Dapper
             finally
             {
                 if (wasClosed) cnn.Close();
-                if (cmd != null) cmd.Dispose();
+                cmd?.Dispose();
             }
         }
 
@@ -904,7 +898,7 @@ namespace ServiceStack.OrmLite.Dapper
             finally
             {
                 if (wasClosed) cnn.Close();
-                if (cmd != null) cmd.Dispose();
+                cmd?.Dispose();
             }
             return Parse<T>(result);
         }

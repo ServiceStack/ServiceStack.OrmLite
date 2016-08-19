@@ -138,7 +138,7 @@
     <Compile Include="Dapper\SqlMapper.cs" />
     <Compile Include="Dapper\SqlMapper.DapperRow.cs" />
     <Compile Include="Dapper\SqlMapper.DapperRowMetaObject.cs" />
-    <Compile Include="Dapper\SqlMapper.DataTable.cs" />
+    <Compile Include="Dapper\SqlMapper.DapperTable.cs" />
     <Compile Include="Dapper\SqlMapper.DeserializerState.cs" />
     <Compile Include="Dapper\SqlMapper.DontMap.cs" />
     <Compile Include="Dapper\SqlMapper.GridReader.Async.cs" />
