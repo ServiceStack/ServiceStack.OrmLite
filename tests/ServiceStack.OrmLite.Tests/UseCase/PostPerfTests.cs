@@ -28,7 +28,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
 
     }
 
-    [NUnit.Framework.Ignore, Explicit("Integration Test")]
+    [Explicit, NUnit.Framework.Ignore("Integration Test")]
     public class PostPerfTests : OrmLiteTestBase
     {
         public PostPerfTests()
@@ -140,7 +140,7 @@ end
         }
     }
 
-    [NUnit.Framework.Ignore, Explicit("Integration Test")]
+    [Explicit, NUnit.Framework.Ignore("Integration Test")]
     public class AdventureWorksPerfTests : OrmLiteTestBase
     {
         private IDbConnection db;

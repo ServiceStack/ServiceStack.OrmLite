@@ -58,7 +58,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
         }
     }
 
-    [NUnit.Framework.Ignore, TestFixture]
+    [NUnit.Framework.Ignore("Benchmark"), TestFixture]
     [Category("Benchmark")]
     public class SimpleInsertSelectBenchmark
     {

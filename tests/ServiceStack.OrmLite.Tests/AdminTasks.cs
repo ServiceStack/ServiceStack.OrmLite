@@ -3,7 +3,7 @@ using ServiceStack.OrmLite.Tests.UseCase;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [Ignore, Explicit("OneOff Tasks")]
+    [Explicit, Ignore("OneOff Tasks")]
     public class AdminTasks
         : OrmLiteTestBase
     {
