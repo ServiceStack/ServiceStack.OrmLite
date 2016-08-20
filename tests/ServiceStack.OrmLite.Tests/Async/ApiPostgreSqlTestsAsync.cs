@@ -9,26 +9,16 @@ namespace ServiceStack.OrmLite.Tests.Async
     public class ApiPostgreSqlTestsAsync
         : OrmLiteTestBase
     {
-        private IDbConnection db;
-
-        [SetUp]
-        public void SetUp()
-        {
-            SuppressIfOracle("SQL Server tests");
-            db = CreatePostgreSqlDbFactory().OpenDbConnection();
-            db.DropAndCreateTable<Person>();
-            db.DropAndCreateTable<PersonWithAutoId>();
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            db.Dispose();
-        }
-
         [Test]
         public async Task API_PostgreSql_Examples_Async()
         {
+            if (Dialect != Dialect.PostgreSql) return;
+
+            SuppressIfOracle("PostgreSQL tests");
+            var db = CreatePostgreSqlDbFactory().OpenDbConnection();
+            db.DropAndCreateTable<Person>();
+            db.DropAndCreateTable<PersonWithAutoId>();
+
             await db.InsertAsync(Person.Rockstars);
 
             await db.SelectAsync<Person>(x => x.Age > 40);
@@ -324,6 +314,8 @@ namespace ServiceStack.OrmLite.Tests.Async
 
             await db.SaveAllAsync(new[]{ new Person { Id = 14, FirstName = "Amy", LastName = "Winehouse", Age = 27 },
                               new Person { Id = 15, FirstName = "Amy", LastName = "Winehouse", Age = 27 } });
+
+            db.Dispose();
         }
     }
 }

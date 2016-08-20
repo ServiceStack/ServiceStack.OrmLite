@@ -15,7 +15,7 @@ namespace ServiceStack.OrmLite.Tests.Async
     {
         private IDbConnection db;
 
-        [OneTimeSetUp]
+        [TestFixtureSetUp]
         public new void TestFixtureSetUp()
         {
             db = base.OpenDbConnection();
@@ -35,7 +35,7 @@ namespace ServiceStack.OrmLite.Tests.Async
             db.DeleteAll<Customer>();
         }
 
-        [OneTimeTearDown]
+        [TestFixtureTearDown]
         public void TestFixtureTearDown()
         {
             db.Dispose();

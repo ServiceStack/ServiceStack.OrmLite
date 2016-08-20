@@ -9,26 +9,16 @@ namespace ServiceStack.OrmLite.Tests.Async
     public class ApiMySqlTestsAsync
         : OrmLiteTestBase
     {
-        private IDbConnection db;
-
-        [SetUp]
-        public void SetUp()
-        {
-            SuppressIfOracle("MySql tests");
-            db = CreateMySqlDbFactory().OpenDbConnection();
-            db.DropAndCreateTable<Person>();
-            db.DropAndCreateTable<PersonWithAutoId>();
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            db.Dispose();
-        }
-
         [Test]
         public async Task API_MySql_Examples_Async()
         {
+            if (Dialect != Dialect.MySql) return;
+            
+            SuppressIfOracle("MySql tests");
+            var db = CreateMySqlDbFactory().OpenDbConnection();
+            db.DropAndCreateTable<Person>();
+            db.DropAndCreateTable<PersonWithAutoId>();
+
             await db.InsertAsync(Person.Rockstars);
 
             await db.SelectAsync<Person>(x => x.Age > 40);
@@ -325,6 +315,8 @@ namespace ServiceStack.OrmLite.Tests.Async
 
             await db.SaveAllAsync(new[]{ new Person { Id = 14, FirstName = "Amy", LastName = "Winehouse", Age = 27 },
                               new Person { Id = 15, FirstName = "Amy", LastName = "Winehouse", Age = 27 } });
+
+            db.Dispose();
         }
     }
 }
