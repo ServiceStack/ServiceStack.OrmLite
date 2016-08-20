@@ -119,6 +119,28 @@
     <Compile Include="AdoNetDataAccessTests.cs" />
     <Compile Include="ApiSqliteTests.cs" />
     <Compile Include="ApiSqlServerTests.cs" />
+    <Compile Include="Async\ApiMySqlTestsAsync.cs" />
+    <Compile Include="Async\ApiPostgreSqlTestsAsync.cs" />
+    <Compile Include="Async\ApiSqliteTestsAsync.cs" />
+    <Compile Include="Async\ApiSqlServerTestsAsync.cs" />
+    <Compile Include="Async\AsyncTests.cs" />
+    <Compile Include="Async\AutoQueryTestsAsync.cs" />
+    <Compile Include="Async\CustomSqlTestsAsync.cs" />
+    <Compile Include="Async\Issues\LoadSelectAmbiguousColumnIssue.cs" />
+    <Compile Include="Async\Issues\PredicateBuilderIssue.cs" />
+    <Compile Include="Async\Issues\SqlServerComputedColumnIssue.cs" />
+    <Compile Include="Async\Legacy\ApiMySqlLegacyTestsAsync.cs" />
+    <Compile Include="Async\Legacy\ApiPostgreSqlLegacyTestsAsync.cs" />
+    <Compile Include="Async\Legacy\ApiSqliteLegacyTestsAsync.cs" />
+    <Compile Include="Async\Legacy\ApiSqlServerLegacyTestsAsync.cs" />
+    <Compile Include="Async\LoadReferencesJoinTestsAsync.cs" />
+    <Compile Include="Async\LoadReferencesTestsAsync.cs" />
+    <Compile Include="Async\OrmLiteUpdateTestsAsync.cs" />
+    <Compile Include="Async\SelectAsyncTests.cs" />
+    <Compile Include="Async\SqlExpressionTests.cs" />
+    <Compile Include="Async\SqlServerProviderTestsAsync.cs" />
+    <Compile Include="Async\UpdateAsyncTests.cs" />
+    <Compile Include="UseCase\CustomerOrdersUseCaseAsync.cs" />
     <Compile Include="AutoQueryTests.cs" />
     <Compile Include="CaptureSqlCommandFilterTests.cs" />
     <Compile Include="CaptureSqlFilterTests.cs" />
@@ -388,7 +410,9 @@
       <Name>ServiceStack.OrmLite</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Async\UseCase\" />
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -8,57 +8,14 @@ using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.Tests.UseCase;
 using ServiceStack.Text;
 
-namespace ServiceStack.OrmLite.Tests
+namespace ServiceStack.OrmLite.Tests.Async
 {
-    public class Customer
-    {
-        [AutoIncrement]
-        public int Id { get; set; }
-        public string Name { get; set; }
-
-        [Reference]
-        public CustomerAddress PrimaryAddress { get; set; }
-
-        [Reference]
-        public List<Order> Orders { get; set; }
-    }
-
-    public class CustomerAddress
-    {
-        [AutoIncrement]
-        public int Id { get; set; }
-        public int CustomerId { get; set; }
-        public string AddressLine1 { get; set; }
-        public string AddressLine2 { get; set; }
-        public string City { get; set; }
-        public string State { get; set; }
-        public string Country { get; set; }
-    }
-
-    public class Order
-    {
-        [AutoIncrement]
-        public int Id { get; set; }
-        public int CustomerId { get; set; }
-        public string LineItem { get; set; }
-        public int Qty { get; set; }
-        public decimal Cost { get; set; }
-    }
-
-    public class Country
-    {
-        [AutoIncrement]
-        public int Id { get; set; }
-        public string CountryName { get; set; }
-        public string CountryCode { get; set; }
-    }
-
-    public class LoadReferencesTests
+    public class LoadReferencesTestsAsync
         : OrmLiteTestBase
     {
         private IDbConnection db;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public new void TestFixtureSetUp()
         {
             db = base.OpenDbConnection();
@@ -78,7 +35,7 @@ namespace ServiceStack.OrmLite.Tests
             db.DeleteAll<Customer>();
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void TestFixtureTearDown()
         {
             db.Dispose();

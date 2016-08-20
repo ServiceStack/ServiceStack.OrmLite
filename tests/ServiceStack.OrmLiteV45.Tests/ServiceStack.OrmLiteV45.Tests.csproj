@@ -66,35 +66,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ApiMySqlTestsAsync.cs" />
-    <Compile Include="ApiPostgreSqlTestsAsync.cs" />
-    <Compile Include="ApiSqliteTestsAsync.cs" />
-    <Compile Include="ApiSqlServerTestsAsync.cs" />
-    <Compile Include="AsyncTests.cs" />
-    <Compile Include="AutoQueryTestsAsync.cs" />
-    <Compile Include="CustomSqlTestsAsync.cs" />
-    <Compile Include="Issues\LoadSelectAmbiguousColumnIssue.cs" />
-    <Compile Include="Issues\PredicateBuilderIssue.cs" />
-    <Compile Include="Issues\SqlServerComputedColumnIssue.cs" />
-    <Compile Include="Legacy\ApiMySqlLegacyTestsAsync.cs" />
-    <Compile Include="Legacy\ApiPostgreSqlLegacyTestsAsync.cs" />
-    <Compile Include="Legacy\ApiSqliteLegacyTestsAsync.cs" />
-    <Compile Include="Legacy\ApiSqlServerLegacyTestsAsync.cs" />
-    <Compile Include="LoadReferenceJoinTests.cs" />
-    <Compile Include="LoadReferencesTests.cs" />
-    <Compile Include="OrmLiteContextTests.cs" />
-    <Compile Include="OrmLiteTestBase.cs" />
-    <Compile Include="OrmLiteUpdateTestsAsync.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SelectAsyncTests.cs" />
-    <Compile Include="Shared\Person.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Shared\Poco.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="SqlExpressionTests.cs" />
-    <Compile Include="SqlServerProviderTestsAsync.cs" />
     <Compile Include="T4\OrmLite.Poco.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -106,9 +78,6 @@
       <DependentUpon>OrmLite.SP.tt</DependentUpon>
     </Compile>
     <Compile Include="T4\OrmLiteT4Tests.cs" />
-    <Compile Include="TestHelpers.cs" />
-    <Compile Include="UpdateAsyncTests.cs" />
-    <Compile Include="UseCase\CustomerOrdersUseCase.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite.MySql\ServiceStack.OrmLite.MySql.csproj">

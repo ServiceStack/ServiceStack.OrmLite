@@ -4,7 +4,7 @@ using NUnit.Framework;
 using ServiceStack.OrmLite.Legacy;
 using ServiceStack.OrmLite.Tests.Shared;
 
-namespace ServiceStack.OrmLite.Tests.Legacy
+namespace ServiceStack.OrmLite.Tests.Async.Legacy
 {
     public class ApiSqlServerLegacyTestsAsync
         : OrmLiteTestBase

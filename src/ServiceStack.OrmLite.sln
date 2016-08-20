@@ -86,8 +86,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceStack.OrmLite.Sqlite
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceStack.OrmLite.VistaDB.Tests", "ServiceStack.OrmLite.VistaDB.Tests\ServiceStack.OrmLite.VistaDB.Tests.csproj", "{DBD5FF1A-454C-4763-A604-6EBB0C230357}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceStack.OrmLiteV45.Tests", "..\tests\ServiceStack.OrmLiteV45.Tests\ServiceStack.OrmLiteV45.Tests.csproj", "{01ABABFF-FA2C-492A-9217-E83658BF6971}"
-EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "ServiceStack.OrmLite.VbNetTests", "..\tests\ServiceStack.OrmLite.VbNetTests\ServiceStack.OrmLite.VbNetTests.vbproj", "{CC385BE2-B49D-46AF-8F1B-BC9943E106E6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceStack.OrmLite.SqlServer.Converters", "ServiceStack.OrmLite.SqlServer.Converters\ServiceStack.OrmLite.SqlServer.Converters.csproj", "{7E9BB57B-53E3-425E-9882-B6E078C5C9BA}"
@@ -491,26 +489,6 @@ Global
 		{DBD5FF1A-454C-4763-A604-6EBB0C230357}.Signed|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{DBD5FF1A-454C-4763-A604-6EBB0C230357}.Signed|Mixed Platforms.Build.0 = Release|Any CPU
 		{DBD5FF1A-454C-4763-A604-6EBB0C230357}.Signed|x86.ActiveCfg = Release|Any CPU
-		{01ABABFF-FA2C-492A-9217-E83658BF6971}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{01ABABFF-FA2C-492A-9217-E83658BF6971}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{01ABABFF-FA2C-492A-9217-E83658BF6971}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{01ABABFF-FA2C-492A-9217-E83658BF6971}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{01ABABFF-FA2C-492A-9217-E83658BF6971}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{01ABABFF-FA2C-492A-9217-E83658BF6971}.Default|Any CPU.ActiveCfg = Debug|Any CPU
-		{01ABABFF-FA2C-492A-9217-E83658BF6971}.Default|Any CPU.Build.0 = Debug|Any CPU
-		{01ABABFF-FA2C-492A-9217-E83658BF6971}.Default|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{01ABABFF-FA2C-492A-9217-E83658BF6971}.Default|Mixed Platforms.Build.0 = Debug|Any CPU
-		{01ABABFF-FA2C-492A-9217-E83658BF6971}.Default|x86.ActiveCfg = Debug|Any CPU
-		{01ABABFF-FA2C-492A-9217-E83658BF6971}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{01ABABFF-FA2C-492A-9217-E83658BF6971}.Release|Any CPU.Build.0 = Release|Any CPU
-		{01ABABFF-FA2C-492A-9217-E83658BF6971}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{01ABABFF-FA2C-492A-9217-E83658BF6971}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{01ABABFF-FA2C-492A-9217-E83658BF6971}.Release|x86.ActiveCfg = Release|Any CPU
-		{01ABABFF-FA2C-492A-9217-E83658BF6971}.Signed|Any CPU.ActiveCfg = Release|Any CPU
-		{01ABABFF-FA2C-492A-9217-E83658BF6971}.Signed|Any CPU.Build.0 = Release|Any CPU
-		{01ABABFF-FA2C-492A-9217-E83658BF6971}.Signed|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{01ABABFF-FA2C-492A-9217-E83658BF6971}.Signed|Mixed Platforms.Build.0 = Release|Any CPU
-		{01ABABFF-FA2C-492A-9217-E83658BF6971}.Signed|x86.ActiveCfg = Release|Any CPU
 		{CC385BE2-B49D-46AF-8F1B-BC9943E106E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{CC385BE2-B49D-46AF-8F1B-BC9943E106E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CC385BE2-B49D-46AF-8F1B-BC9943E106E6}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU

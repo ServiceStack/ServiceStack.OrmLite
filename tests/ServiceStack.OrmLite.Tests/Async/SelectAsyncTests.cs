@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
-using AppDb;
 using NUnit.Framework;
+using ServiceStack.Common.Tests.Models;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Model;
 
-namespace ServiceStack.OrmLite.Tests
+namespace ServiceStack.OrmLite.Tests.Async
 {
     public class PocoWithBytes : IHasGuidId
     {
@@ -28,11 +28,11 @@ namespace ServiceStack.OrmLite.Tests
             {
                 db.DropAndCreateTable<Poco>();
 
-                await db.InsertAsync(new Poco { Id = "foo" });
+                await db.InsertAsync(new Poco { Id = 1 });
 
-                var row = await db.SingleAsync(db.From<Poco>().Where(x => x.Id == "foo"));
+                var row = await db.SingleAsync(db.From<Poco>().Where(x => x.Id == 1));
 
-                Assert.That(row.Id, Is.EqualTo("foo"));
+                Assert.That(row.Id, Is.EqualTo(1));
             }
         }
 

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.OrmLite.Tests.Shared;
 
-namespace ServiceStack.OrmLite.Tests
+namespace ServiceStack.OrmLite.Tests.Async
 {
     public class ApiPostgreSqlTestsAsync
         : OrmLiteTestBase

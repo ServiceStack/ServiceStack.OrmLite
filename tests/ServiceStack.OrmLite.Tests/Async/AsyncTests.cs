@@ -8,7 +8,7 @@ using ServiceStack.Text;
 
 using ServiceStack.OrmLite.Tests.Shared;
 
-namespace ServiceStack.OrmLite.Tests
+namespace ServiceStack.OrmLite.Tests.Async
 {
     [TestFixture]
     public class AsyncTests
@@ -23,7 +23,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 for (var i = 0; i < 3; i++)
                 {
-                    await db.InsertAsync(new Poco { Name = ((char)('A' + i)).ToString() });
+                    await db.InsertAsync(new Poco { Id = i + 1, Name = ((char)('A' + i)).ToString() });
                 }
 
                 var results = (await db.SelectAsync<Poco>()).Map(x => x.Name);
@@ -108,7 +108,7 @@ namespace ServiceStack.OrmLite.Tests
             var db = OpenDbConnection();
 
             "Root: {0}".Print(Thread.CurrentThread.ManagedThreadId);
-            var task = Task.Factory.StartNew(() => 
+            var task = Task.Factory.StartNew(() =>
             {
                 "Before Delay: {0}".Print(Thread.CurrentThread.ManagedThreadId);
                 return Task.Delay(delayMs);
@@ -122,7 +122,8 @@ namespace ServiceStack.OrmLite.Tests
             {
                 "Before SQL: {0}".Print(Thread.CurrentThread.ManagedThreadId);
                 await db.ExistsAsync<Person>(x => x.Age < 50)
-                    .Then(t1 => {
+                    .Then(t1 =>
+                    {
                         "After SQL: {0}".Print(Thread.CurrentThread.ManagedThreadId);
                         return Task.Delay(delayMs);
                     });

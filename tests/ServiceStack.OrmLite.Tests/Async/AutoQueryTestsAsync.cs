@@ -5,53 +5,8 @@ using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Text;
 
-namespace ServiceStack.OrmLite.Tests
+namespace ServiceStack.OrmLite.Tests.Async
 {
-    public class Rockstar
-    {
-        public int Id { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public int? Age { get; set; }
-        public DateTime DateOfBirth { get; set; }
-        public DateTime? DateDied { get; set; }
-        public LivingStatus LivingStatus { get; set; }
-    }
-
-    public class RockstarAlt
-    {
-        public int Id { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public int? Age { get; set; }
-    }
-
-    public enum LivingStatus
-    {
-        Alive,
-        Dead
-    }
-
-    public class DeptEmployee
-    {
-        [PrimaryKey]
-        public int Id { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        [References(typeof(Department2))]
-        public int DepartmentId { get; set; }
-
-        [Reference]
-        public Department2 Department { get; set; }
-    }
-
-    public class Department2
-    {
-        [PrimaryKey]
-        public int Id { get; set; }
-        public string Name { get; set; }
-    }
-
     public class AutoQueryTestsAsync : OrmLiteTestBase
     {
         public static Rockstar[] SeedRockstars = new[] {

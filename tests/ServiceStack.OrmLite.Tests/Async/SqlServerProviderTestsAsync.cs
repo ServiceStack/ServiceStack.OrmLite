@@ -5,14 +5,8 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.Text;
 
-namespace ServiceStack.OrmLite.Tests
+namespace ServiceStack.OrmLite.Tests.Async
 {
-    public class DummyTable
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-    }
-
     [TestFixture]
     public class SqlServerProviderTestsAsync
     {

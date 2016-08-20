@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 
-namespace ServiceStack.OrmLite.Tests
+namespace ServiceStack.OrmLite.Tests.Async
 {
     public class LetterFrequency
     {

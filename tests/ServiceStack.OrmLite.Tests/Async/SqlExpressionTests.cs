@@ -5,7 +5,7 @@ using NUnit.Framework;
 using ServiceStack.OrmLite.Tests.UseCase;
 using ServiceStack.Text;
 
-namespace ServiceStack.OrmLite.Tests
+namespace ServiceStack.OrmLite.Tests.Async
 {
     public class SqlExpressionTests
         : OrmLiteTestBase

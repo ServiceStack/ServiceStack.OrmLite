@@ -4,20 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using ServiceStack.Common.Tests.Models;
 using ServiceStack.OrmLite.Tests.Shared;
 
-namespace ServiceStack.OrmLite.Tests
+namespace ServiceStack.OrmLite.Tests.Async
 {
     [TestFixture]
     public class UpdateAsyncTests
         : OrmLiteTestBase
     {
-        public class Poco
-        {
-            public int Id { get; set; }
-            public string Name { get; set; }
-        }
-
         [Test]
         public async Task Can_updated_with_ExecuteSql_and_db_params_Async()
         {

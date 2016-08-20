@@ -5,7 +5,7 @@ using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Model;
 
-namespace ServiceStack.OrmLite.Tests.Issues
+namespace ServiceStack.OrmLite.Tests.Async.Issues
 {
     public class ComputeTest : IHasId<int>
     {

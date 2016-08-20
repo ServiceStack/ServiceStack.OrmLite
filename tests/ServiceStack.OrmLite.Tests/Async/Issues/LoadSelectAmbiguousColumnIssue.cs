@@ -5,7 +5,7 @@ using ServiceStack.DataAnnotations;
 using ServiceStack.Model;
 using ServiceStack.Text;
 
-namespace ServiceStack.OrmLite.Tests.Issues
+namespace ServiceStack.OrmLite.Tests.Async.Issues
 {
     //[Schema("dbo")]
     [Alias("Project")]

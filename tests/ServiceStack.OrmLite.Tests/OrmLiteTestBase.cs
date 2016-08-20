@@ -54,15 +54,27 @@ namespace ServiceStack.OrmLite.Tests
             return GetFileConnectionString();
         }
 
+        public static OrmLiteConnectionFactory CreateSqliteMemoryDbFactory()
+        {
+            var dbFactory = new OrmLiteConnectionFactory(Config.SqliteMemoryDb, SqliteDialect.Provider);
+            return dbFactory;
+        }
+
         public static OrmLiteConnectionFactory CreateSqlServerDbFactory()
         {
             var dbFactory = new OrmLiteConnectionFactory(Config.SqlServerBuildDb, SqlServerDialect.Provider);
             return dbFactory;
         }
 
-        public static OrmLiteConnectionFactory CreateSqliteMemoryDbFactory()
+        public static OrmLiteConnectionFactory CreateMySqlDbFactory()
         {
-            var dbFactory = new OrmLiteConnectionFactory(Config.SqliteMemoryDb, SqliteDialect.Provider);
+            var dbFactory = new OrmLiteConnectionFactory(Config.MySqlDb, MySqlDialect.Provider);
+            return dbFactory;
+        }
+
+        public static OrmLiteConnectionFactory CreatePostgreSqlDbFactory()
+        {
+            var dbFactory = new OrmLiteConnectionFactory(Config.PostgreSqlDb, PostgreSqlDialect.Provider);
             return dbFactory;
         }
 
