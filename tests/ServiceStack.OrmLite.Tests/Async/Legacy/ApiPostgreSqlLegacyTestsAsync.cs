@@ -9,26 +9,16 @@ namespace ServiceStack.OrmLite.Tests.Async.Legacy
     public class ApiPostgreSqlLegacyTestsAsync
         : OrmLiteTestBase
     {
-        private IDbConnection db;
-
-        [SetUp]
-        public void SetUp()
-        {
-            SuppressIfOracle("SQL Server tests");
-            db = CreatePostgreSqlDbFactory().OpenDbConnection();
-            db.DropAndCreateTable<Person>();
-            db.DropAndCreateTable<PersonWithAutoId>();
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            db.Dispose();
-        }
-
         [Test]
         public async Task API_PostgreSql_Legacy_Examples_Async()
         {
+            if (Dialect != Dialect.PostgreSql) return;
+
+            SuppressIfOracle("SQL Server tests");
+            var db = CreatePostgreSqlDbFactory().OpenDbConnection();
+            db.DropAndCreateTable<Person>();
+            db.DropAndCreateTable<PersonWithAutoId>();
+
             await db.InsertAsync(Person.Rockstars);
 
             await db.SelectAsync<Person>(q => q.Where(x => x.Age > 40).OrderBy(x => x.Id));
@@ -107,6 +97,8 @@ namespace ServiceStack.OrmLite.Tests.Async.Legacy
 
             await db.DeleteFmtAsync(table: "Person", where: "age = {0}".SqlFmt(27));
             Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM \"person\" WHERE age = 27"));
+
+            db.Dispose();
         }
     }
 }

@@ -9,26 +9,16 @@ namespace ServiceStack.OrmLite.Tests.Async.Legacy
     public class ApiMySqlLegacyTestsAsync
         : OrmLiteTestBase
     {
-        private IDbConnection db;
-
-        [SetUp]
-        public void SetUp()
-        {
-            SuppressIfOracle("MySql tests");
-            db = CreateMySqlDbFactory().OpenDbConnection();
-            db.DropAndCreateTable<Person>();
-            db.DropAndCreateTable<PersonWithAutoId>();
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            db.Dispose();
-        }
-
         [Test]
         public async Task API_MySql_Legacy_Examples_Async()
         {
+            if (Dialect != Dialect.MySql) return;
+
+            SuppressIfOracle("MySql tests");
+            var db = CreateMySqlDbFactory().OpenDbConnection();
+            db.DropAndCreateTable<Person>();
+            db.DropAndCreateTable<PersonWithAutoId>();
+
             await db.SelectAsync<Person>(q => q.Where(x => x.Age > 40).OrderBy(x => x.Id));
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT `Id`, `FirstName`, `LastName`, `Age` \nFROM `Person`\nWHERE (`Age` > @0)\nORDER BY `Id`"));
 
@@ -105,6 +95,8 @@ namespace ServiceStack.OrmLite.Tests.Async.Legacy
 
             await db.DeleteFmtAsync(table: "Person", where: "Age = {0}".SqlFmt(27));
             Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM `Person` WHERE Age = 27"));
+
+            db.Dispose();
         }
     }
 }
