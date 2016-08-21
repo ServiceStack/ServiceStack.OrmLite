@@ -224,29 +224,29 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
                 db.Count<Text>(q => q.Name.StartsWith("A"));
                 Assert.That(normalizedSql(),
-                    Is.StringContaining("upper(name) like @0".NormalizeSql()));
+                    Does.Contain("upper(name) like @0".NormalizeSql()));
 
                 db.Count<Text>(q => q.Name.EndsWith("e"));
                 Assert.That(normalizedSql(),
-                    Is.StringContaining("upper(name) like @0".NormalizeSql()));
+                    Does.Contain("upper(name) like @0".NormalizeSql()));
 
                 db.Count<Text>(q => q.Name.Contains("b"));
                 Assert.That(normalizedSql(),
-                    Is.StringContaining("upper(name) like @0".NormalizeSql()));
+                    Does.Contain("upper(name) like @0".NormalizeSql()));
 
                 OrmLiteConfig.StripUpperInLike = true;
 
                 db.Count<Text>(q => q.Name.StartsWith("A"));
                 Assert.That(normalizedSql(),
-                    Is.StringContaining("name like @0".NormalizeSql()));
+                    Does.Contain("name like @0".NormalizeSql()));
 
                 db.Count<Text>(q => q.Name.EndsWith("e"));
                 Assert.That(normalizedSql(),
-                    Is.StringContaining("name like @0".NormalizeSql()));
+                    Does.Contain("name like @0".NormalizeSql()));
 
                 db.Count<Text>(q => q.Name.Contains("b"));
                 Assert.That(normalizedSql(),
-                    Is.StringContaining("name like @0".NormalizeSql()));
+                    Does.Contain("name like @0".NormalizeSql()));
 
                 OrmLiteConfig.StripUpperInLike = false;
             }
