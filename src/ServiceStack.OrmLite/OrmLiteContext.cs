@@ -3,7 +3,9 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
+#if !NETSTANDARD1_3
 using System.Runtime.Remoting.Messaging;
+#endif
 using System.Threading;
 
 namespace ServiceStack.OrmLite

@@ -1537,7 +1537,7 @@ namespace ServiceStack.OrmLite
 
             var tableDef = modelType.GetModelDefinition();
 
-            if (propertyInfo != null && propertyInfo.PropertyType.IsEnum)
+            if (propertyInfo != null && propertyInfo.PropertyType.IsEnum())
                 return new EnumMemberAccess(
                     GetQuotedColumnName(tableDef, m.Member.Name), propertyInfo.PropertyType);
 
@@ -2278,7 +2278,7 @@ namespace ServiceStack.OrmLite
         public EnumMemberAccess(string text, Type enumType)
             : base(text)
         {
-            if (!enumType.IsEnum) throw new ArgumentException("Type not valid", "enumType");
+            if (!enumType.IsEnum()) throw new ArgumentException("Type not valid", "enumType");
 
             EnumType = enumType;
         }

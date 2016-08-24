@@ -100,7 +100,7 @@ namespace ServiceStack.OrmLite
 
                 var isNullableType = propertyInfo.PropertyType.IsNullableType();
 
-                var isNullable = (!propertyInfo.PropertyType.IsValueType
+                var isNullable = (!propertyInfo.PropertyType.IsValueType()
                                    && !propertyInfo.HasAttributeNamed(typeof(RequiredAttribute).Name))
                                    || isNullableType;
 
@@ -155,7 +155,7 @@ namespace ServiceStack.OrmLite
                                                     foreignKeyAttr.OnDelete,
                                                     foreignKeyAttr.OnUpdate,
                                                     foreignKeyAttr.ForeignKeyName),
-                    IsReference = referenceAttr != null && propertyType.IsClass,
+                    IsReference = referenceAttr != null && propertyType.IsClass(),
                     GetValueFn = propertyInfo.GetPropertyGetterFn(),
                     SetValueFn = propertyInfo.GetPropertySetterFn(),
                     Sequence = sequenceAttr != null ? sequenceAttr.Name : string.Empty,

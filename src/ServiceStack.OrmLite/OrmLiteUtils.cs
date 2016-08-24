@@ -59,7 +59,7 @@ namespace ServiceStack.OrmLite
 
         public static bool IsScalar<T>()
         {
-            return typeof(T).IsValueType || typeof(T) == typeof(string);
+            return typeof(T).IsValueType() || typeof(T) == typeof(string);
         }
 
         public static T ConvertTo<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, HashSet<string> onlyFields=null)

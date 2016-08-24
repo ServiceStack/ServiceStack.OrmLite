@@ -8,7 +8,7 @@ namespace ServiceStack.OrmLite.Dapper
     {
         public static string Name(this Type type)
         {
-#if COREFX
+#if NETSTANDARD1_3
             return type.GetTypeInfo().Name;
 #else
             return type.Name;
@@ -17,15 +17,25 @@ namespace ServiceStack.OrmLite.Dapper
 
         public static bool IsValueType(this Type type)
         {
-#if COREFX
+#if NETSTANDARD1_3
             return type.GetTypeInfo().IsValueType;
 #else
             return type.IsValueType;
 #endif
         }
+
+        public static bool IsPrimitive(this Type type)
+        {
+#if NETSTANDARD1_3
+            return type.GetTypeInfo().IsPrimitive;
+#else
+            return type.IsPrimitive;
+#endif
+        }
+
         public static bool IsEnum(this Type type)
         {
-#if COREFX
+#if NETSTANDARD1_3
             return type.GetTypeInfo().IsEnum;
 #else
             return type.IsEnum;
@@ -33,7 +43,7 @@ namespace ServiceStack.OrmLite.Dapper
         }
         public static bool IsGenericType(this Type type)
         {
-#if COREFX
+#if NETSTANDARD1_3
             return type.GetTypeInfo().IsGenericType;
 #else
             return type.IsGenericType;
@@ -41,13 +51,13 @@ namespace ServiceStack.OrmLite.Dapper
         }
         public static bool IsInterface(this Type type)
         {
-#if COREFX
+#if NETSTANDARD1_3
             return type.GetTypeInfo().IsInterface;
 #else
             return type.IsInterface;
 #endif
         }
-#if COREFX
+#if NETSTANDARD1_3
         public static IEnumerable<Attribute> GetCustomAttributes(this Type type, bool inherit)
         {
             return type.GetTypeInfo().GetCustomAttributes(inherit);
@@ -93,7 +103,7 @@ namespace ServiceStack.OrmLite.Dapper
 #endif
         public static MethodInfo GetPublicInstanceMethod(this Type type, string name, Type[] types)
         {
-#if COREFX
+#if NETSTANDARD1_3
             var method = type.GetMethod(name, types);
             return (method != null && method.IsPublic && !method.IsStatic) ? method : null;
 #else

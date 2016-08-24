@@ -14,7 +14,7 @@ namespace ServiceStack.OrmLite.Converters
                 return this.ConvertNumber(fieldType.GetEnumUnderlyingType(), value).ToString();
 
             var isEnumFlags = fieldType.IsEnumFlags() ||
-                (!fieldType.IsEnum && fieldType.IsNumericType()); //i.e. is real int && not Enum
+                (!fieldType.IsEnum() && fieldType.IsNumericType()); //i.e. is real int && not Enum
 
             long enumValue;
             if (!isEnumFlags && long.TryParse(value.ToString(), out enumValue))
@@ -33,9 +33,9 @@ namespace ServiceStack.OrmLite.Converters
         {
             var isIntEnum = fieldType.IsEnumFlags() || 
                 fieldType.HasAttribute<EnumAsIntAttribute>() ||
-                (!fieldType.IsEnum && fieldType.IsNumericType()); //i.e. is real int && not Enum
+                (!fieldType.IsEnum() && fieldType.IsNumericType()); //i.e. is real int && not Enum
 
-            if (isIntEnum && value.GetType().IsEnum)
+            if (isIntEnum && value.GetType().IsEnum())
                 return Convert.ChangeType(value, fieldType.GetTypeCode());
 
             long enumValue;
