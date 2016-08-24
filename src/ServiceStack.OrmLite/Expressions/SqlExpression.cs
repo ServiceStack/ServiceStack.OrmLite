@@ -2069,7 +2069,7 @@ namespace ServiceStack.OrmLite
                     statement = DialectProvider.GetQuotedTableName(argDef) + ".*";
                     break;
                 case "JoinAlias":
-                    statement = args[0] + "." + quotedColName.ToString().RightPart('.');
+                    statement = args[0] + "." + quotedColName.ToString().LastRightPart('.');
                     break;
                 default:
                     throw new NotSupportedException();

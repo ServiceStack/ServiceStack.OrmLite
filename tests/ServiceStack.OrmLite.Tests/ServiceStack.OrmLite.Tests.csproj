@@ -141,6 +141,7 @@
     <Compile Include="Async\SqlServerProviderTestsAsync.cs" />
     <Compile Include="Async\UpdateAsyncTests.cs" />
     <Compile Include="Expression\SqlExpressionJoinTests.cs" />
+    <Compile Include="Issues\JoinAliasWithSchemaIssue.cs" />
     <Compile Include="UseCase\CustomerOrdersUseCaseAsync.cs" />
     <Compile Include="AutoQueryTests.cs" />
     <Compile Include="CaptureSqlCommandFilterTests.cs" />
