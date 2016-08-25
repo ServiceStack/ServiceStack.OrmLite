@@ -133,6 +133,9 @@
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\GenericTableExpressions.cs">
       <Link>Expression\GenericTableExpressions.cs</Link>
     </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\LimitExpressionTests.cs">
+      <Link>Expression\LimitExpressionTests.cs</Link>
+    </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\LogicalExpressionsTest.cs">
       <Link>Expression\LogicalExpressionsTest.cs</Link>
     </Compile>
@@ -169,8 +172,20 @@
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Expression\UnaryExpressionsTest.cs">
       <Link>Expression\UnaryExpressionsTest.cs</Link>
     </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Issues\BelongsToIssue.cs">
+      <Link>BelongsToIssue.cs</Link>
+    </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Issues\ComplexJoinWithAlias.cs">
       <Link>Issues\ComplexJoinWithAlias.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Issues\CustomTypeTests.cs">
+      <Link>Issues\CustomTypeTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Issues\LoadReferencesFKandSelfRefIssue.cs">
+      <Link>Issues\LoadReferencesFKandSelfRefIssue.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Issues\LoadReferencesForeignKeyTests.cs">
+      <Link>Issues\LoadReferencesForeignKeyTests.cs</Link>
     </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Issues\MismatchSchemaTests.cs">
       <Link>Issues\MismatchSchemaTests.cs</Link>
@@ -190,6 +205,12 @@
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Issues\SelectIntoTests.cs">
       <Link>Issues\SelectIntoTests.cs</Link>
     </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Issues\SelectScalarTests.cs">
+      <Link>Issues\SelectScalarTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Issues\UtcDateTimeIssueTests.cs">
+      <Link>Issues\UtcDateTimeIssueTests.cs</Link>
+    </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\LoadReferencesJoinTests.cs">
       <Link>LoadReferencesJoinTests.cs</Link>
     </Compile>
@@ -199,17 +220,26 @@
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\LocalizationTests.cs">
       <Link>LocalizationTests.cs</Link>
     </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\LoggingTests.cs">
+      <Link>LoggingTests.cs</Link>
+    </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\MockAllApiTests.cs">
       <Link>MockAllApiTests.cs</Link>
     </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\MultipleConnectionIdTests.cs">
       <Link>MultipleConnectionIdTests.cs</Link>
     </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\OrderByTests.cs">
+      <Link>OrderByTests.cs</Link>
+    </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\OrmLiteBasicPersistenceProviderTests.cs">
       <Link>OrmLiteBasicPersistenceProviderTests.cs</Link>
     </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\OrmLiteComplexTypesTests.cs">
       <Link>OrmLiteComplexTypesTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\OrmLiteContextTests.cs">
+      <Link>OrmLiteContextTests.cs</Link>
     </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\OrmLiteCreateTableTests.cs">
       <Link>OrmLiteCreateTableTests.cs</Link>
@@ -382,6 +412,9 @@
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\UseCase\CustomerOrdersUseCase.cs">
       <Link>UseCase\CustomerOrdersUseCase.cs</Link>
     </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\UseCase\ExpressionsAuthorTests.cs">
+      <Link>UseCase\ExpressionsAuthorTests.cs</Link>
+    </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\UseCase\FieldFromInterfaceImplementationUseCase.cs">
       <Link>UseCase\FieldFromInterfaceImplementationUseCase.cs</Link>
     </Compile>
@@ -390,6 +423,9 @@
     </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\UseCase\NestedComplexTypeUseCase.cs">
       <Link>UseCase\NestedComplexTypeUseCase.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\UseCase\ParentChildCyclicalExample.cs">
+      <Link>UseCase\ParentChildCyclicalExample.cs</Link>
     </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\UseCase\ServiceStack_OrmLite_UseCase.cs">
       <Link>UseCase\ServiceStack_OrmLite_UseCase.cs</Link>
