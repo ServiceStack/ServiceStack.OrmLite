@@ -1514,7 +1514,7 @@ namespace ServiceStack.OrmLite
         {
             if (value == null) return "NULL";
 
-            var converter = value.GetType().IsEnum
+            var converter = value.GetType().IsEnum()
                 ? EnumConverter
                 : GetConverterBestMatch(fieldType);
             try

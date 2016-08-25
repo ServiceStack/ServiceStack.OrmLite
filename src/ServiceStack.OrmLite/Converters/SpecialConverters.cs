@@ -1,5 +1,8 @@
 ﻿using System;
 using ServiceStack.DataAnnotations;
+#if NETSTANDARD1_3
+using System.Globalization;
+#endif
 
 namespace ServiceStack.OrmLite.Converters
 {
@@ -11,7 +14,7 @@ namespace ServiceStack.OrmLite.Converters
         {
             var isEnumAsInt = fieldType.HasAttribute<EnumAsIntAttribute>();
             if (isEnumAsInt)
-                return this.ConvertNumber(fieldType.GetEnumUnderlyingType(), value).ToString();
+                return this.ConvertNumber(Enum.GetUnderlyingType(fieldType), value).ToString();
 
             var isEnumFlags = fieldType.IsEnumFlags() ||
                 (!fieldType.IsEnum() && fieldType.IsNumericType()); //i.e. is real int && not Enum
@@ -35,8 +38,13 @@ namespace ServiceStack.OrmLite.Converters
                 fieldType.HasAttribute<EnumAsIntAttribute>() ||
                 (!fieldType.IsEnum() && fieldType.IsNumericType()); //i.e. is real int && not Enum
 
+#if NETSTANDARD1_3
+            if (isIntEnum && value.GetType().IsEnum())
+                return Convert.ChangeType(value, (System.TypeCode)fieldType.GetTypeCode(), CultureInfo.CurrentCulture);
+#else
             if (isIntEnum && value.GetType().IsEnum())
                 return Convert.ChangeType(value, fieldType.GetTypeCode());
+#endif
 
             long enumValue;
             if (long.TryParse(value.ToString(), out enumValue))
@@ -155,7 +163,7 @@ namespace ServiceStack.OrmLite.Converters
 
         public override object FromDbValue(Type fieldType, object value)
         {
-            if (fieldType.IsInstanceOfType(value))
+            if (fieldType.InstanceOfType(value))
                 return value;
 
             var convertedValue = DialectProvider.StringSerializer.DeserializeFromString(value.ToString(), fieldType);

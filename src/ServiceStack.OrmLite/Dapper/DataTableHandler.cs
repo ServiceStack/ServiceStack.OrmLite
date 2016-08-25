@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Data;
-#if !COREFX
+#if !NETSTANDARD1_3
 namespace ServiceStack.OrmLite.Dapper
 {
     sealed class DataTableHandler : SqlMapper.ITypeHandler

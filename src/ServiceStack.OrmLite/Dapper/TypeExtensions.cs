@@ -57,6 +57,15 @@ namespace ServiceStack.OrmLite.Dapper
             return type.IsInterface;
 #endif
         }
+
+        public static Type UnderlyingSystemType(this Type type)
+        {
+#if NETSTANDARD1_3
+            return type.GetTypeInfo().AsType();
+#else
+            return type.UnderlyingSystemType;
+#endif
+        }
 #if NETSTANDARD1_3
         public static IEnumerable<Attribute> GetCustomAttributes(this Type type, bool inherit)
         {
@@ -75,6 +84,16 @@ namespace ServiceStack.OrmLite.Dapper
                 if (typeCodeLookup.TryGetValue(type, out result)) return result;
             }
             return TypeCode.Object;
+        }
+
+        public static Type GetTypeFromTypeCode(this TypeCode typeCode)
+        {
+            Type result;
+
+            if (typeFromTypeCodeLookup.TryGetValue(typeCode, out result))
+                return result;
+
+            return typeof(Object);
         }
         static readonly Dictionary<Type, TypeCode> typeCodeLookup = new Dictionary<Type, TypeCode>
         {
@@ -95,6 +114,27 @@ namespace ServiceStack.OrmLite.Dapper
             {typeof(uint), TypeCode.UInt32 },
             {typeof(ulong), TypeCode.UInt64 },
         };
+
+        static readonly Dictionary<TypeCode, Type> typeFromTypeCodeLookup = new Dictionary<TypeCode, Type>
+        {
+            {TypeCode.Boolean, typeof(bool) },
+            {TypeCode.Byte , typeof(byte) },
+            {TypeCode.Char, typeof(char) },
+            {TypeCode.DateTime, typeof(DateTime) },
+            {TypeCode.Decimal, typeof(decimal) },
+            {TypeCode.Double , typeof(double) },
+            {TypeCode.Int16, typeof(short) },
+            {TypeCode.Int32, typeof(int) },
+            {TypeCode.Int64, typeof(long) },
+            {TypeCode.Object, typeof(object) },
+            {TypeCode.SByte, typeof(sbyte) },
+            {TypeCode.Single, typeof(float) },
+            {TypeCode.String, typeof(string) },
+            {TypeCode.UInt16, typeof(ushort) },
+            {TypeCode.UInt32, typeof(uint) },
+            {TypeCode.UInt64, typeof(ulong) },
+        };
+
 #else
         public static TypeCode GetTypeCode(Type type)
         {
