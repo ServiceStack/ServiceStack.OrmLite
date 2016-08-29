@@ -1,0 +1,32 @@
+{
+  "configurations": {
+    "Debug": {
+      "buildOptions": {
+        "define": ["DEBUG", "TRACE"]
+      }
+    },
+    "Release": {
+      "buildOptions": {
+        "define": ["TRACE"],
+        "optimize": true
+      }
+    }
+  },
+  "dependencies": {
+    "NETStandard.Library": "1.6.0",
+    "ServiceStack.Interfaces" : "1.0.*",
+    "ServiceStack.Text" : "1.0.*",
+    "ServiceStack.Common" : "1.0.*",
+    "ServiceStack.OrmLite" : "1.0.*",
+    "Npgsql" : "3.1.*"
+  },
+  "compile": ["../../ServiceStack.OrmLite.PostgreSQL/**/*.cs"],
+  "frameworks": {
+    "netstandard1.3": {
+        "dependencies" : {
+         }
+     }
+   
+  },
+  "version": "1.0.0"
+}
