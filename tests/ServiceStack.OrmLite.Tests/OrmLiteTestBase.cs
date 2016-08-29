@@ -4,7 +4,9 @@ using System.Data.Common;
 using System.IO;
 using NUnit.Framework;
 using ServiceStack.Logging;
+#if !NETCORE
 using ServiceStack.OrmLite.Oracle;
+#endif
 
 namespace ServiceStack.OrmLite.Tests
 {

@@ -59,7 +59,7 @@ namespace ServiceStack.OrmLite.Tests
 
         private void PauseForOtherThreadsAfterInserts(IDbCommand cmd, int numberOfThreads)
         {
-            if (!cmd.CommandText.StartsWith("INSERT ", StringComparison.InvariantCultureIgnoreCase))
+            if (!cmd.CommandText.StartsWith("INSERT ", StringComparison.OrdinalIgnoreCase))
                 return;
 
             var initialReleasedCounter = _waitingThreadsReleasedCounter;
