@@ -2,7 +2,7 @@
   "configurations": {
     "Debug": {
       "buildOptions": {
-        "define": [DEBUG", "TRACE"]
+        "define": ["DEBUG", "TRACE"]
       }
     },
     "Release": {
