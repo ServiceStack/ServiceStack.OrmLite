@@ -778,6 +778,9 @@ namespace ServiceStack.OrmLite.Oracle
             var modelDef = GetModel(tableType);
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
+                if (fieldDef.CustomSelect != null)
+                    continue;
+
                 if (fieldDef.IsPrimaryKey)
                 {
                     sbPk.AppendFormat(sbPk.Length != 0 ? ",{0}" : "{0}", GetQuotedColumnName(fieldDef.FieldName));
