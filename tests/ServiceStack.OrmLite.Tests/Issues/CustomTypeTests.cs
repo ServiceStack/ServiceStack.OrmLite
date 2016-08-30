@@ -21,7 +21,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
         public void Can_select_Guid()
         {
             LogManager.LogFactory = new ConsoleLogFactory();
-
+            
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<PocoWithGuid>();

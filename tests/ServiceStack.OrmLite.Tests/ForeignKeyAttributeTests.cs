@@ -97,11 +97,13 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void CanCreateForeignWithOnDeleteSetDefault()
         {
+#if !NETCORE
             if (OrmLiteConfig.DialectProvider == MySqlDialect.Provider)
             {
                 //ignoring Not supported in InnoDB: http://stackoverflow.com/a/1498015/85785
                 return;
             }
+#endif
 
             using (var dbConn = OpenDbConnection())
             {

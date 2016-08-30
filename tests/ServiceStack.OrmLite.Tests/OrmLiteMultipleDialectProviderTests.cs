@@ -70,7 +70,11 @@ namespace ServiceStack.OrmLite.Tests
         public class MockExecFilter1 : OrmLiteExecFilter
         {
             public override T Exec<T>(IDbConnection dbConn, Func<IDbCommand, T> filter) {
+#if NETCORE                
+                var isCmd = System.Reflection.TypeExtensions.IsAssignableFrom(typeof(IDbCommand), typeof(T));
+#else
                 var isCmd = typeof(IDbCommand).IsAssignableFrom(typeof(T));
+#endif
                 var dbCmd = CreateCommand(dbConn);
                 Stopwatch watch = Stopwatch.StartNew();
                 try {
@@ -89,7 +93,11 @@ namespace ServiceStack.OrmLite.Tests
         public class MockExecFilter2 : OrmLiteExecFilter
         {
             public override T Exec<T>(IDbConnection dbConn, Func<IDbCommand, T> filter) {
+#if NETCORE                
+                var isCmd = System.Reflection.TypeExtensions.IsAssignableFrom(typeof(IDbCommand), typeof(T));
+#else
                 var isCmd = typeof(IDbCommand).IsAssignableFrom(typeof(T));
+#endif
                 var dbCmd = CreateCommand(dbConn);
                 Stopwatch watch = Stopwatch.StartNew();
                 try {

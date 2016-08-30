@@ -17,7 +17,10 @@
     "emitEntryPoint": true
   },
   "compile": ["../../ServiceStack.OrmLite.Tests/**/*.cs"],
-  "exclude": ["../../ServiceStack.OrmLite.Tests/Properties/Settings.Designer.cs"],
+  "exclude": [
+    "../../ServiceStack.OrmLite.Tests/Properties/Settings.Designer.cs", 
+    "../../ServiceStack.OrmLite.Tests/Expressions/RestrictionTests.cs"
+  ],
   "dependencies": {
     "Microsoft.NETCore.App": {
           "type": "platform",
@@ -31,17 +34,19 @@
 //    "ServiceStack.Common" : "1.0.*",
     "ServiceStack.Client" : "1.0.*",
     "ServiceStack.OrmLite.Sqlite" : "1.0.*",
-    "ServiceStack.OrmLite.SqlServer" : "1.0.*"
+    "ServiceStack.OrmLite.SqlServer" : "1.0.*",
+    "ServiceStack.OrmLite.PostgreSQL" : "1.0.*"
   },
   "frameworks": {
    "netcoreapp1.0": { 
             "imports": "dnxcore50",
 	     "dependencies" : {
-		"System.Runtime" : "4.1.0",
-		"System.Reflection" : "4.1.0",
-		"System.Reflection.Primitives" : "4.0.1",
-		"System.Runtime.Serialization.Primitives": "4.1.1"
-            }	
+          "System.Runtime" : "4.1.0",
+          "System.Runtime.Serialization.Xml" : "4.1.1",
+          "System.Reflection" : "4.1.0",
+          "System.Reflection.Primitives" : "4.0.1",
+          "System.Runtime.Serialization.Primitives": "4.1.1"
+        }	
      }
   }
 }

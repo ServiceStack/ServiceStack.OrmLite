@@ -104,7 +104,11 @@ namespace ServiceStack.OrmLite.Sqlite
                         Directory.CreateDirectory(existingDir);
                     }
                 }
+#if NETSTANDARD1_3
+                connString.AppendFormat(@"Data Source={0};", connectionString.Trim());
+#else
                 connString.AppendFormat(@"Data Source={0};Version=3;New=True;Compress=True;", connectionString.Trim());
+#endif
             }
             else
             {

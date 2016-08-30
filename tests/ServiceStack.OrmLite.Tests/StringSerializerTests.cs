@@ -145,8 +145,11 @@ namespace ServiceStack.OrmLite.Tests
             using (var db = OpenDbConnection())
             {
                 var hold = db.GetDialectProvider().StringSerializer;
+#if NETCORE                
+                db.GetDialectProvider().StringSerializer = (IStringSerializer)new XmlSerializableSerializer();
+#else                
                 db.GetDialectProvider().StringSerializer = new XmlSerializableSerializer();
-
+#endif
                 InsertModelWithComplexType(db);
 
                 var str = db.SqlScalar<string>(TestSql);

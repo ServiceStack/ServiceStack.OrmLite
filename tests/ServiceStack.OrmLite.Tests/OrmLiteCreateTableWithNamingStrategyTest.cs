@@ -233,9 +233,11 @@ namespace ServiceStack.OrmLite.Tests
 
         string toUnderscoreSeparatedCompound(string name)
         {
-
+#if NETCORE
+            string r = char.ToLower(name[0]).ToString();
+#else
             string r = char.ToLower(name[0]).ToString(CultureInfo.InvariantCulture);
-
+#endif
             for (int i = 1; i < name.Length; i++)
             {
                 if (char.IsUpper(name[i]))
