@@ -42,6 +42,11 @@ namespace ServiceStack.OrmLite.SqlServerTests.Issues
                 db.Delete(qux);
 
                 Assert.That(db.Select<ModelWithGeo>().Count, Is.EqualTo(1));
+
+                var foo = db.Single<ModelWithGeo>(x => x.Name == "Foo");
+                db.DeleteById<ModelWithGeo>(foo.GetId());
+
+                Assert.That(db.Select<ModelWithGeo>().Count, Is.EqualTo(0));
             }
         }
 
