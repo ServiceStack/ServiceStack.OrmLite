@@ -27,10 +27,7 @@ namespace ServiceStack.OrmLite.Support
             dialectProvider = dbCmd.GetDialectProvider();
         }
 
-        public List<FieldDefinition> FieldDefs
-        {
-            get { return fieldDefs; }
-        }
+        public List<FieldDefinition> FieldDefs => fieldDefs;
 
         protected string GetRefListSql(Type refType)
         {

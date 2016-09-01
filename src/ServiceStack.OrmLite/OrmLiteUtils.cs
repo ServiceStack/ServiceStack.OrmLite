@@ -40,12 +40,12 @@ namespace ServiceStack.OrmLite
                 sb.AppendLine()
                   .Append("PARAMS: ");
 
-                for (int i = 0; i < cmd.Parameters.Count; i++)
+                for (var i = 0; i < cmd.Parameters.Count; i++)
                 {
                     var p = (IDataParameter)cmd.Parameters[i];
                     if (i > 0)
                         sb.Append(", ");
-                    sb.AppendFormat("{0}={1}", p.ParameterName, p.Value);
+                    sb.Append($"{p.ParameterName}={p.Value}");
                 }
             }
 
@@ -416,10 +416,9 @@ namespace ServiceStack.OrmLite
         public static string StripQuotedStrings(this string text, char quote = '\'')
         {
             var sb = StringBuilderCache.Allocate();
-            bool inQuotes = false;
-            for (int i = 0; i < text.Length; i++)
+            var inQuotes = false;
+            foreach (var c in text)
             {
-                var c = text[i];
                 if (c == quote)
                 {
                     inQuotes = !inQuotes;

@@ -84,15 +84,9 @@ namespace ServiceStack.OrmLite
 
         private void Filter(IDbCommand dbCmd)
         {
-            if (SqlFilter != null)
-            {
-                SqlFilter(dbCmd.CommandText);
-            }
+            SqlFilter?.Invoke(dbCmd.CommandText);
 
-            if (SqlCommandFilter != null)
-            {
-                SqlCommandFilter(dbCmd);
-            }
+            SqlCommandFilter?.Invoke(dbCmd);
 
             if (PrintSql)
             {
@@ -147,12 +141,12 @@ namespace ServiceStack.OrmLite
 
         private long GetLongScalarResult(IDbCommand dbCmd)
         {
-            return LongScalarResultFn != null ? LongScalarResultFn(dbCmd) : LongScalarResult;
+            return LongScalarResultFn?.Invoke(dbCmd) ?? LongScalarResult;
         }
 
         public long GetLastInsertId(IDbCommand dbCmd)
         {
-            return LastInsertIdFn != null ? LastInsertIdFn(dbCmd) : LastInsertId;
+            return LastInsertIdFn?.Invoke(dbCmd) ?? LastInsertId;
         }
 
         public List<T> GetList<T>(IDbCommand dbCmd)
@@ -305,11 +299,8 @@ namespace ServiceStack.OrmLite
         public int ExecuteSql(IDbCommand dbCmd)
         {
             Filter(dbCmd);
-            if (ExecuteSqlFn != null)
-            {
-                return ExecuteSqlFn(dbCmd);
-            }
-            return ExecuteSqlResult;
+            return ExecuteSqlFn?.Invoke(dbCmd)
+                ?? ExecuteSqlResult;
         }
 
         public void Dispose()
@@ -343,17 +334,19 @@ namespace ServiceStack.OrmLite
     {
         public SqlCommandDetails(IDbCommand command)
         {
-            if (command != null)
-            {
-                Sql = command.CommandText;
-                if(command.Parameters.Count > 0)
-                {
-                    Parameters = new Dictionary<string, object>();
+            if (command == null)
+                return;
 
-                    foreach (IDataParameter parameter in command.Parameters)
-                        if (!Parameters.ContainsKey(parameter.ParameterName))
-                            Parameters.Add(parameter.ParameterName, parameter.Value);
-                }
+            Sql = command.CommandText;
+            if (command.Parameters.Count <= 0)
+                return;
+
+            Parameters = new Dictionary<string, object>();
+
+            foreach (IDataParameter parameter in command.Parameters)
+            {
+                if (!Parameters.ContainsKey(parameter.ParameterName))
+                    Parameters.Add(parameter.ParameterName, parameter.Value);
             }
         }
 

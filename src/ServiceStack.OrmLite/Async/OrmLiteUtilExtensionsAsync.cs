@@ -62,7 +62,7 @@ namespace ServiceStack.OrmLite
                     }
                     return (T)(object)row;
                 }
-                else if (isObjectDict)
+                if (isObjectDict)
                 {
                     var row = new Dictionary<string,object>();
                     for (var i = 0; i < reader.FieldCount; i++)
@@ -71,7 +71,7 @@ namespace ServiceStack.OrmLite
                     }
                     return (T)(object)row;
                 }
-                else if (isDynamic)
+                if (isDynamic)
                 {
                     var row = (IDictionary<string, object>) new ExpandoObject();
                     for (var i = 0; i < reader.FieldCount; i++)
@@ -80,7 +80,7 @@ namespace ServiceStack.OrmLite
                     }
                     return (T)(object)row;
                 }
-                else if (isTuple)
+                if (isTuple)
                 {
                     var tupleArgs = reader.ToMultiTuple(dialectProvider, modelIndexCaches, genericArgs, values);
                     var tuple = activator(tupleArgs.ToArray());

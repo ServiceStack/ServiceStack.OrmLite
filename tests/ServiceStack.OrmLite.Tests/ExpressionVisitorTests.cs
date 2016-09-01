@@ -279,7 +279,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_Select_using_int_Array_Contains()
         {
-            var vals = new int[] { (int)TestEnum.Val0, (int)TestEnum.Val1 };
+            var vals = new[] { (int)TestEnum.Val0, (int)TestEnum.Val1 };
 
             var q1 = Db.From<TestType>();
             q1.Where(q => vals.Contains((int)q.EnumCol) || vals.Contains((int)q.EnumCol));

@@ -105,8 +105,7 @@ namespace ServiceStack.OrmLite
         /// </param>
         public virtual SqlExpression<T> Select(string selectExpression)
         {
-            if (selectExpression != null)
-                selectExpression.SqlVerifyFragment();
+            selectExpression?.SqlVerifyFragment();
 
             return UnsafeSelect(selectExpression);
         }
@@ -286,8 +285,7 @@ namespace ServiceStack.OrmLite
 
         public virtual SqlExpression<T> From(string tables)
         {
-            if (tables != null)
-                tables.SqlVerifyFragment();
+            tables?.SqlVerifyFragment();
 
             return UnsafeFrom(tables);
         }
@@ -311,7 +309,8 @@ namespace ServiceStack.OrmLite
 
         public virtual SqlExpression<T> Where()
         {
-            if (underlyingExpression != null) underlyingExpression = null; //Where() clears the expression
+            underlyingExpression = null; //Where() clears the expression
+
             whereExpression = null;
             return this;
         }
@@ -991,8 +990,7 @@ namespace ServiceStack.OrmLite
 
         public virtual string ToDeleteRowStatement()
         {
-            return string.Format("DELETE FROM {0} {1}",
-                DialectProvider.GetQuotedTableName(modelDef), WhereExpression);
+            return $"DELETE FROM {DialectProvider.GetQuotedTableName(modelDef)} {WhereExpression}";
         }
 
         public virtual void PrepareUpdateStatement(IDbCommand dbCmd, T item, bool excludeDefaults = false)
@@ -1025,8 +1023,8 @@ namespace ServiceStack.OrmLite
             if (setFields.Length == 0)
                 throw new ArgumentException("No non-null or non-default values were provided for type: " + typeof(T).Name);
 
-            dbCmd.CommandText = string.Format("UPDATE {0} SET {1} {2}",
-                DialectProvider.GetQuotedTableName(modelDef), StringBuilderCache.ReturnAndFree(setFields), WhereExpression);
+            dbCmd.CommandText = $"UPDATE {DialectProvider.GetQuotedTableName(modelDef)} " +
+                                $"SET {StringBuilderCache.ReturnAndFree(setFields)} {WhereExpression}";
         }
 
         public virtual string ToSelectStatement()
@@ -1067,16 +1065,10 @@ namespace ServiceStack.OrmLite
             set { fromExpression = value; }
         }
 
-        public string BodyExpression
-        {
-            get
-            {
-                return FromExpression
-                    + (string.IsNullOrEmpty(WhereExpression) ? "" : "\n" + WhereExpression)
-                    + (string.IsNullOrEmpty(GroupByExpression) ? "" : "\n" + GroupByExpression)
-                    + (string.IsNullOrEmpty(HavingExpression) ? "" : "\n" + HavingExpression);
-            }
-        }
+        public string BodyExpression => FromExpression
+            + (string.IsNullOrEmpty(WhereExpression) ? "" : "\n" + WhereExpression)
+            + (string.IsNullOrEmpty(GroupByExpression) ? "" : "\n" + GroupByExpression)
+            + (string.IsNullOrEmpty(HavingExpression) ? "" : "\n" + HavingExpression);
 
         public string WhereExpression
         {
@@ -1241,7 +1233,7 @@ namespace ServiceStack.OrmLite
                     if (m.Expression.Type.IsNullableType())
                         return r;
 
-                    return string.Format("{0}={1}", r, GetQuotedTrueValue());
+                    return $"{r}={GetQuotedTrueValue()}";
                 }
 
             }
@@ -1263,25 +1255,23 @@ namespace ServiceStack.OrmLite
             var operand = BindOperant(b.NodeType);   //sep= " " ??
             if (operand == "AND" || operand == "OR")
             {
-                if (IsBooleanComparison(b.Left))
-                    left = new PartialSqlString(string.Format("{0}={1}", VisitMemberAccess((MemberExpression) b.Left), GetQuotedTrueValue()));
-                else
-                    left = Visit(b.Left);
+                left = IsBooleanComparison(b.Left) 
+                    ? new PartialSqlString($"{VisitMemberAccess((MemberExpression) b.Left)}={GetQuotedTrueValue()}") 
+                    : Visit(b.Left);
 
-                if (IsBooleanComparison(b.Right))
-                    right = new PartialSqlString(string.Format("{0}={1}", VisitMemberAccess((MemberExpression) b.Right), GetQuotedTrueValue()));
-                else
-                    right = Visit(b.Right);
+                right = IsBooleanComparison(b.Right) 
+                    ? new PartialSqlString($"{VisitMemberAccess((MemberExpression) b.Right)}={GetQuotedTrueValue()}") 
+                    : Visit(b.Right);
 
-                if (left as PartialSqlString == null && right as PartialSqlString == null)
+                if (!(left is PartialSqlString) && !(right is PartialSqlString))
                 {
                     var result = CachedExpressionCompiler.Evaluate(b);
                     return result;
                 }
 
-                if (left as PartialSqlString == null)
+                if (!(left is PartialSqlString))
                     left = ((bool)left) ? GetTrueExpression() : GetFalseExpression();
-                if (right as PartialSqlString == null)
+                if (!(right is PartialSqlString))
                     right = ((bool)right) ? GetTrueExpression() : GetFalseExpression();
             }
             else if ((operand == "=" || operand == "<>") && b.Left is MethodCallExpression && ((MethodCallExpression)b.Left).Method.Name == "CompareString")
@@ -1338,19 +1328,19 @@ namespace ServiceStack.OrmLite
                         left = DialectProvider.GetQuotedValue(left, rightEnum.EnumType);
                     }
                 }
-                else if (left as PartialSqlString == null && right as PartialSqlString == null)
+                else if (!(left is PartialSqlString) && !(right is PartialSqlString))
                 {
                     var evaluatedValue = CachedExpressionCompiler.Evaluate(b);
                     var result = VisitConstant(Expression.Constant(evaluatedValue));
                     return result;
                 }
-                else if (left as PartialSqlString == null)
+                else if (!(left is PartialSqlString))
                 {
-                    left = DialectProvider.GetQuotedValue(left, left != null ? left.GetType() : null);
+                    left = DialectProvider.GetQuotedValue(left, left?.GetType());
                 }
-                else if (right as PartialSqlString == null)
+                else if (!(right is PartialSqlString))
                 {
-                    right = GetValue(right, right != null ? right.GetType() : null);
+                    right = GetValue(right, right?.GetType());
                 }
             }
 
@@ -1365,7 +1355,7 @@ namespace ServiceStack.OrmLite
                 operand = "is not";
 
             if (operand == "+" && b.Left.Type == typeof(string) && b.Right.Type == typeof(string))
-                return BuildConcatExpression(new List<object>() {left, right});
+                return BuildConcatExpression(new List<object> {left, right});
 
             VisitFilter(operand, originalLeft, originalRight, ref left, ref right);
 
@@ -1373,7 +1363,7 @@ namespace ServiceStack.OrmLite
             {
                 case "MOD":
                 case "COALESCE":
-                    return new PartialSqlString(string.Format("{0}({1},{2})", operand, left, right));
+                    return new PartialSqlString($"{operand}({left},{right})");
                 default:
                     return new PartialSqlString("(" + left + sep + operand + sep + right + ")");
             }
@@ -1424,8 +1414,7 @@ namespace ServiceStack.OrmLite
                 if (types.Contains(e.NodeType))
                 {
                     var subUnaryExpr = e as UnaryExpression;
-                    var isSubExprAccess = subUnaryExpr != null && subUnaryExpr.Operand is IndexExpression;
-
+                    var isSubExprAccess = subUnaryExpr?.Operand is IndexExpression;
                     if (!isSubExprAccess)
                         return true;
                 }
@@ -1458,7 +1447,7 @@ namespace ServiceStack.OrmLite
                 }
 
                 var memberExpr = e as MemberExpression;
-                e = memberExpr != null ? memberExpr.Expression : null;
+                e = memberExpr?.Expression;
             }
 
             return false;
@@ -1509,7 +1498,7 @@ namespace ServiceStack.OrmLite
                         return Visit(doesNotEqualNull); // Nullable<T>.HasValue is equivalent to "!= null"
                     }
 
-                    throw new ArgumentException(string.Format("Expression '{0}' accesses unsupported property '{1}' of Nullable<T>", m, m.Member));
+                    throw new ArgumentException($"Expression '{m}' accesses unsupported property '{m.Member}' of Nullable<T>");
                 }
 
                 if (IsParameterOrConvertAccess(m))
@@ -1613,8 +1602,8 @@ namespace ServiceStack.OrmLite
             }
 
             var methodCallExpr = arg as MethodCallExpression;
-            var mi = methodCallExpr != null ? methodCallExpr.Method : null;
-            var declareType = mi != null && mi.DeclaringType != null ? mi.DeclaringType : null;
+            var mi = methodCallExpr?.Method;
+            var declareType = mi?.DeclaringType;
             if (declareType != null && declareType.Name == "Sql" && mi.Name != "Desc" && mi.Name != "Asc" && mi.Name != "As" && mi.Name != "AllFields") 
                 return new PartialSqlString(expr + " AS " + member.Name); // new { Count = Sql.Count("*") }
 
@@ -1709,8 +1698,8 @@ namespace ServiceStack.OrmLite
 
         private object GetNotValue(object o)
         {
-            if (o as PartialSqlString == null)
-                return !((bool) o);
+            if (!(o is PartialSqlString))
+                return !(bool) o;
 
             if (IsFieldName(o))
                 return new PartialSqlString(o + "=" + GetQuotedFalseValue());
@@ -1899,12 +1888,12 @@ namespace ServiceStack.OrmLite
 
         protected object GetTrueExpression()
         {
-            return new PartialSqlString(string.Format("({0}={1})", GetQuotedTrueValue(), GetQuotedTrueValue()));
+            return new PartialSqlString($"({GetQuotedTrueValue()}={GetQuotedTrueValue()})");
         }
 
         protected object GetFalseExpression()
         {
-            return new PartialSqlString(string.Format("({0}={1})", GetQuotedTrueValue(), GetQuotedFalseValue()));
+            return new PartialSqlString($"({GetQuotedTrueValue()}={GetQuotedFalseValue()})");
         }
 
         protected object GetQuotedTrueValue()
@@ -1922,11 +1911,8 @@ namespace ServiceStack.OrmLite
             OnlyFields = null;
             selectDistinct = distinct;
 
-            selectExpression = string.Format("SELECT {0}{1}",
-                (selectDistinct ? "DISTINCT " : ""),
-                (string.IsNullOrEmpty(fields) ?
-                    DialectProvider.GetColumnNames(modelDef) :
-                    fields));
+            selectExpression = $"SELECT {(selectDistinct ? "DISTINCT " : "")}" +
+                               (string.IsNullOrEmpty(fields) ? DialectProvider.GetColumnNames(modelDef) : fields);
         }
 
         public IList<string> GetAllFields()
@@ -1946,12 +1932,12 @@ namespace ServiceStack.OrmLite
             switch (m.Method.Name)
             {
                 case "Contains":
-                    List<Object> args = this.VisitExpressionList(m.Arguments);
+                    List<object> args = this.VisitExpressionList(m.Arguments);
                     object quotedColName = args.Last();
 
                     Expression memberExpr = m.Arguments[0];
                     if (memberExpr.NodeType == ExpressionType.MemberAccess)
-                        memberExpr = (m.Arguments[0] as MemberExpression);
+                        memberExpr = m.Arguments[0] as MemberExpression;
 
                     return ToInPartialString(memberExpr, quotedColName);
 
@@ -1962,11 +1948,11 @@ namespace ServiceStack.OrmLite
 
         private static bool IsEnumerableMethod(MethodCallExpression m)
         {
-            return (m.Object != null
+            return m.Object != null
                 && m.Object.Type.IsOrHasGenericInterfaceTypeOf(typeof(IEnumerable<>))
                 && m.Object.Type != typeof(string)
                 && m.Method.Name == "Contains"
-                && m.Arguments.Count == 1);
+                && m.Arguments.Count == 1;
         }
 
         protected virtual object VisitEnumerableMethodCall(MethodCallExpression m)
@@ -1974,7 +1960,7 @@ namespace ServiceStack.OrmLite
             switch (m.Method.Name)
             {
                 case "Contains":
-                    List<Object> args = this.VisitExpressionList(m.Arguments);
+                    List<object> args = this.VisitExpressionList(m.Arguments);
                     object quotedColName = args[0];
                     return ToInPartialString(m.Object, quotedColName);
 
@@ -1993,7 +1979,7 @@ namespace ServiceStack.OrmLite
                 ? CreateInParamSql(inArgs)
                 : "NULL";
 
-            var statement = string.Format("{0} {1} ({2})", quotedColName, "In", sqlIn);
+            var statement = $"{quotedColName} IN ({sqlIn})";
             return new PartialSqlString(statement);
         }
 
@@ -2020,7 +2006,7 @@ namespace ServiceStack.OrmLite
         {
             for (int i = 0; i < args.Count; i++)
             {
-                if (args[i] as PartialSqlString == null)
+                if (!(args[i] is PartialSqlString))
                     args[i] = ConvertToParam(args[i]);
             }
             return ToConcatPartialString(args);
@@ -2028,7 +2014,7 @@ namespace ServiceStack.OrmLite
 
         protected virtual PartialSqlString ToConcatPartialString(List<object> args)
         {
-            return new PartialSqlString(String.Join(" + ", args));
+            return new PartialSqlString(string.Join(" + ", args));
         }
 
         protected virtual object VisitSqlMethodCall(MethodCallExpression m)
@@ -2045,24 +2031,20 @@ namespace ServiceStack.OrmLite
                     statement = ConvertInExpressionToSql(m, quotedColName);
                     break;
                 case "Desc":
-                    statement = string.Format("{0} DESC", quotedColName);
+                    statement = $"{quotedColName} DESC";
                     break;
                 case "As":
-                    statement = string.Format("{0} As {1}", quotedColName,
-                        DialectProvider.GetQuotedColumnName(RemoveQuoteFromAlias(args[0].ToString())));
+                    statement = $"{quotedColName} AS {DialectProvider.GetQuotedColumnName(RemoveQuoteFromAlias(args[0].ToString()))}";
                     break;
                 case "Sum":
                 case "Count":
                 case "Min":
                 case "Max":
                 case "Avg":
-                    statement = string.Format("{0}({1}{2})",
-                        m.Method.Name,
-                        quotedColName,
-                        args.Count == 1 ? string.Format(",{0}", args[0]) : "");
+                    statement = $"{m.Method.Name}({quotedColName}{(args.Count == 1 ? $",{args[0]}" : "")})";
                     break;
                 case "CountDistinct":
-                    statement = string.Format("COUNT(DISTINCT {0})", quotedColName);
+                    statement = $"COUNT(DISTINCT {quotedColName})";
                     break;
                 case "AllFields":
                     var argDef = m.Arguments[0].Type.GetModelMetadata();
@@ -2093,7 +2075,7 @@ namespace ServiceStack.OrmLite
                     return FalseLiteral; // "column IN ([])" is always false
 
                 string sqlIn = CreateInParamSql(inArgs);
-                return string.Format("{0} {1} ({2})", quotedColName, m.Method.Name, sqlIn);
+                return $"{quotedColName} IN ({sqlIn})";
             }
 
             var exprArg = argValue as ISqlExpression;
@@ -2123,7 +2105,7 @@ namespace ServiceStack.OrmLite
                     subSelect = subSelect.Replace(renameParams[i].Item1, renameParams[i].Item2);
                 }
 
-                return string.Format("{0} {1} ({2})", quotedColName, "IN", subSelect);
+                return $"{quotedColName} IN ({subSelect})";
             }
 
             throw new NotSupportedException("In({0})".Fmt(argValue.GetType()));
@@ -2140,52 +2122,34 @@ namespace ServiceStack.OrmLite
             switch (m.Method.Name)
             {
                 case "Trim":
-                    statement = string.Format("ltrim(rtrim({0}))", quotedColName);
+                    statement = $"ltrim(rtrim({quotedColName}))";
                     break;
                 case "LTrim":
-                    statement = string.Format("ltrim({0})", quotedColName);
+                    statement = $"ltrim({quotedColName})";
                     break;
                 case "RTrim":
-                    statement = string.Format("rtrim({0})", quotedColName);
+                    statement = $"rtrim({quotedColName})";
                     break;
                 case "ToUpper":
-                    statement = string.Format("upper({0})", quotedColName);
+                    statement = $"upper({quotedColName})";
                     break;
                 case "ToLower":
-                    statement = string.Format("lower({0})", quotedColName);
+                    statement = $"lower({quotedColName})";
                     break;
                 case "StartsWith":
                     statement = !OrmLiteConfig.StripUpperInLike
-                        ? string.Format("upper({0}) like {1}{2}",
-                            quotedColName,
-                            ConvertToParam(wildcardArg.ToUpper() + "%"),
-                            escapeSuffix)
-                        : string.Format("{0} like {1}{2}",
-                            quotedColName,
-                            ConvertToParam(wildcardArg + "%"),
-                            escapeSuffix);
+                        ? $"upper({quotedColName}) like {ConvertToParam(wildcardArg.ToUpper() + "%")}{escapeSuffix}"
+                        : $"{quotedColName} like {ConvertToParam(wildcardArg + "%")}{escapeSuffix}";
                     break;
                 case "EndsWith":
                     statement = !OrmLiteConfig.StripUpperInLike
-                        ? string.Format("upper({0}) like {1}{2}",
-                            quotedColName,
-                            ConvertToParam("%" + wildcardArg.ToUpper()),
-                            escapeSuffix)
-                        : string.Format("{0} like {1}{2}",
-                            quotedColName,
-                            ConvertToParam("%" + wildcardArg),
-                            escapeSuffix);
+                        ? $"upper({quotedColName}) like {ConvertToParam("%" + wildcardArg.ToUpper())}{escapeSuffix}"
+                        : $"{quotedColName} like {ConvertToParam("%" + wildcardArg)}{escapeSuffix}";
                     break;
                 case "Contains":
                     statement = !OrmLiteConfig.StripUpperInLike
-                        ? string.Format("upper({0}) like {1}{2}",
-                            quotedColName,
-                            ConvertToParam("%" + wildcardArg.ToUpper() + "%"),
-                            escapeSuffix)
-                        : string.Format("{0} like {1}{2}",
-                            quotedColName,
-                            ConvertToParam("%" + wildcardArg + "%"),
-                            escapeSuffix);
+                        ? $"upper({quotedColName}) like {ConvertToParam("%" + wildcardArg.ToUpper() + "%")}{escapeSuffix}"
+                        : $"{quotedColName} like {ConvertToParam("%" + wildcardArg + "%")}{escapeSuffix}";
                     break;
                 case "Substring":
                     var startIndex = int.Parse(args[0].ToString()) + 1;
@@ -2194,8 +2158,8 @@ namespace ServiceStack.OrmLite
                         : GetSubstringSql(quotedColName, startIndex);
                     break;
                 case "ToString":
-                    statement = m.Object.Type == typeof(string) 
-                        ? string.Format("({0})", quotedColName) 
+                    statement = m.Object?.Type == typeof(string) 
+                        ? $"({quotedColName})"
                         : ToCast(quotedColName.ToString());
                     break;
                 default:
@@ -2206,14 +2170,14 @@ namespace ServiceStack.OrmLite
 
         protected virtual string ToCast(string quotedColName)
         {
-            return string.Format("cast({0} as varchar(1000))", quotedColName);
+            return $"cast({quotedColName} as varchar(1000))";
         }
 
         public virtual string GetSubstringSql(object quotedColumn, int startIndex, int? length = null)
         {
             return length != null
-                ? string.Format("substring({0} from {1} for {2})", quotedColumn, startIndex, length.Value)
-                : string.Format("substring({0} from {1})", quotedColumn, startIndex);
+                ? $"substring({quotedColumn} from {startIndex} for {length.Value})"
+                : $"substring({quotedColumn} from {startIndex})";
         }
 
         public IDbDataParameter CreateParam(string name,
@@ -2278,7 +2242,7 @@ namespace ServiceStack.OrmLite
         public EnumMemberAccess(string text, Type enumType)
             : base(text)
         {
-            if (!enumType.IsEnum) throw new ArgumentException("Type not valid", "enumType");
+            if (!enumType.IsEnum) throw new ArgumentException("Type not valid", nameof(enumType));
 
             EnumType = enumType;
         }
@@ -2291,7 +2255,7 @@ namespace ServiceStack.OrmLite
         protected SelectItem(IOrmLiteDialectProvider dialectProvider, string alias)
         {
             if (dialectProvider == null)
-                throw new ArgumentNullException("dialectProvider");
+                throw new ArgumentNullException(nameof(dialectProvider));
 
             DialectProvider = dialectProvider;
             Alias = alias;
@@ -2313,9 +2277,9 @@ namespace ServiceStack.OrmLite
             : base(dialectProvider, alias)
         {
             if (string.IsNullOrEmpty(selectExpression))
-                throw new ArgumentNullException("selectExpression");
+                throw new ArgumentNullException(nameof(selectExpression));
             if (string.IsNullOrEmpty(alias))
-                throw new ArgumentNullException("alias");
+                throw new ArgumentNullException(nameof(alias));
 
             SelectExpression = selectExpression;
             Alias = alias;
@@ -2341,7 +2305,7 @@ namespace ServiceStack.OrmLite
             : base(dialectProvider, columnAlias)
         {
             if (string.IsNullOrEmpty(columnName))
-                throw new ArgumentNullException("columnName");
+                throw new ArgumentNullException(nameof(columnName));
 
             ColumnName = columnName;
             QuotedTableAlias = quotedTableAlias;
@@ -2410,7 +2374,7 @@ namespace ServiceStack.OrmLite
 
             to.ParameterName = dialectProvider.GetParam(name);
 
-            var valueType = fieldType ?? (value != null ? value.GetType() : typeof(string));
+            var valueType = fieldType ?? (value?.GetType() ?? typeof(string));
 
             if (value != null)
             {

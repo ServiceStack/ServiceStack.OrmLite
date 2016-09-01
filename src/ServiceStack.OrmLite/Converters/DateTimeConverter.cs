@@ -10,15 +10,9 @@ namespace ServiceStack.OrmLite.Converters
     {
         protected static ILog Log = LogManager.GetLogger(typeof(DateTimeConverter));
 
-        public override string ColumnDefinition
-        {
-            get { return "DATETIME"; }
-        }
+        public override string ColumnDefinition => "DATETIME";
 
-        public override DbType DbType
-        {
-            get { return DbType.DateTime; }
-        }
+        public override DbType DbType => DbType.DateTime;
 
         public DateTimeKind DateStyle { get; set; }
 

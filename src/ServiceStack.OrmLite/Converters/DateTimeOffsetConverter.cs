@@ -6,15 +6,8 @@ namespace ServiceStack.OrmLite.Converters
 {
     public class DateTimeOffsetConverter : OrmLiteConverter
     {
-        public override string ColumnDefinition
-        {
-            get { return "DATETIMEOFFSET"; }
-        }
-
-        public override DbType DbType
-        {
-            get { return DbType.DateTimeOffset; }
-        }
+        public override string ColumnDefinition => "DATETIMEOFFSET";
+        public override DbType DbType => DbType.DateTimeOffset;
 
         //From OrmLiteDialectProviderBase:
         public override object FromDbValue(Type fieldType, object value)

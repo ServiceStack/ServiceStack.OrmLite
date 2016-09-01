@@ -6,7 +6,7 @@ namespace ServiceStack.OrmLite
     public class OrmLiteCommand : IDbCommand, IHasDbCommand
     {
         private OrmLiteConnection dbConn;
-        private IDbCommand dbCmd;
+        private readonly IDbCommand dbCmd;
         public IOrmLiteDialectProvider DialectProvider;
         public bool IsDisposed { get; private set; }
 
@@ -83,19 +83,14 @@ namespace ServiceStack.OrmLite
             get { return dbCmd.CommandType; }
             set { dbCmd.CommandType = value; }
         }
-        public IDataParameterCollection Parameters
-        {
-            get { return dbCmd.Parameters; }
-        }
+        public IDataParameterCollection Parameters => dbCmd.Parameters;
+
         public UpdateRowSource UpdatedRowSource
         {
             get { return dbCmd.UpdatedRowSource; }
             set { dbCmd.UpdatedRowSource = value; }
         }
 
-        public IDbCommand DbCommand
-        {
-            get { return dbCmd; }
-        }
+        public IDbCommand DbCommand => dbCmd;
     }
 }

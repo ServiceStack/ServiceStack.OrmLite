@@ -158,7 +158,5 @@ namespace ServiceStack.OrmLite
         {
             dbConn.Exec(dbCmd => dbCmd.DropTable<T>());
         }
-
-         
     }
 }

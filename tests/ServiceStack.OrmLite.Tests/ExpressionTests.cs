@@ -26,16 +26,16 @@ namespace ServiceStack.OrmLite.Tests
             var ids = new[] { 1, 2, 3 };
 
             Assert.That(expr().Where(q => Sql.In(q.Id, 1, 2, 3)).WhereExpression,
-                Is.EqualTo("WHERE \"Id\" In (@0,@1,@2)"));
+                Is.EqualTo("WHERE \"Id\" IN (@0,@1,@2)"));
 
             Assert.That(expr().Where(q => Sql.In(q.Id, ids)).WhereExpression,
-                Is.EqualTo("WHERE \"Id\" In (@0,@1,@2)"));
+                Is.EqualTo("WHERE \"Id\" IN (@0,@1,@2)"));
 
             Assert.That(expr().Where(q => Sql.In(q.Id, ids.ToList())).WhereExpression,
-                Is.EqualTo("WHERE \"Id\" In (@0,@1,@2)"));
+                Is.EqualTo("WHERE \"Id\" IN (@0,@1,@2)"));
 
             Assert.That(expr().Where(q => Sql.In(q.Id, ids.ToList().Cast<object>())).WhereExpression,
-                Is.EqualTo("WHERE \"Id\" In (@0,@1,@2)"));
+                Is.EqualTo("WHERE \"Id\" IN (@0,@1,@2)"));
         }
 
         [Test]
@@ -44,16 +44,16 @@ namespace ServiceStack.OrmLite.Tests
             var ids = new[] { "A", "B", "C" };
 
             Assert.That(expr().Where(q => Sql.In(q.FirstName, "A", "B", "C")).WhereExpression,
-                Is.EqualTo("WHERE \"FirstName\" In (@0,@1,@2)"));
+                Is.EqualTo("WHERE \"FirstName\" IN (@0,@1,@2)"));
 
             Assert.That(expr().Where(q => Sql.In(q.FirstName, ids)).WhereExpression,
-                Is.EqualTo("WHERE \"FirstName\" In (@0,@1,@2)"));
+                Is.EqualTo("WHERE \"FirstName\" IN (@0,@1,@2)"));
 
             Assert.That(expr().Where(q => Sql.In(q.FirstName, ids.ToList())).WhereExpression,
-                Is.EqualTo("WHERE \"FirstName\" In (@0,@1,@2)"));
+                Is.EqualTo("WHERE \"FirstName\" IN (@0,@1,@2)"));
 
             Assert.That(expr().Where(q => Sql.In(q.FirstName, ids.ToList().Cast<object>())).WhereExpression,
-                Is.EqualTo("WHERE \"FirstName\" In (@0,@1,@2)"));
+                Is.EqualTo("WHERE \"FirstName\" IN (@0,@1,@2)"));
         }
     }
 }

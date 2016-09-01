@@ -21,7 +21,7 @@ namespace ServiceStack.OrmLite
             CancellationToken token)
         {
             if (onlyFields == null)
-                throw new ArgumentNullException("onlyFields");
+                throw new ArgumentNullException(nameof(onlyFields));
 
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Update(onlyFields);
@@ -35,7 +35,7 @@ namespace ServiceStack.OrmLite
             CancellationToken token)
         {
             if (onlyFields == null)
-                throw new ArgumentNullException("onlyFields");
+                throw new ArgumentNullException(nameof(onlyFields));
 
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Update(onlyFields);
@@ -49,7 +49,7 @@ namespace ServiceStack.OrmLite
             CancellationToken token)
         {
             if (updateFields == null)
-                throw new ArgumentNullException("updateFields");
+                throw new ArgumentNullException(nameof(updateFields));
 
             if (OrmLiteConfig.UpdateFilter != null)
                 OrmLiteConfig.UpdateFilter(dbCmd, CachedExpressionCompiler.Evaluate(updateFields));
@@ -67,7 +67,7 @@ namespace ServiceStack.OrmLite
             SqlExpression<T> q)
         {
             if (updateFields == null)
-                throw new ArgumentNullException("updateFields");
+                throw new ArgumentNullException(nameof(updateFields));
 
             if (OrmLiteConfig.UpdateFilter != null)
                 OrmLiteConfig.UpdateFilter(dbCmd, CachedExpressionCompiler.Evaluate(updateFields));
@@ -82,8 +82,7 @@ namespace ServiceStack.OrmLite
 
         internal static Task<int> UpdateNonDefaultsAsync<T>(this IDbCommand dbCmd, T item, Expression<Func<T, bool>> obj, CancellationToken token)
         {
-            if (OrmLiteConfig.UpdateFilter != null)
-                OrmLiteConfig.UpdateFilter(dbCmd, item);
+            OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, item);
 
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Where(obj);
@@ -93,8 +92,7 @@ namespace ServiceStack.OrmLite
 
         internal static Task<int> UpdateAsync<T>(this IDbCommand dbCmd, T item, Expression<Func<T, bool>> expression, CancellationToken token)
         {
-            if (OrmLiteConfig.UpdateFilter != null)
-                OrmLiteConfig.UpdateFilter(dbCmd, item);
+            OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, item);
 
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Where(expression);
@@ -114,8 +112,7 @@ namespace ServiceStack.OrmLite
 
         internal static Task InsertOnlyAsync<T>(this IDbCommand dbCmd, T obj, string[] onlyFields, CancellationToken token)
         {
-            if (OrmLiteConfig.InsertFilter != null)
-                OrmLiteConfig.InsertFilter(dbCmd, obj);
+            OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj);
 
             var sql = dbCmd.GetDialectProvider().ToInsertRowStatement(dbCmd, obj, onlyFields);
             return dbCmd.ExecuteSqlAsync(sql, token);
@@ -124,10 +121,9 @@ namespace ServiceStack.OrmLite
         public static Task<int> InsertOnlyAsync<T>(this IDbCommand dbCmd, Expression<Func<T>> insertFields, CancellationToken token)
         {
             if (insertFields == null)
-                throw new ArgumentNullException("insertFields");
+                throw new ArgumentNullException(nameof(insertFields));
 
-            if (OrmLiteConfig.InsertFilter != null)
-                OrmLiteConfig.InsertFilter(dbCmd, CachedExpressionCompiler.Evaluate(insertFields));
+            OrmLiteConfig.InsertFilter?.Invoke(dbCmd, CachedExpressionCompiler.Evaluate(insertFields));
 
             var insertFieldsValues = insertFields.AssignedValues();
             dbCmd.GetDialectProvider().PrepareParameterizedInsertStatement<T>(dbCmd, insertFieldsValues.Keys);

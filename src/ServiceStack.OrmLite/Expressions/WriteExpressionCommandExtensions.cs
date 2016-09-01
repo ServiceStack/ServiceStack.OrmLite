@@ -37,7 +37,7 @@ namespace ServiceStack.OrmLite
             Expression<Func<T, bool>> where = null)
         {
             if (onlyFields == null)
-                throw new ArgumentNullException("onlyFields");
+                throw new ArgumentNullException(nameof(onlyFields));
 
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Update(onlyFields);
@@ -50,7 +50,7 @@ namespace ServiceStack.OrmLite
             Expression<Func<T, bool>> where = null)
         {
             if (onlyFields == null)
-                throw new ArgumentNullException("onlyFields");
+                throw new ArgumentNullException(nameof(onlyFields));
 
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Update(onlyFields);
@@ -63,10 +63,9 @@ namespace ServiceStack.OrmLite
             SqlExpression<T> q)
         {
             if (updateFields == null)
-                throw new ArgumentNullException("updateFields");
+                throw new ArgumentNullException(nameof(updateFields));
 
-            if (OrmLiteConfig.UpdateFilter != null)
-                OrmLiteConfig.UpdateFilter(dbCmd, CachedExpressionCompiler.Evaluate(updateFields));
+            OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, CachedExpressionCompiler.Evaluate(updateFields));
 
             q.CopyParamsTo(dbCmd);
 
@@ -81,10 +80,9 @@ namespace ServiceStack.OrmLite
             SqlExpression<T> q)
         {
             if (updateFields == null)
-                throw new ArgumentNullException("updateFields");
+                throw new ArgumentNullException(nameof(updateFields));
 
-            if (OrmLiteConfig.UpdateFilter != null)
-                OrmLiteConfig.UpdateFilter(dbCmd, CachedExpressionCompiler.Evaluate(updateFields));
+            OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, CachedExpressionCompiler.Evaluate(updateFields));
 
             q.CopyParamsTo(dbCmd);
 
@@ -96,8 +94,7 @@ namespace ServiceStack.OrmLite
 
         public static int UpdateNonDefaults<T>(this IDbCommand dbCmd, T item, Expression<Func<T, bool>> obj)
         {
-            if (OrmLiteConfig.UpdateFilter != null)
-                OrmLiteConfig.UpdateFilter(dbCmd, item);
+            OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, item);
 
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Where(obj);
@@ -107,8 +104,7 @@ namespace ServiceStack.OrmLite
 
         public static int Update<T>(this IDbCommand dbCmd, T item, Expression<Func<T, bool>> expression)
         {
-            if (OrmLiteConfig.UpdateFilter != null)
-                OrmLiteConfig.UpdateFilter(dbCmd, item);
+            OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, item);
 
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Where(expression);
@@ -147,8 +143,8 @@ namespace ServiceStack.OrmLite
                     .Append(dialectProvider.AddParam(dbCmd, value, fieldDef.ColumnType).ParameterName);
             }
 
-            dbCmd.CommandText = string.Format("UPDATE {0} SET {1} {2}",
-                dialectProvider.GetQuotedTableName(modelDef), StringBuilderCache.ReturnAndFree(sql), whereSql);
+            dbCmd.CommandText = $"UPDATE {dialectProvider.GetQuotedTableName(modelDef)} " +
+                                $"SET {StringBuilderCache.ReturnAndFree(sql)} {whereSql}";
         }
 
         public static void InsertOnly<T>(this IDbCommand dbCmd, T obj, string[] onlyFields)
@@ -163,10 +159,9 @@ namespace ServiceStack.OrmLite
         public static int InsertOnly<T>(this IDbCommand dbCmd, Expression<Func<T>> insertFields)
         {
             if (insertFields == null)
-                throw new ArgumentNullException("insertFields");
+                throw new ArgumentNullException(nameof(insertFields));
 
-            if (OrmLiteConfig.InsertFilter != null)
-                OrmLiteConfig.InsertFilter(dbCmd, CachedExpressionCompiler.Evaluate(insertFields));
+            OrmLiteConfig.InsertFilter?.Invoke(dbCmd, CachedExpressionCompiler.Evaluate(insertFields));
 
             var insertFieldsValues = insertFields.AssignedValues();
             dbCmd.GetDialectProvider().PrepareParameterizedInsertStatement<T>(dbCmd, insertFieldsValues.Keys);

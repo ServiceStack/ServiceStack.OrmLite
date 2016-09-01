@@ -26,7 +26,7 @@ namespace ServiceStack.OrmLite
         public SqlExpression<T> Join<Target>(Expression<Func<T, Target, bool>> joinExpr, JoinFormatDelegate joinFormat)
         {
             if (joinFormat == null)
-                throw new ArgumentNullException("joinFormat");
+                throw new ArgumentNullException(nameof(joinFormat));
 
             return InternalJoin("INNER JOIN", joinExpr, joinFormat);
         }
@@ -54,7 +54,7 @@ namespace ServiceStack.OrmLite
         public SqlExpression<T> LeftJoin<Target>(Expression<Func<T, Target, bool>> joinExpr, JoinFormatDelegate joinFormat)
         {
             if (joinFormat == null)
-                throw new ArgumentNullException("joinFormat");
+                throw new ArgumentNullException(nameof(joinFormat));
 
             return InternalJoin("LEFT JOIN", joinExpr, joinFormat);
         }
@@ -82,7 +82,7 @@ namespace ServiceStack.OrmLite
         public SqlExpression<T> RightJoin<Target>(Expression<Func<T, Target, bool>> joinExpr, JoinFormatDelegate joinFormat)
         {
             if (joinFormat == null)
-                throw new ArgumentNullException("joinFormat");
+                throw new ArgumentNullException(nameof(joinFormat));
 
             return InternalJoin("RIGHT JOIN", joinExpr, joinFormat);
         }
@@ -127,7 +127,7 @@ namespace ServiceStack.OrmLite
 
         private string InternalCreateSqlFromExpression(Expression joinExpr, bool isCrossJoin) 
         {
-            return "{0} {1}".Fmt((isCrossJoin ? "WHERE" : "ON"), VisitJoin(joinExpr).ToString());
+            return $"{(isCrossJoin ? "WHERE" : "ON")} {VisitJoin(joinExpr)}";
         }
 
         private string InternalCreateSqlFromDefinitions(ModelDefinition sourceDef, ModelDefinition targetDef, bool isCrossJoin) 
@@ -146,7 +146,7 @@ namespace ServiceStack.OrmLite
             if (refField == null) 
             {
                 if(!isCrossJoin)
-                    throw new ArgumentException("Could not infer relationship between {0} and {1}".Fmt(sourceDef.ModelName, targetDef.ModelName));
+                    throw new ArgumentException($"Could not infer relationship between {sourceDef.ModelName} and {targetDef.ModelName}");
 
                 return string.Empty;
             }
@@ -190,8 +190,8 @@ namespace ServiceStack.OrmLite
                 : targetDef;
 
             FromExpression += joinFormat != null
-                ? " {0} {1}".Fmt(joinType, joinFormat(DialectProvider, joinDef, sqlExpr))
-                : " {0} {1} {2}".Fmt(joinType, SqlTable(joinDef), sqlExpr);
+                ? $" {joinType} {joinFormat(DialectProvider, joinDef, sqlExpr)}"
+                : $" {joinType} {SqlTable(joinDef)} {sqlExpr}";
 
             return this;
         }
@@ -239,9 +239,7 @@ namespace ServiceStack.OrmLite
 
                                 if (fieldDef.CustomSelect == null)
                                 {
-                                    sbSelect.AppendFormat("{0} as {1}",
-                                    DialectProvider.GetQuotedColumnName(tableDef, matchingField),
-                                    SqlColumn(fieldDef.Name));
+                                    sbSelect.Append($"{DialectProvider.GetQuotedColumnName(tableDef, matchingField)} AS {SqlColumn(fieldDef.Name)}");
                                 }
                                 else
                                 {
@@ -268,16 +266,14 @@ namespace ServiceStack.OrmLite
 
                             if (fieldDef.CustomSelect == null)
                             {
-                                sbSelect.AppendFormat("{0}.{1}",
-                                    SqlTable(tableDef),
-                                    tableFieldDef.GetQuotedName(DialectProvider));
+                                sbSelect.Append($"{SqlTable(tableDef)}.{tableFieldDef.GetQuotedName(DialectProvider)}");
 
                                 if (tableFieldDef.Alias != null)
                                     sbSelect.Append(" AS ").Append(SqlColumn(fieldDef.Name));
                             }
                             else
                             {
-                                sbSelect.Append(tableFieldDef.CustomSelect + " AS " + tableFieldDef.FieldName);
+                                sbSelect.Append(tableFieldDef.CustomSelect).Append(" AS ").Append(tableFieldDef.FieldName);
                             }
 
                             found = true;
@@ -303,9 +299,7 @@ namespace ServiceStack.OrmLite
                             if (sbSelect.Length > 0)
                                 sbSelect.Append(", ");
 
-                            sbSelect.AppendFormat("{0} as {1}",
-                                DialectProvider.GetQuotedColumnName(tableDef, matchingField),
-                                SqlColumn(fieldDef.Name));
+                            sbSelect.Append($"{DialectProvider.GetQuotedColumnName(tableDef, matchingField)} as {SqlColumn(fieldDef.Name)}");
                             
                             break;
                         }

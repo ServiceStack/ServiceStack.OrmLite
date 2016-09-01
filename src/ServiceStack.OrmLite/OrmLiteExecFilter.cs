@@ -63,9 +63,7 @@ namespace ServiceStack.OrmLite
             }
             catch (Exception ex)
             {
-                if (OrmLiteConfig.ExceptionFilter != null)
-                    OrmLiteConfig.ExceptionFilter(dbCmd, ex);
-
+                OrmLiteConfig.ExceptionFilter?.Invoke(dbCmd, ex);
                 throw;
             }
             finally
@@ -94,9 +92,7 @@ namespace ServiceStack.OrmLite
             }
             catch (Exception ex)
             {
-                if (OrmLiteConfig.ExceptionFilter != null)
-                    OrmLiteConfig.ExceptionFilter(dbCmd, ex);
-
+                OrmLiteConfig.ExceptionFilter?.Invoke(dbCmd, ex);
                 throw;
             }
             finally

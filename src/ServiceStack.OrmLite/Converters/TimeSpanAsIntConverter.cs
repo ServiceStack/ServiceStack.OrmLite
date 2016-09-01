@@ -6,15 +6,8 @@ namespace ServiceStack.OrmLite.Converters
 {
     public class TimeSpanAsIntConverter : OrmLiteConverter
     {
-        public override string ColumnDefinition
-        {
-            get { return "BIGINT"; }
-        }
-
-        public override DbType DbType
-        {
-            get { return DbType.Int64; }
-        }
+        public override string ColumnDefinition => "BIGINT";
+        public override DbType DbType => DbType.Int64;
 
         public override string ToQuotedString(Type fieldType, object value)
         {

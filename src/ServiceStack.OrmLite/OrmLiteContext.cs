@@ -116,7 +116,7 @@ namespace ServiceStack.OrmLite
 
         public static OrmLiteState GetOrCreateState()
         {
-            return (OrmLiteState as OrmLiteState)
+            return OrmLiteState
                 ?? CreateNewState();
         }
 
@@ -126,8 +126,8 @@ namespace ServiceStack.OrmLite
             {
                 if (Instance.Items.Contains("OrmLiteState"))
                     return Instance.Items["OrmLiteState"] as OrmLiteState;
-                else
-                    return null;
+
+                return null;
             }
             set
             {
@@ -141,9 +141,7 @@ namespace ServiceStack.OrmLite
             get
             {
                 var state = OrmLiteState;
-                return state != null
-                    ? state.TSTransaction
-                    : null;
+                return state?.TSTransaction;
             }
             set { GetOrCreateState().TSTransaction = value; }
         }
