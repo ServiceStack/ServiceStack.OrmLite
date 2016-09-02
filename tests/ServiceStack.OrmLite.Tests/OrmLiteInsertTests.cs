@@ -26,6 +26,54 @@ namespace ServiceStack.OrmLite.Tests
             }
         }
 
+        public class PersonWithAliasedAge
+        {
+            public string Name { get; set; }
+            [Alias("YearsOld")]
+            public int Age { get; set; }
+        }
+
+
+        [Test]
+        public void Can_InsertOnly_aliased_fields()
+        {
+            using (var connection = OpenDbConnection())
+            {
+                connection.CreateTable<PersonWithAliasedAge>(true);
+
+                connection.InsertOnly(() => new PersonWithAliasedAge {Name = "Bob", Age = 30});
+            }
+        }
+
+        public class PersonUsingEnumAsInt
+        {
+            public string Name { get; set; }
+            public Gender Gender { get; set; }
+        }
+
+        [EnumAsInt]
+        public enum Gender
+        {
+            Unknown = 0,
+            Female,
+            Male
+        }
+
+        [Test]
+        public void Can_InsertOnly_fields_using_EnumAsInt()
+        {
+            using (var connection = OpenDbConnection())
+            {
+                connection.CreateTable<PersonUsingEnumAsInt>(true);
+
+                connection.InsertOnly(() => new PersonUsingEnumAsInt {Name = "Sarah", Gender = Gender.Female});
+
+                var saved = connection.Single<PersonUsingEnumAsInt>(p => p.Name == "Sarah");
+                Assert.That(saved.Name, Is.EqualTo("Sarah"));
+                Assert.That(saved.Gender, Is.EqualTo(Gender.Female));
+            }
+        }
+
         [Test]
         public void Can_insert_and_select_from_ModelWithFieldsOfDifferentTypes_table()
         {
