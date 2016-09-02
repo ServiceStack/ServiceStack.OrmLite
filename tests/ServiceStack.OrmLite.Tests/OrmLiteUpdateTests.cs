@@ -509,6 +509,33 @@ namespace ServiceStack.OrmLite.Tests
             }
         }
 
+
+        [Test]
+        public void Can_UpdateOnly_aliased_fields()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<PersonWithAliasedAge>();
+
+                db.UpdateOnly(() => new PersonWithAliasedAge { Name = "Bob", Age = 30 });
+            }
+        }
+
+        [Test]
+        public void Can_UpdateOnly_fields_using_EnumAsInt()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<PersonUsingEnumAsInt>();
+
+                db.InsertOnly(() => new PersonUsingEnumAsInt { Name = "Gene", Gender = Gender.Female });
+                db.UpdateOnly(() => new PersonUsingEnumAsInt { Name = "Gene", Gender = Gender.Male });
+
+                var saved = db.Single<PersonUsingEnumAsInt>(p => p.Name == "Gene");
+                Assert.That(saved.Name, Is.EqualTo("Gene"));
+                Assert.That(saved.Gender, Is.EqualTo(Gender.Male));
+            }
+        }
     }
 
     [CompositeIndex("FirstName", "LastName")]

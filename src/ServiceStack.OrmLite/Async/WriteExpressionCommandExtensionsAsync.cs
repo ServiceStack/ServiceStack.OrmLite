@@ -48,36 +48,15 @@ namespace ServiceStack.OrmLite
             SqlExpression<T> q,
             CancellationToken token)
         {
-            if (updateFields == null)
-                throw new ArgumentNullException(nameof(updateFields));
-
-            if (OrmLiteConfig.UpdateFilter != null)
-                OrmLiteConfig.UpdateFilter(dbCmd, CachedExpressionCompiler.Evaluate(updateFields));
-
-            q.CopyParamsTo(dbCmd);
-
-            var updateFieldValues = updateFields.AssignedValues();
-            dbCmd.GetDialectProvider().PrepareUpdateRowStatement<T>(dbCmd, updateFieldValues, q.WhereExpression);
-
-            return dbCmd.ExecNonQueryAsync(token);
+            return dbCmd.InitUpdateOnly(updateFields, q).ExecNonQueryAsync(token);
         }
 
         public static Task<int> UpdateAddAsync<T>(this IDbCommand dbCmd,
             Expression<Func<T>> updateFields,
-            SqlExpression<T> q)
+            SqlExpression<T> q,
+            CancellationToken token)
         {
-            if (updateFields == null)
-                throw new ArgumentNullException(nameof(updateFields));
-
-            if (OrmLiteConfig.UpdateFilter != null)
-                OrmLiteConfig.UpdateFilter(dbCmd, CachedExpressionCompiler.Evaluate(updateFields));
-
-            q.CopyParamsTo(dbCmd);
-
-            var updateFieldValues = updateFields.AssignedValues();
-            dbCmd.GetDialectProvider().PrepareUpdateRowAddStatement<T>(dbCmd, updateFieldValues, q.WhereExpression);
-
-            return dbCmd.ExecNonQueryAsync();
+            return dbCmd.InitUpdateAdd(updateFields, q).ExecNonQueryAsync(token);
         }
 
         internal static Task<int> UpdateNonDefaultsAsync<T>(this IDbCommand dbCmd, T item, Expression<Func<T, bool>> obj, CancellationToken token)

@@ -90,7 +90,7 @@ namespace ServiceStack.OrmLite
             Expression<Func<T, bool>> where = null,
             CancellationToken token = default(CancellationToken))
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateAddAsync(updateFields, dbCmd.GetDialectProvider().SqlExpression<T>().Where(where)));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateAddAsync(updateFields, dbCmd.GetDialectProvider().SqlExpression<T>().Where(where), token));
         }
 
         /// <summary>
@@ -120,7 +120,7 @@ namespace ServiceStack.OrmLite
             SqlExpression<T> q,
             CancellationToken token = default(CancellationToken))
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateAddAsync(updateFields, q));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateAddAsync(updateFields, q, token));
         }
 
         /// <summary>
