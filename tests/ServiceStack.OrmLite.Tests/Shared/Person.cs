@@ -79,4 +79,30 @@ namespace ServiceStack.OrmLite.Tests.Shared
         public int Id { get; set; }
     }
 
+
+    public class PersonWithAliasedAge
+    {
+        [PrimaryKey]
+        public string Name { get; set; }
+
+        [Alias("YearsOld")]
+        public int Age { get; set; }
+
+        public string Ignored { get; set; }
+    }
+
+    public class PersonUsingEnumAsInt
+    {
+        public string Name { get; set; }
+        public Gender Gender { get; set; }
+    }
+
+    [EnumAsInt]
+    public enum Gender
+    {
+        Unknown = 0,
+        Female,
+        Male
+    }
+
 }

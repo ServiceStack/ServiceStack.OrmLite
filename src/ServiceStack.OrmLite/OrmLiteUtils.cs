@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Dynamic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -930,6 +931,13 @@ namespace ServiceStack.OrmLite
         public static string[] AllAnonFields(this Type type)
         {
             return type.GetPublicProperties().Select(x => x.Name).ToArray();
+        }
+
+        public static T EvalFactoryFn<T>(this Expression<Func<T>> expr)
+        {
+            var factoryFn = (Func<T>)CachedExpressionCompiler.Evaluate(expr);
+            var model = factoryFn();
+            return model;
         }
     }
 }

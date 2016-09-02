@@ -653,6 +653,44 @@ namespace ServiceStack.OrmLite
                               $"VALUES ({StringBuilderCacheAlt.ReturnAndFree(sbColumnValues)})";
         }
 
+        public virtual void PrepareInsertRowStatement<T>(IDbCommand dbCmd, Dictionary<string, object> args)
+        {
+            var sbColumnNames = StringBuilderCache.Allocate();
+            var sbColumnValues = StringBuilderCacheAlt.Allocate();
+            var modelDef = typeof(T).GetModelDefinition();
+
+            dbCmd.Parameters.Clear();
+            dbCmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
+
+            foreach (var entry in args)
+            {
+                var fieldDef = modelDef.GetFieldDefinition(entry.Key);
+                if (fieldDef.ShouldSkipInsert())
+                    continue;
+
+                var value = entry.Value;
+
+                if (sbColumnNames.Length > 0)
+                    sbColumnNames.Append(",");
+                if (sbColumnValues.Length > 0)
+                    sbColumnValues.Append(",");
+
+                try
+                {
+                    sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
+                    sbColumnValues.Append(this.AddParam(dbCmd, value, fieldDef.ColumnType).ParameterName);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("ERROR in PrepareInsertRowStatement(): " + ex.Message, ex);
+                    throw;
+                }
+            }
+
+            dbCmd.CommandText = $"INSERT INTO {GetQuotedTableName(modelDef)} ({StringBuilderCache.ReturnAndFree(sbColumnNames)}) " +
+                                $"VALUES ({StringBuilderCacheAlt.ReturnAndFree(sbColumnValues)})";
+        }
+
         public virtual string ToUpdateStatement<T>(IDbCommand dbCmd, T item, ICollection<string> updateFields = null)
         {
             dbCmd.Parameters.Clear();

@@ -117,12 +117,13 @@ namespace ServiceStack.OrmLite
         object GetFieldValue(FieldDefinition fieldDef, object value);
         object GetFieldValue(Type fieldType, object value);
 
-
         void PrepareUpdateRowStatement(IDbCommand dbCmd, object objWithProperties, ICollection<string> UpdateFields = null);
 
         void PrepareUpdateRowStatement<T>(IDbCommand dbCmd, Dictionary<string, object> args, string sqlFilter);
 
         void PrepareUpdateRowAddStatement<T>(IDbCommand dbCmd, Dictionary<string, object> args, string sqlFilter);
+
+        void PrepareInsertRowStatement<T>(IDbCommand dbCmd, Dictionary<string, object> args);
 
         string ToDeleteStatement(Type tableType, string sqlFilter, params object[] filterParams);
 

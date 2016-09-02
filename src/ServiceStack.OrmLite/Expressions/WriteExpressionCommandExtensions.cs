@@ -149,8 +149,7 @@ namespace ServiceStack.OrmLite
 
         public static void InsertOnly<T>(this IDbCommand dbCmd, T obj, string[] onlyFields)
         {
-            if (OrmLiteConfig.InsertFilter != null)
-                OrmLiteConfig.InsertFilter(dbCmd, obj);
+            OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj);
 
             var sql = dbCmd.GetDialectProvider().ToInsertRowStatement(dbCmd, obj, onlyFields);
             dbCmd.ExecuteSql(sql);
@@ -158,17 +157,19 @@ namespace ServiceStack.OrmLite
 
         public static int InsertOnly<T>(this IDbCommand dbCmd, Expression<Func<T>> insertFields)
         {
+            return dbCmd.InitInsertOnly(insertFields).ExecNonQuery();
+        }
+
+        internal static IDbCommand InitInsertOnly<T>(this IDbCommand dbCmd, Expression<Func<T>> insertFields)
+        {
             if (insertFields == null)
                 throw new ArgumentNullException(nameof(insertFields));
 
-            OrmLiteConfig.InsertFilter?.Invoke(dbCmd, CachedExpressionCompiler.Evaluate(insertFields));
+            OrmLiteConfig.InsertFilter?.Invoke(dbCmd, insertFields.EvalFactoryFn());
 
-            var insertFieldsValues = insertFields.AssignedValues();
-            dbCmd.GetDialectProvider().PrepareParameterizedInsertStatement<T>(dbCmd, insertFieldsValues.Keys);
-
-            dbCmd.SetParameters(insertFieldsValues, excludeDefaults:false);
-
-            return dbCmd.ExecNonQuery();
+            var fieldValuesMap = insertFields.AssignedValues();
+            dbCmd.GetDialectProvider().PrepareInsertRowStatement<T>(dbCmd, fieldValuesMap);
+            return dbCmd;
         }
 
         public static int Delete<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> where)

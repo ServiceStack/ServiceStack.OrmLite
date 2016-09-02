@@ -120,17 +120,7 @@ namespace ServiceStack.OrmLite
 
         public static Task<int> InsertOnlyAsync<T>(this IDbCommand dbCmd, Expression<Func<T>> insertFields, CancellationToken token)
         {
-            if (insertFields == null)
-                throw new ArgumentNullException(nameof(insertFields));
-
-            OrmLiteConfig.InsertFilter?.Invoke(dbCmd, CachedExpressionCompiler.Evaluate(insertFields));
-
-            var insertFieldsValues = insertFields.AssignedValues();
-            dbCmd.GetDialectProvider().PrepareParameterizedInsertStatement<T>(dbCmd, insertFieldsValues.Keys);
-
-            dbCmd.SetParameters(insertFieldsValues, excludeDefaults: false);
-
-            return dbCmd.ExecNonQueryAsync(token);
+            return dbCmd.InitInsertOnly(insertFields).ExecNonQueryAsync(token);
         }
 
         internal static Task<int> DeleteAsync<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> where, CancellationToken token)
