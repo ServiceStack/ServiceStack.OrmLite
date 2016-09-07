@@ -83,7 +83,13 @@ namespace ServiceStack.OrmLite.Tests.Issues
                     }
                 };
 
-                using (var trans = db.OpenTransaction(IsolationLevel.ReadCommitted))
+#if NETCORE
+                var isolationLevel = base.Dialect == Dialect.Sqlite ? IsolationLevel.Serializable : IsolationLevel.ReadCommitted;
+#else
+                var isolationLevel = IsolationLevel.ReadCommitted;
+#endif                
+
+                using (var trans = db.OpenTransaction(isolationLevel))
                 {
                     //Same as below in 1 line
                     //db.Save(user, references: true);
@@ -107,7 +113,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
                     Details = "Reese",
                 });
 
-                using (var trans = db.OpenTransaction(IsolationLevel.ReadCommitted))
+                using (var trans = db.OpenTransaction(isolationLevel))
                 {
                     //Same as below in 1 line
                     //db.Save(user, references: true);
