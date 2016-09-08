@@ -69,7 +69,7 @@ namespace ServiceStack.OrmLite
             };
 
             modelDef.CompositeIndexes.AddRange(
-                modelType.AllAttributes(typeof(CompositeIndexAttribute)).ToList()
+                modelType.AllAttributes<CompositeIndexAttribute>().ToList()
                 .ConvertAll(x => (CompositeIndexAttribute)x));
 
             var objProperties = modelType.GetProperties(
