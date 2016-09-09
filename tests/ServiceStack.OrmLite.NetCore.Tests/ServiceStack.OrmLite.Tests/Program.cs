@@ -7,7 +7,7 @@ using System;
 using System.Globalization;
 using System.Threading;
 
-namespace NUnitLite.Tests
+namespace ServiceStack.OrmLite.Tests
 {
     public class Program
     {
@@ -26,8 +26,17 @@ namespace NUnitLite.Tests
             Licensing.RegisterLicense(licenseKey);
             //"ActivatedLicenseFeatures: ".Print(LicenseUtils.ActivatedLicenseFeatures());
 
-	    CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("en-US");
+            var sqlServerBuildDb = Environment.GetEnvironmentVariable("SQL_SERVER_BUILD_DB");
+
+            if (!sqlServerBuildDb.IsNullOrEmpty())
+            {
+                Config.SqlServerBuildDb = sqlServerBuildDb;
+                Config.DefaultConnection = Config.SqlServerBuildDb;
+            }
+
+    	    CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("en-US");
             JsConfig.InitStatics();
+
             //JsonServiceClient client = new JsonServiceClient();
             var writer = new ExtendedTextWrapper(Console.Out);
             return new AutoRun(((IReflectableType)typeof(Program)).GetTypeInfo().Assembly).Execute(args, writer, Console.In);
