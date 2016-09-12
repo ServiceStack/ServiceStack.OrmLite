@@ -13,14 +13,19 @@
     }
   },
   "dependencies": {
-    "NETStandard.Library": "1.6.0"
+    "NETStandard.Library": "1.6.0",
+    "ServiceStack.Interfaces" : "1.0.*",
+    "ServiceStack.Text" : "1.0.*",
+    "ServiceStack.Common" : "1.0.*",
+    "ServiceStack.OrmLite" : "1.0.*",
+    "Npgsql" : "3.1.*"
   },
   "frameworks": {
-    "netstandard1.1": { 
+    "netstandard1.3": {
         "dependencies" : {
-         },
-	"bin" : { "assembly":"../../../lib/netcore/ServiceStack.Interfaces.dll", "pdb" : "../../../lib/netcore/ServiceStack.Interfaces.pdb" }
+         }
      }
+   
   },
-  "version": "1.0.0"
+  "version": "1.0.4.0"
 }

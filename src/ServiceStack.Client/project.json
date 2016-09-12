@@ -23,7 +23,7 @@
     "netstandard1.1": { 
         "dependencies" : {
          },
-	"bin" : { "assembly":"../../../lib/netcore/ServiceStack.Client.dll", "pdb" : "../../../lib/netcore/ServiceStack.Client.pdb" }
+	"bin" : { "assembly":"../../lib/netstandard1.1/ServiceStack.Client.dll", "pdb" : "../../lib/netstandard1.1/ServiceStack.Client.pdb" }
      }
   },
   "version": "1.0.0"

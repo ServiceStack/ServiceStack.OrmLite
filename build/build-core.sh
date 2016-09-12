@@ -23,7 +23,7 @@ echo replace AssemblyFileVersion
 find ./src -type f -name "AssemblyInfo.cs" -exec sed -i "s/AssemblyFileVersion(\"[^\"]\+\")/AssemblyFileVersion(\"${Version}\")/g" {} +
 
 echo replace project.json
-find ./src/ServiceStack.OrmLite.NetCore -type f -name "project.json" -exec sed -i "s/\"version\": \"[^\"]\+\"/\"version\": \"${Version}\"/g" {} +
+find ./src -type f -name "project.json" -exec sed -i "s/\"version\": \"[^\"]\+\"/\"version\": \"${Version}\"/g" {} +
 
 echo replace package
 find ./NuGet.Core -type f -name "*.nuspec" -exec sed -i "s/<version>[^<]\+/<version>${PackageVersion}/g" {} +
@@ -34,7 +34,7 @@ find ./NuGet.Core -type f -name "*.nuspec" -exec sed -i "s/\"ServiceStack.OrmLit
 
 
 #restore packages
-#(cd ./src/ServiceStack.NetCore && dotnet restore)
+#(cd ./src && dotnet restore)
 #(cd ./tests/ServiceStack.Common.NetCore/ServiceStack.Common.Tests && dotnet restore)
 
 #execute tests

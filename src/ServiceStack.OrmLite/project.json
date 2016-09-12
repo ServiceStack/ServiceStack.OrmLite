@@ -18,7 +18,6 @@
     "ServiceStack.Text" : "1.0.*",
     "ServiceStack.Common" : "1.0.*"
   },
-  "compile": ["../../ServiceStack.OrmLite/**/*.cs"],
   "frameworks": {
     "netstandard1.3": {
         "dependencies" : {
@@ -36,5 +35,5 @@
      }
    
   },
-  "version": "1.0.0"
+  "version": "1.0.4.0"
 }

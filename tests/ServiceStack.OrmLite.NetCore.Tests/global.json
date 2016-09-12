@@ -1,6 +1,6 @@
 {
     "projects": [
-       "../../src/ServiceStack.OrmLite.NetCore",
+       "../../src",
        "ServiceStack.OrmLite.Tests"
     ]
 }
