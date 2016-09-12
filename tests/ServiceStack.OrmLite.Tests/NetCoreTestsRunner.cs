@@ -9,7 +9,7 @@ using System.Threading;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    public class Program
+    public class NetCoreTestsRunner
     {
         /// <summary>
         /// The main program executes the tests. Output may be routed to
@@ -39,7 +39,7 @@ namespace ServiceStack.OrmLite.Tests
 
             //JsonServiceClient client = new JsonServiceClient();
             var writer = new ExtendedTextWrapper(Console.Out);
-            return new AutoRun(((IReflectableType)typeof(Program)).GetTypeInfo().Assembly).Execute(args, writer, Console.In);
+            return new AutoRun(((IReflectableType)typeof(NetCoreTestsRunner)).GetTypeInfo().Assembly).Execute(args, writer, Console.In);
         }
     }
 }

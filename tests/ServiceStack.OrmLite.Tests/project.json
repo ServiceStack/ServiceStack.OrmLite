@@ -16,14 +16,13 @@
     "debugType": "portable",
     "emitEntryPoint": true
   },
-  "compile": ["../../ServiceStack.OrmLite.Tests/**/*.cs"],
   "exclude": [
-    "../../ServiceStack.OrmLite.Tests/Properties/Settings.Designer.cs", 
-    "../../ServiceStack.OrmLite.Tests/Expressions/RestrictionTests.cs"
+    "Properties/Settings.Designer.cs",
+    "Expressions/RestrictionTests.cs"
   ],
   "dependencies": {
     "Microsoft.NETCore.App": {
-          "type": "platform",
+      "type": "platform",
       "version": "1.0.0"
     },
     "NUnitLite" : "3.2.1",
