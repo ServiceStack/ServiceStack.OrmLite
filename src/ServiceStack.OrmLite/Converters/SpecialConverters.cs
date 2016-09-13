@@ -38,13 +38,8 @@ namespace ServiceStack.OrmLite.Converters
                 fieldType.HasAttribute<EnumAsIntAttribute>() ||
                 (!fieldType.IsEnum() && fieldType.IsNumericType()); //i.e. is real int && not Enum
 
-#if NETSTANDARD1_3
             if (isIntEnum && value.GetType().IsEnum())
-                return Convert.ChangeType(value, (System.TypeCode)fieldType.GetTypeCode(), CultureInfo.CurrentCulture);
-#else
-            if (isIntEnum && value.GetType().IsEnum())
-                return Convert.ChangeType(value, fieldType.GetTypeCode());
-#endif
+                return Convert.ChangeType(value, Enum.GetUnderlyingType(fieldType));
 
             long enumValue;
             if (long.TryParse(value.ToString(), out enumValue))
