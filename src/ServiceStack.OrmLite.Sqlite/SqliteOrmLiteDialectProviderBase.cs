@@ -23,7 +23,9 @@ namespace ServiceStack.OrmLite.Sqlite
             base.RegisterConverter<Guid>(new SqliteGuidConverter());
             base.RegisterConverter<bool>(new SqliteBoolConverter());
             base.RegisterConverter<byte[]>(new SqliteByteArrayConverter());
-
+#if NETSTANDARD1_3            
+            base.RegisterConverter<char>(new SqliteCharConverter());
+#endif
             this.Variables = new Dictionary<string, string>
             {
                 { OrmLiteVariables.SystemUtc, "CURRENT_TIMESTAMP" },

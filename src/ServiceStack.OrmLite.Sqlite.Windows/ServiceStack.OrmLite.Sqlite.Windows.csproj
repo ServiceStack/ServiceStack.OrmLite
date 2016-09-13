@@ -70,6 +70,9 @@
     <Compile Include="..\ServiceStack.OrmLite.Sqlite\Converters\SqliteByteArrayConverter.cs">
       <Link>Converters\SqliteByteArrayConverter.cs</Link>
     </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.Sqlite\Converters\SqliteCharConverter.cs">
+      <Link>Converters\SqliteCharConverter.cs</Link>
+    </Compile>
     <Compile Include="..\ServiceStack.OrmLite.Sqlite\Converters\SqliteDateTimeConverter.cs">
       <Link>Converters\SqliteDateTimeConverter.cs</Link>
     </Compile>
