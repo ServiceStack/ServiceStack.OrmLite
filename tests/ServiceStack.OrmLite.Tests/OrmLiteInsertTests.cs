@@ -27,6 +27,32 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        public void Can_InsertOnly_aliased_fields()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<PersonWithAliasedAge>();
+
+                db.InsertOnly(() => new PersonWithAliasedAge { Name = "Bob", Age = 30 });
+            }
+        }
+
+        [Test]
+        public void Can_InsertOnly_fields_using_EnumAsInt()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<PersonUsingEnumAsInt>();
+
+                db.InsertOnly(() => new PersonUsingEnumAsInt { Name = "Sarah", Gender = Gender.Female });
+
+                var saved = db.Single<PersonUsingEnumAsInt>(p => p.Name == "Sarah");
+                Assert.That(saved.Name, Is.EqualTo("Sarah"));
+                Assert.That(saved.Gender, Is.EqualTo(Gender.Female));
+            }
+        }
+
+        [Test]
         public void Can_insert_and_select_from_ModelWithFieldsOfDifferentTypes_table()
         {
             using (var db = OpenDbConnection())
@@ -267,7 +293,7 @@ namespace ServiceStack.OrmLite.Tests
                 db.DropAndCreateTable<PersonWithAutoId>();
 
                 db.InsertOnly(() => new PersonWithAutoId { FirstName = "Amy", Age = 27 });
-                Assert.That(db.GetLastSql().NormalizeSql(), Is.EqualTo("insert into personwithautoid (firstname,age) values (@firstname,@age)"));
+                Assert.That(db.GetLastSql().NormalizeSql(), Is.EqualTo("insert into personwithautoid (firstname,age) values (@0,@1)"));
 
                 var row = db.Select<PersonWithAutoId>()[0];
                 Assert.That(row.FirstName, Is.EqualTo("Amy"));

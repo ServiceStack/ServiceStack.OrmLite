@@ -24,10 +24,7 @@ namespace ServiceStack.OrmLite.Converters
             set { maxColumnDefinition = value; }
         }
 
-        public override string ColumnDefinition
-        {
-            get { return GetColumnDefinition(StringLength); }
-        }
+        public override string ColumnDefinition => GetColumnDefinition(StringLength);
 
         public virtual string GetColumnDefinition(int? stringLength)
         {
@@ -54,15 +51,9 @@ namespace ServiceStack.OrmLite.Converters
 
     public class CharConverter : StringConverter
     {
-        public override string ColumnDefinition
-        {
-            get { return "CHAR(1)"; }
-        }
+        public override string ColumnDefinition => "CHAR(1)";
 
-        public override DbType DbType
-        {
-            get { return DbType.StringFixedLength; }
-        }
+        public override DbType DbType => DbType.StringFixedLength;
 
         public override string GetColumnDefinition(int? stringLength)
         {

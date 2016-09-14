@@ -226,7 +226,7 @@ namespace ServiceStack.OrmLite.Tests.Async
             Assert.That(db.GetLastSql(), Is.EqualTo("INSERT INTO `PersonWithAutoId` (`FirstName`,`Age`) VALUES (@FirstName,@Age)"));
 
             await db.InsertOnlyAsync(() => new PersonWithAutoId { FirstName = "Amy", Age = 27 });
-            Assert.That(db.GetLastSql(), Is.EqualTo("INSERT INTO `PersonWithAutoId` (`FirstName`,`Age`) VALUES (@FirstName,@Age)"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("INSERT INTO `PersonWithAutoId` (`FirstName`,`Age`) VALUES (@0,@1)"));
 
             await db.UpdateAsync(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27 });
             Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE `Person` SET `FirstName`=@FirstName, `LastName`=@LastName, `Age`=@Age WHERE `Id`=@Id"));

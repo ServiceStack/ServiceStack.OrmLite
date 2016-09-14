@@ -13,7 +13,6 @@ namespace ServiceStack.OrmLite
         internal static List<T> Select<T>(this IDbCommand dbCmd, SqlExpression<T> q)
         {
             string sql = q.SelectInto<T>();
-
             return dbCmd.ExprConvertToList<T>(sql, q.Params, onlyFields: q.OnlyFields);
         }
 
@@ -67,17 +66,17 @@ namespace ServiceStack.OrmLite
                 .AppendFormat("{0}.*, 0 EOT", dialectProvider.GetQuotedTableName(typeof(T).GetModelDefinition()));
 
             if (typeof(T2) != typeof(EOT))
-                sb.AppendFormat(", {0}.*, 0 EOT", dialectProvider.GetQuotedTableName(typeof(T2).GetModelDefinition()));
+                sb.Append($", {dialectProvider.GetQuotedTableName(typeof(T2).GetModelDefinition())}.*, 0 EOT");
             if (typeof(T3) != typeof(EOT))
-                sb.AppendFormat(", {0}.*, 0 EOT", dialectProvider.GetQuotedTableName(typeof(T3).GetModelDefinition()));
+                sb.Append($", {dialectProvider.GetQuotedTableName(typeof(T3).GetModelDefinition())}.*, 0 EOT");
             if (typeof(T4) != typeof(EOT))
-                sb.AppendFormat(", {0}.*, 0 EOT", dialectProvider.GetQuotedTableName(typeof(T4).GetModelDefinition()));
+                sb.Append($", {dialectProvider.GetQuotedTableName(typeof(T4).GetModelDefinition())}.*, 0 EOT");
             if (typeof(T5) != typeof(EOT))
-                sb.AppendFormat(", {0}.*, 0 EOT", dialectProvider.GetQuotedTableName(typeof(T5).GetModelDefinition()));
+                sb.Append($", {dialectProvider.GetQuotedTableName(typeof(T5).GetModelDefinition())}.*, 0 EOT");
             if (typeof(T6) != typeof(EOT))
-                sb.AppendFormat(", {0}.*, 0 EOT", dialectProvider.GetQuotedTableName(typeof(T6).GetModelDefinition()));
+                sb.Append($", {dialectProvider.GetQuotedTableName(typeof(T6).GetModelDefinition())}.*, 0 EOT");
             if (typeof(T7) != typeof(EOT))
-                sb.AppendFormat(", {0}.*, 0 EOT", dialectProvider.GetQuotedTableName(typeof(T7).GetModelDefinition()));
+                sb.Append($", {dialectProvider.GetQuotedTableName(typeof(T7).GetModelDefinition())}.*, 0 EOT");
 
             return StringBuilderCache.ReturnAndFree(sb);
         }

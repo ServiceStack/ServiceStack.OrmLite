@@ -73,10 +73,7 @@ namespace ServiceStack.OrmLite.Converters
 
     public class RowVersionConverter : OrmLiteConverter
     {
-        public override string ColumnDefinition
-        {
-            get { return "BIGINT"; }
-        }
+        public override string ColumnDefinition => "BIGINT";
 
         public virtual ulong FromDbRowVersion(object value)
         {
@@ -93,15 +90,9 @@ namespace ServiceStack.OrmLite.Converters
 
     public class ReferenceTypeConverter : StringConverter
     {
-        public override string ColumnDefinition
-        {
-            get { return DialectProvider.GetStringConverter().MaxColumnDefinition; }
-        }
+        public override string ColumnDefinition => DialectProvider.GetStringConverter().MaxColumnDefinition;
 
-        public override string MaxColumnDefinition
-        {
-            get { return DialectProvider.GetStringConverter().MaxColumnDefinition; }
-        }
+        public override string MaxColumnDefinition => DialectProvider.GetStringConverter().MaxColumnDefinition;
 
         public override string GetColumnDefinition(int? stringLength)
         {
@@ -118,10 +109,9 @@ namespace ServiceStack.OrmLite.Converters
         public override object ToDbValue(Type fieldType, object value)
         {
             //Let ADO.NET providers handle byte[]
-            if (fieldType == typeof(byte[]))
-                return value;
-
-            return DialectProvider.StringSerializer.SerializeToString(value);
+            return fieldType == typeof(byte[]) 
+                ? value 
+                : DialectProvider.StringSerializer.SerializeToString(value);
         }
 
         public override object FromDbValue(Type fieldType, object value)
@@ -133,15 +123,8 @@ namespace ServiceStack.OrmLite.Converters
 
     public class ValueTypeConverter : StringConverter
     {
-        public override string ColumnDefinition
-        {
-            get { return DialectProvider.GetStringConverter().MaxColumnDefinition; }
-        }
-
-        public override string MaxColumnDefinition
-        {
-            get { return DialectProvider.GetStringConverter().MaxColumnDefinition; }
-        }
+        public override string ColumnDefinition => DialectProvider.GetStringConverter().MaxColumnDefinition;
+        public override string MaxColumnDefinition => DialectProvider.GetStringConverter().MaxColumnDefinition;
 
         public override string GetColumnDefinition(int? stringLength)
         {

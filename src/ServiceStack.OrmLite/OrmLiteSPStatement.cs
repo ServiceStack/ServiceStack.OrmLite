@@ -57,8 +57,7 @@ namespace ServiceStack.OrmLite
             }
             finally
             {
-                if (reader != null)
-                    reader.Close();
+                reader?.Close();
             }
         }
 
@@ -75,8 +74,7 @@ namespace ServiceStack.OrmLite
             }
             finally
             {
-                if (reader != null)
-                    reader.Close();
+                reader?.Close();
             }
         }
 
@@ -93,8 +91,7 @@ namespace ServiceStack.OrmLite
             }
             finally
             {
-                if (reader != null)
-                    reader.Close();
+                reader?.Close();
             }
         }
 
@@ -111,8 +108,7 @@ namespace ServiceStack.OrmLite
             }
             finally
             {
-                if (reader != null)
-                    reader.Close();
+                reader?.Close();
             }
         }
 
@@ -129,8 +125,7 @@ namespace ServiceStack.OrmLite
             }
             finally
             {
-                if (reader != null)
-                    reader.Close();
+                reader?.Close();
             }
         }
 
@@ -147,8 +142,7 @@ namespace ServiceStack.OrmLite
             }
             finally
             {
-                if (reader != null)
-                    reader.Close();
+                reader?.Close();
             }
         }
 
@@ -163,15 +157,11 @@ namespace ServiceStack.OrmLite
             try
             {
                 reader = dbCmd.ExecuteReader();
-                if (reader.Read())
-                    return true;
-                else
-                    return false;
+                return reader.Read();
             }
             finally
             {
-                if (reader != null)
-                    reader.Close();
+                reader?.Close();
             }
         }
 

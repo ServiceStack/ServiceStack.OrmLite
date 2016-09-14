@@ -26,9 +26,7 @@ namespace ServiceStack.OrmLite
         {
             get
             {
-                if (commandTimeout != null)
-                    return commandTimeout.Value;
-                return defaultCommandTimeout;
+                return commandTimeout ?? defaultCommandTimeout;
             }
             set
             {
@@ -157,9 +155,7 @@ namespace ServiceStack.OrmLite
             get
             {
                 var state = OrmLiteContext.OrmLiteState;
-                return state != null 
-                    ? state.ResultsFilter
-                    : null;
+                return state?.ResultsFilter;
             }
             set { OrmLiteContext.GetOrCreateState().ResultsFilter = value; }
         }
