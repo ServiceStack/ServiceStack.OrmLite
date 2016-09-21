@@ -175,11 +175,11 @@ var customer = await db.SingleAsync<Customer>(new { customer.Email });
 > sequence (incompatible with async) as well as **Schema** DDL API's which are typically not used at runtime.
 
 For a quick preview of many of the new Async API's in action, checkout 
-[ApiSqlServerTestsAsync.cs](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLiteV45.Tests/ApiSqlServerTestsAsync.cs).
+[ApiSqlServerTestsAsync.cs](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLite.Tests/Async/ApiSqlServerTestsAsync.cs).
 
 ### Async RDBMS Providers
 
-Currently only a limited number of RDBMS providers offer async API's which are only available in their **.NET 4.5** builds, which at this time are only:
+Currently only a limited number of RDBMS providers offer async API's, which at this time are only:
 
   - [SQL Server .NET 4.5+](https://www.nuget.org/packages/ServiceStack.OrmLite.SqlServer)
   - [PostgreSQL .NET 4.5+](https://www.nuget.org/packages/ServiceStack.OrmLite.PostgreSQL)
