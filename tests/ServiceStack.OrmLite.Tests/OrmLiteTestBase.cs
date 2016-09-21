@@ -24,6 +24,7 @@ namespace ServiceStack.OrmLite.Tests
         public static string PostgreSqlDb = "Server=localhost;Port=5432;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200";
         public static string FirebirdDb = @"User=SYSDBA;Password=masterkey;Database=C:\src\ServiceStack.OrmLite\tests\ServiceStack.OrmLite.Tests\App_Data\TEST.FDB;DataSource=localhost;Dialect=3;charset=ISO8859_1;";
 
+        public static Dialect DefaultDialect = Dialect.Sqlite;
         public static IOrmLiteDialectProvider DefaultProvider = SqlServerDialect.Provider;
         public static string DefaultConnection = SqlServerBuildDb;
 
@@ -97,7 +98,7 @@ namespace ServiceStack.OrmLite.Tests
                 ConnectionString = GetFileConnectionString();
         }
 
-        public Dialect Dialect = Dialect.Sqlite;
+        public Dialect Dialect = Config.DefaultDialect;
         protected OrmLiteConnectionFactory DbFactory;
 
         OrmLiteConnectionFactory Init(string connStr, IOrmLiteDialectProvider dialectProvider)

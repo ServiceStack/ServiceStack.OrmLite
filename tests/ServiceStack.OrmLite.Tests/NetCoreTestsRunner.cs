@@ -28,11 +28,24 @@ namespace ServiceStack.OrmLite.Tests
 
             var sqlServerBuildDb = Environment.GetEnvironmentVariable("SQL_SERVER_BUILD_DB");
 
-            if (!sqlServerBuildDb.IsNullOrEmpty())
+            if (!String.IsNullOrEmpty(sqlServerBuildDb))
             {
                 Config.SqlServerBuildDb = sqlServerBuildDb;
                 Config.DefaultConnection = Config.SqlServerBuildDb;
             }
+
+            var dialect = Environment.GetEnvironmentVariable("ORMLITE_DIALECT");
+
+            if (!String.IsNullOrEmpty(dialect))
+            {
+                Dialect defaultDialect;
+
+                if (Enum.TryParse(dialect, out defaultDialect))
+                    Config.DefaultDialect = defaultDialect;
+
+            }
+
+            Console.WriteLine($"Dialect: {Config.DefaultDialect}");
 
     	    CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("en-US");
             JsConfig.InitStatics();
