@@ -9,6 +9,7 @@ using ServiceStack.Model;
 using ServiceStack.OrmLite.Dapper;
 using ServiceStack.OrmLite.Tests.UseCase;
 using ServiceStack.Text;
+using System.Text.RegularExpressions;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -841,7 +842,7 @@ Customer Address:
 
         private static void AssertMultiCustomerOrderResults(StringBuilder sb)
         {
-            Assert.That(sb.ToString().Replace(".990000", ".99").NormalizeNewLines().Trim(), Is.EqualTo(
+            Assert.That(Regex.Replace(sb.ToString(), @"\.99[0]+",".99").NormalizeNewLines().Trim(), Is.EqualTo(
                 @"Customer:
 {
 	Id: 1,
