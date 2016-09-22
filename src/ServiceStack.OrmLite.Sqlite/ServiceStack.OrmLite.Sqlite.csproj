@@ -110,6 +110,7 @@
   <ItemGroup>
     <Compile Include="Converters\SqliteBoolConverter.cs" />
     <Compile Include="Converters\SqliteByteArrayConverter.cs" />
+    <Compile Include="Converters\SqliteCharConverter.cs" />
     <Compile Include="Converters\SqliteDateTimeConverter.cs" />
     <Compile Include="Converters\SqliteDateTimeOffsetConverter.cs" />
     <Compile Include="Converters\SqliteGuidConverter.cs" />

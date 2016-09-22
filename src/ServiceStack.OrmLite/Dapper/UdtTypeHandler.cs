@@ -5,7 +5,7 @@ namespace ServiceStack.OrmLite.Dapper
 {
     partial class SqlMapper
     {
-#if !COREFX
+#if !NETSTANDARD1_3
         /// <summary>
         /// A type handler for data-types that are supported by the underlying provider, but which need
         /// a well-known UdtTypeName to be specified

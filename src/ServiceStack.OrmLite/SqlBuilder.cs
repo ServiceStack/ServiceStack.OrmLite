@@ -69,11 +69,17 @@ namespace ServiceStack.OrmLite
             public object CreateDynamicType()
             {
                 var assemblyName = new AssemblyName { Name = "tmpAssembly" };
+#if NETSTANDARD1_3
+                var typeBuilder =
+                    AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run)
+                    .DefineDynamicModule("tmpModule")
+                    .DefineType("SqlBuilderDynamicParameters", TypeAttributes.Public | TypeAttributes.Class);
+#else
                 var typeBuilder =
                     Thread.GetDomain().DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run)
                     .DefineDynamicModule("tmpModule")
                     .DefineType("SqlBuilderDynamicParameters", TypeAttributes.Public | TypeAttributes.Class);
-
+#endif
                 var emptyCtor = typeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, Type.EmptyTypes);
                 var ctorIL = emptyCtor.GetILGenerator();
 
@@ -138,7 +144,11 @@ namespace ServiceStack.OrmLite
 
                 ctorIL.Emit(OpCodes.Ret);
 
+#if NETSTANDARD1_3
+                var generetedType = typeBuilder.CreateTypeInfo().AsType();
+#else
                 var generetedType = typeBuilder.CreateType();
+#endif
                 var instance = Activator.CreateInstance(generetedType);
 
                 //Using reflection for less property types. Not caching since it's a generated type.

@@ -21,6 +21,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using ServiceStack.Logging;
 using ServiceStack.Text;
+using ServiceStack.OrmLite.Dapper;
 
 namespace ServiceStack.OrmLite
 {
@@ -60,7 +61,7 @@ namespace ServiceStack.OrmLite
 
         public static bool IsScalar<T>()
         {
-            return typeof(T).IsValueType || typeof(T) == typeof(string);
+            return typeof(T).IsValueType() || typeof(T) == typeof(string);
         }
 
         public static T ConvertTo<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, HashSet<string> onlyFields=null)
@@ -525,7 +526,7 @@ namespace ServiceStack.OrmLite
 
             if (remainingFieldDefs.Count > 0 && onlyFields == null)
             {
-                var dbFieldMap = new Dictionary<string, int>(StringComparer.InvariantCultureIgnoreCase);
+                var dbFieldMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
                 for (var i = startPos; i < end; i++)
                 {
                     if (!mappedReaderColumns[i])
@@ -654,7 +655,7 @@ namespace ServiceStack.OrmLite
 
         public static bool IsRefType(this Type fieldType)
         {
-            return (!fieldType.UnderlyingSystemType.IsValueType
+            return (!fieldType.UnderlyingSystemType().IsValueType()
                 || JsConfig.TreatValueAsRefTypes.Contains(fieldType.IsGeneric()
                     ? fieldType.GenericTypeDefinition()
                     : fieldType))

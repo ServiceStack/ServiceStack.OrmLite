@@ -23,7 +23,9 @@ namespace ServiceStack.OrmLite.Sqlite
             base.RegisterConverter<Guid>(new SqliteGuidConverter());
             base.RegisterConverter<bool>(new SqliteBoolConverter());
             base.RegisterConverter<byte[]>(new SqliteByteArrayConverter());
-
+#if NETSTANDARD1_3            
+            base.RegisterConverter<char>(new SqliteCharConverter());
+#endif
             this.Variables = new Dictionary<string, string>
             {
                 { OrmLiteVariables.SystemUtc, "CURRENT_TIMESTAMP" },
@@ -104,7 +106,11 @@ namespace ServiceStack.OrmLite.Sqlite
                         Directory.CreateDirectory(existingDir);
                     }
                 }
+#if NETSTANDARD1_3
+                connString.AppendFormat(@"Data Source={0};", connectionString.Trim());
+#else
                 connString.AppendFormat(@"Data Source={0};Version=3;New=True;Compress=True;", connectionString.Trim());
+#endif
             }
             else
             {

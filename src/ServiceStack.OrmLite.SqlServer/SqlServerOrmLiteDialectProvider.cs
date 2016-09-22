@@ -9,6 +9,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using ServiceStack.OrmLite.SqlServer.Converters;
 using ServiceStack.Text;
+#if NETSTANDARD1_3
+using ApplicationException = System.InvalidOperationException;
+#endif
 
 namespace ServiceStack.OrmLite.SqlServer
 {

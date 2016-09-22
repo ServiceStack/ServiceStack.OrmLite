@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.OrmLite.Tests.UseCase;
 using ServiceStack.Text;
+using System.Text.RegularExpressions;
 
 namespace ServiceStack.OrmLite.Tests.Async
 {
@@ -130,7 +131,7 @@ Customer Address:
 
         private static void AssertMultiCustomerOrderResults(StringBuilder sb)
         {
-            Assert.That(sb.ToString().Replace(".9900", ".99").NormalizeNewLines().Trim(), Is.EqualTo(
+            Assert.That(Regex.Replace(sb.ToString(), @"\.99[0]+",".99").NormalizeNewLines().Trim(), Is.EqualTo(
                 @"Customer:
 {
 	Id: 1,

@@ -768,6 +768,8 @@ namespace ServiceStack.OrmLite
             finally
             {
                 dbTrans?.Dispose();
+                if (dbCmd.Transaction == dbTrans)
+                    dbCmd.Transaction = null;
             }
 
             return rowsAdded;

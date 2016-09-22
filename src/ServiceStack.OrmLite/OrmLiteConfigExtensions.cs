@@ -69,7 +69,7 @@ namespace ServiceStack.OrmLite
             };
 
             modelDef.CompositeIndexes.AddRange(
-                modelType.GetCustomAttributes(typeof(CompositeIndexAttribute), true).ToList()
+                modelType.AllAttributes<CompositeIndexAttribute>().ToList()
                 .ConvertAll(x => (CompositeIndexAttribute)x));
 
             var objProperties = modelType.GetProperties(
@@ -100,7 +100,7 @@ namespace ServiceStack.OrmLite
 
                 var isNullableType = propertyInfo.PropertyType.IsNullableType();
 
-                var isNullable = (!propertyInfo.PropertyType.IsValueType
+                var isNullable = (!propertyInfo.PropertyType.IsValueType()
                                    && !propertyInfo.HasAttributeNamed(typeof(RequiredAttribute).Name))
                                    || isNullableType;
 
@@ -150,7 +150,7 @@ namespace ServiceStack.OrmLite
                     ForeignKey = fkAttr == null
                         ? referencesAttr != null ? new ForeignKeyConstraint(referencesAttr.Type) : null
                         : new ForeignKeyConstraint(fkAttr.Type, fkAttr.OnDelete, fkAttr.OnUpdate, fkAttr.ForeignKeyName),
-                    IsReference = referenceAttr != null && propertyType.IsClass,
+                    IsReference = referenceAttr != null && propertyType.IsClass(),
                     GetValueFn = propertyInfo.GetPropertyGetterFn(),
                     SetValueFn = propertyInfo.GetPropertySetterFn(),
                     Sequence = sequenceAttr != null ? sequenceAttr.Name : string.Empty,

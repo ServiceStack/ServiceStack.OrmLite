@@ -1,0 +1,39 @@
+{
+  "configurations": {
+    "Debug": {
+      "buildOptions": {
+        "define": ["ASYNC", "DEBUG", "TRACE"]
+      }
+    },
+    "Release": {
+      "buildOptions": {
+        "define": ["ASYNC", "TRACE"],
+        "optimize": true
+      }
+    }
+  },
+  "dependencies": {
+    "NETStandard.Library": "1.6.0",
+    "ServiceStack.Interfaces" : "1.0.*",
+    "ServiceStack.Text" : "1.0.*",
+    "ServiceStack.Common" : "1.0.*"
+  },
+  "frameworks": {
+    "netstandard1.3": {
+        "dependencies" : {
+            "System.Dynamic.Runtime" : "4.0.11",
+            "System.Reflection.Emit" : "4.0.1",
+            "System.Reflection.Emit.ILGeneration" : "4.0.1",
+            "System.Reflection.Emit.LightWeight" : "4.0.1",
+            "System.Collections.NonGeneric": "4.0.1",
+      	    "System.Xml.XmlDocument" : "4.0.1",
+            "System.ComponentModel.Primitives": "4.1.0",
+            "System.Data.SqlClient" : "4.1.0",
+            "System.Reflection.TypeExtensions" : "4.1.0",
+            "System.ComponentModel.Annotations": "4.1.0"
+         }
+     }
+   
+  },
+  "version": "1.0.4.0"
+}

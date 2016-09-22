@@ -5,7 +5,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
+#if !NETCORE_SUPPORT
 using ServiceStack.Html;
+#endif
 using ServiceStack.OrmLite.Tests.UseCase;
 using ServiceStack.Text;
 

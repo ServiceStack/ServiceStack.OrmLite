@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿#if !NETCORE
+using System.Data;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.OrmLite.Legacy;
@@ -100,3 +101,4 @@ namespace ServiceStack.OrmLite.Tests.Async.Legacy
         }
     }
 }
+#endif

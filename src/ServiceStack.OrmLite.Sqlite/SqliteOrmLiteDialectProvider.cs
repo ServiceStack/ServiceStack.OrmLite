@@ -1,5 +1,9 @@
 using System.Data;
+#if NETSTANDARD1_3
+using Microsoft.Data.Sqlite;
+#else
 using Mono.Data.Sqlite;
+#endif
 
 namespace ServiceStack.OrmLite.Sqlite
 {

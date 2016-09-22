@@ -276,7 +276,7 @@ namespace ServiceStack.OrmLite
             if (converter != null)
                 return converter;
 
-            if (type.IsEnum)
+            if (type.IsEnum())
                 return EnumConverter;
 
             return type.IsRefType()
@@ -296,7 +296,7 @@ namespace ServiceStack.OrmLite
             if (Converters.TryGetValue(fieldType, out converter))
                 return converter;
 
-            if (fieldType.IsEnum)
+            if (fieldType.IsEnum())
                 return EnumConverter;
 
             return fieldType.IsRefType()
@@ -1497,7 +1497,7 @@ namespace ServiceStack.OrmLite
         {
             if (value == null) return "NULL";
 
-            var converter = value.GetType().IsEnum
+            var converter = value.GetType().IsEnum()
                 ? EnumConverter
                 : GetConverterBestMatch(fieldType);
             try

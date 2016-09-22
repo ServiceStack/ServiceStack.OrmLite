@@ -82,6 +82,13 @@ namespace ServiceStack.OrmLite.Tests.Async
             if (Dialect == Dialect.MySql)
                 return; //= This version of MySQL doesn't yet support 'LIMIT & IN/ALL/ANY/SOME subquery'
 
+#if NETCORE
+            if (Dialect == Dialect.SqlServer || Dialect == Dialect.SqlServer2012)
+                return; // generates "... WHERE CustomerId IN (SELECT * FROM ...)" 
+                        // when should generate "... WHERE CustomerId IN (SELECT Id FROM ...)" 
+                        // both on .NET and .NET Core
+#endif        
+
             using (var db = OpenDbConnection())
             {
                 CustomerOrdersUseCase.DropTables(db); //Has conflicting 'Order' table

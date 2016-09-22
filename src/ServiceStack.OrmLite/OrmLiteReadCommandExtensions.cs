@@ -218,7 +218,7 @@ namespace ServiceStack.OrmLite
                 if (entry.Value != null)
                 {
                     var type = entry.Value.GetType();
-                    if (!type.IsValueType || !entry.Value.Equals(type.GetDefaultValue()))
+                    if (!type.IsValueType() || !entry.Value.Equals(type.GetDefaultValue()))
                     {
                         map[entry.Key] = entry.Value;
                     }
