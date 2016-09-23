@@ -52,6 +52,9 @@ namespace ServiceStack.OrmLite.Support
         {
             //Load Self Table.RefTableId PK
             var refPkValue = refSelf.GetValue(instance);
+            if (refPkValue == null)
+                return null;
+
             var sqlFilter = dialectProvider.GetQuotedColumnName(refModelDef.PrimaryKey.FieldName) + "={0}";
             var sql = dialectProvider.ToSelectStatement(refType, sqlFilter, refPkValue);
             return sql;
@@ -83,6 +86,9 @@ namespace ServiceStack.OrmLite.Support
             if (refSelf != null)
             {
                 var sql = GetRefSelfSql(refType, refSelf, refModelDef);
+                if (sql == null)
+                    return;
+
                 var result = dbCmd.ConvertTo(refType, sql);
                 fieldDef.SetValueFn(instance, result);
             }
@@ -127,6 +133,9 @@ namespace ServiceStack.OrmLite.Support
             else if (refSelf != null)
             {
                 var sql = GetRefSelfSql(refType, refSelf, refModelDef);
+                if (sql == null)
+                    return;
+
                 var result = await dbCmd.ConvertToAsync(refType, sql, token);
                 fieldDef.SetValueFn(instance, result);
             }
