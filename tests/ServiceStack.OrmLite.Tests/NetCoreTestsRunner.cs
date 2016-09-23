@@ -34,6 +34,13 @@ namespace ServiceStack.OrmLite.Tests
                 Config.DefaultConnection = Config.SqlServerBuildDb;
             }
 
+            var postgreSqlDb = Environment.GetEnvironmentVariable("POSTGRESQL_DB");
+
+            if (!String.IsNullOrEmpty(postgreSqlDb))
+            {
+                Config.PostgreSqlDb = postgreSqlDb;
+            }
+
             var dialect = Environment.GetEnvironmentVariable("ORMLITE_DIALECT");
 
             if (!String.IsNullOrEmpty(dialect))

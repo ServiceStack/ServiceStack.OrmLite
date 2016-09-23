@@ -51,7 +51,9 @@ namespace ServiceStack.OrmLite.Tests.Async
                 }
                 catch (Exception ex)
                 {
-                    Assert.That(ex.Message.ToLower(), Is.StringContaining("id").Or.StringContaining("notexists"));
+                    Assert.That(ex.Message.ToLower(), Is.StringContaining("id")
+                                                        .Or.StringContaining("notexists")
+                                                        .Or.StringContaining("not_exists"));
                 }
 
                 try
@@ -61,7 +63,9 @@ namespace ServiceStack.OrmLite.Tests.Async
                 }
                 catch (Exception ex)
                 {
-                    Assert.That(ex.Message.ToLower(), Is.StringContaining("id").Or.StringContaining("notexists"));
+                    Assert.That(ex.Message.ToLower(), Is.StringContaining("id")
+                                                        .Or.StringContaining("notexists")
+                                                        .Or.StringContaining("not_exists"));
                 }
 
                 try
@@ -75,7 +79,9 @@ namespace ServiceStack.OrmLite.Tests.Async
                 catch (Exception ex)
                 {
                     var innerEx = ex.UnwrapIfSingleException();
-                    Assert.That(innerEx.Message.ToLower(), Is.StringContaining("id").Or.StringContaining("notexists"));
+                    Assert.That(innerEx.Message.ToLower(), Is.StringContaining("id")
+                                                        .Or.StringContaining("notexists")
+                                                        .Or.StringContaining("not_exists"));
                 }
 
                 try
@@ -89,7 +95,9 @@ namespace ServiceStack.OrmLite.Tests.Async
                 catch (Exception ex)
                 {
                     var innerEx = ex.UnwrapIfSingleException();
-                    Assert.That(innerEx.Message.ToLower(), Is.StringContaining("id").Or.StringContaining("notexists"));
+                    Assert.That(innerEx.Message.ToLower(), Is.StringContaining("id")
+                                                        .Or.StringContaining("notexists")
+                                                        .Or.StringContaining("not_exists"));
                 }
             }
         }
