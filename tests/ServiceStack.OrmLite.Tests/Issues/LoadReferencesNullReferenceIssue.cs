@@ -38,6 +38,8 @@ namespace ServiceStack.OrmLite.Tests.Issues
 
                 var result = db.LoadSingleById<DepartmentEntity>("Dept A");
 
+                db.DropTable<DepartmentEntity>();
+
                 Assert.That(result, Is.Not.Null);
             }
         }
