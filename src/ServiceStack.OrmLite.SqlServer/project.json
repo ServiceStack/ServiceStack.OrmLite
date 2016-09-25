@@ -13,15 +13,15 @@
     }
   },
   "dependencies": {
-    "ServiceStack.Interfaces" : "1.0.*",
-    "ServiceStack.Text" : "1.0.*",
-    "ServiceStack.Common" : "1.0.*",
-    "ServiceStack.OrmLite" : "1.0.*"
   },
   "frameworks": {
     "netstandard1.3": {
         "dependencies" : {
-            "System.Data.SqlClient" : "4.1.0"
+            "System.Data.SqlClient" : "4.1.0",
+            "ServiceStack.Interfaces" : "1.0.*",
+            "ServiceStack.Text" : "1.0.*",
+            "ServiceStack.Common" : "1.0.*",
+            "ServiceStack.OrmLite" : "1.0.*"
          }
      }
    
