@@ -7,10 +7,10 @@
     <authors>Service Stack</authors> 
     <owners>Service Stack</owners>
     <description>
-  		Common library for the Light, simple and fast convention-based code-first POCO, OrmLite.
-  		Support for Creating and Dropping Table Schemas from POCOs, Complex Property types transparently stored in schemaless text blobs.
+      Common library for the Light, simple and fast convention-based code-first POCO, OrmLite.
+      Support for Creating and Dropping Table Schemas from POCOs, Complex Property types transparently stored in schemaless text blobs.
       OrmLite is a suite extension methods on ADO.NET's underlying IDbConnection providing DRY, typed access for common data usage patterns that map to clean, simple POCOs. Great support for testing where OrmLite methods can be mocked.
-  	</description> 
+    </description> 
     <projectUrl>https://github.com/ServiceStack/ServiceStack.OrmLite</projectUrl>
     <licenseUrl>https://servicestack.net/terms</licenseUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
@@ -27,10 +27,9 @@
         <dependency id="System.Collections.NonGeneric" version="[4.0.1, )" />
         <dependency id="System.Xml.XmlDocument" version="[4.0.1, )" />
         <dependency id="System.ComponentModel.Primitives" version="[4.1.0, )" />
-        <dependency id="System.Data.SqlClient" version="[4.1.0, )" />
         <dependency id="System.Reflection.TypeExtensions" version="[4.1.0, )" />
         <dependency id="System.ComponentModel.Annotations" version="[4.1.0, )" />
-        <dependency id="NETStandard.Library" version="[1.6.0, )" />
+        <dependency id="System.Data.SqlClient" version="[4.1.0, )" />
         <dependency id="ServiceStack.Interfaces.Core" version="[1.0.0, )" />
         <dependency id="ServiceStack.Text.Core" version="[1.0.0, )" />
         <dependency id="ServiceStack.Common.Core" version="[1.0.0, )" />
