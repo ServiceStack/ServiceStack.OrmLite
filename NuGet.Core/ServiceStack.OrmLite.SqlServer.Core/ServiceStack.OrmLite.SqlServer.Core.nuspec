@@ -28,6 +28,7 @@
     </dependencies>
   </metadata>
   <files>
+    <file src="lib/**/*.*" target="lib" />
     <file src="../../src/ServiceStack.OrmLite.SqlServer/**/*.cs" target="src" />
   </files>
 </package>
