@@ -1,23 +1,20 @@
 {
   "runtimeTarget": {
     "name": ".NETStandard,Version=v1.1/",
-    "signature": "c2ca356217873e400c28ec0f561ccb6ded04b221"
+    "signature": "87332d22ff0b2d9487498e551d9b7082859e5b9c"
   },
   "compilationOptions": {},
   "targets": {
     ".NETStandard,Version=v1.1": {},
     ".NETStandard,Version=v1.1/": {
-      "ServiceStack.Client/1.0.0": {
+      "ServiceStack.Interfaces/1.0.0": {
         "dependencies": {
-          "System.Net.Requests": "4.0.11",
-          "System.ServiceModel.Primitives": "4.1.0",
-          "System.Xml.XmlSerializer": "4.0.11",
-          "NETStandard.Library": "1.6.0",
-          "ServiceStack.Interfaces": "1.0.0",
-          "ServiceStack.Text": "1.0.0"
+          "System.Runtime": "4.1.0",
+          "System.Runtime.Serialization.Primitives": "4.1.1",
+          "NETStandard.Library": "1.6.0"
         },
         "runtime": {
-          "ServiceStack.Client.dll": {}
+          "ServiceStack.Interfaces.dll": {}
         }
       },
       "Microsoft.NETCore.Platforms/1.0.1": {},
@@ -73,11 +70,6 @@
         "dependencies": {
           "System.Runtime": "4.1.0",
           "System.Threading.Tasks": "4.0.11"
-        }
-      },
-      "System.ComponentModel.EventBasedAsync/4.0.11": {
-        "dependencies": {
-          "System.Runtime": "4.1.0"
         }
       },
       "System.Diagnostics.Debug/4.0.11": {
@@ -150,14 +142,6 @@
           "Microsoft.NETCore.Platforms": "1.0.1",
           "Microsoft.NETCore.Targets": "1.0.1",
           "System.Runtime": "4.1.0"
-        }
-      },
-      "System.Net.Requests/4.0.11": {
-        "dependencies": {
-          "System.IO": "4.1.0",
-          "System.Net.Primitives": "4.0.11",
-          "System.Runtime": "4.1.0",
-          "System.Threading.Tasks": "4.0.11"
         }
       },
       "System.ObjectModel/4.0.12": {
@@ -241,39 +225,6 @@
           "System.Runtime": "4.1.0"
         }
       },
-      "System.Runtime.Serialization.Xml/4.1.1": {
-        "dependencies": {
-          "System.IO": "4.1.0",
-          "System.Runtime": "4.1.0",
-          "System.Text.Encoding": "4.0.11",
-          "System.Xml.ReaderWriter": "4.0.11"
-        }
-      },
-      "System.Security.Principal/4.0.1": {
-        "dependencies": {
-          "System.Runtime": "4.1.0"
-        },
-        "runtime": {
-          "lib/netstandard1.0/System.Security.Principal.dll": {}
-        }
-      },
-      "System.ServiceModel.Primitives/4.1.0": {
-        "dependencies": {
-          "System.ComponentModel.EventBasedAsync": "4.0.11",
-          "System.Globalization": "4.0.11",
-          "System.IO": "4.1.0",
-          "System.Net.Primitives": "4.0.11",
-          "System.ObjectModel": "4.0.12",
-          "System.Reflection": "4.1.0",
-          "System.Runtime": "4.1.0",
-          "System.Runtime.Serialization.Primitives": "4.1.1",
-          "System.Runtime.Serialization.Xml": "4.1.1",
-          "System.Security.Principal": "4.0.1",
-          "System.Text.Encoding": "4.0.11",
-          "System.Threading": "4.0.11",
-          "System.Xml.ReaderWriter": "4.0.11"
-        }
-      },
       "System.Text.Encoding/4.0.11": {
         "dependencies": {
           "Microsoft.NETCore.Platforms": "1.0.1",
@@ -321,36 +272,11 @@
           "System.Runtime": "4.1.0",
           "System.Xml.ReaderWriter": "4.0.11"
         }
-      },
-      "System.Xml.XmlSerializer/4.0.11": {
-        "dependencies": {
-          "System.IO": "4.1.0",
-          "System.Runtime": "4.1.0",
-          "System.Xml.ReaderWriter": "4.0.11"
-        }
-      },
-      "ServiceStack.Interfaces/1.0.0": {
-        "dependencies": {
-          "System.Runtime": "4.1.0",
-          "System.Runtime.Serialization.Primitives": "4.1.1",
-          "NETStandard.Library": "1.6.0"
-        },
-        "runtime": {
-          "ServiceStack.Interfaces.dll": {}
-        }
-      },
-      "ServiceStack.Text/1.0.0": {
-        "dependencies": {
-          "NETStandard.Library": "1.6.0"
-        },
-        "runtime": {
-          "ServiceStack.Text.dll": {}
-        }
       }
     }
   },
   "libraries": {
-    "ServiceStack.Client/1.0.0": {
+    "ServiceStack.Interfaces/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
@@ -384,11 +310,6 @@
       "type": "package",
       "serviceable": true,
       "sha512": "sha512-+Ok1+hnWZ5rRhwr6ty1iYCAVH8wXx1aIVSVhVSZcyzlJcG6YNfHxgGXtJi0fm6jh4PEcxpEWdh4lE3877P88Fg=="
-    },
-    "System.ComponentModel.EventBasedAsync/4.0.11": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-Z7SO6vvQIR84daPE4uhaNdef9CjgjDMGYkas8epUhf0U3WGuaGgZ0Mm4QuNycMdbHUY8KEdZrtgxonkAiJaAlA=="
     },
     "System.Diagnostics.Debug/4.0.11": {
       "type": "package",
@@ -439,11 +360,6 @@
       "type": "package",
       "serviceable": true,
       "sha512": "sha512-tl/51pHaQVIMdpeuDx+s5IzfxluITA9ZWcBESpukkM70qKnMFRHcDae20oqW9rruJd60R56iuKjLn/ftua/UxQ=="
-    },
-    "System.Net.Requests/4.0.11": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-oa/P2creoBe+l4CQEUY2HJGFlAPJuDhZlldkPtQGrM1KIJXsdmSYwIqLarGILVyYWmDbkArDgrc1d5D5Om86lQ=="
     },
     "System.ObjectModel/4.0.12": {
       "type": "package",
@@ -500,21 +416,6 @@
       "serviceable": true,
       "sha512": "sha512-HZ6Du5QrTG8MNJbf4e4qMO3JRAkIboGT5Fk804uZtg3Gq516S7hAqTm2UZKUHa7/6HUGdVy3AqMQKbns06G/cg=="
     },
-    "System.Runtime.Serialization.Xml/4.1.1": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-yqfKHkWUAdI0hdDIdD9KDzluKtZ8IIqLF3O7xIZlt6UTs1bOvFRpCvRTvGQva3Ak/ZM9/nq9IHBJ1tC4Ybcrjg=="
-    },
-    "System.Security.Principal/4.0.1": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-0yZbeYcnYsLegPGMwq3V3EuG4v9syM3VBDIK6H2oNQMtLiS3KuINq8B9sFqdOiVbfperjrNM2bzd6V9U0v6u0g=="
-    },
-    "System.ServiceModel.Primitives/4.1.0": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-Kd65HOn/5pL9xtCUkSL8xVqpqBUYy9tsfo0qe/MTTzApY8WQ+6i4I2ts++M+m4vbOanCoEsjjUj26P6C6ilQjQ=="
-    },
     "System.Text.Encoding/4.0.11": {
       "type": "package",
       "serviceable": true,
@@ -549,21 +450,6 @@
       "type": "package",
       "serviceable": true,
       "sha512": "sha512-ydVR67d6gEeCt6mpntDAxmdrYkujFLlu4m5pEcqZVy8RtpTHOADxVNT3AxgcTScK3y4WdIJxhROgO8svlexBQw=="
-    },
-    "System.Xml.XmlSerializer/4.0.11": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-FrazwwqfIXTfq23mfv4zH+BjqkSFNaNFBtjzu3I9NRmG8EELYyrv/fJnttCIwRMFRR/YKXF1hmsMmMEnl55HGw=="
-    },
-    "ServiceStack.Interfaces/1.0.0": {
-      "type": "project",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "ServiceStack.Text/1.0.0": {
-      "type": "project",
-      "serviceable": false,
-      "sha512": ""
     }
   }
 }
