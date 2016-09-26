@@ -88,6 +88,7 @@
     <Compile Include="Issues\CustomSelectWithPagingIssue.cs" />
     <Compile Include="Converters\InheritanceTest.cs" />
     <Compile Include="Issues\DeleteWithGeoTypesIssue.cs" />
+    <Compile Include="Issues\DeleteWithJoinTest.cs" />
     <Compile Include="Issues\JamesGeoIssue.cs" />
     <Compile Include="Issues\SerializationTests.cs" />
     <Compile Include="NestedTransactions.cs" />
