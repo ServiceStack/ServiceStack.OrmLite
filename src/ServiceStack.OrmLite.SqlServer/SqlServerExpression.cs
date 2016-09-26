@@ -53,6 +53,13 @@ namespace ServiceStack.OrmLite.SqlServer
                 right = "CAST({0} AS TIME)".Fmt(right);
             }
         }
+
+        public override string ToDeleteRowStatement()
+        {
+            return base.tableDefs.Count > 1
+                ? $"DELETE {DialectProvider.GetQuotedTableName(modelDef)} {FromExpression} {WhereExpression}"
+                : base.ToDeleteRowStatement();
+        }
     }
 
     internal class SqlServerExpressionUtils

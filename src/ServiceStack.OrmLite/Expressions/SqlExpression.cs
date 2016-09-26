@@ -990,6 +990,16 @@ namespace ServiceStack.OrmLite
 
         public virtual string ToDeleteRowStatement()
         {
+            var hasTableJoin = tableDefs.Count > 1;
+            if (hasTableJoin)
+            {
+                var clone = this.Clone();
+                var pk = DialectProvider.GetQuotedColumnName(modelDef, modelDef.PrimaryKey);
+                clone.Select(pk);
+                var subSql = clone.ToSelectStatement();
+                var sql = $"DELETE FROM {DialectProvider.GetQuotedTableName(modelDef)} WHERE {pk} IN ({subSql})";
+                return sql;
+            }
             return $"DELETE FROM {DialectProvider.GetQuotedTableName(modelDef)} {WhereExpression}";
         }
 
