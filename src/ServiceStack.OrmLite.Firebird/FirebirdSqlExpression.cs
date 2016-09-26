@@ -17,13 +17,13 @@ namespace ServiceStack.OrmLite.Firebird
             switch (m.Method.Name)
             {
                 case "Trim":
-                    statement = string.Format("trim({0})", quotedColName);
+                    statement = $"trim({quotedColName})";
                     break;
                 case "LTrim":
-                    statement = string.Format("trim(leading from {0})", quotedColName);
+                    statement = $"trim(leading from {quotedColName})";
                     break;
                 case "RTrim":
-                    statement = string.Format("trim(trailing from {0})", quotedColName);
+                    statement = $"trim(trailing from {quotedColName})";
                     break;
                 default:
                     return base.VisitColumnAccessMethod(m);

@@ -22,10 +22,10 @@ namespace ServiceStack.OrmLite.Sqlite
                     if (args.Count == 2)
                     {
                         var length = int.Parse(args[1].ToString());
-                        statement = string.Format("substr({0}, {1}, {2})", quotedColName, startIndex, length);
+                        statement = $"substr({quotedColName}, {startIndex}, {length})";
                     }
                     else
-                        statement = string.Format("substr({0}, {1})", quotedColName, startIndex);
+                        statement = $"substr({quotedColName}, {startIndex})";
                     break;
                 default:
                     return base.VisitColumnAccessMethod(m);
@@ -47,11 +47,10 @@ namespace ServiceStack.OrmLite.Sqlite
                     statement = ConvertInExpressionToSql(m, quotedColName);
                     break;
                 case "Desc":
-                    statement = string.Format("{0} DESC", quotedColName);
+                    statement = $"{quotedColName} DESC";
                     break;
                 case "As":
-                    statement = string.Format("{0} AS {1}", quotedColName,
-                        base.DialectProvider.GetQuotedColumnName(RemoveQuoteFromAlias(args[0].ToString())));
+                    statement = $"{quotedColName} AS {base.DialectProvider.GetQuotedColumnName(RemoveQuoteFromAlias(args[0].ToString()))}";
                     break;
                 case "Sum":
                 case "Count":
@@ -61,10 +60,10 @@ namespace ServiceStack.OrmLite.Sqlite
                     statement = string.Format("{0}({1}{2})",
                         m.Method.Name,
                         quotedColName,
-                        args.Count == 1 ? string.Format(",{0}", args[0]) : "");
+                        args.Count == 1 ? $",{args[0]}" : "");
                     break;
                 case "CountDistinct":
-                    statement = string.Format("COUNT(DISTINCT {0})", quotedColName);
+                    statement = $"COUNT(DISTINCT {quotedColName})";
                     break;
                 default:
                     return base.VisitSqlMethodCall(m);
@@ -78,9 +77,9 @@ namespace ServiceStack.OrmLite.Sqlite
             return base.OrderBy("random()");
         }
 
-        protected override PartialSqlString ToConcatPartialString(List<Object> args)
+        protected override PartialSqlString ToConcatPartialString(List<object> args)
         {
-            return new PartialSqlString(String.Join(" || ", args));
+            return new PartialSqlString(string.Join(" || ", args));
         }
     }
 }
