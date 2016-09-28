@@ -33,6 +33,9 @@ namespace ServiceStack.OrmLite.Tests.UseCase
         [Test]
         public void Run_Expressions_Author_tests()
         {
+            var hold = OrmLiteConfig.StripUpperInLike;
+            OrmLiteConfig.StripUpperInLike = false;
+
             using (var db = OpenDbConnection())
             {
                 var dialect = OrmLiteConfig.DialectProvider;
@@ -399,6 +402,8 @@ namespace ServiceStack.OrmLite.Tests.UseCase
                 "Expressions test in: {0}".Print(t3 - t2);
                 "All test in :        {0}".Print(t3 - t1);
             }
+
+            OrmLiteConfig.StripUpperInLike = hold;
         }
 
         public List<Author> GetAuthors()
