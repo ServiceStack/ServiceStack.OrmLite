@@ -17,5 +17,12 @@ namespace ServiceStack.OrmLite.MySql
         {
             return $"cast({quotedColName} as char(1000))";
         }
+
+        public override string ToDeleteRowStatement()
+        {
+            return base.tableDefs.Count > 1
+                ? $"DELETE {DialectProvider.GetQuotedTableName(modelDef)} {FromExpression} {WhereExpression}"
+                : base.ToDeleteRowStatement();
+        }
     }
 }

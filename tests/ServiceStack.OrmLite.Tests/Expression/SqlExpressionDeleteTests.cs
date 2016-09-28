@@ -15,8 +15,6 @@ namespace ServiceStack.OrmLite.Tests.Expression
         [Test]
         public void Can_delete_entity_with_join_expression()
         {
-            if (Dialect == Dialect.MySql) return; //Not Supported
-
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<Person>();
