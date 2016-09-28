@@ -31,10 +31,14 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 var fromDateTime = new DateTime(2000, 02, 02);
 
                 var q = db.From<Task>()
-                    .LeftJoin<Task>((parent, history) => parent.Id == history.ParentId, db.JoinAlias("history"))
+                    .CustomJoin("LEFT JOIN Task history ON (Task.Id = history.ParentId)")
                     .Where("history.\"Created\" >= {0} OR Task.\"Created\" >= {0}", fromDateTime);
 
-                //TODO: JOIN Alias doesn't support self-joins
+                //doesn't work with Self Joins
+                //var q = db.From<Task>()
+                //    .LeftJoin<Task, Task>((parent, history) => (parent.Id == history.ParentId)
+                //            && (history.CreatedAt >= fromDateTime || parent.CreatedAt >= fromDateTime)
+                //        ,db.JoinAlias("history"));
 
                 var results = db.Select(q);
 
