@@ -148,7 +148,10 @@ namespace ServiceStack.OrmLite
         }
 
         public static bool DisableColumnGuessFallback { get; set; }
-        public static bool StripUpperInLike { get; set; }
+        public static bool StripUpperInLike { get; set; } 
+#if NETSTANDARD1_3
+            = true;
+#endif
 
         public static IOrmLiteResultsFilter ResultsFilter
         {
