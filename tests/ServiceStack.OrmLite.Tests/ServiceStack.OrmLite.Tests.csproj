@@ -140,6 +140,7 @@
     <Compile Include="Async\SqlExpressionTests.cs" />
     <Compile Include="Async\SqlServerProviderTestsAsync.cs" />
     <Compile Include="Async\UpdateAsyncTests.cs" />
+    <Compile Include="Expression\JoinAliasTests.cs" />
     <Compile Include="Expression\SqlExpressionDeleteTests.cs" />
     <Compile Include="Expression\SqlExpressionJoinTests.cs" />
     <Compile Include="Issues\JoinAliasWithSchemaIssue.cs" />
