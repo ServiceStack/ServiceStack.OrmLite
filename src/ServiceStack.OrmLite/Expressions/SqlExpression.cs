@@ -8,6 +8,7 @@ using System.Text;
 using System.Collections.ObjectModel;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
@@ -2112,7 +2113,9 @@ namespace ServiceStack.OrmLite
 
                 for (var i = renameParams.Count - 1; i >= 0; i--)
                 {
-                    subSelect = subSelect.Replace(renameParams[i].Item1, renameParams[i].Item2);
+                    //Replace complete db params [@1] and not partial tokens [@1]0
+                    var paramsRegex = new Regex(renameParams[i].Item1 + "([^\\d])");
+                    subSelect = paramsRegex.Replace(subSelect, renameParams[i].Item2 + "$1");
                 }
 
                 return $"{quotedColName} IN ({subSelect})";
