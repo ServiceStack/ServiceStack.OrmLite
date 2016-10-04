@@ -44,12 +44,9 @@ namespace ServiceStack.OrmLite
         public IOrmLiteDialectProvider DialectProvider { get; set; }
         public List<IDbDataParameter> Params { get; set; }
 
-        protected string Sep
-        {
-            get { return sep; }
-        }
+        protected string Sep => sep;
 
-        public SqlExpression(IOrmLiteDialectProvider dialectProvider)
+        protected SqlExpression(IOrmLiteDialectProvider dialectProvider)
         {
             UpdateFields = new List<string>();
             InsertFields = new List<string>();

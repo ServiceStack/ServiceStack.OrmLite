@@ -14,6 +14,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading;
@@ -569,7 +570,7 @@ namespace ServiceStack.OrmLite
                 if (fieldDef.ShouldSkipInsert())
                     continue;
 
-                if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name))
+                if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase))
                     continue;
 
                 if (sbColumnNames.Length > 0)
@@ -627,7 +628,7 @@ namespace ServiceStack.OrmLite
                     continue;
 
                 //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
-                if (insertFields != null && !insertFields.Contains(fieldDef.Name))
+                if (insertFields != null && !insertFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase))
                     continue;
 
                 if (sbColumnNames.Length > 0)
@@ -758,7 +759,7 @@ namespace ServiceStack.OrmLite
                         continue;
                     }
 
-                    if (!updateAllFields && !updateFields.Contains(fieldDef.Name))
+                    if (!updateAllFields && !updateFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase))
                         continue;
 
                     if (sql.Length > 0)
@@ -1008,7 +1009,7 @@ namespace ServiceStack.OrmLite
                         continue;
                     }
 
-                    if (!updateAllFields && !updateFields.Contains(fieldDef.Name) || fieldDef.AutoIncrement)
+                    if (!updateAllFields && !updateFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase) || fieldDef.AutoIncrement)
                         continue;
 
                     if (sql.Length > 0)
