@@ -42,19 +42,13 @@ namespace ServiceStack.OrmLite
 
         public string PostDropTableSql { get; set; }
 
-        public bool IsInSchema { get { return this.Schema != null; } }
+        public bool IsInSchema => this.Schema != null;
 
-        public bool HasAutoIncrementId
-        {
-            get { return PrimaryKey != null && PrimaryKey.AutoIncrement; }
-        }
+        public bool HasAutoIncrementId => PrimaryKey != null && PrimaryKey.AutoIncrement;
 
         public FieldDefinition RowVersion { get; set; }
 
-        public string ModelName
-        {
-            get { return this.Alias ?? this.Name; }
-        }
+        public string ModelName => this.Alias ?? this.Name;
 
         public Type ModelType { get; set; }
 
@@ -73,25 +67,15 @@ namespace ServiceStack.OrmLite
 
         public List<FieldDefinition> FieldDefinitions { get; set; }
 
-        private FieldDefinition[] fieldDefinitionsArray;
-        public FieldDefinition[] FieldDefinitionsArray
-        {
-            get { return fieldDefinitionsArray; }
-        }
+        public FieldDefinition[] FieldDefinitionsArray { get; private set; }
+
+        public FieldDefinition[] FieldDefinitionsWithAliases { get; private set; }
 
         public List<FieldDefinition> IgnoredFieldDefinitions { get; set; }
 
-        private FieldDefinition[] ignoredFieldDefinitionsArray;
-        public FieldDefinition[] IgnoredFieldDefinitionsArray
-        {
-            get { return ignoredFieldDefinitionsArray; }
-        }
+        public FieldDefinition[] IgnoredFieldDefinitionsArray { get; private set; }
 
-        private FieldDefinition[] allFieldDefinitionsArray;
-        public FieldDefinition[] AllFieldDefinitionsArray
-        {
-            get { return allFieldDefinitionsArray; }
-        }
+        public FieldDefinition[] AllFieldDefinitionsArray { get; private set; }
 
         private readonly object fieldDefLock = new object();
         private Dictionary<string, FieldDefinition> fieldDefinitionMap;
@@ -125,9 +109,19 @@ namespace ServiceStack.OrmLite
         {
             if (fieldName != null)
             {
+                foreach (var f in FieldDefinitionsWithAliases)
+                {
+                    if (f.Alias == fieldName)
+                        return f;
+                }
                 foreach (var f in FieldDefinitionsArray)
                 {
                     if (f.Name == fieldName)
+                        return f;
+                }
+                foreach (var f in FieldDefinitionsWithAliases)
+                {
+                    if (string.Equals(f.Alias, fieldName, StringComparison.OrdinalIgnoreCase))
                         return f;
                 }
                 foreach (var f in FieldDefinitionsArray)
@@ -141,12 +135,14 @@ namespace ServiceStack.OrmLite
 
         public void AfterInit()
         {
-            fieldDefinitionsArray = FieldDefinitions.ToArray();
-            ignoredFieldDefinitionsArray = IgnoredFieldDefinitions.ToArray();
+            FieldDefinitionsArray = FieldDefinitions.ToArray();
+            FieldDefinitionsWithAliases = FieldDefinitions.Where(x => x.Alias != null).ToArray();
+
+            IgnoredFieldDefinitionsArray = IgnoredFieldDefinitions.ToArray();
 
             var allItems = new List<FieldDefinition>(FieldDefinitions);
             allItems.AddRange(IgnoredFieldDefinitions);
-            allFieldDefinitionsArray = allItems.ToArray();
+            AllFieldDefinitionsArray = allItems.ToArray();
         }
 
         public bool IsRefField(FieldDefinition fieldDef)
@@ -166,16 +162,9 @@ namespace ServiceStack.OrmLite
     public static class ModelDefinition<T>
     {
         private static ModelDefinition definition;
-        public static ModelDefinition Definition
-        {
-            get { return definition ?? (definition = typeof(T).GetModelDefinition()); }
-        }
+        public static ModelDefinition Definition => definition ?? (definition = typeof(T).GetModelDefinition());
 
         private static string primaryKeyName;
-        public static string PrimaryKeyName
-        {
-            get { return primaryKeyName ?? (primaryKeyName = Definition.PrimaryKey.FieldName); }
-        }
-
+        public static string PrimaryKeyName => primaryKeyName ?? (primaryKeyName = Definition.PrimaryKey.FieldName);
     }
 }

@@ -7,10 +7,7 @@ namespace ServiceStack.OrmLite
     public class OrmLiteTransaction : IDbTransaction, IHasDbTransaction
     {
         public IDbTransaction Transaction { get; set; }
-        public IDbTransaction DbTransaction
-        {
-            get { return Transaction; }
-        }
+        public IDbTransaction DbTransaction => Transaction;
 
         private readonly IDbConnection db;
 
@@ -61,14 +58,8 @@ namespace ServiceStack.OrmLite
             Transaction.Rollback();
         }
 
-        public IDbConnection Connection
-        {
-            get { return Transaction.Connection; }
-        }
+        public IDbConnection Connection => Transaction.Connection;
 
-        public IsolationLevel IsolationLevel
-        {
-            get { return Transaction.IsolationLevel; }
-        }
+        public IsolationLevel IsolationLevel => Transaction.IsolationLevel;
     }
 }

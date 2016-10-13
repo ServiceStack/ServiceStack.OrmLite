@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-//Apache 2.0 License: https://github.com/StackExchange/dapper-dot-net/blob/master/License.txt
 namespace ServiceStack.OrmLite.Dapper
 {
     /// <summary>
@@ -21,13 +20,13 @@ namespace ServiceStack.OrmLite.Dapper
         public DefaultTypeMap(Type type)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
 
             _fields = GetSettableFields(type);
             Properties = GetSettableProps(type);
             _type = type;
         }
-#if COREFX
+#if NETSTANDARD1_3
         static bool IsParameterMatch(ParameterInfo[] x, ParameterInfo[] y)
         {
             if (ReferenceEquals(x, y)) return true;
@@ -41,7 +40,7 @@ namespace ServiceStack.OrmLite.Dapper
         internal static MethodInfo GetPropertySetter(PropertyInfo propertyInfo, Type type)
         {
             if (propertyInfo.DeclaringType == type) return propertyInfo.GetSetMethod(true);
-#if COREFX
+#if NETSTANDARD1_3
             return propertyInfo.DeclaringType.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
                     .Single(x => x.Name == propertyInfo.Name
                         && x.PropertyType == propertyInfo.PropertyType
@@ -119,7 +118,7 @@ namespace ServiceStack.OrmLite.Dapper
         public ConstructorInfo FindExplicitConstructor()
         {
             var constructors = _type.GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-#if COREFX
+#if NETSTANDARD1_3
             var withAttr = constructors.Where(c => c.CustomAttributes.Any(x => x.AttributeType == typeof(ExplicitConstructorAttribute))).ToList();
 #else
             var withAttr = constructors.Where(c => c.GetCustomAttributes(typeof(ExplicitConstructorAttribute), true).Length > 0).ToList();
@@ -166,7 +165,7 @@ namespace ServiceStack.OrmLite.Dapper
                 return new SimpleMemberMap(columnName, property);
 
             // roslyn automatically implemented properties, in particular for get-only properties: <{Name}>k__BackingField;
-            var backingFieldName = String.Format("<{0}>k__BackingField", columnName);
+            var backingFieldName = "<" + columnName + ">k__BackingField";
 
             // preference order is:
             // exact match over underscre match, exact case over wrong case, backing fields over regular fields, match-inc-underscores over match-exc-underscores
@@ -178,7 +177,7 @@ namespace ServiceStack.OrmLite.Dapper
             if (field == null && MatchNamesWithUnderscores)
             {
                 var effectiveColumnName = columnName.Replace("_", "");
-                backingFieldName = String.Format("<{0}>k__BackingField", effectiveColumnName);
+                backingFieldName = "<" +effectiveColumnName + ">k__BackingField";
 
                 field = _fields.FirstOrDefault(p => string.Equals(p.Name, effectiveColumnName, StringComparison.Ordinal))
                     ?? _fields.FirstOrDefault(p => string.Equals(p.Name, backingFieldName, StringComparison.Ordinal))
@@ -199,6 +198,6 @@ namespace ServiceStack.OrmLite.Dapper
         /// <summary>
         /// The settable properties for this typemap
         /// </summary>
-        public List<PropertyInfo> Properties { get; set; }
+        public List<PropertyInfo> Properties { get; }
     }
 }

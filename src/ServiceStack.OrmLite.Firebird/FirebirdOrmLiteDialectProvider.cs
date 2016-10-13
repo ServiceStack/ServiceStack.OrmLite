@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Reflection;
 using System.Text;
+using System.Linq;
 using FirebirdSql.Data.FirebirdClient;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite;
@@ -133,7 +134,7 @@ namespace ServiceStack.OrmLite.Firebird
 
                 if (fieldDef.IsComputed)
                     continue;
-                if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name))
+                if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase))
                     continue;
 
                 if ((fieldDef.AutoIncrement || !string.IsNullOrEmpty(fieldDef.Sequence)
@@ -199,7 +200,7 @@ namespace ServiceStack.OrmLite.Firebird
                     continue;
 
                 //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
-                if (insertFields != null && !insertFields.Contains(fieldDef.Name))
+                if (insertFields != null && !insertFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase))
                     continue;
 
                 if (sbColumnNames.Length > 0)
@@ -264,7 +265,7 @@ namespace ServiceStack.OrmLite.Firebird
                     continue;
                 }
 
-                if (updateFields.Count > 0 && !updateFields.Contains(fieldDef.Name))
+                if (updateFields.Count > 0 && !updateFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase))
                     continue;
 
                 if (sql.Length > 0)

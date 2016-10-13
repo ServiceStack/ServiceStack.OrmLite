@@ -12,8 +12,11 @@ namespace ServiceStack.OrmLite.Tests.Issues
         {
             using (var db = OpenDbConnection())
             {
-                db.DropAndCreateTable<TestType>();
-                db.DropAndCreateTable<TestType2>();
+                db.DropTable<TestType>();
+                db.DropTable<TestType2>();
+
+                db.CreateTable<TestType2>();
+                db.CreateTable<TestType>();
 
                 var q = db.From<TestType>()
                     .LeftJoin<TestType2>((t1, t2) => t2.BoolCol == true && t1.Id == t2.Id);

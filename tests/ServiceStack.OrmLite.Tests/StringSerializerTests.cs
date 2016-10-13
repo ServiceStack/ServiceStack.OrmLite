@@ -130,7 +130,8 @@ namespace ServiceStack.OrmLite.Tests
                 InsertModelWithComplexType(db);
 
                 var str = db.SqlScalar<string>(TestSql);
-                Assert.That(str, Is.EqualTo("<ComplexType xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://schemas.datacontract.org/2004/07/ServiceStack.OrmLite.Tests\"><Id>2</Id><SubType><Name>Sub</Name></SubType></ComplexType>"));
+                Assert.That(str, Is.EqualTo("<ComplexType xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://schemas.datacontract.org/2004/07/ServiceStack.OrmLite.Tests\"><Id>2</Id><SubType><Name>Sub</Name></SubType></ComplexType>")   //.NET
+                                .Or.EqualTo("<ComplexType xmlns=\"http://schemas.datacontract.org/2004/07/ServiceStack.OrmLite.Tests\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><Id>2</Id><SubType><Name>Sub</Name></SubType></ComplexType>")); //.NET Core
 
                 var data = db.SingleById<ModelWithComplexType>(1);
                 Assert.That(data.ComplexType.SubType.Name, Is.EqualTo("Sub"));

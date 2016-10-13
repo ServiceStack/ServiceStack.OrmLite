@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Data;
+using System.Text;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.SqlServer
@@ -39,6 +40,24 @@ namespace ServiceStack.OrmLite.SqlServer
             }
 
             return StringBuilderCache.ReturnAndFree(sb);
+        }
+
+        public override void AppendFieldCondition(StringBuilder sqlFilter, FieldDefinition fieldDef, IDbCommand cmd)
+        {
+            if (fieldDef.FieldType.Name == "SqlGeography")
+            {
+                sqlFilter
+                    .Append(GetQuotedColumnName(fieldDef.FieldName))
+                    .Append(".STEquals(")
+                    .Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)))
+                    .Append(") = 1");
+
+                AddParameter(cmd, fieldDef);
+            }
+            else
+            {
+                base.AppendFieldCondition(sqlFilter, fieldDef, cmd);
+            }
         }
     }
 }

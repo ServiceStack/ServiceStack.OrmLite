@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Globalization;
-//Apache 2.0 License: https://github.com/StackExchange/dapper-dot-net/blob/master/License.txt
 namespace ServiceStack.OrmLite.Dapper
 {
     partial class SqlMapper
@@ -110,7 +109,7 @@ namespace ServiceStack.OrmLite.Dapper
             /// </summary>
             public IEnumerable<object> Read(Type type, bool buffered = true)
             {
-                if (type == null) throw new ArgumentNullException("type");
+                if (type == null) throw new ArgumentNullException(nameof(type));
                 return ReadImpl<object>(type, buffered);
             }
 
@@ -119,7 +118,7 @@ namespace ServiceStack.OrmLite.Dapper
             /// </summary>
             public object ReadFirst(Type type)
             {
-                if (type == null) throw new ArgumentNullException("type");
+                if (type == null) throw new ArgumentNullException(nameof(type));
                 return ReadRow<object>(type, Row.First);
             }
             /// <summary>
@@ -127,7 +126,7 @@ namespace ServiceStack.OrmLite.Dapper
             /// </summary>
             public object ReadFirstOrDefault(Type type)
             {
-                if (type == null) throw new ArgumentNullException("type");
+                if (type == null) throw new ArgumentNullException(nameof(type));
                 return ReadRow<object>(type, Row.FirstOrDefault);
             }
             /// <summary>
@@ -135,7 +134,7 @@ namespace ServiceStack.OrmLite.Dapper
             /// </summary>
             public object ReadSingle(Type type)
             {
-                if (type == null) throw new ArgumentNullException("type");
+                if (type == null) throw new ArgumentNullException(nameof(type));
                 return ReadRow<object>(type, Row.Single);
             }
             /// <summary>
@@ -143,7 +142,7 @@ namespace ServiceStack.OrmLite.Dapper
             /// </summary>
             public object ReadSingleOrDefault(Type type)
             {
-                if (type == null) throw new ArgumentNullException("type");
+                if (type == null) throw new ArgumentNullException(nameof(type));
                 return ReadRow<object>(type, Row.SingleOrDefault);
             }
 
@@ -356,7 +355,7 @@ namespace ServiceStack.OrmLite.Dapper
                     // need for "Cancel" etc
                     reader.Dispose();
                     reader = null;
-                    if (callbacks != null) callbacks.OnCompleted();
+                    callbacks?.OnCompleted();
                     Dispose();
                 }
             }
@@ -367,7 +366,7 @@ namespace ServiceStack.OrmLite.Dapper
             {
                 if (reader != null)
                 {
-                    if (!reader.IsClosed) if (Command != null) Command.Cancel();
+                    if (!reader.IsClosed) Command?.Cancel();
                     reader.Dispose();
                     reader = null;
                 }

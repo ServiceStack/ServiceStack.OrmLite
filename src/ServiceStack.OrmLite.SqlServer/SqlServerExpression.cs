@@ -20,8 +20,8 @@ namespace ServiceStack.OrmLite.SqlServer
         public override string GetSubstringSql(object quotedColumn, int startIndex, int? length = null)
         {
             return length != null
-                ? string.Format("substring({0}, {1}, {2})", quotedColumn, startIndex, length.Value)
-                : string.Format("substring({0}, {1}, LEN({0}) - {1} + 1)", quotedColumn, startIndex);
+                ? $"substring({quotedColumn}, {startIndex}, {length.Value})"
+                : $"substring({quotedColumn}, {startIndex}, LEN({quotedColumn}) - {startIndex} + 1)";
         }
 
         public override SqlExpression<T> OrderByRandom()
@@ -52,6 +52,13 @@ namespace ServiceStack.OrmLite.SqlServer
             {
                 right = "CAST({0} AS TIME)".Fmt(right);
             }
+        }
+
+        public override string ToDeleteRowStatement()
+        {
+            return base.tableDefs.Count > 1
+                ? $"DELETE {DialectProvider.GetQuotedTableName(modelDef)} {FromExpression} {WhereExpression}"
+                : base.ToDeleteRowStatement();
         }
     }
 
@@ -94,8 +101,7 @@ namespace ServiceStack.OrmLite.SqlServer
             if (strFields.Length == 0)
                 throw new ArgumentException("No non-null or non-default values were provided for type: " + typeof(T).Name);
 
-            dbCmd.CommandText = string.Format("UPDATE {0} SET {1} {2}",
-                dialectProvider.GetQuotedTableName(modelDef), strFields, q.WhereExpression);
+            dbCmd.CommandText = $"UPDATE {dialectProvider.GetQuotedTableName(modelDef)} SET {strFields} {q.WhereExpression}";
         }
     }
 }

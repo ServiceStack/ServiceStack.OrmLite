@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Reflection;
-#if !COREFX
-//Apache 2.0 License: https://github.com/StackExchange/dapper-dot-net/blob/master/License.txt
+#if !NETSTANDARD1_3
 namespace ServiceStack.OrmLite.Dapper
 {
     /// <summary>
@@ -24,7 +23,7 @@ namespace ServiceStack.OrmLite.Dapper
         static readonly Action<System.Data.SqlClient.SqlParameter, string> setTypeName;
         static SqlDataRecordListTVPParameter()
         {
-            var prop = typeof(System.Data.SqlClient.SqlParameter).GetProperty("TypeName", BindingFlags.Instance | BindingFlags.Public);
+            var prop = typeof(System.Data.SqlClient.SqlParameter).GetProperty(nameof(System.Data.SqlClient.SqlParameter.TypeName), BindingFlags.Instance | BindingFlags.Public);
             if (prop != null && prop.PropertyType == typeof(string) && prop.CanWrite)
             {
                 setTypeName = (Action<System.Data.SqlClient.SqlParameter, string>)

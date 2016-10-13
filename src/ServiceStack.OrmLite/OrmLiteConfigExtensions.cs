@@ -60,16 +60,16 @@ namespace ServiceStack.OrmLite
             {
                 ModelType = modelType,
                 Name = modelType.Name,
-                Alias = modelAliasAttr != null ? modelAliasAttr.Name : null,
-                Schema = schemaAttr != null ? schemaAttr.Name : null,
-                PreCreateTableSql = preCreate != null ? preCreate.Sql : null,
-                PostCreateTableSql = postCreate != null ? postCreate.Sql : null,
-                PreDropTableSql = preDrop != null ? preDrop.Sql : null,
-                PostDropTableSql = postDrop != null ? postDrop.Sql : null,
+                Alias = modelAliasAttr?.Name,
+                Schema = schemaAttr?.Name,
+                PreCreateTableSql = preCreate?.Sql,
+                PostCreateTableSql = postCreate?.Sql,
+                PreDropTableSql = preDrop?.Sql,
+                PostDropTableSql = postDrop?.Sql,
             };
 
             modelDef.CompositeIndexes.AddRange(
-                modelType.GetCustomAttributes(typeof(CompositeIndexAttribute), true).ToList()
+                modelType.AllAttributes<CompositeIndexAttribute>().ToList()
                 .ConvertAll(x => (CompositeIndexAttribute)x));
 
             var objProperties = modelType.GetProperties(
@@ -100,7 +100,7 @@ namespace ServiceStack.OrmLite
 
                 var isNullableType = propertyInfo.PropertyType.IsNullableType();
 
-                var isNullable = (!propertyInfo.PropertyType.IsValueType
+                var isNullable = (!propertyInfo.PropertyType.IsValueType()
                                    && !propertyInfo.HasAttributeNamed(typeof(RequiredAttribute).Name))
                                    || isNullableType;
 
@@ -124,13 +124,13 @@ namespace ServiceStack.OrmLite
 
                 var referencesAttr = propertyInfo.FirstAttribute<ReferencesAttribute>();
                 var referenceAttr = propertyInfo.FirstAttribute<ReferenceAttribute>();
-                var foreignKeyAttr = propertyInfo.FirstAttribute<ForeignKeyAttribute>();
+                var fkAttr = propertyInfo.FirstAttribute<ForeignKeyAttribute>();
                 var customFieldAttr = propertyInfo.FirstAttribute<CustomFieldAttribute>();
 
                 var fieldDefinition = new FieldDefinition
                 {
                     Name = propertyInfo.Name,
-                    Alias = aliasAttr != null ? aliasAttr.Name : null,
+                    Alias = aliasAttr?.Name,
                     FieldType = propertyType,
                     FieldTypeDefaultValue = propertyType.GetDefaultValue(),
                     TreatAsType = treatAsType,
@@ -145,29 +145,24 @@ namespace ServiceStack.OrmLite
                     IsClustered = indexAttr != null && indexAttr.Clustered,
                     IsNonClustered = indexAttr != null && indexAttr.NonClustered,
                     IsRowVersion = isRowVersion,
-                    FieldLength = stringLengthAttr != null
-                        ? stringLengthAttr.MaximumLength
-                        : (int?)null,
-                    DefaultValue = defaultValueAttr != null ? defaultValueAttr.DefaultValue : null,
-                    ForeignKey = foreignKeyAttr == null
+                    FieldLength = stringLengthAttr?.MaximumLength,
+                    DefaultValue = defaultValueAttr?.DefaultValue,
+                    ForeignKey = fkAttr == null
                         ? referencesAttr != null ? new ForeignKeyConstraint(referencesAttr.Type) : null
-                        : new ForeignKeyConstraint(foreignKeyAttr.Type,
-                                                    foreignKeyAttr.OnDelete,
-                                                    foreignKeyAttr.OnUpdate,
-                                                    foreignKeyAttr.ForeignKeyName),
-                    IsReference = referenceAttr != null && propertyType.IsClass,
+                        : new ForeignKeyConstraint(fkAttr.Type, fkAttr.OnDelete, fkAttr.OnUpdate, fkAttr.ForeignKeyName),
+                    IsReference = referenceAttr != null && propertyType.IsClass(),
                     GetValueFn = propertyInfo.GetPropertyGetterFn(),
                     SetValueFn = propertyInfo.GetPropertySetterFn(),
                     Sequence = sequenceAttr != null ? sequenceAttr.Name : string.Empty,
                     IsComputed = computeAttr != null || customSelectAttr != null,
                     ComputeExpression = computeAttr != null ? computeAttr.Expression : string.Empty,
-                    CustomSelect = customSelectAttr != null ? customSelectAttr.Sql : null,
-                    Scale = decimalAttribute != null ? decimalAttribute.Scale : (int?)null,
-                    BelongToModelName = belongToAttribute != null ? belongToAttribute.BelongToTableType.GetModelDefinition().ModelName : null,
-                    CustomFieldDefinition = customFieldAttr != null ? customFieldAttr.Sql : null,
+                    CustomSelect = customSelectAttr?.Sql,
+                    Scale = decimalAttribute?.Scale,
+                    BelongToModelName = belongToAttribute?.BelongToTableType.GetModelDefinition().ModelName,
+                    CustomFieldDefinition = customFieldAttr?.Sql,
                     IsRefType = propertyType.IsRefType(),
                 };
-                
+
                 var isIgnored = propertyInfo.HasAttributeNamed(typeof(IgnoreAttribute).Name)
                     || fieldDefinition.IsReference;
                 if (isIgnored)
@@ -185,8 +180,7 @@ namespace ServiceStack.OrmLite
             do
             {
                 snapshot = typeModelDefinitionMap;
-                newCache = new Dictionary<Type, ModelDefinition>(typeModelDefinitionMap);
-                newCache[modelType] = modelDef;
+                newCache = new Dictionary<Type, ModelDefinition>(typeModelDefinitionMap) { [modelType] = modelDef };
 
             } while (!ReferenceEquals(
                 Interlocked.CompareExchange(ref typeModelDefinitionMap, newCache, snapshot), snapshot));

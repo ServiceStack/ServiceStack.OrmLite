@@ -20,10 +20,7 @@ namespace ServiceStack.OrmLite
 
         public string Alias { get; set; }
 
-        public string FieldName
-        {
-            get { return this.Alias ?? this.Name; }
-        }
+        public string FieldName => this.Alias ?? this.Name;
 
         public Type FieldType { get; set; }
 
@@ -31,10 +28,7 @@ namespace ServiceStack.OrmLite
 
         public Type TreatAsType { get; set; }
 
-        public Type ColumnType
-        {
-            get { return TreatAsType ?? FieldType; }
-        }
+        public Type ColumnType => TreatAsType ?? FieldType;
 
         public PropertyInfo PropertyInfo { get; set; }
 
@@ -68,7 +62,7 @@ namespace ServiceStack.OrmLite
 
         public object GetValue(object onInstance)
         {
-            return this.GetValueFn == null ? null : this.GetValueFn(onInstance);
+            return this.GetValueFn?.Invoke(onInstance);
         }
 
         public string GetQuotedName(IOrmLiteDialectProvider dialectProvider)
@@ -160,10 +154,10 @@ namespace ServiceStack.OrmLite
                     ? refModelDef.Schema + "_" + NamingStrategy.GetTableName(refModelDef.ModelName)
                     : NamingStrategy.GetTableName(refModelDef.ModelName);
 
-                var fkName = string.Format("FK_{0}_{1}_{2}", modelName, refModelName, fieldDef.FieldName);
+                var fkName = $"FK_{modelName}_{refModelName}_{fieldDef.FieldName}";
                 return NamingStrategy.ApplyNameRestrictions(fkName);
             }
-            else { return ForeignKeyName; }
+            return ForeignKeyName;
         }
     }
 }

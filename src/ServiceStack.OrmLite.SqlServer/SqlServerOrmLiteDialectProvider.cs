@@ -9,6 +9,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using ServiceStack.OrmLite.SqlServer.Converters;
 using ServiceStack.Text;
+#if NETSTANDARD1_3
+using ApplicationException = System.InvalidOperationException;
+#endif
 
 namespace ServiceStack.OrmLite.SqlServer
 {
@@ -372,7 +375,7 @@ namespace ServiceStack.OrmLite.SqlServer
             return (SqlDataReader)reader;
         }
 
-#if NET45
+#if ASYNC
         public override Task OpenAsync(IDbConnection db, CancellationToken token)
         {
             return Unwrap(db).OpenAsync(token);

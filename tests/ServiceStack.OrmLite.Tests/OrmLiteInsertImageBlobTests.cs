@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !NETCORE
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -122,3 +123,4 @@ namespace ServiceStack.OrmLite.Tests
         }
     }
 }
+#endif

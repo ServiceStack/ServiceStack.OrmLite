@@ -222,33 +222,36 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 Func<string> normalizedSql = () =>
                     db.GetLastSql().Replace("\"", "").Replace("`", "").Replace("Name", "name").Replace("NAME", "name").Replace(":","@");
 
+                var hold = OrmLiteConfig.StripUpperInLike; //.NET Core defaults to `true`
+                OrmLiteConfig.StripUpperInLike = false;
+
                 db.Count<Text>(q => q.Name.StartsWith("A"));
                 Assert.That(normalizedSql(),
-                    Is.StringContaining("upper(name) like @0".NormalizeSql()));
+                    Does.Contain("upper(name) like @0".NormalizeSql()));
 
                 db.Count<Text>(q => q.Name.EndsWith("e"));
                 Assert.That(normalizedSql(),
-                    Is.StringContaining("upper(name) like @0".NormalizeSql()));
+                    Does.Contain("upper(name) like @0".NormalizeSql()));
 
                 db.Count<Text>(q => q.Name.Contains("b"));
                 Assert.That(normalizedSql(),
-                    Is.StringContaining("upper(name) like @0".NormalizeSql()));
+                    Does.Contain("upper(name) like @0".NormalizeSql()));
 
                 OrmLiteConfig.StripUpperInLike = true;
 
                 db.Count<Text>(q => q.Name.StartsWith("A"));
                 Assert.That(normalizedSql(),
-                    Is.StringContaining("name like @0".NormalizeSql()));
+                    Does.Contain("name like @0".NormalizeSql()));
 
                 db.Count<Text>(q => q.Name.EndsWith("e"));
                 Assert.That(normalizedSql(),
-                    Is.StringContaining("name like @0".NormalizeSql()));
+                    Does.Contain("name like @0".NormalizeSql()));
 
                 db.Count<Text>(q => q.Name.Contains("b"));
                 Assert.That(normalizedSql(),
-                    Is.StringContaining("name like @0".NormalizeSql()));
+                    Does.Contain("name like @0".NormalizeSql()));
 
-                OrmLiteConfig.StripUpperInLike = false;
+                OrmLiteConfig.StripUpperInLike = hold;
             }
         }
 

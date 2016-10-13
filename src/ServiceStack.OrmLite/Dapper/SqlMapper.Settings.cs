@@ -1,5 +1,4 @@
-﻿//Apache 2.0 License: https://github.com/StackExchange/dapper-dot-net/blob/master/License.txt
-namespace ServiceStack.OrmLite.Dapper
+﻿namespace ServiceStack.OrmLite.Dapper
 {
     partial class SqlMapper
     {
@@ -45,6 +44,11 @@ namespace ServiceStack.OrmLite.Dapper
             /// default and must be enabled.
             /// </remarks>
             public static bool PadListExpansions { get; set; }
+            /// <summary>
+            /// If set (non-negative), when performing in-list expansions of integer types ("where id in @ids", etc), switch to a string_split based
+            /// operation if there are more than this many elements. Note that this feautre requires SQL Server 2016 / compatibility level 130 (or above).
+            /// </summary>
+            public static int InListStringSplitCount { get; set; } = -1;
         }
     }
 }

@@ -4,7 +4,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
-//Apache 2.0 License: https://github.com/StackExchange/dapper-dot-net/blob/master/License.txt
 namespace ServiceStack.OrmLite.Dapper
 {
     partial class SqlMapper
@@ -124,9 +123,9 @@ namespace ServiceStack.OrmLite.Dapper
                     }
                     for (int i = 0; i < length; i++)
                     {
-                        if (((this.names != null ? this.names[i] : null) ?? (this.reader != null ? this.reader.GetName(startBound + i) : null)) != (other.names != null ? other.names[i] : other.reader != null ? other.reader.GetName(startBound + i) : null)
+                        if ((this.names?[i] ?? this.reader?.GetName(startBound + i)) != (other.names?[i] ?? other.reader?.GetName(startBound + i))
                             ||
-                            ((this.types != null ? this.types[i] : null) ?? (this.reader != null ? this.reader.GetFieldType(startBound + i) : null)) != (other.types != null ? other.types[i] : other.reader != null ? other.reader.GetFieldType(startBound + i) : null)
+                            (this.types?[i] ?? this.reader?.GetFieldType(startBound + i)) != (other.types?[i] ?? other.reader?.GetFieldType(startBound + i))
                             )
                         {
                             return false; // different column name or type

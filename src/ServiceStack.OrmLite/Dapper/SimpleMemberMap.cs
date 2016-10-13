@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Reflection;
 
-//Apache 2.0 License: https://github.com/StackExchange/dapper-dot-net/blob/master/License.txt
 namespace ServiceStack.OrmLite.Dapper
 {
     /// <summary>
@@ -17,10 +16,10 @@ namespace ServiceStack.OrmLite.Dapper
         public SimpleMemberMap(string columnName, PropertyInfo property)
         {
             if (columnName == null)
-                throw new ArgumentNullException("columnName");
+                throw new ArgumentNullException(nameof(columnName));
 
             if (property == null)
-                throw new ArgumentNullException("property");
+                throw new ArgumentNullException(nameof(property));
 
             ColumnName = columnName;
             Property = property;
@@ -34,10 +33,10 @@ namespace ServiceStack.OrmLite.Dapper
         public SimpleMemberMap(string columnName, FieldInfo field)
         {
             if (columnName == null)
-                throw new ArgumentNullException("columnName");
+                throw new ArgumentNullException(nameof(columnName));
 
             if (field == null)
-                throw new ArgumentNullException("field");
+                throw new ArgumentNullException(nameof(field));
 
             ColumnName = columnName;
             Field = field;
@@ -51,10 +50,10 @@ namespace ServiceStack.OrmLite.Dapper
         public SimpleMemberMap(string columnName, ParameterInfo parameter)
         {
             if (columnName == null)
-                throw new ArgumentNullException("columnName");
+                throw new ArgumentNullException(nameof(columnName));
 
             if (parameter == null)
-                throw new ArgumentNullException("parameter");
+                throw new ArgumentNullException(nameof(parameter));
 
             ColumnName = columnName;
             Parameter = parameter;
@@ -63,29 +62,26 @@ namespace ServiceStack.OrmLite.Dapper
         /// <summary>
         /// DataReader column name
         /// </summary>
-        public string ColumnName { get; set; }
+        public string ColumnName { get; }
 
         /// <summary>
         /// Target member type
         /// </summary>
-        public Type MemberType
-        {
-            get { return Field != null ? Field.FieldType : (Property != null ? Property.PropertyType : (Parameter != null ? Parameter.ParameterType : null)); }
-        }
+        public Type MemberType => Field?.FieldType ?? Property?.PropertyType ?? Parameter?.ParameterType;
 
         /// <summary>
         /// Target property
         /// </summary>
-        public PropertyInfo Property { get; set; }
+        public PropertyInfo Property { get; }
 
         /// <summary>
         /// Target field
         /// </summary>
-        public FieldInfo Field { get; set; }
+        public FieldInfo Field { get; }
 
         /// <summary>
         /// Target constructor parameter
         /// </summary>
-        public ParameterInfo Parameter { get; set; }
+        public ParameterInfo Parameter { get; }
     }
 }

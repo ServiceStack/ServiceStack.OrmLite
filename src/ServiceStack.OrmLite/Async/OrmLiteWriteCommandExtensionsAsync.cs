@@ -1,4 +1,4 @@
-#if NET45
+#if ASYNC
 // Copyright (c) Service Stack LLC. All Rights Reserved.
 // License: https://raw.github.com/ServiceStack/ServiceStack/master/license.txt
 
@@ -112,8 +112,7 @@ namespace ServiceStack.OrmLite
                 if (dbTrans != null && t.IsSuccess())
                     dbTrans.Commit();
 
-                if (dbTrans != null)
-                    dbTrans.Dispose();
+                dbTrans?.Dispose();
 
                 if (t.IsFaulted)
                     throw t.Exception;
@@ -204,8 +203,7 @@ namespace ServiceStack.OrmLite
                 if (dbTrans != null && t.IsSuccess())
                     dbTrans.Commit();
 
-                if (dbTrans != null)
-                    dbTrans.Dispose();
+                dbTrans?.Dispose();
 
                 return count;
             }, token);
@@ -265,8 +263,7 @@ namespace ServiceStack.OrmLite
 
         internal static Task<long> InsertAsync<T>(this IDbCommand dbCmd, T obj, bool selectIdentity, CancellationToken token)
         {
-            if (OrmLiteConfig.InsertFilter != null)
-                OrmLiteConfig.InsertFilter(dbCmd, obj);
+            OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj);
 
             var dialectProvider = dbCmd.GetDialectProvider();
 
@@ -299,8 +296,7 @@ namespace ServiceStack.OrmLite
 
             return objs.EachAsync((obj, i) =>
             {
-                if (OrmLiteConfig.InsertFilter != null)
-                    OrmLiteConfig.InsertFilter(dbCmd, obj);
+                OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj);
 
                 dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
@@ -311,8 +307,7 @@ namespace ServiceStack.OrmLite
                 if (dbTrans != null && t.IsSuccess())
                     dbTrans.Commit();
 
-                if (dbTrans != null)
-                    dbTrans.Dispose();
+                dbTrans?.Dispose();
 
                 if (t.IsFaulted)
                     throw t.Exception;
@@ -346,16 +341,14 @@ namespace ServiceStack.OrmLite
                     await dbCmd.InsertAsync(token, obj);
                 }
 
-                if (modelDef.RowVersion != null)
-                    modelDef.RowVersion.SetValueFn(obj, await dbCmd.GetRowVersionAsync(modelDef, id, token));
+                modelDef.RowVersion?.SetValueFn(obj, await dbCmd.GetRowVersionAsync(modelDef, id, token));
 
                 return true;
             }
 
             await dbCmd.UpdateAsync(obj, token);
 
-            if (modelDef.RowVersion != null)
-                modelDef.RowVersion.SetValueFn(obj, await dbCmd.GetRowVersionAsync(modelDef, id, token));
+            modelDef.RowVersion?.SetValueFn(obj, await dbCmd.GetRowVersionAsync(modelDef, id, token));
 
             return false;
         }
@@ -370,7 +363,7 @@ namespace ServiceStack.OrmLite
             var modelDef = typeof(T).GetModelDefinition();
 
             var firstRowId = modelDef.GetPrimaryKey(firstRow);
-            var defaultIdValue = firstRowId != null ? firstRowId.GetType().GetDefaultValue() : null;
+            var defaultIdValue = firstRowId?.GetType().GetDefaultValue();
 
             var idMap = defaultIdValue != null
                 ? saveRows.Where(x => !defaultIdValue.Equals(modelDef.GetPrimaryKey(x))).ToSafeDictionary(x => modelDef.GetPrimaryKey(x))
@@ -394,8 +387,7 @@ namespace ServiceStack.OrmLite
                     var id = modelDef.GetPrimaryKey(row);
                     if (id != defaultIdValue && existingRowsMap.ContainsKey(id))
                     {
-                        if (OrmLiteConfig.UpdateFilter != null)
-                            OrmLiteConfig.UpdateFilter(dbCmd, row);
+                        OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, row);
 
                         await dbCmd.UpdateAsync(row, token);
                     }
@@ -419,17 +411,14 @@ namespace ServiceStack.OrmLite
                         rowsAdded++;
                     }
 
-                    if (modelDef.RowVersion != null)
-                        modelDef.RowVersion.SetValueFn(row, await dbCmd.GetRowVersionAsync(modelDef, id, token));
+                    modelDef.RowVersion?.SetValueFn(row, await dbCmd.GetRowVersionAsync(modelDef, id, token));
                 }
 
-                if (dbTrans != null)
-                    dbTrans.Commit();
+                dbTrans?.Commit();
             }
             finally
             {
-                if (dbTrans != null)
-                    dbTrans.Dispose();
+                dbTrans?.Dispose();
             }
 
             return rowsAdded;
@@ -476,8 +465,7 @@ namespace ServiceStack.OrmLite
 
                     if (result != null)
                     {
-                        if (refField != null)
-                            refField.SetValueFn(result, pkValue);
+                        refField?.SetValueFn(result, pkValue);
 
                         await dbCmd.CreateTypedApi(refType).SaveAsync(result, token);
 
@@ -509,8 +497,7 @@ namespace ServiceStack.OrmLite
                     ? modelDef.GetRefFieldDef(refModelDef, refType)
                     : modelDef.GetRefFieldDefIfExists(refModelDef);
 
-                if (refField != null)
-                    refField.SetValueFn(oRef, pkValue);
+                refField?.SetValueFn(oRef, pkValue);
             }
 
             await dbCmd.SaveAllAsync(refs, token);

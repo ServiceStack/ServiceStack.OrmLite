@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Data;
 
-//Apache 2.0 License: https://github.com/StackExchange/dapper-dot-net/blob/master/License.txt
 namespace ServiceStack.OrmLite.Dapper
 {
     partial class SqlMapper
     {
-#if !COREFX
+#if !NETSTANDARD1_3
         /// <summary>
         /// A type handler for data-types that are supported by the underlying provider, but which need
         /// a well-known UdtTypeName to be specified

@@ -160,7 +160,7 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(expectedString, Is.EqualTo(r9));
 
                 r9 = db.Scalar<Author, string>(e => Sql.Max(e.Name), e => e.City == "SinCity");
-                Assert.IsNullOrEmpty(r9);
+                Assert.That(string.IsNullOrEmpty(r9));
 
                 //Can't MIN(bit)/MAX(bit) in SQL Server
                 if (Dialect == Dialect.SqlServer)

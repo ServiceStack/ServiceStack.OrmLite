@@ -1,4 +1,4 @@
-﻿#if NET45
+﻿#if ASYNC
 // Copyright (c) Service Stack LLC. All Rights Reserved.
 // License: https://raw.github.com/ServiceStack/ServiceStack/master/license.txt
 
@@ -49,8 +49,11 @@ namespace ServiceStack.OrmLite
             var genericArgs = isTuple ? typeof(T).GetGenericArguments() : null;
             var modelIndexCaches = isTuple ? reader.GetMultiIndexCaches(dialectProvider, onlyFields, genericArgs) : null;
             var genericTupleMi = isTuple ? typeof(T).GetGenericTypeDefinition().GetCachedGenericType(genericArgs) : null;
+#if NETSTANDARD1_3
+            var activator = isTuple ? System.Reflection.TypeExtensions.GetConstructor(genericTupleMi, genericArgs).GetActivator() : null;
+#else
             var activator = isTuple ? genericTupleMi.GetConstructor(genericArgs).GetActivator() : null;
-
+#endif
             return dialectProvider.ReaderEach(reader, () =>
             {
                 if (isObjectList)
@@ -62,7 +65,7 @@ namespace ServiceStack.OrmLite
                     }
                     return (T)(object)row;
                 }
-                else if (isObjectDict)
+                if (isObjectDict)
                 {
                     var row = new Dictionary<string,object>();
                     for (var i = 0; i < reader.FieldCount; i++)
@@ -71,7 +74,7 @@ namespace ServiceStack.OrmLite
                     }
                     return (T)(object)row;
                 }
-                else if (isDynamic)
+                if (isDynamic)
                 {
                     var row = (IDictionary<string, object>) new ExpandoObject();
                     for (var i = 0; i < reader.FieldCount; i++)
@@ -80,7 +83,7 @@ namespace ServiceStack.OrmLite
                     }
                     return (T)(object)row;
                 }
-                else if (isTuple)
+                if (isTuple)
                 {
                     var tupleArgs = reader.ToMultiTuple(dialectProvider, modelIndexCaches, genericArgs, values);
                     var tuple = activator(tupleArgs.ToArray());

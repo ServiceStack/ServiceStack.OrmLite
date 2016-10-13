@@ -58,17 +58,7 @@ namespace ServiceStack.OrmLite
         public Action<OrmLiteConnection> OnDispose { get; set; }
 
         private OrmLiteConnection ormLiteConnection;
-        private OrmLiteConnection OrmLiteConnection
-        {
-            get
-            {
-                if (ormLiteConnection == null)
-                {
-                    ormLiteConnection = new OrmLiteConnection(this);
-                }
-                return ormLiteConnection;
-            }
-        }
+        private OrmLiteConnection OrmLiteConnection => ormLiteConnection ?? (ormLiteConnection = new OrmLiteConnection(this));
 
         public virtual IDbConnection OpenDbConnection()
         {
@@ -93,7 +83,7 @@ namespace ServiceStack.OrmLite
         public virtual IDbConnection OpenDbConnectionString(string connectionString)
         {
             if (connectionString == null)
-                throw new ArgumentNullException("connectionString");
+                throw new ArgumentNullException(nameof(connectionString));
 
             var connection = new OrmLiteConnection(this)
             {
@@ -108,9 +98,9 @@ namespace ServiceStack.OrmLite
         public virtual IDbConnection OpenDbConnectionString(string connectionString, string providerName)
         {
             if (connectionString == null)
-                throw new ArgumentNullException("connectionString");
+                throw new ArgumentNullException(nameof(connectionString));
             if (providerName == null)
-                throw new ArgumentNullException("providerName");
+                throw new ArgumentNullException(nameof(providerName));
 
             IOrmLiteDialectProvider dialectProvider;
             if (!DialectProviders.TryGetValue(providerName, out dialectProvider))
@@ -139,13 +129,7 @@ namespace ServiceStack.OrmLite
         }
 
         private static Dictionary<string, IOrmLiteDialectProvider> dialectProviders;
-        public static Dictionary<string, IOrmLiteDialectProvider> DialectProviders
-        {
-            get
-            {
-                return dialectProviders ?? (dialectProviders = new Dictionary<string, IOrmLiteDialectProvider>());
-            }
-        }
+        public static Dictionary<string, IOrmLiteDialectProvider> DialectProviders => dialectProviders ?? (dialectProviders = new Dictionary<string, IOrmLiteDialectProvider>());
 
         public virtual void RegisterDialectProvider(string providerName, IOrmLiteDialectProvider dialectProvider)
         {
@@ -153,13 +137,7 @@ namespace ServiceStack.OrmLite
         }
 
         private static Dictionary<string, OrmLiteConnectionFactory> namedConnections;
-        public static Dictionary<string, OrmLiteConnectionFactory> NamedConnections
-        {
-            get
-            {
-                return namedConnections ?? (namedConnections = new Dictionary<string, OrmLiteConnectionFactory>());
-            }
-        }
+        public static Dictionary<string, OrmLiteConnectionFactory> NamedConnections => namedConnections ?? (namedConnections = new Dictionary<string, OrmLiteConnectionFactory>());
 
         public virtual void RegisterConnection(string namedConnection, string connectionString, IOrmLiteDialectProvider dialectProvider)
         {

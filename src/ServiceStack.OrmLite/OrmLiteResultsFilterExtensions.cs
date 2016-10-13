@@ -14,7 +14,7 @@ namespace ServiceStack.OrmLite
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(OrmLiteResultsFilterExtensions));
 
-        internal static int ExecNonQuery(this IDbCommand dbCmd, string sql, object anonType = null)
+        public static int ExecNonQuery(this IDbCommand dbCmd, string sql, object anonType = null)
         {
             if (anonType != null)
                 dbCmd.SetParameters(anonType.ToObjectDictionary(), (bool)false);
@@ -25,14 +25,12 @@ namespace ServiceStack.OrmLite
                 Log.DebugCommand(dbCmd);
 
             if (OrmLiteConfig.ResultsFilter != null)
-            {
                 return OrmLiteConfig.ResultsFilter.ExecuteSql(dbCmd);
-            }
 
             return dbCmd.ExecuteNonQuery();
         }
 
-        internal static int ExecNonQuery(this IDbCommand dbCmd, string sql, Dictionary<string, object> dict)
+        public static int ExecNonQuery(this IDbCommand dbCmd, string sql, Dictionary<string, object> dict)
         {
 
             if (dict != null)
@@ -44,15 +42,28 @@ namespace ServiceStack.OrmLite
                 Log.DebugCommand(dbCmd);
 
             if (OrmLiteConfig.ResultsFilter != null)
-            {
                 return OrmLiteConfig.ResultsFilter.ExecuteSql(dbCmd);
-            }
 
             return dbCmd.ExecuteNonQuery();
         }
 
-        internal static int ExecNonQuery(this IDbCommand dbCmd)
+        public static int ExecNonQuery(this IDbCommand dbCmd)
         {
+            if (Log.IsDebugEnabled)
+                Log.DebugCommand(dbCmd);
+
+            if (OrmLiteConfig.ResultsFilter != null)
+                return OrmLiteConfig.ResultsFilter.ExecuteSql(dbCmd);
+
+            return dbCmd.ExecuteNonQuery();
+        }
+
+        public static int ExecNonQuery(this IDbCommand dbCmd, string sql, Action<IDbCommand> dbCmdFilter)
+        {
+            dbCmdFilter?.Invoke(dbCmd);
+
+            dbCmd.CommandText = sql;
+
             if (Log.IsDebugEnabled)
                 Log.DebugCommand(dbCmd);
 
@@ -90,9 +101,7 @@ namespace ServiceStack.OrmLite
                 dbCmd.CommandText = sql;
 
             if (OrmLiteConfig.ResultsFilter != null)
-            {
                 return OrmLiteConfig.ResultsFilter.GetRefList(dbCmd, refType);
-            }
 
             using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
             {
@@ -124,9 +133,7 @@ namespace ServiceStack.OrmLite
             dbCmd.SetParameters(sqlParams);
 
             if (OrmLiteConfig.ResultsFilter != null)
-            {
                 return OrmLiteConfig.ResultsFilter.GetList<T>(dbCmd);
-            }
 
             using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
             {
@@ -171,9 +178,7 @@ namespace ServiceStack.OrmLite
                 dbCmd.CommandText = sql;
 
             if (OrmLiteConfig.ResultsFilter != null)
-            {
                 return OrmLiteConfig.ResultsFilter.GetSingle<T>(dbCmd);
-            }
 
             using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
             {
@@ -187,9 +192,7 @@ namespace ServiceStack.OrmLite
                 dbCmd.CommandText = sql;
 
             if (OrmLiteConfig.ResultsFilter != null)
-            {
                 return OrmLiteConfig.ResultsFilter.GetRefSingle(dbCmd, refType);
-            }
 
             using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
             {
@@ -208,9 +211,7 @@ namespace ServiceStack.OrmLite
                 dbCmd.CommandText = sql;
 
             if (OrmLiteConfig.ResultsFilter != null)
-            {
                 return OrmLiteConfig.ResultsFilter.GetScalar<T>(dbCmd);
-            }
 
             using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
             {
@@ -224,9 +225,7 @@ namespace ServiceStack.OrmLite
             dbCmd.SetParameters(sqlExpression.Params);
 
             if (OrmLiteConfig.ResultsFilter != null)
-            {
                 return OrmLiteConfig.ResultsFilter.GetScalar(dbCmd);
-            }
 
             return dbCmd.ExecuteScalar();
         }
@@ -237,9 +236,7 @@ namespace ServiceStack.OrmLite
                 dbCmd.CommandText = sql;
 
             if (OrmLiteConfig.ResultsFilter != null)
-            {
                 return OrmLiteConfig.ResultsFilter.GetScalar(dbCmd);
-            }
 
             return dbCmd.ExecuteScalar();
         }
@@ -250,9 +247,7 @@ namespace ServiceStack.OrmLite
                 dbCmd.CommandText = sql;
 
             if (OrmLiteConfig.ResultsFilter != null)
-            {
                 return OrmLiteConfig.ResultsFilter.GetLongScalar(dbCmd);
-            }
 
             return dbCmd.LongScalar();
         }
@@ -265,9 +260,7 @@ namespace ServiceStack.OrmLite
             dbCmd.SetParameters(sqlParams);
 
             if (OrmLiteConfig.ResultsFilter != null)
-            {
                 return OrmLiteConfig.ResultsFilter.GetSingle<T>(dbCmd);
-            }
 
             using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
             {
@@ -281,9 +274,7 @@ namespace ServiceStack.OrmLite
                 dbCmd.CommandText = sql;
 
             if (OrmLiteConfig.ResultsFilter != null)
-            {
                 return OrmLiteConfig.ResultsFilter.GetColumn<T>(dbCmd);
-            }
 
             using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
             {
@@ -302,9 +293,7 @@ namespace ServiceStack.OrmLite
                 dbCmd.CommandText = sql;
 
             if (OrmLiteConfig.ResultsFilter != null)
-            {
                 return OrmLiteConfig.ResultsFilter.GetColumnDistinct<T>(dbCmd);
-            }
 
             using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
             {
@@ -319,9 +308,7 @@ namespace ServiceStack.OrmLite
             SetParameters(dbCmd, expression.Params);
 
             if (OrmLiteConfig.ResultsFilter != null)
-            {
                 return OrmLiteConfig.ResultsFilter.GetColumnDistinct<T>(dbCmd);
-            }
 
             using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
             {
@@ -335,9 +322,7 @@ namespace ServiceStack.OrmLite
                 dbCmd.CommandText = sql;
 
             if (OrmLiteConfig.ResultsFilter != null)
-            {
                 return OrmLiteConfig.ResultsFilter.GetDictionary<K, V>(dbCmd);
-            }
 
             using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
             {
@@ -350,9 +335,7 @@ namespace ServiceStack.OrmLite
             dbCmd.SetParameters(expression.Params).CommandText = expression.ToSelectStatement();
 
             if (OrmLiteConfig.ResultsFilter != null)
-            {
                 return OrmLiteConfig.ResultsFilter.GetDictionary<K, V>(dbCmd);
-            }
 
             using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
             {
@@ -371,9 +354,7 @@ namespace ServiceStack.OrmLite
                 dbCmd.CommandText = sql;
 
             if (OrmLiteConfig.ResultsFilter != null)
-            {
                 return OrmLiteConfig.ResultsFilter.GetLookup<K, V>(dbCmd);
-            }
 
             using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
             {

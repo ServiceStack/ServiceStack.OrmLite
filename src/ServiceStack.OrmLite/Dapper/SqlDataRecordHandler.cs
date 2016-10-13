@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 
-#if !COREFX
-//Apache 2.0 License: https://github.com/StackExchange/dapper-dot-net/blob/master/License.txt
+#if !NETSTANDARD1_3
 namespace ServiceStack.OrmLite.Dapper
 {
     sealed class SqlDataRecordHandler : SqlMapper.ITypeHandler

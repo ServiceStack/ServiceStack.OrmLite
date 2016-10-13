@@ -1,4 +1,6 @@
-﻿using NUnit.Framework;
+﻿using System.Collections.Generic;
+using NUnit.Framework;
+using ServiceStack.DataAnnotations;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Issues
@@ -15,6 +17,19 @@ namespace ServiceStack.OrmLite.Tests.Issues
         public int Id { get; set; }
         public int DistinctColumnId { get; set; }
         public string Name { get; set; }
+    }
+
+    [Alias("t1")]
+    class TableWithAliases
+    {
+        public int Id { get; set; }
+
+        [Alias("n1")]
+        public string Name { get; set; }
+        [Alias("n2")]
+        public string Name1 { get; set; }
+        [Alias("n3")]
+        public string Name2 { get; set; }
     }
 
     [TestFixture]
@@ -43,11 +58,37 @@ namespace ServiceStack.OrmLite.Tests.Issues
                 var q = db.From<DistinctColumn>()
                     .Join<DistinctJoinColumn>()
                     .SelectDistinct(dt => new { dt.Bar, dt.Foo });
-                
+
                 var result = db.Select(q);
                 db.GetLastSql().Print();
 
                 Assert.That(result.Count, Is.EqualTo(2));
+            }
+        }
+
+        [Test]
+        public void Does_select_alias_in_custom_select()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<TableWithAliases>();
+
+                for (var i = 1; i <= 5; i++)
+                {
+                    db.Insert(new TableWithAliases { Id = i, Name = "foo" + i, Name1 = "bar" + i, Name2 = "qux" + i });
+                }
+
+                var uniqueTrackNames = db.ColumnDistinct<string>(
+                    db.From<TableWithAliases>().Select(x => x.Name));
+
+                Assert.That(uniqueTrackNames, Is.EquivalentTo(new []
+                {
+                    "foo1",
+                    "foo2",
+                    "foo3",
+                    "foo4",
+                    "foo5",
+                }));
             }
         }
     }

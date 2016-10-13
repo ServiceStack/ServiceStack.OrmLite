@@ -7,24 +7,25 @@ namespace ServiceStack.OrmLite
         private readonly IEnumerable values;
         private readonly IOrmLiteDialectProvider dialectProvider;
 
-        public int Count { get; private set; }
+        public int Count { get; }
 
         public SqlInValues(IEnumerable values, IOrmLiteDialectProvider dialectProvider=null)
         {
             this.values = values;
             this.dialectProvider = dialectProvider ?? OrmLiteConfig.DialectProvider;
 
-            if (values != null)
-                foreach (var value in values)
-                    ++Count;
+            if (values == null) return;
+            foreach (var value in values)
+            {
+                ++Count;
+            }
         }
 
         public string ToSqlInString()
         {
-            if (Count == 0)
-                return "NULL";
-
-            return OrmLiteUtils.SqlJoin(values, dialectProvider);
+            return Count == 0 
+                ? "NULL" 
+                : OrmLiteUtils.SqlJoin(values, dialectProvider);
         }
 
         public IEnumerable GetValues()

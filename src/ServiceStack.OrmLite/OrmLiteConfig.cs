@@ -26,9 +26,7 @@ namespace ServiceStack.OrmLite
         {
             get
             {
-                if (commandTimeout != null)
-                    return commandTimeout.Value;
-                return defaultCommandTimeout;
+                return commandTimeout ?? defaultCommandTimeout;
             }
             set
             {
@@ -150,16 +148,17 @@ namespace ServiceStack.OrmLite
         }
 
         public static bool DisableColumnGuessFallback { get; set; }
-        public static bool StripUpperInLike { get; set; }
+        public static bool StripUpperInLike { get; set; } 
+#if NETSTANDARD1_3
+            = true;
+#endif
 
         public static IOrmLiteResultsFilter ResultsFilter
         {
             get
             {
                 var state = OrmLiteContext.OrmLiteState;
-                return state != null 
-                    ? state.ResultsFilter
-                    : null;
+                return state?.ResultsFilter;
             }
             set { OrmLiteContext.GetOrCreateState().ResultsFilter = value; }
         }

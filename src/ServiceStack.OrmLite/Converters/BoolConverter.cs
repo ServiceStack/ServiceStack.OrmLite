@@ -5,15 +5,8 @@ namespace ServiceStack.OrmLite.Converters
 {
     public class BoolConverter : NativeValueOrmLiteConverter
     {
-        public override string ColumnDefinition
-        {
-            get { return "BOOL"; }
-        }
-
-        public override DbType DbType
-        {
-            get { return DbType.Boolean; }
-        }
+        public override string ColumnDefinition => "BOOL";
+        public override DbType DbType => DbType.Boolean;
 
         //Also support coercing 0 != int as Bool
         public override object FromDbValue(Type fieldType, object value)

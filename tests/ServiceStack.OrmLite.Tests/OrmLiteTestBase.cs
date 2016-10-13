@@ -4,7 +4,9 @@ using System.Data.Common;
 using System.IO;
 using NUnit.Framework;
 using ServiceStack.Logging;
+#if !NETCORE
 using ServiceStack.OrmLite.Oracle;
+#endif
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -22,6 +24,7 @@ namespace ServiceStack.OrmLite.Tests
         public static string PostgreSqlDb = "Server=localhost;Port=5432;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200";
         public static string FirebirdDb = @"User=SYSDBA;Password=masterkey;Database=C:\src\ServiceStack.OrmLite\tests\ServiceStack.OrmLite.Tests\App_Data\TEST.FDB;DataSource=localhost;Dialect=3;charset=ISO8859_1;";
 
+        public static Dialect DefaultDialect = Dialect.Sqlite;
         public static IOrmLiteDialectProvider DefaultProvider = SqlServerDialect.Provider;
         public static string DefaultConnection = SqlServerBuildDb;
 
@@ -54,15 +57,29 @@ namespace ServiceStack.OrmLite.Tests
             return GetFileConnectionString();
         }
 
+        public static OrmLiteConnectionFactory CreateSqliteMemoryDbFactory()
+        {
+            var dbFactory = new OrmLiteConnectionFactory(Config.SqliteMemoryDb, SqliteDialect.Provider);
+            return dbFactory;
+        }
+
         public static OrmLiteConnectionFactory CreateSqlServerDbFactory()
         {
             var dbFactory = new OrmLiteConnectionFactory(Config.SqlServerBuildDb, SqlServerDialect.Provider);
             return dbFactory;
         }
 
-        public static OrmLiteConnectionFactory CreateSqliteMemoryDbFactory()
+#if !NETCORE
+        public static OrmLiteConnectionFactory CreateMySqlDbFactory()
         {
-            var dbFactory = new OrmLiteConnectionFactory(Config.SqliteMemoryDb, SqliteDialect.Provider);
+            var dbFactory = new OrmLiteConnectionFactory(Config.MySqlDb, MySqlDialect.Provider);
+            return dbFactory;
+        }
+#endif
+
+        public static OrmLiteConnectionFactory CreatePostgreSqlDbFactory()
+        {
+            var dbFactory = new OrmLiteConnectionFactory(Config.PostgreSqlDb, PostgreSqlDialect.Provider);
             return dbFactory;
         }
 
@@ -81,7 +98,7 @@ namespace ServiceStack.OrmLite.Tests
                 ConnectionString = GetFileConnectionString();
         }
 
-        public Dialect Dialect = Dialect.Sqlite;
+        public Dialect Dialect = Config.DefaultDialect;
         protected OrmLiteConnectionFactory DbFactory;
 
         OrmLiteConnectionFactory Init(string connStr, IOrmLiteDialectProvider dialectProvider)
@@ -120,12 +137,15 @@ namespace ServiceStack.OrmLite.Tests
                     return Init(Config.SqlServerBuildDb, SqlServerDialect.Provider);
                 case Dialect.SqlServer2012:
                     return Init(Config.SqlServerBuildDb, SqlServer2012Dialect.Provider);
+#if !NETCORE
                 case Dialect.MySql:
                     return Init(Config.MySqlDb, MySqlDialect.Provider);
+#endif                    
                 case Dialect.PostgreSql:
                     return Init(Config.PostgreSqlDb, PostgreSqlDialect.Provider);
                 case Dialect.SqlServerMdf:
                     return Init(Config.SqlServerDb, SqlServerDialect.Provider);
+#if !NETCORE                    
                 case Dialect.Oracle:
                     return Init(Config.OracleDb, OracleDialect.Provider);
                 case Dialect.Firebird:
@@ -143,6 +163,7 @@ namespace ServiceStack.OrmLite.Tests
                         cmd.ExecuteNonQuery();
                         return Init("Data Source={0};".Fmt(tmpFile), VistaDbDialect.Provider);
                     }
+#endif
             }
 
             throw new NotImplementedException("{0}".Fmt(Dialect));

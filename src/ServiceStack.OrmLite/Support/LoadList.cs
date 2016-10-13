@@ -20,15 +20,9 @@ namespace ServiceStack.OrmLite.Support
         protected List<FieldDefinition> fieldDefs;
         protected string subSql;
 
-        public List<FieldDefinition> FieldDefs
-        {
-            get { return fieldDefs; }
-        }
+        public List<FieldDefinition> FieldDefs => fieldDefs;
 
-        public List<Into> ParentResults
-        {
-            get { return parentResults; }
-        }
+        public List<Into> ParentResults => parentResults;
 
         protected LoadList(IDbCommand dbCmd, SqlExpression<From> q)
         {
@@ -51,11 +45,10 @@ namespace ServiceStack.OrmLite.Support
 
         protected string GetRefListSql(ModelDefinition refModelDef, FieldDefinition refField)
         {
-            var sqlRef = "SELECT {0} FROM {1} WHERE {2} IN ({3})".Fmt(
-                dialectProvider.GetColumnNames(refModelDef),
-                dialectProvider.GetQuotedTableName(refModelDef),
-                dialectProvider.GetQuotedColumnName(refField),
-                subSql);
+            var sqlRef = $"SELECT {dialectProvider.GetColumnNames(refModelDef)} " +
+                         $"FROM {dialectProvider.GetQuotedTableName(refModelDef)} " +
+                         $"WHERE {dialectProvider.GetQuotedColumnName(refField)} " +
+                         $"IN ({subSql})";
 
             return sqlRef;
         }
@@ -94,22 +87,20 @@ namespace ServiceStack.OrmLite.Support
 
             var subSqlRef = q.ToSelectStatement();
 
-            var sqlRef = "SELECT {0} FROM {1} WHERE {2} IN ({3})".Fmt(
-                dialectProvider.GetColumnNames(refModelDef),
-                dialectProvider.GetQuotedTableName(refModelDef),
-                dialectProvider.GetQuotedColumnName(refModelDef.PrimaryKey),
-                subSqlRef);
+            var sqlRef = $"SELECT {dialectProvider.GetColumnNames(refModelDef)} " +
+                         $"FROM {dialectProvider.GetQuotedTableName(refModelDef)} " +
+                         $"WHERE {dialectProvider.GetQuotedColumnName(refModelDef.PrimaryKey)} " +
+                         $"IN ({subSqlRef})";
 
             return sqlRef;
         }
 
         protected string GetRefFieldSql(ModelDefinition refModelDef, FieldDefinition refField)
         {
-            var sqlRef = "SELECT {0} FROM {1} WHERE {2} IN ({3})".Fmt(
-                dialectProvider.GetColumnNames(refModelDef),
-                dialectProvider.GetQuotedTableName(refModelDef),
-                dialectProvider.GetQuotedColumnName(refField),
-                subSql);
+            var sqlRef = $"SELECT {dialectProvider.GetColumnNames(refModelDef)} " +
+                         $"FROM {dialectProvider.GetQuotedTableName(refModelDef)} " +
+                         $"WHERE {dialectProvider.GetQuotedColumnName(refField)} " +
+                         $"IN ({subSql})";
             return sqlRef;
         }
 
@@ -140,9 +131,7 @@ namespace ServiceStack.OrmLite.Support
             public int GetHashCode(object obj)
             {
                 var str = obj as string;
-                return str != null
-                    ? str.ToUpper().GetHashCode()
-                    : obj.GetHashCode();
+                return str?.ToUpper().GetHashCode() ?? obj.GetHashCode();
             }
         }
 
@@ -229,7 +218,7 @@ namespace ServiceStack.OrmLite.Support
         }
     }
 
-#if NET45
+#if ASYNC
     internal class LoadListAsync<Into, From> : LoadList<Into, From>
     {
         public LoadListAsync(IDbCommand dbCmd, SqlExpression<From> expr) : base(dbCmd, expr) { }

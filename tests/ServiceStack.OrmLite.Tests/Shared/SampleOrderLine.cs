@@ -11,13 +11,7 @@ namespace ServiceStack.Common.Tests.Models
     {
         public string Id { get; set; }
 
-        public string OrderUrn
-        {
-            get
-            {
-                return CreateUrn(this.UserId, this.OrderId, this.OrderLineId);
-            }
-        }
+        public string OrderUrn => CreateUrn(this.UserId, this.OrderId, this.OrderLineId);
 
         public long OrderId { get; set; }
 

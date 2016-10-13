@@ -126,6 +126,14 @@ using (var db = dbFactory.Open())
 }
 ```
 
+## [OrmLite Interactive Tour](http://gistlyn.com/ormlite)
+
+The best way to learn about OrmLite is to take the [OrmLite Interactive Tour](http://gistlyn.com/ormlite)
+which lets you try out and explore different OrmLite features immediately from the comfort of your own 
+browser without needing to install anything:
+
+[![](https://raw.githubusercontent.com/ServiceStack/Assets/master/img/ormlite/ormlite-tour.png)](http://gistlyn.com/ormlite)
+
 ## [Type Converters](https://github.com/ServiceStack/ServiceStack.OrmLite/wiki/OrmLite-Type-Converters)
 
 You can customize, enhance or replace how OrmLite handles specific .NET Types with the new 
@@ -167,11 +175,11 @@ var customer = await db.SingleAsync<Customer>(new { customer.Email });
 > sequence (incompatible with async) as well as **Schema** DDL API's which are typically not used at runtime.
 
 For a quick preview of many of the new Async API's in action, checkout 
-[ApiSqlServerTestsAsync.cs](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLiteV45.Tests/ApiSqlServerTestsAsync.cs).
+[ApiSqlServerTestsAsync.cs](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/tests/ServiceStack.OrmLite.Tests/Async/ApiSqlServerTestsAsync.cs).
 
 ### Async RDBMS Providers
 
-Currently only a limited number of RDBMS providers offer async API's which are only available in their **.NET 4.5** builds, which at this time are only:
+Currently only a limited number of RDBMS providers offer async API's, which at this time are only:
 
   - [SQL Server .NET 4.5+](https://www.nuget.org/packages/ServiceStack.OrmLite.SqlServer)
   - [PostgreSQL .NET 4.5+](https://www.nuget.org/packages/ServiceStack.OrmLite.PostgreSQL)
@@ -181,17 +189,6 @@ We've also added a
 [.NET 4.5 build for Sqlite](https://www.nuget.org/packages/ServiceStack.OrmLite.Sqlite.Mono) 
 as it's a common use-case to swapout to use Sqlite's in-memory provider for faster tests. 
 But as Sqlite doesn't provide async API's under-the-hood we fallback to *pseudo async* support where we just wrap its synchronous responses in `Task` results. 
-
-## Nested Typed Sub SqlExpressions
-
-The `Sql.In()` API supports nesting and combining of multiple Typed SQL Expressions together 
-in a single SQL Query, e.g:
-  
-```csharp
-var usaCustomerIds = db.From<Customer>(c => c.Country == "USA").Select(c => c.Id);
-var usaCustomerOrders = db.Select(db.From<Order>()
-    .Where(x => Sql.In(x.CustomerId, usaCustomerIds)));
-``` 
 
 # API Examples
 
@@ -229,6 +226,14 @@ db.Select<Author>(x => x.Name.Contains("Benedict"));
 
 ```csharp
 db.Select<Author>(x => x.Rate == 10 && x.City == "Mexico");
+```
+
+```csharp
+db.Select<Author>(x => x.Rate.ToString() == "10"); //impicit string casting
+```
+
+```csharp
+db.Select<Author>(x => "Rate " + x.Rate == "Rate 10"); //server string concatenation
 ```
 
 ### Convenient common usage data access patterns 
@@ -1079,6 +1084,85 @@ var customerWithAddress = db.LoadSingleById<Customer>(customer.Id, include: new[
 //Alternative
 var customerWithAddress = db.LoadSingleById<Customer>(customer.Id, include: x => new { x.PrimaryAddress });
 ```
+
+### Custom Select with JOIN
+
+You can specify SQL Aliases for ambiguous columns using anonymous properties, e.g:
+
+```csharp
+var q = db.From<Table>()
+    .Join<JoinedTable>()
+    .Select<Table, JoinedTable>((a, b) => new { a, JoinId = b.Id, JoinName = b.Name });
+```
+
+Which is roughly equivalent to:
+
+    SELECT a.*, b.Id AS JoinId, b.Name AS JoinName
+
+Where it selects all columns from the primary `Table` as well as `Id` and `Name` columns from `JoinedTable,` 
+returning them in the `JoinId` and `JoinName` custom aliases.
+
+### Nested JOIN Table Expressions
+
+You can also query POCO References on JOIN tables, e.g:
+
+```csharp
+var q = db.From<Table>()
+    .Join<Join1>()
+    .Join<Join1, Join2>()
+    .Where(x => !x.IsValid.HasValue && 
+        x.Join1.IsValid &&
+        x.Join1.Join2.Name == theName &&
+        x.Join1.Join2.IntValue == intValue)
+    .GroupBy(x => x.Join1.Join2.IntValue)
+    .Having(x => Sql.Max(x.Join1.Join2.IntValue) != 10)
+    .Select(x => x.Join1.Join2.IntValue);
+```
+
+### JOIN aliases
+
+You can specify join aliases when joining same table multiple times together to differentiate from any 
+ambiguous columns, e.g:
+
+```csharp
+var q = db.From<Sale>()
+    .LeftJoin<ContactIssue>((s,c) => s.SellerId == c.Id, db.JoinAlias("seller"))
+    .LeftJoin<ContactIssue>((s,c) => s.BuyerId == c.Id, db.JoinAlias("buyer"))
+    .Select<Sale, ContactIssue>((s,c) => new {
+        s,
+        BuyerFirstName = Sql.JoinAlias(c.FirstName, "buyer"),
+        BuyerLastName = Sql.JoinAlias(c.LastName, "buyer"),
+        SellerFirstName = Sql.JoinAlias(c.FirstName, "seller"),
+        SellerLastName = Sql.JoinAlias(c.LastName, "seller"),
+    });
+```
+
+### SQL Server Table Hints
+
+Using the same JOIN Filter feature OrmLite also lets you add SQL Server Hints on JOIN Table expressions, e.g:
+
+```csharp
+var q = db.From<Car>()
+    .Join<Car, CarType>((c, t) => c.CarId == t.CarId, SqlServerTableHint.ReadUncommitted);
+```
+
+Which emits the appropriate SQL Server hints:
+
+```sql
+SELECT "Car"."CarId", "CarType"."CarTypeName" 
+FROM "Car" INNER JOIN "CarType" WITH (READUNCOMMITTED) ON ("Car"."CarId" = "CarType"."CarId")
+```
+
+## Nested Typed Sub SqlExpressions
+
+The `Sql.In()` API supports nesting and combining of multiple Typed SQL Expressions together 
+in a single SQL Query, e.g:
+  
+```csharp
+var usaCustomerIds = db.From<Customer>(c => c.Country == "USA").Select(c => c.Id);
+var usaCustomerOrders = db.Select(db.From<Order>()
+    .Where(x => Sql.In(x.CustomerId, usaCustomerIds)));
+``` 
 
 ## Optimistic Concurrency
 

@@ -7,6 +7,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.Converters;
 using ServiceStack.OrmLite.Oracle.Converters;
 using ServiceStack.Text;
@@ -426,7 +427,7 @@ namespace ServiceStack.OrmLite.Oracle
             if (value == null || value is DBNull)
                 return null;
 
-            if (type.IsEnum)
+            if (type.IsEnum && !type.HasAttribute<EnumAsIntAttribute>())
                 return EnumConverter.ToDbValue(type, value);
 
             if (type.IsRefType())
@@ -550,7 +551,7 @@ namespace ServiceStack.OrmLite.Oracle
                 if (fieldDef.IsComputed || fieldDef.IsRowVersion) continue;
 
                 //insertFields contains Property "Name" of fields to insert (that's how expressions work)
-                if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name)) continue;
+                if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase)) continue;
 
                 if (sbColumnNames.Length > 0) sbColumnNames.Append(",");
                 if (sbColumnValues.Length > 0) sbColumnValues.Append(",");
@@ -668,7 +669,7 @@ namespace ServiceStack.OrmLite.Oracle
             {
                 if (fieldDef.IsComputed)
                     continue;
-                if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name))
+                if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase))
                     continue;
 
                 if ((fieldDef.AutoIncrement || !string.IsNullOrEmpty(fieldDef.Sequence))
@@ -748,7 +749,7 @@ namespace ServiceStack.OrmLite.Oracle
                     continue;
                 }
 
-                if (!updateFieldsEmptyOrNull && !updateFields.Contains(fieldDef.Name))
+                if (!updateFieldsEmptyOrNull && !updateFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase))
                     continue;
 
                 if (sql.Length > 0)
@@ -777,6 +778,9 @@ namespace ServiceStack.OrmLite.Oracle
             var modelDef = GetModel(tableType);
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
+                if (fieldDef.CustomSelect != null)
+                    continue;
+
                 if (fieldDef.IsPrimaryKey)
                 {
                     sbPk.AppendFormat(sbPk.Length != 0 ? ",{0}" : "{0}", GetQuotedColumnName(fieldDef.FieldName));

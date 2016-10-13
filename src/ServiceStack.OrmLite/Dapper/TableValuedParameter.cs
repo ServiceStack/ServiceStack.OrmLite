@@ -2,8 +2,7 @@
 using System.Data;
 using System.Reflection;
 
-#if !COREFX
-//Apache 2.0 License: https://github.com/StackExchange/dapper-dot-net/blob/master/License.txt
+#if !NETSTANDARD1_3
 namespace ServiceStack.OrmLite.Dapper
 {
     /// <summary>
@@ -57,7 +56,7 @@ namespace ServiceStack.OrmLite.Dapper
                 var sqlParam = parameter as System.Data.SqlClient.SqlParameter;
                 if (sqlParam != null)
                 {
-                    if (setTypeName != null) setTypeName(sqlParam, typeName);
+                    setTypeName?.Invoke(sqlParam, typeName);
                     sqlParam.SqlDbType = SqlDbType.Structured;
                 }
             }
