@@ -1715,7 +1715,7 @@ namespace ServiceStack.OrmLite
             return new PartialSqlString("NOT (" + o + ")");
         }
 
-        private bool IsColumnAccess(MethodCallExpression m)
+        protected virtual bool IsColumnAccess(MethodCallExpression m)
         {
             if (m.Object == null)
                 return false;
