@@ -292,6 +292,9 @@
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\RowVersionTests.cs">
       <Link>RowVersionTests.cs</Link>
     </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\SchemaTests.cs">
+      <Link>SchemaTests.cs</Link>
+    </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ApiUtilExtensions.cs">
       <Link>Shared\ApiUtilExtensions.cs</Link>
     </Compile>
