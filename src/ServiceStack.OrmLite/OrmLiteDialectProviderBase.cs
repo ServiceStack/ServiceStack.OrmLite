@@ -1544,10 +1544,15 @@ namespace ServiceStack.OrmLite
         public virtual void DropColumn(IDbConnection db, Type modelType, string columnName)
         {
             var provider = db.GetDialectProvider();
-            var command = $"ALTER TABLE {provider.GetQuotedTableName(modelType.GetModelDefinition().ModelName)} " +
-                          $"DROP COLUMN {provider.GetQuotedColumnName(columnName)};";
+            var command = ToDropColumnStatement(modelType, columnName, provider);
 
             db.ExecuteSql(command);
+        }
+
+        protected virtual string ToDropColumnStatement(Type modelType, string columnName, IOrmLiteDialectProvider provider)
+        {
+            return $"ALTER TABLE {provider.GetQuotedTableName(modelType.GetModelDefinition().ModelName)} " +
+                   $"DROP COLUMN {provider.GetQuotedColumnName(columnName)};";
         }
 
         //Async API's, should be overrided by Dialect Providers to use .ConfigureAwait(false)
