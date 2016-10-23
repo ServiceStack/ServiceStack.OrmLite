@@ -20,7 +20,6 @@ namespace ServiceStack.OrmLite
 
         internal static Task<IDataReader> ExecReaderAsync(this IDbCommand dbCmd, string sql, CancellationToken token)
         {
-            dbCmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
             dbCmd.CommandText = sql;
 
             if (Log.IsDebugEnabled)
