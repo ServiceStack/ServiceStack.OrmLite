@@ -620,7 +620,6 @@ namespace ServiceStack.OrmLite
             var modelDef = typeof(T).GetModelDefinition();
 
             cmd.Parameters.Clear();
-            cmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
 
             foreach (var fieldDef in modelDef.FieldDefinitionsArray)
             {
@@ -661,7 +660,6 @@ namespace ServiceStack.OrmLite
             var modelDef = typeof(T).GetModelDefinition();
 
             dbCmd.Parameters.Clear();
-            dbCmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
 
             foreach (var entry in args)
             {
@@ -737,7 +735,6 @@ namespace ServiceStack.OrmLite
             var updateAllFields = updateFields == null || updateFields.Count == 0;
 
             cmd.Parameters.Clear();
-            cmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
@@ -803,7 +800,6 @@ namespace ServiceStack.OrmLite
             var hadRowVesion = false;
 
             cmd.Parameters.Clear();
-            cmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
