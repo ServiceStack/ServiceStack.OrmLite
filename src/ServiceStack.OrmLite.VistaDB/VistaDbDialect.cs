@@ -4,6 +4,6 @@ namespace ServiceStack.OrmLite
 {
     public static class VistaDbDialect
     {
-        public static VistaDbDialectProvider Provider { get { return VistaDbDialectProvider.Instance; } }
+        public static VistaDbDialectProvider Provider => VistaDbDialectProvider.Instance;
     }
 }
