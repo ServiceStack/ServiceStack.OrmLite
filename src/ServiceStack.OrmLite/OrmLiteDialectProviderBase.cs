@@ -677,7 +677,7 @@ namespace ServiceStack.OrmLite
                 try
                 {
                     sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
-                    sbColumnValues.Append(this.AddParam(dbCmd, value, fieldDef.ColumnType).ParameterName);
+                    sbColumnValues.Append(this.AddParam(dbCmd, value, fieldDef).ParameterName);
                 }
                 catch (Exception ex)
                 {
@@ -1000,7 +1000,7 @@ namespace ServiceStack.OrmLite
                         sqlFilter
                             .Append(GetQuotedColumnName(fieldDef.FieldName))
                             .Append("=")
-                            .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef.ColumnType).ParameterName);
+                            .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef).ParameterName);
 
                         continue;
                     }
@@ -1014,7 +1014,7 @@ namespace ServiceStack.OrmLite
                     sql
                         .Append(GetQuotedColumnName(fieldDef.FieldName))
                         .Append("=")
-                        .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef.ColumnType).ParameterName);
+                        .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef).ParameterName);
                 }
                 catch (Exception ex)
                 {
@@ -1051,7 +1051,7 @@ namespace ServiceStack.OrmLite
                     sql
                         .Append(GetQuotedColumnName(fieldDef.FieldName))
                         .Append("=")
-                        .Append(this.AddParam(dbCmd, value, fieldDef.ColumnType).ParameterName);
+                        .Append(this.AddParam(dbCmd, value, fieldDef).ParameterName);
                 }
                 catch (Exception ex)
                 {
@@ -1094,14 +1094,14 @@ namespace ServiceStack.OrmLite
                             .Append("=")
                             .Append(quotedFieldName)
                             .Append("+")
-                            .Append(this.AddParam(dbCmd, value, fieldDef.ColumnType).ParameterName);
+                            .Append(this.AddParam(dbCmd, value, fieldDef).ParameterName);
                     }
                     else
                     {
                         sql
                             .Append(quotedFieldName)
                             .Append("=")
-                            .Append(this.AddParam(dbCmd, value, fieldDef.ColumnType).ParameterName);
+                            .Append(this.AddParam(dbCmd, value, fieldDef).ParameterName);
                     }
                 }
                 catch (Exception ex)

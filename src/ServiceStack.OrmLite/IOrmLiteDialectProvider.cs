@@ -112,6 +112,8 @@ namespace ServiceStack.OrmLite
 
         void SetParameterValues<T>(IDbCommand dbCmd, object obj);
 
+        void SetParameter(FieldDefinition fieldDef, IDbDataParameter p);
+
         Dictionary<string, FieldDefinition> GetFieldDefinitionMap(ModelDefinition modelDef);
 
         object GetFieldValue(FieldDefinition fieldDef, object value);
