@@ -374,8 +374,8 @@ namespace ServiceStack.OrmLite.Tests
 
                 var sql = db.GetLastSql().NormalizeSql();
                 Assert.That(sql, Is.StringContaining("where (lastname = @0)"));
-                Assert.That(sql, Is.StringContaining("id=@1"));
-                Assert.That(sql, Is.StringContaining("firstname=@2"));
+                Assert.That(sql, Is.StringContaining("id=@id"));
+                Assert.That(sql, Is.StringContaining("firstname=@firstname"));
 
                 var row = db.SingleById<Person>(1);
                 Assert.That(row.FirstName, Is.EqualTo("JJ"));
@@ -394,7 +394,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 var sql = db.GetLastSql().NormalizeSql();
                 Assert.That(sql, Is.StringContaining("where (lastname = @0)"));
-                Assert.That(sql, Is.StringContaining("firstname=@1"));
+                Assert.That(sql, Is.StringContaining("firstname=@firstname"));
 
                 var row = db.SingleById<Person>(1);
                 Assert.That(row.FirstName, Is.EqualTo("JJ"));
@@ -413,7 +413,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 var sql = db.GetLastSql().NormalizeSql();
                 Assert.That(sql, Is.StringContaining("where (lastname = @0)"));
-                Assert.That(sql, Is.StringContaining("firstname=@1"));
+                Assert.That(sql, Is.StringContaining("firstname=@firstname"));
 
                 var row = db.SingleById<Person>(1);
                 Assert.That(row.FirstName, Is.EqualTo("JJ"));
@@ -432,7 +432,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 var sql = db.GetLastSql().NormalizeSql();
                 Assert.That(sql, Is.StringContaining("where (lastname = @0)"));
-                Assert.That(sql, Is.StringContaining("firstname=@1"));
+                Assert.That(sql, Is.StringContaining("firstname=@firstname"));
 
                 var row = db.SingleById<Person>(1);
                 Assert.That(row.FirstName, Is.EqualTo("JJ"));
@@ -451,7 +451,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 var sql = db.GetLastSql().NormalizeSql();
                 Assert.That(sql, Is.StringContaining("where (lastname = @0)"));
-                Assert.That(sql, Is.StringContaining("firstname=@1"));
+                Assert.That(sql, Is.StringContaining("firstname=@firstname"));
 
                 var row = db.SingleById<Person>(1);
                 Assert.That(row.FirstName, Is.EqualTo("JJ"));
@@ -502,7 +502,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 var sql = db.GetLastSql().NormalizeSql();
                 Assert.That(sql, Does.Contain("where (firstname = @0)"));
-                Assert.That(sql, Does.Contain("firstname=@1"));
+                Assert.That(sql, Does.Contain("firstname=@firstname"));
 
                 var row = db.SingleById<Person>(1);
                 Assert.That(row.FirstName, Is.EqualTo("JJ"));

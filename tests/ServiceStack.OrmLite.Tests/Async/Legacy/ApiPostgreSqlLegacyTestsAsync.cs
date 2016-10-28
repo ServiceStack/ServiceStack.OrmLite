@@ -72,10 +72,10 @@ namespace ServiceStack.OrmLite.Tests.Async.Legacy
             Assert.That(db.GetLastSql(), Is.EqualTo("INSERT INTO \"person_with_auto_id\" (\"first_name\",\"age\") VALUES (:FirstName,:Age)"));
 
             await db.UpdateOnlyAsync(new Person { FirstName = "JJ", LastName = "Hendo" }, q => q.Update(p => p.FirstName));
-            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"person\" SET \"first_name\"=:0"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"person\" SET \"first_name\"=:FirstName"));
 
             await db.UpdateOnlyAsync(new Person { FirstName = "JJ" }, q => q.Update(p => p.FirstName).Where(x => x.FirstName == "Jimi"));
-            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"person\" SET \"first_name\"=:1 WHERE (\"first_name\" = :0)"));
+            Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"person\" SET \"first_name\"=:FirstName WHERE (\"first_name\" = :0)"));
 
             await db.UpdateFmtAsync<Person>(set: "first_name = {0}".SqlFmt("JJ"), where: "last_name = {0}".SqlFmt("Hendrix"));
             Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"person\" SET first_name = 'JJ' WHERE last_name = 'Hendrix'"));
