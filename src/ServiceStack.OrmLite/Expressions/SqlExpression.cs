@@ -2061,6 +2061,9 @@ namespace ServiceStack.OrmLite
                 case "JoinAlias":
                     statement = args[0] + "." + quotedColName.ToString().LastRightPart('.');
                     break;
+                case "Custom":
+                    statement = quotedColName.ToString();
+                    break;
                 default:
                     throw new NotSupportedException();
             }
