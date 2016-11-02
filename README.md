@@ -611,7 +611,7 @@ This query rougly maps to the following SQL:
 SELECT Customer.* 
   FROM Customer 
        INNER JOIN 
-       CustomerAddress ON (Customer.Id == CustomerAddress.Id)
+       CustomerAddress ON (Customer.Id == CustomerAddress.CustomerId)
 ```
 
 Just like before `q` is an instance of `SqlExpression<Customer>` which is bounded to the base `Customer` type (and what any subsequent implicit API's apply to). 
