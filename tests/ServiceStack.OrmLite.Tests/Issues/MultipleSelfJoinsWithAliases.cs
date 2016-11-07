@@ -197,8 +197,6 @@ namespace ServiceStack.OrmLite.Tests.Issues
                 Assert.That(salesView.SellerFirstName, Is.EqualTo("SellerFirst"));
                 Assert.That(salesView.SellerLastName, Is.EqualTo("LastSeller"));
                 Assert.That(salesView.SellerInitials, Is.EqualTo("SL"));
-
-                sales.PrintDump();
             }
         }
 
