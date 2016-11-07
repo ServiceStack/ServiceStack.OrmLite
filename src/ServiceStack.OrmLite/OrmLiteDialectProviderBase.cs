@@ -873,7 +873,16 @@ namespace ServiceStack.OrmLite
                 fieldMap.TryGetValue(fieldName, out fieldDef);
 
                 if (fieldDef == null)
-                    throw new ArgumentException("Field Definition '{0}' was not found".Fmt(fieldName));
+                {
+                    if (OrmLiteConfig.ParamNameFilter != null)
+                    {
+                        fieldDef = modelDef.GetFieldDefinition(name => 
+                            string.Equals(OrmLiteConfig.ParamNameFilter(name), fieldName, StringComparison.OrdinalIgnoreCase));
+                    }
+
+                    if (fieldDef == null)
+                        throw new ArgumentException("Field Definition '{0}' was not found".Fmt(fieldName));
+                }
 
                 SetParameterValue<T>(fieldDef, p, obj);
             }
