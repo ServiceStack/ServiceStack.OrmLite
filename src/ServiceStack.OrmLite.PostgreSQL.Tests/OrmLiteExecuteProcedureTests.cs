@@ -2,6 +2,7 @@
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.Tests;
 using ServiceStack.Text;
+using IgnoreAttribute = NUnit.Framework.IgnoreAttribute;
 
 namespace ServiceStack.OrmLite.PostgreSQL.Tests
 {
