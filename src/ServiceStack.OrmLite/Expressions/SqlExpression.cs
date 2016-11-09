@@ -1025,7 +1025,7 @@ namespace ServiceStack.OrmLite
                 setFields
                     .Append(DialectProvider.GetQuotedColumnName(fieldDef.FieldName))
                     .Append("=")
-                    .Append(DialectProvider.AddParam(dbCmd, value, fieldDef.ColumnType).ParameterName);
+                    .Append(DialectProvider.AddParam(dbCmd, value, fieldDef).ParameterName);
             }
 
             if (setFields.Length == 0)
@@ -2061,6 +2061,9 @@ namespace ServiceStack.OrmLite
                 case "JoinAlias":
                     statement = args[0] + "." + quotedColName.ToString().LastRightPart('.');
                     break;
+                case "Custom":
+                    statement = quotedColName.ToString();
+                    break;
                 default:
                     throw new NotSupportedException();
             }
@@ -2411,11 +2414,17 @@ namespace ServiceStack.OrmLite
             return to;
         }
 
-        public static IDbDataParameter AddParam(this IOrmLiteDialectProvider dialectProvider, IDbCommand dbCmd, object value, Type fieldType = null)
+        public static IDbDataParameter AddParam(this IOrmLiteDialectProvider dialectProvider,
+            IDbCommand dbCmd,
+            object value,
+            FieldDefinition fieldDef)
         {
             var paramName = dbCmd.Parameters.Count.ToString();
+            var parameter = dialectProvider.CreateParam(paramName, value, fieldDef?.ColumnType);
 
-            var parameter = dialectProvider.CreateParam(paramName, value, fieldType);
+            if (fieldDef != null)
+                dialectProvider.SetParameter(fieldDef, parameter);
+
             dbCmd.Parameters.Add(parameter);
             return parameter;
         }

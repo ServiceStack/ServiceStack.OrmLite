@@ -21,7 +21,8 @@ namespace ServiceStack.OrmLite.Tests.Expression
         [Test]
         public void Can_use_JoinAlias_in_condition()
         {
-            if (Dialect == Dialect.PostgreSql) return; //Invalid Custom SQL for pgsql naming convention 
+            if (Dialect == Dialect.PostgreSql || Dialect == Dialect.MySql)
+                return; //Invalid Custom SQL for pgsql naming convention 
 
             using (var db = OpenDbConnection())
             {

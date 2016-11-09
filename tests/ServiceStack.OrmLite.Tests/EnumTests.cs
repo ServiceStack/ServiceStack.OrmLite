@@ -172,7 +172,7 @@ namespace ServiceStack.OrmLite.Tests
                 db.GetLastSql().Print();
 
                 db.UpdateOnly(new TypeWithFlagsEnum { Id = 1, Flags = FlagsEnum.FlagThree }, onlyFields: q => q.Flags);
-                Assert.That(db.GetLastSql().NormalizeSql(), Is.StringContaining("=@0"));
+                Assert.That(db.GetLastSql().NormalizeSql(), Is.StringContaining("=@flags"));
 
                 var row = db.SingleById<TypeWithFlagsEnum>(1);
                 Assert.That(row.Flags, Is.EqualTo(FlagsEnum.FlagThree));
@@ -196,7 +196,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 db.UpdateOnly(new TypeWithEnumAsInt { Id = 1, EnumValue = SomeEnumAsInt.Value3 }, 
                     onlyFields: q => q.EnumValue);
-                Assert.That(db.GetLastSql().NormalizeSql(), Is.StringContaining("=@0"));
+                Assert.That(db.GetLastSql().NormalizeSql(), Is.StringContaining("=@enumvalue"));
 
                 var row = db.SingleById<TypeWithEnumAsInt>(1);
                 Assert.That(row.EnumValue, Is.EqualTo(SomeEnumAsInt.Value3));

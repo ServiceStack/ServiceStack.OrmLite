@@ -193,5 +193,7 @@ namespace ServiceStack.OrmLite
         public static bool IsCaseInsensitive { get; set; }
 
         public static bool DeoptimizeReader { get; set; }
+
+        public static Func<string, string> ParamNameFilter { get; set; }
     }
 }

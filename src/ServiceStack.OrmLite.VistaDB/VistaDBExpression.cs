@@ -31,7 +31,7 @@ namespace ServiceStack.OrmLite.VistaDB
                 if (setFields.Length > 0)
                     setFields.Append(", ");
 
-                var param = DialectProvider.AddParam(dbCmd, value, fieldDef.ColumnType);
+                var param = DialectProvider.AddParam(dbCmd, value, fieldDef);
                 setFields
                     .Append(DialectProvider.GetQuotedColumnName(fieldDef.FieldName))
                     .Append("=")

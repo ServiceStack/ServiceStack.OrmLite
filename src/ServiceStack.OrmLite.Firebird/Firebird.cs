@@ -4,6 +4,6 @@ namespace ServiceStack.OrmLite
 {
     public static class FirebirdDialect
     {
-        public static IOrmLiteDialectProvider Provider { get { return FirebirdOrmLiteDialectProvider.Instance; } }
+        public static IOrmLiteDialectProvider Provider => FirebirdOrmLiteDialectProvider.Instance;
     }
 }

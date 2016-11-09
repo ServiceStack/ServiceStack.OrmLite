@@ -90,7 +90,7 @@ namespace ServiceStack.OrmLite.SqlServer
                 if (setFields.Length > 0)
                     setFields.Append(", ");
 
-                var param = dialectProvider.AddParam(dbCmd, value, fieldDef.ColumnType);
+                var param = dialectProvider.AddParam(dbCmd, value, fieldDef);
                 setFields
                     .Append(dialectProvider.GetQuotedColumnName(fieldDef.FieldName))
                     .Append("=")

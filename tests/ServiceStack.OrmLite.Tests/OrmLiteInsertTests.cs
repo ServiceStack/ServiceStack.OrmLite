@@ -293,7 +293,7 @@ namespace ServiceStack.OrmLite.Tests
                 db.DropAndCreateTable<PersonWithAutoId>();
 
                 db.InsertOnly(() => new PersonWithAutoId { FirstName = "Amy", Age = 27 });
-                Assert.That(db.GetLastSql().NormalizeSql(), Is.EqualTo("insert into personwithautoid (firstname,age) values (@0,@1)"));
+                Assert.That(db.GetLastSql().NormalizeSql(), Is.EqualTo("insert into personwithautoid (firstname,age) values (@firstname,@age)"));
 
                 var row = db.Select<PersonWithAutoId>()[0];
                 Assert.That(row.FirstName, Is.EqualTo("Amy"));
