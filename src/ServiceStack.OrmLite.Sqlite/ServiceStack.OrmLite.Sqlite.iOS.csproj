@@ -39,6 +39,7 @@
     <Compile Include="SqliteExpressionVisitor.cs" />
     <Compile Include="SqliteOrmLiteDialectProvider.cs" />
     <Compile Include="SqliteOrmLiteDialectProviderBase.cs" />
+    <Compile Include="NetCoreSqliteConnection.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.iOS.csproj">

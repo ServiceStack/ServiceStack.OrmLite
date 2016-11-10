@@ -13,7 +13,11 @@ namespace ServiceStack.OrmLite.Sqlite
 
         protected override IDbConnection CreateConnection(string connectionString)
         {
+#if NETSTANDARD1_3
+            return new NetCoreSqliteConnection(connectionString);
+#else
             return new SqliteConnection(connectionString);
+#endif
         }
 
         public override IDbDataParameter CreateParam()
