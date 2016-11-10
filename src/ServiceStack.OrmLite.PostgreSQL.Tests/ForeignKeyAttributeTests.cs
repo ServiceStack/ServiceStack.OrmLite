@@ -14,6 +14,15 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         {
             using (var dbConn = OpenDbConnection())
             {
+                dbConn.DropTable<TypeWithOnDeleteAndUpdateCascade>();
+                dbConn.DropTable<TypeWithOnDeleteSetNull>();
+                dbConn.DropTable<TypeWithOnDeleteSetDefault>();
+                dbConn.DropTable<TypeWithOnDeleteRestrict>();
+                dbConn.DropTable<TypeWithOnDeleteNoAction>();
+                dbConn.DropTable<TypeWithOnDeleteCascade>();
+                dbConn.DropTable<TypeWithSimpleForeignKey>();
+                dbConn.DropTable<ReferencedType>();
+
                 dbConn.CreateTable<ReferencedType>(true);
             }
         }
@@ -102,7 +111,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         }
 
         [TestFixtureTearDown]
-        public void TearDwon()
+        public void TearDown()
         {
             using (var dbConn = OpenDbConnection())
             {
