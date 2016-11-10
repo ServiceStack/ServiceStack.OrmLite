@@ -11,6 +11,8 @@ namespace ServiceStack.OrmLite.Tests.UseCase
         [Test]
         public void Can_OrderBy_Column_Index()
         {
+            var hold = OrmLiteConfig.StripUpperInLike;
+            OrmLiteConfig.StripUpperInLike = false;
             using (var db = CreateArtistAndTrackTablesWithData(OpenDbConnection()))
             {
                 var q = db.From<Track>()
@@ -25,11 +27,14 @@ namespace ServiceStack.OrmLite.Tests.UseCase
                 var result = db.Dictionary<int, int>(q);
                 Assert.That(result[1993], Is.EqualTo(2));
             }
+            OrmLiteConfig.StripUpperInLike = hold;
         }
 
         [Test]
         public void Can_Order_by_Property_Alias()
         {
+            var hold = OrmLiteConfig.StripUpperInLike;
+            OrmLiteConfig.StripUpperInLike = false;
             using (var db = CreateArtistAndTrackTablesWithData(OpenDbConnection()))
             {
                 var q = db.From<Track>()
@@ -44,6 +49,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
                 var result = db.Dictionary<int, int>(q);
                 Assert.That(result[1993], Is.EqualTo(2));
             }
+            OrmLiteConfig.StripUpperInLike = hold;
         }
 
         [Test]

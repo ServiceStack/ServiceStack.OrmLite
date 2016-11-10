@@ -133,6 +133,22 @@ namespace ServiceStack.OrmLite
             return null;
         }
 
+        public FieldDefinition GetFieldDefinition(Func<string, bool> predicate)
+        {
+            foreach (var f in FieldDefinitionsWithAliases)
+            {
+                if (predicate(f.Alias))
+                    return f;
+            }
+            foreach (var f in FieldDefinitionsArray)
+            {
+                if (predicate(f.Name))
+                    return f;
+            }
+
+            return null;
+        }
+
         public void AfterInit()
         {
             FieldDefinitionsArray = FieldDefinitions.ToArray();

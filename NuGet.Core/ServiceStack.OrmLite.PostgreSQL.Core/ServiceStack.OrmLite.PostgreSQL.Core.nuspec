@@ -7,8 +7,8 @@
     <authors>Service Stack</authors> 
     <owners>Service Stack</owners>
     <description>
-        Light, simple and fast convention-based code-first POCO ORM for PostgreSQL. 
-		Support for Creating and Dropping Table Schemas from POCOs, Complex Property types transparently stored in schemaless text blobs in Postgres.
+      Light, simple and fast convention-based code-first POCO ORM for PostgreSQL. 
+      Support for Creating and Dropping Table Schemas from POCOs, Complex Property types transparently stored in schemaless text blobs in Postgres.
     </description> 
     <projectUrl>https://github.com/ServiceStack/ServiceStack.OrmLite</projectUrl>
     <licenseUrl>https://servicestack.net/terms</licenseUrl>
@@ -19,7 +19,6 @@
     <copyright>Copyright 2016 Service Stack</copyright>
     <dependencies>
       <group targetFramework=".NETStandard1.3">
-        <dependency id="NETStandard.Library" version="[1.6.0, )" />
         <dependency id="Npgsql" version="[3.1.7, )" />
         <dependency id="ServiceStack.Interfaces.Core" version="[1.0.0, )" />
         <dependency id="ServiceStack.Text.Core" version="[1.0.0, )" />

@@ -36,6 +36,3 @@ COPY ..\src\ServiceStack.OrmLite.PostgreSQL\bin\%BUILD%\Npgsql.* ..\..\ServiceSt
 
 COPY ..\src\ServiceStack.OrmLite\bin\Signed\ServiceStack.OrmLite.* ..\..\ServiceStack\lib\signed
 COPY ..\src\ServiceStack.OrmLite.SqlServer\bin\Signed\ServiceStack.OrmLite.SqlServer.* ..\..\ServiceStack\lib\signed
-
-COPY ..\src\ServiceStack.OrmLiteV45\bin\%BUILD%\ServiceStack.OrmLite.* ..\..\ServiceStack\lib\net45
-COPY ..\src\ServiceStack.OrmLite.SqlServerV45\bin\%BUILD%\ServiceStack.OrmLite.SqlServer.* ..\..\ServiceStack\lib\net45

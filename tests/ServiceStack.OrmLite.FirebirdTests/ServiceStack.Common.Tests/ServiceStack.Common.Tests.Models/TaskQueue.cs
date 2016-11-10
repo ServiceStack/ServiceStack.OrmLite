@@ -4,11 +4,12 @@ using NUnit.Framework;
 using ServiceStack.Text;
 using ServiceStack.DataAnnotations;
 
-namespace ServiceStack.Common.Tests.Models{
+namespace ServiceStack.Common.Tests.Models
+{
 	
 	public class TaskQueue
 	{
-		private readonly static ILog Log;
+		private static readonly ILog Log;
 	
 		public const int PriorityHigh = 2;
 	
@@ -115,13 +116,15 @@ namespace ServiceStack.Common.Tests.Models{
 	
 		public static TaskQueue Create(int id)
 		{
-			TaskQueue taskQueue = new TaskQueue();
-			taskQueue.ContentUrn = string.Concat("urn:track:", id);
-			taskQueue.CreatedDate = DateTime.Now;
-			taskQueue.Task = "Load";
-			taskQueue.Status = "Pending";
-			taskQueue.NoOfAttempts = 0;
-			return taskQueue;
+		    var taskQueue = new TaskQueue
+		    {
+		        ContentUrn = string.Concat("urn:track:", id),
+		        CreatedDate = DateTime.Now,
+		        Task = "Load",
+		        Status = "Pending",
+		        NoOfAttempts = 0
+		    };
+		    return taskQueue;
 		}
 	}
 }

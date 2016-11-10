@@ -41,7 +41,9 @@ namespace ServiceStack.OrmLite.Tests
 
                 db.Insert(new PocoWithTime { TimeSpan = oneTime });
 
-                Assert.That(db.Single<PocoWithTime>(x => x.TimeSpan == oneTime).TimeSpan, Is.EqualTo(oneTime));
+                Assert.That(db.Single<PocoWithTime>(x => x.TimeSpan == oneTime).TimeSpan, 
+                    Is.EqualTo(oneTime).Within(TimeSpan.FromSeconds(1)));
+
                 sql = db.GetLastSql();
                 sql.Print();
 

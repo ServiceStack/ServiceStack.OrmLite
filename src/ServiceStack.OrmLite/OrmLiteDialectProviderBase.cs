@@ -14,6 +14,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading;
@@ -569,7 +570,7 @@ namespace ServiceStack.OrmLite
                 if (fieldDef.ShouldSkipInsert())
                     continue;
 
-                if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name))
+                if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase))
                     continue;
 
                 if (sbColumnNames.Length > 0)
@@ -619,7 +620,6 @@ namespace ServiceStack.OrmLite
             var modelDef = typeof(T).GetModelDefinition();
 
             cmd.Parameters.Clear();
-            cmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
 
             foreach (var fieldDef in modelDef.FieldDefinitionsArray)
             {
@@ -627,7 +627,7 @@ namespace ServiceStack.OrmLite
                     continue;
 
                 //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
-                if (insertFields != null && !insertFields.Contains(fieldDef.Name))
+                if (insertFields != null && !insertFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase))
                     continue;
 
                 if (sbColumnNames.Length > 0)
@@ -660,7 +660,6 @@ namespace ServiceStack.OrmLite
             var modelDef = typeof(T).GetModelDefinition();
 
             dbCmd.Parameters.Clear();
-            dbCmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
 
             foreach (var entry in args)
             {
@@ -678,7 +677,7 @@ namespace ServiceStack.OrmLite
                 try
                 {
                     sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
-                    sbColumnValues.Append(this.AddParam(dbCmd, value, fieldDef.ColumnType).ParameterName);
+                    sbColumnValues.Append(this.AddParam(dbCmd, value, fieldDef).ParameterName);
                 }
                 catch (Exception ex)
                 {
@@ -736,7 +735,6 @@ namespace ServiceStack.OrmLite
             var updateAllFields = updateFields == null || updateFields.Count == 0;
 
             cmd.Parameters.Clear();
-            cmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
@@ -758,7 +756,7 @@ namespace ServiceStack.OrmLite
                         continue;
                     }
 
-                    if (!updateAllFields && !updateFields.Contains(fieldDef.Name))
+                    if (!updateAllFields && !updateFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase))
                         continue;
 
                     if (sql.Length > 0)
@@ -802,7 +800,6 @@ namespace ServiceStack.OrmLite
             var hadRowVesion = false;
 
             cmd.Parameters.Clear();
-            cmd.CommandTimeout = OrmLiteConfig.CommandTimeout;
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
@@ -876,7 +873,16 @@ namespace ServiceStack.OrmLite
                 fieldMap.TryGetValue(fieldName, out fieldDef);
 
                 if (fieldDef == null)
-                    throw new ArgumentException("Field Definition '{0}' was not found".Fmt(fieldName));
+                {
+                    if (OrmLiteConfig.ParamNameFilter != null)
+                    {
+                        fieldDef = modelDef.GetFieldDefinition(name => 
+                            string.Equals(OrmLiteConfig.ParamNameFilter(name), fieldName, StringComparison.OrdinalIgnoreCase));
+                    }
+
+                    if (fieldDef == null)
+                        throw new ArgumentException("Field Definition '{0}' was not found".Fmt(fieldName));
+                }
 
                 SetParameterValue<T>(fieldDef, p, obj);
             }
@@ -1003,12 +1009,12 @@ namespace ServiceStack.OrmLite
                         sqlFilter
                             .Append(GetQuotedColumnName(fieldDef.FieldName))
                             .Append("=")
-                            .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef.ColumnType).ParameterName);
+                            .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef).ParameterName);
 
                         continue;
                     }
 
-                    if (!updateAllFields && !updateFields.Contains(fieldDef.Name) || fieldDef.AutoIncrement)
+                    if (!updateAllFields && !updateFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase) || fieldDef.AutoIncrement)
                         continue;
 
                     if (sql.Length > 0)
@@ -1017,7 +1023,7 @@ namespace ServiceStack.OrmLite
                     sql
                         .Append(GetQuotedColumnName(fieldDef.FieldName))
                         .Append("=")
-                        .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef.ColumnType).ParameterName);
+                        .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef).ParameterName);
                 }
                 catch (Exception ex)
                 {
@@ -1054,7 +1060,7 @@ namespace ServiceStack.OrmLite
                     sql
                         .Append(GetQuotedColumnName(fieldDef.FieldName))
                         .Append("=")
-                        .Append(this.AddParam(dbCmd, value, fieldDef.ColumnType).ParameterName);
+                        .Append(this.AddParam(dbCmd, value, fieldDef).ParameterName);
                 }
                 catch (Exception ex)
                 {
@@ -1097,14 +1103,14 @@ namespace ServiceStack.OrmLite
                             .Append("=")
                             .Append(quotedFieldName)
                             .Append("+")
-                            .Append(this.AddParam(dbCmd, value, fieldDef.ColumnType).ParameterName);
+                            .Append(this.AddParam(dbCmd, value, fieldDef).ParameterName);
                     }
                     else
                     {
                         sql
                             .Append(quotedFieldName)
                             .Append("=")
-                            .Append(this.AddParam(dbCmd, value, fieldDef.ColumnType).ParameterName);
+                            .Append(this.AddParam(dbCmd, value, fieldDef).ParameterName);
                     }
                 }
                 catch (Exception ex)
@@ -1543,10 +1549,15 @@ namespace ServiceStack.OrmLite
         public virtual void DropColumn(IDbConnection db, Type modelType, string columnName)
         {
             var provider = db.GetDialectProvider();
-            var command = $"ALTER TABLE {provider.GetQuotedTableName(modelType.GetModelDefinition().ModelName)} " +
-                          $"DROP COLUMN {provider.GetQuotedColumnName(columnName)};";
+            var command = ToDropColumnStatement(modelType, columnName, provider);
 
             db.ExecuteSql(command);
+        }
+
+        protected virtual string ToDropColumnStatement(Type modelType, string columnName, IOrmLiteDialectProvider provider)
+        {
+            return $"ALTER TABLE {provider.GetQuotedTableName(modelType.GetModelDefinition().ModelName)} " +
+                   $"DROP COLUMN {provider.GetQuotedColumnName(columnName)};";
         }
 
         //Async API's, should be overrided by Dialect Providers to use .ConfigureAwait(false)

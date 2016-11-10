@@ -4,6 +4,6 @@ namespace ServiceStack.OrmLite
 {
     public static class PostgreSqlDialect
     {
-        public static IOrmLiteDialectProvider Provider { get { return PostgreSqlDialectProvider.Instance; } }
+        public static IOrmLiteDialectProvider Provider => PostgreSqlDialectProvider.Instance;
     }
 }

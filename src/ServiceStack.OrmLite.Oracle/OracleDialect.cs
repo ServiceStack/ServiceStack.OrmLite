@@ -2,6 +2,6 @@
 {
     public class OracleDialect
     {
-        public static IOrmLiteDialectProvider Provider { get { return OracleOrmLiteDialectProvider.Instance; } }
+        public static IOrmLiteDialectProvider Provider => OracleOrmLiteDialectProvider.Instance;
     }
 }

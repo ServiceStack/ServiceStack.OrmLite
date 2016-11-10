@@ -4,6 +4,6 @@ namespace ServiceStack.OrmLite
 {
     public static class MySqlDialect
     {
-        public static IOrmLiteDialectProvider Provider { get { return MySqlDialectProvider.Instance; } }
+        public static IOrmLiteDialectProvider Provider => MySqlDialectProvider.Instance;
     }
 }

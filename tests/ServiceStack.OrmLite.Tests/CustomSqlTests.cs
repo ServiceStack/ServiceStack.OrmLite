@@ -3,6 +3,7 @@ using System.Linq;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.Tests.Expression;
+using ServiceStack.OrmLite.Tests.Issues;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
@@ -120,7 +121,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 var seedDataNames = db.Select<ModelWithSeedDataSql>().ConvertAll(x => x.Name);
 
-                Assert.That(seedDataNames, Is.EquivalentTo(new[] { "Foo", "Bar" }));
+                Assert.That(seedDataNames, Is.EquivalentTo(new[] {"Foo", "Bar"}));
             }
         }
 
@@ -141,7 +142,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 var seedDataNames = db.Select<DynamicAttributeSeedData>().ConvertAll(x => x.Name);
 
-                Assert.That(seedDataNames, Is.EquivalentTo(new[] { "Foo", "Bar" }));
+                Assert.That(seedDataNames, Is.EquivalentTo(new[] {"Foo", "Bar"}));
             }
         }
 
@@ -198,7 +199,7 @@ namespace ServiceStack.OrmLite.Tests
             {
                 db.DropAndCreateTable<CustomSelectTest>();
 
-                db.Insert(new CustomSelectTest { Id = 1, Width = 10, Height = 5 });
+                db.Insert(new CustomSelectTest {Id = 1, Width = 10, Height = 5});
 
                 var row = db.SingleById<CustomSelectTest>(1);
 
@@ -213,7 +214,7 @@ namespace ServiceStack.OrmLite.Tests
             {
                 db.DropAndCreateTable<LetterFrequency>();
 
-                var rows = "A,B,B,C,C,C,D,D,E".Split(',').Map(x => new LetterFrequency { Letter = x });
+                var rows = "A,B,B,C,C,C,D,D,E".Split(',').Map(x => new LetterFrequency {Letter = x});
 
                 db.InsertAll(rows);
 
@@ -230,5 +231,6 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(distinctCount, Is.EqualTo(rows.Map(x => x.Letter).Distinct().Count()));
             }
         }
+        
     }
 }

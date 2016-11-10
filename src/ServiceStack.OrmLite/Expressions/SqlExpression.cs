@@ -8,6 +8,7 @@ using System.Text;
 using System.Collections.ObjectModel;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
@@ -43,12 +44,9 @@ namespace ServiceStack.OrmLite
         public IOrmLiteDialectProvider DialectProvider { get; set; }
         public List<IDbDataParameter> Params { get; set; }
 
-        protected string Sep
-        {
-            get { return sep; }
-        }
+        protected string Sep => sep;
 
-        public SqlExpression(IOrmLiteDialectProvider dialectProvider)
+        protected SqlExpression(IOrmLiteDialectProvider dialectProvider)
         {
             UpdateFields = new List<string>();
             InsertFields = new List<string>();
@@ -990,6 +988,16 @@ namespace ServiceStack.OrmLite
 
         public virtual string ToDeleteRowStatement()
         {
+            var hasTableJoin = tableDefs.Count > 1;
+            if (hasTableJoin)
+            {
+                var clone = this.Clone();
+                var pk = DialectProvider.GetQuotedColumnName(modelDef, modelDef.PrimaryKey);
+                clone.Select(pk);
+                var subSql = clone.ToSelectStatement();
+                var sql = $"DELETE FROM {DialectProvider.GetQuotedTableName(modelDef)} WHERE {pk} IN ({subSql})";
+                return sql;
+            }
             return $"DELETE FROM {DialectProvider.GetQuotedTableName(modelDef)} {WhereExpression}";
         }
 
@@ -1017,7 +1025,7 @@ namespace ServiceStack.OrmLite
                 setFields
                     .Append(DialectProvider.GetQuotedColumnName(fieldDef.FieldName))
                     .Append("=")
-                    .Append(DialectProvider.AddParam(dbCmd, value, fieldDef.ColumnType).ParameterName);
+                    .Append(DialectProvider.AddParam(dbCmd, value, fieldDef).ParameterName);
             }
 
             if (setFields.Length == 0)
@@ -1707,7 +1715,7 @@ namespace ServiceStack.OrmLite
             return new PartialSqlString("NOT (" + o + ")");
         }
 
-        private bool IsColumnAccess(MethodCallExpression m)
+        protected virtual bool IsColumnAccess(MethodCallExpression m)
         {
             if (m.Object == null)
                 return false;
@@ -2053,6 +2061,9 @@ namespace ServiceStack.OrmLite
                 case "JoinAlias":
                     statement = args[0] + "." + quotedColName.ToString().LastRightPart('.');
                     break;
+                case "Custom":
+                    statement = quotedColName.ToString();
+                    break;
                 default:
                     throw new NotSupportedException();
             }
@@ -2102,7 +2113,9 @@ namespace ServiceStack.OrmLite
 
                 for (var i = renameParams.Count - 1; i >= 0; i--)
                 {
-                    subSelect = subSelect.Replace(renameParams[i].Item1, renameParams[i].Item2);
+                    //Replace complete db params [@1] and not partial tokens [@1]0
+                    var paramsRegex = new Regex(renameParams[i].Item1 + "([^\\d])");
+                    subSelect = paramsRegex.Replace(subSelect, renameParams[i].Item2 + "$1");
                 }
 
                 return $"{quotedColName} IN ({subSelect})";
@@ -2401,11 +2414,17 @@ namespace ServiceStack.OrmLite
             return to;
         }
 
-        public static IDbDataParameter AddParam(this IOrmLiteDialectProvider dialectProvider, IDbCommand dbCmd, object value, Type fieldType = null)
+        public static IDbDataParameter AddParam(this IOrmLiteDialectProvider dialectProvider,
+            IDbCommand dbCmd,
+            object value,
+            FieldDefinition fieldDef)
         {
             var paramName = dbCmd.Parameters.Count.ToString();
+            var parameter = dialectProvider.CreateParam(paramName, value, fieldDef?.ColumnType);
 
-            var parameter = dialectProvider.CreateParam(paramName, value, fieldType);
+            if (fieldDef != null)
+                dialectProvider.SetParameter(fieldDef, parameter);
+
             dbCmd.Parameters.Add(parameter);
             return parameter;
         }

@@ -222,6 +222,9 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 Func<string> normalizedSql = () =>
                     db.GetLastSql().Replace("\"", "").Replace("`", "").Replace("Name", "name").Replace("NAME", "name").Replace(":","@");
 
+                var hold = OrmLiteConfig.StripUpperInLike; //.NET Core defaults to `true`
+                OrmLiteConfig.StripUpperInLike = false;
+
                 db.Count<Text>(q => q.Name.StartsWith("A"));
                 Assert.That(normalizedSql(),
                     Does.Contain("upper(name) like @0".NormalizeSql()));
@@ -248,7 +251,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 Assert.That(normalizedSql(),
                     Does.Contain("name like @0".NormalizeSql()));
 
-                OrmLiteConfig.StripUpperInLike = false;
+                OrmLiteConfig.StripUpperInLike = hold;
             }
         }
 

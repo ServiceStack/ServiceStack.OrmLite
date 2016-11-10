@@ -71,7 +71,7 @@ namespace ServiceStack.OrmLite.Oracle
         {
         }
 
-        public OracleOrmLiteDialectProvider(bool compactGuid, bool quoteNames, string clientProvider = OdpProvider)
+        public OracleOrmLiteDialectProvider(bool compactGuid, bool quoteNames, string clientProvider = ManagedProvider)
         {
             // Make managed provider work with CaptureSqlFilter, safe since Oracle providers don't support async
             OrmLiteContext.UseThreadStatic = true;
@@ -551,7 +551,7 @@ namespace ServiceStack.OrmLite.Oracle
                 if (fieldDef.IsComputed || fieldDef.IsRowVersion) continue;
 
                 //insertFields contains Property "Name" of fields to insert (that's how expressions work)
-                if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name)) continue;
+                if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase)) continue;
 
                 if (sbColumnNames.Length > 0) sbColumnNames.Append(",");
                 if (sbColumnValues.Length > 0) sbColumnValues.Append(",");
@@ -669,7 +669,7 @@ namespace ServiceStack.OrmLite.Oracle
             {
                 if (fieldDef.IsComputed)
                     continue;
-                if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name))
+                if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase))
                     continue;
 
                 if ((fieldDef.AutoIncrement || !string.IsNullOrEmpty(fieldDef.Sequence))
@@ -744,12 +744,12 @@ namespace ServiceStack.OrmLite.Oracle
                     sqlFilter
                         .Append(GetQuotedColumnName(fieldDef.FieldName))
                         .Append("=")
-                        .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef.ColumnType).ParameterName);
+                        .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef).ParameterName);
 
                     continue;
                 }
 
-                if (!updateFieldsEmptyOrNull && !updateFields.Contains(fieldDef.Name))
+                if (!updateFieldsEmptyOrNull && !updateFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase))
                     continue;
 
                 if (sql.Length > 0)
@@ -758,7 +758,7 @@ namespace ServiceStack.OrmLite.Oracle
                 sql
                     .Append(GetQuotedColumnName(fieldDef.FieldName))
                     .Append("=")
-                    .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties)).ParameterName);
+                    .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef).ParameterName);
             }
 
             var strFilter = StringBuilderCacheAlt.ReturnAndFree(sqlFilter);
@@ -1192,11 +1192,37 @@ namespace ServiceStack.OrmLite.Oracle
             return _factory.CreateParameter();
         }
 
+        public override string ToAddColumnStatement(Type modelType, FieldDefinition fieldDef)
+        {
+            var command = base.ToAddColumnStatement(modelType, fieldDef);
+
+            command = RemoveTerminatingSemicolon(command);
+
+            return command.Replace("ADD COLUMN", "ADD");
+        }
+
+        private static string RemoveTerminatingSemicolon(string command)
+        {
+            command = command.Trim();
+
+            if (command[command.Length - 1] == ';') command = command.Substring(0, command.Length - 1);
+
+            return command;
+        }
+
+        protected override string ToDropColumnStatement(Type modelType, string columnName, IOrmLiteDialectProvider provider)
+        {
+            var command = base.ToDropColumnStatement(modelType, columnName, provider);
+
+            return RemoveTerminatingSemicolon(command);
+        }
+
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema=null)
         {
             if (!WillQuote(tableName)) tableName = tableName.ToUpper();
 
-            var sql = "SELECT count(*) FROM USER_TABLES WHERE TABLE_NAME = {0}".SqlFmt(tableName);
+            tableName = RemoveSchemaName(tableName);
+            var sql = "SELECT count(*) FROM ALL_TABLES WHERE TABLE_NAME = {0}".SqlFmt(tableName);
 
             if (schema != null)
                 sql += " AND OWNER = {0}".SqlFmt(schema);
@@ -1207,17 +1233,25 @@ namespace ServiceStack.OrmLite.Oracle
             return result > 0;
         }
 
+        private static string RemoveSchemaName(string tableName)
+        {
+            var indexOfPeriod = tableName.IndexOf(".", StringComparison.Ordinal);
+            return indexOfPeriod < 0 ? tableName : tableName.Substring(indexOfPeriod + 1);
+        }
+
         public override bool DoesColumnExist(IDbConnection db, string columnName, string tableName, string schema = null)
         {
             if (!WillQuote(tableName))
                 tableName = tableName.ToUpper();
 
-            var sql = "SELECT count(*) from user_tab_cols"
-                    + " WHERE table_name = @tableName"
-                    + "   AND column_name = @columnName";
+            columnName = columnName.ToUpper();
+            tableName = RemoveSchemaName(tableName);
+            var sql = "SELECT count(*) from all_tab_cols"
+                    + " WHERE table_name = :tableName"
+                    + "   AND upper(column_name) = :columnName";
 
             if (schema != null)
-                sql += " AND OWNER = @schema";
+                sql += " AND OWNER = :schema";
 
             var result = db.SqlScalar<long>(sql, new { tableName, columnName, schema });
 

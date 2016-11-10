@@ -374,8 +374,8 @@ namespace ServiceStack.OrmLite.Tests
 
                 var sql = db.GetLastSql().NormalizeSql();
                 Assert.That(sql, Is.StringContaining("where (lastname = @0)"));
-                Assert.That(sql, Is.StringContaining("id=@1"));
-                Assert.That(sql, Is.StringContaining("firstname=@2"));
+                Assert.That(sql, Is.StringContaining("id=@id"));
+                Assert.That(sql, Is.StringContaining("firstname=@firstname"));
 
                 var row = db.SingleById<Person>(1);
                 Assert.That(row.FirstName, Is.EqualTo("JJ"));
@@ -394,7 +394,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 var sql = db.GetLastSql().NormalizeSql();
                 Assert.That(sql, Is.StringContaining("where (lastname = @0)"));
-                Assert.That(sql, Is.StringContaining("firstname=@1"));
+                Assert.That(sql, Is.StringContaining("firstname=@firstname"));
 
                 var row = db.SingleById<Person>(1);
                 Assert.That(row.FirstName, Is.EqualTo("JJ"));
@@ -413,7 +413,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 var sql = db.GetLastSql().NormalizeSql();
                 Assert.That(sql, Is.StringContaining("where (lastname = @0)"));
-                Assert.That(sql, Is.StringContaining("firstname=@1"));
+                Assert.That(sql, Is.StringContaining("firstname=@firstname"));
 
                 var row = db.SingleById<Person>(1);
                 Assert.That(row.FirstName, Is.EqualTo("JJ"));
@@ -432,7 +432,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 var sql = db.GetLastSql().NormalizeSql();
                 Assert.That(sql, Is.StringContaining("where (lastname = @0)"));
-                Assert.That(sql, Is.StringContaining("firstname=@1"));
+                Assert.That(sql, Is.StringContaining("firstname=@firstname"));
 
                 var row = db.SingleById<Person>(1);
                 Assert.That(row.FirstName, Is.EqualTo("JJ"));
@@ -451,7 +451,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 var sql = db.GetLastSql().NormalizeSql();
                 Assert.That(sql, Is.StringContaining("where (lastname = @0)"));
-                Assert.That(sql, Is.StringContaining("firstname=@1"));
+                Assert.That(sql, Is.StringContaining("firstname=@firstname"));
 
                 var row = db.SingleById<Person>(1);
                 Assert.That(row.FirstName, Is.EqualTo("JJ"));
@@ -501,8 +501,8 @@ namespace ServiceStack.OrmLite.Tests
                 db.UpdateOnly(new Person { FirstName = "JJ" }, db.From<Person>().Update(p => p.FirstName).Where(x => x.FirstName == "Jimi"));
 
                 var sql = db.GetLastSql().NormalizeSql();
-                Assert.That(sql, Is.StringContaining("where (firstname = @0)"));
-                Assert.That(sql, Is.StringContaining("firstname=@1"));
+                Assert.That(sql, Does.Contain("where (firstname = @0)"));
+                Assert.That(sql, Does.Contain("firstname=@firstname"));
 
                 var row = db.SingleById<Person>(1);
                 Assert.That(row.FirstName, Is.EqualTo("JJ"));
@@ -534,6 +534,30 @@ namespace ServiceStack.OrmLite.Tests
                 var saved = db.Single<PersonUsingEnumAsInt>(p => p.Name == "Gene");
                 Assert.That(saved.Name, Is.EqualTo("Gene"));
                 Assert.That(saved.Gender, Is.EqualTo(Gender.Male));
+            }
+        }
+
+        [Test]
+        public void Can_UpdateOnly_fields_case_insensitive()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Person>();
+                var hendrix = new Person(1, "Jimi", "Hendrix", 27);
+                db.Insert(hendrix);
+
+                hendrix.FirstName = "JJ";
+                hendrix.LastName = "Ignored";
+
+                var q = db.From<Person>().Update(new[] { "FIRSTNAME" });
+
+                db.UpdateOnly(hendrix, q);
+
+                var updatedRow = db.SingleById<Person>(hendrix.Id);
+
+                Assert.That(updatedRow.FirstName, Is.EqualTo("JJ"));
+                Assert.That(updatedRow.LastName, Is.EqualTo("Hendrix"));
+                Assert.That(updatedRow.Age, Is.EqualTo(27));
             }
         }
     }

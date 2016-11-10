@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
@@ -149,7 +150,7 @@ namespace ServiceStack.OrmLite
                 sql
                     .Append(dialectProvider.GetQuotedColumnName(fieldDef.FieldName))
                     .Append("=")
-                    .Append(dialectProvider.AddParam(dbCmd, value, fieldDef.ColumnType).ParameterName);
+                    .Append(dialectProvider.AddParam(dbCmd, value, fieldDef).ParameterName);
             }
 
             dbCmd.CommandText = $"UPDATE {dialectProvider.GetQuotedTableName(modelDef)} " +

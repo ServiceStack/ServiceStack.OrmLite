@@ -31,7 +31,7 @@ namespace ServiceStack.OrmLite.VistaDB
                 if (setFields.Length > 0)
                     setFields.Append(", ");
 
-                var param = DialectProvider.AddParam(dbCmd, value, fieldDef.ColumnType);
+                var param = DialectProvider.AddParam(dbCmd, value, fieldDef);
                 setFields
                     .Append(DialectProvider.GetQuotedColumnName(fieldDef.FieldName))
                     .Append("=")
@@ -42,8 +42,7 @@ namespace ServiceStack.OrmLite.VistaDB
             if (strFields.Length == 0)
                 throw new ArgumentException("No non-null or non-default values were provided for type: " + typeof(T).Name);
 
-            dbCmd.CommandText = string.Format("UPDATE {0} SET {1} {2}",
-                DialectProvider.GetQuotedTableName(ModelDef), strFields, WhereExpression);
+            dbCmd.CommandText = $"UPDATE {DialectProvider.GetQuotedTableName(ModelDef)} SET {strFields} {WhereExpression}";
         }
 
         protected override object VisitColumnAccessMethod(MethodCallExpression m)
@@ -64,8 +63,8 @@ namespace ServiceStack.OrmLite.VistaDB
         public override string GetSubstringSql(object quotedColumn, int startIndex, int? length = null)
         {
             return length != null
-                ? string.Format("substring({0}, {1}, {2})", quotedColumn, startIndex, length.Value)
-                : string.Format("substring({0}, {1}, LEN({0}) - {1} + 1)", quotedColumn, startIndex);
+                ? $"substring({quotedColumn}, {startIndex}, {length.Value})"
+                : $"substring({quotedColumn}, {startIndex}, LEN({quotedColumn}) - {startIndex} + 1)";
         }
     }
 }
