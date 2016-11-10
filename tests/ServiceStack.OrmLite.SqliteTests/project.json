@@ -21,7 +21,7 @@
       "type": "platform",
       "version": "1.0.0"
     },
-    "NUnitLite" : "3.2.1",
+    "NUnitLite" : "3.5.0",
     "ServiceStack.OrmLite" : "1.0.*",
     "ServiceStack.Text" : "1.0.*",
     "ServiceStack.Client" : "1.0.*",
