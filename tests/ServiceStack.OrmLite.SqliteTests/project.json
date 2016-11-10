@@ -16,28 +16,21 @@
     "debugType": "portable",
     "emitEntryPoint": true
   },
-  "exclude": [
-    "Properties/Settings.Designer.cs",
-    "Expressions/RestrictionTests.cs"
-  ],
   "dependencies": {
     "Microsoft.NETCore.App": {
       "type": "platform",
       "version": "1.0.0"
     },
     "NUnitLite" : "3.2.1",
-//    "ImageProcessor": "2.4.*",
     "ServiceStack.OrmLite" : "1.0.*",
-//    "ServiceStack.Interfaces" : "1.0.*",
     "ServiceStack.Text" : "1.0.*",
-//    "ServiceStack.Common" : "1.0.*",
     "ServiceStack.Client" : "1.0.*",
     "ServiceStack.OrmLite.Sqlite" : "1.0.*"
   },
   "frameworks": {
    "netcoreapp1.0": { 
-            "imports": "dnxcore50",
-	     "dependencies" : {
+      "imports": "dnxcore50",
+	    "dependencies" : {
           "System.Runtime" : "4.1.0",
           "System.Runtime.Serialization.Xml" : "4.1.1",
           "System.Reflection" : "4.1.0",
