@@ -107,7 +107,13 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
                 //in the string. 
                 //An underscore ("_") in the LIKE pattern matches any single character in the string. 
                 //Any other character matches itself or its lower/upper case equivalent (i.e. case-insensitive matching).
+                //case-sensitivity matching depends on PostgreSQL underlying OS.
+#if NETCORE
+                expected = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux)? 1 : 3;
+#else
                 expected = 3;
+#endif
+
                 ev.Where().Where(rn => rn.Name.EndsWith("garzon"));
                 result = db.Select(ev);
                 Assert.AreEqual(expected, result.Count);
