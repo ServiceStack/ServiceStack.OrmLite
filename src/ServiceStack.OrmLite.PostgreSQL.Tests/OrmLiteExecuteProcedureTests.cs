@@ -51,7 +51,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         }
 
         [Test]
-        [Ignore("This tests fails both on .NET and .NET Core")]
+        [Ignore("This test fails both on .NET and .NET Core")]
         public void Can_execute_stored_procedure_with_array_arguments()
         {
             using (var db = OpenDbConnection())
