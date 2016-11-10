@@ -81,13 +81,7 @@ namespace ServiceStack.OrmLite.Tests
 					dbTrans.Commit();
 				}
 
-#if NETCORE
-                var isolationLevel = base.Dialect == Dialect.Sqlite ? IsolationLevel.Serializable : IsolationLevel.ReadCommitted;
-#else
-                var isolationLevel = IsolationLevel.ReadCommitted;
-#endif                
-
-				using (IDbTransaction dbTrans = db.OpenTransaction(isolationLevel))
+				using (IDbTransaction dbTrans = db.OpenTransaction(IsolationLevel.ReadCommitted))
 				{
 					db.Insert(new ShipperType { Name = "Automobiles" });
 					Assert.That(db.Select<ShipperType>(), Has.Count.EqualTo(3));
