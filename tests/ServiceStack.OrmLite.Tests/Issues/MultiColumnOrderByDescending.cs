@@ -12,7 +12,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     {
         private List<Person> _people;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public new void TestFixtureSetUp()
         {
             _people = new List<Person>

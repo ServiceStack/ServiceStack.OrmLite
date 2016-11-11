@@ -6,7 +6,7 @@ namespace ServiceStack.OrmLite.SqlServer
 {
     public class SqlServer2012OrmLiteDialectProvider : SqlServerOrmLiteDialectProvider
     {
-        public static SqlServer2012OrmLiteDialectProvider Instance = new SqlServer2012OrmLiteDialectProvider();
+        public static new SqlServer2012OrmLiteDialectProvider Instance = new SqlServer2012OrmLiteDialectProvider();
 
         public override string ToSelectStatement(ModelDefinition modelDef,
             string selectExpression,

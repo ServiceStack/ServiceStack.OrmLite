@@ -26,7 +26,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
 
                 sql.Print();
 
-                Assert.That(sql, Is.StringContaining("DECIMAL(12,3)"));
+                Assert.That(sql, Does.Contain("DECIMAL(12,3)"));
             }
         }
     }

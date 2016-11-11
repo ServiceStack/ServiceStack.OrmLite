@@ -6,7 +6,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixture]
     public class ForeignKeyAttributeTests : OrmLiteTestBase
     {
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             using (var dbConn = OpenDbConnection())

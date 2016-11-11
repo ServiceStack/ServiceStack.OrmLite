@@ -9,7 +9,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
     {
         public ForeignKeyAttributeTests() : base(Dialect.PostgreSql) { }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             DropTables();
@@ -20,7 +20,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
             }
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void TearDown()
         {
             DropTables();

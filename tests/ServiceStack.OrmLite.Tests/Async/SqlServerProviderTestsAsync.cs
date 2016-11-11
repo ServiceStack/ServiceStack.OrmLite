@@ -12,13 +12,13 @@ namespace ServiceStack.OrmLite.Tests.Async
     {
         private IDbConnection db;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void TestFixtureSetUp()
         {
             db = Config.OpenDbConnection();
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void TearDown()
         {
             db.Dispose();

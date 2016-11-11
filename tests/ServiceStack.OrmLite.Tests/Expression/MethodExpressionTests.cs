@@ -29,8 +29,8 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 CollectionAssert.AreEquivalent(new[] { int20, int30 }, results);
                 CollectionAssert.AreEquivalent(new[] { int20, int30 }, resultsNullable);
 
-                Assert.That(db.GetLastSql(), Is.StringContaining("(@0,@1,@2)").
-                                             Or.StringContaining("(:0,:1,:2)"));
+                Assert.That(db.GetLastSql(), Does.Contain("(@0,@1,@2)").
+                                             Or.Contain("(:0,:1,:2)"));
             }
         }
 
@@ -54,8 +54,8 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 CollectionAssert.AreEquivalent(new[] { int20, int30 }, results);
                 CollectionAssert.AreEquivalent(new[] { int20, int30 }, resultsNullable);
 
-                Assert.That(db.GetLastSql(), Is.StringContaining("(@0,@1,@2)").
-                                             Or.StringContaining("(:0,:1,:2)"));
+                Assert.That(db.GetLastSql(), Does.Contain("(@0,@1,@2)").
+                                             Or.Contain("(:0,:1,:2)"));
             }
         }
 
@@ -71,7 +71,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 var results = db.Select<TestType>(x => ints.Contains(x.Id));
 
                 CollectionAssert.IsEmpty(results);
-                Assert.That(db.GetLastSql(), Is.StringContaining("(NULL)"));
+                Assert.That(db.GetLastSql(), Does.Contain("(NULL)"));
             }
         }
 

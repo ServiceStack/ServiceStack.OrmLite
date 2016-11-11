@@ -81,13 +81,13 @@ namespace ServiceStack.OrmLite.Tests.Issues
                 
                 db.SingleById<Poco>(1);
 
-                Assert.That(captured.SqlStatements.Last().ToLower(), Is.StringContaining("schema1"));
+                Assert.That(captured.SqlStatements.Last().ToLower(), Does.Contain("schema1"));
 
                 modelDef.Schema = "schema2";
 
                 db.SingleById<Poco>(1);
 
-                Assert.That(captured.SqlStatements.Last().ToLower(), Is.StringContaining("schema2"));
+                Assert.That(captured.SqlStatements.Last().ToLower(), Does.Contain("schema2"));
             }
         }
     }

@@ -41,14 +41,14 @@ namespace ServiceStack.OrmLite.Tests.Async.Issues
     {
         private IDbConnection db;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void TestFixtureSetUp()
         {
             OrmLiteConfig.DialectProvider = SqlServerDialect.Provider;
             db = Config.SqlServerBuildDb.OpenDbConnection();
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void TearDown()
         {
             db.Dispose();

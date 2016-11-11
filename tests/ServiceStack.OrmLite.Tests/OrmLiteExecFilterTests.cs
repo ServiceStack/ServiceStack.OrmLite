@@ -40,7 +40,7 @@ namespace ServiceStack.OrmLite.Tests
             {
                 return base.Exec(dbConn, filter);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 var sql = dbConn.GetLastSql();
                 if (sql == "exec sp_name @firstName, @age")

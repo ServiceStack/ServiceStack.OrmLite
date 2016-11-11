@@ -218,7 +218,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
             var ages = db.Select(query).ConvertAll(x => x.Age.Value);
 
             db.GetLastSql().Print();
-            Assert.That(db.GetLastSql(), Is.StringContaining("ORDER BY Age DESC"));
+            Assert.That(db.GetLastSql(), Does.Contain("ORDER BY Age DESC"));
 
             ages.PrintDump();
 
