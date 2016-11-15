@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Data;
+using System.Data.SqlClient;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.Converters;
 
@@ -6,10 +8,7 @@ namespace ServiceStack.OrmLite.SqlServer.Converters
 {
     public class SqlServerStringConverter : StringConverter
     {
-        public override string MaxColumnDefinition
-        {
-            get { return UseUnicode ? "NVARCHAR(MAX)" : "VARCHAR(MAX)"; }
-        }
+        public override string MaxColumnDefinition => UseUnicode ? "NVARCHAR(MAX)" : "VARCHAR(MAX)";
 
         public override string GetColumnDefinition(int? stringLength)
         {
@@ -23,6 +22,19 @@ namespace ServiceStack.OrmLite.SqlServer.Converters
             return UseUnicode
                 ? "NVARCHAR({0})".Fmt(safeLength)
                 : "VARCHAR({0})".Fmt(safeLength);
+        }
+
+        public override void InitDbParam(IDbDataParameter p, Type fieldType)
+        {
+            base.InitDbParam(p, fieldType);
+
+            var sqlParam = p as SqlParameter;
+            if (sqlParam == null) return;
+
+            if (!UseUnicode)
+            {
+                sqlParam.SqlDbType = SqlDbType.VarChar;
+            }
         }
     }
 }
