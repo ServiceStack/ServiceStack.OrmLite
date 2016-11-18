@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using ServiceStack.Text;
 using ServiceStack.Common.Tests.Models;
+using ServiceStack.Logging;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -123,5 +124,13 @@ namespace ServiceStack.OrmLite.Tests
             }
         }
 
+        [Test]
+        public void Can_create_CompositeIndex_with_Enum()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<ModelWithEnum>();
+            }
+        }
     }
 }

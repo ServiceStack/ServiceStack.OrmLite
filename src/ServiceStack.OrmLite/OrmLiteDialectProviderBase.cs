@@ -142,8 +142,10 @@ namespace ServiceStack.OrmLite
             }
 
             var stringConverter = columnType.IsRefType()
-                ? (IHasColumnDefinitionLength)ReferenceTypeConverter
-                : ValueTypeConverter;
+                ? ReferenceTypeConverter
+                : columnType.IsEnum()
+                    ? EnumConverter
+                    : (IHasColumnDefinitionLength)ValueTypeConverter;
 
             return stringConverter.GetColumnDefinition(fieldLength);
         }
