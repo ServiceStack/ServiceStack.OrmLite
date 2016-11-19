@@ -17,8 +17,8 @@ namespace ServiceStack.OrmLite.Tests
     {
         private IDbConnection db;
 
-        [TestFixtureSetUp]
-        public void TestFixtureSetUp()
+        [OneTimeSetUp]
+        public new void TestFixtureSetUp()
         {
             db = base.OpenDbConnection();
 
@@ -26,8 +26,8 @@ namespace ServiceStack.OrmLite.Tests
             db.InsertAll(Person.Rockstars);
         }
 
-        [TestFixtureTearDown]
-        public void TestFixtureTearDown()
+        [OneTimeTearDown]
+        public new void TestFixtureTearDown()
         {
             db.Dispose();
         }

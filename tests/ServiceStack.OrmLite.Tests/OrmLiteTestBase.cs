@@ -109,13 +109,13 @@ namespace ServiceStack.OrmLite.Tests
             return DbFactory;
         }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void TestFixtureSetUp()
         {
             Init();
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void TestFixtureTearDown()
         {
             OrmLiteContext.Instance.ClearItems();

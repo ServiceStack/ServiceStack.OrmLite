@@ -81,13 +81,13 @@ namespace ServiceStack.OrmLite.Tests
 
                 if (Dialect != Dialect.Firebird)
                 {
-                    Assert.That(createTableSql, Is.StringContaining("charcolumn char(20) null"));
-                    Assert.That(createTableSql, Is.StringContaining("decimalcolumn decimal(18,4) null"));
+                    Assert.That(createTableSql, Does.Contain("charcolumn char(20) null"));
+                    Assert.That(createTableSql, Does.Contain("decimalcolumn decimal(18,4) null"));
                 }
                 else
                 {
-                    Assert.That(createTableSql, Is.StringContaining("charcolumn char(20)"));
-                    Assert.That(createTableSql, Is.StringContaining("decimalcolumn decimal(18,4)"));
+                    Assert.That(createTableSql, Does.Contain("charcolumn char(20)"));
+                    Assert.That(createTableSql, Does.Contain("decimalcolumn decimal(18,4)"));
                 }
             }
         }

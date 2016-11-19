@@ -15,7 +15,7 @@ namespace ServiceStack.OrmLite.Tests.Async
     {
         private IDbConnection db;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public new void TestFixtureSetUp()
         {
             db = base.OpenDbConnection();
@@ -35,8 +35,8 @@ namespace ServiceStack.OrmLite.Tests.Async
             db.DeleteAll<Customer>();
         }
 
-        [TestFixtureTearDown]
-        public void TestFixtureTearDown()
+        [OneTimeTearDown]
+        public new void TestFixtureTearDown()
         {
             db.Dispose();
         }
@@ -168,10 +168,10 @@ namespace ServiceStack.OrmLite.Tests.Async
                 dbCustomers = await db.LoadSelectAsync<Customer>(q => q.Id == customer.Id, include: new[] { "InvalidOption1", "InvalidOption2" });
                 Assert.Fail();
             }
-            catch (System.ArgumentException ex)
+            catch (System.ArgumentException)
             {
             }
-            catch (System.Exception ex)
+            catch (System.Exception)
             {
                 Assert.Fail();
             }
@@ -182,10 +182,10 @@ namespace ServiceStack.OrmLite.Tests.Async
                 dbCustomer = await db.LoadSingleByIdAsync<Customer>(customer.Id, include: new[] { "InvalidOption1", "InvalidOption2" });
                 Assert.Fail();
             }
-            catch (System.ArgumentException ex)
+            catch (System.ArgumentException)
             {
             }
-            catch (System.Exception ex)
+            catch (System.Exception)
             {
                 Assert.Fail();
             }

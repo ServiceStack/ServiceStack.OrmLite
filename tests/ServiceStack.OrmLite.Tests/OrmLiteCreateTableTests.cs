@@ -189,12 +189,12 @@ namespace ServiceStack.OrmLite.Tests
             Console.WriteLine("createTableSql: " + createTableSql);
             if (Dialect != Dialect.PostgreSql)
             {
-                Assert.That(createTableSql, Is.StringContaining("VARCHAR(255)").
-                                            Or.StringContaining("VARCHAR2(255)"));
+                Assert.That(createTableSql, Does.Contain("VARCHAR(255)").
+                                            Or.Contain("VARCHAR2(255)"));
             }
             else
             {
-                Assert.That(createTableSql, Is.StringContaining("TEXT"));
+                Assert.That(createTableSql, Does.Contain("TEXT"));
             }
             converter.StringLength = hold;
         }
@@ -473,8 +473,8 @@ namespace ServiceStack.OrmLite.Tests
             {
                 db.DropAndCreateTable<TableWithIgnoredFields>();
 
-                Assert.That(db.GetLastSql(), Is.StringContaining("DisplayName".SqlColumnRaw()));
-                Assert.That(db.GetLastSql(), Is.Not.StringContaining("IsIgnored".SqlColumnRaw()));
+                Assert.That(db.GetLastSql(), Does.Contain("DisplayName".SqlColumnRaw()));
+                Assert.That(db.GetLastSql(), Does.Not.Contain("IsIgnored".SqlColumnRaw()));
 
                 db.Insert(new TableWithIgnoredFields
                 {

@@ -107,13 +107,13 @@ namespace ServiceStack.OrmLite.Tests.Issues
                     .Select(y => y.Person2Id);
 
                 subExpr.ToSelectStatement().Print();
-                Assert.That(subExpr.ToSelectStatement().NormalizeSql(), Is.StringContaining("@0"));
+                Assert.That(subExpr.ToSelectStatement().NormalizeSql(), Does.Contain("@0"));
 
                 var expr = db.From<Person2>()
                     .Where(x => Sql.In(x.Id, subExpr));
 
                 expr.ToSelectStatement().Print();
-                Assert.That(expr.ToSelectStatement().NormalizeSql(), Is.StringContaining("@0"));
+                Assert.That(expr.ToSelectStatement().NormalizeSql(), Does.Contain("@0"));
             }
         }
 
@@ -166,14 +166,14 @@ namespace ServiceStack.OrmLite.Tests.Issues
 
                 result.PrintDump();
                 db.GetLastSql().PrintDump();
-                Assert.That(db.GetLastSql().NormalizeSql(), Is.StringContaining("is null"));
+                Assert.That(db.GetLastSql().NormalizeSql(), Does.Contain("is null"));
                 
                 model = new AnyObjectClass { db = db, Identity = Guid.Parse("104ECE6A-7117-4205-961C-126AD276565C") };
                 result = model.CustomProperty;
 
                 result.PrintDump();
                 db.GetLastSql().PrintDump();
-                Assert.That(db.GetLastSql().NormalizeSql(), Is.StringContaining("@"));
+                Assert.That(db.GetLastSql().NormalizeSql(), Does.Contain("@"));
             }
         }
 
@@ -187,12 +187,12 @@ namespace ServiceStack.OrmLite.Tests.Issues
                     .Where(y => y.Order2TypeId == orderTypeId)
                     .Select(y => y.Person2Id);
 
-                Assert.That(subExpr.ToSelectStatement().NormalizeSql(), Is.StringContaining("@"));
+                Assert.That(subExpr.ToSelectStatement().NormalizeSql(), Does.Contain("@"));
 
                 var expr = db.From<Person2>()
                     .Where(x => Sql.In(x.Id, subExpr));
 
-                Assert.That(subExpr.ToSelectStatement().NormalizeSql(), Is.StringContaining("@"));
+                Assert.That(subExpr.ToSelectStatement().NormalizeSql(), Does.Contain("@"));
             }
         }
 
@@ -256,7 +256,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
                     )
                     .Select(b => b.MarginItemId)));
 
-            Assert.That(q.ToSelectStatement().NormalizeSql(), Is.StringContaining("@"));
+            Assert.That(q.ToSelectStatement().NormalizeSql(), Does.Contain("@"));
         }
     }
 
@@ -347,7 +347,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
                         .Select(b => b.MarginItemId)));
 
             q.ToSelectStatement().PrintDump();
-            Assert.That(q.ToSelectStatement().NormalizeSql(), Is.StringContaining("@"));
+            Assert.That(q.ToSelectStatement().NormalizeSql(), Does.Contain("@"));
         }
 
         public void TestMethod2()
@@ -359,7 +359,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
                         .Select(b => b.MarginItemId)));
 
             q.ToSelectStatement().PrintDump();
-            Assert.That(q.ToSelectStatement().NormalizeSql(), Is.StringContaining("@"));
+            Assert.That(q.ToSelectStatement().NormalizeSql(), Does.Contain("@"));
         }
 
         public void TestMethod3()
@@ -373,7 +373,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
                         .Select(b => b.MarginItemId)));
 
             q.ToSelectStatement().PrintDump();
-            Assert.That(q.ToSelectStatement().NormalizeSql(), Is.StringContaining("@"));
+            Assert.That(q.ToSelectStatement().NormalizeSql(), Does.Contain("@"));
         }
     }
 }

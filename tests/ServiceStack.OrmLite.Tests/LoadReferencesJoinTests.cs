@@ -18,7 +18,7 @@ namespace ServiceStack.OrmLite.Tests
     {
         private IDbConnection db;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public new void TestFixtureSetUp()
         {
             db = base.OpenDbConnection();
@@ -44,8 +44,8 @@ namespace ServiceStack.OrmLite.Tests
             db.DeleteAll<Country>();
         }
 
-        [TestFixtureTearDown]
-        public void TestFixtureTearDown()
+        [OneTimeTearDown]
+        public new void TestFixtureTearDown()
         {
             db.Dispose();
         }
@@ -524,9 +524,11 @@ namespace ServiceStack.OrmLite.Tests
 
             db.Save(customer, references: true);
 
+#pragma warning disable 472
             var q = db.From<Customer>();
             q.LeftJoin<Order>()
              .Where<Order>(o => o.Id == null);
+#pragma warning restore 472
 
             var customers = db.Select(q);
 

@@ -78,7 +78,7 @@ namespace ServiceStack.OrmLite.Tests
     {
         private IDbConnection db;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void FixtureSetUp()
         {
             LogManager.LogFactory = new ConsoleLogFactory(debugEnabled: true);

@@ -49,7 +49,7 @@ namespace ServiceStack.OrmLite.Tests
                 i++; db.CreateTable<Person>();
 
                 Assert.That(captured.SqlCommandHistory.Last().Sql.NormalizeSql(),
-                            Is.StringStarting("create table person"));
+                            Does.Contain("create table person"));
 
                 Assert.That(captured.SqlCommandHistory.Count, Is.EqualTo(i)
                     .Or.EqualTo(i + 1)); //Check table if exists
@@ -175,7 +175,7 @@ namespace ServiceStack.OrmLite.Tests
                 i++; db.Update(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27 });
 
                 Assert.That(captured.SqlCommandHistory.Last().Sql.NormalizeSql(),
-                    Is.StringStarting("update person set firstname=@firstname, lastname=@lastname"));
+                    Does.StartWith("update person set firstname=@firstname, lastname=@lastname"));
 
                 i++; db.Update(new[] { new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27 } });
                 i++; db.UpdateAll(new[] { new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27 } });
@@ -264,7 +264,7 @@ namespace ServiceStack.OrmLite.Tests
                 i++; db.Insert(new Person { Id = 7, FirstName = "Amy", LastName = "Winehouse", Age = 27 });
 
                 Assert.That(captured.SqlCommandHistory.Last().Sql.NormalizeSql(),
-                    Is.StringStarting("insert into person (id,firstname,lastname,age) values"));
+                    Does.StartWith("insert into person (id,firstname,lastname,age) values"));
 
                 i++; db.Insert(new Person { Id = 7, FirstName = "Amy", LastName = "Winehouse", Age = 27 });
                 i++; db.InsertAll(new[] { new Person { Id = 10, FirstName = "Biggie", LastName = "Smalls", Age = 24 } });

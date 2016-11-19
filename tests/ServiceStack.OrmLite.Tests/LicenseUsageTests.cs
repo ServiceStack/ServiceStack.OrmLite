@@ -83,14 +83,14 @@ namespace ServiceStack.OrmLite.Tests
     {
         protected IDbConnection db;
 
-        [TestFixtureSetUp]
-        public void TestFixtureSetUp()
+        [OneTimeSetUp]
+        public new void TestFixtureSetUp()
         {
             db = base.OpenDbConnection();
         }
 
-        [TestFixtureTearDown]
-        public void TestFixtureTearDown()
+        [OneTimeTearDown]
+        public new void TestFixtureTearDown()
         {
             db.Dispose();
         }

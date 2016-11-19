@@ -263,10 +263,12 @@ namespace ServiceStack.OrmLite.Tests.Expression
                     db.Insert(new LetterWeighting { LetterFrequencyId = id, Weighting = ++i * 10 });
                 });
 
+#pragma warning disable 618
                 var joinFn = new Func<JoinSqlBuilder<LetterFrequency, LetterWeighting>>(() =>
                     new JoinSqlBuilder<LetterFrequency, LetterWeighting>()
                         .Join<LetterFrequency, LetterWeighting>(x => x.Id, x => x.LetterFrequencyId)
                     );
+#pragma warning restore 618
 
                 var results = db.Select<LetterFrequency>(joinFn());
                 Assert.That(results.Count, Is.EqualTo(5));

@@ -65,7 +65,7 @@ namespace ServiceStack.OrmLite.Tests
                 {
                     db.ExecuteSql("DROP PROCEDURE dbo.[SP_upload_file]");
                 }
-                catch (System.Exception ex) {}
+                catch (System.Exception) {}
 
                 db.ExecuteSql(@"
 CREATE PROCEDURE dbo.[SP_upload_file](          
@@ -105,7 +105,7 @@ end".Fmt(OrmLiteConfig.DialectProvider.ParamString));
                 {
                     db.ExecuteSql("DROP PROCEDURE dbo.[SP_upload_file]");
                 }
-                catch (System.Exception ex) { }
+                catch (System.Exception) { }
 
                 db.ExecuteSql(@"
 CREATE PROCEDURE dbo.[SP_upload_file](          

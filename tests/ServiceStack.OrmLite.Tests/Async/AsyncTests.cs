@@ -51,9 +51,9 @@ namespace ServiceStack.OrmLite.Tests.Async
                 }
                 catch (Exception ex)
                 {
-                    Assert.That(ex.Message.ToLower(), Is.StringContaining("id")
-                                                        .Or.StringContaining("notexists")
-                                                        .Or.StringContaining("not_exists"));
+                    Assert.That(ex.Message.ToLower(), Does.Contain("id")
+                                                        .Or.Contain("notexists")
+                                                        .Or.Contain("not_exists"));
                 }
 
                 try
@@ -63,9 +63,9 @@ namespace ServiceStack.OrmLite.Tests.Async
                 }
                 catch (Exception ex)
                 {
-                    Assert.That(ex.Message.ToLower(), Is.StringContaining("id")
-                                                        .Or.StringContaining("notexists")
-                                                        .Or.StringContaining("not_exists"));
+                    Assert.That(ex.Message.ToLower(), Does.Contain("id")
+                                                        .Or.Contain("notexists")
+                                                        .Or.Contain("not_exists"));
                 }
 
                 try
@@ -79,9 +79,9 @@ namespace ServiceStack.OrmLite.Tests.Async
                 catch (Exception ex)
                 {
                     var innerEx = ex.UnwrapIfSingleException();
-                    Assert.That(innerEx.Message.ToLower(), Is.StringContaining("id")
-                                                        .Or.StringContaining("notexists")
-                                                        .Or.StringContaining("not_exists"));
+                    Assert.That(innerEx.Message.ToLower(), Does.Contain("id")
+                                                        .Or.Contain("notexists")
+                                                        .Or.Contain("not_exists"));
                 }
 
                 try
@@ -95,9 +95,9 @@ namespace ServiceStack.OrmLite.Tests.Async
                 catch (Exception ex)
                 {
                     var innerEx = ex.UnwrapIfSingleException();
-                    Assert.That(innerEx.Message.ToLower(), Is.StringContaining("id")
-                                                        .Or.StringContaining("notexists")
-                                                        .Or.StringContaining("not_exists"));
+                    Assert.That(innerEx.Message.ToLower(), Does.Contain("id")
+                                                        .Or.Contain("notexists")
+                                                        .Or.Contain("not_exists"));
                 }
             }
         }

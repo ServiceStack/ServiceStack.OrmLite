@@ -19,7 +19,7 @@
   "dependencies": {
     "Microsoft.NETCore.App": {
       "type": "platform",
-      "version": "1.0.0"
+      "version": "1.1.0"
     },
     "NUnitLite" : "3.5.0",
     "ServiceStack.OrmLite" : "1.0.*",
@@ -29,15 +29,15 @@
     "ServiceStack.OrmLite.Tests" : "1.0.*"
   },
   "frameworks": {
-    "netcoreapp1.0": { 
+    "netcoreapp1.1": { 
       "imports": "dnxcore50",
       "dependencies" : {
-          "System.Runtime" : "4.1.0",
-          "System.Runtime.Serialization.Xml" : "4.1.1",
-          "System.Reflection" : "4.1.0",
-          "System.Reflection.Primitives" : "4.0.1",
-          "System.Runtime.Serialization.Primitives": "4.1.1",
-          "System.Threading.Thread" : "4.0.0"
+          "System.Runtime" : "4.*",
+          "System.Runtime.Serialization.Xml" : "4.*",
+          "System.Reflection" : "4.*",
+          "System.Reflection.Primitives" : "4.*",
+          "System.Runtime.Serialization.Primitives": "4.*",
+          "System.Threading.Thread" : "4.*"
         }	
      }
   }

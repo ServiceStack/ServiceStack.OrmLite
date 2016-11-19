@@ -189,6 +189,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
             }
         }
 
+#pragma warning disable 618
         [Test]
         public void ComplexJoin_with_JoinSqlBuilder()
         {
@@ -225,6 +226,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 Assert.That(fooBarBaz.BazId, Is.EqualTo(_baz1Id));
             }
         }
+#pragma warning restore 618
 
         [Test]
         public void ComplexJoin_with_SqlExpression()

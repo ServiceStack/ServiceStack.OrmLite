@@ -56,8 +56,8 @@ namespace ServiceStack.OrmLite.Tests
                 db.CreateTable<ModelWithOnlyStringFields>(true);
 
                 var sql = db.GetLastSql().NormalizeSql();
-                Assert.That(sql, Is.StringContaining("CREATE TABLE TableAlias".NormalizeSql()));
-                Assert.That(sql, Is.StringContaining("ColumnAlias".NormalizeSql()));
+                Assert.That(sql, Does.Contain("CREATE TABLE TableAlias".NormalizeSql()));
+                Assert.That(sql, Does.Contain("ColumnAlias".NormalizeSql()));
 
                 var result = db.SqlList<ModelWithIdAndName>(
                     "SELECT * FROM {0} WHERE {1} = {2}"
@@ -74,8 +74,8 @@ namespace ServiceStack.OrmLite.Tests
 
                 db.CreateTable<ModelWithOnlyStringFields>(true);
                 sql = db.GetLastSql().NormalizeSql();
-                Assert.That(sql, Is.StringContaining("CREATE TABLE table_alias".NormalizeSql()));
-                Assert.That(sql, Is.StringContaining("column_alias".NormalizeSql()));
+                Assert.That(sql, Does.Contain("CREATE TABLE table_alias".NormalizeSql()));
+                Assert.That(sql, Does.Contain("column_alias".NormalizeSql()));
             }
         }
 
@@ -183,7 +183,7 @@ namespace ServiceStack.OrmLite.Tests
 
     }
 
-    public class PrefixNamingStrategy : OrmLiteNamingStrategyBase
+    internal class PrefixNamingStrategy : OrmLiteNamingStrategyBase
     {
 
         public string TablePrefix { get; set; }
@@ -202,7 +202,7 @@ namespace ServiceStack.OrmLite.Tests
 
     }
 
-    public class LowercaseNamingStrategy : OrmLiteNamingStrategyBase
+    internal class LowercaseNamingStrategy : OrmLiteNamingStrategyBase
     {
 
         public override string GetTableName(string name)
@@ -217,7 +217,7 @@ namespace ServiceStack.OrmLite.Tests
 
     }
 
-    public class UnderscoreSeparatedCompoundNamingStrategy : OrmLiteNamingStrategyBase
+    internal class UnderscoreSeparatedCompoundNamingStrategy : OrmLiteNamingStrategyBase
     {
 
         public override string GetTableName(string name)
@@ -255,7 +255,7 @@ namespace ServiceStack.OrmLite.Tests
 
     }
 
-    public class LowerCaseUnderscoreNamingStrategy : OrmLiteNamingStrategyBase
+    internal class LowerCaseUnderscoreNamingStrategy : OrmLiteNamingStrategyBase
     {
         public override string GetTableName(string name)
         {

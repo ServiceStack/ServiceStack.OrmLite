@@ -187,7 +187,7 @@ namespace ServiceStack.OrmLite.Tests
     {
         private IDbConnection db;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public new void TestFixtureSetUp()
         {
             db = base.OpenDbConnection();
@@ -221,8 +221,8 @@ namespace ServiceStack.OrmLite.Tests
             db.DeleteAll<Customer>();
         }
 
-        [TestFixtureTearDown]
-        public void TestFixtureTearDown()
+        [OneTimeTearDown]
+        public new void TestFixtureTearDown()
         {
             db.Dispose();
         }
@@ -617,10 +617,10 @@ namespace ServiceStack.OrmLite.Tests
             results.PrintDump();
 
             Assert.That(results.Count, Is.EqualTo(2));
-            Assert.That(results[0].HomeAddress.AddressLine1, Is.StringContaining("Home"));
-            Assert.That(results[0].WorkAddress.AddressLine1, Is.StringContaining("Work"));
-            Assert.That(results[1].HomeAddress.AddressLine1, Is.StringContaining("Home"));
-            Assert.That(results[1].WorkAddress.AddressLine1, Is.StringContaining("Work"));
+            Assert.That(results[0].HomeAddress.AddressLine1, Does.Contain("Home"));
+            Assert.That(results[0].WorkAddress.AddressLine1, Does.Contain("Work"));
+            Assert.That(results[1].HomeAddress.AddressLine1, Does.Contain("Home"));
+            Assert.That(results[1].WorkAddress.AddressLine1, Does.Contain("Work"));
 
             var ukAddress = db.Single<SelfCustomerAddress>(q => q.Country == "UK");
             ukAddress.PrintDump();
@@ -734,9 +734,9 @@ namespace ServiceStack.OrmLite.Tests
 
             Assert.That(orderQuery.Params.Count, Is.EqualTo(2));
             Assert.That(orderQuery.Params[0].Value, Is.EqualTo(1));
-            Assert.That(orderQuery.Params[0].ParameterName, Is.StringEnding("0"));
+            Assert.That(orderQuery.Params[0].ParameterName, Does.EndWith("0"));
             Assert.That(orderQuery.Params[1].Value, Is.EqualTo(-1));
-            Assert.That(orderQuery.Params[1].ParameterName, Is.StringEnding("1"));
+            Assert.That(orderQuery.Params[1].ParameterName, Does.EndWith("1"));
 
             dbOrders = db.Select(orderQuery);
             Assert.That(dbOrders.Count, Is.EqualTo(0));

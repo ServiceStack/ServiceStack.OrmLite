@@ -207,7 +207,7 @@ namespace ServiceStack.OrmLite.Tests
     }
 
 
-    public class Author
+    internal class Author
     {
         public Author() { }
 
