@@ -4,6 +4,7 @@ using ServiceStack.DataAnnotations;
 namespace ServiceStack.OrmLite.SqlServerTests
 {
     [TestFixture]
+    public class MemoryOptimizedAttributeTests : OrmLiteTestBase
     {
         [TestFixtureSetUp]
         public void Setup()
@@ -46,6 +47,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
         }
     }
     
+    [MemoryOptimized]
     public class TypeWithMemTableNoDurability
         {
         [AutoIncrement]
@@ -54,6 +56,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
         public string Name { get; set; }
     }
 
+    [MemoryOptimized(TableDurability.SCHEMA_ONLY)]
     public class TypeWithMemTableSchemaOnlyDurability
     {
         [AutoIncrement]
@@ -62,6 +65,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
         public string Name { get; set; }
     }
 
+    [MemoryOptimized(TableDurability.SCHEMA_AND_DATA)]
     public class TypeWithMemTableSchemaAndDataDurability
     {
         [AutoIncrement]
