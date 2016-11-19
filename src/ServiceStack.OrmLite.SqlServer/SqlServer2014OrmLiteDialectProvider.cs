@@ -8,6 +8,7 @@ namespace ServiceStack.OrmLite.SqlServer
 {
     public class SqlServer2014OrmLiteDialectProvider : SqlServer2012OrmLiteDialectProvider
     {
+        public static new SqlServer2014OrmLiteDialectProvider Instance = new SqlServer2014OrmLiteDialectProvider();
 
         public override string ToCreateTableStatement(Type tableType)
         {
@@ -53,8 +54,10 @@ namespace ServiceStack.OrmLite.SqlServer
                 sbConstraints.Append(GetForeignKeyOnUpdateClause(fieldDef.ForeignKey));
             }
 
+            if (tableType.HasAttribute<MemoryOptimizedAttribute>())
             {
                 sbMemOptimized.Append(" WITH (MEMORY_OPTIMIZED=ON");
+                var attrib = tableType.FirstAttribute<MemoryOptimizedAttribute>();
                 if (attrib.Durability == TableDurability.SCHEMA_ONLY)
                     sbMemOptimized.Append(", DURABILITY=SCHEMA_ONLY");
                 else if (attrib.Durability == TableDurability.SCHEMA_AND_DATA)
@@ -74,8 +77,11 @@ namespace ServiceStack.DataAnnotations
 {
     // SQL 2014: https://msdn.microsoft.com/en-us/library/dn553122(v=sql.120).aspx
     // SQL 2016: https://msdn.microsoft.com/en-us/library/dn553122(v=sql.130).aspx
+    public class MemoryOptimizedAttribute : Attribute
     {
+        public MemoryOptimizedAttribute() { }
 
+        public MemoryOptimizedAttribute(TableDurability durability) { Durability = durability; }
 
         public TableDurability? Durability { get; set; }
     }
