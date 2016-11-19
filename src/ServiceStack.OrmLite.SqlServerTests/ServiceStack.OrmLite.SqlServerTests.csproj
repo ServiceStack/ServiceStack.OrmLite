@@ -90,6 +90,7 @@
     <Compile Include="Issues\DeleteWithGeoTypesIssue.cs" />
     <Compile Include="Issues\JamesGeoIssue.cs" />
     <Compile Include="Issues\SerializationTests.cs" />
+    <Compile Include="MemoryOptimizedAttributeTests.cs" />
     <Compile Include="NestedTransactions.cs" />
     <Compile Include="EnumTests.cs" />
     <Compile Include="Expressions\AdditiveExpressionsTest.cs" />
