@@ -58,9 +58,9 @@ namespace ServiceStack.OrmLite.SqlServer
             {
                 sbMemOptimized.Append(" WITH (MEMORY_OPTIMIZED=ON");
                 var attrib = tableType.FirstAttribute<MemoryOptimizedAttribute>();
-                if (attrib.Durability == TableDurability.SCHEMA_ONLY)
+                if (attrib.Durability == TableDurability.SchemaOnly)
                     sbMemOptimized.Append(", DURABILITY=SCHEMA_ONLY");
-                else if (attrib.Durability == TableDurability.SCHEMA_AND_DATA)
+                else if (attrib.Durability == TableDurability.SchemaAndData)
                     sbMemOptimized.Append(", DURABILITY=SCHEMA_AND_DATA");
                 sbMemOptimized.Append(")");
             }
@@ -88,7 +88,7 @@ namespace ServiceStack.DataAnnotations
 
     public enum TableDurability
     {
-        SCHEMA_ONLY, // (non-durable table) recreated upon server restart, data is lost, no transaction logging and checkpoints
-        SCHEMA_AND_DATA  // (durable table) data persists upon server restart
+        SchemaOnly, // (non-durable table) recreated upon server restart, data is lost, no transaction logging and checkpoints
+        SchemaAndData  // (durable table) data persists upon server restart
     }
 }

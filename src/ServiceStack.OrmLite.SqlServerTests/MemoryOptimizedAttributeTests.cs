@@ -56,7 +56,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
         public string Name { get; set; }
     }
 
-    [MemoryOptimized(TableDurability.SCHEMA_ONLY)]
+    [MemoryOptimized(TableDurability.SchemaOnly)]
     public class TypeWithMemTableSchemaOnlyDurability
     {
         [AutoIncrement]
@@ -65,7 +65,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
         public string Name { get; set; }
     }
 
-    [MemoryOptimized(TableDurability.SCHEMA_AND_DATA)]
+    [MemoryOptimized(TableDurability.SchemaAndData)]
     public class TypeWithMemTableSchemaAndDataDurability
     {
         [AutoIncrement]
