@@ -65,16 +65,14 @@ namespace ServiceStack.OrmLite.SqlServer
             {
                 var filePath = connectionString;
 
-                var filePathWithExt = filePath.ToLower().EndsWith(".mdf")
+                var filePathWithExt = filePath.EndsWithIgnoreCase(".mdf")
                     ? filePath
                     : filePath + ".mdf";
 
                 var fileName = Path.GetFileName(filePathWithExt);
                 var dbName = fileName.Substring(0, fileName.Length - ".mdf".Length);
 
-                connectionString = string.Format(
-                @"Data Source=.\SQLEXPRESS;AttachDbFilename={0};Initial Catalog={1};Integrated Security=True;User Instance=True;",
-                    filePathWithExt, dbName);
+                connectionString = $@"Data Source=.\SQLEXPRESS;AttachDbFilename={filePathWithExt};Initial Catalog={dbName};Integrated Security=True;User Instance=True;";
             }
 
             if (options != null)
@@ -155,7 +153,7 @@ namespace ServiceStack.OrmLite.SqlServer
 
         public override string GetForeignKeyOnUpdateClause(ForeignKeyConstraint foreignKey)
         {
-            return "RESTRICT" == (foreignKey.OnDelete ?? "").ToUpper()
+            return "RESTRICT" == (foreignKey.OnUpdate ?? "").ToUpper()
                 ? ""
                 : base.GetForeignKeyOnUpdateClause(foreignKey);
         }
@@ -176,9 +174,9 @@ namespace ServiceStack.OrmLite.SqlServer
                         fieldDef);
 
                     var tableName = GetQuotedTableName(modelDef);
-                    sb.AppendLine("IF EXISTS (SELECT name FROM sys.foreign_keys WHERE name = '{0}')".Fmt(foreignKeyName));
+                    sb.AppendLine($"IF EXISTS (SELECT name FROM sys.foreign_keys WHERE name = '{foreignKeyName}')");
                     sb.AppendLine("BEGIN");
-                    sb.AppendLine("  ALTER TABLE {0} DROP {1};".Fmt(tableName, foreignKeyName));
+                    sb.AppendLine($"  ALTER TABLE {tableName} DROP {foreignKeyName};");
                     sb.AppendLine("END");
                 }
             }
@@ -199,9 +197,9 @@ namespace ServiceStack.OrmLite.SqlServer
                                              fieldDef.DefaultValue,
                                              fieldDef.CustomFieldDefinition);
 
-            return string.Format("ALTER TABLE {0} ADD {1};",
-                                 GetQuotedTableName(GetModel(modelType).ModelName),
-                                 column);
+            var modelName = GetQuotedTableName(GetModel(modelType).ModelName);
+
+            return string.Format($"ALTER TABLE {modelName} ADD {column};");
         }
 
         public override string ToAlterColumnStatement(Type modelType, FieldDefinition fieldDef)
@@ -217,28 +215,25 @@ namespace ServiceStack.OrmLite.SqlServer
                                              fieldDef.DefaultValue,
                                              fieldDef.CustomFieldDefinition);
 
-            return string.Format("ALTER TABLE {0} ALTER COLUMN {1};",
-                                 GetQuotedTableName(GetModel(modelType).ModelName),
-                                 column);
+            var modelName = GetQuotedTableName(GetModel(modelType).ModelName);
+
+            return $"ALTER TABLE {modelName} ALTER COLUMN {column};";
         }
 
         public override string ToChangeColumnNameStatement(Type modelType, FieldDefinition fieldDef, string oldColumnName)
         {
-            var objectName = string.Format("{0}.{1}",
-                NamingStrategy.GetTableName(GetModel(modelType).ModelName),
-                oldColumnName);
+            var modelName = NamingStrategy.GetTableName(GetModel(modelType).ModelName);
 
-            return string.Format("EXEC sp_rename {0}, {1}, {2};",
-                                 GetQuotedValue(objectName),
-                                 GetQuotedValue(fieldDef.FieldName),
-                                 GetQuotedValue("COLUMN"));
+            var objectName = $"{modelName}.{oldColumnName}";
+
+            return $"EXEC sp_rename {GetQuotedValue(objectName)}, {GetQuotedValue(fieldDef.FieldName)}, {GetQuotedValue("COLUMN")};";
         }
 
         public override string GetColumnDefinition(string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement,
             bool isNullable, bool isRowVersion, int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
         {
             if (isRowVersion)
-                return "{0} rowversion NOT NULL".Fmt(fieldName);
+                return $"{fieldName} rowversion NOT NULL";
 
             var definition = base.GetColumnDefinition(fieldName, fieldType, isPrimaryKey, autoIncrement,
                 isNullable, isRowVersion, fieldLength, scale, defaultValue, customFieldDefinition);
@@ -261,10 +256,10 @@ namespace ServiceStack.OrmLite.SqlServer
                 return StringBuilderCache.ReturnAndFree(sb) + orderByExpression;
 
             if (offset.HasValue && offset.Value < 0)
-                throw new ArgumentException(string.Format("Skip value:'{0}' must be>=0", offset.Value));
+                throw new ArgumentException($"Skip value:'{offset.Value}' must be>=0");
 
             if (rows.HasValue && rows.Value < 0)
-                throw new ArgumentException(string.Format("Rows value:'{0}' must be>=0", rows.Value));
+                throw new ArgumentException($"Rows value:'{rows.Value}' must be>=0");
 
             var skip = offset.HasValue ? offset.Value : 0;
             var take = rows.HasValue ? rows.Value : int.MaxValue;
@@ -279,9 +274,10 @@ namespace ServiceStack.OrmLite.SqlServer
                 if (take == int.MaxValue)
                     return sql;
 
-                if (sql.Length < "SELECT".Length) return sql;
-                sql = selectType + " TOP " + take + sql.Substring(selectType.Length);
-                return sql;
+                if (sql.Length < "SELECT".Length)
+                    return sql;
+
+                return $"{selectType} TOP {take + sql.Substring(selectType.Length)}";
             }
 
             // Required because ordering is done by Windowing function
@@ -290,17 +286,12 @@ namespace ServiceStack.OrmLite.SqlServer
                 if (modelDef.PrimaryKey == null)
                     throw new ApplicationException("Malformed model, no PrimaryKey defined");
 
-                orderByExpression = string.Format("ORDER BY {0}",
-                    this.GetQuotedColumnName(modelDef, modelDef.PrimaryKey));
+                orderByExpression = $"ORDER BY {this.GetQuotedColumnName(modelDef, modelDef.PrimaryKey)}";
             }
 
-            var ret = string.Format(
-                "SELECT * FROM (SELECT {0}, ROW_NUMBER() OVER ({1}) As RowNum {2}) AS RowConstrainedResult WHERE RowNum > {3} AND RowNum <= {4}",
-                selectExpression.Substring(selectType.Length),
-                orderByExpression,
-                bodyExpression,
-                skip,
-                take == int.MaxValue ? take : skip + take);
+            var row = take == int.MaxValue ? take : skip + take;
+
+            var ret = $"SELECT * FROM (SELECT {selectExpression.Substring(selectType.Length)}, ROW_NUMBER() OVER ({orderByExpression}) As RowNum {bodyExpression}) AS RowConstrainedResult WHERE RowNum > {skip} AND RowNum <= {row}";
 
             return ret;
         }
