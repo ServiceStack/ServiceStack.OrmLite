@@ -199,7 +199,7 @@ namespace ServiceStack.OrmLite.SqlServer
 
             var modelName = GetQuotedTableName(GetModel(modelType).ModelName);
 
-            return string.Format($"ALTER TABLE {modelName} ADD {column};");
+            return $"ALTER TABLE {modelName} ADD {column};";
         }
 
         public override string ToAlterColumnStatement(Type modelType, FieldDefinition fieldDef)
