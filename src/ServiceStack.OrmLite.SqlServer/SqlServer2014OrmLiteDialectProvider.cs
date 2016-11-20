@@ -54,13 +54,13 @@ namespace ServiceStack.OrmLite.SqlServer
                 sbConstraints.Append(GetForeignKeyOnUpdateClause(fieldDef.ForeignKey));
             }
 
-            if (tableType.HasAttribute<MemoryOptimizedAttribute>())
+            if (tableType.HasAttribute<SqlServerMemoryOptimizedAttribute>())
             {
                 sbMemOptimized.Append(" WITH (MEMORY_OPTIMIZED=ON");
-                var attrib = tableType.FirstAttribute<MemoryOptimizedAttribute>();
-                if (attrib.Durability == TableDurability.SchemaOnly)
+                var attrib = tableType.FirstAttribute<SqlServerMemoryOptimizedAttribute>();
+                if (attrib.Durability == SqlServerDurability.SchemaOnly)
                     sbMemOptimized.Append(", DURABILITY=SCHEMA_ONLY");
-                else if (attrib.Durability == TableDurability.SchemaAndData)
+                else if (attrib.Durability == SqlServerDurability.SchemaAndData)
                     sbMemOptimized.Append(", DURABILITY=SCHEMA_AND_DATA");
                 sbMemOptimized.Append(")");
             }
@@ -70,25 +70,5 @@ namespace ServiceStack.OrmLite.SqlServer
 
             return sql;
         }
-    }
-}
-
-namespace ServiceStack.DataAnnotations
-{
-    // SQL 2014: https://msdn.microsoft.com/en-us/library/dn553122(v=sql.120).aspx
-    // SQL 2016: https://msdn.microsoft.com/en-us/library/dn553122(v=sql.130).aspx
-    public class MemoryOptimizedAttribute : Attribute
-    {
-        public MemoryOptimizedAttribute() { }
-
-        public MemoryOptimizedAttribute(TableDurability durability) { Durability = durability; }
-
-        public TableDurability? Durability { get; set; }
-    }
-
-    public enum TableDurability
-    {
-        SchemaOnly, // (non-durable table) recreated upon server restart, data is lost, no transaction logging and checkpoints
-        SchemaAndData  // (durable table) data persists upon server restart
     }
 }
