@@ -50,7 +50,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
     [SqlServerMemoryOptimized]
     public class TypeWithMemTableNoDurability
         {
-        [AutoIncrement]
+        [PrimaryKey]
         public int Id { get; set; }
 
         public string Name { get; set; }
@@ -59,7 +59,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
     [SqlServerMemoryOptimized(SqlServerDurability.SchemaOnly)]
     public class TypeWithMemTableSchemaOnlyDurability
     {
-        [AutoIncrement]
+        [PrimaryKey]
         public int Id { get; set; }
 
         public string Name { get; set; }
@@ -68,7 +68,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
     [SqlServerMemoryOptimized(SqlServerDurability.SchemaAndData)]
     public class TypeWithMemTableSchemaAndDataDurability
     {
-        [AutoIncrement]
+        [PrimaryKey]
         public int Id { get; set; }
 
         public string Name { get; set; }
