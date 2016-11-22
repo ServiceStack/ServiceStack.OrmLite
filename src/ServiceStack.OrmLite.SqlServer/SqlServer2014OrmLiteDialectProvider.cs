@@ -39,8 +39,22 @@ namespace ServiceStack.OrmLite.SqlServer
                 if (columnDefinition == null)
                     continue;
 
+                var collationAttribs = fieldDef.PropertyInfo.GetAttributes<SqlServerCollateAttribute>();
+                if (collationAttribs.Count > 0)
+                {
+                    columnDefinition += $" COLLATE {collationAttribs[0].collation}";
+                }
+
                 if (isMemoryTable && fieldDef.IsPrimaryKey)
-                        columnDefinition += " NONCLUSTERED";
+                {
+                    columnDefinition = columnDefinition.Replace("PRIMARY KEY", "PRIMARY KEY NONCLUSTERED");
+
+                    var bucketCountAtribs = fieldDef.PropertyInfo.GetAttributes<SqlServerBucketCountAttribute>();
+                    if (bucketCountAtribs.Count > 0)
+                    {
+                        columnDefinition += $" HASH WITH (BUCKET_COUNT={bucketCountAtribs[0].count})";
+                    }
+                }
 
                 if (sbColumns.Length != 0)
                     sbColumns.Append(", \n  ");
