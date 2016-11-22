@@ -16,6 +16,8 @@ namespace ServiceStack.OrmLite.SqlServer
             var sbConstraints = StringBuilderCacheAlt.Allocate();
             var sbMemOptimized = StringBuilderCacheAlt.Allocate();
 
+            var isMemoryTable = tableType.HasAttribute<SqlServerMemoryOptimizedAttribute>();
+
             var modelDef = OrmLiteUtils.GetModelDefinition(tableType);
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
@@ -37,6 +39,23 @@ namespace ServiceStack.OrmLite.SqlServer
                 if (columnDefinition == null)
                     continue;
 
+                var collationAttribs = fieldDef.PropertyInfo.GetAttributes<SqlServerCollateAttribute>();
+                if (collationAttribs.Count > 0)
+                {
+                    columnDefinition += $" COLLATE {collationAttribs[0].collation}";
+                }
+
+                if (isMemoryTable && fieldDef.IsPrimaryKey)
+                {
+                    columnDefinition = columnDefinition.Replace("PRIMARY KEY", "PRIMARY KEY NONCLUSTERED");
+
+                    var bucketCountAtribs = fieldDef.PropertyInfo.GetAttributes<SqlServerBucketCountAttribute>();
+                    if (bucketCountAtribs.Count > 0)
+                    {
+                        columnDefinition += $" HASH WITH (BUCKET_COUNT={bucketCountAtribs[0].count})";
+                    }
+                }
+
                 if (sbColumns.Length != 0)
                     sbColumns.Append(", \n  ");
 
@@ -54,10 +73,10 @@ namespace ServiceStack.OrmLite.SqlServer
                 sbConstraints.Append(GetForeignKeyOnUpdateClause(fieldDef.ForeignKey));
             }
 
-            if (tableType.HasAttribute<SqlServerMemoryOptimizedAttribute>())
+            if (isMemoryTable)
             {
-                sbMemOptimized.Append(" WITH (MEMORY_OPTIMIZED=ON");
                 var attrib = tableType.FirstAttribute<SqlServerMemoryOptimizedAttribute>();
+                sbMemOptimized.Append(" WITH (MEMORY_OPTIMIZED=ON");
                 if (attrib.Durability == SqlServerDurability.SchemaOnly)
                     sbMemOptimized.Append(", DURABILITY=SCHEMA_ONLY");
                 else if (attrib.Durability == SqlServerDurability.SchemaAndData)
