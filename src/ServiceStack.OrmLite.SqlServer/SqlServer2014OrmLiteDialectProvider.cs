@@ -42,7 +42,7 @@ namespace ServiceStack.OrmLite.SqlServer
                 var collationAttribs = fieldDef.PropertyInfo.GetAttributes<SqlServerCollateAttribute>();
                 if (collationAttribs.Count > 0)
                 {
-                    columnDefinition += $" COLLATE {collationAttribs[0].collation}";
+                    columnDefinition += $" COLLATE {collationAttribs[0].Collation}";
                 }
 
                 if (isMemoryTable && fieldDef.IsPrimaryKey)
@@ -52,7 +52,7 @@ namespace ServiceStack.OrmLite.SqlServer
                     var bucketCountAtribs = fieldDef.PropertyInfo.GetAttributes<SqlServerBucketCountAttribute>();
                     if (bucketCountAtribs.Count > 0)
                     {
-                        columnDefinition += $" HASH WITH (BUCKET_COUNT={bucketCountAtribs[0].count})";
+                        columnDefinition += $" HASH WITH (BUCKET_COUNT={bucketCountAtribs[0].Count})";
                     }
                 }
 
