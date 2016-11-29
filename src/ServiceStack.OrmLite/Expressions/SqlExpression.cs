@@ -43,6 +43,7 @@ namespace ServiceStack.OrmLite
         public bool WhereStatementWithoutWhereString { get; set; }
         public IOrmLiteDialectProvider DialectProvider { get; set; }
         public List<IDbDataParameter> Params { get; set; }
+        public Func<string,string> SqlFilter { get; set; }
 
         protected string Sep => sep;
 
@@ -84,6 +85,7 @@ namespace ServiceStack.OrmLite
             to.PrefixFieldWithTableName = PrefixFieldWithTableName;
             to.WhereStatementWithoutWhereString = WhereStatementWithoutWhereString;
             to.Params = new List<IDbDataParameter>(Params);
+            to.SqlFilter = SqlFilter;
             return to;
         }
 
@@ -939,6 +941,12 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
+        public virtual SqlExpression<T> WithSqlFilter(Func<string,string> sqlFilter)
+        {
+            this.SqlFilter = sqlFilter;
+            return this;
+        }
+
         public string SqlTable(ModelDefinition modelDef)
         {
             return DialectProvider.GetQuotedTableName(modelDef);
@@ -988,6 +996,7 @@ namespace ServiceStack.OrmLite
 
         public virtual string ToDeleteRowStatement()
         {
+            string sql;
             var hasTableJoin = tableDefs.Count > 1;
             if (hasTableJoin)
             {
@@ -995,10 +1004,16 @@ namespace ServiceStack.OrmLite
                 var pk = DialectProvider.GetQuotedColumnName(modelDef, modelDef.PrimaryKey);
                 clone.Select(pk);
                 var subSql = clone.ToSelectStatement();
-                var sql = $"DELETE FROM {DialectProvider.GetQuotedTableName(modelDef)} WHERE {pk} IN ({subSql})";
-                return sql;
+                sql = $"DELETE FROM {DialectProvider.GetQuotedTableName(modelDef)} WHERE {pk} IN ({subSql})";
             }
-            return $"DELETE FROM {DialectProvider.GetQuotedTableName(modelDef)} {WhereExpression}";
+            else
+            {
+                sql = $"DELETE FROM {DialectProvider.GetQuotedTableName(modelDef)} {WhereExpression}";
+            }
+
+            return SqlFilter != null
+                ? SqlFilter(sql)
+                : sql;
         }
 
         public virtual void PrepareUpdateStatement(IDbCommand dbCmd, T item, bool excludeDefaults = false)
@@ -1031,8 +1046,12 @@ namespace ServiceStack.OrmLite
             if (setFields.Length == 0)
                 throw new ArgumentException("No non-null or non-default values were provided for type: " + typeof(T).Name);
 
-            dbCmd.CommandText = $"UPDATE {DialectProvider.GetQuotedTableName(modelDef)} " +
-                                $"SET {StringBuilderCache.ReturnAndFree(setFields)} {WhereExpression}";
+            var sql = $"UPDATE {DialectProvider.GetQuotedTableName(modelDef)} " +
+                      $"SET {StringBuilderCache.ReturnAndFree(setFields)} {WhereExpression}";
+
+            dbCmd.CommandText = SqlFilter != null
+                ? SqlFilter(sql)
+                : sql;
         }
 
         public virtual string ToSelectStatement()
@@ -1040,12 +1059,18 @@ namespace ServiceStack.OrmLite
             var sql = DialectProvider
                 .ToSelectStatement(modelDef, SelectExpression, BodyExpression, OrderByExpression, Offset, Rows);
 
-            return sql;
+            return SqlFilter != null
+                ? SqlFilter(sql)
+                : sql;
         }
 
         public virtual string ToCountStatement()
         {
-            return "SELECT COUNT(*)" + BodyExpression;
+            var sql = "SELECT COUNT(*)" + BodyExpression;
+
+            return SqlFilter != null
+                ? SqlFilter(sql)
+                : sql;
         }
 
         public string SelectExpression
