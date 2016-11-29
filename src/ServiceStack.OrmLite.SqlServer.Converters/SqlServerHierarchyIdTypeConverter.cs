@@ -14,15 +14,9 @@ namespace ServiceStack.OrmLite.SqlServer.Converters
         public SqlServerHierarchyIdTypeConverter() : base()
         { }
 
-        public override string ColumnDefinition
-        {
-            get { return "hierarchyid"; }
-        }
+        public override string ColumnDefinition => "HIERARCHYID";
 
-        public override DbType DbType
-        {
-            get { return DbType.Object; }
-        }
+        public override DbType DbType => DbType.Object;
 
         public override void InitDbParam(IDbDataParameter p, Type fieldType)
         {
