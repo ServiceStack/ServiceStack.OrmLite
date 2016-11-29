@@ -1,4 +1,6 @@
-﻿using ServiceStack.Text;
+﻿using System.Data;
+using System.Text;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.SqlServer
 {
@@ -39,5 +41,40 @@ namespace ServiceStack.OrmLite.SqlServer
 
             return StringBuilderCache.ReturnAndFree(sb);
         }
+
+        public override void AppendFieldCondition(StringBuilder sqlFilter, FieldDefinition fieldDef, IDbCommand cmd)
+        {
+            if (!isSpatialField(fieldDef))
+            {
+                base.AppendFieldCondition(sqlFilter, fieldDef, cmd);
+            }
+            else 
+            {
+                sqlFilter
+                    .Append(GetQuotedColumnName(fieldDef.FieldName))
+                    .Append(".STEquals(")
+                    .Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)))
+                    .Append(") = 1");
+ 
+                AddParameter(cmd, fieldDef);
+            }
+        }
+
+        public override void AppendNullFieldCondition(StringBuilder sqlFilter, FieldDefinition fieldDef)
+        {
+            if (!isSpatialField(fieldDef))
+            {
+                base.AppendNullFieldCondition(sqlFilter, fieldDef);
+            }
+            else
+            {
+                sqlFilter
+                    .Append(GetQuotedColumnName(fieldDef.FieldName))
+                    .Append(".IsNull = 1");
+            }
+        }
+
+        private bool isSpatialField(FieldDefinition fieldDef) => 
+            fieldDef.FieldType.Name == "SqlGeography" || fieldDef.FieldType.Name == "SqlGeometry";
     }
 }

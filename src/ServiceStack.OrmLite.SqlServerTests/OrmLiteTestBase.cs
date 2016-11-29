@@ -24,10 +24,11 @@ namespace ServiceStack.OrmLite.SqlServerTests
             Console.WriteLine(text);
         }
 
-        public virtual IDbConnection OpenDbConnection(string connString = null)
+        public virtual IDbConnection OpenDbConnection(string connString = null, IOrmLiteDialectProvider dialectProvider = null)
         {
+            dialectProvider = dialectProvider ?? OrmLiteConfig.DialectProvider;
             connString = connString ?? ConnectionString;
-            return connString.OpenDbConnection();
+            return new OrmLiteConnectionFactory(connString, dialectProvider).OpenDbConnection();
         }
     }
 }
