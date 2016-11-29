@@ -34,7 +34,7 @@ namespace ServiceStack.OrmLite.SqlServerTests.Issues
                 var bar = db.Single<ModelWithGeo>(x => x.Name == "Bar");
                 db.SqlScalar<int>(
                     "DELETE FROM ModelWithGeo WHERE Id=@Id AND Location.STEquals(@Location) = 1", 
-                    new { bar.Id, bar.Name, bar.Location });
+                    new { Id = bar.Id, Location = bar.Location });
 
                 Assert.That(db.Select<ModelWithGeo>().Count, Is.EqualTo(2));
 

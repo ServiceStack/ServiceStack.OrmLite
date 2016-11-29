@@ -764,7 +764,12 @@ namespace ServiceStack.OrmLite
                     if (sql.Length > 0)
                         sql.Append(", ");
 
-                    AppendFieldCondition(sql, fieldDef, cmd);
+                    sql
+                        .Append(GetQuotedColumnName(fieldDef.FieldName))
+                        .Append("=")
+                        .Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
+
+                    AddParameter(cmd, fieldDef);
                 }
                 catch (Exception ex)
                 {
@@ -780,6 +785,13 @@ namespace ServiceStack.OrmLite
             }
 
             return hadRowVesion;
+        }
+
+        public virtual void AppendNullFieldCondition(StringBuilder sqlFilter, FieldDefinition fieldDef)
+        {
+            sqlFilter
+                .Append(GetQuotedColumnName(fieldDef.FieldName))
+                .Append(" IS NULL");
         }
 
         public virtual void AppendFieldCondition(StringBuilder sqlFilter, FieldDefinition fieldDef, IDbCommand cmd)
@@ -827,9 +839,7 @@ namespace ServiceStack.OrmLite
                     }
                     else
                     {
-                        sqlFilter
-                            .Append(GetQuotedColumnName(fieldDef.FieldName))
-                            .Append(" IS NULL");
+                        AppendNullFieldCondition(sqlFilter, fieldDef);
                     }
                 }
                 catch (Exception ex)
