@@ -317,7 +317,7 @@ namespace ServiceStack.OrmLite.Firebird
 
                 sbColumns.Append(columnDefinition);
 
-                if (fieldDef.ForeignKey == null)
+                if (fieldDef.ForeignKey == null || OrmLiteConfig.SkipForeignKeys)
                     continue;
 
                 var refModelDef = GetModel(fieldDef.ForeignKey.ReferenceType);

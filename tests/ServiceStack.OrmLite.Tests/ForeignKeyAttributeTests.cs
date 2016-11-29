@@ -1,5 +1,7 @@
 ﻿using NUnit.Framework;
 using ServiceStack.DataAnnotations;
+using ServiceStack.Logging;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -118,6 +120,30 @@ namespace ServiceStack.OrmLite.Tests
             {
                 dbConn.DropAndCreateTable<TypeWithOnDeleteSetNull>();
             }
+        }
+
+        [Test]
+        public void Can_Skip_creating_ForeignKeys()
+        {
+            OrmLiteConfig.SkipForeignKeys = true;
+
+            using (var db = OpenDbConnection())
+            {
+                db.DropTable<TypeWithOnDeleteCascade>();
+                db.DropTable<ReferencedType>();
+                db.CreateTable<ReferencedType>();
+                db.CreateTable<TypeWithOnDeleteCascade>();
+
+                db.Save(new ReferencedType { Id = 1 });
+                db.Save(new TypeWithOnDeleteCascade { RefId = 1 });
+
+                db.Delete<ReferencedType>(r => r.Id == 1);
+
+                Assert.That(db.Select<ReferencedType>().Count, Is.EqualTo(0));
+                Assert.That(db.Select<TypeWithOnDeleteCascade>().Count, Is.EqualTo(1));
+            }
+
+            OrmLiteConfig.SkipForeignKeys = false;
         }
     }
 

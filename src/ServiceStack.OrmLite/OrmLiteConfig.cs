@@ -194,6 +194,8 @@ namespace ServiceStack.OrmLite
 
         public static bool DeoptimizeReader { get; set; }
 
+        public static bool SkipForeignKeys { get; set; }
+
         public static Func<string, string> ParamNameFilter { get; set; }
     }
 }

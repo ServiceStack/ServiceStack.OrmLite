@@ -146,18 +146,19 @@ namespace ServiceStack.OrmLite.VistaDB
                         this.GetQuotedName("PK_" + modelDefinition.ModelName),
                         this.GetQuotedColumnName(fieldDef.FieldName));
                 }
-                else if (fieldDef.ForeignKey != null)
-                {
-                    var foreignModelDefinition = OrmLiteUtils.GetModelDefinition(fieldDef.ForeignKey.ReferenceType);
-                    constraints.AppendFormat("ALTER TABLE {0} ADD CONSTRAINT {1} FOREIGN KEY ({2}) REFERENCES {3} ({4}){5}{6};\n",
-                        quotedTableName,
-                        this.GetQuotedName(fieldDef.ForeignKey.GetForeignKeyName(modelDefinition, foreignModelDefinition, this.NamingStrategy, fieldDef)),
-                        this.GetQuotedColumnName(fieldDef.FieldName),
-                        this.GetQuotedTableName(foreignModelDefinition),
-                        this.GetQuotedColumnName(foreignModelDefinition.PrimaryKey.FieldName),
-                        this.GetForeignKeyOnDeleteClause(fieldDef.ForeignKey),
-                        this.GetForeignKeyOnUpdateClause(fieldDef.ForeignKey));
-                }
+
+                if (fieldDef.ForeignKey == null || OrmLiteConfig.SkipForeignKeys)
+                    continue;
+
+                var foreignModelDefinition = OrmLiteUtils.GetModelDefinition(fieldDef.ForeignKey.ReferenceType);
+                constraints.AppendFormat("ALTER TABLE {0} ADD CONSTRAINT {1} FOREIGN KEY ({2}) REFERENCES {3} ({4}){5}{6};\n",
+                    quotedTableName,
+                    this.GetQuotedName(fieldDef.ForeignKey.GetForeignKeyName(modelDefinition, foreignModelDefinition, this.NamingStrategy, fieldDef)),
+                    this.GetQuotedColumnName(fieldDef.FieldName),
+                    this.GetQuotedTableName(foreignModelDefinition),
+                    this.GetQuotedColumnName(foreignModelDefinition.PrimaryKey.FieldName),
+                    this.GetForeignKeyOnDeleteClause(fieldDef.ForeignKey),
+                    this.GetForeignKeyOnUpdateClause(fieldDef.ForeignKey));
             }
 
             return string.Format("CREATE TABLE {0} \n(\n  {1} \n); \n {2}\n",

@@ -8,7 +8,7 @@ namespace ServiceStack.OrmLite.SqlServer
 {
     public class SqlServer2014OrmLiteDialectProvider : SqlServer2012OrmLiteDialectProvider
     {
-        public static new SqlServer2014OrmLiteDialectProvider Instance = new SqlServer2014OrmLiteDialectProvider();
+        public new static SqlServer2014OrmLiteDialectProvider Instance = new SqlServer2014OrmLiteDialectProvider();
 
         public override string ToCreateTableStatement(Type tableType)
         {
@@ -61,7 +61,8 @@ namespace ServiceStack.OrmLite.SqlServer
 
                 sbColumns.Append(columnDefinition);
 
-                if (fieldDef.ForeignKey == null) continue;
+                if (fieldDef.ForeignKey == null || OrmLiteConfig.SkipForeignKeys)
+                    continue;
 
                 var refModelDef = OrmLiteUtils.GetModelDefinition(fieldDef.ForeignKey.ReferenceType);
                 sbConstraints.Append(
