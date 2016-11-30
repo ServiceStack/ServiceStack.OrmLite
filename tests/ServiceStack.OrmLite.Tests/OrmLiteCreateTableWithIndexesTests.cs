@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using ServiceStack.Text;
 using ServiceStack.Common.Tests.Models;
+using ServiceStack.Logging;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -26,8 +27,8 @@ namespace ServiceStack.OrmLite.Tests
                     uniqueName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(uniqueName);
                 }
 
-                Assert.That(sql, Is.StringContaining(indexName));
-                Assert.That(sql, Is.StringContaining(uniqueName));
+                Assert.That(sql, Does.Contain(indexName));
+                Assert.That(sql, Does.Contain(uniqueName));
             }
         }
 
@@ -49,8 +50,8 @@ namespace ServiceStack.OrmLite.Tests
                     compositeName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(compositeName);
                 }
 
-                Assert.That(sql, Is.StringContaining(indexName));
-                Assert.That(sql, Is.StringContaining(compositeName));
+                Assert.That(sql, Does.Contain(indexName));
+                Assert.That(sql, Does.Contain(compositeName));
             }
         }
 
@@ -73,8 +74,8 @@ namespace ServiceStack.OrmLite.Tests
                     compositeName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(compositeName).ToLower();
                 }
 
-                Assert.That(sql, Is.StringContaining(indexName));
-                Assert.That(sql, Is.StringContaining(compositeName));
+                Assert.That(sql, Does.Contain(indexName));
+                Assert.That(sql, Does.Contain(compositeName));
             }
         }
 
@@ -95,7 +96,7 @@ namespace ServiceStack.OrmLite.Tests
                 if (Dialect == Dialect.Oracle || Dialect == Dialect.Firebird)
                     compositeName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(compositeName).ToLower();
 
-                Assert.That(sql, Is.StringContaining(compositeName));
+                Assert.That(sql, Does.Contain(compositeName));
             }
         }
 
@@ -117,11 +118,19 @@ namespace ServiceStack.OrmLite.Tests
                     compositeName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(compositeName);
                 }
 
-                Assert.That(sql, Is.StringContaining(indexName));
-                Assert.That(sql, Is.StringContaining("custom_index_name"));
-                Assert.That(sql, Is.Not.StringContaining(compositeName));
+                Assert.That(sql, Does.Contain(indexName));
+                Assert.That(sql, Does.Contain("custom_index_name"));
+                Assert.That(sql, Does.Not.Contain(compositeName));
             }
         }
 
+        [Test]
+        public void Can_create_CompositeIndex_with_Enum()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<ModelWithEnum>();
+            }
+        }
     }
 }

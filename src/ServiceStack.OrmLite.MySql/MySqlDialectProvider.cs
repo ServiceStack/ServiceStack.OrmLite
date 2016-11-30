@@ -166,7 +166,8 @@ namespace ServiceStack.OrmLite.MySql
 
                 sbColumns.Append(GetColumnDefinition(fieldDef));
 
-                if (fieldDef.ForeignKey == null) continue;
+                if (fieldDef.ForeignKey == null || OrmLiteConfig.SkipForeignKeys)
+                    continue;
 
                 var refModelDef = GetModel(fieldDef.ForeignKey.ReferenceType);
                 sbConstraints.AppendFormat(

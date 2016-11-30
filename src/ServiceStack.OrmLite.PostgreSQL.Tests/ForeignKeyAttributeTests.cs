@@ -9,12 +9,35 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
     {
         public ForeignKeyAttributeTests() : base(Dialect.PostgreSql) { }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
+            DropTables();
+
             using (var dbConn = OpenDbConnection())
             {
                 dbConn.CreateTable<ReferencedType>(true);
+            }
+        }
+
+        [OneTimeTearDown]
+        public void TearDown()
+        {
+            DropTables();
+        }
+
+        private void DropTables()
+        {
+            using (var dbConn = OpenDbConnection())
+            {
+                dbConn.DropTable<TypeWithOnDeleteAndUpdateCascade>();
+                dbConn.DropTable<TypeWithOnDeleteSetNull>();
+                dbConn.DropTable<TypeWithOnDeleteSetDefault>();
+                dbConn.DropTable<TypeWithOnDeleteRestrict>();
+                dbConn.DropTable<TypeWithOnDeleteNoAction>();
+                dbConn.DropTable<TypeWithOnDeleteCascade>();
+                dbConn.DropTable<TypeWithSimpleForeignKey>();
+                dbConn.DropTable<ReferencedType>();
             }
         }
 
@@ -98,22 +121,6 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
             using (var dbConn = OpenDbConnection())
             {
                 dbConn.CreateTable<TypeWithOnDeleteSetNull>(true);
-            }
-        }
-
-        [TestFixtureTearDown]
-        public void TearDwon()
-        {
-            using (var dbConn = OpenDbConnection())
-            {
-                dbConn.DropTable<TypeWithOnDeleteAndUpdateCascade>();
-                dbConn.DropTable<TypeWithOnDeleteSetNull>();
-                dbConn.DropTable<TypeWithOnDeleteSetDefault>();
-                dbConn.DropTable<TypeWithOnDeleteRestrict>();
-                dbConn.DropTable<TypeWithOnDeleteNoAction>();
-                dbConn.DropTable<TypeWithOnDeleteCascade>();
-                dbConn.DropTable<TypeWithSimpleForeignKey>();
-                dbConn.DropTable<ReferencedType>();
             }
         }
     }

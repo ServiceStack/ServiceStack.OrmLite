@@ -33,7 +33,7 @@ namespace ServiceStack.OrmLite.Tests
                 db.DropAndCreateTable<PocoWithTime>();
 
                 var sql = db.GetLastSql();
-                Assert.That(sql, Is.StringContaining("\"TimeSpan\" TIME NOT NULL"));
+                Assert.That(sql, Does.Contain("\"TimeSpan\" TIME NOT NULL"));
                 sql.Print();
 
                 //SQL Server can't do < 1 day and only 3ms precision
@@ -47,8 +47,8 @@ namespace ServiceStack.OrmLite.Tests
                 sql = db.GetLastSql();
                 sql.Print();
 
-                Assert.That(sql, Is.StringContaining("\"TimeSpan\" = '01:01:01.0030000'").
-                                 Or.StringContaining("\"TimeSpan\" = CAST(@0 AS TIME))"));
+                Assert.That(sql, Does.Contain("\"TimeSpan\" = '01:01:01.0030000'").
+                                 Or.Contain("\"TimeSpan\" = CAST(@0 AS TIME))"));
 
                 db.GetDialectProvider().RegisterConverter<TimeSpan>(hold);
             }

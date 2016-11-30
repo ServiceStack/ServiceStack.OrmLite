@@ -49,4 +49,18 @@ namespace ServiceStack.Common.Tests.Models
         [Alias("Field WithSpace2")]
         public string FieldWithSpace2 { get; set; }
     }
+
+    [CompositeIndex(true, nameof(UserId), nameof(UserRole))]
+    public class ModelWithEnum
+    {
+        public long Id { get; set; }
+        public long UserId { get; set; }
+        public UserRoleEnum UserRole { get; set; }
+    }
+
+    public enum UserRoleEnum
+    {
+        User,
+        Admin
+    }
 }

@@ -6,9 +6,9 @@ using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.Tests
 {
-	[TestFixture]
-	public class ForeignKeyAttributeTests : OrmLiteTestBase
-	{
+    [TestFixture]
+    public class ForeignKeyAttributeTests : OrmLiteTestBase
+    {
         [TestFixtureSetUp]
         public void Setup()
         {
@@ -33,26 +33,26 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-		public void CanCreateSimpleForeignKey()
-		{
+        public void CanCreateSimpleForeignKey()
+        {
             using (var dbConnection = OpenDbConnection())
             {
                 dbConnection.DropAndCreateTable<TypeWithSimpleForeignKey>();
             }
         }
-		
-		[Test]
-		public void ForeignWithOnDeleteCascadeCreatesOk()
-		{
+
+        [Test]
+        public void ForeignWithOnDeleteCascadeCreatesOk()
+        {
             using (var dbConn = OpenDbConnection())
             {
                 dbConn.DropAndCreateTable<TypeWithOnDeleteCascade>();
             }
         }
-		
-		[Test]
-		public void ForeignWithOnDeleteCascadeWorks()
-		{
+
+        [Test]
+        public void ForeignWithOnDeleteCascadeWorks()
+        {
             using (var dbConnection = OpenDbConnection())
             {
                 dbConnection.DropAndCreateTable<TypeWithOnDeleteCascade>();
@@ -69,19 +69,19 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.AreEqual(0, dbConnection.Select<TypeWithOnDeleteCascade>().Count);
             }
         }
-		
-		[Test]
-		public void ForeignWithOnDeleteCascadeAndOnUpdateCascadeCreatesOk()
-		{
+
+        [Test]
+        public void ForeignWithOnDeleteCascadeAndOnUpdateCascadeCreatesOk()
+        {
             using (var dbConn = OpenDbConnection())
             {
                 dbConn.DropAndCreateTable<TypeWithOnDeleteAndUpdateCascade>();
             }
-		}
-		
-		[Test]
-		public void ForeignWithOnDeleteNoActionCreatesOk()
-		{
+        }
+
+        [Test]
+        public void ForeignWithOnDeleteNoActionCreatesOk()
+        {
             using (var dbConn = OpenDbConnection())
             {
                 dbConn.DropAndCreateTable<TypeWithOnDeleteNoAction>();
@@ -105,10 +105,10 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.Catch<Exception>(() => dbConnection.Delete<ReferencedType>(r => r.Id == 1));
             }
         }
-		
-		[Test]
-		public void ForeignWithOnDeleteRestrictCreatesOk()
-		{
+
+        [Test]
+        public void ForeignWithOnDeleteRestrictCreatesOk()
+        {
             using (var dbConn = OpenDbConnection())
             {
                 dbConn.DropAndCreateTable<TypeWithOnDeleteRestrict>();
@@ -133,9 +133,9 @@ namespace ServiceStack.OrmLite.Tests
             }
         }
 
-		[Test]
-		public void ForeignWithOnDeleteSetDefaultCreatesOk()
-		{
+        [Test]
+        public void ForeignWithOnDeleteSetDefaultCreatesOk()
+        {
             using (var dbConn = OpenDbConnection())
             {
                 dbConn.DropAndCreateTable<TypeWithOnDeleteSetDefault>();
@@ -159,10 +159,10 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.Catch<Exception>(() => dbConnection.Delete<ReferencedType>(r => r.Id == 1));
             }
         }
-		
-		[Test]
-		public void ForeignWithOnDeleteSetNullCreatesOk()
-		{
+
+        [Test]
+        public void ForeignWithOnDeleteSetNullCreatesOk()
+        {
             using (var dbConn = OpenDbConnection())
             {
                 dbConn.DropAndCreateTable<TypeWithOnDeleteSetNull>();
@@ -210,84 +210,84 @@ namespace ServiceStack.OrmLite.Tests
                 dbConnection.DropAndCreateTable<TypeWithNoForeignKeyInitially>();
                 dbConnection.AddForeignKey<TypeWithNoForeignKeyInitially, ReferencedType>(
                     t => t.RefId, tr => tr.Id, OnFkOption.NoAction, OnFkOption.Cascade, "FK_ADDED");
-            }            
+            }
         }
-	}
-	
-	public class ReferencedType
-	{
-		public int Id { get; set; }
-	}
+    }
+
+    public class ReferencedType
+    {
+        public int Id { get; set; }
+    }
 
     [Alias("TWSKF")]
-	public class TypeWithSimpleForeignKey
-	{
-		[AutoIncrement]
-		public int Id { get; set; }
-		[References(typeof(ReferencedType))]
-		public int RefId { get; set; }
-	}
+    public class TypeWithSimpleForeignKey
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+        [References(typeof(ReferencedType))]
+        public int RefId { get; set; }
+    }
 
-	[Alias("TWODC")]
-	public class TypeWithOnDeleteCascade
-	{
-		[AutoIncrement]
-		public int Id { get; set; }
-		
-		[ForeignKey(typeof(ReferencedType), OnDelete = "CASCADE", ForeignKeyName="FK_DC")]
-		public int? RefId { get; set; }
-	}
+    [Alias("TWODC")]
+    public class TypeWithOnDeleteCascade
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
 
-	[Alias("TWODUC")]
-	public class TypeWithOnDeleteAndUpdateCascade
-	{
-		[AutoIncrement]
-		public int Id { get; set; }
-		
-		[ForeignKey(typeof(ReferencedType), OnDelete = "CASCADE", OnUpdate = "CASCADE", ForeignKeyName="FK_DC_UC")]
-		public int? RefId { get; set; }
-	}
+        [ForeignKey(typeof(ReferencedType), OnDelete = "CASCADE", ForeignKeyName = "FK_DC")]
+        public int? RefId { get; set; }
+    }
 
-	[Alias("TWODNA")]
-	public class TypeWithOnDeleteNoAction
-	{
-		[AutoIncrement]
-		public int Id { get; set; }
-		
-		[ForeignKey(typeof(ReferencedType), OnDelete = "NO ACTION", ForeignKeyName="FK_DNA")]
-		public int? RefId { get; set; }
-	}
+    [Alias("TWODUC")]
+    public class TypeWithOnDeleteAndUpdateCascade
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
 
-	[Alias("TWODNR")]
-	public class TypeWithOnDeleteRestrict
-	{
-		[AutoIncrement]
-		public int Id { get; set; }
-		
-		[ForeignKey(typeof(ReferencedType), OnDelete = "RESTRICT", ForeignKeyName="FK_DR")]
-		public int? RefId { get; set; }
-	}
+        [ForeignKey(typeof(ReferencedType), OnDelete = "CASCADE", OnUpdate = "CASCADE", ForeignKeyName = "FK_DC_UC")]
+        public int? RefId { get; set; }
+    }
 
-	[Alias("TWODDF")]
-	public class TypeWithOnDeleteSetDefault
-	{
-		[AutoIncrement]
-		public int Id { get; set; }
-		
-		[Default(typeof(int), "17")]
-		[ForeignKey(typeof(ReferencedType), OnDelete = "SET DEFAULT", ForeignKeyName="FK_DDF")]
-		public int RefId { get; set; }
-	}
+    [Alias("TWODNA")]
+    public class TypeWithOnDeleteNoAction
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
 
-	[Alias("TWODSN")]
-	public class TypeWithOnDeleteSetNull
-	{
-		[AutoIncrement]
-		public int Id { get; set; }
-		
-		[ForeignKey(typeof(ReferencedType), OnDelete = "SET NULL", ForeignKeyName="FK_SN")]
-		public int? RefId { get; set; }
-	}
+        [ForeignKey(typeof(ReferencedType), OnDelete = "NO ACTION", ForeignKeyName = "FK_DNA")]
+        public int? RefId { get; set; }
+    }
+
+    [Alias("TWODNR")]
+    public class TypeWithOnDeleteRestrict
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+
+        [ForeignKey(typeof(ReferencedType), OnDelete = "RESTRICT", ForeignKeyName = "FK_DR")]
+        public int? RefId { get; set; }
+    }
+
+    [Alias("TWODDF")]
+    public class TypeWithOnDeleteSetDefault
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+
+        [Default(typeof(int), "17")]
+        [ForeignKey(typeof(ReferencedType), OnDelete = "SET DEFAULT", ForeignKeyName = "FK_DDF")]
+        public int RefId { get; set; }
+    }
+
+    [Alias("TWODSN")]
+    public class TypeWithOnDeleteSetNull
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+
+        [ForeignKey(typeof(ReferencedType), OnDelete = "SET NULL", ForeignKeyName = "FK_SN")]
+        public int? RefId { get; set; }
+    }
 
     [Alias("TWONFKI")]
     public class TypeWithNoForeignKeyInitially

@@ -108,6 +108,8 @@
     <Compile Include="Converters\SqlServerSpecialConverters.cs" />
     <Compile Include="Converters\SqlServerStringConverters.cs" />
     <Compile Include="Converters\SqlServerTimeConverter.cs" />
+    <Compile Include="SqlServer2016OrmLiteDialectProvider.cs" />
+    <Compile Include="SqlServer2014OrmLiteDialectProvider.cs" />
     <Compile Include="SqlServer2012OrmLiteDialectProvider.cs" />
     <Compile Include="SqlServerDialect.cs" />
     <Compile Include="SqlServerExpression.cs" />

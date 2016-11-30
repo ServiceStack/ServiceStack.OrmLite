@@ -128,7 +128,7 @@ namespace ServiceStack.OrmLite.Tests
 
     }
 
-    public class PrefixNamingStrategy : OrmLiteNamingStrategyBase
+    internal class PrefixNamingStrategy : OrmLiteNamingStrategyBase
     {
 
         public string TablePrefix { get; set; }
@@ -147,7 +147,7 @@ namespace ServiceStack.OrmLite.Tests
 
     }
 
-    public class LowercaseNamingStrategy : OrmLiteNamingStrategyBase
+    internal class LowercaseNamingStrategy : OrmLiteNamingStrategyBase
     {
 
         public override string GetTableName(string name)
@@ -162,7 +162,7 @@ namespace ServiceStack.OrmLite.Tests
 
     }
 
-    public class UnderscoreSeparatedCompoundNamingStrategy : OrmLiteNamingStrategyBase
+    internal class UnderscoreSeparatedCompoundNamingStrategy : OrmLiteNamingStrategyBase
     {
 
         public override string GetTableName(string name)

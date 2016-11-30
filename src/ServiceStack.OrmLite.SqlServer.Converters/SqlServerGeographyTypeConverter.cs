@@ -9,10 +9,7 @@ namespace ServiceStack.OrmLite.SqlServer.Converters
     /// </summary>
     public class SqlServerGeographyTypeConverter : SqlServerSpatialTypeConverter
     {
-        public override string ColumnDefinition
-        {
-            get { return "geography"; }
-        }
+        public override string ColumnDefinition => "GEOGRAPHY";
 
         public override object FromDbValue(Type fieldType, object value)
         {

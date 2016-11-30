@@ -9,6 +9,7 @@ namespace ServiceStack.OrmLite.Tests.Async.Legacy
     public class ApiPostgreSqlLegacyTestsAsync
         : OrmLiteTestBase
     {
+#pragma warning disable 618
         [Test]
         public async Task API_PostgreSql_Legacy_Examples_Async()
         {
@@ -100,5 +101,6 @@ namespace ServiceStack.OrmLite.Tests.Async.Legacy
 
             db.Dispose();
         }
+#pragma warning restore 618
     }
 }

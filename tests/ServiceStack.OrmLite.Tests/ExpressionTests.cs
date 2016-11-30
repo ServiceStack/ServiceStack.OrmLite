@@ -9,7 +9,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixture]
     public class ExpressionTests
     {
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void TestFixtureSetUp()
         {
             OrmLiteConfig.DialectProvider = new SqliteOrmLiteDialectProvider();

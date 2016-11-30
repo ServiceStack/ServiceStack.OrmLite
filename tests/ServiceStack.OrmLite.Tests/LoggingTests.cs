@@ -52,11 +52,11 @@ namespace ServiceStack.OrmLite.Tests
                 var logs = sbLogFactory.GetLogs();
                 logs.Print();
 
-                Assert.That(logs, Is.StringContaining("CREATE TABLE"));
-                Assert.That(logs, Is.StringContaining("INSERT INTO"));
-                Assert.That(logs, Is.StringContaining("SELECT"));
-                Assert.That(logs, Is.StringContaining("UPDATE"));
-                Assert.That(logs, Is.StringContaining("DELETE FROM"));
+                Assert.That(logs, Does.Contain("CREATE TABLE"));
+                Assert.That(logs, Does.Contain("INSERT INTO"));
+                Assert.That(logs, Does.Contain("SELECT"));
+                Assert.That(logs, Does.Contain("UPDATE"));
+                Assert.That(logs, Does.Contain("DELETE FROM"));
             }
         }
 
@@ -80,9 +80,9 @@ namespace ServiceStack.OrmLite.Tests
                     var results = db.Select<LogTest>("Unknown = @arg", new { arg = "foo" });
                     Assert.Fail("Should throw");
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    Assert.That(lastSql, Is.StringContaining("Unknown"));
+                    Assert.That(lastSql, Does.Contain("Unknown"));
                     Assert.That(lastParam.Value, Is.EqualTo("foo"));
                 }
             }

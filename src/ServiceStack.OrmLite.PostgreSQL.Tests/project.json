@@ -25,17 +25,19 @@
     "ServiceStack.OrmLite" : "1.0.*",
     "ServiceStack.Text" : "1.0.*",
     "ServiceStack.Client" : "1.0.*",
-    "ServiceStack.OrmLite.Sqlite" : "1.0.*"
+    "ServiceStack.OrmLite.PostgreSQL" : "1.0.*",
+    "ServiceStack.OrmLite.Tests" : "1.0.*"
   },
   "frameworks": {
-   "netcoreapp1.1": { 
+    "netcoreapp1.1": { 
       "imports": "dnxcore50",
-	    "dependencies" : {
+      "dependencies" : {
           "System.Runtime" : "4.*",
           "System.Runtime.Serialization.Xml" : "4.*",
           "System.Reflection" : "4.*",
           "System.Reflection.Primitives" : "4.*",
-          "System.Runtime.Serialization.Primitives": "4.*"
+          "System.Runtime.Serialization.Primitives": "4.*",
+          "System.Threading.Thread" : "4.*"
         }	
      }
   }

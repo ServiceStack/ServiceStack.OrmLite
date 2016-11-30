@@ -16,12 +16,14 @@ namespace ServiceStack.OrmLite.SqlServerTests.Expressions
         //Avoid painful refactor to change all tests to use a using pattern
         private IDbConnection db;
 
-        public override IDbConnection OpenDbConnection(string connString = null)
+        public override IDbConnection OpenDbConnection(string connString = null, IOrmLiteDialectProvider dialectProvider = null)
         {
+            dialectProvider = dialectProvider ?? OrmLiteConfig.DialectProvider;
+
             if (db != null && db.State != ConnectionState.Open)
                 db = null;
 
-            return db ?? (db = base.OpenDbConnection(connString));
+            return db ?? (db = base.OpenDbConnection(connString, dialectProvider));
         }
 
         [TearDown]

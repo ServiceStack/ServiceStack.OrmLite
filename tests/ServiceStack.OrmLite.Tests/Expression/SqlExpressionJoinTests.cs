@@ -42,7 +42,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 var lastSql = db.GetLastSql();
                 lastSql.Print();
                 Assert.That(result.Id, Is.EqualTo(1));
-                Assert.That(lastSql, Is.Not.StringContaining("NOT"));
+                Assert.That(lastSql, Is.Not.Contains("NOT"));
 
                 q = db.From<TableA>()
                     .Where(a => !a.Bool)
@@ -52,7 +52,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 lastSql = db.GetLastSql();
                 lastSql.Print();
                 Assert.That(result.Id, Is.EqualTo(1));
-                Assert.That(lastSql, Is.Not.StringContaining("NOT"));
+                Assert.That(lastSql, Is.Not.Contains("NOT"));
 
 
                 q = db.From<TableA>()
@@ -62,7 +62,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 lastSql = db.GetLastSql();
                 lastSql.Print();
                 Assert.That(result.Id, Is.EqualTo(1));
-                Assert.That(lastSql, Is.Not.StringContaining("NOT"));
+                Assert.That(lastSql, Is.Not.Contains("NOT"));
 
                 q = db.From<TableA>()
                     .LeftJoin<TableB>((a, b) => a.Id == b.Id)
@@ -135,11 +135,13 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 db.Insert(new TableA { Id = 3, Bool = true, Name = "C" });
                 db.Insert(new TableB { Id = 1, TableAId = 1, Name = "Z" });
 
+#pragma warning disable 472
                 var missingNames = db.Column<string>(
                     db.From<TableA>()
                         .LeftJoin<TableB>((a, b) => a.Id == b.Id)
                         .Where<TableB>(b => b.Id == null)
                         .Select(a => a.Name));
+#pragma warning restore 472
 
                 Assert.That(missingNames, Is.EquivalentTo(new[] { "B", "C" }));
             }
@@ -172,6 +174,10 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
                 return CrossJoinTableAId == other.CrossJoinTableAId && string.Equals(Name, other.Name) && CrossJoinTableBId == other.CrossJoinTableBId && Value == other.Value;
             }
+
+            public override int GetHashCode() =>
+                (((23*37 + CrossJoinTableAId) * 37 + CrossJoinTableBId) * 37 + Value)
+                ^ Name.GetHashCode();
         }
 
         [Test]
@@ -328,11 +334,13 @@ namespace ServiceStack.OrmLite.Tests.Expression
                     Extra = "EXTRA"
                 });
 
+#pragma warning disable 472
                 var q = db.From<Invoice>()
                     .LeftJoin<Invoice, UsagePageInvoice>((i, upi) => i.Id == upi.InvoiceId)
                     .Where<Invoice>(i => (i.DocumentStatus == "a" || i.DocumentStatus == "b"))
                     .And<UsagePageInvoice>(upi => upi.Id == null)
                     .Select(c => new { c.Id, c.WorkflowId, c.DocumentId, c.DocumentStatus, c.PageCount });
+#pragma warning restore 472
 
                 var result = db.Select(q).First();
 
@@ -360,6 +368,10 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 var other = (JoinSelectResults1)obj;
                 return Id == other.Id && Bool == other.Bool && Name == other.Name && TableAId == other.TableAId;
             }
+
+            public override int GetHashCode() =>
+                ((23*37 + Id) * 37 + Name.GetHashCode())
+                ^ (Bool ? 65535 : 0);
         }
 
         private class JoinSelectResults2
@@ -378,6 +390,13 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 var other = (JoinSelectResults2)obj;
                 return Id == other.Id && Bool == other.Bool && Name == other.Name && TableBId == other.TableBId && TableBName == other.TableBName;
             }
+
+            public override int GetHashCode() =>
+                ((23*37 + Id) * 37 + TableBId)
+                ^ Name.GetHashCode()
+                ^ TableBName.GetHashCode()
+                ^ (Bool ? 65535 : 0);
+
         }
 
         private class JoinSelectResults3
@@ -397,6 +416,12 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 return TableA_Id == other.TableA_Id && TableA_Bool == other.TableA_Bool && TableA_Name == other.TableA_Name
                        && Id == other.Id && TableBName == other.TableBName;
             }
+
+            public override int GetHashCode() =>
+                ((23*37 + TableA_Id) * 37 + Id) 
+                ^ TableA_Name.GetHashCode() 
+                ^ TableBName.GetHashCode() 
+                ^ (TableA_Bool ? 65535 : 0);
         }
 
         [Test]

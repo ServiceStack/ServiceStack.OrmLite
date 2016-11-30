@@ -142,8 +142,10 @@ namespace ServiceStack.OrmLite
             }
 
             var stringConverter = columnType.IsRefType()
-                ? (IHasColumnDefinitionLength)ReferenceTypeConverter
-                : ValueTypeConverter;
+                ? ReferenceTypeConverter
+                : columnType.IsEnum()
+                    ? EnumConverter
+                    : (IHasColumnDefinitionLength)ValueTypeConverter;
 
             return stringConverter.GetColumnDefinition(fieldLength);
         }
@@ -762,7 +764,12 @@ namespace ServiceStack.OrmLite
                     if (sql.Length > 0)
                         sql.Append(", ");
 
-                    AppendFieldCondition(sql, fieldDef, cmd);
+                    sql
+                        .Append(GetQuotedColumnName(fieldDef.FieldName))
+                        .Append("=")
+                        .Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
+
+                    AddParameter(cmd, fieldDef);
                 }
                 catch (Exception ex)
                 {
@@ -778,6 +785,13 @@ namespace ServiceStack.OrmLite
             }
 
             return hadRowVesion;
+        }
+
+        public virtual void AppendNullFieldCondition(StringBuilder sqlFilter, FieldDefinition fieldDef)
+        {
+            sqlFilter
+                .Append(GetQuotedColumnName(fieldDef.FieldName))
+                .Append(" IS NULL");
         }
 
         public virtual void AppendFieldCondition(StringBuilder sqlFilter, FieldDefinition fieldDef, IDbCommand cmd)
@@ -825,9 +839,7 @@ namespace ServiceStack.OrmLite
                     }
                     else
                     {
-                        sqlFilter
-                            .Append(GetQuotedColumnName(fieldDef.FieldName))
-                            .Append(" IS NULL");
+                        AppendNullFieldCondition(sqlFilter, fieldDef);
                     }
                 }
                 catch (Exception ex)
@@ -1198,7 +1210,8 @@ namespace ServiceStack.OrmLite
 
                 sbColumns.Append(columnDefinition);
 
-                if (fieldDef.ForeignKey == null) continue;
+                if (fieldDef.ForeignKey == null || OrmLiteConfig.SkipForeignKeys)
+                    continue;
 
                 var refModelDef = fieldDef.ForeignKey.ReferenceType.GetModelDefinition();
                 sbConstraints.Append(

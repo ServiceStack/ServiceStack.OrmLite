@@ -50,14 +50,8 @@ namespace ServiceStack.OrmLite.Tests.UseCase
                 customer = await db.SingleAsync<Customer>(new { customer.Email }); //Query
                 Assert.That(customer.Id, Is.EqualTo(customerId));
 
-#if NETCORE
-                var isolationLevel = base.Dialect == Dialect.Sqlite ? IsolationLevel.Serializable : IsolationLevel.ReadCommitted;
-#else
-                var isolationLevel = IsolationLevel.ReadCommitted;
-#endif                
-
                 //Direct access to System.Data.Transactions:
-                using (IDbTransaction trans = db.OpenTransaction(isolationLevel))
+                using (IDbTransaction trans = db.OpenTransaction(IsolationLevel.ReadCommitted))
                 {
                     var order = new Order {
                         CustomerId = customer.Id,

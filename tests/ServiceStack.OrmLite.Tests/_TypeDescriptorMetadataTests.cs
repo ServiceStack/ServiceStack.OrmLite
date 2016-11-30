@@ -13,14 +13,14 @@ namespace ServiceStack.OrmLite.Tests
     {
         private IDbConnection db;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public new void TestFixtureSetUp()
         {
             db = OpenDbConnection();
         }
 
-        [TestFixtureTearDown]
-        public void TestFixtureTearDown()
+        [OneTimeTearDown]
+        public new void TestFixtureTearDown()
         {
             db.Dispose();
         }
@@ -59,7 +59,7 @@ namespace ServiceStack.OrmLite.Tests
             db.DropAndCreateTable<DynamicCacheEntry>();
 
             Assert.That(db.GetLastSql().NormalizeSql(), 
-                Is.StringContaining("Data VARCHAR(7000)".NormalizeSql()));
+                Does.Contain("Data VARCHAR(7000)".NormalizeSql()));
             db.GetLastSql().Print();
         }
 
@@ -80,23 +80,23 @@ namespace ServiceStack.OrmLite.Tests
 
             if (Dialect == Dialect.Sqlite)
             {
-                Assert.That(sql, Is.StringContaining(" VARCHAR(1000000)"));
+                Assert.That(sql, Does.Contain(" VARCHAR(1000000)"));
             }
             else if (Dialect == Dialect.PostgreSql)
             {
-                Assert.That(sql, Is.StringContaining(" TEXT"));
+                Assert.That(sql, Does.Contain(" TEXT"));
             }
             else if (Dialect == Dialect.MySql)
             {
-                Assert.That(sql, Is.StringContaining(" LONGTEXT"));
+                Assert.That(sql, Does.Contain(" LONGTEXT"));
             }
             else if (Dialect == Dialect.Oracle)
             {
-                Assert.That(sql, Is.StringContaining(" VARCHAR2(4000)"));
+                Assert.That(sql, Does.Contain(" VARCHAR2(4000)"));
             }
             else if (Dialect == Dialect.SqlServer)
             {
-                Assert.That(sql, Is.StringContaining(" VARCHAR(MAX)"));
+                Assert.That(sql, Does.Contain(" VARCHAR(MAX)"));
             }
         }
 
@@ -125,27 +125,27 @@ namespace ServiceStack.OrmLite.Tests
 
             if (Dialect == Dialect.Sqlite)
             {
-                Assert.That(sql, Is.StringContaining(" NVARCHAR(1000000)"));
+                Assert.That(sql, Does.Contain(" NVARCHAR(1000000)"));
             }
             else if (Dialect == Dialect.PostgreSql)
             {
-                Assert.That(sql, Is.StringContaining(" TEXT"));
+                Assert.That(sql, Does.Contain(" TEXT"));
             }
             else if (Dialect == Dialect.MySql)
             {
-                Assert.That(sql, Is.StringContaining(" LONGTEXT"));
+                Assert.That(sql, Does.Contain(" LONGTEXT"));
             }
             else if (Dialect == Dialect.Oracle)
             {
-                Assert.That(sql, Is.StringContaining(" NVARCHAR2(4000)"));
+                Assert.That(sql, Does.Contain(" NVARCHAR2(4000)"));
             }
             else if (Dialect == Dialect.Firebird)
             {
-                Assert.That(sql, Is.StringContaining(" VARCHAR(10000)"));
+                Assert.That(sql, Does.Contain(" VARCHAR(10000)"));
             }
             else
             {
-                Assert.That(sql, Is.StringContaining(" NVARCHAR(MAX)"));
+                Assert.That(sql, Does.Contain(" NVARCHAR(MAX)"));
             }
         }
     }

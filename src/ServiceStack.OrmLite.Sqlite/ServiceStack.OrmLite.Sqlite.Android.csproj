@@ -59,6 +59,7 @@
     <Compile Include="SqliteOrmLiteDialectProvider.cs" />
     <Compile Include="SqliteOrmLiteDialectProviderBase.cs" />
     <Compile Include="SqliteExpression.cs" />
+    <Compile Include="NetCoreSqliteConnection.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.Android.csproj">

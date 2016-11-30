@@ -22,12 +22,5 @@ namespace ServiceStack.OrmLite.PostgreSQL.Converters
     {
         public PostrgreSqlDecimalConverter() 
             : base(38, 6) {}
-
-        public virtual string GetColumnDefinition(int? precision, int? scale)
-        {
-            return "NUMERIC({0},{1})".Fmt(
-                precision.GetValueOrDefault(Precision),
-                scale.GetValueOrDefault(Scale));
-        }
     }
 }

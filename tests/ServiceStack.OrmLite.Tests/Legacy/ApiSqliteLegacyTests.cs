@@ -25,6 +25,7 @@ namespace ServiceStack.OrmLite.Tests.Legacy
             db.Dispose();
         }
 
+#pragma warning disable 618
         [Test]
         public void API_Sqlite_Legacy_Examples()
         {
@@ -113,5 +114,6 @@ namespace ServiceStack.OrmLite.Tests.Legacy
             db.DeleteFmt(table: "Person", where: "Age = {0}".SqlFmt(27));
             Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM \"Person\" WHERE Age = 27"));
         }
+#pragma warning restore 618
     }
 }

@@ -154,7 +154,7 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(expectedString, Is.EqualTo(r9));
                 
                 r9 = db.Scalar<Author,string>(e=> Sql.Max(e.Name), e=>e.City=="SinCity");
-                Assert.IsNullOrEmpty(r9);
+                Assert.That(r9, Is.Null.Or.Empty);
                                 
                 //var expectedBool=authors.Min(e=>e.Active);
                 //var r10 = db.GetScalar<Author,bool>(e=> Sql.Min(e.Active));
@@ -199,7 +199,7 @@ namespace ServiceStack.OrmLite.Tests
     }
     
     
-    public class Author
+    internal class Author
     {
         public Author(){}
         

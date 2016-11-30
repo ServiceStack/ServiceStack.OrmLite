@@ -138,7 +138,7 @@ namespace ServiceStack.OrmLite.Tests
                 var createTableSql = db.GetLastSql().NormalizeSql();
                 createTableSql.Print();
 
-                Assert.That(createTableSql, Is.StringContaining("flags int"));
+                Assert.That(createTableSql, Does.Contain("flags int"));
             }
         }
 
@@ -152,7 +152,7 @@ namespace ServiceStack.OrmLite.Tests
                 var createTableSql = db.GetLastSql().NormalizeSql();
                 createTableSql.Print();
 
-                Assert.That(createTableSql, Is.StringContaining("enumvalue int"));
+                Assert.That(createTableSql, Does.Contain("enumvalue int"));
             }
         }
 
@@ -168,11 +168,11 @@ namespace ServiceStack.OrmLite.Tests
                 db.Insert(new TypeWithFlagsEnum { Id = 3, Flags = FlagsEnum.FlagOne | FlagsEnum.FlagTwo });
 
                 db.Update(new TypeWithFlagsEnum { Id = 1, Flags = FlagsEnum.FlagThree });
-                Assert.That(db.GetLastSql(), Is.StringContaining("=@Flags").Or.StringContaining("=:Flags"));
+                Assert.That(db.GetLastSql(), Does.Contain("=@Flags").Or.Contain("=:Flags"));
                 db.GetLastSql().Print();
 
                 db.UpdateOnly(new TypeWithFlagsEnum { Id = 1, Flags = FlagsEnum.FlagThree }, onlyFields: q => q.Flags);
-                Assert.That(db.GetLastSql().NormalizeSql(), Is.StringContaining("=@flags"));
+                Assert.That(db.GetLastSql().NormalizeSql(), Does.Contain("=@flags"));
 
                 var row = db.SingleById<TypeWithFlagsEnum>(1);
                 Assert.That(row.Flags, Is.EqualTo(FlagsEnum.FlagThree));
@@ -191,12 +191,12 @@ namespace ServiceStack.OrmLite.Tests
                 db.Insert(new TypeWithEnumAsInt { Id = 3, EnumValue = SomeEnumAsInt.Value3 });
 
                 db.Update(new TypeWithEnumAsInt { Id = 1, EnumValue = SomeEnumAsInt.Value1 });
-                Assert.That(db.GetLastSql(), Is.StringContaining("=@EnumValue").Or.StringContaining("=:EnumValue"));
+                Assert.That(db.GetLastSql(), Does.Contain("=@EnumValue").Or.Contain("=:EnumValue"));
                 db.GetLastSql().Print();
 
                 db.UpdateOnly(new TypeWithEnumAsInt { Id = 1, EnumValue = SomeEnumAsInt.Value3 }, 
                     onlyFields: q => q.EnumValue);
-                Assert.That(db.GetLastSql().NormalizeSql(), Is.StringContaining("=@enumvalue"));
+                Assert.That(db.GetLastSql().NormalizeSql(), Does.Contain("=@enumvalue"));
 
                 var row = db.SingleById<TypeWithEnumAsInt>(1);
                 Assert.That(row.EnumValue, Is.EqualTo(SomeEnumAsInt.Value3));
