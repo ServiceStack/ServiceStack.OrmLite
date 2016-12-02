@@ -70,7 +70,6 @@
     <Compile Include="SqlServerHierarchyIdTypeConverter.cs" />
     <Compile Include="SqlServerGeographyTypeConverter.cs" />
     <Compile Include="SqlServerGeometryTypeConverter.cs" />
-    <Compile Include="SqlServerTypeConverter.cs" />
     <Compile Include="SqlServerExtendedStringConverters.cs" />
   </ItemGroup>
   <ItemGroup>

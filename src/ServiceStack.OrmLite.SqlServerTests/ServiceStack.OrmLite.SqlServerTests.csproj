@@ -81,6 +81,7 @@
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Converters\FileStreamTests.cs" />
+    <Compile Include="Converters\SqlGeometryTests.cs" />
     <Compile Include="CustomSqlTests.cs" />
     <Compile Include="Datetime2Tests.cs" />
     <Compile Include="DateTimeOffsetTests.cs" />
@@ -110,8 +111,8 @@
     <Compile Include="ForeignKeyAttributeTests.cs" />
     <Compile Include="OrmLiteTestBase.cs" />
     <Compile Include="Converters\ConvertersOrmLiteTestBase.cs" />
-    <Compile Include="Converters\HierarchyIdTests.cs" />
-    <Compile Include="Converters\SpatialsTests.cs" />
+    <Compile Include="Converters\SqlHierarchyIdTests.cs" />
+    <Compile Include="Converters\SqlGeographyTests.cs" />
     <Compile Include="SchemaTests.cs" />
     <Compile Include="SqlServerExpressionVisitorQueryTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
