@@ -1363,7 +1363,19 @@ namespace ServiceStack.OrmLite
                 }
                 else if (!(left is PartialSqlString) && !(right is PartialSqlString))
                 {
-                    var evaluatedValue = CachedExpressionCompiler.Evaluate(b);
+                    var visitedBinaryExp = b;
+
+                    if (IsParameterAccess(b.Left) || IsParameterAccess(b.Right))
+                    {
+                        var eLeft = !IsParameterAccess(b.Left) ? b.Left : Expression.Constant(left, b.Left.Type);
+                        var eRight = !IsParameterAccess(b.Right) ? b.Right : Expression.Constant(right, b.Right.Type);
+                        if (b.NodeType == ExpressionType.Coalesce)
+                            visitedBinaryExp = Expression.Coalesce(eLeft, eRight, b.Conversion);
+                        else
+                            visitedBinaryExp = Expression.MakeBinary(b.NodeType, eLeft, eRight, b.IsLiftedToNull, b.Method);
+                    }
+
+                    var evaluatedValue = CachedExpressionCompiler.Evaluate(visitedBinaryExp);
                     var result = VisitConstant(Expression.Constant(evaluatedValue));
                     return result;
                 }

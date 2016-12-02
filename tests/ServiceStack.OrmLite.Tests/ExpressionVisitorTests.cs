@@ -489,6 +489,19 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(target.Count, Is.EqualTo(1));
         }
 
+        [Test]
+        public void Can_Where_using_constant_filter()
+        {
+            object left = null;
+            var right = new PartialSqlString("null");
+
+            System.Linq.Expressions.Expression<Func<TestType, bool>> filter = x => left == right;
+            var q = Db.From<TestType>().Where(filter);//todo: here Where: null is NULL. May be need to change to 1=1 ?
+            var target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(4));
+
+        }
+
         private int MethodReturningInt(int val)
         {
             return val;
