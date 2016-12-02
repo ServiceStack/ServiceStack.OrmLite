@@ -17,6 +17,7 @@ namespace ServiceStack.OrmLite.SqlServer.Converters
                 LoadAssembly(fileName, libraryPath);
             }
 
+            dialectProvider.RegisterConverter<string>(new SqlServerExtendedStringConverter());
             dialectProvider.RegisterConverter<SqlGeography>(new SqlServerGeographyTypeConverter());
             dialectProvider.RegisterConverter<SqlGeometry>(new SqlServerGeometryTypeConverter());
             dialectProvider.RegisterConverter<SqlHierarchyId>(new SqlServerHierarchyIdTypeConverter());
