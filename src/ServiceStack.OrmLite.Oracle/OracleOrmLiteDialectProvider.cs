@@ -788,18 +788,7 @@ namespace ServiceStack.OrmLite.Oracle
 
                 if (sbColumns.Length != 0) sbColumns.Append(", \n  ");
 
-                var columnDefinition = GetColumnDefinition(
-                    fieldDef.FieldName,
-                    fieldDef.ColumnType,
-                    fieldDef.IsPrimaryKey,
-                    fieldDef.AutoIncrement,
-                    fieldDef.IsNullable,
-                    fieldDef.IsRowVersion,
-                    fieldDef.FieldLength,
-                    fieldDef.Scale,
-                    GetDefaultValue(fieldDef),
-                    fieldDef.CustomFieldDefinition);
-
+                var columnDefinition = GetColumnDefinition(fieldDef);
                 sbColumns.Append(columnDefinition);
 
                 if (fieldDef.ForeignKey == null || OrmLiteConfig.SkipForeignKeys)
@@ -894,16 +883,16 @@ namespace ServiceStack.OrmLite.Oracle
             return gens;
         }
 
-        public override string GetColumnDefinition(string fieldName, Type fieldType,
-            bool isPrimaryKey, bool autoIncrement, bool isNullable, bool isRowVersion,
-            int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
+        public override string GetColumnDefinition(FieldDefinition fieldDef)
         {
-            var fieldDefinition = customFieldDefinition ?? GetColumnTypeDefinition(fieldType, fieldLength, scale);
+            var fieldDefinition = fieldDef.CustomFieldDefinition 
+                ?? GetColumnTypeDefinition(fieldDef.FieldType, fieldDef.FieldLength, fieldDef.Scale);
 
             var sql = StringBuilderCache.Allocate();
-            sql.AppendFormat("{0} {1}", GetQuotedColumnName(fieldName), fieldDefinition);
+            sql.AppendFormat("{0} {1}", GetQuotedColumnName(fieldDef.FieldName), fieldDefinition);
 
-            if (isRowVersion)
+            var defaultValue = GetDefaultValue(fieldDef);
+            if (fieldDef.IsRowVersion)
             {
                 sql.AppendFormat(DefaultValueFormat, 1L);
             }
@@ -912,7 +901,7 @@ namespace ServiceStack.OrmLite.Oracle
                 sql.AppendFormat(DefaultValueFormat, defaultValue);
             }
 
-            sql.Append(isNullable ? " NULL" : " NOT NULL");
+            sql.Append(fieldDef.IsNullable ? " NULL" : " NOT NULL");
 
             var definition = StringBuilderCache.ReturnAndFree(sql);
             return definition;

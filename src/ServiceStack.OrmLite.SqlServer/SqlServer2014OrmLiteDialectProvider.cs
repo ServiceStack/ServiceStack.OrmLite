@@ -24,18 +24,7 @@ namespace ServiceStack.OrmLite.SqlServer
                 if (fieldDef.CustomSelect != null)
                     continue;
 
-                var columnDefinition = GetColumnDefinition(
-                    fieldDef.FieldName,
-                    fieldDef.ColumnType,
-                    fieldDef.IsPrimaryKey,
-                    fieldDef.AutoIncrement,
-                    fieldDef.IsNullable,
-                    fieldDef.IsRowVersion,
-                    fieldDef.FieldLength,
-                    fieldDef.Scale,
-                    GetDefaultValue(fieldDef),
-                    fieldDef.CustomFieldDefinition);
-
+                var columnDefinition = GetColumnDefinition(fieldDef);
                 if (columnDefinition == null)
                     continue;
 
