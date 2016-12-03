@@ -1298,7 +1298,7 @@ namespace ServiceStack.OrmLite
 
                 if (!(left is PartialSqlString) && !(right is PartialSqlString))
                 {
-                    var result = CachedExpressionCompiler.Evaluate(b);
+                    var result = CachedExpressionCompiler.Evaluate(PreEvaluateBinary(b, left, right));
                     return result;
                 }
 
@@ -1363,7 +1363,7 @@ namespace ServiceStack.OrmLite
                 }
                 else if (!(left is PartialSqlString) && !(right is PartialSqlString))
                 {
-                    var evaluatedValue = CachedExpressionCompiler.Evaluate(b);
+                    var evaluatedValue = CachedExpressionCompiler.Evaluate(PreEvaluateBinary(b, left, right));
                     var result = VisitConstant(Expression.Constant(evaluatedValue));
                     return result;
                 }
@@ -1400,6 +1400,23 @@ namespace ServiceStack.OrmLite
                 default:
                     return new PartialSqlString("(" + left + sep + operand + sep + right + ")");
             }
+        }
+
+        private BinaryExpression PreEvaluateBinary(BinaryExpression b, object left, object right)
+        {
+            var visitedBinaryExp = b;
+
+            if (IsParameterAccess(b.Left) || IsParameterAccess(b.Right))
+            {
+                var eLeft = !IsParameterAccess(b.Left) ? b.Left : Expression.Constant(left, b.Left.Type);
+                var eRight = !IsParameterAccess(b.Right) ? b.Right : Expression.Constant(right, b.Right.Type);
+                if (b.NodeType == ExpressionType.Coalesce)
+                    visitedBinaryExp = Expression.Coalesce(eLeft, eRight, b.Conversion);
+                else
+                    visitedBinaryExp = Expression.MakeBinary(b.NodeType, eLeft, eRight, b.IsLiftedToNull, b.Method);
+            }
+
+            return visitedBinaryExp;
         }
 
         /// <summary>

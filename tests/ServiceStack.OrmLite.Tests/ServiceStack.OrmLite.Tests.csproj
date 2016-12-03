@@ -136,6 +136,7 @@
     <Compile Include="Async\SqlExpressionTests.cs" />
     <Compile Include="Async\SqlServerProviderTestsAsync.cs" />
     <Compile Include="Async\UpdateAsyncTests.cs" />
+    <Compile Include="CustomSqlExpressionTests.cs" />
     <Compile Include="Expression\JoinAliasTests.cs" />
     <Compile Include="Expression\RestrictionTests.cs" />
     <Compile Include="Expression\SqlExpressionDeleteTests.cs" />
