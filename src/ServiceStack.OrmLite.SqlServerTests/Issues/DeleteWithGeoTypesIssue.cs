@@ -15,7 +15,7 @@ namespace ServiceStack.OrmLite.SqlServerTests.Issues
     }
 
     [TestFixture]
-    public class DeleteWithGeoTypesIssue : SqlServerConvertersOrmLiteTestBase
+    public class DeleteWithGeoTypesIssue : SqlServer2012ConvertersOrmLiteTestBase
     {
         [Test]
         public void Can_delete_entity_with_Geo_Type()

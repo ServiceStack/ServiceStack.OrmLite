@@ -10,8 +10,10 @@ namespace ServiceStack.OrmLite.SqlServerTests
     {
         protected virtual string ConnectionString { get; set; }
 
+        public IDbConnection Db { get; set; }
+
         [TestFixtureSetUp]
-        public void TestFixtureSetUp()
+        public virtual void TestFixtureSetUp()
         {
             LogManager.LogFactory = new ConsoleLogFactory();
 

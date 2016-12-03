@@ -15,7 +15,7 @@ namespace ServiceStack.OrmLite.SqlServerTests.Issues
     }
 
     [TestFixture]
-    public class JamesGeoIssue : SqlServerConvertersOrmLiteTestBase
+    public class JamesGeoIssue : SqlServer2012ConvertersOrmLiteTestBase
     {
         [Test]
         public void Can_insert_and_select_GeoPoint()
