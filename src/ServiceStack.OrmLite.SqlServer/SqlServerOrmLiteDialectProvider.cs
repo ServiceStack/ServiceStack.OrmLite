@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
+using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.SqlServer.Converters;
 using ServiceStack.Text;
 #if NETSTANDARD1_3
@@ -200,11 +201,43 @@ namespace ServiceStack.OrmLite.SqlServer
 
         public override string GetColumnDefinition(FieldDefinition fieldDef)
         {
+            // https://msdn.microsoft.com/en-us/library/ms182776.aspx
             if (fieldDef.IsRowVersion)
                 return $"{fieldDef.FieldName} rowversion NOT NULL";
 
-            var definition = base.GetColumnDefinition(fieldDef);
-            return definition;
+            var fieldDefinition = fieldDef.CustomFieldDefinition ??
+                GetColumnTypeDefinition(fieldDef.ColumnType, fieldDef.FieldLength, fieldDef.Scale);
+
+            var sql = StringBuilderCache.Allocate();
+            sql.Append($"{GetQuotedColumnName(fieldDef.FieldName)} {fieldDefinition}");
+
+            if (fieldDef.IsPrimaryKey)
+            {
+                sql.Append(" PRIMARY KEY");
+                if (fieldDef.AutoIncrement)
+                {
+                    sql.Append(" ").Append(AutoIncrementDefinition);
+                }
+            }
+            else
+            {
+                sql.Append(fieldDef.IsNullable ? " NULL" : " NOT NULL");
+            }
+
+            // https://msdn.microsoft.com/en-us/library/ms184391.aspx
+            var collation = fieldDef.PropertyInfo.FirstAttribute<SqlServerCollateAttribute>()?.Collation;
+            if (!string.IsNullOrEmpty(collation))
+            {
+                sql.Append($" COLLATE {collation}");
+            }
+
+            var defaultValue = GetDefaultValue(fieldDef);
+            if (!string.IsNullOrEmpty(defaultValue))
+            {
+                sql.AppendFormat(DefaultValueFormat, defaultValue);
+            }
+
+            return StringBuilderCache.ReturnAndFree(sql);
         }
 
         public override string ToSelectStatement(ModelDefinition modelDef,
