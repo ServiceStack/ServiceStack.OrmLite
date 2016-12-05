@@ -2,11 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Globalization;
 using System.IO;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using ServiceStack.OrmLite.SqlServer.Converters;
 using ServiceStack.Text;
 #if NETSTANDARD1_3
@@ -108,15 +104,9 @@ namespace ServiceStack.OrmLite.SqlServer
             this.GetDateTimeConverter().DateStyle = DateTimeKind.Utc;
         }
 
-        public override SqlExpression<T> SqlExpression<T>()
-        {
-            return new SqlServerExpression<T>(this);
-        }
+        public override SqlExpression<T> SqlExpression<T>() => new SqlServerExpression<T>(this);
 
-        public override IDbDataParameter CreateParam()
-        {
-            return new SqlParameter();
-        }
+        public override IDbDataParameter CreateParam() => new SqlParameter();
 
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
         {
@@ -327,46 +317,22 @@ namespace ServiceStack.OrmLite.SqlServer
             return base.GetLoadChildrenSubSelect(expr);
         }
 
-        protected SqlConnection Unwrap(IDbConnection db)
-        {
-            return (SqlConnection)db.ToDbConnection();
-        }
+        protected SqlConnection Unwrap(IDbConnection db) => (SqlConnection)db.ToDbConnection();
 
-        protected SqlCommand Unwrap(IDbCommand cmd)
-        {
-            return (SqlCommand)cmd.ToDbCommand();
-        }
+        protected SqlCommand Unwrap(IDbCommand cmd) => (SqlCommand)cmd.ToDbCommand();
 
-        protected SqlDataReader Unwrap(IDataReader reader)
-        {
-            return (SqlDataReader)reader;
-        }
+        protected SqlDataReader Unwrap(IDataReader reader) => (SqlDataReader)reader;
 
 #if ASYNC
-        public override Task OpenAsync(IDbConnection db, CancellationToken token)
-        {
-            return Unwrap(db).OpenAsync(token);
-        }
+        public override Task OpenAsync(IDbConnection db, CancellationToken token) => Unwrap(db).OpenAsync(token);
 
-        public override Task<IDataReader> ExecuteReaderAsync(IDbCommand cmd, CancellationToken token)
-        {
-            return Unwrap(cmd).ExecuteReaderAsync(token).Then(x => (IDataReader)x);
-        }
+        public override Task<IDataReader> ExecuteReaderAsync(IDbCommand cmd, CancellationToken token) => Unwrap(cmd).ExecuteReaderAsync(token).Then(x => (IDataReader)x);
 
-        public override Task<int> ExecuteNonQueryAsync(IDbCommand cmd, CancellationToken token)
-        {
-            return Unwrap(cmd).ExecuteNonQueryAsync(token);
-        }
+        public override Task<int> ExecuteNonQueryAsync(IDbCommand cmd, CancellationToken token) => Unwrap(cmd).ExecuteNonQueryAsync(token);
 
-        public override Task<object> ExecuteScalarAsync(IDbCommand cmd, CancellationToken token)
-        {
-            return Unwrap(cmd).ExecuteScalarAsync(token);
-        }
+        public override Task<object> ExecuteScalarAsync(IDbCommand cmd, CancellationToken token) => Unwrap(cmd).ExecuteScalarAsync(token);
 
-        public override Task<bool> ReadAsync(IDataReader reader, CancellationToken token)
-        {
-            return Unwrap(reader).ReadAsync(token);
-        }
+        public override Task<bool> ReadAsync(IDataReader reader, CancellationToken token) => Unwrap(reader).ReadAsync(token);
 
         public override async Task<List<T>> ReaderEach<T>(IDataReader reader, Func<T> fn, CancellationToken token)
         {
