@@ -376,6 +376,7 @@
     <None Include="App_Data\sql\instnwnd.SqlServer.sql" />
     <None Include="packages.config" />
     <None Include="project.json" />
+    <None Include="ServiceStack.OrmLite.Tests.project.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Firebird\ServiceStack.OrmLite.Firebird.csproj">
