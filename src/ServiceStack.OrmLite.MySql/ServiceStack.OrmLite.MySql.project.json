@@ -6,6 +6,6 @@
     "win": {}
   },
   "dependencies": {
-      "Mysql.Data" : "7.0.6-ir31"
+    "Mysql.Data": "6.9.9"
   }
 }
