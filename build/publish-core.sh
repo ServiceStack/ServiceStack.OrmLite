@@ -5,6 +5,7 @@ declare -A projects=( \
  ["ServiceStack.OrmLite.Sqlite"]="1.3" \
  ["ServiceStack.OrmLite.SqlServer"]="1.3" \
  ["ServiceStack.OrmLite.PostgreSQL"]="1.3" \
+ ["ServiceStack.OrmLite.MySql"]="1.6" \
 )
 
 #for each project copy files to Nuget.Core/$project/lib folder

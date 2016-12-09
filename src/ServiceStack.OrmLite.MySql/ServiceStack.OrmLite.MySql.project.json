@@ -1,0 +1,11 @@
+﻿{
+  "frameworks": {
+    "net45": {}
+  },
+  "runtimes": {
+    "win": {}
+  },
+  "dependencies": {
+      "Mysql.Data" : "7.0.6-ir31"
+  }
+}
