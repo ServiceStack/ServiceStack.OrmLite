@@ -69,13 +69,11 @@ namespace ServiceStack.OrmLite.Tests
             return dbFactory;
         }
 
-#if !NETCORE
         public static OrmLiteConnectionFactory CreateMySqlDbFactory()
         {
             var dbFactory = new OrmLiteConnectionFactory(Config.MySqlDb, MySqlDialect.Provider);
             return dbFactory;
         }
-#endif
 
         public static OrmLiteConnectionFactory CreatePostgreSqlDbFactory()
         {
@@ -137,10 +135,8 @@ namespace ServiceStack.OrmLite.Tests
                     return Init(Config.SqlServerBuildDb, SqlServerDialect.Provider);
                 case Dialect.SqlServer2012:
                     return Init(Config.SqlServerBuildDb, SqlServer2012Dialect.Provider);
-#if !NETCORE
                 case Dialect.MySql:
                     return Init(Config.MySqlDb, MySqlDialect.Provider);
-#endif                    
                 case Dialect.PostgreSql:
                     return Init(Config.PostgreSqlDb, PostgreSqlDialect.Provider);
                 case Dialect.SqlServerMdf:
