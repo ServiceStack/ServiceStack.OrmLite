@@ -8,7 +8,7 @@ using ServiceStack.Text;
 namespace ServiceStack.OrmLite.SqlServerTests.Converters
 {
     [TestFixture]
-    public class FileStreamTests : SqlServerConvertersOrmLiteTestBase
+    public class FileStreamTests : SqlServer2012ConvertersOrmLiteTestBase
     {
         [Explicit("Requires FileGroups enabled in DB")]
         [Test]

@@ -83,14 +83,7 @@ namespace ServiceStack.OrmLite
 
         string SanitizeFieldNameForParamName(string fieldName);
 
-        string GetColumnDefinition(
-            string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement,
-            bool isNullable, 
-            bool isRowVersion,
-            int? fieldLength,
-            int? scale, 
-            string defaultValue,
-            string customFieldDefinition);
+        string GetColumnDefinition(FieldDefinition fieldDef);
 
         long GetLastInsertId(IDbCommand command);
 

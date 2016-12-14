@@ -186,17 +186,7 @@ namespace ServiceStack.OrmLite.SqlServer
 
         public override string ToAddColumnStatement(Type modelType, FieldDefinition fieldDef)
         {
-            var column = GetColumnDefinition(fieldDef.FieldName,
-                                             fieldDef.ColumnType,
-                                             fieldDef.IsPrimaryKey,
-                                             fieldDef.AutoIncrement,
-                                             fieldDef.IsNullable,
-                                             fieldDef.IsRowVersion,
-                                             fieldDef.FieldLength,
-                                             fieldDef.Scale,
-                                             fieldDef.DefaultValue,
-                                             fieldDef.CustomFieldDefinition);
-
+            var column = GetColumnDefinition(fieldDef);
             var modelName = GetQuotedTableName(GetModel(modelType).ModelName);
 
             return $"ALTER TABLE {modelName} ADD {column};";
@@ -204,17 +194,7 @@ namespace ServiceStack.OrmLite.SqlServer
 
         public override string ToAlterColumnStatement(Type modelType, FieldDefinition fieldDef)
         {
-            var column = GetColumnDefinition(fieldDef.FieldName,
-                                             fieldDef.ColumnType,
-                                             fieldDef.IsPrimaryKey,
-                                             fieldDef.AutoIncrement,
-                                             fieldDef.IsNullable,
-                                             fieldDef.IsRowVersion,
-                                             fieldDef.FieldLength,
-                                             fieldDef.Scale,
-                                             fieldDef.DefaultValue,
-                                             fieldDef.CustomFieldDefinition);
-
+            var column = GetColumnDefinition(fieldDef);
             var modelName = GetQuotedTableName(GetModel(modelType).ModelName);
 
             return $"ALTER TABLE {modelName} ALTER COLUMN {column};";
@@ -223,21 +203,17 @@ namespace ServiceStack.OrmLite.SqlServer
         public override string ToChangeColumnNameStatement(Type modelType, FieldDefinition fieldDef, string oldColumnName)
         {
             var modelName = NamingStrategy.GetTableName(GetModel(modelType).ModelName);
-
             var objectName = $"{modelName}.{oldColumnName}";
 
             return $"EXEC sp_rename {GetQuotedValue(objectName)}, {GetQuotedValue(fieldDef.FieldName)}, {GetQuotedValue("COLUMN")};";
         }
 
-        public override string GetColumnDefinition(string fieldName, Type fieldType, bool isPrimaryKey, bool autoIncrement,
-            bool isNullable, bool isRowVersion, int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
+        public override string GetColumnDefinition(FieldDefinition fieldDef)
         {
-            if (isRowVersion)
-                return $"{fieldName} rowversion NOT NULL";
+            if (fieldDef.IsRowVersion)
+                return $"{fieldDef.FieldName} rowversion NOT NULL";
 
-            var definition = base.GetColumnDefinition(fieldName, fieldType, isPrimaryKey, autoIncrement,
-                isNullable, isRowVersion, fieldLength, scale, defaultValue, customFieldDefinition);
-
+            var definition = base.GetColumnDefinition(fieldDef);
             return definition;
         }
 

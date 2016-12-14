@@ -10,16 +10,22 @@ namespace ServiceStack.OrmLite.SqlServer.Converters
         public static string Msvcr100FileName = "msvcr100.dll";
         public static string SqlServerSpatial110FileName = "SqlServerSpatial110.dll";
 
-        public static IOrmLiteDialectProvider Configure(IOrmLiteDialectProvider dialectProvider, string libraryPath = null)
+        public static IOrmLiteDialectProvider Configure(IOrmLiteDialectProvider dialectProvider, string[] fileNames, string libraryPath = null)
         {
-            LoadAssembly(Msvcr100FileName, libraryPath);
-            LoadAssembly(SqlServerSpatial110FileName, libraryPath);
+            foreach (var fileName in fileNames)
+            {
+                LoadAssembly(fileName, libraryPath);
+            }
 
+            dialectProvider.RegisterConverter<string>(new SqlServerExtendedStringConverter());
             dialectProvider.RegisterConverter<SqlGeography>(new SqlServerGeographyTypeConverter());
             dialectProvider.RegisterConverter<SqlGeometry>(new SqlServerGeometryTypeConverter());
             dialectProvider.RegisterConverter<SqlHierarchyId>(new SqlServerHierarchyIdTypeConverter());
             return dialectProvider;
         }
+
+        public static IOrmLiteDialectProvider Configure(IOrmLiteDialectProvider dialectProvider, string libraryPath = null) => 
+            Configure(dialectProvider, new string[] { Msvcr100FileName, SqlServerSpatial110FileName }, libraryPath);
 
         public static void LoadAssembly(string assemblyName, string libraryPath = null)
         {

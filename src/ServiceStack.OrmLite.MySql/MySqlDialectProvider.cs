@@ -201,18 +201,7 @@ namespace ServiceStack.OrmLite.MySql
                 return StringBuilderCache.ReturnAndFree(sql);
             }
 
-            var ret = base.GetColumnDefinition(
-                fieldDef.FieldName,
-                fieldDef.ColumnType,
-                fieldDef.IsPrimaryKey,
-                fieldDef.AutoIncrement,
-                fieldDef.IsNullable,
-                fieldDef.IsRowVersion,
-                fieldDef.FieldLength,
-                fieldDef.Scale,
-                GetDefaultValue(fieldDef),
-                fieldDef.CustomFieldDefinition);
-
+            var ret = base.GetColumnDefinition(fieldDef);
             if (fieldDef.IsRowVersion)
                 return ret + " DEFAULT 1";
 
