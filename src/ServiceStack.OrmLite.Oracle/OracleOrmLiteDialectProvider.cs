@@ -1212,7 +1212,7 @@ namespace ServiceStack.OrmLite.Oracle
             if (!WillQuote(tableName)) tableName = tableName.ToUpper();
 
             tableName = RemoveSchemaName(tableName);
-            var sql = "SELECT count(*) FROM ALL_TABLES WHERE TABLE_NAME = {0}".SqlFmt(tableName);
+            var sql = "SELECT count(*) FROM USER_TABLES WHERE TABLE_NAME = {0}".SqlFmt(tableName);
 
             if (schema != null)
                 sql += " AND OWNER = {0}".SqlFmt(schema);
