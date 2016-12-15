@@ -421,10 +421,10 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
                 var table = typeof(LetterFrequency).Name.SqlTable();
 
-                rowCount = db.RowCount("SELECT * FROM {0} WHERE Letter = @p1".Fmt(table), new { p1 = "B" });
+                rowCount = db.RowCount("SELECT * FROM {0} WHERE Letter = @p1".PreNormalizeSql(db).Fmt(table), new { p1 = "B" });
                 Assert.That(rowCount, Is.EqualTo(4));
 
-                rowCount = db.RowCount("SELECT * FROM {0} WHERE Letter = @p1".Fmt(table),
+                rowCount = db.RowCount("SELECT * FROM {0} WHERE Letter = @p1".PreNormalizeSql(db).Fmt(table),
                     new[] { db.CreateParam("p1", "B") });
                 Assert.That(rowCount, Is.EqualTo(4));
             }

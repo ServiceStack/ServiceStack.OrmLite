@@ -1,3 +1,5 @@
+using System.Data;
+
 namespace ServiceStack.OrmLite.Tests
 {
     public enum Dialect
@@ -24,6 +26,14 @@ namespace ServiceStack.OrmLite.Tests
                 .Replace(":", "@")   //postgresql
                 .Replace("\n", " ")
                 .TrimEnd(); 
+        }
+
+        public static string PreNormalizeSql(this string sql, IDbConnection db)
+        {
+            var paramString = db.GetDialectProvider().ParamString;
+            if (paramString.Equals("@"))
+                return sql;
+            return sql.Replace("@", paramString);
         }
     }
 }
