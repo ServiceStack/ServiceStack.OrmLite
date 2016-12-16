@@ -1241,6 +1241,8 @@ namespace ServiceStack.OrmLite
                     return VisitMemberInit(exp as MemberInitExpression);
                 case ExpressionType.Index:
                     return VisitIndexExpression(exp as IndexExpression);
+                case ExpressionType.Conditional:
+                    return VisitConditional(exp as ConditionalExpression);
                 default:
                     return exp.ToString();
             }
@@ -1496,6 +1498,19 @@ namespace ServiceStack.OrmLite
                         return true;
                 }
 
+                var condExpr = e as ConditionalExpression;
+                if (condExpr != null)
+                {
+                    if (CheckExpressionForTypes(condExpr.Test, types))
+                        return true;
+
+                    if (CheckExpressionForTypes(condExpr.IfTrue, types))
+                        return true;
+
+                    if (CheckExpressionForTypes(condExpr.IfFalse, types))
+                        return true;
+                }
+
                 var memberExpr = e as MemberExpression;
                 e = memberExpr?.Expression;
             }
@@ -1746,6 +1761,32 @@ namespace ServiceStack.OrmLite
             throw new NotImplementedException("Unknown Expression: " + e);
         }
 
+        protected virtual object VisitConditional(ConditionalExpression e)
+        {
+            var test = IsBooleanComparison(e.Test)
+                ? new PartialSqlString($"{VisitMemberAccess((MemberExpression) e.Test)}={GetQuotedTrueValue()}")
+                : Visit(e.Test);
+
+            if (test is bool)
+            {
+                if ((bool) test)
+                {
+                    var ifTrue = Visit(e.IfTrue);
+                    return ifTrue;
+                }
+
+                var ifFalse = Visit(e.IfFalse);
+                return ifFalse;
+            }
+            else
+            {
+                var ifTrue = Visit(e.IfTrue);
+                var ifFalse = Visit(e.IfFalse);
+
+                return new PartialSqlString($"(CASE WHEN {test} THEN {ifTrue} ELSE {ifFalse} END)");
+            }
+        }
+
         private object GetNotValue(object o)
         {
             if (!(o is PartialSqlString))
@@ -1765,6 +1806,10 @@ namespace ServiceStack.OrmLite
             var methCallExp = m.Object as MethodCallExpression;
             if (methCallExp != null)
                 return IsColumnAccess(methCallExp);
+
+            var condExp = m.Object as ConditionalExpression;
+            if (condExp != null)
+                return IsParameterAccess(condExp);
 
             var exp = m.Object as MemberExpression;
             return IsParameterAccess(exp)

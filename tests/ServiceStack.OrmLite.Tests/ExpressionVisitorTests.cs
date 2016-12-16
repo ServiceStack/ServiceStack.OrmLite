@@ -499,7 +499,57 @@ namespace ServiceStack.OrmLite.Tests
             var q = Db.From<TestType>().Where(filter);//todo: here Where: null is NULL. May be need to change to 1=1 ?
             var target = Db.Select(q);
             Assert.That(target.Count, Is.EqualTo(4));
+        }
 
+        [Test]
+        public void Can_Where_using_Conditional_filter()
+        {
+            System.Linq.Expressions.Expression<Func<TestType, bool>> filter = x => (x.NullableIntCol == null ? 0 : x.NullableIntCol) == 10;
+            var q = Db.From<TestType>().Where(filter);
+            var target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Can_Where_using_Bool_Conditional_filter()
+        {
+            System.Linq.Expressions.Expression<Func<TestType, bool>> filter = x => (x.BoolCol ? x.NullableIntCol : 0) == 10;
+            var q = Db.From<TestType>().Where(filter);
+            var target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Can_Where_using_Method_with_Conditional_filter()
+        {
+            System.Linq.Expressions.Expression<Func<TestType, bool>> filter = x => (x.TextCol == null ? null : x.TextCol).StartsWith("asdf");
+            var q = Db.From<TestType>().Where(filter);
+            var target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void Can_Where_using_Constant_Conditional_filter()
+        {
+            var filterConditional = 10;
+            System.Linq.Expressions.Expression<Func<TestType, bool>> filter = x => (filterConditional > 50 ? 123456789 : x.NullableIntCol) == 10;
+            var q = Db.From<TestType>().Where(filter);
+            Assert.That(q.ToSelectStatement(), Does.Not.Contain("123456789"));
+
+            var target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Can_Where_using_Bool_Constant_Conditional_filter()
+        {
+            var filterConditional = true;
+            System.Linq.Expressions.Expression<Func<TestType, bool>> filter = x => (filterConditional ? x.NullableIntCol : 123456789) == 10;
+            var q = Db.From<TestType>().Where(filter);
+            Assert.That(q.ToSelectStatement(), Does.Not.Contain("123456789"));
+
+            var target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(1));
         }
 
         private int MethodReturningInt(int val)
