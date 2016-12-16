@@ -122,6 +122,7 @@
     <Compile Include="Async\AsyncTests.cs" />
     <Compile Include="Async\AutoQueryTestsAsync.cs" />
     <Compile Include="Async\CustomSqlTestsAsync.cs" />
+    <Compile Include="Async\DefaultValueOnUpdateTestsAsync.cs" />
     <Compile Include="Async\Issues\LoadSelectAmbiguousColumnIssue.cs" />
     <Compile Include="Async\Issues\PredicateBuilderIssue.cs" />
     <Compile Include="Async\Issues\SqlServerComputedColumnIssue.cs" />

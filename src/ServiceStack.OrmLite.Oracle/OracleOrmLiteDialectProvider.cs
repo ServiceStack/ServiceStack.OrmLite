@@ -624,34 +624,47 @@ namespace ServiceStack.OrmLite.Oracle
             }
         }
 
-        // TODO: do we need this?
-        public override void SetParameterValue<T>(FieldDefinition fieldDef, IDataParameter p, object obj)
+        protected override void SetParameterValue<T>(IDbCommand dbCmd, ModelDefinition modelDef, Dictionary<string, FieldDefinition> fieldMap, IDataParameter p, object obj)
         {
-            p.Value = GetValueOrDbNull<T>(fieldDef, obj);
+            FieldDefinition fieldDef;
+            var fieldName = this.ToFieldName(p.ParameterName);
+            fieldMap.TryGetValue(fieldName, out fieldDef);
+
+            if (fieldDef == null)
+                throw new ArgumentException("Field Definition '{0}' was not found".Fmt(fieldName));
+
+            if (fieldDef.AutoIncrement || !string.IsNullOrEmpty(fieldDef.Sequence))
+            {
+                if (fieldDef.AutoIncrement && string.IsNullOrEmpty(fieldDef.Sequence))
+                {
+                    fieldDef.Sequence = Sequence(NamingStrategy.GetTableName(modelDef), fieldDef.FieldName, fieldDef.Sequence);
+                }
+
+                var pi = typeof(T).GetProperty(fieldDef.Name,
+                    BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy);
+
+                //TODO fix this hack! Because of the way we handle sequences we have to know whether
+                // this is an insert or update/delete. If we did sequences with triggers this would
+                // not be a problem.
+                var sql = dbCmd.CommandText.TrimStart().ToUpperInvariant();
+                bool isInsert = sql.StartsWith("INSERT", StringComparison.InvariantCulture);
+
+                var result = GetNextValue(dbCmd.Connection, dbCmd.Transaction, fieldDef.Sequence,
+                                          pi.GetValue(obj, new object[] { }), isInsert);
+                if (pi.PropertyType == typeof(String))
+                    pi.SetProperty(obj, result.ToString());
+                else if (pi.PropertyType == typeof(Int16) || pi.PropertyType == typeof(Int16?))
+                    pi.SetProperty(obj, Convert.ToInt16(result));
+                else if (pi.PropertyType == typeof(Int32) || pi.PropertyType == typeof(Int32?))
+                    pi.SetProperty(obj, Convert.ToInt32(result));
+                else if (pi.PropertyType == typeof(Guid) || pi.PropertyType == typeof(Guid?))
+                    pi.SetProperty(obj, result);
+                else
+                    pi.SetProperty(obj, Convert.ToInt64(result));
+            }
+
+            SetParameterValue<T>(fieldDef, p, obj);
         }
-
-        //Moved to Converters.ToDbValue()
-        //protected override object GetValue<T>(FieldDefinition fieldDef, object obj)
-        //{
-        //    var value = base.GetValue<T>(fieldDef, obj);
-
-        //    if (value != null)
-        //    {
-        //        if (fieldDef.FieldType == typeof(Guid))
-        //        {
-        //            var guid = (Guid)value;
-        //            if (CompactGuid) return guid.ToByteArray();
-        //            return guid.ToString();
-        //        }
-
-        //        if (fieldDef.FieldType == typeof(DateTimeOffset))
-        //        {
-        //            var timestamp = (DateTimeOffset)value;
-        //            return _timestampConverter.ConvertToOracleTimeStampTz(timestamp);
-        //        }
-        //    }
-        //    return value;
-        //}
 
         //TODO: Change to parameterized query to match all other ToInsertRowStatement() impls
         public override string ToInsertRowStatement(IDbCommand dbCommand, object objWithProperties, ICollection<string> insertFields = null)
@@ -725,18 +738,19 @@ namespace ServiceStack.OrmLite.Oracle
 
         public override void PrepareUpdateRowStatement(IDbCommand dbCmd, object objWithProperties, ICollection<string> updateFields = null)
         {
+            if (updateFields == null) updateFields = new List<string>();
             var sql = StringBuilderCache.Allocate();
             var sqlFilter = StringBuilderCacheAlt.Allocate();
-            var tableType = objWithProperties.GetType();
-            var modelDef = GetModel(tableType);
+            var modelDef = GetModel(objWithProperties.GetType());
+            var updateAllFields = updateFields.Count == 0;
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
-                if (fieldDef.IsComputed) continue;
+                if (fieldDef.ShouldSkipUpdate())
+                    continue;
 
-                var updateFieldsEmptyOrNull = updateFields == null || updateFields.Count == 0;
                 if ((fieldDef.IsPrimaryKey || fieldDef.Name == OrmLiteConfig.IdField)
-                    && updateFieldsEmptyOrNull)
+                    && updateAllFields)
                 {
                     if (sqlFilter.Length > 0)
                         sqlFilter.Append(" AND ");
@@ -749,23 +763,37 @@ namespace ServiceStack.OrmLite.Oracle
                     continue;
                 }
 
-                if (!updateFieldsEmptyOrNull && !updateFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase))
-                    continue;
+                if (fieldDef.UseDefaultOnUpdate && !updateFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase))
+                {
+                    if (sql.Length > 0)
+                        sql.Append(", ");
 
-                if (sql.Length > 0)
-                    sql.Append(",");
+                    sql.Append(GetQuotedColumnName(fieldDef.FieldName)).Append("=");
+                    var defaultValue = GetDefaultValue(fieldDef);
+                    if (fieldDef.DefaultValue.StartsWith("{") || fieldDef.DefaultValue.StartsWith("'"))
+                    {
+                        sql.Append(defaultValue);
+                    }
+                    else
+                    {
+                        sql.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
+                        var parameter = AddParameter(dbCmd, fieldDef);
+                        parameter.Value = defaultValue;
+                    }
+                }
+                else if (updateAllFields || updateFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase))
+                {
+                    if (sql.Length > 0)
+                        sql.Append(", ");
 
-                sql
-                    .Append(GetQuotedColumnName(fieldDef.FieldName))
-                    .Append("=")
-                    .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef).ParameterName);
+                    sql.Append(GetQuotedColumnName(fieldDef.FieldName)).Append("=")
+                       .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef).ParameterName);
+                }
             }
 
             var strFilter = StringBuilderCacheAlt.ReturnAndFree(sqlFilter);
-            dbCmd.CommandText = string.Format("UPDATE {0} \nSET {1} {2}",
-                GetQuotedTableName(modelDef), 
-                StringBuilderCache.ReturnAndFree(sql),
-                strFilter.Length > 0 ? "\nWHERE " + strFilter : "");
+            dbCmd.CommandText = $"UPDATE {GetQuotedTableName(modelDef)} " +
+                                $"SET {StringBuilderCache.ReturnAndFree(sql)}{(strFilter.Length > 0 ? " WHERE " + strFilter : "")}";
         }
 
         public override string ToCreateTableStatement(Type tableType)

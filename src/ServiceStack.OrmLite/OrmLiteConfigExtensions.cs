@@ -147,6 +147,7 @@ namespace ServiceStack.OrmLite
                     IsRowVersion = isRowVersion,
                     FieldLength = stringLengthAttr?.MaximumLength,
                     DefaultValue = defaultValueAttr?.DefaultValue,
+                    UseDefaultOnUpdate = defaultValueAttr?.OnUpdate ?? false,
                     ForeignKey = fkAttr == null
                         ? referencesAttr != null ? new ForeignKeyConstraint(referencesAttr.Type) : null
                         : new ForeignKeyConstraint(fkAttr.Type, fkAttr.OnDelete, fkAttr.OnUpdate, fkAttr.ForeignKeyName),
