@@ -54,15 +54,15 @@ namespace ServiceStack.OrmLite
 
         internal static Task<int> UpdateAsync<T>(this IDbCommand dbCmd, T obj, CancellationToken token)
         {
-            if (OrmLiteConfig.UpdateFilter != null)
-                OrmLiteConfig.UpdateFilter(dbCmd, obj);
+            OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, obj);
 
             var dialectProvider = dbCmd.GetDialectProvider();
-            var hadRowVersion = dialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
+            var hadRowVersion = false;
+            var parameters = dialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd, ref hadRowVersion);
             if (string.IsNullOrEmpty(dbCmd.CommandText))
                 return TaskResult.Zero;
 
-            dialectProvider.SetParameterValues<T>(dbCmd, obj);
+            dialectProvider.SetParameterValues<T>(dbCmd, parameters, obj);
 
             return dialectProvider.ExecuteNonQueryAsync(dbCmd, token)
                 .Then(rowsUpdated =>
@@ -88,7 +88,8 @@ namespace ServiceStack.OrmLite
 
             var dialectProvider = dbCmd.GetDialectProvider();
 
-            var hadRowVersion = dialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
+            var hadRowVersion = false;
+            var parameters =  dialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd, ref hadRowVersion);
             if (string.IsNullOrEmpty(dbCmd.CommandText))
                 return TaskResult.Zero;
 
@@ -97,7 +98,7 @@ namespace ServiceStack.OrmLite
                 if (OrmLiteConfig.UpdateFilter != null)
                     OrmLiteConfig.UpdateFilter(dbCmd, obj);
 
-                dialectProvider.SetParameterValues<T>(dbCmd, obj);
+                dialectProvider.SetParameterValues<T>(dbCmd, parameters, obj);
 
                 return dbCmd.ExecNonQueryAsync(token).Then(rowsUpdated =>
                 {
