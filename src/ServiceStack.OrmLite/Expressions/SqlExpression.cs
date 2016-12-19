@@ -1264,9 +1264,12 @@ namespace ServiceStack.OrmLite
 
                 if (m.Expression != null)
                 {
-                    string r = VisitMemberAccess(m).ToString();
-                    if (m.Expression.Type.IsNullableType())
+                    var r = VisitMemberAccess(m);
+                    if (!(r is PartialSqlString))
                         return r;
+
+                    if (m.Expression.Type.IsNullableType())
+                        return r.ToString();
 
                     return $"{r}={GetQuotedTrueValue()}";
                 }
@@ -1290,13 +1293,21 @@ namespace ServiceStack.OrmLite
             var operand = BindOperant(b.NodeType);   //sep= " " ??
             if (operand == "AND" || operand == "OR")
             {
-                left = IsBooleanComparison(b.Left) 
-                    ? new PartialSqlString($"{VisitMemberAccess((MemberExpression) b.Left)}={GetQuotedTrueValue()}") 
-                    : Visit(b.Left);
+                if (IsBooleanComparison(b.Left))
+                {
+                    left = VisitMemberAccess((MemberExpression) b.Left);
+                    if (left is PartialSqlString)
+                        left = new PartialSqlString($"{left}={GetQuotedTrueValue()}");
+                }
+                else left = Visit(b.Left);
 
-                right = IsBooleanComparison(b.Right) 
-                    ? new PartialSqlString($"{VisitMemberAccess((MemberExpression) b.Right)}={GetQuotedTrueValue()}") 
-                    : Visit(b.Right);
+                if (IsBooleanComparison(b.Right))
+                {
+                    right = VisitMemberAccess((MemberExpression)b.Right);
+                    if (right is PartialSqlString)
+                        right = new PartialSqlString($"{right}={GetQuotedTrueValue()}");
+                }
+                else right = Visit(b.Right);
 
                 if (!(left is PartialSqlString) && !(right is PartialSqlString))
                 {
