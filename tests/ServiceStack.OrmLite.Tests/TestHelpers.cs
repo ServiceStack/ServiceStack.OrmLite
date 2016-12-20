@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Data;
 
 namespace ServiceStack.OrmLite.Tests
@@ -34,6 +35,14 @@ namespace ServiceStack.OrmLite.Tests
             if (paramString.Equals("@"))
                 return sql;
             return sql.Replace("@", paramString);
+        }
+
+        public static List<int> AdjustIds(this IEnumerable<int> ids, int initialId)
+        {
+            var result = new List<int>();
+            foreach (var id in ids)
+                result.Add(id + initialId);
+            return result;
         }
     }
 }
