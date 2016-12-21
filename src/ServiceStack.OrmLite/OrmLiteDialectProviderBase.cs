@@ -716,13 +716,15 @@ namespace ServiceStack.OrmLite
         {
             dbCmd.Parameters.Clear();
             var dialectProvider = dbCmd.GetDialectProvider();
-            dialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
+            var hadRowVersion = false;
+            var parameters = dialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd, ref hadRowVersion);
 
             if (string.IsNullOrEmpty(dbCmd.CommandText))
                 return null;
 
-            dialectProvider.SetParameterValues<T>(dbCmd, item);
+            dialectProvider.SetParameterValues<T>(dbCmd, parameters, item);
 
+//TODO no way this is correct any more ... because some of the parameters have values supplied already because they are default ...
             return MergeParamsIntoSql(dbCmd.CommandText, ToArray(dbCmd.Parameters));
         }
 
@@ -748,14 +750,13 @@ namespace ServiceStack.OrmLite
             return sql;
         }
 
-        public virtual bool PrepareParameterizedUpdateStatement<T>(IDbCommand cmd, ICollection<string> updateFields = null)
+        public virtual ICollection<IDataParameter> PrepareParameterizedUpdateStatement<T>(IDbCommand cmd, ref bool hadRowVersion)
         {
             var sql = StringBuilderCache.Allocate();
             var sqlFilter = StringBuilderCacheAlt.Allocate();
             var modelDef = typeof(T).GetModelDefinition();
-            var hadRowVesion = false;
-            var updateAllFields = updateFields == null || updateFields.Count == 0;
 
+            var parameters = new List<IDataParameter>();
             cmd.Parameters.Clear();
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
@@ -765,31 +766,46 @@ namespace ServiceStack.OrmLite
 
                 try
                 {
-                    if ((fieldDef.IsPrimaryKey || fieldDef.IsRowVersion) && updateAllFields)
+                    if (fieldDef.IsPrimaryKey || fieldDef.IsRowVersion)
                     {
                         if (sqlFilter.Length > 0)
                             sqlFilter.Append(" AND ");
 
-                        AppendFieldCondition(sqlFilter, fieldDef, cmd);
+                        parameters.Add(AppendFieldCondition(sqlFilter, fieldDef, cmd));
 
                         if (fieldDef.IsRowVersion)
-                            hadRowVesion = true;
+                            hadRowVersion = true;
 
                         continue;
                     }
 
-                    if (!updateAllFields && !updateFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase))
-                        continue;
+                    if (fieldDef.UseDefaultOnUpdate)
+                    {
+                        if (sql.Length > 0)
+                            sql.Append(", ");
 
-                    if (sql.Length > 0)
-                        sql.Append(", ");
+                        sql.Append(GetQuotedColumnName(fieldDef.FieldName)).Append("=");
+                        var defaultValue = GetDefaultValue(fieldDef);
+                        if (fieldDef.DefaultValue.StartsWith("{") || fieldDef.DefaultValue.StartsWith("'"))
+                        {
+                            sql.Append(defaultValue);
+                        }
+                        else
+                        {
+                            sql.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
+                            var parameter = AddParameter(cmd, fieldDef);
+                            parameter.Value = defaultValue;
+                        }
+                    }
+                    else
+                    {
+                        if (sql.Length > 0)
+                            sql.Append(", ");
 
-                    sql
-                        .Append(GetQuotedColumnName(fieldDef.FieldName))
-                        .Append("=")
-                        .Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
-
-                    AddParameter(cmd, fieldDef);
+                        sql.Append(GetQuotedColumnName(fieldDef.FieldName)).Append("=")
+                           .Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
+                        parameters.Add(AddParameter(cmd, fieldDef));
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -804,7 +820,7 @@ namespace ServiceStack.OrmLite
                                   $"SET {StringBuilderCache.ReturnAndFree(sql)} {(strFilter.Length > 0 ? "WHERE " + strFilter : "")}";
             }
 
-            return hadRowVesion;
+            return parameters;
         }
 
         public virtual void AppendNullFieldCondition(StringBuilder sqlFilter, FieldDefinition fieldDef)
@@ -814,14 +830,14 @@ namespace ServiceStack.OrmLite
                 .Append(" IS NULL");
         }
 
-        public virtual void AppendFieldCondition(StringBuilder sqlFilter, FieldDefinition fieldDef, IDbCommand cmd)
+        public virtual IDataParameter AppendFieldCondition(StringBuilder sqlFilter, FieldDefinition fieldDef, IDbCommand cmd)
         {
             sqlFilter
                 .Append(GetQuotedColumnName(fieldDef.FieldName))
                 .Append("=")
                 .Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
 
-            AddParameter(cmd, fieldDef);
+            return AddParameter(cmd, fieldDef);
         }
 
         public virtual bool PrepareParameterizedDeleteStatement<T>(IDbCommand cmd, IDictionary<string, object> deleteFields)
@@ -900,24 +916,40 @@ namespace ServiceStack.OrmLite
 
             foreach (IDataParameter p in dbCmd.Parameters)
             {
-                FieldDefinition fieldDef;
-                var fieldName = this.ToFieldName(p.ParameterName);
-                fieldMap.TryGetValue(fieldName, out fieldDef);
+                SetParameterValue<T>(dbCmd, modelDef, fieldMap, p, obj);
+            }
+        }
 
-                if (fieldDef == null)
+        public virtual void SetParameterValues<T>(IDbCommand dbCmd, ICollection<IDataParameter> parameters, object obj)
+        {
+            var modelDef = GetModel(typeof(T));
+            var fieldMap = GetFieldDefinitionMap(modelDef);
+
+            foreach (var p in parameters)
+            {
+                SetParameterValue<T>(dbCmd, modelDef, fieldMap, p, obj);
+            }
+        }
+
+        protected virtual void SetParameterValue<T>(IDbCommand dbCmd, ModelDefinition modelDef, Dictionary<string, FieldDefinition> fieldMap, IDataParameter p, object obj)
+        {
+            FieldDefinition fieldDef;
+            var fieldName = this.ToFieldName(p.ParameterName);
+            fieldMap.TryGetValue(fieldName, out fieldDef);
+
+            if (fieldDef == null)
+            {
+                if (OrmLiteConfig.ParamNameFilter != null)
                 {
-                    if (OrmLiteConfig.ParamNameFilter != null)
-                    {
-                        fieldDef = modelDef.GetFieldDefinition(name => 
-                            string.Equals(OrmLiteConfig.ParamNameFilter(name), fieldName, StringComparison.OrdinalIgnoreCase));
-                    }
-
-                    if (fieldDef == null)
-                        throw new ArgumentException("Field Definition '{0}' was not found".Fmt(fieldName));
+                    fieldDef = modelDef.GetFieldDefinition(name =>
+                        string.Equals(OrmLiteConfig.ParamNameFilter(name), fieldName, StringComparison.OrdinalIgnoreCase));
                 }
 
-                SetParameterValue<T>(fieldDef, p, obj);
+                if (fieldDef == null)
+                    throw new ArgumentException("Field Definition '{0}' was not found".Fmt(fieldName));
             }
+
+            SetParameterValue<T>(fieldDef, p, obj);
         }
 
         public Dictionary<string, FieldDefinition> GetFieldDefinitionMap(ModelDefinition modelDef)
@@ -995,7 +1027,7 @@ namespace ServiceStack.OrmLite
                 return DBNull.Value;
 
             var unquotedVal = GetQuotedValue(value, fieldDef.FieldType)
-                .TrimStart('\'').TrimEnd('\''); ;
+                .TrimStart('\'').TrimEnd('\'');
 
             if (string.IsNullOrEmpty(unquotedVal))
                 return DBNull.Value;
@@ -1021,10 +1053,11 @@ namespace ServiceStack.OrmLite
 
         public virtual void PrepareUpdateRowStatement(IDbCommand dbCmd, object objWithProperties, ICollection<string> updateFields = null)
         {
+            if (updateFields == null) updateFields = new List<string>();
             var sql = StringBuilderCache.Allocate();
             var sqlFilter = StringBuilderCacheAlt.Allocate();
             var modelDef = objWithProperties.GetType().GetModelDefinition();
-            var updateAllFields = updateFields == null || updateFields.Count == 0;
+            var updateAllFields = updateFields.Count == 0;
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
@@ -1046,16 +1079,32 @@ namespace ServiceStack.OrmLite
                         continue;
                     }
 
-                    if (!updateAllFields && !updateFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase) || fieldDef.AutoIncrement)
-                        continue;
+                    if (fieldDef.UseDefaultOnUpdate && !updateFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase))
+                    {
+                        if (sql.Length > 0)
+                            sql.Append(", ");
 
-                    if (sql.Length > 0)
-                        sql.Append(", ");
+                        sql.Append(GetQuotedColumnName(fieldDef.FieldName)).Append("=");
+                        var defaultValue = GetDefaultValue(fieldDef);
+                        if (fieldDef.DefaultValue.StartsWith("{") || fieldDef.DefaultValue.StartsWith("'"))
+                        {
+                            sql.Append(defaultValue);
+                        }
+                        else
+                        {
+                            sql.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
+                            var parameter = AddParameter(dbCmd, fieldDef);
+                            parameter.Value = defaultValue;
+                        }
+                    }
+                    else if ((updateAllFields || updateFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase)) && !fieldDef.AutoIncrement)
+                    {
+                        if (sql.Length > 0)
+                            sql.Append(", ");
 
-                    sql
-                        .Append(GetQuotedColumnName(fieldDef.FieldName))
-                        .Append("=")
-                        .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef).ParameterName);
+                        sql.Append(GetQuotedColumnName(fieldDef.FieldName)).Append("=")
+                           .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef).ParameterName);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -1076,9 +1125,11 @@ namespace ServiceStack.OrmLite
             var sql = StringBuilderCache.Allocate();
             var modelDef = typeof(T).GetModelDefinition();
 
+            var updateFields = new List<FieldDefinition>();
             foreach (var entry in args)
             {
                 var fieldDef = modelDef.GetFieldDefinition(entry.Key);
+                updateFields.Add(fieldDef);
                 if (fieldDef.ShouldSkipUpdate() || fieldDef.AutoIncrement)
                     continue;
 
@@ -1100,6 +1151,8 @@ namespace ServiceStack.OrmLite
                 }
             }
 
+            AddDefaultUpdateFields(dbCmd, modelDef, updateFields, sql, "ERROR in PrepareUpdateRowStatement(cmd,args): ");
+
             dbCmd.CommandText = $"UPDATE {GetQuotedTableName(modelDef)} " +
                                 $"SET {StringBuilderCache.ReturnAndFree(sql)}{(string.IsNullOrEmpty(sqlFilter) ? "" : " ")}{sqlFilter}";
 
@@ -1107,14 +1160,48 @@ namespace ServiceStack.OrmLite
                 throw new Exception("No valid update properties provided (e.g. () => new Person { Age = 27 }): " + dbCmd.CommandText);
         }
 
+        public virtual void AddDefaultUpdateFields(IDbCommand dbCmd, ModelDefinition modelDef, ICollection<FieldDefinition> updateFields, StringBuilder sql, string errorMessage)
+        {
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+                if (updateFields.Contains(fieldDef) || !fieldDef.UseDefaultOnUpdate)
+                    continue;
+
+                try
+                {
+                    if (sql.Length > 0)
+                        sql.Append(", ");
+
+                    sql.Append(GetQuotedColumnName(fieldDef.FieldName)).Append("=");
+                    var defaultValue = GetDefaultValue(fieldDef);
+                    if (fieldDef.DefaultValue.StartsWith("{") || fieldDef.DefaultValue.StartsWith("'"))
+                    {
+                        sql.Append(defaultValue);
+                    }
+                    else
+                    {
+                        sql.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
+                        var parameter = AddParameter(dbCmd, fieldDef);
+                        parameter.Value = defaultValue;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(errorMessage + ex.Message, ex);
+                }
+            }
+        }
+
         public virtual void PrepareUpdateRowAddStatement<T>(IDbCommand dbCmd, Dictionary<string, object> args, string sqlFilter)
         {
             var sql = StringBuilderCache.Allocate();
             var modelDef = typeof(T).GetModelDefinition();
 
+            var updateFields = new List<FieldDefinition>();
             foreach (var entry in args)
             {
                 var fieldDef = modelDef.GetFieldDefinition(entry.Key);
+                updateFields.Add(fieldDef);
                 if (fieldDef.ShouldSkipUpdate() || fieldDef.AutoIncrement || fieldDef.IsPrimaryKey ||
                     fieldDef.IsRowVersion || fieldDef.Name == OrmLiteConfig.IdField)
                     continue;
@@ -1150,6 +1237,8 @@ namespace ServiceStack.OrmLite
                     Log.Error("ERROR in PrepareUpdateRowAddStatement(): " + ex.Message, ex);
                 }
             }
+
+            AddDefaultUpdateFields(dbCmd, modelDef, updateFields, sql, "ERROR in PrepareUpdateRowAddStatement(): ");
 
             dbCmd.CommandText = $"UPDATE {GetQuotedTableName(modelDef)} " +
                                 $"SET {StringBuilderCache.ReturnAndFree(sql)}{(string.IsNullOrEmpty(sqlFilter) ? "" : " ")}{sqlFilter}";
