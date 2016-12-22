@@ -54,6 +54,8 @@ namespace ServiceStack.OrmLite
 
         public string DefaultValue { get; set; }
 
+        public bool UseDefaultOnUpdate { get; set; }
+
         public ForeignKeyConstraint ForeignKey { get; set; }
 
         public PropertyGetterDelegate GetValueFn { get; set; }
@@ -147,6 +149,7 @@ namespace ServiceStack.OrmLite
                 FieldLength = FieldLength,
                 Scale = Scale,
                 DefaultValue = DefaultValue,
+                UseDefaultOnUpdate = UseDefaultOnUpdate,
                 ForeignKey = ForeignKey,
                 GetValueFn = GetValueFn,
                 SetValueFn = SetValueFn,

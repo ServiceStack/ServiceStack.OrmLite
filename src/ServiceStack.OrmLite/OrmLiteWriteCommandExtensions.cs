@@ -355,11 +355,12 @@ namespace ServiceStack.OrmLite
             OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, obj);
 
             var dialectProvider = dbCmd.GetDialectProvider();
-            var hadRowVersion = dialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
+            var hadRowVersion = false;
+            var parameters = dialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd, ref hadRowVersion);
             if (string.IsNullOrEmpty(dbCmd.CommandText))
                 return 0;
 
-            dialectProvider.SetParameterValues<T>(dbCmd, obj);
+            dialectProvider.SetParameterValues<T>(dbCmd, parameters, obj);
 
             var rowsUpdated = dbCmd.ExecNonQuery();
 
@@ -386,7 +387,8 @@ namespace ServiceStack.OrmLite
 
                 var dialectProvider = dbCmd.GetDialectProvider();
 
-                var hadRowVersion = dialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
+                var hadRowVersion = false;
+                var parameters = dialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd, ref hadRowVersion);
                 if (string.IsNullOrEmpty(dbCmd.CommandText))
                     return 0;
 
@@ -394,7 +396,7 @@ namespace ServiceStack.OrmLite
                 {
                     OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, obj);
 
-                    dialectProvider.SetParameterValues<T>(dbCmd, obj);
+                    dialectProvider.SetParameterValues<T>(dbCmd, parameters, obj);
 
                     var rowsUpdated = dbCmd.ExecNonQuery();
                     if (hadRowVersion && rowsUpdated == 0) 

@@ -42,11 +42,11 @@ namespace ServiceStack.OrmLite.SqlServer
             return StringBuilderCache.ReturnAndFree(sb);
         }
 
-        public override void AppendFieldCondition(StringBuilder sqlFilter, FieldDefinition fieldDef, IDbCommand cmd)
+        public override IDataParameter AppendFieldCondition(StringBuilder sqlFilter, FieldDefinition fieldDef, IDbCommand cmd)
         {
             if (!isSpatialField(fieldDef))
             {
-                base.AppendFieldCondition(sqlFilter, fieldDef, cmd);
+                return base.AppendFieldCondition(sqlFilter, fieldDef, cmd);
             }
             else 
             {
@@ -56,7 +56,7 @@ namespace ServiceStack.OrmLite.SqlServer
                     .Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)))
                     .Append(") = 1");
  
-                AddParameter(cmd, fieldDef);
+                return AddParameter(cmd, fieldDef);
             }
         }
 

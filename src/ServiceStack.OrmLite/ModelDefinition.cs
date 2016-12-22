@@ -24,6 +24,7 @@ namespace ServiceStack.OrmLite
             this.FieldDefinitions = new List<FieldDefinition>();
             this.IgnoredFieldDefinitions = new List<FieldDefinition>();
             this.CompositeIndexes = new List<CompositeIndexAttribute>();
+            this.UpdateDefaultFieldDefinitions = new List<FieldDefinition>();
         }
 
         public const string RowVersionName = "RowVersion";
@@ -76,6 +77,8 @@ namespace ServiceStack.OrmLite
         public FieldDefinition[] IgnoredFieldDefinitionsArray { get; private set; }
 
         public FieldDefinition[] AllFieldDefinitionsArray { get; private set; }
+
+        public List<FieldDefinition> UpdateDefaultFieldDefinitions { get; private set; }
 
         private readonly object fieldDefLock = new object();
         private Dictionary<string, FieldDefinition> fieldDefinitionMap;

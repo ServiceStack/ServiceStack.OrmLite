@@ -121,6 +121,7 @@ namespace ServiceStack.OrmLite
                 var stringLengthAttr = propertyInfo.CalculateStringLength(decimalAttribute);
 
                 var defaultValueAttr = propertyInfo.FirstAttribute<DefaultAttribute>();
+                var useDefaultOnUpdate = defaultValueAttr?.OnUpdate ?? false;
 
                 var referencesAttr = propertyInfo.FirstAttribute<ReferencesAttribute>();
                 var referenceAttr = propertyInfo.FirstAttribute<ReferenceAttribute>();
@@ -147,6 +148,7 @@ namespace ServiceStack.OrmLite
                     IsRowVersion = isRowVersion,
                     FieldLength = stringLengthAttr?.MaximumLength,
                     DefaultValue = defaultValueAttr?.DefaultValue,
+                    UseDefaultOnUpdate = useDefaultOnUpdate,
                     ForeignKey = fkAttr == null
                         ? referencesAttr != null ? new ForeignKeyConstraint(referencesAttr.Type) : null
                         : new ForeignKeyConstraint(fkAttr.Type, fkAttr.OnDelete, fkAttr.OnUpdate, fkAttr.ForeignKeyName),
@@ -169,6 +171,8 @@ namespace ServiceStack.OrmLite
                     modelDef.IgnoredFieldDefinitions.Add(fieldDefinition);
                 else
                     modelDef.FieldDefinitions.Add(fieldDefinition);
+                if (useDefaultOnUpdate)
+                    modelDef.UpdateDefaultFieldDefinitions.Add(fieldDefinition);
 
                 if (isRowVersion)
                     modelDef.RowVersion = fieldDefinition;

@@ -138,10 +138,13 @@ namespace ServiceStack.OrmLite
             var modelDef = typeof(T).GetModelDefinition();
             var fields = modelDef.FieldDefinitionsArray;
 
+            var updateFields = new List<FieldDefinition>();
             foreach (var setField in updateOnly.GetType().GetPublicProperties())
             {
                 var fieldDef = fields.FirstOrDefault(x => string.Equals(x.Name, setField.Name, StringComparison.OrdinalIgnoreCase));
-                if (fieldDef == null || fieldDef.ShouldSkipUpdate()) continue;
+                if (fieldDef == null) continue;
+                updateFields.Add(fieldDef);
+                if (fieldDef.ShouldSkipUpdate()) continue;
 
                 if (sql.Length > 0)
                     sql.Append(", ");
@@ -152,6 +155,8 @@ namespace ServiceStack.OrmLite
                     .Append("=")
                     .Append(dialectProvider.AddParam(dbCmd, value, fieldDef).ParameterName);
             }
+
+            dialectProvider.AddDefaultUpdateFields(dbCmd, modelDef, updateFields, sql, "");
 
             dbCmd.CommandText = $"UPDATE {dialectProvider.GetQuotedTableName(modelDef)} " +
                                 $"SET {StringBuilderCache.ReturnAndFree(sql)} {whereSql}";
