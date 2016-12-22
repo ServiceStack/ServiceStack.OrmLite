@@ -400,6 +400,9 @@
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\TestHelpers.cs">
       <Link>TestHelpers.cs</Link>
     </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\ToInsertAndUpdateStatementTests.cs">
+      <Link>ToInsertAndUpdateStatementTests.cs</Link>
+    </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\TypeDescriptorMetadataTests.cs">
       <Link>TypeDescriptorMetadataTests.cs</Link>
     </Compile>
