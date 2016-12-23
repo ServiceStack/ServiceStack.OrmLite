@@ -21,9 +21,13 @@ namespace ServiceStack.OrmLite
         ///   db.UpdateOnly(new Person { FirstName = "JJ", LastName = "Hendo" }, ev.Update(p => p.FirstName));
         ///   UPDATE "Person" SET "FirstName" = 'JJ'
         /// </summary>
-        public static Task<int> UpdateOnlyAsync<T>(this IDbConnection dbConn, T model, SqlExpression<T> onlyFields, CancellationToken token = default(CancellationToken))
+        public static Task<int> UpdateOnlyAsync<T>(this IDbConnection dbConn,
+            T model,
+            SqlExpression<T> onlyFields,
+            Action<IDbCommand> commandFilter = null,
+            CancellationToken token = default(CancellationToken))
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateOnlyAsync(model, onlyFields, token));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateOnlyAsync(model, onlyFields, commandFilter, token));
         }
 
         /// <summary>
@@ -38,9 +42,10 @@ namespace ServiceStack.OrmLite
         public static Task<int> UpdateOnlyAsync<T>(this IDbConnection dbConn,
             Expression<Func<T>> updateFields,
             Expression<Func<T, bool>> where = null,
+            Action<IDbCommand> commandFilter = null,
             CancellationToken token = default(CancellationToken))
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateOnlyAsync(updateFields, dbCmd.GetDialectProvider().SqlExpression<T>().Where(where), token));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateOnlyAsync(updateFields, dbCmd.GetDialectProvider().SqlExpression<T>().Where(where), commandFilter, token));
         }
 
         /// <summary>
@@ -52,9 +57,10 @@ namespace ServiceStack.OrmLite
         public static Task<int> UpdateOnlyAsync<T>(this IDbConnection dbConn,
             Expression<Func<T>> updateFields,
             SqlExpression<T> q,
+            Action<IDbCommand> commandFilter = null,
             CancellationToken token = default(CancellationToken))
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateOnlyAsync(updateFields, q, token));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateOnlyAsync(updateFields, q, commandFilter, token));
         }
 
         /// <summary>
@@ -69,9 +75,10 @@ namespace ServiceStack.OrmLite
         public static Task<int> UpdateOnlyAsync<T>(this IDbConnection dbConn, T obj,
             Expression<Func<T, object>> onlyFields = null,
             Expression<Func<T, bool>> where = null,
+            Action<IDbCommand> commandFilter = null,
             CancellationToken token = default(CancellationToken))
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateOnlyAsync(obj, onlyFields, where, token));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateOnlyAsync(obj, onlyFields, where, commandFilter, token));
         }
 
         /// <summary>
@@ -88,9 +95,10 @@ namespace ServiceStack.OrmLite
         public static Task<int> UpdateAddAsync<T>(this IDbConnection dbConn,
             Expression<Func<T>> updateFields,
             Expression<Func<T, bool>> where = null,
+            Action<IDbCommand> commandFilter = null,
             CancellationToken token = default(CancellationToken))
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateAddAsync(updateFields, dbCmd.GetDialectProvider().SqlExpression<T>().Where(where), token));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateAddAsync(updateFields, dbCmd.GetDialectProvider().SqlExpression<T>().Where(where), commandFilter, token));
         }
 
         /// <summary>
@@ -102,9 +110,10 @@ namespace ServiceStack.OrmLite
         public static Task<int> UpdateOnlyAsync<T>(this IDbConnection dbConn, T obj,
             string[] onlyFields,
             Expression<Func<T, bool>> where = null,
+            Action<IDbCommand> commandFilter = null,
             CancellationToken token = default(CancellationToken))
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateOnlyAsync(obj, onlyFields, where, token));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateOnlyAsync(obj, onlyFields, where, commandFilter, token));
         }
 
         /// <summary>
@@ -118,9 +127,10 @@ namespace ServiceStack.OrmLite
         public static Task<int> UpdateAddAsync<T>(this IDbConnection dbConn,
             Expression<Func<T>> updateFields,
             SqlExpression<T> q,
+            Action<IDbCommand> commandFilter = null,
             CancellationToken token = default(CancellationToken))
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateAddAsync(updateFields, q, token));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateAddAsync(updateFields, q, commandFilter, token));
         }
 
         /// <summary>
@@ -140,9 +150,13 @@ namespace ServiceStack.OrmLite
         ///   db.Update(new Person { Id = 1, FirstName = "JJ" }, p => p.LastName == "Hendrix");
         ///   UPDATE "Person" SET "Id" = 1,"FirstName" = 'JJ',"LastName" = NULL,"Age" = 0 WHERE ("LastName" = 'Hendrix')
         /// </summary>
-        public static Task<int> UpdateAsync<T>(this IDbConnection dbConn, T item, Expression<Func<T, bool>> where, CancellationToken token = default(CancellationToken))
+        public static Task<int> UpdateAsync<T>(this IDbConnection dbConn,
+            T item,
+            Expression<Func<T, bool>> where,
+            Action<IDbCommand> commandFilter = null,
+            CancellationToken token = default(CancellationToken))
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateAsync(item, where, token));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateAsync(item, where, commandFilter, token));
         }
 
         /// <summary>
@@ -151,9 +165,13 @@ namespace ServiceStack.OrmLite
         ///   db.Update&lt;Person&gt;(new { FirstName = "JJ" }, p => p.LastName == "Hendrix");
         ///   UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("LastName" = 'Hendrix')
         /// </summary>
-        public static Task<int> UpdateAsync<T>(this IDbConnection dbConn, object updateOnly, Expression<Func<T, bool>> where = null, CancellationToken token = default(CancellationToken))
+        public static Task<int> UpdateAsync<T>(this IDbConnection dbConn,
+            object updateOnly,
+            Expression<Func<T, bool>> where = null,
+            Action<IDbCommand> commandFilter = null,
+            CancellationToken token = default(CancellationToken))
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateAsync(updateOnly, where, token));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateAsync(updateOnly, where, commandFilter, token));
         }
 
         /// <summary>
