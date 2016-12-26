@@ -132,16 +132,16 @@ using ServiceStack.Data;
 
 public class MyService
 {
-	public object Post(Poco request)
-	{
-		var response = new Poco { Id = 2, Name = "New Poco from request" };
-		using (var db = HostContext.AppHost.Container.Resolve<IDbConnectionFactoryExtended>().Open())
-		{
-			db.Insert(response);
-		}
+    public object Post(Poco request)
+    {
+        var response = new Poco { Id = 2, Name = "New Poco from request" };
+        using (var db = HostContext.AppHost.Container.Resolve<IDbConnectionFactoryExtended>().Open())
+        {
+            db.Insert(response);
+        }
 
-		return response;
-	}
+        return response;
+    }
 }
 ```
 
@@ -1773,23 +1773,23 @@ An example of a table with all the different options:
 ```csharp
 public class TableWithAllCascadeOptions
 {
-	[AutoIncrement] public int Id { get; set; }
-	
-	[References(typeof(ForeignKeyTable1))]
-	public int SimpleForeignKey { get; set; }
-	
-	[ForeignKey(typeof(ForeignKeyTable2), OnDelete = "CASCADE", OnUpdate = "CASCADE")]
-	public int? CascadeOnUpdateOrDelete { get; set; }
-	
-	[ForeignKey(typeof(ForeignKeyTable3), OnDelete = "NO ACTION")]
-	public int? NoActionOnCascade { get; set; }
-	
-	[Default(typeof(int), "17")]
-	[ForeignKey(typeof(ForeignKeyTable4), OnDelete = "SET DEFAULT")]
-	public int SetToDefaultValueOnDelete { get; set; }
-	
-	[ForeignKey(typeof(ForeignKeyTable5), OnDelete = "SET NULL")]
-	public int? SetToNullOnDelete { get; set; }
+    [AutoIncrement] public int Id { get; set; }
+    
+    [References(typeof(ForeignKeyTable1))]
+    public int SimpleForeignKey { get; set; }
+    
+    [ForeignKey(typeof(ForeignKeyTable2), OnDelete = "CASCADE", OnUpdate = "CASCADE")]
+    public int? CascadeOnUpdateOrDelete { get; set; }
+    
+    [ForeignKey(typeof(ForeignKeyTable3), OnDelete = "NO ACTION")]
+    public int? NoActionOnCascade { get; set; }
+    
+    [Default(typeof(int), "17")]
+    [ForeignKey(typeof(ForeignKeyTable4), OnDelete = "SET DEFAULT")]
+    public int SetToDefaultValueOnDelete { get; set; }
+    
+    [ForeignKey(typeof(ForeignKeyTable5), OnDelete = "SET NULL")]
+    public int? SetToNullOnDelete { get; set; }
 }
 ```
 
@@ -1864,8 +1864,8 @@ NoOfShards.Times(i => {
     dbFactory.RegisterConnection(namedShard, 
         "~/App_Data/{0}.sqlite".Fmt(shardId).MapAbsolutePath(),                //Connection String
         SqliteDialect.Provider);
-	
-	dbFactory.OpenDbConnection(namedShard).Run(db => db.CreateTable<Robot>(overwrite:false));
+    
+    dbFactory.OpenDbConnection(namedShard).Run(db => db.CreateTable<Robot>(overwrite:false));
 });
 
 var newRobots = NoOfRobots.Times(i => //Create 1000 Robots
@@ -1986,8 +1986,8 @@ public class Product {
 
 //Setup SQL Server Connection Factory
 var dbFactory = new OrmLiteConnectionFactory(
-	@"Data Source=.\SQLEXPRESS;AttachDbFilename=|DataDirectory|\App_Data\Database1.mdf;Integrated Security=True;User Instance=True",
-	SqlServerDialect.Provider);
+    @"Data Source=.\SQLEXPRESS;AttachDbFilename=|DataDirectory|\App_Data\Database1.mdf;Integrated Security=True;User Instance=True",
+    SqlServerDialect.Provider);
 
 //Use in-memory Sqlite DB instead
 //var dbFactory = new OrmLiteConnectionFactory(
@@ -2100,8 +2100,8 @@ In its simplest useage, OrmLite can persist any POCO type without any attributes
 ```csharp
 public class SimpleExample
 {
-	public int Id { get; set; }
-	public string Name { get; set; }
+    public int Id { get; set; }
+    public string Name { get; set; }
 }
 
 //Set once before use (i.e. in a static constructor).
@@ -2109,12 +2109,12 @@ OrmLiteConfig.DialectProvider = SqliteDialect.Provider;
 
 using (IDbConnection db = "/path/to/db.sqlite".OpenDbConnection())
 {
-	db.CreateTable<SimpleExample>(true);
-	db.Insert(new SimpleExample { Id=1, Name="Hello, World!"});
-	var rows = db.Select<SimpleExample>();
+    db.CreateTable<SimpleExample>(true);
+    db.Insert(new SimpleExample { Id=1, Name="Hello, World!"});
+    var rows = db.Select<SimpleExample>();
 
-	Assert.That(rows, Has.Count(1));
-	Assert.That(rows[0].Id, Is.EqualTo(1));
+    Assert.That(rows, Has.Count(1));
+    Assert.That(rows[0].Id, Is.EqualTo(1));
 }
 ```
 
@@ -2126,48 +2126,48 @@ So with no other configuration using only the classes below:
 ```csharp
 [Alias("Shippers")]
 public class Shipper
-	: IHasId<int>
+    : IHasId<int>
 {
-	[AutoIncrement]
-	[Alias("ShipperID")]
-	public int Id { get; set; }
+    [AutoIncrement]
+    [Alias("ShipperID")]
+    public int Id { get; set; }
 
-	[Required]
-	[Index(Unique = true)]
-	[StringLength(40)]
-	public string CompanyName { get; set; }
+    [Required]
+    [Index(Unique = true)]
+    [StringLength(40)]
+    public string CompanyName { get; set; }
 
-	[StringLength(24)]
-	public string Phone { get; set; }
+    [StringLength(24)]
+    public string Phone { get; set; }
 
-	[References(typeof(ShipperType))]
-	public int ShipperTypeId { get; set; }
+    [References(typeof(ShipperType))]
+    public int ShipperTypeId { get; set; }
 }
 
 [Alias("ShipperTypes")]
 public class ShipperType
-	: IHasId<int>
+    : IHasId<int>
 {
-	[AutoIncrement]
-	[Alias("ShipperTypeID")]
-	public int Id { get; set; }
+    [AutoIncrement]
+    [Alias("ShipperTypeID")]
+    public int Id { get; set; }
 
-	[Required]
-	[Index(Unique = true)]
-	[StringLength(40)]
-	public string Name { get; set; }
+    [Required]
+    [Index(Unique = true)]
+    [StringLength(40)]
+    public string Name { get; set; }
 }
 
 public class SubsetOfShipper
 {
-	public int ShipperId { get; set; }
-	public string CompanyName { get; set; }
+    public int ShipperId { get; set; }
+    public string CompanyName { get; set; }
 }
 
 public class ShipperTypeCount
 {
-	public int ShipperTypeId { get; set; }
-	public int Total { get; set; }
+    public int ShipperTypeId { get; set; }
+    public int Total { get; set; }
 }
 ```
 
@@ -2222,14 +2222,14 @@ As we have direct access to IDbCommand and friends - playing with transactions i
       db.Insert(new ShipperType { Name = "Automobiles" });
       Assert.That(db.Select<ShipperType>(), Has.Count.EqualTo(3));
   }
-	Assert.That(db.Select<ShipperType>(), Has.Count(2));
+    Assert.That(db.Select<ShipperType>(), Has.Count(2));
 ```
 
 ### CRUD Operations 
 No ORM is complete without the standard crud operations:
 
 ```csharp
-	//Performing standard Insert's and Selects
+    //Performing standard Insert's and Selects
   db.Insert(new Shipper { CompanyName = "Trains R Us", Phone = "555-TRAINS", ShipperTypeId = trainsType.Id });
   db.Insert(new Shipper { CompanyName = "Planes R Us", Phone = "555-PLANES", ShipperTypeId = planesType.Id });
   db.Insert(new Shipper { CompanyName = "We do everything!", Phone = "555-UNICORNS", ShipperTypeId = planesType.Id });
