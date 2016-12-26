@@ -92,20 +92,12 @@ to support OrmLite features. The available Dialect Providers for each RDBMS is l
     FirebirdDialect.Provider       // Firebird
     VistaDbDialect.Provider        // Vista DB
 
-To configure OrmLite you need the DB Connection string along the Dialect Provider of the RDBMS you're
-connecting to, e.g: 
+To configure OrmLite you need the DB Connection string along the Dialect Provider of the RDBMS you're connecting to, e.g:
 
 ```csharp
 var dbFactory = new OrmLiteConnectionFactory(
     connectionString,  
     SqlServerDialect.Provider);
-```
-
-If you're using an IOC you can register `OrmLiteConnectionFactory` as a **singleton**, e.g:
-
-```csharp
-container.Register<IDbConnectionFactory>(c => 
-    new OrmLiteConnectionFactory(":memory:", SqliteDialect.Provider)); //InMemory Sqlite DB
 ```
 
 You can then use the `dbFactory` to open ADO.NET DB Connections to your database. 
@@ -123,6 +115,33 @@ using (var db = dbFactory.Open())
 
     var result = db.SingleById<Poco>(1);
     result.PrintDump(); //= {Id: 1, Name:Seed Data}
+}
+```
+
+If you're using an IOC you can register `OrmLiteConnectionFactory` as a **singleton**, e.g:
+
+```csharp
+container.Register<IDbConnectionFactory>(c => 
+    new OrmLiteConnectionFactory(":memory:", SqliteDialect.Provider)); //InMemory Sqlite DB
+```
+
+You can resolve the factory singleton [in the usual way](http://stackoverflow.com/a/13351091), and use it to open a database connection:
+
+```csharp
+using ServiceStack.Data;
+
+public class MyService
+{
+	public object Post(Poco request)
+	{
+		var response = new Poco { Id = 2, Name = "New Poco from request" };
+		using (var db = HostContext.AppHost.Container.Resolve<IDbConnectionFactoryExtended>().Open())
+		{
+			db.Insert(response);
+		}
+
+		return response;
+	}
 }
 ```
 
