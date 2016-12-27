@@ -135,7 +135,7 @@ public class MyService
     public object Post(Poco request)
     {
         var response = new Poco { Id = 2, Name = "New Poco from request" };
-        using (var db = HostContext.AppHost.Container.Resolve<IDbConnectionFactoryExtended>().Open())
+        using (var db = HostContext.AppHost.Container.Resolve<IDbConnectionFactory>().Open())
         {
             db.Insert(response);
         }
