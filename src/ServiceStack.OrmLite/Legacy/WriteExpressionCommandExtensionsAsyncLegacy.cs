@@ -19,7 +19,7 @@ namespace ServiceStack.OrmLite.Legacy
         [Obsolete("Use db.UpdateOnlyAsync(model, db.From<T>())")]
         internal static Task<int> UpdateOnlyAsync<T>(this IDbCommand dbCmd, T model, Func<SqlExpression<T>, SqlExpression<T>> onlyFields, CancellationToken token)
         {
-            return dbCmd.UpdateOnlyAsync(model, onlyFields(dbCmd.GetDialectProvider().SqlExpression<T>()), token);
+            return dbCmd.UpdateOnlyAsync(model, onlyFields(dbCmd.GetDialectProvider().SqlExpression<T>()), null, token);
         }
 
         internal static Task<int> UpdateFmtAsync<T>(this IDbCommand dbCmd, string set, string where, CancellationToken token)
@@ -29,7 +29,7 @@ namespace ServiceStack.OrmLite.Legacy
 
         internal static Task<int> UpdateFmtAsync(this IDbCommand dbCmd, string table, string set, string where, CancellationToken token)
         {
-            var sql = WriteExpressionCommandExtensionsLegacy.UpdateFmtSql(dbCmd.GetDialectProvider(), table, set, @where);
+            var sql = WriteExpressionCommandExtensionsLegacy.UpdateFmtSql(dbCmd.GetDialectProvider(), table, set, where);
             return dbCmd.ExecuteSqlAsync(sql, token);
         }
 
@@ -46,7 +46,7 @@ namespace ServiceStack.OrmLite.Legacy
 
         internal static Task<int> DeleteFmtAsync(this IDbCommand dbCmd, string table, string where, CancellationToken token)
         {
-            var sql = WriteExpressionCommandExtensionsLegacy.DeleteFmtSql(dbCmd.GetDialectProvider(), table, @where);
+            var sql = WriteExpressionCommandExtensionsLegacy.DeleteFmtSql(dbCmd.GetDialectProvider(), table, where);
             return dbCmd.ExecuteSqlAsync(sql, token);
         }
 

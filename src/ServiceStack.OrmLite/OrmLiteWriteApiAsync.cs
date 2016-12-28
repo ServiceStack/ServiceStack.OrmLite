@@ -69,9 +69,9 @@ namespace ServiceStack.OrmLite
         /// Updates 1 POCO. All fields are updated except for the PrimaryKey which is used as the identity selector. E.g:
         /// <para>db.Update(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27 })</para>
         /// </summary>
-        public static Task<int> UpdateAsync<T>(this IDbConnection dbConn, T obj, CancellationToken token = default(CancellationToken))
+        public static Task<int> UpdateAsync<T>(this IDbConnection dbConn, T obj, Action<IDbCommand> commandFilter = null, CancellationToken token = default(CancellationToken))
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateAsync(obj, token));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateAsync(obj, token, commandFilter));
         }
 
         /// <summary>
@@ -81,20 +81,28 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static Task<int> UpdateAsync<T>(this IDbConnection dbConn, CancellationToken token, params T[] objs)
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateAsync(objs, token));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateAsync(token, null, objs));
         }
         public static Task<int> UpdateAsync<T>(this IDbConnection dbConn, params T[] objs)
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateAsync(default(CancellationToken), objs));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateAsync(default(CancellationToken), null, objs));
+        }
+        public static Task<int> UpdateAsync<T>(this IDbConnection dbConn, Action<IDbCommand> commandFilter, CancellationToken token, params T[] objs)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.UpdateAsync(token, commandFilter, objs));
+        }
+        public static Task<int> UpdateAsync<T>(this IDbConnection dbConn, Action<IDbCommand> commandFilter, params T[] objs)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.UpdateAsync(default(CancellationToken), commandFilter, objs));
         }
 
         /// <summary>
         /// Updates 1 or more POCOs in a transaction. E.g:
         /// <para>db.UpdateAll(new[] { new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27 } })</para>
         /// </summary>
-        public static Task<int> UpdateAllAsync<T>(this IDbConnection dbConn, IEnumerable<T> objs, CancellationToken token = default(CancellationToken))
+        public static Task<int> UpdateAllAsync<T>(this IDbConnection dbConn, IEnumerable<T> objs, Action<IDbCommand> commandFilter = null, CancellationToken token = default(CancellationToken))
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateAllAsync(objs, token));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateAllAsync(objs, token, commandFilter));
         }
 
         /// <summary>

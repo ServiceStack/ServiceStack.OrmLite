@@ -61,6 +61,8 @@ namespace ServiceStack.OrmLite
 
         string GetQuotedValue(object value, Type fieldType);
 
+        string GetDefaultValue(Type tableType, string fieldName);
+
         object GetParamValue(object value, Type fieldType);
 
         object ToDbValue(object value, Type type);

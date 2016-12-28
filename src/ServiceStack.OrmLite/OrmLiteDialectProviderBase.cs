@@ -1185,6 +1185,13 @@ namespace ServiceStack.OrmLite
             return StringBuilderCache.ReturnAndFree(sql);
         }
 
+        public string GetDefaultValue(Type tableType, string fieldName)
+        {
+            var modelDef = tableType.GetModelDefinition();
+            var fieldDef = modelDef.GetFieldDefinition(fieldName);
+            return GetDefaultValue(fieldDef);
+        }
+
         public virtual string GetDefaultValue(FieldDefinition fieldDef)
         {
             var defaultValue = fieldDef.DefaultValue;
