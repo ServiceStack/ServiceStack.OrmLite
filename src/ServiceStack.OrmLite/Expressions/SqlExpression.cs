@@ -456,7 +456,7 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
-        public virtual SqlExpression<T> GroupBy<Table>(Expression<Func<Table, object>> keySelector)
+        private SqlExpression<T> InternalGroupBy(Expression keySelector)
         {
             sep = string.Empty;
             useFieldName = true;
@@ -467,15 +467,29 @@ namespace ServiceStack.OrmLite
             return GroupBy(groupByKey.ToString());
         }
 
+        public virtual SqlExpression<T> GroupBy<Table>(Expression<Func<Table, object>> keySelector)
+        {
+            return InternalGroupBy(keySelector);
+        }
+
+        public virtual SqlExpression<T> GroupBy<Table1, Table2>(Expression<Func<Table1, Table2, object>> keySelector)
+        {
+            return InternalGroupBy(keySelector);
+        }
+
+        public virtual SqlExpression<T> GroupBy<Table1, Table2, Table3>(Expression<Func<Table1, Table2, Table3, object>> keySelector)
+        {
+            return InternalGroupBy(keySelector);
+        }
+
+        public virtual SqlExpression<T> GroupBy<Table1, Table2, Table3, Table4>(Expression<Func<Table1, Table2, Table3, Table4, object>> keySelector)
+        {
+            return InternalGroupBy(keySelector);
+        }
+
         public virtual SqlExpression<T> GroupBy(Expression<Func<T, object>> keySelector)
         {
-            sep = string.Empty;
-            useFieldName = true;
-
-            var groupByKey = Visit(keySelector);
-            StripAliases(groupByKey as SelectList); // No "AS ColumnAlias" in GROUP BY, just the column names/expressions
-
-            return GroupBy(groupByKey.ToString());
+            return InternalGroupBy(keySelector);
         }
 
         public virtual SqlExpression<T> Having()
