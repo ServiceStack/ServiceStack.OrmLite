@@ -17,6 +17,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using ServiceStack.DataAnnotations;
@@ -409,34 +410,54 @@ namespace ServiceStack.OrmLite
             return OrmLiteConfig.SanitizeFieldNameForParamNameFn(fieldName);
         }
 
-        public virtual string GetColumnDefinition(string fieldName, Type fieldType,
-            bool isPrimaryKey, bool autoIncrement, bool isNullable, bool isRowVersion,
-            int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
+        public virtual string GetColumnDefinition(FieldDefinition fieldDef)
         {
-            var fieldDefinition = customFieldDefinition ?? GetColumnTypeDefinition(fieldType, fieldLength, scale);
+            var fieldDefinition = fieldDef.CustomFieldDefinition ?? 
+                GetColumnTypeDefinition(fieldDef.ColumnType, fieldDef.FieldLength, fieldDef.Scale);
 
             var sql = StringBuilderCache.Allocate();
-            sql.Append($"{GetQuotedColumnName(fieldName)} {fieldDefinition}");
+            sql.Append($"{GetQuotedColumnName(fieldDef.FieldName)} {fieldDefinition}");
 
-            if (isPrimaryKey)
+            if (fieldDef.IsPrimaryKey)
             {
                 sql.Append(" PRIMARY KEY");
-                if (autoIncrement)
+                if (fieldDef.AutoIncrement)
                 {
                     sql.Append(" ").Append(AutoIncrementDefinition);
                 }
             }
             else
             {
-                sql.Append(isNullable ? " NULL" : " NOT NULL");
+                sql.Append(fieldDef.IsNullable ? " NULL" : " NOT NULL");
             }
 
+            var defaultValue = GetDefaultValue(fieldDef);
             if (!string.IsNullOrEmpty(defaultValue))
             {
                 sql.AppendFormat(DefaultValueFormat, defaultValue);
             }
 
             return StringBuilderCache.ReturnAndFree(sql);
+        }
+
+        [Obsolete("Use GetColumnDefinition(fieldDef)")]
+        public string GetColumnDefinition(string fieldName, Type fieldType,
+            bool isPrimaryKey, bool autoIncrement, bool isNullable, bool isRowVersion,
+            int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
+        {
+            return GetColumnDefinition(new FieldDefinition
+            {
+                Name = fieldName,
+                FieldType = fieldType,
+                IsPrimaryKey = isPrimaryKey,
+                AutoIncrement = autoIncrement,
+                IsNullable = isNullable,
+                IsRowVersion = isRowVersion,
+                FieldLength = fieldLength,
+                Scale = scale,
+                DefaultValue = defaultValue,
+                CustomFieldDefinition = customFieldDefinition,
+            });
         }
 
         public virtual string SelectIdentitySql { get; set; }
@@ -723,7 +744,7 @@ namespace ServiceStack.OrmLite
                 var quotedValue = dbParam.Value != null
                     ? GetQuotedValue(dbParam.Value, dbParam.Value.GetType())
                     : "null";
-                sql = sql.Replace(dbParam.ParameterName, quotedValue);
+                sql = Regex.Replace(sql, dbParam.ParameterName + @"(,|\s|\)|$)", quotedValue + "$1");
             }
             return sql;
         }
@@ -764,7 +785,12 @@ namespace ServiceStack.OrmLite
                     if (sql.Length > 0)
                         sql.Append(", ");
 
-                    AppendFieldCondition(sql, fieldDef, cmd);
+                    sql
+                        .Append(GetQuotedColumnName(fieldDef.FieldName))
+                        .Append("=")
+                        .Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
+
+                    AddParameter(cmd, fieldDef);
                 }
                 catch (Exception ex)
                 {
@@ -780,6 +806,13 @@ namespace ServiceStack.OrmLite
             }
 
             return hadRowVesion;
+        }
+
+        public virtual void AppendNullFieldCondition(StringBuilder sqlFilter, FieldDefinition fieldDef)
+        {
+            sqlFilter
+                .Append(GetQuotedColumnName(fieldDef.FieldName))
+                .Append(" IS NULL");
         }
 
         public virtual void AppendFieldCondition(StringBuilder sqlFilter, FieldDefinition fieldDef, IDbCommand cmd)
@@ -827,9 +860,7 @@ namespace ServiceStack.OrmLite
                     }
                     else
                     {
-                        sqlFilter
-                            .Append(GetQuotedColumnName(fieldDef.FieldName))
-                            .Append(" IS NULL");
+                        AppendNullFieldCondition(sqlFilter, fieldDef);
                     }
                 }
                 catch (Exception ex)
@@ -1154,6 +1185,13 @@ namespace ServiceStack.OrmLite
             return StringBuilderCache.ReturnAndFree(sql);
         }
 
+        public string GetDefaultValue(Type tableType, string fieldName)
+        {
+            var modelDef = tableType.GetModelDefinition();
+            var fieldDef = modelDef.GetFieldDefinition(fieldName);
+            return GetDefaultValue(fieldDef);
+        }
+
         public virtual string GetDefaultValue(FieldDefinition fieldDef)
         {
             var defaultValue = fieldDef.DefaultValue;
@@ -1180,17 +1218,7 @@ namespace ServiceStack.OrmLite
                 if (fieldDef.CustomSelect != null)
                     continue;
 
-                var columnDefinition = GetColumnDefinition(
-                    fieldDef.FieldName,
-                    fieldDef.ColumnType,
-                    fieldDef.IsPrimaryKey,
-                    fieldDef.AutoIncrement,
-                    fieldDef.IsNullable,
-                    fieldDef.IsRowVersion,
-                    fieldDef.FieldLength,
-                    fieldDef.Scale,
-                    GetDefaultValue(fieldDef),
-                    fieldDef.CustomFieldDefinition);
+                var columnDefinition = GetColumnDefinition(fieldDef);
 
                 if (columnDefinition == null)
                     continue;
@@ -1200,7 +1228,8 @@ namespace ServiceStack.OrmLite
 
                 sbColumns.Append(columnDefinition);
 
-                if (fieldDef.ForeignKey == null) continue;
+                if (fieldDef.ForeignKey == null || OrmLiteConfig.SkipForeignKeys)
+                    continue;
 
                 var refModelDef = fieldDef.ForeignKey.ReferenceType.GetModelDefinition();
                 sbConstraints.Append(
@@ -1396,55 +1425,19 @@ namespace ServiceStack.OrmLite
 
         public virtual string ToAddColumnStatement(Type modelType, FieldDefinition fieldDef)
         {
-
-            var column = GetColumnDefinition(
-                fieldDef.FieldName,
-                fieldDef.ColumnType,
-                fieldDef.IsPrimaryKey,
-                fieldDef.AutoIncrement,
-                fieldDef.IsNullable,
-                fieldDef.IsRowVersion,
-                fieldDef.FieldLength,
-                fieldDef.Scale,
-                fieldDef.DefaultValue,
-                fieldDef.CustomFieldDefinition);
-
+            var column = GetColumnDefinition(fieldDef);
             return $"ALTER TABLE {GetQuotedTableName(modelType.GetModelDefinition().ModelName)} ADD COLUMN {column};";
         }
 
         public virtual string ToAlterColumnStatement(Type modelType, FieldDefinition fieldDef)
         {
-            var column = GetColumnDefinition(
-                fieldDef.FieldName,
-                fieldDef.ColumnType,
-                fieldDef.IsPrimaryKey,
-                fieldDef.AutoIncrement,
-                fieldDef.IsNullable,
-                fieldDef.IsRowVersion,
-                fieldDef.FieldLength,
-                fieldDef.Scale,
-                fieldDef.DefaultValue,
-                fieldDef.CustomFieldDefinition);
-
+            var column = GetColumnDefinition(fieldDef);
             return $"ALTER TABLE {GetQuotedTableName(modelType.GetModelDefinition().ModelName)} MODIFY COLUMN {column};";
         }
 
-        public virtual string ToChangeColumnNameStatement(Type modelType,
-                                                          FieldDefinition fieldDef,
-                                                          string oldColumnName)
+        public virtual string ToChangeColumnNameStatement(Type modelType, FieldDefinition fieldDef, string oldColumnName)
         {
-            var column = GetColumnDefinition(
-                fieldDef.FieldName,
-                fieldDef.ColumnType,
-                fieldDef.IsPrimaryKey,
-                fieldDef.AutoIncrement,
-                fieldDef.IsNullable,
-                fieldDef.IsRowVersion,
-                fieldDef.FieldLength,
-                fieldDef.Scale,
-                fieldDef.DefaultValue,
-                fieldDef.CustomFieldDefinition);
-
+            var column = GetColumnDefinition(fieldDef);
             return $"ALTER TABLE {GetQuotedTableName(modelType.GetModelDefinition().ModelName)} CHANGE COLUMN {GetQuotedColumnName(oldColumnName)} {column};";
         }
 

@@ -102,7 +102,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 db.Insert(filterRow);
 
-                var rows = db.Select<ModelWithOnlyStringFields>("AlbumName".SqlColumn() + " = @album", new { album = filterRow.AlbumName });
+                var rows = db.Select<ModelWithOnlyStringFields>("AlbumName".SqlColumn() + " = @album".PreNormalizeSql(db), new { album = filterRow.AlbumName });
                 var dbRowIds = rows.ConvertAll(x => x.Id);
 
                 Assert.That(dbRowIds, Has.Count.EqualTo(1));
@@ -187,7 +187,7 @@ namespace ServiceStack.OrmLite.Tests
                 db.Insert(filterRow);
 
                 var dbRowIds = new List<string>();
-                var rows = db.SelectLazy<ModelWithOnlyStringFields>("AlbumName".SqlColumn() + " = @AlbumName", new { filterRow.AlbumName });
+                var rows = db.SelectLazy<ModelWithOnlyStringFields>("AlbumName".SqlColumn() + " = @AlbumName".PreNormalizeSql(db), new { filterRow.AlbumName });
                 foreach (var row in rows)
                 {
                     dbRowIds.Add(row.Id);
@@ -331,7 +331,7 @@ namespace ServiceStack.OrmLite.Tests
                 var rows = db.Select<ModelWithIdAndName>("Name IN ({0})".Fmt(selectInNames.SqlInParams()),
                     new { values = selectInNames.SqlInValues() });
                 Assert.That(rows.Count, Is.EqualTo(selectInNames.Length));
-                rows = db.Select<ModelWithIdAndName>("Name IN (@p1, @p2)", new { p1 = "Name1", p2 = "Name2" });
+                rows = db.Select<ModelWithIdAndName>("Name IN (@p1, @p2)".PreNormalizeSql(db), new { p1 = "Name1", p2 = "Name2" });
                 Assert.That(rows.Count, Is.EqualTo(selectInNames.Length));
             }
         }

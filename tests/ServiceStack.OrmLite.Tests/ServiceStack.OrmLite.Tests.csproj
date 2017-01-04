@@ -136,16 +136,21 @@
     <Compile Include="Async\SqlExpressionTests.cs" />
     <Compile Include="Async\SqlServerProviderTestsAsync.cs" />
     <Compile Include="Async\UpdateAsyncTests.cs" />
+    <Compile Include="CustomSqlExpressionTests.cs" />
     <Compile Include="Expression\JoinAliasTests.cs" />
     <Compile Include="Expression\RestrictionTests.cs" />
     <Compile Include="Expression\SqlExpressionDeleteTests.cs" />
+    <Compile Include="Expression\SqlExpressionFilterTests.cs" />
     <Compile Include="Expression\SqlExpressionJoinTests.cs" />
     <Compile Include="Issues\JoinAliasWithSchemaIssue.cs" />
     <Compile Include="Issues\JsonUpdateOnlyIssue.cs" />
     <Compile Include="Issues\LoadReferencesNullReferenceIssue.cs" />
     <Compile Include="Issues\MergeParamsIssue.cs" />
+    <Compile Include="Issues\MultiThreadedUpdateTransactionIssue.cs" />
     <Compile Include="Issues\ParamNameIssues.cs" />
     <Compile Include="MultipleConnectionIdTests.cs" />
+    <Compile Include="Shared\DefaultValues.cs" />
+    <Compile Include="Shared\UpdateCommandFilter.cs" />
     <Compile Include="UseCase\CustomerOrdersUseCaseAsync.cs" />
     <Compile Include="AutoQueryTests.cs" />
     <Compile Include="CaptureSqlCommandFilterTests.cs" />
@@ -373,6 +378,7 @@
     <None Include="App_Data\sql\instnwnd.SqlServer.sql" />
     <None Include="packages.config" />
     <None Include="project.json" />
+    <None Include="ServiceStack.OrmLite.Tests.project.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Firebird\ServiceStack.OrmLite.Firebird.csproj">

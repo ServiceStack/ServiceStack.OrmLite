@@ -166,7 +166,8 @@ namespace ServiceStack.OrmLite.MySql
 
                 sbColumns.Append(GetColumnDefinition(fieldDef));
 
-                if (fieldDef.ForeignKey == null) continue;
+                if (fieldDef.ForeignKey == null || OrmLiteConfig.SkipForeignKeys)
+                    continue;
 
                 var refModelDef = GetModel(fieldDef.ForeignKey.ReferenceType);
                 sbConstraints.AppendFormat(
@@ -200,18 +201,7 @@ namespace ServiceStack.OrmLite.MySql
                 return StringBuilderCache.ReturnAndFree(sql);
             }
 
-            var ret = base.GetColumnDefinition(
-                fieldDef.FieldName,
-                fieldDef.ColumnType,
-                fieldDef.IsPrimaryKey,
-                fieldDef.AutoIncrement,
-                fieldDef.IsNullable,
-                fieldDef.IsRowVersion,
-                fieldDef.FieldLength,
-                fieldDef.Scale,
-                GetDefaultValue(fieldDef),
-                fieldDef.CustomFieldDefinition);
-
+            var ret = base.GetColumnDefinition(fieldDef);
             if (fieldDef.IsRowVersion)
                 return ret + " DEFAULT 1";
 

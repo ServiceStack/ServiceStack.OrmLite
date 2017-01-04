@@ -31,7 +31,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
                     Guid = Guid.NewGuid()
                 };
 
-                long id = db.Insert(dto);
+                long id = db.Insert(dto, selectIdentity: true);
                 var row = db.Single<PocoWithGuid>(r => r.Id == id);
 
                 Assert.That(row.Guid, Is.EqualTo(dto.Guid));

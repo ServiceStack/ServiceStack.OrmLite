@@ -11,32 +11,51 @@ namespace ServiceStack.OrmLite.SqlServer.Converters
     /// </summary>
     public class SqlServerHierarchyIdTypeConverter : OrmLiteConverter
     {
-        public SqlServerHierarchyIdTypeConverter() : base()
-        { }
+        public override string ColumnDefinition => "hierarchyId";
 
-        public override string ColumnDefinition
-        {
-            get { return "hierarchyid"; }
-        }
+        public override DbType DbType => DbType.Object;
 
-        public override DbType DbType
+        public override string ToQuotedString(Type fieldType, object value)
         {
-            get { return DbType.Object; }
+            if (fieldType == typeof(SqlHierarchyId))
+            {
+                string str = null;
+                if (value != null)
+                {
+                    var hierarchyId = (SqlHierarchyId)value;
+                    if (!hierarchyId.IsNull)
+                        str = hierarchyId.ToString();
+                }
+                str = (str == null) ? "null" : $"'{str}'";
+                return $"CAST({str} AS {ColumnDefinition})";
+            }
+
+            return base.ToQuotedString(fieldType, value);
         }
 
         public override void InitDbParam(IDbDataParameter p, Type fieldType)
         {
-            var sqlParam = (SqlParameter)p;
-            sqlParam.IsNullable = fieldType.IsNullableType();
-            sqlParam.SqlDbType = SqlDbType.Udt;
-            sqlParam.UdtTypeName = ColumnDefinition;
+            if (fieldType == typeof(SqlHierarchyId))
+            {
+                var sqlParam = (SqlParameter)p;
+                sqlParam.IsNullable = fieldType.IsNullableType();
+                sqlParam.SqlDbType = SqlDbType.Udt;
+                sqlParam.UdtTypeName = ColumnDefinition;
+            }
+            base.InitDbParam(p, fieldType);
         }
 
         public override object FromDbValue(Type fieldType, object value)
         {
-            if (((SqlHierarchyId)value).IsNull && fieldType.IsNullableType())
+            if (value == null || value is DBNull)
+                return SqlHierarchyId.Null;
+
+            if (value is SqlHierarchyId)
+                return (SqlHierarchyId)value;
+
+            if (value is string)
             {
-                return null;
+                return SqlHierarchyId.Parse(value.ToString());
             }
 
             return base.FromDbValue(fieldType, value);
@@ -44,14 +63,14 @@ namespace ServiceStack.OrmLite.SqlServer.Converters
 
         public override object ToDbValue(Type fieldType, object value)
         {
+            if (value == null || value is DBNull)
+            {
+                return SqlHierarchyId.Null;
+            }
+
             if (value is SqlHierarchyId)
             {
                 return value;
-            }
-
-            if (value == null)
-            {
-                return SqlHierarchyId.Null;
             }
 
             if (value is string)

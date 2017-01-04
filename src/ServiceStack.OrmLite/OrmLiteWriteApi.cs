@@ -87,9 +87,9 @@ namespace ServiceStack.OrmLite
         /// Updates 1 POCO. All fields are updated except for the PrimaryKey which is used as the identity selector. E.g:
         /// <para>db.Update(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27 })</para>
         /// </summary>
-        public static int Update<T>(this IDbConnection dbConn, T obj)
+        public static int Update<T>(this IDbConnection dbConn, T obj, Action<IDbCommand> commandFilter = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Update(obj));
+            return dbConn.Exec(dbCmd => dbCmd.Update(obj, commandFilter));
         }
 
         /// <summary>
@@ -101,14 +101,18 @@ namespace ServiceStack.OrmLite
         {
             return dbConn.Exec(dbCmd => dbCmd.Update(objs));
         }
+        public static int Update<T>(this IDbConnection dbConn, Action<IDbCommand> commandFilter, params T[] objs)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Update(objs, commandFilter));
+        }
 
         /// <summary>
         /// Updates 1 or more POCOs in a transaction. E.g:
         /// <para>db.UpdateAll(new[] { new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27 } })</para>
         /// </summary>
-        public static int UpdateAll<T>(this IDbConnection dbConn, IEnumerable<T> objs)
+        public static int UpdateAll<T>(this IDbConnection dbConn, IEnumerable<T> objs, Action<IDbCommand> commandFilter = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateAll(objs));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateAll(objs, commandFilter));
         }
 
         /// <summary>

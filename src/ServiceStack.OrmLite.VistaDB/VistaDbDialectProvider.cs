@@ -125,18 +125,7 @@ namespace ServiceStack.OrmLite.VistaDB
                 if (columns.Length != 0)
                     columns.Append(", \n  ");
 
-                var columnDefinition = this.GetColumnDefinition(
-                    fieldDef.FieldName,
-                    fieldDef.ColumnType,
-                    false,
-                    fieldDef.AutoIncrement,
-                    fieldDef.IsNullable,
-                    fieldDef.IsRowVersion,
-                    fieldDef.FieldLength,
-                    fieldDef.Scale,
-                    GetDefaultValue(fieldDef),
-                    fieldDef.CustomFieldDefinition);
-
+                var columnDefinition = this.GetColumnDefinition(fieldDef.Clone(f => f.IsPrimaryKey = false));
                 columns.Append(columnDefinition);
 
                 if (fieldDef.IsPrimaryKey)
@@ -146,18 +135,19 @@ namespace ServiceStack.OrmLite.VistaDB
                         this.GetQuotedName("PK_" + modelDefinition.ModelName),
                         this.GetQuotedColumnName(fieldDef.FieldName));
                 }
-                else if (fieldDef.ForeignKey != null)
-                {
-                    var foreignModelDefinition = OrmLiteUtils.GetModelDefinition(fieldDef.ForeignKey.ReferenceType);
-                    constraints.AppendFormat("ALTER TABLE {0} ADD CONSTRAINT {1} FOREIGN KEY ({2}) REFERENCES {3} ({4}){5}{6};\n",
-                        quotedTableName,
-                        this.GetQuotedName(fieldDef.ForeignKey.GetForeignKeyName(modelDefinition, foreignModelDefinition, this.NamingStrategy, fieldDef)),
-                        this.GetQuotedColumnName(fieldDef.FieldName),
-                        this.GetQuotedTableName(foreignModelDefinition),
-                        this.GetQuotedColumnName(foreignModelDefinition.PrimaryKey.FieldName),
-                        this.GetForeignKeyOnDeleteClause(fieldDef.ForeignKey),
-                        this.GetForeignKeyOnUpdateClause(fieldDef.ForeignKey));
-                }
+
+                if (fieldDef.ForeignKey == null || OrmLiteConfig.SkipForeignKeys)
+                    continue;
+
+                var foreignModelDefinition = OrmLiteUtils.GetModelDefinition(fieldDef.ForeignKey.ReferenceType);
+                constraints.AppendFormat("ALTER TABLE {0} ADD CONSTRAINT {1} FOREIGN KEY ({2}) REFERENCES {3} ({4}){5}{6};\n",
+                    quotedTableName,
+                    this.GetQuotedName(fieldDef.ForeignKey.GetForeignKeyName(modelDefinition, foreignModelDefinition, this.NamingStrategy, fieldDef)),
+                    this.GetQuotedColumnName(fieldDef.FieldName),
+                    this.GetQuotedTableName(foreignModelDefinition),
+                    this.GetQuotedColumnName(foreignModelDefinition.PrimaryKey.FieldName),
+                    this.GetForeignKeyOnDeleteClause(fieldDef.ForeignKey),
+                    this.GetForeignKeyOnUpdateClause(fieldDef.ForeignKey));
             }
 
             return string.Format("CREATE TABLE {0} \n(\n  {1} \n); \n {2}\n",
@@ -166,29 +156,29 @@ namespace ServiceStack.OrmLite.VistaDB
                 StringBuilderCacheAlt.ReturnAndFree(constraints));
         }
 
-        public override string GetColumnDefinition(string fieldName, Type fieldType,
-            bool isPrimaryKey, bool autoIncrement, bool isNullable, bool isRowVersion,
-            int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
+        public override string GetColumnDefinition(FieldDefinition fieldDef)
         {
-            var fieldDefinition = customFieldDefinition ?? GetColumnTypeDefinition(fieldType, fieldLength, scale);
+            var fieldDefinition = fieldDef.CustomFieldDefinition 
+                ?? GetColumnTypeDefinition(fieldDef.FieldType, fieldDef.FieldLength, fieldDef.Scale);
 
             var sql = StringBuilderCache.Allocate();
-            sql.AppendFormat("{0} {1}", this.GetQuotedColumnName(fieldName), fieldDefinition);
-            if (isPrimaryKey)
+            sql.AppendFormat("{0} {1}", this.GetQuotedColumnName(fieldDef.FieldName), fieldDefinition);
+            if (fieldDef.IsPrimaryKey)
             {
                 sql.Append(" PRIMARY KEY");
             }
             else
             {
-                if (isNullable && !autoIncrement)
+                if (fieldDef.IsNullable && !fieldDef.AutoIncrement)
                     sql.Append(" NULL");
                 else
                     sql.Append(" NOT NULL");
             }
 
-            if (autoIncrement)
+            if (fieldDef.AutoIncrement)
                 sql.Append(" ").Append(this.AutoIncrementDefinition);
 
+            var defaultValue = GetDefaultValue(fieldDef);
             if (!string.IsNullOrEmpty(defaultValue))
                 sql.AppendFormat(this.DefaultValueFormat, defaultValue);
 
@@ -363,52 +353,20 @@ namespace ServiceStack.OrmLite.VistaDB
 
         public override string ToAddColumnStatement(Type modelType, FieldDefinition fieldDef)
         {
-            var column = GetColumnDefinition(
-                fieldDef.FieldName,
-                fieldDef.FieldType,
-                fieldDef.IsPrimaryKey,
-                fieldDef.AutoIncrement,
-                fieldDef.IsNullable,
-                fieldDef.IsRowVersion,
-                fieldDef.FieldLength,
-                fieldDef.Scale,
-                fieldDef.DefaultValue,
-                fieldDef.CustomFieldDefinition);
-
-            return string.Format("ALTER TABLE {0} ADD {1};",
-                GetQuotedTableName(GetModel(modelType).ModelName),
-                column);
+            var column = GetColumnDefinition(fieldDef);
+            return $"ALTER TABLE {GetQuotedTableName(GetModel(modelType).ModelName)} ADD {column};";
         }
 
         public override string ToAlterColumnStatement(Type modelType, FieldDefinition fieldDef)
         {
-            var column = GetColumnDefinition(
-                fieldDef.FieldName,
-                fieldDef.FieldType,
-                fieldDef.IsPrimaryKey,
-                fieldDef.AutoIncrement,
-                fieldDef.IsNullable,
-                fieldDef.IsRowVersion,
-                fieldDef.FieldLength,
-                fieldDef.Scale,
-                fieldDef.DefaultValue,
-                fieldDef.CustomFieldDefinition);
-
-            return string.Format("ALTER TABLE {0} ALTER COLUMN {1};",
-                GetQuotedTableName(GetModel(modelType).ModelName),
-                column);
+            var column = GetColumnDefinition(fieldDef);
+            return $"ALTER TABLE {GetQuotedTableName(GetModel(modelType).ModelName)} ALTER COLUMN {column};";
         }
 
         public override string ToChangeColumnNameStatement(Type modelType, FieldDefinition fieldDef, string oldColumnName)
         {
-            var objectName = string.Format("{0}.{1}",
-                NamingStrategy.GetTableName(GetModel(modelType).ModelName),
-                oldColumnName);
-
-            return string.Format("sp_rename ({0}, {1}, {2});",
-                GetQuotedValue(objectName),
-                GetQuotedValue(fieldDef.FieldName),
-                GetQuotedValue("COLUMN"));
+            var objectName = $"{NamingStrategy.GetTableName(GetModel(modelType).ModelName)}.{oldColumnName}";
+            return $"sp_rename ({GetQuotedValue(objectName)}, {GetQuotedValue(fieldDef.FieldName)}, {GetQuotedValue("COLUMN")});";
         }
 
         /// Limit/Offset paging logic needs to be implemented here:
@@ -419,7 +377,7 @@ namespace ServiceStack.OrmLite.VistaDB
                 .Append(selectExpression)
                 .Append(bodyExpression);
 
-            var hasOrderBy = !String.IsNullOrWhiteSpace(orderByExpression);
+            var hasOrderBy = !string.IsNullOrWhiteSpace(orderByExpression);
 
             var skip = offset.GetValueOrDefault();
             if ((skip > 0 || rows.HasValue) && !hasOrderBy)

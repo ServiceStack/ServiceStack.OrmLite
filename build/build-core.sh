@@ -25,6 +25,7 @@ find ./src -type f -name "AssemblyInfo.cs" -exec sed -i "s/AssemblyFileVersion(\
 echo replace project.json
 sed -i "s/\"version\": \"[^\"]\+\"/\"version\": \"${Version}\"/g" ./src/ServiceStack.OrmLite/project.json
 sed -i "s/\"version\": \"[^\"]\+\"/\"version\": \"${Version}\"/g" ./src/ServiceStack.OrmLite.PostgreSQL/project.json
+sed -i "s/\"version\": \"[^\"]\+\"/\"version\": \"${Version}\"/g" ./src/ServiceStack.OrmLite.MySql/project.json
 sed -i "s/\"version\": \"[^\"]\+\"/\"version\": \"${Version}\"/g" ./src/ServiceStack.OrmLite.SqlServer/project.json
 sed -i "s/\"version\": \"[^\"]\+\"/\"version\": \"${Version}\"/g" ./src/ServiceStack.OrmLite.Sqlite/project.json
 sed -i "s/\"version\": \"[^\"]\+\"/\"version\": \"${Version}\"/g" ./src/ServiceStack.Text/project.json

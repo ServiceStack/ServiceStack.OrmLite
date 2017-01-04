@@ -5,7 +5,7 @@ using NUnit.Framework;
 
 namespace ServiceStack.OrmLite.SqlServerTests.Converters
 {
-    public class InheritanceTest : SqlServerConvertersOrmLiteTestBase
+    public class InheritanceTest : SqlServer2012ConvertersOrmLiteTestBase
     {
         public class GeoSuper
         {

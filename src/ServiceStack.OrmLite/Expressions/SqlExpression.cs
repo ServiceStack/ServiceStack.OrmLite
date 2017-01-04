@@ -43,6 +43,7 @@ namespace ServiceStack.OrmLite
         public bool WhereStatementWithoutWhereString { get; set; }
         public IOrmLiteDialectProvider DialectProvider { get; set; }
         public List<IDbDataParameter> Params { get; set; }
+        public Func<string,string> SqlFilter { get; set; }
 
         protected string Sep => sep;
 
@@ -84,6 +85,7 @@ namespace ServiceStack.OrmLite
             to.PrefixFieldWithTableName = PrefixFieldWithTableName;
             to.WhereStatementWithoutWhereString = WhereStatementWithoutWhereString;
             to.Params = new List<IDbDataParameter>(Params);
+            to.SqlFilter = SqlFilter;
             return to;
         }
 
@@ -454,7 +456,7 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
-        public virtual SqlExpression<T> GroupBy<Table>(Expression<Func<Table, object>> keySelector)
+        private SqlExpression<T> InternalGroupBy(Expression keySelector)
         {
             sep = string.Empty;
             useFieldName = true;
@@ -465,15 +467,29 @@ namespace ServiceStack.OrmLite
             return GroupBy(groupByKey.ToString());
         }
 
+        public virtual SqlExpression<T> GroupBy<Table>(Expression<Func<Table, object>> keySelector)
+        {
+            return InternalGroupBy(keySelector);
+        }
+
+        public virtual SqlExpression<T> GroupBy<Table1, Table2>(Expression<Func<Table1, Table2, object>> keySelector)
+        {
+            return InternalGroupBy(keySelector);
+        }
+
+        public virtual SqlExpression<T> GroupBy<Table1, Table2, Table3>(Expression<Func<Table1, Table2, Table3, object>> keySelector)
+        {
+            return InternalGroupBy(keySelector);
+        }
+
+        public virtual SqlExpression<T> GroupBy<Table1, Table2, Table3, Table4>(Expression<Func<Table1, Table2, Table3, Table4, object>> keySelector)
+        {
+            return InternalGroupBy(keySelector);
+        }
+
         public virtual SqlExpression<T> GroupBy(Expression<Func<T, object>> keySelector)
         {
-            sep = string.Empty;
-            useFieldName = true;
-
-            var groupByKey = Visit(keySelector);
-            StripAliases(groupByKey as SelectList); // No "AS ColumnAlias" in GROUP BY, just the column names/expressions
-
-            return GroupBy(groupByKey.ToString());
+            return InternalGroupBy(keySelector);
         }
 
         public virtual SqlExpression<T> Having()
@@ -939,6 +955,12 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
+        public virtual SqlExpression<T> WithSqlFilter(Func<string,string> sqlFilter)
+        {
+            this.SqlFilter = sqlFilter;
+            return this;
+        }
+
         public string SqlTable(ModelDefinition modelDef)
         {
             return DialectProvider.GetQuotedTableName(modelDef);
@@ -988,6 +1010,7 @@ namespace ServiceStack.OrmLite
 
         public virtual string ToDeleteRowStatement()
         {
+            string sql;
             var hasTableJoin = tableDefs.Count > 1;
             if (hasTableJoin)
             {
@@ -995,10 +1018,16 @@ namespace ServiceStack.OrmLite
                 var pk = DialectProvider.GetQuotedColumnName(modelDef, modelDef.PrimaryKey);
                 clone.Select(pk);
                 var subSql = clone.ToSelectStatement();
-                var sql = $"DELETE FROM {DialectProvider.GetQuotedTableName(modelDef)} WHERE {pk} IN ({subSql})";
-                return sql;
+                sql = $"DELETE FROM {DialectProvider.GetQuotedTableName(modelDef)} WHERE {pk} IN ({subSql})";
             }
-            return $"DELETE FROM {DialectProvider.GetQuotedTableName(modelDef)} {WhereExpression}";
+            else
+            {
+                sql = $"DELETE FROM {DialectProvider.GetQuotedTableName(modelDef)} {WhereExpression}";
+            }
+
+            return SqlFilter != null
+                ? SqlFilter(sql)
+                : sql;
         }
 
         public virtual void PrepareUpdateStatement(IDbCommand dbCmd, T item, bool excludeDefaults = false)
@@ -1031,8 +1060,12 @@ namespace ServiceStack.OrmLite
             if (setFields.Length == 0)
                 throw new ArgumentException("No non-null or non-default values were provided for type: " + typeof(T).Name);
 
-            dbCmd.CommandText = $"UPDATE {DialectProvider.GetQuotedTableName(modelDef)} " +
-                                $"SET {StringBuilderCache.ReturnAndFree(setFields)} {WhereExpression}";
+            var sql = $"UPDATE {DialectProvider.GetQuotedTableName(modelDef)} " +
+                      $"SET {StringBuilderCache.ReturnAndFree(setFields)} {WhereExpression}";
+
+            dbCmd.CommandText = SqlFilter != null
+                ? SqlFilter(sql)
+                : sql;
         }
 
         public virtual string ToSelectStatement()
@@ -1040,12 +1073,18 @@ namespace ServiceStack.OrmLite
             var sql = DialectProvider
                 .ToSelectStatement(modelDef, SelectExpression, BodyExpression, OrderByExpression, Offset, Rows);
 
-            return sql;
+            return SqlFilter != null
+                ? SqlFilter(sql)
+                : sql;
         }
 
         public virtual string ToCountStatement()
         {
-            return "SELECT COUNT(*)" + BodyExpression;
+            var sql = "SELECT COUNT(*)" + BodyExpression;
+
+            return SqlFilter != null
+                ? SqlFilter(sql)
+                : sql;
         }
 
         public string SelectExpression
@@ -1216,6 +1255,8 @@ namespace ServiceStack.OrmLite
                     return VisitMemberInit(exp as MemberInitExpression);
                 case ExpressionType.Index:
                     return VisitIndexExpression(exp as IndexExpression);
+                case ExpressionType.Conditional:
+                    return VisitConditional(exp as ConditionalExpression);
                 default:
                     return exp.ToString();
             }
@@ -1237,9 +1278,12 @@ namespace ServiceStack.OrmLite
 
                 if (m.Expression != null)
                 {
-                    string r = VisitMemberAccess(m).ToString();
-                    if (m.Expression.Type.IsNullableType())
+                    var r = VisitMemberAccess(m);
+                    if (!(r is PartialSqlString))
                         return r;
+
+                    if (m.Expression.Type.IsNullableType())
+                        return r.ToString();
 
                     return $"{r}={GetQuotedTrueValue()}";
                 }
@@ -1263,17 +1307,25 @@ namespace ServiceStack.OrmLite
             var operand = BindOperant(b.NodeType);   //sep= " " ??
             if (operand == "AND" || operand == "OR")
             {
-                left = IsBooleanComparison(b.Left) 
-                    ? new PartialSqlString($"{VisitMemberAccess((MemberExpression) b.Left)}={GetQuotedTrueValue()}") 
-                    : Visit(b.Left);
+                if (IsBooleanComparison(b.Left))
+                {
+                    left = VisitMemberAccess((MemberExpression) b.Left);
+                    if (left is PartialSqlString)
+                        left = new PartialSqlString($"{left}={GetQuotedTrueValue()}");
+                }
+                else left = Visit(b.Left);
 
-                right = IsBooleanComparison(b.Right) 
-                    ? new PartialSqlString($"{VisitMemberAccess((MemberExpression) b.Right)}={GetQuotedTrueValue()}") 
-                    : Visit(b.Right);
+                if (IsBooleanComparison(b.Right))
+                {
+                    right = VisitMemberAccess((MemberExpression)b.Right);
+                    if (right is PartialSqlString)
+                        right = new PartialSqlString($"{right}={GetQuotedTrueValue()}");
+                }
+                else right = Visit(b.Right);
 
                 if (!(left is PartialSqlString) && !(right is PartialSqlString))
                 {
-                    var result = CachedExpressionCompiler.Evaluate(b);
+                    var result = CachedExpressionCompiler.Evaluate(PreEvaluateBinary(b, left, right));
                     return result;
                 }
 
@@ -1338,7 +1390,7 @@ namespace ServiceStack.OrmLite
                 }
                 else if (!(left is PartialSqlString) && !(right is PartialSqlString))
                 {
-                    var evaluatedValue = CachedExpressionCompiler.Evaluate(b);
+                    var evaluatedValue = CachedExpressionCompiler.Evaluate(PreEvaluateBinary(b, left, right));
                     var result = VisitConstant(Expression.Constant(evaluatedValue));
                     return result;
                 }
@@ -1375,6 +1427,23 @@ namespace ServiceStack.OrmLite
                 default:
                     return new PartialSqlString("(" + left + sep + operand + sep + right + ")");
             }
+        }
+
+        private BinaryExpression PreEvaluateBinary(BinaryExpression b, object left, object right)
+        {
+            var visitedBinaryExp = b;
+
+            if (IsParameterAccess(b.Left) || IsParameterAccess(b.Right))
+            {
+                var eLeft = !IsParameterAccess(b.Left) ? b.Left : Expression.Constant(left, b.Left.Type);
+                var eRight = !IsParameterAccess(b.Right) ? b.Right : Expression.Constant(right, b.Right.Type);
+                if (b.NodeType == ExpressionType.Coalesce)
+                    visitedBinaryExp = Expression.Coalesce(eLeft, eRight, b.Conversion);
+                else
+                    visitedBinaryExp = Expression.MakeBinary(b.NodeType, eLeft, eRight, b.IsLiftedToNull, b.Method);
+            }
+
+            return visitedBinaryExp;
         }
 
         /// <summary>
@@ -1451,6 +1520,19 @@ namespace ServiceStack.OrmLite
                 if (unaryExpr != null)
                 {
                     if (CheckExpressionForTypes(unaryExpr.Operand, types))
+                        return true;
+                }
+
+                var condExpr = e as ConditionalExpression;
+                if (condExpr != null)
+                {
+                    if (CheckExpressionForTypes(condExpr.Test, types))
+                        return true;
+
+                    if (CheckExpressionForTypes(condExpr.IfTrue, types))
+                        return true;
+
+                    if (CheckExpressionForTypes(condExpr.IfFalse, types))
                         return true;
                 }
 
@@ -1704,6 +1786,32 @@ namespace ServiceStack.OrmLite
             throw new NotImplementedException("Unknown Expression: " + e);
         }
 
+        protected virtual object VisitConditional(ConditionalExpression e)
+        {
+            var test = IsBooleanComparison(e.Test)
+                ? new PartialSqlString($"{VisitMemberAccess((MemberExpression) e.Test)}={GetQuotedTrueValue()}")
+                : Visit(e.Test);
+
+            if (test is bool)
+            {
+                if ((bool) test)
+                {
+                    var ifTrue = Visit(e.IfTrue);
+                    return ifTrue;
+                }
+
+                var ifFalse = Visit(e.IfFalse);
+                return ifFalse;
+            }
+            else
+            {
+                var ifTrue = Visit(e.IfTrue);
+                var ifFalse = Visit(e.IfFalse);
+
+                return new PartialSqlString($"(CASE WHEN {test} THEN {ifTrue} ELSE {ifFalse} END)");
+            }
+        }
+
         private object GetNotValue(object o)
         {
             if (!(o is PartialSqlString))
@@ -1723,6 +1831,10 @@ namespace ServiceStack.OrmLite
             var methCallExp = m.Object as MethodCallExpression;
             if (methCallExp != null)
                 return IsColumnAccess(methCallExp);
+
+            var condExp = m.Object as ConditionalExpression;
+            if (condExp != null)
+                return IsParameterAccess(condExp);
 
             var exp = m.Object as MemberExpression;
             return IsParameterAccess(exp)

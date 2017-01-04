@@ -9,15 +9,17 @@ namespace ServiceStack.OrmLite
 {
     internal static class WriteExpressionCommandExtensionsAsync
     {
-        internal static Task<int> UpdateOnlyAsync<T>(this IDbCommand dbCmd, T model, SqlExpression<T> onlyFields, CancellationToken token)
+        internal static Task<int> UpdateOnlyAsync<T>(this IDbCommand dbCmd, T model, SqlExpression<T> onlyFields, Action<IDbCommand> commandFilter, CancellationToken token)
         {
             dbCmd.UpdateOnlySql(model, onlyFields);
+            commandFilter?.Invoke(dbCmd);
             return dbCmd.ExecNonQueryAsync(token);
         }
 
         internal static Task<int> UpdateOnlyAsync<T>(this IDbCommand dbCmd, T obj,
             Expression<Func<T, object>> onlyFields,
             Expression<Func<T, bool>> where,
+            Action<IDbCommand> commandFilter,
             CancellationToken token)
         {
             if (onlyFields == null)
@@ -26,12 +28,13 @@ namespace ServiceStack.OrmLite
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Update(onlyFields);
             q.Where(where);
-            return dbCmd.UpdateOnlyAsync(obj, q, token);
+            return dbCmd.UpdateOnlyAsync(obj, q, commandFilter, token);
         }
 
         internal static Task<int> UpdateOnlyAsync<T>(this IDbCommand dbCmd, T obj,
             string[] onlyFields,
             Expression<Func<T, bool>> where,
+            Action<IDbCommand> commandFilter,
             CancellationToken token)
         {
             if (onlyFields == null)
@@ -40,23 +43,29 @@ namespace ServiceStack.OrmLite
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Update(onlyFields);
             q.Where(where);
-            return dbCmd.UpdateOnlyAsync(obj, q, token);
+            return dbCmd.UpdateOnlyAsync(obj, q, commandFilter, token);
         }
 
         internal static Task<int> UpdateOnlyAsync<T>(this IDbCommand dbCmd,
             Expression<Func<T>> updateFields,
             SqlExpression<T> q,
+            Action<IDbCommand> commandFilter,
             CancellationToken token)
         {
-            return dbCmd.InitUpdateOnly(updateFields, q).ExecNonQueryAsync(token);
+            var cmd = dbCmd.InitUpdateOnly(updateFields, q);
+            commandFilter?.Invoke(cmd);
+            return cmd.ExecNonQueryAsync(token);
         }
 
         public static Task<int> UpdateAddAsync<T>(this IDbCommand dbCmd,
             Expression<Func<T>> updateFields,
             SqlExpression<T> q,
+            Action<IDbCommand> commandFilter,
             CancellationToken token)
         {
-            return dbCmd.InitUpdateAdd(updateFields, q).ExecNonQueryAsync(token);
+            var cmd = dbCmd.InitUpdateAdd(updateFields, q);
+            commandFilter?.Invoke(cmd);
+            return cmd.ExecNonQueryAsync(token);
         }
 
         internal static Task<int> UpdateNonDefaultsAsync<T>(this IDbCommand dbCmd, T item, Expression<Func<T, bool>> obj, CancellationToken token)
@@ -69,22 +78,24 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecNonQueryAsync(token);
         }
 
-        internal static Task<int> UpdateAsync<T>(this IDbCommand dbCmd, T item, Expression<Func<T, bool>> expression, CancellationToken token)
+        internal static Task<int> UpdateAsync<T>(this IDbCommand dbCmd, T item, Expression<Func<T, bool>> expression, Action<IDbCommand> commandFilter, CancellationToken token)
         {
             OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, item);
 
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Where(expression);
             q.PrepareUpdateStatement(dbCmd, item);
+            commandFilter?.Invoke(dbCmd);
             return dbCmd.ExecNonQueryAsync(token);
         }
 
-        internal static Task<int> UpdateAsync<T>(this IDbCommand dbCmd, object updateOnly, Expression<Func<T, bool>> where, CancellationToken token)
+        internal static Task<int> UpdateAsync<T>(this IDbCommand dbCmd, object updateOnly, Expression<Func<T, bool>> where, Action<IDbCommand> commandFilter, CancellationToken token)
         {
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
-            var whereSql = q.Where(@where).WhereExpression;
+            var whereSql = q.Where(where).WhereExpression;
             q.CopyParamsTo(dbCmd);
             dbCmd.PrepareUpdateAnonSql<T>(dbCmd.GetDialectProvider(), updateOnly, whereSql);
+            commandFilter?.Invoke(dbCmd);
 
             return dbCmd.ExecNonQueryAsync(token);
         }

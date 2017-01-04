@@ -125,6 +125,44 @@ namespace ServiceStack.OrmLite
             return (Alias != null && Alias + "Id" == name)
                     || Name + "Id" == name;
         }
+
+        public FieldDefinition Clone(Action<FieldDefinition> modifier = null)
+        {
+            var fieldDef = new FieldDefinition
+            {
+                Name = Name,
+                Alias = Alias,
+                FieldType = FieldType,
+                FieldTypeDefaultValue = FieldTypeDefaultValue,
+                TreatAsType = TreatAsType,
+                PropertyInfo = PropertyInfo,
+                IsPrimaryKey = IsPrimaryKey,
+                AutoIncrement = AutoIncrement,
+                IsNullable = IsNullable,
+                IsIndexed = IsIndexed,
+                IsUnique = IsUnique,
+                IsClustered = IsClustered,
+                IsNonClustered = IsNonClustered,
+                IsRowVersion = IsRowVersion,
+                FieldLength = FieldLength,
+                Scale = Scale,
+                DefaultValue = DefaultValue,
+                ForeignKey = ForeignKey,
+                GetValueFn = GetValueFn,
+                SetValueFn = SetValueFn,
+                Sequence = Sequence,
+                IsComputed = IsComputed,
+                ComputeExpression = ComputeExpression,
+                CustomSelect = CustomSelect,
+                BelongToModelName = BelongToModelName,
+                IsReference = IsReference,
+                CustomFieldDefinition = CustomFieldDefinition,
+                IsRefType = IsRefType,
+            };
+
+            modifier?.Invoke(fieldDef);
+            return fieldDef;
+        }
     }
 
     public class ForeignKeyConstraint

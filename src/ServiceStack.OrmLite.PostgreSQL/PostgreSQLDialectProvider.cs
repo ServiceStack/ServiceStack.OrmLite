@@ -62,51 +62,41 @@ namespace ServiceStack.OrmLite.PostgreSQL
             };
         }
 
-        public override string GetColumnDefinition(
-            string fieldName,
-            Type fieldType,
-            bool isPrimaryKey,
-            bool autoIncrement,
-            bool isNullable, 
-            bool isRowVersion,
-            int? fieldLength,
-            int? scale,
-            string defaultValue,
-            string customFieldDefinition)
+        public override string GetColumnDefinition(FieldDefinition fieldDef)
         {
-            if (isRowVersion)
+            if (fieldDef.IsRowVersion)
                 return null;
 
             string fieldDefinition = null;
-            if (customFieldDefinition != null)
+            if (fieldDef.CustomFieldDefinition != null)
             {
-                fieldDefinition = customFieldDefinition;
+                fieldDefinition = fieldDef.CustomFieldDefinition;
             }
             else
             {
-                if (autoIncrement)
+                if (fieldDef.AutoIncrement)
                 {
-                    if (fieldType == typeof(long))
+                    if (fieldDef.ColumnType == typeof(long))
                         fieldDefinition = "bigserial";
-                    else if (fieldType == typeof(int))
+                    else if (fieldDef.ColumnType == typeof(int))
                         fieldDefinition = "serial";
                 }
                 else
                 {
-                    fieldDefinition = GetColumnTypeDefinition(fieldType, fieldLength, scale);
+                    fieldDefinition = GetColumnTypeDefinition(fieldDef.ColumnType, fieldDef.FieldLength, fieldDef.Scale);
                 }
             }
 
             var sql = StringBuilderCache.Allocate();
-            sql.AppendFormat("{0} {1}", GetQuotedColumnName(fieldName), fieldDefinition);
+            sql.AppendFormat("{0} {1}", GetQuotedColumnName(fieldDef.FieldName), fieldDefinition);
 
-            if (isPrimaryKey)
+            if (fieldDef.IsPrimaryKey)
             {
                 sql.Append(" PRIMARY KEY");
             }
             else
             {
-                if (isNullable)
+                if (fieldDef.IsNullable)
                 {
                     sql.Append(" NULL");
                 }
@@ -116,6 +106,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
                 }
             }
 
+            var defaultValue = GetDefaultValue(fieldDef);
             if (!string.IsNullOrEmpty(defaultValue))
             {
                 sql.AppendFormat(DefaultValueFormat, defaultValue);

@@ -6,7 +6,7 @@ namespace ServiceStack.OrmLite.SqlServer
 {
     public class SqlServer2012OrmLiteDialectProvider : SqlServerOrmLiteDialectProvider
     {
-        public static new SqlServer2012OrmLiteDialectProvider Instance = new SqlServer2012OrmLiteDialectProvider();
+        public new static SqlServer2012OrmLiteDialectProvider Instance = new SqlServer2012OrmLiteDialectProvider();
 
         public override string ToSelectStatement(ModelDefinition modelDef,
             string selectExpression,
@@ -44,20 +44,37 @@ namespace ServiceStack.OrmLite.SqlServer
 
         public override void AppendFieldCondition(StringBuilder sqlFilter, FieldDefinition fieldDef, IDbCommand cmd)
         {
-            if (fieldDef.FieldType.Name == "SqlGeography")
+            if (!isSpatialField(fieldDef))
+            {
+                base.AppendFieldCondition(sqlFilter, fieldDef, cmd);
+            }
+            else 
             {
                 sqlFilter
                     .Append(GetQuotedColumnName(fieldDef.FieldName))
                     .Append(".STEquals(")
                     .Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)))
                     .Append(") = 1");
-
+ 
                 AddParameter(cmd, fieldDef);
+            }
+        }
+
+        public override void AppendNullFieldCondition(StringBuilder sqlFilter, FieldDefinition fieldDef)
+        {
+            if (!isSpatialField(fieldDef))
+            {
+                base.AppendNullFieldCondition(sqlFilter, fieldDef);
             }
             else
             {
-                base.AppendFieldCondition(sqlFilter, fieldDef, cmd);
+                sqlFilter
+                    .Append(GetQuotedColumnName(fieldDef.FieldName))
+                    .Append(".IsNull = 1");
             }
         }
+
+        private bool isSpatialField(FieldDefinition fieldDef) => 
+            fieldDef.FieldType.Name == "SqlGeography" || fieldDef.FieldType.Name == "SqlGeometry";
     }
 }

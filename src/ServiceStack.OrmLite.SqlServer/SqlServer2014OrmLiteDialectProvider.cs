@@ -8,7 +8,7 @@ namespace ServiceStack.OrmLite.SqlServer
 {
     public class SqlServer2014OrmLiteDialectProvider : SqlServer2012OrmLiteDialectProvider
     {
-        public static new SqlServer2014OrmLiteDialectProvider Instance = new SqlServer2014OrmLiteDialectProvider();
+        public new static SqlServer2014OrmLiteDialectProvider Instance = new SqlServer2014OrmLiteDialectProvider();
 
         public override string ToCreateTableStatement(Type tableType)
         {
@@ -24,25 +24,14 @@ namespace ServiceStack.OrmLite.SqlServer
                 if (fieldDef.CustomSelect != null)
                     continue;
 
-                var columnDefinition = GetColumnDefinition(
-                    fieldDef.FieldName,
-                    fieldDef.ColumnType,
-                    fieldDef.IsPrimaryKey,
-                    fieldDef.AutoIncrement,
-                    fieldDef.IsNullable,
-                    fieldDef.IsRowVersion,
-                    fieldDef.FieldLength,
-                    fieldDef.Scale,
-                    GetDefaultValue(fieldDef),
-                    fieldDef.CustomFieldDefinition);
-
+                var columnDefinition = GetColumnDefinition(fieldDef);
                 if (columnDefinition == null)
                     continue;
 
                 var collationAttribs = fieldDef.PropertyInfo.GetAttributes<SqlServerCollateAttribute>();
                 if (collationAttribs.Count > 0)
                 {
-                    columnDefinition += $" COLLATE {collationAttribs[0].collation}";
+                    columnDefinition += $" COLLATE {collationAttribs[0].Collation}";
                 }
 
                 if (isMemoryTable && fieldDef.IsPrimaryKey)
@@ -52,7 +41,7 @@ namespace ServiceStack.OrmLite.SqlServer
                     var bucketCountAtribs = fieldDef.PropertyInfo.GetAttributes<SqlServerBucketCountAttribute>();
                     if (bucketCountAtribs.Count > 0)
                     {
-                        columnDefinition += $" HASH WITH (BUCKET_COUNT={bucketCountAtribs[0].count})";
+                        columnDefinition += $" HASH WITH (BUCKET_COUNT={bucketCountAtribs[0].Count})";
                     }
                 }
 
@@ -61,7 +50,8 @@ namespace ServiceStack.OrmLite.SqlServer
 
                 sbColumns.Append(columnDefinition);
 
-                if (fieldDef.ForeignKey == null) continue;
+                if (fieldDef.ForeignKey == null || OrmLiteConfig.SkipForeignKeys)
+                    continue;
 
                 var refModelDef = OrmLiteUtils.GetModelDefinition(fieldDef.ForeignKey.ReferenceType);
                 sbConstraints.Append(

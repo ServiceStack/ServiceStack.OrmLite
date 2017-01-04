@@ -303,21 +303,10 @@ namespace ServiceStack.OrmLite.Firebird
                 if (sbColumns.Length != 0)
                     sbColumns.Append(", \n  ");
 
-                var columnDefinition = GetColumnDefinition(
-                    fieldDef.FieldName,
-                    fieldDef.ColumnType,
-                    fieldDef.IsPrimaryKey,
-                    fieldDef.AutoIncrement,
-                    fieldDef.IsNullable,
-                    fieldDef.IsRowVersion,
-                    fieldDef.FieldLength,
-                    fieldDef.Scale,
-                    GetDefaultValue(fieldDef),
-                    fieldDef.CustomFieldDefinition);
-
+                var columnDefinition = GetColumnDefinition(fieldDef);
                 sbColumns.Append(columnDefinition);
 
-                if (fieldDef.ForeignKey == null)
+                if (fieldDef.ForeignKey == null || OrmLiteConfig.SkipForeignKeys)
                     continue;
 
                 var refModelDef = GetModel(fieldDef.ForeignKey.ReferenceType);
@@ -362,16 +351,16 @@ namespace ServiceStack.OrmLite.Firebird
             return gens;
         }
 
-        public override string GetColumnDefinition(string fieldName, Type fieldType,
-            bool isPrimaryKey, bool autoIncrement, bool isNullable, bool isRowVersion,
-            int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
+        public override string GetColumnDefinition(FieldDefinition fieldDef)
         {
-            var fieldDefinition = customFieldDefinition ?? GetColumnTypeDefinition(fieldType, fieldLength, scale);
+            var fieldDefinition = fieldDef.CustomFieldDefinition 
+                ?? GetColumnTypeDefinition(fieldDef.ColumnType, fieldDef.FieldLength, fieldDef.Scale);
 
             var sql = StringBuilderCache.Allocate();
-            sql.AppendFormat("{0} {1}", GetQuotedColumnName(fieldName), fieldDefinition);
+            sql.AppendFormat("{0} {1}", GetQuotedColumnName(fieldDef.FieldName), fieldDefinition);
 
-            if (isRowVersion)
+            var defaultValue = GetDefaultValue(fieldDef);
+            if (fieldDef.IsRowVersion)
             {
                 sql.AppendFormat(DefaultValueFormat, 1L);
             }
@@ -380,7 +369,7 @@ namespace ServiceStack.OrmLite.Firebird
                 sql.AppendFormat(DefaultValueFormat, defaultValue);
             }
 
-            if (!isNullable)
+            if (!fieldDef.IsNullable)
             {
                 sql.Append(" NOT NULL");
             }
@@ -754,47 +743,22 @@ namespace ServiceStack.OrmLite.Firebird
         #region DDL
         public override string ToAddColumnStatement(Type modelType, FieldDefinition fieldDef)
         {
-            var column = GetColumnDefinition(fieldDef.FieldName,
-                                             fieldDef.ColumnType,
-                                             fieldDef.IsPrimaryKey,
-                                             fieldDef.AutoIncrement,
-                                             fieldDef.IsNullable,
-                                             fieldDef.IsRowVersion,
-                                             fieldDef.FieldLength,
-                                             fieldDef.Scale,
-                                             fieldDef.DefaultValue,
-                                             fieldDef.CustomFieldDefinition);
-
-            return string.Format("ALTER TABLE {0} ADD {1} ;",
-                                 GetQuotedTableName(GetModel(modelType)),
-                                 column);
+            var column = GetColumnDefinition(fieldDef);
+            return $"ALTER TABLE {GetQuotedTableName(GetModel(modelType))} ADD {column} ;";
         }
 
         public override string ToAlterColumnStatement(Type modelType, FieldDefinition fieldDef)
         {
-            var column = GetColumnDefinition(fieldDef.FieldName,
-                                             fieldDef.ColumnType,
-                                             fieldDef.IsPrimaryKey,
-                                             fieldDef.AutoIncrement,
-                                             fieldDef.IsNullable,
-                                             fieldDef.IsRowVersion,
-                                             fieldDef.FieldLength,
-                                             fieldDef.Scale,
-                                             fieldDef.DefaultValue,
-                                             fieldDef.CustomFieldDefinition);
-            return string.Format("ALTER TABLE {0} ALTER {1} ;",
-                                 GetQuotedTableName(GetModel(modelType)),
-                                 column);
+            var column = GetColumnDefinition(fieldDef);
+            return $"ALTER TABLE {GetQuotedTableName(GetModel(modelType))} ALTER {column} ;";
         }
 
-        public override string ToChangeColumnNameStatement(Type modelType,
-                                                           FieldDefinition fieldDef,
-                                                           string oldColumnName)
+        public override string ToChangeColumnNameStatement(Type modelType, FieldDefinition fieldDef, string oldColumnName)
         {
-            return string.Format("ALTER TABLE {0} ALTER {1} TO {2} ;",
-                                 GetQuotedTableName(GetModel(modelType)),
-                                 GetQuotedColumnName(oldColumnName),
-                                 GetQuotedColumnName(fieldDef.FieldName));
+            return string.Format("ALTER TABLE {0} ALTER {1} TO {2};",
+                GetQuotedTableName(GetModel(modelType)),
+                GetQuotedColumnName(oldColumnName),
+                GetQuotedColumnName(fieldDef.FieldName));
         }
         #endregion DDL
 

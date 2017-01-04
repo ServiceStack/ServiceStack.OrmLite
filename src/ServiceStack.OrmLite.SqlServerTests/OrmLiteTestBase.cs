@@ -10,8 +10,10 @@ namespace ServiceStack.OrmLite.SqlServerTests
     {
         protected virtual string ConnectionString { get; set; }
 
+        public IDbConnection Db { get; set; }
+
         [TestFixtureSetUp]
-        public void TestFixtureSetUp()
+        public virtual void TestFixtureSetUp()
         {
             LogManager.LogFactory = new ConsoleLogFactory();
 
@@ -24,10 +26,11 @@ namespace ServiceStack.OrmLite.SqlServerTests
             Console.WriteLine(text);
         }
 
-        public virtual IDbConnection OpenDbConnection(string connString = null)
+        public virtual IDbConnection OpenDbConnection(string connString = null, IOrmLiteDialectProvider dialectProvider = null)
         {
+            dialectProvider = dialectProvider ?? OrmLiteConfig.DialectProvider;
             connString = connString ?? ConnectionString;
-            return connString.OpenDbConnection();
+            return new OrmLiteConnectionFactory(connString, dialectProvider).OpenDbConnection();
         }
     }
 }

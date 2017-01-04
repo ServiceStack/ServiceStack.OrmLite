@@ -38,7 +38,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        public void Can_query_using_float_in_alernate_culuture()
+        public void Can_query_using_float_in_alernate_culture()
         {
             using (var db = OpenDbConnection())
             {
@@ -47,7 +47,7 @@ namespace ServiceStack.OrmLite.Tests
                 db.Insert(new Point { Width = 4, Height = 1.123f, Top = 3.456d, Left = 2.345m });
                 db.GetLastSql().Print();
 
-                var sql = "Height = @height".NormalizeSql();
+                var sql = "Height = @height".PreNormalizeSql(db);
                 var points = db.Select<Point>(sql, new { height = 1.123 });
                 db.GetLastSql().Print();
 
