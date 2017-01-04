@@ -15,46 +15,74 @@ namespace ServiceStack.OrmLite.SqlServer
                 return $"{fieldDef.FieldName} rowversion NOT NULL";
 
             var fieldDefinition = fieldDef.CustomFieldDefinition ??
-                GetColumnTypeDefinition(fieldDef.ColumnType, fieldDef.FieldLength, fieldDef.Scale);            
+                GetColumnTypeDefinition(fieldDef.ColumnType, fieldDef.FieldLength, fieldDef.Scale);
+
+            var memTableAttrib = fieldDef.PropertyInfo.ReflectedType.FirstAttribute<SqlServerMemoryOptimizedAttribute>();
+            var isMemoryTable = memTableAttrib != null;
 
             var sql = StringBuilderCache.Allocate();
             sql.Append($"{GetQuotedColumnName(fieldDef.FieldName)} {fieldDefinition}");
 
+            if (fieldDef.FieldType == typeof(string))
+            {
+                // https://msdn.microsoft.com/en-us/library/ms184391.aspx
+                var collation = fieldDef.PropertyInfo.FirstAttribute<SqlServerCollateAttribute>()?.Collation;
+                if (!string.IsNullOrEmpty(collation))
+                {
+                    sql.Append($" COLLATE {collation}");
+                }
+            }
+
+            var bucketCount = fieldDef.PropertyInfo.FirstAttribute<SqlServerBucketCountAttribute>()?.Count;
+
             if (fieldDef.IsPrimaryKey)
             {
-                var isMemoryTable = fieldDef.PropertyInfo.DeclaringType.FirstAttribute<SqlServerMemoryOptimizedAttribute>() != null;
-
                 if (isMemoryTable)
                 {
-                    sql.Append(fieldDef.IsNullable ? " NULL" : " NOT NULL");                    
-                    sql.Append(" PRIMARY KEY NONCLUSTERED");
-
-                    var bucketCount = fieldDef.PropertyInfo.FirstAttribute<SqlServerBucketCountAttribute>()?.Count;
-                    if (bucketCount.HasValue)
-                    {
-                        sql.Append($" HASH WITH (BUCKET_COUNT = {bucketCount.Value})");
-                    }
+                    sql.Append($" NOT NULL PRIMARY KEY NONCLUSTERED");
                 }
                 else
                 {
                     sql.Append(" PRIMARY KEY");
+
+                    if (fieldDef.IsNonClustered)
+                        sql.Append(" NONCLUSTERED");
                 }
 
                 if (fieldDef.AutoIncrement)
                 {
                     sql.Append(" ").Append(AutoIncrementDefinition);
                 }
+
+                if (isMemoryTable && bucketCount.HasValue)
+                {
+                    sql.Append($" HASH WITH (BUCKET_COUNT = {bucketCount.Value})");
+                }
+            }
+            else if (!isMemoryTable && fieldDef.IsUnique)
+            {
+                sql.Append(" UNIQUE");
+
+                if (fieldDef.IsNonClustered)
+                    sql.Append(" NONCLUSTERED");
             }
             else
             {
-                sql.Append(fieldDef.IsNullable ? " NULL" : " NOT NULL");
-            }
+                if (isMemoryTable && bucketCount.HasValue)
+                {
+                    sql.Append($" NOT NULL INDEX {GetQuotedColumnName("IDX_" + fieldDef.FieldName)}");
 
-            // https://msdn.microsoft.com/en-us/library/ms184391.aspx
-            var collation = fieldDef.PropertyInfo.FirstAttribute<SqlServerCollateAttribute>()?.Collation;
-            if (!string.IsNullOrEmpty(collation))
-            {
-                sql.Append($" COLLATE {collation}");
+                    if (fieldDef.IsNonClustered)
+                    {
+                        sql.Append(" NONCLUSTERED");
+                    }
+
+                    sql.Append($" HASH WITH (BUCKET_COUNT = {bucketCount.Value})");
+                }
+                else
+                {
+                    sql.Append(fieldDef.IsNullable ? " NULL" : " NOT NULL");
+                }
             }
 
             var defaultValue = GetDefaultValue(fieldDef);
