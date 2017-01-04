@@ -49,11 +49,11 @@ namespace ServiceStack.OrmLite.Tests.Expression
             letterFrequencySumId = db.Scalar<int>(db.From<LetterFrequency>().Select(Sql.Sum("Id")));
         }
 
-        public static void InitLetters(IDbConnection db)
+        public static int InitLetters(IDbConnection db)
         {
             db.DropAndCreateTable<LetterFrequency>();
 
-            db.Insert(new LetterFrequency { Letter = "A" });
+            var firstId = db.Insert(new LetterFrequency { Letter = "A" }, selectIdentity: true);
             db.Insert(new LetterFrequency { Letter = "B" });
             db.Insert(new LetterFrequency { Letter = "B" });
             db.Insert(new LetterFrequency { Letter = "C" });
@@ -63,6 +63,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
             db.Insert(new LetterFrequency { Letter = "D" });
             db.Insert(new LetterFrequency { Letter = "D" });
             db.Insert(new LetterFrequency { Letter = "D" });
+            return (int)firstId;
         }
 
         [Test]
@@ -70,7 +71,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
         {
             using (var db = OpenDbConnection())
             {
-                InitLetters(db);
+                var firstId = InitLetters(db);
                 var expected = new Dictionary<string, int> {
                     { "A", 1 }, { "B", 2 }, { "C", 3 },
                 };
@@ -103,7 +104,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                   .Select(x => new { x.Id });
 
                 var list = db.SqlList<int>(query);
-                Assert.That(list, Is.EquivalentTo(new[] { 1, 2, 3, 4, 5, 6 }));
+                Assert.That(list, Is.EquivalentTo(new[] { 0, 1, 2, 3, 4, 5 }.AdjustIds(firstId)));
             }
         }
 
@@ -421,10 +422,10 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
                 var table = typeof(LetterFrequency).Name.SqlTable();
 
-                rowCount = db.RowCount("SELECT * FROM {0} WHERE Letter = @p1".Fmt(table), new { p1 = "B" });
+                rowCount = db.RowCount("SELECT * FROM {0} WHERE Letter = @p1".PreNormalizeSql(db).Fmt(table), new { p1 = "B" });
                 Assert.That(rowCount, Is.EqualTo(4));
 
-                rowCount = db.RowCount("SELECT * FROM {0} WHERE Letter = @p1".Fmt(table),
+                rowCount = db.RowCount("SELECT * FROM {0} WHERE Letter = @p1".PreNormalizeSql(db).Fmt(table),
                     new[] { db.CreateParam("p1", "B") });
                 Assert.That(rowCount, Is.EqualTo(4));
             }

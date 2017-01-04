@@ -27,7 +27,8 @@
     "ServiceStack.Client": "1.0.*",
     "ServiceStack.OrmLite.Sqlite": "1.0.*",
     "ServiceStack.OrmLite.SqlServer": "1.0.*",
-    "ServiceStack.OrmLite.PostgreSQL": "1.0.*"
+    "ServiceStack.OrmLite.PostgreSQL": "1.0.*",
+    "ServiceStack.OrmLite.MySql": "1.0.*"
   },
   "frameworks": {
     "netcoreapp1.1": {

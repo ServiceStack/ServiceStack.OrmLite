@@ -18,6 +18,8 @@ namespace ServiceStack.OrmLite.Tests
         public string VirtProperty => "WaybillVirtPropertyValue";
 
         public string VirtProperty2 => "WaybillVirtPropertyValue2";
+
+        public bool BoolVirtProperty => false;
     }
 
     public class CustomSqlServerDialectProvider : SqliteOrmLiteDialectProvider
@@ -43,6 +45,8 @@ namespace ServiceStack.OrmLite.Tests
                     return "WaybillVirtPropertyValue";
                 if (m.Member.Name == nameof(Waybill.VirtProperty2))
                     return "WaybillVirtPropertyValue2";
+                if (m.Member.Name == nameof(Waybill.BoolVirtProperty))
+                    return false;
             }
 
             return base.GetMemberExpression(m);
@@ -152,6 +156,64 @@ namespace ServiceStack.OrmLite.Tests
             var q = Db.From<Waybill>().Where(filter);
             var target = Db.Select(q);
             Assert.AreEqual(0, target.Count);
+        }
+
+        [Test]
+        public void Can_Where_using_constant_filter9()
+        {
+            System.Linq.Expressions.Expression<Func<Waybill, bool>> filter = x => x.BoolVirtProperty;
+            var q = Db.From<Waybill>().Where(filter);
+            var target = Db.Select(q);
+            Assert.AreEqual(0, target.Count);
+        }
+
+        [Test]
+        public void Can_Where_using_constant_filter10()
+        {
+            System.Linq.Expressions.Expression<Func<Waybill, bool>> filter = x => !x.BoolVirtProperty;
+            var q = Db.From<Waybill>().Where(filter);
+            var target = Db.Select(q);
+            Assert.AreEqual(3, target.Count);
+        }
+
+        [Test]
+        public void Can_Where_using_constant_filter11()
+        {
+            System.Linq.Expressions.Expression<Func<Waybill, bool>> filter = x => x.BoolVirtProperty && x.VirtProperty == "WaybillVirtPropertyValue";
+            var q = Db.From<Waybill>().Where(filter);
+            var target = Db.Select(q);
+            Assert.AreEqual(0, target.Count);
+        }
+
+        [Test]
+        public void Can_Where_using_constant_filter12()
+        {
+            System.Linq.Expressions.Expression<Func<Waybill, bool>> filter = x => !x.BoolVirtProperty || x.VirtProperty == "WaybillVirtPropertyValue";
+            var q = Db.From<Waybill>().Where(filter);
+            var target = Db.Select(q);
+            Assert.AreEqual(3, target.Count);
+        }
+
+        [Test]
+        public void Can_Where_using_constant_filter13()
+        {
+            System.Linq.Expressions.Expression<Func<Waybill, bool>> filter = x => !x.BoolVirtProperty &&
+                                                                                  x.VirtProperty == "WaybillVirtPropertyValue" &&
+                                                                                  x.Number == 100;
+            var q = Db.From<Waybill>().Where(filter);
+            var target = Db.Select(q);
+            Assert.AreEqual(1, target.Count);
+        }
+
+        [Test]
+        public void Can_Where_using_constant_filter14()
+        {
+            System.Linq.Expressions.Expression<Func<Waybill, bool>> filter = x => x.Number == 100 &&
+                                                                                  (x.BoolVirtProperty ||
+                                                                                   x.VirtProperty == "WaybillVirtPropertyValue");
+            var q = Db.From<Waybill>().Where(filter);
+            var target = Db.Select(q);
+            Assert.AreEqual(1, target.Count);
         }
     }
 }

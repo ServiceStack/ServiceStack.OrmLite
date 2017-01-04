@@ -350,7 +350,7 @@ namespace ServiceStack.OrmLite
             return objWithProperties;
         }
 
-        internal static int Update<T>(this IDbCommand dbCmd, T obj)
+        internal static int Update<T>(this IDbCommand dbCmd, T obj, Action<IDbCommand> commandFilter = null)
         {
             OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, obj);
 
@@ -361,6 +361,7 @@ namespace ServiceStack.OrmLite
 
             dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
+            commandFilter?.Invoke(dbCmd);
             var rowsUpdated = dbCmd.ExecNonQuery();
 
             if (hadRowVersion && rowsUpdated == 0)
@@ -369,12 +370,12 @@ namespace ServiceStack.OrmLite
             return rowsUpdated;
         }
 
-        internal static int Update<T>(this IDbCommand dbCmd, params T[] objs)
+        internal static int Update<T>(this IDbCommand dbCmd, T[] objs, Action<IDbCommand> commandFilter = null)
         {
-            return dbCmd.UpdateAll(objs);
+            return dbCmd.UpdateAll(objs, commandFilter);
         }
 
-        internal static int UpdateAll<T>(this IDbCommand dbCmd, IEnumerable<T> objs)
+        internal static int UpdateAll<T>(this IDbCommand dbCmd, IEnumerable<T> objs, Action<IDbCommand> commandFilter = null)
         {
             IDbTransaction dbTrans = null;
 
@@ -396,6 +397,8 @@ namespace ServiceStack.OrmLite
 
                     dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
+                    commandFilter?.Invoke(dbCmd);
+                    commandFilter = null;
                     var rowsUpdated = dbCmd.ExecNonQuery();
                     if (hadRowVersion && rowsUpdated == 0) 
                         throw new OptimisticConcurrencyException();

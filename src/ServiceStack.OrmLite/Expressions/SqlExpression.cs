@@ -456,7 +456,7 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
-        public virtual SqlExpression<T> GroupBy<Table>(Expression<Func<Table, object>> keySelector)
+        private SqlExpression<T> InternalGroupBy(Expression keySelector)
         {
             sep = string.Empty;
             useFieldName = true;
@@ -467,15 +467,29 @@ namespace ServiceStack.OrmLite
             return GroupBy(groupByKey.ToString());
         }
 
+        public virtual SqlExpression<T> GroupBy<Table>(Expression<Func<Table, object>> keySelector)
+        {
+            return InternalGroupBy(keySelector);
+        }
+
+        public virtual SqlExpression<T> GroupBy<Table1, Table2>(Expression<Func<Table1, Table2, object>> keySelector)
+        {
+            return InternalGroupBy(keySelector);
+        }
+
+        public virtual SqlExpression<T> GroupBy<Table1, Table2, Table3>(Expression<Func<Table1, Table2, Table3, object>> keySelector)
+        {
+            return InternalGroupBy(keySelector);
+        }
+
+        public virtual SqlExpression<T> GroupBy<Table1, Table2, Table3, Table4>(Expression<Func<Table1, Table2, Table3, Table4, object>> keySelector)
+        {
+            return InternalGroupBy(keySelector);
+        }
+
         public virtual SqlExpression<T> GroupBy(Expression<Func<T, object>> keySelector)
         {
-            sep = string.Empty;
-            useFieldName = true;
-
-            var groupByKey = Visit(keySelector);
-            StripAliases(groupByKey as SelectList); // No "AS ColumnAlias" in GROUP BY, just the column names/expressions
-
-            return GroupBy(groupByKey.ToString());
+            return InternalGroupBy(keySelector);
         }
 
         public virtual SqlExpression<T> Having()
@@ -1241,6 +1255,8 @@ namespace ServiceStack.OrmLite
                     return VisitMemberInit(exp as MemberInitExpression);
                 case ExpressionType.Index:
                     return VisitIndexExpression(exp as IndexExpression);
+                case ExpressionType.Conditional:
+                    return VisitConditional(exp as ConditionalExpression);
                 default:
                     return exp.ToString();
             }
@@ -1262,9 +1278,12 @@ namespace ServiceStack.OrmLite
 
                 if (m.Expression != null)
                 {
-                    string r = VisitMemberAccess(m).ToString();
-                    if (m.Expression.Type.IsNullableType())
+                    var r = VisitMemberAccess(m);
+                    if (!(r is PartialSqlString))
                         return r;
+
+                    if (m.Expression.Type.IsNullableType())
+                        return r.ToString();
 
                     return $"{r}={GetQuotedTrueValue()}";
                 }
@@ -1288,13 +1307,21 @@ namespace ServiceStack.OrmLite
             var operand = BindOperant(b.NodeType);   //sep= " " ??
             if (operand == "AND" || operand == "OR")
             {
-                left = IsBooleanComparison(b.Left) 
-                    ? new PartialSqlString($"{VisitMemberAccess((MemberExpression) b.Left)}={GetQuotedTrueValue()}") 
-                    : Visit(b.Left);
+                if (IsBooleanComparison(b.Left))
+                {
+                    left = VisitMemberAccess((MemberExpression) b.Left);
+                    if (left is PartialSqlString)
+                        left = new PartialSqlString($"{left}={GetQuotedTrueValue()}");
+                }
+                else left = Visit(b.Left);
 
-                right = IsBooleanComparison(b.Right) 
-                    ? new PartialSqlString($"{VisitMemberAccess((MemberExpression) b.Right)}={GetQuotedTrueValue()}") 
-                    : Visit(b.Right);
+                if (IsBooleanComparison(b.Right))
+                {
+                    right = VisitMemberAccess((MemberExpression)b.Right);
+                    if (right is PartialSqlString)
+                        right = new PartialSqlString($"{right}={GetQuotedTrueValue()}");
+                }
+                else right = Visit(b.Right);
 
                 if (!(left is PartialSqlString) && !(right is PartialSqlString))
                 {
@@ -1493,6 +1520,19 @@ namespace ServiceStack.OrmLite
                 if (unaryExpr != null)
                 {
                     if (CheckExpressionForTypes(unaryExpr.Operand, types))
+                        return true;
+                }
+
+                var condExpr = e as ConditionalExpression;
+                if (condExpr != null)
+                {
+                    if (CheckExpressionForTypes(condExpr.Test, types))
+                        return true;
+
+                    if (CheckExpressionForTypes(condExpr.IfTrue, types))
+                        return true;
+
+                    if (CheckExpressionForTypes(condExpr.IfFalse, types))
                         return true;
                 }
 
@@ -1746,6 +1786,32 @@ namespace ServiceStack.OrmLite
             throw new NotImplementedException("Unknown Expression: " + e);
         }
 
+        protected virtual object VisitConditional(ConditionalExpression e)
+        {
+            var test = IsBooleanComparison(e.Test)
+                ? new PartialSqlString($"{VisitMemberAccess((MemberExpression) e.Test)}={GetQuotedTrueValue()}")
+                : Visit(e.Test);
+
+            if (test is bool)
+            {
+                if ((bool) test)
+                {
+                    var ifTrue = Visit(e.IfTrue);
+                    return ifTrue;
+                }
+
+                var ifFalse = Visit(e.IfFalse);
+                return ifFalse;
+            }
+            else
+            {
+                var ifTrue = Visit(e.IfTrue);
+                var ifFalse = Visit(e.IfFalse);
+
+                return new PartialSqlString($"(CASE WHEN {test} THEN {ifTrue} ELSE {ifFalse} END)");
+            }
+        }
+
         private object GetNotValue(object o)
         {
             if (!(o is PartialSqlString))
@@ -1765,6 +1831,10 @@ namespace ServiceStack.OrmLite
             var methCallExp = m.Object as MethodCallExpression;
             if (methCallExp != null)
                 return IsColumnAccess(methCallExp);
+
+            var condExp = m.Object as ConditionalExpression;
+            if (condExp != null)
+                return IsParameterAccess(condExp);
 
             var exp = m.Object as MemberExpression;
             return IsParameterAccess(exp)

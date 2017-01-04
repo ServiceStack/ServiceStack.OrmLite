@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
 using ServiceStack.DataAnnotations;
@@ -35,6 +34,25 @@ namespace ServiceStack.OrmLite.Tests
                 row.Name = "UpdatedName";
 
                 db.Update(row);
+
+                var dbRow = db.SingleById<ModelWithFieldsOfDifferentTypes>(row.Id);
+
+                ModelWithFieldsOfDifferentTypes.AssertIsEqual(dbRow, row);
+            }
+        }
+
+        [Test]
+        public void Can_update_ModelWithFieldsOfDifferentTypes_table_with_commandFilter()
+        {
+            using (var db = OpenDbConnection())
+            {
+                var row = CreateModelWithFieldsOfDifferentTypes(db);
+
+                row.Id = (int)db.Insert(row, selectIdentity: true);
+
+                row.Name = "UpdatedName";
+
+                db.Update(row, cmd => cmd.CommandText.Print());
 
                 var dbRow = db.SingleById<ModelWithFieldsOfDifferentTypes>(row.Id);
 
