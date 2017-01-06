@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Linq;
 using NUnit.Framework;
 using ServiceStack.OrmLite.SqlServer;
 using ServiceStack.OrmLite.SqlServer.Converters;
@@ -301,6 +302,43 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(row.DefaultInt, Is.EqualTo(6));
                 Assert.That(row.DefaultDouble, Is.EqualTo(8.3).Within(0.1));
                 VerifyUpdateDate(db);
+            }
+        }
+
+        [Test]
+        public void Does_use_defaults_for_missing_values()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<ModelWithDefaults>();
+
+                db.Insert(new ModelWithDefaults { DefaultInt = 10 });
+
+                var row = db.Select<ModelWithDefaults>().FirstOrDefault();
+
+                Assert.That(row.Id, Is.GreaterThan(0));
+                Assert.That(row.DefaultInt, Is.EqualTo(10));
+                Assert.That(row.DefaultString, Is.EqualTo("String"));
+            }
+        }
+
+        [Test]
+        public void Does_only_use_defaults_for_all_default_properties()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<ModelWithDefaults>();
+
+                db.InsertUsingDefaults(
+                    new ModelWithDefaults { Name = "foo", DefaultInt = 10 },
+                    new ModelWithDefaults { Name = "bar", DefaultString = "qux" });
+
+                var rows = db.Select<ModelWithDefaults>();
+                rows.PrintDump();
+
+                Assert.That(rows.All(x => x.Id > 0));
+                Assert.That(rows.All(x => x.DefaultInt == 1));
+                Assert.That(rows.All(x => x.DefaultString == "String"));
             }
         }
     }

@@ -65,13 +65,13 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
-        /// Insert 1 or more POCOs in a transaction. E.g:
-        /// <para>db.Insert(new Person { Id = 1, FirstName = "Tupac", LastName = "Shakur", Age = 25 },</para>
-        /// <para>          new Person { Id = 2, FirstName = "Biggie", LastName = "Smalls", Age = 24 })</para>
+        /// Insert 1 or more POCOs in a transaction using Table default values when defined. E.g:
+        /// <para>db.InsertUsingDefaults(new Person { FirstName = "Tupac", LastName = "Shakur" },</para>
+        /// <para>                       new Person { FirstName = "Biggie", LastName = "Smalls" })</para>
         /// </summary>
-        public static void Insert<T>(this IDbConnection dbConn, params T[] objs)
+        public static void InsertUsingDefaults<T>(this IDbConnection dbConn, params T[] objs)
         {
-            dbConn.Exec(dbCmd => dbCmd.Insert(objs));
+            dbConn.Exec(dbCmd => dbCmd.InsertUsingDefaults(objs));
         }
 
         /// <summary>
@@ -81,6 +81,16 @@ namespace ServiceStack.OrmLite
         public static void InsertAll<T>(this IDbConnection dbConn, IEnumerable<T> objs)
         {
             dbConn.Exec(dbCmd => dbCmd.InsertAll(objs));
+        }
+
+        /// <summary>
+        /// Insert 1 or more POCOs in a transaction. E.g:
+        /// <para>db.Insert(new Person { Id = 1, FirstName = "Tupac", LastName = "Shakur", Age = 25 },</para>
+        /// <para>          new Person { Id = 2, FirstName = "Biggie", LastName = "Smalls", Age = 24 })</para>
+        /// </summary>
+        public static void Insert<T>(this IDbConnection dbConn, params T[] objs)
+        {
+            dbConn.Exec(dbCmd => dbCmd.Insert(objs));
         }
 
         /// <summary>

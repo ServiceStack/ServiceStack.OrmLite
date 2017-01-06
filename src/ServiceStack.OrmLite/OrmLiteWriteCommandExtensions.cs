@@ -16,6 +16,7 @@ using System.Data;
 using System.Linq;
 using ServiceStack.Data;
 using ServiceStack.Logging;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
@@ -628,7 +629,6 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecNonQuery();
         }
 
-
         internal static void Insert<T>(this IDbCommand dbCmd, params T[] objs)
         {
             InsertAll(dbCmd, objs);
@@ -646,6 +646,50 @@ namespace ServiceStack.OrmLite
                 var dialectProvider = dbCmd.GetDialectProvider();
 
                 dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd);
+
+                foreach (var obj in objs)
+                {
+                    OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj);
+                    dialectProvider.SetParameterValues<T>(dbCmd, obj);
+
+                    try
+                    {
+                        dbCmd.ExecNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error("SQL ERROR: {0}".Fmt(dbCmd.GetLastSqlAndParams()), ex);
+                        throw;
+                    }
+                }
+
+                dbTrans?.Commit();
+            }
+            finally
+            {
+                dbTrans?.Dispose();
+            }
+        }
+
+        internal static void InsertUsingDefaults<T>(this IDbCommand dbCmd, params T[] objs)
+        {
+            IDbTransaction dbTrans = null;
+
+            try
+            {
+                if (dbCmd.Transaction == null)
+                    dbCmd.Transaction = dbTrans = dbCmd.Connection.BeginTransaction();
+
+                var dialectProvider = dbCmd.GetDialectProvider();
+
+                var modelDef = typeof(T).GetModelDefinition();
+                var fieldsWithoutDefaults = modelDef.FieldDefinitionsArray
+                    .Where(x => x.DefaultValue == null)
+                    .Select(x => x.Name)
+                    .ToHashSet(); 
+
+                dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd,
+                    insertFields: fieldsWithoutDefaults);
 
                 foreach (var obj in objs)
                 {

@@ -33,4 +33,18 @@ namespace ServiceStack.OrmLite.Tests.Models
         [Default(OrmLiteVariables.SystemUtc)]
         public DateTime UpdatedDateUtc { get; set; }
     }
+
+    public class ModelWithDefaults
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+
+        public string Name { get; set; }
+
+        [Default(1)]
+        public int DefaultInt { get; set; }
+
+        [Default("'String'")]
+        public string DefaultString { get; set; }
+    }
 }
