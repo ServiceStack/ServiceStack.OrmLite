@@ -211,6 +211,16 @@ namespace ServiceStack.OrmLite.SqlServer
             var sql = StringBuilderCache.Allocate();
             sql.Append($"{GetQuotedColumnName(fieldDef.FieldName)} {fieldDefinition}");
 
+            if (fieldDef.FieldType == typeof(string))
+            {
+                // https://msdn.microsoft.com/en-us/library/ms184391.aspx
+                var collation = fieldDef.PropertyInfo.FirstAttribute<SqlServerCollateAttribute>()?.Collation;
+                if (!string.IsNullOrEmpty(collation))
+                {
+                    sql.Append($" COLLATE {collation}");
+                }
+            }
+
             if (fieldDef.IsPrimaryKey)
             {
                 sql.Append(" PRIMARY KEY");
@@ -222,14 +232,7 @@ namespace ServiceStack.OrmLite.SqlServer
             else
             {
                 sql.Append(fieldDef.IsNullable ? " NULL" : " NOT NULL");
-            }
-
-            // https://msdn.microsoft.com/en-us/library/ms184391.aspx
-            var collation = fieldDef.PropertyInfo.FirstAttribute<SqlServerCollateAttribute>()?.Collation;
-            if (!string.IsNullOrEmpty(collation))
-            {
-                sql.Append($" COLLATE {collation}");
-            }
+            }            
 
             var defaultValue = GetDefaultValue(fieldDef);
             if (!string.IsNullOrEmpty(defaultValue))
