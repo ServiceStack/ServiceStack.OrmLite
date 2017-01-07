@@ -2,69 +2,48 @@
 using Microsoft.SqlServer.Types;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.OrmLite.SqlServer.Converters;
-using ServiceStack.Text;
 
-namespace ServiceStack.OrmLite.SqlServerTests.Converters
+namespace ServiceStack.OrmLite.SqlServerTests.TableOptions
 {
     [TestFixture]
-    public class FileStreamTests : SqlServer2012ConvertersOrmLiteTestBase
+    public class FileTableAttributeTests : SqlServer2012TableOptionsOrmLiteTestBase
     {
         [Explicit("Requires FileGroups enabled in DB")]
         [Test]
-        public void Can_select_from_FileStream()
+        public void Can_select_from_FileTable()
         {
+            Db.DropAndCreateTable<FileTable>();
 
-            ConnectionString = "Data Source=localhost;Initial Catalog=test2;User Id=test;Password=test;Connect Timeout=120;MultipleActiveResultSets=True;Type System Version=SQL Server 2012;";
-            var dialectProvider = SqlServerConverters.Configure(SqlServer2012Dialect.Provider);
-            var dbFactory = new OrmLiteConnectionFactory(ConnectionString, dialectProvider);
-
-            using (var db = dbFactory.OpenDbConnection())
+            var ft = new FileTable
             {
-                db.DropTable<TestFile>();
-                db.CreateTable<TestFile>();
+                Name = "content.txt",
+                Path = SqlHierarchyId.Parse("/1/"),
+                FileContent = "contents".ToUtf8Bytes(),
+                FileType = MimeTypes.PlainText
+            };
+            Db.Insert(ft);
 
-                db.Insert(new TestFile { Contents = "contents".ToUtf8Bytes() });
+            var fileTable = Db.Single<FileTable>(x => x.Name == "content.txt");
 
-                db.Select<TestFile>().PrintDump();
-
-                //db.DropTable<FileStream>();
-                //db.CreateTable<FileStream>();
-
-                //db.Insert(new FileStream
-                //{
-                //    Name = "file.txt",
-                //    Path = SqlHierarchyId.Parse("/1/2/3/"),
-                //    ParentPath = SqlHierarchyId.Parse("/1/2/"),
-                //    FileContent = "contents".ToUtf8Bytes(),
-                //    FileType = MimeTypes.PlainText,
-                //});
-
-                //var q = db.From<FileStream>();
-                //db.Select(q);
-            }
+            Assert.IsNotNull(fileTable);
+            Assert.IsTrue(ft.FileContent.EquivalentTo(fileTable.FileContent));
         }
     }
 
-    public class TestFile
+    
+    public class FileWithCustomSelect : FileTable
     {
-        [PrimaryKey]
-        [CustomField("uniqueidentifier ROWGUIDCOL NOT NULL")]
-        public Guid Id { get; set; }
-
-        [CustomField("varbinary(max) FILESTREAM")]
-        public byte[] Contents { get; set; }
-
-        public bool IsDirectory { get; set; }
-
         [CustomSelect("Contents.GetFileNamespacePath() + (CASE WHEN is_directory = 1 THEN '\' ELSE '' END)")]
         public string FullPath { get; set; }
     }
 
-    public class FileStream
+    [SqlServerFileTable(directory: "FILESTREAM_DIR")]
+    public class FileTable
     {
         [PrimaryKey]
         [CustomField("uniqueidentifier ROWGUIDCOL NOT NULL")]
+        [Default("newuid()")]
+        [Alias("stream_id")]
         public Guid Id { get; set; }
 
         [CustomField("varbinary(max) FILESTREAM")]
@@ -81,6 +60,7 @@ namespace ServiceStack.OrmLite.SqlServerTests.Converters
 
         //[ForeignKey(typeof(FileStream))]
         [Alias("parent_path_locator")]
+        [Compute]
         public SqlHierarchyId? ParentPath { get; set; }
 
         [Alias("file_type")]
@@ -121,8 +101,5 @@ namespace ServiceStack.OrmLite.SqlServerTests.Converters
 
         [Alias("is_temporary")]
         public bool IsTemporary { get; set; }
-
-        [CustomSelect("file_stream.GetFileNamespacePath() + (CASE WHEN is_directory = 1 THEN '\' ELSE '' END)")]
-        public string FullPath { get; set; }
     }
 }
