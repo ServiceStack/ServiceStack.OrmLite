@@ -5,6 +5,7 @@ using System.Text;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.Dapper;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.SqlServerTests
 {
@@ -66,6 +67,32 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 var insertedRow = db.SingleById<ServerGuid>(id);
 
                 Assert.That(insertedRow.Name, Is.EqualTo("foo"));
+            }
+        }
+
+        [PostCreateTable("DBCC CHECKIDENT (SeedTest, RESEED, 1000)")]
+        public class SeedTest
+        {
+            [AutoIncrement]
+            public int Id { get; set; }
+
+            public string Name { get; set; }
+        }
+
+        [Test]
+        public void Can_create_table_starting_from_specific_seed()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<SeedTest>();
+
+                //var modelDef = typeof(SeedTest).GetModelMetadata();
+                //var tableName = db.GetDialectProvider().GetQuotedTableName(modelDef);
+                //db.ExecuteSql($"DBCC CHECKIDENT ({tableName}, RESEED, 1000)");
+
+                db.Insert(new SeedTest { Name = "foo" });
+
+                Assert.That(db.Select<SeedTest>()[0].Id, Is.EqualTo(1000));
             }
         }
     }
