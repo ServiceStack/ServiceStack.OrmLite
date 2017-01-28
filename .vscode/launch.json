@@ -6,7 +6,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceRoot}/tests/ServiceStack.OrmLite.Tests/bin/Debug/netcoreapp1.0/ServiceStack.OrmLite.Tests.dll",
+            "program": "${workspaceRoot}/tests/ServiceStack.OrmLite.Tests/bin/Debug/netcoreapp1.1/ServiceStack.OrmLite.Tests.dll",
             "args": ["--test=ServiceStack.OrmLite.Tests._TypeDescriptorMetadataTests.Can_add_AutoIncrement_Id_at_runtime"],
             "cwd": "${workspaceRoot}",
             "stopAtEntry": false,
