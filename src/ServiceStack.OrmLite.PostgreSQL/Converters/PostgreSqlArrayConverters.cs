@@ -19,14 +19,24 @@ namespace ServiceStack.OrmLite.PostgreSQL.Converters
         }
     }
 
-    //public class PostgreSqlStringArrayConverter : PostgreSqlStringConverter
-    //{
-    //    public override string ToQuotedString(Type fieldType, object value)
-    //    {
-    //        var stringArray = (string[])value;
-    //        return this.ToArray(stringArray);
-    //    }
-    //}
+    public class PostgreSqlStringArrayConverter : ReferenceTypeConverter
+    {
+        public override string ColumnDefinition
+        {
+            get { return "text[]"; }
+        }
+
+        public override string ToQuotedString(Type fieldType, object value)
+        {
+            var stringArray = (string[])value;
+            return this.ToArray(stringArray);
+        }
+
+        public override object FromDbValue(Type fieldType, object value)
+        {
+            return value;
+        }
+    }
 
     public class PostgreSqlIntArrayConverter : NativeValueOrmLiteConverter
     {

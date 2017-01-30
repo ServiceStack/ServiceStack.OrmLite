@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System;
+using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.Tests;
 using ServiceStack.Text;
@@ -22,6 +23,18 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
     public class SubType
     {
         public string Name { get; set; }
+    }
+
+    public class PgsqlData
+    {
+        [PrimaryKey]
+        public Guid Id { get; set; }
+
+        [PgSqlIntArray]
+        public int[] Ints { get; set; }
+
+        [PgSqlTextArray]
+        public string[] Strings { get; set; }
     }
 
 
@@ -63,6 +76,28 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
                 Assert.That(result[0].Id, Is.EqualTo(1));
                 Assert.That(result[0].ComplexTypeJson.Id, Is.EqualTo(2));
                 Assert.That(result[0].ComplexTypeJson.SubType.Name, Is.EqualTo("SubType2"));
+            }
+        }
+
+        [Test]
+        public void Does_save_PgSqlData()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<PgsqlData>();
+
+                var data = new PgsqlData
+                {
+                    Id = Guid.NewGuid(),
+                    Ints = new[] { 2, 4, 1 },
+                    Strings = new[] { "test string 1", "test string 2" }
+                };
+
+                db.Save(data);
+
+                var row = db.Select<PgsqlData>()[0];
+                Assert.That(row.Ints.EquivalentTo(data.Ints));
+                Assert.That(row.Strings.EquivalentTo(data.Strings));
             }
         }
     }

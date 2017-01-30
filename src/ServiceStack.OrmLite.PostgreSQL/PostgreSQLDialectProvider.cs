@@ -52,7 +52,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
             RegisterConverter<byte[]>(new PostrgreSqlByteArrayConverter());
 
             //TODO provide support for pgsql native datastructures:
-            //RegisterConverter<string[]>(new PostgreSqlStringArrayConverter());
+            RegisterConverter<string[]>(new PostgreSqlStringArrayConverter());
             RegisterConverter<int[]>(new PostgreSqlIntArrayConverter());
             RegisterConverter<long[]>(new PostgreSqlLongArrayConverter());
 
