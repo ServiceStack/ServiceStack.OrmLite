@@ -46,7 +46,14 @@ level public properties.
   - [ServiceStack.OrmLite.Oracle](http://nuget.org/packages/ServiceStack.OrmLite.Oracle) (unofficial)
   - [ServiceStack.OrmLite.Firebird](http://nuget.org/List/Packages/ServiceStack.OrmLite.Firebird)  (unofficial)
   - [ServiceStack.OrmLite.VistaDb](http://nuget.org/List/Packages/ServiceStack.OrmLite.VistaDb)  (unofficial)
-   
+
+.NET Core packages:   
+
+  - [ServiceStack.OrmLite.SqlServer.Core](http://nuget.org/List/Packages/ServiceStack.OrmLite.SqlServer.Core)
+  - [ServiceStack.OrmLite.PostgreSQL.Core](http://nuget.org/List/Packages/ServiceStack.OrmLite.PostgreSQL.Core)
+  - [ServiceStack.OrmLite.MySql.Core](http://nuget.org/List/Packages/ServiceStack.OrmLite.MySql.Core)
+  - [ServiceStack.OrmLite.Sqlite.Core](http://nuget.org/packages/ServiceStack.OrmLite.Sqlite.Core) 
+
 _Latest v4+ on NuGet is a [commercial release](https://servicestack.net/ormlite) with [free quotas](https://servicestack.net/download#free-quotas)._
 
 ### [Getting Started with OrmLite and AWS RDS](https://github.com/ServiceStackApps/AwsGettingStarted)
@@ -451,6 +458,7 @@ db.Delete<Person>(p => p.Age == 27);
 ```
 
 Or an SqlExpression:
+
 ```csharp
 var q = db.From<Person>()
     .Where(p => p.Age == 27);
@@ -462,6 +470,20 @@ As well as un-typed, string-based expressions:
 ```csharp
 db.Delete<Person>(where: "Age = @age", new { age = 27 });
 ```
+
+#### Delete from Table JOIN
+
+Using a SqlExpression to delete rows by querying from a joined table:
+
+```csharp
+var q = db.From<Person>()
+    .Join<PersonJoin>((x, y) => x.Id == y.PersonId)
+    .Where<PersonJoin>(x => x.Id == 2);
+
+db.Delete(q);
+```
+
+> Not supported in MySql
 
 # API Overview
 
@@ -1153,6 +1175,22 @@ SELECT "Car"."CarId", "CarType"."CarTypeName"
 FROM "Car" INNER JOIN "CarType" WITH (READUNCOMMITTED) ON ("Car"."CarId" = "CarType"."CarId")
 ```
 
+### Custom SqlExpression Filter
+
+The generated SQL from a Typed `SqlExpression` can also be customized using `.WithSqlFilter()`, e.g:
+
+```csharp
+var q = db.From<Table>()
+    .Where(x => x.Age == 27)
+    .WithSqlFilter(sql => sql + " option (recompile)");
+
+var q = db.From<Table>()
+    .Where(x => x.Age == 27)
+    .WithSqlFilter(sql => sql + " WITH UPDLOCK");
+
+var results = db.Select(q);
+```
+
 ## Nested Typed Sub SqlExpressions
 
 The `Sql.In()` API supports nesting and combining of multiple Typed SQL Expressions together 
@@ -1530,6 +1568,19 @@ var block = db.SingleById<Block>(1);
 block.Area.Print(); //= 50
 
 block.DateFormat.Print(); //= 2016-06-08 (SQL Server)
+```
+
+### Custom SQL Fragments
+
+The `Sql.Custom()` API lets you use raw SQL Fragments in Custom `.Select()` expressions, e.g:
+
+```csharp
+var q = db.From<Table>()
+    .Select(x => new {
+        FirstName = x.FirstName,
+        LastName = x.LastName,
+        Initials = Sql.Custom("CONCAT(LEFT(FirstName,1), LEFT(LastName,1))")
+    });
 ```
 
 ### Custom Field Declarations
@@ -2183,27 +2234,28 @@ DEBUG: CREATE UNIQUE INDEX uidx_shippers_companyname ON "Shippers" ("CompanyName
 ```
 
 ### Transaction Support
+
 As we have direct access to IDbCommand and friends - playing with transactions is easy:
 
 ```csharp
-  var trainsType = new ShipperType { Name = "Trains" };
-  var planesType = new ShipperType { Name = "Planes" };
+var trainsType = new ShipperType { Name = "Trains" };
+var planesType = new ShipperType { Name = "Planes" };
 
-  //Playing with transactions
-  using (IDbTransaction dbTrans = db.OpenTransaction())
-  {
-      db.Save(trainsType);
-      db.Save(planesType);
+//Playing with transactions
+using (IDbTransaction dbTrans = db.OpenTransaction())
+{
+    db.Save(trainsType);
+    db.Save(planesType);
 
-      dbTrans.Commit();
-  }
+    dbTrans.Commit();
+}
 
-  using (IDbTransaction dbTrans = db.OpenTransaction(IsolationLevel.ReadCommitted))
-  {
-      db.Insert(new ShipperType { Name = "Automobiles" });
-      Assert.That(db.Select<ShipperType>(), Has.Count.EqualTo(3));
-  }
-	Assert.That(db.Select<ShipperType>(), Has.Count(2));
+using (IDbTransaction dbTrans = db.OpenTransaction(IsolationLevel.ReadCommitted))
+{
+    db.Insert(new ShipperType { Name = "Automobiles" });
+    Assert.That(db.Select<ShipperType>(), Has.Count.EqualTo(3));
+}
+Assert.That(db.Select<ShipperType>(), Has.Count(2));
 ```
 
 ### CRUD Operations 
@@ -2239,27 +2291,81 @@ No ORM is complete without the standard crud operations:
 And with access to raw sql when you need it - the database is your oyster :)
 
 ```csharp
-    var partialColumns = db.Select<SubsetOfShipper>(typeof(Shipper), 
-        "ShipperTypeId = @Id", new { planesType.Id });
-    Assert.That(partialColumns, Has.Count.EqualTo(2));
+var partialColumns = db.Select<SubsetOfShipper>(typeof(Shipper), 
+    "ShipperTypeId = @Id", new { planesType.Id });
+Assert.That(partialColumns, Has.Count.EqualTo(2));
 
-    //Select into another POCO class that matches sql
-    var rows = db.Select<ShipperTypeCount>(
-      "SELECT ShipperTypeId, COUNT(*) AS Total FROM Shippers GROUP BY ShipperTypeId ORDER BY COUNT(*)");
+//Select into another POCO class that matches sql
+var rows = db.Select<ShipperTypeCount>(
+    "SELECT ShipperTypeId, COUNT(*) AS Total FROM Shippers GROUP BY ShipperTypeId ORDER BY COUNT(*)");
 
-    Assert.That(rows, Has.Count.EqualTo(2));
-    Assert.That(rows[0].ShipperTypeId, Is.EqualTo(trainsType.Id));
-    Assert.That(rows[0].Total, Is.EqualTo(1));
-    Assert.That(rows[1].ShipperTypeId, Is.EqualTo(planesType.Id));
-    Assert.That(rows[1].Total, Is.EqualTo(2));
+Assert.That(rows, Has.Count.EqualTo(2));
+Assert.That(rows[0].ShipperTypeId, Is.EqualTo(trainsType.Id));
+Assert.That(rows[0].Total, Is.EqualTo(1));
+Assert.That(rows[1].ShipperTypeId, Is.EqualTo(planesType.Id));
+Assert.That(rows[1].Total, Is.EqualTo(2));
 
 
-    //And finally lets quickly clean up the mess we've made:
-    db.DeleteAll<Shipper>();
-    db.DeleteAll<ShipperType>();
+//And finally lets quickly clean up the mess we've made:
+db.DeleteAll<Shipper>();
+db.DeleteAll<ShipperType>();
 
-    Assert.That(db.Select<Shipper>(), Has.Count.EqualTo(0));
-    Assert.That(db.Select<ShipperType>(), Has.Count.EqualTo(0));
+Assert.That(db.Select<Shipper>(), Has.Count.EqualTo(0));
+Assert.That(db.Select<ShipperType>(), Has.Count.EqualTo(0));
+```
+
+## SQL Server Features
+
+### Memory Optimized Tables
+
+OrmLite allows access to many advanced SQL Server features including 
+[Memory-Optimized Tables](https://msdn.microsoft.com/en-us/library/dn133165.aspx) where you can tell 
+SQL Server to maintain specific tables in Memory using the `[SqlServerMemoryOptimized]` attribute, e.g:
+
+```csharp
+[SqlServerMemoryOptimized(SqlServerDurability.SchemaOnly)]
+public class SqlServerMemoryOptimizedCacheEntry : ICacheEntry
+{
+    [PrimaryKey]
+    [StringLength(StringLengthAttribute.MaxText)]
+    [SqlServerBucketCount(10000000)]
+    public string Id { get; set; }
+    [StringLength(StringLengthAttribute.MaxText)]
+    public string Data { get; set; }
+    public DateTime CreatedDate { get; set; }
+    public DateTime? ExpiryDate { get; set; }
+    public DateTime ModifiedDate { get; set; }
+}
+```
+
+The `[SqlServerBucketCount]` attribute can be used to 
+[configure the bucket count for a hash index](https://msdn.microsoft.com/en-us/library/mt706517.aspx#configuring_bucket_count)
+whilst the new `[SqlServerCollate]` attribute can be used to specify an SQL Server collation.
+
+## PostgreSQL Features
+
+### PostgreSQL Data Types
+
+The `[PgSql*]` specific attributes lets you use attributes to define PostgreSQL rich data types, e.g:
+
+```csharp
+public class MyPostgreSqlTable
+{
+    [PgSqlJson]
+    public List<Poco> AsJson { get; set; }
+
+    [PgSqlJsonB]
+    public List<Poco> AsJsonB { get; set; }
+
+    [PgSqlTextArray]
+    public string[] AsTextArray { get; set; }
+
+    [PgSqlIntArray]
+    public int[] AsIntArray { get; set; }
+
+    [PgSqlBigIntArray]
+    public long[] AsLongArray { get; set; }
+}
 ```
 
 # Limitations 
