@@ -362,17 +362,22 @@ namespace ServiceStack.OrmLite.SqlServer
         protected SqlDataReader Unwrap(IDataReader reader) => (SqlDataReader)reader;
 
 #if ASYNC
-        public override Task OpenAsync(IDbConnection db, CancellationToken token) => Unwrap(db).OpenAsync(token);
+        public override Task OpenAsync(IDbConnection db, CancellationToken token = default(CancellationToken))
+            => Unwrap(db).OpenAsync(token);
 
-        public override Task<IDataReader> ExecuteReaderAsync(IDbCommand cmd, CancellationToken token) => Unwrap(cmd).ExecuteReaderAsync(token).Then(x => (IDataReader)x);
+        public override Task<IDataReader> ExecuteReaderAsync(IDbCommand cmd, CancellationToken token = default(CancellationToken))
+            => Unwrap(cmd).ExecuteReaderAsync(token).Then(x => (IDataReader)x);
 
-        public override Task<int> ExecuteNonQueryAsync(IDbCommand cmd, CancellationToken token) => Unwrap(cmd).ExecuteNonQueryAsync(token);
+        public override Task<int> ExecuteNonQueryAsync(IDbCommand cmd, CancellationToken token = default(CancellationToken))
+            => Unwrap(cmd).ExecuteNonQueryAsync(token);
 
-        public override Task<object> ExecuteScalarAsync(IDbCommand cmd, CancellationToken token) => Unwrap(cmd).ExecuteScalarAsync(token);
+        public override Task<object> ExecuteScalarAsync(IDbCommand cmd, CancellationToken token = default(CancellationToken))
+            => Unwrap(cmd).ExecuteScalarAsync(token);
 
-        public override Task<bool> ReadAsync(IDataReader reader, CancellationToken token) => Unwrap(reader).ReadAsync(token);
+        public override Task<bool> ReadAsync(IDataReader reader, CancellationToken token = default(CancellationToken))
+            => Unwrap(reader).ReadAsync(token);
 
-        public override async Task<List<T>> ReaderEach<T>(IDataReader reader, Func<T> fn, CancellationToken token)
+        public override async Task<List<T>> ReaderEach<T>(IDataReader reader, Func<T> fn, CancellationToken token = default(CancellationToken))
         {
             try
             {
@@ -390,7 +395,7 @@ namespace ServiceStack.OrmLite.SqlServer
             }
         }
 
-        public override async Task<Return> ReaderEach<Return>(IDataReader reader, Action fn, Return source, CancellationToken token)
+        public override async Task<Return> ReaderEach<Return>(IDataReader reader, Action fn, Return source, CancellationToken token = default(CancellationToken))
         {
             try
             {
@@ -406,7 +411,7 @@ namespace ServiceStack.OrmLite.SqlServer
             }
         }
 
-        public override async Task<T> ReaderRead<T>(IDataReader reader, Func<T> fn, CancellationToken token)
+        public override async Task<T> ReaderRead<T>(IDataReader reader, Func<T> fn, CancellationToken token = default(CancellationToken))
         {
             try
             {

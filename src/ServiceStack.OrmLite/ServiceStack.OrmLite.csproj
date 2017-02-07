@@ -243,7 +243,8 @@
     <Compile Include="Support\LoadList.cs" />
     <Compile Include="Support\LoadReferences.cs" />
     <Compile Include="UntypedApi.cs" />
-  </ItemGroup>
+    <Compile Include="IndexFieldsCacheKey.cs" />
+ </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
       <Visible>False</Visible>
