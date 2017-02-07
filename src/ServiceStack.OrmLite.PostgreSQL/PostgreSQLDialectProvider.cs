@@ -289,17 +289,12 @@ namespace ServiceStack.OrmLite.PostgreSQL
 
         protected override object GetValue<T>(FieldDefinition fieldDef, object obj)
         {
-            if (fieldDef.CustomFieldDefinition == "text[]")
+            switch (fieldDef.CustomFieldDefinition)
             {
-                return fieldDef.GetValue(obj);
-            }
-            if (fieldDef.CustomFieldDefinition == "integer[]")
-            {
-                return fieldDef.GetValue(obj);
-            }
-            if (fieldDef.CustomFieldDefinition == "bigint[]")
-            {
-                return fieldDef.GetValue(obj);
+                case "text[]":
+                case "integer[]":
+                case "bigint[]":
+                    return fieldDef.GetValue(obj);
             }
             return base.GetValue<T>(fieldDef, obj);
         }
