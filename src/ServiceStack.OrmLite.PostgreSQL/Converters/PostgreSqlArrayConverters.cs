@@ -26,15 +26,37 @@ namespace ServiceStack.OrmLite.PostgreSQL.Converters
             get { return "text[]"; }
         }
 
+        public override DbType DbType
+        {
+            get { return DbType.Object; }
+        }
+
+        public override string GetColumnDefinition(int? stringLength)
+        {
+            return stringLength != null
+                ? base.GetColumnDefinition(stringLength)
+                : ColumnDefinition;
+        }
+
         public override string ToQuotedString(Type fieldType, object value)
         {
             var stringArray = (string[])value;
             return this.ToArray(stringArray);
         }
 
+        public override object ToDbValue(Type fieldType, object value)
+        {
+            return fieldType == typeof(string[])
+                ? value
+                : DialectProvider.StringSerializer.SerializeToString(value);
+        }
+
         public override object FromDbValue(Type fieldType, object value)
         {
-            return value;
+            var strVal = value as string;
+            return strVal != null
+                ? strVal.FromJson<string[]>()
+                : value;
         }
     }
 
