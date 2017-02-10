@@ -66,9 +66,15 @@ namespace ServiceStack.OrmLite.Tests.UseCase
                 Assert.That(results.Count, Is.EqualTo(1));
                 Assert.That(results[0].Name, Is.EqualTo("foo"));
 
+                results = db.Select<ModelWithSoftDelete>(x => x.Id > 0);
+                Assert.That(results.Count, Is.EqualTo(1));
+
                 var result = db.Single(db.From<ModelWithSoftDelete>().Where(x => x.Name == "foo"));
                 Assert.That(result.Name, Is.EqualTo("foo"));
                 result = db.Single(db.From<ModelWithSoftDelete>().Where(x => x.Name == "bar"));
+                Assert.That(result, Is.Null);
+
+                result = db.Single<ModelWithSoftDelete>(x => x.Name == "bar");
                 Assert.That(result, Is.Null);
 
                 SqlExpression<ModelWithSoftDelete>.SelectFilter = null;
@@ -97,9 +103,15 @@ namespace ServiceStack.OrmLite.Tests.UseCase
                 Assert.That(results.Count, Is.EqualTo(1));
                 Assert.That(results[0].Name, Is.EqualTo("foo"));
 
+                results = db.Select<ModelWithSoftDelete>(x => x.Id > 0);
+                Assert.That(results.Count, Is.EqualTo(1));
+
                 var result = db.Single(db.From<ModelWithSoftDelete>().Where(x => x.Name == "foo"));
                 Assert.That(result.Name, Is.EqualTo("foo"));
                 result = db.Single(db.From<ModelWithSoftDelete>().Where(x => x.Name == "bar"));
+                Assert.That(result, Is.Null);
+
+                result = db.Single<ModelWithSoftDelete>(x => x.Name == "bar");
                 Assert.That(result, Is.Null);
 
                 OrmLiteConfig.SqlExpressionSelectFilter = null;
