@@ -313,6 +313,7 @@
     <Compile Include="UseCase\SimpleUseCase.cs" />
     <Compile Include="OrmLiteGetScalarTests.cs" />
     <Compile Include="OrmLiteCreateTableWithNamingStrategyTest.cs" />
+    <Compile Include="UseCase\SoftDeleteUseCase.cs" />
     <Compile Include="_TypeDescriptorMetadataTests.cs" />
   </ItemGroup>
   <ItemGroup>
