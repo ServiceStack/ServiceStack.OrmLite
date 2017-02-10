@@ -48,5 +48,62 @@ namespace ServiceStack.OrmLite.Tests.UseCase
                 Assert.That(result, Is.Null);
             }
         }
+
+        [Test]
+        public void Can_add_generic_soft_delete_filter_to_SqlExpression_using_SelectFilter()
+        {
+            using (var db = OpenDbConnection())
+            {
+                SqlExpression<ModelWithSoftDelete>.SelectFilter = q => q.Where(x => x.IsDeleted != true);
+
+                db.DropAndCreateTable<ModelWithSoftDelete>();
+
+                db.Insert(new ModelWithSoftDelete { Name = "foo" });
+                db.Insert(new ModelWithSoftDelete { Name = "bar", IsDeleted = true });
+
+                var results = db.Select(db.From<ModelWithSoftDelete>());
+
+                Assert.That(results.Count, Is.EqualTo(1));
+                Assert.That(results[0].Name, Is.EqualTo("foo"));
+
+                var result = db.Single(db.From<ModelWithSoftDelete>().Where(x => x.Name == "foo"));
+                Assert.That(result.Name, Is.EqualTo("foo"));
+                result = db.Single(db.From<ModelWithSoftDelete>().Where(x => x.Name == "bar"));
+                Assert.That(result, Is.Null);
+
+                SqlExpression<ModelWithSoftDelete>.SelectFilter = null;
+            }
+        }
+
+        [Test]
+        public void Can_add_generic_soft_delete_filter_to_SqlExpression_using_SqlExpressionSelectFilter()
+        {
+            using (var db = OpenDbConnection())
+            {
+                OrmLiteConfig.SqlExpressionSelectFilter = q =>
+                {
+                    if (q.ModelDef.ModelType.HasInterface(typeof(ISoftDelete)))
+                    {
+                        q.Where<ISoftDelete>(x => x.IsDeleted != true);
+                    }
+                };
+
+                db.DropAndCreateTable<ModelWithSoftDelete>();
+                db.Insert(new ModelWithSoftDelete { Name = "foo" });
+                db.Insert(new ModelWithSoftDelete { Name = "bar", IsDeleted = true });
+
+                var results = db.Select(db.From<ModelWithSoftDelete>());
+
+                Assert.That(results.Count, Is.EqualTo(1));
+                Assert.That(results[0].Name, Is.EqualTo("foo"));
+
+                var result = db.Single(db.From<ModelWithSoftDelete>().Where(x => x.Name == "foo"));
+                Assert.That(result.Name, Is.EqualTo("foo"));
+                result = db.Single(db.From<ModelWithSoftDelete>().Where(x => x.Name == "bar"));
+                Assert.That(result, Is.Null);
+
+                OrmLiteConfig.SqlExpressionSelectFilter = null;
+            }
+        }
     }
 }

@@ -44,6 +44,7 @@ namespace ServiceStack.OrmLite
         public IOrmLiteDialectProvider DialectProvider { get; set; }
         public List<IDbDataParameter> Params { get; set; }
         public Func<string,string> SqlFilter { get; set; }
+        public static Action<SqlExpression<T>> SelectFilter { get; set; }
 
         protected string Sep => sep;
 
@@ -1070,6 +1071,9 @@ namespace ServiceStack.OrmLite
 
         public virtual string ToSelectStatement()
         {
+            SelectFilter?.Invoke(this);
+            OrmLiteConfig.SqlExpressionSelectFilter?.Invoke(GetUntyped());
+
             var sql = DialectProvider
                 .ToSelectStatement(modelDef, SelectExpression, BodyExpression, OrderByExpression, Offset, Rows);
 
@@ -1080,6 +1084,9 @@ namespace ServiceStack.OrmLite
 
         public virtual string ToCountStatement()
         {
+            SelectFilter?.Invoke(this);
+            OrmLiteConfig.SqlExpressionSelectFilter?.Invoke(GetUntyped());
+
             var sql = "SELECT COUNT(*)" + BodyExpression;
 
             return SqlFilter != null
