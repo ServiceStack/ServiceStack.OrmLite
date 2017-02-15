@@ -301,6 +301,9 @@
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\BuiltInsFactory.cs">
       <Link>Shared\BuiltInsFactory.cs</Link>
     </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\DefaultValues.cs">
+      <Link>Shared\DefaultValues.cs</Link>
+    </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\IModelFactory.cs">
       <Link>Shared\IModelFactory.cs</Link>
     </Compile>
@@ -379,6 +382,9 @@
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\TaskQueue.cs">
       <Link>Shared\TaskQueue.cs</Link>
     </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\UpdateCommandFilter.cs">
+      <Link>Shared\UpdateCommandFilter.cs</Link>
+    </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\ShippersExample.cs">
       <Link>ShippersExample.cs</Link>
     </Compile>
@@ -399,6 +405,9 @@
     </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\TestHelpers.cs">
       <Link>TestHelpers.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\ToInsertAndUpdateStatementTests.cs">
+      <Link>ToInsertAndUpdateStatementTests.cs</Link>
     </Compile>
     <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\TypeDescriptorMetadataTests.cs">
       <Link>TypeDescriptorMetadataTests.cs</Link>
@@ -454,6 +463,10 @@
     <ProjectReference Include="..\ServiceStack.OrmLite.Oracle\ServiceStack.OrmLite.Oracle.csproj">
       <Project>{517B64BA-D7A6-4A15-8719-821B38147C61}</Project>
       <Name>ServiceStack.OrmLite.Oracle</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ServiceStack.OrmLite.SqlServer\ServiceStack.OrmLite.SqlServer.csproj">
+      <Project>{1887dc99-9139-43e3-a7aa-6d74714b3a5d}</Project>
+      <Name>ServiceStack.OrmLite.SqlServer</Name>
     </ProjectReference>
     <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj">
       <Project>{96179AC6-F6F1-40C3-9FDD-4F6582F54C5C}</Project>

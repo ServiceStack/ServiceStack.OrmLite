@@ -14,7 +14,7 @@
     <iconUrl>https://servicestack.net/img/logo-32.png</iconUrl>
     <tags>T4 SQL Templates CodeGen OrmLite POCO Code-First Orm Schema-less Blobs</tags>
     <language>en-US</language> 
-    <copyright>Copyright 2016 Service Stack</copyright>
+    <copyright>Copyright 2017 ServiceStack</copyright>
   </metadata> 
   <files>
     <file src="content\**\*.*" target="content" />

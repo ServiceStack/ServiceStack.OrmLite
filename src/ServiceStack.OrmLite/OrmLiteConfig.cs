@@ -4,7 +4,7 @@
 // Authors:
 //   Demis Bellot (demis.bellot@gmail.com)
 //
-// Copyright 2013 Service Stack LLC. All Rights Reserved.
+// Copyright 2013 ServiceStack, Inc. All Rights Reserved.
 //
 // Licensed under the same terms of ServiceStack.
 //
@@ -180,6 +180,7 @@ namespace ServiceStack.OrmLite
 
         public static Action<IDbCommand, object> InsertFilter { get; set; }
         public static Action<IDbCommand, object> UpdateFilter { get; set; }
+        public static Action<IUntypedSqlExpression> SqlExpressionSelectFilter { get; set; }
 
         public static Func<string, string> StringFilter { get; set; }
 

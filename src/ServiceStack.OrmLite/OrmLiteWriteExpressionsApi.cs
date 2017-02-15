@@ -18,9 +18,9 @@ namespace ServiceStack.OrmLite
         ///   db.UpdateOnly(new Person { FirstName = "JJ", LastName = "Hendo" }, ev.Update(p => p.FirstName));
         ///   UPDATE "Person" SET "FirstName" = 'JJ'
         /// </summary>
-        public static int UpdateOnly<T>(this IDbConnection dbConn, T model, SqlExpression<T> onlyFields)
+        public static int UpdateOnly<T>(this IDbConnection dbConn, T model, SqlExpression<T> onlyFields, Action<IDbCommand> commandFilter = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateOnly(model, onlyFields));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateOnly(model, onlyFields, commandFilter));
         }
 
         /// <summary>
@@ -34,9 +34,10 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static int UpdateOnly<T>(this IDbConnection dbConn, 
             Expression<Func<T>> updateFields,
-            Expression<Func<T, bool>> where = null)
+            Expression<Func<T, bool>> where = null,
+            Action<IDbCommand> commandFilter = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateOnly(updateFields, dbCmd.GetDialectProvider().SqlExpression<T>().Where(where)));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateOnly(updateFields, dbCmd.GetDialectProvider().SqlExpression<T>().Where(where), commandFilter));
         }
 
         /// <summary>
@@ -47,9 +48,10 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static int UpdateOnly<T>(this IDbConnection dbConn,
             Expression<Func<T>> updateFields,
-            SqlExpression<T> q)
+            SqlExpression<T> q,
+            Action<IDbCommand> commandFilter = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateOnly(updateFields, q));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateOnly(updateFields, q, commandFilter));
         }
 
         /// <summary>
@@ -66,9 +68,10 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static int UpdateOnly<T>(this IDbConnection dbConn, T obj,
             Expression<Func<T, object>> onlyFields = null,
-            Expression<Func<T, bool>> where = null)
+            Expression<Func<T, bool>> where = null,
+            Action<IDbCommand> commandFilter = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateOnly(obj, onlyFields, where));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateOnly(obj, onlyFields, where, commandFilter));
         }
 
         /// <summary>
@@ -79,9 +82,10 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static int UpdateOnly<T>(this IDbConnection dbConn, T obj,
             string[] onlyFields,
-            Expression<Func<T, bool>> where = null)
+            Expression<Func<T, bool>> where = null,
+            Action<IDbCommand> commandFilter = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateOnly(obj, onlyFields, where));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateOnly(obj, onlyFields, where, commandFilter));
         }
 
         /// <summary>
@@ -97,9 +101,10 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static int UpdateAdd<T>(this IDbConnection dbConn,
             Expression<Func<T>> updateFields,
-            Expression<Func<T, bool>> where = null)
+            Expression<Func<T, bool>> where = null,
+            Action<IDbCommand> commandFilter = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateAdd(updateFields, dbCmd.GetDialectProvider().SqlExpression<T>().Where(where)));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateAdd(updateFields, dbCmd.GetDialectProvider().SqlExpression<T>().Where(where), commandFilter));
         }
 
         /// <summary>
@@ -112,9 +117,10 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static int UpdateAdd<T>(this IDbConnection dbConn,
             Expression<Func<T>> updateFields,
-            SqlExpression<T> q)
+            SqlExpression<T> q,
+            Action<IDbCommand> commandFilter = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateAdd(updateFields, q));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateAdd(updateFields, q, commandFilter));
         }
 
         /// <summary>
@@ -134,9 +140,9 @@ namespace ServiceStack.OrmLite
         ///   db.Update(new Person { Id = 1, FirstName = "JJ" }, p => p.LastName == "Hendrix");
         ///   UPDATE "Person" SET "Id" = 1,"FirstName" = 'JJ',"LastName" = NULL,"Age" = 0 WHERE ("LastName" = 'Hendrix')
         /// </summary>
-        public static int Update<T>(this IDbConnection dbConn, T item, Expression<Func<T, bool>> where)
+        public static int Update<T>(this IDbConnection dbConn, T item, Expression<Func<T, bool>> where, Action<IDbCommand> commandFilter = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Update(item, where));
+            return dbConn.Exec(dbCmd => dbCmd.Update(item, where, commandFilter));
         }
 
         /// <summary>
@@ -145,9 +151,9 @@ namespace ServiceStack.OrmLite
         ///   db.Update&lt;Person&gt;(new { FirstName = "JJ" }, p => p.LastName == "Hendrix");
         ///   UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("LastName" = 'Hendrix')
         /// </summary>
-        public static int Update<T>(this IDbConnection dbConn, object updateOnly, Expression<Func<T, bool>> where = null)
+        public static int Update<T>(this IDbConnection dbConn, object updateOnly, Expression<Func<T, bool>> where = null, Action<IDbCommand> commandFilter = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Update(updateOnly, where));
+            return dbConn.Exec(dbCmd => dbCmd.Update(updateOnly, where, commandFilter));
         }
 
         /// <summary>

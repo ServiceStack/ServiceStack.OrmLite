@@ -52,7 +52,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
             RegisterConverter<byte[]>(new PostrgreSqlByteArrayConverter());
 
             //TODO provide support for pgsql native datastructures:
-            //RegisterConverter<string[]>(new PostgreSqlStringArrayConverter());
+            RegisterConverter<string[]>(new PostgreSqlStringArrayConverter());
             RegisterConverter<int[]>(new PostgreSqlIntArrayConverter());
             RegisterConverter<long[]>(new PostgreSqlLongArrayConverter());
 
@@ -289,17 +289,12 @@ namespace ServiceStack.OrmLite.PostgreSQL
 
         protected override object GetValue<T>(FieldDefinition fieldDef, object obj)
         {
-            if (fieldDef.CustomFieldDefinition == "text[]")
+            switch (fieldDef.CustomFieldDefinition)
             {
-                return fieldDef.GetValue(obj);
-            }
-            if (fieldDef.CustomFieldDefinition == "integer[]")
-            {
-                return fieldDef.GetValue(obj);
-            }
-            if (fieldDef.CustomFieldDefinition == "bigint[]")
-            {
-                return fieldDef.GetValue(obj);
+                case "text[]":
+                case "integer[]":
+                case "bigint[]":
+                    return fieldDef.GetValue(obj);
             }
             return base.GetValue<T>(fieldDef, obj);
         }
@@ -339,32 +334,32 @@ namespace ServiceStack.OrmLite.PostgreSQL
         }
 
 #if ASYNC
-        public override Task OpenAsync(IDbConnection db, CancellationToken token)
+        public override Task OpenAsync(IDbConnection db, CancellationToken token = default(CancellationToken))
         {
             return Unwrap(db).OpenAsync(token);
         }
 
-        public override Task<IDataReader> ExecuteReaderAsync(IDbCommand cmd, CancellationToken token)
+        public override Task<IDataReader> ExecuteReaderAsync(IDbCommand cmd, CancellationToken token = default(CancellationToken))
         {
             return Unwrap(cmd).ExecuteReaderAsync(token).Then(x => (IDataReader)x);
         }
 
-        public override Task<int> ExecuteNonQueryAsync(IDbCommand cmd, CancellationToken token)
+        public override Task<int> ExecuteNonQueryAsync(IDbCommand cmd, CancellationToken token = default(CancellationToken))
         {
             return Unwrap(cmd).ExecuteNonQueryAsync(token);
         }
 
-        public override Task<object> ExecuteScalarAsync(IDbCommand cmd, CancellationToken token)
+        public override Task<object> ExecuteScalarAsync(IDbCommand cmd, CancellationToken token = default(CancellationToken))
         {
             return Unwrap(cmd).ExecuteScalarAsync(token);
         }
 
-        public override Task<bool> ReadAsync(IDataReader reader, CancellationToken token)
+        public override Task<bool> ReadAsync(IDataReader reader, CancellationToken token = default(CancellationToken))
         {
             return Unwrap(reader).ReadAsync(token);
         }
 
-        public override async Task<List<T>> ReaderEach<T>(IDataReader reader, Func<T> fn, CancellationToken token)
+        public override async Task<List<T>> ReaderEach<T>(IDataReader reader, Func<T> fn, CancellationToken token = default(CancellationToken))
         {
             try
             {
@@ -382,7 +377,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
             }
         }
 
-        public override async Task<Return> ReaderEach<Return>(IDataReader reader, Action fn, Return source, CancellationToken token)
+        public override async Task<Return> ReaderEach<Return>(IDataReader reader, Action fn, Return source, CancellationToken token = default(CancellationToken))
         {
             try
             {
@@ -398,7 +393,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
             }
         }
 
-        public override async Task<T> ReaderRead<T>(IDataReader reader, Func<T> fn, CancellationToken token)
+        public override async Task<T> ReaderRead<T>(IDataReader reader, Func<T> fn, CancellationToken token = default(CancellationToken))
         {
             try
             {

@@ -1,5 +1,5 @@
 #if ASYNC
-// Copyright (c) Service Stack LLC. All Rights Reserved.
+// Copyright (c) ServiceStack, Inc. All Rights Reserved.
 // License: https://raw.github.com/ServiceStack/ServiceStack/master/license.txt
 
 using System;
@@ -52,10 +52,9 @@ namespace ServiceStack.OrmLite
             return dbCmd.GetDialectProvider().ExecuteNonQueryAsync(dbCmd, token);
         }
 
-        internal static Task<int> UpdateAsync<T>(this IDbCommand dbCmd, T obj, CancellationToken token)
+        internal static Task<int> UpdateAsync<T>(this IDbCommand dbCmd, T obj, CancellationToken token, Action<IDbCommand> commandFilter)
         {
-            if (OrmLiteConfig.UpdateFilter != null)
-                OrmLiteConfig.UpdateFilter(dbCmd, obj);
+            OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, obj);
 
             var dialectProvider = dbCmd.GetDialectProvider();
             var hadRowVersion = dialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
@@ -63,6 +62,7 @@ namespace ServiceStack.OrmLite
                 return TaskResult.Zero;
 
             dialectProvider.SetParameterValues<T>(dbCmd, obj);
+            commandFilter?.Invoke(dbCmd);
 
             return dialectProvider.ExecuteNonQueryAsync(dbCmd, token)
                 .Then(rowsUpdated =>
@@ -73,12 +73,12 @@ namespace ServiceStack.OrmLite
                 });
         }
 
-        internal static Task<int> UpdateAsync<T>(this IDbCommand dbCmd, CancellationToken token, params T[] objs)
+        internal static Task<int> UpdateAsync<T>(this IDbCommand dbCmd, CancellationToken token, Action<IDbCommand> commandFilter, T[] objs)
         {
-            return dbCmd.UpdateAllAsync(objs, token);
+            return dbCmd.UpdateAllAsync(objs, token, commandFilter);
         }
 
-        internal static Task<int> UpdateAllAsync<T>(this IDbCommand dbCmd, IEnumerable<T> objs, CancellationToken token)
+        internal static Task<int> UpdateAllAsync<T>(this IDbCommand dbCmd, IEnumerable<T> objs, CancellationToken token, Action<IDbCommand> commandFilter)
         {
             IDbTransaction dbTrans = null;
 
@@ -94,10 +94,11 @@ namespace ServiceStack.OrmLite
 
             return objs.EachAsync((obj, i) =>
             {
-                if (OrmLiteConfig.UpdateFilter != null)
-                    OrmLiteConfig.UpdateFilter(dbCmd, obj);
+                OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, obj);
 
                 dialectProvider.SetParameterValues<T>(dbCmd, obj);
+                commandFilter?.Invoke(dbCmd);
+                commandFilter = null;
 
                 return dbCmd.ExecNonQueryAsync(token).Then(rowsUpdated =>
                 {
@@ -346,7 +347,7 @@ namespace ServiceStack.OrmLite
                 return true;
             }
 
-            await dbCmd.UpdateAsync(obj, token);
+            await dbCmd.UpdateAsync(obj, token, null);
 
             modelDef.RowVersion?.SetValueFn(obj, await dbCmd.GetRowVersionAsync(modelDef, id, token));
 
@@ -389,7 +390,7 @@ namespace ServiceStack.OrmLite
                     {
                         OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, row);
 
-                        await dbCmd.UpdateAsync(row, token);
+                        await dbCmd.UpdateAsync(row, token, null);
                     }
                     else
                     {
@@ -474,7 +475,7 @@ namespace ServiceStack.OrmLite
                         {
                             var refPkValue = refModelDef.PrimaryKey.GetValue(result);
                             refSelf.SetValueFn(instance, refPkValue);
-                            await dbCmd.UpdateAsync(instance, token);
+                            await dbCmd.UpdateAsync(instance, token, null);
                         }
                     }
                 }
@@ -509,7 +510,7 @@ namespace ServiceStack.OrmLite
                 {
                     var refPkValue = refModelDef.PrimaryKey.GetValue(oRef);
                     refSelf.SetValueFn(instance, refPkValue);
-                    await dbCmd.UpdateAsync(instance, token);
+                    await dbCmd.UpdateAsync(instance, token, null);
                 }
             }
         }

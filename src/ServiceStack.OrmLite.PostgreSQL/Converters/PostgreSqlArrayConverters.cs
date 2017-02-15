@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Data;
-using System.Text;
 using ServiceStack.OrmLite.Converters;
 using ServiceStack.Text;
 
@@ -8,10 +7,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Converters
 {
     public class PostrgreSqlByteArrayConverter : ByteArrayConverter
     {
-        public override string ColumnDefinition
-        {
-            get { return "BYTEA"; }
-        }
+        public override string ColumnDefinition => "BYTEA";
 
         public override string ToQuotedString(Type fieldType, object value)
         {
@@ -19,26 +15,46 @@ namespace ServiceStack.OrmLite.PostgreSQL.Converters
         }
     }
 
-    //public class PostgreSqlStringArrayConverter : PostgreSqlStringConverter
-    //{
-    //    public override string ToQuotedString(Type fieldType, object value)
-    //    {
-    //        var stringArray = (string[])value;
-    //        return this.ToArray(stringArray);
-    //    }
-    //}
+    public class PostgreSqlStringArrayConverter : ReferenceTypeConverter
+    {
+        public override string ColumnDefinition => "text[]";
+
+        public override DbType DbType => DbType.Object;
+
+        public override string GetColumnDefinition(int? stringLength)
+        {
+            return stringLength != null
+                ? base.GetColumnDefinition(stringLength)
+                : ColumnDefinition;
+        }
+
+        public override string ToQuotedString(Type fieldType, object value)
+        {
+            var stringArray = (string[])value;
+            return this.ToArray(stringArray);
+        }
+
+        public override object ToDbValue(Type fieldType, object value)
+        {
+            return fieldType == typeof(string[])
+                ? value
+                : DialectProvider.StringSerializer.SerializeToString(value);
+        }
+
+        public override object FromDbValue(Type fieldType, object value)
+        {
+            var strVal = value as string;
+            return strVal != null
+                ? strVal.FromJson<string[]>()
+                : value;
+        }
+    }
 
     public class PostgreSqlIntArrayConverter : NativeValueOrmLiteConverter
     {
-        public override string ColumnDefinition
-        {
-            get { return "integer[]"; }
-        }
+        public override string ColumnDefinition => "integer[]";
 
-        public override DbType DbType
-        {
-            get { return DbType.Object; }
-        }
+        public override DbType DbType => DbType.Object;
 
         public override string ToQuotedString(Type fieldType, object value)
         {
@@ -49,15 +65,9 @@ namespace ServiceStack.OrmLite.PostgreSQL.Converters
 
     public class PostgreSqlLongArrayConverter : NativeValueOrmLiteConverter
     {
-        public override string ColumnDefinition
-        {
-            get { return "bigint[]"; }
-        }
+        public override string ColumnDefinition => "bigint[]";
 
-        public override DbType DbType
-        {
-            get { return DbType.Object; }
-        }
+        public override DbType DbType => DbType.Object;
 
         public override string ToQuotedString(Type fieldType, object value)
         {

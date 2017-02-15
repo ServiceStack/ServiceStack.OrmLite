@@ -16,7 +16,7 @@
     <iconUrl>https://servicestack.net/img/logo-32.png</iconUrl>
     <tags>MySql OrmLite POCO Code-First Orm Schema-less Blobs</tags>
     <language>en-US</language> 
-    <copyright>Copyright 2016 Service Stack</copyright>
+    <copyright>Copyright 2017 ServiceStack</copyright>
     <dependencies>
       <dependency id="MySql.Data" version="6.9.9" />
       <dependency id="ServiceStack.OrmLite" version="4.5" />

@@ -4,7 +4,7 @@
 // Authors:
 //   Demis Bellot (demis.bellot@gmail.com)
 //
-// Copyright 2013 Service Stack LLC. All Rights Reserved.
+// Copyright 2013 ServiceStack, Inc. All Rights Reserved.
 //
 // Licensed under the same terms of ServiceStack.
 //
@@ -16,6 +16,7 @@ using System.Data;
 using System.Linq;
 using ServiceStack.Data;
 using ServiceStack.Logging;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
@@ -350,7 +351,7 @@ namespace ServiceStack.OrmLite
             return objWithProperties;
         }
 
-        internal static int Update<T>(this IDbCommand dbCmd, T obj)
+        internal static int Update<T>(this IDbCommand dbCmd, T obj, Action<IDbCommand> commandFilter = null)
         {
             OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, obj);
 
@@ -361,6 +362,7 @@ namespace ServiceStack.OrmLite
 
             dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
+            commandFilter?.Invoke(dbCmd);
             var rowsUpdated = dbCmd.ExecNonQuery();
 
             if (hadRowVersion && rowsUpdated == 0)
@@ -369,12 +371,12 @@ namespace ServiceStack.OrmLite
             return rowsUpdated;
         }
 
-        internal static int Update<T>(this IDbCommand dbCmd, params T[] objs)
+        internal static int Update<T>(this IDbCommand dbCmd, T[] objs, Action<IDbCommand> commandFilter = null)
         {
-            return dbCmd.UpdateAll(objs);
+            return dbCmd.UpdateAll(objs, commandFilter);
         }
 
-        internal static int UpdateAll<T>(this IDbCommand dbCmd, IEnumerable<T> objs)
+        internal static int UpdateAll<T>(this IDbCommand dbCmd, IEnumerable<T> objs, Action<IDbCommand> commandFilter = null)
         {
             IDbTransaction dbTrans = null;
 
@@ -396,6 +398,8 @@ namespace ServiceStack.OrmLite
 
                     dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
+                    commandFilter?.Invoke(dbCmd);
+                    commandFilter = null;
                     var rowsUpdated = dbCmd.ExecNonQuery();
                     if (hadRowVersion && rowsUpdated == 0) 
                         throw new OptimisticConcurrencyException();
@@ -625,7 +629,6 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecNonQuery();
         }
 
-
         internal static void Insert<T>(this IDbCommand dbCmd, params T[] objs)
         {
             InsertAll(dbCmd, objs);
@@ -643,6 +646,50 @@ namespace ServiceStack.OrmLite
                 var dialectProvider = dbCmd.GetDialectProvider();
 
                 dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd);
+
+                foreach (var obj in objs)
+                {
+                    OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj);
+                    dialectProvider.SetParameterValues<T>(dbCmd, obj);
+
+                    try
+                    {
+                        dbCmd.ExecNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error("SQL ERROR: {0}".Fmt(dbCmd.GetLastSqlAndParams()), ex);
+                        throw;
+                    }
+                }
+
+                dbTrans?.Commit();
+            }
+            finally
+            {
+                dbTrans?.Dispose();
+            }
+        }
+
+        internal static void InsertUsingDefaults<T>(this IDbCommand dbCmd, params T[] objs)
+        {
+            IDbTransaction dbTrans = null;
+
+            try
+            {
+                if (dbCmd.Transaction == null)
+                    dbCmd.Transaction = dbTrans = dbCmd.Connection.BeginTransaction();
+
+                var dialectProvider = dbCmd.GetDialectProvider();
+
+                var modelDef = typeof(T).GetModelDefinition();
+                var fieldsWithoutDefaults = modelDef.FieldDefinitionsArray
+                    .Where(x => x.DefaultValue == null)
+                    .Select(x => x.Name)
+                    .ToHashSet(); 
+
+                dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd,
+                    insertFields: fieldsWithoutDefaults);
 
                 foreach (var obj in objs)
                 {

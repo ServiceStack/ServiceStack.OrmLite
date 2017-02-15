@@ -222,7 +222,12 @@ namespace ServiceStack.OrmLite.Tests
                 var resultsDynamic = db.Select<dynamic>(q);
                 Assert.That(resultsDynamic.Count, Is.EqualTo(2));
                 var map = (IDictionary<string, object>) resultsDynamic[0];
+                Assert.That(map.ContainsKey("FirstName".SqlTableRaw()));
+                Assert.That(!map.ContainsKey("Id".SqlTableRaw()));
 
+                resultsDynamic = db.Select<dynamic>(q.ToSelectStatement());
+                Assert.That(resultsDynamic.Count, Is.EqualTo(2));
+                map = (IDictionary<string, object>)resultsDynamic[0];
                 Assert.That(map.ContainsKey("FirstName".SqlTableRaw()));
                 Assert.That(!map.ContainsKey("Id".SqlTableRaw()));
             }

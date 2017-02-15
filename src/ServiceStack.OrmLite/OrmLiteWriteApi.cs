@@ -65,13 +65,13 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
-        /// Insert 1 or more POCOs in a transaction. E.g:
-        /// <para>db.Insert(new Person { Id = 1, FirstName = "Tupac", LastName = "Shakur", Age = 25 },</para>
-        /// <para>          new Person { Id = 2, FirstName = "Biggie", LastName = "Smalls", Age = 24 })</para>
+        /// Insert 1 or more POCOs in a transaction using Table default values when defined. E.g:
+        /// <para>db.InsertUsingDefaults(new Person { FirstName = "Tupac", LastName = "Shakur" },</para>
+        /// <para>                       new Person { FirstName = "Biggie", LastName = "Smalls" })</para>
         /// </summary>
-        public static void Insert<T>(this IDbConnection dbConn, params T[] objs)
+        public static void InsertUsingDefaults<T>(this IDbConnection dbConn, params T[] objs)
         {
-            dbConn.Exec(dbCmd => dbCmd.Insert(objs));
+            dbConn.Exec(dbCmd => dbCmd.InsertUsingDefaults(objs));
         }
 
         /// <summary>
@@ -84,12 +84,22 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Insert 1 or more POCOs in a transaction. E.g:
+        /// <para>db.Insert(new Person { Id = 1, FirstName = "Tupac", LastName = "Shakur", Age = 25 },</para>
+        /// <para>          new Person { Id = 2, FirstName = "Biggie", LastName = "Smalls", Age = 24 })</para>
+        /// </summary>
+        public static void Insert<T>(this IDbConnection dbConn, params T[] objs)
+        {
+            dbConn.Exec(dbCmd => dbCmd.Insert(objs));
+        }
+
+        /// <summary>
         /// Updates 1 POCO. All fields are updated except for the PrimaryKey which is used as the identity selector. E.g:
         /// <para>db.Update(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27 })</para>
         /// </summary>
-        public static int Update<T>(this IDbConnection dbConn, T obj)
+        public static int Update<T>(this IDbConnection dbConn, T obj, Action<IDbCommand> commandFilter = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Update(obj));
+            return dbConn.Exec(dbCmd => dbCmd.Update(obj, commandFilter));
         }
 
         /// <summary>
@@ -101,14 +111,18 @@ namespace ServiceStack.OrmLite
         {
             return dbConn.Exec(dbCmd => dbCmd.Update(objs));
         }
+        public static int Update<T>(this IDbConnection dbConn, Action<IDbCommand> commandFilter, params T[] objs)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Update(objs, commandFilter));
+        }
 
         /// <summary>
         /// Updates 1 or more POCOs in a transaction. E.g:
         /// <para>db.UpdateAll(new[] { new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27 } })</para>
         /// </summary>
-        public static int UpdateAll<T>(this IDbConnection dbConn, IEnumerable<T> objs)
+        public static int UpdateAll<T>(this IDbConnection dbConn, IEnumerable<T> objs, Action<IDbCommand> commandFilter = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateAll(objs));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateAll(objs, commandFilter));
         }
 
         /// <summary>

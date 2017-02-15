@@ -4,7 +4,7 @@
 // Authors:
 //   Demis Bellot (demis.bellot@gmail.com)
 //
-// Copyright 2013 Service Stack LLC. All Rights Reserved.
+// Copyright 2013 ServiceStack, Inc. All Rights Reserved.
 //
 // Licensed under the same terms of ServiceStack.
 //
@@ -30,6 +30,10 @@ namespace ServiceStack.OrmLite
     public static class OrmLiteUtils
     {
         internal const string AsyncRequiresNet45Error = "Async support is only available in .NET 4.5 builds";
+
+        const int maxCachedIndexFields = 10000;
+        private static Dictionary<IndexFieldsCacheKey, Tuple<FieldDefinition, int, IOrmLiteConverter>[]> indexFieldsCache 
+            = new Dictionary<IndexFieldsCacheKey, Tuple<FieldDefinition, int, IOrmLiteConverter>[]>(maxCachedIndexFields);
 
         public static void DebugCommand(this ILog log, IDbCommand cmd)
         {
@@ -160,7 +164,7 @@ namespace ServiceStack.OrmLite
                 }
                 return (List<T>)(object)to.ToList();
             }
-            if (typeof(T).Name.StartsWith("Tuple`"))
+            if (typeof(T).Name.StartsWith("Tuple`", StringComparison.Ordinal))
             {
                 var to = new List<T>();
                 using (reader)
@@ -491,12 +495,25 @@ namespace ServiceStack.OrmLite
             int startPos=0,
             int? endPos = null)
         {
+            var end = endPos.GetValueOrDefault(reader.FieldCount);
+            var cacheKey = (startPos == 0 && end == reader.FieldCount && onlyFields == null)
+                            ? new IndexFieldsCacheKey(reader, modelDefinition, dialect)
+                            : null;
+
+            if (cacheKey != null) 
+            {
+                lock (indexFieldsCache)
+                {
+                    if (indexFieldsCache.ContainsKey(cacheKey))
+                        return indexFieldsCache[cacheKey];
+                }
+            }
+
             var cache = new List<Tuple<FieldDefinition, int, IOrmLiteConverter>>();
             var ignoredFields = modelDefinition.IgnoredFieldDefinitions;
             var remainingFieldDefs = modelDefinition.FieldDefinitionsArray
                 .Where(x => !ignoredFields.Contains(x) && x.SetValueFn != null).ToList();
 
-            var end = endPos.GetValueOrDefault(reader.FieldCount);
             var mappedReaderColumns = new bool[end];
 
             for (var i = startPos; i < end; i++)
@@ -549,7 +566,20 @@ namespace ServiceStack.OrmLite
                 }
             }
 
-            return cache.ToArray();
+            var result = cache.ToArray();
+
+            if (cacheKey != null)
+            {
+                lock(indexFieldsCache)
+                {
+                    if (indexFieldsCache.ContainsKey(cacheKey))
+                        return indexFieldsCache[cacheKey];
+                    else if (indexFieldsCache.Count < maxCachedIndexFields)
+                        indexFieldsCache.Add(cacheKey, result);
+                }
+            }
+
+            return result;
         }
 
         private const int NotFound = -1;

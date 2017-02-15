@@ -4,7 +4,7 @@
 // Authors:
 //   Demis Bellot (demis.bellot@gmail.com)
 //
-// Copyright 2013 Service Stack LLC. All Rights Reserved.
+// Copyright 2013 ServiceStack, Inc. All Rights Reserved.
 //
 // Licensed under the same terms of ServiceStack.
 //
@@ -17,6 +17,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using ServiceStack.DataAnnotations;
@@ -743,7 +744,7 @@ namespace ServiceStack.OrmLite
                 var quotedValue = dbParam.Value != null
                     ? GetQuotedValue(dbParam.Value, dbParam.Value.GetType())
                     : "null";
-                sql = sql.Replace(dbParam.ParameterName, quotedValue);
+                sql = Regex.Replace(sql, dbParam.ParameterName + @"(,|\s|\)|$)", quotedValue + "$1");
             }
             return sql;
         }
@@ -1182,6 +1183,13 @@ namespace ServiceStack.OrmLite
             sql.Append(sqlFilter);
 
             return StringBuilderCache.ReturnAndFree(sql);
+        }
+
+        public string GetDefaultValue(Type tableType, string fieldName)
+        {
+            var modelDef = tableType.GetModelDefinition();
+            var fieldDef = modelDef.GetFieldDefinition(fieldName);
+            return GetDefaultValue(fieldDef);
         }
 
         public virtual string GetDefaultValue(FieldDefinition fieldDef)

@@ -4,7 +4,7 @@
 // Authors:
 //   Demis Bellot (demis.bellot@gmail.com)
 //
-// Copyright 2013 Service Stack LLC. All Rights Reserved.
+// Copyright 2013 ServiceStack, Inc. All Rights Reserved.
 //
 // Licensed under the same terms of ServiceStack.
 //
@@ -60,6 +60,8 @@ namespace ServiceStack.OrmLite
         string GetQuotedValue(string paramValue);
 
         string GetQuotedValue(object value, Type fieldType);
+
+        string GetDefaultValue(Type tableType, string fieldName);
 
         object GetParamValue(object value, Type fieldType);
 
