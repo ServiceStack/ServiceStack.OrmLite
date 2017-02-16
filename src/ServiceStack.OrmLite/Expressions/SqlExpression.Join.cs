@@ -203,6 +203,8 @@ namespace ServiceStack.OrmLite
                 return ToSelectStatement();
             }
 
+            useFieldName = true;
+
             var sbSelect = StringBuilderCache.Allocate();
             var selectDef = modelDef;
             var orderedDefs = tableDefs;
@@ -239,7 +241,7 @@ namespace ServiceStack.OrmLite
 
                                 if (fieldDef.CustomSelect == null)
                                 {
-                                    sbSelect.Append($"{DialectProvider.GetQuotedColumnName(tableDef, matchingField)} AS {SqlColumn(fieldDef.Name)}");
+                                    sbSelect.Append($"{GetQuotedColumnName(tableDef, matchingField.Name)} AS {SqlColumn(fieldDef.Name)}");
                                 }
                                 else
                                 {
@@ -266,7 +268,7 @@ namespace ServiceStack.OrmLite
 
                             if (fieldDef.CustomSelect == null)
                             {
-                                sbSelect.Append($"{SqlTable(tableDef)}.{tableFieldDef.GetQuotedName(DialectProvider)}");
+                                sbSelect.Append($"{GetQuotedColumnName(tableDef, tableFieldDef.Name)}");
 
                                 if (tableFieldDef.Alias != null)
                                     sbSelect.Append(" AS ").Append(SqlColumn(fieldDef.Name));
