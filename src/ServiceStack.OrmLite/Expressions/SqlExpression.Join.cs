@@ -166,7 +166,7 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
-        private SqlExpression<T> InternalJoin(string joinType, Expression joinExpr, ModelDefinition sourceDef, ModelDefinition targetDef, JoinFormatDelegate joinFormat = null)
+        protected virtual SqlExpression<T> InternalJoin(string joinType, Expression joinExpr, ModelDefinition sourceDef, ModelDefinition targetDef, JoinFormatDelegate joinFormat = null)
         {
             PrefixFieldWithTableName = true;
 
