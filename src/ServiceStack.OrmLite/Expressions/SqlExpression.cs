@@ -2154,33 +2154,33 @@ namespace ServiceStack.OrmLite
 
             switch (m.Method.Name)
             {
-                case "In":
+                case nameof(Sql.In):
                     statement = ConvertInExpressionToSql(m, quotedColName);
                     break;
-                case "Desc":
+                case nameof(Sql.Desc):
                     statement = $"{quotedColName} DESC";
                     break;
-                case "As":
+                case nameof(Sql.As):
                     statement = $"{quotedColName} AS {DialectProvider.GetQuotedColumnName(RemoveQuoteFromAlias(args[0].ToString()))}";
                     break;
-                case "Sum":
-                case "Count":
-                case "Min":
-                case "Max":
-                case "Avg":
+                case nameof(Sql.Sum):
+                case nameof(Sql.Count):
+                case nameof(Sql.Min):
+                case nameof(Sql.Max):
+                case nameof(Sql.Avg):
                     statement = $"{m.Method.Name}({quotedColName}{(args.Count == 1 ? $",{args[0]}" : "")})";
                     break;
-                case "CountDistinct":
+                case nameof(Sql.CountDistinct):
                     statement = $"COUNT(DISTINCT {quotedColName})";
                     break;
-                case "AllFields":
+                case nameof(Sql.AllFields):
                     var argDef = m.Arguments[0].Type.GetModelMetadata();
                     statement = DialectProvider.GetQuotedTableName(argDef) + ".*";
                     break;
-                case "JoinAlias":
+                case nameof(Sql.JoinAlias):
                     statement = args[0] + "." + quotedColName.ToString().LastRightPart('.');
                     break;
-                case "Custom":
+                case nameof(Sql.Custom):
                     statement = quotedColName.ToString();
                     break;
                 default:
