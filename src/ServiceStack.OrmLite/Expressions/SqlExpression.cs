@@ -137,6 +137,8 @@ namespace ServiceStack.OrmLite
             if (fields == null || fields.Length == 0)
                 return Select(string.Empty);
 
+            useFieldName = true;
+
             var allTableDefs = new List<ModelDefinition> { modelDef };
             allTableDefs.AddRange(tableDefs);
 
@@ -155,7 +157,7 @@ namespace ServiceStack.OrmLite
                     {
                         foreach (var fieldDef in tableDef.FieldDefinitionsArray)
                         {
-                            var qualifiedField = DialectProvider.GetQuotedColumnName(tableDef, fieldDef);
+                            var qualifiedField = GetQuotedColumnName(tableDef, fieldDef.Name);
 
                             if (sb.Length > 0)
                                 sb.Append(", ");
@@ -173,7 +175,7 @@ namespace ServiceStack.OrmLite
                 if (match == null)
                     continue;
 
-                var qualifiedName = DialectProvider.GetQuotedColumnName(match.Item1, match.Item2);
+                var qualifiedName = GetQuotedColumnName(match.Item1, match.Item2.Name);
 
                 if (sb.Length > 0)
                     sb.Append(", ");
@@ -572,12 +574,14 @@ namespace ServiceStack.OrmLite
                 return this;
             }
 
+            useFieldName = true;
+
             var sbOrderBy = StringBuilderCache.Allocate();
             foreach (var field in fields)
             {
                 var tableDef = GetModelDefinition(field);
                 var qualifiedName = modelDef != null
-                    ? DialectProvider.GetQuotedColumnName(tableDef, field)
+                    ? GetQuotedColumnName(tableDef, field.Name)
                     : DialectProvider.GetQuotedColumnName(field);
 
                 if (sbOrderBy.Length > 0)
@@ -616,6 +620,8 @@ namespace ServiceStack.OrmLite
                 return this;
             }
 
+            useFieldName = true;
+
             var sbOrderBy = StringBuilderCache.Allocate();
             foreach (var fieldName in fieldNames)
             {
@@ -628,7 +634,7 @@ namespace ServiceStack.OrmLite
                 var field = FirstMatchingField(useName);
                 if (field == null)
                     throw new ArgumentException("Could not find field " + useName);
-                var qualifiedName = DialectProvider.GetQuotedColumnName(field.Item1, field.Item2);
+                var qualifiedName = GetQuotedColumnName(field.Item1, field.Item2.Name);
 
                 if (sbOrderBy.Length > 0)
                     sbOrderBy.Append(", ");
