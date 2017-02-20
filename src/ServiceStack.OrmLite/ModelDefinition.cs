@@ -172,6 +172,11 @@ namespace ServiceStack.OrmLite
             return (Alias != null && Alias + "Id" == name)
                     || Name + "Id" == name;
         }
+
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 
 
