@@ -38,7 +38,8 @@
         "System.Runtime.Serialization.Xml": "4.*",
         "System.Reflection": "4.*",
         "System.Reflection.Primitives": "4.*",
-        "System.Runtime.Serialization.Primitives": "4.*"
+        "System.Runtime.Serialization.Primitives": "4.*",
+        "System.Reflection.TypeExtensions": "4.*"
       }
     }
   }
