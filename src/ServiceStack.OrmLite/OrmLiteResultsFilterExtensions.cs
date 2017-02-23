@@ -246,6 +246,9 @@ namespace ServiceStack.OrmLite
             if (sql != null)
                 dbCmd.CommandText = sql;
 
+            if (Log.IsDebugEnabled)
+                Log.DebugCommand(dbCmd);
+
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.GetLongScalar(dbCmd);
 
