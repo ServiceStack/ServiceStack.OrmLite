@@ -6,6 +6,8 @@ namespace ServiceStack.OrmLite.Tests.Issues
 {
     public class NoSqlLoggingIssue : OrmLiteTestBase
     {
+        //NUnit in .NET Core not liking resetting AppDomain after each TestFixture
+#if !NETCORE
         [Test]
         public void Does_log_SQL_Insert_for_Saves_with_Auto_Ids()
         {
@@ -24,5 +26,6 @@ namespace ServiceStack.OrmLite.Tests.Issues
             Assert.That(sql, Does.Contain("INSERT INTO"));
             LogManager.LogFactory = null;
         }
+#endif
     }
 }
