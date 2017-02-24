@@ -12,6 +12,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using ServiceStack.Logging;
 
 namespace ServiceStack.OrmLite
 {
@@ -145,6 +146,12 @@ namespace ServiceStack.OrmLite
         {
             var dbConn = dialectProvider.CreateConnection(dbConnectionStringOrFilePath, options: null);
             return dbConn;
+        }
+
+        public static void ResetLogFactory(ILogFactory logFactory)
+        {
+            LogManager.LogFactory = logFactory;
+            OrmLiteResultsFilterExtensions.Log = LogManager.LogFactory.GetLogger(typeof(OrmLiteResultsFilterExtensions));
         }
 
         public static bool DisableColumnGuessFallback { get; set; }
