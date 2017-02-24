@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
 using ServiceStack.OrmLite.Tests.Expression;
@@ -50,6 +51,23 @@ namespace ServiceStack.OrmLite.Tests
                 throw;
             }
         }
+
+        public override Task<T> Exec<T>(IDbConnection dbConn, Func<IDbCommand, Task<T>> filter)
+        {
+            try
+            {
+                return base.Exec(dbConn, filter);
+            }
+            catch (Exception)
+            {
+                var sql = dbConn.GetLastSql();
+                if (sql == "exec sp_name @firstName, @age")
+                {
+                    return ((T)(object)new Person { FirstName = "Mocked" }).AsTaskResult();
+                }
+                throw;
+            }
+        }
     }
 
     [TestFixture]
@@ -85,6 +103,23 @@ namespace ServiceStack.OrmLite.Tests
             using (var db = OpenDbConnection())
             {
                 var person = db.SqlScalar<Person>("exec sp_name @firstName, @age",
+                    new { firstName = "aName", age = 1 });
+
+                Assert.That(person.FirstName, Is.EqualTo("Mocked"));
+            }
+
+            OrmLiteConfig.DialectProvider.ExecFilter = holdExecFilter;
+        }
+
+        [Test]
+        public async System.Threading.Tasks.Task Can_mock_store_procedure_Async()
+        {
+            var holdExecFilter = OrmLiteConfig.DialectProvider.ExecFilter;
+            OrmLiteConfig.DialectProvider.ExecFilter = new MockStoredProcExecFilter();
+
+            using (var db = OpenDbConnection())
+            {
+                var person = await db.SqlScalarAsync<Person>("exec sp_name @firstName, @age",
                     new { firstName = "aName", age = 1 });
 
                 Assert.That(person.FirstName, Is.EqualTo("Mocked"));
