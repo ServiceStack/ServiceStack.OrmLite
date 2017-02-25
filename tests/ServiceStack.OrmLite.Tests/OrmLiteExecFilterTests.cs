@@ -63,7 +63,9 @@ namespace ServiceStack.OrmLite.Tests
                 var sql = dbConn.GetLastSql();
                 if (sql == "exec sp_name @firstName, @age")
                 {
-                    return TaskExt.AsTaskResult((T)(object)new Person { FirstName = "Mocked" });
+                    var tcs = new TaskCompletionSource<T>();
+                    tcs.SetResult((T)(object)new Person { FirstName = "Mocked" });
+                    return tcs.Task;
                 }
                 throw;
             }
