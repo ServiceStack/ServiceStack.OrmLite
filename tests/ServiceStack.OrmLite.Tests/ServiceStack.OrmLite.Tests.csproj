@@ -142,6 +142,7 @@
     <Compile Include="Expression\SqlExpressionDeleteTests.cs" />
     <Compile Include="Expression\SqlExpressionFilterTests.cs" />
     <Compile Include="Expression\SqlExpressionJoinTests.cs" />
+    <Compile Include="Issues\AutoQueryJoinTests.cs" />
     <Compile Include="Issues\JoinAliasWithSchemaIssue.cs" />
     <Compile Include="Issues\JsonUpdateOnlyIssue.cs" />
     <Compile Include="Issues\LoadReferencesNullReferenceIssue.cs" />
