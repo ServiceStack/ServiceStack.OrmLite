@@ -15,8 +15,8 @@ namespace ServiceStack.OrmLite
 {
     public abstract partial class SqlExpression<T> : ISqlExpression, IHasUntypedSqlExpression
     {
-        private const string TrueLiteral = "(1=1)";
-        private const string FalseLiteral = "(1=0)";
+        protected const string TrueLiteral = "(1=1)";
+        protected const string FalseLiteral = "(1=0)";
 
         protected bool visitedExpressionIsTableColumn = false;
         protected bool skipParameterizationForThisExpression = false;
