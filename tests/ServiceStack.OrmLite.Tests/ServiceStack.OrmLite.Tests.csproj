@@ -142,11 +142,13 @@
     <Compile Include="Expression\SqlExpressionDeleteTests.cs" />
     <Compile Include="Expression\SqlExpressionFilterTests.cs" />
     <Compile Include="Expression\SqlExpressionJoinTests.cs" />
+    <Compile Include="Issues\AutoQueryJoinTests.cs" />
     <Compile Include="Issues\JoinAliasWithSchemaIssue.cs" />
     <Compile Include="Issues\JsonUpdateOnlyIssue.cs" />
     <Compile Include="Issues\LoadReferencesNullReferenceIssue.cs" />
     <Compile Include="Issues\MergeParamsIssue.cs" />
     <Compile Include="Issues\MultiThreadedUpdateTransactionIssue.cs" />
+    <Compile Include="Issues\NoSqlLoggingIssue.cs" />
     <Compile Include="Issues\ParamNameIssues.cs" />
     <Compile Include="MultipleConnectionIdTests.cs" />
     <Compile Include="Shared\DefaultValues.cs" />

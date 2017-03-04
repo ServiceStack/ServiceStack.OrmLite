@@ -12,7 +12,7 @@ namespace ServiceStack.OrmLite
 {
     public static class OrmLiteResultsFilterExtensions
     {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(OrmLiteResultsFilterExtensions));
+        internal static ILog Log = LogManager.GetLogger(typeof(OrmLiteResultsFilterExtensions));
 
         public static int ExecNonQuery(this IDbCommand dbCmd, string sql, object anonType = null)
         {
@@ -245,6 +245,9 @@ namespace ServiceStack.OrmLite
         {
             if (sql != null)
                 dbCmd.CommandText = sql;
+
+            if (Log.IsDebugEnabled)
+                Log.DebugCommand(dbCmd);
 
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.GetLongScalar(dbCmd);
