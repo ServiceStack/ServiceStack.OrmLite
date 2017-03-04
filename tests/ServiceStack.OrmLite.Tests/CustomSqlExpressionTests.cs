@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.Sqlite;
@@ -112,7 +113,7 @@ namespace ServiceStack.OrmLite.Tests
             var nonInheritedProperties = GetCurrentPropertiesWithoutBase(tableDef);
             while (curType != null && !nonInheritedProperties.Contains(memberName))
             {
-                curType = curType.BaseType;
+                curType = curType.BaseType();
                 nonInheritedProperties = GetCurrentPropertiesWithoutBase(curType?.GetModelMetadata());
             }
 
