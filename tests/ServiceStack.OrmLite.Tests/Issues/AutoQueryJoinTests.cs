@@ -106,6 +106,8 @@ namespace ServiceStack.OrmLite.Tests.Issues
                 Assert.That(products.Count, Is.EqualTo(2));
                 Assert.That(products[0].StockItems.Count, Is.EqualTo(2));
                 Assert.That(products[1].StockItems.Count, Is.EqualTo(2));
+
+                db.DropTable<StockItem>();
             }
         }
     }
