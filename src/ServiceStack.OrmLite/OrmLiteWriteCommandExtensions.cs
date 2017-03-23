@@ -294,7 +294,14 @@ namespace ServiceStack.OrmLite
                     if (values == null)
                         values = new object[reader.FieldCount];
 
-                    dialectProvider.GetValues(reader, values);
+                    try
+                    {
+                        dialectProvider.GetValues(reader, values);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Warn("Error trying to use GetValues() from DataReader. Falling back to individual field reads...", ex);
+                    }
                 }
                 else
                 {
