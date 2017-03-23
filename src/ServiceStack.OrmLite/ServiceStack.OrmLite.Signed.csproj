@@ -250,7 +250,7 @@
     <Compile Include="Support\LoadReferences.cs" />
     <Compile Include="UntypedApi.cs" />
     <Compile Include="IndexFieldsCacheKey.cs" />
-  </ItemGroup>
+ </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
       <Visible>False</Visible>

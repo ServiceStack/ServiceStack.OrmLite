@@ -87,6 +87,7 @@
     <Compile Include="Expressions\TestType.cs" />
     <Compile Include="Expressions\UnaryExpressionsTest.cs" />
     <Compile Include="ForeignKeyAttributeTests.cs" />
+    <Compile Include="Issues\CustomSqlIssue.cs" />
     <Compile Include="Issues\JsonDataTypeTests.cs" />
     <Compile Include="OrmLiteBasicPersistenceProviderTests.cs" />
     <Compile Include="OrmLiteCreateTableWithNamigStrategyTests.cs" />
@@ -105,7 +106,6 @@
     <None Include="app.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="packages.config" />
     <None Include="project.json" />
     <None Include="ServiceStack.OrmLite.PostgreSQL.Tests.project.json" />
   </ItemGroup>

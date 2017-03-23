@@ -17,7 +17,7 @@
   "frameworks": {
     "netstandard1.3": {
       "dependencies" : {
-        "Npgsql" : "3.1.9",
+        "Npgsql" : "3.2.2",
         "ServiceStack.Interfaces" : "1.0.*",
         "ServiceStack.Text" : "1.0.*",
         "ServiceStack.Common" : "1.0.*",
