@@ -78,7 +78,7 @@ namespace ServiceStack.OrmLite.Tests.Async
                 await CreateAndInitializeAsync(db, 2);
 
                 ResetUpdateDateAsync(db);
-                await db.UpdateAsync(cmd => UpdateCommandFilter.SetUpdateDate<DefaultValues>(cmd, nameof(DefaultValues.UpdatedDateUtc)),
+                await db.UpdateAsync(cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)),
                     new DefaultValues { Id = 1, DefaultInt = 45 }, new DefaultValues { Id = 2, DefaultInt = 72 });
                 VerifyUpdateDateAsync(db);
                 VerifyUpdateDateAsync(db, id: 2);
@@ -134,7 +134,7 @@ namespace ServiceStack.OrmLite.Tests.Async
 
                 ResetUpdateDateAsync(db);
                 await db.UpdateAsync(new DefaultValues { Id = 1, DefaultInt = 2342 }, p => p.Id == 1,
-                    cmd => UpdateCommandFilter.SetUpdateDate<DefaultValues>(cmd, nameof(DefaultValues.UpdatedDateUtc)));
+                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)));
                 VerifyUpdateDateAsync(db);
             }
         }
@@ -150,7 +150,7 @@ namespace ServiceStack.OrmLite.Tests.Async
                 var row = await db.SingleByIdAsync<DefaultValues>(1);
                 row.DefaultInt = 3245;
                 row.DefaultDouble = 978.423;
-                await db.UpdateAsync(row, cmd => UpdateCommandFilter.SetUpdateDate<DefaultValues>(cmd, nameof(DefaultValues.UpdatedDateUtc)));
+                await db.UpdateAsync(row, cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)));
                 VerifyUpdateDateAsync(db);
             }
         }
@@ -164,7 +164,7 @@ namespace ServiceStack.OrmLite.Tests.Async
 
                 ResetUpdateDateAsync(db);
                 await db.UpdateAsync<DefaultValues>(new { DefaultInt = 765 }, p => p.Id == 1,
-                    cmd => UpdateCommandFilter.SetUpdateDate<DefaultValues>(cmd, nameof(DefaultValues.UpdatedDateUtc)));
+                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)));
                 VerifyUpdateDateAsync(db);
             }
         }
@@ -178,7 +178,7 @@ namespace ServiceStack.OrmLite.Tests.Async
 
                 ResetUpdateDateAsync(db);
                 db.UpdateAll(new[] { new DefaultValues { Id = 1, DefaultInt = 45 }, new DefaultValues { Id = 2, DefaultInt = 72 } },
-                    cmd => UpdateCommandFilter.SetUpdateDate<DefaultValues>(cmd, nameof(DefaultValues.UpdatedDateUtc)));
+                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)));
                 VerifyUpdateDateAsync(db);
                 VerifyUpdateDateAsync(db, id: 2);
             }
@@ -193,7 +193,7 @@ namespace ServiceStack.OrmLite.Tests.Async
 
                 ResetUpdateDateAsync(db);
                 db.UpdateOnly(() => new DefaultValues { DefaultInt = 345 }, p => p.Id == 1,
-                    cmd => UpdateCommandFilter.SetUpdateDate<DefaultValues>(cmd, nameof(DefaultValues.UpdatedDateUtc)));
+                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)));
                 VerifyUpdateDateAsync(db);
             }
         }
@@ -207,7 +207,7 @@ namespace ServiceStack.OrmLite.Tests.Async
 
                 ResetUpdateDateAsync(db);
                 await db.UpdateOnlyAsync(() => new DefaultValues { DefaultInt = 345 }, db.From<DefaultValues>().Where(p => p.Id == 1),
-                    cmd => UpdateCommandFilter.SetUpdateDate<DefaultValues>(cmd, nameof(DefaultValues.UpdatedDateUtc)));
+                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)));
                 VerifyUpdateDateAsync(db);
             }
         }
@@ -223,7 +223,7 @@ namespace ServiceStack.OrmLite.Tests.Async
                 var row = await db.SingleByIdAsync<DefaultValues>(1);
                 row.DefaultDouble = 978.423;
                 await db.UpdateOnlyAsync(row, db.From<DefaultValues>().Update(p => p.DefaultDouble),
-                    cmd => UpdateCommandFilter.SetUpdateDate<DefaultValues>(cmd, nameof(DefaultValues.UpdatedDateUtc)));
+                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)));
                 VerifyUpdateDateAsync(db);
             }
         }
@@ -239,7 +239,7 @@ namespace ServiceStack.OrmLite.Tests.Async
                 var row = await db.SingleByIdAsync<DefaultValues>(1);
                 row.DefaultDouble = 978.423;
                 await db.UpdateOnlyAsync(row, p => p.DefaultDouble, p => p.Id == 1,
-                    cmd => UpdateCommandFilter.SetUpdateDate<DefaultValues>(cmd, nameof(DefaultValues.UpdatedDateUtc)));
+                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)));
                 VerifyUpdateDateAsync(db);
             }
         }
@@ -255,7 +255,7 @@ namespace ServiceStack.OrmLite.Tests.Async
                 var row = await db.SingleByIdAsync<DefaultValues>(1);
                 row.DefaultDouble = 978.423;
                 await db.UpdateOnlyAsync(row, new[] { nameof(DefaultValues.DefaultDouble) }, p => p.Id == 1,
-                    cmd => UpdateCommandFilter.SetUpdateDate<DefaultValues>(cmd, nameof(DefaultValues.UpdatedDateUtc)));
+                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)));
                 VerifyUpdateDateAsync(db);
             }
         }
@@ -270,7 +270,7 @@ namespace ServiceStack.OrmLite.Tests.Async
                 ResetUpdateDateAsync(db);
 
                 var count = await db.UpdateAddAsync(() => new DefaultValues { DefaultInt = 5, DefaultDouble = 7.2 }, p => p.Id == 1,
-                    cmd => UpdateCommandFilter.SetUpdateDate<DefaultValues>(cmd, nameof(DefaultValues.UpdatedDateUtc)));
+                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)));
 
                 Assert.That(count, Is.EqualTo(1));
                 var row = await db.SingleByIdAsync<DefaultValues>(1);
@@ -291,7 +291,7 @@ namespace ServiceStack.OrmLite.Tests.Async
 
                 var where = db.From<DefaultValues>().Where(p => p.Id == 1);
                 var count = await db.UpdateAddAsync(() => new DefaultValues { DefaultInt = 5, DefaultDouble = 7.2 }, where,
-                    cmd => UpdateCommandFilter.SetUpdateDate<DefaultValues>(cmd, nameof(DefaultValues.UpdatedDateUtc)));
+                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)));
 
                 Assert.That(count, Is.EqualTo(1));
                 var row = await db.SingleByIdAsync<DefaultValues>(1);
