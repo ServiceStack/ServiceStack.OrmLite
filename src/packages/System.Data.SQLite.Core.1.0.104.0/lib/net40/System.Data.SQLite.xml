@@ -2172,6 +2172,14 @@
             When returning column values, skip verifying their affinity.
             </summary>
         </member>
+        <member name="F:System.Data.SQLite.SQLiteConnectionFlags.AllowNestedTransactions">
+            <summary>
+            Allow transactions to be nested.  The outermost transaction still
+            controls whether or not any changes are ultimately committed or
+            rolled back.  All non-outermost transactions are implemented using
+            the SAVEPOINT construct.
+            </summary>
+        </member>
         <member name="F:System.Data.SQLite.SQLiteConnectionFlags.BindAndGetAllAsText">
             <summary>
             When binding parameter values or returning column values, always
@@ -2291,6 +2299,29 @@
             <param name="sqlbase">The base SQLite object.</param>
             <param name="blob">The blob handle.</param>
         </member>
+        <member name="M:System.Data.SQLite.SQLiteBlob.Create(System.Data.SQLite.SQLiteDataReader,System.Int32,System.Boolean)">
+            <summary>
+            Creates a <see cref="T:System.Data.SQLite.SQLiteBlob"/> object.  This will not work
+            for tables that were created WITHOUT ROWID -OR- if the query
+            does not include the "rowid" column or one of its aliases -OR-
+            if the <see cref="T:System.Data.SQLite.SQLiteDataReader"/> was not created with the
+            <see cref="F:System.Data.CommandBehavior.KeyInfo"/> flag.
+            </summary>
+            <param name="dataReader">
+            The <see cref="T:System.Data.SQLite.SQLiteDataReader"/> instance with a result set
+            containing the desired blob column.
+            </param>
+            <param name="i">
+            The index of the blob column.
+            </param>
+            <param name="readOnly">
+            Non-zero to open the blob object for read-only access.
+            </param>
+            <returns>
+            The newly created <see cref="T:System.Data.SQLite.SQLiteBlob"/> instance -OR- null
+            if an error occurs.
+            </returns>
+        </member>
         <member name="M:System.Data.SQLite.SQLiteBlob.CheckOpen">
             <summary>
             Throws an exception if the blob object does not appear to be open.
@@ -2372,6 +2403,11 @@
         <member name="M:System.Data.SQLite.SQLiteBlob.Dispose">
             <summary>
             Disposes and finalizes the blob.
+            </summary>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteBlob.Finalize">
+            <summary>
+            The destructor.
             </summary>
         </member>
         <member name="T:System.Data.SQLite.SQLiteCommand">
@@ -3980,6 +4016,12 @@
         <member name="F:System.Data.SQLite.SQLiteConnection._transactionLevel">
             <summary>
             Nesting level of the transactions open on the connection
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.SQLiteConnection._transactionSequence">
+            <summary>
+            Transaction counter for the connection.  Currently, this is only used
+            to build SAVEPOINT names.
             </summary>
         </member>
         <member name="F:System.Data.SQLite.SQLiteConnection._noDispose">
@@ -7223,6 +7265,9 @@
             if the <see cref="T:System.Data.SQLite.SQLiteDataReader"/> was not created with the
             <see cref="F:System.Data.CommandBehavior.KeyInfo"/> flag.
             </summary>
+            <param name="i">
+            The index of the BLOB column.
+            </param>
             <returns>
             The integer identifier for the current row -OR- null if it could not
             be determined.
@@ -7234,7 +7279,8 @@
             This will not work for tables that were created WITHOUT ROWID
             -OR- if the query does not include the "rowid" column or one
             of its aliases -OR- if the <see cref="T:System.Data.SQLite.SQLiteDataReader"/> was
-            not created with the <see cref="F:System.Data.CommandBehavior.KeyInfo"/> flag.
+            not created with the <see cref="F:System.Data.CommandBehavior.KeyInfo"/>
+            flag.
             </summary>
             <param name="i">The index of the column.</param>
             <param name="readOnly">
@@ -10010,12 +10056,87 @@
         </member>
         <member name="T:System.Data.SQLite.SQLiteTransaction">
             <summary>
-            SQLite implementation of DbTransaction.
+            SQLite implementation of DbTransaction that does not support nested transactions.
             </summary>
         </member>
-        <member name="F:System.Data.SQLite.SQLiteTransaction._cnn">
+        <member name="T:System.Data.SQLite.SQLiteTransactionBase">
             <summary>
-            The connection to which this transaction is bound
+            Base class used by to implement DbTransaction for SQLite.
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.SQLiteTransactionBase._cnn">
+            <summary>
+            The connection to which this transaction is bound.
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.SQLiteTransactionBase._version">
+            <summary>
+            Matches the version of the connection.
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.SQLiteTransactionBase._level">
+            <summary>
+            The isolation level for this transaction.
+            </summary>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteTransactionBase.#ctor(System.Data.SQLite.SQLiteConnection,System.Boolean)">
+            <summary>
+            Constructs the transaction object, binding it to the supplied connection
+            </summary>
+            <param name="connection">The connection to open a transaction on</param>
+            <param name="deferredLock">TRUE to defer the writelock, or FALSE to lock immediately</param>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteTransactionBase.Dispose(System.Boolean)">
+            <summary>
+            Disposes the transaction.  If it is currently active, any changes are rolled back.
+            </summary>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteTransactionBase.Rollback">
+            <summary>
+            Rolls back the active transaction.
+            </summary>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteTransactionBase.Begin(System.Boolean)">
+            <summary>
+            Attempts to start a transaction.  An exception will be thrown if the transaction cannot
+            be started for any reason.
+            </summary>
+            <param name="deferredLock">TRUE to defer the writelock, or FALSE to lock immediately</param>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteTransactionBase.IssueRollback(System.Boolean)">
+            <summary>
+            Issue a ROLLBACK command against the database connection,
+            optionally re-throwing any caught exception.
+            </summary>
+            <param name="throwError">
+            Non-zero to re-throw caught exceptions.
+            </param>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteTransactionBase.IsValid(System.Boolean)">
+            <summary>
+            Checks the state of this transaction, optionally throwing an exception if a state
+            inconsistency is found.
+            </summary>
+            <param name="throwError">
+            Non-zero to throw an exception if a state inconsistency is found.
+            </param>
+            <returns>
+            Non-zero if this transaction is valid; otherwise, false.
+            </returns>
+        </member>
+        <member name="P:System.Data.SQLite.SQLiteTransactionBase.IsolationLevel">
+            <summary>
+            Gets the isolation level of the transaction.  SQLite only supports Serializable transactions.
+            </summary>
+        </member>
+        <member name="P:System.Data.SQLite.SQLiteTransactionBase.Connection">
+            <summary>
+            Returns the underlying connection to which this transaction applies.
+            </summary>
+        </member>
+        <member name="P:System.Data.SQLite.SQLiteTransactionBase.DbConnection">
+            <summary>
+            Forwards to the local Connection property
             </summary>
         </member>
         <member name="M:System.Data.SQLite.SQLiteTransaction.#ctor(System.Data.SQLite.SQLiteConnection,System.Boolean)">
@@ -10035,25 +10156,80 @@
             Commits the current transaction.
             </summary>
         </member>
-        <member name="M:System.Data.SQLite.SQLiteTransaction.Rollback">
+        <member name="M:System.Data.SQLite.SQLiteTransaction.Begin(System.Boolean)">
             <summary>
-            Rolls back the active transaction.
+            Attempts to start a transaction.  An exception will be thrown if the transaction cannot
+            be started for any reason.
+            </summary>
+            <param name="deferredLock">TRUE to defer the writelock, or FALSE to lock immediately</param>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteTransaction.IssueRollback(System.Boolean)">
+            <summary>
+            Issue a ROLLBACK command against the database connection,
+            optionally re-throwing any caught exception.
+            </summary>
+            <param name="throwError">
+            Non-zero to re-throw caught exceptions.
+            </param>
+        </member>
+        <member name="T:System.Data.SQLite.SQLiteTransaction2">
+            <summary>
+            SQLite implementation of DbTransaction that does support nested transactions.
             </summary>
         </member>
-        <member name="P:System.Data.SQLite.SQLiteTransaction.Connection">
+        <member name="F:System.Data.SQLite.SQLiteTransaction2._beginLevel">
             <summary>
-            Returns the underlying connection to which this transaction applies.
+            The original transaction level for the associated connection
+            when this transaction was created (i.e. begun).
             </summary>
         </member>
-        <member name="P:System.Data.SQLite.SQLiteTransaction.DbConnection">
+        <member name="F:System.Data.SQLite.SQLiteTransaction2._savePointName">
             <summary>
-            Forwards to the local Connection property
+            The SAVEPOINT name for this transaction, if any.  This will
+            only be non-null if this transaction is a nested one.
             </summary>
         </member>
-        <member name="P:System.Data.SQLite.SQLiteTransaction.IsolationLevel">
+        <member name="M:System.Data.SQLite.SQLiteTransaction2.#ctor(System.Data.SQLite.SQLiteConnection,System.Boolean)">
             <summary>
-            Gets the isolation level of the transaction.  SQLite only supports Serializable transactions.
+            Constructs the transaction object, binding it to the supplied connection
             </summary>
+            <param name="connection">The connection to open a transaction on</param>
+            <param name="deferredLock">TRUE to defer the writelock, or FALSE to lock immediately</param>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteTransaction2.Dispose(System.Boolean)">
+            <summary>
+            Disposes the transaction.  If it is currently active, any changes are rolled back.
+            </summary>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteTransaction2.Commit">
+            <summary>
+            Commits the current transaction.
+            </summary>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteTransaction2.Begin(System.Boolean)">
+            <summary>
+            Attempts to start a transaction.  An exception will be thrown if the transaction cannot
+            be started for any reason.
+            </summary>
+            <param name="deferredLock">TRUE to defer the writelock, or FALSE to lock immediately</param>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteTransaction2.IssueRollback(System.Boolean)">
+            <summary>
+            Issue a ROLLBACK command against the database connection,
+            optionally re-throwing any caught exception.
+            </summary>
+            <param name="throwError">
+            Non-zero to re-throw caught exceptions.
+            </param>
+        </member>
+        <member name="M:System.Data.SQLite.SQLiteTransaction2.GetSavePointName">
+            <summary>
+            Constructs the name of a new savepoint for this transaction.  It
+            should only be called from the constructor of this class.
+            </summary>
+            <returns>
+            The name of the new savepoint -OR- null if it cannot be constructed.
+            </returns>
         </member>
         <member name="T:System.Data.SQLite.HelperMethods">
             <summary>
@@ -10255,6 +10431,26 @@
             System.Data.SQLite assembly.
             </summary>
         </member>
+        <member name="F:System.Data.SQLite.UnsafeNativeMethods.XmlConfigDirectoryToken">
+            <summary>
+            This is the XML configuratrion file token that will be replaced with
+            the qualified path to the directory containing the XML configuration
+            file.
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.UnsafeNativeMethods.AssemblyDirectoryToken">
+            <summary>
+            This is the environment variable token that will be replaced with
+            the qualified path to the directory containing this assembly.
+            </summary>
+        </member>
+        <member name="F:System.Data.SQLite.UnsafeNativeMethods.TargetFrameworkToken">
+            <summary>
+            This is the environment variable token that will be replaced with an
+            abbreviation of the target framework attribute value associated with
+            this assembly.
+            </summary>
+        </member>
         <member name="F:System.Data.SQLite.UnsafeNativeMethods.staticSyncRoot">
             <summary>
             This lock is used to protect the static _SQLiteNativeModuleFileName,
@@ -10308,6 +10504,23 @@
             or does not exist.
             </returns>
         </member>
+        <member name="M:System.Data.SQLite.UnsafeNativeMethods.ReplaceXmlConfigFileTokens(System.String,System.String)">
+            <summary>
+            If necessary, replaces all supported XML configuration file tokens
+            with their associated values.
+            </summary>
+            <param name="fileName">
+            The name of the XML configuration file being read.
+            </param>
+            <param name="value">
+            A setting value read from the XML configuration file.
+            </param>
+            <returns>
+            The value of the <paramref name="value" /> will all supported XML
+            configuration file tokens replaced.  No return value is reserved
+            to indicate an error.  This method cannot fail.
+            </returns>
+        </member>
         <member name="M:System.Data.SQLite.UnsafeNativeMethods.GetSettingValueViaXmlConfigFile(System.String,System.String,System.String,System.Boolean)">
             <summary>
             Queries and returns the value of the specified setting, using the
@@ -10332,6 +10545,51 @@
             The value of the setting -OR- the default value specified by
             <paramref name="default" /> if it has not been set explicitly or
             cannot be determined.
+            </returns>
+        </member>
+        <member name="M:System.Data.SQLite.UnsafeNativeMethods.GetAssemblyTargetFramework(System.Reflection.Assembly)">
+            <summary>
+            Attempts to determine the target framework attribute value that is
+            associated with the specified managed assembly, if applicable.
+            </summary>
+            <param name="assembly">
+            The managed assembly to read the target framework attribute value
+            from.
+            </param>
+            <returns>
+            The value of the target framework attribute value for the specified
+            managed assembly -OR- null if it cannot be determined.  If this
+            assembly was compiled with a version of the .NET Framework prior to
+            version 4.0, the value returned MAY reflect that version of the .NET
+            Framework instead of the one associated with the specified managed
+            assembly.
+            </returns>
+        </member>
+        <member name="M:System.Data.SQLite.UnsafeNativeMethods.AbbreviateTargetFramework(System.String)">
+            <summary>
+            Accepts a long target framework attribute value and makes it into a
+            much shorter version, suitable for use with NuGet packages.
+            </summary>
+            <param name="value">
+            The long target framework attribute value to convert.
+            </param>
+            <returns>
+            The short target framework attribute value -OR- null if it cannot
+            be determined or converted.
+            </returns>
+        </member>
+        <member name="M:System.Data.SQLite.UnsafeNativeMethods.ReplaceEnvironmentVariableTokens(System.String)">
+            <summary>
+            If necessary, replaces all supported environment variable tokens
+            with their associated values.
+            </summary>
+            <param name="value">
+            A setting value read from an environment variable.
+            </param>
+            <returns>
+            The value of the <paramref name="value" /> will all supported
+            environment variable tokens replaced.  No return value is reserved
+            to indicate an error.  This method cannot fail.
             </returns>
         </member>
         <member name="M:System.Data.SQLite.UnsafeNativeMethods.GetSettingValue(System.String,System.String)">
@@ -10721,7 +10979,8 @@
             than there are hidden columns in the virtual table.
             </para>
             <para>
-            Beginning with SQLite version 3.14.0, the CREATE TABLE statement that
+            Beginning with SQLite version 3.14.0 (2016-08-08), 
+            the CREATE TABLE statement that
             is passed into sqlite3_declare_vtab() may contain a WITHOUT ROWID clause.
             This is useful for cases where the virtual table rows 
             cannot easily be mapped into unique integers.  A CREATE TABLE
@@ -11054,7 +11313,8 @@
             in the order by clause and whether or not that column is ASC or DESC.
             </para>
             <para>
-            In SQLite version 3.10.0 and later, the colUsed field is available
+            In SQLite version 3.10.0 (2016-01-06) and later, 
+            the colUsed field is available
             to indicate which fields of the virtual table are actually used by the
             statement being prepared.  If the lowest bit of colUsed is set, that
             means that the first column is used.  The second lowest bit corresponds
@@ -11531,14 +11791,14 @@
             <![CDATA[<dl>]]>
             <![CDATA[<dt>]]><![CDATA[<b>]]>argc = 1<![CDATA[</b>]]>
             <![CDATA[</dt>]]><![CDATA[<dd>]]>The single row with rowid equal to argv[0] is deleted. No insert occurs.
-            <![CDATA[</dd>]]><![CDATA[<dt>]]><![CDATA[<b>]]>argc &gt; 1 <![CDATA[<br>]]> argv[0] = NULL<![CDATA[</br>]]><![CDATA[</b>]]>
+            <![CDATA[</dd>]]><![CDATA[<dt>]]><![CDATA[<b>]]>argc &gt; 1 <![CDATA[<br>]]> argv[0] = NULL<![CDATA[</b>]]>
             <![CDATA[</dt>]]><![CDATA[<dd>]]>A new row is inserted with a rowid argv[1] and column values in
                    argv[2] and following.  If argv[1] is an SQL NULL,
                    the a new unique rowid is generated automatically.
-            <![CDATA[</dd>]]><![CDATA[<dt>]]><![CDATA[<b>]]>argc &gt; 1 <![CDATA[<br>]]> argv[0] &#8800; NULL <![CDATA[</br>]]><![CDATA[<br>]]> argv[0] = argv[1]<![CDATA[</br>]]><![CDATA[</b>]]>
+            <![CDATA[</dd>]]><![CDATA[<dt>]]><![CDATA[<b>]]>argc &gt; 1 <![CDATA[<br>]]> argv[0] &#8800; NULL <![CDATA[<br>]]> argv[0] = argv[1]<![CDATA[</b>]]>
             <![CDATA[</dt>]]><![CDATA[<dd>]]>The row with rowid argv[0] is updated with new values 
                    in argv[2] and following parameters.
-            <![CDATA[</dd>]]><![CDATA[<dt>]]><![CDATA[<b>]]>argc &gt; 1 <![CDATA[<br>]]> argv[0] &#8800; NULL <![CDATA[</br>]]><![CDATA[<br>]]> argv[0] &#8800; argv[1]<![CDATA[</br>]]><![CDATA[</b>]]>
+            <![CDATA[</dd>]]><![CDATA[<dt>]]><![CDATA[<b>]]>argc &gt; 1 <![CDATA[<br>]]> argv[0] &#8800; NULL <![CDATA[<br>]]> argv[0] &#8800; argv[1]<![CDATA[</b>]]>
             <![CDATA[</dt>]]><![CDATA[<dd>]]> The row with rowid argv[0] is updated with rowid argv[1] 
             and new values in argv[2] and following parameters. This will occur 
             when an SQL statement updates a rowid, as in the statement:
@@ -11786,7 +12046,7 @@
             <para>
             These methods provide the virtual table implementation an opportunity to
             implement nested transactions.  They are always optional and will only be
-            called in SQLite version 3.7.7 and later.
+            called in SQLite version 3.7.7 (2011-06-23) and later.
             </para>
             <para>
             When xSavepoint(X,N) is invoked, that is a signal to the virtual table X
@@ -11827,7 +12087,7 @@
             <para>
             These methods provide the virtual table implementation an opportunity to
             implement nested transactions.  They are always optional and will only be
-            called in SQLite version 3.7.7 and later.
+            called in SQLite version 3.7.7 (2011-06-23) and later.
             </para>
             <para>
             When xSavepoint(X,N) is invoked, that is a signal to the virtual table X
@@ -11869,7 +12129,7 @@
             <para>
             These methods provide the virtual table implementation an opportunity to
             implement nested transactions.  They are always optional and will only be
-            called in SQLite version 3.7.7 and later.
+            called in SQLite version 3.7.7 (2011-06-23) and later.
             </para>
             <para>
             When xSavepoint(X,N) is invoked, that is a signal to the virtual table X
