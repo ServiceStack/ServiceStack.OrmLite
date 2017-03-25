@@ -16,13 +16,13 @@
   },
   "frameworks": {
     "netstandard1.6": {
-      "dependencies" : {
-        "Mysql.Data" : "7.0.6-ir31",
-        "ServiceStack.Interfaces" : "1.0.*",
-        "ServiceStack.Text" : "1.0.*",
-        "ServiceStack.Common" : "1.0.*",
-        "ServiceStack.OrmLite" : "1.0.*"
-        }
+      "dependencies": {
+        "Mysql.Data": "7.0.7-m61",
+        "ServiceStack.Interfaces": "1.0.*",
+        "ServiceStack.Text": "1.0.*",
+        "ServiceStack.Common": "1.0.*",
+        "ServiceStack.OrmLite": "1.0.*"
+      }
      }
   },
   "version": "1.0.0"
