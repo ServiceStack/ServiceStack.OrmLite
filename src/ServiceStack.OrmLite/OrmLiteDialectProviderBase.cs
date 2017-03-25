@@ -1228,6 +1228,12 @@ namespace ServiceStack.OrmLite
 
                 sbColumns.Append(columnDefinition);
 
+                var sqlConstraint = GetCheckConstraint(fieldDef);
+                if (sqlConstraint != null)
+                {
+                    sbConstraints.Append(",\n" + sqlConstraint);
+                }
+
                 if (fieldDef.ForeignKey == null || OrmLiteConfig.SkipForeignKeys)
                     continue;
 
@@ -1244,6 +1250,14 @@ namespace ServiceStack.OrmLite
                       $"\n(\n  {StringBuilderCache.ReturnAndFree(sbColumns)}{StringBuilderCacheAlt.ReturnAndFree(sbConstraints)} \n); \n";
 
             return sql;
+        }
+
+        public virtual string GetCheckConstraint(FieldDefinition fieldDef)
+        {
+            if (fieldDef.CheckConstraint == null)
+                return null;
+
+            return $"CONSTRAINT CHK_{fieldDef.FieldName} CHECK ({fieldDef.CheckConstraint})";
         }
 
         public virtual string ToPostCreateTableStatement(ModelDefinition modelDef)

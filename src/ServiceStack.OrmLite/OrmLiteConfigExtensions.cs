@@ -126,6 +126,7 @@ namespace ServiceStack.OrmLite
                 var referenceAttr = propertyInfo.FirstAttribute<ReferenceAttribute>();
                 var fkAttr = propertyInfo.FirstAttribute<ForeignKeyAttribute>();
                 var customFieldAttr = propertyInfo.FirstAttribute<CustomFieldAttribute>();
+                var chkConstraintAttr = propertyInfo.FirstAttribute<CheckConstraintAttribute>();
 
                 var fieldDefinition = new FieldDefinition
                 {
@@ -147,6 +148,7 @@ namespace ServiceStack.OrmLite
                     IsRowVersion = isRowVersion,
                     FieldLength = stringLengthAttr?.MaximumLength,
                     DefaultValue = defaultValueAttr?.DefaultValue,
+                    CheckConstraint = chkConstraintAttr?.Constraint,
                     ForeignKey = fkAttr == null
                         ? referencesAttr != null ? new ForeignKeyConstraint(referencesAttr.Type) : null
                         : new ForeignKeyConstraint(fkAttr.Type, fkAttr.OnDelete, fkAttr.OnUpdate, fkAttr.ForeignKeyName),
