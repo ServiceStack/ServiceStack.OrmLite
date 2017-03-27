@@ -300,6 +300,7 @@ namespace ServiceStack.OrmLite
                     }
                     catch (Exception ex)
                     {
+                        values = null;
                         Log.Warn("Error trying to use GetValues() from DataReader. Falling back to individual field reads...", ex);
                     }
                 }

@@ -99,6 +99,103 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Issues
                 }
             }
         }
+
+        [Alias("my_table")]
+        public class MyModel
+        {
+            public int MyModelId { get; set; }
+            public string Name { get; set; }
+            public string Type { get; set; }
+            public string NewField { get; set; }
+        }
+
+        public class MyNewModel
+        {
+            public int MyModelId { get; set; }
+            public string Name { get; set; }
+            public string Type { get; set; }
+            public string NewField { get; set; }
+            public int RenamedId { get; set; }
+        }
+
+        [Test]
+        public void test_model_with_simple_array_and_duplicate_fields()
+        {
+            using (var db = OpenDbConnection())
+            {
+
+                db.DropAndCreateTable<MyModel>();
+
+                db.Insert(new MyModel { MyModelId = 100, Name = "Test Name", NewField = "New Field", Type = "My Type" });
+                db.Insert(new MyModel { MyModelId = 200, Name = "Tester Name 2", NewField = "New Field 2", Type = "My Type 2" });
+
+                const string sql = @"
+                SELECT *, t2.my_model_id AS renamed_id
+                FROM (
+                    SELECT *
+                    FROM my_table
+                    CROSS JOIN (SELECT ARRAY[1,2,3,4] AS int_array) AS c
+                    ) AS t1
+                INNER JOIN my_table AS t2 ON t1.my_model_id = t2.my_model_id;";
+
+                var results = db.Select<MyNewModel>(sql);
+
+                Assert.That(results.Count, Is.GreaterThan(1));
+
+                foreach (var result in results)
+                {
+                    Console.WriteLine("{0} - {1} - {2}".Fmt(result.MyModelId, result.Name, result.RenamedId));
+                    Assert.That(result.MyModelId, Is.Not.EqualTo(0));
+                    Assert.That(result.RenamedId, Is.Not.EqualTo(0));
+                    Assert.That(result.Name, Is.Not.Empty);
+                }
+
+            }
+        }
+
+        [Test]
+        public void test_model_with_complex_array_and_duplicate_fields()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<ColorModel>();
+
+                db.Insert(new ColorModel { Color = "red", Value = "#f00" });
+                db.Insert(new ColorModel { Color = "green", Value = "#0f0" });
+                db.Insert(new ColorModel { Color = "blue", Value = "#00f" });
+                db.Insert(new ColorModel { Color = "cyan", Value = "#0ff" });
+                db.Insert(new ColorModel { Color = "magenta", Value = "#f0f" });
+                db.Insert(new ColorModel { Color = "yellow", Value = "#ff0" });
+                db.Insert(new ColorModel { Color = "black", Value = "#000" });
+
+                db.DropAndCreateTable<MyModel>();
+
+                db.Insert(new MyModel { MyModelId = 100, Name = "Test Name", NewField = "New Field", Type = "My Type" });
+                db.Insert(new MyModel { MyModelId = 200, Name = "Tester Name 2", NewField = "New Field 2", Type = "My Type 2" });
+
+                const string sql = @"
+                SELECT *, t2.my_model_id AS renamed_id
+                FROM (
+                    SELECT *
+                    FROM my_table
+                    CROSS JOIN (SELECT array_agg(color.*) AS color_array FROM color) AS c
+                    ) AS t1
+                INNER JOIN my_table AS t2 ON t1.my_model_id = t2.my_model_id;";
+
+                var results = db.Select<MyNewModel>(sql);
+
+                Assert.That(results.Count, Is.GreaterThan(1));
+
+                foreach (var result in results)
+                {
+                    Console.WriteLine("{0} - {1} - {2}".Fmt(result.MyModelId, result.Name, result.RenamedId));
+                    Assert.That(result.MyModelId, Is.Not.EqualTo(0));
+                    Assert.That(result.RenamedId, Is.Not.EqualTo(0));
+                    Assert.That(result.Name, Is.Not.Empty);
+                }
+            }
+        }
+
     }
 
 }
