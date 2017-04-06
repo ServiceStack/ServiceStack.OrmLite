@@ -1,12 +1,11 @@
-#if NETSTANDARD1_3
 using System.Data;
 using Microsoft.Data.Sqlite;
 
 namespace ServiceStack.OrmLite.Sqlite
 {
-    public class NetCoreSqliteConnection : SqliteConnection
+    public class NetStandardSqliteConnection : SqliteConnection
     {
-        public NetCoreSqliteConnection(string connectionString) 
+        public NetStandardSqliteConnection(string connectionString) 
             : base(connectionString) {}
 
         public override SqliteTransaction BeginTransaction(IsolationLevel isolationLevel)
@@ -19,4 +18,3 @@ namespace ServiceStack.OrmLite.Sqlite
         }
     }
 }
-#endif

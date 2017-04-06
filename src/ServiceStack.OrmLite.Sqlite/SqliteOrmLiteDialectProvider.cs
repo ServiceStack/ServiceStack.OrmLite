@@ -1,9 +1,5 @@
 using System.Data;
-#if NETSTANDARD1_3
 using Microsoft.Data.Sqlite;
-#else
-using Mono.Data.Sqlite;
-#endif
 
 namespace ServiceStack.OrmLite.Sqlite
 {
@@ -13,11 +9,7 @@ namespace ServiceStack.OrmLite.Sqlite
 
         protected override IDbConnection CreateConnection(string connectionString)
         {
-#if NETSTANDARD1_3
-            return new NetCoreSqliteConnection(connectionString);
-#else
-            return new SqliteConnection(connectionString);
-#endif
+            return new NetStandardSqliteConnection(connectionString);
         }
 
         public override IDbDataParameter CreateParam()
