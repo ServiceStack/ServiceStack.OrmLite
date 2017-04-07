@@ -7,7 +7,7 @@ using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.VistaDB.Tests.UseCase
 {
-    [TestFixture, NUnit.Framework.Ignore]
+    [TestFixture]
     public class SimpleUseCase
     {
         [TestFixtureSetUp]
