@@ -1,3 +1,4 @@
+#if NETSTANDARD1_3
 using System.Data;
 using Microsoft.Data.Sqlite;
 
@@ -18,3 +19,4 @@ namespace ServiceStack.OrmLite.Sqlite
         }
     }
 }
+#endif
