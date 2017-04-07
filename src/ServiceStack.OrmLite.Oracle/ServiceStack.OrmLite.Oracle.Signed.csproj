@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>net45</TargetFrameworks>
-    <AssemblyName>ServiceStack.OrmLite.Oracle.Signed</AssemblyName>
+    <AssemblyName>ServiceStack.OrmLite.Oracle</AssemblyName>
     <PackageId>ServiceStack.OrmLite.Oracle.Signed</PackageId>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>net45</TargetFrameworks>
-    <AssemblyName>ServiceStack.OrmLite.MySql.Signed</AssemblyName>
+    <AssemblyName>ServiceStack.OrmLite.MySql</AssemblyName>
     <PackageId>ServiceStack.OrmLite.MySql.Signed</PackageId>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
