@@ -19,7 +19,6 @@
     <Version>$(MajorVersion).$(MinorVersion).$(PatchVersion).0</Version>
     <UnstableTag Condition="$(RELEASE) == ''">-unstable</UnstableTag>
     <PackageVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)$(UnstableTag)</PackageVersion>
-    <EnvVersion>$(MajorVersion).$(MinorVersion)$(PatchVersion)</EnvVersion>
   </PropertyGroup>
 
 
@@ -93,12 +92,12 @@
     <Delete Files="@(NugetPackageFilesToDelete)" />
     
     <ItemGroup>
-      <OrmLiteFiles Include="$(SrcDir)/ServiceStack.OrmLite/bin/$(Configuration)/ServiceStack.OrmLite.*"></OrmLiteFiles>
-      <SqlServerFiles Include="$(SrcDir)/ServiceStack.OrmLite.SqlServer/bin/$(Configuration)/ServiceStack.OrmLite.SqlServer.*"></SqlServerFiles>
-      <SqlServerConverterFiles Include="$(SrcDir)/ServiceStack.OrmLite.SqlServer.Converters/bin/$(Configuration)/ServiceStack.OrmLite.SqlServer.Converters.*"></SqlServerConverterFiles>
-      <OracleFiles Include="$(SrcDir)/ServiceStack.OrmLite.Oracle/bin/$(Configuration)/ServiceStack.OrmLite.Oracle.*"></OracleFiles>
-      <SqliteWindowsFiles Include="$(SrcDir)/ServiceStack.OrmLite.Sqlite.Windows/bin/$(Configuration)/ServiceStack.OrmLite.Sqlite.Windows.*"></SqliteWindowsFiles>
-      <MySqlFiles Include="$(SrcDir)/ServiceStack.OrmLite.MySql/bin/$(Configuration)/ServiceStack.OrmLite.MySql.*"></MySqlFiles>
+      <OrmLiteFiles Include="$(SrcDir)/ServiceStack.OrmLite/bin/$(Configuration)/net45/ServiceStack.OrmLite.*"></OrmLiteFiles>
+      <SqlServerFiles Include="$(SrcDir)/ServiceStack.OrmLite.SqlServer/bin/$(Configuration)/net45/ServiceStack.OrmLite.SqlServer.*"></SqlServerFiles>
+      <SqlServerConverterFiles Include="$(SrcDir)/ServiceStack.OrmLite.SqlServer.Converters/bin/$(Configuration)/net45/ServiceStack.OrmLite.SqlServer.Converters.*"></SqlServerConverterFiles>
+      <OracleFiles Include="$(SrcDir)/ServiceStack.OrmLite.Oracle/bin/$(Configuration)/net45/ServiceStack.OrmLite.Oracle.*"></OracleFiles>
+      <SqliteWindowsFiles Include="$(SrcDir)/ServiceStack.OrmLite.Sqlite.Windows/bin/$(Configuration)/net45/ServiceStack.OrmLite.Sqlite.Windows.*"></SqliteWindowsFiles>
+      <MySqlFiles Include="$(SrcDir)/ServiceStack.OrmLite.MySql/bin/$(Configuration)/net45/ServiceStack.OrmLite.MySql.*"></MySqlFiles>
     </ItemGroup>
 
     <!-- OrmLite -->
