@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>net45</TargetFrameworks>
@@ -18,7 +18,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj" />
+    <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.Signed.csproj" />
     <Reference Include="..\..\lib\ServiceStack.Interfaces.dll" />
   </ItemGroup>
 
@@ -31,8 +31,8 @@
 
     <Reference Include="System.Net" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
-    <Reference Include="..\..\lib\ServiceStack.Text.dll" />
-    <Reference Include="..\..\lib\ServiceStack.Common.dll" />
+    <Reference Include="..\..\lib\signed\ServiceStack.Text.dll" />
+    <Reference Include="..\..\lib\signed\ServiceStack.Common.dll" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>net45</TargetFrameworks>
@@ -29,9 +29,18 @@
     <PackageReference Include="dotConnect.Express.for.Oracle" Version="8.3.115" />
     <PackageReference Include="odp.net.x64" Version="112.3.20" />
     <PackageReference Include="odp.net.x86" Version="112.3.20" />
-    <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj" />
-    <Reference Include="..\..\lib\ServiceStack.Text.dll" />
-    <Reference Include="..\..\lib\ServiceStack.Common.dll" />
+    <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.Signed.csproj" />
+    <Reference Include="..\..\lib\signed\ServiceStack.Text.dll" />
+    <Reference Include="..\..\lib\signed\ServiceStack.Common.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="OracleCommand.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="OracleConnection.cs">
+      <SubType>Component</SubType>
+    </Compile>
   </ItemGroup>
 
 </Project>
