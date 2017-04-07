@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Reflection;
-using System.Text;
 using ServiceStack.OrmLite.Sqlite.Converters;
 using ServiceStack.Text;
 
@@ -17,8 +16,12 @@ namespace ServiceStack.OrmLite.Sqlite
 
             base.InitColumnTypeMap();
 
+            OrmLiteConfig.DeoptimizeReader = true;
+            base.RegisterConverter<DateTime>(new SqliteSystemDataDateTimeConverter());
+            //Old behavior using native sqlite3.dll
+            //base.RegisterConverter<DateTime>(new SqliteNativeDateTimeConverter());
+
             base.RegisterConverter<string>(new SqliteStringConverter());
-            base.RegisterConverter<DateTime>(new SqliteDateTimeConverter());
             base.RegisterConverter<DateTimeOffset>(new SqliteDateTimeOffsetConverter());
             base.RegisterConverter<Guid>(new SqliteGuidConverter());
             base.RegisterConverter<bool>(new SqliteBoolConverter());

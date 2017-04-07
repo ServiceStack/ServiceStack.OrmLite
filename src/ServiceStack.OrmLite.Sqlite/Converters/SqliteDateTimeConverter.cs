@@ -6,17 +6,11 @@ using ServiceStack.Text.Common;
 
 namespace ServiceStack.OrmLite.Sqlite.Converters
 {
-    public class SqliteDateTimeConverter : DateTimeConverter
+    public class SqliteNativeDateTimeConverter : DateTimeConverter
     {
-        public override string ColumnDefinition
-        {
-            get { return "VARCHAR(8000)"; }
-        }
+        public override string ColumnDefinition => "VARCHAR(8000)";
 
-        public override DbType DbType
-        {
-            get { return DbType.DateTime; }
-        }
+        public override DbType DbType => DbType.DateTime;
 
         public override string ToQuotedString(Type fieldType, object value)
         {
@@ -85,7 +79,60 @@ namespace ServiceStack.OrmLite.Sqlite.Converters
         }
     }
 
-    public class SqliteWindowsDateTimeConverter : SqliteDateTimeConverter
+    /// <summary>
+    /// New behavior from using System.Data.SQLite.Core
+    /// </summary>
+    public class SqliteSystemDataDateTimeConverter : SqliteNativeDateTimeConverter
+    {
+        public override object ToDbValue(Type fieldType, object value)
+        {
+            var dateTime = (DateTime)value;
+            if (DateStyle == DateTimeKind.Utc)
+            {
+                if (dateTime.Kind == DateTimeKind.Local)
+                    dateTime = dateTime.ToUniversalTime();
+                else if (dateTime.Kind == DateTimeKind.Unspecified)
+                    dateTime = DateTime.SpecifyKind(dateTime, DateTimeKind.Utc);
+            }
+            else if (DateStyle == DateTimeKind.Local && dateTime.Kind != DateTimeKind.Local)
+            {
+                dateTime = dateTime.Kind == DateTimeKind.Utc
+                    ? dateTime.ToLocalTime()
+                    : DateTime.SpecifyKind(dateTime, DateTimeKind.Utc).ToLocalTime();
+            }
+            else if (DateStyle == DateTimeKind.Unspecified && dateTime.Kind == DateTimeKind.Utc)
+            {
+                dateTime = DateTime.SpecifyKind(dateTime, DateTimeKind.Unspecified);
+            }
+
+            return dateTime;
+        }
+
+        public override object FromDbValue(Type fieldType, object value)
+        {
+            var dateTime = (DateTime)value;
+
+            if (DateStyle == DateTimeKind.Utc)
+                dateTime = dateTime.ToUniversalTime();
+
+            if (DateStyle == DateTimeKind.Local && dateTime.Kind != DateTimeKind.Local)
+            {
+                dateTime = dateTime.Kind == DateTimeKind.Utc
+                    ? dateTime.ToLocalTime()
+                    : DateTime.SpecifyKind(dateTime, DateTimeKind.Local);
+            }
+
+            return dateTime;
+        }
+
+        public override object GetValue(IDataReader reader, int columnIndex, object[] values)
+        {
+            var ret = base.GetValue(reader, columnIndex, values);
+            return ret;
+        }
+    }
+
+    public class SqliteWindowsDateTimeConverter : SqliteNativeDateTimeConverter
     {
         public override object FromDbValue(Type fieldType, object value)
         {
