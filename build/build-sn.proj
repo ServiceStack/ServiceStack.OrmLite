@@ -57,7 +57,7 @@
   </Target>
 
   <Target Name="BuildSolutions">
-    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.sln" Targets="Build"
+    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.Signed.sln" Targets="Build"
       Properties="Configuration=$(Configuration)" />
   </Target>
 
