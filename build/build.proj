@@ -106,7 +106,7 @@
       <SqlServerConverterFiles Include="$(SrcDir)/ServiceStack.OrmLite.SqlServer.Converters/bin/$(Configuration)/net45/ServiceStack.OrmLite.SqlServer.Converters.*"></SqlServerConverterFiles>
 
       <MySqlFiles Include="$(SrcDir)/ServiceStack.OrmLite.MySql/bin/$(Configuration)/net45/ServiceStack.OrmLite.MySql.*"></MySqlFiles>
-      <MySqlCoreFiles Include="$(SrcDir)/ServiceStack.OrmLite.MySql/bin/$(Configuration)/netstandard1.3/ServiceStack.OrmLite.MySql.*"></MySqlCoreFiles>
+      <MySqlCoreFiles Include="$(SrcDir)/ServiceStack.OrmLite.MySql/bin/$(Configuration)/netstandard1.6/ServiceStack.OrmLite.MySql.*"></MySqlCoreFiles>
 
       <PostgreSqlFiles Include="$(SrcDir)/ServiceStack.OrmLite.PostgreSQL/bin/$(Configuration)/net45/ServiceStack.OrmLite.PostgreSQL.*"></PostgreSqlFiles>
       <PostgreSqlCoreFiles Include="$(SrcDir)/ServiceStack.OrmLite.PostgreSQL/bin/$(Configuration)/netstandard1.3/ServiceStack.OrmLite.PostgreSQL.*"></PostgreSqlCoreFiles>
@@ -214,8 +214,8 @@
             LogStandardErrorAsError="true" />
 
     <!-- MySql .NET Core -->
-    <MakeDir Directories="$(NuGetPackageCoreDir)/ServiceStack.OrmLite.MySql.Core/lib/netstandard1.3" Condition="!Exists('$(NuGetPackageCoreDir)/ServiceStack.OrmLite.MySql.Core/lib/netstandard1.3')" />
-    <Copy SourceFiles="%(SqlServerCoreFiles.Identity)" DestinationFolder="$(NuGetPackageCoreDir)/ServiceStack.OrmLite.MySql.Core/lib/netstandard1.3" />
+    <MakeDir Directories="$(NuGetPackageCoreDir)/ServiceStack.OrmLite.MySql.Core/lib/netstandard1.6" Condition="!Exists('$(NuGetPackageCoreDir)/ServiceStack.OrmLite.MySql.Core/lib/netstandard1.6')" />
+    <Copy SourceFiles="%(MySqlCoreFiles.Identity)" DestinationFolder="$(NuGetPackageCoreDir)/ServiceStack.OrmLite.MySql.Core/lib/netstandard1.6" />
 
     <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageCoreDir)/ServiceStack.OrmLite.MySql.Core/servicestack.ormlite.mysql.core.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageCoreDir)&quot; -Version $(PackageCoreVersion) -Symbols"
           LogStandardErrorAsError="true" />
@@ -234,7 +234,7 @@
 
     <!-- PostgreSQL .NET Core -->
     <MakeDir Directories="$(NuGetPackageCoreDir)/ServiceStack.OrmLite.PostgreSQL.Core/lib/netstandard1.3" Condition="!Exists('$(NuGetPackageCoreDir)/ServiceStack.OrmLite.PostgreSQL.Core/lib/netstandard1.3')" />
-    <Copy SourceFiles="%(SqlServerCoreFiles.Identity)" DestinationFolder="$(NuGetPackageCoreDir)/ServiceStack.OrmLite.PostgreSQL.Core/lib/netstandard1.3" />
+    <Copy SourceFiles="%(PostgreSqlCoreFiles.Identity)" DestinationFolder="$(NuGetPackageCoreDir)/ServiceStack.OrmLite.PostgreSQL.Core/lib/netstandard1.3" />
 
     <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageCoreDir)/ServiceStack.OrmLite.PostgreSQL.Core/servicestack.ormlite.postgresql.core.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageCoreDir)&quot; -Version $(PackageCoreVersion) -Symbols"
           LogStandardErrorAsError="true" />
