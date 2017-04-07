@@ -16,17 +16,17 @@
     <Configuration Condition="$(Configuration) == ''">Release</Configuration>
     <NuGetPath>$(BuildSolutionDir)/src/.nuget/nuget.exe</NuGetPath>
     <NuGetPackageDir>$(BuildSolutionDir)/NuGet</NuGetPackageDir>
+    <NuGetPackageCoreDir>$(BuildSolutionDir)/NuGet.Core/</NuGetPackageCoreDir>
     <Version>$(MajorVersion).$(MinorVersion).$(PatchVersion).0</Version>
     <UnstableTag Condition="$(RELEASE) == ''">-unstable</UnstableTag>
     <PackageVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)$(UnstableTag)</PackageVersion>
-    <EnvVersion>$(MajorVersion).$(MinorVersion)$(PatchVersion)</EnvVersion>
+    <PackageCoreVersion>1.0.$(PatchCoreVersion)$(UnstableTag)</PackageCoreVersion>
   </PropertyGroup>
-
 
   <ItemGroup>
       <NugetPackageFilesToDelete Include="$(NuGetPackageDir)/*.nupkg"/>
+    <NugetPackageFilesToDelete Include="$(NuGetPackageCoreDir)/*.nupkg"/>
   </ItemGroup>
-
   
   <PropertyGroup>
     <DoBuildSolutionsDependsOn>
@@ -78,6 +78,10 @@
         <Find>version="4\.5[^"]*"</Find>
         <ReplaceWith>version="$(PackageVersion)"</ReplaceWith>
       </RegexTransform>
+      <RegexTransform Include="$(NuGetPackageCoreDir)/**/*.nuspec">
+        <Find>version="1\.0\.[^"]*"</Find>
+        <ReplaceWith>version="$(PackageCoreVersion)"</ReplaceWith>
+      </RegexTransform>
     </ItemGroup>
 
     <RegexTransform Items="@(RegexTransform)" />
@@ -90,26 +94,28 @@
     <Delete Files="@(NugetPackageFilesToDelete)" />
     
     <ItemGroup>
-      <OrmLiteFiles Include="$(SrcDir)/ServiceStack.OrmLite/bin/$(Configuration)/ServiceStack.OrmLite.*"></OrmLiteFiles>
+      <OrmLiteFiles Include="$(SrcDir)/ServiceStack.OrmLite/bin/$(Configuration)/net45/ServiceStack.OrmLite.*"></OrmLiteFiles>
+      <OrmLiteCoreFiles Include="$(SrcDir)/ServiceStack.OrmLite/bin/$(Configuration)/netstandard1.3/ServiceStack.OrmLite.*"></OrmLiteCoreFiles>
 
+      <SqliteFiles Include="$(SrcDir)/ServiceStack.OrmLite.Sqlite/bin/$(Configuration)/net45/ServiceStack.OrmLite.Sqlite.*"></SqliteFiles>
+      <SqliteCoreFiles Include="$(SrcDir)/ServiceStack.OrmLite.Sqlite/bin/$(Configuration)/netstandard1.3/ServiceStack.OrmLite.Sqlite.*"></SqliteCoreFiles>
       <SqliteWindowsFiles Include="$(SrcDir)/ServiceStack.OrmLite.Sqlite.Windows/bin/$(Configuration)/ServiceStack.OrmLite.Sqlite.Windows.*"></SqliteWindowsFiles>
 
-      <SqliteMonoFiles Include="$(SrcDir)/ServiceStack.OrmLite.Sqlite/bin/$(Configuration)/ServiceStack.OrmLite.Sqlite.*"></SqliteMonoFiles>
-      <SqliteMonoFiles Include="$(LibDir)/Mono.Data.Sqlite.dll"></SqliteMonoFiles>
-      <SqliteMonoContentFiles Include="$(LibDir)/sqlite3.dll"></SqliteMonoContentFiles>
+      <SqlServerFiles Include="$(SrcDir)/ServiceStack.OrmLite.SqlServer/bin/$(Configuration)/net45/ServiceStack.OrmLite.SqlServer.*"></SqlServerFiles>
+      <SqlServerCoreFiles Include="$(SrcDir)/ServiceStack.OrmLite.SqlServer/bin/$(Configuration)/netstandard1.3/ServiceStack.OrmLite.SqlServer.*"></SqlServerCoreFiles>
+      <SqlServerConverterFiles Include="$(SrcDir)/ServiceStack.OrmLite.SqlServer.Converters/bin/$(Configuration)/net45/ServiceStack.OrmLite.SqlServer.Converters.*"></SqlServerConverterFiles>
 
-      <SqlServerFiles Include="$(SrcDir)/ServiceStack.OrmLite.SqlServer/bin/$(Configuration)/ServiceStack.OrmLite.SqlServer.*"></SqlServerFiles>
-      <SqlServerConverterFiles Include="$(SrcDir)/ServiceStack.OrmLite.SqlServer.Converters/bin/$(Configuration)/ServiceStack.OrmLite.SqlServer.Converters.*"></SqlServerConverterFiles>
+      <MySqlFiles Include="$(SrcDir)/ServiceStack.OrmLite.MySql/bin/$(Configuration)/net45/ServiceStack.OrmLite.MySql.*"></MySqlFiles>
+      <MySqlCoreFiles Include="$(SrcDir)/ServiceStack.OrmLite.MySql/bin/$(Configuration)/netstandard1.3/ServiceStack.OrmLite.MySql.*"></MySqlCoreFiles>
 
-      <MySqlFiles Include="$(SrcDir)/ServiceStack.OrmLite.MySql/bin/$(Configuration)/ServiceStack.OrmLite.MySql.*"></MySqlFiles>
+      <PostgreSqlFiles Include="$(SrcDir)/ServiceStack.OrmLite.PostgreSQL/bin/$(Configuration)/net45/ServiceStack.OrmLite.PostgreSQL.*"></PostgreSqlFiles>
+      <PostgreSqlCoreFiles Include="$(SrcDir)/ServiceStack.OrmLite.PostgreSQL/bin/$(Configuration)/netstandard1.3/ServiceStack.OrmLite.PostgreSQL.*"></PostgreSqlCoreFiles>
 
-      <PostgreSqlFiles Include="$(SrcDir)/ServiceStack.OrmLite.PostgreSQL/bin/$(Configuration)/ServiceStack.OrmLite.PostgreSQL.*"></PostgreSqlFiles>
-
-      <OracleFiles Include="$(SrcDir)/ServiceStack.OrmLite.Oracle/bin/$(Configuration)/ServiceStack.OrmLite.Oracle.*"></OracleFiles>
+      <OracleFiles Include="$(SrcDir)/ServiceStack.OrmLite.Oracle/bin/$(Configuration)/net45/ServiceStack.OrmLite.Oracle.*"></OracleFiles>
       
-      <FirebirdFiles Include="$(SrcDir)/ServiceStack.OrmLite.Firebird/bin/$(Configuration)/ServiceStack.OrmLite.Firebird.*"></FirebirdFiles>
+      <FirebirdFiles Include="$(SrcDir)/ServiceStack.OrmLite.Firebird/bin/$(Configuration)/net45/ServiceStack.OrmLite.Firebird.*"></FirebirdFiles>
 
-      <VistaDbFiles Include="$(SrcDir)/ServiceStack.OrmLite.VistaDb/bin/$(Configuration)/ServiceStack.OrmLite.VistaDB.*"></VistaDbFiles>
+      <VistaDbFiles Include="$(SrcDir)/ServiceStack.OrmLite.VistaDb/bin/$(Configuration)/net45/ServiceStack.OrmLite.VistaDB.*"></VistaDbFiles>
 
       <T4Files Include="$(SrcDir)/T4/*.*"></T4Files>
     </ItemGroup>
@@ -126,6 +132,13 @@
     <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite/servicestack.ormlite.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
             LogStandardErrorAsError="true" />
 
+    <!-- OrmLite .NET Core -->
+    <MakeDir Directories="$(NuGetPackageCoreDir)/ServiceStack.OrmLite.Core/lib/netstandard1.3" Condition="!Exists('$(NuGetPackageCoreDir)/ServiceStack.OrmLite.Core/lib/netstandard1.3')" />
+    <Copy SourceFiles="%(OrmLiteCoreFiles.Identity)" DestinationFolder="$(NuGetPackageCoreDir)/ServiceStack.OrmLite.Core/lib/netstandard1.3" />
+
+    <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageCoreDir)/ServiceStack.OrmLite.Core/servicestack.ormlite.core.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageCoreDir)&quot; -Version $(PackageCoreVersion) -Symbols"
+          LogStandardErrorAsError="true" />
+
     <!-- Sqlite.Windows -->
 
     <MSBuild Projects="$(SrcDir)/ServiceStack.OrmLite.Sqlite.Windows/ServiceStack.OrmLite.Sqlite.Windows.csproj"
@@ -138,20 +151,24 @@
     <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite.Windows/servicestack.ormlite.sqlite.windows.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
             LogStandardErrorAsError="true" />
 
-    <!-- Sqlite Mono/.NET -->
+    <!-- Sqlite -->
 
     <MSBuild Projects="$(SrcDir)/ServiceStack.OrmLite.Sqlite/ServiceStack.OrmLite.Sqlite.csproj"
              Targets="Build"
              Properties="Version=$(PackageVersion);Configuration=$(Configuration)" />
 
-    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite.Mono/lib/net45" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite.Mono/lib/net45')" />
-    <Copy SourceFiles="%(SqliteMonoFiles.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite.Mono/lib/net45" />
-    
-    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite.Mono/content" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite.Mono/content')" />
-    <Copy SourceFiles="%(SqliteMonoContentFiles.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite.Mono/content" />
+    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite/lib/net45" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite/lib/net45')" />
+    <Copy SourceFiles="%(SqliteFiles.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite/lib/net45" />
 
-    <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite.Mono/servicestack.ormlite.sqlite.mono.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
+    <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite/servicestack.ormlite.sqlite.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
             LogStandardErrorAsError="true" />
+
+    <!-- Sqlite .NET Core -->
+    <MakeDir Directories="$(NuGetPackageCoreDir)/ServiceStack.OrmLite.Sqlite.Core/lib/netstandard1.3" Condition="!Exists('$(NuGetPackageCoreDir)/ServiceStack.OrmLite.Sqlite.Core/lib/netstandard1.3')" />
+    <Copy SourceFiles="%(SqliteCoreFiles.Identity)" DestinationFolder="$(NuGetPackageCoreDir)/ServiceStack.OrmLite.Sqlite.Core/lib/netstandard1.3" />
+
+    <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageCoreDir)/ServiceStack.OrmLite.Sqlite.Core/servicestack.ormlite.sqlite.core.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageCoreDir)&quot; -Version $(PackageCoreVersion) -Symbols"
+          LogStandardErrorAsError="true" />
 
     <!-- SqlServer -->
 
@@ -164,6 +181,13 @@
 
     <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.SqlServer/servicestack.ormlite.sqlserver.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
             LogStandardErrorAsError="true" />
+
+    <!-- SqlServer .NET Core -->
+    <MakeDir Directories="$(NuGetPackageCoreDir)/ServiceStack.OrmLite.SqlServer.Core/lib/netstandard1.3" Condition="!Exists('$(NuGetPackageCoreDir)/ServiceStack.OrmLite.SqlServer.Core/lib/netstandard1.3')" />
+    <Copy SourceFiles="%(SqlServerCoreFiles.Identity)" DestinationFolder="$(NuGetPackageCoreDir)/ServiceStack.OrmLite.SqlServer.Core/lib/netstandard1.3" />
+
+    <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageCoreDir)/ServiceStack.OrmLite.SqlServer.Core/servicestack.ormlite.sqlserver.core.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageCoreDir)&quot; -Version $(PackageCoreVersion) -Symbols"
+          LogStandardErrorAsError="true" />
 
     <!-- SqlServer.Converters -->
 
@@ -189,6 +213,13 @@
     <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.MySql/servicestack.ormlite.mysql.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
             LogStandardErrorAsError="true" />
 
+    <!-- MySql .NET Core -->
+    <MakeDir Directories="$(NuGetPackageCoreDir)/ServiceStack.OrmLite.MySql.Core/lib/netstandard1.3" Condition="!Exists('$(NuGetPackageCoreDir)/ServiceStack.OrmLite.MySql.Core/lib/netstandard1.3')" />
+    <Copy SourceFiles="%(SqlServerCoreFiles.Identity)" DestinationFolder="$(NuGetPackageCoreDir)/ServiceStack.OrmLite.MySql.Core/lib/netstandard1.3" />
+
+    <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageCoreDir)/ServiceStack.OrmLite.MySql.Core/servicestack.ormlite.mysql.core.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageCoreDir)&quot; -Version $(PackageCoreVersion) -Symbols"
+          LogStandardErrorAsError="true" />
+
     <!-- PostgreSQL -->
 
     <MSBuild Projects="$(SrcDir)/ServiceStack.OrmLite.PostgreSQL/ServiceStack.OrmLite.PostgreSQL.csproj"
@@ -200,6 +231,13 @@
 
     <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.PostgreSQL/servicestack.ormlite.postgresql.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
         LogStandardErrorAsError="true" />
+
+    <!-- PostgreSQL .NET Core -->
+    <MakeDir Directories="$(NuGetPackageCoreDir)/ServiceStack.OrmLite.PostgreSQL.Core/lib/netstandard1.3" Condition="!Exists('$(NuGetPackageCoreDir)/ServiceStack.OrmLite.PostgreSQL.Core/lib/netstandard1.3')" />
+    <Copy SourceFiles="%(SqlServerCoreFiles.Identity)" DestinationFolder="$(NuGetPackageCoreDir)/ServiceStack.OrmLite.PostgreSQL.Core/lib/netstandard1.3" />
+
+    <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageCoreDir)/ServiceStack.OrmLite.PostgreSQL.Core/servicestack.ormlite.postgresql.core.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageCoreDir)&quot; -Version $(PackageCoreVersion) -Symbols"
+          LogStandardErrorAsError="true" />
 
     <!-- Oracle -->
 
