@@ -23,6 +23,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{6CEB3EDE
 		..\NuGet\ServiceStack.OrmLite.PostgreSQL\servicestack.ormlite.postgresql.nuspec = ..\NuGet\ServiceStack.OrmLite.PostgreSQL\servicestack.ormlite.postgresql.nuspec
 		..\NuGet.Signed\ServiceStack.OrmLite.Signed\servicestack.ormlite.signed.nuspec = ..\NuGet.Signed\ServiceStack.OrmLite.Signed\servicestack.ormlite.signed.nuspec
 		..\NuGet\ServiceStack.OrmLite.Sqlite.Mono\servicestack.ormlite.sqlite.mono.nuspec = ..\NuGet\ServiceStack.OrmLite.Sqlite.Mono\servicestack.ormlite.sqlite.mono.nuspec
+		..\NuGet\ServiceStack.OrmLite.Sqlite\servicestack.ormlite.sqlite.nuspec = ..\NuGet\ServiceStack.OrmLite.Sqlite\servicestack.ormlite.sqlite.nuspec
 		..\NuGet\ServiceStack.OrmLite.Sqlite.Windows\servicestack.ormlite.sqlite.windows.nuspec = ..\NuGet\ServiceStack.OrmLite.Sqlite.Windows\servicestack.ormlite.sqlite.windows.nuspec
 		..\NuGet.Signed\ServiceStack.OrmLite.Sqlite.Windows.Signed\servicestack.ormlite.sqlite.windows.signed.nuspec = ..\NuGet.Signed\ServiceStack.OrmLite.Sqlite.Windows.Signed\servicestack.ormlite.sqlite.windows.signed.nuspec
 		..\NuGet\ServiceStack.OrmLite.SqlServer.Converters\servicestack.ormlite.sqlserver.converters.nuspec = ..\NuGet\ServiceStack.OrmLite.SqlServer.Converters\servicestack.ormlite.sqlserver.converters.nuspec
