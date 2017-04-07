@@ -31,4 +31,13 @@
     <Reference Include="..\..\lib\ServiceStack.Common.dll" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="OracleCommand.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="OracleConnection.cs">
+      <SubType>Component</SubType>
+    </Compile>
+  </ItemGroup>
+
 </Project>

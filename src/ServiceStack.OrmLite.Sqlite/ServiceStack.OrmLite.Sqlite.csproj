@@ -29,4 +29,10 @@
     <Reference Include="..\..\lib\netstandard1.3\ServiceStack.Common.dll" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="NetStandardSqliteConnection.cs">
+      <SubType>Component</SubType>
+    </Compile>
+  </ItemGroup>
+
 </Project>
