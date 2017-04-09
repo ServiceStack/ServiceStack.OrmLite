@@ -24,7 +24,7 @@
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj" />
     <ProjectReference Include="..\..\tests\ServiceStack.OrmLite.Tests\ServiceStack.OrmLite.Tests.csproj" />
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite.MySql\ServiceStack.OrmLite.MySql.csproj" />
-    <Reference Include="..\..\lib\ServiceStack.Interfaces.dll" />
+    <Reference Include="..\..\lib\pcl\ServiceStack.Interfaces.dll" />
   </ItemGroup>
 
   <ItemGroup>
@@ -45,10 +45,10 @@
     <Reference Include="System.Web.Extensions" />
     <Reference Include="Microsoft.CSharp" />
 
-    <Reference Include="..\..\lib\ServiceStack.Text.dll" />
-    <Reference Include="..\..\lib\ServiceStack.Common.dll" />
-    <Reference Include="..\..\lib\tests\ServiceStack.Client.dll" />
-    <Reference Include="..\..\lib\tests\ServiceStack.dll" />
+    <Reference Include="..\..\lib\net45\ServiceStack.Text.dll" />
+    <Reference Include="..\..\lib\net45\ServiceStack.Common.dll" />
+    <Reference Include="..\..\lib\net45\ServiceStack.Client.dll" />
+    <Reference Include="..\..\lib\net45\ServiceStack.dll" />
   </ItemGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">
@@ -66,7 +66,7 @@
     <Reference Include="..\..\lib\netstandard1.3\ServiceStack.Text.dll" />
     <Reference Include="..\..\lib\netstandard1.3\ServiceStack.Common.dll" />
     <Reference Include="..\..\lib\netstandard1.6\ServiceStack.Client.dll" />
-    <Reference Include="..\..\lib\tests\netstandard1.6\ServiceStack.dll" />
+    <Reference Include="..\..\lib\netstandard1.6\ServiceStack.dll" />
   </ItemGroup>
 
 </Project>

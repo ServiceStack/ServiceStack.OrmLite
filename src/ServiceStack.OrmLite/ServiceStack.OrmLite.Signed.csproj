@@ -29,7 +29,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="..\..\lib\ServiceStack.Interfaces.dll" />
+    <Reference Include="..\..\lib\pcl\ServiceStack.Interfaces.dll" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">

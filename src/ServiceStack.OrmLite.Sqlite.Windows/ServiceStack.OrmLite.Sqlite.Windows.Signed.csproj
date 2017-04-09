@@ -15,7 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="..\..\lib\ServiceStack.Interfaces.dll" />
+    <Reference Include="..\..\lib\pcl\ServiceStack.Interfaces.dll" />
   </ItemGroup>
 
   <ItemGroup>
@@ -52,7 +52,7 @@
     <PackageReference Include="System.Data.SQLite.Core" Version="1.0.104.0" />
 
     <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj" />
-    <Reference Include="..\..\lib\ServiceStack.Text.dll" />
-    <Reference Include="..\..\lib\ServiceStack.Common.dll" />
+    <Reference Include="..\..\lib\net45\ServiceStack.Text.dll" />
+    <Reference Include="..\..\lib\net45\ServiceStack.Common.dll" />
   </ItemGroup>
 </Project>

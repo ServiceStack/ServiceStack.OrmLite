@@ -9,7 +9,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 	public class OrmLiteConnectionTests 
 		: OrmLiteTestBase
 	{
-		[Test][Ignore]
+		[Test][Ignore("")]
 		public void Can_create_connection_to_blank_database()
 		{
 			var connString ="User=SYSDBA;Password=masterkey;Database=ormlite-tests.fdb;DataSource=localhost;Dialect=3;charset=ISO8859_1;";
@@ -34,7 +34,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 			}
 		}
 
-		[Test][Ignore]
+		[Test][Ignore("")]
 		public void Can_create_table_with_ReadOnly_connection()
 		{
 			using (var db = ConnectionString.OpenReadOnlyDbConnection())

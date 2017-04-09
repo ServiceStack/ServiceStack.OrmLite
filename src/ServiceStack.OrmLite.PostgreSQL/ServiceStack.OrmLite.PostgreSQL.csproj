@@ -15,7 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="..\..\lib\ServiceStack.Interfaces.dll" />
+    <Reference Include="..\..\lib\pcl\ServiceStack.Interfaces.dll" />
     <PackageReference Include="Npgsql" Version="3.2.2" />
   </ItemGroup>
 
@@ -25,8 +25,8 @@
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
     <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj" />
-    <Reference Include="..\..\lib\ServiceStack.Text.dll" />
-    <Reference Include="..\..\lib\ServiceStack.Common.dll" />
+    <Reference Include="..\..\lib\net45\ServiceStack.Text.dll" />
+    <Reference Include="..\..\lib\net45\ServiceStack.Common.dll" />
   </ItemGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">

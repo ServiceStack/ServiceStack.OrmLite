@@ -14,7 +14,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-      <Reference Include="..\..\lib\ServiceStack.Interfaces.dll" />
+      <Reference Include="..\..\lib\pcl\ServiceStack.Interfaces.dll" />
   </ItemGroup>
   
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net45' ">
@@ -24,8 +24,8 @@
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
     <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj" />
     <PackageReference Include="System.Data.SQLite.Core" Version="1.0.104" />
-    <Reference Include="..\..\lib\ServiceStack.Text.dll" />
-    <Reference Include="..\..\lib\ServiceStack.Common.dll" />
+    <Reference Include="..\..\lib\net45\ServiceStack.Text.dll" />
+    <Reference Include="..\..\lib\net45\ServiceStack.Common.dll" />
   </ItemGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">
