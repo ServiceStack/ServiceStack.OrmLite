@@ -13,7 +13,7 @@
     <BuildSolutionDir>$(MSBuildProjectDirectory)/..</BuildSolutionDir>
     <SrcDir>$(BuildSolutionDir)/src</SrcDir>
     <LibDir>$(BuildSolutionDir)/lib</LibDir>
-    <Configuration Condition="$(Configuration) == ''">Signed</Configuration>
+    <Configuration>Signed</Configuration>
     <NuGetPath>$(BuildSolutionDir)/src/.nuget/nuget.exe</NuGetPath>
     <NuGetPackageDir>$(BuildSolutionDir)/NuGet.Signed</NuGetPackageDir>
     <Version>$(MajorVersion).$(MinorVersion).$(PatchVersion).0</Version>
@@ -52,13 +52,9 @@
     <!--<Copy SourceFiles="Test/ci.app.config" DestinationFiles="Test/app.config" />-->
   </Target>
 
-  <Target Name="UnitTests" DependsOnTargets="$(DoBuildSolutionsDependsOn)">
-      <Exec Command="$(BuildSolutionDir)/lib/tests/nunit-console/nunit-console-x86.exe $(BuildSolutionDir)/tests/ServiceStack.OrmLite.Tests/bin/$(Configuration)/ServiceStack.OrmLite.Tests.dll"/>
-  </Target>
-
   <Target Name="BuildSolutions">
-    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.Signed.sln" Targets="Build"
-      Properties="Configuration=$(Configuration)" />
+    <!--<MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.Signed.sln" Targets="Build"
+      Properties="Configuration=$(Configuration)" />-->
   </Target>
 
   <Target Name="UpdateVersion">
