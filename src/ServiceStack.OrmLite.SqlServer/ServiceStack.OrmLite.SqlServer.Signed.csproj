@@ -4,6 +4,7 @@
     <TargetFrameworks>net45</TargetFrameworks>
     <AssemblyName>ServiceStack.OrmLite.SqlServer</AssemblyName>
     <PackageId>ServiceStack.OrmLite.SqlServer</PackageId>
+    <Configuration Condition="$(Configuration) == ''">Signed</Configuration>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>

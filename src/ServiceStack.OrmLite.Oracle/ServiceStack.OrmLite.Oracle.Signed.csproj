@@ -4,6 +4,7 @@
     <TargetFrameworks>net45</TargetFrameworks>
     <AssemblyName>ServiceStack.OrmLite.Oracle</AssemblyName>
     <PackageId>ServiceStack.OrmLite.Oracle.Signed</PackageId>
+    <Configuration Condition="$(Configuration) == ''">Signed</Configuration>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
