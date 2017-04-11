@@ -10,4 +10,4 @@ PUSHD ..\src
 dotnet restore ServiceStack.OrmLite.sln
 POPD
 
-%MSBUILD% build.proj /target:NuGetPack /property:Configuration=Release;RELEASE=true;PatchVersion=0;PatchCoreVersion=0
+%MSBUILD% build.proj /target:NuGetPack /property:Configuration=Release;PatchVersion=0;PatchCoreVersion=0
