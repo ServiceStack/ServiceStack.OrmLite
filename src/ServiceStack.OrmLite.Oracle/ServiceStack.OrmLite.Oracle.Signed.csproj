@@ -20,6 +20,7 @@
 
   <PropertyGroup Condition=" '$(Configuration)' != 'Debug' ">
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Optimize>true</Optimize>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,8 +30,6 @@
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net45' ">
     <DefineConstants>$(DefineConstants);NET45</DefineConstants>
   </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Signed|net45|AnyCPU'" />
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
     <PackageReference Include="dotConnect.Express.for.Oracle" Version="8.3.115" />

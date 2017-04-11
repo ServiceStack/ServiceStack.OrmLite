@@ -20,6 +20,7 @@
 
   <PropertyGroup Condition=" '$(Configuration)' != 'Debug' ">
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Optimize>true</Optimize>
   </PropertyGroup>
 
   <ItemGroup>
