@@ -58,9 +58,8 @@
   </Target>
 
   <Target Name="BuildSolutions">
-    <!--Now explicit step in CI-->
-    <!--<MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.sln" Targets="Build"
-      Properties="Configuration=$(Configuration)" />-->
+    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.sln" Targets="Build"
+      Properties="Configuration=$(Configuration)" />
   </Target>
 
   <Target Name="UpdateVersion">
