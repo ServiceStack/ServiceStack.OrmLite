@@ -24,13 +24,11 @@
     <DefineConstants>$(DefineConstants);NET45;ASYNC</DefineConstants>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Reference Include="..\..\lib\pcl\ServiceStack.Interfaces.dll" />
-  </ItemGroup>
-
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
     <Reference Include="System.Net" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
+
+    <Reference Include="..\..\lib\pcl\ServiceStack.Interfaces.dll" />
     <Reference Include="..\..\lib\net45\ServiceStack.Text.dll" />
     <Reference Include="..\..\lib\net45\ServiceStack.Common.dll" />
   </ItemGroup>
@@ -60,6 +58,7 @@
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.1.1-*" />
     <PackageReference Include="System.Runtime.Serialization.Xml" Version="4.1.1" />
 
+    <Reference Include="..\..\lib\netstandard1.1\ServiceStack.Interfaces.dll" />
     <Reference Include="..\..\lib\netstandard1.3\ServiceStack.Text.dll" />
     <Reference Include="..\..\lib\netstandard1.3\ServiceStack.Common.dll" />
   </ItemGroup>
