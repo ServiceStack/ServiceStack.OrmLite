@@ -16,14 +16,14 @@
     <iconUrl>https://servicestack.net/img/logo-32.png</iconUrl>
     <tags>PostgreSQL Postgres OrmLite POCO Code-First Orm Schema-less Blobs</tags>
     <language>en-US</language> 
-    <copyright>Copyright 2016 Service Stack</copyright>
+    <copyright>Copyright 2017 ServiceStack</copyright>
     <dependencies>
       <group targetFramework=".NETStandard1.3">
         <dependency id="Npgsql" version="[3.2.2, )" />
-        <dependency id="ServiceStack.Interfaces.Core" version="[1.0.0, )" />
-        <dependency id="ServiceStack.Text.Core" version="[1.0.0, )" />
-        <dependency id="ServiceStack.Common.Core" version="[1.0.0, )" />
-        <dependency id="ServiceStack.OrmLite.Core" version="[1.0.0, )" />
+        <dependency id="ServiceStack.Interfaces.Core" version="1.0.0" />
+        <dependency id="ServiceStack.Text.Core" version="1.0.0" />
+        <dependency id="ServiceStack.Common.Core" version="1.0.0" />
+        <dependency id="ServiceStack.OrmLite.Core" version="1.0.0" />
       </group>
     </dependencies>
   </metadata>
