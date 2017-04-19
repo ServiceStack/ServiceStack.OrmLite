@@ -510,6 +510,16 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
+        public virtual SqlExpression<T> UnsafeHaving(string sqlFilter, params object[] filterParams)
+        {
+            havingExpression = FormatFilter(sqlFilter, filterParams);
+
+            if (havingExpression != null)
+                havingExpression = "HAVING " + havingExpression;
+
+            return this;
+        }
+
         public virtual SqlExpression<T> Having(Expression<Func<T, bool>> predicate)
         {
             if (predicate != null)
