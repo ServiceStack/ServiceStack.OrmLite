@@ -171,17 +171,27 @@ namespace ServiceStack.OrmLite
                                 $"SET {StringBuilderCache.ReturnAndFree(sql)} {whereSql}";
         }
 
-        public static void InsertOnly<T>(this IDbCommand dbCmd, T obj, string[] onlyFields)
+        public static long InsertOnly<T>(this IDbCommand dbCmd, T obj, string[] onlyFields, bool selectIdentity)
         {
             OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj);
 
-            var sql = dbCmd.GetDialectProvider().ToInsertRowStatement(dbCmd, obj, onlyFields);
-            dbCmd.ExecuteSql(sql);
+            var dialectProvider = dbCmd.GetDialectProvider();
+            var sql = dialectProvider.ToInsertRowStatement(dbCmd, obj, onlyFields);
+
+            if (selectIdentity)
+                return dbCmd.ExecLongScalar(sql + dialectProvider.GetLastInsertIdSqlSuffix<T>());
+
+            return dbCmd.ExecuteSql(sql);
         }
 
-        public static int InsertOnly<T>(this IDbCommand dbCmd, Expression<Func<T>> insertFields)
+        public static long InsertOnly<T>(this IDbCommand dbCmd, Expression<Func<T>> insertFields, bool selectIdentity)
         {
-            return dbCmd.InitInsertOnly(insertFields).ExecNonQuery();
+            dbCmd.InitInsertOnly(insertFields);
+
+            if (selectIdentity)
+                return dbCmd.ExecLongScalar(dbCmd.CommandText + dbCmd.GetDialectProvider().GetLastInsertIdSqlSuffix<T>());
+
+            return dbCmd.ExecuteNonQuery();
         }
 
         internal static IDbCommand InitInsertOnly<T>(this IDbCommand dbCmd, Expression<Func<T>> insertFields)

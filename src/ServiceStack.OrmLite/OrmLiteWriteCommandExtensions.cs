@@ -632,7 +632,10 @@ namespace ServiceStack.OrmLite
             dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
             if (selectIdentity)
-                return dialectProvider.InsertAndGetLastInsertId<T>(dbCmd);
+            {
+                dbCmd.CommandText += dialectProvider.GetLastInsertIdSqlSuffix<T>();
+                return dbCmd.ExecLongScalar();
+            }
 
             return dbCmd.ExecNonQuery();
         }
