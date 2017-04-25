@@ -368,14 +368,19 @@ db.UpdateOnly(() => new Person { FirstName = "JJ" }, where: p => p.LastName == "
 
 Alternatively you can pass in a POCO directly, in which case the first expression in an `UpdateOnly` 
 statement is used to specify which fields should be updated:
+
 ```csharp
 db.UpdateOnly(new Person { FirstName = "JJ" }, onlyFields: p => p.FirstName);
-```
-```csharp
+
 db.UpdateOnly(new Person { FirstName = "JJ", Age = 12 }, 
     onlyFields: p => new { p.FirstName, p.Age });
+
+db.UpdateOnly(new Person { FirstName = "JJ", Age = 12 }, 
+    onlyFields: p => new[] { "Name", "Age" });
 ```
+
 When present, the second expression is used as the where filter:
+
 ```csharp
 db.UpdateOnly(new Person { FirstName = "JJ" }, 
     onlyFields: p => p.FirstName, 
