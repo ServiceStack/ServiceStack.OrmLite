@@ -60,7 +60,9 @@ namespace ServiceStack.OrmLite
 
         public static T AllFields<T>(T item) => item;
 
-        public static string JoinAlias<T>(T property, string tableAlias) => tableAlias;
+        public static string JoinAlias(string property, string tableAlias) => tableAlias;
+
+        public static T JoinAlias<T>(T property, string tableAlias) => default(T);
 
         public static string Custom(string customSql) => customSql;
     }
