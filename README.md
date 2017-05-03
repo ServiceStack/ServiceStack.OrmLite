@@ -412,21 +412,17 @@ The `UpdateAdd` API provides several Typed API's for updating existing values:
 ```csharp
 //Increase everyone's Score by 3 points
 db.UpdateAdd(() => new Person { Score = 3 }); 
-db.UpdateAdd(new Person { Score = 3 }, updateFields: x => x.Score); 
 
 //Remove 5 points from Jackson Score
 db.UpdateAdd(() => new Person { Score = -5 }, x => where: x.LastName == "Jackson");
-db.UpdateAdd(new Person { Score = -5 }, x => x.Score, x => where: x.LastName == "Jackson");
 
 //Graduate everyone and increase everyone's Score by 2 points 
-var q = db.From<Person>().Update(x => new { x.Points, x.Graduated });
-db.UpdateAdd(new Person { Points = 2, Graduated = true }, q);
+db.UpdateAdd(() => new Person { Points = 2, Graduated = true });
 
 //Add 10 points to Michael's score
 var q = db.From<Person>()
-    .Where(x => x.FirstName == "Michael")
-    .Update(x => x.Points);
-db.UpdateAdd(new Person { Points = 10 }, q);
+    .Where(x => x.FirstName == "Michael");
+db.UpdateAdd(() => new Person { Points = 10 }, q);
 ```
 
 > Note: Any non-numeric values in an `UpdateAdd` statement (e.g. strings) are replaced as normal.
