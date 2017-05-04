@@ -12,7 +12,7 @@
 	bool UseSchemaAttribute = true;		// if true: Adds explicit '[Schema]' attribute
 	bool CreateAutoQueryTypes = false; //if true: Will create <TypeName>Query types with all possible search fields explicitly typed
 	bool AddNamedConnection = false; //if true: Adds NamedConnection attribute so AutoQuery will override default IDbConnection
-	bool IncludeReferences = true; //if true: Addes References(typeof(ReferenceTableType)) to FKs
+	bool IncludeReferences = false; //if true: Addes References(typeof(ReferenceTableType)) to FKs
 	string UseSpecificNamedConnection = ""; //if not null: Will use name provided as NamedConnection and AddNamedConnection = true, else ConnectionStringName is used as default NamedConnection
     // Read schema
 	var tables = LoadTables(MakeSingular);
