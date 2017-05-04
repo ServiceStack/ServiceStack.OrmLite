@@ -12,7 +12,7 @@
 	bool UseSchemaAttribute = true;		// if true: Adds explicit '[Schema]' attribute
 	bool CreateAutoQueryTypes = false; //if true: Will create <TypeName>Query types with all possible search fields explicitly typed
 	bool AddNamedConnection = false; //if true: Adds NamedConnection attribute so AutoQuery will override default IDbConnection
-	bool IncludeReferences = false; //if true: Addes References(typeof(ReferenceTableType)) to FKs
+	bool IncludeReferences = true; //if true: Addes References(typeof(ReferenceTableType)) to FKs
 	string UseSpecificNamedConnection = ""; //if not null: Will use name provided as NamedConnection and AddNamedConnection = true, else ConnectionStringName is used as default NamedConnection
     // Read schema
 	var tables = LoadTables(MakeSingular);
@@ -94,7 +94,7 @@ priorProperyNames.Add(col.PropertyName);
                  [Compute]        
  <# }  if (IncludeReferences && tbl.FKeys != null && tbl.FKeys.Any(x => x.FromColumn ==  col.PropertyName)) { 
  	   var toTable = MakeSingular ? tbl.FKeys.First(x => x.FromColumn == col.PropertyName).ToTableSingular : tbl.FKeys.First(x => x.FromColumn == col.PropertyName).ToTable;#>
-         [References(typeof(<#=ClassPrefix + toTable + ClassSuffix#>))]          
+        [References(typeof(<#=ClassPrefix + toTable + ClassSuffix#>))]
 <# }  if (col.IsNullable != true && col.IsAutoIncrement != true) { #>
         [Required]
 <# } if (!col.IsPK){#>
