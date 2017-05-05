@@ -94,7 +94,7 @@ priorProperyNames.Add(col.PropertyName);
                  [Compute]        
  <# }  if (IncludeReferences && tbl.FKeys != null && tbl.FKeys.Any(x => x.FromColumn ==  col.PropertyName)) { 
  	   var toTable = MakeSingular ? tbl.FKeys.First(x => x.FromColumn == col.PropertyName).ToTableSingular : tbl.FKeys.First(x => x.FromColumn == col.PropertyName).ToTable;#>
-         [References(typeof(<#=ClassPrefix + toTable + ClassSuffix#>))]          
+        [References(typeof(<#=ClassPrefix + toTable + ClassSuffix#>))]
 <# }  if (col.IsNullable != true && col.IsAutoIncrement != true) { #>
         [Required]
 <# } if (!col.IsPK){#>

@@ -1583,6 +1583,33 @@ class PostGreSqlSchemaReader : SchemaReader
 			}
 		}
 
+		var cmdFks = _factory.CreateCommand();
+		cmdFks.Connection=connection;
+		cmdFks.CommandText=FOREIGN_KEYS_SQL;
+		//get all the foreign keys and add them to the tables.
+		using(cmdFks)
+		{
+			using (var rdr=cmdFks.ExecuteReader())
+			{
+				while(rdr.Read())
+				{
+					var tableName = rdr["TableWithForeignKey"].ToString();
+					var table = result.FirstOrDefault(x => x.Name == tableName);
+					if (table != null) {
+						if (table.FKeys == null) {
+							table.FKeys = new List<FKey>(); 
+						}
+						var newForeignKey = new FKey();
+						newForeignKey.ToTable = rdr["TargetTable"].ToString();
+						newForeignKey.ToTableSingular = Inflector.MakeSingular(CleanUp(newForeignKey.ToTable));
+						newForeignKey.FromColumn = rdr["ForeignKeyColumn"].ToString();
+						newForeignKey.ToColumn = rdr["TargetTableKey"].ToString();
+						table.FKeys.Add(newForeignKey);
+                    }
+				}
+			}
+		}
+
 		foreach (var tbl in result)
 		{
 			tbl.Columns=LoadColumns(tbl);
@@ -1740,6 +1767,23 @@ class PostGreSqlSchemaReader : SchemaReader
 			SELECT COLUMN_NAME, IS_NULLABLE, UDT_NAME, COLUMN_DEFAULT
 			FROM INFORMATION_SCHEMA.COLUMNS
 			WHERE TABLE_NAME=@tableName;
+			";
+
+	const string FOREIGN_KEYS_SQL=@"
+			SELECT
+				R.TABLE_NAME AS TableWithForeignKey,
+				R.COLUMN_NAME AS ForeignKeyColumn,
+				U.TABLE_NAME AS TargetTable,
+				U.COLUMN_NAME AS TargetTableKey
+			FROM INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE U
+			INNER JOIN INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS FK
+    			ON U.CONSTRAINT_CATALOG = FK.UNIQUE_CONSTRAINT_CATALOG
+    			AND U.CONSTRAINT_SCHEMA = FK.UNIQUE_CONSTRAINT_SCHEMA
+   				AND U.CONSTRAINT_NAME = FK.UNIQUE_CONSTRAINT_NAME
+			INNER JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE R
+    			ON R.CONSTRAINT_CATALOG = FK.CONSTRAINT_CATALOG
+    			AND R.CONSTRAINT_SCHEMA = FK.CONSTRAINT_SCHEMA
+    			AND R.CONSTRAINT_NAME = FK.CONSTRAINT_NAME
 			";
 
 }
