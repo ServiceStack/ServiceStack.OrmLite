@@ -361,73 +361,63 @@ namespace ServiceStack.OrmLite
 
         public virtual SqlExpression<T> UnsafeWhere(string rawSql, params object[] filterParams)
         {
-            AppendToWhere("AND", FormatFilter(rawSql, filterParams));
-            return this;
+            return AppendToWhere("AND", FormatFilter(rawSql, filterParams));
         }
 
         public virtual SqlExpression<T> Where(string sqlFilter, params object[] filterParams)
         {
-            AppendToWhere("AND", FormatFilter(sqlFilter.SqlVerifyFragment(), filterParams));
-            return this;
+            return AppendToWhere("AND", FormatFilter(sqlFilter.SqlVerifyFragment(), filterParams));
         }
 
         public virtual SqlExpression<T> UnsafeAnd(string rawSql, params object[] filterParams)
         {
-            AppendToWhere("AND", FormatFilter(rawSql, filterParams));
-            return this;
+            return AppendToWhere("AND", FormatFilter(rawSql, filterParams));
         }
 
         public virtual SqlExpression<T> And(string sqlFilter, params object[] filterParams)
         {
-            AppendToWhere("AND", FormatFilter(sqlFilter.SqlVerifyFragment(), filterParams));
-            return this;
+            return AppendToWhere("AND", FormatFilter(sqlFilter.SqlVerifyFragment(), filterParams));
         }
 
         public virtual SqlExpression<T> UnsafeOr(string rawSql, params object[] filterParams)
         {
-            AppendToWhere("OR", FormatFilter(rawSql, filterParams));
-            return this;
+            return AppendToWhere("OR", FormatFilter(rawSql, filterParams));
         }
 
         public virtual SqlExpression<T> Or(string sqlFilter, params object[] filterParams)
         {
-            AppendToWhere("OR", FormatFilter(sqlFilter.SqlVerifyFragment(), filterParams));
-            return this;
+            return AppendToWhere("OR", FormatFilter(sqlFilter.SqlVerifyFragment(), filterParams));
         }
 
         public virtual SqlExpression<T> AddCondition(string condition, string sqlFilter, params object[] filterParams)
         {
-            AppendToWhere(condition, FormatFilter(sqlFilter.SqlVerifyFragment(), filterParams));
-            return this;
+            return AppendToWhere(condition, FormatFilter(sqlFilter.SqlVerifyFragment(), filterParams));
         }
 
         public virtual SqlExpression<T> Where(Expression<Func<T, bool>> predicate)
         {
-            AppendToWhere("AND", predicate);
-            return this;
+            return AppendToWhere("AND", predicate);
         }
 
         public virtual SqlExpression<T> And(Expression<Func<T, bool>> predicate)
         {
-            AppendToWhere("AND", predicate);
-            return this;
+            return AppendToWhere("AND", predicate);
         }
 
         public virtual SqlExpression<T> Or(Expression<Func<T, bool>> predicate)
         {
-            AppendToWhere("OR", predicate);
-            return this;
+            return AppendToWhere("OR", predicate);
         }
 
-        protected void AppendToWhere(string condition, Expression predicate)
+        protected SqlExpression<T> AppendToWhere(string condition, Expression predicate)
         {
             if (predicate == null)
-                return;
+                return this;
 
             useFieldName = true;
             sep = " ";
             var newExpr = WhereExpressionToString(Visit(predicate));
-            AppendToWhere(condition, newExpr);
+            return AppendToWhere(condition, newExpr);
         }
 
         private static string WhereExpressionToString(object expression)
@@ -437,13 +427,14 @@ namespace ServiceStack.OrmLite
             return expression.ToString();
         }
 
-        protected void AppendToWhere(string condition, string sqlExpression)
+        protected SqlExpression<T> AppendToWhere(string condition, string sqlExpression)
         {
             whereExpression = string.IsNullOrEmpty(whereExpression)
                 ? (WhereStatementWithoutWhereString ? "" : "WHERE ")
                 : whereExpression + " " + condition + " ";
 
             whereExpression += sqlExpression;
+            return this;
         }
 
         public virtual SqlExpression<T> GroupBy()
