@@ -382,19 +382,7 @@ namespace ServiceStack.OrmLite
             return "{0}".SqlFmt(value);
         }
 
-        public static string[] IllegalSqlFragmentTokens = { 
-            "--", ";--", ";", "%", "/*", "*/", "@@", "@", 
-            "char", "nchar", "varchar", "nvarchar",
-            "alter", "begin", "cast", "create", "cursor", "declare", "delete",
-            "drop", "end", "exec", "execute", "fetch", "insert", "kill",
-            "open", "select", "sys", "sysobjects", "syscolumns", "table", "update" };
-
         public static string SqlVerifyFragment(this string sqlFragment)
-        {
-            return SqlVerifyFragment(sqlFragment, IllegalSqlFragmentTokens);
-        }
-
-        public static string SqlVerifyFragment(this string sqlFragment, IEnumerable<string> illegalFragments)
         {
             if (sqlFragment == null)
                 return null;
@@ -405,12 +393,13 @@ namespace ServiceStack.OrmLite
                 .StripQuotedStrings('`')
                 .ToLower();
 
-            foreach (var illegalFragment in illegalFragments)
+            const string pattern = "([^[:alnum:]_]|^)+(--|;--|;|%|/\\*|\\*/|@@|@|char|nchar|varchar|nvarchar|alter|begin|cast|create|cursor|declare|delete|drop|end|exec|execute|fetch|insert|kill|open|select|sys|sysobjects|syscolumns|table|update)([^[:alnum:]_]|$)+";
+            var match = Regex.Match(fragmentToVerify, pattern, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            if (match.Success)
             {
-                if ((fragmentToVerify.IndexOf(illegalFragment, StringComparison.Ordinal) >= 0))
-                    throw new ArgumentException("Potential illegal fragment detected: " + sqlFragment);
+                throw new ArgumentException("Potential illegal fragment detected: " + sqlFragment);
             }
-
+            
             return sqlFragment;
         }
 
