@@ -394,7 +394,7 @@ namespace ServiceStack.OrmLite
                 .ToLower();
 
             const string pattern = "([^[:alnum:]_]|^)+(--|;--|;|%|/\\*|\\*/|@@|@|char|nchar|varchar|nvarchar|alter|begin|cast|create|cursor|declare|delete|drop|end|exec|execute|fetch|insert|kill|open|select|sys|sysobjects|syscolumns|table|update)([^[:alnum:]_]|$)+";
-            var match = Regex.Match(fragmentToVerify, pattern, RegexOptions.Singleline | RegexOptions.Compiled);
+            var match = Regex.Match(fragmentToVerify, pattern, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
             if (match.Success)
             {
                 throw new ArgumentException("Potential illegal fragment detected: " + sqlFragment);
