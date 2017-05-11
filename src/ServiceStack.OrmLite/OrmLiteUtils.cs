@@ -382,10 +382,18 @@ namespace ServiceStack.OrmLite
             return "{0}".SqlFmt(value);
         }
 
+        public static Regex VerifyFragmentRegEx = new Regex("([^[:alnum:]_]|^)+(--|;--|;|%|/\\*|\\*/|@@|@|char|nchar|varchar|nvarchar|alter|begin|cast|create|cursor|declare|delete|drop|end|exec|execute|fetch|insert|kill|open|select|sys|sysobjects|syscolumns|table|update)([^[:alnum:]_]|$)+",
+            RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        public static Func<string,string> SqlVerifyFragmentFn { get; set; }
+
         public static string SqlVerifyFragment(this string sqlFragment)
         {
             if (sqlFragment == null)
                 return null;
+
+            if (SqlVerifyFragmentFn != null)
+                return SqlVerifyFragmentFn(sqlFragment);
 
             var fragmentToVerify = sqlFragment
                 .StripQuotedStrings('\'')
@@ -393,13 +401,10 @@ namespace ServiceStack.OrmLite
                 .StripQuotedStrings('`')
                 .ToLower();
 
-            const string pattern = "([^[:alnum:]_]|^)+(--|;--|;|%|/\\*|\\*/|@@|@|char|nchar|varchar|nvarchar|alter|begin|cast|create|cursor|declare|delete|drop|end|exec|execute|fetch|insert|kill|open|select|sys|sysobjects|syscolumns|table|update)([^[:alnum:]_]|$)+";
-            var match = Regex.Match(fragmentToVerify, pattern, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            var match = VerifyFragmentRegEx.Match(fragmentToVerify);
             if (match.Success)
-            {
                 throw new ArgumentException("Potential illegal fragment detected: " + sqlFragment);
-            }
-            
+
             return sqlFragment;
         }
 
