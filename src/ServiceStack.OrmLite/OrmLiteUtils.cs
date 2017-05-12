@@ -408,6 +408,13 @@ namespace ServiceStack.OrmLite
             return sqlFragment;
         }
 
+        public static string[] IllegalSqlFragmentTokens = {
+            "--", ";--", ";", "%", "/*", "*/", "@@", "@",
+            "char", "nchar", "varchar", "nvarchar",
+            "alter", "begin", "cast", "create", "cursor", "declare", "delete",
+            "drop", "end", "exec", "execute", "fetch", "insert", "kill",
+            "open", "select", "sys", "sysobjects", "syscolumns", "table", "update" };
+
         public static string SqlVerifyFragment(this string sqlFragment, IEnumerable<string> illegalFragments)
         {
             if (sqlFragment == null)
