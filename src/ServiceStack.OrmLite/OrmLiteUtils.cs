@@ -408,6 +408,26 @@ namespace ServiceStack.OrmLite
             return sqlFragment;
         }
 
+        public static string SqlVerifyFragment(this string sqlFragment, IEnumerable<string> illegalFragments)
+        {
+            if (sqlFragment == null)
+                return null;
+
+            var fragmentToVerify = sqlFragment
+                .StripQuotedStrings('\'')
+                .StripQuotedStrings('"')
+                .StripQuotedStrings('`')
+                .ToLower();
+
+            foreach (var illegalFragment in illegalFragments)
+            {
+                if (fragmentToVerify.IndexOf(illegalFragment, StringComparison.Ordinal) >= 0)
+                    throw new ArgumentException("Potential illegal fragment detected: " + sqlFragment);
+            }
+
+            return sqlFragment;
+        }
+
         public static string SqlParam(this string paramValue)
         {
             return paramValue.Replace("'", "''");
