@@ -125,6 +125,24 @@ namespace ServiceStack.OrmLite
             return InternalJoin(joinType, joinExpr, sourceDef, targetDef, joinFormat);
         }
 
+        protected SqlExpression<T> InternalJoin<Source, Target>(string joinType, Expression joinExpr)
+        {
+            var sourceDef = typeof(Source).GetModelDefinition();
+            var targetDef = typeof(Target).GetModelDefinition();
+
+            return InternalJoin(joinType, joinExpr, sourceDef, targetDef);
+        }
+
+        public SqlExpression<T> Join<Source, Target, T3>(Expression<Func<Source, Target, T3, bool>> joinExpr) => InternalJoin<Source, Target>("INNER JOIN", joinExpr);
+        public SqlExpression<T> LeftJoin<Source, Target, T3>(Expression<Func<Source, Target, T3, bool>> joinExpr) => InternalJoin<Source, Target>("LEFT JOIN", joinExpr);
+        public SqlExpression<T> RightJoin<Source, Target, T3>(Expression<Func<Source, Target, T3, bool>> joinExpr) => InternalJoin<Source, Target>("RIGHT JOIN", joinExpr);
+        public SqlExpression<T> FullJoin<Source, Target, T3>(Expression<Func<Source, Target, T3, bool>> joinExpr) => InternalJoin<Source, Target>("FULL JOIN", joinExpr);
+
+        public SqlExpression<T> Join<Source, Target, T3, T4>(Expression<Func<Source, Target, T3, T4, bool>> joinExpr) => InternalJoin<Source, Target>("INNER JOIN", joinExpr);
+        public SqlExpression<T> LeftJoin<Source, Target, T3, T4>(Expression<Func<Source, Target, T3, T4, bool>> joinExpr) => InternalJoin<Source, Target>("LEFT JOIN", joinExpr);
+        public SqlExpression<T> RightJoin<Source, Target, T3, T4>(Expression<Func<Source, Target, T3, T4, bool>> joinExpr) => InternalJoin<Source, Target>("RIGHT JOIN", joinExpr);
+        public SqlExpression<T> FullJoin<Source, Target, T3, T4>(Expression<Func<Source, Target, T3, T4, bool>> joinExpr) => InternalJoin<Source, Target>("FULL JOIN", joinExpr);
+
         private string InternalCreateSqlFromExpression(Expression joinExpr, bool isCrossJoin) 
         {
             return $"{(isCrossJoin ? "WHERE" : "ON")} {VisitJoin(joinExpr)}";
