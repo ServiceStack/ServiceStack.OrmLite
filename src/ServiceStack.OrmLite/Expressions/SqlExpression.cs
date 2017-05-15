@@ -2055,7 +2055,7 @@ namespace ServiceStack.OrmLite
             return modelDef.FieldDefinitions.ConvertAll(r => r.Name);
         }
 
-        private static bool IsStaticArrayMethod(MethodCallExpression m)
+        protected virtual bool IsStaticArrayMethod(MethodCallExpression m)
         {
             return (m.Object == null 
                 && m.Method.Name == "Contains"
@@ -2118,7 +2118,7 @@ namespace ServiceStack.OrmLite
             return new PartialSqlString(statement);
         }
 
-        private static bool IsStaticStringMethod(MethodCallExpression m)
+        protected virtual bool IsStaticStringMethod(MethodCallExpression m)
         {
             return (m.Object == null 
                 && m.Method.Name == "Concat");
