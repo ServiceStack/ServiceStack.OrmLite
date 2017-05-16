@@ -201,5 +201,15 @@ namespace ServiceStack.OrmLite
                 ? hasDbTrans.DbTransaction
                 : dbTrans;
         }
+
+        public static void RegisterConnection(this IDbConnectionFactory dbFactory, string namedConnection, string connectionString, IOrmLiteDialectProvider dialectProvider)
+        {
+            ((OrmLiteConnectionFactory)dbFactory).RegisterConnection(namedConnection, connectionString, dialectProvider);
+        }
+
+        public static void RegisterConnection(this IDbConnectionFactory dbFactory, string namedConnection, OrmLiteConnectionFactory connectionFactory)
+        {
+            ((OrmLiteConnectionFactory)dbFactory).RegisterConnection(namedConnection, connectionFactory);
+        }
     }
 }
