@@ -108,7 +108,7 @@ namespace ServiceStack.OrmLite.Tests
 
             db.Insert(row);
 
-            db.Delete<ModelWithFieldsOfDifferentTypes>(x => x.LongId <= row.LongId);
+            db.Delete<ModelWithFieldsOfDifferentTypes>(x => x.Long <= row.Long);
 
             var dbRow = db.SingleById<ModelWithFieldsOfDifferentTypes>(row.Id);
 
