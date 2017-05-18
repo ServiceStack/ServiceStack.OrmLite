@@ -104,7 +104,7 @@ namespace ServiceStack.OrmLite
 
             IOrmLiteDialectProvider dialectProvider;
             if (!DialectProviders.TryGetValue(providerName, out dialectProvider))
-                throw new ArgumentException("{0} is not a registered DialectProvider".Fmt(providerName));
+                throw new ArgumentException($"{providerName} is not a registered DialectProvider");
 
             var dbFactory = new OrmLiteConnectionFactory(connectionString, dialectProvider, setGlobalDialectProvider:false);
 

@@ -137,7 +137,7 @@ namespace ServiceStack.OrmLite
                     return customLengthConverter.GetColumnDefinition(fieldLength);
 
                 if (string.IsNullOrEmpty(converter.ColumnDefinition))
-                    throw new ArgumentException("{0} requires a ColumnDefinition".Fmt(converter.GetType().Name));
+                    throw new ArgumentException($"{converter.GetType().Name} requires a ColumnDefinition");
 
                 return converter.ColumnDefinition;
             }
@@ -320,8 +320,7 @@ namespace ServiceStack.OrmLite
             }
             catch (Exception ex)
             {
-                Log.Error("Error in {0}.ToDbValue() value '{1}' and Type '{2}'"
-                    .Fmt(converter.GetType().Name, value.GetType().Name, type.Name), ex);
+                Log.Error($"Error in {converter.GetType().Name}.ToDbValue() value '{value.GetType().Name}' and Type '{type.Name}'", ex);
                 throw;
             }
         }
@@ -338,8 +337,7 @@ namespace ServiceStack.OrmLite
             }
             catch (Exception ex)
             {
-                Log.Error("Error in {0}.FromDbValue() value '{1}' and Type '{2}'"
-                    .Fmt(converter.GetType().Name, value.GetType().Name, type.Name), ex);
+                Log.Error($"Error in {converter.GetType().Name}.FromDbValue() value '{value.GetType().Name}' and Type '{type.Name}'", ex);
                 throw;
             }
         }
@@ -919,7 +917,7 @@ namespace ServiceStack.OrmLite
                     }
 
                     if (fieldDef == null)
-                        throw new ArgumentException("Field Definition '{0}' was not found".Fmt(fieldName));
+                        throw new ArgumentException($"Field Definition '{fieldName}' was not found");
                 }
 
                 SetParameterValue<T>(fieldDef, p, obj);
@@ -958,8 +956,7 @@ namespace ServiceStack.OrmLite
             }
             catch (Exception ex)
             {
-                Log.Error("Error in {0}.ToDbValue() for field '{1}' of Type '{2}' with value '{3}'"
-                    .Fmt(converter.GetType().Name, fieldDef.Name, fieldDef.FieldType, value.GetType().Name), ex);
+                Log.Error($"Error in {converter.GetType().Name}.ToDbValue() for field '{fieldDef.Name}' of Type '{fieldDef.FieldType}' with value '{value.GetType().Name}'", ex);
                 throw;
             }
         }
@@ -976,8 +973,7 @@ namespace ServiceStack.OrmLite
             }
             catch (Exception ex)
             {
-                Log.Error("Error in {0}.ToDbValue() for field of Type '{1}' with value '{2}'"
-                    .Fmt(converter.GetType().Name, fieldType, value.GetType().Name), ex);
+                Log.Error($"Error in {converter.GetType().Name}.ToDbValue() for field of Type '{fieldType}' with value '{value.GetType().Name}'", ex);
                 throw;
             }
         }
@@ -1526,8 +1522,7 @@ namespace ServiceStack.OrmLite
             }
             catch (Exception ex)
             {
-                Log.Error("Error in {0}.ToQuotedString() value '{0}' and Type '{1}'"
-                    .Fmt(converter.GetType().Name, value.GetType().Name, fieldType.Name), ex);
+                Log.Error($"Error in {converter.GetType().Name}.ToQuotedString() value '{converter.GetType().Name}' and Type '{value.GetType().Name}'", ex);
                 throw;
             }
         }
@@ -1557,7 +1552,7 @@ namespace ServiceStack.OrmLite
 
         public virtual string ToRowCountStatement(string innerSql)
         {
-            return "SELECT COUNT(*) FROM ({0}) AS COUNT".Fmt(innerSql);
+            return $"SELECT COUNT(*) FROM ({innerSql}) AS COUNT";
         }
 
         public virtual void DropColumn(IDbConnection db, Type modelType, string columnName)

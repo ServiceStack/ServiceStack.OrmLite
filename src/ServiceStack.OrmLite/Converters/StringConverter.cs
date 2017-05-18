@@ -20,8 +20,8 @@ namespace ServiceStack.OrmLite.Converters
         protected string maxColumnDefinition;
         public virtual string MaxColumnDefinition
         {
-            get { return maxColumnDefinition ?? ColumnDefinition; }
-            set { maxColumnDefinition = value; }
+            get => maxColumnDefinition ?? ColumnDefinition;
+            set => maxColumnDefinition = value;
         }
 
         public override string ColumnDefinition => GetColumnDefinition(StringLength);
@@ -32,8 +32,8 @@ namespace ServiceStack.OrmLite.Converters
                 return MaxColumnDefinition;
 
             return UseUnicode
-                ? "NVARCHAR({0})".Fmt(stringLength.GetValueOrDefault(StringLength))
-                : "VARCHAR({0})".Fmt(stringLength.GetValueOrDefault(StringLength));
+                ? $"NVARCHAR({stringLength.GetValueOrDefault(StringLength)})"
+                : $"VARCHAR({stringLength.GetValueOrDefault(StringLength)})";
         }
 
         public override object FromDbValue(Type fieldType, object value)

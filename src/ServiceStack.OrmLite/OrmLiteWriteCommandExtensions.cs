@@ -669,7 +669,7 @@ namespace ServiceStack.OrmLite
                     }
                     catch (Exception ex)
                     {
-                        Log.Error("SQL ERROR: {0}".Fmt(dbCmd.GetLastSqlAndParams()), ex);
+                        Log.Error($"SQL ERROR: {dbCmd.GetLastSqlAndParams()}", ex);
                         throw;
                     }
                 }
@@ -713,7 +713,7 @@ namespace ServiceStack.OrmLite
                     }
                     catch (Exception ex)
                     {
-                        Log.Error("SQL ERROR: {0}".Fmt(dbCmd.GetLastSqlAndParams()), ex);
+                        Log.Error($"SQL ERROR: {dbCmd.GetLastSqlAndParams()}", ex);
                         throw;
                     }
                 }

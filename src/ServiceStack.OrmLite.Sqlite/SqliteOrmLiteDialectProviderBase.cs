@@ -46,7 +46,7 @@ namespace ServiceStack.OrmLite.Sqlite
             if (modelDef.RowVersion != null)
             {
                 var triggerName = GetTriggerName(modelDef);
-                return "DROP TRIGGER IF EXISTS {0}".Fmt(GetQuotedName(triggerName));
+                return $"DROP TRIGGER IF EXISTS {GetQuotedName(triggerName)}";
             }
 
             return null;
@@ -63,13 +63,12 @@ namespace ServiceStack.OrmLite.Sqlite
             {
                 var triggerName = GetTriggerName(modelDef);
                 var tableName = GetTableName(modelDef);
-                var triggerBody = "UPDATE {0} SET {1} = OLD.{1} + 1 WHERE {2} = NEW.{2};".Fmt(
+                var triggerBody = string.Format("UPDATE {0} SET {1} = OLD.{1} + 1 WHERE {2} = NEW.{2};",
                     tableName, 
                     modelDef.RowVersion.FieldName.SqlColumn(this), 
                     modelDef.PrimaryKey.FieldName.SqlColumn(this));
 
-                var sql = "CREATE TRIGGER {0} BEFORE UPDATE ON {1} FOR EACH ROW BEGIN {2} END;".Fmt(
-                    triggerName, tableName, triggerBody);
+                var sql = $"CREATE TRIGGER {triggerName} BEFORE UPDATE ON {tableName} FOR EACH ROW BEGIN {triggerBody} END;";
 
                 return sql;
             }
@@ -83,14 +82,14 @@ namespace ServiceStack.OrmLite.Sqlite
             foreach (var propertyInfo in objectWithProperties.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
                 var columnDefinition = (sbColumns.Length == 0)
-                    ? string.Format("{0} TEXT PRIMARY KEY", propertyInfo.Name)
-                    : string.Format(", {0} TEXT", propertyInfo.Name);
+                    ? $"{propertyInfo.Name} TEXT PRIMARY KEY"
+                    : $", {propertyInfo.Name} TEXT";
 
                 sbColumns.AppendLine(columnDefinition);
             }
 
             var tableName = objectWithProperties.GetType().Name;
-            var sql = string.Format("CREATE VIRTUAL TABLE \"{0}\" USING FTS3 ({1});", tableName, StringBuilderCache.ReturnAndFree(sbColumns));
+            var sql = $"CREATE VIRTUAL TABLE \"{tableName}\" USING FTS3 ({StringBuilderCache.ReturnAndFree(sbColumns)});";
 
             return sql;
         }

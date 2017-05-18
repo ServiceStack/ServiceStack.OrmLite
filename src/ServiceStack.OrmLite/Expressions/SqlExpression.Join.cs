@@ -169,7 +169,7 @@ namespace ServiceStack.OrmLite
                 return string.Empty;
             }
 
-            return "{0}\n({1}.{2} = {3}.{4})".Fmt(
+            return string.Format("{0}\n({1}.{2} = {3}.{4})",
                 isCrossJoin ? "WHERE" : "ON",
                 DialectProvider.GetQuotedTableName(parentDef),
                 SqlColumn(parentDef.PrimaryKey.FieldName),

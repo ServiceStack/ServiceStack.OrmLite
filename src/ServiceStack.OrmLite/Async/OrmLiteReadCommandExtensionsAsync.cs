@@ -376,7 +376,7 @@ namespace ServiceStack.OrmLite
                 var fields = fieldDefs.Select(q => q.FieldName);
                 var invalid = include.Except<string>(fields).ToList();
                 if (invalid.Count > 0)
-                    throw new ArgumentException("Fields '{0}' are not Reference Properties of Type '{1}'".Fmt(invalid.Join("', '"), typeof(T).Name));
+                    throw new ArgumentException($"Fields '{invalid.Join("', '")}' are not Reference Properties of Type '{typeof(T).Name}'");
 
                 fieldDefs = fieldDefs.Where(fd => include.Contains(fd.FieldName)).ToList();
             }
@@ -407,7 +407,7 @@ namespace ServiceStack.OrmLite
                 var fields = fieldDefs.Select(q => q.FieldName);
                 var invalid = include.Except<string>(fields).ToList();
                 if (invalid.Count > 0)
-                    throw new ArgumentException("Fields '{0}' are not Reference Properties of Type '{1}'".Fmt(invalid.Join("', '"), typeof(From).Name));
+                    throw new ArgumentException($"Fields '{invalid.Join("', '")}' are not Reference Properties of Type '{typeof(From).Name}'");
 
                 fieldDefs = loadList.FieldDefs.Where(fd => include.Contains(fd.FieldName)).ToList();
             }

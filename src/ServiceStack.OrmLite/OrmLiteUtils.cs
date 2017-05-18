@@ -823,7 +823,7 @@ namespace ServiceStack.OrmLite
             }
 
             if (!hasChildRef)
-                throw new Exception("Could not find Child Reference for '{0}' on Parent '{1}'".Fmt(typeof(Child).Name, typeof(Parent).Name));
+                throw new Exception($"Could not find Child Reference for '{typeof(Child).Name}' on Parent '{typeof(Parent).Name}'");
 
             return parents;
         }

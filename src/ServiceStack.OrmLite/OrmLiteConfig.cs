@@ -106,7 +106,7 @@ namespace ServiceStack.OrmLite
         {
             var ormLiteConn = db as OrmLiteConnection;
             if (ormLiteConn == null)
-                throw new NotImplementedException(RequiresOrmLiteConnection.Fmt("CommandTimeout"));
+                throw new NotImplementedException(string.Format(RequiresOrmLiteConnection,"CommandTimeout"));
 
             ormLiteConn.CommandTimeout = commandTimeout;
         }

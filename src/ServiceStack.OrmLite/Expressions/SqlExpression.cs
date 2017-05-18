@@ -1355,7 +1355,7 @@ namespace ServiceStack.OrmLite
                 var args = this.VisitExpressionList(methodExpr.Arguments);
                 right = GetValue(args[1], typeof(string));
                 ConvertToPlaceholderAndParameter(ref right);
-                return new PartialSqlString("({0} {1} {2})".Fmt(args[0], operand, right));
+                return new PartialSqlString($"({args[0]} {operand} {right})");
             }
             else
             {
@@ -2248,7 +2248,7 @@ namespace ServiceStack.OrmLite
                 return $"{quotedColName} IN ({subSelect})";
             }
 
-            throw new NotSupportedException("In({0})".Fmt(argValue.GetType()));
+            throw new NotSupportedException($"In({argValue.GetType()})");
         }
 
         protected virtual object VisitColumnAccessMethod(MethodCallExpression m)
