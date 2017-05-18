@@ -799,7 +799,7 @@ namespace ServiceStack.OrmLite
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("ERROR in PrepareParameterizedUpdateStatement(): " + ex.Message, ex);
+                    OrmLiteUtils.HandleException(ex, "ERROR in PrepareParameterizedUpdateStatement(): " + ex.Message);
                 }
             }
 
@@ -870,7 +870,7 @@ namespace ServiceStack.OrmLite
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("ERROR in PrepareParameterizedDeleteStatement(): " + ex.Message, ex);
+                    OrmLiteUtils.HandleException(ex, "ERROR in PrepareParameterizedDeleteStatement(): " + ex.Message);
                 }
             }
 
@@ -1065,7 +1065,7 @@ namespace ServiceStack.OrmLite
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("ERROR in ToUpdateRowStatement(): " + ex.Message, ex);
+                    OrmLiteUtils.HandleException(ex, "ERROR in ToUpdateRowStatement(): " + ex.Message);
                 }
             }
 
@@ -1102,7 +1102,7 @@ namespace ServiceStack.OrmLite
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("ERROR in PrepareUpdateRowStatement(cmd,args): " + ex.Message, ex);
+                    OrmLiteUtils.HandleException(ex, "ERROR in PrepareUpdateRowStatement(cmd,args): " + ex.Message);
                 }
             }
 
@@ -1153,7 +1153,7 @@ namespace ServiceStack.OrmLite
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("ERROR in PrepareUpdateRowAddStatement(): " + ex.Message, ex);
+                    OrmLiteUtils.HandleException(ex, "ERROR in PrepareUpdateRowAddStatement(): " + ex.Message);
                 }
             }
 

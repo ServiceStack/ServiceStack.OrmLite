@@ -10,6 +10,8 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_insert_and_select_max_values()
         {
+            //OrmLiteConfig.ThrowOnError = true;
+
             var model = new ModelWithFieldsOfDifferentTypes
             {
                 Int = int.MaxValue,

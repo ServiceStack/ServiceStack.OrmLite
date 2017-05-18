@@ -195,6 +195,8 @@ namespace ServiceStack.OrmLite
 
         public static Action<IDbCommand, Exception> ExceptionFilter { get; set; }
 
+        public static bool ThrowOnError { get; set; }
+
         public static Func<string, string> SanitizeFieldNameForParamNameFn = fieldName =>
             (fieldName ?? "").Replace(" ", "");
 

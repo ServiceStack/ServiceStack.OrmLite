@@ -354,7 +354,7 @@ namespace ServiceStack.OrmLite
             }
             catch (Exception ex)
             {
-                Log.Error(ex);
+                OrmLiteUtils.HandleException(ex);
             }
             return objWithProperties;
         }

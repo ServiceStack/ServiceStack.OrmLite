@@ -35,6 +35,23 @@ namespace ServiceStack.OrmLite
         private static Dictionary<IndexFieldsCacheKey, Tuple<FieldDefinition, int, IOrmLiteConverter>[]> indexFieldsCache 
             = new Dictionary<IndexFieldsCacheKey, Tuple<FieldDefinition, int, IOrmLiteConverter>[]>(maxCachedIndexFields);
 
+        private static readonly ILog Log = LogManager.GetLogger(typeof(OrmLiteUtils));
+
+        public static void HandleException(Exception ex, string message = null)
+        {
+            if (OrmLiteConfig.ThrowOnError)
+                throw ex;
+
+            if (message != null)
+            {
+                Log.Error(message, ex);
+            }
+            else
+            {
+                Log.Error(ex);
+            }
+        }
+
         public static void DebugCommand(this ILog log, IDbCommand cmd)
         {
             var sb = StringBuilderCache.Allocate();
