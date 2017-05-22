@@ -137,7 +137,7 @@ namespace ServiceStack.OrmLite
                     return customLengthConverter.GetColumnDefinition(fieldLength);
 
                 if (string.IsNullOrEmpty(converter.ColumnDefinition))
-                    throw new ArgumentException("{0} requires a ColumnDefinition".Fmt(converter.GetType().Name));
+                    throw new ArgumentException($"{converter.GetType().Name} requires a ColumnDefinition");
 
                 return converter.ColumnDefinition;
             }
@@ -320,8 +320,7 @@ namespace ServiceStack.OrmLite
             }
             catch (Exception ex)
             {
-                Log.Error("Error in {0}.ToDbValue() value '{1}' and Type '{2}'"
-                    .Fmt(converter.GetType().Name, value.GetType().Name, type.Name), ex);
+                Log.Error($"Error in {converter.GetType().Name}.ToDbValue() value '{value.GetType().Name}' and Type '{type.Name}'", ex);
                 throw;
             }
         }
@@ -338,8 +337,7 @@ namespace ServiceStack.OrmLite
             }
             catch (Exception ex)
             {
-                Log.Error("Error in {0}.FromDbValue() value '{1}' and Type '{2}'"
-                    .Fmt(converter.GetType().Name, value.GetType().Name, type.Name), ex);
+                Log.Error($"Error in {converter.GetType().Name}.FromDbValue() value '{value.GetType().Name}' and Type '{type.Name}'", ex);
                 throw;
             }
         }
@@ -471,14 +469,19 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecLongScalar();
         }
 
+        [Obsolete("Use GetLastInsertIdSqlSuffix()")]
         public virtual long InsertAndGetLastInsertId<T>(IDbCommand dbCmd)
+        {
+            dbCmd.CommandText += GetLastInsertIdSqlSuffix<T>();
+            return dbCmd.ExecLongScalar();
+        }
+
+        public virtual string GetLastInsertIdSqlSuffix<T>()
         {
             if (SelectIdentitySql == null)
                 throw new NotImplementedException("Returning last inserted identity is not implemented on this DB Provider.");
 
-            dbCmd.CommandText += "; " + SelectIdentitySql;
-
-            return dbCmd.ExecLongScalar();
+            return "; " + SelectIdentitySql;
         }
 
         // Fmt
@@ -794,7 +797,7 @@ namespace ServiceStack.OrmLite
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("ERROR in PrepareParameterizedUpdateStatement(): " + ex.Message, ex);
+                    OrmLiteUtils.HandleException(ex, "ERROR in PrepareParameterizedUpdateStatement(): " + ex.Message);
                 }
             }
 
@@ -865,7 +868,7 @@ namespace ServiceStack.OrmLite
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("ERROR in PrepareParameterizedDeleteStatement(): " + ex.Message, ex);
+                    OrmLiteUtils.HandleException(ex, "ERROR in PrepareParameterizedDeleteStatement(): " + ex.Message);
                 }
             }
 
@@ -914,7 +917,7 @@ namespace ServiceStack.OrmLite
                     }
 
                     if (fieldDef == null)
-                        throw new ArgumentException("Field Definition '{0}' was not found".Fmt(fieldName));
+                        throw new ArgumentException($"Field Definition '{fieldName}' was not found");
                 }
 
                 SetParameterValue<T>(fieldDef, p, obj);
@@ -953,8 +956,7 @@ namespace ServiceStack.OrmLite
             }
             catch (Exception ex)
             {
-                Log.Error("Error in {0}.ToDbValue() for field '{1}' of Type '{2}' with value '{3}'"
-                    .Fmt(converter.GetType().Name, fieldDef.Name, fieldDef.FieldType, value.GetType().Name), ex);
+                Log.Error($"Error in {converter.GetType().Name}.ToDbValue() for field '{fieldDef.Name}' of Type '{fieldDef.FieldType}' with value '{value.GetType().Name}'", ex);
                 throw;
             }
         }
@@ -971,8 +973,7 @@ namespace ServiceStack.OrmLite
             }
             catch (Exception ex)
             {
-                Log.Error("Error in {0}.ToDbValue() for field of Type '{1}' with value '{2}'"
-                    .Fmt(converter.GetType().Name, fieldType, value.GetType().Name), ex);
+                Log.Error($"Error in {converter.GetType().Name}.ToDbValue() for field of Type '{fieldType}' with value '{value.GetType().Name}'", ex);
                 throw;
             }
         }
@@ -1060,7 +1061,7 @@ namespace ServiceStack.OrmLite
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("ERROR in ToUpdateRowStatement(): " + ex.Message, ex);
+                    OrmLiteUtils.HandleException(ex, "ERROR in ToUpdateRowStatement(): " + ex.Message);
                 }
             }
 
@@ -1097,7 +1098,7 @@ namespace ServiceStack.OrmLite
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("ERROR in PrepareUpdateRowStatement(cmd,args): " + ex.Message, ex);
+                    OrmLiteUtils.HandleException(ex, "ERROR in PrepareUpdateRowStatement(cmd,args): " + ex.Message);
                 }
             }
 
@@ -1148,7 +1149,7 @@ namespace ServiceStack.OrmLite
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("ERROR in PrepareUpdateRowAddStatement(): " + ex.Message, ex);
+                    OrmLiteUtils.HandleException(ex, "ERROR in PrepareUpdateRowAddStatement(): " + ex.Message);
                 }
             }
 
@@ -1228,6 +1229,12 @@ namespace ServiceStack.OrmLite
 
                 sbColumns.Append(columnDefinition);
 
+                var sqlConstraint = GetCheckConstraint(fieldDef);
+                if (sqlConstraint != null)
+                {
+                    sbConstraints.Append(",\n" + sqlConstraint);
+                }
+
                 if (fieldDef.ForeignKey == null || OrmLiteConfig.SkipForeignKeys)
                     continue;
 
@@ -1244,6 +1251,14 @@ namespace ServiceStack.OrmLite
                       $"\n(\n  {StringBuilderCache.ReturnAndFree(sbColumns)}{StringBuilderCacheAlt.ReturnAndFree(sbConstraints)} \n); \n";
 
             return sql;
+        }
+
+        public virtual string GetCheckConstraint(FieldDefinition fieldDef)
+        {
+            if (fieldDef.CheckConstraint == null)
+                return null;
+
+            return $"CONSTRAINT CHK_{fieldDef.FieldName} CHECK ({fieldDef.CheckConstraint})";
         }
 
         public virtual string ToPostCreateTableStatement(ModelDefinition modelDef)
@@ -1507,8 +1522,7 @@ namespace ServiceStack.OrmLite
             }
             catch (Exception ex)
             {
-                Log.Error("Error in {0}.ToQuotedString() value '{0}' and Type '{1}'"
-                    .Fmt(converter.GetType().Name, value.GetType().Name, fieldType.Name), ex);
+                Log.Error($"Error in {converter.GetType().Name}.ToQuotedString() value '{converter.GetType().Name}' and Type '{value.GetType().Name}'", ex);
                 throw;
             }
         }
@@ -1538,7 +1552,7 @@ namespace ServiceStack.OrmLite
 
         public virtual string ToRowCountStatement(string innerSql)
         {
-            return "SELECT COUNT(*) FROM ({0}) AS COUNT".Fmt(innerSql);
+            return $"SELECT COUNT(*) FROM ({innerSql}) AS COUNT";
         }
 
         public virtual void DropColumn(IDbConnection db, Type modelType, string columnName)

@@ -294,7 +294,15 @@ namespace ServiceStack.OrmLite
                     if (values == null)
                         values = new object[reader.FieldCount];
 
-                    dialectProvider.GetValues(reader, values);
+                    try
+                    {
+                        dialectProvider.GetValues(reader, values);
+                    }
+                    catch (Exception ex)
+                    {
+                        values = null;
+                        Log.Warn("Error trying to use GetValues() from DataReader. Falling back to individual field reads...", ex);
+                    }
                 }
                 else
                 {
@@ -346,7 +354,7 @@ namespace ServiceStack.OrmLite
             }
             catch (Exception ex)
             {
-                Log.Error(ex);
+                OrmLiteUtils.HandleException(ex);
             }
             return objWithProperties;
         }
@@ -624,7 +632,10 @@ namespace ServiceStack.OrmLite
             dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
             if (selectIdentity)
-                return dialectProvider.InsertAndGetLastInsertId<T>(dbCmd);
+            {
+                dbCmd.CommandText += dialectProvider.GetLastInsertIdSqlSuffix<T>();
+                return dbCmd.ExecLongScalar();
+            }
 
             return dbCmd.ExecNonQuery();
         }
@@ -658,7 +669,7 @@ namespace ServiceStack.OrmLite
                     }
                     catch (Exception ex)
                     {
-                        Log.Error("SQL ERROR: {0}".Fmt(dbCmd.GetLastSqlAndParams()), ex);
+                        Log.Error($"SQL ERROR: {dbCmd.GetLastSqlAndParams()}", ex);
                         throw;
                     }
                 }
@@ -702,7 +713,7 @@ namespace ServiceStack.OrmLite
                     }
                     catch (Exception ex)
                     {
-                        Log.Error("SQL ERROR: {0}".Fmt(dbCmd.GetLastSqlAndParams()), ex);
+                        Log.Error($"SQL ERROR: {dbCmd.GetLastSqlAndParams()}", ex);
                         throw;
                     }
                 }

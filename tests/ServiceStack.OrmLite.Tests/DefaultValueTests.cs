@@ -109,7 +109,7 @@ namespace ServiceStack.OrmLite.Tests
                 CreateAndInitialize(db, 2);
 
                 ResetUpdateDate(db);
-                db.Update(cmd => UpdateCommandFilter.SetUpdateDate<DefaultValues>(cmd, nameof(DefaultValues.UpdatedDateUtc)),
+                db.Update(cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)),
                     new DefaultValues { Id = 1, DefaultInt = 45 }, new DefaultValues { Id = 2, DefaultInt = 72 });
                 VerifyUpdateDate(db);
                 VerifyUpdateDate(db, id: 2);
@@ -138,7 +138,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 ResetUpdateDate(db);
                 db.Update(new DefaultValues { Id = 1, DefaultInt = 2342 }, p => p.Id == 1,
-                    cmd => UpdateCommandFilter.SetUpdateDate<DefaultValues>(cmd, nameof(DefaultValues.UpdatedDateUtc)));
+                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)));
                 VerifyUpdateDate(db);
             }
         }
@@ -154,7 +154,7 @@ namespace ServiceStack.OrmLite.Tests
                 var row = db.SingleById<DefaultValues>(1);
                 row.DefaultInt = 3245;
                 row.DefaultDouble = 978.423;
-                db.Update(row, cmd => UpdateCommandFilter.SetUpdateDate<DefaultValues>(cmd, nameof(DefaultValues.UpdatedDateUtc)));
+                db.Update(row, cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)));
                 VerifyUpdateDate(db);
             }
         }
@@ -168,7 +168,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 ResetUpdateDate(db);
                 db.Update<DefaultValues>(new { DefaultInt = 765 }, p => p.Id == 1,
-                    cmd => UpdateCommandFilter.SetUpdateDate<DefaultValues>(cmd, nameof(DefaultValues.UpdatedDateUtc)));
+                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)));
                 VerifyUpdateDate(db);
             }
         }
@@ -182,7 +182,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 ResetUpdateDate(db);
                 db.UpdateAll(new [] { new DefaultValues { Id = 1, DefaultInt = 45 }, new DefaultValues { Id = 2, DefaultInt = 72 } },
-                    cmd => UpdateCommandFilter.SetUpdateDate<DefaultValues>(cmd, nameof(DefaultValues.UpdatedDateUtc)));
+                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)));
                 VerifyUpdateDate(db);
                 VerifyUpdateDate(db, id: 2);
             }
@@ -197,7 +197,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 ResetUpdateDate(db);
                 db.UpdateOnly(() => new DefaultValues {DefaultInt = 345}, p => p.Id == 1,
-                    cmd => UpdateCommandFilter.SetUpdateDate<DefaultValues>(cmd, nameof(DefaultValues.UpdatedDateUtc)));
+                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)));
                 VerifyUpdateDate(db);
             }
         }
@@ -211,7 +211,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 ResetUpdateDate(db);
                 db.UpdateOnly(() => new DefaultValues { DefaultInt = 345 }, db.From<DefaultValues>().Where(p => p.Id == 1),
-                    cmd => UpdateCommandFilter.SetUpdateDate<DefaultValues>(cmd, nameof(DefaultValues.UpdatedDateUtc)));
+                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)));
                 VerifyUpdateDate(db);
             }
         }
@@ -227,7 +227,7 @@ namespace ServiceStack.OrmLite.Tests
                 var row = db.SingleById<DefaultValues>(1);
                 row.DefaultDouble = 978.423;
                 db.UpdateOnly(row, db.From<DefaultValues>().Update(p => p.DefaultDouble),
-                    cmd => UpdateCommandFilter.SetUpdateDate<DefaultValues>(cmd, nameof(DefaultValues.UpdatedDateUtc)));
+                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)));
                 VerifyUpdateDate(db);
             }
         }
@@ -243,7 +243,7 @@ namespace ServiceStack.OrmLite.Tests
                 var row = db.SingleById<DefaultValues>(1);
                 row.DefaultDouble = 978.423;
                 db.UpdateOnly(row, p => p.DefaultDouble, p => p.Id == 1,
-                    cmd => UpdateCommandFilter.SetUpdateDate<DefaultValues>(cmd, nameof(DefaultValues.UpdatedDateUtc)));
+                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)));
                 VerifyUpdateDate(db);
             }
         }
@@ -259,7 +259,7 @@ namespace ServiceStack.OrmLite.Tests
                 var row = db.SingleById<DefaultValues>(1);
                 row.DefaultDouble = 978.423;
                 db.UpdateOnly(row, new[] { nameof(DefaultValues.DefaultDouble) }, p => p.Id == 1,
-                    cmd => UpdateCommandFilter.SetUpdateDate<DefaultValues>(cmd, nameof(DefaultValues.UpdatedDateUtc)));
+                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)));
                 VerifyUpdateDate(db);
             }
         }
@@ -274,7 +274,7 @@ namespace ServiceStack.OrmLite.Tests
                 ResetUpdateDate(db);
 
                 var count = db.UpdateAdd(() => new DefaultValues { DefaultInt = 5, DefaultDouble = 7.2 }, p => p.Id == 1,
-                    cmd => UpdateCommandFilter.SetUpdateDate<DefaultValues>(cmd, nameof(DefaultValues.UpdatedDateUtc)));
+                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)));
 
                 Assert.That(count, Is.EqualTo(1));
                 var row = db.SingleById<DefaultValues>(1);
@@ -295,7 +295,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 var where = db.From<DefaultValues>().Where(p => p.Id == 1);
                 var count = db.UpdateAdd(() => new DefaultValues { DefaultInt = 5, DefaultDouble = 7.2 }, where,
-                    cmd => UpdateCommandFilter.SetUpdateDate<DefaultValues>(cmd, nameof(DefaultValues.UpdatedDateUtc)));
+                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)));
 
                 Assert.That(count, Is.EqualTo(1));
                 var row = db.SingleById<DefaultValues>(1);

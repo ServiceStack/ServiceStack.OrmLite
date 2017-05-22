@@ -89,7 +89,10 @@ namespace ServiceStack.OrmLite
 
         long GetLastInsertId(IDbCommand command);
 
+        [Obsolete("Use GetLastInsertIdSqlSuffix()")]
         long InsertAndGetLastInsertId<T>(IDbCommand dbCmd);
+
+        string GetLastInsertIdSqlSuffix<T>();
 
         string ToSelectStatement(Type tableType, string sqlFilter, params object[] filterParams);
 

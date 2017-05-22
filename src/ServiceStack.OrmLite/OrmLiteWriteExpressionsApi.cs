@@ -165,9 +165,9 @@ namespace ServiceStack.OrmLite
         ///   db.InsertOnly(new Person { Id =1 , FirstName="Amy" }, p => new { p.Id, p.FirstName }));
         ///   INSERT INTO "Person" ("Id", "FirstName") VALUES (1, 'Amy');
         /// </summary>
-        public static void InsertOnly<T>(this IDbConnection dbConn, T obj, Expression<Func<T, object>> onlyFields)
+        public static long InsertOnly<T>(this IDbConnection dbConn, T obj, Expression<Func<T, object>> onlyFields, bool selectIdentity = false)
         {
-            dbConn.Exec(dbCmd => dbCmd.InsertOnly(obj, onlyFields.GetFieldNames()));
+            return dbConn.Exec(dbCmd => dbCmd.InsertOnly(obj, onlyFields.GetFieldNames(), selectIdentity));
         }
 
         /// <summary>
@@ -176,9 +176,9 @@ namespace ServiceStack.OrmLite
         ///   db.InsertOnly(new Person { FirstName = "Amy" }, new[]{ "FirstName" }));
         ///   INSERT INTO "Person" ("FirstName") VALUES ('Amy');
         /// </summary>
-        public static void InsertOnly<T>(this IDbConnection dbConn, T obj, string[] onlyFields)
+        public static long InsertOnly<T>(this IDbConnection dbConn, T obj, string[] onlyFields, bool selectIdentity = false)
         {
-            dbConn.Exec(dbCmd => dbCmd.InsertOnly(obj, onlyFields));
+            return dbConn.Exec(dbCmd => dbCmd.InsertOnly(obj, onlyFields, selectIdentity));
         }
 
         /// <summary>
@@ -187,9 +187,9 @@ namespace ServiceStack.OrmLite
         ///   db.InsertOnly(() => new Person { FirstName = "Amy" }));
         ///   INSERT INTO "Person" ("FirstName") VALUES (@FirstName);
         /// </summary>
-        public static int InsertOnly<T>(this IDbConnection dbConn, Expression<Func<T>> insertFields)
+        public static long InsertOnly<T>(this IDbConnection dbConn, Expression<Func<T>> insertFields, bool selectIdentity = false)
         {
-            return dbConn.Exec(dbCmd => dbCmd.InsertOnly(insertFields));
+            return dbConn.Exec(dbCmd => dbCmd.InsertOnly(insertFields, selectIdentity));
         }
 
         /// <summary>

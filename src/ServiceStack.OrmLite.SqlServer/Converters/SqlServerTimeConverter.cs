@@ -9,20 +9,11 @@ namespace ServiceStack.OrmLite.SqlServer.Converters
 
         public int? Precision { get; set; }
 
-        public override string ColumnDefinition
-        {
-            get
-            {
-                return Precision != null
-                    ? "TIME({0})".Fmt(Precision.Value)
-                    : "TIME";
-            }
-        }
+        public override string ColumnDefinition => Precision != null
+            ? $"TIME({Precision.Value})"
+            : "TIME";
 
-        public override DbType DbType
-        {
-            get { return DbType.DateTime; }
-        }
+        public override DbType DbType => DbType.DateTime;
 
         public override object ToDbValue(Type fieldType, object value)
         {

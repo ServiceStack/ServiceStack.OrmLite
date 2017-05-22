@@ -111,7 +111,7 @@ namespace ServiceStack.OrmLite
                 var row = type.CreateInstance();
                 row.PopulateWithSqlReader(dialectProvider, reader, indexCache, values);
                 return row;
-            }, token).Then(t =>
+            }, token).Then<object,object>(t =>
             {
                 reader.Dispose();
                 return t;

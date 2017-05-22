@@ -54,6 +54,8 @@ namespace ServiceStack.OrmLite
 
         public string DefaultValue { get; set; }
 
+        public string CheckConstraint { get; set; }
+
         public ForeignKeyConstraint ForeignKey { get; set; }
 
         public PropertyGetterDelegate GetValueFn { get; set; }

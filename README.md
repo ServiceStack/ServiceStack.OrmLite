@@ -1,4 +1,5 @@
-Join the [ServiceStack Google+ Community](https://plus.google.com/communities/112445368900682590445) or follow [@ServiceStack](https://twitter.com/servicestack) for updates. 
+Follow [@ServiceStack](https://twitter.com/servicestack) or join the [Google+ Community](https://plus.google.com/communities/112445368900682590445)
+for updates, or [StackOverflow](http://stackoverflow.com/questions/ask) or the [Customer Forums](https://forums.servicestack.net/) for support.
 
 # Fast, Simple, Typed ORM for .NET
 
@@ -367,14 +368,19 @@ db.UpdateOnly(() => new Person { FirstName = "JJ" }, where: p => p.LastName == "
 
 Alternatively you can pass in a POCO directly, in which case the first expression in an `UpdateOnly` 
 statement is used to specify which fields should be updated:
+
 ```csharp
 db.UpdateOnly(new Person { FirstName = "JJ" }, onlyFields: p => p.FirstName);
-```
-```csharp
+
 db.UpdateOnly(new Person { FirstName = "JJ", Age = 12 }, 
     onlyFields: p => new { p.FirstName, p.Age });
+
+db.UpdateOnly(new Person { FirstName = "JJ", Age = 12 }, 
+    onlyFields: p => new[] { "Name", "Age" });
 ```
+
 When present, the second expression is used as the where filter:
+
 ```csharp
 db.UpdateOnly(new Person { FirstName = "JJ" }, 
     onlyFields: p => p.FirstName, 
@@ -406,21 +412,17 @@ The `UpdateAdd` API provides several Typed API's for updating existing values:
 ```csharp
 //Increase everyone's Score by 3 points
 db.UpdateAdd(() => new Person { Score = 3 }); 
-db.UpdateAdd(new Person { Score = 3 }, updateFields: x => x.Score); 
 
 //Remove 5 points from Jackson Score
 db.UpdateAdd(() => new Person { Score = -5 }, x => where: x.LastName == "Jackson");
-db.UpdateAdd(new Person { Score = -5 }, x => x.Score, x => where: x.LastName == "Jackson");
 
 //Graduate everyone and increase everyone's Score by 2 points 
-var q = db.From<Person>().Update(x => new { x.Points, x.Graduated });
-db.UpdateAdd(new Person { Points = 2, Graduated = true }, q);
+db.UpdateAdd(() => new Person { Points = 2, Graduated = true });
 
 //Add 10 points to Michael's score
 var q = db.From<Person>()
-    .Where(x => x.FirstName == "Michael")
-    .Update(x => x.Points);
-db.UpdateAdd(new Person { Points = 10 }, q);
+    .Where(x => x.FirstName == "Michael");
+db.UpdateAdd(() => new Person { Points = 10 }, q);
 ```
 
 > Note: Any non-numeric values in an `UpdateAdd` statement (e.g. strings) are replaced as normal.

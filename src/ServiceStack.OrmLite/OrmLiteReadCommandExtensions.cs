@@ -875,7 +875,7 @@ namespace ServiceStack.OrmLite
         {
             var refField = GetRefFieldDefIfExists(modelDef, refModelDef);
             if (refField == null)
-                throw new ArgumentException("Cant find '{0}' Property on Type '{1}'".Fmt(modelDef.ModelName + "Id", refType.Name));
+                throw new ArgumentException($"Cant find '{modelDef.ModelName + "Id"}' Property on Type '{refType.Name}'");
             return refField;
         }
 

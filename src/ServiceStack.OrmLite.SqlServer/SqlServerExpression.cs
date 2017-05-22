@@ -50,7 +50,7 @@ namespace ServiceStack.OrmLite.SqlServer
 
             if (originalRight is TimeSpan && DialectProvider.GetConverter<TimeSpan>() is SqlServerTimeConverter)
             {
-                right = "CAST({0} AS TIME)".Fmt(right);
+                right = $"CAST({right} AS TIME)";
             }
         }
 

@@ -71,7 +71,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 row.Name = "UpdatedName";
 
-                db.Update(row, x => x.LongId <= row.LongId);
+                db.Update(row, x => x.Long <= row.Long);
 
                 var dbRow = db.SingleById<ModelWithFieldsOfDifferentTypes>(row.Id);
 
@@ -91,7 +91,7 @@ namespace ServiceStack.OrmLite.Tests
                 row.Name = "UpdatedName";
 
                 db.Update<ModelWithFieldsOfDifferentTypes>(new { row.Name, row.DateTime },
-                    x => x.LongId >= row.LongId && x.LongId <= row.LongId);
+                    x => x.Long >= row.Long && x.Long <= row.Long);
 
                 var dbRow = db.SingleById<ModelWithFieldsOfDifferentTypes>(row.Id);
                 Console.WriteLine(dbRow.Dump());

@@ -5,9 +5,9 @@ using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.Tests.Shared
 {
-    public class UpdateCommandFilter
+    public static class UpdateCommandFilter
     {
-        public static void SetUpdateDate<T>(IDbCommand cmd, string fieldName) where T : new()
+        public static void SetUpdateDate<T>(this IDbCommand cmd, string fieldName) where T : new()
         {
             var dialectProvider = OrmLiteConfig.DialectProvider;
             var field = typeof(T).GetProperty(fieldName);

@@ -1,284 +1,41 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{96179AC6-F6F1-40C3-9FDD-4F6582F54C5C}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ServiceStack.OrmLite</RootNamespace>
+    <TargetFrameworks>net45</TargetFrameworks>
     <AssemblyName>ServiceStack.OrmLite</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <FileUpgradeFlags>
-    </FileUpgradeFlags>
-    <OldToolsVersion>3.5</OldToolsVersion>
-    <UpgradeBackupLocation />
-    <PublishUrl>publish\</PublishUrl>
-    <Install>true</Install>
-    <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
-    <UpdateMode>Foreground</UpdateMode>
-    <UpdateInterval>7</UpdateInterval>
-    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
-    <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
-    <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
-    <UseApplicationTrust>false</UseApplicationTrust>
-    <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkProfile />
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>True</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>False</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;ASYNC</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>True</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;ASYNC</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <DocumentationFile>bin\Release\ServiceStack.OrmLite.xml</DocumentationFile>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'STATIC_ONLY NO_EXPRESSIONS|AnyCPU' ">
-    <DebugSymbols>True</DebugSymbols>
-    <OutputPath>bin\STATIC_ONLY NO_EXPRESSIONS\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;ASYNC</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Optimize>False</Optimize>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'MonoTouch|AnyCPU' ">
-    <DebugSymbols>True</DebugSymbols>
-    <OutputPath>bin\MonoTouch\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;ASYNC</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Optimize>False</Optimize>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Signed|AnyCPU'">
-    <OutputPath>bin\Signed\</OutputPath>
-    <DefineConstants>TRACE;ASYNC</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
+    <PackageId>ServiceStack.OrmLite.Signed</PackageId>
+    <Configuration>Signed</Configuration>
+    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
+    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+    <SignAssembly>True</SignAssembly>
+    <DelaySign>False</DelaySign>
     <AssemblyOriginatorKeyFile>servicestack-sn.pfx</AssemblyOriginatorKeyFile>
   </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' != 'Debug' ">
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.ComponentModel.DataAnnotations">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Core">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Data" />
-    <Reference Include="ServiceStack.Common">
-      <HintPath>..\..\lib\signed\ServiceStack.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="ServiceStack.Interfaces">
-      <HintPath>..\..\lib\ServiceStack.Interfaces.dll</HintPath>
-    </Reference>
-    <Reference Include="ServiceStack.Text">
-      <HintPath>..\..\lib\signed\ServiceStack.Text.dll</HintPath>
-    </Reference>
-    <Reference Include="System.XML" />
+    <Reference Include="..\..\lib\pcl\ServiceStack.Interfaces.dll" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Converters\BoolConverter.cs" />
-    <Compile Include="Converters\ByteArrayConverter.cs" />
-    <Compile Include="Converters\DateTimeOffsetConverter.cs" />
-    <Compile Include="Converters\FloatConverters.cs" />
-    <Compile Include="Converters\GuidConverter.cs" />
-    <Compile Include="Converters\IntegerConverters.cs" />
-    <Compile Include="Converters\SpecialConverters.cs" />
-    <Compile Include="Converters\StringConverter.cs" />
-    <Compile Include="Converters\TimeSpanAsIntConverter.cs" />
-    <Compile Include="Dapper\CommandDefinition.cs" />
-    <Compile Include="Dapper\CommandFlags.cs" />
-    <Compile Include="Dapper\CustomPropertyTypeMap.cs" />
-    <Compile Include="Dapper\DataTableHandler.cs" />
-    <Compile Include="Dapper\DbString.cs" />
-    <Compile Include="Dapper\DefaultTypeMap.cs" />
-    <Compile Include="Dapper\DynamicParameters.CachedOutputSetters.cs" />
-    <Compile Include="Dapper\DynamicParameters.cs" />
-    <Compile Include="Dapper\DynamicParameters.ParamInfo.cs" />
-    <Compile Include="Dapper\ExplicitConstructorAttribute.cs" />
-    <Compile Include="Dapper\FeatureSupport.cs" />
-    <Compile Include="Dapper\SimpleMemberMap.cs" />
-    <Compile Include="Dapper\SqlDataRecordHandler.cs" />
-    <Compile Include="Dapper\SqlDataRecordListTVPParameter.cs" />
-    <Compile Include="Dapper\SqlMapper.Async.cs" />
-    <Compile Include="Dapper\SqlMapper.CacheInfo.cs" />
-    <Compile Include="Dapper\SqlMapper.cs" />
-    <Compile Include="Dapper\SqlMapper.DapperRow.cs" />
-    <Compile Include="Dapper\SqlMapper.DapperRowMetaObject.cs" />
-    <Compile Include="Dapper\SqlMapper.DapperTable.cs" />
-    <Compile Include="Dapper\SqlMapper.DeserializerState.cs" />
-    <Compile Include="Dapper\SqlMapper.DontMap.cs" />
-    <Compile Include="Dapper\SqlMapper.GridReader.Async.cs" />
-    <Compile Include="Dapper\SqlMapper.GridReader.cs" />
-    <Compile Include="Dapper\SqlMapper.ICustomQueryParameter.cs" />
-    <Compile Include="Dapper\SqlMapper.IDataReader.cs" />
-    <Compile Include="Dapper\SqlMapper.Identity.cs" />
-    <Compile Include="Dapper\SqlMapper.IDynamicParameters.cs" />
-    <Compile Include="Dapper\SqlMapper.IMemberMap.cs" />
-    <Compile Include="Dapper\SqlMapper.IParameterCallbacks.cs" />
-    <Compile Include="Dapper\SqlMapper.IParameterLookup.cs" />
-    <Compile Include="Dapper\SqlMapper.ITypeHandler.cs" />
-    <Compile Include="Dapper\SqlMapper.ITypeMap.cs" />
-    <Compile Include="Dapper\SqlMapper.Link.cs" />
-    <Compile Include="Dapper\SqlMapper.LiteralToken.cs" />
-    <Compile Include="Dapper\SqlMapper.Settings.cs" />
-    <Compile Include="Dapper\SqlMapper.TypeDeserializerCache.cs" />
-    <Compile Include="Dapper\SqlMapper.TypeHandler.cs" />
-    <Compile Include="Dapper\SqlMapper.TypeHandlerCache.cs" />
-    <Compile Include="Dapper\TableValuedParameter.cs" />
-    <Compile Include="Dapper\TypeExtensions.cs" />
-    <Compile Include="Dapper\UdtTypeHandler.cs" />
-    <Compile Include="Dapper\WrappedDataReader.cs" />
-    <Compile Include="Dapper\WrappedReader.cs" />
-    <Compile Include="Dapper\XmlHandlers.cs" />
-    <Compile Include="Expressions\IUntypedSqlExpression.cs" />
-    <Compile Include="IOrmLiteConverter.cs" />
-    <Compile Include="Legacy\OrmLiteReadApiAsyncLegacy.cs" />
-    <Compile Include="Legacy\OrmLiteReadApiLegacy.cs" />
-    <Compile Include="Legacy\OrmLiteReadCommandExtensionsAsyncLegacy.cs" />
-    <Compile Include="Legacy\OrmLiteReadCommandExtensionsLegacy.cs" />
-    <Compile Include="Legacy\OrmLiteReadExpressionsApiAsyncLegacy.cs" />
-    <Compile Include="Legacy\OrmLiteReadExpressionsApiLegacy.cs" />
-    <Compile Include="Legacy\OrmLiteWriteApiAsyncLegacy.cs" />
-    <Compile Include="Legacy\OrmLiteWriteCommandExtensionsAsyncLegacy.cs" />
-    <Compile Include="Legacy\OrmLiteWriteCommandExtensionsLegacy.cs" />
-    <Compile Include="Legacy\OrmLiteWriteExpressionsApiAsyncLegacy.cs" />
-    <Compile Include="Legacy\OrmLiteWriteExpressionsApiLegacy.cs" />
-    <Compile Include="Legacy\ReadExpressionCommandExtensionsAsyncLegacy.cs" />
-    <Compile Include="Legacy\ReadExpressionCommandExtensionsLegacy.cs" />
-    <Compile Include="Legacy\WriteExpressionCommandExtensionsAsyncLegacy.cs" />
-    <Compile Include="Legacy\WriteExpressionCommandExtensionsLegacy.cs" />
-    <Compile Include="NamingStrategy.cs" />
-    <Compile Include="OrmLiteCommand.cs" />
-    <Compile Include="OrmLiteContext.cs" />
-    <Compile Include="OrmLiteReadApiAsync.cs" />
-    <Compile Include="Async\OrmLiteReadCommandExtensionsAsync.cs" />
-    <Compile Include="Async\OrmLiteResultsFilterExtensionsAsync.cs" />
-    <Compile Include="Async\OrmLiteUtilExtensionsAsync.cs" />
-    <Compile Include="OrmLiteVariables.cs" />
-    <Compile Include="OrmLiteWriteApiAsync.cs" />
-    <Compile Include="Async\OrmLiteWriteCommandExtensionsAsync.cs" />
-    <Compile Include="OrmLiteReadExpressionsApiAsync.cs" />
-    <Compile Include="Async\ReadExpressionCommandExtensionsAsync.cs" />
-    <Compile Include="OrmLiteWriteExpressionsApiAsync.cs" />
-    <Compile Include="Async\WriteExpressionCommandExtensionsAsync.cs" />
-    <Compile Include="Expressions\SqlExpression.Join.cs" />
-    <Compile Include="Expressions\SqlExpressionVisitor.cs" />
-    <Compile Include="Expressions\ParameterRebinder.cs" />
-    <Compile Include="Expressions\PredicateBuilder.cs" />
-    <Compile Include="OrmLiteReadExpressionsApi.cs" />
-    <Compile Include="OrmLiteWriteExpressionsApi.cs" />
-    <Compile Include="IUntypedApi.cs" />
-    <Compile Include="OrmLiteDialectProviderExtensions.cs" />
-    <Compile Include="OrmLiteExecFilter.cs" />
-    <Compile Include="OrmLiteReadApi.cs" />
-    <Compile Include="OrmLiteResultsFilterExtensions.cs" />
-    <Compile Include="OrmLiteSchemaApi.cs" />
-    <Compile Include="OrmLiteSPStatement.cs" />
-    <Compile Include="OrmLiteTransaction.cs" />
-    <Compile Include="OrmLiteWriteApi.cs" />
-    <Compile Include="DbTypes.cs" />
-    <Compile Include="INamingStrategy.cs" />
-    <Compile Include="OrmLiteConfigExtensions.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="OrmLiteNamingStrategyBase.cs" />
-    <Compile Include="PropertyInvoker.cs" />
-    <Compile Include="FieldDefinition.cs" />
-    <Compile Include="IPropertyInvoker.cs" />
-    <Compile Include="ModelDefinition.cs" />
-    <Compile Include="OrmLiteConfig.cs" />
-    <Compile Include="OrmLiteConnection.cs" />
-    <Compile Include="OrmLiteConnectionFactory.cs" />
-    <Compile Include="OrmLitePersistenceProvider.cs" />
-    <Compile Include="IOrmLiteDialectProvider.cs" />
-    <Compile Include="OrmLiteDialectProviderBase.cs" />
-    <Compile Include="OrmLiteWriteCommandExtensions.cs" />
-    <Compile Include="OrmLiteReadCommandExtensions.cs" />
-    <Compile Include="OrmLiteUtils.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ReflectionPropertyInvoker.cs" />
-    <Compile Include="OrmLiteResultsFilter.cs" />
-    <Compile Include="SqlBuilder.cs" />
-    <Compile Include="SqlInValues.cs" />
-    <Compile Include="Expressions\ReadExpressionCommandExtensions.cs" />
-    <Compile Include="Expressions\SqlExpression.cs" />
-    <Compile Include="Expressions\WriteExpressionCommandExtensions.cs" />
-    <Compile Include="Expressions\Sql.cs" />
-    <Compile Include="OrmLiteSchemaModifyApi.cs" />
-    <Compile Include="Converters\DateTimeConverter.cs" />
-    <Compile Include="Support\LoadList.cs" />
-    <Compile Include="Support\LoadReferences.cs" />
-    <Compile Include="UntypedApi.cs" />
-    <Compile Include="IndexFieldsCacheKey.cs" />
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net45' ">
+    <DefineConstants>$(DefineConstants);NET45;ASYNC</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+    <Reference Include="System.Net" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="..\..\lib\signed\ServiceStack.Text.dll" />
+    <Reference Include="..\..\lib\signed\ServiceStack.Common.dll" />
   </ItemGroup>
-  <ItemGroup>
-    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
-      <Visible>False</Visible>
-      <ProductName>Windows Installer 3.1</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Async\OrmLiteAsyncApi.cd" />
-    <None Include="OrmLiteApi.cd" />
-  </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
 </Project>

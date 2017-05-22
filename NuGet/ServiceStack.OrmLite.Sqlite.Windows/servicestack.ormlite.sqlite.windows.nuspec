@@ -7,6 +7,7 @@
     <authors>Service Stack</authors> 
     <owners>Service Stack</owners>
     <description>
+        For cross-platform Sqlite use ServiceStack.OrmLite.Sqlite instead.
         Light, simple and fast convention-based code-first POCO ORM. Support for Creating and Dropping Table Schemas from POCOs, Complex Property types transparently stored in schemaless text blobs in Sqlite.
     </description> 
     <projectUrl>https://github.com/ServiceStack/ServiceStack.OrmLite</projectUrl>
@@ -17,7 +18,7 @@
     <language>en-US</language> 
     <copyright>Copyright 2017 ServiceStack</copyright>
     <dependencies>
-      <dependency id="System.Data.SQLite.Core" version="1.0.103" />
+      <dependency id="System.Data.SQLite.Core" version="1.0.105" />
       <dependency id="ServiceStack.OrmLite" version="4.5" />
     </dependencies> 
   </metadata> 

@@ -104,7 +104,7 @@ namespace ServiceStack.OrmLite
 
             IOrmLiteDialectProvider dialectProvider;
             if (!DialectProviders.TryGetValue(providerName, out dialectProvider))
-                throw new ArgumentException("{0} is not a registered DialectProvider".Fmt(providerName));
+                throw new ArgumentException($"{providerName} is not a registered DialectProvider");
 
             var dbFactory = new OrmLiteConnectionFactory(connectionString, dialectProvider, setGlobalDialectProvider:false);
 
@@ -200,6 +200,16 @@ namespace ServiceStack.OrmLite
             return hasDbTrans != null
                 ? hasDbTrans.DbTransaction
                 : dbTrans;
+        }
+
+        public static void RegisterConnection(this IDbConnectionFactory dbFactory, string namedConnection, string connectionString, IOrmLiteDialectProvider dialectProvider)
+        {
+            ((OrmLiteConnectionFactory)dbFactory).RegisterConnection(namedConnection, connectionString, dialectProvider);
+        }
+
+        public static void RegisterConnection(this IDbConnectionFactory dbFactory, string namedConnection, OrmLiteConnectionFactory connectionFactory)
+        {
+            ((OrmLiteConnectionFactory)dbFactory).RegisterConnection(namedConnection, connectionFactory);
         }
     }
 }

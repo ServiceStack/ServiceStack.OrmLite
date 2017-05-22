@@ -35,6 +35,23 @@ namespace ServiceStack.OrmLite
         private static Dictionary<IndexFieldsCacheKey, Tuple<FieldDefinition, int, IOrmLiteConverter>[]> indexFieldsCache 
             = new Dictionary<IndexFieldsCacheKey, Tuple<FieldDefinition, int, IOrmLiteConverter>[]>(maxCachedIndexFields);
 
+        private static readonly ILog Log = LogManager.GetLogger(typeof(OrmLiteUtils));
+
+        public static void HandleException(Exception ex, string message = null)
+        {
+            if (OrmLiteConfig.ThrowOnError)
+                throw ex;
+
+            if (message != null)
+            {
+                Log.Error(message, ex);
+            }
+            else
+            {
+                Log.Error(ex);
+            }
+        }
+
         public static void DebugCommand(this ILog log, IDbCommand cmd)
         {
             var sb = StringBuilderCache.Allocate();
@@ -382,17 +399,38 @@ namespace ServiceStack.OrmLite
             return "{0}".SqlFmt(value);
         }
 
-        public static string[] IllegalSqlFragmentTokens = { 
-            "--", ";--", ";", "%", "/*", "*/", "@@", "@", 
+        public static Regex VerifyFragmentRegEx = new Regex("([^[:alnum:]_]|^)+(--|;--|;|%|/\\*|\\*/|@@|@|char|nchar|varchar|nvarchar|alter|begin|cast|create|cursor|declare|delete|drop|end|exec|execute|fetch|insert|kill|open|select|sys|sysobjects|syscolumns|table|update)([^[:alnum:]_]|$)+",
+            RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        public static Func<string,string> SqlVerifyFragmentFn { get; set; }
+
+        public static string SqlVerifyFragment(this string sqlFragment)
+        {
+            if (sqlFragment == null)
+                return null;
+
+            if (SqlVerifyFragmentFn != null)
+                return SqlVerifyFragmentFn(sqlFragment);
+
+            var fragmentToVerify = sqlFragment
+                .StripQuotedStrings('\'')
+                .StripQuotedStrings('"')
+                .StripQuotedStrings('`')
+                .ToLower();
+
+            var match = VerifyFragmentRegEx.Match(fragmentToVerify);
+            if (match.Success)
+                throw new ArgumentException("Potential illegal fragment detected: " + sqlFragment);
+
+            return sqlFragment;
+        }
+
+        public static string[] IllegalSqlFragmentTokens = {
+            "--", ";--", ";", "%", "/*", "*/", "@@", "@",
             "char", "nchar", "varchar", "nvarchar",
             "alter", "begin", "cast", "create", "cursor", "declare", "delete",
             "drop", "end", "exec", "execute", "fetch", "insert", "kill",
             "open", "select", "sys", "sysobjects", "syscolumns", "table", "update" };
-
-        public static string SqlVerifyFragment(this string sqlFragment)
-        {
-            return SqlVerifyFragment(sqlFragment, IllegalSqlFragmentTokens);
-        }
 
         public static string SqlVerifyFragment(this string sqlFragment, IEnumerable<string> illegalFragments)
         {
@@ -407,7 +445,7 @@ namespace ServiceStack.OrmLite
 
             foreach (var illegalFragment in illegalFragments)
             {
-                if ((fragmentToVerify.IndexOf(illegalFragment, StringComparison.Ordinal) >= 0))
+                if (fragmentToVerify.IndexOf(illegalFragment, StringComparison.Ordinal) >= 0)
                     throw new ArgumentException("Potential illegal fragment detected: " + sqlFragment);
             }
 
@@ -785,7 +823,7 @@ namespace ServiceStack.OrmLite
             }
 
             if (!hasChildRef)
-                throw new Exception("Could not find Child Reference for '{0}' on Parent '{1}'".Fmt(typeof(Child).Name, typeof(Parent).Name));
+                throw new Exception($"Could not find Child Reference for '{typeof(Child).Name}' on Parent '{typeof(Parent).Name}'");
 
             return parents;
         }
