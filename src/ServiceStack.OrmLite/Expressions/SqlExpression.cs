@@ -15,8 +15,8 @@ namespace ServiceStack.OrmLite
 {
     public abstract partial class SqlExpression<T> : ISqlExpression, IHasUntypedSqlExpression
     {
-        protected const string TrueLiteral = "(1=1)";
-        protected const string FalseLiteral = "(1=0)";
+        public const string TrueLiteral = "(1=1)";
+        public const string FalseLiteral = "(1=0)";
 
         protected bool visitedExpressionIsTableColumn = false;
         protected bool skipParameterizationForThisExpression = false;
@@ -1207,7 +1207,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        protected internal virtual object Visit(Expression exp)
+        public virtual object Visit(Expression exp)
         {
             visitedExpressionIsTableColumn = false;
 
