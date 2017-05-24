@@ -22,6 +22,7 @@ using System.Text.RegularExpressions;
 using ServiceStack.Logging;
 using ServiceStack.Text;
 using ServiceStack.OrmLite.Dapper;
+using ServiceStack.Reflection;
 
 namespace ServiceStack.OrmLite
 {
@@ -82,7 +83,7 @@ namespace ServiceStack.OrmLite
 
         public static bool IsScalar<T>()
         {
-            return typeof(T).IsValueType() || typeof(T) == typeof(string);
+            return typeof(T).IsValueType() && !typeof(T).Name.StartsWith("ValueTuple`", StringComparison.Ordinal) || typeof(T) == typeof(string);
         }
 
         public static T ConvertTo<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, HashSet<string> onlyFields=null)
@@ -96,10 +97,14 @@ namespace ServiceStack.OrmLite
 
                     if (typeof(T) == typeof(Dictionary<string, object>))
                         return (T)(object)reader.ConvertToDictionaryObjects();
-                    
+
+                    var values = new object[reader.FieldCount];
+
+                    if (typeof(T).Name.StartsWith("ValueTuple`"))
+                        return reader.ConvertToValueTuple<T>(values, dialectProvider);
+
                     var row = CreateInstance<T>();
                     var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition, dialectProvider, onlyFields: onlyFields);
-                    var values = new object[reader.FieldCount];
                     row.PopulateWithSqlReader(dialectProvider, reader, indexCache, values);
                     return row;
                 }
@@ -138,6 +143,40 @@ namespace ServiceStack.OrmLite
                 row[dataReader.GetName(i).Trim()] = dbValue is DBNull ? null : dbValue;
             }
             return row;
+        }
+
+        public static T ConvertToValueTuple<T>(this IDataReader reader, object[] values, IOrmLiteDialectProvider dialectProvider)
+        {
+            var row = typeof(T).CreateInstance();
+            var fields = typeof(T).GetPublicFields();
+
+            values = reader.PopulateValues(values, dialectProvider);
+
+            for (var i = 0; i < fields.Length; i++)
+            {
+                if (i >= fields.Length) break;
+
+                var field = fields[i];
+
+                var dbValue = values != null
+                    ? values[i]
+                    : reader.GetValue(i);
+
+                if (dbValue == null)
+                    continue;
+
+                if (dbValue.GetType() == field.FieldType)
+                {
+                    field.SetValue(row, dbValue);
+                }
+                else
+                {
+                    var converter = dialectProvider.GetConverter(field.FieldType);
+                    var fieldValue = converter.FromDbValue(field.FieldType, dbValue);
+                    field.SetValue(row, fieldValue);
+                }
+            }
+            return (T)row;
         }
 
         public static List<T> ConvertToList<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, HashSet<string> onlyFields=null)
@@ -180,6 +219,20 @@ namespace ServiceStack.OrmLite
                     }
                 }
                 return (List<T>)(object)to.ToList();
+            }
+            if (typeof(T).Name.StartsWith("ValueTuple`", StringComparison.Ordinal))
+            {
+                var to = new List<T>();
+                var values = new object[reader.FieldCount];
+                using (reader)
+                {
+                    while (reader.Read())
+                    {
+                        var row = reader.ConvertToValueTuple<T>(values, dialectProvider);
+                        to.Add(row);
+                    }
+                }
+                return to;
             }
             if (typeof(T).Name.StartsWith("Tuple`", StringComparison.Ordinal))
             {
@@ -538,12 +591,13 @@ namespace ServiceStack.OrmLite
                             ? new IndexFieldsCacheKey(reader, modelDefinition, dialect)
                             : null;
 
+            Tuple<FieldDefinition, int, IOrmLiteConverter>[] value;
             if (cacheKey != null) 
             {
                 lock (indexFieldsCache)
                 {
-                    if (indexFieldsCache.ContainsKey(cacheKey))
-                        return indexFieldsCache[cacheKey];
+                    if (indexFieldsCache.TryGetValue(cacheKey, out value))
+                        return value;
                 }
             }
 
@@ -608,11 +662,11 @@ namespace ServiceStack.OrmLite
 
             if (cacheKey != null)
             {
-                lock(indexFieldsCache)
+                lock (indexFieldsCache)
                 {
-                    if (indexFieldsCache.ContainsKey(cacheKey))
-                        return indexFieldsCache[cacheKey];
-                    else if (indexFieldsCache.Count < maxCachedIndexFields)
+                    if (indexFieldsCache.TryGetValue(cacheKey, out value))
+                        return value;
+                    if (indexFieldsCache.Count < maxCachedIndexFields)
                         indexFieldsCache.Add(cacheKey, result);
                 }
             }

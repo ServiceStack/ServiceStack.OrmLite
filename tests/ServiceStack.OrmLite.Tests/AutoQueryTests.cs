@@ -401,6 +401,39 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(sb.ToString().NormalizeNewLines(), Is.EqualTo("Dept 1\nDept 2\nDept 3\n"));
             }
         }
+
+        [Test]
+        public void Can_select_custom_fields_using_ValueTuple()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropTable<DeptEmployee>();
+                db.DropTable<Department2>();
+                db.CreateTable<Department2>();
+                db.CreateTable<DeptEmployee>();
+
+                db.InsertAll(SeedDepartments);
+                db.InsertAll(SeedEmployees);
+
+                var q = db.From<DeptEmployee>()
+                    .Join<Department2>()
+                    .OrderBy(x => x.Id)
+                    .Select<DeptEmployee, Department2>(
+                        (de, d2) => new { de.Id, de.LastName, d2.Name });
+
+                var results = db.Select<(int id, string lastName, string deptName)>(q);
+
+                Assert.That(results.Count, Is.EqualTo(3));
+                for (var i = 0; i < results.Count; i++)
+                {
+                    var row = results[i];
+                    var count = i + 1;
+                    Assert.That(row.id, Is.EqualTo(count));
+                    Assert.That(row.lastName, Is.EqualTo("Last " + count));
+                    Assert.That(row.deptName, Is.EqualTo("Dept " + count));
+                }
+            }
+        }
     }
 
 }
