@@ -148,15 +148,17 @@ namespace ServiceStack.OrmLite
         public static T ConvertToValueTuple<T>(this IDataReader reader, object[] values, IOrmLiteDialectProvider dialectProvider)
         {
             var row = typeof(T).CreateInstance();
-            var fields = typeof(T).GetPublicFields();
+            var typeFields = TypeFields.Get(typeof(T));
 
             values = reader.PopulateValues(values, dialectProvider);
 
-            for (var i = 0; i < fields.Length; i++)
+            for (var i = 0; i < reader.FieldCount; i++)
             {
-                if (i >= fields.Length) break;
+                var itemName = "Item" + (i + 1);
+                var field = typeFields.GetPublicField(itemName);
+                if (field == null) break;
 
-                var field = fields[i];
+                var fieldSetFn = typeFields.GetPublicSetterRef(itemName);
 
                 var dbValue = values != null
                     ? values[i]
@@ -167,13 +169,13 @@ namespace ServiceStack.OrmLite
 
                 if (dbValue.GetType() == field.FieldType)
                 {
-                    field.SetValue(row, dbValue);
+                    fieldSetFn(ref row, dbValue);
                 }
                 else
                 {
                     var converter = dialectProvider.GetConverter(field.FieldType);
                     var fieldValue = converter.FromDbValue(field.FieldType, dbValue);
-                    field.SetValue(row, fieldValue);
+                    fieldSetFn(ref row, fieldValue);
                 }
             }
             return (T)row;
