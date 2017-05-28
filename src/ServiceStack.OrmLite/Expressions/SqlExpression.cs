@@ -1907,7 +1907,7 @@ namespace ServiceStack.OrmLite
                 }
                 else if (e.NodeType == ExpressionType.MemberAccess)
                 {
-                    list.Add(GetMemberExpression(e as MemberExpression));
+                    list.Add(VisitMemberAccess(e as MemberExpression));
                 }
                 else
                 {
@@ -1980,7 +1980,7 @@ namespace ServiceStack.OrmLite
                     ? fd.FieldName
                     : memberName;
 
-                var includePrefix = PrefixFieldWithTableName && fd.CustomSelect == null;
+                var includePrefix = PrefixFieldWithTableName && fd?.CustomSelect == null;
                 return includePrefix
                     ? DialectProvider.GetQuotedColumnName(tableDef, fieldName)
                     : DialectProvider.GetQuotedColumnName(fieldName);
