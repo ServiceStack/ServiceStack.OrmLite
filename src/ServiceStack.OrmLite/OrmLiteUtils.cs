@@ -155,10 +155,8 @@ namespace ServiceStack.OrmLite
             for (var i = 0; i < reader.FieldCount; i++)
             {
                 var itemName = "Item" + (i + 1);
-                var field = typeFields.GetPublicField(itemName);
+                typeFields.FieldsMap.TryGetValue(itemName, out TypeFieldInfo field);
                 if (field == null) break;
-
-                var fieldSetFn = typeFields.GetPublicSetterRef(itemName);
 
                 var dbValue = values != null
                     ? values[i]
@@ -167,15 +165,16 @@ namespace ServiceStack.OrmLite
                 if (dbValue == null)
                     continue;
 
-                if (dbValue.GetType() == field.FieldType)
+                var fieldType = field.FieldInfo.FieldType;
+                if (dbValue.GetType() == fieldType)
                 {
-                    fieldSetFn(ref row, dbValue);
+                    field.PublicSetterRef(ref row, dbValue);
                 }
                 else
                 {
-                    var converter = dialectProvider.GetConverter(field.FieldType);
-                    var fieldValue = converter.FromDbValue(field.FieldType, dbValue);
-                    fieldSetFn(ref row, fieldValue);
+                    var converter = dialectProvider.GetConverter(fieldType);
+                    var fieldValue = converter.FromDbValue(fieldType, dbValue);
+                    field.PublicSetterRef(ref row, fieldValue);
                 }
             }
             return (T)row;
