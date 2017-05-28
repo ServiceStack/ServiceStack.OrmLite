@@ -17,7 +17,7 @@
     <language>en-US</language> 
     <copyright>Copyright 2017 ServiceStack</copyright>
     <dependencies>
-      <dependency id="System.Data.SQLite.Core" version="1.0.105" />
+      <dependency id="System.Data.SQLite.Core" version="1.0.105.1" />
       <dependency id="ServiceStack.OrmLite.Signed" version="4.5" />
     </dependencies> 
   </metadata> 
