@@ -552,6 +552,18 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(target.Count, Is.EqualTo(1));
         }
 
+        [Test]
+        public void Can_Where_using_SqlIn_filter()
+        {
+            var subQ = Db.From<TestType>().Where(x=>x.NullableIntCol == 10).Select(x=>x.Id);
+            var q = Db.From<TestType>();
+            q.PrefixFieldWithTableName = true;
+            q.Where(x=>Sql.In(x.Id, subQ));
+
+            var target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(1));
+        }
+
         private int MethodReturningInt(int val)
         {
             return val;
