@@ -182,6 +182,21 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 Assert.That(single.min, Is.EqualTo("A"));
                 Assert.That(single.max, Is.EqualTo("D"));
                 Assert.That(single.sum, Is.EqualTo(letterFrequencySumId));
+
+                single = db.Single<(int count, string min, string max, int sum)>(
+                    db.From<LetterFrequency>()
+                        .Select(x => new
+                        {
+                            Count = Sql.Count("*"),
+                            Min = Sql.Min(x.Letter),
+                            Max = Sql.Max(x.Letter),
+                            Sum = Sql.Sum(x.Id)
+                        }));
+
+                Assert.That(single.count, Is.EqualTo(10));
+                Assert.That(single.min, Is.EqualTo("A"));
+                Assert.That(single.max, Is.EqualTo("D"));
+                Assert.That(single.sum, Is.EqualTo(letterFrequencySumId));
             }
         }
 
