@@ -1005,15 +1005,15 @@ namespace ServiceStack.OrmLite
             return unquotedVal;
         }
 
-        static readonly ConcurrentDictionary<string, PropertyGetterDelegate> anonValueFnMap =
-            new ConcurrentDictionary<string, PropertyGetterDelegate>();
+        static readonly ConcurrentDictionary<string, GetMemberDelegate> anonValueFnMap =
+            new ConcurrentDictionary<string, GetMemberDelegate>();
 
         protected virtual object GetAnonValue(FieldDefinition fieldDef, object obj)
         {
             var anonType = obj.GetType();
             var key = anonType.Name + "." + fieldDef.Name;
 
-            var factoryFn = (Func<string, PropertyGetterDelegate>)(_ =>
+            var factoryFn = (Func<string, GetMemberDelegate>)(_ =>
                 anonType.GetProperty(fieldDef.Name).GetPropertyGetterFn());
 
             var getterFn = anonValueFnMap.GetOrAdd(key, factoryFn);

@@ -23,9 +23,6 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
-    public delegate void PropertySetterDelegate(object instance, object value);
-    public delegate object PropertyGetterDelegate(object instance);
-
     public delegate object GetValueDelegate(int i);
 
     public static class OrmLiteReadCommandExtensions
