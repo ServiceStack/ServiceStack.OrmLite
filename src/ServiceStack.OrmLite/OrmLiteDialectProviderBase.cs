@@ -1014,7 +1014,7 @@ namespace ServiceStack.OrmLite
             var key = anonType.Name + "." + fieldDef.Name;
 
             var factoryFn = (Func<string, GetMemberDelegate>)(_ =>
-                anonType.GetProperty(fieldDef.Name).GetPropertyGetterFn());
+                anonType.GetProperty(fieldDef.Name).CreateGetter());
 
             var getterFn = anonValueFnMap.GetOrAdd(key, factoryFn);
 
