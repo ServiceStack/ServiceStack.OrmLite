@@ -2316,6 +2316,60 @@ Assert.That(db.Select<Shipper>(), Has.Count.EqualTo(0));
 Assert.That(db.Select<ShipperType>(), Has.Count.EqualTo(0));
 ```
 
+### Soft Deletes
+
+Select Filters let you specify a custom `SelectFilter` that lets you modify queries that use `SqlExpression<T>` before they're executed. This could be used to make working with "Soft Deletes" Tables easier where it can be made to apply a custom `x.IsDeleted != true` condition on every `SqlExpression`.
+
+By either using a `SelectFilter` on concrete POCO Table Types, e.g:
+
+```csharp
+SqlExpression<Table1>.SelectFilter = q => q.Where(x => x.IsDeleted != true);
+SqlExpression<Table2>.SelectFilter = q => q.Where(x => x.IsDeleted != true);
+```
+
+Or alternatively using generic delegate that applies to all SqlExpressions, but you'll only have access to a 
+`IUntypedSqlExpression` which offers a limited API surface area but will still let you execute a custom filter 
+for all `SqlExpression<T>` that could be used to add a condition for all tables implementing a custom 
+`ISoftDelete` interface with:
+
+```csharp
+OrmLiteConfig.SqlExpressionSelectFilter = q =>
+{
+    if (q.ModelDef.ModelType.HasInterface(typeof(ISoftDelete)))
+    {
+        q.Where<ISoftDelete>(x => x.IsDeleted != true);
+    }
+};
+```
+
+Both solutions above will transparently add the `x.IsDeleted != true` to all `SqlExpression<T>` based queries
+so it only returns results which aren't `IsDeleted` from any of queries below:
+
+```csharp
+var results = db.Select(db.From<Table>());
+var result = db.Single(db.From<Table>().Where(x => x.Name == "foo"));
+var result = db.Single(x => x.Name == "foo");
+```
+
+### Check Constraints
+
+OrmLite includes support for [SQL Check Constraints](https://en.wikipedia.org/wiki/Check_constraint) which will create your Table schema with the `[CheckConstraint]` specified, e.g:
+
+```csharp
+public class Table
+{
+    [AutoIncrement]
+    public int Id { get; set; }
+
+    [Required]
+    [CheckConstraint("Age > 1")]
+    public int Age { get; set; }
+
+    [CheckConstraint("Name IS NOT NULL")]
+    public string Name { get; set; }
+}
+```
+
 ## SQL Server Features
 
 ### Memory Optimized Tables
