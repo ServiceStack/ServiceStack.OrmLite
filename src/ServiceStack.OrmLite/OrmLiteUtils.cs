@@ -155,7 +155,7 @@ namespace ServiceStack.OrmLite
             for (var i = 0; i < reader.FieldCount; i++)
             {
                 var itemName = "Item" + (i + 1);
-                typeFields.FieldsMap.TryGetValue(itemName, out TypeFieldInfo field);
+                var field = typeFields.GetAccessor(itemName);
                 if (field == null) break;
 
                 var dbValue = values != null
