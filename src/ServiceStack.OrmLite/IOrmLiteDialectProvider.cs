@@ -75,6 +75,10 @@ namespace ServiceStack.OrmLite
 
         IDbConnection CreateConnection(string filePath, Dictionary<string, string> options);
 
+        string GetTableName(ModelDefinition modelDef);
+
+        string GetTableName(string tableName, string schema = null);
+
         string GetQuotedTableName(ModelDefinition modelDef);
 
         string GetQuotedTableName(string tableName, string schema=null);

@@ -76,6 +76,16 @@ namespace ServiceStack.OrmLite
                 $"{dialect.GetQuotedTableName(tableDef)} {alias} {expr.Replace(dialect.GetQuotedTableName(tableDef), dialect.GetQuotedTableName(alias))}";
         }
 
+        public static string GetTableName<T>(this IDbConnection db)
+        {
+            return db.GetDialectProvider().GetTableName(ModelDefinition<T>.Definition);
+        }
+
+        public static string GetQuotedTableName<T>(this IDbConnection db)
+        {
+            return db.GetDialectProvider().GetQuotedTableName(ModelDefinition<T>.Definition);
+        }
+
         /// <summary>
         /// Open a Transaction in OrmLite
         /// </summary>
