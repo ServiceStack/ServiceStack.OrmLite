@@ -9,6 +9,7 @@
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
     <SignAssembly>True</SignAssembly>
     <DelaySign>False</DelaySign>
     <AssemblyOriginatorKeyFile>servicestack-sn.pfx</AssemblyOriginatorKeyFile>
