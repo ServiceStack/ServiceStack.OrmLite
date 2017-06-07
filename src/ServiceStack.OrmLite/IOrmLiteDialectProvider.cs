@@ -51,6 +51,8 @@ namespace ServiceStack.OrmLite
 
         IStringSerializer StringSerializer { get; set; }
 
+        Func<string, string> ParamNameFilter { get; set; }
+
         /// <summary>
         /// Quote the string so that it can be used inside an SQL-expression
         /// Escape quotes inside the string

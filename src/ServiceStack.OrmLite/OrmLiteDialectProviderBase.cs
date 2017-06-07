@@ -198,6 +198,8 @@ namespace ServiceStack.OrmLite
 
         public IStringSerializer StringSerializer { get; set; }
 
+        public Func<string, string> ParamNameFilter { get; set; } = OrmLiteConfig.ParamNameFilter;
+
         public string DefaultValueFormat = " DEFAULT ({0})";
 
         private EnumConverter enumConverter;
@@ -910,10 +912,10 @@ namespace ServiceStack.OrmLite
 
                 if (fieldDef == null)
                 {
-                    if (OrmLiteConfig.ParamNameFilter != null)
+                    if (ParamNameFilter != null)
                     {
                         fieldDef = modelDef.GetFieldDefinition(name => 
-                            string.Equals(OrmLiteConfig.ParamNameFilter(name), fieldName, StringComparison.OrdinalIgnoreCase));
+                            string.Equals(ParamNameFilter(name), fieldName, StringComparison.OrdinalIgnoreCase));
                     }
 
                     if (fieldDef == null)
