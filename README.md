@@ -42,8 +42,7 @@ level public properties.
   - [ServiceStack.OrmLite.SqlServer](http://nuget.org/List/Packages/ServiceStack.OrmLite.SqlServer)
   - [ServiceStack.OrmLite.PostgreSQL](http://nuget.org/List/Packages/ServiceStack.OrmLite.PostgreSQL)
   - [ServiceStack.OrmLite.MySql](http://nuget.org/List/Packages/ServiceStack.OrmLite.MySql)
-  - [ServiceStack.OrmLite.Sqlite.Mono](http://nuget.org/packages/ServiceStack.OrmLite.Sqlite.Mono) - Compatible with Mono / Windows (x86) 
-  - [ServiceStack.OrmLite.Sqlite.Windows](http://nuget.org/List/Packages/ServiceStack.OrmLite.Sqlite.Windows) - 32/64bit Mixed mode .NET for Windows only 
+  - [ServiceStack.OrmLite.Sqlite](http://nuget.org/packages/ServiceStack.OrmLite.Sqlite)
   - [ServiceStack.OrmLite.Oracle](http://nuget.org/packages/ServiceStack.OrmLite.Oracle) (unofficial)
   - [ServiceStack.OrmLite.Firebird](http://nuget.org/List/Packages/ServiceStack.OrmLite.Firebird)  (unofficial)
   - [ServiceStack.OrmLite.VistaDb](http://nuget.org/List/Packages/ServiceStack.OrmLite.VistaDb)  (unofficial)
@@ -194,7 +193,7 @@ Currently only a limited number of RDBMS providers offer async API's, which at t
   - [MySQL .NET 4.5+](https://www.nuget.org/packages/ServiceStack.OrmLite.MySql)
 
 We've also added a 
-[.NET 4.5 build for Sqlite](https://www.nuget.org/packages/ServiceStack.OrmLite.Sqlite.Mono) 
+[.NET 4.5 build for Sqlite](https://www.nuget.org/packages/ServiceStack.OrmLite.Sqlite) 
 as it's a common use-case to swapout to use Sqlite's in-memory provider for faster tests. 
 But as Sqlite doesn't provide async API's under-the-hood we fallback to *pseudo async* support where we just wrap its synchronous responses in `Task` results. 
 
@@ -851,11 +850,61 @@ The mapping also includes a fallback for referencing fully-qualified names in th
 
 ## Dynamic Result Sets
 
-There's new support for returning unstructured resultsets letting you Select `List<object>` instead of having results mapped to a concrete Poco class, e.g:
+In addition to populating Typed POCOs, OrmLite has a number of flexible options for accessing dynamic resultsets with adhoc schemas:
+
+### C# 7 Value Tuples
+ 
+The C# 7 Value Tuple support enables a terse, clean and typed API for accessing the Dynamic Result Sets returned when using a custom Select expression:
 
 ```csharp
-db.Select<List<object>>(db.From<Poco>()
-  .Select("COUNT(*), MIN(Id), MAX(Id)"))[0].PrintDump();
+var query = db.From<Employee>()
+    .Join<Department>()
+    .OrderBy(e => e.Id)
+    .Select<Employee, Department>(
+        (e, d) => new { e.Id, e.LastName, d.Name });
+ 
+var results = db.Select<(int id, string lastName, string deptName)>(query);
+ 
+var row = results[i];
+$"row: ${row.id}, ${row.lastName}, ${row.deptName}".Print();
+```
+ 
+Full Custom SQL Example:
+ 
+```csharp
+var results = db.SqlList<(int count, string min, string max, int sum)>(
+    "SELECT COUNT(*), MIN(Word), MAX(Word), Sum(Total) FROM Table");
+```
+ 
+Partial Custom SQL Select Example:
+ 
+```csharp
+var query = db.From<Table>()
+    .Select("COUNT(*), MIN(Word), MAX(Word), Sum(Total)");
+ 
+var result = db.Single<(int count, string min, string max, int sum)>(query);
+```
+ 
+Same as above, but using Typed APIs:
+ 
+```csharp
+var result = db.Single<(int count, string min, string max, int sum)>(
+    db.From<Table>()
+        .Select(x => new {
+            Count = Sql.Count("*"),
+            Min = Sql.Min(x.Word),
+            Max = Sql.Max(x.Word),
+            Sum = Sql.Sum(x.Total)
+        }));
+```
+
+There's also support for returning unstructured resultsets in `List<object>`, e.g:
+
+```csharp
+var results = db.Select<List<object>>(db.From<Poco>()
+  .Select("COUNT(*), MIN(Id), MAX(Id)"));
+
+results[0].PrintDump();
 ```
 
 Output of objects in the returned `List<object>`:
@@ -869,8 +918,10 @@ Output of objects in the returned `List<object>`:
 You can also Select `Dictionary<string,object>` to return a dictionary of column names mapped with their values, e.g:
 
 ```csharp
-db.Select<Dictionary<string,object>>(db.From<Poco>()
-  .Select("COUNT(*) Total, MIN(Id) MinId, MAX(Id) MaxId"))[0].PrintDump();
+var results = db.Select<Dictionary<string,object>>(db.From<Poco>()
+  .Select("COUNT(*) Total, MIN(Id) MinId, MAX(Id) MaxId"));
+
+results[0].PrintDump();
 ```
 
 Output of objects in the returned `Dictionary<string,object>`:
@@ -884,8 +935,8 @@ Output of objects in the returned `Dictionary<string,object>`:
 and can be used for API's returning a **Single** row result:
 
 ```csharp
-db.Single<List<object>>(db.From<Poco>()
-  .Select("COUNT(*) Total, MIN(Id) MinId, MAX(Id) MaxId")).PrintDump();
+var result = db.Single<List<object>>(db.From<Poco>()
+  .Select("COUNT(*) Total, MIN(Id) MinId, MAX(Id) MaxId"));
 ```
 
 or use `object` to fetch an unknown **Scalar** value:
@@ -1896,7 +1947,7 @@ dbFactory.Run(db => db.CreateTable<MasterRecord>(overwrite:false));
 NoOfShards.Times(i => {
     var namedShard = "robots-shard" + i;
     dbFactory.RegisterConnection(namedShard, 
-        "~/App_Data/{0}.sqlite".Fmt(shardId).MapAbsolutePath(),                //Connection String
+        $"~/App_Data/{shardId}.sqlite".MapAbsolutePath(),                //Connection String
         SqliteDialect.Provider);
 	
 	dbFactory.OpenDbConnection(namedShard).Run(db => db.CreateTable<Robot>(overwrite:false));
