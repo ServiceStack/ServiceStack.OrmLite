@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>net45</TargetFrameworks>
     <AssemblyName>ServiceStack.OrmLite.Oracle</AssemblyName>
+    <RootNamespace>ServiceStack.OrmLite.Oracle</RootNamespace>
     <PackageId>ServiceStack.OrmLite.Oracle.Signed</PackageId>
     <Configuration>Signed</Configuration>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>

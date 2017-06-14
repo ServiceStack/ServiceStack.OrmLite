@@ -4,7 +4,7 @@
     <TargetFrameworks>net45</TargetFrameworks>
     <AssemblyName>ServiceStack.OrmLite.SqlServer.Converters</AssemblyName>
     <RootNamespace>ServiceStack.OrmLite.SqlServer.Converters</RootNamespace>
-    <PackageId>ServiceStack.OrmLite.SqlServer.Converters</PackageId>
+    <PackageId>ServiceStack.OrmLite.SqlServer.Converters.Signed</PackageId>
     <Configuration>Signed</Configuration>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
