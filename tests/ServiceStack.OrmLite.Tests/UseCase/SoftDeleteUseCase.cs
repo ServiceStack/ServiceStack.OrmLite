@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using ServiceStack.DataAnnotations;
+using ServiceStack.OrmLite.Tests.Shared;
 
 namespace ServiceStack.OrmLite.Tests.UseCase
 {
@@ -98,6 +99,10 @@ namespace ServiceStack.OrmLite.Tests.UseCase
                 db.Insert(new ModelWithSoftDelete { Name = "foo" });
                 db.Insert(new ModelWithSoftDelete { Name = "bar", IsDeleted = true });
 
+                db.DropAndCreateTable<Table1>();
+                db.Insert(new Table1 { Id = 1, String = "foo" });
+                db.Insert(new Table1 { Id = 2, String = "bar" });
+
                 var results = db.Select(db.From<ModelWithSoftDelete>());
 
                 Assert.That(results.Count, Is.EqualTo(1));
@@ -112,6 +117,16 @@ namespace ServiceStack.OrmLite.Tests.UseCase
                 Assert.That(result, Is.Null);
 
                 result = db.Single<ModelWithSoftDelete>(x => x.Name == "bar");
+                Assert.That(result, Is.Null);
+
+                result = db.Single(db.From<ModelWithSoftDelete>()
+                    .Join<Table1>((m, t) => m.Name == t.String)
+                    .Where(x => x.Name == "foo"));
+                Assert.That(result.Name, Is.EqualTo("foo"));
+
+                result = db.Single(db.From<ModelWithSoftDelete>()
+                    .Join<Table1>((m, t) => m.Name == t.String)
+                    .Where(x => x.Name == "bar"));
                 Assert.That(result, Is.Null);
 
                 OrmLiteConfig.SqlExpressionSelectFilter = null;
