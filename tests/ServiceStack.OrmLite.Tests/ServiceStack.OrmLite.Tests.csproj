@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>net45;netcoreapp1.1</TargetFrameworks>
-    <!--<TargetFrameworks>netcoreapp1.1</TargetFrameworks>-->
+    <!--<TargetFrameworks>net45</TargetFrameworks>-->
     <DebugType>portable</DebugType>
     <AssemblyName>ServiceStack.OrmLite.Tests</AssemblyName>
     <OutputType>Library</OutputType>
