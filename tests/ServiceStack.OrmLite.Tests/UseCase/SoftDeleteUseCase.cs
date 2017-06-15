@@ -17,6 +17,14 @@ namespace ServiceStack.OrmLite.Tests.UseCase
         public bool IsDeleted { get; set; }
     }
 
+    public class ModelWithSoftDeleteJoin : ISoftDelete
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public bool IsDeleted { get; set; }
+    }
+
     public static class SqlExpressionExtensions
     {
         public static SqlExpression<T> OnlyActive<T>(this SqlExpression<T> q)
@@ -126,6 +134,40 @@ namespace ServiceStack.OrmLite.Tests.UseCase
 
                 result = db.Single(db.From<ModelWithSoftDelete>()
                     .Join<Table1>((m, t) => m.Name == t.String)
+                    .Where(x => x.Name == "bar"));
+                Assert.That(result, Is.Null);
+
+                OrmLiteConfig.SqlExpressionSelectFilter = null;
+            }
+        }
+
+        [Test]
+        public void Can_use_interface_condition_on_table_with_join()
+        {
+            using (var db = OpenDbConnection())
+            {
+                OrmLiteConfig.SqlExpressionSelectFilter = q =>
+                {
+                    if (q.ModelDef.ModelType.HasInterface(typeof(ISoftDelete)))
+                    {
+                        q.Where<ISoftDelete>(x => x.IsDeleted != true);
+                    }
+                };
+
+                db.DropAndCreateTable<ModelWithSoftDelete>();
+                db.Insert(new ModelWithSoftDelete { Name = "foo" });
+                db.Insert(new ModelWithSoftDelete { Name = "bar", IsDeleted = true });
+                db.DropAndCreateTable<ModelWithSoftDeleteJoin>();
+                db.Insert(new ModelWithSoftDeleteJoin { Name = "foo" });
+                db.Insert(new ModelWithSoftDeleteJoin { Name = "bar", IsDeleted = true });
+
+                var result = db.Single(db.From<ModelWithSoftDelete>()
+                    .Join<ModelWithSoftDeleteJoin>((m, j) => m.Name == j.Name)
+                    .Where(x => x.Name == "foo"));
+                Assert.That(result.Name, Is.EqualTo("foo"));
+
+                result = db.Single(db.From<ModelWithSoftDelete>()
+                    .Join<ModelWithSoftDeleteJoin>((m, j) => m.Name == j.Name)
                     .Where(x => x.Name == "bar"));
                 Assert.That(result, Is.Null);
 

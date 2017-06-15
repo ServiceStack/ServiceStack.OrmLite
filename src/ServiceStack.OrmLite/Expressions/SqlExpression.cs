@@ -1980,6 +1980,11 @@ namespace ServiceStack.OrmLite
                     ? fd.FieldName
                     : memberName;
 
+                if (tableDef.ModelType.IsInterface() && this.ModelDef.ModelType.HasInterface(tableDef.ModelType))
+                {
+                    tableDef = this.ModelDef;
+                }
+
                 var includePrefix = PrefixFieldWithTableName && fd?.CustomSelect == null && !tableDef.ModelType.IsInterface();
                 return includePrefix
                     ? DialectProvider.GetQuotedColumnName(tableDef, fieldName)
