@@ -34,6 +34,8 @@
     <DefineConstants>$(DefineConstants);NET45;ASYNC</DefineConstants>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Signed|net45|AnyCPU'" />
+
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
     <PackageReference Include="Mysql.Data" Version="6.9.9" />
 
