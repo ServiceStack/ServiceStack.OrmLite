@@ -2337,7 +2337,12 @@ namespace ServiceStack.OrmLite
             p.SourceVersion = sourceVersion;
 
             if (p.DbType == DbType.String)
+            {
                 p.Size = DialectProvider.GetStringConverter().StringLength;
+                string strValue = value as string;
+                if (strValue != null && strValue.Length > p.Size)
+                    p.Size = strValue.Length;
+            }
 
             if (value != null)
             {
