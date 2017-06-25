@@ -927,7 +927,12 @@ namespace ServiceStack.OrmLite
             p.Direction = direction;
 
             if (p.DbType == DbType.String)
+            {
                 p.Size = dialectProvider.GetStringConverter().StringLength;
+                string strValue = value as string;
+                if (strValue != null && strValue.Length > p.Size)
+                    p.Size = strValue.Length;
+            }
 
             if (value != null)
             {
