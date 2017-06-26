@@ -140,6 +140,13 @@ namespace ServiceStack.OrmLite.Sqlite
 
         protected abstract IDbConnection CreateConnection(string connectionString);
 
+        public override string GetSchemaName(string schema)
+        {
+            return schema != null
+                ? NamingStrategy.GetSchemaName(schema).Replace(".", "_")
+                : NamingStrategy.GetSchemaName(schema);
+        }
+
         public override string GetTableName(string table, string schema=null)
         {
             return schema != null
