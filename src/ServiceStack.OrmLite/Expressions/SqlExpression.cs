@@ -1980,7 +1980,12 @@ namespace ServiceStack.OrmLite
                     ? fd.FieldName
                     : memberName;
 
-                var includePrefix = PrefixFieldWithTableName && fd?.CustomSelect == null;
+                if (tableDef.ModelType.IsInterface() && this.ModelDef.ModelType.HasInterface(tableDef.ModelType))
+                {
+                    tableDef = this.ModelDef;
+                }
+
+                var includePrefix = PrefixFieldWithTableName && fd?.CustomSelect == null && !tableDef.ModelType.IsInterface();
                 return includePrefix
                     ? DialectProvider.GetQuotedColumnName(tableDef, fieldName)
                     : DialectProvider.GetQuotedColumnName(fieldName);
@@ -2332,7 +2337,12 @@ namespace ServiceStack.OrmLite
             p.SourceVersion = sourceVersion;
 
             if (p.DbType == DbType.String)
+            {
                 p.Size = DialectProvider.GetStringConverter().StringLength;
+                string strValue = value as string;
+                if (strValue != null && strValue.Length > p.Size)
+                    p.Size = strValue.Length;
+            }
 
             if (value != null)
             {

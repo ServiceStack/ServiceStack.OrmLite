@@ -56,7 +56,7 @@ namespace ServiceStack.OrmLite
                 if (cmdParams == null) return;
                 foreach (var pi in cmdParams.GetType().GetPublicProperties())
                 {
-                    var getterFn = pi.GetPropertyGetterFn();
+                    var getterFn = pi.CreateGetter();
                     if (getterFn == null) continue;
                     var value = getterFn(cmdParams);
                     properties.Add(new Property(pi.Name, pi.PropertyType, value));

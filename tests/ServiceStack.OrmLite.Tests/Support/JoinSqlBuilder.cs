@@ -526,9 +526,13 @@ namespace ServiceStack.OrmLite
                 if (isDistinct && modelDef.FieldDefinitions.Count > 0)
                     sbSelect.Append(" DISTINCT ");
 
-                foreach (var fi in modelDef.FieldDefinitions)
+                foreach (var fieldDef in modelDef.FieldDefinitions)
                 {
-                    dbColumns.AppendFormat("{0}{1}", dbColumns.Length > 0 ? "," : "", (String.IsNullOrEmpty(fi.BelongToModelName) ? (dialectProvider.GetQuotedTableName(modelDef.ModelName)) : (dialectProvider.GetQuotedTableName(fi.BelongToModelName))) + "." + dialectProvider.GetQuotedColumnName(fi.FieldName));
+                    dbColumns.AppendFormat("{0}{1}", dbColumns.Length > 0 ? "," : "", 
+                        (string.IsNullOrEmpty(fieldDef.BelongToModelName) 
+                            ? dialectProvider.GetQuotedTableName(modelDef.ModelName) 
+                            : dialectProvider.GetQuotedTableName(fieldDef.BelongToModelName))
+                        + "." + dialectProvider.GetQuotedColumnName(fieldDef.FieldName));
                 }
                 if (dbColumns.Length == 0)
                     dbColumns.AppendFormat("\"{0}{1}\".*", baseSchema, dialectProvider.GetQuotedTableName(baseTableName));
@@ -542,7 +546,7 @@ namespace ServiceStack.OrmLite
             foreach (var join in joinList)
             {
                 i++;
-                if ((join.JoinType == JoinType.INNER) || (join.JoinType == JoinType.SELF))
+                if (join.JoinType == JoinType.INNER || join.JoinType == JoinType.SELF)
                     sbBody.Append(" INNER JOIN ");
                 else if (join.JoinType == JoinType.LEFTOUTER)
                     sbBody.Append(" LEFT OUTER JOIN ");

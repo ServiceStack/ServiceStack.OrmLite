@@ -181,15 +181,15 @@ namespace ServiceStack.OrmLite
         [Obsolete("Use GetStringConverter().UseUnicode")]
         public virtual bool UseUnicode
         {
-            get { return StringConverter.UseUnicode; }
-            set { StringConverter.UseUnicode = true; }
+            get => StringConverter.UseUnicode;
+            set => StringConverter.UseUnicode = true;
         }
 
         [Obsolete("Use GetStringConverter().StringLength")]
         public int DefaultStringLength
         {
-            get { return StringConverter.StringLength; }
-            set { StringConverter.StringLength = value; }
+            get => StringConverter.StringLength;
+            set => StringConverter.StringLength = value;
         }
 
         public string ParamString { get; set; } = "@";
@@ -198,12 +198,19 @@ namespace ServiceStack.OrmLite
 
         public IStringSerializer StringSerializer { get; set; }
 
+        private Func<string, string> paramNameFilter;
+        public Func<string, string> ParamNameFilter
+        {
+            get => paramNameFilter ?? OrmLiteConfig.ParamNameFilter;
+            set => paramNameFilter = value;
+        }
+
         public string DefaultValueFormat = " DEFAULT ({0})";
 
         private EnumConverter enumConverter;
         public EnumConverter EnumConverter
         {
-            get { return enumConverter; }
+            get => enumConverter;
             set
             {
                 value.DialectProvider = this;
@@ -214,7 +221,7 @@ namespace ServiceStack.OrmLite
         private RowVersionConverter rowVersionConverter;
         public RowVersionConverter RowVersionConverter
         {
-            get { return rowVersionConverter; }
+            get => rowVersionConverter;
             set
             {
                 value.DialectProvider = this;
@@ -225,7 +232,7 @@ namespace ServiceStack.OrmLite
         private ReferenceTypeConverter referenceTypeConverter;
         public ReferenceTypeConverter ReferenceTypeConverter
         {
-            get { return referenceTypeConverter; }
+            get => referenceTypeConverter;
             set
             {
                 value.DialectProvider = this;
@@ -236,7 +243,7 @@ namespace ServiceStack.OrmLite
         private ValueTypeConverter valueTypeConverter;
         public ValueTypeConverter ValueTypeConverter
         {
-            get { return valueTypeConverter; }
+            get => valueTypeConverter;
             set
             {
                 value.DialectProvider = this;
@@ -256,9 +263,7 @@ namespace ServiceStack.OrmLite
         public IOrmLiteConverter GetConverter(Type type)
         {
             type = Nullable.GetUnderlyingType(type) ?? type;
-
-            IOrmLiteConverter converter;
-            return Converters.TryGetValue(type, out converter)
+            return Converters.TryGetValue(type, out IOrmLiteConverter converter)
                 ? converter
                 : null;
         }
@@ -910,10 +915,10 @@ namespace ServiceStack.OrmLite
 
                 if (fieldDef == null)
                 {
-                    if (OrmLiteConfig.ParamNameFilter != null)
+                    if (ParamNameFilter != null)
                     {
                         fieldDef = modelDef.GetFieldDefinition(name => 
-                            string.Equals(OrmLiteConfig.ParamNameFilter(name), fieldName, StringComparison.OrdinalIgnoreCase));
+                            string.Equals(ParamNameFilter(name), fieldName, StringComparison.OrdinalIgnoreCase));
                     }
 
                     if (fieldDef == null)
@@ -1005,16 +1010,16 @@ namespace ServiceStack.OrmLite
             return unquotedVal;
         }
 
-        static readonly ConcurrentDictionary<string, PropertyGetterDelegate> anonValueFnMap =
-            new ConcurrentDictionary<string, PropertyGetterDelegate>();
+        static readonly ConcurrentDictionary<string, GetMemberDelegate> anonValueFnMap =
+            new ConcurrentDictionary<string, GetMemberDelegate>();
 
         protected virtual object GetAnonValue(FieldDefinition fieldDef, object obj)
         {
             var anonType = obj.GetType();
             var key = anonType.Name + "." + fieldDef.Name;
 
-            var factoryFn = (Func<string, PropertyGetterDelegate>)(_ =>
-                anonType.GetProperty(fieldDef.Name).GetPropertyGetterFn());
+            var factoryFn = (Func<string, GetMemberDelegate>)(_ =>
+                anonType.GetProperty(fieldDef.Name).CreateGetter());
 
             var getterFn = anonValueFnMap.GetOrAdd(key, factoryFn);
 

@@ -160,7 +160,7 @@ namespace ServiceStack.OrmLite
                 if (sql.Length > 0)
                     sql.Append(", ");
 
-                var value = setField.GetPropertyGetterFn()(updateOnly);
+                var value = setField.CreateGetter()(updateOnly);
                 sql
                     .Append(dialectProvider.GetQuotedColumnName(fieldDef.FieldName))
                     .Append("=")

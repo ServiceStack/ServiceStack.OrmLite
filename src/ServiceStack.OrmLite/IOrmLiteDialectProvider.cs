@@ -51,6 +51,8 @@ namespace ServiceStack.OrmLite
 
         IStringSerializer StringSerializer { get; set; }
 
+        Func<string, string> ParamNameFilter { get; set; }
+
         /// <summary>
         /// Quote the string so that it can be used inside an SQL-expression
         /// Escape quotes inside the string
@@ -74,6 +76,10 @@ namespace ServiceStack.OrmLite
         int GetValues(IDataReader reader, object[] values);
 
         IDbConnection CreateConnection(string filePath, Dictionary<string, string> options);
+
+        string GetTableName(ModelDefinition modelDef);
+
+        string GetTableName(string tableName, string schema = null);
 
         string GetQuotedTableName(ModelDefinition modelDef);
 
