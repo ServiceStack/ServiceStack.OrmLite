@@ -368,6 +368,11 @@ namespace ServiceStack.OrmLite
             return "'" + paramValue.Replace("'", "''") + "'";
         }
 
+        public virtual string GetSchemaName(string schema)
+        {
+            return NamingStrategy.GetSchemaName(schema);
+        }
+
         public virtual string GetTableName(ModelDefinition modelDef)
         {
             return GetTableName(modelDef.ModelName, modelDef.Schema);
