@@ -1024,7 +1024,9 @@ namespace ServiceStack.OrmLite
                     if (endPos == -1)
                         endPos = expr.Length;
 
-                    to.Add(expr.Substring(pos, endPos - pos).Trim());
+                    var arg = expr.Substring(pos, endPos - pos).Trim();
+                    if (!string.IsNullOrEmpty(arg))
+                        to.Add(arg);
 
                     pos = endPos;
                     continue;
