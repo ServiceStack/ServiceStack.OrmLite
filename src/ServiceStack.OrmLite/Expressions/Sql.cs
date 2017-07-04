@@ -65,6 +65,8 @@ namespace ServiceStack.OrmLite
         public static T JoinAlias<T>(T property, string tableAlias) => default(T);
 
         public static string Custom(string customSql) => customSql;
+
+        public static T Custom<T>(string customSql) => default(T);
     }
 
 }
