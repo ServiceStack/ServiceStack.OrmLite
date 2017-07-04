@@ -15,8 +15,8 @@ namespace ServiceStack.OrmLite.Tests
                 var table1 = db.GetTableName<Table1>();
                 var quotedTable1 = db.GetQuotedTableName<Table1>();
 
-                Assert.That(table1, Is.EqualTo("Table1"));
-                Assert.That(quotedTable1, Is.EqualTo("\"Table1\""));
+                Assert.That(table1.ToLower(), Is.EqualTo("table1"));
+                Assert.That(quotedTable1.ToLower(), Is.EqualTo("\"table1\""));
 
                 if (Dialect == Dialect.Sqlite)
                 {

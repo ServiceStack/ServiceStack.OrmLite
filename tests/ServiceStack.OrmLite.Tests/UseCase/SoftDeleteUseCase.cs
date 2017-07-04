@@ -107,7 +107,10 @@ namespace ServiceStack.OrmLite.Tests.UseCase
                 db.Insert(new ModelWithSoftDelete { Name = "foo" });
                 db.Insert(new ModelWithSoftDelete { Name = "bar", IsDeleted = true });
 
-                db.DropAndCreateTable<Table1>();
+                db.DropTable<Table3>();
+                db.DropTable<Table2>();
+                db.DropTable<Table1>();
+                db.CreateTable<Table1>();
                 db.Insert(new Table1 { Id = 1, String = "foo" });
                 db.Insert(new Table1 { Id = 2, String = "bar" });
 

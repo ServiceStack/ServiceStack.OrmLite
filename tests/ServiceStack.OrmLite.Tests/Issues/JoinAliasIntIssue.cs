@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using ServiceStack.Logging;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
@@ -63,7 +64,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
                 q.Join<TeamUser>((t, u) => t.TeamLeaderId == u.Id, db.JoinAlias("Leader"));
                 q.Where<Team, TeamUser>((t, u) => t.Id == Sql.JoinAlias(u.TeamId, "Leader"));
                 q.Where<TeamUser>(u => Sql.JoinAlias(u.Id, "Leader") == 1);
-                q.Where<Team, TeamUser>((t, u) => Sql.JoinAlias(t.Id, OrmLiteConfig.DialectProvider.GetQuotedTableName(ModelDefinition<Team>.Definition)) == Sql.JoinAlias(u.TeamId, "Leader")); // Workaround, but only works for fields, not constants
+                q.Where<Team, TeamUser>((t, u) => Sql.JoinAlias(t.Id, q.DialectProvider.GetQuotedTableName(ModelDefinition<Team>.Definition)) == Sql.JoinAlias(u.TeamId, "Leader")); // Workaround, but only works for fields, not constants
                 q.Where<Team, TeamUser>((user, leader) => Sql.JoinAlias(user.Id, "TeamUser") < Sql.JoinAlias(leader.Id, "Leader"));
                 q.Select<Team, TeamUser, TeamUser>((t, u, l) => new
                 {

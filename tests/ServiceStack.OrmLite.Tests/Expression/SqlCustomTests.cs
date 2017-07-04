@@ -35,6 +35,8 @@ namespace ServiceStack.OrmLite.Tests.Expression
         [Test]
         public void Can_use_CustomSelect_field_in_Typed_Query()
         {
+            if (Dialect == Dialect.PostgreSql) return;
+
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<Custom1>();
