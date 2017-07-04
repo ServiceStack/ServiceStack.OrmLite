@@ -216,7 +216,7 @@ namespace ServiceStack.OrmLite
 
         public string SelectInto<TModel>()
         {
-            if ((CustomSelect && OnlyFields  == null) || (typeof(TModel) == typeof(T) && !PrefixFieldWithTableName))
+            if ((CustomSelect && OnlyFields == null) || (typeof(TModel) == typeof(T) && !PrefixFieldWithTableName))
             {
                 return ToSelectStatement();
             }
@@ -259,7 +259,14 @@ namespace ServiceStack.OrmLite
 
                                 if (fieldDef.CustomSelect == null)
                                 {
-                                    sbSelect.Append($"{GetQuotedColumnName(tableDef, matchingField.Name)} AS {SqlColumn(fieldDef.Name)}");
+                                    if (!fieldDef.IsRowVersion)
+                                    {
+                                        sbSelect.Append($"{GetQuotedColumnName(tableDef, matchingField.Name)} AS {SqlColumn(fieldDef.Name)}");
+                                    }
+                                    else
+                                    {
+                                        sbSelect.Append(DialectProvider.GetRowVersionColumnName(fieldDef, DialectProvider.GetTableName(tableDef.ModelName)));
+                                    }
                                 }
                                 else
                                 {
@@ -286,10 +293,17 @@ namespace ServiceStack.OrmLite
 
                             if (fieldDef.CustomSelect == null)
                             {
-                                sbSelect.Append($"{GetQuotedColumnName(tableDef, tableFieldDef.Name)}");
+                                if (!fieldDef.IsRowVersion)
+                                {
+                                    sbSelect.Append(GetQuotedColumnName(tableDef, tableFieldDef.Name));
 
-                                if (tableFieldDef.Alias != null)
-                                    sbSelect.Append(" AS ").Append(SqlColumn(fieldDef.Name));
+                                    if (tableFieldDef.Alias != null)
+                                        sbSelect.Append(" AS ").Append(SqlColumn(fieldDef.Name));
+                                }
+                                else
+                                {
+                                    sbSelect.Append(DialectProvider.GetRowVersionColumnName(fieldDef, DialectProvider.GetTableName(tableDef.ModelName)));
+                                }
                             }
                             else
                             {

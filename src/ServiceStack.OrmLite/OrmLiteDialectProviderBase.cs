@@ -556,9 +556,9 @@ namespace ServiceStack.OrmLite
             return StringBuilderCache.ReturnAndFree(sb);
         }
 
-        public virtual SelectItem GetRowVersionColumnName(FieldDefinition field)
+        public virtual SelectItem GetRowVersionColumnName(FieldDefinition field, string tablePrefix = null)
         {
-            return new SelectItemColumn(this, field.FieldName);
+            return new SelectItemColumn(this, field.FieldName, null, tablePrefix);
         }
 
         public virtual string GetColumnNames(ModelDefinition modelDef)
@@ -581,7 +581,7 @@ namespace ServiceStack.OrmLite
                 }
                 else if (field.IsRowVersion)
                 {
-                    sqlColumns[i] = GetRowVersionColumnName(field);
+                    sqlColumns[i] = GetRowVersionColumnName(field, tablePrefix);
                 }
                 else
                 {
