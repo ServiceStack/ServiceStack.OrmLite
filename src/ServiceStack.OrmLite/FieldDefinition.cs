@@ -96,25 +96,17 @@ namespace ServiceStack.OrmLite
 
         public bool IsRefType { get; set; }
 
-        public override string ToString()
-        {
-            return Name;
-        }
+        public bool IgnoreOnUpdate { get; set; }
 
-        public bool ShouldSkipInsert()
-        {
-            return AutoIncrement || IsComputed || IsRowVersion;
-        }
+        public bool IgnoreOnInsert { get; set; }
+        
+        public override string ToString() => Name;
 
-        public bool ShouldSkipUpdate()
-        {
-            return IsComputed;
-        }
+        public bool ShouldSkipInsert() => IgnoreOnInsert || AutoIncrement || IsComputed || IsRowVersion;
 
-        public bool ShouldSkipDelete()
-        {
-            return IsComputed;
-        }
+        public bool ShouldSkipUpdate() => IgnoreOnUpdate || IsComputed;
+
+        public bool ShouldSkipDelete() => IsComputed;
 
         public bool IsSelfRefField(FieldDefinition fieldDef)
         {

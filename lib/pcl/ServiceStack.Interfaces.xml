@@ -511,6 +511,11 @@
             Contract indication that the Response DTO has a ResponseStatus
             </summary>
         </member>
+        <member name="M:ServiceStack.IO.IVirtualFile.Refresh">
+            <summary>
+            Refresh file stats for this node if supported
+            </summary>
+        </member>
         <member name="P:ServiceStack.IQuery.Skip">
             <summary>
             How many results to skip
@@ -1078,6 +1083,16 @@
             <summary>
             For messaging exceptions that should by-pass the messaging service's configured
             retry attempts and store the message straight into the DLQ
+            </summary>
+        </member>
+        <member name="T:ServiceStack.PageAttribute">
+            <summary>
+            Specify a VirtualPath or Layout for a Code Page
+            </summary>
+        </member>
+        <member name="T:ServiceStack.PageArgAttribute">
+            <summary>
+            Specify static page arguments
             </summary>
         </member>
         <member name="T:ServiceStack.Redis.Generic.IRedisList`1">
@@ -1680,6 +1695,16 @@
             </summary>
         </member>
         <member name="M:ServiceStack.Web.IPartialWriter.WritePartialTo(ServiceStack.Web.IResponse)">
+            <summary>
+            Write a partial content result
+            </summary>
+        </member>
+        <member name="P:ServiceStack.Web.IPartialWriterAsync.IsPartialRequest">
+            <summary>
+            Whether this HttpResult allows Partial Response
+            </summary>
+        </member>
+        <member name="M:ServiceStack.Web.IPartialWriterAsync.WritePartialToAsync(ServiceStack.Web.IResponse,System.Threading.CancellationToken)">
             <summary>
             Write a partial content result
             </summary>

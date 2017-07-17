@@ -87,6 +87,7 @@ namespace ServiceStack.OrmLite
 
                 var sequenceAttr = propertyInfo.FirstAttribute<SequenceAttribute>();
                 var computeAttr = propertyInfo.FirstAttribute<ComputeAttribute>();
+                var computedAttr = propertyInfo.FirstAttribute<ComputedAttribute>();
                 var customSelectAttr = propertyInfo.FirstAttribute<CustomSelectAttribute>();
                 var decimalAttribute = propertyInfo.FirstAttribute<DecimalLengthAttribute>();
                 var belongToAttribute = propertyInfo.FirstAttribute<BelongToAttribute>();
@@ -140,12 +141,14 @@ namespace ServiceStack.OrmLite
                     IsPrimaryKey = isPrimaryKey,
                     AutoIncrement =
                         isPrimaryKey &&
-                        propertyInfo.HasAttributeNamed(typeof(AutoIncrementAttribute).Name),
+                        propertyInfo.HasAttributeNamed(nameof(AutoIncrementAttribute)),
                     IsIndexed = !isPrimaryKey && isIndex,
                     IsUnique = isUnique,
                     IsClustered = indexAttr != null && indexAttr.Clustered,
                     IsNonClustered = indexAttr != null && indexAttr.NonClustered,
                     IsRowVersion = isRowVersion,
+                    IgnoreOnInsert = propertyInfo.HasAttributeNamed(nameof(IgnoreOnInsertAttribute)),
+                    IgnoreOnUpdate = propertyInfo.HasAttributeNamed(nameof(IgnoreOnUpdateAttribute)),
                     FieldLength = stringLengthAttr?.MaximumLength,
                     DefaultValue = defaultValueAttr?.DefaultValue,
                     CheckConstraint = chkConstraintAttr?.Constraint,
@@ -156,7 +159,7 @@ namespace ServiceStack.OrmLite
                     GetValueFn = propertyInfo.CreateGetter(),
                     SetValueFn = propertyInfo.CreateSetter(),
                     Sequence = sequenceAttr != null ? sequenceAttr.Name : string.Empty,
-                    IsComputed = computeAttr != null || customSelectAttr != null,
+                    IsComputed = computeAttr != null || computedAttr != null || customSelectAttr != null,
                     ComputeExpression = computeAttr != null ? computeAttr.Expression : string.Empty,
                     CustomSelect = customSelectAttr?.Sql,
                     Scale = decimalAttribute?.Scale,
@@ -165,7 +168,7 @@ namespace ServiceStack.OrmLite
                     IsRefType = propertyType.IsRefType(),
                 };
 
-                var isIgnored = propertyInfo.HasAttributeNamed(typeof(IgnoreAttribute).Name)
+                var isIgnored = propertyInfo.HasAttributeNamed(nameof(IgnoreAttribute))
                     || fieldDefinition.IsReference;
                 if (isIgnored)
                     modelDef.IgnoredFieldDefinitions.Add(fieldDefinition);
