@@ -757,7 +757,10 @@ namespace ServiceStack.OrmLite
                 var quotedValue = dbParam.Value != null
                     ? GetQuotedValue(dbParam.Value, dbParam.Value.GetType())
                     : "null";
-                sql = Regex.Replace(sql, dbParam.ParameterName + @"(,|\s|\)|$)", quotedValue + "$1");
+
+                var pattern = dbParam.ParameterName + @"(,|\s|\)|$)";
+                var replacement = quotedValue.Replace("$", "$$") + "$1";
+                sql = Regex.Replace(sql, pattern, replacement);
             }
             return sql;
         }
