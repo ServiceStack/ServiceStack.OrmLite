@@ -61,7 +61,7 @@ namespace ServiceStack.Common.Tests.Models
             Assert.That(actual.Id, Is.EqualTo(expected.Id.Value));
             Assert.That(actual.Name, Is.EqualTo(expected.Name));
             Assert.That(actual.Guid, Is.EqualTo(expected.Guid.Value));
-            Assert.That(actual.LongId, Is.EqualTo(expected.LongId.Value));
+            Assert.That(actual.Long, Is.EqualTo(expected.LongId.Value));
             Assert.That(actual.Bool, Is.EqualTo(expected.Bool.Value));
             try
             {
@@ -94,7 +94,9 @@ namespace ServiceStack.Common.Tests.Models
 
         public string Name { get; set; }
 
-        public long LongId { get; set; }
+        public int Int { get; set; }
+
+        public long Long { get; set; }
 
         public Guid Guid { get; set; }
 
@@ -106,6 +108,8 @@ namespace ServiceStack.Common.Tests.Models
 
         public double Double { get; set; }
 
+        public decimal Decimal { get; set; }
+
         public static ModelWithFieldsOfDifferentTypes Create(int id)
         {
             var row = new ModelWithFieldsOfDifferentTypes
@@ -114,8 +118,10 @@ namespace ServiceStack.Common.Tests.Models
                 Bool = id % 2 == 0,
                 DateTime = DateTime.Now.AddDays(id),
                 Double = 1.11d + id,
+                Decimal = 2.22m + id,
                 Guid = Guid.NewGuid(),
-                LongId = 999 + id,
+                Int = 10 + id,
+                Long = 999 + id,
                 Name = "Name" + id
             };
 
@@ -130,8 +136,10 @@ namespace ServiceStack.Common.Tests.Models
                 Bool = id % 2 == 0,
                 DateTime = new DateTime(1979, (id % 12) + 1, (id % 28) + 1),
                 Double = 1.11d + id,
+                Decimal = 2.22m + id,
                 Guid = new Guid(((id % 240) + 16).ToString("X") + "726E3B-9983-40B4-A8CB-2F8ADA8C8760"),
-                LongId = 999 + id,
+                Int = 10 + id,
+                Long = 999 + id,
                 Name = "Name" + id
             };
 
@@ -164,7 +172,7 @@ namespace ServiceStack.Common.Tests.Models
             Assert.That(actual.Id, Is.EqualTo(expected.Id));
             Assert.That(actual.Name, Is.EqualTo(expected.Name));
             Assert.That(actual.Guid, Is.EqualTo(expected.Guid));
-            Assert.That(actual.LongId, Is.EqualTo(expected.LongId));
+            Assert.That(actual.Long, Is.EqualTo(expected.Long));
             Assert.That(actual.Bool, Is.EqualTo(expected.Bool));
             try
             {

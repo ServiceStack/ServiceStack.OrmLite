@@ -6,7 +6,7 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    internal class DateTimeTests : OrmLiteTestBase
+    public class DateTimeTests : OrmLiteTestBase
     {
         [Test]
         public void Can_insert_and_query_with_Unspecified_DateStyle()

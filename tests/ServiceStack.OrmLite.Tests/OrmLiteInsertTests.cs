@@ -154,6 +154,55 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        public void Can_retrieve_AutoIdentityId_with_InsertOnly_fieldNames()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<ModelWithIdAndName>();
+
+                var row1 = ModelWithIdAndName.Create(5);
+                var row2 = ModelWithIdAndName.Create(6);
+
+                var row1LastInsertId = db.InsertOnly(row1, new[] { "Id", "Name" }, selectIdentity: true);
+
+                var row2LastInsertId = db.InsertOnly(row2, new[] { "Id", "Name" }, selectIdentity: true);
+
+                var insertedRow1 = db.SingleById<ModelWithIdAndName>(row1LastInsertId);
+                var insertedRow2 = db.SingleById<ModelWithIdAndName>(row2LastInsertId);
+
+                Assert.That(insertedRow1.Name, Is.EqualTo(row1.Name));
+                Assert.That(insertedRow2.Name, Is.EqualTo(row2.Name));
+            }
+        }
+
+        [Test]
+        public void Can_retrieve_AutoIdentityId_with_InsertOnly_expression()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<ModelWithIdAndName>();
+
+                var row1LastInsertId = db.InsertOnly(() => new ModelWithIdAndName
+                {
+                    Id = 5,
+                    Name = "Name 5"
+                }, selectIdentity: true);
+
+                var row2LastInsertId = db.InsertOnly(() => new ModelWithIdAndName
+                {
+                    Id = 6,
+                    Name = "Name 6"
+                }, selectIdentity: true);
+
+                var insertedRow1 = db.SingleById<ModelWithIdAndName>(row1LastInsertId);
+                var insertedRow2 = db.SingleById<ModelWithIdAndName>(row2LastInsertId);
+
+                Assert.That(insertedRow1.Name, Is.EqualTo("Name 5"));
+                Assert.That(insertedRow2.Name, Is.EqualTo("Name 6"));
+            }
+        }
+
+        [Test]
         public void Can_insert_TaskQueue_table()
         {
             using (var db = OpenDbConnection())

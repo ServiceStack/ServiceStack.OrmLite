@@ -1,121 +1,56 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>10.0.0</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{517B64BA-D7A6-4A15-8719-821B38147C61}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <RootNamespace>ServiceStack.OrmLite.Oracle</RootNamespace>
+    <TargetFrameworks>net45</TargetFrameworks>
     <AssemblyName>ServiceStack.OrmLite.Oracle</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <TargetFrameworkProfile />
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug</OutputPath>
-    <DefineConstants>DEBUG;</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <ConsolePause>false</ConsolePause>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Release</OutputPath>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <ConsolePause>false</ConsolePause>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-    <DebugSymbols>true</DebugSymbols>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Signed|AnyCPU'">
-    <OutputPath>bin\Signed\</OutputPath>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
+    <RootNamespace>ServiceStack.OrmLite.Oracle</RootNamespace>
+    <PackageId>ServiceStack.OrmLite.Oracle.Signed</PackageId>
+    <Configuration>Signed</Configuration>
+    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
+    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+    <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
+    <SignAssembly>True</SignAssembly>
+    <DelaySign>False</DelaySign>
     <AssemblyOriginatorKeyFile>servicestack-sn.pfx</AssemblyOriginatorKeyFile>
   </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' != 'Debug' ">
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="ServiceStack.Text">
-      <HintPath>..\..\lib\signed\ServiceStack.Text.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
-    <Reference Include="ServiceStack.Common">
-      <HintPath>..\..\lib\signed\ServiceStack.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="ServiceStack.Interfaces">
-      <HintPath>..\..\lib\ServiceStack.Interfaces.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Xml" />
+      <Reference Include="..\..\lib\pcl\ServiceStack.Interfaces.dll" />
   </ItemGroup>
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net45' ">
+    <DefineConstants>$(DefineConstants);NET45</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Signed|net45|AnyCPU'" />
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+    <PackageReference Include="dotConnect.Express.for.Oracle" Version="8.3.115" />
+    <PackageReference Include="odp.net.x64" Version="112.3.20" />
+    <PackageReference Include="odp.net.x86" Version="112.3.20" />
+    <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.Signed.csproj" />
+    <Reference Include="..\..\lib\signed\ServiceStack.Text.dll" />
+    <Reference Include="..\..\lib\signed\ServiceStack.Common.dll" />
+  </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="Converters\OracleBoolConverter.cs" />
-    <Compile Include="Converters\OracleByteArrayConverter.cs" />
-    <Compile Include="Converters\OracleCharArrayConverter.cs" />
-    <Compile Include="Converters\OracleDateTimeConverter.cs" />
-    <Compile Include="Converters\OracleDateTimeOffsetConverter.cs" />
-    <Compile Include="Converters\OracleEnumConverter.cs" />
-    <Compile Include="Converters\OracleFloatConverters.cs" />
-    <Compile Include="Converters\OracleGuidConverter.cs" />
-    <Compile Include="Converters\OracleIntegerConverters.cs" />
-    <Compile Include="Converters\OracleStringConverters.cs" />
-    <Compile Include="Converters\OracleTimeSpanAsIntConverter.cs" />
-    <Compile Include="DbSchema\IColumn.cs" />
-    <Compile Include="DbSchema\IParameter.cs" />
-    <Compile Include="DbSchema\IProcedure.cs" />
-    <Compile Include="DbSchema\ISchema.cs" />
-    <Compile Include="DbSchema\ITable.cs" />
-    <Compile Include="DbSchema\ParameterDirection.cs" />
-    <Compile Include="DbSchema\PocoCreator.cs" />
-    <Compile Include="DbSchema\ProcedureType.cs" />
-    <Compile Include="OracleConnection.cs">
+    <Compile Update="OracleCommand.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="OracleCommand.cs">
+    <Compile Update="OracleConnection.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="OracleDataReader.cs" />
-    <Compile Include="OracleDialect.cs" />
-    <Compile Include="OracleExecFilter.cs" />
-    <Compile Include="OracleNamingStrategy.cs" />
-    <Compile Include="OracleTimestampConverter.cs" />
-    <Compile Include="OracleValue.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="OracleOrmLiteDialectProvider.cs" />
-    <Compile Include="OraSchema\ClassWriter.cs" />
-    <Compile Include="OraSchema\Column.cs" />
-    <Compile Include="OraSchema\Parameter.cs" />
-    <Compile Include="OraSchema\Procedure.cs" />
-    <Compile Include="OraSchema\Schema.cs" />
-    <Compile Include="OraSchema\Table.cs" />
-    <Compile Include="OracleSqlExpression.cs" />
   </ItemGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <ItemGroup>
-    <None Include="app.config" />
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj">
-      <Project>{96179AC6-F6F1-40C3-9FDD-4F6582F54C5C}</Project>
-      <Name>ServiceStack.OrmLite</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" />
+
 </Project>

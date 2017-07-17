@@ -20,8 +20,8 @@ namespace ServiceStack.OrmLite.SqlServer.Converters
                 UseUnicode ? 4000 : 8000);
 
             return UseUnicode
-                ? "NVARCHAR({0})".Fmt(safeLength)
-                : "VARCHAR({0})".Fmt(safeLength);
+                ? $"NVARCHAR({safeLength})"
+                : $"VARCHAR({safeLength})";
         }
 
         public override void InitDbParam(IDbDataParameter p, Type fieldType)

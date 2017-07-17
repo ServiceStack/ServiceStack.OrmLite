@@ -13,20 +13,16 @@
     <BuildSolutionDir>$(MSBuildProjectDirectory)/..</BuildSolutionDir>
     <SrcDir>$(BuildSolutionDir)/src</SrcDir>
     <LibDir>$(BuildSolutionDir)/lib</LibDir>
-    <Configuration Condition="$(Configuration) == ''">Release</Configuration>
+    <Configuration>Signed</Configuration>
     <NuGetPath>$(BuildSolutionDir)/src/.nuget/nuget.exe</NuGetPath>
     <NuGetPackageDir>$(BuildSolutionDir)/NuGet</NuGetPackageDir>
     <Version>$(MajorVersion).$(MinorVersion).$(PatchVersion).0</Version>
-    <UnstableTag Condition="$(RELEASE) == ''">-unstable</UnstableTag>
-    <PackageVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)$(UnstableTag)</PackageVersion>
-    <EnvVersion>$(MajorVersion).$(MinorVersion)$(PatchVersion)</EnvVersion>
+    <PackageVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)</PackageVersion>
   </PropertyGroup>
 
-
   <ItemGroup>
-      <NugetPackageFilesToDelete Include="$(NuGetPackageDir)/*.nupkg"/>
+    <NugetPackageFilesToDelete Include="$(NuGetPackageDir)/*.nupkg"/>
   </ItemGroup>
-
   
   <PropertyGroup>
     <DoBuildSolutionsDependsOn>
@@ -42,7 +38,6 @@
   <Target Name="Default" DependsOnTargets="$(DoBuildSolutionsDependsOn)" />
 
   <Target Name="TeamCityBuild">
-    <!--<Copy SourceFiles="$(BuildSolutionDir)/tests/ServiceStack.Common.Tests/ci.app.config" DestinationFiles="$(BuildSolutionDir)/tests/ServiceStack.Common.Tests/app.config" />-->
     <CallTarget Targets="Default" />
   </Target>
 
@@ -50,11 +45,6 @@
 
   <Target Name="BeforeBuildSolutions">
     <Message Text="*****Before building solution*****" Importance="high"/>
-    <!--<Copy SourceFiles="Test/ci.app.config" DestinationFiles="Test/app.config" />-->
-  </Target>
-
-  <Target Name="UnitTests" DependsOnTargets="$(DoBuildSolutionsDependsOn)">
-      <Exec Command="$(BuildSolutionDir)/lib/tests/nunit-console/nunit-console-x86.exe $(BuildSolutionDir)/tests/ServiceStack.OrmLite.Tests/bin/$(Configuration)/ServiceStack.OrmLite.Tests.dll"/>
   </Target>
 
   <Target Name="BuildSolutions">
@@ -90,26 +80,23 @@
     <Delete Files="@(NugetPackageFilesToDelete)" />
     
     <ItemGroup>
-      <OrmLiteFiles Include="$(SrcDir)/ServiceStack.OrmLite/bin/$(Configuration)/ServiceStack.OrmLite.*"></OrmLiteFiles>
+      <OrmLiteFiles Include="$(SrcDir)/ServiceStack.OrmLite/bin/$(Configuration)/net45/ServiceStack.OrmLite.*"></OrmLiteFiles>
 
-      <SqliteWindowsFiles Include="$(SrcDir)/ServiceStack.OrmLite.Sqlite.Windows/bin/$(Configuration)/ServiceStack.OrmLite.Sqlite.Windows.*"></SqliteWindowsFiles>
+      <SqliteFiles Include="$(SrcDir)/ServiceStack.OrmLite.Sqlite/bin/$(Configuration)/net45/ServiceStack.OrmLite.Sqlite.*"></SqliteFiles>
+      <SqliteWindowsFiles Include="$(SrcDir)/ServiceStack.OrmLite.Sqlite.Windows/bin/$(Configuration)/net45/ServiceStack.OrmLite.Sqlite.Windows.*"></SqliteWindowsFiles>
 
-      <SqliteMonoFiles Include="$(SrcDir)/ServiceStack.OrmLite.Sqlite/bin/$(Configuration)/ServiceStack.OrmLite.Sqlite.*"></SqliteMonoFiles>
-      <SqliteMonoFiles Include="$(LibDir)/Mono.Data.Sqlite.dll"></SqliteMonoFiles>
-      <SqliteMonoContentFiles Include="$(LibDir)/sqlite3.dll"></SqliteMonoContentFiles>
+      <SqlServerFiles Include="$(SrcDir)/ServiceStack.OrmLite.SqlServer/bin/$(Configuration)/net45/ServiceStack.OrmLite.SqlServer.*"></SqlServerFiles>
+      <SqlServerConverterFiles Include="$(SrcDir)/ServiceStack.OrmLite.SqlServer.Converters/bin/$(Configuration)/net45/ServiceStack.OrmLite.SqlServer.Converters.*"></SqlServerConverterFiles>
 
-      <SqlServerFiles Include="$(SrcDir)/ServiceStack.OrmLite.SqlServer/bin/$(Configuration)/ServiceStack.OrmLite.SqlServer.*"></SqlServerFiles>
-      <SqlServerConverterFiles Include="$(SrcDir)/ServiceStack.OrmLite.SqlServer.Converters/bin/$(Configuration)/ServiceStack.OrmLite.SqlServer.Converters.*"></SqlServerConverterFiles>
+      <MySqlFiles Include="$(SrcDir)/ServiceStack.OrmLite.MySql/bin/$(Configuration)/net45/ServiceStack.OrmLite.MySql.*"></MySqlFiles>
 
-      <MySqlFiles Include="$(SrcDir)/ServiceStack.OrmLite.MySql/bin/$(Configuration)/ServiceStack.OrmLite.MySql.*"></MySqlFiles>
+      <PostgreSqlFiles Include="$(SrcDir)/ServiceStack.OrmLite.PostgreSQL/bin/$(Configuration)/net45/ServiceStack.OrmLite.PostgreSQL.*"></PostgreSqlFiles>
 
-      <PostgreSqlFiles Include="$(SrcDir)/ServiceStack.OrmLite.PostgreSQL/bin/$(Configuration)/ServiceStack.OrmLite.PostgreSQL.*"></PostgreSqlFiles>
-
-      <OracleFiles Include="$(SrcDir)/ServiceStack.OrmLite.Oracle/bin/$(Configuration)/ServiceStack.OrmLite.Oracle.*"></OracleFiles>
+      <OracleFiles Include="$(SrcDir)/ServiceStack.OrmLite.Oracle/bin/$(Configuration)/net45/ServiceStack.OrmLite.Oracle.*"></OracleFiles>
       
-      <FirebirdFiles Include="$(SrcDir)/ServiceStack.OrmLite.Firebird/bin/$(Configuration)/ServiceStack.OrmLite.Firebird.*"></FirebirdFiles>
+      <FirebirdFiles Include="$(SrcDir)/ServiceStack.OrmLite.Firebird/bin/$(Configuration)/net45/ServiceStack.OrmLite.Firebird.*"></FirebirdFiles>
 
-      <VistaDbFiles Include="$(SrcDir)/ServiceStack.OrmLite.VistaDb/bin/$(Configuration)/ServiceStack.OrmLite.VistaDB.*"></VistaDbFiles>
+      <VistaDbFiles Include="$(SrcDir)/ServiceStack.OrmLite.VistaDb/bin/$(Configuration)/net45/ServiceStack.OrmLite.VistaDB.*"></VistaDbFiles>
 
       <T4Files Include="$(SrcDir)/T4/*.*"></T4Files>
     </ItemGroup>
@@ -138,19 +125,16 @@
     <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite.Windows/servicestack.ormlite.sqlite.windows.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
             LogStandardErrorAsError="true" />
 
-    <!-- Sqlite Mono/.NET -->
+    <!-- Sqlite -->
 
     <MSBuild Projects="$(SrcDir)/ServiceStack.OrmLite.Sqlite/ServiceStack.OrmLite.Sqlite.csproj"
              Targets="Build"
              Properties="Version=$(PackageVersion);Configuration=$(Configuration)" />
 
-    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite.Mono/lib/net45" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite.Mono/lib/net45')" />
-    <Copy SourceFiles="%(SqliteMonoFiles.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite.Mono/lib/net45" />
-    
-    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite.Mono/content" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite.Mono/content')" />
-    <Copy SourceFiles="%(SqliteMonoContentFiles.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite.Mono/content" />
+    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite/lib/net45" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite/lib/net45')" />
+    <Copy SourceFiles="%(SqliteFiles.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite/lib/net45" />
 
-    <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite.Mono/servicestack.ormlite.sqlite.mono.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
+    <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite/servicestack.ormlite.sqlite.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
             LogStandardErrorAsError="true" />
 
     <!-- SqlServer -->
@@ -242,7 +226,7 @@
     <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.T4/content" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.T4/content')" />
     <Copy SourceFiles="%(T4Files.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.T4/content" />
 
-   <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.T4/servicestack.ormlite.t4.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion)"
+    <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.T4/servicestack.ormlite.t4.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion)"
             LogStandardErrorAsError="true" />
 
   </Target>

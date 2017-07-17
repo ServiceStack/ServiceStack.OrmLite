@@ -52,20 +52,18 @@ namespace ServiceStack.OrmLite.Tests
             }
         }
 
-        public override Task<T> Exec<T>(IDbConnection dbConn, Func<IDbCommand, Task<T>> filter)
+        public override async Task<T> Exec<T>(IDbConnection dbConn, Func<IDbCommand, Task<T>> filter)
         {
             try
             {
-                return base.Exec(dbConn, filter);
+                return await base.Exec(dbConn, filter);
             }
             catch (Exception)
             {
                 var sql = dbConn.GetLastSql();
                 if (sql == "exec sp_name @firstName, @age")
                 {
-                    var tcs = new TaskCompletionSource<T>();
-                    tcs.SetResult((T)(object)new Person { FirstName = "Mocked" });
-                    return tcs.Task;
+                    return (T)(object)new Person { FirstName = "Mocked" };
                 }
                 throw;
             }

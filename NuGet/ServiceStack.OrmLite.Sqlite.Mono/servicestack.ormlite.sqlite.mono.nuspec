@@ -7,6 +7,7 @@
     <authors>Service Stack</authors> 
     <owners>Service Stack</owners>
     <description>
+        This package is deprecated. Use ServiceStack.OrmLite.Sqlite instead.
         Light, simple and fast convention-based code-first POCO ORM. Support for Creating and Dropping Table Schemas from POCOs, Complex Property types transparently stored in schemaless text blobs in Sqlite.
     </description> 
     <projectUrl>https://github.com/ServiceStack/ServiceStack.OrmLite</projectUrl>

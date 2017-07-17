@@ -6,7 +6,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 	public class OrmLiteConnectionTests 
 		: OrmLiteTestBase
 	{
-		[Test][Ignore]
+		// [Test]
 		public void Can_create_connection_to_blank_database()
 		{
 			var connString = @"C:\Projects\PoToPe\trunk\website\src\Mflow.Intranet\Mflow.Intranet\App_Data\Exports\2009-10\MonthlySnapshot.mdf";

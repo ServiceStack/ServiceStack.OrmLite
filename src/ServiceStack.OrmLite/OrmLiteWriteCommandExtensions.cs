@@ -289,27 +289,7 @@ namespace ServiceStack.OrmLite
         {
             try
             {
-                if (!OrmLiteConfig.DeoptimizeReader)
-                {
-                    if (values == null)
-                        values = new object[reader.FieldCount];
-
-                    try
-                    {
-                        dialectProvider.GetValues(reader, values);
-                    }
-                    catch (Exception ex)
-                    {
-                        values = null;
-                        Log.Warn("Error trying to use GetValues() from DataReader. Falling back to individual field reads...", ex);
-                    }
-                }
-                else
-                {
-                    //Calling GetValues() on System.Data.SQLite.Core ADO.NET Provider changes behavior of reader.GetGuid()
-                    //So allow providers to by-pass reader.GetValues() optimization.
-                    values = null;
-                }
+                values = PopulateValues(reader, values, dialectProvider);
 
                 foreach (var fieldCache in indexCache)
                 {
@@ -354,9 +334,35 @@ namespace ServiceStack.OrmLite
             }
             catch (Exception ex)
             {
-                Log.Error(ex);
+                OrmLiteUtils.HandleException(ex);
             }
             return objWithProperties;
+        }
+
+        internal static object[] PopulateValues(this IDataReader reader, object[] values, IOrmLiteDialectProvider dialectProvider)
+        {
+            if (!OrmLiteConfig.DeoptimizeReader)
+            {
+                if (values == null)
+                    values = new object[reader.FieldCount];
+
+                try
+                {
+                    dialectProvider.GetValues(reader, values);
+                }
+                catch (Exception ex)
+                {
+                    values = null;
+                    Log.Warn("Error trying to use GetValues() from DataReader. Falling back to individual field reads...", ex);
+                }
+            }
+            else
+            {
+                //Calling GetValues() on System.Data.SQLite.Core ADO.NET Provider changes behavior of reader.GetGuid()
+                //So allow providers to by-pass reader.GetValues() optimization.
+                values = null;
+            }
+            return values;
         }
 
         internal static int Update<T>(this IDbCommand dbCmd, T obj, Action<IDbCommand> commandFilter = null)
@@ -632,7 +638,10 @@ namespace ServiceStack.OrmLite
             dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
             if (selectIdentity)
-                return dialectProvider.InsertAndGetLastInsertId<T>(dbCmd);
+            {
+                dbCmd.CommandText += dialectProvider.GetLastInsertIdSqlSuffix<T>();
+                return dbCmd.ExecLongScalar();
+            }
 
             return dbCmd.ExecNonQuery();
         }
@@ -666,7 +675,7 @@ namespace ServiceStack.OrmLite
                     }
                     catch (Exception ex)
                     {
-                        Log.Error("SQL ERROR: {0}".Fmt(dbCmd.GetLastSqlAndParams()), ex);
+                        Log.Error($"SQL ERROR: {dbCmd.GetLastSqlAndParams()}", ex);
                         throw;
                     }
                 }
@@ -710,7 +719,7 @@ namespace ServiceStack.OrmLite
                     }
                     catch (Exception ex)
                     {
-                        Log.Error("SQL ERROR: {0}".Fmt(dbCmd.GetLastSqlAndParams()), ex);
+                        Log.Error($"SQL ERROR: {dbCmd.GetLastSqlAndParams()}", ex);
                         throw;
                     }
                 }

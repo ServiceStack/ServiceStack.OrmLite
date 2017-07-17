@@ -106,7 +106,7 @@ namespace ServiceStack.OrmLite
         {
             var ormLiteConn = db as OrmLiteConnection;
             if (ormLiteConn == null)
-                throw new NotImplementedException(RequiresOrmLiteConnection.Fmt("CommandTimeout"));
+                throw new NotImplementedException(string.Format(RequiresOrmLiteConnection,"CommandTimeout"));
 
             ormLiteConn.CommandTimeout = commandTimeout;
         }
@@ -194,6 +194,8 @@ namespace ServiceStack.OrmLite
         public static Func<FieldDefinition, object> OnDbNullFilter { get; set; }
 
         public static Action<IDbCommand, Exception> ExceptionFilter { get; set; }
+
+        public static bool ThrowOnError { get; set; }
 
         public static Func<string, string> SanitizeFieldNameForParamNameFn = fieldName =>
             (fieldName ?? "").Replace(" ", "");

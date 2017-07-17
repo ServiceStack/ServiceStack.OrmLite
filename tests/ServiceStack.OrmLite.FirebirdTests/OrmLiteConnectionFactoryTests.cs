@@ -6,7 +6,7 @@ using ServiceStack.OrmLite.Firebird;
 namespace ServiceStack.OrmLite.FirebirdTests
 {
     [TestFixture]
-    [Ignore]
+    [Ignore("")]
     public class OrmLiteConnectionFactoryTests
     {
         [TestFixtureSetUp]

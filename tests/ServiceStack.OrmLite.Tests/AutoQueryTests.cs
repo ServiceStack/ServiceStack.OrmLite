@@ -207,11 +207,11 @@ namespace ServiceStack.OrmLite.Tests
                 db.InsertAll(SeedDepartments);
                 db.InsertAll(SeedEmployees);
 
-                var q = db.From<DeptEmployee>().Select(new[] {"FirstName"}).Take(2);
+                var q = db.From<DeptEmployee>().Select(new[] { "FirstName" }).Take(2);
 
                 var resultsMap = db.Select<Dictionary<string, object>>(q);
                 Assert.That(resultsMap.Count, Is.EqualTo(2));
-                var row = new Dictionary<string,object>(resultsMap[0], StringComparer.OrdinalIgnoreCase);
+                var row = new Dictionary<string, object>(resultsMap[0], StringComparer.OrdinalIgnoreCase);
                 Assert.That(row.ContainsKey("FirstName".SqlTableRaw()));
                 Assert.That(!row.ContainsKey("Id".SqlTableRaw()));
 
@@ -221,7 +221,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 var resultsDynamic = db.Select<dynamic>(q);
                 Assert.That(resultsDynamic.Count, Is.EqualTo(2));
-                var map = (IDictionary<string, object>) resultsDynamic[0];
+                var map = (IDictionary<string, object>)resultsDynamic[0];
                 Assert.That(map.ContainsKey("FirstName".SqlTableRaw()));
                 Assert.That(!map.ContainsKey("Id".SqlTableRaw()));
 
@@ -401,6 +401,68 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(sb.ToString().NormalizeNewLines(), Is.EqualTo("Dept 1\nDept 2\nDept 3\n"));
             }
         }
+
+        [Test]
+        public void Can_select_custom_fields_using_ValueTuple()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropTable<DeptEmployee>();
+                db.DropTable<Department2>();
+                db.CreateTable<Department2>();
+                db.CreateTable<DeptEmployee>();
+
+                db.InsertAll(SeedDepartments);
+                db.InsertAll(SeedEmployees);
+
+                var q = db.From<DeptEmployee>()
+                    .Join<Department2>()
+                    .OrderBy(x => x.Id)
+                    .Select<DeptEmployee, Department2>(
+                        (de, d2) => new { de.Id, de.LastName, d2.Name });
+
+                var results = db.Select<(int id, string lastName, string deptName)>(q);
+
+                Assert.That(results.Count, Is.EqualTo(3));
+                for (var i = 0; i < results.Count; i++)
+                {
+                    var row = results[i];
+                    var count = i + 1;
+                    Assert.That(row.id, Is.EqualTo(count));
+                    Assert.That(row.lastName, Is.EqualTo("Last " + count));
+                    Assert.That(row.deptName, Is.EqualTo("Dept " + count));
+                }
+            }
+        }
+
+        [Test]
+        public void Can_group_by_multiple_columns()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Rockstar>();
+                db.DropAndCreateTable<RockstarAlbum>();
+                db.InsertAll(SeedRockstars);
+                db.InsertAll(SeedAlbums);
+
+                var q = db.From<Rockstar>()
+                    .Join<RockstarAlbum>()
+                    .GroupBy<Rockstar, RockstarAlbum>((r, a) => new { r.Id, AlbumId = a.Id })
+                    .Select<Rockstar, RockstarAlbum>((r,a) => new
+                    {
+                        r.Id,
+                        AlbumId = a.Id,
+                        r.FirstName,
+                        r.LastName,
+                        a.Name
+                    });
+
+                var results = db.Select<(int id, int albumId, string firstName, string album)>(q);
+
+                Assert.That(results.Count, Is.EqualTo(3));
+            }
+        }
+
     }
 
 }

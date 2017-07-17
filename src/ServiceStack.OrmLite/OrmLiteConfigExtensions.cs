@@ -153,8 +153,8 @@ namespace ServiceStack.OrmLite
                         ? referencesAttr != null ? new ForeignKeyConstraint(referencesAttr.Type) : null
                         : new ForeignKeyConstraint(fkAttr.Type, fkAttr.OnDelete, fkAttr.OnUpdate, fkAttr.ForeignKeyName),
                     IsReference = referenceAttr != null && propertyType.IsClass(),
-                    GetValueFn = propertyInfo.GetPropertyGetterFn(),
-                    SetValueFn = propertyInfo.GetPropertySetterFn(),
+                    GetValueFn = propertyInfo.CreateGetter(),
+                    SetValueFn = propertyInfo.CreateSetter(),
                     Sequence = sequenceAttr != null ? sequenceAttr.Name : string.Empty,
                     IsComputed = computeAttr != null || customSelectAttr != null,
                     ComputeExpression = computeAttr != null ? computeAttr.Expression : string.Empty,

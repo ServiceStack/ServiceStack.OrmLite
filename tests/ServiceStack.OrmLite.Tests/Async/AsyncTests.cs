@@ -52,8 +52,8 @@ namespace ServiceStack.OrmLite.Tests.Async
                 catch (Exception ex)
                 {
                     Assert.That(ex.Message.ToLower(), Does.Contain("id")
-                                                        .Or.Contain("notexists")
-                                                        .Or.Contain("not_exists"));
+                                                       .Or.Contain("notexists")
+                                                       .Or.Contain("not_exists"));
                 }
 
                 try
@@ -64,8 +64,8 @@ namespace ServiceStack.OrmLite.Tests.Async
                 catch (Exception ex)
                 {
                     Assert.That(ex.Message.ToLower(), Does.Contain("id")
-                                                        .Or.Contain("notexists")
-                                                        .Or.Contain("not_exists"));
+                                                       .Or.Contain("notexists")
+                                                       .Or.Contain("not_exists"));
                 }
 
                 try

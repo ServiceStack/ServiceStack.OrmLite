@@ -119,9 +119,9 @@ namespace ServiceStack.OrmLite.PostgreSQL
         //Convert xmin into an integer so it can be used in comparisons
         public const string RowVersionFieldComparer = "int8in(xidout(xmin))";
 
-        public override SelectItem GetRowVersionColumnName(FieldDefinition field)
+        public override SelectItem GetRowVersionColumnName(FieldDefinition field, string tablePrefix = null)
         {
-            return new SelectItemExpression(this, "xmin", field.FieldName);
+            return new SelectItemColumn(this, "xmin", field.FieldName, tablePrefix);
         }
 
         public override void AppendFieldCondition(StringBuilder sqlFilter, FieldDefinition fieldDef, IDbCommand cmd)
@@ -226,8 +226,8 @@ namespace ServiceStack.OrmLite.PostgreSQL
             string escapedSchema = modelDef.Schema.Replace(".", "\".\"");
             return string.Format("\"{0}\".\"{1}\"", escapedSchema, base.NamingStrategy.GetTableName(modelDef.ModelName));
         }
-
-        public override long InsertAndGetLastInsertId<T>(IDbCommand dbCmd)
+        
+        public override string GetLastInsertIdSqlSuffix<T>()
         {
             if (SelectIdentitySql == null)
                 throw new NotImplementedException("Returning last inserted identity is not implemented on this DB Provider.");
@@ -236,14 +236,10 @@ namespace ServiceStack.OrmLite.PostgreSQL
             {
                 var modelDef = GetModel(typeof(T));
                 var pkName = NamingStrategy.GetColumnName(modelDef.PrimaryKey.FieldName);
-                dbCmd.CommandText += " RETURNING \"{0}\"".Fmt(pkName);                
-            }
-            else
-            {
-                dbCmd.CommandText += "; " + SelectIdentitySql;
+                return $" RETURNING \"{pkName}\"";
             }
 
-            return dbCmd.ExecLongScalar();
+            return "; " + SelectIdentitySql;
         }
 
         public override void SetParameter(FieldDefinition fieldDef, IDbDataParameter p)

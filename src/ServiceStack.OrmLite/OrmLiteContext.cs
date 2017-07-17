@@ -190,7 +190,7 @@ namespace ServiceStack.OrmLite
 
         public override string ToString()
         {
-            return "State Id: {0}".Fmt(Id);
+            return $"State Id: {Id}";
         }
     }
 }

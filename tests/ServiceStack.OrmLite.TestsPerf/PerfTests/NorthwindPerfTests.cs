@@ -4,7 +4,7 @@ using ServiceStack.OrmLite.TestsPerf.Scenarios.Northwind;
 
 namespace ServiceStack.OrmLite.TestsPerf.PerfTests
 {
-	[Ignore]
+	[Ignore("")]
 	[TestFixture]
 	public class NorthwindPerfTests
 		: OrmLitePerfTests

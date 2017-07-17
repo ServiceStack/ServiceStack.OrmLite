@@ -23,9 +23,6 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
-    public delegate void PropertySetterDelegate(object instance, object value);
-    public delegate object PropertyGetterDelegate(object instance);
-
     public delegate object GetValueDelegate(int i);
 
     public static class OrmLiteReadCommandExtensions
@@ -875,7 +872,7 @@ namespace ServiceStack.OrmLite
         {
             var refField = GetRefFieldDefIfExists(modelDef, refModelDef);
             if (refField == null)
-                throw new ArgumentException("Cant find '{0}' Property on Type '{1}'".Fmt(modelDef.ModelName + "Id", refType.Name));
+                throw new ArgumentException($"Cant find '{modelDef.ModelName + "Id"}' Property on Type '{refType.Name}'");
             return refField;
         }
 
@@ -930,7 +927,12 @@ namespace ServiceStack.OrmLite
             p.Direction = direction;
 
             if (p.DbType == DbType.String)
+            {
                 p.Size = dialectProvider.GetStringConverter().StringLength;
+                string strValue = value as string;
+                if (strValue != null && strValue.Length > p.Size)
+                    p.Size = strValue.Length;
+            }
 
             if (value != null)
             {

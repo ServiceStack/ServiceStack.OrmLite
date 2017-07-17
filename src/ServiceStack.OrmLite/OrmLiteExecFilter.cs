@@ -108,10 +108,14 @@ namespace ServiceStack.OrmLite
             try
             {
                 return filter(dbCmd)
-                    .Then(t =>
+                    .ContinueWith(t =>
                     {
                         DisposeCommand(dbCmd, dbConn);
-                        return t;
+
+                        if (t.IsFaulted)
+                            throw t.Exception.UnwrapIfSingleException();
+
+                        return t.Result;
                     });
             }
             catch

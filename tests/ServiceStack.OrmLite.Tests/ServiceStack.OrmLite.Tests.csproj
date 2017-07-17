@@ -1,433 +1,95 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{9B64F4A7-C008-46A8-AD6F-99626DCFEFBD}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ServiceStack.OrmLite.Tests</RootNamespace>
+    <TargetFrameworks>net45;netcoreapp1.1</TargetFrameworks>
+    <!--<TargetFrameworks>net45</TargetFrameworks>-->
+    <DebugType>portable</DebugType>
     <AssemblyName>ServiceStack.OrmLite.Tests</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
-    <FileUpgradeFlags>
-    </FileUpgradeFlags>
-    <OldToolsVersion>3.5</OldToolsVersion>
-    <UpgradeBackupLocation />
-    <PublishUrl>publish\</PublishUrl>
-    <Install>true</Install>
-    <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
-    <UpdateMode>Foreground</UpdateMode>
-    <UpdateInterval>7</UpdateInterval>
-    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
-    <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
-    <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <UseApplicationTrust>false</UseApplicationTrust>
-    <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkProfile />
+    <OutputType>Library</OutputType>
+    <PackageId>ServiceStack.OrmLite.Tests</PackageId>
+    <RuntimeFrameworkVersion>1.1.1</RuntimeFrameworkVersion>
+    <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
+    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
+    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <PlatformTarget>x86</PlatformTarget>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <PlatformTarget>x86</PlatformTarget>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Signed|AnyCPU'">
-    <OutputPath>bin\Signed\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="ServiceStack">
-      <HintPath>..\..\lib\tests\ServiceStack.dll</HintPath>
-    </Reference>
-    <Reference Include="ServiceStack.Client, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\ServiceStack.Client.dll</HintPath>
-    </Reference>
-    <Reference Include="ServiceStack.Text">
-      <HintPath>..\..\lib\ServiceStack.Text.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.ComponentModel.DataAnnotations">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
+    <ProjectReference Include="..\..\src\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj" />
+    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Sqlite\ServiceStack.OrmLite.Sqlite.csproj" />
+    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.SqlServer\ServiceStack.OrmLite.SqlServer.csproj" />
+    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.PostgreSQL\ServiceStack.OrmLite.PostgreSQL.csproj" />
+    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.MySql\ServiceStack.OrmLite.MySql.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NUnit" Version="3.6.1" />
+    <PackageReference Include="System.ValueTuple" Version="4.3.1" />
+  </ItemGroup>
+  
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net45' ">
+    <DefineConstants>$(DefineConstants);NET45</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.105.2" />
+    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Oracle\ServiceStack.OrmLite.Oracle.csproj" />
+    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Firebird\ServiceStack.OrmLite.Firebird.csproj" />
+    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.VistaDB\ServiceStack.OrmLite.VistaDB.csproj" />
+
     <Reference Include="System.Configuration" />
-    <Reference Include="System.Core">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Runtime.Serialization">
-      <RequiredTargetFramework>3.0</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Security" />
+    <Reference Include="System.Threading" />
+    <Reference Include="System.Threading.Tasks" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
-    <Reference Include="System.Xml.Linq">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Data.DataSetExtensions">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
-    <Reference Include="Mono.Data.Sqlite">
-      <HintPath>..\..\lib\tests\Mono.Data.Sqlite.dll</HintPath>
-    </Reference>
-    <Reference Include="ServiceStack.Common">
-      <HintPath>..\..\lib\ServiceStack.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="ServiceStack.Interfaces">
-      <HintPath>..\..\lib\ServiceStack.Interfaces.dll</HintPath>
-    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+
+    <Reference Include="..\..\lib\pcl\ServiceStack.Interfaces.dll" />
+    <Reference Include="..\..\lib\net45\ServiceStack.Text.dll" />
+    <Reference Include="..\..\lib\net45\ServiceStack.Common.dll" />
+    <Reference Include="..\..\lib\net45\ServiceStack.Client.dll" />
+    <Reference Include="..\..\lib\net45\ServiceStack.dll" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="AdminTasks.cs" />
-    <Compile Include="AdoNetDataAccessTests.cs" />
-    <Compile Include="ApiSqliteTests.cs" />
-    <Compile Include="ApiSqlServerTests.cs" />
-    <Compile Include="Async\ApiMySqlTestsAsync.cs" />
-    <Compile Include="Async\ApiPostgreSqlTestsAsync.cs" />
-    <Compile Include="Async\ApiSqliteTestsAsync.cs" />
-    <Compile Include="Async\ApiSqlServerTestsAsync.cs" />
-    <Compile Include="Async\AsyncTests.cs" />
-    <Compile Include="Async\AutoQueryTestsAsync.cs" />
-    <Compile Include="Async\CustomSqlTestsAsync.cs" />
-    <Compile Include="Async\Issues\LoadSelectAmbiguousColumnIssue.cs" />
-    <Compile Include="Async\Issues\PredicateBuilderIssue.cs" />
-    <Compile Include="Async\Issues\SqlServerComputedColumnIssue.cs" />
-    <Compile Include="Async\Legacy\ApiMySqlLegacyTestsAsync.cs" />
-    <Compile Include="Async\Legacy\ApiPostgreSqlLegacyTestsAsync.cs" />
-    <Compile Include="Async\Legacy\ApiSqliteLegacyTestsAsync.cs" />
-    <Compile Include="Async\Legacy\ApiSqlServerLegacyTestsAsync.cs" />
-    <Compile Include="Async\LoadReferencesJoinTestsAsync.cs" />
-    <Compile Include="Async\LoadReferencesTestsAsync.cs" />
-    <Compile Include="Async\OrmLiteUpdateTestsAsync.cs" />
-    <Compile Include="Async\SelectAsyncTests.cs" />
-    <Compile Include="Async\SqlExpressionTests.cs" />
-    <Compile Include="Async\SqlServerProviderTestsAsync.cs" />
-    <Compile Include="Async\UpdateAsyncTests.cs" />
-    <Compile Include="CheckConstraintTests.cs" />
-    <Compile Include="CustomSqlExpressionTests.cs" />
-    <Compile Include="Expression\JoinAliasTests.cs" />
-    <Compile Include="Expression\RestrictionTests.cs" />
-    <Compile Include="Expression\SqlExpressionDeleteTests.cs" />
-    <Compile Include="Expression\SqlExpressionFilterTests.cs" />
-    <Compile Include="Expression\SqlExpressionJoinTests.cs" />
-    <Compile Include="Issues\AutoQueryJoinTests.cs" />
-    <Compile Include="Issues\JoinAliasWithSchemaIssue.cs" />
-    <Compile Include="Issues\JsonUpdateOnlyIssue.cs" />
-    <Compile Include="Issues\LoadReferencesNullReferenceIssue.cs" />
-    <Compile Include="Issues\MergeParamsIssue.cs" />
-    <Compile Include="Issues\MultiThreadedUpdateTransactionIssue.cs" />
-    <Compile Include="Issues\NoSqlLoggingIssue.cs" />
-    <Compile Include="Issues\NoUpdateIssue.cs" />
-    <Compile Include="Issues\ParamNameIssues.cs" />
-    <Compile Include="MultipleConnectionIdTests.cs" />
-    <Compile Include="Shared\DefaultValues.cs" />
-    <Compile Include="Shared\UpdateCommandFilter.cs" />
-    <Compile Include="UseCase\CustomerOrdersUseCaseAsync.cs" />
-    <Compile Include="AutoQueryTests.cs" />
-    <Compile Include="CaptureSqlCommandFilterTests.cs" />
-    <Compile Include="CaptureSqlFilterTests.cs" />
-    <Compile Include="CompositeKeyTests.cs" />
-    <Compile Include="ConverterTests.cs" />
-    <Compile Include="CustomConverterTests.cs" />
-    <Compile Include="CustomSqlTests.cs" />
-    <Compile Include="DateTimeOffsetTests.cs" />
-    <Compile Include="DateTimeTests.cs" />
-    <Compile Include="DefaultValueTests.cs" />
-    <Compile Include="Issues\BelongsToIssue.cs" />
-    <Compile Include="Issues\CanBuildExpressionWithAbstractType.cs" />
-    <Compile Include="Issues\ColumnGuessingTests.cs" />
-    <Compile Include="Issues\SelectAliasIssue.cs" />
-    <Compile Include="Issues\SimpleInsertSelectBenchmark.cs" />
-    <Compile Include="Issues\JoinBoolSqlServerIssue.cs" />
-    <Compile Include="Issues\LoadReferencesFKandSelfRefIssue.cs" />
-    <Compile Include="Issues\MergingNestedSqlExpressionIssue.cs" />
-    <Compile Include="Issues\SqlExpressionSubSqlExpressionIssue.cs" />
-    <Compile Include="Legacy\ApiSqliteLegacyTests.cs" />
-    <Compile Include="Legacy\ApiSqlServerLegacyTests.cs" />
-    <Compile Include="SchemaTests.cs" />
-    <Compile Include="SelectParamTests.cs" />
-    <Compile Include="Support\ArtistTrackTestBase.cs" />
-    <Compile Include="Support\JoinSqlBuilder.cs" />
-    <Compile Include="TemporaryNamingStrategy.cs" />
-    <Compile Include="ToInsertAndUpdateStatementTests.cs" />
-    <Compile Include="UseCase\ArtistTrackSqlExpressions.cs" />
-    <Compile Include="UseCase\ExpressionsAuthorTests.cs" />
-    <Compile Include="Expression\ComplexJoinTests.cs" />
-    <Compile Include="Expression\ExpressionUsingCustomSerializedEnumTests.cs" />
-    <Compile Include="Expression\FromExpressionTests.cs" />
-    <Compile Include="Expression\GenericTableExpressions.cs" />
-    <Compile Include="Expression\LimitExpressionTests.cs" />
-    <Compile Include="Expression\MethodExpressionTests.cs" />
-    <Compile Include="Expression\SelectFieldExpressionTests.cs" />
-    <Compile Include="Expression\SqlExpressionParamTests.cs" />
-    <Compile Include="Expression\SqlExpressionTests.cs" />
-    <Compile Include="Expression\SelectExpressionTests.cs" />
-    <Compile Include="Issues\ComplexJoinWithAlias.cs" />
-    <Compile Include="Issues\CompositeIndexNamingStrategyIssue.cs" />
-    <Compile Include="Issues\CreateTableAliasTest.cs" />
-    <Compile Include="Issues\CsvTests.cs" />
-    <Compile Include="Issues\CustomFieldTests.cs" />
-    <Compile Include="Issues\CustomTypeTests.cs" />
-    <Compile Include="Issues\LoadReferencesCaseSensitiveTest.cs" />
-    <Compile Include="Issues\LoadReferencesForeignKeyTests.cs" />
-    <Compile Include="Issues\LoadSelectIssue.cs" />
-    <Compile Include="Issues\MultipleSelfJoinsWithNullableInts.cs" />
-    <Compile Include="Issues\SelectScalarTests.cs" />
-    <Compile Include="Issues\UtcDateTimeIssueTests.cs" />
-    <Compile Include="Issues\JoinsWithSchemas.cs" />
-    <Compile Include="Issues\MappingFieldsFromStoredProcedureTests.cs" />
-    <Compile Include="Issues\MismatchSchemaTests.cs" />
-    <Compile Include="Issues\MultiColumnOrderByDescending.cs" />
-    <Compile Include="Issues\MultiFieldReferenceTests.cs" />
-    <Compile Include="Issues\MultipleSelfJoinsWithAliases.cs" />
-    <Compile Include="Issues\MultithreadingIssueTests.cs" />
-    <Compile Include="Issues\SaveDomainUserReferencesIssue.cs" />
-    <Compile Include="Issues\SchemaTests.cs" />
-    <Compile Include="Issues\SelectDistinctTests.cs" />
-    <Compile Include="Issues\SelectIntoTests.cs" />
-    <Compile Include="LicenseUsageTests.cs" />
-    <Compile Include="LoadReferencesJoinTests.cs" />
-    <Compile Include="LoadReferencesTests.cs" />
-    <Compile Include="LoggingTests.cs" />
-    <Compile Include="MergeTests.cs" />
-    <Compile Include="MockAllApiTests.cs" />
-    <Compile Include="OrderByTests.cs" />
-    <Compile Include="OrmLiteContextTests.cs" />
-    <Compile Include="OrmLiteExecFilterTests.cs" />
-    <Compile Include="OrmLiteFiltersTests.cs" />
-    <Compile Include="OrmLiteMultipleDialectProviderTests.cs" />
-    <Compile Include="PerfTests.cs" />
-    <Compile Include="RowVersionTests.cs" />
-    <Compile Include="Shared\ModelWithNumerics.cs" />
-    <Compile Include="StringSerializerTests.cs" />
-    <Compile Include="TestHelpers.cs" />
-    <Compile Include="TypeDescriptorMetadataTests.cs" />
-    <Compile Include="Shared\ApiUtilExtensions.cs" />
-    <Compile Include="EnumTests.cs" />
-    <Compile Include="ExpressionTests.cs" />
-    <Compile Include="ExpressionVisitorTests.cs" />
-    <Compile Include="Expression\AdditiveExpressionsTest.cs" />
-    <Compile Include="Expression\ConditionalExpressionTest.cs" />
-    <Compile Include="Expression\EqualityExpressionsTest.cs" />
-    <Compile Include="Expression\ExpressionChainingUseCase.cs" />
-    <Compile Include="Expression\ExpressionsTestBase.cs" />
-    <Compile Include="Expression\LogicalExpressionsTest.cs" />
-    <Compile Include="Expression\MultiplicativeExpressionsTest.cs" />
-    <Compile Include="Expression\OrmLiteCountTests.cs" />
-    <Compile Include="Expression\PrimaryExpressionsTest.cs" />
-    <Compile Include="Expression\RelationalExpressionsTest.cs" />
-    <Compile Include="Expression\StringFunctionTests.cs" />
-    <Compile Include="Expression\TestType.cs" />
-    <Compile Include="Expression\UnaryExpressionsTest.cs" />
-    <Compile Include="ForeignKeyAttributeTests.cs" />
-    <Compile Include="OrmLiteDropTableTests.cs" />
-    <Compile Include="OrmLiteDropTableWithNamingStrategyTests.cs" />
-    <Compile Include="OrmLiteExecuteNonQueryTests.cs" />
-    <Compile Include="OrmLiteQueryTests.cs" />
-    <Compile Include="LocalizationTests.cs" />
-    <Compile Include="OrmLiteConnectionFactoryTests.cs" />
-    <Compile Include="OrmLiteUtilExtensionsTests.cs" />
-    <Compile Include="Shared\Person.cs" />
-    <Compile Include="Shared\BuiltInsFactory.cs" />
-    <Compile Include="Shared\IModelFactory.cs" />
-    <Compile Include="Shared\ModelFactoryBase.cs" />
-    <Compile Include="Shared\ModelWithComplexTypes.cs" />
-    <Compile Include="Shared\ModelWithComplexTypesFactory.cs" />
-    <Compile Include="Shared\ModelWithCompositeIndexFields.cs" />
-    <Compile Include="Shared\ModelWithFieldsOfDifferentAndNullableTypes.cs" />
-    <Compile Include="Shared\ModelWithFieldsOfDifferentAndNullableTypesFactory.cs" />
-    <Compile Include="Shared\ModelWithFieldsOfDifferentTypes.cs" />
-    <Compile Include="Shared\ModelWithFieldsOfDifferentTypesFactory.cs" />
-    <Compile Include="Shared\ModelWithFieldsOfNullableTypes.cs" />
-    <Compile Include="Shared\ModelWithFieldsOfNullableTypesFactory.cs" />
-    <Compile Include="Shared\ModelWithIdAndName.cs" />
-    <Compile Include="Shared\ModelWithIdOnly.cs" />
-    <Compile Include="Shared\ModelWithIndexFields.cs" />
-    <Compile Include="Shared\ModelWithLongIdAndStringFields.cs" />
-    <Compile Include="Shared\ModelWithMapAndList.cs" />
-    <Compile Include="Shared\ModelWithNamedCompositeIndex.cs" />
-    <Compile Include="Shared\ModelWithOnlyStringFields.cs" />
-    <Compile Include="Shared\Movie.cs" />
-    <Compile Include="Shared\Poco.cs" />
-    <Compile Include="Shared\SampleOrderLine.cs" />
-    <Compile Include="Shared\Shipper.cs" />
-    <Compile Include="Shared\ShipperFactory.cs" />
-    <Compile Include="Shared\TaskQueue.cs" />
-    <Compile Include="ShippersExample.cs" />
-    <Compile Include="OrmLiteComplexTypesTests.cs" />
-    <Compile Include="OrmLiteSaveTests.cs" />
-    <Compile Include="SqlFormatTests.cs" />
-    <Compile Include="OrmLiteTransactionTests.cs" />
-    <Compile Include="OrmLiteBasicPersistenceProviderTests.cs" />
-    <Compile Include="SqliteOrmLiteConnectionTests.cs" />
-    <Compile Include="OrmLiteDeleteTests.cs" />
-    <Compile Include="OrmLiteUpdateTests.cs" />
-    <Compile Include="OrmLiteSelectTests.cs" />
-    <Compile Include="OrmLiteCreateTableWithIndexesTests.cs" />
-    <Compile Include="OrmLiteCreateTableTests.cs" />
-    <Compile Include="OrmLiteInsertTests.cs" />
-    <Compile Include="OrmLiteTestBase.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SqlBuilderTests.cs" />
-    <Compile Include="SqlServerProviderTests.cs" />
-    <Compile Include="TypeWithByteArrayFieldTests.cs" />
-    <Compile Include="UntypedApiTests.cs" />
-    <Compile Include="UseCase\AliasedFieldUseCase.cs" />
-    <Compile Include="UseCase\CustomerOrdersUseCase.cs" />
-    <Compile Include="UseCase\FieldFromInterfaceImplementationUseCase.cs" />
-    <Compile Include="UseCase\NestedComplexTypeUseCase.cs" />
-    <Compile Include="UseCase\ParentChildCyclicalExample.cs" />
-    <Compile Include="UseCase\PostPerfTests.cs" />
-    <Compile Include="UseCase\SchemaUseCase.cs" />
-    <Compile Include="UseCase\ServiceStack_OrmLite_UseCase.cs" />
-    <Compile Include="UseCase\ShardingUseCase.cs" />
-    <Compile Include="UseCase\SimpleUseCase.cs" />
-    <Compile Include="OrmLiteGetScalarTests.cs" />
-    <Compile Include="OrmLiteCreateTableWithNamingStrategyTest.cs" />
-    <Compile Include="UseCase\SoftDeleteUseCase.cs" />
-    <Compile Include="_TypeDescriptorMetadataTests.cs" />
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">
+    <DefineConstants>$(DefineConstants);NETCORE_SUPPORT;NETCORE</DefineConstants>
+  </PropertyGroup>
+
+  <!-- Enable NunitLite build, becase NUnit is not supported on .NET Core SDK 1.0.2 
+   https://github.com/nunit/dotnet-test-nunit/issues/91 
+   To enable NUnitLite pass /p:NUNITLITE=1 into msbuild arguments
+   -->
+  <PropertyGroup Condition=" '$(NUNITLITE)' != '' ">
+    <OutputType>Exe</OutputType>
+    <DefineConstants>$(DefineConstants);NUNITLITE</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition=" '$(NUNITLITE)' != '' ">
+    <PackageReference Include="NUnitLite" Version="3.6.1" />
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="..\..\lib\sqlite3.dll">
-      <Link>sqlite3.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="1.1.1" />
+    <PackageReference Include="System.Runtime" Version="4.*" />
+    <PackageReference Include="System.Runtime.Serialization.Xml" Version="4.*" />
+    <PackageReference Include="System.Reflection" Version="4.*" />
+    <PackageReference Include="System.Reflection.Primitives" Version="4.*" />
+    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.*" />
+    <PackageReference Include="System.Reflection.TypeExtensions" Version="4.*" />
+
+    <!-- <Reference Include="..\..\lib\netstandard1.1\ServiceStack.Interfaces.dll" /> -->
+    <PackageReference Include="ServiceStack.Interfaces.Core" Version="1.0.*" />
+    <PackageReference Include="ServiceStack.Text.Core" Version="1.0.*" />
+    <PackageReference Include="ServiceStack.Common.Core" Version="1.0.*" />
+    <PackageReference Include="ServiceStack.Client.Core" Version="1.0.*" />
+    <PackageReference Include="ServiceStack.Core" Version="1.0.*" />
   </ItemGroup>
-  <ItemGroup>
-    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.0">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.0 %28x86%29</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Sql.Server.Express.10.0">
-      <Visible>False</Visible>
-      <ProductName>SQL Server 2008 Express</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Sql.Server.Express.9.2">
-      <Visible>False</Visible>
-      <ProductName>SQL Server 2005 Express Edition SP2 %28x86%29</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
-      <Visible>False</Visible>
-      <ProductName>Windows Installer 3.1</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Windows.Installer.4.5">
-      <Visible>False</Visible>
-      <ProductName>Windows Installer 4.5</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
-    <None Include="App_Data\sql\instnwnd.Ingres.sql" />
-    <None Include="App_Data\sql\instnwnd.MySql.sql" />
-    <None Include="App_Data\sql\instnwnd.Oracle.sql" />
-    <None Include="App_Data\sql\instnwnd.PostgreSQL.sql" />
-    <None Include="App_Data\sql\instnwnd.SQLite.sql" />
-    <None Include="App_Data\sql\instnwnd.SqlServer.sql" />
-    <None Include="packages.config" />
-    <None Include="project.json" />
-    <None Include="ServiceStack.OrmLite.Tests.project.json" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Firebird\ServiceStack.OrmLite.Firebird.csproj">
-      <Project>{317B64BA-D7A6-4A15-8719-821B38147C63}</Project>
-      <Name>ServiceStack.OrmLite.Firebird</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.MySql\ServiceStack.OrmLite.MySql.csproj">
-      <Project>{fd20f088-acc0-4979-ac0c-8c541c2e7de5}</Project>
-      <Name>ServiceStack.OrmLite.MySql</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Oracle\ServiceStack.OrmLite.Oracle.csproj">
-      <Project>{517B64BA-D7A6-4A15-8719-821B38147C61}</Project>
-      <Name>ServiceStack.OrmLite.Oracle</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.PostgreSQL\ServiceStack.OrmLite.PostgreSQL.csproj">
-      <Project>{3220F088-BDD0-6979-AC0C-8C541C2E7DE5}</Project>
-      <Name>ServiceStack.OrmLite.PostgreSQL</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Sqlite\ServiceStack.OrmLite.Sqlite.csproj">
-      <Project>{CF68A37D-D071-469D-AE04-68594CB95382}</Project>
-      <Name>ServiceStack.OrmLite.Sqlite</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.SqlServer\ServiceStack.OrmLite.SqlServer.csproj">
-      <Project>{1887dc99-9139-43e3-a7aa-6d74714b3a5d}</Project>
-      <Name>ServiceStack.OrmLite.SqlServer</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.VistaDB\ServiceStack.OrmLite.VistaDB.csproj">
-      <Project>{D18D9D3C-B3B3-433C-9578-68E978587858}</Project>
-      <Name>ServiceStack.OrmLite.VistaDB</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj">
-      <Project>{96179AC6-F6F1-40C3-9FDD-4F6582F54C5C}</Project>
-      <Name>ServiceStack.OrmLite</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Async\UseCase\" />
-  </ItemGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
 </Project>

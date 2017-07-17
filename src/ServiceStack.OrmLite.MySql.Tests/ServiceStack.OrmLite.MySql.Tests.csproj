@@ -1,163 +1,73 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{21EBB2F6-030B-492C-963B-2FC447684CCD}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ServiceStack.OrmLite.MySql.Tests</RootNamespace>
+    <!--<TargetFrameworks>net45;netcoreapp1.1</TargetFrameworks>-->
+    <TargetFrameworks>net45</TargetFrameworks>
+    <DebugType>portable</DebugType>
     <AssemblyName>ServiceStack.OrmLite.MySql.Tests</AssemblyName>
-    <FileAlignment>512</FileAlignment>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <TargetFrameworkProfile />
+    <OutputType>Library</OutputType>
+    <PackageId>ServiceStack.OrmLite.MySql.Tests</PackageId>
+    <RuntimeFrameworkVersion>1.1.1</RuntimeFrameworkVersion>
+    <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
+    <PackageTargetFallback>$(PackageTargetFallback);portable-net45+win8+wp8+wpa81+xamarinmac</PackageTargetFallback>
+    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
+    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-    <PlatformTarget>x86</PlatformTarget>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <PlatformTarget>x86</PlatformTarget>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Signed|AnyCPU'">
-    <OutputPath>bin\Signed\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="MySql.Data, Version=6.9.9.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
-      <HintPath>..\packages\MySql.Data.6.9.9\lib\net45\MySql.Data.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="nunit.framework">
-      <HintPath>..\..\lib\tests\nunit.framework.dll</HintPath>
-    </Reference>
-    <Reference Include="ServiceStack.Common">
-      <HintPath>..\..\lib\ServiceStack.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="ServiceStack.Interfaces">
-      <HintPath>..\..\lib\ServiceStack.Interfaces.dll</HintPath>
-    </Reference>
-    <Reference Include="ServiceStack.Text">
-      <HintPath>..\..\lib\ServiceStack.Text.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <ProjectReference Include="..\..\src\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj" />
+    <ProjectReference Include="..\..\tests\ServiceStack.OrmLite.Tests\ServiceStack.OrmLite.Tests.csproj" />
+    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.MySql\ServiceStack.OrmLite.MySql.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NUnit" Version="3.6.1" />
+  </ItemGroup>
+  
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net45' ">
+    <DefineConstants>$(DefineConstants);NET45</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
     <Reference Include="System.Configuration" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Threading" />
+    <Reference Include="System.Threading.Tasks" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
+
+    <Reference Include="..\..\lib\pcl\ServiceStack.Interfaces.dll" />
+    <Reference Include="..\..\lib\net45\ServiceStack.Text.dll" />
+    <Reference Include="..\..\lib\net45\ServiceStack.Common.dll" />
+    <Reference Include="..\..\lib\net45\ServiceStack.Client.dll" />
+    <Reference Include="..\..\lib\net45\ServiceStack.dll" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="..\GlobalAssemblyInfo.cs">
-      <Link>Properties\GlobalAssemblyInfo.cs</Link>
-    </Compile>
-    <Compile Include="BooleanTests.cs" />
-    <Compile Include="CustomSqlTests.cs" />
-    <Compile Include="DateTimeColumnTest.cs" />
-    <Compile Include="EnumTests.cs" />
-    <Compile Include="Expressions\AdditiveExpressionsTest.cs" />
-    <Compile Include="Expressions\Author.cs" />
-    <Compile Include="Expressions\AuthorUseCase.cs" />
-    <Compile Include="Expressions\ConditionalExpressionTest.cs" />
-    <Compile Include="Expressions\EqualityExpressionsTest.cs" />
-    <Compile Include="Expressions\ExpressionsTestBase.cs" />
-    <Compile Include="Expressions\LogicalExpressionsTest.cs" />
-    <Compile Include="Expressions\MultiplicativeExpressionsTest.cs" />
-    <Compile Include="Expressions\OrmLiteCountTests.cs" />
-    <Compile Include="Expressions\PrimaryExpressionsTest.cs" />
-    <Compile Include="Expressions\RelationalExpressionsTest.cs" />
-    <Compile Include="Expressions\StringFunctionTests.cs" />
-    <Compile Include="Expressions\TestType.cs" />
-    <Compile Include="Expressions\UnaryExpressionsTest.cs" />
-    <Compile Include="ForeignKeyAttributeTests.cs" />
-    <Compile Include="Issues\CustomMappingIssue.cs" />
-    <Compile Include="Issues\SelectExpressionIssues.cs" />
-    <Compile Include="LocalizationTests.cs" />
-    <Compile Include="MySqlAdminTests.cs" />
-    <Compile Include="StringColumnTests.cs" />
-    <Compile Include="OrmLiteBasicPersistenceProviderTests.cs" />
-    <Compile Include="OrmLiteComplexTypesTests.cs" />
-    <Compile Include="OrmLiteConnectionTests.cs" />
-    <Compile Include="OrmLiteCreateTableTests.cs" />
-    <Compile Include="OrmLiteCreateTableWithIndexesTests.cs" />
-    <Compile Include="OrmLiteDeleteTests.cs" />
-    <Compile Include="OrmLiteInsertTests.cs" />
-    <Compile Include="OrmLiteQueryTests.cs" />
-    <Compile Include="OrmLiteSaveStringValueTests.cs" />
-    <Compile Include="OrmLiteSaveTests.cs" />
-    <Compile Include="OrmLiteSelectTests.cs" />
-    <Compile Include="OrmLiteTestBase.cs" />
-    <Compile Include="OrmLiteTransactionTests.cs" />
-    <Compile Include="OrmLiteUpdateTests.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ShippersExample.cs" />
-    <Compile Include="SqlMapperTests.cs" />
-    <Compile Include="TypeWithByteArrayFieldTests.cs" />
-    <Compile Include="UseCase\CustomerOrdersUseCase.cs" />
-    <Compile Include="UseCase\SimpleUseCase.cs" />
-    <Compile Include="OrmLiteGetScalarTests.cs" />
-    <Compile Include="OrmLiteCreateTableWithNamingStrategyTests.cs" />
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">
+    <DefineConstants>$(DefineConstants);NETCORE_SUPPORT;NETCORE</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">
+    <PackageReference Include="Microsoft.NETCore.Portable.Compatibility" Version="1.0.1" />
+    <PackageReference Include="System.Runtime" Version="4.1.0" />
+    <PackageReference Include="System.Runtime.Serialization.Xml" Version="4.1.1" />
+    <PackageReference Include="System.Reflection" Version="4.1.0" />
+    <PackageReference Include="System.Reflection.Primitives" Version="4.0.1" />
+    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.1.1" />
+
+    <Reference Include="..\..\lib\netstandard1.1\ServiceStack.Interfaces.dll" />
+    <Reference Include="..\..\lib\netstandard1.3\ServiceStack.Text.dll" />
+    <Reference Include="..\..\lib\netstandard1.3\ServiceStack.Common.dll" />
+    <Reference Include="..\..\lib\netstandard1.6\ServiceStack.Client.dll" />
+    <Reference Include="..\..\lib\netstandard1.6\ServiceStack.dll" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\tests\ServiceStack.OrmLite.Tests\ServiceStack.OrmLite.Tests.csproj">
-      <Project>{9b64f4a7-c008-46a8-ad6f-99626dcfefbd}</Project>
-      <Name>ServiceStack.OrmLite.Tests</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ServiceStack.OrmLite.MySql\ServiceStack.OrmLite.MySql.csproj">
-      <Project>{FD20F088-ACC0-4979-AC0C-8C541C2E7DE5}</Project>
-      <Name>ServiceStack.OrmLite.MySql</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj">
-      <Project>{96179AC6-F6F1-40C3-9FDD-4F6582F54C5C}</Project>
-      <Name>ServiceStack.OrmLite</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
-  </Target>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
 </Project>

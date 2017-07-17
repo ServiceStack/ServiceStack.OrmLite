@@ -1,3 +1,5 @@
+//NUnitLite isn't recognized in VS2017 - shouldn't need NUnitLite with NUnit 3.5+ https://github.com/nunit/dotnet-test-nunit
+#if NUNITLITE
 using NUnitLite;
 using NUnit.Common;
 using System.Reflection;
@@ -63,3 +65,4 @@ namespace ServiceStack.OrmLite.Tests
         }
     }
 }
+#endif

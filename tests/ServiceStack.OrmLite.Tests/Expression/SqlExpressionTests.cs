@@ -153,6 +153,53 @@ namespace ServiceStack.OrmLite.Tests.Expression
             }
         }
 
+        [Test]
+        public void Can_Select_as_List_ValueTuple()
+        {
+            using (var db = OpenDbConnection())
+            {
+                InitLetters(db);
+                GetIdStats(db);
+
+                //var a = new ValueTuple<int, int, int, int>();
+                //a.Item1 = 1;
+
+                var query = db.From<LetterFrequency>()
+                    .Select("COUNT(*), MIN(Letter), MAX(Letter), Sum(Id)");
+
+                var results = db.Select<(int count, string min, string max, int sum)>(query);
+
+                Assert.That(results.Count, Is.EqualTo(1));
+
+                var result = results[0];
+                Assert.That(result.count, Is.EqualTo(10));
+                Assert.That(result.min, Is.EqualTo("A"));
+                Assert.That(result.max, Is.EqualTo("D"));
+                Assert.That(result.sum, Is.EqualTo(letterFrequencySumId));
+
+                var single = db.Single<(int count, string min, string max, int sum)>(query);
+                Assert.That(single.count, Is.EqualTo(10));
+                Assert.That(single.min, Is.EqualTo("A"));
+                Assert.That(single.max, Is.EqualTo("D"));
+                Assert.That(single.sum, Is.EqualTo(letterFrequencySumId));
+
+                single = db.Single<(int count, string min, string max, int sum)>(
+                    db.From<LetterFrequency>()
+                        .Select(x => new
+                        {
+                            Count = Sql.Count("*"),
+                            Min = Sql.Min(x.Letter),
+                            Max = Sql.Max(x.Letter),
+                            Sum = Sql.Sum(x.Id)
+                        }));
+
+                Assert.That(single.count, Is.EqualTo(10));
+                Assert.That(single.min, Is.EqualTo("A"));
+                Assert.That(single.max, Is.EqualTo("D"));
+                Assert.That(single.sum, Is.EqualTo(letterFrequencySumId));
+            }
+        }
+
         private void CheckDbTypeInsensitiveEquivalency(List<object> result)
         {
             Assert.That(Convert.ToInt64(result[0]), Is.EqualTo(10));

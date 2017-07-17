@@ -9,12 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Microsoft")]
-#if NET35
-[assembly: AssemblyProduct("ServiceStack.OrmLite.Sqlite CLI 3.5")]
-#elif NET40
-[assembly: AssemblyProduct("ServiceStack.OrmLite.Sqlite CLI 4.0")]
-#endif
-[assembly: AssemblyCopyright("Copyright (c) ServiceStack 2016")]
+[assembly: AssemblyCopyright("Copyright (c) ServiceStack 2017")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -27,3 +22,4 @@ using System.Runtime.InteropServices;
 [assembly: Guid("ac105634-e91a-4fcc-a4f9-36aacd9fd47c")]
 
 [assembly: AssemblyVersion("4.0.0.0")]
+[assembly: AssemblyFileVersion("4.0.0.0")]

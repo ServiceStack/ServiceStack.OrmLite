@@ -15,8 +15,8 @@ namespace ServiceStack.OrmLite
 {
     public abstract partial class SqlExpression<T> : ISqlExpression, IHasUntypedSqlExpression
     {
-        protected const string TrueLiteral = "(1=1)";
-        protected const string FalseLiteral = "(1=0)";
+        public const string TrueLiteral = "(1=1)";
+        public const string FalseLiteral = "(1=0)";
 
         protected bool visitedExpressionIsTableColumn = false;
         protected bool skipParameterizationForThisExpression = false;
@@ -361,73 +361,63 @@ namespace ServiceStack.OrmLite
 
         public virtual SqlExpression<T> UnsafeWhere(string rawSql, params object[] filterParams)
         {
-            AppendToWhere("AND", FormatFilter(rawSql, filterParams));
-            return this;
+            return AppendToWhere("AND", FormatFilter(rawSql, filterParams));
         }
 
         public virtual SqlExpression<T> Where(string sqlFilter, params object[] filterParams)
         {
-            AppendToWhere("AND", FormatFilter(sqlFilter.SqlVerifyFragment(), filterParams));
-            return this;
+            return AppendToWhere("AND", FormatFilter(sqlFilter.SqlVerifyFragment(), filterParams));
         }
 
         public virtual SqlExpression<T> UnsafeAnd(string rawSql, params object[] filterParams)
         {
-            AppendToWhere("AND", FormatFilter(rawSql, filterParams));
-            return this;
+            return AppendToWhere("AND", FormatFilter(rawSql, filterParams));
         }
 
         public virtual SqlExpression<T> And(string sqlFilter, params object[] filterParams)
         {
-            AppendToWhere("AND", FormatFilter(sqlFilter.SqlVerifyFragment(), filterParams));
-            return this;
+            return AppendToWhere("AND", FormatFilter(sqlFilter.SqlVerifyFragment(), filterParams));
         }
 
         public virtual SqlExpression<T> UnsafeOr(string rawSql, params object[] filterParams)
         {
-            AppendToWhere("OR", FormatFilter(rawSql, filterParams));
-            return this;
+            return AppendToWhere("OR", FormatFilter(rawSql, filterParams));
         }
 
         public virtual SqlExpression<T> Or(string sqlFilter, params object[] filterParams)
         {
-            AppendToWhere("OR", FormatFilter(sqlFilter.SqlVerifyFragment(), filterParams));
-            return this;
+            return AppendToWhere("OR", FormatFilter(sqlFilter.SqlVerifyFragment(), filterParams));
         }
 
         public virtual SqlExpression<T> AddCondition(string condition, string sqlFilter, params object[] filterParams)
         {
-            AppendToWhere(condition, FormatFilter(sqlFilter.SqlVerifyFragment(), filterParams));
-            return this;
+            return AppendToWhere(condition, FormatFilter(sqlFilter.SqlVerifyFragment(), filterParams));
         }
 
         public virtual SqlExpression<T> Where(Expression<Func<T, bool>> predicate)
         {
-            AppendToWhere("AND", predicate);
-            return this;
+            return AppendToWhere("AND", predicate);
         }
 
         public virtual SqlExpression<T> And(Expression<Func<T, bool>> predicate)
         {
-            AppendToWhere("AND", predicate);
-            return this;
+            return AppendToWhere("AND", predicate);
         }
 
         public virtual SqlExpression<T> Or(Expression<Func<T, bool>> predicate)
         {
-            AppendToWhere("OR", predicate);
-            return this;
+            return AppendToWhere("OR", predicate);
         }
 
-        protected void AppendToWhere(string condition, Expression predicate)
+        protected SqlExpression<T> AppendToWhere(string condition, Expression predicate)
         {
             if (predicate == null)
-                return;
+                return this;
 
             useFieldName = true;
             sep = " ";
             var newExpr = WhereExpressionToString(Visit(predicate));
-            AppendToWhere(condition, newExpr);
+            return AppendToWhere(condition, newExpr);
         }
 
         private static string WhereExpressionToString(object expression)
@@ -437,13 +427,14 @@ namespace ServiceStack.OrmLite
             return expression.ToString();
         }
 
-        protected void AppendToWhere(string condition, string sqlExpression)
+        protected SqlExpression<T> AppendToWhere(string condition, string sqlExpression)
         {
             whereExpression = string.IsNullOrEmpty(whereExpression)
                 ? (WhereStatementWithoutWhereString ? "" : "WHERE ")
                 : whereExpression + " " + condition + " ";
 
             whereExpression += sqlExpression;
+            return this;
         }
 
         public virtual SqlExpression<T> GroupBy()
@@ -503,6 +494,16 @@ namespace ServiceStack.OrmLite
         public virtual SqlExpression<T> Having(string sqlFilter, params object[] filterParams)
         {
             havingExpression = FormatFilter(sqlFilter.SqlVerifyFragment(), filterParams);
+
+            if (havingExpression != null)
+                havingExpression = "HAVING " + havingExpression;
+
+            return this;
+        }
+
+        public virtual SqlExpression<T> UnsafeHaving(string sqlFilter, params object[] filterParams)
+        {
+            havingExpression = FormatFilter(sqlFilter, filterParams);
 
             if (havingExpression != null)
                 havingExpression = "HAVING " + havingExpression;
@@ -1206,7 +1207,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        protected internal virtual object Visit(Expression exp)
+        public virtual object Visit(Expression exp)
         {
             visitedExpressionIsTableColumn = false;
 
@@ -1354,7 +1355,7 @@ namespace ServiceStack.OrmLite
                 var args = this.VisitExpressionList(methodExpr.Arguments);
                 right = GetValue(args[1], typeof(string));
                 ConvertToPlaceholderAndParameter(ref right);
-                return new PartialSqlString("({0} {1} {2})".Fmt(args[0], operand, right));
+                return new PartialSqlString($"({args[0]} {operand} {right})");
             }
             else
             {
@@ -1906,7 +1907,7 @@ namespace ServiceStack.OrmLite
                 }
                 else if (e.NodeType == ExpressionType.MemberAccess)
                 {
-                    list.Add(GetMemberExpression(e as MemberExpression));
+                    list.Add(VisitMemberAccess(e as MemberExpression));
                 }
                 else
                 {
@@ -1979,7 +1980,13 @@ namespace ServiceStack.OrmLite
                     ? fd.FieldName
                     : memberName;
 
-                return PrefixFieldWithTableName
+                if (tableDef.ModelType.IsInterface() && this.ModelDef.ModelType.HasInterface(tableDef.ModelType))
+                {
+                    tableDef = this.ModelDef;
+                }
+
+                var includePrefix = PrefixFieldWithTableName && fd?.CustomSelect == null && !tableDef.ModelType.IsInterface();
+                return includePrefix
                     ? DialectProvider.GetQuotedColumnName(tableDef, fieldName)
                     : DialectProvider.GetQuotedColumnName(fieldName);
             }
@@ -2053,7 +2060,7 @@ namespace ServiceStack.OrmLite
             return modelDef.FieldDefinitions.ConvertAll(r => r.Name);
         }
 
-        private static bool IsStaticArrayMethod(MethodCallExpression m)
+        protected virtual bool IsStaticArrayMethod(MethodCallExpression m)
         {
             return (m.Object == null 
                 && m.Method.Name == "Contains"
@@ -2116,7 +2123,7 @@ namespace ServiceStack.OrmLite
             return new PartialSqlString(statement);
         }
 
-        private static bool IsStaticStringMethod(MethodCallExpression m)
+        protected virtual bool IsStaticStringMethod(MethodCallExpression m)
         {
             return (m.Object == null 
                 && m.Method.Name == "Concat");
@@ -2246,7 +2253,7 @@ namespace ServiceStack.OrmLite
                 return $"{quotedColName} IN ({subSelect})";
             }
 
-            throw new NotSupportedException("In({0})".Fmt(argValue.GetType()));
+            throw new NotSupportedException($"In({argValue.GetType()})");
         }
 
         protected virtual object VisitColumnAccessMethod(MethodCallExpression m)
@@ -2330,7 +2337,12 @@ namespace ServiceStack.OrmLite
             p.SourceVersion = sourceVersion;
 
             if (p.DbType == DbType.String)
+            {
                 p.Size = DialectProvider.GetStringConverter().StringLength;
+                string strValue = value as string;
+                if (strValue != null && strValue.Length > p.Size)
+                    p.Size = strValue.Length;
+            }
 
             if (value != null)
             {

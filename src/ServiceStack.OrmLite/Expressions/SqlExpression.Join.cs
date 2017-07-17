@@ -125,6 +125,24 @@ namespace ServiceStack.OrmLite
             return InternalJoin(joinType, joinExpr, sourceDef, targetDef, joinFormat);
         }
 
+        protected SqlExpression<T> InternalJoin<Source, Target>(string joinType, Expression joinExpr)
+        {
+            var sourceDef = typeof(Source).GetModelDefinition();
+            var targetDef = typeof(Target).GetModelDefinition();
+
+            return InternalJoin(joinType, joinExpr, sourceDef, targetDef);
+        }
+
+        public SqlExpression<T> Join<Source, Target, T3>(Expression<Func<Source, Target, T3, bool>> joinExpr) => InternalJoin<Source, Target>("INNER JOIN", joinExpr);
+        public SqlExpression<T> LeftJoin<Source, Target, T3>(Expression<Func<Source, Target, T3, bool>> joinExpr) => InternalJoin<Source, Target>("LEFT JOIN", joinExpr);
+        public SqlExpression<T> RightJoin<Source, Target, T3>(Expression<Func<Source, Target, T3, bool>> joinExpr) => InternalJoin<Source, Target>("RIGHT JOIN", joinExpr);
+        public SqlExpression<T> FullJoin<Source, Target, T3>(Expression<Func<Source, Target, T3, bool>> joinExpr) => InternalJoin<Source, Target>("FULL JOIN", joinExpr);
+
+        public SqlExpression<T> Join<Source, Target, T3, T4>(Expression<Func<Source, Target, T3, T4, bool>> joinExpr) => InternalJoin<Source, Target>("INNER JOIN", joinExpr);
+        public SqlExpression<T> LeftJoin<Source, Target, T3, T4>(Expression<Func<Source, Target, T3, T4, bool>> joinExpr) => InternalJoin<Source, Target>("LEFT JOIN", joinExpr);
+        public SqlExpression<T> RightJoin<Source, Target, T3, T4>(Expression<Func<Source, Target, T3, T4, bool>> joinExpr) => InternalJoin<Source, Target>("RIGHT JOIN", joinExpr);
+        public SqlExpression<T> FullJoin<Source, Target, T3, T4>(Expression<Func<Source, Target, T3, T4, bool>> joinExpr) => InternalJoin<Source, Target>("FULL JOIN", joinExpr);
+
         private string InternalCreateSqlFromExpression(Expression joinExpr, bool isCrossJoin) 
         {
             return $"{(isCrossJoin ? "WHERE" : "ON")} {VisitJoin(joinExpr)}";
@@ -151,7 +169,7 @@ namespace ServiceStack.OrmLite
                 return string.Empty;
             }
 
-            return "{0}\n({1}.{2} = {3}.{4})".Fmt(
+            return string.Format("{0}\n({1}.{2} = {3}.{4})",
                 isCrossJoin ? "WHERE" : "ON",
                 DialectProvider.GetQuotedTableName(parentDef),
                 SqlColumn(parentDef.PrimaryKey.FieldName),
@@ -198,7 +216,7 @@ namespace ServiceStack.OrmLite
 
         public string SelectInto<TModel>()
         {
-            if ((CustomSelect && OnlyFields  == null) || (typeof(TModel) == typeof(T) && !PrefixFieldWithTableName))
+            if ((CustomSelect && OnlyFields == null) || (typeof(TModel) == typeof(T) && !PrefixFieldWithTableName))
             {
                 return ToSelectStatement();
             }
@@ -241,7 +259,14 @@ namespace ServiceStack.OrmLite
 
                                 if (fieldDef.CustomSelect == null)
                                 {
-                                    sbSelect.Append($"{GetQuotedColumnName(tableDef, matchingField.Name)} AS {SqlColumn(fieldDef.Name)}");
+                                    if (!fieldDef.IsRowVersion)
+                                    {
+                                        sbSelect.Append($"{GetQuotedColumnName(tableDef, matchingField.Name)} AS {SqlColumn(fieldDef.Name)}");
+                                    }
+                                    else
+                                    {
+                                        sbSelect.Append(DialectProvider.GetRowVersionColumnName(fieldDef, DialectProvider.GetTableName(tableDef.ModelName)));
+                                    }
                                 }
                                 else
                                 {
@@ -268,10 +293,17 @@ namespace ServiceStack.OrmLite
 
                             if (fieldDef.CustomSelect == null)
                             {
-                                sbSelect.Append($"{GetQuotedColumnName(tableDef, tableFieldDef.Name)}");
+                                if (!fieldDef.IsRowVersion)
+                                {
+                                    sbSelect.Append(GetQuotedColumnName(tableDef, tableFieldDef.Name));
 
-                                if (tableFieldDef.Alias != null)
-                                    sbSelect.Append(" AS ").Append(SqlColumn(fieldDef.Name));
+                                    if (tableFieldDef.Alias != null)
+                                        sbSelect.Append(" AS ").Append(SqlColumn(fieldDef.Name));
+                                }
+                                else
+                                {
+                                    sbSelect.Append(DialectProvider.GetRowVersionColumnName(fieldDef, DialectProvider.GetTableName(tableDef.ModelName)));
+                                }
                             }
                             else
                             {
@@ -325,41 +357,95 @@ namespace ServiceStack.OrmLite
                     || string.Compare(tableDef.ModelName + x.FieldName, fieldDef.Name, StringComparison.OrdinalIgnoreCase) == 0);
         }
 
-        public virtual SqlExpression<T> Where<Target>(Expression<Func<Target, bool>> predicate)
-        {
-            AppendToWhere("AND", predicate);
-            return this;
-        }
+        public virtual SqlExpression<T> Where<Target>(Expression<Func<Target, bool>> predicate) => AppendToWhere("AND", predicate);
 
-        public virtual SqlExpression<T> Where<Source, Target>(Expression<Func<Source, Target, bool>> predicate)
-        {
-            AppendToWhere("AND", predicate);
-            return this;
-        }
+        public virtual SqlExpression<T> Where<Source, Target>(Expression<Func<Source, Target, bool>> predicate) => AppendToWhere("AND", predicate);
 
-        public virtual SqlExpression<T> And<Target>(Expression<Func<Target, bool>> predicate)
-        {
-            AppendToWhere("AND", predicate);
-            return this;
-        }
+        public virtual SqlExpression<T> Where<T1, T2, T3>(Expression<Func<T1, T2, T3, bool>> predicate) => AppendToWhere("AND", predicate);
 
-        public virtual SqlExpression<T> And<Source, Target>(Expression<Func<Source, Target, bool>> predicate)
-        {
-            AppendToWhere("AND", predicate);
-            return this;
-        }
+        public virtual SqlExpression<T> Where<T1, T2, T3, T4>(Expression<Func<T1, T2, T3, T4, bool>> predicate) => AppendToWhere("AND", predicate);
 
-        public virtual SqlExpression<T> Or<Target>(Expression<Func<Target, bool>> predicate)
-        {
-            AppendToWhere("OR", predicate);
-            return this;
-        }
+        public virtual SqlExpression<T> Where<T1, T2, T3, T4, T5>(Expression<Func<T1, T2, T3, T4, T5, bool>> predicate) => AppendToWhere("AND", predicate);
 
-        public virtual SqlExpression<T> Or<Source, Target>(Expression<Func<Source, Target, bool>> predicate)
-        {
-            AppendToWhere("OR", predicate);
-            return this;
-        }
+        public virtual SqlExpression<T> Where<T1, T2, T3, T4, T5, T6>(Expression<Func<T1, T2, T3, T4, T5, T6, bool>> predicate) => AppendToWhere("AND", predicate);
+
+        public virtual SqlExpression<T> Where<T1, T2, T3, T4, T5, T6, T7>(Expression<Func<T1, T2, T3, T4, T5, T6, T7, bool>> predicate) => AppendToWhere("AND", predicate);
+
+        public virtual SqlExpression<T> Where<T1, T2, T3, T4, T5, T6, T7, T8>(Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, bool>> predicate) => AppendToWhere("AND", predicate);
+
+        public virtual SqlExpression<T> Where<T1, T2, T3, T4, T5, T6, T7, T8, T9>(Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, bool>> predicate) => AppendToWhere("AND", predicate);
+
+        public virtual SqlExpression<T> Where<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, bool>> predicate) => AppendToWhere("AND", predicate);
+
+        public virtual SqlExpression<T> Where<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, bool>> predicate) => AppendToWhere("AND", predicate);
+
+        public virtual SqlExpression<T> Where<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, bool>> predicate) => AppendToWhere("AND", predicate);
+
+        public virtual SqlExpression<T> Where<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, bool>> predicate) => AppendToWhere("AND", predicate);
+
+        public virtual SqlExpression<T> Where<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, bool>> predicate) => AppendToWhere("AND", predicate);
+
+        public virtual SqlExpression<T> Where<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, bool>> predicate) => AppendToWhere("AND", predicate);
+
+        public virtual SqlExpression<T> And<Target>(Expression<Func<Target, bool>> predicate) => AppendToWhere("AND", predicate);
+
+        public virtual SqlExpression<T> And<Source, Target>(Expression<Func<Source, Target, bool>> predicate) => AppendToWhere("AND", predicate);
+
+        public virtual SqlExpression<T> And<T1, T2, T3>(Expression<Func<T1, T2, T3, bool>> predicate) => AppendToWhere("AND", predicate);
+
+        public virtual SqlExpression<T> And<T1, T2, T3, T4>(Expression<Func<T1, T2, T3, T4, bool>> predicate) => AppendToWhere("AND", predicate);
+
+        public virtual SqlExpression<T> And<T1, T2, T3, T4, T5>(Expression<Func<T1, T2, T3, T4, T5, bool>> predicate) => AppendToWhere("AND", predicate);
+
+        public virtual SqlExpression<T> And<T1, T2, T3, T4, T5, T6>(Expression<Func<T1, T2, T3, T4, T5, T6, bool>> predicate) => AppendToWhere("AND", predicate);
+
+        public virtual SqlExpression<T> And<T1, T2, T3, T4, T5, T6, T7>(Expression<Func<T1, T2, T3, T4, T5, T6, T7, bool>> predicate) => AppendToWhere("AND", predicate);
+
+        public virtual SqlExpression<T> And<T1, T2, T3, T4, T5, T6, T7, T8>(Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, bool>> predicate) => AppendToWhere("AND", predicate);
+
+        public virtual SqlExpression<T> And<T1, T2, T3, T4, T5, T6, T7, T8, T9>(Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, bool>> predicate) => AppendToWhere("AND", predicate);
+
+        public virtual SqlExpression<T> And<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, bool>> predicate) => AppendToWhere("AND", predicate);
+
+        public virtual SqlExpression<T> And<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, bool>> predicate) => AppendToWhere("AND", predicate);
+
+        public virtual SqlExpression<T> And<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, bool>> predicate) => AppendToWhere("AND", predicate);
+
+        public virtual SqlExpression<T> And<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, bool>> predicate) => AppendToWhere("AND", predicate);
+
+        public virtual SqlExpression<T> And<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, bool>> predicate) => AppendToWhere("AND", predicate);
+
+        public virtual SqlExpression<T> And<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, bool>> predicate) => AppendToWhere("AND", predicate);
+
+        public virtual SqlExpression<T> Or<Target>(Expression<Func<Target, bool>> predicate) => AppendToWhere("OR", predicate);
+
+        public virtual SqlExpression<T> Or<Source, Target>(Expression<Func<Source, Target, bool>> predicate) => AppendToWhere("OR", predicate);
+
+        public virtual SqlExpression<T> Or<T1, T2, T3>(Expression<Func<T1, T2, T3, bool>> predicate) => AppendToWhere("OR", predicate);
+
+        public virtual SqlExpression<T> Or<T1, T2, T3, T4>(Expression<Func<T1, T2, T3, T4, bool>> predicate) => AppendToWhere("OR", predicate);
+
+        public virtual SqlExpression<T> Or<T1, T2, T3, T4, T5>(Expression<Func<T1, T2, T3, T4, T5, bool>> predicate) => AppendToWhere("OR", predicate);
+
+        public virtual SqlExpression<T> Or<T1, T2, T3, T4, T5, T6>(Expression<Func<T1, T2, T3, T4, T5, T6, bool>> predicate) => AppendToWhere("OR", predicate);
+
+        public virtual SqlExpression<T> Or<T1, T2, T3, T4, T5, T6, T7>(Expression<Func<T1, T2, T3, T4, T5, T6, T7, bool>> predicate) => AppendToWhere("OR", predicate);
+
+        public virtual SqlExpression<T> Or<T1, T2, T3, T4, T5, T6, T7, T8>(Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, bool>> predicate) => AppendToWhere("OR", predicate);
+
+        public virtual SqlExpression<T> Or<T1, T2, T3, T4, T5, T6, T7, T8, T9>(Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, bool>> predicate) => AppendToWhere("OR", predicate);
+
+        public virtual SqlExpression<T> Or<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, bool>> predicate) => AppendToWhere("OR", predicate);
+
+        public virtual SqlExpression<T> Or<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, bool>> predicate) => AppendToWhere("OR", predicate);
+
+        public virtual SqlExpression<T> Or<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, bool>> predicate) => AppendToWhere("OR", predicate);
+
+        public virtual SqlExpression<T> Or<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, bool>> predicate) => AppendToWhere("OR", predicate);
+
+        public virtual SqlExpression<T> Or<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, bool>> predicate) => AppendToWhere("OR", predicate);
+
+        public virtual SqlExpression<T> Or<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, bool>> predicate) => AppendToWhere("OR", predicate);
 
         public Tuple<ModelDefinition,FieldDefinition> FirstMatchingField(string fieldName)
         {

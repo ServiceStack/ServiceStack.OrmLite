@@ -1,159 +1,48 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>10.0.0</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{CB988768-7753-4EF2-8C06-6A74B384C78E}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <RootNamespace>ServiceStack.OrmLite.FirebirdTests</RootNamespace>
+    <TargetFramework>net45</TargetFramework>
     <AssemblyName>ServiceStack.OrmLite.FirebirdTests</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <TargetFrameworkProfile />
+    <PackageId>ServiceStack.OrmLite.FirebirdTests</PackageId>
+    <NetStandardImplicitPackageVersion>1.6.0</NetStandardImplicitPackageVersion>
+    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
+    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>True</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>False</Optimize>
-    <OutputPath>bin\Debug</OutputPath>
-    <DefineConstants>DEBUG;</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <ConsolePause>False</ConsolePause>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>none</DebugType>
-    <Optimize>False</Optimize>
-    <OutputPath>bin\Release</OutputPath>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <ConsolePause>False</ConsolePause>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Signed|AnyCPU'">
-    <OutputPath>bin\Signed\</OutputPath>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="FirebirdSql.Data.FirebirdClient, Version=4.10.0.0, Culture=neutral, PublicKeyToken=3750abcc3150b00c, processorArchitecture=MSIL">
-      <HintPath>..\..\src\packages\FirebirdSql.Data.FirebirdClient.4.10.0.0\lib\net40-client\FirebirdSql.Data.FirebirdClient.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="ServiceStack.Common">
-      <HintPath>..\..\lib\ServiceStack.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="ServiceStack.Interfaces">
-      <HintPath>..\..\lib\ServiceStack.Interfaces.dll</HintPath>
-    </Reference>
-    <Reference Include="ServiceStack.Text">
-      <HintPath>..\..\lib\ServiceStack.Text.dll</HintPath>
-    </Reference>
-    <Reference Include="System.configuration" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Data.DataSetExtensions" />
+    <PackageReference Include="NUnit" Version="3.6.1" />
+    <ProjectReference Include="..\..\src\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj" />
+    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Firebird\ServiceStack.OrmLite.Firebird.csproj" />
+    <ProjectReference Include="..\ServiceStack.OrmLite.Tests\ServiceStack.OrmLite.Tests.csproj" />
+    <Reference Include="..\..\lib\pcl\ServiceStack.Interfaces.dll" />
+  </ItemGroup>
+  
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net45' ">
+    <DefineConstants>$(DefineConstants);NET45</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Threading" />
+    <Reference Include="System.Threading.Tasks" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
-    <Reference Include="nunit.framework">
-      <HintPath>..\..\lib\tests\nunit.framework.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Xml" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="Microsoft.CSharp" />
+
+    <Reference Include="..\..\lib\net45\ServiceStack.Text.dll" />
+    <Reference Include="..\..\lib\net45\ServiceStack.Common.dll" />
+    <Reference Include="..\..\lib\net45\ServiceStack.Client.dll" />
+    <Reference Include="..\..\lib\net45\ServiceStack.dll" />
+    <Reference Include="..\..\lib\net45\Northwind.Common.dll" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="..\ServiceStack.OrmLite.Tests\TemporaryNamingStrategy.cs">
-      <Link>TemporaryNamingStrategy.cs</Link>
-    </Compile>
-    <Compile Include="Expressions\AdditiveExpressionsTest.cs" />
-    <Compile Include="Expressions\Author.cs" />
-    <Compile Include="Expressions\AuthorUseCase.cs" />
-    <Compile Include="Expressions\ConditionalExpressionTest.cs" />
-    <Compile Include="Expressions\EqualityExpressionsTest.cs" />
-    <Compile Include="Expressions\ExpressionsTestBase.cs" />
-    <Compile Include="Expressions\LogicalExpressionsTest.cs" />
-    <Compile Include="Expressions\MultiplicativeExpressionsTest.cs" />
-    <Compile Include="Expressions\OrmLiteCountTests.cs" />
-    <Compile Include="Expressions\PrimaryExpressionsTest.cs" />
-    <Compile Include="Expressions\RelationalExpressionsTest.cs" />
-    <Compile Include="Expressions\StringFunctionTests.cs" />
-    <Compile Include="Expressions\TestType.cs" />
-    <Compile Include="Expressions\UnaryExpressionsTest.cs" />
-    <Compile Include="TypeWithByteArrayFieldTests.cs" />
-    <Compile Include="UseCase\SimpleUseCase.cs" />
-    <Compile Include="UseCase\CustomerOrdersUseCase.cs" />
-    <Compile Include="UseCase\SchemaUseCase.cs" />
-    <Compile Include="OrmLiteTestBase.cs" />
-    <Compile Include="LocalizationTests.cs" />
-    <Compile Include="ShipperExample.cs" />
-    <Compile Include="OrmLiteBasicPersistenceProviderTest.cs" />
-    <Compile Include="ServiceStack.Common.Tests\ServiceStack.Common.Tests.Models\ModelWithFieldsOfDifferentTypes.cs" />
-    <Compile Include="ServiceStack.Common.Tests\ServiceStack.Common.Tests.Models\SampleOrderLine.cs" />
-    <Compile Include="ServiceStack.Common.Tests\ServiceStack.Common.Tests.Models\ModelWithComplexTypes.cs" />
-    <Compile Include="OrmLiteComplexTypesTests.cs" />
-    <Compile Include="OrmLiteConnectionFactoryTests.cs" />
-    <Compile Include="Northwind.Common\Northwind.Common.DataModel\Shipper.cs" />
-    <Compile Include="OrmLiteConnectionTests.cs" />
-    <Compile Include="ServiceStack.Common.Tests\ServiceStack.Common.Tests.Models\ModelWithIdAndName.cs" />
-    <Compile Include="ServiceStack.Common.Tests\ServiceStack.Common.Tests.Models\ModelWithIdOnly.cs" />
-    <Compile Include="ServiceStack.Common.Tests\ServiceStack.Common.Tests.Models\ModelWithLongIdAndStringFields.cs" />
-    <Compile Include="ServiceStack.Common.Tests\ServiceStack.Common.Tests.Models\ModelWithOnlyStringFields.cs" />
-    <Compile Include="OrmLiteCreateTableTests.cs" />
-    <Compile Include="ServiceStack.Common.Tests\ServiceStack.Common.Tests.Models\ModelWithCompositeIndexFields.cs" />
-    <Compile Include="ServiceStack.Common.Tests\ServiceStack.Common.Tests.Models\ModelWithIndexFields.cs" />
-    <Compile Include="OrmLiteCreateTableWithIndexesTests.cs" />
-    <Compile Include="OrmLiteDeleteTests.cs" />
-    <Compile Include="Northwind.Common\Northwind.Common.DataModel\OrderBlob.cs" />
-    <Compile Include="Northwind.Common\Northwind.Common.DataModel\Customer.cs" />
-    <Compile Include="Northwind.Common\Northwind.Common.DataModel\Employee.cs" />
-    <Compile Include="Northwind.Common\Northwind.Common.DataModel\OrderDetailBlob.cs" />
-    <Compile Include="Northwind.Common\Northwind.Common.DataModel\Category.cs" />
-    <Compile Include="Northwind.Common\Northwind.Common.DataModel\CustomerCustomerDemo.cs" />
-    <Compile Include="Northwind.Common\Northwind.Common.DataModel\EmployeeTerritory.cs" />
-    <Compile Include="Northwind.Common\Northwind.Common.DataModel\OrderDetail.cs" />
-    <Compile Include="Northwind.Common\Northwind.Common.DataModel\Order.cs" />
-    <Compile Include="Northwind.Common\Northwind.Common.DataModel\Product.cs" />
-    <Compile Include="Northwind.Common\Northwind.Common.DataModel\Region.cs" />
-    <Compile Include="Northwind.Common\Northwind.Common.DataModel\Supplier.cs" />
-    <Compile Include="Northwind.Common\Northwind.Common.DataModel\Territory.cs" />
-    <Compile Include="Northwind.Common\Northwind.Common.DataModel\NorthwindFactory.cs" />
-    <Compile Include="Northwind.Common\Northwind.Common.DataModel\CustomerDemographic.cs" />
-    <Compile Include="Northwind.Common\Northwind.Common.DataModel\NorthwindData.cs" />
-    <Compile Include="OrmLiteInsertTests.cs" />
-    <Compile Include="ServiceStack.Common.Tests\ServiceStack.Common.Tests.Models\TaskQueue.cs" />
-    <Compile Include="ServiceStack.Common.Tests\ServiceStack.Common.Tests.Models\ModelWithFieldsOfNullableTypes.cs" />
-    <Compile Include="ServiceStack.Common.Tests\ServiceStack.Common.Tests.Models\ModelWithFieldsOfDifferentAndNullableTypes.cs" />
-    <Compile Include="OrmLiteQueryTests.cs" />
-    <Compile Include="ServiceStack.Common.Tests\ServiceStack.Common.Tests.Models\Movie.cs" />
-    <Compile Include="OrmLiteSaveTests.cs" />
-    <Compile Include="OrmLiteSelectTests.cs" />
-    <Compile Include="OrmLiteTransactionTests.cs" />
-    <Compile Include="OrmLiteUpdateTests.cs" />
-    <Compile Include="OrmLiteGetScalarTests.cs" />
-    <Compile Include="DateTimeColumnTest.cs" />
-    <Compile Include="OrmLiteCreateTableWithNamigStrategyTests.cs" />
-    <Compile Include="ForeignKeyAttributeTests.cs" />
-  </ItemGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <ItemGroup>
-    <Folder Include="App_Data\" />
-    <Folder Include="Northwind.Common\Northwind.Common\" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj">
-      <Project>{96179AC6-F6F1-40C3-9FDD-4F6582F54C5C}</Project>
-      <Name>ServiceStack.OrmLite</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Firebird\ServiceStack.OrmLite.Firebird.csproj">
-      <Project>{317B64BA-D7A6-4A15-8719-821B38147C63}</Project>
-      <Name>ServiceStack.OrmLite.Firebird</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
-    <None Include="packages.config" />
-  </ItemGroup>
+
 </Project>

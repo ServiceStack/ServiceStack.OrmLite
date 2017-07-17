@@ -51,6 +51,8 @@ namespace ServiceStack.OrmLite
 
         IStringSerializer StringSerializer { get; set; }
 
+        Func<string, string> ParamNameFilter { get; set; }
+
         /// <summary>
         /// Quote the string so that it can be used inside an SQL-expression
         /// Escape quotes inside the string
@@ -75,6 +77,10 @@ namespace ServiceStack.OrmLite
 
         IDbConnection CreateConnection(string filePath, Dictionary<string, string> options);
 
+        string GetTableName(ModelDefinition modelDef);
+
+        string GetTableName(string tableName, string schema = null);
+
         string GetQuotedTableName(ModelDefinition modelDef);
 
         string GetQuotedTableName(string tableName, string schema=null);
@@ -89,7 +95,10 @@ namespace ServiceStack.OrmLite
 
         long GetLastInsertId(IDbCommand command);
 
+        [Obsolete("Use GetLastInsertIdSqlSuffix()")]
         long InsertAndGetLastInsertId<T>(IDbCommand dbCmd);
+
+        string GetLastInsertIdSqlSuffix<T>();
 
         string ToSelectStatement(Type tableType, string sqlFilter, params object[] filterParams);
 
@@ -156,7 +165,7 @@ namespace ServiceStack.OrmLite
         void DropColumn(IDbConnection db, Type modelType, string columnName);
 
         ulong FromDbRowVersion(object value);
-        SelectItem GetRowVersionColumnName(FieldDefinition field);
+        SelectItem GetRowVersionColumnName(FieldDefinition field, string tablePrefix = null);
 
         string GetColumnNames(ModelDefinition modelDef);
         SelectItem[] GetColumnNames(ModelDefinition modelDef, bool tableQualified);
