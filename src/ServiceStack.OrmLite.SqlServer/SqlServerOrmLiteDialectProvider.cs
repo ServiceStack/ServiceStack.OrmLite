@@ -114,10 +114,10 @@ namespace ServiceStack.OrmLite.SqlServer
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
         {
             var sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = {0}"
-                .SqlFmt(tableName);
+                .SqlFmt(this, tableName);
 
             if (schema != null)
-                sql += " AND TABLE_SCHEMA = {0}".SqlFmt(schema);
+                sql += " AND TABLE_SCHEMA = {0}".SqlFmt(this, schema);
 
             var result = dbCmd.ExecLongScalar(sql);
 
@@ -127,7 +127,7 @@ namespace ServiceStack.OrmLite.SqlServer
         public override bool DoesColumnExist(IDbConnection db, string columnName, string tableName, string schema = null)
         {
             var sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @tableName AND COLUMN_NAME = @columnName"
-                .SqlFmt(tableName, columnName);
+                .SqlFmt(this, tableName, columnName);
 
             if (schema != null)
                 sql += " AND TABLE_SCHEMA = @schema";
