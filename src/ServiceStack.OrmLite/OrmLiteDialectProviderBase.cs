@@ -503,7 +503,7 @@ namespace ServiceStack.OrmLite
                 && sqlFilter.TrimStart().StartsWith(SelectStatement, StringComparison.OrdinalIgnoreCase);
 
             if (isFullSelectStatement)
-                return sqlFilter.SqlFmt(filterParams);
+                return sqlFilter.SqlFmt(this, filterParams);
 
             var modelDef = tableType.GetModelDefinition();
             var sql = StringBuilderCache.Allocate();
@@ -512,7 +512,7 @@ namespace ServiceStack.OrmLite
             if (string.IsNullOrEmpty(sqlFilter))
                 return StringBuilderCache.ReturnAndFree(sql);
 
-            sqlFilter = sqlFilter.SqlFmt(filterParams);
+            sqlFilter = sqlFilter.SqlFmt(this, filterParams);
             if (!sqlFilter.StartsWith("ORDER ", StringComparison.OrdinalIgnoreCase)
                 && !sqlFilter.StartsWith("LIMIT ", StringComparison.OrdinalIgnoreCase))
             {
@@ -1184,7 +1184,7 @@ namespace ServiceStack.OrmLite
                 && sqlFilter.Substring(0, deleteStatement.Length).ToUpper().Equals(deleteStatement);
 
             if (isFullDeleteStatement)
-                return sqlFilter.SqlFmt(filterParams);
+                return sqlFilter.SqlFmt(this, filterParams);
 
             var modelDef = tableType.GetModelDefinition();
             sql.Append($"DELETE FROM {GetQuotedTableName(modelDef)}");
@@ -1192,7 +1192,7 @@ namespace ServiceStack.OrmLite
             if (string.IsNullOrEmpty(sqlFilter))
                 return StringBuilderCache.ReturnAndFree(sql);
 
-            sqlFilter = sqlFilter.SqlFmt(filterParams);
+            sqlFilter = sqlFilter.SqlFmt(this, filterParams);
             sql.Append(" WHERE ");
             sql.Append(sqlFilter);
 
