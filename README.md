@@ -413,7 +413,7 @@ The `UpdateAdd` API provides several Typed API's for updating existing values:
 db.UpdateAdd(() => new Person { Score = 3 }); 
 
 //Remove 5 points from Jackson Score
-db.UpdateAdd(() => new Person { Score = -5 }, x => where: x.LastName == "Jackson");
+db.UpdateAdd(() => new Person { Score = -5 }, where: x => x.LastName == "Jackson");
 
 //Graduate everyone and increase everyone's Score by 2 points 
 db.UpdateAdd(() => new Person { Points = 2, Graduated = true });
