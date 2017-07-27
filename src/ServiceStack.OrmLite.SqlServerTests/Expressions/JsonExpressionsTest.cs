@@ -1,6 +1,4 @@
-﻿using System;
-using System.Data;
-using System.Linq;
+﻿using System.Collections.Generic;
 using NUnit.Framework;
 
 namespace ServiceStack.OrmLite.SqlServerTests.Expressions
@@ -10,40 +8,61 @@ namespace ServiceStack.OrmLite.SqlServerTests.Expressions
         [Test]
         public void Can_select_json_scalar_value()
         {
-            OrmLiteConfig.DialectProvider = SqlServer2016Dialect.Provider;
+            using (var db = OpenDbConnection(dialectProvider: SqlServer2016Dialect.Provider))
+            {
+                db.DropAndCreateTable<TestType>();
 
-            OpenDbConnection().CreateTableIfNotExists<TestType>();
-            OpenDbConnection().DeleteAll<TestType>();
+                var obj = new
+                {
+                    Address = new Address
+                    {
+                        Line1 = "1234 Main Street",
+                        Line2 = "Apt. 404",
+                        City = "Las Vegas",
+                        State = "NV"
+                    }
+                };
 
-            var obj = new { Address = new Address { Line1 = "1234 Main Street", Line2 = "Apt. 404", City = "Las Vegas", State = "NV" } };
-            var stringValue = obj.ToJson(); //"{ \"Address\": { \"Line1\": \"1234 Main Street\", \"Line2\": \"Apt. 404\", \"City\": \"Las Vegas\", \"State\": \"NV\" } }"
+                //{ "Address": { "Line1": "1234 Main Street", "Line2": "Apt. 404", "City": "Las Vegas", "State": "NV" } }
+                var stringValue = obj.ToJson();
 
-            OpenDbConnection().Insert(new TestType() { StringColumn = stringValue });
+                db.Insert(new TestType { StringColumn = stringValue });
 
-            var actual = OpenDbConnection().Select<TestType>(q => 
-                Sql2016.JsonValue(q.StringColumn, "$.address.state") == "NV");
+                List<TestType> actual = db.Select<TestType>(q =>
+                    Sql.JsonValue(q.StringColumn, "$.address.state") == "NV");
 
-            Assert.AreEqual(obj.Address.State, actual);
+                Assert.That(actual, Is.EqualTo(obj.Address.State));
+            }
         }
 
         [Test]
         public void Can_select_json_object_value()
         {
-            OrmLiteConfig.DialectProvider = SqlServer2016Dialect.Provider;
+            using (var db = OpenDbConnection(dialectProvider: SqlServer2016Dialect.Provider))
+            {
+                db.DropAndCreateTable<TestType>();
 
-            OpenDbConnection().CreateTableIfNotExists<TestType>();
-            OpenDbConnection().DeleteAll<TestType>();
+                var expected = new Address
+                {
+                    Line1 = "1234 Main Street",
+                    Line2 = "Apt. 404",
+                    City = "Las Vegas",
+                    State = "NV"
+                };
+                var obj = new { Address = expected };
 
-            var expected = new Address { Line1 = "1234 Main Street", Line2 = "Apt. 404", City = "Las Vegas", State = "NV" };
-            var obj = new { Address = expected };
-            var stringValue = obj.ToJson(); //"{ \"Address\": { \"Line1\": \"1234 Main Street\", \"Line2\": \"Apt. 404\", \"City\": \"Las Vegas\", \"State\": \"NV\" } }"
+                //{ "Address": { "Line1": "1234 Main Street", "Line2": "Apt. 404", "City": "Las Vegas", "State": "NV" } }
+                var stringValue = obj.ToJson(); 
 
-            OpenDbConnection().Insert(new TestType() { StringColumn = stringValue });
+                db.Insert(new TestType { StringColumn = stringValue });
 
-            var address = OpenDbConnection().From<TestType>().Select(q =>
-                Sql2016.JsonQuery<Address>(q.StringColumn, "$.address")).ConvertTo<Address>();
+                SqlExpression<TestType> q = db.From<TestType>().Select(x =>
+                    Sql.JsonQuery<Address>(x.StringColumn, "$.address"));
 
-            Assert.AreEqual(obj.Address, address);
+                var address = q.ConvertTo<Address>();
+
+                Assert.That(address, Is.EqualTo(obj.Address));
+            }
         }
 
         internal class Address
