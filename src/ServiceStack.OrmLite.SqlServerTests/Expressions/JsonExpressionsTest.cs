@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace ServiceStack.OrmLite.SqlServerTests.Expressions
 {
-    public class JsonExpressionsTest : ExpressionsTestBase
+    public class JsonExpressionsTest : OrmLiteTestBase
     {
         [Test]
         public void Can_select_json_scalar_value()
