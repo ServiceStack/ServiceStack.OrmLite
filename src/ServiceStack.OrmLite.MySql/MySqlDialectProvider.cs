@@ -209,7 +209,7 @@ namespace ServiceStack.OrmLite.MySql
         }
 
         public override string SqlCurrency(string fieldOrValue, string currencySymbol) => 
-            SqlConcat(new []{ "'" + currencySymbol + "'", "format(" + fieldOrValue + ",2)"});
+            SqlConcat(new []{ "'" + currencySymbol + "'", "cast(" + fieldOrValue + " as decimal(15,2))" });
 
         protected MySqlConnection Unwrap(IDbConnection db)
         {

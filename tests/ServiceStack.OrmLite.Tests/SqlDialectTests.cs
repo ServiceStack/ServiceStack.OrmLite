@@ -13,6 +13,8 @@ namespace ServiceStack.OrmLite.Tests
 
     public class SqlDialectTests : OrmLiteTestBase
     {
+        //public SqlDialectTests() : base(Dialect.PostgreSql) {}
+
         [Test]
         public void Does_concat_values()
         {
@@ -40,6 +42,15 @@ namespace ServiceStack.OrmLite.Tests
                 db.DropAndCreateTable<Sqltest>();
 
                 db.Insert(new Sqltest { Value = 12 });
+
+                var sqlCurrency = db.GetDialectProvider().SqlCurrency("12.3456");
+                var result = db.Scalar<string>($"SELECT {sqlCurrency} from sqltest");
+                Assert.That(result, Is.EqualTo("$12.35"));
+
+                sqlCurrency = db.GetDialectProvider().SqlCurrency("12.3456", "£");
+                result = db.Scalar<string>($"SELECT {sqlCurrency} from sqltest");
+                Assert.That(result, Is.EqualTo("£12.35"));
+
                 db.Insert(new Sqltest { Value = 12.3 });
                 db.Insert(new Sqltest { Value = 12.34 });
                 db.Insert(new Sqltest { Value = 12.345 });
