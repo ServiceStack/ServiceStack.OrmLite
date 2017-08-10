@@ -1582,6 +1582,12 @@ namespace ServiceStack.OrmLite
                    $"DROP COLUMN {provider.GetQuotedColumnName(columnName)};";
         }
 
+        public virtual string SqlConcat(IEnumerable<object> args) => $"CONCAT({string.Join(", ", args)})";
+
+        public virtual string SqlCurrency(string fieldOrValue) => SqlCurrency(fieldOrValue, "$");
+
+        public virtual string SqlCurrency(string fieldOrValue, string currencySymbol) => SqlConcat(new List<string> { currencySymbol, fieldOrValue });
+
         //Async API's, should be overrided by Dialect Providers to use .ConfigureAwait(false)
         //Default impl below uses TaskAwaiter shim in async.cs
 

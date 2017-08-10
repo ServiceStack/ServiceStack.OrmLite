@@ -801,6 +801,8 @@ namespace ServiceStack.OrmLite.Firebird
 
             db.ExecuteSql(command);
         }
+
+        public override string SqlConcat(IEnumerable<object> args) => string.Join(" || ", args);
     }
 }
 

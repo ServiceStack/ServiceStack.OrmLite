@@ -313,6 +313,11 @@ namespace ServiceStack.OrmLite.PostgreSQL
             SetParameterValues<T>(cmd, obj);
         }
 
+        public override string SqlConcat(IEnumerable<object> args) => string.Join(" || ", args);
+
+        public override string SqlCurrency(string fieldOrValue, string currencySymbol) => currencySymbol == "$"
+            ? fieldOrValue + "::text::money::text"
+            : "replace(" + fieldOrValue + "::text::money::text,'$','" + currencySymbol + "')";
 
         protected NpgsqlConnection Unwrap(IDbConnection db)
         {

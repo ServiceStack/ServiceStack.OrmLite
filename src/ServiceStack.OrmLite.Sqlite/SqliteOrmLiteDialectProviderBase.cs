@@ -203,6 +203,10 @@ namespace ServiceStack.OrmLite.Sqlite
 
             return ret;
         }
+
+        public override string SqlConcat(IEnumerable<object> args) => string.Join(" || ", args);
+
+        public override string SqlCurrency(string fieldOrValue, string currencySymbol) => SqlConcat(new []{ "'" + currencySymbol + "'", "printf(\"%.2f\", " + fieldOrValue + ")" });
     }
 
     public static class SqliteExtensions

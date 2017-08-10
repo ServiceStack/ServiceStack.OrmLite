@@ -211,5 +211,9 @@ namespace ServiceStack.OrmLite
         string ToUpdateStatement<T>(IDbCommand dbCmd, T item, ICollection<string> updateFields = null);
         string ToInsertStatement<T>(IDbCommand dbCmd, T item, ICollection<string> insertFields = null);
         string MergeParamsIntoSql(string sql, IEnumerable<IDbDataParameter> dbParams);
+
+        string SqlConcat(IEnumerable<object> args);
+        string SqlCurrency(string fieldOrValue);
+        string SqlCurrency(string fieldOrValue, string currencySymbol);
     }
 }

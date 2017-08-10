@@ -355,6 +355,9 @@ namespace ServiceStack.OrmLite.SqlServer
             return base.GetLoadChildrenSubSelect(expr);
         }
 
+        public override string SqlCurrency(string fieldOrValue, string currencySymbol) => 
+            SqlConcat(new[] { "'" + currencySymbol + "'", $"CONVERT(VARCHAR, CONVERT(MONEY, {fieldOrValue}), 1)" });
+
         protected SqlConnection Unwrap(IDbConnection db) => (SqlConnection)db.ToDbConnection();
 
         protected SqlCommand Unwrap(IDbCommand cmd) => (SqlCommand)cmd.ToDbCommand();
