@@ -56,6 +56,15 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Execute any arbitrary raw SQL with db params.
+        /// </summary>
+        /// <returns>number of rows affected</returns>
+        public static int ExecuteSql(this IDbConnection dbConn, string sql, Dictionary<string,object> dbParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.ExecuteSql(sql, dbParams));
+        }
+
+        /// <summary>
         /// Insert 1 POCO, use selectIdentity to retrieve the last insert AutoIncrement id (if any). E.g:
         /// <para>var id = db.Insert(new Person { Id = 1, FirstName = "Jimi }, selectIdentity:true)</para>
         /// </summary>
