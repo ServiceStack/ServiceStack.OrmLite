@@ -216,5 +216,6 @@ namespace ServiceStack.OrmLite
         string SqlCurrency(string fieldOrValue);
         string SqlCurrency(string fieldOrValue, string currencySymbol);
         string SqlBool(bool value);
+        string SqlLimit(int? offset = null, int? rows = null);
     }
 }

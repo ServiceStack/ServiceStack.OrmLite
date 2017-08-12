@@ -360,6 +360,12 @@ namespace ServiceStack.OrmLite.SqlServer
 
         public override string SqlBool(bool value) => value ? "1" : "0";
 
+        public override string SqlLimit(int? offset = null, int? rows = null) => rows == null && offset == null
+            ? ""
+            : rows != null
+                ? "OFFSET " + offset.GetValueOrDefault() + " ROWS FETCH NEXT " + rows
+                : "OFFSET " + offset.GetValueOrDefault(int.MaxValue) + " ROWS";
+
         protected SqlConnection Unwrap(IDbConnection db) => (SqlConnection)db.ToDbConnection();
 
         protected SqlCommand Unwrap(IDbCommand cmd) => (SqlCommand)cmd.ToDbCommand();

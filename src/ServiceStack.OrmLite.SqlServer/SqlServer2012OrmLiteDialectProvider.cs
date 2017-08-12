@@ -35,10 +35,7 @@ namespace ServiceStack.OrmLite.SqlServer
                     sb.Append(" ORDER BY " + orderBy);
                 }
 
-                sb.Append(" OFFSET ").Append(offset.GetValueOrDefault()).Append(" ROWS");
-
-                if (rows != null)
-                    sb.Append(" FETCH NEXT ").Append(rows.Value).Append(" ROWS ONLY");
+                sb.Append(" ").Append(SqlLimit(offset, rows));
             }
 
             return StringBuilderCache.ReturnAndFree(sb);
