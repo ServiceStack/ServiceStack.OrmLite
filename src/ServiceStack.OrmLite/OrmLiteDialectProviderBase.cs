@@ -1588,6 +1588,8 @@ namespace ServiceStack.OrmLite
 
         public virtual string SqlCurrency(string fieldOrValue, string currencySymbol) => SqlConcat(new List<string> { currencySymbol, fieldOrValue });
 
+        public virtual string SqlBool(bool value) => value ? "true" : "false";
+
         //Async API's, should be overrided by Dialect Providers to use .ConfigureAwait(false)
         //Default impl below uses TaskAwaiter shim in async.cs
 

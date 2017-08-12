@@ -9,6 +9,7 @@ namespace ServiceStack.OrmLite.Tests
         [AutoIncrement]
         public int Id { get; set; }
         public double Value { get; set; }
+        public bool Bool { get; set; }
     }
 
     public class SqlDialectTests : OrmLiteTestBase
@@ -76,6 +77,26 @@ namespace ServiceStack.OrmLite.Tests
                     "£12.34",
                     "£12.35",
                 }));
+            }
+        }
+
+        [Test]
+        public void Does_handle_booleans()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Sqltest>();
+
+                db.Insert(new Sqltest { Value = 0, Bool = false });
+                db.Insert(new Sqltest { Value = 1, Bool = true });
+
+                var sqlBool = db.GetDialectProvider().SqlBool(false);
+                var result = db.Scalar<double>($"SELECT Value from sqltest where Bool = {sqlBool}");
+                Assert.That(result, Is.EqualTo(0));
+
+                sqlBool = db.GetDialectProvider().SqlBool(true);
+                result = db.Scalar<double>($"SELECT Value from sqltest where Bool = {sqlBool}");
+                Assert.That(result, Is.EqualTo(1));
             }
         }
 

@@ -215,5 +215,6 @@ namespace ServiceStack.OrmLite
         string SqlConcat(IEnumerable<object> args);
         string SqlCurrency(string fieldOrValue);
         string SqlCurrency(string fieldOrValue, string currencySymbol);
+        string SqlBool(bool value);
     }
 }

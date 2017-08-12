@@ -358,6 +358,8 @@ namespace ServiceStack.OrmLite.SqlServer
         public override string SqlCurrency(string fieldOrValue, string currencySymbol) => 
             SqlConcat(new[] { "'" + currencySymbol + "'", $"CONVERT(VARCHAR, CONVERT(MONEY, {fieldOrValue}), 1)" });
 
+        public override string SqlBool(bool value) => value ? "1" : "0";
+
         protected SqlConnection Unwrap(IDbConnection db) => (SqlConnection)db.ToDbConnection();
 
         protected SqlCommand Unwrap(IDbCommand cmd) => (SqlCommand)cmd.ToDbCommand();
