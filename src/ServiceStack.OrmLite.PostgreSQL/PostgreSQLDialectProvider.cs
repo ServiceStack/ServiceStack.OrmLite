@@ -68,8 +68,8 @@ namespace ServiceStack.OrmLite.PostgreSQL
             get => normalize;
             set
             {
-                normalize = !value;
-                NamingStrategy = value 
+                normalize = value;
+                NamingStrategy = normalize
                     ? new OrmLiteNamingStrategyBase()
                     : new PostgreSqlNamingStrategy();
             }            
@@ -260,7 +260,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
 
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
         {
-            var sql = !Normalize 
+            var sql = !Normalize || ReservedWords.Contains(tableName)
                 ? "SELECT COUNT(*) FROM pg_class WHERE relname = {0}".SqlFmt(tableName)
                 : "SELECT COUNT(*) FROM pg_class WHERE lower(relname) = {0}".SqlFmt(tableName.ToLower());
 
@@ -274,7 +274,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
                 // If a search path (schema) is specified, and there is only one, then assume the CREATE TABLE directive should apply to that schema.
                 if (!string.IsNullOrEmpty(schema) && !schema.Contains(","))
                 {
-                    sql = !Normalize
+                    sql = !Normalize || ReservedWords.Contains(schema)
                         ? "SELECT COUNT(*) FROM pg_class JOIN pg_catalog.pg_namespace n ON n.oid = pg_class.relnamespace WHERE relname = {0} AND nspname = {1}".SqlFmt(tableName, schema)
                         : "SELECT COUNT(*) FROM pg_class JOIN pg_catalog.pg_namespace n ON n.oid = pg_class.relnamespace WHERE lower(relname) = {0} AND lower(nspname) = {1}".SqlFmt(tableName.ToLower(), schema.ToLower());
                 }
@@ -287,13 +287,17 @@ namespace ServiceStack.OrmLite.PostgreSQL
 
         public override bool DoesColumnExist(IDbConnection db, string columnName, string tableName, string schema = null)
         {
-            var sql = !Normalize
-                ? "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @tableName AND COLUMN_NAME = @columnName".SqlFmt(tableName, columnName)
-                : "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE lower(TABLE_NAME) = @tableName AND lower(COLUMN_NAME) = @columnName".SqlFmt(tableName.ToLower(), columnName.ToLower());
+            var sql = !Normalize || ReservedWords.Contains(tableName)
+                ? "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @tableName".SqlFmt(tableName)
+                : "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE lower(TABLE_NAME) = @tableName".SqlFmt(tableName.ToLower());
+
+            sql += !Normalize || ReservedWords.Contains(columnName)
+                ? " AND COLUMN_NAME = @columnName".SqlFmt(columnName)
+                : " AND lower(COLUMN_NAME) = @columnName".SqlFmt(columnName.ToLower());
 
             if (schema != null)
             {
-                sql += !Normalize
+                sql += !Normalize || ReservedWords.Contains(schema)
                     ? " AND TABLE_SCHEMA = @schema"
                     : " AND lower(TABLE_SCHEMA) = @schema";
 

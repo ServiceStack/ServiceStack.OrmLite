@@ -56,6 +56,8 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
 
                 var dbCustomer = db.SingleById<Customer>(customer.Id);
                 Assert.That(dbCustomer.Name, Is.EqualTo(customer.Name));
+                dbCustomer = db.SqlList<Customer>("select * from Customer where Id = @Id", new { customer.Id })[0];
+                Assert.That(dbCustomer.Name, Is.EqualTo(customer.Name));
 
                 var address = db.Single<CustomerAddress>(x => x.CustomerId == customer.Id && x.Id == customer.PrimaryAddress.Id);
                 Assert.That(address.Country, Is.EqualTo("Australia"));
