@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System.Linq;
+using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Text;
 
@@ -97,6 +98,41 @@ namespace ServiceStack.OrmLite.Tests
                 sqlBool = db.GetDialectProvider().SqlBool(true);
                 result = db.Scalar<double>($"SELECT Value from sqltest where Bool = {sqlBool}");
                 Assert.That(result, Is.EqualTo(1));
+            }
+        }
+
+        [Test]
+        public void Can_use_limit()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Sqltest>();
+
+                5.Times(i => db.Insert(new Sqltest { Value = i + 1 }));
+
+                var sqlLimit = db.GetDialectProvider().SqlLimit(rows: 1);
+                var results = db.SqlList<double>($"SELECT Value from sqltest ORDER BY Id {sqlLimit}").Sum();
+                Assert.That(results, Is.EqualTo(1));
+
+                sqlLimit = db.GetDialectProvider().SqlLimit(rows: 3);
+                results = db.SqlList<double>($"SELECT Value from sqltest ORDER BY Id {sqlLimit}").Sum();
+                Assert.That(results, Is.EqualTo(6));
+
+                sqlLimit = db.GetDialectProvider().SqlLimit(offset: 1);
+                results = db.SqlList<double>($"SELECT Value from sqltest ORDER BY Id {sqlLimit}").Sum();
+                Assert.That(results, Is.EqualTo(14));
+
+                sqlLimit = db.GetDialectProvider().SqlLimit(offset: 4);
+                results = db.SqlList<double>($"SELECT Value from sqltest ORDER BY Id {sqlLimit}").Sum();
+                Assert.That(results, Is.EqualTo(5));
+
+                sqlLimit = db.GetDialectProvider().SqlLimit(offset: 1, rows: 1);
+                results = db.SqlList<double>($"SELECT Value from sqltest ORDER BY Id {sqlLimit}").Sum();
+                Assert.That(results, Is.EqualTo(2));
+
+                sqlLimit = db.GetDialectProvider().SqlLimit(offset: 2, rows: 2);
+                results = db.SqlList<double>($"SELECT Value from sqltest ORDER BY Id {sqlLimit}").Sum();
+                Assert.That(results, Is.EqualTo(7));
             }
         }
 
