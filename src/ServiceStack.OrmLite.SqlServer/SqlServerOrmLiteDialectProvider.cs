@@ -363,7 +363,7 @@ namespace ServiceStack.OrmLite.SqlServer
         public override string SqlLimit(int? offset = null, int? rows = null) => rows == null && offset == null
             ? ""
             : rows != null
-                ? "OFFSET " + offset.GetValueOrDefault() + " ROWS FETCH NEXT " + rows
+                ? "OFFSET " + offset.GetValueOrDefault() + " ROWS FETCH NEXT " + rows + " ROWS ONLY"
                 : "OFFSET " + offset.GetValueOrDefault(int.MaxValue) + " ROWS";
 
         protected SqlConnection Unwrap(IDbConnection db) => (SqlConnection)db.ToDbConnection();
