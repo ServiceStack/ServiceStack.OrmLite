@@ -53,6 +53,10 @@ namespace ServiceStack.OrmLite.MySql
 
         public static string RowVersionTriggerFormat = "{0}RowVersionUpdateTrigger";
 
+        public override string GetLoadChildrenSubSelect<From>(SqlExpression<From> expr)
+        {
+            return $"SELECT * FROM ({base.GetLoadChildrenSubSelect(expr)}) AS COUNT";
+        }
         public override string ToPostDropTableStatement(ModelDefinition modelDef)
         {
             if (modelDef.RowVersion != null)
