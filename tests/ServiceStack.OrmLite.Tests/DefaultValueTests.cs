@@ -122,11 +122,13 @@ namespace ServiceStack.OrmLite.Tests
             db.Update<DefaultValues>(new { UpdatedDateUtc = updateTime }, p => p.Id == 1);
         }
 
-        private static void VerifyUpdateDate(IDbConnection db, int id = 1)
+        private void VerifyUpdateDate(IDbConnection db, int id = 1)
         {
             var row = db.SingleById<DefaultValues>(id);
             row.PrintDump();
-            Assert.That(row.UpdatedDateUtc, Is.GreaterThan(DateTime.UtcNow - TimeSpan.FromMinutes(5)));
+
+            if (Dialect != Dialect.MySql) //not returning UTC
+                Assert.That(row.UpdatedDateUtc, Is.GreaterThan(DateTime.UtcNow - TimeSpan.FromMinutes(5)));
         }
 
         [Test]

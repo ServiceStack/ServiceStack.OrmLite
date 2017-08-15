@@ -76,10 +76,5 @@ namespace ServiceStack.OrmLite.Sqlite
         {
             return base.OrderBy("random()");
         }
-
-        protected override PartialSqlString ToConcatPartialString(List<object> args)
-        {
-            return new PartialSqlString(string.Join(" || ", args));
-        }
     }
 }

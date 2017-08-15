@@ -62,6 +62,106 @@ namespace ServiceStack.OrmLite.PostgreSQL
             };
         }
 
+        private bool normalize;
+        public bool Normalize
+        {
+            get => normalize;
+            set
+            {
+                normalize = value;
+                NamingStrategy = normalize
+                    ? new OrmLiteNamingStrategyBase()
+                    : new PostgreSqlNamingStrategy();
+            }            
+        }
+
+        //https://www.postgresql.org/docs/7.3/static/sql-keywords-appendix.html
+        public static HashSet<string> ReservedWords = new HashSet<string>(new[]
+        {
+            "ALL",
+            "ANALYSE",
+            "ANALYZE",
+            "AND",
+            "ANY",
+            "AS",
+            "ASC",
+            "AUTHORIZATION",
+            "BETWEEN",
+            "BINARY",
+            "BOTH",
+            "CASE",
+            "CAST",
+            "CHECK",
+            "COLLATE",
+            "COLUMN",
+            "CONSTRAINT",
+            "CURRENT_DATE",
+            "CURRENT_TIME",
+            "CURRENT_TIMESTAMP",
+            "CURRENT_USER",
+            "DEFAULT",
+            "DEFERRABLE",
+            "DISTINCT",
+            "DO",
+            "ELSE",
+            "END",
+            "EXCEPT",
+            "FOR",
+            "FOREIGN",
+            "FREEZE",
+            "FROM",
+            "FULL",
+            "HAVING",
+            "ILIKE",
+            "IN",
+            "INITIALLY",
+            "INNER",
+            "INTERSECT",
+            "INTO",
+            "IS",
+            "ISNULL",
+            "JOIN",
+            "LEADING",
+            "LEFT",
+            "LIKE",
+            "LIMIT",
+            "LOCALTIME",
+            "LOCALTIMESTAMP",
+            "NEW",
+            "NOT",
+            "NOTNULL",
+            "NULL",
+            "OFF",
+            "OFFSET",
+            "OLD",
+            "ON",
+            "ONLY",
+            "OR",
+            "ORDER",
+            "OUTER",
+            "OVERLAPS",
+            "PLACING",
+            "PRIMARY",
+            "REFERENCES",
+            "RIGHT",
+            "SELECT",
+            "SESSION_USER",
+            "SIMILAR",
+            "SOME",
+            "TABLE",
+            "THEN",
+            "TO",
+            "TRAILING",
+            "TRUE",
+            "UNION",
+            "UNIQUE",
+            "USER",
+            "USING",
+            "VERBOSE",
+            "WHEN",
+            "WHERE",
+        }, StringComparer.OrdinalIgnoreCase);
+
         public override string GetColumnDefinition(FieldDefinition fieldDef)
         {
             if (fieldDef.IsRowVersion)
@@ -160,8 +260,9 @@ namespace ServiceStack.OrmLite.PostgreSQL
 
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
         {
-            var sql = "SELECT COUNT(*) FROM pg_class WHERE relname = {0}"
-                .SqlFmt(tableName);
+            var sql = !Normalize || ReservedWords.Contains(tableName)
+                ? "SELECT COUNT(*) FROM pg_class WHERE relname = {0}".SqlFmt(tableName)
+                : "SELECT COUNT(*) FROM pg_class WHERE lower(relname) = {0}".SqlFmt(tableName.ToLower());
 
             var conn = dbCmd.Connection;
             if (conn != null)
@@ -172,8 +273,11 @@ namespace ServiceStack.OrmLite.PostgreSQL
                 
                 // If a search path (schema) is specified, and there is only one, then assume the CREATE TABLE directive should apply to that schema.
                 if (!string.IsNullOrEmpty(schema) && !schema.Contains(","))
-                    sql = "SELECT COUNT(*) FROM pg_class JOIN pg_catalog.pg_namespace n ON n.oid = pg_class.relnamespace WHERE relname = {0} AND nspname = {1}"
-                          .SqlFmt(tableName, schema);
+                {
+                    sql = !Normalize || ReservedWords.Contains(schema)
+                        ? "SELECT COUNT(*) FROM pg_class JOIN pg_catalog.pg_namespace n ON n.oid = pg_class.relnamespace WHERE relname = {0} AND nspname = {1}".SqlFmt(tableName, schema)
+                        : "SELECT COUNT(*) FROM pg_class JOIN pg_catalog.pg_namespace n ON n.oid = pg_class.relnamespace WHERE lower(relname) = {0} AND lower(nspname) = {1}".SqlFmt(tableName.ToLower(), schema.ToLower());
+                }
             }
 
             var result = dbCmd.ExecLongScalar(sql);
@@ -183,11 +287,23 @@ namespace ServiceStack.OrmLite.PostgreSQL
 
         public override bool DoesColumnExist(IDbConnection db, string columnName, string tableName, string schema = null)
         {
-            var sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @tableName AND COLUMN_NAME = @columnName"
-                .SqlFmt(tableName, columnName);
+            var sql = !Normalize || ReservedWords.Contains(tableName)
+                ? "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @tableName".SqlFmt(tableName)
+                : "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE lower(TABLE_NAME) = @tableName".SqlFmt(tableName.ToLower());
+
+            sql += !Normalize || ReservedWords.Contains(columnName)
+                ? " AND COLUMN_NAME = @columnName".SqlFmt(columnName)
+                : " AND lower(COLUMN_NAME) = @columnName".SqlFmt(columnName.ToLower());
 
             if (schema != null)
-                sql += " AND TABLE_SCHEMA = @schema";
+            {
+                sql += !Normalize || ReservedWords.Contains(schema)
+                    ? " AND TABLE_SCHEMA = @schema"
+                    : " AND lower(TABLE_SCHEMA) = @schema";
+
+                if (Normalize)
+                    schema = schema.ToLower();
+            }
 
             var result = db.SqlScalar<long>(sql, new { tableName, columnName, schema });
 
@@ -217,14 +333,31 @@ namespace ServiceStack.OrmLite.PostgreSQL
             return sql;
         }
 
+        public override string GetQuotedTableName(string tableName, string schema = null)
+        {
+            return !Normalize || ReservedWords.Contains(tableName) || (schema != null && ReservedWords.Contains(schema))
+                ? base.GetQuotedTableName(tableName, schema)
+                : schema != null
+                    ? schema + "." + tableName
+                    : tableName;
+        }
+
+        public override string GetQuotedName(string name)
+        {
+            return !Normalize || ReservedWords.Contains(name)
+                ? base.GetQuotedName(name)
+                : name;
+        }
+
         public override string GetQuotedTableName(ModelDefinition modelDef)
         {
             if (!modelDef.IsInSchema)
-            {
                 return base.GetQuotedTableName(modelDef);
-            }
+            if (Normalize && !ReservedWords.Contains(modelDef.ModelName) && !ReservedWords.Contains(modelDef.Schema))
+                return modelDef.Schema + "." + base.NamingStrategy.GetTableName(modelDef.ModelName);
+
             string escapedSchema = modelDef.Schema.Replace(".", "\".\"");
-            return string.Format("\"{0}\".\"{1}\"", escapedSchema, base.NamingStrategy.GetTableName(modelDef.ModelName));
+            return $"\"{escapedSchema}\".\"{base.NamingStrategy.GetTableName(modelDef.ModelName)}\"";
         }
         
         public override string GetLastInsertIdSqlSuffix<T>()
@@ -236,7 +369,9 @@ namespace ServiceStack.OrmLite.PostgreSQL
             {
                 var modelDef = GetModel(typeof(T));
                 var pkName = NamingStrategy.GetColumnName(modelDef.PrimaryKey.FieldName);
-                return $" RETURNING \"{pkName}\"";
+                return !Normalize
+                    ? $" RETURNING \"{pkName}\""
+                    : " RETURNING " + pkName;
             }
 
             return "; " + SelectIdentitySql;
@@ -313,6 +448,11 @@ namespace ServiceStack.OrmLite.PostgreSQL
             SetParameterValues<T>(cmd, obj);
         }
 
+        public override string SqlConcat(IEnumerable<object> args) => string.Join(" || ", args);
+
+        public override string SqlCurrency(string fieldOrValue, string currencySymbol) => currencySymbol == "$"
+            ? fieldOrValue + "::text::money::text"
+            : "replace(" + fieldOrValue + "::text::money::text,'$','" + currencySymbol + "')";
 
         protected NpgsqlConnection Unwrap(IDbConnection db)
         {

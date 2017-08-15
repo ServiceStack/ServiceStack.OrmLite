@@ -377,6 +377,13 @@ namespace ServiceStack.OrmLite.Tests
 
                 var row = db.SingleById<Poco>(2);
                 Assert.That(row.Name, Is.EqualTo("UPDATED"));
+
+                sql = "UPDATE poco SET name = {0}name WHERE id = {0}id".Fmt(OrmLiteConfig.DialectProvider.ParamString);
+                result = db.ExecuteSql(sql, new Dictionary<string, object> { {"id", 2}, {"name", "RE-UPDATED" } });
+                Assert.That(result, Is.EqualTo(1));
+
+                row = db.SingleById<Poco>(2);
+                Assert.That(row.Name, Is.EqualTo("RE-UPDATED"));
             }
         }
 

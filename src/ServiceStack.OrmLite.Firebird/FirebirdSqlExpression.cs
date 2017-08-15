@@ -30,11 +30,6 @@ namespace ServiceStack.OrmLite.Firebird
             }
             return new PartialSqlString(statement);
         }
-
-        protected override PartialSqlString ToConcatPartialString(List<object> args)
-        {
-            return new PartialSqlString(string.Join(" || ", args));
-        }
     }
 }
 
