@@ -9,21 +9,61 @@ namespace ServiceStack.OrmLite
     public class TemplateDbFilters : TemplateFilter
     {
         public IDbConnectionFactory DbFactory { get; set; }
-        T exec<T>(Func<IDbConnection, T> fn)
+
+        T exec<T>(Func<IDbConnection, T> fn, TemplateScopeContext scope, object options)
         {
-            using (var db = DbFactory.Open())
+            try
             {
-                return fn(db);
+                using (var db = DbFactory.Open())
+                {
+                    return fn(db);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new StopFilterExecutionException(scope, options, ex);
             }
         }
 
-        public object dbSelect(string sql) => exec(db => db.Select<Dictionary<string, object>>(sql));
-        public object dbSelect(string sql, Dictionary<string, object> args) => exec(db => db.Select<Dictionary<string, object>>(sql, args));
-        public object dbSingle(string sql) => exec(db => db.Single<Dictionary<string, object>>(sql));
-        public object dbSingle(string sql, Dictionary<string, object> args) => exec(db => db.Single<Dictionary<string, object>>(sql, args));
-        public object dbScalar(string sql) => exec(db => db.Scalar<object>(sql));
-        public object dbScalar(string sql, Dictionary<string, object> args) => exec(db => db.Scalar<object>(sql, args));
-        public int dbExec(string sql, Dictionary<string, object> args) => exec(db => db.ExecuteSql(sql, args));
+        public object dbSelect(TemplateScopeContext scope, string sql) => 
+            exec(db => db.Select<Dictionary<string, object>>(sql), scope, null);
+
+        public object dbSelect(TemplateScopeContext scope, string sql, Dictionary<string, object> args) => 
+            exec(db => db.Select<Dictionary<string, object>>(sql, args), scope, null);
+
+        public object dbSelect(TemplateScopeContext scope, string sql, Dictionary<string, object> args, object options) => 
+            exec(db => db.Select<Dictionary<string, object>>(sql, args), scope, options);
+
+
+        public object dbSingle(TemplateScopeContext scope, string sql) => 
+            exec(db => db.Single<Dictionary<string, object>>(sql), scope, null);
+
+        public object dbSingle(TemplateScopeContext scope, string sql, Dictionary<string, object> args) =>
+            exec(db => db.Single<Dictionary<string, object>>(sql, args), scope, null);
+
+        public object dbSingle(TemplateScopeContext scope, string sql, Dictionary<string, object> args, object options) =>
+            exec(db => db.Single<Dictionary<string, object>>(sql, args), scope, options);
+
+
+        public object dbScalar(TemplateScopeContext scope, string sql) => 
+            exec(db => db.Scalar<object>(sql), scope, null);
+
+        public object dbScalar(TemplateScopeContext scope, string sql, Dictionary<string, object> args) => 
+            exec(db => db.Scalar<object>(sql, args), scope, null);
+
+        public object dbScalar(TemplateScopeContext scope, string sql, Dictionary<string, object> args, object options) => 
+            exec(db => db.Scalar<object>(sql, args), scope, options);
+
+
+        public int dbExec(TemplateScopeContext scope, string sql) => 
+            exec(db => db.ExecuteSql(sql), scope, null);
+
+        public int dbExec(TemplateScopeContext scope, string sql, Dictionary<string, object> args) => 
+            exec(db => db.ExecuteSql(sql, args), scope, null);
+
+        public int dbExec(TemplateScopeContext scope, string sql, Dictionary<string, object> args, object options) => 
+            exec(db => db.ExecuteSql(sql, args), scope, options);
+
 
         public string sqlQuote(string name) => OrmLiteConfig.DialectProvider.GetQuotedName(name);
         public string sqlConcat(IEnumerable<object> values) => OrmLiteConfig.DialectProvider.SqlConcat(values);
