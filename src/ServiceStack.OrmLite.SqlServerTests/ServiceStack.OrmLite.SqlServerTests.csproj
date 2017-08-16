@@ -4,7 +4,6 @@
     <TargetFramework>net45</TargetFramework>
     <AssemblyName>ServiceStack.OrmLite.SqlServerTests</AssemblyName>
     <PackageId>ServiceStack.OrmLite.SqlServerTests</PackageId>
-    <NetStandardImplicitPackageVersion>1.6.0</NetStandardImplicitPackageVersion>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
