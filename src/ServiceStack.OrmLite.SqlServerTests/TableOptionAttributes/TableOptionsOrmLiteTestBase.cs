@@ -8,7 +8,7 @@ namespace ServiceStack.OrmLite.SqlServerTests.TableOptions
 {
     public class SqlServer2012TableOptionsOrmLiteTestBase : OrmLiteTestBase
     {
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public override void TestFixtureSetUp()
         {
             try
@@ -31,7 +31,7 @@ namespace ServiceStack.OrmLite.SqlServerTests.TableOptions
 
     public class SqlServer2014TableOptionsOrmLiteTestBase : OrmLiteTestBase
     {
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public override void TestFixtureSetUp()
         {
             try
@@ -54,7 +54,7 @@ namespace ServiceStack.OrmLite.SqlServerTests.TableOptions
 
     public class SqlServer2016TableOptionsOrmLiteTestBase : OrmLiteTestBase
     {
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public override void TestFixtureSetUp()
         {
             try
