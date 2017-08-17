@@ -12,199 +12,143 @@ namespace ServiceStack.OrmLite.SqlServerTests.Expressions
 {
 	public class JsonExpressionsTest : OrmLiteTestBase
 	{
-		[OneTimeSetUp]
+		public static Address Addr { get; set; } 
+			= new Address
+				{
+					Line1 = "1234 Main Street",
+					Line2 = "Apt. 404",
+					City = "Las Vegas",
+					State = "NV"
+				};
+
+	[OneTimeSetUp]
 		public override void TestFixtureSetUp()
 		{
 			LogManager.LogFactory = new ConsoleLogFactory();
 
 			OrmLiteConfig.DialectProvider = SqlServer2016Dialect.Provider;
-			OrmLiteConfig.DialectProvider.RegisterConverter<Address>(new SqlServerJsonToObjectConverter());
+			OrmLiteConfig.DialectProvider.RegisterConverter<string>(new SqlServerJsonStringConverter());
+			OrmLiteConfig.DialectProvider.RegisterConverter<Address>(new SqlServerJsonStringConverter());
 
 			ConnectionString = ConfigurationManager.ConnectionStrings["testDb"].ConnectionString;
+
+			Db = OpenDbConnection();
+
+			// Load test data
+			Db.DropAndCreateTable<TestType>();
+			Db.Insert(new TestType { Id = 1, StringColumn = "not json" });
+			Db.Insert(new TestType { Id = 2, StringColumn = Addr.ToJson() });
+		}
+
+		[OneTimeTearDown]
+		public void TextFixtureTearDown()
+		{
+			if (Db != null)
+			{
+				if (Db.State == System.Data.ConnectionState.Open)
+					Db.Close();
+
+				Db.Dispose();
+			}
 		}
 
 
 		[Test]
 		public void Can_test_if_string_field_contains_json()
 		{
-			using (var db = OpenDbConnection())
-			{
-				db.DropAndCreateTable<TestType>();
+			// test if string field is not JSON with Sql.IsJson
+			var j = Db.From<TestType>()
+				.Select(x => Sql.IsJson(x.StringColumn))
+				.Where(x => x.Id == 1);
+			var isJson = Db.Scalar<bool>(j);
 
-				// test if string field is not JSON with Sql.IsJson
-				db.Insert(new TestType { Id = 1, StringColumn = "not json" });
+			Assert.IsFalse(isJson);
 
-				var j = db.From<TestType>()
-					.Select(x => Sql.IsJson(x.StringColumn))
-					.Where(x => x.Id == 1);
-				var isJson = db.Scalar<bool>(j);
+			// test if string field is JSON with Sql.IsJson
+			j = Db.From<TestType>()
+				.Select(x => Sql.IsJson(x.StringColumn))
+				.Where(x => x.Id == 2);
+			isJson = Db.Scalar<bool>(j);
 
-				Assert.IsFalse(isJson);
-
-				// test if string field is JSON with Sql.IsJson
-				var expected = new Address
-				{
-					Line1 = "1234 Main Street",
-					Line2 = "Apt. 404",
-					City = "Las Vegas",
-					State = "NV"
-				};
-				var obj = new { Address = expected };
-
-				//{ "Address": { "Line1": "1234 Main Street", "Line2": "Apt. 404", "City": "Las Vegas", "State": "NV" } }
-				var stringValue = obj.ToJson();
-
-				db.Insert(new TestType { Id = 2, StringColumn = stringValue });
-
-				j = db.From<TestType>()
-					.Select(x => Sql.IsJson(x.StringColumn))
-					.Where(x => x.Id == 2);
-				isJson = db.Scalar<bool>(j);
-
-				Assert.IsTrue(isJson);
-			}
+			Assert.IsTrue(isJson);		
 		}
 
 		[Test]
 		public void Can_select_using_a_json_scalar_filter()
 		{
-			using (var db = OpenDbConnection())
-			{
-				db.DropAndCreateTable<TestType>();
+			// retrieve records where City in Address is NV (1 record)
+			var actual = Db.Select<TestType>(q => 
+					Sql.JsonValue(q.StringColumn, "$.State") == "NV" 
+					&& q.Id == 2 
+				);
 
-				var obj = new
-				{
-					Address = new Address
-					{
-						Line1 = "1234 Main Street",
-						Line2 = "Apt. 404",
-						City = "Las Vegas",
-						State = "NV"
-					}
-				};
+			Assert.IsNotEmpty(actual);
 
-				//{ "Address": { "Line1": "1234 Main Street", "Line2": "Apt. 404", "City": "Las Vegas", "State": "NV" } }
-				var stringValue = obj.ToJson();
+			// retrieve records where City in Address is FL (0 records)
+			actual = Db.Select<TestType>(q => 
+					Sql.JsonValue(q.StringColumn, "$.State") == "FL" 
+					&& q.Id == 2 
+				);
 
-				db.Insert(new TestType { StringColumn = stringValue });
-
-				// retrieve records where City in Address is NV (1 record)
-				var actual = db.Select<TestType>(q =>
-					Sql.JsonValue(q.StringColumn, "$.Address.State") == "NV");
-
-				Assert.IsNotEmpty(actual);
-
-				// retrieve records where City in Address is FL (0 records)
-				actual = db.Select<TestType>(q =>
-					Sql.JsonValue(q.StringColumn, "$.Address.State") == "FL");
-
-				Assert.IsEmpty(actual);
-			}
+			Assert.IsEmpty(actual);
 		}
 
 		[Test]
 		public void Can_select_a_json_scalar_value()
 		{
-			using (var db = OpenDbConnection())
-			{
-				db.DropAndCreateTable<TestType>();
-
-				var obj = new
-				{
-					Address = new Address
-					{
-						Line1 = "1234 Main Street",
-						Line2 = "Apt. 404",
-						City = "Las Vegas",
-						State = "NV"
-					}
-				};
-
-				//{ "Address": { "Line1": "1234 Main Street", "Line2": "Apt. 404", "City": "Las Vegas", "State": "NV" } }
-				var stringValue = obj.ToJson();
-
-				db.Insert(new TestType { StringColumn = stringValue });
-
-				// retrieve only the State in a field that contains a JSON Address
-				var state = db.Scalar<string>(
-					db.From<TestType>().Select(q =>
-						Sql.As(Sql.JsonValue(q.StringColumn, "$.Address.State"), "State")
+			// retrieve only the State in a field that contains a JSON Address
+			var state = Db.Scalar<string>(
+				Db.From<TestType>()
+					.Where(q => q.Id == 2)
+					.Select(q =>
+						Sql.JsonValue(q.StringColumn, "$.State")
 					)
-				);
+			);
 
-				Assert.AreEqual(state, obj.Address.State);
-			}
+			Assert.AreEqual(state, Addr.State);
 		}
 
 		[Test]
 		public void Can_select_a_json_object_value()
 		{
-			using (var db = OpenDbConnection())
-			{
-				db.DropAndCreateTable<TestType>();
-
-				var expected = new Address
-				{
-					Line1 = "1234 Main Street",
-					Line2 = "Apt. 404",
-					City = "Las Vegas",
-					State = "NV"
-				};
-
-				//{ "Line1": "1234 Main Street", "Line2": "Apt. 404", "City": "Las Vegas", "State": "NV" }
-				var stringValue = expected.ToJson();
-
-				db.Insert(new TestType { StringColumn = stringValue });
-
-				// demo how to retrieve inserted JSON string directly to an object
-				var address = db.Scalar<Address>(
-					db.From<TestType>().Select(q => q.StringColumn)
+			// demo how to retrieve inserted JSON string directly to an object
+			var address = Db.Scalar<Address>(
+					Db.From<TestType>()
+					.Where(q => q.Id == 2)
+					.Select(q => q.StringColumn)
 				);
 
-				var sql = db.GetLastSql();
-
-				Assert.That(expected.Line1, Is.EqualTo(address.Line1));
-				Assert.That(expected.Line2, Is.EqualTo(address.Line2));
-				Assert.That(expected.City, Is.EqualTo(address.City));
-				Assert.That(expected.State, Is.EqualTo(address.State));
-			}
+			Assert.That(Addr.Line1, Is.EqualTo(address.Line1));
+			Assert.That(Addr.Line2, Is.EqualTo(address.Line2));
+			Assert.That(Addr.City, Is.EqualTo(address.City));
+			Assert.That(Addr.State, Is.EqualTo(address.State));
 		}
 
 		[Ignore("Not functioning properly, issue with converter")]
 		[Test]
 		public void Can_insert_an_object_directly_to_json()
 		{
-			using (var db = OpenDbConnection())
-			{
-				db.DropAndCreateTable<TestType>();
+			var tableName = Db.GetDialectProvider().GetQuotedTableName(ModelDefinition<TestType>.Definition);
+			var sql = $"INSERT {tableName} (StringColumn) VALUES (@Address);";
 
-				var expected = new Address
-				{
-					Line1 = "1234 Main Street",
-					Line2 = "Apt. 404",
-					City = "Las Vegas",
-					State = "NV"
-				};
+			// breaks here with an invalid conversion error from Address to string
+			Db.ExecuteSql(sql, new { Id = 3, Address = Addr });
 
-				var tableName = db.GetDialectProvider().GetQuotedTableName(ModelDefinition<TestType>.Definition);
-
-				var sql = $"INSERT {tableName} (StringColumn) VALUES (@StringColumn);";
-				db.ExecuteSql(sql, new { StringColumn = expected });
-
-				// demo how to retrieve inserted JSON string directly to an object
-				var address = db.Scalar<Address>(
-					db.From<TestType>().Select(q => q.StringColumn)
+			// demo how to retrieve inserted JSON string directly to an object
+			var address = Db.Single<Address>(
+				Db.From<TestType>()
+					.Where(q => q.Id == 3)
+					.Select(q => q.StringColumn)
 				);
 
-				Assert.That(expected.Line1, Is.EqualTo(address.Line1));
-				Assert.That(expected.Line2, Is.EqualTo(address.Line2));
-				Assert.That(expected.City, Is.EqualTo(address.City));
-				Assert.That(expected.State, Is.EqualTo(address.State));
-			}
-
+			Assert.That(Addr.Line1, Is.EqualTo(address.Line1));
+			Assert.That(Addr.Line2, Is.EqualTo(address.Line2));
+			Assert.That(Addr.City, Is.EqualTo(address.City));
+			Assert.That(Addr.State, Is.EqualTo(address.State));
 		}
 
-		public class Address : ISqlJson
+		[SqlJson]
+		public class Address
 		{
 			public string Line1 { get; set; }
 			public string Line2 { get; set; }

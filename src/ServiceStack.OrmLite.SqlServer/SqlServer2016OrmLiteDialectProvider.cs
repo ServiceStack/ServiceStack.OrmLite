@@ -1,4 +1,6 @@
-﻿using ServiceStack.OrmLite.SqlServer.Converters;
+﻿using System;
+
+using ServiceStack.OrmLite.SqlServer.Converters;
 
 namespace ServiceStack.OrmLite.SqlServer
 {
@@ -6,7 +8,7 @@ namespace ServiceStack.OrmLite.SqlServer
     {
 		public SqlServer2016OrmLiteDialectProvider() : base()
 		{
-			base.RegisterConverter<string>(new SqlServerJsonToObjectConverter());
+			base.RegisterConverter<String>(new SqlServerJsonStringConverter());
 		}
 
         public new static SqlServer2016OrmLiteDialectProvider Instance = new SqlServer2016OrmLiteDialectProvider();

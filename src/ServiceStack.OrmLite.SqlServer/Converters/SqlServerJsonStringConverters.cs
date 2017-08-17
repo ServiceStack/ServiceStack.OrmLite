@@ -7,29 +7,28 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.SqlServer.Converters
 {
-    public class SqlServerJsonToObjectConverter : SqlServerStringConverter
+    public class SqlServerJsonStringConverter : SqlServerStringConverter
 	{
+		// json string to object
 		public override object FromDbValue(Type fieldType, object value)
 		{
-			var deflt = fieldType.GetDefaultValue();
-			if (value == null || value == deflt)
-				return deflt;
+			if (value is string raw && fieldType.HasAttribute<SqlJsonAttribute>())
+				return JsonSerializer.DeserializeFromString(raw, fieldType);
 
-			var json = value.ToString();
-			return JsonSerializer.DeserializeFromString(json, fieldType);
+			return base.FromDbValue(fieldType, value);
 		}
 
+		// object to json string
 		public override object ToDbValue(Type fieldType, object value)
 		{
-			if (value != null && value.GetType().HasInterface(typeof(ISqlJson)))
-			{
-				return value.ToJson();
-			}
+			if (value.GetType().HasAttribute<SqlJsonAttribute>())
+				return JsonSerializer.SerializeToString(value, value.GetType());
 
 			return base.ToDbValue(fieldType, value);
 		}
 	}
 
-	public interface ISqlJson
+	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+	public class SqlJsonAttribute : Attribute
 	{ }
 }
