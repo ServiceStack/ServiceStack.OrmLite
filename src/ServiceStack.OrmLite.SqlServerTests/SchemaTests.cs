@@ -65,7 +65,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
             {
                 db.DropAndCreateTable<TestDecimalConverter>();
 
-                Assert.That(db.GetLastSql(), Is.StringContaining("FLOAT"));
+                Assert.That(db.GetLastSql(), Does.Contain("FLOAT"));
             }
         }
 

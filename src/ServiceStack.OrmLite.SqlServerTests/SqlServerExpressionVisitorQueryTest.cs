@@ -13,7 +13,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
     public class SqlServerExpressionVisitorQueryTest : OrmLiteTestBase
     {
         [OneTimeSetUp]
-        public void TestFixtureSetUp()
+        public override void TestFixtureSetUp()
         {
             OrmLiteConfig.SanitizeFieldNameForParamNameFn = s =>
                 (s ?? "").Replace(" ", "").Replace("°", "");
