@@ -12,7 +12,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
 
         public IDbConnection Db { get; set; }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public virtual void TestFixtureSetUp()
         {
             LogManager.LogFactory = new ConsoleLogFactory();
