@@ -1525,9 +1525,12 @@ namespace ServiceStack.OrmLite
                 {
                     for (var i = 0; i < methodCallExpr.Arguments.Count; i++)
                     {
-                        if (CheckExpressionForTypes(methodCallExpr.Arguments[0], types))
+                        if (CheckExpressionForTypes(methodCallExpr.Arguments[i], types))
                             return true;
                     }
+
+                    if (CheckExpressionForTypes(methodCallExpr.Object, types))
+                        return true;
                 }
 
                 var unaryExpr = e as UnaryExpression;
