@@ -4,7 +4,6 @@
     <TargetFramework>net45</TargetFramework>
     <AssemblyName>ServiceStack.OrmLite.SqlServerTests</AssemblyName>
     <PackageId>ServiceStack.OrmLite.SqlServerTests</PackageId>
-    <NetStandardImplicitPackageVersion>1.6.0</NetStandardImplicitPackageVersion>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
@@ -14,7 +13,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NUnit" Version="3.6.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0" />
+    <PackageReference Include="NUnit" Version="3.7.1" />
     <Reference Include="..\..\lib\pcl\ServiceStack.Interfaces.dll" />
   </ItemGroup>
 
@@ -23,7 +23,7 @@
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
-    <PackageReference Include="Microsoft.SqlServer.Types" Version="11.0.2" />
+    <PackageReference Include="Microsoft.SqlServer.Types" Version="14.0.314.76" />
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Threading" />

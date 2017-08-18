@@ -304,7 +304,7 @@ namespace ServiceStack.OrmLite.SqlServerTests.Expressions
                     bool r6 = db.Scalar<Author, bool>(e => Sql.Max(e.Active));
                     Assert.AreEqual(expectedBool, r6);
                 }
-                catch (Exception e)
+                catch //(Exception e)
                 {
                     //????
                     //if (dialect.Name == "PostgreSQL")

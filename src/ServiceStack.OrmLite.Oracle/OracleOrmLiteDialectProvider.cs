@@ -1084,5 +1084,7 @@ namespace ServiceStack.OrmLite.Oracle
         {
             return "SELECT COUNT(*) FROM ({0})".Fmt(innerSql);
         }
+
+        public override string SqlConcat(IEnumerable<object> args) => string.Join(" || ", args);
     }
 }

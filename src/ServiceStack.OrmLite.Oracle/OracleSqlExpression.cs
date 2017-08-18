@@ -52,11 +52,6 @@ namespace ServiceStack.OrmLite.Oracle
         {
             return base.OrderBy("dbms_random.value");
         }
-
-        protected override PartialSqlString ToConcatPartialString(List<object> args)
-        {
-            return new PartialSqlString(string.Join(" || ", args));
-        }
     }
 }
 

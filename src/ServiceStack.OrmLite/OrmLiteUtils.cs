@@ -453,7 +453,7 @@ namespace ServiceStack.OrmLite
             return "{0}".SqlFmt(value);
         }
 
-        public static Regex VerifyFragmentRegEx = new Regex("([^[:alnum:]_]|^)+(--|;--|;|%|/\\*|\\*/|@@|@|char|nchar|varchar|nvarchar|alter|begin|cast|create|cursor|declare|delete|drop|end|exec|execute|fetch|insert|kill|open|select|sys|sysobjects|syscolumns|table|update)([^[:alnum:]_]|$)+",
+        public static Regex VerifyFragmentRegEx = new Regex("([^\\w]|^)+(--|;--|;|%|/\\*|\\*/|@@|@|char|nchar|varchar|nvarchar|alter|begin|cast|create|cursor|declare|delete|drop|end|exec|execute|fetch|insert|kill|open|select|sys|sysobjects|syscolumns|table|update)([^\\w]|$)+",
             RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         public static Func<string,string> SqlVerifyFragmentFn { get; set; }

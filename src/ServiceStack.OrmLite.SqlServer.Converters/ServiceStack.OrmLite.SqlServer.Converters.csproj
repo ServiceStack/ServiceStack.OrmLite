@@ -29,7 +29,7 @@
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
-    <PackageReference Include="Microsoft.SqlServer.Types" Version="11.0.2" />
+    <PackageReference Include="Microsoft.SqlServer.Types" Version="14.0.314.76" />
     <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj" />
     <ProjectReference Include="..\ServiceStack.OrmLite.SqlServer\ServiceStack.OrmLite.SqlServer.csproj" />
     <Reference Include="..\..\lib\net45\ServiceStack.Text.dll" />

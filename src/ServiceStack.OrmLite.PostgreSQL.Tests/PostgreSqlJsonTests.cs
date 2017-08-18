@@ -10,8 +10,11 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
     {
         public int Id { get; set; }
 
-        [CustomField("json")]
+        [PgSqlJson]
         public ComplexType ComplexTypeJson { get; set; }
+
+        [PgSqlJsonB]
+        public ComplexType ComplexTypeJsonb { get; set; }
     }
 
     public class ComplexType
@@ -59,10 +62,10 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
                     {
                         Id = 2, SubType = new SubType { Name = "SubType2" }
                     },
-                    //ComplexTypeJsonb = new ComplexType
-                    //{
-                    //    Id = 3, SubType = new SubType { Name = "SubType3" }
-                    //},
+                    ComplexTypeJsonb = new ComplexType
+                    {
+                        Id = 3, SubType = new SubType { Name = "SubType3" }
+                    },
                 };
 
                 db.Insert(row);
@@ -76,6 +79,12 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
                 Assert.That(result[0].Id, Is.EqualTo(1));
                 Assert.That(result[0].ComplexTypeJson.Id, Is.EqualTo(2));
                 Assert.That(result[0].ComplexTypeJson.SubType.Name, Is.EqualTo("SubType2"));
+
+                result = db.Select<ModelWithJsonType>(
+                    "complex_type_jsonb->'SubType'->>'Name' = 'SubType3'");
+
+                Assert.That(result[0].ComplexTypeJsonb.Id, Is.EqualTo(3));
+                Assert.That(result[0].ComplexTypeJsonb.SubType.Name, Is.EqualTo("SubType3"));
             }
         }
 

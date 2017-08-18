@@ -53,6 +53,10 @@ namespace ServiceStack.OrmLite.MySql
 
         public static string RowVersionTriggerFormat = "{0}RowVersionUpdateTrigger";
 
+        public override string GetLoadChildrenSubSelect<From>(SqlExpression<From> expr)
+        {
+            return $"SELECT * FROM ({base.GetLoadChildrenSubSelect(expr)}) AS COUNT";
+        }
         public override string ToPostDropTableStatement(ModelDefinition modelDef)
         {
             if (modelDef.RowVersion != null)
@@ -207,6 +211,9 @@ namespace ServiceStack.OrmLite.MySql
 
             return ret;
         }
+
+        public override string SqlCurrency(string fieldOrValue, string currencySymbol) => 
+            SqlConcat(new []{ "'" + currencySymbol + "'", "cast(" + fieldOrValue + " as decimal(15,2))" });
 
         protected MySqlConnection Unwrap(IDbConnection db)
         {

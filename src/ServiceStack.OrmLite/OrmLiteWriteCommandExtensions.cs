@@ -287,11 +287,11 @@ namespace ServiceStack.OrmLite
             IOrmLiteDialectProvider dialectProvider, IDataReader reader, 
             Tuple<FieldDefinition, int, IOrmLiteConverter>[] indexCache, object[] values)
         {
-            try
-            {
-                values = PopulateValues(reader, values, dialectProvider);
+            values = PopulateValues(reader, values, dialectProvider);
 
-                foreach (var fieldCache in indexCache)
+            foreach (var fieldCache in indexCache)
+            {
+                try
                 {
                     var fieldDef = fieldCache.Item1;
                     var index = fieldCache.Item2;
@@ -331,11 +331,12 @@ namespace ServiceStack.OrmLite
                         }
                     }
                 }
+                catch (Exception ex)
+                {
+                    OrmLiteUtils.HandleException(ex);
+                }
             }
-            catch (Exception ex)
-            {
-                OrmLiteUtils.HandleException(ex);
-            }
+
             return objWithProperties;
         }
 

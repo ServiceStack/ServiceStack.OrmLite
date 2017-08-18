@@ -1,15 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net45;netcoreapp1.1</TargetFrameworks>
+    <TargetFrameworks>net45;netcoreapp2.0</TargetFrameworks>
     <!--<TargetFrameworks>netcoreapp1.1</TargetFrameworks>-->
     <DebugType>portable</DebugType>
     <AssemblyName>ServiceStack.OrmLite.SqliteTests</AssemblyName>
     <OutputType>Library</OutputType>
     <PackageId>ServiceStack.OrmLite.SqliteTests</PackageId>
-    <RuntimeFrameworkVersion>1.1.1</RuntimeFrameworkVersion>
-    <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
-    <PackageTargetFallback>$(PackageTargetFallback);portable-net45+win8+wp8+wpa81+xamarinmac</PackageTargetFallback>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
@@ -51,7 +48,7 @@
     <Reference Include="..\..\lib\net45\ServiceStack.dll" />
   </ItemGroup>
 
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
     <DefineConstants>$(DefineConstants);NETCORE_SUPPORT;NETCORE</DefineConstants>
   </PropertyGroup>
 
@@ -68,18 +65,19 @@
     <PackageReference Include="NUnitLite" Version="3.6.1" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
+    <PackageReference Include="Microsoft.Extensions.Primitives" Version="1.1.1" />
     <PackageReference Include="System.Runtime" Version="4.*" />
     <PackageReference Include="System.Runtime.Serialization.Xml" Version="4.*" />
     <PackageReference Include="System.Reflection" Version="4.*" />
     <PackageReference Include="System.Reflection.Primitives" Version="4.*" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.*" />
 
-    <PackageReference Include="ServiceStack.Interfaces.Core" Version="1.0.*" />
-    <PackageReference Include="ServiceStack.Text.Core" Version="1.0.*" />
-    <PackageReference Include="ServiceStack.Common.Core" Version="1.0.*" />
-    <PackageReference Include="ServiceStack.Client.Core" Version="1.0.*" />
-    <PackageReference Include="ServiceStack.Core" Version="1.0.*" />
+    <Reference Include="..\..\lib\netstandard1.1\ServiceStack.Interfaces.dll" />
+    <Reference Include="..\..\lib\netstandard1.3\ServiceStack.Text.dll" />
+    <Reference Include="..\..\lib\netstandard1.3\ServiceStack.Common.dll" />
+    <Reference Include="..\..\lib\netstandard1.6\ServiceStack.Client.dll" />
+    <Reference Include="..\..\lib\netstandard1.6\ServiceStack.dll" />
   </ItemGroup>
 
 </Project>

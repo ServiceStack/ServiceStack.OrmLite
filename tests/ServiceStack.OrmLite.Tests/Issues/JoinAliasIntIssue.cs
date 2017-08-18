@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using ServiceStack.Logging;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
@@ -13,7 +14,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
             public int? TeamLeaderId { get; set; }
         }
 
-        class TeamUser
+        class Teamuser
         {
             public int Id { get; set; }
 
@@ -27,7 +28,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
         {
             using (var db = OpenDbConnection())
             {
-                db.DropAndCreateTable<TeamUser>();
+                db.DropAndCreateTable<Teamuser>();
                 db.DropAndCreateTable<Team>();
 
                 db.InsertAll(new[] {
@@ -40,13 +41,13 @@ namespace ServiceStack.OrmLite.Tests.Issues
 
                 db.InsertAll(new[]
                 {
-                    new TeamUser
+                    new Teamuser
                     {
                         Id = 1,
                         Name = "User 1",
                         TeamId = 1
                     },
-                    new TeamUser
+                    new Teamuser
                     {
                         Id = 2,
                         Name = "User 2",
@@ -59,13 +60,13 @@ namespace ServiceStack.OrmLite.Tests.Issues
                     where: x => x.Id == 1);
 
                 var q = db.From<Team>();
-                q.Join<TeamUser>((t, u) => t.Id == u.TeamId, db.JoinAlias("TeamUser"));
-                q.Join<TeamUser>((t, u) => t.TeamLeaderId == u.Id, db.JoinAlias("Leader"));
-                q.Where<Team, TeamUser>((t, u) => t.Id == Sql.JoinAlias(u.TeamId, "Leader"));
-                q.Where<TeamUser>(u => Sql.JoinAlias(u.Id, "Leader") == 1);
-                q.Where<Team, TeamUser>((t, u) => Sql.JoinAlias(t.Id, OrmLiteConfig.DialectProvider.GetQuotedTableName(ModelDefinition<Team>.Definition)) == Sql.JoinAlias(u.TeamId, "Leader")); // Workaround, but only works for fields, not constants
-                q.Where<Team, TeamUser>((user, leader) => Sql.JoinAlias(user.Id, "TeamUser") < Sql.JoinAlias(leader.Id, "Leader"));
-                q.Select<Team, TeamUser, TeamUser>((t, u, l) => new
+                q.Join<Teamuser>((t, u) => t.Id == u.TeamId, db.JoinAlias("Teamuser"));
+                q.Join<Teamuser>((t, u) => t.TeamLeaderId == u.Id, db.JoinAlias("Leader"));
+                q.Where<Team, Teamuser>((t, u) => t.Id == Sql.JoinAlias(u.TeamId, "Leader"));
+                q.Where<Teamuser>(u => Sql.JoinAlias(u.Id, "Leader") == 1);
+                q.Where<Team, Teamuser>((t, u) => Sql.JoinAlias(t.Id, q.DialectProvider.GetQuotedTableName(ModelDefinition<Team>.Definition)) == Sql.JoinAlias(u.TeamId, "Leader")); // Workaround, but only works for fields, not constants
+                q.Where<Team, Teamuser>((user, leader) => Sql.JoinAlias(user.Id, "Teamuser") < Sql.JoinAlias(leader.Id, "Leader"));
+                q.Select<Team, Teamuser, Teamuser>((t, u, l) => new
                 {
                     TeamName = Sql.As(t.Name, "TeamName"),
                     UserName = Sql.As(u.Name, "UserName"),

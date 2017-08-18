@@ -368,6 +368,11 @@ namespace ServiceStack.OrmLite
             return "'" + paramValue.Replace("'", "''") + "'";
         }
 
+        public virtual string GetSchemaName(string schema)
+        {
+            return NamingStrategy.GetSchemaName(schema);
+        }
+
         public virtual string GetTableName(ModelDefinition modelDef)
         {
             return GetTableName(modelDef.ModelName, modelDef.Schema);
@@ -498,7 +503,7 @@ namespace ServiceStack.OrmLite
                 && sqlFilter.TrimStart().StartsWith(SelectStatement, StringComparison.OrdinalIgnoreCase);
 
             if (isFullSelectStatement)
-                return sqlFilter.SqlFmt(filterParams);
+                return sqlFilter.SqlFmt(this, filterParams);
 
             var modelDef = tableType.GetModelDefinition();
             var sql = StringBuilderCache.Allocate();
@@ -507,7 +512,7 @@ namespace ServiceStack.OrmLite
             if (string.IsNullOrEmpty(sqlFilter))
                 return StringBuilderCache.ReturnAndFree(sql);
 
-            sqlFilter = sqlFilter.SqlFmt(filterParams);
+            sqlFilter = sqlFilter.SqlFmt(this, filterParams);
             if (!sqlFilter.StartsWith("ORDER ", StringComparison.OrdinalIgnoreCase)
                 && !sqlFilter.StartsWith("LIMIT ", StringComparison.OrdinalIgnoreCase))
             {
@@ -537,23 +542,16 @@ namespace ServiceStack.OrmLite
 
             if (offset != null || rows != null)
             {
-                sb.Append("\nLIMIT ");
-                if (offset == null)
-                {
-                    sb.Append(rows);
-                }
-                else
-                {
-                    sb.Append(rows.GetValueOrDefault(int.MaxValue)).Append(" OFFSET ").Append(offset);
-                }
+                sb.Append("\n");
+                sb.Append(SqlLimit(offset, rows));
             }
 
             return StringBuilderCache.ReturnAndFree(sb);
         }
 
-        public virtual SelectItem GetRowVersionColumnName(FieldDefinition field)
+        public virtual SelectItem GetRowVersionColumnName(FieldDefinition field, string tablePrefix = null)
         {
-            return new SelectItemColumn(this, field.FieldName);
+            return new SelectItemColumn(this, field.FieldName, null, tablePrefix);
         }
 
         public virtual string GetColumnNames(ModelDefinition modelDef)
@@ -576,7 +574,7 @@ namespace ServiceStack.OrmLite
                 }
                 else if (field.IsRowVersion)
                 {
-                    sqlColumns[i] = GetRowVersionColumnName(field);
+                    sqlColumns[i] = GetRowVersionColumnName(field, tablePrefix);
                 }
                 else
                 {
@@ -752,7 +750,10 @@ namespace ServiceStack.OrmLite
                 var quotedValue = dbParam.Value != null
                     ? GetQuotedValue(dbParam.Value, dbParam.Value.GetType())
                     : "null";
-                sql = Regex.Replace(sql, dbParam.ParameterName + @"(,|\s|\)|$)", quotedValue + "$1");
+
+                var pattern = dbParam.ParameterName + @"(,|\s|\)|$)";
+                var replacement = quotedValue.Replace("$", "$$") + "$1";
+                sql = Regex.Replace(sql, pattern, replacement);
             }
             return sql;
         }
@@ -1176,7 +1177,7 @@ namespace ServiceStack.OrmLite
                 && sqlFilter.Substring(0, deleteStatement.Length).ToUpper().Equals(deleteStatement);
 
             if (isFullDeleteStatement)
-                return sqlFilter.SqlFmt(filterParams);
+                return sqlFilter.SqlFmt(this, filterParams);
 
             var modelDef = tableType.GetModelDefinition();
             sql.Append($"DELETE FROM {GetQuotedTableName(modelDef)}");
@@ -1184,7 +1185,7 @@ namespace ServiceStack.OrmLite
             if (string.IsNullOrEmpty(sqlFilter))
                 return StringBuilderCache.ReturnAndFree(sql);
 
-            sqlFilter = sqlFilter.SqlFmt(filterParams);
+            sqlFilter = sqlFilter.SqlFmt(this, filterParams);
             sql.Append(" WHERE ");
             sql.Append(sqlFilter);
 
@@ -1573,6 +1574,20 @@ namespace ServiceStack.OrmLite
             return $"ALTER TABLE {provider.GetQuotedTableName(modelType.GetModelDefinition().ModelName)} " +
                    $"DROP COLUMN {provider.GetQuotedColumnName(columnName)};";
         }
+
+        public virtual string SqlConcat(IEnumerable<object> args) => $"CONCAT({string.Join(", ", args)})";
+
+        public virtual string SqlCurrency(string fieldOrValue) => SqlCurrency(fieldOrValue, "$");
+
+        public virtual string SqlCurrency(string fieldOrValue, string currencySymbol) => SqlConcat(new List<string> { currencySymbol, fieldOrValue });
+
+        public virtual string SqlBool(bool value) => value ? "true" : "false";
+
+        public virtual string SqlLimit(int? offset = null, int? rows = null) => rows == null && offset == null
+            ? "" 
+            : offset == null
+                ? "LIMIT " + rows
+                : "LIMIT " + rows.GetValueOrDefault(int.MaxValue) + " OFFSET " + offset;
 
         //Async API's, should be overrided by Dialect Providers to use .ConfigureAwait(false)
         //Default impl below uses TaskAwaiter shim in async.cs

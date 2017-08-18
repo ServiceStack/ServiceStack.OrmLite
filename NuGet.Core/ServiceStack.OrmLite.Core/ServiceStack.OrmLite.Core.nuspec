@@ -27,7 +27,7 @@
         <dependency id="System.Collections.NonGeneric" version="[4.3.0, )" />
         <dependency id="System.Xml.XmlDocument" version="[4.3.0, )" />
         <dependency id="System.ComponentModel.Primitives" version="[4.3.0, )" />
-        <dependency id="System.Data.SqlClient" version="[4.3.0, )" />
+        <dependency id="System.Data.SqlClient" version="[4.3.1, )" />
         <dependency id="System.ComponentModel.Annotations" version="[4.3.0, )" />
         <dependency id="ServiceStack.Interfaces.Core" version="1.0.0" />
         <dependency id="ServiceStack.Text.Core" version="1.0.0" />

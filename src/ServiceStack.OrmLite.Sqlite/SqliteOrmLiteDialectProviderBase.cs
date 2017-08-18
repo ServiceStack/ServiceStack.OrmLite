@@ -140,6 +140,13 @@ namespace ServiceStack.OrmLite.Sqlite
 
         protected abstract IDbConnection CreateConnection(string connectionString);
 
+        public override string GetSchemaName(string schema)
+        {
+            return schema != null
+                ? NamingStrategy.GetSchemaName(schema).Replace(".", "_")
+                : NamingStrategy.GetSchemaName(schema);
+        }
+
         public override string GetTableName(string table, string schema=null)
         {
             return schema != null
@@ -196,6 +203,12 @@ namespace ServiceStack.OrmLite.Sqlite
 
             return ret;
         }
+
+        public override string SqlConcat(IEnumerable<object> args) => string.Join(" || ", args);
+
+        public override string SqlCurrency(string fieldOrValue, string currencySymbol) => SqlConcat(new []{ "'" + currencySymbol + "'", "printf(\"%.2f\", " + fieldOrValue + ")" });
+
+        public override string SqlBool(bool value) => value ? "1" : "0";
     }
 
     public static class SqliteExtensions

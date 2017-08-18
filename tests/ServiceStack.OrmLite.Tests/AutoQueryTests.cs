@@ -207,11 +207,11 @@ namespace ServiceStack.OrmLite.Tests
                 db.InsertAll(SeedDepartments);
                 db.InsertAll(SeedEmployees);
 
-                var q = db.From<DeptEmployee>().Select(new[] {"FirstName"}).Take(2);
+                var q = db.From<DeptEmployee>().Select(new[] { "FirstName" }).Take(2);
 
                 var resultsMap = db.Select<Dictionary<string, object>>(q);
                 Assert.That(resultsMap.Count, Is.EqualTo(2));
-                var row = new Dictionary<string,object>(resultsMap[0], StringComparer.OrdinalIgnoreCase);
+                var row = new Dictionary<string, object>(resultsMap[0], StringComparer.OrdinalIgnoreCase);
                 Assert.That(row.ContainsKey("FirstName".SqlTableRaw()));
                 Assert.That(!row.ContainsKey("Id".SqlTableRaw()));
 
@@ -221,7 +221,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 var resultsDynamic = db.Select<dynamic>(q);
                 Assert.That(resultsDynamic.Count, Is.EqualTo(2));
-                var map = (IDictionary<string, object>) resultsDynamic[0];
+                var map = (IDictionary<string, object>)resultsDynamic[0];
                 Assert.That(map.ContainsKey("FirstName".SqlTableRaw()));
                 Assert.That(!map.ContainsKey("Id".SqlTableRaw()));
 
@@ -434,6 +434,35 @@ namespace ServiceStack.OrmLite.Tests
                 }
             }
         }
+
+        [Test]
+        public void Can_group_by_multiple_columns()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Rockstar>();
+                db.DropAndCreateTable<RockstarAlbum>();
+                db.InsertAll(SeedRockstars);
+                db.InsertAll(SeedAlbums);
+
+                var q = db.From<Rockstar>()
+                    .Join<RockstarAlbum>()
+                    .GroupBy<Rockstar, RockstarAlbum>((r, a) => new { r.Id, AlbumId = a.Id, r.FirstName, r.LastName, a.Name })
+                    .Select<Rockstar, RockstarAlbum>((r,a) => new
+                    {
+                        r.Id,
+                        AlbumId = a.Id,
+                        r.FirstName,
+                        r.LastName,
+                        a.Name
+                    });
+
+                var results = db.Select<(int id, int albumId, string firstName, string album)>(q);
+
+                Assert.That(results.Count, Is.EqualTo(3));
+            }
+        }
+
     }
 
 }

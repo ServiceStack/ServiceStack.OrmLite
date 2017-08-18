@@ -114,10 +114,10 @@ namespace ServiceStack.OrmLite.SqlServer
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
         {
             var sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = {0}"
-                .SqlFmt(tableName);
+                .SqlFmt(this, tableName);
 
             if (schema != null)
-                sql += " AND TABLE_SCHEMA = {0}".SqlFmt(schema);
+                sql += " AND TABLE_SCHEMA = {0}".SqlFmt(this, schema);
 
             var result = dbCmd.ExecLongScalar(sql);
 
@@ -127,7 +127,7 @@ namespace ServiceStack.OrmLite.SqlServer
         public override bool DoesColumnExist(IDbConnection db, string columnName, string tableName, string schema = null)
         {
             var sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @tableName AND COLUMN_NAME = @columnName"
-                .SqlFmt(tableName, columnName);
+                .SqlFmt(this, tableName, columnName);
 
             if (schema != null)
                 sql += " AND TABLE_SCHEMA = @schema";
@@ -354,6 +354,17 @@ namespace ServiceStack.OrmLite.SqlServer
 
             return base.GetLoadChildrenSubSelect(expr);
         }
+
+        public override string SqlCurrency(string fieldOrValue, string currencySymbol) => 
+            SqlConcat(new[] { "'" + currencySymbol + "'", $"CONVERT(VARCHAR, CONVERT(MONEY, {fieldOrValue}), 1)" });
+
+        public override string SqlBool(bool value) => value ? "1" : "0";
+
+        public override string SqlLimit(int? offset = null, int? rows = null) => rows == null && offset == null
+            ? ""
+            : rows != null
+                ? "OFFSET " + offset.GetValueOrDefault() + " ROWS FETCH NEXT " + rows + " ROWS ONLY"
+                : "OFFSET " + offset.GetValueOrDefault(int.MaxValue) + " ROWS";
 
         protected SqlConnection Unwrap(IDbConnection db) => (SqlConnection)db.ToDbConnection();
 

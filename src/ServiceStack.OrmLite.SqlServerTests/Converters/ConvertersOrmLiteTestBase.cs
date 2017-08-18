@@ -8,7 +8,7 @@ namespace ServiceStack.OrmLite.SqlServerTests.Converters
 {
     public class SqlServer2012ConvertersOrmLiteTestBase : OrmLiteTestBase
     {
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public override void TestFixtureSetUp()
         {
             try
@@ -33,7 +33,7 @@ namespace ServiceStack.OrmLite.SqlServerTests.Converters
 
     public class SqlServer2014ConvertersOrmLiteTestBase : SqlServer2012ConvertersOrmLiteTestBase
     {
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public override void TestFixtureSetUp()
         {
             try
@@ -58,7 +58,7 @@ namespace ServiceStack.OrmLite.SqlServerTests.Converters
 
     public class SqlServer2016ConvertersOrmLiteTestBase : SqlServer2014ConvertersOrmLiteTestBase
     {
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public override void TestFixtureSetUp()
         {
             try

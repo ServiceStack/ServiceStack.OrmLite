@@ -2152,9 +2152,9 @@ namespace ServiceStack.OrmLite
             return ToConcatPartialString(args);
         }
 
-        protected virtual PartialSqlString ToConcatPartialString(List<object> args)
+        protected PartialSqlString ToConcatPartialString(List<object> args)
         {
-            return new PartialSqlString(string.Join(" + ", args));
+            return new PartialSqlString(DialectProvider.SqlConcat(args));
         }
 
         protected virtual object VisitSqlMethodCall(MethodCallExpression m)
