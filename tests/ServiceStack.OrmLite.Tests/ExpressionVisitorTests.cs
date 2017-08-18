@@ -575,6 +575,17 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(target.Count, Is.EqualTo(1));
         }
 
+        [Test]
+        public void Can_Where_using_IfWithStringConstant_filter()
+        {
+            System.Linq.Expressions.Expression<Func<TestType, bool>> filter = x => (String.Concat("Text: ", x.TextCol) == null ? " " : String.Concat("Text: ", x.TextCol)).EndsWith("asdf");
+            var q = Db.From<TestType>().Where(filter);
+            Assert.That(q.ToSelectStatement(), Does.Contain("Text"));
+
+            var target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(1));
+        }
+
         private int MethodReturningInt(int val)
         {
             return val;

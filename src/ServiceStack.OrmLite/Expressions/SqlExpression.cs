@@ -1814,16 +1814,27 @@ namespace ServiceStack.OrmLite
                 if ((bool) test)
                 {
                     var ifTrue = Visit(e.IfTrue);
+                    if (e.IfTrue.Type == typeof(string) && !(ifTrue is PartialSqlString))
+                        ifTrue = ConvertToParam(ifTrue);
+
                     return ifTrue;
                 }
 
                 var ifFalse = Visit(e.IfFalse);
+                if (e.IfFalse.Type == typeof(string) && !(ifFalse is PartialSqlString))
+                    ifFalse = ConvertToParam(ifFalse);
+
                 return ifFalse;
             }
             else
             {
                 var ifTrue = Visit(e.IfTrue);
+                if (e.IfTrue.Type == typeof(string) && !(ifTrue is PartialSqlString))
+                    ifTrue = ConvertToParam(ifTrue);
+
                 var ifFalse = Visit(e.IfFalse);
+                if (e.IfFalse.Type == typeof(string) && !(ifFalse is PartialSqlString))
+                    ifFalse = ConvertToParam(ifFalse);
 
                 return new PartialSqlString($"(CASE WHEN {test} THEN {ifTrue} ELSE {ifFalse} END)");
             }
