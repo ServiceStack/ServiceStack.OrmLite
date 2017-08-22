@@ -8,11 +8,18 @@ namespace ServiceStack.OrmLite
 {
     public class TemplateDbFilters : TemplateFilter
     {
+        private IDbConnectionFactory dbFactory;
+        public IDbConnectionFactory DbFactory
+        {
+            get => dbFactory ?? (dbFactory = Context.Container.Resolve<IDbConnectionFactory>());
+            set => dbFactory = value;
+        }
+
         T exec<T>(Func<IDbConnection, T> fn, TemplateScopeContext scope, object options)
         {
             try
             {
-                using (var db = Context.Container.Resolve<IDbConnectionFactory>().Open())
+                using (var db = DbFactory.Open())
                 {
                     return fn(db);
                 }
