@@ -16,13 +16,14 @@ namespace ServiceStack.OrmLite
             set => dbFactory = value;
         }
 
-        Task<object> exec<T>(Func<IDbConnection, Task<T>> fn, TemplateScopeContext scope, object options)
+        async Task<object> exec<T>(Func<IDbConnection, Task<T>> fn, TemplateScopeContext scope, object options)
         {
             try
             {
                 using (var db = DbFactory.Open())
                 {
-                    return fn(db).Then(x => (object)x);
+                    var result = await fn(db);
+                    return result;
                 }
             }
             catch (Exception ex)
@@ -32,13 +33,13 @@ namespace ServiceStack.OrmLite
         }
 
         public Task<object> dbSelect(TemplateScopeContext scope, string sql) => 
-            exec(db => db.SelectAsync<Dictionary<string, object>>(sql), scope, null);
+            exec(db => db.SqlListAsync<Dictionary<string, object>>(sql), scope, null);
 
         public Task<object> dbSelect(TemplateScopeContext scope, string sql, Dictionary<string, object> args) => 
-            exec(db => db.SelectAsync<Dictionary<string, object>>(sql, args), scope, null);
+            exec(db => db.SqlListAsync<Dictionary<string, object>>(sql, args), scope, null);
 
         public Task<object> dbSelect(TemplateScopeContext scope, string sql, Dictionary<string, object> args, object options) => 
-            exec(db => db.SelectAsync<Dictionary<string, object>>(sql, args), scope, options);
+            exec(db => db.SqlListAsync<Dictionary<string, object>>(sql, args), scope, options);
 
 
         public Task<object> dbSingle(TemplateScopeContext scope, string sql) => 

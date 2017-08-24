@@ -83,7 +83,8 @@ namespace ServiceStack.OrmLite
 
         public static bool IsScalar<T>()
         {
-            return typeof(T).IsValueType() && !typeof(T).Name.StartsWith("ValueTuple`", StringComparison.Ordinal) || typeof(T) == typeof(string);
+            var isScalar = typeof(T).IsValueType() && !typeof(T).Name.StartsWith("ValueTuple`", StringComparison.Ordinal) || typeof(T) == typeof(string);
+            return isScalar;
         }
 
         public static T ConvertTo<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, HashSet<string> onlyFields=null)
