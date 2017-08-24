@@ -7,8 +7,6 @@ namespace ServiceStack.OrmLite.Tests
 {
     public class TemplateDbTests : OrmLiteTestBase
     {
-        public TemplateDbTests() : base(Dialect.SqlServer) {}
-
         [Test]
         public async Task Can_retrieve_single_record_with_param()
         {
@@ -32,6 +30,8 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public async Task Can_call_dbSingle_with_param()
         {
+            if (Dialect == Dialect.Sqlite) return;
+
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<Rockstar>();

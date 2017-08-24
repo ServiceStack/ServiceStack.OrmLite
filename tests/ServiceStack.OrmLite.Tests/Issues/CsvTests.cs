@@ -25,7 +25,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
                 Assert.That(json.ToLower(), Is.EqualTo("[{\"Id\":1,\"Name\":\"Foo\"},{\"Id\":2,\"Name\":\"Bar\"}]".ToLower()));
 
                 var csv = CsvSerializer.SerializeToCsv(results);
-                Assert.That(csv.NormalizeNewLines().ToLower(), Is.EqualTo("Id,Name\n1,Foo\n2,Bar\n".ToLower()));
+                Assert.That(csv.NormalizeNewLines().ToLower(), Is.EqualTo("Id,Name\n1,Foo\n2,Bar".ToLower()));
             }
         }
 
@@ -45,11 +45,11 @@ namespace ServiceStack.OrmLite.Tests.Issues
                 Assert.That(json.ToLower(), Is.EqualTo("[{\"Id\":1,\"Name\":\"Foo\"},{\"Id\":2,\"Name\":\"Bar\"}]".ToLower()));
 
                 var csv = results.ToCsv();
-                Assert.That(csv.NormalizeNewLines().ToLower(), Is.EqualTo("Id,Name\n1,Foo\n2,Bar\n".ToLower()));
+                Assert.That(csv.NormalizeNewLines().ToLower(), Is.EqualTo("Id,Name\n1,Foo\n2,Bar".ToLower()));
 
                 var rows = db.Select<Dictionary<string,object>>("select * from Poco Order By Id");
                 csv = rows.ToCsv();
-                Assert.That(csv.NormalizeNewLines().ToLower(), Is.EqualTo("Id,Name\n1,Foo\n2,Bar\n".ToLower()));
+                Assert.That(csv.NormalizeNewLines().ToLower(), Is.EqualTo("Id,Name\n1,Foo\n2,Bar".ToLower()));
             }
         }
     }
