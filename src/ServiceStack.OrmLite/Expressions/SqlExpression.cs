@@ -2270,7 +2270,7 @@ namespace ServiceStack.OrmLite
             throw new NotSupportedException($"In({argValue.GetType()})");
         }
 
-        protected virtual string CreateInSubQuerySql(string quotedColName,string subSelect)
+        protected virtual string CreateInSubQuerySql(object quotedColName,string subSelect)
         {
             return $"{quotedColName} IN ({subSelect})";
         }

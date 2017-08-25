@@ -17,7 +17,7 @@
                 : base.ToDeleteRowStatement();
         }
 
-        protected override string CreateInSubQuerySql(string quotedColName, string subSelect)
+        protected override string CreateInSubQuerySql(object quotedColName, string subSelect)
         {
             return $"{quotedColName} IN (SELECT * FROM ({subSelect})  SubQuery)";
         }
