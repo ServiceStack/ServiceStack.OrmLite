@@ -2264,7 +2264,14 @@ namespace ServiceStack.OrmLite
                     subSelect = paramsRegex.Replace(subSelect, renameParams[i].Item2 + "$1");
                 }
 
-                return $"{quotedColName} IN ({subSelect})";
+                if (DialectProvider.GetType().Name == "MySqlDialectProvider")
+                {
+                    return $"{quotedColName} IN (SELECT * FROM ({subSelect})  SubQuery)";
+                }
+                else
+                {
+                    return $"{quotedColName} IN ({subSelect})";
+                }
             }
 
             throw new NotSupportedException($"In({argValue.GetType()})");
