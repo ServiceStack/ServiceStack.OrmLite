@@ -55,7 +55,7 @@ namespace ServiceStack.OrmLite.MySql
 
         public override string GetLoadChildrenSubSelect<From>(SqlExpression<From> expr)
         {
-            return $"SELECT * FROM ({base.GetLoadChildrenSubSelect(expr)}) AS COUNT";
+            return $"SELECT * FROM ({base.GetLoadChildrenSubSelect(expr)}) AS SubQuery";
         }
         public override string ToPostDropTableStatement(ModelDefinition modelDef)
         {

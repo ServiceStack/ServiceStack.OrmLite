@@ -16,5 +16,10 @@
                 ? $"DELETE {DialectProvider.GetQuotedTableName(modelDef)} {FromExpression} {WhereExpression}"
                 : base.ToDeleteRowStatement();
         }
+
+        protected override string CreateInSubQuerySql(object quotedColName, string subSelect)
+        {
+            return $"{quotedColName} IN (SELECT * FROM ({subSelect})  SubQuery)";
+        }
     }
 }
