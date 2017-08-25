@@ -8,7 +8,7 @@ namespace ServiceStack.OrmLite.SqlServerTests.TableOptions
     [TestFixture]
     public class SqlServer2014MemoryOptimizedAttributeTests : SqlServer2014TableOptionsOrmLiteTestBase
     {
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             base.TestFixtureSetUp();

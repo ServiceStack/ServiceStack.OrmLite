@@ -10,7 +10,7 @@ namespace ServiceStack.OrmLite.SqlServerTests.Converters
     {
         public string ColumnDefinition { get; set; }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public new void TestFixtureSetUp()
         {
             base.TestFixtureSetUp();

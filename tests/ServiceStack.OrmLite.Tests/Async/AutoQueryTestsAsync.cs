@@ -156,7 +156,7 @@ namespace ServiceStack.OrmLite.Tests.Async
                 }
 
                 Assert.That(sb.ToString().NormalizeNewLines(), Is.EqualTo(
-                    "First 1,Last 1,Dept 1\nFirst 2,Last 2,Dept 2\nFirst 3,Last 3,Dept 3\n"));
+                    "First 1,Last 1,Dept 1\nFirst 2,Last 2,Dept 2\nFirst 3,Last 3,Dept 3"));
 
                 q = db.From<DeptEmployee>()
                     .Join<Department2>()
@@ -177,7 +177,7 @@ namespace ServiceStack.OrmLite.Tests.Async
                     }
                 }
 
-                Assert.That(sb.ToString().NormalizeNewLines(), Is.EqualTo("Dept 1\nDept 2\nDept 3\n"));
+                Assert.That(sb.ToString().NormalizeNewLines(), Is.EqualTo("Dept 1\nDept 2\nDept 3"));
             }
         }
     }
