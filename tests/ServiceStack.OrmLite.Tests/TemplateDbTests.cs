@@ -37,18 +37,20 @@ namespace ServiceStack.OrmLite.Tests
                 db.DropAndCreateTable<Rockstar>();
                 db.InsertAll(AutoQueryTests.SeedRockstars);
 
+                var firstName = db.GetDialectProvider().NamingStrategy.GetColumnName("FirstName");
+
                 var args = new Dictionary<string, object> { { "id", 3 } };
 
                 var filter = new TemplateDbFilters { DbFactory = base.DbFactory };
                 var result = filter.dbSingle(default(TemplateScopeContext), "SELECT * FROM Rockstar WHERE Id = @id", args);
                 var objDictionary = (Dictionary<string, object>)result;
-                Assert.That(objDictionary["FirstName"], Is.EqualTo("Kurt"));
+                Assert.That(objDictionary[firstName], Is.EqualTo("Kurt"));
 
                 var asyncFilter = new TemplateDbFiltersAsync { DbFactory = base.DbFactory };
                 result = await asyncFilter.dbSingle(default(TemplateScopeContext), "SELECT * FROM Rockstar WHERE Id = @id", args);
 
                 objDictionary = (Dictionary<string, object>)result;
-                Assert.That(objDictionary["FirstName"], Is.EqualTo("Kurt"));
+                Assert.That(objDictionary[firstName], Is.EqualTo("Kurt"));
             }
         }
 
