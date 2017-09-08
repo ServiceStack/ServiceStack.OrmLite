@@ -983,7 +983,7 @@ namespace ServiceStack.OrmLite
 
             var inDoubleQuotes = false;
             var inSingleQuotes = false;
-            var inBraces = false;
+            int inBracesCount = 0;
 
             var pos = 0;
 
@@ -1014,12 +1014,14 @@ namespace ServiceStack.OrmLite
                 }
                 if (c == '(')
                 {
-                    inBraces = true;
+                    inBracesCount++;
                     continue;
                 }
                 if (c == ')')
                 {
-                    inBraces = false;
+                    inBracesCount--;
+                    if(inBracesCount > 0)
+                        continue;
 
                     var endPos = expr.IndexOf(',', i);
                     if (endPos == -1)
@@ -1035,7 +1037,7 @@ namespace ServiceStack.OrmLite
 
                 if (c == ',')
                 {
-                    if (!inBraces)
+                    if (inBracesCount == 0)
                     {
                         var arg = expr.Substring(pos, i - pos).Trim();
                         if (!string.IsNullOrEmpty(arg))
