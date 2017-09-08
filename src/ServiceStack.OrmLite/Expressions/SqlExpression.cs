@@ -2263,11 +2263,16 @@ namespace ServiceStack.OrmLite
                     var paramsRegex = new Regex(renameParams[i].Item1 + "([^\\d])");
                     subSelect = paramsRegex.Replace(subSelect, renameParams[i].Item2 + "$1");
                 }
-
-                return $"{quotedColName} IN ({subSelect})";
+                
+                return CreateInSubQuerySql(quotedColName, subSelect);
             }
 
             throw new NotSupportedException($"In({argValue.GetType()})");
+        }
+
+        protected virtual string CreateInSubQuerySql(object quotedColName,string subSelect)
+        {
+            return $"{quotedColName} IN ({subSelect})";
         }
 
         protected virtual object VisitColumnAccessMethod(MethodCallExpression m)

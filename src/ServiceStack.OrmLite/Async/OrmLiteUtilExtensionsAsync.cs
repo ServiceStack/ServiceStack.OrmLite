@@ -23,9 +23,19 @@ namespace ServiceStack.OrmLite
         public static Task<T> ConvertToAsync<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, CancellationToken token)
         {
             var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition, dialectProvider);
-            var values = new object[reader.FieldCount];
             return dialectProvider.ReaderRead(reader, () =>
             {
+                if (typeof(T) == typeof(List<object>))
+                    return (T)(object)reader.ConvertToListObjects();
+
+                if (typeof(T) == typeof(Dictionary<string, object>))
+                    return (T)(object)reader.ConvertToDictionaryObjects();
+
+                var values = new object[reader.FieldCount];
+
+                if (typeof(T).Name.StartsWith("ValueTuple`"))
+                    return reader.ConvertToValueTuple<T>(values, dialectProvider);
+
                 var row = CreateInstance<T>();
                 row.PopulateWithSqlReader(dialectProvider, reader, indexCache, values);
                 return row;

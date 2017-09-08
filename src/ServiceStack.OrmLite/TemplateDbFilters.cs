@@ -8,7 +8,12 @@ namespace ServiceStack.OrmLite
 {
     public class TemplateDbFilters : TemplateFilter
     {
-        public IDbConnectionFactory DbFactory { get; set; }
+        private IDbConnectionFactory dbFactory;
+        public IDbConnectionFactory DbFactory
+        {
+            get => dbFactory ?? (dbFactory = Context.Container.Resolve<IDbConnectionFactory>());
+            set => dbFactory = value;
+        }
 
         T exec<T>(Func<IDbConnection, T> fn, TemplateScopeContext scope, object options)
         {
@@ -26,13 +31,13 @@ namespace ServiceStack.OrmLite
         }
 
         public object dbSelect(TemplateScopeContext scope, string sql) => 
-            exec(db => db.Select<Dictionary<string, object>>(sql), scope, null);
+            exec(db => db.SqlList<Dictionary<string, object>>(sql), scope, null);
 
         public object dbSelect(TemplateScopeContext scope, string sql, Dictionary<string, object> args) => 
-            exec(db => db.Select<Dictionary<string, object>>(sql, args), scope, null);
+            exec(db => db.SqlList<Dictionary<string, object>>(sql, args), scope, null);
 
         public object dbSelect(TemplateScopeContext scope, string sql, Dictionary<string, object> args, object options) => 
-            exec(db => db.Select<Dictionary<string, object>>(sql, args), scope, options);
+            exec(db => db.SqlList<Dictionary<string, object>>(sql, args), scope, options);
 
 
         public object dbSingle(TemplateScopeContext scope, string sql) => 
