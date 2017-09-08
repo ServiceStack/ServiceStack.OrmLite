@@ -586,6 +586,17 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(target.Count, Is.EqualTo(1));
         }
 
+        [Test]
+        public void Can_OrderBy_using_isnull()
+        {
+            System.Linq.Expressions.Expression<Func<TestType, object>> orderBy = x => x.TextCol == null ? x.TextCol : x.NullableIntCol.ToString();
+            var q = Db.From<TestType>().OrderBy(orderBy);
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Not.Contain("isnull"));
+
+            var target = Db.Select(q);
+            Assert.IsTrue(target.Count > 0);
+        }
+
         private int MethodReturningInt(int val)
         {
             return val;

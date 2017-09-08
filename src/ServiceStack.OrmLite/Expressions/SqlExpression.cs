@@ -1423,10 +1423,16 @@ namespace ServiceStack.OrmLite
                 Swap(ref left, ref right); // "null is x" will not work, so swap the operands
             }
 
-            if (operand == "=" && right.ToString().Equals("null", StringComparison.OrdinalIgnoreCase))
-                operand = "is";
-            else if (operand == "<>" && right.ToString().Equals("null", StringComparison.OrdinalIgnoreCase))
-                operand = "is not";
+            var separator = sep;
+            if (right.ToString().Equals("null", StringComparison.OrdinalIgnoreCase))
+            {
+                if (operand == "=")
+                    operand = "is";
+                else if (operand == "<>")
+                    operand = "is not";
+
+                separator = " ";
+            }
 
             if (operand == "+" && b.Left.Type == typeof(string) && b.Right.Type == typeof(string))
                 return BuildConcatExpression(new List<object> {left, right});
@@ -1439,7 +1445,7 @@ namespace ServiceStack.OrmLite
                 case "COALESCE":
                     return new PartialSqlString($"{operand}({left},{right})");
                 default:
-                    return new PartialSqlString("(" + left + sep + operand + sep + right + ")");
+                    return new PartialSqlString("(" + left + separator + operand + separator + right + ")");
             }
         }
 
