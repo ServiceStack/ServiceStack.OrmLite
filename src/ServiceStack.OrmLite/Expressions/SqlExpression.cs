@@ -672,9 +672,13 @@ namespace ServiceStack.OrmLite
             sep = string.Empty;
             useFieldName = true;
             orderByProperties.Clear();
-            var fields = Visit(keySelector).ToString();
-            orderByProperties.Add(fields);
-            BuildOrderByClauseInternal();
+            var orderBySql = Visit(keySelector);
+            if (orderBySql is PartialSqlString)
+            {
+                var fields = orderBySql.ToString();
+                orderByProperties.Add(fields);
+                BuildOrderByClauseInternal();
+            }
             return this;
         }
 
@@ -700,9 +704,13 @@ namespace ServiceStack.OrmLite
         {
             sep = string.Empty;
             useFieldName = true;
-            var fields = Visit(keySelector).ToString();
-            orderByProperties.Add(fields);
-            BuildOrderByClauseInternal();
+            var orderBySql = Visit(keySelector);
+            if (orderBySql is PartialSqlString)
+            {
+                var fields = orderBySql.ToString();
+                orderByProperties.Add(fields);
+                BuildOrderByClauseInternal();
+            }
             return this;
         }
 
@@ -721,10 +729,14 @@ namespace ServiceStack.OrmLite
             sep = string.Empty;
             useFieldName = true;
             orderByProperties.Clear();
-            var orderBySql = Visit(keySelector).ToString();
-            orderBySql.ParseTokens()
-                .Each(x => orderByProperties.Add(x + " DESC"));
-            BuildOrderByClauseInternal();
+            var orderBySql = Visit(keySelector);
+            if (orderBySql is PartialSqlString)
+            {
+                var fields = orderBySql.ToString();
+                fields.ParseTokens()
+                    .Each(x => orderByProperties.Add(x + " DESC"));
+                BuildOrderByClauseInternal();
+            }
             return this;
         }
 
@@ -768,10 +780,14 @@ namespace ServiceStack.OrmLite
         {
             sep = string.Empty;
             useFieldName = true;
-            var orderBySql = Visit(keySelector).ToString();
-            orderBySql.ParseTokens()
-                .Each(x => orderByProperties.Add(x + " DESC"));
-            BuildOrderByClauseInternal();
+            var orderBySql = Visit(keySelector);
+            if (orderBySql is PartialSqlString)
+            {
+                var fields = orderBySql.ToString();
+                fields.ParseTokens()
+                    .Each(x => orderByProperties.Add(x + " DESC"));
+                BuildOrderByClauseInternal();
+            }
             return this;
         }
 
@@ -2285,6 +2301,9 @@ namespace ServiceStack.OrmLite
         {
             List<object> args = this.VisitExpressionList(m.Arguments);
             var quotedColName = Visit(m.Object);
+            if (m.Object?.Type == typeof(string) && !(quotedColName is PartialSqlString))
+                quotedColName = ConvertToParam(quotedColName);
+
             var statement = "";
 
             var wildcardArg = args.Count > 0 ? DialectProvider.EscapeWildcards(args[0].ToString()) : "";
