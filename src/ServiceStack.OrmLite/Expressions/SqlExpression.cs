@@ -9,6 +9,7 @@ using System.Collections.ObjectModel;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+using ServiceStack.OrmLite.Dapper;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
@@ -673,13 +674,19 @@ namespace ServiceStack.OrmLite
             useFieldName = true;
             orderByProperties.Clear();
             var orderBySql = Visit(keySelector);
-            if (orderBySql is PartialSqlString)
+            if (ObjectIsClass(orderBySql))
             {
                 var fields = orderBySql.ToString();
                 orderByProperties.Add(fields);
                 BuildOrderByClauseInternal();
             }
             return this;
+        }
+
+        private static bool ObjectIsClass(object obj)
+        {
+            return obj != null &&
+                   !(obj.GetType().IsPrimitive() || obj.GetType().IsValueType() || obj is string);
         }
 
         public virtual SqlExpression<T> ThenBy(string orderBy)
@@ -705,7 +712,7 @@ namespace ServiceStack.OrmLite
             sep = string.Empty;
             useFieldName = true;
             var orderBySql = Visit(keySelector);
-            if (orderBySql is PartialSqlString)
+            if (ObjectIsClass(orderBySql))
             {
                 var fields = orderBySql.ToString();
                 orderByProperties.Add(fields);
@@ -730,7 +737,7 @@ namespace ServiceStack.OrmLite
             useFieldName = true;
             orderByProperties.Clear();
             var orderBySql = Visit(keySelector);
-            if (orderBySql is PartialSqlString)
+            if (ObjectIsClass(orderBySql))
             {
                 var fields = orderBySql.ToString();
                 fields.ParseTokens()
@@ -781,7 +788,7 @@ namespace ServiceStack.OrmLite
             sep = string.Empty;
             useFieldName = true;
             var orderBySql = Visit(keySelector);
-            if (orderBySql is PartialSqlString)
+            if (ObjectIsClass(orderBySql))
             {
                 var fields = orderBySql.ToString();
                 fields.ParseTokens()
