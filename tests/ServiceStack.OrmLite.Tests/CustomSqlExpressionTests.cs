@@ -29,6 +29,10 @@ namespace ServiceStack.OrmLite.Tests
         [DataAnnotations.Ignore]
         public string VirtProperty2 => "WaybillVirtPropertyValue2";
 
+
+        [DataAnnotations.Ignore]
+        public string VirtPropertyEmpty => String.Empty;
+
         [DataAnnotations.Ignore]
         public bool BoolVirtProperty => false;
     }
@@ -80,6 +84,8 @@ namespace ServiceStack.OrmLite.Tests
                     return "WaybillVirtPropertyValue";
                 if (m.Member.Name == nameof(WaybillBase.VirtProperty2))
                     return "WaybillVirtPropertyValue2";
+                if (m.Member.Name == nameof(WaybillBase.VirtPropertyEmpty))
+                    return String.Empty;
                 if (m.Member.Name == nameof(WaybillBase.BoolVirtProperty))
                     return false;
             }
@@ -366,6 +372,50 @@ namespace ServiceStack.OrmLite.Tests
 
             var obj = target[0];
             Assert.AreEqual(DateTime.Parse("2014-01-01"), obj.DateBegin);
+        }
+
+        [Test]
+        public void Can_Where_using_constant_orderBy1()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => !x.BoolVirtProperty;
+            System.Linq.Expressions.Expression<Func<WaybillBase, object>> orderBy = x => x.BoolVirtProperty;
+            var q = Db.From<WaybillBase>().Where(filter).OrderBy(orderBy);
+            var target = Db.Select(q);
+            Assert.AreEqual(3, target.Count);
+        }
+
+        [Test]
+        public void Can_Where_using_constant_orderBy2()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => !x.BoolVirtProperty &&
+                                                                                      x.VirtPropertyEmpty != "WaybillVirtPropertyValue" &&
+                                                                                      x.Number == 100;
+            System.Linq.Expressions.Expression<Func<WaybillBase, object>> orderBy = x => x.VirtProperty;
+            var q = Db.From<WaybillBase>().Where(filter).OrderBy(orderBy);
+            var target = Db.Select(q);
+            Assert.AreEqual(1, target.Count);
+        }
+
+        [Test]
+        public void Can_Where_using_constant_coniditionalOrderBy()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => !x.BoolVirtProperty &&
+                                                                                      x.VirtPropertyEmpty != "WaybillVirtPropertyValue" &&
+                                                                                      x.Number == 100;
+            System.Linq.Expressions.Expression<Func<WaybillBase, object>> orderBy = x => x.Number > 0 ? x.VirtPropertyEmpty : x.Name;
+            var q = Db.From<WaybillBase>().Where(filter).OrderBy(orderBy);
+            var target = Db.Select(q);
+            Assert.AreEqual(1, target.Count);
+        }
+
+        [Test]
+        public void Can_Where_using_constant_func_where()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => x.VirtProperty.StartsWith("Way");
+            System.Linq.Expressions.Expression<Func<WaybillBase, object>> orderBy = x => x.Name;
+            var q = Db.From<WaybillBase>().Where(filter).OrderByDescending(orderBy);
+            var target = Db.Select(q);
+            Assert.AreEqual(3, target.Count);
         }
     }
 }
