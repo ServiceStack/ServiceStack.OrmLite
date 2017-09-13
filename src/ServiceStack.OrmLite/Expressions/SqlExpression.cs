@@ -674,7 +674,7 @@ namespace ServiceStack.OrmLite
             useFieldName = true;
             orderByProperties.Clear();
             var orderBySql = Visit(keySelector);
-            if (ObjectIsClass(orderBySql))
+            if (IsSqlClass(orderBySql))
             {
                 var fields = orderBySql.ToString();
                 orderByProperties.Add(fields);
@@ -683,10 +683,11 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
-        private static bool ObjectIsClass(object obj)
+        private static bool IsSqlClass(object obj)
         {
             return obj != null &&
-                   !(obj.GetType().IsPrimitive() || obj.GetType().IsValueType() || obj is string);
+                   (obj is PartialSqlString ||
+                    obj is SelectList);
         }
 
         public virtual SqlExpression<T> ThenBy(string orderBy)
@@ -712,7 +713,7 @@ namespace ServiceStack.OrmLite
             sep = string.Empty;
             useFieldName = true;
             var orderBySql = Visit(keySelector);
-            if (ObjectIsClass(orderBySql))
+            if (IsSqlClass(orderBySql))
             {
                 var fields = orderBySql.ToString();
                 orderByProperties.Add(fields);
@@ -737,7 +738,7 @@ namespace ServiceStack.OrmLite
             useFieldName = true;
             orderByProperties.Clear();
             var orderBySql = Visit(keySelector);
-            if (ObjectIsClass(orderBySql))
+            if (IsSqlClass(orderBySql))
             {
                 var fields = orderBySql.ToString();
                 fields.ParseTokens()
@@ -788,7 +789,7 @@ namespace ServiceStack.OrmLite
             sep = string.Empty;
             useFieldName = true;
             var orderBySql = Visit(keySelector);
-            if (ObjectIsClass(orderBySql))
+            if (IsSqlClass(orderBySql))
             {
                 var fields = orderBySql.ToString();
                 fields.ParseTokens()
