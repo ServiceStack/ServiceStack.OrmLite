@@ -1849,14 +1849,14 @@ namespace ServiceStack.OrmLite
                 if ((bool) test)
                 {
                     var ifTrue = Visit(e.IfTrue);
-                    if (e.IfTrue.Type == typeof(string) && !(ifTrue is PartialSqlString))
+                    if (!IsSqlClass(ifTrue))
                         ifTrue = ConvertToParam(ifTrue);
 
                     return ifTrue;
                 }
 
                 var ifFalse = Visit(e.IfFalse);
-                if (e.IfFalse.Type == typeof(string) && !(ifFalse is PartialSqlString))
+                if (!IsSqlClass(ifFalse))
                     ifFalse = ConvertToParam(ifFalse);
 
                 return ifFalse;
@@ -1864,11 +1864,11 @@ namespace ServiceStack.OrmLite
             else
             {
                 var ifTrue = Visit(e.IfTrue);
-                if (e.IfTrue.Type == typeof(string) && !(ifTrue is PartialSqlString))
+                if (!IsSqlClass(ifTrue))
                     ifTrue = ConvertToParam(ifTrue);
 
                 var ifFalse = Visit(e.IfFalse);
-                if (e.IfFalse.Type == typeof(string) && !(ifFalse is PartialSqlString))
+                if (!IsSqlClass(ifFalse))
                     ifFalse = ConvertToParam(ifFalse);
 
                 return new PartialSqlString($"(CASE WHEN {test} THEN {ifTrue} ELSE {ifFalse} END)");
@@ -2314,7 +2314,7 @@ namespace ServiceStack.OrmLite
         {
             List<object> args = this.VisitExpressionList(m.Arguments);
             var quotedColName = Visit(m.Object);
-            if (m.Object?.Type == typeof(string) && !(quotedColName is PartialSqlString))
+            if (!IsSqlClass(quotedColName))
                 quotedColName = ConvertToParam(quotedColName);
 
             var statement = "";
