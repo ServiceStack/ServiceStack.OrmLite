@@ -417,5 +417,19 @@ namespace ServiceStack.OrmLite.Tests
             var target = Db.Select(q);
             Assert.AreEqual(3, target.Count);
         }
+
+        [Test]
+        public void Can_Select_using_constant()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => !x.BoolVirtProperty &&
+                                                                                      x.VirtPropertyEmpty != "WaybillVirtPropertyValue" &&
+                                                                                      x.Number == 100;
+
+            System.Linq.Expressions.Expression<Func<WaybillBase, object>> select = x => x.VirtProperty;
+            var q = Db.From<WaybillBase>().Where(filter).Select(select);
+            var target = Db.Column<string>(q);
+            Assert.AreEqual(1, target.Count);
+            Assert.AreEqual("WaybillVirtPropertyValue", target[0]);
+        }
     }
 }

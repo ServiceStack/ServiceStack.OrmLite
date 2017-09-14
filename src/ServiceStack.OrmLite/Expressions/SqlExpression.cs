@@ -195,7 +195,12 @@ namespace ServiceStack.OrmLite
             sep = string.Empty;
             useFieldName = true;
             CustomSelect = true;
-            BuildSelectExpression(Visit(fields).ToString(), distinct: distinct);
+            var selectSql = Visit(fields);
+            if (!IsSqlClass(selectSql))
+            {
+                selectSql = ConvertToParam(selectSql);
+            }
+            BuildSelectExpression(selectSql.ToString(), distinct: distinct);
             return this;
         }
 
