@@ -1,5 +1,5 @@
 using System.Data;
-#if NETSTANDARD1_3
+#if NETSTANDARD2_0
 using Microsoft.Data.Sqlite;
 #else
 using SqliteConnection = System.Data.SQLite.SQLiteConnection;
@@ -14,7 +14,7 @@ namespace ServiceStack.OrmLite.Sqlite
 
         protected override IDbConnection CreateConnection(string connectionString)
         {
-#if NETSTANDARD1_3
+#if NETSTANDARD2_0
             return new NetStandardSqliteConnection(connectionString);
 #else
             return new SqliteConnection(connectionString);
