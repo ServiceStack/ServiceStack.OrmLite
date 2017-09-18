@@ -535,5 +535,23 @@ namespace ServiceStack.OrmLite.Tests
             var target = Db.Select(q);
             Assert.AreEqual(3, target.Count);
         }
+
+        [Test]
+        public void Can_GroupBy_using_constant()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => (x.Number > 0 ? x.DecimalVirtProperty : x.Amount) == 10M;
+            var q = Db.From<WaybillBase>().Where(filter).GroupBy(x => x.VirtProperty);
+            var target = Db.Select(q);
+            Assert.AreEqual(3, target.Count);
+        }
+
+        [Test]
+        public void Can_Having_using_constant()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => (x.Number > 0 ? x.DecimalVirtProperty : x.Amount) == 10M;
+            var q = Db.From<WaybillBase>().Where(filter).Select(x=>x.Name).GroupBy(x => x.Name).Having(x=>x.VirtProperty == "WaybillVirtPropertyValue");
+            var target = Db.Column<string>(q);
+            Assert.AreEqual(3, target.Count);
+        }
     }
 }
