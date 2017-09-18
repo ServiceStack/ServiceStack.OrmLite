@@ -462,9 +462,14 @@ namespace ServiceStack.OrmLite
             useFieldName = true;
 
             var groupByKey = Visit(keySelector);
-            StripAliases(groupByKey as SelectList); // No "AS ColumnAlias" in GROUP BY, just the column names/expressions
+            if (IsSqlClass(groupByKey))
+            {
+                StripAliases(groupByKey as SelectList); // No "AS ColumnAlias" in GROUP BY, just the column names/expressions
 
-            return GroupBy(groupByKey.ToString());
+                return GroupBy(groupByKey.ToString());
+            }
+
+            return this;
         }
 
         public virtual SqlExpression<T> GroupBy<Table>(Expression<Func<Table, object>> keySelector)
@@ -523,7 +528,7 @@ namespace ServiceStack.OrmLite
             {
                 useFieldName = true;
                 sep = " ";
-                havingExpression = Visit(predicate).ToString();
+                havingExpression = WhereExpressionToString(Visit(predicate));
                 if (!string.IsNullOrEmpty(havingExpression))
                     havingExpression = "HAVING " + havingExpression;
             }
