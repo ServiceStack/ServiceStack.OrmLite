@@ -9,6 +9,7 @@ using System.Collections.ObjectModel;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+using ServiceStack.OrmLite.Dapper;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
@@ -194,7 +195,12 @@ namespace ServiceStack.OrmLite
             sep = string.Empty;
             useFieldName = true;
             CustomSelect = true;
-            BuildSelectExpression(Visit(fields).ToString(), distinct: distinct);
+            var selectSql = Visit(fields);
+            if (!IsSqlClass(selectSql))
+            {
+                selectSql = ConvertToParam(selectSql);
+            }
+            BuildSelectExpression(selectSql.ToString(), distinct: distinct);
             return this;
         }
 
@@ -456,9 +462,14 @@ namespace ServiceStack.OrmLite
             useFieldName = true;
 
             var groupByKey = Visit(keySelector);
-            StripAliases(groupByKey as SelectList); // No "AS ColumnAlias" in GROUP BY, just the column names/expressions
+            if (IsSqlClass(groupByKey))
+            {
+                StripAliases(groupByKey as SelectList); // No "AS ColumnAlias" in GROUP BY, just the column names/expressions
 
-            return GroupBy(groupByKey.ToString());
+                return GroupBy(groupByKey.ToString());
+            }
+
+            return this;
         }
 
         public virtual SqlExpression<T> GroupBy<Table>(Expression<Func<Table, object>> keySelector)
@@ -517,7 +528,7 @@ namespace ServiceStack.OrmLite
             {
                 useFieldName = true;
                 sep = " ";
-                havingExpression = Visit(predicate).ToString();
+                havingExpression = WhereExpressionToString(Visit(predicate));
                 if (!string.IsNullOrEmpty(havingExpression))
                     havingExpression = "HAVING " + havingExpression;
             }
@@ -672,10 +683,21 @@ namespace ServiceStack.OrmLite
             sep = string.Empty;
             useFieldName = true;
             orderByProperties.Clear();
-            var fields = Visit(keySelector).ToString();
-            orderByProperties.Add(fields);
-            BuildOrderByClauseInternal();
+            var orderBySql = Visit(keySelector);
+            if (IsSqlClass(orderBySql))
+            {
+                var fields = orderBySql.ToString();
+                orderByProperties.Add(fields);
+                BuildOrderByClauseInternal();
+            }
             return this;
+        }
+
+        private static bool IsSqlClass(object obj)
+        {
+            return obj != null &&
+                   (obj is PartialSqlString ||
+                    obj is SelectList);
         }
 
         public virtual SqlExpression<T> ThenBy(string orderBy)
@@ -700,9 +722,13 @@ namespace ServiceStack.OrmLite
         {
             sep = string.Empty;
             useFieldName = true;
-            var fields = Visit(keySelector).ToString();
-            orderByProperties.Add(fields);
-            BuildOrderByClauseInternal();
+            var orderBySql = Visit(keySelector);
+            if (IsSqlClass(orderBySql))
+            {
+                var fields = orderBySql.ToString();
+                orderByProperties.Add(fields);
+                BuildOrderByClauseInternal();
+            }
             return this;
         }
 
@@ -721,10 +747,14 @@ namespace ServiceStack.OrmLite
             sep = string.Empty;
             useFieldName = true;
             orderByProperties.Clear();
-            var orderBySql = Visit(keySelector).ToString();
-            orderBySql.ParseTokens()
-                .Each(x => orderByProperties.Add(x + " DESC"));
-            BuildOrderByClauseInternal();
+            var orderBySql = Visit(keySelector);
+            if (IsSqlClass(orderBySql))
+            {
+                var fields = orderBySql.ToString();
+                fields.ParseTokens()
+                    .Each(x => orderByProperties.Add(x + " DESC"));
+                BuildOrderByClauseInternal();
+            }
             return this;
         }
 
@@ -768,10 +798,14 @@ namespace ServiceStack.OrmLite
         {
             sep = string.Empty;
             useFieldName = true;
-            var orderBySql = Visit(keySelector).ToString();
-            orderBySql.ParseTokens()
-                .Each(x => orderByProperties.Add(x + " DESC"));
-            BuildOrderByClauseInternal();
+            var orderBySql = Visit(keySelector);
+            if (IsSqlClass(orderBySql))
+            {
+                var fields = orderBySql.ToString();
+                fields.ParseTokens()
+                    .Each(x => orderByProperties.Add(x + " DESC"));
+                BuildOrderByClauseInternal();
+            }
             return this;
         }
 
@@ -1423,10 +1457,16 @@ namespace ServiceStack.OrmLite
                 Swap(ref left, ref right); // "null is x" will not work, so swap the operands
             }
 
-            if (operand == "=" && right.ToString().Equals("null", StringComparison.OrdinalIgnoreCase))
-                operand = "is";
-            else if (operand == "<>" && right.ToString().Equals("null", StringComparison.OrdinalIgnoreCase))
-                operand = "is not";
+            var separator = sep;
+            if (right.ToString().Equals("null", StringComparison.OrdinalIgnoreCase))
+            {
+                if (operand == "=")
+                    operand = "is";
+                else if (operand == "<>")
+                    operand = "is not";
+
+                separator = " ";
+            }
 
             if (operand == "+" && b.Left.Type == typeof(string) && b.Right.Type == typeof(string))
                 return BuildConcatExpression(new List<object> {left, right});
@@ -1439,7 +1479,7 @@ namespace ServiceStack.OrmLite
                 case "COALESCE":
                     return new PartialSqlString($"{operand}({left},{right})");
                 default:
-                    return new PartialSqlString("(" + left + sep + operand + sep + right + ")");
+                    return new PartialSqlString("(" + left + separator + operand + separator + right + ")");
             }
         }
 
@@ -1814,14 +1854,14 @@ namespace ServiceStack.OrmLite
                 if ((bool) test)
                 {
                     var ifTrue = Visit(e.IfTrue);
-                    if (e.IfTrue.Type == typeof(string) && !(ifTrue is PartialSqlString))
+                    if (!IsSqlClass(ifTrue))
                         ifTrue = ConvertToParam(ifTrue);
 
                     return ifTrue;
                 }
 
                 var ifFalse = Visit(e.IfFalse);
-                if (e.IfFalse.Type == typeof(string) && !(ifFalse is PartialSqlString))
+                if (!IsSqlClass(ifFalse))
                     ifFalse = ConvertToParam(ifFalse);
 
                 return ifFalse;
@@ -1829,11 +1869,11 @@ namespace ServiceStack.OrmLite
             else
             {
                 var ifTrue = Visit(e.IfTrue);
-                if (e.IfTrue.Type == typeof(string) && !(ifTrue is PartialSqlString))
+                if (!IsSqlClass(ifTrue))
                     ifTrue = ConvertToParam(ifTrue);
 
                 var ifFalse = Visit(e.IfFalse);
-                if (e.IfFalse.Type == typeof(string) && !(ifFalse is PartialSqlString))
+                if (!IsSqlClass(ifFalse))
                     ifFalse = ConvertToParam(ifFalse);
 
                 return new PartialSqlString($"(CASE WHEN {test} THEN {ifTrue} ELSE {ifFalse} END)");
@@ -2279,6 +2319,9 @@ namespace ServiceStack.OrmLite
         {
             List<object> args = this.VisitExpressionList(m.Arguments);
             var quotedColName = Visit(m.Object);
+            if (!IsSqlClass(quotedColName))
+                quotedColName = ConvertToParam(quotedColName);
+
             var statement = "";
 
             var wildcardArg = args.Count > 0 ? DialectProvider.EscapeWildcards(args[0].ToString()) : "";
