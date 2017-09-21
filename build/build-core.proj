@@ -84,7 +84,7 @@
     <ItemGroup>
       <OrmLiteCoreFiles Include="$(SrcDir)/ServiceStack.OrmLite/bin/$(Configuration)/netstandard1.3/ServiceStack.OrmLite.*"></OrmLiteCoreFiles>
 
-      <SqliteCoreFiles Include="$(SrcDir)/ServiceStack.OrmLite.Sqlite/bin/$(Configuration)/netstandard1.3/ServiceStack.OrmLite.Sqlite.*"></SqliteCoreFiles>
+      <SqliteCoreFiles Include="$(SrcDir)/ServiceStack.OrmLite.Sqlite/bin/$(Configuration)/netstandard2.0/ServiceStack.OrmLite.Sqlite.*"></SqliteCoreFiles>
 
       <SqlServerCoreFiles Include="$(SrcDir)/ServiceStack.OrmLite.SqlServer/bin/$(Configuration)/netstandard1.3/ServiceStack.OrmLite.SqlServer.*"></SqlServerCoreFiles>
 
@@ -111,8 +111,8 @@
              Targets="Build"
              Properties="Version=$(PackageVersion);Configuration=$(Configuration)" />
 
-    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite.Core/lib/netstandard1.3" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite.Core/lib/netstandard1.3')" />
-    <Copy SourceFiles="%(SqliteCoreFiles.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite.Core/lib/netstandard1.3" />
+    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite.Core/lib/netstandard2.0" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite.Core/lib/netstandard2.0')" />
+    <Copy SourceFiles="%(SqliteCoreFiles.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite.Core/lib/netstandard2.0" />
 
     <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.Sqlite.Core/servicestack.ormlite.sqlite.core.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion)"
           LogStandardErrorAsError="true" />
