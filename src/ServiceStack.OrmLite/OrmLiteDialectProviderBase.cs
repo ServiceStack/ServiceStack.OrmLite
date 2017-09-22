@@ -815,7 +815,7 @@ namespace ServiceStack.OrmLite
             }
             else
             {
-                cmd.CommandText = null;
+                cmd.CommandText = "";
             }
 
             return hadRowVesion;
