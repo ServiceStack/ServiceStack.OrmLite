@@ -7,7 +7,7 @@
   "targets": {
     ".NETStandard,Version=v1.1": {},
     ".NETStandard,Version=v1.1/": {
-      "ServiceStack.Client/1.0.0": {
+      "ServiceStack.Client/1.0.45": {
         "dependencies": {
           "MSBuild.Sdk.Extras": "1.0.1",
           "Microsoft.Extensions.Primitives": "1.1.1",
@@ -17,7 +17,7 @@
           "System.ServiceModel.Primitives": "4.3.0",
           "System.Xml.XmlSerializer": "4.3.0",
           "ServiceStack.Interfaces": "4.0.0.0",
-          "ServiceStack.Text": "4.0.0.0"
+          "ServiceStack.Text": "1.0.45.0"
         },
         "runtime": {
           "ServiceStack.Client.dll": {}
@@ -385,7 +385,7 @@
           "ServiceStack.Interfaces.dll": {}
         }
       },
-      "ServiceStack.Text/4.0.0.0": {
+      "ServiceStack.Text/1.0.45.0": {
         "runtime": {
           "ServiceStack.Text.dll": {}
         }
@@ -393,7 +393,7 @@
     }
   },
   "libraries": {
-    "ServiceStack.Client/1.0.0": {
+    "ServiceStack.Client/1.0.45": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
@@ -732,7 +732,7 @@
       "serviceable": false,
       "sha512": ""
     },
-    "ServiceStack.Text/4.0.0.0": {
+    "ServiceStack.Text/1.0.45.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""

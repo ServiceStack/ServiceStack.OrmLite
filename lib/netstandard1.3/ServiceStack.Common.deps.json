@@ -7,7 +7,7 @@
   "targets": {
     ".NETStandard,Version=v1.3": {},
     ".NETStandard,Version=v1.3/": {
-      "ServiceStack.Common/1.0.0": {
+      "ServiceStack.Common/1.0.45": {
         "dependencies": {
           "Microsoft.Extensions.Primitives": "1.1.1",
           "Microsoft.NETCore.Portable.Compatibility": "1.0.1",
@@ -20,7 +20,7 @@
           "System.Reflection.TypeExtensions": "4.3.0",
           "System.Runtime.Serialization.Primitives": "4.3.0",
           "ServiceStack.Interfaces": "4.0.0.0",
-          "ServiceStack.Text": "4.0.0.0"
+          "ServiceStack.Text": "1.0.45.0"
         },
         "runtime": {
           "ServiceStack.Common.dll": {}
@@ -833,7 +833,7 @@
           "ServiceStack.Interfaces.dll": {}
         }
       },
-      "ServiceStack.Text/4.0.0.0": {
+      "ServiceStack.Text/1.0.45.0": {
         "runtime": {
           "ServiceStack.Text.dll": {}
         }
@@ -841,7 +841,7 @@
     }
   },
   "libraries": {
-    "ServiceStack.Common/1.0.0": {
+    "ServiceStack.Common/1.0.45": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
@@ -1446,7 +1446,7 @@
       "serviceable": false,
       "sha512": ""
     },
-    "ServiceStack.Text/4.0.0.0": {
+    "ServiceStack.Text/1.0.45.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
