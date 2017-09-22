@@ -813,6 +813,10 @@ namespace ServiceStack.OrmLite
                 cmd.CommandText = $"UPDATE {GetQuotedTableName(modelDef)} " +
                                   $"SET {StringBuilderCache.ReturnAndFree(sql)} {(strFilter.Length > 0 ? "WHERE " + strFilter : "")}";
             }
+            else
+            {
+                cmd.CommandText = null;
+            }
 
             return hadRowVesion;
         }

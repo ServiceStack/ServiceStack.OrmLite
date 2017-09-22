@@ -14,7 +14,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
         {
             using (var db = OpenDbConnection())
             {
-                db.DropAndCreateTable<UserRole>();
+                db.CreateTableIfNotExists<UserRole>();
 
                 db.SaveAll(new[]
                 {
