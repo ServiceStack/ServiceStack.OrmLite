@@ -38,7 +38,7 @@
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">
-    <PackageReference Include="System.Data.SqlClient" Version="4.3.1" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.4.0" />
     <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj" />
 
     <Reference Include="..\..\lib\netstandard1.1\ServiceStack.Interfaces.dll" />
