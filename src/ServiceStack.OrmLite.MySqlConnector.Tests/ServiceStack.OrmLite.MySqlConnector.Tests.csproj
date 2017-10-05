@@ -4,9 +4,9 @@
     <!--<TargetFrameworks>net45;netcoreapp1.1</TargetFrameworks>-->
     <TargetFrameworks>net45</TargetFrameworks>
     <DebugType>portable</DebugType>
-    <AssemblyName>ServiceStack.OrmLite.MySql.Tests</AssemblyName>
+    <AssemblyName>ServiceStack.OrmLite.MySqlConnector.Tests</AssemblyName>
     <OutputType>Library</OutputType>
-    <PackageId>ServiceStack.OrmLite.MySql.Tests</PackageId>
+    <PackageId>ServiceStack.OrmLite.MySqlConnector.Tests</PackageId>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
@@ -24,6 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="MySqlConnector" Version="0.27.0" />
     <PackageReference Include="NUnit" Version="3.6.1" />
   </ItemGroup>
   

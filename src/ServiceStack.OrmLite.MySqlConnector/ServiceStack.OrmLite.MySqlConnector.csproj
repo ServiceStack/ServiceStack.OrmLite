@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj" />
+    <PackageReference Include="MySqlConnector" Version="0.27.0" />
   </ItemGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net45' ">
@@ -30,8 +31,6 @@
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
-    <PackageReference Include="Mysql.Data" Version="6.9.9" />
-
     <Reference Include="System.Net" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
 
@@ -43,9 +42,8 @@
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.6' ">
     <DefineConstants>$(DefineConstants);NETSTANDARD1_6;ASYNC</DefineConstants>
   </PropertyGroup>
-
+ 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.6' ">
-    <PackageReference Include="Mysql.Data" Version="8.0.8-dmr" />
 
     <Reference Include="..\..\lib\netstandard1.1\ServiceStack.Interfaces.dll" />
     <Reference Include="..\..\lib\netstandard1.3\ServiceStack.Text.dll" />
