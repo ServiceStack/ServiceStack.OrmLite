@@ -13,7 +13,7 @@ namespace ServiceStack.OrmLite.MySqlConnector
 
         private const string TextColumnDefinition = "TEXT";
 
-        MySqlConnectorDialectProvider() : base()
+	    public MySqlConnectorDialectProvider() : base()
         {
             base.RegisterConverter<DateTime>(new MySqlConnectorDateTimeConverter());
         }
