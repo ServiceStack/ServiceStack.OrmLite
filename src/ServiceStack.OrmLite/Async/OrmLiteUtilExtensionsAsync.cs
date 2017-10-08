@@ -59,7 +59,7 @@ namespace ServiceStack.OrmLite
             var genericArgs = isTuple ? typeof(T).GetGenericArguments() : null;
             var modelIndexCaches = isTuple ? reader.GetMultiIndexCaches(dialectProvider, onlyFields, genericArgs) : null;
             var genericTupleMi = isTuple ? typeof(T).GetGenericTypeDefinition().GetCachedGenericType(genericArgs) : null;
-#if NETSTANDARD1_3
+#if NETSTANDARD2_0
             var activator = isTuple ? System.Reflection.TypeExtensions.GetConstructor(genericTupleMi, genericArgs).GetActivator() : null;
 #else
             var activator = isTuple ? genericTupleMi.GetConstructor(genericArgs).GetActivator() : null;

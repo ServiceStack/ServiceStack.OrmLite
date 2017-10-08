@@ -19,7 +19,7 @@ using System.Threading;
 using System.Xml;
 //using System.Xml.Linq;
 
-#if NETSTANDARD1_3
+#if NETSTANDARD2_0
 using DataException = System.InvalidOperationException;
 #endif
 
@@ -225,7 +225,7 @@ namespace ServiceStack.OrmLite.Dapper
         private static void ResetTypeHandlers(bool clone)
         {
             typeHandlers = new Dictionary<Type, ITypeHandler>();
-#if !NETSTANDARD1_3
+#if !NETSTANDARD2_0
             AddTypeHandlerImpl(typeof(DataTable), new DataTableHandler(), clone);
             try // see https://github.com/StackExchange/dapper-dot-net/issues/424
             {
@@ -239,7 +239,7 @@ namespace ServiceStack.OrmLite.Dapper
 
             allowedCommandBehaviors = DefaultAllowedCommandBehaviors;
         }
-#if !NETSTANDARD1_3
+#if !NETSTANDARD2_0
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static void AddSqlDataRecordsTypeHandler(bool clone)
         {
@@ -342,7 +342,7 @@ namespace ServiceStack.OrmLite.Dapper
         /// Get the DbType that maps to a given value
         /// </summary>
         [Obsolete(ObsoleteInternalUsageOnly, false)]
-#if !NETSTANDARD1_3
+#if !NETSTANDARD2_0
         [Browsable(false)]
 #endif
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -359,7 +359,7 @@ namespace ServiceStack.OrmLite.Dapper
         /// OBSOLETE: For internal usage only. Lookup the DbType and handler for a given Type and member
         /// </summary>
         [Obsolete(ObsoleteInternalUsageOnly, false)]
-#if !NETSTANDARD1_3
+#if !NETSTANDARD2_0
         [Browsable(false)]
 #endif
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -390,7 +390,7 @@ namespace ServiceStack.OrmLite.Dapper
                 return DynamicParameters.EnumerableMultiParameter;
             }
 
-#if !NETSTANDARD1_3
+#if !NETSTANDARD2_0
             switch (type.FullName)
             {
                 case "Microsoft.SqlServer.Types.SqlGeography":
@@ -1750,7 +1750,7 @@ namespace ServiceStack.OrmLite.Dapper
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-#if !NETSTANDARD1_3
+#if !NETSTANDARD2_0
         [Browsable(false)]
 #endif
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -1766,7 +1766,7 @@ namespace ServiceStack.OrmLite.Dapper
         /// <summary>
         /// Internal use only
         /// </summary>
-#if !NETSTANDARD1_3
+#if !NETSTANDARD2_0
         [Browsable(false)]
 #endif
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -1783,7 +1783,7 @@ namespace ServiceStack.OrmLite.Dapper
         /// <summary>
         /// Internal use only
         /// </summary>
-#if !NETSTANDARD1_3
+#if !NETSTANDARD2_0
         [Browsable(false)]
 #endif
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -1837,7 +1837,7 @@ namespace ServiceStack.OrmLite.Dapper
         /// <summary>
         /// Internal use only
         /// </summary>
-#if !NETSTANDARD1_3
+#if !NETSTANDARD2_0
         [Browsable(false)]
 #endif
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -2075,7 +2075,7 @@ namespace ServiceStack.OrmLite.Dapper
                 TypeCode typeCode;
                 if (value is IConvertible)
                 {
-#if NETSTANDARD1_3                    
+#if NETSTANDARD2_0                    
                     typeCode = (TypeCode)((IConvertible)value).GetTypeCode();
 #else
                     typeCode = ((IConvertible)value).GetTypeCode();
@@ -2135,7 +2135,7 @@ namespace ServiceStack.OrmLite.Dapper
             {
                 switch (TypeExtensions.GetTypeCode(value.GetType()))
                 {
-#if !NETSTANDARD1_3
+#if !NETSTANDARD2_0
                     case TypeCode.DBNull:
                         return "null";
 #endif
@@ -2932,7 +2932,7 @@ namespace ServiceStack.OrmLite.Dapper
 
             ConstructorInfo specializedConstructor = null;
 
-#if !NETSTANDARD1_3
+#if !NETSTANDARD2_0
             bool supportInitialize = false;
 #endif
             Dictionary<Type, LocalBuilder> structLocals = null;
@@ -2967,7 +2967,7 @@ namespace ServiceStack.OrmLite.Dapper
 
                     il.Emit(OpCodes.Newobj, explicitConstr);
                     il.Emit(OpCodes.Stloc_1);
-#if !NETSTANDARD1_3
+#if !NETSTANDARD2_0
                     supportInitialize = typeof(ISupportInitialize).IsAssignableFrom(type);
                     if (supportInitialize)
                     {
@@ -2989,7 +2989,7 @@ namespace ServiceStack.OrmLite.Dapper
                     {
                         il.Emit(OpCodes.Newobj, ctor);
                         il.Emit(OpCodes.Stloc_1);
-#if !NETSTANDARD1_3
+#if !NETSTANDARD2_0
                         supportInitialize = typeof(ISupportInitialize).IsAssignableFrom(type);
                         if (supportInitialize)
                         {
@@ -3206,7 +3206,7 @@ namespace ServiceStack.OrmLite.Dapper
                     il.Emit(OpCodes.Newobj, specializedConstructor);
                 }
                 il.Emit(OpCodes.Stloc_1); // stack is empty
-#if !NETSTANDARD1_3
+#if !NETSTANDARD2_0
                 if (supportInitialize)
                 {
                     il.Emit(OpCodes.Ldloc_1);
@@ -3472,7 +3472,7 @@ namespace ServiceStack.OrmLite.Dapper
         }
         private static IEqualityComparer<string> connectionStringComparer = StringComparer.Ordinal;
 
-#if !NETSTANDARD1_3
+#if !NETSTANDARD2_0
         /// <summary>
         /// Key used to indicate the type name associated with a DataTable
         /// </summary>

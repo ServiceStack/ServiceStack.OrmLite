@@ -4,7 +4,6 @@
     <TargetFramework>net45</TargetFramework>
     <AssemblyName>ServiceStack.OrmLite.Sqlite.Windows.Testss</AssemblyName>
     <PackageId>ServiceStack.OrmLite.Sqlite.Windows.Tests</PackageId>
-    <NetStandardImplicitPackageVersion>1.6.0</NetStandardImplicitPackageVersion>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
@@ -20,7 +19,7 @@
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj" />
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Sqlite.Windows\ServiceStack.OrmLite.Sqlite.Windows.csproj" />
     <ProjectReference Include="..\ServiceStack.OrmLite.Tests\ServiceStack.OrmLite.Tests.csproj" />
-    <Reference Include="..\..\lib\pcl\ServiceStack.Interfaces.dll" />
+    <Reference Include="..\..\lib\net45\ServiceStack.Interfaces.dll" />
   </ItemGroup>
   
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net45' ">

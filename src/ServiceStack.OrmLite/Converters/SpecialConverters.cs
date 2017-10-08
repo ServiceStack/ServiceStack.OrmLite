@@ -1,6 +1,6 @@
 ﻿using System;
 using ServiceStack.DataAnnotations;
-#if NETSTANDARD1_3
+#if NETSTANDARD2_0
 using System.Globalization;
 #endif
 

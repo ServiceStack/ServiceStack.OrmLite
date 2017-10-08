@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>net45;netstandard2.0</TargetFrameworks>
-    <!--<TargetFrameworks>netstandard1.3</TargetFrameworks>-->
+    <!--<TargetFrameworks>netstandard2.0</TargetFrameworks>-->
     <AssemblyName>ServiceStack.OrmLite.Sqlite</AssemblyName>
     <PackageId>ServiceStack.OrmLite.Sqlite</PackageId>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
@@ -28,7 +28,7 @@
     <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj" />
     <PackageReference Include="System.Data.SQLite.Core" Version="1.0.105.2" />
 
-    <Reference Include="..\..\lib\pcl\ServiceStack.Interfaces.dll" />
+    <Reference Include="..\..\lib\net45\ServiceStack.Interfaces.dll" />
     <Reference Include="..\..\lib\net45\ServiceStack.Text.dll" />
     <Reference Include="..\..\lib\net45\ServiceStack.Common.dll" />
   </ItemGroup>
@@ -41,9 +41,9 @@
     <PackageReference Include="Microsoft.Data.Sqlite" Version="2.0.0" />
     <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj" />
 
-    <Reference Include="..\..\lib\netstandard1.1\ServiceStack.Interfaces.dll" />
-    <Reference Include="..\..\lib\netstandard1.3\ServiceStack.Text.dll" />
-    <Reference Include="..\..\lib\netstandard1.3\ServiceStack.Common.dll" />
+    <Reference Include="..\..\lib\netstandard2.0\ServiceStack.Interfaces.dll" />
+    <Reference Include="..\..\lib\netstandard2.0\ServiceStack.Text.dll" />
+    <Reference Include="..\..\lib\netstandard2.0\ServiceStack.Common.dll" />
   </ItemGroup>
 
 </Project>

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Data;
-#if !NETSTANDARD1_3
+#if !NETSTANDARD2_0
 namespace ServiceStack.OrmLite.Dapper
 {
     sealed class DataTableHandler : SqlMapper.ITypeHandler
