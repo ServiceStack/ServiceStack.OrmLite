@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Default"
     xmlns='http://schemas.microsoft.com/developer/msbuild/2003' ToolsVersion="4.0">
   <Import Project="$(MSBuildProjectDirectory)/build.tasks" />
@@ -82,15 +82,15 @@
     <Delete Files="@(NugetPackageFilesToDelete)" />
     
     <ItemGroup>
-      <OrmLiteCoreFiles Include="$(SrcDir)/ServiceStack.OrmLite/bin/$(Configuration)/netstandard1.3/ServiceStack.OrmLite.*"></OrmLiteCoreFiles>
+      <OrmLiteCoreFiles Include="$(SrcDir)/ServiceStack.OrmLite/bin/$(Configuration)/netstandard2.0/ServiceStack.OrmLite.*"></OrmLiteCoreFiles>
 
       <SqliteCoreFiles Include="$(SrcDir)/ServiceStack.OrmLite.Sqlite/bin/$(Configuration)/netstandard2.0/ServiceStack.OrmLite.Sqlite.*"></SqliteCoreFiles>
 
-      <SqlServerCoreFiles Include="$(SrcDir)/ServiceStack.OrmLite.SqlServer/bin/$(Configuration)/netstandard1.3/ServiceStack.OrmLite.SqlServer.*"></SqlServerCoreFiles>
+      <SqlServerCoreFiles Include="$(SrcDir)/ServiceStack.OrmLite.SqlServer/bin/$(Configuration)/netstandard2.0/ServiceStack.OrmLite.SqlServer.*"></SqlServerCoreFiles>
 
       <MySqlCoreFiles Include="$(SrcDir)/ServiceStack.OrmLite.MySql/bin/$(Configuration)/netstandard1.6/ServiceStack.OrmLite.MySql.*"></MySqlCoreFiles>
 
-      <PostgreSqlCoreFiles Include="$(SrcDir)/ServiceStack.OrmLite.PostgreSQL/bin/$(Configuration)/netstandard1.3/ServiceStack.OrmLite.PostgreSQL.*"></PostgreSqlCoreFiles>
+      <PostgreSqlCoreFiles Include="$(SrcDir)/ServiceStack.OrmLite.PostgreSQL/bin/$(Configuration)/netstandard2.0/ServiceStack.OrmLite.PostgreSQL.*"></PostgreSqlCoreFiles>
     </ItemGroup>
 
     <!-- OrmLite -->
@@ -99,8 +99,8 @@
              Targets="Build"
              Properties="Version=$(PackageVersion);Configuration=$(Configuration)" />
 
-    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.Core/lib/netstandard1.3" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.Core/lib/netstandard1.3')" />
-    <Copy SourceFiles="%(OrmLiteCoreFiles.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.Core/lib/netstandard1.3" />
+    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.Core/lib/netstandard2.0" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.Core/lib/netstandard2.0')" />
+    <Copy SourceFiles="%(OrmLiteCoreFiles.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.Core/lib/netstandard2.0" />
 
     <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.Core/servicestack.ormlite.core.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion)"
           LogStandardErrorAsError="true" />
@@ -123,8 +123,8 @@
              Targets="Build"
              Properties="Version=$(PackageVersion);Configuration=$(Configuration)" />
 
-    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.SqlServer.Core/lib/netstandard1.3" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.SqlServer.Core/lib/netstandard1.3')" />
-    <Copy SourceFiles="%(SqlServerCoreFiles.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.SqlServer.Core/lib/netstandard1.3" />
+    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.SqlServer.Core/lib/netstandard2.0" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.SqlServer.Core/lib/netstandard2.0')" />
+    <Copy SourceFiles="%(SqlServerCoreFiles.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.SqlServer.Core/lib/netstandard2.0" />
 
     <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.SqlServer.Core/servicestack.ormlite.sqlserver.core.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion)"
           LogStandardErrorAsError="true" />
@@ -147,8 +147,8 @@
              Targets="Build"
              Properties="Version=$(PackageVersion);Configuration=$(Configuration)" />
 
-    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.PostgreSQL.Core/lib/netstandard1.3" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.PostgreSQL.Core/lib/netstandard1.3')" />
-    <Copy SourceFiles="%(PostgreSqlCoreFiles.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.PostgreSQL.Core/lib/netstandard1.3" />
+    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.PostgreSQL.Core/lib/netstandard2.0" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.PostgreSQL.Core/lib/netstandard2.0')" />
+    <Copy SourceFiles="%(PostgreSqlCoreFiles.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.PostgreSQL.Core/lib/netstandard2.0" />
 
     <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.PostgreSQL.Core/servicestack.ormlite.postgresql.core.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion)"
           LogStandardErrorAsError="true" />
