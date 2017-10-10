@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 
-#if !NETSTANDARD1_3
+#if !NETSTANDARD2_0
 namespace ServiceStack.OrmLite.Dapper
 {
     sealed class SqlDataRecordHandler : SqlMapper.ITypeHandler

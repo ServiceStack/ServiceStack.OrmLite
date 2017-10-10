@@ -3,7 +3,7 @@
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>ServiceStack.OrmLite.Oracle</id> 
     <title>OrmLite.Oracle - Fast, code-first, config-free Poco ORM</title>
-    <version>4.5.0</version>
+    <version>5.0.0</version>
     <authors>Service Stack, Guru Kathiresan</authors> 
     <owners>Service Stack, Guru Kathiresan</owners>
     <description>
@@ -18,7 +18,7 @@
     <language>en-US</language> 
     <copyright>Copyright 2017 ServiceStack</copyright>
     <dependencies>
-      <dependency id="ServiceStack.OrmLite" version="4.5" />
+      <dependency id="ServiceStack.OrmLite" version="5.0" />
     </dependencies> 
   </metadata> 
   <files>

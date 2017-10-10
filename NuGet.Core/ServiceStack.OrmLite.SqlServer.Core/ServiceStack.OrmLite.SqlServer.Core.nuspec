@@ -19,7 +19,7 @@
     <copyright>Copyright 2017 ServiceStack</copyright>
     <dependencies>
       <group targetFramework=".NETStandard1.3">
-        <dependency id="System.Data.SqlClient" version="[4.3.1, )" />
+        <dependency id="System.Data.SqlClient" version="[4.4.0, )" />
         <dependency id="ServiceStack.Interfaces.Core" version="1.0.0" />
         <dependency id="ServiceStack.Text.Core" version="1.0.0" />
         <dependency id="ServiceStack.Common.Core" version="1.0.0" />

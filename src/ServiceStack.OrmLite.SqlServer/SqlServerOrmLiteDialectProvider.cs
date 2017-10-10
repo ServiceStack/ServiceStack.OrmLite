@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.SqlServer.Converters;
 using ServiceStack.Text;
-#if NETSTANDARD1_3
+#if NETSTANDARD2_0
 using ApplicationException = System.InvalidOperationException;
 #endif
 

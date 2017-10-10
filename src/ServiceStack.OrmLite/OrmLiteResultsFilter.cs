@@ -159,7 +159,7 @@ namespace ServiceStack.OrmLite
         {
             Filter(dbCmd);
             var list = (IList)typeof(List<>).GetCachedGenericType(refType).CreateInstance();
-            foreach (object result in GetRefResults(dbCmd, refType))
+            foreach (object result in GetRefResults(dbCmd, refType).Safe())
             {
                 list.Add(result);
             }
@@ -185,7 +185,7 @@ namespace ServiceStack.OrmLite
             if (RefSingleResult != null || RefSingleResultFn != null)
                 return GetRefSingleResult(dbCmd, refType);
 
-            foreach (var result in GetRefResults(dbCmd, refType))
+            foreach (var result in GetRefResults(dbCmd, refType).Safe())
             {
                 return result;
             }

@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
 
-#if NETSTANDARD1_3
+#if NETSTANDARD2_0
 using ApplicationException = System.InvalidOperationException;
 #endif
 
