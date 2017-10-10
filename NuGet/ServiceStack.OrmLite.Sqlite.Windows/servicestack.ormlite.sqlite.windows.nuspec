@@ -3,7 +3,7 @@
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>ServiceStack.OrmLite.Sqlite.Windows</id>
     <title>OrmLite.Sqlite.Windows (x86/x64) - Fast, code-first, config-free Poco ORM</title>
-    <version>4.5.0</version>
+    <version>5.0.0</version>
     <authors>Service Stack</authors> 
     <owners>Service Stack</owners>
     <description>

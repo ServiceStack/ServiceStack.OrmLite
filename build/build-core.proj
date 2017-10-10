@@ -88,7 +88,7 @@
 
       <SqlServerCoreFiles Include="$(SrcDir)/ServiceStack.OrmLite.SqlServer/bin/$(Configuration)/netstandard2.0/ServiceStack.OrmLite.SqlServer.*"></SqlServerCoreFiles>
 
-      <MySqlCoreFiles Include="$(SrcDir)/ServiceStack.OrmLite.MySql/bin/$(Configuration)/netstandard1.6/ServiceStack.OrmLite.MySql.*"></MySqlCoreFiles>
+      <MySqlCoreFiles Include="$(SrcDir)/ServiceStack.OrmLite.MySql/bin/$(Configuration)/netstandard2.0/ServiceStack.OrmLite.MySql.*"></MySqlCoreFiles>
 
       <PostgreSqlCoreFiles Include="$(SrcDir)/ServiceStack.OrmLite.PostgreSQL/bin/$(Configuration)/netstandard2.0/ServiceStack.OrmLite.PostgreSQL.*"></PostgreSqlCoreFiles>
     </ItemGroup>
@@ -135,8 +135,8 @@
              Targets="Build"
              Properties="Version=$(PackageVersion);Configuration=$(Configuration)" />
 
-    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.MySql.Core/lib/netstandard1.6" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.MySql.Core/lib/netstandard1.6')" />
-    <Copy SourceFiles="%(MySqlCoreFiles.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.MySql.Core/lib/netstandard1.6" />
+    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.MySql.Core/lib/netstandard2.0" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.MySql.Core/lib/netstandard2.0')" />
+    <Copy SourceFiles="%(MySqlCoreFiles.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.MySql.Core/lib/netstandard2.0" />
 
     <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.MySql.Core/servicestack.ormlite.mysql.core.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion)"
           LogStandardErrorAsError="true" />

@@ -3,7 +3,7 @@
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>ServiceStack.OrmLite.MySql</id>
     <title>OrmLite.MySQL - Fast, code-first, config-free Poco ORM</title>
-    <version>4.5.0</version>
+    <version>5.0.0</version>
     <authors>Service Stack, Thomas Grassauer</authors> 
     <owners>Service Stack, Thomas Grassauer</owners>
     <description>

@@ -6,7 +6,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{6CEB3EDE
 	ProjectSection(SolutionItems) = preProject
 		..\build\appsettings.license.txt = ..\build\appsettings.license.txt
 		..\build\build-core.sh = ..\build\build-core.sh
-		..\build\build-sn.proj = ..\build\build-sn.proj
 		..\build\build.bat = ..\build\build.bat
 		..\build\build.proj = ..\build\build.proj
 		..\build\build.tasks = ..\build\build.tasks
@@ -15,20 +14,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{6CEB3EDE
 		..\README.md = ..\README.md
 		..\NuGet\ServiceStack.OrmLite.Firebird\servicestack.ormlite.firebird.nuspec = ..\NuGet\ServiceStack.OrmLite.Firebird\servicestack.ormlite.firebird.nuspec
 		..\NuGet\ServiceStack.OrmLite.MySql\servicestack.ormlite.mysql.nuspec = ..\NuGet\ServiceStack.OrmLite.MySql\servicestack.ormlite.mysql.nuspec
-		..\NuGet.Signed\ServiceStack.OrmLite.MySql.Signed\servicestack.ormlite.mysql.signed.nuspec = ..\NuGet.Signed\ServiceStack.OrmLite.MySql.Signed\servicestack.ormlite.mysql.signed.nuspec
 		..\NuGet\ServiceStack.OrmLite\servicestack.ormlite.nuspec = ..\NuGet\ServiceStack.OrmLite\servicestack.ormlite.nuspec
 		..\NuGet\ServiceStack.OrmLite.Oracle\servicestack.ormlite.oracle.nuspec = ..\NuGet\ServiceStack.OrmLite.Oracle\servicestack.ormlite.oracle.nuspec
-		..\NuGet.Signed\ServiceStack.OrmLite.Oracle.Signed\servicestack.ormlite.oracle.signed.nuspec = ..\NuGet.Signed\ServiceStack.OrmLite.Oracle.Signed\servicestack.ormlite.oracle.signed.nuspec
 		..\NuGet\ServiceStack.OrmLite.PostgreSQL\servicestack.ormlite.postgresql.nuspec = ..\NuGet\ServiceStack.OrmLite.PostgreSQL\servicestack.ormlite.postgresql.nuspec
-		..\NuGet.Signed\ServiceStack.OrmLite.Signed\servicestack.ormlite.signed.nuspec = ..\NuGet.Signed\ServiceStack.OrmLite.Signed\servicestack.ormlite.signed.nuspec
-		..\NuGet\ServiceStack.OrmLite.Sqlite.Mono\servicestack.ormlite.sqlite.mono.nuspec = ..\NuGet\ServiceStack.OrmLite.Sqlite.Mono\servicestack.ormlite.sqlite.mono.nuspec
 		..\NuGet\ServiceStack.OrmLite.Sqlite\servicestack.ormlite.sqlite.nuspec = ..\NuGet\ServiceStack.OrmLite.Sqlite\servicestack.ormlite.sqlite.nuspec
 		..\NuGet\ServiceStack.OrmLite.Sqlite.Windows\servicestack.ormlite.sqlite.windows.nuspec = ..\NuGet\ServiceStack.OrmLite.Sqlite.Windows\servicestack.ormlite.sqlite.windows.nuspec
-		..\NuGet.Signed\ServiceStack.OrmLite.Sqlite.Windows.Signed\servicestack.ormlite.sqlite.windows.signed.nuspec = ..\NuGet.Signed\ServiceStack.OrmLite.Sqlite.Windows.Signed\servicestack.ormlite.sqlite.windows.signed.nuspec
 		..\NuGet\ServiceStack.OrmLite.SqlServer.Converters\servicestack.ormlite.sqlserver.converters.nuspec = ..\NuGet\ServiceStack.OrmLite.SqlServer.Converters\servicestack.ormlite.sqlserver.converters.nuspec
-		..\NuGet.Signed\ServiceStack.OrmLite.SqlServer.Converters.Signed\servicestack.ormlite.sqlserver.converters.signed.nuspec = ..\NuGet.Signed\ServiceStack.OrmLite.SqlServer.Converters.Signed\servicestack.ormlite.sqlserver.converters.signed.nuspec
 		..\NuGet\ServiceStack.OrmLite.SqlServer\servicestack.ormlite.sqlserver.nuspec = ..\NuGet\ServiceStack.OrmLite.SqlServer\servicestack.ormlite.sqlserver.nuspec
-		..\NuGet.Signed\ServiceStack.OrmLite.SqlServer.Signed\servicestack.ormlite.sqlserver.signed.nuspec = ..\NuGet.Signed\ServiceStack.OrmLite.SqlServer.Signed\servicestack.ormlite.sqlserver.signed.nuspec
 		..\NuGet\ServiceStack.OrmLite.T4\servicestack.ormlite.t4.nuspec = ..\NuGet\ServiceStack.OrmLite.T4\servicestack.ormlite.t4.nuspec
 		..\build\build-core.proj = ..\build\build-core.proj
 	EndProjectSection
@@ -64,15 +56,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "T4", "T4", "{ACB237F8-B931-
 		T4\OrmLite.Core.ttinclude = T4\OrmLite.Core.ttinclude
 		T4\OrmLite.Poco.tt = T4\OrmLite.Poco.tt
 		T4\OrmLite.SP.tt = T4\OrmLite.SP.tt
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Signed", "Signed", "{4A755D3C-CE48-4DB1-BF29-90A696ACD71B}"
-	ProjectSection(SolutionItems) = preProject
-		..\NuGet.Signed\ServiceStack.OrmLite.MySql.Signed\servicestack.ormlite.mysql.signed.nuspec = ..\NuGet.Signed\ServiceStack.OrmLite.MySql.Signed\servicestack.ormlite.mysql.signed.nuspec
-		..\NuGet.Signed\ServiceStack.OrmLite.Oracle.Signed\servicestack.ormlite.oracle.signed.nuspec = ..\NuGet.Signed\ServiceStack.OrmLite.Oracle.Signed\servicestack.ormlite.oracle.signed.nuspec
-		..\NuGet.Signed\ServiceStack.OrmLite.Signed\servicestack.ormlite.signed.nuspec = ..\NuGet.Signed\ServiceStack.OrmLite.Signed\servicestack.ormlite.signed.nuspec
-		..\NuGet.Signed\ServiceStack.OrmLite.SqlServer.Converters.Signed\servicestack.ormlite.sqlserver.converters.signed.nuspec = ..\NuGet.Signed\ServiceStack.OrmLite.SqlServer.Converters.Signed\servicestack.ormlite.sqlserver.converters.signed.nuspec
-		..\NuGet.Signed\ServiceStack.OrmLite.SqlServer.Signed\servicestack.ormlite.sqlserver.signed.nuspec = ..\NuGet.Signed\ServiceStack.OrmLite.SqlServer.Signed\servicestack.ormlite.sqlserver.signed.nuspec
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceStack.OrmLite.VistaDB", "ServiceStack.OrmLite.VistaDB\ServiceStack.OrmLite.VistaDB.csproj", "{D18D9D3C-B3B3-433C-9578-68E978587858}"
