@@ -597,6 +597,23 @@ namespace ServiceStack.OrmLite.Tests
             Assert.IsTrue(target.Count > 0);
         }
 
+        [Test]
+        public void Can_Where_using_Convert()
+        {
+            var paramExpr = System.Linq.Expressions.Expression.Parameter(typeof(TestType));
+            var propExpr = System.Linq.Expressions.Expression.Property(paramExpr, nameof(TestType.TextCol));
+            var convert = System.Linq.Expressions.Expression.Convert(propExpr, typeof(object));
+            var methodToString = typeof(object).GetMethod(nameof(ToString));
+            var toString = System.Linq.Expressions.Expression.Call(convert, methodToString);
+            var equal = System.Linq.Expressions.Expression.Equal(toString, System.Linq.Expressions.Expression.Constant("asdf"));
+            var lambda = System.Linq.Expressions.Expression.Lambda<System.Func<TestType, bool>>(equal, paramExpr);
+
+            var q = Db.From<TestType>().Where(lambda);
+
+            var target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(1));
+        }
+
         private int MethodReturningInt(int val)
         {
             return val;
