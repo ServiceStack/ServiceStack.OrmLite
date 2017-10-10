@@ -1904,6 +1904,10 @@ namespace ServiceStack.OrmLite
             if (condExp != null)
                 return IsParameterAccess(condExp);
 
+            var unaryExp = m.Object as UnaryExpression;
+            if (unaryExp != null)
+                return IsParameterAccess(unaryExp);
+
             var exp = m.Object as MemberExpression;
             return IsParameterAccess(exp)
                    && IsJoinedTable(exp.Expression.Type);
