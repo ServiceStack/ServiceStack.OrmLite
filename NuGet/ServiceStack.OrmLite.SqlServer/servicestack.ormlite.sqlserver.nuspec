@@ -18,7 +18,7 @@
     <language>en-US</language> 
     <copyright>Copyright 2017 ServiceStack</copyright>
     <dependencies>
-      <dependency id="ServiceStack.OrmLite" version="4.5" />
+      <dependency id="ServiceStack.OrmLite" version="5.0" />
     </dependencies> 
   </metadata> 
   <files>
