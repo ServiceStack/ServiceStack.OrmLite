@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
-<package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
     <id>ServiceStack.OrmLite.SqlServer.Converters</id> 
     <title>OrmLite.SqlServer.Converters - Converters for SQL Server Types</title>
     <version>5.0.0</version>
-    <authors>Service Stack</authors> 
-    <owners>Service Stack</owners>
+    <authors>ServiceStack</authors> 
+    <owners>ServiceStack</owners>
     <description>
         Add OrmLite Converters for SQL Servers SqlGeography and SqlGeometry Types
     </description> 
@@ -15,11 +15,13 @@
     <iconUrl>https://servicestack.net/img/logo-32.png</iconUrl>
     <tags>SQLServer SQL Server OrmLite POCO Code-First Orm Schema-less Blobs Converters</tags>
     <language>en-US</language> 
-    <copyright>Copyright 2017 ServiceStack</copyright>
+    <copyright>ServiceStack and contributors</copyright>
     <dependencies>
-      <dependency id="ServiceStack.OrmLite.SqlServer" version="5.0" />
-      <dependency id="Microsoft.SqlServer.Types" version="11.0.2" />
-    </dependencies> 
+      <group targetFramework="net45">
+        <dependency id="Microsoft.SqlServer.Types" version="[14.0.314.76, )" />
+        <dependency id="ServiceStack.OrmLite.SqlServer" version="5.0.0" />
+      </group>
+    </dependencies>
   </metadata> 
   <files>
     <file src="lib\**\*.*" target="lib" />

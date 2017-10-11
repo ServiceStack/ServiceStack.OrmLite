@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
-<package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
     <id>ServiceStack.OrmLite.Oracle</id> 
     <title>OrmLite.Oracle - Fast, code-first, config-free Poco ORM</title>
     <version>5.0.0</version>
-    <authors>Service Stack, Guru Kathiresan</authors> 
-    <owners>Service Stack, Guru Kathiresan</owners>
+    <authors>ServiceStack, Guru Kathiresan</authors> 
+    <owners>ServiceStack, Guru Kathiresan</owners>
     <description>
       Light, simple and fast convention-based code-first POCO ORM for Oracle RDBMS (Unofficial).
       Support for Creating and Dropping Table Schemas from POCOs, Complex Property types transparently 
@@ -16,10 +16,15 @@
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <tags>Oracle SQL OrmLite POCO Code-First Orm Schema-less Blobs</tags>
     <language>en-US</language> 
-    <copyright>Copyright 2017 ServiceStack</copyright>
+    <copyright>ServiceStack and contributors</copyright>
     <dependencies>
-      <dependency id="ServiceStack.OrmLite" version="5.0" />
-    </dependencies> 
+      <group targetFramework="net45">
+        <dependency id="dotConnect.Express.for.Oracle" version="8.3.115" />
+        <dependency id="odp.net.x64" version="112.3.20" />
+        <dependency id="odp.net.x86" version="112.3.20" />
+        <dependency id="ServiceStack.OrmLite" version="5.0.0" />
+      </group>
+    </dependencies>
   </metadata> 
   <files>
     <file src="lib\**\*.*" target="lib" />
