@@ -614,6 +614,17 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(target.Count, Is.EqualTo(1));
         }
 
+        [Test]
+        public void Can_Where_using_filter_with_Compare()
+        {
+            string filterText = "asdf";
+
+            System.Linq.Expressions.Expression<Func<TestType, bool>> filter = x => String.Compare(x.TextCol, filterText) == 0;
+            var q = Db.From<TestType>().Where(filter);
+            var target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(1));
+        }
+
         private int MethodReturningInt(int val)
         {
             return val;
