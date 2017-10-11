@@ -2183,17 +2183,18 @@ namespace ServiceStack.OrmLite
 
         protected virtual bool IsStaticStringMethod(MethodCallExpression m)
         {
-            return (m.Object == null 
-                && m.Method.Name == "Concat");
+            return (m.Object == null
+                    && (m.Method.Name == nameof(String.Concat) || m.Method.Name == nameof(String.Compare)));
         }
 
         protected virtual object VisitStaticStringMethodCall(MethodCallExpression m)
         {
             switch (m.Method.Name)
             {
-                case "Concat":
-                    var args = VisitExpressionList(m.Arguments);
-                    return BuildConcatExpression(args);
+                case nameof(String.Concat):
+                    return BuildConcatExpression(VisitExpressionList(m.Arguments));
+                case nameof(String.Compare):
+                    return BuildCompareExpression(VisitExpressionList(m.Arguments));
 
                 default:
                     throw new NotSupportedException();
@@ -2210,9 +2211,24 @@ namespace ServiceStack.OrmLite
             return ToConcatPartialString(args);
         }
 
+        private PartialSqlString BuildCompareExpression(List<object> args)
+        {
+            for (int i = 0; i < args.Count; i++)
+            {
+                if (!(args[i] is PartialSqlString))
+                    args[i] = ConvertToParam(args[i]);
+            }
+            return ToComparePartialString(args);
+        }
+
         protected PartialSqlString ToConcatPartialString(List<object> args)
         {
             return new PartialSqlString(DialectProvider.SqlConcat(args));
+        }
+
+        protected virtual PartialSqlString ToComparePartialString(List<object> args)
+        {
+            return new PartialSqlString($"(CASE WHEN {args[0]} = {args[1]} THEN 0 WHEN {args[0]} > {args[1]} THEN 1 ELSE -1 END)");
         }
 
         protected virtual object VisitSqlMethodCall(MethodCallExpression m)
