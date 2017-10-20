@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>6c7cc59b-82ba-4eae-8c80-ffab13dbaa5e</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>ServiceStack.OrmLite.MySqlShared</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Converters\MySqlBoolConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Converters\MySqlDateTimeConverterBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Converters\MySqlDateTimeOffsetConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Converters\MySqlFloatConverters.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Converters\MySqlGuidConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Converters\MySqlIntegerConverters.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Converters\MySqlStringConverters.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataAnnotations\TextAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MySqlDialectProviderBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MySqlExpression.cs" />
+  </ItemGroup>
+</Project>

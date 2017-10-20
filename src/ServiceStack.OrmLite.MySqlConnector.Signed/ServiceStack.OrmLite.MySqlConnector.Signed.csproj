@@ -1,9 +1,11 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net45;netstandard2.0</TargetFrameworks>
-    <AssemblyName>ServiceStack.OrmLite.MySql</AssemblyName>
-    <PackageId>ServiceStack.OrmLite.MySql</PackageId>
+    <TargetFrameworks>net45</TargetFrameworks>
+    <AssemblyName>ServiceStack.OrmLite.MySqlConnector.Signed</AssemblyName>
+    <RootNamespace>ServiceStack.OrmLite.MySqlConnector.Signed</RootNamespace>
+    <PackageId>ServiceStack.OrmLite.MySqlConnector.Signed</PackageId>
+    <Configuration>Signed</Configuration>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
@@ -13,6 +15,9 @@
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
     <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
+    <SignAssembly>True</SignAssembly>
+    <DelaySign>False</DelaySign>
+    <AssemblyOriginatorKeyFile>servicestack-sn.pfx</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' != 'Debug' ">
@@ -21,39 +26,24 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj" />
+    <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.Signed.csproj" />
+    <Reference Include="..\..\lib\pcl\ServiceStack.Interfaces.dll" />
   </ItemGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net45' ">
     <DefineConstants>$(DefineConstants);NET45;ASYNC</DefineConstants>
-    <SignAssembly>True</SignAssembly>
-    <DelaySign>False</DelaySign>
-    <AssemblyOriginatorKeyFile>../servicestack.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Signed|net45|AnyCPU'" />
+
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
-    <PackageReference Include="Mysql.Data" Version="6.9.9" />
+    <PackageReference Include="MySqlConnector" Version="0.27.0" />
 
     <Reference Include="System.Net" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
-
-    <Reference Include="..\..\lib\net45\ServiceStack.Interfaces.dll" />
-    <Reference Include="..\..\lib\net45\ServiceStack.Text.dll" />
-    <Reference Include="..\..\lib\net45\ServiceStack.Common.dll" />
-  </ItemGroup>
-
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <DefineConstants>$(DefineConstants);NETSTANDARD1_6;ASYNC</DefineConstants>
-  </PropertyGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <PackageReference Include="Mysql.Data" Version="8.0.8-dmr" />
-
-    <Reference Include="..\..\lib\netstandard2.0\ServiceStack.Interfaces.dll" />
-    <Reference Include="..\..\lib\netstandard2.0\ServiceStack.Text.dll" />
-    <Reference Include="..\..\lib\netstandard2.0\ServiceStack.Common.dll" />
+    <Reference Include="..\..\lib\signed\ServiceStack.Text.dll" />
+    <Reference Include="..\..\lib\signed\ServiceStack.Common.dll" />
   </ItemGroup>
 
   <Import Project="..\ServiceStack.OrmLite.MySqlShared\ServiceStack.OrmLite.MySqlShared.projitems" Label="Shared" />
-
 </Project>
