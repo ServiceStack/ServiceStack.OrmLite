@@ -56,10 +56,10 @@ namespace ServiceStack.OrmLite.MySql.Tests
                 var id = (int)db.LastInsertId();
                 var target = db.SingleById<Analyze>(id);
 
-                Assert.IsNotNull(target);
-                Assert.AreEqual(id, target.Id);
-                Assert.AreEqual(obj.Date.ToString("yyyy-MM-dd HH:mm:ss"), target.Date.ToString("yyyy-MM-dd HH:mm:ss"));
-                Assert.AreEqual(obj.Url, target.Url);
+                Assert.That(target, Is.Not.Null);
+                Assert.That(target.Id, Is.EqualTo(id));
+                Assert.That(target.Date, Is.EqualTo(obj.Date).Within(TimeSpan.FromSeconds(1)));
+                Assert.That(target.Url, Is.EqualTo(obj.Url));
             }
         }
 

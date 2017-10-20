@@ -5,6 +5,7 @@ using System.Data;
 using System.Linq;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
+using ServiceStack.OrmLite.Tests;
 
 namespace ServiceStack.OrmLite.MySql.Tests.UseCase
 {
@@ -124,9 +125,7 @@ namespace ServiceStack.OrmLite.MySql.Tests.UseCase
         public void Run()
         {
             //Setup SQL Server Connection Factory
-            var dbFactory = new OrmLiteConnectionFactory(
-                ConfigurationManager.ConnectionStrings["testDb"].ConnectionString,
-                MySqlDialectProvider.Instance);
+            var dbFactory = new OrmLiteConnectionFactory(MySqlConfig.ConnectionString, MySqlConfig.DialectProvider);
 
             //Non-intrusive: All extension methods hang off System.Data.* interfaces
             IDbConnection db = dbFactory.OpenDbConnection();

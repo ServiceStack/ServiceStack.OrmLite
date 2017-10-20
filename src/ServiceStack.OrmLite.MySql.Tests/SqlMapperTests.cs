@@ -5,6 +5,7 @@ using System.Linq;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.MySql;
+using ServiceStack.OrmLite.MySql.Tests;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -26,9 +27,7 @@ namespace ServiceStack.OrmLite.Tests
         public void SetUp()
         {
             //Setup SQL Server Connection Factory
-            dbFactory = new OrmLiteConnectionFactory(
-                ConfigurationManager.ConnectionStrings["testDb"].ConnectionString,
-                MySqlDialectProvider.Instance);
+            dbFactory = new OrmLiteConnectionFactory(MySqlConfig.ConnectionString, MySqlConfig.DialectProvider);
 
             using (var db = dbFactory.Open())
                 db.DropAndCreateTable<User>();

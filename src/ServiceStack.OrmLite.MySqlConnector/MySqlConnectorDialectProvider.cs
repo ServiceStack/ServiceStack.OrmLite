@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Data;
 using MySql.Data.MySqlClient;
-using ServiceStack.OrmLite.MySql;
-using ServiceStack.OrmLite.MySqlConnector.Converters;
+using ServiceStack.OrmLite.MySql.Converters;
 
-namespace ServiceStack.OrmLite.MySqlConnector
+namespace ServiceStack.OrmLite.MySql
 {
     public class MySqlConnectorDialectProvider : MySqlDialectProviderBase<MySqlConnectorDialectProvider>
     {
@@ -13,8 +12,8 @@ namespace ServiceStack.OrmLite.MySqlConnector
 
         private const string TextColumnDefinition = "TEXT";
 
-	    public MySqlConnectorDialectProvider() : base()
-        {
+	    public MySqlConnectorDialectProvider()
+	    {
             base.RegisterConverter<DateTime>(new MySqlConnectorDateTimeConverter());
         }
 

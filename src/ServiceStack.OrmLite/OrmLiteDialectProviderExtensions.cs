@@ -83,5 +83,8 @@ namespace ServiceStack.OrmLite
         {
             return (DateTimeConverter)dialect.GetConverter(typeof(DateTime));
         }
+
+        public static bool IsMySqlConnector(this IOrmLiteDialectProvider dialect) => 
+            dialect.GetType().Name == "MySqlConnectorDialectProvider";
     }
 }

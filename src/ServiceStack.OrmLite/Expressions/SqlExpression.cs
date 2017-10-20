@@ -2416,13 +2416,16 @@ namespace ServiceStack.OrmLite
             var p = DialectProvider.CreateParam();
             p.ParameterName = DialectProvider.GetParam(name);
             p.Direction = direction;
-            p.SourceVersion = sourceVersion;
+
+            if (!DialectProvider.IsMySqlConnector()) //throws NotSupportedException
+            {
+                p.SourceVersion = sourceVersion;
+            }
 
             if (p.DbType == DbType.String)
             {
                 p.Size = DialectProvider.GetStringConverter().StringLength;
-                string strValue = value as string;
-                if (strValue != null && strValue.Length > p.Size)
+                if (value is string strValue && strValue.Length > p.Size)
                     p.Size = strValue.Length;
             }
 

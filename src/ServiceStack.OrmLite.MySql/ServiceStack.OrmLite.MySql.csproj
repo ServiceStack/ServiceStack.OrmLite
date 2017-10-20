@@ -54,6 +54,4 @@
     <Reference Include="..\..\lib\netstandard2.0\ServiceStack.Common.dll" />
   </ItemGroup>
 
-  <Import Project="..\ServiceStack.OrmLite.MySqlShared\ServiceStack.OrmLite.MySqlShared.projitems" Label="Shared" />
-
 </Project>

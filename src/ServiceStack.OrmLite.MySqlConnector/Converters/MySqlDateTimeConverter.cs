@@ -1,6 +1,4 @@
-using ServiceStack.OrmLite.MySql.Converters;
-
-namespace ServiceStack.OrmLite.MySqlConnector.Converters
+namespace ServiceStack.OrmLite.MySql.Converters
 {
     public class MySqlConnectorDateTimeConverter : MySqlDateTimeConverterBase
     {

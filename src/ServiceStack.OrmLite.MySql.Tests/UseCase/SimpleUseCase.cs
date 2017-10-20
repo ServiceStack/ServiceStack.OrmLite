@@ -1,19 +1,17 @@
 using System;
 using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
 using NUnit.Framework;
+using ServiceStack.OrmLite.Tests;
 
 namespace ServiceStack.OrmLite.MySql.Tests.UseCase
 {
 	[TestFixture]
 	public class SimpleUseCase
 	{
-		[TestFixtureSetUp]
-		public void TestFixtureSetUp()
+		public SimpleUseCase()
 		{
 			//Inject your database provider here
-            OrmLiteConfig.DialectProvider = MySqlDialectProvider.Instance;
+            OrmLiteConfig.DialectProvider = MySqlConfig.DialectProvider;
 		}
 
 		public class UserWithIndex
@@ -29,7 +27,7 @@ namespace ServiceStack.OrmLite.MySql.Tests.UseCase
 		[Test]
 		public void Simple_CRUD_example()
 		{
-            using (IDbConnection db = ConfigurationManager.ConnectionStrings["testDb"].ConnectionString.OpenDbConnection())
+            using (var db = MySqlConfig.ConnectionString.OpenDbConnection())
 			{
 				db.CreateTable<UserWithIndex>(true);
 
