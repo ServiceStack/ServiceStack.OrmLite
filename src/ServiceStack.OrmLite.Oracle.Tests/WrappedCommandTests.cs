@@ -58,11 +58,11 @@ namespace ServiceStack.OrmLite.Tests
 
     public class SpecializedProfiledDbConnection : ProfiledDbConnection
     {
-        public SpecializedProfiledDbConnection(DbConnection connection, IDbProfiler profiler, bool autoDisposeConnection = true)
+        public SpecializedProfiledDbConnection(DbConnection connection, IProfiler profiler, bool autoDisposeConnection = true)
             : base(connection, profiler, autoDisposeConnection)
         { }
 
-        public SpecializedProfiledDbConnection(IDbConnection connection, IDbProfiler profiler, bool autoDisposeConnection = true)
+        public SpecializedProfiledDbConnection(IDbConnection connection, IProfiler profiler, bool autoDisposeConnection = true)
             : base(connection, profiler, autoDisposeConnection)
         { }
 
