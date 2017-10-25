@@ -38,6 +38,7 @@
     <Reference Include="..\..\lib\net45\ServiceStack.Text.dll" />
     <Reference Include="..\..\lib\net45\ServiceStack.Common.dll" />
     <Reference Include="..\..\lib\net45\ServiceStack.dll" />
+    <Reference Include="..\..\lib\net45\ServiceStack.NetFramework.dll" />
   </ItemGroup>
 
 </Project>

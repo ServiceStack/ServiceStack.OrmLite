@@ -21,3 +21,5 @@ COPY ..\..\ServiceStack\src\ServiceStack\bin\%BUILD%\netstandard2.0\ServiceStack
 
 COPY ..\..\ServiceStack\src\ServiceStack.Server\bin\%BUILD%\net45\ServiceStack.Server.* net45
 COPY ..\..\ServiceStack\src\ServiceStack.Server\bin\%BUILD%\netstandard2.0\ServiceStack.Server.* netstandard2.0
+
+COPY ..\..\ServiceStack\src\ServiceStack.NetFramework\bin\%BUILD%\net45\ServiceStack.NetFramework.* net45
