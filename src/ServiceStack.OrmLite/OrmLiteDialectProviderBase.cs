@@ -13,7 +13,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -128,12 +127,10 @@ namespace ServiceStack.OrmLite
             var converter = GetConverter(columnType);
             if (converter != null)
             {
-                var customPrecisionConverter = converter as IHasColumnDefinitionPrecision;
-                if (customPrecisionConverter != null)
+                if (converter is IHasColumnDefinitionPrecision customPrecisionConverter)
                     return customPrecisionConverter.GetColumnDefinition(fieldLength, scale);
 
-                var customLengthConverter = converter as IHasColumnDefinitionLength;
-                if (customLengthConverter != null)
+                if (converter is IHasColumnDefinitionLength customLengthConverter)
                     return customLengthConverter.GetColumnDefinition(fieldLength);
 
                 if (string.IsNullOrEmpty(converter.ColumnDefinition))
@@ -144,7 +141,7 @@ namespace ServiceStack.OrmLite
 
             var stringConverter = columnType.IsRefType()
                 ? ReferenceTypeConverter
-                : columnType.IsEnum()
+                : columnType.IsEnum
                     ? EnumConverter
                     : (IHasColumnDefinitionLength)ValueTypeConverter;
 
@@ -191,6 +188,8 @@ namespace ServiceStack.OrmLite
             get => StringConverter.StringLength;
             set => StringConverter.StringLength = value;
         }
+
+        public Action<IDbConnection> OnOpenConnection { get; set; }
 
         public string ParamString { get; set; } = "@";
 
@@ -1451,19 +1450,19 @@ namespace ServiceStack.OrmLite
         public virtual string ToAddColumnStatement(Type modelType, FieldDefinition fieldDef)
         {
             var column = GetColumnDefinition(fieldDef);
-            return $"ALTER TABLE {GetQuotedTableName(modelType.GetModelDefinition().ModelName)} ADD COLUMN {column};";
+            return $"ALTER TABLE {GetQuotedTableName(modelType.GetModelDefinition())} ADD COLUMN {column};";
         }
 
         public virtual string ToAlterColumnStatement(Type modelType, FieldDefinition fieldDef)
         {
             var column = GetColumnDefinition(fieldDef);
-            return $"ALTER TABLE {GetQuotedTableName(modelType.GetModelDefinition().ModelName)} MODIFY COLUMN {column};";
+            return $"ALTER TABLE {GetQuotedTableName(modelType.GetModelDefinition())} MODIFY COLUMN {column};";
         }
 
         public virtual string ToChangeColumnNameStatement(Type modelType, FieldDefinition fieldDef, string oldColumnName)
         {
             var column = GetColumnDefinition(fieldDef);
-            return $"ALTER TABLE {GetQuotedTableName(modelType.GetModelDefinition().ModelName)} CHANGE COLUMN {GetQuotedColumnName(oldColumnName)} {column};";
+            return $"ALTER TABLE {GetQuotedTableName(modelType.GetModelDefinition())} CHANGE COLUMN {GetQuotedColumnName(oldColumnName)} {column};";
         }
 
         public virtual string ToAddForeignKeyStatement<T, TForeign>(Expression<Func<T, object>> field,
@@ -1482,9 +1481,9 @@ namespace ServiceStack.OrmLite
                 "fk_" + sourceMD.ModelName + "_" + fieldName + "_" + referenceFieldName :
                 foreignKeyName);
 
-            return $"ALTER TABLE {GetQuotedTableName(sourceMD.ModelName)} " +
+            return $"ALTER TABLE {GetQuotedTableName(sourceMD)} " +
                    $"ADD CONSTRAINT {name} FOREIGN KEY ({GetQuotedColumnName(fieldName)}) " +
-                   $"REFERENCES {GetQuotedTableName(referenceMD.ModelName)} " +
+                   $"REFERENCES {GetQuotedTableName(referenceMD)} " +
                    $"({GetQuotedColumnName(referenceFieldName)})" +
                    $"{GetForeignKeyOnDeleteClause(new ForeignKeyConstraint(typeof(T), onDelete: FkOptionToString(onDelete)))}" +
                    $"{GetForeignKeyOnUpdateClause(new ForeignKeyConstraint(typeof(T), onUpdate: FkOptionToString(onUpdate)))};";
@@ -1500,7 +1499,7 @@ namespace ServiceStack.OrmLite
                 indexName);
 
             string command = $"CREATE {(unique ? "UNIQUE" : "")} " +
-                             $"INDEX {name} ON {GetQuotedTableName(sourceDef.ModelName)}" +
+                             $"INDEX {name} ON {GetQuotedTableName(sourceDef)}" +
                              $"({GetQuotedColumnName(fieldName)});";
             return command;
         }
@@ -1575,7 +1574,7 @@ namespace ServiceStack.OrmLite
 
         protected virtual string ToDropColumnStatement(Type modelType, string columnName, IOrmLiteDialectProvider provider)
         {
-            return $"ALTER TABLE {provider.GetQuotedTableName(modelType.GetModelDefinition().ModelName)} " +
+            return $"ALTER TABLE {provider.GetQuotedTableName(modelType.GetModelDefinition())} " +
                    $"DROP COLUMN {provider.GetQuotedColumnName(columnName)};";
         }
 

@@ -180,7 +180,7 @@ namespace ServiceStack.OrmLite.SqlServer
         public override string ToAddColumnStatement(Type modelType, FieldDefinition fieldDef)
         {
             var column = GetColumnDefinition(fieldDef);
-            var modelName = GetQuotedTableName(GetModel(modelType).ModelName);
+            var modelName = GetQuotedTableName(GetModel(modelType));
 
             return $"ALTER TABLE {modelName} ADD {column};";
         }
@@ -188,14 +188,14 @@ namespace ServiceStack.OrmLite.SqlServer
         public override string ToAlterColumnStatement(Type modelType, FieldDefinition fieldDef)
         {
             var column = GetColumnDefinition(fieldDef);
-            var modelName = GetQuotedTableName(GetModel(modelType).ModelName);
+            var modelName = GetQuotedTableName(GetModel(modelType));
 
             return $"ALTER TABLE {modelName} ALTER COLUMN {column};";
         }
 
         public override string ToChangeColumnNameStatement(Type modelType, FieldDefinition fieldDef, string oldColumnName)
         {
-            var modelName = NamingStrategy.GetTableName(GetModel(modelType).ModelName);
+            var modelName = NamingStrategy.GetTableName(GetModel(modelType));
             var objectName = $"{modelName}.{oldColumnName}";
 
             return $"EXEC sp_rename {GetQuotedValue(objectName)}, {GetQuotedValue(fieldDef.FieldName)}, {GetQuotedValue("COLUMN")};";
@@ -265,8 +265,8 @@ namespace ServiceStack.OrmLite.SqlServer
             if (rows.HasValue && rows.Value < 0)
                 throw new ArgumentException($"Rows value:'{rows.Value}' must be>=0");
 
-            var skip = offset.HasValue ? offset.Value : 0;
-            var take = rows.HasValue ? rows.Value : int.MaxValue;
+            var skip = offset ?? 0;
+            var take = rows ?? int.MaxValue;
 
             var selectType = selectExpression.StartsWithIgnoreCase("SELECT DISTINCT") ? "SELECT DISTINCT" : "SELECT";
 
