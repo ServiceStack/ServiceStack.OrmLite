@@ -23,6 +23,12 @@ namespace ServiceStack.OrmLite
     {
         void RegisterConverter<T>(IOrmLiteConverter converter);
 
+        /// <summary>
+        /// Invoked when a DB Connection is opened
+        /// </summary>
+        Action<IDbConnection> OnOpenConnection { get; set; } 
+            
+
         IOrmLiteExecFilter ExecFilter { get; set; }
 
         /// <summary>
