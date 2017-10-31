@@ -36,13 +36,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj" />
-    <PackageReference Include="MySqlConnector" Version="0.28.2" />
+    <PackageReference Include="MySqlConnector" Version="0.30.0" />
   </ItemGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net45' ">
     <DefineConstants>$(DefineConstants);NET45;ASYNC</DefineConstants>
-    <!--MySqlConnector is not Signed -->
-    <SignAssembly>False</SignAssembly>
+    <SignAssembly>True</SignAssembly>
     <DelaySign>False</DelaySign>
     <AssemblyOriginatorKeyFile>../servicestack.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
