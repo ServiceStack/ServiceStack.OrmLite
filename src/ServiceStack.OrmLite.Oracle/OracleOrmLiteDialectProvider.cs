@@ -158,23 +158,6 @@ namespace ServiceStack.OrmLite.Oracle
             throw new NotSupportedException();
         }
 
-        public override long InsertAndGetLastInsertId<T>(IDbCommand dbCmd)
-        {
-            dbCmd.ExecuteScalar();
-
-            var modelDef = GetModel(typeof(T));
-
-            var primaryKey = modelDef.PrimaryKey;
-            if (primaryKey == null)
-                return 0;
-
-            var identityParameter = (DbParameter)dbCmd.Parameters[this.GetParam(SanitizeFieldNameForParamName(primaryKey.FieldName))];
-            if (identityParameter == null)
-                return 0;
-
-            return Convert.ToInt64(identityParameter.Value);
-        }
-
         public override object ToDbValue(object value, Type type)
         {
             if (value == null || value is DBNull)

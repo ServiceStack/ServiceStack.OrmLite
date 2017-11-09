@@ -1049,6 +1049,46 @@
             </summary>
             <param name="user">User identified by the current <see cref="!:MiniProfiler.Settings.UserProvider"/>.</param>
         </member>
+        <member name="T:ServiceStack.MiniProfiler.Storage.SqlServerStorage">
+            <summary>
+            Understands how to store a <see cref="T:ServiceStack.MiniProfiler.Profiler"/> to a MSSQL database.
+            </summary>
+        </member>
+        <member name="M:ServiceStack.MiniProfiler.Storage.SqlServerStorage.#ctor(System.String)">
+            <summary>
+            Returns a new <see cref="T:ServiceStack.MiniProfiler.Storage.SqlServerStorage"/>.
+            </summary>
+        </member>
+        <member name="M:ServiceStack.MiniProfiler.Storage.SqlServerStorage.Save(ServiceStack.MiniProfiler.MiniProfiler)">
+            <summary>
+            Stores <param name="profiler"/> to dbo.MiniProfilers under its <see cref="!:Profiler.Id"/>; 
+            stores all child Timings and SqlTimings to their respective tables.
+            </summary>
+        </member>
+        <member name="M:ServiceStack.MiniProfiler.Storage.SqlServerStorage.Load(System.Guid)">
+            <summary>
+            Loads the MiniProfiler identifed by 'id' from the database.
+            </summary>
+        </member>
+        <member name="M:ServiceStack.MiniProfiler.Storage.SqlServerStorage.GetUnviewedIds(System.String)">
+            <summary>
+            Returns a list of <see cref="!:Profiler.Id"/>s that haven't been seen by <paramref name="user"/>.
+            </summary>
+            <param name="user">User identified by the current <see cref="!:MiniProfiler.Settings.UserProvider"/>.</param>
+        </member>
+        <member name="M:ServiceStack.MiniProfiler.Storage.SqlServerStorage.GetConnection">
+            <summary>
+            Returns a connection to Sql Server.
+            </summary>
+        </member>
+        <member name="F:ServiceStack.MiniProfiler.Storage.SqlServerStorage.TableCreationScript">
+            <summary>
+            Creates needed tables. Run this once on your database.
+            </summary>
+            <remarks>
+            Works in sql server and sqlite (with documented removals).
+            </remarks>
+        </member>
         <member name="T:ServiceStack.MiniProfiler.Timing">
             <summary>
             An individual profiling step that can contain child steps.

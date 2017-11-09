@@ -74,13 +74,6 @@ namespace ServiceStack.OrmLite.Firebird
             return LastInsertId;
         }
 
-        public override long InsertAndGetLastInsertId<T>(IDbCommand dbCmd)
-        {
-            dbCmd.CommandText += " returning {0};".Fmt(typeof(T).GetModelMetadata().PrimaryKey.FieldName);
-
-            return dbCmd.ExecLongScalar();
-        }
-
         public override string ToRowCountStatement(string innerSql)
         {
             return "SELECT COUNT(*) FROM ({0})".Fmt(innerSql);
