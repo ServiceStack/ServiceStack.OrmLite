@@ -333,9 +333,8 @@ namespace ServiceStack.OrmLite
             {
                 var pLiteral = "{" + i + "}";
                 var filterParam = filterParams[i];
-                var sqlParams = filterParam as SqlInValues;
 
-                if (sqlParams != null)
+                if (filterParam is SqlInValues sqlParams)
                 {
                     var sqlIn = CreateInParamSql(sqlParams.GetValues());
                     sqlFilter = sqlFilter.Replace(pLiteral, sqlIn);
@@ -1550,8 +1549,7 @@ namespace ServiceStack.OrmLite
                         return true;
                 }
 
-                var binaryExpr = e as BinaryExpression;
-                if (binaryExpr != null)
+                if (e is BinaryExpression binaryExpr)
                 {
                     if (CheckExpressionForTypes(binaryExpr.Left, types))
                         return true;
@@ -1560,8 +1558,7 @@ namespace ServiceStack.OrmLite
                         return true;
                 }
 
-                var methodCallExpr = e as MethodCallExpression;
-                if (methodCallExpr != null)
+                if (e is MethodCallExpression methodCallExpr)
                 {
                     for (var i = 0; i < methodCallExpr.Arguments.Count; i++)
                     {
@@ -1573,15 +1570,13 @@ namespace ServiceStack.OrmLite
                         return true;
                 }
 
-                var unaryExpr = e as UnaryExpression;
-                if (unaryExpr != null)
+                if (e is UnaryExpression unaryExpr)
                 {
                     if (CheckExpressionForTypes(unaryExpr.Operand, types))
                         return true;
                 }
 
-                var condExpr = e as ConditionalExpression;
-                if (condExpr != null)
+                if (e is ConditionalExpression condExpr)
                 {
                     if (CheckExpressionForTypes(condExpr.Test, types))
                         return true;
@@ -1662,8 +1657,7 @@ namespace ServiceStack.OrmLite
             var modelType = m.Expression.Type;
             if (m.Expression.NodeType == ExpressionType.Convert)
             {
-                var unaryExpr = m.Expression as UnaryExpression;
-                if (unaryExpr != null)
+                if (m.Expression is UnaryExpression unaryExpr)
                 {
                     modelType = unaryExpr.Operand.Type;
                 }
@@ -1673,7 +1667,7 @@ namespace ServiceStack.OrmLite
 
             var tableDef = modelType.GetModelDefinition();
 
-            if (propertyInfo != null && propertyInfo.PropertyType.IsEnum())
+            if (propertyInfo != null && propertyInfo.PropertyType.IsEnum)
                 return new EnumMemberAccess(
                     GetQuotedColumnName(tableDef, m.Member.Name), propertyInfo.PropertyType);
 
@@ -1721,16 +1715,14 @@ namespace ServiceStack.OrmLite
             // When selecting an entire table use the anon type property name as a prefix for the returned column name
             // to allow the caller to distinguish properties with the same names from different tables
 
-            var paramExpr = arg as ParameterExpression;
-            var selectList = paramExpr != null && paramExpr.Name != member.Name
+            var selectList = arg is ParameterExpression paramExpr && paramExpr.Name != member.Name
                 ? expr as SelectList
                 : null;
             if (selectList != null)
             {
                 foreach (var item in selectList.Items)
                 {
-                    var selectItem = item as SelectItem;
-                    if (selectItem != null)
+                    if (item is SelectItem selectItem)
                     {
                         if (!string.IsNullOrEmpty(selectItem.Alias))
                         {
@@ -1738,8 +1730,7 @@ namespace ServiceStack.OrmLite
                         }
                         else
                         {
-                            var columnItem = item as SelectItemColumn;
-                            if (columnItem != null)
+                            if (item is SelectItemColumn columnItem)
                             {
                                 columnItem.Alias = member.Name + columnItem.ColumnName;
                             }
@@ -1764,8 +1755,7 @@ namespace ServiceStack.OrmLite
 
             foreach (var item in selectList.Items)
             {
-                var selectItem = item as SelectItem;
-                if (selectItem != null)
+                if (item is SelectItem selectItem)
                 {
                     selectItem.Alias = null;
                 }
@@ -1828,16 +1818,14 @@ namespace ServiceStack.OrmLite
         protected virtual object VisitIndexExpression(IndexExpression e)
         {
             var arg = e.Arguments[0];
-            var constant = arg as ConstantExpression;
-            var oIndex = constant != null
+            var oIndex = arg is ConstantExpression constant
                 ? constant.Value
                 : CachedExpressionCompiler.Evaluate(arg);
 
             var index = (int)Convert.ChangeType(oIndex, typeof(int));
             var oCollection = CachedExpressionCompiler.Evaluate(e.Object);
 
-            var list = oCollection as List<object>;
-            if (list != null)
+            if (oCollection is List<object> list)
                 return list[index];
 
             throw new NotImplementedException("Unknown Expression: " + e);
@@ -1895,17 +1883,14 @@ namespace ServiceStack.OrmLite
         {
             if (m.Object == null)
                 return false;
-            
-            var methCallExp = m.Object as MethodCallExpression;
-            if (methCallExp != null)
+
+            if (m.Object is MethodCallExpression methCallExp)
                 return IsColumnAccess(methCallExp);
 
-            var condExp = m.Object as ConditionalExpression;
-            if (condExp != null)
+            if (m.Object is ConditionalExpression condExp)
                 return IsParameterAccess(condExp);
 
-            var unaryExp = m.Object as UnaryExpression;
-            if (unaryExp != null)
+            if (m.Object is UnaryExpression unaryExp)
                 return IsParameterAccess(unaryExp);
 
             var exp = m.Object as MemberExpression;
@@ -2038,12 +2023,12 @@ namespace ServiceStack.OrmLite
                     ? fd.FieldName
                     : memberName;
 
-                if (tableDef.ModelType.IsInterface() && this.ModelDef.ModelType.HasInterface(tableDef.ModelType))
+                if (tableDef.ModelType.IsInterface && this.ModelDef.ModelType.HasInterface(tableDef.ModelType))
                 {
                     tableDef = this.ModelDef;
                 }
 
-                var includePrefix = PrefixFieldWithTableName && fd?.CustomSelect == null && !tableDef.ModelType.IsInterface();
+                var includePrefix = PrefixFieldWithTableName && fd?.CustomSelect == null && !tableDef.ModelType.IsInterface;
                 return includePrefix
                     ? DialectProvider.GetQuotedColumnName(tableDef, fieldName)
                     : DialectProvider.GetQuotedColumnName(fieldName);
@@ -2284,8 +2269,7 @@ namespace ServiceStack.OrmLite
             if (argValue == null)
                 return FalseLiteral; // "column IN (NULL)" is always false
 
-            var enumerableArg = argValue as IEnumerable;
-            if (enumerableArg != null)
+            if (argValue is IEnumerable enumerableArg)
             {
                 var inArgs = Sql.Flatten(enumerableArg);
                 if (inArgs.Count == 0)
@@ -2295,8 +2279,7 @@ namespace ServiceStack.OrmLite
                 return $"{quotedColName} IN ({sqlIn})";
             }
 
-            var exprArg = argValue as ISqlExpression;
-            if (exprArg != null)
+            if (argValue is ISqlExpression exprArg)
             {
                 var subSelect = exprArg.ToSelectStatement();
                 var renameParams = new List<Tuple<string,string>>();
@@ -2477,7 +2460,7 @@ namespace ServiceStack.OrmLite
         public EnumMemberAccess(string text, Type enumType)
             : base(text)
         {
-            if (!enumType.IsEnum()) throw new ArgumentException("Type not valid", nameof(enumType));
+            if (!enumType.IsEnum) throw new ArgumentException("Type not valid", nameof(enumType));
 
             EnumType = enumType;
         }
@@ -2489,10 +2472,8 @@ namespace ServiceStack.OrmLite
     {
         protected SelectItem(IOrmLiteDialectProvider dialectProvider, string alias)
         {
-            if (dialectProvider == null)
-                throw new ArgumentNullException(nameof(dialectProvider));
+            DialectProvider = dialectProvider ?? throw new ArgumentNullException(nameof(dialectProvider));
 
-            DialectProvider = dialectProvider;
             Alias = alias;
         }
 

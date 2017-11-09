@@ -284,7 +284,7 @@ namespace ServiceStack.OrmLite
             if (converter != null)
                 return converter;
 
-            if (type.IsEnum())
+            if (type.IsEnum)
                 return EnumConverter;
 
             return type.IsRefType()
@@ -299,12 +299,10 @@ namespace ServiceStack.OrmLite
             if (fieldDef.IsRowVersion)
                 return RowVersionConverter;
 
-            IOrmLiteConverter converter;
-
-            if (Converters.TryGetValue(fieldType, out converter))
+            if (Converters.TryGetValue(fieldType, out var converter))
                 return converter;
 
-            if (fieldType.IsEnum())
+            if (fieldType.IsEnum)
                 return EnumConverter;
 
             return fieldType.IsRefType()
@@ -348,8 +346,7 @@ namespace ServiceStack.OrmLite
 
         public object GetValue(IDataReader reader, int columnIndex, Type type)
         {
-            IOrmLiteConverter converter;
-            if (Converters.TryGetValue(type, out converter))
+            if (Converters.TryGetValue(type, out var converter))
                 return converter.GetValue(reader, columnIndex, null);
 
             return reader.GetValue(columnIndex);
@@ -853,9 +850,7 @@ namespace ServiceStack.OrmLite
                 if (fieldDef.ShouldSkipDelete())
                     continue;
 
-                object fieldValue;
-
-                if (!deleteFields.TryGetValue(fieldDef.Name, out fieldValue))
+                if (!deleteFields.TryGetValue(fieldDef.Name, out var fieldValue))
                     continue;
 
                 if (fieldDef.IsRowVersion)
@@ -913,9 +908,8 @@ namespace ServiceStack.OrmLite
 
             foreach (IDataParameter p in dbCmd.Parameters)
             {
-                FieldDefinition fieldDef;
                 var fieldName = this.ToFieldName(p.ParameterName);
-                fieldMap.TryGetValue(fieldName, out fieldDef);
+                fieldMap.TryGetValue(fieldName, out var fieldDef);
 
                 if (fieldDef == null)
                 {
@@ -1211,8 +1205,7 @@ namespace ServiceStack.OrmLite
             if (!defaultValue.StartsWith("{"))
                 return defaultValue;
 
-            string variable;
-            return Variables.TryGetValue(defaultValue, out variable)
+            return Variables.TryGetValue(defaultValue, out var variable)
                 ? variable
                 : null;
         }
@@ -1522,7 +1515,7 @@ namespace ServiceStack.OrmLite
         {
             if (value == null) return "NULL";
 
-            var converter = value.GetType().IsEnum()
+            var converter = value.GetType().IsEnum
                 ? EnumConverter
                 : GetConverterBestMatch(fieldType);
             try

@@ -43,7 +43,7 @@ namespace ServiceStack.OrmLite
         public IDbConnection Db { get; set; }
         public IDbCommand DbCmd { get; set; }
 
-        public T Exec<T>(Func<IDbCommand, T> filter)
+        public TReturn Exec<TReturn>(Func<IDbCommand, TReturn> filter)
         {
             return DbCmd != null ? filter(DbCmd) : Db.Exec(filter);
         }

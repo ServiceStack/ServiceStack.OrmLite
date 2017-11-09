@@ -663,9 +663,7 @@ namespace ServiceStack.OrmLite.Firebird
         public override string GetTableName(string table, string schema = null)
         {
             return schema != null
-                ? string.Format("{0}_{1}",
-                    NamingStrategy.GetSchemaName(schema),
-                    NamingStrategy.GetTableName(table))
+                ? $"{NamingStrategy.GetSchemaName(schema)}_{NamingStrategy.GetTableName(table)}"
                 : NamingStrategy.GetTableName(table);
         }
 

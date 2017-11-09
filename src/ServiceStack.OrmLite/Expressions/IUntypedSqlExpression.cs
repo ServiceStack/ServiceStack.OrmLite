@@ -15,7 +15,6 @@ namespace ServiceStack.OrmLite
         bool PrefixFieldWithTableName { get; set; }
         bool WhereStatementWithoutWhereString { get; set; }
         IOrmLiteDialectProvider DialectProvider { get; set; }
-        List<IDbDataParameter> Params { get; set; }
         string SelectExpression { get; set; }
         string FromExpression { get; set; }
         string BodyExpression { get; }
@@ -98,11 +97,9 @@ namespace ServiceStack.OrmLite
         string SqlTable(ModelDefinition modelDef);
         string SqlColumn(string columnName);
         string ToDeleteRowStatement();
-        string ToSelectStatement();
         string ToCountStatement();
         IList<string> GetAllFields();
         Tuple<ModelDefinition, FieldDefinition> FirstMatchingField(string fieldName);
-        string SelectInto<TModel>();
     }
 
     public class UntypedSqlExpressionProxy<T> : IUntypedSqlExpression
@@ -624,7 +621,7 @@ namespace ServiceStack.OrmLite
         public static IUntypedSqlExpression GetUntypedSqlExpression(this ISqlExpression sqlExpression)
         {
             var hasUntyped = sqlExpression as IHasUntypedSqlExpression;
-            return hasUntyped == null ? null : hasUntyped.GetUntyped();
+            return hasUntyped?.GetUntyped();
         }
     }
 }

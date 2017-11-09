@@ -79,7 +79,7 @@ namespace ServiceStack.OrmLite.Dapper
             TypeCode result;
             if (typeCodeLookup.TryGetValue(type, out result)) return result;
 
-            if (type.IsEnum())
+            if (type.IsEnum)
             {
                 type = Enum.GetUnderlyingType(type);
                 if (typeCodeLookup.TryGetValue(type, out result)) return result;

@@ -161,7 +161,7 @@ namespace ServiceStack.OrmLite
 
         internal static Task<List<T>> SqlListAsync<T>(this IDbCommand dbCmd, string sql, Action<IDbCommand> dbCmdFilter, CancellationToken token)
         {
-            if (dbCmdFilter != null) dbCmdFilter(dbCmd);
+            dbCmdFilter?.Invoke(dbCmd);
             dbCmd.CommandText = sql;
 
             return dbCmd.ConvertToListAsync<T>(null, token);
@@ -288,8 +288,7 @@ namespace ServiceStack.OrmLite
                 var key = (K)dialectProvider.FromDbValue(reader, 0, typeof(K));
                 var value = (V)dialectProvider.FromDbValue(reader, 1, typeof(V));
 
-                List<V> values;
-                if (!lookup.TryGetValue(key, out values))
+                if (!lookup.TryGetValue(key, out var values))
                 {
                     values = new List<V>();
                     lookup[key] = values;
@@ -387,7 +386,7 @@ namespace ServiceStack.OrmLite
                 var listInterface = fieldDef.FieldType.GetTypeWithGenericInterfaceOf(typeof(IList<>));
                 if (listInterface != null)
                 {
-                    await loadRef.SetRefFieldList(fieldDef, listInterface.GenericTypeArguments()[0], token);
+                    await loadRef.SetRefFieldList(fieldDef, listInterface.GetGenericArguments()[0], token);
                 }
                 else
                 {
@@ -417,7 +416,7 @@ namespace ServiceStack.OrmLite
                 var listInterface = fieldDef.FieldType.GetTypeWithGenericInterfaceOf(typeof(IList<>));
                 if (listInterface != null)
                 {
-                    await loadList.SetRefFieldListAsync(fieldDef, listInterface.GenericTypeArguments()[0], token);
+                    await loadList.SetRefFieldListAsync(fieldDef, listInterface.GetGenericArguments()[0], token);
                 }
                 else
                 {

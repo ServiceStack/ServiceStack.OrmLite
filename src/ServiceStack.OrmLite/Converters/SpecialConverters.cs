@@ -17,10 +17,9 @@ namespace ServiceStack.OrmLite.Converters
                 return this.ConvertNumber(Enum.GetUnderlyingType(fieldType), value).ToString();
 
             var isEnumFlags = fieldType.IsEnumFlags() ||
-                (!fieldType.IsEnum() && fieldType.IsNumericType()); //i.e. is real int && not Enum
+                (!fieldType.IsEnum && fieldType.IsNumericType()); //i.e. is real int && not Enum
 
-            long enumValue;
-            if (!isEnumFlags && long.TryParse(value.ToString(), out enumValue))
+            if (!isEnumFlags && long.TryParse(value.ToString(), out var enumValue))
                 value = Enum.ToObject(fieldType, enumValue);
 
             var enumString = DialectProvider.StringSerializer.SerializeToString(value);
@@ -36,13 +35,12 @@ namespace ServiceStack.OrmLite.Converters
         {
             var isIntEnum = fieldType.IsEnumFlags() || 
                 fieldType.HasAttribute<EnumAsIntAttribute>() ||
-                (!fieldType.IsEnum() && fieldType.IsNumericType()); //i.e. is real int && not Enum
+                (!fieldType.IsEnum && fieldType.IsNumericType()); //i.e. is real int && not Enum
 
-            if (isIntEnum && value.GetType().IsEnum())
+            if (isIntEnum && value.GetType().IsEnum)
                 return Convert.ChangeType(value, Enum.GetUnderlyingType(fieldType));
 
-            long enumValue;
-            if (long.TryParse(value.ToString(), out enumValue))
+            if (long.TryParse(value.ToString(), out var enumValue))
             {
                 if (isIntEnum)
                     return enumValue;
@@ -58,8 +56,7 @@ namespace ServiceStack.OrmLite.Converters
 
         public override object FromDbValue(Type fieldType, object value)
         {
-            var strVal = value as string;
-            if (strVal != null)
+            if (value is string strVal)
                 return Enum.Parse(fieldType, strVal, ignoreCase:true);
 
             return Enum.ToObject(fieldType, value);
@@ -141,7 +138,7 @@ namespace ServiceStack.OrmLite.Converters
 
         public override object FromDbValue(Type fieldType, object value)
         {
-            if (fieldType.InstanceOfType(value))
+            if (fieldType.IsInstanceOfType(value))
                 return value;
 
             var convertedValue = DialectProvider.StringSerializer.DeserializeFromString(value.ToString(), fieldType);

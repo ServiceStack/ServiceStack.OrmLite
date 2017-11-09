@@ -276,7 +276,7 @@ namespace ServiceStack.OrmLite
             {
                 return reader.GetOrdinal(dialectProvider.NamingStrategy.GetColumnName(fieldName));
             }
-            catch (IndexOutOfRangeException ignoreNotFoundExInSomeProviders)
+            catch (IndexOutOfRangeException /*ignoreNotFoundExInSomeProviders*/)
             {
                 return NotFound;
             }
@@ -851,7 +851,7 @@ namespace ServiceStack.OrmLite
                 var listInterface = fieldDef.FieldType.GetTypeWithGenericInterfaceOf(typeof(IList<>));
                 if (listInterface != null)
                 {
-                    var refType = listInterface.GenericTypeArguments()[0];
+                    var refType = listInterface.GetGenericArguments()[0];
                     var refModelDef = refType.GetModelDefinition();
 
                     var refField = modelDef.GetRefFieldDef(refModelDef, refType);

@@ -183,7 +183,7 @@ namespace ServiceStack.OrmLite.MySql
             return sql;
         }
 
-        public string GetColumnDefinition(FieldDefinition fieldDef)
+        public override string GetColumnDefinition(FieldDefinition fieldDef)
         {
             if (fieldDef.PropertyInfo.FirstAttribute<TextAttribute>() != null)
             {

@@ -40,12 +40,10 @@ namespace ServiceStack.OrmLite
 
         internal static ModelDefinition GetModelDefinition(this Type modelType)
         {
-            ModelDefinition modelDef;
-
-            if (typeModelDefinitionMap.TryGetValue(modelType, out modelDef))
+            if (typeModelDefinitionMap.TryGetValue(modelType, out var modelDef))
                 return modelDef;
 
-            if (modelType.IsValueType() || modelType == typeof(string))
+            if (modelType.IsValueType || modelType == typeof(string))
                 return null;
 
             var modelAliasAttr = modelType.FirstAttribute<AliasAttribute>();
@@ -101,7 +99,7 @@ namespace ServiceStack.OrmLite
 
                 var isNullableType = propertyInfo.PropertyType.IsNullableType();
 
-                var isNullable = (!propertyInfo.PropertyType.IsValueType()
+                var isNullable = (!propertyInfo.PropertyType.IsValueType
                                    && !propertyInfo.HasAttributeNamed(typeof(RequiredAttribute).Name))
                                    || isNullableType;
 
@@ -155,7 +153,7 @@ namespace ServiceStack.OrmLite
                     ForeignKey = fkAttr == null
                         ? referencesAttr != null ? new ForeignKeyConstraint(referencesAttr.Type) : null
                         : new ForeignKeyConstraint(fkAttr.Type, fkAttr.OnDelete, fkAttr.OnUpdate, fkAttr.ForeignKeyName),
-                    IsReference = referenceAttr != null && propertyType.IsClass(),
+                    IsReference = referenceAttr != null && propertyType.IsClass,
                     GetValueFn = propertyInfo.CreateGetter(),
                     SetValueFn = propertyInfo.CreateSetter(),
                     Sequence = sequenceAttr != null ? sequenceAttr.Name : string.Empty,

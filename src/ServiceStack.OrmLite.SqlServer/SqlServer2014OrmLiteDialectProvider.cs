@@ -17,7 +17,7 @@ namespace ServiceStack.OrmLite.SqlServer
             var fieldDefinition = fieldDef.CustomFieldDefinition ??
                 GetColumnTypeDefinition(fieldDef.ColumnType, fieldDef.FieldLength, fieldDef.Scale);
 
-            var memTableAttrib = fieldDef.PropertyInfo.ReflectedType().FirstAttribute<SqlServerMemoryOptimizedAttribute>();
+            var memTableAttrib = fieldDef.PropertyInfo.ReflectedType.FirstAttribute<SqlServerMemoryOptimizedAttribute>();
             var isMemoryTable = memTableAttrib != null;
 
             var sql = StringBuilderCache.Allocate();

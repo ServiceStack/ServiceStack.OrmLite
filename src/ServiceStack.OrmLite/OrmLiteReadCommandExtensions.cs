@@ -107,8 +107,7 @@ namespace ServiceStack.OrmLite
             anonType.ToObjectDictionary().ForEachParam(modelDef, excludeDefaults, (propName, columnName, value) =>
             {
                 var propType = value?.GetType() ?? typeof(object);
-                var inValues = value as SqlInValues;
-                if (inValues != null)
+                if (value is SqlInValues inValues)
                 {
                     var i = 0;
                     foreach (var item in inValues.GetValues())
@@ -139,8 +138,7 @@ namespace ServiceStack.OrmLite
                     p.Direction = ParameterDirection.Input;
                     dialectProvider.InitDbParam(p, propType);
 
-                    FieldDefinition fieldDef;
-                    if (fieldMap != null && fieldMap.TryGetValue(columnName, out fieldDef))
+                    if (fieldMap != null && fieldMap.TryGetValue(columnName, out var fieldDef))
                     {
                         value = dialectProvider.GetFieldValue(fieldDef, value);
                         var valueType = value?.GetType();
@@ -213,7 +211,7 @@ namespace ServiceStack.OrmLite
                 if (entry.Value != null)
                 {
                     var type = entry.Value.GetType();
-                    if (!type.IsValueType() || !entry.Value.Equals(type.GetDefaultValue()))
+                    if (!type.IsValueType || !entry.Value.Equals(type.GetDefaultValue()))
                     {
                         map[entry.Key] = entry.Value;
                     }
@@ -716,8 +714,7 @@ namespace ServiceStack.OrmLite
                 var key = (K)dialectProvider.FromDbValue(reader, 0, typeof(K));
                 var value = (V)dialectProvider.FromDbValue(reader, 1, typeof(V));
 
-                List<V> values;
-                if (!lookup.TryGetValue(key, out values))
+                if (!lookup.TryGetValue(key, out var values))
                 {
                     values = new List<V>();
                     lookup[key] = values;
@@ -831,7 +828,7 @@ namespace ServiceStack.OrmLite
                 var listInterface = fieldDef.FieldType.GetTypeWithGenericInterfaceOf(typeof(IList<>));
                 if (listInterface != null)
                 {
-                    loadRef.SetRefFieldList(fieldDef, listInterface.GenericTypeArguments()[0]);
+                    loadRef.SetRefFieldList(fieldDef, listInterface.GetGenericArguments()[0]);
                 }
                 else
                 {
@@ -857,7 +854,7 @@ namespace ServiceStack.OrmLite
                 var listInterface = fieldDef.FieldType.GetTypeWithGenericInterfaceOf(typeof(IList<>));
                 if (listInterface != null)
                 {
-                    loadList.SetRefFieldList(fieldDef, listInterface.GenericTypeArguments()[0]);
+                    loadList.SetRefFieldList(fieldDef, listInterface.GetGenericArguments()[0]);
                 }
                 else
                 {
@@ -929,8 +926,7 @@ namespace ServiceStack.OrmLite
             if (p.DbType == DbType.String)
             {
                 p.Size = dialectProvider.GetStringConverter().StringLength;
-                string strValue = value as string;
-                if (strValue != null && strValue.Length > p.Size)
+                if (value is string strValue && strValue.Length > p.Size)
                     p.Size = strValue.Length;
             }
 

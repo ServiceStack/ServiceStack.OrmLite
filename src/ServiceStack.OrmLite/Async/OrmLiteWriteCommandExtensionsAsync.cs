@@ -403,8 +403,7 @@ namespace ServiceStack.OrmLite
                         }
                         else
                         {
-                            if (OrmLiteConfig.InsertFilter != null)
-                                OrmLiteConfig.InsertFilter(dbCmd, row);
+                            OrmLiteConfig.InsertFilter?.Invoke(dbCmd, row);
 
                             await dbCmd.InsertAsync(token, row);
                         }
@@ -436,7 +435,7 @@ namespace ServiceStack.OrmLite
                 var listInterface = fieldDef.FieldType.GetTypeWithGenericInterfaceOf(typeof(IList<>));
                 if (listInterface != null)
                 {
-                    var refType = listInterface.GenericTypeArguments()[0];
+                    var refType = listInterface.GetGenericArguments()[0];
                     var refModelDef = refType.GetModelDefinition();
 
                     var refField = modelDef.GetRefFieldDef(refModelDef, refType);

@@ -115,7 +115,7 @@ namespace ServiceStack.OrmLite.Support
         {
             public static CaseInsensitiveObjectComparer Instance = new CaseInsensitiveObjectComparer();
 
-            public bool Equals(object x, object y)
+            public new bool Equals(object x, object y)
             {
                 if (x == null && y == null) return true;
                 if (x == null || y == null) return false;
@@ -147,9 +147,8 @@ namespace ServiceStack.OrmLite.Support
 
             foreach (var result in parentResults)
             {
-                object childResult;
                 var fkValue = refSelf.GetValue(result);
-                if (fkValue != null && map.TryGetValue(fkValue, out childResult))
+                if (fkValue != null && map.TryGetValue(fkValue, out var childResult))
                 {
                     fieldDef.SetValueFn(result, childResult);
                 }
@@ -168,9 +167,8 @@ namespace ServiceStack.OrmLite.Support
 
             foreach (var result in parentResults)
             {
-                object childResult;
                 var pkValue = modelDef.PrimaryKey.GetValue(result);
-                if (map.TryGetValue(pkValue, out childResult))
+                if (map.TryGetValue(pkValue, out var childResult))
                 {
                     fieldDef.SetValueFn(result, childResult);
                 }
