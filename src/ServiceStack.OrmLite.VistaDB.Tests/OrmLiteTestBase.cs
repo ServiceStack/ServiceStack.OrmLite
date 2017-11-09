@@ -12,7 +12,7 @@ namespace ServiceStack.OrmLite.VistaDB.Tests
 
         protected virtual string DataFileName { get; private set; }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void TestFixtureSetUp()
         {
             LogManager.LogFactory = new ConsoleLogFactory();
@@ -25,7 +25,7 @@ namespace ServiceStack.OrmLite.VistaDB.Tests
             ConnectionString = "Data Source=" + DataFileName + ";";
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void TestFixtureTearDown()
         {
             if (File.Exists(DataFileName))

@@ -600,8 +600,7 @@ namespace ServiceStack.OrmLite.Firebird
 
             if (value.ToString() != "0")
             {
-                long nv;
-                if (long.TryParse(value.ToString(), out nv))
+                if (long.TryParse(value.ToString(), out var nv))
                 {
                     LastInsertId = nv;
                     retObj = LastInsertId;

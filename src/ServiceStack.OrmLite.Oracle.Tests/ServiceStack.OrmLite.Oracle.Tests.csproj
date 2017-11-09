@@ -13,7 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NUnit" Version="3.6.1" />
+    <PackageReference Include="NUnit" Version="3.8.1" />
     <Reference Include="..\..\lib\net45\ServiceStack.Interfaces.dll" />
   </ItemGroup>
 

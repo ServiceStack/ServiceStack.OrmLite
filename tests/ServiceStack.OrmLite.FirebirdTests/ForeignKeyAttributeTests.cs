@@ -6,7 +6,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 	[TestFixture]
 	public class ForeignKeyAttributeTests : OrmLiteTestBase
 	{
-		[TestFixtureSetUp]
+		[OneTimeSetUp]
 		public void Setup()
 		{
 			using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
@@ -99,7 +99,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 			}
 		}
 		
-		[TestFixtureTearDown]
+		[OneTimeTearDown]
 		public void TearDwon()
 		{
 			using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())

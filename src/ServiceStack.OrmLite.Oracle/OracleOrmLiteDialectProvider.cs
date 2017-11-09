@@ -319,9 +319,8 @@ namespace ServiceStack.OrmLite.Oracle
 
             foreach (IDataParameter p in dbCmd.Parameters)
             {
-                FieldDefinition fieldDef;
                 var fieldName = this.ToFieldName(p.ParameterName);
-                fieldMap.TryGetValue(fieldName, out fieldDef);
+                fieldMap.TryGetValue(fieldName, out var fieldDef);
 
                 if (fieldDef == null)
                     throw new ArgumentException("Field Definition '{0}' was not found".Fmt(fieldName));
@@ -805,8 +804,7 @@ namespace ServiceStack.OrmLite.Oracle
         {
             if (!isInsert)
             {
-                long nv;
-                return long.TryParse(value.ToString(), out nv) 
+                return long.TryParse(value.ToString(), out var nv) 
                     ? nv 
                     : 0;
             }
