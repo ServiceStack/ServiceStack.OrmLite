@@ -18,7 +18,7 @@
     <copyright>ServiceStack and contributors</copyright>
     <dependencies>
       <group targetFramework="net45">
-        <dependency id="System.Data.SQLite.Core" version="[1.0.105.2, )" />
+        <dependency id="System.Data.SQLite.Core" version="[1.0.106, )" />
         <dependency id="ServiceStack.OrmLite" version="5.0.0" />
       </group>
       <group targetFramework=".netstandard2.0">
