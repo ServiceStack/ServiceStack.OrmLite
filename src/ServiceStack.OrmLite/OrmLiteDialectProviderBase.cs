@@ -148,13 +148,6 @@ namespace ServiceStack.OrmLite
             return stringConverter.GetColumnDefinition(fieldLength);
         }
 
-        [Obsolete("Use GetConverter().DbType")]
-        public virtual DbType GetColumnDbType(Type columnType)
-        {
-            var converter = GetConverterBestMatch(columnType);
-            return converter.DbType;
-        }
-
         public virtual void InitDbParam(IDbDataParameter dbParam, Type columnType)
         {
             var converter = GetConverterBestMatch(columnType);
@@ -174,20 +167,6 @@ namespace ServiceStack.OrmLite
         public DecimalConverter DecimalConverter => (DecimalConverter)Converters[typeof(decimal)];
 
         public StringConverter StringConverter => (StringConverter)Converters[typeof(string)];
-
-        [Obsolete("Use GetStringConverter().UseUnicode")]
-        public virtual bool UseUnicode
-        {
-            get => StringConverter.UseUnicode;
-            set => StringConverter.UseUnicode = true;
-        }
-
-        [Obsolete("Use GetStringConverter().StringLength")]
-        public int DefaultStringLength
-        {
-            get => StringConverter.StringLength;
-            set => StringConverter.StringLength = value;
-        }
 
         public Action<IDbConnection> OnOpenConnection { get; set; }
 
@@ -444,26 +423,6 @@ namespace ServiceStack.OrmLite
             return StringBuilderCache.ReturnAndFree(sql);
         }
 
-        [Obsolete("Use GetColumnDefinition(fieldDef)")]
-        public string GetColumnDefinition(string fieldName, Type fieldType,
-            bool isPrimaryKey, bool autoIncrement, bool isNullable, bool isRowVersion,
-            int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
-        {
-            return GetColumnDefinition(new FieldDefinition
-            {
-                Name = fieldName,
-                FieldType = fieldType,
-                IsPrimaryKey = isPrimaryKey,
-                AutoIncrement = autoIncrement,
-                IsNullable = isNullable,
-                IsRowVersion = isRowVersion,
-                FieldLength = fieldLength,
-                Scale = scale,
-                DefaultValue = defaultValue,
-                CustomFieldDefinition = customFieldDefinition,
-            });
-        }
-
         public virtual string SelectIdentitySql { get; set; }
 
         public virtual long GetLastInsertId(IDbCommand dbCmd)
@@ -472,13 +431,6 @@ namespace ServiceStack.OrmLite
                 throw new NotImplementedException("Returning last inserted identity is not implemented on this DB Provider.");
 
             dbCmd.CommandText = SelectIdentitySql;
-            return dbCmd.ExecLongScalar();
-        }
-
-        [Obsolete("Use GetLastInsertIdSqlSuffix()")]
-        public virtual long InsertAndGetLastInsertId<T>(IDbCommand dbCmd)
-        {
-            dbCmd.CommandText += GetLastInsertIdSqlSuffix<T>();
             return dbCmd.ExecLongScalar();
         }
 

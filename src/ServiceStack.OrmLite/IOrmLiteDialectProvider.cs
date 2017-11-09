@@ -45,12 +45,6 @@ namespace ServiceStack.OrmLite
 
         string ParamString { get; set; }
 
-        [Obsolete("Use GetStringConverter().UseUnicode")]
-        bool UseUnicode { get; set; }
-
-        [Obsolete("Use GetStringConverter().StringLength")]
-        int DefaultStringLength { get; set; }
-
         string EscapeWildcards(string value);
 
         INamingStrategy NamingStrategy { get; set; }
@@ -100,9 +94,6 @@ namespace ServiceStack.OrmLite
         string GetColumnDefinition(FieldDefinition fieldDef);
 
         long GetLastInsertId(IDbCommand command);
-
-        [Obsolete("Use GetLastInsertIdSqlSuffix()")]
-        long InsertAndGetLastInsertId<T>(IDbCommand dbCmd);
 
         string GetLastInsertIdSqlSuffix<T>();
 
@@ -177,9 +168,6 @@ namespace ServiceStack.OrmLite
         SelectItem[] GetColumnNames(ModelDefinition modelDef, bool tableQualified);
 
         SqlExpression<T> SqlExpression<T>();
-
-        [Obsolete("Use InitDbParam")]
-        DbType GetColumnDbType(Type columnType);
 
         IDbDataParameter CreateParam();
 

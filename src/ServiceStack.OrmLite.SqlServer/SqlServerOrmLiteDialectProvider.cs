@@ -93,20 +93,6 @@ namespace ServiceStack.OrmLite.SqlServer
             return new SqlConnection(connectionString);
         }
 
-        [Obsolete("Use SqlServerDialect.Provider.RegisterConverter<DateTime>(new SqlServerDateTime2Converter());")]
-        public void UseDatetime2(bool shouldUseDatetime2)
-        {
-            RegisterConverter<DateTime>(shouldUseDatetime2
-                ? new SqlServerDateTime2Converter()
-                : new SqlServerDateTimeConverter());
-        }
-
-        [Obsolete("Use GetDateTimeConverter().DateStyle = DateTimeKind.Utc")]
-        public void EnsureUtc(bool shouldEnsureUtc)
-        {
-            this.GetDateTimeConverter().DateStyle = DateTimeKind.Utc;
-        }
-
         public override SqlExpression<T> SqlExpression<T>() => new SqlServerExpression<T>(this);
 
         public override IDbDataParameter CreateParam() => new SqlParameter();
