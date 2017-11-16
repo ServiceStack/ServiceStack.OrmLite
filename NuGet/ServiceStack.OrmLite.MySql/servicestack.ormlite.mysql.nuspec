@@ -23,7 +23,7 @@
         <dependency id="ServiceStack.OrmLite" version="5.0.0" />
       </group>
       <group targetFramework=".netstandard2.0">
-        <dependency id="MySql.Data" version="[8.0.8-dmr, )" />
+        <dependency id="MySql.Data" version="[8.0.9-dmr, )" />
         <dependency id="ServiceStack.OrmLite" version="5.0.0" />
       </group>
     </dependencies>

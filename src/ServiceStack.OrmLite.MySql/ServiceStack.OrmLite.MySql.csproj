@@ -47,7 +47,7 @@
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <PackageReference Include="Mysql.Data" Version="8.0.8-dmr" />
+    <PackageReference Include="Mysql.Data" Version="8.0.9-dmr" />
 
     <Reference Include="..\..\lib\netstandard2.0\ServiceStack.Interfaces.dll" />
     <Reference Include="..\..\lib\netstandard2.0\ServiceStack.Text.dll" />
