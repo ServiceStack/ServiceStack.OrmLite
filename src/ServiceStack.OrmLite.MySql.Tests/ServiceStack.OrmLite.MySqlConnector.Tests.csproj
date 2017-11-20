@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net45;netcoreapp2.0</TargetFrameworks>
+    <TargetFrameworks>net46;netcoreapp2.0</TargetFrameworks>
     <DebugType>portable</DebugType>
     <AssemblyName>ServiceStack.OrmLite.MySql.Tests</AssemblyName>
     <OutputType>Library</OutputType>
@@ -56,18 +56,18 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="NUnit" Version="3.8.1" />
+    <PackageReference Include="NUnit" Version="3.9.0" />
   </ItemGroup>
 
   <PropertyGroup>
     <DefineConstants>$(DefineConstants);MYSQLCONNECTOR</DefineConstants>
   </PropertyGroup>
   
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net45' ">
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net46' ">
     <DefineConstants>$(DefineConstants);NET45</DefineConstants>
   </PropertyGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
     <Reference Include="System.Configuration" />
     <Reference Include="System.Threading" />
     <Reference Include="System.Threading.Tasks" />

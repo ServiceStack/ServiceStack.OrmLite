@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net45</TargetFramework>
+    <TargetFramework>net46</TargetFramework>
     <AssemblyName>ServiceStack.OrmLite.Sqlite.Windows.Testss</AssemblyName>
     <PackageId>ServiceStack.OrmLite.Sqlite.Windows.Tests</PackageId>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
@@ -15,18 +15,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NUnit" Version="3.8.1" />
+    <PackageReference Include="NUnit" Version="3.9.0" />
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj" />
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Sqlite.Windows\ServiceStack.OrmLite.Sqlite.Windows.csproj" />
     <ProjectReference Include="..\ServiceStack.OrmLite.Tests\ServiceStack.OrmLite.Tests.csproj" />
     <Reference Include="..\..\lib\net45\ServiceStack.Interfaces.dll" />
   </ItemGroup>
   
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net45' ">
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net46' ">
     <DefineConstants>$(DefineConstants);NET45</DefineConstants>
   </PropertyGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
     <Reference Include="System.Configuration" />
     <Reference Include="System.Threading" />
     <Reference Include="System.Threading.Tasks" />

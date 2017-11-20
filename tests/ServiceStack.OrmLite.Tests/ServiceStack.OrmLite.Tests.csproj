@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net45;netcoreapp2.0</TargetFrameworks>
-    <!--<TargetFrameworks>net45</TargetFrameworks>-->
+    <TargetFrameworks>net46;netcoreapp2.0</TargetFrameworks>
+    <!--<TargetFrameworks>net46</TargetFrameworks>-->
     <DebugType>portable</DebugType>
     <AssemblyName>ServiceStack.OrmLite.Tests</AssemblyName>
     <OutputType>Library</OutputType>
@@ -26,15 +26,23 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="NUnit" Version="3.8.1" />
-    <PackageReference Include="System.ValueTuple" Version="4.3.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.9.0" />
+    <PackageReference Include="NUnit" Version="3.9.0" />
+    <PackageReference Include="System.Reflection" Version="4.3.0" />
+    <PackageReference Include="System.Reflection.Primitives" Version="4.3.0" />
+    <PackageReference Include="System.Reflection.TypeExtensions" Version="4.4.0" />
+    <PackageReference Include="System.Runtime" Version="4.3.0" />
+    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
+    <PackageReference Include="System.Runtime.Serialization.Xml" Version="4.3.0" />
+    <PackageReference Include="System.ValueTuple" Version="4.4.0" />
   </ItemGroup>
   
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net45' ">
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net46' ">
     <DefineConstants>$(DefineConstants);NET45</DefineConstants>
   </PropertyGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
     <PackageReference Include="System.Data.SQLite.Core" Version="1.0.106" />
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Oracle\ServiceStack.OrmLite.Oracle.csproj" />
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Firebird\ServiceStack.OrmLite.Firebird.csproj" />
@@ -70,7 +78,7 @@
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(NUNITLITE)' != '' ">
-    <PackageReference Include="NUnitLite" Version="3.8.1" />
+    <PackageReference Include="NUnitLite" Version="3.9.0" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
