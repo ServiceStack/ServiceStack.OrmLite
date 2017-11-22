@@ -46,6 +46,8 @@ namespace ServiceStack.OrmLite
         public List<IDbDataParameter> Params { get; set; }
         public Func<string,string> SqlFilter { get; set; }
         public static Action<SqlExpression<T>> SelectFilter { get; set; }
+        public int? Rows { get; set; }
+        public int? Offset { get; set; }
 
         protected string Sep => sep;
 
@@ -70,24 +72,30 @@ namespace ServiceStack.OrmLite
 
         protected virtual SqlExpression<T> CopyTo(SqlExpression<T> to)
         {
+            to.visitedExpressionIsTableColumn = visitedExpressionIsTableColumn;
+            to.skipParameterizationForThisExpression = skipParameterizationForThisExpression;
             to.underlyingExpression = underlyingExpression;
             to.orderByProperties = orderByProperties;
             to.selectExpression = selectExpression;
-            to.selectDistinct = selectDistinct;
-            to.CustomSelect = CustomSelect;
             to.fromExpression = fromExpression;
             to.whereExpression = whereExpression;
             to.groupBy = groupBy;
             to.havingExpression = havingExpression;
             to.orderBy = orderBy;
-            to.OnlyFields = OnlyFields != null ? new HashSet<string>(OnlyFields) : null;
+            to.OnlyFields = OnlyFields != null ? new HashSet<string>(OnlyFields, StringComparer.OrdinalIgnoreCase) : null;
             to.UpdateFields = UpdateFields;
             to.InsertFields = InsertFields;
+            to.useFieldName = useFieldName;
+            to.selectDistinct = selectDistinct;
+            to.CustomSelect = CustomSelect;
             to.modelDef = modelDef;
             to.PrefixFieldWithTableName = PrefixFieldWithTableName;
             to.WhereStatementWithoutWhereString = WhereStatementWithoutWhereString;
             to.Params = new List<IDbDataParameter>(Params);
             to.SqlFilter = SqlFilter;
+            to.Offset = Offset;
+            to.Rows = Rows;
+            to.tableDefs = tableDefs;
             return to;
         }
 
@@ -1212,9 +1220,6 @@ namespace ServiceStack.OrmLite
                 orderBy = value;
             }
         }
-
-        public int? Rows { get; set; }
-        public int? Offset { get; set; }
 
         public ModelDefinition ModelDef
         {
