@@ -34,13 +34,17 @@ namespace ServiceStack.OrmLite.Support
             this.dbCmd = dbCmd;
             this.q = q;
 
-            var sql = q.SelectInto<Into>();
-            parentResults = dbCmd.ExprConvertToList<Into>(sql, q.Params, onlyFields:q.OnlyFields);
+            //Use .Clone() to prevent SqlExpressionSelectFilter from adding params to original query
+            var parentQ = q.Clone();
+            var sql = parentQ.SelectInto<Into>();
+            parentResults = dbCmd.ExprConvertToList<Into>(sql, parentQ.Params, onlyFields:q.OnlyFields);
 
             modelDef = ModelDefinition<Into>.Definition;
             fieldDefs = modelDef.AllFieldDefinitionsArray.Where(x => x.IsReference).ToList();
 
-            subSql = dialectProvider.GetLoadChildrenSubSelect(q);
+            var subQ = q.Clone();
+            var subQSql = dialectProvider.GetLoadChildrenSubSelect(subQ);
+            subSql = dialectProvider.MergeParamsIntoSql(subQSql, subQ.Params);
         }
 
         protected string GetRefListSql(ModelDefinition refModelDef, FieldDefinition refField)
@@ -83,9 +87,10 @@ namespace ServiceStack.OrmLite.Support
         protected string GetRefSelfSql(ModelDefinition modelDef, FieldDefinition refSelf, ModelDefinition refModelDef)
         {
             //Load Self Table.RefTableId PK
-            q.Select(dialectProvider.GetQuotedColumnName(modelDef, refSelf));
+            var refQ = q.Clone();
+            refQ.Select(dialectProvider.GetQuotedColumnName(modelDef, refSelf));
 
-            var subSqlRef = q.ToSelectStatement();
+            var subSqlRef = refQ.ToMergedParamsSelectStatement();
 
             var sqlRef = $"SELECT {dialectProvider.GetColumnNames(refModelDef)} " +
                          $"FROM {dialectProvider.GetQuotedTableName(refModelDef)} " +

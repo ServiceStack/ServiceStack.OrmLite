@@ -1130,6 +1130,16 @@ namespace ServiceStack.OrmLite
                 : sql;
         }
 
+        /// <summary>
+        /// Merge params into an encapsulated SQL Statement with embedded param values
+        /// </summary>
+        public virtual string ToMergedParamsSelectStatement()
+        {
+            var sql = this.ToSelectStatement();
+            var mergedSql = DialectProvider.MergeParamsIntoSql(sql, Params);
+            return mergedSql;
+        }
+
         public virtual string ToCountStatement()
         {
             SelectFilter?.Invoke(this);
