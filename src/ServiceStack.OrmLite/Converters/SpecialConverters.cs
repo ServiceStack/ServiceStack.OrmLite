@@ -69,8 +69,7 @@ namespace ServiceStack.OrmLite.Converters
 
         public override object FromDbValue(Type fieldType, object value)
         {
-	        var bytes = value as byte[];
-	        if (bytes != null)
+            if (value is byte[] bytes)
 	        {
 		        if (fieldType == typeof(byte[])) return bytes;
 		        if (fieldType == typeof(ulong)) return OrmLiteUtils.ConvertToULong(bytes);
@@ -78,7 +77,10 @@ namespace ServiceStack.OrmLite.Converters
 		        // an SQL row version has to be declared as either byte[] OR ulong... 
 		        throw new Exception("Rowversion property must be declared as either byte[] or ulong");
 	        }
-	        return null;
+
+            return value != null
+                ? this.ConvertNumber(typeof(ulong), value)
+                : null;
         }
     }
 
