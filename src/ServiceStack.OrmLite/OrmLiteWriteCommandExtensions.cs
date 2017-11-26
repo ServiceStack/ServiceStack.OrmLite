@@ -939,10 +939,10 @@ namespace ServiceStack.OrmLite
             dbCmd.ExecuteNonQuery();
         }
 
-        internal static ulong GetRowVersion(this IDbCommand dbCmd, ModelDefinition modelDef, object id)
+        internal static object GetRowVersion(this IDbCommand dbCmd, ModelDefinition modelDef, object id)
         {
             var sql = RowVersionSql(dbCmd, modelDef, id);
-            return dbCmd.GetDialectProvider().FromDbRowVersion(dbCmd.Scalar<object>(sql));
+            return dbCmd.GetDialectProvider().FromDbRowVersion(modelDef.RowVersion.FieldType, dbCmd.Scalar<object>(sql));
         }
 
         internal static string RowVersionSql(this IDbCommand dbCmd, ModelDefinition modelDef, object id)

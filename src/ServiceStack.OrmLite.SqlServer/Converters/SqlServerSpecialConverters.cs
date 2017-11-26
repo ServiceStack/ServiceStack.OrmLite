@@ -24,11 +24,20 @@ namespace ServiceStack.OrmLite.SqlServer.Converters
             return null;
         }
 
-        public override ulong FromDbRowVersion(object value)
-        {
-            var bytes = value as byte[];
-            var ulongValue = OrmLiteUtils.ConvertToULong(bytes);
-            return ulongValue;
-        }
+  //      public override object FromDbRowVersion(Type fieldType, object value)
+  //      {
+  //          var bytes = value as byte[];
+	 //       if (bytes != null)
+	 //       {
+		//        if (fieldType == typeof(byte[])) return bytes;
+		//        if (fieldType == typeof(ulong)) return OrmLiteUtils.ConvertToULong(bytes);
+
+		//        // an SQL row version has to be declared as either byte[] OR ulong... 
+		//        throw new Exception("SQL Rowversion property must be declared as either byte[] or ulong");
+	 //       }
+		//	//var ulongValue = OrmLiteUtils.ConvertToULong(bytes);
+		//	//return ulongValue;
+		//	throw new Exception("Rowversion could not be parsed as byte array");
+		//}
     }
 }

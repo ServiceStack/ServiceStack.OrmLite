@@ -67,16 +67,26 @@ namespace ServiceStack.OrmLite.Converters
     {
         public override string ColumnDefinition => "BIGINT";
 
-        public virtual ulong FromDbRowVersion(object value)
+        public virtual object FromDbRowVersion(Type fieldType, object value)
         {
-            return (ulong)this.ConvertNumber(typeof(ulong), value);
+            //return (ulong)this.ConvertNumber(typeof(ulong), value);
+
+	        return this.FromDbValue(fieldType, value);
         }
+
 
         public override object FromDbValue(Type fieldType, object value)
         {
-            return value != null
-                ? this.ConvertNumber(typeof(ulong), value)
-                : null;
+	        var bytes = value as byte[];
+	        if (bytes != null)
+	        {
+		        if (fieldType == typeof(byte[])) return bytes;
+		        if (fieldType == typeof(ulong)) return OrmLiteUtils.ConvertToULong(bytes);
+
+		        // an SQL row version has to be declared as either byte[] OR ulong... 
+		        throw new Exception("SQL Rowversion property must be declared as either byte[] or ulong");
+	        }
+	        return null;
         }
     }
 

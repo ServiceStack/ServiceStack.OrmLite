@@ -252,9 +252,9 @@ namespace ServiceStack.OrmLite
             return converter == null || converter is NativeValueOrmLiteConverter;
         }
 
-        public virtual ulong FromDbRowVersion(object value)
+        public virtual object FromDbRowVersion(Type fieldType, object value)
         {
-            return RowVersionConverter.FromDbRowVersion(value);
+            return RowVersionConverter.FromDbRowVersion(fieldType, value);
         }
 
         public IOrmLiteConverter GetConverterBestMatch(Type type)
