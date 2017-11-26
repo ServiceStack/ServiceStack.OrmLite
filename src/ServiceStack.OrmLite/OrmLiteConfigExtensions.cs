@@ -95,7 +95,7 @@ namespace ServiceStack.OrmLite
                     || propertyInfo.HasAttributeNamed(typeof(PrimaryKeyAttribute).Name);
 
                 var isRowVersion = propertyInfo.Name == ModelDefinition.RowVersionName
-                    && propertyInfo.PropertyType == typeof(ulong);
+                    && (propertyInfo.PropertyType == typeof(ulong) || propertyInfo.PropertyType == typeof(byte[]));
 
                 var isNullableType = propertyInfo.PropertyType.IsNullableType();
 

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data;
 using ServiceStack.OrmLite.Converters;
 
 namespace ServiceStack.OrmLite.SqlServer.Converters
@@ -16,8 +15,11 @@ namespace ServiceStack.OrmLite.SqlServer.Converters
             var bytes = value as byte[];
             if (bytes != null)
             {
-                var ulongValue = OrmLiteUtils.ConvertToULong(bytes);
-                return ulongValue;
+	            if (fieldType == typeof(byte[])) return bytes;
+				if (fieldType == typeof(ulong)) return OrmLiteUtils.ConvertToULong(bytes);
+
+                // an SQL row version has to be declared as either byte[] OR ulong... 
+				throw new Exception("SQL Rowversion property must be declared as either byte[] or ulong");
             }
             return null;
         }
