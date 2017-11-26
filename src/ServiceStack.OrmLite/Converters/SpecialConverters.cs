@@ -67,14 +67,6 @@ namespace ServiceStack.OrmLite.Converters
     {
         public override string ColumnDefinition => "BIGINT";
 
-        public virtual object FromDbRowVersion(Type fieldType, object value)
-        {
-            //return (ulong)this.ConvertNumber(typeof(ulong), value);
-
-	        return this.FromDbValue(fieldType, value);
-        }
-
-
         public override object FromDbValue(Type fieldType, object value)
         {
 	        var bytes = value as byte[];
@@ -84,7 +76,7 @@ namespace ServiceStack.OrmLite.Converters
 		        if (fieldType == typeof(ulong)) return OrmLiteUtils.ConvertToULong(bytes);
 
 		        // an SQL row version has to be declared as either byte[] OR ulong... 
-		        throw new Exception("SQL Rowversion property must be declared as either byte[] or ulong");
+		        throw new Exception("Rowversion property must be declared as either byte[] or ulong");
 	        }
 	        return null;
         }

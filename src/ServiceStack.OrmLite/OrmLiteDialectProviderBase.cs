@@ -252,12 +252,12 @@ namespace ServiceStack.OrmLite
             return converter == null || converter is NativeValueOrmLiteConverter;
         }
 
-        public virtual object FromDbRowVersion(Type fieldType, object value)
-        {
-            return RowVersionConverter.FromDbRowVersion(fieldType, value);
-        }
+		public virtual object FromDbRowVersion(Type fieldType, object value)
+		{
+			return RowVersionConverter.FromDbValue(fieldType, value);
+		}
 
-        public IOrmLiteConverter GetConverterBestMatch(Type type)
+		public IOrmLiteConverter GetConverterBestMatch(Type type)
         {
             var converter = GetConverter(type);
             if (converter != null)

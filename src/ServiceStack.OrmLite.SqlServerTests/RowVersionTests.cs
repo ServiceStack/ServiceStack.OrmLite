@@ -170,7 +170,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
 				{
 					// test original ulong version with child operations
 					var ulongId1 = Guid.NewGuid();
-					db.Insert(new UlongTbl
+					db.Save(new UlongTbl
 					{
 						Id = ulongId1,
 						Children = new List<UlongChildTbl>()
@@ -178,8 +178,11 @@ namespace ServiceStack.OrmLite.SqlServerTests
 							new UlongChildTbl { Id = Guid.NewGuid() },
 							new UlongChildTbl { Id = Guid.NewGuid() }
 						}
-					});
-					db.LoadSelect<UlongTbl>(x => x.Id == ulongId1);
+					}, references: true);
+					var ulongObj1 = db.LoadSelect<UlongTbl>(x => x.Id == ulongId1, x => x.Children).First();
+					Assert.AreNotEqual(default(byte[]), ulongObj1.RowVersion);
+					Assert.AreNotEqual(default(byte[]), ulongObj1.Children[0].RowVersion);
+					Assert.AreNotEqual(default(byte[]), ulongObj1.Children[1].RowVersion);
 
 					var ulongId2 = Guid.NewGuid();
 					db.Save(new UlongTbl
@@ -190,8 +193,11 @@ namespace ServiceStack.OrmLite.SqlServerTests
 							new UlongChildTbl {Id = Guid.NewGuid()},
 							new UlongChildTbl {Id = Guid.NewGuid()}
 						}
-					});
-					db.LoadSelect<UlongTbl>(x => x.Id == ulongId2);
+					}, references: true);
+					var ulongObj2 = db.LoadSelect<UlongTbl>(x => x.Id == ulongId2, x => x.Children).First();
+					Assert.AreNotEqual(default(byte[]), ulongObj2.RowVersion);
+					Assert.AreNotEqual(default(byte[]), ulongObj2.Children[0].RowVersion);
+					Assert.AreNotEqual(default(byte[]), ulongObj2.Children[1].RowVersion);
 
 					// COnfirm multip select logic works
 					var q = db.From<UlongTbl>()
@@ -202,22 +208,27 @@ namespace ServiceStack.OrmLite.SqlServerTests
 					{
 						UlongTbl parent = tuple.Item1;
 						UlongChildTbl child = tuple.Item2;
+						Assert.AreNotEqual(default(byte[]), parent.RowVersion);
+						Assert.AreNotEqual(default(byte[]), child.RowVersion);
 					}
 				}
 
 				{
 					// test byte[] version with child operations
 					var byteid1 = Guid.NewGuid();
-					db.Insert(new ByteTbl
+					db.Save(new ByteTbl
 					{
 						Id = byteid1,
 						Children = new List<ByteChildTbl>()
 						{
-							new ByteChildTbl() { Id = Guid.NewGuid() },
-							new ByteChildTbl { Id = Guid.NewGuid() }
+							new ByteChildTbl() { Id = Guid.NewGuid(), ParentId = byteid1},
+							new ByteChildTbl { Id = Guid.NewGuid(), ParentId = byteid1 }
 						}
-					});
-					var result = db.LoadSelect<ByteTbl>(x => x.Id == byteid1);
+					}, references: true);
+					var byteObj1 = db.LoadSelect<ByteTbl>(x => x.Id == byteid1, x => x.Children).First();
+					Assert.AreNotEqual(default(byte[]), byteObj1.RowVersion);
+					Assert.AreNotEqual(default(byte[]), byteObj1.Children[0].RowVersion);
+					Assert.AreNotEqual(default(byte[]), byteObj1.Children[1].RowVersion);
 
 					var byteid2 = Guid.NewGuid();
 					db.Save(new ByteTbl
@@ -225,11 +236,14 @@ namespace ServiceStack.OrmLite.SqlServerTests
 						Id = byteid2,
 						Children = new List<ByteChildTbl>()
 						{
-							new ByteChildTbl {Id = Guid.NewGuid()},
-							new ByteChildTbl {Id = Guid.NewGuid()}
+							new ByteChildTbl {Id = Guid.NewGuid(), ParentId = byteid2},
+							new ByteChildTbl {Id = Guid.NewGuid(), ParentId = byteid2}
 						}
-					});
-					db.LoadSelect<ByteTbl>(x => x.Id == byteid2);
+					}, references: true);
+					var byteObj2 = db.LoadSelect<ByteTbl>(x => x.Id == byteid2, x => x.Children).First();
+					Assert.AreNotEqual(default(byte[]), byteObj2.RowVersion);
+					Assert.AreNotEqual(default(byte[]), byteObj2.Children[0].RowVersion);
+					Assert.AreNotEqual(default(byte[]), byteObj2.Children[1].RowVersion);
 
 					// COnfirm multip select logic works
 					var q = db.From<ByteTbl>()
@@ -240,9 +254,45 @@ namespace ServiceStack.OrmLite.SqlServerTests
 					{
 						ByteTbl parent = tuple.Item1;
 						ByteChildTbl child = tuple.Item2;
+						Assert.AreNotEqual(default(byte[]), parent.RowVersion);
+						Assert.AreNotEqual(default(byte[]), child.RowVersion);
 					}
 				}
 
+
+				{
+					// test the multi select using dapper
+
+					var byteid2 = Guid.NewGuid();
+					db.Save(new ByteTbl
+					{
+						Id = byteid2,
+						Children = new List<ByteChildTbl>()
+						{
+							new ByteChildTbl {Id = Guid.NewGuid(), ParentId = byteid2},
+							new ByteChildTbl {Id = Guid.NewGuid(), ParentId = byteid2}
+						}
+					}, references: true);
+
+					var q = db.From<ByteTbl>()
+						.Join<ByteTbl, ByteChildTbl>()
+						.Select("*");
+
+					using (var multi = db.QueryMultiple(q.ToSelectStatement()))
+					{
+						var results = multi.Read<ByteTbl, ByteChildTbl,
+							Tuple<ByteTbl, ByteChildTbl>>(Tuple.Create).ToList();
+
+						foreach (var tuple in results)
+						{
+							ByteTbl parent = tuple.Item1;
+							ByteChildTbl child = tuple.Item2;
+							Assert.AreNotEqual(default(byte[]), parent.RowVersion);
+							Assert.AreNotEqual(default(byte[]), child.RowVersion);
+						}
+						Assert.True(results.Count > 0);
+					}
+				}
 				//Console.WriteLine("hit a key to end test");
 				//Console.ReadLine();
 
