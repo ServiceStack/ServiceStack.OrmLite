@@ -161,7 +161,8 @@ namespace ServiceStack.OrmLite
 
         void DropColumn(IDbConnection db, Type modelType, string columnName);
 
-        ulong FromDbRowVersion(object value);
+        object FromDbRowVersion(Type fieldType,  object value);
+
         SelectItem GetRowVersionColumnName(FieldDefinition field, string tablePrefix = null);
 
         string GetColumnNames(ModelDefinition modelDef);
