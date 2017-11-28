@@ -139,14 +139,14 @@ namespace ServiceStack.OrmLite
                     IsPrimaryKey = isPrimaryKey,
                     AutoIncrement =
                         isPrimaryKey &&
-                        propertyInfo.HasAttributeNamed(nameof(AutoIncrementAttribute)),
+                        propertyInfo.HasAttribute<AutoIncrementAttribute>(),
                     IsIndexed = !isPrimaryKey && isIndex,
                     IsUnique = isUnique,
                     IsClustered = indexAttr != null && indexAttr.Clustered,
                     IsNonClustered = indexAttr != null && indexAttr.NonClustered,
                     IsRowVersion = isRowVersion,
-                    IgnoreOnInsert = propertyInfo.HasAttributeNamed(nameof(IgnoreOnInsertAttribute)),
-                    IgnoreOnUpdate = propertyInfo.HasAttributeNamed(nameof(IgnoreOnUpdateAttribute)),
+                    IgnoreOnInsert = propertyInfo.HasAttribute<IgnoreOnInsertAttribute>(),
+                    IgnoreOnUpdate = propertyInfo.HasAttribute<IgnoreOnUpdateAttribute>(),
                     FieldLength = stringLengthAttr?.MaximumLength,
                     DefaultValue = defaultValueAttr?.DefaultValue,
                     CheckConstraint = chkConstraintAttr?.Constraint,
@@ -166,7 +166,7 @@ namespace ServiceStack.OrmLite
                     IsRefType = propertyType.IsRefType(),
                 };
 
-                var isIgnored = propertyInfo.HasAttributeNamed(nameof(IgnoreAttribute))
+                var isIgnored = propertyInfo.HasAttribute<IgnoreAttribute>()
                     || fieldDefinition.IsReference;
                 if (isIgnored)
                     modelDef.IgnoredFieldDefinitions.Add(fieldDefinition);
