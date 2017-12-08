@@ -36,7 +36,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj" />
-    <PackageReference Include="MySqlConnector" Version="0.30.0" />
+    <PackageReference Include="MySqlConnector" Version="0.33.1" />
   </ItemGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net45' ">
