@@ -32,6 +32,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
             using (var db = OpenDbConnection())
             {
                 //db.DropAndCreateTable<UserAuth>(); //This test shouldn't query this table
+                db.DropAndCreateTable<UserAuth>();
                 db.DropAndCreateTable<DepartmentEntity>();
 
                 db.Insert(new DepartmentEntity { Name = "Dept A", Email = "asif@depta.com" });
