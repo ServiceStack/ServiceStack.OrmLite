@@ -1,18 +1,14 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.3
+VisualStudioVersion = 15.0.27130.2003
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{6CEB3EDE-9F02-4F4F-BD8A-1B2939C1AE6E}"
 	ProjectSection(SolutionItems) = preProject
-		..\build\appsettings.license.txt = ..\build\appsettings.license.txt
-		..\build\build-core.proj = ..\build\build-core.proj
-		..\build\build-core.sh = ..\build\build-core.sh
 		..\build\build.bat = ..\build\build.bat
 		..\build\build.proj = ..\build\build.proj
 		..\build\build.tasks = ..\build\build.tasks
 		..\build\copy.bat = ..\build\copy.bat
-		..\build\publish-core.sh = ..\build\publish-core.sh
 		..\README.md = ..\README.md
 		..\NuGet\ServiceStack.OrmLite.Firebird\servicestack.ormlite.firebird.nuspec = ..\NuGet\ServiceStack.OrmLite.Firebird\servicestack.ormlite.firebird.nuspec
 		..\NuGet\ServiceStack.OrmLite.MySql\servicestack.ormlite.mysql.nuspec = ..\NuGet\ServiceStack.OrmLite.MySql\servicestack.ormlite.mysql.nuspec
