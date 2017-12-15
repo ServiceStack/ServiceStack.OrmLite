@@ -96,7 +96,8 @@ namespace ServiceStack.OrmLite
 
             return (value is IEnumerable enumerable &&
                     !(enumerable is string ||
-                      enumerable is IEnumerable<KeyValuePair<string, object>>)
+                      enumerable is IEnumerable<KeyValuePair<string, object>> ||
+                      enumerable is byte[])
             ) ? enumerable : null;
         }
 
