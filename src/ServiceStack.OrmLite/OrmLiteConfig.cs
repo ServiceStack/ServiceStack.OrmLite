@@ -25,14 +25,8 @@ namespace ServiceStack.OrmLite
 
         public static int CommandTimeout
         {
-            get
-            {
-                return commandTimeout ?? defaultCommandTimeout;
-            }
-            set
-            {
-                commandTimeout = value;
-            }
+            get => commandTimeout ?? defaultCommandTimeout;
+            set => commandTimeout = value;
         }
 
         private static IOrmLiteDialectProvider dialectProvider;
@@ -47,24 +41,19 @@ namespace ServiceStack.OrmLite
                 }
                 return dialectProvider;
             }
-            set
-            {
-                dialectProvider = value;
-            }
+            set => dialectProvider = value;
         }
 
         public static IOrmLiteDialectProvider GetDialectProvider(this IDbCommand dbCmd)
         {
-            var ormLiteCmd = dbCmd as OrmLiteCommand;
-            return ormLiteCmd != null 
+            return dbCmd is OrmLiteCommand ormLiteCmd 
                 ? ormLiteCmd.DialectProvider
                 : DialectProvider;
         }
 
         public static IOrmLiteDialectProvider GetDialectProvider(this IDbConnection db)
         {
-            var ormLiteConn = db as OrmLiteConnection;
-            return ormLiteConn != null
+            return db is OrmLiteConnection ormLiteConn
                 ? ormLiteConn.DialectProvider
                 : DialectProvider;
         }
@@ -76,16 +65,14 @@ namespace ServiceStack.OrmLite
         }
 
         public static IOrmLiteExecFilter GetExecFilter(this IDbCommand dbCmd) {
-            var ormLiteCmd = dbCmd as OrmLiteCommand;
-            var dialectProvider = ormLiteCmd != null
+            var dialectProvider = dbCmd is OrmLiteCommand ormLiteCmd
                 ? ormLiteCmd.DialectProvider
                 : DialectProvider;
             return dialectProvider.GetExecFilter();
         }
 
         public static IOrmLiteExecFilter GetExecFilter(this IDbConnection db) {
-            var ormLiteConn = db as OrmLiteConnection;
-            var dialectProvider = ormLiteConn != null
+            var dialectProvider = db is OrmLiteConnection ormLiteConn
                 ? ormLiteConn.DialectProvider
                 : DialectProvider;
             return dialectProvider.GetExecFilter();
@@ -93,8 +80,7 @@ namespace ServiceStack.OrmLite
 
         public static void SetLastCommandText(this IDbConnection db, string sql)
         {
-            var ormLiteConn = db as OrmLiteConnection;
-            if (ormLiteConn != null)
+            if (db is OrmLiteConnection ormLiteConn)
             {
                 ormLiteConn.LastCommandText = sql;
             }
@@ -104,8 +90,7 @@ namespace ServiceStack.OrmLite
 
         public static void SetCommandTimeout(this IDbConnection db, int? commandTimeout)
         {
-            var ormLiteConn = db as OrmLiteConnection;
-            if (ormLiteConn == null)
+            if (!(db is OrmLiteConnection ormLiteConn))
                 throw new NotImplementedException(string.Format(RequiresOrmLiteConnection,"CommandTimeout"));
 
             ormLiteConn.CommandTimeout = commandTimeout;
@@ -167,7 +152,7 @@ namespace ServiceStack.OrmLite
                 var state = OrmLiteContext.OrmLiteState;
                 return state?.ResultsFilter;
             }
-            set { OrmLiteContext.GetOrCreateState().ResultsFilter = value; }
+            set => OrmLiteContext.GetOrCreateState().ResultsFilter = value;
         }
 
         private static IOrmLiteExecFilter execFilter;
@@ -182,7 +167,7 @@ namespace ServiceStack.OrmLite
                     ? dialectProvider.ExecFilter ?? execFilter 
                     : execFilter; 
             }
-            set { execFilter = value; }
+            set => execFilter = value;
         }
 
         public static Action<IDbCommand, object> InsertFilter { get; set; }
