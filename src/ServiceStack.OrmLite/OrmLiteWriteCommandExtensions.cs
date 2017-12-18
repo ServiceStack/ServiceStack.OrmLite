@@ -388,7 +388,7 @@ namespace ServiceStack.OrmLite
 
         internal static int Update<T>(this IDbCommand dbCmd, T[] objs, Action<IDbCommand> commandFilter = null)
         {
-            return dbCmd.UpdateAll(objs, commandFilter);
+            return dbCmd.UpdateAll(objs: objs, commandFilter: commandFilter);
         }
 
         internal static int UpdateAll<T>(this IDbCommand dbCmd, IEnumerable<T> objs, Action<IDbCommand> commandFilter = null)
@@ -628,7 +628,7 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecuteSql(dbCmd.GetDialectProvider().ToDeleteStatement(tableType, sql));
         }
 
-        internal static long Insert<T>(this IDbCommand dbCmd, T obj, bool selectIdentity = false)
+        internal static long Insert<T>(this IDbCommand dbCmd, T obj, Action<IDbCommand> commandFilter, bool selectIdentity = false)
         {
             OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj);
 
@@ -638,21 +638,24 @@ namespace ServiceStack.OrmLite
 
             dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
+            commandFilter?.Invoke(dbCmd); //dbCmd.OnConflictInsert() needs to be applied before last insert id
+
             if (selectIdentity)
             {
                 dbCmd.CommandText += dialectProvider.GetLastInsertIdSqlSuffix<T>();
+
                 return dbCmd.ExecLongScalar();
             }
 
             return dbCmd.ExecNonQuery();
         }
 
-        internal static void Insert<T>(this IDbCommand dbCmd, params T[] objs)
+        internal static void Insert<T>(this IDbCommand dbCmd, Action<IDbCommand> commandFilter, params T[] objs)
         {
-            InsertAll(dbCmd, objs);
+            dbCmd.InsertAll(objs: objs, commandFilter: commandFilter);
         }
 
-        internal static void InsertAll<T>(this IDbCommand dbCmd, IEnumerable<T> objs)
+        internal static void InsertAll<T>(this IDbCommand dbCmd, IEnumerable<T> objs, Action<IDbCommand> commandFilter)
         {
             IDbTransaction dbTrans = null;
 
@@ -664,6 +667,8 @@ namespace ServiceStack.OrmLite
                 var dialectProvider = dbCmd.GetDialectProvider();
 
                 dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd);
+
+                commandFilter?.Invoke(dbCmd);
 
                 foreach (var obj in objs)
                 {
@@ -749,14 +754,14 @@ namespace ServiceStack.OrmLite
                 if (modelDef.HasAutoIncrementId)
                 {
                     var dialectProvider = dbCmd.GetDialectProvider();
-                    var newId = dbCmd.Insert(obj, selectIdentity: true);
+                    var newId = dbCmd.Insert(obj, commandFilter:null, selectIdentity: true);
                     var safeId = dialectProvider.FromDbValue(newId, modelDef.PrimaryKey.FieldType);
                     modelDef.PrimaryKey.SetValueFn(obj, safeId);
                     id = newId;
                 }
                 else
                 {
-                    dbCmd.Insert(obj);
+                    dbCmd.Insert(obj, commandFilter:null);
                 }
 
                 modelDef.RowVersion?.SetValueFn(obj, dbCmd.GetRowVersion(modelDef, id));
@@ -811,7 +816,7 @@ namespace ServiceStack.OrmLite
                         if (modelDef.HasAutoIncrementId)
                         {
                             var dialectProvider = dbCmd.GetDialectProvider();
-                            var newId = dbCmd.Insert(row, selectIdentity: true);
+                            var newId = dbCmd.Insert(row, commandFilter: null, selectIdentity: true);
                             var safeId = dialectProvider.FromDbValue(newId, modelDef.PrimaryKey.FieldType);
                             modelDef.PrimaryKey.SetValueFn(row, safeId);
                             id = newId;
@@ -819,7 +824,7 @@ namespace ServiceStack.OrmLite
                         else
                         {
                             OrmLiteConfig.InsertFilter?.Invoke(dbCmd, row);
-                            dbCmd.Insert(row);
+                            dbCmd.Insert(row, commandFilter: null);
                         }
 
                         rowsAdded++;

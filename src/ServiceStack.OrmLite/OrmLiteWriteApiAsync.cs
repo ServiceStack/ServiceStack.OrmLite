@@ -39,30 +39,60 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static Task<long> InsertAsync<T>(this IDbConnection dbConn, T obj, bool selectIdentity = false, CancellationToken token = default(CancellationToken))
         {
-            return dbConn.Exec(dbCmd => dbCmd.InsertAsync(obj, selectIdentity, token));
+            return dbConn.Exec(dbCmd => dbCmd.InsertAsync(obj, commandFilter: null, selectIdentity: selectIdentity, token: token));
+        }
+
+        /// <summary>
+        /// Insert 1 POCO, use selectIdentity to retrieve the last insert AutoIncrement id (if any). E.g:
+        /// <para>var id = db.Insert(new Person { Id = 1, FirstName = "Jimi }, selectIdentity:true)</para>
+        /// </summary>
+        public static Task<long> InsertAsync<T>(this IDbConnection dbConn, T obj, Action<IDbCommand> commandFilter, bool selectIdentity = false, CancellationToken token = default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd => dbCmd.InsertAsync(obj, commandFilter: commandFilter, selectIdentity: selectIdentity, token: token));
         }
 
         /// <summary>
         /// Insert 1 or more POCOs in a transaction. E.g:
-        /// <para>db.Insert(new Person { Id = 1, FirstName = "Tupac", LastName = "Shakur", Age = 25 },</para>
-        /// <para>          new Person { Id = 2, FirstName = "Biggie", LastName = "Smalls", Age = 24 })</para>
+        /// <para>db.InsertAsync(new Person { Id = 1, FirstName = "Tupac", LastName = "Shakur", Age = 25 },</para>
+        /// <para>               new Person { Id = 2, FirstName = "Biggie", LastName = "Smalls", Age = 24 })</para>
         /// </summary>
         public static Task InsertAsync<T>(this IDbConnection dbConn, CancellationToken token, params T[] objs)
         {
-            return dbConn.Exec(dbCmd => dbCmd.InsertAsync(token, objs));
+            return dbConn.Exec(dbCmd => dbCmd.InsertAsync(commandFilter:null, token:token, objs:objs));
         }
         public static Task InsertAsync<T>(this IDbConnection dbConn, params T[] objs)
         {
-            return dbConn.Exec(dbCmd => dbCmd.InsertAsync(default(CancellationToken), objs));
+            return dbConn.Exec(dbCmd => dbCmd.InsertAsync(commandFilter:null, token:default(CancellationToken), objs:objs));
+        }
+
+        /// <summary>
+        /// Insert 1 or more POCOs in a transaction and modify populated IDbCommand with a commandFilter. E.g:
+        /// <para>db.InsertAsync(dbCmd => applyFilter(dbCmd), token, </para>
+        /// <para>               new Person { Id = 1, FirstName = "Tupac", LastName = "Shakur", Age = 25 },</para>
+        /// <para>               new Person { Id = 2, FirstName = "Biggie", LastName = "Smalls", Age = 24 })</para>
+        /// </summary>
+        public static Task InsertAsync<T>(this IDbConnection dbConn, Action<IDbCommand> commandFilter, CancellationToken token, params T[] objs)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.InsertAsync(commandFilter:commandFilter, token:token, objs:objs));
         }
 
         /// <summary>
         /// Insert a collection of POCOs in a transaction. E.g:
-        /// <para>db.InsertAll(new[] { new Person { Id = 9, FirstName = "Biggie", LastName = "Smalls", Age = 24 } })</para>
+        /// <para>db.InsertAllAsync(new[] { new Person { Id = 9, FirstName = "Biggie", LastName = "Smalls", Age = 24 } })</para>
         /// </summary>
         public static Task InsertAllAsync<T>(this IDbConnection dbConn, IEnumerable<T> objs, CancellationToken token = default(CancellationToken))
         {
-            return dbConn.Exec(dbCmd => dbCmd.InsertAllAsync(objs, token));
+            return dbConn.Exec(dbCmd => dbCmd.InsertAllAsync(objs, commandFilter:null, token:token));
+        }
+
+        /// <summary>
+        /// Insert a collection of POCOs in a transaction and modify populated IDbCommand with a commandFilter. E.g:
+        /// <para>db.InsertAllAsync(new[] { new Person { Id = 9, FirstName = "Biggie", LastName = "Smalls", Age = 24 } },</para>
+        /// <para>                  dbCmd => applyFilter(dbCmd))</para>
+        /// </summary>
+        public static Task InsertAllAsync<T>(this IDbConnection dbConn, IEnumerable<T> objs, Action<IDbCommand> commandFilter, CancellationToken token = default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd => dbCmd.InsertAllAsync(objs, commandFilter:commandFilter, token:token));
         }
 
         /// <summary>
@@ -81,19 +111,19 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static Task<int> UpdateAsync<T>(this IDbConnection dbConn, CancellationToken token, params T[] objs)
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateAsync(token, null, objs));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateAsync(commandFilter:null, token: token, objs: objs));
         }
         public static Task<int> UpdateAsync<T>(this IDbConnection dbConn, params T[] objs)
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateAsync(default(CancellationToken), null, objs));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateAsync(commandFilter: null, token: default(CancellationToken), objs: objs));
         }
         public static Task<int> UpdateAsync<T>(this IDbConnection dbConn, Action<IDbCommand> commandFilter, CancellationToken token, params T[] objs)
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateAsync(token, commandFilter, objs));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateAsync(commandFilter: commandFilter, token: token, objs: objs));
         }
         public static Task<int> UpdateAsync<T>(this IDbConnection dbConn, Action<IDbCommand> commandFilter, params T[] objs)
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateAsync(default(CancellationToken), commandFilter, objs));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateAsync(commandFilter: commandFilter, token:default(CancellationToken), objs: objs));
         }
 
         /// <summary>
@@ -102,11 +132,11 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static Task<int> UpdateAllAsync<T>(this IDbConnection dbConn, IEnumerable<T> objs, Action<IDbCommand> commandFilter = null, CancellationToken token = default(CancellationToken))
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateAllAsync(objs, token, commandFilter));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateAllAsync(objs, commandFilter, token));
         }
 
         /// <summary>
-        /// Delete rows using an anonymous type filter. E.g:
+        /// Delete rows using an anonymous type commandFilter. E.g:
         /// <para>db.Delete&lt;Person&gt;(new { FirstName = "Jimi", Age = 27 })</para>
         /// </summary>
         /// <returns>number of rows deleted</returns>
@@ -116,7 +146,7 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
-        /// Delete 1 row using all fields in the filter. E.g:
+        /// Delete 1 row using all fields in the commandFilter. E.g:
         /// <para>db.Delete(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27 })</para>
         /// </summary>
         /// <returns>number of rows deleted</returns>
@@ -126,7 +156,7 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
-        /// Delete 1 or more rows in a transaction using all fields in the filter. E.g:
+        /// Delete 1 or more rows in a transaction using all fields in the commandFilter. E.g:
         /// <para>db.Delete(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27 })</para>
         /// </summary>
         public static Task<int> DeleteAsync<T>(this IDbConnection dbConn, CancellationToken token = default(CancellationToken), params T[] allFieldsFilters)
@@ -139,7 +169,7 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
-        /// Delete 1 or more rows using only field with non-default values in the filter. E.g:
+        /// Delete 1 or more rows using only field with non-default values in the commandFilter. E.g:
         /// <para>db.DeleteNonDefaults(new Person { FirstName = "Jimi", Age = 27 })</para>
         /// </summary>
         /// <returns>number of rows deleted</returns>
@@ -149,7 +179,7 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
-        /// Delete 1 or more rows in a transaction using only field with non-default values in the filter. E.g:
+        /// Delete 1 or more rows in a transaction using only field with non-default values in the commandFilter. E.g:
         /// <para>db.DeleteNonDefaults(new Person { FirstName = "Jimi", Age = 27 }, 
         /// new Person { FirstName = "Janis", Age = 27 })</para>
         /// </summary>
