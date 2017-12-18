@@ -1523,6 +1523,8 @@ namespace ServiceStack.OrmLite
                    $"DROP COLUMN {provider.GetQuotedColumnName(columnName)};";
         }
 
+        public virtual string SqlConflict(string sql, string conflictResolution) => sql; //NOOP
+
         public virtual string SqlConcat(IEnumerable<object> args) => $"CONCAT({string.Join(", ", args)})";
 
         public virtual string SqlCurrency(string fieldOrValue) => SqlCurrency(fieldOrValue, "$");

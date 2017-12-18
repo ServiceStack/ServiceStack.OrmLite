@@ -200,6 +200,12 @@ namespace ServiceStack.OrmLite.MySql
             return ret;
         }
 
+        public override string SqlConflict(string sql, string conflictResolution)
+        {
+            var parts = sql.SplitOnFirst(' ');
+            return parts[0] + " " + conflictResolution + " " + parts[1];
+        }
+
         public override string SqlCurrency(string fieldOrValue, string currencySymbol) =>
             SqlConcat(new[] { "'" + currencySymbol + "'", "cast(" + fieldOrValue + " as decimal(15,2))" });
 
