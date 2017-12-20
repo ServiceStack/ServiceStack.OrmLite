@@ -333,6 +333,31 @@ namespace ServiceStack.OrmLite.PostgreSQL
             return sql;
         }
 
+        public override string ToAlterColumnStatement(Type modelType, FieldDefinition fieldDef)
+        {
+            var columnDefinition = GetColumnDefinition(fieldDef);
+            var modelName = GetQuotedTableName(GetModel(modelType));
+
+            var parts = columnDefinition.SplitOnFirst(' ');
+            var columnName = parts[0];
+            var columnType = parts[1];
+
+            var notNull = columnDefinition.Contains("NOT NULL");
+
+            var nullLiteral = notNull ? " NOT NULL" : " NULL";
+            columnType = columnType.Replace(nullLiteral, "");
+
+            var nullSql = notNull 
+                ? "SET NOT NULL" 
+                : "DROP NOT NULL";
+
+            var sql = $"ALTER TABLE {modelName}\n" 
+                    + $"  ALTER COLUMN {columnName} TYPE {columnType},\n"
+                    + $"  ALTER COLUMN {columnName} {nullSql}";
+
+            return sql;
+        }
+
         public override string GetQuotedTableName(string tableName, string schema = null)
         {
             return !Normalize || ReservedWords.Contains(tableName) || (schema != null && ReservedWords.Contains(schema))
