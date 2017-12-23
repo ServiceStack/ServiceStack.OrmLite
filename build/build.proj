@@ -208,6 +208,13 @@
     <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.MySql/servicestack.ormlite.mysql.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
             LogStandardErrorAsError="true" />
 
+    <!-- MySql.Core -->
+    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.MySql.Core/lib/netstandard2.0" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.MySql.Core/lib/netstandard2.0')" />
+    <Copy SourceFiles="%(MySqlCoreFiles.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.MySql.Core/lib/netstandard2.0" />
+
+    <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.MySql.Core/servicestack.ormlite.mysql.core.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
+          LogStandardErrorAsError="true" />
+
     <!-- MySqlConnector -->
 
     <MSBuild Projects="$(SrcDir)/ServiceStack.OrmLite.MySqlConnector/ServiceStack.OrmLite.MySqlConnector.csproj"

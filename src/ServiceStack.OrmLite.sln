@@ -12,6 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{6CEB3EDE
 		..\README.md = ..\README.md
 		..\NuGet\ServiceStack.OrmLite.Core\servicestack.ormlite.core.nuspec = ..\NuGet\ServiceStack.OrmLite.Core\servicestack.ormlite.core.nuspec
 		..\NuGet\ServiceStack.OrmLite.Firebird\servicestack.ormlite.firebird.nuspec = ..\NuGet\ServiceStack.OrmLite.Firebird\servicestack.ormlite.firebird.nuspec
+		..\NuGet\ServiceStack.OrmLite.MySql.Core\servicestack.ormlite.mysql.core.nuspec = ..\NuGet\ServiceStack.OrmLite.MySql.Core\servicestack.ormlite.mysql.core.nuspec
 		..\NuGet\ServiceStack.OrmLite.MySql\servicestack.ormlite.mysql.nuspec = ..\NuGet\ServiceStack.OrmLite.MySql\servicestack.ormlite.mysql.nuspec
 		..\NuGet\ServiceStack.OrmLite.MySqlConnector.Core\servicestack.ormlite.mysqlconnector.core.nuspec = ..\NuGet\ServiceStack.OrmLite.MySqlConnector.Core\servicestack.ormlite.mysqlconnector.core.nuspec
 		..\NuGet\ServiceStack.OrmLite.MySqlConnector\servicestack.ormlite.mysqlconnector.nuspec = ..\NuGet\ServiceStack.OrmLite.MySqlConnector\servicestack.ormlite.mysqlconnector.nuspec
