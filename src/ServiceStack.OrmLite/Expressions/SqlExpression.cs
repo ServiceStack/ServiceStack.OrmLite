@@ -111,7 +111,7 @@ namespace ServiceStack.OrmLite
         /// set the specified selectExpression.
         /// </summary>
         /// <param name='selectExpression'>
-        /// raw Select expression: "Select SomeField1, SomeField2 from SomeTable"
+        /// raw Select expression: "SomeField1, SomeField2 from SomeTable"
         /// </param>
         public virtual SqlExpression<T> Select(string selectExpression)
         {
@@ -120,15 +120,30 @@ namespace ServiceStack.OrmLite
             return UnsafeSelect(selectExpression);
         }
 
-        public virtual SqlExpression<T> UnsafeSelect(string rawSelect)
+        /// <summary>
+        /// set the specified DISTINCT selectExpression.
+        /// </summary>
+        /// <param name='selectExpression'>
+        /// raw Select expression: "SomeField1, SomeField2 from SomeTable"
+        /// </param>
+        public virtual SqlExpression<T> SelectDistinct(string selectExpression)
+        {
+            selectExpression?.SqlVerifyFragment();
+
+            return UnsafeSelect(selectExpression, distinct:true);
+        }
+
+        public virtual SqlExpression<T> UnsafeSelect(string rawSelect) => UnsafeSelect(rawSelect, distinct: false);
+
+        public virtual SqlExpression<T> UnsafeSelect(string rawSelect, bool distinct)
         {
             if (string.IsNullOrEmpty(rawSelect))
             {
-                BuildSelectExpression(string.Empty, false);
+                BuildSelectExpression(string.Empty, distinct: distinct);
             }
             else
             {
-                this.selectExpression = "SELECT " + rawSelect;
+                this.selectExpression = "SELECT " + (distinct ? "DISTINCT " : "") + rawSelect;
                 this.CustomSelect = true;
                 OnlyFields = null;
             }
@@ -141,7 +156,17 @@ namespace ServiceStack.OrmLite
         /// <param name='fields'>
         /// Matching Fields: "SomeField1, SomeField2"
         /// </param>
-        public virtual SqlExpression<T> Select(string[] fields)
+        public virtual SqlExpression<T> Select(string[] fields) => Select(fields, distinct: false);
+
+        /// <summary>
+        /// Set the specified DISTINCT selectExpression using matching fields.
+        /// </summary>
+        /// <param name='fields'>
+        /// Matching Fields: "SomeField1, SomeField2"
+        /// </param>
+        public virtual SqlExpression<T> SelectDistinct(string[] fields) => Select(fields, distinct: true);
+
+        internal virtual SqlExpression<T> Select(string[] fields, bool distinct)
         {
             if (fields == null || fields.Length == 0)
                 return Select(string.Empty);
@@ -192,7 +217,7 @@ namespace ServiceStack.OrmLite
                 sb.Append(qualifiedName);
             }
 
-            UnsafeSelect(StringBuilderCache.ReturnAndFree(sb));
+            UnsafeSelect(StringBuilderCache.ReturnAndFree(sb), distinct:distinct);
             OnlyFields = new HashSet<string>(fieldsList, StringComparer.OrdinalIgnoreCase);
 
             return this;
