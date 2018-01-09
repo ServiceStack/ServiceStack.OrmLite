@@ -185,7 +185,7 @@ namespace ServiceStack.OrmLite.MySql
 
         public override string GetColumnDefinition(FieldDefinition fieldDef)
         {
-            if (fieldDef.PropertyInfo.FirstAttribute<TextAttribute>() != null)
+            if (fieldDef.PropertyInfo?.HasAttribute<TextAttribute>() == true)
             {
                 var sql = StringBuilderCache.Allocate();
                 sql.AppendFormat("{0} {1}", GetQuotedColumnName(fieldDef.FieldName), TextColumnDefinition);
