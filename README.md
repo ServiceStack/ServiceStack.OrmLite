@@ -40,19 +40,25 @@ level public properties.
 ### 8 flavours of OrmLite is on NuGet: 
 
   - [ServiceStack.OrmLite.SqlServer](http://nuget.org/List/Packages/ServiceStack.OrmLite.SqlServer)
+  - [ServiceStack.OrmLite.Sqlite](http://nuget.org/packages/ServiceStack.OrmLite.Sqlite)
   - [ServiceStack.OrmLite.PostgreSQL](http://nuget.org/List/Packages/ServiceStack.OrmLite.PostgreSQL)
   - [ServiceStack.OrmLite.MySql](http://nuget.org/List/Packages/ServiceStack.OrmLite.MySql)
-  - [ServiceStack.OrmLite.Sqlite](http://nuget.org/packages/ServiceStack.OrmLite.Sqlite)
-  - [ServiceStack.OrmLite.Oracle](http://nuget.org/packages/ServiceStack.OrmLite.Oracle) (unofficial)
-  - [ServiceStack.OrmLite.Firebird](http://nuget.org/List/Packages/ServiceStack.OrmLite.Firebird)  (unofficial)
-  - [ServiceStack.OrmLite.VistaDb](http://nuget.org/List/Packages/ServiceStack.OrmLite.VistaDb)  (unofficial)
+  - [ServiceStack.OrmLite.MySqlConnector](http://nuget.org/List/Packages/ServiceStack.OrmLite.MySqlConnector)
 
-.NET Core packages:   
+These packages contain both **.NET Framework v4.5** and **.NET Standard 2.0** versions and supports both .NET Framework and .NET Core projects.
+
+The `.Core` packages contains only **.NET Standard 2.0** versions which can be used in ASP.NET Core Apps running on the .NET Framework:
 
   - [ServiceStack.OrmLite.SqlServer.Core](http://nuget.org/List/Packages/ServiceStack.OrmLite.SqlServer.Core)
   - [ServiceStack.OrmLite.PostgreSQL.Core](http://nuget.org/List/Packages/ServiceStack.OrmLite.PostgreSQL.Core)
   - [ServiceStack.OrmLite.MySql.Core](http://nuget.org/List/Packages/ServiceStack.OrmLite.MySql.Core)
   - [ServiceStack.OrmLite.Sqlite.Core](http://nuget.org/packages/ServiceStack.OrmLite.Sqlite.Core) 
+
+Unofficial Releases maintained by ServiceStack Community:
+
+  - [ServiceStack.OrmLite.Oracle](http://nuget.org/packages/ServiceStack.OrmLite.Oracle)
+  - [ServiceStack.OrmLite.Firebird](http://nuget.org/List/Packages/ServiceStack.OrmLite.Firebird)
+  - [ServiceStack.OrmLite.VistaDb](http://nuget.org/List/Packages/ServiceStack.OrmLite.VistaDb)
 
 _Latest v4+ on NuGet is a [commercial release](https://servicestack.net/ormlite) with [free quotas](https://servicestack.net/download#free-quotas)._
 
@@ -587,6 +593,18 @@ SingleById(s), SelectById(s), etc provide strong-typed convenience methods to fe
 ```csharp
 var track = db.SingleById<Track>(1);
 var tracks = db.SelectByIds<Track>(new[]{ 1,2,3 });
+```
+
+### Parametrized IN Values
+
+OrmLite also supports providing collection of values which is automatically split into multiple DB parameters to simplify executing parameterized SQL with multiple IN Values, e.g:
+
+```csharp
+var ids = new[]{ 1, 2, 3};
+var results = db.Select<Table>("Id in (@ids)", new { ids });
+
+var names = new List<string>{ "foo", "bar", "qux" };
+var results = db.SqlList<Table>("SELECT * FROM Table WHERE Name IN (@names)", new { names });
 ```
 
 ### Lazy Queries
@@ -1302,6 +1320,33 @@ Optimistic concurrency is only verified on API's that update or delete an entire
 ```csharp
 db.DeleteById<Poco>(id:updatedRow.Id, rowversion:updatedRow.RowVersion)
 ```
+
+### RowVersion Byte Array
+
+To improve reuse of OrmLite's Data Models in Dapper, OrmLite also supports `byte[] RowVersion` which lets you use OrmLite Data Models with `byte[] RowVersion` properties in Dapper queries.
+
+## Conflict Resolution using commandFilter
+
+An optional `Func<IDbCommand> commandFilter` is available in all `INSERT` and `UPDATE` APIs to allow customization and inspection of the populated `IDbCommand` before it's run. 
+This feature is utilized in the [Conflict Resolution Extension methods](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/src/ServiceStack.OrmLite/OrmLiteConflictResolutions.cs) 
+where you can specify the conflict resolution strategy when a Primary Key or Unique constraint violation occurs:
+
+```csharp
+db.InsertAll(rows, dbCmd => dbCmd.OnConflictIgnore());
+
+//Equivalent to: 
+db.InsertAll(rows, dbCmd => dbCmd.OnConflict(ConflictResolution.Ignore));
+```
+
+In this case it will ignore any conflicts that occurs and continue inserting the remaining rows in SQLite, MySql and PostgreSQL, whilst in SQL Server it's a NOOP.
+
+SQLite offers [additional fine-grained behavior](https://sqlite.org/lang_conflict.html) that can be specified for when a conflict occurs:
+
+ - ROLLBACK
+ - ABORT
+ - FAIL
+ - IGNORE
+ - REPLACE
 
 ### Modify Custom Schema
 
