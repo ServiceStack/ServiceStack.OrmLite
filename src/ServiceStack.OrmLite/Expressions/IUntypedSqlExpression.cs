@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace ServiceStack.OrmLite
@@ -622,6 +623,56 @@ namespace ServiceStack.OrmLite
         {
             var hasUntyped = sqlExpression as IHasUntypedSqlExpression;
             return hasUntyped?.GetUntyped();
+        }
+
+        public static IOrmLiteDialectProvider ToDialectProvider(this ISqlExpression sqlExpression) =>
+            (sqlExpression as IHasDialectProvider)?.DialectProvider ?? OrmLiteConfig.DialectProvider;
+
+        public static string Table<T>(this ISqlExpression sqlExpression) => sqlExpression.ToDialectProvider().GetQuotedTableName(typeof(T).GetModelDefinition());
+
+        public static string Table<T>(this IOrmLiteDialectProvider dialect) => dialect.GetQuotedTableName(typeof(T).GetModelDefinition());
+
+        public static string Column<Table>(this ISqlExpression sqlExpression, Expression<Func<Table, object>> propertyExpression, bool prefixTable = false) => 
+            sqlExpression.ToDialectProvider().Column(propertyExpression, prefixTable);
+
+        public static string Column<Table>(this IOrmLiteDialectProvider dialect, Expression<Func<Table, object>> propertyExpression, bool prefixTable = false)
+        {
+            string propertyName = null;
+            Expression expr = propertyExpression;
+
+            if (expr is LambdaExpression lambda)
+                expr = lambda.Body;
+
+            if (expr.NodeType == ExpressionType.Convert && expr is UnaryExpression unary)
+                expr = unary.Operand;
+
+            if (expr is MemberExpression member)
+                propertyName = member.Member.Name;
+
+            if (propertyName == null)
+                propertyName = expr.ToPropertyInfo()?.Name;
+
+            if (propertyName != null)
+                return dialect.Column<Table>(propertyName, prefixTable);
+
+            throw new ArgumentException("Expected Lambda MemberExpression but received: " + propertyExpression.Name);
+        }
+
+        public static string Column<Table>(this ISqlExpression sqlExpression, string propertyName, bool prefixTable = false) =>
+            sqlExpression.ToDialectProvider().Column<Table>(propertyName, prefixTable);
+
+        public static string Column<Table>(this IOrmLiteDialectProvider dialect, string propertyName, bool prefixTable = false)
+        {
+            var tableDef = typeof(Table).GetModelDefinition();
+
+            var fieldDef = tableDef.FieldDefinitions.FirstOrDefault(x => x.Name == propertyName);
+            var fieldName = fieldDef != null
+                ? fieldDef.FieldName
+                : propertyName;
+
+            return prefixTable
+                ? dialect.GetQuotedColumnName(tableDef, fieldName)
+                : dialect.GetQuotedColumnName(fieldName);
         }
     }
 }
