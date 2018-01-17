@@ -129,13 +129,15 @@ namespace ServiceStack.OrmLite.Tests.UseCase
             using (var db = OpenDbConnection())
             {
                 if (db.TableExists<Level>())
-                    db.DeleteAll<Level>();
+                    db.DeleteAll<Level>();   // Delete ForeignKey data if exists
 
+                //DROP and CREATE Foreign Key Tables in dependent order
                 db.DropTable<Player>();
                 db.DropTable<Level>();
                 db.CreateTable<Level>();
                 db.CreateTable<Player>();
 
+                //DROP and CREATE tables without Foreign Keys in any order
                 db.DropAndCreateTable<Profile>();
                 db.DropAndCreateTable<GameItem>();
 

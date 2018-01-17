@@ -619,13 +619,15 @@ We can drop the existing tables and re-create the above table definitions with:
 using (var db = dbFactory.Open())
 {
     if (db.TableExists<Level>())
-        db.DeleteAll<Level>();
+        db.DeleteAll<Level>();                      // Delete ForeignKey data if exists
 
+    //DROP and CREATE ForeignKey Tables in dependent order
     db.DropTable<Player>();
     db.DropTable<Level>();
     db.CreateTable<Level>();
     db.CreateTable<Player>();
 
+    //DROP and CREATE tables without Foreign Keys in any order
     db.DropAndCreateTable<Profile>();
     db.DropAndCreateTable<GameItem>();
 
