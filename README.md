@@ -680,63 +680,61 @@ var dbPlayer = db.LoadSingleById<Player>(player.Id);
 dbPlayer.PrintDump();
 ```
 
-Which uses ServiceStack's [Dump Utils](http://docs.servicestack.net/dump-utils) to dump the data to the console:
+Which uses the [Dump Utils](http://docs.servicestack.net/dump-utils) to quickly display the populated data to the console:
 
-```js
-{
-	Id: 1,
-	FirstName: North,
-	LastName: West,
-	Email: north@west.com,
-	PhoneNumbers: 
-	[
-		{
-			Kind: Mobile,
-			Number: 123-555-5555
-		},
-		{
-			Kind: Home,
-			Number: 555-555-5555,
-			Ext: 123
-		}
-	],
-	GameItems: 
-	[
-		{
-			Name: WAND,
-			PlayerId: 1,
-			Description: Golden Wand of Odyssey,
-			DateAdded: 2018-01-17T07:53:45-05:00
-		},
-		{
-			Name: STAFF,
-			PlayerId: 1,
-			Description: Staff of the Magi,
-			DateAdded: 2018-01-17T07:53:45-05:00
-		}
-	],
-	Profile: 
-	{
-		Id: 1,
-		Role: Leader,
-		Region: Australasia,
-		Username: north,
-		HighScore: 100,
-		GamesPlayed: 10,
-		Energy: 0,
-		ProfileUrl: "https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50.jpg",
-		Meta: 
-		{
-			Quote: I am gamer
-		}
-	},
-	ProfileId: 1,
-	SavedLevelId: 7690dfa4d31949ab9bce628c34d1c549,
-	RowVersion: 2
-}
-```
+    {
+        Id: 1,
+        FirstName: North,
+        LastName: West,
+        Email: north@west.com,
+        PhoneNumbers: 
+        [
+            {
+                Kind: Mobile,
+                Number: 123-555-5555
+            },
+            {
+                Kind: Home,
+                Number: 555-555-5555,
+                Ext: 123
+            }
+        ],
+        GameItems: 
+        [
+            {
+                Name: WAND,
+                PlayerId: 1,
+                Description: Golden Wand of Odyssey,
+                DateAdded: 2018-01-17T07:53:45-05:00
+            },
+            {
+                Name: STAFF,
+                PlayerId: 1,
+                Description: Staff of the Magi,
+                DateAdded: 2018-01-17T07:53:45-05:00
+            }
+        ],
+        Profile: 
+        {
+            Id: 1,
+            Role: Leader,
+            Region: Australasia,
+            Username: north,
+            HighScore: 100,
+            GamesPlayed: 10,
+            Energy: 0,
+            ProfileUrl: "https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50.jpg",
+            Meta: 
+            {
+                Quote: I am gamer
+            }
+        },
+        ProfileId: 1,
+        SavedLevelId: 7690dfa4d31949ab9bce628c34d1c549,
+        RowVersion: 2
+    }
 
-Feel free to expirement around with this Example [Live on Gistlyn](https://gistlyn.com/?gist=840bc7f09292ad5753d07cef6063893e&collection=991db51e44674ad01d3d318b24cf0934).
+Feel free to continue expirementing with [this Example Live on Gistlyn](https://gistlyn.com/?gist=840bc7f09292ad5753d07cef6063893e&collection=991db51e44674ad01d3d318b24cf0934).
 
 ## Select APIs
 
