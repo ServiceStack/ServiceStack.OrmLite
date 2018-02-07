@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using ServiceStack.DataAnnotations;
 #if NETSTANDARD2_0
 using System.Globalization;
@@ -9,6 +10,17 @@ namespace ServiceStack.OrmLite.Converters
     public class EnumConverter : StringConverter
     {
         public EnumConverter() : base(255) {}
+
+        public override void InitDbParam(IDbDataParameter p, Type fieldType)
+        {
+            var isIntEnum = IsIntEnum(fieldType);
+
+            p.DbType = isIntEnum
+                ? Enum.GetUnderlyingType(fieldType) == typeof(long)
+                    ? DbType.Int64
+                    : DbType.Int32
+                : DbType;
+        }
 
         public override string ToQuotedString(Type fieldType, object value)
         {
@@ -33,9 +45,7 @@ namespace ServiceStack.OrmLite.Converters
 
         public override object ToDbValue(Type fieldType, object value)
         {
-            var isIntEnum = fieldType.IsEnumFlags() || 
-                fieldType.HasAttribute<EnumAsIntAttribute>() ||
-                (!fieldType.IsEnum && fieldType.IsNumericType()); //i.e. is real int && not Enum
+            var isIntEnum = IsIntEnum(fieldType);
 
             if (isIntEnum && value.GetType().IsEnum)
                 return Convert.ChangeType(value, Enum.GetUnderlyingType(fieldType));
@@ -52,6 +62,14 @@ namespace ServiceStack.OrmLite.Converters
             return enumString != null && enumString != "null"
                 ? enumString.Trim('"') 
                 : value.ToString();
+        }
+
+        public static bool IsIntEnum(Type fieldType)
+        {
+            var isIntEnum = fieldType.IsEnumFlags() ||
+                            fieldType.HasAttribute<EnumAsIntAttribute>() ||
+                            (!fieldType.IsEnum && fieldType.IsNumericType()); //i.e. is real int && not Enum
+            return isIntEnum;
         }
 
         public override object FromDbValue(Type fieldType, object value)

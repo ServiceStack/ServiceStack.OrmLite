@@ -47,10 +47,7 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Used in DB Params. Defaults to DbType.String
         /// </summary>
-        public virtual DbType DbType
-        {
-            get { return DbType.String; }
-        }
+        public virtual DbType DbType => DbType.String;
 
         /// <summary>
         /// Quoted Value in SQL Statement
