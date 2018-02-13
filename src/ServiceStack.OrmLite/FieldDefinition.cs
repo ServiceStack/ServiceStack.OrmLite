@@ -56,6 +56,8 @@ namespace ServiceStack.OrmLite
 
         public string CheckConstraint { get; set; }
 
+        public bool UniqueConstraint { get; set; }
+
         public ForeignKeyConstraint ForeignKey { get; set; }
 
         public GetMemberDelegate GetValueFn { get; set; }
@@ -141,6 +143,8 @@ namespace ServiceStack.OrmLite
                 FieldLength = FieldLength,
                 Scale = Scale,
                 DefaultValue = DefaultValue,
+                CheckConstraint = CheckConstraint,
+                UniqueConstraint = UniqueConstraint,
                 ForeignKey = ForeignKey,
                 GetValueFn = GetValueFn,
                 SetValueFn = SetValueFn,

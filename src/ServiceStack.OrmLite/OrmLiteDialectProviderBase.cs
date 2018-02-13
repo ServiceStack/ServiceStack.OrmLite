@@ -414,6 +414,11 @@ namespace ServiceStack.OrmLite
                 sql.Append(fieldDef.IsNullable ? " NULL" : " NOT NULL");
             }
 
+            if (fieldDef.UniqueConstraint)
+            {
+                sql.Append(" UNIQUE");
+            }
+
             var defaultValue = GetDefaultValue(fieldDef);
             if (!string.IsNullOrEmpty(defaultValue))
             {
@@ -1201,11 +1206,31 @@ namespace ServiceStack.OrmLite
                 sbConstraints.Append(GetForeignKeyOnDeleteClause(fieldDef.ForeignKey));
                 sbConstraints.Append(GetForeignKeyOnUpdateClause(fieldDef.ForeignKey));
             }
+
+            var uniqueConstraints = GetUniqueConstraints(modelDef);
+            if (uniqueConstraints != null)
+            {
+                sbConstraints.Append(",\n" + uniqueConstraints);
+            }
+
             var sql = $"CREATE TABLE {GetQuotedTableName(modelDef)} " +
                       $"\n(\n  {StringBuilderCache.ReturnAndFree(sbColumns)}{StringBuilderCacheAlt.ReturnAndFree(sbConstraints)} \n); \n";
 
             return sql;
         }
+
+        public virtual string GetUniqueConstraints(ModelDefinition modelDef)
+        {
+            var constraints = modelDef.UniqueConstraints.Map(x => 
+                $"CONSTRAINT {GetUniqueConstraintName(x)} UNIQUE ({x.FieldNames.Map(f => modelDef.GetQuotedName(f,this)).Join(",")})" );
+
+            return constraints.Count > 0
+                ? constraints.Join(",\n")
+                : null;
+        }
+
+        protected virtual string GetUniqueConstraintName(UniqueConstraintAttribute constraint) =>
+            constraint.Name ?? $"UC_{constraint.FieldNames.Join("_")}";
 
         public virtual string GetCheckConstraint(FieldDefinition fieldDef)
         {

@@ -67,8 +67,10 @@ namespace ServiceStack.OrmLite
             };
 
             modelDef.CompositeIndexes.AddRange(
-                modelType.AllAttributes<CompositeIndexAttribute>().ToList()
-                .ConvertAll(x => (CompositeIndexAttribute)x));
+                modelType.AllAttributes<CompositeIndexAttribute>().ToList());
+
+            modelDef.UniqueConstraints.AddRange(
+                modelType.AllAttributes<UniqueConstraintAttribute>().ToList());
 
             var objProperties = modelType.GetProperties(
                 BindingFlags.Public | BindingFlags.Instance).ToList();
@@ -150,6 +152,7 @@ namespace ServiceStack.OrmLite
                     FieldLength = stringLengthAttr?.MaximumLength,
                     DefaultValue = defaultValueAttr?.DefaultValue,
                     CheckConstraint = chkConstraintAttr?.Constraint,
+                    UniqueConstraint = propertyInfo.HasAttribute<UniqueAttribute>(),
                     ForeignKey = fkAttr == null
                         ? referencesAttr != null ? new ForeignKeyConstraint(referencesAttr.Type) : null
                         : new ForeignKeyConstraint(fkAttr.Type, fkAttr.OnDelete, fkAttr.OnUpdate, fkAttr.ForeignKeyName),

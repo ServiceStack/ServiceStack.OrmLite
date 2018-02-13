@@ -206,6 +206,11 @@ namespace ServiceStack.OrmLite.PostgreSQL
                 }
             }
 
+            if (fieldDef.UniqueConstraint)
+            {
+                sql.Append(" UNIQUE");
+            }
+
             var defaultValue = GetDefaultValue(fieldDef);
             if (!string.IsNullOrEmpty(defaultValue))
             {

@@ -147,6 +147,12 @@ namespace ServiceStack.OrmLite.SqlServer
                 }
             }
 
+            var uniqueConstraints = GetUniqueConstraints(modelDef);
+            if (uniqueConstraints != null)
+            {
+                sbConstraints.Append(",\n" + uniqueConstraints);
+            }
+
             var sql = $"CREATE TABLE {GetQuotedTableName(modelDef)} ";
             sql += (fileTableAttrib != null)
                 ? $"\n AS FILETABLE{StringBuilderCache.ReturnAndFree(sbTableOptions)};"

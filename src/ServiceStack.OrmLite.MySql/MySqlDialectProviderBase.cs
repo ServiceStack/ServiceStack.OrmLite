@@ -175,6 +175,13 @@ namespace ServiceStack.OrmLite.MySql
                 if (!string.IsNullOrEmpty(fieldDef.ForeignKey.OnUpdate))
                     sbConstraints.AppendFormat(" ON UPDATE {0}", fieldDef.ForeignKey.OnUpdate);
             }
+
+            var uniqueConstraints = GetUniqueConstraints(modelDef);
+            if (uniqueConstraints != null)
+            {
+                sbConstraints.Append(",\n" + uniqueConstraints);
+            }
+
             var sql = string.Format(
                 "CREATE TABLE {0} \n(\n  {1}{2} \n); \n", GetQuotedTableName(modelDef),
                 StringBuilderCache.ReturnAndFree(sbColumns),

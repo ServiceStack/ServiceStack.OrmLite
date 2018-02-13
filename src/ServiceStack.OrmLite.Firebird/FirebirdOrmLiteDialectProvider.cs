@@ -366,6 +366,10 @@ namespace ServiceStack.OrmLite.Firebird
             {
                 sql.Append(" NOT NULL");
             }
+            if (fieldDef.UniqueConstraint)
+            {
+                sql.Append(" UNIQUE");
+            }
 
             return StringBuilderCacheAlt.ReturnAndFree(sql);
         }
