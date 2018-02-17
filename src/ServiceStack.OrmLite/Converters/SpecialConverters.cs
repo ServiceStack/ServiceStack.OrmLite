@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Data;
 using ServiceStack.DataAnnotations;
 #if NETSTANDARD2_0
@@ -130,7 +132,13 @@ namespace ServiceStack.OrmLite.Converters
 
         public override object FromDbValue(Type fieldType, object value)
         {
-            var convertedValue = DialectProvider.StringSerializer.DeserializeFromString(value.ToString(), fieldType);
+            if (value is string str)
+                return DialectProvider.StringSerializer.DeserializeFromString(str, fieldType);
+            
+            var convertedValue = value is IEnumerable
+                ? value.ConvertTo(fieldType)
+                : DialectProvider.StringSerializer.DeserializeFromString(value.ToString(), fieldType);
+
             return convertedValue;
         }
     }
