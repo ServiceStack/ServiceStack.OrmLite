@@ -86,8 +86,45 @@ namespace ServiceStack.OrmLite
             return dbCmd;
         }
 
+        internal static void PopulateWith(this IDbCommand dbCmd, ISqlExpression expression)
+        {
+            dbCmd.CommandText = expression.ToSelectStatement(); //needs to evaluate SQL before setting params
+            dbCmd.SetParameters(expression.Params);
+        }
+
         internal static IDbCommand SetParameters<T>(this IDbCommand dbCmd, object anonType, bool excludeDefaults, ref string sql) => 
             dbCmd.SetParameters(typeof(T), anonType, excludeDefaults, ref sql);
+
+        internal static IDbCommand SetParameters(this IDbCommand dbCmd, IEnumerable<IDbDataParameter> sqlParams)
+        {
+            if (sqlParams == null)
+                return dbCmd;
+
+            try
+            {
+                dbCmd.Parameters.Clear();
+                foreach (var sqlParam in sqlParams)
+                {
+                    dbCmd.Parameters.Add(sqlParam);
+                }
+            }
+            catch (Exception ex)
+            {
+                //SQL Server + PostgreSql doesn't allow re-using db params in multiple queries
+                if (Log.IsDebugEnabled)
+                    Log.Debug("Exception trying to reuse db params, executing with cloned params instead", ex);
+
+                dbCmd.Parameters.Clear();
+                foreach (var sqlParam in sqlParams)
+                {
+                    var p = dbCmd.CreateParameter();
+                    p.PopulateWith(sqlParam);
+                    dbCmd.Parameters.Add(p);
+                }
+            }
+
+            return dbCmd;
+        }
 
         private static IEnumerable GetMultiValues(object value)
         {
