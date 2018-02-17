@@ -134,11 +134,8 @@ namespace ServiceStack.OrmLite.Converters
         {
             if (value is string str)
                 return DialectProvider.StringSerializer.DeserializeFromString(str, fieldType);
-            
-            var convertedValue = value is IEnumerable
-                ? value.ConvertTo(fieldType)
-                : DialectProvider.StringSerializer.DeserializeFromString(value.ToString(), fieldType);
 
+            var convertedValue = value.ConvertTo(fieldType);
             return convertedValue;
         }
     }
