@@ -184,9 +184,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
                     .GroupBy(x => x.Extension)
                     .Select(x => new { x.Extension, Total = Sql.As(Sql.Count("*"), "Total") });
 
-                var results = db.Dictionary<int, long>(q);
-
-                results.PrintDump();
+                var results = db.Dictionary<string, long>(q);
             }
 
             OrmLiteConfig.SqlExpressionSelectFilter = null;
