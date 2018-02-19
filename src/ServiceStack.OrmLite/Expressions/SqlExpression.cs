@@ -1376,6 +1376,17 @@ namespace ServiceStack.OrmLite
                 }
 
             }
+            else if (lambda.Body.NodeType == ExpressionType.Conditional && sep == " ")
+            {
+                ConditionalExpression c = lambda.Body as ConditionalExpression;
+
+                var r = VisitConditional(c);
+                if (!(r is PartialSqlString))
+                    return r;
+
+                return $"{r}={GetQuotedTrueValue()}";
+            }
+
             return Visit(lambda.Body);
         }
 
@@ -1400,11 +1411,23 @@ namespace ServiceStack.OrmLite
                     if (left is PartialSqlString)
                         left = new PartialSqlString($"{left}={GetQuotedTrueValue()}");
                 }
+                else if (b.Left is ConditionalExpression)
+                {
+                    left = VisitConditional((ConditionalExpression) b.Left);
+                    if (left is PartialSqlString)
+                        left = new PartialSqlString($"{left}={GetQuotedTrueValue()}");
+                }
                 else left = Visit(b.Left);
 
                 if (IsBooleanComparison(b.Right))
                 {
-                    right = VisitMemberAccess((MemberExpression)b.Right);
+                    right = VisitMemberAccess((MemberExpression) b.Right);
+                    if (right is PartialSqlString)
+                        right = new PartialSqlString($"{right}={GetQuotedTrueValue()}");
+                }
+                else if (b.Right is ConditionalExpression)
+                {
+                    right = VisitConditional((ConditionalExpression) b.Right);
                     if (right is PartialSqlString)
                         right = new PartialSqlString($"{right}={GetQuotedTrueValue()}");
                 }
@@ -1444,7 +1467,7 @@ namespace ServiceStack.OrmLite
                         Swap(ref left, ref right); // Should be safe to swap for equality/inequality checks
                     }
 
-                    if (right is bool && !IsFieldName(left)) // Don't change anything when "expr" is a column name - then we really want "ColName = 1"
+                    if (right is bool && !IsFieldName(left) && !(b.Left is ConditionalExpression)) // Don't change anything when "expr" is a column name or ConditionalExpression - then we really want "ColName = 1" or (Case When 1=0 Then 1 Else 0 End = 1)
                     {
                         if (operand == "=")
                             return (bool)right ? left : GetNotValue(left); // "expr == true" becomes "expr", "expr == false" becomes "not (expr)"
@@ -1899,10 +1922,26 @@ namespace ServiceStack.OrmLite
                 var ifTrue = Visit(e.IfTrue);
                 if (!IsSqlClass(ifTrue))
                     ifTrue = ConvertToParam(ifTrue);
+                else if (e.IfTrue.Type == typeof(bool))
+                {
+                    var isBooleanComparison = IsBooleanComparison(e.IfTrue);
+                    if (!isBooleanComparison)
+                    {
+                        ifTrue = $"(CASE WHEN {ifTrue} THEN {1} ELSE {0} END)";
+                    }
+                }
 
                 var ifFalse = Visit(e.IfFalse);
                 if (!IsSqlClass(ifFalse))
                     ifFalse = ConvertToParam(ifFalse);
+                else if (e.IfFalse.Type == typeof(bool))
+                {
+                    var isBooleanComparison = IsBooleanComparison(e.IfFalse);
+                    if (!isBooleanComparison)
+                    {
+                        ifFalse = $"(CASE WHEN {ifFalse} THEN {1} ELSE {0} END)";
+                    }
+                }
 
                 return new PartialSqlString($"(CASE WHEN {test} THEN {ifTrue} ELSE {ifFalse} END)");
             }

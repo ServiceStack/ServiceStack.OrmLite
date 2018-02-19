@@ -625,6 +625,50 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(target.Count, Is.EqualTo(1));
         }
 
+        [Test]
+        public void Can_Where_using_Only_Conditional_filter()
+        {
+            System.Linq.Expressions.Expression<Func<TestType, bool>> filter = x => (x.NullableBoolCol.HasValue ? false : x.TextCol.Contains("qwer"));
+            var q = Db.From<TestType>().Where(filter);
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Contain("="));
+
+            var target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void Can_Where_using_Equal_Conditional_filter()
+        {
+            System.Linq.Expressions.Expression<Func<TestType, bool>> filter = x => ((x.NullableBoolCol.HasValue ? false : x.TextCol.Contains("qwer")) == true);
+            var q = Db.From<TestType>().Where(filter);
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Contain("="));
+
+            var target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void Can_Where_using_And_Conditional_filter()
+        {
+            System.Linq.Expressions.Expression<Func<TestType, bool>> filter = x => x.Id > 2 && (x.NullableBoolCol.HasValue ? false : x.TextCol.Contains("qwer"));
+            var q = Db.From<TestType>().Where(filter);
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Contain("="));
+
+            var target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void Can_Where_using_And_Equal_Conditional_filter()
+        {
+            System.Linq.Expressions.Expression<Func<TestType, bool>> filter = x => x.Id > 2 && (x.NullableBoolCol.HasValue ? false : x.TextCol.Contains("qwer")) == true;
+            var q = Db.From<TestType>().Where(filter);
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Contain("="));
+
+            var target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(2));
+        }
+
         private int MethodReturningInt(int val)
         {
             return val;
