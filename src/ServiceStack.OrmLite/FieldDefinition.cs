@@ -101,7 +101,9 @@ namespace ServiceStack.OrmLite
         public bool IgnoreOnUpdate { get; set; }
 
         public bool IgnoreOnInsert { get; set; }
-        
+
+        public bool ReturnOnInsert { get; set; }
+
         public override string ToString() => Name;
 
         public bool ShouldSkipInsert() => IgnoreOnInsert || AutoIncrement || IsComputed || IsRowVersion;

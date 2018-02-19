@@ -647,7 +647,27 @@ namespace ServiceStack.OrmLite
                 return dbCmd.ExecLongScalar();
             }
 
-            return dbCmd.ExecNonQuery();
+            var modelDef = typeof(T).GetModelDefinition();
+            if (modelDef.HasReturnAttribute)
+            {
+                using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
+                {
+                    using (reader)
+                    {
+                        if (reader.Read())
+                        {
+                            var values = new object[reader.FieldCount];
+
+                            var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition, dialectProvider);
+                            obj.PopulateWithSqlReader(dialectProvider, reader, indexCache, values);
+                            return 1;
+                        }
+                        return reader.RecordsAffected;
+                    }
+                }
+            }
+            else
+                return dbCmd.ExecNonQuery();
         }
 
         internal static void Insert<T>(this IDbCommand dbCmd, Action<IDbCommand> commandFilter, params T[] objs)
