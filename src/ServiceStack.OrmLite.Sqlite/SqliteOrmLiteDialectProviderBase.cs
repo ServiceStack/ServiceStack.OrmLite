@@ -204,6 +204,13 @@ namespace ServiceStack.OrmLite.Sqlite
             return ret;
         }
 
+        public override string SqlConflict(string sql, string conflictResolution)
+        {
+            // http://www.sqlite.org/lang_conflict.html
+            var parts = sql.SplitOnFirst(' ');
+            return parts[0] + " OR " + conflictResolution + " " + parts[1];
+        }
+
         public override string SqlConcat(IEnumerable<object> args) => string.Join(" || ", args);
 
         public override string SqlCurrency(string fieldOrValue, string currencySymbol) => SqlConcat(new []{ "'" + currencySymbol + "'", "printf(\"%.2f\", " + fieldOrValue + ")" });

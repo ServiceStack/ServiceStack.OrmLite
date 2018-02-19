@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using NUnit.Framework;
+using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.SqlServer.Converters;
 using ServiceStack.Text;
 
@@ -9,7 +9,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
     [TestFixture]
     public class SchemaTests : OrmLiteTestBase
     {
-        public class SchemaTest
+        public class TableTest
         {
             public int Id { get; set; }
             public string Name { get; set; }
@@ -17,6 +17,45 @@ namespace ServiceStack.OrmLite.SqlServerTests
 
         [Test]
         public void Can_drop_and_add_column()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<TableTest>();
+
+                Assert.That(db.ColumnExists<TableTest>(x => x.Id));
+                Assert.That(db.ColumnExists<TableTest>(x => x.Name));
+
+                db.DropColumn<TableTest>(x => x.Name);
+                Assert.That(!db.ColumnExists<TableTest>(x => x.Name));
+
+                try
+                {
+                    db.DropColumn<TableTest>(x => x.Name);
+                    Assert.Fail("Should throw");
+                }
+                catch (Exception) { }
+
+                db.AddColumn<TableTest>(x => x.Name);
+                Assert.That(db.ColumnExists<TableTest>(x => x.Name));
+
+                try
+                {
+                    db.AddColumn<TableTest>(x => x.Name);
+                    Assert.Fail("Should throw");
+                }
+                catch (Exception) {}
+            }
+        }
+
+        [Schema("Schema")]
+        public class SchemaTest
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+        }
+
+        [Test]
+        public void Can_drop_and_add_column_with_Schema()
         {
             using (var db = OpenDbConnection())
             {
@@ -43,7 +82,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
                     db.AddColumn<SchemaTest>(x => x.Name);
                     Assert.Fail("Should throw");
                 }
-                catch (Exception) {}
+                catch (Exception) { }
             }
         }
 
@@ -90,9 +129,9 @@ FROM INFORMATION_SCHEMA.COLUMNS";
 
             using (var db = OpenDbConnection())
             {
-                db.DropAndCreateTable<SchemaTest>();
+                db.DropAndCreateTable<TableTest>();
 
-                var results = db.Dictionary<string,string>(sql + " WHERE table_name = 'SchemaTest'");
+                var results = db.Dictionary<string,string>(sql + " WHERE table_name = 'TableTest'");
                 results.PrintDump();
                 Assert.That(results["Name"], Is.EqualTo("varchar(8000)"));
             }

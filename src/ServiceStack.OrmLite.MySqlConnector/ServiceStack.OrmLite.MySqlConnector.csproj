@@ -1,0 +1,72 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net45;netstandard2.0</TargetFrameworks>
+    <AssemblyName>ServiceStack.OrmLite.MySqlConnector</AssemblyName>
+    <PackageId>ServiceStack.OrmLite.MySqlConnector</PackageId>
+    <RootNamespace>ServiceStack.OrmLite.MySql</RootNamespace>
+    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
+    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+    <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' != 'Debug' ">
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\ServiceStack.OrmLite.MySql\Converters\MySqlBoolConverter.cs" Link="Converters\MySqlBoolConverter.cs" />
+    <Compile Include="..\ServiceStack.OrmLite.MySql\Converters\MySqlDateTimeConverterBase.cs" Link="Converters\MySqlDateTimeConverterBase.cs" />
+    <Compile Include="..\ServiceStack.OrmLite.MySql\Converters\MySqlDateTimeOffsetConverter.cs" Link="Converters\MySqlDateTimeOffsetConverter.cs" />
+    <Compile Include="..\ServiceStack.OrmLite.MySql\Converters\MySqlFloatConverters.cs" Link="Converters\MySqlFloatConverters.cs" />
+    <Compile Include="..\ServiceStack.OrmLite.MySql\Converters\MySqlGuidConverter.cs" Link="Converters\MySqlGuidConverter.cs" />
+    <Compile Include="..\ServiceStack.OrmLite.MySql\Converters\MySqlIntegerConverters.cs" Link="Converters\MySqlIntegerConverters.cs" />
+    <Compile Include="..\ServiceStack.OrmLite.MySql\Converters\MySqlStringConverters.cs" Link="Converters\MySqlStringConverters.cs" />
+    <Compile Include="..\ServiceStack.OrmLite.MySql\DataAnnotations\TextAttribute.cs" Link="DataAnnotations\TextAttribute.cs" />
+    <Compile Include="..\ServiceStack.OrmLite.MySql\MySqlDialectProviderBase.cs" Link="MySqlDialectProviderBase.cs" />
+    <Compile Include="..\ServiceStack.OrmLite.MySql\MySqlExpression.cs" Link="MySqlExpression.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj" />
+    <PackageReference Include="MySqlConnector" Version="0.33.2" />
+  </ItemGroup>
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net45' ">
+    <DefineConstants>$(DefineConstants);NET45;ASYNC</DefineConstants>
+    <SignAssembly>True</SignAssembly>
+    <DelaySign>False</DelaySign>
+    <AssemblyOriginatorKeyFile>../servicestack.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+    <Reference Include="System.Net" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+
+    <Reference Include="..\..\lib\net45\ServiceStack.Interfaces.dll" />
+    <Reference Include="..\..\lib\net45\ServiceStack.Text.dll" />
+    <Reference Include="..\..\lib\net45\ServiceStack.Common.dll" />
+  </ItemGroup>
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <DefineConstants>$(DefineConstants);NETSTANDARD2_0;ASYNC</DefineConstants>
+  </PropertyGroup>
+ 
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <Reference Include="..\..\lib\netstandard2.0\ServiceStack.Interfaces.dll" />
+    <Reference Include="..\..\lib\netstandard2.0\ServiceStack.Text.dll" />
+    <Reference Include="..\..\lib\netstandard2.0\ServiceStack.Common.dll" />
+  </ItemGroup>
+ 
+  <ItemGroup>
+    <Folder Include="DataAnnotations\" />
+  </ItemGroup>
+
+</Project>

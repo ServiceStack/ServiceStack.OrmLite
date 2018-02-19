@@ -106,33 +106,33 @@ namespace ServiceStack.OrmLite.Tests
 
                 dateTime = new DateTime(2012, 1, 1, 1, 1, 1, DateTimeKind.Local);
                 x = InsertAndSelectDateTime(db, dateTime);
-                Assert.AreEqual(DateTimeKind.Utc, x.Test.Kind);
-                Assert.AreEqual(DateTimeKind.Utc, x.TestNullable.Value.Kind);
-                Assert.AreEqual(x.Test, x.TestNullable.Value);
-                Assert.AreEqual(x.Test.ToUniversalTime(), dateTime.ToUniversalTime());
-                Assert.AreEqual(x.Test.ToLocalTime(), dateTime.ToLocalTime());
+                Assert.That(x.Test.Kind, Is.EqualTo(DateTimeKind.Utc));
+                Assert.That(x.TestNullable.Value.Kind, Is.EqualTo(DateTimeKind.Utc));
+                Assert.That(x.Test, Is.EqualTo(x.TestNullable.Value));
+                Assert.That(x.Test.ToUniversalTime(), Is.EqualTo(dateTime.ToUniversalTime()));
+                Assert.That(x.Test.ToLocalTime(), Is.EqualTo(dateTime.ToLocalTime()));
                 x = db.Select<DateTimeObject>(d => d.Test == dateTime).FirstOrDefault();
-                Assert.IsNotNull(x);
+                Assert.That(x, Is.Not.Null);
 
                 dateTime = new DateTime(2012, 1, 1, 1, 1, 1, DateTimeKind.Utc);
                 x = InsertAndSelectDateTime(db, dateTime);
-                Assert.AreEqual(DateTimeKind.Utc, x.Test.Kind);
-                Assert.AreEqual(DateTimeKind.Utc, x.TestNullable.Value.Kind);
-                Assert.AreEqual(x.Test, x.TestNullable.Value);
-                Assert.AreEqual(x.Test.ToUniversalTime(), dateTime.ToUniversalTime());
-                Assert.AreEqual(x.Test.ToLocalTime(), dateTime.ToLocalTime());
+                Assert.That(x.Test.Kind, Is.EqualTo(DateTimeKind.Utc));
+                Assert.That(x.TestNullable.Value.Kind, Is.EqualTo(DateTimeKind.Utc));
+                Assert.That(x.Test, Is.EqualTo(x.TestNullable.Value));
+                Assert.That(x.Test.ToUniversalTime(), Is.EqualTo(dateTime.ToUniversalTime()));
+                Assert.That(x.Test.ToLocalTime(), Is.EqualTo(dateTime.ToLocalTime()));
                 x = db.Select<DateTimeObject>(d => d.Test == dateTime).FirstOrDefault();
-                Assert.IsNotNull(x);
+                Assert.That(x, Is.Not.Null);
 
                 dateTime = new DateTime(2012, 1, 1, 1, 1, 1, DateTimeKind.Unspecified);
                 x = InsertAndSelectDateTime(db, dateTime);
-                Assert.AreEqual(DateTimeKind.Utc, x.Test.Kind);
-                Assert.AreEqual(DateTimeKind.Utc, x.TestNullable.Value.Kind);
-                Assert.AreEqual(x.Test, x.TestNullable.Value);
-                Assert.AreEqual(x.Test.ToUniversalTime(), dateTime);
-                Assert.AreEqual(x.Test.ToLocalTime(), dateTime.ToLocalTime());
+                Assert.That(x.Test.Kind, Is.EqualTo(DateTimeKind.Utc));
+                Assert.That(x.TestNullable.Value.Kind, Is.EqualTo(DateTimeKind.Utc));
+                Assert.That(x.Test, Is.EqualTo(x.TestNullable.Value));
+                Assert.That(x.Test.ToUniversalTime(), Is.EqualTo(dateTime));
+                Assert.That(x.Test.ToLocalTime(), Is.EqualTo(dateTime.ToLocalTime()));
                 x = db.Select<DateTimeObject>(d => d.Test == dateTime).FirstOrDefault();
-                Assert.IsNotNull(x);
+                Assert.That(x, Is.Not.Null);
 
                 dialectProvider.GetDateTimeConverter().DateStyle = hold;
             }

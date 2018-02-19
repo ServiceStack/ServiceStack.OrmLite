@@ -90,9 +90,15 @@ namespace ServiceStack.OrmLite.Sqlite.Converters
             if (DateStyle == DateTimeKind.Utc)
             {
                 if (dateTime.Kind == DateTimeKind.Local)
+                {
                     dateTime = dateTime.ToUniversalTime();
+                }
                 else if (dateTime.Kind == DateTimeKind.Unspecified)
+                {
+#if !NETSTANDARD2_0
                     dateTime = DateTime.SpecifyKind(dateTime, DateTimeKind.Utc);
+#endif
+                }
             }
             else if (DateStyle == DateTimeKind.Local && dateTime.Kind != DateTimeKind.Local)
             {
@@ -113,7 +119,14 @@ namespace ServiceStack.OrmLite.Sqlite.Converters
             var dateTime = (DateTime)value;
 
             if (DateStyle == DateTimeKind.Utc)
+            {
+#if NETSTANDARD2_0
+                //.NET Core returns correct UTC time but as Unspecified so just change to Utc
+                dateTime = DateTime.SpecifyKind(dateTime, DateTimeKind.Utc);
+#else
                 dateTime = dateTime.ToUniversalTime();
+#endif
+            }
 
             if (DateStyle == DateTimeKind.Local && dateTime.Kind != DateTimeKind.Local)
             {

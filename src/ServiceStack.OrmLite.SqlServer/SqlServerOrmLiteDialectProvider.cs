@@ -93,20 +93,6 @@ namespace ServiceStack.OrmLite.SqlServer
             return new SqlConnection(connectionString);
         }
 
-        [Obsolete("Use SqlServerDialect.Provider.RegisterConverter<DateTime>(new SqlServerDateTime2Converter());")]
-        public void UseDatetime2(bool shouldUseDatetime2)
-        {
-            RegisterConverter<DateTime>(shouldUseDatetime2
-                ? new SqlServerDateTime2Converter()
-                : new SqlServerDateTimeConverter());
-        }
-
-        [Obsolete("Use GetDateTimeConverter().DateStyle = DateTimeKind.Utc")]
-        public void EnsureUtc(bool shouldEnsureUtc)
-        {
-            this.GetDateTimeConverter().DateStyle = DateTimeKind.Utc;
-        }
-
         public override SqlExpression<T> SqlExpression<T>() => new SqlServerExpression<T>(this);
 
         public override IDbDataParameter CreateParam() => new SqlParameter();
@@ -180,7 +166,7 @@ namespace ServiceStack.OrmLite.SqlServer
         public override string ToAddColumnStatement(Type modelType, FieldDefinition fieldDef)
         {
             var column = GetColumnDefinition(fieldDef);
-            var modelName = GetQuotedTableName(GetModel(modelType).ModelName);
+            var modelName = GetQuotedTableName(GetModel(modelType));
 
             return $"ALTER TABLE {modelName} ADD {column};";
         }
@@ -188,14 +174,14 @@ namespace ServiceStack.OrmLite.SqlServer
         public override string ToAlterColumnStatement(Type modelType, FieldDefinition fieldDef)
         {
             var column = GetColumnDefinition(fieldDef);
-            var modelName = GetQuotedTableName(GetModel(modelType).ModelName);
+            var modelName = GetQuotedTableName(GetModel(modelType));
 
             return $"ALTER TABLE {modelName} ALTER COLUMN {column};";
         }
 
         public override string ToChangeColumnNameStatement(Type modelType, FieldDefinition fieldDef, string oldColumnName)
         {
-            var modelName = NamingStrategy.GetTableName(GetModel(modelType).ModelName);
+            var modelName = NamingStrategy.GetTableName(GetModel(modelType));
             var objectName = $"{modelName}.{oldColumnName}";
 
             return $"EXEC sp_rename {GetQuotedValue(objectName)}, {GetQuotedValue(fieldDef.FieldName)}, {GetQuotedValue("COLUMN")};";
@@ -216,7 +202,7 @@ namespace ServiceStack.OrmLite.SqlServer
             if (fieldDef.FieldType == typeof(string))
             {
                 // https://msdn.microsoft.com/en-us/library/ms184391.aspx
-                var collation = fieldDef.PropertyInfo.FirstAttribute<SqlServerCollateAttribute>()?.Collation;
+                var collation = fieldDef.PropertyInfo?.FirstAttribute<SqlServerCollateAttribute>()?.Collation;
                 if (!string.IsNullOrEmpty(collation))
                 {
                     sql.Append($" COLLATE {collation}");
@@ -234,7 +220,12 @@ namespace ServiceStack.OrmLite.SqlServer
             else
             {
                 sql.Append(fieldDef.IsNullable ? " NULL" : " NOT NULL");
-            }            
+            }
+
+            if (fieldDef.UniqueConstraint)
+            {
+                sql.Append(" UNIQUE");
+            }
 
             var defaultValue = GetDefaultValue(fieldDef);
             if (!string.IsNullOrEmpty(defaultValue))
@@ -265,8 +256,8 @@ namespace ServiceStack.OrmLite.SqlServer
             if (rows.HasValue && rows.Value < 0)
                 throw new ArgumentException($"Rows value:'{rows.Value}' must be>=0");
 
-            var skip = offset.HasValue ? offset.Value : 0;
-            var take = rows.HasValue ? rows.Value : int.MaxValue;
+            var skip = offset ?? 0;
+            var take = rows ?? int.MaxValue;
 
             var selectType = selectExpression.StartsWithIgnoreCase("SELECT DISTINCT") ? "SELECT DISTINCT" : "SELECT";
 

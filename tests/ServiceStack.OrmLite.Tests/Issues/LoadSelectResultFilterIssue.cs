@@ -45,8 +45,6 @@ namespace ServiceStack.OrmLite.Tests.Issues
         public Parent Parent { get; set; }
     }
 
-
-
     public class LoadSelectResultFilterIssue : OrmLiteTestBase
     {
         [Test]
@@ -54,6 +52,9 @@ namespace ServiceStack.OrmLite.Tests.Issues
         {
             using (var db = OpenDbConnection())
             {
+                db.DropTable<Parent>();
+                db.DropTable<Child>();
+
                 db.CreateTable<Parent>();
                 db.CreateTable<Child>();
 

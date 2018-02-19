@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Data;
 using System.Threading;
@@ -16,9 +17,12 @@ namespace ServiceStack.OrmLite
         Task<bool> SaveAsync(object obj, CancellationToken token);
 
         void InsertAll(IEnumerable objs);
+        void InsertAll(IEnumerable objs, Action<IDbCommand> commandFilter);
         long Insert(object obj, bool selectIdentity = false);
+        long Insert(object obj, Action<IDbCommand> commandFilter, bool selectIdentity = false);
 
         int UpdateAll(IEnumerable objs);
+        int UpdateAll(IEnumerable objs, Action<IDbCommand> commandFilter);
         int Update(object obj);
 
         int DeleteAll();

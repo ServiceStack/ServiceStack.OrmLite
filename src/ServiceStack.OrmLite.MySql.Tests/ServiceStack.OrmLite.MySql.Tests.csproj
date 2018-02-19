@@ -1,8 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <!--<TargetFrameworks>net45;netcoreapp1.1</TargetFrameworks>-->
-    <TargetFrameworks>net45</TargetFrameworks>
+    <TargetFrameworks>net46;netcoreapp2.0</TargetFrameworks>
     <DebugType>portable</DebugType>
     <AssemblyName>ServiceStack.OrmLite.MySql.Tests</AssemblyName>
     <OutputType>Library</OutputType>
@@ -18,20 +17,53 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ApiUtilExtensions.cs" Link="Shared\ApiUtilExtensions.cs" />
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\BuiltInsFactory.cs" Link="Shared\BuiltInsFactory.cs" />
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\DefaultValues.cs" Link="Shared\DefaultValues.cs" />
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\IModelFactory.cs" Link="Shared\IModelFactory.cs" />
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelFactoryBase.cs" Link="Shared\ModelFactoryBase.cs" />
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelWithComplexTypes.cs" Link="Shared\ModelWithComplexTypes.cs" />
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelWithComplexTypesFactory.cs" Link="Shared\ModelWithComplexTypesFactory.cs" />
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelWithCompositeIndexFields.cs" Link="Shared\ModelWithCompositeIndexFields.cs" />
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelWithFieldsOfDifferentAndNullableTypes.cs" Link="Shared\ModelWithFieldsOfDifferentAndNullableTypes.cs" />
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelWithFieldsOfDifferentAndNullableTypesFactory.cs" Link="Shared\ModelWithFieldsOfDifferentAndNullableTypesFactory.cs" />
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelWithFieldsOfDifferentTypes.cs" Link="Shared\ModelWithFieldsOfDifferentTypes.cs" />
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelWithFieldsOfDifferentTypesFactory.cs" Link="Shared\ModelWithFieldsOfDifferentTypesFactory.cs" />
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelWithFieldsOfNullableTypes.cs" Link="Shared\ModelWithFieldsOfNullableTypes.cs" />
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelWithFieldsOfNullableTypesFactory.cs" Link="Shared\ModelWithFieldsOfNullableTypesFactory.cs" />
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelWithIdAndName.cs" Link="Shared\ModelWithIdAndName.cs" />
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelWithIdOnly.cs" Link="Shared\ModelWithIdOnly.cs" />
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelWithIndexFields.cs" Link="Shared\ModelWithIndexFields.cs" />
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelWithLongIdAndStringFields.cs" Link="Shared\ModelWithLongIdAndStringFields.cs" />
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelWithMapAndList.cs" Link="Shared\ModelWithMapAndList.cs" />
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelWithNamedCompositeIndex.cs" Link="Shared\ModelWithNamedCompositeIndex.cs" />
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelWithNumerics.cs" Link="Shared\ModelWithNumerics.cs" />
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ModelWithOnlyStringFields.cs" Link="Shared\ModelWithOnlyStringFields.cs" />
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\Movie.cs" Link="Shared\Movie.cs" />
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\MultipleTables.cs" Link="Shared\MultipleTables.cs" />
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\Person.cs" Link="Shared\Person.cs" />
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\Poco.cs" Link="Shared\Poco.cs" />
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\SampleOrderLine.cs" Link="Shared\SampleOrderLine.cs" />
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\Shipper.cs" Link="Shared\Shipper.cs" />
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\ShipperFactory.cs" Link="Shared\ShipperFactory.cs" />
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\TaskQueue.cs" Link="Shared\TaskQueue.cs" />
+    <Compile Include="..\..\tests\ServiceStack.OrmLite.Tests\Shared\UpdateCommandFilter.cs" Link="Shared\UpdateCommandFilter.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj" />
-    <ProjectReference Include="..\..\tests\ServiceStack.OrmLite.Tests\ServiceStack.OrmLite.Tests.csproj" />
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite.MySql\ServiceStack.OrmLite.MySql.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="NUnit" Version="3.6.1" />
+    <PackageReference Include="NUnit" Version="3.9.0" />
   </ItemGroup>
   
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net45' ">
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net46' ">
     <DefineConstants>$(DefineConstants);NET45</DefineConstants>
   </PropertyGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
     <Reference Include="System.Configuration" />
     <Reference Include="System.Threading" />
     <Reference Include="System.Threading.Tasks" />

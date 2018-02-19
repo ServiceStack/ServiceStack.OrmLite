@@ -6,8 +6,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
     [TestFixture]
     public class ForeignKeyAttributeTests : OrmLiteTestBase
     {
-        [TestFixtureSetUp]
-        public void Setup()
+        public ForeignKeyAttributeTests()
         {
             using (var db = OpenDbConnection())
             {

@@ -206,6 +206,11 @@ namespace ServiceStack.OrmLite.PostgreSQL
                 }
             }
 
+            if (fieldDef.UniqueConstraint)
+            {
+                sql.Append(" UNIQUE");
+            }
+
             var defaultValue = GetDefaultValue(fieldDef);
             if (!string.IsNullOrEmpty(defaultValue))
             {
@@ -333,6 +338,31 @@ namespace ServiceStack.OrmLite.PostgreSQL
             return sql;
         }
 
+        public override string ToAlterColumnStatement(Type modelType, FieldDefinition fieldDef)
+        {
+            var columnDefinition = GetColumnDefinition(fieldDef);
+            var modelName = GetQuotedTableName(GetModel(modelType));
+
+            var parts = columnDefinition.SplitOnFirst(' ');
+            var columnName = parts[0];
+            var columnType = parts[1];
+
+            var notNull = columnDefinition.Contains("NOT NULL");
+
+            var nullLiteral = notNull ? " NOT NULL" : " NULL";
+            columnType = columnType.Replace(nullLiteral, "");
+
+            var nullSql = notNull 
+                ? "SET NOT NULL" 
+                : "DROP NOT NULL";
+
+            var sql = $"ALTER TABLE {modelName}\n" 
+                    + $"  ALTER COLUMN {columnName} TYPE {columnType},\n"
+                    + $"  ALTER COLUMN {columnName} {nullSql}";
+
+            return sql;
+        }
+
         public override string GetQuotedTableName(string tableName, string schema = null)
         {
             return !Normalize || ReservedWords.Contains(tableName) || (schema != null && ReservedWords.Contains(schema))
@@ -446,6 +476,14 @@ namespace ServiceStack.OrmLite.PostgreSQL
             }
 
             SetParameterValues<T>(cmd, obj);
+        }
+
+        public override string SqlConflict(string sql, string conflictResolution)
+        {
+            //https://www.postgresql.org/docs/current/static/sql-insert.html
+            return sql + " ON CONFLICT " + (conflictResolution == ConflictResolution.Ignore
+                       ? " DO NOTHING"
+                       : conflictResolution);
         }
 
         public override string SqlConcat(IEnumerable<object> args) => string.Join(" || ", args);

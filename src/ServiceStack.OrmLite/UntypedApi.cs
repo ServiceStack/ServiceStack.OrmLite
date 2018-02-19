@@ -43,7 +43,7 @@ namespace ServiceStack.OrmLite
         public IDbConnection Db { get; set; }
         public IDbCommand DbCmd { get; set; }
 
-        public T Exec<T>(Func<IDbCommand, T> filter)
+        public TReturn Exec<TReturn>(Func<IDbCommand, TReturn> filter)
         {
             return DbCmd != null ? filter(DbCmd) : Db.Exec(filter);
         }
@@ -90,12 +90,22 @@ namespace ServiceStack.OrmLite
 
         public void InsertAll(IEnumerable objs)
         {
-            Exec(dbCmd => dbCmd.InsertAll((IEnumerable<T>)objs));
+            Exec(dbCmd => dbCmd.InsertAll((IEnumerable<T>)objs, commandFilter:null));
+        }
+
+        public void InsertAll(IEnumerable objs, Action<IDbCommand> commandFilter)
+        {
+            Exec(dbCmd => dbCmd.InsertAll((IEnumerable<T>)objs, commandFilter:commandFilter));
         }
 
         public long Insert(object obj, bool selectIdentity = false)
         {
-            return Exec(dbCmd => dbCmd.Insert((T)obj, selectIdentity: selectIdentity));
+            return Exec(dbCmd => dbCmd.Insert((T)obj, commandFilter: null, selectIdentity: selectIdentity));
+        }
+
+        public long Insert(object obj, Action<IDbCommand> commandFilter, bool selectIdentity = false)
+        {
+            return Exec(dbCmd => dbCmd.Insert((T)obj, commandFilter: commandFilter, selectIdentity: selectIdentity));
         }
 
         public int UpdateAll(IEnumerable objs)
@@ -103,9 +113,19 @@ namespace ServiceStack.OrmLite
             return Exec(dbCmd => dbCmd.UpdateAll((IEnumerable<T>)objs));
         }
 
+        public int UpdateAll(IEnumerable objs, Action<IDbCommand> commandFilter)
+        {
+            return Exec(dbCmd => dbCmd.UpdateAll((IEnumerable<T>)objs, commandFilter: commandFilter));
+        }
+
         public int Update(object obj)
         {
             return Exec(dbCmd => dbCmd.Update((T)obj));
+        }
+
+        public int Update(object obj, Action<IDbCommand> commandFilter)
+        {
+            return Exec(dbCmd => dbCmd.Update((T)obj, commandFilter: commandFilter));
         }
 
         public int DeleteAll()

@@ -5,7 +5,7 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [TestFixture, Explicit]
+    [TestFixture, Ignore("Required DB with MigrateSqlServerTypes table")]
     public class AdoNetDataAccessTests
         : OrmLiteTestBase
     {

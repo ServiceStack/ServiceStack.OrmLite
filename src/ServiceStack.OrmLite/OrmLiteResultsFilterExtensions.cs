@@ -141,37 +141,6 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        internal static IDbCommand SetParameters(this IDbCommand dbCmd, IEnumerable<IDbDataParameter> sqlParams)
-        {
-            if (sqlParams == null) 
-                return dbCmd;
-            
-            try
-            {
-                dbCmd.Parameters.Clear();
-                foreach (var sqlParam in sqlParams)
-                {
-                    dbCmd.Parameters.Add(sqlParam);
-                }
-            }
-            catch (Exception ex)
-            {
-                //SQL Server + PostgreSql doesn't allow re-using db params in multiple queries
-                if (Log.IsDebugEnabled)
-                    Log.Debug("Exception trying to reuse db params, executing with cloned params instead", ex);
-
-                dbCmd.Parameters.Clear();
-                foreach (var sqlParam in sqlParams)
-                {
-                    var p = dbCmd.CreateParameter();
-                    p.PopulateWith(sqlParam);
-                    dbCmd.Parameters.Add(p);
-                }
-            }
-
-            return dbCmd;
-        }
-
         public static T ConvertTo<T>(this IDbCommand dbCmd, string sql = null)
         {
             if (sql != null)
@@ -221,8 +190,7 @@ namespace ServiceStack.OrmLite
 
         public static object Scalar(this IDbCommand dbCmd, ISqlExpression sqlExpression)
         {
-            dbCmd.CommandText = sqlExpression.ToSelectStatement();
-            dbCmd.SetParameters(sqlExpression.Params);
+            dbCmd.PopulateWith(sqlExpression);
 
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.GetScalar(dbCmd);
@@ -306,9 +274,7 @@ namespace ServiceStack.OrmLite
 
         internal static HashSet<T> ColumnDistinct<T>(this IDbCommand dbCmd, ISqlExpression expression)
         {
-            dbCmd.CommandText = expression.ToSelectStatement();
-
-            SetParameters(dbCmd, expression.Params);
+            dbCmd.PopulateWith(expression);
 
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.GetColumnDistinct<T>(dbCmd);
@@ -335,7 +301,7 @@ namespace ServiceStack.OrmLite
 
         internal static Dictionary<K, V> Dictionary<K, V>(this IDbCommand dbCmd, ISqlExpression expression)
         {
-            dbCmd.SetParameters(expression.Params).CommandText = expression.ToSelectStatement();
+            dbCmd.PopulateWith(expression);
 
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.GetDictionary<K, V>(dbCmd);

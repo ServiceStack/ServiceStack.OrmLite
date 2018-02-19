@@ -11,7 +11,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
     [TestFixture]
     public class PasswordUseCase
     {
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void TestFixtureSetUp()
         {
             //Inject your database provider here

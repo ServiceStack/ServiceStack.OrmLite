@@ -16,8 +16,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static string GetLastSql(this IDbConnection dbConn)
         {
-            var ormLiteConn = dbConn as OrmLiteConnection;
-            return ormLiteConn != null ? ormLiteConn.LastCommandText : null;
+            return dbConn is OrmLiteConnection ormLiteConn ? ormLiteConn.LastCommandText : null;
         }
 
         public static string GetLastSqlAndParams(this IDbCommand dbCmd)
@@ -70,7 +69,16 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static long Insert<T>(this IDbConnection dbConn, T obj, bool selectIdentity = false)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Insert(obj, selectIdentity));
+            return dbConn.Exec(dbCmd => dbCmd.Insert(obj, commandFilter: null, selectIdentity: selectIdentity));
+        }
+
+        /// <summary>
+        /// Insert 1 POCO and modify populated IDbCommand with a commandFilter. E.g:
+        /// <para>var id = db.Insert(new Person { Id = 1, FirstName = "Jimi }, dbCmd => applyFilter(dbCmd))</para>
+        /// </summary>
+        public static long Insert<T>(this IDbConnection dbConn, T obj, Action<IDbCommand> commandFilter, bool selectIdentity = false)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Insert(obj, commandFilter: commandFilter, selectIdentity: selectIdentity));
         }
 
         /// <summary>
@@ -89,7 +97,17 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static void InsertAll<T>(this IDbConnection dbConn, IEnumerable<T> objs)
         {
-            dbConn.Exec(dbCmd => dbCmd.InsertAll(objs));
+            dbConn.Exec(dbCmd => dbCmd.InsertAll(objs, commandFilter:null));
+        }
+
+        /// <summary>
+        /// Insert a collection of POCOs in a transaction and modify populated IDbCommand with a commandFilter. E.g:
+        /// <para>db.InsertAll(new[] { new Person { Id = 9, FirstName = "Biggie", LastName = "Smalls", Age = 24 } },</para>
+        /// <para>             dbCmd => applyFilter(dbCmd))</para>
+        /// </summary>
+        public static void InsertAll<T>(this IDbConnection dbConn, IEnumerable<T> objs, Action<IDbCommand> commandFilter)
+        {
+            dbConn.Exec(dbCmd => dbCmd.InsertAll(objs, commandFilter: commandFilter));
         }
 
         /// <summary>
@@ -99,7 +117,18 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static void Insert<T>(this IDbConnection dbConn, params T[] objs)
         {
-            dbConn.Exec(dbCmd => dbCmd.Insert(objs));
+            dbConn.Exec(dbCmd => dbCmd.Insert(commandFilter: null, objs: objs));
+        }
+
+        /// <summary>
+        /// Insert 1 or more POCOs in a transaction and modify populated IDbCommand with a commandFilter. E.g:
+        /// <para>db.Insert(dbCmd => applyFilter(dbCmd),</para>
+        /// <para>          new Person { Id = 1, FirstName = "Tupac", LastName = "Shakur", Age = 25 },</para>
+        /// <para>          new Person { Id = 2, FirstName = "Biggie", LastName = "Smalls", Age = 24 })</para>
+        /// </summary>
+        public static void Insert<T>(this IDbConnection dbConn, Action<IDbCommand> commandFilter, params T[] objs)
+        {
+            dbConn.Exec(dbCmd => dbCmd.Insert(commandFilter: commandFilter, objs: objs));
         }
 
         /// <summary>
@@ -118,7 +147,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static int Update<T>(this IDbConnection dbConn, params T[] objs)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Update(objs));
+            return dbConn.Exec(dbCmd => dbCmd.Update(objs, commandFilter:null));
         }
         public static int Update<T>(this IDbConnection dbConn, Action<IDbCommand> commandFilter, params T[] objs)
         {

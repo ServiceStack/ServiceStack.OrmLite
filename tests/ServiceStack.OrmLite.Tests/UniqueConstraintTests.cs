@@ -1,0 +1,117 @@
+﻿using System;
+using NUnit.Framework;
+using ServiceStack.DataAnnotations;
+using ServiceStack.Logging;
+using ServiceStack.Text;
+
+namespace ServiceStack.OrmLite.Tests
+{
+    public class UniqueTest
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+
+        [Unique]
+        public string Field { get; set; }
+    }
+
+    [UniqueConstraint(nameof(Field2), nameof(Field3))]
+    public class UniqueTest2
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+
+        public string Field2 { get; set; }
+        public string Field3 { get; set; }
+    }
+
+    [UniqueConstraint(nameof(Field4), nameof(Field5), nameof(Field6), Name = "UC_CUSTOM")]
+    public class UniqueTest3
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+
+        public string Field4 { get; set; }
+        public string Field5 { get; set; }
+        public string Field6 { get; set; }
+    }
+
+    public class UniqueConstraintTests : OrmLiteTestBase
+    {
+        //public UniqueConstraintTests() : base(Dialect.Sqlite) {}
+        //[OneTimeSetUp] public void OneTimeSetUp() => LogManager.LogFactory = new ConsoleLogFactory(debugEnabled: true);
+
+        [Test]
+        public void Does_add_individual_Constraints()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<UniqueTest>();
+
+                db.Insert(new UniqueTest { Field = "A" });
+                db.Insert(new UniqueTest { Field = "B" });
+
+                try
+                {
+                    db.Insert(new UniqueTest { Field = "B" });
+                    Assert.Fail("Should throw");
+                }
+                catch (Exception ex)
+                {
+                    ex.Message.Print();
+                    Assert.That(ex.Message.ToLower().Contains("unique") || ex.Message.ToLower().Contains("duplicate"));
+                }
+            }
+        }
+
+        [Test]
+        public void Does_add_multiple_column_unique_constraint()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<UniqueTest2>();
+
+                db.Insert(new UniqueTest2 { Field2 = "A", Field3 = "A" });
+                db.Insert(new UniqueTest2 { Field2 = "A", Field3 = "B" });
+
+                try
+                {
+                    db.Insert(new UniqueTest2 { Field2 = "A", Field3 = "B" });
+                    Assert.Fail("Should throw");
+                }
+                catch (Exception ex)
+                {
+                    ex.Message.Print();
+                    Assert.That(ex.Message.ToLower().Contains("unique") || ex.Message.ToLower().Contains("duplicate"));
+                }
+            }
+        }
+
+        [Test]
+        public void Does_add_multiple_column_unique_constraint_with_custom_name()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<UniqueTest3>();
+
+                var createSql = db.GetDialectProvider().ToCreateTableStatement(typeof(UniqueTest3));
+                Assert.That(createSql.ToUpper(), Does.Contain("CONSTRAINT UC_CUSTOM UNIQUE"));
+
+                db.Insert(new UniqueTest3 { Field4 = "A", Field5 = "A", Field6 = "A" });
+                db.Insert(new UniqueTest3 { Field4 = "A", Field5 = "A", Field6 = "B" });
+
+                try
+                {
+                    db.Insert(new UniqueTest3 { Field4 = "A", Field5 = "A", Field6 = "B" });
+                    Assert.Fail("Should throw");
+                }
+                catch (Exception ex)
+                {
+                    ex.Message.Print();
+                    Assert.That(ex.Message.ToLower().Contains("unique") || ex.Message.ToLower().Contains("duplicate"));
+                }
+            }
+        }
+
+    }
+}

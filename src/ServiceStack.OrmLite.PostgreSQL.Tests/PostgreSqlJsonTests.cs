@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.Tests;
@@ -38,8 +40,13 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
 
         [PgSqlTextArray]
         public string[] Strings { get; set; }
-    }
 
+        [PgSqlIntArray]
+        public List<int> ListInts { get; set; }
+
+        [PgSqlTextArray]
+        public List<string> ListStrings { get; set; }
+    }
 
     [TestFixture]
     public class PostgreSqlJsonTests : OrmLiteTestBase
@@ -99,14 +106,18 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
                 {
                     Id = Guid.NewGuid(),
                     Ints = new[] { 2, 4, 1 },
-                    Strings = new[] { "test string 1", "test string 2" }
+                    ListInts = new[] { 2, 4, 1 }.ToList(),
+                    Strings = new[] { "test string 1", "test string 2" },
+                    ListStrings = new[] { "test string 1", "test string 2" }.ToList(),
                 };
 
                 db.Save(data);
 
                 var row = db.Select<PgsqlData>()[0];
                 Assert.That(row.Ints.EquivalentTo(data.Ints));
+                Assert.That(row.ListInts.EquivalentTo(data.ListInts));
                 Assert.That(row.Strings.EquivalentTo(data.Strings));
+                Assert.That(row.ListStrings.EquivalentTo(data.ListStrings));
             }
         }
     }

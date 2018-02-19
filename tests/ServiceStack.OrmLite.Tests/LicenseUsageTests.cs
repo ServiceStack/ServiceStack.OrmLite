@@ -9,6 +9,7 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
+    [Ignore("Run manually")]
     [TestFixture]
     public class FreeLicenseUsageTests : LicenseUsageTests
     {
@@ -47,7 +48,8 @@ namespace ServiceStack.OrmLite.Tests
                 db.DropAndCreateTable<T11>());
         }
     }
-    
+
+    [Ignore("Run manually")]
     [TestFixture]
     public class RegisteredLicenseUsageTests : LicenseUsageTests
     {
@@ -78,7 +80,7 @@ namespace ServiceStack.OrmLite.Tests
     class T10 { public int Id { get; set; } }
     class T11 { public int Id { get; set; } }
 
-    public class LicenseUsageTests
+    public abstract class LicenseUsageTests
         : OrmLiteTestBase
     {
         protected IDbConnection db;

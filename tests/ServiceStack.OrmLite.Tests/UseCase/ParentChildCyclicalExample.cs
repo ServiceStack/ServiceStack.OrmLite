@@ -40,8 +40,11 @@ namespace ServiceStack.OrmLite.Tests.UseCase
         {
             using (var db = OpenDbConnection())
             {
-                db.DropAndCreateTable<Parent>();
-                db.DropAndCreateTable<Child>();
+                db.DropTable<Child>();
+                db.DropTable<Parent>();
+
+                db.CreateTable<Parent>();
+                db.CreateTable<Child>();
 
                 var parent = new Parent
                 {

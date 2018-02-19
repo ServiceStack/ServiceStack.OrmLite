@@ -2,6 +2,7 @@
 using System.Linq;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
+using ServiceStack.Logging;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
@@ -19,10 +20,11 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void CanStoreEnumValue()
         {
+            LogManager.LogFactory = new ConsoleLogFactory();
             using (var con = OpenDbConnection())
             {
                 con.CreateTable<TypeWithEnum>(true);
-                con.Save(new TypeWithEnum { Id = 1, EnumValue = SomeEnum.Value1 });
+                con.Insert(new TypeWithEnum { Id = 1 });
             }
         }
 
@@ -427,9 +429,9 @@ namespace ServiceStack.OrmLite.Tests
 
     public enum SomeEnum
     {
-        Value1 = 1,
-        Value2 = 2,
-        Value3 = 3
+        Value1,
+        Value2,
+        Value3
     }
 
     public class TypeWithEnum

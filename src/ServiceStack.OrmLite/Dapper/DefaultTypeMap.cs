@@ -97,9 +97,9 @@ namespace ServiceStack.OrmLite.Dapper
                         continue;
                     var unboxedType = Nullable.GetUnderlyingType(ctorParameters[i].ParameterType) ?? ctorParameters[i].ParameterType;
                     if ((unboxedType != types[i] && !SqlMapper.HasTypeHandler(unboxedType))
-                        && !(unboxedType.IsEnum() && Enum.GetUnderlyingType(unboxedType) == types[i])
+                        && !(unboxedType.IsEnum && Enum.GetUnderlyingType(unboxedType) == types[i])
                         && !(unboxedType == typeof(char) && types[i] == typeof(string))
-                        && !(unboxedType.IsEnum() && types[i] == typeof(string)))
+                        && !(unboxedType.IsEnum && types[i] == typeof(string)))
                     {
                         break;
                     }

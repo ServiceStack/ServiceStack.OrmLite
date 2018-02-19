@@ -158,23 +158,6 @@ namespace ServiceStack.OrmLite.Oracle
             throw new NotSupportedException();
         }
 
-        public override long InsertAndGetLastInsertId<T>(IDbCommand dbCmd)
-        {
-            dbCmd.ExecuteScalar();
-
-            var modelDef = GetModel(typeof(T));
-
-            var primaryKey = modelDef.PrimaryKey;
-            if (primaryKey == null)
-                return 0;
-
-            var identityParameter = (DbParameter)dbCmd.Parameters[this.GetParam(SanitizeFieldNameForParamName(primaryKey.FieldName))];
-            if (identityParameter == null)
-                return 0;
-
-            return Convert.ToInt64(identityParameter.Value);
-        }
-
         public override object ToDbValue(object value, Type type)
         {
             if (value == null || value is DBNull)
@@ -336,9 +319,8 @@ namespace ServiceStack.OrmLite.Oracle
 
             foreach (IDataParameter p in dbCmd.Parameters)
             {
-                FieldDefinition fieldDef;
                 var fieldName = this.ToFieldName(p.ParameterName);
-                fieldMap.TryGetValue(fieldName, out fieldDef);
+                fieldMap.TryGetValue(fieldName, out var fieldDef);
 
                 if (fieldDef == null)
                     throw new ArgumentException("Field Definition '{0}' was not found".Fmt(fieldName));
@@ -532,6 +514,12 @@ namespace ServiceStack.OrmLite.Oracle
             if (sbPk.Length != 0)
                 sbColumns.AppendFormat(", \n  PRIMARY KEY({0})", sbPk);
 
+            var uniqueConstraints = GetUniqueConstraints(modelDef);
+            if (uniqueConstraints != null)
+            {
+                sbConstraints.Append(",\n" + uniqueConstraints);
+            }
+
             var sql = string.Format(
                 "CREATE TABLE {0} \n(\n  {1}{2} \n) \n", GetQuotedTableName(modelDef), 
                 StringBuilderCache.ReturnAndFree(sbColumns), 
@@ -627,10 +615,14 @@ namespace ServiceStack.OrmLite.Oracle
 
             sql.Append(fieldDef.IsNullable ? " NULL" : " NOT NULL");
 
+            if (fieldDef.UniqueConstraint)
+            {
+                sql.Append(" UNIQUE");
+            }
+
             var definition = StringBuilderCache.ReturnAndFree(sql);
             return definition;
         }
-
 
         public override List<string> ToCreateIndexStatements(Type tableType)
         {
@@ -669,20 +661,16 @@ namespace ServiceStack.OrmLite.Oracle
         protected override string ToCreateIndexStatement(bool isUnique, string indexName, ModelDefinition modelDef, string fieldName,
             bool isCombined = false, FieldDefinition fieldDef = null)
         {
-            return string.Format("CREATE {0} INDEX {1} ON {2} ({3} ) \n",
-                isUnique ? "UNIQUE" : "",
-                indexName,
-                GetQuotedTableName(modelDef),
-                (isCombined) ? fieldName : GetQuotedColumnName(fieldName));
+            var unique = isUnique ? "UNIQUE" : "";
+            var field = isCombined ? fieldName : GetQuotedColumnName(fieldName);
+            return $"CREATE {unique} INDEX {indexName} ON {GetQuotedTableName(modelDef)} ({field}) \n";
         }
-
 
         public override string ToExistStatement(Type fromTableType,
             object objWithProperties,
             string sqlFilter,
             params object[] filterParams)
         {
-
             var fromModelDef = GetModel(fromTableType);
             var sql = StringBuilderCache.Allocate();
             sql.AppendFormat("SELECT 1 FROM {0}", GetQuotedTableName(fromModelDef));
@@ -822,8 +810,7 @@ namespace ServiceStack.OrmLite.Oracle
         {
             if (!isInsert)
             {
-                long nv;
-                return long.TryParse(value.ToString(), out nv) 
+                return long.TryParse(value.ToString(), out var nv) 
                     ? nv 
                     : 0;
             }

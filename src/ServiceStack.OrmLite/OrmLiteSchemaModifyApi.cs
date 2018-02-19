@@ -15,6 +15,14 @@ namespace ServiceStack.OrmLite
 
     public static class OrmLiteSchemaModifyApi
     {
+        private static void InitUserFieldDefinition(Type modelType, FieldDefinition fieldDef)
+        {
+            if (fieldDef.PropertyInfo == null)
+            {
+                fieldDef.PropertyInfo = TypeProperties.Get(modelType).GetPublicProperty(fieldDef.Name);
+            }
+        }
+
         public static void AlterTable<T>(this IDbConnection dbConn, string command)
         {
             AlterTable(dbConn, typeof(T), command);
@@ -35,6 +43,8 @@ namespace ServiceStack.OrmLite
 
         public static void AddColumn(this IDbConnection dbConn, Type modelType, FieldDefinition fieldDef)
         {
+            InitUserFieldDefinition(modelType, fieldDef);
+
             var command = dbConn.GetDialectProvider().ToAddColumnStatement(modelType, fieldDef);
             dbConn.ExecuteSql(command);
         }
@@ -48,6 +58,8 @@ namespace ServiceStack.OrmLite
 
         public static void AlterColumn(this IDbConnection dbConn, Type modelType, FieldDefinition fieldDef)
         {
+            InitUserFieldDefinition(modelType, fieldDef);
+
             var command = dbConn.GetDialectProvider().ToAlterColumnStatement(modelType, fieldDef);
             dbConn.ExecuteSql(command);
         }

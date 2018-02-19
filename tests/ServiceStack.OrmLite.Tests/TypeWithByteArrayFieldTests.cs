@@ -55,7 +55,8 @@ namespace ServiceStack.OrmLite.Tests
         [Test, Explicit]
         public void Can_upload_attachment_via_sp()
         {
-            SuppressIfOracle("Oracle does not like this procedure definition");
+            if (Dialect != Dialect.SqlServer)
+                return;
 
             using (var db = OpenDbConnection())
             {
@@ -95,7 +96,8 @@ end".Fmt(OrmLiteConfig.DialectProvider.ParamString));
         [Test, Explicit]
         public void Can_upload_attachment_via_sp_with_ADONET()
         {
-            SuppressIfOracle("Oracle does not like this procedure definition");
+            if (Dialect != Dialect.SqlServer)
+                return;
 
             using (var db = OpenDbConnection())
             {

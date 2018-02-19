@@ -15,14 +15,14 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		private readonly CultureInfo CurrentCulture = Thread.CurrentThread.CurrentCulture;
 		private readonly CultureInfo CurrentUICulture = Thread.CurrentThread.CurrentUICulture;
 
-		[TestFixtureSetUp]
+		[OneTimeSetUp]
 		public new  void TestFixtureSetUp()
 		{
 			Thread.CurrentThread.CurrentCulture = new CultureInfo("vi-VN");
 			Thread.CurrentThread.CurrentUICulture = new CultureInfo("vi-VN");
 		}
 
-		[TestFixtureTearDown]
+		[OneTimeTearDown]
 		public void TestFixtureTearDown()
 		{
 			Thread.CurrentThread.CurrentCulture = CurrentCulture;
