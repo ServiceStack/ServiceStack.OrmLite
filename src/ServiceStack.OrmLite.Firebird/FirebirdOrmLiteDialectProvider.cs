@@ -118,12 +118,19 @@ namespace ServiceStack.OrmLite.Firebird
 
             var sbColumnNames = StringBuilderCache.Allocate();
             var sbColumnValues = StringBuilderCacheAlt.Allocate();
+            var sbReturningColumns = StringBuilderCacheAlt.Allocate();
 
             var tableType = objWithProperties.GetType();
             var modelDef = GetModel(tableType);
 
             foreach (var fieldDef in modelDef.FieldDefinitionsArray)
             {
+                if (fieldDef.ReturnOnInsert || (fieldDef.IsPrimaryKey && fieldDef.AutoIncrement && modelDef.HasReturnAttribute))
+                {
+                    if (sbReturningColumns.Length > 0)
+                        sbReturningColumns.Append(",");
+                    sbReturningColumns.Append(GetQuotedColumnName(fieldDef.FieldName));
+                }
 
                 if (fieldDef.IsComputed)
                     continue;
@@ -154,13 +161,6 @@ namespace ServiceStack.OrmLite.Firebird
 
                     var p = AddParameter(cmd, fieldDef);
                     p.Value = fieldDef.GetValue(objWithProperties) ?? DBNull.Value;
-
-                    if (fieldDef.ReturnOnInsert)
-                    {
-                        if (sbReturningColumns.Length > 0)
-                            sbReturningColumns.Append(",");
-                        sbReturningColumns.Append(GetQuotedColumnName(fieldDef.FieldName));
-                    }
                 }
                 catch (Exception ex)
                 {
@@ -199,6 +199,13 @@ namespace ServiceStack.OrmLite.Firebird
 
             foreach (var fieldDef in modelDef.FieldDefinitionsArray)
             {
+                if (fieldDef.ReturnOnInsert || (fieldDef.IsPrimaryKey && fieldDef.AutoIncrement && modelDef.HasReturnAttribute))
+                {
+                    if (sbReturningColumns.Length > 0)
+                        sbReturningColumns.Append(",");
+                    sbReturningColumns.Append(GetQuotedColumnName(fieldDef.FieldName));
+                }
+
                 if (fieldDef.ShouldSkipInsert() && !fieldDef.AutoIncrement)
                     continue;
 
@@ -224,13 +231,6 @@ namespace ServiceStack.OrmLite.Firebird
                     {
                         EnsureAutoIncrementSequence(modelDef, fieldDef);
                         sbColumnValues.Append("NEXT VALUE FOR " + fieldDef.Sequence);
-                    }
-
-                    if (fieldDef.ReturnOnInsert)
-                    {
-                        if (sbReturningColumns.Length > 0)
-                            sbReturningColumns.Append(",");
-                        sbReturningColumns.Append(GetQuotedColumnName(fieldDef.FieldName));
                     }
                 }
                 catch (Exception ex)

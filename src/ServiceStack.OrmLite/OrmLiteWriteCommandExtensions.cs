@@ -640,13 +640,6 @@ namespace ServiceStack.OrmLite
 
             commandFilter?.Invoke(dbCmd); //dbCmd.OnConflictInsert() needs to be applied before last insert id
 
-            if (selectIdentity)
-            {
-                dbCmd.CommandText += dialectProvider.GetLastInsertIdSqlSuffix<T>();
-
-                return dbCmd.ExecLongScalar();
-            }
-
             var modelDef = typeof(T).GetModelDefinition();
             if (modelDef.HasReturnAttribute)
             {
@@ -657,14 +650,24 @@ namespace ServiceStack.OrmLite
                         if (reader.Read())
                         {
                             var values = new object[reader.FieldCount];
-
                             var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition, dialectProvider);
                             obj.PopulateWithSqlReader(dialectProvider, reader, indexCache, values);
-                            return 1;
+                            if ((modelDef.PrimaryKey != null) && modelDef.PrimaryKey.AutoIncrement)
+                            {
+                                var id = modelDef.GetPrimaryKey(obj);
+                                return Convert.ToInt64(id);
+                            }
                         }
-                        return reader.RecordsAffected;
+                        return 0;
                     }
                 }
+            }
+            else
+            if (selectIdentity)
+            {
+                dbCmd.CommandText += dialectProvider.GetLastInsertIdSqlSuffix<T>();
+
+                return dbCmd.ExecLongScalar();
             }
             else
                 return dbCmd.ExecNonQuery();

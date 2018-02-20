@@ -250,7 +250,7 @@ namespace ServiceStack.OrmLite.SqlServer
 
             foreach (var fieldDef in modelDef.FieldDefinitionsArray)
             {
-                if (fieldDef.ReturnOnInsert)
+                if (fieldDef.ReturnOnInsert || (fieldDef.IsPrimaryKey && fieldDef.AutoIncrement && modelDef.HasReturnAttribute))
                 {
                     if (sbReturningColumns.Length > 0)
                         sbReturningColumns.Append(",");
@@ -284,7 +284,7 @@ namespace ServiceStack.OrmLite.SqlServer
             }
 
             var strReturning = StringBuilderCacheAlt.ReturnAndFree(sbReturningColumns);
-            strReturning = strReturning.Length > 0 ? "OUTPUT " + strReturning : "";
+            strReturning = strReturning.Length > 0 ? "OUTPUT " + strReturning + " " : "";
             var sql = $"INSERT INTO {GetQuotedTableName(modelDef)} ({StringBuilderCache.ReturnAndFree(sbColumnNames)}) " +
                       strReturning +
                       $"VALUES ({StringBuilderCacheAlt.ReturnAndFree(sbColumnValues)})";
@@ -303,7 +303,7 @@ namespace ServiceStack.OrmLite.SqlServer
 
             foreach (var fieldDef in modelDef.FieldDefinitionsArray)
             {
-                if (fieldDef.ReturnOnInsert)
+                if (fieldDef.ReturnOnInsert || (fieldDef.IsPrimaryKey && fieldDef.AutoIncrement && modelDef.HasReturnAttribute))
                 {
                     if (sbReturningColumns.Length > 0)
                         sbReturningColumns.Append(",");
@@ -337,7 +337,7 @@ namespace ServiceStack.OrmLite.SqlServer
             }
 
             var strReturning = StringBuilderCacheAlt.ReturnAndFree(sbReturningColumns);
-            strReturning = strReturning.Length > 0 ? "OUTPUT " + strReturning : "";
+            strReturning = strReturning.Length > 0 ? "OUTPUT " + strReturning + " " : "";
             cmd.CommandText = $"INSERT INTO {GetQuotedTableName(modelDef)} ({StringBuilderCache.ReturnAndFree(sbColumnNames)}) " +
                               strReturning +
                               $"VALUES ({StringBuilderCacheAlt.ReturnAndFree(sbColumnValues)})";
@@ -356,7 +356,7 @@ namespace ServiceStack.OrmLite.SqlServer
             {
                 var fieldDef = modelDef.GetFieldDefinition(entry.Key);
 
-                if (fieldDef.ReturnOnInsert)
+                if (fieldDef.ReturnOnInsert || (fieldDef.IsPrimaryKey && fieldDef.AutoIncrement && modelDef.HasReturnAttribute))
                 {
                     if (sbReturningColumns.Length > 0)
                         sbReturningColumns.Append(",");
@@ -386,7 +386,7 @@ namespace ServiceStack.OrmLite.SqlServer
             }
 
             var strReturning = StringBuilderCacheAlt.ReturnAndFree(sbReturningColumns);
-            strReturning = strReturning.Length > 0 ? "OUTPUT " + strReturning : "";
+            strReturning = strReturning.Length > 0 ? "OUTPUT " + strReturning + " " : "";
             dbCmd.CommandText = $"INSERT INTO {GetQuotedTableName(modelDef)} ({StringBuilderCache.ReturnAndFree(sbColumnNames)}) " +
                                 strReturning +
                                 $"VALUES ({StringBuilderCacheAlt.ReturnAndFree(sbColumnValues)})";
