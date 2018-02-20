@@ -188,6 +188,11 @@ namespace ServiceStack.OrmLite.SqlServer
             return $"EXEC sp_rename {GetQuotedValue(objectName)}, {GetQuotedValue(fieldDef.FieldName)}, {GetQuotedValue("COLUMN")};";
         }
 
+        protected virtual string GetAutoIncrementDefinition(FieldDefinition fieldDef)
+        {
+            return AutoIncrementDefinition;
+        }
+
         public override string GetColumnDefinition(FieldDefinition fieldDef)
         {
             // https://msdn.microsoft.com/en-us/library/ms182776.aspx
@@ -215,7 +220,7 @@ namespace ServiceStack.OrmLite.SqlServer
                 sql.Append(" PRIMARY KEY");
                 if (fieldDef.AutoIncrement)
                 {
-                    sql.Append(" ").Append(AutoIncrementDefinition);
+                    sql.Append(" ").Append(GetAutoIncrementDefinition(fieldDef));
                 }
             }
             else

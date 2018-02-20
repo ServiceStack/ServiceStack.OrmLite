@@ -78,37 +78,7 @@ namespace ServiceStack.OrmLite
                         ExecuteSql(dbCmd, modelDef.PreCreateTableSql);
                     }
 
-                    ExecuteSql(dbCmd, dialectProvider.ToCreateTableStatement(modelType));
-
-                    var postCreateTableSql = dialectProvider.ToPostCreateTableStatement(modelDef);
-                    if (postCreateTableSql != null)
-                    {
-                        ExecuteSql(dbCmd, postCreateTableSql);
-                    }
-
-                    if (modelDef.PostCreateTableSql != null)
-                    {
-                        ExecuteSql(dbCmd, modelDef.PostCreateTableSql);
-                    }
-
-                    var sqlIndexes = dialectProvider.ToCreateIndexStatements(modelType);
-                    foreach (var sqlIndex in sqlIndexes)
-                    {
-                        try
-                        {
-                            dbCmd.ExecuteSql(sqlIndex);
-                        }
-                        catch (Exception exIndex)
-                        {
-                            if (IgnoreAlreadyExistsError(exIndex))
-                            {
-                                Log.DebugFormat("Ignoring existing index '{0}': {1}", sqlIndex, exIndex.Message);
-                                continue;
-                            }
-                            throw;
-                        }
-                    }
-
+                    /// sequences must be created before tables
                     var sequenceList = dialectProvider.SequenceList(modelType);
                     if (sequenceList.Count > 0)
                     {
@@ -139,6 +109,37 @@ namespace ServiceStack.OrmLite
                                 }
                                 throw;
                             }
+                        }
+                    }
+
+                    ExecuteSql(dbCmd, dialectProvider.ToCreateTableStatement(modelType));
+
+                    var postCreateTableSql = dialectProvider.ToPostCreateTableStatement(modelDef);
+                    if (postCreateTableSql != null)
+                    {
+                        ExecuteSql(dbCmd, postCreateTableSql);
+                    }
+
+                    if (modelDef.PostCreateTableSql != null)
+                    {
+                        ExecuteSql(dbCmd, modelDef.PostCreateTableSql);
+                    }
+
+                    var sqlIndexes = dialectProvider.ToCreateIndexStatements(modelType);
+                    foreach (var sqlIndex in sqlIndexes)
+                    {
+                        try
+                        {
+                            dbCmd.ExecuteSql(sqlIndex);
+                        }
+                        catch (Exception exIndex)
+                        {
+                            if (IgnoreAlreadyExistsError(exIndex))
+                            {
+                                Log.DebugFormat("Ignoring existing index '{0}': {1}", sqlIndex, exIndex.Message);
+                                continue;
+                            }
+                            throw;
                         }
                     }
                     return true;
