@@ -17,9 +17,10 @@ namespace ServiceStack.OrmLite.SqlServer
             var sql = "SELECT 1 FROM SYS.SEQUENCES WHERE object_id=object_id({0})"
                 .SqlFmt(this, sequenceName);
 
-            var result = dbCmd.ExecLongScalar(sql);
+            dbCmd.CommandText = sql;
+            var result = dbCmd.ExecuteScalar();
 
-            return result > 0;
+            return result != null;
         }
 
         private string Sequence(string schema, string sequence)
@@ -61,7 +62,7 @@ namespace ServiceStack.OrmLite.SqlServer
                     sbReturningColumns.Append($"INSERTED.{GetQuotedColumnName(fieldDef.FieldName)}");
                 }
 
-                if (fieldDef.ShouldSkipInsert() && !fieldDef.AutoIncrement)
+                if (fieldDef.ShouldSkipInsert() && !fieldDef.AutoIncrement && string.IsNullOrEmpty(fieldDef.Sequence))
                     continue;
 
                 //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
@@ -77,14 +78,14 @@ namespace ServiceStack.OrmLite.SqlServer
                 {
                     sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
 
-                    if (!fieldDef.AutoIncrement || string.IsNullOrEmpty(fieldDef.Sequence))
+                    if (fieldDef.AutoIncrement || !string.IsNullOrEmpty(fieldDef.Sequence))
                     {
-                        sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
-                        AddParameter(cmd, fieldDef);
+                        sbColumnValues.Append($"NEXT VALUE FOR {Sequence(NamingStrategy.GetSchemaName(modelDef), fieldDef.Sequence)}");
                     }
                     else
                     {
-                        sbColumnValues.Append($"NEXT VALUE FOR {Sequence(NamingStrategy.GetSchemaName(modelDef), fieldDef.Sequence)}");
+                        sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
+                        AddParameter(cmd, fieldDef);
                     }
                 }
                 catch (Exception ex)
@@ -105,6 +106,12 @@ namespace ServiceStack.OrmLite.SqlServer
         {
             var modelDef = GetModel(tableType);
             return SequenceList(tableType).Select(seq => $"CREATE SEQUENCE {Sequence(NamingStrategy.GetSchemaName(modelDef), seq)} AS BIGINT START WITH 1 INCREMENT BY 1 NO CACHE;").ToList();
+        }
+
+        public override string ToCreateSequenceStatement(Type tableType, string sequenceName)
+        {
+            var modelDef = GetModel(tableType);
+            return $"CREATE SEQUENCE {Sequence(NamingStrategy.GetSchemaName(modelDef), sequenceName)} AS BIGINT START WITH 1 INCREMENT BY 1 NO CACHE;";
         }
 
         public override List<string> SequenceList(Type tableType)

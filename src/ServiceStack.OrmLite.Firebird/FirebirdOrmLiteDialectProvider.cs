@@ -206,7 +206,7 @@ namespace ServiceStack.OrmLite.Firebird
                     sbReturningColumns.Append(GetQuotedColumnName(fieldDef.FieldName));
                 }
 
-                if (fieldDef.ShouldSkipInsert() && !fieldDef.AutoIncrement)
+                if (fieldDef.ShouldSkipInsert() && !fieldDef.AutoIncrement && string.IsNullOrEmpty(fieldDef.Sequence))
                     continue;
 
                 //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
@@ -222,15 +222,15 @@ namespace ServiceStack.OrmLite.Firebird
                 {
                     sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
 
-                    if (!fieldDef.AutoIncrement)
-                    {
-                        sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
-                        AddParameter(cmd, fieldDef);
-                    }
-                    else
+                    if (fieldDef.AutoIncrement || !string.IsNullOrEmpty(fieldDef.Sequence))
                     {
                         EnsureAutoIncrementSequence(modelDef, fieldDef);
                         sbColumnValues.Append("NEXT VALUE FOR " + fieldDef.Sequence);
+                    }
+                    else
+                    {
+                        sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
+                        AddParameter(cmd, fieldDef);
                     }
                 }
                 catch (Exception ex)

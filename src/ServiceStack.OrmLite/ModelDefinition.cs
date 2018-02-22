@@ -49,10 +49,12 @@ namespace ServiceStack.OrmLite
 
         public bool HasReturnAttribute 
         {
-            get
-            {
-                return this.FieldDefinitions.First(x => x.ReturnOnInsert) != null;
-            }
+            get { return this.FieldDefinitions.First(x => x.ReturnOnInsert) != null; }
+        }
+
+        public bool HasSequenceAttribute
+        {
+            get { return this.FieldDefinitions.First(x => !x.Sequence.IsNullOrEmpty()) != null; }
         }
 
         public FieldDefinition RowVersion { get; set; }
