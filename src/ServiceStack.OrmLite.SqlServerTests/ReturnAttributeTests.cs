@@ -16,7 +16,7 @@ namespace ReturnAttributeTests
 {
     public class User
     {
-        [ReturnOnInsert]
+        [Return]
         [PrimaryKey]
         [AutoIncrement]
         [Sequence("Gen_User_Id")]
@@ -29,7 +29,7 @@ namespace ReturnAttributeTests
 
     public class User2
     {
-        [ReturnOnInsert]
+        [Return]
         [PrimaryKey]
         [AutoIncrement]
         [Sequence("Gen_User_Id")]
@@ -39,7 +39,7 @@ namespace ReturnAttributeTests
         public string UserName { get; set; }
         public string Email { get; set; }
 
-        [ReturnOnInsert]
+        [Return]
         [Sequence("Gen_Counter_Id")]
         public int Counter { get; set; }
     }
