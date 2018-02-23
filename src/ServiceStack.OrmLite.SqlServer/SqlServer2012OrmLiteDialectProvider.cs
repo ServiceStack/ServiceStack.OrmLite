@@ -23,19 +23,6 @@ namespace ServiceStack.OrmLite.SqlServer
             return result != null;
         }
 
-        private string Sequence(string schema, string sequence)
-        {
-            if (schema == null)
-                return GetQuotedName(sequence);
-
-            var escapedSchema = NamingStrategy.GetSchemaName(schema)
-                .Replace(".", "\".\"");
-
-            return GetQuotedName(escapedSchema)
-                + "."
-                + GetQuotedName(sequence);
-        }
-
         protected override string GetAutoIncrementDefinition(FieldDefinition fieldDef)
         {
             if (fieldDef.AutoIncrement && !string.IsNullOrEmpty(fieldDef.Sequence))
@@ -44,64 +31,10 @@ namespace ServiceStack.OrmLite.SqlServer
                 return AutoIncrementDefinition;
         }
 
-        public override void PrepareParameterizedInsertStatement<T>(IDbCommand cmd, ICollection<string> insertFields = null)
-        {
-            var sbColumnNames = StringBuilderCache.Allocate();
-            var sbColumnValues = StringBuilderCacheAlt.Allocate();
-            var sbReturningColumns = StringBuilderCacheAlt.Allocate();
-            var modelDef = OrmLiteUtils.GetModelDefinition(typeof(T));
+        protected override bool ShouldSkipInsert(FieldDefinition fieldDef) => fieldDef.ShouldSkipInsert() && !fieldDef.AutoIncrement && string.IsNullOrEmpty(fieldDef.Sequence);
 
-            cmd.Parameters.Clear();
-
-            foreach (var fieldDef in modelDef.FieldDefinitionsArray)
-            {
-                if (fieldDef.ReturnOnInsert || (fieldDef.IsPrimaryKey && fieldDef.AutoIncrement && modelDef.HasReturnAttribute))
-                {
-                    if (sbReturningColumns.Length > 0)
-                        sbReturningColumns.Append(",");
-                    sbReturningColumns.Append($"INSERTED.{GetQuotedColumnName(fieldDef.FieldName)}");
-                }
-
-                if (fieldDef.ShouldSkipInsert() && !fieldDef.AutoIncrement && string.IsNullOrEmpty(fieldDef.Sequence))
-                    continue;
-
-                //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
-                if (insertFields != null && !insertFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase))
-                    continue;
-
-                if (sbColumnNames.Length > 0)
-                    sbColumnNames.Append(",");
-                if (sbColumnValues.Length > 0)
-                    sbColumnValues.Append(",");
-
-                try
-                {
-                    sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
-
-                    if (fieldDef.AutoIncrement || !string.IsNullOrEmpty(fieldDef.Sequence))
-                    {
-                        sbColumnValues.Append($"NEXT VALUE FOR {Sequence(NamingStrategy.GetSchemaName(modelDef), fieldDef.Sequence)}");
-                    }
-                    else
-                    {
-                        sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
-                        AddParameter(cmd, fieldDef);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Log.Error("ERROR in PrepareParameterizedInsertStatement(): " + ex.Message, ex);
-                    throw;
-                }
-            }
-
-            var strReturning = StringBuilderCacheAlt.ReturnAndFree(sbReturningColumns);
-            strReturning = strReturning.Length > 0 ? "OUTPUT " + strReturning + " " : "";
-            cmd.CommandText = $"INSERT INTO {GetQuotedTableName(modelDef)} ({StringBuilderCache.ReturnAndFree(sbColumnNames)}) " +
-                              strReturning +
-                              $"VALUES ({StringBuilderCacheAlt.ReturnAndFree(sbColumnValues)})";
-        }
-
+        protected override bool SupportsSequences(FieldDefinition fieldDef) => fieldDef.AutoIncrement || !string.IsNullOrEmpty(fieldDef.Sequence);
+        
         public override List<string> ToCreateSequenceStatements(Type tableType)
         {
             var modelDef = GetModel(tableType);

@@ -149,7 +149,7 @@ namespace ServiceStack.OrmLite
                     IsRowVersion = isRowVersion,
                     IgnoreOnInsert = propertyInfo.HasAttribute<IgnoreOnInsertAttribute>(),
                     IgnoreOnUpdate = propertyInfo.HasAttribute<IgnoreOnUpdateAttribute>(),
-                    ReturnOnInsert = propertyInfo.HasAttribute<ReturnAttribute>(),
+                    ReturnOnInsert = propertyInfo.HasAttribute<ReturnOnInsertAttribute>(),
                     FieldLength = stringLengthAttr?.MaximumLength,
                     DefaultValue = defaultValueAttr?.DefaultValue,
                     CheckConstraint = chkConstraintAttr?.Constraint,

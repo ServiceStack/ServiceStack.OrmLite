@@ -255,14 +255,14 @@ namespace ServiceStack.OrmLite.SqlServer
 
             foreach (var fieldDef in modelDef.FieldDefinitionsArray)
             {
-                if (fieldDef.ReturnOnInsert || (fieldDef.IsPrimaryKey && fieldDef.AutoIncrement && modelDef.HasReturnAttribute))
+                if (ShouldReturnOnInsert(modelDef, fieldDef))
                 {
                     if (sbReturningColumns.Length > 0)
                         sbReturningColumns.Append(",");
                     sbReturningColumns.Append("INSERTED." + GetQuotedColumnName(fieldDef.FieldName));
                 }
 
-                if (fieldDef.ShouldSkipInsert())
+                if (ShouldSkipInsert(fieldDef))
                     continue;
 
                 if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase))
@@ -297,6 +297,26 @@ namespace ServiceStack.OrmLite.SqlServer
             return sql;
         }
 
+        protected string Sequence(string schema, string sequence)
+        {
+            if (schema == null)
+                return GetQuotedName(sequence);
+
+            var escapedSchema = NamingStrategy.GetSchemaName(schema)
+                .Replace(".", "\".\"");
+
+            return GetQuotedName(escapedSchema)
+                   + "."
+                   + GetQuotedName(sequence);
+        }
+
+        protected virtual bool ShouldReturnOnInsert(ModelDefinition modelDef, FieldDefinition fieldDef) =>
+            fieldDef.ReturnOnInsert || (fieldDef.IsPrimaryKey && fieldDef.AutoIncrement && modelDef.HasReturnAttribute);
+
+        protected virtual bool ShouldSkipInsert(FieldDefinition fieldDef) => fieldDef.ShouldSkipInsert();
+
+        protected virtual bool SupportsSequences(FieldDefinition fieldDef) => false;
+
         public override void PrepareParameterizedInsertStatement<T>(IDbCommand cmd, ICollection<string> insertFields = null)
         {
             var sbColumnNames = StringBuilderCache.Allocate();
@@ -308,14 +328,14 @@ namespace ServiceStack.OrmLite.SqlServer
 
             foreach (var fieldDef in modelDef.FieldDefinitionsArray)
             {
-                if (fieldDef.ReturnOnInsert || (fieldDef.IsPrimaryKey && fieldDef.AutoIncrement && modelDef.HasReturnAttribute))
+                if (ShouldReturnOnInsert(modelDef, fieldDef))
                 {
                     if (sbReturningColumns.Length > 0)
                         sbReturningColumns.Append(",");
                     sbReturningColumns.Append("INSERTED." + GetQuotedColumnName(fieldDef.FieldName));
                 }
 
-                if (fieldDef.ShouldSkipInsert())
+                if (ShouldSkipInsert(fieldDef))
                     continue;
 
                 //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
@@ -330,9 +350,16 @@ namespace ServiceStack.OrmLite.SqlServer
                 try
                 {
                     sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
-                    sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
 
-                    AddParameter(cmd, fieldDef);
+                    if (SupportsSequences(fieldDef))
+                    {
+                        sbColumnValues.Append("NEXT VALUE FOR " + Sequence(NamingStrategy.GetSchemaName(modelDef), fieldDef.Sequence));
+                    }
+                    else
+                    {
+                        sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
+                        AddParameter(cmd, fieldDef);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -361,14 +388,14 @@ namespace ServiceStack.OrmLite.SqlServer
             {
                 var fieldDef = modelDef.GetFieldDefinition(entry.Key);
 
-                if (fieldDef.ReturnOnInsert || (fieldDef.IsPrimaryKey && fieldDef.AutoIncrement && modelDef.HasReturnAttribute))
+                if (ShouldReturnOnInsert(modelDef, fieldDef))
                 {
                     if (sbReturningColumns.Length > 0)
                         sbReturningColumns.Append(",");
                     sbReturningColumns.Append("INSERTED." + GetQuotedColumnName(fieldDef.FieldName));
                 }
 
-                if (fieldDef.ShouldSkipInsert())
+                if (ShouldSkipInsert(fieldDef))
                     continue;
 
                 var value = entry.Value;

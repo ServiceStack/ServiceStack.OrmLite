@@ -47,15 +47,9 @@ namespace ServiceStack.OrmLite
 
         public bool HasAutoIncrementId => PrimaryKey != null && PrimaryKey.AutoIncrement;
 
-        public bool HasReturnAttribute 
-        {
-            get { return this.FieldDefinitions.First(x => x.ReturnOnInsert) != null; }
-        }
+        public bool HasReturnAttribute => this.FieldDefinitions.Any(x => x.ReturnOnInsert);
 
-        public bool HasSequenceAttribute
-        {
-            get { return this.FieldDefinitions.First(x => !x.Sequence.IsNullOrEmpty()) != null; }
-        }
+        public bool HasSequenceAttribute => this.FieldDefinitions.Any(x => !x.Sequence.IsNullOrEmpty());
 
         public FieldDefinition RowVersion { get; set; }
 

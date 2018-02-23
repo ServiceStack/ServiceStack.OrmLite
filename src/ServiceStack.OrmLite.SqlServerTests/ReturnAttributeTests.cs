@@ -1,25 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Data;
+﻿using System.Data;
 using System.Configuration;
 using ServiceStack.DataAnnotations;
-using ServiceStack.Data;
-using ServiceStack;
 using ServiceStack.OrmLite;
-using ServiceStack.OrmLite.SqlServer;
 using NUnit.Framework;
+using ServiceStack.Logging;
 
 namespace ReturnAttributeTests
 {
-    public class User
+    public class UserSequence
     {
-        [Return]
-        [PrimaryKey]
-        [AutoIncrement]
-        [Sequence("Gen_User_Id")]
+        [Sequence("Gen_UserSequence_Id"), ReturnOnInsert]
         public int Id { get; set; }
 
         public string Name { get; set; }
@@ -27,21 +17,20 @@ namespace ReturnAttributeTests
         public string Email { get; set; }
     }
 
-    public class User2
+    public class UserSequence3
     {
-        [Return]
-        [PrimaryKey]
-        [AutoIncrement]
-        [Sequence("Gen_User_Id")]
+        [Sequence("Gen_UserSequence_Id"), ReturnOnInsert]
         public int Id { get; set; }
 
         public string Name { get; set; }
         public string UserName { get; set; }
         public string Email { get; set; }
 
-        [Return]
-        [Sequence("Gen_Counter_Id")]
+        [Sequence("Gen_Counter")]
         public int Counter { get; set; }
+
+        [Sequence("Gen_Counter_Return"), ReturnOnInsert]
+        public int CounterReturn { get; set; }
     }
 
     public class TestsBase
@@ -50,7 +39,7 @@ namespace ReturnAttributeTests
 
         protected string ConnectionString { get; set; }
         protected IOrmLiteDialectProvider DialectProvider { get; set; }
-        protected OrmLiteConnectionFactory DbFactory => (dbFactory == null) ? dbFactory = new OrmLiteConnectionFactory(ConnectionString, DialectProvider) : dbFactory;
+        protected OrmLiteConnectionFactory DbFactory => dbFactory ?? (dbFactory = new OrmLiteConnectionFactory(ConnectionString, DialectProvider));
 
         public TestsBase()
         {
@@ -58,6 +47,13 @@ namespace ReturnAttributeTests
 
         protected void Init()
         {
+            LogManager.LogFactory = new ConsoleLogFactory(debugEnabled:true);
+        }
+
+        public IDbConnection OpenDbConnection()
+        {
+            Init();
+            return DbFactory.OpenDbConnection();
         }
     }
 
@@ -70,14 +66,13 @@ namespace ReturnAttributeTests
         }
 
         [Test]
-        public void TestIdOnInsert()
+        public void Does_use_and_return_Sequence_on_Insert()
         {
-            Init();
-            using (var db = DbFactory.Open())
+            using (var db = OpenDbConnection())
             {
-                db.CreateTable<User>(true);
+                db.DropAndCreateTable<UserSequence>();
 
-                var user = new User { Name = "me", Email = "me@mydomain.com" };
+                var user = new UserSequence { Name = "me", Email = "me@mydomain.com" };
                 user.UserName = user.Email;
 
                 db.Insert(user);               
@@ -86,14 +81,13 @@ namespace ReturnAttributeTests
         }
 
         [Test]
-        public void TestIdOnSave()
+        public void Does_use_and_return_Sequence_on_Save()
         {
-            Init();
-            using (var db = DbFactory.Open())
+            using (var db = OpenDbConnection())
             {
-                db.CreateTable<User>(true);
+                db.DropAndCreateTable<UserSequence>();
 
-                var user = new User { Name = "me", Email = "me@mydomain.com" };
+                var user = new UserSequence { Name = "me", Email = "me@mydomain.com" };
                 user.UserName = user.Email;
 
                 db.Save(user);
@@ -102,36 +96,38 @@ namespace ReturnAttributeTests
         }
 
         [Test]
-        public void TestTwoSequencesOnInsert()
+        public void Can_use_3_Sequences_on_Insert()
         {
-            Init();
-            using (var db = DbFactory.Open())
+            using (var db = OpenDbConnection())
             {
-                db.CreateTable<User2>(true);
+                db.DropAndCreateTable<UserSequence3>();
 
-                var user = new User2 { Name = "me", Email = "me@mydomain.com" };
+                var user = new UserSequence3 { Name = "me", Email = "me@mydomain.com" };
                 user.UserName = user.Email;
 
                 db.Insert(user);
                 Assert.That(user.Id, Is.GreaterThan(0), "normal Insert");
-                Assert.That(user.Counter, Is.GreaterThan(0), "counter sequence ok");
+                Assert.That(user.CounterReturn, Is.GreaterThan(0), "counter sequence ok");
+                Assert.That(user.Counter, Is.EqualTo(0));
+
+                var dbUser = db.SingleById<UserSequence3>(user.Id);
+                Assert.That(dbUser.Counter, Is.GreaterThan(0));
             }
         }
 
         [Test]
-        public void TestSqlOnInsert()
+        public void Does_generate_Sql_with_Sequence()
         {
-            Init();
-            using (var db = DbFactory.Open())
+            using (var db = OpenDbConnection())
             {
-                db.CreateTable<User>(true);
+                db.DropAndCreateTable<UserSequence>();
 
-                var user = new User { Name = "me", Email = "me@mydomain.com" };
+                var user = new UserSequence { Name = "me", Email = "me@mydomain.com" };
                 user.UserName = user.Email;
 
                 var id = db.Insert(user);
                 var sql = db.GetLastSql();
-                Assert.That(sql, Is.EqualTo("INSERT INTO \"User\" (\"Id\",\"Name\",\"UserName\",\"Email\") OUTPUT INSERTED.\"Id\" VALUES (NEXT VALUE FOR \"Gen_User_Id\",@Name,@UserName,@Email)"), "normal Insert");
+                Assert.That(sql, Is.EqualTo("INSERT INTO \"UserSequence\" (\"Id\",\"Name\",\"UserName\",\"Email\") OUTPUT INSERTED.\"Id\" VALUES (NEXT VALUE FOR \"Gen_UserSequence_Id\",@Name,@UserName,@Email)"), "normal Insert");
             }
         }
     }
