@@ -78,37 +78,7 @@ namespace ServiceStack.OrmLite
                         ExecuteSql(dbCmd, modelDef.PreCreateTableSql);
                     }
 
-                    ExecuteSql(dbCmd, dialectProvider.ToCreateTableStatement(modelType));
-
-                    var postCreateTableSql = dialectProvider.ToPostCreateTableStatement(modelDef);
-                    if (postCreateTableSql != null)
-                    {
-                        ExecuteSql(dbCmd, postCreateTableSql);
-                    }
-
-                    if (modelDef.PostCreateTableSql != null)
-                    {
-                        ExecuteSql(dbCmd, modelDef.PostCreateTableSql);
-                    }
-
-                    var sqlIndexes = dialectProvider.ToCreateIndexStatements(modelType);
-                    foreach (var sqlIndex in sqlIndexes)
-                    {
-                        try
-                        {
-                            dbCmd.ExecuteSql(sqlIndex);
-                        }
-                        catch (Exception exIndex)
-                        {
-                            if (IgnoreAlreadyExistsError(exIndex))
-                            {
-                                Log.DebugFormat("Ignoring existing index '{0}': {1}", sqlIndex, exIndex.Message);
-                                continue;
-                            }
-                            throw;
-                        }
-                    }
-
+                    /// sequences must be created before tables
                     var sequenceList = dialectProvider.SequenceList(modelType);
                     if (sequenceList.Count > 0)
                     {
@@ -139,6 +109,37 @@ namespace ServiceStack.OrmLite
                                 }
                                 throw;
                             }
+                        }
+                    }
+
+                    ExecuteSql(dbCmd, dialectProvider.ToCreateTableStatement(modelType));
+
+                    var postCreateTableSql = dialectProvider.ToPostCreateTableStatement(modelDef);
+                    if (postCreateTableSql != null)
+                    {
+                        ExecuteSql(dbCmd, postCreateTableSql);
+                    }
+
+                    if (modelDef.PostCreateTableSql != null)
+                    {
+                        ExecuteSql(dbCmd, modelDef.PostCreateTableSql);
+                    }
+
+                    var sqlIndexes = dialectProvider.ToCreateIndexStatements(modelType);
+                    foreach (var sqlIndex in sqlIndexes)
+                    {
+                        try
+                        {
+                            dbCmd.ExecuteSql(sqlIndex);
+                        }
+                        catch (Exception exIndex)
+                        {
+                            if (IgnoreAlreadyExistsError(exIndex))
+                            {
+                                Log.DebugFormat("Ignoring existing index '{0}': {1}", sqlIndex, exIndex.Message);
+                                continue;
+                            }
+                            throw;
                         }
                     }
                     return true;
@@ -640,14 +641,37 @@ namespace ServiceStack.OrmLite
 
             commandFilter?.Invoke(dbCmd); //dbCmd.OnConflictInsert() needs to be applied before last insert id
 
+            var modelDef = typeof(T).GetModelDefinition();
+            if (modelDef.HasReturnAttribute)
+            {
+                using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
+                {
+                    using (reader)
+                    {
+                        if (reader.Read())
+                        {
+                            var values = new object[reader.FieldCount];
+                            var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition, dialectProvider);
+                            obj.PopulateWithSqlReader(dialectProvider, reader, indexCache, values);
+                            if ((modelDef.PrimaryKey != null) && modelDef.PrimaryKey.AutoIncrement)
+                            {
+                                var id = modelDef.GetPrimaryKey(obj);
+                                return Convert.ToInt64(id);
+                            }
+                        }
+                        return 0;
+                    }
+                }
+            }
+            else
             if (selectIdentity)
             {
                 dbCmd.CommandText += dialectProvider.GetLastInsertIdSqlSuffix<T>();
 
                 return dbCmd.ExecLongScalar();
             }
-
-            return dbCmd.ExecNonQuery();
+            else
+                return dbCmd.ExecNonQuery();
         }
 
         internal static void Insert<T>(this IDbCommand dbCmd, Action<IDbCommand> commandFilter, params T[] objs)

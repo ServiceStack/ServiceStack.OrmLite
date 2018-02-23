@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ServiceStack.DataAnnotations;
@@ -187,6 +188,11 @@ namespace ServiceStack.OrmLite.SqlServer
             return $"EXEC sp_rename {GetQuotedValue(objectName)}, {GetQuotedValue(fieldDef.FieldName)}, {GetQuotedValue("COLUMN")};";
         }
 
+        protected virtual string GetAutoIncrementDefinition(FieldDefinition fieldDef)
+        {
+            return AutoIncrementDefinition;
+        }
+
         public override string GetColumnDefinition(FieldDefinition fieldDef)
         {
             // https://msdn.microsoft.com/en-us/library/ms182776.aspx
@@ -214,7 +220,7 @@ namespace ServiceStack.OrmLite.SqlServer
                 sql.Append(" PRIMARY KEY");
                 if (fieldDef.AutoIncrement)
                 {
-                    sql.Append(" ").Append(AutoIncrementDefinition);
+                    sql.Append(" ").Append(GetAutoIncrementDefinition(fieldDef));
                 }
             }
             else
@@ -236,6 +242,161 @@ namespace ServiceStack.OrmLite.SqlServer
             return StringBuilderCache.ReturnAndFree(sql);
         }
 
+        public override string ToInsertRowStatement(IDbCommand cmd, object objWithProperties, ICollection<string> insertFields = null)
+        {
+            if (insertFields == null)
+                insertFields = new List<string>();
+
+            var sbColumnNames = StringBuilderCache.Allocate();
+            var sbColumnValues = StringBuilderCacheAlt.Allocate();
+            var sbReturningColumns = StringBuilderCacheAlt.Allocate();
+            var tableType = objWithProperties.GetType();
+            var modelDef = GetModel(tableType);
+
+            foreach (var fieldDef in modelDef.FieldDefinitionsArray)
+            {
+                if (fieldDef.ReturnOnInsert || (fieldDef.IsPrimaryKey && fieldDef.AutoIncrement && modelDef.HasReturnAttribute))
+                {
+                    if (sbReturningColumns.Length > 0)
+                        sbReturningColumns.Append(",");
+                    sbReturningColumns.Append("INSERTED." + GetQuotedColumnName(fieldDef.FieldName));
+                }
+
+                if (fieldDef.ShouldSkipInsert())
+                    continue;
+
+                if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase))
+                    continue;
+
+                if (sbColumnNames.Length > 0)
+                    sbColumnNames.Append(",");
+                if (sbColumnValues.Length > 0)
+                    sbColumnValues.Append(",");
+
+                try
+                {
+                    sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
+                    sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
+
+                    var p = AddParameter(cmd, fieldDef);
+                    p.Value = fieldDef.GetValue(objWithProperties) ?? DBNull.Value;
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("ERROR in ToInsertRowStatement(): " + ex.Message, ex);
+                    throw;
+                }
+            }
+
+            var strReturning = StringBuilderCacheAlt.ReturnAndFree(sbReturningColumns);
+            strReturning = strReturning.Length > 0 ? "OUTPUT " + strReturning + " " : "";
+            var sql = $"INSERT INTO {GetQuotedTableName(modelDef)} ({StringBuilderCache.ReturnAndFree(sbColumnNames)}) " +
+                      strReturning +
+                      $"VALUES ({StringBuilderCacheAlt.ReturnAndFree(sbColumnValues)})";
+
+            return sql;
+        }
+
+        public override void PrepareParameterizedInsertStatement<T>(IDbCommand cmd, ICollection<string> insertFields = null)
+        {
+            var sbColumnNames = StringBuilderCache.Allocate();
+            var sbColumnValues = StringBuilderCacheAlt.Allocate();
+            var sbReturningColumns = StringBuilderCacheAlt.Allocate();
+            var modelDef = OrmLiteUtils.GetModelDefinition(typeof(T));
+
+            cmd.Parameters.Clear();
+
+            foreach (var fieldDef in modelDef.FieldDefinitionsArray)
+            {
+                if (fieldDef.ReturnOnInsert || (fieldDef.IsPrimaryKey && fieldDef.AutoIncrement && modelDef.HasReturnAttribute))
+                {
+                    if (sbReturningColumns.Length > 0)
+                        sbReturningColumns.Append(",");
+                    sbReturningColumns.Append("INSERTED." + GetQuotedColumnName(fieldDef.FieldName));
+                }
+
+                if (fieldDef.ShouldSkipInsert())
+                    continue;
+
+                //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
+                if (insertFields != null && !insertFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase))
+                    continue;
+
+                if (sbColumnNames.Length > 0)
+                    sbColumnNames.Append(",");
+                if (sbColumnValues.Length > 0)
+                    sbColumnValues.Append(",");
+
+                try
+                {
+                    sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
+                    sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
+
+                    AddParameter(cmd, fieldDef);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("ERROR in PrepareParameterizedInsertStatement(): " + ex.Message, ex);
+                    throw;
+                }
+            }
+
+            var strReturning = StringBuilderCacheAlt.ReturnAndFree(sbReturningColumns);
+            strReturning = strReturning.Length > 0 ? "OUTPUT " + strReturning + " " : "";
+            cmd.CommandText = $"INSERT INTO {GetQuotedTableName(modelDef)} ({StringBuilderCache.ReturnAndFree(sbColumnNames)}) " +
+                              strReturning +
+                              $"VALUES ({StringBuilderCacheAlt.ReturnAndFree(sbColumnValues)})";
+        }
+
+        public override void PrepareInsertRowStatement<T>(IDbCommand dbCmd, Dictionary<string, object> args)
+        {
+            var sbColumnNames = StringBuilderCache.Allocate();
+            var sbColumnValues = StringBuilderCacheAlt.Allocate();
+            var sbReturningColumns = StringBuilderCacheAlt.Allocate();
+            var modelDef = OrmLiteUtils.GetModelDefinition(typeof(T));
+
+            dbCmd.Parameters.Clear();
+
+            foreach (var entry in args)
+            {
+                var fieldDef = modelDef.GetFieldDefinition(entry.Key);
+
+                if (fieldDef.ReturnOnInsert || (fieldDef.IsPrimaryKey && fieldDef.AutoIncrement && modelDef.HasReturnAttribute))
+                {
+                    if (sbReturningColumns.Length > 0)
+                        sbReturningColumns.Append(",");
+                    sbReturningColumns.Append("INSERTED." + GetQuotedColumnName(fieldDef.FieldName));
+                }
+
+                if (fieldDef.ShouldSkipInsert())
+                    continue;
+
+                var value = entry.Value;
+
+                if (sbColumnNames.Length > 0)
+                    sbColumnNames.Append(",");
+                if (sbColumnValues.Length > 0)
+                    sbColumnValues.Append(",");
+
+                try
+                {
+                    sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
+                    sbColumnValues.Append(this.AddParam(dbCmd, value, fieldDef).ParameterName);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("ERROR in PrepareInsertRowStatement(): " + ex.Message, ex);
+                    throw;
+                }
+            }
+
+            var strReturning = StringBuilderCacheAlt.ReturnAndFree(sbReturningColumns);
+            strReturning = strReturning.Length > 0 ? "OUTPUT " + strReturning + " " : "";
+            dbCmd.CommandText = $"INSERT INTO {GetQuotedTableName(modelDef)} ({StringBuilderCache.ReturnAndFree(sbColumnNames)}) " +
+                                strReturning +
+                                $"VALUES ({StringBuilderCacheAlt.ReturnAndFree(sbColumnValues)})";
+        }
+ 
         public override string ToSelectStatement(ModelDefinition modelDef,
             string selectExpression,
             string bodyExpression,

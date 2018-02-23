@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Text;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Text;
@@ -9,6 +11,124 @@ namespace ServiceStack.OrmLite.SqlServer
     public class SqlServer2012OrmLiteDialectProvider : SqlServerOrmLiteDialectProvider
     {
         public new static SqlServer2012OrmLiteDialectProvider Instance = new SqlServer2012OrmLiteDialectProvider();
+
+        public override bool DoesSequenceExist(IDbCommand dbCmd, string sequenceName)
+        {
+            var sql = "SELECT 1 FROM SYS.SEQUENCES WHERE object_id=object_id({0})"
+                .SqlFmt(this, sequenceName);
+
+            dbCmd.CommandText = sql;
+            var result = dbCmd.ExecuteScalar();
+
+            return result != null;
+        }
+
+        private string Sequence(string schema, string sequence)
+        {
+            if (schema == null)
+                return GetQuotedName(sequence);
+
+            var escapedSchema = NamingStrategy.GetSchemaName(schema)
+                .Replace(".", "\".\"");
+
+            return GetQuotedName(escapedSchema)
+                + "."
+                + GetQuotedName(sequence);
+        }
+
+        protected override string GetAutoIncrementDefinition(FieldDefinition fieldDef)
+        {
+            if (fieldDef.AutoIncrement && !string.IsNullOrEmpty(fieldDef.Sequence))
+                return $"DEFAULT NEXT VALUE FOR {Sequence(NamingStrategy.GetSchemaName(GetModel(fieldDef.PropertyInfo?.ReflectedType)), fieldDef.Sequence)}";
+            else
+                return AutoIncrementDefinition;
+        }
+
+        public override void PrepareParameterizedInsertStatement<T>(IDbCommand cmd, ICollection<string> insertFields = null)
+        {
+            var sbColumnNames = StringBuilderCache.Allocate();
+            var sbColumnValues = StringBuilderCacheAlt.Allocate();
+            var sbReturningColumns = StringBuilderCacheAlt.Allocate();
+            var modelDef = OrmLiteUtils.GetModelDefinition(typeof(T));
+
+            cmd.Parameters.Clear();
+
+            foreach (var fieldDef in modelDef.FieldDefinitionsArray)
+            {
+                if (fieldDef.ReturnOnInsert || (fieldDef.IsPrimaryKey && fieldDef.AutoIncrement && modelDef.HasReturnAttribute))
+                {
+                    if (sbReturningColumns.Length > 0)
+                        sbReturningColumns.Append(",");
+                    sbReturningColumns.Append($"INSERTED.{GetQuotedColumnName(fieldDef.FieldName)}");
+                }
+
+                if (fieldDef.ShouldSkipInsert() && !fieldDef.AutoIncrement && string.IsNullOrEmpty(fieldDef.Sequence))
+                    continue;
+
+                //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
+                if (insertFields != null && !insertFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase))
+                    continue;
+
+                if (sbColumnNames.Length > 0)
+                    sbColumnNames.Append(",");
+                if (sbColumnValues.Length > 0)
+                    sbColumnValues.Append(",");
+
+                try
+                {
+                    sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
+
+                    if (fieldDef.AutoIncrement || !string.IsNullOrEmpty(fieldDef.Sequence))
+                    {
+                        sbColumnValues.Append($"NEXT VALUE FOR {Sequence(NamingStrategy.GetSchemaName(modelDef), fieldDef.Sequence)}");
+                    }
+                    else
+                    {
+                        sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
+                        AddParameter(cmd, fieldDef);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("ERROR in PrepareParameterizedInsertStatement(): " + ex.Message, ex);
+                    throw;
+                }
+            }
+
+            var strReturning = StringBuilderCacheAlt.ReturnAndFree(sbReturningColumns);
+            strReturning = strReturning.Length > 0 ? "OUTPUT " + strReturning + " " : "";
+            cmd.CommandText = $"INSERT INTO {GetQuotedTableName(modelDef)} ({StringBuilderCache.ReturnAndFree(sbColumnNames)}) " +
+                              strReturning +
+                              $"VALUES ({StringBuilderCacheAlt.ReturnAndFree(sbColumnValues)})";
+        }
+
+        public override List<string> ToCreateSequenceStatements(Type tableType)
+        {
+            var modelDef = GetModel(tableType);
+            return SequenceList(tableType).Select(seq => $"CREATE SEQUENCE {Sequence(NamingStrategy.GetSchemaName(modelDef), seq)} AS BIGINT START WITH 1 INCREMENT BY 1 NO CACHE;").ToList();
+        }
+
+        public override string ToCreateSequenceStatement(Type tableType, string sequenceName)
+        {
+            var modelDef = GetModel(tableType);
+            return $"CREATE SEQUENCE {Sequence(NamingStrategy.GetSchemaName(modelDef), sequenceName)} AS BIGINT START WITH 1 INCREMENT BY 1 NO CACHE;";
+        }
+
+        public override List<string> SequenceList(Type tableType)
+        {
+            var gens = new List<string>();
+            var modelDef = GetModel(tableType);
+
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+                if (fieldDef.AutoIncrement || !fieldDef.Sequence.IsNullOrEmpty())
+                {
+                    if (gens.IndexOf(fieldDef.Sequence) == -1)
+                        gens.Add(fieldDef.Sequence);
+                }
+            }
+            return gens;
+        }
 
         public override string ToSelectStatement(ModelDefinition modelDef,
             string selectExpression,

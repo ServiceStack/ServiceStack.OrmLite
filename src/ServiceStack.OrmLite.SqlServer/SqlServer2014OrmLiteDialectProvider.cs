@@ -51,7 +51,7 @@ namespace ServiceStack.OrmLite.SqlServer
 
                 if (fieldDef.AutoIncrement)
                 {
-                    sql.Append(" ").Append(AutoIncrementDefinition);
+                    sql.Append(" ").Append(GetAutoIncrementDefinition(fieldDef));
                 }
 
                 if (isMemoryTable && bucketCount.HasValue)
