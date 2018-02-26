@@ -160,7 +160,7 @@ namespace ServiceStack.OrmLite
                     IsReference = referenceAttr != null && propertyType.IsClass,
                     GetValueFn = propertyInfo.CreateGetter(),
                     SetValueFn = propertyInfo.CreateSetter(),
-                    Sequence = sequenceAttr != null ? sequenceAttr.Name : string.Empty,
+                    Sequence = sequenceAttr?.Name,
                     IsComputed = computeAttr != null || computedAttr != null || customSelectAttr != null,
                     ComputeExpression = computeAttr != null ? computeAttr.Expression : string.Empty,
                     CustomSelect = customSelectAttr?.Sql,

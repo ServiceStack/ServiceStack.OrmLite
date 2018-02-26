@@ -54,10 +54,9 @@ namespace ServiceStack.OrmLite.SqlServer
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
-                if (fieldDef.AutoIncrement || !fieldDef.Sequence.IsNullOrEmpty())
+                if (!string.IsNullOrEmpty(fieldDef.Sequence))
                 {
-                    if (gens.IndexOf(fieldDef.Sequence) == -1)
-                        gens.Add(fieldDef.Sequence);
+                    gens.AddIfNotExists(fieldDef.Sequence);
                 }
             }
             return gens;
