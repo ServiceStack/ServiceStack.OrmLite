@@ -206,7 +206,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
                 }
             }
 
-            if (fieldDef.UniqueConstraint)
+            if (fieldDef.IsUniqueConstraint)
             {
                 sql.Append(" UNIQUE");
             }

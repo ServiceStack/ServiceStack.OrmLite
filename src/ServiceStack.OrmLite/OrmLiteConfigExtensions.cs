@@ -143,7 +143,7 @@ namespace ServiceStack.OrmLite
                         isPrimaryKey &&
                         propertyInfo.HasAttribute<AutoIncrementAttribute>(),
                     IsIndexed = !isPrimaryKey && isIndex,
-                    IsUnique = isUnique,
+                    IsUniqueIndex = isUnique,
                     IsClustered = indexAttr != null && indexAttr.Clustered,
                     IsNonClustered = indexAttr != null && indexAttr.NonClustered,
                     IsRowVersion = isRowVersion,
@@ -153,7 +153,7 @@ namespace ServiceStack.OrmLite
                     FieldLength = stringLengthAttr?.MaximumLength,
                     DefaultValue = defaultValueAttr?.DefaultValue,
                     CheckConstraint = chkConstraintAttr?.Constraint,
-                    UniqueConstraint = propertyInfo.HasAttribute<UniqueAttribute>(),
+                    IsUniqueConstraint = propertyInfo.HasAttribute<UniqueAttribute>(),
                     ForeignKey = fkAttr == null
                         ? referencesAttr != null ? new ForeignKeyConstraint(referencesAttr.Type) : null
                         : new ForeignKeyConstraint(fkAttr.Type, fkAttr.OnDelete, fkAttr.OnUpdate, fkAttr.ForeignKeyName),

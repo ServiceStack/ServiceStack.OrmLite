@@ -228,7 +228,7 @@ namespace ServiceStack.OrmLite.SqlServer
                 sql.Append(fieldDef.IsNullable ? " NULL" : " NOT NULL");
             }
 
-            if (fieldDef.UniqueConstraint)
+            if (fieldDef.IsUniqueConstraint)
             {
                 sql.Append(" UNIQUE");
             }

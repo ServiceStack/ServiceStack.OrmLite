@@ -385,7 +385,7 @@ namespace ServiceStack.OrmLite.Firebird
             {
                 sql.Append(" NOT NULL");
             }
-            if (fieldDef.UniqueConstraint)
+            if (fieldDef.IsUniqueConstraint)
             {
                 sql.Append(" UNIQUE");
             }
@@ -403,10 +403,10 @@ namespace ServiceStack.OrmLite.Firebird
                 if (!fieldDef.IsIndexed) continue;
 
                 var indexName = GetIndexName(
-                    fieldDef.IsUnique, modelDef.ModelName, fieldDef.FieldName);
+                    fieldDef.IsUniqueIndex, modelDef.ModelName, fieldDef.FieldName);
 
                 sqlIndexes.Add(
-                    ToCreateIndexStatement(fieldDef.IsUnique, indexName, modelDef, fieldDef.FieldName, false));
+                    ToCreateIndexStatement(fieldDef.IsUniqueIndex, indexName, modelDef, fieldDef.FieldName, false));
             }
 
             foreach (var compositeIndex in modelDef.CompositeIndexes)

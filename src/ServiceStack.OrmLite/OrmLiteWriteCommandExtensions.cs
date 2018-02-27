@@ -78,7 +78,7 @@ namespace ServiceStack.OrmLite
                         ExecuteSql(dbCmd, modelDef.PreCreateTableSql);
                     }
 
-                    /// sequences must be created before tables
+                    // sequences must be created before tables
                     var sequenceList = dialectProvider.SequenceList(modelType);
                     if (sequenceList.Count > 0)
                     {

@@ -130,6 +130,11 @@ namespace ServiceStack.OrmLite.SqlServer
                 sql.Append(fieldDef.IsNullable ? " NULL" : " NOT NULL");
             }
 
+            if (fieldDef.IsUniqueConstraint)
+            {
+                sql.Append(" UNIQUE");
+            }
+
             var defaultValue = GetDefaultValue(fieldDef);
             if (!string.IsNullOrEmpty(defaultValue))
             {
