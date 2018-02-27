@@ -110,7 +110,8 @@ namespace ServiceStack.OrmLite.Tests
 
                 ResetUpdateDate(db);
                 db.Update(cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)),
-                    new DefaultValues { Id = 1, DefaultInt = 45 }, new DefaultValues { Id = 2, DefaultInt = 72 });
+                    new DefaultValues { Id = 1, DefaultInt = 45, CreatedDateUtc = DateTime.Now }, 
+                    new DefaultValues { Id = 2, DefaultInt = 72, CreatedDateUtc = DateTime.Now });
                 VerifyUpdateDate(db);
                 VerifyUpdateDate(db, id: 2);
             }
@@ -139,7 +140,7 @@ namespace ServiceStack.OrmLite.Tests
                 CreateAndInitialize(db);
 
                 ResetUpdateDate(db);
-                db.Update(new DefaultValues { Id = 1, DefaultInt = 2342 }, p => p.Id == 1,
+                db.Update(new DefaultValues { Id = 1, DefaultInt = 2342, CreatedDateUtc = DateTime.Now }, p => p.Id == 1,
                     cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)));
                 VerifyUpdateDate(db);
             }
@@ -183,7 +184,8 @@ namespace ServiceStack.OrmLite.Tests
                 CreateAndInitialize(db, 2);
 
                 ResetUpdateDate(db);
-                db.UpdateAll(new [] { new DefaultValues { Id = 1, DefaultInt = 45 }, new DefaultValues { Id = 2, DefaultInt = 72 } },
+                db.UpdateAll(new [] { new DefaultValues { Id = 1, DefaultInt = 45, CreatedDateUtc = DateTime.Now },
+                                      new DefaultValues { Id = 2, DefaultInt = 72, CreatedDateUtc = DateTime.Now } },
                     cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)));
                 VerifyUpdateDate(db);
                 VerifyUpdateDate(db, id: 2);

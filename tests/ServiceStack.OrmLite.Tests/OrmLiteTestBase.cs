@@ -12,6 +12,7 @@ namespace ServiceStack.OrmLite.Tests
 {
     public class Config
     {
+        public const bool EnableDebugLogging = false;
         public static string SqliteMemoryDb = ":memory:";
         public static string SqliteFileDir = "~/App_Data/".MapAbsolutePath();
         public static string SqliteFileDb = "~/App_Data/db.sqlite".MapAbsolutePath();
@@ -124,7 +125,7 @@ namespace ServiceStack.OrmLite.Tests
             //OrmLiteConfig.UseParameterizeSqlExpressions = false;
 
             //OrmLiteConfig.DeoptimizeReader = true;
-            LogManager.LogFactory = new ConsoleLogFactory(debugEnabled: false);
+            LogManager.LogFactory = new ConsoleLogFactory(debugEnabled: Config.EnableDebugLogging);
             switch (Dialect)
             {
                 case Dialect.Sqlite:
