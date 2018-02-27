@@ -25,15 +25,17 @@ namespace ServiceStack.OrmLite.SqlServer
 
         protected override string GetAutoIncrementDefinition(FieldDefinition fieldDef)
         {
-            if (fieldDef.AutoIncrement && !string.IsNullOrEmpty(fieldDef.Sequence))
+            if (!string.IsNullOrEmpty(fieldDef.Sequence))
                 return $"DEFAULT NEXT VALUE FOR {Sequence(NamingStrategy.GetSchemaName(GetModel(fieldDef.PropertyInfo?.ReflectedType)), fieldDef.Sequence)}";
             else
                 return AutoIncrementDefinition;
         }
 
-        protected override bool ShouldSkipInsert(FieldDefinition fieldDef) => fieldDef.ShouldSkipInsert() && !fieldDef.AutoIncrement && string.IsNullOrEmpty(fieldDef.Sequence);
+        protected override bool ShouldSkipInsert(FieldDefinition fieldDef) => 
+            fieldDef.ShouldSkipInsert() && string.IsNullOrEmpty(fieldDef.Sequence);
 
-        protected override bool SupportsSequences(FieldDefinition fieldDef) => fieldDef.AutoIncrement || !string.IsNullOrEmpty(fieldDef.Sequence);
+        protected override bool SupportsSequences(FieldDefinition fieldDef) => 
+            !string.IsNullOrEmpty(fieldDef.Sequence);
         
         public override List<string> ToCreateSequenceStatements(Type tableType)
         {

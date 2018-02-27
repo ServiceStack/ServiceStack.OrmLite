@@ -645,33 +645,31 @@ namespace ServiceStack.OrmLite
             if (modelDef.HasReturnAttribute)
             {
                 using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
+                using (reader)
                 {
-                    using (reader)
+                    if (reader.Read())
                     {
-                        if (reader.Read())
+                        var values = new object[reader.FieldCount];
+                        var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition, dialectProvider);
+                        obj.PopulateWithSqlReader(dialectProvider, reader, indexCache, values);
+                        if ((modelDef.PrimaryKey != null) && modelDef.PrimaryKey.AutoIncrement)
                         {
-                            var values = new object[reader.FieldCount];
-                            var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition, dialectProvider);
-                            obj.PopulateWithSqlReader(dialectProvider, reader, indexCache, values);
-                            if ((modelDef.PrimaryKey != null) && modelDef.PrimaryKey.AutoIncrement)
-                            {
-                                var id = modelDef.GetPrimaryKey(obj);
-                                return Convert.ToInt64(id);
-                            }
+                            var id = modelDef.GetPrimaryKey(obj);
+                            return Convert.ToInt64(id);
                         }
-                        return 0;
                     }
+                    return 0;
                 }
             }
-            else
+
             if (selectIdentity)
             {
                 dbCmd.CommandText += dialectProvider.GetLastInsertIdSqlSuffix<T>();
 
                 return dbCmd.ExecLongScalar();
             }
-            else
-                return dbCmd.ExecNonQuery();
+
+            return dbCmd.ExecNonQuery();
         }
 
         internal static void Insert<T>(this IDbCommand dbCmd, Action<IDbCommand> commandFilter, params T[] objs)

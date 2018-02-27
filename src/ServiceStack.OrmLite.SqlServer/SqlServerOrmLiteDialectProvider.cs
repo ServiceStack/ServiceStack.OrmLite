@@ -313,7 +313,8 @@ namespace ServiceStack.OrmLite.SqlServer
         protected virtual bool ShouldReturnOnInsert(ModelDefinition modelDef, FieldDefinition fieldDef) =>
             fieldDef.ReturnOnInsert || (fieldDef.IsPrimaryKey && fieldDef.AutoIncrement && modelDef.HasReturnAttribute);
 
-        protected virtual bool ShouldSkipInsert(FieldDefinition fieldDef) => fieldDef.ShouldSkipInsert();
+        protected virtual bool ShouldSkipInsert(FieldDefinition fieldDef) => 
+            fieldDef.ShouldSkipInsert();
 
         protected virtual bool SupportsSequences(FieldDefinition fieldDef) => false;
 
