@@ -1906,14 +1906,42 @@ namespace ServiceStack.OrmLite
                 {
                     var ifTrue = Visit(e.IfTrue);
                     if (!IsSqlClass(ifTrue))
-                        ifTrue = ConvertToParam(ifTrue);
+                    {
+                        if (sep == " ")
+                            ifTrue = new PartialSqlString(ConvertToParam(ifTrue));
+                    }
+                    else if (e.IfTrue.Type == typeof(bool))
+                    {
+                        var isBooleanComparison = IsBooleanComparison(e.IfTrue);
+                        if (!isBooleanComparison)
+                        {
+                            if (sep == " ")
+                                ifTrue = ifTrue.ToString();
+                            else
+                                ifTrue = new PartialSqlString($"(CASE WHEN {ifTrue} THEN {1} ELSE {0} END)");
+                        }
+                    }
 
                     return ifTrue;
                 }
 
                 var ifFalse = Visit(e.IfFalse);
                 if (!IsSqlClass(ifFalse))
-                    ifFalse = ConvertToParam(ifFalse);
+                {
+                    if (sep == " ")
+                        ifFalse = new PartialSqlString(ConvertToParam(ifFalse));
+                }
+                else if (e.IfFalse.Type == typeof(bool))
+                {
+                    var isBooleanComparison = IsBooleanComparison(e.IfFalse);
+                    if (!isBooleanComparison)
+                    {
+                        if (sep == " ")
+                            ifFalse = ifFalse.ToString();
+                        else
+                            ifFalse = new PartialSqlString($"(CASE WHEN {ifFalse} THEN {1} ELSE {0} END)");
+                    }
+                }
 
                 return ifFalse;
             }
