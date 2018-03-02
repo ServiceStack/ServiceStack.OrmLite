@@ -118,6 +118,7 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(captured.SqlStatements.Last().NormalizeSql(),
                     Is.EqualTo("select id, firstname, lastname, age  from person where (age = {0}) limit 1".Fmt(p)). //sqlite
                     Or.EqualTo("select top 1 id, firstname, lastname, age  from person where (age = {0})".Fmt(p)).   //SqlServer
+                    Or.EqualTo("select id, firstname, lastname, age  from person where (age = {0}) order by 1 offset 0 rows fetch next 1 rows only".Fmt(p)).   //SqlServer 2012+
                     Or.EqualTo("select first 1 id, firstname, lastname, age  from person where (age = {0})".Fmt(p)).  //Firebird
                     Or.EqualTo("select id, firstname, lastname, age  from person where (age = {0}) order by person.id offset 0 rows fetch next 1 rows only".Fmt(p)). //VistaDB
                     Or.EqualTo("select * from (\r select ssormlite1.*, rownum rnum from (\r select id, firstname, lastname, age  from person where (age = {0}) order by person.id) ssormlite1\r where rownum <= 0 + 1) ssormlite2 where ssormlite2.rnum > 0".Fmt(p))  //Oracle

@@ -118,7 +118,7 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(captured.SqlCommandHistory.Last().Sql.NormalizeSql(),
                     Is.EqualTo("select id, firstname, lastname, age  from person where (age = {0}) limit 1".Fmt(p)).  //Sqlite
                     Or.EqualTo("select top 1 id, firstname, lastname, age  from person where (age = {0})".Fmt(p)).    //SQLServer < 2012
-                    Or.EqualTo("select id, firstname, lastname, age  from person where (age = {0}) order by person.id offset 0 rows fetch next 1 rows only".Fmt(p)). //SQLServer >= 2012
+                    Or.EqualTo("select id, firstname, lastname, age  from person where (age = {0}) order by 1 offset 0 rows fetch next 1 rows only".Fmt(p)). //SQLServer >= 2012
                     Or.EqualTo("select first 1 id, firstname, lastname, age  from person where (age = {0})".Fmt(p))); //Firebird
 
                 i++; db.Exists<Person>("Age = @age", new { age = 42 });

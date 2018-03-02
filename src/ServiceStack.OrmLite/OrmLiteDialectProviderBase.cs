@@ -414,7 +414,7 @@ namespace ServiceStack.OrmLite
                 sql.Append(fieldDef.IsNullable ? " NULL" : " NOT NULL");
             }
 
-            if (fieldDef.UniqueConstraint)
+            if (fieldDef.IsUniqueConstraint)
             {
                 sql.Append(" UNIQUE");
             }
@@ -1269,10 +1269,10 @@ namespace ServiceStack.OrmLite
             {
                 if (!fieldDef.IsIndexed) continue;
 
-                var indexName = GetIndexName(fieldDef.IsUnique, modelDef.ModelName.SafeVarName(), fieldDef.FieldName);
+                var indexName = GetIndexName(fieldDef.IsUniqueIndex, modelDef.ModelName.SafeVarName(), fieldDef.FieldName);
 
                 sqlIndexes.Add(
-                    ToCreateIndexStatement(fieldDef.IsUnique, indexName, modelDef, fieldDef.FieldName, isCombined: false, fieldDef: fieldDef));
+                    ToCreateIndexStatement(fieldDef.IsUniqueIndex, indexName, modelDef, fieldDef.FieldName, isCombined: false, fieldDef: fieldDef));
             }
 
             foreach (var compositeIndex in modelDef.CompositeIndexes)

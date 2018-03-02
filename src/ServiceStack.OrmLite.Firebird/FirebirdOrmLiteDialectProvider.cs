@@ -118,12 +118,19 @@ namespace ServiceStack.OrmLite.Firebird
 
             var sbColumnNames = StringBuilderCache.Allocate();
             var sbColumnValues = StringBuilderCacheAlt.Allocate();
+            var sbReturningColumns = StringBuilderCacheAlt.Allocate();
 
             var tableType = objWithProperties.GetType();
             var modelDef = GetModel(tableType);
 
             foreach (var fieldDef in modelDef.FieldDefinitionsArray)
             {
+                if (fieldDef.ReturnOnInsert || (fieldDef.IsPrimaryKey && fieldDef.AutoIncrement && modelDef.HasReturnAttribute))
+                {
+                    if (sbReturningColumns.Length > 0)
+                        sbReturningColumns.Append(",");
+                    sbReturningColumns.Append(GetQuotedColumnName(fieldDef.FieldName));
+                }
 
                 if (fieldDef.IsComputed)
                     continue;
@@ -162,10 +169,12 @@ namespace ServiceStack.OrmLite.Firebird
                 }
             }
 
-            var sql = string.Format("INSERT INTO {0} ({1}) VALUES ({2});",
+            var strReturning = StringBuilderCacheAlt.ReturnAndFree(sbReturningColumns);
+            var sql = string.Format("INSERT INTO {0} ({1}) VALUES ({2}) {3};",
                 GetQuotedTableName(modelDef), 
                 StringBuilderCache.ReturnAndFree(sbColumnNames), 
-                StringBuilderCacheAlt.ReturnAndFree(sbColumnValues));
+                StringBuilderCacheAlt.ReturnAndFree(sbColumnValues),
+                strReturning.Length > 0 ? "RETURNING " + strReturning : "");
 
             return sql;
         }
@@ -182,6 +191,7 @@ namespace ServiceStack.OrmLite.Firebird
         {
             var sbColumnNames = StringBuilderCache.Allocate();
             var sbColumnValues = StringBuilderCacheAlt.Allocate();
+            var sbReturningColumns = StringBuilderCacheAlt.Allocate();
             var modelDef = OrmLiteUtils.GetModelDefinition(typeof(T));
 
             cmd.Parameters.Clear();
@@ -189,7 +199,14 @@ namespace ServiceStack.OrmLite.Firebird
 
             foreach (var fieldDef in modelDef.FieldDefinitionsArray)
             {
-                if (fieldDef.ShouldSkipInsert() && !fieldDef.AutoIncrement)
+                if (fieldDef.ReturnOnInsert || (fieldDef.IsPrimaryKey && fieldDef.AutoIncrement && modelDef.HasReturnAttribute))
+                {
+                    if (sbReturningColumns.Length > 0)
+                        sbReturningColumns.Append(",");
+                    sbReturningColumns.Append(GetQuotedColumnName(fieldDef.FieldName));
+                }
+
+                if (fieldDef.ShouldSkipInsert() && !fieldDef.AutoIncrement && string.IsNullOrEmpty(fieldDef.Sequence))
                     continue;
 
                 //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
@@ -205,15 +222,15 @@ namespace ServiceStack.OrmLite.Firebird
                 {
                     sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
 
-                    if (!fieldDef.AutoIncrement)
-                    {
-                        sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
-                        AddParameter(cmd, fieldDef);
-                    }
-                    else
+                    if (fieldDef.AutoIncrement || !string.IsNullOrEmpty(fieldDef.Sequence))
                     {
                         EnsureAutoIncrementSequence(modelDef, fieldDef);
                         sbColumnValues.Append("NEXT VALUE FOR " + fieldDef.Sequence);
+                    }
+                    else
+                    {
+                        sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
+                        AddParameter(cmd, fieldDef);
                     }
                 }
                 catch (Exception ex)
@@ -223,10 +240,12 @@ namespace ServiceStack.OrmLite.Firebird
                 }
             }
 
-            cmd.CommandText = string.Format("INSERT INTO {0} ({1}) VALUES ({2})",
+            var strReturning = StringBuilderCacheAlt.ReturnAndFree(sbReturningColumns);
+            cmd.CommandText = string.Format("INSERT INTO {0} ({1}) VALUES ({2}) {3}",
                 GetQuotedTableName(modelDef), 
                 StringBuilderCache.ReturnAndFree(sbColumnNames), 
-                StringBuilderCacheAlt.ReturnAndFree(sbColumnValues));
+                StringBuilderCacheAlt.ReturnAndFree(sbColumnValues),
+                strReturning.Length > 0 ? "RETURNING " + strReturning : "");
         }
 
         public override void PrepareUpdateRowStatement(IDbCommand dbCmd, object objWithProperties, ICollection<string> updateFields = null)
@@ -366,7 +385,7 @@ namespace ServiceStack.OrmLite.Firebird
             {
                 sql.Append(" NOT NULL");
             }
-            if (fieldDef.UniqueConstraint)
+            if (fieldDef.IsUniqueConstraint)
             {
                 sql.Append(" UNIQUE");
             }
@@ -384,10 +403,10 @@ namespace ServiceStack.OrmLite.Firebird
                 if (!fieldDef.IsIndexed) continue;
 
                 var indexName = GetIndexName(
-                    fieldDef.IsUnique, modelDef.ModelName, fieldDef.FieldName);
+                    fieldDef.IsUniqueIndex, modelDef.ModelName, fieldDef.FieldName);
 
                 sqlIndexes.Add(
-                    ToCreateIndexStatement(fieldDef.IsUnique, indexName, modelDef, fieldDef.FieldName, false));
+                    ToCreateIndexStatement(fieldDef.IsUniqueIndex, indexName, modelDef, fieldDef.FieldName, false));
             }
 
             foreach (var compositeIndex in modelDef.CompositeIndexes)
@@ -651,7 +670,7 @@ namespace ServiceStack.OrmLite.Firebird
             return Quote(fieldName);
         }
 
-        public virtual string GetTableName(ModelDefinition modelDef)
+        public override string GetTableName(ModelDefinition modelDef)
         {
             return GetTableName(modelDef.ModelName, modelDef.Schema);
         }

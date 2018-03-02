@@ -51,7 +51,7 @@ namespace ServiceStack.OrmLite.SqlServer
 
                 if (fieldDef.AutoIncrement)
                 {
-                    sql.Append(" ").Append(AutoIncrementDefinition);
+                    sql.Append(" ").Append(GetAutoIncrementDefinition(fieldDef));
                 }
 
                 if (isMemoryTable && bucketCount.HasValue)
@@ -59,7 +59,7 @@ namespace ServiceStack.OrmLite.SqlServer
                     sql.Append($" HASH WITH (BUCKET_COUNT = {bucketCount.Value})");
                 }
             }
-            else if (!isMemoryTable && fieldDef.IsUnique)
+            else if (!isMemoryTable && fieldDef.IsUniqueIndex)
             {
                 sql.Append(" UNIQUE");
 
@@ -83,6 +83,11 @@ namespace ServiceStack.OrmLite.SqlServer
                 {
                     sql.Append(fieldDef.IsNullable ? " NULL" : " NOT NULL");
                 }
+            }
+
+            if (fieldDef.IsUniqueConstraint)
+            {
+                sql.Append(" UNIQUE");
             }
 
             var defaultValue = GetDefaultValue(fieldDef);

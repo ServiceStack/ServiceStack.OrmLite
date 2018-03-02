@@ -615,7 +615,7 @@ namespace ServiceStack.OrmLite.Oracle
 
             sql.Append(fieldDef.IsNullable ? " NULL" : " NOT NULL");
 
-            if (fieldDef.UniqueConstraint)
+            if (fieldDef.IsUniqueConstraint)
             {
                 sql.Append(" UNIQUE");
             }
@@ -634,7 +634,7 @@ namespace ServiceStack.OrmLite.Oracle
                 if (!fieldDef.IsIndexed) continue;
 
                 var indexName = GetIndexName(
-                    fieldDef.IsUnique,
+                    fieldDef.IsUniqueIndex,
                     (modelDef.IsInSchema
                         ? modelDef.Schema + "_" + modelDef.ModelName
                         : modelDef.ModelName).SafeVarName(),
@@ -642,7 +642,7 @@ namespace ServiceStack.OrmLite.Oracle
                 indexName = NamingStrategy.ApplyNameRestrictions(indexName);
 
                 sqlIndexes.Add(
-                    ToCreateIndexStatement(fieldDef.IsUnique, indexName, modelDef, fieldDef.FieldName));
+                    ToCreateIndexStatement(fieldDef.IsUniqueIndex, indexName, modelDef, fieldDef.FieldName));
             }
 
             foreach (var compositeIndex in modelDef.CompositeIndexes)

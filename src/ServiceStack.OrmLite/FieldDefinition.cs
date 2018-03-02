@@ -40,7 +40,7 @@ namespace ServiceStack.OrmLite
 
         public bool IsIndexed { get; set; }
 
-        public bool IsUnique { get; set; }
+        public bool IsUniqueIndex { get; set; }
 
         public bool IsClustered { get; set; }
 
@@ -56,7 +56,7 @@ namespace ServiceStack.OrmLite
 
         public string CheckConstraint { get; set; }
 
-        public bool UniqueConstraint { get; set; }
+        public bool IsUniqueConstraint { get; set; }
 
         public ForeignKeyConstraint ForeignKey { get; set; }
 
@@ -101,7 +101,9 @@ namespace ServiceStack.OrmLite
         public bool IgnoreOnUpdate { get; set; }
 
         public bool IgnoreOnInsert { get; set; }
-        
+
+        public bool ReturnOnInsert { get; set; }
+
         public override string ToString() => Name;
 
         public bool ShouldSkipInsert() => IgnoreOnInsert || AutoIncrement || IsComputed || IsRowVersion;
@@ -136,7 +138,7 @@ namespace ServiceStack.OrmLite
                 AutoIncrement = AutoIncrement,
                 IsNullable = IsNullable,
                 IsIndexed = IsIndexed,
-                IsUnique = IsUnique,
+                IsUniqueIndex = IsUniqueIndex,
                 IsClustered = IsClustered,
                 IsNonClustered = IsNonClustered,
                 IsRowVersion = IsRowVersion,
@@ -144,7 +146,7 @@ namespace ServiceStack.OrmLite
                 Scale = Scale,
                 DefaultValue = DefaultValue,
                 CheckConstraint = CheckConstraint,
-                UniqueConstraint = UniqueConstraint,
+                IsUniqueConstraint = IsUniqueConstraint,
                 ForeignKey = ForeignKey,
                 GetValueFn = GetValueFn,
                 SetValueFn = SetValueFn,
