@@ -669,6 +669,198 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(target.Count, Is.EqualTo(2));
         }
 
+        [Test]
+        public void Can_Where_using_Constant_in_Conditional_filter1()
+        {
+            var i = 0;
+            System.Linq.Expressions.Expression<Func<TestType, bool>> filter = x => i > 0 ? x.BoolCol : x.TextCol.Contains("qwer");
+            var q = Db.From<TestType>().Where(filter);
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Not.Contain("="));
+
+            var target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void Can_Where_using_Constant_in_Conditional_filter2()
+        {
+            var i = 10;
+            System.Linq.Expressions.Expression<Func<TestType, bool>> filter = x => i > 0 ? x.BoolCol : x.TextCol.Contains("qwer");
+            var q = Db.From<TestType>().Where(filter);
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Contain("="));
+
+            var target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void Can_Where_using_Constant_in_Conditional_filter3()
+        {
+            var i = 0;
+            var fake = 1;
+            System.Linq.Expressions.Expression<Func<TestType, bool>> filter = x => x.Id > 0 ? fake != fake : x.TextCol.Contains("zxcv");
+            var q = Db.From<TestType>().Where(filter);
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Contain("="));
+            
+            var target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void Can_Where_using_Constant_in_Conditional_filter4()
+        {
+            var i = 10;
+            var fake = 1;
+            System.Linq.Expressions.Expression<Func<TestType, bool>> filter = x => i > 0 ? fake != fake : x.TextCol.Contains("qwer");
+            var q = Db.From<TestType>().Where(filter);
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Contain("="));
+
+            var target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(0));
+        }
+
+
+        [Test]
+        public void Can_Where_using_Constant_in_Conditional_filter5()
+        {
+            var i = 10;
+            var fake = 1;
+            System.Linq.Expressions.Expression<Func<TestType, bool>> filter = x => i > 0 ? x.Id == x.Id : x.TextCol.Contains("qwer");
+            var q = Db.From<TestType>().Where(filter);
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Contain("="));
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Not.Contain("=1"));
+
+            var target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(4));
+        }
+
+        [Test]
+        public void Can_Where_using_Conditional_order1()
+        {
+            var i = 0;
+            var fake = 1;
+            System.Linq.Expressions.Expression<Func<TestType, object>> order = x => x.Id > 2 ? x.BoolCol : x.TextCol.Contains("qwer");
+            var q = Db.From<TestType>().OrderBy(order).ThenBy(x => x.Id);
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Not.Contain("="));
+
+            var target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(4));
+            var text = target[0].TextCol;
+            Assert.AreEqual("asdf", text);
+        }
+
+        [Test]
+        public void Can_Where_using_Constant_in_Conditional_order1()
+        {
+            var i = 0;
+            var fake = 1;
+            System.Linq.Expressions.Expression<Func<TestType, object>> order = x => i > 0 ? x.BoolCol : x.TextCol.Contains("qwer");
+            var q = Db.From<TestType>().OrderBy(order).ThenBy(x => x.Id);
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Not.Contain("="));
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Contain(" like "));
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Contain("case when "));
+
+            var target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(4));
+            var text = target[0].TextCol;
+            Assert.AreEqual("asdf", text);
+        }
+
+        [Test]
+        public void Can_Where_using_Constant_in_Conditional_order2()
+        {
+            var i = 10;
+            var fake = 1;
+            System.Linq.Expressions.Expression<Func<TestType, object>> order = x => i > 0 ? x.BoolCol : x.TextCol.Contains("qwer");
+            var q = Db.From<TestType>().OrderBy(order).ThenBy(x => x.Id);
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Not.Contain("="));
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Contain("order by \"boolcol\""));
+
+            var target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(4));
+            var text = target[0].TextCol;
+            Assert.AreEqual("qwer", text);
+        }
+
+        [Test]
+        public void Can_Where_using_Constant_in_Conditional_order3()
+        {
+            var i = 0;
+            var fake = 1;
+            System.Linq.Expressions.Expression<Func<TestType, object>> order = x => i > 0 ? false : x.TextCol.Contains("qwer");
+            var q = Db.From<TestType>().OrderBy(order).ThenBy(x => x.Id);
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Not.Contain("="));
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Contain("@0"));
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Contain("case when "));
+
+            var target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(4));
+            var text = target[0].TextCol;
+            Assert.AreEqual("asdf", text);
+        }
+
+        [Test]
+        public void Can_Where_using_Constant_in_Conditional_order4()
+        {
+            var i = 10;
+            var fake = 1;
+            System.Linq.Expressions.Expression<Func<TestType, object>> order = x => i > 0 ? false : x.TextCol.Contains("qwer");
+            var q = Db.From<TestType>().OrderBy(order).ThenBy(x => x.Id);
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Not.Contain("="));
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Not.Contain("@0"));
+
+            var target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(4));
+            var text = target[0].TextCol;
+            Assert.AreEqual("asdf", text);
+        }
+
+        [Test]
+        public void Can_Where_using_Constant_in_Conditional_order5()
+        {
+            var i = 0;
+            System.Linq.Expressions.Expression<Func<TestType, object>> order = x => i > 0 ? x.TextCol : "www";
+            var q = Db.From<TestType>().OrderBy(order).ThenBy(x => x.Id);
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Not.Contain("="));
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Not.Contain("@0"));
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Contain("order by \"id\"")); 
+
+            var target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(4));
+            var text = target[0].TextCol;
+            Assert.AreEqual("asdf", text);
+        }
+
+        [Test]
+        public void Can_Where_using_Constant_in_Conditional_order6()
+        {
+            var i = 10;
+            System.Linq.Expressions.Expression<Func<TestType, object>> order = x => i > 0 ? x.TextCol : "www";
+            var q = Db.From<TestType>().OrderBy(order).ThenBy(x => x.Id);
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Not.Contain("="));
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Not.Contain("@0"));
+
+            var target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(4));
+            var text = target[0].TextCol;
+            Assert.AreEqual("asdf", text);
+        }
+
+        [Test]
+        public void Can_Where_using_Constant_in_Conditional_order7()
+        {
+            var i = 10;
+            System.Linq.Expressions.Expression<Func<TestType, object>> order = x => x.Id > 0 ? x.TextCol : "www";
+            var q = Db.From<TestType>().OrderBy(order).ThenBy(x => x.Id);
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Not.Contain("="));
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Contain("@0"));
+
+            var target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(4));
+            var text = target[0].TextCol;
+            Assert.AreEqual("asdf", text);
+        }
+
         private int MethodReturningInt(int val)
         {
             return val;
