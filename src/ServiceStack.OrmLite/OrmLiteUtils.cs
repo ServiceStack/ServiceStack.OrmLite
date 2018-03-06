@@ -81,9 +81,13 @@ namespace ServiceStack.OrmLite
             return (T)ReflectionExtensions.CreateInstance<T>();
         }
 
+        internal static bool IsTuple(this Type type) => type.Name.StartsWith("Tuple`", StringComparison.Ordinal);
+
+        internal static bool IsValueTuple(this Type type) => type.Name.StartsWith("ValueTuple`", StringComparison.Ordinal);
+
         public static bool IsScalar<T>()
         {
-            var isScalar = typeof(T).IsValueType && !typeof(T).Name.StartsWith("ValueTuple`", StringComparison.Ordinal) || typeof(T) == typeof(string);
+            var isScalar = typeof(T).IsValueType && !typeof(T).IsValueTuple() || typeof(T) == typeof(string);
             return isScalar;
         }
 
@@ -101,7 +105,7 @@ namespace ServiceStack.OrmLite
 
                     var values = new object[reader.FieldCount];
 
-                    if (typeof(T).Name.StartsWith("ValueTuple`"))
+                    if (typeof(T).IsValueTuple())
                         return reader.ConvertToValueTuple<T>(values, dialectProvider);
 
                     var row = CreateInstance<T>();
@@ -222,7 +226,7 @@ namespace ServiceStack.OrmLite
                 }
                 return (List<T>)(object)to.ToList();
             }
-            if (typeof(T).Name.StartsWith("ValueTuple`", StringComparison.Ordinal))
+            if (typeof(T).IsValueTuple())
             {
                 var to = new List<T>();
                 var values = new object[reader.FieldCount];
@@ -236,7 +240,7 @@ namespace ServiceStack.OrmLite
                 }
                 return to;
             }
-            if (typeof(T).Name.StartsWith("Tuple`", StringComparison.Ordinal))
+            if (typeof(T).IsTuple())
             {
                 var to = new List<T>();
                 using (reader)
