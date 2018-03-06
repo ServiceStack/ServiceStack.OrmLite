@@ -1222,15 +1222,15 @@ namespace ServiceStack.OrmLite
         public virtual string GetUniqueConstraints(ModelDefinition modelDef)
         {
             var constraints = modelDef.UniqueConstraints.Map(x => 
-                $"CONSTRAINT {GetUniqueConstraintName(x)} UNIQUE ({x.FieldNames.Map(f => modelDef.GetQuotedName(f,this)).Join(",")})" );
+                $"CONSTRAINT {GetUniqueConstraintName(x, GetTableName(modelDef))} UNIQUE ({x.FieldNames.Map(f => modelDef.GetQuotedName(f,this)).Join(",")})" );
 
             return constraints.Count > 0
                 ? constraints.Join(",\n")
                 : null;
         }
 
-        protected virtual string GetUniqueConstraintName(UniqueConstraintAttribute constraint) =>
-            constraint.Name ?? $"UC_{constraint.FieldNames.Join("_")}";
+        protected virtual string GetUniqueConstraintName(UniqueConstraintAttribute constraint, string tableName) =>
+            constraint.Name ?? $"UC_{tableName}_{constraint.FieldNames.Join("_")}";
 
         public virtual string GetCheckConstraint(FieldDefinition fieldDef)
         {
