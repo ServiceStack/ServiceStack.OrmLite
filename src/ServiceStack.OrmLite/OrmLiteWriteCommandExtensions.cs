@@ -983,8 +983,11 @@ namespace ServiceStack.OrmLite
 
             dbCmd.Parameters.Clear();
             var idParam = dbCmd.CreateParameter();
+            idParam.Direction = ParameterDirection.Input;
             idParam.ParameterName = idParamString;
-            idParam.Value = id;
+
+            dialectProvider.SetParamValue(idParam, id, modelDef.PrimaryKey.ColumnType, modelDef.PrimaryKey);
+
             dbCmd.Parameters.Add(idParam);
             return sql;
         }

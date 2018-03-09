@@ -9,8 +9,35 @@ namespace ServiceStack.OrmLite.Tests
 {
     using System;
 
+    public class TypeWithEnumAsStringAsPk
+    {
+        [PrimaryKey]
+        public SomeEnum Id { get; set; }
+
+        [Default(typeof(bool), "0")]
+        public bool IsDeleted { get; set; }
+
+
+        [RowVersion]
+        public byte[] RowVersion { get; set; }
+
+    }
+
     public class EnumTests : OrmLiteTestBase
     {
+        [Test]
+        public void Can_use_RowVersion_on_EnumAsString_PrimaryKey()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<TypeWithEnumAsStringAsPk>();
+
+                db.Insert(new TypeWithEnumAsStringAsPk { Id = SomeEnum.Value1 });
+
+                db.Save(new TypeWithEnumAsStringAsPk { Id = SomeEnum.Value2 });
+            }
+        }
+
         [Test]
         public void CanCreateTable()
         {

@@ -174,16 +174,7 @@ namespace ServiceStack.OrmLite
                         p.Direction = ParameterDirection.Input;
                         dialectProvider.InitDbParam(p, item.GetType());
 
-                        var pValue = dialectProvider.GetFieldValue(item.GetType(), item);
-                        var valueType = pValue?.GetType();
-                        if (valueType != null && valueType != propType)
-                            dialectProvider.InitDbParam(p, valueType);
-
-                        p.Value = pValue == null ?
-                            DBNull.Value
-                          : p.DbType == DbType.String ?
-                            pValue.ToString() :
-                            pValue;
+                        dialectProvider.SetParamValue(p, item, propType);
 
                         dbCmd.Parameters.Add(p);
                     }
@@ -200,26 +191,10 @@ namespace ServiceStack.OrmLite
                     p.Direction = ParameterDirection.Input;
                     dialectProvider.InitDbParam(p, propType);
 
-                    if (fieldMap != null && fieldMap.TryGetValue(columnName, out var fieldDef))
-                    {
-                        value = dialectProvider.GetFieldValue(fieldDef, value);
-                        var valueType = value?.GetType();
-                        if (valueType != null && valueType != propType)
-                            dialectProvider.InitDbParam(p, valueType);
-                    }
-                    else
-                    {
-                        value = dialectProvider.GetFieldValue(propType, value);
-                        var valueType = value?.GetType();
-                        if (valueType != null && valueType != propType)
-                            dialectProvider.InitDbParam(p, valueType);
-                    }
+                    FieldDefinition fieldDef = null;
+                    fieldMap?.TryGetValue(columnName, out fieldDef);
 
-                    p.Value = value == null ?
-                        DBNull.Value
-                        : p.DbType == DbType.String ?
-                            value.ToString() :
-                            value;
+                    dialectProvider.SetParamValue(p, value, propType, fieldDef);
 
                     dbCmd.Parameters.Add(p);
                 }
@@ -227,6 +202,30 @@ namespace ServiceStack.OrmLite
 
             sql = sqlCopy;
             return dbCmd;
+        }
+
+        internal static void SetParamValue(this IOrmLiteDialectProvider dialectProvider, IDbDataParameter p, object value, Type propType, FieldDefinition fieldDef=null)
+        {
+            if (fieldDef != null)
+            {
+                value = dialectProvider.GetFieldValue(fieldDef, value);
+                var valueType = value?.GetType();
+                if (valueType != null && valueType != propType)
+                    dialectProvider.InitDbParam(p, valueType);
+            }
+            else
+            {
+                value = dialectProvider.GetFieldValue(propType, value);
+                var valueType = value?.GetType();
+                if (valueType != null && valueType != propType)
+                    dialectProvider.InitDbParam(p, valueType);
+            }
+
+            p.Value = value == null
+                ? DBNull.Value
+                : p.DbType == DbType.String
+                    ? value.ToString()
+                    : value;
         }
 
         internal delegate void ParamIterDelegate(string propName, string columnName, object value);
