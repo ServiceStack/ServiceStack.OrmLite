@@ -14,7 +14,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="..\..\lib\pcl\ServiceStack.Interfaces.dll" />
+    <Reference Include="..\..\lib\net45\ServiceStack.Interfaces.dll" />
   </ItemGroup>
 
   <ItemGroup>
@@ -47,8 +47,15 @@
     </Compile>
   </ItemGroup>
 
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net45' ">
+    <DefineConstants>$(DefineConstants);NET45</DefineConstants>
+    <SignAssembly>True</SignAssembly>
+    <DelaySign>False</DelaySign>
+    <AssemblyOriginatorKeyFile>../servicestack.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
-    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.105.2" />
+    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.106" />
     <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj" />
     <Reference Include="..\..\lib\net45\ServiceStack.Text.dll" />
     <Reference Include="..\..\lib\net45\ServiceStack.Common.dll" />

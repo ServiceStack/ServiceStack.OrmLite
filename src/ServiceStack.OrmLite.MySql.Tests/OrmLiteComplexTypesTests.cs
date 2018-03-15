@@ -1,5 +1,4 @@
 using System;
-using System.Configuration;
 using System.Linq;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
@@ -10,13 +9,9 @@ namespace ServiceStack.OrmLite.MySql.Tests
 	[TestFixture]
 	public class OrmLiteComplexTypesTests : OrmLiteTestBase
 	{
-        [TestFixtureSetUp]
-        public void TestFixtureSetUp()
+        public OrmLiteComplexTypesTests()
         {
             LogManager.LogFactory = new ConsoleLogFactory();
-
-            OrmLiteConfig.DialectProvider = MySqlDialectProvider.Instance;
-            ConnectionString = ConfigurationManager.ConnectionStrings["testDb"].ConnectionString;
         }
 
 		[Test]

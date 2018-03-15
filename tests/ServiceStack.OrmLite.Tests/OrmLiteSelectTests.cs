@@ -5,6 +5,7 @@ using System.Linq;
 using NUnit.Framework;
 using ServiceStack.Common;
 using ServiceStack.Common.Tests.Models;
+using ServiceStack.Logging;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
@@ -331,8 +332,34 @@ namespace ServiceStack.OrmLite.Tests
                 var rows = db.Select<ModelWithIdAndName>("Name IN ({0})".Fmt(selectInNames.SqlInParams()),
                     new { values = selectInNames.SqlInValues() });
                 Assert.That(rows.Count, Is.EqualTo(selectInNames.Length));
+
+                rows = db.Select<ModelWithIdAndName>("Name IN (@values)",
+                    new { values = selectInNames });
+                Assert.That(rows.Count, Is.EqualTo(selectInNames.Length));
+
                 rows = db.Select<ModelWithIdAndName>("Name IN (@p1, @p2)".PreNormalizeSql(db), new { p1 = "Name1", p2 = "Name2" });
                 Assert.That(rows.Count, Is.EqualTo(selectInNames.Length));
+            }
+        }
+
+        [Test]
+        public void Can_select_IN_using_array_or_List_params()
+        {
+            LogManager.LogFactory = new ConsoleLogFactory();
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<ModelWithIdAndName>();
+                5.Times(x => db.Insert(ModelWithIdAndName.Create(x)));
+
+                var names = new[] { "Name2", "Name3" };
+                var rows = db.Select<ModelWithIdAndName>("Name IN (@names)", new { names });
+                Assert.That(rows.Count, Is.EqualTo(2));
+                Assert.That(rows.Map(x => x.Name), Is.EquivalentTo(names));
+
+                var ids = new List<int> { 2, 3 };
+                rows = db.Select<ModelWithIdAndName>("Id IN (@ids)", new { ids });
+                Assert.That(rows.Count, Is.EqualTo(2));
+                Assert.That(rows.Map(x => x.Id), Is.EquivalentTo(ids));
             }
         }
 

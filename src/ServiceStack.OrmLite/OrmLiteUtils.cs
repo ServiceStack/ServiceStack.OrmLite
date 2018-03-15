@@ -81,9 +81,13 @@ namespace ServiceStack.OrmLite
             return (T)ReflectionExtensions.CreateInstance<T>();
         }
 
+        internal static bool IsTuple(this Type type) => type.Name.StartsWith("Tuple`", StringComparison.Ordinal);
+
+        internal static bool IsValueTuple(this Type type) => type.Name.StartsWith("ValueTuple`", StringComparison.Ordinal);
+
         public static bool IsScalar<T>()
         {
-            var isScalar = typeof(T).IsValueType() && !typeof(T).Name.StartsWith("ValueTuple`", StringComparison.Ordinal) || typeof(T) == typeof(string);
+            var isScalar = typeof(T).IsValueType && !typeof(T).IsValueTuple() || typeof(T) == typeof(string);
             return isScalar;
         }
 
@@ -101,7 +105,7 @@ namespace ServiceStack.OrmLite
 
                     var values = new object[reader.FieldCount];
 
-                    if (typeof(T).Name.StartsWith("ValueTuple`"))
+                    if (typeof(T).IsValueTuple())
                         return reader.ConvertToValueTuple<T>(values, dialectProvider);
 
                     var row = CreateInstance<T>();
@@ -222,7 +226,7 @@ namespace ServiceStack.OrmLite
                 }
                 return (List<T>)(object)to.ToList();
             }
-            if (typeof(T).Name.StartsWith("ValueTuple`", StringComparison.Ordinal))
+            if (typeof(T).IsValueTuple())
             {
                 var to = new List<T>();
                 var values = new object[reader.FieldCount];
@@ -236,7 +240,7 @@ namespace ServiceStack.OrmLite
                 }
                 return to;
             }
-            if (typeof(T).Name.StartsWith("Tuple`", StringComparison.Ordinal))
+            if (typeof(T).IsTuple())
             {
                 var to = new List<T>();
                 using (reader)
@@ -415,8 +419,7 @@ namespace ServiceStack.OrmLite
                 }
                 else
                 {
-                    var sqlInValues = sqlParam as SqlInValues;
-                    if (sqlInValues != null)
+                    if (sqlParam is SqlInValues sqlInValues)
                     {
                         escapedParams.Add(sqlInValues.ToSqlInString());
                     }
@@ -679,9 +682,8 @@ namespace ServiceStack.OrmLite
         private const int NotFound = -1;
         internal static int FindColumnIndex(IOrmLiteDialectProvider dialectProvider, FieldDefinition fieldDef, Dictionary<string, int> dbFieldMap)
         {
-            int index;
             var fieldName = dialectProvider.NamingStrategy.GetColumnName(fieldDef.FieldName);
-            if (dbFieldMap.TryGetValue(fieldName, out index))
+            if (dbFieldMap.TryGetValue(fieldName, out var index))
                 return index;
 
             index = TryGuessColumnIndex(fieldName, dbFieldMap);
@@ -779,9 +781,9 @@ namespace ServiceStack.OrmLite
 
         public static bool IsRefType(this Type fieldType)
         {
-            return (!fieldType.UnderlyingSystemType().IsValueType()
-                || JsConfig.TreatValueAsRefTypes.Contains(fieldType.IsGeneric()
-                    ? fieldType.GenericTypeDefinition()
+            return (!fieldType.UnderlyingSystemType().IsValueType
+                || JsConfig.TreatValueAsRefTypes.Contains(fieldType.IsGenericType
+                    ? fieldType.GetGenericTypeDefinition()
                     : fieldType))
                 && fieldType != typeof(string);
         }
@@ -850,7 +852,7 @@ namespace ServiceStack.OrmLite
                 var listInterface = fieldDef.FieldType.GetTypeWithGenericInterfaceOf(typeof(IList<>));
                 if (listInterface != null)
                 {
-                    var refType = listInterface.GenericTypeArguments()[0];
+                    var refType = listInterface.GetGenericArguments()[0];
                     var refModelDef = refType.GetModelDefinition();
                     var refField = modelDef.GetRefFieldDef(refModelDef, refType);
 
@@ -923,9 +925,8 @@ namespace ServiceStack.OrmLite
 
             foreach (var result in parents)
             {
-                object childResult;
                 var fkValue = refSelf.GetValue(result);
-                if (fkValue != null && map.TryGetValue(fkValue, out childResult))
+                if (fkValue != null && map.TryGetValue(fkValue, out var childResult))
                 {
                     fieldDef.SetValueFn(result, childResult);
                 }
@@ -945,9 +946,8 @@ namespace ServiceStack.OrmLite
 
             foreach (var result in parents)
             {
-                object childResult;
                 var pkValue = modelDef.PrimaryKey.GetValue(result);
-                if (map.TryGetValue(pkValue, out childResult))
+                if (map.TryGetValue(pkValue, out var childResult))
                 {
                     fieldDef.SetValueFn(result, childResult);
                 }

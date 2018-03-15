@@ -50,5 +50,34 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 results.PrintDump();
             }
         }
+
+        [Test]
+        public void Can_use_Column_to_resolve_properties()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Task>();
+
+                var parentId = db.Insert(new Task { Created = new DateTime(2000, 01, 01) }, selectIdentity: true);
+                var childId = db.Insert(new Task { ParentId = parentId, Created = new DateTime(2001, 01, 01) }, selectIdentity: true);
+
+                var q = db.From<Task>();
+
+                var leftJoin = 
+                    $"LEFT JOIN Task history ON ({q.Column<Task>(t => t.Id, prefixTable:true)} = history.{q.Column<Task>(t => t.ParentId)})";
+                Assert.That(leftJoin, Is.EqualTo(
+                    $"LEFT JOIN Task history ON ({q.Table<Task>()}.{q.Column<Task>(t => t.Id)} = history.{q.Column<Task>(t => t.ParentId)})"));
+                Assert.That(leftJoin, Is.EqualTo(
+                    $"LEFT JOIN Task history ON ({q.Table<Task>()}.{q.Column<Task>(nameof(Task.Id))} = history.{q.Column<Task>(nameof(Task.ParentId))})"));
+
+                q.CustomJoin(leftJoin);
+
+                var results = db.Select(q);
+
+                db.GetLastSql().Print();
+
+                Assert.That(results.Count, Is.EqualTo(2));
+            }
+        }
     }
 }

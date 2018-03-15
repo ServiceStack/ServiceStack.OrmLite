@@ -14,16 +14,15 @@ namespace ServiceStack.OrmLite.MySql.Tests
 		private readonly CultureInfo CurrentCulture = Thread.CurrentThread.CurrentCulture;
 		private readonly CultureInfo CurrentUICulture = Thread.CurrentThread.CurrentUICulture;
 
-		[TestFixtureSetUp]
-		public void TestFixtureSetUp()
+		public LocalizationTests()
 		{
 			Thread.CurrentThread.CurrentCulture = new CultureInfo("vi-VN");
 			Thread.CurrentThread.CurrentUICulture = new CultureInfo("vi-VN");
 
-		    OrmLiteConfig.DialectProvider = MySqlDialectProvider.Instance;
+		    OrmLiteConfig.DialectProvider = MySqlConfig.DialectProvider;
 		}
 
-		[TestFixtureTearDown]
+		[OneTimeTearDown]
 		public void TestFixtureTearDown()
 		{
 			Thread.CurrentThread.CurrentCulture = CurrentCulture;

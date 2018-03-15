@@ -5,10 +5,7 @@ namespace ServiceStack.OrmLite.SqlServer.Converters
 {
     public class SqlServerByteArrayConverter : ByteArrayConverter
     {
-        public override string ColumnDefinition
-        {
-            get { return "VARBINARY(MAX)"; }
-        }
+        public override string ColumnDefinition => "VARBINARY(MAX)";
 
         public override string ToQuotedString(Type fieldType, object value)
         {

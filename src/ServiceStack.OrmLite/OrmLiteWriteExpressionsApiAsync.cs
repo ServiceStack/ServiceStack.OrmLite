@@ -83,7 +83,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Update record, updating only fields specified in updateOnly that matches the where condition (if any), E.g:
-        /// Numeric fields generates an increment sql which is usefull to increment counters, etc...
+        /// Numeric fields generates an increment sql which is useful to increment counters, etc...
         /// avoiding concurrency conflicts
         /// 
         ///   db.UpdateAddAsync(() => new Person { Age = 5 }, where: p => p.LastName == "Hendrix");
@@ -118,7 +118,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Update record, updating only fields specified in updateOnly that matches the where condition (if any), E.g:
-        /// Numeric fields generates an increment sql which is usefull to increment counters, etc...
+        /// Numeric fields generates an increment sql which is useful to increment counters, etc...
         /// avoiding concurrency conflicts
         /// 
         ///   db.UpdateAddAsync(() => new Person { Age = 5 }, db.From&lt;Person&gt;().Where(p => p.LastName == "Hendrix"));

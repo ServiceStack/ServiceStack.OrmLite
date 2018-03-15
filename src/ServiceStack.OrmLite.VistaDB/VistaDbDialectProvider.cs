@@ -175,6 +175,11 @@ namespace ServiceStack.OrmLite.VistaDB
                     sql.Append(" NOT NULL");
             }
 
+            if (fieldDef.IsUniqueConstraint)
+            {
+                sql.Append(" UNIQUE");
+            }
+
             if (fieldDef.AutoIncrement)
                 sql.Append(" ").Append(this.AutoIncrementDefinition);
 

@@ -10,7 +10,7 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.UseCase
     [TestFixture]
     public class SimpleUseCase
     {
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void TestFixtureSetUp()
         {
             //Inject your database provider here

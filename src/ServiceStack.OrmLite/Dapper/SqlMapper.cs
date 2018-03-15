@@ -19,7 +19,7 @@ using System.Threading;
 using System.Xml;
 //using System.Xml.Linq;
 
-#if NETSTANDARD1_3
+#if NETSTANDARD2_0
 using DataException = System.InvalidOperationException;
 #endif
 
@@ -225,7 +225,7 @@ namespace ServiceStack.OrmLite.Dapper
         private static void ResetTypeHandlers(bool clone)
         {
             typeHandlers = new Dictionary<Type, ITypeHandler>();
-#if !NETSTANDARD1_3
+#if !NETSTANDARD2_0
             AddTypeHandlerImpl(typeof(DataTable), new DataTableHandler(), clone);
             try // see https://github.com/StackExchange/dapper-dot-net/issues/424
             {
@@ -239,7 +239,7 @@ namespace ServiceStack.OrmLite.Dapper
 
             allowedCommandBehaviors = DefaultAllowedCommandBehaviors;
         }
-#if !NETSTANDARD1_3
+#if !NETSTANDARD2_0
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static void AddSqlDataRecordsTypeHandler(bool clone)
         {
@@ -283,7 +283,7 @@ namespace ServiceStack.OrmLite.Dapper
             if (type == null) throw new ArgumentNullException(nameof(type));
 
             Type secondary = null;
-            if(type.IsValueType())
+            if(type.IsValueType)
             {
                 var underlying = Nullable.GetUnderlyingType(type);
                 if(underlying == null)
@@ -342,7 +342,7 @@ namespace ServiceStack.OrmLite.Dapper
         /// Get the DbType that maps to a given value
         /// </summary>
         [Obsolete(ObsoleteInternalUsageOnly, false)]
-#if !NETSTANDARD1_3
+#if !NETSTANDARD2_0
         [Browsable(false)]
 #endif
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -359,7 +359,7 @@ namespace ServiceStack.OrmLite.Dapper
         /// OBSOLETE: For internal usage only. Lookup the DbType and handler for a given Type and member
         /// </summary>
         [Obsolete(ObsoleteInternalUsageOnly, false)]
-#if !NETSTANDARD1_3
+#if !NETSTANDARD2_0
         [Browsable(false)]
 #endif
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -369,7 +369,7 @@ namespace ServiceStack.OrmLite.Dapper
             handler = null;
             var nullUnderlyingType = Nullable.GetUnderlyingType(type);
             if (nullUnderlyingType != null) type = nullUnderlyingType;
-            if (type.IsEnum() && !typeMap.ContainsKey(type))
+            if (type.IsEnum && !typeMap.ContainsKey(type))
             {
                 type = Enum.GetUnderlyingType(type);
             }
@@ -390,7 +390,7 @@ namespace ServiceStack.OrmLite.Dapper
                 return DynamicParameters.EnumerableMultiParameter;
             }
 
-#if !NETSTANDARD1_3
+#if !NETSTANDARD2_0
             switch (type.FullName)
             {
                 case "Microsoft.SqlServer.Types.SqlGeography":
@@ -1654,8 +1654,8 @@ namespace ServiceStack.OrmLite.Dapper
                 return GetDapperRowDeserializer(reader, startBound, length, returnNullIfFirstMissing);
             }
             Type underlyingType = null;
-            if (!(typeMap.ContainsKey(type) || type.IsEnum() || type.FullName == LinqBinary ||
-                (type.IsValueType()  && (underlyingType = Nullable.GetUnderlyingType(type)) != null && underlyingType.IsEnum())))
+            if (!(typeMap.ContainsKey(type) || type.IsEnum || type.FullName == LinqBinary ||
+                (type.IsValueType  && (underlyingType = Nullable.GetUnderlyingType(type)) != null && underlyingType.IsEnum)))
             {
                 ITypeHandler handler;
                 if (typeHandlers.TryGetValue(type, out handler))
@@ -1750,7 +1750,7 @@ namespace ServiceStack.OrmLite.Dapper
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-#if !NETSTANDARD1_3
+#if !NETSTANDARD2_0
         [Browsable(false)]
 #endif
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -1766,7 +1766,7 @@ namespace ServiceStack.OrmLite.Dapper
         /// <summary>
         /// Internal use only
         /// </summary>
-#if !NETSTANDARD1_3
+#if !NETSTANDARD2_0
         [Browsable(false)]
 #endif
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -1783,7 +1783,7 @@ namespace ServiceStack.OrmLite.Dapper
         /// <summary>
         /// Internal use only
         /// </summary>
-#if !NETSTANDARD1_3
+#if !NETSTANDARD2_0
         [Browsable(false)]
 #endif
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -1837,7 +1837,7 @@ namespace ServiceStack.OrmLite.Dapper
         /// <summary>
         /// Internal use only
         /// </summary>
-#if !NETSTANDARD1_3
+#if !NETSTANDARD2_0
         [Browsable(false)]
 #endif
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -2075,7 +2075,7 @@ namespace ServiceStack.OrmLite.Dapper
                 TypeCode typeCode;
                 if (value is IConvertible)
                 {
-#if NETSTANDARD1_3                    
+#if NETSTANDARD2_0                    
                     typeCode = (TypeCode)((IConvertible)value).GetTypeCode();
 #else
                     typeCode = ((IConvertible)value).GetTypeCode();
@@ -2135,7 +2135,7 @@ namespace ServiceStack.OrmLite.Dapper
             {
                 switch (TypeExtensions.GetTypeCode(value.GetType()))
                 {
-#if !NETSTANDARD1_3
+#if !NETSTANDARD2_0
                     case TypeCode.DBNull:
                         return "null";
 #endif
@@ -2251,7 +2251,7 @@ namespace ServiceStack.OrmLite.Dapper
 
             var il = dm.GetILGenerator();
 
-            bool isStruct = type.IsValueType();
+            bool isStruct = type.IsValueType;
             bool haveInt32Arg1 = false;
             il.Emit(OpCodes.Ldarg_1); // stack is now [untyped-param]
             if (isStruct)
@@ -2349,7 +2349,7 @@ namespace ServiceStack.OrmLite.Dapper
                     il.Emit(OpCodes.Ldstr, prop.Name); // stack is now [parameters] [command] [name]
                     il.Emit(OpCodes.Ldloc_0); // stack is now [parameters] [command] [name] [typed-param]
                     il.Emit(callOpCode, prop.GetGetMethod()); // stack is [parameters] [command] [name] [typed-value]
-                    if (prop.PropertyType.IsValueType())
+                    if (prop.PropertyType.IsValueType)
                     {
                         il.Emit(OpCodes.Box, prop.PropertyType); // stack is [parameters] [command] [name] [boxed-value]
                     }
@@ -2401,13 +2401,13 @@ namespace ServiceStack.OrmLite.Dapper
                 il.Emit(OpCodes.Ldloc_0); // stack is now [parameters] [[parameters]] [parameter] [parameter] [typed-param]
                 il.Emit(callOpCode, prop.GetGetMethod()); // stack is [parameters] [[parameters]] [parameter] [parameter] [typed-value]
                 bool checkForNull;
-                if (prop.PropertyType.IsValueType())
+                if (prop.PropertyType.IsValueType)
                 {
                     var propType = prop.PropertyType;
                     var nullType = Nullable.GetUnderlyingType(propType);
                     bool callSanitize = false;
                     
-                    if((nullType ?? propType).IsEnum())
+                    if((nullType ?? propType).IsEnum)
                     {
                         if(nullType != null)
                         {
@@ -2616,7 +2616,7 @@ namespace ServiceStack.OrmLite.Dapper
                                 il.EmitCall(OpCodes.Call, convert, null); // command, sql, string value
                                 break;
                             default:
-                                if (propType.IsValueType()) il.Emit(OpCodes.Box, propType); // command, sql, object value
+                                if (propType.IsValueType) il.Emit(OpCodes.Box, propType); // command, sql, object value
                                 il.EmitCall(OpCodes.Call, format, null); // command, sql, string value
                                 break;
 
@@ -2750,7 +2750,7 @@ namespace ServiceStack.OrmLite.Dapper
             }
 #pragma warning restore 618
 
-            if (effectiveType.IsEnum())
+            if (effectiveType.IsEnum)
             {   // assume the value is returned as the correct type (int/byte/etc), but box back to the typed enum
                 return r =>
                 {
@@ -2784,7 +2784,7 @@ namespace ServiceStack.OrmLite.Dapper
             if (value is T) return (T)value;
             var type = typeof(T);
             type = Nullable.GetUnderlyingType(type) ?? type;
-            if (type.IsEnum())
+            if (type.IsEnum)
             {
                 if (value is float || value is double || value is decimal)
                 {
@@ -2906,7 +2906,7 @@ namespace ServiceStack.OrmLite.Dapper
             Type type, IDataReader reader, int startBound = 0, int length = -1, bool returnNullIfFirstMissing = false
         )
         {
-            var returnType = type.IsValueType() ? typeof(object) : type;
+            var returnType = type.IsValueType ? typeof(object) : type;
             var dm = new DynamicMethod("Deserialize" + Guid.NewGuid().ToString(), returnType, new[] { typeof(IDataReader) }, type, true);
             var il = dm.GetILGenerator();
             il.DeclareLocal(typeof(int));
@@ -2932,11 +2932,11 @@ namespace ServiceStack.OrmLite.Dapper
 
             ConstructorInfo specializedConstructor = null;
 
-#if !NETSTANDARD1_3
+#if !NETSTANDARD2_0
             bool supportInitialize = false;
 #endif
             Dictionary<Type, LocalBuilder> structLocals = null;
-            if (type.IsValueType())
+            if (type.IsValueType)
             {
                 il.Emit(OpCodes.Ldloca_S, (byte)1);
                 il.Emit(OpCodes.Initobj, type);
@@ -2955,7 +2955,7 @@ namespace ServiceStack.OrmLite.Dapper
                     var consPs = explicitConstr.GetParameters();
                     foreach(var p in consPs)
                     {
-                        if(!p.ParameterType.IsValueType())
+                        if(!p.ParameterType.IsValueType)
                         {
                             il.Emit(OpCodes.Ldnull);
                         }
@@ -2967,7 +2967,7 @@ namespace ServiceStack.OrmLite.Dapper
 
                     il.Emit(OpCodes.Newobj, explicitConstr);
                     il.Emit(OpCodes.Stloc_1);
-#if !NETSTANDARD1_3
+#if !NETSTANDARD2_0
                     supportInitialize = typeof(ISupportInitialize).IsAssignableFrom(type);
                     if (supportInitialize)
                     {
@@ -2989,7 +2989,7 @@ namespace ServiceStack.OrmLite.Dapper
                     {
                         il.Emit(OpCodes.Newobj, ctor);
                         il.Emit(OpCodes.Stloc_1);
-#if !NETSTANDARD1_3
+#if !NETSTANDARD2_0
                         supportInitialize = typeof(ISupportInitialize).IsAssignableFrom(type);
                         if (supportInitialize)
                         {
@@ -3006,7 +3006,7 @@ namespace ServiceStack.OrmLite.Dapper
             }
 
             il.BeginExceptionBlock();
-            if (type.IsValueType())
+            if (type.IsValueType)
             {
                 il.Emit(OpCodes.Ldloca_S, (byte)1);// [target]
             }
@@ -3058,9 +3058,9 @@ namespace ServiceStack.OrmLite.Dapper
                         // unbox nullable enums as the primitive, i.e. byte etc
 
                         var nullUnderlyingType = Nullable.GetUnderlyingType(memberType);
-                        var unboxType = nullUnderlyingType != null && nullUnderlyingType.IsEnum() ? nullUnderlyingType : memberType;
+                        var unboxType = nullUnderlyingType != null && nullUnderlyingType.IsEnum ? nullUnderlyingType : memberType;
 
-                        if (unboxType.IsEnum())
+                        if (unboxType.IsEnum)
                         {
                             Type numericType = Enum.GetUnderlyingType(unboxType);
                             if(colType == typeof(string))
@@ -3126,7 +3126,7 @@ namespace ServiceStack.OrmLite.Dapper
                         // Store the value in the property/field
                         if (item.Property != null)
                         {
-                            il.Emit(type.IsValueType() ? OpCodes.Call : OpCodes.Callvirt, DefaultTypeMap.GetPropertySetter(item.Property, type));
+                            il.Emit(type.IsValueType ? OpCodes.Call : OpCodes.Callvirt, DefaultTypeMap.GetPropertySetter(item.Property, type));
                         }
                         else
                         {
@@ -3140,7 +3140,7 @@ namespace ServiceStack.OrmLite.Dapper
                     if (specializedConstructor != null)
                     {
                         il.Emit(OpCodes.Pop);
-                        if (item.MemberType.IsValueType())
+                        if (item.MemberType.IsValueType)
                         {
                             int localIndex = il.DeclareLocal(item.MemberType).LocalIndex;
                             LoadLocalAddress(il, localIndex);
@@ -3152,11 +3152,11 @@ namespace ServiceStack.OrmLite.Dapper
                             il.Emit(OpCodes.Ldnull);
                         }
                     }
-                    else if(applyNullSetting && (!memberType.IsValueType() || Nullable.GetUnderlyingType(memberType) != null))
+                    else if(applyNullSetting && (!memberType.IsValueType || Nullable.GetUnderlyingType(memberType) != null))
                     {
                         il.Emit(OpCodes.Pop); // stack is now [target][target]
                         // can load a null with this value
-                        if (memberType.IsValueType())
+                        if (memberType.IsValueType)
                         { // must be Nullable<T> for some T
                             GetTempLocal(il, ref structLocals, memberType, true); // stack is now [target][target][null]
                         }
@@ -3168,7 +3168,7 @@ namespace ServiceStack.OrmLite.Dapper
                         // Store the value in the property/field
                         if (item.Property != null)
                         {
-                            il.Emit(type.IsValueType() ? OpCodes.Call : OpCodes.Callvirt, DefaultTypeMap.GetPropertySetter(item.Property, type));
+                            il.Emit(type.IsValueType ? OpCodes.Call : OpCodes.Callvirt, DefaultTypeMap.GetPropertySetter(item.Property, type));
                             // stack is now [target]
                         }
                         else
@@ -3195,7 +3195,7 @@ namespace ServiceStack.OrmLite.Dapper
                 first = false;
                 index += 1;
             }
-            if (type.IsValueType())
+            if (type.IsValueType)
             {
                 il.Emit(OpCodes.Pop);
             }
@@ -3206,7 +3206,7 @@ namespace ServiceStack.OrmLite.Dapper
                     il.Emit(OpCodes.Newobj, specializedConstructor);
                 }
                 il.Emit(OpCodes.Stloc_1); // stack is empty
-#if !NETSTANDARD1_3
+#if !NETSTANDARD2_0
                 if (supportInitialize)
                 {
                     il.Emit(OpCodes.Ldloc_1);
@@ -3223,7 +3223,7 @@ namespace ServiceStack.OrmLite.Dapper
             il.EndExceptionBlock();
 
             il.Emit(OpCodes.Ldloc_1); // stack is [rval]
-            if (type.IsValueType())
+            if (type.IsValueType)
             {
                 il.Emit(OpCodes.Box, type);
             }
@@ -3472,7 +3472,7 @@ namespace ServiceStack.OrmLite.Dapper
         }
         private static IEqualityComparer<string> connectionStringComparer = StringComparer.Ordinal;
 
-#if !NETSTANDARD1_3
+#if !NETSTANDARD2_0
         /// <summary>
         /// Key used to indicate the type name associated with a DataTable
         /// </summary>

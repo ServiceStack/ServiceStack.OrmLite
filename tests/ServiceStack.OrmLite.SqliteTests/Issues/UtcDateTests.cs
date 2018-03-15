@@ -15,7 +15,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixture]
     public class When_DateTimeConverter_DateStyle_is_Utc
     {
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void TestFixtureSetUp()
         {
             OrmLiteConfig.DialectProvider = new SqliteOrmLiteDialectProvider();
@@ -31,7 +31,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
         }
 
         [Test]
-        public void insert_and_select_utc_DateTime()
+        public void Insert_and_select_utc_DateTime()
         {
             using (IDbConnection db = ":memory:".OpenDbConnection())
             {
@@ -49,7 +49,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
         }
 
         [Test]
-        public void insert_and_select_local_DateTime()
+        public void Insert_and_select_local_DateTime()
         {
             using (IDbConnection db = ":memory:".OpenDbConnection())
             {
@@ -74,7 +74,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixture]
     public class _DateTimeQueryTests
     {
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void TestFixtureSetUp()
         {
             //OrmLiteConfig.UseParameterizeSqlExpressions = false;  //Removed in OrmLite in future
@@ -91,7 +91,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
         }
 
         [Test]
-        public void count_using_utc_DateTime_in_where_clause()
+        public void Count_using_utc_DateTime_in_where_clause()
         {
             using (IDbConnection db = ":memory:".OpenDbConnection())
             {
@@ -111,7 +111,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
         }
 
         [Test]
-        public void count_using_local_DateTime_in_where_clause()
+        public void Count_using_local_DateTime_in_where_clause()
         {
             using (IDbConnection db = ":memory:".OpenDbConnection())
             {
@@ -138,7 +138,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixture]
     public class When_DateTimeConverter_DateStyle_is_default
     {
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void TestFixtureSetUp()
         {
             OrmLiteConfig.DialectProvider = new SqliteOrmLiteDialectProvider();
@@ -155,7 +155,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
         }
 
         [Test]
-        public void insert_and_select_utc_DateTime()
+        public void Insert_and_select_utc_DateTime()
         {
             using (IDbConnection db = ":memory:".OpenDbConnection())
             {
@@ -174,7 +174,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
         }
 
         [Test]
-        public void insert_and_select_local_DateTime()
+        public void Insert_and_select_local_DateTime()
         {
             using (IDbConnection db = ":memory:".OpenDbConnection())
             {

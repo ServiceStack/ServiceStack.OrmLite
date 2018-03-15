@@ -2,14 +2,42 @@
 using System.Linq;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
+using ServiceStack.Logging;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
     using System;
 
+    public class TypeWithEnumAsStringAsPk
+    {
+        [PrimaryKey]
+        public SomeEnum Id { get; set; }
+
+        [Default(typeof(bool), "0")]
+        public bool IsDeleted { get; set; }
+
+
+        [RowVersion]
+        public byte[] RowVersion { get; set; }
+
+    }
+
     public class EnumTests : OrmLiteTestBase
     {
+        [Test]
+        public void Can_use_RowVersion_on_EnumAsString_PrimaryKey()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<TypeWithEnumAsStringAsPk>();
+
+                db.Insert(new TypeWithEnumAsStringAsPk { Id = SomeEnum.Value1 });
+
+                db.Save(new TypeWithEnumAsStringAsPk { Id = SomeEnum.Value2 });
+            }
+        }
+
         [Test]
         public void CanCreateTable()
         {
@@ -19,10 +47,11 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void CanStoreEnumValue()
         {
+            LogManager.LogFactory = new ConsoleLogFactory();
             using (var con = OpenDbConnection())
             {
                 con.CreateTable<TypeWithEnum>(true);
-                con.Save(new TypeWithEnum { Id = 1, EnumValue = SomeEnum.Value1 });
+                con.Insert(new TypeWithEnum { Id = 1 });
             }
         }
 
@@ -427,9 +456,9 @@ namespace ServiceStack.OrmLite.Tests
 
     public enum SomeEnum
     {
-        Value1 = 1,
-        Value2 = 2,
-        Value3 = 3
+        Value1,
+        Value2,
+        Value3
     }
 
     public class TypeWithEnum

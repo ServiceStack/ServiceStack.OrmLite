@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Text;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Text;
@@ -9,6 +11,58 @@ namespace ServiceStack.OrmLite.SqlServer
     public class SqlServer2012OrmLiteDialectProvider : SqlServerOrmLiteDialectProvider
     {
         public new static SqlServer2012OrmLiteDialectProvider Instance = new SqlServer2012OrmLiteDialectProvider();
+
+        public override bool DoesSequenceExist(IDbCommand dbCmd, string sequenceName)
+        {
+            var sql = "SELECT 1 FROM SYS.SEQUENCES WHERE object_id=object_id({0})"
+                .SqlFmt(this, sequenceName);
+
+            dbCmd.CommandText = sql;
+            var result = dbCmd.ExecuteScalar();
+
+            return result != null;
+        }
+
+        protected override string GetAutoIncrementDefinition(FieldDefinition fieldDef)
+        {
+            if (!string.IsNullOrEmpty(fieldDef.Sequence))
+                return $"DEFAULT NEXT VALUE FOR {Sequence(NamingStrategy.GetSchemaName(GetModel(fieldDef.PropertyInfo?.ReflectedType)), fieldDef.Sequence)}";
+            else
+                return AutoIncrementDefinition;
+        }
+
+        protected override bool ShouldSkipInsert(FieldDefinition fieldDef) => 
+            fieldDef.ShouldSkipInsert() && string.IsNullOrEmpty(fieldDef.Sequence);
+
+        protected override bool SupportsSequences(FieldDefinition fieldDef) => 
+            !string.IsNullOrEmpty(fieldDef.Sequence);
+        
+        public override List<string> ToCreateSequenceStatements(Type tableType)
+        {
+            var modelDef = GetModel(tableType);
+            return SequenceList(tableType).Select(seq => $"CREATE SEQUENCE {Sequence(NamingStrategy.GetSchemaName(modelDef), seq)} AS BIGINT START WITH 1 INCREMENT BY 1 NO CACHE;").ToList();
+        }
+
+        public override string ToCreateSequenceStatement(Type tableType, string sequenceName)
+        {
+            var modelDef = GetModel(tableType);
+            return $"CREATE SEQUENCE {Sequence(NamingStrategy.GetSchemaName(modelDef), sequenceName)} AS BIGINT START WITH 1 INCREMENT BY 1 NO CACHE;";
+        }
+
+        public override List<string> SequenceList(Type tableType)
+        {
+            var gens = new List<string>();
+            var modelDef = GetModel(tableType);
+
+            foreach (var fieldDef in modelDef.FieldDefinitions)
+            {
+                if (!string.IsNullOrEmpty(fieldDef.Sequence))
+                {
+                    gens.AddIfNotExists(fieldDef.Sequence);
+                }
+            }
+            return gens;
+        }
 
         public override string ToSelectStatement(ModelDefinition modelDef,
             string selectExpression,
@@ -56,7 +110,7 @@ namespace ServiceStack.OrmLite.SqlServer
             if (fieldDef.FieldType == typeof(string))
             {
                 // https://msdn.microsoft.com/en-us/library/ms184391.aspx
-                var collation = fieldDef.PropertyInfo.FirstAttribute<SqlServerCollateAttribute>()?.Collation;
+                var collation = fieldDef.PropertyInfo?.FirstAttribute<SqlServerCollateAttribute>()?.Collation;
                 if (!string.IsNullOrEmpty(collation))
                 {
                     sql.Append($" COLLATE {collation}");
@@ -74,6 +128,11 @@ namespace ServiceStack.OrmLite.SqlServer
             else
             {
                 sql.Append(fieldDef.IsNullable ? " NULL" : " NOT NULL");
+            }
+
+            if (fieldDef.IsUniqueConstraint)
+            {
+                sql.Append(" UNIQUE");
             }
 
             var defaultValue = GetDefaultValue(fieldDef);
@@ -112,6 +171,12 @@ namespace ServiceStack.OrmLite.SqlServer
 
                     sbColumns.Append(columnDefinition);
 
+                    var sqlConstraint = GetCheckConstraint(fieldDef);
+                    if (sqlConstraint != null)
+                    {
+                        sbConstraints.Append(",\n" + sqlConstraint);
+                    }
+
                     if (fieldDef.ForeignKey == null || OrmLiteConfig.SkipForeignKeys)
                         continue;
 
@@ -145,6 +210,12 @@ namespace ServiceStack.OrmLite.SqlServer
                     }
                     sbTableOptions.Append(")");
                 }
+            }
+
+            var uniqueConstraints = GetUniqueConstraints(modelDef);
+            if (uniqueConstraints != null)
+            {
+                sbConstraints.Append(",\n" + uniqueConstraints);
             }
 
             var sql = $"CREATE TABLE {GetQuotedTableName(modelDef)} ";

@@ -23,6 +23,14 @@ namespace ServiceStack.OrmLite.Tests
 
         public string Name { get; set; }
 
+        public Guid Id1 { get; set; }
+
+        public Guid Id2 { get; set; }
+
+        public DateTime Date { get; set; }
+
+        public decimal Amount { get; set; }
+
         [DataAnnotations.Ignore]
         public string VirtProperty => "WaybillVirtPropertyValue";
 
@@ -30,7 +38,25 @@ namespace ServiceStack.OrmLite.Tests
         public string VirtProperty2 => "WaybillVirtPropertyValue2";
 
         [DataAnnotations.Ignore]
+        public string VirtPropertyEmpty => String.Empty;
+
+        [DataAnnotations.Ignore]
+        public string VirtPropertyNull => null;
+
+        [DataAnnotations.Ignore]
         public bool BoolVirtProperty => false;
+
+        [DataAnnotations.Ignore]
+        public Guid GuidVirtProperty => Guid.Parse("00000000-0000-0000-0000-000000000000");
+
+        [DataAnnotations.Ignore]
+        public DateTime DateVirtProperty => DateTime.Parse("2000-01-01");
+
+        [DataAnnotations.Ignore]
+        public int IntVirtProperty => 5;
+
+        [DataAnnotations.Ignore]
+        public decimal DecimalVirtProperty => 10M;
     }
 
     public class WaybillIn : WaybillBase
@@ -80,8 +106,20 @@ namespace ServiceStack.OrmLite.Tests
                     return "WaybillVirtPropertyValue";
                 if (m.Member.Name == nameof(WaybillBase.VirtProperty2))
                     return "WaybillVirtPropertyValue2";
+                if (m.Member.Name == nameof(WaybillBase.VirtPropertyEmpty))
+                    return String.Empty;
+                if (m.Member.Name == nameof(WaybillBase.VirtPropertyNull))
+                    return null;
                 if (m.Member.Name == nameof(WaybillBase.BoolVirtProperty))
                     return false;
+                if (m.Member.Name == nameof(WaybillBase.GuidVirtProperty))
+                    return Guid.Parse("00000000-0000-0000-0000-000000000000");
+                if (m.Member.Name == nameof(WaybillBase.DateVirtProperty))
+                    return DateTime.Parse("2000-01-01");
+                if (m.Member.Name == nameof(WaybillBase.IntVirtProperty))
+                    return 5;
+                if (m.Member.Name == nameof(WaybillBase.DecimalVirtProperty))
+                    return 10M;
             }
 
             return base.GetMemberExpression(m);
@@ -153,9 +191,36 @@ namespace ServiceStack.OrmLite.Tests
                 db.DropTable<WaybillBase>();
 
                 db.CreateTable<WaybillBase>();
-                db.Insert(new WaybillBase {Id = 1, Number = 100, Name = "first"});
-                db.Insert(new WaybillBase {Id = 2, Number = 200, Name = "second"});
-                db.Insert(new WaybillBase {Id = 3, Number = 300, Name = "third"});
+                db.Insert(new WaybillBase
+                {
+                    Id = 1,
+                    Number = 100,
+                    Name = "first",
+                    Id1 = Guid.Parse("11111111-1111-1111-1111-111111111111"),
+                    Id2 = Guid.Parse("51111111-1111-1111-1111-111111111111"),
+                    Date = DateTime.Parse("2001-01-01"),
+                    Amount = 20M
+                });
+                db.Insert(new WaybillBase
+                {
+                    Id = 2,
+                    Number = 200,
+                    Name = "second",
+                    Id1 = Guid.Parse("22222222-2222-2222-2222-222222222222"),
+                    Id2 = Guid.Parse("52222222-2222-2222-2222-222222222222"),
+                    Date = DateTime.Parse("2002-01-01"),
+                    Amount = 30M
+                });
+                db.Insert(new WaybillBase
+                {
+                    Id = 3,
+                    Number = 300,
+                    Name = "third",
+                    Id1 = Guid.Parse("33333333-3333-3333-3333-333333333333"),
+                    Id2 = Guid.Parse("53333333-3333-3333-3333-333333333333"),
+                    Date = DateTime.Parse("2003-01-01"),
+                    Amount = 40M
+                });
 
                 db.DropTable<SeparateWaybillIn>();
 
@@ -366,6 +431,127 @@ namespace ServiceStack.OrmLite.Tests
 
             var obj = target[0];
             Assert.AreEqual(DateTime.Parse("2014-01-01"), obj.DateBegin);
+        }
+
+        [Test]
+        public void Can_Where_using_constant_orderBy1()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => !x.BoolVirtProperty;
+            System.Linq.Expressions.Expression<Func<WaybillBase, object>> orderBy = x => x.BoolVirtProperty;
+            var q = Db.From<WaybillBase>().Where(filter).OrderBy(orderBy);
+            var target = Db.Select(q);
+            Assert.AreEqual(3, target.Count);
+        }
+
+        [Test]
+        public void Can_Where_using_constant_orderBy2()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => !x.BoolVirtProperty &&
+                                                                                      x.VirtPropertyEmpty != "WaybillVirtPropertyValue" &&
+                                                                                      x.Number == 100;
+            System.Linq.Expressions.Expression<Func<WaybillBase, object>> orderBy = x => x.VirtProperty;
+            var q = Db.From<WaybillBase>().Where(filter).OrderBy(orderBy);
+            var target = Db.Select(q);
+            Assert.AreEqual(1, target.Count);
+        }
+
+        [Test]
+        public void Can_Where_using_constant_coniditionalOrderBy()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => !x.BoolVirtProperty &&
+                                                                                      x.VirtPropertyEmpty != "WaybillVirtPropertyValue" &&
+                                                                                      x.Number == 100;
+            System.Linq.Expressions.Expression<Func<WaybillBase, object>> orderBy = x => x.Number > 0 ? x.VirtPropertyEmpty : x.Name;
+            var q = Db.From<WaybillBase>().Where(filter).OrderBy(orderBy);
+            var target = Db.Select(q);
+            Assert.AreEqual(1, target.Count);
+        }
+
+        [Test]
+        public void Can_Where_using_constant_func_where()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => x.VirtProperty.StartsWith("Way");
+            System.Linq.Expressions.Expression<Func<WaybillBase, object>> orderBy = x => x.Name;
+            var q = Db.From<WaybillBase>().Where(filter).OrderByDescending(orderBy);
+            var target = Db.Select(q);
+            Assert.AreEqual(3, target.Count);
+        }
+
+        [Test]
+        public void Can_Select_using_constant()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => !x.BoolVirtProperty &&
+                                                                                      x.VirtPropertyEmpty != "WaybillVirtPropertyValue" &&
+                                                                                      x.Number == 100;
+
+            System.Linq.Expressions.Expression<Func<WaybillBase, object>> select = x => x.VirtProperty;
+            var q = Db.From<WaybillBase>().Where(filter).Select(select);
+            var target = Db.Column<string>(q);
+            Assert.AreEqual(1, target.Count);
+            Assert.AreEqual("WaybillVirtPropertyValue", target[0]);
+        }
+
+        [Test]
+        public void Can_Where_using_guid_constant_coniditional()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => (x.Number > 0 ? x.GuidVirtProperty : x.Id1) == Guid.Parse("00000000-0000-0000-0000-000000000000");
+            var q = Db.From<WaybillBase>().Where(filter);
+            var target = Db.Select(q);
+            Assert.AreEqual(3, target.Count);
+        }
+
+        [Test]
+        public void Can_Where_using_null_constant_coniditional()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => (x.Number == 0 ? x.VirtPropertyNull : x.Name) == "first";
+            var q = Db.From<WaybillBase>().Where(filter);
+            var target = Db.Select(q);
+            Assert.AreEqual(1, target.Count);
+        }
+
+        [Test]
+        public void Can_Where_using_datetime_constant_coniditional()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => (x.Number > 0 ? x.DateVirtProperty : x.Date) == DateTime.Parse("2000-01-01");
+            var q = Db.From<WaybillBase>().Where(filter);
+            var target = Db.Select(q);
+            Assert.AreEqual(3, target.Count);
+        }
+
+        [Test]
+        public void Can_Where_using_int_constant_coniditional()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => (x.Number > 0 ? x.IntVirtProperty : x.Number) == 5;
+            var q = Db.From<WaybillBase>().Where(filter);
+            var target = Db.Select(q);
+            Assert.AreEqual(3, target.Count);
+        }
+
+        [Test]
+        public void Can_Where_using_decimal_constant_coniditional()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => (x.Number > 0 ? x.DecimalVirtProperty : x.Amount) == 10M;
+            var q = Db.From<WaybillBase>().Where(filter);
+            var target = Db.Select(q);
+            Assert.AreEqual(3, target.Count);
+        }
+
+        [Test]
+        public void Can_GroupBy_using_constant()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => (x.Number > 0 ? x.DecimalVirtProperty : x.Amount) == 10M;
+            var q = Db.From<WaybillBase>().Where(filter).GroupBy(x => x.VirtProperty);
+            var target = Db.Select(q);
+            Assert.AreEqual(3, target.Count);
+        }
+
+        [Test]
+        public void Can_Having_using_constant()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => (x.Number > 0 ? x.DecimalVirtProperty : x.Amount) == 10M;
+            var q = Db.From<WaybillBase>().Where(filter).Select(x=>x.Name).GroupBy(x => x.Name).Having(x=>x.VirtProperty == "WaybillVirtPropertyValue");
+            var target = Db.Column<string>(q);
+            Assert.AreEqual(3, target.Count);
         }
     }
 }

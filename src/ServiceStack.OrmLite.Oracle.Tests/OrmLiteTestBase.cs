@@ -35,7 +35,7 @@ namespace ServiceStack.OrmLite.Tests
 			ConnectionString = GetFileConnectionString();
 		}
 
-		[TestFixtureSetUp]
+		[OneTimeSetUp]
 		public void TestFixtureSetUp()
 		{
 			LogManager.LogFactory = new ConsoleLogFactory();

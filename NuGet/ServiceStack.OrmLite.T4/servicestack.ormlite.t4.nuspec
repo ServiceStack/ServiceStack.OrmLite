@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
-<package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
     <id>ServiceStack.OrmLite.T4</id> 
     <title>OrmLite.T4 - T4 schema-generation templates for OrmLite</title>
-    <version>4.5.0</version>
-    <authors>Service Stack</authors> 
-    <owners>Service Stack</owners>
+    <version>5.0.0</version>
+    <authors>ServiceStack</authors> 
+    <owners>ServiceStack</owners>
     <description>
       Generate POCO models for all existing tables and stored procedures in a database for use with OrmLite.
     </description> 
@@ -14,7 +14,7 @@
     <iconUrl>https://servicestack.net/img/logo-32.png</iconUrl>
     <tags>T4 SQL Templates CodeGen OrmLite POCO Code-First Orm Schema-less Blobs</tags>
     <language>en-US</language> 
-    <copyright>Copyright 2017 ServiceStack</copyright>
+    <copyright>ServiceStack and contributors</copyright>
   </metadata> 
   <files>
     <file src="content\**\*.*" target="content" />

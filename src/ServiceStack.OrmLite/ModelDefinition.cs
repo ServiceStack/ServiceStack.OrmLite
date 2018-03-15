@@ -24,6 +24,7 @@ namespace ServiceStack.OrmLite
             this.FieldDefinitions = new List<FieldDefinition>();
             this.IgnoredFieldDefinitions = new List<FieldDefinition>();
             this.CompositeIndexes = new List<CompositeIndexAttribute>();
+            this.UniqueConstraints = new List<UniqueConstraintAttribute>();
         }
 
         public const string RowVersionName = "RowVersion";
@@ -45,6 +46,10 @@ namespace ServiceStack.OrmLite
         public bool IsInSchema => this.Schema != null;
 
         public bool HasAutoIncrementId => PrimaryKey != null && PrimaryKey.AutoIncrement;
+
+        public bool HasReturnAttribute => this.FieldDefinitions.Any(x => x.ReturnOnInsert);
+
+        public bool HasSequenceAttribute => this.FieldDefinitions.Any(x => !x.Sequence.IsNullOrEmpty());
 
         public FieldDefinition RowVersion { get; set; }
 
@@ -100,6 +105,8 @@ namespace ServiceStack.OrmLite
 
         public List<CompositeIndexAttribute> CompositeIndexes { get; set; }
 
+        public List<UniqueConstraintAttribute> UniqueConstraints { get; set; }
+
         public FieldDefinition GetFieldDefinition<T>(Expression<Func<T, object>> field)
         {
             return GetFieldDefinition(ExpressionUtils.GetMemberName(field));
@@ -132,6 +139,9 @@ namespace ServiceStack.OrmLite
             }
             return null;
         }
+
+        public string GetQuotedName(string fieldName, IOrmLiteDialectProvider dialectProvider) => 
+            GetFieldDefinition(fieldName)?.GetQuotedName(dialectProvider);
 
         public FieldDefinition GetFieldDefinition(Func<string, bool> predicate)
         {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ServiceStack.OrmLite.Dapper
 {
@@ -8,7 +9,7 @@ namespace ServiceStack.OrmLite.Dapper
     {
         public static string Name(this Type type)
         {
-#if NETSTANDARD1_3
+#if NETSTANDARD2_0
             return type.GetTypeInfo().Name;
 #else
             return type.Name;
@@ -17,7 +18,7 @@ namespace ServiceStack.OrmLite.Dapper
 
         public static bool IsValueType(this Type type)
         {
-#if NETSTANDARD1_3
+#if NETSTANDARD2_0
             return type.GetTypeInfo().IsValueType;
 #else
             return type.IsValueType;
@@ -26,7 +27,7 @@ namespace ServiceStack.OrmLite.Dapper
 
         public static bool IsPrimitive(this Type type)
         {
-#if NETSTANDARD1_3
+#if NETSTANDARD2_0
             return type.GetTypeInfo().IsPrimitive;
 #else
             return type.IsPrimitive;
@@ -35,7 +36,7 @@ namespace ServiceStack.OrmLite.Dapper
 
         public static bool IsEnum(this Type type)
         {
-#if NETSTANDARD1_3
+#if NETSTANDARD2_0
             return type.GetTypeInfo().IsEnum;
 #else
             return type.IsEnum;
@@ -43,7 +44,7 @@ namespace ServiceStack.OrmLite.Dapper
         }
         public static bool IsGenericType(this Type type)
         {
-#if NETSTANDARD1_3
+#if NETSTANDARD2_0
             return type.GetTypeInfo().IsGenericType;
 #else
             return type.IsGenericType;
@@ -51,7 +52,7 @@ namespace ServiceStack.OrmLite.Dapper
         }
         public static bool IsInterface(this Type type)
         {
-#if NETSTANDARD1_3
+#if NETSTANDARD2_0
             return type.GetTypeInfo().IsInterface;
 #else
             return type.IsInterface;
@@ -60,16 +61,16 @@ namespace ServiceStack.OrmLite.Dapper
 
         public static Type UnderlyingSystemType(this Type type)
         {
-#if NETSTANDARD1_3
+#if NETSTANDARD2_0
             return type.GetTypeInfo().AsType();
 #else
             return type.UnderlyingSystemType;
 #endif
         }
-#if NETSTANDARD1_3
+#if NETSTANDARD2_0
         public static IEnumerable<Attribute> GetCustomAttributes(this Type type, bool inherit)
         {
-            return type.GetTypeInfo().GetCustomAttributes(inherit);
+            return type.GetTypeInfo().GetCustomAttributes(inherit).Cast<Attribute>();
         }
 
         public static TypeCode GetTypeCode(Type type)
@@ -78,7 +79,7 @@ namespace ServiceStack.OrmLite.Dapper
             TypeCode result;
             if (typeCodeLookup.TryGetValue(type, out result)) return result;
 
-            if (type.IsEnum())
+            if (type.IsEnum)
             {
                 type = Enum.GetUnderlyingType(type);
                 if (typeCodeLookup.TryGetValue(type, out result)) return result;
@@ -143,7 +144,7 @@ namespace ServiceStack.OrmLite.Dapper
 #endif
         public static MethodInfo GetPublicInstanceMethod(this Type type, string name, Type[] types)
         {
-#if NETSTANDARD1_3
+#if NETSTANDARD2_0
             var method = type.GetMethod(name, types);
             return (method != null && method.IsPublic && !method.IsStatic) ? method : null;
 #else

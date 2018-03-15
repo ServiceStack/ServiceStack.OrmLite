@@ -1,9 +1,8 @@
-
-using System.Configuration;
 using System.Data;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Model;
+using ServiceStack.OrmLite.Tests;
 
 namespace ServiceStack.OrmLite.MySql.Tests
 {
@@ -12,9 +11,8 @@ namespace ServiceStack.OrmLite.MySql.Tests
 	{
 		static ShippersExample()
 		{
-			OrmLiteConfig.DialectProvider = MySqlDialectProvider.Instance;
+			OrmLiteConfig.DialectProvider = MySqlConfig.DialectProvider;
 		}
-
 
 		[Alias("Shippers")]
 		public class Shipper
@@ -62,11 +60,10 @@ namespace ServiceStack.OrmLite.MySql.Tests
 			public int Total { get; set; }
 		}
 
-
 		[Test]
 		public void Shippers_UseCase()
 		{
-			using (IDbConnection db = ConfigurationManager.ConnectionStrings["testDb"].ConnectionString.OpenDbConnection())
+			using (IDbConnection db = MySqlConfig.ConnectionString.OpenDbConnection())
 			{
                 db.DropTable<Shipper>();
                 db.DropTable<ShipperType>();
@@ -77,7 +74,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 				int trainsTypeId, planesTypeId;
 
 				//Playing with transactions
-				using (IDbTransaction dbTrans = db.BeginTransaction())
+				using (IDbTransaction dbTrans = db.OpenTransaction())
 				{
 					db.Insert(new ShipperType { Name = "Trains" });
 					trainsTypeId = (int)db.LastInsertId();
@@ -87,7 +84,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 
 					dbTrans.Commit();
 				}
-				using (IDbTransaction dbTrans = db.BeginTransaction(IsolationLevel.ReadCommitted))
+				using (IDbTransaction dbTrans = db.OpenTransaction(IsolationLevel.ReadCommitted))
 				{
 					db.Insert(new ShipperType { Name = "Automobiles" });
 					Assert.That(db.Select<ShipperType>(), Has.Count.EqualTo(3));

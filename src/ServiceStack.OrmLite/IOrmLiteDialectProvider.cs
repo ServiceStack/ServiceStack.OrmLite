@@ -23,6 +23,12 @@ namespace ServiceStack.OrmLite
     {
         void RegisterConverter<T>(IOrmLiteConverter converter);
 
+        /// <summary>
+        /// Invoked when a DB Connection is opened
+        /// </summary>
+        Action<IDbConnection> OnOpenConnection { get; set; } 
+            
+
         IOrmLiteExecFilter ExecFilter { get; set; }
 
         /// <summary>
@@ -38,12 +44,6 @@ namespace ServiceStack.OrmLite
         IOrmLiteConverter GetConverterBestMatch(FieldDefinition fieldDef);
 
         string ParamString { get; set; }
-
-        [Obsolete("Use GetStringConverter().UseUnicode")]
-        bool UseUnicode { get; set; }
-
-        [Obsolete("Use GetStringConverter().StringLength")]
-        int DefaultStringLength { get; set; }
 
         string EscapeWildcards(string value);
 
@@ -94,9 +94,6 @@ namespace ServiceStack.OrmLite
         string GetColumnDefinition(FieldDefinition fieldDef);
 
         long GetLastInsertId(IDbCommand command);
-
-        [Obsolete("Use GetLastInsertIdSqlSuffix()")]
-        long InsertAndGetLastInsertId<T>(IDbCommand dbCmd);
 
         string GetLastInsertIdSqlSuffix<T>();
 
@@ -164,16 +161,14 @@ namespace ServiceStack.OrmLite
 
         void DropColumn(IDbConnection db, Type modelType, string columnName);
 
-        ulong FromDbRowVersion(object value);
+        object FromDbRowVersion(Type fieldType,  object value);
+
         SelectItem GetRowVersionColumnName(FieldDefinition field, string tablePrefix = null);
 
         string GetColumnNames(ModelDefinition modelDef);
         SelectItem[] GetColumnNames(ModelDefinition modelDef, bool tableQualified);
 
         SqlExpression<T> SqlExpression<T>();
-
-        [Obsolete("Use InitDbParam")]
-        DbType GetColumnDbType(Type columnType);
 
         IDbDataParameter CreateParam();
 
@@ -211,6 +206,8 @@ namespace ServiceStack.OrmLite
         string ToUpdateStatement<T>(IDbCommand dbCmd, T item, ICollection<string> updateFields = null);
         string ToInsertStatement<T>(IDbCommand dbCmd, T item, ICollection<string> insertFields = null);
         string MergeParamsIntoSql(string sql, IEnumerable<IDbDataParameter> dbParams);
+
+        string SqlConflict(string sql, string conflictResolution);
 
         string SqlConcat(IEnumerable<object> args);
         string SqlCurrency(string fieldOrValue);

@@ -40,12 +40,10 @@ namespace ServiceStack.OrmLite
 
         internal static ModelDefinition GetModelDefinition(this Type modelType)
         {
-            ModelDefinition modelDef;
-
-            if (typeModelDefinitionMap.TryGetValue(modelType, out modelDef))
+            if (typeModelDefinitionMap.TryGetValue(modelType, out var modelDef))
                 return modelDef;
 
-            if (modelType.IsValueType() || modelType == typeof(string))
+            if (modelType.IsValueType || modelType == typeof(string))
                 return null;
 
             var modelAliasAttr = modelType.FirstAttribute<AliasAttribute>();
@@ -69,8 +67,10 @@ namespace ServiceStack.OrmLite
             };
 
             modelDef.CompositeIndexes.AddRange(
-                modelType.AllAttributes<CompositeIndexAttribute>().ToList()
-                .ConvertAll(x => (CompositeIndexAttribute)x));
+                modelType.AllAttributes<CompositeIndexAttribute>().ToList());
+
+            modelDef.UniqueConstraints.AddRange(
+                modelType.AllAttributes<UniqueConstraintAttribute>().ToList());
 
             var objProperties = modelType.GetProperties(
                 BindingFlags.Public | BindingFlags.Instance).ToList();
@@ -97,11 +97,11 @@ namespace ServiceStack.OrmLite
                     || propertyInfo.HasAttributeNamed(typeof(PrimaryKeyAttribute).Name);
 
                 var isRowVersion = propertyInfo.Name == ModelDefinition.RowVersionName
-                    && propertyInfo.PropertyType == typeof(ulong);
+                    && (propertyInfo.PropertyType == typeof(ulong) || propertyInfo.PropertyType == typeof(byte[]));
 
                 var isNullableType = propertyInfo.PropertyType.IsNullableType();
 
-                var isNullable = (!propertyInfo.PropertyType.IsValueType()
+                var isNullable = (!propertyInfo.PropertyType.IsValueType
                                    && !propertyInfo.HasAttributeNamed(typeof(RequiredAttribute).Name))
                                    || isNullableType;
 
@@ -141,24 +141,26 @@ namespace ServiceStack.OrmLite
                     IsPrimaryKey = isPrimaryKey,
                     AutoIncrement =
                         isPrimaryKey &&
-                        propertyInfo.HasAttributeNamed(nameof(AutoIncrementAttribute)),
+                        propertyInfo.HasAttribute<AutoIncrementAttribute>(),
                     IsIndexed = !isPrimaryKey && isIndex,
-                    IsUnique = isUnique,
+                    IsUniqueIndex = isUnique,
                     IsClustered = indexAttr != null && indexAttr.Clustered,
                     IsNonClustered = indexAttr != null && indexAttr.NonClustered,
                     IsRowVersion = isRowVersion,
-                    IgnoreOnInsert = propertyInfo.HasAttributeNamed(nameof(IgnoreOnInsertAttribute)),
-                    IgnoreOnUpdate = propertyInfo.HasAttributeNamed(nameof(IgnoreOnUpdateAttribute)),
+                    IgnoreOnInsert = propertyInfo.HasAttribute<IgnoreOnInsertAttribute>(),
+                    IgnoreOnUpdate = propertyInfo.HasAttribute<IgnoreOnUpdateAttribute>(),
+                    ReturnOnInsert = propertyInfo.HasAttribute<ReturnOnInsertAttribute>(),
                     FieldLength = stringLengthAttr?.MaximumLength,
                     DefaultValue = defaultValueAttr?.DefaultValue,
                     CheckConstraint = chkConstraintAttr?.Constraint,
+                    IsUniqueConstraint = propertyInfo.HasAttribute<UniqueAttribute>(),
                     ForeignKey = fkAttr == null
                         ? referencesAttr != null ? new ForeignKeyConstraint(referencesAttr.Type) : null
                         : new ForeignKeyConstraint(fkAttr.Type, fkAttr.OnDelete, fkAttr.OnUpdate, fkAttr.ForeignKeyName),
-                    IsReference = referenceAttr != null && propertyType.IsClass(),
+                    IsReference = referenceAttr != null && propertyType.IsClass,
                     GetValueFn = propertyInfo.CreateGetter(),
                     SetValueFn = propertyInfo.CreateSetter(),
-                    Sequence = sequenceAttr != null ? sequenceAttr.Name : string.Empty,
+                    Sequence = sequenceAttr?.Name,
                     IsComputed = computeAttr != null || computedAttr != null || customSelectAttr != null,
                     ComputeExpression = computeAttr != null ? computeAttr.Expression : string.Empty,
                     CustomSelect = customSelectAttr?.Sql,
@@ -168,7 +170,7 @@ namespace ServiceStack.OrmLite
                     IsRefType = propertyType.IsRefType(),
                 };
 
-                var isIgnored = propertyInfo.HasAttributeNamed(nameof(IgnoreAttribute))
+                var isIgnored = propertyInfo.HasAttribute<IgnoreAttribute>()
                     || fieldDefinition.IsReference;
                 if (isIgnored)
                     modelDef.IgnoredFieldDefinitions.Add(fieldDefinition);

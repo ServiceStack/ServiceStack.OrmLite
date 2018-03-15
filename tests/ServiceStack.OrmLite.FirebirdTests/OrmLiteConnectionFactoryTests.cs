@@ -9,7 +9,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
     [Ignore("")]
     public class OrmLiteConnectionFactoryTests
     {
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void TestFixtureSetUp()
         {
             OrmLiteConfig.DialectProvider = FirebirdOrmLiteDialectProvider.Instance; //use Pooling=false ?

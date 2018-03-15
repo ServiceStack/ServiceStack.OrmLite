@@ -21,7 +21,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 			ConnectionString = GetFileConnectionString();
 		}
 
-		[TestFixtureSetUp]
+		[OneTimeSetUp]
 		public void TestFixtureSetUp()
 		{
 			LogManager.LogFactory = new ConsoleLogFactory();

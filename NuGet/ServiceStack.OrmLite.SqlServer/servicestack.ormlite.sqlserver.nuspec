@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
-<package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
     <id>ServiceStack.OrmLite.SqlServer</id> 
     <title>OrmLite.SqlServer - Fast, code-first, config-free Poco ORM</title>
-    <version>4.5.0</version>
-    <authors>Service Stack</authors> 
-    <owners>Service Stack</owners>
+    <version>5.0.0</version>
+    <authors>ServiceStack</authors> 
+    <owners>ServiceStack</owners>
     <description>
 		Light, simple and fast convention-based code-first POCO ORM for Sql Server.
 		Support for Creating and Dropping Table Schemas from POCOs, Complex Property types transparently stored in schemaless text blobs in SQLServer.
@@ -16,10 +16,16 @@
     <iconUrl>https://servicestack.net/img/logo-32.png</iconUrl>
     <tags>SQLServer SQL Server OrmLite POCO Code-First Orm Schema-less Blobs</tags>
     <language>en-US</language> 
-    <copyright>Copyright 2017 ServiceStack</copyright>
+    <copyright>ServiceStack and contributors</copyright>
     <dependencies>
-      <dependency id="ServiceStack.OrmLite" version="4.5" />
-    </dependencies> 
+      <group targetFramework="net45">
+        <dependency id="ServiceStack.OrmLite" version="5.0.0" />
+      </group>
+      <group targetFramework=".netstandard2.0">
+        <dependency id="System.Data.SqlClient" version="[4.4.0, )" />
+        <dependency id="ServiceStack.OrmLite" version="5.0.0" />
+      </group>
+    </dependencies>
   </metadata> 
   <files>
     <file src="lib\**\*.*" target="lib" />

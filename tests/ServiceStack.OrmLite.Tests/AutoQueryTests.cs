@@ -463,6 +463,27 @@ namespace ServiceStack.OrmLite.Tests
             }
         }
 
+        [Test]
+        public void Can_query_Rockstars_with_Distinct_Fields()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Rockstar>();
+                db.InsertAll(SeedRockstars);
+                //Add another Michael Rockstar
+                db.Insert(new Rockstar { Id = 8, FirstName = "Michael", LastName = "Bolton", Age = 64, LivingStatus = LivingStatus.Alive, DateOfBirth = new DateTime(1953,02,26) });
+
+                var q = db.From<Rockstar>();
+                q.SelectDistinct(new[]{ "FirstName" });
+
+                var results = db.LoadSelect(q, include:q.OnlyFields);
+
+                results.PrintDump();
+                Assert.That(results.All(x => x.Id == 0));
+                Assert.That(results.Count(x => x.FirstName == "Michael"), Is.EqualTo(1));
+            }
+        }
+
     }
 
 }

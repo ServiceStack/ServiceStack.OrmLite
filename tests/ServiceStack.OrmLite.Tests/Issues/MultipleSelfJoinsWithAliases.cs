@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Text;
@@ -200,5 +202,64 @@ namespace ServiceStack.OrmLite.Tests.Issues
             }
         }
 
+        void AssertTupleResults(List<Tuple<Sale, ContactIssue, ContactIssue>> results)
+        {
+            var result = results[0];
+            var sales = result.Item1;
+            var buyer = result.Item2;
+            var seller = result.Item3;
+
+            Assert.That(sales.AmountCents, Is.EqualTo(100));
+            Assert.That(buyer.FirstName, Is.EqualTo("BuyerFirst"));
+            Assert.That(buyer.LastName, Is.EqualTo("LastBuyer"));
+            Assert.That(seller.FirstName, Is.EqualTo("SellerFirst"));
+            Assert.That(seller.LastName, Is.EqualTo("LastSeller"));
+        }
+
+        [Test]
+        public void Can_use_Custom_Select_with_Tuples()
+        {
+            using (var db = OpenDbConnection())
+            {
+                var tenantId = Guid.NewGuid();
+                var sale = PopulateData(db, tenantId);
+
+                var q = db.From<Sale>()
+                    .LeftJoin<ContactIssue>((s, c) => s.SellerId == c.Id, db.JoinAlias("seller"))
+                    .LeftJoin<ContactIssue>((s, c) => s.BuyerId == c.Id, db.JoinAlias("buyer"))
+                    .Select("Sale.*, 0 EOT, buyer.*, 0 EOT, seller.*, 0 EOT");
+
+                AssertTupleResults(db.Select<Tuple<Sale, ContactIssue, ContactIssue>>(q));
+
+                q = db.From<Sale>()
+                    .LeftJoin<ContactIssue>((s, c) => s.SellerId == c.Id, db.JoinAlias("seller"))
+                    .LeftJoin<ContactIssue>((s, c) => s.BuyerId == c.Id, db.JoinAlias("buyer"));
+
+                AssertTupleResults(db.SelectMulti<Sale, ContactIssue, ContactIssue>(q, new[] { "Sale.*", "buyer.*", "seller.*" }));
+            }
+        }
+
+        [Test]
+        public async Task Can_use_Custom_Select_with_Tuples_Async()
+        {
+            using (var db = OpenDbConnection())
+            {
+                var tenantId = Guid.NewGuid();
+                var sale = PopulateData(db, tenantId);
+
+                var q = db.From<Sale>()
+                    .LeftJoin<ContactIssue>((s, c) => s.SellerId == c.Id, db.JoinAlias("seller"))
+                    .LeftJoin<ContactIssue>((s, c) => s.BuyerId == c.Id, db.JoinAlias("buyer"))
+                    .Select("Sale.*, 0 EOT, buyer.*, 0 EOT, seller.*, 0 EOT");
+
+                AssertTupleResults(await db.SelectAsync<Tuple<Sale, ContactIssue, ContactIssue>>(q));
+
+                q = db.From<Sale>()
+                    .LeftJoin<ContactIssue>((s, c) => s.SellerId == c.Id, db.JoinAlias("seller"))
+                    .LeftJoin<ContactIssue>((s, c) => s.BuyerId == c.Id, db.JoinAlias("buyer"));
+
+                AssertTupleResults(await db.SelectMultiAsync<Sale, ContactIssue, ContactIssue>(q, new[] { "Sale.*", "buyer.*", "seller.*" }));
+            }            
+        }
     }
 }

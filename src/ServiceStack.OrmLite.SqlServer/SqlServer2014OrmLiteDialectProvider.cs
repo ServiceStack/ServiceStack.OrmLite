@@ -17,7 +17,7 @@ namespace ServiceStack.OrmLite.SqlServer
             var fieldDefinition = fieldDef.CustomFieldDefinition ??
                 GetColumnTypeDefinition(fieldDef.ColumnType, fieldDef.FieldLength, fieldDef.Scale);
 
-            var memTableAttrib = fieldDef.PropertyInfo.ReflectedType().FirstAttribute<SqlServerMemoryOptimizedAttribute>();
+            var memTableAttrib = fieldDef.PropertyInfo?.ReflectedType.FirstAttribute<SqlServerMemoryOptimizedAttribute>();
             var isMemoryTable = memTableAttrib != null;
 
             var sql = StringBuilderCache.Allocate();
@@ -26,14 +26,14 @@ namespace ServiceStack.OrmLite.SqlServer
             if (fieldDef.FieldType == typeof(string))
             {
                 // https://msdn.microsoft.com/en-us/library/ms184391.aspx
-                var collation = fieldDef.PropertyInfo.FirstAttribute<SqlServerCollateAttribute>()?.Collation;
+                var collation = fieldDef.PropertyInfo?.FirstAttribute<SqlServerCollateAttribute>()?.Collation;
                 if (!string.IsNullOrEmpty(collation))
                 {
                     sql.Append($" COLLATE {collation}");
                 }
             }
 
-            var bucketCount = fieldDef.PropertyInfo.FirstAttribute<SqlServerBucketCountAttribute>()?.Count;
+            var bucketCount = fieldDef.PropertyInfo?.FirstAttribute<SqlServerBucketCountAttribute>()?.Count;
 
             if (fieldDef.IsPrimaryKey)
             {
@@ -51,7 +51,7 @@ namespace ServiceStack.OrmLite.SqlServer
 
                 if (fieldDef.AutoIncrement)
                 {
-                    sql.Append(" ").Append(AutoIncrementDefinition);
+                    sql.Append(" ").Append(GetAutoIncrementDefinition(fieldDef));
                 }
 
                 if (isMemoryTable && bucketCount.HasValue)
@@ -59,7 +59,7 @@ namespace ServiceStack.OrmLite.SqlServer
                     sql.Append($" HASH WITH (BUCKET_COUNT = {bucketCount.Value})");
                 }
             }
-            else if (!isMemoryTable && fieldDef.IsUnique)
+            else if (!isMemoryTable && fieldDef.IsUniqueIndex)
             {
                 sql.Append(" UNIQUE");
 
@@ -83,6 +83,11 @@ namespace ServiceStack.OrmLite.SqlServer
                 {
                     sql.Append(fieldDef.IsNullable ? " NULL" : " NOT NULL");
                 }
+            }
+
+            if (fieldDef.IsUniqueConstraint)
+            {
+                sql.Append(" UNIQUE");
             }
 
             var defaultValue = GetDefaultValue(fieldDef);

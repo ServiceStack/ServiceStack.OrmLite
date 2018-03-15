@@ -1,5 +1,7 @@
 using System.Data;
 using System.Data.Common;
+using System.Threading;
+using System.Threading.Tasks;
 using ServiceStack.Data;
 
 namespace ServiceStack.OrmLite
@@ -83,14 +85,32 @@ namespace ServiceStack.OrmLite
                 //so the internal connection is wrapped for example by miniprofiler
                 if (Factory.ConnectionFilter != null)
                     dbConnection = Factory.ConnectionFilter(dbConnection);
+
+                DialectProvider.OnOpenConnection?.Invoke(dbConnection);
+            }
+        }
+
+        public async Task OpenAsync(CancellationToken token = default(CancellationToken))
+        {
+            if (DbConnection.State == ConnectionState.Broken)
+                DbConnection.Close();
+
+            if (DbConnection.State == ConnectionState.Closed)
+            {
+                await DialectProvider.OpenAsync(DbConnection, token);
+                //so the internal connection is wrapped for example by miniprofiler
+                if (Factory.ConnectionFilter != null)
+                    dbConnection = Factory.ConnectionFilter(dbConnection);
+
+                DialectProvider.OnOpenConnection?.Invoke(dbConnection);
             }
         }
 
         private string connectionString;
         public string ConnectionString
         {
-            get { return connectionString ?? Factory.ConnectionString; }
-            set { connectionString = value; }
+            get => connectionString ?? Factory.ConnectionString;
+            set => connectionString = value;
         }
 
         public int ConnectionTimeout => DbConnection.ConnectionTimeout;

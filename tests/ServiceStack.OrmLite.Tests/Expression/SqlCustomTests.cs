@@ -35,7 +35,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
         [Test]
         public void Can_use_CustomSelect_field_in_Typed_Query()
         {
-            if (Dialect == Dialect.PostgreSql || Dialect == Dialect.SqlServer || Dialect == Dialect.MySql) return;
+            if (Dialect == Dialect.PostgreSql || Dialect == Dialect.SqlServer || Dialect == Dialect.SqlServer2012 || Dialect == Dialect.MySql) return;
 
             using (var db = OpenDbConnection())
             {

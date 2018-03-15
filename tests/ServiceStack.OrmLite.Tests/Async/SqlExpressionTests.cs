@@ -76,6 +76,56 @@ namespace ServiceStack.OrmLite.Tests.Async
                 Assert.That(result["sum"], Is.EqualTo(55));
             }
         }
+
+        [Test]
+        public void Can_select_limit_on_Table_with_References()
+        {
+            if (Dialect == Dialect.MySql)
+                return; //= This version of MySQL doesn't yet support 'LIMIT & IN/ALL/ANY/SOME subquery'
+
+            if (Dialect == Dialect.SqlServer)
+                return; // generates Windowing function "... WHERE CustomerId IN (SELECT * FROM ...)" 
+                        // when should generate "... WHERE CustomerId IN (SELECT Id FROM ...)" 
+                        // both on .NET and .NET Core
+
+            using (var db = OpenDbConnection())
+            {
+                CustomerOrdersUseCase.DropTables(db); //Has conflicting 'Order' table
+                db.DropAndCreateTable<Order>();
+                db.DropAndCreateTable<Customer>();
+                db.DropAndCreateTable<CustomerAddress>();
+
+                var customer1 = LoadReferencesTests.GetCustomerWithOrders("1");
+                db.Save(customer1, references: true);
+
+                var customer2 = LoadReferencesTests.GetCustomerWithOrders("2");
+                db.Save(customer2, references: true);
+
+                var results = db.LoadSelect(db.From<Customer>()
+                    .OrderBy(x => x.Id)
+                    .Limit(1, 1));
+
+                //db.GetLastSql().Print();
+
+                Assert.That(results.Count, Is.EqualTo(1));
+                Assert.That(results[0].Name, Is.EqualTo("Customer 2"));
+                Assert.That(results[0].PrimaryAddress.AddressLine1, Is.EqualTo("2 Humpty Street"));
+                Assert.That(results[0].Orders.Count, Is.EqualTo(2));
+
+                results = db.LoadSelect(db.From<Customer>()
+                    .Join<CustomerAddress>()
+                    .OrderBy(x => x.Id)
+                    .Limit(1, 1));
+
+                db.GetLastSql().Print();
+
+                Assert.That(results.Count, Is.EqualTo(1));
+                Assert.That(results[0].Name, Is.EqualTo("Customer 2"));
+                Assert.That(results[0].PrimaryAddress.AddressLine1, Is.EqualTo("2 Humpty Street"));
+                Assert.That(results[0].Orders.Count, Is.EqualTo(2));
+            }
+        }
+
         [Test]
         public async Task Can_select_limit_on_Table_with_References_Async()
         {

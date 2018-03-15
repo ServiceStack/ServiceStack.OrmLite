@@ -15,7 +15,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 				db.CreateTable<ModelWithIdAndName>(true);
 				db.Insert(new ModelWithIdAndName(1));
 
-				using (var dbTrans = db.BeginTransaction())
+				using (var dbTrans = db.OpenTransaction())
 				{
 					db.Insert(new ModelWithIdAndName(2));
 					db.Insert(new ModelWithIdAndName(3));
@@ -39,9 +39,9 @@ namespace ServiceStack.OrmLite.MySql.Tests
 				db.CreateTable<ModelWithIdAndName>(true);
 				db.Insert(new ModelWithIdAndName(1));
 
-				using (var dbTrans = db.BeginTransaction())
+			    using (var dbTrans = db.OpenTransaction())
 				{
-					db.Insert(new ModelWithIdAndName(2));
+                    db.Insert(new ModelWithIdAndName(2));
 					db.Insert(new ModelWithIdAndName(3));
 
 					var rowsInTrans = db.Select<ModelWithIdAndName>();
@@ -64,9 +64,9 @@ namespace ServiceStack.OrmLite.MySql.Tests
 
 				db.Insert(new ModelWithIdAndName(1));
 
-				using (var dbTrans = db.BeginTransaction())
+			    using (var dbTrans = db.OpenTransaction())
 				{
-					db.Insert(new ModelWithIdAndName(2));
+                    db.Insert(new ModelWithIdAndName(2));
 					db.Insert(ModelWithFieldsOfDifferentTypes.Create(3));
 					db.Insert(ModelWithOnlyStringFields.Create("id3"));
 
@@ -92,9 +92,9 @@ namespace ServiceStack.OrmLite.MySql.Tests
 
 				db.Insert(new ModelWithIdAndName(1));
 
-				using (var dbTrans = db.BeginTransaction())
+			    using (var dbTrans = db.OpenTransaction())
 				{
-					db.Insert(new ModelWithIdAndName(2));
+                    db.Insert(new ModelWithIdAndName(2));
 					db.Insert(ModelWithFieldsOfDifferentTypes.Create(3));
 					db.Insert(ModelWithOnlyStringFields.Create("id3"));
 

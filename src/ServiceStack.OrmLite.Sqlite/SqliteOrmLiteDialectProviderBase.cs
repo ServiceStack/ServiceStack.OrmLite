@@ -26,7 +26,7 @@ namespace ServiceStack.OrmLite.Sqlite
             base.RegisterConverter<Guid>(new SqliteGuidConverter());
             base.RegisterConverter<bool>(new SqliteBoolConverter());
             base.RegisterConverter<byte[]>(new SqliteByteArrayConverter());
-#if NETSTANDARD1_3            
+#if NETSTANDARD2_0            
             base.RegisterConverter<char>(new SqliteCharConverter());
 #endif
             this.Variables = new Dictionary<string, string>
@@ -108,7 +108,7 @@ namespace ServiceStack.OrmLite.Sqlite
                         Directory.CreateDirectory(existingDir);
                     }
                 }
-#if NETSTANDARD1_3
+#if NETSTANDARD2_0
                 connString.AppendFormat(@"Data Source={0};", connectionString.Trim());
 #else
                 connString.AppendFormat(@"Data Source={0};Version=3;New=True;Compress=True;", connectionString.Trim());
@@ -202,6 +202,13 @@ namespace ServiceStack.OrmLite.Sqlite
                 return ret + " DEFAULT 1";
 
             return ret;
+        }
+
+        public override string SqlConflict(string sql, string conflictResolution)
+        {
+            // http://www.sqlite.org/lang_conflict.html
+            var parts = sql.SplitOnFirst(' ');
+            return parts[0] + " OR " + conflictResolution + " " + parts[1];
         }
 
         public override string SqlConcat(IEnumerable<object> args) => string.Join(" || ", args);

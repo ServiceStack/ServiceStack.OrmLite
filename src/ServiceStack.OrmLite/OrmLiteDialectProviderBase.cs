@@ -13,7 +13,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -128,12 +127,10 @@ namespace ServiceStack.OrmLite
             var converter = GetConverter(columnType);
             if (converter != null)
             {
-                var customPrecisionConverter = converter as IHasColumnDefinitionPrecision;
-                if (customPrecisionConverter != null)
+                if (converter is IHasColumnDefinitionPrecision customPrecisionConverter)
                     return customPrecisionConverter.GetColumnDefinition(fieldLength, scale);
 
-                var customLengthConverter = converter as IHasColumnDefinitionLength;
-                if (customLengthConverter != null)
+                if (converter is IHasColumnDefinitionLength customLengthConverter)
                     return customLengthConverter.GetColumnDefinition(fieldLength);
 
                 if (string.IsNullOrEmpty(converter.ColumnDefinition))
@@ -144,18 +141,11 @@ namespace ServiceStack.OrmLite
 
             var stringConverter = columnType.IsRefType()
                 ? ReferenceTypeConverter
-                : columnType.IsEnum()
+                : columnType.IsEnum
                     ? EnumConverter
                     : (IHasColumnDefinitionLength)ValueTypeConverter;
 
             return stringConverter.GetColumnDefinition(fieldLength);
-        }
-
-        [Obsolete("Use GetConverter().DbType")]
-        public virtual DbType GetColumnDbType(Type columnType)
-        {
-            var converter = GetConverterBestMatch(columnType);
-            return converter.DbType;
         }
 
         public virtual void InitDbParam(IDbDataParameter dbParam, Type columnType)
@@ -178,19 +168,7 @@ namespace ServiceStack.OrmLite
 
         public StringConverter StringConverter => (StringConverter)Converters[typeof(string)];
 
-        [Obsolete("Use GetStringConverter().UseUnicode")]
-        public virtual bool UseUnicode
-        {
-            get => StringConverter.UseUnicode;
-            set => StringConverter.UseUnicode = true;
-        }
-
-        [Obsolete("Use GetStringConverter().StringLength")]
-        public int DefaultStringLength
-        {
-            get => StringConverter.StringLength;
-            set => StringConverter.StringLength = value;
-        }
+        public Action<IDbConnection> OnOpenConnection { get; set; }
 
         public string ParamString { get; set; } = "@";
 
@@ -274,18 +252,18 @@ namespace ServiceStack.OrmLite
             return converter == null || converter is NativeValueOrmLiteConverter;
         }
 
-        public virtual ulong FromDbRowVersion(object value)
-        {
-            return RowVersionConverter.FromDbRowVersion(value);
-        }
+		public virtual object FromDbRowVersion(Type fieldType, object value)
+		{
+			return RowVersionConverter.FromDbValue(fieldType, value);
+		}
 
-        public IOrmLiteConverter GetConverterBestMatch(Type type)
+		public IOrmLiteConverter GetConverterBestMatch(Type type)
         {
             var converter = GetConverter(type);
             if (converter != null)
                 return converter;
 
-            if (type.IsEnum())
+            if (type.IsEnum)
                 return EnumConverter;
 
             return type.IsRefType()
@@ -300,12 +278,10 @@ namespace ServiceStack.OrmLite
             if (fieldDef.IsRowVersion)
                 return RowVersionConverter;
 
-            IOrmLiteConverter converter;
-
-            if (Converters.TryGetValue(fieldType, out converter))
+            if (Converters.TryGetValue(fieldType, out var converter))
                 return converter;
 
-            if (fieldType.IsEnum())
+            if (fieldType.IsEnum)
                 return EnumConverter;
 
             return fieldType.IsRefType()
@@ -349,8 +325,7 @@ namespace ServiceStack.OrmLite
 
         public object GetValue(IDataReader reader, int columnIndex, Type type)
         {
-            IOrmLiteConverter converter;
-            if (Converters.TryGetValue(type, out converter))
+            if (Converters.TryGetValue(type, out var converter))
                 return converter.GetValue(reader, columnIndex, null);
 
             return reader.GetValue(columnIndex);
@@ -439,6 +414,11 @@ namespace ServiceStack.OrmLite
                 sql.Append(fieldDef.IsNullable ? " NULL" : " NOT NULL");
             }
 
+            if (fieldDef.IsUniqueConstraint)
+            {
+                sql.Append(" UNIQUE");
+            }
+
             var defaultValue = GetDefaultValue(fieldDef);
             if (!string.IsNullOrEmpty(defaultValue))
             {
@@ -446,26 +426,6 @@ namespace ServiceStack.OrmLite
             }
 
             return StringBuilderCache.ReturnAndFree(sql);
-        }
-
-        [Obsolete("Use GetColumnDefinition(fieldDef)")]
-        public string GetColumnDefinition(string fieldName, Type fieldType,
-            bool isPrimaryKey, bool autoIncrement, bool isNullable, bool isRowVersion,
-            int? fieldLength, int? scale, string defaultValue, string customFieldDefinition)
-        {
-            return GetColumnDefinition(new FieldDefinition
-            {
-                Name = fieldName,
-                FieldType = fieldType,
-                IsPrimaryKey = isPrimaryKey,
-                AutoIncrement = autoIncrement,
-                IsNullable = isNullable,
-                IsRowVersion = isRowVersion,
-                FieldLength = fieldLength,
-                Scale = scale,
-                DefaultValue = defaultValue,
-                CustomFieldDefinition = customFieldDefinition,
-            });
         }
 
         public virtual string SelectIdentitySql { get; set; }
@@ -476,13 +436,6 @@ namespace ServiceStack.OrmLite
                 throw new NotImplementedException("Returning last inserted identity is not implemented on this DB Provider.");
 
             dbCmd.CommandText = SelectIdentitySql;
-            return dbCmd.ExecLongScalar();
-        }
-
-        [Obsolete("Use GetLastInsertIdSqlSuffix()")]
-        public virtual long InsertAndGetLastInsertId<T>(IDbCommand dbCmd)
-        {
-            dbCmd.CommandText += GetLastInsertIdSqlSuffix<T>();
             return dbCmd.ExecLongScalar();
         }
 
@@ -813,6 +766,10 @@ namespace ServiceStack.OrmLite
                 cmd.CommandText = $"UPDATE {GetQuotedTableName(modelDef)} " +
                                   $"SET {StringBuilderCache.ReturnAndFree(sql)} {(strFilter.Length > 0 ? "WHERE " + strFilter : "")}";
             }
+            else
+            {
+                cmd.CommandText = "";
+            }
 
             return hadRowVesion;
         }
@@ -850,9 +807,7 @@ namespace ServiceStack.OrmLite
                 if (fieldDef.ShouldSkipDelete())
                     continue;
 
-                object fieldValue;
-
-                if (!deleteFields.TryGetValue(fieldDef.Name, out fieldValue))
+                if (!deleteFields.TryGetValue(fieldDef.Name, out var fieldValue))
                     continue;
 
                 if (fieldDef.IsRowVersion)
@@ -910,9 +865,8 @@ namespace ServiceStack.OrmLite
 
             foreach (IDataParameter p in dbCmd.Parameters)
             {
-                FieldDefinition fieldDef;
                 var fieldName = this.ToFieldName(p.ParameterName);
-                fieldMap.TryGetValue(fieldName, out fieldDef);
+                fieldMap.TryGetValue(fieldName, out var fieldDef);
 
                 if (fieldDef == null)
                 {
@@ -1208,8 +1162,7 @@ namespace ServiceStack.OrmLite
             if (!defaultValue.StartsWith("{"))
                 return defaultValue;
 
-            string variable;
-            return Variables.TryGetValue(defaultValue, out variable)
+            return Variables.TryGetValue(defaultValue, out var variable)
                 ? variable
                 : null;
         }
@@ -1253,11 +1206,31 @@ namespace ServiceStack.OrmLite
                 sbConstraints.Append(GetForeignKeyOnDeleteClause(fieldDef.ForeignKey));
                 sbConstraints.Append(GetForeignKeyOnUpdateClause(fieldDef.ForeignKey));
             }
+
+            var uniqueConstraints = GetUniqueConstraints(modelDef);
+            if (uniqueConstraints != null)
+            {
+                sbConstraints.Append(",\n" + uniqueConstraints);
+            }
+
             var sql = $"CREATE TABLE {GetQuotedTableName(modelDef)} " +
                       $"\n(\n  {StringBuilderCache.ReturnAndFree(sbColumns)}{StringBuilderCacheAlt.ReturnAndFree(sbConstraints)} \n); \n";
 
             return sql;
         }
+
+        public virtual string GetUniqueConstraints(ModelDefinition modelDef)
+        {
+            var constraints = modelDef.UniqueConstraints.Map(x => 
+                $"CONSTRAINT {GetUniqueConstraintName(x, GetTableName(modelDef))} UNIQUE ({x.FieldNames.Map(f => modelDef.GetQuotedName(f,this)).Join(",")})" );
+
+            return constraints.Count > 0
+                ? constraints.Join(",\n")
+                : null;
+        }
+
+        protected virtual string GetUniqueConstraintName(UniqueConstraintAttribute constraint, string tableName) =>
+            constraint.Name ?? $"UC_{tableName}_{constraint.FieldNames.Join("_")}";
 
         public virtual string GetCheckConstraint(FieldDefinition fieldDef)
         {
@@ -1296,10 +1269,10 @@ namespace ServiceStack.OrmLite
             {
                 if (!fieldDef.IsIndexed) continue;
 
-                var indexName = GetIndexName(fieldDef.IsUnique, modelDef.ModelName.SafeVarName(), fieldDef.FieldName);
+                var indexName = GetIndexName(fieldDef.IsUniqueIndex, modelDef.ModelName.SafeVarName(), fieldDef.FieldName);
 
                 sqlIndexes.Add(
-                    ToCreateIndexStatement(fieldDef.IsUnique, indexName, modelDef, fieldDef.FieldName, isCombined: false, fieldDef: fieldDef));
+                    ToCreateIndexStatement(fieldDef.IsUniqueIndex, indexName, modelDef, fieldDef.FieldName, isCombined: false, fieldDef: fieldDef));
             }
 
             foreach (var compositeIndex in modelDef.CompositeIndexes)
@@ -1447,19 +1420,19 @@ namespace ServiceStack.OrmLite
         public virtual string ToAddColumnStatement(Type modelType, FieldDefinition fieldDef)
         {
             var column = GetColumnDefinition(fieldDef);
-            return $"ALTER TABLE {GetQuotedTableName(modelType.GetModelDefinition().ModelName)} ADD COLUMN {column};";
+            return $"ALTER TABLE {GetQuotedTableName(modelType.GetModelDefinition())} ADD COLUMN {column};";
         }
 
         public virtual string ToAlterColumnStatement(Type modelType, FieldDefinition fieldDef)
         {
             var column = GetColumnDefinition(fieldDef);
-            return $"ALTER TABLE {GetQuotedTableName(modelType.GetModelDefinition().ModelName)} MODIFY COLUMN {column};";
+            return $"ALTER TABLE {GetQuotedTableName(modelType.GetModelDefinition())} MODIFY COLUMN {column};";
         }
 
         public virtual string ToChangeColumnNameStatement(Type modelType, FieldDefinition fieldDef, string oldColumnName)
         {
             var column = GetColumnDefinition(fieldDef);
-            return $"ALTER TABLE {GetQuotedTableName(modelType.GetModelDefinition().ModelName)} CHANGE COLUMN {GetQuotedColumnName(oldColumnName)} {column};";
+            return $"ALTER TABLE {GetQuotedTableName(modelType.GetModelDefinition())} CHANGE COLUMN {GetQuotedColumnName(oldColumnName)} {column};";
         }
 
         public virtual string ToAddForeignKeyStatement<T, TForeign>(Expression<Func<T, object>> field,
@@ -1478,9 +1451,9 @@ namespace ServiceStack.OrmLite
                 "fk_" + sourceMD.ModelName + "_" + fieldName + "_" + referenceFieldName :
                 foreignKeyName);
 
-            return $"ALTER TABLE {GetQuotedTableName(sourceMD.ModelName)} " +
+            return $"ALTER TABLE {GetQuotedTableName(sourceMD)} " +
                    $"ADD CONSTRAINT {name} FOREIGN KEY ({GetQuotedColumnName(fieldName)}) " +
-                   $"REFERENCES {GetQuotedTableName(referenceMD.ModelName)} " +
+                   $"REFERENCES {GetQuotedTableName(referenceMD)} " +
                    $"({GetQuotedColumnName(referenceFieldName)})" +
                    $"{GetForeignKeyOnDeleteClause(new ForeignKeyConstraint(typeof(T), onDelete: FkOptionToString(onDelete)))}" +
                    $"{GetForeignKeyOnUpdateClause(new ForeignKeyConstraint(typeof(T), onUpdate: FkOptionToString(onUpdate)))};";
@@ -1496,7 +1469,7 @@ namespace ServiceStack.OrmLite
                 indexName);
 
             string command = $"CREATE {(unique ? "UNIQUE" : "")} " +
-                             $"INDEX {name} ON {GetQuotedTableName(sourceDef.ModelName)}" +
+                             $"INDEX {name} ON {GetQuotedTableName(sourceDef)}" +
                              $"({GetQuotedColumnName(fieldName)});";
             return command;
         }
@@ -1519,7 +1492,7 @@ namespace ServiceStack.OrmLite
         {
             if (value == null) return "NULL";
 
-            var converter = value.GetType().IsEnum()
+            var converter = value.GetType().IsEnum
                 ? EnumConverter
                 : GetConverterBestMatch(fieldType);
             try
@@ -1571,9 +1544,11 @@ namespace ServiceStack.OrmLite
 
         protected virtual string ToDropColumnStatement(Type modelType, string columnName, IOrmLiteDialectProvider provider)
         {
-            return $"ALTER TABLE {provider.GetQuotedTableName(modelType.GetModelDefinition().ModelName)} " +
+            return $"ALTER TABLE {provider.GetQuotedTableName(modelType.GetModelDefinition())} " +
                    $"DROP COLUMN {provider.GetQuotedColumnName(columnName)};";
         }
+
+        public virtual string SqlConflict(string sql, string conflictResolution) => sql; //NOOP
 
         public virtual string SqlConcat(IEnumerable<object> args) => $"CONCAT({string.Join(", ", args)})";
 

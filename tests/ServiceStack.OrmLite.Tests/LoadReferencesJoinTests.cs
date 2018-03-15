@@ -710,21 +710,25 @@ namespace ServiceStack.OrmLite.Tests
         public void Can_load_references_with_OrderBy_and_Paging()
         {
             //This version of MariaDB doesn't yet support 'LIMIT & IN/ALL/ANY/SOME subquery'
-            if (Dialect == Dialect.MySql) return;
+            if (Dialect == Dialect.MySql)
+                return;
+            if (Dialect == Dialect.SqlServer) //Only one expression can be specified in the select list when the subquery is not introduced with EXISTS.
+                return;
 
-            db.DropTable<Parent>();
-            db.DropTable<Child>();
-            db.CreateTable<Child>();
-            db.CreateTable<Parent>();
+            db.DropTable<ParentSelf>();
+            db.DropTable<ChildSelf>();
 
-            db.Save(new Child { Id = 1, Value = "Lolz" });
-            db.Insert(new Parent { Id = 1, ChildId = null });
-            db.Insert(new Parent { Id = 2, ChildId = 1 });
+            db.CreateTable<ChildSelf>();
+            db.CreateTable<ParentSelf>();
+
+            db.Save(new ChildSelf { Id = 1, Value = "Lolz" });
+            db.Insert(new ParentSelf { Id = 1, ChildId = null });
+            db.Insert(new ParentSelf { Id = 2, ChildId = 1 });
 
             // Select the Parent.Id == 2.  LoadSelect should populate the child, but doesn't.
-            var q = db.From<Parent>()
+            var q = db.From<ParentSelf>()
                 .Take(1)
-                .OrderByDescending<Parent>(p => p.Id);
+                .OrderByDescending<ParentSelf>(p => p.Id);
 
             var results = db.LoadSelect(q);
 
@@ -732,9 +736,9 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(results[0].Child, Is.Not.Null);
             Assert.That(results[0].Child.Value, Is.EqualTo("Lolz"));
 
-            q = db.From<Parent>()
+            q = db.From<ParentSelf>()
                 .Skip(1)
-                .OrderBy<Parent>(p => p.Id);
+                .OrderBy<ParentSelf>(p => p.Id);
 
             results = db.LoadSelect(q);
 
@@ -888,19 +892,19 @@ Order:
         }
     }
 
-    public class Parent
+    public class ParentSelf
     {
         [PrimaryKey]
         public int Id { get; set; }
 
-        [References(typeof(Child))]
+        [References(typeof(ChildSelf))]
         public int? ChildId { get; set; }
 
         [Reference]
-        public Child Child { get; set; }
+        public ChildSelf Child { get; set; }
     }
 
-    public class Child
+    public class ChildSelf
     {
         [PrimaryKey]
         public int Id { get; set; }

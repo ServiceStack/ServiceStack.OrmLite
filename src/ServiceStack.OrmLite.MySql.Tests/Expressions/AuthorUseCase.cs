@@ -297,7 +297,7 @@ namespace ServiceStack.OrmLite.MySql.Tests.Expressions
                     bool r6 = db.Scalar<Author, bool>(e => Sql.Max(e.Active));
                     Assert.AreEqual(expectedBool, r6);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     //????
                     //if (dialect.Name == "PostgreSQL")

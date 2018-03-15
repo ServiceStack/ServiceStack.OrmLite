@@ -22,7 +22,6 @@ namespace ServiceStack.OrmLite
 
         public static Task<T> ConvertToAsync<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, CancellationToken token)
         {
-            var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition, dialectProvider);
             return dialectProvider.ReaderRead(reader, () =>
             {
                 if (typeof(T) == typeof(List<object>))
@@ -33,10 +32,11 @@ namespace ServiceStack.OrmLite
 
                 var values = new object[reader.FieldCount];
 
-                if (typeof(T).Name.StartsWith("ValueTuple`"))
+                if (typeof(T).IsValueTuple())
                     return reader.ConvertToValueTuple<T>(values, dialectProvider);
 
                 var row = CreateInstance<T>();
+                var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition, dialectProvider);
                 row.PopulateWithSqlReader(dialectProvider, reader, indexCache, values);
                 return row;
             }, token).Then(t => { 
@@ -51,15 +51,16 @@ namespace ServiceStack.OrmLite
             var isObjectList = typeof(T) == typeof(List<object>);
             var isObjectDict = typeof(T) == typeof(Dictionary<string,object>);
             var isDynamic = typeof(T) == typeof(object);
-            var isTuple = typeof(T).Name.StartsWith("Tuple`");
-            var indexCache = isObjectDict || isObjectDict || isTuple
+            var isValueTuple = typeof(T).IsValueTuple();
+            var isTuple = typeof(T).IsTuple();
+            var indexCache = isObjectDict || isObjectDict || isValueTuple || isTuple
                 ? null
                 : reader.GetIndexFieldsCache(ModelDefinition<T>.Definition, dialectProvider, onlyFields);
 
             var genericArgs = isTuple ? typeof(T).GetGenericArguments() : null;
             var modelIndexCaches = isTuple ? reader.GetMultiIndexCaches(dialectProvider, onlyFields, genericArgs) : null;
             var genericTupleMi = isTuple ? typeof(T).GetGenericTypeDefinition().GetCachedGenericType(genericArgs) : null;
-#if NETSTANDARD1_3
+#if NETSTANDARD2_0
             var activator = isTuple ? System.Reflection.TypeExtensions.GetConstructor(genericTupleMi, genericArgs).GetActivator() : null;
 #else
             var activator = isTuple ? genericTupleMi.GetConstructor(genericArgs).GetActivator() : null;
@@ -92,6 +93,11 @@ namespace ServiceStack.OrmLite
                         row[reader.GetName(i).Trim()] = reader.GetValue(i);
                     }
                     return (T)(object)row;
+                }
+                if (isValueTuple)
+                {
+                    var row = reader.ConvertToValueTuple<T>(values, dialectProvider);
+                    return (T)row;
                 }
                 if (isTuple)
                 {
