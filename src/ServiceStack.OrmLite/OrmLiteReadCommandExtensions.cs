@@ -180,6 +180,8 @@ namespace ServiceStack.OrmLite
                     }
 
                     var sqlIn = StringBuilderCache.ReturnAndFree(sb);
+                    if (string.IsNullOrEmpty(sqlIn))
+                        sqlIn = "NULL";
                     sqlCopy = sqlCopy?.Replace(dialectProvider.ParamString + propName, sqlIn);
                     if (dialectProvider.ParamString != "@")
                         sqlCopy = sqlCopy?.Replace("@" + propName, sqlIn);
