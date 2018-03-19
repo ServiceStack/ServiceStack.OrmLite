@@ -204,7 +204,7 @@ namespace ServiceStack.OrmLite
         internal static long RowCount(this IDbCommand dbCmd, string sql, object anonType)
         {
             if (anonType != null)
-                dbCmd.SetParameters(anonType.ToObjectDictionary(), excludeDefaults: false);
+                dbCmd.SetParameters(anonType.ToObjectDictionary(), excludeDefaults: false, sql:ref sql);
 
             return dbCmd.Scalar<long>(dbCmd.GetDialectProvider().ToRowCountStatement(sql));
         }
