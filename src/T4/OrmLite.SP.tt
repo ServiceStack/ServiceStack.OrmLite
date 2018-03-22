@@ -59,9 +59,9 @@ namespace <#=SPNamespace#>
 	if (!sp.SPOutputColumns.Any()) continue; #>
 		public class <#=sp.CleanName#>_Result
 		{ 
-				<# foreach(var prop in sp.SPOutputColumns) { var alias = false; var propName = prop.Name;  if (propName.Contains(' ') || propName.Contains('$') || propName.Contains('+') || propName.Contains('%')) { propName = propName.Replace(' ','_').Replace("$","_Dollar").Replace("+","_Plus").Replace("%","_Percent"); alias = true; }; if (char.IsDigit(propName[0])) { propName = "_" + propName; alias = true; };
+				<# foreach(var prop in sp.SPOutputColumns) { var _alias = false; var propName = prop.Name;  if (propName.Contains(' ') || propName.Contains('$') || propName.Contains('+') || propName.Contains('%')) { propName = propName.Replace(' ','_').Replace("$","_Dollar").Replace("+","_Plus").Replace("%","_Percent"); _alias = true; }; if (char.IsDigit(propName[0])) { propName = "_" + propName; _alias = true; };
 			
-		if (alias) {#>		[Alias("<#=prop.Name#>")]
+		if (_alias) {#>		[Alias("<#=prop.Name#>")]
 		<#}#>
 		public <#=prop.DotNetType#> <#=propName#> { get; set; }			
 		<#}
