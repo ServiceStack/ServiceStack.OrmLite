@@ -2653,12 +2653,12 @@ class Manager {
         CurrentBlock = new Block { Name = name };
     }
 
-    public void StartFooter(bool includeInDefault = true) {
+    public void StartFooter(bool includeInDefault) {
         CurrentBlock = footer;
         footer.IncludeInDefault = includeInDefault;
     }
 
-    public void StartHeader(bool includeInDefault = true) {
+    public void StartHeader(bool includeInDefault) {
         CurrentBlock = header;
         header.IncludeInDefault = includeInDefault;
     }
@@ -2672,7 +2672,7 @@ class Manager {
         currentBlock = null;
     }
 
-    public virtual void Process(bool split, bool sync = true) {
+    public virtual void Process(bool split, bool sync) {
         if (split) {
             EndBlock();
             String headerText = template.ToString(header.Start, header.Length);
