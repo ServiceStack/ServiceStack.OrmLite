@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
+using NUnit.Framework.Internal;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Text;
 
@@ -483,7 +484,56 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(results.Count(x => x.FirstName == "Michael"), Is.EqualTo(1));
             }
         }
+        
+        public class FeatureRequest
+        {
+            public int Id { get; set; }
+            public int Up { get; set; }
+            public int Down { get; set; }
+            [CustomSelect("up - down")]
+            public int Points { get; set; }
+        }
 
+        [Test]
+        public void Can_select_custom_select_column()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<FeatureRequest>();
+
+                3.Times(i => db.Insert(new FeatureRequest {Id = i + 1, Up = (i + 1) * 2, Down = i + 1}));
+
+                var q = db.From<FeatureRequest>()
+                    .Select(new[]{ "id", "up", "down", "points" });
+
+                var results = db.Select(q);
+                
+                results.PrintDump();
+
+                Assert.That(results.Map(x => x.Points), Is.EqualTo(new[]{ 1, 2, 3 }));
+            }
+        }
+
+        [Test]
+        public void Can_order_by_custom_select_column()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<FeatureRequest>();
+
+                3.Times(i => db.Insert(new FeatureRequest {Id = i + 1, Up = (i + 1) * 2, Down = i + 1}));
+
+                var q = db.From<FeatureRequest>()
+                    .Select(new[]{ "id", "up", "down", "points" })
+                    .OrderByDescending(x => x.Points);
+
+                var results = db.Select(q);
+                
+                results.PrintDump();
+
+                Assert.That(results.Map(x => x.Points), Is.EqualTo(new[]{ 3, 2, 1 }));
+            }
+        }
     }
 
 }

@@ -57,7 +57,7 @@ namespace ServiceStack.OrmLite
         public string CheckConstraint { get; set; }
 
         public bool IsUniqueConstraint { get; set; }
-
+        
         public ForeignKeyConstraint ForeignKey { get; set; }
 
         public GetMemberDelegate GetValueFn { get; set; }
@@ -89,6 +89,8 @@ namespace ServiceStack.OrmLite
         public string ComputeExpression { get; set; }
 
         public string CustomSelect { get; set; }
+
+        public bool RequiresAlias => Alias != null || CustomSelect != null;
 
         public string BelongToModelName { get; set; }
 

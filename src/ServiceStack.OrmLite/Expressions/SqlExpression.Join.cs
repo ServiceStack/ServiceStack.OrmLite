@@ -297,7 +297,7 @@ namespace ServiceStack.OrmLite
                                 {
                                     sbSelect.Append(GetQuotedColumnName(tableDef, tableFieldDef.Name));
 
-                                    if (tableFieldDef.Alias != null)
+                                    if (tableFieldDef.RequiresAlias)
                                         sbSelect.Append(" AS ").Append(SqlColumn(fieldDef.Name));
                                 }
                                 else

@@ -192,6 +192,8 @@ namespace ServiceStack.OrmLite
                         foreach (var fieldDef in tableDef.FieldDefinitionsArray)
                         {
                             var qualifiedField = GetQuotedColumnName(tableDef, fieldDef.Name);
+                            if (fieldDef.CustomSelect != null)
+                                qualifiedField += " AS " + fieldDef.Name;
 
                             if (sb.Length > 0)
                                 sb.Append(", ");
@@ -200,21 +202,25 @@ namespace ServiceStack.OrmLite
                             fieldsList.Add(fieldDef.Name);
                         }
                     }
-                    continue;
                 }
-
-                fieldsList.Add(field); //Could be non-matching referenced property
-
-                var match = FirstMatchingField(field);
-                if (match == null)
-                    continue;
-
-                var qualifiedName = GetQuotedColumnName(match.Item1, match.Item2.Name);
-
-                if (sb.Length > 0)
-                    sb.Append(", ");
-
-                sb.Append(qualifiedName);
+                else
+                {
+                    fieldsList.Add(field); //Could be non-matching referenced property
+    
+                    var match = FirstMatchingField(field);
+                    if (match == null)
+                        continue;
+    
+                    var fieldDef = match.Item2;
+                    var qualifiedName = GetQuotedColumnName(match.Item1, fieldDef.Name);
+                    if (fieldDef.CustomSelect != null)
+                        qualifiedName += " AS " + fieldDef.Name;
+    
+                    if (sb.Length > 0)
+                        sb.Append(", ");
+    
+                    sb.Append(qualifiedName);
+                }
             }
 
             UnsafeSelect(StringBuilderCache.ReturnAndFree(sb), distinct:distinct);
@@ -2135,7 +2141,10 @@ namespace ServiceStack.OrmLite
                     tableDef = this.ModelDef;
                 }
 
-                var includePrefix = PrefixFieldWithTableName && fd?.CustomSelect == null && !tableDef.ModelType.IsInterface;
+                if (fd?.CustomSelect != null)
+                    return fd.CustomSelect;
+
+                var includePrefix = PrefixFieldWithTableName && !tableDef.ModelType.IsInterface;
                 return includePrefix
                     ? DialectProvider.GetQuotedColumnName(tableDef, fieldName)
                     : DialectProvider.GetQuotedColumnName(fieldName);
