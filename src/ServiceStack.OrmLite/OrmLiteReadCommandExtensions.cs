@@ -173,7 +173,7 @@ namespace ServiceStack.OrmLite
                         p.Direction = ParameterDirection.Input;
                         dialectProvider.InitDbParam(p, item.GetType());
 
-                        dialectProvider.SetParamValue(p, item, propType);
+                        dialectProvider.SetParamValue(p, item, item.GetType());
 
                         dbCmd.Parameters.Add(p);
                     }
@@ -238,7 +238,7 @@ namespace ServiceStack.OrmLite
                         p.Direction = ParameterDirection.Input;
                         dialectProvider.InitDbParam(p, item.GetType());
 
-                        dialectProvider.SetParamValue(p, item, propType);
+                        dialectProvider.SetParamValue(p, item, item.GetType());
 
                         dbCmd.Parameters.Add(p);
                     }
