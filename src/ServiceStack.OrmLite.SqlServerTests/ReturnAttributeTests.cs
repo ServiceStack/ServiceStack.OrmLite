@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
 using System.Configuration;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite;
@@ -130,5 +131,6 @@ namespace ReturnAttributeTests
                 Assert.That(sql, Is.EqualTo("INSERT INTO \"UserSequence\" (\"Id\",\"Name\",\"UserName\",\"Email\") OUTPUT INSERTED.\"Id\" VALUES (NEXT VALUE FOR \"Gen_UserSequence_Id\",@Name,@UserName,@Email)"), "normal Insert");
             }
         }
+
     }
 }

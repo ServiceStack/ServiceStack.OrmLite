@@ -65,6 +65,10 @@ namespace ServiceStack.OrmLite
 
         string GetDefaultValue(Type tableType, string fieldName);
 
+        string GetDefaultValue(FieldDefinition fieldDef);
+
+        bool HasInsertReturnValues(ModelDefinition modelDef);
+
         object GetParamValue(object value, Type fieldType);
 
         object ToDbValue(object value, Type type);
@@ -105,8 +109,10 @@ namespace ServiceStack.OrmLite
 
         void PrepareParameterizedInsertStatement<T>(IDbCommand cmd, ICollection<string> insertFields = null);
 
+        /// <returns>If had RowVersion</returns>
         bool PrepareParameterizedUpdateStatement<T>(IDbCommand cmd, ICollection<string> updateFields = null);
 
+        /// <returns>If had RowVersion</returns>
         bool PrepareParameterizedDeleteStatement<T>(IDbCommand cmd, IDictionary<string, object> delteFieldValues);
 
         void PrepareStoredProcedureStatement<T>(IDbCommand cmd, T obj);

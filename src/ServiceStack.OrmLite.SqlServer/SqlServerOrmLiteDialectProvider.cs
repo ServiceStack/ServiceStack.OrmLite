@@ -193,6 +193,13 @@ namespace ServiceStack.OrmLite.SqlServer
             return AutoIncrementDefinition;
         }
 
+        public override string GetAutoIdDefaultValue(FieldDefinition fieldDef)
+        {
+            return fieldDef.FieldType == typeof(Guid) 
+                ? "newid()" 
+                : null;
+        }
+
         public override string GetColumnDefinition(FieldDefinition fieldDef)
         {
             // https://msdn.microsoft.com/en-us/library/ms182776.aspx
@@ -310,11 +317,14 @@ namespace ServiceStack.OrmLite.SqlServer
                    + GetQuotedName(sequence);
         }
 
-        protected virtual bool ShouldReturnOnInsert(ModelDefinition modelDef, FieldDefinition fieldDef) =>
-            fieldDef.ReturnOnInsert || (fieldDef.IsPrimaryKey && fieldDef.AutoIncrement && modelDef.HasReturnAttribute);
+        protected override bool ShouldSkipInsert(FieldDefinition fieldDef) => 
+            fieldDef.ShouldSkipInsert() || fieldDef.AutoId;
 
-        protected virtual bool ShouldSkipInsert(FieldDefinition fieldDef) => 
-            fieldDef.ShouldSkipInsert();
+        protected virtual bool ShouldReturnOnInsert(ModelDefinition modelDef, FieldDefinition fieldDef) =>
+            fieldDef.ReturnOnInsert || (fieldDef.IsPrimaryKey && fieldDef.AutoIncrement && HasInsertReturnValues(modelDef)) || fieldDef.AutoId;
+
+        public override bool HasInsertReturnValues(ModelDefinition modelDef) =>
+            modelDef.FieldDefinitions.Any(x => x.ReturnOnInsert || (x.AutoId && x.FieldType == typeof(Guid)));
 
         protected virtual bool SupportsSequences(FieldDefinition fieldDef) => false;
 

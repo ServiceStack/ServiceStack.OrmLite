@@ -36,6 +36,8 @@ namespace ServiceStack.OrmLite
 
         public bool AutoIncrement { get; set; }
 
+        public bool AutoId { get; set; }
+
         public bool IsNullable { get; set; }
 
         public bool IsIndexed { get; set; }
@@ -138,6 +140,7 @@ namespace ServiceStack.OrmLite
                 PropertyInfo = PropertyInfo,
                 IsPrimaryKey = IsPrimaryKey,
                 AutoIncrement = AutoIncrement,
+                AutoId = AutoId,
                 IsNullable = IsNullable,
                 IsIndexed = IsIndexed,
                 IsUniqueIndex = IsUniqueIndex,

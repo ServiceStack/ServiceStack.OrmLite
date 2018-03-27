@@ -538,6 +538,9 @@ namespace ServiceStack.OrmLite
             return sqlColumns;
         }
 
+        protected virtual bool ShouldSkipInsert(FieldDefinition fieldDef) => 
+            fieldDef.ShouldSkipInsert();
+
         public virtual string ToInsertRowStatement(IDbCommand cmd, object objWithProperties, ICollection<string> insertFields = null)
         {
             if (insertFields == null)
@@ -549,7 +552,7 @@ namespace ServiceStack.OrmLite
 
             foreach (var fieldDef in modelDef.FieldDefinitionsArray)
             {
-                if (fieldDef.ShouldSkipInsert())
+                if (ShouldSkipInsert(fieldDef))
                     continue;
 
                 if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase))
@@ -595,6 +598,15 @@ namespace ServiceStack.OrmLite
             return MergeParamsIntoSql(dbCmd.CommandText, ToArray(dbCmd.Parameters));
         }
 
+        protected virtual object GetInsertDefaultValue(FieldDefinition fieldDef)
+        {
+            if (!fieldDef.AutoId)
+                return null;
+            if (fieldDef.FieldType == typeof(Guid))
+                return Guid.NewGuid();
+            return null;
+        }
+
         public virtual void PrepareParameterizedInsertStatement<T>(IDbCommand cmd, ICollection<string> insertFields = null)
         {
             var sbColumnNames = StringBuilderCache.Allocate();
@@ -622,7 +634,12 @@ namespace ServiceStack.OrmLite
                     sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
                     sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
 
-                    AddParameter(cmd, fieldDef);
+                    var p = AddParameter(cmd, fieldDef);
+
+                    if (fieldDef.AutoId)
+                    {
+                        p.Value = GetInsertDefaultValue(fieldDef);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -880,6 +897,12 @@ namespace ServiceStack.OrmLite
                         throw new ArgumentException($"Field Definition '{fieldName}' was not found");
                 }
 
+                if (fieldDef.AutoId && p.Value != null)
+                {
+                    fieldDef.SetValueFn(obj, p.Value); //Auto populate default values
+                    continue;
+                }
+                
                 SetParameterValue<T>(fieldDef, p, obj);
             }
         }
@@ -1146,6 +1169,9 @@ namespace ServiceStack.OrmLite
             return StringBuilderCache.ReturnAndFree(sql);
         }
 
+        public virtual bool HasInsertReturnValues(ModelDefinition modelDef) =>
+            modelDef.FieldDefinitions.Any(x => x.ReturnOnInsert);
+
         public string GetDefaultValue(Type tableType, string fieldName)
         {
             var modelDef = tableType.GetModelDefinition();
@@ -1157,7 +1183,11 @@ namespace ServiceStack.OrmLite
         {
             var defaultValue = fieldDef.DefaultValue;
             if (string.IsNullOrEmpty(defaultValue))
-                return null;
+            {
+                return fieldDef.AutoId 
+                    ? GetAutoIdDefaultValue(fieldDef) 
+                    : null;
+            }
 
             if (!defaultValue.StartsWith("{"))
                 return defaultValue;
@@ -1166,6 +1196,8 @@ namespace ServiceStack.OrmLite
                 ? variable
                 : null;
         }
+
+        public virtual string GetAutoIdDefaultValue(FieldDefinition fieldDef) => null;
 
         public virtual string ToCreateTableStatement(Type tableType)
         {

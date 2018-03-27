@@ -954,15 +954,24 @@ namespace ServiceStack.OrmLite
             }
         }
 
+        [Obsolete("Use dialectProvider.GetNonDefaultValueInsertFields()")]
         public static List<string> GetNonDefaultValueInsertFields<T>(T obj)
+        {
+            return OrmLiteConfig.DialectProvider.GetNonDefaultValueInsertFields(obj);
+        }
+        
+        public static List<string> GetNonDefaultValueInsertFields<T>(this IOrmLiteDialectProvider dialectProvider, T obj)
         {
             var insertFields = new List<string>();
             var modelDef = typeof(T).GetModelDefinition();
             foreach (var fieldDef in modelDef.FieldDefinitionsArray)
             {
-                if (!string.IsNullOrEmpty(fieldDef.DefaultValue))
+                if (!string.IsNullOrEmpty(dialectProvider.GetDefaultValue(fieldDef)))
                 {
-                    var value = fieldDef.GetValue(obj);
+                    if (fieldDef.AutoId)
+                        continue;
+                    
+                    var value = fieldDef.GetValue(obj);    
                     if (value == null || value.Equals(fieldDef.FieldTypeDefaultValue))
                         continue;
                 }
