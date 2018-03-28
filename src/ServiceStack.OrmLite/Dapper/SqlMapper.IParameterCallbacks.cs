@@ -1,6 +1,6 @@
 ﻿namespace ServiceStack.OrmLite.Dapper
 {
-    partial class SqlMapper
+    public static partial class SqlMapper
     {
         /// <summary>
         /// Extends IDynamicParameters with facilities for executing callbacks after commands have completed

@@ -781,7 +781,7 @@ namespace ServiceStack.OrmLite
 
         public static bool IsRefType(this Type fieldType)
         {
-            return (!fieldType.UnderlyingSystemType().IsValueType
+            return (!fieldType.UnderlyingSystemType.IsValueType
                 || JsConfig.TreatValueAsRefTypes.Contains(fieldType.IsGenericType
                     ? fieldType.GetGenericTypeDefinition()
                     : fieldType))
