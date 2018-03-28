@@ -612,7 +612,8 @@ namespace ServiceStack.OrmLite.Tests.Expression
             if (Dialect == Dialect.MySql) return;
 
             //Only one expression can be specified in the select list when the subquery is not introduced with EXISTS.
-            if (Dialect == Dialect.SqlServer) return;
+            if ((Dialect & Dialect.AnySqlServer) == Dialect)
+                return;
 
             using (var db = OpenDbConnection())
             {

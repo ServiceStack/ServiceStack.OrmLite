@@ -135,6 +135,8 @@ namespace ServiceStack.OrmLite.Tests
                     return dbFactory;
                 case Dialect.SqlServer:
                     return Init(Config.SqlServerBuildDb, SqlServerDialect.Provider);
+                case Dialect.SqlServer2008:
+                    return Init(Config.SqlServerBuildDb, SqlServer2008Dialect.Provider);
                 case Dialect.SqlServer2012:
                     return Init(Config.SqlServerBuildDb, SqlServer2012Dialect.Provider);
                 case Dialect.MySql:
