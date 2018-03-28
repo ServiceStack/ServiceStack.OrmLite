@@ -1595,6 +1595,8 @@ namespace ServiceStack.OrmLite
             : offset == null
                 ? "LIMIT " + rows
                 : "LIMIT " + rows.GetValueOrDefault(int.MaxValue) + " OFFSET " + offset;
+        
+        public virtual string SqlCast(object fieldOrValue, string castAs) => $"CAST({fieldOrValue} AS {castAs})";
 
         //Async API's, should be overrided by Dialect Providers to use .ConfigureAwait(false)
         //Default impl below uses TaskAwaiter shim in async.cs

@@ -216,6 +216,11 @@ namespace ServiceStack.OrmLite.MySql
         public override string SqlCurrency(string fieldOrValue, string currencySymbol) =>
             SqlConcat(new[] { "'" + currencySymbol + "'", "cast(" + fieldOrValue + " as decimal(15,2))" });
 
+        public override string SqlCast(object fieldOrValue, string castAs) => 
+            castAs == Sql.VARCHAR
+                ? $"CAST({fieldOrValue} AS CHAR(1000))"
+                : $"CAST({fieldOrValue} AS {castAs})";
+        
         protected DbConnection Unwrap(IDbConnection db)
         {
             return (DbConnection)db.ToDbConnection();

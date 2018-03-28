@@ -559,6 +559,9 @@ namespace ServiceStack.OrmLite.PostgreSQL
             ? fieldOrValue + "::text::money::text"
             : "replace(" + fieldOrValue + "::text::money::text,'$','" + currencySymbol + "')";
 
+        public override string SqlCast(object fieldOrValue, string castAs) => 
+            $"{fieldOrValue}::{castAs}";
+
         protected NpgsqlConnection Unwrap(IDbConnection db)
         {
             return (NpgsqlConnection)db.ToDbConnection();

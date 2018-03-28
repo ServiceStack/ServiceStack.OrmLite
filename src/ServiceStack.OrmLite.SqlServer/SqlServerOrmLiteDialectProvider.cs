@@ -556,6 +556,11 @@ namespace ServiceStack.OrmLite.SqlServer
                 ? "OFFSET " + offset.GetValueOrDefault() + " ROWS FETCH NEXT " + rows + " ROWS ONLY"
                 : "OFFSET " + offset.GetValueOrDefault(int.MaxValue) + " ROWS";
 
+        public override string SqlCast(object fieldOrValue, string castAs) => 
+            castAs == Sql.VARCHAR
+                ? $"CAST({fieldOrValue} AS VARCHAR(MAX))"
+                : $"CAST({fieldOrValue} AS {castAs})";
+
         protected SqlConnection Unwrap(IDbConnection db) => (SqlConnection)db.ToDbConnection();
 
         protected SqlCommand Unwrap(IDbCommand cmd) => (SqlCommand)cmd.ToDbCommand();
