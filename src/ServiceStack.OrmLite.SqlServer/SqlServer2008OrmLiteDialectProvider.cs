@@ -17,7 +17,7 @@ namespace ServiceStack.OrmLite.SqlServer
                     sb.Append(" + ");
 
                 var argType = arg.GetType();
-                if (argType.IsNumericType() || argType == typeof(bool) || argType == typeof(DateTime) || argType == typeof(TimeSpan))
+                if (argType.IsValueType)
                 {
                     sb.AppendFormat("'{0}'", arg);
                 }
