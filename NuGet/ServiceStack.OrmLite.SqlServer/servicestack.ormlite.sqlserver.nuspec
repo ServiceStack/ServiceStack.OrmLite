@@ -22,7 +22,7 @@
         <dependency id="ServiceStack.OrmLite" version="5.0.0" />
       </group>
       <group targetFramework=".netstandard2.0">
-        <dependency id="System.Data.SqlClient" version="[4.4.0, )" />
+        <dependency id="System.Data.SqlClient" version="[4.4.3, )" />
         <dependency id="ServiceStack.OrmLite" version="5.0.0" />
       </group>
     </dependencies>
