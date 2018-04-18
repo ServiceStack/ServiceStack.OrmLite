@@ -170,6 +170,7 @@ namespace ServiceStack.OrmLite
             set => execFilter = value;
         }
 
+        public static Action<IDbCommand> BeforeExecFilter { get; set; }
         public static Action<IDbCommand> AfterExecFilter { get; set; }
 
         public static Action<IDbCommand, object> InsertFilter { get; set; }
