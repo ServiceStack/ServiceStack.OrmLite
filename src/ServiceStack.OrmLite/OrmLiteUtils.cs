@@ -78,8 +78,7 @@ namespace ServiceStack.OrmLite
                 }
             }
 
-            var dbAndParams = StringBuilderCache.ReturnAndFree(sb);
-            return dbAndParams;
+            return StringBuilderCache.ReturnAndFree(sb);
         }
 
         public static T CreateInstance<T>()
