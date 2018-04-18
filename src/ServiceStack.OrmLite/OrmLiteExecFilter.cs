@@ -48,6 +48,9 @@ namespace ServiceStack.OrmLite
         public virtual void DisposeCommand(IDbCommand dbCmd, IDbConnection dbConn)
         {
             if (dbCmd == null) return;
+
+            OrmLiteConfig.AfterExecFilter?.Invoke(dbCmd);
+
             dbConn.SetLastCommandText(dbCmd.CommandText);
 
             dbCmd.Dispose();
