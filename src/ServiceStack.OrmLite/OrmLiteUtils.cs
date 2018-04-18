@@ -55,6 +55,11 @@ namespace ServiceStack.OrmLite
 
         public static void DebugCommand(this ILog log, IDbCommand cmd)
         {
+            log.Debug(GetDebugString(cmd));
+        }
+
+        public static string GetDebugString(this IDbCommand cmd)
+        {
             var sb = StringBuilderCache.Allocate();
 
             sb.Append("SQL: ").Append(cmd.CommandText);
@@ -62,18 +67,19 @@ namespace ServiceStack.OrmLite
             if (cmd.Parameters.Count > 0)
             {
                 sb.AppendLine()
-                  .Append("PARAMS: ");
+                    .Append("PARAMS: ");
 
                 for (var i = 0; i < cmd.Parameters.Count; i++)
                 {
-                    var p = (IDataParameter)cmd.Parameters[i];
+                    var p = (IDataParameter) cmd.Parameters[i];
                     if (i > 0)
                         sb.Append(", ");
                     sb.Append($"{p.ParameterName}={p.Value}");
                 }
             }
 
-            log.Debug(StringBuilderCache.ReturnAndFree(sb));
+            var dbAndParams = StringBuilderCache.ReturnAndFree(sb);
+            return dbAndParams;
         }
 
         public static T CreateInstance<T>()
