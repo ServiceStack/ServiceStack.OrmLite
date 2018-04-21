@@ -43,7 +43,7 @@
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
-    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.106" />
+    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.108" />
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Oracle\ServiceStack.OrmLite.Oracle.csproj" />
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Firebird\ServiceStack.OrmLite.Firebird.csproj" />
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite.VistaDB\ServiceStack.OrmLite.VistaDB.csproj" />
@@ -82,7 +82,7 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="2.0" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="2.0.1" />
     <PackageReference Include="Microsoft.Extensions.Primitives" Version="2.0.0" />
     <PackageReference Include="System.Runtime" Version="4.*" />
     <PackageReference Include="System.Runtime.Serialization.Xml" Version="4.*" />
