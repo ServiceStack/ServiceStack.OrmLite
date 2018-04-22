@@ -51,9 +51,28 @@ namespace ServiceStack.OrmLite.Tests
                         x.Id,
                         text = Sql.As(Sql.Cast(x.Id, Sql.VARCHAR) + " : " + Sql.Cast(x.Value, Sql.VARCHAR) + " : " + Sql.Cast(x.Bool, Sql.VARCHAR) + " string", "text") 
                     }));
-                
+
                 Assert.That(results[0]["text"], Is.EqualTo("1 : 123.456 : 1 string")
                                                .Or.EqualTo("1 : 123.456 : true string"));
+            }
+        }
+
+        [Test]
+        public void Does_concat_values_in_SqlExpression_using_tuple()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Sqltest>();
+
+                db.Insert(new Sqltest { Value = 123.456 });
+
+                var results = db.Select<(int id, string text)>(db.From<Sqltest>()
+                    .Select(x => new {
+                        x.Id,
+                        text = Sql.Cast(x.Id, Sql.VARCHAR) + " : " + Sql.Cast(x.Value, Sql.VARCHAR) + " : " + Sql.Cast("1 + 2", Sql.VARCHAR) + " string"
+                    }));
+
+                Assert.That(results[0].text, Is.EqualTo("1 : 123.456 : 3 string"));
             }
         }
 
