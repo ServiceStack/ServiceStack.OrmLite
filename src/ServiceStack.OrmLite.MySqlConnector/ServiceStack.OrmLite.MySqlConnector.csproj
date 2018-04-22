@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFrameworks>net45;netstandard2.0</TargetFrameworks>
     <AssemblyName>ServiceStack.OrmLite.MySqlConnector</AssemblyName>
@@ -15,12 +14,10 @@
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
     <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
   </PropertyGroup>
-
   <PropertyGroup Condition=" '$(Configuration)' != 'Debug' ">
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <Optimize>true</Optimize>
   </PropertyGroup>
-
   <ItemGroup>
     <Compile Include="..\ServiceStack.OrmLite.MySql\Converters\MySqlBoolConverter.cs" Link="Converters\MySqlBoolConverter.cs" />
     <Compile Include="..\ServiceStack.OrmLite.MySql\Converters\MySqlDateTimeConverterBase.cs" Link="Converters\MySqlDateTimeConverterBase.cs" />
@@ -33,40 +30,34 @@
     <Compile Include="..\ServiceStack.OrmLite.MySql\MySqlDialectProviderBase.cs" Link="MySqlDialectProviderBase.cs" />
     <Compile Include="..\ServiceStack.OrmLite.MySql\MySqlExpression.cs" Link="MySqlExpression.cs" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj" />
-    <PackageReference Include="MySqlConnector" Version="0.33.2" />
   </ItemGroup>
-
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net45' ">
     <DefineConstants>$(DefineConstants);NET45;ASYNC</DefineConstants>
     <SignAssembly>True</SignAssembly>
     <DelaySign>False</DelaySign>
     <AssemblyOriginatorKeyFile>../servicestack.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
-
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
     <Reference Include="System.Net" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
-
     <Reference Include="..\..\lib\net45\ServiceStack.Interfaces.dll" />
     <Reference Include="..\..\lib\net45\ServiceStack.Text.dll" />
     <Reference Include="..\..\lib\net45\ServiceStack.Common.dll" />
   </ItemGroup>
-
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
     <DefineConstants>$(DefineConstants);NETSTANDARD2_0;ASYNC</DefineConstants>
   </PropertyGroup>
- 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
     <Reference Include="..\..\lib\netstandard2.0\ServiceStack.Interfaces.dll" />
     <Reference Include="..\..\lib\netstandard2.0\ServiceStack.Text.dll" />
     <Reference Include="..\..\lib\netstandard2.0\ServiceStack.Common.dll" />
   </ItemGroup>
- 
   <ItemGroup>
     <Folder Include="DataAnnotations\" />
   </ItemGroup>
-
+  <ItemGroup>
+    <PackageReference Include="MySqlConnector" Version="0.40.2" />
+  </ItemGroup>
 </Project>
