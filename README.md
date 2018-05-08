@@ -97,13 +97,21 @@ Each RDBMS includes a specialized dialect provider that encapsulated the differe
 to support OrmLite features. The available Dialect Providers for each RDBMS is listed below:
 
     SqlServerDialect.Provider      // Any SQL Server Version
-    SqlServer2012Dialect.Provider  // SQL Server 2012+
+    SqlServer2008Dialect.Provider  // SQL Server 2008
+    SqlServer2012Dialect.Provider  // SQL Server 2012
+    SqlServer2014Dialect.Provider  // SQL Server 2014
+    SqlServer2016Dialect.Provider  // SQL Server 2016
+    SqlServer2017Dialect.Provider  // SQL Server 2017+
     SqliteDialect.Provider         // Sqlite
     PostgreSqlDialect.Provider     // PostgreSQL 
     MySqlDialect.Provider          // MySql
     OracleDialect.Provider         // Oracle
     FirebirdDialect.Provider       // Firebird
     VistaDbDialect.Provider        // Vista DB
+
+There are a few SQL Server dialects in order to add support for newer features in each version
+(e.g. JSON in 2016+). For best results and breadth of features, it is recommended that you
+match the dialect with your version of SQL Server.
 
 To configure OrmLite you need the DB Connection string along the Dialect Provider of the RDBMS you're
 connecting to, e.g: 
