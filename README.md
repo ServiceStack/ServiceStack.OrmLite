@@ -22,12 +22,12 @@ OrmLite was designed with a focus on the core objectives:
 
 In OrmLite: **1 Class = 1 Table**. There should be no surprising or hidden behaviour, the Typed API
 that produces the Query 
-[doesn't impact how results get intuitvely mapped](http://stackoverflow.com/a/37443162/85785)
+[doesn't impact how results get intuitively mapped](http://stackoverflow.com/a/37443162/85785)
 to the returned POCO's which could be different to the POCO used to create the query, e.g. containing only 
 a subset of the fields you want populated.
 
 Any non-scalar properties (i.e. complex types) are text blobbed by default in a schema-less text field 
-using any of the [avilable pluggable text serializers](#pluggable-complex-type-serializers). 
+using any of the [available pluggable text serializers](#pluggable-complex-type-serializers). 
 Support for [POCO-friendly references](#reference-support-poco-style) is also available to provide 
 a convenient API to persist related models. Effectively this allows you to create a table from any 
 POCO type and it should persist as expected in a DB Table with columns for each of the classes 1st 
@@ -96,12 +96,7 @@ First Install the NuGet package of the RDBMS you want to use, e.g:
 Each RDBMS includes a specialized dialect provider that encapsulated the differences in each RDBMS 
 to support OrmLite features. The available Dialect Providers for each RDBMS is listed below:
 
-    SqlServerDialect.Provider      // Any SQL Server Version
-    SqlServer2008Dialect.Provider  // SQL Server 2008
-    SqlServer2012Dialect.Provider  // SQL Server 2012
-    SqlServer2014Dialect.Provider  // SQL Server 2014
-    SqlServer2016Dialect.Provider  // SQL Server 2016
-    SqlServer2017Dialect.Provider  // SQL Server 2017+
+    SqlServerDialect.Provider      // SQL Server Version 2012+
     SqliteDialect.Provider         // Sqlite
     PostgreSqlDialect.Provider     // PostgreSQL 
     MySqlDialect.Provider          // MySql
@@ -109,9 +104,17 @@ to support OrmLite features. The available Dialect Providers for each RDBMS is l
     FirebirdDialect.Provider       // Firebird
     VistaDbDialect.Provider        // Vista DB
 
-There are a few SQL Server dialects in order to add support for newer features in each version
-(e.g. JSON in 2016+). For best results and breadth of features, it is recommended that you
-match the dialect with your version of SQL Server.
+#### SQL Server Versions
+
+There are a number of different SQL Server dialects to take advantage of features available in each version. For any version before SQL Server 2008 please use `SqlServer2008Dialect.Provider`, for any other version please use the best matching version:
+
+    SqlServer2008Dialect.Provider  // SQL Server <= 2008
+    SqlServer2012Dialect.Provider  // SQL Server 2012
+    SqlServer2014Dialect.Provider  // SQL Server 2014
+    SqlServer2016Dialect.Provider  // SQL Server 2016
+    SqlServer2017Dialect.Provider  // SQL Server 2017+
+
+### Configure OrmLiteConnectionFactory
 
 To configure OrmLite you need the DB Connection string along the Dialect Provider of the RDBMS you're
 connecting to, e.g: 
