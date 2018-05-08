@@ -295,6 +295,11 @@ namespace ServiceStack.OrmLite
             return InternalSelect(fields, distinct:true);
         }
 
+        public virtual SqlExpression<T> SelectDistinct<Table1>(Expression<Func<Table1, object>> fields)
+        {
+            return InternalSelect(fields, distinct: true);
+        }
+
         public virtual SqlExpression<T> SelectDistinct<Table1, Table2>(Expression<Func<Table1, Table2, object>> fields)
         {
             return InternalSelect(fields, distinct: true);
