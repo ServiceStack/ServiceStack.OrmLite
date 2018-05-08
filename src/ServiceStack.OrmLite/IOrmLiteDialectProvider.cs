@@ -52,6 +52,8 @@ namespace ServiceStack.OrmLite
         IStringSerializer StringSerializer { get; set; }
 
         Func<string, string> ParamNameFilter { get; set; }
+        
+        Dictionary<string, string> Variables { get; }
 
         /// <summary>
         /// Quote the string so that it can be used inside an SQL-expression
