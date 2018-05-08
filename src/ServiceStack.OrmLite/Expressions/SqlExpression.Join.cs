@@ -229,7 +229,8 @@ namespace ServiceStack.OrmLite
 
             if (typeof(TModel) != typeof(List<object>) && 
                 typeof(TModel) != typeof(Dictionary<string, object>) &&
-                typeof(TModel) != typeof(object)) //dynamic
+                typeof(TModel) != typeof(object) && //dynamic
+                !typeof(TModel).IsValueTuple())
             {
                 selectDef = typeof(TModel).GetModelDefinition();
                 if (selectDef != modelDef && tableDefs.Contains(selectDef))

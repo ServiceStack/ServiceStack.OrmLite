@@ -168,21 +168,19 @@ namespace ServiceStack.OrmLite
                 var field = typeFields.GetAccessor(itemName);
                 if (field == null) break;
 
-                var dbValue = values != null
-                    ? values[i]
-                    : reader.GetValue(i);
-
+                var fieldType = field.FieldInfo.FieldType;
+                var converter = dialectProvider.GetConverter(fieldType);
+                                
+                var dbValue = converter.GetValue(reader, i, values);
                 if (dbValue == null)
                     continue;
 
-                var fieldType = field.FieldInfo.FieldType;
                 if (dbValue.GetType() == fieldType)
                 {
                     field.PublicSetterRef(ref row, dbValue);
                 }
                 else
                 {
-                    var converter = dialectProvider.GetConverter(fieldType);
                     var fieldValue = converter.FromDbValue(fieldType, dbValue);
                     field.PublicSetterRef(ref row, fieldValue);
                 }
