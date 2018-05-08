@@ -61,6 +61,8 @@ namespace ServiceStack.OrmLite.PostgreSQL
             this.Variables = new Dictionary<string, string>
             {
                 { OrmLiteVariables.SystemUtc, "now() at time zone 'utc'" },
+                { OrmLiteVariables.MaxText, "TEXT" },
+                { OrmLiteVariables.MaxTextUnicode, "TEXT" },
             };
         }
 
@@ -172,7 +174,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
             string fieldDefinition = null;
             if (fieldDef.CustomFieldDefinition != null)
             {
-                fieldDefinition = fieldDef.CustomFieldDefinition;
+                fieldDefinition = ResolveFragment(fieldDef.CustomFieldDefinition);
             }
             else
             {

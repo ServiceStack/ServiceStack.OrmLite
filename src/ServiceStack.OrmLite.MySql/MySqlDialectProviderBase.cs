@@ -46,6 +46,8 @@ namespace ServiceStack.OrmLite.MySql
             this.Variables = new Dictionary<string, string>
             {
                 { OrmLiteVariables.SystemUtc, "CURRENT_TIMESTAMP" },
+                { OrmLiteVariables.MaxText, "LONGTEXT" },
+                { OrmLiteVariables.MaxTextUnicode, "LONGTEXT" },
             };
         }
 

@@ -116,6 +116,8 @@ namespace ServiceStack.OrmLite.Oracle
             this.Variables = new Dictionary<string, string>
             {
                 { OrmLiteVariables.SystemUtc, "sys_extract_utc(systimestamp)" },
+                { OrmLiteVariables.MaxText, "VARCHAR2(2000)" },
+                { OrmLiteVariables.MaxTextUnicode, "NVARCHAR2(2000)" },
             };
         }
 
@@ -597,7 +599,7 @@ namespace ServiceStack.OrmLite.Oracle
 
         public override string GetColumnDefinition(FieldDefinition fieldDef)
         {
-            var fieldDefinition = fieldDef.CustomFieldDefinition 
+            var fieldDefinition = ResolveFragment(fieldDef.CustomFieldDefinition) 
                 ?? GetColumnTypeDefinition(fieldDef.FieldType, fieldDef.FieldLength, fieldDef.Scale);
 
             var sql = StringBuilderCache.Allocate();

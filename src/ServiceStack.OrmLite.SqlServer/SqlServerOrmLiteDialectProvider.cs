@@ -49,6 +49,8 @@ namespace ServiceStack.OrmLite.SqlServer
             this.Variables = new Dictionary<string, string>
             {
                 { OrmLiteVariables.SystemUtc, "SYSUTCDATETIME()" },
+                { OrmLiteVariables.MaxText, "VARCHAR(MAX)" },
+                { OrmLiteVariables.MaxTextUnicode, "NVARCHAR(MAX)" },
             };
         }
 
@@ -206,7 +208,7 @@ namespace ServiceStack.OrmLite.SqlServer
             if (fieldDef.IsRowVersion)
                 return $"{fieldDef.FieldName} rowversion NOT NULL";
 
-            var fieldDefinition = fieldDef.CustomFieldDefinition ??
+            var fieldDefinition = ResolveFragment(fieldDef.CustomFieldDefinition) ??
                 GetColumnTypeDefinition(fieldDef.ColumnType, fieldDef.FieldLength, fieldDef.Scale);
 
             var sql = StringBuilderCache.Allocate();

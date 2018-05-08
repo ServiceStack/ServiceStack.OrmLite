@@ -28,8 +28,7 @@ namespace ServiceStack.OrmLite.SqlServer.Converters
         {
             base.InitDbParam(p, fieldType);
 
-            var sqlParam = p as SqlParameter;
-            if (sqlParam == null) return;
+            if (!(p is SqlParameter sqlParam)) return;
 
             if (!UseUnicode)
             {

@@ -7,10 +7,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Converters
 {
     public class PostgreSqlStringConverter : StringConverter
     {
-        public override string ColumnDefinition
-        {
-            get { return "TEXT"; }
-        }
+        public override string ColumnDefinition => "TEXT";
 
         public override string GetColumnDefinition(int? stringLength)
         {
@@ -18,16 +15,13 @@ namespace ServiceStack.OrmLite.PostgreSQL.Converters
             if (stringLength == null || stringLength == StringLengthAttribute.MaxText)
                 return ColumnDefinition;
 
-            return "VARCHAR({0})".Fmt(stringLength.Value);
+            return $"VARCHAR({stringLength.Value})";
         }
     }
 
     public class PostgreSqlCharArrayConverter : CharArrayConverter
     {
-        public override string ColumnDefinition
-        {
-            get { return "TEXT"; }
-        }
+        public override string ColumnDefinition => "TEXT";
 
         public override string GetColumnDefinition(int? stringLength)
         {

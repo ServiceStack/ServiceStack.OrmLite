@@ -395,7 +395,7 @@ namespace ServiceStack.OrmLite
 
         public virtual string GetColumnDefinition(FieldDefinition fieldDef)
         {
-            var fieldDefinition = fieldDef.CustomFieldDefinition ?? 
+            var fieldDefinition = ResolveFragment(fieldDef.CustomFieldDefinition) ?? 
                 GetColumnTypeDefinition(fieldDef.ColumnType, fieldDef.FieldLength, fieldDef.Scale);
 
             var sql = StringBuilderCache.Allocate();
@@ -1189,10 +1189,18 @@ namespace ServiceStack.OrmLite
                     : null;
             }
 
-            if (!defaultValue.StartsWith("{"))
-                return defaultValue;
+            return ResolveFragment(defaultValue);
+        }
 
-            return Variables.TryGetValue(defaultValue, out var variable)
+        public virtual string ResolveFragment(string sql)
+        {
+            if (string.IsNullOrEmpty(sql))
+                return null;
+            
+            if (!sql.StartsWith("{"))
+                return sql;
+
+            return Variables.TryGetValue(sql, out var variable)
                 ? variable
                 : null;
         }

@@ -10,6 +10,9 @@ namespace ServiceStack.OrmLite.Tests.Issues
 
         [DecimalLength(12,3)]
         public decimal? Decimal { get; set; }
+        
+        [CustomField(OrmLiteVariables.MaxText)]
+        public string MaxText { get; set; }
     }
 
     [TestFixture]

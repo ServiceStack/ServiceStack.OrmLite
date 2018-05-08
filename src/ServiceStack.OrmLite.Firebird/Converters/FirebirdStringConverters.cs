@@ -21,16 +21,13 @@ namespace ServiceStack.OrmLite.Firebird.Converters
             if (stringLength.GetValueOrDefault() == StringLengthAttribute.MaxText)
                 return MaxColumnDefinition;
 
-            return "VARCHAR({0})".Fmt(stringLength.GetValueOrDefault(StringLength));
+            return $"VARCHAR({stringLength.GetValueOrDefault(StringLength)})";
         }
     }
 
     public class FirebirdCharArrayConverter : CharArrayConverter
     {
-        public override string MaxColumnDefinition
-        {
-            get { return DialectProvider.GetStringConverter().MaxColumnDefinition; }
-        }
+        public override string MaxColumnDefinition => DialectProvider.GetStringConverter().MaxColumnDefinition;
 
         public override string GetColumnDefinition(int? stringLength)
         {
