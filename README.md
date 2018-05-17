@@ -1477,6 +1477,84 @@ var q = db.From<Sale>()
     });
 ```
 
+### Unique Constraints
+
+In addition to creating an Index with unique constraints using `[Index(Unique=true)]` you can now use `[Unique]` to enforce a single column should only contain unique values or annotate the class with `[UniqueConstraint]` to specify a composite unique constraint, e.g:
+
+```csharp
+[UniqueConstraint(nameof(PartialUnique1), nameof(PartialUnique2), nameof(PartialUnique3))]
+public class UniqueTest
+{
+    [AutoIncrement]
+    public int Id { get; set; }
+
+    [Unique]
+    public string UniqueField { get; set; }
+
+    public string PartialUnique1 { get; set; }
+    public string PartialUnique2 { get; set; }
+    public string PartialUnique3 { get; set; }
+}
+```
+
+### Auto populated Guid Ids
+
+Support for Auto populating `Guid` Primary Keys was also added in this release with the new `[AutoId]` attribute, e.g:
+
+```csharp
+public class Table
+{
+    [AutoId]
+    public Guid Id { get; set; }
+}
+```
+
+In SQL Server it will populate `Id` primary key with `newid()`, in `PostgreSQL` it uses `uuid_generate_v4()` which requires installing the the **uuid-ossp** extension by running the SQL below on each PostgreSQL RDBMS it's used on:
+
+    CREATE EXTENSION IF NOT EXISTS "uuid-ossp"
+
+For all other RDBMS's OrmLite will populate the `Id` with `Guid.NewGuid()`. In all RDBMS's it will populate the `Id` property on `db.Insert()` or `db.Save()` with the new value, e.g:
+
+```csharp
+var row = new Table { ... };
+db.Insert(row);
+row.Id //= Auto populated with new Guid
+```
+
+### SQL Server 2012 Sequences
+
+The `[Sequence]` attribute can be used as an alternative to `[AutoIncrement]` for inserting rows with an auto incrementing integer value populated by SQL Server, but instead of needing an `IDENTITY` column it can populate a normal `INT` column from a user-defined Sequence, e.g:
+
+```csharp
+public class SequenceTest
+{
+    [Sequence("Seq_SequenceTest_Id"), ReturnOnInsert]
+    public int Id { get; set; }
+
+    public string Name { get; set; }
+    public string UserName { get; set; }
+    public string Email { get; set; }
+
+    [Sequence("Seq_Counter")]
+    public int Counter { get; set; }
+}
+
+var user = new SequenceTest { Name = "me", Email = "me@mydomain.com" };
+db.Insert(user);
+
+user.Id //= Populated by next value in "Seq_SequenceTest_Id" SQL Server Sequence
+```
+
+The new `[ReturnOnInsert]` attribute tells OrmLite which columns to return the values of, in this case it returns the new Sequence value the row was inserted with. Sequences offer more flexibility than `IDENTITY` columns where you can use multiple sequences in a table or have the same sequence shared across multiple tables.
+
+When creating tables, OrmLite will also create any missing Sequences automatically so you can continue to have reproducible tests and consistent Startups states that's unreliant on external state. But it doesn't drop sequences when OrmLite drops the table as they could have other external dependents.
+
+To be able to use the new sequence support you'll need to use an SQL Server dialect greater than SQL Server 2012+, e.g:
+
+```csharp
+var dbFactory = new OrmLiteConnectionFactory(connString, SqlServer2012Dialect.Provider);
+```
+
 ### SQL Server Table Hints
 
 Using the same JOIN Filter feature OrmLite also lets you add SQL Server Hints on JOIN Table expressions, e.g:
@@ -1638,6 +1716,38 @@ if (!db.ColumnExists<Poco>(x => x.Age)) //= false
 db.ColumnExists<Poco>(x => x.Age); //= true
 ```
 
+### Typed `Sql.Cast()` SQL Modifier
+
+The `Sql.Cast()` provides a cross-database abstraction for casting columns or expressions in SQL queries, e.g:
+
+```csharp
+db.Insert(new SqlTest { Value = 123.456 });
+
+var results = db.Select<(int id, string text)>(db.From<SqlTest>()
+    .Select(x => new {
+        x.Id,
+        text = Sql.Cast(x.Id, Sql.VARCHAR) + " : " + Sql.Cast(x.Value, Sql.VARCHAR) + " : " 
+             + Sql.Cast("1 + 2", Sql.VARCHAR) + " string"
+    }));
+
+results[0].text //= 1 : 123.456 : 3 string
+```
+
+### Typed `Column<T>` and `Table<T>` APIs
+
+You can use the `Column<T>` and `Table<T>()` methods to resolve the quoted names of a Column or Table within SQL Fragments (taking into account any configured aliases or naming strategies). 
+
+Usage Example of the new APIs inside a `CustomJoin()` expression used to join on a custom SELECT expression:
+
+```csharp
+q.CustomJoin($"LEFT JOIN (SELECT {q.Column<Job>(x => x.Id)} ...")
+q.CustomJoin($"LEFT JOIN (SELECT {q.Column<Job>(nameof(Job.Id))} ...")
+
+q.CustomJoin($"LEFT JOIN (SELECT {q.Column<Job>(x => x.Id, tablePrefix:true)} ...")
+//Equivalent to:
+q.CustomJoin($"LEFT JOIN (SELECT {q.Table<Job>()}.{q.Column<Job>(x => x.Id)} ...")
+```
+
 ### DB Parameter API's
 
 To enable even finer-grained control of parameterized queries we've added new overloads that take a collection of IDbDataParameter's:
@@ -1675,6 +1785,26 @@ OrmLiteConfig.OnDbNullFilter = fieldDef =>
     fieldDef.FieldType == typeof(string)
         ? "NULL"
         : null;
+```
+
+### Logging an Introspection
+
+One way to see what queries OrmLite generates is to enable a **debug** enabled logger, e.g:
+
+```csharp
+LogManager.LogFactory = new ConsoleLogFactory(debugEnabled:true);
+```
+
+Where it will log the generated SQL and Params OrmLite executes to the Console.
+
+### BeforeExecFilter and AfterExecFilter filters
+
+An alternative to debug logging which can easily get lost in the noisy stream of other debug messages is to use the `BeforeExecFilter` and `AfterExecFilter` filters where you can inspect executed commands with a custom lambda expression before and after each query is executed. So if one of your a queries are failing you can put a breakpoint in `BeforeExecFilter` to inspect the populated `IDbCommand` object before it's executed or use the `.GetDebugString()` extension method for an easy way to print the Generated SQL and DB Params to the Console:
+
+```csharp
+OrmLiteConfig.BeforeExecFilter = dbCmd => Console.WriteLine(dbCmd.GetDebugString());
+
+//OrmLiteConfig.AfterExecFilter = dbCmd => Console.WriteLine(dbCmd.GetDebugString());
 ```
 
 ### Exec, Result and String Filters
@@ -1914,6 +2044,26 @@ block.Area.Print(); //= 50
 
 block.DateFormat.Print(); //= 2016-06-08 (SQL Server)
 ```
+
+### Order by dynamic expressions
+
+The `[CustomSelect]` attribute can be used to populate a property with a dynamic SQL Expression instead of an existing column, e.g:
+
+```csharp
+public class FeatureRequest
+{
+    public int Id { get; set; }
+    public int Up { get; set; }
+    public int Down { get; set; }
+
+    [CustomSelect("1 + Up - Down")]
+    public int Points { get; set; }
+}
+```
+
+You can also order by the SQL Expression by referencing the property as you would a normal column. By extension this feature now also works in AutoQuery where you can [select it in a partial result set](http://docs.servicestack.net/autoquery-rdbms#custom-fields) and order the results by using its property name, e.g:
+
+    /features?fields=id,points&orderBy=points
 
 ### Custom SQL Fragments
 
