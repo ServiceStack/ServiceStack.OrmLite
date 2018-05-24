@@ -1,4 +1,6 @@
-﻿using NUnit.Framework;
+﻿using System.Collections.Generic;
+using NUnit.Framework;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {
@@ -14,7 +16,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 StringColumn = "4"
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {
@@ -36,7 +38,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 StringColumn = "4"
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {
@@ -63,7 +65,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 StringColumn = "4"
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {
@@ -90,7 +92,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 StringColumn = "4"
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {
@@ -116,7 +118,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 StringColumn = "4"
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {
@@ -143,7 +145,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 StringColumn = "4"
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {
