@@ -1364,9 +1364,7 @@ namespace ServiceStack.OrmLite
                 case ExpressionType.MultiplyChecked:
                 case ExpressionType.Divide:
                 case ExpressionType.Modulo:
-                case ExpressionType.And:
                 case ExpressionType.AndAlso:
-                case ExpressionType.Or:
                 case ExpressionType.OrElse:
                 case ExpressionType.LessThan:
                 case ExpressionType.LessThanOrEqual:
@@ -1376,9 +1374,11 @@ namespace ServiceStack.OrmLite
                 case ExpressionType.NotEqual:
                 case ExpressionType.Coalesce:
                 case ExpressionType.ArrayIndex:
+                case ExpressionType.And:
+                case ExpressionType.Or:
+                case ExpressionType.ExclusiveOr:
                 case ExpressionType.RightShift:
                 case ExpressionType.LeftShift:
-                case ExpressionType.ExclusiveOr:
                     //return "(" + VisitBinary(exp as BinaryExpression) + ")";
                     return VisitBinary(exp as BinaryExpression);
                 case ExpressionType.Negate:
@@ -2177,6 +2177,16 @@ namespace ServiceStack.OrmLite
                     return "MOD";
                 case ExpressionType.Coalesce:
                     return "COALESCE";
+                case ExpressionType.And:
+                    return "&";
+                case ExpressionType.Or:
+                    return "|";
+                case ExpressionType.ExclusiveOr:
+                    return "^";
+                case ExpressionType.LeftShift:
+                    return "<<";
+                case ExpressionType.RightShift:
+                    return ">>";
                 default:
                     return e.ToString();
             }
