@@ -875,6 +875,8 @@ namespace ServiceStack.OrmLite
             var pkValue = modelDef.PrimaryKey.GetValue(instance);
 
             var fieldDefs = modelDef.AllFieldDefinitionsArray.Where(x => x.IsReference);
+
+            bool updateInstance = false;
             foreach (var fieldDef in fieldDefs)
             {
                 var listInterface = fieldDef.FieldType.GetTypeWithGenericInterfaceOf(typeof(IList<>));
@@ -920,10 +922,15 @@ namespace ServiceStack.OrmLite
                         {
                             var refPkValue = refModelDef.PrimaryKey.GetValue(result);
                             refSelf.SetValueFn(instance, refPkValue);
-                            dbCmd.Update(instance);
+                            updateInstance = true;
                         }
                     }
                 }
+            }
+
+            if (updateInstance)
+            {
+                dbCmd.Update(instance);
             }
         }
 
