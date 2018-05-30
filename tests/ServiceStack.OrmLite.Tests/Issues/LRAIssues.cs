@@ -3,6 +3,7 @@ using System.Data;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Model;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
@@ -42,6 +43,30 @@ namespace ServiceStack.OrmLite.Tests.Issues
                             prioritaContenitore = cont.PrioritaId,
                             idLaboratorioEsecutoreCandidatoAnalisi = ana.LaboratorioEsecutoreCandidatoId
                         });
+            }
+        }
+
+        [Test]
+        public void Can_run_expression_using_captured_lambda_params()
+        {
+            using (var db = OpenDbConnection())
+            {
+                CreateTables(db);
+
+                var idContenitore = 1;
+                
+                var q = db.From<LRAAnalisi>()
+                    .Where(ana => ana.ContenitoreId == idContenitore)
+                    .And(ana => !Sql.In(ana.Id, db.From<LRAContenitore>()
+                            .Where(ris => ris.Id == ana.ContenitoreId)
+                            .Select(ris => new { Id = ris.Id })
+                        )
+                    )
+                    .Select(x => new { A = 1 });
+
+                var sql = q.ToSelectStatement();
+                sql.Print();
+                Assert.That(sql, Is.Not.Null);
             }
         }
 

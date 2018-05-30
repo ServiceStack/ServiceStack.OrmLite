@@ -231,8 +231,8 @@ namespace ServiceStack.OrmLite
 
         private SqlExpression<T> InternalSelect(Expression fields, bool distinct=false)
         {
-            sep = string.Empty;
-            useFieldName = true;
+            Reset(sep=string.Empty);
+
             CustomSelect = true;
             var selectSql = Visit(fields);
             if (!IsSqlClass(selectSql))
@@ -508,13 +508,22 @@ namespace ServiceStack.OrmLite
             return AppendToWhere("OR", predicate);
         }
 
+        private LambdaExpression originalLambda;
+
+        void Reset(string sep = " ", bool useFieldName = true)
+        {
+            this.sep = sep;
+            this.useFieldName = useFieldName;
+            this.originalLambda = null;
+        }
+
         protected SqlExpression<T> AppendToWhere(string condition, Expression predicate)
         {
             if (predicate == null)
                 return this;
 
-            useFieldName = true;
-            sep = " ";
+            Reset();
+
             var newExpr = WhereExpressionToString(Visit(predicate));
             return AppendToWhere(condition, newExpr);
         }
@@ -551,8 +560,7 @@ namespace ServiceStack.OrmLite
 
         private SqlExpression<T> InternalGroupBy(Expression keySelector)
         {
-            sep = string.Empty;
-            useFieldName = true;
+            Reset(sep=string.Empty);
 
             var groupByKey = Visit(keySelector);
             if (IsSqlClass(groupByKey))
@@ -619,8 +627,8 @@ namespace ServiceStack.OrmLite
         {
             if (predicate != null)
             {
-                useFieldName = true;
-                sep = " ";
+                Reset();
+
                 havingExpression = WhereExpressionToString(Visit(predicate));
                 if (!string.IsNullOrEmpty(havingExpression))
                     havingExpression = "HAVING " + havingExpression;
@@ -773,8 +781,8 @@ namespace ServiceStack.OrmLite
 
         private SqlExpression<T> OrderByInternal(Expression keySelector)
         {
-            sep = string.Empty;
-            useFieldName = true;
+            Reset(sep=string.Empty);
+
             orderByProperties.Clear();
             var orderBySql = Visit(keySelector);
             if (IsSqlClass(orderBySql))
@@ -813,8 +821,8 @@ namespace ServiceStack.OrmLite
 
         private SqlExpression<T> ThenByInternal(Expression keySelector)
         {
-            sep = string.Empty;
-            useFieldName = true;
+            Reset(sep=string.Empty);
+
             var orderBySql = Visit(keySelector);
             if (IsSqlClass(orderBySql))
             {
@@ -837,8 +845,8 @@ namespace ServiceStack.OrmLite
 
         private SqlExpression<T> OrderByDescendingInternal(Expression keySelector)
         {
-            sep = string.Empty;
-            useFieldName = true;
+            Reset(sep=string.Empty);
+
             orderByProperties.Clear();
             var orderBySql = Visit(keySelector);
             if (IsSqlClass(orderBySql))
@@ -889,8 +897,8 @@ namespace ServiceStack.OrmLite
 
         private SqlExpression<T> ThenByDescendingInternal(Expression keySelector)
         {
-            sep = string.Empty;
-            useFieldName = true;
+            Reset(sep=string.Empty);
+
             var orderBySql = Visit(keySelector);
             if (IsSqlClass(orderBySql))
             {
@@ -1036,8 +1044,7 @@ namespace ServiceStack.OrmLite
         /// </param>
         public virtual SqlExpression<T> Update(Expression<Func<T, object>> fields)
         {
-            sep = string.Empty;
-            useFieldName = false;
+            Reset(sep=string.Empty, useFieldName=false);
             this.UpdateFields = fields.GetFieldNames().ToList();
             return this;
         }
@@ -1062,8 +1069,7 @@ namespace ServiceStack.OrmLite
         /// </typeparam>
         public virtual SqlExpression<T> Insert<TKey>(Expression<Func<T, TKey>> fields)
         {
-            sep = string.Empty;
-            useFieldName = false;
+            Reset(sep=string.Empty, useFieldName=false);
             var fieldList = Visit(fields);
             InsertFields = fieldList.ToString().Split(',').Select(f => f.Trim()).ToList();
             return this;
@@ -1420,6 +1426,9 @@ namespace ServiceStack.OrmLite
 
         protected virtual object VisitLambda(LambdaExpression lambda)
         {
+            if (originalLambda == null)
+                originalLambda = lambda;
+            
             if (lambda.Body.NodeType == ExpressionType.MemberAccess && sep == " ")
             {
                 MemberExpression m = lambda.Body as MemberExpression;
@@ -2083,7 +2092,32 @@ namespace ServiceStack.OrmLite
             if (IsStaticStringMethod(m))
                 return VisitStaticStringMethodCall(m);
 
-            return CachedExpressionCompiler.Evaluate(m);
+            return EvaluateExpression(m);
+        }
+
+        private object EvaluateExpression(Expression m)
+        {
+            try
+            {
+                return CachedExpressionCompiler.Evaluate(m);
+            }
+            catch (InvalidOperationException e)
+            {
+                // Can't use expression.Compile() if lambda expression contains captured parameters.
+                // Fallback invokes expression with default parameters from original lambda expression  
+                
+                var lambda = Expression.Lambda(m, originalLambda.Parameters).Compile();
+
+                var exprParams = new object[originalLambda.Parameters.Count];
+                for (var i = 0; i < originalLambda.Parameters.Count; i++)
+                {
+                    var p = originalLambda.Parameters[i];
+                    exprParams[i] = p.Type.CreateInstance();
+                }
+
+                var ret = lambda.DynamicInvoke(exprParams);
+                return ret;
+            }
         }
 
         protected virtual List<object> VisitExpressionList(ReadOnlyCollection<Expression> original)
@@ -2335,7 +2369,7 @@ namespace ServiceStack.OrmLite
 
         private object ToInPartialString(Expression memberExpr, object quotedColName)
         {
-            var result = CachedExpressionCompiler.Evaluate(memberExpr);
+            var result = EvaluateExpression(memberExpr);
 
             var inArgs = Sql.Flatten(result as IEnumerable);
 
@@ -2448,7 +2482,7 @@ namespace ServiceStack.OrmLite
 
         protected string ConvertInExpressionToSql(MethodCallExpression m, object quotedColName)
         {
-            var argValue = CachedExpressionCompiler.Evaluate(m.Arguments[1]);
+            var argValue = EvaluateExpression(m.Arguments[1]);
 
             if (argValue == null)
                 return FalseLiteral; // "column IN (NULL)" is always false
