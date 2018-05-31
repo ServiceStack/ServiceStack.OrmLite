@@ -2103,6 +2103,9 @@ namespace ServiceStack.OrmLite
             }
             catch (InvalidOperationException e)
             {
+                if (originalLambda == null)
+                    throw;
+                    
                 // Can't use expression.Compile() if lambda expression contains captured parameters.
                 // Fallback invokes expression with default parameters from original lambda expression  
                 
