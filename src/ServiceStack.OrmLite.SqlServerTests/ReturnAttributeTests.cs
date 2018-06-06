@@ -1,5 +1,7 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
 using System.Configuration;
+using System.Runtime.InteropServices.ComTypes;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite;
 using NUnit.Framework;
@@ -130,5 +132,25 @@ namespace ReturnAttributeTests
                 Assert.That(sql, Is.EqualTo("INSERT INTO \"UserSequence\" (\"Id\",\"Name\",\"UserName\",\"Email\") OUTPUT INSERTED.\"Id\" VALUES (NEXT VALUE FOR \"Gen_UserSequence_Id\",@Name,@UserName,@Email)"), "normal Insert");
             }
         }
+
+        [Test]
+        public void Does_drop_and_create_tables_with_sequences()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropTable<UserSequence>();
+                Assert.That(!db.TableExists<UserSequence>());
+
+                db.CreateTable<UserSequence>();
+                Assert.That(db.TableExists<UserSequence>());
+
+                db.DropTable<UserSequence>();
+                Assert.That(!db.TableExists<UserSequence>());
+
+                db.CreateTable<UserSequence>();
+                Assert.That(db.TableExists<UserSequence>());
+            }
+        }
+
     }
 }

@@ -712,7 +712,7 @@ namespace ServiceStack.OrmLite.Tests
             //This version of MariaDB doesn't yet support 'LIMIT & IN/ALL/ANY/SOME subquery'
             if (Dialect == Dialect.MySql)
                 return;
-            if (Dialect == Dialect.SqlServer) //Only one expression can be specified in the select list when the subquery is not introduced with EXISTS.
+            if ((Dialect & Dialect.AnySqlServer) == Dialect) //Only one expression can be specified in the select list when the subquery is not introduced with EXISTS.
                 return;
 
             db.DropTable<ParentSelf>();

@@ -28,6 +28,9 @@ namespace ServiceStack.OrmLite.SqlServer
                 case nameof(Sql.As):
                     statement = $"{quotedColName} AS {DialectProvider.GetQuotedColumnName(RemoveQuoteFromAlias(args[0].ToString()))}";
                     break;
+                case nameof(Sql.Cast):
+                    statement = DialectProvider.SqlCast(quotedColName, args[0].ToString());
+                    break;
                 case nameof(Sql.Sum):
                 case nameof(Sql.Count):
                 case nameof(Sql.Min):

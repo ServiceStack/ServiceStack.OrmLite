@@ -14,7 +14,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 StringColumn = "test"
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {
@@ -36,7 +36,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 StringColumn = "test"
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {
@@ -58,7 +58,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 StringColumn = "test"
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {
@@ -79,7 +79,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 StringColumn = "test"
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {

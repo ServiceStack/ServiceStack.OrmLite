@@ -1,4 +1,6 @@
-﻿using NUnit.Framework;
+﻿using System.Collections.Generic;
+using NUnit.Framework;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {
@@ -14,7 +16,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 StringColumn = "4"
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {
@@ -36,7 +38,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 StringColumn = "4"
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {
@@ -63,7 +65,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 StringColumn = "4"
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {
@@ -90,7 +92,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 StringColumn = "4"
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {
@@ -116,7 +118,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 StringColumn = "4"
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {
@@ -143,7 +145,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 StringColumn = "4"
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {
@@ -152,6 +154,40 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 Assert.IsNotNull(actual);
                 Assert.Greater(actual.Count, 0);
                 CollectionAssert.Contains(actual, expected);
+            }
+        }
+
+        [Test]
+        public void Can_use_bitwise_operations_in_typed_query()
+        {
+            OrmLiteConfig.BeforeExecFilter = dbCmd => dbCmd.GetDebugString().Print();
+            
+            Init(5);
+
+            List<TestType> results;
+                
+            using (var db = OpenDbConnection())
+            {
+                results = db.Select<TestType>(x => (x.Id | 2) == 3);
+                Assert.That(results.Map(x => x.Id), Is.EquivalentTo(new[]{ 1, 3 }));
+                
+                results = db.Select<TestType>(x => (x.Id & 2) == 2);
+                Assert.That(results.Map(x => x.Id), Is.EquivalentTo(new[]{ 2, 3 }));
+
+                if ((Dialect & Dialect.AnySqlServer) != Dialect)
+                {
+                    results = db.Select<TestType>(x => (x.Id << 1) == 4);
+                    Assert.That(results.Map(x => x.Id), Is.EquivalentTo(new[]{ 2 }));
+                
+                    results = db.Select<TestType>(x => (x.Id >> 1) == 1);
+                    Assert.That(results.Map(x => x.Id), Is.EquivalentTo(new[]{ 2, 3 }));
+                }
+                
+                if ((Dialect & Dialect.AnySqlServer) == Dialect || Dialect == Dialect.MySql)
+                {
+                    results = db.Select<TestType>(x => (x.Id ^ 2) == 3);
+                    Assert.That(results.Map(x => x.Id), Is.EquivalentTo(new[]{ 1 }));
+                }
             }
         }
     }

@@ -47,17 +47,17 @@ namespace ServiceStack.OrmLite.Tests.Expression
             return item;
         }
 
-        protected void EstablishContext(int numberOfRandomObjects)
+        protected void Init(int numberOfRandomObjects)
         {
-            EstablishContext(numberOfRandomObjects, null);
+            Init(numberOfRandomObjects, null);
         }
 
-        protected void EstablishContext(int numberOfRandomObjects, params TestType[] obj)
+        protected void Init(int numberOfRandomObjects, params TestType[] obj)
         {
-            EstablishContext(null, numberOfRandomObjects, obj);
+            Init(null, numberOfRandomObjects, obj);
         }
 
-        protected void EstablishContext(IDbConnection db, int numberOfRandomObjects, params TestType[] obj)
+        protected void Init(IDbConnection db, int numberOfRandomObjects, params TestType[] obj)
         {
             if (obj == null)
                 obj = new TestType[0];

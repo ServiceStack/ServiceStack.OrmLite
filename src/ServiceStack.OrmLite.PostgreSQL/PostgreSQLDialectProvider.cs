@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,14 +18,15 @@ namespace ServiceStack.OrmLite.PostgreSQL
     {
         public static PostgreSqlDialectProvider Instance = new PostgreSqlDialectProvider();
 
-        public bool UseReturningForLastInsertId { get; set; }
+        public bool UseReturningForLastInsertId { get; set; } = true;
+
+        public string AutoIdGuidFunction { get; set; } = "uuid_generate_v4()";
 
         public PostgreSqlDialectProvider()
         {
             base.AutoIncrementDefinition = "";
             base.ParamString = ":";
             base.SelectIdentitySql = "SELECT LASTVAL()";
-            this.UseReturningForLastInsertId = true;
             this.NamingStrategy = new PostgreSqlNamingStrategy();
             this.StringSerializer = new JsonStringSerializer();
 
@@ -59,6 +61,8 @@ namespace ServiceStack.OrmLite.PostgreSQL
             this.Variables = new Dictionary<string, string>
             {
                 { OrmLiteVariables.SystemUtc, "now() at time zone 'utc'" },
+                { OrmLiteVariables.MaxText, "TEXT" },
+                { OrmLiteVariables.MaxTextUnicode, "TEXT" },
             };
         }
 
@@ -170,7 +174,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
             string fieldDefinition = null;
             if (fieldDef.CustomFieldDefinition != null)
             {
-                fieldDefinition = fieldDef.CustomFieldDefinition;
+                fieldDefinition = ResolveFragment(fieldDef.CustomFieldDefinition);
             }
             else
             {
@@ -221,6 +225,71 @@ namespace ServiceStack.OrmLite.PostgreSQL
             return definition;
         }
 
+        public override string GetAutoIdDefaultValue(FieldDefinition fieldDef)
+        {
+            return fieldDef.FieldType == typeof(Guid)
+                ? AutoIdGuidFunction
+                : null;
+        }
+
+        protected override bool ShouldSkipInsert(FieldDefinition fieldDef) => 
+            fieldDef.ShouldSkipInsert() || fieldDef.AutoId;
+
+        protected virtual bool ShouldReturnOnInsert(ModelDefinition modelDef, FieldDefinition fieldDef) =>
+            fieldDef.ReturnOnInsert || (fieldDef.IsPrimaryKey && fieldDef.AutoIncrement && HasInsertReturnValues(modelDef)) || fieldDef.AutoId;
+
+        public override bool HasInsertReturnValues(ModelDefinition modelDef) =>
+            modelDef.FieldDefinitions.Any(x => x.ReturnOnInsert || (x.AutoId && x.FieldType == typeof(Guid)));
+
+        public override void PrepareParameterizedInsertStatement<T>(IDbCommand cmd, ICollection<string> insertFields = null)
+        {
+            var sbColumnNames = StringBuilderCache.Allocate();
+            var sbColumnValues = StringBuilderCacheAlt.Allocate();
+            var sbReturningColumns = StringBuilderCacheAlt.Allocate();
+            var modelDef = OrmLiteUtils.GetModelDefinition(typeof(T));
+
+            cmd.Parameters.Clear();
+
+            foreach (var fieldDef in modelDef.FieldDefinitionsArray)
+            {
+                if (ShouldReturnOnInsert(modelDef, fieldDef))
+                {
+                    sbReturningColumns.Append(sbReturningColumns.Length == 0 ? "RETURNING " : ",");
+                    sbReturningColumns.Append(GetQuotedColumnName(fieldDef.FieldName));
+                }
+
+                if (ShouldSkipInsert(fieldDef))
+                    continue;
+
+                //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
+                if (insertFields != null && !insertFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase))
+                    continue;
+
+                if (sbColumnNames.Length > 0)
+                    sbColumnNames.Append(",");
+                if (sbColumnValues.Length > 0)
+                    sbColumnValues.Append(",");
+
+                try
+                {
+                    sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
+
+                    sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
+                    AddParameter(cmd, fieldDef);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("ERROR in PrepareParameterizedInsertStatement(): " + ex.Message, ex);
+                    throw;
+                }
+            }
+
+            var strReturning = StringBuilderCacheAlt.ReturnAndFree(sbReturningColumns);
+            cmd.CommandText = $"INSERT INTO {GetQuotedTableName(modelDef)} ({StringBuilderCache.ReturnAndFree(sbColumnNames)}) " +
+                              $"VALUES ({StringBuilderCacheAlt.ReturnAndFree(sbColumnValues)})"
+                              + strReturning;
+        }
+        
         //Convert xmin into an integer so it can be used in comparisons
         public const string RowVersionFieldComparer = "int8in(xidout(xmin))";
 
@@ -491,6 +560,9 @@ namespace ServiceStack.OrmLite.PostgreSQL
         public override string SqlCurrency(string fieldOrValue, string currencySymbol) => currencySymbol == "$"
             ? fieldOrValue + "::text::money::text"
             : "replace(" + fieldOrValue + "::text::money::text,'$','" + currencySymbol + "')";
+
+        public override string SqlCast(object fieldOrValue, string castAs) => 
+            $"{fieldOrValue}::{castAs}";
 
         protected NpgsqlConnection Unwrap(IDbConnection db)
         {

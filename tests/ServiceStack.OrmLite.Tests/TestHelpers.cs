@@ -1,19 +1,23 @@
+using System;
 using System.Collections.Generic;
 using System.Data;
 
 namespace ServiceStack.OrmLite.Tests
 {
+    [Flags]
     public enum Dialect
     {
-        Sqlite,
-        SqlServer,
-        SqlServer2012,
-        PostgreSql,
-        MySql,
-        SqlServerMdf,
-        Oracle,
-        Firebird,
-        VistaDb,
+        Sqlite = 1,
+        SqlServer = 2,
+        SqlServer2008 = 4,
+        SqlServer2012 = 8,
+        PostgreSql = 16,
+        MySql = 32,
+        SqlServerMdf = 64,
+        Oracle = 128,
+        Firebird = 256,
+        VistaDb = 512,
+        AnySqlServer = SqlServer | SqlServer2008 | SqlServer2012 | SqlServerMdf,
     }
 
     public static class TestHelpers

@@ -93,8 +93,11 @@ namespace ServiceStack.OrmLite
                 var belongToAttribute = propertyInfo.FirstAttribute<BelongToAttribute>();
                 var isFirst = i++ == 0;
 
+                var isAutoId = propertyInfo.HasAttribute<AutoIdAttribute>();
+
                 var isPrimaryKey = (!hasPkAttr && (propertyInfo.Name == OrmLiteConfig.IdField || (!hasIdField && isFirst)))
-                    || propertyInfo.HasAttributeNamed(typeof(PrimaryKeyAttribute).Name);
+                    || propertyInfo.HasAttributeNamed(typeof(PrimaryKeyAttribute).Name)
+                    || isAutoId;
 
                 var isRowVersion = propertyInfo.Name == ModelDefinition.RowVersionName
                     && (propertyInfo.PropertyType == typeof(ulong) || propertyInfo.PropertyType == typeof(byte[]));
@@ -142,6 +145,7 @@ namespace ServiceStack.OrmLite
                     AutoIncrement =
                         isPrimaryKey &&
                         propertyInfo.HasAttribute<AutoIncrementAttribute>(),
+                    AutoId = isAutoId,
                     IsIndexed = !isPrimaryKey && isIndex,
                     IsUniqueIndex = isUnique,
                     IsClustered = indexAttr != null && indexAttr.Clustered,

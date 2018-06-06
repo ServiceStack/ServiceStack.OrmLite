@@ -1,6 +1,6 @@
 ﻿using System.Data;
 using System.Xml;
-//using System.Xml.Linq;
+using System.Xml.Linq;
 
 namespace ServiceStack.OrmLite.Dapper
 {
@@ -12,6 +12,7 @@ namespace ServiceStack.OrmLite.Dapper
             parameter.DbType = DbType.Xml;
         }
     }
+
     internal sealed class XmlDocumentHandler : XmlTypeHandler<XmlDocument>
     {
         protected override XmlDocument Parse(string xml)
@@ -20,16 +21,19 @@ namespace ServiceStack.OrmLite.Dapper
             doc.LoadXml(xml);
             return doc;
         }
+
         protected override string Format(XmlDocument xml) => xml.OuterXml;
     }
-    //internal sealed class XDocumentHandler : XmlTypeHandler<XDocument>
-    //{
-    //    protected override XDocument Parse(string xml) => XDocument.Parse(xml);
-    //    protected override string Format(XDocument xml) => xml.ToString();
-    //}
-    //internal sealed class XElementHandler : XmlTypeHandler<XElement>
-    //{
-    //    protected override XElement Parse(string xml) => XElement.Parse(xml);
-    //    protected override string Format(XElement xml) => xml.ToString();
-    //}
+
+    internal sealed class XDocumentHandler : XmlTypeHandler<XDocument>
+    {
+        protected override XDocument Parse(string xml) => XDocument.Parse(xml);
+        protected override string Format(XDocument xml) => xml.ToString();
+    }
+
+    internal sealed class XElementHandler : XmlTypeHandler<XElement>
+    {
+        protected override XElement Parse(string xml) => XElement.Parse(xml);
+        protected override string Format(XElement xml) => xml.ToString();
+    }
 }

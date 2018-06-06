@@ -2,7 +2,7 @@
 
 namespace ServiceStack.OrmLite.Dapper
 {
-    partial class DynamicParameters
+    public partial class DynamicParameters
     {
         // The type here is used to differentiate the cache by type via generics
         // ReSharper disable once UnusedTypeParameter

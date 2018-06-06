@@ -20,6 +20,8 @@ namespace ServiceStack.OrmLite.Tests.Issues
 
         [Reference]
         public ChildSelfRef Child2 { get; set; }
+        
+        public ulong RowVersion { get; set; }
     }
 
     public class ChildSelfRef

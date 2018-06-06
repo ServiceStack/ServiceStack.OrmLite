@@ -32,7 +32,7 @@
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
-    <PackageReference Include="Mysql.Data" Version="6.9.10" />
+    <PackageReference Include="Mysql.Data" Version="6.9.11" />
 
     <Reference Include="System.Net" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -47,7 +47,7 @@
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <PackageReference Include="Mysql.Data" Version="8.0.9-dmr" />
+    <PackageReference Include="Mysql.Data" Version="8.0.11" />
 
     <Reference Include="..\..\lib\netstandard2.0\ServiceStack.Interfaces.dll" />
     <Reference Include="..\..\lib\netstandard2.0\ServiceStack.Text.dll" />

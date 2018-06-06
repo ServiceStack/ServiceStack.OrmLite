@@ -125,7 +125,7 @@ namespace ServiceStack.OrmLite.Tests
             return base.GetMemberExpression(m);
         }
 
-        protected override string GetQuotedColumnName(ModelDefinition tableDef, String memberName)
+        protected override string GetQuotedColumnName(ModelDefinition tableDef, string memberName)
         {
             if (useFieldName)
             {
@@ -151,7 +151,7 @@ namespace ServiceStack.OrmLite.Tests
             var nonInheritedProperties = GetCurrentPropertiesWithoutBase(tableDef);
             while (curType != null && !nonInheritedProperties.Contains(memberName))
             {
-                curType = curType.BaseType();
+                curType = curType.BaseType;
                 nonInheritedProperties = GetCurrentPropertiesWithoutBase(curType?.GetModelMetadata());
             }
 

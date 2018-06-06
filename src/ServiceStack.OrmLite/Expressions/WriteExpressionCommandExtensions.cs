@@ -88,7 +88,7 @@ namespace ServiceStack.OrmLite
 
             return dbCmd;
         }
-
+        
         public static int UpdateAdd<T>(this IDbCommand dbCmd,
             Expression<Func<T>> updateFields,
             SqlExpression<T> q,
@@ -114,12 +114,30 @@ namespace ServiceStack.OrmLite
             return dbCmd;
         }
 
-        public static int UpdateNonDefaults<T>(this IDbCommand dbCmd, T item, Expression<Func<T, bool>> obj)
+        public static int UpdateOnly<T>(this IDbCommand dbCmd,
+            Dictionary<string, object> updateFields,
+            Expression<Func<T, bool>> where,
+            Action<IDbCommand> commandFilter = null)
+        {
+            if (updateFields == null)
+                throw new ArgumentNullException(nameof(updateFields));
+
+            OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, updateFields.FromObjectDictionary<T>());
+
+            var q = dbCmd.GetDialectProvider().SqlExpression<T>();
+            q.Where(where);
+            q.PrepareUpdateStatement(dbCmd, updateFields);
+            commandFilter?.Invoke(dbCmd);
+
+            return dbCmd.ExecNonQuery();
+        }
+
+        public static int UpdateNonDefaults<T>(this IDbCommand dbCmd, T item, Expression<Func<T, bool>> where)
         {
             OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, item);
 
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
-            q.Where(obj);
+            q.Where(@where);
             q.PrepareUpdateStatement(dbCmd, item, excludeDefaults: true);
             return dbCmd.ExecNonQuery();
         }

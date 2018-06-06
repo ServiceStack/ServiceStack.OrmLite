@@ -16,7 +16,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 StringColumn = "4"
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {
@@ -42,7 +42,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 StringColumn = "4"
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {
@@ -64,7 +64,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 StringColumn = "4"
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {
@@ -86,7 +86,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 StringColumn = "4"
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {
@@ -112,7 +112,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 StringColumn = "4"
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {
@@ -134,7 +134,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 StringColumn = "4"
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {
@@ -160,7 +160,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 StringColumn = "4"
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {
@@ -182,7 +182,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 StringColumn = "4"
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {
@@ -208,7 +208,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 StringColumn = "4"
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {
@@ -230,7 +230,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 StringColumn = "4"
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {
@@ -253,7 +253,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 NullableCol = new TestType { StringColumn = "sometext" }
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {
@@ -276,7 +276,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 NullableCol = new TestType { StringColumn = "sometext" }
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {
@@ -302,7 +302,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 NullableCol = new TestType { StringColumn = "sometext" }
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             var actual = OpenDbConnection().Select<TestType>(q => q.NullableCol == columnValue);
 

@@ -32,6 +32,8 @@ namespace ServiceStack.OrmLite.Sqlite
             this.Variables = new Dictionary<string, string>
             {
                 { OrmLiteVariables.SystemUtc, "CURRENT_TIMESTAMP" },
+                { OrmLiteVariables.MaxText, "VARCHAR(1000000)" },
+                { OrmLiteVariables.MaxTextUnicode, "NVARCHAR(1000000)" },
             };
         }
 

@@ -65,6 +65,8 @@ namespace ServiceStack.OrmLite.VistaDB
             this.Variables = new Dictionary<string, string>
             {
                 { OrmLiteVariables.SystemUtc, "GetDate()" },
+                { OrmLiteVariables.MaxText, "VARCHAR(MAX)" },
+                { OrmLiteVariables.MaxTextUnicode, "NVARCHAR(MAX)" },
             };
         }
 
@@ -158,7 +160,7 @@ namespace ServiceStack.OrmLite.VistaDB
 
         public override string GetColumnDefinition(FieldDefinition fieldDef)
         {
-            var fieldDefinition = fieldDef.CustomFieldDefinition 
+            var fieldDefinition = ResolveFragment(fieldDef.CustomFieldDefinition) 
                 ?? GetColumnTypeDefinition(fieldDef.FieldType, fieldDef.FieldLength, fieldDef.Scale);
 
             var sql = StringBuilderCache.Allocate();

@@ -197,6 +197,22 @@ namespace ServiceStack.OrmLite.Tests.Issues
         }
 
         [Test]
+        public void Can_query_sub_expression_using_lambda()
+        {
+            using (var db = OpenDbConnection())
+            {
+                var q = db.From<Order3>()
+                    .Where(x => Sql.In(x.Person2Id,
+                        db.From<Person2>()
+                            .Where(p => p.Id == x.Person2Id)
+                            .Select(p => new {p.Id})
+                    ));
+
+                q.ToSelectStatement().Print();
+            }
+        }
+
+        [Test]
         public void SubExpressions_TestMethod1()
         {
             using (var db = OpenDbConnection())

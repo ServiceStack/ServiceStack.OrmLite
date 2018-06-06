@@ -12,7 +12,9 @@ namespace ServiceStack.OrmLite.Tests
 {
     public class Config
     {
+        public static Dialect DefaultDialect = Dialect.Sqlite;
         public const bool EnableDebugLogging = false;
+
         public static string SqliteMemoryDb = ":memory:";
         public static string SqliteFileDir = "~/App_Data/".MapAbsolutePath();
         public static string SqliteFileDb = "~/App_Data/db.sqlite".MapAbsolutePath();
@@ -25,7 +27,6 @@ namespace ServiceStack.OrmLite.Tests
         public static string PostgreSqlDb = "Server=localhost;Port=5432;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200";
         public static string FirebirdDb = @"User=SYSDBA;Password=masterkey;Database=C:\src\ServiceStack.OrmLite\tests\ServiceStack.OrmLite.Tests\App_Data\TEST.FDB;DataSource=localhost;Dialect=3;charset=ISO8859_1;";
 
-        public static Dialect DefaultDialect = Dialect.Sqlite;
 
         public static IOrmLiteDialectProvider DefaultProvider = SqlServerDialect.Provider;
         public static string DefaultConnection = SqlServerBuildDb;
@@ -134,6 +135,8 @@ namespace ServiceStack.OrmLite.Tests
                     return dbFactory;
                 case Dialect.SqlServer:
                     return Init(Config.SqlServerBuildDb, SqlServerDialect.Provider);
+                case Dialect.SqlServer2008:
+                    return Init(Config.SqlServerBuildDb, SqlServer2008Dialect.Provider);
                 case Dialect.SqlServer2012:
                     return Init(Config.SqlServerBuildDb, SqlServer2012Dialect.Provider);
                 case Dialect.MySql:

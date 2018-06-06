@@ -2,7 +2,6 @@
 
 namespace ServiceStack.OrmLite.Dapper
 {
-
     /// <summary>
     /// Additional state flags that control command behaviour
     /// </summary>
@@ -26,5 +25,4 @@ namespace ServiceStack.OrmLite.Dapper
         /// </summary>
         NoCache = 4,
     }
-
 }

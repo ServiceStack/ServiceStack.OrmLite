@@ -13,7 +13,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
         [Test]
         public void Can_select_where_and_limit_expression()
         {
-            EstablishContext(20);
+            Init(20);
 
             using (var db = OpenDbConnection())
             {

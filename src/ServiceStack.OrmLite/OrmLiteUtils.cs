@@ -33,7 +33,7 @@ namespace ServiceStack.OrmLite
         internal const string AsyncRequiresNet45Error = "Async support is only available in .NET 4.5 builds";
 
         const int maxCachedIndexFields = 10000;
-        private static Dictionary<IndexFieldsCacheKey, Tuple<FieldDefinition, int, IOrmLiteConverter>[]> indexFieldsCache 
+        private static readonly Dictionary<IndexFieldsCacheKey, Tuple<FieldDefinition, int, IOrmLiteConverter>[]> indexFieldsCache 
             = new Dictionary<IndexFieldsCacheKey, Tuple<FieldDefinition, int, IOrmLiteConverter>[]>(maxCachedIndexFields);
 
         private static readonly ILog Log = LogManager.GetLogger(typeof(OrmLiteUtils));
@@ -55,6 +55,11 @@ namespace ServiceStack.OrmLite
 
         public static void DebugCommand(this ILog log, IDbCommand cmd)
         {
+            log.Debug(GetDebugString(cmd));
+        }
+
+        public static string GetDebugString(this IDbCommand cmd)
+        {
             var sb = StringBuilderCache.Allocate();
 
             sb.Append("SQL: ").Append(cmd.CommandText);
@@ -62,18 +67,18 @@ namespace ServiceStack.OrmLite
             if (cmd.Parameters.Count > 0)
             {
                 sb.AppendLine()
-                  .Append("PARAMS: ");
+                    .Append("PARAMS: ");
 
                 for (var i = 0; i < cmd.Parameters.Count; i++)
                 {
-                    var p = (IDataParameter)cmd.Parameters[i];
+                    var p = (IDataParameter) cmd.Parameters[i];
                     if (i > 0)
                         sb.Append(", ");
                     sb.Append($"{p.ParameterName}={p.Value}");
                 }
             }
 
-            log.Debug(StringBuilderCache.ReturnAndFree(sb));
+            return StringBuilderCache.ReturnAndFree(sb);
         }
 
         public static T CreateInstance<T>()
@@ -81,9 +86,13 @@ namespace ServiceStack.OrmLite
             return (T)ReflectionExtensions.CreateInstance<T>();
         }
 
+        internal static bool IsTuple(this Type type) => type.Name.StartsWith("Tuple`", StringComparison.Ordinal);
+
+        internal static bool IsValueTuple(this Type type) => type.Name.StartsWith("ValueTuple`", StringComparison.Ordinal);
+
         public static bool IsScalar<T>()
         {
-            var isScalar = typeof(T).IsValueType && !typeof(T).Name.StartsWith("ValueTuple`", StringComparison.Ordinal) || typeof(T) == typeof(string);
+            var isScalar = typeof(T).IsValueType && !typeof(T).IsValueTuple() || typeof(T) == typeof(string);
             return isScalar;
         }
 
@@ -101,7 +110,7 @@ namespace ServiceStack.OrmLite
 
                     var values = new object[reader.FieldCount];
 
-                    if (typeof(T).Name.StartsWith("ValueTuple`"))
+                    if (typeof(T).IsValueTuple())
                         return reader.ConvertToValueTuple<T>(values, dialectProvider);
 
                     var row = CreateInstance<T>();
@@ -159,21 +168,19 @@ namespace ServiceStack.OrmLite
                 var field = typeFields.GetAccessor(itemName);
                 if (field == null) break;
 
-                var dbValue = values != null
-                    ? values[i]
-                    : reader.GetValue(i);
-
+                var fieldType = field.FieldInfo.FieldType;
+                var converter = dialectProvider.GetConverter(fieldType);
+                                
+                var dbValue = converter.GetValue(reader, i, values);
                 if (dbValue == null)
                     continue;
 
-                var fieldType = field.FieldInfo.FieldType;
                 if (dbValue.GetType() == fieldType)
                 {
                     field.PublicSetterRef(ref row, dbValue);
                 }
                 else
                 {
-                    var converter = dialectProvider.GetConverter(fieldType);
                     var fieldValue = converter.FromDbValue(fieldType, dbValue);
                     field.PublicSetterRef(ref row, fieldValue);
                 }
@@ -222,7 +229,7 @@ namespace ServiceStack.OrmLite
                 }
                 return (List<T>)(object)to.ToList();
             }
-            if (typeof(T).Name.StartsWith("ValueTuple`", StringComparison.Ordinal))
+            if (typeof(T).IsValueTuple())
             {
                 var to = new List<T>();
                 var values = new object[reader.FieldCount];
@@ -236,7 +243,7 @@ namespace ServiceStack.OrmLite
                 }
                 return to;
             }
-            if (typeof(T).Name.StartsWith("Tuple`", StringComparison.Ordinal))
+            if (typeof(T).IsTuple())
             {
                 var to = new List<T>();
                 using (reader)
@@ -777,7 +784,7 @@ namespace ServiceStack.OrmLite
 
         public static bool IsRefType(this Type fieldType)
         {
-            return (!fieldType.UnderlyingSystemType().IsValueType
+            return (!fieldType.UnderlyingSystemType.IsValueType
                 || JsConfig.TreatValueAsRefTypes.Contains(fieldType.IsGenericType
                     ? fieldType.GetGenericTypeDefinition()
                     : fieldType))
@@ -950,15 +957,24 @@ namespace ServiceStack.OrmLite
             }
         }
 
+        [Obsolete("Use dialectProvider.GetNonDefaultValueInsertFields()")]
         public static List<string> GetNonDefaultValueInsertFields<T>(T obj)
+        {
+            return OrmLiteConfig.DialectProvider.GetNonDefaultValueInsertFields(obj);
+        }
+        
+        public static List<string> GetNonDefaultValueInsertFields<T>(this IOrmLiteDialectProvider dialectProvider, T obj)
         {
             var insertFields = new List<string>();
             var modelDef = typeof(T).GetModelDefinition();
             foreach (var fieldDef in modelDef.FieldDefinitionsArray)
             {
-                if (!string.IsNullOrEmpty(fieldDef.DefaultValue))
+                if (!string.IsNullOrEmpty(dialectProvider.GetDefaultValue(fieldDef)))
                 {
-                    var value = fieldDef.GetValue(obj);
+                    if (fieldDef.AutoId)
+                        continue;
+                    
+                    var value = fieldDef.GetValue(obj);    
                     if (value == null || value.Equals(fieldDef.FieldTypeDefaultValue))
                         continue;
                 }

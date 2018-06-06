@@ -39,7 +39,7 @@ namespace ServiceStack.OrmLite
         internal static Task<int> ExecuteSqlAsync(this IDbCommand dbCmd, string sql, object anonType, CancellationToken token)
         {
             if (anonType != null)
-                dbCmd.SetParameters(anonType.ToObjectDictionary(), excludeDefaults: false);
+                dbCmd.SetParameters(anonType.ToObjectDictionary(), excludeDefaults: false, sql:ref sql);
 
             dbCmd.CommandText = sql;
 
@@ -269,7 +269,7 @@ namespace ServiceStack.OrmLite
             var dialectProvider = dbCmd.GetDialectProvider();
 
             dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd,
-                insertFields: OrmLiteUtils.GetNonDefaultValueInsertFields(obj));
+                insertFields: dialectProvider.GetNonDefaultValueInsertFields(obj));
 
             dialectProvider.SetParameterValues<T>(dbCmd, obj);
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq.Expressions;
 
@@ -121,6 +122,17 @@ namespace ServiceStack.OrmLite
             Action<IDbCommand> commandFilter = null)
         {
             return dbConn.Exec(dbCmd => dbCmd.UpdateAdd(updateFields, q, commandFilter));
+        }
+
+        /// <summary>
+        /// Updates all values from Object Dictionary matching the where condition. E.g
+        /// 
+        ///   db.UpdateOnly&lt;Person&gt;(new Dictionary&lt;string,object&lt; { {"FirstName", "JJ"} }, where:p => p.FirstName == "Jimi");
+        ///   UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("FirstName" = 'Jimi')
+        /// </summary>
+        public static int UpdateOnly<T>(this IDbConnection dbConn, Dictionary<string, object> updateFields, Expression<Func<T, bool>> obj)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.UpdateOnly(updateFields, obj));
         }
 
         /// <summary>

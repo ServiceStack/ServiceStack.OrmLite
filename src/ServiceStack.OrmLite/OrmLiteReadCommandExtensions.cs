@@ -37,6 +37,8 @@ namespace ServiceStack.OrmLite
             if (Log.IsDebugEnabled)
                 Log.DebugCommand(dbCmd);
 
+            OrmLiteConfig.BeforeExecFilter?.Invoke(dbCmd);
+
             return dbCmd.ExecuteReader();
         }
 
@@ -52,6 +54,8 @@ namespace ServiceStack.OrmLite
 
             if (Log.IsDebugEnabled)
                 Log.DebugCommand(dbCmd);
+
+            OrmLiteConfig.BeforeExecFilter?.Invoke(dbCmd);
 
             return dbCmd.ExecuteReader();
         }
@@ -138,6 +142,70 @@ namespace ServiceStack.OrmLite
             ) ? enumerable : null;
         }
 
+        internal static IDbCommand SetParameters(this IDbCommand dbCmd, Dictionary<string, object> dict, bool excludeDefaults, ref string sql)
+        {
+            if (dict == null)
+                return dbCmd;
+
+            dbCmd.Parameters.Clear();
+            lastQueryType = null;
+            var dialectProvider = dbCmd.GetDialectProvider();
+
+            var paramIndex = 0;
+            var sqlCopy = sql; //C# doesn't allow changing ref params in lambda's
+
+            foreach (var kvp in dict)
+            {
+                var value = kvp.Value;
+                var propName = kvp.Key;
+                if (excludeDefaults && value == null) continue;
+                
+                var inValues = sql != null ? GetMultiValues(value) : null;
+                if (inValues != null)
+                {
+                    var propType = value?.GetType() ?? typeof(object);
+                    var sb = StringBuilderCache.Allocate();
+                    foreach (var item in inValues)
+                    {
+                        var p = dbCmd.CreateParameter();
+                        p.ParameterName = "v" + paramIndex++;
+
+                        if (sb.Length > 0)
+                            sb.Append(',');
+                        sb.Append(dialectProvider.ParamString + p.ParameterName);
+
+                        p.Direction = ParameterDirection.Input;
+                        dialectProvider.InitDbParam(p, item.GetType());
+
+                        dialectProvider.SetParamValue(p, item, item.GetType());
+
+                        dbCmd.Parameters.Add(p);
+                    }
+
+                    var sqlIn = StringBuilderCache.ReturnAndFree(sb);
+                    if (string.IsNullOrEmpty(sqlIn))
+                        sqlIn = "NULL";
+                    sqlCopy = sqlCopy?.Replace(dialectProvider.ParamString + propName, sqlIn);
+                    if (dialectProvider.ParamString != "@")
+                        sqlCopy = sqlCopy?.Replace("@" + propName, sqlIn);
+                }
+                else
+                {
+                    var p = dbCmd.CreateParameter();
+                    p.ParameterName = propName;
+    
+                    p.Direction = ParameterDirection.Input;
+                    p.Value = value ?? DBNull.Value;
+                    if (value != null)
+                        dialectProvider.InitDbParam(p, value.GetType());
+    
+                    dbCmd.Parameters.Add(p);
+                }
+            }
+
+            return dbCmd;
+        }
+
         internal static IDbCommand SetParameters(this IDbCommand dbCmd, Type type, object anonType, bool excludeDefaults, ref string sql)
         {
             if (anonType == null)
@@ -154,18 +222,18 @@ namespace ServiceStack.OrmLite
 
             var sqlCopy = sql; //C# doesn't allow changing ref params in lambda's
 
+            var paramIndex = 0;
             anonType.ToObjectDictionary().ForEachParam(modelDef, excludeDefaults, (propName, columnName, value) =>
             {
                 var propType = value?.GetType() ?? typeof(object);
                 var inValues = GetMultiValues(value);
                 if (inValues != null)
                 {
-                    var i = 0;
                     var sb = StringBuilderCache.Allocate();
                     foreach (var item in inValues)
                     {
                         var p = dbCmd.CreateParameter();
-                        p.ParameterName = "v" + i++;
+                        p.ParameterName = "v" + paramIndex++;
 
                         if (sb.Length > 0)
                             sb.Append(',');
@@ -174,21 +242,14 @@ namespace ServiceStack.OrmLite
                         p.Direction = ParameterDirection.Input;
                         dialectProvider.InitDbParam(p, item.GetType());
 
-                        var pValue = dialectProvider.GetFieldValue(item.GetType(), item);
-                        var valueType = pValue?.GetType();
-                        if (valueType != null && valueType != propType)
-                            dialectProvider.InitDbParam(p, valueType);
-
-                        p.Value = pValue == null ?
-                            DBNull.Value
-                          : p.DbType == DbType.String ?
-                            pValue.ToString() :
-                            pValue;
+                        dialectProvider.SetParamValue(p, item, item.GetType());
 
                         dbCmd.Parameters.Add(p);
                     }
 
                     var sqlIn = StringBuilderCache.ReturnAndFree(sb);
+                    if (string.IsNullOrEmpty(sqlIn))
+                        sqlIn = "NULL";
                     sqlCopy = sqlCopy?.Replace(dialectProvider.ParamString + propName, sqlIn);
                     if (dialectProvider.ParamString != "@")
                         sqlCopy = sqlCopy?.Replace("@" + propName, sqlIn);
@@ -200,26 +261,10 @@ namespace ServiceStack.OrmLite
                     p.Direction = ParameterDirection.Input;
                     dialectProvider.InitDbParam(p, propType);
 
-                    if (fieldMap != null && fieldMap.TryGetValue(columnName, out var fieldDef))
-                    {
-                        value = dialectProvider.GetFieldValue(fieldDef, value);
-                        var valueType = value?.GetType();
-                        if (valueType != null && valueType != propType)
-                            dialectProvider.InitDbParam(p, valueType);
-                    }
-                    else
-                    {
-                        value = dialectProvider.GetFieldValue(propType, value);
-                        var valueType = value?.GetType();
-                        if (valueType != null && valueType != propType)
-                            dialectProvider.InitDbParam(p, valueType);
-                    }
+                    FieldDefinition fieldDef = null;
+                    fieldMap?.TryGetValue(columnName, out fieldDef);
 
-                    p.Value = value == null ?
-                        DBNull.Value
-                        : p.DbType == DbType.String ?
-                            value.ToString() :
-                            value;
+                    dialectProvider.SetParamValue(p, value, propType, fieldDef);
 
                     dbCmd.Parameters.Add(p);
                 }
@@ -227,6 +272,30 @@ namespace ServiceStack.OrmLite
 
             sql = sqlCopy;
             return dbCmd;
+        }
+
+        internal static void SetParamValue(this IOrmLiteDialectProvider dialectProvider, IDbDataParameter p, object value, Type propType, FieldDefinition fieldDef=null)
+        {
+            if (fieldDef != null)
+            {
+                value = dialectProvider.GetFieldValue(fieldDef, value);
+                var valueType = value?.GetType();
+                if (valueType != null && valueType != propType)
+                    dialectProvider.InitDbParam(p, valueType);
+            }
+            else
+            {
+                value = dialectProvider.GetFieldValue(propType, value);
+                var valueType = value?.GetType();
+                if (valueType != null && valueType != propType)
+                    dialectProvider.InitDbParam(p, valueType);
+            }
+
+            p.Value = value == null
+                ? DBNull.Value
+                : p.DbType == DbType.String
+                    ? value.ToString()
+                    : value;
         }
 
         internal delegate void ParamIterDelegate(string propName, string columnName, object value);
@@ -281,33 +350,6 @@ namespace ServiceStack.OrmLite
                 }
             }
             return map;
-        }
-
-        internal static IDbCommand SetParameters(this IDbCommand dbCmd, Dictionary<string, object> dict, bool excludeDefaults)
-        {
-            if (dict == null)
-                return dbCmd;
-
-            dbCmd.Parameters.Clear();
-            lastQueryType = null;
-            var dialectProvider = dbCmd.GetDialectProvider();
-
-            foreach (var kvp in dict)
-            {
-                var value = kvp.Value;
-                if (excludeDefaults && value == null) continue;
-                var p = dbCmd.CreateParameter();
-                p.ParameterName = kvp.Key;
-
-                p.Direction = ParameterDirection.Input;
-                p.Value = value ?? DBNull.Value;
-                if (value != null)
-                    dialectProvider.InitDbParam(p, value.GetType());
-
-                dbCmd.Parameters.Add(p);
-            }
-
-            return dbCmd;
         }
 
         public static IDbCommand SetFilters<T>(this IDbCommand dbCmd, object anonType)
@@ -442,7 +484,7 @@ namespace ServiceStack.OrmLite
 
         internal static List<T> Select<T>(this IDbCommand dbCmd, string sql, Dictionary<string, object> dict)
         {
-            if (dict != null) SetParameters(dbCmd, dict, (bool)false);
+            if (dict != null) SetParameters(dbCmd, dict, (bool)false, sql:ref sql);
             dbCmd.CommandText = dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), sql);
 
             return dbCmd.ConvertToList<T>();
@@ -494,7 +536,7 @@ namespace ServiceStack.OrmLite
 
         internal static List<T> SqlList<T>(this IDbCommand dbCmd, string sql, Dictionary<string, object> dict)
         {
-            if (dict != null) SetParameters(dbCmd, dict, false);
+            if (dict != null) SetParameters(dbCmd, dict, false, sql:ref sql);
             dbCmd.CommandText = sql;
 
             return dbCmd.ConvertToList<T>();
@@ -522,7 +564,7 @@ namespace ServiceStack.OrmLite
 
         internal static List<T> SqlColumn<T>(this IDbCommand dbCmd, string sql, Dictionary<string, object> dict)
         {
-            if (dict != null) SetParameters(dbCmd, dict, false);
+            if (dict != null) SetParameters(dbCmd, dict, false, sql:ref sql);
             dbCmd.CommandText = sql;
 
             return dbCmd.ConvertToList<T>();
@@ -542,7 +584,7 @@ namespace ServiceStack.OrmLite
 
         internal static T SqlScalar<T>(this IDbCommand dbCmd, string sql, Dictionary<string, object> dict)
         {
-            if (dict != null) SetParameters(dbCmd, dict, false);
+            if (dict != null) SetParameters(dbCmd, dict, false, sql:ref sql);
 
             return dbCmd.Scalar<T>(sql);
         }
@@ -765,7 +807,7 @@ namespace ServiceStack.OrmLite
 
         internal static Dictionary<K, List<V>> Lookup<K, V>(this IDbCommand dbCmd, string sql, object anonType = null)
         {
-            return dbCmd.SetParameters(anonType.ToObjectDictionary(), false).Lookup<K, V>(sql);
+            return dbCmd.SetParameters(anonType.ToObjectDictionary(), false, sql:ref sql).Lookup<K, V>(sql);
         }
 
         internal static Dictionary<K, List<V>> Lookup<K, V>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider)
@@ -790,7 +832,7 @@ namespace ServiceStack.OrmLite
 
         internal static Dictionary<K, V> Dictionary<K, V>(this IDbCommand dbCmd, string sql, object anonType = null)
         {
-            if (anonType != null) SetParameters(dbCmd, anonType.ToObjectDictionary(), excludeDefaults: false);
+            if (anonType != null) SetParameters(dbCmd, anonType.ToObjectDictionary(), excludeDefaults: false, sql:ref sql);
 
             return dbCmd.Dictionary<K, V>(sql);
         }
@@ -812,9 +854,10 @@ namespace ServiceStack.OrmLite
 
         internal static bool Exists<T>(this IDbCommand dbCmd, object anonType)
         {
-            if (anonType != null) SetParameters(dbCmd, anonType.ToObjectDictionary(), excludeDefaults: true);
+            string sql = null;
+            if (anonType != null) SetParameters(dbCmd, anonType.ToObjectDictionary(), excludeDefaults: true, sql:ref sql);
 
-            var sql = GetFilterSql<T>(dbCmd);
+            sql = GetFilterSql<T>(dbCmd);
 
             var result = dbCmd.Scalar(sql);
             return result != null;
@@ -822,7 +865,7 @@ namespace ServiceStack.OrmLite
 
         internal static bool Exists<T>(this IDbCommand dbCmd, string sql, object anonType = null)
         {
-            if (anonType != null) SetParameters(dbCmd, anonType.ToObjectDictionary(), (bool)false);
+            if (anonType != null) SetParameters(dbCmd, anonType.ToObjectDictionary(), (bool)false, sql:ref sql);
 
             var result = dbCmd.Scalar(dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), sql));
             return result != null;
@@ -1019,7 +1062,8 @@ namespace ServiceStack.OrmLite
             dbCmd.CommandType = CommandType.StoredProcedure;
             dbCmd.CommandText = name;
 
-            dbCmd.SetParameters(inParams.ToObjectDictionary(), excludeDefaults);
+            string sql = null;
+            dbCmd.SetParameters(inParams.ToObjectDictionary(), excludeDefaults, sql:ref sql);
 
             return dbCmd;
         }

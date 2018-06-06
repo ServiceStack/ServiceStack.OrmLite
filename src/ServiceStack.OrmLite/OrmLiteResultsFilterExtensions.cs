@@ -17,12 +17,14 @@ namespace ServiceStack.OrmLite
         public static int ExecNonQuery(this IDbCommand dbCmd, string sql, object anonType = null)
         {
             if (anonType != null)
-                dbCmd.SetParameters(anonType.ToObjectDictionary(), (bool)false);
+                dbCmd.SetParameters(anonType.ToObjectDictionary(), (bool)false, sql:ref sql);
 
             dbCmd.CommandText = sql;
 
             if (Log.IsDebugEnabled)
                 Log.DebugCommand(dbCmd);
+
+            OrmLiteConfig.BeforeExecFilter?.Invoke(dbCmd);
 
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.ExecuteSql(dbCmd);
@@ -34,12 +36,14 @@ namespace ServiceStack.OrmLite
         {
 
             if (dict != null)
-                dbCmd.SetParameters(dict, (bool)false);
+                dbCmd.SetParameters(dict, (bool)false, sql:ref sql);
 
             dbCmd.CommandText = sql;
 
             if (Log.IsDebugEnabled)
                 Log.DebugCommand(dbCmd);
+
+            OrmLiteConfig.BeforeExecFilter?.Invoke(dbCmd);
 
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.ExecuteSql(dbCmd);
@@ -51,6 +55,8 @@ namespace ServiceStack.OrmLite
         {
             if (Log.IsDebugEnabled)
                 Log.DebugCommand(dbCmd);
+
+            OrmLiteConfig.BeforeExecFilter?.Invoke(dbCmd);
 
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.ExecuteSql(dbCmd);
@@ -66,6 +72,8 @@ namespace ServiceStack.OrmLite
 
             if (Log.IsDebugEnabled)
                 Log.DebugCommand(dbCmd);
+
+            OrmLiteConfig.BeforeExecFilter?.Invoke(dbCmd);
 
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.ExecuteSql(dbCmd);
@@ -216,6 +224,8 @@ namespace ServiceStack.OrmLite
 
             if (Log.IsDebugEnabled)
                 Log.DebugCommand(dbCmd);
+
+            OrmLiteConfig.BeforeExecFilter?.Invoke(dbCmd);
 
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.GetLongScalar(dbCmd);

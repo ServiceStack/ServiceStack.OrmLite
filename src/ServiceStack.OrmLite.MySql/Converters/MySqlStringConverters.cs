@@ -7,19 +7,13 @@ namespace ServiceStack.OrmLite.MySql.Converters
     {
         public MySqlStringConverter() : base(255) {}
 
-        public override string MaxColumnDefinition
-        {
-            get { return "LONGTEXT"; }
-        }
+        public override string MaxColumnDefinition => "LONGTEXT";
     }
 
     public class MySqlCharArrayConverter : CharArrayConverter
     {
         public MySqlCharArrayConverter() : base(255) { }
 
-        public override string MaxColumnDefinition
-        {
-            get { return "LONGTEXT"; }
-        }
+        public override string MaxColumnDefinition => "LONGTEXT";
     }
 }

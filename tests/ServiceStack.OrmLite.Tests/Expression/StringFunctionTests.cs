@@ -16,7 +16,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 StringColumn = stringVal
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {
@@ -40,7 +40,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 StringColumn = stringVal
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {
@@ -64,7 +64,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 StringColumn = stringVal
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {
@@ -88,7 +88,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 StringColumn = stringVal
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {
@@ -112,7 +112,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 StringColumn = prefix + "asdfasdfasdf"
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {
@@ -136,7 +136,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 StringColumn = prefix + "'asdfasdfasdf"
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {
@@ -160,7 +160,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 StringColumn = prefix + "\"asdfasdfasdf"
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {
@@ -184,7 +184,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 StringColumn = prefix + "`asdfasdfasdf"
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {
@@ -208,7 +208,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 StringColumn = "asdfasdfasdf" + postfix
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {
@@ -232,7 +232,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 StringColumn = "asdfasd'fasdf" + postfix
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {
@@ -256,7 +256,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 StringColumn = "asdfasd\"fasdf" + postfix
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {
@@ -280,7 +280,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 StringColumn = "asdfasd`fasdf" + postfix
             };
 
-            EstablishContext(10, expected);
+            Init(10, expected);
 
             using (var db = OpenDbConnection())
             {

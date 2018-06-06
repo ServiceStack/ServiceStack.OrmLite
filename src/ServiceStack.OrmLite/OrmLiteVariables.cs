@@ -3,6 +3,8 @@
     public static class OrmLiteVariables
     {
         public const string SystemUtc = "{SYSTEM_UTC}";
+        public const string MaxText = "{MAX_TEXT}";
+        public const string MaxTextUnicode = "{NMAX_TEXT}";
     }
 
     public static class Messages

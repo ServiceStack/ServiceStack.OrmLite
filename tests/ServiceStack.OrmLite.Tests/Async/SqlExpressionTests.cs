@@ -83,7 +83,7 @@ namespace ServiceStack.OrmLite.Tests.Async
             if (Dialect == Dialect.MySql)
                 return; //= This version of MySQL doesn't yet support 'LIMIT & IN/ALL/ANY/SOME subquery'
 
-            if (Dialect == Dialect.SqlServer)
+            if ((Dialect & Dialect.AnySqlServer) == Dialect)
                 return; // generates Windowing function "... WHERE CustomerId IN (SELECT * FROM ...)" 
                         // when should generate "... WHERE CustomerId IN (SELECT Id FROM ...)" 
                         // both on .NET and .NET Core
@@ -132,7 +132,7 @@ namespace ServiceStack.OrmLite.Tests.Async
             if (Dialect == Dialect.MySql)
                 return; //= This version of MySQL doesn't yet support 'LIMIT & IN/ALL/ANY/SOME subquery'
 
-            if (Dialect == Dialect.SqlServer)
+            if ((Dialect & Dialect.AnySqlServer) == Dialect)
                 return; // generates Windowing function "... WHERE CustomerId IN (SELECT * FROM ...)" 
                         // when should generate "... WHERE CustomerId IN (SELECT Id FROM ...)" 
                         // both on .NET and .NET Core

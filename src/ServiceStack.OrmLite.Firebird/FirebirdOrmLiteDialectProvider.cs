@@ -53,6 +53,8 @@ namespace ServiceStack.OrmLite.Firebird
             this.Variables = new Dictionary<string, string>
             {
                 { OrmLiteVariables.SystemUtc, "CURRENT_TIMESTAMP" },
+                { OrmLiteVariables.MaxText, "VARCHAR(1000)" },
+                { OrmLiteVariables.MaxTextUnicode, "VARCHAR(1000)" },
             };
         }
 
@@ -125,7 +127,7 @@ namespace ServiceStack.OrmLite.Firebird
 
             foreach (var fieldDef in modelDef.FieldDefinitionsArray)
             {
-                if (fieldDef.ReturnOnInsert || (fieldDef.IsPrimaryKey && fieldDef.AutoIncrement && modelDef.HasReturnAttribute))
+                if (fieldDef.ReturnOnInsert || (fieldDef.IsPrimaryKey && fieldDef.AutoIncrement && HasInsertReturnValues(modelDef)))
                 {
                     if (sbReturningColumns.Length > 0)
                         sbReturningColumns.Append(",");
@@ -199,7 +201,7 @@ namespace ServiceStack.OrmLite.Firebird
 
             foreach (var fieldDef in modelDef.FieldDefinitionsArray)
             {
-                if (fieldDef.ReturnOnInsert || (fieldDef.IsPrimaryKey && fieldDef.AutoIncrement && modelDef.HasReturnAttribute))
+                if (fieldDef.ReturnOnInsert || (fieldDef.IsPrimaryKey && fieldDef.AutoIncrement && HasInsertReturnValues(modelDef)))
                 {
                     if (sbReturningColumns.Length > 0)
                         sbReturningColumns.Append(",");
@@ -365,7 +367,7 @@ namespace ServiceStack.OrmLite.Firebird
 
         public override string GetColumnDefinition(FieldDefinition fieldDef)
         {
-            var fieldDefinition = fieldDef.CustomFieldDefinition 
+            var fieldDefinition = ResolveFragment(fieldDef.CustomFieldDefinition) 
                 ?? GetColumnTypeDefinition(fieldDef.ColumnType, fieldDef.FieldLength, fieldDef.Scale);
 
             var sql = StringBuilderCache.Allocate();

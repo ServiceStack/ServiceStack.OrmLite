@@ -224,10 +224,10 @@ namespace ServiceStack.OrmLite
             if (Log.IsDebugEnabled)
                 Log.DebugCommand(dbCmd);
 
+            OrmLiteConfig.BeforeExecFilter?.Invoke(dbCmd);
+
             if (OrmLiteConfig.ResultsFilter != null)
-            {
                 return OrmLiteConfig.ResultsFilter.ExecuteSql(dbCmd);
-            }
 
             return dbCmd.ExecuteNonQuery();
         }
@@ -235,12 +235,14 @@ namespace ServiceStack.OrmLite
         internal static int ExecuteSql(this IDbCommand dbCmd, string sql, object anonType)
         {
             if (anonType != null)
-                dbCmd.SetParameters(anonType.ToObjectDictionary(), excludeDefaults: false);
+                dbCmd.SetParameters(anonType.ToObjectDictionary(), excludeDefaults: false, sql:ref sql);
 
             dbCmd.CommandText = sql;
 
             if (Log.IsDebugEnabled)
                 Log.DebugCommand(dbCmd);
+
+            OrmLiteConfig.BeforeExecFilter?.Invoke(dbCmd);
 
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.ExecuteSql(dbCmd);
@@ -628,21 +630,21 @@ namespace ServiceStack.OrmLite
             if (anonType != null) dbCmd.SetParameters(tableType, anonType, excludeDefaults: false, sql: ref sql);
             return dbCmd.ExecuteSql(dbCmd.GetDialectProvider().ToDeleteStatement(tableType, sql));
         }
-
+        
         internal static long Insert<T>(this IDbCommand dbCmd, T obj, Action<IDbCommand> commandFilter, bool selectIdentity = false)
         {
             OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj);
 
             var dialectProvider = dbCmd.GetDialectProvider();
             dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd, 
-                insertFields: OrmLiteUtils.GetNonDefaultValueInsertFields(obj));
+                insertFields: dialectProvider.GetNonDefaultValueInsertFields(obj));
 
             dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
             commandFilter?.Invoke(dbCmd); //dbCmd.OnConflictInsert() needs to be applied before last insert id
 
             var modelDef = typeof(T).GetModelDefinition();
-            if (modelDef.HasReturnAttribute)
+            if (dialectProvider.HasInsertReturnValues(modelDef))
             {
                 using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
                 using (reader)
@@ -873,6 +875,8 @@ namespace ServiceStack.OrmLite
             var pkValue = modelDef.PrimaryKey.GetValue(instance);
 
             var fieldDefs = modelDef.AllFieldDefinitionsArray.Where(x => x.IsReference);
+
+            bool updateInstance = false;
             foreach (var fieldDef in fieldDefs)
             {
                 var listInterface = fieldDef.FieldType.GetTypeWithGenericInterfaceOf(typeof(IList<>));
@@ -918,10 +922,15 @@ namespace ServiceStack.OrmLite
                         {
                             var refPkValue = refModelDef.PrimaryKey.GetValue(result);
                             refSelf.SetValueFn(instance, refPkValue);
-                            dbCmd.Update(instance);
+                            updateInstance = true;
                         }
                     }
                 }
+            }
+
+            if (updateInstance)
+            {
+                dbCmd.Update(instance);
             }
         }
 
@@ -983,8 +992,11 @@ namespace ServiceStack.OrmLite
 
             dbCmd.Parameters.Clear();
             var idParam = dbCmd.CreateParameter();
+            idParam.Direction = ParameterDirection.Input;
             idParam.ParameterName = idParamString;
-            idParam.Value = id;
+
+            dialectProvider.SetParamValue(idParam, id, modelDef.PrimaryKey.ColumnType, modelDef.PrimaryKey);
+
             dbCmd.Parameters.Add(idParam);
             return sql;
         }

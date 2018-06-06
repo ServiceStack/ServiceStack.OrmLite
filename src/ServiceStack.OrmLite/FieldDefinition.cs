@@ -36,6 +36,8 @@ namespace ServiceStack.OrmLite
 
         public bool AutoIncrement { get; set; }
 
+        public bool AutoId { get; set; }
+
         public bool IsNullable { get; set; }
 
         public bool IsIndexed { get; set; }
@@ -57,7 +59,7 @@ namespace ServiceStack.OrmLite
         public string CheckConstraint { get; set; }
 
         public bool IsUniqueConstraint { get; set; }
-
+        
         public ForeignKeyConstraint ForeignKey { get; set; }
 
         public GetMemberDelegate GetValueFn { get; set; }
@@ -89,6 +91,8 @@ namespace ServiceStack.OrmLite
         public string ComputeExpression { get; set; }
 
         public string CustomSelect { get; set; }
+
+        public bool RequiresAlias => Alias != null || CustomSelect != null;
 
         public string BelongToModelName { get; set; }
 
@@ -136,6 +140,7 @@ namespace ServiceStack.OrmLite
                 PropertyInfo = PropertyInfo,
                 IsPrimaryKey = IsPrimaryKey,
                 AutoIncrement = AutoIncrement,
+                AutoId = AutoId,
                 IsNullable = IsNullable,
                 IsIndexed = IsIndexed,
                 IsUniqueIndex = IsUniqueIndex,
