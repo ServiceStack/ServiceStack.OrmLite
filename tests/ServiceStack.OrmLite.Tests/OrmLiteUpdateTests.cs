@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
 using ServiceStack.DataAnnotations;
@@ -442,6 +443,56 @@ namespace ServiceStack.OrmLite.Tests
 
                 var row = db.SingleById<Person>(1);
                 Assert.That(row.FirstName, Is.EqualTo("JJ"));
+            }
+        }
+
+        [Test]
+        public void Does_UpdateOnly_using_Object_Dictionary()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Person>();
+                db.InsertAll(Person.Rockstars);
+                
+                var fields = new Dictionary<string, object> {
+                    [nameof(Person.FirstName)] = "JJ",
+                    [nameof(Person.LastName)] = null,
+                };
+
+                db.UpdateOnly<Person>(fields, p => p.LastName == "Hendrix");
+
+                var sql = db.GetLastSql().NormalizeSql();
+                Assert.That(sql, Does.Contain("where (lastname = @0)"));
+                Assert.That(sql, Does.Contain("firstname=@firstname"));
+
+                var row = db.SingleById<Person>(1);
+                Assert.That(row.FirstName, Is.EqualTo("JJ"));
+                Assert.That(row.LastName, Is.Null);
+            }
+        }
+
+        [Test]
+        public async Task Does_UpdateOnly_using_Object_Dictionary_Async()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Person>();
+                db.InsertAll(Person.Rockstars);
+                
+                var fields = new Dictionary<string, object> {
+                    [nameof(Person.FirstName)] = "JJ",
+                    [nameof(Person.LastName)] = null,
+                };
+
+                await db.UpdateOnlyAsync<Person>(fields, p => p.LastName == "Hendrix");
+
+                var sql = db.GetLastSql().NormalizeSql();
+                Assert.That(sql, Does.Contain("where (lastname = @0)"));
+                Assert.That(sql, Does.Contain("firstname=@firstname"));
+
+                var row = db.SingleById<Person>(1);
+                Assert.That(row.FirstName, Is.EqualTo("JJ"));
+                Assert.That(row.LastName, Is.Null);
             }
         }
 

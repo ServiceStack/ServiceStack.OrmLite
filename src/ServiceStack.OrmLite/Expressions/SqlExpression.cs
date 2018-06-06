@@ -1209,6 +1209,45 @@ namespace ServiceStack.OrmLite
                 : sql;
         }
 
+        public virtual void PrepareUpdateStatement(IDbCommand dbCmd, Dictionary<string, object> updateFields)
+        {
+            CopyParamsTo(dbCmd);
+
+            var setFields = StringBuilderCache.Allocate();
+
+            foreach (var entry in updateFields)
+            {
+                var fieldDef = ModelDef.GetFieldDefinition(entry.Key);
+                if (fieldDef.ShouldSkipUpdate()) continue;
+                if (fieldDef.IsRowVersion) continue;
+
+                if (UpdateFields.Count > 0
+                    && !UpdateFields.Contains(fieldDef.Name)) continue; // added
+
+                var value = entry.Value;
+                if (value == null && !fieldDef.IsNullable)
+                    continue;
+
+                if (setFields.Length > 0)
+                    setFields.Append(", ");
+
+                setFields
+                    .Append(DialectProvider.GetQuotedColumnName(fieldDef.FieldName))
+                    .Append("=")
+                    .Append(DialectProvider.AddParam(dbCmd, value, fieldDef).ParameterName);
+            }
+            
+            if (setFields.Length == 0)
+                throw new ArgumentException("No non-null or non-default values were provided for type: " + typeof(T).Name);
+
+            var sql = $"UPDATE {DialectProvider.GetQuotedTableName(modelDef)} " +
+                      $"SET {StringBuilderCache.ReturnAndFree(setFields)} {WhereExpression}";
+
+            dbCmd.CommandText = SqlFilter != null
+                ? SqlFilter(sql)
+                : sql;
+        }
+
         public virtual string ToSelectStatement()
         {
             SelectFilter?.Invoke(this);

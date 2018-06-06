@@ -1,5 +1,6 @@
 ﻿#if ASYNC
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq.Expressions;
 using System.Threading;
@@ -131,6 +132,21 @@ namespace ServiceStack.OrmLite
             CancellationToken token = default(CancellationToken))
         {
             return dbConn.Exec(dbCmd => dbCmd.UpdateAddAsync(updateFields, q, commandFilter, token));
+        }
+
+        /// <summary>
+        /// Updates all values from Object Dictionary matching the where condition. E.g
+        /// 
+        ///   db.UpdateOnlyAsync&lt;Person&gt;(new Dictionary&lt;string,object&lt; { {"FirstName", "JJ"} }, where:p => p.FirstName == "Jimi");
+        ///   UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("FirstName" = 'Jimi')
+        /// </summary>
+        public static Task<int> UpdateOnlyAsync<T>(this IDbConnection dbConn, 
+            Dictionary<string, object> updateFields, 
+            Expression<Func<T, bool>> where, 
+            Action<IDbCommand> commandFilter = null,
+            CancellationToken token = default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd => dbCmd.UpdateOnlyAsync(updateFields, where, commandFilter, token));
         }
 
         /// <summary>

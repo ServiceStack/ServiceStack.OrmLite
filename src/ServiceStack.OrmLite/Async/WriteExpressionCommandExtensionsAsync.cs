@@ -1,5 +1,6 @@
 #if ASYNC
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq.Expressions;
 using System.Threading;
@@ -65,6 +66,25 @@ namespace ServiceStack.OrmLite
         {
             var cmd = dbCmd.InitUpdateAdd(updateFields, q);
             commandFilter?.Invoke(cmd);
+            return cmd.ExecNonQueryAsync(token);
+        }
+
+        public static Task<int> UpdateOnlyAsync<T>(this IDbCommand cmd,
+            Dictionary<string, object> updateFields,
+            Expression<Func<T, bool>> where,
+            Action<IDbCommand> commandFilter = null, 
+            CancellationToken token = default(CancellationToken))
+        {
+            if (updateFields == null)
+                throw new ArgumentNullException(nameof(updateFields));
+
+            OrmLiteConfig.UpdateFilter?.Invoke(cmd, updateFields.FromObjectDictionary<T>());
+
+            var q = cmd.GetDialectProvider().SqlExpression<T>();
+            q.Where(where);
+            q.PrepareUpdateStatement(cmd, updateFields);
+            commandFilter?.Invoke(cmd);
+
             return cmd.ExecNonQueryAsync(token);
         }
 
