@@ -6,6 +6,7 @@ using NUnit.Framework;
 using ServiceStack.Common;
 using ServiceStack.Common.Tests.Models;
 using ServiceStack.Logging;
+using ServiceStack.OrmLite.Tests.Shared;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
@@ -480,6 +481,46 @@ namespace ServiceStack.OrmLite.Tests
                                              Or.EqualTo(-9.9999999999999992E+124d).
                                              Or.EqualTo(9.9999999999999992E+124d)); //Firebird
             }
+        }
+        
+        public class CustomSql
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public int CustomMax { get; set; }
+            public int CustomCount { get; set; }
+        }
+
+        [Test]
+        public void Does_project_Sql_columns()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Rockstar>();
+                db.DropAndCreateTable<RockstarAlbum>();
+                db.Insert(AutoQueryTests.SeedRockstars);
+                db.Insert(AutoQueryTests.SeedAlbums);
+                
+                var q = db.From<Rockstar>()
+                    .Join<RockstarAlbum>()
+                    .Select<Rockstar, RockstarAlbum>((r,a) => new {
+                        r.Id,
+                        Name = r.FirstName + " " + r.LastName,
+                        CustomMax = Sql.Max(r.Id),
+                        CustomCount = Sql.Count(r.Id > a.Id ? r.Id + 2 : a.Id + 2)
+                    });
+
+                var results = db.Select<CustomSql>(q);
+                var result = results[0];
+                
+//                results.PrintDump();
+
+                Assert.That(result.Id, Is.GreaterThan(0));
+                Assert.That(result.Name, Is.Not.Null);
+                Assert.That(result.CustomMax, Is.GreaterThan(0));
+                Assert.That(result.CustomCount, Is.GreaterThan(0));
+            }
+            
         }
     }
 }

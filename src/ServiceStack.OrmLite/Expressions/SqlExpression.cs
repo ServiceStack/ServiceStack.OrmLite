@@ -1917,6 +1917,9 @@ namespace ServiceStack.OrmLite
             if (declareType != null && declareType.Name == "Sql" && mi.Name != "Desc" && mi.Name != "Asc" && mi.Name != "As" && mi.Name != "AllFields") 
                 return new PartialSqlString(expr + " AS " + member.Name); // new { Count = Sql.Count("*") }
 
+            if (arg is ConditionalExpression)
+                return new PartialSqlString(expr + " AS " + member.Name); // new { Count = Sql.Count("*") }
+
             return expr;
         }
 
