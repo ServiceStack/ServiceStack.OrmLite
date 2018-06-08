@@ -1746,6 +1746,10 @@ q.CustomJoin($"LEFT JOIN (SELECT {q.Column<Job>(nameof(Job.Id))} ...")
 q.CustomJoin($"LEFT JOIN (SELECT {q.Column<Job>(x => x.Id, tablePrefix:true)} ...")
 //Equivalent to:
 q.CustomJoin($"LEFT JOIN (SELECT {q.Table<Job>()}.{q.Column<Job>(x => x.Id)} ...")
+
+q.Select($"{q.Column<Job>(x => x.Id)} as JobId, {q.Column<Task>(x => x.Id)} as TaskId")
+//Equivalent to:
+q.Select<Job,Task>((j,t) => new { JobId = j.Id, TaskId = t.Id })
 ```
 
 ### DB Parameter API's
