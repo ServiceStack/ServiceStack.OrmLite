@@ -5,10 +5,9 @@ namespace ServiceStack.OrmLite.Sqlite.Converters
 {
     public class SqliteBoolConverter : OrmLiteConverter
     {
-        public override string ColumnDefinition
-        {
-            get { return "INTEGER"; }
-        }
+        public override string ColumnDefinition => "INTEGER";
+
+        public override DbType DbType => DbType.Int32;
 
         public override string ToQuotedString(Type fieldType, object value)
         {
