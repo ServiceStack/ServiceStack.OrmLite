@@ -105,8 +105,8 @@ namespace ServiceStack.OrmLite.Tests.Issues
     }
     
     [Alias("LRAANALISI")]
-    [CompositeIndex("AANALISIPADREID", "ACONTENITOREID", Unique = false, Name = "IDXLRAANALISI")]
-    [CompositeIndex("ACONTENITOREID", "DANALISIID", "AANALISIPADREID", "LIVELLOANALISI", Unique = true, Name = "IDXLRAANALISI2")]
+//    [CompositeIndex("AANALISIPADREID", "ACONTENITOREID", Unique = false, Name = "IDXLRAANALISI")]
+//    [CompositeIndex("ACONTENITOREID", "DANALISIID", "AANALISIPADREID", "LIVELLOANALISI", Unique = true, Name = "IDXLRAANALISI2")]
     public class LRAAnalisi : IHasId<int>
     {
         [PrimaryKey]
@@ -189,8 +189,8 @@ namespace ServiceStack.OrmLite.Tests.Issues
     }
     
     [Alias("LRACONTENITORI")]
-    [CompositeIndex("BARCODE", Unique = false, Name = "NCI_BARCODE")]
-    [CompositeIndex("ARICHIESTAID", Unique = false, Name = "NCI_ARICHIESTAID")]
+//    [CompositeIndex("BARCODE", Unique = false, Name = "NCI_BARCODE")]
+//    [CompositeIndex("ARICHIESTAID", Unique = false, Name = "NCI_ARICHIESTAID")]
     public class LRAContenitore : DBObject, IHasId<int>
     {
 //        private string _barcode;
@@ -297,7 +297,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     }
 
     [Alias("LRARICHIESTE")]
-    [CompositeIndex("NUMERORICHIESTA", "DATAORAACCETTAZIONE", Unique = true, Name = "IDXLRARICHIESTE")]
+//    [CompositeIndex("NUMERORICHIESTA", "DATAORAACCETTAZIONE", Unique = true, Name = "IDXLRARICHIESTE")]
     public class LRARichiesta : DBObject, IHasId<int>
     {
 //        private string _numero_richiesta;
@@ -427,7 +427,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     }
     
     [Alias("LRAPAZIENTI")]
-    [CompositeIndex("COGNOME", "NOME", "DATADINASCITA", Unique = false, Name = "IDXLRAPAZIENTI")]
+//    [CompositeIndex("COGNOME", "NOME", "DATADINASCITA", Unique = false, Name = "IDXLRAPAZIENTI")]
     public class LRAPaziente : DBObject, IHasId<int>
     {
 //        private string _cognome;
