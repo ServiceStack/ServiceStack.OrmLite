@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Model;
@@ -69,7 +71,49 @@ namespace ServiceStack.OrmLite.Tests.Issues
                 Assert.That(sql, Is.Not.Null);
             }
         }
+        
+        [Test]
+        public void Does_select_aliases_on_custom_expressions()
+        {
+            var statements = new List<string>();
+            OrmLiteConfig.BeforeExecFilter = cmd => statements.Add(cmd.GetDebugString());
 
+            using (var db = OpenDbConnection())
+            {
+                var ADeviceId = 1;
+                
+                var q = db.From<LRDDevice>();
+                q.LeftJoin<LRDDevice,LRDConnessione>((a,b)=>a.Id==b.DeviceId);
+                q.LeftJoin<LRDDevice, LRAAlert>((a, b) => a.Id == b.DeviceID && b.Visto==(int)SiNo.No);
+                q.Where<LRDDevice>(x => x.Id == ADeviceId);
+                q.GroupBy<LRDDevice,LRDConnessione, LRAAlert>((dev,con, ale) => new {dev.Id, con.DeviceId, ale.DeviceID,ale.Tipo });
+                q.Select<LRDDevice, LRDConnessione, LRAAlert>((dev, con, ale) => new //DeviceDashboardDTO
+                {
+                    DeviceId = dev.Id,
+                    //Device = dev,
+                    StatoLinea = Sql.Min(con.StatoConnessione),
+                    StatoQC = (Sql.Count(ale.Tipo == (int)TipoAlert.AlertQC ? ale.Id : 0) > 0 ? (int)SiNo.Si : (int)SiNo.No),
+                    StatoWarning = (Sql.Count(ale.Tipo == (int)TipoAlert.WarningDevice ? ale.Id : 0) > 0 ? (int)SiNo.Si : (int)SiNo.No)
+                });
+
+
+                try
+                {
+                    var results = db.Select<DeviceDashboardDTO>(q);
+                }
+                catch {} // no tables
+
+                var lastStatement = statements.Last();
+                lastStatement.Print();
+                
+                lastStatement = lastStatement.NormalizeSql();
+                Assert.That(lastStatement, Does.Contain("as deviceid"));
+                Assert.That(lastStatement, Does.Contain("as statolinea"));
+                Assert.That(lastStatement, Does.Contain("as statoqc"));
+                Assert.That(lastStatement, Does.Contain("as statowarning"));
+            }
+        }
+        
         private static void CreateTables(IDbConnection db)
         {
             db.DropTable<LRAAnalisi>();
@@ -655,5 +699,52 @@ namespace ServiceStack.OrmLite.Tests.Issues
     public class LRDLaboratorio
     {
         public int Id { get; set; }
+    }
+
+    public class LRDDevice
+    {
+        public int Id { get; set; }
+    }
+
+    public class LRDConnessione
+    {
+        public int Id { get; set; }
+
+        public int DeviceId { get; set; }
+        
+        public int StatoConnessione { get; set; }
+    }
+
+    public class LRAAlert
+    {
+        public int Id { get; set; }
+
+        public int DeviceID { get; set; }
+        
+        public int Visto { get; set; }
+        
+        public int Tipo { get; set; }
+    }
+    
+    public static class SiNo
+    {
+        public static int No { get; set; }
+        
+        public static int Si { get; set; }
+    }
+    
+    public static class TipoAlert
+    {
+        public static int AlertQC { get; set; }
+        
+        public static int WarningDevice { get; set; }
+    }
+
+    public class DeviceDashboardDTO
+    {
+        public int DeviceId { get; set; }
+        public int StatoLinea { get; set; }
+        public int StatoQC { get; set; }
+        public int StatoWarning { get; set; }
     }
 }

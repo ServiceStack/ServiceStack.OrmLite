@@ -162,7 +162,7 @@ namespace ServiceStack.OrmLite.Firebird
                     sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
 
                     var p = AddParameter(cmd, fieldDef);
-                    p.Value = fieldDef.GetValue(objWithProperties) ?? DBNull.Value;
+                    p.Value = GetFieldValue(fieldDef, fieldDef.GetValue(objWithProperties)) ?? DBNull.Value;
                 }
                 catch (Exception ex)
                 {
