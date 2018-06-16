@@ -65,8 +65,6 @@ namespace ServiceStack.OrmLite
             return Select<T>(dbCmd, (string)null);
         }
 
-        [ThreadStatic]
-        private static Type lastQueryType;
         internal static void SetFilter<T>(this IDbCommand dbCmd, string name, object value)
         {
             var dialectProvider = dbCmd.GetDialectProvider();
@@ -75,11 +73,10 @@ namespace ServiceStack.OrmLite
             var p = dbCmd.CreateParameter();
             p.ParameterName = name;
             p.Direction = ParameterDirection.Input;
-            dialectProvider.InitDbParam(p, value.GetType());
+            dialectProvider.InitDbParam(p, value.GetType(), value);
 
             dbCmd.Parameters.Add(p);
             dbCmd.CommandText = GetFilterSql<T>(dbCmd);
-            lastQueryType = typeof(T);
         }
 
         internal static IDbCommand SetFilters<T>(this IDbCommand dbCmd, object anonType, bool excludeDefaults)
@@ -148,7 +145,6 @@ namespace ServiceStack.OrmLite
                 return dbCmd;
 
             dbCmd.Parameters.Clear();
-            lastQueryType = null;
             var dialectProvider = dbCmd.GetDialectProvider();
 
             var paramIndex = 0;
@@ -212,7 +208,6 @@ namespace ServiceStack.OrmLite
                 return dbCmd;
 
             dbCmd.Parameters.Clear();
-            lastQueryType = null;
 
             var modelDef = type.GetModelDefinition();
             var dialectProvider = dbCmd.GetDialectProvider();
@@ -389,12 +384,12 @@ namespace ServiceStack.OrmLite
             return dialectProvider.ToSelectStatement(typeof(T), StringBuilderCache.ReturnAndFree(sb));
         }
 
-        internal static bool CanReuseParam<T>(this IDbCommand dbCmd, string paramName)
-        {
-            return (dbCmd.Parameters.Count == 1
-                    && ((IDbDataParameter)dbCmd.Parameters[0]).ParameterName == paramName
-                    && lastQueryType != typeof(T));
-        }
+//        internal static bool CanReuseParam<T>(this IDbCommand dbCmd, string paramName)
+//        {
+//            return (dbCmd.Parameters.Count == 1
+//                    && ((IDbDataParameter)dbCmd.Parameters[0]).ParameterName == paramName
+//                    && lastQueryType != typeof(T));
+//        }
 
         internal static List<T> SelectByIds<T>(this IDbCommand dbCmd, IEnumerable idValues)
         {
@@ -406,21 +401,13 @@ namespace ServiceStack.OrmLite
 
         internal static T SingleById<T>(this IDbCommand dbCmd, object value)
         {
-            if (!dbCmd.CanReuseParam<T>(ModelDefinition<T>.PrimaryKeyName))
-                SetFilter<T>(dbCmd, ModelDefinition<T>.PrimaryKeyName, value);
-
-            ((IDbDataParameter)dbCmd.Parameters[0]).Value = value;
-
+            SetFilter<T>(dbCmd, ModelDefinition<T>.PrimaryKeyName, value);
             return dbCmd.ConvertTo<T>();
         }
 
         internal static T SingleWhere<T>(this IDbCommand dbCmd, string name, object value)
         {
-            if (!dbCmd.CanReuseParam<T>(name))
-                SetFilter<T>(dbCmd, name, value);
-
-            ((IDbDataParameter)dbCmd.Parameters[0]).Value = value;
-
+            SetFilter<T>(dbCmd, name, value);
             return dbCmd.ConvertTo<T>();
         }
 
@@ -451,11 +438,7 @@ namespace ServiceStack.OrmLite
 
         internal static List<T> Where<T>(this IDbCommand dbCmd, string name, object value)
         {
-            if (!dbCmd.CanReuseParam<T>(name))
-                SetFilter<T>(dbCmd, name, value);
-
-            ((IDbDataParameter)dbCmd.Parameters[0]).Value = value;
-
+            SetFilter<T>(dbCmd, name, value);
             return dbCmd.ConvertToList<T>();
         }
 

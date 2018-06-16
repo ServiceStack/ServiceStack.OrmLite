@@ -124,7 +124,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
         [Test]
         public void Can_Create_Player_Tables_and_Save_Data()
         {
-            LogManager.LogFactory = new ConsoleLogFactory(debugEnabled:true);
+//            OrmLiteConfig.BeforeExecFilter = cmd => cmd.GetDebugString().Print();
 
             using (var db = OpenDbConnection())
             {

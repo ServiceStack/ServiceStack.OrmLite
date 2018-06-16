@@ -71,21 +71,13 @@ namespace ServiceStack.OrmLite
 
         internal static Task<T> SingleByIdAsync<T>(this IDbCommand dbCmd, object value, CancellationToken token)
         {
-            if (!dbCmd.CanReuseParam<T>(ModelDefinition<T>.PrimaryKeyName))
-                dbCmd.SetFilter<T>(ModelDefinition<T>.PrimaryKeyName, value);
-
-            ((IDbDataParameter)dbCmd.Parameters[0]).Value = value;
-
+            dbCmd.SetFilter<T>(ModelDefinition<T>.PrimaryKeyName, value);
             return dbCmd.ConvertToAsync<T>(null, token);
         }
 
         internal static Task<T> SingleWhereAsync<T>(this IDbCommand dbCmd, string name, object value, CancellationToken token)
         {
-            if (!dbCmd.CanReuseParam<T>(name))
-                dbCmd.SetFilter<T>(name, value);
-
-            ((IDbDataParameter)dbCmd.Parameters[0]).Value = value;
-
+            dbCmd.SetFilter<T>(name, value);
             return dbCmd.ConvertToAsync<T>(null, token);
         }
 
@@ -110,11 +102,7 @@ namespace ServiceStack.OrmLite
 
         internal static Task<List<T>> WhereAsync<T>(this IDbCommand dbCmd, string name, object value, CancellationToken token)
         {
-            if (!dbCmd.CanReuseParam<T>(name))
-                dbCmd.SetFilter<T>(name, value);
-
-            ((IDbDataParameter)dbCmd.Parameters[0]).Value = value;
-
+            dbCmd.SetFilter<T>(name, value);
             return dbCmd.ConvertToListAsync<T>(null, token);
         }
 
