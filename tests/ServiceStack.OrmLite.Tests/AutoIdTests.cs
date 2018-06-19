@@ -67,6 +67,26 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(dbB.Name, Is.EqualTo(guidB.Name));
             }
         }
+
+        [Test]
+        public void Uses_existing_Guid_Id_if_not_Empty()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<GuidAutoId>();
+
+                var existingGuid = Guid.NewGuid();
+                var guidA = new GuidAutoId { Id = existingGuid, Name = "A" };
+
+                db.Insert(guidA);
+                
+                Assert.That(guidA.Id, Is.EqualTo(existingGuid));
+
+                var fromDb = db.SingleById<GuidAutoId>(existingGuid);
+                
+                Assert.That(fromDb.Id, Is.EqualTo(existingGuid));
+            }
+        }
     }
     
 }
