@@ -6,7 +6,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Npgsql;
+using Npgsql.TypeMapping;
 using NpgsqlTypes;
+using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.Converters;
 using ServiceStack.OrmLite.PostgreSQL.Converters;
 using ServiceStack.OrmLite.Support;
@@ -29,8 +31,10 @@ namespace ServiceStack.OrmLite.PostgreSQL
             base.SelectIdentitySql = "SELECT LASTVAL()";
             this.NamingStrategy = new PostgreSqlNamingStrategy();
             this.StringSerializer = new JsonStringSerializer();
-
+            
             base.InitColumnTypeMap();
+
+            this.RowVersionConverter = new PostgreSqlRowVersionConverter();
 
             RegisterConverter<string>(new PostgreSqlStringConverter());
             RegisterConverter<char[]>(new PostgreSqlCharArrayConverter());
@@ -562,7 +566,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
             : "replace(" + fieldOrValue + "::text::money::text,'$','" + currencySymbol + "')";
 
         public override string SqlCast(object fieldOrValue, string castAs) => 
-            $"{fieldOrValue}::{castAs}";
+            $"({fieldOrValue})::{castAs}";
 
         protected NpgsqlConnection Unwrap(IDbConnection db)
         {

@@ -14,7 +14,7 @@ namespace ServiceStack.OrmLite.Tests
         [PrimaryKey]
         public SomeEnum Id { get; set; }
 
-        [Default(typeof(bool), "0")]
+//        [Default(typeof(bool), "0")]
         public bool IsDeleted { get; set; }
 
 

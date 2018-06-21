@@ -569,7 +569,7 @@ namespace ServiceStack.OrmLite
                     sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
 
                     var p = AddParameter(cmd, fieldDef);
-                    p.Value = fieldDef.GetValue(objWithProperties) ?? DBNull.Value;
+                    p.Value = GetFieldValue(fieldDef, fieldDef.GetValue(objWithProperties)) ?? DBNull.Value;
                 }
                 catch (Exception ex)
                 {
@@ -899,6 +899,12 @@ namespace ServiceStack.OrmLite
 
                 if (fieldDef.AutoId && p.Value != null)
                 {
+                    var existingId = fieldDef.GetValueFn(obj);
+                    if (existingId is Guid existingGuid && existingGuid != default(Guid))
+                    {
+                        p.Value = existingGuid; // Use existing value if not default
+                    }
+
                     fieldDef.SetValueFn(obj, p.Value); //Auto populate default values
                     continue;
                 }

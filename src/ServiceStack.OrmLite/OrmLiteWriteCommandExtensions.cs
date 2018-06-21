@@ -788,14 +788,14 @@ namespace ServiceStack.OrmLite
                     dbCmd.Insert(obj, commandFilter:null);
                 }
 
-                modelDef.RowVersion?.SetValueFn(obj, dbCmd.GetRowVersion(modelDef, id));
+                modelDef.RowVersion?.SetValueFn(obj, dbCmd.GetRowVersion(modelDef, id, modelDef.RowVersion.ColumnType));
 
                 return true;
             }
 
             dbCmd.Update(obj);
 
-            modelDef.RowVersion?.SetValueFn(obj, dbCmd.GetRowVersion(modelDef, id));
+            modelDef.RowVersion?.SetValueFn(obj, dbCmd.GetRowVersion(modelDef, id, modelDef.RowVersion.ColumnType));
 
             return false;
         }
@@ -854,7 +854,7 @@ namespace ServiceStack.OrmLite
                         rowsAdded++;
                     }
 
-                    modelDef.RowVersion?.SetValueFn(row, dbCmd.GetRowVersion(modelDef, id));
+                    modelDef.RowVersion?.SetValueFn(row, dbCmd.GetRowVersion(modelDef, id, modelDef.RowVersion.ColumnType));
                 }
 
                 dbTrans?.Commit();
@@ -975,10 +975,15 @@ namespace ServiceStack.OrmLite
             dbCmd.ExecuteNonQuery();
         }
 
-        internal static object GetRowVersion(this IDbCommand dbCmd, ModelDefinition modelDef, object id)
+        internal static object GetRowVersion(this IDbCommand dbCmd, ModelDefinition modelDef, object id, Type asType)
         {
             var sql = RowVersionSql(dbCmd, modelDef, id);
-            return dbCmd.GetDialectProvider().FromDbRowVersion(modelDef.RowVersion.FieldType, dbCmd.Scalar<object>(sql));
+            var to = dbCmd.GetDialectProvider().FromDbRowVersion(modelDef.RowVersion.FieldType, dbCmd.Scalar<object>(sql));
+
+            if (to is ulong u && asType == typeof(byte[]))
+                return BitConverter.GetBytes(u);
+
+            return to;
         }
 
         internal static string RowVersionSql(this IDbCommand dbCmd, ModelDefinition modelDef, object id)

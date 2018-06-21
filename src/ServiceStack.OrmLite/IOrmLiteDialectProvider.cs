@@ -180,8 +180,6 @@ namespace ServiceStack.OrmLite
 
         IDbDataParameter CreateParam();
 
-        void InitDbParam(IDbDataParameter dbParam, Type columnType);
-
         //DDL
         string GetDropForeignKeyConstraints(ModelDefinition modelDef);
 

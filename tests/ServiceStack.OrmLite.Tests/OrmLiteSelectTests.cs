@@ -494,6 +494,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Does_project_Sql_columns()
         {
+            OrmLiteConfig.BeforeExecFilter = cmd => cmd.GetDebugString().Print();
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<Rockstar>();
@@ -503,6 +504,7 @@ namespace ServiceStack.OrmLite.Tests
                 
                 var q = db.From<Rockstar>()
                     .Join<RockstarAlbum>()
+                    .GroupBy(r => new { r.Id })
                     .Select<Rockstar, RockstarAlbum>((r,a) => new {
                         r.Id,
                         Name = r.FirstName + " " + r.LastName,
