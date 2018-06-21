@@ -151,7 +151,7 @@ namespace ServiceStack.OrmLite.MySql
             var sbConstraints = StringBuilderCache.Allocate();
 
             var modelDef = GetModel(tableType);
-            foreach (var fieldDef in modelDef.FieldDefinitions)
+            foreach (var fieldDef in CreateTableFieldsStrategy(modelDef))
             {
                 if (fieldDef.CustomSelect != null)
                     continue;

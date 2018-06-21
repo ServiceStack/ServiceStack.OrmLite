@@ -306,7 +306,7 @@ namespace ServiceStack.OrmLite.Firebird
             var sbPk = new StringBuilder();
 
             var modelDef = GetModel(tableType);
-            foreach (var fieldDef in modelDef.FieldDefinitions)
+            foreach (var fieldDef in CreateTableFieldsStrategy(modelDef))
             {
                 if (fieldDef.CustomSelect != null)
                     continue;
