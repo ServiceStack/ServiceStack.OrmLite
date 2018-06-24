@@ -29,6 +29,11 @@
             <param name="assemblyName"></param>
             <returns>The type if it exists</returns>
         </member>
+        <member name="M:ServiceStack.Text.CharSpanExtensions.Value(System.ReadOnlySpan{System.Char})">
+            <summary>
+            Returns null if Length == 0, string.Empty if value[0] == NonWidthWhitespace, otherise returns value.ToString()
+            </summary>
+        </member>
         <member name="M:ServiceStack.Text.Common.DateTimeSerializer.Prepare(System.DateTime,System.Boolean)">
             <summary>
             If AlwaysUseUtc is set to true then convert all DateTime to UTC. If PreserveUtc is set to true then UTC dates will not convert to local
@@ -144,10 +149,10 @@
             Define how property names are mapped during deserialization
             </summary>
         </member>
-        <member name="F:ServiceStack.Text.JsConfig.sThrowOnDeserializationError">
+        <member name="F:ServiceStack.Text.JsConfig.sThrowOnError">
             <summary>
             Gets or sets a value indicating if the framework should throw serialization exceptions
-            or continue regardless of deserialization errors. If <see langword="true"/>  the framework
+            or continue regardless of serialization errors. If <see langword="true"/>  the framework
             will throw; otherwise, it will parse as many fields as possible. The default is <see langword="false"/>.
             </summary>
         </member>
@@ -395,6 +400,17 @@
             and strictly append-only; you cannot change existing values. All key matches are on **REFERENCE**
             equality. The type is fully thread-safe.
             </summary>
+        </member>
+        <member name="T:ServiceStack.Text.Pools.BufferPool">
+            <summary>
+            Courtesy of @marcgravell
+            https://github.com/mgravell/protobuf-net/blob/master/src/protobuf-net/BufferPool.cs
+            </summary>
+        </member>
+        <member name="F:ServiceStack.Text.Pools.BufferPool.MaxByteArraySize">
+            <remarks>
+            https://docs.microsoft.com/en-us/dotnet/framework/configure-apps/file-schema/runtime/gcallowverylargeobjects-element
+            </remarks>
         </member>
         <member name="T:ServiceStack.Text.Pools.ObjectPool`1">
             <summary>
