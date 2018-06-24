@@ -62,6 +62,32 @@ namespace ServiceStack.OrmLite
         private OrmLiteConnection ormLiteConnection;
         private OrmLiteConnection OrmLiteConnection => ormLiteConnection ?? (ormLiteConnection = new OrmLiteConnection(this));
 
+        public virtual IDbConnection CreateDbConnection()
+        {
+            if (this.ConnectionString == null)
+                throw new ArgumentNullException("ConnectionString", "ConnectionString must be set");
+
+            var connection = AutoDisposeConnection
+                ? new OrmLiteConnection(this)
+                : OrmLiteConnection;
+
+            return connection;
+        }
+
+        public static IDbConnection CreateDbConnection(string namedConnection)
+        {
+            if (namedConnection == null)
+                throw new ArgumentNullException(nameof(namedConnection));
+            
+            if (!NamedConnections.TryGetValue(namedConnection, out var factory))
+                throw new KeyNotFoundException("No factory registered is named " + namedConnection);
+
+            IDbConnection connection = factory.AutoDisposeConnection
+                ? new OrmLiteConnection(factory)
+                : factory.OrmLiteConnection;
+            return connection;
+        }
+
         public virtual IDbConnection OpenDbConnection()
         {
             var connection = CreateDbConnection();
@@ -83,15 +109,16 @@ namespace ServiceStack.OrmLite
             return connection;
         }
 
-        public virtual IDbConnection CreateDbConnection()
+        public virtual async Task<IDbConnection> OpenDbConnectionAsync(string namedConnection, CancellationToken token = default(CancellationToken))
         {
-            if (this.ConnectionString == null)
-                throw new ArgumentNullException("ConnectionString", "ConnectionString must be set");
+            var connection = CreateDbConnection(namedConnection);
+            if (connection is OrmLiteConnection ormliteConn)
+            {
+                await ormliteConn.OpenAsync(token);
+                return connection;
+            }
 
-            var connection = AutoDisposeConnection
-                ? new OrmLiteConnection(this)
-                : OrmLiteConnection;
-
+            await DialectProvider.OpenAsync(connection, token);
             return connection;
         }
 
@@ -127,13 +154,7 @@ namespace ServiceStack.OrmLite
 
         public virtual IDbConnection OpenDbConnection(string namedConnection)
         {
-            OrmLiteConnectionFactory factory;
-            if (!NamedConnections.TryGetValue(namedConnection, out factory))
-                throw new KeyNotFoundException("No factory registered is named " + namedConnection);
-
-            IDbConnection connection = factory.AutoDisposeConnection
-                ? new OrmLiteConnection(factory)
-                : factory.OrmLiteConnection;
+            var connection = CreateDbConnection(namedConnection);
 
             //moved setting up the ConnectionFilter to OrmLiteConnection.Open
             //connection = factory.ConnectionFilter(connection);
@@ -180,6 +201,14 @@ namespace ServiceStack.OrmLite
         public static Task<IDbConnection> OpenAsync(this IDbConnectionFactory connectionFactory, CancellationToken token = default(CancellationToken))
         {
             return ((OrmLiteConnectionFactory)connectionFactory).OpenDbConnectionAsync(token);
+        }
+
+        /// <summary>
+        /// Alias for OpenDbConnectionAsync
+        /// </summary>
+        public static Task<IDbConnection> OpenAsync(this IDbConnectionFactory connectionFactory, string namedConnection, CancellationToken token = default(CancellationToken))
+        {
+            return ((OrmLiteConnectionFactory)connectionFactory).OpenDbConnectionAsync(namedConnection, token);
         }
 
         /// <summary>
