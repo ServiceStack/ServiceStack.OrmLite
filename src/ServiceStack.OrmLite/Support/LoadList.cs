@@ -89,6 +89,7 @@ namespace ServiceStack.OrmLite.Support
             //Load Self Table.RefTableId PK
             var refQ = q.Clone();
             refQ.Select(dialectProvider.GetQuotedColumnName(modelDef, refSelf));
+            refQ.OrderBy(); //clear any ORDER BY in Sub Select's
 
             var subSqlRef = refQ.ToMergedParamsSelectStatement();
 
