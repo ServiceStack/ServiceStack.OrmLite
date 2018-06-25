@@ -139,6 +139,12 @@ namespace ServiceStack.OrmLite.Tests
                     return Init(Config.SqlServerBuildDb, SqlServer2008Dialect.Provider);
                 case Dialect.SqlServer2012:
                     return Init(Config.SqlServerBuildDb, SqlServer2012Dialect.Provider);
+                case Dialect.SqlServer2014:
+                    return Init(Config.SqlServerBuildDb, SqlServer2014Dialect.Provider);
+                case Dialect.SqlServer2016:
+                    return Init(Config.SqlServerBuildDb, SqlServer2016Dialect.Provider);
+                case Dialect.SqlServer2017:
+                    return Init(Config.SqlServerBuildDb, SqlServer2017Dialect.Provider);
                 case Dialect.MySql:
                     return Init(Config.MySqlDb, MySqlDialect.Provider);
                 case Dialect.PostgreSql:
