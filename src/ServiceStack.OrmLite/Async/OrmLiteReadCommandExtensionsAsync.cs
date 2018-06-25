@@ -25,6 +25,8 @@ namespace ServiceStack.OrmLite
             if (Log.IsDebugEnabled)
                 Log.DebugCommand(dbCmd);
 
+            OrmLiteConfig.BeforeExecFilter?.Invoke(dbCmd);
+
             return dbCmd.GetDialectProvider().ExecuteReaderAsync(dbCmd, token);
         }
 
@@ -40,6 +42,8 @@ namespace ServiceStack.OrmLite
 
             if (Log.IsDebugEnabled)
                 Log.DebugCommand(dbCmd);
+
+            OrmLiteConfig.BeforeExecFilter?.Invoke(dbCmd);
 
             return dbCmd.GetDialectProvider().ExecuteReaderAsync(dbCmd, token);
         }
@@ -389,11 +393,11 @@ namespace ServiceStack.OrmLite
             var loadList = new LoadListAsync<Into, From>(dbCmd, expr);
 
             var fieldDefs = loadList.FieldDefs;
-            if (!include.IsEmpty())
+            if (include?.Length > 0)
             {
                 // Check that any include values aren't reference fields of the specified From type
                 var fields = fieldDefs.Select(q => q.FieldName);
-                var invalid = include.Except<string>(fields).ToList();
+                var invalid = include.Except(fields).ToList();
                 if (invalid.Count > 0)
                     throw new ArgumentException($"Fields '{invalid.Join("', '")}' are not Reference Properties of Type '{typeof(From).Name}'");
 
