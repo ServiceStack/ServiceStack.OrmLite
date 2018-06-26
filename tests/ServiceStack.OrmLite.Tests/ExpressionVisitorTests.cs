@@ -823,7 +823,7 @@ namespace ServiceStack.OrmLite.Tests
             var q = Db.From<TestType>().OrderBy(order).ThenBy(x => x.Id);
             Assert.That(q.ToSelectStatement().ToLower(), Does.Not.Contain("="));
             Assert.That(q.ToSelectStatement().ToLower(), Does.Not.Contain(Db.GetDialectProvider().ParamString + "0"));
-            Assert.That(q.ToSelectStatement().ToLower(), Does.Contain("order by \"id\"")); 
+            Assert.That(q.ToSelectStatement().ToLower().NormalizeSql(), Does.Contain("order by id")); 
 
             var target = Db.Select(q);
             Assert.That(target.Count, Is.EqualTo(4));
