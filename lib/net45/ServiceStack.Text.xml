@@ -473,6 +473,11 @@
             https://docs.microsoft.com/en-us/dotnet/framework/configure-apps/file-schema/runtime/gcallowverylargeobjects-element
             </remarks>
         </member>
+        <member name="F:ServiceStack.Text.Pools.CharPool.MaxcharArraySize">
+            <remarks>
+            https://docs.microsoft.com/en-us/dotnet/framework/configure-apps/file-schema/runtime/gcallowverylargeobjects-element
+            </remarks>
+        </member>
         <member name="T:ServiceStack.Text.Pools.ObjectPool`1">
             <summary>
             Generic implementation of object pooling pattern with predefined pool size limit. The main
@@ -1736,6 +1741,11 @@
         <member name="M:ServiceStack.StreamExtensions.ReadExactlyFast(System.IO.Stream,System.Byte[],System.Int32,System.Int32)">
             <summary>
             Same as ReadExactly, but without the argument checks.
+            </summary>
+        </member>
+        <member name="M:ServiceStack.StreamExtensions.InMemoryStream(System.Byte[])">
+            <summary>
+            Returns bytes in publiclyVisible MemoryStream
             </summary>
         </member>
         <member name="M:ServiceStack.StringExtensions.BaseConvert(System.String,System.Int32,System.Int32)">
