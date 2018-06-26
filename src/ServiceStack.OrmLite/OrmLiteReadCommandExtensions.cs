@@ -199,6 +199,8 @@ namespace ServiceStack.OrmLite
                 }
             }
 
+            sql = sqlCopy;
+
             return dbCmd;
         }
 

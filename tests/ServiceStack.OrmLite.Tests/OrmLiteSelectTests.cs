@@ -346,7 +346,6 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_select_IN_using_array_or_List_params()
         {
-            LogManager.LogFactory = new ConsoleLogFactory();
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<ModelWithIdAndName>();
@@ -361,6 +360,30 @@ namespace ServiceStack.OrmLite.Tests
                 rows = db.Select<ModelWithIdAndName>("Id IN (@ids)", new { ids });
                 Assert.That(rows.Count, Is.EqualTo(2));
                 Assert.That(rows.Map(x => x.Id), Is.EquivalentTo(ids));
+            }
+        }
+
+        [Test]
+        public void Can_use_array_param_for_ExecuteSql()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<ModelWithIdAndName>();
+                5.Times(x => db.Insert(ModelWithIdAndName.Create(x + 1)));
+
+                var q = db.From<ModelWithIdAndName>();
+
+                db.ExecuteSql($"UPDATE {q.Table<ModelWithIdAndName>()} SET Name = 'updated' WHERE Id IN (@ids)",
+                    new {ids = new[] {1, 2, 3}});
+
+                var count = db.Count<ModelWithIdAndName>(x => x.Name == "updated");
+                Assert.That(count, Is.EqualTo(3));
+                
+                db.ExecuteSql($"UPDATE {q.Table<ModelWithIdAndName>()} SET Name = 'updated' WHERE Name IN (@names)",
+                    new {names = new[] {"Name4", "Name5"}});
+                
+                count = db.Count<ModelWithIdAndName>(x => x.Name == "updated");
+                Assert.That(count, Is.EqualTo(5));
             }
         }
 
