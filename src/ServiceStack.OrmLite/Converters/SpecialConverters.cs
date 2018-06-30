@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using ServiceStack.DataAnnotations;
@@ -66,11 +67,17 @@ namespace ServiceStack.OrmLite.Converters
                 : value.ToString();
         }
 
+        //cache expensive to calculate operation
+        static readonly ConcurrentDictionary<Type, bool> intEnums = new ConcurrentDictionary<Type, bool>();
+
         public static bool IsIntEnum(Type fieldType)
         {
-            var isIntEnum = fieldType.IsEnumFlags() ||
-                            fieldType.HasAttribute<EnumAsIntAttribute>() ||
-                            (!fieldType.IsEnum && fieldType.IsNumericType()); //i.e. is real int && not Enum
+            var isIntEnum = intEnums.GetOrAdd(fieldType, type => 
+                type.IsEnumFlags() ||
+                type.HasAttribute<EnumAsIntAttribute>() || 
+                !type.IsEnum && 
+                type.IsNumericType()); //i.e. is real int && not Enum)
+
             return isIntEnum;
         }
 
