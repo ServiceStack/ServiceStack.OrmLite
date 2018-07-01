@@ -1716,6 +1716,20 @@ if (!db.ColumnExists<Poco>(x => x.Age)) //= false
 db.ColumnExists<Poco>(x => x.Age); //= true
 ```
 
+#### Modify Schema APIs
+
+Additional Modify Schema APIs are available in the [OrmLiteSchemaModifyApi](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/src/ServiceStack.OrmLite/OrmLiteSchemaModifyApi.cs) class:
+
+ - `AlterTable`
+ - `AddColumn`
+ - `AlterColumn`
+ - `ChangeColumnName`
+ - `DropColumn`
+ - `AddForeignKey`
+ - `DropForeignKey`
+ - `CreateIndex`
+ - `DropIndex`
+
 ### Typed `Sql.Cast()` SQL Modifier
 
 The `Sql.Cast()` provides a cross-database abstraction for casting columns or expressions in SQL queries, e.g:
