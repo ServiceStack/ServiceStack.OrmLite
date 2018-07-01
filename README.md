@@ -1718,7 +1718,7 @@ db.ColumnExists<Poco>(x => x.Age); //= true
 
 #### Modify Schema APIs
 
-Additional Modify Schema APIs are available in the [OrmLiteSchemaModifyApi](https://github.com/ServiceStack/ServiceStack.OrmLite/blob/master/src/ServiceStack.OrmLite/OrmLiteSchemaModifyApi.cs) class:
+Additional Modify Schema APIs available in OrmLite include:
 
  - `AlterTable`
  - `AddColumn`
