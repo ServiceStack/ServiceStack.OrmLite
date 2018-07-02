@@ -341,14 +341,17 @@ namespace ServiceStack.OrmLite.SqlServer
 
             foreach (var fieldDef in modelDef.FieldDefinitionsArray)
             {
-                if (ShouldReturnOnInsert(modelDef, fieldDef))
+                //insertFields contains Property "Name" of fields to insert
+                var includeField = insertFields == null || insertFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase);
+
+                if (ShouldReturnOnInsert(modelDef, fieldDef) && (!fieldDef.AutoId || !includeField))
                 {
                     if (sbReturningColumns.Length > 0)
                         sbReturningColumns.Append(",");
                     sbReturningColumns.Append("INSERTED." + GetQuotedColumnName(fieldDef.FieldName));
                 }
 
-                if (ShouldSkipInsert(fieldDef))
+                if (ShouldSkipInsert(fieldDef) && (!fieldDef.AutoId || !includeField))
                     continue;
 
                 //insertFields contains Property "Name" of fields to insert ( that's how expressions work )

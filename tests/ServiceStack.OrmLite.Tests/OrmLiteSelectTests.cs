@@ -527,7 +527,7 @@ namespace ServiceStack.OrmLite.Tests
                 
                 var q = db.From<Rockstar>()
                     .Join<RockstarAlbum>()
-                    .GroupBy(r => new { r.Id })
+                    .GroupBy(r => new { r.Id, r.FirstName, r.LastName })
                     .Select<Rockstar, RockstarAlbum>((r,a) => new {
                         r.Id,
                         Name = r.FirstName + " " + r.LastName,
