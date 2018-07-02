@@ -256,17 +256,19 @@ namespace ServiceStack.OrmLite.PostgreSQL
 
             foreach (var fieldDef in modelDef.FieldDefinitionsArray)
             {
-                if (ShouldReturnOnInsert(modelDef, fieldDef))
+                //insertFields contains Property "Name" of fields to insert
+                var includeField = insertFields == null || insertFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase);
+
+                if (ShouldReturnOnInsert(modelDef, fieldDef) && (!fieldDef.AutoId || !includeField))
                 {
-                    sbReturningColumns.Append(sbReturningColumns.Length == 0 ? "RETURNING " : ",");
+                    sbReturningColumns.Append(sbReturningColumns.Length == 0 ? " RETURNING " : ",");
                     sbReturningColumns.Append(GetQuotedColumnName(fieldDef.FieldName));
                 }
 
-                if (ShouldSkipInsert(fieldDef))
+                if (ShouldSkipInsert(fieldDef) && (!fieldDef.AutoId || !includeField))
                     continue;
 
-                //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
-                if (insertFields != null && !insertFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase))
+                if (!includeField)
                     continue;
 
                 if (sbColumnNames.Length > 0)

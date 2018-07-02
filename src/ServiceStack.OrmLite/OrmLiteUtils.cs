@@ -971,9 +971,6 @@ namespace ServiceStack.OrmLite
             {
                 if (!string.IsNullOrEmpty(dialectProvider.GetDefaultValue(fieldDef)))
                 {
-                    if (fieldDef.AutoId)
-                        continue;
-                    
                     var value = fieldDef.GetValue(obj);    
                     if (value == null || value.Equals(fieldDef.FieldTypeDefaultValue))
                         continue;
