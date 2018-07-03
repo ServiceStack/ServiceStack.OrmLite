@@ -76,6 +76,11 @@ namespace ServiceStack.OrmLite
             return dbConn.Exec(dbCmd => dbCmd.Select<TModel>(fromTableType));
         }
 
+        public static List<TModel> SelectOnly<TModel>(this IDbConnection dbConn, Type fromTableType, Expression<Func<TModel, object>> onlyFields = null)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.SelectOnly<TModel>(fromTableType, onlyFields));
+        }
+
         /// <summary>
         /// Returns results from using a single name, value filter. E.g:
         /// <para>db.Where&lt;Person&gt;("Age", 27)</para>
