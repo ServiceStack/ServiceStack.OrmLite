@@ -20,6 +20,7 @@ using ServiceStack.Logging;
 using System.Linq;
 using ServiceStack.OrmLite.Support;
 using ServiceStack.Text;
+using System.Linq.Expressions;
 
 namespace ServiceStack.OrmLite
 {
@@ -480,6 +481,11 @@ namespace ServiceStack.OrmLite
             return Select<TModel>(dbCmd, fromTableType, null);
         }
 
+        internal static List<TModel> SelectOnly<TModel>(this IDbCommand dbCmd, Type fromTableType, Expression<Func<TModel, object>> onlyFields = null)
+        {
+            return SelectOnly<TModel>(dbCmd, fromTableType, null, null, onlyFields);
+        }
+
         internal static List<T> Select<T>(this IDbCommand dbCmd, Type fromTableType, string sql, object anonType = null)
         {
             if (anonType != null) dbCmd.SetParameters(fromTableType, anonType, excludeDefaults: false, sql: ref sql);
@@ -488,10 +494,19 @@ namespace ServiceStack.OrmLite
             return dbCmd.ConvertToList<T>();
         }
 
-        internal static string ToSelect<TModel>(IOrmLiteDialectProvider dialectProvider, Type fromTableType, string sqlFilter)
+        internal static List<T> SelectOnly<T>(this IDbCommand dbCmd, Type fromTableType, string sql, object anonType = null, Expression<Func<T, object>> onlyFields = null)
+        {
+            if (anonType != null) dbCmd.SetParameters(fromTableType, anonType, excludeDefaults: false, sql: ref sql);
+            dbCmd.CommandText = ToSelect<T>(dbCmd.GetDialectProvider(), fromTableType, sql, onlyFields);
+
+            return dbCmd.ConvertToList<T>();
+        }
+
+        internal static string ToSelect<TModel>(IOrmLiteDialectProvider dialectProvider, Type fromTableType, string sqlFilter, Expression<Func<TModel, object>> onlyFields = null)
         {
             var sql = StringBuilderCache.Allocate();
-            var modelDef = ModelDefinition<TModel>.Definition;
+            var modelDef = onlyFields != null ? ModelDefinition<TModel>.DynamicDefinition(onlyFields.GetFieldNames().ToList()) : ModelDefinition<TModel>.Definition;
+
             sql.Append(
                 $"SELECT {dialectProvider.GetColumnNames(modelDef)} " +
                 $"FROM {dialectProvider.GetQuotedTableName(fromTableType.GetModelDefinition())}");

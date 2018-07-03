@@ -38,9 +38,9 @@ namespace ServiceStack.OrmLite
             typeModelDefinitionMap = new Dictionary<Type, ModelDefinition>();
         }
 
-        internal static ModelDefinition GetModelDefinition(this Type modelType)
+        internal static ModelDefinition GetModelDefinition(this Type modelType, List<string> fieldNames = null)
         {
-            if (typeModelDefinitionMap.TryGetValue(modelType, out var modelDef))
+            if (typeModelDefinitionMap.TryGetValue(modelType, out var modelDef) && fieldNames == null)
                 return modelDef;
 
             if (modelType.IsValueType || modelType == typeof(string))
@@ -74,7 +74,10 @@ namespace ServiceStack.OrmLite
 
             var objProperties = modelType.GetProperties(
                 BindingFlags.Public | BindingFlags.Instance).ToList();
-
+            if (fieldNames != null)
+            {
+                objProperties = objProperties.Where(x => fieldNames.Contains(x.Name)).ToList();
+            }
             var hasPkAttr = objProperties.Any(p => p.HasAttribute<PrimaryKeyAttribute>());
 
             var hasIdField = CheckForIdField(objProperties);
