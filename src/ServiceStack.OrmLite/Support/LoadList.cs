@@ -54,6 +54,9 @@ namespace ServiceStack.OrmLite.Support
                          $"WHERE {dialectProvider.GetQuotedColumnName(refField)} " +
                          $"IN ({subSql})";
 
+            if (OrmLiteConfig.SqlSelectRefFilter != null)
+                sqlRef = OrmLiteConfig.SqlSelectRefFilter?.Invoke(refModelDef.ModelType, sqlRef);
+
             return sqlRef;
         }
 
@@ -98,6 +101,9 @@ namespace ServiceStack.OrmLite.Support
                          $"WHERE {dialectProvider.GetQuotedColumnName(refModelDef.PrimaryKey)} " +
                          $"IN ({subSqlRef})";
 
+            if (OrmLiteConfig.SqlSelectRefFilter != null)
+                sqlRef = OrmLiteConfig.SqlSelectRefFilter?.Invoke(refModelDef.ModelType, sqlRef);
+
             return sqlRef;
         }
 
@@ -107,6 +113,10 @@ namespace ServiceStack.OrmLite.Support
                          $"FROM {dialectProvider.GetQuotedTableName(refModelDef)} " +
                          $"WHERE {dialectProvider.GetQuotedColumnName(refField)} " +
                          $"IN ({subSql})";
+
+            if (OrmLiteConfig.SqlSelectRefFilter != null)
+                sqlRef = OrmLiteConfig.SqlSelectRefFilter?.Invoke(refModelDef.ModelType, sqlRef);
+
             return sqlRef;
         }
 
