@@ -55,7 +55,7 @@ namespace ServiceStack.OrmLite.Support
                          $"IN ({subSql})";
 
             if (OrmLiteConfig.SqlSelectRefFilter != null)
-                sqlRef = OrmLiteConfig.SqlSelectRefFilter?.Invoke(refModelDef.ModelType, sqlRef);
+                sqlRef = OrmLiteConfig.SqlSelectRefFilter.Invoke(refModelDef.ModelType, sqlRef);
 
             return sqlRef;
         }
@@ -102,7 +102,7 @@ namespace ServiceStack.OrmLite.Support
                          $"IN ({subSqlRef})";
 
             if (OrmLiteConfig.SqlSelectRefFilter != null)
-                sqlRef = OrmLiteConfig.SqlSelectRefFilter?.Invoke(refModelDef.ModelType, sqlRef);
+                sqlRef = OrmLiteConfig.SqlSelectRefFilter.Invoke(refModelDef.ModelType, sqlRef);
 
             return sqlRef;
         }
@@ -115,7 +115,7 @@ namespace ServiceStack.OrmLite.Support
                          $"IN ({subSql})";
 
             if (OrmLiteConfig.SqlSelectRefFilter != null)
-                sqlRef = OrmLiteConfig.SqlSelectRefFilter?.Invoke(refModelDef.ModelType, sqlRef);
+                sqlRef = OrmLiteConfig.SqlSelectRefFilter.Invoke(refModelDef.ModelType, sqlRef);
 
             return sqlRef;
         }

@@ -39,7 +39,7 @@ namespace ServiceStack.OrmLite.Support
             var sql = dialectProvider.ToSelectStatement(refType, sqlFilter, pkValue);
 
             if (OrmLiteConfig.SqlSelectRefFilter != null)
-                sql = OrmLiteConfig.SqlSelectRefFilter?.Invoke(refType, sql);
+                sql = OrmLiteConfig.SqlSelectRefFilter.Invoke(refType, sql);
 
             return sql;
         }
@@ -50,7 +50,7 @@ namespace ServiceStack.OrmLite.Support
             var sql = dialectProvider.ToSelectStatement(refType, sqlFilter, pkValue);
 
             if (OrmLiteConfig.SqlSelectRefFilter != null)
-                sql = OrmLiteConfig.SqlSelectRefFilter?.Invoke(refType, sql);
+                sql = OrmLiteConfig.SqlSelectRefFilter.Invoke(refType, sql);
 
             return sql;
         }
@@ -66,7 +66,7 @@ namespace ServiceStack.OrmLite.Support
             var sql = dialectProvider.ToSelectStatement(refType, sqlFilter, refPkValue);
 
             if (OrmLiteConfig.SqlSelectRefFilter != null)
-                sql = OrmLiteConfig.SqlSelectRefFilter?.Invoke(refType, sql);
+                sql = OrmLiteConfig.SqlSelectRefFilter.Invoke(refType, sql);
 
             return sql;
         }
