@@ -176,7 +176,7 @@ namespace ServiceStack.OrmLite
         public static Action<IDbCommand, object> InsertFilter { get; set; }
         public static Action<IDbCommand, object> UpdateFilter { get; set; }
         public static Action<IUntypedSqlExpression> SqlExpressionSelectFilter { get; set; }
-        public static Func<Type, string, string> SqlSelectRefFilter { get; set; }
+        public static Func<Type, string, string> LoadReferenceSelectFilter { get; set; }
 
 
         public static Func<string, string> StringFilter { get; set; }

@@ -131,7 +131,7 @@ namespace ServiceStack.OrmLite.Tests
                 }
             };
 
-            OrmLiteConfig.SqlSelectRefFilter = (type, sql) =>
+            OrmLiteConfig.LoadReferenceSelectFilter = (type, sql) =>
             {
                 var meta = type.GetModelMetadata();
                 if (type.HasInterface(typeof(ISoftDelete)))
@@ -154,13 +154,13 @@ namespace ServiceStack.OrmLite.Tests
             }
 
             OrmLiteConfig.SqlExpressionSelectFilter = null;
-            OrmLiteConfig.SqlSelectRefFilter = null;
+            OrmLiteConfig.LoadReferenceSelectFilter = null;
         }
 
         [Test]
         public void Can_get_single_vendor_and__load_active_references_using_soft_delete_ref_filter()
         {
-            OrmLiteConfig.SqlSelectRefFilter = (type, sql) =>
+            OrmLiteConfig.LoadReferenceSelectFilter = (type, sql) =>
             {
                 var meta = type.GetModelMetadata();
                 if (type.HasInterface(typeof(ISoftDelete)))
@@ -182,7 +182,7 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(vendor.Products.Count, Is.EqualTo(1));
             }
 
-            OrmLiteConfig.SqlSelectRefFilter = null;
+            OrmLiteConfig.LoadReferenceSelectFilter = null;
         }
     }
 }
