@@ -20,12 +20,12 @@ namespace ServiceStack.OrmLite
     {
         public const string IdField = "Id";
 
-        private const int defaultCommandTimeout = 30;
+        private const int DefaultCommandTimeout = 30;
         private static int? commandTimeout;
 
         public static int CommandTimeout
         {
-            get => commandTimeout ?? defaultCommandTimeout;
+            get => commandTimeout ?? DefaultCommandTimeout;
             set => commandTimeout = value;
         }
 
@@ -36,7 +36,7 @@ namespace ServiceStack.OrmLite
             {
                 if (dialectProvider == null)
                 {
-                    throw new ArgumentNullException("DialectProvider",
+                    throw new ArgumentNullException(nameof(DialectProvider),
                         "You must set the singleton 'OrmLiteConfig.DialectProvider' to use the OrmLiteWriteExtensions");
                 }
                 return dialectProvider;
@@ -60,22 +60,22 @@ namespace ServiceStack.OrmLite
 
         public static IOrmLiteExecFilter GetExecFilter(this IOrmLiteDialectProvider dialectProvider) {
             return dialectProvider != null
-                    ? dialectProvider.ExecFilter ?? ExecFilter
-                    : ExecFilter;
+                ? dialectProvider.ExecFilter ?? ExecFilter
+                : ExecFilter;
         }
 
         public static IOrmLiteExecFilter GetExecFilter(this IDbCommand dbCmd) {
-            var dialectProvider = dbCmd is OrmLiteCommand ormLiteCmd
+            var dialect = dbCmd is OrmLiteCommand ormLiteCmd
                 ? ormLiteCmd.DialectProvider
                 : DialectProvider;
-            return dialectProvider.GetExecFilter();
+            return dialect.GetExecFilter();
         }
 
         public static IOrmLiteExecFilter GetExecFilter(this IDbConnection db) {
-            var dialectProvider = db is OrmLiteConnection ormLiteConn
+            var dialect = db is OrmLiteConnection ormLiteConn
                 ? ormLiteConn.DialectProvider
                 : DialectProvider;
-            return dialectProvider.GetExecFilter();
+            return dialect.GetExecFilter();
         }
 
         public static void SetLastCommandText(this IDbConnection db, string sql)
