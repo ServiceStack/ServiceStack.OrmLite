@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Model;
@@ -111,6 +112,20 @@ namespace ServiceStack.OrmLite.Tests.Issues
                 Assert.That(lastStatement, Does.Contain("as statolinea"));
                 Assert.That(lastStatement, Does.Contain("as statoqc"));
                 Assert.That(lastStatement, Does.Contain("as statowarning"));
+            }
+        }
+
+        [Test]
+        public async Task Does_RowCount_LRARichiesta_Async()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<LRARichiesta>();
+                
+                var q = db.From<LRARichiesta>()
+                    .Where(x => x.Id > 0);
+
+                var result = await db.RowCountAsync(q);                
             }
         }
         
