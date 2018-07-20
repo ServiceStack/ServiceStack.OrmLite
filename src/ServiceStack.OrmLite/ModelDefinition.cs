@@ -167,6 +167,8 @@ namespace ServiceStack.OrmLite
             var allItems = new List<FieldDefinition>(FieldDefinitions);
             allItems.AddRange(IgnoredFieldDefinitions);
             AllFieldDefinitionsArray = allItems.ToArray();
+
+            OrmLiteConfig.OnModelDefinitionInit?.Invoke(this);
         }
 
         public bool IsRefField(FieldDefinition fieldDef)
