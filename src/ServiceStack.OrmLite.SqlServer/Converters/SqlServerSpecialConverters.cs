@@ -4,9 +4,6 @@ namespace ServiceStack.OrmLite.SqlServer.Converters
 {
     public class SqlServerRowVersionConverter : RowVersionConverter
     {
-        public override string ColumnDefinition
-        {
-            get { return "rowversion"; }
-        }
+        public override string ColumnDefinition => "rowversion";
     }
 }

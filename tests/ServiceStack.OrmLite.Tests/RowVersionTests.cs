@@ -360,6 +360,18 @@ namespace ServiceStack.OrmLite.Tests
             var count = db.Count<ModelWithRowVersion>(m => m.Id == rowId);
             Assert.That(count, Is.EqualTo(0));
         }
+        
+        [Test]
+        public void Can_DeleteById_with_current_rowversion()
+        {
+            var rowId = db.Insert(new ModelWithRowVersion { Text = "Four" }, selectIdentity: true);
+            var row = db.SingleById<ModelWithRowVersion>(rowId);
+
+            db.DeleteById<ModelWithRowVersion>(row.Id, rowVersion:row.RowVersion);
+
+            var count = db.Count<ModelWithRowVersion>(m => m.Id == rowId);
+            Assert.That(count, Is.EqualTo(0));
+        }
 
         [Test]
         public void Update_with_outdated_rowversion_throws()

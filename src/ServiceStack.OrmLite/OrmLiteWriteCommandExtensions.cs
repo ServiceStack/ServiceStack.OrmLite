@@ -573,6 +573,9 @@ namespace ServiceStack.OrmLite
 
             var rowVersionParam = dbCmd.CreateParameter();
             rowVersionParam.ParameterName = dialectProvider.GetParam("rowVersion");
+            var converter = dialectProvider.GetConverterBestMatch(typeof(ulong));
+            converter.InitDbParam(rowVersionParam, typeof(ulong));
+
             rowVersionParam.Value = rowVersion;
             dbCmd.Parameters.Add(rowVersionParam);
 
