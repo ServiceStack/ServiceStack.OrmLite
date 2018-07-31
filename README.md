@@ -2309,11 +2309,10 @@ More examples can be found in [SqlServerProviderTests](https://github.com/Servic
 
 Creating a foreign key in OrmLite can be done by adding `[References(typeof(ForeignKeyTable))]` on the relation property,
 which will result in OrmLite creating the Foreign Key relationship when it creates the DB table with `db.CreateTable<Poco>`.
-[@brainless83](https://github.com/brainless83) has extended this support further by adding more finer-grain options 
-and behaviours with the new `[ForeignKey]` attribute which will now let you specify the desired behaviour when deleting
-or updating related rows in Foreign Key tables. 
 
-An example of a table with all the different options:
+Additional fine-grain options and behaviour are available in the `[ForeignKey]` attribute which will let you specify the desired behaviour when deleting or updating related rows in Foreign Key tables. 
+
+An example of a table with the different available options:
 
 ```csharp
 public class TableWithAllCascadeOptions
