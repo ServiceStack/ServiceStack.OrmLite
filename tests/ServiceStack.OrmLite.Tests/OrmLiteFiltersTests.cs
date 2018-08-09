@@ -97,8 +97,7 @@ namespace ServiceStack.OrmLite.Tests
 
             OrmLiteConfig.InsertFilter = (dbCmd, row) =>
             {
-                var auditRow = row as IAudit;
-                if (auditRow != null)
+                if (row is IAudit auditRow)
                 {
                     auditRow.CreatedDate = auditRow.ModifiedDate = insertDate;
                 }
@@ -106,8 +105,7 @@ namespace ServiceStack.OrmLite.Tests
 
             OrmLiteConfig.UpdateFilter = (dbCmd, row) =>
             {
-                var auditRow = row as IAudit;
-                if (auditRow != null)
+                if (row is IAudit auditRow)
                 {
                     auditRow.ModifiedDate = updateDate;
                 }
@@ -147,8 +145,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             OrmLiteConfig.InsertFilter = OrmLiteConfig.UpdateFilter = (dbCmd, row) =>
             {
-                var auditRow = row as IAudit;
-                if (auditRow != null)
+                if (row is IAudit auditRow)
                 {
                     if (auditRow.ModifiedBy == null)
                         throw new ArgumentNullException("ModifiedBy");

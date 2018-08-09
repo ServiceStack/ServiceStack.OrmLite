@@ -1992,14 +1992,12 @@ public interface IAudit
 }
 
 OrmLiteConfig.InsertFilter = (dbCmd, row) => {
-    var auditRow = row as IAudit;
-    if (auditRow != null)
+    if (row is IAudit auditRow)
         auditRow.CreatedDate = auditRow.ModifiedDate = DateTime.UtcNow;
 };
 
 OrmLiteConfig.UpdateFilter = (dbCmd, row) => {
-    var auditRow = row as IAudit;
-    if (auditRow != null)
+    if (row is IAudit auditRow)
         auditRow.ModifiedDate = DateTime.UtcNow;
 };
 ```
@@ -2012,8 +2010,7 @@ The filters can also be used for validation where throwing an exception will pre
 
 ```csharp
 OrmLiteConfig.InsertFilter = OrmLiteConfig.UpdateFilter = (dbCmd, row) => {
-    var auditRow = row as IAudit;
-    if (auditRow != null && auditRow.ModifiedBy == null)
+    if (row is IAudit auditRow && auditRow.ModifiedBy == null)
         throw new ArgumentNullException("ModifiedBy");
 };
 
