@@ -29,6 +29,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 Assert.That(sql, Does.Contain(indexName));
                 Assert.That(sql, Does.Contain(uniqueName));
+                Assert.That(sql, Does.Contain("altname"));
             }
         }
 

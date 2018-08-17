@@ -635,7 +635,7 @@ namespace ServiceStack.OrmLite.Oracle
             {
                 if (!fieldDef.IsIndexed) continue;
 
-                var indexName = GetIndexName(
+                var indexName = fieldDef.IndexName ?? GetIndexName(
                     fieldDef.IsUniqueIndex,
                     (modelDef.IsInSchema
                         ? modelDef.Schema + "_" + modelDef.ModelName

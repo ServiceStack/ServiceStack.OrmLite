@@ -404,7 +404,7 @@ namespace ServiceStack.OrmLite.Firebird
             {
                 if (!fieldDef.IsIndexed) continue;
 
-                var indexName = GetIndexName(
+                var indexName = fieldDef.IndexName ?? GetIndexName(
                     fieldDef.IsUniqueIndex, modelDef.ModelName, fieldDef.FieldName);
 
                 sqlIndexes.Add(

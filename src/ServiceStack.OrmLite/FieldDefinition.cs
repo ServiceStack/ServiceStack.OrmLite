@@ -47,6 +47,8 @@ namespace ServiceStack.OrmLite
         public bool IsClustered { get; set; }
 
         public bool IsNonClustered { get; set; }
+        
+        public string IndexName { get; set; }
 
         public bool IsRowVersion { get; set; }
 
