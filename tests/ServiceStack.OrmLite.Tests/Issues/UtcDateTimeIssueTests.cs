@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using NUnit.Framework;
 using ServiceStack.Text;
 
@@ -38,6 +39,34 @@ namespace ServiceStack.OrmLite.Tests.Issues
                 //db.GetLastSql().Print();
 
                 //db.Select<TestDate>().PrintDump();
+            }
+        }
+
+        [Test]
+        public void Can_select_DateTime_by_Range()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<TestDate>();
+
+                db.Insert(new TestDate {
+                    Name = "Now",
+                    ExpiryDate = DateTime.Now,
+                });
+                db.Insert(new TestDate {
+                    Name = "Today",
+                    ExpiryDate = DateTime.Now.Date,
+                });
+                db.Insert(new TestDate {
+                    Name = "Tomorrow",
+                    ExpiryDate = DateTime.Now.Date.AddDays(1),
+                });
+
+                var results = db.Select<TestDate>()
+                    .Where(x => x.ExpiryDate >= DateTime.Now.Date && 
+                                x.ExpiryDate < DateTime.Now.Date.AddDays(1));
+                
+                Assert.That(results.Map(x => x.Name), Is.EquivalentTo(new[]{"Now","Today"}));
             }
         }
 
