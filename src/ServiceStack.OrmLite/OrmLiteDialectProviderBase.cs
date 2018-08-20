@@ -258,7 +258,10 @@ namespace ServiceStack.OrmLite
 		}
 
 		public IOrmLiteConverter GetConverterBestMatch(Type type)
-        {
+		{
+		    if (type == typeof(RowVersionConverter))
+		        return RowVersionConverter;
+            
             var converter = GetConverter(type);
             if (converter != null)
                 return converter;
@@ -502,11 +505,16 @@ namespace ServiceStack.OrmLite
             return StringBuilderCache.ReturnAndFree(sb);
         }
 
-        public virtual SelectItem GetRowVersionColumnName(FieldDefinition field, string tablePrefix = null)
+        public virtual SelectItem GetRowVersionSelectColumn(FieldDefinition field, string tablePrefix = null)
         {
             return new SelectItemColumn(this, field.FieldName, null, tablePrefix);
         }
 
+        public virtual string GetRowVersionColumn(FieldDefinition field, string tablePrefix = null)
+        {
+            return GetRowVersionSelectColumn(field, tablePrefix).ToString();
+        }
+        
         public virtual string GetColumnNames(ModelDefinition modelDef)
         {
             return GetColumnNames(modelDef, false).ToSelectString();
@@ -527,7 +535,7 @@ namespace ServiceStack.OrmLite
                 }
                 else if (field.IsRowVersion)
                 {
-                    sqlColumns[i] = GetRowVersionColumnName(field, tablePrefix);
+                    sqlColumns[i] = GetRowVersionSelectColumn(field, tablePrefix);
                 }
                 else
                 {

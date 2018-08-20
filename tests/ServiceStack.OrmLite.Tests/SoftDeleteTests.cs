@@ -4,6 +4,7 @@ using System.Data;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.Tests.UseCase;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -136,7 +137,8 @@ namespace ServiceStack.OrmLite.Tests
                 var meta = type.GetModelMetadata();
                 if (type.HasInterface(typeof(ISoftDelete)))
                 {
-                    sql += $" AND (\"{meta.ModelName}\".\"IsDeleted\" = 0)";
+                    var sqlFalse = OrmLiteConfig.DialectProvider.SqlBool(false);
+                    sql += $" AND ({meta.ModelName.SqlTable()}.{"IsDeleted".SqlColumn()} = {sqlFalse})";
                 }
 
                 return sql;
@@ -165,7 +167,8 @@ namespace ServiceStack.OrmLite.Tests
                 var meta = type.GetModelMetadata();
                 if (type.HasInterface(typeof(ISoftDelete)))
                 {
-                    sql += $" AND (\"{meta.ModelName}\".\"IsDeleted\" = 0)";
+                    var sqlFalse = OrmLiteConfig.DialectProvider.SqlBool(false);
+                    sql += $" AND ({meta.ModelName.SqlTable()}.{"IsDeleted".SqlColumn()} = {sqlFalse})";
                 }
 
                 return sql;

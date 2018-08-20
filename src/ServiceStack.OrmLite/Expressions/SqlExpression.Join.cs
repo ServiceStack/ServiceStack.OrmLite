@@ -266,7 +266,7 @@ namespace ServiceStack.OrmLite
                                     }
                                     else
                                     {
-                                        sbSelect.Append(DialectProvider.GetRowVersionColumnName(fieldDef, DialectProvider.GetTableName(tableDef.ModelName)));
+                                        sbSelect.Append(DialectProvider.GetRowVersionSelectColumn(fieldDef, DialectProvider.GetTableName(tableDef.ModelName)));
                                     }
                                 }
                                 else
@@ -303,7 +303,7 @@ namespace ServiceStack.OrmLite
                                 }
                                 else
                                 {
-                                    sbSelect.Append(DialectProvider.GetRowVersionColumnName(fieldDef, DialectProvider.GetTableName(tableDef.ModelName)));
+                                    sbSelect.Append(DialectProvider.GetRowVersionSelectColumn(fieldDef, DialectProvider.GetTableName(tableDef.ModelName)));
                                 }
                             }
                             else

@@ -94,6 +94,8 @@ namespace ServiceStack.OrmLite.Converters
     {
         public override string ColumnDefinition => "BIGINT";
 
+        public override DbType DbType => DbType.Int64;
+
         public override object FromDbValue(Type fieldType, object value)
         {
             if (value is byte[] bytes)

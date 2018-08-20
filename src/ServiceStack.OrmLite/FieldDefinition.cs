@@ -76,7 +76,7 @@ namespace ServiceStack.OrmLite
         public string GetQuotedName(IOrmLiteDialectProvider dialectProvider)
         {
             return IsRowVersion
-                ? dialectProvider.GetRowVersionColumnName(this).ToString()
+                ? dialectProvider.GetRowVersionSelectColumn(this).ToString()
                 : dialectProvider.GetQuotedColumnName(FieldName);
         }
 

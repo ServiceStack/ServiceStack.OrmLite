@@ -16,6 +16,7 @@ using System.Data;
 using System.Linq;
 using ServiceStack.Data;
 using ServiceStack.Logging;
+using ServiceStack.OrmLite.Converters;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
@@ -573,15 +574,15 @@ namespace ServiceStack.OrmLite
 
             var rowVersionParam = dbCmd.CreateParameter();
             rowVersionParam.ParameterName = dialectProvider.GetParam("rowVersion");
-            var converter = dialectProvider.GetConverterBestMatch(typeof(ulong));
+            var converter = dialectProvider.GetConverterBestMatch(typeof(RowVersionConverter));
             converter.InitDbParam(rowVersionParam, typeof(ulong));
 
-            rowVersionParam.Value = rowVersion;
+            rowVersionParam.Value = converter.ToDbValue(typeof(ulong), rowVersion);
             dbCmd.Parameters.Add(rowVersionParam);
 
             var sql = $"DELETE FROM {dialectProvider.GetQuotedTableName(modelDef)} " +
                       $"WHERE {dialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName)} = {idParam.ParameterName} " +
-                      $"AND {dialectProvider.GetQuotedColumnName(rowVersionField.FieldName)} = {rowVersionParam.ParameterName}";
+                      $"AND {dialectProvider.GetRowVersionColumn(rowVersionField)} = {rowVersionParam.ParameterName}";
 
             return sql;
         }
@@ -994,7 +995,7 @@ namespace ServiceStack.OrmLite
             var dialectProvider = dbCmd.GetDialectProvider();
             var idParamString = dialectProvider.GetParam();
 
-            var sql = $"SELECT {dialectProvider.GetRowVersionColumnName(modelDef.RowVersion)} " +
+            var sql = $"SELECT {dialectProvider.GetRowVersionSelectColumn(modelDef.RowVersion)} " +
                       $"FROM {dialectProvider.GetQuotedTableName(modelDef)} " +
                       $"WHERE {dialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName)} = {idParamString}";
 
