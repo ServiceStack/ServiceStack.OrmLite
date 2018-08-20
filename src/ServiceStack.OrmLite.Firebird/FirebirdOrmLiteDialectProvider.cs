@@ -55,6 +55,8 @@ namespace ServiceStack.OrmLite.Firebird
                 { OrmLiteVariables.SystemUtc, "CURRENT_TIMESTAMP" },
                 { OrmLiteVariables.MaxText, "VARCHAR(1000)" },
                 { OrmLiteVariables.MaxTextUnicode, "VARCHAR(1000)" },
+                { OrmLiteVariables.True, SqlBool(true) },                
+                { OrmLiteVariables.False, SqlBool(false) },                
             };
         }
 

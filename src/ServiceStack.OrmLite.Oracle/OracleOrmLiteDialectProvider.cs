@@ -118,6 +118,8 @@ namespace ServiceStack.OrmLite.Oracle
                 { OrmLiteVariables.SystemUtc, "sys_extract_utc(systimestamp)" },
                 { OrmLiteVariables.MaxText, "VARCHAR2(2000)" },
                 { OrmLiteVariables.MaxTextUnicode, "NVARCHAR2(2000)" },
+                { OrmLiteVariables.True, SqlBool(true) },                
+                { OrmLiteVariables.False, SqlBool(false) },                
             };
         }
 

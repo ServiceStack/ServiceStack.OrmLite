@@ -35,9 +35,9 @@ namespace ServiceStack.OrmLite.Tests.Issues
         
         public abstract class EntityBase<T> // : IEntity<T>
         {
-            [Required, Default(typeof(bool), "0")]
+            [Required, Default(typeof(bool), "{FALSE}")]
             public bool IsDeleted { get; set; }
-            [Required, Default(typeof(bool), "1")]
+            [Required, Default(typeof(bool), "{TRUE}")]
             public bool IsActive { get; set; } = true;
             public int? Position { get; set; }
             //public ulong RowVersion { get; set; }

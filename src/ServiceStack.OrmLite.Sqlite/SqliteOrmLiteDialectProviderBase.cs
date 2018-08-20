@@ -34,6 +34,8 @@ namespace ServiceStack.OrmLite.Sqlite
                 { OrmLiteVariables.SystemUtc, "CURRENT_TIMESTAMP" },
                 { OrmLiteVariables.MaxText, "VARCHAR(1000000)" },
                 { OrmLiteVariables.MaxTextUnicode, "NVARCHAR(1000000)" },
+                { OrmLiteVariables.True, SqlBool(true) },                
+                { OrmLiteVariables.False, SqlBool(false) },                
             };
         }
 

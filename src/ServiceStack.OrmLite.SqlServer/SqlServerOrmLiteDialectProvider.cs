@@ -51,6 +51,8 @@ namespace ServiceStack.OrmLite.SqlServer
                 { OrmLiteVariables.SystemUtc, "SYSUTCDATETIME()" },
                 { OrmLiteVariables.MaxText, "VARCHAR(MAX)" },
                 { OrmLiteVariables.MaxTextUnicode, "NVARCHAR(MAX)" },
+                { OrmLiteVariables.True, SqlBool(true) },                
+                { OrmLiteVariables.False, SqlBool(false) },                
             };
         }
 

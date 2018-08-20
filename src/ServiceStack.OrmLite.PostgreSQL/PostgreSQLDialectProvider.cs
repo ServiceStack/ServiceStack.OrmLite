@@ -67,6 +67,8 @@ namespace ServiceStack.OrmLite.PostgreSQL
                 { OrmLiteVariables.SystemUtc, "now() at time zone 'utc'" },
                 { OrmLiteVariables.MaxText, "TEXT" },
                 { OrmLiteVariables.MaxTextUnicode, "TEXT" },
+                { OrmLiteVariables.True, SqlBool(true) },                
+                { OrmLiteVariables.False, SqlBool(false) },                
             };
         }
 

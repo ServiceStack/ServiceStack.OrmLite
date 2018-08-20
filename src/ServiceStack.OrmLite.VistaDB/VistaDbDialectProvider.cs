@@ -67,6 +67,8 @@ namespace ServiceStack.OrmLite.VistaDB
                 { OrmLiteVariables.SystemUtc, "GetDate()" },
                 { OrmLiteVariables.MaxText, "VARCHAR(MAX)" },
                 { OrmLiteVariables.MaxTextUnicode, "NVARCHAR(MAX)" },
+                { OrmLiteVariables.True, SqlBool(true) },                
+                { OrmLiteVariables.False, SqlBool(false) },                
             };
         }
 
