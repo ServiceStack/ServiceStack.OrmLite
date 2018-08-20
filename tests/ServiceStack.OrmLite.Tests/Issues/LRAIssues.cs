@@ -120,7 +120,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
         {
             using (var db = OpenDbConnection())
             {
-                db.DropAndCreateTable<LRARichiesta>();
+               CreateTables(db);
                 
                 var q = db.From<LRARichiesta>()
                     .Where(x => x.Id > 0);

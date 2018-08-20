@@ -22,7 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj" />
-    <PackageReference Include="Mysql.Data" Version="8.0.11" />
+    <PackageReference Include="Mysql.Data" Version="8.0.12" />
   </ItemGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net452' ">
