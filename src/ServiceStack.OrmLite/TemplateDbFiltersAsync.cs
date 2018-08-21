@@ -86,7 +86,7 @@ namespace ServiceStack.OrmLite
         public string sqlTake(int? limit) => padCondition(OrmLiteConfig.DialectProvider.SqlLimit(null, limit));
         public string ormliteVar(string name) => OrmLiteConfig.DialectProvider.Variables.TryGetValue(name, out var value) ? value : null;
 
-        public bool isSqlSafe(string sql) => OrmLiteUtils.IsSqlSafe(sql);
+        public bool isUnsafeSql(string sql) => OrmLiteUtils.isUnsafeSql(sql);
 
         private string padCondition(string text) => string.IsNullOrEmpty(text) ? "" : " " + text;
     }

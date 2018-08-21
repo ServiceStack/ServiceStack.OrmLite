@@ -465,15 +465,15 @@ namespace ServiceStack.OrmLite
 
         public static Func<string,string> SqlVerifyFragmentFn { get; set; }
 
-        public static bool IsSqlSafe(string sql)
+        public static bool isUnsafeSql(string sql)
         {
             if (sql == null)
-                return true;
+                return false;
 
             if (SqlVerifyFragmentFn != null)
             {
                 SqlVerifyFragmentFn(sql);
-                return true;
+                return false;
             }
 
             var fragmentToVerify = sql
@@ -483,12 +483,12 @@ namespace ServiceStack.OrmLite
                 .ToLower();
 
             var match = VerifyFragmentRegEx.Match(fragmentToVerify);
-            return !match.Success;
+            return match.Success;
         }
 
         public static string SqlVerifyFragment(this string sqlFragment)
         {
-            if (!IsSqlSafe(sqlFragment))
+            if (isUnsafeSql(sqlFragment))
                 throw new ArgumentException("Potential illegal fragment detected: " + sqlFragment);
 
             return sqlFragment;
