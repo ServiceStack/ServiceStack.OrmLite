@@ -266,7 +266,7 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecuteSqlAsync(dbCmd.GetDialectProvider().ToDeleteStatement(tableType, sql), token);
         }
 
-        internal static Task<long> InsertAsync<T>(this IDbCommand dbCmd, T obj, Action<IDbCommand> commandFilter, bool selectIdentity, CancellationToken token)
+        internal static async Task<long> InsertAsync<T>(this IDbCommand dbCmd, T obj, Action<IDbCommand> commandFilter, bool selectIdentity, CancellationToken token)
         {
             OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj);
 
@@ -278,11 +278,20 @@ namespace ServiceStack.OrmLite
             dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
             commandFilter?.Invoke(dbCmd);
+            
+            if (dialectProvider.HasInsertReturnValues(ModelDefinition<T>.Definition))
+            {
+                using (var reader = await dbCmd.ExecReaderAsync(dbCmd.CommandText, token))
+                using (reader)
+                {
+                    return reader.PopulateReturnValues(dialectProvider, obj);
+                }
+            }
 
             if (selectIdentity)
-                return dialectProvider.InsertAndGetLastInsertIdAsync<T>(dbCmd, token);
+                return await dialectProvider.InsertAndGetLastInsertIdAsync<T>(dbCmd, token);
 
-            return dbCmd.ExecNonQueryAsync(token).Then(i => (long)i);
+            return await dbCmd.ExecNonQueryAsync(token).Then(i => (long)i);
         }
 
         internal static Task InsertAsync<T>(this IDbCommand dbCmd, Action<IDbCommand> commandFilter, CancellationToken token, params T[] objs)
