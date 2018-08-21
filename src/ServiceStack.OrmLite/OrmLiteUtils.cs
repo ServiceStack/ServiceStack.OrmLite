@@ -463,9 +463,12 @@ namespace ServiceStack.OrmLite
         public static Regex VerifyFragmentRegEx = new Regex("([^\\w]|^)+(--|;--|;|%|/\\*|\\*/|@@|@|char|nchar|varchar|nvarchar|alter|begin|cast|create|cursor|declare|delete|drop|end|exec|execute|fetch|insert|kill|open|select|sys|sysobjects|syscolumns|table|update)([^\\w]|$)+",
             RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
+        public static Regex VerifySqlRegEx = new Regex("([^\\w]|^)+(--|;--|;|%|/\\*|\\*/|@@|@|char|nchar|varchar|nvarchar|alter|begin|cast|create|cursor|declare|delete|drop|end|exec|execute|fetch|insert|kill|open|table|update)([^\\w]|$)+",
+            RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
         public static Func<string,string> SqlVerifyFragmentFn { get; set; }
 
-        public static bool isUnsafeSql(string sql)
+        public static bool isUnsafeSql(string sql, Regex verifySql)
         {
             if (sql == null)
                 return false;
@@ -482,13 +485,13 @@ namespace ServiceStack.OrmLite
                 .StripQuotedStrings('`')
                 .ToLower();
 
-            var match = VerifyFragmentRegEx.Match(fragmentToVerify);
+            var match = verifySql.Match(fragmentToVerify);
             return match.Success;
         }
 
         public static string SqlVerifyFragment(this string sqlFragment)
         {
-            if (isUnsafeSql(sqlFragment))
+            if (isUnsafeSql(sqlFragment, VerifyFragmentRegEx))
                 throw new ArgumentException("Potential illegal fragment detected: " + sqlFragment);
 
             return sqlFragment;
