@@ -27,11 +27,13 @@ namespace ServiceStack.OrmLite
         {
             dbCmd.CommandText = sql;
 
-            if (OrmLiteConfig.ResultsFilter != null)
-                return OrmLiteConfig.ResultsFilter.ExecuteSql(dbCmd).InTask();
-
             if (Log.IsDebugEnabled)
                 Log.DebugCommand(dbCmd);
+
+            OrmLiteConfig.BeforeExecFilter?.Invoke(dbCmd);
+
+            if (OrmLiteConfig.ResultsFilter != null)
+                return OrmLiteConfig.ResultsFilter.ExecuteSql(dbCmd).InTask();
 
             return dbCmd.GetDialectProvider().ExecuteNonQueryAsync(dbCmd, token);
         }
@@ -45,6 +47,8 @@ namespace ServiceStack.OrmLite
 
             if (Log.IsDebugEnabled)
                 Log.DebugCommand(dbCmd);
+
+            OrmLiteConfig.BeforeExecFilter?.Invoke(dbCmd);
 
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.ExecuteSql(dbCmd).InTask();
