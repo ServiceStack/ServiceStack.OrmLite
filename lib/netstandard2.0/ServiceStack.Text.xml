@@ -29,11 +29,6 @@
             <param name="assemblyName"></param>
             <returns>The type if it exists</returns>
         </member>
-        <member name="M:ServiceStack.Text.CharSpanExtensions.Value(System.ReadOnlySpan{System.Char})">
-            <summary>
-            Returns null if Length == 0, string.Empty if value[0] == NonWidthWhitespace, otherise returns value.ToString()
-            </summary>
-        </member>
         <member name="M:ServiceStack.Text.Common.DateTimeSerializer.Prepare(System.DateTime,System.Boolean)">
             <summary>
             If AlwaysUseUtc is set to true then convert all DateTime to UTC. If PreserveUtc is set to true then UTC dates will not convert to local
@@ -181,12 +176,12 @@
             Only supported for when the JsConfig.DateHandler == JsonDateHandler.TimestampOffset
             </summary>
         </member>
-        <member name="F:ServiceStack.Text.JsConfig.sEscapeUnicode">
+        <member name="P:ServiceStack.Text.JsConfig.EscapeUnicode">
             <summary>
             Gets or sets a value indicating if unicode symbols should be serialized as "\uXXXX".
             </summary>
         </member>
-        <member name="F:ServiceStack.Text.JsConfig.sEscapeHtmlChars">
+        <member name="P:ServiceStack.Text.JsConfig.EscapeHtmlChars">
             <summary>
             Gets or sets a value indicating if HTML entity chars [&gt; &lt; &amp; = '] should be escaped as "\uXXXX".
             </summary>
@@ -1080,6 +1075,17 @@
         <member name="T:ServiceStack.Text.StringBuilderCacheAlt">
             <summary>
             Alternative Reusable StringBuilder ThreadStatic Cache
+            </summary>
+        </member>
+        <member name="T:ServiceStack.Text.StringSpanExtensions">
+            <summary>
+            Helpful extensions on ReadOnlySpan&lt;char&gt;
+            Previous extensions on StringSegment available from: https://gist.github.com/mythz/9825689f0db7464d1d541cb62954614c
+            </summary>
+        </member>
+        <member name="M:ServiceStack.Text.StringSpanExtensions.Value(System.ReadOnlySpan{System.Char})">
+            <summary>
+            Returns null if Length == 0, string.Empty if value[0] == NonWidthWhitespace, otherise returns value.ToString()
             </summary>
         </member>
         <member name="T:ServiceStack.Text.StringWriterCache">
