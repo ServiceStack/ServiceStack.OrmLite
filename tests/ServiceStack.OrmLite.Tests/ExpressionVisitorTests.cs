@@ -861,6 +861,19 @@ namespace ServiceStack.OrmLite.Tests
             Assert.AreEqual("asdf", text);
         }
 
+        [Test]
+        public void Can_Where_using_StaticInsideNonStaticMethod()
+        {
+            System.Linq.Expressions.Expression<Func<TestType, bool>> filter = x => String.Concat(x.TextCol, "test").StartsWith("asdf");
+            var q = Db.From<TestType>().Where(filter).OrderBy(x => x.Id);
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Not.Contain(SqlExpression<TestType>.TrueLiteral));
+
+            var target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(2));
+            var text = target[0].TextCol;
+            Assert.AreEqual("asdf", text);
+        }
+
         private int MethodReturningInt(int val)
         {
             return val;

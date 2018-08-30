@@ -794,7 +794,7 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
-        private static bool IsSqlClass(object obj)
+        public static bool IsSqlClass(object obj)
         {
             return obj != null &&
                    (obj is PartialSqlString ||
@@ -2104,7 +2104,18 @@ namespace ServiceStack.OrmLite
         protected virtual bool IsColumnAccess(MethodCallExpression m)
         {
             if (m.Object == null)
+            {
+                foreach (var arg in m.Arguments)
+                {
+                    if (!(arg is LambdaExpression) &&
+                        IsParameterAccess(arg))
+                    {
+                        return true;
+                    }
+                }
+
                 return false;
+            }
 
             if (m.Object is MethodCallExpression methCallExp)
                 return IsColumnAccess(methCallExp);
@@ -2131,11 +2142,11 @@ namespace ServiceStack.OrmLite
             if (IsEnumerableMethod(m))
                 return VisitEnumerableMethodCall(m);
 
-            if (IsColumnAccess(m))
-                return VisitColumnAccessMethod(m);
-
             if (IsStaticStringMethod(m))
                 return VisitStaticStringMethodCall(m);
+
+            if (IsColumnAccess(m))
+                return VisitColumnAccessMethod(m);
 
             return EvaluateExpression(m);
         }
