@@ -4,6 +4,7 @@ using System.Data;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.Tests.UseCase;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -118,6 +119,73 @@ namespace ServiceStack.OrmLite.Tests
             }
 
             OrmLiteConfig.SqlExpressionSelectFilter = null;
+        }
+
+        [Test]
+        public void Can_get_active_vendor_and_active_references_using_SoftDelete_ref_filter()
+        {
+            OrmLiteConfig.SqlExpressionSelectFilter = q =>
+            {
+                if (q.ModelDef.ModelType.HasInterface(typeof(ISoftDelete)))
+                {
+                    q.Where<ISoftDelete>(x => !x.IsDeleted);
+                }
+            };
+
+            OrmLiteConfig.LoadReferenceSelectFilter = (type, sql) =>
+            {
+                var meta = type.GetModelMetadata();
+                if (type.HasInterface(typeof(ISoftDelete)))
+                {
+                    var sqlFalse = OrmLiteConfig.DialectProvider.SqlBool(false);
+                    sql += $" AND ({meta.ModelName.SqlTable()}.{"IsDeleted".SqlColumn()} = {sqlFalse})";
+                }
+
+                return sql;
+            };
+
+            using (var db = OpenDbConnection())
+            {
+                InitData(db);
+
+                var vendors = db.LoadSelect<Vendor>();
+
+                Assert.That(vendors.Count, Is.EqualTo(1));
+                Assert.That(vendors[0].Name, Is.EqualTo("Active Vendor"));
+                Assert.That(vendors[0].Products.Count, Is.EqualTo(1));
+            }
+
+            OrmLiteConfig.SqlExpressionSelectFilter = null;
+            OrmLiteConfig.LoadReferenceSelectFilter = null;
+        }
+
+        [Test]
+        public void Can_get_single_vendor_and__load_active_references_using_soft_delete_ref_filter()
+        {
+            OrmLiteConfig.LoadReferenceSelectFilter = (type, sql) =>
+            {
+                var meta = type.GetModelMetadata();
+                if (type.HasInterface(typeof(ISoftDelete)))
+                {
+                    var sqlFalse = OrmLiteConfig.DialectProvider.SqlBool(false);
+                    sql += $" AND ({meta.ModelName.SqlTable()}.{"IsDeleted".SqlColumn()} = {sqlFalse})";
+                }
+
+                return sql;
+            };
+
+            using (var db = OpenDbConnection())
+            {
+                InitData(db);
+
+                var vendor = db.Single<Vendor>(v=>v.Name == "Active Vendor");
+                db.LoadReferences(vendor);
+
+                Assert.That(vendor.Name, Is.EqualTo("Active Vendor"));
+                Assert.That(vendor.Products.Count, Is.EqualTo(1));
+            }
+
+            OrmLiteConfig.LoadReferenceSelectFilter = null;
         }
     }
 }

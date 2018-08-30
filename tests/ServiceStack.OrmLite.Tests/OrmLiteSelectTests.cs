@@ -6,6 +6,7 @@ using NUnit.Framework;
 using ServiceStack.Common;
 using ServiceStack.Common.Tests.Models;
 using ServiceStack.Logging;
+using ServiceStack.OrmLite.Tests.Shared;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
@@ -345,7 +346,6 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_select_IN_using_array_or_List_params()
         {
-            LogManager.LogFactory = new ConsoleLogFactory();
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<ModelWithIdAndName>();
@@ -360,6 +360,30 @@ namespace ServiceStack.OrmLite.Tests
                 rows = db.Select<ModelWithIdAndName>("Id IN (@ids)", new { ids });
                 Assert.That(rows.Count, Is.EqualTo(2));
                 Assert.That(rows.Map(x => x.Id), Is.EquivalentTo(ids));
+            }
+        }
+
+        [Test]
+        public void Can_use_array_param_for_ExecuteSql()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<ModelWithIdAndName>();
+                5.Times(x => db.Insert(ModelWithIdAndName.Create(x + 1)));
+
+                var q = db.From<ModelWithIdAndName>();
+
+                db.ExecuteSql($"UPDATE {q.Table<ModelWithIdAndName>()} SET Name = 'updated' WHERE Id IN (@ids)",
+                    new {ids = new[] {1, 2, 3}});
+
+                var count = db.Count<ModelWithIdAndName>(x => x.Name == "updated");
+                Assert.That(count, Is.EqualTo(3));
+                
+                db.ExecuteSql($"UPDATE {q.Table<ModelWithIdAndName>()} SET Name = 'updated' WHERE Name IN (@names)",
+                    new {names = new[] {"Name4", "Name5"}});
+                
+                count = db.Count<ModelWithIdAndName>(x => x.Name == "updated");
+                Assert.That(count, Is.EqualTo(5));
             }
         }
 
@@ -480,6 +504,48 @@ namespace ServiceStack.OrmLite.Tests
                                              Or.EqualTo(-9.9999999999999992E+124d).
                                              Or.EqualTo(9.9999999999999992E+124d)); //Firebird
             }
+        }
+        
+        public class CustomSql
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public int CustomMax { get; set; }
+            public int CustomCount { get; set; }
+        }
+
+        [Test]
+        public void Does_project_Sql_columns()
+        {
+            OrmLiteConfig.BeforeExecFilter = cmd => cmd.GetDebugString().Print();
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Rockstar>();
+                db.DropAndCreateTable<RockstarAlbum>();
+                db.Insert(AutoQueryTests.SeedRockstars);
+                db.Insert(AutoQueryTests.SeedAlbums);
+                
+                var q = db.From<Rockstar>()
+                    .Join<RockstarAlbum>()
+                    .GroupBy(r => new { r.Id, r.FirstName, r.LastName })
+                    .Select<Rockstar, RockstarAlbum>((r,a) => new {
+                        r.Id,
+                        Name = r.FirstName + " " + r.LastName,
+                        CustomMax = Sql.Max(r.Id),
+                        CustomCount = Sql.Count(r.Id > a.Id ? r.Id + 2 : a.Id + 2)
+                    });
+
+                var results = db.Select<CustomSql>(q);
+                var result = results[0];
+                
+//                results.PrintDump();
+
+                Assert.That(result.Id, Is.GreaterThan(0));
+                Assert.That(result.Name, Is.Not.Null);
+                Assert.That(result.CustomMax, Is.GreaterThan(0));
+                Assert.That(result.CustomCount, Is.GreaterThan(0));
+            }
+            
         }
     }
 }

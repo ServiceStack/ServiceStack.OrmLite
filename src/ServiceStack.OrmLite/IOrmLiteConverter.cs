@@ -135,8 +135,7 @@ namespace ServiceStack.OrmLite
                 case TypeCode.Int64:
                     return Convert.ToInt64(value);
                 case TypeCode.UInt64:
-                    var byteValue = value as byte[];
-                    if (byteValue != null)
+                    if (value is byte[] byteValue)
                         return OrmLiteUtils.ConvertToULong(byteValue);
                     return Convert.ToUInt64(value);
                 case TypeCode.Single:

@@ -58,6 +58,6 @@
     <Folder Include="DataAnnotations\" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="MySqlConnector" Version="0.40.2" />
+    <PackageReference Include="MySqlConnector" Version="0.43.0" />
   </ItemGroup>
 </Project>

@@ -14,9 +14,8 @@ namespace ServiceStack.OrmLite.Tests
         [PrimaryKey]
         public SomeEnum Id { get; set; }
 
-        [Default(typeof(bool), "0")]
+//        [Default(typeof(bool), "0")]
         public bool IsDeleted { get; set; }
-
 
         [RowVersion]
         public byte[] RowVersion { get; set; }
@@ -28,6 +27,9 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_use_RowVersion_on_EnumAsString_PrimaryKey()
         {
+            //Blob columns can't have a default value, so can't use byte[] RowVersion in MySql https://stackoverflow.com/a/4553664/85785
+            if (OrmLiteConfig.DialectProvider == MySqlDialect.Provider) return;
+
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<TypeWithEnumAsStringAsPk>();

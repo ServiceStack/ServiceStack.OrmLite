@@ -111,6 +111,8 @@ namespace ServiceStack.OrmLite
 
         internal static Task<int> UpdateAsync<T>(this IDbCommand dbCmd, object updateOnly, Expression<Func<T, bool>> where, Action<IDbCommand> commandFilter, CancellationToken token)
         {
+            OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, updateOnly);
+
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             var whereSql = q.Where(where).WhereExpression;
             q.CopyParamsTo(dbCmd);

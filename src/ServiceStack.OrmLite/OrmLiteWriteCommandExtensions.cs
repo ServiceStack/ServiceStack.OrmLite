@@ -16,6 +16,7 @@ using System.Data;
 using System.Linq;
 using ServiceStack.Data;
 using ServiceStack.Logging;
+using ServiceStack.OrmLite.Converters;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
@@ -573,12 +574,15 @@ namespace ServiceStack.OrmLite
 
             var rowVersionParam = dbCmd.CreateParameter();
             rowVersionParam.ParameterName = dialectProvider.GetParam("rowVersion");
-            rowVersionParam.Value = rowVersion;
+            var converter = dialectProvider.GetConverterBestMatch(typeof(RowVersionConverter));
+            converter.InitDbParam(rowVersionParam, typeof(ulong));
+
+            rowVersionParam.Value = converter.ToDbValue(typeof(ulong), rowVersion);
             dbCmd.Parameters.Add(rowVersionParam);
 
             var sql = $"DELETE FROM {dialectProvider.GetQuotedTableName(modelDef)} " +
                       $"WHERE {dialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName)} = {idParam.ParameterName} " +
-                      $"AND {dialectProvider.GetQuotedColumnName(rowVersionField.FieldName)} = {rowVersionParam.ParameterName}";
+                      $"AND {dialectProvider.GetRowVersionColumn(rowVersionField)} = {rowVersionParam.ParameterName}";
 
             return sql;
         }
@@ -643,24 +647,12 @@ namespace ServiceStack.OrmLite
 
             commandFilter?.Invoke(dbCmd); //dbCmd.OnConflictInsert() needs to be applied before last insert id
 
-            var modelDef = typeof(T).GetModelDefinition();
-            if (dialectProvider.HasInsertReturnValues(modelDef))
+            if (dialectProvider.HasInsertReturnValues(ModelDefinition<T>.Definition))
             {
                 using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
                 using (reader)
                 {
-                    if (reader.Read())
-                    {
-                        var values = new object[reader.FieldCount];
-                        var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition, dialectProvider);
-                        obj.PopulateWithSqlReader(dialectProvider, reader, indexCache, values);
-                        if ((modelDef.PrimaryKey != null) && modelDef.PrimaryKey.AutoIncrement)
-                        {
-                            var id = modelDef.GetPrimaryKey(obj);
-                            return Convert.ToInt64(id);
-                        }
-                    }
-                    return 0;
+                    return reader.PopulateReturnValues(dialectProvider, obj);
                 }
             }
 
@@ -672,6 +664,24 @@ namespace ServiceStack.OrmLite
             }
 
             return dbCmd.ExecNonQuery();
+        }
+
+        internal static long PopulateReturnValues<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, T obj)
+        {
+            if (reader.Read())
+            {
+                var modelDef = ModelDefinition<T>.Definition;
+                var values = new object[reader.FieldCount];
+                var indexCache = reader.GetIndexFieldsCache(modelDef, dialectProvider);
+                obj.PopulateWithSqlReader(dialectProvider, reader, indexCache, values);
+                if ((modelDef.PrimaryKey != null) && modelDef.PrimaryKey.AutoIncrement)
+                {
+                    var id = modelDef.GetPrimaryKey(obj);
+                    return Convert.ToInt64(id);
+                }
+            }
+
+            return 0;
         }
 
         internal static void Insert<T>(this IDbCommand dbCmd, Action<IDbCommand> commandFilter, params T[] objs)
@@ -788,14 +798,14 @@ namespace ServiceStack.OrmLite
                     dbCmd.Insert(obj, commandFilter:null);
                 }
 
-                modelDef.RowVersion?.SetValueFn(obj, dbCmd.GetRowVersion(modelDef, id));
+                modelDef.RowVersion?.SetValueFn(obj, dbCmd.GetRowVersion(modelDef, id, modelDef.RowVersion.ColumnType));
 
                 return true;
             }
 
             dbCmd.Update(obj);
 
-            modelDef.RowVersion?.SetValueFn(obj, dbCmd.GetRowVersion(modelDef, id));
+            modelDef.RowVersion?.SetValueFn(obj, dbCmd.GetRowVersion(modelDef, id, modelDef.RowVersion.ColumnType));
 
             return false;
         }
@@ -854,7 +864,7 @@ namespace ServiceStack.OrmLite
                         rowsAdded++;
                     }
 
-                    modelDef.RowVersion?.SetValueFn(row, dbCmd.GetRowVersion(modelDef, id));
+                    modelDef.RowVersion?.SetValueFn(row, dbCmd.GetRowVersion(modelDef, id, modelDef.RowVersion.ColumnType));
                 }
 
                 dbTrans?.Commit();
@@ -975,10 +985,15 @@ namespace ServiceStack.OrmLite
             dbCmd.ExecuteNonQuery();
         }
 
-        internal static object GetRowVersion(this IDbCommand dbCmd, ModelDefinition modelDef, object id)
+        internal static object GetRowVersion(this IDbCommand dbCmd, ModelDefinition modelDef, object id, Type asType)
         {
             var sql = RowVersionSql(dbCmd, modelDef, id);
-            return dbCmd.GetDialectProvider().FromDbRowVersion(modelDef.RowVersion.FieldType, dbCmd.Scalar<object>(sql));
+            var to = dbCmd.GetDialectProvider().FromDbRowVersion(modelDef.RowVersion.FieldType, dbCmd.Scalar<object>(sql));
+
+            if (to is ulong u && asType == typeof(byte[]))
+                return BitConverter.GetBytes(u);
+
+            return to;
         }
 
         internal static string RowVersionSql(this IDbCommand dbCmd, ModelDefinition modelDef, object id)
@@ -986,7 +1001,7 @@ namespace ServiceStack.OrmLite
             var dialectProvider = dbCmd.GetDialectProvider();
             var idParamString = dialectProvider.GetParam();
 
-            var sql = $"SELECT {dialectProvider.GetRowVersionColumnName(modelDef.RowVersion)} " +
+            var sql = $"SELECT {dialectProvider.GetRowVersionSelectColumn(modelDef.RowVersion)} " +
                       $"FROM {dialectProvider.GetQuotedTableName(modelDef)} " +
                       $"WHERE {dialectProvider.GetQuotedColumnName(modelDef.PrimaryKey.FieldName)} = {idParamString}";
 

@@ -155,6 +155,8 @@ namespace ServiceStack.OrmLite
 
         public static int Update<T>(this IDbCommand dbCmd, object updateOnly, Expression<Func<T, bool>> where = null, Action<IDbCommand> commandFilter = null)
         {
+            OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, updateOnly);
+
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             var whereSql = q.Where(where).WhereExpression;
             q.CopyParamsTo(dbCmd);
@@ -175,10 +177,16 @@ namespace ServiceStack.OrmLite
                 var fieldDef = fields.FirstOrDefault(x => string.Equals(x.Name, setField.Name, StringComparison.OrdinalIgnoreCase));
                 if (fieldDef == null || fieldDef.ShouldSkipUpdate()) continue;
 
+                var value = setField.CreateGetter()(updateOnly);
+                if (string.IsNullOrEmpty(whereSql) && (fieldDef.IsPrimaryKey || fieldDef.AutoIncrement))
+                {
+                    whereSql = $"WHERE {dialectProvider.GetQuotedColumnName(fieldDef.FieldName)} = {dialectProvider.AddParam(dbCmd, value, fieldDef).ParameterName}";
+                    continue;
+                }
+
                 if (sql.Length > 0)
                     sql.Append(", ");
 
-                var value = setField.CreateGetter()(updateOnly);
                 sql
                     .Append(dialectProvider.GetQuotedColumnName(fieldDef.FieldName))
                     .Append("=")

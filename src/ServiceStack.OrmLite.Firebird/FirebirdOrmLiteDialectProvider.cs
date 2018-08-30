@@ -55,6 +55,8 @@ namespace ServiceStack.OrmLite.Firebird
                 { OrmLiteVariables.SystemUtc, "CURRENT_TIMESTAMP" },
                 { OrmLiteVariables.MaxText, "VARCHAR(1000)" },
                 { OrmLiteVariables.MaxTextUnicode, "VARCHAR(1000)" },
+                { OrmLiteVariables.True, SqlBool(true) },                
+                { OrmLiteVariables.False, SqlBool(false) },                
             };
         }
 
@@ -306,7 +308,7 @@ namespace ServiceStack.OrmLite.Firebird
             var sbPk = new StringBuilder();
 
             var modelDef = GetModel(tableType);
-            foreach (var fieldDef in modelDef.FieldDefinitions)
+            foreach (var fieldDef in CreateTableFieldsStrategy(modelDef))
             {
                 if (fieldDef.CustomSelect != null)
                     continue;
@@ -404,7 +406,7 @@ namespace ServiceStack.OrmLite.Firebird
             {
                 if (!fieldDef.IsIndexed) continue;
 
-                var indexName = GetIndexName(
+                var indexName = fieldDef.IndexName ?? GetIndexName(
                     fieldDef.IsUniqueIndex, modelDef.ModelName, fieldDef.FieldName);
 
                 sqlIndexes.Add(

@@ -151,9 +151,9 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Return the number of rows returned by the supplied sql
         /// </summary>
-        public static Task<long> RowCountAsync(this IDbConnection dbConn, string sql, CancellationToken token = default(CancellationToken))
+        public static Task<long> RowCountAsync(this IDbConnection dbConn, string sql, object anonType = null, CancellationToken token = default(CancellationToken))
         {
-            return dbConn.Exec(dbCmd => dbCmd.RowCountAsync(sql, token));
+            return dbConn.Exec(dbCmd => dbCmd.RowCountAsync(sql, anonType, token));
         }
 
         /// <summary>

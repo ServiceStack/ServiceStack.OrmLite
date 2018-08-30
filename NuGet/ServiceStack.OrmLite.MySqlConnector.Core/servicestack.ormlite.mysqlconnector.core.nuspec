@@ -18,7 +18,7 @@
     <copyright>ServiceStack and contributors</copyright>
     <dependencies>
       <group targetFramework=".netstandard2.0">
-        <dependency id="MySqlConnector" version="[0.40.2, )" />
+        <dependency id="MySqlConnector" version="[0.43.0, )" />
         <dependency id="ServiceStack.OrmLite.Core" version="5.0.0" />
       </group>
     </dependencies>

@@ -258,7 +258,10 @@ namespace ServiceStack.OrmLite
 		}
 
 		public IOrmLiteConverter GetConverterBestMatch(Type type)
-        {
+		{
+		    if (type == typeof(RowVersionConverter))
+		        return RowVersionConverter;
+            
             var converter = GetConverter(type);
             if (converter != null)
                 return converter;
@@ -502,11 +505,16 @@ namespace ServiceStack.OrmLite
             return StringBuilderCache.ReturnAndFree(sb);
         }
 
-        public virtual SelectItem GetRowVersionColumnName(FieldDefinition field, string tablePrefix = null)
+        public virtual SelectItem GetRowVersionSelectColumn(FieldDefinition field, string tablePrefix = null)
         {
             return new SelectItemColumn(this, field.FieldName, null, tablePrefix);
         }
 
+        public virtual string GetRowVersionColumn(FieldDefinition field, string tablePrefix = null)
+        {
+            return GetRowVersionSelectColumn(field, tablePrefix).ToString();
+        }
+        
         public virtual string GetColumnNames(ModelDefinition modelDef)
         {
             return GetColumnNames(modelDef, false).ToSelectString();
@@ -527,7 +535,7 @@ namespace ServiceStack.OrmLite
                 }
                 else if (field.IsRowVersion)
                 {
-                    sqlColumns[i] = GetRowVersionColumnName(field, tablePrefix);
+                    sqlColumns[i] = GetRowVersionSelectColumn(field, tablePrefix);
                 }
                 else
                 {
@@ -899,6 +907,12 @@ namespace ServiceStack.OrmLite
 
                 if (fieldDef.AutoId && p.Value != null)
                 {
+                    var existingId = fieldDef.GetValueFn(obj);
+                    if (existingId is Guid existingGuid && existingGuid != default(Guid))
+                    {
+                        p.Value = existingGuid; // Use existing value if not default
+                    }
+
                     fieldDef.SetValueFn(obj, p.Value); //Auto populate default values
                     continue;
                 }
@@ -1064,7 +1078,7 @@ namespace ServiceStack.OrmLite
             foreach (var entry in args)
             {
                 var fieldDef = modelDef.GetFieldDefinition(entry.Key);
-                if (fieldDef.ShouldSkipUpdate() || fieldDef.AutoIncrement)
+                if (fieldDef.ShouldSkipUpdate() || fieldDef.IsPrimaryKey || fieldDef.AutoIncrement)
                     continue;
 
                 var value = entry.Value;
@@ -1207,13 +1221,17 @@ namespace ServiceStack.OrmLite
 
         public virtual string GetAutoIdDefaultValue(FieldDefinition fieldDef) => null;
 
+        public Func<ModelDefinition, List<FieldDefinition>> CreateTableFieldsStrategy { get; set; } = GetFieldDefinitions;
+
+        public static List<FieldDefinition> GetFieldDefinitions(ModelDefinition modelDef) => modelDef.FieldDefinitions;
+
         public virtual string ToCreateTableStatement(Type tableType)
         {
             var sbColumns = StringBuilderCache.Allocate();
             var sbConstraints = StringBuilderCacheAlt.Allocate();
 
             var modelDef = tableType.GetModelDefinition();
-            foreach (var fieldDef in modelDef.FieldDefinitions)
+            foreach (var fieldDef in CreateTableFieldsStrategy(modelDef))
             {
                 if (fieldDef.CustomSelect != null)
                     continue;
@@ -1309,7 +1327,8 @@ namespace ServiceStack.OrmLite
             {
                 if (!fieldDef.IsIndexed) continue;
 
-                var indexName = GetIndexName(fieldDef.IsUniqueIndex, modelDef.ModelName.SafeVarName(), fieldDef.FieldName);
+                var indexName = fieldDef.IndexName 
+                    ?? GetIndexName(fieldDef.IsUniqueIndex, modelDef.ModelName.SafeVarName(), fieldDef.FieldName);
 
                 sqlIndexes.Add(
                     ToCreateIndexStatement(fieldDef.IsUniqueIndex, indexName, modelDef, fieldDef.FieldName, isCombined: false, fieldDef: fieldDef));

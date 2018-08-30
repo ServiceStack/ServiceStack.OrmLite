@@ -1716,6 +1716,20 @@ if (!db.ColumnExists<Poco>(x => x.Age)) //= false
 db.ColumnExists<Poco>(x => x.Age); //= true
 ```
 
+#### Modify Schema APIs
+
+Additional Modify Schema APIs available in OrmLite include:
+
+ - `AlterTable`
+ - `AddColumn`
+ - `AlterColumn`
+ - `ChangeColumnName`
+ - `DropColumn`
+ - `AddForeignKey`
+ - `DropForeignKey`
+ - `CreateIndex`
+ - `DropIndex`
+
 ### Typed `Sql.Cast()` SQL Modifier
 
 The `Sql.Cast()` provides a cross-database abstraction for casting columns or expressions in SQL queries, e.g:
@@ -1746,6 +1760,10 @@ q.CustomJoin($"LEFT JOIN (SELECT {q.Column<Job>(nameof(Job.Id))} ...")
 q.CustomJoin($"LEFT JOIN (SELECT {q.Column<Job>(x => x.Id, tablePrefix:true)} ...")
 //Equivalent to:
 q.CustomJoin($"LEFT JOIN (SELECT {q.Table<Job>()}.{q.Column<Job>(x => x.Id)} ...")
+
+q.Select($"{q.Column<Job>(x => x.Id)} as JobId, {q.Column<Task>(x => x.Id)} as TaskId")
+//Equivalent to:
+q.Select<Job,Task>((j,t) => new { JobId = j.Id, TaskId = t.Id })
 ```
 
 ### DB Parameter API's
@@ -1974,14 +1992,12 @@ public interface IAudit
 }
 
 OrmLiteConfig.InsertFilter = (dbCmd, row) => {
-    var auditRow = row as IAudit;
-    if (auditRow != null)
+    if (row is IAudit auditRow)
         auditRow.CreatedDate = auditRow.ModifiedDate = DateTime.UtcNow;
 };
 
 OrmLiteConfig.UpdateFilter = (dbCmd, row) => {
-    var auditRow = row as IAudit;
-    if (auditRow != null)
+    if (row is IAudit auditRow)
         auditRow.ModifiedDate = DateTime.UtcNow;
 };
 ```
@@ -1994,8 +2010,7 @@ The filters can also be used for validation where throwing an exception will pre
 
 ```csharp
 OrmLiteConfig.InsertFilter = OrmLiteConfig.UpdateFilter = (dbCmd, row) => {
-    var auditRow = row as IAudit;
-    if (auditRow != null && auditRow.ModifiedBy == null)
+    if (row is IAudit auditRow && auditRow.ModifiedBy == null)
         throw new ArgumentNullException("ModifiedBy");
 };
 
@@ -2291,11 +2306,10 @@ More examples can be found in [SqlServerProviderTests](https://github.com/Servic
 
 Creating a foreign key in OrmLite can be done by adding `[References(typeof(ForeignKeyTable))]` on the relation property,
 which will result in OrmLite creating the Foreign Key relationship when it creates the DB table with `db.CreateTable<Poco>`.
-[@brainless83](https://github.com/brainless83) has extended this support further by adding more finer-grain options 
-and behaviours with the new `[ForeignKey]` attribute which will now let you specify the desired behaviour when deleting
-or updating related rows in Foreign Key tables. 
 
-An example of a table with all the different options:
+Additional fine-grain options and behaviour are available in the `[ForeignKey]` attribute which will let you specify the desired behaviour when deleting or updating related rows in Foreign Key tables. 
+
+An example of a table with the different available options:
 
 ```csharp
 public class TableWithAllCascadeOptions

@@ -774,7 +774,7 @@ namespace ServiceStack.OrmLite.Tests
             System.Linq.Expressions.Expression<Func<TestType, object>> order = x => i > 0 ? x.BoolCol : x.TextCol.Contains("qwer");
             var q = Db.From<TestType>().OrderBy(order).ThenBy(x => x.Id);
             Assert.That(q.ToSelectStatement().ToLower(), Does.Not.Contain("="));
-            Assert.That(q.ToSelectStatement().ToLower(), Does.Contain("order by \"boolcol\""));
+            Assert.That(q.ToSelectStatement().NormalizeSql(), Does.Contain("order by boolcol"));
 
             var target = Db.Select(q);
             Assert.That(target.Count, Is.EqualTo(4));
@@ -790,7 +790,7 @@ namespace ServiceStack.OrmLite.Tests
             System.Linq.Expressions.Expression<Func<TestType, object>> order = x => i > 0 ? false : x.TextCol.Contains("qwer");
             var q = Db.From<TestType>().OrderBy(order).ThenBy(x => x.Id);
             Assert.That(q.ToSelectStatement().ToLower(), Does.Not.Contain("="));
-            Assert.That(q.ToSelectStatement().ToLower(), Does.Contain("@0"));
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Contain(Db.GetDialectProvider().ParamString + "0"));
             Assert.That(q.ToSelectStatement().ToLower(), Does.Contain("case when "));
 
             var target = Db.Select(q);
@@ -807,7 +807,7 @@ namespace ServiceStack.OrmLite.Tests
             System.Linq.Expressions.Expression<Func<TestType, object>> order = x => i > 0 ? false : x.TextCol.Contains("qwer");
             var q = Db.From<TestType>().OrderBy(order).ThenBy(x => x.Id);
             Assert.That(q.ToSelectStatement().ToLower(), Does.Not.Contain("="));
-            Assert.That(q.ToSelectStatement().ToLower(), Does.Not.Contain("@0"));
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Not.Contain(Db.GetDialectProvider().ParamString + "0"));
 
             var target = Db.Select(q);
             Assert.That(target.Count, Is.EqualTo(4));
@@ -822,8 +822,8 @@ namespace ServiceStack.OrmLite.Tests
             System.Linq.Expressions.Expression<Func<TestType, object>> order = x => i > 0 ? x.TextCol : "www";
             var q = Db.From<TestType>().OrderBy(order).ThenBy(x => x.Id);
             Assert.That(q.ToSelectStatement().ToLower(), Does.Not.Contain("="));
-            Assert.That(q.ToSelectStatement().ToLower(), Does.Not.Contain("@0"));
-            Assert.That(q.ToSelectStatement().ToLower(), Does.Contain("order by \"id\"")); 
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Not.Contain(Db.GetDialectProvider().ParamString + "0"));
+            Assert.That(q.ToSelectStatement().ToLower().NormalizeSql(), Does.Contain("order by id")); 
 
             var target = Db.Select(q);
             Assert.That(target.Count, Is.EqualTo(4));
@@ -853,7 +853,7 @@ namespace ServiceStack.OrmLite.Tests
             System.Linq.Expressions.Expression<Func<TestType, object>> order = x => x.Id > 0 ? x.TextCol : "www";
             var q = Db.From<TestType>().OrderBy(order).ThenBy(x => x.Id);
             Assert.That(q.ToSelectStatement().ToLower(), Does.Not.Contain("="));
-            Assert.That(q.ToSelectStatement().ToLower(), Does.Contain("@0"));
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Contain(Db.GetDialectProvider().ParamString + "0"));
 
             var target = Db.Select(q);
             Assert.That(target.Count, Is.EqualTo(4));

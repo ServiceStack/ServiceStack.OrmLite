@@ -15,6 +15,7 @@ using System.Data;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+using ServiceStack.OrmLite.Converters;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
@@ -40,7 +41,7 @@ namespace ServiceStack.OrmLite
         /// Return best matching converter, falling back to Enum, Value or Ref Type Converters
         /// </summary>
         IOrmLiteConverter GetConverterBestMatch(Type type);
-
+        
         IOrmLiteConverter GetConverterBestMatch(FieldDefinition fieldDef);
 
         string ParamString { get; set; }
@@ -171,7 +172,8 @@ namespace ServiceStack.OrmLite
 
         object FromDbRowVersion(Type fieldType,  object value);
 
-        SelectItem GetRowVersionColumnName(FieldDefinition field, string tablePrefix = null);
+        SelectItem GetRowVersionSelectColumn(FieldDefinition field, string tablePrefix = null);
+        string GetRowVersionColumn(FieldDefinition field, string tablePrefix = null);
 
         string GetColumnNames(ModelDefinition modelDef);
         SelectItem[] GetColumnNames(ModelDefinition modelDef, bool tableQualified);
@@ -179,8 +181,6 @@ namespace ServiceStack.OrmLite
         SqlExpression<T> SqlExpression<T>();
 
         IDbDataParameter CreateParam();
-
-        void InitDbParam(IDbDataParameter dbParam, Type columnType);
 
         //DDL
         string GetDropForeignKeyConstraints(ModelDefinition modelDef);

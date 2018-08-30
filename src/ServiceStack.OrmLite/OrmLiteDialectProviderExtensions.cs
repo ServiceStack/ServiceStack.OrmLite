@@ -86,5 +86,18 @@ namespace ServiceStack.OrmLite
 
         public static bool IsMySqlConnector(this IOrmLiteDialectProvider dialect) => 
             dialect.GetType().Name == "MySqlConnectorDialectProvider";
+
+        public static void InitDbParam(this IOrmLiteDialectProvider dialect, IDbDataParameter dbParam, Type columnType)
+        {
+            var converter = dialect.GetConverterBestMatch(columnType);
+            converter.InitDbParam(dbParam, columnType);
+        }
+
+        public static void InitDbParam(this IOrmLiteDialectProvider dialect, IDbDataParameter dbParam, Type columnType, object value)
+        {
+            var converter = dialect.GetConverterBestMatch(columnType);
+            converter.InitDbParam(dbParam, columnType);
+            dbParam.Value = converter.ToDbValue(columnType, value);
+        }
     }
 }

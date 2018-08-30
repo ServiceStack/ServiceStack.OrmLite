@@ -54,6 +54,9 @@ namespace ServiceStack.OrmLite.Support
                          $"WHERE {dialectProvider.GetQuotedColumnName(refField)} " +
                          $"IN ({subSql})";
 
+            if (OrmLiteConfig.LoadReferenceSelectFilter != null)
+                sqlRef = OrmLiteConfig.LoadReferenceSelectFilter(refModelDef.ModelType, sqlRef);
+
             return sqlRef;
         }
 
@@ -89,6 +92,7 @@ namespace ServiceStack.OrmLite.Support
             //Load Self Table.RefTableId PK
             var refQ = q.Clone();
             refQ.Select(dialectProvider.GetQuotedColumnName(modelDef, refSelf));
+            refQ.OrderBy().ClearLimits(); //clear any ORDER BY or LIMIT's in Sub Select's
 
             var subSqlRef = refQ.ToMergedParamsSelectStatement();
 
@@ -96,6 +100,9 @@ namespace ServiceStack.OrmLite.Support
                          $"FROM {dialectProvider.GetQuotedTableName(refModelDef)} " +
                          $"WHERE {dialectProvider.GetQuotedColumnName(refModelDef.PrimaryKey)} " +
                          $"IN ({subSqlRef})";
+
+            if (OrmLiteConfig.LoadReferenceSelectFilter != null)
+                sqlRef = OrmLiteConfig.LoadReferenceSelectFilter(refModelDef.ModelType, sqlRef);
 
             return sqlRef;
         }
@@ -106,6 +113,10 @@ namespace ServiceStack.OrmLite.Support
                          $"FROM {dialectProvider.GetQuotedTableName(refModelDef)} " +
                          $"WHERE {dialectProvider.GetQuotedColumnName(refField)} " +
                          $"IN ({subSql})";
+
+            if (OrmLiteConfig.LoadReferenceSelectFilter != null)
+                sqlRef = OrmLiteConfig.LoadReferenceSelectFilter(refModelDef.ModelType, sqlRef);
+
             return sqlRef;
         }
 

@@ -38,6 +38,9 @@ namespace ServiceStack.OrmLite.Support
             var sqlFilter = dialectProvider.GetQuotedColumnName(refField.FieldName) + "={0}";
             var sql = dialectProvider.ToSelectStatement(refType, sqlFilter, pkValue);
 
+            if (OrmLiteConfig.LoadReferenceSelectFilter != null)
+                sql = OrmLiteConfig.LoadReferenceSelectFilter(refType, sql);
+
             return sql;
         }
 
@@ -45,6 +48,10 @@ namespace ServiceStack.OrmLite.Support
         {
             var sqlFilter = dialectProvider.GetQuotedColumnName(refField.FieldName) + "={0}";
             var sql = dialectProvider.ToSelectStatement(refType, sqlFilter, pkValue);
+
+            if (OrmLiteConfig.LoadReferenceSelectFilter != null)
+                sql = OrmLiteConfig.LoadReferenceSelectFilter(refType, sql);
+
             return sql;
         }
 
@@ -57,6 +64,10 @@ namespace ServiceStack.OrmLite.Support
 
             var sqlFilter = dialectProvider.GetQuotedColumnName(refModelDef.PrimaryKey.FieldName) + "={0}";
             var sql = dialectProvider.ToSelectStatement(refType, sqlFilter, refPkValue);
+
+            if (OrmLiteConfig.LoadReferenceSelectFilter != null)
+                sql = OrmLiteConfig.LoadReferenceSelectFilter(refType, sql);
+
             return sql;
         }
     }

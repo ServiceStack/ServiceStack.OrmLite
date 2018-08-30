@@ -5,6 +5,8 @@
         public const string SystemUtc = "{SYSTEM_UTC}";
         public const string MaxText = "{MAX_TEXT}";
         public const string MaxTextUnicode = "{NMAX_TEXT}";
+        public const string True = "{TRUE}";
+        public const string False = "{FALSE}";
     }
 
     public static class Messages

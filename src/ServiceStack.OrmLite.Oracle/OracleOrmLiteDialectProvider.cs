@@ -118,6 +118,8 @@ namespace ServiceStack.OrmLite.Oracle
                 { OrmLiteVariables.SystemUtc, "sys_extract_utc(systimestamp)" },
                 { OrmLiteVariables.MaxText, "VARCHAR2(2000)" },
                 { OrmLiteVariables.MaxTextUnicode, "NVARCHAR2(2000)" },
+                { OrmLiteVariables.True, SqlBool(true) },                
+                { OrmLiteVariables.False, SqlBool(false) },                
             };
         }
 
@@ -484,7 +486,7 @@ namespace ServiceStack.OrmLite.Oracle
             var sbPk = new StringBuilder();
 
             var modelDef = GetModel(tableType);
-            foreach (var fieldDef in modelDef.FieldDefinitions)
+            foreach (var fieldDef in CreateTableFieldsStrategy(modelDef))
             {
                 if (fieldDef.CustomSelect != null)
                     continue;
@@ -635,7 +637,7 @@ namespace ServiceStack.OrmLite.Oracle
             {
                 if (!fieldDef.IsIndexed) continue;
 
-                var indexName = GetIndexName(
+                var indexName = fieldDef.IndexName ?? GetIndexName(
                     fieldDef.IsUniqueIndex,
                     (modelDef.IsInSchema
                         ? modelDef.Schema + "_" + modelDef.ModelName

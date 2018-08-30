@@ -25,6 +25,8 @@ namespace ServiceStack.OrmLite
             if (Log.IsDebugEnabled)
                 Log.DebugCommand(dbCmd);
 
+            OrmLiteConfig.BeforeExecFilter?.Invoke(dbCmd);
+
             return dbCmd.GetDialectProvider().ExecuteReaderAsync(dbCmd, token);
         }
 
@@ -40,6 +42,8 @@ namespace ServiceStack.OrmLite
 
             if (Log.IsDebugEnabled)
                 Log.DebugCommand(dbCmd);
+
+            OrmLiteConfig.BeforeExecFilter?.Invoke(dbCmd);
 
             return dbCmd.GetDialectProvider().ExecuteReaderAsync(dbCmd, token);
         }
@@ -71,21 +75,13 @@ namespace ServiceStack.OrmLite
 
         internal static Task<T> SingleByIdAsync<T>(this IDbCommand dbCmd, object value, CancellationToken token)
         {
-            if (!dbCmd.CanReuseParam<T>(ModelDefinition<T>.PrimaryKeyName))
-                dbCmd.SetFilter<T>(ModelDefinition<T>.PrimaryKeyName, value);
-
-            ((IDbDataParameter)dbCmd.Parameters[0]).Value = value;
-
+            dbCmd.SetFilter<T>(ModelDefinition<T>.PrimaryKeyName, value);
             return dbCmd.ConvertToAsync<T>(null, token);
         }
 
         internal static Task<T> SingleWhereAsync<T>(this IDbCommand dbCmd, string name, object value, CancellationToken token)
         {
-            if (!dbCmd.CanReuseParam<T>(name))
-                dbCmd.SetFilter<T>(name, value);
-
-            ((IDbDataParameter)dbCmd.Parameters[0]).Value = value;
-
+            dbCmd.SetFilter<T>(name, value);
             return dbCmd.ConvertToAsync<T>(null, token);
         }
 
@@ -110,11 +106,7 @@ namespace ServiceStack.OrmLite
 
         internal static Task<List<T>> WhereAsync<T>(this IDbCommand dbCmd, string name, object value, CancellationToken token)
         {
-            if (!dbCmd.CanReuseParam<T>(name))
-                dbCmd.SetFilter<T>(name, value);
-
-            ((IDbDataParameter)dbCmd.Parameters[0]).Value = value;
-
+            dbCmd.SetFilter<T>(name, value);
             return dbCmd.ConvertToListAsync<T>(null, token);
         }
 
@@ -401,11 +393,11 @@ namespace ServiceStack.OrmLite
             var loadList = new LoadListAsync<Into, From>(dbCmd, expr);
 
             var fieldDefs = loadList.FieldDefs;
-            if (!include.IsEmpty())
+            if (include?.Length > 0)
             {
                 // Check that any include values aren't reference fields of the specified From type
                 var fields = fieldDefs.Select(q => q.FieldName);
-                var invalid = include.Except<string>(fields).ToList();
+                var invalid = include.Except(fields).ToList();
                 if (invalid.Count > 0)
                     throw new ArgumentException($"Fields '{invalid.Join("', '")}' are not Reference Properties of Type '{typeof(From).Name}'");
 

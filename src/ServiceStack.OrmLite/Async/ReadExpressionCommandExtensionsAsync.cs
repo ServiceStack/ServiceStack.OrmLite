@@ -161,13 +161,16 @@ namespace ServiceStack.OrmLite
 
         internal static Task<long> RowCountAsync<T>(this IDbCommand dbCmd, SqlExpression<T> expression, CancellationToken token)
         {
-            var sql = $"SELECT COUNT(*) FROM ({expression.ToSelectStatement()}) AS COUNT";
-            return dbCmd.ScalarAsync<long>(sql, token);
+            var countExpr = expression.Clone().OrderBy();
+            return dbCmd.ScalarAsync<long>(dbCmd.GetDialectProvider().ToRowCountStatement(countExpr.ToSelectStatement()), expression.Params, token);
         }
 
-        internal static Task<long> RowCountAsync(this IDbCommand dbCmd, string sql, CancellationToken token)
+        internal static Task<long> RowCountAsync(this IDbCommand dbCmd, string sql, object anonType, CancellationToken token)
         {
-            return dbCmd.ScalarAsync<long>($"SELECT COUNT(*) FROM ({sql}) AS COUNT", token);
+            if (anonType != null)
+                dbCmd.SetParameters(anonType.ToObjectDictionary(), excludeDefaults: false, sql:ref sql);
+
+            return dbCmd.ScalarAsync<long>(dbCmd.GetDialectProvider().ToRowCountStatement(sql), token);
         }
 
         internal static Task<List<T>> LoadSelectAsync<T>(this IDbCommand dbCmd, SqlExpression<T> expression = null, string[] include = null, CancellationToken token = default(CancellationToken))

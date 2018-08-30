@@ -174,15 +174,9 @@ namespace ServiceStack.Common.Tests.Models
             Assert.That(actual.Guid, Is.EqualTo(expected.Guid));
             Assert.That(actual.Long, Is.EqualTo(expected.Long));
             Assert.That(actual.Bool, Is.EqualTo(expected.Bool));
-            try
-            {
-                Assert.That(actual.DateTime, Is.EqualTo(expected.DateTime));
-            }
-            catch (Exception ex)
-            {
-                Log.Error("Trouble with DateTime precisions, trying Assert again with rounding to seconds", ex);
-                Assert.That(actual.DateTime, Is.EqualTo(expected.DateTime).Within(TimeSpan.FromSeconds(1)));
-            }
+
+            Assert.That(actual.DateTime, Is.EqualTo(expected.DateTime).Within(TimeSpan.FromSeconds(1)));
+            
             try
             {
                 Assert.That(actual.Double, Is.EqualTo(expected.Double));

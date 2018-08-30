@@ -463,24 +463,35 @@ namespace ServiceStack.OrmLite
         public static Regex VerifyFragmentRegEx = new Regex("([^\\w]|^)+(--|;--|;|%|/\\*|\\*/|@@|@|char|nchar|varchar|nvarchar|alter|begin|cast|create|cursor|declare|delete|drop|end|exec|execute|fetch|insert|kill|open|select|sys|sysobjects|syscolumns|table|update)([^\\w]|$)+",
             RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
+        public static Regex VerifySqlRegEx = new Regex("([^\\w]|^)+(--|;--|;|%|/\\*|\\*/|@@|@|char|nchar|varchar|nvarchar|alter|begin|cast|create|cursor|declare|delete|drop|end|exec|execute|fetch|insert|kill|open|table|update)([^\\w]|$)+",
+            RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
         public static Func<string,string> SqlVerifyFragmentFn { get; set; }
 
-        public static string SqlVerifyFragment(this string sqlFragment)
+        public static bool isUnsafeSql(string sql, Regex verifySql)
         {
-            if (sqlFragment == null)
-                return null;
+            if (sql == null)
+                return false;
 
             if (SqlVerifyFragmentFn != null)
-                return SqlVerifyFragmentFn(sqlFragment);
+            {
+                SqlVerifyFragmentFn(sql);
+                return false;
+            }
 
-            var fragmentToVerify = sqlFragment
+            var fragmentToVerify = sql
                 .StripQuotedStrings('\'')
                 .StripQuotedStrings('"')
                 .StripQuotedStrings('`')
                 .ToLower();
 
-            var match = VerifyFragmentRegEx.Match(fragmentToVerify);
-            if (match.Success)
+            var match = verifySql.Match(fragmentToVerify);
+            return match.Success;
+        }
+
+        public static string SqlVerifyFragment(this string sqlFragment)
+        {
+            if (isUnsafeSql(sqlFragment, VerifyFragmentRegEx))
                 throw new ArgumentException("Potential illegal fragment detected: " + sqlFragment);
 
             return sqlFragment;
@@ -971,9 +982,6 @@ namespace ServiceStack.OrmLite
             {
                 if (!string.IsNullOrEmpty(dialectProvider.GetDefaultValue(fieldDef)))
                 {
-                    if (fieldDef.AutoId)
-                        continue;
-                    
                     var value = fieldDef.GetValue(obj);    
                     if (value == null || value.Equals(fieldDef.FieldTypeDefaultValue))
                         continue;

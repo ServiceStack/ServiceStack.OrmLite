@@ -47,6 +47,8 @@ namespace ServiceStack.OrmLite
         public bool IsClustered { get; set; }
 
         public bool IsNonClustered { get; set; }
+        
+        public string IndexName { get; set; }
 
         public bool IsRowVersion { get; set; }
 
@@ -74,7 +76,7 @@ namespace ServiceStack.OrmLite
         public string GetQuotedName(IOrmLiteDialectProvider dialectProvider)
         {
             return IsRowVersion
-                ? dialectProvider.GetRowVersionColumnName(this).ToString()
+                ? dialectProvider.GetRowVersionSelectColumn(this).ToString()
                 : dialectProvider.GetQuotedColumnName(FieldName);
         }
 

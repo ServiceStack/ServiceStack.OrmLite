@@ -13,5 +13,8 @@ namespace ServiceStack.Common.Tests.Models
 
         [Index(true)]
         public string UniqueName { get; set; }
+        
+        [Index(Name = "altname")]
+        public string Custom { get; set; }
     }
 }

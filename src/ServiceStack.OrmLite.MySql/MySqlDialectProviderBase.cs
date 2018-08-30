@@ -48,6 +48,8 @@ namespace ServiceStack.OrmLite.MySql
                 { OrmLiteVariables.SystemUtc, "CURRENT_TIMESTAMP" },
                 { OrmLiteVariables.MaxText, "LONGTEXT" },
                 { OrmLiteVariables.MaxTextUnicode, "LONGTEXT" },
+                { OrmLiteVariables.True, SqlBool(true) },                
+                { OrmLiteVariables.False, SqlBool(false) },                
             };
         }
 
@@ -151,7 +153,7 @@ namespace ServiceStack.OrmLite.MySql
             var sbConstraints = StringBuilderCache.Allocate();
 
             var modelDef = GetModel(tableType);
-            foreach (var fieldDef in modelDef.FieldDefinitions)
+            foreach (var fieldDef in CreateTableFieldsStrategy(modelDef))
             {
                 if (fieldDef.CustomSelect != null)
                     continue;
@@ -222,7 +224,9 @@ namespace ServiceStack.OrmLite.MySql
             castAs == Sql.VARCHAR
                 ? $"CAST({fieldOrValue} AS CHAR(1000))"
                 : $"CAST({fieldOrValue} AS {castAs})";
-        
+
+        public override string SqlBool(bool value) => value ? "1" : "0";
+
         protected DbConnection Unwrap(IDbConnection db)
         {
             return (DbConnection)db.ToDbConnection();

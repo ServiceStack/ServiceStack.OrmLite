@@ -17,7 +17,10 @@ namespace ServiceStack.OrmLite.Tests
         Oracle = 128,
         Firebird = 256,
         VistaDb = 512,
-        AnySqlServer = SqlServer | SqlServer2008 | SqlServer2012 | SqlServerMdf,
+        SqlServer2014 = 1024,
+        SqlServer2016 = 2048,
+        SqlServer2017 = 4096,
+        AnySqlServer = SqlServer | SqlServer2008 | SqlServer2012 | SqlServer2014 | SqlServer2016 | SqlServer2017 | SqlServerMdf,
     }
 
     public static class TestHelpers

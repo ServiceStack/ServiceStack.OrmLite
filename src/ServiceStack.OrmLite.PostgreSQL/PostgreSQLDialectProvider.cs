@@ -6,7 +6,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Npgsql;
+using Npgsql.TypeMapping;
 using NpgsqlTypes;
+using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.Converters;
 using ServiceStack.OrmLite.PostgreSQL.Converters;
 using ServiceStack.OrmLite.Support;
@@ -29,8 +31,10 @@ namespace ServiceStack.OrmLite.PostgreSQL
             base.SelectIdentitySql = "SELECT LASTVAL()";
             this.NamingStrategy = new PostgreSqlNamingStrategy();
             this.StringSerializer = new JsonStringSerializer();
-
+            
             base.InitColumnTypeMap();
+
+            this.RowVersionConverter = new PostgreSqlRowVersionConverter();
 
             RegisterConverter<string>(new PostgreSqlStringConverter());
             RegisterConverter<char[]>(new PostgreSqlCharArrayConverter());
@@ -63,6 +67,8 @@ namespace ServiceStack.OrmLite.PostgreSQL
                 { OrmLiteVariables.SystemUtc, "now() at time zone 'utc'" },
                 { OrmLiteVariables.MaxText, "TEXT" },
                 { OrmLiteVariables.MaxTextUnicode, "TEXT" },
+                { OrmLiteVariables.True, SqlBool(true) },                
+                { OrmLiteVariables.False, SqlBool(false) },                
             };
         }
 
@@ -252,17 +258,19 @@ namespace ServiceStack.OrmLite.PostgreSQL
 
             foreach (var fieldDef in modelDef.FieldDefinitionsArray)
             {
-                if (ShouldReturnOnInsert(modelDef, fieldDef))
+                //insertFields contains Property "Name" of fields to insert
+                var includeField = insertFields == null || insertFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase);
+
+                if (ShouldReturnOnInsert(modelDef, fieldDef) && (!fieldDef.AutoId || !includeField))
                 {
-                    sbReturningColumns.Append(sbReturningColumns.Length == 0 ? "RETURNING " : ",");
+                    sbReturningColumns.Append(sbReturningColumns.Length == 0 ? " RETURNING " : ",");
                     sbReturningColumns.Append(GetQuotedColumnName(fieldDef.FieldName));
                 }
 
-                if (ShouldSkipInsert(fieldDef))
+                if (ShouldSkipInsert(fieldDef) && (!fieldDef.AutoId || !includeField))
                     continue;
 
-                //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
-                if (insertFields != null && !insertFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase))
+                if (!includeField)
                     continue;
 
                 if (sbColumnNames.Length > 0)
@@ -293,9 +301,14 @@ namespace ServiceStack.OrmLite.PostgreSQL
         //Convert xmin into an integer so it can be used in comparisons
         public const string RowVersionFieldComparer = "int8in(xidout(xmin))";
 
-        public override SelectItem GetRowVersionColumnName(FieldDefinition field, string tablePrefix = null)
+        public override SelectItem GetRowVersionSelectColumn(FieldDefinition field, string tablePrefix = null)
         {
             return new SelectItemColumn(this, "xmin", field.FieldName, tablePrefix);
+        }
+
+        public override string GetRowVersionColumn(FieldDefinition field, string tablePrefix = null)
+        {
+            return RowVersionFieldComparer;
         }
 
         public override void AppendFieldCondition(StringBuilder sqlFilter, FieldDefinition fieldDef, IDbCommand cmd)
@@ -562,7 +575,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
             : "replace(" + fieldOrValue + "::text::money::text,'$','" + currencySymbol + "')";
 
         public override string SqlCast(object fieldOrValue, string castAs) => 
-            $"{fieldOrValue}::{castAs}";
+            $"({fieldOrValue})::{castAs}";
 
         protected NpgsqlConnection Unwrap(IDbConnection db)
         {

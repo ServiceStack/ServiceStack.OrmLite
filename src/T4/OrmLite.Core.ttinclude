@@ -1153,8 +1153,11 @@ class SqlServerSchemaReader : SchemaReader
 			case "datetime":
 			case "datetime2":
 			case "date":
-			case "time":
 				sysType=  "DateTime";
+				sysDbType = "DbType.DateTime";
+				break;
+			case "time":
+				sysType=  "TimeSpan";
 				sysDbType = "DbType.DateTime";
 				break;
 			case "datetimeoffset":
@@ -1225,8 +1228,10 @@ class SqlServerSchemaReader : SchemaReader
 			case "datetime":
 			case "datetime2":
 			case "date":
+			sysType=  "DateTime";
+				  break;
 			case "time":
-				sysType=  "DateTime";
+				sysType=  "TimeSpan";
 				  break;
 			case "datetimeoffset":
 				sysType = "DateTimeOffset";
@@ -1583,7 +1588,7 @@ class PostGreSqlSchemaReader : SchemaReader
 			}
 		}
 
-		var cmdFks = _factory.CreateCommand();
+var cmdFks = _factory.CreateCommand();
 		cmdFks.Connection=connection;
 		cmdFks.CommandText=FOREIGN_KEYS_SQL;
 		//get all the foreign keys and add them to the tables.
@@ -2516,8 +2521,27 @@ public static class Inflector {
     /// <param name="word">The word.</param>
     /// <returns></returns>
     public static string MakeInitialCaps(string word) {
-        return String.Concat(word.Substring(0, 1).ToUpper(), word.Substring(1).ToLower());
+        return FixInvalidChars(String.Concat(word.Substring(0, 1).ToUpper(), word.Substring(1).ToLower()));
     }
+
+	public static string FixInvalidChars(string word) {
+		 var val = word;
+		 val = val.Replace("-","_Dash")
+		 .Replace(' ','_')
+		 .Replace("#","_Hash")
+		 .Replace("$","_Dollar")
+		 .Replace("+","_Plus")
+		 .Replace("%","_Percent")
+		 .Replace(">","_GreaterThan")
+		 .Replace("<","_LessThan")
+		 .Replace("&","_And")
+		 .Replace(",","_Comma") 
+		 .Replace("'","_Apst")
+		 .Replace("/","_Per");
+		 if (char.IsDigit(val[0])) { val = "_" + val; };
+		
+		return val;
+	}
 
     /// <summary>
     /// Makes the initial lower case.
@@ -2525,7 +2549,9 @@ public static class Inflector {
     /// <param name="word">The word.</param>
     /// <returns></returns>
     public static string MakeInitialLowerCase(string word) {
-        return String.Concat(word.Substring(0, 1).ToLower(), word.Substring(1));
+        var val = String.Concat(word.Substring(0, 1).ToLower(), word.Substring(1));
+		 val = FixInvalidChars(val);
+		return val;
     }
 
 

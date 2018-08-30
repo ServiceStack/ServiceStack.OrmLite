@@ -1915,7 +1915,13 @@ namespace ServiceStack.OrmLite
             var mi = methodCallExpr?.Method;
             var declareType = mi?.DeclaringType;
             if (declareType != null && declareType.Name == "Sql" && mi.Name != "Desc" && mi.Name != "Asc" && mi.Name != "As" && mi.Name != "AllFields") 
-                return new PartialSqlString(expr + " AS " + member.Name); // new { Count = Sql.Count("*") }
+                return new PartialSqlString(expr + " AS " + member.Name); // new { Alias = Sql.Count("*") }
+
+            if (arg is ConditionalExpression ||                           // new { Alias = x.Value > 1 ? 1 : x.Value }
+                arg is BinaryExpression)                                  // new { Alias = x.First + " " + x.Last }
+            {
+                return new PartialSqlString(expr + " AS " + member.Name);
+            } 
 
             return expr;
         }
@@ -2064,7 +2070,7 @@ namespace ServiceStack.OrmLite
                     var isBooleanComparison = IsBooleanComparison(e.IfTrue);
                     if (!isBooleanComparison)
                     {
-                        ifTrue = $"(CASE WHEN {ifTrue} THEN {1} ELSE {0} END)";
+                        ifTrue = $"(CASE WHEN {ifTrue} THEN {GetQuotedTrueValue()} ELSE {GetQuotedFalseValue()} END)";
                     }
                 }
 
@@ -2076,7 +2082,7 @@ namespace ServiceStack.OrmLite
                     var isBooleanComparison = IsBooleanComparison(e.IfFalse);
                     if (!isBooleanComparison)
                     {
-                        ifFalse = $"(CASE WHEN {ifFalse} THEN {1} ELSE {0} END)";
+                        ifFalse = $"(CASE WHEN {ifFalse} THEN {GetQuotedTrueValue()} ELSE {GetQuotedFalseValue()} END)";
                     }
                 }
 
@@ -2330,20 +2336,22 @@ namespace ServiceStack.OrmLite
         {
             return new PartialSqlString($"({GetQuotedTrueValue()}={GetQuotedTrueValue()})");
         }
-
+        
         protected object GetFalseExpression()
         {
             return new PartialSqlString($"({GetQuotedTrueValue()}={GetQuotedFalseValue()})");
         }
 
+        private string quotedTrue;
         protected object GetQuotedTrueValue()
         {
-            return new PartialSqlString(DialectProvider.GetQuotedValue(true, typeof(bool)));
+            return new PartialSqlString(quotedTrue ?? (quotedTrue = DialectProvider.GetQuotedValue(true, typeof(bool))));
         }
 
+        private string quotedFalse;
         protected object GetQuotedFalseValue()
         {
-            return new PartialSqlString(DialectProvider.GetQuotedValue(false, typeof(bool)));
+            return new PartialSqlString(quotedFalse ?? (quotedFalse =DialectProvider.GetQuotedValue(false, typeof(bool))));
         }
 
         private void BuildSelectExpression(string fields, bool distinct)
@@ -2713,11 +2721,8 @@ namespace ServiceStack.OrmLite
         {
             Text = text;
         }
-        public string Text { get; set; }
-        public override string ToString()
-        {
-            return Text;
-        }
+        public string Text { get; }
+        public override string ToString() => Text;
     }
 
     public class EnumMemberAccess : PartialSqlString
