@@ -17,6 +17,12 @@ namespace ServiceStack.OrmLite.Tests
 
         [CustomField("DECIMAL(18,4)")]
         public decimal? DecimalColumn { get; set; }
+
+        [CustomField(OrmLiteVariables.MaxText)]        //= {MAX_TEXT}
+        public string MaxText { get; set; }
+
+        [CustomField(OrmLiteVariables.MaxTextUnicode)] //= {NMAX_TEXT}
+        public string MaxUnicodeText { get; set; }
     }
 
     [PreCreateTable("CREATE INDEX udxNoTable on NonExistingTable (Name);")]
@@ -71,6 +77,8 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_create_field_with_custom_sql()
         {
+            OrmLiteConfig.BeforeExecFilter = cmd => cmd.GetDebugString().Print();
+            
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<PocoTable>();
