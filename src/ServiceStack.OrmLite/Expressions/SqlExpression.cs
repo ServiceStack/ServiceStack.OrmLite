@@ -794,7 +794,7 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
-        private static bool IsSqlClass(object obj)
+        public static bool IsSqlClass(object obj)
         {
             return obj != null &&
                    (obj is PartialSqlString ||
