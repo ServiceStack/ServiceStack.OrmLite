@@ -1815,6 +1815,12 @@ namespace ServiceStack.OrmLite
                     throw new ArgumentException($"Expression '{m}' accesses unsupported property '{m.Member}' of Nullable<T>");
                 }
 
+                if (m.Member.DeclaringType == typeof(string) &&
+                    m.Member.Name == nameof(string.Length))
+                {
+                    return VisitLengthStringProperty(m);
+                }
+
                 if (IsParameterOrConvertAccess(m))
                     return GetMemberExpression(m);
             }
@@ -2460,6 +2466,18 @@ namespace ServiceStack.OrmLite
                 default:
                     throw new NotSupportedException();
             }
+        }
+
+        private object VisitLengthStringProperty(MemberExpression m)
+        {
+            var sql = Visit(m.Expression);
+
+            return ToLengthPartialString(sql);
+        }
+
+        protected virtual PartialSqlString ToLengthPartialString(object arg)
+        {
+            return new PartialSqlString($"CHAR_LENGTH({arg})");
         }
 
         private PartialSqlString BuildConcatExpression(List<object> args)

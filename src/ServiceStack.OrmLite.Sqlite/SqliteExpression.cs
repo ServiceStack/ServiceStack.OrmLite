@@ -76,5 +76,10 @@ namespace ServiceStack.OrmLite.Sqlite
         {
             return base.OrderBy("random()");
         }
+
+        protected override PartialSqlString ToLengthPartialString(object arg)
+        {
+            return new PartialSqlString($"LENGTH({arg})");
+        }
     }
 }

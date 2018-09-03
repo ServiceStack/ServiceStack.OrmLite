@@ -52,6 +52,11 @@ namespace ServiceStack.OrmLite.Oracle
         {
             return base.OrderBy("dbms_random.value");
         }
+
+        protected override PartialSqlString ToLengthPartialString(object arg)
+        {
+            return new PartialSqlString($"LENGTH({arg})");
+        }
     }
 }
 

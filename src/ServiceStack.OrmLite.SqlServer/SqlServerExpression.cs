@@ -29,6 +29,11 @@ namespace ServiceStack.OrmLite.SqlServer
             return base.OrderBy("NEWID()");
         }
 
+        protected override PartialSqlString ToLengthPartialString(object arg)
+        {
+            return new PartialSqlString($"LEN({arg})");
+        }
+
         protected override void ConvertToPlaceholderAndParameter(ref object right)
         {
             var paramName = Params.Count.ToString();
