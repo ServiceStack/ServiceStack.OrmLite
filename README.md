@@ -411,6 +411,16 @@ var q = db.From<Person>()
 db.UpdateOnly(new Person { FirstName = "JJ", LastName = "Hendo" }, onlyFields: q);
 ```
 
+Using an Object Dictionary:
+
+```csharp
+var updateFields = new Dictionary<string,object> {
+    [nameof(Person.FirstName)] = "JJ",
+};
+
+db.UpdateOnly<Person>(updateFields, p => p.LastName == "Hendrix");
+```
+
 Using a typed SQL Expression:
 
 ```csharp
@@ -2107,21 +2117,31 @@ public class PocoTable
 
     [CustomField("DECIMAL(18,4)")]
     public decimal? DecimalColumn { get; set; }
+
+    [CustomField(OrmLiteVariables.MaxText)]        //= {MAX_TEXT}
+    public string MaxText { get; set; }
+
+    [CustomField(OrmLiteVariables.MaxTextUnicode)] //= {NMAX_TEXT}
+    public string MaxUnicodeText { get; set; }
 }
 
 db.CreateTable<PocoTable>(); 
 ```
 
-Generates and executes the following SQL:
+Generates and executes the following SQL in SQL Server:
 
 ```sql
 CREATE TABLE "PocoTable" 
 (
   "Id" INTEGER PRIMARY KEY, 
   "CharColumn" CHAR(20) NULL, 
-  "DecimalColumn" DECIMAL(18,4) NULL 
-);  
+  "DecimalColumn" DECIMAL(18,4) NULL, 
+  "MaxText" VARCHAR(MAX) NULL, 
+  "MaxUnicodeText" NVARCHAR(MAX) NULL 
+); 
 ```
+
+> OrmLite replaces any variable placeholders with the value in each RDBMS DialectProvider's `Variables` Dictionary.
 
 #### Pre / Post Custom SQL Hooks when Creating and Dropping tables 
 
@@ -2875,6 +2895,30 @@ public class Table
     [CheckConstraint("Name IS NOT NULL")]
     public string Name { get; set; }
 }
+```
+
+### Bitwise operators
+
+The Typed SqlExpression bitwise operations support depends on the RDBMS used.
+
+E.g. all RDBMS's support Bitwise `And` and `Or` operators:
+
+```csharp
+db.Select<Table>(x => (x.Id | 2) == 3);
+db.Select<Table>(x => (x.Id & 2) == 2);
+```
+
+All RDBMS Except for SQL Server support bit shift operators:
+
+```csharp
+db.Select<Table>(x => (x.Id << 1) == 4);
+db.Select<Table>(x => (x.Id >> 1) == 1);
+```
+
+Whilst only SQL Server and MySQL Support Exclusive Or:
+
+```csharp
+db.Select<Table>(x => (x.Id ^ 2) == 3);
 ```
 
 ## SQL Server Features
