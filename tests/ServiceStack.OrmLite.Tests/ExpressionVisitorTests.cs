@@ -874,6 +874,28 @@ namespace ServiceStack.OrmLite.Tests
             Assert.AreEqual("asdf", text);
         }
 
+        [Test]
+        public void Can_Where_using_StringLengthProperty1()
+        {
+            System.Linq.Expressions.Expression<Func<TestType, bool>> filter = x => x.TextCol.Length == 4;
+            var q = Db.From<TestType>().Where(filter).OrderBy(x => x.Id);
+
+            var target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(2));
+            var text = target[0].TextCol;
+            Assert.AreEqual("asdf", text);
+        }
+
+        [Test]
+        public void Can_Where_using_StringLengthProperty2()
+        {
+            System.Linq.Expressions.Expression<Func<TestType, bool>> filter = x => x.TextCol.Length == 0;
+            var q = Db.From<TestType>().Where(filter).OrderBy(x => x.Id);
+
+            var target = Db.Select(q);
+            Assert.That(target.Count, Is.EqualTo(0));
+        }
+
         private int MethodReturningInt(int val)
         {
             return val;

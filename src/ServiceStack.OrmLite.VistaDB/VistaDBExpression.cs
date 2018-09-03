@@ -66,5 +66,10 @@ namespace ServiceStack.OrmLite.VistaDB
                 ? $"substring({quotedColumn}, {startIndex}, {length.Value})"
                 : $"substring({quotedColumn}, {startIndex}, LEN({quotedColumn}) - {startIndex} + 1)";
         }
+
+        protected override PartialSqlString ToLengthPartialString(object arg)
+        {
+            return new PartialSqlString($"LEN({arg})");
+        }
     }
 }
