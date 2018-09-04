@@ -2471,6 +2471,14 @@ namespace ServiceStack.OrmLite
         private object VisitLengthStringProperty(MemberExpression m)
         {
             var sql = Visit(m.Expression);
+            if (!IsSqlClass(sql))
+            {
+                if (sql == null)
+                    return 0;
+
+                sql = ((string) sql).Length;
+                return sql;
+            }
 
             return ToLengthPartialString(sql);
         }
