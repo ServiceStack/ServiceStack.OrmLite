@@ -91,7 +91,7 @@ namespace ServiceStack.OrmLite.Tests
         }
     }
 
-    public class CustomSqlExpression<T> : SqlExpression<T>
+    public class CustomSqlExpression<T> : SqliteExpression<T>
     {
 
         public CustomSqlExpression(IOrmLiteDialectProvider dialectProvider) : base(dialectProvider)
@@ -551,6 +551,56 @@ namespace ServiceStack.OrmLite.Tests
             System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => (x.Number > 0 ? x.DecimalVirtProperty : x.Amount) == 10M;
             var q = Db.From<WaybillBase>().Where(filter).Select(x=>x.Name).GroupBy(x => x.Name).Having(x=>x.VirtProperty == "WaybillVirtPropertyValue");
             var target = Db.Column<string>(q);
+            Assert.AreEqual(3, target.Count);
+        }
+
+        [Test]
+        public void Can_Where_using_StringLengthVirtualProperty1()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => x.VirtProperty.Length == 0;
+
+            var q = Db.From<WaybillBase>().Where(filter);
+            var target = Db.Select(q);
+            Assert.AreEqual(0, target.Count);
+        }
+
+        [Test]
+        public void Can_Where_using_StringLengthVirtualProperty2()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => x.VirtProperty.Length == 24;
+
+            var q = Db.From<WaybillBase>().Where(filter);
+            var target = Db.Select(q);
+            Assert.AreEqual(3, target.Count);
+        }
+
+        [Test]
+        public void Can_Where_using_StringLengthVirtualProperty3()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => x.VirtProperty.Length == 0 && x.Id > 0;
+
+            var q = Db.From<WaybillBase>().Where(filter);
+            var target = Db.Select(q);
+            Assert.AreEqual(0, target.Count);
+        }
+
+        [Test]
+        public void Can_Where_using_StringLengthVirtualProperty4()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => x.VirtPropertyNull.Length == 0;
+
+            var q = Db.From<WaybillBase>().Where(filter);
+            var target = Db.Select(q);
+            Assert.AreEqual(3, target.Count);
+        }
+
+        [Test]
+        public void Can_Where_using_StringLengthVirtualProperty5()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => x.VirtPropertyNull.Length == 0 && x.Id > 0;
+
+            var q = Db.From<WaybillBase>().Where(filter);
+            var target = Db.Select(q);
             Assert.AreEqual(3, target.Count);
         }
     }
