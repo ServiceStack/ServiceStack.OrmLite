@@ -1576,6 +1576,15 @@ namespace ServiceStack.OrmLite
                         Swap(ref left, ref right); // Should be safe to swap for equality/inequality checks
                     }
 
+                    if (right is bool &&
+                        (left == null || left.ToString().Equals("null", StringComparison.OrdinalIgnoreCase)))
+                    {
+                        if (operand == "=")
+                            return false; // "null == true/false" becomes "false"
+                        if (operand == "<>")
+                            return true; // "null != true/false" becomes "true"
+                    }
+
                     if (right is bool && !IsFieldName(left) && !(b.Left is ConditionalExpression)) // Don't change anything when "expr" is a column name or ConditionalExpression - then we really want "ColName = 1" or (Case When 1=0 Then 1 Else 0 End = 1)
                     {
                         if (operand == "=")
